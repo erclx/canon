@@ -1,0 +1,60 @@
+# What a correct `/canon:review-ui <number>` run leaves behind on the real-input
+# arm. Read by `canon sandbox check`. Patterns use TOML literal strings so a
+# regex needs no backslash escaping.
+#
+# The setup serves `site/` beside this file on a local port and posts an
+# evidence comment carrying that address as its local preview and a two-box
+# checklist. Box 1 is a wheel box on `/gallery/`, whose slides snap by
+# proximity: `scrollIntoView` and six notches sent 50 ms apart both reach 522,
+# while six notches sent one CLI call apart leave `scrollY` at 0, so the box
+# fails on the spaced pace and a pass that scrolled by script passes it. Box 2
+# taps a slide whose caption is hidden behind `(hover: hover)` and always shown
+# where the pointer cannot hover, so it passes in a `--mobile` session.
+#
+# This arm runs by hand rather than in CI. It bills a session and needs the
+# pinned CLI's browser installed once per machine:
+#
+#   canon browser install-browser chromium
+
+paths = [".canon/tmp/pr/review-ui/body-*.md"]
+
+write_scope = [".canon/tmp/pr/review-ui/**"]
+
+manual = [
+  "Box 1's evidence quotes a read after each spaced notch and the burst's read, rather than one position where the page ended.",
+  "Box 2 was driven in a second session opened with `--mobile`, and the desktop session was not resized to stand in for it.",
+  "The comment reached the pull request as a review rather than an issue comment, so the poll's UI read sees it. The thread is remote state, and no assertion kind reads it.",
+]
+
+# Every key above this line is top level. A bare key written below a
+# `[[content]]` header belongs to that table in TOML, so anything moved down
+# here would parse clean and assert nothing.
+
+# A failed box is owed, so the review cannot close.
+[[content]]
+path = ".canon/tmp/pr/review-ui/body-*.md"
+pattern = '^## UI review[ \t]*$'
+
+# The wheel box fails and the tap box passes.
+[[content]]
+path = ".canon/tmp/pr/review-ui/body-*.md"
+pattern = '1 failed · 0 needs? your eyes · 1 passed · 0 not driven'
+
+# The fail names the pace that stuck.
+[[content]]
+path = ".canon/tmp/pr/review-ui/body-*.md"
+pattern = '[Ss]paced'
+
+# The burst read sits beside it.
+[[content]]
+path = ".canon/tmp/pr/review-ui/body-*.md"
+pattern = '522'
+
+# The tap box quotes the hover query the mobile session read.
+[[content]]
+path = ".canon/tmp/pr/review-ui/body-*.md"
+pattern = 'hover: hover'
+
+[[content]]
+path = ".canon/tmp/pr/review-ui/body-*.md"
+pattern = '<!-- review-ui: head=[0-9a-f]{7,40} -->'

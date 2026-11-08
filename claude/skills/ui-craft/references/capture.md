@@ -35,6 +35,14 @@ Only a change with no visible result in any reachable state is exempt, such as a
 - Capture a state case at one width, driving states a first render cannot reach, such as an open menu.
 - Add a surface's case with the surface, and remove it with the surface.
 
+## What a moving change owes
+
+- Verify a change that scrolls, snaps, or tracks the scroll with the input a person uses, at each width it is captured at. A scripted `scrollIntoView` only brings a target into view.
+- Send the wheel in 100 px notches at two paces, spaced and in a burst, since a snap or scroll-linked page can stall at one pace and move at the other.
+- Move the same surface with the keyboard, through the arrow keys and Page Down, since a surface the wheel moves and the keys cannot fails keyboard operation.
+- Sample the motion at fixed steps across its range, reading the position after each notch or key, never only where it ends.
+- Drive a touch or hover behavior in a touch session, since a resized desktop window keeps hover on and cannot fail a hover query.
+
 ## Sharing a capture
 
 - Write a capture into a folder named `evidence`, which the pull request comment collects from.

@@ -19,6 +19,7 @@ import { ScenarioStop, type StageContext, scenario } from '@/sandbox/scenario'
 const EVIDENCE_RENDER =
   'sandbox/fixtures/claude/review-pr/evidence-mismatch/render'
 const DRIVE_SITE = 'sandbox/fixtures/claude/review-ui/drive/site'
+const REAL_INPUT_SITE = 'sandbox/fixtures/claude/review-ui/real-input/site'
 
 // Three boxes in the drivable format: one that passes, one planted to fail at
 // 320 wide, and one marked as taste.
@@ -30,7 +31,15 @@ const DRIVE_CHECKLIST = `**What to verify visually:**
 - [ ] /pricing/, 320: resize to 320 wide → the plan table fits the width with no sideways scroll
 - [ ] /: scroll to the hero → the headline reads as calm and confident (taste)`
 
-function seedTrunk(ctx: StageContext): void {
+// Two boxes on a moving surface: a wheel box on a proximity-snap gallery that
+// a scripted scroll and a fast burst both move and spaced notches leave at 0,
+// and a tap box whose caption shows only where the pointer cannot hover.
+const REAL_INPUT_CHECKLIST = `**Gallery**
+
+- [ ] /gallery/, 1280: wheel down six notches from the top → the page leaves slide 1 and comes to rest on a later slide
+- [ ] /gallery/, 390: tap slide 2 → its caption "Deploy 2 landed on time" shows with no hover`
+
+function seedTrunk(ctx: StageContext, site: string = DRIVE_SITE): void {
   ctx.anchorRemote()
 
   ctx.run('find', [
@@ -61,7 +70,7 @@ function seedTrunk(ctx: StageContext): void {
     `${ctx.root}/${EVIDENCE_RENDER}/base/1280.png`,
     'evidence/header/',
   ])
-  ctx.run('cp', ['-r', `${ctx.root}/${DRIVE_SITE}/.`, 'site/'])
+  ctx.run('cp', ['-r', `${ctx.root}/${site}/.`, 'site/'])
 
   ctx.git('add', '.')
   ctx.git(
@@ -172,9 +181,12 @@ function seedPr(
  * run, so the pass has an address and nothing to build. `timeout` ends it on
  * its own. The server stays in the provisioning process group, unref'd.
  */
-async function serveDriveSite(ctx: StageContext): Promise<string> {
+async function serveDriveSite(
+  ctx: StageContext,
+  site: string = DRIVE_SITE,
+): Promise<string> {
   const serveDir = mkdtempSync(join(tmpdir(), 'tmp.'))
-  ctx.run('cp', ['-r', `${ctx.root}/${DRIVE_SITE}/.`, `${serveDir}/`])
+  ctx.run('cp', ['-r', `${ctx.root}/${site}/.`, `${serveDir}/`])
   const serveRecord = join(serveDir, 'serve.json')
 
   const record = openSync(serveRecord, 'w')
@@ -273,6 +285,47 @@ export default scenario({
       )
       ctx.log.info(
         'Assert:  declared in fixtures/claude/review-ui/drive/expect.toml',
+      )
+    },
+    'real-input': async (ctx) => {
+      ctx.log.step(
+        `Configuring review-ui real-input environment (${ctx.env.ANCHOR_REPO})`,
+      )
+      seedTrunk(ctx, REAL_INPUT_SITE)
+
+      const url = await serveDriveSite(ctx, REAL_INPUT_SITE)
+
+      const prNumber = seedPr(
+        ctx,
+        'feat/gallery-real-input',
+        REAL_INPUT_CHECKLIST,
+        ['--local', url],
+      )
+
+      ctx.log.step(
+        'Scenario ready: a wheel box and a tap box against a snap gallery',
+      )
+      ctx.log.info(
+        `Context: open draft PR #${prNumber}, evidence comment carries a checklist and **Local preview:** ${url}`,
+      )
+      ctx.log.info(
+        '         /gallery/ snaps by proximity, so scrollIntoView and a fast burst move it while spaced notches stay at 0',
+      )
+      ctx.log.info(
+        '         the slide captions show on hover where hover exists, and always where it does not',
+      )
+      ctx.log.info(`Action:  /canon:review-ui ${prNumber}`)
+      ctx.log.info(
+        'Expect:  box 1 fails, naming the spaced pace as stuck and quoting both paces read after each notch',
+      )
+      ctx.log.info(
+        '         box 2 passes in a --mobile session that reads (hover: hover) as false',
+      )
+      ctx.log.info(
+        'Needs:   canon browser install-browser chromium, once per machine',
+      )
+      ctx.log.info(
+        'Assert:  declared in fixtures/claude/review-ui/real-input/expect.toml',
       )
     },
   },
