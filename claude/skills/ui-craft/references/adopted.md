@@ -15,8 +15,8 @@ Each field below names the source its references cite, and a house choice covers
 - **CSS behavior.** [MDN](https://developer.mozilla.org/en-US/docs/Web/CSS) and the CSS specifications back the focus ring, `color-scheme`, overflow, cursor, and hover query bullets.
 - **Native targets.** Apple's and Android's platform guidelines back the native touch target figures in `pointer.md`.
 - **Forms and copy.** The [GOV.UK Design System](https://design-system.service.gov.uk/) and its style guide back `forms.md` and the copy and casing sections of `copy.md`.
-- **Interaction design.** Shneiderman's [direct manipulation](https://www.cs.umd.edu/~ben/papers/Shneiderman1983Direct.pdf) paper and Material's [motion system](https://github.com/material-components/material-components-android/blob/master/docs/theming/Motion.md) back the reader-paced section of `motion.md`.
-- **Web performance.** Google's [web.dev](https://web.dev/articles/cls) guidance on layout shift backs the held-size bullet in `motion.md`.
+- **Interaction design.** [Ben Shneiderman](https://www.cs.umd.edu/~ben/)'s direct manipulation paper and the motion system of [Material Components](https://github.com/material-components/material-components-android) back the reader-paced section of `motion.md`.
+- **Web performance.** Google's [web.dev](https://web.dev/) guidance on layout shift backs the held-size bullet in `motion.md`.
 - **Usability research.** The [Nielsen Norman Group](https://www.nngroup.com/articles/) backs most of `states.md`, part of `controls.md`, and the link sections of `copy.md`.
 - **Capture.** `capture.md` is a house procedure, with its reflow width taken from the WCAG reflow criterion `a11y.md` cites.
 
