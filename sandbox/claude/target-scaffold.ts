@@ -5,7 +5,12 @@ export default scenario({
     SANDBOX_SKIP_AUTO_COMMIT: 'true',
   },
   arms: {
+    // Provisioning commits a .gitignore, which the empty-folder rule counts as
+    // a file, so the arm removes it to leave nothing but .git.
     empty: (ctx) => {
+      ctx.git('rm', '-q', '.gitignore')
+      ctx.commit('chore(sandbox): leave nothing but .git')
+
       ctx.log.step('Scenario ready: scaffold skill in an empty folder')
       ctx.log.info('Context: a git repository holding nothing but .git')
       ctx.log.info('Action:  "start a new astro project here"')
