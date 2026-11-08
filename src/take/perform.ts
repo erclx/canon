@@ -472,6 +472,12 @@ async function scrollPoint(stage: Stage, target: string): Promise<Point> {
  * innermost element with a size whose whole text is those words, so a hidden
  * copy earlier in the page cannot shadow a visible one, and anything else as a
  * CSS selector.
+ * The document is searched first and every open shadow root after it in tree
+ * order, so a document-tree match wins, except that innermost reads containment
+ * through a shadow root to its host and a `text=` match holding a sized match
+ * inside its subtree's roots gives way to it. A selector matches within one
+ * root and never across a shadow boundary. A closed root and a frame stay
+ * unreachable.
  * It runs inside the page so both routes resolve a target the same way, and a
  * match with no size counts as missing, since a click on it would land on
  * whatever sits behind.
@@ -479,19 +485,38 @@ async function scrollPoint(stage: Stage, target: string): Promise<Point> {
 export function boxExpression(target: string): string {
   return `(() => {
     const target = ${JSON.stringify(target)}
+    const roots = []
+    const collect = (root) => {
+      roots.push(root)
+      for (const node of root.querySelectorAll('*')) {
+        if (node.shadowRoot) collect(node.shadowRoot)
+      }
+    }
+    collect(document)
+    const within = (outer, inner) => {
+      for (let node = inner; node; node = node.parentNode ?? node.host ?? null) {
+        if (node === outer) return true
+      }
+      return false
+    }
     let element = null
     if (target.startsWith('text=')) {
       const want = target.slice(5).trim()
-      const matches = [...document.querySelectorAll('body *')].filter(
-        (node) => node.textContent.trim() === want,
+      const matches = roots.flatMap((root) =>
+        [...root.querySelectorAll(root === document ? 'body *' : '*')].filter(
+          (node) => node.textContent.trim() === want,
+        ),
       )
-      const innermost = matches.filter((node) => !matches.some((other) => other !== node && node.contains(other)))
+      const innermost = matches.filter((node) => !matches.some((other) => other !== node && within(node, other)))
       element = innermost.find((node) => {
         const rect = node.getBoundingClientRect()
         return rect.width > 0 && rect.height > 0
       }) ?? null
     } else {
-      element = document.querySelector(target)
+      for (const root of roots) {
+        element = root.querySelector(target)
+        if (element) break
+      }
     }
     if (!element) return null
     const rect = element.getBoundingClientRect()

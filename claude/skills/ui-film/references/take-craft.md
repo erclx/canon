@@ -83,6 +83,8 @@ Two rules hold once a beat is filmed.
 - Use a `move` to a point only for a target the page reveals on hover, and follow it with the click
 - Read each target off the served page before writing it. The verb refuses `target-missing` rather than filming a guess, and a refusal costs a reload.
 
+Both forms reach inside an open shadow root, such as a web component banner. A document-tree match wins over one inside a root, unless a `text=` match contains the root's match, where the inner one wins. A selector cannot span a shadow boundary, and a target inside a closed root or a frame refuses as missing.
+
 ## The pointer
 
 - Draw no pointer in the page. The edit draws one from the log at a constant size, and two pointers on one frame leave the viewer guessing which one acted.
