@@ -2,4 +2,4 @@
 name = "cloudflare"
 extends = ""
 runtime = "bun"
-scaffold = ""
+scaffold = "npm create cloudflare@latest {{name}} -- --type hello-world --lang ts --no-deploy --no-git"

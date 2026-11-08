@@ -31,7 +31,6 @@ This record holds at most 600 words.
 - Ship runtime dependencies or application code to target projects. The toolkit ships configs, seeds, rules, and code proven to stay out of the production build, verified per instance.
 - First-class support for every AI coding tool. Claude Code is the platform. Another tool stays deferred until a concrete use case drives it.
 - Produce visual, video, or teaching artifacts as products. Frameboard carries the design board in its own repository, and composed video goes to a tool built for it.
-- Wrap framework scaffolding. Users run `bun init`, `npm create vite`, and similar themselves, and the toolkit layers on top.
 - Provide a hosted service. Everything runs locally. Publishing to a registry someone else hosts stays in scope.
 
 ## Constraints

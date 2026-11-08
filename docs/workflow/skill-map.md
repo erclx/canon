@@ -10,10 +10,11 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 
 ## Set up a project
 
-| Skill                | When to use                                   |
-| -------------------- | --------------------------------------------- |
-| `canon:target-setup` | On a fresh scaffold, to run the install chain |
-| `canon:deploy-app`   | When a project is ready to publish            |
+| Skill                   | When to use                                       |
+| ----------------------- | ------------------------------------------------- |
+| `canon:target-scaffold` | In an empty folder, to start a project on a stack |
+| `canon:target-setup`    | On a fresh scaffold, to run the install chain     |
+| `canon:deploy-app`      | When a project is ready to publish                |
 
 ## Decide what to build
 

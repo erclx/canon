@@ -36,8 +36,8 @@ To develop against a checkout, run `claude --plugin-dir <toolkit>/claude`.
 
 ## Scaffold
 
-1. Run the framework's own scaffold if the project needs one, such as `bun init` or `npm create vite`
-2. Invoke `canon:target-setup` in Claude Code. It detects the stack, previews the chain with the opt-in rules `canon gov detect` proposes, and runs it on your confirmation.
+1. In an empty folder, invoke `canon:target-scaffold`. It asks for the stack, runs the stack's starter, and hands off to `canon:target-setup`.
+2. Otherwise invoke `canon:target-setup` in Claude Code. It detects the stack, previews the chain with the opt-in rules `canon gov detect` proposes, and runs it on your confirmation.
 
 The chain runs these phases:
 

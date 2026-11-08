@@ -19,6 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         # Only the stacks that scaffold. A layer or an add-on is refused by the verb.
+        # cloudflare scaffolds but stays out: it ships no scripts, so verify fails at lint:fix.
         # Keep in step with the stack list in the report job's loop
         stack: [astro, nextjs, vite-react, go, php, python]
     steps:

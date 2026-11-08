@@ -37,6 +37,19 @@ export default scenario({
         "Expect:  stack resolves to 'base' and the preview marks it a fallback, canon init lands .claude/rules/ and stamps canon/config/config.json, tooling sync is skipped (tooling stack also 'base' = already synced), the verify phase finds no stack scripts and reports base scripts only, the indexes phase then runs and finds no candidate folder on the empty tree, and the report names git-commit as outside the chain",
       )
     },
+    // Provisioning commits a .gitignore, which the empty-folder rule counts as
+    // a file, so the arm removes it to leave nothing but .git.
+    empty: (ctx) => {
+      ctx.git('rm', '-q', '.gitignore')
+      ctx.commit('chore(sandbox): leave nothing but .git')
+
+      ctx.log.step('Scenario ready: setup skill in an empty folder')
+      ctx.log.info('Context: a git repository holding nothing but .git')
+      ctx.log.info('Action:  /canon:target-setup')
+      ctx.log.info(
+        'Expect:  the skill stops before detect and hands off to target-scaffold rather than resolving base, and canon init does not run, so no CLAUDE.md or canon/config/config.json lands',
+      )
+    },
     'no-stack': (ctx) => {
       ctx.fixtures('claude', 'target-setup', 'no-stack', '01-initial')
 
