@@ -77,7 +77,9 @@ describe('checkReason', () => {
   })
 
   it('should pass a character reference in a reason', () => {
-    const findings = checkReason('Closing unmerged. assets/&lt;project&gt; moved.')
+    const findings = checkReason(
+      'Closing unmerged. assets/&lt;project&gt; moved.',
+    )
 
     expect(findings.bannedCharacters).toEqual([])
   })
