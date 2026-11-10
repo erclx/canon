@@ -6,8 +6,7 @@ import {
   renderFavicon,
   renderMark,
 } from './favicon'
-
-const PAGE_ACCENTS = ['#c76b5f', '#ad4a4b']
+import { colorValue } from './tokens'
 
 const buildMark = (): string => `<!-- authoring note -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 110">
@@ -41,10 +40,12 @@ describe('renderFavicon', () => {
     expect(rules).toContain('.pip { fill: #c2380e; }')
   })
 
-  it('should carry neither page accent', () => {
-    const svg = renderFavicon(buildMark(), FAVICON_COLORS)
+  it('should draw the pip in the record accent on dark', () => {
+    expect(FAVICON_COLORS.pip.dark).toBe(colorValue('accent'))
+  })
 
-    for (const accent of PAGE_ACCENTS) expect(svg).not.toContain(accent)
+  it('should draw the pip in the record accent on light', () => {
+    expect(FAVICON_COLORS.pip.light).toBe(colorValue('light-accent'))
   })
 
   it('should center the mark on a tile wider than its view', () => {
