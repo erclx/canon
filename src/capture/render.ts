@@ -303,46 +303,55 @@ interface Clip {
 }
 
 /**
- * Shoots a document-coordinate clip one viewport at a time and stitches the
- * tiles, since Playwright's `fullPage` shot resets the device metrics while it
+ * Shoots a document-coordinate clip one viewport at a time, down and across,
+ * and stitches the tiles, since Playwright's `fullPage` shot resets the device metrics while it
  * paints and drops touch emulation with them, so a `(hover: hover)` rule paints
  * its desktop form though `matchMedia` reads false before and after. A shot
  * inside the viewport keeps it. Neither `isMobile` nor an emulated `hover`
  * media feature survives the `fullPage` path either.
  */
 async function shootByViewport(page: Page, clip: Clip): Promise<Buffer> {
-  const viewportHeight = page.viewportSize()?.height ?? DEFAULT_VIEWPORT_HEIGHT
+  const viewport = page.viewportSize()
+  const viewportWidth = viewport?.width ?? clip.width
+  const viewportHeight = viewport?.height ?? DEFAULT_VIEWPORT_HEIGHT
   const sheet = new PNG({
     width: clip.width * DEVICE_SCALE_FACTOR,
     height: clip.height * DEVICE_SCALE_FACTOR,
   })
-  for (let offset = 0; offset < clip.height; offset += viewportHeight) {
-    const top = clip.y + offset
-    const scroll = await page.evaluate((y) => {
-      window.scrollTo(window.scrollX, y)
-      return { x: window.scrollX, y: window.scrollY }
-    }, top)
-    const tile = PNG.sync.read(
-      await page.screenshot({
-        clip: {
-          x: clip.x - scroll.x,
-          y: top - scroll.y,
-          width: clip.width,
-          height: Math.min(viewportHeight, clip.height - offset),
+  for (let down = 0; down < clip.height; down += viewportHeight) {
+    for (let across = 0; across < clip.width; across += viewportWidth) {
+      const left = clip.x + across
+      const top = clip.y + down
+      const scroll = await page.evaluate(
+        ({ x, y }) => {
+          window.scrollTo(x, y)
+          return { x: window.scrollX, y: window.scrollY }
         },
-      }),
-    )
-    const destinationY = offset * DEVICE_SCALE_FACTOR
-    PNG.bitblt(
-      tile,
-      sheet,
-      0,
-      0,
-      Math.min(tile.width, sheet.width),
-      Math.min(tile.height, sheet.height - destinationY),
-      0,
-      destinationY,
-    )
+        { x: left, y: top },
+      )
+      const tile = PNG.sync.read(
+        await page.screenshot({
+          clip: {
+            x: left - scroll.x,
+            y: top - scroll.y,
+            width: Math.min(viewportWidth, clip.width - across),
+            height: Math.min(viewportHeight, clip.height - down),
+          },
+        }),
+      )
+      const destinationX = across * DEVICE_SCALE_FACTOR
+      const destinationY = down * DEVICE_SCALE_FACTOR
+      PNG.bitblt(
+        tile,
+        sheet,
+        0,
+        0,
+        Math.min(tile.width, sheet.width - destinationX),
+        Math.min(tile.height, sheet.height - destinationY),
+        destinationX,
+        destinationY,
+      )
+    }
   }
   return PNG.sync.write(sheet)
 }
