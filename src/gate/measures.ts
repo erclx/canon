@@ -517,9 +517,13 @@ export const documentCeiling: Measure = async (ctx) => {
  * domain's own name and the entry reads as nothing else without the prefix.
  * So is a replay snapshot, which copies a consumer's paths verbatim, such as
  * `canon/config/config.json`, and a renamed copy would sync as another file.
+ * A plugin's `hooks/hooks.json` is the one path Claude Code reads a plugin's
+ * hooks from by default, so no other name is loaded.
  */
 export function isFolderEchoedName(path: string): boolean {
   if (path === 'canon/context/context-model.md') return false
+  if (path === 'hooks/hooks.json' || path.endsWith('/hooks/hooks.json'))
+    return false
   if (path.startsWith('sandbox/fixtures/replay/')) return false
   const segments = path.split('/')
   if (segments.length < 2) return false

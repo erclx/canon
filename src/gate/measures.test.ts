@@ -1319,6 +1319,14 @@ describe('isFolderEchoedName', () => {
     expect(isFolderEchoedName('x/foo/foo.config.json')).toBe(true)
   })
 
+  it('should pass the default plugin hooks path Claude Code reads', () => {
+    expect(isFolderEchoedName('claude/hooks/hooks.json')).toBe(false)
+  })
+
+  it('should still flag another file named for a hooks folder', () => {
+    expect(isFolderEchoedName('claude/hooks/hooks-extra.json')).toBe(true)
+  })
+
   it('should pass a consumer path a replay snapshot copies verbatim', () => {
     expect(
       isFolderEchoedName(
