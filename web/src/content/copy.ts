@@ -74,8 +74,8 @@ export const fold = {
   parts: ['canon runs agent work from', 'plan to', 'merge'] as const,
   // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs agent work from plan to merge"
   headline: 'canon runs agent work from plan to merge',
-  // README.md: canon-allow-readme-paraphrase: the opening sentence's subject, carried on to who uses it and how each role runs, which the settled page states and the README spreads across its sections. "A Claude Code plugin and CLI that"
-  lead: 'A Claude Code plugin and CLI that one developer uses to plan, build, review, and merge with coding agents, each role in its own session.',
+  // README.md: canon-allow-readme-paraphrase: the opening sentence's subject, carried on to the plan and the merge the README's claim names. "A Claude Code plugin and CLI that"
+  lead: 'A Claude Code plugin and CLI that takes coding agents from the plan to the merge.',
   view: {
     title: 'claude',
     // README.md: canon-allow-readme-paraphrase: the agent view's own prompt hint, which no README sentence carries.
@@ -88,26 +88,26 @@ export const fold = {
 }
 
 export const roles = {
-  // README.md: "Who works"
-  head: 'Who works',
-  // README.md: "You talk to the orchestrator. It starts every other role in its own session and hears back from each."
-  lede: 'You talk to the orchestrator. It starts every other role in its own session and hears back from each.',
+  // README.md: "Five roles, each in its own session"
+  head: 'Five roles, each in its own session',
+  // README.md: "You talk to the orchestrator, which starts the others and hears back from each."
+  lede: 'You talk to the orchestrator, which starts the others and hears back from each.',
 }
 
 export const records = {
-  // README.md: "What each step leaves behind"
-  head: 'What each step leaves behind',
-  // README.md: "Every step writes a record in a fixed shape, and every change carries what it looks like."
-  lede: 'Every step writes a record in a fixed shape, and every change carries what it looks like.',
+  // README.md: "The record each step writes"
+  head: 'The record each step writes',
+  // README.md: "Each record has a fixed shape, so the next session knows where to read."
+  lede: 'Each record has a fixed shape, so the next session knows where to read.',
   // README.md: canon-allow-readme-paraphrase: the skip link past the scroll-driven stack, which the README has no stack to need.
   skip: 'Skip past the records',
 }
 
 export const craft = {
-  // README.md: "What good work looks like"
-  head: 'What good work looks like',
-  // README.md: "The practice an agent follows lives in skills, and every rule in them traces to a published source."
-  lede: 'The practice an agent follows lives in skills, and every rule in them traces to a published source.',
+  // README.md: "Practice skills with cited sources"
+  head: 'Practice skills with cited sources',
+  // README.md: "Each skill loads when its kind of work starts, and every rule names where it came from."
+  lede: 'Each skill loads when its kind of work starts, and every rule names where it came from.',
   // README.md: canon-allow-readme-paraphrase: the README's ledger sentence, opened on Every rather than Each. "has its own source row in a ledger, and the skill audit fails when a skill's rules and its rows disagree in count."
   note: "Every rule has its own source row in a ledger, and the skill audit fails when a skill's rules and its rows disagree in count.",
   // README.md: canon-allow-readme-paraphrase: the pane labels beside one skill's rule and source, which the README's table folds into its columns.
@@ -116,45 +116,45 @@ export const craft = {
 }
 
 export const guardrails = {
-  // README.md: "What holds it"
-  head: 'What holds it',
-  // README.md: "A skill says what good looks like. These four parts catch the agent when it skips one."
-  lede: 'A skill says what good looks like. These four parts catch the agent when it skips one.',
+  // README.md: "Checks that catch a skipped step"
+  head: 'Checks that catch a skipped step',
+  // README.md: "A skill says what good looks like. These four parts hold the agent to it."
+  lede: 'A skill says what good looks like. These four parts hold the agent to it.',
   /** One part per README bullet, each with the real name it runs under. */
-  // README.md: canon-allow-readme-paraphrase: each part restates its README bullet as two sentences beside the file or command it runs as.
+  // README.md: canon-allow-readme-paraphrase: each part restates its README bullet as one sentence beside the file or command it runs as.
   parts: [
     {
       name: 'Rules by path',
       play: 'Play rules by path in the window',
-      line: 'A rule file loads when the agent opens a matching path, and names the skill that owns that kind of file.',
+      line: 'Opening a matching file loads the rule naming its skill.',
       real: '.claude/rules/canon/ui/craft.md',
     },
     {
       name: 'Hooks',
       play: 'Play hooks in the window',
-      line: 'A hook reads each action before or after it runs. It refuses some and reports others back into the same turn.',
+      line: 'A hook checks each action as it runs, and refuses some.',
       real: 'plan-guard.sh, standards-audit.sh',
     },
     {
       name: 'The gate',
       play: 'Play the gate in the window',
-      line: 'Every stage runs in order before a pull request opens, and a stage that cannot read its input fails under CI rather than passing.',
+      line: 'Every check runs before a pull request opens.',
       real: 'canon gate run',
     },
     {
       name: 'Deny rules',
       play: 'Play deny rules in the window',
-      line: 'The agent cannot merge. A hook fails open on a timeout, so the merge block is a permission rule rather than a hook.',
+      line: 'A permission rule, not a hook, stops the agent merging.',
       real: 'Bash(gh pr merge:*)',
     },
   ],
 }
 
 export const worktrees = {
-  // README.md: "Where it happens"
-  head: 'Where it happens',
-  // README.md: canon-allow-readme-paraphrase: the README's sentence, closed on the shared record rather than the main checkout the line under the graph names. "Changes run side by side. Each worker builds in its own worktree on its own branch"
-  lede: 'Changes run side by side. Each worker builds in its own worktree on its own branch, and every one of them reads and writes one shared record.',
+  // README.md: "One worktree for each change"
+  head: 'One worktree for each change',
+  // README.md: canon-allow-readme-paraphrase: the README's sentence, cut to the branch each change builds on and the one record they share. "on its own branch"
+  lede: 'Every change builds on its own branch, and all of them share one record.',
   // README.md: canon-allow-readme-paraphrase: the band naming the shared folder, which the README states as the record in the main checkout. "the one `.canon/` record in the main checkout"
   band: {
     name: '.canon/',
@@ -169,32 +169,32 @@ export const worktrees = {
 }
 
 export const setup = {
-  // README.md: "How a repo comes onto canon"
-  head: 'How a repo comes onto canon',
-  // README.md: canon-allow-readme-paraphrase: the README's opening and its three steps, compressed into the section's two-sentence lede. "The project starts with its stack's own tool"
-  lede: "The project starts with its stack's own tool. An agent brings it onto canon, and the same skills keep it current after every release.",
+  // README.md: "Setting up a project"
+  head: 'Setting up a project',
+  // README.md: canon-allow-readme-paraphrase: the README's three steps, compressed into the section's one-sentence lede.
+  lede: 'An agent sets the project up, and the same skills keep it current.',
   /** The four stages along the rule, the three skills set apart as `skill`. */
-  // README.md: canon-allow-readme-paraphrase: each stage condenses its README step, with the scaffold skill named in Start since v179.8. "or with `/canon:target-scaffold` in an empty folder" "writes nothing until you say yes. Then it runs `canon init`, checks what landed, and indexes the docs." "reports, domain by domain, what the project holds against what canon now ships, and repairs nothing."
+  // README.md: canon-allow-readme-paraphrase: each stage condenses its README step to one line, with the scaffold skill named in Start since v179.8. "such as `bun init` or `npm create vite`" "writes nothing until you say yes" "catches the project up on your go-ahead"
   stages: [
     {
       name: 'Start',
       skill: false,
-      line: "`bun init` or `npm create vite` starts the project, or `target-scaffold` runs the stack's starter in an empty folder.",
+      line: '`bun init`, `npm create vite`, or `target-scaffold` starts the project.',
     },
     {
       name: 'target-setup',
       skill: true,
-      line: 'Detects the stack, shows the whole chain, and writes nothing until you say yes. Then it runs `canon init`, checks what landed, and indexes the docs.',
+      line: 'Shows what it will lay down, and writes nothing until you say yes.',
     },
     {
       name: 'target-check',
       skill: true,
-      line: 'Reports, domain by domain, what the project holds against what canon now ships, and repairs nothing.',
+      line: 'Reports what the project lacks against the current release.',
     },
     {
       name: 'target-update',
       skill: true,
-      line: 'After a release, upgrades the CLI and plugin, previews the changelog, migrations, and drift, and on your go-ahead catches the project up.',
+      line: 'After a release, catches the project up on your go-ahead.',
     },
   ],
   session: 'A session in a fresh project',
