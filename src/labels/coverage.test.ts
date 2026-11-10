@@ -166,6 +166,17 @@ describe("resolveCoverage against the repository's own map", () => {
     expect(coverage.uncovered).toEqual([])
     expect(coverage.declined).toHaveLength(3)
   })
+
+  it('should label the README loops docs and leave a sibling folder name uncovered', () => {
+    const coverage = resolveCoverage(repositoryMap(), [
+      'assets/loops/readme.gif',
+      'assets/loops/launch.mp4',
+      'assets/loopsX/a.gif',
+    ])
+
+    expect(coverage.uncovered).toEqual(['assets/loopsX/a.gif'])
+    expect(coverage.labels).toContain('docs')
+  })
 })
 
 describe('resolveCoverage with stem prefixes', () => {

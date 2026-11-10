@@ -51,7 +51,16 @@ tooling = ["tooling/"]
 # `scripts/` folder goes bare until the uncovered-surface check names it.
 cli = ["src/", "scripts/eval/"]
 sandbox = ["sandbox/", "src/sandbox/"]
-docs = ["docs/", "wiki/", "README.md", "CONTRIBUTING.md", "examples/"]
+# `assets/loops/` holds the README's loops, so a change to them rides with the
+# README rather than merging bare.
+docs = [
+  "docs/",
+  "wiki/",
+  "README.md",
+  "CONTRIBUTING.md",
+  "examples/",
+  "assets/loops/",
+]
 # The canon.erclx.dev landing page: its own Astro config, its own manual
 # typecheck path, its own Playwright e2e suite, and its own deploy workflow
 # (deploy-site.yml) building and shipping it independently of every row
