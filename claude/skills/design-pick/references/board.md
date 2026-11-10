@@ -1,6 +1,6 @@
 # The Frameboard board
 
-Read before the first `frameboard` verb a `design-pick` run sends. It carries where the board sits, how the verbs are reached, how the server starts, how a round is laid out beside its references, and how a selection resolves to an answer.
+Read before the first `frameboard` verb a `design-pick` run sends. It carries where the board sits, how the verbs are reached, how the server starts, the references page a round draws beside, and how a selection resolves to an answer.
 
 ## Reaching the board
 
@@ -32,15 +32,9 @@ frameboard serve --root <board> --no-open --tokens <stylesheet> --json
 - `reused: true` means a server was already up, so this run did not start it and its close leaves it running
 - Report a refusal's `error.code` and stop, since no file stands in for a board
 
-## Laying out a round
+## Drawing on the board
 
-A round draws each arm once per round width, so the page reads as a grid the operator scans both ways.
-
-- Give each arm one row in arm order, and each round width one column in ascending order
-- Pass `--width <px> --height <px> --x <px> --y <px>` on every add, setting each frame to its column's width
-- Start each column 80px past the right edge of the column before it
-- Start each row 80px below the tallest frame of the row above, so a long phone frame never overlaps the next arm
-- Name each frame `arm-<id>-<px>`, so a frame names its arm and its width on the board and in the archive
+Read `drawing.md` beside this file before the first frame, for the widths, pages, layout, names, and heights every frame takes, and how a pick is asked.
 
 ## The references page
 

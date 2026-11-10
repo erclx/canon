@@ -34,10 +34,10 @@ export default scenario({
         '         treatment as undecided between a border, a ground shift, and an edge rule',
       )
       ctx.log.info(
-        '         canon/DESIGN.md names 320, 768, 1024, and 1440 under ## Layout, so a round',
+        '         canon/DESIGN.md names Draw widths 320, 768, and 1440 under ## Layout, so a round',
       )
       ctx.log.info(
-        '         draws each arm at 320, 768, and 1440 rather than at the 834 fallback',
+        '         draws each arm at those rather than at the 390, 834, 1440 fallback',
       )
       ctx.log.info(
         '         .canon/board/picks/references/ holds a references page an earlier run left,',

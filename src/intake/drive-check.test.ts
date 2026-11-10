@@ -149,7 +149,7 @@ describe('readDrawn', () => {
   it('should read the reference example as drawn, citing its paths', () => {
     expect(readDrawn(REFERENCE_LOG)).toEqual({
       undrawn: [],
-      paths: ['evidence/02-options.png', 'evidence/mocks/layers/'],
+      paths: ['evidence/layers/02-options.png', 'evidence/mocks/layers/'],
     })
   })
 
@@ -412,10 +412,33 @@ describe('checkDrive', () => {
 
   it('should pass a drawn decision whose paths hold files', async () => {
     await recordBaseline(ROOT, 'app-drive-1-0')
-    write(`${FOLDER}/evidence/02-options.png`, 'png')
+    write(`${FOLDER}/evidence/layers/02-options.png`, 'png')
     write(`${FOLDER}/evidence/mocks/layers/02-fix.html`, '<div></div>')
     writeLog(REFERENCE_LOG.replace(/^# Drive log\n/, ''))
     writeRecord({ goals: BOTH_DRIVEN })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'clean',
+    })
+  })
+
+  it('should pass evidence grouped in a folder per surface', async () => {
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    write(`${FOLDER}/evidence/layers/02-options.png`, 'png')
+    write(`${FOLDER}/evidence/layers/frames/02-partial.png`, 'png')
+    write(`${FOLDER}/evidence/mocks/layers/02-fix.html`, '<div></div>')
+    writeLog(
+      '## 02. Layers click leaves a frame half hidden',
+      '- **Drawn:** `evidence/layers/02-options.png`, `evidence/mocks/layers/`',
+      '- **Decision (operator):** center the frame',
+    )
+    writeRecord({
+      goals: BOTH_DRIVEN,
+      evidence: [
+        'evidence/layers/02-options.png',
+        'evidence/layers/frames/02-partial.png',
+      ],
+    })
 
     expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
       reason: 'clean',

@@ -19,7 +19,7 @@ Every round puts real candidates in front of the operator at every width the sur
 
 - Three to five arms, the shipping state among them, each carry an id, a label, and a cost, and vary only at a layer named from the `design-taste` catalog
 - Each round is one Frameboard page, themed by the board toggle and captured once as a composite, with the link ahead of the first pick question
-- Every arm is drawn at a phone, a tablet, and a desktop width taken from the design record's `## Layout`, falling back to 320, 834, and 1440
+- Every arm is drawn at the phone, tablet, and desktop widths of the design record's `Draw widths:` line, falling back to 390, 834, and 1440
 - References are gathered before drafting, and each arm names the kept reference it draws on and what it takes, or says none backs it
 - Every arm is rendered and judged against a stated bar before handover, and a missing browser or a board that will not start is reported as a refusal
 
@@ -27,7 +27,7 @@ Every round puts real candidates in front of the operator at every width the sur
 
 The pick lands only once it holds at every width, and the run leaves a record of what lost.
 
-- No pick folds into the surface while any of its frames scrolls sideways at the width it was drawn at, and the hold names that width
+- No pick folds into the surface while any of its frames scrolls sideways at the width it was drawn at or at 320, and the hold names that width
 - The pick comes through the structured question surface with the recommendation first and every option's cost, and the winner lands in one change
 - Rounds sit on the board the design config names, each openable until the pick
 - The picked arms and the references page are archived at the main root before the run's pages go
