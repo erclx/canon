@@ -19,7 +19,10 @@ const minimal = (overrides: Partial<DesignTokens> = {}): DesignTokens => ({
   borders: [],
   bordersRules: [],
   layout: [],
+  shadows: [],
   motion: [],
+  durations: [],
+  easings: [],
   iconography: [],
   ...overrides,
 })
@@ -102,8 +105,8 @@ describe('buildDesignCss', () => {
     expect(css).toContain(
       '--type-code-family: Noto Sans Mono, DejaVu Sans Mono, monospace;',
     )
-    expect(css).toContain('--t0: 3.175rem;')
-    expect(css).toContain('--t6: 0.6875rem;')
+    expect(css).toContain('--size-t0: 3.175rem;')
+    expect(css).toContain('--size-t6: 0.6875rem;')
     expect(css).toContain('--radius-marker: 999px;')
   })
 
@@ -144,6 +147,88 @@ describe('buildDesignCss', () => {
       '--color-text-secondary: var(--color-light-text-secondary);',
     )
     expect(css).toContain('--color-success: var(--color-light-success);')
+  })
+
+  it('emits a shadow, a duration, and an easing as properties', () => {
+    const css = buildDesignCss(
+      minimal({
+        shadows: [{ role: 'ring', value: '0 0 0 1px #000000', when: 'edges' }],
+        durations: [{ role: 'fade', value: '240ms', when: 'fades' }],
+        easings: [
+          {
+            role: 'standard',
+            value: 'cubic-bezier(0.3, 0.7, 0.3, 1)',
+            when: 'moves',
+          },
+        ],
+      }),
+    )
+
+    expect(css).toContain('--shadow-ring: 0 0 0 1px #000000;')
+    expect(css).toContain('--duration-fade: 240ms;')
+    expect(css).toContain('--ease-standard: cubic-bezier(0.3, 0.7, 0.3, 1);')
+  })
+
+  it('remaps a shadow onto its light counterpart under the light theme', () => {
+    const css = buildDesignCss(
+      minimal({
+        shadows: [
+          { role: 'ring', value: '0 0 0 1px #ffffff', when: 'edges' },
+          { role: 'light-ring', value: '0 0 0 1px #000000', when: 'edges' },
+        ],
+      }),
+    )
+
+    expect(declarationsOf(css, "[data-theme='light']")).toContain(
+      '--shadow-ring: var(--shadow-light-ring);',
+    )
+  })
+
+  it('breaks a declaration past 80 columns after its colon, as oxfmt prints it', () => {
+    const value =
+      '0 0 0 1px rgba(0, 0, 0, 0.07), 0 24px 60px -28px rgba(0, 0, 0, 0.3)'
+
+    const css = buildDesignCss(
+      minimal({ shadows: [{ role: 'light-window', value, when: 'windows' }] }),
+    )
+
+    expect(css).toContain(`  --shadow-light-window:\n    ${value};`)
+  })
+
+  it('emits a step and a radius at their tablet and phone sizes under the two queries', () => {
+    const css = buildDesignCss(
+      minimal({
+        typeScale: [
+          { step: 'hero', size: '5.625rem', tablet: '4rem', phone: '2.5rem' },
+        ],
+        borders: [
+          {
+            role: 'tray',
+            radius: '36px',
+            width: 'none',
+            when: 'trays',
+            tablet: '28px',
+            phone: '22px',
+          },
+        ],
+      }),
+    )
+
+    expect(css).toContain(
+      '@media (max-width: 900px) {\n  :root {\n    --size-hero: 4rem;\n    --radius-tray: 28px;\n  }\n}',
+    )
+    expect(css).toContain(
+      '@media (max-width: 600px) {\n  :root {\n    --size-hero: 2.5rem;\n    --radius-tray: 22px;\n  }\n}',
+    )
+  })
+
+  it('emits no width query when no step shrinks', () => {
+    const css = buildDesignCss(
+      minimal({ typeScale: [{ step: 'body', size: '1rem' }] }),
+      { components: false },
+    )
+
+    expect(css).not.toContain('@media')
   })
 
   it('carries every component rule by default', () => {

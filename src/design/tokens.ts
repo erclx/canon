@@ -33,13 +33,21 @@ export interface TypeToken {
   readonly weight: string
   readonly size: string
   readonly lineHeight: string
+  /** The `typeScale` step the role takes, read for its tablet and phone sizes. */
+  readonly step?: string
   readonly verify?: readonly ('family' | 'weight' | 'size' | 'lineHeight')[]
 }
 
-/** One size the system offers, named apart from any role that takes it. */
+/**
+ * One size the system offers, named apart from any role that takes it. A step
+ * names its tablet and phone sizes where it shrinks, which `@/design/css` emits
+ * under the `TABLET` and `PHONE` queries.
+ */
 export interface TypeStep {
   readonly step: string
   readonly size: string
+  readonly tablet?: string
+  readonly phone?: string
 }
 
 export interface SpaceToken {
@@ -53,7 +61,20 @@ export interface BorderToken {
   readonly radius: string
   readonly width: string
   readonly when: string
+  /** A radius that steps down on smaller screens, as `TypeStep` sizes do. */
+  readonly tablet?: string
+  readonly phone?: string
   readonly verify?: readonly ('radius' | 'width')[]
+}
+
+/**
+ * A shadow, a duration, or an easing curve. A shadow role prefixed `light-`
+ * stands in for its unprefixed role on a light ground, as a color role does.
+ */
+export interface EffectToken {
+  readonly role: string
+  readonly value: string
+  readonly when: string
 }
 
 /**
@@ -73,7 +94,10 @@ export interface DesignTokens {
   readonly borders: readonly BorderToken[]
   readonly bordersRules: readonly string[]
   readonly layout: readonly string[]
+  readonly shadows: readonly EffectToken[]
   readonly motion: readonly string[]
+  readonly durations: readonly EffectToken[]
+  readonly easings: readonly EffectToken[]
   readonly iconography: readonly string[]
 }
 
@@ -354,6 +378,12 @@ export const TOKENS: DesignTokens = {
     'Capture widths: 320, 768, 1280, 1536. 320 is the reflow floor.',
     'Every width query in the generated stylesheets opens a range one of these widths reaches.',
   ],
+
+  shadows: [],
+
+  durations: [],
+
+  easings: [],
 
   motion: [
     'None. No transition, animation, or keyframe on any rendered surface.',

@@ -29,15 +29,37 @@ function hasHexValue(value: string): boolean {
 }
 
 /**
+ * The widths the responsive steps shrink under, matching the tablet and phone
+ * frames the system was drawn at.
+ */
+export const TABLET = 900
+export const PHONE = 600
+
+/** oxfmt's print width for `web/src/styles/tokens.css`, which a declaration must match. */
+const PRINT_WIDTH = 80
+
+/**
+ * One declaration as oxfmt prints it, breaking after the colon once the line
+ * passes the print width, so the generated stylesheet and the formatter agree.
+ */
+function declaration(property: string, value: string, indent = '  '): string {
+  const line = `${indent}${property}: ${value};`
+  if (line.length <= PRINT_WIDTH) return line
+  return `${indent}${property}:\n${indent}  ${value};`
+}
+
+/**
  * Dark role each `light-` role stands in for. Read off the names rather than
  * declared twice, so a light role added to the record joins the theme block
  * with no edit here.
  */
-function lightCounterparts(tokens: DesignTokens): Map<string, string> {
-  const roles = new Set(tokens.color.map((token) => token.role))
+function lightCounterparts(
+  tokens: readonly { readonly role: string }[],
+): Map<string, string> {
+  const roles = new Set(tokens.map((token) => token.role))
   const pairs = new Map<string, string>()
 
-  for (const token of tokens.color) {
+  for (const token of tokens) {
     if (!token.role.startsWith('light-')) continue
     const dark = token.role.slice('light-'.length)
     if (roles.has(dark)) pairs.set(dark, token.role)
@@ -53,7 +75,7 @@ function lightCounterparts(tokens: DesignTokens): Map<string, string> {
  * consolidation exists to end.
  */
 export function unmappedOnLight(tokens: DesignTokens = TOKENS): string[] {
-  const pairs = lightCounterparts(tokens)
+  const pairs = lightCounterparts(tokens.color)
 
   return tokens.color
     .filter(
@@ -78,7 +100,7 @@ function tokenProperties(tokens: DesignTokens): string[] {
   }
 
   for (const step of tokens.typeScale) {
-    lines.push(`  --${slug(step.step)}: ${step.size};`)
+    lines.push(`  --size-${slug(step.step)}: ${step.size};`)
   }
 
   for (const role of tokens.typography) {
@@ -92,7 +114,56 @@ function tokenProperties(tokens: DesignTokens): string[] {
     lines.push(`  --radius-${slug(border.role)}: ${border.radius};`)
   }
 
+  for (const shadow of tokens.shadows) {
+    lines.push(declaration(`--shadow-${slug(shadow.role)}`, shadow.value))
+  }
+
+  for (const duration of tokens.durations) {
+    lines.push(`  --duration-${slug(duration.role)}: ${duration.value};`)
+  }
+
+  for (const easing of tokens.easings) {
+    lines.push(declaration(`--ease-${slug(easing.role)}`, easing.value))
+  }
+
   return lines
+}
+
+/**
+ * The sizes and radii a smaller screen takes, as one query per width. A width
+ * no step shrinks under emits no query, so the capture-width check never
+ * reads a range the stylesheet does not open.
+ */
+function responsiveBlocks(tokens: DesignTokens): string[] {
+  const widths = [
+    { width: TABLET, pick: (entry: Shrinking) => entry.tablet },
+    { width: PHONE, pick: (entry: Shrinking) => entry.phone },
+  ]
+
+  return widths.flatMap(({ width, pick }) => {
+    const lines = [
+      ...tokens.typeScale.map((step) => [
+        `--size-${slug(step.step)}`,
+        pick(step),
+      ]),
+      ...tokens.borders.map((border) => [
+        `--radius-${slug(border.role)}`,
+        pick(border),
+      ]),
+    ]
+      .filter((pair): pair is [string, string] => pair[1] !== undefined)
+      .map(([property, value]) => declaration(property, value, '    '))
+
+    if (lines.length === 0) return []
+    return [
+      `@media (max-width: ${width}px) {\n  :root {\n${lines.join('\n')}\n  }\n}`,
+    ]
+  })
+}
+
+interface Shrinking {
+  readonly tablet?: string
+  readonly phone?: string
 }
 
 /**
@@ -101,12 +172,15 @@ function tokenProperties(tokens: DesignTokens): string[] {
  * what every surface here does today.
  */
 function lightBlock(tokens: DesignTokens): string {
-  const pairs = [...lightCounterparts(tokens)]
-    .map(
+  const remap = (prefix: string, roles: readonly { readonly role: string }[]) =>
+    [...lightCounterparts(roles)].map(
       ([dark, light]) =>
-        `  --color-${slug(dark)}: var(--color-${slug(light)});`,
+        `  --${prefix}-${slug(dark)}: var(--${prefix}-${slug(light)});`,
     )
-    .join('\n')
+  const pairs = [
+    ...remap('color', tokens.color),
+    ...remap('shadow', tokens.shadows),
+  ].join('\n')
 
   const gap = unmappedOnLight(tokens)
   const notice =
@@ -179,7 +253,7 @@ export function buildDesignCss(
         ? options.embedFonts
         : undefined
   const parts = faces ? [fontFaceBlock(faces), root] : [root]
-  parts.push(lightBlock(tokens))
+  parts.push(lightBlock(tokens), ...responsiveBlocks(tokens))
 
   const components =
     options.components === false
