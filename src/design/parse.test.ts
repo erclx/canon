@@ -133,6 +133,30 @@ describe('parseDesignDoc', () => {
     expect(doc.typography[0]['Size']).toEqual({ tagged: false, value: '12px' })
   })
 
+  it('should read only the first table when a section carries two', () => {
+    const path = write(
+      [
+        '# Design',
+        '',
+        '## Shapes',
+        '',
+        '| Role | Radius | Width | When used |',
+        '| ---- | ------ | ----- | --------- |',
+        '| window | 12px | none | windows |',
+        '',
+        '| Token | Value | When used |',
+        '| ----- | ----- | --------- |',
+        '| --shadow-ring | 0 0 0 1px | outlines |',
+        '',
+      ].join('\n'),
+    )
+
+    const doc = parseDesignDoc(path)
+
+    expect(doc.borders).toHaveLength(1)
+    expect(doc.borders[0]['Radius'].value).toBe('12px')
+  })
+
   it('should leave a prose section untouched by the table parse', () => {
     const path = write(
       ['# Design', '', '## Motion', '', 'Motion is not used.', ''].join('\n'),
