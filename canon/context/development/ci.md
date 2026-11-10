@@ -65,12 +65,18 @@ Every workflow installing the Playwright system packages calls this script, sinc
 - `src/gate/workflow-timeouts.test.ts` fails a direct `install-deps` or `--with-deps` call and an unbounded script step, in `.github/workflows/` and every `tooling/*/configs/.github/workflows/`
 - The web stack ships a copy at `tooling/web/configs/scripts/install-playwright-deps.sh`, and a case in `src/gate/install-playwright-deps.test.ts` fails when its bytes drift from this one
 
+### `release-please-config.json`
+
+The root owns this config and the manifests it versions.
+
+- Its `bootstrap-sha` stops a first run versioning every untagged commit, and `include-component-in-tag: false` keeps tags `v<semver>`
+- Its `exclude-paths` skips a commit whose every file is unshipped. `src/gate/release-paths.test.ts` fails on a tracked folder neither shipped nor excluded, reading `assets` one level down.
+- `.claude-plugin/` and `claude/.claude-plugin/` hold the manifests release-please versions, and `.oxfmtrc.jsonc` ignores the files the tool writes
+
 ### Other folders
 
-The release configuration, the manifests, and the install check sit beside the workflows.
+The CI programs, the install check, and a version pin sit beside the workflows.
 
-- The root owns `release-please-config.json`, whose `bootstrap-sha` stops a first run versioning every untagged commit and whose `include-component-in-tag: false` keeps tags `v<semver>`
-- `.claude-plugin/` and `claude/.claude-plugin/` hold the manifests release-please versions, and `.oxfmtrc.jsonc` ignores the files the tool writes
 - `scripts/ci/` owns the programs the long steps call, such as `publish-check.sh`, `refresh-frames-pr.sh`, and `install-playwright-deps.sh`, and a step past five lines moves there
 - `scripts/core/` owns `install-check.ts`, run in CI after `check:ci` and kept out of the local gate because a cold pack-and-install is unmeasured
 - `package.json` pins `typescript` to the v5 line `@astrojs/check` expects, so `bun add -D typescript` selecting v7 is a compiler upgrade

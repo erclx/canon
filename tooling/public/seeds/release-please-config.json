@@ -6,7 +6,8 @@
       "release-type": "simple",
       "changelog-path": "CHANGELOG.md",
       "initial-version": "0.0.1",
-      "bump-minor-pre-major": true
+      "bump-minor-pre-major": true,
+      "exclude-paths": ["canon", ".claude"]
     }
   }
 }
