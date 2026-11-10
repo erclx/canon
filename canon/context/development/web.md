@@ -37,7 +37,7 @@ This repository's self-portrait for a visitor who never opens the source, where 
 
 - `evidence/home/` is the committed baseline of the page, one folder per section holding a frame per theme at 320 and 1280 pixels
 - `frames/` holds the social card and its stamp, the one image the site's link preview shows
-- `loops/` holds the launch film's README GIFs and the page's silent MP4s and posters, all written by `bun run film:render`
+- `loops/` holds the README's `readme` pair, taken by hand from the page's opening, beside the launch posts' `launch` GIFs and the page's MP4s and posters, which `bun run film:render` writes
 - `merge/` and the whole-page frames come from a `workflow_dispatch` artifact on `main`, since a local capture falls back to another font
 - Every README image ships as a `<name>` and `<name>-light` pair behind a `<picture>`
 

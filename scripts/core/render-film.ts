@@ -1,6 +1,6 @@
 /**
  * Renders the launch film in assets/film/ once per theme and writes the
- * README loops to assets/loops/launch.gif and launch-light.gif, and beside
+ * launch loops to assets/loops/launch.gif and launch-light.gif, and beside
  * them the landing page's web MP4 and poster PNG per theme.
  *
  * Each theme renders to an MP4 at the canvas size under assets/film/renders/,

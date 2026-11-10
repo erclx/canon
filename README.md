@@ -7,15 +7,15 @@
 
 # canon
 
-A CLI and Claude Code plugin that runs your agent's work from plan to merge, holds it to established engineering practice, and installs the same setup in every repo.
+A Claude Code plugin and CLI that runs agent work from plan to merge.
 
 [![npm version](https://img.shields.io/npm/v/@erclx/canon)](https://www.npmjs.com/package/@erclx/canon)
 [![CI status](https://img.shields.io/github/actions/workflow/status/erclx/canon/verify.yml?branch=main)](https://github.com/erclx/canon/actions/workflows/verify.yml)
 [![License MIT](https://img.shields.io/npm/l/@erclx/canon)](LICENSE)
 
 <picture>
- <source media="(prefers-color-scheme: dark)" srcset="assets/loops/launch.gif">
- <img src="assets/loops/launch-light.gif" alt="One change running through canon, from the groundwork that measured it through its plan, dispatch, build, and review to the merge" width="960">
+ <source media="(prefers-color-scheme: dark)" srcset="assets/loops/readme.gif">
+ <img src="assets/loops/readme-light.gif" alt="Claude Code's agent view in canon: sessions complete, take answers, and arrive, then a slash opens canon's skill menu" width="960">
 </picture>
 
 </div>
@@ -28,25 +28,68 @@ claude plugin install canon@canon
 bun install --global @erclx/canon
 ```
 
-The skills land as `/canon:<name>`, and the CLI needs Bun on your path. canon runs on Linux and macOS.
+Then open a project in Claude Code and run `/canon:target-setup`, which brings it onto canon.
 
-Set up a repository with `canon init`, which lays down its rules, seeds, and configs.
+canon expects someone who already knows Claude Code well. It runs on Linux and macOS, and the CLI needs Bun.
 
-## How a change runs
+## Who works
 
-| 1. Plan                                                  | 2. Build                                                | 3. Review                                                   | 4. Merge                      |
-| -------------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------- | ----------------------------- |
-| A planner reads the code and writes one plan you approve | A worker builds it on its own branch, held to the rules | A fresh session reviews the pull request and posts findings | You read the review and merge |
+You talk to the orchestrator. It starts every other role in its own session and hears back from each.
 
-Each session works in its own worktree, so several changes run at once.
+- The orchestrator dispatches the rows on the task board
+- A planner reads the code and writes one plan you approve
+- A worker builds the plan and opens the pull request
+- A code reviewer reads the diff from a fresh session
+- A UI reviewer drives the visual checklist in the running app
 
-## What lands in your repo
+## What each step leaves behind
 
-| Part              | How it reaches you                                                             |
-| ----------------- | ------------------------------------------------------------------------------ |
-| Skills            | Loaded live from the plugin, so there is no copy to drift                      |
-| Rules             | Files under `.claude/rules/` that load when you edit a matching path           |
-| Configs and seeds | Real files you own, laid down by `canon init` and kept current by `canon sync` |
+Every step writes a record in a fixed shape, and every change carries what it looks like. Records live under `.canon/` in the main checkout.
+
+- Before a build: intake, groundwork, the plan, its task, and the board
+- Around a pull request: the code review, the UI review, and the screenshot evidence
+- Across sessions: the drive log, the context entries, and the handoff a compaction would lose
+
+## What good work looks like
+
+The practice an agent follows lives in skills, and every rule in them traces to a published source. A skill loads at the moment its practice applies.
+
+| Skill                  | Loads                           | Cites                                     |
+| ---------------------- | ------------------------------- | ----------------------------------------- |
+| `code-craft`           | Before a new function or module | Google, What to look for in a code review |
+| `test-craft`           | Before writing a test           | Ham Vocke, The Practical Test Pyramid     |
+| `api-design`           | Before shaping a flag or output | Software Engineering at Google            |
+| `ui-craft`             | When a rendered file changes    | W3C, Using ARIA                           |
+| `systematic-debugging` | On a bug nobody has explained   | Jesse Vincent, superpowers                |
+
+Each rule has its own source row in a ledger, and the skill audit fails when a skill's rules and its rows disagree in count.
+
+## What holds it
+
+A skill says what good looks like. These four parts catch the agent when it skips one.
+
+- Rules by path load when the agent opens a matching file, and each names the skill that owns that kind of file
+- Hooks read each action before or after it runs, refusing some and reporting others back into the same turn
+- The gate runs every stage before a pull request opens, and a stage that cannot read its input fails rather than passing
+- A deny rule keeps the agent from merging, since a hook fails open on a timeout and a permission rule does not
+
+## Where it happens
+
+Changes run side by side. Each worker builds in its own worktree on its own branch, and every session reads and writes the one `.canon/` record in the main checkout, so no worktree keeps a copy of its own.
+
+## How a repo comes onto canon
+
+The project starts with its stack's own tool, such as `bun init` or `npm create vite`, or with `/canon:target-scaffold` in an empty folder, and canon layers on top.
+
+1. `/canon:target-setup` detects the stack, shows the whole chain, and writes nothing until you say yes. Then it runs `canon init`, checks what landed, and indexes the docs.
+2. `/canon:target-check` reports, domain by domain, what the project holds against what canon now ships, and repairs nothing.
+3. `/canon:target-update` upgrades the CLI and plugin after a release, previews the changelog and any migrations, and catches the project up on your go-ahead.
+
+Three kinds of file land in your repo:
+
+- Skills load live from the plugin, so there is no copy to drift
+- Rules are files under `.claude/rules/` that load when you edit a matching path
+- Configs and seeds are real files you own, laid down by `canon init` and kept current by `canon sync`
 
 ## For your agent
 

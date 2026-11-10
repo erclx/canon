@@ -21,10 +21,10 @@ function readJson(path: string) {
 function readmeOpening(): string {
   const line = readText('README.md')
     .split('\n')
-    .find((candidate) => candidate.startsWith('A CLI and Claude Code plugin '))
+    .find((candidate) => candidate.startsWith('A Claude Code plugin and CLI '))
   if (line === undefined)
     throw new Error(
-      'README.md has no line opening "A CLI and Claude Code plugin "',
+      'README.md has no line opening "A Claude Code plugin and CLI "',
     )
   return line
 }
@@ -48,9 +48,10 @@ describe('public positioning', () => {
     expect(readmeOpening()).toContain(fold.headline.replace(/^canon /, ''))
   })
 
-  it('should end the hero lead on the README opening sentence', () => {
-    const tail = fold.lead.slice(fold.lead.indexOf('established'))
+  it('should open the hero lead on the README opening sentence subject', () => {
+    const subject = 'A Claude Code plugin and CLI that'
 
-    expect(readmeOpening().endsWith(tail)).toBe(true)
+    expect(readmeOpening().startsWith(subject)).toBe(true)
+    expect(fold.lead.startsWith(subject)).toBe(true)
   })
 })
