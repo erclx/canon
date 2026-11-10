@@ -40,7 +40,7 @@ Derive a kebab `<site>` from each address's host without its `www.`, such as `li
 
 ## Step 2: read the widths
 
-Capture each site at every width the project draws at. Read the widths from the layout section of `canon/DESIGN.md` at the main worktree root when it names them, and take 320, 768, and 1440 otherwise.
+Capture each site at every width the project draws at. Read the widths as `${CLAUDE_SKILL_DIR}/../design-pick/references/widths.md` states them, so a reference set and a round share one width per device class.
 
 Say which source gave the widths. A site that switches on a hover or pointer media query shows its desktop variant at 320, since `--width` sets the viewport and turns no touch on, so say so where a phone shot shows a hover-only control.
 
