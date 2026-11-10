@@ -288,7 +288,7 @@ test.describe('at the 320 pixel floor', () => {
 })
 
 test.describe('the social card', () => {
-  const card = '/assets/social-card.png'
+  const card = '/og-image.png'
 
   test('both card tags name the composed card on the deployed origin', async ({
     page,
@@ -329,6 +329,25 @@ test.describe('the social card', () => {
     await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute(
       'content',
       /\S/,
+    )
+  })
+})
+
+test.describe('the page name', () => {
+  test('the tab reads the capitalized name alone', async ({ page }) => {
+    await page.goto('/')
+
+    await expect(page).toHaveTitle('Canon')
+  })
+
+  test('the share label reads the host rather than repeating the name', async ({
+    page,
+  }) => {
+    await page.goto('/')
+
+    await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute(
+      'content',
+      'canon.erclx.com',
     )
   })
 })

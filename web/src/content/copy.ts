@@ -17,18 +17,25 @@
 const REPO = 'https://github.com/erclx/canon'
 const NPM = 'https://www.npmjs.com/package/@erclx/canon'
 const DOCS = `${REPO}/tree/main/docs`
+/**
+ * The deployed origin, which a social card's absolute image URL is resolved
+ * against and which `astro.config.mjs` reads as its own `site` value. It is
+ * the address `.github/workflows/deploy-site.yml` publishes to rather than
+ * anything `README.md` states, so it carries no citation.
+ */
+const ORIGIN = 'https://canon.erclx.com'
 
 export const site = {
+  /** The lowercase wordmark the social card and its alt text draw, so a change re-captures the card. */
   name: 'canon',
   /**
-   * The deployed origin, which a social card's absolute image URL is resolved
-   * against and which `astro.config.mjs` reads as its own `site` value. It is
-   * the address `.github/workflows/deploy-site.yml` publishes to rather than
-   * anything `README.md` states, so it carries no citation.
+   * The host, which `og:site_name` reads. LinkedIn prints it under the share
+   * title, which already reads `title`, so the name there would show twice.
    */
-  origin: 'https://canon.erclx.com',
-  // README.md: "runs agent work from plan to merge"
-  title: 'canon runs agent work from plan to merge',
+  label: new URL(ORIGIN).host,
+  origin: ORIGIN,
+  /** The browser tab and the share title, which read the project name alone with no tagline after it. */
+  title: 'Canon',
   // README.md: "A Claude Code plugin and CLI that runs agent work from plan to merge."
   description:
     'A Claude Code plugin and CLI that runs agent work from plan to merge.',
