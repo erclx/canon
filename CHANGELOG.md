@@ -1,5 +1,24 @@
 # Changelog
 
+## [5.82.0](https://github.com/erclx/canon/compare/v5.81.0...v5.82.0) (2026-11-10)
+
+
+### Features
+
+* **design-pick:** draw drives and picks by one board convention ([#2976](https://github.com/erclx/canon/issues/2976)) ([a25da62](https://github.com/erclx/canon/commit/a25da629e6720c429914d0632e489d25ca9bdb2a))
+* **design:** run the design sync through frameboard's references sync ([#2964](https://github.com/erclx/canon/issues/2964)) ([9987d58](https://github.com/erclx/canon/commit/9987d5825c0ab553eab98b16b3cef6a874705af9))
+* **release:** exclude unshipped folders from release-please ([#2975](https://github.com/erclx/canon/issues/2975)) ([fdd4213](https://github.com/erclx/canon/commit/fdd4213f7871578ffcc4e0eb0037f85ac1f4d243))
+* **skills:** name which shapes take a pill under the radius lock ([#2969](https://github.com/erclx/canon/issues/2969)) ([6d5ef2e](https://github.com/erclx/canon/commit/6d5ef2e43fb182c38360e21353957fef80f760b2))
+* **skills:** point design-record frame assets at the project assets folder ([36b1953](https://github.com/erclx/canon/commit/36b1953fcd3fad03a3e73ca37b4750851d09c61e))
+* **tooling:** split the astro switcher into script and style files ([#2974](https://github.com/erclx/canon/issues/2974)) ([3141d16](https://github.com/erclx/canon/commit/3141d16ecb4f5ebafff4f1f00e9a4775321efa00))
+* **web:** rebuild six landing sections to the settled drive frames ([#2966](https://github.com/erclx/canon/issues/2966)) ([b51e9c3](https://github.com/erclx/canon/commit/b51e9c3e4a5637c95fe1e00f2075c60994957980))
+
+
+### Bug Fixes
+
+* **pr:** leave deleted paths out of the uncaptured evidence list ([#2973](https://github.com/erclx/canon/issues/2973)) ([42000d2](https://github.com/erclx/canon/commit/42000d284ada5e2bb1dd075e07b1723c0970f595))
+* **records:** exempt drive log labeled fields from S4 ([#2971](https://github.com/erclx/canon/issues/2971)) ([653f80a](https://github.com/erclx/canon/commit/653f80a04899a1c31729d0e0b44cd84778405c2a))
+
 ## [5.81.0](https://github.com/erclx/canon/compare/v5.80.0...v5.81.0) (2026-11-10)
 
 
