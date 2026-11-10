@@ -23,12 +23,13 @@ Reads the project's config or resolves the frame files, runs a subject's reader 
 - The focus reader reports rest against focus rather than the focused style alone, and names an element the browser refuses to focus apart from one with no ring
 - A route answering 404 contributes zero elements, so the per-route line separates an empty page from one not being served
 
-### Frames and values in `src/inventory/`
+### `src/inventory/values.ts`
 
-The frame input and the value subjects add a second walk beside the route one.
+The value subjects and the frame input add a second walk beside the route one.
 
 - The five value subjects share one reader in `values.ts`, and `scale.ts` writes the record's values in the same normalized form, so a change to one side's form is a change to both
 - A frame walk needs no config and refuses `focus`, whose element query only a project declares
+- A frame's dark read sets `data-theme` and emulates the dark scheme, then finishes every CSS transition, since a transition on a color would otherwise report a value between the two themes
 
 ### Other folders
 
@@ -44,10 +45,3 @@ The browser helpers and the step driver sit beside the walk.
 - Only two of the four `keyboard.md` focus rules are measurable from computed style, since the 3:1 rule needs a background the walk lacks and a clipped ring shows in no computed property
 - The axe bundle sets `window.axe`, `doT`, and `_encodeHTML` as it loads, so the `axe` probe restores only what that load changed, and a default run leaves it out
 - A test for the server-unreachable refusal needs a port the kernel handed out and released, because a low reserved port fails in the engine first
-
-### The frame walk
-
-A board frame carries both themes in one file, so the walk reads it twice.
-
-- The dark read sets `data-theme` and emulates the dark scheme, then finishes every CSS transition, since a transition declared on a color would otherwise report a value between the two themes
-- A read computes one state, so a `:hover` value is never counted, and a frame per width stands in for the `@media` values a single read misses
