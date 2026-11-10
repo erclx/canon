@@ -75,13 +75,20 @@ States a default rather than a fixed vocabulary. A session may write the header 
 
 ### A relayed operator answer
 
-A message carrying an operator's answer adds one line under the header, naming the file and the slot the answer was written in:
+A message carrying an operator's answer opens its body with one line naming the file and the slot the answer was written in. The line goes on the send route and the block route alike:
 
 ```plaintext
 Answer at: <path>, <slot>
 ```
 
-The slot is a plan question's `- Answer:` line, an intake item's `You:` line, or a task's outcome box. The calling role decides whether a message relays an answer, and one relaying none, such as a landing announcement, carries no such line.
+The slot is one of these:
+
+- A plan question's `- Answer:` line
+- A plan question's `- Suggested:` line, for a pick settled in conversation, which names who settled it there
+- An intake item's `You:` line
+- A task's outcome box
+
+The calling role decides whether a message relays an answer, and one relaying none, such as a landing announcement, carries no such line.
 
 An answer given in chat and never written back has no slot to cite. Write `Answer at: none` for it rather than leaving the line off, so the receiver sees the gap and confirms with the operator.
 
