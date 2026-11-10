@@ -31,9 +31,9 @@ interface Run {
 
 /**
  * Scaffolds a stack into `.canon/tmp/runs/verify-<stack>/`, syncs its chain
- * from the checkout at `root`, and runs the scaffold's own `lint:fix`,
- * `format`, `check`, `test:e2e`, and `screenshot` scripts. Every line goes
- * to stderr.
+ * from the checkout at `root`, and runs the scaffold's own `format` and
+ * `check` scripts, plus `lint:fix`, `test:e2e`, and `screenshot` where it
+ * declares them. Every line goes to stderr.
  *
  * A failed phase is recorded and the run carries on, so the Results block
  * reports every phase rather than the first failure. The tmp dir is removed
@@ -156,9 +156,15 @@ async function run({
  * `lint:fix` and `format` run first and rewrite the scaffold, so `check`
  * reads the tree a project would commit. `check` itself writes nothing, and a
  * fresh scaffold ships files its own generator formatted another way.
+ *
+ * `format` and `check` run unconditionally, since `base` declares both and
+ * every verified chain reaches it. `lint:fix`, `test:e2e`, and `screenshot`
+ * run only where the synced scaffold declares them.
  */
 async function runScripts(state: Run, scripts: Set<string>): Promise<void> {
-  await phase(state, 'lint:fix', () => bunRun('lint:fix', state.dir))
+  if (scripts.has('lint:fix')) {
+    await phase(state, 'lint:fix', () => bunRun('lint:fix', state.dir))
+  }
   await phase(state, 'format', () => bunRun('format', state.dir))
   await phase(state, 'check', () => bunRun('check', state.dir))
 

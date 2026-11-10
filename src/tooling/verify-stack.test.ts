@@ -101,7 +101,7 @@ describe('verifyStack sync', () => {
 
 describe('verifyStack phases', () => {
   it('should run test:e2e and screenshot after check when declared', async () => {
-    seedStack('web', scaffoldWith(['test:e2e', 'screenshot']))
+    seedStack('web', scaffoldWith(['lint:fix', 'test:e2e', 'screenshot']))
     vi.stubEnv('SHOTS', '1')
 
     const outcome = await verifyStack({ root, stack: 'web' })
@@ -119,7 +119,7 @@ describe('verifyStack phases', () => {
     expect(outcome.exitCode).toBe(0)
   })
 
-  it('should skip test:e2e and screenshot when not declared', async () => {
+  it('should skip lint:fix, test:e2e, and screenshot when not declared', async () => {
     seedStack('lib', scaffoldWith([]))
 
     const outcome = await verifyStack({ root, stack: 'lib' })
@@ -127,10 +127,10 @@ describe('verifyStack phases', () => {
     expect(outcome.results.map((result) => result.name)).toEqual([
       'Scaffold',
       'Sync',
-      'lint:fix',
       'format',
       'check',
     ])
+    expect(bunCalls()).not.toContain('run lint:fix')
   })
 
   it('should run the manifest prepare before sync', async () => {
@@ -146,7 +146,7 @@ describe('verifyStack phases', () => {
   })
 
   it('should run later phases after a failed phase', async () => {
-    seedStack('web', scaffoldWith(['test:e2e']))
+    seedStack('web', scaffoldWith(['lint:fix', 'test:e2e']))
     vi.stubEnv('FAIL_ON', 'check')
 
     const outcome = await verifyStack({ root, stack: 'web' })
