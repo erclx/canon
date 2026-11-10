@@ -47,4 +47,7 @@ packages = [
 "# Social card" = ["card-dist/"]
 
 [verify]
-prepare = "bunx astro add react --yes"
+# The scaffold's page writes its own head, so it is pointed at the synced
+# site-head component, and the grep stops the run here if a template change
+# left the rewrite unmatched rather than at the head tag check later.
+prepare = '''bunx astro add react --yes && perl -0pi -e 's|---\n---|---\nimport SiteHead from "\@/components/site-head.astro"\n---|; s|<title>Astro</title>|<SiteHead />|' src/pages/index.astro && grep -q '<SiteHead />' src/pages/index.astro'''
