@@ -47,14 +47,14 @@ Warm neutrals with actions in ink, set in Geist. The page reads as prose, and mo
 - Tracking: `label` at `0.05em`, `display` at `-0.01em`, nothing else.
 - Sizes come from seven steps, `t0` to `t6`. A role takes one step.
 
-| Role         | Family                                      | Weight       | Size              | Line height   |
-| ------------ | ------------------------------------------- | ------------ | ----------------- | ------------- |
-| display      | Geist Variable, DejaVu Sans, sans-serif     | 700          | 2.375rem          | 1.3           |
-| page-display | Geist Variable, DejaVu Sans, sans-serif     | 700          | 3.175rem ? verify | 1.1 ? verify  |
-| heading      | Geist Variable, DejaVu Sans, sans-serif     | 700          | 1.375rem          | 1.3 ? verify  |
-| body         | Geist Variable, DejaVu Sans, sans-serif     | 400 ? verify | 0.9375rem         | 1.65          |
-| label        | Geist Variable, DejaVu Sans, sans-serif     | 400 ? verify | 0.8125rem         | 1.45 ? verify |
-| code         | Noto Sans Mono, DejaVu Sans Mono, monospace | 700          | 0.8125rem         | 1.3 ? verify  |
+| Role         | Family                                      | Weight       | Size              | Tablet            | Phone             | Line height   |
+| ------------ | ------------------------------------------- | ------------ | ----------------- | ----------------- | ----------------- | ------------- |
+| display      | Geist Variable, DejaVu Sans, sans-serif     | 700          | 2.375rem          | 2.375rem          | 2.375rem          | 1.3           |
+| page-display | Geist Variable, DejaVu Sans, sans-serif     | 700          | 3.175rem ? verify | 3.175rem ? verify | 3.175rem ? verify | 1.1 ? verify  |
+| heading      | Geist Variable, DejaVu Sans, sans-serif     | 700          | 1.375rem          | 1.375rem          | 1.375rem          | 1.3 ? verify  |
+| body         | Geist Variable, DejaVu Sans, sans-serif     | 400 ? verify | 0.9375rem         | 0.9375rem         | 0.9375rem         | 1.65          |
+| label        | Geist Variable, DejaVu Sans, sans-serif     | 400 ? verify | 0.8125rem         | 0.8125rem         | 0.8125rem         | 1.45 ? verify |
+| code         | Noto Sans Mono, DejaVu Sans Mono, monospace | 700          | 0.8125rem         | 0.8125rem         | 0.8125rem         | 1.3 ? verify  |
 
 ## Spacing
 
