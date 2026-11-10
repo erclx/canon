@@ -20,6 +20,8 @@ const canon = (): BranchCli => ({
 
 const verdict = (): object => ({ state: 'pass', asserted: 1, failed: 0 })
 
+const skills = (): readonly string[] => ['canon:target-scaffold']
+
 describe('parseRunArgs', () => {
   it('should refuse a target with no category separator', () => {
     expect(parseRunArgs('commit', '/canon:git-commit')).toEqual(
@@ -57,7 +59,7 @@ describe('parseRunArgs', () => {
 })
 
 describe('mergeEnvelope', () => {
-  it('should append the verdict, escapes, sessions, and CLI to a parsed envelope', () => {
+  it('should append the verdict, escapes, sessions, CLI, and skills to a parsed envelope', () => {
     const out = '{"is_error":false,"result":"ok","num_turns":1}'
 
     const { merged, isParsed } = mergeEnvelope(
@@ -66,6 +68,7 @@ describe('mergeEnvelope', () => {
       ['/root/.canon/plans/x.md'],
       sessions(),
       canon(),
+      skills(),
     )
 
     expect(isParsed).toBe(true)
@@ -80,6 +83,7 @@ describe('mergeEnvelope', () => {
         cli: '/checkout/src/cli.ts',
         head: '0123456789abcdef0123456789abcdef01234567',
       },
+      skills: ['canon:target-scaffold'],
     })
   })
 
@@ -93,6 +97,7 @@ describe('mergeEnvelope', () => {
       [],
       sessions(),
       canon(),
+      skills(),
     )
 
     expect(isParsed).toBe(false)
@@ -105,18 +110,19 @@ describe('mergeEnvelope', () => {
         cli: '/checkout/src/cli.ts',
         head: '0123456789abcdef0123456789abcdef01234567',
       },
+      skills: ['canon:target-scaffold'],
     })
   })
 
   it('should fall back when the envelope is empty', () => {
-    expect(mergeEnvelope('', verdict(), [], sessions(), canon()).isParsed).toBe(
-      false,
-    )
+    expect(
+      mergeEnvelope('', verdict(), [], sessions(), canon(), []).isParsed,
+    ).toBe(false)
   })
 
   it('should fall back when the envelope is JSON but not an object', () => {
     expect(
-      mergeEnvelope('[1,2]', verdict(), [], sessions(), canon()).isParsed,
+      mergeEnvelope('[1,2]', verdict(), [], sessions(), canon(), []).isParsed,
     ).toBe(false)
   })
 })

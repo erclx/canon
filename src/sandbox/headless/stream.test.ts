@@ -38,7 +38,8 @@ describe('reduceStream', () => {
     const out = [system(), bashCall(), result()].join('\n')
 
     expect(reduceStream(out)).toEqual({
-      result: '{"type":"result","is_error":false,"result":"done","num_turns":3}',
+      result:
+        '{"type":"result","is_error":false,"result":"done","num_turns":3}',
       skills: [],
     })
   })

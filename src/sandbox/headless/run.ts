@@ -33,6 +33,7 @@ import {
   snapshotTree,
   writesBetween,
 } from '@/sandbox/headless/watch'
+import { reduceStream } from '@/sandbox/headless/stream'
 import { mintSandboxRunId, sandboxTree } from '@/sandbox/tree'
 import {
   intro,
@@ -143,7 +144,9 @@ export interface SessionsReport {
  * is not in that tree to be asserted over.
  *
  * `canon` names the CLI every child of the run resolved, so a reader can tell
- * a run that drove the branch from one that drove the release.
+ * a run that drove the branch from one that drove the release. `skills` names
+ * the skills the session loaded, read from the stream rather than the result
+ * object, so it survives a result that did not parse.
  */
 export function mergeEnvelope(
   out: string,
@@ -151,16 +154,17 @@ export function mergeEnvelope(
   escapes: readonly string[],
   sessions: SessionsReport,
   canon: BranchCli,
+  skills: readonly string[],
 ): { readonly merged: Record<string, unknown>; readonly isParsed: boolean } {
   const envelope = parseObject(out)
   if (envelope === undefined)
     return {
-      merged: { is_error: true, verdict, escapes, sessions, canon },
+      merged: { is_error: true, verdict, escapes, sessions, canon, skills },
       isParsed: false,
     }
 
   return {
-    merged: { ...envelope, verdict, escapes, sessions, canon },
+    merged: { ...envelope, verdict, escapes, sessions, canon, skills },
     isParsed: true,
   }
 }
@@ -470,8 +474,11 @@ async function drive(
       join(projectRoot, 'claude'),
       '--model',
       settings.model,
+      // Stream-json carries every tool call, which is how `skills` is read.
+      // `--verbose` is what `-p` requires before it emits the stream.
       '--output-format',
-      'json',
+      'stream-json',
+      '--verbose',
       '--permission-mode',
       settings.permissionMode,
       '--allowedTools',
@@ -529,7 +536,10 @@ async function drive(
     return sessionCode
   }
 
-  const envelope = parseObject(out)
+  // Every reader below takes the result message alone, the object the json
+  // output format printed, so none of them meets the stream's other lines.
+  const stream = reduceStream(out)
+  const envelope = parseObject(stream.result)
   const isError = envelopeField(envelope, 'is_error', 'unknown')
   const turns = envelopeField(envelope, 'num_turns', '?')
   const cost = envelopeField(envelope, 'total_cost_usd', '?')
@@ -561,7 +571,7 @@ async function drive(
   )
 
   const verdict = takeVerdict(cli, target, arm, workDir, {
-    envelope: out,
+    envelope: stream.result,
     writes,
     escapes,
     concurrent,
@@ -604,7 +614,7 @@ async function drive(
   }
 
   const { merged, isParsed } = mergeEnvelope(
-    out,
+    stream.result,
     verdict.record,
     escapes,
     {
@@ -614,6 +624,7 @@ async function drive(
       reap: cleanup.reap,
     },
     branchCli,
+    stream.skills,
   )
   if (!isParsed)
     logWarn('Envelope was not valid JSON. Emitting the verdict alone.')
