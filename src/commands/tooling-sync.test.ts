@@ -3,6 +3,7 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -279,6 +280,66 @@ describe('tooling diff', () => {
 
   it('should still exit 1 under --json when a file differs', () => {
     expect(diff(['--json']).status).toBe(1)
+  })
+})
+
+describe('tooling diff over a Tailwind plugin no stylesheet imports', () => {
+  const syncStack = (stack: string, args: readonly string[]): Run => {
+    seedPackage(target, stack)
+    const run = spawnSync(
+      'bun',
+      [CLI, 'tooling', 'sync', stack, target, ...args],
+      { encoding: 'utf8', env: buildEnv() },
+    )
+    return { status: run.status, stderr: run.stderr, stdout: run.stdout }
+  }
+
+  beforeEach(() => {
+    syncStack('vite-react', ['--write'])
+  })
+
+  it('should exit 0 when the warning is the only finding', () => {
+    expect(diffStack('vite-react').status).toBe(0)
+  })
+
+  it('should tell the reader the import to add on stderr', () => {
+    expect(diffStack('vite-react').stderr).toContain("@import 'tailwindcss';")
+  })
+
+  it('should carry a tailwind-unimported warning on the --json record', () => {
+    const record = JSON.parse(
+      diffStack('vite-react', ['--json']).stdout ?? '',
+    ) as { warnings: { code: string; config: string }[] }
+
+    expect(record.warnings).toEqual([
+      expect.objectContaining({
+        code: 'tailwind-unimported',
+        config: 'vite.config.ts',
+      }),
+    ])
+  })
+
+  it('should write no file into the target', () => {
+    const before = readdirSync(target, { recursive: true }).sort()
+
+    diffStack('vite-react')
+
+    expect(readdirSync(target, { recursive: true }).sort()).toEqual(before)
+  })
+
+  it('should still report the target up to date from sync', () => {
+    expect(syncStack('vite-react', ['--write']).stderr).toContain(
+      'Everything up to date',
+    )
+  })
+
+  it('should stay silent once a stylesheet imports Tailwind', () => {
+    mkdirSync(join(target, 'src'), { recursive: true })
+    writeFileSync(join(target, 'src/index.css'), "@import 'tailwindcss';\n")
+
+    expect(diffStack('vite-react').stderr).not.toContain(
+      "@import 'tailwindcss';",
+    )
   })
 })
 

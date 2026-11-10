@@ -12,9 +12,10 @@ The astro stack covers Astro + TypeScript projects, being content sites, marketi
 2. Add React with `bunx astro add react`. Never use `astro add tailwind`, which installs the v3 integration. Tailwind v4 arrives via the web manifest.
 3. Install web tooling with `canon tooling sync web . --write`.
 4. Install the astro adapter with `canon tooling sync astro . --write`.
-5. Render `src/components/site-head.astro` inside the layout's `<head>`, fill `src/site.ts`, and set `ASTRO_SITE` to the deployed address.
-6. Extend the `ci` and `development` context entries under `canon/context/` per the web reference's extend sections plus the astro rows below.
-7. Run `bun run lint:fix`, then `bun run format`, then `bun run check`.
+5. Add `@import 'tailwindcss';` to the global stylesheet. The stack registers the Vite plugin and seeds no stylesheet, and `canon tooling diff` warns until one imports it.
+6. Render `src/components/site-head.astro` inside the layout's `<head>`, fill `src/site.ts`, and set `ASTRO_SITE` to the deployed address.
+7. Extend the `ci` and `development` context entries under `canon/context/` per the web reference's extend sections plus the astro rows below.
+8. Run `bun run lint:fix`, then `bun run format`, then `bun run check`.
 
 ## Astro config
 

@@ -68,6 +68,12 @@ After a rename the new name shows as `missing` when the stamp records a stack, a
 - `present` marks a copy an earlier sync left, which is reported and never deleted
 - `canon tooling sync <stack> [target]` writes only under `--write`. `--check` reports and exits 0, and a headless run with neither flag exits 1. It never installs over an `ahead` dependency.
 
+### Warnings
+
+Both verbs print a warning beside the comparison, and `diff --json` carries each as a `warnings` entry of `{ code, config, message }`. A warning counts toward no exit, since nothing `sync` writes would clear it.
+
+`tailwind-unimported` fires when a root config registers `@tailwindcss/vite` and no `.css` file imports Tailwind. The fix is `@import 'tailwindcss';` in the global stylesheet.
+
 ### Drift cause and the write hold
 
 A `drifted` entry in `configs` carries a `cause`, read against the golden hash the last write recorded for that path.

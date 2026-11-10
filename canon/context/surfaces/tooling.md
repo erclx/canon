@@ -79,6 +79,14 @@ Owns the manifest walk, scan, injection engine, stamp, reference resolver, and v
 - `canon tooling diff` dispatches into `runSync` with `check` set and exits 1 on any difference, and `--json` answers `{ ok: false, reason, message }` on a refusal
 - A target below its git toplevel syncs as a subfolder and withholds every `.github/` file. Sync writes a missing `package.json` only when the chain declares an install
 
+### `src/tooling/tailwind-import.ts`
+
+Warns when a root config registers `@tailwindcss/vite` and no `.css` file in the target imports Tailwind, since that project compiles no utility while every check passes.
+
+- It reads the target's copy of a config over the golden, so a project that removed the plugin gets no warning
+- The stylesheet walk skips every dot folder and build output, which keeps a `.claude` worktree copy from silencing it
+- The result lands on `ScanResult.warnings` and never raises `totalChanges`, so `diff` exits 0 when only the warning fires
+
 ### `src/tooling/disposition.ts`
 
 Holds the decline, customize, and lift transitions over `domains.tooling.dispositions` in the stamp. `scan` and both injectors read that record, so a held path is never written.

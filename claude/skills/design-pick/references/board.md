@@ -44,6 +44,7 @@ A round draws on the `references` page in `<project>`, which the `design-referen
 - Otherwise invoke `canon:design-references` with the sites the ask names, or bare when it names none
 - Draft on when that skill refuses or does not resolve, or the operator declines references, and say no reference backs the arms
 - Never put `references` on the run's list of pages, so the close archives it beside the picked round and leaves it standing for the next round
+- Find a reference's images in `<project>/assets/references/`, since Frameboard serves nothing from a page folder's subfolders. The close's capture renders them into each frame.
 
 ## Reading the selection
 
