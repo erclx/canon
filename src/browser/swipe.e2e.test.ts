@@ -1,5 +1,6 @@
-import { existsSync, readFileSync } from 'node:fs'
-import { homedir } from 'node:os'
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { homedir, tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { CHROMIUM_REVISION, browsersRoot } from '@/browser/agent-cli'
@@ -21,6 +22,10 @@ const PAGE = readFileSync(
 const CLI = fileURLToPath(new URL('../cli.ts', import.meta.url))
 const SESSION = `-s=canon-swipe-e2e-${process.pid}`
 
+// The CLI writes snapshots under the folder it runs in, so it runs from a
+// scratch folder rather than leaving them in the checkout.
+let scratch = ''
+
 const hasChromium = existsSync(
   `${browsersRoot(process.env, process.platform, homedir())}/chromium-${CHROMIUM_REVISION}`,
 )
@@ -34,6 +39,7 @@ interface Events {
 
 async function browser(...words: string[]): Promise<string> {
   const child = Bun.spawn(['bun', CLI, 'browser', SESSION, ...words], {
+    cwd: scratch,
     stdout: 'pipe',
     stderr: 'pipe',
   })
@@ -64,6 +70,7 @@ describe.skipIf(!hasChromium)('canon browser swipe on a served page', () => {
   let server: { port: number; stop: () => void }
 
   beforeAll(async () => {
+    scratch = mkdtempSync(join(tmpdir(), 'canon-swipe-e2e-'))
     const served = Bun.serve({
       port: 0,
       fetch: () =>
@@ -76,6 +83,7 @@ describe.skipIf(!hasChromium)('canon browser swipe on a served page', () => {
   afterAll(async () => {
     await browser('close').catch(() => '')
     server.stop()
+    rmSync(scratch, { recursive: true, force: true })
   })
 
   it('should fire touch events and scroll the page down for a positive dy', async () => {
