@@ -157,6 +157,22 @@ describe('attributeEscapes', () => {
     expect(split.tied).toEqual([plan])
   })
 
+  it('should tie a path when a command removes its parent under the root', () => {
+    const split = attributeEscapes([plan], {
+      commands: ['rm -rf /main/.canon'],
+    })
+
+    expect(split.tied).toEqual([plan])
+  })
+
+  it('should tie a relative write once a command enters the root .canon folder', () => {
+    const split = attributeEscapes([plan], {
+      commands: ['cd /main/.canon && rm plans/feature-x.md'],
+    })
+
+    expect(split.tied).toEqual([plan])
+  })
+
   it('should not tie a directory whose name merely starts the same way', () => {
     const split = attributeEscapes([plan], {
       commands: ['ls "$main/.canon/plans-old"'],

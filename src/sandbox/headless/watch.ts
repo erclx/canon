@@ -157,14 +157,16 @@ export interface AttributedEscapes {
  *
  * A bare relative `.canon/plans` or `./.canon/plans` ties nothing on its own,
  * since the session runs from the sandbox, which sits outside every watched
- * root. It ties once some command also spells the path's root, which is how a
- * `cd` into that root followed by a relative write reads, in one call or two.
+ * root. It ties once some command also spells the path's root and some command
+ * spells the directory's top segment, `.canon`. That is how `rm -rf
+ * /main/.canon`, or a `cd` into the root or `.canon` followed by a relative
+ * write, reads, in one call or two.
  *
  * A stream carrying no call at all ties every path, so a dead or unparsable
  * stream keeps the verdict the watch gave before attribution. The one gap is a
- * shell write whose destination is computed in full, such as a path read from
- * `git worktree list` into a variable with no scratch directory spelled, which
- * ties nothing and reads as foreign.
+ * shell write that never spells the root, nor the scratch directory behind a
+ * prefix, such as a path read from `git worktree list` into a variable and
+ * joined with `.canon` alone. It ties nothing and reads as foreign.
  */
 export function attributeEscapes(
   escapes: readonly string[],
@@ -205,11 +207,12 @@ function entersRootOf(path: string, commands: readonly string[]): boolean {
   const dir = scratchDirOf(path)
   if (dir === undefined) return false
   const root = path.slice(0, path.indexOf(`/${dir}/`))
+  const top = dir.split('/')[0] ?? dir
 
   return (
     root !== '' &&
     commands.some((command) => command.includes(root)) &&
-    commands.some((command) => command.includes(dir))
+    commands.some((command) => command.includes(top))
   )
 }
 

@@ -55,7 +55,7 @@ Owns the runner behind `canon sandbox run <cat:cmd> "<prompt>" [scenario]`.
 - `stream.ts` reduces `stream-json` to an envelope of `is_error`, `result`, `num_turns`, `total_cost_usd`, `skills`, and a `verdict`, kept in `.canon/tmp/runs/sandbox/`, as a later check finds none
 - Pass the prompt whole as `/canon:<skill> <args>`, which `skills` never lists. Four `CANON_SKILL_TEST_*` variables override the defaults. `_TOOLS` restricts nothing under `bypassPermissions`.
 - The cap of 30 turns is the only budget. A run it truncates fails by `subtype`, and a `max_turns` at or above it compares nothing. A no-shell arm uses `dontAsk`, as `claude:deploy-app` does.
-- `watch.ts` diffs the four `.canon/` scratch folders per root and fails only paths a session call names. A shell write built at run time slips past. `dispatch.ts` reaps a nested `claude --bg`.
+- `watch.ts` diffs the four `.canon/` scratch folders per root and fails only paths a session names. A shell write naming neither root nor scratch path slips. `dispatch.ts` reaps a nested `claude --bg`.
 
 ### `src/sandbox/replay/`
 
