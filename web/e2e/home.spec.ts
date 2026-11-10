@@ -334,15 +334,20 @@ test.describe('the social card', () => {
 })
 
 test.describe('the page name', () => {
-  test('the tab and the share label read the capitalized name alone', async ({
+  test('the tab reads the capitalized name alone', async ({ page }) => {
+    await page.goto('/')
+
+    await expect(page).toHaveTitle('Canon')
+  })
+
+  test('the share label reads the host rather than repeating the name', async ({
     page,
   }) => {
     await page.goto('/')
 
-    await expect(page).toHaveTitle('Canon')
     await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute(
       'content',
-      'Canon',
+      'canon.erclx.com',
     )
   })
 })

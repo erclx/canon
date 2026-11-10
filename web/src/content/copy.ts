@@ -17,24 +17,24 @@
 const REPO = 'https://github.com/erclx/canon'
 const NPM = 'https://www.npmjs.com/package/@erclx/canon'
 const DOCS = `${REPO}/tree/main/docs`
+/**
+ * The deployed origin, which a social card's absolute image URL is resolved
+ * against and which `astro.config.mjs` reads as its own `site` value. It is
+ * the address `.github/workflows/deploy-site.yml` publishes to rather than
+ * anything `README.md` states, so it carries no citation.
+ */
+const ORIGIN = 'https://canon.erclx.com'
 
 export const site = {
   /** The lowercase wordmark the social card and its alt text draw, so a change re-captures the card. */
   name: 'canon',
   /**
-   * The name as text, capitalized, which `og:site_name` reads. It stays apart
-   * from `name` because the wordmark is artwork styled lowercase while a name
-   * written in a label takes a capital.
+   * The host, which `og:site_name` reads. LinkedIn prints it under the share
+   * title, which already reads `title`, so the name there would show twice.
    */
-  label: 'Canon',
-  /**
-   * The deployed origin, which a social card's absolute image URL is resolved
-   * against and which `astro.config.mjs` reads as its own `site` value. It is
-   * the address `.github/workflows/deploy-site.yml` publishes to rather than
-   * anything `README.md` states, so it carries no citation.
-   */
-  origin: 'https://canon.erclx.com',
-  /** The browser tab, which reads the project name alone with no tagline after it. */
+  label: new URL(ORIGIN).host,
+  origin: ORIGIN,
+  /** The browser tab and the share title, which read the project name alone with no tagline after it. */
   title: 'Canon',
   // README.md: "A Claude Code plugin and CLI that runs agent work from plan to merge."
   description:
