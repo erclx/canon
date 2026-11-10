@@ -160,7 +160,7 @@ export const TOKENS: DesignTokens = {
     },
     {
       role: 'band',
-      intent: 'a highlighted run inside a window, such as a prompt',
+      intent: 'a quiet fill inside a window, such as a prompt',
       value: '#282826',
     },
     {
@@ -170,7 +170,7 @@ export const TOKENS: DesignTokens = {
     },
     {
       role: 'edge',
-      intent: 'the outline of a card on the tray',
+      intent: "a control's outline",
       value: '#2a2a28',
     },
     {
@@ -232,7 +232,7 @@ export const TOKENS: DesignTokens = {
     },
     {
       role: 'light-band',
-      intent: 'a highlighted run inside a window on light',
+      intent: 'a quiet fill inside a window, on light',
       value: '#f0f0ee',
     },
     {
@@ -242,7 +242,7 @@ export const TOKENS: DesignTokens = {
     },
     {
       role: 'light-edge',
-      intent: 'the outline of a card on the tray, on light',
+      intent: "a control's outline, on light",
       value: '#e4e4e1',
     },
     {
@@ -389,7 +389,7 @@ export const TOKENS: DesignTokens = {
   ],
 
   bordersRules: [
-    'Every border is one pixel solid, in `border` for a rule and `edge` around a card. Radius and width are independent.',
+    'Every border is one pixel solid, in `border` for a rule and `edge` around a control. Radius and width are independent.',
     'The tray steps down to 28px under 900 and 22px under 640.',
     'No pill. A one-line picker takes `action` at 28px high.',
   ],
@@ -413,7 +413,7 @@ export const TOKENS: DesignTokens = {
       role: 'panel',
       radius: '12px',
       width: '1px',
-      when: 'cards and columns, edged in `edge`',
+      when: 'cards and columns',
     },
     {
       role: 'action',

@@ -22,9 +22,9 @@ Warm neutral grounds with ink text, set in Geist, and Geist Mono where a surface
 | surface          | the tray a product window sits in, and cards            | #1a1a18 |
 | window           | the body of a product window                            | #1e1e1e |
 | chrome           | the window titlebar                                     | #252523 |
-| band             | a highlighted run inside a window, such as a prompt     | #282826 |
+| band             | a quiet fill inside a window, such as a prompt          | #282826 |
 | border           | every rule and divider                                  | #2e2e2c |
-| edge             | the outline of a card on the tray                       | #2a2a28 |
+| edge             | a control's outline                                     | #2a2a28 |
 | text             | headings, counts, emphasized runs                       | #f2f2f0 |
 | text-body        | default body copy                                       | #cfcdc8 |
 | muted            | ledes, labels, captions, trailing notes                 | #8f8d88 |
@@ -37,9 +37,9 @@ Warm neutral grounds with ink text, set in Geist, and Geist Mono where a surface
 | light-surface    | the tray and cards on a light ground                    | #f2f2f0 |
 | light-window     | the body of a product window on light                   | #ffffff |
 | light-chrome     | the window titlebar on light                            | #f7f7f5 |
-| light-band       | a highlighted run inside a window on light              | #f0f0ee |
+| light-band       | a quiet fill inside a window, on light                  | #f0f0ee |
 | light-border     | rules and dividers on light                             | #ececea |
-| light-edge       | the outline of a card on the tray, on light             | #e4e4e1 |
+| light-edge       | a control's outline, on light                           | #e4e4e1 |
 | light-text       | primary text on a light ground                          | #121212 |
 | light-text-body  | default body copy on a light ground                     | #3b3b38 |
 | light-muted      | ledes, labels, and captions on a light ground           | #6b6a66 |
@@ -86,7 +86,7 @@ Warm neutral grounds with ink text, set in Geist, and Geist Mono where a surface
 
 ## Shapes
 
-- Every border is one pixel solid, in `border` for a rule and `edge` around a card. Radius and width are independent.
+- Every border is one pixel solid, in `border` for a rule and `edge` around a control. Radius and width are independent.
 - The tray steps down to 28px under 900 and 22px under 640.
 - No pill. A one-line picker takes `action` at 28px high.
 
@@ -94,7 +94,7 @@ Warm neutral grounds with ink text, set in Geist, and Geist Mono where a surface
 | ------ | ------ | ----- | -------------------------------------------------- |
 | tray   | 36px   | none  | the soft tray a product window sits in             |
 | frame  | 12px   | none  | windows, sheets, popovers, a picked or hovered row |
-| panel  | 12px   | 1px   | cards and columns, edged in `edge`                 |
+| panel  | 12px   | 1px   | cards and columns                                  |
 | action | 8px    | none  | controls, the install command, one-line pickers    |
 | chip   | 4px    | none  | chips and tags                                     |
 | rule   | none   | 1px   | horizontal dividers between bands                  |
