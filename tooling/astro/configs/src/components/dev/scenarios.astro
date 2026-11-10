@@ -18,6 +18,12 @@
  * and the module holding that value reads the active id off
  * `document.documentElement.dataset[param]`.
  *
+ * The script is a deferred module rather than a parse-time inline one, so it
+ * writes that key and applies an arm's CSS only once the page has parsed, in
+ * document order with the page's own module scripts. Place the switcher above
+ * any module that reads the key at load, or read it on `DOMContentLoaded` or
+ * later, and expect the baseline to paint for a frame before a CSS arm lands.
+ *
  * The client script lives in `scenarios.ts` and the switcher's style in
  * `scenarios.css`, so the stack's own gates check both. This shell passes
  * them values alone, on the carrier element's data attributes. The script

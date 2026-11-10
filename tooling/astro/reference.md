@@ -95,8 +95,8 @@ The astro stack covers Astro + TypeScript projects, being content sites, marketi
 - Expect `scenarios.astro`, `scenarios.ts`, and `scenarios.css` under `src/components/dev/` overwritten on every sync, since they are toolkit infrastructure a project never hand-edits
 - Import `scenarios.astro` into a page under test to drive candidate treatments of one decision by hand, selected by a query parameter, with a switcher between them
 - Rely on its `import.meta.env.DEV` guard, so it renders nothing and ships nothing in a production build
-- Expect the shell to pass values alone, on a carrier element's data attributes, to a processed script the stack's lint, format, and type check all reach
-- Expect it on Astro alone, since the shell is an `.astro` component and its script bundles through Astro's processed `<script>`
+- Read the arm's dataset key on `DOMContentLoaded` or from a module placed after the switcher, since its script is a deferred module and a CSS arm lands a frame after first paint
+- Expect it on Astro alone, since the `.astro` shell passes values on a carrier's data attributes to a processed `<script>` the stack's lint, format, and type check reach
 
 ## Development docs (extend)
 
