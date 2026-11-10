@@ -78,6 +78,7 @@ The design board is Frameboard, a separate CLI outside canon, so a board job run
 | Read the dependency set for advisories    | `canon deps`     |
 | Check a changed set against the label map | `canon labels`   |
 | Measure comment density                   | `canon comments` |
+| Check source for code embedded inline     | `canon code`     |
 | Report context folder health              | `canon context`  |
 | Check markdown against the standards      | `canon markdown` |
 | Count files, extensions, and lines        | `canon census`   |
