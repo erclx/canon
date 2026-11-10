@@ -62,7 +62,7 @@ A box naming a tap, a swipe, or a hover at a phone width opens a second session,
 
 - The mobile session opens at 360 wide, measured on `2026-11-08`, so a box naming another width runs `pw-mobile resize <width> 900` before its first read, as `## Reading a line` does for desktop
 - Read `pw-mobile --raw eval "matchMedia('(hover: hover)').matches"` first and quote it, since a pass that never saw it false proves nothing about a hover query
-- Tap through `pw-mobile run-code` with `page.touchscreen.tap(<x>, <y>)` at the target's center, taken from `getBoundingClientRect()`
+- Tap through `pw-mobile run-code` with `page.touchscreen.tap(<x>, <y>)` at the center `getBoundingClientRect()` gives, and swipe with `pw-mobile swipe <x> <y> <dy>`, a positive `<dy>` scrolling down
 - Take the box's frame through `pw-mobile screenshot`, and close the session with `pw-mobile close` once its boxes land
 - A phone-width box naming no touch or hover stays a resize of the desktop session, with no second session
 

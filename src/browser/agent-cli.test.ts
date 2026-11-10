@@ -64,6 +64,31 @@ describe('planAgentCall', () => {
     expect(call.message).toContain('canon browser install-browser chromium')
   })
 
+  it('should expand swipe into run-code behind the leading global flags', () => {
+    const call = planAgentCall(
+      ['-s=canon-12', '--raw', 'swipe', '195', '700', '580'],
+      missing,
+    )
+
+    expect(call.kind).toBe('run')
+    if (call.kind !== 'run') return
+    expect(call.args.slice(0, 3)).toEqual(['-s=canon-12', '--raw', 'run-code'])
+    expect(call.args).toHaveLength(4)
+    expect(call.args[3]).toContain('Input.dispatchTouchEvent')
+  })
+
+  it('should refuse swipe with a dy of 0 before any child runs', () => {
+    const call = planAgentCall(['swipe', '195', '700', '0'], installed)
+
+    expect(call.kind).toBe('refused')
+  })
+
+  it('should refuse swipe given a non-number', () => {
+    const call = planAgentCall(['swipe', '195', 'top', '580'], installed)
+
+    expect(call.kind).toBe('refused')
+  })
+
   it('should pass a bare flag call such as version through', () => {
     expect(planAgentCall(['--version'], missing)).toEqual({
       kind: 'run',

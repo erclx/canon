@@ -7,6 +7,8 @@
  * installs mid-pass spends its budget on the download.
  */
 
+import { planSwipe } from '@/browser/swipe'
+
 export const AGENT_CLI = '@playwright/cli@0.1.22'
 
 /**
@@ -23,14 +25,24 @@ export type AgentCall =
 
 /**
  * Rewrites the caller's words into the child's, reading the revision only for
- * `open`, the one verb that launches a browser. Global flags may lead the verb,
- * as in `-s=<name> --raw open <url>`.
+ * `open`, the one verb that launches a browser, and expanding `swipe`, which
+ * the pinned CLI lacks, into `run-code`. Global flags may lead the verb, as in
+ * `-s=<name> --raw open <url>`. A later pin shipping its own `swipe` is shadowed
+ * here, so moving the pin checks its command list for one.
  */
 export function planAgentCall(
   args: readonly string[],
   hasRevision: () => boolean,
 ): AgentCall {
   const verbAt = args.findIndex((arg) => !arg.startsWith('-'))
+  if (verbAt !== -1 && args[verbAt] === 'swipe') {
+    const swipe = planSwipe(args.slice(verbAt + 1))
+    if (swipe.kind === 'refused') return swipe
+    return {
+      kind: 'run',
+      args: [...args.slice(0, verbAt), 'run-code', swipe.code],
+    }
+  }
   if (verbAt === -1 || args[verbAt] !== 'open') return { kind: 'run', args }
 
   if (!hasRevision()) {

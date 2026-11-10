@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Pinned section</title>
+    <style>
+      body {
+        margin: 0;
+        font: 16px sans-serif;
+      }
+      .pad {
+        height: 900px;
+        background: #eee;
+      }
+      .track {
+        height: 3000px;
+        position: relative;
+        background: #ddd;
+      }
+      .pin {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #246;
+        color: #fff;
+        font-size: 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="pad">above</div>
+    <section class="track" id="track">
+      <div class="pin" id="pin">step 0</div>
+    </section>
+    <div class="pad">below</div>
+    <script>
+      // Counts every event a swipe could fire, so a test reads touch events and
+      // scroll apart: a mouse wheel scrolls with no touch event.
+      window.__events = {
+        touchstart: 0,
+        touchmove: 0,
+        touchend: 0,
+        wheel: 0,
+        scroll: 0,
+      }
+      for (const name of Object.keys(window.__events)) {
+        addEventListener(name, () => window.__events[name]++, {
+          passive: true,
+        })
+      }
+      const track = document.getElementById('track')
+      const pin = document.getElementById('pin')
+      addEventListener('scroll', () => {
+        const rect = track.getBoundingClientRect()
+        const progress = Math.min(
+          1,
+          Math.max(0, -rect.top / (rect.height - innerHeight)),
+        )
+        pin.textContent = 'step ' + Math.round(progress * 5)
+      })
+    </script>
+  </body>
+</html>
