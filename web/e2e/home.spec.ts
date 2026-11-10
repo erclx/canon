@@ -241,6 +241,22 @@ test.describe('the records stack', () => {
     ).toHaveAttribute('data-i', '11', SETTLE)
   })
 
+  test('the explorer lights the file the front record has open', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const front = page.locator('#records .sheet[data-i="0"]')
+    const lit = front.locator('.explorer .on')
+    // Intake opens on its second file, so the first tab is the one to switch to.
+    await expect(lit).toHaveAttribute('data-f', '1')
+
+    await front.locator('.ftab[data-f="0"]').click()
+
+    await expect(lit).toHaveCount(1)
+    await expect(lit).toHaveAttribute('data-f', '0')
+    await expect(lit).toBeVisible()
+  })
+
   test('takes no pinned scroll under reduced motion', async ({ page }) => {
     await page.goto('/')
 
