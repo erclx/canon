@@ -159,11 +159,6 @@ export const worktrees = {
     dirs: 'plans/ · review/ · tasks/',
     shared: 'shared by every worktree',
   },
-  // README.md: canon-allow-readme-paraphrase: the README's closing clause, spelled out for the folders the band names. "so no worktree keeps a copy of its own"
-  under:
-    "Plans, reviews, and tasks live once, in the main checkout's .canon/, so a worktree never keeps its own copy and every session reads the same board.",
-  now: 'now',
-  main: 'main',
 }
 
 export const setup = {
@@ -374,44 +369,27 @@ export const guardrailScenes: {
 ]
 
 /**
- * Where it happens: three live branches forking off main at different moments
- * and running up to the now line, the oldest on the top lane, and one earlier
- * branch drawn merged back under the youngest. Positions are fractions of the
- * graph's width.
+ * One worktree for each change: three worktrees side by side, each its folder,
+ * its branch, and what the session in it is doing.
  */
-// README.md: canon-allow-readme-paraphrase: page fiction drawn from the worktree layout the README describes, with session names in the roster's form.
-export const worktreeBranches = {
-  now: 0.92,
-  lanes: [
-    {
-      branch: 'feat/take-timer',
-      session: 'worker-canon-take-timer',
-      line: 'Gate: 9 of 14 stages passed',
-      fork: 0.22,
-      commits: [0.36, 0.52, 0.7],
-    },
-    {
-      branch: 'feat/sync-stamp',
-      session: 'reviewer-canon-sync-stamp',
-      line: 'Second pass on the added commits',
-      fork: 0.4,
-      commits: [0.55, 0.74],
-    },
-    {
-      branch: 'feat/toolbar',
-      session: 'ui-reviewer-canon-toolbar',
-      line: 'Driving the checklist in the running app',
-      fork: 0.62,
-      commits: [0.78],
-    },
-  ],
-  merged: {
-    label: 'feat/relay-citation, merged',
-    fork: 0.02,
-    merge: 0.16,
-    commits: [0.07, 0.11],
+// README.md: canon-allow-readme-paraphrase: page fiction drawn from the worktree layout the README describes. "Each worker builds in its own worktree on its own branch"
+export const worktreeCards = [
+  {
+    path: '.claude/worktrees/take-timer/',
+    branch: 'feat/take-timer',
+    line: 'Gate: 9 of 14 stages passed',
   },
-}
+  {
+    path: '.claude/worktrees/sync-stamp/',
+    branch: 'feat/sync-stamp',
+    line: 'Second pass on the added commits',
+  },
+  {
+    path: '.claude/worktrees/toolbar/',
+    branch: 'feat/toolbar',
+    line: 'Driving the checklist in the running app',
+  },
+]
 
 /** How a repo comes onto canon: the session the setup window plays, one block per stage. */
 // README.md: canon-allow-readme-paraphrase: page fiction of a setup session, each block condensing what its README step says the skill does.
