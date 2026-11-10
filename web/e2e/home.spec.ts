@@ -40,7 +40,9 @@ test('every nav link and menu entry resolves to a section or an absolute address
   await page.goto('/')
   const hrefs = await page
     .locator('nav[aria-label="Site"] a')
-    .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href') ?? ''))
+    .evaluateAll((nodes) =>
+      nodes.map((node) => node.getAttribute('href') ?? ''),
+    )
 
   const anchors = [...new Set(hrefs.filter((href) => href.startsWith('#')))]
   const outward = hrefs.filter((href) => !href.startsWith('#'))
