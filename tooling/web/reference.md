@@ -98,6 +98,13 @@ The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project tha
 - Expect a seeded `canon/design/index.md` stub carrying `auto: false`, copied only when missing, so a project's own index is never replaced
 - Expect `governance/rules/ui/design-reference.md` to install once a group folder sits under `canon/design/`, since the stub alone is no reference
 
+## Site settings
+
+- Keep the site's `name`, `description`, and `card` in the seeded `src/site.ts`, which every page's head reads, so the tab, the link preview, and the card agree across pages
+- Expect `card` to default to `/og-image.png`, the name `canon:design-identity` writes the card under
+- Expect no address in the file, since each framework holds it in its own site setting and a second copy drifts. Astro reads `ASTRO_SITE`.
+- Expect only the astro stack to write head tags from the file, and to fail a built page missing one, per its reference
+
 ## Ports
 
 - Derive every served port from `scripts/worktree-port.sh`, never a port literal in a script string, since two worktrees of one repository otherwise attach to one server
@@ -121,8 +128,9 @@ The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project tha
 ## Verify script
 
 - Expect `scripts/verify.json` to require `typecheck`, `lint`, `test:run`, and `build`, which base's `scripts/verify.ts` runs in its fixed order
-- That order is typecheck, lint, format, shell where the `shell` stack declares it, unit tests, build, markdown bans, then the card exclusion check
+- That order is typecheck, lint, format, shell where the `shell` stack declares it, unit tests, build, markdown bans, the card exclusion check, then the head tag check
 - Expect the card stage to run `scripts/check-card-exclusion.sh` whenever that file is installed, so a project with no card route runs one less stage with no override
+- Expect the head tag stage to run `scripts/check-head-meta.sh` the same way, whenever that file is installed
 
 ## CI docs (extend)
 
