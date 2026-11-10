@@ -215,8 +215,8 @@ export const setup = {
 }
 
 export const tryIt = {
-  // README.md: canon-allow-readme-paraphrase: the README's Quick start, headed for a reader trying it rather than starting quickly.
-  head: 'Trying it',
+  // README.md: canon-allow-readme-paraphrase: the README's Quick start, headed for what the three commands do rather than how fast they run.
+  head: 'Installing canon',
   // README.md: "canon expects someone who already knows Claude Code well. It runs on Linux and macOS, and the CLI needs Bun."
   lede: 'canon expects someone who already knows Claude Code well. It runs on Linux and macOS, and the CLI needs Bun.',
   // README.md: "claude plugin marketplace add https://github.com/erclx/canon" "claude plugin install canon@canon" "bun install --global @erclx/canon"
@@ -231,15 +231,8 @@ export const tryIt = {
     done: 'Copied',
     status: 'Copied the three commands',
   },
-  // README.md: canon-allow-readme-paraphrase: the README's first-run sentence, carried on to what the skill does before it writes. "Then open a project in Claude Code and run `/canon:target-setup`"
-  first: {
-    lead: 'Then open a project in Claude Code and run `/canon:target-setup`. It reads the stack, shows what it will lay down, and writes nothing until you say yes. The',
-    guide: {
-      label: 'workflow guide',
-      href: `${REPO}/blob/main/docs/workflow/ai-workflow.md`,
-    },
-    tail: 'takes it from there.',
-  },
+  // README.md: canon-allow-readme-paraphrase: the README's first-run sentence, cut to the command and where it runs. "run `/canon:target-setup`"
+  first: 'Then run `/canon:target-setup` in a project.',
 }
 
 export const footer = {
