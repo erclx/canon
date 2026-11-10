@@ -3,6 +3,7 @@ import {
   deadRunRecord,
   mergeEnvelope,
   parseRunArgs,
+  verdictFiles,
   type SessionsReport,
 } from '@/sandbox/headless/run'
 import type { BranchCli } from '@/sandbox/headless/branch-cli'
@@ -152,5 +153,28 @@ describe('deadRunRecord', () => {
 
   it('should carry no skills for output cut before any line', () => {
     expect(deadRunRecord(137, '{"type":"sys', canon()).skills).toEqual([])
+  })
+})
+
+describe('verdictFiles', () => {
+  it('should hand the tied list to --escapes and the untied list to --untied-escapes', () => {
+    const files = verdictFiles({
+      envelope: '{}',
+      writes: [],
+      escapes: ['/main/.canon/plans/feature-x.md'],
+      untiedEscapes: ['/main/.canon/tasks/a.md', '/main/.canon/tasks/b.md'],
+      concurrent: [],
+    })
+
+    expect(files).toContainEqual({
+      flag: '--escapes',
+      name: 'escapes.txt',
+      body: '/main/.canon/plans/feature-x.md\n',
+    })
+    expect(files).toContainEqual({
+      flag: '--untied-escapes',
+      name: 'untied-escapes.txt',
+      body: '/main/.canon/tasks/a.md\n/main/.canon/tasks/b.md\n',
+    })
   })
 })
