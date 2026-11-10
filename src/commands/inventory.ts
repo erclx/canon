@@ -1,13 +1,26 @@
-import { resolve } from 'node:path'
-import type { Command } from 'commander'
+import { join, relative, resolve } from 'node:path'
+import { type Command, Option } from 'commander'
 import { INSTALL_BROWSER, isEngineMissing } from '@/browser/engine'
 import {
   CONFIG_REL,
   type ConfigRefusal,
   readInventoryConfig,
+  routeUrl,
 } from '@/inventory/config'
-import { abbreviate, groupByTreatment } from '@/inventory/group'
-import { findSubject, SUBJECTS } from '@/inventory/subjects'
+import { DESIGN_DOCUMENT } from '@/design/regen'
+import { resolveFrames } from '@/inventory/frames'
+import {
+  abbreviate,
+  groupByTreatment,
+  type TreatmentGroup,
+} from '@/inventory/group'
+import {
+  isValueSubject,
+  readScale,
+  VALUE_SUBJECTS,
+  type ValueSubject,
+} from '@/inventory/scale'
+import { findSubject, type Subject, SUBJECTS } from '@/inventory/subjects'
 import type { WalkRefusal } from '@/inventory/walk'
 import {
   intro,
@@ -29,6 +42,7 @@ type Walker = typeof import('@/inventory/walk')
 interface RunOptions {
   readonly root?: string
   readonly baseUrl?: string
+  readonly frames?: readonly string[]
   readonly json?: boolean
 }
 
@@ -51,18 +65,26 @@ const WALK_REFUSALS: Record<WalkRefusal, string> = {
 export function register(program: Command): void {
   const inventory = program
     .command('inventory')
-    .description('Report one computed property across every route of a project')
+    .description(
+      'Report one computed property across every route or board frame of a project',
+    )
     .helpOption('-h, --help', 'Show this help message')
 
   inventory
     .command('run', { isDefault: true })
     .description(
-      'Walk every route and group its elements by the answer each gives',
+      'Walk every route or frame and group its elements by the answer each gives',
     )
     .argument('[subject]', 'Treatment to read, defaulting to focus', 'focus')
     .helpOption('-h, --help', 'Show this help message')
     .option('--root <path>', 'Project to read, defaulting to the cwd')
     .option('--base-url <url>', 'Address to walk, overriding the config')
+    .addOption(
+      new Option(
+        '--frames <file...>',
+        'Board frame HTML files to read light and dark, in place of the routes',
+      ).conflicts('baseUrl'),
+    )
     .option('--json', 'Add a machine-readable record on stdout')
     .addHelpText(
       'after',
@@ -72,10 +94,16 @@ export function register(program: Command): void {
         'each subject runs over, so what gets walked comes from the project',
         'rather than from the toolkit.',
         '',
+        `With --frames it reads each HTML file in both themes instead, needing no`,
+        `${CONFIG_REL} and no server, for the five value subjects alone. Each`,
+        `value listing closes on a line comparing its distinct values with what`,
+        `${DESIGN_DOCUMENT} carries. A read sees one state, so a :hover value is`,
+        'never counted.',
+        '',
         'It reports a listing and never a verdict. The value is seeing how many',
         'different answers one site gives, and a gate collapses that to one bit.',
         '',
-        'Needs a running server and a browser binary. Install the browser with:',
+        'A route walk needs a running server. Both need a browser binary. Install the browser with:',
         `  ${INSTALL_BROWSER}`,
         '',
         'Subjects:',
@@ -89,6 +117,7 @@ export function register(program: Command): void {
         '  canon inventory focus',
         '  canon inventory focus --json',
         '  canon inventory focus --base-url http://localhost:3000',
+        '  canon inventory font-size --frames .canon/board/<page>/00-current/*.html',
         '',
       ].join('\n'),
     )
@@ -116,6 +145,8 @@ async function runInventory(
       `No reader named ${subjectName}. This build ships: ${known}.`,
     )
   }
+
+  if (opts.frames) return runFrames(subject, opts.frames, root, emitJson)
 
   const read = readInventoryConfig(root)
   if (read.kind === 'refused') {
@@ -158,10 +189,13 @@ async function runInventory(
   }
 
   const result = await walker.walk({
-    baseUrl,
-    routes: read.config.routes,
+    targets: read.config.routes.map((route) => ({
+      label: route,
+      url: routeUrl(baseUrl, route),
+    })),
     subject,
     query: declared.query,
+    frames: false,
   })
 
   if (result.status === 'failed') {
@@ -191,8 +225,8 @@ async function runInventory(
   const groups = groupByTreatment(result.readings)
 
   logStep('Routes')
-  for (const route of result.routes) {
-    logInfo(`${route.route}  ${plural(route.elements, 'element')}`)
+  for (const target of result.targets) {
+    logInfo(`${target.location}  ${plural(target.elements, 'element')}`)
   }
 
   // A walk that matched nothing refuses rather than printing an empty listing,
@@ -204,32 +238,214 @@ async function runInventory(
       emitJson,
       root,
       'no-elements',
-      `No element matched ${declared.query} on any of the ${plural(result.routes.length, 'route')} walked.`,
+      `No element matched ${declared.query} on any of the ${plural(result.targets.length, 'route')} walked.`,
     )
   }
 
-  logStep('Treatments')
-  logInfo(
-    `${plural(groups.length, 'answer')} across ${plural(result.readings.length, 'element')}`,
-  )
-  for (const group of groups) {
-    logInfo(`  ${group.count}x  ${group.treatment}`)
-    logInfo(
-      `      ${abbreviate(group.samples, group.count)} on ${abbreviate(group.routes, group.routes.length)}`,
-    )
-  }
+  printTreatments(groups, result.readings.length)
   outro()
 
   emit(emitJson, {
     root,
     subject: subjectName,
     baseUrl,
-    routes: result.routes,
+    routes: result.targets.map(({ location, elements }) => ({
+      route: location,
+      elements,
+    })),
     elements: result.readings.length,
-    treatments: groups,
+    treatments: groups.map(({ treatment, count, locations, samples }) => ({
+      treatment,
+      count,
+      routes: locations,
+      samples,
+    })),
     durationMs: result.durationMs,
   })
   return 0
+}
+
+/**
+ * Reads board frame files rather than a served project's routes, which is
+ * what lets a plan count a picked round's values before anything is built.
+ * It reads no config, since a frame's every element is the subject and the
+ * file list is the scope.
+ */
+async function runFrames(
+  subject: Subject,
+  paths: readonly string[],
+  root: string,
+  emitJson: boolean,
+): Promise<number> {
+  const name = subject.name
+  if (!isValueSubject(name)) {
+    return refuse(
+      emitJson,
+      root,
+      'frames-need-value-subject',
+      `${subject.name} reads the elements a project's ${CONFIG_REL} names, so it cannot run over frames. Run a value subject: ${VALUE_SUBJECTS.join(', ')}.`,
+    )
+  }
+
+  const resolved = resolveFrames(paths, process.cwd())
+  if (resolved.kind === 'missing') {
+    return refuse(
+      emitJson,
+      root,
+      'frames-missing',
+      `No file at ${resolved.paths.join(', ')}, so no frame was read.`,
+    )
+  }
+
+  logStep('Scope')
+  logInfo(
+    `${plural(resolved.frames.length, 'frame')}, each read light and dark`,
+  )
+
+  const walker = await loadWalker()
+  if (!walker) {
+    logStep('Browser')
+    logError('the browser engine is not installed in this project')
+    logWarn(`Install it with: ${INSTALL_BROWSER}`)
+    outro()
+    emit(emitJson, {
+      root,
+      subject: subject.name,
+      reason: 'engine-missing',
+      install: INSTALL_BROWSER,
+    })
+    return 1
+  }
+
+  const result = await walker.walk({
+    targets: resolved.frames,
+    subject,
+    query: '',
+    frames: true,
+  })
+
+  if (result.status === 'failed') {
+    logStep('Refused')
+    logWarn(
+      result.reason === 'browser-missing'
+        ? WALK_REFUSALS['browser-missing']
+        : 'The walk failed while reading the frames.',
+    )
+    if (result.reason === 'browser-missing') {
+      logWarn(`Install the browser binary with: ${INSTALL_BROWSER}`)
+    }
+    logWarn(result.message.split('\n')[0] ?? '')
+    outro()
+    emit(emitJson, {
+      root,
+      subject: subject.name,
+      reason: result.reason,
+      message: result.message,
+      ...(result.reason === 'browser-missing'
+        ? { install: INSTALL_BROWSER }
+        : {}),
+    })
+    return 1
+  }
+
+  const groups = groupByTreatment(result.readings)
+
+  logStep('Frames')
+  for (const target of result.targets) {
+    logInfo(`${target.location}  ${plural(target.elements, 'element')}`)
+  }
+
+  if (groups.length === 0) {
+    return refuse(
+      emitJson,
+      root,
+      'no-elements',
+      `No ${subject.name} value was read on any of the ${plural(result.targets.length, 'frame')} read.`,
+    )
+  }
+
+  printTreatments(groups, result.readings.length)
+  const scale = compareScale(root, name, groups)
+  logInfo(scale.line)
+  outro()
+
+  emit(emitJson, {
+    root,
+    subject: subject.name,
+    frames: result.targets.map(({ location, elements }) => ({
+      frame: location,
+      elements,
+    })),
+    elements: result.readings.length,
+    treatments: groups.map(({ treatment, count, locations, samples }) => ({
+      treatment,
+      count,
+      frames: locations,
+      samples,
+    })),
+    scale: scale.record,
+    durationMs: result.durationMs,
+  })
+  return 0
+}
+
+function printTreatments(
+  groups: readonly TreatmentGroup[],
+  elements: number,
+): void {
+  logStep('Treatments')
+  logInfo(
+    `${plural(groups.length, 'answer')} across ${plural(elements, 'element')}`,
+  )
+  for (const group of groups) {
+    logInfo(`  ${group.count}x  ${group.treatment}`)
+    logInfo(
+      `      ${abbreviate(group.samples, group.count)} on ${abbreviate(group.locations, group.locations.length)}`,
+    )
+  }
+}
+
+/**
+ * The total line and its record. A record carrying no value for the subject,
+ * as an intent record never does, says the comparison is missing rather than
+ * reporting every value as off the record.
+ */
+function compareScale(
+  root: string,
+  subject: ValueSubject,
+  groups: readonly TreatmentGroup[],
+): { line: string; record: Record<string, unknown> } {
+  const path = join(root, DESIGN_DOCUMENT)
+  const record = relative(root, path)
+  const distinct = groups.length
+  const scale = readScale(path, subject)
+  const total = `${plural(distinct, 'distinct value')}`
+
+  if (scale.kind === 'no-record') {
+    return {
+      line: `${total}, and no ${record} to compare against`,
+      record: { kind: scale.kind, record, distinct },
+    }
+  }
+  if (scale.kind === 'no-values') {
+    return {
+      line: `${total}, and ${record} carries no ${subject} value, so the stylesheet its lead names is unread`,
+      record: { kind: scale.kind, record, distinct },
+    }
+  }
+  const offRecord = groups
+    .map((group) => group.treatment)
+    .filter((value) => !scale.values.includes(value))
+  return {
+    line: `${total} against ${scale.values.length} in ${record}, ${offRecord.length} off the record`,
+    record: {
+      kind: scale.kind,
+      record,
+      distinct,
+      carried: scale.values.length,
+      offRecord,
+    },
+  }
 }
 
 /**

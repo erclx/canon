@@ -1,25 +1,35 @@
 ---
 title: Inventory
-description: The route walk behind canon inventory, the subject readers it runs, and the focus reader's dependence on keyboard modality
+description: The route and frame walks behind canon inventory, the focus and value readers they run, and the traps in keyboard modality and the dark read
 ---
 
 # Inventory
 
 ## Overview
 
-`canon inventory` walks every route a project declares and reports one computed property per element, grouped by the answer rather than by the component. Its one subject today is the focus ring, which the `ui-craft` keyboard reference states rules against. The command reports a listing and gates nothing. Start from `canon inventory --help`.
+`canon inventory` walks every route a project declares, or the board frame files `--frames` names, and reports one computed property per element, grouped by the answer rather than by the component. The command reports a listing and gates nothing. Start from `canon inventory --help`.
+
+`focus` reads the ring the `ui-craft` keyboard reference states rules against, over a project's routes alone. `color`, `font-size`, `radius`, `shadow`, and `duration` read every rendered element, and a frame listing closes on its distinct count against `canon/DESIGN.md`.
 
 ## Layout
 
 ### `src/inventory/`
 
-Reads the project's config, runs a subject's reader over each route in the browser, and groups the rows.
+Reads the project's config or resolves the frame files, runs a subject's reader over each target in the browser, and groups the rows.
 
 - A project declares its routes and each subject's query in `inventory.toml` at its root, and this repository carries none, so the verb refuses with `no-config` here
 - The toolkit ships the reader and the project ships the query, and a config naming no subject refuses rather than falling back to a built-in query
 - Every way the walk yields no rows is a refusal, being a missing config, a server nobody started, or a query matching nothing on any route
 - The focus reader reports rest against focus rather than the focused style alone, and names an element the browser refuses to focus apart from one with no ring
 - A route answering 404 contributes zero elements, so the per-route line separates an empty page from one not being served
+
+### `src/inventory/values.ts`
+
+The value subjects and the frame input add a second walk beside the route one.
+
+- The five value subjects share one reader in `values.ts`, and `scale.ts` writes the record's values in the same normalized form, so a change to one side's form is a change to both
+- A frame walk needs no config and refuses `focus`, whose element query only a project declares
+- A frame's dark read sets `data-theme` and emulates the dark scheme, then finishes every CSS transition, since a transition on a color would otherwise report a value between the two themes
 
 ### Other folders
 

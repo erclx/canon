@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { abbreviate, groupByTreatment, SAMPLE_LIMIT } from '@/inventory/group'
 
-const reading = (route: string, selector: string, treatment: string) => ({
-  route,
+const reading = (location: string, selector: string, treatment: string) => ({
+  location,
   selector,
   treatment,
 })
@@ -48,14 +48,14 @@ describe('groupByTreatment', () => {
     expect(groups.map((group) => group.treatment)).toEqual(['none', 'shadow'])
   })
 
-  it('should name each route an answer appears on, once and in walk order', () => {
+  it('should name each location an answer appears on, once and in walk order', () => {
     const groups = groupByTreatment([
       reading('/pricing', 'button', 'ring'),
       reading('/', 'a', 'ring'),
       reading('/pricing', 'input', 'ring'),
     ])
 
-    expect(groups[0]?.routes).toEqual(['/pricing', '/'])
+    expect(groups[0]?.locations).toEqual(['/pricing', '/'])
   })
 
   it('should keep a bounded sample of the elements behind a row', () => {

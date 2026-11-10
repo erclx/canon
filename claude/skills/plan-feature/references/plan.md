@@ -276,6 +276,14 @@ The suggestion line is the planner's, and the answer line belongs to whoever own
 - Write `- Suggested: needs your call, <why>` where the answer turns on preference rather than on a technical default. Fabricating a default there hides an open question behind an accepted answer.
 - Never fill an `- Answer:` slot on behalf of the person who owns it. Recording the pick as the suggestion is what the suggestion line is for.
 
+### Predicted questions
+
+Before Step 3, `plan-feature` predicts the operator's answer to the next three questions about what the ask must achieve, and each prediction lands by how sure it is.
+
+- A predictable answer settles its criterion, which Step 3 writes as a `## Verification` bullet rather than a question
+- Only a prediction still open goes under `## Questions` with a `- Suggested:` line, so a fully specified ask carries none and Small mode stays reachable
+- When you can predict none of the three, ask before Step 3 through whatever route reaches the operator, including a message to a dispatching session
+
 ### Overrides and settled questions
 
 A deviation from an unanswered question rewrites the `- Suggested:` line to the pick execution made and leaves the slot blank, since the prohibition above reaches the answer line alone.

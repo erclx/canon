@@ -24,9 +24,7 @@ Write the plan, and nothing else in the tree being planned against.
 
 Before Step 3, name the next three questions you would ask about what the ask must achieve, and predict the operator's answer to each. The test reads the ask's success criteria, never the plan's open questions.
 
-- A predictable answer settles its criterion, which Step 3 writes as a `## Verification` bullet rather than a question
-- Only a prediction still open goes under `## Questions` with a `- Suggested:` line, so a fully specified ask carries none and Small mode stays reachable
-- When you can predict none of the three, ask before Step 3 through whatever route reaches the operator, including a message to a dispatching session
+Read `### Predicted questions` in `${CLAUDE_SKILL_DIR}/references/plan.md` for where each prediction goes.
 
 ## Step 1: read the Claude setup
 
@@ -39,6 +37,10 @@ Read these in parallel from the project root, skipping any that do not exist:
 Also read `canon/DESIGN.md` when the feature touches code or UI, for visual intent and component rules, with values read from the stylesheet its lead names. Skip it for prose, docs, catalog, or config-only changes. For a UI feature, read `canon/design/index.md` too, if it exists, for the surfaces with an accepted design.
 
 Coding standards live in `.claude/rules/`. Claude Code loads them automatically, and path-scoped rules apply to the files they match. For a UI feature, load `canon:ui-craft` for how it behaves and `canon:design-taste` for how it looks, whether or not `canon/DESIGN.md` exists.
+
+### Count a picked round's values
+
+Read `${CLAUDE_SKILL_DIR}/references/board-frames.md` for picked board frames.
 
 ### Read the domain's context entry
 

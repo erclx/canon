@@ -6,11 +6,13 @@
  * is declared inside its own body: a reference to anything at module scope
  * survives typechecking and throws once the page tries to call it.
  *
- * `focus` is the first and, for now, the only subject. The four sibling
- * instruments this shape was lifted from differ only in their element query and
- * the property they read, which is what makes a subject a row here rather than
- * a command of its own.
+ * `focus` reads an element query the project declares. The five value
+ * subjects read every rendered element, so they run over board frames as well
+ * as routes, and their one reader lives in `values.ts`.
  */
+
+import { VALUE_SUBJECTS } from '@/inventory/scale'
+import { readValues } from '@/inventory/values'
 
 /** One element as a reader saw it, before any grouping. */
 export interface SubjectReading {
@@ -18,11 +20,20 @@ export interface SubjectReading {
   readonly treatment: string
 }
 
+/**
+ * What `page.evaluate` hands a reader. One object rather than two arguments,
+ * because the browser passes a reader exactly one serialized value.
+ */
+export interface ReaderArgs {
+  readonly query: string
+  readonly subject: string
+}
+
 export interface Subject {
   readonly name: string
   /** What the listing means, printed above the rows so a count reads correctly. */
   readonly summary: string
-  readonly read: (query: string) => SubjectReading[]
+  readonly read: (args: ReaderArgs) => SubjectReading[]
 }
 
 /**
@@ -39,7 +50,7 @@ export interface Subject {
  * into the no-treatment row, since a disabled control and a control with no
  * ring are different findings with different remedies.
  */
-function readFocusTreatments(query: string): SubjectReading[] {
+function readFocusTreatments({ query }: ReaderArgs): SubjectReading[] {
   const PROPERTIES = [
     'outlineStyle',
     'outlineWidth',
@@ -106,7 +117,22 @@ const FOCUS: Subject = {
   read: readFocusTreatments,
 }
 
-export const SUBJECTS: readonly Subject[] = [FOCUS]
+const VALUE_SUMMARIES: Record<(typeof VALUE_SUBJECTS)[number], string> = {
+  color: 'each distinct background, border, outline, and text color painted',
+  'font-size': 'each distinct font size on an element carrying its own text',
+  radius: 'each distinct corner radius, all four corners when they differ',
+  shadow: 'each distinct box shadow',
+  duration: 'each distinct transition and animation duration',
+}
+
+export const SUBJECTS: readonly Subject[] = [
+  FOCUS,
+  ...VALUE_SUBJECTS.map((name): Subject => ({
+    name,
+    summary: VALUE_SUMMARIES[name],
+    read: readValues,
+  })),
+]
 
 /** Resolves a subject by name, so an unknown one is the caller's to report. */
 export function findSubject(name: string): Subject | undefined {

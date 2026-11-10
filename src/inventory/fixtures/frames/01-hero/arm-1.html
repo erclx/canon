@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Hero, arm 1</title>
+    <link rel="stylesheet" href="../assets/missing.css" />
+    <style>
+      :root {
+        --ground: #ffffff;
+        --ink: #121212;
+        --accent: #c2380e;
+      }
+      :root[data-theme='dark'] {
+        --ground: #121211;
+        --ink: #f2f2f0;
+        --accent: #ff6b42;
+      }
+      body {
+        margin: 0;
+        background: var(--ground);
+        color: var(--ink);
+        font-size: 16px;
+      }
+      .wrap {
+        font-size: 40px;
+      }
+      h1 {
+        font-size: 90px;
+        margin: 0;
+        transition: color 400ms;
+      }
+      .card {
+        position: relative;
+        border-radius: 12px;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.07);
+        transition: background-color 0.12s;
+      }
+      .card::after {
+        content: '';
+        position: absolute;
+        inset: 0 auto auto 0;
+        width: 24px;
+        height: 3px;
+        background: var(--accent);
+        border-radius: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Ship it</h1>
+    </div>
+    <div class="card">Body copy</div>
+  </body>
+</html>

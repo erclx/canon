@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { parseDesignDoc } from '@/design/parse'
+import { parseDesignDoc, parseSectionTables } from '@/design/parse'
 
 let root: string
 
@@ -245,5 +245,66 @@ describe('parseDesignDoc', () => {
     expect(doc.personality).toBe('Calm and exact.')
     expect(doc.color[0]['Value'].value).toBe('#e0724b')
     expect(doc.borders[0]['When used'].value).toBe('cards')
+  })
+})
+
+describe('parseSectionTables', () => {
+  const shapesDoc = [
+    '# Design',
+    '',
+    '## Shapes',
+    '',
+    '| Role | Radius |',
+    '| ---- | ------ |',
+    '| card | 12px   |',
+    '',
+    '| Token           | Value          |',
+    '| --------------- | -------------- |',
+    '| `--shadow-ring` | 0 0 0 1px #000 |',
+    '| `--shadow-lift` | 0 4px 8px #000 |',
+    '',
+    '## Motion',
+    '',
+    '- Two durations.',
+    '',
+    '| Token        | Value |',
+    '| ------------ | ----- |',
+    '| `--duration` | 120ms |',
+    '',
+  ].join('\n')
+
+  it('should return every table under a section in record order', () => {
+    const path = write(shapesDoc)
+
+    const tables = parseSectionTables(path, 'Shapes')
+
+    expect(tables).toHaveLength(2)
+    expect(tables[0]?.[0]?.['Radius']?.value).toBe('12px')
+    expect(tables[1]?.map((row) => row['Value']?.value)).toEqual([
+      '0 0 0 1px #000',
+      '0 4px 8px #000',
+    ])
+  })
+
+  it('should read the table under a section the doc parse keeps as prose', () => {
+    const path = write(shapesDoc)
+
+    const tables = parseSectionTables(path, 'Motion')
+
+    expect(tables[0]?.[0]?.['Value']?.value).toBe('120ms')
+  })
+
+  it('should resolve a legacy heading to the section it was renamed to', () => {
+    const path = write(shapesDoc.replace('## Shapes', '## Borders'))
+
+    const tables = parseSectionTables(path, 'Shapes')
+
+    expect(tables).toHaveLength(2)
+  })
+
+  it('should read a missing section as no tables', () => {
+    const path = write(shapesDoc)
+
+    expect(parseSectionTables(path, 'Colors')).toEqual([])
   })
 })
