@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
-import { join, relative } from 'node:path'
+import { join, normalize, relative } from 'node:path'
 
 /** Path to content hash, one entry per regular file. */
 export type Manifest = ReadonlyMap<string, string>
@@ -141,4 +141,101 @@ export function snapshotRoot(dir: string): RootSnapshot {
       manifest.set(`${sub}/${path}`, hash)
 
   return { manifest, isWatched: true }
+}
+
+export interface AttributedEscapes {
+  readonly tied: readonly string[]
+  readonly untied: readonly string[]
+}
+
+/**
+ * Splits the watched writes into those a tool call of this session names and
+ * those none does, so a parallel session's board write stops failing an arm.
+ * A diffed path ties when a file-writing call targeted it, when a `Bash` command
+ * spells it, or when a `Bash` command spells its scratch directory behind some
+ * prefix, such as `"$main/.canon/plans"`.
+ *
+ * A bare relative `.canon/plans` or `./.canon/plans` ties nothing on its own,
+ * since the session runs from the sandbox, which sits outside every watched
+ * root. It ties once some command also spells the path's root and some command
+ * spells the directory's top segment, `.canon`. That is how `rm -rf
+ * /main/.canon`, or a `cd` into the root or `.canon` followed by a relative
+ * write, reads, in one call or two.
+ *
+ * A stream carrying no call at all ties every path, so a dead or unparsable
+ * stream keeps the verdict the watch gave before attribution. The one gap is a
+ * shell write that never spells the root, nor the scratch directory behind a
+ * prefix, such as a path read from `git worktree list` into a variable and
+ * joined with `.canon` alone. It ties nothing and reads as foreign.
+ */
+export function attributeEscapes(
+  escapes: readonly string[],
+  calls: {
+    readonly writeTargets?: readonly string[]
+    readonly commands?: readonly string[]
+  },
+): AttributedEscapes {
+  const targets = new Set(
+    (calls.writeTargets ?? []).map((path) => normalize(path)),
+  )
+  const commands = calls.commands ?? []
+  if (targets.size === 0 && commands.length === 0)
+    return { tied: [...escapes], untied: [] }
+
+  const tied: string[] = []
+  const untied: string[] = []
+  for (const path of escapes) {
+    const isTied =
+      targets.has(normalize(path)) ||
+      commands.some(
+        (command) =>
+          command.includes(path) ||
+          namesScratchDir(command, scratchDirOf(path)),
+      ) ||
+      entersRootOf(path, commands)
+    ;(isTied ? tied : untied).push(path)
+  }
+
+  return { tied, untied }
+}
+
+function scratchDirOf(path: string): string | undefined {
+  return ESCAPE_SCRATCH_DIRS.find((dir) => path.includes(`/${dir}/`))
+}
+
+function entersRootOf(path: string, commands: readonly string[]): boolean {
+  const dir = scratchDirOf(path)
+  if (dir === undefined) return false
+  const root = path.slice(0, path.indexOf(`/${dir}/`))
+  const top = dir.split('/')[0] ?? dir
+
+  return (
+    root !== '' &&
+    commands.some((command) => command.includes(root)) &&
+    commands.some((command) => command.includes(top))
+  )
+}
+
+/**
+ * True when `command` spells `/<dir>` behind a prefix that could resolve to a
+ * watched root. A prefix of dots, slashes, or a tilde alone resolves against the
+ * sandbox, the filesystem root, or the home directory, none of them a root the
+ * watch reads.
+ */
+function namesScratchDir(command: string, dir: string | undefined): boolean {
+  if (dir === undefined) return false
+  const needle = `/${dir}`
+
+  for (
+    let at = command.indexOf(needle);
+    at !== -1;
+    at = command.indexOf(needle, at + 1)
+  ) {
+    const next = command[at + needle.length]
+    if (next !== undefined && !/[/\s'"`;)|&>]/.test(next)) continue
+    const prefix = /[^\s'"`=;(|&<>]*$/.exec(command.slice(0, at))?.[0] ?? ''
+    if (!/^[./~]*$/.test(prefix)) return true
+  }
+
+  return false
 }

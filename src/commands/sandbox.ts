@@ -132,6 +132,7 @@ interface CheckOptions {
   readonly writes?: string
   readonly escapes?: string
   readonly escapesWatched?: boolean
+  readonly untiedEscapes?: string
   readonly concurrentSessions?: string
   readonly json?: boolean
   readonly strict?: boolean
@@ -207,7 +208,7 @@ function readEnvelope(path: string | undefined): RunEnvelope | undefined {
 }
 
 /**
- * Shared by `--writes` and `--escapes`, which are both a newline-delimited
+ * Shared by `--writes`, `--escapes`, and `--untied-escapes`, which are each a newline-delimited
  * path list written by `canon sandbox run`. Undefined when no file was given, which is
  * not the same as a run that produced no paths. Write scope and escape scope
  * both need that distinction: an empty list is a finding, an absent list is a
@@ -687,6 +688,7 @@ function runCheck(
           ? undefined
           : options.escapesWatched === true,
       concurrentSessions: readPathList(options.concurrentSessions),
+      untiedEscapes: readPathList(options.untiedEscapes),
       envelope: readEnvelope(options.envelope),
     },
   )
@@ -798,6 +800,10 @@ export function register(program: Command): void {
     .option(
       '--escapes <file>',
       'Newline-delimited paths written to a watched toolkit root, for escape scope',
+    )
+    .option(
+      '--untied-escapes <file>',
+      'Newline-delimited watched writes no tool call of the session names, reported as skipped rather than asserted',
     )
     .option(
       '--escapes-watched',

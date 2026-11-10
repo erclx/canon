@@ -28,6 +28,7 @@ import {
   type ReapState,
 } from '@/sandbox/headless/dispatch'
 import {
+  attributeEscapes,
   escapeRoots,
   snapshotRoot,
   snapshotTree,
@@ -583,10 +584,13 @@ async function drive(
     (name) => describeSession(registry, name),
   )
 
+  const { tied, untied } = attributeEscapes(escapes, stream)
+
   const verdict = takeVerdict(cli, target, arm, workDir, {
     envelope: stream.result,
     writes,
-    escapes,
+    escapes: tied,
+    untiedEscapes: untied,
     concurrent,
     isEscapeWatched,
   })
@@ -597,25 +601,24 @@ async function drive(
   cleanup.reapSession()
   cleanup.removeShim()
 
-  // An escape reports without failing, the same relationship `write_scope` has
-  // to the writes it names. Nothing here distinguishes the spawned session's
-  // writes from the operator's own, and on a machine running parallel sessions
-  // the watched directories are rarely quiet: of five runs on 2026-08-02, three
-  // reported an escape and every one named a file another session was writing.
-  // What enforces the scope is that the sandbox sits outside the repository, so
-  // a correct run has nothing to escape with.
-  if (escapes.length > 0) {
-    logWarn('Shared scratch changed under a toolkit root during this run:')
-    for (const path of escapes) logRemove(path)
+  // A tied escape fails an arm declaring `escape_scope`, and an untied one
+  // reports as skipped there, since no tool call of this session names it. Both
+  // print here for every arm, since an arm declaring no scope asserts neither.
+  if (tied.length > 0) {
+    logWarn('This session wrote shared scratch under a toolkit root:')
+    for (const path of tied) logRemove(path)
+  }
+  if (untied.length > 0) {
+    logWarn(
+      'Shared scratch changed under a toolkit root, named by no call of this session:',
+    )
+    for (const path of untied) logRemove(path)
     if (concurrent.length > 0) {
       logWarn(
         'A session was live throughout the run and may account for these:',
       )
       for (const record of concurrent) logRemove(record)
     }
-    logWarn(
-      'No assertion covers these. Check them against what else was running.',
-    )
   }
 
   if (newSessions.length > 0) {
@@ -662,17 +665,16 @@ function takeVerdict(
     readonly envelope: string
     readonly writes: readonly string[]
     readonly escapes: readonly string[]
+    readonly untiedEscapes: readonly string[]
     readonly concurrent: readonly string[]
     readonly isEscapeWatched: boolean
   },
 ): { readonly record: unknown; readonly code: number } {
-  const file = (name: string, body: string): string => {
+  const fileArgs = verdictFiles(run).flatMap(({ flag, name, body }) => {
     const path = join(workDir, name)
     writeFileSync(path, body, 'utf8')
-    return path
-  }
-  const lines = (list: readonly string[]): string =>
-    list.map((line) => `${line}\n`).join('')
+    return [flag, path]
+  })
 
   const check = spawnSync(
     process.execPath,
@@ -682,14 +684,7 @@ function takeVerdict(
       'check',
       target,
       arm ?? '',
-      '--envelope',
-      file('envelope.json', run.envelope),
-      '--writes',
-      file('writes.txt', lines(run.writes)),
-      '--escapes',
-      file('escapes.txt', lines(run.escapes)),
-      '--concurrent-sessions',
-      file('concurrent.txt', lines(run.concurrent)),
+      ...fileArgs,
       ...(run.isEscapeWatched ? ['--escapes-watched'] : []),
       '--json',
     ],
@@ -704,4 +699,38 @@ function takeVerdict(
   }
 
   return { record, code: check.status ?? 1 }
+}
+
+export interface VerdictFile {
+  readonly flag: string
+  readonly name: string
+  readonly body: string
+}
+
+/** The files `canon sandbox check` reads a run's data from, one per flag. */
+export function verdictFiles(run: {
+  readonly envelope: string
+  readonly writes: readonly string[]
+  readonly escapes: readonly string[]
+  readonly untiedEscapes: readonly string[]
+  readonly concurrent: readonly string[]
+}): VerdictFile[] {
+  const lines = (list: readonly string[]): string =>
+    list.map((line) => `${line}\n`).join('')
+
+  return [
+    { flag: '--envelope', name: 'envelope.json', body: run.envelope },
+    { flag: '--writes', name: 'writes.txt', body: lines(run.writes) },
+    { flag: '--escapes', name: 'escapes.txt', body: lines(run.escapes) },
+    {
+      flag: '--untied-escapes',
+      name: 'untied-escapes.txt',
+      body: lines(run.untiedEscapes),
+    },
+    {
+      flag: '--concurrent-sessions',
+      name: 'concurrent.txt',
+      body: lines(run.concurrent),
+    },
+  ]
 }

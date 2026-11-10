@@ -687,6 +687,74 @@ describe('checkExpectation on escape scope', () => {
       message: 'no escape during this run',
     })
   })
+
+  describe('with untied escapes', () => {
+    const tied = '/main/.canon/plans/feature-x.md'
+    const fleet = '/main/.canon/tasks/session-worker.md'
+
+    it('should fail on the tied path alone and count the untied one as skipped', () => {
+      const verdict = checkExpectation(scopedExpectation([]), {
+        sandboxDir: sandbox,
+        escapes: [tied],
+        untiedEscapes: [fleet],
+        escapesWatched: true,
+      })
+
+      expect(verdict.state).toBe('fail')
+      expect(verdict.results).toEqual([
+        { ok: false, message: `unbounded escape: ${tied}` },
+      ])
+      expect(verdict.skipped).toEqual([
+        'escape scope: 1 write under a watched root no call of this session names, not asserted',
+      ])
+    })
+
+    it('should pass with a skipped line when every escape is untied', () => {
+      const verdict = checkExpectation(scopedExpectation([]), {
+        sandboxDir: sandbox,
+        escapes: [],
+        untiedEscapes: [fleet, tied],
+        escapesWatched: true,
+      })
+
+      expect(verdict.state).toBe('pass')
+      expect(verdict.results).toEqual([
+        { ok: true, message: 'no escape during this run' },
+      ])
+      expect(verdict.skipped).toEqual([
+        'escape scope: 2 writes under a watched root no call of this session names, not asserted',
+      ])
+      expect(verdict.unchecked).toBe(1)
+    })
+
+    it('should keep a tied path matching a declared glob as a declared escape', () => {
+      const verdict = checkExpectation(
+        scopedExpectation(['/main/.canon/plans/**']),
+        {
+          sandboxDir: sandbox,
+          escapes: [tied],
+          untiedEscapes: [fleet],
+          escapesWatched: true,
+        },
+      )
+
+      expect(verdict.state).toBe('pass')
+      expect(verdict.results).toEqual([
+        { ok: true, message: `declared escape: ${tied}` },
+      ])
+    })
+
+    it('should assert every escape when the caller passes no untied list', () => {
+      const verdict = checkExpectation(scopedExpectation([]), {
+        sandboxDir: sandbox,
+        escapes: [tied, fleet],
+        escapesWatched: true,
+      })
+
+      expect(verdict.failed).toBe(2)
+      expect(verdict.skipped).toEqual([])
+    })
+  })
 })
 
 describe('checkExpectation with data the caller did not supply', () => {
