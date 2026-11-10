@@ -39,7 +39,8 @@ Each reference is one name in two themes, with a PNG and its frame HTML per them
 
 - Name each file `<name>-dark` or `<name>-light`, as in `grid-dark.png` beside `grid-dark.html`
 - Keep one HTML file without a theme suffix only for a frame that switches theme itself, beside both PNGs
-- Put what every frame HTML loads, being its stylesheet, script, fonts, and vendored files, under `kit/`
+- Put what every frame HTML loads, being its stylesheet, script, fonts, and vendored files, under `assets/<project>/`, one folder per board project
+- Keep every such file there, since the sync writes each frame's `../assets/` links to that folder and reports a file elsewhere below the first level as stray
 
 ## The index
 
