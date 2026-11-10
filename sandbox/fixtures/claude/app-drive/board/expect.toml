@@ -1,0 +1,92 @@
+# What a correct `/canon:app-drive` run leaves behind on the seeded board app
+# when the project carries a board. Read by `canon sandbox check`. Patterns use
+# TOML literal strings so a regex needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block. A bare key below
+# one belongs to that table in TOML, so an array written at the bottom parses
+# clean and silently asserts nothing.
+#
+# The arm drives the same app as `default/`, so the seed, the goals, and the
+# removed worktree are asserted the same way. It adds what the board drawing
+# convention leaves on disk, being the `00-current` page first, a frame at each
+# of 390, 834, and 1440, evidence grouped by surface, and no empty start project
+# or page. The pick question and the ended server sit under `manual`, since the
+# checker reads the sandbox tree alone.
+#
+# No `max_turns` is declared until a billed run records a count. A guessed cap
+# fails a correct run, and a truncated run fails by its subtype regardless.
+#
+# Every pattern below matches a pretty-printed JSON file and a compact one
+# alike, since the formatting varies by writer.
+
+paths = [
+  ".canon/intake/*/drive.json",
+  ".canon/intake/*/evidence/drive-log.md",
+  ".canon/intake/*/evidence/*/*.png",
+  ".canon/intake/*/evidence/*/*-options.png",
+  ".canon/intake/*/evidence/mocks/*/*",
+  ".canon/board/drive-*/project.json",
+  ".canon/board/drive-*/00-current/layout.json",
+  ".canon/board/drive-*/00-current/*-390.html",
+  ".canon/board/drive-*/00-current/*-834.html",
+  ".canon/board/drive-*/00-current/*-1440.html",
+]
+
+# The worktree registration, as in the default arm, plus the two things an empty
+# board leaves. `serve` starts a project named `untitled` and `project add` makes
+# a project holding an empty `page-1`, and the drive deletes each while it holds
+# nothing. Each entry names a file, since the scan returns files only and a bare
+# folder matches nothing.
+absent = [
+  ".git/worktrees/*/HEAD",
+  ".canon/board/untitled/project.json",
+  ".canon/board/drive-*/page-1/layout.json",
+]
+
+# The default scope plus the board root, where a board run writes its pages.
+write_scope = [
+  ".canon/intake/**",
+  ".canon/tmp/app-drive/**",
+  ".canon/picks/**",
+  ".canon/board/**",
+]
+
+escape_scope = []
+
+manual = [
+  "The pick question carried the board page address and named each option's frame. Unwired: the question is a turn in the transcript, which the checker does not read.",
+  "Both addresses were handed before driving. Unwired: an ordering inside the reply.",
+  "The board server and the app server ended. Unwired: a listener is not a file in the sandbox tree.",
+  "The run's own `canon intake drive-check <slug> --json` returned clean. Unwired: a command's exit is not in the envelope.",
+]
+
+# The seed is untouched, which a drive served from the checkout would break.
+[[content]]
+path = "boards/board.json"
+pattern = '^\{"frames":\["frame 1"\]\}$'
+
+[[content]]
+path = ".canon/intake/*/drive.json"
+pattern = 'adds a frame to the board and sees it saved'
+
+[[content]]
+path = ".canon/intake/*/drive.json"
+pattern = 'exports the board to PNG'
+
+[[content]]
+path = ".canon/intake/*/drive.json"
+pattern = '"worktree":\s*"/'
+
+# The log opens on its setup table, and the Board row names the drive's project.
+[[content]]
+path = ".canon/intake/*/evidence/drive-log.md"
+pattern = '^\| Commit\s'
+
+[[content]]
+path = ".canon/intake/*/evidence/drive-log.md"
+pattern = '^\| Board\s.*drive-\d+'
+
+# `00-current` leads the page order, in a pretty-printed file and a compact one.
+[[content]]
+path = ".canon/board/drive-*/project.json"
+pattern = '"pages":\s*\[\s*"00-current"'

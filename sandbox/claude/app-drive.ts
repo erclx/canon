@@ -129,13 +129,19 @@ export default scenario({
         'Action:  /canon:app-drive drive v0.1.0 of the board app, decide one finding, and close the drive, since no operator is present',
       )
       ctx.log.info(
-        'Expect:  both addresses handed before driving, a Board row in the log, 00-current and a topic page in',
+        'Expect:  both addresses handed before driving and a Board row in the log naming project drive-<nn>,',
       )
       ctx.log.info(
-        '         project drive-<nn>, the address inside the pick question, the mock source under',
+        '         whose pages open on 00-current with frames at 390, 834, and 1440, and no empty',
       )
       ctx.log.info(
-        '         evidence/mocks/, the board server ended, and the project still on the board',
+        '         page-1 or untitled project, evidence grouped under evidence/<surface>/ with the',
+      )
+      ctx.log.info(
+        '         options shot, the mock source under evidence/mocks/<surface>/, the address inside',
+      )
+      ctx.log.info(
+        '         the pick question, the board server ended, and the project still on the board',
       )
     },
   },
