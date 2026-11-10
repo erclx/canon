@@ -1662,6 +1662,42 @@ describe('canon pr evidence --check', () => {
       expect(record.uncaptured).toEqual([])
     })
 
+    it('should report an empty list when the only painted change is a deletion', async () => {
+      writeBaseTree(false, ['e2e/evidence/dark/board.png'])
+      writeFileSync(
+        join(tempDir, 'files.tsv'),
+        'removed\tsrc/client/old-styles.css\n',
+      )
+
+      const record = await runCheck()
+
+      expect(record.uncaptured).toEqual([])
+    })
+
+    it('should name only the modified painted path beside a deleted one', async () => {
+      writeBaseTree(false, ['e2e/evidence/dark/board.png'])
+      writeFileSync(
+        join(tempDir, 'files.tsv'),
+        'removed\tsrc/client/old-styles.css\nmodified\tsrc/client/styles.css\n',
+      )
+
+      const record = await runCheck()
+
+      expect(record.uncaptured).toEqual(['src/client/styles.css'])
+    })
+
+    it('should not let a deleted evidence image clear a modified painted path', async () => {
+      writeBaseTree(false, ['e2e/evidence/dark/board.png'])
+      writeFileSync(
+        join(tempDir, 'files.tsv'),
+        'removed\te2e/evidence/dark/stale.png\nmodified\tsrc/client/styles.css\n',
+      )
+
+      const record = await runCheck()
+
+      expect(record.uncaptured).toEqual(['src/client/styles.css'])
+    })
+
     it('should omit the field when the base keeps no capture', async () => {
       writeBaseTree(false, ['src/app.tsx'])
       writeFileSync(join(tempDir, 'files.tsv'), 'modified\tsrc/client/a.css\n')

@@ -119,6 +119,7 @@ An `ok` or `no-evidence` record can carry `uncaptured`, the painted paths this p
 - The fix is a recapture by the session that built the change, pushed as a follow-up, after which this skill renders the comparison on the new head
 - An empty list or an absent field adds no report line. An absent field means the base keeps no capture or its tree went unread, which the review weighs on its own.
 - A redraw under `canon/design/` never empties the list, since a design reference shows the accepted design rather than the built app
+- A path the pull request deletes never lists, and a deleted evidence image empties nothing, since a deletion captures nothing
 
 ### Git refusals
 

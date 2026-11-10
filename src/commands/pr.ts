@@ -940,7 +940,9 @@ export function register(program: Command): void {
         "a project whose base branch's tree holds one. Painted is the set",
         '`canon/config/painted.json` tunes, minus any path under an evidence/',
         'segment or canon/design/, and any changed evidence image empties the',
-        'list. The field is absent when the base tree holds no capture or could',
+        'list. A path the pull request deletes is left out, and a deleted',
+        'evidence image empties nothing, since a deletion captures nothing.',
+        'The field is absent when the base tree holds no capture or could',
         'not be read, a cut-short listing showing none included, so absent means',
         'unchecked rather than clean. It never adds to `owed`, since no step of',
         'the ship chain can take a capture.',
@@ -2923,7 +2925,7 @@ async function runEvidence(
     pullFiles.renamedFrom,
   )
   const uncaptured = readUncaptured(
-    everyChangedPath(pullFiles),
+    [...pullFiles.present.keys()],
     loadPaintedPatterns(root),
     keepsCaptures,
   )
