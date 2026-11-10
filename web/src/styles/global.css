@@ -2,40 +2,41 @@
 @import './tokens.css';
 
 /*
- * The page follows one change through six steps, built against the board
- * preview `landing/landing-preview` picked on 2026-10-27. Every value is read
- * from `tokens.css`, which is generated from `src/design/tokens.ts`, bar
- * `--pip`, which `base.astro` sets from the mark's own `FAVICON_COLORS`.
+ * The page is built to the drive 215 mocks, the `landing-v2` board, on the
+ * design system `src/design/tokens.ts` generates into `tokens.css`. Every
+ * size, color, corner, shadow, and duration reads a token. Layout spacing
+ * reads the mocks' pixels, since the system sets no spacing ladder.
  *
  * Tailwind v4 generates its utility classes inside `@layer utilities`, and an
  * unlayered rule always wins over a layered one regardless of specificity, so
- * everything here sits in `@layer base`.
+ * everything here sits in `@layer base`. Each section's own rules sit in its
+ * component, prefixed by the section's id, so a rule never reaches a second
+ * section.
  */
 @layer base {
-  /*
-   * Role names over tokens. Ink carries every action and link, and the pip is
-   * the page's one hue, so the page reads no accent token at all.
-   */
+  /* Role names over tokens, in the mocks' vocabulary. */
   :root {
     --ground: var(--color-background);
-    --tint: var(--color-surface);
-    --chrome: var(--color-chrome);
-    --ring: var(--color-border);
+    --tray: var(--color-surface);
+    --win: var(--color-window);
+    --winbar: var(--color-chrome);
+    --band: var(--color-band);
+    --line: var(--color-border);
+    --edge: var(--color-edge);
     --ink: var(--color-text);
-    --ink-body: var(--color-text-body);
-    --ink-soft: var(--color-muted);
-    --ink-faint: var(--color-muted);
-    /* The bright ink a filled action takes, a step past the text ink toward the page's far end. */
-    --hi: color-mix(in srgb, var(--color-text) 30%, white);
-    --hi-ink: var(--color-background);
-    --ease: cubic-bezier(0.4, 0, 0.2, 1);
-    --bin: 1088px;
+    --body: var(--color-text-body);
+    --muted: var(--color-muted);
+    --accent: var(--color-accent);
+    --hover: color-mix(in srgb, var(--ink) 5%, transparent);
     --mono: var(--type-code-family);
+    --sans: var(--type-body-family);
+    --nav-h: 88px;
+    --page-w: 1180px;
+    --gutter: 32px;
     color-scheme: dark;
   }
 
   [data-theme='light'] {
-    --hi: color-mix(in srgb, var(--color-text) 62%, black);
     color-scheme: light;
   }
 
@@ -44,18 +45,22 @@
   }
 
   html {
-    /* The bar is sticky and measured, so an anchor lands clear of it. */
-    scroll-padding-top: calc(var(--nav-height, 64px) + var(--space-md));
+    /* The bar is fixed, so a jump lands clear of it and a focused control never sits behind it. */
+    scroll-padding-top: var(--nav-h);
   }
 
   body {
     margin: 0;
     background: var(--ground);
-    color: var(--ink-body);
-    font-family: var(--type-body-family);
-    font-size: 1.125rem;
+    color: var(--body);
+    font-family: var(--sans);
+    font-size: var(--size-body);
+    line-height: var(--type-body-lh);
     -webkit-font-smoothing: antialiased;
-    line-height: 1.55;
+  }
+
+  main {
+    padding-top: var(--nav-h);
   }
 
   code,
@@ -65,67 +70,19 @@
     font-family: var(--mono);
   }
 
-  h1 {
-    font-size: var(--size-display);
-    line-height: 1.12;
-    letter-spacing: -0.02em;
-    font-weight: 600;
-    text-wrap: balance;
-    color: var(--ink);
-    margin: 0;
-    max-width: 18em;
-  }
-
-  h2 {
-    font-size: 2.125rem;
-    line-height: 1.2;
-    letter-spacing: -0.01em;
-    font-weight: 600;
-    color: var(--ink);
-    margin: 0 0 var(--space-md);
-    text-wrap: balance;
-  }
-
-  .lead {
-    font-size: var(--size-lede);
-    line-height: 1.45;
-    color: var(--ink-body);
-    margin: var(--space-lg) 0 0;
-    max-width: 38em;
-  }
-
-  .sub {
-    margin: 0;
-    max-width: 29em;
-  }
-
-  .sub + .sub {
-    margin-top: var(--space-md);
-  }
-
-  .mono {
-    font-family: var(--mono);
-    font-size: var(--size-body);
-    color: var(--ink);
-  }
-
-  .dim {
-    color: var(--ink-soft);
-  }
-
   a:focus-visible,
-  button:focus-visible {
+  button:focus-visible,
+  input:focus-visible {
     outline: 2px solid var(--ink);
-    outline-offset: 3px;
-    border-radius: var(--radius-action);
+    outline-offset: 2px;
   }
 
   .skip {
     position: absolute;
     left: -9999px;
     top: 0;
-    z-index: 50;
-    padding: var(--space-sm) var(--space-md);
+    z-index: 60;
+    padding: 8px 14px;
     background: var(--ink);
     color: var(--ground);
     border-radius: 0 0 var(--radius-action) 0;
@@ -136,552 +93,267 @@
     left: 0;
   }
 
-  .bin {
-    max-width: var(--bin);
-    margin: 0 auto;
-    padding: 0 var(--space-lg);
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 
-  /*
-   * Actions, from the board's `landing-buttons/arm-1`: a primary filled in
-   * bright ink with an arrow, and a secondary that reads as a link rather than
-   * a second button of equal weight. Every control answers hover, press and
-   * focus in 160ms.
-   */
-  .btn {
-    display: inline-flex;
+  /* A section: one column at the page width, its heading and lede, then its object. */
+  .sec {
+    max-width: calc(var(--page-w) + var(--gutter) * 2);
+    margin: 0 auto;
+    padding: 120px var(--gutter) 128px;
+  }
+
+  .sec-head h2 {
+    margin: 0;
+    font-size: var(--type-display-size);
+    line-height: var(--type-display-lh);
+    letter-spacing: -0.03em;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .sec-head p {
+    margin: 18px 0 0;
+    max-width: 60ch;
+    font-size: var(--type-lede-size);
+    line-height: var(--type-lede-lh);
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  .sec code {
+    font-family: var(--mono);
+    font-size: 0.9em;
+    color: var(--ink);
+  }
+
+  /* The grey tray every section's object sits on. */
+  .tray {
+    background: var(--tray);
+    border-radius: var(--radius-tray);
+    padding: 40px;
+  }
+
+  /* A Claude Code window: a chrome bar with three dots and a centered title, over a monospace view. */
+  .win {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--win);
+    border-radius: var(--radius-frame);
+    box-shadow: var(--shadow-window);
+    font-family: var(--type-view-family);
+    font-size: var(--type-view-size);
+    line-height: var(--type-view-lh);
+    color: var(--body);
+  }
+
+  .win-bar {
+    flex: none;
+    position: relative;
+    display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 44px;
-    padding: 0 22px;
-    border-radius: var(--radius-panel);
-    font-size: 1rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    line-height: 1;
-    color: var(--ink);
-    text-decoration: none;
-    transition:
-      opacity 0.16s var(--ease),
-      color 0.16s var(--ease);
+    height: 40px;
+    background: var(--winbar);
+    border-bottom: 1px solid var(--line);
+    font-family: var(--sans);
+    font-size: var(--size-view-small);
+    font-weight: 500;
+    color: var(--muted);
+    user-select: none;
   }
 
-  .btn-primary {
-    background: var(--hi);
-    color: var(--hi-ink);
-    box-shadow: 0 1px 0 rgb(0 0 0 / 0.08);
+  .win-bar i {
+    position: absolute;
+    top: 14px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--edge);
   }
 
-  .btn-primary::after {
-    content: '→';
-    margin-left: 10px;
+  .win-bar i:nth-child(1) {
+    left: 14px;
   }
 
-  .btn-primary:hover {
-    opacity: 0.88;
+  .win-bar i:nth-child(2) {
+    left: 34px;
   }
 
-  .btn-text {
-    padding-left: 8px;
+  .win-bar i:nth-child(3) {
+    left: 54px;
   }
 
-  .btn-text::after {
-    content: '↓';
-    margin-left: 8px;
-    color: var(--ink-soft);
-  }
-
-  .btn-text.btn-out::after {
-    content: '→';
-  }
-
-  .btn-text:hover {
-    text-decoration: underline;
-    text-underline-offset: 4px;
-  }
-
-  .btn-small {
-    min-height: 34px;
-    padding: 0 14px;
-    border-radius: var(--radius-action);
-    font-size: var(--size-body);
-  }
-
-  .btn-small::after {
-    content: none;
-  }
-
-  .cta {
+  /* A typed request in a window, on its band. */
+  .win .ask {
     display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin: var(--space-xl) 0 0;
-  }
-
-  .cmd {
-    margin: var(--space-xl) 0 0;
-    padding: 14px 20px;
-    background: var(--tint);
-    border-radius: var(--radius-panel);
-    box-shadow: inset 0 0 0 1px var(--ring);
-    font-size: var(--size-body);
-    line-height: 1.8;
+    gap: 10px;
+    background: var(--band);
     color: var(--ink);
-    font-family: var(--mono);
-    overflow-wrap: anywhere;
   }
 
-  /* The fold's box fits its two commands, and the quick start's fills its column. */
-  .fold .cmd {
+  .win .ask .g {
+    flex: none;
+    color: var(--muted);
+    user-select: none;
+  }
+
+  .win .cur {
     display: inline-block;
-    max-width: 100%;
+    width: 8px;
+    height: 17px;
+    background: var(--ink);
+    vertical-align: -4px;
   }
 
-  .cmd code {
-    display: block;
+  /* A one-line picker: the control step's 8px corners at 28px high, the picked one filled in ink. */
+  .pick {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    padding: 5px 14px;
+    border-radius: var(--radius-action);
+    box-shadow: inset 0 0 0 1px var(--line);
+    font-family: var(--sans);
+    font-size: var(--size-small);
+    font-weight: 500;
+    line-height: 18px;
+    color: var(--body);
+    white-space: nowrap;
+    transition:
+      background-color var(--duration-feedback) var(--ease-standard),
+      color var(--duration-feedback) var(--ease-standard);
   }
 
-  .cmd code span {
-    color: var(--ink-soft);
-  }
-
-  /* Sections. Each step is divided from the next by a rule, and the review band takes the surface. */
-  main > section {
-    padding: 80px 0;
-    box-shadow: inset 0 1px 0 var(--ring);
-  }
-
-  main > section.fold {
-    padding-top: 56px;
+  .pick[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--ground);
     box-shadow: none;
   }
 
-  main > section.bridge {
-    padding: 56px 0;
+  .pick:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
   }
 
-  .bridge .lead {
-    margin: 0;
+  @media (hover: hover) {
+    .pick:hover {
+      background: var(--tray);
+      color: var(--ink);
+    }
+
+    .pick[aria-pressed='true']:hover {
+      background: var(--ink);
+      color: var(--ground);
+    }
   }
 
-  section.band {
-    background: var(--tint);
-  }
-
-  .split {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-    gap: 56px;
-    align-items: center;
-  }
-
-  .split.top {
-    align-items: start;
-  }
-
-  .split.rev > :first-child {
-    order: 2;
-  }
-
-  .wide .step-text {
-    max-width: 640px;
-    margin-bottom: 32px;
-  }
-
-  .wide .step-figs {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 24px;
-    align-items: start;
-  }
-
-  .wide .step-figs.lead {
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-  }
-
-  /* The step's name, marked by the pip as the result its figure ends on. */
-  .kicker {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0 0 10px;
-    font-family: var(--mono);
-    font-size: var(--size-body);
-    color: var(--ink-soft);
-  }
-
-  .kicker i {
-    width: 10px;
-    height: 10px;
-    border-radius: 2px;
-    background: var(--pip);
-  }
-
-  .stack {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .stack > * + * {
-    margin-top: 14px;
-  }
-
-  /* Figures. A panel with a chrome header strip, and marked rows inside it. */
-  .fig {
-    background: var(--tint);
-    border-radius: var(--radius-frame);
-    box-shadow: inset 0 0 0 1px var(--ring);
-    overflow: hidden;
-  }
-
-  .band .fig {
-    background: var(--ground);
-  }
-
-  .fig-head {
+  .picks {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 2px 12px;
-    padding: 12px 20px;
-    background: var(--chrome);
-    box-shadow: inset 0 -1px 0 var(--ring);
-    font-family: var(--mono);
-    font-size: var(--size-body);
-    color: var(--ink);
+    gap: 8px;
   }
 
-  .fig-aside {
-    color: var(--ink-soft);
-  }
-
-  .fig-body {
-    padding: 20px;
-  }
-
-  .fig-body.tight {
-    padding: 8px 20px;
-  }
-
-  .rows {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .rows li {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 9px 0;
-    font-size: 1rem;
-  }
-
-  .rows em {
-    margin-left: auto;
-    font-style: normal;
-    font-size: var(--size-body);
-    color: var(--ink-soft);
-    text-align: right;
-  }
-
-  .strong {
-    font-weight: 600;
-    color: var(--ink);
-  }
-
-  .struck s {
-    color: var(--ink-soft);
-  }
-
-  /* A finished row is a filled square, an open one a ring, and the step's one result the pip. */
-  .m {
-    flex: none;
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
-    background: var(--ink-faint);
-  }
-
-  .m-open {
-    background: transparent;
-    border: 2px solid var(--ink-faint);
-    border-radius: 50%;
-  }
-
-  .m-result {
-    background: var(--pip);
-  }
-
-  .num {
-    margin: 0;
-    font-size: 4.5rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    line-height: 1;
-    color: var(--ink);
-  }
-
-  .num-cap {
-    margin: 8px 0 0;
-    font-size: 1rem;
-    color: var(--ink-soft);
-  }
-
-  .ledger {
-    margin: 24px 0 0;
-    padding: 0;
-    list-style: none;
-    box-shadow: inset 0 1px 0 var(--ring);
-  }
-
-  .ledger li {
-    padding: 12px 0;
-    box-shadow: inset 0 -1px 0 var(--ring);
-    font-size: 1rem;
-  }
-
-  .ledger b {
-    margin-right: 10px;
-    font-weight: 600;
-    color: var(--ink);
-  }
-
-  .decision {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin: 16px 0 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--ink);
-  }
-
-  .dated {
-    margin: 16px 0 0;
-    font-size: var(--size-small);
-    color: var(--ink-soft);
-  }
-
-  .plan-outline {
-    margin: 0;
-  }
-
-  .plan-outline dd {
-    margin: 4px 0 14px 16px;
-  }
-
-  .chip {
-    display: inline-block;
-    margin: 6px 0;
-    padding: 3px 10px;
-    border-radius: var(--radius-action);
-    box-shadow: inset 0 0 0 1px var(--ring);
-    font-family: var(--mono);
-    font-size: var(--size-small);
-    color: var(--ink-soft);
-  }
-
-  .code {
-    margin: 10px 0;
-    font-size: var(--size-body);
-    line-height: 1.9;
-    color: var(--ink);
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-  }
-
-  .msg {
-    padding: 14px 18px;
-    background: var(--ground);
-    border-radius: var(--radius-frame);
-    box-shadow: inset 0 0 0 1px var(--ring);
-    font-size: 1rem;
-    color: var(--ink);
-  }
-
-  .msg small {
-    display: block;
-    margin-bottom: 2px;
-    font-size: var(--size-small);
-    color: var(--ink-soft);
-  }
-
-  .prompt {
-    display: flex;
-    gap: 14px;
-    margin: 9px 0 0;
-  }
-
-  .prompt span {
-    color: var(--ink-soft);
-  }
-
-  /* The film, framed like a figure, with its two controls over it. */
-  .film {
+  /*
+   * A pickable row: a button whose hit area covers the row, and a lit state
+   * painted on the row behind it. Hover shows only where a pointer hovers.
+   */
+  .lit-row {
     position: relative;
-    margin: 44px 0 0;
-    border-radius: var(--radius-frame);
-    box-shadow: inset 0 0 0 1px var(--ring);
-    overflow: hidden;
-    background: var(--ground);
+    z-index: 0;
   }
 
-  .film video {
-    display: block;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 10;
-  }
-
-  [data-theme='dark'] .film-light,
-  [data-theme='light'] .film-dark {
-    display: none;
-  }
-
-  .film-play {
+  .lit-row::before {
+    content: '';
     position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 44px;
-    padding: 0 18px;
-    border: 0;
-    border-radius: var(--radius-action);
-    background: var(--ink);
-    color: var(--ground);
-    font: inherit;
-    font-size: var(--size-body);
-    font-weight: 600;
-    white-space: nowrap;
+    inset: var(--lit-inset, 0 -16px);
+    z-index: -1;
+    border-radius: var(--radius-panel);
+    background: var(--tray);
+    opacity: 0;
+    transition: opacity var(--duration-fade) var(--ease-standard);
+  }
+
+  .lit-row.lit::before {
+    opacity: 1;
+  }
+
+  .lit-row .go {
+    all: unset;
     cursor: pointer;
-    box-shadow: 0 6px 24px rgb(0 0 0 / 0.25);
   }
 
-  .tri {
-    border-left: 11px solid currentColor;
-    border-top: 7px solid transparent;
-    border-bottom: 7px solid transparent;
-  }
-
-  .film-pause {
+  .lit-row .go::after {
+    content: '';
     position: absolute;
-    right: 12px;
-    bottom: 12px;
-    min-height: 32px;
-    padding: 0 12px;
-    border: 0;
-    border-radius: var(--radius-action);
-    background: var(--chrome);
-    color: var(--ink);
-    font: inherit;
-    font-size: var(--size-small);
-    cursor: pointer;
-    box-shadow: inset 0 0 0 1px var(--ring);
+    inset: var(--lit-inset, 0 -16px);
+    border-radius: var(--radius-panel);
   }
 
-  [data-state='playing'] .film-play,
-  [data-state='poster'] .film-pause {
-    display: none;
+  .lit-row:has(.go:focus-visible)::before {
+    opacity: 1;
+    outline: 2px solid var(--ink);
   }
 
-  /* The display steps come down with the viewport, and every grid stacks below 900. */
-  @media (max-width: 1100px) {
-    h1 {
-      font-size: 2.75rem;
+  @media (hover: hover) {
+    .lit-row:hover::before {
+      opacity: 0.6;
+    }
+
+    .lit-row.lit:hover::before {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 1240px) {
+    :root {
+      --page-w: 100%;
     }
   }
 
   @media (max-width: 900px) {
-    .split,
-    .wide .step-figs,
-    .wide .step-figs.lead {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 24px;
+    :root {
+      --gutter: 24px;
     }
 
-    .split.rev > :first-child {
-      order: 0;
+    .sec {
+      padding-top: 88px;
+      padding-bottom: 96px;
+    }
+
+    .tray {
+      padding: 24px;
     }
   }
 
   @media (max-width: 640px) {
-    body {
-      font-size: 1rem;
+    :root {
+      --nav-h: 64px;
+      --gutter: 16px;
     }
 
-    h1 {
-      font-size: 2rem;
-      line-height: 1.15;
+    .sec {
+      padding-top: 64px;
+      padding-bottom: 72px;
     }
 
-    h2 {
-      font-size: 1.5625rem;
+    .tray {
+      padding: 12px;
     }
 
-    .lead {
-      font-size: 1.0625rem;
+    .pick {
+      padding: 5px 12px;
     }
 
-    .bin {
-      padding: 0 var(--space-md);
-    }
-
-    main > section {
-      padding: 48px 0;
-    }
-
-    main > section.fold {
-      padding-top: 28px;
-    }
-
-    .cmd {
-      padding: 12px 14px;
-      font-size: 0.75rem;
-    }
-
-    .film {
-      margin-top: 28px;
-    }
-
-    .num {
-      font-size: 3.125rem;
-    }
-
-    .fig-head {
-      padding: 10px 14px;
-      font-size: 0.75rem;
-    }
-
-    .fig-aside {
-      flex-basis: 100%;
-    }
-
-    .fig-body {
-      padding: 14px;
-    }
-
-    .fig-body.tight {
-      padding: 6px 14px;
-    }
-
-    .rows li {
-      font-size: 0.875rem;
-      gap: 10px;
-    }
-
-    .rows em {
-      font-size: 0.75rem;
-    }
-
-    .mono,
-    .code {
-      font-size: 0.75rem;
-      overflow-wrap: anywhere;
+    .picks {
+      gap: 6px;
     }
   }
 
