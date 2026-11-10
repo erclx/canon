@@ -336,3 +336,144 @@ export const roleScenes = [
     ],
   },
 ]
+
+/**
+ * What holds it: one scene per part, each a request and the lines the window
+ * shows. A line is its kind, a lead, and its text, where `block` is a refusal
+ * and `note` a line the harness reports back into the turn.
+ */
+// README.md: canon-allow-readme-paraphrase: page fiction drawn from the plan guard's real refusal and the seeded merge deny, which the README describes but never quotes.
+export const guardrailScenes: {
+  ask: string
+  lines: [string, string, string][]
+}[] = [
+  {
+    ask: 'add a disabled state to the save button',
+    lines: [
+      ['tool', 'Read', 'src/components/SaveButton.tsx'],
+      ['res', '', 'Read 48 lines'],
+      ['note', '', 'Loaded rule .claude/rules/canon/ui/craft.md'],
+      ['tool', 'Skill', 'canon:ui-craft'],
+      ['res', '', 'Loaded'],
+    ],
+  },
+  {
+    ask: 'plan the --json flag for the export command',
+    lines: [
+      ['tool', 'Write', '.canon/plans/feature-export-json.md'],
+      [
+        'block',
+        'PreToolUse:Write hook blocked the write',
+        'This session has not invoked canon:plan-feature, so .canon/plans/feature-export-json.md would be written outside the skill that owns its shape. Invoke the canon:plan-feature skill for this plan, then resend the write.',
+      ],
+      ['tool', 'Skill', 'canon:plan-feature'],
+      ['res', '', 'Loaded'],
+      ['tool', 'Write', '.canon/plans/feature-export-json.md'],
+      ['res', '', 'Wrote 42 lines'],
+    ],
+  },
+  {
+    ask: 'open the pull request',
+    lines: [
+      ['tool', 'Bash', 'canon gate run'],
+      ['block', 'Tests failed', 'src/cart/total.test.ts, 1 of 212'],
+      ['tool', 'Update', 'src/cart/total.ts'],
+      ['res', '', '1 addition, 1 removal'],
+      ['tool', 'Bash', 'canon gate run'],
+      ['res', '', 'Every stage passed'],
+    ],
+  },
+  {
+    ask: 'merge it',
+    lines: [
+      ['tool', 'Bash', 'gh pr merge 412'],
+      ['block', 'Denied by a permission rule', 'Bash(gh pr merge:*)'],
+      [
+        'say',
+        '',
+        'The merge is yours. #412 is ready, and its review is closed.',
+      ],
+    ],
+  },
+]
+
+/**
+ * Where it happens: three live branches forking off main at different moments
+ * and running up to the now line, the oldest on the top lane, and one earlier
+ * branch drawn merged back under the youngest. Positions are fractions of the
+ * graph's width.
+ */
+// README.md: canon-allow-readme-paraphrase: page fiction drawn from the worktree layout the README describes, with session names in the roster's form.
+export const worktreeBranches = {
+  now: 0.92,
+  lanes: [
+    {
+      branch: 'feat/take-timer',
+      session: 'worker-canon-take-timer',
+      line: 'Gate: 9 of 14 stages passed',
+      fork: 0.22,
+      commits: [0.36, 0.52, 0.7],
+    },
+    {
+      branch: 'feat/sync-stamp',
+      session: 'reviewer-canon-sync-stamp',
+      line: 'Second pass on the added commits',
+      fork: 0.4,
+      commits: [0.55, 0.74],
+    },
+    {
+      branch: 'feat/toolbar',
+      session: 'ui-reviewer-canon-toolbar',
+      line: 'Driving the checklist in the running app',
+      fork: 0.62,
+      commits: [0.78],
+    },
+  ],
+  merged: {
+    label: 'feat/relay-citation, merged',
+    fork: 0.02,
+    merge: 0.16,
+    commits: [0.07, 0.11],
+  },
+}
+
+/** How a repo comes onto canon: the session the setup window plays, one block per stage. */
+// README.md: canon-allow-readme-paraphrase: page fiction of a setup session, each block condensing what its README step says the skill does.
+export const setupSession: {
+  ask: string
+  shell: boolean
+  rows: [string, string, string][]
+}[] = [
+  { ask: 'bun init', shell: true, rows: [] },
+  {
+    ask: '/canon:target-setup',
+    shell: false,
+    rows: [
+      ['k', 'Stack', 'bun, react'],
+      [
+        'k',
+        'Lays down',
+        'base tooling, the react stack, governance rules, the Claude seeds',
+      ],
+      ['q', 'Run it?', 'yes'],
+      ['k', 'Verified', 'format, lint, types, tests'],
+    ],
+  },
+  {
+    ask: '/canon:target-check',
+    shell: false,
+    rows: [
+      ['k', 'Domains', 'tooling, governance, Claude, indexes'],
+      ['k', 'Behind', 'nothing, every domain current'],
+    ],
+  },
+  {
+    ask: '/canon:target-update',
+    shell: false,
+    rows: [
+      ['k', 'Release', 'the installed one to the latest'],
+      ['q', 'Go ahead?', 'yes'],
+      ['k', 'Done', 'one migration, synced, check clean'],
+    ],
+  },
+]
