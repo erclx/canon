@@ -7,6 +7,19 @@
       "release-type": "node",
       "package-name": "@erclx/canon",
       "changelog-path": "CHANGELOG.md",
+      "exclude-paths": [
+        "web",
+        "canon",
+        "internal",
+        ".claude",
+        ".github",
+        ".husky",
+        "sandbox",
+        "examples",
+        "wiki",
+        "assets/evidence",
+        "assets/frames"
+      ],
       "extra-files": [
         {
           "type": "json",
