@@ -3,6 +3,10 @@
     "landing/page": "landing/landing-preview/page",
     "landing/page-phone": "landing/landing-preview/page-phone",
     "readme/page": "readme/round-3-v2/arm-2",
-    "foundations/mark": "brand/brand-mark-final/mark"
+    "foundations/mark": "brand/brand-mark-final/mark",
+    "foundations/palette": "system/palette/arm-2",
+    "foundations/type": "system/type/arm-2",
+    "foundations/shape": "system/shape/arm-1",
+    "foundations/motion": "system/motion/arm-2"
   }
 }

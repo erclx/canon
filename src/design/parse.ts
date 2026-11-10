@@ -89,9 +89,20 @@ function prose(body: string | undefined): string {
     .trim()
 }
 
+/** A table's delimiter row, which opens its body. */
+const DELIMITER = /^\s*\|\s*:?-{3,}/
+
+/**
+ * The first table in a section. A section may carry a second, such as the
+ * shadows under Shapes, with columns of its own, so the first ends on the row
+ * heading the next delimiter. Rows are matched by their pipe rather than by
+ * adjacency, since a hand-written record can leave blank lines between them.
+ */
 function table(body: string | undefined): Row[] {
   if (!body) return []
-  const rows = body.split('\n').filter((l) => l.trim().startsWith('|'))
+  const piped = body.split('\n').filter((l) => l.trim().startsWith('|'))
+  const second = piped.findIndex((l, i) => i > 1 && DELIMITER.test(l))
+  const rows = second === -1 ? piped : piped.slice(0, second - 1)
   if (rows.length < 2) return []
   const headers = splitRow(rows[0]).map((c) => c.value)
   const data = rows.slice(2)

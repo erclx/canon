@@ -2,7 +2,9 @@ import type {
   BorderToken,
   ColorToken,
   DesignTokens,
+  EffectToken,
   SpaceToken,
+  TypeStep,
   TypeToken,
 } from '@/design/tokens'
 import { REVIEWED, TOKENS } from '@/design/tokens'
@@ -59,17 +61,47 @@ function colorRows(tokens: readonly ColorToken[]): string[][] {
   ])
 }
 
-function typeRows(tokens: readonly TypeToken[]): string[][] {
+/**
+ * A role's row, with the tablet and phone sizes read off the step it takes. A
+ * role naming no step, or a step that never shrinks, repeats its size.
+ */
+function typeRows(
+  tokens: readonly TypeToken[],
+  scale: readonly TypeStep[],
+): string[][] {
   return tokens.map((token) => {
     const tagged = new Set(token.verify ?? [])
+    const step = scale.find((entry) => entry.step === token.step)
+    const size = (value: string | undefined): string =>
+      tag(value ?? token.size, tagged.has('size'))
     return [
       token.role,
       tag(token.family, tagged.has('family')),
       tag(token.weight, tagged.has('weight')),
-      tag(token.size, tagged.has('size')),
+      size(token.size),
+      size(step?.tablet),
+      size(step?.phone ?? step?.tablet),
       tag(token.lineHeight, tagged.has('lineHeight')),
     ]
   })
+}
+
+/** An effect's row, named by the property a stylesheet reads it through. */
+function effectRows(
+  prefix: string,
+  tokens: readonly EffectToken[],
+): string[][] {
+  return tokens.map((token) => [
+    `\`--${prefix}-${token.role}\``,
+    token.value,
+    token.when,
+  ])
+}
+
+function effectTable(rows: readonly string[][]): string {
+  return rows.length === 0
+    ? ''
+    : formatTable(['Token', 'Value', 'When used'], rows)
 }
 
 function spaceRows(tokens: readonly SpaceToken[]): string[][] {
@@ -130,8 +162,8 @@ export function renderDesignDocument(tokens: DesignTokens = TOKENS): string {
       'Typography',
       bullets(tokens.typographyRules),
       formatTable(
-        ['Role', 'Family', 'Weight', 'Size', 'Line height'],
-        typeRows(tokens.typography),
+        ['Role', 'Family', 'Weight', 'Size', 'Tablet', 'Phone', 'Line height'],
+        typeRows(tokens.typography, tokens.typeScale),
       ),
     ),
     '',
@@ -150,9 +182,17 @@ export function renderDesignDocument(tokens: DesignTokens = TOKENS): string {
         ['Role', 'Radius', 'Width', 'When used'],
         borderRows(tokens.borders),
       ),
+      effectTable(effectRows('shadow', tokens.shadows)),
     ),
     '',
-    section('Motion', bullets(tokens.motion)),
+    section(
+      'Motion',
+      bullets(tokens.motion),
+      effectTable([
+        ...effectRows('duration', tokens.durations),
+        ...effectRows('ease', tokens.easings),
+      ]),
+    ),
     '',
     section('Iconography', bullets(tokens.iconography)),
   ]

@@ -54,7 +54,24 @@ describe('readings', () => {
   it('measures success, which holds a hex a surface renders', () => {
     const measured = readings().filter((reading) => reading.role === 'success')
 
-    expect(measured.map((reading) => reading.ground)).toEqual(['background'])
+    expect(measured.map((reading) => reading.ground)).toEqual([
+      'background',
+      'window',
+    ])
+  })
+
+  it.each([
+    ['text', ['background', 'surface', 'window']],
+    ['text-body', ['background', 'surface', 'window']],
+    ['muted', ['background', 'surface', 'window']],
+    ['accent', ['background', 'surface', 'window']],
+    ['light-text', ['light-background', 'light-surface', 'light-window']],
+    ['light-text-body', ['light-background', 'light-surface', 'light-window']],
+    ['light-muted', ['light-background', 'light-surface', 'light-window']],
+  ])('measures %s on the canvas, the tray, and the window', (role, grounds) => {
+    const measured = readings().filter((reading) => reading.role === role)
+
+    expect(measured.map((reading) => reading.ground)).toEqual(grounds)
   })
 
   it('refuses a ground the record does not declare', () => {

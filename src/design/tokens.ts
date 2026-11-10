@@ -33,13 +33,21 @@ export interface TypeToken {
   readonly weight: string
   readonly size: string
   readonly lineHeight: string
+  /** The `typeScale` step the role takes, read for its tablet and phone sizes. */
+  readonly step?: string
   readonly verify?: readonly ('family' | 'weight' | 'size' | 'lineHeight')[]
 }
 
-/** One size the system offers, named apart from any role that takes it. */
+/**
+ * One size the system offers, named apart from any role that takes it. A step
+ * names its tablet and phone sizes where it shrinks, which `@/design/css` emits
+ * under the `TABLET` and `PHONE` queries.
+ */
 export interface TypeStep {
   readonly step: string
   readonly size: string
+  readonly tablet?: string
+  readonly phone?: string
 }
 
 export interface SpaceToken {
@@ -53,7 +61,20 @@ export interface BorderToken {
   readonly radius: string
   readonly width: string
   readonly when: string
+  /** A radius that steps down on smaller screens, as `TypeStep` sizes do. */
+  readonly tablet?: string
+  readonly phone?: string
   readonly verify?: readonly ('radius' | 'width')[]
+}
+
+/**
+ * A shadow, a duration, or an easing curve. A shadow role prefixed `light-`
+ * stands in for its unprefixed role on a light ground, as a color role does.
+ */
+export interface EffectToken {
+  readonly role: string
+  readonly value: string
+  readonly when: string
 }
 
 /**
@@ -73,16 +94,20 @@ export interface DesignTokens {
   readonly borders: readonly BorderToken[]
   readonly bordersRules: readonly string[]
   readonly layout: readonly string[]
+  readonly shadows: readonly EffectToken[]
   readonly motion: readonly string[]
+  readonly durations: readonly EffectToken[]
+  readonly easings: readonly EffectToken[]
   readonly iconography: readonly string[]
 }
 
-/** The monospace stack, taken by code and by the terminal frames a page embeds. */
-const MONO = 'Noto Sans Mono, DejaVu Sans Mono, monospace'
+/** The monospace stack, taken by code, by product-view text, and by the terminal frames a page embeds. */
+const MONO = 'Geist Mono Variable, DejaVu Sans Mono, monospace'
 
 /**
- * The proportional stack every role but `code` declares. Geist is the face the
- * visual-direction track set throughout, embedded through `FONT_FACES`.
+ * The proportional stack every role but `code` and `view` declares. Geist is
+ * the face the visual-direction track set throughout, embedded through
+ * `FONT_FACES`.
  *
  * The stack stops at two names and a generic because
  * `web/src/styles/tokens.css` is written by `bun run web:tokens` and formatted
@@ -92,202 +117,259 @@ const MONO = 'Noto Sans Mono, DejaVu Sans Mono, monospace'
  */
 const SANS = 'Geist Variable, DejaVu Sans, sans-serif'
 
-const DARK_GROUNDS = ['background', 'surface'] as const
-const LIGHT_GROUNDS = ['light-background', 'light-surface'] as const
+const DARK_GROUNDS = ['background', 'surface', 'window'] as const
+const LIGHT_GROUNDS = [
+  'light-background',
+  'light-surface',
+  'light-window',
+] as const
 
 /** The day the record was last read whole, rendered into its frontmatter so `canon design regen` and the review point agree. */
-export const REVIEWED = '2026-10-24'
+export const REVIEWED = '2026-11-10'
 
 export const TOKENS: DesignTokens = {
   personality:
-    'Warm neutrals with actions in ink, set in Geist. The page reads as prose, and monospace appears only where a surface shows a path, a command, or what a shell printed. The rust accent marks a status the surface it shows would color, and the landing page carries none, leaving the vermilion pip of the mark as its one hue.',
+    'Warm neutral grounds with ink text, set in Geist, and Geist Mono where a surface shows a path, a command, or what a shell printed. Product windows sit on a soft tray. The vermilion pip of the mark is the one accent, marking a status the surface would color.',
 
   colorRules: [
-    'One accent. Never promote a second color into a structural role.',
+    "One accent, the mark's pip. Never promote a second color into a structural role.",
     'Every text role clears WCAG AA at 4.5:1 against each ground it is drawn on.',
-    '`warning` and `error` exist only in the terminal, as ANSI codes.',
+    '`waiting` colors product-view glyphs, never text. `warning` and `error` exist only in the terminal, as ANSI codes.',
   ],
 
   color: [
     {
       role: 'background',
       intent: 'page canvas',
-      value: '#0f0e0c',
+      value: '#121211',
     },
     {
       role: 'surface',
-      intent: 'cards, panels, raised blocks',
-      value: '#151412',
+      intent: 'the tray a product window sits in, and cards',
+      value: '#1a1a18',
+    },
+    {
+      role: 'window',
+      intent: 'the body of a product window',
+      value: '#1e1e1e',
     },
     {
       role: 'chrome',
-      intent: 'the window titlebar, one step above the canvas',
-      value: '#1b1a18',
+      intent: 'the window titlebar',
+      value: '#252523',
+    },
+    {
+      role: 'band',
+      intent: 'a quiet fill inside a window, such as a prompt',
+      value: '#282826',
     },
     {
       role: 'border',
-      intent: 'every rule and panel edge',
-      value: '#2a2926',
+      intent: 'every rule and divider',
+      value: '#2e2e2c',
+    },
+    {
+      role: 'edge',
+      intent: "a control's outline",
+      value: '#2a2a28',
     },
     {
       role: 'text',
       intent: 'headings, counts, emphasized runs',
-      value: '#d9d7d4',
+      value: '#f2f2f0',
       grounds: DARK_GROUNDS,
     },
     {
       role: 'text-body',
       intent: 'default body copy',
-      value: '#aeada9',
-      grounds: DARK_GROUNDS,
-    },
-    {
-      role: 'text-secondary',
-      intent: 'labels, captions, supporting copy',
-      value: '#8c8b86',
+      value: '#cfcdc8',
       grounds: DARK_GROUNDS,
     },
     {
       role: 'muted',
-      intent: 'the faintest step, trailing notes',
-      value: '#7f7f7c',
+      intent: 'ledes, labels, captions, trailing notes',
+      value: '#8f8d88',
       grounds: DARK_GROUNDS,
     },
     {
       role: 'accent',
-      intent: 'a status the surface would color, such as an open pull request',
-      value: '#c76b5f',
+      intent: 'the pip, and a status the surface would color',
+      value: '#ff6b42',
       grounds: DARK_GROUNDS,
     },
     {
       role: 'success',
-      intent: 'confirmations, rendered and in the terminal',
-      value: '#61c454',
-      grounds: ['background'],
+      intent: 'done, rendered and in the terminal',
+      value: '#6fae6a',
+      grounds: ['background', 'window'],
+    },
+    {
+      role: 'waiting',
+      intent: 'a product-view glyph for work not yet done',
+      value: '#e5b567',
     },
     { role: 'warning', intent: 'terminal cautions', value: 'ANSI 33' },
     { role: 'error', intent: 'terminal failures', value: 'ANSI 31' },
     {
       role: 'light-background',
       intent: 'page canvas on a light ground',
-      value: '#fbfaf8',
+      value: '#fdfdfc',
     },
     {
       role: 'light-surface',
-      intent: 'cards and panels on a light ground',
-      value: '#f1f1ee',
+      intent: 'the tray and cards on a light ground',
+      value: '#f2f2f0',
+    },
+    {
+      role: 'light-window',
+      intent: 'the body of a product window on light',
+      value: '#ffffff',
     },
     {
       role: 'light-chrome',
-      intent: 'the window titlebar, one step above the canvas',
-      value: '#e9e8e5',
+      intent: 'the window titlebar on light',
+      value: '#f7f7f5',
+    },
+    {
+      role: 'light-band',
+      intent: 'a quiet fill inside a window, on light',
+      value: '#f0f0ee',
+    },
+    {
+      role: 'light-border',
+      intent: 'rules and dividers on light',
+      value: '#ececea',
+    },
+    {
+      role: 'light-edge',
+      intent: "a control's outline, on light",
+      value: '#e4e4e1',
     },
     {
       role: 'light-text',
       intent: 'primary text on a light ground',
-      value: '#2c2c29',
+      value: '#121212',
       grounds: LIGHT_GROUNDS,
     },
     {
       role: 'light-text-body',
       intent: 'default body copy on a light ground',
-      value: '#4b4947',
-      grounds: LIGHT_GROUNDS,
-    },
-    {
-      role: 'light-text-secondary',
-      intent: 'labels, captions, supporting copy on a light ground',
-      value: '#666561',
+      value: '#3b3b38',
       grounds: LIGHT_GROUNDS,
     },
     {
       role: 'light-muted',
-      intent: 'secondary text on a light ground',
-      value: '#6e6d6c',
+      intent: 'ledes, labels, and captions on a light ground',
+      value: '#6b6a66',
       grounds: LIGHT_GROUNDS,
     },
     {
       role: 'light-accent',
-      intent: 'a status the surface would color, on light',
-      value: '#ad4a4b',
+      intent: 'the pip, and a status the surface would color, on light',
+      value: '#c2380e',
       grounds: LIGHT_GROUNDS,
     },
     {
       role: 'light-success',
-      intent: 'confirmations, rendered and in the terminal, on light',
-      value: '#2d6b22',
-      grounds: ['light-background'],
+      intent: 'done, rendered and in the terminal, on light',
+      value: '#3f7f3e',
+      grounds: ['light-background', 'light-window'],
     },
     {
-      role: 'light-border',
-      intent: 'rules and panel edges on light',
-      value: '#d5d4d1',
-      verify: true,
+      role: 'light-waiting',
+      intent: 'a product-view glyph for work not yet done, on light',
+      value: '#b07d1a',
     },
   ],
 
   typographyRules: [
-    'Geist for every role except `code`, which is monospace.',
-    'Tracking: `label` at `0.05em`, `display` at `-0.01em`, nothing else.',
-    'Sizes come from seven steps, `t0` to `t6`. A role takes one step.',
+    'Geist for every role except `code` and `view`, which take Geist Mono.',
+    'Tracking: `hero` at `-0.04em`, `display` at `-0.03em`, nothing else.',
+    'Seven steps, five on a 4:3 ratio from body 16 and two inside product windows. A role takes one step.',
   ],
 
   typeScale: [
-    { step: 't0', size: '3.175rem' },
-    { step: 't1', size: '2.375rem' },
-    { step: 't2', size: '1.375rem' },
-    { step: 't3', size: '1.125rem' },
-    { step: 't4', size: '0.9375rem' },
-    { step: 't5', size: '0.8125rem' },
-    { step: 't6', size: '0.6875rem' },
+    { step: 'hero', size: '5.625rem', tablet: '4rem', phone: '2.5rem' },
+    { step: 'display', size: '3.125rem', tablet: '2.5rem', phone: '2rem' },
+    { step: 'lede', size: '1.3125rem', tablet: '1.125rem', phone: '1.0625rem' },
+    { step: 'body', size: '1rem', phone: '0.9375rem' },
+    { step: 'small', size: '0.8125rem', phone: '0.78125rem' },
+    { step: 'view', size: '0.8125rem', phone: '0.75rem' },
+    { step: 'view-small', size: '0.75rem', tablet: '0.6875rem' },
   ],
 
   typography: [
     {
+      role: 'hero',
+      family: SANS,
+      weight: '600',
+      size: '5.625rem',
+      lineHeight: '1',
+      step: 'hero',
+    },
+    {
       role: 'display',
       family: SANS,
-      weight: '700',
-      size: '2.375rem',
-      lineHeight: '1.3',
+      weight: '600',
+      size: '3.125rem',
+      lineHeight: '1.06',
+      step: 'display',
     },
     {
-      role: 'page-display',
+      role: 'lede',
       family: SANS,
-      weight: '700',
-      size: '3.175rem',
-      lineHeight: '1.1',
-      verify: ['size', 'lineHeight'],
+      weight: '400',
+      size: '1.3125rem',
+      lineHeight: '1.48',
+      step: 'lede',
     },
     {
-      role: 'heading',
+      role: 'title',
       family: SANS,
-      weight: '700',
-      size: '1.375rem',
-      lineHeight: '1.3',
-      verify: ['lineHeight'],
+      weight: '600',
+      size: '1rem',
+      lineHeight: '1.55',
+      step: 'body',
     },
     {
       role: 'body',
       family: SANS,
       weight: '400',
-      size: '0.9375rem',
-      lineHeight: '1.65',
-      verify: ['weight'],
+      size: '1rem',
+      lineHeight: '1.55',
+      step: 'body',
     },
     {
-      role: 'label',
+      role: 'small',
       family: SANS,
-      weight: '400',
+      weight: '500',
       size: '0.8125rem',
       lineHeight: '1.45',
-      verify: ['weight', 'lineHeight'],
+      step: 'small',
+    },
+    {
+      role: 'view',
+      family: MONO,
+      weight: '400',
+      size: '0.8125rem',
+      lineHeight: '1.6',
+      step: 'view',
+    },
+    {
+      role: 'view-small',
+      family: SANS,
+      weight: '500',
+      size: '0.75rem',
+      lineHeight: '1.45',
+      step: 'view-small',
     },
     {
       role: 'code',
       family: MONO,
-      weight: '700',
+      weight: '400',
       size: '0.8125rem',
-      lineHeight: '1.3',
+      lineHeight: '1.45',
+      step: 'small',
       verify: ['lineHeight'],
     },
   ],
@@ -307,27 +389,43 @@ export const TOKENS: DesignTokens = {
   ],
 
   bordersRules: [
-    'Every border is one pixel solid in `border`. Radius and width are independent.',
+    'Every border is one pixel solid, in `border` for a rule and `edge` around a control. Radius and width are independent.',
+    'The tray steps down to 28px under 900 and 22px under 640.',
+    'No pill. A one-line picker takes `action` at 28px high.',
   ],
 
   borders: [
     {
+      role: 'tray',
+      radius: '36px',
+      width: 'none',
+      when: 'the soft tray a product window sits in',
+      tablet: '28px',
+      phone: '22px',
+    },
+    {
       role: 'frame',
       radius: '12px',
       width: 'none',
-      when: 'the outer window, radius only',
+      when: 'windows, sheets, popovers, a picked or hovered row',
     },
     {
       role: 'panel',
-      radius: '10px',
+      radius: '12px',
       width: '1px',
       when: 'cards and columns',
     },
     {
       role: 'action',
-      radius: '7px',
+      radius: '8px',
       width: 'none',
-      when: 'the install command block',
+      when: 'controls, the install command, one-line pickers',
+    },
+    {
+      role: 'chip',
+      radius: '4px',
+      width: 'none',
+      when: 'chips and tags',
     },
     {
       role: 'rule',
@@ -336,17 +434,10 @@ export const TOKENS: DesignTokens = {
       when: 'horizontal dividers between bands',
     },
     {
-      role: 'pill',
-      radius: '999px',
-      width: 'none',
-      when: 'tags and status chips, none built',
-      verify: ['radius', 'width'],
-    },
-    {
       role: 'marker',
-      radius: '999px',
+      radius: '2px',
       width: 'none',
-      when: 'the status dot, sized at 6px',
+      when: 'status marks and the status dot, sized at 6px',
     },
   ],
 
@@ -355,13 +446,72 @@ export const TOKENS: DesignTokens = {
     'Every width query in the generated stylesheets opens a range one of these widths reaches.',
   ],
 
+  shadows: [
+    {
+      role: 'window',
+      value:
+        '0 0 0 1px rgba(255, 255, 255, 0.06), 0 24px 60px -28px rgba(0, 0, 0, 0.6)',
+      when: 'a product window on its tray',
+    },
+    {
+      role: 'popover',
+      value:
+        '0 0 0 1px rgba(255, 255, 255, 0.06), 0 16px 36px -16px rgba(0, 0, 0, 0.6)',
+      when: 'a menu or popover over content',
+    },
+    {
+      role: 'ring',
+      value: '0 0 0 1px rgba(255, 255, 255, 0.06)',
+      when: 'a hairline around a picked row',
+    },
+    {
+      role: 'light-window',
+      value:
+        '0 0 0 1px rgba(0, 0, 0, 0.07), 0 24px 60px -28px rgba(0, 0, 0, 0.3)',
+      when: 'a product window on its tray, on light',
+    },
+    {
+      role: 'light-popover',
+      value:
+        '0 0 0 1px rgba(0, 0, 0, 0.07), 0 16px 36px -16px rgba(0, 0, 0, 0.3)',
+      when: 'a menu or popover over content, on light',
+    },
+    {
+      role: 'light-ring',
+      value: '0 0 0 1px rgba(0, 0, 0, 0.07)',
+      when: 'a hairline around a picked row, on light',
+    },
+  ],
+
+  durations: [
+    { role: 'feedback', value: '120ms', when: 'hover, press, and toggle' },
+    { role: 'fade', value: '240ms', when: 'a fade in or out' },
+    { role: 'move', value: '400ms', when: 'an element moving or resizing' },
+    { role: 'draw', value: '1000ms', when: 'a line or figure drawing on' },
+  ],
+
+  easings: [
+    {
+      role: 'standard',
+      value: 'cubic-bezier(0.3, 0.7, 0.3, 1)',
+      when: 'fades and moves',
+    },
+    {
+      role: 'draw',
+      value: 'cubic-bezier(0.65, 0, 0.35, 1)',
+      when: 'draws',
+    },
+  ],
+
   motion: [
-    'None. No transition, animation, or keyframe on any rendered surface.',
+    'Four durations and two curves. Progress runs linear, and nothing sets a timing of its own.',
+    "Product-view loops keep Claude Code's rhythm: a 1.6s spinner, a 1.4s pulse, a 1.1s cursor blink.",
+    'Under reduced motion every end state renders at once, so a duration is never the only way to reach one.',
   ],
 
   iconography: [
     'No icon library. `assets/brand/mark.svg` is the one authored icon.',
-    'The mark takes its own colors from `src/design/favicon.ts`, never the accent: the c in the text ink and the pip in a vermilion pair.',
+    'The mark takes its colors from `src/design/favicon.ts`: the c in the text ink and the pip in the accent pair.',
     'The terminal draws glyphs: `│ ├ ✓ ! ✗ + - ◆ ◇ ❯`.',
   ],
 }

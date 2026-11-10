@@ -113,10 +113,10 @@ describe('renderDesignDocument', () => {
   it('tags a cell the record marks and leaves the rest bare', () => {
     const document = renderDesignDocument()
 
-    expect(document).toContain('#d5d4d1 ? verify')
+    expect(document).toContain('| 1.45 ? verify |')
     // The role column pads to the widest role in the table, so this width
     // moves whenever a longer role name is declared.
-    expect(document).toContain('| background           | page canvas')
+    expect(document).toContain('| background       | page canvas')
   })
 
   /**
@@ -137,7 +137,110 @@ describe('renderDesignDocument', () => {
     const border = parsed.color.find(
       (row) => row['Role'].value === 'light-border',
     )
-    expect(border?.['Value']).toEqual({ value: '#d5d4d1', tagged: true })
+    expect(border?.['Value']).toEqual({ value: '#ececea', tagged: false })
+
+    const code = parsed.typography.find((row) => row['Role'].value === 'code')
+    expect(code?.['Line height']).toEqual({ value: '1.45', tagged: true })
+  })
+
+  it('renders a role at the tablet and phone sizes of the step it takes', () => {
+    const document = renderDesignDocument({
+      ...TOKENS,
+      typeScale: [
+        { step: 'hero', size: '5.625rem', tablet: '4rem', phone: '2.5rem' },
+      ],
+      typography: [
+        {
+          role: 'hero',
+          family: 'Geist',
+          weight: '600',
+          size: '5.625rem',
+          lineHeight: '1',
+          step: 'hero',
+        },
+      ],
+    })
+
+    expect(document).toContain(
+      '| hero | Geist  | 600    | 5.625rem | 4rem   | 2.5rem |',
+    )
+  })
+
+  it('repeats the size for a role whose step never shrinks', () => {
+    const document = renderDesignDocument({
+      ...TOKENS,
+      typeScale: [{ step: 'body', size: '1rem' }],
+      typography: [
+        {
+          role: 'body',
+          family: 'Geist',
+          weight: '400',
+          size: '1rem',
+          lineHeight: '1.5',
+          step: 'body',
+        },
+      ],
+    })
+
+    expect(document).toContain(
+      '| body | Geist  | 400    | 1rem | 1rem   | 1rem  |',
+    )
+  })
+
+  it('shows the tablet size at phone for a step that shrinks only at tablet', () => {
+    const document = renderDesignDocument({
+      ...TOKENS,
+      typeScale: [{ step: 'caption', size: '0.75rem', tablet: '0.6875rem' }],
+      typography: [
+        {
+          role: 'caption',
+          family: 'Geist',
+          weight: '500',
+          size: '0.75rem',
+          lineHeight: '1.45',
+          step: 'caption',
+        },
+      ],
+    })
+
+    expect(document).toContain('| 0.75rem | 0.6875rem | 0.6875rem |')
+  })
+
+  it('renders the shadows under Shapes by the property each is read through', () => {
+    const document = renderDesignDocument({
+      ...TOKENS,
+      shadows: [{ role: 'ring', value: '0 0 0 1px #000000', when: 'edges' }],
+    })
+    const shapes = document.split('## Shapes')[1].split('## Motion')[0]
+
+    expect(shapes).toContain(
+      '| `--shadow-ring` | 0 0 0 1px #000000 | edges     |',
+    )
+  })
+
+  it('renders the durations and easings under Motion as one table', () => {
+    const document = renderDesignDocument({
+      ...TOKENS,
+      durations: [{ role: 'fade', value: '240ms', when: 'fades' }],
+      easings: [{ role: 'draw', value: 'linear', when: 'draws' }],
+    })
+    const motion = document.split('## Motion')[1].split('## Iconography')[0]
+
+    expect(motion).toContain('`--duration-fade`')
+    expect(motion).toContain('`--ease-draw`')
+  })
+
+  it('leaves the borders parse to the borders table when shadows follow it', () => {
+    const path = join(root, 'DESIGN.md')
+    writeFileSync(
+      path,
+      renderDesignDocument({
+        ...TOKENS,
+        shadows: [{ role: 'ring', value: '0 0 0 1px #000000', when: 'edges' }],
+      }),
+    )
+
+    expect(parseDesignDoc(path).borders).toHaveLength(TOKENS.borders.length)
   })
 
   it('ends on a single trailing newline', () => {

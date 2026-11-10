@@ -19,9 +19,9 @@ export interface FaviconColors {
 
 /** The mark's own colors, picked on the board and kept apart from the page accent tokens. */
 export const FAVICON_COLORS: FaviconColors = {
-  tile: { light: '#fbfaf8', dark: '#1b1a18' },
+  tile: { light: '#fdfdfc', dark: '#1a1a18' },
   edge: '#dcdad6',
-  c: { light: '#2c2c29', dark: '#d9d7d4' },
+  c: { light: '#121212', dark: '#f2f2f0' },
   pip: { light: '#c2380e', dark: '#ff6b42' },
 }
 
