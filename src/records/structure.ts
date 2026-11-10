@@ -127,6 +127,21 @@ export function intakeSpill(text: string): StructureEntry[] {
 }
 
 /**
+ * The structure report for an app drive's log. A finding carries the measured
+ * number beside every claim, so a labeled field runs long and `S4` skips it.
+ * Spill is a cluster check, since a log holds findings rather than items, so
+ * it is not added here.
+ */
+export function driveLogStructure(text: string): StructureEntry[] {
+  const lines = text.split('\n')
+
+  return structureFindings(text).filter(
+    (entry) =>
+      !(entry.criterion === 'S4' && FIELD.test(lines[entry.line - 1] ?? '')),
+  )
+}
+
+/**
  * The structure report for an intake cluster file. Item headings open on
  * their fields by the template's design, so `S3` skips them, and a field
  * carries its whole content on one line, so `S4` skips it.

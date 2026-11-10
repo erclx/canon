@@ -1038,10 +1038,23 @@ describe('validateRecords', () => {
       ].join('\n')
     }
 
-    it('should report a long drive log bullet under its subject', async () => {
+    it('should report no structure entry on a long labeled field', async () => {
       await seedFolder('intake', 'drive', {
         '00-overview.md': overview,
         'evidence/drive-log.md': driveLog(`- **Saw:** ${'a'.repeat(300)}`),
+      })
+
+      expect(await validateRecords(ROOT, 'intake', 'drive')).toMatchObject({
+        ok: true,
+        findings: [],
+        structure: [],
+      })
+    })
+
+    it('should report a long unlabeled drive log bullet under its subject', async () => {
+      await seedFolder('intake', 'drive', {
+        '00-overview.md': overview,
+        'evidence/drive-log.md': driveLog(`- Saw: ${'a'.repeat(300)}`),
       })
       const outcome = await validateRecords(ROOT, 'intake', 'drive')
 

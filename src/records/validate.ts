@@ -9,6 +9,7 @@ import {
   type SessionMapLength,
 } from '@/records/session-map'
 import {
+  driveLogStructure,
   intakeStructure,
   type StructureEntry,
   structureFindings,
@@ -809,8 +810,10 @@ const STRUCTURE_FILES: Readonly<
 
 /**
  * An app drive's log, which sits under an intake folder's `evidence/` and
- * holds findings as headings and fields rather than items, so it reads on the
- * plain criteria rather than the cluster exemptions.
+ * holds findings as headings and fields rather than items. It reads on the
+ * plain criteria with a labeled field exempt from `S4`, since a finding
+ * carries the measured number beside each claim, and without the cluster-only
+ * spill and item-heading checks.
  */
 const DRIVE_LOG = 'evidence/drive-log.md'
 
@@ -826,7 +829,7 @@ async function folderStructure(
   const files = (await listMarkdown(dir)).filter(reads)
   const reports = files.map((file) => ({ file, read: report }))
   if (kind === 'intake' && existsSync(join(dir, DRIVE_LOG))) {
-    reports.push({ file: DRIVE_LOG, read: structureFindings })
+    reports.push({ file: DRIVE_LOG, read: driveLogStructure })
   }
 
   const perFile = await Promise.all(
