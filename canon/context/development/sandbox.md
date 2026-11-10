@@ -55,11 +55,7 @@ Owns the runner behind `canon sandbox run <cat:cmd> "<prompt>" [scenario]`.
 - `stream.ts` reduces `stream-json` to an envelope of `is_error`, `result`, `num_turns`, `total_cost_usd`, `skills`, and a `verdict`, kept in `.canon/tmp/runs/sandbox/`, as a later check finds none
 - Pass the prompt whole as `/canon:<skill> <args>`, which `skills` never lists. Four `CANON_SKILL_TEST_*` variables override the defaults. `_TOOLS` restricts nothing under `bypassPermissions`.
 - The cap of 30 turns is the only budget. A run it truncates fails by `subtype`, and a `max_turns` at or above it compares nothing. A no-shell arm uses `dontAsk`, as `claude:deploy-app` does.
-- `watch.ts` diffs `.canon/plans`, `.canon/review`, `.canon/memory`, and `.canon/tasks` under each root and sees nothing else. `dispatch.ts` bounds a nested `claude --bg` by shim and reap.
-
-The diff names no writer, so `attributeEscapes` ties a path to the session through the calls its stream carries. A file-writing target ties it, and so does a `Bash` command spelling the path, its directory behind a prefix, or its root. Tied paths reach `--escapes` and can fail an arm. The rest go to `--untied-escapes` as one skipped line.
-
-A stream with no such call ties every path. A shell write whose destination is computed in full ties nothing and passes as foreign, the one place the check is weaker than before.
+- `watch.ts` diffs the four `.canon/` scratch folders per root and fails only paths a session call names. A shell write built at run time slips past. `dispatch.ts` reaps a nested `claude --bg`.
 
 ### `src/sandbox/replay/`
 
