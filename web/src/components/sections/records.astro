@@ -817,21 +817,73 @@ function explorerOf(html: string): Entry[] {
     margin: 6px 0 10px;
   }
 
+  /*
+   * A drawn shot of the toolbar under review, its Save button focused. Each
+   * shot keeps the theme it was taken in, whatever theme the page is in, and a
+   * cut shot clips the bar at Save's edge so its ring shows broken.
+   */
   #records .thumb {
+    --t-ground: var(--color-light-band);
+    --t-bar: var(--color-light-window);
+    --t-line: var(--color-light-border);
+    --t-key: var(--color-light-surface);
+    --t-text: var(--color-light-text-body);
+    --t-ring: var(--color-light-accent);
     display: flex;
     align-items: center;
     justify-content: center;
     height: 90px;
     margin: 8px 0;
+    overflow: hidden;
     border-radius: var(--radius-action);
-    background: var(--band);
-    font-size: var(--size-view-small);
-    color: var(--muted);
+    background: var(--t-ground);
+  }
+
+  /* The dark tokens turn light under the light theme and no theme-fixed set exists, so a dark shot carries their dark values. */
+  #records .thumb.dk {
+    --t-ground: #282826;
+    --t-bar: #1e1e1e;
+    --t-line: #2e2e2c;
+    --t-key: #252523;
+    --t-text: #cfcdc8;
+    --t-ring: #ff6b42;
   }
 
   #records .pair .thumb {
     height: 80px;
     margin: 0;
+  }
+
+  #records .tt .bar {
+    display: flex;
+    gap: 6px;
+    padding: 7px;
+    border-radius: 8px;
+    background: var(--t-bar);
+    box-shadow: 0 0 0 1px var(--t-line);
+  }
+
+  #records .tt.cut .bar {
+    overflow: hidden;
+    padding-right: 0;
+  }
+
+  #records .tt .b {
+    display: flex;
+    flex: none;
+    align-items: center;
+    height: 20px;
+    padding: 0 7px;
+    border-radius: 5px;
+    background: var(--t-key);
+    box-shadow: 0 0 0 1px var(--t-line);
+    font: 500 10px/1 var(--sans);
+    color: var(--t-text);
+  }
+
+  #records .tt .b.f {
+    outline: 2px solid var(--t-ring);
+    outline-offset: 2px;
   }
 
   #records .sev {
@@ -1166,6 +1218,12 @@ function explorerOf(html: string): Entry[] {
     #records .lo-m,
     #records .prt {
       display: none;
+    }
+
+    /* A shot in the phone's half-width pair draws the whole bar smaller, so only a cut shot reads as cut. */
+    #records .pair .tt .bar {
+      flex: none;
+      transform: scale(0.55);
     }
 
     #records .gh {
