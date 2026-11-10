@@ -82,7 +82,7 @@ Five measures report and never set the exit code on their own.
 | `2`  | A ban, a dead link, or a gating density or reference shape finding |
 | `3`  | The shipped ban set is empty, so nothing was measured              |
 
-Rewrite the sentence on a ban hit rather than swapping the token. A code span clears the report only where the token is an identifier under discussion, while a character reference such as `&lt;` or `&#59;` is never a hit, since the semicolon ends the reference rather than a clause.
+Rewrite the sentence on a ban hit rather than swapping the token. A code span clears the report only where the token is an identifier under discussion, while a character reference such as `&lt;` or `&amp;` is never a hit, since the semicolon ends the reference rather than a clause.
 
 The audit runs in four places:
 
