@@ -10,7 +10,7 @@ import { expect, test } from '@playwright/test'
 
 const run = promisify(execFile)
 
-/** The capture itself launches a browser and shoots ten frames. */
+/** The capture itself launches a browser and shoots nine frames. */
 const CAPTURE_TIMEOUT = 180_000
 
 const HARNESS = fileURLToPath(
@@ -36,14 +36,13 @@ const FILTER = 'home/1280--dark'
  */
 const SECTIONS = [
   'top',
-  'how',
-  'groundwork',
-  'plan',
-  'dispatch',
-  'build',
-  'review',
-  'merge',
-  'start',
+  'roles',
+  'records',
+  'craft',
+  'guardrails',
+  'worktrees',
+  'setup',
+  'try',
 ] as const
 
 interface Size {
@@ -134,7 +133,7 @@ test.describe('the section capture', () => {
     // Read what the run wrote before measuring what was asked for. The list
     // below is a copy of the harness's own, so a section dropped from the
     // harness fails the measurement loudly while one added to it would fail
-    // nothing, and the tenth frame would reach the committed baseline
+    // nothing, and the ninth frame would reach the committed baseline
     // with nothing having checked where it was cut from.
     const written = await readdir(home, { withFileTypes: true })
     expect(
