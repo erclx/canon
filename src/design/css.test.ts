@@ -212,9 +212,11 @@ describe('buildDesignCss', () => {
     )
 
     expect(css).toContain(
+      // canon-allow-embedded: the emitted query under test
       '@media (max-width: 900px) {\n  :root {\n    --size-hero: 4rem;\n    --radius-tray: 28px;\n  }\n}',
     )
     expect(css).toContain(
+      // canon-allow-embedded: the emitted query under test
       '@media (max-width: 640px) {\n  :root {\n    --size-hero: 2.5rem;\n    --radius-tray: 22px;\n  }\n}',
     )
   })
