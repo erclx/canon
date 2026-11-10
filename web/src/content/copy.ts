@@ -257,3 +257,82 @@ export const footer = {
   // README.md: "MIT license"
   license: { label: 'MIT licensed', href: `${REPO}/blob/main/LICENSE` },
 }
+
+/**
+ * The five roles beside the window, each with the scene the window plays for
+ * it: the request it receives, what it did, and what it said back.
+ */
+// README.md: canon-allow-readme-paraphrase: each role's line condenses its README bullet, and each scene is page fiction drawn from how that role really reports.
+export const roleScenes = [
+  {
+    name: 'Orchestrator',
+    line: 'dispatches the rows',
+    session: 'orchestrator-canon',
+    prompt: 'dispatch the ready rows',
+    act: [
+      'Read the board, ran 3 shell commands',
+      'Checked each row against what is in flight',
+    ],
+    say: [
+      'Two rows are ready. relayed-answer-citation has its plan, so a worker takes it now.',
+      'board-arm-expect has none, so a cold planner writes it first and I launch it when the plan lands.',
+    ],
+  },
+  {
+    name: 'Planner',
+    line: 'writes one plan',
+    session: 'planner-canon-board-arm-expect',
+    prompt:
+      '/canon:role-planner, then /canon:plan-feature board-arm-expect. Write one plan against the current tree and message the orchestrator when it lands.',
+    act: [
+      'Read 7 files, ran 4 shell commands',
+      'Measured the row against main',
+    ],
+    say: [
+      'Wrote the plan for board-arm-expect. Two questions, both with suggested answers.',
+      'Launchable.',
+    ],
+  },
+  {
+    name: 'Worker',
+    line: 'builds and opens the pull request',
+    session: 'worker-canon-relayed-answer-citation',
+    prompt:
+      "/canon:auto-ship relayed-answer-citation's plan. Controller: the orchestrator. Message it when the pull request opens.",
+    act: [
+      'Edited 5 files in its own worktree, ran the check',
+      'Committed 3 slices, each tested',
+    ],
+    say: [
+      'Opened the pull request as a draft for relayed-answer-citation.',
+      'Check passed, and evidence is posted.',
+    ],
+  },
+  {
+    name: 'Code reviewer',
+    line: 'reads the diff',
+    session: 'reviewer-canon-relayed-answer-citation',
+    prompt:
+      "/canon:role-reviewer, then /canon:review-pr on relayed-answer-citation. Read the plan's review focus first.",
+    act: [
+      'Read the diff and the plan, ran 2 shell commands',
+      'Loaded review-craft',
+    ],
+    say: [
+      '0 critical, 2 should-fix, 1 minor.',
+      'Posted to the pull request and sent to the worker.',
+    ],
+  },
+  {
+    name: 'UI reviewer',
+    line: 'drives the checklist',
+    session: 'ui-reviewer-canon-relayed-answer-citation',
+    prompt:
+      '/canon:role-reviewer, then /canon:review-ui on relayed-answer-citation. One verdict per box, and skip any box marked as taste.',
+    act: ['Drove 7 boxes in the running app', 'Loaded ui-craft'],
+    say: [
+      '6 of 7 boxes pass. One fails: the focus ring is clipped on mobile.',
+      'Posted under UI review.',
+    ],
+  },
+]
