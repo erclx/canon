@@ -61,6 +61,26 @@ export function parseDesignDoc(path: string): DesignDoc {
   }
 }
 
+/**
+ * Every table under one section, in the order the record writes them. The
+ * shadows under Shapes and the durations under Motion sit in tables
+ * `parseDesignDoc` does not reach, the first by being second in its section
+ * and the second by sitting under a section it reads as prose. A missing
+ * section reads as no tables rather than as an error.
+ */
+export function parseSectionTables(path: string, heading: string): Row[][] {
+  const sections = splitSections(readFileSync(path, 'utf8'))
+  const body = sections[canonicalHeading(heading)]
+  if (!body) return []
+  const piped = body.split('\n').filter((l) => l.trim().startsWith('|'))
+  const starts = piped
+    .map((l, i) => (i > 0 && DELIMITER.test(l) ? i - 1 : -1))
+    .filter((i) => i !== -1)
+  return starts.map((start, n) =>
+    rowsOf(piped.slice(start, starts[n + 1] ?? piped.length)),
+  )
+}
+
 function splitSections(raw: string): Record<string, string> {
   const out: Record<string, string> = {}
   const lines = raw.split('\n')
@@ -103,6 +123,11 @@ function table(body: string | undefined): Row[] {
   const piped = body.split('\n').filter((l) => l.trim().startsWith('|'))
   const second = piped.findIndex((l, i) => i > 1 && DELIMITER.test(l))
   const rows = second === -1 ? piped : piped.slice(0, second - 1)
+  return rowsOf(rows)
+}
+
+/** One table's piped lines, header and delimiter first, as keyed rows. */
+function rowsOf(rows: readonly string[]): Row[] {
   if (rows.length < 2) return []
   const headers = splitRow(rows[0]).map((c) => c.value)
   const data = rows.slice(2)
