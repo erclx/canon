@@ -44,10 +44,10 @@ Every arm of a round sits as one frame on one board page, side by side. The oper
 1. Start the board the way `references/board.md` states, unless this run already has. Note whether this run started the server, read off `reused`, since Step 6 ends only a server this run started.
 2. Read `frameboard list --root <board> --json` with no `--project`, so it lists every project. Run `frameboard project add <project> --root <board> --json` when it lists no `<project>`.
 3. Add the round's page with `frameboard page add <page>` and record its `ref` on the run's list of pages. A `name-taken` refusal means the name is somebody else's, so take the next free suffix.
-4. Add each arm once per round width with `frameboard frame add <page>/arm-<id>-<px>`, sized and placed as `references/board.md` lays out a round. Step 6's archive keys on those names.
+4. Add each arm at each round width as `frameboard frame add <page>/arm-<id>-<px>`, laid out as `${CLAUDE_SKILL_DIR}/references/drawing.md` states. Step 6's archive keys on those names.
 5. Write each frame's whole document to the `path` the add verb reported. From a linked worktree, take the heredoc route `session-worktree` gives for a main-root write.
 
-A frame renders at its own layout width on the board and in a capture alike, so a layout decision needs no device toolbar. Read `${CLAUDE_SKILL_DIR}/references/widths.md` before the first add, for the phone, tablet, and desktop widths the round draws and the form a tablet frame takes.
+A frame renders at its own layout width on the board and in a capture alike, so a layout decision needs no device toolbar. Read `${CLAUDE_SKILL_DIR}/references/widths.md` before the first add, for the phone, tablet, and desktop widths the round draws, the 320 check, and the form a tablet frame takes.
 
 ### What every frame carries
 
@@ -100,7 +100,7 @@ Hand over the address rather than a description. Emit the board link first on it
 
 ## Step 4: take the pick
 
-Put the choice to the operator through the structured question surface, since a call the operator's preference decides always routes through it rather than through prose.
+Put the choice to the operator through the structured question surface, since a call the operator's preference decides always routes through it rather than through prose. Ask one round per question, behind `frameboard show` on its frames, as `${CLAUDE_SKILL_DIR}/references/drawing.md` states under Asking.
 
 - Emit the link ahead of the question call and again in the question's text, since some surfaces render the card alone
 - One option per arm, labeled with the arm's id and carrying its cost as the description

@@ -28,26 +28,28 @@ A drive puts a built app in front of the operator and the session together, and 
 
 ## Step 1: copy
 
-Read `${CLAUDE_SKILL_DIR}/references/config.md` for `canon/config/app-drive.toml`, and ask the operator for each key it lacks before anything is built.
+Read `${CLAUDE_SKILL_DIR}/references/config.md` for `canon/config/app-drive.toml`. Before anything is built, ask the operator for each key it lacks, and which target the drive runs when it names targets.
 
 1. Derive `<slug>` from the build being driven, such as `app-drive-0-12-0` for a tag. Claim the folder with `canon records ordinal intake <slug> --claim`.
 2. Record the baseline with `canon intake drive-check <slug> --baseline --json` from the main root, before the first build step. Stop on any `reason` other than `recorded`.
 3. Make the throwaway worktree, build it, and serve it per `${CLAUDE_SKILL_DIR}/references/isolate.md`, which also carries the close and the recovery after a crash.
 4. Confirm the address with `canon pr local --root <worktree> --json` and write it as the drive log's `Address` row.
 5. Start the board per the section below when the drive will draw on it, and write its address and project as the `Board` row. Leave the row empty otherwise.
-6. Hand the operator the app's address and the board's together before driving.
+6. Draw the shipped page on `00-current` when the drive draws on the board, per the drawing guide the section below names.
+7. Hand the operator the app's address and the board's together before driving.
 
 ### Starting the board
 
 A drive will draw on the board when the config names `board-project`, `canon/config/design.toml` exists, or `.canon/board/` exists at the main root. With none of the three, the drive starts no server and draws as Step 3's cases state.
 
-Read `${CLAUDE_SKILL_DIR}/../design-pick/references/board.md` for how the board is reached and started, and `design-config.md` beside it for the `board` key. Three things differ from a `design-pick` run.
+Read `${CLAUDE_SKILL_DIR}/../design-pick/references/board.md` for reaching and starting the board, `design-config.md` beside it for the `board` key, and `drawing.md` beside it before the first frame. A drive differs from a `design-pick` run in four ways.
 
 - `<project>` is the config's `board-project` with `<nn>` filled in, never the `project` key of `design.toml`, so a drive's pages stay apart from pick rounds and accepted frames
+- Where `frameboard list` holds a versioned project of the stem, such as `landing-v2`, ask whether the drive continues it as `landing-v3`, and never write into the earlier one
 - Test the root with `git check-ignore -q <board>/` before serving, slash kept for a folder not made yet. The write scope forbids an unignored root, and `drive-check` reports its frames under `changed`.
 - That test, a stop either reference names, or no `frameboard` and no `bunx` on PATH ends the board rather than the drive. Report why, leave the row empty, and draw as a project with no board does.
 
-Note `reused` off the serve record, since the close ends only a server this run started.
+Note `reused` off the serve record, since the close ends only a server this run started. Delete an `untitled` project `serve` left only while it holds one empty page.
 
 ## Step 2: drive
 
@@ -75,23 +77,23 @@ A drive reaches the app the way its personas do, through the page or through the
 
 Append each finding to the drive log as it happens, never batched at the end, since a compaction drops what chat alone holds.
 
-- Move each frame a finding cites from scratch into the intake folder's `evidence/`, and cite it by that path
-- Copy each image the operator pastes into `evidence/` in the turn its message arrives, under its finding's number, or under a `ref-` prefix when no finding cites it yet
+- Move each frame a finding cites from scratch into `evidence/<surface>/` in the intake folder, and cite it by that path
+- Copy each image the operator pastes into the evidence in the turn its message arrives, under its finding's number, or into `evidence/refs/` under a `ref-` prefix when no finding cites it yet
 - Keep the measured number beside the claim in the log, never only in chat
 - Write an operator's decision under the finding it settles, even when later findings already sit below it, since it is the one edit above the end of the log
-- Write `drive.json` into the intake folder in the shape `drive-record.md` sets, with one entry per goal
+- Write `drive.json` into the intake folder in the shape `drive-record.md` sets
 
 ### Drawing a decided finding
 
-Draw every finding the operator decides before writing its `Decision (operator)` line, whether it is a bug fix, a new feature, or a taste call. A planner reading one line of text cannot see what the operator saw, and drawing the options settles questions the text hides.
+Draw every finding the operator decides, bug fix, feature, or taste call, before writing its `Decision (operator)` line. A planner reading one line cannot see what the operator saw.
 
-Load `canon:ui-craft` and `canon:design-taste` before the first fix frame of a rendered surface, as `design-pick` does before drafting. The picked frame is what a worker builds against, so it has to cover states such as popover dismissal and focus return.
+Load `canon:ui-craft` and `canon:design-taste` before the first fix frame of a rendered surface, since a worker builds against the picked frame, focus return and dismissal included.
 
-1. Draw a now frame and one fix frame per option on the board, per the next section, or with no board inside the copy, on a canvas the app offers or a scratch route. Name them per `drive-record.md`.
-2. Screenshot the frames side by side to `evidence/<nn>-options.png` and open it. Put the options to the operator through the structured question surface, shaped as `design-pick`'s Step 4 shapes a pick.
+1. Draw the section as shipped and one frame per option at each width on the board, per the next section, or with no board inside the copy, on a canvas the app offers or a scratch route.
+2. Screenshot the frames side by side to `evidence/<surface>/<nn>-options.png` and open it. Ask the pick as `drawing.md` states under Asking, one finding per question.
 3. Copy the mock source into `evidence/mocks/<surface>/`, then write `Drawn` citing both paths and record the pick as the decision.
 
-A few cases bend those steps without lifting them.
+A few cases bend those steps.
 
 - When the copy cannot host a mock and the drive draws no board, lift the frames into standalone HTML in the config's `proposals` folder
 - Copy a mock's source into `evidence/mocks/` wherever it was drawn, since the board can change after the close and the check reads `evidence/` alone
@@ -99,21 +101,19 @@ A few cases bend those steps without lifting them.
 - Never write a mock into a tracked path, `canon/design/`, or a page holding the accepted design. An accepted design reaches those through `design-pick` or `design-record` once its fix ships.
 - Leave an undecided taste finding undrawn here, since Step 4 hands it to `design-pick`
 
+Decide a finding about behavior across sections on `drawing.md`'s live prototype.
+
 ### Drawing on the board
 
-The drive's board project holds one page per topic, named by the same `<surface>` as `evidence/mocks/<surface>/`, so a second finding on a surface adds a row to its page.
+The drive's project holds `00-current`, a page per topic, and `00-next`, as `drawing.md` states. A topic's section is the drive's `<surface>`, the name `evidence/<surface>/` takes. Read `frameboard list --root <board> --json` with no `--project`, which refuses before the project exists, and run `project add` when it lacks it.
 
-Read `frameboard list --root <board> --json` with no `--project`, since naming one refuses before it exists. Run `frameboard project add` when the list lacks it, and `frameboard page add` on each new topic.
-
-- Add each frame with `frameboard frame add <page>/<nn>-now`, and take the rest of a frame's shape from `design-pick`'s Step 2
+- Add each page and frame by the name, place, and height `drawing.md` gives, and take theming and font from `design-pick`'s Step 2
 - Lift the copy's rendered markup per `${CLAUDE_SKILL_DIR}/../design-pick/references/live-arms.md`, since the board cannot reach a stylesheet inside the copy
-- Capture with `frameboard capture --page <page> --composite --theme <theme> --out <scratch>`, in the theme the board is judged in, and copy that image to `evidence/<nn>-options.png`
+- Capture with `frameboard capture --page <page> --composite --theme <theme> --out <scratch>`, in the theme the board is judged in, and copy that image to `evidence/<surface>/<nn>-options.png`
 - Hide an earlier finding's frames with `frameboard frame hide` for that capture, and clear them with `--off`
-- State the board's address and the page in the turn's text before the pick question, and repeat both inside it, since the surface can hide what the turn said
+- Draw `00-next` once the operator's picks settle, and copy both whole-page captures into `evidence/baseline/`
 
-Repair a `font-missing` capture as `design-pick`'s Step 3 does. Answer a refusal `board.md` reads, such as `server-not-running`, as it states.
-
-A `browser-not-found` capture, or any refusal neither reference gives a reading for, ends the board the way Step 1 does, so redraw the finding's frames in the copy and take `evidence/<nn>-options.png` from there. On `browser-not-found`, name `bunx playwright install chromium` to the operator as the repair.
+Repair a `font-missing` capture as `design-pick`'s Step 3 does, and answer a refusal `board.md` reads as it states. Any other refusal ends the board as Step 1 does, so redraw in the copy and take the options shot there. On `browser-not-found`, name `bunx playwright install chromium` as the repair.
 
 ## Step 4: sort
 

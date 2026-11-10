@@ -9,21 +9,25 @@ Read before a `design-pick` round adds its first frame, again before a pick fold
 
 ## Picking the widths
 
-Draw every arm at one width per device class. Take the widths from the `## Layout` section of `canon/DESIGN.md` at the main worktree root, by the class each width falls in.
+Draw every arm at one width per device class. Take the widths from the `Draw widths:` line in the `## Layout` section of `canon/DESIGN.md` at the main worktree root, which names phone, tablet, and desktop in that order.
 
-| Class   | Width the record gives              | Fallback |
-| ------- | ----------------------------------- | -------- |
-| Phone   | The narrowest it names, under 600   | 320      |
-| Tablet  | The narrowest it names, 600 to 1023 | 834      |
-| Desktop | The widest it names, 1024 up        | 1440     |
+| Class   | Fallback |
+| ------- | -------- |
+| Phone   | 390      |
+| Tablet  | 834      |
+| Desktop | 1440     |
 
-The table resolves each class on its own, so a record naming phone and desktop widths alone still gets a tablet.
+The draw widths are not the capture widths. The capture list beside them is the screenshot harness every target syncs, and it carries more widths than a round draws.
 
-- Fill a class the record names no width in from the fallback column
-- Take all three fallbacks when the document is absent or carries no `## Layout`
+- Fill a class the line names no width for from the fallback column
+- Take all three fallbacks when the document is absent, carries no `## Layout`, or its layout carries no `Draw widths:` line
 - Say in the run's output which widths the round draws and which source gave each
 
 One width per class keeps the round's frame count at three times its arms. A width between two classes rarely changes a pick, and drawing it grows the board and the composite for no new answer.
+
+### The 320 check
+
+A round draws no 320 frame, and every pick is still measured at 320 for sideways scroll, as the hold below states. 320 is the reflow floor, so a phone frame drawn at 390 that scrolls at 320 fails.
 
 ## Drawing the tablet frame
 
@@ -31,7 +35,7 @@ Draw a tablet frame in the desktop form first. Fall back to the phone form at th
 
 ## Holding a pick that scrolls sideways
 
-No pick folds into the surface until every one of its frames renders with no sideways scroll, per [WCAG 2.2 Reflow](https://www.w3.org/TR/WCAG22/#reflow). Measure each of the picked arm's frames at the width it was drawn at:
+No pick folds into the surface until every one of its frames renders with no sideways scroll, per [WCAG 2.2 Reflow](https://www.w3.org/TR/WCAG22/#reflow). Measure each of the picked arm's frames at the width it was drawn at, and the phone frame again at 320:
 
 ```bash
 canon browser -s=<run> open file://<frame-path>
@@ -41,7 +45,7 @@ canon browser -s=<run> --raw eval "document.documentElement.scrollWidth - docume
 
 Read the result per frame, and close the session with `canon browser -s=<run> close` after the last one.
 
-- Read any value above 1 as a frame that scrolls sideways, and hold the pick, naming each width that failed
+- Read any value above 1 as a frame that scrolls sideways, and hold the pick, naming each width that failed, 320 included
 - Carry a held pick into the loop as a correction to the failing frames, and measure again before the close
 - Report a browser refusal by its stderr and hold the pick, since an unmeasured width is not a clean one
 
