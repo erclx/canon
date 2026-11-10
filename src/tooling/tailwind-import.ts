@@ -38,7 +38,10 @@ export function tailwindImportWarnings(
   target: string,
 ): ToolingWarning[] {
   const config = registeringConfig(chain, target)
-  if (config === undefined || importsTailwind(target)) return []
+  // A sync may name a folder it has not created yet, which holds no stylesheet.
+  if (config === undefined || (existsSync(target) && importsTailwind(target))) {
+    return []
+  }
 
   return [
     {

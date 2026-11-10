@@ -118,6 +118,18 @@ describe('tailwindImportWarnings with the plugin registered', () => {
   })
 })
 
+describe('tailwindImportWarnings on a target not created yet', () => {
+  it('should warn rather than throw when the target folder is missing', () => {
+    const chain = [stack({ 'vite.config.ts': PLUGIN_CONFIG })]
+
+    const warnings = tailwindImportWarnings(chain, join(root, 'not-yet'))
+
+    expect(warnings).toEqual([
+      expect.objectContaining({ code: 'tailwind-unimported' }),
+    ])
+  })
+})
+
 describe('tailwindImportWarnings without the plugin registered', () => {
   it('should stay silent on a stack whose configs register no plugin', () => {
     const chain = [stack({ 'next.config.ts': PLAIN_CONFIG })]
