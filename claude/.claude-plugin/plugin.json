@@ -10,10 +10,13 @@
   "repository": "https://github.com/erclx/canon",
   "license": "MIT",
   "keywords": [
-    "governance",
-    "standards",
-    "skills",
-    "workflow",
-    "tooling"
+    "agentic-workflow",
+    "ai-agents",
+    "claude-code",
+    "claude-code-plugin",
+    "cli",
+    "code-review",
+    "coding-agent",
+    "developer-tools"
   ]
 }
