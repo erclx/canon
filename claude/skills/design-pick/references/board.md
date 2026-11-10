@@ -32,9 +32,19 @@ frameboard serve --root <board> --no-open --tokens <stylesheet> --json
 - `reused: true` means a server was already up, so this run did not start it and its close leaves it running
 - Report a refusal's `error.code` and stop, since no file stands in for a board
 
+## Laying out a round
+
+A round draws each arm once per round width, so the page reads as a grid the operator scans both ways.
+
+- Give each arm one row in arm order, and each round width one column in ascending order
+- Pass `--width <px> --height <px> --x <px> --y <px>` on every add, setting each frame to its column's width
+- Start each column 80px past the right edge of the column before it
+- Start each row 80px below the tallest frame of the row above, so a long phone frame never overlaps the next arm
+- Name each frame `arm-<id>-<px>`, so a frame names its arm and its width on the board and in the archive
+
 ## Reading the selection
 
-Read `frameboard selection --root <board> --json` when the operator's answer points at the board, such as "the selected one". Resolve it against the record's `project` and `page` as well as its `frames`, since every round reuses the `arm-<id>` names.
+Read `frameboard selection --root <board> --json` when the operator's answer points at the board, such as "the selected one". Resolve it against the record's `project` and `page` as well as its `frames`, since every round reuses the `arm-<id>-<px>` names. Read a frame of any width as a pick of its arm.
 
 | Selection                                                         | Reading                                                  |
 | ----------------------------------------------------------------- | -------------------------------------------------------- |

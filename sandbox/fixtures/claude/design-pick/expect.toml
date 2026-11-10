@@ -28,6 +28,12 @@
 # condition is a person, and no fixture supplies one. Reading a green verdict as
 # coverage of the loop is the mistake this paragraph exists to prevent.
 #
+# The three archive globs hold the width rule. The seeded `## Layout` names 320,
+# 768, 1024, and 1440, so a round reading it draws 320, 768, and 1440, and the
+# 768 column is what separates a run that read the record from one that took
+# the 834 fallback. Not yet measured, so a first failure here may be the capture's
+# file naming rather than the run.
+#
 # Two earlier premises were wrong and are recorded so neither is re-derived. The
 # arm first asserted a render refusal, read off the arm then named `ui-test` (canon-keep-retired)
 # failing in a
@@ -37,7 +43,13 @@
 # its working files still standing, on the reading that a pick is not permission
 # to close, which is true of the body and untestable without an operator.
 
-paths = ["index.html", "canon/DESIGN.md"]
+paths = [
+  "index.html",
+  "canon/DESIGN.md",
+  ".canon/picks/**/arm-*-320*",
+  ".canon/picks/**/arm-*-768*",
+  ".canon/picks/**/arm-*-1440*",
+]
 
 # The two surfaces a close reaches, and the board it works on. `index.html`
 # carries the applied arm and the design note carries the decision, and step 6
@@ -73,7 +85,8 @@ max_turns = 30
 
 manual = [
   "The arms differ in a way worth choosing between. Semantic: this is the whole judgment the skill exists to serve, and a fixture with the answer pre-supplied proves the run reached a pick rather than that the candidates were worth choosing between.",
-  "Three to five arms were drafted as frames on one Frameboard page, each labeled with its id and its cost, with the shipping state among them. Unwired: step 6 deletes the round pages, so the page the claim is about is gone by the time anything reads the tree. The archive under .canon/picks/ holds one arm-<id> image per arm, which is evidence rather than an assertion.",
+  "Three to five arms were drafted as frames on one Frameboard page, each labeled with its id and its cost, with the shipping state among them. Unwired: step 6 deletes the round pages, so the page the claim is about is gone by the time anything reads the tree. The archive globs above assert a width column, not the arm count.",
+  "The picked arm was measured for sideways scroll at each width before it folded in. Unwired: the harness captures no tool calls, and the seeded callout reflows at every width, so no fixture forces a hold.",
   "The arms varied one property. Semantic: the seeded decision names a border, a ground shift, and a rule down one edge, and whether a run held everything else fixed is read off markup that no longer exists once the run closes.",
   "Every frame declared a font stack the machine resolves. Unwired: the frames are deleted by the close, and the render it gates is a property of the machine rather than of the run.",
   "The applied treatment is the arm the prompt picked rather than another. Semantic: which arm is second is a property of the order the run authored, so no pattern can tie the pick to the treatment without fixing the arms the run is meant to invent.",

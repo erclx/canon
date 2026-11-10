@@ -36,10 +36,10 @@ Every arm of a round sits as one frame on one board page, side by side. The oper
 1. Start the board the way `references/board.md` states, unless this run already has. Note whether this run started the server, read off `reused`, since Step 6 ends only a server this run started.
 2. Read `frameboard list --root <board> --json` with no `--project`, so it lists every project. Run `frameboard project add <project> --root <board> --json` when it lists no `<project>`.
 3. Add the round's page with `frameboard page add <page>` and record its `ref` on the run's list of pages. A `name-taken` refusal means the name is somebody else's, so take the next free suffix.
-4. Add each arm with `frameboard frame add <page>/arm-<id> --width <px> --height <px> --x <px> --y <px>`, placing the frames in one row in arm order. Step 6's archive keys on the `arm-<id>` names.
-5. Write each arm's whole document to the `path` the add verb reported. From a linked worktree, take the heredoc route `session-worktree` gives for a main-root write.
+4. Add each arm once per round width with `frameboard frame add <page>/arm-<id>-<px>`, sized and placed as `references/board.md` lays out a round. Step 6's archive keys on those names.
+5. Write each frame's whole document to the `path` the add verb reported. From a linked worktree, take the heredoc route `session-worktree` gives for a main-root write.
 
-Set each frame's width to the one the arm is judged at. A frame renders at its own layout width on the board and in a capture alike, so a layout decision needs no device toolbar.
+A frame renders at its own layout width on the board and in a capture alike, so a layout decision needs no device toolbar. Read `${CLAUDE_SKILL_DIR}/references/widths.md` before the first add, for the phone, tablet, and desktop widths the round draws and the form a tablet frame takes.
 
 ### What every frame carries
 
@@ -105,6 +105,10 @@ Take no pick on the operator's behalf when two arms are both defensible and the 
 
 Read the selection when the answer points at the board, such as "the selected one". `references/board.md` maps each record to a pick, a revert, a correction, or no answer.
 
+### Holding a pick that scrolls sideways
+
+No pick folds into the surface while any of its frames scrolls sideways. Measure the picked arm at every round width before Step 6, as `${CLAUDE_SKILL_DIR}/references/widths.md` states, and carry a held pick into Step 5 naming each width that failed.
+
 ## Step 5: loop on the pick
 
 1. Add each iteration as its own page, recorded on the run's list. An overwritten page cannot be reopened, and the losing round stops a correction re-proposing a rejected arm.
@@ -125,7 +129,7 @@ A round never sees its neighbors, so run this before Step 6 item 1 where the pic
 
 1. Apply the winning arm to the real surface, in one change.
 2. Close out any document stating the decision as open, in the same change, naming the winner and the arms that stayed defensible. Skip this where nothing stated the decision.
-3. Hand the winning frame's ref to `canon:design-record`, which lands it in the project's design record. Report it rather than proceeding silently when that skill does not resolve.
+3. Hand the winning arm's frame refs to `canon:design-record`, which lands them in the project's design record. Report it rather than proceeding silently when that skill does not resolve.
 4. Capture the picked round's frames with `frameboard capture --page <page> --out <canon-dir>`, keeping the losing arms as a revert record. Report each image's `path` off the record.
 5. Resolve `<canon-dir>` as `.canon/` against the main worktree root, where shared session scratch resolves. Frameboard appends the project and page, so the archive lands at `.canon/<project>/<page>/`.
 6. Delete every page on the run's list with `frameboard page delete <page>`, except a picked page on a named board. Touch no page the run did not add, and never remove a page folder by hand.
@@ -138,28 +142,22 @@ The picked round is the final one unless Step 4 resolved a revert. Archiving any
 
 ### On a named board
 
-A board `canon/config/design.toml` names is the one the project's design sync reads, and once `design-record` lands the pick, the sync's mapping points at the winning frame. Deleting that page leaves a later redraw nothing to read.
+A board `canon/config/design.toml` names is the one the project's design sync reads, and once `design-record` lands the pick, the sync's mapping points at the winning arm's frames. Deleting that page leaves a later redraw nothing to read.
 
-- Keep the picked round's page and its winning frame
-- Delete each losing arm on it with `frameboard frame delete <page>/arm-<id>`, after item 4's capture has archived it
+- Keep the picked round's page and the winning arm's frames
+- Delete each losing arm's frames with `frameboard frame delete <page>/arm-<id>-<px>`, after item 4's capture has archived them
 - Delete every other page on the run's list as item 6 states
 
 ## Reading a measurement
 
-A capture proves appearance and a measurement proves a relationship, so reach for the second whenever the claim is a number, such as a contrast ratio, a column width, or a tap target. `canon drive` runs the probes and ships the failure modes each one carries.
-
-- Composite alpha before reading a color. A `color-mix` toward transparent resolves to channels plus an alpha, and reading them as opaque reports a color nobody sees.
-- Sample inside the shape. A patch at a bounding box corner misses a round control and reads the page behind it.
-- Ask whether a reader would see the thing. A panel sized a healthy 1517 by 639 passed every size check while sitting 1868px above the viewport.
-
-`canon drive` reports findings and never gates. Read its record as evidence for the operator rather than as a filter over the arms, since the probe catalog has not earned the right to drop one.
+Reach for a measurement whenever the claim is a number, such as a contrast ratio, a column width, or a tap target. Read `${CLAUDE_SKILL_DIR}/references/widths.md` before trusting one, for the failure modes each probe carries.
 
 ## What this delegates
 
 Cite these rather than restating them. A step reimplemented here rots against the skill that owns it.
 
 - `plan-feature` plans the work once the pick is made, and declares the pull request boundary that plan carries
-- `design-record` lands the winning frame in the reference folder and its values in the design document, and runs before item 4's capture and item 6's deletes, which keep the picked page on named boards
+- `design-record` lands the winning arm in the reference folder and its values in the design document, and runs before item 4's capture and item 6's deletes, which keep the picked page on named boards
 - `design-taste` carries the layer catalog, the ordering, grey-boxing, and the defaults an arm should reach past
 - `write-human` carries the voice for any copy an arm puts in front of a reader
 

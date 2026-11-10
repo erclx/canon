@@ -28,6 +28,12 @@ export default scenario({
         '         treatment as undecided between a border, a ground shift, and an edge rule',
       )
       ctx.log.info(
+        '         canon/DESIGN.md names 320, 768, 1024, and 1440 under ## Layout, so a round',
+      )
+      ctx.log.info(
+        '         draws each arm at 320, 768, and 1440 rather than at the 834 fallback',
+      )
+      ctx.log.info(
         'Browser: machine-dependent, and the sandbox does not decide it. The run serves a',
       )
       ctx.log.info(
@@ -55,7 +61,7 @@ export default scenario({
         '         the arm applied to the callout in index.html, the rest of that page untouched,',
       )
       ctx.log.info(
-        '         every arm captured under .canon/picks/, and the round pages the run added gone',
+        '         every arm captured at each round width under .canon/picks/, and the round pages the run added gone',
       )
       ctx.log.info(
         '         from frameboard list. Not yet measured on Frameboard.',

@@ -13,9 +13,20 @@ The evidence fails as well. Arms get reported unrendered or unjudged, a driver f
 
 ## Must
 
+### The round
+
+Every round puts real candidates in front of the operator at every width the surface ships at.
+
 - Three to five arms, the shipping state among them, each carry an id, a label, and a cost, and vary only at a layer named from the `design-taste` catalog
-- Each round is one Frameboard page of frames at their judged widths, themed by the board toggle and captured once as a composite, with the link ahead of the first pick question
+- Each round is one Frameboard page, themed by the board toggle and captured once as a composite, with the link ahead of the first pick question
+- Every arm is drawn at a phone, a tablet, and a desktop width taken from the design record's `## Layout`, falling back to 320, 834, and 1440
 - Every arm is rendered and judged against a stated bar before handover, and a missing browser or a board that will not start is reported as a refusal
+
+### The pick and the close
+
+The pick lands only once it holds at every width, and the run leaves a record of what lost.
+
+- No pick folds into the surface while any of its frames scrolls sideways at the width it was drawn at, and the hold names that width
 - The pick comes through the structured question surface with the recommendation first and every option's cost, and the winner lands in one change
 - Rounds sit on the board the design config names, each openable until the pick, and the picked arms are archived at the main root before the run's pages go
 

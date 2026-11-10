@@ -1,6 +1,6 @@
 ---
 title: Design
-description: Tokens, typography, and the treatments still unresolved
+description: Tokens, layout widths, and the treatments still unresolved
 ---
 
 # Design
@@ -10,6 +10,10 @@ description: Tokens, typography, and the treatments still unresolved
 - Ground: `#ffffff`
 - Ink: `#18181b`
 - Muted ground: `#f4f4f5`
+
+## Layout
+
+- Widths: 320, 768, 1024, 1440. 320 is the reflow floor.
 
 ## Unresolved
 
