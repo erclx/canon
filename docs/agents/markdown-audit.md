@@ -24,7 +24,7 @@ The ban set and checkpoints ship in `src/markdown/bans.ts` and `src/markdown/str
 
 | Finding         | Reports                                                                                                               | Gates             |
 | --------------- | --------------------------------------------------------------------------------------------------------------------- | ----------------- |
-| Bans            | The two characters `markdown.md` bans, outside frontmatter, fences, spans, and links                                  | Always            |
+| Bans            | The two characters `markdown.md` bans, outside frontmatter, fences, spans, links, and character references            | Always            |
 | Links           | A relative link resolving to nothing on disk                                                                          | Always            |
 | Density         | The six limits and two table limits below, under `density`                                                            | On a gated prefix |
 | Reference shape | A `kind: reference` page breaking its shape, under `referenceShape`                                                   | On a gated prefix |
@@ -82,7 +82,7 @@ Five measures report and never set the exit code on their own.
 | `2`  | A ban, a dead link, or a gating density or reference shape finding |
 | `3`  | The shipped ban set is empty, so nothing was measured              |
 
-Rewrite the sentence on a ban hit rather than swapping the token. A code span clears the report only where the token is an identifier under discussion.
+Rewrite the sentence on a ban hit rather than swapping the token. A code span clears the report only where the token is an identifier under discussion, while a character reference such as `&lt;` or `&amp;` is never a hit, since the semicolon ends the reference rather than a clause.
 
 The audit runs in four places:
 

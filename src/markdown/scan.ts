@@ -34,6 +34,23 @@ const LINK_DESTINATION = new RegExp(String.raw`\]\(${LINK_TARGET}\)`, 'g')
 const AUTOLINK = /<[^>\s]+>/g
 
 /**
+ * An HTML character reference by shape, whose closing semicolon is part of the
+ * reference rather than prose.
+ *
+ * Only `scanBans` blanks it, so the colon and heading checks reading
+ * `maskDisplayed` are unchanged. A name takes two characters at least, which
+ * keeps `R&D; then` and `AT&T; and` a prose semicolon. No lookbehind refuses a
+ * letter before the ampersand, since `project&gt;` is the case this exists for.
+ * That trade lets a plural abbreviation such as `Q&As; then` or `M&Ms; then`
+ * pass, and so does `rock&roll; x`, since no lookbehind separates them from
+ * `Map&lt;K&gt;`, whose real reference follows a capital. A reference this shape
+ * accepts and no browser knows is blanked too, since a closed list of names
+ * would be a table to maintain.
+ */
+const CHARACTER_REFERENCE =
+  /&(?:[A-Za-z][A-Za-z0-9]{1,31}|#[0-9]{1,7}|#[xX][0-9A-Fa-f]{1,6});/g
+
+/**
  * A whole inline link, capturing the anchor text a reader is shown.
  *
  * `LINK_DESTINATION` covers the span both measures drop and this covers the
@@ -211,7 +228,8 @@ export function visibleText(text: string): string {
 }
 
 /**
- * Finds every banned character outside a fence, a code span, and a link.
+ * Finds every banned character outside a fence, a code span, a link, and a
+ * character reference.
  *
  * Characters are the whole set because a character is the one class a literal
  * match settles. A word carries honest uses no match separates, which is why
@@ -225,7 +243,7 @@ export function scanBans(
 
   for (const line of lines) {
     if (line.fenced) continue
-    const text = maskDisplayed(line.text)
+    const text = maskDisplayed(line.text).replace(CHARACTER_REFERENCE, blank)
 
     for (const term of bans.characters) {
       let column = text.indexOf(term)
