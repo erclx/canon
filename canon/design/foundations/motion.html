@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Motion</title><style>
+:root{--pg:#fdfdfc;--tray:#f2f2f0;--win:#ffffff;--winbar:#f7f7f5;--band:#f0f0ee;--line:#ececea;--ink:#121212;--body:#3b3b38;--mut:#6b6a66;--acc:#c2380e;--ok:#3f7f3e;--wait:#b07d1a;--hov:rgba(0,0,0,.04);--ring:rgba(0,0,0,.07);--drop:rgba(0,0,0,.3);--fb:120ms;--st:240ms;--mv:400ms;--dr:1000ms;--out:cubic-bezier(.3,.7,.3,1);--io:cubic-bezier(.65,0,.35,1);color-scheme:light}:root[data-theme="dark"]{--pg:#121211;--tray:#1a1a18;--win:#1e1e1e;--winbar:#252523;--band:#282826;--line:#2e2e2c;--ink:#f2f2f0;--body:#cfcdc8;--mut:#8f8d88;--acc:#ff6b42;--ok:#6fae6a;--wait:#e5b567;--hov:rgba(255,255,255,.05);--ring:rgba(255,255,255,.06);--drop:rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0;background:var(--pg)}body{font-family:"Geist",sans-serif;color:var(--body);font-size:16px;line-height:1.55}
+.tag{display:flex;gap:14px;align-items:baseline;padding:12px 32px;background:var(--band);color:var(--ink);font-size:14px}.tag b{font-weight:600;white-space:nowrap}
+.wrap{max-width:1180px;margin:0 auto;padding:56px 32px 72px}
+h2{font-size:13px;font-weight:500;color:var(--mut);margin:40px 0 12px}h2:first-child{margin-top:0}
+.tr{display:grid;grid-template-columns:110px 1fr 90px 110px;gap:16px;padding:10px 0;border-top:1px solid var(--line);align-items:baseline}.tr b{color:var(--ink);font-weight:600;font-size:15px}.tr code{font-family:"Geist Mono",monospace;font-size:13px;color:var(--ink)}
+.demos{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.d{background:var(--tray);border-radius:28px;padding:22px;min-height:230px;display:flex;flex-direction:column;gap:14px}
+.d .h{display:flex;justify-content:space-between;align-items:baseline}.d .h b{color:var(--ink);font-size:15px;font-weight:600}
+button.play{all:unset;cursor:pointer;font-family:"Geist",sans-serif;font-size:13px;font-weight:500;color:var(--ink);padding:5px 12px;border-radius:8px;box-shadow:inset 0 0 0 1px var(--line);background:var(--win)}
+button.play:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+@media (hover:hover){button.play:hover{background:var(--hov)}}
+.pk{display:flex;gap:6px;flex-wrap:wrap}.pk button{all:unset;cursor:pointer;font-family:"Geist",sans-serif;border-radius:8px;padding:5px 14px;font-size:13px;font-weight:500;box-shadow:inset 0 0 0 1px var(--line);color:var(--body);transition:background-color var(--fb) var(--out),color var(--fb) var(--out)}
+@media (hover:hover){.pk button:hover{background:var(--hov);color:var(--ink)}}
+.pk button[aria-pressed="true"]{background:var(--ink);color:var(--pg);box-shadow:none}
+.pk button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.win{background:var(--win);border-radius:12px;box-shadow:0 0 0 1px var(--ring),0 24px 60px -28px var(--drop);overflow:hidden;font-family:"Geist Mono",monospace;font-size:13px}
+.list{position:relative;height:150px}
+.list .g,.list .r{position:absolute;left:14px;right:14px;transition:top var(--mv) var(--out),opacity var(--st) var(--out)}
+.list .g{font-family:"Geist",sans-serif;font-size:12px;font-weight:600;color:var(--ink)}
+.list .r{height:24px;display:flex;gap:8px;align-items:center;color:var(--ink)}.list .r i{font-style:normal;width:12px}
+.sw{position:relative;height:120px}.sw .s{position:absolute;inset:14px;transition:opacity var(--st) var(--out)}.sw .s.off{opacity:0}
+.sw .s b{display:block;font-family:"Geist",sans-serif;color:var(--ink);font-size:14px;margin-bottom:4px}
+svg.path{width:100%;height:120px}svg.path path{fill:none;stroke:var(--acc);stroke-width:2.5;stroke-linecap:round}svg.path .main{stroke:var(--mut)}
+.menu{position:relative;height:150px}.menu .pop{position:absolute;top:6px;left:0;width:200px;background:var(--win);border-radius:12px;box-shadow:0 0 0 1px var(--ring),0 16px 36px -16px var(--drop);padding:6px;transform-origin:top left;transition:opacity var(--fb) var(--out),transform var(--st) var(--out)}
+.menu .pop.shut{opacity:0;transform:translateY(-4px)}.menu .pop a{display:block;padding:6px 12px;border-radius:8px;font-size:14px}
+.ring{display:flex;gap:18px;align-items:center}.ring i{width:16px;height:16px;border-radius:50%;box-shadow:inset 0 0 0 2.5px var(--mut);transition:box-shadow var(--dr) var(--io)}.ring i.on{box-shadow:inset 0 0 0 8px var(--acc)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:900px){.wrap{padding:40px 24px 56px}.demos{grid-template-columns:1fr 1fr}.tr{grid-template-columns:90px 1fr 80px}.tr code:last-child{display:none}}
+@media (max-width:600px){.wrap{padding:32px 16px 48px}.demos{grid-template-columns:1fr}.tag{padding:12px 16px;flex-direction:column;gap:2px}}
+</style></head><body><div class="tag"><b>Arm 2, four durations, snappier</b><span>120 for feedback, 240 for a fade, 400 for a move, 1000 for a draw, so a move reads slower than the fade beside it</span></div><div class="wrap">
+<h2>Durations, each tied to what uses it</h2><div class="tr"><b>fast</b><span>hover, focus, a color or a chevron</span><code>120 ms</code><code>out</code></div><div class="tr"><b>fade</b><span>one state swapping for the next</span><code>240 ms</code><code>out</code></div><div class="tr"><b>move</b><span>a row or sheet changing place</span><code>400 ms</code><code>out</code></div><div class="tr"><b>draw</b><span>a path or ring drawing in once</span><code>1000 ms</code><code>in and out</code></div>
+<h2>Each demo plays once on load and again on Play. Reduced motion shows the end state</h2>
+<div class="demos">
+<div class="d"><div class="h"><b>A pick, fast</b><span style="font-size:13px;color:var(--mut)">hover and click</span></div><div class="pk" id="pk"><button type="button" aria-pressed="true">Intake</button><button type="button" aria-pressed="false">Plan</button><button type="button" aria-pressed="false">Task</button><button type="button" aria-pressed="false">Board</button></div></div>
+<div class="d"><div class="h"><b>A row moves group</b><button type="button" class="play" data-p="list">Play</button></div><div class="win"><div class="list" id="list"><div class="g" data-k="wk">Working</div><div class="r" data-k="a"><i style="color:var(--acc)">✻</i>worker-canon-take-timer</div><div class="r" data-k="b"><i style="color:var(--acc)">✻</i>reviewer-canon-sync-stamp</div><div class="g" data-k="dn">Completed</div><div class="r" data-k="c"><i style="color:var(--ok)">✓</i>planner-canon-gate-stages</div></div></div></div>
+<div class="d"><div class="h"><b>A sheet swaps, fade</b><button type="button" class="play" data-p="sw">Play</button></div><div class="win"><div class="sw"><div class="s" id="s1"><b>plan.md</b>## Files to touch</div><div class="s off" id="s2"><b>task.md</b>## Outcomes</div></div></div></div>
+<div class="d"><div class="h"><b>A branch draws</b><button type="button" class="play" data-p="path">Play</button></div><svg class="path" viewBox="0 0 300 120" aria-hidden="true"><path class="main" d="M10 100 H290"/><path id="br" d="M60 100 C 100 100, 100 40, 140 40 H 280"/></svg></div>
+<div class="d"><div class="h"><b>A menu opens</b><button type="button" class="play" data-p="menu">Play</button></div><div class="menu"><div class="pop shut" id="pop"><a>Roles</a><a>Records</a><a style="color:var(--ink);font-weight:500">Craft</a><a>Guardrails</a></div></div></div>
+<div class="d"><div class="h"><b>A stage fills, draw</b><button type="button" class="play" data-p="ring">Play</button></div><div class="ring" id="ring"><i></i><i></i><i></i><i></i></div></div>
+</div><p class="sr" role="status" id="st"></p></div>
+<script>(()=>{
+const R=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const pk=document.getElementById('pk');pk.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{pk.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'))}));
+const L=document.getElementById('list');const ROW=24,HEAD=22;
+let moved=false;function lay(){const order=moved?['wk','b','dn','a','c']:['wk','a','b','dn','c'];let y=12;order.forEach(k=>{const e=L.querySelector('[data-k="'+k+'"]');e.style.top=y+'px';y+=e.classList.contains('g')?HEAD:ROW;if(k==='b'&&!moved)y+=0})}
+lay();
+const play={
+ list(){const ic=L.querySelector('[data-k="a"] i');moved=false;ic.textContent='✻';ic.style.color='var(--acc)';lay();setTimeout(()=>{moved=true;ic.textContent='✓';ic.style.color='var(--ok)';lay()},R?0:350)},
+ sw(){const a=document.getElementById('s1'),b=document.getElementById('s2');a.classList.remove('off');b.classList.add('off');setTimeout(()=>{a.classList.add('off');b.classList.remove('off')},R?0:350)},
+ path(){const p=document.getElementById('br');const n=p.getTotalLength();p.style.transition='none';p.style.strokeDasharray=n;p.style.strokeDashoffset=R?0:n;p.getBoundingClientRect();if(!R){p.style.transition='stroke-dashoffset var(--dr) var(--io)';p.style.strokeDashoffset=0}},
+ menu(){const p=document.getElementById('pop');p.classList.add('shut');setTimeout(()=>p.classList.remove('shut'),R?0:300)},
+ ring(){const r=[...document.querySelectorAll('#ring i')];r.forEach(i=>i.classList.remove('on'));r.forEach((i,n)=>setTimeout(()=>i.classList.add('on'),R?0:250+n*450))},
+};
+document.querySelectorAll('button.play').forEach(b=>b.addEventListener('click',()=>play[b.dataset.p]()));
+Object.values(play).forEach(f=>f());
+})();</script></body></html>
