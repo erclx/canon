@@ -32,6 +32,8 @@ The ban set and checkpoints ship in `src/markdown/bans.ts` and `src/markdown/str
 | Colons          | A colon followed by more text in a prose line, under `colons`                        | Never             |
 | Heading case    | A capital after the first word of a heading or `title`, under `headingCase`          | Never             |
 
+The colon check skips the attributes of an HTML tag written on one line, such as `media` on a `<source>`, and still reads the values of `alt` and `title`, which carry prose. A tag split across lines is read as text.
+
 A page marked `kind: reference` holds its opening, then `Output`, `Refusals`, and `See also` as H2s, each at most once and in that order. It takes no H3 and no table headed `Flag` or `Option`. An unmarked page is never measured.
 
 Tables take the four limits in the `markdown-craft` skill's `tables.md`, on the density paths but never `CLAUDE.md`.
