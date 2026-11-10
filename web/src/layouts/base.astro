@@ -82,6 +82,7 @@ const pip = `:root{--pip:${FAVICON_COLORS.pip.dark}}[data-theme='light']{--pip:$
     <style is:inline set:html={fontFace}></style>
     <style is:inline set:html={pip}></style>
 
+    <!-- canon-allow-embedded: sets the theme before first paint, which a bundled module runs too late for -->
     <script is:inline>
       /**
        * Runs before first paint, so a stored or preferred theme never flashes
