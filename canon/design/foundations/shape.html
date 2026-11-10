@@ -1,48 +1,462 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Shape</title><style>
-:root{--pg:#fdfdfc;--tray:#f2f2f0;--win:#ffffff;--winbar:#f7f7f5;--band:#f0f0ee;--line:#ececea;--edge:#e4e4e1;--dot:#dedede;--ink:#121212;--body:#3b3b38;--mut:#6b6a66;--acc:#c2380e;--ring:rgba(0,0,0,.07);--drop:rgba(0,0,0,.3);--hov:rgba(0,0,0,.04);--sh-win:0 0 0 1px var(--ring),0 24px 60px -28px var(--drop);--sh-pop:0 0 0 1px var(--ring),0 16px 36px -16px var(--drop);--sh-ring:0 0 0 1px var(--ring);--r-tray:36px;--r-win:12px;--r-ctl:8px;--r-chip:4px;color-scheme:light}:root[data-theme="dark"]{--pg:#121211;--tray:#1a1a18;--win:#1e1e1e;--winbar:#252523;--band:#282826;--line:#2e2e2c;--edge:#2a2a28;--dot:#3a3a38;--ink:#f2f2f0;--body:#cfcdc8;--mut:#8f8d88;--acc:#ff6b42;--ring:rgba(255,255,255,.06);--drop:rgba(0,0,0,.6);--hov:rgba(255,255,255,.05);color-scheme:dark}
-*{box-sizing:border-box}html,body{margin:0;background:var(--pg)}
-body{font-family:"Geist",sans-serif;color:var(--body);font-size:16px;line-height:1.55}
-.tag{display:flex;gap:14px;align-items:baseline;padding:12px 32px;background:var(--band);color:var(--ink);font-size:14px}.tag b{font-weight:600;white-space:nowrap}
-.wrap{max-width:1180px;margin:0 auto;padding:56px 32px 72px}
-h2.k{font-size:13px;font-weight:500;color:var(--mut);margin:44px 0 12px}h2.k:first-child{margin-top:0}
-.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:0 28px}
-.rl{padding:12px 0;border-top:1px solid var(--line)}.rl b{display:block;color:var(--ink);font-weight:600;font-size:14px}.rl span{font-size:13px;color:var(--mut)}.rl code{font-family:"Geist Mono",monospace;font-size:12px;color:var(--ink)}
-.demo{display:grid;grid-template-columns:1.25fr 1fr;gap:28px;align-items:start}
-.tray{background:var(--tray);border-radius:var(--r-tray);padding:40px}
-.win{background:var(--win);border-radius:var(--r-win);box-shadow:var(--sh-win);overflow:hidden}
-.bar{height:36px;background:var(--winbar);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:7px;padding:0 13px}.bar i{width:11px;height:11px;border-radius:50%;background:var(--dot)}
-.bar span{flex:1;text-align:center;font-size:12px;color:var(--mut);margin-right:40px}
-.log{padding:14px 16px;font-family:"Geist Mono",monospace;font-size:13.5px;line-height:1.6}
-.chip{font-family:"Geist Mono",monospace;font-size:12.5px;background:var(--band);color:var(--ink);border-radius:var(--r-chip);padding:1px 6px}
-.ctl{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:var(--r-ctl);color:var(--body);background:var(--hov)}
-.ctl svg{width:17px;height:17px}
-.rows{display:flex;flex-direction:column;gap:4px}
-.row{padding:12px 14px;border-radius:var(--r-win)}.row b{display:block;color:var(--ink);font-weight:600;font-size:16px}.row span{font-size:14px;color:var(--mut)}
-.row.on{background:var(--win);box-shadow:var(--sh-ring)}
-.pills{display:flex;gap:6px;flex-wrap:wrap}
-.pills span{border-radius:999px;padding:7px 14px;font-size:14px;font-weight:500;box-shadow:inset 0 0 0 1px var(--line);color:var(--body)}
-.pills span.on{background:var(--ink);color:var(--pg);box-shadow:none}
-.pop{background:var(--win);border-radius:var(--r-win);box-shadow:var(--sh-pop);padding:6px;width:220px}
-.pop a{display:block;padding:8px 12px 8px 14px;border-radius:var(--r-ctl);font-size:15px;color:var(--body);position:relative}
-.pop a.on{color:var(--ink);font-weight:500}.pop a.on::before{content:"";position:absolute;left:4px;top:10px;bottom:10px;width:2px;border-radius:2px;background:var(--acc)}
-.pop a.h{background:var(--hov)}
-.cap{font-size:13px;color:var(--mut);margin:10px 0 0}
-.mk{display:flex;gap:22px;font-size:14px;font-weight:500}.mk span.on{color:var(--ink);position:relative}.mk span.on::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;border-radius:2px;background:var(--acc)}
-.shs{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
-.shs div{height:110px;border-radius:var(--r-win);background:var(--win);display:grid;place-items:center;font-size:13px;color:var(--mut)}
-.dr{display:grid;grid-template-columns:220px 1fr;gap:20px;padding:10px 0;border-top:1px solid var(--line)}.dr b{color:var(--ink);font-weight:600;font-size:14px}.dr span{font-family:"Geist Mono",monospace;font-size:13px}
-@media (max-width:900px){.tray{border-radius:28px;padding:24px}.wrap{padding:40px 24px 56px}.demo,.rules,.shs{grid-template-columns:1fr}}
-@media (max-width:600px){.tray{border-radius:22px;padding:12px}.wrap{padding:32px 16px 48px}.tag{padding:12px 16px;flex-direction:column;gap:2px}.dr{grid-template-columns:1fr;gap:4px}}
-:root{--r-tray:36px;--r-win:12px;--r-ctl:8px;--r-chip:4px}</style></head><body><div class="tag"><b>Arm 1, tight ladder</b><span>Tray 36, window 12, control 8, chip 4, pill only on one-line controls. Windows match the 12px most sections already use, and the 16px sheets and cards tighten</span></div><div class="wrap"><h2 class="k">Corners</h2><div class="rules">
-<div class="rl"><b>Tray</b><span>behind every section object</span><br><code>36 / 28 / 22 px</code></div>
-<div class="rl"><b>Window</b><span>windows, sheets, cards, popovers, a picked or hovered row</span><br><code>12 px</code></div>
-<div class="rl"><b>Control</b><span>icon buttons, menu items, the copy button</span><br><code>8 px</code></div>
-<div class="rl"><b>Chip</b><span>inline code, small tags inside text</span><br><code>4 px</code></div>
-<div class="rl"><b>Pill</b><span>a one-line control only, never a block of two lines</span><br><code>999 px</code></div>
-<div class="rl"><b>Mark</b><span>the accent bar and underline</span><br><code>2 px</code></div></div><h2 class="k">In use</h2><div class="demo"><div class="tray"><div class="win"><div class="bar"><i></i><i></i><i></i><span>claude</span></div><div class="log"><div>❯ run the gate</div><div style="color:var(--mut)">  Ran <span class="chip">canon gate run</span>, 9 of 14 passed</div></div></div></div>
-<div><div class="rows"><div class="row on"><b>Planner</b><span>writes one plan</span></div><div class="row"><b>Worker</b><span>builds and opens the pull request</span></div></div>
-<p class="cap">A two-line row takes the window's corners, never the pill</p>
-<div class="pills" style="margin-top:22px"><span>Intake</span><span class="on">Plan</span><span>Task</span></div><p class="cap">A one-line control takes the pill</p>
-<div style="display:flex;gap:16px;align-items:flex-start;margin-top:22px"><div class="pop"><a>Roles</a><a class="h">Records</a><a class="on">Craft</a><a>Guardrails</a></div><span class="ctl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="13" height="13" x="9" y="9" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></div>
-<p class="cap">A popover and its items, and an icon control</p>
-<div class="mk" style="margin-top:22px"><span>Roles</span><span class="on">Craft</span><span>Setup</span></div></div></div><h2 class="k">Three shadows, one light from above, nothing else casts one</h2><div class="shs"><div style="box-shadow:var(--sh-win)">window</div><div style="box-shadow:var(--sh-pop)">popover</div><div style="box-shadow:var(--sh-ring)">ring, a picked row</div></div></div></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shape</title>
+    <style>
+      :root {
+        --pg: #fdfdfc;
+        --tray: #f2f2f0;
+        --win: #ffffff;
+        --winbar: #f7f7f5;
+        --band: #f0f0ee;
+        --line: #ececea;
+        --edge: #e4e4e1;
+        --dot: #dedede;
+        --ink: #121212;
+        --body: #3b3b38;
+        --mut: #6b6a66;
+        --acc: #c2380e;
+        --ring: rgba(0, 0, 0, 0.07);
+        --drop: rgba(0, 0, 0, 0.3);
+        --hov: rgba(0, 0, 0, 0.04);
+        --sh-win: 0 0 0 1px var(--ring), 0 24px 60px -28px var(--drop);
+        --sh-pop: 0 0 0 1px var(--ring), 0 16px 36px -16px var(--drop);
+        --sh-ring: 0 0 0 1px var(--ring);
+        --r-tray: 36px;
+        --r-win: 12px;
+        --r-ctl: 8px;
+        --r-chip: 4px;
+        color-scheme: light;
+      }
+      :root[data-theme='dark'] {
+        --pg: #121211;
+        --tray: #1a1a18;
+        --win: #1e1e1e;
+        --winbar: #252523;
+        --band: #282826;
+        --line: #2e2e2c;
+        --edge: #2a2a28;
+        --dot: #3a3a38;
+        --ink: #f2f2f0;
+        --body: #cfcdc8;
+        --mut: #8f8d88;
+        --acc: #ff6b42;
+        --ring: rgba(255, 255, 255, 0.06);
+        --drop: rgba(0, 0, 0, 0.6);
+        --hov: rgba(255, 255, 255, 0.05);
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        background: var(--pg);
+      }
+      body {
+        font-family: 'Geist', sans-serif;
+        color: var(--body);
+        font-size: 16px;
+        line-height: 1.55;
+      }
+      .tag {
+        display: flex;
+        gap: 14px;
+        align-items: baseline;
+        padding: 12px 32px;
+        background: var(--band);
+        color: var(--ink);
+        font-size: 14px;
+      }
+      .tag b {
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 56px 32px 72px;
+      }
+      h2.k {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--mut);
+        margin: 44px 0 12px;
+      }
+      h2.k:first-child {
+        margin-top: 0;
+      }
+      .rules {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0 28px;
+      }
+      .rl {
+        padding: 12px 0;
+        border-top: 1px solid var(--line);
+      }
+      .rl b {
+        display: block;
+        color: var(--ink);
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .rl span {
+        font-size: 13px;
+        color: var(--mut);
+      }
+      .rl code {
+        font-family: 'Geist Mono', monospace;
+        font-size: 12px;
+        color: var(--ink);
+      }
+      .demo {
+        display: grid;
+        grid-template-columns: 1.25fr 1fr;
+        gap: 28px;
+        align-items: start;
+      }
+      .tray {
+        background: var(--tray);
+        border-radius: var(--r-tray);
+        padding: 40px;
+      }
+      .win {
+        background: var(--win);
+        border-radius: var(--r-win);
+        box-shadow: var(--sh-win);
+        overflow: hidden;
+      }
+      .bar {
+        height: 36px;
+        background: var(--winbar);
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 0 13px;
+      }
+      .bar i {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: var(--dot);
+      }
+      .bar span {
+        flex: 1;
+        text-align: center;
+        font-size: 12px;
+        color: var(--mut);
+        margin-right: 40px;
+      }
+      .log {
+        padding: 14px 16px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 13.5px;
+        line-height: 1.6;
+      }
+      .chip {
+        font-family: 'Geist Mono', monospace;
+        font-size: 12.5px;
+        background: var(--band);
+        color: var(--ink);
+        border-radius: var(--r-chip);
+        padding: 1px 6px;
+      }
+      .ctl {
+        display: inline-grid;
+        place-items: center;
+        width: 34px;
+        height: 34px;
+        border-radius: var(--r-ctl);
+        color: var(--body);
+        background: var(--hov);
+      }
+      .ctl svg {
+        width: 17px;
+        height: 17px;
+      }
+      .rows {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .row {
+        padding: 12px 14px;
+        border-radius: var(--r-win);
+      }
+      .row b {
+        display: block;
+        color: var(--ink);
+        font-weight: 600;
+        font-size: 16px;
+      }
+      .row span {
+        font-size: 14px;
+        color: var(--mut);
+      }
+      .row.on {
+        background: var(--win);
+        box-shadow: var(--sh-ring);
+      }
+      .pills {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .pills span {
+        border-radius: 999px;
+        padding: 7px 14px;
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: inset 0 0 0 1px var(--line);
+        color: var(--body);
+      }
+      .pills span.on {
+        background: var(--ink);
+        color: var(--pg);
+        box-shadow: none;
+      }
+      .pop {
+        background: var(--win);
+        border-radius: var(--r-win);
+        box-shadow: var(--sh-pop);
+        padding: 6px;
+        width: 220px;
+      }
+      .pop a {
+        display: block;
+        padding: 8px 12px 8px 14px;
+        border-radius: var(--r-ctl);
+        font-size: 15px;
+        color: var(--body);
+        position: relative;
+      }
+      .pop a.on {
+        color: var(--ink);
+        font-weight: 500;
+      }
+      .pop a.on::before {
+        content: '';
+        position: absolute;
+        left: 4px;
+        top: 10px;
+        bottom: 10px;
+        width: 2px;
+        border-radius: 2px;
+        background: var(--acc);
+      }
+      .pop a.h {
+        background: var(--hov);
+      }
+      .cap {
+        font-size: 13px;
+        color: var(--mut);
+        margin: 10px 0 0;
+      }
+      .mk {
+        display: flex;
+        gap: 22px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .mk span.on {
+        color: var(--ink);
+        position: relative;
+      }
+      .mk span.on::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -6px;
+        height: 2px;
+        border-radius: 2px;
+        background: var(--acc);
+      }
+      .shs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 28px;
+      }
+      .shs div {
+        height: 110px;
+        border-radius: var(--r-win);
+        background: var(--win);
+        display: grid;
+        place-items: center;
+        font-size: 13px;
+        color: var(--mut);
+      }
+      .dr {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 20px;
+        padding: 10px 0;
+        border-top: 1px solid var(--line);
+      }
+      .dr b {
+        color: var(--ink);
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .dr span {
+        font-family: 'Geist Mono', monospace;
+        font-size: 13px;
+      }
+      @media (max-width: 900px) {
+        .tray {
+          border-radius: 28px;
+          padding: 24px;
+        }
+        .wrap {
+          padding: 40px 24px 56px;
+        }
+        .demo,
+        .rules,
+        .shs {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 600px) {
+        .tray {
+          border-radius: 22px;
+          padding: 12px;
+        }
+        .wrap {
+          padding: 32px 16px 48px;
+        }
+        .tag {
+          padding: 12px 16px;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .dr {
+          grid-template-columns: 1fr;
+          gap: 4px;
+        }
+      }
+      :root {
+        --r-tray: 36px;
+        --r-win: 12px;
+        --r-ctl: 8px;
+        --r-chip: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tag">
+      <b>Arm 1, tight ladder</b
+      ><span
+        >Tray 36, window 12, control 8, chip 4, pill only on one-line controls.
+        Windows match the 12px most sections already use, and the 16px sheets
+        and cards tighten</span
+      >
+    </div>
+    <div class="wrap">
+      <h2 class="k">Corners</h2>
+      <div class="rules">
+        <div class="rl">
+          <b>Tray</b><span>behind every section object</span><br /><code
+            >36 / 28 / 22 px</code
+          >
+        </div>
+        <div class="rl">
+          <b>Window</b
+          ><span>windows, sheets, cards, popovers, a picked or hovered row</span
+          ><br /><code>12 px</code>
+        </div>
+        <div class="rl">
+          <b>Control</b><span>icon buttons, menu items, the copy button</span
+          ><br /><code>8 px</code>
+        </div>
+        <div class="rl">
+          <b>Chip</b><span>inline code, small tags inside text</span><br /><code
+            >4 px</code
+          >
+        </div>
+        <div class="rl">
+          <b>Pill</b
+          ><span>a one-line control only, never a block of two lines</span
+          ><br /><code>999 px</code>
+        </div>
+        <div class="rl">
+          <b>Mark</b><span>the accent bar and underline</span><br /><code
+            >2 px</code
+          >
+        </div>
+      </div>
+      <h2 class="k">In use</h2>
+      <div class="demo">
+        <div class="tray">
+          <div class="win">
+            <div class="bar"><i></i><i></i><i></i><span>claude</span></div>
+            <div class="log">
+              <div>❯ run the gate</div>
+              <div style="color: var(--mut)">
+                Ran <span class="chip">canon gate run</span>, 9 of 14 passed
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="rows">
+            <div class="row on"><b>Planner</b><span>writes one plan</span></div>
+            <div class="row">
+              <b>Worker</b><span>builds and opens the pull request</span>
+            </div>
+          </div>
+          <p class="cap">
+            A two-line row takes the window's corners, never the pill
+          </p>
+          <div class="pills" style="margin-top: 22px">
+            <span>Intake</span><span class="on">Plan</span><span>Task</span>
+          </div>
+          <p class="cap">A one-line control takes the pill</p>
+          <div
+            style="
+              display: flex;
+              gap: 16px;
+              align-items: flex-start;
+              margin-top: 22px;
+            "
+          >
+            <div class="pop">
+              <a>Roles</a><a class="h">Records</a><a class="on">Craft</a
+              ><a>Guardrails</a>
+            </div>
+            <span class="ctl"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect width="13" height="13" x="9" y="9" rx="2" />
+                <path
+                  d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                /></svg
+            ></span>
+          </div>
+          <p class="cap">A popover and its items, and an icon control</p>
+          <div class="mk" style="margin-top: 22px">
+            <span>Roles</span><span class="on">Craft</span><span>Setup</span>
+          </div>
+        </div>
+      </div>
+      <h2 class="k">
+        Three shadows, one light from above, nothing else casts one
+      </h2>
+      <div class="shs">
+        <div style="box-shadow: var(--sh-win)">window</div>
+        <div style="box-shadow: var(--sh-pop)">popover</div>
+        <div style="box-shadow: var(--sh-ring)">ring, a picked row</div>
+      </div>
+    </div>
+  </body>
+</html>

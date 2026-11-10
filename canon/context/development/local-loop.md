@@ -19,19 +19,19 @@ Owns the local development loop, being the run commands, the gate behind `bun ru
 
 The run commands, which stack references and `docs/target/projects.md` send a session to, so a command added elsewhere is invisible to them.
 
-| Command                 | Purpose                                                                                          |
-| ----------------------- | ------------------------------------------------------------------------------------------------ |
-| `bun run check`         | Verification scoped to changed files. Fails on format drift, regenerates indexes, asserts clean. |
-| `bun run check:ci`      | Every stage via `--all`, the run CI does. Still regenerates.                                     |
-| `bun run check:format`  | Read-only oxfmt, Prettier for `.astro`, and shfmt format check.                                  |
-| `bun run check:shell`   | Read-only shellcheck against `scripts/`, `tooling/`, `src/`, and `.claude/hooks/`.               |
-| `bun run check:lint`    | Read-only oxlint at its default rules, failing on any warning.                                   |
-| `bun run check:types`   | Read-only `tsc --noEmit` against `src/`.                                                         |
-| `bun run check:install` | Clones the repo to tmp and asserts `canon init` lands a fresh scaffold.                          |
-| `bun run format`        | Auto-fix oxfmt, Prettier for `.astro`, and shfmt formatting.                                     |
-| `bun run design:sync`   | Lands the mapped board frames in `canon/design/`. `--check` writes nothing and exits 1 on drift. |
-| `bun run clean`         | Wipe `node_modules/`, clear bun cache, reinstall.                                                |
-| `bun run update`        | Interactive `bun update` followed by verification.                                               |
+| Command                 | Purpose                                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------------------- |
+| `bun run check`         | Verification scoped to changed files. Fails on format drift, regenerates indexes, asserts clean.  |
+| `bun run check:ci`      | Every stage via `--all`, the run CI does. Still regenerates.                                      |
+| `bun run check:format`  | Read-only oxfmt, Prettier for `.astro`, and shfmt format check.                                   |
+| `bun run check:shell`   | Read-only shellcheck against `scripts/`, `tooling/`, `src/`, and `.claude/hooks/`.                |
+| `bun run check:lint`    | Read-only oxlint at its default rules, failing on any warning.                                    |
+| `bun run check:types`   | Read-only `tsc --noEmit` against `src/`.                                                          |
+| `bun run check:install` | Clones the repo to tmp and asserts `canon init` lands a fresh scaffold.                           |
+| `bun run format`        | Auto-fix oxfmt, Prettier for `.astro`, and shfmt formatting.                                      |
+| `bun run design:sync`   | Lands the mapped board frames in `canon/design/`. `--check` writes nothing and exits 14 on drift. |
+| `bun run clean`         | Wipe `node_modules/`, clear bun cache, reinstall.                                                 |
+| `bun run update`        | Interactive `bun update` followed by verification.                                                |
 
 ### `src/gate/`
 

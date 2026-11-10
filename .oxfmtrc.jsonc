@@ -22,12 +22,13 @@
     // web/public/evidence/ and the hand-authored web sources keep their format gate.
     "/web/public/previews/",
 
-    // design-sync.ts writes these as the board holds them, the frame HTML and the
-    // assets it copies under kit/, and its --check compares the bytes. Formatting
-    // them too gives each file two writers, and the check then fails for whichever
+    // Frameboard's references sync, run as bun run design:sync, writes these as
+    // the board holds them, the frame HTML and the assets it copies under
+    // assets/<project>/, and its --check compares the bytes. Formatting them too
+    // gives each file two writers, and the check then fails for whichever
     // committed last.
     "/canon/design/**/*.html",
-    "/canon/design/kit/",
+    "/canon/design/assets/",
 
     // The design generators emit these byte for byte with their {{slots}} filled,
     // and the previews and favicon built from them are committed. Reflowing a

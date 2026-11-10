@@ -1,40 +1,447 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Type</title><style>
-:root{--pg:#fdfdfc;--tray:#f2f2f0;--win:#ffffff;--winbar:#f7f7f5;--band:#f0f0ee;--line:#ececea;--edge:#e4e4e1;--dot:#dedede;--ink:#121212;--body:#3b3b38;--mut:#6b6a66;--acc:#c2380e;color-scheme:light}:root[data-theme="dark"]{--pg:#121211;--tray:#1a1a18;--win:#1e1e1e;--winbar:#252523;--band:#282826;--line:#2e2e2c;--edge:#2a2a28;--dot:#3a3a38;--ink:#f2f2f0;--body:#cfcdc8;--mut:#8f8d88;--acc:#ff6b42;color-scheme:dark}
-*{box-sizing:border-box}html,body{margin:0;background:var(--pg)}
-body{font-family:"Geist",sans-serif;color:var(--body);font-size:15px;line-height:1.5}
-.tag{display:flex;gap:14px;align-items:baseline;padding:12px 32px;background:var(--band);color:var(--ink);font-size:14px}.tag b{font-weight:600;white-space:nowrap}
-.wrap{max-width:1180px;margin:0 auto;padding:56px 32px 72px}
-h2.k{font-size:13px;font-weight:500;color:var(--mut);margin:44px 0 6px}h2.k:first-child{margin-top:0}
-.st{display:grid;grid-template-columns:150px 1fr;gap:20px;align-items:baseline;padding:18px 0;border-top:1px solid var(--line)}
-.st .m{font-size:13px;color:var(--mut);line-height:1.45}.st .m b{display:block;color:var(--ink);font-weight:600;font-size:14px}
-.st .m code{font-family:"Geist Mono",monospace;font-size:12px}
-.s{color:var(--ink);margin:0;overflow-wrap:anywhere}
-.view{font-family:"Geist Mono",monospace}
-.dr{display:grid;grid-template-columns:150px 1fr;gap:20px;padding:10px 0;border-top:1px solid var(--line);align-items:baseline}
-.dr b{color:var(--ink);font-weight:600;font-size:14px}.dr span{font-family:"Geist Mono",monospace;font-size:13px;color:var(--body)}
-.use{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
-.trayx{background:var(--tray);border-radius:28px;padding:28px}
-.win{background:var(--win);border-radius:12px;box-shadow:0 0 0 1px rgba(0,0,0,.07),0 24px 60px -28px rgba(0,0,0,.3);overflow:hidden}
-:root[data-theme="dark"] .win{box-shadow:0 0 0 1px rgba(255,255,255,.06),0 24px 60px -28px rgba(0,0,0,.6)}
-.bar{height:34px;background:var(--winbar);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--mut)}
-.log{padding:14px 16px;font-family:"Geist Mono",monospace;color:var(--body)}.log .k{color:var(--mut)}.log .a{color:var(--acc)}
-.row{padding:14px 0;border-top:1px solid var(--line)}
-@media (max-width:900px){.wrap{padding:40px 24px 56px}.use{grid-template-columns:1fr}}
-@media (max-width:600px){.wrap{padding:32px 16px 48px}.tag{padding:12px 16px;flex-direction:column;gap:2px}.st,.dr{grid-template-columns:1fr;gap:6px}}
-.b-hero{font-size:90px;line-height:1.0;font-weight:600;letter-spacing:-0.04em}
-@media (max-width:900px){.b-hero{font-size:64px}}@media (max-width:600px){.b-hero{font-size:40px}}
-.b-display{font-size:50px;line-height:1.06;font-weight:600;letter-spacing:-0.03em}
-@media (max-width:900px){.b-display{font-size:40px}}@media (max-width:600px){.b-display{font-size:32px}}
-.b-lede{font-size:21px;line-height:1.48;font-weight:400;letter-spacing:0}
-@media (max-width:900px){.b-lede{font-size:18px}}@media (max-width:600px){.b-lede{font-size:17px}}
-.b-body{font-size:16px;line-height:1.55;font-weight:400;letter-spacing:0}
-@media (max-width:900px){.b-body{font-size:16px}}@media (max-width:600px){.b-body{font-size:15px}}
-.b-small{font-size:13px;line-height:1.45;font-weight:500;letter-spacing:0}
-@media (max-width:900px){.b-small{font-size:13px}}@media (max-width:600px){.b-small{font-size:12.5px}}
-.b-view{font-size:13px;line-height:1.6;font-weight:400;letter-spacing:0}
-@media (max-width:900px){.b-view{font-size:13px}}@media (max-width:600px){.b-view{font-size:12px}}
-.b-view-small{font-size:12px;line-height:1.45;font-weight:400;letter-spacing:0}
-@media (max-width:900px){.b-view-small{font-size:11px}}@media (max-width:600px){.b-view-small{font-size:11px}}</style></head><body><div class="tag"><b>Arm 2, five page steps on a 4:3 ratio</b><span>Body 16 times 4:3 per step, so every step is visibly apart. Titles become body or lede at 600, and headings drop from 56 to 50</span></div><div class="wrap"><h2 class="k">Page steps, desktop / tablet / phone</h2><div class="st"><div class="m"><b>hero</b>the opening headline<br><code>90 / 64 / 40 px · 1.0 · 600</code></div><p class="s b-hero">canon runs agent work</p></div><div class="st"><div class="m"><b>display</b>every section heading<br><code>50 / 40 / 32 px · 1.06 · 600</code></div><p class="s b-display">What holds it</p></div><div class="st"><div class="m"><b>lede</b>ledes, the hero line, titles at 600<br><code>21 / 18 / 17 px · 1.48 · 400</code></div><p class="s b-lede">A skill says what good looks like. These four parts catch the agent when it skips one.</p></div><div class="st"><div class="m"><b>body</b>running text, and titles at 600<br><code>16 / 16 / 15 px · 1.55 · 400</code></div><p class="s b-body">A rule file loads when the agent opens a matching path, and names the skill that owns that kind of file.</p></div><div class="st"><div class="m"><b>small</b>nav, pills, labels, captions<br><code>13 / 13 / 12.5 px · 1.45 · 500</code></div><p class="s b-small">Roles  Records  Craft  Guardrails</p></div><h2 class="k">View steps, inside product windows only</h2><div class="st"><div class="m"><b>view</b>text inside a window<br><code>13 / 13 / 12 px · 1.6 · 400</code></div><p class="s b-view view">❯ /canon:target-setup</p></div><div class="st"><div class="m"><b>view-small</b>window chrome, line numbers, tags<br><code>12 / 11 / 11 px · 1.45 · 400</code></div><p class="s b-view-small view">claude · 1 awaiting input · 3 working</p></div><h2 class="k">In use</h2><div class="use"><div><p class="s b-display">What holds it</p><p class="b-lede" style="color:var(--mut);margin:14px 0 18px;max-width:52ch">A skill says what good looks like. These four parts catch the agent when it skips one.</p>
-<div class="row"><p class="s b-body" style="font-weight:600;color:var(--ink)">Rules by path</p><p class="b-body" style="margin:4px 0 6px">A rule file loads when the agent opens a matching path, and names the skill that owns that kind of file.</p><p class="b-small" style="color:var(--mut);margin:0;font-family:Geist Mono,monospace">.claude/rules/canon/ui/craft.md</p></div>
-<div class="row"><p class="s b-body" style="font-weight:600;color:var(--ink)">Hooks</p><p class="b-body" style="margin:4px 0 0">A hook reads each action before or after it runs. It refuses some and reports others back into the same turn.</p></div></div>
-<div class="trayx"><div class="win"><div class="bar b-view-small" style="font-family:Geist,sans-serif">claude</div><div class="log b-view"><div>❯ write the plan guard</div><div class="k">  ⎿ Write(.canon/plans/feature-guard.md)</div><div><span class="a">✗</span> Blocked by plan-guard.sh</div><div class="k">  a plan is written through canon:plan-feature</div></div></div></div></div></div></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Type</title>
+    <style>
+      :root {
+        --pg: #fdfdfc;
+        --tray: #f2f2f0;
+        --win: #ffffff;
+        --winbar: #f7f7f5;
+        --band: #f0f0ee;
+        --line: #ececea;
+        --edge: #e4e4e1;
+        --dot: #dedede;
+        --ink: #121212;
+        --body: #3b3b38;
+        --mut: #6b6a66;
+        --acc: #c2380e;
+        color-scheme: light;
+      }
+      :root[data-theme='dark'] {
+        --pg: #121211;
+        --tray: #1a1a18;
+        --win: #1e1e1e;
+        --winbar: #252523;
+        --band: #282826;
+        --line: #2e2e2c;
+        --edge: #2a2a28;
+        --dot: #3a3a38;
+        --ink: #f2f2f0;
+        --body: #cfcdc8;
+        --mut: #8f8d88;
+        --acc: #ff6b42;
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        background: var(--pg);
+      }
+      body {
+        font-family: 'Geist', sans-serif;
+        color: var(--body);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      .tag {
+        display: flex;
+        gap: 14px;
+        align-items: baseline;
+        padding: 12px 32px;
+        background: var(--band);
+        color: var(--ink);
+        font-size: 14px;
+      }
+      .tag b {
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 56px 32px 72px;
+      }
+      h2.k {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--mut);
+        margin: 44px 0 6px;
+      }
+      h2.k:first-child {
+        margin-top: 0;
+      }
+      .st {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 20px;
+        align-items: baseline;
+        padding: 18px 0;
+        border-top: 1px solid var(--line);
+      }
+      .st .m {
+        font-size: 13px;
+        color: var(--mut);
+        line-height: 1.45;
+      }
+      .st .m b {
+        display: block;
+        color: var(--ink);
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .st .m code {
+        font-family: 'Geist Mono', monospace;
+        font-size: 12px;
+      }
+      .s {
+        color: var(--ink);
+        margin: 0;
+        overflow-wrap: anywhere;
+      }
+      .view {
+        font-family: 'Geist Mono', monospace;
+      }
+      .dr {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 20px;
+        padding: 10px 0;
+        border-top: 1px solid var(--line);
+        align-items: baseline;
+      }
+      .dr b {
+        color: var(--ink);
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .dr span {
+        font-family: 'Geist Mono', monospace;
+        font-size: 13px;
+        color: var(--body);
+      }
+      .use {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+        align-items: start;
+      }
+      .trayx {
+        background: var(--tray);
+        border-radius: 28px;
+        padding: 28px;
+      }
+      .win {
+        background: var(--win);
+        border-radius: 12px;
+        box-shadow:
+          0 0 0 1px rgba(0, 0, 0, 0.07),
+          0 24px 60px -28px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+      :root[data-theme='dark'] .win {
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.06),
+          0 24px 60px -28px rgba(0, 0, 0, 0.6);
+      }
+      .bar {
+        height: 34px;
+        background: var(--winbar);
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--mut);
+      }
+      .log {
+        padding: 14px 16px;
+        font-family: 'Geist Mono', monospace;
+        color: var(--body);
+      }
+      .log .k {
+        color: var(--mut);
+      }
+      .log .a {
+        color: var(--acc);
+      }
+      .row {
+        padding: 14px 0;
+        border-top: 1px solid var(--line);
+      }
+      @media (max-width: 900px) {
+        .wrap {
+          padding: 40px 24px 56px;
+        }
+        .use {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 600px) {
+        .wrap {
+          padding: 32px 16px 48px;
+        }
+        .tag {
+          padding: 12px 16px;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .st,
+        .dr {
+          grid-template-columns: 1fr;
+          gap: 6px;
+        }
+      }
+      .b-hero {
+        font-size: 90px;
+        line-height: 1;
+        font-weight: 600;
+        letter-spacing: -0.04em;
+      }
+      @media (max-width: 900px) {
+        .b-hero {
+          font-size: 64px;
+        }
+      }
+      @media (max-width: 600px) {
+        .b-hero {
+          font-size: 40px;
+        }
+      }
+      .b-display {
+        font-size: 50px;
+        line-height: 1.06;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+      }
+      @media (max-width: 900px) {
+        .b-display {
+          font-size: 40px;
+        }
+      }
+      @media (max-width: 600px) {
+        .b-display {
+          font-size: 32px;
+        }
+      }
+      .b-lede {
+        font-size: 21px;
+        line-height: 1.48;
+        font-weight: 400;
+        letter-spacing: 0;
+      }
+      @media (max-width: 900px) {
+        .b-lede {
+          font-size: 18px;
+        }
+      }
+      @media (max-width: 600px) {
+        .b-lede {
+          font-size: 17px;
+        }
+      }
+      .b-body {
+        font-size: 16px;
+        line-height: 1.55;
+        font-weight: 400;
+        letter-spacing: 0;
+      }
+      @media (max-width: 900px) {
+        .b-body {
+          font-size: 16px;
+        }
+      }
+      @media (max-width: 600px) {
+        .b-body {
+          font-size: 15px;
+        }
+      }
+      .b-small {
+        font-size: 13px;
+        line-height: 1.45;
+        font-weight: 500;
+        letter-spacing: 0;
+      }
+      @media (max-width: 900px) {
+        .b-small {
+          font-size: 13px;
+        }
+      }
+      @media (max-width: 600px) {
+        .b-small {
+          font-size: 12.5px;
+        }
+      }
+      .b-view {
+        font-size: 13px;
+        line-height: 1.6;
+        font-weight: 400;
+        letter-spacing: 0;
+      }
+      @media (max-width: 900px) {
+        .b-view {
+          font-size: 13px;
+        }
+      }
+      @media (max-width: 600px) {
+        .b-view {
+          font-size: 12px;
+        }
+      }
+      .b-view-small {
+        font-size: 12px;
+        line-height: 1.45;
+        font-weight: 400;
+        letter-spacing: 0;
+      }
+      @media (max-width: 900px) {
+        .b-view-small {
+          font-size: 11px;
+        }
+      }
+      @media (max-width: 600px) {
+        .b-view-small {
+          font-size: 11px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tag">
+      <b>Arm 2, five page steps on a 4:3 ratio</b
+      ><span
+        >Body 16 times 4:3 per step, so every step is visibly apart. Titles
+        become body or lede at 600, and headings drop from 56 to 50</span
+      >
+    </div>
+    <div class="wrap">
+      <h2 class="k">Page steps, desktop / tablet / phone</h2>
+      <div class="st">
+        <div class="m">
+          <b>hero</b>the opening headline<br /><code
+            >90 / 64 / 40 px · 1.0 · 600</code
+          >
+        </div>
+        <p class="s b-hero">canon runs agent work</p>
+      </div>
+      <div class="st">
+        <div class="m">
+          <b>display</b>every section heading<br /><code
+            >50 / 40 / 32 px · 1.06 · 600</code
+          >
+        </div>
+        <p class="s b-display">What holds it</p>
+      </div>
+      <div class="st">
+        <div class="m">
+          <b>lede</b>ledes, the hero line, titles at 600<br /><code
+            >21 / 18 / 17 px · 1.48 · 400</code
+          >
+        </div>
+        <p class="s b-lede">
+          A skill says what good looks like. These four parts catch the agent
+          when it skips one.
+        </p>
+      </div>
+      <div class="st">
+        <div class="m">
+          <b>body</b>running text, and titles at 600<br /><code
+            >16 / 16 / 15 px · 1.55 · 400</code
+          >
+        </div>
+        <p class="s b-body">
+          A rule file loads when the agent opens a matching path, and names the
+          skill that owns that kind of file.
+        </p>
+      </div>
+      <div class="st">
+        <div class="m">
+          <b>small</b>nav, pills, labels, captions<br /><code
+            >13 / 13 / 12.5 px · 1.45 · 500</code
+          >
+        </div>
+        <p class="s b-small">Roles Records Craft Guardrails</p>
+      </div>
+      <h2 class="k">View steps, inside product windows only</h2>
+      <div class="st">
+        <div class="m">
+          <b>view</b>text inside a window<br /><code
+            >13 / 13 / 12 px · 1.6 · 400</code
+          >
+        </div>
+        <p class="s b-view view">❯ /canon:target-setup</p>
+      </div>
+      <div class="st">
+        <div class="m">
+          <b>view-small</b>window chrome, line numbers, tags<br /><code
+            >12 / 11 / 11 px · 1.45 · 400</code
+          >
+        </div>
+        <p class="s b-view-small view">claude · 1 awaiting input · 3 working</p>
+      </div>
+      <h2 class="k">In use</h2>
+      <div class="use">
+        <div>
+          <p class="s b-display">What holds it</p>
+          <p
+            class="b-lede"
+            style="color: var(--mut); margin: 14px 0 18px; max-width: 52ch"
+          >
+            A skill says what good looks like. These four parts catch the agent
+            when it skips one.
+          </p>
+          <div class="row">
+            <p class="s b-body" style="font-weight: 600; color: var(--ink)">
+              Rules by path
+            </p>
+            <p class="b-body" style="margin: 4px 0 6px">
+              A rule file loads when the agent opens a matching path, and names
+              the skill that owns that kind of file.
+            </p>
+            <p
+              class="b-small"
+              style="
+                color: var(--mut);
+                margin: 0;
+                font-family:
+                  Geist Mono,
+                  monospace;
+              "
+            >
+              .claude/rules/canon/ui/craft.md
+            </p>
+          </div>
+          <div class="row">
+            <p class="s b-body" style="font-weight: 600; color: var(--ink)">
+              Hooks
+            </p>
+            <p class="b-body" style="margin: 4px 0 0">
+              A hook reads each action before or after it runs. It refuses some
+              and reports others back into the same turn.
+            </p>
+          </div>
+        </div>
+        <div class="trayx">
+          <div class="win">
+            <div
+              class="bar b-view-small"
+              style="font-family: Geist, sans-serif"
+            >
+              claude
+            </div>
+            <div class="log b-view">
+              <div>❯ write the plan guard</div>
+              <div class="k">⎿ Write(.canon/plans/feature-guard.md)</div>
+              <div><span class="a">✗</span> Blocked by plan-guard.sh</div>
+              <div class="k">a plan is written through canon:plan-feature</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
