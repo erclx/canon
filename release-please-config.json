@@ -18,7 +18,9 @@
         "examples",
         "wiki",
         "assets/evidence",
-        "assets/frames"
+        "assets/frames",
+        "assets/film",
+        "assets/loops"
       ],
       "extra-files": [
         {

@@ -15,6 +15,8 @@ const readJson = <T>(file: string): T =>
 
 const topFolder = (path: string): string => path.split('/')[0]
 
+const firstTwo = (path: string): string => path.split('/').slice(0, 2).join('/')
+
 // A negated glob narrows what npm packs and never adds a folder, so only the
 // positive entries say which folders ship
 const npmFiles = readJson<{ files: string[] }>('package.json').files.filter(
@@ -26,26 +28,40 @@ const excludePaths =
     packages: Record<string, { 'exclude-paths'?: string[] }>
   }>('release-please-config.json').packages['.']['exclude-paths'] ?? []
 
+const shipped = [...npmFiles, ...SHIPPED_OUTSIDE_NPM]
+
+// A folder npm ships only part of, such as `assets` through
+// `assets/brand/mark.svg`, is read one level down, so a new subfolder beside
+// the shipped file still has to be shipped or excluded
+const wholeTops = new Set(
+  shipped.filter((entry) => !entry.includes('/')).map(topFolder),
+)
+const partialTops = new Set(
+  shipped
+    .filter((entry) => entry.includes('/'))
+    .map(topFolder)
+    .filter((top) => !wholeTops.has(top)),
+)
+
+const unitOf = (path: string): string =>
+  partialTops.has(topFolder(path)) ? firstTwo(path) : topFolder(path)
+
 // Tracked paths alone, so a folder living only in `node_modules` or a
 // gitignored path never reads as a leak
-const trackedTopFolders = [
+const trackedUnits = [
   ...new Set(
     execFileSync('git', ['ls-files'], { cwd: REPO_ROOT, encoding: 'utf8' })
       .split('\n')
       .filter((path) => path.includes('/'))
-      .map(topFolder),
+      .map(unitOf),
   ),
 ]
 
 describe('release-please exclude-paths', () => {
-  it('should ship or exclude every tracked top-level folder', () => {
-    const covered = new Set([
-      ...npmFiles.map(topFolder),
-      ...SHIPPED_OUTSIDE_NPM,
-      ...excludePaths.map(topFolder),
-    ])
+  it('should ship or exclude every tracked folder', () => {
+    const covered = new Set([...shipped, ...excludePaths].map(unitOf))
 
-    const uncovered = trackedTopFolders.filter((folder) => !covered.has(folder))
+    const uncovered = trackedUnits.filter((unit) => !covered.has(unit))
 
     expect(uncovered).toEqual([])
   })
@@ -53,8 +69,6 @@ describe('release-please exclude-paths', () => {
   // release-please skips a commit whose every file sits under an excluded
   // prefix, so an exclusion reaching a shipped path drops a real change
   it('should exclude no path npm or the marketplace ships', () => {
-    const shipped = [...npmFiles, ...SHIPPED_OUTSIDE_NPM]
-
     const overlapping = excludePaths.filter((excluded) =>
       shipped.some(
         (entry) =>
@@ -65,11 +79,5 @@ describe('release-please exclude-paths', () => {
     )
 
     expect(overlapping).toEqual([])
-  })
-
-  it('should keep the unshipped half of assets out of the release', () => {
-    expect(excludePaths).toEqual(
-      expect.arrayContaining(['assets/evidence', 'assets/frames']),
-    )
   })
 })
