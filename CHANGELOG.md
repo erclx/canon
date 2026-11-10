@@ -1,5 +1,26 @@
 # Changelog
 
+## [5.83.0](https://github.com/erclx/canon/compare/v5.82.0...v5.83.0) (2026-11-10)
+
+
+### Features
+
+* **browser:** add a swipe verb that sends a real touch drag ([#2984](https://github.com/erclx/canon/issues/2984)) ([7566709](https://github.com/erclx/canon/commit/7566709953f2cdaa2c18b4cb891c9708b12dc766))
+* **ci-workflow:** let a browser job pin its runner image ([#2988](https://github.com/erclx/canon/issues/2988)) ([7e79635](https://github.com/erclx/canon/commit/7e796353d554b6fa23a3eae7d18862ee6c12c687))
+* **code:** read astro files and ship the embedded-code audit ([#2990](https://github.com/erclx/canon/issues/2990)) ([8167496](https://github.com/erclx/canon/commit/81674960546dc70604bee62ac79dbe6a051ba066))
+* **inventory:** read board frames against the design record ([#2986](https://github.com/erclx/canon/issues/2986)) ([dbcb1f3](https://github.com/erclx/canon/commit/dbcb1f3b75f2838d7955432208fa9331e44f1752))
+* **markdown:** skip html tag attributes in the colon check ([#2977](https://github.com/erclx/canon/issues/2977)) ([179ede4](https://github.com/erclx/canon/commit/179ede4cb5d5acd06df93ec93a5f90b9fa91842a))
+* **relay:** cite the slot a relayed operator answer was written in ([#2982](https://github.com/erclx/canon/issues/2982)) ([8ad363e](https://github.com/erclx/canon/commit/8ad363ee579a73131ac99fc1f5fe72800a91ebd1))
+* **tooling:** seed site head metadata and check it on astro builds ([#2983](https://github.com/erclx/canon/issues/2983)) ([9722cf4](https://github.com/erclx/canon/commit/9722cf4bb3ecb0796c04e64ef5be8c4166ccc9e2))
+* **tooling:** warn when no stylesheet imports Tailwind ([#2981](https://github.com/erclx/canon/issues/2981)) ([805e3f9](https://github.com/erclx/canon/commit/805e3f9e4ce063f0c534be084a7aac24695215c0))
+
+
+### Bug Fixes
+
+* **design:** write reference shots under the project's assets folder ([#2979](https://github.com/erclx/canon/issues/2979)) ([b7092e3](https://github.com/erclx/canon/commit/b7092e387243e8e70bb0345312fbebecab42bfaa))
+* **markdown:** pass a character reference in the ban scan ([#2991](https://github.com/erclx/canon/issues/2991)) ([39c2473](https://github.com/erclx/canon/commit/39c2473539102f233bdaa25e3c078c4b8ebdfc90))
+* **pr:** leave synced stack configs unpainted in this repository ([#2980](https://github.com/erclx/canon/issues/2980)) ([7c88145](https://github.com/erclx/canon/commit/7c881452af2e4fc8215c7398f93a953177b56675))
+
 ## [5.82.0](https://github.com/erclx/canon/compare/v5.81.0...v5.82.0) (2026-11-10)
 
 
