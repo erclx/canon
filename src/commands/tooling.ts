@@ -1025,6 +1025,14 @@ function report(result: ScanResult, target: string): void {
   for (const entry of result.gitignore) {
     if (entry.state === 'missing') logAdd(entry.entry)
   }
+
+  reportWarnings(result)
+}
+
+function reportWarnings(result: ScanResult): void {
+  if (result.warnings.length === 0) return
+  logStep('Warnings')
+  for (const warning of result.warnings) logWarn(warning.message)
 }
 
 function reportWithheld(result: ScanResult, target: string): void {
