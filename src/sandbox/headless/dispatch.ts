@@ -63,7 +63,7 @@ export function installDispatchShim(dir: string, real: string): void {
   chmodSync(join(dir, 'claude'), 0o755)
 }
 
-function shellQuote(value: string): string {
+export function shellQuote(value: string): string {
   return `'${value.replaceAll("'", `'\\''`)}'`
 }
 

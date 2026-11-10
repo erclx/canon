@@ -13,7 +13,7 @@ Every `canon sandbox` verb is toolkit-only, so run `bun src/cli.ts sandbox <verb
 
 - Anchor scenarios push to a real remote and need an authenticated `gh` plus membership in the org owning `canon-sandbox`. Everything else runs offline.
 - Sandboxes are minimal by default. `SANDBOX_INJECT_SEEDS` runs `canon claude init` and `SANDBOX_INJECT_GOV` runs `canon gov install`, so no hand copy drifts from the installer.
-- A scenario that reads commit history needs a checkout `canon` first on `PATH`, and the headless run calls that same one.
+- `canon sandbox run` puts a `canon` wrapper for the checkout's `src/cli.ts` first on the `PATH` of provisioning and the session, and names that path and commit in the envelope's `canon` field.
 
 ## Layout
 
@@ -91,6 +91,6 @@ The state and the remote a run touches sit outside the repository.
 
 - A green `bun run check` does not prove an `expect.toml` parses, and a bare key under a `[[content]]` header joins that table and never asserts
 - `canon sandbox check` mints a fresh run id and asserts nothing on a multi-arm scenario without an arm, so name the arm and pin `CANON_SANDBOX_DIR` outside `~/.claude/`, where every `Write` is refused
-- The driven session resolves `canon` from `PATH`, the published release, so an arm exercising a verb this branch adds meets a binary that refuses
+- A run serves toolkit-only verbs to the driven session, which a consumer's install refuses, so an arm calling one passes on behavior no consumer gets
 - A skill with a decline guard declines in a cold sandbox, which holds nothing git does not, so the arm's prompt states the reasoning to record as `claude:session-compact` does
 - A verdict covers the arm that ran, so read `unchecked` beside `asserted`, since `manual` entries carry what no substring reaches

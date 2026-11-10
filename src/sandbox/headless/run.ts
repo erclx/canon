@@ -12,6 +12,11 @@ import {
 import { constants, tmpdir } from 'node:os'
 import { join, relative } from 'node:path'
 import {
+  describeBranchCli,
+  installCanonShim,
+  type BranchCli,
+} from '@/sandbox/headless/branch-cli'
+import {
   describeSession,
   installDispatchShim,
   processGroupOf,
@@ -136,22 +141,26 @@ export interface SessionsReport {
  * An escape rides alongside the verdict rather than inside it. The verdict
  * answers what the sandbox contains, and a file the session put somewhere else
  * is not in that tree to be asserted over.
+ *
+ * `canon` names the CLI every child of the run resolved, so a reader can tell
+ * a run that drove the branch from one that drove the release.
  */
 export function mergeEnvelope(
   out: string,
   verdict: unknown,
   escapes: readonly string[],
   sessions: SessionsReport,
+  canon: BranchCli,
 ): { readonly merged: Record<string, unknown>; readonly isParsed: boolean } {
   const envelope = parseObject(out)
   if (envelope === undefined)
     return {
-      merged: { is_error: true, verdict, escapes, sessions },
+      merged: { is_error: true, verdict, escapes, sessions, canon },
       isParsed: false,
     }
 
   return {
-    merged: { ...envelope, verdict, escapes, sessions },
+    merged: { ...envelope, verdict, escapes, sessions, canon },
     isParsed: true,
   }
 }
@@ -380,10 +389,27 @@ async function drive(
   // the session, and the check all resolve one tree.
   mintSandboxRunId()
   const settings = runSettings(process.env)
-  const cli = join(projectRoot, 'src/cli.ts')
+  const branchCli = describeBranchCli(projectRoot)
+  const { cli } = branchCli
 
   const sandbox = sandboxTree()
   logStep(`Sandbox: ${sandbox}`)
+  logStep(`Canon: ${cli} at ${branchCli.head ?? 'an unread commit'}`)
+
+  // Created ahead of provisioning, since a scenario's own `canon` spawns read
+  // the provisioning env, and set on the cleanup before the spawn so a failed
+  // provision still removes it. The `claude` shim's refusal is reachable from
+  // provisioning too, which no scenario dispatches from.
+  //
+  // The session calls the real binary by its resolved path and puts the shim on
+  // the PATH the session inherits, so a `claude --bg` from inside the run meets
+  // the refusal and this invocation does not. Routing the session through the
+  // shim too would read the arm's own prompt as arguments, so a prompt naming
+  // `--bg` would refuse the run the shim exists to allow.
+  cleanup.shimDir = mkdtempSync(join(tmpdir(), 'canon-dispatch-shim-'))
+  installDispatchShim(cleanup.shimDir, realClaude)
+  installCanonShim(cleanup.shimDir, process.execPath, cli)
+  const shimPath = `${cleanup.shimDir}:${process.env.PATH ?? ''}`
 
   // The session below loads the branch's skills whole through --plugin-dir. A
   // copied SKILL.md would outrank that and cite references beside it that were
@@ -393,7 +419,7 @@ async function drive(
     process.execPath,
     [cli, 'sandbox', '--no-header', target, arm ?? ''],
     {
-      env: { ...process.env, SANDBOX_SKIP_SKILL_INJECT: '1' },
+      env: { ...process.env, PATH: shimPath, SANDBOX_SKIP_SKILL_INJECT: '1' },
       stdio: ['inherit', 2, 'inherit'],
     },
   )
@@ -426,14 +452,6 @@ async function drive(
   const registry = sessionsDir()
   const sessionsBefore = snapshotSessions(registry)
 
-  // The session calls the real binary by its resolved path and puts the shim on
-  // the PATH the session inherits, so a `claude --bg` from inside the run meets
-  // the refusal and this invocation does not. Routing the session through the
-  // shim too would read the arm's own prompt as arguments, so a prompt naming
-  // `--bg` would refuse the run the shim exists to allow.
-  cleanup.shimDir = mkdtempSync(join(tmpdir(), 'canon-dispatch-shim-'))
-  installDispatchShim(cleanup.shimDir, realClaude)
-
   logStep(`Running ${prompt} on ${settings.model}`)
 
   // Detached, so the session leads a process group of its own and the reap
@@ -464,10 +482,7 @@ async function drive(
     {
       cwd: sandbox,
       detached: true,
-      env: {
-        ...process.env,
-        PATH: `${cleanup.shimDir}:${process.env.PATH ?? ''}`,
-      },
+      env: { ...process.env, PATH: shimPath },
       stdio: ['ignore', outFd, 'inherit'],
     },
   )
@@ -503,7 +518,12 @@ async function drive(
       projectRoot,
       target,
       arm,
-      { is_error: true, exit_code: sessionCode, raw_output: out },
+      {
+        is_error: true,
+        exit_code: sessionCode,
+        raw_output: out,
+        canon: branchCli,
+      },
       'dead run',
     )
     return sessionCode
@@ -583,12 +603,18 @@ async function drive(
     )
   }
 
-  const { merged, isParsed } = mergeEnvelope(out, verdict.record, escapes, {
-    watched: sessionsBefore.isWatched || sessionsAfter.isWatched,
-    new: newSessions,
-    concurrent,
-    reap: cleanup.reap,
-  })
+  const { merged, isParsed } = mergeEnvelope(
+    out,
+    verdict.record,
+    escapes,
+    {
+      watched: sessionsBefore.isWatched || sessionsAfter.isWatched,
+      new: newSessions,
+      concurrent,
+      reap: cleanup.reap,
+    },
+    branchCli,
+  )
   if (!isParsed)
     logWarn('Envelope was not valid JSON. Emitting the verdict alone.')
 
