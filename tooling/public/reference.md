@@ -29,10 +29,13 @@ These two start release-please at version zero.
 
 - Start `release-please-config.json` on the `simple` release type, with `initial-version` `0.0.1` and `bump-minor-pre-major` on.
 - Switch the type and add `extra-files` for a package that carries its version in a manifest.
-- Exclude `canon` and `.claude` through `exclude-paths`, so a commit touching only the project's records skips the version and changelog.
+- Start `.release-please-manifest.json` at `0.0.0`.
+
+The config's `exclude-paths` keeps a commit out of the version and changelog when every file it touches sits under an excluded folder.
+
+- Exclude `canon` and `.claude`, the record folders every canon project carries.
 - Add the folder the project serves its site from to `exclude-paths`, since the seed cannot know it.
 - Add the `exclude-paths` lines by hand in a project seeded before them, since sync never rewrites a seed.
-- Start `.release-please-manifest.json` at `0.0.0`.
 
 ## Release workflow
 
