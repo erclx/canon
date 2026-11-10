@@ -13,6 +13,8 @@ Checked against the [Claude Code skills](https://code.claude.com/docs/en/skills)
 - **Reserved words**: an upload to claude.ai or the API rejects `anthropic` and `claude` in a name, and Claude Code does not.
 - **`description`** (required): what it does + when to use it, under 1024 chars, no XML tags. That is the portable maximum.
 - **Listing cap**: Claude Code truncates `description` plus `when_to_use` at 1,536 characters in its skill listing, so put the key use case first.
+- **Listing budget**: past the whole listing's character budget, Claude Code drops descriptions starting with the least-invoked skills, so a new skill loses its description first.
+- **Past the budget**: no wording brings a dropped description back, so route a case that has to fire from its first use through a hook or a rule instead.
 - **`disable-model-invocation: true`**: Claude will not auto-trigger, and the `Skill` tool also refuses the operator's request made in words. Set it only on a skill run by slash command alone.
 - **`allowed-tools`**: tools Claude can use without asking permission during the turn that invokes the skill, cleared at the next message. It grants and never limits the tool set.
 - **`metadata`**: optional key-value pairs (`author`, `version`, `mcp-server`)
