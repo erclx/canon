@@ -52,7 +52,7 @@ Each record has a fixed shape, so the next session knows where to read. Records 
 
 ## Practice skills with cited sources
 
-Each skill loads when its kind of work starts, and every rule names where it came from. A skill loads at the moment its practice applies.
+Each skill loads when its kind of work starts, and every rule names where it came from.
 
 | Skill                  | Loads                           | Cites                                     |
 | ---------------------- | ------------------------------- | ----------------------------------------- |
