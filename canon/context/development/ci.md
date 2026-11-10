@@ -65,9 +65,9 @@ Every workflow installing the Playwright system packages calls this script, sinc
 - `src/gate/workflow-timeouts.test.ts` fails a direct `install-deps` or `--with-deps` call and an unbounded script step, in `.github/workflows/` and every `tooling/*/configs/.github/workflows/`
 - The web stack ships a copy at `tooling/web/configs/scripts/install-playwright-deps.sh`, and a case in `src/gate/install-playwright-deps.test.ts` fails when its bytes drift from this one
 
-### Release configuration
+### `release-please-config.json`
 
-The root owns `release-please-config.json` and the manifests it versions.
+The root owns this config and the manifests it versions.
 
 - Its `bootstrap-sha` stops a first run versioning every untagged commit, and `include-component-in-tag: false` keeps tags `v<semver>`
 - Its `exclude-paths` skips a commit whose every file is unshipped. `src/gate/release-paths.test.ts` fails on a tracked top-level folder neither shipped nor excluded.
