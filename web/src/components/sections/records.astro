@@ -1,0 +1,1313 @@
+---
+import { records as copy } from '../../content/copy'
+import { records } from '../../content/records'
+
+/**
+ * The twelve records as a stack of sheets the page's scroll pages through.
+ * The stage pins below the nav for one step of scroll per sheet, then lets go.
+ * The pickers jump to a sheet, a phone reads them as one picker menu, and a
+ * skip link passes the whole stack. Under reduced motion the stage does not
+ * pin and the pickers swap sheets in place.
+ *
+ * Each sheet is an editor or a browser window with a rendered and a source
+ * view, and its checkboxes and file tabs work.
+ */
+---
+
+<section class="sec" id="records">
+  <div class="sec-head">
+    <h2>{copy.head}</h2>
+    <p>{copy.lede}</p>
+  </div>
+  <a class="skip-stack" href="#records-after">{copy.skip}</a>
+  <div class="scrolly">
+    <div class="stick">
+      <div class="tray">
+        <div class="pk">
+          <button
+            type="button"
+            class="pk-btn"
+            aria-expanded="false"
+            aria-controls="records-pk-list"
+          >
+            <span class="pk-name">{records[0]?.name}</span>
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"
+              ><path
+                d="M4 6l4 4 4-4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"></path></svg
+            >
+          </button>
+          <span class="pk-n"></span>
+          <ul class="pk-list" id="records-pk-list" hidden>
+            {
+              records.map((sheet, index) => (
+                <li>
+                  <button type="button" data-j={index}>
+                    {sheet.name}
+                  </button>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div class="tabs picks" role="group" aria-label="Records">
+          {
+            records.map((sheet, index) => (
+              <button
+                type="button"
+                class="pick"
+                aria-pressed={index === 0 ? 'true' : 'false'}
+                data-i={index}
+              >
+                {sheet.name}
+              </button>
+            ))
+          }
+        </div>
+        <div class="pile">
+          {
+            records.map((sheet, index) => (
+              <article
+                class={`sheet ${sheet.kind}`}
+                data-i={index}
+                data-name={sheet.name}
+                data-by={sheet.by}
+              >
+                <div class="in" set:html={sheet.html} />
+              </article>
+            ))
+          }
+        </div>
+        <div class="foot">
+          <p class="cap" aria-live="polite"></p>
+          <span class="count"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="records-after" tabindex="-1"></div>
+</section>
+
+<style is:global>
+  #records {
+    --back1: color-mix(in srgb, var(--win) 55%, var(--tray));
+    --back2: color-mix(in srgb, var(--win) 25%, var(--tray));
+    --pin: calc(var(--nav-h) + 24px);
+  }
+
+  #records .skip-stack {
+    display: inline-block;
+    margin-top: 18px;
+    font-size: var(--size-small);
+    color: var(--muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  #records .skip-stack:hover {
+    color: var(--body);
+  }
+
+  #records .scrolly {
+    position: relative;
+  }
+
+  #records .stick {
+    position: sticky;
+    top: var(--pin);
+  }
+
+  #records .tray {
+    margin-top: 56px;
+    padding: 40px 40px 48px;
+  }
+
+  #records .tabs {
+    justify-content: center;
+    max-width: 900px;
+    margin: 0 auto 30px;
+  }
+
+  #records .pile {
+    position: relative;
+    max-width: 900px;
+    height: clamp(480px, calc(100svh - var(--nav-h) - 280px), 720px);
+    margin: 0 auto;
+  }
+
+  #records .sheet {
+    position: absolute;
+    inset: 0 0 24px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--win);
+    border-radius: var(--radius-frame);
+    box-shadow: var(--shadow-window);
+    transition:
+      top var(--duration-move) var(--ease-standard),
+      left var(--duration-move) var(--ease-standard),
+      right var(--duration-move) var(--ease-standard),
+      opacity var(--duration-fade) var(--ease-standard),
+      background-color var(--duration-fade) var(--ease-standard);
+  }
+
+  #records .sheet .in {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: opacity var(--duration-fade) var(--ease-standard);
+  }
+
+  #records .foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 24px;
+    max-width: 900px;
+    margin: 40px auto 0;
+    font-family: var(--mono);
+    font-size: var(--size-small);
+    color: var(--muted);
+  }
+
+  #records .cap {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    font-family: var(--sans);
+    font-size: var(--size-small);
+    color: var(--muted);
+  }
+
+  #records .cap b {
+    margin-right: 8px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  #records-after {
+    height: 1px;
+  }
+
+  /* The phone's one picker, a button opening the list of sheets. */
+  #records .pk {
+    position: relative;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0 18px;
+  }
+
+  #records .pk-btn {
+    all: unset;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px;
+    line-height: 18px;
+    border-radius: var(--radius-action);
+    background: var(--win);
+    box-shadow: var(--shadow-ring);
+    font-family: var(--sans);
+    font-size: var(--size-small);
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  #records .pk-btn svg {
+    color: var(--muted);
+  }
+
+  #records .pk-btn:focus-visible,
+  #records .pk-list button:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  #records .pk-n {
+    font-family: var(--mono);
+    font-size: var(--size-small);
+    color: var(--muted);
+  }
+
+  #records .pk-list {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 8px);
+    z-index: 50;
+    min-width: 220px;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    background: var(--win);
+    border-radius: var(--radius-panel);
+    box-shadow: var(--shadow-popover);
+  }
+
+  #records .pk-list[hidden] {
+    display: none;
+  }
+
+  #records .pk-list button {
+    all: unset;
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: var(--radius-action);
+    font-family: var(--sans);
+    font-size: var(--size-body);
+    color: var(--body);
+    cursor: pointer;
+  }
+
+  #records .pk-list button:hover {
+    background: var(--band);
+  }
+
+  #records .pk-list button[aria-current='true'] {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  /* An editor sheet: a file tab bar with the view switch, a breadcrumb, then the file. */
+  #records .tb {
+    flex: none;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    height: 40px;
+    background: var(--winbar);
+    border-bottom: 1px solid var(--line);
+  }
+
+  #records .ftabs {
+    display: flex;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  #records .ftab {
+    all: unset;
+    box-sizing: border-box;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 0 14px;
+    border-right: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: var(--size-view-small);
+    color: var(--muted);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  #records .ftab:hover {
+    color: var(--body);
+  }
+
+  #records .ftab span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  #records .ftab[aria-selected='true'] {
+    background: var(--win);
+    color: var(--ink);
+  }
+
+  #records .ftab[aria-selected='true']::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  #records .ftab:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: -2px;
+  }
+
+  #records .fi {
+    flex: none;
+    color: var(--muted);
+  }
+
+  #records .fi.md {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  #records .vt {
+    display: flex;
+    flex: none;
+    align-self: center;
+    gap: 2px;
+    margin-right: 10px;
+    padding: 2px;
+    border-radius: var(--radius-action);
+    background: var(--band);
+  }
+
+  #records .vt button {
+    all: unset;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 26px;
+    border-radius: var(--radius-chip);
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  #records .vt button:hover {
+    color: var(--body);
+  }
+
+  #records .vt button[aria-pressed='true'] {
+    background: var(--win);
+    color: var(--ink);
+    box-shadow: var(--shadow-ring);
+  }
+
+  #records .vt button:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 1px;
+  }
+
+  #records .file {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #records .file[hidden] {
+    display: none;
+  }
+
+  #records .crumb {
+    flex: none;
+    padding: 7px 18px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: var(--size-view-small);
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  #records .crumb i {
+    margin: 0 4px;
+    font-style: normal;
+    opacity: 0.7;
+  }
+
+  #records .bd.v3 {
+    display: block;
+    flex: 1;
+    min-height: 0;
+    padding: 16px 26px 16px 0;
+  }
+
+  #records .pile[data-view='src'] .v-view,
+  #records .pile[data-view='view'] .v-src {
+    display: none;
+  }
+
+  #records .pile[data-view='src'] .v-src,
+  #records .pile[data-view='view'] .v-view {
+    display: block;
+  }
+
+  #records .v-view {
+    padding-left: 26px;
+  }
+
+  #records .also {
+    margin: 12px 0 0 26px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--line);
+    font-size: var(--size-view-small);
+    color: var(--muted);
+  }
+
+  /* The markdown source, numbered. */
+  #records .raw {
+    margin: 0;
+    counter-reset: ln;
+    font-family: var(--mono);
+    font-size: var(--size-view);
+    line-height: 1.7;
+    color: var(--body);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  #records .raw .l {
+    position: relative;
+    display: block;
+    min-height: 1.7em;
+    padding-left: 58px;
+  }
+
+  #records .raw .l::before {
+    counter-increment: ln;
+    content: counter(ln);
+    position: absolute;
+    left: 0;
+    width: 40px;
+    text-align: right;
+    font-size: var(--size-view-small);
+    color: var(--muted);
+    opacity: 0.55;
+  }
+
+  #records .raw.nonum .l {
+    padding-left: 0;
+  }
+
+  #records .raw.nonum .l::before {
+    content: none;
+  }
+
+  #records .raw .mk,
+  #records .raw .fm {
+    color: var(--muted);
+  }
+
+  #records .raw .hh,
+  #records .raw b {
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  #records .raw .cd {
+    color: var(--accent);
+  }
+
+  #records .raw .tr {
+    color: var(--body);
+  }
+
+  /* The rendered view. */
+  #records .ren {
+    font-size: var(--size-view);
+    line-height: 1.55;
+    color: var(--body);
+  }
+
+  #records .md h4 {
+    margin: 16px 0 6px;
+    font-size: var(--size-view);
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  #records .md h4:first-child {
+    margin-top: 0;
+  }
+
+  #records .md h4.t {
+    font-size: var(--size-body);
+  }
+
+  #records .ren p {
+    margin: 0 0 6px;
+  }
+
+  #records .ren ul,
+  #records .ren ol {
+    margin: 0 0 8px;
+    padding-left: 20px;
+  }
+
+  #records .ren li {
+    margin: 3px 0;
+  }
+
+  #records .ren b {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  #records .ren code,
+  #records .prh code,
+  #records .gmd code {
+    padding: 1px 5px;
+    border-radius: var(--radius-chip);
+    background: var(--band);
+    font-family: var(--mono);
+    font-size: var(--size-view-small);
+    color: var(--ink);
+  }
+
+  #records .ren .fm {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 12px;
+    margin: 0 0 12px;
+    padding: 8px 12px;
+    border-radius: var(--radius-action);
+    background: var(--band);
+    font-size: var(--size-view-small);
+  }
+
+  #records .ren .fm dt {
+    color: var(--muted);
+  }
+
+  #records .ren .fm dd {
+    margin: 0;
+    color: var(--ink);
+  }
+
+  #records .ren .tree {
+    margin: 0 0 10px;
+    padding: 0;
+    list-style: none;
+    font-family: var(--mono);
+    font-size: var(--size-view);
+    line-height: 1.7;
+  }
+
+  #records .ren .tree span {
+    display: block;
+  }
+
+  #records .ren .fn {
+    margin: 14px 0 6px;
+    font-family: var(--mono);
+    font-size: var(--size-view-small);
+    color: var(--muted);
+  }
+
+  #records .ren table {
+    width: 100%;
+    margin: 4px 0 10px;
+    border-collapse: collapse;
+    font-size: var(--size-view);
+  }
+
+  #records .ren th {
+    padding: 5px 8px 5px 0;
+    border-bottom: 1px solid var(--edge);
+    text-align: left;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  #records .ren td {
+    padding: 5px 8px 5px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  #records .ren td:first-child {
+    color: var(--ink);
+  }
+
+  #records .ren li.ck,
+  #records .gmd li.ck {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-left: -20px;
+    list-style: none;
+  }
+
+  #records .ren a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: var(--edge);
+    text-underline-offset: 3px;
+  }
+
+  #records .pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 6px 0 10px;
+  }
+
+  #records .thumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 90px;
+    margin: 8px 0;
+    border-radius: var(--radius-action);
+    background: var(--band);
+    font-size: var(--size-view-small);
+    color: var(--muted);
+  }
+
+  #records .pair .thumb {
+    height: 80px;
+    margin: 0;
+  }
+
+  #records .sev {
+    display: inline-block;
+    margin-right: 4px;
+    padding: 1px 7px;
+    border-radius: var(--radius-chip);
+    background: var(--band);
+    font-family: var(--mono);
+    font-size: var(--size-view-small);
+    color: var(--ink);
+  }
+
+  /* A working checkbox, in the source as a bracket and in the view as a box. */
+  #records .ckl {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+  }
+
+  #records .cbx {
+    appearance: none;
+    flex: none;
+    width: 15px;
+    height: 15px;
+    margin: 3px 0 0;
+    border: 1.5px solid var(--edge);
+    border-radius: var(--radius-chip);
+    background: transparent;
+    cursor: pointer;
+  }
+
+  #records .cbx:checked {
+    border-color: var(--accent);
+    background: var(--accent)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.6 2.5L12 5.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      center / 12px no-repeat;
+  }
+
+  #records .cbx:focus-visible,
+  #records .rk:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  #records .rk {
+    all: unset;
+    border-radius: var(--radius-marker);
+    font-family: var(--mono);
+    font-size: inherit;
+    line-height: inherit;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  #records .rk:hover {
+    color: var(--ink);
+  }
+
+  #records .rk[aria-checked='true'] {
+    color: var(--accent);
+  }
+
+  /* A browser sheet: an address bar, then the pull request page. */
+  #records .bbar {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 40px;
+    padding: 0 10px 0 14px;
+    background: var(--winbar);
+    border-bottom: 1px solid var(--line);
+  }
+
+  #records .bbar > i {
+    flex: none;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--edge);
+  }
+
+  #records .url {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    height: 26px;
+    margin: 0 10px 0 12px;
+    padding: 0 12px;
+    border-radius: var(--radius-action);
+    background: var(--win);
+    box-shadow: 0 0 0 1px var(--line);
+    font-family: var(--mono);
+    font-size: var(--size-view-small);
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  #records .bbar .vt {
+    margin-right: 0;
+  }
+
+  #records .gh {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    padding: 18px 24px;
+    font-family: var(--sans);
+    color: var(--ink);
+  }
+
+  #records .prh h3 {
+    margin: 0;
+    font-size: var(--size-lede);
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--ink);
+  }
+
+  #records .prh h3 span {
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  #records .prh .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0 0;
+    font-size: var(--size-view);
+    color: var(--muted);
+  }
+
+  #records .prh .st {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: var(--radius-action);
+    background: var(--color-success);
+    font-size: var(--size-view);
+    font-weight: 500;
+    color: var(--color-light-window);
+  }
+
+  #records .prh .st .fi {
+    color: inherit;
+  }
+
+  #records .prt {
+    display: flex;
+    gap: 22px;
+    margin-top: 14px;
+    border-bottom: 1px solid var(--line);
+    font-size: var(--size-view);
+    color: var(--muted);
+  }
+
+  #records .prt span {
+    padding: 8px 0 10px;
+  }
+
+  #records .prt span.on {
+    font-weight: 500;
+    color: var(--ink);
+    box-shadow: inset 0 -2px 0 var(--accent);
+  }
+
+  #records .cmt {
+    margin-top: 16px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-action);
+  }
+
+  #records .ch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    background: var(--winbar);
+    border-bottom: 1px solid var(--line);
+    font-size: var(--size-view);
+    color: var(--muted);
+  }
+
+  #records .ch b {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  #records .av {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--edge);
+  }
+
+  #records .cb {
+    padding: 14px 16px;
+  }
+
+  #records .gmd {
+    font-size: var(--size-view);
+    line-height: 1.55;
+    color: var(--ink);
+  }
+
+  #records .gmd h4 {
+    margin: 0 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+    font-size: var(--size-body);
+    font-weight: 600;
+  }
+
+  #records .gmd p {
+    margin: 0 0 8px;
+  }
+
+  #records .gmd ul,
+  #records .gmd ol {
+    margin: 0 0 8px;
+    padding-left: 22px;
+  }
+
+  #records .gmd li {
+    margin: 3px 0;
+  }
+
+  #records .gmd .cbx {
+    width: 14px;
+    height: 14px;
+    margin-top: 4px;
+    border-width: 1px;
+    border-color: var(--line);
+  }
+
+  #records .sheet.br .also {
+    margin: 12px 0 0;
+    border-top-color: var(--line);
+    font-family: var(--sans);
+  }
+
+  #records .prt,
+  #records .prh .st,
+  #records .prh .meta,
+  #records .url,
+  #records .bbar,
+  #records .ch,
+  #records .crumb,
+  #records .tb,
+  #records .cap,
+  #records .count {
+    user-select: none;
+    cursor: default;
+  }
+
+  @media (max-width: 900px) {
+    #records .tray {
+      margin-top: 40px;
+      padding: 24px 20px 32px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    #records .tray {
+      margin-top: 32px;
+      padding: 14px 12px 22px;
+    }
+
+    #records .tabs,
+    #records .count {
+      display: none;
+    }
+
+    #records .pk {
+      display: flex;
+    }
+
+    #records .foot {
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 32px;
+    }
+
+    #records .bd.v3 {
+      padding: 12px 14px 12px 0;
+    }
+
+    #records .v-view {
+      padding-left: 14px;
+    }
+
+    #records .also {
+      margin-left: 14px;
+    }
+
+    #records .raw .l {
+      padding-left: 40px;
+    }
+
+    #records .raw .l::before {
+      width: 28px;
+    }
+
+    #records .ftab {
+      padding: 0 12px;
+    }
+
+    #records .crumb {
+      padding: 6px 12px;
+    }
+
+    #records .ren .lo,
+    #records .raw .l.lo,
+    #records .gmd .lo,
+    #records .lo-m,
+    #records .prt {
+      display: none;
+    }
+
+    #records .gh {
+      padding: 14px;
+    }
+
+    #records .prh .meta {
+      margin-top: 8px;
+    }
+
+    #records .cmt {
+      margin-top: 12px;
+    }
+
+    #records .cb {
+      padding: 12px;
+    }
+
+    #records .url {
+      margin: 0 6px 0 8px;
+      padding: 0 8px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #records .scrolly {
+      height: auto !important;
+    }
+
+    #records .stick {
+      position: static;
+    }
+  }
+</style>
+
+<script>
+  import { reducedMotion } from '../../lib/scene'
+
+  const section = document.getElementById('records')
+  const box = section?.querySelector<HTMLElement>('.scrolly')
+  const stick = box?.querySelector<HTMLElement>('.stick')
+  const pile = section?.querySelector<HTMLElement>('.pile')
+  const after = document.getElementById('records-after')
+
+  if (section && box && stick && pile && after) {
+    const tabs = [...section.querySelectorAll<HTMLButtonElement>('.tabs .pick')]
+    const sheets = [...section.querySelectorAll<HTMLElement>('.sheet')]
+    const rail = section.querySelector<HTMLElement>('.tabs')
+    const caption = section.querySelector<HTMLElement>('.cap')
+    const count = section.querySelector<HTMLElement>('.count')
+    const pickName = section.querySelector<HTMLElement>('.pk-name')
+    const pickCount = section.querySelector<HTMLElement>('.pk-n')
+    const pickButton = section.querySelector<HTMLButtonElement>('.pk-btn')
+    const pickList = section.querySelector<HTMLElement>('.pk-list')
+    const pickItems = [
+      ...(pickList?.querySelectorAll<HTMLButtonElement>('button') ?? []),
+    ]
+    const N = sheets.length
+    /** Pixels of scroll per sheet while the stage is pinned. */
+    const STEP = 260
+    const still = reducedMotion()
+    const pin = () => parseFloat(getComputedStyle(stick).top) || 0
+    let current = 0
+    let lock: ReturnType<typeof setTimeout> | 0 = 0
+
+    function label(index: number) {
+      current = index
+      tabs.forEach((tab, j) => {
+        tab.setAttribute('aria-pressed', String(j === index))
+        tab.tabIndex = j === index ? 0 : -1
+      })
+      const of = `${index + 1} of ${N}`
+      if (count) count.textContent = of
+      if (pickCount) pickCount.textContent = of
+      if (pickName) pickName.textContent = tabs[index]?.textContent ?? ''
+      pickItems.forEach((item, j) =>
+        item.setAttribute('aria-current', String(j === index)),
+      )
+      const sheet = sheets[index]
+      if (caption && sheet) {
+        caption.replaceChildren()
+        const name = document.createElement('b')
+        name.textContent = sheet.dataset.name ?? ''
+        const by = document.createElement('span')
+        by.textContent = sheet.dataset.by ?? ''
+        caption.append(name, by)
+      }
+    }
+
+    function place(sheet: HTMLElement, depth: number, lift = 0) {
+      const o = Math.min(depth, 2)
+      sheet.style.top = `${o * 12 + lift}px`
+      sheet.style.bottom = `${24 - o * 12 - lift}px`
+      sheet.style.left = sheet.style.right = `${o * 18}px`
+      sheet.style.backgroundColor =
+        o < 0.5 ? '' : o < 1.5 ? 'var(--back1)' : 'var(--back2)'
+    }
+
+    /** Settles the stack on one sheet, as a pick or the reduced-motion path does. */
+    function show(index: number) {
+      label(index)
+      sheets.forEach((sheet, j) => {
+        sheet.style.transition = ''
+        const depth = (j - index + N) % N
+        place(sheet, depth)
+        sheet.style.opacity = depth < 3 ? '1' : '0'
+        sheet.style.zIndex = String(N - depth)
+        const inner = sheet.querySelector<HTMLElement>('.in')
+        if (inner) {
+          inner.style.transition = ''
+          inner.style.opacity = depth ? '0' : '1'
+        }
+        sheet.setAttribute('aria-hidden', String(depth !== 0))
+        sheet.inert = depth !== 0
+      })
+    }
+
+    /** Moves the stack by the scroll, so stopping halfway leaves it halfway. */
+    function scrub() {
+      const top = box!.getBoundingClientRect().top - pin()
+      const t = Math.max(0, Math.min(N - 1, -top / STEP))
+      const a = Math.floor(t)
+      const p = t - a
+      const r = Math.round(t)
+      sheets.forEach((sheet, j) => {
+        sheet.style.transition = 'none'
+        const d = j - a
+        let depth = 0
+        let opacity = 1
+        let content = 0
+        let lift = 0
+        let z = N - Math.max(d, 0)
+        if (d < 0) {
+          opacity = 0
+          lift = -26
+          z = 0
+        } else if (d === 0) {
+          lift = -26 * p
+          content = p < 0.5 ? 1 : 0
+          opacity = p < 0.5 ? 1 : Math.max(0, 1 - (p - 0.5) * 2)
+          z = p < 0.5 ? N + 1 : N - 1
+        } else {
+          depth = d - p
+          opacity = depth < 2 ? 1 : Math.max(0, 3 - depth)
+          content = d === 1 && p >= 0.5 ? 1 : 0
+        }
+        place(sheet, depth, lift)
+        sheet.style.opacity = String(opacity)
+        sheet.style.zIndex = String(z)
+        const inner = sheet.querySelector<HTMLElement>('.in')
+        if (inner) {
+          inner.style.transition = 'none'
+          inner.style.opacity = String(content)
+        }
+        sheet.setAttribute('aria-hidden', String(j !== r))
+        sheet.inert = j !== r
+      })
+      if (r !== current) label(r)
+    }
+
+    function size() {
+      if (still) {
+        box!.style.height = 'auto'
+        after!.style.height = '1px'
+        return
+      }
+      box!.style.height = `${stick!.offsetHeight + STEP * (N - 1)}px`
+      after!.style.height = '160px'
+    }
+
+    function pick(index: number) {
+      if (still) {
+        show(index)
+        return
+      }
+      const top = box!.getBoundingClientRect().top - pin()
+      const y = window.scrollY + top + index * STEP
+      const pinned = top <= 0.5 && top > -(STEP * (N - 1)) - 0.5
+      show(index)
+      if (lock) clearTimeout(lock)
+      lock = setTimeout(() => (lock = 0), pinned ? 80 : 900)
+      window.scrollTo({ top: y, behavior: pinned ? 'instant' : 'smooth' })
+    }
+
+    tabs.forEach((tab) =>
+      tab.addEventListener('click', () => pick(Number(tab.dataset.i))),
+    )
+    rail?.addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return
+      event.preventDefault()
+      const next = (current + (event.key === 'ArrowRight' ? 1 : -1) + N) % N
+      pick(next)
+      tabs[next]?.focus()
+    })
+
+    let frame = 0
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (frame) return
+        frame = requestAnimationFrame(() => {
+          frame = 0
+          if (lock) return
+          if (!still) scrub()
+        })
+      },
+      { passive: true },
+    )
+    window.addEventListener('resize', size)
+    size()
+    show(0)
+    if (!still) requestAnimationFrame(scrub)
+
+    /* The phone picker: the list of sheets behind one button. */
+    function openList(open: boolean) {
+      if (!pickList || !pickButton) return
+      pickList.hidden = !open
+      pickButton.setAttribute('aria-expanded', String(open))
+      if (open)
+        (
+          pickList.querySelector<HTMLElement>('[aria-current="true"]') ??
+          pickItems[0]
+        )?.focus()
+    }
+    pickButton?.addEventListener('click', () =>
+      openList(pickList?.hidden ?? false),
+    )
+    pickItems.forEach((item) =>
+      item.addEventListener('click', () => {
+        openList(false)
+        pickButton?.focus()
+        pick(Number(item.dataset.j))
+      }),
+    )
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && pickList && !pickList.hidden) {
+        openList(false)
+        pickButton?.focus()
+      }
+    })
+
+    /* The rendered and source views, one switch for the whole stack. */
+    const views = [...section.querySelectorAll<HTMLButtonElement>('.vt button')]
+    function setView(view: string) {
+      pile!.dataset.view = view
+      views.forEach((button) =>
+        button.setAttribute('aria-pressed', String(button.dataset.v === view)),
+      )
+    }
+    views.forEach((button) =>
+      button.addEventListener('click', () =>
+        setView(button.dataset.v ?? 'src'),
+      ),
+    )
+    setView('src')
+
+    /* A checkbox ticks in both views of its file at once. */
+    section
+      .querySelectorAll<HTMLElement>('.sheet .file, .sheet.br .cmt')
+      .forEach((part) => {
+        const set = (key: string, on: boolean) => {
+          part
+            .querySelectorAll<HTMLInputElement>(`.cbx[data-ck="${key}"]`)
+            .forEach((box) => (box.checked = on))
+          part
+            .querySelectorAll<HTMLElement>(`.rk[data-ck="${key}"]`)
+            .forEach((mark) => {
+              mark.setAttribute('aria-checked', String(on))
+              mark.textContent = on ? '[x]' : '[ ]'
+            })
+        }
+        part
+          .querySelectorAll<HTMLInputElement>('.cbx')
+          .forEach((box) =>
+            box.addEventListener('change', () =>
+              set(box.dataset.ck ?? '', box.checked),
+            ),
+          )
+        part
+          .querySelectorAll<HTMLElement>('.rk')
+          .forEach((mark) =>
+            mark.addEventListener('click', () =>
+              set(
+                mark.dataset.ck ?? '',
+                mark.getAttribute('aria-checked') !== 'true',
+              ),
+            ),
+          )
+      })
+
+    /* An editor sheet's file tabs. */
+    section.querySelectorAll<HTMLElement>('.sheet.ed').forEach((sheet) => {
+      const fileTabs = [...sheet.querySelectorAll<HTMLElement>('.ftab')]
+      const files = [...sheet.querySelectorAll<HTMLElement>('.file')]
+      const open = (k: number) => {
+        fileTabs.forEach((tab, j) => {
+          tab.setAttribute('aria-selected', String(j === k))
+          tab.tabIndex = j === k ? 0 : -1
+        })
+        files.forEach((file, j) => (file.hidden = j !== k))
+      }
+      fileTabs.forEach((tab, k) => {
+        tab.addEventListener('click', () => open(k))
+        tab.addEventListener('keydown', (event) => {
+          if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return
+          event.preventDefault()
+          const next =
+            (k + (event.key === 'ArrowRight' ? 1 : -1) + fileTabs.length) %
+            fileTabs.length
+          open(next)
+          fileTabs[next]?.focus()
+        })
+      })
+      open(
+        Math.max(
+          0,
+          fileTabs.findIndex(
+            (tab) => tab.getAttribute('aria-selected') === 'true',
+          ),
+        ),
+      )
+    })
+  }
+</script>

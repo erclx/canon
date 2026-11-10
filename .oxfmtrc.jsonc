@@ -22,6 +22,10 @@
     // web/public/evidence/ and the hand-authored web sources keep their format gate.
     "/web/public/previews/",
 
+    // The landing page's record sheets, whose whitespace is the content: the
+    // source view renders each with pre-wrap, so a reflow changes what shows.
+    "/web/src/content/records/",
+
     // design-sync.ts writes these as the board holds them, the frame HTML and the
     // assets it copies under kit/, and its --check compares the bytes. Formatting
     // them too gives each file two writers, and the check then fails for whichever
