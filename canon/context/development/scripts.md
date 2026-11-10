@@ -28,7 +28,7 @@ Traps for any bash script edited under this folder, each a failure that passed a
 Holds the scripts run by `bun run` name or fired by a gate stage or workflow, and none is a `canon` verb. `capture-home.sh` builds the landing page for `pr-visual-checks.yml` and the baseline refresh, `regen-web-*.ts` write the committed previews and favicon, and `design-sync.ts` lands board frames in `canon/design/`.
 
 - `bootstrap.ts` installs dependencies, links the CLI globally, and appends the alias block to `~/.zshrc`. A re-run stops at the marker, so a grown block reaches no one until they delete the old one.
-- `render-film.ts` renders `assets/film/` once per theme at a pinned `hyperframes` and derives the README GIF, web MP4, and poster with ffmpeg, copying them into `assets/loops/` once both themes succeed
+- `render-film.ts` renders `assets/film/` once per theme at a pinned `hyperframes` and derives the launch GIF, web MP4, and poster with ffmpeg, copying them into `assets/loops/` once both themes succeed
 
 ### `scripts/ci/`
 
