@@ -59,8 +59,12 @@ const [before, middle, last] = fold.parts
       {middle}
       <span class="ico mg" aria-hidden="true"
         ><svg viewBox="0 0 40 40" fill="none"
-          ><circle cx="12" cy="9" r="3.6" stroke="currentColor" stroke-width="2.6"
-          ></circle><circle
+          ><circle
+            cx="12"
+            cy="9"
+            r="3.6"
+            stroke="currentColor"
+            stroke-width="2.6"></circle><circle
             cx="12"
             cy="31"
             r="3.6"
@@ -83,7 +87,9 @@ const [before, middle, last] = fold.parts
   </div>
   <div class="tray">
     <div class="win term">
-      <div class="win-bar"><i></i><i></i><i></i><span>{fold.view.title}</span></div>
+      <div class="win-bar">
+        <i></i><i></i><i></i><span>{fold.view.title}</span>
+      </div>
       <div class="av">
         <div class="cnts" id="av-counts"></div>
         <div class="lst" id="av-list"></div>
@@ -121,7 +127,11 @@ const [before, middle, last] = fold.parts
       </div>
     </div>
   </div>
-  <script type="application/json" id="av-data" set:html={JSON.stringify(data)} />
+  <script
+    type="application/json"
+    id="av-data"
+    set:html={JSON.stringify(data)}
+  />
 </section>
 
 <style is:global>
@@ -746,7 +756,11 @@ const [before, middle, last] = fold.parts
       }
       return null
     }
-    const seed = (list: Live[], ages: number[], need?: (s: Session) => boolean) =>
+    const seed = (
+      list: Live[],
+      ages: number[],
+      need?: (s: Session) => boolean,
+    ) =>
       ages.forEach((age) => {
         const s = take(need)
         if (s) list.push({ ...s, age })
@@ -894,7 +908,9 @@ const [before, middle, last] = fold.parts
         }
       } else {
         const s = take(
-          state.wk.length >= 4 ? (x) => Boolean(x.aw) && !state.aw.length : undefined,
+          state.wk.length >= 4
+            ? (x) => Boolean(x.aw) && !state.aw.length
+            : undefined,
         )
         if (s) {
           if (s.aw && state.aw.length < 1) {
@@ -920,8 +936,9 @@ const [before, middle, last] = fold.parts
       let found: Element | null = null
       if (px !== null) {
         found =
-          document.elementFromPoint(px, py)?.closest('#av-list .r:not(.leave)') ??
-          null
+          document
+            .elementFromPoint(px, py)
+            ?.closest('#av-list .r:not(.leave)') ?? null
       }
       if (found !== hot) {
         hot?.classList.remove('hot')
@@ -960,7 +977,8 @@ const [before, middle, last] = fold.parts
             ? ask.selectionStart
             : ask.selectionEnd
           : null
-      const index = at ?? (ask instanceof HTMLInputElement ? ask.value.length : 0)
+      const index =
+        at ?? (ask instanceof HTMLInputElement ? ask.value.length : 0)
       const left =
         ask instanceof HTMLInputElement ? index * width - ask.scrollLeft : 0
       caret.style.left = `${Math.max(0, left)}px`
@@ -990,9 +1008,13 @@ const [before, middle, last] = fold.parts
     let shell = false
     let occlude = 0
     function match() {
-      const q = ask instanceof HTMLInputElement
-        ? ask.value.slice(1).toLowerCase().replace(/^canon:/, '')
-        : ''
+      const q =
+        ask instanceof HTMLInputElement
+          ? ask.value
+              .slice(1)
+              .toLowerCase()
+              .replace(/^canon:/, '')
+          : ''
       if (!q) return ordered
       const starts = data.skills.filter((s) => s.name.startsWith(q))
       const holds = data.skills.filter(
@@ -1041,7 +1063,8 @@ const [before, middle, last] = fold.parts
             const top = on.offsetTop - 4
             const bottom = top + 28
             if (top < menu.scrollTop) menu.scrollTop = top
-            else if (bottom > menu.scrollTop + 168) menu.scrollTop = bottom - 168
+            else if (bottom > menu.scrollTop + 168)
+              menu.scrollTop = bottom - 168
           }
         }
       } else {
@@ -1072,7 +1095,9 @@ const [before, middle, last] = fold.parts
     }
     menu.addEventListener('pointerdown', (event) => {
       const item =
-        event.target instanceof Element ? event.target.closest<HTMLElement>('.mi') : null
+        event.target instanceof Element
+          ? event.target.closest<HTMLElement>('.mi')
+          : null
       if (!item) return
       event.preventDefault()
       accept(Number(item.dataset.i))
@@ -1080,7 +1105,9 @@ const [before, middle, last] = fold.parts
     })
     menu.addEventListener('pointermove', (event) => {
       const item =
-        event.target instanceof Element ? event.target.closest<HTMLElement>('.mi') : null
+        event.target instanceof Element
+          ? event.target.closest<HTMLElement>('.mi')
+          : null
       if (item && Number(item.dataset.i) !== selected) {
         selected = Number(item.dataset.i)
         draw()
@@ -1154,7 +1181,10 @@ const [before, middle, last] = fold.parts
     const view = list.closest('.av')
     let held = false
     view?.addEventListener('pointerenter', () => (held = true))
-    view?.addEventListener('pointerleave', () => (held = view.contains(document.activeElement)))
+    view?.addEventListener(
+      'pointerleave',
+      () => (held = view.contains(document.activeElement)),
+    )
     view?.addEventListener('focusin', () => (held = true))
     view?.addEventListener('focusout', () => (held = false))
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches)

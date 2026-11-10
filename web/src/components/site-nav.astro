@@ -422,7 +422,9 @@ const glyph = mark.replace(/<!--[\s\S]*?-->/, '').trim()
   }
 
   /* The section in view marks its link in the bar and in the menu. */
-  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-section]')]
+  const links = [
+    ...document.querySelectorAll<HTMLAnchorElement>('[data-section]'),
+  ]
   const targets = [
     ...new Set(links.map((link) => link.dataset.section ?? '')),
   ].flatMap((id) => {
