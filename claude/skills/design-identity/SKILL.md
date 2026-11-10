@@ -29,7 +29,7 @@ No signal from any of these is not a stop. Draft against a neutral default, and 
 
 Check the project's HTML entry points (`index.html`, `public/index.html`, `src/index.html`) for a `<link rel="icon">` or `<link rel="apple-touch-icon">` tag carrying a `sizes` attribute, and any `manifest.json` or `site.webmanifest` for an `icons` array. Take the union of every size found.
 
-Fall back to the stated default when nothing is detected, since no `tooling/` stack scaffolds a `public/` folder, a favicon reference, or an `og:image` meta tag:
+Fall back to the stated default when nothing is detected, since no `tooling/` stack scaffolds a `public/` folder or a favicon reference. The astro stack's head component writes the one `og:image` tag, pointed at `/og-image.png` through `src/site.ts`:
 
 - `16x16`, `32x32`, `48x48`
 - `180x180`
