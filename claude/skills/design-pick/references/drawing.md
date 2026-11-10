@@ -48,7 +48,7 @@ A drive draws the shipped surface whole on `00-current` before its first finding
 - Leave `00-current` as the shipped page for the whole drive, and apply each pick to `00-next` alone
 - Log the page's measured height at 1440 on both pages under the finding that asked for a shorter page, when one did
 
-Copy both pages' capture into the drive's evidence as its whole-page comparison, per `drive-record.md` in `app-drive`.
+Copy both pages' captures into the drive's `evidence/baseline/` as its whole-page comparison.
 
 ## Layout
 
