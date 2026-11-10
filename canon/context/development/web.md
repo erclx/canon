@@ -17,7 +17,7 @@ Holds the page, built from components that read their figures through `lib/`.
 
 - `pages/` assembles the one route from `components/sections/`, one component per section, each styled in `<style is:global>` under its id since its script writes markup a scoped style never reaches
 - `content/copy.ts` holds the copy and the product views' scenes, each string cited to `README.md` or marked as a paraphrase, gated by `readmeCitations`
-- `content/` also holds the sessions, craft's practices with each quote's ledger row, and the record sheets under `content/records/`, which the formatter skips since their whitespace renders
+- `content/` also holds the sessions, craft's practices with each quote's ledger row, and the record sheets under `content/records/`, one formatted HTML file each
 - `lib/skills.ts` reads the skill catalog for the opening's `/` menu, and `lib/scene.ts` paces every scene window, halting it while the reader holds it
 - `styles/global.css` maps role names onto the generated `tokens.css` inside `@layer base` beside the shared tray, window, and picker classes, and `base.astro` embeds Geist and Geist Mono
 

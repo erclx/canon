@@ -19,8 +19,8 @@ import handoff from './records/12-handoff.html?raw'
  * or account detail.
  *
  * Each sheet's body is its own file beside this module, as the drive settled
- * it on the `landing-v2` board. Its whitespace is the content, since the source
- * view renders it with `pre-wrap`, so no formatter reflows it.
+ * it on the `landing-v2` board. The formatter keeps the source view's `<pre>`
+ * text and the whitespace between inline elements, so a reflow renders the same.
  */
 export interface RecordSheet {
   readonly name: string
