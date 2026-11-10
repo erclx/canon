@@ -25,9 +25,9 @@ export const site = {
    * anything `README.md` states, so it carries no citation.
    */
   origin: 'https://canon.erclx.dev',
-  // README.md: "runs your agent's work from plan to merge"
-  title: "canon runs your agent's work from plan to merge",
-  // README.md: canon-allow-readme-paraphrase: names the change the page follows, which the README never states. "established engineering practice"
+  // README.md: "runs agent work from plan to merge"
+  title: 'canon runs agent work from plan to merge',
+  // README.md: canon-allow-readme-paraphrase: names the change the page follows, which the README never states.
   description:
     'One real change, followed from its groundwork to its merge, run by canon and held to established engineering practice.',
   // README.md: canon-allow-readme-paraphrase: the short variant of the README's opening sentence, which is also the `description` in `package.json` and both manifests, kept equal by `positioning.test.ts`.
@@ -52,10 +52,10 @@ export const nav = {
 }
 
 export const fold = {
-  // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's first claim. "runs your agent's work from plan to merge"
-  headline: "canon runs your agent's work from plan to merge",
-  // README.md: canon-allow-readme-paraphrase: the opening sentence with its first claim lifted into the headline. "A CLI and Claude Code plugin that" "established engineering practice, and installs the same setup in every repo."
-  lead: 'A CLI and Claude Code plugin that holds the work to established engineering practice, and installs the same setup in every repo.',
+  // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs agent work from plan to merge"
+  headline: 'canon runs agent work from plan to merge',
+  // README.md: canon-allow-readme-paraphrase: the opening sentence's subject, carried on to who uses it and how each role runs, which the settled page states and the README spreads across its sections. "A Claude Code plugin and CLI that"
+  lead: 'A Claude Code plugin and CLI that one developer uses to plan, build, review, and merge with coding agents, each role in its own session.',
   // README.md: "claude plugin marketplace add https://github.com/erclx/canon" "claude plugin install canon@canon"
   commands: [
     'claude plugin marketplace add https://github.com/erclx/canon',
@@ -64,7 +64,7 @@ export const fold = {
   primary: { label: 'Install canon', href: '#start' },
   secondary: { label: 'Follow the change', href: '#how' },
   film: {
-    // README.md: "One change running through canon, from the groundwork that measured it through its plan, dispatch, build, and review to the merge"
+    // README.md: canon-allow-readme-paraphrase: describes the film the page plays, which the README no longer carries.
     label:
       'One change running through canon, from the groundwork that measured it through its plan, dispatch, build, and review to the merge',
     /** The poster's action, with the length read off the rendered film. */
@@ -116,10 +116,10 @@ export const steps = {
 export const start = {
   // README.md: "Quick start"
   head: 'Quick start',
-  // README.md: "The skills land as `/canon:<name>`, and the CLI needs Bun on your path. canon runs on Linux and macOS."
+  // README.md: canon-allow-readme-paraphrase: the quick start's platform and Bun line, reworded for a page that names no setup skill. "It runs on Linux and macOS, and the CLI needs Bun."
   setup:
     'The skills land as /canon:<name>, and the CLI needs Bun on your path. canon runs on Linux and macOS.',
-  // README.md: "Set up a repository with `canon init`, which lays down its rules, seeds, and configs."
+  // README.md: canon-allow-readme-paraphrase: the setup step the README now routes through `/canon:target-setup`, which runs `canon init`. "Then it runs `canon init`"
   init: 'Set up a repository with canon init, which lays down its rules, seeds, and configs.',
   // README.md: "claude plugin marketplace add https://github.com/erclx/canon" "claude plugin install canon@canon" "bun install --global @erclx/canon"
   commands: [
