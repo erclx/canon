@@ -87,6 +87,8 @@ Both forms reach inside an open shadow root, such as a web component banner. A d
 
 ## The pointer
 
+- Expect the pointer at the window center when the first filmed step starts, on either route, since the verb resets it after `setup`
+- Open a beat needing the pointer elsewhere with a filmed `move`, since a `move` or `click` in `setup` never reaches the beat
 - Draw no pointer in the page. The edit draws one from the log at a constant size, and two pointers on one frame leave the viewer guessing which one acted.
 - Start from a state where the app paints no cursor of its own, since a painted one films into the clip and grows with every zoom
 - Check that each click lands inside its target's box on the closing still. The verb aims at the box's center, and an element covering it takes the click instead.
