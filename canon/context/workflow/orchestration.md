@@ -93,7 +93,7 @@ Owns the handoff the orchestrator adds three sections to.
 Owns the orchestrator body and requirement, which state the dispatch policy.
 
 - Controller names the session that dispatched this one, usually the orchestrator, so it is a relation and renaming the orchestrator role would leave it alone
-- After any change to the shared-file policy, search every spelling in the body, its requirement, five runbooks, and two workflow docs, including `wiring seam`, `serialize`, and `shared file`
+- After any change to the shared-file policy, search every spelling in the body, its requirement, each runbook, and two workflow docs, including `wiring seam`, `serialize`, and `shared file`
 - Check a peer's claim about what a merge did against its commits, since an add followed by a remove reads as an untouched file in the net diff
 
 ### `claude/skills/role-orchestrator/scripts/`

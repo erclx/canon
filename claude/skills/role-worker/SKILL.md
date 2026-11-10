@@ -55,12 +55,7 @@ A hand-run `git-ship` or `git-pr` starts no server, since only a worker has a li
 
 ### Building against design references and images
 
-A plan's `## Design references` names the accepted design per surface, and `## Reference images` names images it was shaped against by main-root path. Either can appear alone. Open both before building, since a worker reading the dark image alone ships a light theme nobody saw.
-
-- Open each cited folder's light and dark images and its frame HTML before the first edit to that surface
-- Take sizes, spacing, and colors from the frame HTML rather than from the image
-- Report a missing reference by its path rather than building without it
-- Leave `None identified.` as it stands and build without a reference
+Read `${CLAUDE_SKILL_DIR}/references/design-references.md` before the first edit to a surface a plan's `## Design references` or `## Reference images` names.
 
 ## Scope after dispatch
 
@@ -112,6 +107,7 @@ Ask for the re-review as `review-address` Step 8 returns, carrying what was addr
 - Send it to the reviewer whose sessionId the review dispatch carried, resolved from that id at sending, since a reviewer holds the trunk branch and no branch lookup finds it
 - Send it to the controller instead when the dispatch named no reviewer or the id resolves to no live session
 - Send a block out as a message before it becomes an interactive prompt.
+- Cite the slot an operator's answer was written in when relaying it to the controller, in the `Answer at:` line whose form `canon:session-relay` states
 - Send nothing on progress. A worker reporting progress rebuilds, on this side of the channel, the poll the announcement retired on the other.
 
 ### Waiting on the reviews
