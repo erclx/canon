@@ -66,7 +66,14 @@ describe.skipIf(!hasBrowser)('walk over board frames', () => {
   it('should count font size only where an element carries its own text', async () => {
     const { groups } = await read('font-size')
 
-    expect(valuesOf(groups)).toEqual(['16px', '17px', '90px'])
+    expect(valuesOf(groups)).toEqual(['16px', '17px', '19px', '90px'])
+  }, 120_000)
+
+  it('should count a text input, which holds no text node, as carrying text', async () => {
+    const { groups } = await read('color')
+
+    const field = groups.find((group) => group.treatment === '#e6e6e6')
+    expect(field?.samples).toEqual(['input', 'input'])
   }, 120_000)
 
   it('should read both themes, a pseudo-element, and skip transparent', async () => {
@@ -76,6 +83,7 @@ describe.skipIf(!hasBrowser)('walk over board frames', () => {
       '#121211',
       '#121212',
       '#c2380e',
+      '#e6e6e6',
       '#f2f2f0',
       '#ff6b42',
       '#ffffff',

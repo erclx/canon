@@ -55,7 +55,24 @@ export function readValues(args: {
     return raw.endsWith('px') ? `${round(amount)}px` : raw
   }
 
+  // A form control paints its value and placeholder in its own color and size
+  // while holding no text node, so it counts as carrying text unless its type
+  // draws no text at all.
+  const TEXTLESS_INPUTS = [
+    'checkbox',
+    'radio',
+    'range',
+    'color',
+    'file',
+    'image',
+    'hidden',
+  ]
   const hasOwnText = (element: Element): boolean =>
+    (element instanceof HTMLInputElement &&
+      !TEXTLESS_INPUTS.includes(element.type)) ||
+    element instanceof HTMLTextAreaElement ||
+    element instanceof HTMLSelectElement ||
+    element instanceof HTMLButtonElement ||
     Array.from(element.childNodes).some(
       (node) =>
         node.nodeType === Node.TEXT_NODE &&
