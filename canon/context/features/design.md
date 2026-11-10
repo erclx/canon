@@ -23,11 +23,12 @@ Owns the token module, the component layer, the renderers, the markdown parser, 
 
 ### `canon/design/`
 
-Holds the accepted frames a build matches. `bun run design:sync` writes them from the board at the main worktree root through `scripts/core/design-sync.ts`, a port of Frameboard's own sync whose pure half sits in `src/design/reference.ts`.
+Holds the accepted frames a build matches. `bun run design:sync` writes them from the board at the main worktree root through Frameboard's `references sync`, run from the `frameboard` on PATH, the same install that serves and checks the board.
 
 - `frames.json` maps each `<group>/<name>` to a board frame as `<project>/<page>/<frame>`, and it and `index.md` are the only files written by hand
-- Each frame's `../assets/` links point at `kit/<project>/assets/` in the record, mirroring the board, so two projects loading an asset of the same name land apart
-- The sync removes a file no mapping writes, and `--check` names it as stray, while a PNG whose bytes alone differ only warns
+- Each frame's `../assets/` links point at `assets/<project>/` in the record, which also holds every font a copied stylesheet loads, so two projects loading an asset of the same name land apart
+- The sync removes a file below the folder's first level that no mapping writes. `--check` names it as stray and exits 14, while a PNG whose bytes alone differ only warns.
+- No version pin holds the release, so a session with no `frameboard` on PATH gets command-not-found rather than a sync
 - CI never runs the check, since `.canon/board/` is gitignored and CI holds no copy, so drift between board and record surfaces only when a session runs the sync
 
 ### Other folders
