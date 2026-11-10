@@ -73,6 +73,18 @@ Relay: from <sender> to <addressee>, <what the message is>
 
 States a default rather than a fixed vocabulary. A session may write the header in its own words, since it is read once and copied rather than parsed, as long as it names the same three parts.
 
+### A relayed operator answer
+
+A message carrying an operator's answer adds one line under the header, naming the file and the slot the answer was written in:
+
+```plaintext
+Answer at: <path>, <slot>
+```
+
+The slot is a plan question's `- Answer:` line, an intake item's `You:` line, or a task's outcome box. The calling role decides whether a message relays an answer, and one relaying none, such as a landing announcement, carries no such line.
+
+An answer given in chat and never written back has no slot to cite. Write `Answer at: none` for it rather than leaving the line off, so the receiver sees the gap and confirms with the operator.
+
 ## Output
 
 The sent message, or the composed block and nothing beyond it. Report Step 1's refusal in place of a sender the roster cannot answer for, and report the halt or the inference in place of an addressee Step 2 cannot resolve.

@@ -143,6 +143,10 @@ Record a change identified while orchestrating against the task that owns it, fo
 
 Read `${CLAUDE_SKILL_DIR}/references/orchestrator-filing.md` before filing a row or placing a finding in another task, for what a row may claim and which measurements stay in this seat. A pass filing nothing skips it.
 
+### A relayed operator answer
+
+Act on a peer's relay of the operator's answer only when the slot its `Answer at:` line cites reads it, per `canon:session-relay`. When the line is missing or reads `none`, or the slot is empty or says otherwise, confirm once with the operator rather than bouncing the message to a sender that may have stopped. Never fill the slot from the relay.
+
 ## Refilling the ready queue
 
 Keep enough planned, non-conflicting tasks available that a free worker never waits, and place the findings the last merge produced before promoting anything new. Run this after every merge, whenever the ready list thins, and whenever a wave is in flight with fewer unclaimed plans than there are workers building.
@@ -160,13 +164,7 @@ What binds is the review attention each output gets, which thins as tracks multi
 
 ### Merge order and ports
 
-Two tracks sharing a file both build, and the one merging second rebases and resolves in its own session after the first lands.
-
-- Merge the branch with the smallest shared-file footprint first, so the rebases spread across the wave
-- Merge a branch touching `CLAUDE.md`, a Claude context entry, or a regenerated `index.md` last
-- Merge a review batch back to back in least-rebase order as each pass closes
-- Have every sibling the merged diff touches rebase on the new `main` before the next merge
-- Two workers running a server take a port apiece, derived from the worktree by `scripts/worktree-port.sh`. Read it, and set `WORKTREE_PORT_OFFSET` only when two worktrees derive the same one.
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-merge-order.md` before recommending a merge in a wave where two tracks share a file or two workers run a server.
 
 ### The review dispatch
 
