@@ -24,8 +24,8 @@ describe('copy', () => {
   const strings = collectStrings(copy)
 
   it('should read every exported string, including those built from counts', () => {
-    expect(strings).toContain(copy.fold.film.play(7))
-    expect(strings).toContain(copy.steps.review.line)
+    expect(strings).toContain(copy.guardrails.parts[1]?.play)
+    expect(strings).toContain(copy.setup.stages[0]?.line)
     expect(strings).toContain(copy.footer.links[0]?.label)
   })
 

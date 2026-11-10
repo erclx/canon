@@ -1,5 +1,5 @@
 name: Deploy Site
-# canon-no-seed: builds the landing page from this checkout and publishes it to this project's Cloudflare Pages site at canon.erclx.dev. Seeding it as-is would have a target deploy this repository's page under this repository's domain.
+# canon-no-seed: builds the landing page from this checkout and publishes it to this project's Cloudflare Pages site at canon.erclx.com. Seeding it as-is would have a target deploy this repository's page under this repository's domain.
 
 on:
   push:

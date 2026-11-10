@@ -1,0 +1,121 @@
+@font-face { font-family: "Geist Mono"; src: url("GeistMono-Regular.woff2") format("woff2"); font-weight: 400; }
+@font-face { font-family: "Geist Mono"; src: url("GeistMono-Medium.woff2") format("woff2"); font-weight: 500; }
+
+:root {
+  --page: #f3f3f1;
+  --paper: #ffffff;
+  --ink: #111110;
+  --body: #3b3b38;
+  --muted: #73736e;
+  --rule: #e2e2de;
+  --accent: #e0461c;
+  --accent-wash: #fbe9e3;
+  --term: #161614;
+  --term-ink: #e9e8e4;
+  --term-muted: #8f8e89;
+  --shadow: 0 1px 1px rgba(46, 38, 30, 0.05), 0 18px 40px -16px rgba(46, 38, 30, 0.22);
+  --mark: url("mark-light.svg");
+}
+:root[data-theme="dark"] {
+  --page: #121211;
+  --paper: #1c1c1a;
+  --ink: #f3f2ef;
+  --body: #c9c8c3;
+  --muted: #8f8e89;
+  --rule: #2d2d2a;
+  --accent: #ff6a3d;
+  --accent-wash: #3a1d14;
+  --term: #0a0a09;
+  --term-ink: #e9e8e4;
+  --term-muted: #8f8e89;
+  --shadow: 0 1px 1px rgba(0, 0, 0, 0.4), 0 18px 40px -16px rgba(0, 0, 0, 0.7);
+  --mark: url("mark-dark.svg");
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--page);
+  color: var(--body);
+  font-family: "Geist", sans-serif;
+  font-size: 19px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.tag {
+  background: var(--accent-wash);
+  color: var(--ink);
+  font-size: 15px;
+  padding: 12px 56px;
+  display: flex;
+  gap: 14px;
+}
+.tag b { color: var(--accent); font-weight: 600; }
+
+.wrap { width: 1240px; margin: 0 auto; }
+nav { display: flex; justify-content: space-between; align-items: center; height: 88px; font-size: 15px; }
+nav .brand { display: flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 600; font-size: 17px; }
+nav .brand i { width: 26px; height: 26px; background: var(--mark) center / contain no-repeat; display: block; }
+nav .links { display: flex; gap: 32px; color: var(--body); }
+
+.display { color: var(--ink); font-weight: 600; letter-spacing: -0.035em; line-height: 0.98; }
+.h2 { color: var(--ink); font-weight: 600; font-size: 44px; letter-spacing: -0.025em; line-height: 1.08; }
+.h3 { color: var(--ink); font-weight: 600; font-size: 20px; letter-spacing: -0.01em; line-height: 1.3; }
+.lede { font-size: 21px; line-height: 1.5; color: var(--body); }
+.small { font-size: 15px; line-height: 1.5; color: var(--muted); }
+.mono { font-family: "Geist Mono", monospace; }
+
+.film {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background: var(--paper);
+}
+.film img { display: block; width: 100%; height: auto; }
+.film .dark { display: none; }
+:root[data-theme="dark"] .film .light { display: none; }
+:root[data-theme="dark"] .film .dark { display: block; }
+
+.paper {
+  background: var(--paper);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  font-family: "Geist Mono", monospace;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--body);
+  overflow: hidden;
+}
+.paper .head {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.paper .head b { color: var(--ink); font-weight: 500; }
+.paper .body { padding: 16px 18px 20px; }
+.paper .h { color: var(--ink); font-weight: 500; }
+.paper .dim { color: var(--muted); }
+.paper .mark { background: var(--accent-wash); color: var(--ink); border-radius: 3px; padding: 0 3px; }
+
+.term {
+  background: var(--term);
+  color: var(--term-ink);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  font-family: "Geist Mono", monospace;
+  font-size: 14px;
+  line-height: 1.7;
+  overflow: hidden;
+}
+.term .bar { display: flex; gap: 7px; padding: 14px 16px; }
+.term .bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3a37; display: block; }
+.term .out { padding: 4px 22px 22px; }
+.term .dim { color: var(--term-muted); }
+.term .no { color: var(--accent); }
+
+.note { color: var(--accent); font-size: 15px; line-height: 1.4; font-weight: 500; }
+.pip { width: 12px; height: 12px; border-radius: 3px; background: var(--accent); display: inline-block; }
+footer { display: flex; justify-content: space-between; padding: 40px 0 56px; border-top: 1px solid var(--rule); font-size: 15px; color: var(--muted); }
+footer span + span { margin-left: 28px; }

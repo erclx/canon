@@ -1,0 +1,71 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Setup, current</title><link rel="stylesheet" href="../kit/landing-v2/assets/v2.css"><link rel="stylesheet" href="../kit/landing-v2/assets/fonts.css"><style>
+:root{--pg:#fdfdfc;--ink:#121212;--body:#3b3b38;--mut:#8a8a86;--tray:#f2f2f0;--line:#ececea;--acc:#c15f3c;--win:#ffffff;--winbar:#f7f7f5;--dot:#dedede;--band:#f3f3f1;--selring:rgba(0,0,0,.07);color-scheme:light}
+:root[data-theme="dark"]{--pg:#121211;--ink:#f2f2f0;--body:#cccccc;--mut:#8b8b8b;--tray:#1a1a18;--line:#2e2e2c;--acc:#d97757;--win:#1e1e1e;--winbar:#252526;--dot:#3a3a38;--band:#2a2a29;--selring:rgba(255,255,255,.06);color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--pg)}
+body{font-family:"Geist",sans-serif;color:var(--body);-webkit-font-smoothing:antialiased}
+.sec{width:1180px;margin:0 auto;padding:120px 0 128px}
+.head h2{font-size:56px;line-height:1.04;letter-spacing:-0.035em;font-weight:600;color:var(--ink);margin:0}
+.head p{font-size:20px;line-height:1.5;color:var(--mut);margin:18px 0 0;max-width:60ch;text-wrap:pretty}
+
+code{font-family:"Geist Mono",monospace;font-size:.88em;color:var(--ink)}
+.stages{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;margin-top:56px;position:relative;padding-top:30px}
+.stages::before{content:"";position:absolute;left:0;right:0;top:6px;height:2px;border-radius:2px;background:var(--line)}
+.st{position:relative}
+.st::before{content:"";position:absolute;top:-30px;left:0;width:14px;height:14px;border-radius:50%;background:var(--pg);box-shadow:inset 0 0 0 2.5px var(--mut)}
+.st.skill::before{box-shadow:inset 0 0 0 3px var(--acc)}
+.st h3{margin:0;font-size:17px;font-weight:600;color:var(--ink)}
+.st.skill h3{font-family:"Geist Mono",monospace;font-size:15.5px;font-weight:500}
+.st p{margin:8px 0 0;font-size:16px;line-height:1.55;text-wrap:pretty}
+.pair{display:grid;grid-template-columns:7fr 5fr;gap:48px;margin-top:52px;align-items:start}
+.tx{background:var(--tray);border-radius:20px;padding:24px 26px;font-family:"Geist Mono",monospace;font-size:14px;line-height:1.7;color:var(--body);user-select:none}
+.tx .cap{font-family:"Geist",sans-serif;font-size:13px;color:var(--mut);margin:0 0 10px}
+.tx .ask{color:var(--ink)}.tx .ask .g{color:var(--mut);margin-right:10px}
+.tx .row{display:grid;grid-template-columns:110px 1fr;gap:12px;padding-left:20px}
+.tx .row .k{color:var(--mut)}.tx .row .v{color:var(--ink)}
+.tx .row.q .v{color:var(--acc)}
+.lands{display:flex;flex-direction:column;gap:20px;padding-top:4px}
+.lands h3{margin:0;font-size:17px;font-weight:600;color:var(--ink)}
+.lands p{margin:6px 0 0;font-size:16px;line-height:1.55}
+.lands .cap{font-size:13px;color:var(--mut);margin:0 0 -6px}
+@media (max-width:1240px){.sec{width:auto;padding-left:32px;padding-right:32px}}
+@media (max-width:900px){.sec{padding:88px 24px 96px}.head h2{font-size:44px}.stages{grid-template-columns:1fr 1fr;gap:32px 36px;padding-top:0}.stages::before{display:none}.st{padding-left:26px}.st::before{top:4px;left:0}.pair{grid-template-columns:1fr;gap:32px}}
+@media (max-width:600px){.sec{padding:64px 16px 72px}.head h2{font-size:36px}.head p{font-size:17px}.stages{grid-template-columns:1fr;gap:0;margin-top:40px;padding-left:6px}.st{padding:0 0 22px 26px;border-left:2px solid var(--line);margin-left:0}.st:last-child{border-left-color:transparent}.st::before{left:-8px;top:2px}.st p{font-size:15px}.tx{padding:18px;font-size:12.5px;border-radius:16px}.tx .row{grid-template-columns:1fr;gap:0;padding-left:16px;margin-bottom:4px}}
+
+.tx{min-height:var(--txh,0px)}
+.tx .ask.sh .g{color:var(--mut)}
+.tx .blk+.blk{margin-top:10px}
+.tx .cur{display:inline-block;width:8px;height:16px;background:var(--ink);vertical-align:-3px;margin-left:1px}
+.st{cursor:default}
+.st .go{all:unset;cursor:pointer;display:block;font-family:inherit;color:inherit}
+.st .go::after{content:"";position:absolute;inset:-34px -14px -10px -14px;border-radius:14px}
+.st h3{transition:color .2s ease}
+.st::before{transition:background-color .25s ease,transform .3s cubic-bezier(.34,1.56,.64,1)}
+.st.on::before{background:var(--acc);box-shadow:none;transform:scale(1.15)}
+.st:first-child.on::before{background:var(--mut)}
+.st.done::before{background:color-mix(in srgb,var(--acc) 30%,var(--pg))}
+.st:first-child.done::before{background:color-mix(in srgb,var(--mut) 35%,var(--pg))}
+.st .go:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:6px}
+@media (hover:hover){.st:hover h3{color:var(--acc)}}
+@media (prefers-reduced-motion:reduce){.st::before,.st h3{transition:none}}
+@media (max-width:900px){.st .go::after{inset:-8px -10px -8px -34px}}
+.tray{background:var(--tray);border-radius:36px;padding:40px}@media (max-width:900px){.tray{padding:24px;border-radius:28px}}@media (max-width:600px){.tray{padding:12px;border-radius:22px}}.tx{background:var(--win);border:0;box-shadow:0 0 0 1px var(--selring),0 24px 60px -28px rgba(0,0,0,.3);border-radius:12px}@media (max-width:600px){.tx{border-radius:10px}}</style></head><body><div class="tag"><b>Setup, current</b><span>The working version of the setup section. Options are drawn beside it, and a pick is folded back in here</span></div><div class="sec"><div class="head"><h2>How a repo comes onto canon</h2><p>The project starts with its stack's own tool. An agent brings it onto canon, and the same skills keep it current after every release.</p></div><div class="stages"><div class="st" data-i="0"><button type="button" class="go" aria-label="Play Start in the session"><h3>Start</h3></button><p>canon does not make the project. <code>bun init</code> or <code>npm create vite</code> does, and canon layers on top.</p></div><div class="st skill" data-i="1"><button type="button" class="go" aria-label="Play target-setup in the session"><h3>target-setup</h3></button><p>Detects the stack, shows the whole chain, and writes nothing until you say yes. Then it runs <code>canon init</code>, checks what landed, and indexes the docs.</p></div><div class="st skill" data-i="2"><button type="button" class="go" aria-label="Play target-check in the session"><h3>target-check</h3></button><p>Reports, domain by domain, what the project holds against what canon now ships, and repairs nothing.</p></div><div class="st skill" data-i="3"><button type="button" class="go" aria-label="Play target-update in the session"><h3>target-update</h3></button><p>After a release, upgrades the CLI and plugin, previews the changelog, migrations, and drift, and on your go-ahead catches the project up.</p></div></div><div class="pair"><div class="tray"><div class="tx" aria-hidden="true"><p class="cap">A session in a fresh project</p><div class="log" id="log"></div></div></div><div class="lands"><p class="cap">What lands in the project</p><div><h3>Skills</h3><p>Load live from the plugin, so there is no copy to drift.</p></div><div><h3>Rules</h3><p>Files under <code>.claude/rules/</code> that load when a matching path is edited.</p></div><div><h3>Configs and seeds</h3><p>Real files the project owns.</p></div></div></div></div><script>const B=[{"ask": "bun init", "shell": true, "rows": []}, {"ask": "/canon:target-setup", "rows": [["k", "Stack", "bun, react"], ["k", "Lays down", "base tooling, the react stack, governance rules, the Claude seeds"], ["q", "Run it?", "yes"], ["k", "Verified", "format, lint, types, tests"]]}, {"ask": "/canon:target-check", "rows": [["k", "Domains", "tooling, governance, Claude, indexes"], ["k", "Behind", "nothing, every domain current"]]}, {"ask": "/canon:target-update", "rows": [["k", "Release", "5.79.0 to 5.80.0"], ["q", "Go ahead?", "yes"], ["k", "Done", "one migration, synced, check clean"]]}];
+const log=document.getElementById('log'),tx=document.querySelector('.tx'),st=[...document.querySelectorAll('.st')];
+const esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;');const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function mark(i){st.forEach((s,j)=>{s.classList.toggle('on',j===i);s.classList.toggle('done',j<i)})}
+function blk(i){const d=document.createElement('div');d.className='blk';d.innerHTML='<div class="ask'+(B[i].shell?' sh':'')+'"><span class="g">'+(B[i].shell?'$':'❯')+'</span><span class="t"></span></div>';log.append(d);return d}
+function row(d,[k,a,b]){const r=document.createElement('div');r.className='row'+(k==='q'?' q':'');r.innerHTML='<span class="k">'+esc(a)+'</span><span class="v">'+esc(b)+'</span>';d.append(r)}
+function full(i){const d=blk(i);d.querySelector('.t').textContent=B[i].ask;B[i].rows.forEach(r=>row(d,r))}
+function upto(n){log.innerHTML='';for(let i=0;i<=n;i++)full(i)}
+function size(){tx.style.setProperty('--txh','0px');const keep=log.innerHTML;upto(B.length-1);tx.style.setProperty('--txh',tx.offsetHeight+'px');log.innerHTML=keep}
+let gen=0;
+async function play(i,g){mark(i);log.innerHTML='';for(let j=0;j<i;j++)full(j);const d=blk(i),t=d.querySelector('.t'),c=document.createElement('span');c.className='cur';t.after(c);
+  for(let k=1;k<=B[i].ask.length;k++){t.textContent=B[i].ask.slice(0,k);await wait(30);if(g!==gen)return}
+  await wait(500);if(g!==gen)return;c.remove();
+  for(const r of B[i].rows){await wait(r[0]==='q'?900:420);if(g!==gen)return;row(d,r)}}
+async function tour(g){for(let i=0;i<B.length;i++){await play(i,g);if(g!==gen)return;await wait(1100);if(g!==gen)return}mark(B.length-1)}
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+st.forEach((s,i)=>s.querySelector('.go').addEventListener('click',()=>{gen++;if(reduce){mark(i);upto(i)}else play(i,gen)}));
+upto(B.length-1);mark(B.length-1);size();addEventListener('resize',size);document.fonts&&document.fonts.ready.then(size);
+if(!reduce){const io=new IntersectionObserver(es=>{if(es.some(x=>x.isIntersecting&&x.intersectionRatio>=.35)){io.disconnect();gen++;log.innerHTML='';tour(gen)}},{threshold:[.35]});io.observe(tx)}
+</script></body></html>

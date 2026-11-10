@@ -1,5 +1,5 @@
 ---
-description: Hold the landing page's motion test and its one hue, each of which fails silently when broken
+description: Hold the landing page's motion test and its one accent, each of which fails silently when broken
 paths:
   - 'web/**'
 ---
@@ -14,11 +14,10 @@ paths:
 - Treat a reveal that plays the same on every section as an entrance, and hold a section tuning its own arrival to the test above.
 - Give every animation a `prefers-reduced-motion: reduce` branch that still lands the state change, carried by a class rather than the motion alone.
 
-## The page carries no accent, and the pip is its one hue
+## The page carries one accent, and it is the pip
 
-- Draw every action and link in ink, and leave `--color-accent` off the page, since a second hue beside the pip splits the one signal the page carries.
-- Read the pip as `--pip`, which `base.astro` sets from `FAVICON_COLORS` so the page, the favicon, and the card share one pair.
-- Use the pip outside the mark only for status, to mark the one result a step's figure ends on and the kicker naming that step.
-- Never give the pip a second use, since each arrives with a reason as good as the last and the hue holds only while it marks one thing.
-- Reach for `--color-success` or a surface and border token for any other state.
-- Keep the pip out of persistent chrome bar the mark itself, so the nav and the footer stay ink.
+- Read the accent as `--color-accent`, whose pair is the pip's own in `FAVICON_COLORS`, so the page, favicon, and card share one hue. A second hue splits the one signal the page carries.
+- Color the mark's pip from `--pip`, which `base.astro` sets from `FAVICON_COLORS`, since the mark is drawn from its own pair rather than a page token.
+- Keep the accent to the section marker in the nav, the focused prompt, and the live state a product view shows, such as a working session, an active skill, a refusal, or a branch.
+- Draw every action, link, and focus ring in ink, so a control never borrows the accent to look pressed.
+- Reach for `--color-success`, `--color-waiting`, or a surface and border token for any other state.

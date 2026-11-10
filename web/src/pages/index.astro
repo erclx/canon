@@ -1,28 +1,23 @@
 ---
-import Build from '../components/beats/build.astro'
-import Dispatch from '../components/beats/dispatch.astro'
-import Groundwork from '../components/beats/groundwork.astro'
-import Merge from '../components/beats/merge.astro'
-import Plan from '../components/beats/plan.astro'
-import Review from '../components/beats/review.astro'
-import Fold from '../components/sections/fold.astro'
-import QuickStart from '../components/sections/quick-start.astro'
-import { bridge, site } from '../content/copy'
+import Craft from '../components/sections/craft.astro'
+import Guardrails from '../components/sections/guardrails.astro'
+import Opening from '../components/sections/opening.astro'
+import Records from '../components/sections/records.astro'
+import Roles from '../components/sections/roles.astro'
+import Setup from '../components/sections/setup.astro'
+import Try from '../components/sections/try.astro'
+import Worktrees from '../components/sections/worktrees.astro'
+import { site } from '../content/copy'
 import Base from '../layouts/base.astro'
 ---
 
 <Base title={site.title} description={site.description}>
-  <Fold />
-  <section class="bridge" id="how">
-    <div class="bin">
-      <p class="lead">{bridge}</p>
-    </div>
-  </section>
-  <Groundwork />
-  <Plan />
-  <Dispatch />
-  <Build />
-  <Review />
-  <Merge />
-  <QuickStart />
+  <Opening />
+  <Roles />
+  <Records />
+  <Craft />
+  <Guardrails />
+  <Worktrees />
+  <Setup />
+  <Try />
 </Base>

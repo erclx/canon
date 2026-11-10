@@ -61,7 +61,7 @@ docs = [
   "examples/",
   "assets/loops/",
 ]
-# The canon.erclx.dev landing page: its own Astro config, its own manual
+# The canon.erclx.com landing page: its own Astro config, its own manual
 # typecheck path, its own Playwright e2e suite, and its own deploy workflow
 # (deploy-site.yml) building and shipping it independently of every row
 # above, which is what earns it a row of its own rather than riding with

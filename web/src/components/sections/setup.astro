@@ -1,0 +1,450 @@
+---
+import { setup, setupSession } from '../../content/copy'
+
+/**
+ * A project's life with canon: four stages along one rule, the three skills
+ * ringed in the accent, and the setup session on the tray beside what lands.
+ * The session plays once when it scrolls into view, each stage's ring filling
+ * as its command types, finished stages kept tinted, and rests whole on the
+ * last stage. A click on a stage replays from it and rests there, and the
+ * session holds one height so the page never jumps.
+ */
+const code = (text: string) => text.split('`')
+---
+
+<section class="sec" id="setup">
+  <div class="sec-head">
+    <h2>{setup.head}</h2>
+    <p>{setup.lede}</p>
+  </div>
+  <div class="stages">
+    {
+      setup.stages.map((stage, index) => (
+        <div class={`st${stage.skill ? ' skill' : ''}`} data-i={index}>
+          <button type="button" class="go" aria-label={setup.play(stage.name)}>
+            <h3>{stage.name}</h3>
+          </button>
+          <p>
+            {code(stage.line).map((part, k) =>
+              k % 2 ? <code>{part}</code> : part,
+            )}
+          </p>
+        </div>
+      ))
+    }
+  </div>
+  <div class="pair">
+    <div class="tray">
+      <div class="tx win" aria-hidden="true">
+        <p class="cap">{setup.session}</p>
+        <div class="log"></div>
+      </div>
+    </div>
+    <div class="lands">
+      <p class="cap">{setup.lands.cap}</p>
+      {
+        setup.lands.items.map((item) => (
+          <div>
+            <h3>{item.name}</h3>
+            <p>
+              {code(item.line).map((part, k) =>
+                k % 2 ? <code>{part}</code> : part,
+              )}
+            </p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+  <script
+    type="application/json"
+    class="setup-data"
+    set:html={JSON.stringify(setupSession)}
+  />
+</section>
+
+<style is:global>
+  #setup .stages {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 32px;
+    margin-top: 56px;
+    padding-top: 30px;
+  }
+
+  #setup .stages::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 6px;
+    height: 2px;
+    border-radius: var(--radius-marker);
+    background: var(--line);
+  }
+
+  #setup .st {
+    position: relative;
+  }
+
+  #setup .st::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    left: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--ground);
+    box-shadow: inset 0 0 0 2.5px var(--muted);
+    transition:
+      background-color var(--duration-fade) var(--ease-standard),
+      transform var(--duration-move) var(--ease-standard);
+  }
+
+  #setup .st.skill::before {
+    box-shadow: inset 0 0 0 3px var(--accent);
+  }
+
+  #setup .st.on::before {
+    background: var(--accent);
+    box-shadow: none;
+    transform: scale(1.15);
+  }
+
+  #setup .st:first-child.on::before {
+    background: var(--muted);
+  }
+
+  #setup .st.done::before {
+    background: color-mix(in srgb, var(--accent) 30%, var(--ground));
+  }
+
+  #setup .st:first-child.done::before {
+    background: color-mix(in srgb, var(--muted) 35%, var(--ground));
+  }
+
+  #setup .st .go {
+    all: unset;
+    display: block;
+    cursor: pointer;
+  }
+
+  #setup .st .go::after {
+    content: '';
+    position: absolute;
+    inset: -34px -14px -10px;
+    border-radius: var(--radius-panel);
+  }
+
+  #setup .st .go:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 4px;
+    border-radius: var(--radius-action);
+  }
+
+  #setup .st h3 {
+    margin: 0;
+    font-size: var(--size-body);
+    font-weight: 600;
+    color: var(--ink);
+    transition: color var(--duration-fade) var(--ease-standard);
+  }
+
+  #setup .st.skill h3 {
+    font-family: var(--mono);
+  }
+
+  @media (hover: hover) {
+    #setup .st:hover h3 {
+      color: var(--accent);
+    }
+  }
+
+  #setup .st p,
+  #setup .lands p {
+    margin: 8px 0 0;
+    font-size: var(--size-body);
+    line-height: var(--type-body-lh);
+    text-wrap: pretty;
+  }
+
+  #setup .pair {
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: 48px;
+    margin-top: 52px;
+    align-items: start;
+  }
+
+  #setup .tx {
+    display: block;
+    min-height: var(--txh, 0px);
+    padding: 24px 26px;
+    line-height: 1.7;
+    user-select: none;
+  }
+
+  #setup .cap {
+    margin: 0 0 10px;
+    font-family: var(--sans);
+    font-size: var(--size-small);
+    color: var(--muted);
+  }
+
+  #setup .tx .ask {
+    background: none;
+  }
+
+  #setup .tx .ask .g {
+    margin-right: 0;
+  }
+
+  #setup .tx .blk + .blk {
+    margin-top: 10px;
+  }
+
+  #setup .tx .row {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr);
+    gap: 12px;
+    padding-left: 20px;
+  }
+
+  #setup .tx .row .k {
+    color: var(--muted);
+  }
+
+  #setup .tx .row .v {
+    color: var(--ink);
+  }
+
+  #setup .tx .row.q .v {
+    color: var(--accent);
+  }
+
+  #setup .tx .cur {
+    height: 16px;
+    margin-left: 1px;
+    vertical-align: -3px;
+  }
+
+  #setup .lands {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-top: 4px;
+  }
+
+  #setup .lands .cap {
+    margin: 0 0 -6px;
+  }
+
+  #setup .lands h3 {
+    margin: 0;
+    font-size: var(--size-body);
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  #setup .lands p {
+    margin-top: 6px;
+  }
+
+  @media (max-width: 900px) {
+    #setup .stages {
+      grid-template-columns: 1fr 1fr;
+      gap: 32px 36px;
+      padding-top: 0;
+    }
+
+    #setup .stages::before {
+      display: none;
+    }
+
+    #setup .st {
+      padding-left: 26px;
+    }
+
+    #setup .st::before {
+      top: 4px;
+    }
+
+    #setup .st .go::after {
+      inset: -8px -10px -8px -34px;
+    }
+
+    #setup .pair {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 32px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    #setup .stages {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
+      margin-top: 40px;
+      padding-left: 6px;
+    }
+
+    #setup .st {
+      padding: 0 0 22px 26px;
+      border-left: 2px solid var(--line);
+    }
+
+    #setup .st:last-child {
+      border-left-color: transparent;
+    }
+
+    #setup .st::before {
+      left: -8px;
+      top: 2px;
+    }
+
+    #setup .tx {
+      padding: 18px;
+    }
+
+    #setup .tx .row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
+      margin-bottom: 4px;
+      padding-left: 16px;
+    }
+  }
+</style>
+
+<script>
+  import { escapeHtml, pacer, reducedMotion } from '../../lib/scene'
+
+  interface Block {
+    ask: string
+    shell: boolean
+    rows: [string, string, string][]
+  }
+
+  const section = document.getElementById('setup')
+  const source = section?.querySelector('.setup-data')
+  const log = section?.querySelector<HTMLElement>('.log')
+  const tx = section?.querySelector<HTMLElement>('.tx')
+
+  if (section && source?.textContent && log && tx) {
+    const blocks = JSON.parse(source.textContent) as Block[]
+    const stages = [...section.querySelectorAll<HTMLElement>('.st')]
+    const pace = pacer()
+    const still = reducedMotion()
+    const last = blocks.length - 1
+
+    function mark(index: number) {
+      stages.forEach((stage, j) => {
+        stage.classList.toggle('on', j === index)
+        stage.classList.toggle('done', j < index)
+      })
+    }
+
+    function block(index: number) {
+      const node = document.createElement('div')
+      const shell = blocks[index]?.shell
+      node.className = 'blk'
+      node.innerHTML = `<div class="ask"><span class="g">${shell ? '$' : '❯'}</span> <span class="t"></span></div>`
+      log!.append(node)
+      return node
+    }
+    function row(
+      node: HTMLElement,
+      [kind, key, value]: [string, string, string],
+    ) {
+      const line = document.createElement('div')
+      line.className = `row${kind === 'q' ? ' q' : ''}`
+      line.innerHTML = `<span class="k">${escapeHtml(key)}</span><span class="v">${escapeHtml(value)}</span>`
+      node.append(line)
+    }
+    function full(index: number) {
+      const node = block(index)
+      const text = node.querySelector('.t')
+      if (text) text.textContent = blocks[index]?.ask ?? ''
+      blocks[index]?.rows.forEach((r) => row(node, r))
+    }
+    function upTo(index: number) {
+      log!.replaceChildren()
+      for (let i = 0; i <= index; i++) full(i)
+    }
+
+    /** The session keeps the height of the whole run, so a replay never moves the page. */
+    function size() {
+      tx!.style.setProperty('--txh', '0px')
+      const kept = [...log!.childNodes]
+      upTo(last)
+      tx!.style.setProperty('--txh', `${tx!.offsetHeight}px`)
+      log!.replaceChildren(...kept)
+    }
+
+    async function play(index: number, generation: number) {
+      const item = blocks[index]
+      if (!item) return false
+      mark(index)
+      log!.replaceChildren()
+      for (let j = 0; j < index; j++) full(j)
+      const node = block(index)
+      const text = node.querySelector<HTMLElement>('.t')
+      const cursor = document.createElement('span')
+      cursor.className = 'cur'
+      text?.after(cursor)
+      for (let k = 1; k <= item.ask.length; k++) {
+        if (text) text.textContent = item.ask.slice(0, k)
+        if (!(await pace.wait(30, generation))) return false
+      }
+      if (!(await pace.wait(500, generation))) return false
+      cursor.remove()
+      for (const r of item.rows) {
+        if (!(await pace.wait(r[0] === 'q' ? 900 : 420, generation)))
+          return false
+        row(node, r)
+      }
+      return true
+    }
+
+    async function tour(generation: number) {
+      for (let i = 0; i < blocks.length; i++) {
+        if (!(await play(i, generation))) return
+        if (!(await pace.wait(1100, generation))) return
+      }
+      mark(last)
+    }
+
+    stages.forEach((stage, index) =>
+      stage.querySelector('.go')?.addEventListener('click', () => {
+        const generation = pace.next()
+        if (still) {
+          mark(index)
+          upTo(index)
+        } else void play(index, generation)
+      }),
+    )
+
+    upTo(last)
+    mark(last)
+    size()
+    window.addEventListener('resize', size)
+    void document.fonts?.ready.then(size)
+
+    if (!still) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (
+            entries.some((e) => e.isIntersecting && e.intersectionRatio >= 0.35)
+          ) {
+            observer.disconnect()
+            const generation = pace.next()
+            log.replaceChildren()
+            void tour(generation)
+          }
+        },
+        { threshold: [0.35] },
+      )
+      observer.observe(tx)
+    }
+  }
+</script>
