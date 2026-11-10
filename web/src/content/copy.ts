@@ -19,7 +19,14 @@ const NPM = 'https://www.npmjs.com/package/@erclx/canon'
 const DOCS = `${REPO}/tree/main/docs`
 
 export const site = {
+  /** The lowercase wordmark the social card and its alt text draw, so a change re-captures the card. */
   name: 'canon',
+  /**
+   * The name as text, capitalized, which `og:site_name` reads. It stays apart
+   * from `name` because the wordmark is artwork styled lowercase while a name
+   * written in a label takes a capital.
+   */
+  label: 'Canon',
   /**
    * The deployed origin, which a social card's absolute image URL is resolved
    * against and which `astro.config.mjs` reads as its own `site` value. It is
@@ -27,8 +34,8 @@ export const site = {
    * anything `README.md` states, so it carries no citation.
    */
   origin: 'https://canon.erclx.com',
-  // README.md: "runs agent work from plan to merge"
-  title: 'canon runs agent work from plan to merge',
+  /** The browser tab, which reads the project name alone with no tagline after it. */
+  title: 'Canon',
   // README.md: "A Claude Code plugin and CLI that runs agent work from plan to merge."
   description:
     'A Claude Code plugin and CLI that runs agent work from plan to merge.',
