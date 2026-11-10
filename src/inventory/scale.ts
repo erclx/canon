@@ -27,6 +27,10 @@ export const VALUE_SUBJECTS = [
 
 export type ValueSubject = (typeof VALUE_SUBJECTS)[number]
 
+export function isValueSubject(name: string): name is ValueSubject {
+  return (VALUE_SUBJECTS as readonly string[]).includes(name)
+}
+
 /**
  * `no-values` covers an intent record, which names each role's custom property
  * and leaves the value to the stylesheet its lead names. That stylesheet goes

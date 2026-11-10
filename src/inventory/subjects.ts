@@ -33,11 +33,6 @@ export interface Subject {
   readonly name: string
   /** What the listing means, printed above the rows so a count reads correctly. */
   readonly summary: string
-  /**
-   * `element` reads the elements a project's query names, so it needs an
-   * `inventory.toml`. `value` reads every rendered element, so it needs none.
-   */
-  readonly kind: 'element' | 'value'
   readonly read: (args: ReaderArgs) => SubjectReading[]
 }
 
@@ -119,7 +114,6 @@ function readFocusTreatments({ query }: ReaderArgs): SubjectReading[] {
 const FOCUS: Subject = {
   name: 'focus',
   summary: 'what each element changes about itself when it takes focus',
-  kind: 'element',
   read: readFocusTreatments,
 }
 
@@ -136,7 +130,6 @@ export const SUBJECTS: readonly Subject[] = [
   ...VALUE_SUBJECTS.map((name): Subject => ({
     name,
     summary: VALUE_SUMMARIES[name],
-    kind: 'value',
     read: readValues,
   })),
 ]
