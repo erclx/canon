@@ -54,7 +54,7 @@ Each verb here has a skill that owns the job. Load the skill rather than driving
 | Film a web app with a click log and camera   | `canon take`               | `canon:ui-film`             |
 | Fetch a YouTube transcript                   | `canon transcripts`        | `canon:youtube-transcripts` |
 
-Section mode takes one HTML file or URL and a folder, as in `canon capture <source> --sections --out <dir> --json`, which prints each shot's path, top, and height in page order.
+Section mode takes one HTML file or URL and a folder, as in `canon capture <source> --sections --out <dir> --json`, which prints each shot's path, top, and height in page order. A phone pass adds `--width 320 --touch`, so hover media queries resolve false and pointer resolves coarse.
 
 The design board is Frameboard, a separate CLI outside canon, so a board job runs a `frameboard` verb rather than a `canon` one.
 
