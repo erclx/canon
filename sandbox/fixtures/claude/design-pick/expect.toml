@@ -34,6 +34,11 @@
 # the 834 fallback. Not yet measured, so a first failure here may be the capture's
 # file naming rather than the run.
 #
+# The last two entries hold the reference step's close. The scenario seeds a
+# references page, so the archive holds its capture under
+# `.canon/picks/references/`, and the seeded frame still standing proves the
+# close left the page rather than deleting it with the round pages.
+#
 # Two earlier premises were wrong and are recorded so neither is re-derived. The
 # arm first asserted a render refusal, read off the arm then named `ui-test` (canon-keep-retired)
 # failing in a
@@ -49,6 +54,8 @@ paths = [
   ".canon/picks/**/arm-*-320*",
   ".canon/picks/**/arm-*-768*",
   ".canon/picks/**/arm-*-1440*",
+  ".canon/picks/references/*",
+  ".canon/board/picks/references/fieldnote-app-1440-s01.html",
 ]
 
 # The two surfaces a close reaches, and the board it works on. `index.html`
@@ -94,6 +101,7 @@ manual = [
   "The loop narrowed to the picked arm and handed off before closing. Unwired: the loop stops on a person saying the pick is right and no fixture supplies one, so a headless run closes on the pick and a green verdict here is not coverage of the loop.",
   "The board was served and its link emitted ahead of the pick question. Unwired: the harness captures no tool calls and cannot assert ordering, and step 6 ends the server it started and deletes the round pages before anything reads the tree.",
   "The close deleted only the round pages the run added and left no other board page touched. Unwired: the fixture seeds no operator page beside the run's, so nothing here separates a delete by recorded name from a delete by prefix.",
+  "Each arm named the references frame it draws on and what it takes, and copied no text or number off it. Semantic: the arms are deleted by the close, and the run's reply carries the field only when an envelope is passed.",
   "The design note names the arm that won and the ones that stayed defensible, rather than merely being touched. Judgment: step 6 now directs the write and write_scope admits it, so what nothing asserts is whether the record says anything useful, and any pattern over it would match wording the run chooses.",
 ]
 

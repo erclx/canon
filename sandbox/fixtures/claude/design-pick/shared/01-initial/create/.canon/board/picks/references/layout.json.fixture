@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "frames": {
+    "fieldnote-app-notes": { "x": 0, "y": 0, "width": 480, "height": 240, "order": 0 },
+    "fieldnote-app-1440-s01": { "x": 0, "y": 320, "width": 1440, "height": 420, "order": 1 }
+  }
+}

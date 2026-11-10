@@ -23,11 +23,18 @@ The candidates live on the Frameboard board the project names, in a project of t
 1. State the decision in one sentence, naming what changes between arms and what stays fixed.
 2. Emit the design read in the run's output, in the form `design-taste` fixes, taking the layer from its ordered catalog. The arms differ at that layer, and a missing read is visible.
 3. Derive a kebab slug from that sentence. The first round's page is `<slug>`, and Step 5 names later rounds `<slug>-2`, `<slug>-3`, and so on.
-4. Write one arm per candidate, each carrying an id, a label, and what the arm costs. An arm with no stated cost is not an option.
+4. Write one arm per candidate, each carrying an id, a label, what the arm costs, and the reference it draws on. An arm with no stated cost is not an option.
 5. Make the current state arm `0`, so the baseline is a candidate rather than an absence. A decision with nothing shipped yet says so and starts at arm `1`.
 6. Stop at three to five arms. Two is a comparison the operator can hold in prose, and past five the pick stops being a look and becomes a sort.
 
 Inside a live `plan-groundwork` track, renders land in the track's own `evidence/<slug>/renders/`, since a candidate render is evidence its decision file cites. Everywhere else they land in session scratch.
+
+### Gather references before drafting
+
+A round drafted with nothing real in front of it comes back generic, so gather references before Step 2 as `references/board.md` states.
+
+- Name in each arm's reference field the frame it draws on and what it takes, or `none`
+- Take structure alone, as the `design-references` skill draws that line, and never a product's text, accounts, logo, or numbers
 
 ## Step 2: draft the arms as frames on one page
 
@@ -45,7 +52,7 @@ A frame renders at its own layout width on the board and in a capture alike, so 
 
 Each frame carries its own label and follows the board theme, so the set reads as one comparison.
 
-- Label each arm inside its frame with its id and its cost, since the composite capture draws no captions
+- Label each arm inside its frame with its id, its cost, and its reference, since the composite capture draws no captions
 - Theme every arm off the `data-theme` attribute the board sets on each frame's root, so the theme toggle sets the whole set at once. A set spanning both themes cannot be compared.
 - Give no arm a script that stores a theme and reapplies it on load. It overwrites the toggle, and a fresh browser profile hides the fault.
 - Write each frame's headings, labels, and captions by `${CLAUDE_SKILL_DIR}/../ui-craft/references/copy.md`, since a candidate's copy is often the first draft of the shipped page's
@@ -103,11 +110,8 @@ Put the choice to the operator through the structured question surface, since a 
 
 Take no pick on the operator's behalf when two arms are both defensible and the difference is taste. That call is theirs, and a silent one is the failure this skill exists to prevent.
 
-Read the selection when the answer points at the board, such as "the selected one". `references/board.md` maps each record to a pick, a revert, a correction, or no answer.
-
-### Holding a pick that scrolls sideways
-
-No pick folds into the surface while any of its frames scrolls sideways. Measure the picked arm at every round width before Step 6, as `${CLAUDE_SKILL_DIR}/references/widths.md` states, and carry a held pick into Step 5 naming each width that failed.
+- Read the selection when the answer points at the board, such as "the selected one", which `references/board.md` maps to a pick, a revert, a correction, or no answer
+- Hold a pick while any of its frames scrolls sideways, measured before Step 6 as `${CLAUDE_SKILL_DIR}/references/widths.md` states, and carry it into Step 5 naming each width that failed
 
 ## Step 5: loop on the pick
 
@@ -130,7 +134,7 @@ A round never sees its neighbors, so run this before Step 6 item 1 where the pic
 1. Apply the winning arm to the real surface, in one change.
 2. Close out any document stating the decision as open, in the same change, naming the winner and the arms that stayed defensible. Skip this where nothing stated the decision.
 3. Hand the winning arm's frame refs to `canon:design-record`, which lands them in the project's design record. Report it rather than proceeding silently when that skill does not resolve.
-4. Capture the picked round's frames with `frameboard capture --page <page> --out <canon-dir>`, keeping the losing arms as a revert record. Report each image's `path` off the record.
+4. Capture the picked round's frames and the `references` page with `frameboard capture --page <page> --out <canon-dir>`, keeping the losing arms as a revert record. Report each image's `path`.
 5. Resolve `<canon-dir>` as `.canon/` against the main worktree root, where shared session scratch resolves. Frameboard appends the project and page, so the archive lands at `.canon/<project>/<page>/`.
 6. Delete every page on the run's list with `frameboard page delete <page>`, except a picked page on a named board. Touch no page the run did not add, and never remove a page folder by hand.
 7. End the serve command if this run started it, since Frameboard carries no stop verb. Leave a server the operator started running.
@@ -148,16 +152,13 @@ A board `canon/config/design.toml` names is the one the project's design sync re
 - Delete each losing arm's frames with `frameboard frame delete <page>/arm-<id>-<px>`, after item 4's capture has archived them
 - Delete every other page on the run's list as item 6 states
 
-## Reading a measurement
-
-Reach for a measurement whenever the claim is a number, such as a contrast ratio, a column width, or a tap target. Read `${CLAUDE_SKILL_DIR}/references/widths.md` before trusting one, for the failure modes each probe carries.
-
 ## What this delegates
 
 Cite these rather than restating them. A step reimplemented here rots against the skill that owns it.
 
 - `plan-feature` plans the work once the pick is made, and declares the pull request boundary that plan carries
 - `design-record` lands the winning arm in the reference folder and its values in the design document, and runs before item 4's capture and item 6's deletes, which keep the picked page on named boards
+- `references/widths.md` carries how to read a contrast, a column width, or a tap target off a frame, and `canon drive` runs the probes without gating
 - `design-taste` carries the layer catalog, the ordering, grey-boxing, and the defaults an arm should reach past
 - `write-human` carries the voice for any copy an arm puts in front of a reader
 
