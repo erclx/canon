@@ -1,106 +1,709 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Roles, chat with plain list</title><link rel="stylesheet" href="../kit/landing-v2/assets/v2.css"><link rel="stylesheet" href="../kit/landing-v2/assets/fonts.css"><style>
-:root{--pg:#fdfdfc;--ink:#121212;--body:#3b3b38;--mut:#8a8a86;--tray:#f2f2f0;--win:#ffffff;--winbar:#f7f7f5;--line:#ececea;--band:#f3f3f1;--dot:#dedede;--acc:#c15f3c;--hov:rgba(0,0,0,.035);--sel:#ffffff;--selring:rgba(0,0,0,.07);color-scheme:light}
-:root[data-theme="dark"]{--pg:#121211;--ink:#f2f2f0;--body:#cccccc;--mut:#8b8b8b;--tray:#1a1a18;--win:#1e1e1e;--winbar:#252526;--line:#2e2e2c;--band:#2a2a29;--dot:#3a3a38;--acc:#d97757;--hov:rgba(255,255,255,.04);--sel:#262624;--selring:rgba(255,255,255,.06);color-scheme:dark}
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--pg)}
-body{font-family:"Geist",sans-serif;color:var(--body);-webkit-font-smoothing:antialiased}
-.tag{font-family:"Geist",sans-serif}
-.sec{width:1180px;margin:0 auto;padding:120px 0 128px}
-.head h2{font-size:56px;line-height:1.04;letter-spacing:-0.035em;font-weight:600;color:var(--ink);margin:0}
-.head p{font-size:20px;line-height:1.5;color:var(--mut);margin:18px 0 0;max-width:60ch;text-wrap:pretty}
-.tray{background:var(--tray);border-radius:36px;margin-top:56px;padding:40px}
-.win{background:var(--win);border-radius:12px;box-shadow:0 0 0 1px var(--selring),0 24px 60px -28px rgba(0,0,0,.3);overflow:hidden;display:flex;flex-direction:column;font-family:"Geist Mono",monospace;font-size:14.5px;line-height:1.6;color:var(--body)}
-.win .bar{flex:none;height:44px;background:var(--winbar);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;position:relative;font-family:"Geist",sans-serif;font-size:13px;font-weight:500;color:var(--mut)}
-.win .bar i{position:absolute;top:16px;width:12px;height:12px;border-radius:50%;background:var(--dot)}
-.win .bar i:nth-child(1){left:16px}.win .bar i:nth-child(2){left:36px}.win .bar i:nth-child(3){left:56px}
-.log{flex:1;min-height:0;padding:20px 26px 0;overflow:hidden}
-.log>div{transition:opacity .3s ease}
-.log .ask{background:var(--band);margin:0 -26px 16px;padding:8px 26px;color:var(--ink);display:flex;gap:10px}
-.log .ask .g{color:var(--mut);flex:none}
-.log .act{color:var(--mut);margin-bottom:14px}
-.log .act span{display:flex;gap:10px;padding-left:4px}
-.log .act span::before{content:"\23BF";flex:none}
-.log .say{color:var(--ink);padding-left:22px;position:relative;margin-bottom:8px}
-.log .say.first::before{content:"\25CF";position:absolute;left:0;top:0;font-size:12px;line-height:23px;color:var(--ink)}
-.log .hide{opacity:0}
-.inp{flex:none;padding:0 26px 16px}
-.inp .rule{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:12.5px}
-.inp .rule i{height:1px;background:var(--line);flex:1}.inp .rule i.s{flex:0 0 18px}
-.inp .line{display:flex;gap:10px;padding:10px 0;white-space:pre-wrap}
-.inp .line .g{color:var(--mut);flex:none}
-.inp .cur{display:inline-block;width:9px;height:18px;background:var(--ink);vertical-align:-4px}
-.inp .bot{height:1px;background:var(--line)}
-.roles button{all:unset;box-sizing:border-box;cursor:pointer;display:block;position:relative;border-radius:12px;font-family:"Geist",sans-serif}
-.roles button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.roles button .pr{position:absolute;left:14px;right:14px;bottom:0;height:2px;border-radius:2px;background:var(--acc);transform-origin:left;transform:scaleX(0);opacity:0}
-.roles button[aria-pressed="true"] .pr{opacity:1;animation:fill var(--dur,6s) linear forwards}
-@keyframes fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-@media (prefers-reduced-motion:reduce){.log>div{transition:none}.roles button .pr{display:none}}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Roles, chat with plain list</title>
+    <link rel="stylesheet" href="../assets/landing-v2/v2.css" />
+    <link rel="stylesheet" href="../assets/landing-v2/fonts.css" />
+    <style>
+      :root {
+        --pg: #fdfdfc;
+        --ink: #121212;
+        --body: #3b3b38;
+        --mut: #8a8a86;
+        --tray: #f2f2f0;
+        --win: #ffffff;
+        --winbar: #f7f7f5;
+        --line: #ececea;
+        --band: #f3f3f1;
+        --dot: #dedede;
+        --acc: #c15f3c;
+        --hov: rgba(0, 0, 0, 0.035);
+        --sel: #ffffff;
+        --selring: rgba(0, 0, 0, 0.07);
+        color-scheme: light;
+      }
+      :root[data-theme='dark'] {
+        --pg: #121211;
+        --ink: #f2f2f0;
+        --body: #cccccc;
+        --mut: #8b8b8b;
+        --tray: #1a1a18;
+        --win: #1e1e1e;
+        --winbar: #252526;
+        --line: #2e2e2c;
+        --band: #2a2a29;
+        --dot: #3a3a38;
+        --acc: #d97757;
+        --hov: rgba(255, 255, 255, 0.04);
+        --sel: #262624;
+        --selring: rgba(255, 255, 255, 0.06);
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        background: var(--pg);
+      }
+      body {
+        font-family: 'Geist', sans-serif;
+        color: var(--body);
+        -webkit-font-smoothing: antialiased;
+      }
+      .tag {
+        font-family: 'Geist', sans-serif;
+      }
+      .sec {
+        width: 1180px;
+        margin: 0 auto;
+        padding: 120px 0 128px;
+      }
+      .head h2 {
+        font-size: 56px;
+        line-height: 1.04;
+        letter-spacing: -0.035em;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 0;
+      }
+      .head p {
+        font-size: 20px;
+        line-height: 1.5;
+        color: var(--mut);
+        margin: 18px 0 0;
+        max-width: 60ch;
+        text-wrap: pretty;
+      }
+      .tray {
+        background: var(--tray);
+        border-radius: 36px;
+        margin-top: 56px;
+        padding: 40px;
+      }
+      .win {
+        background: var(--win);
+        border-radius: 12px;
+        box-shadow:
+          0 0 0 1px var(--selring),
+          0 24px 60px -28px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        font-family: 'Geist Mono', monospace;
+        font-size: 14.5px;
+        line-height: 1.6;
+        color: var(--body);
+      }
+      .win .bar {
+        flex: none;
+        height: 44px;
+        background: var(--winbar);
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        font-family: 'Geist', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--mut);
+      }
+      .win .bar i {
+        position: absolute;
+        top: 16px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--dot);
+      }
+      .win .bar i:nth-child(1) {
+        left: 16px;
+      }
+      .win .bar i:nth-child(2) {
+        left: 36px;
+      }
+      .win .bar i:nth-child(3) {
+        left: 56px;
+      }
+      .log {
+        flex: 1;
+        min-height: 0;
+        padding: 20px 26px 0;
+        overflow: hidden;
+      }
+      .log > div {
+        transition: opacity 0.3s ease;
+      }
+      .log .ask {
+        background: var(--band);
+        margin: 0 -26px 16px;
+        padding: 8px 26px;
+        color: var(--ink);
+        display: flex;
+        gap: 10px;
+      }
+      .log .ask .g {
+        color: var(--mut);
+        flex: none;
+      }
+      .log .act {
+        color: var(--mut);
+        margin-bottom: 14px;
+      }
+      .log .act span {
+        display: flex;
+        gap: 10px;
+        padding-left: 4px;
+      }
+      .log .act span::before {
+        content: '\23BF';
+        flex: none;
+      }
+      .log .say {
+        color: var(--ink);
+        padding-left: 22px;
+        position: relative;
+        margin-bottom: 8px;
+      }
+      .log .say.first::before {
+        content: '\25CF';
+        position: absolute;
+        left: 0;
+        top: 0;
+        font-size: 12px;
+        line-height: 23px;
+        color: var(--ink);
+      }
+      .log .hide {
+        opacity: 0;
+      }
+      .inp {
+        flex: none;
+        padding: 0 26px 16px;
+      }
+      .inp .rule {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--mut);
+        font-size: 12.5px;
+      }
+      .inp .rule i {
+        height: 1px;
+        background: var(--line);
+        flex: 1;
+      }
+      .inp .rule i.s {
+        flex: 0 0 18px;
+      }
+      .inp .line {
+        display: flex;
+        gap: 10px;
+        padding: 10px 0;
+        white-space: pre-wrap;
+      }
+      .inp .line .g {
+        color: var(--mut);
+        flex: none;
+      }
+      .inp .cur {
+        display: inline-block;
+        width: 9px;
+        height: 18px;
+        background: var(--ink);
+        vertical-align: -4px;
+      }
+      .inp .bot {
+        height: 1px;
+        background: var(--line);
+      }
+      .roles button {
+        all: unset;
+        box-sizing: border-box;
+        cursor: pointer;
+        display: block;
+        position: relative;
+        border-radius: 12px;
+        font-family: 'Geist', sans-serif;
+      }
+      .roles button:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 2px;
+      }
+      .roles button .pr {
+        position: absolute;
+        left: 14px;
+        right: 14px;
+        bottom: 0;
+        height: 2px;
+        border-radius: 2px;
+        background: var(--acc);
+        transform-origin: left;
+        transform: scaleX(0);
+        opacity: 0;
+      }
+      .roles button[aria-pressed='true'] .pr {
+        opacity: 1;
+        animation: fill var(--dur, 6s) linear forwards;
+      }
+      @keyframes fill {
+        from {
+          transform: scaleX(0);
+        }
+        to {
+          transform: scaleX(1);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .log > div {
+          transition: none;
+        }
+        .roles button .pr {
+          display: none;
+        }
+      }
 
-.two{display:grid;grid-template-columns:1fr 300px;gap:36px;align-items:start}
-.two .win{height:452px}
-.roles .lbl{font-size:13px;font-weight:500;color:var(--mut);margin:0 0 8px 14px}
-.roles .lbl+.lbl,.roles .grp+.lbl{margin-top:22px}
-.roles button{width:100%;padding:12px 14px 14px}
-.roles button:hover{background:var(--hov)}
-.roles button[aria-pressed="true"]{background:var(--sel);box-shadow:0 0 0 1px var(--selring)}
-.roles button b{display:block;font-size:16px;font-weight:600;color:var(--ink);letter-spacing:-0.005em}
-.roles button span{display:block;font-size:14px;color:var(--mut);margin-top:2px}
-.roles .note{font-size:13px;color:var(--mut);margin:18px 0 0 14px;line-height:1.5}
-.roles.plain{display:flex;flex-direction:column;gap:4px}.two{align-items:center}/* tablet and phone */
-@media (max-width:1240px){.sec{width:auto;padding-left:32px;padding-right:32px}}
-@media (max-width:900px){
- .sec{padding:88px 24px 96px}
- .head h2{font-size:44px}
- .tray{padding:24px;border-radius:28px;margin-top:40px}
- .two{grid-template-columns:1fr;gap:16px}
- .roles.plain{order:-1;flex-direction:row;flex-wrap:wrap;justify-content:center;gap:6px}
- .roles.plain button{width:auto;padding:9px 14px 11px}
- .roles.plain button span{display:none}
- .roles.plain button b{font-size:15px}
-}
-@media (max-width:600px){
- .sec{padding:64px 16px 72px}
- .head h2{font-size:36px}
- .head p{font-size:17px}
- .tray{padding:12px;border-radius:22px;margin-top:32px}
- .roles.plain button{padding:8px 12px 10px}
- .roles.plain button b{font-size:14px}
- .two .win{height:500px}
- .win{font-size:13px}
- .log{padding:16px 16px 0}
- .log .ask{margin:0 -16px 14px;padding:8px 16px}
- .inp{padding:0 16px 14px}
- .inp .rule span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-}
-</style><style data-pills>
-.roles.plain button{border-radius:999px!important;padding:7px 14px!important;box-shadow:inset 0 0 0 1px var(--line);background:transparent}
-@media (hover:hover){.roles.plain button:hover{background:var(--tray)}}
-.roles.plain button[aria-pressed="true"]{background:var(--ink)!important;box-shadow:none!important}
-.roles.plain button[aria-pressed="true"] b{color:var(--pg)!important}
-.roles.plain button b{font-weight:500!important}
-.roles.plain button .pr{display:none!important}
-@media (min-width:901px){.roles.plain button{border-radius:12px!important;padding:12px 14px 14px!important;box-shadow:none!important}.roles.plain button[aria-pressed="true"]{background:var(--sel)!important;box-shadow:0 0 0 1px var(--selring)!important}.roles.plain button[aria-pressed="true"] b{color:var(--ink)!important}.roles.plain button b{font-weight:600!important}}</style></head><body><div class="tag"><b>Roles, current</b><span>The working version of the roles section. Options are drawn beside it, and a pick is folded back in here</span></div><div class="sec"><div class="head"><h2>Who works</h2><p>You talk to the orchestrator. It starts every other role in its own session and hears back from each.</p></div><div class="tray"><div class="two"><div class="win"><div class="bar"><i></i><i></i><i></i><span>claude</span></div><div class="log" id="log" aria-live="polite"></div><div class="inp"><div class="rule"><i></i><span id="who"></span><i class="s"></i></div><div class="line"><span class="g">❯</span><span><span id="typed"></span><span class="cur"></span></span></div><div class="bot"></div></div></div><div class="roles plain" role="group" aria-label="Roles"><button type="button" aria-pressed="true" data-i="0"><b>Orchestrator</b><span>dispatches the rows</span><i class="pr"></i></button><button type="button" aria-pressed="false" data-i="1"><b>Planner</b><span>writes one plan</span><i class="pr"></i></button><button type="button" aria-pressed="false" data-i="2"><b>Worker</b><span>builds and opens the pull request</span><i class="pr"></i></button><button type="button" aria-pressed="false" data-i="3"><b>Code reviewer</b><span>reads the diff</span><i class="pr"></i></button><button type="button" aria-pressed="false" data-i="4"><b>UI reviewer</b><span>drives the checklist</span><i class="pr"></i></button></div></div></div></div><script>
-(()=>{const R=[{"n": "Orchestrator", "from": "from you", "session": "orchestrator-canon", "prompt": "dispatch the ready rows", "act": ["Read the board, ran 3 shell commands", "Checked each row against what is in flight"], "say": ["Two rows are ready. relayed-answer-citation has its plan, so a worker takes it now.", "board-arm-expect has none, so a cold planner writes it first and I launch it when the plan lands."]}, {"n": "Planner", "from": "from the orchestrator, or you for a talk", "session": "planner-canon-board-arm-expect", "prompt": "/canon:role-planner, then /canon:plan-feature board-arm-expect. Write one plan against the current tree and message the orchestrator when it lands.", "act": ["Read 7 files, ran 4 shell commands", "Measured the row against main"], "say": ["Wrote the plan for board-arm-expect. Two questions, both with suggested answers.", "Launchable."]}, {"n": "Worker", "from": "from the orchestrator", "session": "worker-canon-relayed-answer-citation", "prompt": "/canon:auto-ship relayed-answer-citation's plan. Controller: the orchestrator. Message it when the pull request opens.", "act": ["Edited 5 files in its own worktree, ran the check", "Committed 3 slices, each tested"], "say": ["Opened the pull request as a draft for relayed-answer-citation.", "Check passed, and evidence is posted."]}, {"n": "Code reviewer", "from": "from the orchestrator", "session": "reviewer-canon-relayed-answer-citation", "prompt": "/canon:role-reviewer, then /canon:review-pr on relayed-answer-citation. Read the plan's review focus first.", "act": ["Read the diff and the plan, ran 2 shell commands", "Loaded review-craft"], "say": ["0 critical, 2 should-fix, 1 minor.", "Posted to the pull request and sent to the worker."]}, {"n": "UI reviewer", "from": "from the orchestrator", "session": "ui-reviewer-canon-relayed-answer-citation", "prompt": "/canon:role-reviewer, then /canon:review-ui on relayed-answer-citation. One verdict per box, and skip any box marked as taste.", "act": ["Drove 7 boxes in the running app", "Loaded ui-craft"], "say": ["6 of 7 boxes pass. One fails: the focus ring is clipped on mobile.", "Posted under UI review."]}],WHO=["You prompt it", "The orchestrator starts it, or you do for a talk", "The orchestrator starts it", "The orchestrator starts it", "The orchestrator starts it"];
-const B=[...document.querySelectorAll('.roles button')],who=document.getElementById('who'),log=document.getElementById('log'),typed=document.getElementById('typed'),cap=document.getElementById('cap');
-const still=matchMedia('(prefers-reduced-motion: reduce)').matches;let gen=0,cur=0;
-const wait=(ms,g)=>new Promise((ok,no)=>setTimeout(()=>g===gen?ok():no(),ms));
-const esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;');
-function el(cls,html){const d=document.createElement('div');d.className=cls;d.innerHTML=html;return d}
-const ask=r=>el('ask','<span class="g">\u276F</span><span>'+esc(r.prompt)+'</span>');
-const act=r=>el('act',esc(r.act[0])+r.act.slice(1).map(a=>'<span>'+esc(a)+'</span>').join(''));
-const pause=r=>Math.min(2200,700+r.prompt.length*10);
-const est=r=>300+250+r.prompt.length*11+pause(r)+460+530+r.say.length*350+2600;
-function mark(i){B.forEach((b,j)=>{b.setAttribute('aria-pressed',j===i?'true':'false');const p=b.querySelector('.pr');p.style.animation='none';void p.offsetWidth;p.style.animation=''});
- B[i].style.setProperty('--dur',est(R[i])+'ms');who.textContent=R[i].session;if(cap)cap.textContent=WHO[i]}
-function full(i){mark(i);log.innerHTML='';typed.textContent='';log.append(ask(R[i]),act(R[i]));R[i].say.forEach((s,k)=>log.append(el('say'+(k?'':' first'),esc(s))))}
-async function show(node,g){node.classList.add('hide');log.append(node);await wait(30,g);node.classList.remove('hide')}
-async function play(i,g){mark(i);[...log.children].forEach(c=>c.classList.add('hide'));await wait(300,g);log.innerHTML='';typed.textContent='';await wait(250,g);
- for(const ch of R[i].prompt){typed.textContent+=ch;await wait(11,g)}
- await wait(pause(R[i]),g);typed.textContent='';await show(ask(R[i]),g);await wait(400,g);await show(act(R[i]),g);await wait(500,g);
- for(let k=0;k<R[i].say.length;k++){await show(el('say'+(k?'':' first'),esc(R[i].say[k])),g);await wait(320,g)}
- await wait(2600,g)}
-async function loop(from){const g=++gen;cur=from;try{for(;;){await play(cur,g);cur=(cur+1)%R.length}}catch(e){}}
-B.forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.i;if(still){gen++;full(i)}else loop(i)}));
-if(still)full(0);else loop(0);})();
-</script></body></html>
+      .two {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 36px;
+        align-items: start;
+      }
+      .two .win {
+        height: 452px;
+      }
+      .roles .lbl {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--mut);
+        margin: 0 0 8px 14px;
+      }
+      .roles .lbl + .lbl,
+      .roles .grp + .lbl {
+        margin-top: 22px;
+      }
+      .roles button {
+        width: 100%;
+        padding: 12px 14px 14px;
+      }
+      .roles button:hover {
+        background: var(--hov);
+      }
+      .roles button[aria-pressed='true'] {
+        background: var(--sel);
+        box-shadow: 0 0 0 1px var(--selring);
+      }
+      .roles button b {
+        display: block;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--ink);
+        letter-spacing: -0.005em;
+      }
+      .roles button span {
+        display: block;
+        font-size: 14px;
+        color: var(--mut);
+        margin-top: 2px;
+      }
+      .roles .note {
+        font-size: 13px;
+        color: var(--mut);
+        margin: 18px 0 0 14px;
+        line-height: 1.5;
+      }
+      .roles.plain {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .two {
+        align-items: center;
+      } /* tablet and phone */
+      @media (max-width: 1240px) {
+        .sec {
+          width: auto;
+          padding-left: 32px;
+          padding-right: 32px;
+        }
+      }
+      @media (max-width: 900px) {
+        .sec {
+          padding: 88px 24px 96px;
+        }
+        .head h2 {
+          font-size: 44px;
+        }
+        .tray {
+          padding: 24px;
+          border-radius: 28px;
+          margin-top: 40px;
+        }
+        .two {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        .roles.plain {
+          order: -1;
+          flex-direction: row;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 6px;
+        }
+        .roles.plain button {
+          width: auto;
+          padding: 9px 14px 11px;
+        }
+        .roles.plain button span {
+          display: none;
+        }
+        .roles.plain button b {
+          font-size: 15px;
+        }
+      }
+      @media (max-width: 600px) {
+        .sec {
+          padding: 64px 16px 72px;
+        }
+        .head h2 {
+          font-size: 36px;
+        }
+        .head p {
+          font-size: 17px;
+        }
+        .tray {
+          padding: 12px;
+          border-radius: 22px;
+          margin-top: 32px;
+        }
+        .roles.plain button {
+          padding: 8px 12px 10px;
+        }
+        .roles.plain button b {
+          font-size: 14px;
+        }
+        .two .win {
+          height: 500px;
+        }
+        .win {
+          font-size: 13px;
+        }
+        .log {
+          padding: 16px 16px 0;
+        }
+        .log .ask {
+          margin: 0 -16px 14px;
+          padding: 8px 16px;
+        }
+        .inp {
+          padding: 0 16px 14px;
+        }
+        .inp .rule span {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          min-width: 0;
+        }
+      }
+    </style>
+    <style data-pills>
+      .roles.plain button {
+        border-radius: 999px !important;
+        padding: 7px 14px !important;
+        box-shadow: inset 0 0 0 1px var(--line);
+        background: transparent;
+      }
+      @media (hover: hover) {
+        .roles.plain button:hover {
+          background: var(--tray);
+        }
+      }
+      .roles.plain button[aria-pressed='true'] {
+        background: var(--ink) !important;
+        box-shadow: none !important;
+      }
+      .roles.plain button[aria-pressed='true'] b {
+        color: var(--pg) !important;
+      }
+      .roles.plain button b {
+        font-weight: 500 !important;
+      }
+      .roles.plain button .pr {
+        display: none !important;
+      }
+      @media (min-width: 901px) {
+        .roles.plain button {
+          border-radius: 12px !important;
+          padding: 12px 14px 14px !important;
+          box-shadow: none !important;
+        }
+        .roles.plain button[aria-pressed='true'] {
+          background: var(--sel) !important;
+          box-shadow: 0 0 0 1px var(--selring) !important;
+        }
+        .roles.plain button[aria-pressed='true'] b {
+          color: var(--ink) !important;
+        }
+        .roles.plain button b {
+          font-weight: 600 !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tag">
+      <b>Roles, current</b
+      ><span
+        >The working version of the roles section. Options are drawn beside it,
+        and a pick is folded back in here</span
+      >
+    </div>
+    <div class="sec">
+      <div class="head">
+        <h2>Who works</h2>
+        <p>
+          You talk to the orchestrator. It starts every other role in its own
+          session and hears back from each.
+        </p>
+      </div>
+      <div class="tray">
+        <div class="two">
+          <div class="win">
+            <div class="bar"><i></i><i></i><i></i><span>claude</span></div>
+            <div class="log" id="log" aria-live="polite"></div>
+            <div class="inp">
+              <div class="rule">
+                <i></i><span id="who"></span><i class="s"></i>
+              </div>
+              <div class="line">
+                <span class="g">❯</span
+                ><span><span id="typed"></span><span class="cur"></span></span>
+              </div>
+              <div class="bot"></div>
+            </div>
+          </div>
+          <div class="roles plain" role="group" aria-label="Roles">
+            <button type="button" aria-pressed="true" data-i="0">
+              <b>Orchestrator</b><span>dispatches the rows</span
+              ><i class="pr"></i></button
+            ><button type="button" aria-pressed="false" data-i="1">
+              <b>Planner</b><span>writes one plan</span
+              ><i class="pr"></i></button
+            ><button type="button" aria-pressed="false" data-i="2">
+              <b>Worker</b><span>builds and opens the pull request</span
+              ><i class="pr"></i></button
+            ><button type="button" aria-pressed="false" data-i="3">
+              <b>Code reviewer</b><span>reads the diff</span
+              ><i class="pr"></i></button
+            ><button type="button" aria-pressed="false" data-i="4">
+              <b>UI reviewer</b><span>drives the checklist</span
+              ><i class="pr"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      ;(() => {
+        const R = [
+            {
+              n: 'Orchestrator',
+              from: 'from you',
+              session: 'orchestrator-canon',
+              prompt: 'dispatch the ready rows',
+              act: [
+                'Read the board, ran 3 shell commands',
+                'Checked each row against what is in flight',
+              ],
+              say: [
+                'Two rows are ready. relayed-answer-citation has its plan, so a worker takes it now.',
+                'board-arm-expect has none, so a cold planner writes it first and I launch it when the plan lands.',
+              ],
+            },
+            {
+              n: 'Planner',
+              from: 'from the orchestrator, or you for a talk',
+              session: 'planner-canon-board-arm-expect',
+              prompt:
+                '/canon:role-planner, then /canon:plan-feature board-arm-expect. Write one plan against the current tree and message the orchestrator when it lands.',
+              act: [
+                'Read 7 files, ran 4 shell commands',
+                'Measured the row against main',
+              ],
+              say: [
+                'Wrote the plan for board-arm-expect. Two questions, both with suggested answers.',
+                'Launchable.',
+              ],
+            },
+            {
+              n: 'Worker',
+              from: 'from the orchestrator',
+              session: 'worker-canon-relayed-answer-citation',
+              prompt:
+                "/canon:auto-ship relayed-answer-citation's plan. Controller: the orchestrator. Message it when the pull request opens.",
+              act: [
+                'Edited 5 files in its own worktree, ran the check',
+                'Committed 3 slices, each tested',
+              ],
+              say: [
+                'Opened the pull request as a draft for relayed-answer-citation.',
+                'Check passed, and evidence is posted.',
+              ],
+            },
+            {
+              n: 'Code reviewer',
+              from: 'from the orchestrator',
+              session: 'reviewer-canon-relayed-answer-citation',
+              prompt:
+                "/canon:role-reviewer, then /canon:review-pr on relayed-answer-citation. Read the plan's review focus first.",
+              act: [
+                'Read the diff and the plan, ran 2 shell commands',
+                'Loaded review-craft',
+              ],
+              say: [
+                '0 critical, 2 should-fix, 1 minor.',
+                'Posted to the pull request and sent to the worker.',
+              ],
+            },
+            {
+              n: 'UI reviewer',
+              from: 'from the orchestrator',
+              session: 'ui-reviewer-canon-relayed-answer-citation',
+              prompt:
+                '/canon:role-reviewer, then /canon:review-ui on relayed-answer-citation. One verdict per box, and skip any box marked as taste.',
+              act: ['Drove 7 boxes in the running app', 'Loaded ui-craft'],
+              say: [
+                '6 of 7 boxes pass. One fails: the focus ring is clipped on mobile.',
+                'Posted under UI review.',
+              ],
+            },
+          ],
+          WHO = [
+            'You prompt it',
+            'The orchestrator starts it, or you do for a talk',
+            'The orchestrator starts it',
+            'The orchestrator starts it',
+            'The orchestrator starts it',
+          ]
+        const B = [...document.querySelectorAll('.roles button')],
+          who = document.getElementById('who'),
+          log = document.getElementById('log'),
+          typed = document.getElementById('typed'),
+          cap = document.getElementById('cap')
+        const still = matchMedia('(prefers-reduced-motion: reduce)').matches
+        let gen = 0,
+          cur = 0
+        const wait = (ms, g) =>
+          new Promise((ok, no) =>
+            setTimeout(() => (g === gen ? ok() : no()), ms),
+          )
+        const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        function el(cls, html) {
+          const d = document.createElement('div')
+          d.className = cls
+          d.innerHTML = html
+          return d
+        }
+        const ask = (r) =>
+          el(
+            'ask',
+            '<span class="g">\u276F</span><span>' + esc(r.prompt) + '</span>',
+          )
+        const act = (r) =>
+          el(
+            'act',
+            esc(r.act[0]) +
+              r.act
+                .slice(1)
+                .map((a) => '<span>' + esc(a) + '</span>')
+                .join(''),
+          )
+        const pause = (r) => Math.min(2200, 700 + r.prompt.length * 10)
+        const est = (r) =>
+          300 +
+          250 +
+          r.prompt.length * 11 +
+          pause(r) +
+          460 +
+          530 +
+          r.say.length * 350 +
+          2600
+        function mark(i) {
+          B.forEach((b, j) => {
+            b.setAttribute('aria-pressed', j === i ? 'true' : 'false')
+            const p = b.querySelector('.pr')
+            p.style.animation = 'none'
+            void p.offsetWidth
+            p.style.animation = ''
+          })
+          B[i].style.setProperty('--dur', est(R[i]) + 'ms')
+          who.textContent = R[i].session
+          if (cap) cap.textContent = WHO[i]
+        }
+        function full(i) {
+          mark(i)
+          log.innerHTML = ''
+          typed.textContent = ''
+          log.append(ask(R[i]), act(R[i]))
+          R[i].say.forEach((s, k) =>
+            log.append(el('say' + (k ? '' : ' first'), esc(s))),
+          )
+        }
+        async function show(node, g) {
+          node.classList.add('hide')
+          log.append(node)
+          await wait(30, g)
+          node.classList.remove('hide')
+        }
+        async function play(i, g) {
+          mark(i)
+          ;[...log.children].forEach((c) => c.classList.add('hide'))
+          await wait(300, g)
+          log.innerHTML = ''
+          typed.textContent = ''
+          await wait(250, g)
+          for (const ch of R[i].prompt) {
+            typed.textContent += ch
+            await wait(11, g)
+          }
+          await wait(pause(R[i]), g)
+          typed.textContent = ''
+          await show(ask(R[i]), g)
+          await wait(400, g)
+          await show(act(R[i]), g)
+          await wait(500, g)
+          for (let k = 0; k < R[i].say.length; k++) {
+            await show(el('say' + (k ? '' : ' first'), esc(R[i].say[k])), g)
+            await wait(320, g)
+          }
+          await wait(2600, g)
+        }
+        async function loop(from) {
+          const g = ++gen
+          cur = from
+          try {
+            for (;;) {
+              await play(cur, g)
+              cur = (cur + 1) % R.length
+            }
+          } catch (e) {}
+        }
+        B.forEach((b) =>
+          b.addEventListener('click', () => {
+            const i = +b.dataset.i
+            if (still) {
+              gen++
+              full(i)
+            } else loop(i)
+          }),
+        )
+        if (still) full(0)
+        else loop(0)
+      })()
+    </script>
+  </body>
+</html>

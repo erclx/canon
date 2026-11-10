@@ -1,465 +1,3305 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Hero board</title>
-<link rel="stylesheet" href="../kit/landing-v2/assets/v2.css"><link rel="stylesheet" href="../kit/landing-v2/assets/fonts.css"><style>
-:root{--sans:"Geist",sans-serif;--mono:"Geist Mono",monospace}
-.wrap{width:auto;max-width:1240px;margin:0 auto;padding:0 32px}
-.hero{text-align:center;padding-top:72px}
-.hero h1{font-size:96px;line-height:1;letter-spacing:-0.045em;font-weight:600;color:var(--ink);max-width:1100px;margin:0 auto}
-.pill{display:inline-flex;align-items:center;gap:18px;background:var(--accent-wash);border-radius:999px;padding:0 34px 6px 28px}
-.pill i{width:26px;height:26px;border-radius:7px;background:var(--accent);display:block;margin-top:8px}
-.hero p{margin:28px auto 0;max-width:52ch;font-size:21px;color:var(--body)}
-.stage{margin:64px auto 0;width:1100px;position:relative}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hero board</title>
+    <link rel="stylesheet" href="../assets/landing-v2/v2.css" />
+    <link rel="stylesheet" href="../assets/landing-v2/fonts.css" />
+    <style>
+      :root {
+        --sans: 'Geist', sans-serif;
+        --mono: 'Geist Mono', monospace;
+      }
+      .wrap {
+        width: auto;
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 0 32px;
+      }
+      .hero {
+        text-align: center;
+        padding-top: 72px;
+      }
+      .hero h1 {
+        font-size: 96px;
+        line-height: 1;
+        letter-spacing: -0.045em;
+        font-weight: 600;
+        color: var(--ink);
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 18px;
+        background: var(--accent-wash);
+        border-radius: 999px;
+        padding: 0 34px 6px 28px;
+      }
+      .pill i {
+        width: 26px;
+        height: 26px;
+        border-radius: 7px;
+        background: var(--accent);
+        display: block;
+        margin-top: 8px;
+      }
+      .hero p {
+        margin: 28px auto 0;
+        max-width: 52ch;
+        font-size: 21px;
+        color: var(--body);
+      }
+      .stage {
+        margin: 64px auto 0;
+        width: 1100px;
+        position: relative;
+      }
 
-.win{background:var(--paper);border-radius:16px;box-shadow:var(--shadow),0 0 0 1px var(--rule);overflow:hidden;height:640px;display:grid;grid-template-rows:40px 1fr}
-.chrome{display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid var(--rule);font-size:13px;color:var(--muted)}
-.chrome i{width:10px;height:10px;border-radius:50%;background:var(--rule);display:block}
-.chrome b{margin-left:14px;font-weight:500;color:var(--ink)}
-.body{display:grid;grid-template-columns:210px 1fr;min-height:0}
-.side{border-right:1px solid var(--rule);padding:16px 14px;font-size:13.5px;background:var(--page)}
-.side h6{font-size:12px;font-weight:600;color:var(--muted);margin:14px 0 6px}
-.side h6:first-child{margin-top:0}
-.side div{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:6px;color:var(--ink)}
-.side div.on{background:var(--paper);box-shadow:0 0 0 1px var(--rule)}
-.side .av{width:18px;height:18px;border-radius:5px;background:var(--accent)}
-.side .sq{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--muted)}
-.main{padding:20px 22px;min-width:0;position:relative}
-.main h2{font-size:24px;font-weight:600;color:var(--ink);letter-spacing:-0.01em}
-.main .meta{font-size:13px;color:var(--muted);margin-top:2px}
-.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
-.col h5{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:10px}
-.col h5 em{font-style:normal;font-weight:500;color:var(--muted)}
-.dot{width:8px;height:8px;border-radius:50%}
-.lane{position:relative;height:420px;border-radius:10px;background:var(--page);padding:0}
-.k{position:absolute;left:8px;right:8px;height:64px;background:var(--paper);border-radius:9px;box-shadow:0 1px 2px rgba(0,0,0,.06),0 0 0 1px var(--rule);padding:9px 11px;font-size:12.5px;line-height:1.35}
-.k b{display:block;font-family:var(--mono);font-weight:500;font-size:11.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.k span{display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
-.k .role{position:absolute;right:9px;bottom:8px;font-size:11px;color:var(--muted)}
-.k .st{position:absolute;left:11px;bottom:8px;color:var(--accent);display:inline-block;width:12px;text-align:center;font-size:12px}
-.k .st.sp{animation:spin 1.6s linear infinite}.k .st.wait{color:#c98a10;animation:pulse 1.4s ease-in-out infinite}.k .st.idle{color:var(--muted)}
-.k .lbl{position:absolute;left:28px;bottom:8px;font-size:11px;color:var(--muted)}
-@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{opacity:.3}}
-/* a card leaves Working and lands in Completed, a waiting one starts */
-.out1{animation:out1 10s infinite}@keyframes out1{0%,25%{opacity:1}29%,96%{opacity:0}100%{opacity:1}}
-.in1{opacity:0;animation:in1 10s infinite}@keyframes in1{0%,30%{opacity:0;margin-top:-10px}35%,94%{opacity:1;margin-top:0}97%,100%{opacity:0}}
-.dn1{animation:dn1 10s ease-in-out infinite}@keyframes dn1{0%,29%{margin-top:0}34%,94%{margin-top:72px}97%,100%{margin-top:0}}
-.out2{animation:out2 10s infinite}@keyframes out2{0%,55%{opacity:1}59%,96%{opacity:0}100%{opacity:1}}
-.in2{opacity:0;animation:in2 10s infinite}@keyframes in2{0%,60%{opacity:0;margin-top:-10px}65%,94%{opacity:1;margin-top:0}97%,100%{opacity:0}}
-/* one record at a time in the side panel */
-.peek{position:absolute;right:-36px;top:150px;width:300px;background:var(--paper);border-radius:14px;box-shadow:var(--shadow),0 0 0 1px var(--rule);padding:14px 16px;font-size:13px;height:178px}
-.pk{position:absolute;inset:14px 16px;opacity:0;animation:pk 12s infinite}
-.pk:nth-child(1){animation-delay:0s}.pk:nth-child(2){animation-delay:-8s}.pk:nth-child(3){animation-delay:-4s}
-@keyframes pk{0%{opacity:0}3%,30%{opacity:1}33%,100%{opacity:0}}
-.pk h6{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px}
-.pk h6 i{width:16px;height:16px;border-radius:5px;background:var(--accent);display:block}
-.pk h6 span{font-family:var(--mono);font-weight:400;font-size:11px;color:var(--muted)}
-.pk .sug{margin-top:6px;background:var(--accent-wash);color:var(--ink);border-radius:9px;padding:7px 10px}
-.pk pre{font-family:var(--mono);font-size:11.5px;line-height:1.55;color:var(--ink)}
-.pk em{font-style:normal;color:var(--accent);font-weight:600}
-.pk code{font-family:var(--mono);font-size:11px;background:var(--page);border-radius:4px;padding:0 4px}
-.pk:first-child{opacity:1}
-@media (prefers-reduced-motion:reduce){*{animation:none!important}.in1,.in2{opacity:0}.pk{opacity:0}.pk:first-child{opacity:1}}
+      .win {
+        background: var(--paper);
+        border-radius: 16px;
+        box-shadow:
+          var(--shadow),
+          0 0 0 1px var(--rule);
+        overflow: hidden;
+        height: 640px;
+        display: grid;
+        grid-template-rows: 40px 1fr;
+      }
+      .chrome {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 14px;
+        border-bottom: 1px solid var(--rule);
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .chrome i {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--rule);
+        display: block;
+      }
+      .chrome b {
+        margin-left: 14px;
+        font-weight: 500;
+        color: var(--ink);
+      }
+      .body {
+        display: grid;
+        grid-template-columns: 210px 1fr;
+        min-height: 0;
+      }
+      .side {
+        border-right: 1px solid var(--rule);
+        padding: 16px 14px;
+        font-size: 13.5px;
+        background: var(--page);
+      }
+      .side h6 {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        margin: 14px 0 6px;
+      }
+      .side h6:first-child {
+        margin-top: 0;
+      }
+      .side div {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 6px;
+        border-radius: 6px;
+        color: var(--ink);
+      }
+      .side div.on {
+        background: var(--paper);
+        box-shadow: 0 0 0 1px var(--rule);
+      }
+      .side .av {
+        width: 18px;
+        height: 18px;
+        border-radius: 5px;
+        background: var(--accent);
+      }
+      .side .sq {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        border: 1.5px solid var(--muted);
+      }
+      .main {
+        padding: 20px 22px;
+        min-width: 0;
+        position: relative;
+      }
+      .main h2 {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--ink);
+        letter-spacing: -0.01em;
+      }
+      .main .meta {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .cols {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 18px;
+      }
+      .col h5 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--ink);
+        margin-bottom: 10px;
+      }
+      .col h5 em {
+        font-style: normal;
+        font-weight: 500;
+        color: var(--muted);
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+      .lane {
+        position: relative;
+        height: 420px;
+        border-radius: 10px;
+        background: var(--page);
+        padding: 0;
+      }
+      .k {
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        height: 64px;
+        background: var(--paper);
+        border-radius: 9px;
+        box-shadow:
+          0 1px 2px rgba(0, 0, 0, 0.06),
+          0 0 0 1px var(--rule);
+        padding: 9px 11px;
+        font-size: 12.5px;
+        line-height: 1.35;
+      }
+      .k b {
+        display: block;
+        font-family: var(--mono);
+        font-weight: 500;
+        font-size: 11.5px;
+        color: var(--ink);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .k span {
+        display: block;
+        color: var(--muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: 3px;
+      }
+      .k .role {
+        position: absolute;
+        right: 9px;
+        bottom: 8px;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .k .st {
+        position: absolute;
+        left: 11px;
+        bottom: 8px;
+        color: var(--accent);
+        display: inline-block;
+        width: 12px;
+        text-align: center;
+        font-size: 12px;
+      }
+      .k .st.sp {
+        animation: spin 1.6s linear infinite;
+      }
+      .k .st.wait {
+        color: #c98a10;
+        animation: pulse 1.4s ease-in-out infinite;
+      }
+      .k .st.idle {
+        color: var(--muted);
+      }
+      .k .lbl {
+        position: absolute;
+        left: 28px;
+        bottom: 8px;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes pulse {
+        50% {
+          opacity: 0.3;
+        }
+      }
+      /* a card leaves Working and lands in Completed, a waiting one starts */
+      .out1 {
+        animation: out1 10s infinite;
+      }
+      @keyframes out1 {
+        0%,
+        25% {
+          opacity: 1;
+        }
+        29%,
+        96% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      .in1 {
+        opacity: 0;
+        animation: in1 10s infinite;
+      }
+      @keyframes in1 {
+        0%,
+        30% {
+          opacity: 0;
+          margin-top: -10px;
+        }
+        35%,
+        94% {
+          opacity: 1;
+          margin-top: 0;
+        }
+        97%,
+        100% {
+          opacity: 0;
+        }
+      }
+      .dn1 {
+        animation: dn1 10s ease-in-out infinite;
+      }
+      @keyframes dn1 {
+        0%,
+        29% {
+          margin-top: 0;
+        }
+        34%,
+        94% {
+          margin-top: 72px;
+        }
+        97%,
+        100% {
+          margin-top: 0;
+        }
+      }
+      .out2 {
+        animation: out2 10s infinite;
+      }
+      @keyframes out2 {
+        0%,
+        55% {
+          opacity: 1;
+        }
+        59%,
+        96% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      .in2 {
+        opacity: 0;
+        animation: in2 10s infinite;
+      }
+      @keyframes in2 {
+        0%,
+        60% {
+          opacity: 0;
+          margin-top: -10px;
+        }
+        65%,
+        94% {
+          opacity: 1;
+          margin-top: 0;
+        }
+        97%,
+        100% {
+          opacity: 0;
+        }
+      }
+      /* one record at a time in the side panel */
+      .peek {
+        position: absolute;
+        right: -36px;
+        top: 150px;
+        width: 300px;
+        background: var(--paper);
+        border-radius: 14px;
+        box-shadow:
+          var(--shadow),
+          0 0 0 1px var(--rule);
+        padding: 14px 16px;
+        font-size: 13px;
+        height: 178px;
+      }
+      .pk {
+        position: absolute;
+        inset: 14px 16px;
+        opacity: 0;
+        animation: pk 12s infinite;
+      }
+      .pk:nth-child(1) {
+        animation-delay: 0s;
+      }
+      .pk:nth-child(2) {
+        animation-delay: -8s;
+      }
+      .pk:nth-child(3) {
+        animation-delay: -4s;
+      }
+      @keyframes pk {
+        0% {
+          opacity: 0;
+        }
+        3%,
+        30% {
+          opacity: 1;
+        }
+        33%,
+        100% {
+          opacity: 0;
+        }
+      }
+      .pk h6 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink);
+        margin-bottom: 8px;
+      }
+      .pk h6 i {
+        width: 16px;
+        height: 16px;
+        border-radius: 5px;
+        background: var(--accent);
+        display: block;
+      }
+      .pk h6 span {
+        font-family: var(--mono);
+        font-weight: 400;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .pk .sug {
+        margin-top: 6px;
+        background: var(--accent-wash);
+        color: var(--ink);
+        border-radius: 9px;
+        padding: 7px 10px;
+      }
+      .pk pre {
+        font-family: var(--mono);
+        font-size: 11.5px;
+        line-height: 1.55;
+        color: var(--ink);
+      }
+      .pk em {
+        font-style: normal;
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .pk code {
+        font-family: var(--mono);
+        font-size: 11px;
+        background: var(--page);
+        border-radius: 4px;
+        padding: 0 4px;
+      }
+      .pk:first-child {
+        opacity: 1;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation: none !important;
+        }
+        .in1,
+        .in2 {
+          opacity: 0;
+        }
+        .pk {
+          opacity: 0;
+        }
+        .pk:first-child {
+          opacity: 1;
+        }
+      }
 
+      body {
+        background: #fdfdfc;
+      }
+      :root[data-theme='dark'] body {
+        background: var(--page);
+      }
+      .hero {
+        padding-top: 88px;
+      }
+      .hero h1 {
+        font-size: 88px;
+        line-height: 1.08;
+        letter-spacing: -0.045em;
+        max-width: 1000px;
+      }
+      .ico {
+        display: inline-grid;
+        place-items: center;
+        width: 78px;
+        height: 78px;
+        border-radius: 20px;
+        vertical-align: -10px;
+        margin: 0 6px;
+        box-shadow:
+          0 1px 2px rgba(0, 0, 0, 0.08),
+          0 8px 22px -10px rgba(0, 0, 0, 0.25);
+      }
+      .ico.mk {
+        background: #fff url('../assets/landing-v2/mark-light.svg') center/44px
+          no-repeat;
+      }
+      :root[data-theme='dark'] .ico.mk {
+        background: #1c1c1a url('../assets/landing-v2/mark-dark.svg')
+          center/44px no-repeat;
+      }
+      .ico.doc {
+        background: #fff;
+      }
+      .ico.doc svg,
+      .ico.mg svg {
+        width: 40px;
+        height: 40px;
+      }
+      .ico.mg {
+        background: var(--accent);
+      }
+      .hero p {
+        color: #8a8a86;
+        font-size: 20px;
+        margin-top: 32px;
+      }
+      .tray {
+        margin: 88px auto 0;
+        width: 1180px;
+        height: 640px;
+        background: #f2f2f0;
+        border-radius: 36px;
+        padding: 44px 40px 0;
+        overflow: hidden;
+        position: relative;
+      }
+      :root[data-theme='dark'] .tray {
+        background: #1a1a18;
+      }
+      .tray .stage {
+        margin: 0 auto;
+        width: 1100px;
+      }
+      .win {
+        box-shadow:
+          0 1px 2px rgba(0, 0, 0, 0.05),
+          0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+      }
+      .peek {
+        right: -20px !important;
+        box-shadow:
+          0 1px 2px rgba(0, 0, 0, 0.06),
+          0 12px 30px -14px rgba(0, 0, 0, 0.28) !important;
+      }
+      .pill,
+      .pill i {
+        all: unset;
+      }
 
-body{background:#fdfdfc}
-:root[data-theme="dark"] body{background:var(--page)}
-.hero{padding-top:88px}
-.hero h1{font-size:88px;line-height:1.08;letter-spacing:-0.045em;max-width:1000px}
-.ico{display:inline-grid;place-items:center;width:78px;height:78px;border-radius:20px;vertical-align:-10px;margin:0 6px;box-shadow:0 1px 2px rgba(0,0,0,.08),0 8px 22px -10px rgba(0,0,0,.25)}
-.ico.mk{background:#fff url("../kit/landing-v2/assets/mark-light.svg") center/44px no-repeat}
-:root[data-theme="dark"] .ico.mk{background:#1c1c1a url("../kit/landing-v2/assets/mark-dark.svg") center/44px no-repeat}
-.ico.doc{background:#fff}
-.ico.doc svg,.ico.mg svg{width:40px;height:40px}
-.ico.mg{background:var(--accent)}
-.hero p{color:#8a8a86;font-size:20px;margin-top:32px}
-.tray{margin:88px auto 0;width:1180px;height:640px;background:#f2f2f0;border-radius:36px;padding:44px 40px 0;overflow:hidden;position:relative}
-:root[data-theme="dark"] .tray{background:#1a1a18}
-.tray .stage{margin:0 auto;width:1100px}
-.win{box-shadow:0 1px 2px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.05)!important}
-.peek{right:-20px!important;box-shadow:0 1px 2px rgba(0,0,0,.06),0 12px 30px -14px rgba(0,0,0,.28)!important}
-.pill,.pill i{all:unset}
+      .term2 {
+        width: 1040px;
+        margin: 0 auto;
+        background: #1e1e1e;
+        border-radius: 14px 14px 0 0;
+        color: #cccccc;
+        font-family: 'Geist Mono', monospace;
+        font-size: 14.5px;
+        line-height: 1.5;
+        overflow: hidden;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+      }
+      .term2 .bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 38px;
+        padding: 0 16px;
+        background: #252526;
+        color: #8b8b8b;
+        font-size: 12.5px;
+      }
+      .term2 .bar i {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #3c3c3c;
+        display: block;
+      }
+      .term2 .bar span {
+        margin-left: 12px;
+      }
+      .av {
+        padding: 22px 28px 0;
+        position: relative;
+      }
+      .cnts {
+        color: #8b8b8b;
+        height: 24px;
+        position: relative;
+      }
+      .cnts b {
+        color: #e6e6e6;
+        font-weight: 500;
+      }
+      .lst {
+        position: relative;
+        height: 392px;
+        margin-top: 14px;
+      }
+      .g {
+        position: absolute;
+        left: 0;
+        color: #e6e6e6;
+        font-weight: 500;
+      }
+      .r {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 30px;
+        display: grid;
+        grid-template-columns: 22px 340px minmax(0, 1fr) 46px;
+        column-gap: 18px;
+        align-items: center;
+        white-space: nowrap;
+      }
+      .r > span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .r .s {
+        color: #e0613a;
+        display: inline-block;
+        width: 16px;
+        text-align: center;
+      }
+      .r .s.sp {
+        animation: spin 1.6s linear infinite;
+      }
+      .r .s.wt {
+        color: #d7ba7d;
+        animation: pulse 1.4s ease-in-out infinite;
+      }
+      .r .s.dn {
+        color: #6a9955;
+      }
+      .r .n {
+        color: #d4d4d4;
+      }
+      .r .d {
+        color: #8b8b8b;
+        position: relative;
+        height: 30px;
+      }
+      .r .t {
+        color: #8b8b8b;
+        text-align: right;
+      }
+      .r.pin .n {
+        color: #ffffff;
+        font-weight: 500;
+      }
+      .sw {
+        position: absolute;
+        inset: 0;
+        line-height: 30px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .sw.b {
+        opacity: 0;
+      }
+      .prompt {
+        border-top: 1px solid #333;
+        margin: 0 -28px;
+        padding: 16px 28px 22px;
+        color: #8b8b8b;
+      }
+      .prompt .p {
+        color: #e6e6e6;
+      }
+      .prompt .c {
+        display: inline-block;
+        width: 9px;
+        height: 17px;
+        background: #cccccc;
+        vertical-align: -3px;
+        margin-right: 6px;
+        animation: blink 1.1s steps(1) infinite;
+      }
+      .prompt .h {
+        margin-top: 10px;
+        font-size: 13px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes pulse {
+        50% {
+          opacity: 0.35;
+        }
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+      /* one shared 12s clock */
+      .lst {
+        animation: rst 12s infinite;
+      }
+      @keyframes rst {
+        0%,
+        93% {
+          opacity: 1;
+        }
+        95.5%,
+        98.5% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      @keyframes fo1 {
+        0%,
+        18% {
+          opacity: 1;
+        }
+        20%,
+        97% {
+          opacity: 0;
+        }
+        97.01%,
+        100% {
+          opacity: 1;
+        }
+      }
+      @keyframes fi1 {
+        0%,
+        22% {
+          opacity: 0;
+        }
+        25%,
+        97% {
+          opacity: 1;
+        }
+        97.01%,
+        100% {
+          opacity: 0;
+        }
+      }
+      @keyframes up1 {
+        0%,
+        20% {
+          margin-top: 0;
+        }
+        24%,
+        97% {
+          margin-top: -30px;
+        }
+        97.01%,
+        100% {
+          margin-top: 0;
+        }
+      }
+      @keyframes fo2 {
+        0%,
+        48% {
+          opacity: 1;
+        }
+        50%,
+        97% {
+          opacity: 0;
+        }
+        97.01%,
+        100% {
+          opacity: 1;
+        }
+      }
+      @keyframes fi2 {
+        0%,
+        53% {
+          opacity: 0;
+        }
+        56%,
+        97% {
+          opacity: 1;
+        }
+        97.01%,
+        100% {
+          opacity: 0;
+        }
+      }
+      @keyframes up2 {
+        0%,
+        50% {
+          margin-top: 0;
+        }
+        54%,
+        97% {
+          margin-top: -30px;
+        }
+        97.01%,
+        100% {
+          margin-top: 0;
+        }
+      }
+      @keyframes sa {
+        0%,
+        33% {
+          opacity: 1;
+        }
+        36%,
+        97% {
+          opacity: 0;
+        }
+        97.01%,
+        100% {
+          opacity: 1;
+        }
+      }
+      @keyframes sb {
+        0%,
+        33% {
+          opacity: 0;
+        }
+        36%,
+        97% {
+          opacity: 1;
+        }
+        97.01%,
+        100% {
+          opacity: 0;
+        }
+      }
+      @keyframes ca {
+        0%,
+        22% {
+          opacity: 1;
+        }
+        25%,
+        97% {
+          opacity: 0;
+        }
+        97.01%,
+        100% {
+          opacity: 1;
+        }
+      }
+      @keyframes cb {
+        0%,
+        22% {
+          opacity: 0;
+        }
+        25%,
+        52% {
+          opacity: 1;
+        }
+        55%,
+        97% {
+          opacity: 0;
+        }
+        97.01%,
+        100% {
+          opacity: 0;
+        }
+      }
+      @keyframes cc {
+        0%,
+        52% {
+          opacity: 0;
+        }
+        55%,
+        97% {
+          opacity: 1;
+        }
+        97.01%,
+        100% {
+          opacity: 0;
+        }
+      }
+      .fi1,
+      .fi2 {
+        opacity: 0;
+      }
+      .fo1 {
+        animation: fo1 12s infinite;
+      }
+      .fi1 {
+        animation: fi1 12s infinite;
+      }
+      .up1 {
+        animation: up1 12s ease-in-out infinite;
+      }
+      .fo2 {
+        animation: fo2 12s infinite;
+      }
+      .fi2 {
+        animation: fi2 12s infinite;
+      }
+      .up2 {
+        animation: up2 12s ease-in-out infinite;
+      }
+      .x .sw.a {
+        animation: sa 12s infinite;
+      }
+      .x .sw.b {
+        animation: sb 12s infinite;
+      }
+      .cnts .c1 {
+        animation: ca 12s infinite;
+      }
+      .cnts .c2 {
+        opacity: 0;
+        animation: cb 12s infinite;
+      }
+      .cnts .c3 {
+        opacity: 0;
+        animation: cc 12s infinite;
+      }
+      .cnts > span {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .term2 * {
+          animation: none !important;
+        }
+        .fi1,
+        .fi2,
+        .cnts .c2,
+        .cnts .c3 {
+          opacity: 0;
+        }
+      }
+      .tray {
+        height: 600px;
+      }
 
-.term2{width:1040px;margin:0 auto;background:#1e1e1e;border-radius:14px 14px 0 0;color:#cccccc;font-family:"Geist Mono",monospace;font-size:14.5px;line-height:1.5;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.08)}
-.term2 .bar{display:flex;align-items:center;gap:8px;height:38px;padding:0 16px;background:#252526;color:#8b8b8b;font-size:12.5px}
-.term2 .bar i{width:11px;height:11px;border-radius:50%;background:#3c3c3c;display:block}
-.term2 .bar span{margin-left:12px}
-.av{padding:22px 28px 0;position:relative}
-.cnts{color:#8b8b8b;height:24px;position:relative}
-.cnts b{color:#e6e6e6;font-weight:500}
-.lst{position:relative;height:392px;margin-top:14px}
-.g{position:absolute;left:0;color:#e6e6e6;font-weight:500}
-.r{position:absolute;left:0;right:0;height:30px;display:grid;grid-template-columns:22px 340px minmax(0,1fr) 46px;column-gap:18px;align-items:center;white-space:nowrap}
-.r>span{overflow:hidden;text-overflow:ellipsis}
-.r .s{color:#e0613a;display:inline-block;width:16px;text-align:center}
-.r .s.sp{animation:spin 1.6s linear infinite}.r .s.wt{color:#d7ba7d;animation:pulse 1.4s ease-in-out infinite}.r .s.dn{color:#6a9955}
-.r .n{color:#d4d4d4}.r .d{color:#8b8b8b;position:relative;height:30px}.r .t{color:#8b8b8b;text-align:right}
-.r.pin .n{color:#ffffff;font-weight:500}
-.sw{position:absolute;inset:0;line-height:30px;overflow:hidden;text-overflow:ellipsis}.sw.b{opacity:0}
-.prompt{border-top:1px solid #333;margin:0 -28px;padding:16px 28px 22px;color:#8b8b8b}
-.prompt .p{color:#e6e6e6}.prompt .c{display:inline-block;width:9px;height:17px;background:#cccccc;vertical-align:-3px;margin-right:6px;animation:blink 1.1s steps(1) infinite}
-.prompt .h{margin-top:10px;font-size:13px}
-@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{opacity:.35}}@keyframes blink{50%{opacity:0}}
-/* one shared 12s clock */
-.lst{animation:rst 12s infinite}@keyframes rst{0%,93%{opacity:1}95.5%,98.5%{opacity:0}100%{opacity:1}}
-@keyframes fo1{0%,18%{opacity:1}20%,97%{opacity:0}97.01%,100%{opacity:1}}@keyframes fi1{0%,22%{opacity:0}25%,97%{opacity:1}97.01%,100%{opacity:0}}
-@keyframes up1{0%,20%{margin-top:0}24%,97%{margin-top:-30px}97.01%,100%{margin-top:0}}
-@keyframes fo2{0%,48%{opacity:1}50%,97%{opacity:0}97.01%,100%{opacity:1}}@keyframes fi2{0%,53%{opacity:0}56%,97%{opacity:1}97.01%,100%{opacity:0}}
-@keyframes up2{0%,50%{margin-top:0}54%,97%{margin-top:-30px}97.01%,100%{margin-top:0}}
-@keyframes sa{0%,33%{opacity:1}36%,97%{opacity:0}97.01%,100%{opacity:1}}@keyframes sb{0%,33%{opacity:0}36%,97%{opacity:1}97.01%,100%{opacity:0}}
-@keyframes ca{0%,22%{opacity:1}25%,97%{opacity:0}97.01%,100%{opacity:1}}@keyframes cb{0%,22%{opacity:0}25%,52%{opacity:1}55%,97%{opacity:0}97.01%,100%{opacity:0}}@keyframes cc{0%,52%{opacity:0}55%,97%{opacity:1}97.01%,100%{opacity:0}}
-.fi1,.fi2{opacity:0}
-.fo1{animation:fo1 12s infinite}.fi1{animation:fi1 12s infinite}.up1{animation:up1 12s ease-in-out infinite}
-.fo2{animation:fo2 12s infinite}.fi2{animation:fi2 12s infinite}.up2{animation:up2 12s ease-in-out infinite}
-.x .sw.a{animation:sa 12s infinite}.x .sw.b{animation:sb 12s infinite}
-.cnts .c1{animation:ca 12s infinite}.cnts .c2{opacity:0;animation:cb 12s infinite}.cnts .c3{opacity:0;animation:cc 12s infinite}
-.cnts>span{position:absolute;left:0;top:0}
-@media (prefers-reduced-motion:reduce){.term2 *{animation:none!important}.fi1,.fi2,.cnts .c2,.cnts .c3{opacity:0}}
-.tray{height:600px}
+      :root:not([data-theme='dark']) .term2 {
+        background: #ffffff;
+        color: #3b3b38;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+      }
+      :root:not([data-theme='dark']) .term2 .bar {
+        background: #f7f7f5;
+        color: #8a8a86;
+        border-bottom: 1px solid #ececea;
+      }
+      :root:not([data-theme='dark']) .term2 .bar i {
+        background: #e2e2df;
+      }
+      :root:not([data-theme='dark']) .cnts,
+      :root:not([data-theme='dark']) .r .d,
+      :root:not([data-theme='dark']) .r .t,
+      :root:not([data-theme='dark']) .prompt {
+        color: #8a8a86;
+      }
+      :root:not([data-theme='dark']) .cnts b,
+      :root:not([data-theme='dark']) .g,
+      :root:not([data-theme='dark']) .prompt .p {
+        color: #121212;
+      }
+      :root:not([data-theme='dark']) .r .n {
+        color: #2a2a28;
+      }
+      :root:not([data-theme='dark']) .r.pin .n {
+        color: #121212;
+      }
+      :root:not([data-theme='dark']) .r .s {
+        color: #d0491f;
+      }
+      :root:not([data-theme='dark']) .r .s.wt {
+        color: #b8860b;
+      }
+      :root:not([data-theme='dark']) .r .s.dn {
+        color: #2e7d32;
+      }
+      :root:not([data-theme='dark']) .prompt {
+        border-top-color: #ececea;
+      }
+      :root:not([data-theme='dark']) .prompt .c {
+        background: #121212;
+      }
+      .tray {
+        height: auto !important;
+        padding: 44px 40px !important;
+      }
+      .term2 {
+        border-radius: 14px !important;
+      }
 
-:root:not([data-theme="dark"]) .term2{background:#ffffff;color:#3b3b38;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
-:root:not([data-theme="dark"]) .term2 .bar{background:#f7f7f5;color:#8a8a86;border-bottom:1px solid #ececea}
-:root:not([data-theme="dark"]) .term2 .bar i{background:#e2e2df}
-:root:not([data-theme="dark"]) .cnts,:root:not([data-theme="dark"]) .r .d,:root:not([data-theme="dark"]) .r .t,:root:not([data-theme="dark"]) .prompt{color:#8a8a86}
-:root:not([data-theme="dark"]) .cnts b,:root:not([data-theme="dark"]) .g,:root:not([data-theme="dark"]) .prompt .p{color:#121212}
-:root:not([data-theme="dark"]) .r .n{color:#2a2a28}:root:not([data-theme="dark"]) .r.pin .n{color:#121212}
-:root:not([data-theme="dark"]) .r .s{color:#d0491f}:root:not([data-theme="dark"]) .r .s.wt{color:#b8860b}:root:not([data-theme="dark"]) .r .s.dn{color:#2e7d32}
-:root:not([data-theme="dark"]) .prompt{border-top-color:#ececea}:root:not([data-theme="dark"]) .prompt .c{background:#121212}
-.tray{height:auto!important;padding:44px 40px!important}.term2{border-radius:14px!important}
+      /* refined colors: Claude orange for work, amber for waiting, green for done */
+      .r .s {
+        color: #d97757 !important;
+      }
+      :root:not([data-theme='dark']) .r .s {
+        color: #c15f3c !important;
+      }
+      .r .s.wt {
+        color: #e5b567 !important;
+      }
+      :root:not([data-theme='dark']) .r .s.wt {
+        color: #b07d1a !important;
+      }
+      .r .s.dn {
+        color: #7fb77e !important;
+      }
+      :root:not([data-theme='dark']) .r .s.dn {
+        color: #3f7f3e !important;
+      }
+      .g {
+        font-family: var(--sans);
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+      }
+      :root:not([data-theme='dark']) .g {
+        color: #121212 !important;
+      }
+      :root[data-theme='dark'] .g {
+        color: #f2f2f0 !important;
+      }
+      .cnts {
+        font-size: 13.5px;
+      }
+      .r .n {
+        font-weight: 500;
+      }
 
-/* refined colors: Claude orange for work, amber for waiting, green for done */
-.r .s{color:#d97757!important}:root:not([data-theme="dark"]) .r .s{color:#c15f3c!important}
-.r .s.wt{color:#e5b567!important}:root:not([data-theme="dark"]) .r .s.wt{color:#b07d1a!important}
-.r .s.dn{color:#7fb77e!important}:root:not([data-theme="dark"]) .r .s.dn{color:#3f7f3e!important}
-.g{font-family:var(--sans);font-size:13px;font-weight:600;letter-spacing:.01em}
-:root:not([data-theme="dark"]) .g{color:#121212!important}:root[data-theme="dark"] .g{color:#f2f2f0!important}
-.cnts{font-size:13.5px}
-.r .n{font-weight:500}
+      .term2 {
+        border-radius: 12px !important;
+        box-shadow:
+          0 0 0 1px rgba(0, 0, 0, 0.07),
+          0 24px 60px -28px rgba(0, 0, 0, 0.3) !important;
+      }
+      .term2 .bar {
+        height: 44px !important;
+        justify-content: center;
+        position: relative;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+        font-family: var(--sans) !important;
+        font-size: 13px !important;
+        font-weight: 500;
+      }
+      .term2 .bar i {
+        position: absolute;
+        top: 16px;
+        width: 12px !important;
+        height: 12px !important;
+        background: #dedede !important;
+      }
+      .term2 .bar i:nth-child(1) {
+        left: 16px;
+      }
+      .term2 .bar i:nth-child(2) {
+        left: 36px;
+      }
+      .term2 .bar i:nth-child(3) {
+        left: 56px;
+      }
+      .term2 .bar span {
+        margin: 0 !important;
+      }
+      :root[data-theme='dark'] .term2 .bar i {
+        background: #3a3a38 !important;
+      }
+      .term2 {
+        font-family: 'Geist Mono', monospace !important;
+      }
+      .ico {
+        vertical-align: middle !important;
+        position: relative;
+        top: -0.06em;
+      }
+      .prompt {
+        padding-top: 18px !important;
+      }
 
-.term2{border-radius:12px!important;box-shadow:0 0 0 1px rgba(0,0,0,.07),0 24px 60px -28px rgba(0,0,0,.3)!important}
-.term2 .bar{height:44px!important;justify-content:center;position:relative;border-bottom:1px solid rgba(0,0,0,.06)!important;font-family:var(--sans)!important;font-size:13px!important;font-weight:500}
-.term2 .bar i{position:absolute;top:16px;width:12px!important;height:12px!important;background:#dedede!important}
-.term2 .bar i:nth-child(1){left:16px}.term2 .bar i:nth-child(2){left:36px}.term2 .bar i:nth-child(3){left:56px}
-.term2 .bar span{margin:0!important}
-:root[data-theme="dark"] .term2 .bar i{background:#3a3a38!important}
-.term2{font-family:"Geist Mono", monospace!important}.ico{vertical-align:middle!important;position:relative;top:-0.06em}
-.prompt{padding-top:18px!important}
+      .hd {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 4px 0;
+        margin-bottom: 18px;
+      }
+      .hd .v {
+        color: var(--hd-ink);
+      }
+      .hd .v b {
+        font-weight: 600;
+      }
+      .hd .m {
+        color: var(--hd-mut);
+      }
+      :root:not([data-theme='dark']) .term2 {
+        --hd-ink: #121212;
+        --hd-mut: #8a8a86;
+      }
+      :root[data-theme='dark'] .term2 {
+        --hd-ink: #f2f2f0;
+        --hd-mut: #8b8b8b;
+      }
+      .r .s.dn {
+        color: #7fb77e;
+      }
+      :root:not([data-theme='dark']) .r .s.dn {
+        color: #3f7f3e !important;
+      }
+      .r .s.old {
+        color: #8a8a86 !important;
+      }
+      .r .s.pn {
+        color: #c15f3c;
+      }
 
-.hd{display:grid;grid-template-columns:auto 1fr;gap:4px 0;margin-bottom:18px}
-.hd .v{color:var(--hd-ink)}.hd .v b{font-weight:600}
-.hd .m{color:var(--hd-mut)}
-:root:not([data-theme="dark"]) .term2{--hd-ink:#121212;--hd-mut:#8a8a86}
-:root[data-theme="dark"] .term2{--hd-ink:#f2f2f0;--hd-mut:#8b8b8b}
-.r .s.dn{color:#7fb77e}:root:not([data-theme="dark"]) .r .s.dn{color:#3f7f3e!important}
-.r .s.old{color:#8a8a86!important}
-.r .s.pn{color:#c15f3c}
+      .r {
+        grid-template-columns: 22px 360px minmax(0, 1fr) 70px 46px !important;
+      }
+      .r .pr {
+        color: #8a8a86;
+        text-align: right;
+      }
 
-.r{grid-template-columns:22px 360px minmax(0,1fr) 70px 46px!important}
-.r .pr{color:#8a8a86;text-align:right}
+      @keyframes fo1b {
+        0%,
+        30% {
+          opacity: 1;
+        }
+        33%,
+        97% {
+          opacity: 0;
+        }
+        97.01%,
+        100% {
+          opacity: 1;
+        }
+      }
+      @keyframes fi1b {
+        0%,
+        35% {
+          opacity: 0;
+        }
+        38%,
+        97% {
+          opacity: 1;
+        }
+        97.01%,
+        100% {
+          opacity: 0;
+        }
+      }
+      @keyframes up1b {
+        0%,
+        33% {
+          margin-top: 0;
+        }
+        37%,
+        97% {
+          margin-top: -30px;
+        }
+        97.01%,
+        100% {
+          margin-top: 0;
+        }
+      }
+      @keyframes dnb {
+        0%,
+        33% {
+          margin-top: 0;
+        }
+        37%,
+        97% {
+          margin-top: 30px;
+        }
+        97.01%,
+        100% {
+          margin-top: 0;
+        }
+      }
+      @keyframes cab {
+        0%,
+        33% {
+          opacity: 1;
+        }
+        36%,
+        97% {
+          opacity: 0;
+        }
+        97.01%,
+        100% {
+          opacity: 1;
+        }
+      }
+      @keyframes cbb {
+        0%,
+        33% {
+          opacity: 0;
+        }
+        36%,
+        97% {
+          opacity: 1;
+        }
+        97.01%,
+        100% {
+          opacity: 0;
+        }
+      }
+      .fo1 {
+        animation: fo1b 12s infinite !important;
+      }
+      .fi1 {
+        opacity: 0;
+        animation: fi1b 12s infinite !important;
+      }
+      .up1 {
+        animation: up1b 12s ease-in-out infinite !important;
+      }
+      .dn1x {
+      }
+      .up2 {
+        animation: none !important;
+      }
+      .cnts .c1 {
+        animation: cab 12s infinite !important;
+      }
+      .cnts .c2 {
+        opacity: 0;
+        animation: cbb 12s infinite !important;
+      }
+      .lst .r .s.old {
+        color: #9a9a96 !important;
+      }
 
-@keyframes fo1b{0%,30%{opacity:1}33%,97%{opacity:0}97.01%,100%{opacity:1}}
-@keyframes fi1b{0%,35%{opacity:0}38%,97%{opacity:1}97.01%,100%{opacity:0}}
-@keyframes up1b{0%,33%{margin-top:0}37%,97%{margin-top:-30px}97.01%,100%{margin-top:0}}
-@keyframes dnb{0%,33%{margin-top:0}37%,97%{margin-top:30px}97.01%,100%{margin-top:0}}
-@keyframes cab{0%,33%{opacity:1}36%,97%{opacity:0}97.01%,100%{opacity:1}}@keyframes cbb{0%,33%{opacity:0}36%,97%{opacity:1}97.01%,100%{opacity:0}}
-.fo1{animation:fo1b 12s infinite!important}.fi1{opacity:0;animation:fi1b 12s infinite!important}
-.up1{animation:up1b 12s ease-in-out infinite!important}.dn1x{}
-.up2{animation:none!important}
-.cnts .c1{animation:cab 12s infinite!important}.cnts .c2{opacity:0;animation:cbb 12s infinite!important}
-.lst .r .s.old{color:#9a9a96!important}
+      .lst .r .s.sp {
+        animation: none !important;
+        transform: none !important;
+      }
+      .lst .r .s.sp::after {
+        content: '✻';
+        animation: glyph 1.2s steps(1) infinite;
+      }
+      @keyframes glyph {
+        0% {
+          content: '·';
+        }
+        16.6% {
+          content: '✢';
+        }
+        33.3% {
+          content: '✳';
+        }
+        50% {
+          content: '✶';
+        }
+        66.6% {
+          content: '✻';
+        }
+        83.3% {
+          content: '✽';
+        }
+      }
+      .lst .r .s {
+        font-size: 15px;
+        width: 16px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .lst .r .s.sp::after {
+          animation: none;
+          content: '✻';
+        }
+      }
 
-.lst .r .s.sp{animation:none!important;transform:none!important}
-.lst .r .s.sp::after{content:"✻";animation:glyph 1.2s steps(1) infinite}
-@keyframes glyph{0%{content:"·"}16.6%{content:"✢"}33.3%{content:"✳"}50%{content:"✶"}66.6%{content:"✻"}83.3%{content:"✽"}}
-.lst .r .s{font-size:15px;width:16px}
-@media (prefers-reduced-motion:reduce){.lst .r .s.sp::after{animation:none;content:"✻"}}
+      .below,
+      .olderrows {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+      }
+      .lst .r .s.wt {
+        color: #b07d1a !important;
+        animation: pulse 1.4s ease-in-out infinite;
+      }
+      :root[data-theme='dark'] .lst .r .s.wt {
+        color: #e5b567 !important;
+      }
+      /* E1 at 30-34%: a planner finishes. E2 at 58-64%: this session is answered and starts work */
+      @keyframes e1out {
+        0%,
+        30% {
+          opacity: 1;
+        }
+        32%,
+        97% {
+          opacity: 0;
+        }
+        97.01%,
+        100% {
+          opacity: 1;
+        }
+      }
+      @keyframes e1in {
+        0%,
+        32% {
+          opacity: 0;
+        }
+        35%,
+        97% {
+          opacity: 1;
+        }
+        97.01%,
+        100% {
+          opacity: 0;
+        }
+      }
+      @keyframes ch {
+        0%,
+        31% {
+          margin-top: 0;
+        }
+        34%,
+        59% {
+          margin-top: -30px;
+        }
+        62%,
+        97% {
+          margin-top: 0;
+        }
+        97.01%,
+        100% {
+          margin-top: 0;
+        }
+      }
+      @keyframes e1inshift {
+        0%,
+        59% {
+          margin-top: 0;
+        }
+        62%,
+        97% {
+          margin-top: 30px;
+        }
+        97.01%,
+        100% {
+          margin-top: 0;
+        }
+      }
+      @keyframes oldshift {
+        0%,
+        59% {
+          margin-top: 0;
+        }
+        62%,
+        97% {
+          margin-top: 30px;
+        }
+        97.01%,
+        100% {
+          margin-top: 0;
+        }
+      }
+      @keyframes awout {
+        0%,
+        58% {
+          opacity: 1;
+        }
+        60%,
+        97% {
+          opacity: 0;
+        }
+        97.01%,
+        100% {
+          opacity: 1;
+        }
+      }
+      @keyframes below {
+        0%,
+        60% {
+          margin-top: 0;
+        }
+        64%,
+        97% {
+          margin-top: -72px;
+        }
+        97.01%,
+        100% {
+          margin-top: 0;
+        }
+      }
+      @keyframes e2in {
+        0%,
+        63% {
+          opacity: 0;
+        }
+        66%,
+        97% {
+          opacity: 1;
+        }
+        97.01%,
+        100% {
+          opacity: 0;
+        }
+      }
+      @keyframes k1 {
+        0%,
+        31% {
+          opacity: 1;
+        }
+        33%,
+        100% {
+          opacity: 0;
+        }
+      }
+      @keyframes k2 {
+        0%,
+        31% {
+          opacity: 0;
+        }
+        33%,
+        59% {
+          opacity: 1;
+        }
+        61%,
+        100% {
+          opacity: 0;
+        }
+      }
+      @keyframes k3 {
+        0%,
+        59% {
+          opacity: 0;
+        }
+        61%,
+        97% {
+          opacity: 1;
+        }
+        97.01%,
+        100% {
+          opacity: 0;
+        }
+      }
+      .e1out {
+        animation: e1out 12s infinite;
+      }
+      .e1in {
+        opacity: 0;
+        animation:
+          e1in 12s infinite,
+          e1inshift 12s ease-in-out infinite;
+      }
+      .ch {
+        animation: ch 12s ease-in-out infinite;
+      }
+      .olderrows {
+        animation: oldshift 12s ease-in-out infinite;
+      }
+      .aw {
+        animation: awout 12s infinite;
+      }
+      .below {
+        animation: below 12s ease-in-out infinite;
+      }
+      .e2in {
+        opacity: 0;
+        animation: e2in 12s infinite;
+      }
+      .cnts .k1 {
+        animation: k1 12s infinite;
+      }
+      .cnts .k2 {
+        opacity: 0;
+        animation: k2 12s infinite;
+      }
+      .cnts .k3 {
+        opacity: 0;
+        animation: k3 12s infinite;
+      }
+      .cnts > span {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .lst *,
+        .cnts * {
+          animation: none !important;
+        }
+        .e1in,
+        .e2in,
+        .cnts .k2,
+        .cnts .k3 {
+          opacity: 0;
+        }
+      }
 
+      @keyframes lsth {
+        0%,
+        60% {
+          height: 442px;
+        }
+        64%,
+        97% {
+          height: 400px;
+        }
+        97.01%,
+        100% {
+          height: 442px;
+        }
+      }
+      .lst.lst {
+        height: 442px;
+        animation:
+          rst 12s infinite,
+          lsth 12s ease-in-out infinite;
+      }
+      .prompt {
+        padding-bottom: 20px !important;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .lst {
+          animation: none !important;
+        }
+      }
 
-.below,.olderrows{position:absolute;left:0;right:0;top:0}
-.lst .r .s.wt{color:#b07d1a!important;animation:pulse 1.4s ease-in-out infinite}
-:root[data-theme="dark"] .lst .r .s.wt{color:#e5b567!important}
-/* E1 at 30-34%: a planner finishes. E2 at 58-64%: this session is answered and starts work */
-@keyframes e1out{0%,30%{opacity:1}32%,97%{opacity:0}97.01%,100%{opacity:1}}
-@keyframes e1in{0%,32%{opacity:0}35%,97%{opacity:1}97.01%,100%{opacity:0}}
-@keyframes ch{0%,31%{margin-top:0}34%,59%{margin-top:-30px}62%,97%{margin-top:0}97.01%,100%{margin-top:0}}
-@keyframes e1inshift{0%,59%{margin-top:0}62%,97%{margin-top:30px}97.01%,100%{margin-top:0}}
-@keyframes oldshift{0%,59%{margin-top:0}62%,97%{margin-top:30px}97.01%,100%{margin-top:0}}
-@keyframes awout{0%,58%{opacity:1}60%,97%{opacity:0}97.01%,100%{opacity:1}}
-@keyframes below{0%,60%{margin-top:0}64%,97%{margin-top:-72px}97.01%,100%{margin-top:0}}
-@keyframes e2in{0%,63%{opacity:0}66%,97%{opacity:1}97.01%,100%{opacity:0}}
-@keyframes k1{0%,31%{opacity:1}33%,100%{opacity:0}}
-@keyframes k2{0%,31%{opacity:0}33%,59%{opacity:1}61%,100%{opacity:0}}
-@keyframes k3{0%,59%{opacity:0}61%,97%{opacity:1}97.01%,100%{opacity:0}}
-.e1out{animation:e1out 12s infinite}
-.e1in{opacity:0;animation:e1in 12s infinite,e1inshift 12s ease-in-out infinite}
-.ch{animation:ch 12s ease-in-out infinite}
-.olderrows{animation:oldshift 12s ease-in-out infinite}
-.aw{animation:awout 12s infinite}
-.below{animation:below 12s ease-in-out infinite}
-.e2in{opacity:0;animation:e2in 12s infinite}
-.cnts .k1{animation:k1 12s infinite}.cnts .k2{opacity:0;animation:k2 12s infinite}.cnts .k3{opacity:0;animation:k3 12s infinite}
-.cnts>span{position:absolute;left:0;top:0}
-@media (prefers-reduced-motion:reduce){.lst *,.cnts *{animation:none!important}.e1in,.e2in,.cnts .k2,.cnts .k3{opacity:0}}
+      .lst.live {
+        position: relative;
+        height: 404px !important;
+        overflow: hidden;
+        animation: none !important;
+      }
+      .lst.live .g,
+      .lst.live .r {
+        position: absolute;
+        left: 0;
+        right: 0;
+        transition:
+          top 0.4s cubic-bezier(0.3, 0.7, 0.3, 1) 0.3s,
+          opacity 0.3s ease;
+      }
+      .lst.live .r.enter,
+      .lst.live .r.arriving {
+        transition:
+          top 0s,
+          opacity 0.35s ease 0.75s;
+      }
+      .lst.live .r.leave {
+        transition: opacity 0.3s ease;
+      }
+      .lst.live .r.enter {
+        opacity: 0;
+      }
+      .lst.live .r.leave {
+        opacity: 0;
+      }
+      .lst.live .r .d .sw,
+      .lst.live .r .d {
+        transition: opacity 0.25s;
+      }
+      .lst.live .r.flash .d {
+        animation: flash 0.9s ease;
+      }
+      @keyframes flash {
+        0% {
+          opacity: 0.2;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      .cnts#cnts {
+        position: static;
+        height: auto;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .lst.live .g,
+        .lst.live .r {
+          transition: none;
+        }
+      }
 
-@keyframes lsth{0%,60%{height:442px}64%,97%{height:400px}97.01%,100%{height:442px}}
-.lst.lst{height:442px;animation:rst 12s infinite,lsth 12s ease-in-out infinite}
-.prompt{padding-bottom:20px!important}
-@media (prefers-reduced-motion:reduce){.lst{animation:none!important}}
+      /* hover follows the pointer, rows keep moving */
+      .lst .r .n,
+      .lst .r .d,
+      .lst .r .t,
+      .lst .r .pr {
+        transition: color 0.12s;
+      }
+      .lst .r::before {
+        content: '';
+        position: absolute;
+        left: -10px;
+        right: -10px;
+        top: 1px;
+        bottom: 1px;
+        border-radius: 7px;
+        background: rgba(255, 255, 255, 0.055);
+        opacity: 0;
+        transition: opacity 0.12s;
+        pointer-events: none;
+        z-index: -1;
+      }
+      .lst .r {
+        isolation: isolate;
+      }
+      .lst .r.hot::before {
+        opacity: 1;
+      }
+      :root:not([data-theme='dark']) .lst .r::before {
+        background: rgba(0, 0, 0, 0.04);
+      }
+      .lst .r.hot .n {
+        color: #ffffff;
+      }
+      .lst .r.hot .d,
+      .lst .r.hot .t {
+        color: #cccccc;
+      }
+      :root:not([data-theme='dark']) .lst .r.hot .n {
+        color: #121212;
+      }
+      :root:not([data-theme='dark']) .lst .r.hot .d,
+      :root:not([data-theme='dark']) .lst .r.hot .t {
+        color: #3b3b38;
+      }
+      /* the prompt takes typing, Enter clears it. The block cursor sits where typing starts, the hint follows it */
+      .prompt .ask {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        cursor: text;
+      }
+      .prompt .ask .p {
+        flex: none;
+      }
+      .prompt .fld {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+      }
+      .prompt input {
+        flex: 1;
+        min-width: 0;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font: inherit;
+        color: #e6e6e6;
+        caret-color: transparent;
+      }
+      .prompt input::placeholder {
+        color: transparent;
+      }
+      .prompt .fld .c {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        margin: -9px 0 0;
+        pointer-events: none;
+        background: #ffffff !important;
+        mix-blend-mode: difference;
+      }
+      .prompt .fld .c,
+      .prompt .fld .c.solid {
+        animation: none !important;
+      }
+      .prompt .fld .mz {
+        position: absolute;
+        visibility: hidden;
+        white-space: pre;
+      }
+      .prompt .fld .ph {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        color: #8b8b8b;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+      .prompt input:not(:placeholder-shown) ~ .ph {
+        display: none;
+      }
+      .prompt input:not(:placeholder-shown):not(:focus) ~ .c {
+        display: none;
+      }
+      :root:not([data-theme='dark']) .prompt input {
+        color: #121212;
+      }
+      :root:not([data-theme='dark']) .prompt .fld .ph {
+        color: #8a8a86;
+      }
+      :root:not([data-theme='dark']) .prompt .ask:focus-within .p {
+        color: #d97757;
+      }
+      :root:not([data-theme='dark']) .prompt .ask:focus-within .p {
+        color: #c15f3c;
+      }
+      :root[data-theme='dark'] .prompt .ask:focus-within .p {
+        color: #d97757;
+      }
 
-.lst.live{position:relative;height:404px!important;overflow:hidden;animation:none!important}
-.lst.live .g,.lst.live .r{position:absolute;left:0;right:0;transition:top .4s cubic-bezier(.3,.7,.3,1) .3s,opacity .3s ease}
-.lst.live .r.enter,.lst.live .r.arriving{transition:top 0s,opacity .35s ease .75s}
-.lst.live .r.leave{transition:opacity .3s ease}
-.lst.live .r.enter{opacity:0}
-.lst.live .r.leave{opacity:0}
-.lst.live .r .d .sw,.lst.live .r .d{transition:opacity .25s}
-.lst.live .r.flash .d{animation:flash .9s ease}
-@keyframes flash{0%{opacity:.2}100%{opacity:1}}
-.cnts#cnts{position:static;height:auto}
-@media (prefers-reduced-motion:reduce){.lst.live .g,.lst.live .r{transition:none}}
+      /* slash menu: opens upward over the list so the window never grows */
+      .prompt {
+        position: relative;
+      }
+      .menu {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 100%;
+        z-index: 5;
+        background: #1e1e1e;
+        border-top: 1px solid #333;
+        padding: 8px 28px 6px;
+        max-height: 182px;
+        overflow: hidden;
+      }
+      .menu[hidden] {
+        display: none;
+      }
+      .menu .mi {
+        display: grid;
+        grid-template-columns: 22px 360px minmax(0, 1fr);
+        column-gap: 18px;
+        align-items: center;
+        height: 28px;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .menu .mk {
+        color: transparent;
+      }
+      .menu .mn {
+        color: #cccccc;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .menu .md {
+        color: #8b8b8b;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .menu .mi.on .mk,
+      .menu .mi.on .mn {
+        color: #d97757;
+      }
+      .menu .mi.on .md {
+        color: #cccccc;
+      }
+      .menu .none {
+        height: 28px;
+        line-height: 28px;
+        color: #8b8b8b;
+        padding-left: 40px;
+      }
+      :root:not([data-theme='dark']) .menu {
+        background: #ffffff;
+        border-top-color: #ececea;
+      }
+      :root:not([data-theme='dark']) .menu .mn {
+        color: #2a2a28;
+      }
+      :root:not([data-theme='dark']) .menu .md,
+      :root:not([data-theme='dark']) .menu .none {
+        color: #8a8a86;
+      }
+      :root:not([data-theme='dark']) .menu .mi.on .mk,
+      :root:not([data-theme='dark']) .menu .mi.on .mn {
+        color: #c15f3c;
+      }
+      :root:not([data-theme='dark']) .menu .mi.on .md {
+        color: #3b3b38;
+      }
 
-/* hover follows the pointer, rows keep moving */
-.lst .r .n,.lst .r .d,.lst .r .t,.lst .r .pr{transition:color .12s}
-.lst .r::before{content:"";position:absolute;left:-10px;right:-10px;top:1px;bottom:1px;border-radius:7px;background:rgba(255,255,255,.055);opacity:0;transition:opacity .12s;pointer-events:none;z-index:-1}
-.lst .r{isolation:isolate}.lst .r.hot::before{opacity:1}
-:root:not([data-theme="dark"]) .lst .r::before{background:rgba(0,0,0,.04)}
-.lst .r.hot .n{color:#ffffff}.lst .r.hot .d,.lst .r.hot .t{color:#cccccc}
-:root:not([data-theme="dark"]) .lst .r.hot .n{color:#121212}:root:not([data-theme="dark"]) .lst .r.hot .d,:root:not([data-theme="dark"]) .lst .r.hot .t{color:#3b3b38}
-/* the prompt takes typing, Enter clears it. The block cursor sits where typing starts, the hint follows it */
-.prompt .ask{display:flex;align-items:center;gap:11px;cursor:text}
-.prompt .ask .p{flex:none}
-.prompt .fld{position:relative;flex:1;min-width:0;display:flex;align-items:center}
-.prompt input{flex:1;min-width:0;border:0;outline:0;background:transparent;padding:0;margin:0;font:inherit;color:#e6e6e6;caret-color:transparent}
-.prompt input::placeholder{color:transparent}
-.prompt .fld .c{position:absolute;left:0;top:50%;margin:-9px 0 0;pointer-events:none;background:#ffffff!important;mix-blend-mode:difference}
-.prompt .fld .c,.prompt .fld .c.solid{animation:none!important}
-.prompt .fld .mz{position:absolute;visibility:hidden;white-space:pre}
-.prompt .fld .ph{position:absolute;left:0;top:0;bottom:0;display:flex;align-items:center;color:#8b8b8b;pointer-events:none;white-space:nowrap}
-.prompt input:not(:placeholder-shown)~.ph{display:none}.prompt input:not(:placeholder-shown):not(:focus)~.c{display:none}
-:root:not([data-theme="dark"]) .prompt input{color:#121212}:root:not([data-theme="dark"]) .prompt .fld .ph{color:#8a8a86}
-:root:not([data-theme="dark"]) .prompt .ask:focus-within .p{color:#d97757}:root:not([data-theme="dark"]) .prompt .ask:focus-within .p{color:#c15f3c}
-:root[data-theme="dark"] .prompt .ask:focus-within .p{color:#d97757}
+      /* shell mode: the prompt takes Claude Code's shell color */
+      .prompt.shell {
+        border-top-color: #f06ba8 !important;
+      }
+      .prompt.shell .ask .p,
+      .prompt.shell .ask:focus-within .p {
+        color: #f06ba8 !important;
+      }
+      .prompt.shell .fld .ph {
+        color: #f06ba8 !important;
+      }
+      :root:not([data-theme='dark']) .prompt.shell {
+        border-top-color: #c2185b !important;
+      }
+      :root:not([data-theme='dark']) .prompt.shell .ask .p,
+      :root:not([data-theme='dark']) .prompt.shell .ask:focus-within .p,
+      :root:not([data-theme='dark']) .prompt.shell .fld .ph {
+        color: #c2185b !important;
+      }
 
-/* slash menu: opens upward over the list so the window never grows */
-.prompt{position:relative}
-.menu{position:absolute;left:0;right:0;bottom:100%;z-index:5;background:#1e1e1e;border-top:1px solid #333;padding:8px 28px 6px;max-height:182px;overflow:hidden}
-.menu[hidden]{display:none}
-.menu .mi{display:grid;grid-template-columns:22px 360px minmax(0,1fr);column-gap:18px;align-items:center;height:28px;white-space:nowrap;cursor:pointer}
-.menu .mk{color:transparent}.menu .mn{color:#cccccc;overflow:hidden;text-overflow:ellipsis}.menu .md{color:#8b8b8b;overflow:hidden;text-overflow:ellipsis}
-.menu .mi.on .mk,.menu .mi.on .mn{color:#d97757}.menu .mi.on .md{color:#cccccc}
-.menu .none{height:28px;line-height:28px;color:#8b8b8b;padding-left:40px}
-:root:not([data-theme="dark"]) .menu{background:#ffffff;border-top-color:#ececea}
-:root:not([data-theme="dark"]) .menu .mn{color:#2a2a28}:root:not([data-theme="dark"]) .menu .md,:root:not([data-theme="dark"]) .menu .none{color:#8a8a86}
-:root:not([data-theme="dark"]) .menu .mi.on .mk,:root:not([data-theme="dark"]) .menu .mi.on .mn{color:#c15f3c}:root:not([data-theme="dark"]) .menu .mi.on .md{color:#3b3b38}
+      /* the menu reads as a layer over the list */
+      .menu {
+        box-shadow: 0 -12px 24px -16px rgba(0, 0, 0, 0.7);
+      }
+      :root:not([data-theme='dark']) .menu {
+        box-shadow: 0 -12px 24px -16px rgba(30, 25, 20, 0.22);
+      }
 
-/* shell mode: the prompt takes Claude Code's shell color */
-.prompt.shell{border-top-color:#f06ba8!important}
-.prompt.shell .ask .p,.prompt.shell .ask:focus-within .p{color:#f06ba8!important}
-.prompt.shell .fld .ph{color:#f06ba8!important}
-:root:not([data-theme="dark"]) .prompt.shell{border-top-color:#c2185b!important}
-:root:not([data-theme="dark"]) .prompt.shell .ask .p,:root:not([data-theme="dark"]) .prompt.shell .ask:focus-within .p,:root:not([data-theme="dark"]) .prompt.shell .fld .ph{color:#c2185b!important}
+      /* menu in the flow: no border or shadow, the rule stays under it */
+      .menu {
+        bottom: calc(100% + 11px) !important;
+        border-top: 0 !important;
+        box-shadow: none !important;
+        padding: 4px 28px 0 !important;
+        max-height: 172px !important;
+      }
+      .menu .mn {
+        color: #8b8b8b;
+      }
+      .menu .mi.on .mn {
+        color: #d97757;
+      }
+      .menu .mi.on .md {
+        color: #e6e6e6;
+      }
+      :root:not([data-theme='dark']) .menu .mn {
+        color: #8a8a86;
+      }
+      :root:not([data-theme='dark']) .menu .mi.on .mn {
+        color: #c15f3c;
+      }
+      :root:not([data-theme='dark']) .menu .mi.on .md {
+        color: #121212;
+      }
+      .lst .under {
+        filter: opacity(0);
+      }
+      /* tablet and phone */
+      @media (max-width: 1240px) {
+        .tray {
+          width: auto !important;
+          margin-left: 24px !important;
+          margin-right: 24px !important;
+        }
+        .tray .stage,
+        .term2 {
+          width: auto !important;
+        }
+      }
+      @media (max-width: 900px) {
+        .wrap {
+          padding: 0 24px;
+        }
+        .hero {
+          padding-top: 64px !important;
+        }
+        .hero h1 {
+          font-size: 60px !important;
+          max-width: 640px !important;
+        }
+        .ico {
+          width: 56px !important;
+          height: 56px !important;
+          border-radius: 15px !important;
+          vertical-align: -8px !important;
+        }
+        .ico.doc svg,
+        .ico.mg svg {
+          width: 28px !important;
+          height: 28px !important;
+        }
+        .hero p {
+          font-size: 18px !important;
+          margin-top: 24px !important;
+        }
+        .tray {
+          margin: 56px 16px 0 !important;
+          padding: 24px 18px !important;
+          border-radius: 28px !important;
+        }
+        .r {
+          grid-template-columns: 22px 250px minmax(0, 1fr) 40px !important;
+          column-gap: 14px !important;
+        }
+        .r .pr {
+          display: none;
+        }
+        .r .n {
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .menu .mi {
+          grid-template-columns: 22px 250px minmax(0, 1fr) !important;
+          column-gap: 14px !important;
+        }
+      }
+      @media (max-width: 600px) {
+        .wrap {
+          padding: 0 16px;
+        }
+        nav {
+          height: 64px !important;
+        }
+        nav .links {
+          gap: 18px !important;
+          font-size: 14px;
+        }
+        .hero {
+          padding-top: 40px !important;
+        }
+        .hero h1 {
+          font-size: 40px !important;
+          line-height: 1.12 !important;
+          letter-spacing: -0.035em !important;
+        }
+        .ico {
+          width: 40px !important;
+          height: 40px !important;
+          border-radius: 11px !important;
+          vertical-align: -6px !important;
+          margin: 0 2px !important;
+        }
+        .ico.doc svg,
+        .ico.mg svg {
+          width: 20px !important;
+          height: 20px !important;
+        }
+        .hero p {
+          font-size: 16px !important;
+          margin-top: 18px !important;
+        }
+        .tray {
+          margin: 36px 8px 0 !important;
+          padding: 12px 8px !important;
+          border-radius: 22px !important;
+        }
+        .term2 {
+          font-size: 13px !important;
+        }
+        .av {
+          padding: 16px 16px 0 !important;
+        }
+        .prompt {
+          margin: 0 -16px !important;
+          padding-left: 16px !important;
+          padding-right: 16px !important;
+        }
+        .cnts {
+          font-size: 12px !important;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .r {
+          grid-template-columns: 18px minmax(0, 1fr) 34px !important;
+          column-gap: 10px !important;
+        }
+        .r .d {
+          display: none;
+        }
+        .menu {
+          padding-left: 16px !important;
+          padding-right: 16px !important;
+        }
+        .menu .mi {
+          grid-template-columns: 18px minmax(0, 1fr) !important;
+          column-gap: 10px !important;
+        }
+        .menu .md {
+          display: none;
+        }
+      }
+    </style>
+    <style>
+      nav a {
+        color: var(--body);
+        text-decoration: none;
+        border-radius: 6px;
+      }
+      nav a:hover {
+        color: var(--ink);
+      }
+      nav a:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 4px;
+      }
+      nav .brand {
+        text-decoration: none;
+      }
+      nav .links a {
+        padding: 6px 0;
+      }
+      nav .links .sep {
+        width: 1px;
+        height: 16px;
+        background: var(--rule);
+        align-self: center;
+      }
+      @media (max-width: 600px) {
+        nav .links .wide {
+          display: none;
+        }
+        nav .links .sep {
+          display: none;
+        }
+      }
+      nav .theme {
+        all: unset;
+        box-sizing: border-box;
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 8px;
+        color: var(--body);
+        cursor: pointer;
+        margin-left: -6px;
+      }
+      nav .theme svg {
+        width: 18px;
+        height: 18px;
+        grid-area: 1/1;
+      }
+      nav .theme .sun {
+        display: none;
+      }
+      :root[data-theme='dark'] nav .theme .sun {
+        display: block;
+      }
+      :root[data-theme='dark'] nav .theme .moon {
+        display: none;
+      }
+      @media (hover: hover) {
+        nav .theme:hover {
+          background: var(--rule);
+          color: var(--ink);
+        }
+      }
+      nav .theme:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 2px;
+      }
+      @media (max-width: 600px) {
+        nav .links {
+          gap: 14px !important;
+        }
+      }
 
-/* the menu reads as a layer over the list */
-.menu{box-shadow:0 -12px 24px -16px rgba(0,0,0,.7)}
-:root:not([data-theme="dark"]) .menu{box-shadow:0 -12px 24px -16px rgba(30,25,20,.22)}
+      nav {
+        position: relative;
+      }
+      nav .links > a {
+        position: relative;
+      }
+      nav .links > a[aria-current='true'] {
+        color: var(--ink);
+      }
+      nav .links > a[aria-current='true']::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -2px;
+        height: 2px;
+        border-radius: 2px;
+        background: var(--accent);
+      }
+      nav .nmw {
+        position: relative;
+        display: none;
+      }
+      nav .nbtn {
+        all: unset;
+        box-sizing: border-box;
+        font-family: 'Geist', sans-serif;
+        font-size: inherit;
+        color: var(--ink);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 34px;
+        padding: 0 10px;
+        margin: 0 -10px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      nav .nbtn .chev {
+        width: 15px;
+        height: 15px;
+        color: var(--muted);
+        transition: transform 0.15s ease;
+      }
+      nav .nbtn[aria-expanded='true'] .chev {
+        transform: rotate(180deg);
+      }
+      nav .nbtn .lp {
+        display: none;
+      }
+      nav .nbtn:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 2px;
+      }
+      @media (hover: hover) {
+        nav .nbtn:hover {
+          background: var(--rule);
+        }
+      }
+      nav .npanel {
+        display: none;
+        position: absolute;
+        top: calc(100% + 10px);
+        left: -10px;
+        min-width: 232px;
+        background: var(--paper);
+        border-radius: 12px;
+        box-shadow:
+          0 0 0 1px var(--rule),
+          var(--shadow);
+        padding: 6px;
+        z-index: 20;
+      }
+      nav .nbtn[aria-expanded='true'] + .npanel {
+        display: block;
+      }
+      nav .npanel a {
+        display: block;
+        padding: 9px 12px 9px 14px;
+        border-radius: 8px;
+        color: var(--body);
+        font-size: 15px;
+        position: relative;
+      }
+      nav .npanel a:focus-visible {
+        outline-offset: -2px;
+      }
+      nav .npanel a[aria-current='true'] {
+        color: var(--ink);
+        font-weight: 500;
+      }
+      nav .npanel a[aria-current='true']::before {
+        content: '';
+        position: absolute;
+        left: 4px;
+        top: 11px;
+        bottom: 11px;
+        width: 2px;
+        border-radius: 2px;
+        background: var(--accent);
+      }
+      nav .npanel .ndiv {
+        height: 1px;
+        background: var(--rule);
+        margin: 6px 8px;
+      }
+      nav .npanel .ndiv,
+      nav .npanel .pext {
+        display: none;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        nav .nbtn .chev {
+          transition: none;
+        }
+      }
+      @media (max-width: 1040px) {
+        nav .links > .sl {
+          display: none;
+        }
+        nav .nmw {
+          display: block;
+        }
+      }
+      @media (max-width: 600px) {
+        nav .links > .ext,
+        nav .links > .sep {
+          display: none !important;
+        }
+        nav .nbtn .lw {
+          display: none;
+        }
+        nav .nbtn .lp {
+          display: inline;
+        }
+        nav .npanel .ndiv,
+        nav .npanel .pext {
+          display: block;
+        }
+        nav .nmw {
+          position: static;
+        }
+        nav .npanel {
+          left: 0;
+          right: 0;
+          top: calc(100% - 4px);
+          min-width: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tag">
+      <b>Opening, current</b
+      ><span
+        >The working version every change lands on. Options are drawn beside it,
+        and a pick is folded back in here</span
+      >
+    </div>
+    <div class="wrap">
+      <nav aria-label="Site">
+        <a class="brand" href="#top" aria-label="canon, back to top"
+          ><i></i>canon</a
+        ><span class="links"
+          ><a class="sl" href="#roles">Roles</a
+          ><a class="sl" href="#records">Records</a
+          ><a class="sl" href="#craft">Craft</a
+          ><a class="sl" href="#guardrails">Guardrails</a
+          ><a class="sl" href="#worktrees">Worktrees</a
+          ><a class="sl" href="#setup">Setup</a
+          ><span class="nmw"
+            ><button
+              type="button"
+              class="nbtn"
+              aria-expanded="false"
+              aria-controls="npanel"
+            >
+              <span class="lw">Sections</span><span class="lp">Menu</span
+              ><svg
+                class="chev"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            <div class="npanel" id="npanel">
+              <a href="#roles">Roles</a><a href="#records">Records</a
+              ><a href="#craft">Craft</a><a href="#guardrails">Guardrails</a
+              ><a href="#worktrees">Worktrees</a><a href="#setup">Setup</a>
+              <div class="ndiv"></div>
+              <a
+                class="pext"
+                href="https://github.com/erclx/canon/tree/main/docs"
+                >Docs</a
+              ><a class="pext" href="https://github.com/erclx/canon">GitHub</a>
+            </div></span
+          ><a class="try" href="#try">Try it</a
+          ><i class="sep" aria-hidden="true"></i
+          ><a class="ext" href="https://github.com/erclx/canon/tree/main/docs"
+            >Docs</a
+          ><a class="ext" href="https://github.com/erclx/canon">GitHub</a
+          ><button
+            type="button"
+            class="theme"
+            aria-label="Switch to dark theme"
+          >
+            <svg
+              class="moon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></svg
+            ><svg
+              class="sun"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="4" />
+              <path
+                d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"
+              />
+            </svg></button
+        ></span>
+      </nav>
+      <div class="hero">
+        <h1>
+          canon runs agent work from
+          <span class="ico doc"
+            ><svg viewBox="0 0 40 40" fill="none">
+              <rect
+                x="9"
+                y="5"
+                width="22"
+                height="30"
+                rx="4"
+                stroke="#121212"
+                stroke-width="2.4"
+              />
+              <path
+                d="M14 13h12M14 19h12M14 25h7"
+                stroke="#121212"
+                stroke-width="2.4"
+                stroke-linecap="round"
+              />
+              <rect
+                x="25"
+                y="23"
+                width="7"
+                height="7"
+                rx="1.6"
+                fill="#e0461c"
+              /></svg
+          ></span>
+          plan to
+          <span class="ico mg"
+            ><svg viewBox="0 0 40 40" fill="none">
+              <circle cx="12" cy="9" r="3.6" stroke="#fff" stroke-width="2.6" />
+              <circle
+                cx="12"
+                cy="31"
+                r="3.6"
+                stroke="#fff"
+                stroke-width="2.6"
+              />
+              <circle
+                cx="29"
+                cy="20"
+                r="3.6"
+                stroke="#fff"
+                stroke-width="2.6"
+              />
+              <path
+                d="M12 12.6v14.8M12 12.6c0 7 6 7.4 13.4 7.4"
+                stroke="#fff"
+                stroke-width="2.6"
+                stroke-linecap="round"
+              /></svg
+          ></span>
+          merge
+        </h1>
+        <p>
+          A Claude Code plugin and CLI that one developer uses to plan, build,
+          review, and merge with coding agents, each role in its own session.
+        </p>
+      </div>
+      <div class="tray">
+        <div class="stage">
+          <div class="term2">
+            <div class="bar"><i></i><i></i><i></i><span>claude</span></div>
+            <div class="av">
+              <div class="cnts" id="cnts">
+                <b>1</b> awaiting input · <b>3</b> working · <b>41</b> completed
+              </div>
+              <div class="lst live" id="lst"></div>
+              <div class="prompt">
+                <label class="ask"
+                  ><span class="p">❯</span
+                  ><span class="fld"
+                    ><input
+                      id="ask"
+                      type="text"
+                      placeholder=" "
+                      aria-label="Describe a task for a new session"
+                      autocomplete="off"
+                      spellcheck="false"
+                      maxlength="120"
+                    /><span class="c"></span
+                    ><span class="ph"
+                      >describe a task for a new session</span
+                    ></span
+                  ></label
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="height: 80px"></div>
+    <script>
+      ;(() => {
+        const pool = [
+          {
+            n: 'planner-canon-landing-page',
+            aw: 'Two questions, each with a suggested answer',
+            wk: 'Writing the plan from the answers',
+            dn: 'Plan written, linked to its task',
+          },
+          {
+            n: 'worker-canon-take-timer',
+            wk: 'Gate: 9 of 14 stages passed',
+            dn: 'Pull request opened, evidence posted',
+          },
+          {
+            n: 'reviewer-canon-sync-stamp',
+            wk: 'Second pass on the added commits',
+            dn: 'Review closed, no findings',
+          },
+          {
+            n: 'ui-reviewer-canon-toolbar',
+            wk: 'Driving the checklist in the running app',
+            dn: '10 boxes passed, 2 sent back',
+          },
+          {
+            n: 'planner-canon-gate-stages',
+            aw: 'Measure first? One question open',
+            wk: 'Groundwork: measuring the gate stages',
+            dn: 'Groundwork closed into two tasks',
+          },
+          {
+            n: 'worker-canon-sync-coverage',
+            wk: 'Rules loaded: code-craft, test-craft',
+            dn: 'Merged by the operator, plan archived',
+          },
+          {
+            n: 'planner-canon-review-lift',
+            aw: 'Three questions, each with a suggested answer',
+            wk: 'Reading the review layer before planning',
+            dn: 'Plan written, linked to its task',
+          },
+          {
+            n: 'worker-canon-session-limits',
+            wk: 'Streaming src/sessions/limits.ts',
+            dn: 'Pull request opened, evidence posted',
+          },
+          {
+            n: 'worker-canon-drive-check',
+            wk: 'Slice 2 of 3: the baseline record',
+            dn: 'Pull request opened, evidence posted',
+          },
+          {
+            n: 'reviewer-canon-plan-guard',
+            wk: 'First pass against the whole change',
+            dn: 'Two findings posted',
+          },
+          {
+            n: 'planner-canon-intake-sort',
+            aw: 'Two items need a call',
+            wk: 'Sorting the drive findings',
+            dn: 'Intake filed, five items',
+          },
+          {
+            n: 'worker-canon-records-push',
+            wk: 'Tests green, checking the gate',
+            dn: 'Pull request opened, evidence posted',
+          },
+          {
+            n: 'ui-reviewer-canon-board-picks',
+            wk: 'Box 4 of 9: focus returns to the frame',
+            dn: 'All nine boxes passed',
+          },
+          {
+            n: 'planner-canon-film-beats',
+            aw: 'Which take opens the film?',
+            wk: 'Timing each take against 32 seconds',
+            dn: 'Plan written, linked to its task',
+          },
+        ]
+        const ROW = 30,
+          HEAD = 26,
+          GAP = 16
+        const L = document.getElementById('lst'),
+          C = document.getElementById('cnts')
+        let pi = 0,
+          tick = 0,
+          done = 41
+        const st = {
+          pin: 'Wave 3 queued behind two plans',
+          aw: [],
+          wk: [],
+          dn: [],
+        }
+        const el = {}
+        function inUse(n) {
+          return [...st.aw, ...st.wk, ...st.dn].some((x) => x.n === n)
+        }
+        function take(need) {
+          for (let i = 0; i < pool.length; i++) {
+            const s = pool[pi % pool.length]
+            pi++
+            if (inUse(s.n) || (need && !need(s))) continue
+            return { ...s, age: 0, key: s.n + '#' + pi }
+          }
+          return null
+        }
+        // initial state
+        st.aw.push({ ...take((x) => x.aw), age: 2 })
+        ;[4, 9, 13].forEach((a) => {
+          const s = take((x) => !x.aw)
+          st.wk.push({ ...s, age: a })
+        })
+        ;[5, 25, 45, 70, 95, 130].forEach((a) => {
+          const s = take()
+          st.dn.push({ ...s, age: a })
+        })
+        const heads = {}
+        function head(id, txt) {
+          if (!heads[id]) {
+            const h = document.createElement('div')
+            h.className = 'g'
+            h.textContent = txt
+            L.appendChild(h)
+            heads[id] = h
+          }
+          return heads[id]
+        }
+        function glyph(kind) {
+          return kind === 'aw'
+            ? '<span class="s wt">◆</span>'
+            : kind === 'wk'
+              ? '<span class="s sp"></span>'
+              : kind === 'pin'
+                ? '<span class="s pn">✻</span>'
+                : '<span class="s dn">✓</span>'
+        }
+        function age(a) {
+          return a < 60 ? a + 'm' : Math.floor(a / 60) + 'h'
+        }
+        function row(key, kind, name, line, a, old) {
+          key = key + ':' + kind
+          let r = el[key]
+          const html =
+            '<span>' +
+            glyph(kind) +
+            '</span><span class="n">' +
+            name +
+            '</span><span class="d"><span class="sw">' +
+            line +
+            '</span></span><span class="pr"></span><span class="t">' +
+            (kind === 'pin' ? '3d' : age(a)) +
+            '</span>'
+          if (!r) {
+            r = document.createElement('div')
+            r.className = 'r enter arriving'
+            r.innerHTML = html
+            L.appendChild(r)
+            el[key] = r
+            r._k = kind
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() => {
+                r.classList.remove('enter')
+                setTimeout(() => r.classList.remove('arriving'), 1200)
+              }),
+            )
+          } else {
+            if (r._k !== kind || r._line !== line) {
+              r.innerHTML = html
+              r.classList.remove('flash')
+              void r.offsetWidth
+              r.classList.add('flash')
+            } else {
+              r.querySelector('.t').textContent = kind === 'pin' ? '3d' : age(a)
+            }
+          }
+          r._k = kind
+          r._line = line
+          if (old) {
+            r.querySelector('.s').className = 's old'
+            r.querySelector('.s').textContent = '·'
+          }
+          return r
+        }
+        function layout() {
+          let y = 0
+          const seen = new Set()
+          const H = (id, txt, show) => {
+            const h = head(id, txt)
+            const was = h.style.opacity !== '0'
+            if (show) {
+              h.style.transition = was
+                ? 'top .4s cubic-bezier(.3,.7,.3,1) .3s, opacity .3s'
+                : 'top 0s, opacity .35s ease .75s'
+              h.style.top = y + 'px'
+              h.style.opacity = 1
+              y += HEAD
+            } else {
+              h.style.transition = 'opacity .25s'
+              h.style.opacity = 0
+            }
+          }
+          H('pin', 'Pinned', 1)
+          const p = row('pin', 'pin', 'orchestrator-canon', st.pin, 0)
+          p.style.top = y + 'px'
+          seen.add('pin:pin')
+          y += ROW + GAP
+          H('aw', 'Awaiting input', st.aw.length > 0)
+          st.aw.forEach((s) => {
+            const r = row(s.key, 'aw', s.n, s.aw, s.age)
+            r.style.top = y + 'px'
+            seen.add(s.key + ':aw')
+            y += ROW
+          })
+          if (st.aw.length) y += GAP
+          H('wk', 'Working', 1)
+          st.wk.forEach((s) => {
+            const r = row(s.key, 'wk', s.n, s.wk, s.age)
+            r.style.top = y + 'px'
+            seen.add(s.key + ':wk')
+            y += ROW
+          })
+          y += GAP
+          H('dn', 'Completed', 1)
+          for (let i = 0; i < st.dn.length; i++) {
+            if (y + ROW > 404) break
+            const s = st.dn[i]
+            const r = row(s.key, 'dn', s.n, s.dn, s.age, i >= 3)
+            r.style.top = y + 'px'
+            seen.add(s.key + ':dn')
+            y += ROW
+          }
+          Object.keys(el).forEach((k) => {
+            if (!seen.has(k)) {
+              const r = el[k]
+              r.classList.add('leave')
+              delete el[k]
+              setTimeout(() => r.remove(), 400)
+            }
+          })
 
-/* menu in the flow: no border or shadow, the rule stays under it */
-.menu{bottom:calc(100% + 11px)!important;border-top:0!important;box-shadow:none!important;padding:4px 28px 0!important;max-height:172px!important}
-.menu .mn{color:#8b8b8b}.menu .mi.on .mn{color:#d97757}.menu .mi.on .md{color:#e6e6e6}
-:root:not([data-theme="dark"]) .menu .mn{color:#8a8a86}:root:not([data-theme="dark"]) .menu .mi.on .mn{color:#c15f3c}:root:not([data-theme="dark"]) .menu .mi.on .md{color:#121212}
-.lst .under{filter:opacity(0)}
-/* tablet and phone */
-@media (max-width:1240px){
- .tray{width:auto!important;margin-left:24px!important;margin-right:24px!important}
- .tray .stage,.term2{width:auto!important}
-}
-@media (max-width:900px){
- .wrap{padding:0 24px}
- .hero{padding-top:64px!important}
- .hero h1{font-size:60px!important;max-width:640px!important}
- .ico{width:56px!important;height:56px!important;border-radius:15px!important;vertical-align:-8px!important}
- .ico.doc svg,.ico.mg svg{width:28px!important;height:28px!important}
- .hero p{font-size:18px!important;margin-top:24px!important}
- .tray{margin:56px 16px 0!important;padding:24px 18px!important;border-radius:28px!important}
- .r{grid-template-columns:22px 250px minmax(0,1fr) 40px!important;column-gap:14px!important}
- .r .pr{display:none}
- .r .n{overflow:hidden;text-overflow:ellipsis}
- .menu .mi{grid-template-columns:22px 250px minmax(0,1fr)!important;column-gap:14px!important}
-}
-@media (max-width:600px){
- .wrap{padding:0 16px}
- nav{height:64px!important}
- nav .links{gap:18px!important;font-size:14px}
- .hero{padding-top:40px!important}
- .hero h1{font-size:40px!important;line-height:1.12!important;letter-spacing:-0.035em!important}
- .ico{width:40px!important;height:40px!important;border-radius:11px!important;vertical-align:-6px!important;margin:0 2px!important}
- .ico.doc svg,.ico.mg svg{width:20px!important;height:20px!important}
- .hero p{font-size:16px!important;margin-top:18px!important}
- .tray{margin:36px 8px 0!important;padding:12px 8px!important;border-radius:22px!important}
- .term2{font-size:13px!important}
- .av{padding:16px 16px 0!important}
- .prompt{margin:0 -16px!important;padding-left:16px!important;padding-right:16px!important}
- .cnts{font-size:12px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
- .r{grid-template-columns:18px minmax(0,1fr) 34px!important;column-gap:10px!important}
- .r .d{display:none}
- .menu{padding-left:16px!important;padding-right:16px!important}
- .menu .mi{grid-template-columns:18px minmax(0,1fr)!important;column-gap:10px!important}
- .menu .md{display:none}
-}
-</style><style>
-nav a{color:var(--body);text-decoration:none;border-radius:6px}
-nav a:hover{color:var(--ink)}
-nav a:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
-nav .brand{text-decoration:none}
-nav .links a{padding:6px 0}
-nav .links .sep{width:1px;height:16px;background:var(--rule);align-self:center}
-@media (max-width:600px){nav .links .wide{display:none}nav .links .sep{display:none}}
-nav .theme{all:unset;box-sizing:border-box;width:34px;height:34px;display:grid;place-items:center;border-radius:8px;color:var(--body);cursor:pointer;margin-left:-6px}
-nav .theme svg{width:18px;height:18px;grid-area:1/1}
-nav .theme .sun{display:none}
-:root[data-theme="dark"] nav .theme .sun{display:block}
-:root[data-theme="dark"] nav .theme .moon{display:none}
-@media (hover:hover){nav .theme:hover{background:var(--rule);color:var(--ink)}}
-nav .theme:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-@media (max-width:600px){nav .links{gap:14px!important}}
+          C.innerHTML =
+            '<b>' +
+            st.aw.length +
+            '</b> awaiting input · <b>' +
+            st.wk.length +
+            '</b> working · <b>' +
+            done +
+            '</b> completed'
+        }
+        const plan = [
+          'complete',
+          'answer',
+          'dispatch',
+          'complete',
+          'dispatch',
+          'complete',
+          'answer',
+          'dispatch',
+        ]
+        function step() {
+          const t = plan[tick % plan.length]
+          tick++
+          ;[...st.aw, ...st.wk, ...st.dn].forEach((s) => (s.age += 1))
+          if (t === 'complete' && st.wk.length > 1) {
+            const s = st.wk.shift()
+            s.age = 0
+            st.dn.unshift(s)
+            done++
+            st.pin =
+              s.n.replace(/^[a-z-]+?-canon-/, '') + ' merged, next row is ready'
+          } else if (t === 'answer' && st.aw.length) {
+            const s = st.aw.shift()
+            s.age = 0
+            st.wk.push(s)
+            st.pin = 'Answers in for ' + s.n + ', it starts the plan'
+          } else {
+            const s = take(
+              st.wk.length >= 4 ? (x) => x.aw && !st.aw.length : null,
+            )
+            if (!s) {
+              layout()
+              return
+            }
+            s.age = 0
+            if (s.aw && st.aw.length < 1) {
+              st.aw.push(s)
+              st.pin = 'Dispatched ' + s.n + ', it has questions'
+            } else {
+              st.wk.push(s)
+              st.pin = 'Dispatched ' + s.n
+            }
+          }
+          if (st.dn.length > 8) st.dn.length = 8
+          layout()
+        }
+        // hover tracks the pointer while rows move under it
+        let px = null,
+          py = null,
+          hot = null,
+          raf = 0
+        function mark() {
+          raf = 0
+          let r = null
+          if (px !== null) {
+            const e = document.elementFromPoint(px, py)
+            r = e && e.closest('#lst .r:not(.leave)')
+          }
+          if (r !== hot) {
+            hot && hot.classList.remove('hot')
+            r && r.classList.add('hot')
+            hot = r
+          }
+          if (px !== null) raf = requestAnimationFrame(mark)
+        }
+        L.addEventListener('pointermove', (e) => {
+          px = e.clientX
+          py = e.clientY
+          if (!raf) raf = requestAnimationFrame(mark)
+        })
+        L.addEventListener('pointerleave', () => {
+          px = py = null
+          if (raf) {
+            cancelAnimationFrame(raf)
+            raf = 0
+          }
+          hot && hot.classList.remove('hot')
+          hot = null
+        })
+        const A = document.getElementById('ask')
+        const F = A.parentElement,
+          K = F.querySelector('.c'),
+          M = document.createElement('span')
+        M.className = 'mz'
+        M.textContent = 'x'.repeat(20)
+        F.appendChild(M)
+        let solid = 0
+        function place() {
+          const cw = M.getBoundingClientRect().width / 20
+          const i =
+            A.selectionDirection === 'backward'
+              ? A.selectionStart
+              : A.selectionEnd
+          K.style.left =
+            Math.max(0, (i == null ? A.value.length : i) * cw - A.scrollLeft) +
+            'px'
+        }
+        function hold() {
+          K.classList.add('solid')
+          clearTimeout(solid)
+          solid = setTimeout(() => K.classList.remove('solid'), 700)
+        }
 
-nav{position:relative}
-nav .links>a{position:relative}
-nav .links>a[aria-current="true"]{color:var(--ink)}
-nav .links>a[aria-current="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;border-radius:2px;background:var(--accent)}
-nav .nmw{position:relative;display:none}
-nav .nbtn{all:unset;box-sizing:border-box;font-family:"Geist",sans-serif;font-size:inherit;color:var(--ink);display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 10px;margin:0 -10px;border-radius:8px;cursor:pointer}
-nav .nbtn .chev{width:15px;height:15px;color:var(--muted);transition:transform .15s ease}
-nav .nbtn[aria-expanded="true"] .chev{transform:rotate(180deg)}
-nav .nbtn .lp{display:none}
-nav .nbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-@media (hover:hover){nav .nbtn:hover{background:var(--rule)}}
-nav .npanel{display:none;position:absolute;top:calc(100% + 10px);left:-10px;min-width:232px;background:var(--paper);border-radius:12px;box-shadow:0 0 0 1px var(--rule),var(--shadow);padding:6px;z-index:20}
-nav .nbtn[aria-expanded="true"]+.npanel{display:block}
-nav .npanel a{display:block;padding:9px 12px 9px 14px;border-radius:8px;color:var(--body);font-size:15px;position:relative}
-nav .npanel a:focus-visible{outline-offset:-2px}
-nav .npanel a[aria-current="true"]{color:var(--ink);font-weight:500}
-nav .npanel a[aria-current="true"]::before{content:"";position:absolute;left:4px;top:11px;bottom:11px;width:2px;border-radius:2px;background:var(--accent)}
-nav .npanel .ndiv{height:1px;background:var(--rule);margin:6px 8px}
-nav .npanel .ndiv,nav .npanel .pext{display:none}
-@media (prefers-reduced-motion:reduce){nav .nbtn .chev{transition:none}}
-@media (max-width:1040px){nav .links>.sl{display:none}nav .nmw{display:block}}
-@media (max-width:600px){nav .links>.ext,nav .links>.sep{display:none!important}nav .nbtn .lw{display:none}nav .nbtn .lp{display:inline}nav .npanel .ndiv,nav .npanel .pext{display:block}nav .nmw{position:static}nav .npanel{left:0;right:0;top:calc(100% - 4px);min-width:0}}
-</style></head><body><div class="tag"><b>Opening, current</b><span>The working version every change lands on. Options are drawn beside it, and a pick is folded back in here</span></div><div class="wrap">
-<nav aria-label="Site"><a class="brand" href="#top" aria-label="canon, back to top"><i></i>canon</a><span class="links"><a class="sl" href="#roles">Roles</a><a class="sl" href="#records">Records</a><a class="sl" href="#craft">Craft</a><a class="sl" href="#guardrails">Guardrails</a><a class="sl" href="#worktrees">Worktrees</a><a class="sl" href="#setup">Setup</a><span class="nmw"><button type="button" class="nbtn" aria-expanded="false" aria-controls="npanel"><span class="lw">Sections</span><span class="lp">Menu</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="npanel" id="npanel"><a href="#roles">Roles</a><a href="#records">Records</a><a href="#craft">Craft</a><a href="#guardrails">Guardrails</a><a href="#worktrees">Worktrees</a><a href="#setup">Setup</a><div class="ndiv"></div><a class="pext" href="https://github.com/erclx/canon/tree/main/docs">Docs</a><a class="pext" href="https://github.com/erclx/canon">GitHub</a></div></span><a class="try" href="#try">Try it</a><i class="sep" aria-hidden="true"></i><a class="ext" href="https://github.com/erclx/canon/tree/main/docs">Docs</a><a class="ext" href="https://github.com/erclx/canon">GitHub</a><button type="button" class="theme" aria-label="Switch to dark theme"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg></button></span></nav>
-<div class="hero"><h1>canon runs agent work from <span class="ico doc"><svg viewBox="0 0 40 40" fill="none"><rect x="9" y="5" width="22" height="30" rx="4" stroke="#121212" stroke-width="2.4"/><path d="M14 13h12M14 19h12M14 25h7" stroke="#121212" stroke-width="2.4" stroke-linecap="round"/><rect x="25" y="23" width="7" height="7" rx="1.6" fill="#e0461c"/></svg></span> plan to <span class="ico mg"><svg viewBox="0 0 40 40" fill="none"><circle cx="12" cy="9" r="3.6" stroke="#fff" stroke-width="2.6"/><circle cx="12" cy="31" r="3.6" stroke="#fff" stroke-width="2.6"/><circle cx="29" cy="20" r="3.6" stroke="#fff" stroke-width="2.6"/><path d="M12 12.6v14.8M12 12.6c0 7 6 7.4 13.4 7.4" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg></span> merge</h1>
-<p>A Claude Code plugin and CLI that one developer uses to plan, build, review, and merge with coding agents, each role in its own session.</p></div>
-<div class="tray"><div class="stage"><div class="term2"><div class="bar"><i></i><i></i><i></i><span>claude</span></div><div class="av">
-<div class="cnts" id="cnts"><b>1</b> awaiting input · <b>3</b> working · <b>41</b> completed</div><div class="lst live" id="lst"></div><div class="prompt"><label class="ask"><span class="p">❯</span><span class="fld"><input id="ask" type="text" placeholder=" " aria-label="Describe a task for a new session" autocomplete="off" spellcheck="false" maxlength="120"><span class="c"></span><span class="ph">describe a task for a new session</span></span></label></div></div></div></div></div></div><div style="height:80px"></div><script>
-(()=>{
-const pool=[
- {n:'planner-canon-landing-page',aw:'Two questions, each with a suggested answer',wk:'Writing the plan from the answers',dn:'Plan written, linked to its task'},
- {n:'worker-canon-take-timer',wk:'Gate: 9 of 14 stages passed',dn:'Pull request opened, evidence posted'},
- {n:'reviewer-canon-sync-stamp',wk:'Second pass on the added commits',dn:'Review closed, no findings'},
- {n:'ui-reviewer-canon-toolbar',wk:'Driving the checklist in the running app',dn:'10 boxes passed, 2 sent back'},
- {n:'planner-canon-gate-stages',aw:'Measure first? One question open',wk:'Groundwork: measuring the gate stages',dn:'Groundwork closed into two tasks'},
- {n:'worker-canon-sync-coverage',wk:'Rules loaded: code-craft, test-craft',dn:'Merged by the operator, plan archived'},
- {n:'planner-canon-review-lift',aw:'Three questions, each with a suggested answer',wk:'Reading the review layer before planning',dn:'Plan written, linked to its task'},
- {n:'worker-canon-session-limits',wk:'Streaming src/sessions/limits.ts',dn:'Pull request opened, evidence posted'},
- {n:'worker-canon-drive-check',wk:'Slice 2 of 3: the baseline record',dn:'Pull request opened, evidence posted'},
- {n:'reviewer-canon-plan-guard',wk:'First pass against the whole change',dn:'Two findings posted'},
- {n:'planner-canon-intake-sort',aw:'Two items need a call',wk:'Sorting the drive findings',dn:'Intake filed, five items'},
- {n:'worker-canon-records-push',wk:'Tests green, checking the gate',dn:'Pull request opened, evidence posted'},
- {n:'ui-reviewer-canon-board-picks',wk:'Box 4 of 9: focus returns to the frame',dn:'All nine boxes passed'},
- {n:'planner-canon-film-beats',aw:'Which take opens the film?',wk:'Timing each take against 32 seconds',dn:'Plan written, linked to its task'},
-];
-const ROW=30,HEAD=26,GAP=16;
-const L=document.getElementById('lst'),C=document.getElementById('cnts');
-let pi=0,tick=0,done=41;
-const st={pin:'Wave 3 queued behind two plans',aw:[],wk:[],dn:[]};
-const el={};
-function inUse(n){return [...st.aw,...st.wk,...st.dn].some(x=>x.n===n)}
-function take(need){for(let i=0;i<pool.length;i++){const s=pool[pi%pool.length];pi++;if(inUse(s.n)||(need&&!need(s)))continue;return {...s,age:0,key:s.n+'#'+pi}}return null}
-// initial state
-st.aw.push({...take(x=>x.aw),age:2});
-[4,9,13].forEach(a=>{const s=take(x=>!x.aw);st.wk.push({...s,age:a})});
-[5,25,45,70,95,130].forEach(a=>{const s=take();st.dn.push({...s,age:a})});
-const heads={};
-function head(id,txt){if(!heads[id]){const h=document.createElement('div');h.className='g';h.textContent=txt;L.appendChild(h);heads[id]=h}return heads[id]}
-function glyph(kind){return kind==='aw'?'<span class="s wt">◆</span>':kind==='wk'?'<span class="s sp"></span>':kind==='pin'?'<span class="s pn">✻</span>':'<span class="s dn">✓</span>'}
-function age(a){return a<60?a+'m':Math.floor(a/60)+'h'}
-function row(key,kind,name,line,a,old){key=key+':'+kind;let r=el[key];const html='<span>'+glyph(kind)+'</span><span class="n">'+name+'</span><span class="d"><span class="sw">'+line+'</span></span><span class="pr"></span><span class="t">'+(kind==='pin'?'3d':age(a))+'</span>';
- if(!r){r=document.createElement('div');r.className='r enter arriving';r.innerHTML=html;L.appendChild(r);el[key]=r;r._k=kind;requestAnimationFrame(()=>requestAnimationFrame(()=>{r.classList.remove('enter');setTimeout(()=>r.classList.remove('arriving'),1200)}))}
- else{if(r._k!==kind||r._line!==line){r.innerHTML=html;r.classList.remove('flash');void r.offsetWidth;r.classList.add('flash')}else{r.querySelector('.t').textContent=kind==='pin'?'3d':age(a)}}
- r._k=kind;r._line=line;if(old){r.querySelector('.s').className='s old';r.querySelector('.s').textContent='·'}return r}
-function layout(){let y=0;const seen=new Set();
- const H=(id,txt,show)=>{const h=head(id,txt);const was=h.style.opacity!=='0';if(show){h.style.transition=was?'top .4s cubic-bezier(.3,.7,.3,1) .3s, opacity .3s':'top 0s, opacity .35s ease .75s';h.style.top=y+'px';h.style.opacity=1;y+=HEAD}else{h.style.transition='opacity .25s';h.style.opacity=0}};
- H('pin','Pinned',1);const p=row('pin','pin','orchestrator-canon',st.pin,0);p.style.top=y+'px';seen.add('pin:pin');y+=ROW+GAP;
- H('aw','Awaiting input',st.aw.length>0);st.aw.forEach(s=>{const r=row(s.key,'aw',s.n,s.aw,s.age);r.style.top=y+'px';seen.add(s.key+':aw');y+=ROW});if(st.aw.length)y+=GAP;
- H('wk','Working',1);st.wk.forEach(s=>{const r=row(s.key,'wk',s.n,s.wk,s.age);r.style.top=y+'px';seen.add(s.key+':wk');y+=ROW});y+=GAP;
- H('dn','Completed',1);for(let i=0;i<st.dn.length;i++){if(y+ROW>404)break;const s=st.dn[i];const r=row(s.key,'dn',s.n,s.dn,s.age,i>=3);r.style.top=y+'px';seen.add(s.key+':dn');y+=ROW}
- Object.keys(el).forEach(k=>{if(!seen.has(k)){const r=el[k];r.classList.add('leave');delete el[k];setTimeout(()=>r.remove(),400)}});
- 
- C.innerHTML='<b>'+st.aw.length+'</b> awaiting input · <b>'+st.wk.length+'</b> working · <b>'+done+'</b> completed';}
-const plan=['complete','answer','dispatch','complete','dispatch','complete','answer','dispatch'];
-function step(){const t=plan[tick%plan.length];tick++;
- [...st.aw,...st.wk,...st.dn].forEach(s=>s.age+=1);
- if(t==='complete'&&st.wk.length>1){const s=st.wk.shift();s.age=0;st.dn.unshift(s);done++;st.pin=s.n.replace(/^[a-z-]+?-canon-/,'')+' merged, next row is ready'}
- else if(t==='answer'&&st.aw.length){const s=st.aw.shift();s.age=0;st.wk.push(s);st.pin='Answers in for '+s.n+', it starts the plan'}
- else{const s=take(st.wk.length>=4?x=>x.aw&&!st.aw.length:null);if(!s){layout();return}s.age=0;if(s.aw&&st.aw.length<1){st.aw.push(s);st.pin='Dispatched '+s.n+', it has questions'}else{st.wk.push(s);st.pin='Dispatched '+s.n}}
- if(st.dn.length>8)st.dn.length=8;layout()}
-// hover tracks the pointer while rows move under it
-let px=null,py=null,hot=null,raf=0;
-function mark(){raf=0;let r=null;if(px!==null){const e=document.elementFromPoint(px,py);r=e&&e.closest('#lst .r:not(.leave)')}if(r!==hot){hot&&hot.classList.remove('hot');r&&r.classList.add('hot');hot=r}if(px!==null)raf=requestAnimationFrame(mark)}
-L.addEventListener('pointermove',e=>{px=e.clientX;py=e.clientY;if(!raf)raf=requestAnimationFrame(mark)});
-L.addEventListener('pointerleave',()=>{px=py=null;if(raf){cancelAnimationFrame(raf);raf=0}hot&&hot.classList.remove('hot');hot=null});
-const A=document.getElementById('ask');
-const F=A.parentElement,K=F.querySelector('.c'),M=document.createElement('span');M.className='mz';M.textContent='x'.repeat(20);F.appendChild(M);
-let solid=0;
-function place(){const cw=M.getBoundingClientRect().width/20;const i=A.selectionDirection==='backward'?A.selectionStart:A.selectionEnd;K.style.left=Math.max(0,(i==null?A.value.length:i)*cw-A.scrollLeft)+'px'}
-function hold(){K.classList.add('solid');clearTimeout(solid);solid=setTimeout(()=>K.classList.remove('solid'),700)}
+        ;['input', 'click', 'focus', 'select', 'keyup'].forEach((ev) =>
+          A.addEventListener(ev, () => requestAnimationFrame(place)),
+        )
+        document.addEventListener('selectionchange', () => {
+          if (document.activeElement === A) place()
+        })
+        A.addEventListener('blur', () => {
+          if (!A.value) K.style.left = '0px'
+        })
+        layout()
+        const SK = [
+          [
+            'api-design',
+            "Carries the rules for shaping what a caller of code can see and come to depend on, being a function's exports, a command's flags and output, a file format, an endpoint, or a module boundary, so a change keeps every existing caller working and exposes nothing by accident.",
+          ],
+          [
+            'app-drive',
+            "Drives a throwaway copy of a built app with the operator, tries every requirements goal per persona, re-checks the last drive's findings, measures each operator ask, sorts each finding as a bug, a requirements conflict, or a taste call, and files the lot as an intake folder that canon intake drive-check holds.",
+          ],
+          [
+            'auto-ship',
+            'Chains implement → verify → ship after a feature plan is approved.',
+          ],
+          [
+            'backlog-triage',
+            'Files a measured verdict for every backlog row into an intake folder, suggesting decline, archive, keep, or promote and leaning toward decline, then applies the verdicts the operator approved through the task verbs.',
+          ],
+          [
+            'build-in-slices',
+            'Carries how a building session works through an approved plan in thin slices, each one tested, committed, and left green before the next starts, and how it records what it noticed outside the plan rather than fixing it.',
+          ],
+          [
+            'canon-cli',
+            "Routes a job to the canon verb that does it, and warns which verbs can lose a project's edits before one runs.",
+          ],
+          [
+            'canon-feedback',
+            "Format a report about something broken, missing, or off in canon and open it as a GitHub issue on the toolkit repo via canon feedback, where the toolkit's triage reads it.",
+          ],
+          [
+            'ci-workflow',
+            'Generates GitHub Actions CI workflow files with parallel jobs, emoji job names, and gated deploy stages.',
+          ],
+          [
+            'code-craft',
+            "Carries the rules for shaping code while it is being written, being a function, a class, or a module's internals, so a session picks the shape the next change needs rather than copying its neighbor, splitting by step, or building for a case nobody asked for.",
+          ],
+          [
+            'codebase-layout',
+            'Carries the rules that decide where a new file goes, when a folder splits, and when a file moves from its one consumer to shared code, so a plan places each new path by role and feature with a one-clause reason rather than beside its nearest neighbor.',
+          ],
+          [
+            'context-fold',
+            "Folds a branch's diff into the project's context entries, rewriting a folder or a gotcha the diff left untrue, then audits what it touched.",
+          ],
+          [
+            'create-rule',
+            'Scaffolds a project-specific governance rule into .claude/rules/project/<subdir>/<slug>.md with correct frontmatter and a slug no other rule in that subdir takes.',
+          ],
+          [
+            'create-skill',
+            "Creates a new SKILL.md in .claude/skills/ in a target project, or in the toolkit's own checkout under claude/skills/ for a plugin skill and .claude/skills/ for an internal-* one.",
+          ],
+          [
+            'decision-escalate',
+            "Collects every open decision whose answer turns on the operator's preference, since only they know what they need, puts them as one batch of questions each carrying options and a recommended default, then waits.",
+          ],
+          [
+            'deploy-app',
+            "Sets up a deploy for the current project on Cloudflare Pages or Vercel by picking the host the project already carries, creating the host's project, setting the IDs it needs as repository secrets, and stopping for the operator to issue the API token and attach the custom domain.",
+          ],
+          [
+            'deprecation-migration',
+            'Carries how a session retires a function, a flag, a field, a file, or a command without stranding whoever still calls it, from deciding whether to deprecate at all through proving no caller remains, migrating callers through an adapter or a strangler, and removing the old surface in its own change after the new one has carried every caller.',
+          ],
+          [
+            'design-identity',
+            "Drafts a project's logo mark through design-pick's render-and-pick loop, then composes the picked mark into an icon sequence and a 1200x630 social card.",
+          ],
+          [
+            'design-pick',
+            'Drafts several candidates for a decision judged by looking, lays them out side by side as frames on one Frameboard page, hands the operator the address, takes the pick through the structured question surface, and loops on the pick until they stop.',
+          ],
+          [
+            'design-record',
+            "Keeps the project's design record, being the design document at canon/DESIGN.md and the reference folder at canon/design/ holding the accepted frames a build matches.",
+          ],
+          [
+            'design-taste',
+            'Carries the layer model that decides which design decision settles first, the rules that keep a surface coherent across sections, and the catalog of defaults a model reaches for when nothing states a direction.',
+          ],
+          [
+            'docs-sync',
+            'Rewrites stale README.md and docs/*.md sections based on changes since main.',
+          ],
+          [
+            'document-health',
+            "Reports which of a project's documents have rotted, one section per document, across length, placement, and staleness.",
+          ],
+          [
+            'document-repair',
+            "Rewrites a project's markdown to the density limits one failing folder at a time, re-audits each to zero, and gates it through canon markdown gated add so it cannot drift back.",
+          ],
+          [
+            'draw-figure',
+            'Drafts one hand-drawn figure for a document, deciding whether the subject is Mermaid-shaped, an architecture view, or needs freehand SVG, then draws it.',
+          ],
+          [
+            'git-branch',
+            'Generates and validates conventional branch names, creating the branch from main or master and renaming it anywhere else.',
+          ],
+          [
+            'git-commit',
+            'Generates one conventional commit message from the staged changes and commits them exactly as staged, so a hunk-level selection survives.',
+          ],
+          [
+            'git-followup',
+            'Ships a small self-review edit on the current PR branch by staging, committing, pushing, and syncing the open PR, replying on the PR when it carries review comments.',
+          ],
+          [
+            'git-issue',
+            'Format a bug or task from the current session into a GitHub issue and file it on the current repo via gh issue create.',
+          ],
+          [
+            'git-pr-close',
+            'Closes an open pull request without merging it, posting a short reason first and deleting its head branch, through canon pr close.',
+          ],
+          [
+            'git-pr',
+            'Generates pull request titles and descriptions from git diffs.',
+          ],
+          [
+            'git-ship',
+            'Runs the full post-feature workflow by syncing docs, staging commits, renaming the branch, and opening a PR.',
+          ],
+          [
+            'git-split',
+            'Splits a mixed-commit branch into focused branches off main using cherry-pick.',
+          ],
+          [
+            'git-stage',
+            'Groups staged files by concern and generates one conventional commit per group.',
+          ],
+          [
+            'git-worktree',
+            'Lists linked worktrees with PR state and cleans up merged ones.',
+          ],
+          [
+            'issue-triage',
+            'Files the open GitHub issues on the current repository into an intake folder as one measured item each, narrowed by an optional label, capped per pass, and skipping any issue the board already carries.',
+          ],
+          [
+            'markdown-craft',
+            'Carries the format and structure rules for markdown, being headings, the density limits, paragraph and list shape, code spans, the date form, punctuation, emphasis, file references, American spelling, and frontmatter wording, and runs the audit after an edit.',
+          ],
+          [
+            'plan-feature',
+            "Plans a feature by reading the project's Claude setup and scanning relevant source files.",
+          ],
+          [
+            'plan-groundwork',
+            'Opens and runs a numbered groundwork folder under .canon/groundwork/<nn>-<slug>/ for a topic that has to be measured before it can be planned.',
+          ],
+          [
+            'plan-intake-answer',
+            "Walks an intake folder's unread items and puts them as batched questions in chat, writing each selection back onto the item it answers.",
+          ],
+          [
+            'plan-intake',
+            'Files a raw brain dump into a numbered intake folder under .canon/intake/<nn>-<slug>/, one item per finding carrying a measured problem, a proposed fix, and a verdict.',
+          ],
+          [
+            'pr-evidence',
+            'Posts the rendered-surface evidence on an open pull request, being the screenshot comparison with the UI checklist, the checklist alone when git refuses the comparison, the local server link, and the preview address, editing the one marked comment in place on every later head.',
+          ],
+          [
+            'proposal-critique',
+            'Questions a plan, a fix, a triage call, or a feature ask before it is built, in both directions, whether it does too much and whether it is too cautious, scaling the questions to how reversible the change is and how far it reaches, and ends on one verdict of go, probe first, absorb, or stop.',
+          ],
+          [
+            'review-address',
+            "Pulls review findings and CI status on the current branch's open PR, fixes each in the working tree, refreshes any stale .claude/ docs, replies with a summary comment, and pushes a follow-up commit.",
+          ],
+          [
+            'review-craft',
+            'Carries what a code review looks for and how much evidence a finding needs, from design and scope through breakage outside the diff, a test or check the change weakens to pass, performance, developer experience, executable prose, stale docs, security classes, and rendered output checked against the screenshots a pull request carries.',
+          ],
+          [
+            'review-pr',
+            'Reviews an open pull request from an independent session and posts findings as a review comment on the PR.',
+          ],
+          [
+            'review-ui',
+            "Drives an open pull request's visual checklist in the running app, one box at a time through a pinned agent browser, and posts one verdict per box as its own review comment under ## UI review while the branch owes a fix, being a failed box, a sweep finding, or a box the page kept from being driven, and ## UI review closed once it owes none.",
+          ],
+          [
+            'role-orchestrator',
+            'Asserts the orchestrator role for the current session, holds the build loop and the queue-refill sweep, and dispatches to the feature, review, and worktree skills.',
+          ],
+          [
+            'role-planner',
+            'Asserts the planner role for a session writing one plan, groundwork track, or intake pass under one row, holding what it reads before deciding, what may be written and where, how to read what is already in flight, and what it hands back.',
+          ],
+          [
+            'role-reviewer',
+            'Asserts the reviewer role for a session dispatched to review one pull request another session built, or a batch of small ones, holding what it may write, what it reads and never reads, the messages it owes the worker and the controller, the lift it runs on a close, and the acts it refuses.',
+          ],
+          [
+            'role-worker',
+            'Asserts the worker role for a building session, holding the boundary set, the lifetime, and the two channel obligations a session owes whoever dispatched it.',
+          ],
+          [
+            'search-craft',
+            'Carries the thinking step a session takes before it searches outside the project, naming the field, deriving who that field treats as authoritative, and running a search scoped to those sources beside an open one, plus a dated note on which sites refuse access.',
+          ],
+          [
+            'session-compact',
+            'Writes one handoff note to .canon/compact/ so the session after a compaction picks up where this one stopped.',
+          ],
+          [
+            'session-map',
+            'Writes the session map, the board-side handoff at .canon/tasks/session-<slug>.md, for an orchestrating session or on a request naming the session map or the task board, running the skill-drift step the write procedure opens with.',
+          ],
+          [
+            'session-relay',
+            'Relays a message to another session, turning the sessionId the caller named into an address at the moment of sending and composing a copyable block where no send tool exists.',
+          ],
+          [
+            'session-resume',
+            'Resumes a previous session by reading the handoff it left behind, tracked work, and relevant context.',
+          ],
+          [
+            'session-worktree',
+            'Enters a Claude Code worktree at .claude/worktrees/<name>/ with a name derived from the active plan or branch.',
+          ],
+          [
+            'systematic-debugging',
+            'Forces root-cause investigation before any fix when a test fails, a bug surfaces, or unexpected behavior appears.',
+          ],
+          [
+            'target-check',
+            'Reports what a target project holds against what the toolkit currently ships, one section per domain, reading through canon verbs rather than inspecting files.',
+          ],
+          ['target-setup', 'Gets a project onto the toolkit.'],
+          [
+            'target-update',
+            'Catches a target project up to the toolkit after a release.',
+          ],
+          [
+            'task-board',
+            'Creates a task file in .canon/tasks/ with the filename, phase label, and frontmatter the standard requires, and declines one decided against.',
+          ],
+          [
+            'task-complete',
+            "Marks the outcomes a branch's diff shipped [x] on the task board, sweeps the review receipts whose branch is gone, and archives a shipped task by hand where the post-merge hook could not.",
+          ],
+          [
+            'teach-craft',
+            'Carries the judgment for teaching a subject so it sticks, being retrieval over review, spacing, interleaving, placing the learner just past what they can do unaided, quiz design that leaks no answer, the teach-back, and what makes a lesson worth returning to.',
+          ],
+          [
+            'test-craft',
+            'Carries the rule that decides which layer a test belongs at, the question each one opens with, the end to end budget, and the final filter a session runs over what it wrote.',
+          ],
+          [
+            'test-first',
+            'Write the failing test for a behavior before writing the code that satisfies it, confirm it fails for the right reason, implement the smallest change that turns it green, then refactor with the suite green.',
+          ],
+          [
+            'ui-audit',
+            'Audits the current UI for incomplete, inconsistent, or confusing patterns.',
+          ],
+          [
+            'ui-checklist',
+            'Writes the visual checklist a reviewer reads beside the evidence screenshots, and names each changed behavior shipping with no test so test-craft can place one.',
+          ],
+          [
+            'ui-craft',
+            'Carries the behavior practice for rendered UI, being accessibility, keyboard and pointer operation, forms, motion, controls, state coverage, interface copy, and the capture a rendered change owes, routed from the kind of change to the references it reads.',
+          ],
+          [
+            'ui-film',
+            "Records real footage of a project's own web app for a video.",
+          ],
+          [
+            'ui-measure',
+            'Measures paint, processor, and layout cost against a running interface and reports numbers against published thresholds.',
+          ],
+          [
+            'write-doc',
+            'Drafts one brand-new project document from scratch against the standard for its kind, picking the kind from where it lands, a docs/ page, a canon/context/ entry, a wiki reference page, or a README.md.',
+          ],
+          [
+            'write-human',
+            'Carries the voice, word choice, rhythm, sentence construction, and information density rules a banned-character scan cannot express, plus the catalog of machine tells that survive a clean ban scan.',
+          ],
+          [
+            'youtube-transcripts',
+            'Fetches a YouTube video transcript with metadata frontmatter into the current repo via canon transcripts.',
+          ],
+        ]
+        const P = A.closest('.prompt'),
+          PG = P.querySelector('.ask .p'),
+          PH = P.querySelector('.ph'),
+          HINT = PH.textContent
+        const MU = document.createElement('div')
+        MU.className = 'menu'
+        MU.id = 'menu'
+        MU.setAttribute('role', 'listbox')
+        MU.setAttribute('aria-label', 'Commands')
+        MU.hidden = true
+        P.appendChild(MU)
+        A.setAttribute('role', 'combobox')
+        A.setAttribute('aria-autocomplete', 'list')
+        A.setAttribute('aria-controls', 'menu')
+        A.setAttribute('aria-expanded', 'false')
+        let hits = [],
+          sel = 0,
+          shut = false,
+          shell = false
+        const FLOW = [
+          'role-orchestrator',
+          'plan-feature',
+          'role-worker',
+          'review-pr',
+          'review-ui',
+          'git-ship',
+          'plan-groundwork',
+          'role-planner',
+          'build-in-slices',
+          'review-address',
+          'app-drive',
+          'design-pick',
+          'session-compact',
+          'session-resume',
+        ]
+        function match() {
+          const q = A.value
+            .slice(1)
+            .toLowerCase()
+            .replace(/^canon:/, '')
+          if (!q) {
+            const by = new Map(SK.map((s) => [s[0], s]))
+            return FLOW.filter((n) => by.has(n))
+              .map((n) => by.get(n))
+              .concat(SK.filter((s) => !FLOW.includes(s[0])))
+          }
+          const a = [],
+            b = []
+          SK.forEach((s) => {
+            const n = s[0]
+            if (n.startsWith(q)) a.push(s)
+            else if (n.includes(q)) b.push(s)
+          })
+          return a.concat(b)
+        }
+        let occ = 0
+        function occl() {
+          const top = MU.hidden ? Infinity : MU.getBoundingClientRect().top
+          L.querySelectorAll('.r,.g').forEach((e) =>
+            e.classList.toggle(
+              'under',
+              e.getBoundingClientRect().bottom +
+                (e.classList.contains('g') ? 30 : 0) >
+                top - 2,
+            ),
+          )
+          occ = MU.hidden ? 0 : requestAnimationFrame(occl)
+        }
+        function draw() {
+          draw0()
+          if (!MU.hidden && !occ) occ = requestAnimationFrame(occl)
+          if (MU.hidden && occ) {
+            cancelAnimationFrame(occ)
+            occ = 0
+            occl()
+          }
+        }
+        function draw0() {
+          const open =
+            !shell &&
+            !shut &&
+            A.value.startsWith('/') &&
+            !/\s/.test(A.value) &&
+            document.activeElement === A
+          MU.hidden = !open
+          A.setAttribute('aria-expanded', open ? 'true' : 'false')
+          if (!open) {
+            A.removeAttribute('aria-activedescendant')
+            return
+          }
+          hits = match()
+          if (sel >= hits.length) sel = Math.max(0, hits.length - 1)
+          if (!hits.length) {
+            MU.innerHTML = '<div class="none">No matching command</div>'
+            A.removeAttribute('aria-activedescendant')
+            return
+          }
+          MU.innerHTML = hits
+            .map(
+              (s, i) =>
+                '<div class="mi' +
+                (i === sel ? ' on' : '') +
+                '" role="option" id="mi-' +
+                i +
+                '" aria-selected="' +
+                (i === sel) +
+                '" data-i="' +
+                i +
+                '"><span class="mk">❯</span><span class="mn">/canon:' +
+                s[0] +
+                '</span><span class="md">(canon) ' +
+                s[1] +
+                '</span></div>',
+            )
+            .join('')
+          A.setAttribute('aria-activedescendant', 'mi-' + sel)
+          const on = MU.children[sel]
+          const top = on.offsetTop - 4,
+            bot = top + 28
+          if (top < MU.scrollTop) MU.scrollTop = top
+          else if (bot > MU.scrollTop + 168) MU.scrollTop = bot - 168
+        }
+        function accept(i) {
+          const s = hits[i]
+          if (!s) return
+          A.value = '/canon:' + s[0] + ' '
+          shut = true
+          draw()
+          A.setSelectionRange(A.value.length, A.value.length)
+          requestAnimationFrame(place)
+        }
+        function mode(on) {
+          shell = on
+          P.classList.toggle('shell', on)
+          if (PG) PG.textContent = on ? '!' : '❯'
+          PH.textContent = on ? 'run a shell command' : HINT
+          draw()
+        }
+        MU.addEventListener('pointerdown', (e) => {
+          const r = e.target.closest('.mi')
+          if (!r) return
+          e.preventDefault()
+          accept(+r.dataset.i)
+          A.focus()
+        })
+        MU.addEventListener('pointermove', (e) => {
+          const r = e.target.closest('.mi')
+          if (r && +r.dataset.i !== sel) {
+            sel = +r.dataset.i
+            draw()
+          }
+        })
+        MU.addEventListener(
+          'wheel',
+          (e) => {
+            e.preventDefault()
+            if (!hits.length) return
+            sel = Math.max(
+              0,
+              Math.min(hits.length - 1, sel + (e.deltaY > 0 ? 1 : -1)),
+            )
+            draw()
+          },
+          { passive: false },
+        )
+        A.addEventListener('keydown', (e) => {
+          const open = !MU.hidden && hits.length
+          if (open && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+            e.preventDefault()
+            sel =
+              (sel + (e.key === 'ArrowDown' ? 1 : -1) + hits.length) %
+              hits.length
+            draw()
+            return
+          }
+          if (open && (e.key === 'Tab' || e.key === 'Enter')) {
+            e.preventDefault()
+            accept(sel)
+            return
+          }
+          if (e.key === 'Escape' && !MU.hidden) {
+            e.preventDefault()
+            shut = true
+            draw()
+            return
+          }
+          if (e.key === 'Escape' && shell && !A.value) {
+            e.preventDefault()
+            mode(false)
+            return
+          }
+          if (e.key === 'Backspace' && shell && !A.value) {
+            e.preventDefault()
+            mode(false)
+            return
+          }
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            A.value = ''
+            shut = false
+            sel = 0
+            if (shell) mode(false)
+            else draw()
+          }
+          hold()
+          requestAnimationFrame(place)
+        })
+        A.addEventListener('input', () => {
+          shut = false
+          sel = 0
+          if (true && !shell && A.value.startsWith('!')) {
+            A.value = A.value.slice(1)
+            mode(true)
+            A.setSelectionRange(A.value.length, A.value.length)
+          }
+          draw()
+        })
+        A.addEventListener('focus', draw)
+        A.addEventListener('blur', () => {
+          MU.hidden = true
+          A.setAttribute('aria-expanded', 'false')
+          if (occ) {
+            cancelAnimationFrame(occ)
+            occ = 0
+          }
+          occl()
+        })
 
-['input','click','focus','select','keyup'].forEach(ev=>A.addEventListener(ev,()=>requestAnimationFrame(place)));
-document.addEventListener('selectionchange',()=>{if(document.activeElement===A)place()});
-A.addEventListener('blur',()=>{if(!A.value)K.style.left='0px'});
-layout();
-const SK=[["api-design", "Carries the rules for shaping what a caller of code can see and come to depend on, being a function's exports, a command's flags and output, a file format, an endpoint, or a module boundary, so a change keeps every existing caller working and exposes nothing by accident."], ["app-drive", "Drives a throwaway copy of a built app with the operator, tries every requirements goal per persona, re-checks the last drive's findings, measures each operator ask, sorts each finding as a bug, a requirements conflict, or a taste call, and files the lot as an intake folder that canon intake drive-check holds."], ["auto-ship", "Chains implement → verify → ship after a feature plan is approved."], ["backlog-triage", "Files a measured verdict for every backlog row into an intake folder, suggesting decline, archive, keep, or promote and leaning toward decline, then applies the verdicts the operator approved through the task verbs."], ["build-in-slices", "Carries how a building session works through an approved plan in thin slices, each one tested, committed, and left green before the next starts, and how it records what it noticed outside the plan rather than fixing it."], ["canon-cli", "Routes a job to the canon verb that does it, and warns which verbs can lose a project's edits before one runs."], ["canon-feedback", "Format a report about something broken, missing, or off in canon and open it as a GitHub issue on the toolkit repo via canon feedback, where the toolkit's triage reads it."], ["ci-workflow", "Generates GitHub Actions CI workflow files with parallel jobs, emoji job names, and gated deploy stages."], ["code-craft", "Carries the rules for shaping code while it is being written, being a function, a class, or a module's internals, so a session picks the shape the next change needs rather than copying its neighbor, splitting by step, or building for a case nobody asked for."], ["codebase-layout", "Carries the rules that decide where a new file goes, when a folder splits, and when a file moves from its one consumer to shared code, so a plan places each new path by role and feature with a one-clause reason rather than beside its nearest neighbor."], ["context-fold", "Folds a branch's diff into the project's context entries, rewriting a folder or a gotcha the diff left untrue, then audits what it touched."], ["create-rule", "Scaffolds a project-specific governance rule into .claude/rules/project/<subdir>/<slug>.md with correct frontmatter and a slug no other rule in that subdir takes."], ["create-skill", "Creates a new SKILL.md in .claude/skills/ in a target project, or in the toolkit's own checkout under claude/skills/ for a plugin skill and .claude/skills/ for an internal-* one."], ["decision-escalate", "Collects every open decision whose answer turns on the operator's preference, since only they know what they need, puts them as one batch of questions each carrying options and a recommended default, then waits."], ["deploy-app", "Sets up a deploy for the current project on Cloudflare Pages or Vercel by picking the host the project already carries, creating the host's project, setting the IDs it needs as repository secrets, and stopping for the operator to issue the API token and attach the custom domain."], ["deprecation-migration", "Carries how a session retires a function, a flag, a field, a file, or a command without stranding whoever still calls it, from deciding whether to deprecate at all through proving no caller remains, migrating callers through an adapter or a strangler, and removing the old surface in its own change after the new one has carried every caller."], ["design-identity", "Drafts a project's logo mark through design-pick's render-and-pick loop, then composes the picked mark into an icon sequence and a 1200x630 social card."], ["design-pick", "Drafts several candidates for a decision judged by looking, lays them out side by side as frames on one Frameboard page, hands the operator the address, takes the pick through the structured question surface, and loops on the pick until they stop."], ["design-record", "Keeps the project's design record, being the design document at canon/DESIGN.md and the reference folder at canon/design/ holding the accepted frames a build matches."], ["design-taste", "Carries the layer model that decides which design decision settles first, the rules that keep a surface coherent across sections, and the catalog of defaults a model reaches for when nothing states a direction."], ["docs-sync", "Rewrites stale README.md and docs/*.md sections based on changes since main."], ["document-health", "Reports which of a project's documents have rotted, one section per document, across length, placement, and staleness."], ["document-repair", "Rewrites a project's markdown to the density limits one failing folder at a time, re-audits each to zero, and gates it through canon markdown gated add so it cannot drift back."], ["draw-figure", "Drafts one hand-drawn figure for a document, deciding whether the subject is Mermaid-shaped, an architecture view, or needs freehand SVG, then draws it."], ["git-branch", "Generates and validates conventional branch names, creating the branch from main or master and renaming it anywhere else."], ["git-commit", "Generates one conventional commit message from the staged changes and commits them exactly as staged, so a hunk-level selection survives."], ["git-followup", "Ships a small self-review edit on the current PR branch by staging, committing, pushing, and syncing the open PR, replying on the PR when it carries review comments."], ["git-issue", "Format a bug or task from the current session into a GitHub issue and file it on the current repo via gh issue create."], ["git-pr-close", "Closes an open pull request without merging it, posting a short reason first and deleting its head branch, through canon pr close."], ["git-pr", "Generates pull request titles and descriptions from git diffs."], ["git-ship", "Runs the full post-feature workflow by syncing docs, staging commits, renaming the branch, and opening a PR."], ["git-split", "Splits a mixed-commit branch into focused branches off main using cherry-pick."], ["git-stage", "Groups staged files by concern and generates one conventional commit per group."], ["git-worktree", "Lists linked worktrees with PR state and cleans up merged ones."], ["issue-triage", "Files the open GitHub issues on the current repository into an intake folder as one measured item each, narrowed by an optional label, capped per pass, and skipping any issue the board already carries."], ["markdown-craft", "Carries the format and structure rules for markdown, being headings, the density limits, paragraph and list shape, code spans, the date form, punctuation, emphasis, file references, American spelling, and frontmatter wording, and runs the audit after an edit."], ["plan-feature", "Plans a feature by reading the project's Claude setup and scanning relevant source files."], ["plan-groundwork", "Opens and runs a numbered groundwork folder under .canon/groundwork/<nn>-<slug>/ for a topic that has to be measured before it can be planned."], ["plan-intake-answer", "Walks an intake folder's unread items and puts them as batched questions in chat, writing each selection back onto the item it answers."], ["plan-intake", "Files a raw brain dump into a numbered intake folder under .canon/intake/<nn>-<slug>/, one item per finding carrying a measured problem, a proposed fix, and a verdict."], ["pr-evidence", "Posts the rendered-surface evidence on an open pull request, being the screenshot comparison with the UI checklist, the checklist alone when git refuses the comparison, the local server link, and the preview address, editing the one marked comment in place on every later head."], ["proposal-critique", "Questions a plan, a fix, a triage call, or a feature ask before it is built, in both directions, whether it does too much and whether it is too cautious, scaling the questions to how reversible the change is and how far it reaches, and ends on one verdict of go, probe first, absorb, or stop."], ["review-address", "Pulls review findings and CI status on the current branch's open PR, fixes each in the working tree, refreshes any stale .claude/ docs, replies with a summary comment, and pushes a follow-up commit."], ["review-craft", "Carries what a code review looks for and how much evidence a finding needs, from design and scope through breakage outside the diff, a test or check the change weakens to pass, performance, developer experience, executable prose, stale docs, security classes, and rendered output checked against the screenshots a pull request carries."], ["review-pr", "Reviews an open pull request from an independent session and posts findings as a review comment on the PR."], ["review-ui", "Drives an open pull request's visual checklist in the running app, one box at a time through a pinned agent browser, and posts one verdict per box as its own review comment under ## UI review while the branch owes a fix, being a failed box, a sweep finding, or a box the page kept from being driven, and ## UI review closed once it owes none."], ["role-orchestrator", "Asserts the orchestrator role for the current session, holds the build loop and the queue-refill sweep, and dispatches to the feature, review, and worktree skills."], ["role-planner", "Asserts the planner role for a session writing one plan, groundwork track, or intake pass under one row, holding what it reads before deciding, what may be written and where, how to read what is already in flight, and what it hands back."], ["role-reviewer", "Asserts the reviewer role for a session dispatched to review one pull request another session built, or a batch of small ones, holding what it may write, what it reads and never reads, the messages it owes the worker and the controller, the lift it runs on a close, and the acts it refuses."], ["role-worker", "Asserts the worker role for a building session, holding the boundary set, the lifetime, and the two channel obligations a session owes whoever dispatched it."], ["search-craft", "Carries the thinking step a session takes before it searches outside the project, naming the field, deriving who that field treats as authoritative, and running a search scoped to those sources beside an open one, plus a dated note on which sites refuse access."], ["session-compact", "Writes one handoff note to .canon/compact/ so the session after a compaction picks up where this one stopped."], ["session-map", "Writes the session map, the board-side handoff at .canon/tasks/session-<slug>.md, for an orchestrating session or on a request naming the session map or the task board, running the skill-drift step the write procedure opens with."], ["session-relay", "Relays a message to another session, turning the sessionId the caller named into an address at the moment of sending and composing a copyable block where no send tool exists."], ["session-resume", "Resumes a previous session by reading the handoff it left behind, tracked work, and relevant context."], ["session-worktree", "Enters a Claude Code worktree at .claude/worktrees/<name>/ with a name derived from the active plan or branch."], ["systematic-debugging", "Forces root-cause investigation before any fix when a test fails, a bug surfaces, or unexpected behavior appears."], ["target-check", "Reports what a target project holds against what the toolkit currently ships, one section per domain, reading through canon verbs rather than inspecting files."], ["target-setup", "Gets a project onto the toolkit."], ["target-update", "Catches a target project up to the toolkit after a release."], ["task-board", "Creates a task file in .canon/tasks/ with the filename, phase label, and frontmatter the standard requires, and declines one decided against."], ["task-complete", "Marks the outcomes a branch's diff shipped [x] on the task board, sweeps the review receipts whose branch is gone, and archives a shipped task by hand where the post-merge hook could not."], ["teach-craft", "Carries the judgment for teaching a subject so it sticks, being retrieval over review, spacing, interleaving, placing the learner just past what they can do unaided, quiz design that leaks no answer, the teach-back, and what makes a lesson worth returning to."], ["test-craft", "Carries the rule that decides which layer a test belongs at, the question each one opens with, the end to end budget, and the final filter a session runs over what it wrote."], ["test-first", "Write the failing test for a behavior before writing the code that satisfies it, confirm it fails for the right reason, implement the smallest change that turns it green, then refactor with the suite green."], ["ui-audit", "Audits the current UI for incomplete, inconsistent, or confusing patterns."], ["ui-checklist", "Writes the visual checklist a reviewer reads beside the evidence screenshots, and names each changed behavior shipping with no test so test-craft can place one."], ["ui-craft", "Carries the behavior practice for rendered UI, being accessibility, keyboard and pointer operation, forms, motion, controls, state coverage, interface copy, and the capture a rendered change owes, routed from the kind of change to the references it reads."], ["ui-film", "Records real footage of a project's own web app for a video."], ["ui-measure", "Measures paint, processor, and layout cost against a running interface and reports numbers against published thresholds."], ["write-doc", "Drafts one brand-new project document from scratch against the standard for its kind, picking the kind from where it lands, a docs/ page, a canon/context/ entry, a wiki reference page, or a README.md."], ["write-human", "Carries the voice, word choice, rhythm, sentence construction, and information density rules a banned-character scan cannot express, plus the catalog of machine tells that survive a clean ban scan."], ["youtube-transcripts", "Fetches a YouTube video transcript with metadata frontmatter into the current repo via canon transcripts."]];
-const P=A.closest('.prompt'),PG=P.querySelector('.ask .p'),PH=P.querySelector('.ph'),HINT=PH.textContent;
-const MU=document.createElement('div');MU.className='menu';MU.id='menu';MU.setAttribute('role','listbox');MU.setAttribute('aria-label','Commands');MU.hidden=true;P.appendChild(MU);
-A.setAttribute('role','combobox');A.setAttribute('aria-autocomplete','list');A.setAttribute('aria-controls','menu');A.setAttribute('aria-expanded','false');
-let hits=[],sel=0,shut=false,shell=false;
-const FLOW=['role-orchestrator','plan-feature','role-worker','review-pr','review-ui','git-ship','plan-groundwork','role-planner','build-in-slices','review-address','app-drive','design-pick','session-compact','session-resume'];
-function match(){const q=A.value.slice(1).toLowerCase().replace(/^canon:/,'');if(!q){const by=new Map(SK.map(s=>[s[0],s]));return FLOW.filter(n=>by.has(n)).map(n=>by.get(n)).concat(SK.filter(s=>!FLOW.includes(s[0])))}const a=[],b=[];SK.forEach(s=>{const n=s[0];if(n.startsWith(q))a.push(s);else if(n.includes(q))b.push(s)});return a.concat(b)}
-let occ=0;
-function occl(){const top=MU.hidden?Infinity:MU.getBoundingClientRect().top;L.querySelectorAll('.r,.g').forEach(e=>e.classList.toggle('under',e.getBoundingClientRect().bottom+(e.classList.contains('g')?30:0)>top-2));occ=MU.hidden?0:requestAnimationFrame(occl)}
-function draw(){draw0();if(!MU.hidden&&!occ)occ=requestAnimationFrame(occl);if(MU.hidden&&occ){cancelAnimationFrame(occ);occ=0;occl()}}
-function draw0(){const open=!shell&&!shut&&A.value.startsWith('/')&&!/\s/.test(A.value)&&document.activeElement===A;
- MU.hidden=!open;A.setAttribute('aria-expanded',open?'true':'false');if(!open){A.removeAttribute('aria-activedescendant');return}
- hits=match();if(sel>=hits.length)sel=Math.max(0,hits.length-1);
- if(!hits.length){MU.innerHTML='<div class="none">No matching command</div>';A.removeAttribute('aria-activedescendant');return}
- MU.innerHTML=hits.map((s,i)=>'<div class="mi'+(i===sel?' on':'')+'" role="option" id="mi-'+i+'" aria-selected="'+(i===sel)+'" data-i="'+i+'"><span class="mk">❯</span><span class="mn">/canon:'+s[0]+'</span><span class="md">(canon) '+s[1]+'</span></div>').join('');
- A.setAttribute('aria-activedescendant','mi-'+sel);
- const on=MU.children[sel];const top=on.offsetTop-4,bot=top+28;if(top<MU.scrollTop)MU.scrollTop=top;else if(bot>MU.scrollTop+168)MU.scrollTop=bot-168}
-function accept(i){const s=hits[i];if(!s)return;A.value='/canon:'+s[0]+' ';shut=true;draw();A.setSelectionRange(A.value.length,A.value.length);requestAnimationFrame(place)}
-function mode(on){shell=on;P.classList.toggle('shell',on);if(PG)PG.textContent=on?'!':'❯';PH.textContent=on?'run a shell command':HINT;draw()}
-MU.addEventListener('pointerdown',e=>{const r=e.target.closest('.mi');if(!r)return;e.preventDefault();accept(+r.dataset.i);A.focus()});
-MU.addEventListener('pointermove',e=>{const r=e.target.closest('.mi');if(r&&+r.dataset.i!==sel){sel=+r.dataset.i;draw()}});
-MU.addEventListener('wheel',e=>{e.preventDefault();if(!hits.length)return;sel=Math.max(0,Math.min(hits.length-1,sel+(e.deltaY>0?1:-1)));draw()},{passive:false});
-A.addEventListener('keydown',e=>{const open=!MU.hidden&&hits.length;
- if(open&&(e.key==='ArrowDown'||e.key==='ArrowUp')){e.preventDefault();sel=(sel+(e.key==='ArrowDown'?1:-1)+hits.length)%hits.length;draw();return}
- if(open&&(e.key==='Tab'||e.key==='Enter')){e.preventDefault();accept(sel);return}
- if(e.key==='Escape'&&!MU.hidden){e.preventDefault();shut=true;draw();return}
- if(e.key==='Escape'&&shell&&!A.value){e.preventDefault();mode(false);return}
- if(e.key==='Backspace'&&shell&&!A.value){e.preventDefault();mode(false);return}
- if(e.key==='Enter'){e.preventDefault();A.value='';shut=false;sel=0;if(shell)mode(false);else draw()}
- hold();requestAnimationFrame(place)});
-A.addEventListener('input',()=>{shut=false;sel=0;if(true&&!shell&&A.value.startsWith('!')){A.value=A.value.slice(1);mode(true);A.setSelectionRange(A.value.length,A.value.length)}draw()});
-A.addEventListener('focus',draw);A.addEventListener('blur',()=>{MU.hidden=true;A.setAttribute('aria-expanded','false');if(occ){cancelAnimationFrame(occ);occ=0}occl()});
-
-if(!matchMedia('(prefers-reduced-motion: reduce)').matches)setInterval(step,2600);
-})();
-</script><script>document.querySelectorAll("nav a").forEach(a=>a.addEventListener("click",e=>e.preventDefault()));
-const r=document.documentElement,t=document.querySelector("nav .theme");
-const now=()=>r.dataset.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
-const label=()=>t.setAttribute("aria-label",now()==="dark"?"Switch to light theme":"Switch to dark theme");
-t.addEventListener("click",()=>{r.dataset.theme=now()==="dark"?"light":"dark";label()});label();
-new MutationObserver(label).observe(r,{attributes:true,attributeFilter:["data-theme"]});
-</script><script>(()=>{const b=document.querySelector('nav .nbtn');if(!b)return;const p=b.nextElementSibling;
-const set=v=>b.setAttribute('aria-expanded',v?'true':'false'),open=()=>b.getAttribute('aria-expanded')==='true';
-b.addEventListener('click',()=>set(!open()));
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&open()){set(false);b.focus()}});
-document.addEventListener('click',e=>{if(open()&&!b.contains(e.target)&&!p.contains(e.target))set(false)});
-p.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>set(false)));
-window.closeNavMenu=()=>set(false)})();</script></body></html>
+        if (!matchMedia('(prefers-reduced-motion: reduce)').matches)
+          setInterval(step, 2600)
+      })()
+    </script>
+    <script>
+      document
+        .querySelectorAll('nav a')
+        .forEach((a) => a.addEventListener('click', (e) => e.preventDefault()))
+      const r = document.documentElement,
+        t = document.querySelector('nav .theme')
+      const now = () =>
+        r.dataset.theme ||
+        (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      const label = () =>
+        t.setAttribute(
+          'aria-label',
+          now() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme',
+        )
+      t.addEventListener('click', () => {
+        r.dataset.theme = now() === 'dark' ? 'light' : 'dark'
+        label()
+      })
+      label()
+      new MutationObserver(label).observe(r, {
+        attributes: true,
+        attributeFilter: ['data-theme'],
+      })
+    </script>
+    <script>
+      ;(() => {
+        const b = document.querySelector('nav .nbtn')
+        if (!b) return
+        const p = b.nextElementSibling
+        const set = (v) =>
+            b.setAttribute('aria-expanded', v ? 'true' : 'false'),
+          open = () => b.getAttribute('aria-expanded') === 'true'
+        b.addEventListener('click', () => set(!open()))
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && open()) {
+            set(false)
+            b.focus()
+          }
+        })
+        document.addEventListener('click', (e) => {
+          if (open() && !b.contains(e.target) && !p.contains(e.target))
+            set(false)
+        })
+        p.querySelectorAll('a').forEach((a) =>
+          a.addEventListener('click', () => set(false)),
+        )
+        window.closeNavMenu = () => set(false)
+      })()
+    </script>
+  </body>
+</html>

@@ -1,63 +1,515 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Palette</title><style>
-:root{--pg:#fdfdfc;--tray:#f2f2f0;--win:#ffffff;--winbar:#f7f7f5;--band:#f0f0ee;--line:#ececea;--edge:#e4e4e1;--dot:#dedede;--ink:#121212;--body:#3b3b38;--mut:#6b6a66;--acc:#c2380e;--ok:#3f7f3e;--wait:#b07d1a;color-scheme:light}
-:root[data-theme="dark"]{--pg:#121211;--tray:#1a1a18;--win:#1e1e1e;--winbar:#252523;--band:#282826;--line:#2e2e2c;--edge:#2a2a28;--dot:#3a3a38;--ink:#f2f2f0;--body:#cfcdc8;--mut:#8f8d88;--acc:#ff6b42;--ok:#6fae6a;--wait:#e5b567;color-scheme:dark}
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--pg)}
-body{font-family:"Geist",sans-serif;color:var(--body);font-size:15px;line-height:1.5}
-.tag{display:flex;gap:14px;align-items:baseline;padding:12px 32px;background:var(--band);color:var(--ink);font-size:14px}
-.tag b{font-weight:600;white-space:nowrap}
-.wrap{max-width:1180px;margin:0 auto;padding:56px 32px 72px}
-h2{font-size:13px;font-weight:500;color:var(--mut);margin:40px 0 14px}
-h2:first-child{margin-top:0}
-.dk{display:none}
-:root[data-theme="dark"] .lt{display:none}
-:root[data-theme="dark"] .dk{display:inline}
-.sws{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.sw{display:grid;grid-template-columns:44px 1fr;column-gap:12px;align-items:center}
-.sw i{grid-row:1/4;width:44px;height:44px;border-radius:10px;box-shadow:0 0 0 1px var(--edge)}
-.sw b{color:var(--ink);font-weight:600;font-size:14px}
-.sw code,.tx code{font-family:"Geist Mono",monospace;font-size:12.5px;color:var(--mut)}
-.sw span{font-size:12.5px;color:var(--mut)}
-.tx{display:grid;grid-template-columns:120px 1fr 90px 220px;gap:16px;align-items:baseline;padding:12px 0;border-top:1px solid var(--line)}
-.tx b{font-size:17px;font-weight:600}
-.tx .use{color:var(--body)}
-.hdr{display:grid;grid-template-columns:120px 1fr 90px 220px;gap:16px;font-size:12.5px;color:var(--mut);padding-bottom:6px}
-.hdr .gs{display:grid;grid-template-columns:repeat(3,1fr)}
-.rs{display:grid;grid-template-columns:repeat(3,1fr);font-family:"Geist Mono",monospace;font-size:12.5px;color:var(--ink)}
-.rs.dk{display:none}
-:root[data-theme="dark"] .rs.lt{display:none}
-:root[data-theme="dark"] .rs.dk{display:grid}
-.r.bad{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;text-decoration-color:var(--acc)}
-.use-row{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
-.lede{color:var(--mut);font-size:20px;line-height:1.5;margin:6px 0 0;max-width:48ch}
-.h{font-size:40px;line-height:1.05;letter-spacing:-0.03em;font-weight:600;color:var(--ink);margin:0}
-.trayx{background:var(--tray);border-radius:28px;padding:28px}
-.win{background:var(--win);border-radius:12px;box-shadow:0 0 0 1px rgba(0,0,0,.07),0 24px 60px -28px rgba(0,0,0,.3);overflow:hidden;font-family:"Geist Mono",monospace;font-size:13px}
-:root[data-theme="dark"] .win{box-shadow:0 0 0 1px rgba(255,255,255,.06),0 24px 60px -28px rgba(0,0,0,.6)}
-.bar{height:34px;background:var(--winbar);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:7px;padding:0 12px}
-.bar i{width:10px;height:10px;border-radius:50%;background:var(--dot)}
-.log{padding:14px 16px;line-height:1.7}
-.k{color:var(--mut)} .v{color:var(--ink)} .a{color:var(--acc)} .o{color:var(--ok)} .w{color:var(--wait)}
-.ask{background:var(--band);margin:0 -16px 8px;padding:5px 16px;color:var(--ink)}
-.pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:18px}
-.pills span{border-radius:999px;padding:6px 13px;font-size:14px;box-shadow:inset 0 0 0 1px var(--line);color:var(--body)}
-.pills span.on{background:var(--ink);color:var(--pg);box-shadow:none}
-.nav{display:flex;gap:22px;font-size:14px;margin-top:22px;color:var(--body)}
-.nav span.on{color:var(--ink);position:relative}
-.nav span.on::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;border-radius:2px;background:var(--acc)}
-@media (max-width:900px){.wrap{padding:40px 24px 56px}.sws{grid-template-columns:repeat(2,1fr)}.tx,.hdr{grid-template-columns:100px 1fr 160px}.tx .use,.hdr .u{display:none}.use-row{grid-template-columns:1fr}}
-@media (max-width:600px){.wrap{padding:32px 16px 48px}.tag{padding:12px 16px;flex-direction:column;gap:2px}.sws{grid-template-columns:1fr}.tx,.hdr{grid-template-columns:80px 1fr 150px}.h{font-size:30px}.lede{font-size:17px}}
-</style></head><body>
-<div class="tag"><b>Arm 2, repaired, pip red</b><span>The same repair with the mark's pip as the one red, #c2380e and #ff6b42. The favicon, the card, and the README mark stay as they are, and the red reads more saturated</span></div>
-<div class="wrap">
-<h2>Grounds and surfaces</h2><div class="sws"><div class="sw"><i style="background:var(--pg)"></i><b>ground</b><code class="lt">#fdfdfc</code><code class="dk">#121211</code><span>the page</span></div><div class="sw"><i style="background:var(--tray)"></i><b>tray</b><code class="lt">#f2f2f0</code><code class="dk">#1a1a18</code><span>behind every section object</span></div><div class="sw"><i style="background:var(--win)"></i><b>window</b><code class="lt">#ffffff</code><code class="dk">#1e1e1e</code><span>windows, sheets, the picked row</span></div><div class="sw"><i style="background:var(--winbar)"></i><b>window bar</b><code class="lt">#f7f7f5</code><code class="dk">#252523</code><span>a window's title bar</span></div><div class="sw"><i style="background:var(--band)"></i><b>band</b><code class="lt">#f0f0ee</code><code class="dk">#282826</code><span>a quiet fill inside a window</span></div><div class="sw"><i style="background:var(--line)"></i><b>line</b><code class="lt">#ececea</code><code class="dk">#2e2e2c</code><span>rules and dividers</span></div><div class="sw"><i style="background:var(--edge)"></i><b>edge</b><code class="lt">#e4e4e1</code><code class="dk">#2a2a28</code><span>a control's outline</span></div><div class="sw"><i style="background:var(--dot)"></i><b>dots</b><code class="lt">#dedede</code><code class="dk">#3a3a38</code><span>window controls</span></div></div>
-<h2>Text, with its contrast on the ground, the tray, and a window</h2>
-<div class="hdr"><span>Role</span><span class="u">Used for</span><span>Value</span><span class="gs"><span>ground</span><span>tray</span><span>window</span></span></div>
-<div class="tx"><b style="color:var(--ink)">ink</b><span class="use">headings, names, picked text</span><code class="lt">#121212</code><code class="dk">#f2f2f0</code><span class="rs lt"><span class="r">18.41</span><span class="r">16.71</span><span class="r">18.73</span></span><span class="rs dk"><span class="r">16.72</span><span class="r">15.55</span><span class="r">14.87</span></span></div><div class="tx"><b style="color:var(--body)">body</b><span class="use">running text</span><code class="lt">#3b3b38</code><code class="dk">#cfcdc8</code><span class="rs lt"><span class="r">11.04</span><span class="r">10.03</span><span class="r">11.24</span></span><span class="rs dk"><span class="r">11.80</span><span class="r">10.97</span><span class="r">10.49</span></span></div><div class="tx"><b style="color:var(--mut)">muted</b><span class="use">ledes, captions, timestamps</span><code class="lt">#6b6a66</code><code class="dk">#8f8d88</code><span class="rs lt"><span class="r">5.32</span><span class="r">4.83</span><span class="r">5.41</span></span><span class="rs dk"><span class="r">5.65</span><span class="r">5.26</span><span class="r">5.03</span></span></div><div class="tx"><b style="color:var(--acc)">accent</b><span class="use">the one red, for a mark and a live state</span><code class="lt">#c2380e</code><code class="dk">#ff6b42</code><span class="rs lt"><span class="r">5.34</span><span class="r">4.85</span><span class="r">5.43</span></span><span class="rs dk"><span class="r">6.64</span><span class="r">6.17</span><span class="r">5.90</span></span></div>
-<h2>Status glyphs inside product views, which need 3:1 as graphics</h2><div class="tx"><b style="color:var(--ok)">done</b><span class="use">the check beside a finished session</span><code class="lt">#3f7f3e</code><code class="dk">#6fae6a</code><span class="rs lt"><span class="r">4.78</span><span class="r">4.34</span><span class="r">4.86</span></span><span class="rs dk"><span class="r">7.09</span><span class="r">6.59</span><span class="r">6.30</span></span></div><div class="tx"><b style="color:var(--wait)">waiting</b><span class="use">the diamond beside a session awaiting input</span><code class="lt">#b07d1a</code><code class="dk">#e5b567</code><span class="rs lt"><span class="r">3.56</span><span class="r">3.23</span><span class="r">3.62</span></span><span class="rs dk"><span class="r">9.94</span><span class="r">9.24</span><span class="r">8.84</span></span></div>
-<h2>In use</h2>
-<div class="use-row"><div><p class="h">What holds it</p><p class="lede">A skill says what good looks like. These four parts catch the agent when it skips one.</p>
-<div class="pills"><span>Intake</span><span class="on">Plan</span><span>Task</span><span>Board</span></div>
-<div class="nav"><span>Roles</span><span>Records</span><span class="on">Craft</span><span>Guardrails</span></div></div>
-<div class="trayx"><div class="win"><div class="bar"><i></i><i></i><i></i></div><div class="log"><div class="ask">❯ /canon:target-setup</div><div><span class="k">Stack     </span><span class="v">bun, react</span></div><div><span class="k">Run it?   </span><span class="a">yes</span></div><div><span class="o">✓</span> <span class="v">worker-canon-take-timer</span> <span class="k">merged</span></div><div><span class="w">◆</span> <span class="v">planner-canon-intake-sort</span> <span class="k">two items need a call</span></div></div></div></div></div>
-</div></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Palette</title>
+    <style>
+      :root {
+        --pg: #fdfdfc;
+        --tray: #f2f2f0;
+        --win: #ffffff;
+        --winbar: #f7f7f5;
+        --band: #f0f0ee;
+        --line: #ececea;
+        --edge: #e4e4e1;
+        --dot: #dedede;
+        --ink: #121212;
+        --body: #3b3b38;
+        --mut: #6b6a66;
+        --acc: #c2380e;
+        --ok: #3f7f3e;
+        --wait: #b07d1a;
+        color-scheme: light;
+      }
+      :root[data-theme='dark'] {
+        --pg: #121211;
+        --tray: #1a1a18;
+        --win: #1e1e1e;
+        --winbar: #252523;
+        --band: #282826;
+        --line: #2e2e2c;
+        --edge: #2a2a28;
+        --dot: #3a3a38;
+        --ink: #f2f2f0;
+        --body: #cfcdc8;
+        --mut: #8f8d88;
+        --acc: #ff6b42;
+        --ok: #6fae6a;
+        --wait: #e5b567;
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        background: var(--pg);
+      }
+      body {
+        font-family: 'Geist', sans-serif;
+        color: var(--body);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      .tag {
+        display: flex;
+        gap: 14px;
+        align-items: baseline;
+        padding: 12px 32px;
+        background: var(--band);
+        color: var(--ink);
+        font-size: 14px;
+      }
+      .tag b {
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 56px 32px 72px;
+      }
+      h2 {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--mut);
+        margin: 40px 0 14px;
+      }
+      h2:first-child {
+        margin-top: 0;
+      }
+      .dk {
+        display: none;
+      }
+      :root[data-theme='dark'] .lt {
+        display: none;
+      }
+      :root[data-theme='dark'] .dk {
+        display: inline;
+      }
+      .sws {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+      }
+      .sw {
+        display: grid;
+        grid-template-columns: 44px 1fr;
+        column-gap: 12px;
+        align-items: center;
+      }
+      .sw i {
+        grid-row: 1/4;
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        box-shadow: 0 0 0 1px var(--edge);
+      }
+      .sw b {
+        color: var(--ink);
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .sw code,
+      .tx code {
+        font-family: 'Geist Mono', monospace;
+        font-size: 12.5px;
+        color: var(--mut);
+      }
+      .sw span {
+        font-size: 12.5px;
+        color: var(--mut);
+      }
+      .tx {
+        display: grid;
+        grid-template-columns: 120px 1fr 90px 220px;
+        gap: 16px;
+        align-items: baseline;
+        padding: 12px 0;
+        border-top: 1px solid var(--line);
+      }
+      .tx b {
+        font-size: 17px;
+        font-weight: 600;
+      }
+      .tx .use {
+        color: var(--body);
+      }
+      .hdr {
+        display: grid;
+        grid-template-columns: 120px 1fr 90px 220px;
+        gap: 16px;
+        font-size: 12.5px;
+        color: var(--mut);
+        padding-bottom: 6px;
+      }
+      .hdr .gs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .rs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        font-family: 'Geist Mono', monospace;
+        font-size: 12.5px;
+        color: var(--ink);
+      }
+      .rs.dk {
+        display: none;
+      }
+      :root[data-theme='dark'] .rs.lt {
+        display: none;
+      }
+      :root[data-theme='dark'] .rs.dk {
+        display: grid;
+      }
+      .r.bad {
+        text-decoration: underline;
+        text-decoration-thickness: 2px;
+        text-underline-offset: 3px;
+        text-decoration-color: var(--acc);
+      }
+      .use-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+        align-items: start;
+      }
+      .lede {
+        color: var(--mut);
+        font-size: 20px;
+        line-height: 1.5;
+        margin: 6px 0 0;
+        max-width: 48ch;
+      }
+      .h {
+        font-size: 40px;
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 0;
+      }
+      .trayx {
+        background: var(--tray);
+        border-radius: 28px;
+        padding: 28px;
+      }
+      .win {
+        background: var(--win);
+        border-radius: 12px;
+        box-shadow:
+          0 0 0 1px rgba(0, 0, 0, 0.07),
+          0 24px 60px -28px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        font-family: 'Geist Mono', monospace;
+        font-size: 13px;
+      }
+      :root[data-theme='dark'] .win {
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.06),
+          0 24px 60px -28px rgba(0, 0, 0, 0.6);
+      }
+      .bar {
+        height: 34px;
+        background: var(--winbar);
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 0 12px;
+      }
+      .bar i {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--dot);
+      }
+      .log {
+        padding: 14px 16px;
+        line-height: 1.7;
+      }
+      .k {
+        color: var(--mut);
+      }
+      .v {
+        color: var(--ink);
+      }
+      .a {
+        color: var(--acc);
+      }
+      .o {
+        color: var(--ok);
+      }
+      .w {
+        color: var(--wait);
+      }
+      .ask {
+        background: var(--band);
+        margin: 0 -16px 8px;
+        padding: 5px 16px;
+        color: var(--ink);
+      }
+      .pills {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+      }
+      .pills span {
+        border-radius: 999px;
+        padding: 6px 13px;
+        font-size: 14px;
+        box-shadow: inset 0 0 0 1px var(--line);
+        color: var(--body);
+      }
+      .pills span.on {
+        background: var(--ink);
+        color: var(--pg);
+        box-shadow: none;
+      }
+      .nav {
+        display: flex;
+        gap: 22px;
+        font-size: 14px;
+        margin-top: 22px;
+        color: var(--body);
+      }
+      .nav span.on {
+        color: var(--ink);
+        position: relative;
+      }
+      .nav span.on::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -6px;
+        height: 2px;
+        border-radius: 2px;
+        background: var(--acc);
+      }
+      @media (max-width: 900px) {
+        .wrap {
+          padding: 40px 24px 56px;
+        }
+        .sws {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .tx,
+        .hdr {
+          grid-template-columns: 100px 1fr 160px;
+        }
+        .tx .use,
+        .hdr .u {
+          display: none;
+        }
+        .use-row {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 600px) {
+        .wrap {
+          padding: 32px 16px 48px;
+        }
+        .tag {
+          padding: 12px 16px;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .sws {
+          grid-template-columns: 1fr;
+        }
+        .tx,
+        .hdr {
+          grid-template-columns: 80px 1fr 150px;
+        }
+        .h {
+          font-size: 30px;
+        }
+        .lede {
+          font-size: 17px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tag">
+      <b>Arm 2, repaired, pip red</b
+      ><span
+        >The same repair with the mark's pip as the one red, #c2380e and
+        #ff6b42. The favicon, the card, and the README mark stay as they are,
+        and the red reads more saturated</span
+      >
+    </div>
+    <div class="wrap">
+      <h2>Grounds and surfaces</h2>
+      <div class="sws">
+        <div class="sw">
+          <i style="background: var(--pg)"></i><b>ground</b
+          ><code class="lt">#fdfdfc</code><code class="dk">#121211</code
+          ><span>the page</span>
+        </div>
+        <div class="sw">
+          <i style="background: var(--tray)"></i><b>tray</b
+          ><code class="lt">#f2f2f0</code><code class="dk">#1a1a18</code
+          ><span>behind every section object</span>
+        </div>
+        <div class="sw">
+          <i style="background: var(--win)"></i><b>window</b
+          ><code class="lt">#ffffff</code><code class="dk">#1e1e1e</code
+          ><span>windows, sheets, the picked row</span>
+        </div>
+        <div class="sw">
+          <i style="background: var(--winbar)"></i><b>window bar</b
+          ><code class="lt">#f7f7f5</code><code class="dk">#252523</code
+          ><span>a window's title bar</span>
+        </div>
+        <div class="sw">
+          <i style="background: var(--band)"></i><b>band</b
+          ><code class="lt">#f0f0ee</code><code class="dk">#282826</code
+          ><span>a quiet fill inside a window</span>
+        </div>
+        <div class="sw">
+          <i style="background: var(--line)"></i><b>line</b
+          ><code class="lt">#ececea</code><code class="dk">#2e2e2c</code
+          ><span>rules and dividers</span>
+        </div>
+        <div class="sw">
+          <i style="background: var(--edge)"></i><b>edge</b
+          ><code class="lt">#e4e4e1</code><code class="dk">#2a2a28</code
+          ><span>a control's outline</span>
+        </div>
+        <div class="sw">
+          <i style="background: var(--dot)"></i><b>dots</b
+          ><code class="lt">#dedede</code><code class="dk">#3a3a38</code
+          ><span>window controls</span>
+        </div>
+      </div>
+      <h2>Text, with its contrast on the ground, the tray, and a window</h2>
+      <div class="hdr">
+        <span>Role</span><span class="u">Used for</span><span>Value</span
+        ><span class="gs"
+          ><span>ground</span><span>tray</span><span>window</span></span
+        >
+      </div>
+      <div class="tx">
+        <b style="color: var(--ink)">ink</b
+        ><span class="use">headings, names, picked text</span
+        ><code class="lt">#121212</code><code class="dk">#f2f2f0</code
+        ><span class="rs lt"
+          ><span class="r">18.41</span><span class="r">16.71</span
+          ><span class="r">18.73</span></span
+        ><span class="rs dk"
+          ><span class="r">16.72</span><span class="r">15.55</span
+          ><span class="r">14.87</span></span
+        >
+      </div>
+      <div class="tx">
+        <b style="color: var(--body)">body</b
+        ><span class="use">running text</span><code class="lt">#3b3b38</code
+        ><code class="dk">#cfcdc8</code
+        ><span class="rs lt"
+          ><span class="r">11.04</span><span class="r">10.03</span
+          ><span class="r">11.24</span></span
+        ><span class="rs dk"
+          ><span class="r">11.80</span><span class="r">10.97</span
+          ><span class="r">10.49</span></span
+        >
+      </div>
+      <div class="tx">
+        <b style="color: var(--mut)">muted</b
+        ><span class="use">ledes, captions, timestamps</span
+        ><code class="lt">#6b6a66</code><code class="dk">#8f8d88</code
+        ><span class="rs lt"
+          ><span class="r">5.32</span><span class="r">4.83</span
+          ><span class="r">5.41</span></span
+        ><span class="rs dk"
+          ><span class="r">5.65</span><span class="r">5.26</span
+          ><span class="r">5.03</span></span
+        >
+      </div>
+      <div class="tx">
+        <b style="color: var(--acc)">accent</b
+        ><span class="use">the one red, for a mark and a live state</span
+        ><code class="lt">#c2380e</code><code class="dk">#ff6b42</code
+        ><span class="rs lt"
+          ><span class="r">5.34</span><span class="r">4.85</span
+          ><span class="r">5.43</span></span
+        ><span class="rs dk"
+          ><span class="r">6.64</span><span class="r">6.17</span
+          ><span class="r">5.90</span></span
+        >
+      </div>
+      <h2>Status glyphs inside product views, which need 3:1 as graphics</h2>
+      <div class="tx">
+        <b style="color: var(--ok)">done</b
+        ><span class="use">the check beside a finished session</span
+        ><code class="lt">#3f7f3e</code><code class="dk">#6fae6a</code
+        ><span class="rs lt"
+          ><span class="r">4.78</span><span class="r">4.34</span
+          ><span class="r">4.86</span></span
+        ><span class="rs dk"
+          ><span class="r">7.09</span><span class="r">6.59</span
+          ><span class="r">6.30</span></span
+        >
+      </div>
+      <div class="tx">
+        <b style="color: var(--wait)">waiting</b
+        ><span class="use">the diamond beside a session awaiting input</span
+        ><code class="lt">#b07d1a</code><code class="dk">#e5b567</code
+        ><span class="rs lt"
+          ><span class="r">3.56</span><span class="r">3.23</span
+          ><span class="r">3.62</span></span
+        ><span class="rs dk"
+          ><span class="r">9.94</span><span class="r">9.24</span
+          ><span class="r">8.84</span></span
+        >
+      </div>
+      <h2>In use</h2>
+      <div class="use-row">
+        <div>
+          <p class="h">What holds it</p>
+          <p class="lede">
+            A skill says what good looks like. These four parts catch the agent
+            when it skips one.
+          </p>
+          <div class="pills">
+            <span>Intake</span><span class="on">Plan</span><span>Task</span
+            ><span>Board</span>
+          </div>
+          <div class="nav">
+            <span>Roles</span><span>Records</span><span class="on">Craft</span
+            ><span>Guardrails</span>
+          </div>
+        </div>
+        <div class="trayx">
+          <div class="win">
+            <div class="bar"><i></i><i></i><i></i></div>
+            <div class="log">
+              <div class="ask">❯ /canon:target-setup</div>
+              <div>
+                <span class="k">Stack </span><span class="v">bun, react</span>
+              </div>
+              <div>
+                <span class="k">Run it? </span><span class="a">yes</span>
+              </div>
+              <div>
+                <span class="o">✓</span>
+                <span class="v">worker-canon-take-timer</span>
+                <span class="k">merged</span>
+              </div>
+              <div>
+                <span class="w">◆</span>
+                <span class="v">planner-canon-intake-sort</span>
+                <span class="k">two items need a call</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
