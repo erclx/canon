@@ -524,6 +524,8 @@ function isPluginHooksManifest(path: string): boolean {
  * domain's own name and the entry reads as nothing else without the prefix.
  * So is a replay snapshot, which copies a consumer's paths verbatim, such as
  * `canon/config/config.json`, and a renamed copy would sync as another file.
+ * So is `canon/design/assets/`, where Frameboard's references sync copies each
+ * board asset under its project's name, so a rename reads to `--check` as drift.
  * So is `hooks/hooks.json` at a plugin root, being `claude/` or a bundle under
  * `plugins/`. It is the location Claude Code loads with no `hooks` key in the
  * manifest, and any other name would need one. The same name anywhere else is
@@ -533,6 +535,7 @@ export function isFolderEchoedName(path: string): boolean {
   if (path === 'canon/context/context-model.md') return false
   if (isPluginHooksManifest(path)) return false
   if (path.startsWith('sandbox/fixtures/replay/')) return false
+  if (path.startsWith('canon/design/assets/')) return false
   const segments = path.split('/')
   if (segments.length < 2) return false
   const folder = segments[segments.length - 2] ?? ''

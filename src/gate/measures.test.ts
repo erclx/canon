@@ -1345,6 +1345,18 @@ describe('isFolderEchoedName', () => {
     ).toBe(false)
   })
 
+  it('should pass a board asset the design sync copies verbatim', () => {
+    expect(isFolderEchoedName('canon/design/assets/readme/readme.css')).toBe(
+      false,
+    )
+  })
+
+  it('should flag a hand-named file elsewhere under canon/design', () => {
+    expect(isFolderEchoedName('canon/design/landing/landing-dark.png')).toBe(
+      true,
+    )
+  })
+
   it('should still flag the same name in another scenario fixture', () => {
     expect(
       isFolderEchoedName(
