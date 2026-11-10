@@ -94,6 +94,12 @@ export interface CheckInput {
    * per session makes this list empty regardless of who else was live.
    */
   readonly concurrentSessions?: readonly string[]
+  /**
+   * Watched writes no tool call of the session names, split off `escapes` by
+   * `attributeEscapes`. Undefined when the caller did not split, which asserts
+   * every path in `escapes` as before.
+   */
+  readonly untiedEscapes?: readonly string[]
   readonly envelope?: RunEnvelope
 }
 
@@ -386,10 +392,14 @@ function checkWriteScope(
 
 /**
  * `canon sandbox run` watches two toolkit roots for a write to shared session scratch
- * during a run, and reports every one it finds as an unattributed escape with
- * no arm able to fail on it. An arm whose skill legitimately reaches outside
- * the sandbox tree declares the destinations here, and the harness asserts
- * them instead of trusting the skill to bound itself.
+ * during a run, and splits what it finds by `attributeEscapes` in
+ * `src/sandbox/headless/watch.ts`. A write a tool call of the session names
+ * arrives as `escapes` and is asserted here. A write no call names arrives as
+ * `untiedEscapes` and reports as one skipped line, since a parallel session
+ * writing the board is not this skill escaping. An arm whose skill
+ * legitimately reaches outside the sandbox tree declares the destinations
+ * here, and the harness asserts them instead of trusting the skill to bound
+ * itself.
  *
  * Declaring the scope inverts the empty case against `checkWriteScope`. A
  * write-scope declaration exists to bound required output, so a run that wrote
@@ -403,6 +413,9 @@ function checkWriteScope(
  * nothing to watch reports unmeasured rather than passing on a diff it never
  * had the target to take.
  *
+ * A caller passing no `untiedEscapes` gets every path asserted, which is the
+ * verdict `--escapes` gave before attribution.
+ *
  * A witnessed concurrent session never softens the verdict. `concurrentSessions`
  * is evidence a reader can act on without a second lookup, appended to the
  * message on an unbounded escape, never a reason to pass or skip one: a session
@@ -411,6 +424,33 @@ function checkWriteScope(
  * innocent sibling's write either way.
  */
 function checkEscapeScope(
+  expectation: Expectation,
+  escapes: readonly string[] | undefined,
+  watched: boolean | undefined,
+  concurrentSessions: readonly string[] | undefined,
+  untiedEscapes: readonly string[] | undefined,
+): KindOutcome {
+  const outcome = checkTiedEscapes(
+    expectation,
+    escapes,
+    watched,
+    concurrentSessions,
+  )
+  const untiedCount = untiedEscapes?.length ?? 0
+  if (expectation.escapeScope === undefined || escapes === undefined)
+    return outcome
+  if (untiedCount === 0) return outcome
+
+  return {
+    results: outcome.results,
+    skipped: [
+      ...outcome.skipped,
+      `escape scope: ${untiedCount} write${untiedCount === 1 ? '' : 's'} under a watched root no call of this session names, not asserted`,
+    ],
+  }
+}
+
+function checkTiedEscapes(
   expectation: Expectation,
   escapes: readonly string[] | undefined,
   watched: boolean | undefined,
@@ -571,6 +611,7 @@ export function checkExpectation(
     input.escapes,
     input.escapesWatched,
     input.concurrentSessions,
+    input.untiedEscapes,
   )
   const reply = checkReply(expectation, input.envelope)
   const envelope = checkEnvelope(expectation, input.envelope)
