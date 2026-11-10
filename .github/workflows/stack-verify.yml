@@ -18,10 +18,9 @@ jobs:
       # One red stack must not hide the result of the others
       fail-fast: false
       matrix:
-        # Only the stacks that scaffold. A layer or an add-on is refused by the verb.
-        # cloudflare scaffolds but stays out: it ships no scripts, so verify fails at lint:fix.
+        # Only the stacks that scaffold. A stack with no scaffold is refused by the verb.
         # Keep in step with the stack list in the report job's loop
-        stack: [astro, nextjs, vite-react, go, php, python]
+        stack: [astro, nextjs, vite-react, go, php, python, cloudflare]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -116,4 +115,4 @@ jobs:
           GH_REPO: ${{ github.repository }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         # Keep in step with the matrix above. A stack missing here gets no issue.
-        run: scripts/ci/stack-issues.sh astro nextjs vite-react go php python
+        run: scripts/ci/stack-issues.sh astro nextjs vite-react go php python cloudflare
