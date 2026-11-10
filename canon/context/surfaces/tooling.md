@@ -28,6 +28,8 @@ Holds the one stack that lints with ESLint and formats `.astro` files with Prett
 - `lint` and `lint:fix` are overridden back to `eslint`, and every other file takes oxfmt
 - Its `.oxfmtrc.json` repeats base's options because scan takes a child config over the parent's whole file
 - `configs/src/components/dev/` holds a query-parameter switcher between candidate treatments as an `.astro` shell, a `.ts` script, and a `.css` file, shipped under the application-code proof
+- `configs/src/components/site-head.astro` writes the head tags from `src/site.ts`, a `web` seed, and its `[verify] prepare` wires the scaffold's page to it
+- `configs/scripts/check-head-meta.sh` fails a built page missing a head tag. It sits here rather than in `web` because `vite-react` and `nextjs` write no head yet.
 
 ### `tooling/web/`
 

@@ -13,8 +13,9 @@ The astro stack covers Astro + TypeScript projects, being content sites, marketi
 3. Install web tooling with `canon tooling sync web . --write`.
 4. Install the astro adapter with `canon tooling sync astro . --write`.
 5. Add `@import 'tailwindcss';` to the global stylesheet. The stack registers the Vite plugin and seeds no stylesheet, and `canon tooling diff` warns until one imports it.
-6. Extend the `ci` and `development` context entries under `canon/context/` per the web reference's extend sections plus the astro rows below.
-7. Run `bun run lint:fix`, then `bun run format`, then `bun run check`.
+6. Render `src/components/site-head.astro` inside the layout's `<head>`, fill `src/site.ts`, and set `ASTRO_SITE` to the deployed address.
+7. Extend the `ci` and `development` context entries under `canon/context/` per the web reference's extend sections plus the astro rows below.
+8. Run `bun run lint:fix`, then `bun run format`, then `bun run check`.
 
 ## Astro config
 
@@ -61,6 +62,20 @@ The astro stack covers Astro + TypeScript projects, being content sites, marketi
 - Ignore `**/*.astro` in this stack's `.oxfmtrc.json`, so the two formatters never touch one file
 - Expect this stack's `.oxfmtrc.json` to replace base's whole file, so a base option change reaches a target only once this stack copies it
 - Override `check:format` and `format` to run oxfmt, then Prettier over `**/*.astro`
+
+## Head tags
+
+- Render `src/components/site-head.astro` once in each layout's `<head>`, passing a page's own `title` and `description`, and pass neither on the home page
+- Expect an inner page's title to read the page title then the site name, and a page passing none to read the site name alone
+- Expect the canonical link, `og:url`, and `og:image` resolved against `ASTRO_SITE`, so an unset address shows as the `.invalid` fallback in the built page
+- Put a page's extra tags in the component's slot, since sync overwrites the component on every run
+
+## Head tag check
+
+- `scripts/check-head-meta.sh` fails a built HTML page under `dist/` missing a title, a description, a canonical link, `og:site_name`, `og:image`, or `twitter:card`
+- Expect it to skip an HTML file `public/` holds at the same path, since Astro copies that folder verbatim
+- Expect it to fail when `dist/` is absent or holds no page, since no build is no evidence
+- Expect the check to read presence and a non-empty value alone, so a placeholder left in `src/site.ts` passes it
 
 ## Social card route
 
