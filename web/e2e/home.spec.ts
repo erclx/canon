@@ -79,11 +79,13 @@ test.describe('the fixed bar', () => {
 
     await page.locator('.links > a.sl[href="#guardrails"]').click()
 
+    await expect(page.locator('#guardrails h2')).toBeInViewport(SETTLE)
     const bar = await page.locator('.site-nav').boundingBox()
-    const heading = await page.locator('#guardrails h2').boundingBox()
+    const section = await page.locator('#guardrails').boundingBox()
     expect(bar).not.toBeNull()
-    expect(heading).not.toBeNull()
-    expect(heading!.y).toBeGreaterThanOrEqual(bar!.y + bar!.height)
+    expect(section).not.toBeNull()
+    // The section's top lands at the bar's bottom, which only scroll-padding-top puts there.
+    expect(Math.abs(section!.y - (bar!.y + bar!.height))).toBeLessThan(2)
   })
 
   for (const width of [1041, 1039, 641, 639]) {
