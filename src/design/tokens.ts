@@ -444,6 +444,7 @@ export const TOKENS: DesignTokens = {
   layout: [
     'Capture widths: 320, 768, 1280, 1536. 320 is the reflow floor.',
     'Every width query in the generated stylesheets opens a range one of these widths reaches.',
+    'Draw widths: 390, 834, 1440. Every pick is also checked for sideways scroll at 320.',
   ],
 
   shadows: [
