@@ -92,10 +92,11 @@ The astro stack covers Astro + TypeScript projects, being content sites, marketi
 
 ## Scenario switcher
 
-- Expect `src/components/dev/scenarios.astro` overwritten on every sync, since it is toolkit-authored infrastructure rather than a file a project hand-edits
-- Import it into a page under test to drive candidate treatments of one decision by hand, selected by a query parameter, with a switcher between them
+- Expect `scenarios.astro`, `scenarios.ts`, and `scenarios.css` under `src/components/dev/` overwritten on every sync, since they are toolkit infrastructure a project never hand-edits
+- Import `scenarios.astro` into a page under test to drive candidate treatments of one decision by hand, selected by a query parameter, with a switcher between them
 - Rely on its `import.meta.env.DEV` guard, so it renders nothing and ships nothing in a production build
-- Expect it on Astro alone, since it uses `is:inline`, `define:vars`, and `set:html`, which only the `.astro` format parses
+- Expect the shell to pass values alone, on a carrier element's data attributes, to a processed script the stack's lint, format, and type check all reach
+- Expect it on Astro alone, since the shell is an `.astro` component and its script bundles through Astro's processed `<script>`
 
 ## Development docs (extend)
 
