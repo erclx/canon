@@ -215,7 +215,7 @@ async function runInventory(
   for (const group of groups) {
     logInfo(`  ${group.count}x  ${group.treatment}`)
     logInfo(
-      `      ${abbreviate(group.samples, group.count)} on ${abbreviate(group.routes, group.routes.length)}`,
+      `      ${abbreviate(group.samples, group.count)} on ${abbreviate(group.locations, group.locations.length)}`,
     )
   }
   outro()
@@ -226,7 +226,12 @@ async function runInventory(
     baseUrl,
     routes: result.routes,
     elements: result.readings.length,
-    treatments: groups,
+    treatments: groups.map(({ treatment, count, locations, samples }) => ({
+      treatment,
+      count,
+      routes: locations,
+      samples,
+    })),
     durationMs: result.durationMs,
   })
   return 0

@@ -84,7 +84,7 @@ describe.skipIf(!hasBrowser)('walk against a served application', () => {
     // is two rows rather than the four a per-element listing would print.
     expect(groups).toHaveLength(2)
     expect(groups[0]?.count).toBe(3)
-    expect(groups[0]?.routes).toEqual(['/', '/pricing'])
+    expect(groups[0]?.locations).toEqual(['/', '/pricing'])
     expect(groups[0]?.treatment).toContain('outlineStyle solid')
     expect(groups[1]).toMatchObject({
       treatment: 'no visible change',

@@ -7,11 +7,11 @@ export const SAMPLE_LIMIT = 3
 
 /**
  * Names a bounded head of a list and says how many it left out, so a treatment
- * carried by fifty routes reads as fifty rather than as the three named.
+ * carried by fifty locations reads as fifty rather than as the three named.
  *
  * `total` arrives separately because the two lists reach here differently. A
  * row's samples are already capped when they are collected, so their own length
- * cannot say how many elements the row covers, while its routes arrive whole.
+ * cannot say how many elements the row covers, while its locations arrive whole.
  */
 export function abbreviate(entries: readonly string[], total: number): string {
   const head = entries.slice(0, SAMPLE_LIMIT)
@@ -19,9 +19,13 @@ export function abbreviate(entries: readonly string[], total: number): string {
   return elided > 0 ? `${head.join(', ')} and ${elided} more` : head.join(', ')
 }
 
-/** One element as the walk read it, on the route it was read from. */
+/**
+ * One element as the walk read it, at the location it was read from. A
+ * location is a route on a served project and a frame's label on board files,
+ * so the grouping names whichever the walk took without calling a frame a route.
+ */
 export interface Reading {
-  readonly route: string
+  readonly location: string
   readonly selector: string
   readonly treatment: string
 }
@@ -30,7 +34,7 @@ export interface Reading {
 export interface TreatmentGroup {
   readonly treatment: string
   readonly count: number
-  readonly routes: readonly string[]
+  readonly locations: readonly string[]
   readonly samples: readonly string[]
 }
 
@@ -51,17 +55,17 @@ export function groupByTreatment(
 ): readonly TreatmentGroup[] {
   const byTreatment = new Map<
     string,
-    { count: number; routes: string[]; samples: string[] }
+    { count: number; locations: string[]; samples: string[] }
   >()
 
-  for (const { route, selector, treatment } of readings) {
+  for (const { location, selector, treatment } of readings) {
     const row = byTreatment.get(treatment) ?? {
       count: 0,
-      routes: [],
+      locations: [],
       samples: [],
     }
     row.count += 1
-    if (!row.routes.includes(route)) row.routes.push(route)
+    if (!row.locations.includes(location)) row.locations.push(location)
     if (row.samples.length < SAMPLE_LIMIT) row.samples.push(selector)
     byTreatment.set(treatment, row)
   }

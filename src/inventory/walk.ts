@@ -92,7 +92,7 @@ export async function walk(options: WalkOptions): Promise<WalkResult> {
       await enterKeyboardModality(page)
 
       const rows = await page.evaluate(options.subject.read, options.query)
-      for (const row of rows) readings.push({ route, ...row })
+      for (const row of rows) readings.push({ location: route, ...row })
       routes.push({ route, elements: rows.length })
     }
   } catch (error) {
