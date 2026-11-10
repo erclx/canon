@@ -17,6 +17,19 @@
  * page reads at runtime, a pace or a shader uniform, the arm carries no CSS
  * and the module holding that value reads the active id off
  * `document.documentElement.dataset[param]`.
+ *
+ * The script is a deferred module rather than a parse-time inline one, so it
+ * writes that key and applies an arm's CSS only once the page has parsed, in
+ * document order with the page's own module scripts. Place the switcher above
+ * any module that reads the key at load, or read it on `DOMContentLoaded` or
+ * later, and expect the baseline to paint for a frame before a CSS arm lands.
+ *
+ * The client script lives in `scenarios.ts` and the switcher's style in
+ * `scenarios.css`, so the stack's own gates check both. This shell passes
+ * them values alone, on the carrier element's data attributes. The script
+ * pulls the style in as a string rather than this shell importing it, since
+ * Astro hoists a stylesheet import into the page whether or not the guard
+ * renders, and a build once carried the switcher's style that way.
  */
 interface Arm {
   /** Appears in the URL. Use `0` for what ships, so the baseline is an arm. */
@@ -43,85 +56,17 @@ const { param, arms, mountInto } = Astro.props
 // The component leaves the production tree rather than gating itself at
 // runtime, so neither an arm nor the parameter can reach a reader.
 const enabled = import.meta.env.DEV
-
-// Held as a string and written with `set:html`. Inside an Astro expression a
-// script's children are parsed the way JSX children are, so every brace in the
-// source reads as an interpolation and the body ships as an unevaluated
-// literal. It did, once, silently.
-const SOURCE = `
-const wanted = new URLSearchParams(location.search).get(param)
-const active = arms.find((arm) => arm.id === wanted)
-
-if (active) {
-  document.documentElement.dataset[param] = active.id
-
-  if (active.css) {
-    const style = document.createElement('style')
-    style.textContent = active.css
-    document.head.appendChild(style)
-  }
-
-  const render = () => {
-    const host = mountInto ? document.querySelector(mountInto) : document.body
-    if (!host) return
-    const bar = document.createElement('div')
-    bar.setAttribute('data-scenario-switcher', '')
-    for (const arm of arms) {
-      const link = document.createElement('a')
-      link.href = '?' + param + '=' + arm.id
-      link.textContent = arm.label
-      if (arm.id === active.id) link.setAttribute('data-current', 'true')
-      bar.appendChild(link)
-    }
-    host.appendChild(bar)
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', render)
-  } else {
-    render()
-  }
-}
-`
-
-const SWITCHER_CSS = `
-/* Bottom left rather than bottom centre, which Astro's dev toolbar owns.
-   Centred, the toolbar sits over the switcher and swallows every click on it. */
-[data-scenario-switcher] {
-  position: fixed;
-  left: 1.5rem;
-  bottom: 1.5rem;
-  z-index: 60;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  max-width: calc(100vw - 3rem);
-  font: 500 13px system-ui, sans-serif;
-}
-[data-scenario-switcher] a {
-  padding: 0.4rem 0.8rem;
-  border: 1px solid rgb(128 128 128 / 0.4);
-  border-radius: 999px;
-  background: rgb(255 255 255 / 0.9);
-  color: #1a1815;
-  text-decoration: none;
-  white-space: nowrap;
-}
-[data-scenario-switcher] a[data-current='true'] {
-  background: #1a1815;
-  color: #f8f4ed;
-}
-`
 ---
 
-{
-  enabled && (
-    <script
-      is:inline
-      define:vars={{ param, arms, mountInto }}
-      set:html={SOURCE}
-    />
-  )
-}
+{enabled && (
+  <template
+    data-scenario-carrier
+    data-param={param}
+    data-arms={JSON.stringify(arms)}
+    data-mount-into={mountInto}
+  />
+)}
 
-{enabled && <style is:global set:html={SWITCHER_CSS} />}
+{enabled && <script>
+  import './scenarios'
+</script>}
