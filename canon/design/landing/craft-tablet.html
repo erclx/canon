@@ -1,0 +1,123 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Craft, current</title><link rel="stylesheet" href="../kit/landing-v2/assets/v2.css"><link rel="stylesheet" href="../kit/landing-v2/assets/fonts.css"><style>
+:root{--pg:#fdfdfc;--ink:#121212;--body:#3b3b38;--mut:#8a8a86;--tray:#f2f2f0;--line:#ececea;--edge:#e4e4e1;--acc:#c15f3c;color-scheme:light}
+:root[data-theme="dark"]{--pg:#121211;--ink:#f2f2f0;--body:#cccccc;--mut:#8b8b8b;--tray:#1a1a18;--line:#2e2e2c;--edge:#2a2a28;--acc:#d97757;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--pg)}
+body{font-family:"Geist",sans-serif;color:var(--body);-webkit-font-smoothing:antialiased}
+.sec{width:1180px;margin:0 auto;padding:120px 0 128px}
+.head h2{font-size:56px;line-height:1.04;letter-spacing:-0.035em;font-weight:600;color:var(--ink);margin:0}
+.head p{font-size:20px;line-height:1.5;color:var(--mut);margin:18px 0 0;max-width:60ch;text-wrap:pretty}
+.head .how{font-size:16px;color:var(--mut);margin:12px 0 0;max-width:80ch}
+code{font-family:"Geist Mono",monospace;font-size:.9em;color:var(--ink);white-space:nowrap}
+q{quotes:"\201C" "\201D"}
+.name{font-family:"Geist Mono",monospace;font-size:15px;font-weight:500;color:var(--ink)}
+.loads{display:block;font-size:14px;line-height:1.45;color:var(--mut);margin-top:4px}
+.rule{font-size:18px;line-height:1.5;color:var(--ink);margin:0;text-wrap:pretty}
+.srcname{font-size:14px;color:var(--mut);margin:0}
+.quote{font-size:16px;line-height:1.5;color:var(--body);margin:4px 0 0;text-wrap:pretty}
+.note{font-size:15px;color:var(--mut);margin:32px 0 0;max-width:80ch}
+/* desktop rows */
+.rows{margin-top:52px;border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:240px 1fr 1fr;gap:12px 48px;padding:22px 0;border-bottom:1px solid var(--line)}
+/* tablet and phone pair */
+.pair{display:none;margin-top:40px}
+.tabs{display:flex;flex-wrap:wrap;gap:4px 20px;border-bottom:1px solid var(--line)}
+.tabs button{all:unset;box-sizing:border-box;cursor:pointer;font-family:"Geist Mono",monospace;font-size:14px;font-weight:500;color:var(--mut);white-space:nowrap;padding:8px 0 12px;position:relative}
+.tabs button:hover{color:var(--body)}
+.tabs button:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:6px}
+.tabs button[aria-pressed="true"]{color:var(--ink)}
+.tabs button[aria-pressed="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:3px;border-radius:3px;background:var(--acc)}
+.panes{display:grid;gap:12px;margin-top:20px;align-content:start}
+.pane{background:var(--tray);border:1px solid var(--edge);border-radius:16px;padding:22px 24px}
+.pane .lbl{font-size:13px;color:var(--mut);margin:0 0 8px}
+.pane .loads{margin-top:10px}
+.pane .quote{font-size:17px;color:var(--ink);margin-top:6px}
+@media (max-width:1240px){.sec{width:auto;padding-left:32px;padding-right:32px}.row{grid-template-columns:200px 1fr 1fr;gap:12px 32px}}
+@media (max-width:900px){.sec{padding:88px 24px 96px}.head h2{font-size:44px}.rows{display:none}.pair{display:block}}
+@media (min-width:601px) and (max-width:900px){.panes{grid-template-columns:1fr 1fr}}
+@media (max-width:600px){.sec{padding:64px 16px 72px}.head h2{font-size:36px}.head p{font-size:17px}.head .how{font-size:15px}.tabs{gap:2px 16px}.tabs button{font-size:13px}.pane{padding:18px 18px}.rule{font-size:17px}}
+
+.tabs{display:flex;flex-wrap:wrap;gap:8px;border-bottom:0}
+.tabs button{all:unset;box-sizing:border-box;cursor:pointer;font-family:"Geist Mono",monospace;font-size:14px;font-weight:500;color:var(--body);white-space:nowrap;padding:7px 14px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--line);transition:background-color .12s ease,color .12s ease}
+@media (hover:hover){.tabs button:hover{background:var(--tray);color:var(--ink)}}
+.tabs button[aria-pressed="true"]:hover{background:var(--ink);color:var(--pg)}
+.tabs button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--pg);box-shadow:none}
+.tabs button[aria-pressed="true"]::after{content:none}
+@media (prefers-reduced-motion:reduce){.tabs button{transition:none}}
+@media (max-width:600px){.tabs{gap:6px}.tabs button{font-size:13px;padding:6px 12px}}
+
+:root{--win:#ffffff;--winbar:#f7f7f5;--dot:#dedede;--band:#f3f3f1;--selring:rgba(0,0,0,.07);--lit:#f2f2f0}
+:root[data-theme="dark"]{--win:#1e1e1e;--winbar:#252526;--dot:#3a3a38;--band:#2a2a29;--selring:rgba(255,255,255,.06);--lit:#1c1c1a}
+.top{display:grid;grid-template-columns:1fr 440px;gap:48px;align-items:center}
+.win{background:var(--win);border-radius:12px;box-shadow:0 0 0 1px var(--selring),0 24px 60px -28px rgba(0,0,0,.3);overflow:hidden;display:flex;flex-direction:column;font-family:"Geist Mono",monospace;font-size:13.5px;line-height:1.6;color:var(--body);height:380px;user-select:none}
+.win .bar{flex:none;height:40px;background:var(--winbar);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;position:relative;font-family:"Geist",sans-serif;font-size:13px;font-weight:500;color:var(--mut)}
+.win .bar i{position:absolute;top:14px;width:12px;height:12px;border-radius:50%;background:var(--dot)}
+.win .bar i:nth-child(1){left:14px}.win .bar i:nth-child(2){left:34px}.win .bar i:nth-child(3){left:54px}
+.log{flex:1;min-height:0;padding:16px 22px 0;overflow:hidden;transition:opacity .3s ease}
+.log.hide{opacity:0}
+.log .ask{background:var(--band);margin:0 -22px 12px;padding:7px 22px;color:var(--ink);display:flex;gap:10px}
+.log .ask .g{color:var(--mut);flex:none}
+.log .tool{color:var(--ink);padding-left:20px;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log .tool::before{content:"\25CF";position:absolute;left:0;top:0;font-size:11px;line-height:21.6px;color:var(--mut)}
+.log .tool.sk::before{color:var(--acc)}
+.log .tool b{font-weight:500}
+.log .res{color:var(--mut);padding-left:24px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log .res::before{content:"\23BF  ";white-space:pre}
+.inp{flex:none;padding:0 22px 14px}
+.inp .rule{height:1px;background:var(--line)}
+.inp .line{display:flex;gap:10px;padding:9px 0;white-space:pre-wrap;color:var(--ink)}
+.inp .line .g{color:var(--mut);flex:none}
+.inp .cur{display:inline-block;width:8px;height:17px;background:var(--ink);vertical-align:-4px}
+.inp .hint{color:var(--mut)}
+.rows{position:relative;z-index:0}
+.row{position:relative}
+.row::before{content:"";position:absolute;inset:0 -16px;border-radius:12px;background:var(--lit);opacity:0;transition:opacity .25s ease;z-index:-1}
+.row.lit::before{opacity:1}
+.row .name{position:relative}
+.rows{border-top:0}
+.row{border-bottom:0;box-shadow:inset 0 -1px 0 var(--line)}
+.row.lit{box-shadow:none}
+.row .go{all:unset;cursor:pointer;font-family:"Geist Mono",monospace;font-size:15px;font-weight:500;color:var(--ink)}
+.row .go::after{content:"";position:absolute;inset:0 -16px;border-radius:12px}
+@media (hover:hover){.row:hover::before{opacity:.6}.row.lit:hover::before{opacity:1}}
+.row:has(.go:focus-visible)::before{opacity:1;outline:2px solid var(--ink);outline-offset:0}
+.row .loads{display:block}
+@media (prefers-reduced-motion:reduce){.row::before,.log{transition:none}}
+@media (max-width:900px){.top{grid-template-columns:1fr;gap:28px}.win{height:364px}}
+@media (max-width:600px){.win{font-size:12px;height:332px}.log{padding:12px 14px 0}.log .ask{margin:0 -14px 10px;padding:6px 14px}.inp{padding:0 14px 12px}}
+.tray{background:var(--tray);border-radius:36px;padding:40px}@media (max-width:900px){.tray{padding:24px;border-radius:28px}}@media (max-width:600px){.tray{padding:12px;border-radius:22px}}.top{grid-template-columns:1fr 464px}@media (max-width:1240px){.top{grid-template-columns:1fr 440px}}@media (max-width:900px){.top{grid-template-columns:1fr}}</style></head><body><div class="tag"><b>Craft, current</b><span>The working version of the craft section. Options are drawn beside it, and a pick is folded back in here</span></div><div class="sec"><div class="top"><div class="head"><h2>What good work looks like</h2><p>The practice an agent follows lives in skills, and every rule in them traces to a published source.</p></div><div class="tray"><div class="win" aria-hidden="true"><div class="bar"><i></i><i></i><i></i><span>claude</span></div><div class="log" id="log"></div><div class="inp"><div class="rule"></div><div class="line"><span class="g">❯</span><span><span id="typed"></span><span class="cur"></span><span class="hint" id="hint"></span></span></div><div class="rule"></div></div></div></div></div><div class="rows"><div class="row" data-n="code-craft"><div><button type="button" class="go name" data-n="code-craft" aria-label="Show code-craft loading in the window">code-craft</button><span class="loads">loads before a new function or module</span></div><p class="rule">When no next change can be named, write the plainest code that passes, since a shape built for an unnamed change is a guess.</p><div><p class="srcname">Google, What to look for in a code review</p><p class="quote"><q>solve the problem they know needs to be solved now, not the problem that the developer speculates might need to be solved in the future</q></p></div></div><div class="row" data-n="test-craft"><div><button type="button" class="go name" data-n="test-craft" aria-label="Show test-craft loading in the window">test-craft</button><span class="loads">loads before writing a test</span></div><p class="rule">Write the lower test when a higher one catches a break no lower test did.</p><div><p class="srcname">Ham Vocke, The Practical Test Pyramid</p><p class="quote"><q>Push your tests as far down the test pyramid as you can</q></p></div></div><div class="row" data-n="api-design"><div><button type="button" class="go name" data-n="api-design" aria-label="Show api-design loading in the window">api-design</button><span class="loads">loads before shaping a flag, output, or format</span></div><p class="rule">Treat ordering, timing, default values, and the exact text of an error as observable.</p><div><p class="srcname">Software Engineering at Google, chapter 1</p><p class="quote"><q>all observable behaviors of your system will be depended on by somebody</q></p></div></div><div class="row" data-n="ui-craft"><div><button type="button" class="go name" data-n="ui-craft" aria-label="Show ui-craft loading in the window">ui-craft</button><span class="loads">loads when a rendered file changes</span></div><p class="rule">Use a native &lt;button&gt; or &lt;a&gt; over a &lt;div&gt; carrying a click handler.</p><div><p class="srcname">W3C, Using ARIA, the first rule</p><p class="quote"><q>If you can use a native HTML element or attribute with the semantics and behavior you require already built in</q></p></div></div><div class="row" data-n="design-taste"><div><button type="button" class="go name" data-n="design-taste" aria-label="Show design-taste loading in the window">design-taste</button><span class="loads">loads when a rendered file changes</span></div><p class="rule">Never settle a higher layer before the one below it.</p><div><p class="srcname">Jesse James Garrett, The Elements of User Experience</p><p class="quote"><q>Each plane is dependent on the planes below it.</q></p></div></div><div class="row" data-n="review-craft"><div><button type="button" class="go name" data-n="review-craft" aria-label="Show review-craft loading in the window">review-craft</button><span class="loads">loads in every code review</span></div><p class="rule">Design and scope come first: does the change do one thing, and does it build what nobody asked for?</p><div><p class="srcname">Google, What to look for in a code review</p><p class="quote"><q>The most important thing to cover in a review is the overall design of the CL</q></p></div></div><div class="row" data-n="write-human"><div><button type="button" class="go name" data-n="write-human" aria-label="Show write-human loading in the window">write-human</button><span class="loads">loads before writing prose</span></div><p class="rule">Write for a developer who is scanning rather than studying.</p><div><p class="srcname">Nielsen Norman Group, How users read on the web</p><p class="quote"><q>79 percent of our test users always scanned any new page they came across</q></p></div></div><div class="row" data-n="systematic-debugging"><div><button type="button" class="go name" data-n="systematic-debugging" aria-label="Show systematic-debugging loading in the window">systematic-debugging</button><span class="loads">loads on a bug nobody has explained</span></div><p class="rule">Trace bad values backward to their source. Fix at the origin, not the symptom.</p><div><p class="srcname">Jesse Vincent, superpowers, Systematic Debugging</p><p class="quote"><q>Fix at source, not at symptom</q></p></div></div></div><div class="pair"><div class="tabs" role="group" aria-label="Practice skills"><button type="button" aria-pressed="true" data-i="0">code-craft</button><button type="button" aria-pressed="false" data-i="1">test-craft</button><button type="button" aria-pressed="false" data-i="2">api-design</button><button type="button" aria-pressed="false" data-i="3">ui-craft</button><button type="button" aria-pressed="false" data-i="4">design-taste</button><button type="button" aria-pressed="false" data-i="5">review-craft</button><button type="button" aria-pressed="false" data-i="6">write-human</button><button type="button" aria-pressed="false" data-i="7">systematic-debugging</button></div><div class="panes"><div class="pane"><p class="lbl">The rule, in <code id="p">claude/skills/code-craft/SKILL.md</code></p><p class="rule" id="r">When no next change can be named, write the plainest code that passes, since a shape built for an unnamed change is a guess.</p><span class="loads" id="l">loads before a new function or module</span></div><div class="pane"><p class="lbl">The source it cites</p><p class="srcname" id="s">Google, What to look for in a code review</p><p class="quote" id="q"><q>solve the problem they know needs to be solved now, not the problem that the developer speculates might need to be solved in the future</q></p></div></div></div><p class="note">Every rule has its own source row in a ledger, and the skill audit fails when a skill's rules and its rows disagree in count.</p></div><script>const SK=[["code-craft", "loads before a new function or module", "When no next change can be named, write the plainest code that passes, since a shape built for an unnamed change is a guess.", "Google, What to look for in a code review", "solve the problem they know needs to be solved now, not the problem that the developer speculates might need to be solved in the future"], ["test-craft", "loads before writing a test", "Write the lower test when a higher one catches a break no lower test did.", "Ham Vocke, The Practical Test Pyramid", "Push your tests as far down the test pyramid as you can"], ["api-design", "loads before shaping a flag, output, or format", "Treat ordering, timing, default values, and the exact text of an error as observable.", "Software Engineering at Google, chapter 1", "all observable behaviors of your system will be depended on by somebody"], ["ui-craft", "loads when a rendered file changes", "Use a native <button> or <a> over a <div> carrying a click handler.", "W3C, Using ARIA, the first rule", "If you can use a native HTML element or attribute with the semantics and behavior you require already built in"], ["design-taste", "loads when a rendered file changes", "Never settle a higher layer before the one below it.", "Jesse James Garrett, The Elements of User Experience", "Each plane is dependent on the planes below it."], ["review-craft", "loads in every code review", "Design and scope come first: does the change do one thing, and does it build what nobody asked for?", "Google, What to look for in a code review", "The most important thing to cover in a review is the overall design of the CL"], ["write-human", "loads before writing prose", "Write for a developer who is scanning rather than studying.", "Nielsen Norman Group, How users read on the web", "79 percent of our test users always scanned any new page they came across"], ["systematic-debugging", "loads on a bug nobody has explained", "Trace bad values backward to their source. Fix at the origin, not the symptom.", "Jesse Vincent, superpowers, Systematic Debugging", "Fix at source, not at symptom"]];const SC=[{"ask": "move the pricing rules out of the cart", "lines": [["Skill", "canon:code-craft", "Loaded"], ["Write", "src/pricing/rules.ts", "Wrote 37 lines"]]}, {"ask": "cover an empty cart total with a test", "lines": [["Read", "src/cart/total.ts", "Read 31 lines"], ["Skill", "canon:test-craft", "Loaded"], ["Write", "src/cart/total.test.ts", "Wrote 24 lines"]]}, {"ask": "add a --json flag to the export command", "lines": [["Skill", "canon:api-design", "Loaded"], ["Update", "src/commands/export.ts", "9 additions"]]}, {"ask": "add a disabled state to the save button", "lines": [["Read", "src/components/SaveButton.tsx", "Read 48 lines"], ["Skill", "canon:ui-craft", "Loaded"], ["Skill", "canon:design-taste", "Loaded"], ["Update", "src/components/SaveButton.tsx", "2 additions, 1 removal"]]}, {"ask": "review the open pull request", "lines": [["Skill", "canon:review-pr", "Loaded"], ["Skill", "canon:review-craft", "Loaded"]]}, {"ask": "write the release notes for this change", "lines": [["Skill", "canon:write-human", "Loaded"], ["Update", "CHANGELOG.md", "6 additions"]]}, {"ask": "the totals are a cent off since the refactor", "lines": [["Skill", "canon:systematic-debugging", "Loaded"], ["Bash", "git bisect run bun test src/cart", "first bad commit 3f9c2a1"]]}];
+const $=id=>document.getElementById(id),log=$('log'),typed=$('typed'),hint=$('hint');
+const bs=[...document.querySelectorAll('.tabs button')],rowsEl=[...document.querySelectorAll('.row')],panes=document.querySelector('.panes');
+const idx=n=>SK.findIndex(s=>s[0]===n);
+function fill(i){const [n,l,r,s,q]=SK[i];$('p').textContent='claude/skills/'+n+'/SKILL.md';$('r').textContent=r;$('l').textContent=l;$('s').textContent=s;$('q').firstChild.textContent=q}
+let cur=0,gen=0,hold=-1;
+const sceneOf=n=>SC.findIndex(sc=>sc.lines.some(([t,a])=>t==='Skill'&&a==='canon:'+n));
+function pick(i){cur=i;bs.forEach(x=>x.setAttribute('aria-pressed',+x.dataset.i===i));fill(i)}
+function settle(){panes.style.minHeight='';if(getComputedStyle(document.querySelector('.pair')).display==='none')return;let m=0;SK.forEach((_,i)=>{fill(i);m=Math.max(m,panes.offsetHeight)});fill(cur);panes.style.minHeight=m+'px'}
+only(0);settle();addEventListener('resize',settle);document.fonts&&document.fonts.ready.then(settle);
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function only(i){rowsEl.forEach((r,j)=>r.classList.toggle('lit',j===i));pick(i)}
+function light(n){const i=idx(n);if(i<0)return;if(hold>=0&&i!==hold)return;hold=-1;only(i)}
+function unlight(){rowsEl.forEach(r=>r.classList.remove('lit'))}
+function add(cls,html){const d=document.createElement('div');d.className=cls;d.innerHTML=html;log.append(d)}
+const esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+function render(sc){log.innerHTML='';typed.textContent='';add('ask','<span class="g">❯</span><span>'+esc(sc.ask)+'</span>');sc.lines.forEach(([t,a,r])=>{add('tool'+(t==='Skill'?' sk':''),'<b>'+t+'</b>('+esc(a)+')');add('res',esc(r));if(t==='Skill')light(a.replace('canon:',''))})}
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+async function run(k,g,fade){
+  const ok=async ms=>{await wait(ms);return g===gen};
+  if(fade){log.classList.add('hide');if(!await ok(320))return;log.innerHTML='';log.classList.remove('hide')}
+  for(;;){const sc=SC[k%SC.length];
+    const lead=sc.lines.find(([t,a])=>t==='Skill'&&idx(a.replace('canon:',''))>=0);if(lead)light(lead[1].replace('canon:',''));
+    for(let c=1;c<=sc.ask.length;c++){typed.textContent=sc.ask.slice(0,c);if(!await ok(26))return}
+    if(!await ok(Math.min(1400,500+sc.ask.length*12)))return;typed.textContent='';
+    log.innerHTML='';add('ask','<span class="g">❯</span><span>'+esc(sc.ask)+'</span>');
+    for(const [t,a,r] of sc.lines){if(!await ok(650))return;add('tool'+(t==='Skill'?' sk':''),'<b>'+t+'</b>('+esc(a)+')');if(!await ok(250))return;add('res',esc(r));if(t==='Skill')light(a.replace('canon:',''))}
+    if(!await ok(2600))return;log.classList.add('hide');if(!await ok(320))return;
+    hold=-1;log.innerHTML='';log.classList.remove('hide');k++}}
+function jump(i){const k=sceneOf(SK[i][0]);gen++;hold=i;only(i);typed.textContent='';
+  if(reduce){render(SC[k]);return}run(k,gen,true)}
+bs.forEach(b=>b.addEventListener('click',()=>jump(+b.dataset.i)));
+document.querySelectorAll('.row .go').forEach(b=>b.addEventListener('click',()=>jump(idx(b.dataset.n))));
+if(reduce){render(SC[0])}else{let started=false;const io=new IntersectionObserver(es=>{if(!started&&es.some(x=>x.isIntersecting)){started=true;run(0,gen,false)}});io.observe(document.querySelector('.win'))}
+</script></body></html>
