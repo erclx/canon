@@ -53,7 +53,9 @@ Resolve `<board>` and `<project>` and start the board as `${CLAUDE_SKILL_DIR}/..
 3. Resolve `<page-dir>` as `<board>/<project>/references/`, which holds the frame HTML alone, and `<asset-dir>` as `<board>/<project>/assets/references/`, which holds every shot and film.
 4. Delete every frame named `<site>-*` on `references` with `frameboard frame delete`, and remove `<asset-dir>/<site>/`, for each site this run captures.
 
-Frameboard serves a frame's images from its project's `assets/` folder and never from a page folder, which is why the two differ. Clearing a site's folder makes a rerun replace that site rather than stack a second copy beside the first, and leaves every other site's shots standing.
+Frameboard serves a file sitting directly in a page folder or anywhere under its project's `assets/` folder, but nothing in a page folder's subfolders, so shots kept in `<site>/<px>/` folders live under `assets/`.
+
+Clearing a site's folder makes a rerun replace that site rather than stack a second copy beside the first, and leaves every other site's shots standing.
 
 ## Step 4: shoot the sections
 
