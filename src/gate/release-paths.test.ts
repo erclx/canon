@@ -21,9 +21,10 @@ const npmFiles = readJson<{ files: string[] }>('package.json').files.filter(
   (entry) => !entry.startsWith('!'),
 )
 
-const excludePaths = readJson<{
-  packages: Record<string, { 'exclude-paths'?: string[] }>
-}>('release-please-config.json').packages['.']['exclude-paths'] ?? []
+const excludePaths =
+  readJson<{
+    packages: Record<string, { 'exclude-paths'?: string[] }>
+  }>('release-please-config.json').packages['.']['exclude-paths'] ?? []
 
 // Tracked paths alone, so a folder living only in `node_modules` or a
 // gitignored path never reads as a leak
