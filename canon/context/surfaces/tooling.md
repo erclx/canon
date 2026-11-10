@@ -95,10 +95,10 @@ Holds the decline, customize, and lift transitions over `domains.tooling.disposi
 
 ### `src/tooling/verify-stack.ts`
 
-Runs `canon tooling verify <stack>` by scaffolding into `.canon/tmp/runs/verify-<stack>/`, running `[verify] prepare`, syncing, then running `lint:fix`, `format`, `check`, `test:e2e`, and `screenshot` with `CI` set.
+Runs `canon tooling verify <stack>` by scaffolding into `.canon/tmp/runs/verify-<stack>/`, running `[verify] prepare`, syncing, then running `format` and `check` with `CI` set, plus `lint:fix`, `test:e2e`, and `screenshot` where the synced `package.json` declares them.
 
 - A failed phase is recorded and the run continues, a scaffold with no `package.json` after sync fails it, and `--keep` preserves a green run
-- The sync phase runs `bun <root>/src/cli.ts` from the checkout, never `canon` on PATH
+- The sync phase runs `bun <root>/src/cli.ts` from the checkout, never `canon` on PATH, and an add-on such as `cloudflare` syncs `base` first, as `canon init` would
 - `web` has no scaffold command, so a change to `tooling/web/configs/` is verified through `vite-react` and `astro`
 - Run it after any change to `tooling/<stack>/configs/`, a manifest, or `src/tooling/`
 - Install Playwright browsers from the scaffold's `node_modules/.bin/`, since `web` leaves `@playwright/test` unpinned and a scaffold can resolve a newer release than this checkout's

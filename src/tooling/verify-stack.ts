@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { execa, type Options } from 'execa'
 import { isStackExcluded, loadManifest } from '@/tooling/manifest'
+import { isAddOn } from '@/tooling/stamp'
 import { intro, logError, logInfo, logStep, logWarn, outro } from '@/cli/ui'
 
 const SCREENSHOT_TIMEOUT_MS = 60_000
@@ -31,9 +32,9 @@ interface Run {
 
 /**
  * Scaffolds a stack into `.canon/tmp/runs/verify-<stack>/`, syncs its chain
- * from the checkout at `root`, and runs the scaffold's own `lint:fix`,
- * `format`, `check`, `test:e2e`, and `screenshot` scripts. Every line goes
- * to stderr.
+ * from the checkout at `root`, with `base` ahead of an add-on, and runs the
+ * scaffold's own `format` and `check` scripts, plus `lint:fix`, `test:e2e`,
+ * and `screenshot` where it declares them. Every line goes to stderr.
  *
  * A failed phase is recorded and the run carries on, so the Results block
  * reports every phase rather than the first failure. The tmp dir is removed
@@ -120,12 +121,12 @@ async function run({
 
   const cli = join(root, 'src/cli.ts')
   logInfo(`Sync resolves via bun ${cli}, not PATH canon`)
-  await phase(state, 'Sync', () =>
-    execa('bun', [cli, 'tooling', 'sync', stack, '.', '--write'], {
-      ...captured(state.dir),
-      env: { CI: '1' },
-    }),
-  )
+  // An add-on layers onto a core chain rather than heading one, so it lands
+  // on `base` first, the order `canon init` gives a real target.
+  if (isAddOn(manifest)) {
+    await phase(state, 'Sync base', () => sync(cli, 'base', state.dir))
+  }
+  await phase(state, 'Sync', () => sync(cli, stack, state.dir))
 
   const packagePath = join(state.dir, 'package.json')
   if (existsSync(packagePath)) {
@@ -156,9 +157,15 @@ async function run({
  * `lint:fix` and `format` run first and rewrite the scaffold, so `check`
  * reads the tree a project would commit. `check` itself writes nothing, and a
  * fresh scaffold ships files its own generator formatted another way.
+ *
+ * `format` and `check` run unconditionally, since `base` declares both and
+ * every verified chain reaches it. `lint:fix`, `test:e2e`, and `screenshot`
+ * run only where the synced scaffold declares them.
  */
 async function runScripts(state: Run, scripts: Set<string>): Promise<void> {
-  await phase(state, 'lint:fix', () => bunRun('lint:fix', state.dir))
+  if (scripts.has('lint:fix')) {
+    await phase(state, 'lint:fix', () => bunRun('lint:fix', state.dir))
+  }
   await phase(state, 'format', () => bunRun('format', state.dir))
   await phase(state, 'check', () => bunRun('check', state.dir))
 
@@ -212,6 +219,13 @@ function shell(command: string, cwd: string): Promise<Spawned> {
   return execa(command, {
     ...captured(cwd),
     shell: 'bash',
+    env: { CI: '1' },
+  })
+}
+
+function sync(cli: string, stack: string, cwd: string): Promise<Spawned> {
+  return execa('bun', [cli, 'tooling', 'sync', stack, '.', '--write'], {
+    ...captured(cwd),
     env: { CI: '1' },
   })
 }

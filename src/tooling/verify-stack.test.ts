@@ -28,11 +28,16 @@ const seedStack = (stack: string, body: string): void => {
   writeFileSync(join(root, 'tooling', stack, 'manifest.toml'), body)
 }
 
-const scaffoldWith = (scripts: readonly string[]): string => {
+// A core stack extends `base` by default, since a manifest with no parent
+// reads as an add-on and gains a `Sync base` phase.
+const scaffoldWith = (
+  scripts: readonly string[],
+  parent: string = 'base',
+): string => {
   const pkg = JSON.stringify({
     scripts: Object.fromEntries(scripts.map((key) => [key, 'true'])),
   })
-  return `[stack]\nscaffold = "mkdir -p {{name}} && echo '${pkg.replaceAll('"', '\\"')}' > {{name}}/package.json"\n`
+  return `[stack]\nextends = "${parent}"\nscaffold = "mkdir -p {{name}} && echo '${pkg.replaceAll('"', '\\"')}' > {{name}}/package.json"\n`
 }
 
 const bunCalls = (): string[] => {
@@ -54,7 +59,7 @@ beforeEach(() => {
     'bun',
     [
       `echo "$@" >> "${join(root, 'bun-args')}"`,
-      `[ "$2" = "\${FAIL_ON:-}" ] && exit 1`,
+      `[ "$2" = "\${FAIL_ON:-}" ] && [ -z "\${FAIL_STACK:-}" -o "$4" = "\${FAIL_STACK:-}" ] && exit 1`,
       `[ "$2" = screenshot ] && [ -n "\${SHOTS:-}" ] && mkdir -p screenshots && touch screenshots/home.png`,
       'exit 0',
     ].join('\n'),
@@ -86,6 +91,49 @@ describe('verifyStack sync', () => {
     )
   })
 
+  it('should sync base ahead of an add-on stack', async () => {
+    seedStack('addon', scaffoldWith([], ''))
+
+    const outcome = await verifyStack({ root, stack: 'addon' })
+
+    expect(outcome.results.map((result) => result.name).slice(0, 3)).toEqual([
+      'Scaffold',
+      'Sync base',
+      'Sync',
+    ])
+    expect(bunCalls().slice(0, 2)).toEqual([
+      `${root}/src/cli.ts tooling sync base . --write`,
+      `${root}/src/cli.ts tooling sync addon . --write`,
+    ])
+  })
+
+  it('should not sync base ahead of a stack with a parent', async () => {
+    seedStack('child', scaffoldWith([], 'web'))
+
+    const outcome = await verifyStack({ root, stack: 'child' })
+
+    expect(outcome.results.map((result) => result.name)).not.toContain(
+      'Sync base',
+    )
+    expect(bunCalls()).not.toContain(
+      `${root}/src/cli.ts tooling sync base . --write`,
+    )
+  })
+
+  it('should carry on to the stack sync when the base sync fails', async () => {
+    seedStack('addon', scaffoldWith([], ''))
+    vi.stubEnv('FAIL_ON', 'tooling')
+    vi.stubEnv('FAIL_STACK', 'base')
+
+    const outcome = await verifyStack({ root, stack: 'addon' })
+
+    expect(outcome.results.slice(1, 3)).toEqual([
+      { name: 'Sync base', passed: false },
+      { name: 'Sync', passed: true },
+    ])
+    expect(outcome.exitCode).toBe(1)
+  })
+
   it('should fail naming the stack when sync leaves no package.json', async () => {
     seedStack('bare', '[stack]\nscaffold = "mkdir -p {{name}}"\n')
     const stderr = vi.mocked(process.stderr.write)
@@ -101,7 +149,7 @@ describe('verifyStack sync', () => {
 
 describe('verifyStack phases', () => {
   it('should run test:e2e and screenshot after check when declared', async () => {
-    seedStack('web', scaffoldWith(['test:e2e', 'screenshot']))
+    seedStack('web', scaffoldWith(['lint:fix', 'test:e2e', 'screenshot']))
     vi.stubEnv('SHOTS', '1')
 
     const outcome = await verifyStack({ root, stack: 'web' })
@@ -119,7 +167,7 @@ describe('verifyStack phases', () => {
     expect(outcome.exitCode).toBe(0)
   })
 
-  it('should skip test:e2e and screenshot when not declared', async () => {
+  it('should skip lint:fix, test:e2e, and screenshot when not declared', async () => {
     seedStack('lib', scaffoldWith([]))
 
     const outcome = await verifyStack({ root, stack: 'lib' })
@@ -127,10 +175,10 @@ describe('verifyStack phases', () => {
     expect(outcome.results.map((result) => result.name)).toEqual([
       'Scaffold',
       'Sync',
-      'lint:fix',
       'format',
       'check',
     ])
+    expect(bunCalls()).not.toContain('run lint:fix')
   })
 
   it('should run the manifest prepare before sync', async () => {
@@ -146,7 +194,7 @@ describe('verifyStack phases', () => {
   })
 
   it('should run later phases after a failed phase', async () => {
-    seedStack('web', scaffoldWith(['test:e2e']))
+    seedStack('web', scaffoldWith(['lint:fix', 'test:e2e']))
     vi.stubEnv('FAIL_ON', 'check')
 
     const outcome = await verifyStack({ root, stack: 'web' })

@@ -12,7 +12,8 @@ The manifest's scaffold starts a new project as a TypeScript Worker from the `he
 
 - The starter installs its own dependencies, since `create-cloudflare` runs the install itself.
 - A project already on `astro` or `vite-react` never takes this scaffold. It syncs the stack onto the framework it has.
-- The stack extends nothing and ships no scripts, so `canon tooling verify cloudflare` passes Scaffold and Sync and stops at `lint:fix`. Run `canon init` on the starter to bring in the base scripts.
+- The stack extends nothing and ships no scripts, so `canon tooling verify cloudflare` syncs `base` onto the starter first, as `canon init` would
+- A verify pass proves the two syncs and the base format check alone, since the Worker declares no typecheck, lint, or build
 
 ## Deploy workflow
 
