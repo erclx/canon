@@ -15,7 +15,7 @@ paths:
 ## Every image is generated, never a screenshot pasted in
 
 - Point an image at a file a script writes, such as a frame `canon capture` renders under `assets/`.
-- Symlink a frame into `web/public/assets/` rather than holding a second copy.
+- Symlink a frame into `web/public/` rather than holding a second copy.
 - Label a hand-taken snapshot no build refreshes as one on the page.
 - Never hand-edit a generated artifact, since the next generation silently undoes the edit or the edit silently outlives it.
 
