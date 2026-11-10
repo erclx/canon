@@ -1,0 +1,46 @@
+---
+/**
+ * Writes the title, description, canonical link, Open Graph, and Twitter tags
+ * from `src/site.ts`, so every page carries the six tags
+ * `scripts/check-head-meta.sh` fails a build without.
+ *
+ * Synced as a config and overwritten on every sync, so a page's extra tags go
+ * in the slot rather than into this file.
+ *
+ * The address comes from `Astro.site`, which `astro.config.mjs` reads from
+ * `ASTRO_SITE`. Unset, every URL here carries the `.invalid` fallback, which
+ * stays visible in the built page rather than resolving somewhere wrong.
+ */
+import { site } from '@/site'
+
+interface Props {
+  /** The page's own title. Omitted on the home page, which reads the name alone. */
+  title?: string
+  /** Falls back to the site description. */
+  description?: string
+}
+
+const { title, description = site.description } = Astro.props
+
+const fullTitle = title ? `${title} · ${site.name}` : site.name
+const canonical = new URL(Astro.url.pathname, Astro.site).href
+const card = new URL(site.card, Astro.site).href
+---
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={site.name} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={card} />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={card} />
+
+<slot />
