@@ -53,7 +53,9 @@ export interface TargetReading {
 }
 
 export type WalkRefusal =
-  'browser-missing' | 'server-unreachable' | 'walk-failed'
+  | 'browser-missing'
+  | 'server-unreachable'
+  | 'walk-failed'
 
 export type WalkResult =
   | {
