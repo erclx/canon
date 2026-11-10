@@ -73,7 +73,7 @@ export default scenario({
         '         which reaches the fixture through the references key',
       )
       ctx.log.info(
-        'Expect:  a references page on the board at .canon/board/, section shots at 320, 768, and',
+        'Expect:  a references page on the board at .canon/board/, section shots at 320, 834, and',
       )
       ctx.log.info(
         '         1440 under its localhost-4532 folder, a scroll of five stills and up to three hovers',
