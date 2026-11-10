@@ -427,6 +427,13 @@ const [before, middle, last] = fold.parts
     color: var(--accent);
   }
 
+  /* The input draws no outline of its own, since the block caret stands in for the text caret, so its field carries the ring. */
+  #top .fld:has(input:focus-visible) {
+    outline: 2px solid var(--ink);
+    outline-offset: 4px;
+    border-radius: var(--radius-action);
+  }
+
   #top .fld {
     position: relative;
     flex: 1;

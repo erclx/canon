@@ -70,6 +70,16 @@ test('the toggle flips the theme and a reload keeps it', async ({ page }) => {
   await expect(root).toHaveAttribute('data-theme', after as string, SETTLE)
 })
 
+test('the opening prompt shows a focus ring when it takes focus', async ({
+  page,
+}) => {
+  await page.goto('/')
+
+  await page.locator('#av-ask').focus()
+
+  await expect(page.locator('#top .fld')).toHaveCSS('outline-style', 'solid')
+})
+
 test.describe('the fixed bar', () => {
   test('lands a section jump with its heading below the bar', async ({
     page,
