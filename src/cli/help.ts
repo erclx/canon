@@ -71,6 +71,7 @@ export const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
       ['deps [cmd]', 'Read the dependency set for advisories'],
       ['labels [cmd]', 'Read a changed set against the label map'],
       ['comments [cmd]', 'Measure comment density and trend'],
+      ['code [cmd]', 'Report source against the code standards'],
       ['context [cmd]', 'Report context folder health'],
       ['markdown [cmd]', 'Report markdown against the shipped bans'],
       ['census [path]', 'Report file count, extensions, and line totals'],
