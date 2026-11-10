@@ -42,6 +42,32 @@ export const SETUP_CASES: readonly SkillCase[] = [
       'This folder is empty, start a new astro project in it and get it on the toolkit.',
     expect: 'target-scaffold',
   },
+  // Plain start-a-project phrasings with no word about the folder, the shape
+  // that missed the skill in a sandbox run, one per stack and verb.
+  {
+    prompt: 'start a new astro project here',
+    expect: 'target-scaffold',
+  },
+  {
+    prompt: 'create a new vite react app in this folder',
+    expect: 'target-scaffold',
+  },
+  {
+    prompt: 'scaffold a next.js app here',
+    expect: 'target-scaffold',
+  },
+  {
+    prompt: 'I want to build a python project, set it up from scratch',
+    expect: 'target-scaffold',
+  },
+  {
+    prompt: 'spin up a new go service in this directory',
+    expect: 'target-scaffold',
+  },
+  {
+    prompt: 'new php project please',
+    expect: 'target-scaffold',
+  },
   {
     prompt:
       "Before I run this sync, tell me exactly what it's going to overwrite.",
