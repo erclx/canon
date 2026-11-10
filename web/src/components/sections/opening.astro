@@ -684,6 +684,8 @@ const [before, middle, last] = fold.parts
 </style>
 
 <script>
+  import { holdOn, reducedMotion } from '../../lib/scene'
+
   interface Session {
     n: string
     aw?: string
@@ -1178,18 +1180,10 @@ const [before, middle, last] = fold.parts
      * The loop halts while the reader holds the view, by pointer or focus,
      * so moving content stops under the person reading it.
      */
-    const view = list.closest('.av')
-    let held = false
-    view?.addEventListener('pointerenter', () => (held = true))
-    view?.addEventListener(
-      'pointerleave',
-      () => (held = view.contains(document.activeElement)),
-    )
-    view?.addEventListener('focusin', () => (held = true))
-    view?.addEventListener('focusout', () => (held = false))
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches)
+    const held = holdOn(list.closest('.av'))
+    if (!reducedMotion())
       setInterval(() => {
-        if (!held) step()
+        if (!held()) step()
       }, 2600)
   }
 </script>
