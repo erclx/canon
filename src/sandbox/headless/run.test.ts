@@ -4,12 +4,18 @@ import {
   parseRunArgs,
   type SessionsReport,
 } from '@/sandbox/headless/run'
+import type { BranchCli } from '@/sandbox/headless/branch-cli'
 
 const sessions = (): SessionsReport => ({
   watched: true,
   new: [],
   concurrent: [],
   reap: 'clear',
+})
+
+const canon = (): BranchCli => ({
+  cli: '/checkout/src/cli.ts',
+  head: '0123456789abcdef0123456789abcdef01234567',
 })
 
 const verdict = (): object => ({ state: 'pass', asserted: 1, failed: 0 })
@@ -51,7 +57,7 @@ describe('parseRunArgs', () => {
 })
 
 describe('mergeEnvelope', () => {
-  it('should append the verdict, escapes, and sessions to a parsed envelope', () => {
+  it('should append the verdict, escapes, sessions, and CLI to a parsed envelope', () => {
     const out = '{"is_error":false,"result":"ok","num_turns":1}'
 
     const { merged, isParsed } = mergeEnvelope(
@@ -59,6 +65,7 @@ describe('mergeEnvelope', () => {
       verdict(),
       ['/root/.canon/plans/x.md'],
       sessions(),
+      canon(),
     )
 
     expect(isParsed).toBe(true)
@@ -69,6 +76,10 @@ describe('mergeEnvelope', () => {
       verdict: { state: 'pass', asserted: 1, failed: 0 },
       escapes: ['/root/.canon/plans/x.md'],
       sessions: { watched: true, new: [], concurrent: [], reap: 'clear' },
+      canon: {
+        cli: '/checkout/src/cli.ts',
+        head: '0123456789abcdef0123456789abcdef01234567',
+      },
     })
   })
 
@@ -81,6 +92,7 @@ describe('mergeEnvelope', () => {
       verdict(),
       [],
       sessions(),
+      canon(),
     )
 
     expect(isParsed).toBe(false)
@@ -89,16 +101,22 @@ describe('mergeEnvelope', () => {
       verdict: { state: 'pass', asserted: 1, failed: 0 },
       escapes: [],
       sessions: { watched: true, new: [], concurrent: [], reap: 'clear' },
+      canon: {
+        cli: '/checkout/src/cli.ts',
+        head: '0123456789abcdef0123456789abcdef01234567',
+      },
     })
   })
 
   it('should fall back when the envelope is empty', () => {
-    expect(mergeEnvelope('', verdict(), [], sessions()).isParsed).toBe(false)
+    expect(mergeEnvelope('', verdict(), [], sessions(), canon()).isParsed).toBe(
+      false,
+    )
   })
 
   it('should fall back when the envelope is JSON but not an object', () => {
-    expect(mergeEnvelope('[1,2]', verdict(), [], sessions()).isParsed).toBe(
-      false,
-    )
+    expect(
+      mergeEnvelope('[1,2]', verdict(), [], sessions(), canon()).isParsed,
+    ).toBe(false)
   })
 })
