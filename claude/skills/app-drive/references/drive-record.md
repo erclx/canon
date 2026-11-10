@@ -30,13 +30,13 @@ Write the log to `evidence/drive-log.md` inside the intake folder. It opens on a
 - **Did:** clicked the frame in Layers
 - **Saw:** the view stayed put, with 64% of the frame under the panel edge
 - **Cause:** from code, the reveal acts only when the box is wholly outside the view
-- **Evidence:** `evidence/02-partial-no-pan.png`
-- **Drawn:** `evidence/02-options.png`, `evidence/mocks/layers/`
+- **Evidence:** `evidence/layers/02-partial-no-pan.png`
+- **Drawn:** `evidence/layers/02-options.png`, `evidence/mocks/layers/`
 - **Decision (operator):** center the frame unless it is wholly visible
 ```
 
 - `<nn>` numbers findings in the order they were found, and the frame carries the same number
-- A drive frame is named `frames/<nn>-<name>.png`. A drawn frame is named `<nn>-now`, `<nn>-fix`, or `<nn>-fix-<variant>` by the log's finding number, for a bug fix and a new feature alike.
+- A screenshot is `frames/<nn>-<name>.png`, moved under `evidence/<surface>/` once cited. A drawn frame takes the drawing guide's name, such as `<section>-<arm>-<px>`.
 - The title names what the persona met, in sentence case with no trailing period
 - The meta line holds the severity, the source, and the persona, in that order. The source is `goal`, `last-drive`, or `operator`, and a finding naming none sorts as taste.
 - A `last-drive` finding adds `fixed`, `still open`, or `changed` to its meta line
@@ -64,7 +64,7 @@ The fields under the meta line carry the drive itself, one fact to a line.
 
 The check reads `Drawn` and `Decision (operator)` off the log by those exact labels, so a reworded label turns the check off without failing it.
 
-- Put the options screenshot at `evidence/<nn>-options.png`, showing the now frame beside every fix frame
+- Put the options screenshot at `evidence/<surface>/<nn>-options.png`, showing the section as shipped beside every option
 - Copy the mock source into `evidence/mocks/<surface>/`, where `<surface>` names the screen or panel drawn on
 - Write `Drawn` above the decision, citing paths under `evidence/` the way `Evidence` does, or `skipped, <reason>` when the change has nothing visible
 - A bare `skipped` with no reason counts as undrawn, since the next reader cannot tell a choice from an omission
@@ -83,7 +83,7 @@ Operator images count as evidence on arrival. One showing a finding takes that f
 ```markdown
 ## ref-01. The operator's Figma typography panel
 
-- **Evidence:** `evidence/ref-01-figma-typography.png`
+- **Evidence:** `evidence/refs/ref-01-figma-typography.png`
 ```
 
 - `ref-<nn>` numbers reference shots apart from findings, so a later finding citing one keeps the path it already has
@@ -114,7 +114,7 @@ Write it to the intake folder root before the close. `canon intake drive-check` 
       "reason": "export needs a signed build"
     }
   ],
-  "evidence": ["evidence/01-board.png"],
+  "evidence": ["evidence/board/01-board.png"],
   "worktree": "/tmp/tmp.Xy12/app"
 }
 ```

@@ -28,10 +28,10 @@
 # condition is a person, and no fixture supplies one. Reading a green verdict as
 # coverage of the loop is the mistake this paragraph exists to prevent.
 #
-# The three archive globs hold the width rule. The seeded `## Layout` names 320,
-# 768, 1024, and 1440, so a round reading it draws 320, 768, and 1440, and the
-# 768 column is what separates a run that read the record from one that took
-# the 834 fallback. Not yet measured, so a first failure here may be the capture's
+# The three archive globs hold the width rule. The seeded `## Layout` carries a
+# `Draw widths:` line naming 320, 768, and 1440, so a round reading it draws
+# those, and the 768 column is what separates a run that read the record from
+# one that took the 390, 834, and 1440 fallback. Not yet measured, so a first failure here may be the capture's
 # file naming rather than the run.
 #
 # The last two entries hold the reference step's close. The scenario seeds a

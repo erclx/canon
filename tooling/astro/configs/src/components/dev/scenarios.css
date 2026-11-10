@@ -1,0 +1,28 @@
+/* Bottom left rather than bottom centre, which Astro's dev toolbar owns.
+   Centred, the toolbar sits over the switcher and swallows every click on it. */
+[data-scenario-switcher] {
+  position: fixed;
+  left: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 60;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-width: calc(100vw - 3rem);
+  font:
+    500 13px system-ui,
+    sans-serif;
+}
+[data-scenario-switcher] a {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid rgb(128 128 128 / 0.4);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.9);
+  color: #1a1815;
+  text-decoration: none;
+  white-space: nowrap;
+}
+[data-scenario-switcher] a[data-current='true'] {
+  background: #1a1815;
+  color: #f8f4ed;
+}

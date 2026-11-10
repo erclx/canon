@@ -29,6 +29,14 @@ A project with a board gets its frames there, and a project with none draws as i
 
 - A drive draws in a board project of its own, and the operator holds the board's address before driving and inside every pick question
 - `evidence/mocks/` stays the record a finding cites, wherever its frames were drawn
+- Every frame follows the drawing guide `design-pick` shares, so the operator never restates a width, a name, or a page order
+- A drive draws the shipped page before its first finding, and the page with every pick applied once the picks settle
+
+### On a repository with several apps
+
+A site beside its app is a common shape, and both get a drive from one config.
+
+- A drive names the target it runs when the config holds several, and a config holding one drives as it did
 
 ## Must not
 

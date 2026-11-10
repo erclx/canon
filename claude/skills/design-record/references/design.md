@@ -87,9 +87,10 @@ Use `## Overview`, `## Colors`, `## Typography`, `## Spacing`, `## Shapes`, `## 
 
 In an intent record, `## Colors` carries a `Role | Property | Intent` table and `## Shapes` a `Role | Property | When used` table. Each row names the custom property the stylesheet declares for that role, such as `--color-accent`. Typography and Spacing carry rules alone.
 
-Add either optional section when the project has content for it:
+Add either optional section, and the one line Layout may carry, when the project has content for it:
 
 - `## Layout`: page width, breakpoints, and grid rules as current constraints. `ui-craft` captures at these breakpoints, so a project declaring none is captured at the 320 reflow floor alone.
+- `Draw widths:`, a line inside `## Layout` naming the phone, tablet, and desktop widths a board draws at, which `design-pick` reads
 - `## Mark`: the logo's construction rules and the files that carry it
 
 ## The uncertainty tag

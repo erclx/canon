@@ -27,7 +27,7 @@ Holds the one stack that lints with ESLint and formats `.astro` files with Prett
 
 - `lint` and `lint:fix` are overridden back to `eslint`, and every other file takes oxfmt
 - Its `.oxfmtrc.json` repeats base's options because scan takes a child config over the parent's whole file
-- `configs/src/components/dev/scenarios.astro` is a query-parameter switcher between candidate treatments, shipped under the application-code proof
+- `configs/src/components/dev/` holds a query-parameter switcher between candidate treatments as an `.astro` shell, a `.ts` script, and a `.css` file, shipped under the application-code proof
 
 ### `tooling/web/`
 

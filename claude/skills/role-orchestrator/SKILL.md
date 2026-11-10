@@ -105,8 +105,6 @@ A pass posting anything owed reaches the session holding the branch from the rev
 - Run it yourself when a close message reports a refusal other than the other review being open, or when a cloud reviewer's close posts, per Boundaries below
 - Then the human merges from a line naming its proof, per `${CLAUDE_SKILL_DIR}/references/orchestrator-output.md`. Tell each trailing worker the merged diff touches to run `review-address`.
 
-The handback runbook holds how the message is addressed and worded, what to do when no live session holds the branch, and where a worker's reply goes.
-
 ### Constraints from the tracks in flight
 
 A plan written here targets a tree several branches are changing, so it names each in-flight track's file set as a constraint, read from the plan its row links. State for each set which of the two acts it forbids, per Constraints in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
@@ -125,11 +123,13 @@ A plan written here targets a tree several branches are changing, so it names ea
 
 ### Workers and files
 
+The controller is the session that dispatched this one, usually the orchestrator, and a skill writes controller for that relation and orchestrator for the role.
+
 A worker is a separate process the controller can steer, and scope reaches it through a plan alone.
 
 - Do not spawn a worker with the Agent tool. A subagent shares this session's context and cannot be reached independently, where the `claude --bg` launch gets its own process, worktree, and PR.
 - Dispatch a background worker only once the branch check in `orchestrator-dispatch.md` clears and its conflict check holds the row behind no track in flight
-- That check catches a collision with an existing worktree or session, and a shared file alone is not a hold. No fixed count binds how many tracks run, as Parallelism below states.
+- That check catches a collision with an existing worktree or session, and a shared file alone is not a hold.
 - Do not edit tracked files from this session, at any size. The boundary offers no proportionality exception and nothing enforces it.
 - Do not hand a worker anything but a plan, which carries exact diffs only when already known and otherwise states scope and open questions
 

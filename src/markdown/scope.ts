@@ -204,6 +204,7 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/design-pick/REQUIREMENT.md',
   'claude/skills/design-pick/SKILL.md',
   'claude/skills/design-pick/references/board.md',
+  'claude/skills/design-pick/references/drawing.md',
   'claude/skills/design-pick/references/live-arms.md',
   'claude/skills/write-doc/REQUIREMENT.md',
   'claude/skills/write-doc/SKILL.md',

@@ -129,7 +129,7 @@ export default scenario({
         'Action:  /canon:app-drive drive v0.1.0 of the board app, decide one finding, and close the drive, since no operator is present',
       )
       ctx.log.info(
-        'Expect:  both addresses handed before driving, a Board row in the log, frames on a page in',
+        'Expect:  both addresses handed before driving, a Board row in the log, 00-current and a topic page in',
       )
       ctx.log.info(
         '         project drive-<nn>, the address inside the pick question, the mock source under',
