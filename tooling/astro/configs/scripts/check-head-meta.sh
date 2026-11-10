@@ -15,6 +15,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 
 DIST="$PROJECT_ROOT/dist"
+PUBLIC="$PROJECT_ROOT/public"
 
 # Callers run this after `bun run build`, so an absent dist means the build
 # failed or never ran, which is no evidence any page carries its tags.
@@ -61,6 +62,12 @@ missing_in() {
 pages=0
 failures=0
 while IFS= read -r -d '' file; do
+  # Astro copies public/ into dist verbatim, so a file found there at the same
+  # path is a static asset the project wrote, such as a verification file or
+  # a standalone preview, rather than a page a layout rendered.
+  if [ -f "$PUBLIC/${file#"$DIST"/}" ]; then
+    continue
+  fi
   pages=$((pages + 1))
   absent="$(missing_in "$file")"
   if [ -n "$absent" ]; then

@@ -72,6 +72,7 @@ The astro stack covers Astro + TypeScript projects, being content sites, marketi
 ## Head tag check
 
 - `scripts/check-head-meta.sh` fails a built HTML page under `dist/` missing a title, a description, a canonical link, `og:site_name`, `og:image`, or `twitter:card`
+- Expect it to skip an HTML file `public/` holds at the same path, since Astro copies that folder verbatim
 - Expect it to fail when `dist/` is absent or holds no page, since no build is no evidence
 - Expect the check to read presence and a non-empty value alone, so a placeholder left in `src/site.ts` passes it
 

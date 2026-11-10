@@ -81,6 +81,14 @@ describe('check-head-meta.sh', () => {
       expect(run().status).toBe(0)
     })
 
+    it('passes an html file copied from public/', () => {
+      put('dist/index.html', page())
+      put('public/previews/tokens/index.html', '<html></html>\n')
+      put('dist/previews/tokens/index.html', '<html></html>\n')
+
+      expect(run().status).toBe(0)
+    })
+
     it('passes a canonical on the reserved fallback address', () => {
       put(
         'dist/index.html',
