@@ -26,8 +26,8 @@ describe('renderFavicon', () => {
   it('should take the dark tile, c, and pip where no color scheme applies', () => {
     const rules = defaultRules(renderFavicon(buildMark(), FAVICON_COLORS))
 
-    expect(rules).toContain('.tile { fill: #1b1a18;')
-    expect(rules).toContain('.c { fill: #d9d7d4; }')
+    expect(rules).toContain('.tile { fill: #1a1a18;')
+    expect(rules).toContain('.c { fill: #f2f2f0; }')
     expect(rules).toContain('.pip { fill: #ff6b42; }')
   })
 
@@ -36,8 +36,8 @@ describe('renderFavicon', () => {
 
     expect(svg).toContain('@media (prefers-color-scheme: light)')
     const rules = lightRules(svg)
-    expect(rules).toContain('.tile { fill: #fbfaf8; stroke: #dcdad6; }')
-    expect(rules).toContain('.c { fill: #2c2c29; }')
+    expect(rules).toContain('.tile { fill: #fdfdfc; stroke: #dcdad6; }')
+    expect(rules).toContain('.c { fill: #121212; }')
     expect(rules).toContain('.pip { fill: #c2380e; }')
   })
 

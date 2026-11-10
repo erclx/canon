@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-20.97 -25.62 151.25 151.25">
   <style>
-    .tile { fill: #1b1a18; stroke: #1b1a18; }
-    .c { fill: #d9d7d4; }
+    .tile { fill: #1a1a18; stroke: #1a1a18; }
+    .c { fill: #f2f2f0; }
     .pip { fill: #ff6b42; }
     @media (prefers-color-scheme: light) {
-      .tile { fill: #fbfaf8; stroke: #dcdad6; }
-      .c { fill: #2c2c29; }
+      .tile { fill: #fdfdfc; stroke: #dcdad6; }
+      .c { fill: #121212; }
       .pip { fill: #c2380e; }
     }
   </style>
