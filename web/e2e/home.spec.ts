@@ -288,7 +288,7 @@ test.describe('at the 320 pixel floor', () => {
 })
 
 test.describe('the social card', () => {
-  const card = '/assets/social-card.png'
+  const card = '/og-image.png'
 
   test('both card tags name the composed card on the deployed origin', async ({
     page,

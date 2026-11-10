@@ -19,9 +19,11 @@ const { title, description } = Astro.props
  * digests the route's address rather than its markup, so an edit to that route,
  * to `site` above, or to the mark leaves the PNG stale until someone
  * re-captures it. A card needs an absolute URL, so it is resolved against the
- * deployed origin rather than written as a path.
+ * deployed origin rather than written as a path. It is served as
+ * `/og-image.png` at the site root, the one card name every site the operator
+ * runs shares.
  */
-const cardImage = new URL('/assets/social-card.png', site.origin).href
+const cardImage = new URL('/og-image.png', site.origin).href
 const card = { width: 1200, height: 630 }
 const cardAlt = `${site.name}: ${site.tagline}`
 
