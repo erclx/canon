@@ -437,3 +437,35 @@ describe('markdown bans', () => {
     expect(runVerify().stdout).not.toContain('CHANGELOG')
   })
 })
+
+describe('the head tag check', () => {
+  const writeCheck = (body: string): void => {
+    writeFileSync(join(fixture, 'scripts/check-head-meta.sh'), body)
+  }
+
+  it('should fail when the installed check exits 1', () => {
+    setUp('web', STACK_SCRIPTS.web)
+    writeCheck('echo "index.html: missing og:image" >&2\nexit 1\n')
+
+    const result = runVerify()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('Head tag check failed')
+  })
+
+  it('should pass when the installed check exits 0', () => {
+    setUp('web', STACK_SCRIPTS.web)
+    writeCheck('exit 0\n')
+
+    const result = runVerify()
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('Head tags passed')
+  })
+
+  it('should run no head tag stage where the check is not installed', () => {
+    setUp('web', STACK_SCRIPTS.web)
+
+    expect(runVerify().stdout).not.toContain('Head tags')
+  })
+})

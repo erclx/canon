@@ -87,6 +87,7 @@ const ADD_ON_PHASES = new Map([['check:shell', 'shell']])
 
 const PHASE_LIST = 'scripts/verify.json'
 const CARD_EXCLUSION = 'scripts/check-card-exclusion.sh'
+const HEAD_META = 'scripts/check-head-meta.sh'
 
 const GREEN = '\x1b[0;32m'
 const RED = '\x1b[0;31m'
@@ -361,6 +362,14 @@ function main(): void {
     logStep('Card exclusion')
     runCheck(`bash ${CARD_EXCLUSION}`, 'Card exclusion check failed')
     logInfo('Card exclusion passed')
+  }
+
+  // The head tag check reads the build too, and runs only where the stack that
+  // writes the tags shipped it.
+  if (existsSync(HEAD_META)) {
+    logStep('Head tags')
+    runCheck(`bash ${HEAD_META}`, 'Head tag check failed')
+    logInfo('Head tags passed')
   }
 
   if (!isNested) {
