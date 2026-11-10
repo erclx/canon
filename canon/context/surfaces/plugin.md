@@ -23,13 +23,22 @@ The plugin root, the directory the marketplace entry sources. Everything under i
 - `poll.ts` routes on what `canon pr review-state` reads off a review's first line, `## Review` or `## UI review` and a `closed` form of each, so renaming one in a review skill silently stops routing
 - `tsconfig.json` reaches `claude/skills/*/scripts/**/*.ts` through its own `include` entry, and the shell stages glob `claude` for `.sh` files alone
 
+### `claude/hooks/`
+
+Holds the plugin's hooks at the default path, which Claude Code merges into every session of every project with canon enabled.
+
+- `hooks.json` registers one `SessionStart` hook on `startup`, running `empty-folder.sh` through `sh` so the cache needs no executable bit
+- `empty-folder.sh` adds one line of context naming `canon:target-scaffold` when the session's folder holds nothing but `.git`, the same test step 2 of that skill runs
+- It exists because an over-budget skill listing drops the least-used descriptions first, and `target-scaffold` is used about once per project, so no wording reaches a session that never saw it
+- A hook here runs at every startup, so it stays POSIX `sh`, reads one listing, writes nothing, and exits 0 on every path. `src/claude/empty-folder-hook.test.ts` covers its folder states.
+
 ### `claude/skills/`
 
 Owns the plugin skills, one flat kebab-case folder each with a `SKILL.md`. Discovery is by folder presence with no registration, and a skill nested under a category folder is not discovered.
 
 - `REQUIREMENT.md` beside `SKILL.md` holds the skill's gap statement. A body change tests against it, and a `## Must` line moves in the same change as the body line implementing it.
 - `references/` holds each artifact's shape reference, cited by a sibling as `${CLAUDE_SKILL_DIR}/../<owner>/references/<name>.md`, and a path resolving only here fails the Skill paths stage
-- `role-orchestrator/scripts/` holds `poll.ts` and `watch.ts`, the one executable code the plugin carries, run in a target by that machine's `bun` and `gh`
+- `role-orchestrator/scripts/` holds `poll.ts` and `watch.ts`, the plugin's only TypeScript, run in a target by that machine's `bun` and `gh`
 - A new skill needs `metadata.family` and a routing case in `src/claude/cases/`, per the Sync checklist in `.claude/skills/internal-claude/SKILL.md`
 - A body writing shared scratch at the main worktree root names its route per `claude/skills/session-worktree/references/main-root-writes.md`, since `Edit` and `Write` refuse it from a linked worktree
 
