@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.81.0](https://github.com/erclx/canon/compare/v5.80.0...v5.81.0) (2026-11-10)
+
+
+### Features
+
+* **capture:** add --touch so hover queries resolve as on a phone ([#2950](https://github.com/erclx/canon/issues/2950)) ([3449a7f](https://github.com/erclx/canon/commit/3449a7fab66cb028747c0e628256665ce16f79c6))
+* **design:** draw pick arms at every width and cite a reference each ([#2942](https://github.com/erclx/canon/issues/2942)) ([9d5b848](https://github.com/erclx/canon/commit/9d5b848a02ce6b0d66dab4381337997cb2b862d8))
+* **design:** set the tokens to the picked design system ([#2945](https://github.com/erclx/canon/issues/2945)) ([20ac16c](https://github.com/erclx/canon/commit/20ac16ca1c117f6e30a97ab915b37f240a07b641))
+* **design:** shoot references at the round's widths ([#2946](https://github.com/erclx/canon/issues/2946)) ([aee195e](https://github.com/erclx/canon/commit/aee195e461b97873490d7ab82dc95f6281a7d1f5))
+* **labels:** label a pull request that changes the README loops ([#2948](https://github.com/erclx/canon/issues/2948)) ([5637582](https://github.com/erclx/canon/commit/5637582fd9598e1eaf73cd1359518d10b6f4900a))
+* **plugin:** point an empty folder at the scaffold skill ([#2949](https://github.com/erclx/canon/issues/2949)) ([127a506](https://github.com/erclx/canon/commit/127a50676aa8fc6d1e7e21ecfa5520f96fc3c73a))
+* **sandbox:** drive the checkout canon in every sandbox run ([#2941](https://github.com/erclx/canon/issues/2941)) ([185a15d](https://github.com/erclx/canon/commit/185a15d8c41bedec039d392c1625684e8645e67b))
+* **sandbox:** fail an escape only on the sandboxed session's own writes ([#2952](https://github.com/erclx/canon/issues/2952)) ([0b20c50](https://github.com/erclx/canon/commit/0b20c500199bc92beadbd29ef67320a3a443a366))
+* **tooling:** verify cloudflare by syncing base ahead of an add-on ([#2947](https://github.com/erclx/canon/issues/2947)) ([78302e8](https://github.com/erclx/canon/commit/78302e8c9ced3766c4bd6bf50e9a51a9ee592597))
+* **web:** rebuild the landing page to the landing-v2 mocks ([#2953](https://github.com/erclx/canon/issues/2953)) ([b914d1e](https://github.com/erclx/canon/commit/b914d1e93d6ec533f4ec9d492af96a58d7054560))
+
 ## [5.80.0](https://github.com/erclx/canon/compare/v5.79.0...v5.80.0) (2026-11-08)
 
 
