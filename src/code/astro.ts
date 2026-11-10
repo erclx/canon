@@ -84,18 +84,43 @@ export function astroBindings(source: string): AstroBinding[] {
   return bindings
 }
 
-const INLINE_SCRIPT = /<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi
+const SCRIPT_OPEN = /<script\b([^>]*)>/gi
+const SCRIPT_CLOSE = /<\/script\s*>/i
+// A type naming anything but JavaScript, such as a JSON data block, holds no program.
+const SCRIPT_TYPE =
+  /\btype\s*=\s*["']\s*(?:module|(?:text|application)\/javascript)?\s*["']/i
+const ANY_TYPE = /\btype\s*=/i
 
-/** Every `<script is:inline>` body in the template. */
+/** The attribute names on a tag, with every value, quoted or braced, removed. */
+function attributeNames(attributes: string): string[] {
+  let bare = attributes.replace(/"[^"]*"|'[^']*'/g, '')
+  while (/\{[^{}]*\}/.test(bare)) bare = bare.replace(/\{[^{}]*\}/g, '')
+  return bare
+    .split(/[\s=/]+/)
+    .filter((name) => /^[A-Za-z_:@][\w:.@-]*$/.test(name))
+}
+
+/**
+ * Every script body Astro passes through unprocessed. Astro bundles a
+ * `<script>` carrying no attribute or `src` alone, and inlines any other,
+ * whether the attribute is `is:inline`, `type="module"`, or `define:vars`,
+ * which implies `is:inline`.
+ */
 export function astroInlineScripts(source: string): AstroInlineScript[] {
   const start = templateStart(source)
   const template = source.slice(start)
   const scripts: AstroInlineScript[] = []
-  for (const match of template.matchAll(INLINE_SCRIPT)) {
-    if (!/\bis:inline\b/.test(match[1] ?? '')) continue
+  for (const match of template.matchAll(SCRIPT_OPEN)) {
+    const attributes = match[1] ?? ''
+    if (attributes.trimEnd().endsWith('/')) continue
+    if (ANY_TYPE.test(attributes) && !SCRIPT_TYPE.test(attributes)) continue
+    if (attributeNames(attributes).every((name) => name === 'src')) continue
+
+    const from = match.index + match[0].length
+    const close = SCRIPT_CLOSE.exec(template.slice(from))
     scripts.push({
       line: lineAt(source, start + match.index),
-      body: match[2] ?? '',
+      body: template.slice(from, close ? from + close.index : undefined),
     })
   }
   return scripts

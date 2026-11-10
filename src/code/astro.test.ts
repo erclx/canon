@@ -78,6 +78,31 @@ describe('astroInlineScripts', () => {
 
     expect(astroInlineScripts(source)).toEqual([{ line: 2, body: '\ngo()\n' }])
   })
+
+  it('should read a script any attribute but src leaves unprocessed', () => {
+    const source = [
+      '<script type="module">a()</script>',
+      '<script define:vars={{ id }}>b()</script>',
+      '<script src="/c.js"></script>',
+    ].join('\n')
+
+    expect(astroInlineScripts(source)).toEqual([
+      { line: 1, body: 'a()' },
+      { line: 2, body: 'b()' },
+    ])
+  })
+
+  it('should pass a self-closing data block and read no further', () => {
+    const source = [
+      '<script type="application/json" set:html={JSON.stringify(x)} />',
+      '<script>',
+      'bundled()',
+      '</script>',
+      '<script type="application/ld+json">{"a": 1}</script>',
+    ].join('\n')
+
+    expect(astroInlineScripts(source)).toEqual([])
+  })
 })
 
 describe('embeddedBlocksInAstro', () => {
