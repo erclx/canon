@@ -10,7 +10,13 @@ export default scenario({
       // The page carries one unresolved treatment and nothing else worth deciding,
       // so a run has one subject to draft arms against. The callout ships flat, which
       // is arm 0 for any candidate set drawn off this page.
+      // The fixture also seeds the references page an earlier design-references run
+      // left on the board, so the reference step reuses it rather than reaching the
+      // network. Its frames are captioned with structure alone.
       ctx.fixtures('claude', 'design-pick', 'shared', '01-initial')
+      // Frameboard names its marker board.json, which the folder-name gate reads as a
+      // repeat, so the scenario writes it rather than the fixture tree.
+      ctx.write('.canon/board/board.json', '{"version": 1}\n')
 
       ctx.mkdir('.claude')
       ctx.git('add', '.')
@@ -26,6 +32,18 @@ export default scenario({
       )
       ctx.log.info(
         '         treatment as undecided between a border, a ground shift, and an edge rule',
+      )
+      ctx.log.info(
+        '         canon/DESIGN.md names 320, 768, 1024, and 1440 under ## Layout, so a round',
+      )
+      ctx.log.info(
+        '         draws each arm at 320, 768, and 1440 rather than at the 834 fallback',
+      )
+      ctx.log.info(
+        '         .canon/board/picks/references/ holds a references page an earlier run left,',
+      )
+      ctx.log.info(
+        '         so the reference step reuses it and each arm names the frame it draws on',
       )
       ctx.log.info(
         'Browser: machine-dependent, and the sandbox does not decide it. The run serves a',
@@ -55,7 +73,10 @@ export default scenario({
         '         the arm applied to the callout in index.html, the rest of that page untouched,',
       )
       ctx.log.info(
-        '         every arm captured under .canon/picks/, and the round pages the run added gone',
+        '         every arm captured at each round width under .canon/picks/, the references page',
+      )
+      ctx.log.info(
+        '         archived under .canon/picks/references/ and still on the board, and the round pages the run added gone',
       )
       ctx.log.info(
         '         from frameboard list. Not yet measured on Frameboard.',

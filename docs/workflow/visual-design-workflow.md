@@ -75,14 +75,24 @@ A close posts as `## UI review closed`. The reviewers lift the draft mark on the
 
 Most projects author design in the loop above and need nothing more. Start with `canon:design-pick`, which drafts candidates as frames on a [Frameboard](https://www.npmjs.com/package/frameboard) board and takes your pick, then record the pick with `canon:design-record`. `canon:design-identity` drafts a logo mark and social card the same way.
 
-- Run `canon:design-references` first when a round has nothing real to look at, with a site address or bare to capture the project's list and then a default one.
-- It fills a `references` page on the same board with section shots at each width, a filmed scroll, and a few hovers, each frame naming its source.
+### What a round draws
+
+A round draws every arm at a phone, a tablet, and a desktop width, read from the `## Layout` section of `canon/DESIGN.md` and falling back to 320, 834, and 1440.
+
+- A pick that scrolls sideways at any of those widths is held until it reflows.
+- Before drafting, a round reuses the board's `references` page or runs `canon:design-references` to fill one, with the sites you name or bare.
+- That page holds section shots at each width, a filmed scroll, and a few hovers, each frame naming its source. Each arm names the frame it draws on and takes structure alone.
+- The close archives the references page beside the picked round and leaves it on the board for the next round.
+
+### Where a round drafts
 
 A pick round drafts on `.canon/board/` unless the project names another board in `canon/config/design.toml`.
 
 - Set `board` when your design sync reads another Frameboard board, so the picked frame lands without a redraw.
 - Leave `project` unset to keep rounds in their own `picks` project on that board.
 - Set `references` to an array of site addresses to replace the default list `canon:design-references` captures when you name no site.
+
+### When a graphical tool fits
 
 A graphical tool earns its place when design is the product, a designer owns it, and it changes more often than code. Then the tool is the source of truth, and `canon/DESIGN.md` carries a top note naming the upstream project.
 

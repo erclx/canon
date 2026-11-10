@@ -1,6 +1,6 @@
 # The Frameboard board
 
-Read before the first `frameboard` verb a `design-pick` run sends. It carries where the board sits, how the verbs are reached, how the server starts, and how a selection resolves to an answer.
+Read before the first `frameboard` verb a `design-pick` run sends. It carries where the board sits, how the verbs are reached, how the server starts, how a round is laid out beside its references, and how a selection resolves to an answer.
 
 ## Reaching the board
 
@@ -32,9 +32,28 @@ frameboard serve --root <board> --no-open --tokens <stylesheet> --json
 - `reused: true` means a server was already up, so this run did not start it and its close leaves it running
 - Report a refusal's `error.code` and stop, since no file stands in for a board
 
+## Laying out a round
+
+A round draws each arm once per round width, so the page reads as a grid the operator scans both ways.
+
+- Give each arm one row in arm order, and each round width one column in ascending order
+- Pass `--width <px> --height <px> --x <px> --y <px>` on every add, setting each frame to its column's width
+- Start each column 80px past the right edge of the column before it
+- Start each row 80px below the tallest frame of the row above, so a long phone frame never overlaps the next arm
+- Name each frame `arm-<id>-<px>`, so a frame names its arm and its width on the board and in the archive
+
+## The references page
+
+A round draws on the `references` page in `<project>`, which the `design-references` skill writes and owns. Start the board first, then read `frameboard list` for it.
+
+- Reuse a `references` page that holds frames, since an earlier `design-references` run left it
+- Otherwise invoke `canon:design-references` with the sites the ask names, or bare when it names none
+- Draft on when that skill refuses or does not resolve, or the operator declines references, and say no reference backs the arms
+- Never put `references` on the run's list of pages, so the close archives it beside the picked round and leaves it standing for the next round
+
 ## Reading the selection
 
-Read `frameboard selection --root <board> --json` when the operator's answer points at the board, such as "the selected one". Resolve it against the record's `project` and `page` as well as its `frames`, since every round reuses the `arm-<id>` names.
+Read `frameboard selection --root <board> --json` when the operator's answer points at the board, such as "the selected one". Resolve it against the record's `project` and `page` as well as its `frames`, since every round reuses the `arm-<id>-<px>` names. Read a frame of any width as a pick of its arm.
 
 | Selection                                                         | Reading                                                  |
 | ----------------------------------------------------------------- | -------------------------------------------------------- |
