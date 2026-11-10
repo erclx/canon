@@ -2,7 +2,12 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { chromium } from 'playwright-core'
-import type { Browser, Locator, Page } from 'playwright-core'
+import type {
+  Browser,
+  BrowserContextOptions,
+  Locator,
+  Page,
+} from 'playwright-core'
 import {
   mergeBlocks,
   preparePage,
@@ -77,6 +82,30 @@ export async function captureSources(
   }
 }
 
+interface PageEmulation {
+  width?: number
+  colorScheme?: ColorScheme
+}
+
+/**
+ * A viewport rather than a wrapper, since a media query answers to the
+ * viewport. Absent leaves the option out so the browser default stands and
+ * every committed capture renders as before. The height is Playwright's own
+ * default, which keeps `vh` units where they were.
+ */
+function pageOptions({
+  width,
+  colorScheme,
+}: PageEmulation): BrowserContextOptions {
+  return {
+    deviceScaleFactor: DEVICE_SCALE_FACTOR,
+    ...(width === undefined
+      ? {}
+      : { viewport: { width, height: DEFAULT_VIEWPORT_HEIGHT } }),
+    ...(colorScheme === undefined ? {} : { colorScheme }),
+  }
+}
+
 /**
  * Resolves to a failed result rather than throwing, so one source that cannot
  * render does not drop the rest of the batch.
@@ -86,19 +115,7 @@ async function captureOne(
   source: CaptureSource,
   { selector, width, colorScheme }: CaptureOptions,
 ): Promise<CaptureResult> {
-  /**
-   * A viewport rather than a wrapper, since a media query answers to the
-   * viewport. Absent leaves the option out so the browser default stands and
-   * every committed capture renders as before. The height is Playwright's own
-   * default, which keeps `vh` units where they were.
-   */
-  const page = await browser.newPage({
-    deviceScaleFactor: DEVICE_SCALE_FACTOR,
-    ...(width === undefined
-      ? {}
-      : { viewport: { width, height: DEFAULT_VIEWPORT_HEIGHT } }),
-    ...(colorScheme === undefined ? {} : { colorScheme }),
-  })
+  const page = await browser.newPage(pageOptions({ width, colorScheme }))
   try {
     await page.goto(
       source.kind === 'url' ? source.url : pathToFileURL(source.htmlPath).href,
@@ -199,13 +216,7 @@ export async function captureSections(
     : { kind: 'file', htmlPath: sourcePath, pngPath: outDir }
   const browser = await chromium.launch()
   try {
-    const page = await browser.newPage({
-      deviceScaleFactor: DEVICE_SCALE_FACTOR,
-      ...(width === undefined
-        ? {}
-        : { viewport: { width, height: DEFAULT_VIEWPORT_HEIGHT } }),
-      ...(colorScheme === undefined ? {} : { colorScheme }),
-    })
+    const page = await browser.newPage(pageOptions({ width, colorScheme }))
     await page.goto(
       pageSource.kind === 'url'
         ? pageSource.url
