@@ -246,7 +246,7 @@ test.describe('the social card', () => {
     page,
   }) => {
     await page.goto('/')
-    const expected = new URL(card, 'https://canon.erclx.dev').href
+    const expected = new URL(card, 'https://canon.erclx.com').href
 
     await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
       'content',

@@ -26,7 +26,7 @@ export const site = {
    * the address `.github/workflows/deploy-site.yml` publishes to rather than
    * anything `README.md` states, so it carries no citation.
    */
-  origin: 'https://canon.erclx.dev',
+  origin: 'https://canon.erclx.com',
   // README.md: "runs agent work from plan to merge"
   title: 'canon runs agent work from plan to merge',
   // README.md: "A Claude Code plugin and CLI that runs agent work from plan to merge."
