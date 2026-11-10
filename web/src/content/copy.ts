@@ -108,8 +108,6 @@ export const craft = {
   head: 'Practice skills with cited sources',
   // README.md: "Each skill loads when its kind of work starts, and every rule names where it came from."
   lede: 'Each skill loads when its kind of work starts, and every rule names where it came from.',
-  // README.md: canon-allow-readme-paraphrase: the README's ledger sentence, opened on Every rather than Each. "has its own source row in a ledger, and the skill audit fails when a skill's rules and its rows disagree in count."
-  note: "Every rule has its own source row in a ledger, and the skill audit fails when a skill's rules and its rows disagree in count.",
   // README.md: canon-allow-readme-paraphrase: the pane labels beside one skill's rule and source, which the README's table folds into its columns.
   ruleIn: 'The rule, in',
   source: 'The source it cites',

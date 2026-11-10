@@ -167,6 +167,24 @@ test.describe('the fixed bar', () => {
   })
 })
 
+test.describe('the craft section', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+
+  test('plays the last craft scene with the window in view', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const last = page.locator('#craft .pick').last()
+
+    await last.click()
+
+    await expect(page.locator('#craft .win')).toBeInViewport({ ratio: 1 })
+    await expect(page.locator('#craft .log')).toContainText(
+      'canon:systematic-debugging',
+    )
+  })
+})
+
 test.describe('the records stack', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
