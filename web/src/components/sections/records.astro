@@ -10,8 +10,73 @@ import { records } from '../../content/records'
  * pin and the pickers swap sheets in place.
  *
  * Each sheet is an editor or a browser window with a rendered and a source
- * view, and its checkboxes and file tabs work.
+ * view, and its checkboxes and file tabs work. An editor sheet carries an
+ * explorer, drawn from its breadcrumb, that lights the file its tabs have open.
  */
+
+interface Entry {
+  name: string
+  depth: number
+  /** The tab index of a file entry, absent on a folder. */
+  file?: number
+  on?: boolean
+}
+
+/** The project's top folders, and the record folders inside `.canon/`. */
+const ROOTS = ['.canon', 'canon', 'src', 'docs']
+const RECORD_DIRS = [
+  'compact',
+  'groundwork',
+  'intake',
+  'plans',
+  'review',
+  'tasks',
+]
+
+/**
+ * An editor sheet's explorer: the top folders, the one its breadcrumb runs
+ * through opened down to the files its tabs hold, the open tab's file lit.
+ * Every tab of a sheet sits in one folder, so the first breadcrumb stands for
+ * them all.
+ */
+function explorerOf(html: string): Entry[] {
+  const crumb = /<div class="crumb">([\s\S]*?)<\/div>/.exec(html)?.[1] ?? ''
+  const dirs = crumb
+    .replace(/<[^>]+>/g, '')
+    .split('›')
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .slice(0, -1)
+  const tabs = [
+    ...html.matchAll(/<button[^>]*class="ftab"[\s\S]*?<\/button\s*>/g),
+  ]
+  const files = tabs.map(
+    (tab) => /<span>([^<]+)<\/span>/.exec(tab[0])?.[1] ?? '',
+  )
+  const open = Math.max(
+    0,
+    tabs.findIndex((tab) => tab[0].includes('aria-selected="true"')),
+  )
+  const [root, folder] = dirs
+  const tree: Entry[] = []
+  for (const top of ROOTS) {
+    tree.push({ name: top, depth: 0 })
+    if (top !== root || !folder) continue
+    const siblings =
+      top === '.canon' && RECORD_DIRS.includes(folder) ? RECORD_DIRS : [folder]
+    for (const sibling of siblings) {
+      tree.push({ name: `${sibling}/`, depth: 1 })
+      if (sibling !== folder) continue
+      dirs
+        .slice(2)
+        .forEach((dir, i) => tree.push({ name: `${dir}/`, depth: i + 2 }))
+      files.forEach((name, file) =>
+        tree.push({ name, depth: dirs.length, file, on: file === open }),
+      )
+    }
+  }
+  return tree
+}
 ---
 
 <section class="sec" id="records">
@@ -77,7 +142,27 @@ import { records } from '../../content/records'
                 data-name={sheet.name}
                 data-by={sheet.by}
               >
+                {sheet.kind === 'ed' && (
+                  <div class="wbar" aria-hidden="true">
+                    <i />
+                    <i />
+                    <i />
+                  </div>
+                )}
                 <div class="in" set:html={sheet.html} />
+                {sheet.kind === 'ed' && (
+                  <aside class="explorer" aria-hidden="true">
+                    {explorerOf(sheet.html).map((entry) => (
+                      <div
+                        class:list={{ on: entry.on, top: entry.depth === 0 }}
+                        data-f={entry.file}
+                        style={`--d:${entry.depth}`}
+                      >
+                        {entry.name}
+                      </div>
+                    ))}
+                  </aside>
+                )}
               </article>
             ))
           }
@@ -160,7 +245,94 @@ import { records } from '../../content/records'
     display: flex;
     flex-direction: column;
     height: 100%;
+  }
+
+  #records .sheet > :is(.in, .wbar, .explorer) {
     transition: opacity var(--duration-fade) var(--ease-standard);
+  }
+
+  /* An editor sheet's window bar, and the explorer down its left edge. */
+  #records .sheet.ed .in {
+    padding-top: 34px;
+  }
+
+  #records .wbar {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px;
+    background: var(--winbar);
+    border-bottom: 1px solid var(--line);
+  }
+
+  #records .wbar i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--line);
+  }
+
+  #records .explorer {
+    display: none;
+    position: absolute;
+    top: 34px;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    width: 188px;
+    padding: 12px 0;
+    overflow: hidden;
+    background: var(--winbar);
+    border-right: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: var(--size-view-small);
+    line-height: 1.9;
+    color: var(--muted);
+    user-select: none;
+  }
+
+  #records .explorer div {
+    padding: 0 14px 0 calc(14px + var(--d) * 16px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  #records .explorer .top {
+    color: var(--ink);
+  }
+
+  #records .explorer .on {
+    background: var(--tray);
+    color: var(--ink);
+  }
+
+  /* Beside the explorer the view switch leaves the tab bar for the breadcrumb row, so the tabs keep their width. */
+  @media (min-width: 641px) {
+    #records .sheet.ed .in {
+      margin-left: 188px;
+    }
+
+    #records .sheet.ed .explorer {
+      display: block;
+    }
+
+    #records .sheet.ed .tb > .vt {
+      position: absolute;
+      top: 77px;
+      right: 10px;
+      z-index: 3;
+      margin: 0;
+      transform: scale(0.9);
+    }
+
+    #records .sheet.ed .crumb {
+      padding-right: 84px;
+    }
   }
 
   #records .foot {
@@ -645,21 +817,73 @@ import { records } from '../../content/records'
     margin: 6px 0 10px;
   }
 
+  /*
+   * A drawn shot of the toolbar under review, its Save button focused. Each
+   * shot keeps the theme it was taken in, whatever theme the page is in, and a
+   * cut shot clips the bar at Save's edge so its ring shows broken.
+   */
   #records .thumb {
+    --t-ground: var(--color-light-band);
+    --t-bar: var(--color-light-window);
+    --t-line: var(--color-light-border);
+    --t-key: var(--color-light-surface);
+    --t-text: var(--color-light-text-body);
+    --t-ring: var(--color-light-accent);
     display: flex;
     align-items: center;
     justify-content: center;
     height: 90px;
     margin: 8px 0;
+    overflow: hidden;
     border-radius: var(--radius-action);
-    background: var(--band);
-    font-size: var(--size-view-small);
-    color: var(--muted);
+    background: var(--t-ground);
+  }
+
+  /* The dark tokens turn light under the light theme and no theme-fixed set exists, so a dark shot carries their dark values. */
+  #records .thumb.dk {
+    --t-ground: #282826;
+    --t-bar: #1e1e1e;
+    --t-line: #2e2e2c;
+    --t-key: #252523;
+    --t-text: #cfcdc8;
+    --t-ring: #ff6b42;
   }
 
   #records .pair .thumb {
     height: 80px;
     margin: 0;
+  }
+
+  #records .tt .bar {
+    display: flex;
+    gap: 6px;
+    padding: 7px;
+    border-radius: 8px;
+    background: var(--t-bar);
+    box-shadow: 0 0 0 1px var(--t-line);
+  }
+
+  #records .tt.cut .bar {
+    overflow: hidden;
+    padding-right: 0;
+  }
+
+  #records .tt .b {
+    display: flex;
+    flex: none;
+    align-items: center;
+    height: 20px;
+    padding: 0 7px;
+    border-radius: 5px;
+    background: var(--t-key);
+    box-shadow: 0 0 0 1px var(--t-line);
+    font: 500 10px/1 var(--sans);
+    color: var(--t-text);
+  }
+
+  #records .tt .b.f {
+    outline: 2px solid var(--t-ring);
+    outline-offset: 2px;
   }
 
   #records .sev {
@@ -925,6 +1149,13 @@ import { records } from '../../content/records'
     cursor: default;
   }
 
+  /* Twelve pills need about 1,040 pixels, past the sheet's 900, so they take the tray's width. */
+  @media (min-width: 901px) {
+    #records .tabs {
+      max-width: none;
+    }
+  }
+
   @media (max-width: 900px) {
     #records .tray {
       margin-top: 40px;
@@ -987,6 +1218,12 @@ import { records } from '../../content/records'
     #records .lo-m,
     #records .prt {
       display: none;
+    }
+
+    /* A shot in the phone's half-width pair draws the whole bar smaller, so only a cut shot reads as cut. */
+    #records .pair .tt .bar {
+      flex: none;
+      transform: scale(0.55);
     }
 
     #records .gh {
@@ -1076,6 +1313,13 @@ import { records } from '../../content/records'
       }
     }
 
+    /** What a sheet shows only at the front: its content, and an editor's bar and explorer. */
+    const faces = (sheet: HTMLElement) => [
+      ...sheet.querySelectorAll<HTMLElement>(
+        ':scope > :is(.in, .wbar, .explorer)',
+      ),
+    ]
+
     function place(sheet: HTMLElement, depth: number, lift = 0) {
       const o = Math.min(depth, 2)
       sheet.style.top = `${o * 12 + lift}px`
@@ -1094,11 +1338,10 @@ import { records } from '../../content/records'
         place(sheet, depth)
         sheet.style.opacity = depth < 3 ? '1' : '0'
         sheet.style.zIndex = String(N - depth)
-        const inner = sheet.querySelector<HTMLElement>('.in')
-        if (inner) {
-          inner.style.transition = ''
-          inner.style.opacity = depth ? '0' : '1'
-        }
+        faces(sheet).forEach((face) => {
+          face.style.transition = ''
+          face.style.opacity = depth ? '0' : '1'
+        })
         sheet.setAttribute('aria-hidden', String(depth !== 0))
         sheet.inert = depth !== 0
       })
@@ -1136,11 +1379,10 @@ import { records } from '../../content/records'
         place(sheet, depth, lift)
         sheet.style.opacity = String(opacity)
         sheet.style.zIndex = String(z)
-        const inner = sheet.querySelector<HTMLElement>('.in')
-        if (inner) {
-          inner.style.transition = 'none'
-          inner.style.opacity = String(content)
-        }
+        faces(sheet).forEach((face) => {
+          face.style.transition = 'none'
+          face.style.opacity = String(content)
+        })
         sheet.setAttribute('aria-hidden', String(j !== r))
         sheet.inert = j !== r
       })
@@ -1281,12 +1523,18 @@ import { records } from '../../content/records'
     section.querySelectorAll<HTMLElement>('.sheet.ed').forEach((sheet) => {
       const fileTabs = [...sheet.querySelectorAll<HTMLElement>('.ftab')]
       const files = [...sheet.querySelectorAll<HTMLElement>('.file')]
+      const entries = [
+        ...sheet.querySelectorAll<HTMLElement>('.explorer [data-f]'),
+      ]
       const open = (k: number) => {
         fileTabs.forEach((tab, j) => {
           tab.setAttribute('aria-selected', String(j === k))
           tab.tabIndex = j === k ? 0 : -1
         })
         files.forEach((file, j) => (file.hidden = j !== k))
+        entries.forEach((entry) =>
+          entry.classList.toggle('on', Number(entry.dataset.f) === k),
+        )
       }
       fileTabs.forEach((tab, k) => {
         tab.addEventListener('click', () => open(k))

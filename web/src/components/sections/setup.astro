@@ -2,10 +2,10 @@
 import { setup, setupSession } from '../../content/copy'
 
 /**
- * A project's life with canon: four stages along one rule, the three skills
- * ringed in the accent, and the setup session on the tray beside what lands.
- * The session plays once when it scrolls into view, each stage's ring filling
- * as its command types, finished stages kept tinted, and rests whole on the
+ * A project's life with canon: four stages down one rule beside the setup
+ * session, which they center on above 900. The session plays once when it
+ * scrolls into view, the active stage's dot filling in the accent as its
+ * command types and finished stages kept a quiet fill, and rests whole on the
  * last stage. A click on a stage replays from it and rests there, and the
  * session holds one height so the page never jumps.
  */
@@ -17,43 +17,32 @@ const code = (text: string) => text.split('`')
     <h2>{setup.head}</h2>
     <p>{setup.lede}</p>
   </div>
-  <div class="stages">
-    {
-      setup.stages.map((stage, index) => (
-        <div class={`st${stage.skill ? ' skill' : ''}`} data-i={index}>
-          <button type="button" class="go" aria-label={setup.play(stage.name)}>
-            <h3>{stage.name}</h3>
-          </button>
-          <p>
-            {code(stage.line).map((part, k) =>
-              k % 2 ? <code>{part}</code> : part,
-            )}
-          </p>
-        </div>
-      ))
-    }
-  </div>
-  <div class="pair">
-    <div class="tray">
-      <div class="tx win" aria-hidden="true">
-        <p class="cap">{setup.session}</p>
-        <div class="log"></div>
-      </div>
-    </div>
-    <div class="lands">
-      <p class="cap">{setup.lands.cap}</p>
+  <div class="split">
+    <div class="stages">
       {
-        setup.lands.items.map((item) => (
-          <div>
-            <h3>{item.name}</h3>
+        setup.stages.map((stage, index) => (
+          <div class={`st${stage.skill ? ' skill' : ''}`} data-i={index}>
+            <button
+              type="button"
+              class="go"
+              aria-label={setup.play(stage.name)}
+            >
+              <h3>{stage.name}</h3>
+            </button>
             <p>
-              {code(item.line).map((part, k) =>
+              {code(stage.line).map((part, k) =>
                 k % 2 ? <code>{part}</code> : part,
               )}
             </p>
           </div>
         ))
       }
+    </div>
+    <div class="tray">
+      <div class="tx win" aria-hidden="true">
+        <p class="cap">{setup.session}</p>
+        <div class="log"></div>
+      </div>
     </div>
   </div>
   <script
@@ -64,22 +53,29 @@ const code = (text: string) => text.split('`')
 </section>
 
 <style is:global>
+  #setup .split {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: 56px;
+    margin-top: 52px;
+    align-items: center;
+  }
+
   #setup .stages {
     position: relative;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 32px;
-    margin-top: 56px;
-    padding-top: 30px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 26px;
+    padding-left: 32px;
   }
 
   #setup .stages::before {
     content: '';
     position: absolute;
-    left: 0;
-    right: 0;
-    top: 6px;
-    height: 2px;
+    left: 6px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
     border-radius: var(--radius-marker);
     background: var(--line);
   }
@@ -91,8 +87,8 @@ const code = (text: string) => text.split('`')
   #setup .st::before {
     content: '';
     position: absolute;
-    top: -30px;
-    left: 0;
+    top: 3px;
+    left: -32px;
     width: 14px;
     height: 14px;
     border-radius: 50%;
@@ -103,26 +99,14 @@ const code = (text: string) => text.split('`')
       transform var(--duration-move) var(--ease-standard);
   }
 
-  #setup .st.skill::before {
-    box-shadow: inset 0 0 0 3px var(--accent);
-  }
-
   #setup .st.on::before {
     background: var(--accent);
     box-shadow: none;
     transform: scale(1.15);
   }
 
-  #setup .st:first-child.on::before {
-    background: var(--muted);
-  }
-
   #setup .st.done::before {
-    background: color-mix(in srgb, var(--accent) 30%, var(--ground));
-  }
-
-  #setup .st:first-child.done::before {
-    background: color-mix(in srgb, var(--muted) 35%, var(--ground));
+    background: var(--line);
   }
 
   #setup .st .go {
@@ -134,7 +118,7 @@ const code = (text: string) => text.split('`')
   #setup .st .go::after {
     content: '';
     position: absolute;
-    inset: -34px -14px -10px;
+    inset: -8px -12px -8px -40px;
     border-radius: var(--radius-panel);
   }
 
@@ -162,20 +146,11 @@ const code = (text: string) => text.split('`')
     }
   }
 
-  #setup .st p,
-  #setup .lands p {
+  #setup .st p {
     margin: 8px 0 0;
     font-size: var(--size-body);
     line-height: var(--type-body-lh);
     text-wrap: pretty;
-  }
-
-  #setup .pair {
-    display: grid;
-    grid-template-columns: 7fr 5fr;
-    gap: 48px;
-    margin-top: 52px;
-    align-items: start;
   }
 
   #setup .tx {
@@ -230,33 +205,17 @@ const code = (text: string) => text.split('`')
     vertical-align: -3px;
   }
 
-  #setup .lands {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding-top: 4px;
-  }
-
-  #setup .lands .cap {
-    margin: 0 0 -6px;
-  }
-
-  #setup .lands h3 {
-    margin: 0;
-    font-size: var(--size-body);
-    font-weight: 600;
-    color: var(--ink);
-  }
-
-  #setup .lands p {
-    margin-top: 6px;
-  }
-
   @media (max-width: 900px) {
+    #setup .split {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 52px;
+      margin-top: 56px;
+    }
+
     #setup .stages {
       grid-template-columns: 1fr 1fr;
       gap: 32px 36px;
-      padding-top: 0;
+      padding-left: 0;
     }
 
     #setup .stages::before {
@@ -269,15 +228,11 @@ const code = (text: string) => text.split('`')
 
     #setup .st::before {
       top: 4px;
+      left: 0;
     }
 
     #setup .st .go::after {
       inset: -8px -10px -8px -34px;
-    }
-
-    #setup .pair {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 32px;
     }
   }
 
@@ -285,7 +240,6 @@ const code = (text: string) => text.split('`')
     #setup .stages {
       grid-template-columns: minmax(0, 1fr);
       gap: 0;
-      margin-top: 40px;
       padding-left: 6px;
     }
 
@@ -296,6 +250,10 @@ const code = (text: string) => text.split('`')
 
     #setup .st:last-child {
       border-left-color: transparent;
+    }
+
+    #setup .split {
+      margin-top: 40px;
     }
 
     #setup .st::before {

@@ -32,9 +32,9 @@ Then open a project in Claude Code and run `/canon:target-setup`, which brings i
 
 canon expects someone who already knows Claude Code well. It runs on Linux and macOS, and the CLI needs Bun.
 
-## Who works
+## Five roles, each in its own session
 
-You talk to the orchestrator. It starts every other role in its own session and hears back from each.
+You talk to the orchestrator, which starts the others and hears back from each.
 
 - The orchestrator dispatches the rows on the task board
 - A planner reads the code and writes one plan you approve
@@ -42,17 +42,17 @@ You talk to the orchestrator. It starts every other role in its own session and 
 - A code reviewer reads the diff from a fresh session
 - A UI reviewer drives the visual checklist in the running app
 
-## What each step leaves behind
+## The record each step writes
 
-Every step writes a record in a fixed shape, and every change carries what it looks like. Records live under `.canon/` in the main checkout.
+Each record has a fixed shape, so the next session knows where to read. Records live under `.canon/` in the main checkout.
 
 - Before a build: intake, groundwork, the plan, its task, and the board
 - Around a pull request: the code review, the UI review, and the screenshot evidence
 - Across sessions: the drive log, the context entries, and the handoff a compaction would lose
 
-## What good work looks like
+## Practice skills with cited sources
 
-The practice an agent follows lives in skills, and every rule in them traces to a published source. A skill loads at the moment its practice applies.
+Each skill loads when its kind of work starts, and every rule names where it came from.
 
 | Skill                  | Loads                           | Cites                                     |
 | ---------------------- | ------------------------------- | ----------------------------------------- |
@@ -64,20 +64,20 @@ The practice an agent follows lives in skills, and every rule in them traces to 
 
 Each rule has its own source row in a ledger, and the skill audit fails when a skill's rules and its rows disagree in count.
 
-## What holds it
+## Checks that catch a skipped step
 
-A skill says what good looks like. These four parts catch the agent when it skips one.
+A skill says what good looks like. These four parts hold the agent to it.
 
 - Rules by path load when the agent opens a matching file, and each names the skill that owns that kind of file
 - Hooks read each action before or after it runs, refusing some and reporting others back into the same turn
 - The gate runs every stage before a pull request opens, and a stage that cannot read its input fails rather than passing
 - A deny rule keeps the agent from merging, since a hook fails open on a timeout and a permission rule does not
 
-## Where it happens
+## One worktree for each change
 
 Changes run side by side. Each worker builds in its own worktree on its own branch, and every session reads and writes the one `.canon/` record in the main checkout, so no worktree keeps a copy of its own.
 
-## How a repo comes onto canon
+## Setting up a project
 
 The project starts with its stack's own tool, such as `bun init` or `npm create vite`, or with `/canon:target-scaffold` in an empty folder, and canon layers on top.
 

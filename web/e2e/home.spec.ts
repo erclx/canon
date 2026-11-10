@@ -167,6 +167,24 @@ test.describe('the fixed bar', () => {
   })
 })
 
+test.describe('the craft section', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+
+  test('plays the last craft scene with the window in view', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const last = page.locator('#craft .pick').last()
+
+    await last.click()
+
+    await expect(page.locator('#craft .win')).toBeInViewport({ ratio: 1 })
+    await expect(page.locator('#craft .log')).toContainText(
+      'canon:systematic-debugging',
+    )
+  })
+})
+
 test.describe('the records stack', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
@@ -221,6 +239,22 @@ test.describe('the records stack', () => {
     await expect(
       page.locator('#records .tabs .pick[aria-pressed="true"]'),
     ).toHaveAttribute('data-i', '11', SETTLE)
+  })
+
+  test('the explorer lights the file the front record has open', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const front = page.locator('#records .sheet[data-i="0"]')
+    const lit = front.locator('.explorer .on')
+    // Intake opens on its second file, so the first tab is the one to switch to.
+    await expect(lit).toHaveAttribute('data-f', '1')
+
+    await front.locator('.ftab[data-f="0"]').click()
+
+    await expect(lit).toHaveCount(1)
+    await expect(lit).toHaveAttribute('data-f', '0')
+    await expect(lit).toBeVisible()
   })
 
   test('takes no pinned scroll under reduced motion', async ({ page }) => {

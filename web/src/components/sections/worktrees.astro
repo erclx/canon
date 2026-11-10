@@ -1,14 +1,12 @@
 ---
-import { worktreeBranches, worktrees } from '../../content/copy'
+import { worktreeCards, worktrees } from '../../content/copy'
 
 /**
- * A branch graph over time under the shared `.canon/` band: main along the
- * bottom, three branches forking at different moments and running up to a
- * shared now line, the oldest on the top lane so no line crosses, and an
- * earlier branch drawn merged back. It draws itself in once on view, at its
- * real pixel size, and on a phone the labels list under a full-width graph.
+ * Three worktrees side by side, each a card naming its folder, its branch, and
+ * what its session is doing, each joined down into the one shared `.canon/`
+ * band they all read and write. On a phone the cards stack over the band with
+ * no joins.
  */
-const { lanes } = worktreeBranches
 ---
 
 <section class="sec" id="worktrees">
@@ -18,6 +16,20 @@ const { lanes } = worktreeBranches
   </div>
   <div class="tray">
     <div class="card">
+      <ul class="wts" role="list">
+        {
+          worktreeCards.map((card) => (
+            <li class="wt">
+              <p class="p">{card.path}</p>
+              <p class="b">
+                <span class="dot" aria-hidden="true" />
+                {card.branch}
+              </p>
+              <p class="l">{card.line}</p>
+            </li>
+          ))
+        }
+      </ul>
       <div class="band">
         <span class="ic"
           ><svg
@@ -36,42 +48,17 @@ const { lanes } = worktreeBranches
         <span class="dirs">{worktrees.band.dirs}</span>
         <span class="sh">{worktrees.band.shared}</span>
       </div>
-      <div class="tl play">
-        <div class="plot">
-          <svg aria-hidden="true"></svg>
-          <span class="nowlab">{worktrees.now}</span>
-          <span class="mlab">{worktrees.main}</span>
-          <span class="merged">{worktreeBranches.merged.label}</span>
-        </div>
-        <div class="labs">
-          {
-            lanes.map((lane, index) => (
-              <div class="lab" style={`--i:${index}`}>
-                <p class="b">{lane.branch}</p>
-                <p class="s">{lane.session}</p>
-                <p class="l">{lane.line}</p>
-              </div>
-            ))
-          }
-        </div>
-      </div>
     </div>
-    <p class="under">{worktrees.under}</p>
   </div>
-  <script
-    type="application/json"
-    class="worktrees-data"
-    set:html={JSON.stringify(worktreeBranches)}
-  />
 </section>
 
 <style is:global>
   #worktrees {
-    --trunk: var(--line);
+    --join: var(--line);
   }
 
   [data-theme='dark'] #worktrees {
-    --trunk: color-mix(in srgb, var(--ink) 15%, var(--win));
+    --join: color-mix(in srgb, var(--ink) 15%, var(--win));
   }
 
   #worktrees .tray {
@@ -85,10 +72,75 @@ const { lanes } = worktreeBranches
     box-shadow: var(--shadow-window);
   }
 
+  #worktrees .wts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  #worktrees .wt {
+    position: relative;
+    min-width: 0;
+    padding: 14px 16px;
+    border-radius: var(--radius-panel);
+    background: var(--win);
+    box-shadow: 0 0 0 1px var(--line);
+  }
+
+  /* The join from each worktree down into the shared band, spanning the gap between them. */
+  #worktrees .wt::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -25px;
+    height: 24px;
+    border-left: 2px dashed var(--join);
+  }
+
+  #worktrees .wt p {
+    margin: 0;
+  }
+
+  #worktrees .wt .p {
+    font-family: var(--mono);
+    font-size: var(--size-view-small);
+    color: var(--muted);
+    overflow-wrap: anywhere;
+  }
+
+  #worktrees .wt .b {
+    margin-top: 6px;
+    font-size: var(--size-body);
+    font-weight: 600;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+  }
+
+  #worktrees .wt .l {
+    margin-top: 4px;
+    font-size: var(--size-small);
+    line-height: 1.4;
+    color: var(--body);
+  }
+
+  #worktrees .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    vertical-align: 1px;
+  }
+
   #worktrees .band {
     display: flex;
     align-items: center;
     gap: 12px;
+    margin-top: 24px;
     padding: 12px 16px;
     border-radius: var(--radius-panel);
     background: var(--band);
@@ -131,211 +183,9 @@ const { lanes } = worktreeBranches
     margin-left: auto;
   }
 
-  #worktrees .under {
-    max-width: 70ch;
-    margin: 20px 0 0;
-    font-size: var(--size-body);
-    line-height: var(--type-body-lh);
-    color: var(--body);
-    text-wrap: pretty;
-  }
-
-  #worktrees .tl {
-    --lh: 76px;
-    --top: 30px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 300px;
-    gap: 0 20px;
-    margin-top: 20px;
-    user-select: none;
-  }
-
-  #worktrees .plot {
-    position: relative;
-    height: calc(var(--top) + var(--lh) * 3 + 54px);
-  }
-
-  #worktrees .plot svg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-  }
-
-  #worktrees .labs {
-    position: relative;
-  }
-
-  #worktrees .lab {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: calc(var(--top) + var(--lh) * var(--i) - 10px);
-  }
-
-  #worktrees .lab p {
-    margin: 0;
-  }
-
-  #worktrees .lab .b {
-    font-size: var(--size-body);
-    font-weight: 600;
-    color: var(--ink);
-  }
-
-  #worktrees .lab .s {
-    margin-top: 1px;
-    font-family: var(--mono);
-    font-size: var(--size-view-small);
-    color: var(--muted);
-  }
-
-  #worktrees .lab .l {
-    margin-top: 3px;
-    font-size: var(--size-small);
-    line-height: 1.4;
-    color: var(--body);
-  }
-
-  #worktrees :is(.nowlab, .mlab, .merged) {
-    position: absolute;
-    font-family: var(--mono);
-    font-size: var(--size-view-small);
-    color: var(--muted);
-  }
-
-  #worktrees .nowlab {
-    top: 0;
-    transform: translateX(-50%);
-  }
-
-  #worktrees .main {
-    fill: none;
-    stroke: var(--trunk);
-    stroke-width: 5;
-    stroke-linecap: round;
-  }
-
-  #worktrees .br {
-    fill: none;
-    stroke: var(--accent);
-    stroke-width: 4.5;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  #worktrees .br.old {
-    stroke: var(--muted);
-    opacity: 0.55;
-  }
-
-  #worktrees .now {
-    stroke: var(--muted);
-    stroke-width: 1.2;
-    stroke-dasharray: 3 5;
-    opacity: 0.6;
-  }
-
-  #worktrees .nd {
-    fill: var(--win);
-    stroke: var(--accent);
-    stroke-width: 3.2;
-  }
-
-  #worktrees .nd.old {
-    stroke: var(--muted);
-    opacity: 0.7;
-  }
-
-  #worktrees .nd.fork {
-    stroke: var(--muted);
-  }
-
-  #worktrees .nd.head {
-    fill: var(--accent);
-    stroke: var(--win);
-    stroke-width: 3;
-  }
-
-  /* Drawn in once on view: main, then each branch, its commits, its head, then the labels. */
-  #worktrees .br,
-  #worktrees .nd {
-    --t: 0s;
-  }
-
-  #worktrees .play .br,
-  #worktrees .play .main {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-  }
-
-  #worktrees .play :is(.nd, .lab, .nowlab, .now) {
-    opacity: 0;
-  }
-
-  #worktrees .go .main {
-    stroke-dashoffset: 0;
-    transition: stroke-dashoffset var(--duration-draw) var(--ease-draw);
-  }
-
-  #worktrees .go .br {
-    stroke-dashoffset: 0;
-    transition: stroke-dashoffset var(--duration-draw) var(--ease-draw) var(--t);
-  }
-
-  #worktrees .go .nd {
-    opacity: 1;
-    transition: opacity var(--duration-fade) var(--ease-standard) var(--t);
-  }
-
-  #worktrees .go .nd.old {
-    opacity: 0.7;
-  }
-
-  #worktrees .go .lab {
-    opacity: 1;
-    transition: opacity var(--duration-fade) var(--ease-standard)
-      calc(1.4s + var(--i) * 0.15s);
-  }
-
-  #worktrees .go .now {
-    opacity: 0.6;
-    transition: opacity var(--duration-fade) var(--ease-standard) 1.6s;
-  }
-
-  #worktrees .go .nowlab {
-    opacity: 1;
-    transition: opacity var(--duration-fade) var(--ease-standard) 1.6s;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    #worktrees .play .br,
-    #worktrees .play .main {
-      stroke-dashoffset: 0;
-    }
-
-    #worktrees .play :is(.nd, .lab, .nowlab) {
-      opacity: 1;
-    }
-
-    #worktrees .play .now {
-      opacity: 0.6;
-    }
-
-    #worktrees .play .nd.old {
-      opacity: 0.7;
-    }
-  }
-
   @media (max-width: 900px) {
     #worktrees .tray {
       margin-top: 40px;
-    }
-
-    #worktrees .tl {
-      --lh: 84px;
-      grid-template-columns: minmax(0, 1fr) 220px;
     }
 
     #worktrees .band {
@@ -357,40 +207,17 @@ const { lanes } = worktreeBranches
       margin-top: 32px;
     }
 
-    #worktrees .tl {
-      --lh: 44px;
-      --top: 26px;
+    #worktrees .wts {
       grid-template-columns: minmax(0, 1fr);
+      gap: 10px;
     }
 
-    #worktrees .labs {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      margin-top: 22px;
-    }
-
-    #worktrees .lab {
-      position: static;
-    }
-
-    #worktrees .lab .b::before {
-      content: '';
-      display: inline-block;
-      width: 9px;
-      height: 9px;
-      margin-right: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      vertical-align: 1px;
-    }
-
-    #worktrees .lab :is(.s, .l) {
-      padding-left: 17px;
-    }
-
-    #worktrees .merged {
+    #worktrees .wt::after {
       display: none;
+    }
+
+    #worktrees .band {
+      margin-top: 16px;
     }
 
     #worktrees .card {
@@ -402,100 +229,3 @@ const { lanes } = worktreeBranches
     }
   }
 </style>
-
-<script>
-  interface Lane {
-    fork: number
-    commits: number[]
-  }
-  interface Graph {
-    now: number
-    lanes: Lane[]
-    merged: { fork: number; merge: number; commits: number[] }
-  }
-
-  const section = document.getElementById('worktrees')
-  const source = section?.querySelector('.worktrees-data')
-  const timeline = section?.querySelector<HTMLElement>('.tl')
-  const plot = timeline?.querySelector<HTMLElement>('.plot')
-  const svg = plot?.querySelector('svg')
-
-  if (source?.textContent && timeline && plot && svg) {
-    const graph = JSON.parse(source.textContent) as Graph
-    const nowLabel = plot.querySelector<HTMLElement>('.nowlab')
-    const mainLabel = plot.querySelector<HTMLElement>('.mlab')
-    const mergedLabel = plot.querySelector<HTMLElement>('.merged')
-
-    /** Redrawn at the plot's real pixel size, so strokes and dots never scale. */
-    function draw() {
-      const W = plot!.clientWidth
-      const H = plot!.clientHeight
-      const styles = getComputedStyle(timeline!)
-      const lh = parseFloat(styles.getPropertyValue('--lh'))
-      const top = parseFloat(styles.getPropertyValue('--top'))
-      const my = top + lh * 3
-      const X = (f: number) => 8 + f * (W - 16)
-      const ly = (i: number) => top + lh * i
-      svg!.setAttribute('viewBox', `0 0 ${W} ${H}`)
-      const curve = (x0: number, y0: number, x1: number, y1: number) => {
-        const k = Math.min(46, (x1 - x0) * 0.5)
-        return `C ${x0 + k} ${y0}, ${x0 + k * 0.3} ${y1}, ${x0 + k * 1.2} ${y1}`
-      }
-      let h = `<line class="now" x1="${X(graph.now)}" y1="${top - 12}" x2="${X(graph.now)}" y2="${my + 8}"/>`
-      h += `<path class="main" pathLength="1" d="M${X(0)} ${my} H${X(1)}"/>`
-      graph.lanes.forEach((lane, i) => {
-        const y = ly(i)
-        const t = i * 0.35 + 0.3
-        if (i === graph.lanes.length - 1) {
-          const m = graph.merged
-          const f = X(m.fork)
-          const g = X(m.merge)
-          const k = Math.min(40, (g - f) * 0.35)
-          h += `<path class="br old" style="--t:.2s" pathLength="1" d="M${f} ${my} C ${f + k} ${my}, ${f + k * 0.2} ${y}, ${f + k * 1.1} ${y} H ${g - k * 1.1} C ${g - k * 0.2} ${y}, ${g - k} ${my}, ${g} ${my}"/>`
-          m.commits.forEach(
-            (c) =>
-              (h += `<circle class="nd old" style="--t:.6s" cx="${X(c)}" cy="${y}" r="5"/>`),
-          )
-          h += `<circle class="nd old fork" style="--t:.2s" cx="${f}" cy="${my}" r="5.5"/><circle class="nd old" style="--t:.9s" cx="${g}" cy="${my}" r="5.5"/>`
-          if (mergedLabel) {
-            mergedLabel.style.left = `${f}px`
-            mergedLabel.style.top = `${my + 14}px`
-          }
-        }
-        const f = X(lane.fork)
-        const n = X(graph.now)
-        h += `<path class="br" style="--t:${t}s" pathLength="1" d="M${f} ${my} ${curve(f, my, n, y)} H ${n}"/>`
-        h += `<circle class="nd fork" style="--t:${t}s" cx="${f}" cy="${my}" r="6"/>`
-        lane.commits.forEach(
-          (c, j) =>
-            (h += `<circle class="nd" style="--t:${t + 0.3 + j * 0.15}s" cx="${X(c)}" cy="${y}" r="6"/>`),
-        )
-        h += `<circle class="nd head" style="--t:${t + 0.8}s" cx="${n}" cy="${y}" r="8.5"/>`
-      })
-      svg!.innerHTML = h
-      if (nowLabel) nowLabel.style.left = `${X(graph.now)}px`
-      if (mainLabel) {
-        mainLabel.style.top = `${my + 14}px`
-        mainLabel.style.right = '0'
-      }
-    }
-
-    draw()
-    window.addEventListener('resize', draw)
-    void document.fonts?.ready.then(draw)
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (
-          entries.some((e) => e.isIntersecting && e.intersectionRatio >= 0.35)
-        ) {
-          observer.disconnect()
-          requestAnimationFrame(() =>
-            requestAnimationFrame(() => timeline.classList.add('go')),
-          )
-        }
-      },
-      { threshold: [0.35] },
-    )
-    observer.observe(timeline)
-  }
-</script>

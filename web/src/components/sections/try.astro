@@ -3,7 +3,7 @@ import { tryIt } from '../../content/copy'
 
 /**
  * The quiet install: who canon expects, the three commands on the tray with
- * one copy control, then the first run and where the guide takes over. The
+ * one copy control, then the first run. The
  * copy control shows on hover or focus, and always on a touch screen.
  */
 const code = (text: string) => text.split('`')
@@ -54,13 +54,7 @@ const code = (text: string) => text.split('`')
     </div>
   </div>
   <p class="first">
-    {
-      code(tryIt.first.lead).map((part, k) =>
-        k % 2 ? <code>{part}</code> : part,
-      )
-    }
-    <a href={tryIt.first.guide.href}>{tryIt.first.guide.label}</a>
-    {tryIt.first.tail}
+    {code(tryIt.first).map((part, k) => (k % 2 ? <code>{part}</code> : part))}
   </p>
 </section>
 
@@ -187,18 +181,6 @@ const code = (text: string) => text.split('`')
     font-size: var(--size-body);
     line-height: 1.6;
     color: var(--body);
-  }
-
-  #try .first a {
-    color: var(--ink);
-    text-decoration: underline;
-    text-decoration-color: var(--muted);
-    text-decoration-thickness: 1px;
-    text-underline-offset: 3px;
-  }
-
-  #try .first a:hover {
-    text-decoration-color: var(--ink);
   }
 
   @media (max-width: 640px) {
