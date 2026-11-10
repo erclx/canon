@@ -25,6 +25,10 @@ import {
   type ScriptState,
 } from '@/tooling/package'
 import { isSubfolderTarget, isWithheldInSubfolder } from '@/tooling/subfolder'
+import {
+  tailwindImportWarnings,
+  type ToolingWarning,
+} from '@/tooling/tailwind-import'
 
 export type DriftCause = 'stale' | 'edited' | 'unattributed'
 
@@ -77,6 +81,8 @@ export interface ScanResult {
   readonly hasPackageJson: boolean
   readonly newManifest: boolean
   readonly totalChanges: number
+  /** Facts beside the changes, which never raise `totalChanges`. */
+  readonly warnings: readonly ToolingWarning[]
 }
 
 /**
@@ -238,6 +244,7 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
     hasPackageJson: pkg !== undefined,
     newManifest,
     totalChanges,
+    warnings: tailwindImportWarnings(chain, target),
   }
 }
 
