@@ -108,6 +108,7 @@ Coherence is a property of the whole and every one of these is broken one sectio
 
 - **One accent.** Chosen once, used everywhere. A warm-grey surface does not grow a blue action in its seventh section.
 - **One radius system.** Mixed radii are allowed only under a stated rule applied everywhere, such as pill actions over square containers.
+  - A pill fits a one-line control alone, and a block of two or more lines takes the corners of the surface it sits on.
 - **One theme.** No inverted section dropped between its neighbors. A reader must not feel they walked into a different product mid-scroll.
 - **One copy register.** Technical, editorial and promotional voices do not mix in one composition unless the brand states that they do.
 - **One light source.** Every shadow on the surface falls the same way, and a shadow is tinted toward the ground rather than pure black.
