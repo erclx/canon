@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  driveLogStructure,
   intakeSpill,
   intakeStructure,
   structureFindings,
@@ -236,6 +237,43 @@ describe('intakeSpill', () => {
     const text = ['## Cluster', '', 'Lead prose for the cluster.'].join('\n')
 
     expect(intakeSpill(text)).toEqual([])
+  })
+})
+
+describe('driveLogStructure', () => {
+  const lead = ['## 01. Finding', '', '`minor` · operator · developer', '']
+
+  it('should exempt a long labeled field from S4', () => {
+    const text = [...lead, `- **Saw:** ${'a'.repeat(300)}`].join('\n')
+
+    expect(driveLogStructure(text)).toEqual([])
+  })
+
+  it('should still report S4 on a long bullet with no bold label', () => {
+    const text = [...lead, `- Saw: ${'a'.repeat(300)}`].join('\n')
+
+    expect(driveLogStructure(text)).toMatchObject([
+      { criterion: 'S4', line: 5 },
+    ])
+  })
+
+  it('should add no intake-spill entry under a field', () => {
+    const text = [
+      ...lead,
+      '- **Saw:** the frame',
+      '',
+      'A trailing paragraph.',
+    ].join('\n')
+
+    expect(driveLogStructure(text)).toEqual([])
+  })
+
+  it('should still report S3 on an H3 with no lead', () => {
+    const text = ['### Notes', '', '- one'].join('\n')
+
+    expect(driveLogStructure(text).map((entry) => entry.criterion)).toEqual([
+      'S3',
+    ])
   })
 })
 
