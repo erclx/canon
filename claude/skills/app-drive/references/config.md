@@ -34,7 +34,7 @@ Some of the keys carry a reading the table cannot hold.
 
 ### The board key
 
-`board-project` is optional and defaults to `drive-<nn>`. A drive asks about it only when the board already holds a project of the same stem, as Step 1 states.
+`board-project` is optional and defaults to `drive-<nn>`. A drive asks about it only when the board holds a versioned project of the stem, such as `landing-v2`, as Step 1 states, so `drive-<nn>` never triggers it.
 
 - Naming the key opts the project in, even with no board yet, while omitting it leaves the call to `canon/config/design.toml` or `.canon/board/`
 - Keep `<nn>` in a value you set, since one project across drives loses which frames came from which

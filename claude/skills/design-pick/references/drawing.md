@@ -52,7 +52,7 @@ Copy both pages' captures into the drive's `evidence/baseline/` as its whole-pag
 
 ## Layout
 
-Place every frame with `--x` and `--y` on its add, since `frame add` alone places a frame past every other one in the order it ran. Leave 80px between columns and 80px below the tallest frame of the row above, so a tall phone frame never overlaps the next row.
+Place every frame with `--width <px>`, `--x`, and `--y` on its add, the width being its column's. A frame added without them hugs its content and lands past every other one. Leave 80px between columns and 80px below the tallest frame of the row above, so a tall phone frame never overlaps the next row.
 
 ### A pick round
 

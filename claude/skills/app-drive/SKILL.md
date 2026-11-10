@@ -45,7 +45,7 @@ A drive will draw on the board when the config names `board-project`, `canon/con
 Read `${CLAUDE_SKILL_DIR}/../design-pick/references/board.md` for reaching and starting the board, `design-config.md` beside it for the `board` key, and `drawing.md` beside it before the first frame. A drive differs from a `design-pick` run in four ways.
 
 - `<project>` is the config's `board-project` with `<nn>` filled in, never the `project` key of `design.toml`, so a drive's pages stay apart from pick rounds and accepted frames
-- Where `frameboard list` holds a project of the same stem, such as `landing-v2`, ask whether the drive continues it as `landing-v3`, and never write into the earlier one
+- Where `frameboard list` holds a versioned project of the stem, such as `landing-v2`, ask whether the drive continues it as `landing-v3`, and never write into the earlier one
 - Test the root with `git check-ignore -q <board>/` before serving, slash kept for a folder not made yet. The write scope forbids an unignored root, and `drive-check` reports its frames under `changed`.
 - That test, a stop either reference names, or no `frameboard` and no `bunx` on PATH ends the board rather than the drive. Report why, leave the row empty, and draw as a project with no board does.
 
