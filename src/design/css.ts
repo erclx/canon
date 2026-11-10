@@ -106,7 +106,10 @@ function tokenProperties(tokens: DesignTokens): string[] {
 
   for (const role of tokens.typography) {
     lines.push(`  --type-${slug(role.role)}-family: ${role.family};`)
-    lines.push(`  --type-${slug(role.role)}-size: ${role.size};`)
+    // A role naming a step reads it, so the role shrinks under the queries
+    // the step's tablet and phone sizes are emitted in.
+    const size = role.step ? `var(--size-${slug(role.step)})` : role.size
+    lines.push(`  --type-${slug(role.role)}-size: ${size};`)
     lines.push(`  --type-${slug(role.role)}-lh: ${role.lineHeight};`)
   }
 

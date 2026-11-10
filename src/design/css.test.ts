@@ -118,6 +118,44 @@ describe('buildDesignCss', () => {
     )
   })
 
+  it('reads a role naming a step through that step, so the role shrinks with it', () => {
+    const css = buildDesignCss(
+      minimal({
+        typeScale: [{ step: 'hero', size: '5.625rem', phone: '2.5rem' }],
+        typography: [
+          {
+            role: 'hero',
+            family: 'Geist',
+            weight: '600',
+            size: '5.625rem',
+            lineHeight: '1',
+            step: 'hero',
+          },
+        ],
+      }),
+    )
+
+    expect(css).toContain('--type-hero-size: var(--size-hero);')
+  })
+
+  it('emits the literal size for a role naming no step', () => {
+    const css = buildDesignCss(
+      minimal({
+        typography: [
+          {
+            role: 'note',
+            family: 'Geist',
+            weight: '400',
+            size: '0.75rem',
+            lineHeight: '1.4',
+          },
+        ],
+      }),
+    )
+
+    expect(css).toContain('--type-note-size: 0.75rem;')
+  })
+
   it('drops a radius the record declares as none rather than emitting it', () => {
     expect(buildDesignCss()).not.toContain('--radius-rule')
   })
