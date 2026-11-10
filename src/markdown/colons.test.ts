@@ -204,6 +204,64 @@ describe('findColons', () => {
     expect(colonsIn('See [Step: one](docs/a:b.md) for more.')).toEqual([])
   })
 
+  it('should not report a colon in a tag attribute that carries no prose', () => {
+    expect(
+      colonsIn('<source media="(prefers-color-scheme: dark)" srcset="a.svg">'),
+    ).toEqual([])
+    expect(colonsIn("<source media='(a: b)' srcset=a.svg>")).toEqual([])
+  })
+
+  it('should report a colon in the alt text of a tag', () => {
+    const found = colonsIn('<img src="a.svg" alt="a view in canon: sessions">')
+
+    expect(found.map((hit) => hit.lead)).toEqual(['canon'])
+  })
+
+  it('should report a colon in the title text of a tag', () => {
+    const found = colonsIn('<a href="/x" title="a note on the fix: split it">')
+
+    expect(found.map((hit) => hit.lead)).toEqual(['fix'])
+  })
+
+  it('should read an attribute name in any case', () => {
+    expect(colonsIn('<img ALT="a view in canon: sessions">')).toHaveLength(1)
+    expect(colonsIn('<source MEDIA="(a: b)">')).toEqual([])
+  })
+
+  it('should read a single-quoted alt value and keep its column', () => {
+    const source = "<img src='a.svg' alt='a view in canon: sessions'>"
+    const found = colonsIn(source)
+
+    expect(found.map((hit) => hit.column)).toEqual([source.indexOf(':')])
+  })
+
+  it('should end a tag at the real close when a value holds a greater-than sign', () => {
+    const found = colonsIn('<img alt="a > b in canon: sessions"> then: more')
+
+    expect(found.map((hit) => hit.lead)).toEqual(['canon', 'then'])
+  })
+
+  it('should still report a colon in prose after a tag on the same line', () => {
+    const found = colonsIn('<b data-x="a: b">Bold</b> is the fix: split it.')
+
+    expect(found.map((hit) => hit.lead)).toEqual(['fix'])
+  })
+
+  it('should read an angle bracket in prose that forms no tag', () => {
+    const found = colonsIn('Use <b and c: d> when it is the fix.')
+
+    expect(found.map((hit) => hit.lead)).toEqual(['c'])
+  })
+
+  it('should mask a tag at the head of a list item without moving the list', () => {
+    const source = [
+      '- <img src="a.svg" alt="x" data-n="a: b"> A long lead for the first item: one',
+      '- A long lead for the second item: two',
+    ].join('\n')
+
+    expect(colonsIn(source)).toEqual([])
+  })
+
   it('should not report a fenced line, a heading, or a table row', () => {
     const source = [
       '```yaml',

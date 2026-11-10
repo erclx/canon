@@ -22,15 +22,15 @@ An argument is a file, a directory, or a glob, taken against the corpus git list
 
 The ban set and checkpoints ship in `src/markdown/bans.ts` and `src/markdown/structure.ts`. `markdown.md` states each rule and the `write-human` skill states the cadence numbers, so move a number in both places in one change.
 
-| Finding         | Reports                                                                              | Gates             |
-| --------------- | ------------------------------------------------------------------------------------ | ----------------- |
-| Bans            | The two characters `markdown.md` bans, outside frontmatter, fences, spans, and links | Always            |
-| Links           | A relative link resolving to nothing on disk                                         | Always            |
-| Density         | The six limits and two table limits below, under `density`                           | On a gated prefix |
-| Reference shape | A `kind: reference` page breaking its shape, under `referenceShape`                  | On a gated prefix |
-| Tables          | The row count and wide token limits below, under `tables`                            | Never             |
-| Colons          | A colon followed by more text in a prose line, under `colons`                        | Never             |
-| Heading case    | A capital after the first word of a heading or `title`, under `headingCase`          | Never             |
+| Finding         | Reports                                                                                                               | Gates             |
+| --------------- | --------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| Bans            | The two characters `markdown.md` bans, outside frontmatter, fences, spans, and links                                  | Always            |
+| Links           | A relative link resolving to nothing on disk                                                                          | Always            |
+| Density         | The six limits and two table limits below, under `density`                                                            | On a gated prefix |
+| Reference shape | A `kind: reference` page breaking its shape, under `referenceShape`                                                   | On a gated prefix |
+| Tables          | The row count and wide token limits below, under `tables`                                                             | Never             |
+| Colons          | A colon followed by more text in a prose line, under `colons`, skipping one-line tag attributes but `alt` and `title` | Never             |
+| Heading case    | A capital after the first word of a heading or `title`, under `headingCase`                                           | Never             |
 
 A page marked `kind: reference` holds its opening, then `Output`, `Refusals`, and `See also` as H2s, each at most once and in that order. It takes no H3 and no table headed `Flag` or `Option`. An unmarked page is never measured.
 
