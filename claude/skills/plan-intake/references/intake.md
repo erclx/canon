@@ -82,7 +82,7 @@ An item citing a capture, a log, or a machine record keeps the file in the folde
 - Move a file into `evidence/` before an item cites it, and cite it by its path relative to the folder, such as `evidence/04-export.png`
 - Never cite a file under `.canon/tmp/` or any other scratch folder, since a later reader opens the item after that folder is gone
 - Prefix each file with the number of the finding or item it backs, so the folder sorts in the order the evidence was taken
-- Keep `evidence/` flat, holding no cluster file. The item checks read the folder's own markdown alone.
+- Group `evidence/` files by the surface they show, and keep cluster files out of it. The item checks read the folder's own markdown alone.
 
 ## Frontmatter and dating
 
