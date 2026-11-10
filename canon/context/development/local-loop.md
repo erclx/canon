@@ -103,7 +103,7 @@ Holds the dev regression baselines, one subfolder per area. Dev evidence is what
 
 ### `assets/film/`
 
-Holds the HyperFrames source of the launch film, which `scripts/core/render-film.ts` renders into the README loops and the landing page's silent MP4s and posters under `assets/loops/`.
+Holds the HyperFrames source of the launch film, which `scripts/core/render-film.ts` renders into the launch loops and the landing page's silent MP4s and posters under `assets/loops/`.
 
 - No gate renders it, so an edit to the source leaves the committed outputs stale until someone runs `bun run film:render` and commits them
 - `.oxfmtrc.jsonc` ignores the folder, since reflowing the markup can move whitespace the compositions lay out
