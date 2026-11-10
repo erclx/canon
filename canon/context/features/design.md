@@ -28,11 +28,7 @@ Holds the accepted frames a build matches. `bun run design:sync` writes them fro
 - `frames.json` maps each `<group>/<name>` to a board frame as `<project>/<page>/<frame>`, and it and `index.md` are the only files written by hand
 - Each frame's `../assets/` links point at `assets/<project>/` in the record, which also holds every font a copied stylesheet loads, so two projects loading an asset of the same name land apart
 - The sync removes a file below the folder's first level that no mapping writes. `--check` names it as stray and exits 14, while a PNG whose bytes alone differ only warns.
-
-What the sync writes depends on the machine running it, and nothing in CI checks it.
-
-- No version pin holds the release, so a session with no `frameboard` on PATH gets command-not-found rather than a sync
-- The sync formats each frame through the checkout's installed oxfmt, so a stale `node_modules` reads as drift to `--check` and makes a sync rewrite frames. Run `bun install` first.
+- The output rests on two unpinned installs, the `frameboard` on PATH and the checkout's oxfmt, which formats each frame. A stale `node_modules` reads as drift, so run `bun install` first.
 - CI never runs the check, since `.canon/board/` is gitignored and CI holds no copy, so drift between board and record surfaces only when a session runs the sync
 
 ### Other folders
