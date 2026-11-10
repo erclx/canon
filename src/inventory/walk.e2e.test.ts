@@ -62,20 +62,24 @@ describe.skipIf(!hasBrowser)('walk against a served application', () => {
     expect(subject).toBeDefined()
     if (!subject) return
 
+    const base = `http://127.0.0.1:${server.port}`
     const result = await walk({
-      baseUrl: `http://127.0.0.1:${server.port}`,
-      routes: ['/', '/pricing'],
+      targets: ['/', '/pricing'].map((route) => ({
+        label: route,
+        url: `${base}${route}`,
+      })),
       subject,
       query: QUERY,
+      frames: false,
     })
 
     expect(result.status).toBe('read')
     if (result.status !== 'read') return
 
     expect(result.readings).toHaveLength(4)
-    expect(result.routes).toEqual([
-      { route: '/', elements: 3 },
-      { route: '/pricing', elements: 1 },
+    expect(result.targets).toEqual([
+      { location: '/', elements: 3 },
+      { location: '/pricing', elements: 1 },
     ])
 
     const groups = groupByTreatment(result.readings)
@@ -105,10 +109,10 @@ describe.skipIf(!hasBrowser)('walk against a served application', () => {
     closed.stop(true)
 
     const result = await walk({
-      baseUrl: `http://127.0.0.1:${port}`,
-      routes: ['/'],
+      targets: [{ label: '/', url: `http://127.0.0.1:${port}/` }],
       subject,
       query: QUERY,
+      frames: false,
     })
 
     expect(result).toMatchObject({

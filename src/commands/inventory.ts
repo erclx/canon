@@ -5,6 +5,7 @@ import {
   CONFIG_REL,
   type ConfigRefusal,
   readInventoryConfig,
+  routeUrl,
 } from '@/inventory/config'
 import { abbreviate, groupByTreatment } from '@/inventory/group'
 import { findSubject, SUBJECTS } from '@/inventory/subjects'
@@ -158,10 +159,13 @@ async function runInventory(
   }
 
   const result = await walker.walk({
-    baseUrl,
-    routes: read.config.routes,
+    targets: read.config.routes.map((route) => ({
+      label: route,
+      url: routeUrl(baseUrl, route),
+    })),
     subject,
     query: declared.query,
+    frames: false,
   })
 
   if (result.status === 'failed') {
@@ -191,8 +195,8 @@ async function runInventory(
   const groups = groupByTreatment(result.readings)
 
   logStep('Routes')
-  for (const route of result.routes) {
-    logInfo(`${route.route}  ${plural(route.elements, 'element')}`)
+  for (const target of result.targets) {
+    logInfo(`${target.location}  ${plural(target.elements, 'element')}`)
   }
 
   // A walk that matched nothing refuses rather than printing an empty listing,
@@ -204,7 +208,7 @@ async function runInventory(
       emitJson,
       root,
       'no-elements',
-      `No element matched ${declared.query} on any of the ${plural(result.routes.length, 'route')} walked.`,
+      `No element matched ${declared.query} on any of the ${plural(result.targets.length, 'route')} walked.`,
     )
   }
 
@@ -224,7 +228,10 @@ async function runInventory(
     root,
     subject: subjectName,
     baseUrl,
-    routes: result.routes,
+    routes: result.targets.map(({ location, elements }) => ({
+      route: location,
+      elements,
+    })),
     elements: result.readings.length,
     treatments: groups.map(({ treatment, count, locations, samples }) => ({
       treatment,
