@@ -36,6 +36,8 @@ A bare name carried by two folders of one root resolves to neither and exits 1. 
 
 `canon inventory [subject]` reads `inventory.toml` at the project root and never gates. A missing server and an unmatched query refuse rather than list nothing.
 
+`--frames <file...>` swaps the routes for board frame files, each read light and dark, with no `inventory.toml` or server. It takes the five value subjects, being `color`, `font-size`, `radius`, `shadow`, and `duration`, and each listing ends on its distinct count against `canon/DESIGN.md`.
+
 ```toml
 base-url = "http://localhost:4173"
 routes = ["/", "/pricing"]
