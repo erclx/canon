@@ -41,8 +41,11 @@ const AUTOLINK = /<[^>\s]+>/g
  * `maskDisplayed` are unchanged. A name takes two characters at least, which
  * keeps `R&D; then` and `AT&T; and` a prose semicolon. No lookbehind refuses a
  * letter before the ampersand, since `project&gt;` is the case this exists for.
- * A reference this shape accepts and no browser knows is still blanked, since a
- * closed list of names would be a table to maintain.
+ * That trade lets a plural abbreviation such as `Q&As; then` or `M&Ms; then`
+ * pass, and so does `rock&roll; x`, since no lookbehind separates them from
+ * `Map&lt;K&gt;`, whose real reference follows a capital. A reference this shape
+ * accepts and no browser knows is blanked too, since a closed list of names
+ * would be a table to maintain.
  */
 const CHARACTER_REFERENCE =
   /&(?:[A-Za-z][A-Za-z0-9]{1,31}|#[0-9]{1,7}|#[xX][0-9A-Fa-f]{1,6});/g

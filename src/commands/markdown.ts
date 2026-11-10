@@ -540,7 +540,7 @@ function reportBans(
     `${plural(bans.characters.length, 'character')} shipped with the canon package`,
   )
   logInfo(
-    'Frontmatter, fenced blocks, code spans, and link destinations are excluded.',
+    'Frontmatter, fenced blocks, code spans, link destinations, and character references are excluded.',
   )
   logInfo(
     'Word bans, phrase bans, and every voice rule are guidance for the reader',
