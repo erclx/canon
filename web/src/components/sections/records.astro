@@ -925,6 +925,13 @@ import { records } from '../../content/records'
     cursor: default;
   }
 
+  /* Twelve pills need about 1,040 pixels, past the sheet's 900, so they take the tray's width. */
+  @media (min-width: 901px) {
+    #records .tabs {
+      max-width: none;
+    }
+  }
+
   @media (max-width: 900px) {
     #records .tray {
       margin-top: 40px;
