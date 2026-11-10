@@ -83,6 +83,17 @@ describe('canon capture', () => {
     expect(result.stdout).toContain('--selector')
   })
 
+  it('should list --touch in the help', async () => {
+    const result = await execa(process.execPath, [CLI, 'capture', '--help'], {
+      cwd: REPO_ROOT,
+      reject: false,
+      timeout: RUN_TIMEOUT_MS,
+    })
+
+    expect(result.exitCode).toBe(0)
+    expect(result.stdout).toContain('--touch')
+  })
+
   it('should refuse a missing selector ahead of a missing source', async () => {
     const result = await runCapture(['no-such-directory'])
 

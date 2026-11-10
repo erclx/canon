@@ -43,6 +43,14 @@ function band(height: number, color = '#fff'): string {
   return `<section style="height:${height}px;background:${color}"></section>`
 }
 
+/**
+ * A control drawn red where the primary pointer hovers and green where it
+ * cannot, so the painted color names which media query matched.
+ */
+const HOVER_KEYED_STYLE =
+  '#menu,#tap{height:200px;display:none}@media (hover:hover){#menu{display:block;background:#f00}}@media (hover:none){#tap{display:block;background:#0f0}}'
+const HOVER_KEYED_BODY = `<main><section style="height:800px"><div id="menu"></div><div id="tap"></div></section></main>`
+
 /** Whether any pixel of the PNG is the given pure color. */
 function paints(path: string, [r, g, b]: [number, number, number]): boolean {
   const png = PNG.sync.read(readFileSync(path))
@@ -233,6 +241,75 @@ describe.skipIf(!hasBrowser)('captureSections', () => {
         ],
       })
       expect(paints(join(outDir, 'section-03.png'), [0, 0, 255])).toBe(true)
+    },
+    TIMEOUT_MS,
+  )
+
+  it(
+    'should draw the touch variant of a hover-keyed control under touch',
+    async () => {
+      const page = source(
+        'hover-touch',
+        pageWith(HOVER_KEYED_STYLE, HOVER_KEYED_BODY),
+      )
+      const outDir = join(dir, 'hover-touch')
+
+      const result = await captureSections(page, {
+        outDir,
+        width: 320,
+        touch: true,
+      })
+
+      expect(result).toMatchObject({ status: 'captured', failed: [] })
+      expect(paints(join(outDir, 'section-01.png'), [0, 255, 0])).toBe(true)
+      expect(paints(join(outDir, 'section-01.png'), [255, 0, 0])).toBe(false)
+    },
+    TIMEOUT_MS,
+  )
+
+  it(
+    'should draw the hover variant of the same control without touch',
+    async () => {
+      const page = source(
+        'hover-default',
+        pageWith(HOVER_KEYED_STYLE, HOVER_KEYED_BODY),
+      )
+      const outDir = join(dir, 'hover-default')
+
+      const result = await captureSections(page, { outDir, width: 320 })
+
+      expect(result).toMatchObject({ status: 'captured', failed: [] })
+      expect(paints(join(outDir, 'section-01.png'), [255, 0, 0])).toBe(true)
+      expect(paints(join(outDir, 'section-01.png'), [0, 255, 0])).toBe(false)
+    },
+    TIMEOUT_MS,
+  )
+
+  it(
+    'should shoot a touch section taller than the viewport whole',
+    async () => {
+      const page = source(
+        'touch-tall',
+        pageWith(
+          '',
+          `<main><section style="height:1100px;background:#0f0"><div style="height:1000px"></div><div style="height:100px;background:#00f"></div></section></main>`,
+        ),
+      )
+      const outDir = join(dir, 'touch-tall')
+
+      const result = await captureSections(page, {
+        outDir,
+        width: 320,
+        touch: true,
+      })
+
+      expect(result).toMatchObject({
+        status: 'captured',
+        sections: [{ index: 1, top: 0, height: 1100 }],
+      })
+      const png = PNG.sync.read(readFileSync(join(outDir, 'section-01.png')))
+      expect([png.width, png.height]).toEqual([640, 2200])
+      expect(paints(join(outDir, 'section-01.png'), [0, 0, 255])).toBe(true)
     },
     TIMEOUT_MS,
   )

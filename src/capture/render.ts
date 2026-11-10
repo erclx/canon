@@ -2,6 +2,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { chromium } from 'playwright-core'
+import { PNG } from 'pngjs'
 import type {
   Browser,
   BrowserContextOptions,
@@ -53,6 +54,7 @@ export interface CaptureOptions {
   outDir?: string
   width?: number
   colorScheme?: ColorScheme
+  touch?: boolean
 }
 
 export type CaptureResult =
@@ -85,6 +87,7 @@ export async function captureSources(
 interface PageEmulation {
   width?: number
   colorScheme?: ColorScheme
+  touch?: boolean
 }
 
 /**
@@ -92,10 +95,15 @@ interface PageEmulation {
  * viewport. Absent leaves the option out so the browser default stands and
  * every committed capture renders as before. The height is Playwright's own
  * default, which keeps `vh` units where they were.
+ *
+ * Touch sets `hasTouch` alone, which turns `(hover: hover)` false and
+ * `(pointer: coarse)` true. `isMobile` stays off, since it lays out a page with
+ * no meta viewport at 980 wide and stops the wheel the section prep scrolls by.
  */
 function pageOptions({
   width,
   colorScheme,
+  touch,
 }: PageEmulation): BrowserContextOptions {
   return {
     deviceScaleFactor: DEVICE_SCALE_FACTOR,
@@ -103,6 +111,7 @@ function pageOptions({
       ? {}
       : { viewport: { width, height: DEFAULT_VIEWPORT_HEIGHT } }),
     ...(colorScheme === undefined ? {} : { colorScheme }),
+    ...(touch ? { hasTouch: true } : {}),
   }
 }
 
@@ -113,9 +122,9 @@ function pageOptions({
 async function captureOne(
   browser: Browser,
   source: CaptureSource,
-  { selector, width, colorScheme }: CaptureOptions,
+  { selector, width, colorScheme, touch }: CaptureOptions,
 ): Promise<CaptureResult> {
-  const page = await browser.newPage(pageOptions({ width, colorScheme }))
+  const page = await browser.newPage(pageOptions({ width, colorScheme, touch }))
   try {
     await page.goto(
       source.kind === 'url' ? source.url : pathToFileURL(source.htmlPath).href,
@@ -170,6 +179,7 @@ export interface SectionOptions {
   root?: string
   width?: number
   colorScheme?: ColorScheme
+  touch?: boolean
 }
 
 export interface SectionShot {
@@ -209,14 +219,16 @@ export type SectionsResult =
  */
 export async function captureSections(
   sourcePath: string,
-  { outDir, root, width, colorScheme }: SectionOptions,
+  { outDir, root, width, colorScheme, touch }: SectionOptions,
 ): Promise<SectionsResult> {
   const pageSource: CaptureSource = isUrlSource(sourcePath)
     ? { kind: 'url', url: sourcePath, pngPath: outDir }
     : { kind: 'file', htmlPath: sourcePath, pngPath: outDir }
   const browser = await chromium.launch()
   try {
-    const page = await browser.newPage(pageOptions({ width, colorScheme }))
+    const page = await browser.newPage(
+      pageOptions({ width, colorScheme, touch }),
+    )
     await page.goto(
       pageSource.kind === 'url'
         ? pageSource.url
@@ -253,7 +265,9 @@ export async function captureSections(
           misses.push({ index, reason: 'the section drew no box' })
           continue
         }
-        const png = await page.screenshot({ clip, fullPage: true })
+        const png = touch
+          ? await shootByViewport(page, clip)
+          : await page.screenshot({ clip, fullPage: true })
         writeFileSync(pngPath, png)
         writeStamp({ ...pageSource, pngPath }, png)
         shots.push({ index, path: pngPath, top: clip.y, height: clip.height })
@@ -279,6 +293,58 @@ export async function captureSections(
   } finally {
     await browser.close()
   }
+}
+
+interface Clip {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+/**
+ * Shoots a document-coordinate clip one viewport at a time and stitches the
+ * tiles, since Playwright's `fullPage` shot resets the device metrics while it
+ * paints and drops touch emulation with them, so a `(hover: hover)` rule paints
+ * its desktop form though `matchMedia` reads false before and after. A shot
+ * inside the viewport keeps it. Neither `isMobile` nor an emulated `hover`
+ * media feature survives the `fullPage` path either.
+ */
+async function shootByViewport(page: Page, clip: Clip): Promise<Buffer> {
+  const viewportHeight = page.viewportSize()?.height ?? DEFAULT_VIEWPORT_HEIGHT
+  const sheet = new PNG({
+    width: clip.width * DEVICE_SCALE_FACTOR,
+    height: clip.height * DEVICE_SCALE_FACTOR,
+  })
+  for (let offset = 0; offset < clip.height; offset += viewportHeight) {
+    const top = clip.y + offset
+    const scroll = await page.evaluate((y) => {
+      window.scrollTo(window.scrollX, y)
+      return { x: window.scrollX, y: window.scrollY }
+    }, top)
+    const tile = PNG.sync.read(
+      await page.screenshot({
+        clip: {
+          x: clip.x - scroll.x,
+          y: top - scroll.y,
+          width: clip.width,
+          height: Math.min(viewportHeight, clip.height - offset),
+        },
+      }),
+    )
+    const destinationY = offset * DEVICE_SCALE_FACTOR
+    PNG.bitblt(
+      tile,
+      sheet,
+      0,
+      0,
+      Math.min(tile.width, sheet.width),
+      Math.min(tile.height, sheet.height - destinationY),
+      0,
+      destinationY,
+    )
+  }
+  return PNG.sync.write(sheet)
 }
 
 /**

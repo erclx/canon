@@ -74,6 +74,10 @@ export function register(program: Command): void {
       '--color-scheme <scheme>',
       'Theme to render in, light or dark; defaults to whichever theme the page renders unset',
     )
+    .option(
+      '--touch',
+      'Emulate a touch screen, so hover media queries resolve false and pointer resolves coarse',
+    )
     .addHelpText(
       'after',
       [
@@ -90,6 +94,11 @@ export function register(program: Command): void {
         'a light or dark class on the root, so a stylesheet keyed on any of the',
         'three renders that theme. Run it once per scheme with its own --out.',
         '',
+        '--touch turns touch on and hover off, so (hover: hover) is false and',
+        '(pointer: coarse) is true. It leaves the width to --width and the user',
+        'agent as it is, so a site that picks its phone layout by user agent',
+        'still serves its desktop markup. Pair it with --width 320 for a phone.',
+        '',
         '--sections takes one HTML file or URL and needs --out naming a folder.',
         'It wheels down the page so lazy content loads, hides fixed and sticky',
         'layers, splits any block taller than 1.6 viewports into its children,',
@@ -103,6 +112,7 @@ export function register(program: Command): void {
         'Examples:',
         '  canon capture assets --selector .window',
         '  canon capture https://example.com --sections --out refs/example --width 1440',
+        '  canon capture https://example.com --sections --out refs/example-320 --width 320 --touch',
         '  canon capture https://example.com --sections --out refs/example --json',
         '',
       ].join('\n'),
@@ -115,6 +125,7 @@ export function register(program: Command): void {
           selector?: string
           width?: string
           colorScheme?: string
+          touch?: boolean
           sections?: boolean
           json?: boolean
         },
@@ -179,6 +190,7 @@ export function register(program: Command): void {
             selector,
             width,
             colorScheme,
+            touch: opts.touch,
             outDir: opts.out ? resolve(process.cwd(), opts.out) : undefined,
           })
         } catch (error) {
@@ -217,6 +229,7 @@ interface SectionFlags {
   selector?: string
   width?: string
   colorScheme?: string
+  touch?: boolean
   json?: boolean
 }
 
@@ -276,6 +289,7 @@ async function captureSectionsAction(
       root: opts.selector,
       width,
       colorScheme,
+      touch: opts.touch,
     })
   } catch (error) {
     if (json) {

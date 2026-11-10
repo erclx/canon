@@ -87,3 +87,32 @@ describe.skipIf(!hasBrowser)('captureSources font probe', () => {
     expect(existsSync(join(dir, 'empty.png'))).toBe(true)
   }, 60_000)
 })
+
+describe.skipIf(!hasBrowser)('captureSources touch', () => {
+  let dir: string
+
+  beforeAll(() => {
+    dir = mkdtempSync(join(tmpdir(), 'capture-touch-'))
+  })
+
+  afterAll(() => {
+    rmSync(dir, { recursive: true, force: true })
+  })
+
+  it('should resolve a hover media query as a touch device would', async () => {
+    const source = join(dir, 'hover.html')
+    writeFileSync(
+      source,
+      pageWith(
+        '<style>#box{width:10px;height:10px;background:red}@media (hover:none){#box{width:30px}}</style><div id="box"></div>',
+      ),
+    )
+
+    const [result] = await captureSources(source, {
+      selector: '#box',
+      touch: true,
+    })
+
+    expect(result).toMatchObject({ status: 'rendered', width: 60 })
+  }, 60_000)
+})
