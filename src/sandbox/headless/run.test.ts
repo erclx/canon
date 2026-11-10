@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  deadRunRecord,
   mergeEnvelope,
   parseRunArgs,
   type SessionsReport,
@@ -124,5 +125,32 @@ describe('mergeEnvelope', () => {
     expect(
       mergeEnvelope('[1,2]', verdict(), [], sessions(), canon(), []).isParsed,
     ).toBe(false)
+  })
+})
+
+describe('deadRunRecord', () => {
+  // The turn cap ends a session with exit 1 after it has already loaded its
+  // skills, which is the run a routing measurement most often takes.
+  it('should carry the skills a capped session loaded beside its raw output', () => {
+    const out = [
+      '{"type":"system","subtype":"init"}',
+      '{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Skill","input":{"skill":"canon:target-scaffold"}}]}}',
+      '{"type":"result","subtype":"error_max_turns","is_error":true}',
+    ].join('\n')
+
+    expect(deadRunRecord(1, out, canon())).toEqual({
+      is_error: true,
+      exit_code: 1,
+      raw_output: out,
+      canon: {
+        cli: '/checkout/src/cli.ts',
+        head: '0123456789abcdef0123456789abcdef01234567',
+      },
+      skills: ['canon:target-scaffold'],
+    })
+  })
+
+  it('should carry no skills for output cut before any line', () => {
+    expect(deadRunRecord(137, '{"type":"sys', canon()).skills).toEqual([])
   })
 })

@@ -169,6 +169,27 @@ export function mergeEnvelope(
   }
 }
 
+/**
+ * The record for a session that exited non-zero, such as one stopped by the
+ * turn cap. The output is stamped as text rather than as a parsed envelope,
+ * since a dying session's stdout can be partial or not JSON at all, which is
+ * why this run has no verdict to attach it to. `skills` is still read from the
+ * stream, since a capped run has usually loaded its skills before the cap.
+ */
+export function deadRunRecord(
+  exitCode: number,
+  out: string,
+  canon: BranchCli,
+): Record<string, unknown> {
+  return {
+    is_error: true,
+    exit_code: exitCode,
+    raw_output: out,
+    canon,
+    skills: reduceStream(out).skills,
+  }
+}
+
 function parseObject(text: string): Record<string, unknown> | undefined {
   try {
     const parsed: unknown = JSON.parse(text)
@@ -518,19 +539,11 @@ async function drive(
     logWarn(
       `The session exited ${sessionCode} before a verdict could be taken.`,
     )
-    // Stamped as text rather than as a parsed envelope, since a dying session's
-    // stdout can be partial or not JSON at all, which is why this run has no
-    // verdict to attach it to.
     writeRecord(
       projectRoot,
       target,
       arm,
-      {
-        is_error: true,
-        exit_code: sessionCode,
-        raw_output: out,
-        canon: branchCli,
-      },
+      deadRunRecord(sessionCode, out, branchCli),
       'dead run',
     )
     return sessionCode
