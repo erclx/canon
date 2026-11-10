@@ -349,6 +349,21 @@ describe('canon labels scan text checks', { timeout: RUN_TIMEOUT_MS }, () => {
 
     expect(record.bannedCharacters).toEqual([])
   })
+
+  it('should pass a character reference in a title and a body', async () => {
+    const body = await writeBody(
+      '## Summary\n\n- point at assets/&lt;project&gt; and &#59; ok\n\n## Key changes\n\n- b\n',
+    )
+
+    const record = await runScan([
+      '--title',
+      'fix(x): read assets/&lt;project&gt;',
+      '--body-file',
+      body,
+    ])
+
+    expect(record.bannedCharacters).toEqual([])
+  })
 })
 
 describe('canon labels apply', { timeout: RUN_TIMEOUT_MS }, () => {

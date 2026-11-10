@@ -76,6 +76,12 @@ describe('checkReason', () => {
     expect(findings.bannedCharacters).not.toEqual([])
   })
 
+  it('should pass a character reference in a reason', () => {
+    const findings = checkReason('Closing unmerged. assets/&lt;project&gt; moved.')
+
+    expect(findings.bannedCharacters).toEqual([])
+  })
+
   it('should flag a phase label', () => {
     const findings = checkReason('Closing unmerged. v167.2 replaces it.')
 

@@ -186,6 +186,51 @@ describe('scanBans', () => {
     expect(terms('The `a; b` operator and `x — y` flag.\n')).toEqual([])
   })
 
+  it('should report nothing for a named character reference', () => {
+    expect(terms('Point at assets/&lt;project&gt; and &amp; here.\n')).toEqual(
+      [],
+    )
+  })
+
+  it.each(['&#59;', '&#x3B;', '&#X3b;'])(
+    'should report nothing for the numeric character reference %s',
+    (reference) => {
+      expect(terms(`Write ${reference} for the mark.\n`)).toEqual([])
+    },
+  )
+
+  it('should report nothing for a reference in a link text, heading, and table cell', () => {
+    expect(
+      terms(
+        '# Use &lt;x&gt;\n\nSee [the &lt;x&gt; page](a.md).\n\n| &lt;x&gt; |\n',
+      ),
+    ).toEqual([])
+  })
+
+  it('should report a prose semicolon beside a character reference', () => {
+    expect(terms('Use &lt;x&gt;; then stop.\n')).toEqual([';'])
+  })
+
+  it('should hold the column of a prose semicolon after a reference', () => {
+    const [found] = scan('A &lt;b&gt; c; d.\n')
+
+    expect(found).toMatchObject({ line: 1, column: 13, term: ';' })
+  })
+
+  it.each(['R&D; then', 'AT&T; and'])(
+    'should report the semicolon of the one-letter name in %s',
+    (text) => {
+      expect(terms(`${text}\n`)).toEqual([';'])
+    },
+  )
+
+  it.each(['&;', '&#;', '&#x;', '& lt;', '&1a;'])(
+    'should report the semicolon of the non-reference %s',
+    (text) => {
+      expect(terms(`Say ${text} here.\n`)).toEqual([';'])
+    },
+  )
+
   it('should point at the column the term sits in', () => {
     const [found] = scan('Ab; cd.\n')
 
