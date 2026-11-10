@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { embeddedBlocksIn, embeddedPrograms } from '@/gate/embedded'
+import { embeddedBlocksIn, embeddedPrograms } from '@/code/embedded'
 import type { MeasureContext } from '@/gate/measures'
 import { gitEnv } from '@/git/env'
 

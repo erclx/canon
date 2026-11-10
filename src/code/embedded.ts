@@ -1,9 +1,14 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { plural } from '@/cli/ui'
+import {
+  astroBindings,
+  astroFrontmatter,
+  astroInlineScripts,
+} from '@/code/astro'
 import type { Emission, Measure } from '@/gate/measures'
 import { listRepositoryFiles } from '@/git/files'
-import { isMarked } from '@/sweep/exempt-marker'
+import { escapeForPattern, isMarked } from '@/sweep/exempt-marker'
 
 export const EMBEDDED_MARKER = 'canon-allow-embedded'
 
@@ -363,7 +368,77 @@ export function embeddedBlocksIn(
   return blocks
 }
 
-const SOURCE_FILE = /\.(?:ts|tsx|mts|cts)$/
+/** The literal a frontmatter declaration of `name` assigns, if it assigns one. */
+function boundLiteral(
+  source: string,
+  candidates: readonly Literal[],
+  name: string,
+): Literal | undefined {
+  const declaration = new RegExp(
+    `(?:^|[^\\w$.])(?:const|let|var)\\s+${escapeForPattern(name)}\\s*(?::[^=]+)?=`,
+    'm',
+  )
+  const match = declaration.exec(source)
+  if (match === null) return undefined
+  const value = skipTrivia(source, match.index + match[0].length)
+  return candidates.find((candidate) => candidate.start === value)
+}
+
+/**
+ * The blocks an `.astro` file embeds past the limit: every frontmatter string
+ * the TypeScript reading finds, a frontmatter string a `<script>` or `<style>`
+ * takes through `set:html`, which names the language the text alone cannot,
+ * and an `is:inline` script body. An inline block is exempt when its opening
+ * tag, or the line above it, carries the marker with a reason.
+ */
+export function embeddedBlocksInAstro(
+  file: string,
+  source: string,
+): EmbeddedBlock[] {
+  const sourceLines = source.split('\n')
+  const frontmatter = astroFrontmatter(source)
+  const blocks = frontmatter ? embeddedBlocksIn(file, frontmatter.source) : []
+  const reported = new Set(blocks.map((block) => block.line))
+
+  const report = (line: number, kind: EmbeddedKind, lines: number): void => {
+    if (lines <= EMBEDDED_LINE_LIMIT || reported.has(line)) return
+    if (isMarked(sourceLines, line - 1, EMBEDDED_MARKER)) return
+    reported.add(line)
+    blocks.push({ file, line, kind, lines, branches: false })
+  }
+
+  if (frontmatter) {
+    const { literals, comments } = lex(frontmatter.source)
+    const candidates = blocksOf(frontmatter.source, literals, comments)
+    for (const binding of astroBindings(source)) {
+      const literal = boundLiteral(frontmatter.source, candidates, binding.name)
+      if (literal === undefined) continue
+      report(
+        literal.line,
+        binding.tag === 'style' ? 'stylesheet' : 'script',
+        staticLines(literal.text),
+      )
+    }
+  }
+
+  for (const script of astroInlineScripts(source)) {
+    report(script.line, 'script', staticLines(script.body))
+  }
+
+  return blocks.sort((a, b) => a.line - b.line)
+}
+
+/** Reads a file by its extension, as an `.astro` component or as TypeScript. */
+export function embeddedBlocksInFile(
+  file: string,
+  source: string,
+): EmbeddedBlock[] {
+  return file.endsWith('.astro')
+    ? embeddedBlocksInAstro(file, source)
+    : embeddedBlocksIn(file, source)
+}
+
+export const EMBEDDED_SOURCE = /\.(?:ts|tsx|mts|cts|astro)$/
 
 export const embeddedPrograms: Measure = async (ctx) => {
   const files = await listRepositoryFiles(ctx.root)
@@ -375,9 +450,9 @@ export const embeddedPrograms: Measure = async (ctx) => {
     }
   }
 
-  const sources = files.filter((path) => SOURCE_FILE.test(path))
+  const sources = files.filter((path) => EMBEDDED_SOURCE.test(path))
   const blocks = sources.flatMap((path) =>
-    embeddedBlocksIn(path, readFileSync(join(ctx.root, path), 'utf8')),
+    embeddedBlocksInFile(path, readFileSync(join(ctx.root, path), 'utf8')),
   )
 
   if (blocks.length === 0) {

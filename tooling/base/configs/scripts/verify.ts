@@ -340,6 +340,40 @@ function checkMarkdownBans(): void {
   }
 }
 
+// canon code audit exits 0 on a pass, 1 on a refusal that read nothing, and 2
+// on a finding. A canon too old to carry the verb exits 1 on the unknown
+// command, which the skip below covers.
+function checkEmbeddedCode(): void {
+  if (!onPath('canon')) {
+    logInfo(
+      'Skipped: no canon binary on PATH. Install with `bun install --global @erclx/canon`.',
+    )
+    return
+  }
+
+  const { code, output } = capture('canon code audit')
+  switch (code) {
+    case 0:
+      logInfo('No page, stylesheet, or script embedded past the limit')
+      return
+    case 1:
+      logInfo(
+        'Skipped: canon code audit refused or is missing from this canon, and read nothing.',
+      )
+      return
+    case 2:
+      pipeOutput(output)
+      fail(
+        'Source embeds a page, stylesheet, or script past the line limit. Move each into its own file, or mark it where it must stay inline',
+      )
+      break
+    default:
+      fail(
+        `canon code audit exited ${code}, which is neither a pass nor a finding`,
+      )
+  }
+}
+
 function main(): void {
   const declared = readDeclaredScripts()
   const list = readPhaseList()
@@ -355,6 +389,9 @@ function main(): void {
 
   logStep('Markdown bans')
   checkMarkdownBans()
+
+  logStep('Embedded code')
+  checkEmbeddedCode()
 
   // The card exclusion check reads the build, so it runs last, and only where
   // the stack that owns the card route shipped it.

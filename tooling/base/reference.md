@@ -23,7 +23,7 @@ Two configs fix how output looks and how commits read.
 
 `scripts/verify.ts` is the one verify runner every stack shares, and the command behind `check`. It uses Node modules only, since a target's own lint and typecheck read it.
 
-- It runs typecheck, lint, format check, shell, unit tests, build, markdown bans, then card exclusion, always in that order, and skips any phase the folder's `scripts/verify.json` leaves out.
+- It runs typecheck, lint, format check, shell, unit tests, build, markdown bans, embedded code, card exclusion, then head tags, skipping a phase `scripts/verify.json` leaves out.
 - `scripts/verify.json` lists the phases a stack requires, plus any tools and preconditions it probes first. The nearest stack's copy wins.
 - A required phase whose script `package.json` lacks fails the run. A base phase the list leaves out runs only where the folder declares its script.
 - Base requires `check:format`, so a base-only target still fails on a missing one.
@@ -115,3 +115,11 @@ The `Markdown bans` stage of `scripts/verify.ts` runs `canon markdown audit` ove
 - It exits `2` on a finding or `3` on a shipped-empty ban set, failing `bun run check` and the `pre-push` hook that calls it.
 - A refusal to measure exits `1` and is logged as a skip, as does a corpus with no file left once `CHANGELOG.md` is set aside.
 - The stage needs `canon` on PATH, and `canon docs projects` names the install command. Without it the stage is skipped and logged.
+
+### The embedded code stage
+
+The `Embedded code` stage runs `canon code audit` over every TypeScript and Astro file git lists, so a page, stylesheet, or script held as a string past five lines fails the check rather than resting on prose.
+
+- It exits `2` on a finding, failing `bun run check` and the `pre-push` hook. A block that must stay inline takes a `canon-allow-embedded: <reason>` marker on its opening line or the line above.
+- A refusal exits `1` and is logged as a skip, as does a canon too old to carry the verb, since an unknown command exits `1` too.
+- Without `canon` on PATH the stage is skipped and logged, the same as the markdown bans stage.

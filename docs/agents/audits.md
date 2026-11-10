@@ -84,11 +84,14 @@ An audit that finds no corpus reports `absent`, which moves neither the verdict 
 | `census`             | `canon census`                      | File count, extension breakdown, and line total                                             | Reports        |
 | `deps`               | `canon deps audit`                  | Advisories against the resolved dependencies                                                | Reports        |
 | `outside`            | `canon gov citations`               | Rule citations and internal frontmatter globs reaching nothing                              | Gates in check |
+| `outside`            | `canon code audit`                  | Pages, stylesheets, and scripts held inline in TypeScript or Astro source past five lines   | Gates in check |
 | `outside`            | `canon gov superseded <old> <new>`  | Where the tree still asserts a value a changed convention no longer produces                | Reports        |
 | `outside`            | `canon claude skills drift <ref>`   | Shipped skill bodies rewritten since a ref                                                  | Reports        |
 | `outside`            | `canon claude routing`              | Per `CLAUDE.md` section, how many bullets name a path and whether a rule covers it          | Reports        |
 
-A deliberate secret takes a `canon-allow-secret: <reason>` marker. A deliberate citation takes `canon-allow-citation: <reason>` and a deliberate superseded value takes `canon-allow-superseded: <reason>`, each on its own line or the one above. Run any verb with `--help` for its flags and refusal reasons.
+A deliberate secret takes a `canon-allow-secret: <reason>` marker. A deliberate citation takes `canon-allow-citation: <reason>`, a deliberate superseded value takes `canon-allow-superseded: <reason>`, and a block that must stay inline takes `canon-allow-embedded: <reason>`, each on its own line or the one above.
+
+Run any verb with `--help` for its flags and refusal reasons.
 
 ## Refusals
 

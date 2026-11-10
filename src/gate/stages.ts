@@ -5,7 +5,7 @@ import {
   seedIndependence,
   skillPaths,
 } from '@/gate/boundaries'
-import { embeddedPrograms } from '@/gate/embedded'
+import { embeddedPrograms } from '@/code/embedded'
 import {
   canonicalRecords,
   auditSet,
