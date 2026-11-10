@@ -7,10 +7,10 @@ description: Take plan shapes for a scroll read as stills and for nav and action
 
 Read before writing the first take plan in a `design-references` run. A still taken at one scroll position paints a scroll-linked layer where the visitor never sees it, and a hover state does not exist in a still at all, so both are filmed.
 
-`canon take` films each beat from a fresh load of the page, on the plan shape its `--help` prints. Write each plan to `<page-dir>/<site>/takes/<name>.json` and film it into the folder beside it:
+`canon take` films each beat from a fresh load of the page, on the plan shape its `--help` prints. Write each plan to `<asset-dir>/<site>/takes/<name>.json` and film it into the folder beside it:
 
 ```bash
-canon take <url> <plan> --out <page-dir>/<site>/takes/<name> --reel <page-dir>/<site>/takes/<name>.webp --max-seconds 60 --json
+canon take <url> <plan> --out <asset-dir>/<site>/takes/<name> --reel <asset-dir>/<site>/takes/<name>.webp --max-seconds 60 --json
 ```
 
 - Read each beat's `still` off the record, the clip's closing frame, which is the image the agent reads and the frame links
@@ -63,7 +63,7 @@ Up to three hovers per site, each its own take of one beat, so a target that ref
 
 ### Picking the target
 
-Pick each target from the page as a visitor sees it, never from memory of the site. Run every `canon browser` command from `<page-dir>/<site>/`, since its snapshots land in `.playwright-cli/` under the folder it runs in and the project root is tracked.
+Pick each target from the page as a visitor sees it, never from memory of the site. Run every `canon browser` command from `<asset-dir>/<site>/`, since its snapshots land in `.playwright-cli/` under the folder it runs in and the project root is tracked.
 
 1. Open the page with `canon browser -s=<site> open <url>` and read `canon browser -s=<site> snapshot`.
 2. Take the nav entries that open a menu and the first primary action in the header or the hero.

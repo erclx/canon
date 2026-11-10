@@ -50,15 +50,17 @@ Resolve `<board>` and `<project>` and start the board as `${CLAUDE_SKILL_DIR}/..
 
 1. Read `frameboard list --root <board> --json` with no `--project`, and run `frameboard project add <project>` when it lists no `<project>`.
 2. Add the page `references` with `frameboard page add references` when the project has none. A page by that name already there is this skill's page from an earlier run, so keep it.
-3. Delete every frame named `<site>-*` on it with `frameboard frame delete`, for each site this run captures, so a rerun replaces a site rather than stacking a second copy beside the first.
-4. Resolve `<page-dir>` as `<board>/<project>/references/`, the folder the frames link their images from.
+3. Resolve `<page-dir>` as `<board>/<project>/references/`, which holds the frame HTML alone, and `<asset-dir>` as `<board>/<project>/assets/references/`, which holds every shot and film.
+4. Delete every frame named `<site>-*` on `references` with `frameboard frame delete`, and remove `<asset-dir>/<site>/`, for each site this run captures.
+
+Frameboard serves a frame's images from its project's `assets/` folder and never from a page folder, which is why the two differ. Clearing a site's folder makes a rerun replace that site rather than stack a second copy beside the first, and leaves every other site's shots standing.
 
 ## Step 4: shoot the sections
 
 Run one capture per width, each into its own folder:
 
 ```bash
-canon capture <url> --sections --width <px> --out <page-dir>/<site>/<px> --json
+canon capture <url> --sections --width <px> --out <asset-dir>/<site>/<px> --json
 ```
 
 - Read the record's `sections` for each shot's `path` and `height`, and its `failed` for each section that did not shoot
@@ -97,7 +99,7 @@ Write each frame's whole document to `<page-dir>/<frame>.html`, then place it wi
 Every frame follows the same layout rules, so the page reads as one set.
 
 - Caption every frame above its image with the site, the source URL, the width, and one line on the structure an arm may take
-- Link each image by a path relative to `<page-dir>`, which Frameboard serves beside the frame
+- Link each image as `../assets/references/<site>/<px>/section-<nn>.png`, and a film's still and reel under `../assets/references/<site>/takes/`, one folder up from `<page-dir>`
 - Lay each site out as one band, a column per width in ascending order and the films in a column after them, with the notes frame heading the band
 - Theme the caption off the `data-theme` attribute the board sets on each frame's root, and leave the image as it was shot
 
@@ -105,7 +107,7 @@ Every frame follows the same layout rules, so the page reads as one set.
 
 1. Emit the board address with the page, so the operator opens `references` directly.
 2. Report each site on one line, naming its shot count per width, its films, its DESIGN.md state, and every refusal.
-3. Report `<page-dir>` as the folder holding every shot and film.
+3. Report `<asset-dir>` as the folder holding every shot and film, and `<page-dir>` as the one holding the frames.
 4. Leave the server running, since the operator reads the page after the run ends, and say it stops with the session that started it.
 
 ## What this delegates
