@@ -82,6 +82,22 @@ describe('loadPaintedPatterns', () => {
     expect(isPainted('src/pr/lift.ts', patterns)).toBe(false)
   })
 
+  it('should leave a synced stack config unpainted through its shipped override', () => {
+    const patterns = loadPaintedPatterns(
+      fileURLToPath(new URL('../..', import.meta.url)),
+    )
+
+    expect(
+      isPainted(
+        'tooling/astro/configs/src/components/site-head.astro',
+        patterns,
+      ),
+    ).toBe(false)
+    expect(isPainted('tooling/astro/scenarios.css', patterns)).toBe(false)
+    expect(isPainted('web/src/pages/index.astro', patterns)).toBe(true)
+    expect(isPainted('src/design/tokens.ts', patterns)).toBe(true)
+  })
+
   it('should keep the default when the override does not parse', () => {
     expect(loadPaintedPatterns(rootWith('{nope'))).toEqual(DEFAULT_PAINTED)
   })
