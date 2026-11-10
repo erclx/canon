@@ -80,7 +80,7 @@ function typeRows(
       tag(token.weight, tagged.has('weight')),
       size(token.size),
       size(step?.tablet),
-      size(step?.phone),
+      size(step?.phone ?? step?.tablet),
       tag(token.lineHeight, tagged.has('lineHeight')),
     ]
   })

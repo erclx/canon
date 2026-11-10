@@ -113,10 +113,10 @@ describe('renderDesignDocument', () => {
   it('tags a cell the record marks and leaves the rest bare', () => {
     const document = renderDesignDocument()
 
-    expect(document).toContain('#d5d4d1 ? verify')
+    expect(document).toContain('| 1.45 ? verify |')
     // The role column pads to the widest role in the table, so this width
     // moves whenever a longer role name is declared.
-    expect(document).toContain('| background           | page canvas')
+    expect(document).toContain('| background       | page canvas')
   })
 
   /**
@@ -137,7 +137,10 @@ describe('renderDesignDocument', () => {
     const border = parsed.color.find(
       (row) => row['Role'].value === 'light-border',
     )
-    expect(border?.['Value']).toEqual({ value: '#d5d4d1', tagged: true })
+    expect(border?.['Value']).toEqual({ value: '#ececea', tagged: false })
+
+    const code = parsed.typography.find((row) => row['Role'].value === 'code')
+    expect(code?.['Line height']).toEqual({ value: '1.45', tagged: true })
   })
 
   it('renders a role at the tablet and phone sizes of the step it takes', () => {
@@ -182,6 +185,25 @@ describe('renderDesignDocument', () => {
     expect(document).toContain(
       '| body | Geist  | 400    | 1rem | 1rem   | 1rem  |',
     )
+  })
+
+  it('shows the tablet size at phone for a step that shrinks only at tablet', () => {
+    const document = renderDesignDocument({
+      ...TOKENS,
+      typeScale: [{ step: 'caption', size: '0.75rem', tablet: '0.6875rem' }],
+      typography: [
+        {
+          role: 'caption',
+          family: 'Geist',
+          weight: '500',
+          size: '0.75rem',
+          lineHeight: '1.45',
+          step: 'caption',
+        },
+      ],
+    })
+
+    expect(document).toContain('| 0.75rem | 0.6875rem | 0.6875rem |')
   })
 
   it('renders the shadows under Shapes by the property each is read through', () => {

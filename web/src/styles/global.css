@@ -14,9 +14,7 @@
 @layer base {
   /*
    * Role names over tokens. Ink carries every action and link, and the pip is
-   * the page's one hue, so the page reads no accent token at all. Muted
-   * text reads `--color-text-secondary` on every ground, since the muted token
-   * falls under 4.5:1 on the surface at the sizes a figure sets.
+   * the page's one hue, so the page reads no accent token at all.
    */
   :root {
     --ground: var(--color-background);
@@ -25,7 +23,7 @@
     --ring: var(--color-border);
     --ink: var(--color-text);
     --ink-body: var(--color-text-body);
-    --ink-soft: var(--color-text-secondary);
+    --ink-soft: var(--color-muted);
     --ink-faint: var(--color-muted);
     /* The bright ink a filled action takes, a step past the text ink toward the page's far end. */
     --hi: color-mix(in srgb, var(--color-text) 30%, white);
@@ -68,7 +66,7 @@
   }
 
   h1 {
-    font-size: var(--size-t0);
+    font-size: var(--size-display);
     line-height: 1.12;
     letter-spacing: -0.02em;
     font-weight: 600;
@@ -89,7 +87,7 @@
   }
 
   .lead {
-    font-size: var(--size-t2);
+    font-size: var(--size-lede);
     line-height: 1.45;
     color: var(--ink-body);
     margin: var(--space-lg) 0 0;
@@ -107,7 +105,7 @@
 
   .mono {
     font-family: var(--mono);
-    font-size: var(--size-t4);
+    font-size: var(--size-body);
     color: var(--ink);
   }
 
@@ -131,7 +129,7 @@
     background: var(--ink);
     color: var(--ground);
     border-radius: 0 0 var(--radius-action) 0;
-    font-size: var(--size-t5);
+    font-size: var(--size-small);
   }
 
   .skip:focus {
@@ -206,7 +204,7 @@
     min-height: 34px;
     padding: 0 14px;
     border-radius: var(--radius-action);
-    font-size: var(--size-t4);
+    font-size: var(--size-body);
   }
 
   .btn-small::after {
@@ -226,7 +224,7 @@
     background: var(--tint);
     border-radius: var(--radius-panel);
     box-shadow: inset 0 0 0 1px var(--ring);
-    font-size: var(--size-t4);
+    font-size: var(--size-body);
     line-height: 1.8;
     color: var(--ink);
     font-family: var(--mono);
@@ -308,7 +306,7 @@
     gap: 10px;
     margin: 0 0 10px;
     font-family: var(--mono);
-    font-size: var(--size-t4);
+    font-size: var(--size-body);
     color: var(--ink-soft);
   }
 
@@ -350,7 +348,7 @@
     background: var(--chrome);
     box-shadow: inset 0 -1px 0 var(--ring);
     font-family: var(--mono);
-    font-size: var(--size-t4);
+    font-size: var(--size-body);
     color: var(--ink);
   }
 
@@ -383,7 +381,7 @@
   .rows em {
     margin-left: auto;
     font-style: normal;
-    font-size: var(--size-t4);
+    font-size: var(--size-body);
     color: var(--ink-soft);
     text-align: right;
   }
@@ -462,7 +460,7 @@
 
   .dated {
     margin: 16px 0 0;
-    font-size: var(--size-t5);
+    font-size: var(--size-small);
     color: var(--ink-soft);
   }
 
@@ -481,13 +479,13 @@
     border-radius: var(--radius-action);
     box-shadow: inset 0 0 0 1px var(--ring);
     font-family: var(--mono);
-    font-size: var(--size-t5);
+    font-size: var(--size-small);
     color: var(--ink-soft);
   }
 
   .code {
     margin: 10px 0;
-    font-size: var(--size-t4);
+    font-size: var(--size-body);
     line-height: 1.9;
     color: var(--ink);
     white-space: pre-wrap;
@@ -506,7 +504,7 @@
   .msg small {
     display: block;
     margin-bottom: 2px;
-    font-size: var(--size-t5);
+    font-size: var(--size-small);
     color: var(--ink-soft);
   }
 
@@ -553,11 +551,11 @@
     min-height: 44px;
     padding: 0 18px;
     border: 0;
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-action);
     background: var(--ink);
     color: var(--ground);
     font: inherit;
-    font-size: var(--size-t4);
+    font-size: var(--size-body);
     font-weight: 600;
     white-space: nowrap;
     cursor: pointer;
@@ -581,7 +579,7 @@
     background: var(--chrome);
     color: var(--ink);
     font: inherit;
-    font-size: var(--size-t5);
+    font-size: var(--size-small);
     cursor: pointer;
     box-shadow: inset 0 0 0 1px var(--ring);
   }

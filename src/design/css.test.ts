@@ -79,8 +79,8 @@ describe('buildDesignCss', () => {
   it('emits one custom property per color role a browser can render', () => {
     const css = buildDesignCss()
 
-    expect(css).toContain('--color-background: #0f0e0c;')
-    expect(css).toContain('--color-light-muted: #6e6d6c;')
+    expect(css).toContain('--color-background: #121211;')
+    expect(css).toContain('--color-light-muted: #6b6a66;')
   })
 
   it('leaves an ANSI role out, since no browser renders one', () => {
@@ -91,23 +91,23 @@ describe('buildDesignCss', () => {
   })
 
   it('emits success, which holds a hex a browser does render', () => {
-    expect(buildDesignCss()).toContain('--color-success: #61c454;')
+    expect(buildDesignCss()).toContain('--color-success: #6fae6a;')
   })
 
   it('carries the spacing, type, and radius layers beside the colors', () => {
     const css = buildDesignCss()
 
     expect(css).toContain('--space-md: 0.875rem;')
-    expect(css).toContain('--type-body-lh: 1.65;')
+    expect(css).toContain('--type-body-lh: 1.55;')
     expect(css).toContain(
       '--type-body-family: Geist Variable, DejaVu Sans, sans-serif;',
     )
     expect(css).toContain(
-      '--type-code-family: Noto Sans Mono, DejaVu Sans Mono, monospace;',
+      '--type-code-family: Geist Mono Variable, DejaVu Sans Mono, monospace;',
     )
-    expect(css).toContain('--size-t0: 3.175rem;')
-    expect(css).toContain('--size-t6: 0.6875rem;')
-    expect(css).toContain('--radius-marker: 999px;')
+    expect(css).toContain('--size-hero: 5.625rem;')
+    expect(css).toContain('--size-view-small: 0.75rem;')
+    expect(css).toContain('--radius-marker: 2px;')
   })
 
   it('gives every role a size the type scale offers', () => {
@@ -138,14 +138,11 @@ describe('buildDesignCss', () => {
   it('maps every role the light theme block stands in for', () => {
     const css = buildDesignCss()
 
-    // The four that closed the gap. Each one carries text on a light ground,
-    // or is the surface step behind it, so a page reading any of them used to
-    // resolve a dark value against a light canvas.
+    // Each carries text on a light ground or is the surface step behind it, so
+    // a page reading one unmapped resolves a dark value against a light canvas.
     expect(css).toContain('--color-chrome: var(--color-light-chrome);')
     expect(css).toContain('--color-text-body: var(--color-light-text-body);')
-    expect(css).toContain(
-      '--color-text-secondary: var(--color-light-text-secondary);',
-    )
+    expect(css).toContain('--color-window: var(--color-light-window);')
     expect(css).toContain('--color-success: var(--color-light-success);')
   })
 
@@ -218,7 +215,7 @@ describe('buildDesignCss', () => {
       '@media (max-width: 900px) {\n  :root {\n    --size-hero: 4rem;\n    --radius-tray: 28px;\n  }\n}',
     )
     expect(css).toContain(
-      '@media (max-width: 600px) {\n  :root {\n    --size-hero: 2.5rem;\n    --radius-tray: 22px;\n  }\n}',
+      '@media (max-width: 640px) {\n  :root {\n    --size-hero: 2.5rem;\n    --radius-tray: 22px;\n  }\n}',
     )
   })
 

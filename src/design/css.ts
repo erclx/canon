@@ -29,11 +29,12 @@ function hasHexValue(value: string): boolean {
 }
 
 /**
- * The widths the responsive steps shrink under, matching the tablet and phone
- * frames the system was drawn at.
+ * The widths the responsive steps shrink under. The phone cut sits at the
+ * figure component's 640 rather than a cut of its own, since two cuts that
+ * close together open a range no capture width reaches.
  */
 export const TABLET = 900
-export const PHONE = 600
+export const PHONE = 640
 
 /** oxfmt's print width for `web/src/styles/tokens.css`, which a declaration must match. */
 const PRINT_WIDTH = 80
