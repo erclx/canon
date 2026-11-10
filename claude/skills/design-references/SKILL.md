@@ -42,7 +42,7 @@ Derive a kebab `<site>` from each address's host without its `www.`, such as `li
 
 Capture each site at every width the project draws at. Read the widths as `${CLAUDE_SKILL_DIR}/../design-pick/references/widths.md` states them, so a reference set and a round share one width per device class.
 
-Say which source gave the widths. Add `--touch` to the capture at the phone width, 320 or the narrowest the record names, so a site that switches on a hover or pointer media query shows its tap variant there. `--touch` leaves the user agent as it is, so say so where a phone shot still shows a hover-only control, since that site picks its phone layout by user agent.
+Say which source gave the widths. Add `--touch` to the capture at the phone-class width, so a site that switches on a hover or pointer media query shows its tap variant there. `--touch` leaves the user agent as it is, so say so where a phone shot still shows a hover-only control, since that site picks its phone layout by user agent.
 
 ## Step 3: open the page
 
