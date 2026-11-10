@@ -1319,8 +1319,18 @@ describe('isFolderEchoedName', () => {
     expect(isFolderEchoedName('x/foo/foo.config.json')).toBe(true)
   })
 
-  it('should pass the default plugin hooks path Claude Code reads', () => {
+  it('should pass the default hooks path at the plugin root', () => {
     expect(isFolderEchoedName('claude/hooks/hooks.json')).toBe(false)
+  })
+
+  it('should pass the default hooks path at a bundle plugin root', () => {
+    expect(isFolderEchoedName('plugins/canon-media/hooks/hooks.json')).toBe(
+      false,
+    )
+  })
+
+  it('should flag hooks/hooks.json outside a plugin root', () => {
+    expect(isFolderEchoedName('src/hooks/hooks.json')).toBe(true)
   })
 
   it('should still flag another file named for a hooks folder', () => {
