@@ -196,21 +196,6 @@ export const setup = {
     },
   ],
   session: 'A session in a fresh project',
-  // README.md: canon-allow-readme-paraphrase: the README's three kinds of file, each as a heading and its line. "Skills load live from the plugin, so there is no copy to drift" "Configs and seeds are real files you own"
-  lands: {
-    cap: 'What lands in the project',
-    items: [
-      {
-        name: 'Skills',
-        line: 'Load live from the plugin, so there is no copy to drift.',
-      },
-      {
-        name: 'Rules',
-        line: 'Files under `.claude/rules/` that load when a matching path is edited.',
-      },
-      { name: 'Configs and seeds', line: 'Real files the project owns.' },
-    ],
-  },
   play: (name: string) => `Play ${name} in the session`,
 }
 
