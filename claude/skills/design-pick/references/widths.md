@@ -13,7 +13,7 @@ Draw every arm at one width per device class. Take the widths from the `## Layou
 
 | Class   | Width the record gives              | Fallback |
 | ------- | ----------------------------------- | -------- |
-| Phone   | The narrowest it names              | 320      |
+| Phone   | The narrowest it names, under 600   | 320      |
 | Tablet  | The narrowest it names, 600 to 1023 | 834      |
 | Desktop | The widest it names, 1024 up        | 1440     |
 

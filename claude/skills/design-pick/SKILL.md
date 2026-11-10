@@ -23,9 +23,10 @@ The candidates live on the Frameboard board the project names, in a project of t
 1. State the decision in one sentence, naming what changes between arms and what stays fixed.
 2. Emit the design read in the run's output, in the form `design-taste` fixes, taking the layer from its ordered catalog. The arms differ at that layer, and a missing read is visible.
 3. Derive a kebab slug from that sentence. The first round's page is `<slug>`, and Step 5 names later rounds `<slug>-2`, `<slug>-3`, and so on.
-4. Write one arm per candidate, each carrying an id, a label, what the arm costs, and the reference it draws on. An arm with no stated cost is not an option.
-5. Make the current state arm `0`, so the baseline is a candidate rather than an absence. A decision with nothing shipped yet says so and starts at arm `1`.
-6. Stop at three to five arms. Two is a comparison the operator can hold in prose, and past five the pick stops being a look and becomes a sort.
+4. Gather references before writing any arm, as `### Gather references before drafting` below states.
+5. Write one arm per candidate, each carrying an id, a label, what the arm costs, and the reference it draws on. An arm with no stated cost is not an option.
+6. Make the current state arm `0`, so the baseline is a candidate rather than an absence. A decision with nothing shipped yet says so and starts at arm `1`.
+7. Stop at three to five arms. Two is a comparison the operator can hold in prose, and past five the pick stops being a look and becomes a sort.
 
 Inside a live `plan-groundwork` track, renders land in the track's own `evidence/<slug>/renders/`, since a candidate render is evidence its decision file cites. Everywhere else they land in session scratch.
 
@@ -134,7 +135,7 @@ A round never sees its neighbors, so run this before Step 6 item 1 where the pic
 1. Apply the winning arm to the real surface, in one change.
 2. Close out any document stating the decision as open, in the same change, naming the winner and the arms that stayed defensible. Skip this where nothing stated the decision.
 3. Hand the winning arm's frame refs to `canon:design-record`, which lands them in the project's design record. Report it rather than proceeding silently when that skill does not resolve.
-4. Capture the picked round's frames and the `references` page with `frameboard capture --page <page> --out <canon-dir>`, keeping the losing arms as a revert record. Report each image's `path`.
+4. Capture the picked round's frames with `frameboard capture --page <page> --out <canon-dir>`, keeping the losing arms as a revert record. Capture `references` the same way when the board lists it.
 5. Resolve `<canon-dir>` as `.canon/` against the main worktree root, where shared session scratch resolves. Frameboard appends the project and page, so the archive lands at `.canon/<project>/<page>/`.
 6. Delete every page on the run's list with `frameboard page delete <page>`, except a picked page on a named board. Touch no page the run did not add, and never remove a page folder by hand.
 7. End the serve command if this run started it, since Frameboard carries no stop verb. Leave a server the operator started running.
