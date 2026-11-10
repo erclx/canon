@@ -21,6 +21,7 @@ import { register as transcripts } from '@/commands/transcripts'
 import { register as tasks } from '@/commands/tasks'
 import { register as intake } from '@/commands/intake'
 import { register as comments } from '@/commands/comments'
+import { register as code } from '@/commands/code'
 import { register as context } from '@/commands/context'
 import { register as markdown } from '@/commands/markdown'
 import { register as migrate } from '@/commands/migrate'
@@ -87,6 +88,7 @@ transcripts(program)
 tasks(program)
 intake(program)
 comments(program)
+code(program)
 context(program)
 markdown(program)
 records(program)
