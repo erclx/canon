@@ -21,7 +21,7 @@ if (section && box && stick && pile && after) {
   ]
   const N = sheets.length
   /** Pixels of scroll per sheet while the stage is pinned. */
-  const STEP = 260
+  const STEP = 120
   const still = reducedMotion()
   const pin = () => parseFloat(getComputedStyle(stick).top) || 0
   let current = 0
