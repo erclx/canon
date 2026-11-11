@@ -51,6 +51,8 @@ Holds the repository-root configs, including the verify runner, and every `--ski
 - `scripts/verify.ts` runs the phases the nearest `scripts/verify.json` requires, and `check:format` and the `shell` add-on's `check:shell` run only where `package.json` declares the script
 - A missing `package.json` in a subfolder verify tells the caller to sync the stack, and a missing `verify.json` names `canon tooling sync`
 
+The two canon stages take `canon` from `PATH` first. Under `CI=true` they fall back to `bunx` pinned to `domains.tooling.version` in `canon/config/config.json`, since the sync that wrote the runner stamped a release carrying its verbs. A missing stamp version fails there, and so does exit 1, which `bunx` also returns on a failed fetch.
+
 ### `tooling/base/seeds/`
 
 Holds the files every project starts with and then owns.
