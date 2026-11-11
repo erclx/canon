@@ -195,9 +195,19 @@ if (
       rows.delete(id)
       setTimeout(() => node.remove(), 400)
     })
-    if (counts)
-      counts.innerHTML = `<b>${state.aw.length}</b> awaiting input · <b>${state.wk.length}</b> working · <b>${done}</b> completed`
+    writeCounts()
   }
+
+  /* A phone width cuts the long wording mid-word, so it takes the short one. */
+  const narrow = matchMedia('(max-width: 640px)')
+  function writeCounts() {
+    if (!counts) return
+    const [awaiting, completed] = narrow.matches
+      ? ['awaiting', 'done']
+      : ['awaiting input', 'completed']
+    counts.innerHTML = `<b>${state.aw.length}</b> ${awaiting} · <b>${state.wk.length}</b> working · <b>${done}</b> ${completed}`
+  }
+  narrow.addEventListener('change', writeCounts)
 
   function step() {
     const kind = data.steps[tick % data.steps.length]

@@ -186,6 +186,19 @@ test.describe('the fixed bar', () => {
   })
 })
 
+test('the opening status line fits on one row at 360', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 })
+  await page.goto('/')
+  const line = page.locator('#av-counts')
+  await expect(line).toHaveText(/\S/)
+
+  const cut = await line.evaluate(
+    (node) => node.scrollWidth - node.clientWidth,
+  )
+
+  expect(cut).toBeLessThanOrEqual(0)
+})
+
 test('the footer mark takes the reader back to the top', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto('/')
