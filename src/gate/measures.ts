@@ -1118,7 +1118,10 @@ export const readmeCitations: Measure = async (ctx) => {
  * because the path changes no byte of the built site. The capture harness is
  * the one case: a change there should report the capture job and never deploy.
  */
-const VISUAL_ONLY_GLOBS: readonly string[] = ['tooling/web/configs/e2e/**']
+const VISUAL_ONLY_GLOBS: readonly string[] = [
+  'tooling/web/configs/e2e/**',
+  '.htmlvalidate.cjs',
+]
 
 /**
  * `deploy-site.yml` and `pr-visual-checks.yml` each carry their own literal

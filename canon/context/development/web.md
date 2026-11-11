@@ -56,7 +56,7 @@ Holds the `html-validate` rules for the built page, and `.htmlvalidate-records.c
 
 - `check:lint` lints `web/src/content/records/*.html` through `.htmlvalidate-records.cjs`, which demands the self-closing form oxfmt writes
 - The `pr-visual-checks.yml` e2e job lints the built `web/dist/index.html` through `.htmlvalidate.cjs`, so the page is linted only after a build
-- Each rule set to `off` in `.htmlvalidate.cjs` carries its reason beside it, and the `h3` inside the hero's play buttons is a real defect left standing until the section markup stops moving
+- Each rule set to `off` in `.htmlvalidate.cjs` carries its reason beside it, and the `h3` inside the setup section's stage buttons is a real defect left standing until the section markup stops moving
 - `canon/design/**/*.html` is exempt, since Frameboard's sync writes the board's markup and its `--check` compares the bytes, so a fix belongs in Frameboard
 
 ### Other folders
