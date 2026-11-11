@@ -85,6 +85,21 @@ Read the slot off `canon pr evidence <number> --json` at the moment the line is 
 - `waived` when neither is carried and `canon pr lift <number> --check --json` names every listed path under `waived`, quoting no token from the reason
 - `none` otherwise, and a pull request with no painted path takes no slot at all
 
+### Gate the line on CI at the tip
+
+Write the line only off `already-ready` or `clear` from `canon pr lift <number> --check --json`, read at the moment the line is written. A ready mark is not a merge-ready one, and `canon pr merge` refuses `ci-pending` on a pull request the mark alone vouched for.
+
+- Read a record whose `gates` carries no `ci` entry as CI unread, which a CLI older than the plugin returns, and write no line on it
+- On a `ci-pending` reason, report CI as running and run `canon pr lift <number> --json` with `run_in_background`, writing the line on its wake once it returns `already-ready` or `lifted`
+- On any other refusal, report the reason and write no line, since a stale standing goes back through the poll's rebase handback
+
+### A bot pull request
+
+A release or Dependabot pull request takes no review, so its check read refuses `review-missing` forever, and a lift without `--check` returns it to draft. Never run the non-check lift on one.
+
+- Gate its line on the `ci` entry in `gates` alone, written only when that entry reads `isOk: true`
+- On a pending `ci` entry, wake through `gh pr checks <number> --watch --required` with `run_in_background`, then take a fresh `--check` read before writing the line
+
 ### An unproven painted pull request
 
 A painted pull request whose slot reads `none` is unproven. Report it as unproven, never as ready, whatever the lift returned, and put the missing proof to the operator as a decision.
