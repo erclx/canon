@@ -15,7 +15,8 @@ Owns `web/`, the Astro app behind the `canon.erclx.com` landing page, and the im
 
 Holds the page, built from components that read their figures through `lib/`.
 
-- `pages/` assembles the one route from `components/sections/`, one component per section, each styled in `<style is:global>` under its id since its script writes markup a scoped style never reaches
+- `pages/` assembles the one route from `components/sections/`, one folder per section holding `index.astro`, `style.css`, `client.ts`, and its icons, each sheet's rules under the section id since its script writes markup a scoped style never reaches
+- `components/site-nav/` and `components/site-footer/` take the same split, each sheet under its root class so a bare `nav` or `a` rule stays inside it
 - `content/copy.ts` holds the copy and the product views' scenes, each string cited to `README.md` or marked as a paraphrase, gated by `readmeCitations`
 - `content/` also holds the sessions, craft's practices with each quote's ledger row, and the record sheets under `content/records/`, one formatted HTML file each
 - `lib/skills.ts` reads the skill catalog for the opening's `/` menu, and `lib/scene.ts` paces every scene window, halting it while the reader holds it
@@ -58,6 +59,12 @@ Two folders outside `web/` shape what the page renders and captures.
 - `scripts/core/regen-web-favicon.ts` writes `web/public/favicon.svg`, the mark on a tile, and the README `mark-color` pair, since an image has no CSS context and `currentColor` paints black
 - The nav and the card inline the mark and color its pip from `FAVICON_COLORS`, never `--color-accent`
 - `tooling/web/configs/e2e/` owns the screenshot harness, which shoots each section with reduced motion, and `css.test.ts` pins its widths to the record's Layout line in `src/design/tokens.ts`
+
+## Decisions
+
+- The page keeps Tailwind v4 as its floor, imported first in `global.css`, and writes its own CSS rather than utility classes. It builds the `astro` stack canon ships, whose `web` base installs Tailwind, and the mocks it matches carry pixel values a utility rewrite would only restate.
+- The page carries no shadcn/ui and no `components.json`. shadcn/ui ships React components, and the page renders no React island, so adopting it would add client JavaScript for no control the page lacks.
+- Each section, the nav, and the footer is a folder of `index.astro` for markup, `style.css`, `client.ts`, and one `.svg` per icon. `markup.test.ts` fails on a style block, a script body, or inline SVG back in an Astro file. A JSON data island, a sheet rendered from `content/records/`, and generated inline CSS stay, since none is markup written by hand.
 
 ## Gotchas
 

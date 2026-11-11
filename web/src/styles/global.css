@@ -9,9 +9,9 @@
  *
  * Tailwind v4 generates its utility classes inside `@layer utilities`, and an
  * unlayered rule always wins over a layered one regardless of specificity, so
- * everything here sits in `@layer base`. Each section's own rules sit in its
- * component, prefixed by the section's id, so a rule never reaches a second
- * section.
+ * everything here sits in `@layer base`. Each section's own rules sit in the
+ * `style.css` of its folder under `components/sections/`, prefixed by the
+ * section's id, so a rule never reaches a second section.
  */
 @layer base {
   /* Role names over tokens, in the mocks' vocabulary. */
