@@ -90,7 +90,7 @@ Read the slot off `canon pr evidence <number> --json` at the moment the line is 
 Write the line only off `already-ready` or `clear` from `canon pr lift <number> --check --json`, read at the moment the line is written. A ready mark is not a merge-ready one, and `canon pr merge` refuses `ci-pending` on a pull request the mark alone vouched for.
 
 - Read a record whose `gates` carries no `ci` entry as CI unread, which a CLI older than the plugin returns, and write no line on it
-- On a `ci-pending` reason, report CI as running and run `canon pr lift <number> --json` with `run_in_background`, writing the line on its wake once it returns `already-ready` or `lifted`
+- On a `ci-pending` reason, report CI as running and run `canon pr lift <number> --json` with `run_in_background` as the wake, then take a fresh `--check` read and write the line only off that
 - On any other refusal, report the reason and write no line, since a stale standing goes back through the poll's rebase handback
 
 ### A bot pull request
