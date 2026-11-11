@@ -22,6 +22,9 @@ on:
       - 'src/design/**'
       - '.github/workflows/deploy-site.yml'
       - 'tooling/web/configs/e2e/**'
+      # The built page is linted against this file, which changes no byte of
+      # the site, so it reports the lint and never deploys.
+      - '.htmlvalidate.cjs'
   workflow_dispatch:
 
 permissions:
@@ -64,6 +67,9 @@ jobs:
 
       - name: Run E2E Tests
         run: bun run web:e2e
+
+      - name: Lint the built page
+        run: bunx html-validate web/dist/index.html
 
       - name: Upload E2E Report
         uses: actions/upload-artifact@v7

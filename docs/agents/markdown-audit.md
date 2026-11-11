@@ -88,8 +88,10 @@ The audit runs in four places:
 
 - `.claude/hooks/standards-audit.sh` after each markdown edit, handing back every finding
 - The `Markdown` stage of `canon gate run`, over the whole corpus
-- `scripts/verify.ts` in a scaffolded project, excluding `CHANGELOG.md` and skipping with a logged line when no `canon` is on `PATH`
+- `scripts/verify.ts` in a scaffolded project, excluding `CHANGELOG.md`
 - The seeded hook in a target
+
+With no `canon` on `PATH`, a local `scripts/verify.ts` run skips with an install hint. Under `CI=true` it runs the release the project's stamp records through `bunx`, and fails when the stamp holds no version or the audit exits 1.
 
 ## Refusals
 
