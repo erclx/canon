@@ -22,9 +22,6 @@ on:
       - 'src/design/**'
       - '.github/workflows/deploy-site.yml'
       - 'tooling/web/configs/e2e/**'
-      # The built page is linted against this file, which changes no byte of
-      # the site, so it reports the lint and never deploys.
-      - '.htmlvalidate.cjs'
   workflow_dispatch:
 
 permissions:

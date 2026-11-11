@@ -71,6 +71,7 @@ The root owns this config and the manifests it versions.
 
 - Its `bootstrap-sha` stops a first run versioning every untagged commit, and `include-component-in-tag: false` keeps tags `v<semver>`
 - Its `exclude-paths` skips a commit whose every file is unshipped. `src/gate/release-paths.test.ts` fails on a tracked folder neither shipped nor excluded, reading `assets` one level down.
+- `exclude-paths` matches folder prefixes only, so an entry naming a file never matches. An unshipped root file moves into an excluded folder instead.
 - `.claude-plugin/` and `claude/.claude-plugin/` hold the manifests release-please versions, and `.oxfmtrc.jsonc` ignores the files the tool writes
 
 ### Other folders
