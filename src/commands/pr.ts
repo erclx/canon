@@ -1065,12 +1065,16 @@ export function register(program: Command): void {
         'in `canon/config/painted.json` as `{ "painted": [glob], "unpainted":',
         '[glob] }`.',
         '',
-        'A pull request that is already ready has the review, ui, and evidence',
-        'gates read too. One that reads not clear returns to draft with reason',
-        '`redrafted` and the failing reason as `failed`, exit 1. Standing and CI',
-        'are reported and never cause a re-draft. A ready pull request that',
-        'clears reports `already-ready`, exit 0. Under --check nothing is',
-        'written and the first failing reason is reported.',
+        'A pull request that is already ready has every gate read too, CI',
+        'included. A review, ui, or evidence gate that reads not clear returns',
+        'it to draft with reason `redrafted` and the failing reason as',
+        '`failed`, exit 1. A stale standing refuses before the CI wait, and CI',
+        'is waited on up to --wait as on a draft. Either refuses with its own',
+        'reason, exit 1, and never causes a re-draft. Every record whose pull',
+        'request is still ready carries `isReady: true`. Only a ready pull',
+        'request whose gates all clear, CI included, reports `already-ready`,',
+        'exit 0. Under --check nothing is written, CI is read once, and the',
+        'first failing reason is reported.',
         '',
         'Reasons:',
         '  lifted, already-ready, redrafted, clear (--check)',
@@ -1084,7 +1088,8 @@ export function register(program: Command): void {
         'Every read is REST. The mutation is the one GraphQL call.',
         '',
         'Exit codes:',
-        '  0  lifted, already-ready, or every gate clear under --check',
+        '  0  lifted, already-ready with CI passing, or every gate clear under',
+        '     --check',
         '  1  refused, with the reason in the JSON record',
         '',
         'Examples:',
@@ -4648,7 +4653,7 @@ async function runLift(
     record.reason === 'lifted'
       ? `#${resolved.number} is ready for review at ${record.head?.slice(0, 8)}`
       : record.reason === 'already-ready'
-        ? `#${resolved.number} is already ready for review`
+        ? `#${resolved.number} is ready and every gate reads clear, CI included`
         : record.reason === 'redrafted'
           ? `#${resolved.number} is back to draft, since ${record.failed === undefined ? 'a gate' : LIFT_REFUSALS[record.failed]}`
           : record.reason === 'clear'
