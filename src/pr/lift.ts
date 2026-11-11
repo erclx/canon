@@ -179,6 +179,12 @@ export interface LiftRecord {
   readonly isLifted: boolean
   /** Whether the caller can treat the pull request as ready afterwards. */
   readonly isOk: boolean
+  /**
+   * Whether the pull request is out of draft when the verb returns, carried on
+   * the ready path alone. A refusal beside it names a gate that holds the merge
+   * rather than the mark.
+   */
+  readonly isReady?: boolean
   readonly head?: string
   readonly gates: readonly GateResult[]
   readonly waitedSeconds: number
@@ -395,50 +401,116 @@ function refused(
 /** The gates whose failure sends a ready pull request back to draft. */
 const REDRAFT_GATES: readonly GateName[] = ['review', 'ui', 'evidence']
 
-/**
- * Reads a ready pull request against the gates a person's ready mark vouched
- * for. A failing review, UI, or evidence gate returns it to draft, since the
- * mark no longer holds. Standing and CI are reported and never written on, as
- * either would flap a merge-ready pull request on a run still going.
- */
-async function settleReady(
+/** The ci gate one reading of the check runs gives, read once and never waited on. */
+function ciGate(reading: ChecksGate): GateResult {
+  if (reading.state === 'passing') return pass('ci')
+  if (reading.state === 'failing') return fail('ci', 'ci-failing')
+  if (reading.isConflicted) return fail('ci', 'ci-conflicted')
+  return fail('ci', 'ci-pending')
+}
+
+/** Marks a record as one whose pull request is out of draft when the verb returns. */
+function stillReady(record: LiftRecord): LiftRecord {
+  return { ...record, isReady: true }
+}
+
+function alreadyReady(
+  gates: readonly GateResult[],
+  head: string,
+  waitedSeconds: number,
+  reading: ChecksGate,
+): LiftRecord {
+  return stillReady({
+    reason: 'already-ready',
+    isLifted: false,
+    isOk: true,
+    head,
+    gates,
+    waitedSeconds,
+    ...carried(gates),
+    ...advisoryOf(reading),
+  })
+}
+
+/** Returns a ready pull request to draft on a gate its ready mark vouched for. */
+async function redraft(
   api: LiftApi,
-  opts: LiftOptions,
   pull: PullState,
   tip: string,
   gates: readonly GateResult[],
+  reason: LiftRefusal,
 ): Promise<LiftRecord> {
-  const blocked = gates.find(
-    (gate) => REDRAFT_GATES.includes(gate.gate) && !gate.isOk,
-  )
-  if (blocked?.reason === undefined) {
-    return {
-      reason: 'already-ready',
-      isLifted: false,
-      isOk: true,
-      head: tip,
-      gates,
-      waitedSeconds: 0,
-      ...carried(gates),
-    }
-  }
-  if (opts.isCheck || blocked.reason === 'gh-failed') {
-    return refused(blocked.reason, gates, tip)
-  }
+  if (reason === 'gh-failed') return stillReady(refused(reason, gates, tip))
 
   const isDrafted = await api.markDraft(pull.nodeId)
-  if (!isDrafted) return refused('gh-failed', gates, tip)
+  if (!isDrafted) return stillReady(refused('gh-failed', gates, tip))
 
   return {
     reason: 'redrafted',
-    failed: blocked.reason,
+    failed: reason,
     isLifted: false,
     isOk: false,
+    isReady: false,
     head: tip,
     gates,
     waitedSeconds: 0,
     ...carried(gates),
   }
+}
+
+/**
+ * Reads a ready pull request against every gate, and reports `already-ready`
+ * only when all of them, standing and CI included, read clear at the tip.
+ *
+ * A failing review, UI, or evidence gate returns it to draft, since the mark
+ * no longer holds. A failing standing or CI gate refuses and writes nothing,
+ * as either would flap a merge-ready pull request on a run still going.
+ */
+async function settleReady(
+  api: LiftApi,
+  opts: LiftOptions,
+  pollMs: number,
+  pull: PullState,
+  tip: string,
+  gates: readonly GateResult[],
+): Promise<LiftRecord> {
+  if (opts.isCheck) {
+    const reading = await api.readChecks(tip)
+    if (reading === undefined) {
+      return stillReady(refused('gh-failed', gates, tip))
+    }
+    const all = [...gates, ciGate(reading)]
+    const first = all.find((gate) => !gate.isOk)
+    if (first?.reason !== undefined) {
+      return stillReady(refused(first.reason, all, tip))
+    }
+    return alreadyReady(all, tip, 0, reading)
+  }
+
+  // The redraft gates come first in the list, so a standing failure reaches
+  // this branch only once the mark itself still holds.
+  const blocked = gates.find((gate) => !gate.isOk)
+  if (blocked?.reason !== undefined) {
+    return REDRAFT_GATES.includes(blocked.gate)
+      ? redraft(api, pull, tip, gates, blocked.reason)
+      : stillReady(refused(blocked.reason, gates, tip))
+  }
+
+  const ci = await waitForChecks(api, tip, opts.waitSeconds, pollMs)
+  if (ci.kind === 'refused') {
+    const failed = [...gates, fail('ci', ci.reason)]
+    return stillReady(refused(ci.reason, failed, tip, ci.waited))
+  }
+  const cleared = [...gates, pass('ci')]
+
+  const nowTip = await api.readTip(pull.branch)
+  if (nowTip === undefined) {
+    return stillReady(refused('gh-failed', cleared, tip, ci.waited))
+  }
+  if (nowTip !== tip) {
+    return stillReady(refused('head-moved', cleared, nowTip, ci.waited))
+  }
+  return alreadyReady(cleared, tip, ci.waited, ci.reading)
 }
 
 /**
@@ -481,7 +553,7 @@ export async function lift(
     evidenceGate(evidence, reviews, tip),
     standingGate(standing),
   ]
-  if (!pull.isDraft) return settleReady(api, opts, pull, tip, gates)
+  if (!pull.isDraft) return settleReady(api, opts, pollMs, pull, tip, gates)
 
   const blocked = gates.find((gate) => !gate.isOk)
 
@@ -490,15 +562,7 @@ export async function lift(
     if (reading === undefined) {
       return refused('gh-failed', gates, tip)
     }
-    const ci =
-      reading.state === 'passing'
-        ? pass('ci')
-        : reading.state === 'failing'
-          ? fail('ci', 'ci-failing')
-          : reading.isConflicted
-            ? fail('ci', 'ci-conflicted')
-            : fail('ci', 'ci-pending')
-    const all = [...gates, ci]
+    const all = [...gates, ciGate(reading)]
     const first = all.find((gate) => !gate.isOk)
     if (first?.reason !== undefined) return refused(first.reason, all, tip)
     return {
@@ -535,15 +599,7 @@ export async function lift(
     return refused('gh-failed', cleared, tip, ci.waited)
   }
   if (!nowPull.isDraft) {
-    return {
-      reason: 'already-ready',
-      isLifted: false,
-      isOk: true,
-      head: nowTip,
-      gates: cleared,
-      waitedSeconds: ci.waited,
-      ...carried(cleared),
-    }
+    return alreadyReady(cleared, nowTip, ci.waited, ci.reading)
   }
   if (nowTip !== tip) return refused('head-moved', cleared, nowTip, ci.waited)
 
@@ -569,6 +625,7 @@ export async function lift(
     reason: 'lifted',
     isLifted: true,
     isOk: true,
+    isReady: true,
     head: nowTip,
     gates: cleared,
     waitedSeconds: ci.waited,
