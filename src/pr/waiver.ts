@@ -16,15 +16,16 @@ const WAIVER_LINE = /^- \*\*Waived capture:\*\* `([^`]+)`:\s*(\S.*)$/
 const FENCE = /^\s*(```|~~~)/
 
 /**
- * Every waiver in the review bodies, in order. A line inside a fenced block is
- * a quoted sample rather than a waiver, so it never counts.
+ * Every line of the review bodies outside a fenced block, in order, with
+ * trailing whitespace dropped. A line inside a fence is a quoted sample rather
+ * than a waiver, so it never reaches a reader.
  *
  * Review bodies alone are read, never the pull request body or an issue
  * comment, since every session posts as one account and a review is the one
  * surface a worker never writes.
  */
-export function readWaivers(reviews: readonly ReviewRow[]): Waiver[] {
-  const waivers: Waiver[] = []
+function unfencedLines(reviews: readonly ReviewRow[]): string[] {
+  const lines: string[] = []
   for (const review of reviews) {
     let fence: string | undefined
     for (const line of (review.body ?? '').split('\n')) {
@@ -34,11 +35,19 @@ export function readWaivers(reviews: readonly ReviewRow[]): Waiver[] {
         else if (opener === fence) fence = undefined
         continue
       }
-      if (fence !== undefined) continue
-      const match = WAIVER_LINE.exec(line.trimEnd())
-      if (match?.[1] !== undefined && match[2] !== undefined) {
-        waivers.push({ path: match[1], reason: match[2] })
-      }
+      if (fence === undefined) lines.push(line.trimEnd())
+    }
+  }
+  return lines
+}
+
+/** Every capture waiver in the review bodies, in order. */
+export function readWaivers(reviews: readonly ReviewRow[]): Waiver[] {
+  const waivers: Waiver[] = []
+  for (const line of unfencedLines(reviews)) {
+    const match = WAIVER_LINE.exec(line)
+    if (match?.[1] !== undefined && match[2] !== undefined) {
+      waivers.push({ path: match[1], reason: match[2] })
     }
   }
   return waivers
