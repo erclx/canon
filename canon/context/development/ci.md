@@ -58,7 +58,7 @@ Runs weekly and on dispatch, one matrix job per scaffoldable stack through `cano
 
 ### `scripts/ci/install-playwright-deps.sh`
 
-Canon's own workflows installing the Playwright system packages call this script, and no seeded web workflow does since the hosted image ships Chrome, since a stalled `azure.archive.ubuntu.com` connection hangs rather than fails and a step bound alone only turns the hang red.
+Canon's own workflows installing the Playwright system packages call this script, since a stalled `azure.archive.ubuntu.com` connection hangs rather than fails and a step bound alone only turns the hang red. No seeded web workflow calls it, because the hosted image ships Chrome.
 
 - The script kills an attempt at 150 seconds and retries up to three times, running `dpkg --configure -a` before each retry
 - A signal from the runner user never reaches the root `apt-get` that `sudo` spawns, so the script kills any left behind with `sudo pkill` before that
