@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Try, current</title>
+    <link rel="stylesheet" href="../../assets/landing-v2/v2.css" />
+    <link rel="stylesheet" href="../../assets/landing-v2/fonts.css" />
+    <style>
+      :root {
+        --pg: #fdfdfc;
+        --ink: #121212;
+        --body: #3b3b38;
+        --mut: #8a8a86;
+        --tray: #f2f2f0;
+        --line: #ececea;
+        --edge: #e4e4e1;
+        --hov: rgba(0, 0, 0, 0.05);
+        --tip: #121212;
+        --tip-ink: #f2f2f0;
+        --mark: url('../../assets/landing-v2/mark-light.svg');
+        color-scheme: light;
+      }
+      :root[data-theme='dark'] {
+        --pg: #121211;
+        --ink: #f2f2f0;
+        --body: #cccccc;
+        --mut: #8b8b8b;
+        --tray: #1a1a18;
+        --line: #2e2e2c;
+        --edge: #2a2a28;
+        --hov: rgba(255, 255, 255, 0.06);
+        --tip: #f2f2f0;
+        --tip-ink: #121212;
+        --mark: url('../../assets/landing-v2/mark-dark.svg');
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        background: var(--pg);
+      }
+      body {
+        font-family: 'Geist', sans-serif;
+        color: var(--body);
+        -webkit-font-smoothing: antialiased;
+      }
+      .sec {
+        width: 1180px;
+        margin: 0 auto;
+        padding: 120px 0 128px;
+      }
+      .head h2 {
+        font-size: 56px;
+        line-height: 1.04;
+        letter-spacing: -0.035em;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 0;
+      }
+      .head p {
+        font-size: 20px;
+        line-height: 1.5;
+        color: var(--mut);
+        margin: 18px 0 0;
+        max-width: 46ch;
+      }
+      .block {
+        position: relative;
+        margin-top: 44px;
+        background: var(--tray);
+        border: 1px solid var(--edge);
+        border-radius: 12px;
+        padding: 20px 68px 20px 24px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 15px;
+        line-height: 1.5;
+        color: var(--ink);
+      }
+      .block code {
+        display: block;
+        font-family: inherit;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        padding: 3px 0 3px 2ch;
+        text-indent: -2ch;
+      }
+      .block code::before {
+        content: '$ ';
+        color: var(--mut);
+        user-select: none;
+      }
+      .copy {
+        position: absolute;
+        top: 13px;
+        right: 13px;
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--mut);
+        cursor: pointer;
+        opacity: 0;
+        transition:
+          opacity 0.12s ease,
+          background-color 0.12s ease,
+          color 0.12s ease;
+      }
+      .block:hover .copy,
+      .copy:focus-visible,
+      .copy.done {
+        opacity: 1;
+      }
+      .copy:hover {
+        background: var(--hov);
+        color: var(--ink);
+      }
+      .copy:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 1px;
+      }
+      .copy svg {
+        width: 17px;
+        height: 17px;
+      }
+      .copy .ok {
+        display: none;
+      }
+      .copy.done .ok {
+        display: block;
+      }
+      .copy.done .ic {
+        display: none;
+      }
+      .copy.done {
+        color: var(--ink);
+      }
+      .tip {
+        position: absolute;
+        bottom: calc(100% + 8px);
+        right: 50%;
+        transform: translateX(50%);
+        background: var(--tip);
+        color: var(--tip-ink);
+        font-family: 'Geist', sans-serif;
+        font-size: 13px;
+        line-height: 1;
+        padding: 7px 9px;
+        border-radius: 6px;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.12s ease;
+      }
+      .copy:hover .tip,
+      .copy:focus-visible .tip,
+      .copy.done .tip {
+        opacity: 1;
+      }
+      @media (hover: none) {
+        .copy {
+          opacity: 1;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .copy,
+        .tip {
+          transition: none;
+        }
+      }
+      .first {
+        margin: 28px 0 0;
+        max-width: 60ch;
+        font-size: 18px;
+        line-height: 1.6;
+        color: var(--body);
+      }
+      .first code {
+        font-family: 'Geist Mono', monospace;
+        font-size: 15.5px;
+        color: var(--ink);
+      }
+      .first a {
+        color: var(--ink);
+        text-decoration: underline;
+        text-decoration-color: var(--mut);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+      }
+      .first a:hover {
+        text-decoration-color: var(--ink);
+      }
+      .sr {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+      footer {
+        display: block;
+        border-top: 1px solid var(--line);
+        padding: 0;
+        font-size: 15px;
+        color: var(--mut);
+      }
+      footer span + span {
+        margin-left: 0;
+      }
+      footer .in {
+        width: 1180px;
+        margin: 0 auto;
+        padding: 32px 0 48px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px 32px;
+        flex-wrap: wrap;
+      }
+      footer .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--ink);
+        font-weight: 600;
+        font-size: 16px;
+        user-select: none;
+      }
+      footer .brand i {
+        width: 22px;
+        height: 22px;
+        background: var(--mark) center/contain no-repeat;
+        display: block;
+      }
+      footer .links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 28px;
+        align-items: center;
+      }
+      footer a {
+        color: var(--body);
+        text-decoration: none;
+        border-radius: 4px;
+      }
+      footer a:hover {
+        color: var(--ink);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      footer a:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 3px;
+      }
+      .head p {
+        max-width: 60ch;
+        text-wrap: pretty;
+      }
+      .first {
+        max-width: 72ch;
+      }
+      @media (max-width: 1240px) {
+        .sec,
+        footer .in {
+          width: auto;
+          padding-left: 32px;
+          padding-right: 32px;
+        }
+      }
+      @media (max-width: 900px) {
+        .sec {
+          padding: 88px 24px 96px;
+        }
+        .head h2 {
+          font-size: 44px;
+        }
+        footer .in {
+          padding-left: 24px;
+          padding-right: 24px;
+        }
+      }
+      @media (max-width: 600px) {
+        .sec {
+          padding: 64px 16px 72px;
+        }
+        .head h2 {
+          font-size: 36px;
+        }
+        .head p {
+          font-size: 17px;
+        }
+        .first {
+          font-size: 16.5px;
+        }
+        .block {
+          padding: 14px 52px 14px 16px;
+          font-size: 13.5px;
+          margin-top: 32px;
+        }
+        .copy {
+          top: 8px;
+          right: 8px;
+        }
+        footer .in {
+          padding: 28px 16px 40px;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+      footer nav.links {
+        display: flex;
+        height: auto;
+        justify-content: flex-start;
+        font-size: 15px;
+      }
+      :root {
+        --win: #ffffff;
+        --selring: rgba(0, 0, 0, 0.07);
+      }
+      :root[data-theme='dark'] {
+        --win: #1e1e1e;
+        --selring: rgba(255, 255, 255, 0.06);
+      }
+      .tray {
+        background: var(--tray);
+        border-radius: 36px;
+        padding: 40px;
+      }
+      @media (max-width: 900px) {
+        .tray {
+          padding: 24px;
+          border-radius: 28px;
+        }
+      }
+      @media (max-width: 600px) {
+        .tray {
+          padding: 12px;
+          border-radius: 22px;
+        }
+      }
+      .tray {
+        margin-top: 44px;
+      }
+      .tray .block {
+        margin-top: 0;
+        background: var(--win);
+        border: 0;
+        box-shadow:
+          0 0 0 1px var(--selring),
+          0 24px 60px -28px rgba(0, 0, 0, 0.3);
+      }
+      @media (max-width: 600px) {
+        .tray {
+          margin-top: 32px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tag">
+      <b>Try, current</b
+      ><span
+        >The working version of the try section and the footer. Options are
+        drawn beside it, and a pick is folded back in here</span
+      >
+    </div>
+    <div class="sec">
+      <div class="head">
+        <h2>Trying it</h2>
+        <p>
+          canon expects someone who already knows Claude Code well. It runs on
+          Linux and macOS, and the CLI needs Bun.
+        </p>
+      </div>
+      <div class="tray">
+        <div class="block">
+          <code
+            >claude plugin marketplace add https://github.com/erclx/canon</code
+          ><code>claude plugin install canon@canon</code
+          ><code>bun install --global @erclx/canon</code
+          ><button
+            type="button"
+            class="copy"
+            aria-label="Copy the three commands"
+          >
+            <svg
+              class="ic"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <rect width="13" height="13" x="9" y="9" rx="2" />
+              <path
+                d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+              /></svg
+            ><svg
+              class="ok"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M20 6 9 17l-5-5" /></svg
+            ><span class="tip" aria-hidden="true">Copy</span></button
+          ><span class="sr" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+      <p class="first">
+        Then open a project in Claude Code and run
+        <code>/canon:target-setup</code>. It reads the stack, shows what it will
+        lay down, and writes nothing until you say yes. The
+        <a href="#">workflow guide</a> takes it from there.
+      </p>
+    </div>
+    <footer>
+      <div class="in">
+        <span class="brand"><i></i>canon</span>
+        <nav class="links" aria-label="Project links">
+          <a href="#">Docs</a><a href="#">Skill map</a><a href="#">GitHub</a
+          ><a href="#">npm</a><span>MIT licensed</span>
+        </nav>
+      </div>
+    </footer>
+    <script>
+      const CMDS = [
+        'claude plugin marketplace add https://github.com/erclx/canon',
+        'claude plugin install canon@canon',
+        'bun install --global @erclx/canon',
+      ]
+      document.querySelectorAll('.copy').forEach((b) => {
+        let t
+        const tip = b.querySelector('.tip'),
+          st = b.parentElement.querySelector('[role=status]')
+        b.addEventListener('click', () => {
+          try {
+            navigator.clipboard.writeText(CMDS.join('\n')).catch(() => {})
+          } catch (e) {}
+          b.classList.add('done')
+          tip.textContent = 'Copied'
+          st.textContent = 'Copied the three commands'
+          clearTimeout(t)
+          t = setTimeout(() => {
+            b.classList.remove('done')
+            tip.textContent = 'Copy'
+            st.textContent = ''
+          }, 1600)
+        })
+      })
+      document
+        .querySelectorAll('a[href="#"]')
+        .forEach((a) => a.addEventListener('click', (e) => e.preventDefault()))
+    </script>
+  </body>
+</html>

@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Holds, current</title>
+    <link rel="stylesheet" href="../../assets/landing-v2/v2.css" />
+    <link rel="stylesheet" href="../../assets/landing-v2/fonts.css" />
+    <style>
+      :root {
+        --pg: #fdfdfc;
+        --ink: #121212;
+        --body: #3b3b38;
+        --mut: #8a8a86;
+        --tray: #f2f2f0;
+        --line: #ececea;
+        --acc: #c15f3c;
+        --win: #ffffff;
+        --winbar: #f7f7f5;
+        --dot: #dedede;
+        --band: #f3f3f1;
+        --selring: rgba(0, 0, 0, 0.07);
+        color-scheme: light;
+      }
+      :root[data-theme='dark'] {
+        --pg: #121211;
+        --ink: #f2f2f0;
+        --body: #cccccc;
+        --mut: #8b8b8b;
+        --tray: #1a1a18;
+        --line: #2e2e2c;
+        --acc: #d97757;
+        --win: #1e1e1e;
+        --winbar: #252526;
+        --dot: #3a3a38;
+        --band: #2a2a29;
+        --selring: rgba(255, 255, 255, 0.06);
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        background: var(--pg);
+      }
+      body {
+        font-family: 'Geist', sans-serif;
+        color: var(--body);
+        -webkit-font-smoothing: antialiased;
+      }
+      .sec {
+        width: 1180px;
+        margin: 0 auto;
+        padding: 120px 0 128px;
+      }
+      .head h2 {
+        font-size: 56px;
+        line-height: 1.04;
+        letter-spacing: -0.035em;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 0;
+      }
+      .head p {
+        font-size: 20px;
+        line-height: 1.5;
+        color: var(--mut);
+        margin: 18px 0 0;
+        max-width: 60ch;
+        text-wrap: pretty;
+      }
+      .tray {
+        background: var(--tray);
+        border-radius: 36px;
+        margin-top: 52px;
+        padding: 40px;
+      }
+      .win {
+        background: var(--win);
+        border-radius: 12px;
+        box-shadow:
+          0 0 0 1px var(--selring),
+          0 24px 60px -28px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        font-family: 'Geist Mono', monospace;
+        font-size: 14.5px;
+        line-height: 1.6;
+        color: var(--body);
+      }
+      .win .bar {
+        height: 40px;
+        background: var(--winbar);
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        font-family: 'Geist', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--mut);
+        user-select: none;
+      }
+      .win .bar i {
+        position: absolute;
+        top: 14px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--dot);
+      }
+      .win .bar i:nth-child(1) {
+        left: 14px;
+      }
+      .win .bar i:nth-child(2) {
+        left: 34px;
+      }
+      .win .bar i:nth-child(3) {
+        left: 54px;
+      }
+      .log {
+        padding: 18px 26px 22px;
+      }
+      .log .ask {
+        background: var(--band);
+        margin: 0 -26px 14px;
+        padding: 8px 26px;
+        color: var(--ink);
+        display: flex;
+        gap: 10px;
+      }
+      .log .ask .g {
+        color: var(--mut);
+        flex: none;
+        user-select: none;
+      }
+      .log .tool {
+        color: var(--ink);
+        padding-left: 22px;
+        position: relative;
+      }
+      .log .tool::before {
+        content: '\25CF';
+        position: absolute;
+        left: 0;
+        top: 0;
+        font-size: 11px;
+        line-height: 23px;
+        color: var(--acc);
+        user-select: none;
+      }
+      .log .tool b {
+        font-weight: 500;
+      }
+      .log .res {
+        padding-left: 24px;
+        display: flex;
+        gap: 10px;
+      }
+      .log .res::before {
+        content: '\23BF';
+        color: var(--mut);
+        flex: none;
+        user-select: none;
+      }
+      .log .res .why {
+        color: var(--acc);
+      }
+      .log .res .msg {
+        display: block;
+        color: var(--body);
+        margin-top: 2px;
+        text-wrap: pretty;
+      }
+      .four {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 40px;
+        margin-top: 48px;
+      }
+      .four h3 {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 0;
+        letter-spacing: -0.005em;
+      }
+      .four p {
+        font-size: 16px;
+        line-height: 1.55;
+        margin: 8px 0 0;
+        text-wrap: pretty;
+      }
+      .four > div {
+        display: flex;
+        flex-direction: column;
+      }
+      .four code {
+        display: block;
+        margin-top: auto;
+        padding-top: 12px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 13px;
+        color: var(--mut);
+      }
+      @media (max-width: 1240px) {
+        .sec {
+          width: auto;
+          padding-left: 32px;
+          padding-right: 32px;
+        }
+      }
+      @media (max-width: 900px) {
+        .sec {
+          padding: 88px 24px 96px;
+        }
+        .head h2 {
+          font-size: 44px;
+        }
+        .tray {
+          padding: 24px;
+          border-radius: 28px;
+          margin-top: 40px;
+        }
+        .four {
+          grid-template-columns: 1fr 1fr;
+          gap: 32px 36px;
+        }
+      }
+      @media (max-width: 600px) {
+        .sec {
+          padding: 64px 16px 72px;
+        }
+        .head h2 {
+          font-size: 36px;
+        }
+        .head p {
+          font-size: 17px;
+        }
+        .tray {
+          padding: 12px;
+          border-radius: 22px;
+          margin-top: 32px;
+        }
+        .win {
+          font-size: 12.5px;
+        }
+        .log {
+          padding: 14px 16px 18px;
+        }
+        .log .ask {
+          margin: 0 -16px 12px;
+          padding: 7px 16px;
+        }
+        .four {
+          grid-template-columns: 1fr;
+          gap: 26px;
+        }
+      }
+
+      .log {
+        transition: opacity 0.3s ease;
+      }
+      .log.hide {
+        opacity: 0;
+      }
+      .log .res .msg {
+        display: block;
+      }
+      .log .note {
+        padding-left: 24px;
+        color: var(--mut);
+        display: flex;
+        gap: 10px;
+      }
+      .log .note::before {
+        content: '\23BF';
+        flex: none;
+        user-select: none;
+      }
+      .log .say {
+        color: var(--ink);
+        padding-left: 22px;
+        position: relative;
+        margin-top: 6px;
+      }
+      .log .say::before {
+        content: '\25CF';
+        position: absolute;
+        left: 0;
+        top: 0;
+        font-size: 11px;
+        line-height: 23px;
+        color: var(--ink);
+        user-select: none;
+      }
+      .log .tool + .tool,
+      .log .res + .tool,
+      .log .note + .tool,
+      .log .block + .tool {
+        margin-top: 6px;
+      }
+      .log .block {
+        padding-left: 24px;
+        display: flex;
+        gap: 10px;
+      }
+      .log .block::before {
+        content: '\23BF';
+        color: var(--mut);
+        flex: none;
+        user-select: none;
+      }
+      .log .block .why {
+        color: var(--acc);
+      }
+      .log .block .msg {
+        display: block;
+        color: var(--body);
+        text-wrap: pretty;
+      }
+      .four {
+        position: relative;
+        z-index: 0;
+      }
+      .four > div {
+        position: relative;
+      }
+      .four > div::before {
+        content: '';
+        position: absolute;
+        inset: -14px -16px;
+        border-radius: 14px;
+        background: var(--tray);
+        opacity: 0;
+        transition: opacity 0.25s ease;
+        z-index: -1;
+      }
+      .four > div.lit::before {
+        opacity: 1;
+      }
+      @media (hover: hover) {
+        .four > div:hover::before {
+          opacity: 0.6;
+        }
+        .four > div.lit:hover::before {
+          opacity: 1;
+        }
+      }
+      .four .go {
+        all: unset;
+        cursor: pointer;
+        font-family: 'Geist', sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--ink);
+        letter-spacing: -0.005em;
+      }
+      .four .go::after {
+        content: '';
+        position: absolute;
+        inset: -14px -16px;
+        border-radius: 14px;
+      }
+      .four > div:has(.go:focus-visible)::before {
+        opacity: 1;
+        outline: 2px solid var(--ink);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .log,
+        .four > div::before {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tag">
+      <b>Holds, current</b
+      ><span
+        >The working version of the holds section. Options are drawn beside it,
+        and a pick is folded back in here</span
+      >
+    </div>
+    <div class="sec">
+      <div class="head">
+        <h2>What holds it</h2>
+        <p>
+          A skill says what good looks like. These four parts catch the agent
+          when it skips one.
+        </p>
+      </div>
+      <div class="tray">
+        <div class="win" aria-hidden="true">
+          <div class="bar"><i></i><i></i><i></i><span>claude</span></div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+      <div class="four">
+        <div data-i="0">
+          <button
+            type="button"
+            class="go"
+            aria-label="Play rules by path in the window"
+          >
+            Rules by path
+          </button>
+          <p>
+            A rule file loads when the agent opens a matching path, and names
+            the skill that owns that kind of file.
+          </p>
+          <code>.claude/rules/canon/ui/craft.md</code>
+        </div>
+        <div data-i="1">
+          <button
+            type="button"
+            class="go"
+            aria-label="Play hooks in the window"
+          >
+            Hooks
+          </button>
+          <p>
+            A hook reads each action before or after it runs. It refuses some
+            and reports others back into the same turn.
+          </p>
+          <code>plan-guard.sh, standards-audit.sh</code>
+        </div>
+        <div data-i="2">
+          <button
+            type="button"
+            class="go"
+            aria-label="Play the gate in the window"
+          >
+            The gate
+          </button>
+          <p>
+            Every stage runs in order before a pull request opens, and a stage
+            that cannot read its input fails under CI rather than passing.
+          </p>
+          <code>canon gate run</code>
+        </div>
+        <div data-i="3">
+          <button
+            type="button"
+            class="go"
+            aria-label="Play deny rules in the window"
+          >
+            Deny rules
+          </button>
+          <p>
+            The agent cannot merge. A hook fails open on a timeout, so the merge
+            block is a permission rule rather than a hook.
+          </p>
+          <code>Bash(gh pr merge:*)</code>
+        </div>
+      </div>
+      <p
+        class="sr"
+        role="status"
+        id="st"
+        style="
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          overflow: hidden;
+          clip: rect(0 0 0 0);
+        "
+      ></p>
+    </div>
+    <script>
+      const SC = [
+        {
+          ask: 'add a disabled state to the save button',
+          lines: [
+            ['tool', 'Read', 'src/components/SaveButton.tsx'],
+            ['res', '', 'Read 48 lines'],
+            ['note', '', 'Loaded rule .claude/rules/canon/ui/craft.md'],
+            ['tool', 'Skill', 'canon:ui-craft'],
+            ['res', '', 'Loaded'],
+          ],
+        },
+        {
+          ask: 'plan the --json flag for the export command',
+          lines: [
+            ['tool', 'Write', '.canon/plans/feature-export-json.md'],
+            [
+              'block',
+              'PreToolUse:Write hook blocked the write',
+              'This session has not invoked canon:plan-feature, so .canon/plans/feature-export-json.md would be written outside the skill that owns its shape. Invoke the canon:plan-feature skill for this plan, then resend the write.',
+            ],
+            ['tool', 'Skill', 'canon:plan-feature'],
+            ['res', '', 'Loaded'],
+            ['tool', 'Write', '.canon/plans/feature-export-json.md'],
+            ['res', '', 'Wrote 42 lines'],
+          ],
+        },
+        {
+          ask: 'open the pull request',
+          lines: [
+            ['tool', 'Bash', 'canon gate run'],
+            ['block', 'Tests failed', 'src/cart/total.test.ts, 1 of 212'],
+            ['tool', 'Update', 'src/cart/total.ts'],
+            ['res', '', '1 addition, 1 removal'],
+            ['tool', 'Bash', 'canon gate run'],
+            ['res', '', 'Every stage passed'],
+          ],
+        },
+        {
+          ask: 'merge it',
+          lines: [
+            ['tool', 'Bash', 'gh pr merge 412'],
+            ['block', 'Denied by a permission rule', 'Bash(gh pr merge:*)'],
+            [
+              'say',
+              '',
+              'The merge is yours. #412 is ready, and its review is closed.',
+            ],
+          ],
+        },
+      ]
+      const log = document.getElementById('log'),
+        cols = [...document.querySelectorAll('.four>div')],
+        REST = 1
+      const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      const wait = (ms) => new Promise((r) => setTimeout(r, ms))
+      function mark(i) {
+        cols.forEach((c, j) => c.classList.toggle('lit', j === i))
+      }
+      function el([k, a, b]) {
+        const d = document.createElement('div')
+        d.className = k
+        if (k === 'tool') d.innerHTML = '<b>' + a + '</b>(' + esc(b) + ')'
+        else if (k === 'block')
+          d.innerHTML =
+            '<span><span class="why">' +
+            esc(a) +
+            '</span><span class="msg">' +
+            esc(b) +
+            '</span></span>'
+        else d.textContent = b
+        return d
+      }
+      function askEl(t) {
+        const d = document.createElement('div')
+        d.className = 'ask'
+        d.innerHTML = '<span class="g">❯</span><span>' + esc(t) + '</span>'
+        return d
+      }
+      function full(i) {
+        log.innerHTML = ''
+        log.append(askEl(SC[i].ask))
+        SC[i].lines.forEach((l) => log.append(el(l)))
+      }
+      function size() {
+        log.style.height = ''
+        let m = 0
+        SC.forEach((_, i) => {
+          full(i)
+          m = Math.max(m, log.scrollHeight)
+        })
+        log.style.height = m + 'px'
+        full(cur)
+      }
+      let cur = REST,
+        gen = 0
+      async function play(i, g) {
+        cur = i
+        mark(i)
+        log.classList.add('hide')
+        await wait(300)
+        if (g !== gen) return
+        log.innerHTML = ''
+        log.classList.remove('hide')
+        log.append(askEl(SC[i].ask))
+        for (const l of SC[i].lines) {
+          await wait(l[0] === 'tool' || l[0] === 'say' ? 700 : 300)
+          if (g !== gen) return
+          log.append(el(l))
+        }
+      }
+      async function tour(g) {
+        for (let i = 0; i < SC.length; i++) {
+          await play(i, g)
+          if (g !== gen) return
+          await wait(1800)
+          if (g !== gen) return
+        }
+        cur = REST
+        mark(REST)
+        log.classList.add('hide')
+        await wait(300)
+        if (g !== gen) return
+        full(REST)
+        log.classList.remove('hide')
+      }
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+      cols.forEach((c, i) =>
+        c.querySelector('.go').addEventListener('click', () => {
+          gen++
+          if (reduce) {
+            cur = i
+            mark(i)
+            full(i)
+          } else play(i, gen)
+        }),
+      )
+      size()
+      mark(REST)
+      addEventListener('resize', size)
+      document.fonts && document.fonts.ready.then(size)
+      if (!reduce) {
+        const io = new IntersectionObserver(
+          (es) => {
+            if (
+              es.some((x) => x.isIntersecting && x.intersectionRatio >= 0.4)
+            ) {
+              io.disconnect()
+              gen++
+              tour(gen)
+            }
+          },
+          { threshold: [0.4] },
+        )
+        io.observe(document.querySelector('.tray'))
+      }
+    </script>
+  </body>
+</html>
