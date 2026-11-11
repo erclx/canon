@@ -84,8 +84,7 @@ if (section && source?.textContent && log && typed && who) {
       typed!.textContent += char
       if (!(await pace.wait(11, generation))) return false
     }
-    const pause = Math.min(2200, 700 + scene.prompt.length * 10)
-    if (!(await pace.wait(pause, generation))) return false
+    if (!(await pace.wait(600, generation))) return false
     typed!.textContent = ''
     if (!(await show(ask(scene), generation))) return false
     if (!(await pace.wait(400, generation))) return false
