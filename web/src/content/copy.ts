@@ -26,8 +26,8 @@ const DOCS = `${REPO}/tree/main/docs`
 const ORIGIN = 'https://canon.erclx.com'
 
 export const site = {
-  /** The lowercase wordmark the social card and its alt text draw, so a change re-captures the card. */
-  name: 'canon',
+  /** The name the social card and its alt text draw, so a change re-captures the card. */
+  name: 'Canon',
   /**
    * The host, which `og:site_name` reads. LinkedIn prints it under the share
    * title, which already reads `title`, so the name there would show twice.
