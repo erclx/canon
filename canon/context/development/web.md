@@ -50,6 +50,15 @@ Holds the two workflows that build and check the page.
 - Both lists hold `web/**`, `assets/**` minus `assets/evidence/**`, `src/design/**`, and the deploy workflow file
 - The catalogs (`claude/skills/`, `governance/rules/`, the skill map) are out of both lists because the page reads none at build time, so add one back in the change that makes it read one
 
+### `.htmlvalidate.cjs`
+
+Holds the `html-validate` rules for the built page, and `.htmlvalidate-records.cjs` extends it for the record sheets.
+
+- `check:lint` lints `web/src/content/records/*.html` through `.htmlvalidate-records.cjs`, which demands the self-closing form oxfmt writes
+- The `pr-visual-checks.yml` e2e job lints the built `web/dist/index.html` through `.htmlvalidate.cjs`, so the page is linted only after a build
+- Each rule set to `off` in `.htmlvalidate.cjs` carries its reason beside it, and the `h3` inside the hero's play buttons is a real defect left standing until the section markup stops moving
+- `canon/design/**/*.html` is exempt, since Frameboard's sync writes the board's markup and its `--check` compares the bytes, so a fix belongs in Frameboard
+
 ### Other folders
 
 Two folders outside `web/` shape what the page renders and captures.
