@@ -32,6 +32,8 @@ Group by app part, being the places a user sees, such as `home`, `inspector`, or
 - Give each app part one plain kebab-case folder directly under `canon/design/`
 - Put the inputs every app part draws on, such as tokens, colors, and the logo, under `foundations/`, so they read apart from places in the app
 - Gather a surface shown on several app parts, such as a toast, under the part a user meets it in first
+- A group may split into one subfolder per section when its code splits the same way, as `home/sidebar/`. A flat group stays conforming, and a section folder takes no further level.
+- Name a file inside a section folder without repeating the section, as `home/sidebar/desktop-dark.png` rather than `home/sidebar/sidebar-dark.png`
 
 ## Files
 
@@ -40,7 +42,7 @@ Each reference is one name in two themes, with a PNG and its frame HTML per them
 - Name each file `<name>-dark` or `<name>-light`, as in `grid-dark.png` beside `grid-dark.html`
 - Keep one HTML file without a theme suffix only for a frame that switches theme itself, beside both PNGs
 - Put what every frame HTML loads, being its stylesheet, script, fonts, and vendored files, under `assets/<project>/`, one folder per board project
-- Keep every such file there, since the sync writes each frame's `../assets/` links to that folder and reports a file elsewhere below the first level as stray
+- Keep every such file there, since the sync writes each frame's assets links to that folder, one `../` per level the frame sits below `canon/design/`, and reports a file no mapping writes as stray
 
 ## The index
 
