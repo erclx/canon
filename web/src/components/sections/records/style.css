@@ -155,9 +155,10 @@
   }
 }
 
+/* Out of flow, so the whitespace before a folder's name collapses and the name keeps its depth's indent. */
 #records .explorer .fold::before {
   content: '\25BE';
-  display: inline-block;
+  position: absolute;
   width: 12px;
   margin-left: -12px;
   font-size: 10px;
