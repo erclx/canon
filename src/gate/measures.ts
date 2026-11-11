@@ -1115,14 +1115,10 @@ export const readmeCitations: Measure = async (ctx) => {
 
 /**
  * Globs `pr-visual-checks.yml` carries with no `deploy-site.yml` counterpart,
- * because the path changes no byte of the built site. The capture harness and
- * the page's lint config are the two cases: a change to either should report
- * the visual jobs and never deploy.
+ * because the path changes no byte of the built site. The capture harness is
+ * the one case: a change to it should report the visual jobs and never deploy.
  */
-const VISUAL_ONLY_GLOBS: readonly string[] = [
-  'tooling/web/configs/e2e/**',
-  '.htmlvalidate.cjs',
-]
+const VISUAL_ONLY_GLOBS: readonly string[] = ['tooling/web/configs/e2e/**']
 
 /**
  * `deploy-site.yml` and `pr-visual-checks.yml` each carry their own literal

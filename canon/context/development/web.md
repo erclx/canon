@@ -47,17 +47,17 @@ Holds the two workflows that build and check the page.
 
 - `deploy-site.yml` publishes the page, and `pr-visual-checks.yml` runs the e2e job and a capture job that reports into the job summary and commits nothing
 - The two files carry literal copies of the same path globs, which the `visual-path-globs` stage compares
-- The visual copy adds `tooling/web/configs/e2e/**` and `.htmlvalidate.cjs` through `VISUAL_ONLY_GLOBS`
+- The visual copy adds `tooling/web/configs/e2e/**` through `VISUAL_ONLY_GLOBS`
 - Both lists hold `web/**`, `assets/**` minus `assets/evidence/**`, `src/design/**`, and the deploy workflow file
 - The catalogs (`claude/skills/`, `governance/rules/`, the skill map) are out of both lists because the page reads none at build time, so add one back in the change that makes it read one
 
-### `.htmlvalidate.cjs`
+### `web/.htmlvalidate.cjs`
 
-Holds the `html-validate` rules for the built page, and `.htmlvalidate-records.cjs` extends it for the record sheets.
+Holds the `html-validate` rules for the built page, and `web/.htmlvalidate-records.cjs` extends it for the record sheets. Both sit under `web/` so release-please excludes them, and a config edit there also triggers the deploy workflow.
 
-- `check:lint` lints `web/src/content/records/*.html` through `.htmlvalidate-records.cjs`, which demands the self-closing form oxfmt writes
-- The `pr-visual-checks.yml` e2e job lints the built `web/dist/index.html` through `.htmlvalidate.cjs`, so the page is linted only after a build
-- Each rule set to `off` in `.htmlvalidate.cjs` carries its reason beside it, so a rule turned off with no reason reads as a defect someone left standing
+- `check:lint` lints `web/src/content/records/*.html` through `web/.htmlvalidate-records.cjs`, which demands the self-closing form oxfmt writes
+- The `pr-visual-checks.yml` e2e job lints the built `web/dist/index.html` through `web/.htmlvalidate.cjs`, found by walking up from the file, so the page is linted only after a build
+- Each rule set to `off` in `web/.htmlvalidate.cjs` carries its reason beside it, so a rule turned off with no reason reads as a defect someone left standing
 - `canon/design/**/*.html` is exempt, since Frameboard's sync writes the board's markup and its `--check` compares the bytes, so a fix belongs in Frameboard
 
 ### Other folders
