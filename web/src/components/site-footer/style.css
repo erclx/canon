@@ -1,10 +1,10 @@
-.foot {
+.site-footer {
   border-top: 1px solid var(--line);
   font-size: var(--size-body);
   color: var(--muted);
 }
 
-.foot .in {
+.site-footer .in {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -15,7 +15,7 @@
   padding: 32px var(--gutter) 48px;
 }
 
-.foot .brand {
+.site-footer .brand {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -24,40 +24,40 @@
   user-select: none;
 }
 
-.foot .glyph {
+.site-footer .glyph {
   display: flex;
 }
 
-.foot .glyph svg {
+.site-footer .glyph svg {
   width: 22px;
   height: 22px;
 }
 
-.foot .glyph .pip {
+.site-footer .glyph .pip {
   fill: var(--pip);
 }
 
-.foot nav {
+.site-footer nav {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 28px;
 }
 
-.foot a {
+.site-footer a {
   color: var(--body);
   text-decoration: none;
   border-radius: var(--radius-chip);
 }
 
-.foot a:hover {
+.site-footer a:hover {
   color: var(--ink);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 @media (max-width: 640px) {
-  .foot .in {
+  .site-footer .in {
     flex-direction: column;
     align-items: flex-start;
     padding-top: 28px;
