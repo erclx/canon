@@ -48,8 +48,16 @@ Holds the repository-root configs, including the verify runner, and every `--ski
 - Repo-root-once configs live in `base` and per-root configs in `web` and the adapters, so a per-root config moved into `base` breaks the split unless `base` names it under `[sync] per_root`
 - `resolveChain` keeps a skipped stack carrying that key as a restricted manifest with those configs only, and `buildToolingReport` restores it so `canon sync --check` still measures them
 - Syncing a subtree without `--skip base` re-drops husky per subtree, and git honors one `core.hooksPath`, so the extra hook directories break silently
-- `scripts/verify.ts` runs the phases the nearest `scripts/verify.json` requires, and `check:format` and the `shell` add-on's `check:shell` run only where `package.json` declares the script
+
+### `tooling/base/configs/scripts/verify.ts`
+
+The seeded runner reads the phases the nearest `scripts/verify.json` requires. Its CI pin comes from the stamp, since the sync that wrote the runner stamped a release carrying every verb it calls.
+
+- `check:format` and the `shell` add-on's `check:shell` run only where `package.json` declares the script
 - A missing `package.json` in a subfolder verify tells the caller to sync the stack, and a missing `verify.json` names `canon tooling sync`
+- The two canon stages take `canon` from `PATH` first, then under `CI=true` a `bunx` pinned to `domains.tooling.version` in `canon/config/config.json`
+- Under CI a missing stamp version fails the stage, and so does exit 1, which `bunx` also returns on a failed fetch
+- A local run with no `canon` skips both stages with an install hint and no pass check
 
 ### `tooling/base/seeds/`
 

@@ -4,6 +4,7 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -97,7 +98,14 @@ const run = (
   spawnSync(command[0], command.slice(1), {
     cwd: fixture,
     encoding: 'utf8',
-    env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, ...env },
+    // CI is cleared unless a case sets it, since GitHub Actions sets it on
+    // this repository's own run and would flip every no-canon case to bunx.
+    env: {
+      ...process.env,
+      CI: '',
+      PATH: `${bin}:${process.env.PATH}`,
+      ...env,
+    },
     timeout: 20_000,
   })
 
@@ -396,7 +404,7 @@ describe('markdown bans', () => {
     const result = runVerify()
 
     expect(result.status).toBe(0)
-    expect(result.stdout).toContain('refused and measured nothing')
+    expect(result.stdout).toContain('refused or is missing')
   })
 
   it('should fail and print the findings on exit 3', () => {
@@ -408,18 +416,6 @@ describe('markdown bans', () => {
 
     expect(result.status).toBe(1)
     expect(result.stdout).toContain('empty ban set')
-  })
-
-  it('should skip when no canon binary is on PATH', () => {
-    setUp('web', STACK_SCRIPTS.web)
-    initRepoWithMarkdown()
-    linkTool('bun')
-    linkTool('git')
-
-    const result = run([process.execPath, RUNNER], { PATH: bin })
-
-    expect(result.status).toBe(0)
-    expect(result.stdout).toContain('Skipped: no canon binary on PATH')
   })
 
   it('should leave CHANGELOG.md at any depth out of the audit', () => {
@@ -435,6 +431,137 @@ describe('markdown bans', () => {
     )
 
     expect(runVerify().stdout).not.toContain('CHANGELOG')
+  })
+})
+
+describe('canon resolution', () => {
+  const argvLog = (): string => join(fixture, 'bunx-argv.log')
+
+  // Stands in for bunx, recording each call's argv on its own line.
+  const writeBunx = (exitCode: number): void => {
+    writeFileSync(
+      join(bin, 'bunx'),
+      `#!/usr/bin/env bash\necho "$*" >> ${argvLog()}\nexit ${exitCode}\n`,
+      { mode: 0o755 },
+    )
+  }
+
+  const writeStamp = (version: string): void => {
+    mkdirSync(join(fixture, 'canon/config'), { recursive: true })
+    writeFileSync(
+      join(fixture, 'canon/config/config.json'),
+      JSON.stringify({ domains: { tooling: { version } } }),
+    )
+  }
+
+  // Only bun, git, bash for the stubs' shebang, and the fixture stubs are on
+  // PATH, so no global canon is.
+  const runWithoutCanon = (
+    env: NodeJS.ProcessEnv = {},
+  ): SpawnSyncReturns<string> => {
+    linkTool('bun')
+    linkTool('git')
+    linkTool('bash')
+    return run([process.execPath, RUNNER], { PATH: bin, ...env })
+  }
+
+  const readArgv = (): string[] =>
+    existsSync(argvLog())
+      ? readFileSync(argvLog(), 'utf8').trim().split('\n')
+      : []
+
+  beforeEach(() => {
+    setUp('web', STACK_SCRIPTS.web)
+    initRepoWithMarkdown()
+  })
+
+  describe('under CI', () => {
+    it('should run both stages through bunx pinned to the stamp', () => {
+      writeStamp('5.83.0')
+      writeBunx(0)
+
+      const result = runWithoutCanon({ CI: 'true' })
+
+      expect(result.status).toBe(0)
+      expect(readArgv()).toEqual([
+        '-y @erclx/canon@5.83.0 markdown audit note.md',
+        '-y @erclx/canon@5.83.0 code audit',
+      ])
+    })
+
+    it('should fail and name the stage when bunx exits 1', () => {
+      writeStamp('5.83.0')
+      writeBunx(1)
+
+      const result = runWithoutCanon({ CI: 'true' })
+
+      expect(result.status).toBe(1)
+      expect(result.stdout).toContain('canon markdown audit refused')
+    })
+
+    it('should fail and name canon tooling sync when no stamp exists', () => {
+      writeBunx(0)
+
+      const result = runWithoutCanon({ CI: 'true' })
+
+      expect(result.status).toBe(1)
+      expect(result.stdout).toContain('canon tooling sync')
+      expect(readArgv()).toEqual([])
+    })
+
+    it('should fail rather than pass a stamp version that is not a release', () => {
+      writeStamp('latest; touch pwned')
+      writeBunx(0)
+
+      const result = runWithoutCanon({ CI: 'true' })
+
+      expect(result.status).toBe(1)
+      expect(readArgv()).toEqual([])
+    })
+
+    it('should fail when a canon on PATH exits 1', () => {
+      writeStub('canon', 1)
+
+      expect(runVerify({ CI: 'true' }).status).toBe(1)
+    })
+
+    it('should never call bunx when canon is on PATH', () => {
+      writeStamp('5.83.0')
+      writeBunx(0)
+      writeStub('canon', 0)
+
+      const result = runWithoutCanon({ CI: 'true' })
+
+      expect(result.status).toBe(0)
+      expect(readArgv()).toEqual([])
+    })
+  })
+
+  describe('outside CI', () => {
+    it('should skip both stages with the install hint when no canon is on PATH', () => {
+      writeStamp('5.83.0')
+      writeBunx(0)
+
+      const result = runWithoutCanon()
+
+      expect(result.status).toBe(0)
+      expect(
+        result.stdout.match(/Skipped: no canon binary on PATH/g),
+      ).toHaveLength(2)
+      expect(result.stdout).toContain('bun install --global @erclx/canon')
+      expect(readArgv()).toEqual([])
+    })
+
+    it('should not mark the no-canon skip with a pass check', () => {
+      const result = runWithoutCanon()
+
+      const skipLines = result.stdout
+        .split('\n')
+        .filter((line) => line.includes('Skipped: no canon binary on PATH'))
+
+      expect(skipLines).toHaveLength(2)
+      expect(skipLines.filter((line) => line.includes('✓'))).toEqual([])
+    })
   })
 })
 
