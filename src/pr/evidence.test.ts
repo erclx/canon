@@ -1650,12 +1650,12 @@ describe('the skip lines', () => {
     expect(body).not.toContain('No local preview')
   })
 
-  it('should drop the reel skip when a reel renders beside it', () => {
+  it('should drop the reel skip when a reel filmed at the head renders beside it', () => {
     const body = renderEvidenceBody(
       [],
       'o/r',
       'aaaa000',
-      'cccc222',
+      'bbbb111',
       undefined,
       '- [ ] look',
       undefined,
@@ -1665,6 +1665,23 @@ describe('the skip lines', () => {
 
     expect(body).toContain('**Reel** filmed at `bbbb111`')
     expect(body).not.toContain('No reel')
+  })
+
+  it('should keep the reel skip beside a reel filmed at an earlier head', () => {
+    const body = renderEvidenceBody(
+      [],
+      'o/r',
+      'aaaa000',
+      'cccc222',
+      undefined,
+      '- [ ] look',
+      undefined,
+      { link: LINK, head: 'bbbb111' },
+      { reel: 'reel-too-large' },
+    )
+
+    expect(body).toContain('**Reel** filmed at `bbbb111`')
+    expect(body).toContain('**No reel:** reel-too-large')
   })
 
   it('should fold a multi-line reason onto one escaped line', () => {

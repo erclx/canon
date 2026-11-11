@@ -546,8 +546,10 @@ export function evidenceMarker(head: string): string {
  * was filmed at, so a reel carried past a later push never reads as current.
  *
  * A skip names why the local address or the reel is missing, on its own line
- * where that address or reel would sit. Each is dropped whenever its address
- * or reel renders, carried or passed, so a skip never outlives its cause.
+ * where that address or reel would sit. The local skip is dropped whenever
+ * its address renders, carried or passed. The reel skip is dropped only by a
+ * reel filmed at the head, so a skip decided at a later head still reaches
+ * the lift beside a reel carried from an earlier one.
  *
  * The uncaptured line names each painted path changed with no capture, under
  * the reel, and is computed fresh on every render rather than carried, so it
@@ -574,9 +576,10 @@ export function renderEvidenceBody(
     '',
     ...(segments.length === 0 ? [] : [segments.join(ADDRESS_SEPARATOR), '']),
     ...(local === undefined ? skipLines(LOCAL_SKIP_PREFIX, skips.local) : []),
-    ...(reel === undefined
-      ? skipLines(REEL_SKIP_PREFIX, skips.reel)
-      : [reelLine(reel), '']),
+    ...(reel === undefined ? [] : [reelLine(reel), '']),
+    ...(reel !== undefined && head.startsWith(reel.head)
+      ? []
+      : skipLines(REEL_SKIP_PREFIX, skips.reel)),
     ...uncapturedLines(uncaptured, head, reel),
   ]
   const closing =
