@@ -254,7 +254,7 @@ describe('lift', () => {
     it('should stay ready on a test-only push after a UI close', async () => {
       const { api, calls } = makeApi({
         ...ready,
-        evidence: { hasDrivableBox: true, reelHead: HEAD },
+        evidence: { hasDrivableBox: true, reelHead: MOVED },
         reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
         changed: { isAncestor: true, paths: ['src/App.test.tsx'] },
       })
@@ -1141,10 +1141,12 @@ describe('lift', () => {
             reelSkip: 'no-visible-change',
           },
           reviews: [CODE_CLOSED, UI_CLOSED],
+          changed: { isAncestor: true, paths: ['src/App.tsx'] },
         })
         const unsettled = makeApi({
           evidence: { ...drivable, reelHead: MOVED, reelSkip: 'wrong-state' },
           reviews: [CODE_CLOSED, UI_CLOSED],
+          changed: { isAncestor: true, paths: ['src/App.tsx'] },
         })
 
         const settled = await lift(settling.api, {
@@ -1159,6 +1161,42 @@ describe('lift', () => {
         expect(settled.reason).toBe('clear')
         expect(refused.reason).toBe('reel-unsettled')
       })
+
+      it('should carry a reel across a push no box can observe, naming where it was filmed', async () => {
+        const { api } = makeApi({
+          evidence: { ...drivable, reelHead: MOVED },
+          reviews: [CODE_CLOSED, UI_CLOSED],
+          changed: { isAncestor: true, paths: ['src/App.test.tsx'] },
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('lifted')
+        expect(evidenceEntry(record)).toEqual({
+          gate: 'evidence',
+          isOk: true,
+          reelCarriedFrom: MOVED,
+        })
+      })
+
+      it.each([
+        ['a push a box can observe', { isAncestor: true, paths: ['src/App.tsx'] }],
+        ['a rewritten reel commit', { isAncestor: false, paths: [] }],
+        ['a failed read', null],
+      ] as const)(
+        'should not carry a reel across %s',
+        async (_, changed) => {
+          const { api } = makeApi({
+            evidence: { ...drivable, reelHead: MOVED },
+            reviews: [CODE_CLOSED, UI_CLOSED],
+            changed,
+          })
+
+          const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+          expect(record.reason).toBe('reel-unsettled')
+        },
+      )
 
       it('should settle on a reel waiver in the newest pass, naming its reason', async () => {
         const { api } = makeApi({
