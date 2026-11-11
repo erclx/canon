@@ -82,7 +82,8 @@ Send it to the worker holding the branch as `review-pr` Step 5 returns an open `
 
 Run `canon pr lift <number> --json` after posting `## Review closed` or `## UI review closed`. Message the controller with the heading, the count line, and the reason the verb returned.
 
-Skip that message when the reason names the other review as open or missing, since the other reviewer's close runs the verb again.
+- Skip that message when the reason names the other review as open or missing, since the other reviewer's close runs the verb again
+- On a ready pull request the verb waits on CI too. A standing or CI reason beside `isReady: true` holds the merge line rather than the ready mark, so relay it that way.
 
 ### A re-drive owed
 

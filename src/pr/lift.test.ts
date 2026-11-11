@@ -267,19 +267,193 @@ describe('lift', () => {
       expect(calls.drafts).toEqual([])
     })
 
+    const failingRun = {
+      checks: [{ state: 'failing', isConflicted: false }],
+    } as const
     it.each([
-      ['a stale standing', { standing: 'stale' }],
-      [
-        'a failing run',
-        { checks: [{ state: 'failing', isConflicted: false }] },
-      ],
-    ] as const)('should stay ready on %s', async (_label, fixture) => {
-      const { api, calls } = makeApi({ ...ready, ...fixture })
+      ['standing-stale', false, { standing: 'stale' }],
+      ['standing-stale', true, { standing: 'stale' }],
+      ['ci-failing', false, failingRun],
+      ['ci-failing', true, failingRun],
+    ] as const)(
+      'should refuse %s with isCheck %s and leave the ready mark in place',
+      async (reason, isCheck, fixture) => {
+        const { api, calls } = makeApi({ ...ready, ...fixture })
+
+        const record = await lift(api, { isCheck, waitSeconds: 60 })
+
+        expect(record).toMatchObject({ reason, isOk: false, isReady: true })
+        expect(calls.drafts).toEqual([])
+      },
+    )
+
+    it('should refuse a stale standing before it reads the check runs', async () => {
+      const { api, calls } = makeApi({
+        ...ready,
+        standing: 'stale',
+        checks: [PENDING],
+      })
+
+      await lift(api, { isCheck: false, waitSeconds: 600 })
+
+      expect(calls.checks).toBe(0)
+      expect(calls.sleeps).toEqual([])
+    })
+
+    it('should report ci-pending under --check without waiting or writing', async () => {
+      const { api, calls } = makeApi({ ...ready, checks: [PENDING] })
+
+      const record = await lift(api, { isCheck: true, waitSeconds: 600 })
+
+      expect(record).toMatchObject({
+        reason: 'ci-pending',
+        isOk: false,
+        isReady: true,
+      })
+      expect(calls.sleeps).toEqual([])
+      expect(calls.drafts).toEqual([])
+    })
+
+    it('should wait on a pending run and report already-ready once it passes', async () => {
+      const { api, calls } = makeApi({
+        ...ready,
+        checks: [PENDING, PASSING],
+      })
+
+      const record = await lift(api, {
+        isCheck: false,
+        waitSeconds: 600,
+        pollMs: 30_000,
+      })
+
+      expect(record).toMatchObject({
+        reason: 'already-ready',
+        isOk: true,
+        isReady: true,
+        waitedSeconds: 30,
+      })
+      expect(calls.marks).toEqual([])
+    })
+
+    it('should refuse ci-timeout on a run still pending at the deadline', async () => {
+      const { api, calls } = makeApi({ ...ready, checks: [PENDING] })
+
+      const record = await lift(api, {
+        isCheck: false,
+        waitSeconds: 60,
+        pollMs: 30_000,
+      })
+
+      expect(record).toMatchObject({ reason: 'ci-timeout', isReady: true })
+      expect(calls.drafts).toEqual([])
+    })
+
+    it('should refuse head-moved when a push lands during the wait', async () => {
+      const harness = makeApi({ ...ready, checks: [PENDING, PASSING] })
+      let reads = 0
+      const api: LiftApi = {
+        ...harness.api,
+        readTip: async () => {
+          reads += 1
+          return reads === 1 ? HEAD : MOVED
+        },
+      }
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 600 })
+
+      expect(record).toMatchObject({ reason: 'head-moved', head: MOVED })
+    })
+
+    it('should refuse a review reopened during the wait and stay ready', async () => {
+      const harness = makeApi({ ...ready, checks: [PENDING, PASSING] })
+      let reads = 0
+      const api: LiftApi = {
+        ...harness.api,
+        readReviews: async () => {
+          reads += 1
+          return reads === 1 ? [CODE_CLOSED] : [CODE_CLOSED, CODE_OPEN]
+        },
+      }
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 600 })
+
+      expect(record).toMatchObject({ reason: 'review-open', isReady: true })
+      expect(harness.calls.drafts).toEqual([])
+    })
+
+    it('should refuse a standing that went stale during the wait', async () => {
+      const harness = makeApi({ ...ready, checks: [PENDING, PASSING] })
+      let reads = 0
+      const api: LiftApi = {
+        ...harness.api,
+        readStanding: async () => {
+          reads += 1
+          return reads === 1 ? 'fresh' : 'stale'
+        },
+      }
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 600 })
+
+      expect(record).toMatchObject({ reason: 'standing-stale', isReady: true })
+    })
+
+    it('should refuse ready-withdrawn and mark nothing when drafted during the wait', async () => {
+      const harness = makeApi({ ...ready, checks: [PENDING, PASSING] })
+      let reads = 0
+      const api: LiftApi = {
+        ...harness.api,
+        readPull: async () => {
+          reads += 1
+          const pull = await harness.api.readPull()
+          return pull && { ...pull, isDraft: reads > 1 }
+        },
+      }
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 600 })
+
+      expect(record.reason).toBe('ready-withdrawn')
+      expect(record).not.toHaveProperty('isReady')
+      expect(harness.calls.marks).toEqual([])
+    })
+
+    it('should keep the ci gate beside an open review under --check', async () => {
+      const { api } = makeApi({
+        ...ready,
+        reviews: [CODE_OPEN],
+        checks: [PENDING],
+      })
+
+      const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+      expect(record.reason).toBe('review-open')
+      expect(record.gates.find((gate) => gate.gate === 'ci')).toMatchObject({
+        isOk: false,
+        reason: 'ci-pending',
+      })
+    })
+
+    it('should carry a failing advisory check on already-ready', async () => {
+      const { api } = makeApi({
+        ...ready,
+        checks: [
+          { state: 'passing', isConflicted: false, advisory: ['🍎 macOS'] },
+        ],
+      })
+
+      const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+      expect(record).toMatchObject({
+        reason: 'already-ready',
+        advisory: ['🍎 macOS'],
+      })
+    })
+
+    it('should mark a redrafted record as no longer ready', async () => {
+      const { api } = makeApi({ ...ready, reviews: [CODE_OPEN] })
 
       const record = await lift(api, { isCheck: false, waitSeconds: 60 })
 
-      expect(record).toMatchObject({ reason: 'already-ready', isOk: true })
-      expect(calls.drafts).toEqual([])
+      expect(record).toMatchObject({ reason: 'redrafted', isReady: false })
     })
 
     it('should refuse gh-failed when the draft mutation does not take', async () => {
@@ -967,6 +1141,32 @@ describe('lift', () => {
 
       expect(record.reason).toBe('head-moved')
       expect(harness.calls.marks).toEqual([])
+    })
+
+    it('should refuse head-moved when another session readied it and a push landed', async () => {
+      const harness = makeApi({ checks: [PENDING, PASSING] })
+      let pulls = 0
+      let tips = 0
+      const api: LiftApi = {
+        ...harness.api,
+        readPull: async () => {
+          pulls += 1
+          const pull = await harness.api.readPull()
+          return pull && { ...pull, isDraft: pulls === 1 }
+        },
+        readTip: async () => {
+          tips += 1
+          return tips === 1 ? HEAD : MOVED
+        },
+      }
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 600 })
+
+      expect(record).toMatchObject({
+        reason: 'head-moved',
+        head: MOVED,
+        isReady: true,
+      })
     })
 
     it('should re-read the standing and refuse one that went stale during the wait', async () => {
