@@ -1569,6 +1569,27 @@ describe('canon pr evidence --check', () => {
     expect(record).toMatchObject({ reason: 'settled', owed: [] })
   })
 
+  it('should carry the reel skip line the marked comment holds as reelSkip', async () => {
+    writeComment(
+      '**No reel:** target-missing: beat 2: no match\n\n## What to look at\n\n<!-- pr-evidence: head=abc -->',
+    )
+
+    const record = await runCheck()
+
+    expect(record).toMatchObject({
+      reason: 'settled',
+      reelSkip: 'target-missing: beat 2: no match',
+    })
+  })
+
+  it('should omit reelSkip when the marked comment holds no reel skip line', async () => {
+    writeComment('## What to look at\n\n<!-- pr-evidence: head=abc -->')
+
+    const record = await runCheck()
+
+    expect(record).not.toHaveProperty('reelSkip')
+  })
+
   it('should render no body and write nothing', async () => {
     writeFileSync(
       join(tempDir, 'files.tsv'),

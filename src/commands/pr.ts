@@ -964,7 +964,11 @@ export function register(program: Command): void {
         'this checkout resolves, its push path filter matches a path the pull',
         'request changed, and the marked comment carries no **Preview:**',
         'address. A failed deploy reads the same as a skipped one.',
-        'The record carries `owed` and the same marked fields. --check refuses',
+        'The record carries `owed` and the same marked fields, plus',
+        '`reelSkip`, the text after **No reel:** on the marked comment, present',
+        'only when that line is posted. `canon pr lift` reads its reason code,',
+        'the text before the first colon, to decide whether a drivable',
+        'checklist with no reel at the head is settled. --check refuses',
         'with --preview, --local, --checklist, --no-checklist, --reel,',
         '--local-skip, or --reel-skip as check-writes.',
         '',
@@ -3009,6 +3013,9 @@ async function runEvidence(
     warnUncaptured()
     outro()
     if (emitJson) {
+      // The lift reads the skip to decide whether a drivable checklist with
+      // no reel at the head is settled, so the check carries it verbatim.
+      const reelSkip = findEvidenceSkips(comments).reel
       process.stdout.write(
         `${JSON.stringify({
           root,
@@ -3016,6 +3023,7 @@ async function runEvidence(
           reason: owed.length === 0 ? 'settled' : 'owed',
           owed,
           ...uncapturedField,
+          ...(reelSkip !== undefined && { reelSkip }),
           ...(commentId !== undefined && { commentId }),
           ...carried,
         })}\n`,
