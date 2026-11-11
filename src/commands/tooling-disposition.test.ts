@@ -233,4 +233,85 @@ describe('tooling disposition refusals', () => {
       json(tooling(['decline', '../outside.yml', target, '--json'])),
     ).toMatchObject({ ok: false, reason: 'bad-path' })
   })
+
+  it('should name the script address when a bare script name is passed', () => {
+    const run = tooling(['decline', 'test:run', target, '--json'])
+
+    expect(run.status).toBe(1)
+    expect(json(run)).toMatchObject({ ok: false, reason: 'not-golden' })
+    expect(String(json(run).message)).toContain('package.json:test:run')
+  })
+})
+
+describe('tooling dispositions on a script', () => {
+  const SCRIPT = 'package.json:test:run'
+  const packagePath = (): string => join(target, 'package.json')
+  const scripts = (): Record<string, string> =>
+    JSON.parse(readFileSync(packagePath(), 'utf8')).scripts
+  const editScripts = (
+    edit: (scripts: Record<string, string>) => void,
+  ): void => {
+    const pkg = JSON.parse(readFileSync(packagePath(), 'utf8'))
+    edit(pkg.scripts)
+    writeFileSync(packagePath(), `${JSON.stringify(pkg, null, 2)}\n`)
+  }
+
+  it('should record a declined script under its address', () => {
+    const record = json(tooling(['decline', SCRIPT, target, '--json']))
+
+    expect(record).toEqual({
+      ok: true,
+      action: 'decline',
+      path: SCRIPT,
+      entry: { disposition: 'declined' },
+    })
+  })
+
+  it('should keep a declined script the project removed out of sync and diff', () => {
+    editScripts((s) => delete s['test:run'])
+    tooling(['decline', SCRIPT, target])
+
+    expect(tooling(['diff', 'web', target]).status).toBe(0)
+    syncWeb(target)
+    expect(scripts()['test:run']).toBeUndefined()
+  })
+
+  it('should keep a customized script value and leave diff clean', () => {
+    editScripts((s) => {
+      s['test:run'] = 'vitest run --bail 1'
+    })
+    tooling(['customize', SCRIPT, target])
+
+    expect(tooling(['diff', 'web', target]).status).toBe(0)
+    syncWeb(target)
+    expect(scripts()['test:run']).toBe('vitest run --bail 1')
+  })
+
+  it('should keep a customized override key through a write', () => {
+    editScripts((s) => {
+      s.lint = 'oxlint'
+    })
+    tooling(['customize', 'package.json:lint', target])
+    syncWeb(target)
+
+    expect(scripts().lint).toBe('oxlint')
+  })
+
+  it('should refuse to customize a script the target lacks', () => {
+    editScripts((s) => delete s['test:run'])
+
+    expect(
+      json(tooling(['customize', SCRIPT, target, '--json'])),
+    ).toMatchObject({ ok: false, reason: 'missing-script' })
+  })
+
+  it('should hand a lifted script back to the next sync', () => {
+    editScripts((s) => delete s['test:run'])
+    tooling(['decline', SCRIPT, target])
+
+    tooling(['lift', SCRIPT, target])
+    syncWeb(target)
+
+    expect(scripts()['test:run']).toBe('vitest run --reporter=verbose')
+  })
 })
