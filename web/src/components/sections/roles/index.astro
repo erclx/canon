@@ -1,0 +1,58 @@
+---
+import { roleScenes, roles } from '../../../content/copy'
+import './style.css'
+
+/**
+ * A Claude Code window beside the five roles. The window loops through each
+ * role's scene, typing its request, then showing what it did and said, and a
+ * pick plays that role's scene and carries the loop on from it. Above 900 the
+ * roles are a list with lines, below it a row of pickers over the window.
+ */
+---
+
+<section class="sec" id="roles">
+  <div class="sec-head">
+    <h2>{roles.head}</h2>
+    <p>{roles.lede}</p>
+  </div>
+  <div class="tray">
+    <div class="two">
+      <div class="win">
+        <div class="win-bar"><i></i><i></i><i></i><span>claude</span></div>
+        <div class="log" aria-live="polite"></div>
+        <div class="inp">
+          <div class="rule">
+            <i></i><span class="who"></span><i class="s"></i>
+          </div>
+          <div class="line">
+            <span class="g">❯</span><span
+              ><span class="typed"></span><span class="cur"></span></span
+            >
+          </div>
+          <div class="bot"></div>
+        </div>
+      </div>
+      <div class="list" role="group" aria-label="Roles">
+        {
+          roleScenes.map((role, index) => (
+            <button
+              type="button"
+              aria-pressed={index === 0 ? 'true' : 'false'}
+              data-i={index}
+            >
+              <b>{role.name}</b>
+              <span>{role.line}</span>
+            </button>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+  <script
+    type="application/json"
+    class="roles-data"
+    set:html={JSON.stringify(roleScenes)}
+  />
+</section>
+
+<script src="./client.ts"></script>

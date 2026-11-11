@@ -1,0 +1,88 @@
+---
+import { craft } from '../../../content/copy'
+import { craftScenes, practices } from '../../../content/practice'
+import './style.css'
+
+/**
+ * The eight practice skills beside a Claude Code window that loops through
+ * seven requests in the list's order, each loading its skill, the skill lit
+ * before its request types. A pick fades the window to the scene that loads
+ * that skill and holds the pick until it loads. One skill shows at a time
+ * behind a row of pickers, beside the window above 900 and under it below, so
+ * a pick never plays its scene off screen.
+ */
+const data = {
+  skills: practices.map((p) => ({
+    name: p.name,
+    loads: p.loads,
+    rule: p.rule,
+    ruleFile: p.ruleFile,
+    source: p.source,
+    quote: p.quote,
+  })),
+  scenes: craftScenes,
+}
+const first = practices[0]
+---
+
+<section class="sec" id="craft">
+  <div class="top">
+    <div class="sec-head">
+      <h2>{craft.head}</h2>
+      <p>{craft.lede}</p>
+    </div>
+    <div class="tray">
+      <div class="win" aria-hidden="true">
+        <div class="win-bar"><i></i><i></i><i></i><span>claude</span></div>
+        <div class="log"></div>
+        <div class="inp">
+          <div class="rule"></div>
+          <div class="line">
+            <span class="g">❯</span><span
+              ><span class="typed"></span><span class="cur"></span></span
+            >
+          </div>
+          <div class="rule"></div>
+        </div>
+      </div>
+    </div>
+    <div class="pair">
+      <div class="picks" role="group" aria-label="Practice skills">
+        {
+          practices.map((p, index) => (
+            <button
+              type="button"
+              class="pick"
+              aria-pressed={index === 0 ? 'true' : 'false'}
+              data-i={index}
+            >
+              {p.name}
+            </button>
+          ))
+        }
+      </div>
+      <div class="panes">
+        <div class="pane">
+          <p class="lbl">
+            {craft.ruleIn}
+            <code class="p-file">{first?.ruleFile}</code>
+          </p>
+          <p class="rule p-rule">{first?.rule}</p>
+          <span class="loads p-loads">{first?.loads}</span>
+        </div>
+        <div class="pane">
+          <p class="lbl">{craft.source}</p>
+          <p class="srcname p-source">{first?.source}</p>
+          <p class="quote"><q class="p-quote">{first?.quote}</q></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script
+    type="application/json"
+    class="craft-data"
+    set:html={JSON.stringify(data)}
+  />
+</section>
+
+<script src="./client.ts"></script>

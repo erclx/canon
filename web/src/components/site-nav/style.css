@@ -1,0 +1,262 @@
+.site-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: var(--ground);
+}
+
+.site-nav nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1240px;
+  height: var(--nav-h);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+  font-size: var(--size-body);
+}
+
+.site-nav a {
+  color: var(--body);
+  text-decoration: none;
+  border-radius: var(--radius-action);
+}
+
+.site-nav a:hover {
+  color: var(--ink);
+}
+
+.site-nav .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.site-nav .glyph {
+  display: flex;
+}
+
+.site-nav .glyph svg {
+  width: 26px;
+  height: 26px;
+}
+
+.site-nav .glyph .pip {
+  fill: var(--pip);
+}
+
+.site-nav .links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.site-nav .links > a {
+  position: relative;
+  padding: 6px 0;
+}
+
+.site-nav .links > a[aria-current='true'] {
+  color: var(--ink);
+}
+
+.site-nav .links > a[aria-current='true']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  border-radius: var(--radius-marker);
+  background: var(--accent);
+}
+
+.site-nav .sep {
+  align-self: center;
+  width: 1px;
+  height: 16px;
+  background: var(--line);
+}
+
+.site-nav .theme-toggle {
+  all: unset;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-left: -6px;
+  border-radius: var(--radius-action);
+  color: var(--body);
+  cursor: pointer;
+}
+
+.site-nav .theme-toggle svg {
+  grid-area: 1 / 1;
+  width: 18px;
+  height: 18px;
+}
+
+.site-nav .theme-toggle .sun,
+[data-theme='dark'] .site-nav .theme-toggle .moon {
+  display: none;
+}
+
+[data-theme='dark'] .site-nav .theme-toggle .sun {
+  display: block;
+}
+
+.site-nav .theme-toggle:focus-visible,
+.site-nav .nbtn:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.site-nav .nmw {
+  position: relative;
+  display: none;
+}
+
+.site-nav .nbtn {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  margin: 0 -10px;
+  padding: 0 10px;
+  border-radius: var(--radius-action);
+  font-family: var(--sans);
+  font-size: inherit;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.site-nav .chev {
+  width: 15px;
+  height: 15px;
+  color: var(--muted);
+  transition: transform var(--duration-feedback) var(--ease-standard);
+}
+
+.site-nav .nbtn[aria-expanded='true'] .chev {
+  transform: rotate(180deg);
+}
+
+.site-nav .nbtn .lp {
+  display: none;
+}
+
+@media (hover: hover) {
+  .site-nav .theme-toggle:hover,
+  .site-nav .nbtn:hover {
+    background: var(--line);
+    color: var(--ink);
+  }
+}
+
+.site-nav .npanel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  left: -10px;
+  z-index: 20;
+  min-width: 232px;
+  padding: 6px;
+  background: var(--win);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-popover);
+}
+
+.site-nav .nbtn[aria-expanded='true'] + .npanel {
+  display: block;
+}
+
+.site-nav .npanel a {
+  position: relative;
+  display: block;
+  padding: 9px 12px 9px 14px;
+  color: var(--body);
+}
+
+.site-nav .npanel a:focus-visible {
+  outline-offset: -2px;
+}
+
+.site-nav .npanel a[aria-current='true'] {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.site-nav .npanel a[aria-current='true']::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 11px;
+  bottom: 11px;
+  width: 2px;
+  border-radius: var(--radius-marker);
+  background: var(--accent);
+}
+
+.site-nav .ndiv {
+  display: none;
+  height: 1px;
+  margin: 6px 8px;
+  background: var(--line);
+}
+
+.site-nav .npanel .pext {
+  display: none;
+}
+
+@media (max-width: 1040px) {
+  .site-nav .links > .sl {
+    display: none;
+  }
+
+  .site-nav .nmw {
+    display: block;
+  }
+}
+
+@media (max-width: 640px) {
+  .site-nav .links {
+    gap: 14px;
+  }
+
+  .site-nav .links > .ext,
+  .site-nav .links > .sep {
+    display: none;
+  }
+
+  .site-nav .nbtn .lw {
+    display: none;
+  }
+
+  .site-nav .nbtn .lp {
+    display: inline;
+  }
+
+  .site-nav .ndiv,
+  .site-nav .npanel .pext {
+    display: block;
+  }
+
+  .site-nav .nmw {
+    position: static;
+  }
+
+  .site-nav .npanel {
+    left: var(--gutter);
+    right: var(--gutter);
+    top: calc(100% - 4px);
+    min-width: 0;
+  }
+}

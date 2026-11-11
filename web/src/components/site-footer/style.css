@@ -1,0 +1,66 @@
+.site-footer {
+  border-top: 1px solid var(--line);
+  font-size: var(--size-body);
+  color: var(--muted);
+}
+
+.site-footer .in {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+  max-width: calc(var(--page-w) + var(--gutter) * 2);
+  margin: 0 auto;
+  padding: 32px var(--gutter) 48px;
+}
+
+.site-footer .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--ink);
+  user-select: none;
+}
+
+.site-footer .glyph {
+  display: flex;
+}
+
+.site-footer .glyph svg {
+  width: 22px;
+  height: 22px;
+}
+
+.site-footer .glyph .pip {
+  fill: var(--pip);
+}
+
+.site-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 28px;
+}
+
+.site-footer a {
+  color: var(--body);
+  text-decoration: none;
+  border-radius: var(--radius-chip);
+}
+
+.site-footer a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .site-footer .in {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 28px;
+    padding-bottom: 40px;
+  }
+}

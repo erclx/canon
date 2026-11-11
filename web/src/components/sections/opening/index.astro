@@ -1,0 +1,96 @@
+---
+import { fold } from '../../../content/copy'
+import {
+  completed,
+  menuFlow,
+  opening,
+  pinned,
+  pool,
+  steps,
+} from '../../../content/sessions'
+import { readSkills } from '../../../lib/skills'
+import DocIcon from './doc.svg'
+import MergeIcon from './merge.svg'
+import './style.css'
+
+/**
+ * The claim, its lede, and Claude Code's agent view on the tray. The view runs
+ * one event a tick, completing, answering, and dispatching sessions, and its
+ * prompt takes typing, opening the canon skill menu on `/` and shell mode on
+ * `!`. The menu reads the catalog at build time.
+ */
+const data = {
+  pool,
+  steps,
+  pinned,
+  completed,
+  opening,
+  flow: menuFlow,
+  skills: readSkills(),
+  noMatch: fold.view.noMatch,
+  shellHint: fold.view.shellHint,
+}
+const [before, middle, last] = fold.parts
+---
+
+<section class="sec" id="top">
+  <div class="hero">
+    <h1>
+      {before}
+      <span class="ico doc" aria-hidden="true"><DocIcon /></span>
+      {middle}
+      <span class="ico mg" aria-hidden="true"><MergeIcon /></span>
+      {last}
+    </h1>
+    <p>{fold.lead}</p>
+  </div>
+  <div class="tray">
+    <div class="win term">
+      <div class="win-bar">
+        <i></i><i></i><i></i><span>{fold.view.title}</span>
+      </div>
+      <div class="av">
+        <div class="cnts" id="av-counts"></div>
+        <div class="lst" id="av-list"></div>
+        <div class="prompt">
+          <label class="ask-line">
+            <span class="p">❯</span>
+            <span class="fld">
+              <input
+                id="av-ask"
+                type="text"
+                placeholder=" "
+                aria-label={fold.view.askLabel}
+                autocomplete="off"
+                spellcheck="false"
+                maxlength="120"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-controls="av-menu"
+                aria-expanded="false"
+              />
+              <span class="c"></span>
+              <span class="ph">{fold.view.hint}</span>
+              <span class="mz" aria-hidden="true">xxxxxxxxxxxxxxxxxxxx</span>
+            </span>
+          </label>
+          <div
+            class="menu"
+            id="av-menu"
+            role="listbox"
+            aria-label={fold.view.menuLabel}
+            hidden
+          >
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script
+    type="application/json"
+    id="av-data"
+    set:html={JSON.stringify(data)}
+  />
+</section>
+
+<script src="./client.ts"></script>

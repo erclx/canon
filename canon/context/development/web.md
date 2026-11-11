@@ -13,13 +13,13 @@ Owns `web/`, the Astro app behind the `canon.erclx.com` landing page, and the im
 
 ### `web/src/`
 
-Holds the page, built from components that read their figures through `lib/`.
+Holds the page, built from components that read their figures through `lib/`. A section sheet sits under its id, since its script writes markup a scoped style never reaches, and the nav and footer sheets sit under their root class. `components/markup.test.ts` fails on a style block, a script body, or SVG written inline.
 
-- `pages/` assembles the one route from `components/sections/`, one component per section, each styled in `<style is:global>` under its id since its script writes markup a scoped style never reaches
+- `components/` holds a folder per section, plus `site-nav/` and `site-footer/`, each splitting `index.astro` from its `style.css`, `client.ts`, and icons, which `pages/` assembles into one route
 - `content/copy.ts` holds the copy and the product views' scenes, each string cited to `README.md` or marked as a paraphrase, gated by `readmeCitations`
 - `content/` also holds the sessions, craft's practices with each quote's ledger row, and the record sheets under `content/records/`, one formatted HTML file each
 - `lib/skills.ts` reads the skill catalog for the opening's `/` menu, and `lib/scene.ts` paces every scene window, halting it while the reader holds it
-- `styles/global.css` maps role names onto the generated `tokens.css` inside `@layer base` beside the shared tray, window, and picker classes, and `base.astro` embeds Geist and Geist Mono
+- `styles/global.css` imports Tailwind first, then maps role names onto `tokens.css` in `@layer base` beside the shared tray, window, and picker classes, and `base.astro` embeds Geist and Geist Mono
 
 ### `web/`
 

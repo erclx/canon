@@ -1,0 +1,56 @@
+---
+import { setup, setupSession } from '../../../content/copy'
+import './style.css'
+
+/**
+ * A project's life with canon: four stages down one rule beside the setup
+ * session, which they center on above 900. The session plays once when it
+ * scrolls into view, the active stage's dot filling in the accent as its
+ * command types and finished stages kept a quiet fill, and rests whole on the
+ * last stage. A click on a stage replays from it and rests there, and the
+ * session holds one height so the page never jumps.
+ */
+const code = (text: string) => text.split('`')
+---
+
+<section class="sec" id="setup">
+  <div class="sec-head">
+    <h2>{setup.head}</h2>
+    <p>{setup.lede}</p>
+  </div>
+  <div class="split">
+    <div class="stages">
+      {
+        setup.stages.map((stage, index) => (
+          <div class={`st${stage.skill ? ' skill' : ''}`} data-i={index}>
+            <button
+              type="button"
+              class="go"
+              aria-label={setup.play(stage.name)}
+            >
+              <h3>{stage.name}</h3>
+            </button>
+            <p>
+              {code(stage.line).map((part, k) =>
+                k % 2 ? <code>{part}</code> : part,
+              )}
+            </p>
+          </div>
+        ))
+      }
+    </div>
+    <div class="tray">
+      <div class="tx win" aria-hidden="true">
+        <p class="cap">{setup.session}</p>
+        <div class="log"></div>
+      </div>
+    </div>
+  </div>
+  <script
+    type="application/json"
+    class="setup-data"
+    set:html={JSON.stringify(setupSession)}
+  />
+</section>
+
+<script src="./client.ts"></script>

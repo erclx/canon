@@ -1,0 +1,21 @@
+---
+import mark from '../../../../assets/brand/mark.svg?raw'
+import { footer, nav } from '../../content/copy'
+import './style.css'
+
+/** One row under a rule: the mark, then the real destinations a reader goes next. */
+const glyph = mark.replace(/<!--[\s\S]*?-->/, '').trim()
+---
+
+<footer class="site-footer">
+  <div class="in">
+    <span class="brand">
+      <span class="glyph" aria-hidden="true" set:html={glyph} />
+      {nav.mark}
+    </span>
+    <nav aria-label="Project links">
+      {footer.links.map((link) => <a href={link.href}>{link.label}</a>)}
+      <a href={footer.license.href}>{footer.license.label}</a>
+    </nav>
+  </div>
+</footer>

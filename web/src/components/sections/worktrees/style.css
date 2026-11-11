@@ -1,0 +1,175 @@
+#worktrees {
+  --join: var(--line);
+}
+
+[data-theme='dark'] #worktrees {
+  --join: color-mix(in srgb, var(--ink) 15%, var(--win));
+}
+
+#worktrees .tray {
+  margin-top: 52px;
+}
+
+#worktrees .card {
+  padding: 28px 32px 26px;
+  background: var(--win);
+  border-radius: var(--radius-frame);
+  box-shadow: var(--shadow-window);
+}
+
+#worktrees .wts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#worktrees .wt {
+  position: relative;
+  min-width: 0;
+  padding: 14px 16px;
+  border-radius: var(--radius-panel);
+  background: var(--win);
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+/* The join from each worktree down into the shared band, spanning the gap between them. */
+#worktrees .wt::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -25px;
+  height: 24px;
+  border-left: 2px dashed var(--join);
+}
+
+#worktrees .wt p {
+  margin: 0;
+}
+
+#worktrees .wt .p {
+  font-family: var(--mono);
+  font-size: var(--size-view-small);
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+#worktrees .wt .b {
+  margin-top: 6px;
+  font-size: var(--size-body);
+  font-weight: 600;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+#worktrees .wt .l {
+  margin-top: 4px;
+  font-size: var(--size-small);
+  line-height: 1.4;
+  color: var(--body);
+}
+
+#worktrees .dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: 1px;
+}
+
+#worktrees .band {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 12px 16px;
+  border-radius: var(--radius-panel);
+  background: var(--band);
+}
+
+#worktrees .ic {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-action);
+  background: var(--win);
+  color: var(--accent);
+  box-shadow: var(--shadow-ring);
+}
+
+#worktrees .ic svg {
+  width: 17px;
+  height: 17px;
+}
+
+#worktrees .nm {
+  font-family: var(--mono);
+  font-size: var(--size-body);
+  font-weight: 500;
+  color: var(--ink);
+}
+
+#worktrees .dirs,
+#worktrees .sh {
+  font-size: var(--size-small);
+  color: var(--muted);
+}
+
+#worktrees .dirs {
+  font-family: var(--mono);
+}
+
+#worktrees .sh {
+  margin-left: auto;
+}
+
+@media (max-width: 900px) {
+  #worktrees .tray {
+    margin-top: 40px;
+  }
+
+  #worktrees .band {
+    flex-wrap: wrap;
+  }
+
+  #worktrees .sh {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  #worktrees .card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  #worktrees .tray {
+    margin-top: 32px;
+  }
+
+  #worktrees .wts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  #worktrees .wt::after {
+    display: none;
+  }
+
+  #worktrees .band {
+    margin-top: 16px;
+  }
+
+  #worktrees .card {
+    padding: 16px;
+  }
+
+  #worktrees .dirs {
+    width: 100%;
+  }
+}
