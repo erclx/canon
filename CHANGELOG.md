@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.84.0](https://github.com/erclx/canon/compare/v5.83.0...v5.84.0) (2026-11-11)
+
+
+### Features
+
+* **pr:** read CI on a ready pull request before the merge line ([#2999](https://github.com/erclx/canon/issues/2999)) ([28d7810](https://github.com/erclx/canon/commit/28d7810129d73aac9ad7c4018cef182ca7175854))
+* **tooling:** run the seeded canon stages in CI or fail them ([#2995](https://github.com/erclx/canon/issues/2995)) ([e2241e8](https://github.com/erclx/canon/commit/e2241e86a49b7d74d90ae8deaf3ab28156601389))
+* **web:** apply the drive 224 landing fixes ([#2997](https://github.com/erclx/canon/issues/2997)) ([a778e40](https://github.com/erclx/canon/commit/a778e404fe6ce1a3b746a78936202b455ed49ab7))
+
 ## [5.83.0](https://github.com/erclx/canon/compare/v5.82.0...v5.83.0) (2026-11-10)
 
 
