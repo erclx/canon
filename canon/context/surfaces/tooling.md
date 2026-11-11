@@ -103,6 +103,8 @@ Holds the decline, customize, and lift transitions over `domains.tooling.disposi
 - `sync --write` replaces only a stale config and holds the rest until `--replace` names them, while `canon tooling inject` holds nothing
 - A config no recorded stack ships is never held, since a fresh scaffold ships its own copies and `canon init` records `base` before `target-setup` syncs the framework stack
 - `putDomain` rebuilds a record from the fields it knows, so a release older than the dispositions field drops it on its next tooling write and restores a declined file
+- Scripts share the map under a `package.json:<key>` address rather than a sibling field, since that rebuild would drop a new field. An older binary keeps such a key and ignores it, as no golden path matches.
+- The address is parsed ahead of `normalizeGoldenPath`, whose `posix.normalize` would rewrite a key holding `/` or `..`
 
 ### `src/tooling/install.ts`
 
