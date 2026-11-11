@@ -8,7 +8,13 @@ import './style.css'
  * what its session is doing, each joined down into the one shared `.canon/`
  * band they all read and write. On a phone the cards stack over the band with
  * no joins.
+ *
+ * One card a beat steps its status line on, pulses its dot, and drops a dot
+ * down its join that lights the folder the step writes, holding while the
+ * reader holds the card and standing still under reduced motion. Each card
+ * rests on its second step.
  */
+const REST = 1
 ---
 
 <section class="sec" id="worktrees">
@@ -27,7 +33,12 @@ import './style.css'
                 <span class="dot" aria-hidden="true" />
                 {card.branch}
               </p>
-              <p class="l">{card.line}</p>
+              <p class="l">
+                {card.steps.map((step, index) => (
+                  <span class:list={{ on: index === REST }}>{step.line}</span>
+                ))}
+              </p>
+              <span class="drop" aria-hidden="true" />
             </li>
           ))
         }
@@ -35,9 +46,28 @@ import './style.css'
       <div class="band">
         <span class="ic"><FolderIcon aria-hidden="true" /></span>
         <span class="nm">{worktrees.band.name}</span>
-        <span class="dirs">{worktrees.band.dirs}</span>
+        <span class="dirs">
+          {
+            worktrees.band.dirs.map((dir, index) => (
+              <>
+                {index > 0 && ' · '}
+                <span data-dir={dir}>{dir}</span>
+              </>
+            ))
+          }
+        </span>
         <span class="sh">{worktrees.band.shared}</span>
       </div>
     </div>
   </div>
+  <script
+    type="application/json"
+    class="worktrees-data"
+    set:html={JSON.stringify({
+      rest: REST,
+      cards: worktreeCards.map((card) => card.steps.map((step) => step.dir)),
+    })}
+  />
 </section>
+
+<script src="./client.ts"></script>

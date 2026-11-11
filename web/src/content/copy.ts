@@ -163,7 +163,7 @@ export const worktrees = {
   // README.md: canon-allow-readme-paraphrase: the band naming the shared folder, which the README states as the record in the main checkout. "the one `.canon/` record in the main checkout"
   band: {
     name: '.canon/',
-    dirs: 'plans/ · review/ · tasks/',
+    dirs: ['plans/', 'review/', 'tasks/'],
     shared: 'shared by every worktree',
   },
 }
@@ -377,24 +377,38 @@ export const guardrailScenes: {
 
 /**
  * One worktree for each change: three worktrees side by side, each its folder,
- * its branch, and what the session in it is doing.
+ * its branch, and what the session in it is doing. Each card steps through its
+ * status lines in turn, lighting the band folder the step writes, and rests on
+ * its second.
  */
 // README.md: canon-allow-readme-paraphrase: page fiction drawn from the worktree layout the README describes. "Each worker builds in its own worktree on its own branch"
 export const worktreeCards = [
   {
     path: '.claude/worktrees/take-timer/',
     branch: 'feat/take-timer',
-    line: 'Gate: 9 of 14 stages passed',
+    steps: [
+      { line: 'Slice 2 of 4 committed', dir: 'plans/' },
+      { line: 'Gate: 9 of 14 stages passed', dir: 'plans/' },
+      { line: 'Pull request opened', dir: 'tasks/' },
+    ],
   },
   {
     path: '.claude/worktrees/sync-stamp/',
     branch: 'feat/sync-stamp',
-    line: 'Second pass on the added commits',
+    steps: [
+      { line: 'Reading the added commits', dir: 'review/' },
+      { line: 'Second pass on the added commits', dir: 'review/' },
+      { line: 'Two findings posted', dir: 'review/' },
+    ],
   },
   {
     path: '.claude/worktrees/toolbar/',
     branch: 'feat/toolbar',
-    line: 'Driving the checklist in the running app',
+    steps: [
+      { line: 'Starting the app from the branch', dir: 'review/' },
+      { line: 'Driving the checklist in the running app', dir: 'review/' },
+      { line: 'Box 3 sent back to the worker', dir: 'review/' },
+    ],
   },
 ]
 
