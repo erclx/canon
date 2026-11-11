@@ -1180,23 +1180,23 @@ describe('lift', () => {
       })
 
       it.each([
-        ['a push a box can observe', { isAncestor: true, paths: ['src/App.tsx'] }],
+        [
+          'a push a box can observe',
+          { isAncestor: true, paths: ['src/App.tsx'] },
+        ],
         ['a rewritten reel commit', { isAncestor: false, paths: [] }],
         ['a failed read', null],
-      ] as const)(
-        'should not carry a reel across %s',
-        async (_, changed) => {
-          const { api } = makeApi({
-            evidence: { ...drivable, reelHead: MOVED },
-            reviews: [CODE_CLOSED, UI_CLOSED],
-            changed,
-          })
+      ] as const)('should not carry a reel across %s', async (_, changed) => {
+        const { api } = makeApi({
+          evidence: { ...drivable, reelHead: MOVED },
+          reviews: [CODE_CLOSED, UI_CLOSED],
+          changed,
+        })
 
-          const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+        const record = await lift(api, { isCheck: true, waitSeconds: 60 })
 
-          expect(record.reason).toBe('reel-unsettled')
-        },
-      )
+        expect(record.reason).toBe('reel-unsettled')
+      })
 
       it('should settle on a reel waiver in the newest pass, naming its reason', async () => {
         const { api } = makeApi({
