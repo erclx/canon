@@ -77,6 +77,7 @@ import { type HeadRefusal, resolveHead, resolveTip } from '@/pr/head'
 import {
   type ChecksGate,
   DEFAULT_WAIT_SECONDS,
+  SETTLING_REEL_SKIPS,
   type EvidenceGate,
   type GitRunner,
   lift,
@@ -1050,7 +1051,16 @@ export function register(program: Command): void {
         '            refuses `painted-uncaptured`,',
         '            the gate entry naming what is left as `uncaptured` and what',
         '            a review waived as `waived`, each sorted. An absent list,',
-        '            in a project whose base keeps no captures, passes',
+        '            in a project whose base keeps no captures, passes. Last, a',
+        '            checklist holding a drivable box owes a reel at the head. A',
+        '            `reelSkip` on the evidence check whose code, the text before',
+        '            its first colon, is one of',
+        `            ${SETTLING_REEL_SKIPS.join(', ')}`,
+        '            settles it, since no builder can change those. So does a',
+        '            `- **Waived reel:** <reason>` line in a',
+        '            standing pass, read the way a capture waiver is. Anything',
+        '            else refuses `reel-unsettled`, the gate entry naming the skip',
+        '            as `reelSkip`, and a waiver that settled it as `reelWaived`',
         '  standing  the head is fresh against the base, not stale or conflicted',
         '  ci        every required check run on the tip passed, waited on up to --wait',
         '',
@@ -1086,8 +1096,8 @@ export function register(program: Command): void {
         '  lifted, already-ready, redrafted, clear (--check)',
         '  pull-closed, review-missing, review-open, review-unmarked,',
         '  review-behind, ui-missing, ui-open, ui-unmarked, ui-behind,',
-        '  ui-undriven, evidence-owed, painted-uncaptured, standing-stale,',
-        '  standing-conflict, standing-unknown,',
+        '  ui-undriven, evidence-owed, painted-uncaptured, reel-unsettled,',
+        '  standing-stale, standing-conflict, standing-unknown,',
         '  ci-pending (--check), ci-failing, ci-conflicted, ci-timeout,',
         '  head-moved, ready-withdrawn, gh-failed',
         '',
@@ -4336,6 +4346,8 @@ const LIFT_REFUSALS: Record<LiftRefusal | 'bad-wait' | 'gh-missing', string> = {
     'The evidence check reads owed, so the ship chain left a step undone.',
   'painted-uncaptured':
     'A painted path changed with no capture, no reel at the head, and no waiver in a review. Capture it, or have a review waive it.',
+  'reel-unsettled':
+    'The checklist holds a box a driver can run, and no reel is filmed at the head. The posted skip, if any, is one a builder can fix. Film the reel, or have a review waive it.',
   'standing-stale':
     'The base moved under a path this branch writes since it branched, so CI measured a tree that is gone.',
   'standing-conflict': 'The head does not merge cleanly into the base.',
@@ -4448,6 +4460,7 @@ async function readEvidenceGate(
     drivable?: unknown
     uncaptured?: unknown
     reel?: unknown
+    reelSkip?: unknown
   }
   try {
     record = JSON.parse(last)
@@ -4467,6 +4480,7 @@ async function readEvidenceGate(
       uncaptured: record.uncaptured.map(String),
     }),
     ...(reelHead !== undefined && { reelHead }),
+    ...(typeof record.reelSkip === 'string' && { reelSkip: record.reelSkip }),
   }
 }
 
