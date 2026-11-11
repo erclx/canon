@@ -26,8 +26,8 @@ const DOCS = `${REPO}/tree/main/docs`
 const ORIGIN = 'https://canon.erclx.com'
 
 export const site = {
-  /** The lowercase wordmark the social card and its alt text draw, so a change re-captures the card. */
-  name: 'canon',
+  /** The name the social card and its alt text draw, so a change re-captures the card. */
+  name: 'Canon',
   /**
    * The host, which `og:site_name` reads. LinkedIn prints it under the share
    * title, which already reads `title`, so the name there would show twice.
@@ -60,8 +60,8 @@ export const sections = [
 ] as const
 
 export const nav = {
-  mark: 'canon',
-  back: 'canon, back to top',
+  mark: 'Canon',
+  back: 'Canon, back to top',
   // README.md: canon-allow-readme-paraphrase: the jump to the install section, which the README opens on as Quick start.
   try: { href: '#try', label: 'Try it' },
   // README.md: "Docs"
@@ -78,9 +78,9 @@ export const nav = {
 export const fold = {
   /** The claim in three runs, with the record icon set before `plan` and the merge icon before `merge`. */
   // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs agent work from" "plan to merge"
-  parts: ['canon runs agent work from', 'plan to', 'merge'] as const,
+  parts: ['Canon runs agent work from', 'plan to', 'merge'] as const,
   // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs agent work from plan to merge"
-  headline: 'canon runs agent work from plan to merge',
+  headline: 'Canon runs agent work from plan to merge',
   // README.md: canon-allow-readme-paraphrase: the opening sentence's subject, carried on to the plan and the merge the README's claim names. "A Claude Code plugin and CLI that"
   lead: 'A Claude Code plugin and CLI that takes coding agents from the plan to the merge.',
   view: {
@@ -163,7 +163,7 @@ export const worktrees = {
   // README.md: canon-allow-readme-paraphrase: the band naming the shared folder, which the README states as the record in the main checkout. "the one `.canon/` record in the main checkout"
   band: {
     name: '.canon/',
-    dirs: 'plans/ · review/ · tasks/',
+    dirs: ['plans/', 'review/', 'tasks/'],
     shared: 'shared by every worktree',
   },
 }
@@ -203,9 +203,9 @@ export const setup = {
 
 export const tryIt = {
   // README.md: canon-allow-readme-paraphrase: the README's Quick start, headed for what the three commands do rather than how fast they run.
-  head: 'Installing canon',
-  // README.md: "canon expects someone who already knows Claude Code well. It runs on Linux and macOS, and the CLI needs Bun."
-  lede: 'canon expects someone who already knows Claude Code well. It runs on Linux and macOS, and the CLI needs Bun.',
+  head: 'Installing Canon',
+  // README.md: canon-allow-readme-paraphrase: the README's sentence with the name capitalized as the page writes it. "expects someone who already knows Claude Code well. It runs on Linux and macOS, and the CLI needs Bun."
+  lede: 'Canon expects someone who already knows Claude Code well. It runs on Linux and macOS, and the CLI needs Bun.',
   // README.md: "claude plugin marketplace add https://github.com/erclx/canon" "claude plugin install canon@canon" "bun install --global @erclx/canon"
   commands: [
     'claude plugin marketplace add https://github.com/erclx/canon',
@@ -377,24 +377,38 @@ export const guardrailScenes: {
 
 /**
  * One worktree for each change: three worktrees side by side, each its folder,
- * its branch, and what the session in it is doing.
+ * its branch, and what the session in it is doing. Each card steps through its
+ * status lines in turn, lighting the band folder the step writes, and rests on
+ * its second.
  */
 // README.md: canon-allow-readme-paraphrase: page fiction drawn from the worktree layout the README describes. "Each worker builds in its own worktree on its own branch"
 export const worktreeCards = [
   {
     path: '.claude/worktrees/take-timer/',
     branch: 'feat/take-timer',
-    line: 'Gate: 9 of 14 stages passed',
+    steps: [
+      { line: 'Slice 2 of 4 committed', dir: 'plans/' },
+      { line: 'Gate: 9 of 14 stages passed', dir: 'plans/' },
+      { line: 'Pull request opened', dir: 'tasks/' },
+    ],
   },
   {
     path: '.claude/worktrees/sync-stamp/',
     branch: 'feat/sync-stamp',
-    line: 'Second pass on the added commits',
+    steps: [
+      { line: 'Reading the added commits', dir: 'review/' },
+      { line: 'Second pass on the added commits', dir: 'review/' },
+      { line: 'Two findings posted', dir: 'review/' },
+    ],
   },
   {
     path: '.claude/worktrees/toolbar/',
     branch: 'feat/toolbar',
-    line: 'Driving the checklist in the running app',
+    steps: [
+      { line: 'Starting the app from the branch', dir: 'review/' },
+      { line: 'Driving the checklist in the running app', dir: 'review/' },
+      { line: 'Box 3 sent back to the worker', dir: 'review/' },
+    ],
   },
 ]
 

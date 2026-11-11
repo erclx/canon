@@ -23,13 +23,15 @@ const code = (text: string) => text.split('`')
       {
         setup.stages.map((stage, index) => (
           <div class={`st${stage.skill ? ' skill' : ''}`} data-i={index}>
-            <button
-              type="button"
-              class="go"
-              aria-label={setup.play(stage.name)}
-            >
-              <h3>{stage.name}</h3>
-            </button>
+            <h3>
+              <button
+                type="button"
+                class="go"
+                aria-label={setup.play(stage.name)}
+              >
+                {stage.name}
+              </button>
+            </h3>
             <p>
               {code(stage.line).map((part, k) =>
                 k % 2 ? <code>{part}</code> : part,

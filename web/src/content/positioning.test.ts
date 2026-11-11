@@ -45,7 +45,7 @@ describe('public positioning', () => {
   })
 
   it('should take the headline claim from the README opening sentence', () => {
-    expect(readmeOpening()).toContain(fold.headline.replace(/^canon /, ''))
+    expect(readmeOpening()).toContain(fold.headline.replace(/^Canon /, ''))
   })
 
   it('should open the hero lead on the README opening sentence subject', () => {

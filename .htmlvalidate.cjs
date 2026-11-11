@@ -15,8 +15,5 @@ module.exports = {
     // role="list" on a ul keeps list semantics where Safari drops them with
     // list-style: none, so the attribute is deliberate.
     'no-redundant-role': 'off',
-    // The setup section's stage buttons wrap an h3. Fixing it moves section
-    // markup that is being relocated, so it waits for the queued landing fixes.
-    'element-permitted-content': 'off',
   },
 }

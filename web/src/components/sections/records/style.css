@@ -115,11 +115,28 @@
   user-select: none;
 }
 
-#records .explorer div {
+#records .explorer > * {
   padding: 0 14px 0 calc(14px + var(--d) * 16px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+#records .explorer button {
+  all: unset;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  padding: 0 14px 0 calc(14px + var(--d) * 16px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+/* The reset above sets display, which would otherwise outrank the hidden attribute on a folded row. */
+#records .explorer [hidden] {
+  display: none;
 }
 
 #records .explorer .top {
@@ -129,6 +146,34 @@
 #records .explorer .on {
   background: var(--tray);
   color: var(--ink);
+}
+
+@media (hover: hover) {
+  #records .explorer button:hover {
+    background: var(--tray);
+    color: var(--ink);
+  }
+}
+
+/* Out of flow, so the whitespace before a folder's name collapses and the name keeps its depth's indent. */
+#records .explorer .fold::before {
+  content: '\25BE';
+  position: absolute;
+  width: 12px;
+  margin-left: -12px;
+  font-size: 10px;
+  color: var(--muted);
+  transition: transform var(--duration-feedback) var(--ease-standard);
+}
+
+#records .explorer .fold.shut::before {
+  transform: rotate(-90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #records .explorer .fold::before {
+    transition: none;
+  }
 }
 
 /* Beside the explorer the view switch leaves the tab bar for the breadcrumb row, so the tabs keep their width. */

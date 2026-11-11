@@ -14,6 +14,8 @@ import './style.css'
  * Each sheet is an editor or a browser window with a rendered and a source
  * view, and its checkboxes and file tabs work. An editor sheet carries an
  * explorer, drawn from its breadcrumb, that lights the file its tabs have open.
+ * A file entry opens its tab and a folder folds the rows under it, both out of
+ * the tab order, since the file tabs already reach every file by keyboard.
  */
 
 interface Entry {
@@ -146,15 +148,39 @@ function explorerOf(html: string): Entry[] {
                 <div class="in" set:html={sheet.html} />
                 {sheet.kind === 'ed' && (
                   <aside class="explorer" aria-hidden="true">
-                    {explorerOf(sheet.html).map((entry) => (
-                      <div
-                        class:list={{ on: entry.on, top: entry.depth === 0 }}
-                        data-f={entry.file}
-                        style={`--d:${entry.depth}`}
-                      >
-                        {entry.name}
-                      </div>
-                    ))}
+                    {explorerOf(sheet.html).map((entry, k, tree) =>
+                      entry.file !== undefined ? (
+                        <button
+                          type="button"
+                          tabindex="-1"
+                          class:list={{ on: entry.on }}
+                          data-f={entry.file}
+                          data-d={entry.depth}
+                          style={`--d:${entry.depth}`}
+                        >
+                          {entry.name}
+                        </button>
+                      ) : entry.depth > 0 ? (
+                        <button
+                          type="button"
+                          tabindex="-1"
+                          class:list={[
+                            'fold',
+                            {
+                              shut: (tree[k + 1]?.depth ?? 0) <= entry.depth,
+                            },
+                          ]}
+                          data-d={entry.depth}
+                          style={`--d:${entry.depth}`}
+                        >
+                          {entry.name}
+                        </button>
+                      ) : (
+                        <div class="top" data-d="0" style="--d:0">
+                          {entry.name}
+                        </div>
+                      ),
+                    )}
                   </aside>
                 )}
               </article>

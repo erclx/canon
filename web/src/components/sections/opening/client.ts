@@ -195,9 +195,19 @@ if (
       rows.delete(id)
       setTimeout(() => node.remove(), 400)
     })
-    if (counts)
-      counts.innerHTML = `<b>${state.aw.length}</b> awaiting input · <b>${state.wk.length}</b> working · <b>${done}</b> completed`
+    writeCounts()
   }
+
+  /* A phone width cuts the long wording mid-word, so it takes the short one. */
+  const narrow = matchMedia('(max-width: 640px)')
+  function writeCounts() {
+    if (!counts) return
+    const [awaiting, completed] = narrow.matches
+      ? ['awaiting', 'done']
+      : ['awaiting input', 'completed']
+    counts.innerHTML = `<b>${state.aw.length}</b> ${awaiting} · <b>${state.wk.length}</b> working · <b>${done}</b> ${completed}`
+  }
+  narrow.addEventListener('change', writeCounts)
 
   function step() {
     const kind = data.steps[tick % data.steps.length]
@@ -301,6 +311,28 @@ if (
   })
   ask.addEventListener('blur', () => {
     if (!ask.value && caret) caret.style.left = '0px'
+  })
+
+  /*
+   * A pointer focus is one that arrives during a press, as on the input, or
+   * from a click on the label, which focuses the input after the release. A
+   * press released elsewhere clicks no label, so it leaves no flag behind.
+   */
+  const line = ask.closest('.ask-line')
+  let pressed = false
+  let clicked = false
+  const release = () => (pressed = false)
+  line?.addEventListener('pointerdown', () => (pressed = true))
+  line?.addEventListener('click', () => (clicked = true))
+  window.addEventListener('pointerup', release, true)
+  window.addEventListener('pointercancel', release, true)
+  ask.addEventListener('focus', () => {
+    if ((pressed || clicked) && field) field.dataset.pointer = ''
+    clicked = false
+  })
+  ask.addEventListener('blur', () => {
+    clicked = false
+    if (field) delete field.dataset.pointer
   })
 
   /* The `/` menu: the workflow skills first, then the rest of the catalog. */

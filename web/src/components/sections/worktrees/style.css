@@ -71,6 +71,20 @@
   color: var(--body);
 }
 
+/* Every status line sits in one cell, so the card holds the height of its longest while they swap. */
+#worktrees .wt .l {
+  display: grid;
+}
+
+#worktrees .wt .l > span {
+  grid-area: 1 / 1;
+  visibility: hidden;
+}
+
+#worktrees .wt .l > .on {
+  visibility: visible;
+}
+
 #worktrees .dot {
   display: inline-block;
   width: 8px;
@@ -79,6 +93,69 @@
   border-radius: 50%;
   background: var(--accent);
   vertical-align: 1px;
+}
+
+/* The beat: a card's dot pulses and a drop runs down its join into the band, lighting the folder its step writes. */
+#worktrees .wt .drop {
+  position: absolute;
+  left: 50%;
+  bottom: -26px;
+  width: 6px;
+  height: 6px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+#worktrees .wt .drop.go {
+  animation: wt-drop 520ms var(--ease-standard) both;
+}
+
+@keyframes wt-drop {
+  0% {
+    transform: translateY(-6px);
+    opacity: 0;
+  }
+
+  25% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+}
+
+#worktrees .wt .dot.go {
+  animation: wt-dot 520ms var(--ease-standard);
+}
+
+@keyframes wt-dot {
+  40% {
+    transform: scale(1.6);
+  }
+}
+
+#worktrees .dirs span {
+  transition: color var(--duration-fade) var(--ease-standard);
+}
+
+#worktrees .dirs span.lit {
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #worktrees .wt .drop.go,
+  #worktrees .wt .dot.go {
+    animation: none;
+  }
+
+  #worktrees .dirs span {
+    transition: none;
+  }
 }
 
 #worktrees .band {
@@ -157,7 +234,8 @@
     gap: 10px;
   }
 
-  #worktrees .wt::after {
+  #worktrees .wt::after,
+  #worktrees .wt .drop {
     display: none;
   }
 

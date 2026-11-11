@@ -80,6 +80,25 @@ test('the opening prompt shows a focus ring when it takes focus', async ({
   await expect(page.locator('#top .fld')).toHaveCSS('outline-style', 'solid')
 })
 
+test('a click into the opening prompt draws no ring, and Tab back draws it', async ({
+  page,
+}) => {
+  await page.goto('/')
+  const ask = page.locator('#av-ask')
+  const field = page.locator('#top .fld')
+
+  await ask.click()
+  await expect(ask).toBeFocused()
+  await expect(field).toHaveCSS('outline-style', 'none')
+
+  await page.keyboard.press('Shift+Tab')
+  await expect(ask).not.toBeFocused()
+  await page.keyboard.press('Tab')
+
+  await expect(ask).toBeFocused()
+  await expect(field).toHaveCSS('outline-style', 'solid')
+})
+
 test.describe('the fixed bar', () => {
   test('lands a section jump with its heading below the bar', async ({
     page,
@@ -165,6 +184,72 @@ test.describe('the fixed bar', () => {
     )
     await expect(page.locator('.nbtn')).toBeFocused()
   })
+})
+
+test('a click on the prompt mark focuses the input with no ring', async ({
+  page,
+}) => {
+  await page.goto('/')
+
+  await page.locator('#top .ask-line .p').click()
+
+  await expect(page.locator('#av-ask')).toBeFocused()
+  await expect(page.locator('#top .fld')).toHaveCSS('outline-style', 'none')
+})
+
+test('a press on the prompt dragged off before release leaves Tab its ring', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/')
+  const ask = page.locator('#av-ask')
+  const mark = await page.locator('#top .ask-line .p').boundingBox()
+  expect(mark).not.toBeNull()
+
+  await page.mouse.move(mark!.x + mark!.width / 2, mark!.y + mark!.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(5, 5)
+  await page.mouse.up()
+  await expect(ask).not.toBeFocused()
+  // Focus the control just ahead of the prompt in tab order, so Tab is what lands on it.
+  await page.evaluate(() => {
+    const target = document.getElementById('av-ask')
+    const focusable = [
+      ...document.querySelectorAll<HTMLElement>(
+        'a[href], button, input, [tabindex]:not([tabindex="-1"])',
+      ),
+    ].filter((node) => node.offsetParent !== null || node === target)
+    const index = target ? focusable.indexOf(target) : -1
+    if (index < 1) throw new Error('no control sits ahead of the prompt')
+    focusable[index - 1]?.focus()
+  })
+  await page.keyboard.press('Tab')
+
+  await expect(ask).toBeFocused()
+  await expect(page.locator('#top .fld')).toHaveCSS('outline-style', 'solid')
+})
+
+test('the opening status line fits on one row at 360', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 })
+  await page.goto('/')
+  const line = page.locator('#av-counts')
+  await expect(line).toHaveText(/\S/)
+
+  const cut = await line.evaluate((node) => node.scrollWidth - node.clientWidth)
+
+  expect(cut).toBeLessThanOrEqual(0)
+})
+
+test('the footer mark takes the reader back to the top', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/')
+  const brand = page.locator('.site-footer a.brand')
+  await brand.scrollIntoViewIfNeeded()
+
+  await brand.click()
+
+  await expect(page.locator('#top h1')).toBeInViewport(SETTLE)
+  expect(new URL(page.url()).hash).toBe('#top')
 })
 
 test.describe('the craft section', () => {
@@ -255,6 +340,41 @@ test.describe('the records stack', () => {
     await expect(lit).toHaveCount(1)
     await expect(lit).toHaveAttribute('data-f', '0')
     await expect(lit).toBeVisible()
+  })
+
+  test('a click on an explorer file opens its tab, out of the tab order', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const front = page.locator('#records .sheet[data-i="0"]')
+    const entry = front.locator('.explorer button[data-f="0"]')
+    await expect(entry).toHaveAttribute('tabindex', '-1')
+
+    await entry.click()
+
+    await expect(front.locator('.ftab[data-f="0"]')).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+    await expect(entry).toHaveClass(/\bon\b/)
+  })
+
+  test('a click on an explorer folder folds the rows under it', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const explorer = page.locator('#records .sheet[data-i="0"] .explorer')
+    const files = explorer.locator('button[data-f]')
+    const folder = explorer.locator('.fold:has(+ button[data-f])')
+    await expect(folder).toHaveCount(1)
+    await expect(files.first()).toBeVisible()
+
+    await folder.click()
+
+    await expect(files.first()).toBeHidden()
+    await expect(folder).toHaveClass(/\bshut\b/)
+    await folder.click()
+    await expect(files.first()).toBeVisible()
   })
 
   test('takes no pinned scroll under reduced motion', async ({ page }) => {
