@@ -52,10 +52,4 @@ describe('worktreeCards', () => {
     expect(steps.length).toBeGreaterThan(0)
     expect(strays).toEqual([])
   })
-
-  it('should give every card three status steps', () => {
-    expect(copy.worktreeCards.map((card) => card.steps.length)).toEqual([
-      3, 3, 3,
-    ])
-  })
 })

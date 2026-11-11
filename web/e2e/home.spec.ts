@@ -186,6 +186,49 @@ test.describe('the fixed bar', () => {
   })
 })
 
+test('a click on the prompt mark focuses the input with no ring', async ({
+  page,
+}) => {
+  await page.goto('/')
+
+  await page.locator('#top .ask-line .p').click()
+
+  await expect(page.locator('#av-ask')).toBeFocused()
+  await expect(page.locator('#top .fld')).toHaveCSS('outline-style', 'none')
+})
+
+test('a press on the prompt dragged off before release leaves Tab its ring', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/')
+  const ask = page.locator('#av-ask')
+  const mark = await page.locator('#top .ask-line .p').boundingBox()
+  expect(mark).not.toBeNull()
+
+  await page.mouse.move(mark!.x + mark!.width / 2, mark!.y + mark!.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(5, 5)
+  await page.mouse.up()
+  await expect(ask).not.toBeFocused()
+  // Focus the control just ahead of the prompt in tab order, so Tab is what lands on it.
+  await page.evaluate(() => {
+    const target = document.getElementById('av-ask')
+    const focusable = [
+      ...document.querySelectorAll<HTMLElement>(
+        'a[href], button, input, [tabindex]:not([tabindex="-1"])',
+      ),
+    ].filter((node) => node.offsetParent !== null || node === target)
+    const index = target ? focusable.indexOf(target) : -1
+    if (index < 1) throw new Error('no control sits ahead of the prompt')
+    focusable[index - 1]?.focus()
+  })
+  await page.keyboard.press('Tab')
+
+  await expect(ask).toBeFocused()
+  await expect(page.locator('#top .fld')).toHaveCSS('outline-style', 'solid')
+})
+
 test('the opening status line fits on one row at 360', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 })
   await page.goto('/')
