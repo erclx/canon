@@ -85,7 +85,18 @@ describe('every workflow', () => {
       .filter(({ step }) => typeof step['timeout-minutes'] !== 'number')
       .map(({ file, step }) => `${file}: ${step.name}`)
 
-    expect(steps).toHaveLength(7)
+    expect(steps).toHaveLength(4)
     expect(unbounded).toEqual([])
+  })
+
+  // Both hosted Ubuntu images ship Chrome and its libraries, so a seeded
+  // workflow that reaches apt fails on a mirror outage for nothing
+  it('should keep every shipped workflow off the retry script', () => {
+    const calls = allSteps()
+      .filter(({ file }) => file.startsWith('tooling/'))
+      .filter(({ step }) => step.run?.includes(INSTALL_SCRIPT))
+      .map(({ file, step }) => `${file}: ${step.name}`)
+
+    expect(calls).toEqual([])
   })
 })
