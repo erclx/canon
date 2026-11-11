@@ -1,0 +1,253 @@
+#roles .tray {
+  margin-top: 56px;
+}
+
+#roles .two {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 36px;
+  align-items: center;
+}
+
+#roles .win {
+  height: 452px;
+}
+
+#roles .log {
+  flex: 1;
+  min-height: 0;
+  padding: 20px 26px 0;
+  overflow: hidden;
+}
+
+#roles .log > div {
+  transition: opacity var(--duration-fade) var(--ease-standard);
+}
+
+#roles .log .hide {
+  opacity: 0;
+}
+
+#roles .log .ask {
+  margin: 0 -26px 16px;
+  padding: 8px 26px;
+}
+
+#roles .log .act {
+  margin-bottom: 14px;
+  color: var(--muted);
+}
+
+#roles .log .act span {
+  display: flex;
+  gap: 10px;
+  padding-left: 4px;
+}
+
+#roles .log .act span::before {
+  content: '\23BF';
+  flex: none;
+}
+
+#roles .log .say {
+  position: relative;
+  margin-bottom: 8px;
+  padding-left: 22px;
+  color: var(--ink);
+}
+
+#roles .log .say.first::before {
+  content: '\25CF';
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: var(--size-view-small);
+  color: var(--ink);
+}
+
+#roles .inp {
+  flex: none;
+  padding: 0 26px 16px;
+}
+
+#roles .inp .rule {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--size-view-small);
+  color: var(--muted);
+}
+
+#roles .inp .rule i {
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+#roles .inp .rule i.s {
+  flex: 0 0 18px;
+}
+
+#roles .inp .line {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  white-space: pre-wrap;
+  color: var(--ink);
+}
+
+#roles .inp .line .g {
+  flex: none;
+  color: var(--muted);
+}
+
+#roles .inp .bot {
+  height: 1px;
+  background: var(--line);
+}
+
+#roles .list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#roles .list button {
+  all: unset;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  padding: 12px 14px 14px;
+  border-radius: var(--radius-panel);
+  font-family: var(--sans);
+  cursor: pointer;
+}
+
+#roles .list button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+#roles .list button[aria-pressed='true'] {
+  background: var(--win);
+  box-shadow: var(--shadow-ring);
+}
+
+#roles .list b {
+  display: block;
+  font-size: var(--size-body);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+#roles .list span {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--size-small);
+  color: var(--muted);
+}
+
+@media (hover: hover) {
+  #roles .list button:hover {
+    background: var(--hover);
+  }
+
+  #roles .list button[aria-pressed='true']:hover {
+    background: var(--win);
+  }
+}
+
+@media (max-width: 900px) {
+  #roles .tray {
+    margin-top: 40px;
+  }
+
+  #roles .two {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  #roles .list {
+    order: -1;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  /* Below 900 the roles are one-line pickers, the page's one picker shape. */
+  #roles .list button {
+    width: auto;
+    padding: 5px 14px;
+    border-radius: var(--radius-action);
+    box-shadow: inset 0 0 0 1px var(--line);
+    line-height: 18px;
+  }
+
+  #roles .list button[aria-pressed='true'] {
+    background: var(--ink);
+    box-shadow: none;
+  }
+
+  #roles .list b {
+    font-size: var(--size-small);
+    font-weight: 500;
+    color: var(--body);
+  }
+
+  #roles .list button[aria-pressed='true'] b {
+    color: var(--ground);
+  }
+
+  #roles .list span {
+    display: none;
+  }
+
+  @media (hover: hover) {
+    #roles .list button:hover {
+      background: var(--win);
+    }
+
+    #roles .list button[aria-pressed='true']:hover {
+      background: var(--ink);
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  #roles .tray {
+    margin-top: 32px;
+  }
+
+  #roles .list {
+    gap: 6px;
+  }
+
+  #roles .list button {
+    padding: 5px 12px;
+  }
+
+  #roles .win {
+    height: 500px;
+  }
+
+  #roles .log {
+    padding: 16px 16px 0;
+  }
+
+  #roles .log .ask {
+    margin: 0 -16px 14px;
+    padding: 8px 16px;
+  }
+
+  #roles .inp {
+    padding: 0 16px 14px;
+  }
+
+  #roles .inp .rule span {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}

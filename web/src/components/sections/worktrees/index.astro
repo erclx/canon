@@ -1,0 +1,43 @@
+---
+import { worktreeCards, worktrees } from '../../../content/copy'
+import FolderIcon from './folder.svg'
+import './style.css'
+
+/**
+ * Three worktrees side by side, each a card naming its folder, its branch, and
+ * what its session is doing, each joined down into the one shared `.canon/`
+ * band they all read and write. On a phone the cards stack over the band with
+ * no joins.
+ */
+---
+
+<section class="sec" id="worktrees">
+  <div class="sec-head">
+    <h2>{worktrees.head}</h2>
+    <p>{worktrees.lede}</p>
+  </div>
+  <div class="tray">
+    <div class="card">
+      <ul class="wts" role="list">
+        {
+          worktreeCards.map((card) => (
+            <li class="wt">
+              <p class="p">{card.path}</p>
+              <p class="b">
+                <span class="dot" aria-hidden="true" />
+                {card.branch}
+              </p>
+              <p class="l">{card.line}</p>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="band">
+        <span class="ic"><FolderIcon aria-hidden="true" /></span>
+        <span class="nm">{worktrees.band.name}</span>
+        <span class="dirs">{worktrees.band.dirs}</span>
+        <span class="sh">{worktrees.band.shared}</span>
+      </div>
+    </div>
+  </div>
+</section>

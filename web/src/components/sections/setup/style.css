@@ -1,0 +1,219 @@
+#setup .split {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: 56px;
+  margin-top: 52px;
+  align-items: center;
+}
+
+#setup .stages {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 26px;
+  padding-left: 32px;
+}
+
+#setup .stages::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  border-radius: var(--radius-marker);
+  background: var(--line);
+}
+
+#setup .st {
+  position: relative;
+}
+
+#setup .st::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: -32px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ground);
+  box-shadow: inset 0 0 0 2.5px var(--muted);
+  transition:
+    background-color var(--duration-fade) var(--ease-standard),
+    transform var(--duration-move) var(--ease-standard);
+}
+
+#setup .st.on::before {
+  background: var(--accent);
+  box-shadow: none;
+  transform: scale(1.15);
+}
+
+#setup .st.done::before {
+  background: var(--line);
+}
+
+#setup .st .go {
+  all: unset;
+  display: block;
+  cursor: pointer;
+}
+
+#setup .st .go::after {
+  content: '';
+  position: absolute;
+  inset: -8px -12px -8px -40px;
+  border-radius: var(--radius-panel);
+}
+
+#setup .st .go:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+  border-radius: var(--radius-action);
+}
+
+#setup .st h3 {
+  margin: 0;
+  font-size: var(--size-body);
+  font-weight: 600;
+  color: var(--ink);
+  transition: color var(--duration-fade) var(--ease-standard);
+}
+
+#setup .st.skill h3 {
+  font-family: var(--mono);
+}
+
+@media (hover: hover) {
+  #setup .st:hover h3 {
+    color: var(--accent);
+  }
+}
+
+#setup .st p {
+  margin: 8px 0 0;
+  font-size: var(--size-body);
+  line-height: var(--type-body-lh);
+  text-wrap: pretty;
+}
+
+#setup .tx {
+  display: block;
+  min-height: var(--txh, 0px);
+  padding: 24px 26px;
+  line-height: 1.7;
+  user-select: none;
+}
+
+#setup .cap {
+  margin: 0 0 10px;
+  font-family: var(--sans);
+  font-size: var(--size-small);
+  color: var(--muted);
+}
+
+#setup .tx .ask {
+  background: none;
+}
+
+#setup .tx .ask .g {
+  margin-right: 0;
+}
+
+#setup .tx .blk + .blk {
+  margin-top: 10px;
+}
+
+#setup .tx .row {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 12px;
+  padding-left: 20px;
+}
+
+#setup .tx .row .k {
+  color: var(--muted);
+}
+
+#setup .tx .row .v {
+  color: var(--ink);
+}
+
+#setup .tx .row.q .v {
+  color: var(--accent);
+}
+
+#setup .tx .cur {
+  height: 16px;
+  margin-left: 1px;
+  vertical-align: -3px;
+}
+
+@media (max-width: 900px) {
+  #setup .split {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 52px;
+    margin-top: 56px;
+  }
+
+  #setup .stages {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px 36px;
+    padding-left: 0;
+  }
+
+  #setup .stages::before {
+    display: none;
+  }
+
+  #setup .st {
+    padding-left: 26px;
+  }
+
+  #setup .st::before {
+    top: 4px;
+    left: 0;
+  }
+
+  #setup .st .go::after {
+    inset: -8px -10px -8px -34px;
+  }
+}
+
+@media (max-width: 640px) {
+  #setup .stages {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding-left: 6px;
+  }
+
+  #setup .st {
+    padding: 0 0 22px 26px;
+    border-left: 2px solid var(--line);
+  }
+
+  #setup .st:last-child {
+    border-left-color: transparent;
+  }
+
+  #setup .split {
+    margin-top: 40px;
+  }
+
+  #setup .st::before {
+    left: -8px;
+    top: 2px;
+  }
+
+  #setup .tx {
+    padding: 18px;
+  }
+
+  #setup .tx .row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    margin-bottom: 4px;
+    padding-left: 16px;
+  }
+}

@@ -1,0 +1,43 @@
+---
+import { tryIt } from '../../../content/copy'
+import CopyIcon from './copy.svg'
+import CheckIcon from './check.svg'
+import './style.css'
+
+/**
+ * The quiet install: who canon expects, the three commands on the tray with
+ * one copy control, then the first run. The
+ * copy control shows on hover or focus, and always on a touch screen.
+ */
+const code = (text: string) => text.split('`')
+---
+
+<section class="sec" id="try">
+  <div class="sec-head">
+    <h2>{tryIt.head}</h2>
+    <p>{tryIt.lede}</p>
+  </div>
+  <div class="tray">
+    <div class="block" data-commands={tryIt.commands.join('\n')}>
+      {tryIt.commands.map((command) => <code>{command}</code>)}
+      <button
+        type="button"
+        class="copy"
+        aria-label={tryIt.copy.label}
+        data-tip={tryIt.copy.tip}
+        data-done={tryIt.copy.done}
+        data-status={tryIt.copy.status}
+      >
+        <CopyIcon class="ic" aria-hidden="true" />
+        <CheckIcon class="ok" aria-hidden="true" />
+        <span class="tip" aria-hidden="true">{tryIt.copy.tip}</span>
+      </button>
+      <span class="sr-only" role="status" aria-live="polite"></span>
+    </div>
+  </div>
+  <p class="first">
+    {code(tryIt.first).map((part, k) => (k % 2 ? <code>{part}</code> : part))}
+  </p>
+</section>
+
+<script src="./client.ts"></script>

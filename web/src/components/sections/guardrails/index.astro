@@ -1,0 +1,47 @@
+---
+import { guardrailScenes, guardrails } from '../../../content/copy'
+import './style.css'
+
+/**
+ * The refusal first: a Claude Code window on the tray above the four parts.
+ * It plays one scene per part once, when it scrolls into view, and rests on
+ * the plan guard's refusal. A click on a part plays that scene and rests
+ * there. The window holds the height of its tallest scene, so a scene never
+ * moves the page.
+ */
+const REST = 1
+---
+
+<section class="sec" id="guardrails">
+  <div class="sec-head">
+    <h2>{guardrails.head}</h2>
+    <p>{guardrails.lede}</p>
+  </div>
+  <div class="tray">
+    <div class="win" aria-hidden="true">
+      <div class="win-bar"><i></i><i></i><i></i><span>claude</span></div>
+      <div class="log"></div>
+    </div>
+  </div>
+  <div class="four">
+    {
+      guardrails.parts.map((part, index) => (
+        <div class={`lit-row${index === REST ? ' lit' : ''}`} data-i={index}>
+          <button type="button" class="go" aria-label={part.play}>
+            {part.name}
+          </button>
+          <p>{part.line}</p>
+          <code>{part.real}</code>
+        </div>
+      ))
+    }
+  </div>
+  <p class="sr-only" role="status"></p>
+  <script
+    type="application/json"
+    class="guardrails-data"
+    set:html={JSON.stringify({ scenes: guardrailScenes, rest: REST })}
+  />
+</section>
+
+<script src="./client.ts"></script>
