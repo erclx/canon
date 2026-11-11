@@ -186,6 +186,18 @@ test.describe('the fixed bar', () => {
   })
 })
 
+test('the footer mark takes the reader back to the top', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/')
+  const brand = page.locator('.site-footer a.brand')
+  await brand.scrollIntoViewIfNeeded()
+
+  await brand.click()
+
+  await expect(page.locator('#top h1')).toBeInViewport(SETTLE)
+  expect(new URL(page.url()).hash).toBe('#top')
+})
+
 test.describe('the craft section', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
