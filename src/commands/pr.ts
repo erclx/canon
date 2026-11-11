@@ -1069,12 +1069,14 @@ export function register(program: Command): void {
         'included. A review, ui, or evidence gate that reads not clear returns',
         'it to draft with reason `redrafted` and the failing reason as',
         '`failed`, exit 1. A stale standing refuses before the CI wait, and CI',
-        'is waited on up to --wait as on a draft. Either refuses with its own',
-        'reason, exit 1, and never causes a re-draft. Every record whose pull',
-        'request is still ready carries `isReady: true`. Only a ready pull',
-        'request whose gates all clear, CI included, reports `already-ready`,',
-        'exit 0. Under --check nothing is written, CI is read once, and the',
-        'first failing reason is reported.',
+        'is waited on up to --wait as on a draft, with the head, the reviews,',
+        'the standing, and the draft state read again after it. Either refuses',
+        'with its own reason, exit 1, and never causes a re-draft. One drafted',
+        'during the wait refuses `ready-withdrawn` and stays a draft. Every',
+        'record whose pull request is still ready carries `isReady: true`.',
+        'Only a ready pull request whose gates all clear, CI included,',
+        'reports `already-ready`, exit 0. Under --check nothing is written, CI',
+        'is read once, and the first failing reason is reported.',
         '',
         'Reasons:',
         '  lifted, already-ready, redrafted, clear (--check)',
@@ -1083,7 +1085,7 @@ export function register(program: Command): void {
         '  ui-undriven, evidence-owed, painted-uncaptured, standing-stale,',
         '  standing-conflict, standing-unknown,',
         '  ci-pending (--check), ci-failing, ci-conflicted, ci-timeout,',
-        '  head-moved, gh-failed',
+        '  head-moved, ready-withdrawn, gh-failed',
         '',
         'Every read is REST. The mutation is the one GraphQL call.',
         '',
@@ -4338,6 +4340,8 @@ const LIFT_REFUSALS: Record<LiftRefusal | 'bad-wait' | 'gh-missing', string> = {
   'ci-timeout': 'A check run was still pending when --wait ran out.',
   'head-moved':
     'A push landed during the wait, so the gates cleared a commit that is no longer the head.',
+  'ready-withdrawn':
+    'The pull request went back to draft during the wait, so its mark is left as someone set it.',
   'gh-failed':
     'A read or the mutation was refused, so nothing is reported as lifted.',
 }
