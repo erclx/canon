@@ -60,8 +60,8 @@ export const sections = [
 ] as const
 
 export const nav = {
-  mark: 'canon',
-  back: 'canon, back to top',
+  mark: 'Canon',
+  back: 'Canon, back to top',
   // README.md: canon-allow-readme-paraphrase: the jump to the install section, which the README opens on as Quick start.
   try: { href: '#try', label: 'Try it' },
   // README.md: "Docs"
@@ -78,9 +78,9 @@ export const nav = {
 export const fold = {
   /** The claim in three runs, with the record icon set before `plan` and the merge icon before `merge`. */
   // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs agent work from" "plan to merge"
-  parts: ['canon runs agent work from', 'plan to', 'merge'] as const,
+  parts: ['Canon runs agent work from', 'plan to', 'merge'] as const,
   // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs agent work from plan to merge"
-  headline: 'canon runs agent work from plan to merge',
+  headline: 'Canon runs agent work from plan to merge',
   // README.md: canon-allow-readme-paraphrase: the opening sentence's subject, carried on to the plan and the merge the README's claim names. "A Claude Code plugin and CLI that"
   lead: 'A Claude Code plugin and CLI that takes coding agents from the plan to the merge.',
   view: {
@@ -203,9 +203,9 @@ export const setup = {
 
 export const tryIt = {
   // README.md: canon-allow-readme-paraphrase: the README's Quick start, headed for what the three commands do rather than how fast they run.
-  head: 'Installing canon',
-  // README.md: "canon expects someone who already knows Claude Code well. It runs on Linux and macOS, and the CLI needs Bun."
-  lede: 'canon expects someone who already knows Claude Code well. It runs on Linux and macOS, and the CLI needs Bun.',
+  head: 'Installing Canon',
+  // README.md: canon-allow-readme-paraphrase: the README's sentence with the name capitalized as the page writes it. "expects someone who already knows Claude Code well. It runs on Linux and macOS, and the CLI needs Bun."
+  lede: 'Canon expects someone who already knows Claude Code well. It runs on Linux and macOS, and the CLI needs Bun.',
   // README.md: "claude plugin marketplace add https://github.com/erclx/canon" "claude plugin install canon@canon" "bun install --global @erclx/canon"
   commands: [
     'claude plugin marketplace add https://github.com/erclx/canon',
