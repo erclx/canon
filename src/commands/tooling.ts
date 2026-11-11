@@ -227,7 +227,9 @@ export function register(program: Command): void {
 
   tooling
     .command('decline')
-    .description('Keep sync and inject from ever writing one golden file')
+    .description(
+      'Keep sync and inject from ever writing one golden file or script',
+    )
     .argument(
       '<path>',
       'Golden file path relative to the target, or package.json:<key>',
@@ -283,7 +285,7 @@ export function register(program: Command): void {
 
   tooling
     .command('lift')
-    .description('Hand a declined or customized file back to sync')
+    .description('Hand a declined or customized file or script back to sync')
     .argument(
       '<path>',
       'Golden file path relative to the target, or package.json:<key>',
