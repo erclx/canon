@@ -297,13 +297,68 @@ function listMarkdown(): string[] {
   return (result.stdout ?? '').split('\n').filter((line) => line !== '')
 }
 
+// Where canon comes from for the two canon stages. A canon on PATH wins.
+// Under CI, where no canon is installed, bunx fetches the release the last
+// sync stamped, since that sync wrote this file and so carries every verb it
+// calls. A local run with neither skips, since a pre-push hook stalling on a
+// fetch costs more than the stage. CI reads as the literal 'true' only, the
+// form GitHub Actions sets.
+const STAMP = 'canon/config/config.json'
+const INSTALL_HINT = 'Install with `bun install --global @erclx/canon`.'
+const isCi = process.env.CI === 'true'
+
+type Canon =
+  | { readonly kind: 'run'; readonly command: string }
+  | { readonly kind: 'skip' }
+
+function readStampVersion(): string | undefined {
+  const tooling = asRecord(asRecord(asRecord(readJson(STAMP)).domains).tooling)
+  const version = tooling.version
+  // The version reaches a shell string, so only a release number passes.
+  return typeof version === 'string' &&
+    /^\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?$/.test(version)
+    ? version
+    : undefined
+}
+
+function resolveCanon(): Canon {
+  if (onPath('canon')) return { kind: 'run', command: 'canon' }
+  if (!isCi) return { kind: 'skip' }
+  const version = readStampVersion()
+  if (version === undefined) {
+    fail(
+      `No canon on PATH and no tooling version in ${STAMP} to pin bunx to, so CI cannot run this stage. Run 'canon tooling sync <stack>' to stamp one`,
+    )
+  }
+  return { kind: 'run', command: `bunx -y @erclx/canon@${version}` }
+}
+
+function skipNoCanon(): void {
+  logSkip(`Skipped: no canon binary on PATH. ${INSTALL_HINT}`)
+}
+
+// Exit 1 is a refusal that measured nothing, and through bunx a failed fetch
+// too. Locally that skips. Under CI the stage fails, since a skip there is
+// the gate passing on nothing.
+function refused(verb: string, output: string): void {
+  if (!isCi) {
+    logSkip(
+      `Skipped: canon ${verb} refused or is missing from this canon, and measured nothing.`,
+    )
+    return
+  }
+  pipeOutput(output)
+  fail(
+    `canon ${verb} refused, is missing from this canon, or could not be fetched, and measured nothing. Under CI that fails the stage`,
+  )
+}
+
 // canon markdown audit exits 0 on a pass, 1 on a refusal that measured
 // nothing, 2 on a finding, and 3 when it shipped an empty ban set.
 function checkMarkdownBans(): void {
-  if (!onPath('canon')) {
-    logInfo(
-      'Skipped: no canon binary on PATH. Install with `bun install --global @erclx/canon`.',
-    )
+  const canon = resolveCanon()
+  if (canon.kind === 'skip') {
+    skipNoCanon()
     return
   }
 
@@ -313,13 +368,16 @@ function checkMarkdownBans(): void {
     return
   }
 
-  const { code, output } = capture('canon markdown audit "$@"', files)
+  const { code, output } = capture(
+    `${canon.command} markdown audit "$@"`,
+    files,
+  )
   switch (code) {
     case 0:
       logInfo('No banned character')
       return
     case 1:
-      logInfo('Skipped: canon markdown audit refused and measured nothing.')
+      refused('markdown audit', output)
       return
     case 2:
       pipeOutput(output)
@@ -342,24 +400,21 @@ function checkMarkdownBans(): void {
 
 // canon code audit exits 0 on a pass, 1 on a refusal that read nothing, and 2
 // on a finding. A canon too old to carry the verb exits 1 on the unknown
-// command, which the skip below covers.
+// command, which the refusal branch covers.
 function checkEmbeddedCode(): void {
-  if (!onPath('canon')) {
-    logInfo(
-      'Skipped: no canon binary on PATH. Install with `bun install --global @erclx/canon`.',
-    )
+  const canon = resolveCanon()
+  if (canon.kind === 'skip') {
+    skipNoCanon()
     return
   }
 
-  const { code, output } = capture('canon code audit')
+  const { code, output } = capture(`${canon.command} code audit`)
   switch (code) {
     case 0:
       logInfo('No page, stylesheet, or script embedded past the limit')
       return
     case 1:
-      logInfo(
-        'Skipped: canon code audit refused or is missing from this canon, and read nothing.',
-      )
+      refused('code audit', output)
       return
     case 2:
       pipeOutput(output)
