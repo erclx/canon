@@ -1,4 +1,4 @@
-import { escapeHtml, pacer, reducedMotion } from '../../../lib/scene'
+import { escapeHtml, holdOn, pacer, reducedMotion } from '../../../lib/scene'
 
 type Line = [string, string, string]
 interface Scene {
@@ -17,7 +17,7 @@ if (section && source?.textContent && log) {
   }
   const parts = [...section.querySelectorAll<HTMLElement>('.four > div')]
   const status = section.querySelector<HTMLElement>('[role="status"]')
-  const pace = pacer()
+  const pace = pacer(holdOn(section.querySelector('.win')))
   const still = reducedMotion()
   let current = rest
 
@@ -70,13 +70,15 @@ if (section && source?.textContent && log) {
     current = index
     mark(index)
     log!.classList.add('hide')
-    if (!(await pace.wait(300, generation))) return false
+    if (!(await pace.wait(160, generation))) return false
     log!.replaceChildren(askLine(scene.ask))
     log!.classList.remove('hide')
     for (const item of scene.lines) {
-      const gap = item[0] === 'tool' || item[0] === 'say' ? 700 : 300
+      const gap = item[0] === 'tool' || item[0] === 'say' ? 380 : 160
       if (!(await pace.wait(gap, generation))) return false
-      log!.append(line(item))
+      const node = line(item)
+      node.classList.add('in')
+      log!.append(node)
     }
     return true
   }
@@ -84,7 +86,7 @@ if (section && source?.textContent && log) {
   async function tour(generation: number) {
     for (let i = 0; i < scenes.length; i++) {
       if (!(await play(i, generation))) return
-      if (!(await pace.wait(1800, generation))) return
+      if (!(await pace.wait(1200, generation))) return
     }
     current = rest
     mark(rest)

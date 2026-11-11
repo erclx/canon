@@ -11,6 +11,24 @@
   opacity: 0;
 }
 
+/* Each line the tour appends rises into place, so the order the checks fire in reads as it plays. */
+#guardrails .log > .in {
+  animation: gr-in 180ms var(--ease-standard) both;
+}
+
+@keyframes gr-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #guardrails .log > .in {
+    animation: none;
+  }
+}
+
 #guardrails .log .ask {
   margin: 0 -26px 14px;
   padding: 8px 26px;
