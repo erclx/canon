@@ -192,9 +192,7 @@ test('the opening status line fits on one row at 360', async ({ page }) => {
   const line = page.locator('#av-counts')
   await expect(line).toHaveText(/\S/)
 
-  const cut = await line.evaluate(
-    (node) => node.scrollWidth - node.clientWidth,
-  )
+  const cut = await line.evaluate((node) => node.scrollWidth - node.clientWidth)
 
   expect(cut).toBeLessThanOrEqual(0)
 })
@@ -299,6 +297,41 @@ test.describe('the records stack', () => {
     await expect(lit).toHaveCount(1)
     await expect(lit).toHaveAttribute('data-f', '0')
     await expect(lit).toBeVisible()
+  })
+
+  test('a click on an explorer file opens its tab, out of the tab order', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const front = page.locator('#records .sheet[data-i="0"]')
+    const entry = front.locator('.explorer button[data-f="0"]')
+    await expect(entry).toHaveAttribute('tabindex', '-1')
+
+    await entry.click()
+
+    await expect(front.locator('.ftab[data-f="0"]')).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+    await expect(entry).toHaveClass(/\bon\b/)
+  })
+
+  test('a click on an explorer folder folds the rows under it', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const explorer = page.locator('#records .sheet[data-i="0"] .explorer')
+    const files = explorer.locator('button[data-f]')
+    const folder = explorer.locator('.fold:has(+ button[data-f])')
+    await expect(folder).toHaveCount(1)
+    await expect(files.first()).toBeVisible()
+
+    await folder.click()
+
+    await expect(files.first()).toBeHidden()
+    await expect(folder).toHaveClass(/\bshut\b/)
+    await folder.click()
+    await expect(files.first()).toBeVisible()
   })
 
   test('takes no pinned scroll under reduced motion', async ({ page }) => {

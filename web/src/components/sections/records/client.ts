@@ -272,6 +272,9 @@ if (section && box && stick && pile && after) {
         entry.classList.toggle('on', Number(entry.dataset.f) === k),
       )
     }
+    entries.forEach((entry) =>
+      entry.addEventListener('click', () => open(Number(entry.dataset.f))),
+    )
     fileTabs.forEach((tab, k) => {
       tab.addEventListener('click', () => open(k))
       tab.addEventListener('keydown', (event) => {
@@ -292,5 +295,23 @@ if (section && box && stick && pile && after) {
         ),
       ),
     )
+  })
+
+  /* An explorer folder folds every deeper row up to the next row at its own depth or shallower. */
+  section.querySelectorAll<HTMLElement>('.explorer').forEach((explorer) => {
+    const rows = [...explorer.querySelectorAll<HTMLElement>(':scope > *')]
+    const depth = (row: HTMLElement) => Number(row.dataset.d)
+    rows.forEach((row, k) => {
+      if (!row.classList.contains('fold')) return
+      row.addEventListener('click', () => {
+        const shut = row.classList.toggle('shut')
+        for (let j = k + 1; j < rows.length; j++) {
+          const below = rows[j]
+          if (!below || depth(below) <= depth(row)) break
+          below.hidden = shut
+          if (!shut) below.classList.remove('shut')
+        }
+      })
+    })
   })
 }
