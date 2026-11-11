@@ -90,8 +90,10 @@ The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project tha
 
 ## Playwright installs in CI
 
-- Both workflows install Playwright's system packages through `scripts/install-playwright-deps.sh`, which sits beside `worktree-port.sh` and retries an attempt a stalled apt mirror hangs
-- Expect each system install bounded at 10 minutes and each browser download at 5, while the jobs carry no bound, since test and build time differs per project
+- Expect the seeded workflows to install no system packages, since both hosted Ubuntu images ship Chrome and the libraries Chromium loads
+- Expect each browser download bounded at 5 minutes, while the jobs carry no bound, since test and build time differs per project
+- Add `bunx playwright install-deps chromium` before the browser install on a self-hosted runner, which carries none of those libraries
+- Delete `scripts/install-playwright-deps.sh` from a target synced before this change, since sync never removes it and no seeded workflow calls it
 
 ## Design references
 
