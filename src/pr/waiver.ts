@@ -13,6 +13,13 @@ export interface Waiver {
  */
 const WAIVER_LINE = /^- \*\*Waived capture:\*\* `([^`]+)`:\s*(\S.*)$/
 
+/**
+ * The line `review-pr` writes in a pass body to accept a drivable checklist
+ * with no reel at the head. It names no path, since one reel covers the whole
+ * checklist and box numbers shift when the checklist is edited.
+ */
+const REEL_WAIVER_LINE = /^- \*\*Waived reel:\*\*\s*(\S.*)$/
+
 const FENCE = /^\s*(```|~~~)/
 
 /**
@@ -51,4 +58,12 @@ export function readWaivers(reviews: readonly ReviewRow[]): Waiver[] {
     }
   }
   return waivers
+}
+
+/** The reason on every reel waiver in the review bodies, in order. */
+export function readReelWaivers(reviews: readonly ReviewRow[]): string[] {
+  return unfencedLines(reviews).flatMap((line) => {
+    const reason = REEL_WAIVER_LINE.exec(line)?.[1]
+    return reason === undefined ? [] : [reason]
+  })
 }
