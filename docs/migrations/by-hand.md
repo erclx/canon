@@ -79,6 +79,14 @@ A reference to a retired skill takes a hand edit.
 - Delete a `canon:make-deck`, `canon:script-screencast`, `canon:record-screencast`, `canon:read-frames`, or `canon:video-craft` reference, since none has a successor <!-- canon-keep-retired -->
 - Delete a `canon:canvas-board` reference too. Frameboard, which `canon:design-pick` drives, reads each `.canon/canvas/` folder as a project, so move a kept page under one <!-- canon-keep-retired -->
 
+## Delete the retired Playwright deps script, your call
+
+The web stack no longer ships `scripts/install-playwright-deps.sh`, and nothing deletes the copy a project already synced.
+
+- No seeded workflow calls it, since both hosted Ubuntu images ship Chrome and the libraries Chromium loads, so deleting it is safe
+- A workflow of your own may still call it, so search for the name before deleting
+- A self-hosted runner adds `bunx playwright install-deps chromium` before the browser install
+
 ## Move decisions out of a held architecture record, once
 
 The toolkit no longer seeds `canon/ARCHITECTURE.md`, and a held file and its `CLAUDE.md` import stay. Move a trap a session would hit into that domain's `## Gotchas`, then delete the file and its `@canon/ARCHITECTURE.md` line.

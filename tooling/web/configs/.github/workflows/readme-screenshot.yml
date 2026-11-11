@@ -70,13 +70,6 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-chromium-${{ hashFiles('**/package.json') }}
 
-      - name: Install Playwright System Dependencies
-        # Unconditional: the cache holds browser binaries and nothing apt
-        # wrote, so gating this on a cache hit leaves a warm run launching
-        # chromium without the libraries it needs.
-        timeout-minutes: 10
-        run: bash scripts/install-playwright-deps.sh chromium
-
       - name: Install Playwright Browser
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         timeout-minutes: 5

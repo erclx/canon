@@ -40,7 +40,6 @@ const stepNamed = (steps: WorkflowStep[], name: string): WorkflowStep => {
 
 describe('web verify.yml unit-tests job', () => {
   const browserSteps = [
-    'Install Playwright System Dependencies',
     'Cache Playwright Browsers',
     'Install Playwright Chromium',
     'Run Browser Tests',

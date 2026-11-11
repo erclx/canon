@@ -69,11 +69,6 @@ jobs:
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Install Playwright System Dependencies
-        if: steps.browser.outputs.enabled == 'true'
-        timeout-minutes: 10
-        run: bash scripts/install-playwright-deps.sh chromium
-
       - name: Cache Playwright Browsers
         id: playwright-cache
         if: steps.browser.outputs.enabled == 'true'
@@ -150,10 +145,6 @@ jobs:
         with:
           name: build-output
           path: dist/
-
-      - name: Install Playwright System Dependencies
-        timeout-minutes: 10
-        run: bash scripts/install-playwright-deps.sh chromium
 
       - name: Cache Playwright Browsers
         id: playwright-cache
