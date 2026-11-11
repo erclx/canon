@@ -543,3 +543,87 @@ describe('scan with dispositions', () => {
     expect(scan([webManifest()], target()).dispositions).toEqual([])
   })
 })
+
+describe('scan with held scripts', () => {
+  function hold(dir: string, dispositions: Record<string, unknown>): void {
+    seedFile(
+      stampPath(dir),
+      JSON.stringify({
+        covers: ['tooling'],
+        domains: {
+          tooling: {
+            syncedAt: 'then',
+            files: {},
+            chain: ['web'],
+            dispositions,
+          },
+        },
+      }),
+    )
+  }
+
+  function withScripts(dir: string, scripts: Record<string, string>): string {
+    seedFile(join(dir, 'package.json'), JSON.stringify({ scripts }))
+    return dir
+  }
+
+  const chain = (): Manifest[] => [
+    makeManifest('web', {
+      scripts: { 'test:run': 'vitest run', lint: 'oxlint' },
+    }),
+  ]
+
+  it('should move a declined script the target lacks out of scripts', () => {
+    const dir = withScripts(target(), { lint: 'oxlint' })
+    hold(dir, { 'package.json:test:run': { disposition: 'declined' } })
+
+    const result = scan(chain(), dir)
+
+    expect(result.scripts).toEqual([{ key: 'lint', state: 'matching' }])
+    expect(result.dispositions).toEqual([
+      {
+        rel: 'package.json:test:run',
+        stack: 'web',
+        kind: 'script',
+        disposition: 'declined',
+        present: false,
+      },
+    ])
+    expect(result.totalChanges).toBe(0)
+  })
+
+  it('should not count a customized script whose golden is unchanged', () => {
+    const dir = withScripts(target(), { 'test:run': 'mine', lint: 'oxlint' })
+    hold(dir, {
+      'package.json:test:run': {
+        disposition: 'customized',
+        base: hashContent('vitest run'),
+      },
+    })
+
+    const result = scan(chain(), dir)
+
+    expect(result.dispositions[0]).toMatchObject({
+      kind: 'script',
+      present: true,
+      moved: false,
+    })
+    expect(result.totalChanges).toBe(0)
+  })
+
+  it('should count a customized script whose golden moved once', () => {
+    const dir = withScripts(target(), { 'test:run': 'mine', lint: 'oxlint' })
+    hold(dir, {
+      'package.json:test:run': {
+        disposition: 'customized',
+        base: hashContent('vitest'),
+      },
+    })
+
+    const result = scan(chain(), dir)
+
+    expect(result.dispositions[0]?.moved).toBe(true)
+    expect(result.scripts.map((entry) => entry.key)).toEqual(['lint'])
+    expect(result.totalChanges).toBe(1)
+  })
+})

@@ -3,11 +3,14 @@ import { join } from 'node:path'
 import { resolveSurfacePath } from '@/roots/surface'
 import {
   type Disposition,
+  type DomainDispositions,
+  hashContent,
   hashFile,
   readStamp,
   stampedDispositions,
   stampedHashes,
 } from '@/sync/stamp'
+import { heldScriptKeys, scriptAddress } from '@/tooling/disposition'
 import { mergeSections } from '@/tooling/gitignore'
 import {
   ancestorsFirst,
@@ -21,7 +24,9 @@ import {
   collectScripts,
   declaresInstalls,
   type DepState,
+  type PackageJson,
   readPackage,
+  resolveScript,
   type ScriptState,
 } from '@/tooling/package'
 import { isSubfolderTarget, isWithheldInSubfolder } from '@/tooling/subfolder'
@@ -57,14 +62,15 @@ export interface WithheldState {
 }
 
 /**
- * A golden file the project declined or customized, which every write skips.
- * `moved` is set on a customized config alone, true once the golden copy no
+ * A golden file or script the project declined or customized, which every
+ * write skips. A script's `rel` is its `package.json:<key>` address. `moved`
+ * is set on a customized config or script alone, true once the golden copy no
  * longer hashes to the one the project took.
  */
 export interface DispositionState {
   readonly rel: string
   readonly stack: string
-  readonly kind: 'config' | 'seed'
+  readonly kind: 'config' | 'seed' | 'script'
   readonly disposition: Disposition
   readonly present: boolean
   readonly moved?: boolean
@@ -215,7 +221,9 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
   const pkg = readPackage(packagePath)
   const newManifest = !existsSync(packagePath) && declaresInstalls(chain)
   const basis = pkg ?? (newManifest ? {} : undefined)
-  const scripts = basis ? collectScripts(chain, basis) : []
+  const heldScripts = heldScriptKeys(held)
+  dispositions.push(...scriptDispositions(chain, held, heldScripts, pkg))
+  const scripts = basis ? collectScripts(chain, basis, heldScripts) : []
   const deps = basis ? collectDeps(chain, basis) : []
 
   const gitignorePath = join(target, '.gitignore')
@@ -246,6 +254,38 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
     totalChanges,
     warnings: tailwindImportWarnings(chain, target),
   }
+}
+
+/**
+ * A held script the chain still ships. A key the chain stopped shipping is
+ * left to `lift`, the way a held path the chain dropped is.
+ */
+function scriptDispositions(
+  chain: readonly Manifest[],
+  held: DomainDispositions,
+  keys: ReadonlySet<string>,
+  pkg: PackageJson | undefined,
+): DispositionState[] {
+  const states: DispositionState[] = []
+
+  for (const key of keys) {
+    const script = resolveScript(chain, key)
+    const entry = held[scriptAddress(key)]
+    if (script === undefined || entry === undefined) continue
+
+    states.push({
+      rel: scriptAddress(key),
+      stack: script.stack,
+      kind: 'script',
+      disposition: entry.disposition,
+      present: pkg?.scripts?.[key] !== undefined,
+      ...(entry.disposition === 'customized'
+        ? { moved: hashContent(script.value) !== entry.base }
+        : {}),
+    })
+  }
+
+  return states
 }
 
 /**

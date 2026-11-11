@@ -256,6 +256,44 @@ describe('inject with dispositions', () => {
     expect(existsSync(join(target, '.lintstagedrc'))).toBe(false)
     expect(applied).not.toContain('.lintstagedrc')
   })
+
+  it('should neither add a declined script nor override a customized one', async () => {
+    captureStderr()
+    writeFileSync(
+      join(target, 'package.json'),
+      '{"name":"mine","scripts":{"check":"mine"}}\n',
+    )
+    hold({
+      'package.json:test:run': { disposition: 'declined' },
+      'package.json:check': { disposition: 'customized', base: 'sha256:x' },
+    })
+
+    await injectManifest(
+      [
+        {
+          ...scriptsOnly({ 'test:run': 'vitest run', lint: 'oxlint' }),
+          scriptOverrides: { check: 'bun run gate' },
+        },
+      ],
+      target,
+    )
+
+    expect(readManifest().scripts).toEqual({ check: 'mine', lint: 'oxlint' })
+  })
+
+  it('should leave a held script out of the skipped list over an invalid package.json', async () => {
+    const stderr = captureStderr()
+    writeFileSync(join(target, 'package.json'), '{ not json')
+    hold({ 'package.json:test:run': { disposition: 'declined' } })
+
+    await injectManifest(
+      [scriptsOnly({ 'test:run': 'vitest run', lint: 'oxlint' })],
+      target,
+    )
+
+    expect(stderr()).toContain('Scripts not added: lint')
+    expect(stderr()).not.toContain('test:run')
+  })
 })
 
 describe('injectSeeds with a config at the same path', () => {
