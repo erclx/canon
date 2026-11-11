@@ -303,6 +303,14 @@ if (
     if (!ask.value && caret) caret.style.left = '0px'
   })
 
+  /* The whole label focuses the input, so a press anywhere on it counts as a pointer focus. */
+  ask.closest('.ask-line')?.addEventListener('pointerdown', () => {
+    if (field) field.dataset.pointer = ''
+  })
+  ask.addEventListener('blur', () => {
+    if (field) delete field.dataset.pointer
+  })
+
   /* The `/` menu: the workflow skills first, then the rest of the catalog. */
   const byName = new Map(data.skills.map((s) => [s.name, s]))
   const ordered = [

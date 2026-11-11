@@ -80,6 +80,25 @@ test('the opening prompt shows a focus ring when it takes focus', async ({
   await expect(page.locator('#top .fld')).toHaveCSS('outline-style', 'solid')
 })
 
+test('a click into the opening prompt draws no ring, and Tab back draws it', async ({
+  page,
+}) => {
+  await page.goto('/')
+  const ask = page.locator('#av-ask')
+  const field = page.locator('#top .fld')
+
+  await ask.click()
+  await expect(ask).toBeFocused()
+  await expect(field).toHaveCSS('outline-style', 'none')
+
+  await page.keyboard.press('Shift+Tab')
+  await expect(ask).not.toBeFocused()
+  await page.keyboard.press('Tab')
+
+  await expect(ask).toBeFocused()
+  await expect(field).toHaveCSS('outline-style', 'solid')
+})
+
 test.describe('the fixed bar', () => {
   test('lands a section jump with its heading below the bar', async ({
     page,
