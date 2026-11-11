@@ -1,0 +1,79 @@
+---
+import mark from '../../../../assets/brand/mark.svg?raw'
+import { nav, sections } from '../../content/copy'
+import ChevronIcon from './chevron.svg'
+import MoonIcon from './moon.svg'
+import SunIcon from './sun.svg'
+import './style.css'
+
+/**
+ * The fixed bar: the mark back to the top, the six section jumps, Try it, then
+ * Docs and GitHub after a thin rule, and the theme toggle. Below 1040 the
+ * jumps fold into a Sections menu, and on a phone Docs and GitHub join it as
+ * Menu, so the bar reads Menu, Try it, and the toggle, and focus order matches
+ * what shows.
+ *
+ * The section in view takes ink and the accent underline. The mark is inlined
+ * from its source so the c inherits the bar's ink through `currentColor`, and
+ * its pip takes `--pip`, the mark's own pair.
+ */
+const glyph = mark.replace(/<!--[\s\S]*?-->/, '').trim()
+---
+
+<header class="site-nav">
+  <nav aria-label="Site">
+    <a class="brand" href="#top" aria-label={nav.back}>
+      <span class="glyph" aria-hidden="true" set:html={glyph} />
+      <span>{nav.mark}</span>
+    </a>
+    <span class="links">
+      {
+        sections.map((section) => (
+          <a class="sl" href={`#${section.id}`} data-section={section.id}>
+            {section.label}
+          </a>
+        ))
+      }
+      <span class="nmw">
+        <button
+          type="button"
+          class="nbtn"
+          aria-expanded="false"
+          aria-controls="nav-panel"
+        >
+          <span class="lw">{nav.menu.wide}</span>
+          <span class="lp">{nav.menu.phone}</span>
+          <ChevronIcon class="chev" aria-hidden="true" />
+        </button>
+        <span class="npanel" id="nav-panel">
+          {
+            sections.map((section) => (
+              <a href={`#${section.id}`} data-section={section.id}>
+                {section.label}
+              </a>
+            ))
+          }
+          <span class="ndiv" aria-hidden="true"></span>
+          <a class="pext" href={nav.docs.href}>{nav.docs.label}</a>
+          <a class="pext" href={nav.github.href}>{nav.github.label}</a>
+        </span>
+      </span>
+      <a class="try" href={nav.try.href}>{nav.try.label}</a>
+      <i class="sep" aria-hidden="true"></i>
+      <a class="ext" href={nav.docs.href}>{nav.docs.label}</a>
+      <a class="ext" href={nav.github.href}>{nav.github.label}</a>
+      <button
+        type="button"
+        class="theme-toggle"
+        aria-label={nav.toggle.toDark}
+        data-to-dark={nav.toggle.toDark}
+        data-to-light={nav.toggle.toLight}
+      >
+        <MoonIcon class="moon" aria-hidden="true" />
+        <SunIcon class="sun" aria-hidden="true" />
+      </button>
+    </span>
+  </nav>
+</header>
+
+<script src="./client.ts"></script>

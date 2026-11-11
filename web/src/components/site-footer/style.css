@@ -1,0 +1,66 @@
+.foot {
+  border-top: 1px solid var(--line);
+  font-size: var(--size-body);
+  color: var(--muted);
+}
+
+.foot .in {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+  max-width: calc(var(--page-w) + var(--gutter) * 2);
+  margin: 0 auto;
+  padding: 32px var(--gutter) 48px;
+}
+
+.foot .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--ink);
+  user-select: none;
+}
+
+.foot .glyph {
+  display: flex;
+}
+
+.foot .glyph svg {
+  width: 22px;
+  height: 22px;
+}
+
+.foot .glyph .pip {
+  fill: var(--pip);
+}
+
+.foot nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 28px;
+}
+
+.foot a {
+  color: var(--body);
+  text-decoration: none;
+  border-radius: var(--radius-chip);
+}
+
+.foot a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .foot .in {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 28px;
+    padding-bottom: 40px;
+  }
+}
