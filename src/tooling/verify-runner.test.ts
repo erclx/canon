@@ -555,7 +555,12 @@ describe('canon resolution', () => {
     it('should not mark the no-canon skip with a pass check', () => {
       const result = runWithoutCanon()
 
-      expect(result.stdout).not.toContain('✓\x1b[0m Skipped')
+      const skipLines = result.stdout
+        .split('\n')
+        .filter((line) => line.includes('Skipped: no canon binary on PATH'))
+
+      expect(skipLines).toHaveLength(2)
+      expect(skipLines.filter((line) => line.includes('✓'))).toEqual([])
     })
   })
 })
