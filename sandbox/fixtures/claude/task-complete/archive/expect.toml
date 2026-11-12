@@ -3,7 +3,7 @@
 # needs no backslash escaping.
 
 # The arm asserts the successful move and nothing about the refusals.
-# `src/tasks/archive.test.ts` covers those at 27 tests, and a model session at a
+# `src/tasks/archive/` covers those, and a model session at a
 # dollar a run is the wrong instrument for a typed guard. What no unit test
 # reaches is whether the skill gets to the command at all with the board in the
 # state the command needs.
