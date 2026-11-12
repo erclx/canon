@@ -18,7 +18,12 @@ The skill body holds the order, the guards, and the report shape. This file hold
 | Keys           | `fileLimit`, and `longFiles` with `file` and `lines`      |
 | Evidence class | `measured`                                                |
 
-The record lists each code file past `fileLimit`, tests included. The length report counts code in every language the audit's `--help` lists under it, shell included, so a file absent from `longFiles` is under the limit rather than unread. Read the limit from the record rather than from a number written here.
+The record lists each code file past `fileLimit`, tests included. Read the limit from the record rather than from a number written here.
+
+- **Covered:** `ts`, `tsx`, `mts`, `cts`, `js`, `jsx`, `mjs`, `cjs`, `astro`, `vue`, `svelte`, `py`, `go`, `php`, `sh`, `bash`, `rs`, and `css`
+- **Under the limit:** a covered file absent from `longFiles`
+- **Not covered:** a file in any other language is unread on file length, never ok
+- **`files` is not coverage:** the record's top-level `files` counts only what the embedded read covers, so never infer a length gap from it
 
 - **Routes to:** `codebase-layout` for a source file, which splits it along its roles, and a split by behavior for a test file
 - **Missing key:** a record without `longFiles` came from a binary older than the length report, so the axis is unread with that cause
