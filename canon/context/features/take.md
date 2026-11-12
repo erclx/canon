@@ -37,6 +37,6 @@ Owns the static pages the end to end takes film, two of which post each input th
 
 - Frame time continues Chromium's monotonic clock, read off the load event's timestamp, since Bun's `process.hrtime` counts from its own start and a frame stamped on it freezes every animation
 - Send an input, step a frame, then await the input, and begin a frame only once the last settles, since awaiting first deadlocks and Chromium refuses a second frame as pending
-- A JPEG frame is full range and H.264 is read as TV range, so the encoder scales between them, and a test reading luma through FFmpeg's `format=gray` stretches it again and clips both ends
+- A JPEG frame is full range and H.264 is TV range, so the encoder scales between them. From FFmpeg 7.1 a conversion keeps the source range, so every call reading or writing a still names `out_range`.
 - The stepper advances virtual time plainly, since pausing on a fetch held the clock into the stall fallback. Stepped tests raise that limit to 8 s, save the fallback test, which stalls at 2 s.
 - The shell's failures are read off its cache layout and its stderr, so a moved Playwright cache reads as `browser-missing` and a reworded `No usable sandbox!` as `take-failed`, not `sandbox-blocked`

@@ -150,7 +150,8 @@ export async function lastFrame(clip: string, frames: number): Promise<Buffer> {
       '-i',
       clip,
       '-vf',
-      `select=eq(n\\,${frames - 1})`,
+      // A JPEG is full range, which FFmpeg 7.1 and later leave to negotiation.
+      `select=eq(n\\,${frames - 1}),scale=out_range=full`,
       '-frames:v',
       '1',
       '-q:v',

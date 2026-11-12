@@ -140,7 +140,9 @@ function bandLuma(media: string, crop = '16:16:200:1000'): number[] {
       '-i',
       media,
       '-vf',
-      `crop=${crop},scale=2:2:flags=area`,
+      // The still is full range and the clip TV range. From FFmpeg 7.1 a
+      // conversion to yuv420p keeps the source range, so name the target.
+      `crop=${crop},scale=2:2:flags=area:out_range=tv`,
       '-pix_fmt',
       'yuv420p',
       '-f',

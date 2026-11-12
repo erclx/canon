@@ -130,11 +130,7 @@ jobs:
   # than skipping green. Informational: the ruleset does not require it.
   e2e-suites:
     name: 🎬 E2E Suites
-    # Pinned for FFmpeg: this image holds FFmpeg 6.1, since the take e2e luma
-    # reader assumes pre-7.1 range handling. From 7.1 FFmpeg no longer squeezes
-    # a full-range still to TV range, so the reader compares 255 against 235.
-    # Lift when the reader's range fix ships, and return to ubuntu-latest then.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 25
     needs: changes
     # The macOS job's condition, so a Markdown-only pull request skips it and
