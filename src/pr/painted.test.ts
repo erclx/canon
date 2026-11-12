@@ -149,6 +149,14 @@ describe('loadPaintedPatterns', () => {
     expect(isPainted('web/src/pages/index.astro', patterns)).toBe(true)
   })
 
+  it('should declare the reel inputs this repository ships', () => {
+    const root = fileURLToPath(new URL('../..', import.meta.url))
+
+    expect(loadPaintedPatterns(root).reelInputs).toContain(
+      'src/browser/engine.ts',
+    )
+  })
+
   it('should keep the default when the override does not parse', () => {
     expect(loadPaintedPatterns(rootWith('{nope'))).toEqual(DEFAULT_PAINTED)
   })

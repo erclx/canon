@@ -1,4 +1,11 @@
 {
   "painted": ["src/take/**"],
-  "unpainted": ["tooling/**"]
+  "unpainted": ["tooling/**"],
+  "reelInputs": [
+    "src/browser/engine.ts",
+    "web/src/styles/tokens.css",
+    "assets/film/fonts/**",
+    "package.json",
+    "bun.lock"
+  ]
 }
