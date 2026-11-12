@@ -308,6 +308,45 @@ describe('reading counts out of each record shape', () => {
     expect(countsFor(specFor('labels'), record)).toEqual({ uncovered: 1 })
   })
 
+  it('should retain the long file and function counts and leave embedded blocks out', () => {
+    const record = {
+      files: 3,
+      limit: 5,
+      blocks: [{ file: 'a.ts', line: 1, kind: 'page', lines: 9 }],
+      longFiles: [{ file: 'b.ts', lines: 2400 }],
+      longFunctions: [
+        { file: 'b.ts', line: 1, lines: 120, name: 'a' },
+        { file: 'b.ts', line: 200, lines: 140, name: null },
+      ],
+    }
+
+    expect(countsFor(specFor('code'), record)).toEqual({
+      longFiles: 1,
+      longFunctions: 2,
+    })
+  })
+
+  it('should read a code record from a binary predating length as unmeasured', () => {
+    const record = JSON.stringify({
+      root: '/r',
+      files: 3,
+      limit: 5,
+      blocks: [],
+    })
+
+    expect(classify(specFor('code'), 0, record).status).toBe('unmeasured')
+  })
+
+  it('should report rather than gate on an embedded block in the code audit', () => {
+    const record = JSON.stringify({
+      blocks: [{ file: 'a.ts', line: 1, kind: 'page', lines: 9 }],
+      longFiles: [],
+      longFunctions: [],
+    })
+
+    expect(classify(specFor('code'), 2, record).status).toBe('reported')
+  })
+
   it('should retain the census totals and the large-folder count, leaving both lists out', () => {
     const record = {
       files: 1139,
