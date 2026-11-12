@@ -34,7 +34,7 @@ export function register(program: Command): void {
         '  scan already read. A line total skips whatever reads as binary.',
         '',
         'Folders:',
-        '  Only folders holding 10 or more files of their own are listed, each',
+        `  Only folders holding ${FOLDER_FILE_CHECKPOINT} or more files of their own are listed, each`,
         '  counted without its subfolders. A fixtures folder is left out.',
         '',
         'Exit codes:',

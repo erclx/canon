@@ -14,9 +14,9 @@ Length, placement, and staleness answer to different evidence, and one list hand
 ## Must
 
 - Report per document across the length, placement, and staleness axes, marking each finding with its evidence class, read through the verb owning each measurement and its record's checkpoints
-- Propose a split or an owner for each overgrown or doubled entry, and a folder line for each large markdown folder holding two roles
-- Ship the staleness axis as a reading rather than cutting it for lacking a verb
-- Report a refusal, an absent key, or a missing subcommand as an unread axis naming the cause
+- Propose a split or an owner as a structure line for each overgrown entry and doubled or unnamed coverage finding, with the headings and the reason
+- Report a folder line for each large markdown folder holding two roles, read from `canon census --json` and routed to `codebase-layout`
+- Ship staleness as a reading rather than cutting it, and report a refusal, an absent key, or a missing subcommand as an unread axis naming the cause
 - Run standalone, reading the requirements record for drift with its reminder, and the design record through `canon design audit --json` and its review reminder, routing findings to `design-record`
 
 ## Must not
