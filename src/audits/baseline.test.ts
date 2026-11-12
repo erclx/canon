@@ -192,6 +192,99 @@ describe('comparing a run against the recorded baseline', () => {
   })
 })
 
+describe('comparing a count that carries a growth tolerance', () => {
+  const recorded = {
+    recordedAt: '2026-11-12',
+    commit: 'aaaaaaa',
+    checks: { census: { files: 2170, largeFolders: 0 } },
+  }
+  const tolerances = { census: { files: 0.1, largeFolders: 0.1 } }
+
+  it('should mark a growth inside the tolerance as tolerated', () => {
+    const deltas = compareBaseline(
+      recorded,
+      [result('census', { files: 2183, largeFolders: 0 })],
+      tolerances,
+    )
+
+    expect(compared(deltas[0]).moved).toEqual([
+      { key: 'files', from: 2170, to: 2183, delta: 13, tolerated: true },
+    ])
+  })
+
+  /**
+   * 2170 times 0.1 is not exactly 217 in floating point, so the boundary is
+   * floored to a whole count and held inclusive.
+   */
+  it('should tolerate a growth exactly at the tolerance', () => {
+    const deltas = compareBaseline(
+      recorded,
+      [result('census', { files: 2387, largeFolders: 0 })],
+      tolerances,
+    )
+
+    expect(compared(deltas[0]).moved[0]?.tolerated).toBe(true)
+  })
+
+  it('should not tolerate a growth one past the tolerance', () => {
+    const deltas = compareBaseline(
+      recorded,
+      [result('census', { files: 2388, largeFolders: 0 })],
+      tolerances,
+    )
+
+    expect(compared(deltas[0]).moved).toEqual([
+      { key: 'files', from: 2170, to: 2388, delta: 218 },
+    ])
+  })
+
+  it('should never tolerate a shrink', () => {
+    const deltas = compareBaseline(
+      recorded,
+      [result('census', { files: 2160, largeFolders: 0 })],
+      tolerances,
+    )
+
+    expect(compared(deltas[0]).moved).toEqual([
+      { key: 'files', from: 2170, to: 2160, delta: -10 },
+    ])
+  })
+
+  it('should tolerate no growth on a key recorded at zero', () => {
+    const deltas = compareBaseline(
+      recorded,
+      [result('census', { files: 2170, largeFolders: 1 })],
+      tolerances,
+    )
+
+    expect(compared(deltas[0]).moved).toEqual([
+      { key: 'largeFolders', from: 0, to: 1, delta: 1 },
+    ])
+  })
+
+  it('should compare a key with no tolerance exactly', () => {
+    const deltas = compareBaseline(
+      recorded,
+      [result('census', { files: 2171, largeFolders: 0 })],
+      { census: { largeFolders: 0.1 } },
+    )
+
+    expect(compared(deltas[0]).moved).toEqual([
+      { key: 'files', from: 2170, to: 2171, delta: 1 },
+    ])
+  })
+
+  it('should keep a reproduced key steady rather than tolerated', () => {
+    const deltas = compareBaseline(
+      recorded,
+      [result('census', { files: 2170, largeFolders: 0 })],
+      tolerances,
+    )
+
+    expect(compared(deltas[0]).steady).toEqual(['files', 'largeFolders'])
+  })
+})
+
 describe('reading and writing the baseline file', () => {
   it('should round-trip a written baseline', async () => {
     const baseline = baselineFrom([result('markdown', { bans: 0 })], {
