@@ -11,17 +11,17 @@ import type { FunctionSpan } from '@/code/length'
  * never as an empty list.
  */
 
-export type PythonUnreadReason =
+export type UnreadReason =
   | 'unclosed-string'
   | 'unclosed-bracket'
   | 'mixed-indent'
 
-export type PythonRead =
+export type FunctionRead =
   | { readonly kind: 'read'; readonly spans: FunctionSpan[] }
   | {
       readonly kind: 'unread'
       readonly line: number
-      readonly reason: PythonUnreadReason
+      readonly reason: UnreadReason
     }
 
 /** Stands in for each character of a string, so a line holding one reads as code. */
@@ -61,7 +61,7 @@ type LexResult =
   | {
       readonly kind: 'unread'
       readonly line: number
-      readonly reason: PythonUnreadReason
+      readonly reason: UnreadReason
     }
 
 /** The string prefix written right before the quote at `quote`, or '' for none. */
@@ -284,7 +284,7 @@ export interface PythonOptions {
 export function pythonFunctionSpans(
   source: string,
   options: PythonOptions = {},
-): PythonRead {
+): FunctionRead {
   const lexResult = lexPython(source)
   if (lexResult.kind === 'unread') return lexResult
 

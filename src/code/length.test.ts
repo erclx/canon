@@ -177,20 +177,46 @@ describe('functionSpansInFile', () => {
   it('should read only the frontmatter of an astro file', () => {
     const source = '---\nfunction a() {\n  return 1\n}\n---\n<div>{b}</div>\n'
 
-    expect(functionSpansInFile('page.astro', source)).toEqual([
-      { line: 2, lines: 3, name: 'a', depth: 0 },
-    ])
+    expect(functionSpansInFile('page.astro', source)).toEqual({
+      kind: 'read',
+      spans: [{ line: 2, lines: 3, name: 'a', depth: 0 }],
+    })
   })
 
   it('should read no function in a JSX file, whose text the lexer misreads', () => {
     const source = "function A() {\n  return <span>Can't save</span>\n}\n"
 
-    expect(functionSpansInFile('a.tsx', source)).toEqual([])
+    expect(functionSpansInFile('a.tsx', source)).toEqual({
+      kind: 'read',
+      spans: [],
+    })
   })
 
   it('should read no function in a language it cannot parse', () => {
-    expect(functionSpansInFile('a.py', 'def a():\n  return {}\n')).toEqual([])
+    expect(functionSpansInFile('a.go', 'func a() {\n  return\n}\n')).toEqual({
+      kind: 'read',
+      spans: [],
+    })
   })
+
+  it('should read a python file by indentation', () => {
+    expect(functionSpansInFile('a.py', 'def a():\n  return {}\n')).toEqual({
+      kind: 'read',
+      spans: [{ line: 1, lines: 2, name: 'a', depth: 0 }],
+    })
+  })
+
+  it.each([
+    ['tests/test_a.py', []],
+    ['src/a.py', [{ line: 1, lines: 2, name: 'test_a', depth: 0 }]],
+  ])(
+    'should skip a test_ function only in a pytest file: %s',
+    (file, spans) => {
+      const source = 'def test_a():\n  pass\n'
+
+      expect(functionSpansInFile(file, source)).toEqual({ kind: 'read', spans })
+    },
+  )
 })
 
 describe('lineCount', () => {
@@ -232,6 +258,7 @@ describe('longCode', () => {
     expect(result).toEqual({
       longFiles: [{ file: 'a.test.ts', lines: 2002 }],
       longFunctions: [],
+      unreadFiles: [],
     })
   })
 
@@ -242,6 +269,30 @@ describe('longCode', () => {
     expect(longCode([{ file: 'a.test.ts', source }]).longFunctions).toEqual([
       { file: 'a.test.ts', line: 2, lines: 112, name: 'build' },
     ])
+  })
+
+  it('should name a top-level python function past the checkpoint', () => {
+    const source = `def build():\n${body(FUNCTION_LINE_CHECKPOINT)}`
+
+    expect(longCode([{ file: 'a.py', source }]).longFunctions).toEqual([
+      { file: 'a.py', line: 1, lines: 101, name: 'build' },
+    ])
+  })
+
+  it('should list each python file it cannot read by path and read the rest', () => {
+    const result = longCode([
+      { file: 'b.py', source: 'x = """\nnever closed\n' },
+      { file: 'a.py', source: 'def a():\n\t    return 1\n' },
+      { file: 'c.py', source: `def a():\n${body(FUNCTION_LINE_CHECKPOINT)}` },
+    ])
+
+    expect(result).toMatchObject({
+      unreadFiles: [
+        { file: 'a.py', line: 2, reason: 'mixed-indent' },
+        { file: 'b.py', line: 1, reason: 'unclosed-string' },
+      ],
+      longFunctions: [{ file: 'c.py', line: 1, lines: 101, name: 'a' }],
+    })
   })
 
   it('should leave a function at the checkpoint', () => {
