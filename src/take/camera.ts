@@ -24,9 +24,9 @@ export const CAMERA_VERSION = 1
 const DEPTH = 1.8
 
 /**
- * How far a clip with one pixel per CSS pixel zooms before it goes soft, which
- * caps a screencast's depth well under `DEPTH` and leaves the stepper's 4K
- * clip at it.
+ * How far an output with one pixel per clip pixel zooms before it goes soft,
+ * which caps a screencast's depth well under `DEPTH` at a 1920-wide output and
+ * leaves the stepper's 4K clip at it.
  */
 const SHARP_DEPTH = 1.35
 
@@ -117,6 +117,17 @@ export interface CameraOptions {
    * playback clock and a zoom settles at the speed a viewer sees. 1 by default.
    */
   readonly rate?: number
+  /**
+   * The depth every press zooms to, before the sharpness and fill caps lower
+   * it. `DEPTH` by default.
+   */
+  readonly depth?: number
+  /**
+   * How many pixels wide the track is rendered at, which the sharpness cap
+   * reads against, so a narrower output zooms deeper before the clip goes
+   * soft. The viewport's width by default.
+   */
+  readonly outputWidth?: number
 }
 
 export function cameraTrack(
@@ -126,7 +137,10 @@ export function cameraTrack(
   const log = atRate(source, options.rate ?? 1)
   const { width, height } = log.viewport
   const clip = log.clip ?? CLIP_SIZES[log.route]
-  const deepest = Math.min(DEPTH, (SHARP_DEPTH * clip.width) / width)
+  const deepest = Math.min(
+    options.depth ?? DEPTH,
+    (SHARP_DEPTH * clip.width) / (options.outputWidth ?? width),
+  )
   const depthFor = (box: Box): number =>
     Math.min(
       deepest,
@@ -233,6 +247,20 @@ function aimsOf(
           depth: depthFor(event.box),
         },
       ]
+    case 'key': {
+      if (event.focus === undefined) return []
+      // Aimed once the press lands, since focus moves on the key coming up.
+      const moved = event.t + event.ms
+      return [
+        {
+          t: moved,
+          until: moved,
+          at: centerOf(event.focus),
+          box: event.focus,
+          depth: depthFor(event.focus),
+        },
+      ]
+    }
     case 'move': {
       if (event.hold === undefined) return []
       // A move logs no box, so a hold aims at the full depth.

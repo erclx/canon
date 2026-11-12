@@ -569,6 +569,108 @@ describe('cameraTrack input steps', () => {
   })
 })
 
+describe('cameraTrack focus', () => {
+  const FIELD = { x: 400, y: 300, width: 160, height: 32 }
+
+  function keyed(
+    focus: { x: number; y: number; width: number; height: number } | undefined,
+  ): TakeLog {
+    return {
+      ...takeOf([]),
+      events: [
+        {
+          t: 2000,
+          kind: 'key',
+          keys: 'Tab',
+          ms: 33.33,
+          ...(focus ? { focus } : {}),
+        },
+      ],
+    }
+  }
+
+  it('should zoom onto the box a key moved focus to', () => {
+    const { frames } = cameraTrack(keyed(FIELD))
+
+    const held = at(frames, 2100)
+    expect(held.scale).toBe(1.8)
+    expect(screenOf(held, { x: 480, y: 316 }).x).toBeGreaterThan(0)
+    expect(viewCenter(held).x).toBeGreaterThan(FIELD.x)
+    expect(viewCenter(held).x).toBeLessThan(FIELD.x + VIEWPORT.width / 1.8)
+  })
+
+  it('should pull back after the hold on the focused box', () => {
+    const { frames } = cameraTrack(keyed(FIELD))
+
+    expect(at(frames, 4000).scale).toBe(1)
+  })
+
+  it('should draw no ring for a key that moved focus', () => {
+    const { frames } = cameraTrack(keyed(FIELD))
+
+    expect(frames.every((frame) => frame.ring === null)).toBe(true)
+  })
+
+  it('should hold the whole page for a focus move on a beat with push off', () => {
+    const log: TakeLog = { ...keyed(FIELD), push: false }
+
+    const { frames } = cameraTrack(log)
+
+    expect(frames.every((frame) => frame.scale === 1)).toBe(true)
+  })
+
+  it('should not zoom onto a focused box that fills the page', () => {
+    const { frames } = cameraTrack(
+      keyed({ x: 0, y: 0, width: 1900, height: 1000 }),
+    )
+
+    expect(frames.every((frame) => frame.scale === 1)).toBe(true)
+  })
+})
+
+describe('cameraTrack depth', () => {
+  const SCREENCAST = {
+    ...takeOf([{ t: 3000, at: { x: 400, y: 300 } }]),
+    clip: { width: 1920, height: 1080 },
+  }
+
+  it('should reach the depth asked for when the output is half the clip wide', () => {
+    const track = cameraTrack(SCREENCAST, { depth: 2, outputWidth: 960 })
+
+    const peak = Math.max(...track.frames.map((f) => f.scale))
+
+    expect(peak).toBe(2)
+  })
+
+  it('should cap the depth asked for at the sharpness of a full-width output', () => {
+    const track = cameraTrack(SCREENCAST, { depth: 2 })
+
+    const peak = Math.max(...track.frames.map((f) => f.scale))
+
+    expect(peak).toBeLessThanOrEqual(1.35)
+  })
+
+  it('should cap the depth asked for at the fill of a large target', () => {
+    const log = {
+      ...takeOf([{ t: 3000, at: { x: 400, y: 300 }, size: { x: 960, y: 40 } }]),
+      clip: { width: 1920, height: 1080 },
+    }
+
+    const track = cameraTrack(log, { depth: 2, outputWidth: 960 })
+    const peak = Math.max(...track.frames.map((f) => f.scale))
+
+    expect(peak).toBe(1.6)
+  })
+
+  it('should build the same track with no options as at the default depth', () => {
+    const log = takeOf([{ t: 3000, at: { x: 400, y: 300 } }])
+
+    expect(cameraTrack(log, { depth: 1.8, outputWidth: 1920 })).toEqual(
+      cameraTrack(log),
+    )
+  })
+})
+
 describe('readRate', () => {
   it('should read a positive number', () => {
     expect(readRate('1.5')).toBe(1.5)
