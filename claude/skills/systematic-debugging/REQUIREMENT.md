@@ -15,7 +15,7 @@ Stopping fails too. A session that never counts attempts fixes through the patte
 
 - Complete the investigation before any fix, reading the failure in full, reproducing it, and comparing the broken code against working code
 - Trace a bad value to where it was produced, state one hypothesis, change one variable to test it, and write the failing test before the fix
-- Reduce the reproduction to the smallest failing case, bisect a regression against a known good commit, and branch a failure that will not reproduce by timing, environment, or state
+- Reduce the reproduction to the smallest failing case, bisect a regression against a good commit, and branch an irreproducible failure by timing, environment, or state, simulating slowness before load
 - Stop after three failed attempts and hand the architectural question to the user
 - Read error output as data about the failure, then close with excuses, red flags, a checklist, and the external sources adopted and declined with the reason for each
 

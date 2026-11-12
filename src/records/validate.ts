@@ -63,6 +63,7 @@ export const FINDING_KINDS = [
   'operator-call-phrasing',
   'batch-unsplit',
   'source-unquoted',
+  'verification-load-unconfined',
   'stack-foldable',
   'fan-in-unmatched',
   'counterpart-unstated',
@@ -481,6 +482,34 @@ function checkSources(name: string, lines: readonly string[]): Finding[] {
     )
 }
 
+const LOAD_GENERATOR =
+  /\b\d+\s+(?:[a-z]+[ -])?(?:hogs?|busy[ -]loops?)\b|\bstress-ng\s+-/i
+const LOAD_PINNED = /\btaskset\b|\bmacos\b/i
+const LOAD_BOUNDED = /\bg?timeout\b/
+
+/**
+ * Keys on a launched generator, being a digit count beside the word or
+ * `stress-ng` with arguments, so a bullet that only mentions a hog passes.
+ * Confined takes a `timeout` bound and a `taskset` pin on the line, where naming macOS waives the pin and `gtimeout` stands for the bound. A plan
+ * saying "saturate the CPU" slips past.
+ */
+function checkVerification(name: string, lines: readonly string[]): Finding[] {
+  return readSourceEntries(lines)
+    .filter(
+      (entry) =>
+        LOAD_GENERATOR.test(entry) &&
+        !(LOAD_PINNED.test(entry) && LOAD_BOUNDED.test(entry)),
+    )
+    .map((entry) =>
+      finding(
+        'verification-load-unconfined',
+        name,
+        shorten(entry),
+        'names generated machine load without both a taskset pin and a timeout bound, per the Timing bullet of canon:systematic-debugging.',
+      ),
+    )
+}
+
 /**
  * `counterpart` is the root the plan sits under, read by `readCounterpartRoot`.
  * Left out, as in a project keeping no stack under `tooling/`, the plan owes no
@@ -570,6 +599,7 @@ export function checkPlan(
 
   findings.push(...checkQuestionContract(name, sections.get('Questions') ?? []))
   findings.push(...checkSources(name, sections.get('Sources') ?? []))
+  findings.push(...checkVerification(name, sections.get('Verification') ?? []))
 
   if (hasStagedBatches(text)) {
     const staged = linesOutsideFences(text).find((line) =>
