@@ -23,7 +23,7 @@ Five axes carry the report. Four answer from a verb, and two of those add a read
 
 Take every tracked source file the verbs reach by default. Narrow to a path the caller named when one was given, passing it to each verb that takes one, and say which scope the run took.
 
-Drop a generated file, a vendored copy, and a fixture before reporting a finding against it, since nobody hand-writes them. A finding against one names a file an author cannot fix, since the next regeneration overwrites it.
+Drop a generated file, a vendored copy, a copy an installer wrote, and a fixture before reporting a finding against it, since nobody hand-writes them. A finding against one names a file an author cannot fix, since the next regeneration or install overwrites it.
 
 ## Step 2: read the verbs
 
@@ -45,7 +45,8 @@ Take every checkpoint from the record that carries it rather than from a number 
 A refusal, an absent key, and a subcommand the project's binary does not carry each leave an axis unread. An older binary returns a record without the key the axis reads, which looks the same as an empty finding set unless the key itself is tested.
 
 - Report the axis as unread against the files it would have covered, naming the read that could not be taken and the cause
-- A language the verb does not parse leaves its files unread on that axis, never passing. Each verb's `--help` names the languages it reads.
+- A language the verb does not parse leaves its files unread on that axis, never passing
+- Coverage differs per axis, so take it from `${CLAUDE_SKILL_DIR}/references/axes.md` rather than from one line of a verb's help
 - A comment record whose `vocabulary` is `null` found no rule publishing the terms, so the degradation half is unread while the block half still reads
 
 ## Step 3: take the readings
