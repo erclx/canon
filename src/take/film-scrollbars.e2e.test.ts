@@ -40,6 +40,7 @@ describe.skipIf(!available())('scrollbars on both routes', () => {
       plan: read.plan,
       out,
       stallMs: LOADED_STALL_MS,
+      deviceScale: 1,
     })
     if (result.status !== 'filmed') throw new Error(result.message)
     expect(result.beats[0]?.route).toBe(route)

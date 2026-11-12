@@ -177,6 +177,41 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
     expect(camera.frames).toHaveLength(beat.frames)
   }, 180_000)
 
+  it('should film a stepped beat at the viewport size when asked for device scale 1', async () => {
+    const read = readTakePlan(ONE_BEAT)
+    if (read.kind !== 'read') throw new Error(read.detail)
+
+    const result = await take({
+      url: server.url,
+      plan: read.plan,
+      out,
+      stallMs: LOADED_STALL_MS,
+      deviceScale: 1,
+    })
+
+    expect(result).not.toHaveProperty('beats.0.fallback')
+    expect(result).toMatchObject({
+      status: 'filmed',
+      beats: [{ route: 'step' }],
+    })
+    if (result.status !== 'filmed') return
+    const [beat] = result.beats
+    if (!beat) return
+    expect(probe(join(out, beat.clip))).toEqual({
+      width: 1920,
+      height: 1080,
+      rate: '60/1',
+    })
+    const still = join(out, beat.still)
+    expect(probe(still)).toMatchObject({ width: 1920, height: 1080 })
+    // The band's CSS crop lands on the same element at this scale, so the
+    // still reads white where the scale-2 case reads it.
+    const [stillLuma = 0] = bandLuma(still)
+    expect(stillLuma).toBeGreaterThan(230)
+    const log = JSON.parse(readFileSync(join(out, beat.log), 'utf8')) as TakeLog
+    expect(log.clip).toEqual({ width: 1920, height: 1080 })
+  }, 180_000)
+
   it('should film a screencast beat at the viewport size and the same rate', async () => {
     const read = readTakePlan(
       JSON.stringify({
@@ -376,6 +411,7 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       url: new URL('/ticket', server.url).href,
       plan: read.plan,
       out,
+      deviceScale: 1,
     })
 
     expect(result).toMatchObject({
@@ -442,6 +478,7 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       plan: read.plan,
       out,
       stallMs: LOADED_STALL_MS,
+      deviceScale: 1,
     })
 
     expect(result).not.toHaveProperty('beats.0.fallback')
@@ -465,6 +502,7 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       plan: read.plan,
       out,
       stallMs: LOADED_STALL_MS,
+      deviceScale: 1,
     })
 
     expect(onceHits).toBe(1)

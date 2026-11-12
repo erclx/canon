@@ -63,6 +63,7 @@ describe.skipIf(!available())('a take of a page whose frames run slow', () => {
       plan: read.plan,
       out,
       stallMs: LOADED_STALL_MS,
+      deviceScale: 1,
     })
 
     // Ahead of the status, so a refusal prints its message.
@@ -89,6 +90,7 @@ describe.skipIf(!available())('a take of a page whose frames run slow', () => {
       plan: read.plan,
       out,
       stallMs: LOADED_STALL_MS,
+      deviceScale: 1,
     })
 
     // Ahead of the route, so a refusal prints its message and a fall back
@@ -200,6 +202,7 @@ describe.skipIf(!available())('a take of a page whose frames run slow', () => {
       plan: read.plan,
       out,
       stallMs: LOADED_STALL_MS,
+      deviceScale: 1,
     })
 
     expect(result).toMatchObject({

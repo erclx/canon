@@ -77,6 +77,7 @@ describe.skipIf(!available())('input steps on both routes', () => {
       plan: read.plan,
       out,
       stallMs: LOADED_STALL_MS,
+      deviceScale: 1,
     })
     if (result.status !== 'filmed') throw new Error(result.message)
     stepped ??= result

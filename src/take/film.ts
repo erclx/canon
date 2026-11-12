@@ -86,6 +86,12 @@ export interface TakeRequest {
   readonly stallMs?: number
   /** The filmed seconds the beats may sum to, past which the take refuses. */
   readonly maxSeconds?: number
+  /**
+   * How many times the viewport a stepped clip films at, 2 by default. Scale 1
+   * halves each side and is for a take whose reader never looks at the extra
+   * pixels. A screencast beat films at the viewport either way.
+   */
+  readonly deviceScale?: 1 | 2
 }
 
 const REACH_TIMEOUT_MS = 5000
@@ -135,6 +141,7 @@ export async function take(request: TakeRequest): Promise<TakeResult> {
           dir,
           executable,
           request.stallMs,
+          request.deviceScale ?? 2,
         ),
       )
     } catch (error) {
@@ -176,6 +183,7 @@ async function filmBeat(
   dir: string,
   executable: string,
   stallMs: number | undefined,
+  deviceScale: 1 | 2,
 ): Promise<FilmedBeat> {
   const clip = join(dir, 'clip.mp4')
   const target = join(out, clip)
@@ -196,6 +204,7 @@ async function filmBeat(
         beat,
         clip: target,
         stallMs,
+        deviceScale,
       })
     } catch (error) {
       if (!(error instanceof StepperStalled)) throw error
@@ -216,7 +225,13 @@ async function filmBeat(
     viewport: VIEWPORT,
     fps: FPS,
     route,
-    clip: CLIP_SIZES[route],
+    clip:
+      route === 'step'
+        ? {
+            width: VIEWPORT.width * deviceScale,
+            height: VIEWPORT.height * deviceScale,
+          }
+        : CLIP_SIZES[route],
     ...(beat.push === false ? { push: false as const } : {}),
     ...(filmed.lag === undefined ? {} : { lag: filmed.lag }),
     frames: filmed.frames,
