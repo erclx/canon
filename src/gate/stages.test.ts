@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { fileLength } from '@/gate/file-length'
+import { commentBodyBlocks, commentFileLines } from '@/gate/comment-caps'
 import { clientCommandCitations } from '@/gate/measures'
 import { STAGES } from '@/gate/stages'
 
@@ -380,5 +381,27 @@ describe('the file length stage', () => {
     expect(ids.indexOf('file-length')).toBe(
       ids.indexOf('embedded-programs') + 1,
     )
+  })
+})
+
+describe('the comment cap stages', () => {
+  it.each([
+    ['comment-body-blocks', commentBodyBlocks],
+    ['comment-file-lines', commentFileLines],
+  ])('should run %s with no scope', (id, measure) => {
+    const stage = STAGES.find((candidate) => candidate.id === id)
+
+    expect(stage?.scope).toBeUndefined()
+    expect(stage?.checks).toEqual([{ kind: 'measure', measure }])
+  })
+
+  it('should sit right after the file length stage', () => {
+    const ids = STAGES.map((stage) => stage.id)
+    const after = ids.indexOf('file-length')
+
+    expect(ids.slice(after + 1, after + 3)).toEqual([
+      'comment-body-blocks',
+      'comment-file-lines',
+    ])
   })
 })
