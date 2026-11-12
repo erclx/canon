@@ -126,6 +126,14 @@ function countLines(text: string): number {
 }
 
 /**
+ * A text's line count under the census definition, or undefined when it reads
+ * as binary, for a caller sizing single files rather than a whole tree.
+ */
+export function textLines(text: string): number | undefined {
+  return isBinary(text) ? undefined : countLines(text)
+}
+
+/**
  * Counts what was read, the one definition both the working-tree census and
  * the past-revision census share, so the two cannot drift apart on what a
  * line or a skipped file is.
