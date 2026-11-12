@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { withinCap } from '@/take/stepper'
+import { alignTicks, withinCap } from '@/take/stepper'
 
 /**
  * Covers the capped race both stepper waits share. A cap timer that outlives
@@ -38,5 +38,56 @@ describe('withinCap', () => {
     ).rejects.toThrow('navigation failed')
 
     expect(vi.getTimerCount()).toBe(0)
+  })
+})
+
+/**
+ * Covers the lift that keeps the frame ticks at or ahead of the page clock at
+ * the pause. A transition the page starts after the pause runs on the later of
+ * the two, so ticks left behind it film the transition dead for the whole clip.
+ */
+
+describe('alignTicks', () => {
+  const FRAME_MS = 1000 / 60
+  const loadTicks = 100_000
+  const loadEventStart = 2000
+
+  it('should keep the ticks when they lead the page clock', () => {
+    const pageNow = 6000
+    const ticks = loadTicks + (pageNow - loadEventStart) + 700
+
+    expect(alignTicks({ ticks, loadTicks, pageNow, loadEventStart })).toBe(
+      ticks,
+    )
+  })
+
+  it('should lift the ticks a frame past the page clock when they lag it by seconds', () => {
+    const pageNow = 9200
+    const ticks = loadTicks + (pageNow - loadEventStart) - 4300
+
+    expect(alignTicks({ ticks, loadTicks, pageNow, loadEventStart })).toBe(
+      loadTicks + (pageNow - loadEventStart) + FRAME_MS,
+    )
+  })
+
+  it('should lift the ticks one frame when they tie the page clock', () => {
+    const pageNow = 6000
+    const ticks = loadTicks + (pageNow - loadEventStart)
+
+    expect(alignTicks({ ticks, loadTicks, pageNow, loadEventStart })).toBe(
+      ticks + FRAME_MS,
+    )
+  })
+
+  it.each([
+    ['no navigation entry', undefined],
+    ['a load that never started', 0],
+    ['a non-numeric reading', Number.NaN],
+  ])('should keep the ticks given %s', (_, start) => {
+    const ticks = loadTicks + 1000
+
+    expect(
+      alignTicks({ ticks, loadTicks, pageNow: 9200, loadEventStart: start }),
+    ).toBe(ticks)
   })
 })
