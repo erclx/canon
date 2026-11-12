@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises'
-import { extname, join } from 'node:path'
+import { dirname, extname, join } from 'node:path'
 import { isBinary } from '@/sweep/binary'
 import { listRepositoryFiles } from '@/git/files'
 
@@ -11,6 +11,21 @@ export interface ExtensionCount {
   readonly lines: number
 }
 
+export interface FolderExtensionCount {
+  readonly extension: string
+  readonly files: number
+}
+
+/** One folder's own files, never its subtree's, broken down by extension. */
+export interface FolderCount {
+  readonly path: string
+  readonly files: number
+  readonly byExtension: readonly FolderExtensionCount[]
+}
+
+/** A folder holding this many files of its own is reported. */
+export const FOLDER_FILE_CHECKPOINT = 10
+
 export interface CensusResult {
   readonly kind: 'measured'
   readonly files: number
@@ -18,6 +33,8 @@ export interface CensusResult {
   readonly skipped: number
   readonly lines: number
   readonly byExtension: readonly ExtensionCount[]
+  /** Every folder at or past `FOLDER_FILE_CHECKPOINT`, empty when none is. */
+  readonly folders: readonly FolderCount[]
 }
 
 export interface CensusFailure {
@@ -51,6 +68,48 @@ async function readOne(root: string, path: string): Promise<ReadOutcome> {
 function extensionFor(path: string): string {
   const ext = extname(path)
   return ext === '' ? 'no-extension' : ext.slice(1).toLowerCase()
+}
+
+const FIXTURE_SEGMENTS: ReadonlySet<string> = new Set([
+  'fixtures',
+  '__fixtures__',
+])
+
+/** Only a directory segment counts, so a file named `fixtures.ts` does not. */
+function underFixtures(folder: string): boolean {
+  return folder.split('/').some((segment) => FIXTURE_SEGMENTS.has(segment))
+}
+
+/**
+ * Counts each file toward its own folder alone, keeping the folders that reach
+ * the checkpoint. Fixture folders are left out of this list only, since the
+ * headline totals are the baseline's and must not move.
+ */
+function largeFolders(paths: readonly string[]): FolderCount[] {
+  const byFolder = new Map<string, Map<string, number>>()
+
+  for (const path of paths) {
+    const folder = dirname(path)
+    if (underFixtures(folder)) continue
+
+    const extensions = byFolder.get(folder) ?? new Map<string, number>()
+    const extension = extensionFor(path)
+    extensions.set(extension, (extensions.get(extension) ?? 0) + 1)
+    byFolder.set(folder, extensions)
+  }
+
+  return [...byFolder.entries()]
+    .map(([path, extensions]) => ({
+      path,
+      files: [...extensions.values()].reduce((sum, n) => sum + n, 0),
+      byExtension: [...extensions.entries()]
+        .map(([extension, files]) => ({ extension, files }))
+        .sort(
+          (a, b) => b.files - a.files || a.extension.localeCompare(b.extension),
+        ),
+    }))
+    .filter((folder) => folder.files >= FOLDER_FILE_CHECKPOINT)
+    .sort((a, b) => b.files - a.files || a.path.localeCompare(b.path))
 }
 
 /**
@@ -109,5 +168,12 @@ export async function census(
     .map(([extension, counts]) => ({ extension, ...counts }))
     .sort((a, b) => b.files - a.files || a.extension.localeCompare(b.extension))
 
-  return { kind: 'measured', files: listed.length, skipped, lines, byExtension }
+  return {
+    kind: 'measured',
+    files: listed.length,
+    skipped,
+    lines,
+    byExtension,
+    folders: largeFolders(listed),
+  }
 }

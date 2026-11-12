@@ -32,11 +32,12 @@ Run these from the project root, in parallel:
 ```bash
 canon markdown audit --json
 canon context audit --json
+canon census --json
 ```
 
 The first answers length, carrying the bullet, paragraph, and depth checkpoints and the per-file weights read against them. The second answers placement for the folders it resolves, carrying entry length, reference form, and index drift. Placement reads `shapeFindings`, `extraSections`, and each entry's `provenance`, all `measured`.
 
-Take the checkpoints from the record each verb returns rather than from a number written here. A checkpoint the CLI moves reaches this report with no edit, and a number held in this body goes stale on its own cadence.
+The census answers folder layout. Take the checkpoints from the record each verb returns rather than from a number written here. A checkpoint the CLI moves reaches this report with no edit, and a number held in this body goes stale on its own cadence.
 
 ### The structure line
 
@@ -44,9 +45,15 @@ The context audit record already carries what a restructure needs, so the placem
 
 Emit the line only for a folder with an entry past the line checkpoint whose Layout headings group into two or more domains, or with a doubled or unnamed coverage finding. A folder with neither gets no line, and `document-repair` goes straight to its rewrite.
 
+### The folder line
+
+The census record lists every folder at or past its `folderCheckpoint`, with a `byExtension` count per folder. Take the markdown folders from it without listing files yourself, and read the roles inside each, per `${CLAUDE_SKILL_DIR}/references/axes.md`.
+
+Emit the line only for a folder whose markdown files reach the checkpoint on their own and hold two or more roles. A folder with one role gets no line, and the folder line reports under the table beside the structure line, never as a column.
+
 ### An unread axis is not a healthy one
 
-A refusal, an absent key, and a subcommand the project's binary does not carry each leave an axis unread. Report it as unread against the documents it would have covered, name the read that could not be taken, and name the cause.
+A refusal, an absent key, and a subcommand the project's binary does not carry each leave an axis unread. A census record with no `folders` key is an older binary, so report the folder layout as unread with that cause. Report it as unread against the documents it would have covered, name the read that could not be taken, and name the cause.
 
 - `canon context audit` refuses with `reason: "no-folders"` where the layout is not the expected one. Reading that honest refusal as an empty finding set reports a healthy corpus nothing looked at.
 
@@ -119,6 +126,12 @@ Structure `canon/context/surfaces/`: `cli.md` (300 lines) splits into `cli.md` t
 ```
 
 The line is a proposal for the operator, with the headings each entry takes and why. Health applies nothing, and `document-repair` offers the proposal before it rewrites.
+
+Add one folder line per large markdown folder holding two roles, after the structure lines, naming the folder, its markdown count, the roles, and `codebase-layout` as the owner of the split:
+
+```markdown
+Folder `docs/guides/`: 14 markdown files holding two roles, <role> and <role>, because <reason>. `codebase-layout` places the split.
+```
 
 Keep the evidence line under the table on every run. A table read without it flattens a judgment into a measurement, which is the one shape the two classes exist to prevent.
 
