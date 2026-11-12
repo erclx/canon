@@ -8,6 +8,12 @@ export interface PaintedPatterns {
   /** A path matching any of these is painted unless `unpainted` also matches. */
   readonly painted: readonly string[]
   readonly unpainted: readonly string[]
+  /**
+   * The project's own `painted` globs. A path matching one paints even inside
+   * a default fixture folder, so a target serving a real page from one keeps
+   * its capture gate. Test, story, and project exclusions still apply.
+   */
+  readonly repainted?: readonly string[]
 }
 
 const RENDERED_EXTENSIONS = [
@@ -34,16 +40,25 @@ const RENDERED_EXTENSIONS = [
 ]
 
 /**
- * What a browser renders, minus the tests and stories beside it. A test-only
- * push touches nothing a reviewer drove, which is the case the carry-forward
- * exists for.
+ * What a browser renders, minus the tests, stories, and fixtures beside it. A
+ * test-only push touches nothing a reviewer drove, which is the case the
+ * carry-forward exists for. A fixture is test input no app renders, the same
+ * judgment `INCIDENTAL` in `src/pr/bijection.ts` makes, so only a whole
+ * `fixtures`, `__fixtures__`, or `testdata` segment exempts a path.
  */
+const FIXTURE_FOLDERS: readonly string[] = [
+  '**/fixtures/**',
+  '**/__fixtures__/**',
+  '**/testdata/**',
+]
+
 export const DEFAULT_PAINTED: PaintedPatterns = {
   painted: [`**/*.{${RENDERED_EXTENSIONS.join(',')}}`],
   unpainted: [
     '**/*.{test,spec,stories}.*',
     '**/__tests__/**',
     '**/__snapshots__/**',
+    ...FIXTURE_FOLDERS,
   ],
 }
 
@@ -70,6 +85,7 @@ export function loadPaintedPatterns(root: string): PaintedPatterns {
     return {
       painted: [...DEFAULT_PAINTED.painted, ...strings(painted)],
       unpainted: [...DEFAULT_PAINTED.unpainted, ...strings(unpainted)],
+      repainted: strings(painted),
     }
   } catch {
     return DEFAULT_PAINTED
@@ -81,7 +97,9 @@ function matchesAny(path: string, globs: readonly string[]): boolean {
 }
 
 export function isPainted(path: string, patterns: PaintedPatterns): boolean {
-  return (
-    matchesAny(path, patterns.painted) && !matchesAny(path, patterns.unpainted)
-  )
+  if (!matchesAny(path, patterns.painted)) return false
+  const exclusions = matchesAny(path, patterns.repainted ?? [])
+    ? patterns.unpainted.filter((glob) => !FIXTURE_FOLDERS.includes(glob))
+    : patterns.unpainted
+  return !matchesAny(path, exclusions)
 }

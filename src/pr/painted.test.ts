@@ -18,6 +18,8 @@ describe('isPainted', () => {
     'assets/logo.png',
     'assets/icon.svg',
     'a/b/c/Card.vue',
+    'src/fixtures.tsx',
+    'src/myfixtures/page.html',
   ])('should classify %s as painted', (path) => {
     expect(isPainted(path, DEFAULT_PAINTED)).toBe(true)
   })
@@ -29,6 +31,12 @@ describe('isPainted', () => {
     'src/App.test.tsx',
     'src/Button.stories.tsx',
     'src/__tests__/render.tsx',
+    'src/take/fixtures/focus.html',
+    'src/take/fixtures/scrollbars.html',
+    'src/driver/probes/fixtures/page.html',
+    'sandbox/fixtures/claude/review-pr/evidence-mismatch/render/head/header.css',
+    'src/__fixtures__/card.tsx',
+    'pkg/testdata/golden.svg',
   ])('should classify %s as not painted', (path) => {
     expect(isPainted(path, DEFAULT_PAINTED)).toBe(false)
   })
@@ -62,6 +70,26 @@ describe('loadPaintedPatterns', () => {
     expect(isPainted('src/App.tsx', patterns)).toBe(true)
   })
 
+  it('should let a project glob paint a fixture folder the default excludes', () => {
+    const patterns = loadPaintedPatterns(
+      rootWith('{"painted":["app/fixtures/**"]}'),
+    )
+
+    expect(isPainted('app/fixtures/index.html', patterns)).toBe(true)
+    expect(isPainted('src/take/fixtures/focus.html', patterns)).toBe(false)
+  })
+
+  it('should keep a test file and a project trim unpainted under a repainted fixture folder', () => {
+    const patterns = loadPaintedPatterns(
+      rootWith(
+        '{"painted":["app/fixtures/**"],"unpainted":["app/fixtures/data/**"]}',
+      ),
+    )
+
+    expect(isPainted('app/fixtures/page.test.tsx', patterns)).toBe(false)
+    expect(isPainted('app/fixtures/data/table.html', patterns)).toBe(false)
+  })
+
   it('should let a project trim a path the default paints', () => {
     const patterns = loadPaintedPatterns(
       rootWith('{"unpainted":["fixtures/**"]}'),
@@ -70,16 +98,18 @@ describe('loadPaintedPatterns', () => {
     expect(isPainted('fixtures/page.html', patterns)).toBe(false)
   })
 
-  it('should paint this repository own rendered sources through its shipped override', () => {
+  it('should leave this repository design sources unpainted while their generated outputs paint', () => {
     const patterns = loadPaintedPatterns(
       fileURLToPath(new URL('../..', import.meta.url)),
     )
 
-    expect(isPainted('src/design/components.ts', patterns)).toBe(true)
-    expect(isPainted('src/design/css.ts', patterns)).toBe(true)
-    expect(isPainted('src/design/render.ts', patterns)).toBe(true)
-    expect(isPainted('src/design/css.test.ts', patterns)).toBe(false)
-    expect(isPainted('src/pr/lift.ts', patterns)).toBe(false)
+    expect(isPainted('src/design/parse.ts', patterns)).toBe(false)
+    expect(isPainted('src/design/render.ts', patterns)).toBe(false)
+    expect(isPainted('src/design/templates/status.css', patterns)).toBe(true)
+    expect(isPainted('web/src/styles/tokens.css', patterns)).toBe(true)
+    expect(
+      isPainted('web/public/previews/design-tokens/design.css', patterns),
+    ).toBe(true)
   })
 
   it('should paint the take engine and leave its tests unpainted through the shipped override', () => {
@@ -90,6 +120,18 @@ describe('loadPaintedPatterns', () => {
     expect(isPainted('src/take/camera.ts', patterns)).toBe(true)
     expect(isPainted('src/take/camera.test.ts', patterns)).toBe(false)
     expect(isPainted('src/take/film.e2e.test.ts', patterns)).toBe(false)
+  })
+
+  it('should paint a take fixture through the take glob while other fixture folders stay unpainted', () => {
+    const patterns = loadPaintedPatterns(
+      fileURLToPath(new URL('../..', import.meta.url)),
+    )
+
+    expect(isPainted('src/take/fixtures/focus.html', patterns)).toBe(true)
+    expect(isPainted('src/take/fixtures/pr-reel.test.ts', patterns)).toBe(false)
+    expect(isPainted('src/driver/probes/fixtures/page.html', patterns)).toBe(
+      false,
+    )
   })
 
   it('should leave a synced stack config unpainted through its shipped override', () => {
@@ -105,7 +147,6 @@ describe('loadPaintedPatterns', () => {
     ).toBe(false)
     expect(isPainted('tooling/astro/scenarios.css', patterns)).toBe(false)
     expect(isPainted('web/src/pages/index.astro', patterns)).toBe(true)
-    expect(isPainted('src/design/tokens.ts', patterns)).toBe(true)
   })
 
   it('should keep the default when the override does not parse', () => {
