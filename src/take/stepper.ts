@@ -15,7 +15,8 @@ import { type ShellPage, openShell } from '@/take/shell'
  * Films a beat by frame stepping. The page's clock is virtual and advances one
  * 60 fps frame per step, so every transition, animation, and timer moves
  * exactly one frame between screenshots however long a frame takes to render,
- * and each screenshot comes back at twice the viewport, 3840x2160.
+ * and each screenshot comes back at the request's device scale times the viewport,
+ * 3840x2160 at the default scale of 2.
  *
  * These orderings hold a take together, and each one broken deadlocks or
  * freezes it rather than failing loudly:
@@ -76,6 +77,8 @@ export interface SteppedRequest {
   readonly clip: string
   /** How long one frame may take before the beat falls back, `STALL_MS` by default. */
   readonly stallMs?: number
+  /** The multiple of the viewport each frame films at, 2 by default. */
+  readonly deviceScale?: 1 | 2
 }
 
 export async function filmStepped(
@@ -83,6 +86,7 @@ export async function filmStepped(
 ): Promise<SteppedTake> {
   const page = await openShell(request.executable, VIEWPORT, {
     scrollbars: request.beat.scrollbars,
+    deviceScale: request.deviceScale,
   })
   const encoder = openFrameEncoder(request.clip, FPS)
   const stallMs = request.stallMs ?? STALL_MS

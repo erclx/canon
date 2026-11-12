@@ -1,4 +1,10 @@
-import { chmodSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  chmodSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -42,6 +48,20 @@ describe('openShell', () => {
 
     await expect(launch).rejects.toBeInstanceOf(ShellSandboxBlocked)
     await expect(launch).rejects.toThrow(shell)
+  })
+
+  it.each([
+    ['at scale 1 when asked', { deviceScale: 1 as const }, 1],
+    ['at scale 2 when no scale is given', {}, 2],
+  ])('should launch %s', async (_, options, scale) => {
+    const argv = join(dir, `argv-${scale}-${Object.keys(options).length}`)
+    const shell = fake(`scaled-${scale}`, `echo "$@" > ${argv}\nexit 1`)
+
+    await expect(openShell(shell, SIZE, options)).rejects.toThrow()
+
+    const flags = readFileSync(argv, 'utf8')
+    expect(flags).toContain(`--force-device-scale-factor=${scale} `)
+    expect(flags.match(/--force-device-scale-factor/g)).toHaveLength(1)
   })
 
   it('should read the marker when it arrives split across two writes', async () => {
