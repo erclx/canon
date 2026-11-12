@@ -29,7 +29,7 @@ Owns the scenario scripts, one folder per category and one `.ts` file per comman
 
 ### `sandbox/fixtures/`
 
-Owns the content a scenario stages and each arm's `expect.toml`. It holds no scenarios, and `listCategories` skips it.
+Owns the content a scenario stages and each arm's `expect.toml`. It holds no scenarios, and `listCategories` skips it. A sole-`default` scenario keeps its `expect.toml` at `<scenario>/expect.toml`, where the runner reads an unnamed arm. A `default/expect.toml` there is never read, and `canon sandbox coverage` exits 1 on it.
 
 - Content lives at `<category>/<scenario>/<arm>/<stage>/`, and `ctx.fixtures(category, scenario, arm, stage)` copies one stage
 - A stage splits into `create/`, which overwrites, and `append/`, which fails when the target the anchor or seeds should provide is missing
@@ -49,7 +49,7 @@ Owns provisioning, the scenario contract, the checker, the coverage report, the 
 
 ### `src/sandbox/headless/`
 
-Owns the runner behind `canon sandbox run <cat:cmd> "<prompt>" [scenario]`.
+Owns the runner behind `canon sandbox run <cat:cmd> "<prompt>" [scenario]`. A run exits 1 when its arm declares nothing, because its closing `sandbox check` passes `--strict`.
 
 - `run.ts` provisions, snapshots the tree, and spawns `claude -p --plugin-dir` on `sonnet` under `bypassPermissions`, since `acceptEdits` denies writes under `.claude/`
 - `stream.ts` reduces `stream-json` to an envelope of `is_error`, `result`, `num_turns`, `total_cost_usd`, `skills`, and a `verdict`, kept in `.canon/tmp/runs/sandbox/`, as a later check finds none
