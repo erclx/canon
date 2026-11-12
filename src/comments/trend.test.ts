@@ -2,7 +2,7 @@ import { execSync } from 'node:child_process'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { countFiles, type LanguageCount } from '@/comments/scan'
-import { listCommits, readRevision, spaceEvenly } from '@/comments/trend'
+import { listCommits, readRevision } from '@/comments/trend'
 
 const REPO = process.cwd()
 
@@ -48,51 +48,6 @@ async function countAt(
   const [count] = countFiles(files, { languages: [language] })
   return count
 }
-
-function commit(rev: string, date: string): { rev: string; date: string } {
-  return { rev, date }
-}
-
-describe('spaceEvenly', () => {
-  it('should return every commit when the window is smaller than the sample', () => {
-    const commits = [commit('a', '2026-01-01'), commit('b', '2026-02-01')]
-
-    expect(spaceEvenly(commits, 6)).toEqual(commits)
-  })
-
-  it('should keep the first and last commit of the window', () => {
-    const commits = Array.from({ length: 40 }, (_, index) =>
-      commit(`c${index}`, '2026-01-01'),
-    )
-
-    const picked = spaceEvenly(commits, 6)
-
-    expect(picked).toHaveLength(6)
-    expect(picked[0].rev).toBe('c0')
-    expect(picked[5].rev).toBe('c39')
-  })
-
-  it('should space the picked commits evenly across the window', () => {
-    const commits = Array.from({ length: 11 }, (_, index) =>
-      commit(`c${index}`, '2026-01-01'),
-    )
-
-    expect(spaceEvenly(commits, 6).map((entry) => entry.rev)).toEqual([
-      'c0',
-      'c2',
-      'c4',
-      'c6',
-      'c8',
-      'c10',
-    ])
-  })
-
-  it('should return the newest commit alone when one point is asked for', () => {
-    const commits = [commit('a', '2026-01-01'), commit('b', '2026-02-01')]
-
-    expect(spaceEvenly(commits, 1)).toEqual([commit('b', '2026-02-01')])
-  })
-})
 
 describe('listCommits', () => {
   it.skipIf(SHALLOW)(

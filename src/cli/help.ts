@@ -75,6 +75,7 @@ export const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
       ['context [cmd]', 'Report context folder health'],
       ['markdown [cmd]', 'Report markdown against the shipped bans'],
       ['census [path]', 'Report file count, extensions, and line totals'],
+      ['history [path]', 'Report weekly delivery trend from git'],
     ],
   },
 ]
@@ -123,6 +124,7 @@ const EXAMPLES = [
   'canon deps audit --json',
   'canon labels audit --json',
   'canon census --json',
+  'canon history --weeks 26 --json',
   'canon audits run --json',
   'canon gate run --all',
   'canon upgrade --json',

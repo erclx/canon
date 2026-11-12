@@ -9,7 +9,7 @@ import {
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { census, type CensusResult } from '@/census/count'
+import { census, censusAt, type CensusResult } from '@/census/count'
 import { gitEnv } from '@/git/env'
 
 let ROOT: string
@@ -234,5 +234,73 @@ describe('census', () => {
 
       expect(result.folders).toEqual([])
     })
+  })
+})
+
+describe('censusAt', () => {
+  function commitAll(): string {
+    git('add', '--all')
+    git('commit', '--quiet', '-m', 'snapshot')
+    return git('rev-parse', 'HEAD')
+  }
+
+  it('should count the tree the revision committed rather than the working tree', async () => {
+    write('a.ts', 'one\ntwo\n')
+    const first = commitAll()
+    write('a.ts', 'one\ntwo\nthree\n')
+    write('b.md', 'four\n')
+    commitAll()
+
+    const result = measured(await censusAt(ROOT, first))
+
+    expect(result.files).toBe(1)
+    expect(result.lines).toBe(2)
+  })
+
+  it('should equal census on a clean tree with no untracked files', async () => {
+    write('a.ts', 'one\ntwo\n')
+    write('docs/b.md', 'three\n')
+    write('Dockerfile', 'FROM node\n')
+    writeFileSync(join(ROOT, 'logo.bin'), Buffer.from([0x00, 0x01, 0x02]))
+    const rev = commitAll()
+
+    const past = measured(await censusAt(ROOT, rev))
+    const present = measured(await census(ROOT))
+
+    expect(past).toEqual(present)
+  })
+
+  it('should count a symlink toward files and as skipped, never as the link text', async () => {
+    write('a.ts', 'one\n')
+    symlinkSync('a.ts', join(ROOT, 'link.ts'))
+    const rev = commitAll()
+
+    const result = measured(await censusAt(ROOT, rev))
+
+    expect(result.files).toBe(2)
+    expect(result.skipped).toBe(1)
+    expect(result.lines).toBe(1)
+  })
+
+  it('should count a submodule entry toward files and as skipped', async () => {
+    write('a.ts', 'one\n')
+    const first = commitAll()
+    git('update-index', '--add', '--cacheinfo', `160000,${first},vendored`)
+    git('commit', '--quiet', '-m', 'add submodule')
+
+    const result = measured(await censusAt(ROOT, 'HEAD'))
+
+    expect(result.files).toBe(2)
+    expect(result.skipped).toBe(1)
+    expect(result.lines).toBe(1)
+  })
+
+  it('should refuse a revision git cannot resolve', async () => {
+    write('a.ts', 'one\n')
+    commitAll()
+
+    const result = await censusAt(ROOT, 'not-a-real-ref')
+
+    expect(result).toEqual({ kind: 'refused', reason: 'no-git' })
   })
 })

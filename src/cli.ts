@@ -36,6 +36,7 @@ import { register as deps } from '@/commands/deps'
 import { register as labels } from '@/commands/labels'
 import { register as pr } from '@/commands/pr'
 import { register as census } from '@/commands/census'
+import { register as history } from '@/commands/history'
 import { register as upstream } from '@/commands/upstream'
 import { register as targets } from '@/commands/targets'
 import { register as upgrade } from '@/commands/upgrade'
@@ -102,6 +103,7 @@ deps(program)
 labels(program)
 pr(program)
 census(program)
+history(program)
 upstream(program)
 audits(program)
 gate(program)

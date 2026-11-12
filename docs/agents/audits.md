@@ -88,6 +88,7 @@ An audit that finds no corpus reports `absent`, which moves neither the verdict 
 | `outside`            | `canon gov superseded <old> <new>`  | Where the tree still asserts a value a changed convention no longer produces                  | Reports        |
 | `outside`            | `canon claude skills drift <ref>`   | Shipped skill bodies rewritten since a ref                                                    | Reports        |
 | `outside`            | `canon claude routing`              | Per `CLAUDE.md` section, how many bullets name a path and whether a rule covers it            | Reports        |
+| `outside`            | `canon history`                     | Weekly type mix, fix share, files per feat, size-weighted hotspots, and tree size from git    | Reports        |
 
 A deliberate secret takes a `canon-allow-secret: <reason>` marker. A deliberate citation takes `canon-allow-citation: <reason>`, a deliberate superseded value takes `canon-allow-superseded: <reason>`, and a block that must stay inline takes `canon-allow-embedded: <reason>`, each on its own line or the one above.
 

@@ -82,6 +82,7 @@ The design board is Frameboard, a separate CLI outside canon, so a board job run
 | Report context folder health              | `canon context`  |
 | Check markdown against the standards      | `canon markdown` |
 | Count files, extensions, and lines        | `canon census`   |
+| Report the weekly delivery trend from git | `canon history`  |
 
 ## Verbs that can lose your edits
 
