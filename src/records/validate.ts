@@ -4,6 +4,11 @@ import { join } from 'node:path'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { linesOutsideFences } from '@/markdown/scan'
 import {
+  checkCounterparts,
+  type CounterpartRoot,
+  readCounterpartRoot,
+} from '@/records/counterpart'
+import {
   isSessionMap,
   measureSessionMap,
   type SessionMapLength,
@@ -60,6 +65,8 @@ export const FINDING_KINDS = [
   'source-unquoted',
   'stack-foldable',
   'fan-in-unmatched',
+  'counterpart-unstated',
+  'counterpart-malformed',
 ] as const
 
 export type FindingKind = (typeof FINDING_KINDS)[number]
@@ -250,6 +257,7 @@ const PLAN_SECTIONS = [
   'Current behavior',
   'Constraints',
   'Files to touch',
+  'Counterparts',
   'Design references',
   'Reference images',
   'Verification',
@@ -473,7 +481,16 @@ function checkSources(name: string, lines: readonly string[]): Finding[] {
     )
 }
 
-export function checkPlan(name: string, text: string): Finding[] {
+/**
+ * `counterpart` is the root the plan sits under, read by `readCounterpartRoot`.
+ * Left out, as in a project keeping no stack under `tooling/`, the plan owes no
+ * `Counterparts` section.
+ */
+export function checkPlan(
+  name: string,
+  text: string,
+  counterpart?: CounterpartRoot,
+): Finding[] {
   const findings: Finding[] = []
 
   if (!PLAN_NAME.test(name)) {
@@ -539,6 +556,18 @@ export function checkPlan(name: string, text: string): Finding[] {
         ),
       )
     }
+  }
+
+  if (counterpart) {
+    findings.push(
+      ...checkCounterparts(
+        sections.get('Files to touch') ?? [],
+        sections.get('Counterparts'),
+        counterpart,
+      ).map((found) =>
+        finding(found.kind, name, found.subject, found.message),
+      ),
+    )
   }
 
   findings.push(...checkQuestionContract(name, sections.get('Questions') ?? []))
@@ -947,7 +976,12 @@ export async function validateRecords(
     return refuse('no-record', `No ${kind} record named ${record} in ${dir}.`)
   }
 
-  if (kind === 'plans') return validateFiles(dir, kind, names, checkPlan)
+  if (kind === 'plans') {
+    const counterpart = await readCounterpartRoot(root)
+    return validateFiles(dir, kind, names, (name, text) =>
+      checkPlan(name, text, counterpart),
+    )
+  }
   if (kind === 'sessions') return validateSessionMaps(dir, names)
 
   const check = FOLDER_CHECK[kind]
