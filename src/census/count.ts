@@ -2,6 +2,9 @@ import { readFile } from 'node:fs/promises'
 import { dirname, extname, join } from 'node:path'
 import { isBinary } from '@/sweep/binary'
 import { listRepositoryFiles } from '@/git/files'
+import { readBlobsAt, SYMLINK_MODE } from '@/git/revision'
+import { $ } from 'bun'
+import { gitEnv } from '@/git/env'
 
 export type CensusRefusal = 'no-git'
 
@@ -123,6 +126,50 @@ function countLines(text: string): number {
 }
 
 /**
+ * Counts what was read, the one definition both the working-tree census and
+ * the past-revision census share, so the two cannot drift apart on what a
+ * line or a skipped file is.
+ */
+function tally(outcomes: readonly ReadOutcome[]): CensusResult {
+  const totals = new Map<string, { files: number; lines: number }>()
+  let skipped = 0
+  let lines = 0
+
+  for (const outcome of outcomes) {
+    const extension = extensionFor(outcome.path)
+    const entry = totals.get(extension) ?? { files: 0, lines: 0 }
+    entry.files += 1
+
+    // A read that failed and a file that read as binary are counted the
+    // same way: toward `files`, excluded from every line count.
+    if (outcome.text === undefined || isBinary(outcome.text)) {
+      skipped += 1
+    } else {
+      const counted = countLines(outcome.text)
+      entry.lines += counted
+      lines += counted
+    }
+
+    totals.set(extension, entry)
+  }
+
+  const byExtension = [...totals.entries()]
+    .map(([extension, counts]) => ({ extension, ...counts }))
+    .sort((a, b) => b.files - a.files || a.extension.localeCompare(b.extension))
+
+  const paths = outcomes.map((outcome) => outcome.path)
+
+  return {
+    kind: 'measured',
+    files: outcomes.length,
+    skipped,
+    lines,
+    byExtension,
+    folders: largeFolders(paths),
+  }
+}
+
+/**
  * Censuses the tracked-plus-untracked tree under `root`: a file count, a
  * breakdown by extension, and a line total that skips whatever reads as
  * binary.
@@ -137,43 +184,48 @@ export async function census(
   const listed = await listRepositoryFiles(root)
   if (listed === undefined) return { kind: 'refused', reason: 'no-git' }
 
-  const totals = new Map<string, { files: number; lines: number }>()
-  let skipped = 0
-  let lines = 0
+  const outcomes: ReadOutcome[] = []
 
   for (let start = 0; start < listed.length; start += CONCURRENT_READS) {
     const batch = listed.slice(start, start + CONCURRENT_READS)
-    const outcomes = await Promise.all(batch.map((path) => readOne(root, path)))
-
-    for (const outcome of outcomes) {
-      const extension = extensionFor(outcome.path)
-      const entry = totals.get(extension) ?? { files: 0, lines: 0 }
-      entry.files += 1
-
-      // A read that failed and a file that read as binary are counted the
-      // same way: toward `files`, excluded from every line count.
-      if (outcome.text === undefined || isBinary(outcome.text)) {
-        skipped += 1
-      } else {
-        const counted = countLines(outcome.text)
-        entry.lines += counted
-        lines += counted
-      }
-
-      totals.set(extension, entry)
-    }
+    outcomes.push(
+      ...(await Promise.all(batch.map((path) => readOne(root, path)))),
+    )
   }
 
-  const byExtension = [...totals.entries()]
-    .map(([extension, counts]) => ({ extension, ...counts }))
-    .sort((a, b) => b.files - a.files || a.extension.localeCompare(b.extension))
+  return tally(outcomes)
+}
 
-  return {
-    kind: 'measured',
-    files: listed.length,
-    skipped,
-    lines,
-    byExtension,
-    folders: largeFolders(listed),
-  }
+/**
+ * Censuses the tree `rev` committed under `root`, through the same count
+ * `census` runs over the working tree.
+ *
+ * A symlink and a submodule count toward `files` and as skipped, never as the
+ * link text's lines. `census` reads a symlink through to its target, so the two
+ * agree on a clean tree only while every symlink points at a binary or
+ * unreadable file, as canon's one symlink does.
+ *
+ * Refuses with `no-git` when git cannot resolve `rev` to a tree, since an
+ * empty count would read as an empty repository.
+ */
+export async function censusAt(
+  root: string,
+  rev: string,
+): Promise<CensusResult | CensusFailure> {
+  const resolved =
+    await $`git -C ${root} rev-parse --verify --quiet ${`${rev}^{tree}`}`
+      .env(gitEnv())
+      .quiet()
+      .nothrow()
+  if (resolved.exitCode !== 0) return { kind: 'refused', reason: 'no-git' }
+
+  const entries = await readBlobsAt(root, rev, () => true)
+  const outcomes = entries
+    .map(({ path, mode, text }) => ({
+      path,
+      text: mode === SYMLINK_MODE ? undefined : text,
+    }))
+    .sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0))
+
+  return tally(outcomes)
 }
