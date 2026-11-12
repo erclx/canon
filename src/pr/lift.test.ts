@@ -145,6 +145,12 @@ function makeApi(fixture: Fixture = {}): Harness {
 
 const PENDING: ChecksGate = { state: 'pending', isConflicted: false }
 const PASSING: ChecksGate = { state: 'passing', isConflicted: false }
+const STUCK_RUN = { id: 43095326656, workflow: 'Verify', queuedSeconds: 900 }
+const STALLED: ChecksGate = {
+  state: 'pending',
+  isConflicted: false,
+  stalled: [STUCK_RUN],
+}
 
 describe('lift', () => {
   it('should lift and report lifted when every gate passes', async () => {
@@ -1330,6 +1336,16 @@ describe('lift', () => {
       expect(calls.sleeps).toEqual([])
     })
 
+    it('should stop waiting at once on a stalled run and name it', async () => {
+      const { api, calls } = makeApi({ checks: [STALLED] })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 600 })
+
+      expect(record.reason).toBe('ci-stalled')
+      expect(record.stalled).toEqual([STUCK_RUN])
+      expect(calls.sleeps).toEqual([])
+    })
+
     it('should refuse ci-failing without waiting', async () => {
       const { api, calls } = makeApi({
         checks: [{ state: 'failing', isConflicted: false }],
@@ -1464,6 +1480,24 @@ describe('lift', () => {
 
       expect(record.reason).toBe('ci-pending')
       expect(calls.sleeps).toEqual([])
+    })
+
+    it('should report a stalled run as ci-stalled with its id', async () => {
+      const { api } = makeApi({ checks: [STALLED] })
+
+      const record = await lift(api, { isCheck: true, waitSeconds: 600 })
+
+      expect(record.reason).toBe('ci-stalled')
+      expect(record.stalled).toEqual([STUCK_RUN])
+    })
+
+    it('should keep ci-pending when the reading names no stalled run', async () => {
+      const { api } = makeApi({ checks: [{ ...PENDING, stalled: [] }] })
+
+      const record = await lift(api, { isCheck: true, waitSeconds: 600 })
+
+      expect(record.reason).toBe('ci-pending')
+      expect(record.stalled).toBeUndefined()
     })
 
     it('should keep every failing gate in the record, not the first alone', async () => {

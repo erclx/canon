@@ -10,6 +10,7 @@ export type MergeRefusal =
   | 'missing-key-changes'
   | 'ci-failing'
   | 'ci-conflicted'
+  | 'ci-stalled'
   | 'ci-pending'
   | 'head-moved'
   | 'not-mergeable'
@@ -184,6 +185,15 @@ export function mergeTitle(title: string, number: number): string {
   return `${title} (#${number})`
 }
 
+/** Why a reading that is neither passing nor failing holds the merge. */
+function pendingReason(checks: ChecksGate): MergeRefusal {
+  if (checks.isConflicted) return 'ci-conflicted'
+  if (checks.stalled !== undefined && checks.stalled.length > 0) {
+    return 'ci-stalled'
+  }
+  return 'ci-pending'
+}
+
 function refused(
   reason: MergeRefusal,
   number: number,
@@ -225,11 +235,7 @@ export async function merge(
   if (checks === undefined) return refused('gh-failed', number, message)
   if (checks.state === 'failing') return refused('ci-failing', number, message)
   if (checks.state !== 'passing') {
-    return refused(
-      checks.isConflicted ? 'ci-conflicted' : 'ci-pending',
-      number,
-      message,
-    )
+    return refused(pendingReason(checks), number, message)
   }
 
   if (opts.isDryRun) {

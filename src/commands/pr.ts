@@ -796,8 +796,8 @@ export function register(program: Command): void {
         '  review-behind, ui-missing, ui-open, ui-unmarked, ui-behind,',
         '  ui-undriven, evidence-owed, painted-uncaptured, reel-unsettled,',
         '  standing-stale, standing-conflict, standing-unknown,',
-        '  ci-pending (--check), ci-failing, ci-conflicted, ci-timeout,',
-        '  head-moved, ready-withdrawn, gh-failed',
+        '  ci-pending (--check), ci-failing, ci-conflicted, ci-stalled,',
+        '  ci-timeout, head-moved, ready-withdrawn, gh-failed',
         '',
         'Every read is REST. The mutation is the one GraphQL call.',
         '',
@@ -859,8 +859,8 @@ export function register(program: Command): void {
         'Reasons:',
         '  merged, dry-run (--dry-run)',
         '  pull-closed, pull-draft, missing-summary, missing-key-changes,',
-        '  ci-failing, ci-conflicted, ci-pending, head-moved, not-mergeable,',
-        '  gh-failed',
+        '  ci-failing, ci-conflicted, ci-stalled, ci-pending, head-moved,',
+        '  not-mergeable, gh-failed',
         '',
         'The merge is the REST `PUT pulls/<number>/merge` with',
         '`merge_method=squash`, never `gh pr merge`, which runs on GraphQL.',
@@ -3027,6 +3027,8 @@ const LIFT_REFUSALS: Record<LiftRefusal | 'bad-wait' | 'gh-missing', string> = {
   'ci-failing': 'A check run on the tip failed.',
   'ci-conflicted':
     'The branch conflicts with its base, so no run will start for the tip.',
+  'ci-stalled':
+    'A workflow run on the tip has sat queued with no job past 10 minutes, and a cancel or rerun does not restart it. Close and reopen the pull request to start a fresh run.',
   'ci-timeout': 'A check run was still pending when --wait ran out.',
   'head-moved':
     'A push landed during the wait, so the gates cleared a commit that is no longer the head.',
@@ -3378,6 +3380,8 @@ const MERGE_REFUSALS: Record<MergeRefusal | 'gh-missing', string> = {
     'The body carries no `## Key changes` with text under it, so the description has no change to state.',
   'ci-failing': 'A check run on the head failed.',
   'ci-conflicted': 'The branch conflicts with its base.',
+  'ci-stalled':
+    'A workflow run on the head has sat queued with no job past 10 minutes. Close and reopen the pull request to start a fresh run.',
   'ci-pending':
     'A check run on the head has yet to conclude. Run the verb again once it does.',
   'head-moved':
