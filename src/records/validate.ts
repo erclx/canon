@@ -564,9 +564,7 @@ export function checkPlan(
         sections.get('Files to touch') ?? [],
         sections.get('Counterparts'),
         counterpart,
-      ).map((found) =>
-        finding(found.kind, name, found.subject, found.message),
-      ),
+      ).map((found) => finding(found.kind, name, found.subject, found.message)),
     )
   }
 
