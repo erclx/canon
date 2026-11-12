@@ -81,7 +81,7 @@ The plan standard fixes that block for a feature plan, and a groundwork or intak
 
 ### The groundwork exception
 
-One exception belongs to `plan-groundwork` alone, which writes a single task file at close recording what the track concluded. Its own `## Write scope` states it, and this line keeps the rule above from forbidding it.
+One exception belongs to `plan-groundwork` alone, which at close records what the track concluded into the named task, or writes a single task file when the launch named none. Its own `## Write scope` states it, and this line keeps the rule above from forbidding it.
 
 Each finding in that file opens with the bold source-and-date label that `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
 

@@ -123,6 +123,19 @@ claude --bg --model <model> -n "planner-<project>-<slug>" "Run /canon:role-plann
 
 `<task>` is the row's task file path and `<slug>` the slug its plan will take, resolved off the row. `<dispatcher-id>`, `<model>`, and `<project>` resolve as above, and the prefix reads `planner-` because it marks the role of the session it names. Then wait per `orchestrator-planning-wait.md`.
 
+### A flaky row
+
+A row whose task reports an intermittent failure with no finding naming its cause swaps the middle of the brief. The planner measures under groundwork's experiment rules, then plans the fix in the same session.
+
+```bash
+claude --bg --model <model> -n "planner-<project>-<slug>" "Run /canon:role-planner, then /canon:plan-groundwork <task>, then /canon:plan-feature <task> once the track closes. Your controller is ..."
+```
+
+- Read intermittent as a failure that differs between runs of the same code and inputs, judged from the task rather than matched on a word
+- A failure that reproduces on demand, such as a deterministic timeout or perf bug, keeps `plan-feature`
+- A flaky row whose cause a finding already names keeps the shape above, since nothing is left to measure
+- The ellipsis stands for the message clauses above, unchanged
+
 ### Which checks bind
 
 None of the three checks in `orchestrator-dispatch.md` binds this shape.
