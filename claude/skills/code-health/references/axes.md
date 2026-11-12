@@ -84,7 +84,8 @@ A `blocks` entry is a page, stylesheet, or script embedded in a string past `lim
 
 A folder counts its own files and not its subfolders', and the census leaves out gitignored paths and fixtures.
 
-- **Code folders:** an entry whose files other than `md` outnumber its `md` files. A markdown-led folder belongs to `document-health`.
+- **Code folders:** an entry whose code files outnumber its `md` files, counting as code a language's source, such as `ts`, `js`, `py`, `go`, `sh`, or `css`
+- **Not code:** images, fonts, markup, and data, so an asset folder is no candidate, and a markdown-led folder belongs to `document-health`
 - **Roles:** list the folder's files and group them by what each is for, such as commands beside helpers or types. A test beside the file it covers shares that file's role.
 - **One role:** no finding at any size
 - **Missing key:** a census record without `folders` came from an older binary, so the axis is unread with that cause
