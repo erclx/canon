@@ -91,7 +91,7 @@ export async function* reelFrames(
     )) {
       const at =
         camera.frames[Math.min(index * REEL_EVERY, camera.frames.length - 1)]
-      const view = snapped(at ?? { scale: 1, x: 0, y: 0 })
+      const view = snapped(at ?? { scale: 1, x: 0, y: 0 }, source)
       const cursor = at?.cursor ?? { x: 0, y: 0 }
       const pointer = {
         x: (cursor.x - view.x) * view.scale * factor,
@@ -133,10 +133,23 @@ function reelCamera(out: string, filmed: FilmedBeat): CameraTrack {
 /**
  * The view moved onto whole source pixels, so a held zoom at `REEL_DEPTH`
  * copies the clip pixel for pixel rather than blending each pixel with its
- * neighbor and softening a thin ring.
+ * neighbor and softening a thin ring. It stays inside the source, since a
+ * rounded origin past the far edge leaves the last pixels short of weight.
  */
-function snapped(view: View): View {
-  return { scale: view.scale, x: Math.round(view.x), y: Math.round(view.y) }
+function snapped(
+  view: View,
+  source: { readonly width: number; readonly height: number },
+): View {
+  const axis = (origin: number, size: number) =>
+    Math.min(
+      Math.max(Math.round(origin), 0),
+      Math.floor(size - size / view.scale),
+    )
+  return {
+    scale: view.scale,
+    x: axis(view.x, source.width),
+    y: axis(view.y, source.height),
+  }
 }
 
 /**
