@@ -17,7 +17,7 @@ import { type ShellPage, openShell } from '@/take/shell'
  * exactly one frame between screenshots however long a frame takes to render,
  * and each screenshot comes back at twice the viewport, 3840x2160.
  *
- * Three orderings hold a take together, and each one broken deadlocks or
+ * These orderings hold a take together, and each one broken deadlocks or
  * freezes it rather than failing loudly:
  *
  * - An input is sent, a frame is stepped, and only then is the input awaited,
