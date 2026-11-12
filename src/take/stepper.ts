@@ -77,7 +77,9 @@ export interface SteppedRequest {
 export async function filmStepped(
   request: SteppedRequest,
 ): Promise<SteppedTake> {
-  const page = await openShell(request.executable, VIEWPORT)
+  const page = await openShell(request.executable, VIEWPORT, {
+    scrollbars: request.beat.scrollbars,
+  })
   const encoder = openFrameEncoder(request.clip, FPS)
   const stallMs = request.stallMs ?? STALL_MS
   let still: (() => Promise<Buffer | undefined>) | undefined

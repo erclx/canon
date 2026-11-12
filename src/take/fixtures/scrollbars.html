@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Scrollbars</title>
+    <!--
+      A tall page that reports its scrollbar gutter to the test server once
+      loaded, so a test reads the layout width a browser gave up to a scrollbar.
+    -->
+    <style>
+      body {
+        margin: 0;
+        height: 3000px;
+        background: #808080;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      fetch('/gutter', {
+        method: 'POST',
+        body: String(window.innerWidth - document.documentElement.clientWidth),
+      })
+    </script>
+  </body>
+</html>
