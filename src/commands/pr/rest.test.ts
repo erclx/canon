@@ -398,6 +398,34 @@ describe('canon pr reads through REST alone', () => {
 
       expect(record.reason).toBe('bad-wait')
     })
+
+    it('should report a tip run queued with no job as ci-stalled with its id', async () => {
+      stageClearPull()
+      writeFixture('checks.json', { total_count: 0, check_runs: [] })
+      writeFixture('runs.json', {
+        total_count: 1,
+        workflow_runs: [
+          {
+            id: 43095326656,
+            workflow_id: 7,
+            name: 'Verify',
+            event: 'pull_request',
+            status: 'queued',
+            head_sha: tip,
+            created_at: '2026-11-11T20:19:24Z',
+          },
+        ],
+      })
+      writeFixture('jobs.json', { total_count: 0, jobs: [] })
+
+      const { record, exit } = await runLift(['7', '--check'])
+
+      expect(record).toMatchObject({
+        reason: 'ci-stalled',
+        stalled: [{ id: 43095326656, workflow: 'Verify' }],
+      })
+      expect(exit).toBe(1)
+    })
   })
 
   describe('merge', () => {
