@@ -17,6 +17,28 @@ import { dirname, join } from 'node:path'
 
 export class ShellMissing extends Error {}
 
+/**
+ * The shell aborted with no usable sandbox, printing the marker from
+ * `zygote_host_impl_linux.cc` and dying on a signal. AppArmor's default from
+ * Ubuntu 23.10 is one cause and a container's seccomp profile another, so
+ * `fix` is set only when the AppArmor setting reads 1 and the sysctl applies.
+ */
+export class ShellSandboxBlocked extends Error {
+  constructor(
+    message: string,
+    readonly fix?: string,
+  ) {
+    super(message)
+  }
+}
+
+const SANDBOX_MARKER = 'No usable sandbox!'
+const USERNS_SETTING = 'kernel.apparmor_restrict_unprivileged_userns'
+const USERNS_FILE = '/proc/sys/kernel/apparmor_restrict_unprivileged_userns'
+const SANDBOX_FIX = `sudo sysctl -w ${USERNS_SETTING}=0`
+const SANDBOX_GUIDE =
+  'https://chromium.googlesource.com/chromium/src/+/main/docs/security/apparmor-userns-restrictions.md'
+
 /** Each platform's folder and binary inside the shell's revision folder. */
 const SHELL_DIRS: Record<string, readonly [string, string]> = {
   'linux-x64': ['chrome-headless-shell-linux64', 'chrome-headless-shell'],
@@ -38,6 +60,20 @@ const FLAGS = [
 
 /** Resolves the installed shell, throwing `ShellMissing` naming where it looked. */
 export function findShell(env: NodeJS.ProcessEnv = process.env): string {
+  const path = shellPath(env)
+  if (!existsSync(path)) {
+    throw new ShellMissing(
+      `chrome-headless-shell executable doesn't exist at ${path}`,
+    )
+  }
+  return path
+}
+
+/**
+ * Where the shell would sit under `env`, installed or not. Throws
+ * `ShellMissing` when this platform or the engine's manifest names none.
+ */
+export function shellPath(env: NodeJS.ProcessEnv = process.env): string {
   const require = createRequire(import.meta.url)
   const engineRoot = dirname(require.resolve('playwright-core/package.json'))
   const manifest = JSON.parse(
@@ -53,17 +89,11 @@ export function findShell(env: NodeJS.ProcessEnv = process.env): string {
     )
   }
 
-  const path = join(
+  return join(
     registryRoot(env, engineRoot),
     `chromium_headless_shell-${revision}`,
     ...dirs,
   )
-  if (!existsSync(path)) {
-    throw new ShellMissing(
-      `chrome-headless-shell executable doesn't exist at ${path}`,
-    )
-  }
-  return path
 }
 
 /** Where Playwright keeps its browsers, read the way its own registry reads it. */
@@ -138,7 +168,7 @@ export async function openShell(
 
   let socket: WebSocket | undefined
   try {
-    socket = new WebSocket(await devtoolsUrl(proc))
+    socket = new WebSocket(await devtoolsUrl(proc, executable))
     await new Promise((done, fail) => {
       socket?.addEventListener('open', done, { once: true })
       socket?.addEventListener('error', fail, { once: true })
@@ -150,19 +180,91 @@ export async function openShell(
   }
 }
 
-function devtoolsUrl(proc: ChildProcess): Promise<string> {
+function devtoolsUrl(proc: ChildProcess, executable: string): Promise<string> {
   return new Promise((done, fail) => {
     let output = ''
+    let settled = false
     proc.stderr?.on('data', (chunk: Buffer) => {
       output += chunk.toString()
       const match = output.match(/DevTools listening on (ws:\S+)/)
-      if (match?.[1]) done(match[1])
+      if (match?.[1] && !settled) {
+        settled = true
+        done(match[1])
+      }
     })
-    proc.on('error', fail)
-    proc.on('exit', (code) =>
-      fail(new Error(`the shell exited ${code}: ${output.slice(-400)}`)),
-    )
+    proc.on('error', (error) => {
+      settled = true
+      fail(error)
+    })
+    // `close` rather than `exit`, since only `close` waits for stderr to drain
+    // and the marker can sit in the last chunk. A shell that already printed
+    // its address is past the launch, so a later death is not read here.
+    proc.on('close', (code, signal) => {
+      if (settled) return
+      settled = true
+      fail(
+        output.includes(SANDBOX_MARKER)
+          ? sandboxBlocked(executable, readSetting())
+          : new Error(
+              `the shell exited ${ending(code, signal)}: ${lastWords(output)}`,
+            ),
+      )
+    })
   })
+}
+
+/**
+ * Builds the refusal from the AppArmor setting as this machine reads it,
+ * naming the sysctl only at 1, where it is the fix, and the guide otherwise.
+ */
+export function sandboxBlocked(
+  executable: string,
+  setting: string | undefined,
+): ShellSandboxBlocked {
+  const opening = `the shell at ${executable} found no usable sandbox`
+  if (setting === '1') {
+    return new ShellSandboxBlocked(
+      `${opening}, since ${USERNS_SETTING} is 1. Allow unprivileged user namespaces for this boot with ${SANDBOX_FIX}, or see ${SANDBOX_GUIDE} for the persistent and per-binary forms.`,
+      SANDBOX_FIX,
+    )
+  }
+  const reading =
+    setting === undefined
+      ? `this kernel carries no ${USERNS_SETTING}`
+      : `${USERNS_SETTING} is ${setting}`
+  return new ShellSandboxBlocked(
+    `${opening}, and ${reading}, so something other than AppArmor blocks it, such as a container's seccomp profile. See ${SANDBOX_GUIDE}.`,
+  )
+}
+
+/** Read only after the marker, since a profiled shell starts with it at 1. */
+function readSetting(): string | undefined {
+  try {
+    return readFileSync(USERNS_FILE, 'utf8').trim()
+  } catch {
+    return undefined
+  }
+}
+
+/** Node passes a null code to a process a signal ended. */
+function ending(code: number | null, signal: NodeJS.Signals | null): string {
+  return code === null ? `on ${signal ?? 'an unknown signal'}` : `with ${code}`
+}
+
+/**
+ * Keeps Chromium's `FATAL` line when it printed one and the last line
+ * otherwise, so the message never opens mid-word the way a raw tail did.
+ */
+function lastWords(output: string): string {
+  const lines = output
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+  return (
+    lines.findLast((line) => line.includes(':FATAL:')) ??
+    lines.at(-1) ??
+    'no output'
+  )
 }
 
 async function attach(

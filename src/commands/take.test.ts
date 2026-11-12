@@ -1,10 +1,17 @@
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { execa } from 'execa'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { findShell } from '@/take/shell'
+import { findShell, shellPath } from '@/take/shell'
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..')
 const CLI = join(REPO_ROOT, 'src', 'cli.ts')
@@ -138,6 +145,40 @@ describe('canon take', () => {
         exitCode: 1,
         record: { reason: 'browser-missing' },
       })
+    },
+  )
+
+  it.skipIf(!hasFfmpeg)(
+    'should refuse sandbox-blocked naming the shell when it finds no sandbox',
+    async () => {
+      // A fake shell where Playwright would keep the real one, printing
+      // Chromium's fatal line and dying on the signal Chromium dies on.
+      const browsers = join(dir, 'blocked-browsers')
+      const shell = shellPath({ PLAYWRIGHT_BROWSERS_PATH: browsers })
+      mkdirSync(dirname(shell), { recursive: true })
+      writeFileSync(
+        shell,
+        "#!/bin/sh\necho '[1:FATAL:zygote_host_impl_linux.cc(128)] No usable sandbox!' >&2\nkill -TRAP $$\n",
+      )
+      chmodSync(shell, 0o755)
+      const served = Bun.serve({ port: 0, fetch: () => new Response('') })
+      try {
+        const result = await runTake(
+          [`http://127.0.0.1:${served.port}/`, plan, '--out', dir],
+          { PLAYWRIGHT_BROWSERS_PATH: browsers },
+        )
+
+        expect(result).toMatchObject({
+          exitCode: 1,
+          record: {
+            reason: 'sandbox-blocked',
+            beat: 'press go',
+            message: expect.stringContaining(shell),
+          },
+        })
+      } finally {
+        served.stop(true)
+      }
     },
   )
 
