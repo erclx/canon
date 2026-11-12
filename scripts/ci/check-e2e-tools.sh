@@ -7,7 +7,9 @@
 # The engine's browsers are checked by check-browsers.sh. This checks the
 # exact Chromium revision the pinned agent CLI launches, which a glob on
 # chromium-* would pass on the engine's revision alone, and FFmpeg's animated
-# WebP encoder, which the reel suite needs.
+# WebP encoder, which the reel suite needs. It also launches the engine's
+# Chromium once, the probe the Playwright suites skip on, since a browser on
+# disk that cannot start would otherwise skip five suites green.
 set -eo pipefail
 
 if [ $# -ne 1 ]; then
@@ -17,6 +19,11 @@ fi
 
 if [ ! -d "$HOME/.cache/ms-playwright/chromium-$1" ]; then
   echo "Missing agent CLI Chromium revision $1" >&2
+  exit 1
+fi
+
+if ! bun -e "const { chromium } = await import('playwright-core'); await (await chromium.launch()).close()"; then
+  echo "The engine's Chromium is installed but does not launch" >&2
   exit 1
 fi
 

@@ -38,7 +38,7 @@ A third Linux job runs `bun run test:e2e` with the tools the nine `*.e2e.test.ts
 - FFmpeg comes from apt with `Acquire::Retries=3` and a 5-minute step bound, since the runner image lists none
 - `bunx playwright install chromium` lands the engine's browsers, and `canon browser install-browser chromium` the agent CLI's own revision, which the swipe suite launches
 - The browser cache keys on `bun.lock` and `src/browser/agent-cli.ts` under its own prefix, since a hit on the capture job's cache would skip the agent CLI install
-- `scripts/ci/check-browsers.sh` and `scripts/ci/check-e2e-tools.sh` run before the suites, so a missing browser, revision, or `libwebp_anim` encoder reddens the job rather than skipping a suite green
+- `scripts/ci/check-browsers.sh` and `scripts/ci/check-e2e-tools.sh` run first, so a missing revision or `libwebp_anim` encoder, or a Chromium that cannot launch, reddens the job
 - A sysctl clears `kernel.apparmor_restrict_unprivileged_userns`, since Ubuntu 24.04 kills the chrome-headless-shell the take engine spawns with its sandbox on
 
 ### `scripts/ci/docs-only.sh`
