@@ -1,11 +1,11 @@
 ---
 name: internal-shipped-reference
-description: Reviews a shipped-corpus edit for a reference that resolves only in this checkout and reads as portable, the one form the reference gate cannot classify by pattern, and for a line in a target-loaded skill that only this toolkit acts on. Use before shipping a change under claude/, docs/, governance/, scripts/, standards/, or tooling/, routed here by `authoring-layout.md`. Do NOT use for a pull request number, a commit sha, a resolvable `docs/<name>.md` path, a phase label, or an installed rule path, which `canon gate run`'s shipped-references stage already classifies by pattern.
+description: Reviews a shipped-corpus edit for a reference that resolves only in this checkout and reads as portable, the one form the reference gate cannot classify by pattern, and for a line in a target-loaded skill that only this toolkit acts on. Use before shipping a change under claude/, docs/, governance/, scripts/, standards/, or tooling/, routed here by `authoring-layout.md`. Do NOT use for a pull request number, a commit sha, a resolvable `docs/<name>.md` path, a phase label, an installed rule path, or a stack's `configs/` or `seeds/` source path, which `canon gate run`'s shipped-references stage already classifies by pattern.
 ---
 
 # Internal shipped reference
 
-`src/shipped/references.ts` classifies five same-repository reference forms by pattern and stops there on purpose. Its own `DOCS_PATH` comment names the sixth, a `canon/context/<name>.md` token that may cite this repository's own domain entry or illustrate a target's generic tree, such as `canon/context/index.md`.
+`src/shipped/references.ts` classifies seven same-repository reference forms by pattern and stops there on purpose. Its own `DOCS_PATH` comment names one more, a `canon/context/<name>.md` token that may cite this repository's own domain entry or illustrate a target's generic tree, such as `canon/context/index.md`.
 
 Telling those two apart is a semantic read no pattern makes. This skill is that read, plus the parallel judgment over a layout or count claim and the audience test over a shipped skill's lines.
 
