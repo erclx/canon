@@ -130,7 +130,11 @@ jobs:
   # than skipping green. Informational: the ruleset does not require it.
   e2e-suites:
     name: 🎬 E2E Suites
-    runs-on: ubuntu-latest
+    # Pinned for FFmpeg: ubuntu-latest's FFmpeg 8 tags the take still and the
+    # clip with different color ranges, so the film suite fails. This image
+    # holds FFmpeg 6.1. Lift when take's FFmpeg 8 color range fix ships, and
+    # return to ubuntu-latest then.
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     needs: changes
     # The macOS job's condition, so a Markdown-only pull request skips it and

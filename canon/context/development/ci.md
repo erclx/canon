@@ -33,7 +33,7 @@ Runs `🛡️ Static Checks` on Linux and `🍎 macOS Unit Tests` beside it, nei
 
 ### `🎬 E2E Suites`
 
-A third Linux job runs `bun run test:e2e` with the tools the nine `*.e2e.test.ts` suites gate on. It copies the macOS job's `if:`, so a Markdown-only pull request skips it and the cron never runs it. The ruleset does not require it, and the operator adds it after 20 consecutive green runs.
+A third job runs `bun run test:e2e` with the tools the nine `*.e2e.test.ts` suites gate on, pinned to `ubuntu-24.04` for FFmpeg 6.1 until take handles FFmpeg 8's color range. It copies the macOS job's `if:`, so a Markdown-only pull request skips it. The ruleset does not require it, and the operator adds it after 20 consecutive green runs.
 
 - FFmpeg comes from apt with `Acquire::Retries=3` and a 5-minute step bound, since the runner image lists none
 - `bunx playwright install chromium` lands the engine's browsers, and `canon browser install-browser chromium` the agent CLI's own revision, which the swipe suite launches
