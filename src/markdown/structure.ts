@@ -6,60 +6,26 @@ export const HEADING = /^#{1,6}\s/
  * A section marker holding its line alone, which is the signpost a document
  * uses where its own template asks for bold rather than a heading.
  *
- * `claude/skills/plan-feature/references/plan.md` gives `## Summary` a heading and marks the four sections
- * below it this way, so a conforming plan read as one run from its first line
- * to its last and all seven live plans reported past the depth checkpoint, at
- * 106 to 166 rendered lines. A measure firing on a whole corpus says nothing
- * about it, and it costs more than silence, since a reader who learns to skip
- * the depth section skips it on the file where a deep run genuinely sits.
+ * `claude/skills/plan-feature/references/plan.md` marks its sections this way,
+ * so without the break a conforming plan reads as one run and every plan
+ * reports past the depth checkpoint. Moving the template to headings was the
+ * alternative, and it clears no plan already written.
  *
- * Breaking on the marker clears two of those seven and moves the other five
- * onto the seams inside them, at 42 to 77 lines, which is the measure telling
- * a long section from a long file for the first time. Moving the template to
- * headings was the alternative and it clears no plan already written, leaving
- * each flagged until someone rewrites it.
+ * The marker starts at column zero and fills the line, since a bold sentence
+ * opener is emphasis and an indented one labels a list item. A false break
+ * shortens every run around it until the measure stops reporting, so it is the
+ * dearer error, and a missed break costs one unbroken run.
  *
- * The marker starts at column zero and the whole line is the marker or none of
- * it is. A bold phrase opening a sentence is emphasis rather than a seam, and
- * an indented one is a label inside a list item, so both stay prose. This ships
- * as package data every project reads, where a missed break costs one unbroken
- * run and a false one shortens every run around it until the measure stops
- * reporting, which is the dearer of the two.
+ * A colon ends most markers, but `review-pr` writes colon-less ones and a bold
+ * path heading per file, so two signals stand in where the colon is absent. A
+ * label that is one whole code span breaks at any width, since a bold sentence
+ * is never a single span. `MARKER_WIDTH` is read off the review bodies and the
+ * records tree, where colon-less labels sit at or under 20 visible characters
+ * and the 21 to 30 band holds lines nobody can classify on sight, such as
+ * `One change across four files.`. Terminal punctuation separates nothing.
  *
- * A colon ends most markers and not all of them. `review-pr` writes
- * three colon-less ones into every body it posts and a bold path heading for
- * each file it reviews, so requiring the colon held a real seam out. Two
- * signals stand in where the colon is absent, because the shape a marker has to
- * be told from is a sentence set in bold and no one test separates both kinds
- * of marker from it.
- *
- * A label that is one whole code span breaks at any width. A path runs long and
- * a sentence set in bold is never a single span, so shape settles this half
- * where width cannot. Across 81 colon-less markers in the review bodies posted
- * on this repository, the 30 path headings run from 20 to 70 characters, and no
- * colon-less line in the records tree is a whole span at all, so the rule adds
- * reach without adding a false break.
- *
- * `MARKER_WIDTH` covers the rest and is read off the corpus rather than picked.
- * Of the remaining 51 markers in those review bodies, 50 sit at or under 20
- * visible characters, and so do 48 of the 94 colon-less lines in the records
- * tree at `9960a4d7`, every one of them a label. The 21 to 30 band above it
- * holds 8 lines nobody can classify on sight, where `One change across four
- * files.` reads as a sentence and `Rule plus a mechanical half` reads as a
- * seam, so the ceiling sits under that band rather than over it. That is where
- * the asymmetry above points, a false break being the dearer error. Terminal
- * punctuation separates nothing, since 45 of the 48 shortest colon-less lines
- * end in one.
- *
- * Both signals govern the colon-less shape alone. A colon is its own evidence
- * of a label, and capping the colon form as well takes the break back from four
- * markers between 31 and 50 characters that already have it, every one of them
- * a genuine section marker.
- *
- * One marker in that review corpus is reached by neither signal, a 48-character
- * heading a session wrote by hand rather than from the template. Widening to
- * catch it means raising the ceiling back through the band, so it is left as
- * the cheap error the asymmetry above already names.
+ * Neither signal caps the colon form, which is its own evidence of a label and
+ * reaches genuine markers between 31 and 50 characters.
  */
 const BOLD_LINE = /^\*\*([^*]+)\*\*\s*$/
 const SPAN_LABEL = /^`[^`]+`$/
@@ -74,37 +40,26 @@ export const BLOCKQUOTE = /^\s*>/
  * A sentence ends on terminal punctuation followed by the start of another
  * sentence or by the end of the paragraph.
  *
- * Requiring an opening capital after the space is what keeps a version pin and
- * a decimal from each reading as two sentences, since neither is followed by
- * one. An abbreviation ahead of a capitalized word still counts, which
- * over-reports by one on the sentence that carries it and is why this measure
- * reports rather than gates.
- *
- * A code span opens a sentence that carries no capital at all, since a command
- * name is lowercase and the requirement above would catch nothing there. The
- * backtick therefore stands alone rather than joining the delimiters a capital
- * follows, and the price is that a span opening a fragment mid-paragraph reads
- * as a sentence start.
+ * Requiring a capital after the space keeps a version pin or a decimal from
+ * splitting a sentence. An abbreviation before a capital still over-reports by
+ * one, which is why this reports rather than gates. A backtick also opens a
+ * sentence, since a command name is lowercase, at the price of reading a span
+ * opening a mid-paragraph fragment as a start.
  */
 const SENTENCE_END = /[.!?]["'’”)\]]*(?=\s+(?:["'“([]*[A-Z]|`)|\s*$)/g
 
 /**
  * Checkpoints the structural measures run against.
  *
- * These are the definition rather than a fallback. Reading each number out of
- * the sentence `claude/skills/markdown-craft/references/markdown.md` states it in was the alternative, and it
- * put a parser contract on a document authored for people, where a rewording
- * degraded a number and the report had to carry a legend saying which one. The
- * standard still states every number for a reader, and moving one is an edit to
- * both.
+ * These are the definition rather than a fallback. Parsing each number out of
+ * `claude/skills/markdown-craft/references/markdown.md` was the alternative,
+ * and it put a parser contract on prose authored for people. The standard
+ * still states every number, so moving one is an edit to both.
  *
- * The last three come from the `## Rhythm` section of the `write-human` skill
- * rather than from a standard. That skill states what good rhythm is and this
- * measures against the statement, so the numbers are read off the sentences
- * that already carry them: a longest and shortest sentence within roughly five
- * words of each other is one cadence, an opening word repeating twice is
- * coincidence and three times is a pattern, and both rules are written about a
- * paragraph, which needs a third sentence before either says anything.
+ * `cadence`, `spread`, and `opener` come from the `## Rhythm` section of the
+ * `write-human` skill: sentences within roughly five words are one cadence, an
+ * opener repeating three times is a pattern, and a paragraph needs a third
+ * sentence before either says anything.
  */
 export const CHECKPOINTS = {
   run: 40,
@@ -678,50 +633,20 @@ function measureParagraph(block: readonly BodyLine[]): CadenceFinding {
  * absence of something, so no addition to that set catches a paragraph whose
  * sentences are all one length. The measure stops at what is countable. A
  * sentence's grammatical shape and whether it carries a finite verb are the two
- * rules `write-human` states that this does not implement. Reporting them wrong
- * is worse than not reporting them, since they name the exact failure this
- * exists to measure.
+ * rules `write-human` states that this does not implement, since reporting
+ * them wrong names the exact failure this exists to measure.
  *
- * That was a prediction and it has now been measured, against two parsers
- * rather than against the idea of one. Both ran over 11,389 paragraph sentences
- * across 503 markdown files at `c7e92612` on 2026-08-20, and they disagree by
- * a factor of four on a number one of them has to be wrong about.
+ * Two part-of-speech taggers were tried for the verb rule and rejected.
+ * `compromise` tags a fronted past participle, `Measured at`, as a finite verb,
+ * which is the exact shape the rule exists to catch. `wink-pos-tagger` fixes
+ * that class, but about three quarters of what it flags is still wrong, split
+ * between imperatives whose verb tags as a proper noun and declaratives whose
+ * noun-ambiguous predicate, as in `Each maps to a skill.`, tags as a noun.
+ * Separating those needs the predicate, which is syntax rather than a tag.
  *
- * `compromise` reported 2 percent. It tags a fronted past participle as a
- * finite past-tense verb, so all twelve of those sentences in
- * the repository's architecture record at that commit read as carrying one, eleven opening `Measured at`
- * and one `Overturned by`, which is the exact shape the measure exists to
- * catch. It is not even consistent with itself there: `Measured at` tags a verb
- * and `Measured against` tags an adjective.
- *
- * `wink-pos-tagger` reported 9 percent and fixes that class, tagging the
- * participle `VBN`. Roughly three quarters of what it flags is still wrong:
- * hand-classifying every 21st of the 1,071 flagged sentences put 12 of 51
- * genuinely verbless. Two classes split the other 39 almost evenly and neither
- * is a tuning problem. Nineteen are imperatives, which this instructional
- * corpus is full of and whose verb tags as a proper noun as often as a verb.
- * Twenty are ordinary declaratives whose predicate is noun-ambiguous and tags
- * as a noun outright, so `Each maps to a skill.` and `Nothing checks either
- * one.` both report verbless. This corpus is built from exactly those words:
- * reports, answers, checks, maps, holds, names, carries, records, measures.
- *
- * Separating them needs to know which token is the predicate, which is syntax
- * rather than a tag. Neither tagger carries one and nothing was found worth
- * taking for a number nothing gates on, so the rule the deferral set is met and
- * still returns no: a parse was tried, twice, and neither produced a number
- * worth printing beside two that hold.
- *
- * Where a shape sits is a different question and is already answered. A heading
- * fragment, a list item, and a table cell are all legitimately verbless and
- * none of them reaches this measure, because `paragraphBlocks` ends a paragraph
- * on each. That exclusion is structural and needs no grammar. The imperative is
- * the one that sits in paragraph prose, and it is what neither parser could
- * separate out.
- *
- * A paragraph under the floor is skipped rather than scored. A two-sentence
- * configuration note has no spread worth reading, and the opener rule is
- * written about a third sentence turning a coincidence into a pattern, so
- * neither measure says anything before the floor is reached.
+ * A heading fragment, a list item, and a table cell never reach this, since
+ * `paragraphBlocks` ends a paragraph on each. A paragraph under the floor is
+ * skipped, since the opener rule needs a third sentence to see a pattern.
  */
 export function measureCadence(
   lines: readonly BodyLine[],
