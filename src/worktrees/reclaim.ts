@@ -38,10 +38,7 @@ export type Refusal =
 
 /** Why the whole reading was refused, so no verdict was produced at all. */
 export type Unreadable =
-  | 'gh-missing'
-  | 'gh-failed'
-  | 'sessions-unreadable'
-  | 'sessions-unchecked'
+  'gh-missing' | 'gh-failed' | 'sessions-unreadable' | 'sessions-unchecked'
 
 /**
  * Which removal shape applies. `session` removes the background session and its
@@ -90,6 +87,8 @@ export interface WorktreeVerdict {
 export interface MergedPullRequest {
   readonly branch: string
   readonly number: number
+  /** The commit the pull request merged from, absent when the read did not ask for it. */
+  readonly headOid?: string
 }
 
 export type MergedReport =
