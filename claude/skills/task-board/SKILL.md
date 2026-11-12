@@ -51,7 +51,7 @@ A session that asserted `canon:role-worker` this run, or whose own name in `cano
 
 - Report the row's title, its origin, and the surface it would take to the controlling session instead, since placing the row is that session's call
 - The guard sits ahead of Step 2 because `--claim` reserves a label on disk, so a later stop leaves a reservation nothing uses
-- It names the worker role alone. A planner closing a groundwork track still writes its task file here and reaches Step 4's roster check.
+- It names the worker role alone. A planner closing a groundwork track launched with no task still writes its task file here and reaches Step 4's roster check.
 
 ### Step 2: allocate the phase label
 

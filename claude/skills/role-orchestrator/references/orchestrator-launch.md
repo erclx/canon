@@ -131,7 +131,8 @@ A row whose task reports an intermittent failure with no finding naming its caus
 claude --bg --model <model> -n "planner-<project>-<slug>" "Run /canon:role-planner, then /canon:plan-groundwork <task>, then /canon:plan-feature <task> once the track closes. Your controller is ..."
 ```
 
-- Read intermittent as a rerun that passed or a failure seen only under load, judged from the task rather than matched on a word
+- Read intermittent as a failure that differs between runs of the same code and inputs, judged from the task rather than matched on a word
+- A failure that reproduces on demand, such as a deterministic timeout or perf bug, keeps `plan-feature`
 - A flaky row whose cause a finding already names keeps the shape above, since nothing is left to measure
 - The ellipsis stands for the message clauses above, unchanged
 

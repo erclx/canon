@@ -13,6 +13,7 @@ Read `${CLAUDE_SKILL_DIR}/references/groundwork.md` before writing any file in t
 
 ## Guards
 
+- If the argument resolves to a task file, take it as the named task and its title as the topic, and record its path in the folder's `README.md` for close
 - If no topic is given, stop: `❌ No topic. Name what needs measuring.`
 - Do not pause for approval between steps. The write scope below is what makes that safe.
 
@@ -131,7 +132,7 @@ The standard sets the open question format inside a topic file and in `00-scope.
 4. Record the conclusion, even when it is to do nothing.
    - Launched with a task: write it into the task the launch named as a `Groundwork:` origin line and a finding, and create no second file
    - Launched with none: write one task file in `.canon/tasks/` per `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` and place its row through `task-board` Step 4
-5. When the task written in Step 4 does not cover every finding the track surfaced, route what it leaves out through `plan-intake`. Skip this step when it does.
+5. When the task Step 4 recorded into or wrote does not cover every finding the track surfaced, route what it leaves out through `plan-intake`. Skip this step when it does.
 6. Report each statement about an outside source carrying neither a link nor a lead entry. Report and do not block, because judging what counts as an external claim is the call a checker gets wrong.
 
 Aside from an experiment fixture, Steps 4 and 5 are the only ways close mode reaches outside the folder. Do not close while an open question quietly fails an outcome. Resolve it, or record it in `06-decision.md` as knowingly accepted.
