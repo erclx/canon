@@ -20,9 +20,9 @@ export interface VitestRun {
 }
 
 /**
- * The filter `bun run test:e2e` hands vitest and every end-to-end suite's name
- * carries. A run naming it films in a real browser, so it queues like a full
- * suite however it is scoped.
+ * The infix every end-to-end suite's name carries. A run naming it, as a hand
+ * run of `bun --bun vitest run .e2e.test` or one suite's path does, films in a
+ * real browser, so it queues like a full suite however it is scoped.
  */
 export const E2E_FILTER = '.e2e.test'
 
