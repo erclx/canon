@@ -1,4 +1,8 @@
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import { dirname, join, relative } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+import { isPainted, loadPaintedPatterns } from '@/pr/painted'
 import { fitBeats, selectFixtures } from '@/take/fixtures/pr-reel'
 
 function beat(name: string, seconds: number) {
@@ -113,5 +117,85 @@ describe('selectFixtures', () => {
       stems: ['motion', 'scrollbars'],
       fallback: false,
     })
+  })
+})
+
+describe('the declared reel inputs', () => {
+  const root = fileURLToPath(new URL('../../..', import.meta.url))
+  const TAKE = 'src/take/'
+
+  function filesUnder(rel: string): string[] {
+    return readdirSync(join(root, rel), { recursive: true, encoding: 'utf8' })
+      .map((name) => join(rel, name))
+      .filter((path) => statSync(join(root, path)).isFile())
+  }
+
+  /** Resolves an `@/`, `./`, or `../` specifier to a tracked file, and a package name to nothing. */
+  function resolveImport(from: string, spec: string): string | undefined {
+    const base = spec.startsWith('@/')
+      ? `src/${spec.slice(2)}`
+      : spec.startsWith('.')
+        ? relative(root, join(dirname(join(root, from)), spec))
+        : undefined
+    if (base === undefined) return undefined
+    return [base, `${base}.ts`, `${base}.tsx`, `${base}/index.ts`].find(
+      (path) =>
+        existsSync(join(root, path)) && statSync(join(root, path)).isFile(),
+    )
+  }
+
+  /** Every repository path a module reaches by an import of any form or reads through `new URL`. */
+  function readsOf(path: string): string[] {
+    const text = readFileSync(join(root, path), 'utf8')
+    const imports = [
+      ...text.matchAll(/(?:\bfrom|\bimport)\s*\(?\s*['"]([^'"]+)['"]/g),
+    ]
+      .map((match) => resolveImport(path, match[1] ?? ''))
+      .filter((found): found is string => found !== undefined)
+    const urls = [
+      ...text.matchAll(/new URL\(\s*'([^']+)',\s*import\.meta\.url\s*\)/g),
+    ].flatMap((match) => {
+      const target = relative(
+        root,
+        join(dirname(join(root, path)), match[1] ?? ''),
+      )
+      if (!existsSync(join(root, target))) return []
+      return statSync(join(root, target)).isDirectory()
+        ? filesUnder(target)
+        : [target]
+    })
+    return [...imports, ...urls]
+  }
+
+  const isModule = (path: string): boolean =>
+    path.endsWith('.ts') && !path.endsWith('.test.ts')
+
+  it('should follow a relative import as well as an alias', () => {
+    expect(readsOf('src/design/favicon.ts')).toContain('src/design/template.ts')
+  })
+
+  it('should paint or declare every path outside the engine a reel reads', () => {
+    const patterns = loadPaintedPatterns(root)
+    const inputs = patterns.reelInputs ?? []
+    const queue = filesUnder(TAKE).filter(isModule)
+    const seen = new Set(queue)
+    for (let path = queue.shift(); path !== undefined; path = queue.shift()) {
+      for (const read of readsOf(path)) {
+        if (seen.has(read)) continue
+        seen.add(read)
+        if (isModule(read)) queue.push(read)
+      }
+    }
+
+    const outside = [...seen].filter((path) => !path.startsWith(TAKE))
+    const undeclared = outside.filter(
+      (path) =>
+        !isPainted(path, patterns) &&
+        !inputs.some((glob) => new Bun.Glob(glob).match(path)),
+    )
+
+    expect(outside).toContain('src/browser/engine.ts')
+    expect(outside).toContain('web/src/styles/tokens.css')
+    expect(undeclared).toEqual([])
   })
 })

@@ -41,15 +41,16 @@ export type Carry =
   | { readonly kind: 'failed' }
 
 /**
- * Carries a verdict driven at `from` to `to` only across a gap that changed
- * nothing a box drives. A box drives behavior, which lives in any source file
- * and not only in a painted one, so every path outside the inert set moves the
- * verdict. A `from` that `to` does not descend from never carries.
+ * Carries a verdict driven at `from` to `to` only across a gap where no changed
+ * path `moves` it. By default that is every path outside the inert set, since a
+ * box drives behavior, which lives in any source file and not only in a painted
+ * one. A `from` that `to` does not descend from never carries.
  */
 export async function readCarry(
   readChanged: (from: string, to: string) => Promise<ChangedRead | undefined>,
   from: string,
   to: string,
+  moves: (path: string) => boolean = (path) => !isInert(path),
 ): Promise<Carry> {
   if (coversHead(from, to)) return { kind: 'covered' }
 
@@ -57,7 +58,7 @@ export async function readCarry(
   if (changed === undefined) return { kind: 'failed' }
   if (!changed.isAncestor) return { kind: 'not-ancestor' }
 
-  const drivenPaths = changed.paths.filter((path) => !isInert(path))
+  const drivenPaths = changed.paths.filter(moves)
   return drivenPaths.length > 0
     ? { kind: 'moved', drivenPaths }
     : { kind: 'carried', carriedFrom: from }
