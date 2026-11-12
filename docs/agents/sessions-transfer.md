@@ -25,7 +25,7 @@ The manifest names the session, its `branch` and `head`, and these fields:
 - `handoff` and `handoffCommitted`: the newest `.canon/compact/` note since the session began, and whether the records history holds it
 - `recommend`: `handoff` where one exists, `transcript` otherwise, since a transcript carries the source machine's absolute paths
 
-Import writes new files only. The record's `behind` list carries `repository-behind` when this checkout lacks the exported `HEAD`, and `records-behind` when `canon records pull` has records to bring. Neither refuses. Its two `routes` are `claude --resume <id>` and a fresh `claude` running `/canon:session-resume`.
+Import writes new files only. The `behind` list carries `repository-behind` when this checkout lacks the exported `HEAD`, and `records-behind` when `canon records pull` has records to bring. Neither refuses. The `routes` are `claude --resume <id>` and a fresh `claude` running `/canon:session-resume <note>`, which names the exported note.
 
 Resuming while the source keeps running forks the conversation, and only `live` warns of it.
 
