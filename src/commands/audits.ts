@@ -7,6 +7,7 @@ import {
   compareBaseline,
   type Delta,
   readBaseline,
+  type Tolerances,
   writeBaseline,
 } from '@/audits/baseline'
 import { AUDITS, type AuditResult, type Corpus } from '@/audits/catalog'
@@ -240,7 +241,10 @@ async function runAll(opts: RunCommandOptions): Promise<number> {
   }
 
   const results = await runAudits(audits, spawnAudit(root))
-  const deltas = compareBaseline(baseline, results)
+  const tolerances: Tolerances = Object.fromEntries(
+    audits.map((audit) => [audit.id, audit.tolerance]),
+  )
+  const deltas = compareBaseline(baseline, results, tolerances)
   const summary = summarize(results, deltas)
 
   let recorded: string | undefined
@@ -269,7 +273,7 @@ async function runAll(opts: RunCommandOptions): Promise<number> {
       })}\n`,
     )
   } else {
-    report(results, deltas, baseline, recorded, summary)
+    report(results, deltas, tolerances, baseline, recorded, summary)
   }
 
   return exitCodeFor(results)
@@ -287,7 +291,10 @@ function countLine(counts: Record<string, number>): string {
  * report. A first run says so rather than showing a delta of zero, since zero
  * against an absent baseline says the same as a corpus that did not move.
  */
-function deltaLine(delta: Delta): string | undefined {
+function deltaLine(
+  delta: Delta,
+  tolerance: Tolerances[string] = {},
+): string | undefined {
   if (
     delta.kind === 'per-machine' ||
     delta.kind === 'upstream' ||
@@ -298,10 +305,15 @@ function deltaLine(delta: Delta): string | undefined {
   if (delta.kind === 'unrecorded') return 'No recorded baseline to compare'
 
   const parts = [
-    ...delta.moved.map(
-      ({ key, from, to, delta: moved }) =>
-        `${key} ${from} to ${to} (${moved > 0 ? '+' : ''}${moved})`,
-    ),
+    ...delta.moved.map(({ key, from, to, delta: moved, tolerated }) => {
+      const sign = moved > 0 ? '+' : ''
+      const fraction = tolerance[key]
+      const within =
+        tolerated === true && fraction !== undefined
+          ? `, within ${Math.round(fraction * 100)}%`
+          : ''
+      return `${key} ${from} to ${to} (${sign}${moved}${within})`
+    }),
     ...delta.added.map(({ key, to }) => `${key} ${to}, newly measured`),
     ...delta.dropped.map(({ key, from }) => `${key} was ${from}, not measured`),
   ]
@@ -312,6 +324,7 @@ function deltaLine(delta: Delta): string | undefined {
 function report(
   results: readonly AuditResult[],
   deltas: readonly Delta[],
+  tolerances: Tolerances,
   baseline: Baseline | undefined,
   recorded: string | undefined,
   summary: Summary,
@@ -359,6 +372,7 @@ function report(
 
     const moved = deltaLine(
       byId.get(result.id) ?? { id: result.id, kind: 'unrecorded' },
+      tolerances[result.id],
     )
     if (moved !== undefined) logInfo(moved)
   }
