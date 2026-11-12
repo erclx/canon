@@ -21,10 +21,15 @@ export const LENGTH_SOURCE =
 
 /**
  * Files whose functions the brace reading can find, an `.astro` file by its
- * frontmatter. JSX is left out, since `lex` reads an apostrophe in JSX text as
- * a quote and the braces after it go unbalanced.
+ * frontmatter.
  */
-const FUNCTION_SOURCE = /\.(?:ts|mts|cts|js|mjs|cjs|astro)$/
+const FUNCTION_SOURCE = /\.(?:ts|tsx|mts|cts|js|jsx|mjs|cjs|astro)$/
+
+/**
+ * Files `lex` reads in JSX mode. A `.js` file holding JSX stays out, since the
+ * mode changes how every `<` where an expression starts is read.
+ */
+const JSX_SOURCE = /\.(?:tsx|jsx)$/
 
 export interface FunctionSpan {
   /** The line the header opens on. */
@@ -51,12 +56,19 @@ export function lineCount(source: string): number {
 const LITERAL = '\u0001'
 
 /**
- * Blanks every literal, comment, and regular expression, keeping newlines, so
- * a brace or a keyword inside one reads as nothing. A function written inside
- * a template's `${}` is blanked with the template and goes unmeasured.
+ * Stands in for each character of JSX markup. Unlike `LITERAL` it ends no
+ * return type, so a `{` inside `c ? f() : <div style={{` opens no body for `f`.
  */
-function codeOnly(source: string): string {
-  const { literals, comments, regexes } = lex(source)
+const MARKUP = '\u0002'
+
+/**
+ * Blanks every literal, comment, regular expression, and stretch of JSX
+ * markup, keeping newlines, so a brace or a keyword inside one reads as
+ * nothing. A function written inside a template's `${}` is blanked with the
+ * template and goes unmeasured, while one inside a JSX `{}` container is read.
+ */
+function codeOnly(source: string, options: { jsx?: boolean }): string {
+  const { literals, comments, regexes, jsx } = lex(source, options)
   const chars = source.split('')
   const blank = (start: number, end: number, fill: string): void => {
     for (let k = start; k < end && k < chars.length; k++) {
@@ -66,6 +78,7 @@ function codeOnly(source: string): string {
   for (const literal of literals) blank(literal.start, literal.end, LITERAL)
   for (const [end, start] of comments) blank(start, end, ' ')
   for (const regex of regexes) blank(regex.start, regex.end, ' ')
+  for (const markup of jsx) blank(markup.start, markup.end, MARKUP)
   return chars.join('')
 }
 
@@ -322,7 +335,7 @@ function headerAt(code: string, brace: number): Header | undefined {
 
 /**
  * Every function with a block body in a TypeScript or JavaScript source, in
- * the order each closes.
+ * the order each closes. Pass `jsx` for a `.tsx` or `.jsx` source.
  *
  * `typescript` is a development dependency and this module ships inside the
  * published CLI, so braces are matched over the code `lex` leaves outside
@@ -331,8 +344,11 @@ function headerAt(code: string, brace: number): Header | undefined {
  * arrow with an expression body has no braces and is skipped, and so is a
  * callback passed to `describe`, `it`, or `test`.
  */
-export function functionSpans(source: string): FunctionSpan[] {
-  const code = codeOnly(source)
+export function functionSpans(
+  source: string,
+  options: { readonly jsx?: boolean } = {},
+): FunctionSpan[] {
+  const code = codeOnly(source, options)
   const newlines: number[] = []
   for (let i = 0; i < code.length; i++) if (code[i] === '\n') newlines.push(i)
   const lineOf = (offset: number): number => {
@@ -384,7 +400,9 @@ export function functionSpansInFile(
   source: string,
 ): FunctionSpan[] {
   if (!FUNCTION_SOURCE.test(file)) return []
-  if (!file.endsWith('.astro')) return functionSpans(source)
+  if (!file.endsWith('.astro')) {
+    return functionSpans(source, { jsx: JSX_SOURCE.test(file) })
+  }
   const frontmatter = astroFrontmatter(source)
   return frontmatter === undefined ? [] : functionSpans(frontmatter.source)
 }
