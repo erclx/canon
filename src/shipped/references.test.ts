@@ -512,6 +512,26 @@ describe('referencesIn', () => {
       ).toEqual([['source-path', 'tooling/<stack>/seeds/']])
     })
 
+    it('should report a brace group listing either folder', () => {
+      expect(
+        referencesIn(
+          'claude/skills/alpha/SKILL.md',
+          'Never cite `tooling/<stack>/{configs,seeds}/` here, nor `tooling/base/{seeds}/x`.',
+          root,
+        ).map((reference) => reference.text),
+      ).toEqual(['tooling/<stack>/{configs,seeds}/', 'tooling/base/{seeds}/x'])
+    })
+
+    it('should pass a brace group listing neither folder', () => {
+      expect(
+        referencesIn(
+          'claude/skills/alpha/SKILL.md',
+          'Read `tooling/base/{manifest,reference}.toml`.',
+          root,
+        ),
+      ).toEqual([])
+    })
+
     it('should pass a stack manifest, a bare tooling mention, and a tooling verb', () => {
       expect(
         referencesIn(

@@ -194,7 +194,8 @@ const RULE_PATH = /(?<![\w./-])\.claude\/rules\/[^\s`)\]]*?[\w-]+\.md\b/g
  * Unlike `RULE_PATH`, a placeholder such as `tooling/<stack>/configs/` is
  * reported too. The bracket spares an illustration of a path a target does
  * hold, and no target holds this one, so the bracketed form still describes
- * this checkout alone. The segment class admits `<` and `>` for that reason.
+ * this checkout alone. The segment class admits `<` and `>` for that reason,
+ * and a brace group such as `{configs,seeds}` matches when it lists either.
  *
  * Only `configs` and `seeds` match. A bare `tooling/`, a stack's
  * `manifest.toml`, and a `canon tooling sync` call pass. Three bare `tooling/`
@@ -208,7 +209,7 @@ const RULE_PATH = /(?<![\w./-])\.claude\/rules\/[^\s`)\]]*?[\w-]+\.md\b/g
  * since a path resolving here proves nothing about a target.
  */
 const SOURCE_PATH =
-  /(?<![\w./-])tooling\/[\w<>.*-]+\/(?:configs|seeds)(?![\w.-])[^\s`)\]]*/g
+  /(?<![\w./-])tooling\/[\w<>.*-]+\/(?:configs|seeds|\{[\w,]*\b(?:configs|seeds)\b[\w,]*\})(?![\w.-])[^\s`)\]]*/g
 
 export interface ShippedReference {
   readonly file: string
