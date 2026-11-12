@@ -13,6 +13,7 @@ import {
   readsDrivableBox,
   type Standing,
 } from '@/pr/lift'
+import { DEFAULT_PAINTED, type PaintedPatterns } from '@/pr/painted'
 import type { ReviewRow } from '@/pr/review-scope'
 
 const HEAD = '9b1f2c3d4e5f60718293a4b5c6d7e8f901234567'
@@ -1029,14 +1030,95 @@ describe('lift', () => {
         expect(record.reason).toBe('lifted')
       })
 
-      it('should not clear the list with a reel filmed at an earlier head', async () => {
+      it('should not clear the list with a reel filmed before a push to a painted path', async () => {
         const { api } = makeApi({
           evidence: { uncaptured: ['src/b.tsx'], reelHead: MOVED },
+          changed: { isAncestor: true, paths: ['src/b.tsx'] },
         })
 
         const record = await lift(api, { isCheck: false, waitSeconds: 60 })
 
         expect(record.reason).toBe('painted-uncaptured')
+      })
+
+      describe('a reel carried from an earlier head', () => {
+        const TAKE: PaintedPatterns = {
+          painted: [...DEFAULT_PAINTED.painted, 'src/take/**'],
+          unpainted: DEFAULT_PAINTED.unpainted,
+          repainted: ['src/take/**'],
+          reelInputs: ['src/browser/engine.ts', 'bun.lock'],
+        }
+        const filmedEarlier = {
+          uncaptured: ['src/take/film.ts'],
+          reelHead: MOVED,
+        }
+
+        it('should clear the list across a push to a source path the reel does not read, naming where it was filmed', async () => {
+          const { api } = makeApi({
+            evidence: filmedEarlier,
+            changed: { isAncestor: true, paths: ['src/capture/render.ts'] },
+          })
+
+          const record = await lift(api, {
+            isCheck: false,
+            waitSeconds: 60,
+            painted: TAKE,
+          })
+
+          expect(record.reason).toBe('lifted')
+          expect(record.gates.find((gate) => gate.gate === 'evidence')).toEqual(
+            { gate: 'evidence', isOk: true, reelCarriedFrom: MOVED },
+          )
+        })
+
+        it.each([
+          ['a painted path', { isAncestor: true, paths: ['src/take/film.ts'] }],
+          [
+            'a declared reel input',
+            { isAncestor: true, paths: ['src/browser/engine.ts'] },
+          ],
+          ['a rewritten reel commit', { isAncestor: false, paths: [] }],
+          ['a failed read', null],
+        ] as const)(
+          'should refuse painted-uncaptured across %s',
+          async (_, changed) => {
+            const { api } = makeApi({ evidence: filmedEarlier, changed })
+
+            const record = await lift(api, {
+              isCheck: true,
+              waitSeconds: 60,
+              painted: TAKE,
+            })
+
+            expect(record.reason).toBe('painted-uncaptured')
+          },
+        )
+
+        it('should refuse across a source push when the project declares no reel inputs', async () => {
+          const { api } = makeApi({
+            evidence: filmedEarlier,
+            changed: { isAncestor: true, paths: ['src/capture/render.ts'] },
+          })
+
+          const record = await lift(api, {
+            isCheck: true,
+            waitSeconds: 60,
+            painted: { ...TAKE, reelInputs: undefined },
+          })
+
+          expect(record.reason).toBe('painted-uncaptured')
+        })
+
+        it('should carry across a docs-only push when the project declares no reel inputs', async () => {
+          const { api } = makeApi({
+            evidence: filmedEarlier,
+            changed: { isAncestor: true, paths: ['README.md'] },
+          })
+
+          const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+          expect(record.reason).toBe('lifted')
+        })
       })
 
       it('should pass as today when the record carries no uncaptured list', async () => {

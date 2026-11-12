@@ -8,7 +8,7 @@ import {
   standingPasses,
   type UiCounts,
 } from '@/pr/review-scope'
-import { readCarry } from '@/pr/carry'
+import { isInert, readCarry } from '@/pr/carry'
 import { readReelWaivers, readWaivers } from '@/pr/waiver'
 import { DEFAULT_PAINTED, isPainted, type PaintedPatterns } from '@/pr/painted'
 
@@ -200,11 +200,7 @@ export interface LiftOptions {
 
 export interface LiftRecord {
   readonly reason:
-    | 'lifted'
-    | 'already-ready'
-    | 'redrafted'
-    | 'clear'
-    | LiftRefusal
+    'lifted' | 'already-ready' | 'redrafted' | 'clear' | LiftRefusal
   /** The gate that read not clear when a ready pull request went back to draft. */
   readonly failed?: LiftRefusal
   readonly carriedFrom?: string
@@ -341,16 +337,16 @@ export async function uiGate(
 
 /**
  * The evidence gate. An owed step refuses first. Then every painted path the
- * pull request changed with no capture refuses, unless a reel filmed at the
- * head shows it or a standing pass waived it by the path as the list spells it.
- * A reel at an earlier head clears nothing, since a later push may add the
- * path, and for the same reason a waiver counts only while the newest pass of
- * its family restates it.
+ * pull request changed with no capture refuses, unless a reel shows it or a
+ * standing pass waived it by the path as the list spells it. A reel shows the
+ * list when it was filmed at the head or `readReelCarry` carried it there,
+ * since a reel at an earlier head that did not carry may miss a path a later
+ * push added. For the same reason a waiver counts only while the newest pass
+ * of its family restates it.
  *
- * Last, a checklist holding a drivable box owes a reel at the head, or one
- * `readReelCarry` carried to it. A skip whose code is in `SETTLING_REEL_SKIPS`
- * settles it, and so does a standing reel waiver, and anything else refuses
- * `reel-unsettled`.
+ * Last, a checklist holding a drivable box owes a reel the same way. A skip
+ * whose code is in `SETTLING_REEL_SKIPS` settles it, and so does a standing
+ * reel waiver, and anything else refuses `reel-unsettled`.
  */
 export function evidenceGate(
   evidence: EvidenceGate,
@@ -361,8 +357,10 @@ export function evidenceGate(
   if (!evidence.isSettled) return fail('evidence', 'evidence-owed')
 
   const standing = standingPasses(reviews)
-  const isFilmed =
+  const isAtHead =
     evidence.reelHead !== undefined && coversHead(evidence.reelHead, head)
+  const isFilmed = isAtHead || reelCarriedFrom !== undefined
+  const carried = !isAtHead && reelCarriedFrom !== undefined
   const listed = isFilmed ? [] : (evidence.uncaptured ?? [])
   const named = new Set(readWaivers(standing).map((waiver) => waiver.path))
   const waived = listed.filter((path) => named.has(path)).toSorted()
@@ -375,11 +373,9 @@ export function evidenceGate(
   if (uncaptured.length > 0) {
     return { ...fail('evidence', 'painted-uncaptured'), ...lists }
   }
+  if (carried) return { ...pass('evidence'), ...lists, reelCarriedFrom }
   if (!evidence.hasDrivableBox || isFilmed) {
     return { ...pass('evidence'), ...lists }
-  }
-  if (reelCarriedFrom !== undefined) {
-    return { ...pass('evidence'), ...lists, reelCarriedFrom }
   }
 
   const { reelSkip } = evidence
@@ -398,22 +394,39 @@ export function evidenceGate(
 }
 
 /**
- * The commit a reel carries from when it was filmed before the head and every
- * push since changed no path a box can observe, the rule `uiGate` carries a
- * close by. A push a box can observe, a rewritten reel commit, or a failed
- * read carries nothing, so the reel half decides on the skip and the waivers.
+ * Which changed paths move a reel. A project declaring `reelInputs` names what
+ * a reel reads beyond the painted set, so any other source change leaves the
+ * pixels alone. With no declaration, every path outside the inert set moves
+ * it, the rule `uiGate` carries a close by.
+ */
+function reelMoves(painted: PaintedPatterns): (path: string) => boolean {
+  const { reelInputs } = painted
+  if (reelInputs === undefined) return (path) => !isInert(path)
+  return (path) =>
+    !isInert(path) &&
+    (isPainted(path, painted) ||
+      reelInputs.some((glob) => new Bun.Glob(glob).match(path)))
+}
+
+/**
+ * The commit a reel carries from when it was filmed before the head and no
+ * push since changed a path `reelMoves` names. A rewritten reel commit or a
+ * failed read carries nothing, so both evidence halves decide as if no reel
+ * stood at the head.
  */
 async function readReelCarry(
   api: Pick<LiftApi, 'readChanged'>,
+  painted: PaintedPatterns,
   evidence: EvidenceGate,
   head: string,
 ): Promise<string | undefined> {
   const { reelHead } = evidence
-  if (!evidence.hasDrivableBox || reelHead === undefined) return undefined
+  if (reelHead === undefined) return undefined
   const carry = await readCarry(
     (from, to) => api.readChanged(from, to),
     reelHead,
     head,
+    reelMoves(painted),
   )
   return carry.kind === 'carried' ? carry.carriedFrom : undefined
 }
@@ -732,7 +745,7 @@ export async function lift(
       evidence,
       reviews,
       tip,
-      await readReelCarry(api, evidence, tip),
+      await readReelCarry(api, painted, evidence, tip),
     ),
     standingGate(standing),
   ]
