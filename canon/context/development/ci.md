@@ -35,13 +35,11 @@ Runs `🛡️ Static Checks` on Linux and `🍎 macOS Unit Tests` beside it, nei
 
 A third Linux job runs `bun run test:e2e` with the tools the nine `*.e2e.test.ts` suites gate on. It copies the macOS job's `if:`, so a Markdown-only pull request skips it and the cron never runs it. The ruleset does not require it, and the operator adds it after 20 consecutive green runs.
 
-A step sets `kernel.apparmor_restrict_unprivileged_userns=0` before the suites, since Ubuntu 24.04 otherwise kills the chrome-headless-shell the take engine spawns with its sandbox on. Playwright's own launches turn the sandbox off and never meet it.
-
 - FFmpeg comes from apt with `Acquire::Retries=3` and a 5-minute step bound, since the runner image lists none
 - `bunx playwright install chromium` lands the engine's browsers, and `canon browser install-browser chromium` the agent CLI's own revision, which the swipe suite launches
 - The browser cache keys on `bun.lock` and `src/browser/agent-cli.ts` under its own prefix, since a hit on the capture job's cache would skip the agent CLI install
 - `scripts/ci/check-browsers.sh` and `scripts/ci/check-e2e-tools.sh` run before the suites, so a missing browser, revision, or `libwebp_anim` encoder reddens the job rather than skipping a suite green
-- Four probe tests under `src/driver/probes/` and `src/take/target.test.ts` skip in every job, since `test:e2e` selects `.e2e.test` files alone
+- A sysctl clears `kernel.apparmor_restrict_unprivileged_userns`, since Ubuntu 24.04 kills the chrome-headless-shell the take engine spawns with its sandbox on
 
 ### `scripts/ci/docs-only.sh`
 
@@ -100,5 +98,5 @@ The CI programs, the install check, and a version pin sit beside the workflows.
 - `no checks reported on the '<branch>' branch` usually means a merge conflict, since such a branch has no merge ref to run on. Read `gh pr view --json mergeable,mergeStateStatus` and rebase.
 - A green `🛡️ Static Checks` tested `refs/pull/<n>/merge` as of the last push. No merge queue exists, so a sibling merge leaves it stale until the poll reads `STALE`.
 - The ruleset requires `🛡️ Static Checks` and `🍎 macOS Unit Tests` by name, so renaming either strands branch protection and leaves lift and merge waiting on a check no run reports
-- `🛡️ Static Checks` has no browser or FFmpeg, so each `*.e2e.test.ts` skips itself there and its green says nothing about them. Read `🎬 E2E Suites` instead.
+- `🛡️ Static Checks` has no browser or FFmpeg, so every `*.e2e.test.ts` skips there. `🎬 E2E Suites` runs them, but not the probe tests under `src/driver/probes/` or `src/take/target.test.ts`.
 - The `merge_group` trigger is inert, since a `merge_queue` rule returns `422` on a user-owned repository until a move to an organization
