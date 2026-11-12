@@ -7,6 +7,7 @@ import { gitEnv } from '@/git/env'
 import {
   type CheckRunListing,
   collapseChecks,
+  missesGatingCheck,
   type RawStatus,
   type RawWorkflowRun,
   requiredChecks,
@@ -3185,19 +3186,19 @@ async function readChecksGate(
         ? []
         : ((JSON.parse(combined) as { statuses?: readonly RawStatus[] })
             .statuses ?? [])
+    const listing = JSON.parse(listed) as CheckRunListing
     const reading = withMergeState(
       mergeStateOf(row?.mergeable_state),
-      collapseChecks(
-        tip,
-        JSON.parse(listed) as CheckRunListing,
-        required,
-        statuses,
-      ),
+      collapseChecks(tip, listing, required, statuses),
     )
     // Only a reading that would refuse `ci-pending` pays for the runs read, so
-    // a pass, a failure, or a conflict keeps its reason and its cost.
+    // a pass, a failure, or a conflict keeps its reason and its cost. A gating
+    // check with a row is a run still going, which a stall elsewhere must not
+    // cut short.
     const stalled =
-      reading.state === 'pending' && !reading.conflicted
+      reading.state === 'pending' &&
+      !reading.conflicted &&
+      missesGatingCheck(tip, listing, required, statuses)
         ? await readStalledRuns(root, tip)
         : []
     return {

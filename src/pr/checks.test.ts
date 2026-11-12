@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   collapseChecks,
+  missesGatingCheck,
   type RawWorkflowRun,
   requiredChecks,
   STALL_SECONDS,
@@ -606,6 +607,55 @@ describe('stalledRuns', () => {
     )
 
     expect(stalled).toEqual([])
+  })
+})
+
+describe('missesGatingCheck', () => {
+  const REQUIRED = new Set(['🛡️ Static Checks', '🍎 macOS Unit Tests'])
+
+  it('should read false when every required check has a running row on the tip', () => {
+    const listing = {
+      check_runs: [
+        { head_sha: TIP, name: '🛡️ Static Checks', status: 'in_progress' },
+        { head_sha: TIP, name: '🍎 macOS Unit Tests', status: 'in_progress' },
+      ],
+    }
+
+    expect(missesGatingCheck(TIP, listing, REQUIRED)).toBe(false)
+  })
+
+  it('should read true when a required check has no row on the tip', () => {
+    const listing = {
+      check_runs: [
+        { head_sha: TIP, name: '🛡️ Static Checks', status: 'completed' },
+        { head_sha: PRIOR, name: '🍎 macOS Unit Tests', status: 'completed' },
+      ],
+    }
+
+    expect(missesGatingCheck(TIP, listing, REQUIRED)).toBe(true)
+  })
+
+  it('should count a commit status as the row for a required context', () => {
+    const listing = {
+      check_runs: [
+        { head_sha: TIP, name: '🛡️ Static Checks', status: 'in_progress' },
+      ],
+    }
+    const statuses = [{ context: '🍎 macOS Unit Tests', state: 'pending' }]
+
+    expect(missesGatingCheck(TIP, listing, REQUIRED, statuses)).toBe(false)
+  })
+
+  it('should read true with no required set only when the tip has no row', () => {
+    expect(missesGatingCheck(TIP, { check_runs: [] }, undefined)).toBe(true)
+  })
+
+  it('should read false with no required set when the tip has a running row', () => {
+    const listing = {
+      check_runs: [{ head_sha: TIP, name: 'check', status: 'in_progress' }],
+    }
+
+    expect(missesGatingCheck(TIP, listing, new Set())).toBe(false)
   })
 })
 

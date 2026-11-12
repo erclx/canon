@@ -240,6 +240,36 @@ export interface RawWorkflowRun {
 /** How long a run may sit queued with no job before it reads as stalled. */
 export const STALL_SECONDS = 600
 
+/**
+ * Whether a gating check has no row on the tip, the only pending reading a
+ * stalled run can explain.
+ *
+ * A run that never got a job writes no check run, so it holds the reading
+ * pending only by leaving a gating check unreported. A pending reading whose
+ * gating checks all have rows is waiting on a run still going, and a stalled
+ * workflow nothing requires beside it must not end that wait. A non-empty
+ * required set gates by name, with a commit status counting as a row. An
+ * unread or empty set gates by every check, so only a tip with no row at all
+ * qualifies.
+ */
+export function missesGatingCheck(
+  tip: string,
+  listing: CheckRunListing,
+  required: ReadonlySet<string> | undefined,
+  statuses: readonly RawStatus[] = [],
+): boolean {
+  const reported = new Set<string>()
+  for (const run of listing.check_runs ?? []) {
+    if (run.head_sha === tip && run.name !== undefined) reported.add(run.name)
+  }
+  if (required === undefined || required.size === 0) return reported.size === 0
+
+  for (const status of statuses) {
+    if (status.context !== undefined) reported.add(status.context)
+  }
+  return [...required].some((name) => !reported.has(name))
+}
+
 /** A run GitHub queued for the tip and never gave a job. */
 export interface StalledRun {
   readonly id: number
