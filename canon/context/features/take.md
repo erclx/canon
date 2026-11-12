@@ -23,6 +23,8 @@ Reads a take plan, films each beat from a fresh load, and writes the clip, the l
 - The camera zooms in over the glide reaching a target and out over the glide leaving it, scaling about the target, at a depth the clip's resolution caps, and pans only at a steady scale
 - Stepped frames stream into the system FFmpeg, screencast frames spool beside the clip until the stop, and FFmpeg's absence refuses before any browser launches
 
+Both routes hide scrollbars unless a beat sets `scrollbars: true`. The stepper then drops its `--hide-scrollbars` flag and the screencast ignores Playwright's default of it, so a stepped beat that falls back keeps its scrollbars.
+
 ### `src/take/fixtures/`
 
 Owns the static pages the end to end takes film, two of which post each input they receive back to the test's server.
