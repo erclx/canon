@@ -4,8 +4,7 @@ import {
   isBrowserMissing,
   isSandboxBlocked,
   isServerUnreachable,
-  readUsernsSetting,
-  sandboxFix,
+  launchSandboxFix,
 } from '@/browser/engine'
 import { cameraTrack } from '@/take/camera'
 import { FfmpegMissing, requireFfmpeg } from '@/take/encode'
@@ -279,7 +278,7 @@ function classify(error: unknown): TakeRefusal {
  */
 function sandboxFixFor(error: unknown): string | undefined {
   if (error instanceof ShellSandboxBlocked) return error.fix
-  return isSandboxBlocked(error) ? sandboxFix(readUsernsSetting()) : undefined
+  return isSandboxBlocked(error) ? launchSandboxFix() : undefined
 }
 
 function failed(

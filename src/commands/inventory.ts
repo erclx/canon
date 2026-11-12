@@ -58,7 +58,7 @@ const CONFIG_REFUSALS: Record<ConfigRefusal, string> = {
 const WALK_REFUSALS: Record<WalkRefusal, string> = {
   'browser-missing': 'The browser binary is not installed in this project.',
   'sandbox-blocked':
-    'The browser could not start its sandbox, since this kernel refuses it a user namespace.',
+    'The browser could not start its sandbox, as under the AppArmor user namespace restriction or when run as root.',
   'server-unreachable':
     'Nothing answered at the base URL, so no route was read.',
   'walk-failed': 'The walk failed against a running server.',
@@ -108,8 +108,8 @@ export function register(program: Command): void {
         'A route walk needs a running server. Both need a browser binary. Install the browser with:',
         `  ${INSTALL_BROWSER}`,
         '',
-        'The browser runs sandboxed. Where the kernel refuses it a user namespace,',
-        'as under AppArmor, the walk refuses as sandbox-blocked, carrying fix when',
+        'The browser runs sandboxed. Where it cannot start the sandbox, as under',
+        'AppArmor or as root, the walk refuses as sandbox-blocked, carrying fix when',
         'that setting reads 1.',
         '',
         'Subjects:',

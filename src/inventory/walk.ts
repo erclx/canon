@@ -6,8 +6,7 @@ import {
   isBrowserMissing,
   isSandboxBlocked,
   isServerUnreachable,
-  readUsernsSetting,
-  sandboxFix,
+  launchSandboxFix,
 } from '@/browser/engine'
 import type { Reading } from '@/inventory/group'
 import type { Subject } from '@/inventory/subjects'
@@ -99,7 +98,7 @@ export async function walk(options: WalkOptions): Promise<WalkResult> {
   } catch (error) {
     if (isBrowserMissing(error)) return failed('browser-missing', error)
     if (isSandboxBlocked(error)) {
-      const fix = sandboxFix(readUsernsSetting())
+      const fix = launchSandboxFix()
       return { ...failed('sandbox-blocked', error), ...(fix ? { fix } : {}) }
     }
     return failed('walk-failed', error)

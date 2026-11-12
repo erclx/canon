@@ -5,8 +5,7 @@ import {
   isBrowserMissing,
   isSandboxBlocked,
   isServerUnreachable,
-  readUsernsSetting,
-  sandboxFix,
+  launchSandboxFix,
 } from '@/browser/engine'
 import { AxeEngineMissing, probeAxe } from '@/driver/probes/axe'
 import { probeDetails } from '@/driver/probes/details'
@@ -128,7 +127,7 @@ export async function drive(options: DriveOptions): Promise<DriverResult> {
   } catch (error) {
     if (isBrowserMissing(error)) return failed('browser-missing', error)
     if (isSandboxBlocked(error)) {
-      const fix = sandboxFix(readUsernsSetting())
+      const fix = launchSandboxFix()
       return { ...failed('sandbox-blocked', error), ...(fix ? { fix } : {}) }
     }
     return failed('drive-failed', error)

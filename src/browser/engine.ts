@@ -119,9 +119,18 @@ export function readUsernsSetting(): string | undefined {
 
 /**
  * The fix a `sandbox-blocked` refusal carries, set only when the setting reads
- * 1. Anywhere else the sysctl changes nothing, as under a container's seccomp
- * profile, and naming it would send the operator to the wrong cause.
+ * 1 and the process is not root. Anywhere else the sysctl changes nothing, as
+ * under a container's seccomp profile or for root, which Chromium refuses a
+ * sandbox outright, and naming it would send the operator to the wrong cause.
  */
-export function sandboxFix(setting: string | undefined): string | undefined {
-  return setting === '1' ? SANDBOX_FIX : undefined
+export function sandboxFix(
+  setting: string | undefined,
+  uid: number | undefined,
+): string | undefined {
+  return setting === '1' && uid !== 0 ? SANDBOX_FIX : undefined
+}
+
+/** `sandboxFix` read off this machine and this process. */
+export function launchSandboxFix(): string | undefined {
+  return sandboxFix(readUsernsSetting(), process.getuid?.())
 }

@@ -33,12 +33,16 @@ describe('isSandboxBlocked', () => {
 
 describe('sandboxFix', () => {
   it('should name the sysctl where AppArmor restricts user namespaces', () => {
-    expect(sandboxFix('1')).toBe(SANDBOX_FIX)
+    expect(sandboxFix('1', 1000)).toBe(SANDBOX_FIX)
   })
 
   it('should name nothing where the setting is off or absent', () => {
-    expect(sandboxFix('0')).toBeUndefined()
-    expect(sandboxFix(undefined)).toBeUndefined()
+    expect(sandboxFix('0', 1000)).toBeUndefined()
+    expect(sandboxFix(undefined, 1000)).toBeUndefined()
+  })
+
+  it('should name nothing for root, whom Chromium refuses whatever the setting', () => {
+    expect(sandboxFix('1', 0)).toBeUndefined()
   })
 })
 
