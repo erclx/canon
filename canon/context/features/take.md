@@ -39,4 +39,4 @@ Owns the static pages the end to end takes film, two of which post each input th
 - Send an input, step a frame, then await the input, and begin a frame only once the last settles, since awaiting first deadlocks and Chromium refuses a second frame as pending
 - A JPEG frame is full range and H.264 is read as TV range, so the encoder scales between them, and a test reading luma through FFmpeg's `format=gray` stretches it again and clips both ends
 - The stepper advances virtual time plainly, since pausing on a fetch held the clock into the stall fallback. Stepped tests raise that limit to 8 s, save the fallback test, which stalls at 2 s.
-- The shell's path is rebuilt from `playwright-core`'s `browsers.json` and cache layout, so a Playwright upgrade that moves the layout reads as `browser-missing`
+- The shell's failures are read off its cache layout and its stderr, so a moved Playwright cache reads as `browser-missing` and a reworded `No usable sandbox!` as `take-failed`, not `sandbox-blocked`
