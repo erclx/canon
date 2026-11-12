@@ -34,6 +34,8 @@ Load it before writing a new path into a plan, not after, since a worker copies 
 - Split a folder when the new file brings a second role into it, before the file lands rather than in a later refactor. The 98-file split would have touched a handful when the folder held eleven.
 - Treat roughly ten files as a prompt to look, not a gate. A folder holding one role can stay flat at any size, and a folder mixing two roles is worth splitting at six.
 - Give a new role a named folder in the plan, rather than dropping its first file beside the nearest neighbor.
+- Treat a new file whose stem shares a prefix with two siblings as a prompt to look, at any folder size.
+- Give the three a folder before the third lands when they hold one role. A prefix naming a shared verb over unrelated jobs is no role.
 
 ## Place a file with its consumer
 
