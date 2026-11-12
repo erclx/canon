@@ -21,7 +21,7 @@ Five axes carry the report. Four answer from a verb, and two of those add a read
 
 ## Step 1: scope the tree
 
-Take every tracked source file the verbs reach by default. Narrow to a path the caller named when one was given, passing it to each verb that takes one, and say which scope the run took.
+Take every tracked source file the verbs reach by default. Narrow to a path the caller named when one was given, passing it to each verb that takes one, and say which scope the run took. `canon history` reads a whole repository, so run it bare and filter its hotspots to the scope, per `${CLAUDE_SKILL_DIR}/references/trend.md`.
 
 Drop a generated file, a vendored copy, a copy an installer wrote, and a fixture before reporting a finding against it, since nobody hand-writes them. A finding against one names a file an author cannot fix, since the next regeneration or install overwrites it.
 

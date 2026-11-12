@@ -28,6 +28,10 @@ Name these in order, and skip any the record cannot answer.
 4. **Code size over the window.** The code extensions' `lines` from `size.byExtension` in the first and last week carrying a `size`. State both figures and the change.
 5. **Fix share.** `fixShareRolling` in the first and last week, as a figure and never as a quality verdict.
 
+## A narrowed scope
+
+The verb takes a repository rather than a subtree, so a path argument still returns hotspots from the whole tree. Run it bare and keep only the hotspots inside the scope the run took. Its size figures cover the whole repository on any scope, so say so beside them.
+
 ## When a figure is missing
 
 - `coverage.share` under half nulls the type figures, so leave fix share out and say why
