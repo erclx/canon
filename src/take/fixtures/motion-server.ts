@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 
 /**
- * Serves `motion.html` with canon's token sheet and Geist read from where they
+ * Serves a take fixture with canon's token sheet and Geist read from where they
  * live rather than copied beside it, so the fixture follows a token or font
  * change. Each report the page posts reaches `onReport`.
  */
@@ -29,6 +29,14 @@ export const MOTION_PLAN = new URL('./motion.json', import.meta.url)
 export function serveMotion(
   onReport: (report: MotionReport) => void = () => {},
 ): MotionServer {
+  return serveFixture(PAGE, onReport)
+}
+
+/** Serves `page` at every path but the report, the token sheet, and the fonts. */
+export function serveFixture(
+  page: URL,
+  onReport: (report: MotionReport) => void = () => {},
+): MotionServer {
   const served = Bun.serve({
     port: 0,
     fetch: async (request) => {
@@ -48,7 +56,7 @@ export function serveMotion(
           headers: { 'content-type': 'font/woff2' },
         })
       }
-      return new Response(readFileSync(PAGE), {
+      return new Response(readFileSync(page), {
         headers: { 'content-type': 'text/html' },
       })
     },
