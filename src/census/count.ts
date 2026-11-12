@@ -133,29 +133,39 @@ export function textLines(text: string): number | undefined {
   return isBinary(text) ? undefined : countLines(text)
 }
 
+/** One file reduced to what the count needs, so no caller holds its text. */
+interface Counted {
+  readonly path: string
+  /** Absent for a file that read as binary or could not be read. */
+  readonly lines?: number
+}
+
+function counted(path: string, text: string | undefined): Counted {
+  // A read that failed and a file that read as binary are counted the same
+  // way: toward `files`, excluded from every line count.
+  return { path, lines: text === undefined ? undefined : textLines(text) }
+}
+
 /**
  * Counts what was read, the one definition both the working-tree census and
  * the past-revision census share, so the two cannot drift apart on what a
  * line or a skipped file is.
  */
-function tally(outcomes: readonly ReadOutcome[]): CensusResult {
+function tally(files: readonly Counted[]): CensusResult {
   const totals = new Map<string, { files: number; lines: number }>()
   let skipped = 0
   let lines = 0
 
-  for (const outcome of outcomes) {
-    const extension = extensionFor(outcome.path)
+  for (const file of files) {
+    const extension = extensionFor(file.path)
     const entry = totals.get(extension) ?? { files: 0, lines: 0 }
     entry.files += 1
 
-    // A read that failed and a file that read as binary are counted the
-    // same way: toward `files`, excluded from every line count.
-    if (outcome.text === undefined || isBinary(outcome.text)) {
+    if (file.lines === undefined) {
       skipped += 1
     } else {
-      const counted = countLines(outcome.text)
-      entry.lines += counted
-      lines += counted
+      entry.lines += file.lines
+      lines += file.lines
     }
 
     totals.set(extension, entry)
@@ -165,15 +175,13 @@ function tally(outcomes: readonly ReadOutcome[]): CensusResult {
     .map(([extension, counts]) => ({ extension, ...counts }))
     .sort((a, b) => b.files - a.files || a.extension.localeCompare(b.extension))
 
-  const paths = outcomes.map((outcome) => outcome.path)
-
   return {
     kind: 'measured',
-    files: outcomes.length,
+    files: files.length,
     skipped,
     lines,
     byExtension,
-    folders: largeFolders(paths),
+    folders: largeFolders(files.map((file) => file.path)),
   }
 }
 
@@ -192,16 +200,17 @@ export async function census(
   const listed = await listRepositoryFiles(root)
   if (listed === undefined) return { kind: 'refused', reason: 'no-git' }
 
-  const outcomes: ReadOutcome[] = []
+  // Each batch is reduced to line counts before the next is read, so the
+  // peak holds one batch of text rather than the whole tree.
+  const files: Counted[] = []
 
   for (let start = 0; start < listed.length; start += CONCURRENT_READS) {
     const batch = listed.slice(start, start + CONCURRENT_READS)
-    outcomes.push(
-      ...(await Promise.all(batch.map((path) => readOne(root, path)))),
-    )
+    const outcomes = await Promise.all(batch.map((path) => readOne(root, path)))
+    files.push(...outcomes.map(({ path, text }) => counted(path, text)))
   }
 
-  return tally(outcomes)
+  return tally(files)
 }
 
 /**
@@ -228,12 +237,11 @@ export async function censusAt(
   if (resolved.exitCode !== 0) return { kind: 'refused', reason: 'no-git' }
 
   const entries = await readBlobsAt(root, rev, () => true)
-  const outcomes = entries
-    .map(({ path, mode, text }) => ({
-      path,
-      text: mode === SYMLINK_MODE ? undefined : text,
-    }))
+  const files = entries
+    .map(({ path, mode, text }) =>
+      counted(path, mode === SYMLINK_MODE ? undefined : text),
+    )
     .sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0))
 
-  return tally(outcomes)
+  return tally(files)
 }

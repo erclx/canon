@@ -32,9 +32,12 @@ interface HistoryCommandOptions {
 
 type HistoryRefusal = 'no-git' | 'invalid-weeks'
 
+/** Ten years of weeks, past which the window walks dates nobody asked about. */
+const MAX_WEEKS = 520
+
 const REFUSALS: Record<HistoryRefusal, string> = {
   'no-git': 'git could not read a commit history here, so there is no trend.',
-  'invalid-weeks': '--weeks takes a whole number of weeks, 1 or more.',
+  'invalid-weeks': `--weeks takes a whole number of weeks, from 1 to ${MAX_WEEKS}.`,
 }
 
 /** Hotspots the person-facing report prints. The record carries every one. */
@@ -51,7 +54,7 @@ export function register(program: Command): void {
     .helpOption('-h, --help', 'Show this help message')
     .option(
       '--weeks <n>',
-      `Weeks the window spans, defaulting to ${DEFAULT_WEEKS}`,
+      `Weeks the window spans, ${DEFAULT_WEEKS} by default and ${MAX_WEEKS} at most`,
     )
     .option('--json', 'Add a machine-readable record on stdout')
     .addHelpText(
@@ -96,7 +99,7 @@ function parseWeeks(raw: string | undefined): number | undefined {
   if (raw === undefined) return DEFAULT_WEEKS
   if (!/^\d+$/.test(raw)) return undefined
   const weeks = Number(raw)
-  return weeks >= 1 ? weeks : undefined
+  return weeks >= 1 && weeks <= MAX_WEEKS ? weeks : undefined
 }
 
 function refuse(
@@ -169,10 +172,9 @@ async function runHistory(
     excluded: (file) => isLockOrRelease(file) || generated.has(file),
   })
 
-  const [lines, sizes] = await Promise.all([
-    linesAt(root, head, new Set(summary.changes.keys())),
-    sizeSeries(root, merges, slots),
-  ])
+  // In turn rather than together, since each read buffers a tree's blobs.
+  const lines = await linesAt(root, head, new Set(summary.changes.keys()))
+  const sizes = await sizeSeries(root, merges, slots)
   const hotspots = rankHotspots(summary.changes, lines)
   const weekRecords = summary.weeks.map((week) => ({
     ...week,
@@ -188,7 +190,9 @@ async function runHistory(
   logInfo(
     `${summary.coverage.typed} of ${plural(summary.coverage.merges, 'merge')} typed (${percent(summary.coverage.share)}), ${plural(summary.excluded.bots, 'bot commit')} and ${plural(summary.excluded.releases, 'release')} left out`,
   )
-  if (summary.weeks.some((week) => week.types === null)) {
+  if (summary.coverage.share === null) {
+    logWarn('No delivery merge landed in the window, so no type figure reads.')
+  } else if (summary.coverage.share < COVERAGE_FLOOR) {
     logWarn(
       `Under ${percent(COVERAGE_FLOOR)} typed, so type counts, fix share, and feat files read as unread.`,
     )

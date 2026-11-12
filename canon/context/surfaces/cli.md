@@ -49,8 +49,8 @@ Holds every module that reads repository state, named for what it reads.
 - `env.ts` holds `gitEnv()`, which strips the variables a hook exports, and `gh-invocations.test.ts` fails on a `gh` call in `src/` that skips it
 - `worktree.ts` holds `mainWorktreeRoot()` for shared scratch, `currentWorktreeRoot()` for a tracked tree, `listWorktrees()`, and `branchRefs()`
 - `base.ts` holds `baseCandidates()`, the trunk order the base-ref resolver and `src/gov/test-order.ts` each run their own call over
-- `files.ts` holds `listRepositoryFiles()`, the corpus the citation, markdown, and secret checks read, and `listChangedFiles()`, which diffs the working tree
-- `revision.ts` holds `readBlobsAt()` and `spaceEvenly()`, which every trend shares
+- `files.ts` holds `listRepositoryFiles()`, the corpus three audits read, and `listChangedFiles()`, which diffs the working tree rather than `HEAD`, so an uncommitted surface is in scope
+- `revision.ts` holds `readBlobsAt()` and `spaceEvenly()` for every trend
 
 ### `src/sync/`
 

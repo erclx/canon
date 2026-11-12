@@ -65,22 +65,23 @@ export async function sizeSeries(
 ): Promise<Map<string, SizePoint>> {
   const sampled = sampleWeeks(weekEnds(merges, slots), slots, points)
 
-  const read = await Promise.all(
-    [...sampled.entries()].map(async ([from, rev]) => {
-      const result = await censusAt(root, rev)
-      if (result.kind !== 'measured') return undefined
-      const point: SizePoint = {
-        rev,
-        files: result.files,
-        skipped: result.skipped,
-        lines: result.lines,
-        byExtension: result.byExtension,
-      }
-      return [from, point] as const
-    }),
-  )
+  const series = new Map<string, SizePoint>()
 
-  return new Map(read.filter((entry) => entry !== undefined))
+  // One point at a time, since each read buffers a whole tree's blobs and a
+  // concurrent sample would hold every one of those trees together.
+  for (const [from, rev] of sampled) {
+    const result = await censusAt(root, rev)
+    if (result.kind !== 'measured') continue
+    series.set(from, {
+      rev,
+      files: result.files,
+      skipped: result.skipped,
+      lines: result.lines,
+      byExtension: result.byExtension,
+    })
+  }
+
+  return series
 }
 
 /**
