@@ -12,12 +12,14 @@ import {
 /**
  * The spans the compiler gives for every function with a block body, the
  * reference the brace reading is held to. Depth counts block-bodied ancestors
- * alone, since an arrow with an expression body is skipped by design.
+ * alone, since an arrow with an expression body is skipped by design. The
+ * compiler parses JSX only in a file named `.tsx`.
  */
 function compilerSpans(
   source: string,
+  name = 'f.ts',
 ): { line: number; lines: number; depth: number }[] {
-  const file = ts.createSourceFile('f.ts', source, ts.ScriptTarget.Latest, true)
+  const file = ts.createSourceFile(name, source, ts.ScriptTarget.Latest, true)
   const spans: { line: number; lines: number; depth: number; end: number }[] =
     []
   const visit = (node: ts.Node, depth: number): void => {
@@ -43,8 +45,9 @@ function compilerSpans(
 
 function braceSpans(
   source: string,
+  options: { jsx?: boolean } = {},
 ): { line: number; lines: number; depth: number }[] {
-  return functionSpans(source).map(({ line, lines, depth }) => ({
+  return functionSpans(source, options).map(({ line, lines, depth }) => ({
     line,
     lines,
     depth,
@@ -173,6 +176,63 @@ describe('functionSpans', () => {
   })
 })
 
+describe('functionSpans in JSX mode', () => {
+  it.each([
+    [
+      'an apostrophe in text',
+      "function A() {\n  return <p>Can't save</p>\n}\nfunction B() {\n  return 1\n}\n",
+    ],
+    [
+      'a closing tag before a brace',
+      'function A() {\n  if (a) { return <span>x</span>}\n  return <Foo />}\n',
+    ],
+    [
+      'quotes, a backtick, and slashes in text',
+      'function A() {\n  return <p>"a" `b` // /path</p>\n}\n',
+    ],
+    [
+      'attribute strings ending at their own quote',
+      'function A() {\n  return <img title="C:\\" alt="it\'s" />\n}\n',
+    ],
+    [
+      'a container holding a block arrow',
+      'function A() {\n  return (\n    <ul>\n      {items.map((x) => {\n        return <li key={x}>{`${x}`}</li>\n      })}\n      {/* } */}\n    </ul>\n  )\n}\n',
+    ],
+    [
+      'a handler in an attribute',
+      'function A() {\n  return <button onClick={() => {\n    go()\n  }}>Go</button>\n}\n',
+    ],
+    [
+      'an object in a container after a ternary call',
+      'function A() {\n  return c ? f() : <div style={{ a: 1 }}>x</div>\n}\n',
+    ],
+    [
+      'a fragment as an arrow expression body',
+      'const A = () => <>\n  <B />\n</>\nfunction C() {\n  return 1\n}\n',
+    ],
+    [
+      'a generic arrow with a comma',
+      'const f = <T,>(x: T) => {\n  return x\n}\n',
+    ],
+    [
+      'generic signatures before a function',
+      'const f: <T>(x: T) => T = g\ntype F = <T>(x: T) => T\ninterface A {\n  map: <U>(f: U) => U[]\n}\nconst h = <const T,>(x: T) => x\nconst k = <T = unknown,>(x: T) => x\nfunction B() {\n  return <b>x</b>\n}\n',
+    ],
+    [
+      'a type argument before a call',
+      'function A() {\n  const r = useRef<HTMLDivElement>(null)\n  return <div ref={r} />\n}\n',
+    ],
+    [
+      'a type argument on a tag name',
+      'function A() {\n  return <Select<T> onPick={(v) => {\n    go(v)\n  }} />\n}\n',
+    ],
+  ])('should match the compiler on %s', (_shape, source) => {
+    expect(braceSpans(source, { jsx: true })).toEqual(
+      compilerSpans(source, 'f.tsx'),
+    )
+  })
+})
+
 describe('functionSpansInFile', () => {
   it('should read only the frontmatter of an astro file', () => {
     const source = '---\nfunction a() {\n  return 1\n}\n---\n<div>{b}</div>\n'
@@ -182,10 +242,13 @@ describe('functionSpansInFile', () => {
     ])
   })
 
-  it('should read no function in a JSX file, whose text the lexer misreads', () => {
-    const source = "function A() {\n  return <span>Can't save</span>\n}\n"
-
-    expect(functionSpansInFile('a.tsx', source)).toEqual([])
+  it.each([
+    ['a.tsx', "function A() {\n  return <span>Can't save</span>\n}\n"],
+    ['a.jsx', 'function A() {\n  return <a href="/x">{b}</a>\n}\n'],
+  ])('should read a function in %s', (file, source) => {
+    expect(functionSpansInFile(file, source)).toEqual([
+      { line: 1, lines: 3, name: 'A', depth: 0 },
+    ])
   })
 
   it('should read no function in a language it cannot parse', () => {
