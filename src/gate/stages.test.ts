@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { fileLength } from '@/gate/file-length'
 import { clientCommandCitations } from '@/gate/measures'
 import { STAGES } from '@/gate/stages'
 
@@ -344,5 +345,22 @@ describe('the context-citations stage', () => {
     )
 
     expect(argv).toEqual([['context', 'audit', '--gate']])
+  })
+})
+
+describe('the file length stage', () => {
+  it('should run the file length measure with no scope', () => {
+    const stage = STAGES.find((candidate) => candidate.id === 'file-length')
+
+    expect(stage?.scope).toBeUndefined()
+    expect(stage?.checks).toEqual([{ kind: 'measure', measure: fileLength }])
+  })
+
+  it('should sit right after the embedded programs stage', () => {
+    const ids = STAGES.map((stage) => stage.id)
+
+    expect(ids.indexOf('file-length')).toBe(
+      ids.indexOf('embedded-programs') + 1,
+    )
   })
 })

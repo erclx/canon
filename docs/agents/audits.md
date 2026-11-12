@@ -82,7 +82,7 @@ An audit that finds no corpus reports `absent`, which moves neither the verdict 
 | `rules`              | `canon gov audit`                   | Rules past a shape limit or out of step with a ledger, and here rules short of one            | Reports        |
 | `counts`             | `canon gov counts`                  | Sentences stating a closed catalog's size that disagree with the tree                         | Reports        |
 | `census`             | `canon census`                      | File count, extension breakdown, files per folder, and line total                             | Reports        |
-| `code`               | `canon code audit`                  | Code files past 2,000 lines and functions past 100. Embedded blocks gate through check.       | Reports        |
+| `code`               | `canon code audit`                  | Functions past 100. Files past 2,000 lines and embedded blocks gate through check.            | Reports        |
 | `deps`               | `canon deps audit`                  | Advisories against the resolved dependencies                                                  | Reports        |
 | `outside`            | `canon gov citations`               | Rule citations and internal frontmatter globs reaching nothing                                | Gates in check |
 | `outside`            | `canon gov superseded <old> <new>`  | Where the tree still asserts a value a changed convention no longer produces                  | Reports        |
