@@ -100,7 +100,7 @@ The closing lines end `## Summary`, one `Closes #NNN` per issue and no trailing 
 - Run the check before writing its line. A `- [ ]` reports a check that has not run rather than one that is planned.
 - Tick the box and state the observed result. `- [x] npm test passes, 42 tests` beats `- [ ] run npm test`.
 - Quote the count or output the run reported, never a figure carried from elsewhere.
-- A ticked box describes the tree as it stands. A later commit removing or replacing what it names makes the box false, and that branch corrects it in the same pass.
+- A ticked box describes the tree as it stands. A later commit that removes or replaces what it names makes it false, and that branch corrects it and any other claim it made stale in one pass.
 
 Leave the `UI pass` line to `canon pr tick`, and carry it on a rewrite.
 
