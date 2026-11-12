@@ -1,6 +1,11 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { isBrowserMissing, isServerUnreachable } from '@/browser/engine'
+import {
+  isBrowserMissing,
+  isSandboxBlocked,
+  isServerUnreachable,
+  launchSandboxFix,
+} from '@/browser/engine'
 import { cameraTrack } from '@/take/camera'
 import { FfmpegMissing, requireFfmpeg } from '@/take/encode'
 import {
@@ -137,13 +142,12 @@ export async function take(request: TakeRequest): Promise<TakeResult> {
       const shot = cause instanceof TargetRefused ? cause.still : undefined
       const still = shot ? join(dir, 'still.jpg') : undefined
       if (shot && still) writeFileSync(join(out, still), shot)
+      const fix = sandboxFixFor(cause)
       return {
         ...failed(classify(cause), cause, beat.name),
         ...(error instanceof FellBack ? { fallback: error.fallback } : {}),
         ...(still ? { still } : {}),
-        ...(cause instanceof ShellSandboxBlocked && cause.fix
-          ? { fix: cause.fix }
-          : {}),
+        ...(fix ? { fix } : {}),
       }
     }
     // Checked after each beat rather than once at the end, so a take refused
@@ -261,9 +265,20 @@ function classify(error: unknown): TakeRefusal {
   if (error instanceof ShellMissing || isBrowserMissing(error)) {
     return 'browser-missing'
   }
-  if (error instanceof ShellSandboxBlocked) return 'sandbox-blocked'
+  if (error instanceof ShellSandboxBlocked || isSandboxBlocked(error)) {
+    return 'sandbox-blocked'
+  }
   if (isServerUnreachable(error)) return 'server-unreachable'
   return 'take-failed'
+}
+
+/**
+ * The shell read the setting when it refused, and a screencast's Playwright
+ * launch did not, so that route reads it here.
+ */
+function sandboxFixFor(error: unknown): string | undefined {
+  if (error instanceof ShellSandboxBlocked) return error.fix
+  return isSandboxBlocked(error) ? launchSandboxFix() : undefined
 }
 
 function failed(

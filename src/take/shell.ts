@@ -3,6 +3,11 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { homedir, tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
+import {
+  SANDBOX_FIX,
+  USERNS_SETTING,
+  readUsernsSetting,
+} from '@/browser/engine'
 
 /**
  * Launches chrome-headless-shell under begin-frame control and speaks raw CDP
@@ -33,9 +38,6 @@ export class ShellSandboxBlocked extends Error {
 }
 
 const SANDBOX_MARKER = 'No usable sandbox!'
-const USERNS_SETTING = 'kernel.apparmor_restrict_unprivileged_userns'
-const USERNS_FILE = '/proc/sys/kernel/apparmor_restrict_unprivileged_userns'
-const SANDBOX_FIX = `sudo sysctl -w ${USERNS_SETTING}=0`
 const SANDBOX_GUIDE =
   'https://chromium.googlesource.com/chromium/src/+/main/docs/security/apparmor-userns-restrictions.md'
 
@@ -202,9 +204,11 @@ function devtoolsUrl(proc: ChildProcess, executable: string): Promise<string> {
     proc.on('close', (code, signal) => {
       if (settled) return
       settled = true
+      // The setting is read only after the marker, since a profiled shell
+      // starts with it at 1.
       fail(
         output.includes(SANDBOX_MARKER)
-          ? sandboxBlocked(executable, readSetting())
+          ? sandboxBlocked(executable, readUsernsSetting())
           : new Error(
               `the shell exited ${ending(code, signal)}: ${lastWords(output)}`,
             ),
@@ -235,15 +239,6 @@ export function sandboxBlocked(
   return new ShellSandboxBlocked(
     `${opening}, and ${reading}, so something other than AppArmor blocks it, such as a container's seccomp profile. See ${SANDBOX_GUIDE}.`,
   )
-}
-
-/** Read only after the marker, since a profiled shell starts with it at 1. */
-function readSetting(): string | undefined {
-  try {
-    return readFileSync(USERNS_FILE, 'utf8').trim()
-  } catch {
-    return undefined
-  }
 }
 
 /** Node passes a null code to a process a signal ended. */

@@ -52,6 +52,8 @@ const PLAN_REFUSALS: Record<PlanRefusal, string> = {
 
 const DRIVE_REFUSALS: Record<DriverRefusal, string> = {
   'browser-missing': 'The browser binary is not installed in this project.',
+  'sandbox-blocked':
+    'The browser could not start its sandbox, as under the AppArmor user namespace restriction or when run as root.',
   'axe-missing':
     'The axe engine did not resolve from canon, so no page was read with it.',
   'server-unreachable': 'Nothing answered at the URL, so no state was reached.',
@@ -138,6 +140,8 @@ export function register(program: Command): void {
         '  no-heights          the viewport names no height, which is never defaulted',
         '  engine-missing      the browser engine is not installed in this project',
         '  browser-missing     the engine is installed and its browser binary is not',
+        '  sandbox-blocked     the browser found no usable sandbox, as under AppArmor',
+        '                      or as root, carrying fix when that setting reads 1',
         '  axe-missing         the run names axe and its engine did not resolve',
         '  server-unreachable  nothing answered at the URL, so no state was reached',
         '  drive-failed        the drive failed against a reachable page',
@@ -244,6 +248,7 @@ async function runDriver(
     if (result.reason === 'browser-missing') {
       logWarn(`Install the browser binary with: ${INSTALL_BROWSER}`)
     }
+    if (result.fix) logWarn(`Allow it for this boot with: ${result.fix}`)
     logWarn(result.message.split('\n')[0] ?? '')
     outro()
     emit(emitJson, {
@@ -254,6 +259,7 @@ async function runDriver(
       ...(result.reason === 'browser-missing'
         ? { install: INSTALL_BROWSER }
         : {}),
+      ...(result.fix ? { fix: result.fix } : {}),
     })
     return 1
   }

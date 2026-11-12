@@ -31,7 +31,7 @@ Holds one file per subcommand, each exporting `register(program)` for `src/cli.t
 - Define real options in commander and re-enable `helpOption` at each level, since the root disables it. Put a default on the flag, and read `getOptionValueSource` to tell it from an explicit pass
 - A parent with subcommands and an action prints help through `outputHelp({ error: true })`, or the block lands in the data stream
 - A command file cannot be imported by a test. Move testable logic to a pure module in the domain folder and pass the impure factories in
-- A browser-backed command imports its engine inside the action, since `src/cli.ts` loads every `register` at module scope. `src/browser/engine.ts` holds the shared absence predicates
+- A browser-backed command imports its engine inside the action, since `src/cli.ts` loads every `register` at module scope. `src/browser/engine.ts` holds the shared predicates and `SANDBOXED`
 
 ### `src/roots/`
 

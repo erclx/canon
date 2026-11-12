@@ -1,9 +1,12 @@
 import { chromium } from 'playwright-core'
 import type { Browser, Page } from 'playwright-core'
 import {
+  SANDBOXED,
   enterKeyboardModality,
   isBrowserMissing,
+  isSandboxBlocked,
   isServerUnreachable,
+  launchSandboxFix,
 } from '@/browser/engine'
 import type { Reading } from '@/inventory/group'
 import type { Subject } from '@/inventory/subjects'
@@ -54,6 +57,7 @@ export interface TargetReading {
 
 export type WalkRefusal =
   | 'browser-missing'
+  | 'sandbox-blocked'
   | 'server-unreachable'
   | 'walk-failed'
 
@@ -68,6 +72,8 @@ export type WalkResult =
       readonly status: 'failed'
       readonly reason: WalkRefusal
       readonly message: string
+      /** The command that clears a `sandbox-blocked` refusal, when one does. */
+      readonly fix?: string
     }
 
 function failed(reason: WalkRefusal, error: unknown): WalkResult {
@@ -88,12 +94,14 @@ export async function walk(options: WalkOptions): Promise<WalkResult> {
 
   let browser: Browser
   try {
-    browser = await chromium.launch()
+    browser = await chromium.launch(SANDBOXED)
   } catch (error) {
-    return failed(
-      isBrowserMissing(error) ? 'browser-missing' : 'walk-failed',
-      error,
-    )
+    if (isBrowserMissing(error)) return failed('browser-missing', error)
+    if (isSandboxBlocked(error)) {
+      const fix = launchSandboxFix()
+      return { ...failed('sandbox-blocked', error), ...(fix ? { fix } : {}) }
+    }
+    return failed('walk-failed', error)
   }
 
   const readings: Reading[] = []

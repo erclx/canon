@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { chromium } from 'playwright-core'
+import { SANDBOXED } from '@/browser/engine'
 import { lastFrame, openFrameEncoder, probeFrames } from '@/take/encode'
 import { frameStamp, slotFrames } from '@/take/frame-clock'
 import { FPS, type LogEvent, START, VIEWPORT } from '@/take/log'
@@ -55,11 +56,12 @@ export async function filmScreencast(request: {
   // process open past its refusal.
   const scratch = openSpool(request.clip)
   const browser = await chromium
-    .launch(
-      request.beat.scrollbars
+    .launch({
+      ...SANDBOXED,
+      ...(request.beat.scrollbars
         ? { ignoreDefaultArgs: ['--hide-scrollbars'] }
-        : {},
-    )
+        : {}),
+    })
     .catch((error: unknown) => {
       scratch.remove()
       throw error

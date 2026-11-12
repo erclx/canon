@@ -58,7 +58,7 @@ const TAKE_REFUSALS: Record<TakeRefusal, string> = {
   'ffmpeg-missing': 'FFmpeg is not installed, so no clip could be encoded.',
   'browser-missing': 'The headless shell is not installed in this project.',
   'sandbox-blocked':
-    'The headless shell could not start its sandbox, since this kernel refuses it a user namespace.',
+    'The headless shell or browser could not start its sandbox, as under the AppArmor user namespace restriction or when run as root.',
   'server-unreachable': 'Nothing answered at the URL, so no beat was filmed.',
   'target-missing': 'A step names a target the page does not carry.',
   'target-offscreen':
@@ -194,8 +194,9 @@ export function register(program: Command): void {
         '  engine-missing      the browser engine is not installed in this project',
         '  ffmpeg-missing      FFmpeg is not on the PATH',
         '  browser-missing     the headless shell or browser binary is not installed',
-        '  sandbox-blocked     the headless shell found no usable sandbox, as under',
-        '                      AppArmor, carrying fix when that setting reads 1',
+        '  sandbox-blocked     the headless shell or browser found no usable sandbox,',
+        '                      as under AppArmor or as root, carrying fix when',
+        '                      that setting reads 1',
         '  server-unreachable  nothing answered at the URL',
         '  target-missing      a step names a target the page does not carry',
         '  target-offscreen    a step names a target outside the window, so a setup step must bring it into view first',
