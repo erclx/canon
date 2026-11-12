@@ -11,37 +11,37 @@ The skill body holds the order, the guards, and the report shape. This file hold
 
 ## File length
 
-| Field          | Value                                                     |
-| -------------- | --------------------------------------------------------- |
-| Measures       | Whether a code file has grown past what one read takes in |
-| Verb           | `canon code audit --json`                                 |
-| Keys           | `fileLimit`, and `longFiles` with `file` and `lines`      |
-| Evidence class | `measured`                                                |
+| Field          | Value                                                                    |
+| -------------- | ------------------------------------------------------------------------ |
+| Measures       | Whether a code file has grown past what one read takes in                |
+| Verb           | `canon code audit --json`                                                |
+| Keys           | `fileLimit`, `lengthExtensions`, and `longFiles` with `file` and `lines` |
+| Evidence class | `measured`                                                               |
 
 The record lists each code file past `fileLimit`, tests included. Read the limit from the record rather than from a number written here.
 
-- **Covered:** `ts`, `tsx`, `mts`, `cts`, `js`, `jsx`, `mjs`, `cjs`, `astro`, `vue`, `svelte`, `py`, `go`, `php`, `sh`, `bash`, `rs`, and `css`
+- **Covered:** the bare extensions in `lengthExtensions`, read from the record rather than from a list written here
 - **Under the limit:** a covered file absent from `longFiles`
 - **Not covered:** a file in any other language is unread on file length, never ok
 - **`files` is not coverage:** the record's top-level `files` counts only what the embedded read covers, so never infer a length gap from it
 
 - **Routes to:** `codebase-layout` for a source file, which splits it along its roles, and a split by behavior for a test file
-- **Missing key:** a record without `longFiles` came from a binary older than the length report, so the axis is unread with that cause
+- **Missing key:** no `longFiles` means a binary older than the length report, so the axis is unread with that cause. No `lengthExtensions` means one older than the published list, so coverage is unread.
 - **Empty list:** no file passes the limit, which is a result rather than an unread axis
 
 ## Function length
 
-| Field          | Value                                                                                         |
-| -------------- | --------------------------------------------------------------------------------------------- |
-| Measures       | Whether a top-level function runs long enough that a split would help                         |
-| Verb           | `canon code audit --json`                                                                     |
-| Keys           | `functionCheckpoint`, `longFunctions` with `file`, `line`, `lines`, `name`, and `unreadFiles` |
-| Evidence class | `measured`                                                                                    |
+| Field          | Value                                                                                                               |
+| -------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Measures       | Whether a top-level function runs long enough that a split would help                                               |
+| Verb           | `canon code audit --json`                                                                                           |
+| Keys           | `functionCheckpoint`, `functionExtensions`, `longFunctions` with `file`, `line`, `lines`, `name`, and `unreadFiles` |
+| Evidence class | `measured`                                                                                                          |
 
-A `name` of `null` is an unnamed function, such as a callback assigned nowhere. Function reading reaches a narrower set of languages than file length, named in the audit's `--help` paragraph on long functions, so a file in any other language is unread here alone and never on file length.
+A `name` of `null` is an unnamed function, such as a callback assigned nowhere. Function reading reaches a narrower set of languages than file length, the bare extensions in `functionExtensions`, so a file in any other extension is unread here alone and never on file length.
 
 - **Unread file:** an `unreadFiles` entry carries `file`, `line`, and `reason` for a file the reading could not follow. Report it unread on this axis with that reason, never as under the checkpoint.
-- **Missing key:** a record without `unreadFiles` came from a binary older than the unread report, so a file absent from `longFunctions` is only as covered as that binary's `--help` says
+- **Missing key:** no `unreadFiles` means a binary older than the unread report, so a file absent from `longFunctions` is only as covered as its `--help` says. No `functionExtensions` leaves the covered set unread.
 - **Length is not complexity.** A `register` function holding help text runs long without branching. Report it as long and claim nothing about how hard it is to follow.
 - **Routes to:** `code-craft`, which decides whether the function splits and where
 - **Gate:** none. The figure reports and never fails.

@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { execa } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { FUNCTION_EXTENSIONS, LENGTH_EXTENSIONS } from '@/code/length'
 
 const CLI = join(import.meta.dirname, '..', 'cli.ts')
 const RUN_TIMEOUT_MS = 30_000
@@ -99,6 +100,26 @@ describe('code audit', () => {
       longFiles: [{ file: 'src/long.py', lines: 2001 }],
       longFunctions: [{ file: 'src/fn.ts', line: 1, lines: 122, name: 'big' }],
     })
+  })
+
+  it('should publish the extensions the audit measures', async () => {
+    write('src/a.ts', 'export const a = 1\n')
+
+    const result = await run(['code', 'audit', '--json'])
+
+    const record = JSON.parse(result.stdout)
+    expect(record.lengthExtensions).toEqual(LENGTH_EXTENSIONS)
+    expect(record.functionExtensions).toEqual(FUNCTION_EXTENSIONS)
+    expect(record.lengthExtensions).toContain('css')
+    expect(record.functionExtensions).toContain('py')
+    expect(record.functionExtensions).not.toContain('css')
+  })
+
+  it('should name both extension lists in the help', async () => {
+    const result = await run(['code', 'audit', '--help'])
+
+    expect(result.stdout).toContain('lengthExtensions')
+    expect(result.stdout).toContain(`.${LENGTH_EXTENSIONS.join(', .')}`)
   })
 
   it('should record a long python function and an unread file and leave the exit at 0', async () => {

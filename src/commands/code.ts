@@ -11,7 +11,9 @@ import {
 } from '@/code/embedded'
 import {
   FILE_LINE_LIMIT,
+  FUNCTION_EXTENSIONS,
   FUNCTION_LINE_CHECKPOINT,
+  LENGTH_EXTENSIONS,
   LENGTH_SOURCE,
   type LongFile,
   type LongFunction,
@@ -69,6 +71,10 @@ export function register(program: Command): void {
         'whose strings, brackets, or indentation cannot be followed is listed under',
         'unreadFiles with its line and reason, never skipped in silence.',
         'None of these moves the exit code.',
+        '',
+        `File length counts .${LENGTH_EXTENSIONS.join(', .')}.`,
+        `Function length reads .${FUNCTION_EXTENSIONS.join(', .')}.`,
+        'The --json record carries both lists as lengthExtensions and functionExtensions.',
         '',
         'Examples:',
         '  canon code audit',
@@ -157,6 +163,8 @@ async function runAudit(
         longFiles,
         longFunctions,
         unreadFiles,
+        lengthExtensions: LENGTH_EXTENSIONS,
+        functionExtensions: FUNCTION_EXTENSIONS,
       })}\n`,
     )
   }
