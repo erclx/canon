@@ -130,18 +130,27 @@ describe('the declared reel inputs', () => {
       .filter((path) => statSync(join(root, path)).isFile())
   }
 
-  function resolveAlias(spec: string): string | undefined {
-    const base = `src/${spec.slice(2)}`
-    return [`${base}.ts`, `${base}.tsx`, `${base}/index.ts`].find((path) =>
-      existsSync(join(root, path)),
+  /** Resolves an `@/`, `./`, or `../` specifier to a tracked file, and a package name to nothing. */
+  function resolveImport(from: string, spec: string): string | undefined {
+    const base = spec.startsWith('@/')
+      ? `src/${spec.slice(2)}`
+      : spec.startsWith('.')
+        ? relative(root, join(dirname(join(root, from)), spec))
+        : undefined
+    if (base === undefined) return undefined
+    return [base, `${base}.ts`, `${base}.tsx`, `${base}/index.ts`].find(
+      (path) =>
+        existsSync(join(root, path)) && statSync(join(root, path)).isFile(),
     )
   }
 
-  /** Every repository path a module reaches by an `@/` import or reads through `new URL`. */
+  /** Every repository path a module reaches by an import of any form or reads through `new URL`. */
   function readsOf(path: string): string[] {
     const text = readFileSync(join(root, path), 'utf8')
-    const imports = [...text.matchAll(/from '(@\/[^']+)'/g)]
-      .map((match) => resolveAlias(match[1] ?? ''))
+    const imports = [
+      ...text.matchAll(/(?:\bfrom|\bimport)\s*\(?\s*['"]([^'"]+)['"]/g),
+    ]
+      .map((match) => resolveImport(path, match[1] ?? ''))
       .filter((found): found is string => found !== undefined)
     const urls = [
       ...text.matchAll(/new URL\(\s*'([^']+)',\s*import\.meta\.url\s*\)/g),
@@ -160,6 +169,10 @@ describe('the declared reel inputs', () => {
 
   const isModule = (path: string): boolean =>
     path.endsWith('.ts') && !path.endsWith('.test.ts')
+
+  it('should follow a relative import as well as an alias', () => {
+    expect(readsOf('src/design/favicon.ts')).toContain('src/design/template.ts')
+  })
 
   it('should paint or declare every path outside the engine a reel reads', () => {
     const patterns = loadPaintedPatterns(root)
