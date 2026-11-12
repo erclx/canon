@@ -3,6 +3,11 @@ import { execa } from 'execa'
 import { existsSync } from 'node:fs'
 import { gitEnv } from '@/git/env'
 import {
+  type BranchInput,
+  branchReport,
+  type BranchReport,
+} from '@/worktrees/branches'
+import {
   repositoryOf,
   type ResolvedSession,
   resolveSessions,
@@ -90,6 +95,8 @@ export interface WorktreeVerdict {
 export interface MergedPullRequest {
   readonly branch: string
   readonly number: number
+  /** The commit the pull request merged from, absent when the read did not ask for it. */
+  readonly headOid?: string
 }
 
 export type MergedReport =
@@ -117,7 +124,15 @@ export type ReclaimReport =
       readonly reason: Unreadable
       readonly detail: string
     }
-  | { readonly kind: 'read'; readonly worktrees: readonly WorktreeVerdict[] }
+  | {
+      readonly kind: 'read'
+      readonly worktrees: readonly WorktreeVerdict[]
+      /**
+       * The local branches no worktree holds. Read apart from the worktrees, so
+       * a listing that failed leaves the worktree verdicts standing.
+       */
+      readonly branches: BranchReport
+    }
 
 export interface ReclaimOptions {
   readonly cwd?: string
@@ -128,6 +143,7 @@ export interface ReclaimOptions {
   readonly claudeAgentIds?: (
     cwd: string,
   ) => Promise<ReadonlyMap<number, string>>
+  readonly branchReport?: (input: BranchInput) => Promise<BranchReport>
 }
 
 /**
@@ -154,7 +170,7 @@ async function mergedPullRequests(cwd: string): Promise<MergedReport> {
     '--limit',
     String(MERGED_LIMIT),
     '--json',
-    'headRefName,number',
+    'headRefName,number,headRefOid',
   ]
 
   try {
@@ -173,6 +189,7 @@ async function mergedPullRequests(cwd: string): Promise<MergedReport> {
     const rows = JSON.parse(result.stdout) as readonly {
       headRefName: string
       number: number
+      headRefOid?: string
     }[]
 
     return {
@@ -180,6 +197,9 @@ async function mergedPullRequests(cwd: string): Promise<MergedReport> {
       merged: rows.map((row) => ({
         branch: row.headRefName,
         number: row.number,
+        ...(typeof row.headRefOid === 'string'
+          ? { headOid: row.headRefOid }
+          : {}),
       })),
     }
   } catch (error) {
@@ -372,6 +392,7 @@ export async function reclaimReport(
   const readStatus = opts.worktreeStatus ?? worktreeStatus
   const resolve = opts.resolve ?? resolveSessions
   const readAgentIds = opts.claudeAgentIds ?? claudeAgentIds
+  const readBranches = opts.branchReport ?? branchReport
 
   const [entries, merged, sessions, repository, current, agentIds] =
     await Promise.all([
@@ -432,5 +453,27 @@ export async function reclaimReport(
     ),
   )
 
-  return { kind: 'read', worktrees }
+  // `listWorktrees` answers a failed read with no entries, and every
+  // repository lists at least its main worktree, so an empty listing is the
+  // failure. Reading branches past it would offer every checked-out branch.
+  const branches: BranchReport =
+    entries.length === 0
+      ? {
+          kind: 'unreadable',
+          detail:
+            'git worktree list returned nothing, so no branch could be told apart from one a worktree holds.',
+        }
+      : await readBranches({
+          cwd,
+          worktreeBranches: new Set(
+            entries.flatMap((entry) =>
+              entry.branch === null ? [] : [entry.branch],
+            ),
+          ),
+          merged: merged.merged,
+          sessions: sessions.sessions,
+          repository,
+        })
+
+  return { kind: 'read', worktrees, branches }
 }

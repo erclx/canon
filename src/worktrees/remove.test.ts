@@ -4,9 +4,14 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gitEnv } from '@/git/env'
+import type { BranchVerdict } from '@/worktrees/branches'
 import type { WorktreeVerdict } from '@/worktrees/reclaim'
 import { reclaimReport } from '@/worktrees/reclaim'
-import { type GitResult, removeReclaimable } from '@/worktrees/remove'
+import {
+  type GitResult,
+  removeBranches,
+  removeReclaimable,
+} from '@/worktrees/remove'
 
 let ROOT: string
 
@@ -187,5 +192,62 @@ describe('removeReclaimable', () => {
     expect(removal.outcomes[0]?.removed).toBe(true)
     expect(existsSync(path)).toBe(false)
     expect(git('branch', '--list', 'feat/locked')).toBe('')
+  })
+})
+
+function branchVerdict(fields: Partial<BranchVerdict> = {}): BranchVerdict {
+  return {
+    branch: 'feat/parser',
+    tip: 'a'.repeat(40),
+    reclaimable: true,
+    refusals: [],
+    pullRequest: 673,
+    ...fields,
+  }
+}
+
+describe('removeBranches', () => {
+  it('should delete a reclaimable branch and report the tip it took', async () => {
+    git('branch', 'feat/parser')
+    const tip = git('rev-parse', 'feat/parser')
+
+    const outcomes = await removeBranches([branchVerdict({ tip })], {
+      cwd: ROOT,
+    })
+
+    expect(outcomes).toEqual([
+      {
+        branch: 'feat/parser',
+        tip,
+        pullRequest: 673,
+        removed: true,
+        detail: null,
+      },
+    ])
+    expect(git('branch', '--list', 'feat/parser')).toBe('')
+  })
+
+  it('should leave a branch no reading called reclaimable', async () => {
+    git('branch', 'feat/parser')
+
+    const outcomes = await removeBranches(
+      [branchVerdict({ reclaimable: false, refusals: ['not-in-merged-head'] })],
+      { cwd: ROOT },
+    )
+
+    expect(outcomes).toEqual([])
+    expect(git('branch', '--list', 'feat/parser')).not.toBe('')
+  })
+
+  // A worktree that checked the branch out after the reading makes git refuse
+  // the delete, which reports rather than forcing past it.
+  it('should report a delete git refused, with its reason', async () => {
+    git('worktree', 'add', '--quiet', '-b', 'feat/parser', 'wt-parser')
+
+    const outcomes = await removeBranches([branchVerdict()], { cwd: ROOT })
+
+    expect(outcomes[0]?.removed).toBe(false)
+    expect(outcomes[0]?.detail).toContain('feat/parser')
+    expect(git('branch', '--list', 'feat/parser')).not.toBe('')
   })
 })

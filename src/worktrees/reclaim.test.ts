@@ -481,3 +481,62 @@ describe('reclaimReport', () => {
     expect(calls).toBe(1)
   })
 })
+
+describe('reclaimReport branches', () => {
+  it('should report a merged branch no worktree holds', async () => {
+    git('branch', 'feat/parser')
+    const tip = git('rev-parse', 'feat/parser')
+
+    const report = await reclaimReport({
+      cwd: ROOT,
+      resolve: async () => roster(),
+      mergedPullRequests: async () => ({
+        kind: 'read',
+        merged: [{ branch: 'feat/parser', number: 673, headOid: tip }],
+      }),
+    })
+
+    if (report.kind !== 'read' || report.branches.kind !== 'read') {
+      throw new Error('expected a readable branch report')
+    }
+    expect(report.branches.branches).toEqual([
+      {
+        branch: 'feat/parser',
+        tip,
+        reclaimable: true,
+        refusals: [],
+        pullRequest: 673,
+      },
+    ])
+  })
+
+  it('should never list a branch a worktree holds as a branch candidate', async () => {
+    const path = linked('wt-parser', 'feat/parser')
+    const tip = git('rev-parse', 'feat/parser')
+
+    const report = await reclaimReport({
+      cwd: ROOT,
+      resolve: async () => roster(),
+      mergedPullRequests: async () => ({
+        kind: 'read',
+        merged: [{ branch: 'feat/parser', number: 673, headOid: tip }],
+      }),
+    })
+
+    if (report.kind !== 'read') throw new Error('expected a readable report')
+    expect(report.branches).toEqual({ kind: 'read', branches: [] })
+    expect(verdictFor(report, path).reclaimable).toBe(true)
+  })
+
+  it('should refuse the branch reading alone when the worktree listing reads empty', async () => {
+    const report = await reclaimReport({
+      cwd: ROOT,
+      listWorktrees: async () => [],
+      resolve: async () => roster(),
+      mergedPullRequests: async () => merged(['feat/parser', 673]),
+    })
+
+    if (report.kind !== 'read') throw new Error('expected a readable report')
+    expect(report.branches.kind).toBe('unreadable')
+  })
+})

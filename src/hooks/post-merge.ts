@@ -199,6 +199,25 @@ function pushLines(result: StepResult, fields: Fields): string | undefined {
 }
 
 /**
+ * One line per branch the reclaim deleted, naming its tip. `git branch -D`
+ * drops the branch's reflog with it and the verb's own lines go to a stderr the
+ * hook never prints, so this is where the restore point survives.
+ */
+function deletedBranchLines(fields: Fields): string {
+  const entries = Array.isArray(fields.branches) ? fields.branches : []
+  let lines = ''
+  for (const entry of entries) {
+    if (entry === null || typeof entry !== 'object') continue
+    const { branch, tip, pullRequest, removed } = entry as Fields
+    if (removed !== true || typeof branch !== 'string') continue
+    if (typeof tip !== 'string') continue
+    const merged = typeof pullRequest === 'number' ? ` #${pullRequest}` : ''
+    lines += `  ${branch} ${tip}${merged}\n`
+  }
+  return lines
+}
+
+/**
  * The exit decides nothing here and the fields decide everything. A run that
  * removes one worktree and fails on another exits 1 with a directory already
  * deleted, so a report keyed on the exit would never name the removal.
@@ -222,6 +241,24 @@ function reclaimLines(fields: Fields): string | undefined {
     lines +=
       `\n🧹 ${failed} worktree(s) could not be removed.\n` +
       'Run canon worktrees reclaim to read which step failed.\n\n'
+  }
+
+  // A binary predating the branch half carries none of these fields, and
+  // `count` reads an absent one as zero, so that record stays quiet here.
+  const branchesRemoved = count(fields, 'branchesRemoved')
+  if (branchesRemoved > 0) {
+    lines += `\n🧹 Deleted ${branchesRemoved} merged branch(es) no worktree held.\n${deletedBranchLines(fields)}\n`
+  }
+
+  const branchesFailed = count(fields, 'branchesFailed')
+  if (reason === undefined && fields.branchesReclaimable === null) {
+    lines +=
+      '\n🧹 Merged branches not read, so none was deleted.\n' +
+      'Run canon worktrees reclaim --dry-run to read why.\n\n'
+  } else if (branchesFailed > 0) {
+    lines +=
+      `\n🧹 ${branchesFailed} merged branch(es) could not be deleted.\n` +
+      'Run canon worktrees reclaim to read why.\n\n'
   }
   return lines.length > 0 ? lines : undefined
 }

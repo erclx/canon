@@ -1,5 +1,6 @@
 import { $ } from 'bun'
 import { gitEnv } from '@/git/env'
+import type { BranchVerdict } from '@/worktrees/branches'
 import type { WorktreeVerdict } from '@/worktrees/reclaim'
 
 /** Which half of the removal a failure landed on, so a reader repairs the right one. */
@@ -155,4 +156,44 @@ async function deleteBranch(
   }
 
   return { path, branch, removed: true, failedAt: null, detail: null }
+}
+
+export interface BranchOutcome {
+  readonly branch: string
+  /** The tip the delete took, so a reader can restore the branch with `git branch <name> <tip>`. */
+  readonly tip: string
+  readonly pullRequest: number | null
+  readonly removed: boolean
+  readonly detail: string | null
+}
+
+/**
+ * Deletes every branch a reading called reclaimable, from `opts.cwd`.
+ *
+ * `-D` rather than `-d`, since a squash merge never makes the branch an
+ * ancestor of the trunk and `-d` refuses every one of them. The containment
+ * test the reading ran is what stands in for `-d`'s check. Git still refuses a
+ * branch a worktree checked out since the reading, which reports as a failure
+ * rather than a forced delete.
+ */
+export async function removeBranches(
+  verdicts: readonly BranchVerdict[],
+  opts: RemovalOptions,
+): Promise<BranchOutcome[]> {
+  const git = opts.git ?? runGit
+  const outcomes: BranchOutcome[] = []
+
+  for (const { branch, tip, pullRequest, reclaimable } of verdicts) {
+    if (!reclaimable) continue
+    const result = await git(opts.cwd, ['branch', '-D', branch])
+    outcomes.push({
+      branch,
+      tip,
+      pullRequest,
+      removed: result.exitCode === 0,
+      detail: result.exitCode === 0 ? null : result.stderr || null,
+    })
+  }
+
+  return outcomes
 }
