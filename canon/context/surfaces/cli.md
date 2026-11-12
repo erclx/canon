@@ -49,8 +49,8 @@ Holds every module that reads repository state, named for what it reads.
 - `env.ts` holds `gitEnv()`, which strips the variables a hook exports, and `gh-invocations.test.ts` fails on a `gh` call in `src/` that skips it
 - `worktree.ts` holds `mainWorktreeRoot()` for shared scratch, `currentWorktreeRoot()` for a tracked tree, `listWorktrees()`, and `branchRefs()`
 - `base.ts` holds `baseCandidates()`, the trunk order the base-ref resolver and `src/gov/test-order.ts` each run their own call over
-- `files.ts` holds `listRepositoryFiles()`, the file set the citation check, markdown corpus, and secret scan read
-- `listChangedFiles()` in that file diffs the working tree rather than `HEAD`, so a surface added before the commit is in scope
+- `files.ts` holds `listRepositoryFiles()`, the corpus the citation, markdown, and secret checks read, and `listChangedFiles()`, which diffs the working tree
+- `revision.ts` holds `readBlobsAt()` and `spaceEvenly()`, which every trend shares
 
 ### `src/sync/`
 
@@ -154,7 +154,7 @@ Each of these owns one slice the folders above lean on.
 - `src/capture/` owns the one browser import for `canon capture`, and `src/docs/`, `src/serve/`, and `src/web/` own the docs reader, the static server, and the README citation check
 - `src/records/`, `src/tasks/`, and `src/worktrees/` own the record-folder, task-board, and worktree verbs, each planning before it applies
 - `src/gate/` and `src/shipped/` own the gate stages and the shipped-references check
-- `src/code/`, `src/comments/`, `src/secrets/`, `src/deps/`, `src/labels/`, `src/counts/`, and `src/census/` own the remaining audit engines
+- `src/code/`, `src/comments/`, `src/secrets/`, `src/deps/`, `src/labels/`, `src/counts/`, `src/census/`, and `src/history/` own the remaining audit engines
 - `src/sweep/` owns the skip and mute contract line sweeps read, and `src/version/` and `src/upstream/` own the skew read, the release digest, and the `canon changelog` split
 
 ## Gotchas
