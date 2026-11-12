@@ -21,5 +21,5 @@ paths:
 ## Posting
 
 - Push the reel with `canon pr frames <number> --reel <reel> --pass "$(date -u +%Y%m%dT%H%M%SZ)" --json` and hold the record's `link`.
-- Post it with `canon pr evidence <number> --reel <link> --json`, which opens the evidence comment with no checklist.
+- Render it with `canon pr evidence <number> --reel <link> --json`, then post or edit its `body` the way `canon:pr-evidence` posts one. The verb renders and never posts.
 - Film again after a push that changes an engine path, since `canon pr lift` settles only on a reel filmed at the head.
