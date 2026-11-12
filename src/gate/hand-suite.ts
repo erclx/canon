@@ -19,6 +19,13 @@ export interface VitestRun {
   readonly heldLock: string | undefined
 }
 
+/**
+ * The filter `bun run test:e2e` hands vitest and every end-to-end suite's name
+ * carries. A run naming it films in a real browser, so it queues like a full
+ * suite however it is scoped.
+ */
+export const E2E_FILTER = '.e2e.test'
+
 const SUBCOMMANDS = new Set(['run'])
 
 /** `-t` and its long forms filter by test name, which scopes the run. */
@@ -37,8 +44,10 @@ function isNameFilter(arg: string): boolean {
  * Whether a hand-run vitest invocation runs the whole suite and so queues on
  * the machine lock the gate's Tests stage holds.
  *
- * A scoped run is seconds of work, and queueing it behind a full suite costs
- * more than any collision it causes. Vitest exposes no setup-time API naming
+ * A run naming `E2E_FILTER` queues too, since the suites it selects film in a
+ * real browser and two of them at once contend for CPU. Any other scoped run
+ * is seconds of work, and queueing it behind a full suite costs more than any
+ * collision it causes. Vitest exposes no setup-time API naming
  * the CLI filters, so any bare argument other than the subcommand reads as a
  * file filter. That includes the value of a flag spelled `--flag value`, which
  * misreads such a run as scoped. The misread skips a lock rather than queueing
@@ -48,5 +57,6 @@ export function locksHandSuite(run: VitestRun): boolean {
   if (run.ci || run.watch || run.heldLock !== undefined) return false
 
   const args = SUBCOMMANDS.has(run.args[0] ?? '') ? run.args.slice(1) : run.args
+  if (args.some((arg) => arg.includes(E2E_FILTER))) return true
   return !args.some((arg) => isNameFilter(arg) || !arg.startsWith('-'))
 }
