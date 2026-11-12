@@ -417,13 +417,21 @@ function commentCounts(record: unknown): Record<string, number> | undefined {
   if (!Array.isArray(snapshot)) return undefined
 
   let degradationHits = 0
+  let longBlocks = 0
+  let hasLongBlocks = true
   for (const language of snapshot) {
     const hits = lengthOf(asObject(language)?.degradationHits)
     if (hits === undefined) return undefined
     degradationHits += hits
+
+    // A record from a binary older than the long-block measure carries no
+    // array. That leaves the key out rather than failing the hit count.
+    const blocks = lengthOf(asObject(language)?.longBlocks)
+    if (blocks === undefined) hasLongBlocks = false
+    else longBlocks += blocks
   }
 
-  return { degradationHits }
+  return hasLongBlocks ? { degradationHits, longBlocks } : { degradationHits }
 }
 
 /**
