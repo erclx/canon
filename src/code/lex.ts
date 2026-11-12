@@ -19,6 +19,29 @@ const REGEX_KEYWORDS =
   /(?:^|[^\w$])(?:return|typeof|case|do|else|in|of|new|delete|void|throw|yield|await)$/
 
 /**
+ * A `<` opening an element or a fragment, unless it opens a generic arrow's
+ * type parameters, which a `.tsx` file writes as `<T,>` or `<T extends U>`.
+ */
+const TAG_START = /^<(?:>|[A-Za-z_$])/
+const TYPE_PARAMETERS = /^<[\w$]+\s*(?:,|extends\s)/
+
+/** Offsets of a span, from its first character to just past its last. */
+export interface Range {
+  readonly start: number
+  readonly end: number
+}
+
+/** Where JSX mode stands inside one element tree. */
+interface Tree {
+  /** Elements opened and not yet closed. */
+  open: number
+  /** Inside an opening tag, its children, or a closing tag. */
+  mode: 'tag' | 'children' | 'close'
+  /** Type argument brackets open on a tag name, as in `<Select<T>>`. */
+  angles: number
+}
+
+/**
  * Finds every string and template literal in a TypeScript source.
  *
  * A pattern over backticks reads a doc comment saying `then` as a script, so
@@ -27,18 +50,35 @@ const REGEX_KEYWORDS =
  * published CLI, so a lexer tracking comment, string, regex, and template
  * state stands in for it.
  */
-export function lex(source: string): {
+export function lex(
+  source: string,
+  options: {
+    /**
+     * Reads `<` where an expression starts as JSX, for a `.tsx` or `.jsx`
+     * file. Off, `lex` reads such a `<` as code, as a `.ts` file needs.
+     */
+    readonly jsx?: boolean
+  } = {},
+): {
   readonly literals: Literal[]
   /** Each comment's start, keyed by the end of its text. */
   readonly comments: ReadonlyMap<number, number>
   /** Each regular expression literal, as its start and the offset past its flags. */
-  readonly regexes: readonly { readonly start: number; readonly end: number }[]
+  readonly regexes: readonly Range[]
+  /**
+   * JSX markup in source order, being tags, attribute strings, text, and the
+   * braces of each `{}` container, with the code inside a container left out.
+   * Always empty with `jsx` off.
+   */
+  readonly jsx: readonly Range[]
 } {
   const literals: Literal[] = []
   const comments = new Map<number, number>()
-  const regexes: { start: number; end: number }[] = []
-  // One entry per open template expression, holding its brace depth.
-  const expressions: number[] = []
+  const regexes: Range[] = []
+  const jsx: Range[] = []
+  // One entry per open template expression or JSX container, holding its
+  // brace depth and what resumes once its closing brace is read.
+  const expressions: { depth: number; resume: () => void }[] = []
   // One entry per open template, holding its start line and static text.
   const templates: { line: number; start: number; text: string }[] = []
   let line = 1
@@ -91,7 +131,7 @@ export function lex(source: string): {
       if (char === '$' && source[i + 1] === '{') {
         current.text += INTERPOLATION
         i += 2
-        expressions.push(0)
+        expressions.push({ depth: 0, resume: readTemplate })
         lastSignificant = '{'
         return
       }
@@ -120,6 +160,90 @@ export function lex(source: string): {
     while (i < source.length && /[a-z]/.test(source[i] ?? '')) i++
     regexes.push({ start, end: i })
     lastSignificant = 'a'
+  }
+
+  // Reads a comment written between a tag's attributes.
+  const readTagComment = (): void => {
+    const start = i
+    const block = source[i + 1] === '*'
+    const close = source.indexOf(block ? '*/' : '\n', i + 2)
+    let end = close === -1 ? source.length : close
+    if (block && close !== -1) end += 2
+    for (let k = i; k < end; k++) if (source[k] === '\n') line++
+    comments.set(start + source.slice(start, end).trimEnd().length, start)
+    i = end
+  }
+
+  // Reads one element tree's markup from `start` until the tree closes or a
+  // `{` opens a container, whose closing brace resumes the read.
+  const readMarkup = (tree: Tree, start: number): void => {
+    while (i < source.length) {
+      const char = source[i]
+      const next = source[i + 1]
+      if (char === '\n') line++
+      if (tree.mode !== 'close' && char === '{') {
+        i++
+        jsx.push({ start, end: i })
+        expressions.push({
+          depth: 0,
+          resume: () => readMarkup(tree, i - 1),
+        })
+        lastSignificant = '{'
+        return
+      }
+      if (tree.mode === 'children') {
+        if (char === '<') {
+          tree.mode = next === '/' ? 'close' : 'tag'
+          if (tree.mode === 'tag') tree.open++
+        }
+        i++
+        continue
+      }
+      if (tree.mode === 'close') {
+        i++
+        if (char === '>' && --tree.open === 0) break
+        if (char === '>') tree.mode = 'children'
+        continue
+      }
+      if (char === '"' || char === "'") {
+        const close = source.indexOf(char, i + 1)
+        const end = close === -1 ? source.length : close + 1
+        for (let k = i + 1; k < end; k++) if (source[k] === '\n') line++
+        i = end
+        continue
+      }
+      if (char === '/' && (next === '/' || next === '*')) {
+        readTagComment()
+        continue
+      }
+      if (char === '<') tree.angles++
+      if (char === '>' && tree.angles > 0) {
+        tree.angles--
+        i++
+        continue
+      }
+      if (char === '/' && next === '>') {
+        i += 2
+        if (--tree.open === 0) break
+        tree.mode = 'children'
+        continue
+      }
+      if (char === '>') tree.mode = 'children'
+      i++
+    }
+    jsx.push({ start, end: i })
+    lastSignificant = 'a'
+  }
+
+  // Whether the code before `i` leaves an expression to start, where `/`
+  // opens a regular expression and, in JSX mode, `<` opens an element.
+  const expressionStarts = (): boolean => {
+    const before = source.slice(Math.max(0, i - 12), i).trimEnd()
+    return (
+      lastSignificant === '' ||
+      REGEX_PRECEDERS.has(lastSignificant) ||
+      REGEX_KEYWORDS.test(before)
+    )
   }
 
   while (i < source.length) {
@@ -156,33 +280,38 @@ export function lex(source: string): {
       readTemplate()
       continue
     }
-    if (char === '/') {
-      const before = source.slice(Math.max(0, i - 12), i).trimEnd()
-      if (
-        lastSignificant === '' ||
-        REGEX_PRECEDERS.has(lastSignificant) ||
-        REGEX_KEYWORDS.test(before)
-      ) {
-        readRegex()
-        continue
-      }
+    if (char === '/' && expressionStarts()) {
+      readRegex()
+      continue
     }
-    if (expressions.length > 0) {
-      const depth = expressions.length - 1
-      if (char === '{') expressions[depth] = (expressions[depth] ?? 0) + 1
+    if (
+      options.jsx === true &&
+      char === '<' &&
+      expressionStarts() &&
+      TAG_START.test(source.slice(i, i + 2)) &&
+      !TYPE_PARAMETERS.test(source.slice(i, i + 80))
+    ) {
+      const start = i
+      i++
+      readMarkup({ open: 1, mode: 'tag', angles: 0 }, start)
+      continue
+    }
+    const expression = expressions[expressions.length - 1]
+    if (expression !== undefined) {
+      if (char === '{') expression.depth++
       if (char === '}') {
-        if (expressions[depth] === 0) {
+        if (expression.depth === 0) {
           expressions.pop()
           i++
-          readTemplate()
+          expression.resume()
           continue
         }
-        expressions[depth] = (expressions[depth] ?? 0) - 1
+        expression.depth--
       }
     }
     if (!/\s/.test(char)) lastSignificant = /[\w$)\]]/.test(char) ? 'a' : char
     i++
   }
 
-  return { literals, comments, regexes }
+  return { literals, comments, regexes, jsx }
 }
