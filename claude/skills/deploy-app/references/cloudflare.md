@@ -54,4 +54,4 @@ Stop: `⏸ Attach the custom domain to the <project-name> Pages project in the C
 
 ## Step 6: hand off
 
-Report that setup is complete and name the seeded workflow (`tooling/cloudflare/configs/.github/workflows/deploy.yml`, synced via `canon tooling sync cloudflare . --write`) as what deploys on the next push. Do not invoke `git-pr` or `git-ship` from here. The operator or the controlling session decides when to open that pull request.
+Report that setup is complete and name the seeded workflow (`.github/workflows/deploy.yml`, synced via `canon tooling sync cloudflare . --write`) as what deploys on the next push. Do not invoke `git-pr` or `git-ship` from here. The operator or the controlling session decides when to open that pull request.
