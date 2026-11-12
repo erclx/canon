@@ -48,7 +48,7 @@ When modifying a root CI workflow, hook, script, or config:
 - Check `tooling/<stack>/configs/` and `seeds/` for a counterpart and apply the change there if targets should receive it. This is the root to seed direction.
 - Name a deliberately root-only change in the commit.
 - Find a counterpart under another name by searching `tooling/` for the root file's distinctive command or key, since a list of pairs goes stale.
-- Point the change at the plan's counterparts section where `plan-feature` writes one, and do not depend on it having landed.
+- State the other side in the plan's `## Counterparts` section, per `## Plan counterparts` below.
 
 When modifying `tooling/<stack>/configs/` or `tooling/<stack>/seeds/`:
 
@@ -59,6 +59,26 @@ When adding deps or scripts to `manifest.toml`:
 
 - Verify they don't conflict with the parent stack in the extends chain.
 - Scripts walk the extends chain too, so a child script overrides a parent script on the same key name.
+
+## Plan counterparts
+
+A plan here that changes one side of the canon-versus-seeded split carries a `## Counterparts` section saying what happens to the other side. `canon records validate plans` reports `counterpart-unstated` for a firing path no bullet covers and `counterpart-malformed` for a bullet it cannot read.
+
+A backticked path anywhere in `## Files to touch` fires when it falls in one of five classes, a path cited in an entry's reason included.
+
+- CI under `.github/`
+- Hooks under `.husky/` or `.claude/hooks/`
+- Scripts under `scripts/`
+- Root config, being a top-level file other than markdown, the license, or a lockfile
+- A stack's `tooling/<stack>/configs/` or `tooling/<stack>/seeds/`
+
+Each bullet names its paths in backticks before a colon and one verdict after it. A directory covers every file under it, and one bullet may name both sides.
+
+- `here` when the plan changes the other side too
+- `none, <reason>` when no counterpart exists or none should change
+- `filed` followed by the backticked stem of the task row carrying the other side
+
+The check runs only where a stack keeps a `tooling/<stack>/manifest.toml`, so a target project never sees it.
 
 ## Verify command
 

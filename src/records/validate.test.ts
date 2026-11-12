@@ -69,6 +69,13 @@ function conformingPlan(): string {
   ].join('\n')
 }
 
+function counterpartPlan(): string {
+  return conformingPlan().replace(
+    '- `standards/plan.md`: the sections and the answer contract',
+    '- `.github/workflows/ci.yml`: reads `package.json` for the version',
+  )
+}
+
 async function seedPlan(name: string, body: string): Promise<void> {
   const dir = recordsDir(ROOT, 'plans')
   mkdirSync(dir, { recursive: true })
@@ -418,6 +425,57 @@ describe('checkPlan', () => {
     expect(checkPlan('feature-a-b.md', body)).toEqual([])
   })
 
+  describe('Counterparts', () => {
+    const CONTEXT = { rootFiles: new Set(['package.json']) }
+
+    function workflowPlan(counterparts: string[]): string {
+      return conformingPlan()
+        .replace(
+          '- `standards/plan.md`: the sections and the answer contract',
+          '- `.github/workflows/ci.yml`: bound the job with a timeout',
+        )
+        .replace(
+          '**Verification:**',
+          [...counterparts, '**Verification:**'].join('\n'),
+        )
+    }
+
+    it('should report a counterpart-class path with no section', () => {
+      const findings = checkPlan('feature-a-b.md', workflowPlan([]), CONTEXT)
+
+      expect(kinds(findings)).toEqual(['counterpart-unstated'])
+      expect(findings[0].subject).toBe('.github/workflows/ci.yml')
+    })
+
+    it('should report a bullet with a bare none as malformed', () => {
+      const body = workflowPlan([
+        '## Counterparts',
+        '',
+        '- `.github/workflows/ci.yml`: none',
+        '',
+      ])
+
+      const findings = checkPlan('feature-a-b.md', body, CONTEXT)
+
+      expect(kinds(findings)).toEqual(['counterpart-malformed'])
+    })
+
+    it('should pass a bold-label section whose verdict files a row', () => {
+      const body = workflowPlan([
+        '**Counterparts:**',
+        '',
+        '- `.github/workflows/ci.yml`: filed `v187.9`',
+        '',
+      ])
+
+      expect(checkPlan('feature-a-b.md', body, CONTEXT)).toEqual([])
+    })
+
+    it('should report no counterpart finding when called with two arguments', () => {
+      expect(checkPlan('feature-a-b.md', workflowPlan([]))).toEqual([])
+    })
+  })
+
   describe('Current behavior', () => {
     const section = [
       '## Current behavior',
@@ -759,6 +817,31 @@ describe('validateRecords', () => {
     const outcome = await validateRecords(ROOT, 'plans')
 
     expect(outcome).toMatchObject({ ok: true, records: 1, findings: [] })
+  })
+
+  it('should report a counterpart-class plan in a project keeping stacks', async () => {
+    mkdirSync(join(ROOT, 'tooling/base'), { recursive: true })
+    await writeFile(join(ROOT, 'tooling/base/manifest.toml'), '')
+    await writeFile(join(ROOT, 'package.json'), '{}')
+    await seedPlan('feature-a-b.md', counterpartPlan())
+
+    const outcome = await validateRecords(ROOT, 'plans')
+
+    expect(outcome.ok).toBe(true)
+    if (!outcome.ok) return
+    expect(outcome.findings.map((found) => found.subject)).toEqual([
+      '.github/workflows/ci.yml',
+      'package.json',
+    ])
+  })
+
+  it('should report no counterpart finding in a project with no tooling stack', async () => {
+    await writeFile(join(ROOT, 'package.json'), '{}')
+    await seedPlan('feature-a-b.md', counterpartPlan())
+
+    const outcome = await validateRecords(ROOT, 'plans')
+
+    expect(outcome).toMatchObject({ ok: true, findings: [] })
   })
 
   it('should validate an old bold-label plan and report S1 under structure alone', async () => {
