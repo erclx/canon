@@ -20,9 +20,11 @@ export const HEADING = /^#{1,6}\s/
  * path heading per file, so two signals stand in where the colon is absent. A
  * label that is one whole code span breaks at any width, since a bold sentence
  * is never a single span. `MARKER_WIDTH` is read off the review bodies and the
- * records tree, where colon-less labels sit at or under 20 visible characters
- * and the 21 to 30 band holds lines nobody can classify on sight, such as
- * `One change across four files.`. Terminal punctuation separates nothing.
+ * records tree, where most colon-less labels sit at or under 20 visible
+ * characters and the 21 to 30 band holds lines nobody can classify on sight,
+ * such as `One change across four files.`. Terminal punctuation separates
+ * nothing. A 48-character hand-written marker stays unbroken, since raising
+ * the ceiling to reach it re-enters that band.
  *
  * Neither signal caps the colon form, which is its own evidence of a label and
  * reaches genuine markers between 31 and 50 characters.
@@ -642,7 +644,8 @@ function measureParagraph(block: readonly BodyLine[]): CadenceFinding {
  * that class, but about three quarters of what it flags is still wrong, split
  * between imperatives whose verb tags as a proper noun and declaratives whose
  * noun-ambiguous predicate, as in `Each maps to a skill.`, tags as a noun.
- * Separating those needs the predicate, which is syntax rather than a tag.
+ * Separating those needs the predicate, which is syntax rather than a tag, and
+ * no syntax parser was taken for a number nothing gates on.
  *
  * A heading fragment, a list item, and a table cell never reach this, since
  * `paragraphBlocks` ends a paragraph on each. A paragraph under the floor is
