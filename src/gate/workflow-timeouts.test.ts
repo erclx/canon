@@ -54,21 +54,22 @@ const allSteps = (): { file: string; step: WorkflowStep }[] =>
     ),
   )
 
-const canonWorkflowFiles = readdirSync(WORKFLOWS_DIR)
-  .filter((file) => /\.ya?ml$/.test(file))
-  .sort()
+// Labelled by repo-relative path, since a seed and canon's own copy can share
+// a basename
+describe.each(workflowFiles.map((path) => relative(REPO_ROOT, path)).sort())(
+  '%s',
+  (file) => {
+    // A job that sets uses: calls a reusable workflow and cannot carry the key
+    it('should bound every job with a timeout', () => {
+      const unbounded = Object.entries(readJobs(join(REPO_ROOT, file)))
+        .filter(([, job]) => job.uses === undefined)
+        .filter(([, job]) => typeof job['timeout-minutes'] !== 'number')
+        .map(([id]) => id)
 
-describe.each(canonWorkflowFiles)('%s', (file) => {
-  // A job that sets uses: calls a reusable workflow and cannot carry the key
-  it('should bound every job with a timeout', () => {
-    const unbounded = Object.entries(readJobs(join(WORKFLOWS_DIR, file)))
-      .filter(([, job]) => job.uses === undefined)
-      .filter(([, job]) => typeof job['timeout-minutes'] !== 'number')
-      .map(([id]) => id)
-
-    expect(unbounded).toEqual([])
-  })
-})
+      expect(unbounded).toEqual([])
+    })
+  },
+)
 
 describe('every workflow', () => {
   // A direct call reaches apt with no retry, so one stalled mirror

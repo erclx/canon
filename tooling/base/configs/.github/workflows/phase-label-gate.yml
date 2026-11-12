@@ -18,6 +18,7 @@ jobs:
   phase-label-gate:
     name: 🏷️ Phase Label Gate
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     # Dependabot bodies carry upstream release notes that read as phase labels
     if: github.event.pull_request.user.login != 'dependabot[bot]' && github.event.pull_request.user.login != 'renovate[bot]' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.base.ref == 'main')
     steps:

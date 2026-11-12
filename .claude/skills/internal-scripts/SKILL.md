@@ -46,6 +46,11 @@ When adding a command to any `manage-*.sh`:
 - Update the corresponding scenario list in `sandbox/infra/*.ts`
 - Update the CLI table in `README.md`
 
+When writing a test over a class of files, such as workflows, hooks, or configs:
+
+- Read every stack's tree beside the root, in `src/gate/` style, so the test covers every stack and not canon alone. When a test deliberately covers one side, name why in the test.
+- Follow the both-direction sync in `internal-tooling` when the class has a seeded counterpart.
+
 After editing scripts in a domain that has a sandbox scenario:
 
 - Run `canon sandbox infra:{domain} install` and `canon sandbox infra:{domain} sync` to verify
