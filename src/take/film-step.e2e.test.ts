@@ -411,7 +411,6 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       url: new URL('/ticket', server.url).href,
       plan: read.plan,
       out,
-      deviceScale: 1,
     })
 
     expect(result).toMatchObject({
