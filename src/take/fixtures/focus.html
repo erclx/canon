@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Focus</title>
+    <!--
+      One control on a white page whose focus draws a 2 px pure red outline,
+      so a reel frame's red pixels across one side of the outline read how
+      wide the ring drew.
+    -->
+    <style>
+      body {
+        margin: 0;
+        background: #fff;
+      }
+
+      #field {
+        position: absolute;
+        left: 400px;
+        top: 300px;
+        width: 160px;
+        height: 40px;
+        border: 0;
+        background: #ddd;
+      }
+
+      #field:focus {
+        outline: 2px solid #f00;
+        outline-offset: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="field">Field</button>
+  </body>
+</html>
