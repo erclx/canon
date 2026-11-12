@@ -199,11 +199,6 @@ function pushLines(result: StepResult, fields: Fields): string | undefined {
 }
 
 /**
- * The exit decides nothing here and the fields decide everything. A run that
- * removes one worktree and fails on another exits 1 with a directory already
- * deleted, so a report keyed on the exit would never name the removal.
- */
-/**
  * One line per branch the reclaim deleted, naming its tip. `git branch -D`
  * drops the branch's reflog with it and the verb's own lines go to a stderr the
  * hook never prints, so this is where the restore point survives.
@@ -222,6 +217,11 @@ function deletedBranchLines(fields: Fields): string {
   return lines
 }
 
+/**
+ * The exit decides nothing here and the fields decide everything. A run that
+ * removes one worktree and fails on another exits 1 with a directory already
+ * deleted, so a report keyed on the exit would never name the removal.
+ */
 function reclaimLines(fields: Fields): string | undefined {
   let lines = ''
   const removed = count(fields, 'removed')
