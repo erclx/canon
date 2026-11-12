@@ -78,16 +78,18 @@ describe('loadPaintedPatterns', () => {
     expect(isPainted('fixtures/page.html', patterns)).toBe(false)
   })
 
-  it('should paint this repository own rendered sources through its shipped override', () => {
+  it('should leave this repository design sources unpainted while their generated outputs paint', () => {
     const patterns = loadPaintedPatterns(
       fileURLToPath(new URL('../..', import.meta.url)),
     )
 
-    expect(isPainted('src/design/components.ts', patterns)).toBe(true)
-    expect(isPainted('src/design/css.ts', patterns)).toBe(true)
-    expect(isPainted('src/design/render.ts', patterns)).toBe(true)
-    expect(isPainted('src/design/css.test.ts', patterns)).toBe(false)
-    expect(isPainted('src/pr/lift.ts', patterns)).toBe(false)
+    expect(isPainted('src/design/parse.ts', patterns)).toBe(false)
+    expect(isPainted('src/design/render.ts', patterns)).toBe(false)
+    expect(isPainted('src/design/templates/status.css', patterns)).toBe(true)
+    expect(isPainted('web/src/styles/tokens.css', patterns)).toBe(true)
+    expect(
+      isPainted('web/public/previews/design-tokens/design.css', patterns),
+    ).toBe(true)
   })
 
   it('should paint the take engine and leave its tests unpainted through the shipped override', () => {
@@ -113,7 +115,6 @@ describe('loadPaintedPatterns', () => {
     ).toBe(false)
     expect(isPainted('tooling/astro/scenarios.css', patterns)).toBe(false)
     expect(isPainted('web/src/pages/index.astro', patterns)).toBe(true)
-    expect(isPainted('src/design/tokens.ts', patterns)).toBe(true)
   })
 
   it('should keep the default when the override does not parse', () => {

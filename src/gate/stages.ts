@@ -209,9 +209,11 @@ export const STAGES: readonly Stage[] = [
     success: 'Consumed copies clean',
   },
   {
-    // `canon/DESIGN.md`, the web stylesheet, and the tab icon are written
-    // from `src/design/tokens.ts`, and none is edited by hand. Three
-    // artifacts from one token source is the cost of the token move, and a
+    // `canon/DESIGN.md`, the web stylesheet, the tab icon, and the landing
+    // page's token preview are written from `src/design/`, and none is edited
+    // by hand. Four artifacts from one token source is the cost of the token
+    // move, and the preview's drift is what paints a `parse.ts` or `render.ts`
+    // change now that `src/design/**` is unpainted. A
     // render step that has to run is only safe while something fails when it
     // did not, which is this. The record and the worked example are
     // then counted against the prose budget, which the drift asserts cannot
@@ -251,6 +253,17 @@ export const STAGES: readonly Stage[] = [
         pathspec: 'web/public/favicon.svg',
         failure:
           'The tab icon drifted from the token source. Run bun run check and commit web/public/favicon.svg.',
+      },
+      {
+        kind: 'command',
+        argv: ['bun', 'run', 'web:previews'],
+        failure: 'Web preview regen failed',
+      },
+      {
+        kind: 'drift',
+        pathspec: 'web/public/previews/design-tokens',
+        failure:
+          'The token preview drifted from the design source. Run bun run check and commit web/public/previews/design-tokens.',
       },
       {
         kind: 'drift',

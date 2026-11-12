@@ -9,6 +9,8 @@ description: DESIGN.md as a generated record, the token module and component lay
 
 `canon/DESIGN.md` holds visual intent, being a short Overview, one-line rules, and a table naming what each role is for. This repository's record is generated from `src/design/tokens.ts` by `canon design regen`, and the `design` gate stage checks it for drift. A target writes its record by hand with no values.
 
+The same stage drift-checks the landing page's token preview, and that drift is what paints a `src/design/` change, since `canon/config/painted.json` leaves those sources unpainted.
+
 ## Layout
 
 ### `src/design/`

@@ -324,6 +324,22 @@ describe('the design stage', () => {
       ]),
     )
   })
+
+  it('should assert drift on the token preview after its regen', () => {
+    const checks =
+      STAGES.find((candidate) => candidate.id === 'design')?.checks ?? []
+    const regen = checks.findIndex(
+      (check) =>
+        check.kind === 'command' &&
+        check.argv.join(' ') === 'bun run web:previews',
+    )
+    const drifted = checks
+      .slice(regen + 1)
+      .flatMap((check) => (check.kind === 'drift' ? [check.pathspec] : []))
+
+    expect(regen).toBeGreaterThan(-1)
+    expect(drifted).toContain('web/public/previews/design-tokens')
+  })
 })
 
 describe('the markdown stage', () => {
