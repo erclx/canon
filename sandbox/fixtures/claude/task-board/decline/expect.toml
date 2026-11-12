@@ -3,7 +3,7 @@
 # needs no backslash escaping.
 
 # The arm asserts the successful move and the Declined: line, not the refusal
-# set. `src/tasks/archive.test.ts` covers those at the unit level, and a model
+# set. `src/tasks/archive/` covers those at the unit level, and a model
 # session at a dollar a run is the wrong instrument for a typed guard. What no
 # unit test reaches is whether the skill gets to the command at all with the
 # board in the state the command needs.
