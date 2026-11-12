@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Fake gh for src/commands/pr.test.ts. Reads FAKE_GH_FX, FAKE_GH_COMMENTS, and FAKE_GH_API_LOG.
+# Fake gh for the tests under src/commands/pr/. Reads FAKE_GH_FX, FAKE_GH_COMMENTS, and FAKE_GH_API_LOG.
 set -o pipefail
 fx="$FAKE_GH_FX"
 f=.
@@ -39,7 +39,7 @@ api*compare/*)
   id=${4##*/}
   echo "$id" >>"$fx/review-puts.log"
   [ -f "$fx/review-put-fail-$id" ] && exit 1
-  printf '%s\n' "${@: -1}" >>"$fx/review-bodies.log"
+  printf '%s' "${@: -1}" >"$fx/review-body-$id.log"
   echo "{}"
   ;;
 api*pulls/7/reviews*) [ -f "$fx/ui-reviews.json" ] && jq -r "$f" "$fx/ui-reviews.json" ;;

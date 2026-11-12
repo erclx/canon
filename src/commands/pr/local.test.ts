@@ -277,8 +277,13 @@ describe('canon pr local', () => {
         .split('\n')
         .sort(),
     ).toEqual(['11', '13'])
-    expect(readFileSync(join(tempDir, 'review-bodies.log'), 'utf8')).toContain(
-      'body=## UI review closed\n\n0 failed · 0 need your eyes · 2 passed · 0 not driven\nDriven at `38db88d` on a local preview, rendered by agent-browser.',
+    const masked =
+      'body=## UI review closed\n\n0 failed · 0 need your eyes · 2 passed · 0 not driven\nDriven at `38db88d` on a local preview, rendered by agent-browser.\n\n<!-- review-ui: head=38db88d -->'
+    expect(readFileSync(join(tempDir, 'review-body-11.log'), 'utf8')).toBe(
+      masked,
+    )
+    expect(readFileSync(join(tempDir, 'review-body-13.log'), 'utf8')).toBe(
+      masked,
     )
   })
 
