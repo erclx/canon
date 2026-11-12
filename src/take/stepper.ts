@@ -17,7 +17,7 @@ import { type ShellPage, openShell } from '@/take/shell'
  * exactly one frame between screenshots however long a frame takes to render,
  * and each screenshot comes back at twice the viewport, 3840x2160.
  *
- * Three orderings hold a take together, and each one broken deadlocks or
+ * These orderings hold a take together, and each one broken deadlocks or
  * freezes it rather than failing loudly:
  *
  * - An input is sent, a frame is stepped, and only then is the input awaited,
@@ -26,6 +26,10 @@ import { type ShellPage, openShell } from '@/take/shell'
  *   any other base leaves every CSS animation at its first frame
  * - No frame is begun before the load event, since one sent mid-navigation can
  *   go unanswered
+ * - Frame ticks sit at or ahead of the page's clock once virtual time pauses,
+ *   since Blink starts a transition on the later of the two, and ticks lagging
+ *   the real time setup spent leave every later transition starting in the
+ *   future of the frames
  * - A frame is begun only once the one before it settles, since Chromium
  *   refuses a second while one is pending, and a frame left pending past the
  *   stall limit falls the beat back rather than hanging it
@@ -84,7 +88,8 @@ export async function filmStepped(
   const stallMs = request.stallMs ?? STALL_MS
   let still: (() => Promise<Buffer | undefined>) | undefined
   try {
-    let ticks = await load(page, request.url)
+    const loadTicks = await load(page, request.url)
+    let ticks = loadTicks
     let outstanding: Promise<unknown> = Promise.resolve()
     const beginFrame = (screenshot: boolean) => {
       const reply = outstanding.then(() =>
@@ -111,6 +116,7 @@ export async function filmStepped(
     await live.pointer({ type: 'move', ...START })
 
     await page.send('Emulation.setVirtualTimePolicy', { policy: 'pause' })
+    ticks = alignTicks({ ticks, loadTicks, ...(await readPageClock(page)) })
 
     const events: LogEvent[] = []
     let frames = 0
@@ -223,6 +229,57 @@ async function load(page: ShellPage, url: string): Promise<number> {
     )
   }
   return timestamp
+}
+
+export interface TickAlignment {
+  readonly ticks: number
+  /** The load event's monotonic time, which seeded the ticks. */
+  readonly loadTicks: number
+  /** The page's `performance.now()`, read after the pause. */
+  readonly pageNow?: number
+  /** The navigation entry's `loadEventStart`, the load event in the page's base. */
+  readonly loadEventStart?: number
+}
+
+/**
+ * The ticks the first recorded frame builds on, being the page clock carried
+ * into the monotonic base plus one frame of margin, or the current ticks when
+ * they already lead it or the page gave no usable timing. Never moves the
+ * ticks backward.
+ */
+export function alignTicks(alignment: TickAlignment): number {
+  const { ticks, loadTicks, pageNow, loadEventStart } = alignment
+  if (
+    pageNow === undefined ||
+    loadEventStart === undefined ||
+    !Number.isFinite(pageNow) ||
+    !Number.isFinite(loadEventStart) ||
+    loadEventStart <= 0
+  ) {
+    return ticks
+  }
+  return Math.max(ticks, loadTicks + (pageNow - loadEventStart) + FRAME_MS)
+}
+
+/**
+ * Reads the page's clock beside the load event in the same base, since
+ * `performance.now()` restarts at navigation and only `loadEventStart` pairs
+ * it exactly with the load event's monotonic stamp. A read that fails or
+ * returns no entry yields nothing, and the ticks stand.
+ */
+async function readPageClock(
+  page: ShellPage,
+): Promise<Pick<TickAlignment, 'pageNow' | 'loadEventStart'>> {
+  const reading = await page
+    .evaluate<unknown>(
+      "[performance.now(), performance.getEntriesByType('navigation')[0]?.loadEventStart]",
+    )
+    .catch(() => undefined)
+  if (!Array.isArray(reading)) return {}
+  const [pageNow, loadEventStart] = reading
+  return typeof pageNow === 'number' && typeof loadEventStart === 'number'
+    ? { pageNow, loadEventStart }
+    : {}
 }
 
 /**
