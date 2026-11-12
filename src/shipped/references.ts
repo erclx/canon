@@ -71,28 +71,17 @@ const PULL_REQUEST = /(?<![0-9A-Za-z_])#([0-9]+)(?![0-9A-Za-z_])/g
  *
  * Seven characters is git's own short-sha floor and forty is a full one. No
  * rule here requires a letter, because an all-digit sha is real:
- * `orchestrator-poll.md` cites `5653721`, and the first pass at this classifier
- * required a letter and lost it.
+ * `orchestrator-poll.md` cites `5653721`.
  *
  * The lookbehind rejects `@` and `/` so the repair form `erclx/canon@5653721`
  * passes the check that told the author to write it, and rejects `#` so a hex
  * color long enough to reach the floor is not reported twice under two names.
  *
- * Three false-positive classes survive by construction and the marker is what
- * answers each. An all-digit hex color is indistinguishable from a pull request
- * number. A seven-letter word spelled from `a` through `f` alone, such as
- * `defaced`, reads as a sha. Neither occurs anywhere in the corpus today.
- *
- * The third is the one a later author meets. Admitting an all-digit sha admits
- * every run of seven or more decimal digits with it, so a date written without
- * separators, a large count, or a float artifact reads as a commit reference.
- * The corpus carries no instance and that is the corpus bounds rather than luck:
- * twelve such runs were counted when the scenario tree still sat under
- * `scripts/`, eleven of them under that tree, `scripts/eval/`, or a test file,
- * all now outside the corpus, and the twelfth is the genuine sha in
- * `orchestrator-poll.md`. Write a seven-digit measurement into a
- * shipped page and the push fails on it, which the marker answers and no
- * narrowing can, since requiring a letter loses the all-digit sha above.
+ * Three false-positive classes survive by construction, and the marker answers
+ * each: an all-digit hex color, a seven-letter word spelled from `a` through
+ * `f` alone, such as `defaced`, and any run of seven or more decimal digits,
+ * such as an unseparated date or a large count. No narrowing answers the third,
+ * since requiring a letter loses the all-digit sha above.
  */
 const COMMIT_SHA = /(?<![0-9A-Za-z_@/#])([0-9a-f]{7,40})(?![0-9A-Za-z_])/g
 
@@ -152,16 +141,10 @@ const STANDARDS_CALL = /\bcanon standards(?![\w-])/g
  * A phase-label-shaped token: exactly two numeric groups, with a negative
  * lookahead rejecting a third.
  *
- * This does not reuse `VERSION_TOKEN` from `src/labels/phase.ts`, which
- * admits one or two decimal groups and therefore matches a three-group
- * semver tag as readily as a two-group phase label. That is the right shape
- * there, since `scanPhaseLabels` sorts the two namespaces apart by asking
- * whether the pull request carrying the token is release-please's own, a
- * signal this reader has no equivalent of: a shipped-corpus file carries no
- * pull request to test. Shape is the only discriminator available here, and
- * every phase label this board issues carries exactly two groups while every
- * semver tag carries three, so narrowing to two removes the semver class by
- * construction rather than by a marker standing in for the missing signal.
+ * `VERSION_TOKEN` in `src/labels/phase.ts` also matches a semver tag, which
+ * fits there because `scanPhaseLabels` asks whether the carrying pull request
+ * is release-please's own. A shipped file carries no pull request, so shape is
+ * the only discriminator: a phase label has two groups and a semver tag three.
  *
  * A target holds no board to resolve a label against, so a bare instance
  * here is unresolvable the same way a same-repository citation is, and is
@@ -197,12 +180,8 @@ const RULE_PATH = /(?<![\w./-])\.claude\/rules\/[^\s`)\]]*?[\w-]+\.md\b/g
  * this checkout alone. The segment class admits `<` and `>` for that reason,
  * and a brace group such as `{configs,seeds}` matches when it lists either.
  *
- * Only `configs` and `seeds` match. A bare `tooling/`, a stack's
- * `manifest.toml`, and a `canon tooling sync` call pass. Three bare `tooling/`
- * mentions name the category in shipped skill bodies today, and widening to
- * other files under a stack is its own measured change. On 2026-11-12 the
- * pattern matched two lines across `claude/skills/`, both removed before it
- * gated.
+ * Only `configs` and `seeds` match. A bare `tooling/`, which names the
+ * category, a stack's `manifest.toml`, and a `canon tooling sync` call pass.
  *
  * The leading boundary is `DOCS_PATH`'s, so `foo/tooling/base/configs/` reads
  * as some other tree's folder and passes. No filesystem read backs the match,
