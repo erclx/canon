@@ -27,10 +27,11 @@ Reads a take plan, films each beat from a fresh load, and writes the clip, the l
 
 Owns the static pages the end to end takes film, two of which post each input they receive back to the test's server.
 
-- `motion.html` is the release-checklist page every motion rule is measured on, and `motion-server.ts` serves it with canon's token sheet and Geist from where they live
+- `motion.html` is the release-checklist page every motion rule is measured on, and `motion-server.ts` serves any fixture with canon's token sheet and Geist from where they live
 - `motion.html` reports the animation frame each input paints in, since a stepped page's `performance.now()` runs ahead of the clip while inputs are dispatched
 - `scrollbars.html` posts its scrollbar gutter, 0 on both routes since a take hides scrollbars until a beat sets `scrollbars: true`, which a stepped beat that falls back to the screencast keeps
 - `watch.ts` films `motion.json` on that page and renders each beat with its zoom and cursor burned in, for judging a camera change by eye
+- `pr-reel.ts` films each changed fixture with its `<stem>.json` plan, or `motion.json`, through the worktree's engine into the reel the lift owes, since canon's config paints `src/take/**`
 
 ## Gotchas
 

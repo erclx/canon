@@ -207,8 +207,9 @@ export function registerEvidence(pr: Command): void {
         'labeled with the head this render describes as the one it was filmed',
         'at. Without --reel, a reel the marked comment already embeds is carried',
         'forward under the head it names, so a stale reel never reads as',
-        'current, and a passed one replaces it. Like --local it rides on a',
-        'checklist or a comparison and never opens a comment alone.',
+        'current, and a passed one replaces it. Unlike --local, a passed reel',
+        'opens a render alone, so a branch whose evidence is a filmed reel',
+        'posts it with no checklist or comparison. A carried reel opens none.',
         '',
         '--local-skip and --reel-skip each put one line under the addresses,',
         '**No local preview:** or **No reel:** followed by the text passed, a',
@@ -703,10 +704,12 @@ async function runEvidence(
   }
 
   // A checklist opens a comment on its own, so it always lands in the marked
-  // comment a later call edits. A local address rides on a checklist or a
-  // hosted preview and never opens one alone, so a docs-only branch with a
-  // server up posts nothing. An uncaptured painted path opens one too, so the
-  // gap the lift refuses on shows on the thread.
+  // comment a later call edits. A passed reel opens one too, since it is
+  // evidence a branch filmed rather than a server it happens to run. A local
+  // address rides on a checklist or a hosted preview and never opens one
+  // alone, so a docs-only branch with a server up posts nothing. An uncaptured
+  // painted path opens one too, so the gap the lift refuses on shows on the
+  // thread.
   // A dropped checklist still opens a render, so the marked comment holding
   // it is edited without the block rather than left showing it.
   const hasChecklist =
@@ -715,6 +718,7 @@ async function runEvidence(
   if (
     grouped.kind === 'refused' &&
     opts.preview === undefined &&
+    opts.reel === undefined &&
     !hasChecklist &&
     !hasUncaptured
   ) {

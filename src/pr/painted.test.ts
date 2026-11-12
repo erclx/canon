@@ -82,6 +82,16 @@ describe('loadPaintedPatterns', () => {
     expect(isPainted('src/pr/lift.ts', patterns)).toBe(false)
   })
 
+  it('should paint the take engine and leave its tests unpainted through the shipped override', () => {
+    const patterns = loadPaintedPatterns(
+      fileURLToPath(new URL('../..', import.meta.url)),
+    )
+
+    expect(isPainted('src/take/camera.ts', patterns)).toBe(true)
+    expect(isPainted('src/take/camera.test.ts', patterns)).toBe(false)
+    expect(isPainted('src/take/film.e2e.test.ts', patterns)).toBe(false)
+  })
+
   it('should leave a synced stack config unpainted through its shipped override', () => {
     const patterns = loadPaintedPatterns(
       fileURLToPath(new URL('../..', import.meta.url)),
