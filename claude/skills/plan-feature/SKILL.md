@@ -108,7 +108,7 @@ A plan sequencing its work into batches declares where each pull request ends, s
 
 Decide the mode based on what Step 3 produced:
 
-- **Small** when the plan touches 2 files or fewer, owes no `## Counterparts`, makes no cross-cutting choice, and Risks and Questions are `None identified.`
+- **Small** when the plan touches 2 files or fewer, has no architectural or cross-cutting choices, and both Risks and Questions come out `None identified.`
 - **Full** otherwise
 
 A consumer list is a `Risks` entry, which already forces Full. A resource with more than one consumer, at least one writing, is a cross-cutting choice, so such a plan stays Full even at two files.
