@@ -21,11 +21,12 @@ Write only what a compaction destroys. Git, the tree, and durable records are al
 
 Write one file to `.canon/compact/<slug>.md`, overwriting any note of the same name.
 
-| Part     | Rule                                                                                                                     |
-| -------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `<slug>` | Short kebab-case phrase for what the session did, not the branch, so work on `main` still gets a name. `latest` if none. |
-| Sections | Follow `${CLAUDE_SKILL_DIR}/references/handoff-note.md`, read before drafting rather than worked from memory             |
-| Count    | One note per piece of work. A second file for the same work splits the handoff.                                          |
+| Part      | Rule                                                                                                                     |
+| --------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `<slug>`  | Short kebab-case phrase for what the session did, not the branch, so work on `main` still gets a name. `latest` if none. |
+| Sections  | Follow `${CLAUDE_SKILL_DIR}/references/handoff-note.md`, read before drafting rather than worked from memory             |
+| Count     | One note per piece of work. A second file for the same work splits the handoff.                                          |
+| `session` | The `sessionId` of `canon sessions list --self --json`, read before drafting. Write no field where the read refuses.     |
 
 ## Step 2: report
 
