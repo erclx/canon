@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Fake gh for the pr frames tests in src/commands/pr.test.ts. Refuses every write the way a read-only token does, and logs each call to FAKE_LOG.
+# Fake gh for the pr frames tests in src/commands/pr/frames.test.ts. Refuses every write the way a read-only token does, and logs each call to FAKE_LOG.
 echo "$*" >>"$FAKE_LOG"
 case "$*" in
 "api repos/{owner}/{repo}") echo '{"full_name":"o/r"}' ;;
