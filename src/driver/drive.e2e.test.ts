@@ -9,9 +9,9 @@ import { readDriverPlan } from '@/driver/steps'
  * state. The fixture's defect is both: it needs the menu open, and it needs the
  * short viewport, so a run that skipped either reports the page clean.
  *
- * The suite needs a browser binary. CI installs none, so it skips there rather
- * than failing, which means a green pipeline is not evidence this passed. Run
- * it locally, or read the manual pass recorded with the feature.
+ * The suite needs a browser binary and skips without one. The E2E Suites job
+ * in verify.yml installs it and fails before any suite starts when it is
+ * missing, so read that job, not Static Checks, for whether this passed.
  */
 
 /**

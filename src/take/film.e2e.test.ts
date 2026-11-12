@@ -41,9 +41,9 @@ const FRAME_MS = 1000 / FPS
  * because the property the stepper exists for, one frame of page time per
  * frame of clip, is visible only in the pixels it wrote.
  *
- * The suite needs chrome-headless-shell and FFmpeg. CI installs neither, so it
- * skips there rather than failing, which means a green pipeline is not
- * evidence this passed. Run it locally.
+ * The suite needs chrome-headless-shell and FFmpeg and skips without either.
+ * The E2E Suites job in verify.yml installs both and fails before any suite
+ * starts when one is missing.
  */
 
 const PAGE = readFileSync(

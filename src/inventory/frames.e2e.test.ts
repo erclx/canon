@@ -10,8 +10,8 @@ import { walk } from '@/inventory/walk'
  * subject reports depends on what the browser computes: the dark theme, a
  * pseudo-element's box, and a transition's duration exist nowhere else.
  *
- * The suite needs a browser binary. CI installs none, so it skips there rather
- * than failing, the same as the route walk's suite. Run it locally.
+ * The suite needs a browser binary and skips without one, the same as the
+ * route walk's suite. The E2E Suites job in verify.yml installs it.
  */
 
 const FIXTURES = fileURLToPath(new URL('./fixtures/frames', import.meta.url))
