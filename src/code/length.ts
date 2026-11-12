@@ -1,5 +1,5 @@
 import { astroFrontmatter } from '@/code/astro'
-import { lex } from '@/code/lex'
+import { lex, type Range } from '@/code/lex'
 import {
   isPythonTestFile,
   type FunctionRead,
@@ -407,32 +407,70 @@ export function functionSpans(
     return low + 1
   }
 
-  const open: { header: Header | undefined }[] = []
+  return bodies(code)
+    .filter((body) => !body.testCallback)
+    .map(({ header, close, depth }) => {
+      const line = lineOf(header.start)
+      return { line, lines: lineOf(close) - line + 1, name: header.name, depth }
+    })
+}
+
+/**
+ * Each function's block body as offsets from its `{` to just past its `}`,
+ * in the order each closes, by the reading `functionSpans` takes. Unlike that
+ * reading, a callback passed to `describe`, `it`, or `test` is a body here,
+ * since a comment inside one sits inside a function all the same.
+ */
+export function functionBodies(
+  source: string,
+  options: { readonly jsx?: boolean } = {},
+): Range[] {
+  return bodies(codeOnly(source, options)).map(({ open, close }) => ({
+    start: open,
+    end: close + 1,
+  }))
+}
+
+interface Body {
+  readonly header: Header
+  /** Offsets of the opening and the closing brace. */
+  readonly open: number
+  readonly close: number
+  /** Enclosing bodies, a test runner's callback left out. */
+  readonly depth: number
+  readonly testCallback: boolean
+}
+
+/** Every function body in blanked code, in the order each closes. */
+function bodies(code: string): Body[] {
+  const open: {
+    header: Header | undefined
+    at: number
+    testCallback: boolean
+  }[] = []
   let depth = 0
-  const spans: FunctionSpan[] = []
+  const found: Body[] = []
   for (let i = 0; i < code.length; i++) {
     if (code[i] === '{') {
-      const found = headerAt(code, i)
-      const header =
-        found !== undefined && isTestCallback(code, found.start)
-          ? undefined
-          : found
-      open.push({ header })
-      if (header !== undefined) depth++
+      const header = headerAt(code, i)
+      const testCallback =
+        header !== undefined && isTestCallback(code, header.start)
+      open.push({ header, at: i, testCallback })
+      if (header !== undefined && !testCallback) depth++
     } else if (code[i] === '}') {
-      const header = open.pop()?.header
-      if (header === undefined) continue
-      depth--
-      const line = lineOf(header.start)
-      spans.push({
-        line,
-        lines: lineOf(i) - line + 1,
-        name: header.name,
+      const entry = open.pop()
+      if (entry?.header === undefined) continue
+      if (!entry.testCallback) depth--
+      found.push({
+        header: entry.header,
+        open: entry.at,
+        close: i,
         depth,
+        testCallback: entry.testCallback,
       })
     }
   }
-  return spans
+  return found
 }
 
 /**

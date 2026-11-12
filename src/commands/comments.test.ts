@@ -108,3 +108,69 @@ describe('canon comments scan vocabulary root', () => {
     RUN_TIMEOUT_MS,
   )
 })
+
+describe('canon comments scan block record', () => {
+  let TREE: string
+
+  beforeAll(async () => {
+    TREE = await realpath(await mkdtemp(join(tmpdir(), 'canon-comments-caps-')))
+    const git = (...args: string[]) =>
+      execa('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+        cwd: TREE,
+      })
+    const inBody = Array.from({ length: 11 }, (_, i) => `  // line ${i}`)
+    await git('init', '-q')
+    await writeFile(
+      join(TREE, 'a.ts'),
+      ['function a() {', ...inBody, '  return 1', '}', ''].join('\n'),
+    )
+    await git('add', '.')
+    await git('commit', '-qm', 'one')
+    await writeFile(join(TREE, 'b.ts'), 'export const b = 1\n')
+    await git('add', '.')
+    await git('commit', '-qm', 'two')
+  }, SETUP_TIMEOUT_MS)
+
+  afterAll(async () => {
+    await rm(TREE, { recursive: true, force: true })
+  })
+
+  it(
+    'should carry the caps and the block lists on the snapshot and not on a trend point',
+    async () => {
+      const record = (await scan(
+        TREE,
+        '--since',
+        'HEAD~1',
+        '--languages',
+        'ts',
+      )) as unknown as {
+        bodyBlockCap: number
+        fileLongBlockCap: number
+        longBlockFloor: number
+        snapshot: Record<string, unknown>[]
+        trend: { languages: Record<string, unknown>[] }[]
+      }
+
+      expect([
+        record.longBlockFloor,
+        record.bodyBlockCap,
+        record.fileLongBlockCap,
+      ]).toEqual([10, 10, 200])
+      expect(record.snapshot[0]?.bodyBlocks).toEqual([
+        { file: 'a.ts', line: 2, lines: 11 },
+      ])
+      expect(record.snapshot[0]?.longBlockFiles).toEqual([
+        { file: 'a.ts', lines: 11, blocks: 1, headLines: 0, bodyLines: 11 },
+      ])
+      expect(record.trend.length).toBeGreaterThan(0)
+      for (const point of record.trend) {
+        expect(Object.keys(point.languages[0] ?? {})).not.toContain('blocks')
+        expect(Object.keys(point.languages[0] ?? {})).not.toContain(
+          'bodyBlocks',
+        )
+      }
+    },
+    RUN_TIMEOUT_MS,
+  )
+})
