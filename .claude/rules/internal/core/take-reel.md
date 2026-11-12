@@ -8,7 +8,7 @@ paths:
 
 ## Filming
 
-- Before opening or pushing a pull request changing a non-test path under `src/take/`, run `bun src/take/fixtures/pr-reel.ts --base origin/main --out .canon/tmp/take-reel/<number> --json`.
+- After opening or pushing a pull request changing a non-test path under `src/take/`, run `bun src/take/fixtures/pr-reel.ts --base origin/main --out .canon/tmp/take-reel/<number> --json`.
 - Never film with the `canon` on PATH, which is the published release rather than the engine under review.
 - Write a `<stem>.json` plan beside a fixture the change adds or alters, since a fixture with no plan films `motion.json` instead.
 - On `over-cap`, which only a fixture's own plan raises, cut its beats through the one named and film again. The motion fallback cuts itself and lists the rest in `dropped`.
