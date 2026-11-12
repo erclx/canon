@@ -23,14 +23,13 @@ Reads a take plan, films each beat from a fresh load, and writes the clip, the l
 - The camera zooms in over the glide reaching a target and out over the glide leaving it, scaling about the target, at a depth the clip's resolution caps, and pans only at a steady scale
 - Stepped frames stream into the system FFmpeg, screencast frames spool beside the clip until the stop, and FFmpeg's absence refuses before any browser launches
 
-Both routes hide scrollbars unless a beat sets `scrollbars: true`. The stepper then drops its `--hide-scrollbars` flag and the screencast ignores Playwright's default of it, so a stepped beat that falls back keeps its scrollbars.
-
 ### `src/take/fixtures/`
 
 Owns the static pages the end to end takes film, two of which post each input they receive back to the test's server.
 
 - `motion.html` is the release-checklist page every motion rule is measured on, and `motion-server.ts` serves it with canon's token sheet and Geist from where they live
 - `motion.html` reports the animation frame each input paints in, since a stepped page's `performance.now()` runs ahead of the clip while inputs are dispatched
+- `scrollbars.html` posts its scrollbar gutter, 0 on both routes since a take hides scrollbars until a beat sets `scrollbars: true`, which a stepped beat that falls back to the screencast keeps
 - `watch.ts` films `motion.json` on that page and renders each beat with its zoom and cursor burned in, for judging a camera change by eye
 
 ## Gotchas
