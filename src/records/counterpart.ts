@@ -170,6 +170,13 @@ function covers(stated: string, path: string): boolean {
   return path === base || path.startsWith(`${base}/`)
 }
 
+/**
+ * No shipped standard describes the section, since the canon-versus-seeded
+ * split exists only in this toolkit, so each message carries the form itself.
+ */
+const BULLET_FORM =
+  'Write it as "- `<path>`: here", "- `<path>`: none, <reason>", or "- `<path>`: filed `<row stem>`" under ## Counterparts, where a directory path covers every file under it.'
+
 function shorten(label: string): string {
   return label.length > 60 ? `${label.slice(0, 57)}...` : label
 }
@@ -196,8 +203,7 @@ export function checkCounterparts(
     findings.push({
       kind: 'counterpart-malformed',
       subject: shorten(bullet.text),
-      message:
-        'states no path before a colon, or no verdict of here, none with a reason, or filed with a backticked row stem.',
+      message: `states no backticked path before a colon, or no verdict after it that reads as here, none with a reason, or filed with a backticked row stem. ${BULLET_FORM}`,
     })
   }
 
@@ -209,8 +215,7 @@ export function checkCounterparts(
     findings.push({
       kind: 'counterpart-unstated',
       subject: path,
-      message:
-        'is a canon CI, hook, script, root config, or stack configs or seeds path, and no ## Counterparts bullet states what happens to the other side.',
+      message: `is a canon CI, hook, script, root config, or stack configs or seeds path, and no ## Counterparts bullet states what happens to its seeded or canon counterpart. ${BULLET_FORM}`,
     })
   }
 

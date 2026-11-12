@@ -147,6 +147,17 @@ describe('checkCounterparts', () => {
     expect(checkCounterparts(files, section, CONTEXT)).toEqual([])
   })
 
+  it.each([
+    ['an unstated path', undefined],
+    ['a malformed bullet', ['- `.github/workflows/ci.yml`: none']],
+  ])('states the expected bullet form on %s', (_case, section) => {
+    const [found] = checkCounterparts(files, section, CONTEXT)
+
+    expect(found.message).toContain('- `<path>`: here')
+    expect(found.message).toContain('- `<path>`: none, <reason>')
+    expect(found.message).toContain('- `<path>`: filed `<row stem>`')
+  })
+
   it('reports nothing when no path fires', () => {
     const entries = filesEntry('src/records/validate.ts')
 
