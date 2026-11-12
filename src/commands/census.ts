@@ -1,6 +1,10 @@
 import { resolve } from 'node:path'
 import type { Command } from 'commander'
-import { census, type CensusRefusal } from '@/census/count'
+import {
+  census,
+  FOLDER_FILE_CHECKPOINT,
+  type CensusRefusal,
+} from '@/census/count'
 import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
 
 interface CensusCommandOptions {
@@ -28,6 +32,10 @@ export function register(program: Command): void {
         '  Tracked files plus untracked files git does not ignore, the same',
         '  corpus the citation check, the markdown corpus, and the secret',
         '  scan already read. A line total skips whatever reads as binary.',
+        '',
+        'Folders:',
+        '  Only folders holding 10 or more files of their own are listed, each',
+        '  counted without its subfolders. A fixtures folder is left out.',
         '',
         'Exit codes:',
         '  0  the census completed',
@@ -84,6 +92,17 @@ async function runCensus(
     )
   }
 
+  logStep('Folders')
+  if (result.folders.length === 0) {
+    logInfo(`none hold ${FOLDER_FILE_CHECKPOINT} or more files`)
+  }
+  for (const folder of result.folders) {
+    const kinds = folder.byExtension
+      .map((entry) => `${entry.extension} ${entry.files}`)
+      .join(', ')
+    logInfo(`${folder.path}: ${plural(folder.files, 'file')} (${kinds})`)
+  }
+
   logStep('Lines')
   logInfo(`${result.lines} counted, skipping binary or unreadable files`)
 
@@ -97,6 +116,8 @@ async function runCensus(
         skipped: result.skipped,
         lines: result.lines,
         byExtension: result.byExtension,
+        folderCheckpoint: FOLDER_FILE_CHECKPOINT,
+        folders: result.folders,
       })}\n`,
     )
   }
