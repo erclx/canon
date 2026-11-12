@@ -85,7 +85,7 @@ describe('every workflow', () => {
       .filter(({ step }) => typeof step['timeout-minutes'] !== 'number')
       .map(({ file, step }) => `${file}: ${step.name}`)
 
-    expect(steps).toHaveLength(4)
+    expect(steps).toHaveLength(2)
     expect(unbounded).toEqual([])
   })
 

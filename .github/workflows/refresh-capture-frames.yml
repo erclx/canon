@@ -50,10 +50,6 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
-      - name: Install Playwright System Dependencies
-        timeout-minutes: 10
-        run: scripts/ci/install-playwright-deps.sh chromium
-
       - name: Install Playwright Chromium
         run: bunx playwright install chromium
 
