@@ -64,6 +64,11 @@ export interface Beat {
    * carries the cursor and the click ring. Absent means the zoom runs.
    */
   readonly push?: false
+  /**
+   * True films the page with its classic scrollbars drawn, which take 15 px of
+   * layout width. Absent means they stay hidden.
+   */
+  readonly scrollbars?: true
   /** Runs after the page loads and before the first frame is kept. */
   readonly setup: readonly TakeStep[]
   readonly steps: readonly TakeStep[]
@@ -180,11 +185,18 @@ function readBeat(entry: unknown, index: number, fallback: Route): Beat {
       `${name} carries a push that is not true or false`,
     )
   }
+  if (entry.scrollbars !== undefined && typeof entry.scrollbars !== 'boolean') {
+    throw new Refusal(
+      'bad-beat',
+      `${name} carries a scrollbars that is not true or false`,
+    )
+  }
 
   return {
     name,
     route: route as Route,
     ...(entry.push === false ? { push: false as const } : {}),
+    ...(entry.scrollbars === true ? { scrollbars: true as const } : {}),
     setup: (entry.setup ?? []).map((step: unknown, i: number) =>
       readStep(step, `${name}, setup step ${i + 1}`),
     ),
