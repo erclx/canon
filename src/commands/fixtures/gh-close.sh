@@ -1,5 +1,5 @@
 #!/bin/sh
-# Fake gh for the pr close tests in src/commands/pr.test.ts. Reads FAKE_LOG and FAKE_HEAD.
+# Fake gh for the pr close tests in src/commands/pr/close.test.ts. Reads FAKE_LOG and FAKE_HEAD.
 echo "$*" >>"$FAKE_LOG"
 case "$*" in
 *"-X POST"*) printf 'https://example.test/c/1' ;;

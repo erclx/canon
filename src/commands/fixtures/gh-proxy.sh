@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Fake gh that blocks GraphQL like the proxy, for src/commands/pr.test.ts. Reads FAKE_DIR.
+# Fake gh that blocks GraphQL like the proxy, for src/commands/pr/rest.test.ts and src/commands/pr/drive-copy.test.ts, loaded through PROXY_GH in src/commands/pr/fixture.ts. Reads FAKE_DIR.
 set -o pipefail
 fx="$FAKE_DIR"
 echo "$*" >>"$fx/gh.log"
