@@ -79,20 +79,21 @@ A staged batch is a concern of its own and takes its own file rather than a `**B
 
 The document opens with `# Feature: <short title>` and one paragraph stating what is being built and why now. The sections below follow in this order.
 
-| Section                | Holds                                                                       | Required                                          |
-| ---------------------- | --------------------------------------------------------------------------- | ------------------------------------------------- |
-| `## Summary`           | three to five one-line bullets: the goal, the deliverables, the trade-off   | Always                                            |
-| `## Current behavior`  | each command run against the thing being changed and what it showed         | When the change touches something that runs       |
-| `## Constraints`       | durable rules the work must respect                                         | When supplied                                     |
-| `## Files to touch`    | each file with a one-line reason                                            | Always                                            |
-| `## Verbatim`          | settled wording that lands unchanged in a file, one H3 per block            | When wording is settled                           |
-| `## Design references` | the tracked design folders the change builds against, each with its surface | When Files to touch names a rendered-surface file |
-| `## Reference images`  | the untracked images the plan was shaped against, each from the main root   | When an image shaped the plan                     |
-| `## Verification`      | the test or command that proves each outcome                                | Always                                            |
-| `## Risks`             | conflicts, coupling, and the tricky spots                                   | Always                                            |
-| `## Review focus`      | the inputs or states that would break the change, for the reviewer          | Always                                            |
-| `## Questions`         | numbered open decisions, each with a suggestion and an answer slot          | Always                                            |
-| `## Sources`           | the outside sources a decision rests on, each with its quoted passage       | When a decision rests on an outside source        |
+| Section                | Holds                                                                       | Required                                           |
+| ---------------------- | --------------------------------------------------------------------------- | -------------------------------------------------- |
+| `## Summary`           | three to five one-line bullets: the goal, the deliverables, the trade-off   | Always                                             |
+| `## Current behavior`  | each command run against the thing being changed and what it showed         | When the change touches something that runs        |
+| `## Constraints`       | durable rules the work must respect                                         | When supplied                                      |
+| `## Files to touch`    | each file with a one-line reason                                            | Always                                             |
+| `## Counterparts`      | each seeded-or-canon path with what happens to its other side               | When Files to touch names a counterpart-class path |
+| `## Verbatim`          | settled wording that lands unchanged in a file, one H3 per block            | When wording is settled                            |
+| `## Design references` | the tracked design folders the change builds against, each with its surface | When Files to touch names a rendered-surface file  |
+| `## Reference images`  | the untracked images the plan was shaped against, each from the main root   | When an image shaped the plan                      |
+| `## Verification`      | the test or command that proves each outcome                                | Always                                             |
+| `## Risks`             | conflicts, coupling, and the tricky spots                                   | Always                                             |
+| `## Review focus`      | the inputs or states that would break the change, for the reviewer          | Always                                             |
+| `## Questions`         | numbered open decisions, each with a suggestion and an answer slot          | Always                                             |
+| `## Sources`           | the outside sources a decision rests on, each with its quoted passage       | When a decision rests on an outside source         |
 
 ### Writing a section
 
@@ -203,6 +204,28 @@ A plan whose `## Files to touch` names a rendered-surface file (`.tsx`, `.jsx`, 
 - Write `None identified.` when the project has no `canon/design/` folder or no folder governs the change, so the section reads as considered
 - Cite a tracked folder only, since the building session opens its light and dark images and its frame HTML from the working tree
 - `canon records validate plans` reports `section-missing` for a plan that names a rendered-surface file and omits the section
+
+### Counterparts
+
+A project that keeps stacks under `tooling/<stack>/` holds two copies of much of its setup, its own at the root and the one it seeds into targets. A plan changing one side states what happens to the other.
+
+The section applies only in a project keeping a stack under `tooling/<stack>/` with a `manifest.toml`. Elsewhere there is no seeded side, so a plan leaves it out and the validator asks for nothing.
+
+A backticked path anywhere in `## Files to touch` fires when it falls in one of five classes, a path cited in an entry's reason included.
+
+- CI under `.github/`
+- Hooks under `.husky/` or `.claude/hooks/`
+- Scripts under `scripts/`
+- Root config, being a file at the project root other than markdown, the license, or a lockfile
+- A stack's `tooling/<stack>/configs/` or `tooling/<stack>/seeds/`
+
+Each bullet names one or more paths before a colon and one verdict after it. A directory path covers every file under it, and a bullet may name both sides when the plan changes both.
+
+- `here` when this plan changes the other side too
+- `none, <reason>` when no counterpart exists or none should change
+- `filed` followed by the backticked stem of the task row that carries the other side
+
+`canon records validate plans` reports `counterpart-unstated` for a firing path no bullet covers and `counterpart-malformed` for a bullet with no path or no valid verdict. A plan touching no such path owes nothing, and may write `None identified.` to show the check was made. A plan owing the section is written in Full mode, since Small mode writes no file for the validator to read.
 
 ### Reference images
 
@@ -341,6 +364,10 @@ The rules below protect <what>.
 The files below share <the reason>.
 
 - `<path/to/file>`: <reason>
+
+## Counterparts
+
+- `<path/to/file>`: <here, none with its reason, or filed with its row stem>
 
 ## Verbatim
 

@@ -88,7 +88,7 @@ Every `- Suggested:` line takes senior judgment, picking the best option in one 
 
 - Suggest a real default when best practice, the codebase, or prior context points to one
 - Before `## Files to touch`, load `canon:codebase-layout` for a new path (its reason) and `canon:api-design` for a changed verb, flag, output, record shape, or endpoint. Report either if missing.
-- Fill `## Design references` with the `canon/design/<surface>/` folder per rendered surface, or `None identified.`, and `## Reference images` with each untracked image that shaped the plan
+- Fill `## Design references` with the `canon/design/<surface>/` folder per rendered surface, or `None identified.`, and `## Reference images` with each untracked image that shaped the plan, and `## Counterparts` per the standard
 - Write `## Verification` as one bullet per outcome naming the test or command that proves it, with a grep bullet per `## Verbatim` block of settled wording
 - Write `## Review focus` as the inputs or states that would break the change, carrying the risk you understood to the executor and the reviewer
 
@@ -108,7 +108,7 @@ A plan sequencing its work into batches declares where each pull request ends, s
 
 Decide the mode based on what Step 3 produced:
 
-- **Small** when the plan touches 2 files or fewer, has no architectural or cross-cutting choices, and both Risks and Questions come out `None identified.`
+- **Small** when the plan touches 2 files or fewer, owes no `## Counterparts`, makes no cross-cutting choice, and Risks and Questions are `None identified.`
 - **Full** otherwise
 
 A consumer list is a `Risks` entry, which already forces Full. A resource with more than one consumer, at least one writing, is a cross-cutting choice, so such a plan stays Full even at two files.
