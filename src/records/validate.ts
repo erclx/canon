@@ -484,23 +484,28 @@ function checkSources(name: string, lines: readonly string[]): Finding[] {
 
 const LOAD_GENERATOR =
   /\b\d+\s+(?:[a-z]+[ -])?(?:hogs?|busy[ -]loops?)\b|\bstress-ng\s+-/i
-const LOAD_CONFINED = /\b(?:taskset|timeout)\b/
+const LOAD_PINNED = /\btaskset\b/
+const LOAD_BOUNDED = /\btimeout\b/
 
 /**
  * Keys on a launched generator, being a digit count beside the word or
  * `stress-ng` with arguments, so a bullet that only mentions a hog passes.
- * `taskset` pins cores on Linux and `timeout` bounds the run on macOS. A plan
+ * Confined takes both a `taskset` pin and a `timeout` bound on the line. A plan
  * saying "saturate the CPU" slips past.
  */
 function checkVerification(name: string, lines: readonly string[]): Finding[] {
   return readSourceEntries(lines)
-    .filter((entry) => LOAD_GENERATOR.test(entry) && !LOAD_CONFINED.test(entry))
+    .filter(
+      (entry) =>
+        LOAD_GENERATOR.test(entry) &&
+        !(LOAD_PINNED.test(entry) && LOAD_BOUNDED.test(entry)),
+    )
     .map((entry) =>
       finding(
         'verification-load-unconfined',
         name,
         shorten(entry),
-        'names generated machine load with no taskset or timeout confining it.',
+        'names generated machine load without both a taskset pin and a timeout bound, per the Timing bullet of canon:systematic-debugging.',
       ),
     )
 }

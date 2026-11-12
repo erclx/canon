@@ -224,7 +224,7 @@ Every outcome reaches the review with its proof named.
 
 **Generated load**
 
-- Name no launched hog or busy loop without `taskset` on Linux or `timeout` on macOS. `canon records validate plans` reports it as `verification-load-unconfined`.
+- Confine any load a reproduction needs, per the Timing bullet of `canon:systematic-debugging`, or `canon records validate plans` reports `verification-load-unconfined`.
 
 ### Risks
 

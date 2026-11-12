@@ -763,7 +763,7 @@ describe('checkPlan', () => {
       )
     }
 
-    it('should report a bullet naming CPU hogs with no taskset', () => {
+    it('should report a bullet naming CPU hogs with no pin or bound', () => {
       const body = withVerification(
         '- The flake reproduces with 64 CPU hogs running: `bun test src/take`',
       )
@@ -773,7 +773,7 @@ describe('checkPlan', () => {
       ])
     })
 
-    it('should report a busy-loop bullet with no taskset', () => {
+    it('should report a busy-loop bullet with no pin or bound', () => {
       const body = withVerification(
         '- Start 8 busy loops, then run `bun test src/take`',
       )
@@ -783,9 +783,9 @@ describe('checkPlan', () => {
       ])
     })
 
-    it('should pass the same bullet once it names taskset', () => {
+    it('should pass the same bullet once it names taskset and timeout', () => {
       const body = withVerification(
-        '- The flake reproduces with 4 CPU hogs pinned by `taskset -c 0-3`: `bun test src/take`',
+        '- The flake reproduces with 4 CPU hogs pinned by `taskset -c 0-3` under `timeout 90`: `bun test src/take`',
       )
 
       expect(checkPlan('feature-a-b.md', body)).toEqual([])
@@ -809,12 +809,24 @@ describe('checkPlan', () => {
       ])
     })
 
-    it('should pass the macOS form that bounds the run with timeout', () => {
+    it('should report hogs bounded by timeout alone as unpinned', () => {
       const body = withVerification(
-        '- Run 4 CPU hogs under `timeout 10`, then `bun test src/take`',
+        '- Run 64 hogs, `timeout 90`, then `bun test src/take`',
       )
 
-      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+      expect(kinds(checkPlan('feature-a-b.md', body))).toEqual([
+        'verification-load-unconfined',
+      ])
+    })
+
+    it('should report hogs pinned by taskset alone as unbounded', () => {
+      const body = withVerification(
+        '- Run 4 hogs under `taskset -c 0-3`, then `bun test src/take`',
+      )
+
+      expect(kinds(checkPlan('feature-a-b.md', body))).toEqual([
+        'verification-load-unconfined',
+      ])
     })
 
     it.each([
@@ -830,7 +842,7 @@ describe('checkPlan', () => {
     it('should read taskset on a wrapped line as part of the bullet', () => {
       const body = withVerification(
         '- Run 4 CPU hogs',
-        '  pinned with `taskset -c 0-3`: `bun test src/take`',
+        '  pinned with `taskset -c 0-3` and `timeout 90`: `bun test src/take`',
       )
 
       expect(checkPlan('feature-a-b.md', body)).toEqual([])
