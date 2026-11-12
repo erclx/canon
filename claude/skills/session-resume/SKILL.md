@@ -18,6 +18,8 @@ Resolve `.canon/compact/` at the main worktree root the way `session-worktree` d
 
 Read the id before the notes. When `--self` refuses, treat the session as matching no note rather than reading the newest.
 
+When a named note is absent from the folder, report it missing and point at `canon records pull`, since an imported session receives its notes through the records repository. Then take the path below, never the newest note.
+
 ### When nothing matches
 
 Never fall back to the newest note, since a note another session wrote is the wrong handoff. A note written before the `session` field existed matches nothing here.

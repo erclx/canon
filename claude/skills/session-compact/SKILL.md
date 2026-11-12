@@ -58,5 +58,5 @@ A decline reports itself so a caller can tell it from a failure:
 
 - The orchestrator's handoff, which carries a drift check and writes a task row: `canon:session-map`
 - Reading a handoff back at the start of the next session: `canon:session-resume`
-- Packing the session for another machine: `canon sessions export`, with `canon sessions import` and then `/canon:session-resume` on the arriving side
+- Packing the session for another machine: `canon sessions export`, with `canon sessions import` and then `/canon:session-resume <note>` on the arriving side
 - A decision a groundwork track owns, which belongs in its own `06-decision.md`: `canon:plan-groundwork`
