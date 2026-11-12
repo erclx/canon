@@ -9,6 +9,14 @@ import {
   type EmbeddedBlock,
   embeddedBlocksInFile,
 } from '@/code/embedded'
+import {
+  FILE_LINE_LIMIT,
+  FUNCTION_LINE_CHECKPOINT,
+  LENGTH_SOURCE,
+  type LongFile,
+  type LongFunction,
+  longCode,
+} from '@/code/length'
 import { listRepositoryFiles } from '@/git/files'
 
 const EXIT_REFUSED = 1
@@ -29,7 +37,7 @@ export function register(program: Command): void {
   code
     .command('audit')
     .description(
-      'Fail on a page, stylesheet, or script embedded in source past the line limit',
+      'Fail on a page, stylesheet, or script embedded in source past the line limit, and report long files and functions',
     )
     .argument(
       '[path...]',
@@ -52,6 +60,10 @@ export function register(program: Command): void {
         '<style> takes through set:html, and an is:inline script body.',
         `Mark the opening line, or the line above it, "${EMBEDDED_MARKER}: <reason>"`,
         'where a block must stay inline.',
+        '',
+        `It also reports each code file past ${FILE_LINE_LIMIT} lines, tests included, and each`,
+        `top-level function past ${FUNCTION_LINE_CHECKPOINT} lines in TypeScript, JavaScript, and Astro`,
+        'frontmatter, tests excluded. Neither moves the exit code.',
         '',
         'Examples:',
         '  canon code audit',
@@ -93,15 +105,16 @@ async function runAudit(
   }
 
   const prefixes = paths.map((path) => relative(root, resolve(root, path)))
-  const files = listed.filter(
+  const inScope = listed.filter(
     (file) =>
-      EMBEDDED_SOURCE.test(file) &&
-      (prefixes.length === 0 ||
-        prefixes.some(
-          (prefix) =>
-            prefix === '' || file === prefix || file.startsWith(`${prefix}/`),
-        )),
+      prefixes.length === 0 ||
+      prefixes.some(
+        (prefix) =>
+          prefix === '' || file === prefix || file.startsWith(`${prefix}/`),
+      ),
   )
+  const files = inScope.filter((file) => EMBEDDED_SOURCE.test(file))
+  const codeFiles = inScope.filter((file) => LENGTH_SOURCE.test(file))
 
   const blocks = files
     .flatMap((file) =>
@@ -109,8 +122,16 @@ async function runAudit(
     )
     .sort((a, b) => a.file.localeCompare(b.file) || a.line - b.line)
 
+  const { longFiles, longFunctions } = longCode(
+    codeFiles.map((file) => ({
+      file,
+      source: readFileSync(join(root, file), 'utf8'),
+    })),
+  )
+
   intro('canon code audit')
   report(files.length, blocks)
+  reportLength(codeFiles.length, longFiles, longFunctions)
   outro()
 
   if (emitJson) {
@@ -126,6 +147,10 @@ async function runAudit(
           lines: block.lines,
           branches: block.branches,
         })),
+        fileLimit: FILE_LINE_LIMIT,
+        functionCheckpoint: FUNCTION_LINE_CHECKPOINT,
+        longFiles,
+        longFunctions,
       })}\n`,
     )
   }
@@ -150,6 +175,29 @@ function report(files: number, blocks: readonly EmbeddedBlock[]): void {
   logWarn(
     `Move each into its own file with its language's extension, or mark the opening line "${EMBEDDED_MARKER}: <reason>" where it must stay inline.`,
   )
+}
+
+function reportLength(
+  files: number,
+  longFiles: readonly LongFile[],
+  longFunctions: readonly LongFunction[],
+): void {
+  logStep('Length')
+  logInfo(plural(files, 'code file'))
+
+  if (longFiles.length === 0) logInfo(`No file past ${FILE_LINE_LIMIT} lines.`)
+  for (const file of longFiles) {
+    logWarn(`${file.file} runs ${plural(file.lines, 'line')}`)
+  }
+
+  if (longFunctions.length === 0) {
+    logInfo(`No function past ${FUNCTION_LINE_CHECKPOINT} lines.`)
+  }
+  for (const fn of longFunctions) {
+    logWarn(
+      `${fn.file}:${fn.line} ${fn.name ?? 'an unnamed function'} runs ${plural(fn.lines, 'line')}`,
+    )
+  }
 }
 
 function refuse(

@@ -85,6 +85,34 @@ describe('code audit', () => {
     expect(JSON.parse(result.stdout)).toMatchObject({ files: 1, blocks: [] })
   })
 
+  it('should record a long file and function and leave the exit at 0', async () => {
+    const body = '  x()\n'.repeat(120)
+    write('src/long.py', 'x = 1\n'.repeat(2001))
+    write('src/fn.ts', `export function big() {\n${body}}\n`)
+
+    const result = await run(['code', 'audit', '--json'])
+
+    expect(result.exitCode).toBe(0)
+    expect(JSON.parse(result.stdout)).toMatchObject({
+      fileLimit: 2000,
+      functionCheckpoint: 100,
+      longFiles: [{ file: 'src/long.py', lines: 2001 }],
+      longFunctions: [{ file: 'src/fn.ts', line: 1, lines: 122, name: 'big' }],
+    })
+  })
+
+  it('should read length only under the paths it is given', async () => {
+    write('src/long.py', 'x = 1\n'.repeat(2001))
+    write('lib/short.py', 'x = 1\n')
+
+    const result = await run(['code', 'audit', 'lib', '--json'])
+
+    expect(JSON.parse(result.stdout)).toMatchObject({
+      longFiles: [],
+      longFunctions: [],
+    })
+  })
+
   it('should refuse a path that names nothing', async () => {
     const result = await run(['code', 'audit', 'missing', '--json'])
 
