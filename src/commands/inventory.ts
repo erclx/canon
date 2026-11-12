@@ -335,8 +335,7 @@ async function runFrames(
   if (result.status === 'failed') {
     logStep('Refused')
     logWarn(
-      result.reason === 'browser-missing' ||
-        result.reason === 'sandbox-blocked'
+      result.reason === 'browser-missing' || result.reason === 'sandbox-blocked'
         ? WALK_REFUSALS[result.reason]
         : 'The walk failed while reading the frames.',
     )
