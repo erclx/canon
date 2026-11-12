@@ -31,9 +31,12 @@ export function lex(source: string): {
   readonly literals: Literal[]
   /** Each comment's start, keyed by the end of its text. */
   readonly comments: ReadonlyMap<number, number>
+  /** Each regular expression literal, as its start and the offset past its flags. */
+  readonly regexes: readonly { readonly start: number; readonly end: number }[]
 } {
   const literals: Literal[] = []
   const comments = new Map<number, number>()
+  const regexes: { start: number; end: number }[] = []
   // One entry per open template expression, holding its brace depth.
   const expressions: number[] = []
   // One entry per open template, holding its start line and static text.
@@ -99,6 +102,7 @@ export function lex(source: string): {
   }
 
   const readRegex = (): void => {
+    const start = i
     let inClass = false
     i++
     while (i < source.length && source[i] !== '\n') {
@@ -114,6 +118,7 @@ export function lex(source: string): {
     }
     i++
     while (i < source.length && /[a-z]/.test(source[i] ?? '')) i++
+    regexes.push({ start, end: i })
     lastSignificant = 'a'
   }
 
@@ -179,5 +184,5 @@ export function lex(source: string): {
     i++
   }
 
-  return { literals, comments }
+  return { literals, comments, regexes }
 }
