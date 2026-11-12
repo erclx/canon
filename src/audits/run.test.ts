@@ -215,6 +215,31 @@ describe('the flat summary a shell stage reads', () => {
     expect(summary.shrunk).toBe(1)
   })
 
+  /**
+   * A growth inside its tolerance stays visible in `moved` but leaves `grown`
+   * alone, so a gate reading `grown` sees only growth past the tolerance.
+   */
+  it('should leave a tolerated growth out of grown and count one past it', () => {
+    const summary = summarize(
+      [result('census', 'reported')],
+      [
+        {
+          id: 'census',
+          kind: 'compared',
+          moved: [
+            { key: 'files', from: 2170, to: 2183, delta: 13, tolerated: true },
+            { key: 'lines', from: 1000, to: 1200, delta: 200 },
+          ],
+          steady: [],
+          added: [],
+          dropped: [],
+        },
+      ],
+    )
+
+    expect(summary).toMatchObject({ grown: 1, shrunk: 0 })
+  })
+
   it('should count the audits that reported apart from those that did not', () => {
     const summary = summarize(
       [result('markdown', 'reported'), result('context', 'unmeasured')],
