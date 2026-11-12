@@ -1,5 +1,24 @@
 # Changelog
 
+## [5.86.0](https://github.com/erclx/canon/compare/v5.85.0...v5.86.0) (2026-11-12)
+
+
+### Features
+
+* **gate:** fail any code file past 2,000 lines ([#3039](https://github.com/erclx/canon/issues/3039)) ([516d7cc](https://github.com/erclx/canon/commit/516d7ccdfa8c9b956ffdd5ad2cf5d03d2c8ff53f))
+* **gate:** queue end-to-end hand runs on the Tests lock ([#3037](https://github.com/erclx/canon/issues/3037)) ([7321729](https://github.com/erclx/canon/commit/7321729cd15af0fe105ceafd2666d932d65c58d6))
+* **gate:** report a stack source path in a shipped skill body ([#3042](https://github.com/erclx/canon/issues/3042)) ([7b95c1c](https://github.com/erclx/canon/commit/7b95c1c5c13f59b25994ac36bca32d1da62adcda))
+* **history:** add canon history to report the weekly delivery trend ([#3038](https://github.com/erclx/canon/issues/3038)) ([30db780](https://github.com/erclx/canon/commit/30db780a1574359315bcfc26068e1d969d6d2566))
+* **take:** film a beat with its scrollbars showing ([#3016](https://github.com/erclx/canon/issues/3016)) ([01859de](https://github.com/erclx/canon/commit/01859de34f45c2e0a0b5dfa3564e551be7619620))
+* **take:** film a take engine pull request's fixtures into a reel ([#3041](https://github.com/erclx/canon/issues/3041)) ([41cbb44](https://github.com/erclx/canon/commit/41cbb44369d2c5ae2295b21ff946619204b55795))
+* **take:** zoom the reel so a thin focus ring reads as drawn ([#3011](https://github.com/erclx/canon/issues/3011)) ([058d166](https://github.com/erclx/canon/commit/058d1665e674ef8d75801865a63f71f6b26e9c94))
+* **worktrees:** delete merged local branches no worktree holds ([#3029](https://github.com/erclx/canon/issues/3029)) ([f218144](https://github.com/erclx/canon/commit/f2181448fa114bbcede42f39fb97d4bf36eb95c3))
+
+
+### Bug Fixes
+
+* **skills:** remove canon-only lines from shipped skill files ([#3034](https://github.com/erclx/canon/issues/3034)) ([b3e89d4](https://github.com/erclx/canon/commit/b3e89d4934ae4f93147462f330d512d523ae54ec))
+
 ## [5.85.0](https://github.com/erclx/canon/compare/v5.84.0...v5.85.0) (2026-11-12)
 
 
