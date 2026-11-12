@@ -58,7 +58,7 @@ Runs weekly and on dispatch, one matrix job per scaffoldable stack through `cano
 
 ### `scripts/ci/install-playwright-deps.sh`
 
-Canon's own workflows installing the Playwright system packages call this script, since a stalled `azure.archive.ubuntu.com` connection hangs rather than fails and a step bound alone only turns the hang red. No seeded web workflow calls it, because the hosted image ships Chrome.
+Canon's own workflows installing the firefox and webkit system packages call this script, since a stalled `azure.archive.ubuntu.com` connection hangs rather than fails and a step bound alone only turns the hang red. No seeded web workflow calls it, and neither do canon's chromium-only capture and refresh jobs, because the hosted image ships Chrome.
 
 - The script kills an attempt at 150 seconds and retries up to three times, running `dpkg --configure -a` before each retry
 - A signal from the runner user never reaches the root `apt-get` that `sudo` spawns, so the script kills any left behind with `sudo pkill` before that
@@ -80,6 +80,7 @@ The CI programs, the install check, and a version pin sit beside the workflows.
 
 - `scripts/ci/` owns the programs the long steps call, such as `publish-check.sh`, `refresh-frames-pr.sh`, and `install-playwright-deps.sh`, and a step past five lines moves there
 - `scripts/core/` owns `install-check.ts`, run in CI after `check:ci` and kept out of the local gate because a cold pack-and-install is unmeasured
+- `src/gate/workflow-timeouts.test.ts` fails a job with no `timeout-minutes` in canon's or any stack's workflows and skips one that sets `uses:`. A timeout never reaches a run that starts no job.
 - `package.json` pins `typescript` to the v5 line `@astrojs/check` expects, so `bun add -D typescript` selecting v7 is a compiler upgrade
 
 ## Gotchas
@@ -87,5 +88,5 @@ The CI programs, the install check, and a version pin sit beside the workflows.
 - `no checks reported on the '<branch>' branch` usually means a merge conflict, since such a branch has no merge ref to run on. Read `gh pr view --json mergeable,mergeStateStatus` and rebase.
 - A green `🛡️ Static Checks` tested `refs/pull/<n>/merge` as of the last push. No merge queue exists, so a sibling merge leaves it stale until the poll reads `STALE`.
 - The ruleset requires `🛡️ Static Checks` and `🍎 macOS Unit Tests` by name, so renaming either strands branch protection and leaves lift and merge waiting on a check no run reports
-- The runner installs no browser, so each `*.e2e.test.ts` skips itself and a green run does not show it ran. Verify those locally.
+- The runner installs no browser, so each `*.e2e.test.ts` skips itself and a green run does not show it ran. Verify those locally with `bun run test:e2e`, since a scoped pre-push leaves them out too.
 - The `merge_group` trigger is inert, since a `merge_queue` rule returns `422` on a user-owned repository until a move to an organization

@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join, relative } from 'node:path'
 import { copyPreservingMode } from '@/sync/copy'
-import { readDispositions } from '@/tooling/disposition'
+import { heldScriptKeys, readDispositions } from '@/tooling/disposition'
 import { type InstallResult, installDevDependencies } from '@/tooling/install'
 import { rewritesOnInstall, stripSeedMarker } from '@/tooling/seed-marker'
 import { resolveSurfacePath } from '@/roots/surface'
@@ -172,8 +172,8 @@ export async function pruneGitignore(
 }
 
 /**
- * Installs missing dev dependencies, fills package scripts, and merges
- * gitignore entries. A target with no package.json gets a minimal one first
+ * Installs missing dev dependencies, fills package scripts the project has not
+ * declined or customized, and merges gitignore entries. A target with no package.json gets a minimal one first
  * when the chain installs anything. A package.json that exists but cannot be
  * parsed is never rewritten, and the install is skipped with a warning.
  */
@@ -182,6 +182,7 @@ export async function injectManifest(
   target: string,
 ): Promise<InstallResult> {
   const packagePath = join(target, 'package.json')
+  const heldScripts = heldScriptKeys(readDispositions(target))
 
   if (!existsSync(packagePath) && declaresInstalls(chain)) {
     logStep('Writing package.json')
@@ -205,7 +206,7 @@ export async function injectManifest(
 
     const fresh = readPackage(packagePath)
     if (fresh) {
-      const result = applyScripts(fresh, chain)
+      const result = applyScripts(fresh, chain, heldScripts)
       if (result.added.length > 0 || result.overridden.length > 0) {
         logStep('Applying scripts')
         for (const key of result.added) logAdd(key)
@@ -217,7 +218,7 @@ export async function injectManifest(
 
   await injectGitignore(chain, target)
 
-  if (!pkg) warnUnreadablePackage(chain, target)
+  if (!pkg) warnUnreadablePackage(chain, target, heldScripts)
 
   return { ok: true }
 }
@@ -229,11 +230,12 @@ export async function injectManifest(
 function warnUnreadablePackage(
   chain: readonly Manifest[],
   target: string,
+  heldScripts: ReadonlySet<string>,
 ): void {
   if (!declaresInstalls(chain)) return
 
   const deps = collectDeps(chain, {}).map((dep) => dep.spec)
-  const skipped = applyScripts({}, chain)
+  const skipped = applyScripts({}, chain, heldScripts)
   const scripts = [...new Set([...skipped.added, ...skipped.overridden])]
 
   logStep('Skipped installs')

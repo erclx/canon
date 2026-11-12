@@ -51,6 +51,11 @@ export type Check =
        * command.
        */
       readonly changedArgv?: (changed: readonly string[]) => readonly string[]
+      /**
+       * What a run through `changedArgv` left out, printed whenever that argv
+       * differed from `argv`, so a scoped pass never reads as the full one.
+       */
+      readonly scopedNote?: string
       readonly failure: string
     }
   /** This checkout's own CLI, so a worktree gate never reads the main tree. */
@@ -115,6 +120,13 @@ const TESTS_SCOPE = new RegExp(
 
 const FULL_SUITE = ['bun', 'run', 'test']
 
+/**
+ * The end-to-end suites launch a browser and FFmpeg, so a scoped run that
+ * reached them held the machine tests lock for minutes on one `src/take/`
+ * change. They run by hand through `bun run test:e2e` and on the full suite.
+ */
+const END_TO_END = '**/*.e2e.test.ts'
+
 function relatedTests(changed: readonly string[]): readonly string[] {
   if (changed.some((file) => FULL_SUITE_TRIGGERS.test(file))) return FULL_SUITE
   return [
@@ -124,6 +136,10 @@ function relatedTests(changed: readonly string[]): readonly string[] {
     'related',
     '--run',
     '--passWithNoTests',
+    // The glob has to follow its flag directly, or vitest reads the first
+    // changed file as the pattern.
+    '--exclude',
+    END_TO_END,
     ...changed.filter((file) => RELATED_SOURCES.test(file)),
   ]
 }
@@ -587,14 +603,16 @@ export const STAGES: readonly Stage[] = [
     skipped: 'Skipped, no TypeScript or test config changes',
     // Concurrent suites from a wave of worktrees starve each other's spawn
     // and browser tests past their timeouts, so the box runs one at a time.
-    // A related run can still reach a spawn or browser test, so it holds the
-    // lock too.
+    // A related run excludes the browser suites but can still reach a spawn
+    // test, so it holds the lock too.
     lock: 'tests',
     checks: [
       {
         kind: 'command',
         argv: FULL_SUITE,
         changedArgv: relatedTests,
+        scopedNote:
+          'Scoped run left out every *.e2e.test.ts suite. Run bun run test:e2e when this change reaches a browser or FFmpeg path.',
         failure: 'Tests failed',
       },
     ],

@@ -233,13 +233,38 @@ describe('reading counts out of each record shape', () => {
   it('should sum the degradation hits across every scanned language', () => {
     const record = {
       snapshot: [
-        { language: 'ts', degradationHits: [{}, {}] },
-        { language: 'sh', degradationHits: [{}] },
+        { language: 'ts', degradationHits: [{}, {}], longBlocks: [] },
+        { language: 'sh', degradationHits: [{}], longBlocks: [] },
       ],
     }
 
     expect(countsFor(specFor('comments'), record)).toEqual({
       degradationHits: 3,
+      longBlocks: 0,
+    })
+  })
+
+  it('should sum the long comment blocks across every scanned language', () => {
+    const record = {
+      snapshot: [
+        { language: 'ts', degradationHits: [], longBlocks: [{}, {}] },
+        { language: 'sh', degradationHits: [], longBlocks: [{}] },
+      ],
+    }
+
+    expect(countsFor(specFor('comments'), record)).toEqual({
+      degradationHits: 0,
+      longBlocks: 3,
+    })
+  })
+
+  it('should keep the hit count for a record with no long blocks', () => {
+    const record = {
+      snapshot: [{ language: 'ts', degradationHits: [{}, {}] }],
+    }
+
+    expect(countsFor(specFor('comments'), record)).toEqual({
+      degradationHits: 2,
     })
   })
 
@@ -283,19 +308,82 @@ describe('reading counts out of each record shape', () => {
     expect(countsFor(specFor('labels'), record)).toEqual({ uncovered: 1 })
   })
 
-  it('should retain the census totals and leave the extension breakdown out', () => {
+  it('should retain the long file and function counts and leave embedded blocks out', () => {
+    const record = {
+      files: 3,
+      limit: 5,
+      blocks: [{ file: 'a.ts', line: 1, kind: 'page', lines: 9 }],
+      longFiles: [{ file: 'b.ts', lines: 2400 }],
+      longFunctions: [
+        { file: 'b.ts', line: 1, lines: 120, name: 'a' },
+        { file: 'b.ts', line: 200, lines: 140, name: null },
+      ],
+    }
+
+    expect(countsFor(specFor('code'), record)).toEqual({
+      longFiles: 1,
+      longFunctions: 2,
+    })
+  })
+
+  it('should read a code record from a binary predating length as unmeasured', () => {
+    const record = JSON.stringify({
+      root: '/r',
+      files: 3,
+      limit: 5,
+      blocks: [],
+    })
+
+    expect(classify(specFor('code'), 0, record).status).toBe('unmeasured')
+  })
+
+  it('should report rather than gate on an embedded block in the code audit', () => {
+    const record = JSON.stringify({
+      blocks: [{ file: 'a.ts', line: 1, kind: 'page', lines: 9 }],
+      longFiles: [],
+      longFunctions: [],
+    })
+
+    expect(classify(specFor('code'), 2, record).status).toBe('reported')
+  })
+
+  it('should retain the census totals and the large-folder count, leaving both lists out', () => {
     const record = {
       files: 1139,
       skipped: 4,
       lines: 42017,
       byExtension: [{ extension: 'md', files: 505, lines: 30000 }],
+      folderCheckpoint: 10,
+      folders: [
+        { path: 'src/a', files: 12, byExtension: [] },
+        { path: 'docs', files: 10, byExtension: [] },
+      ],
     }
 
     expect(countsFor(specFor('census'), record)).toEqual({
       files: 1139,
       skipped: 4,
       lines: 42017,
+      largeFolders: 2,
     })
+  })
+
+  it('should retain zero large folders for an empty list', () => {
+    const record = {
+      files: 3,
+      skipped: 0,
+      lines: 9,
+      byExtension: [],
+      folders: [],
+    }
+
+    expect(countsFor(specFor('census'), record)?.largeFolders).toBe(0)
+  })
+
+  it('should read a census record from a binary without folders as unmeasured', () => {
+    const record = { files: 3, skipped: 0, lines: 9, byExtension: [] }
+
+    expect(countsFor(specFor('census'), record)).toBeUndefined()
   })
 })
 

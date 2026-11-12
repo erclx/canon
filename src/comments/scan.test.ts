@@ -274,3 +274,75 @@ describe('scanTree', () => {
     ])
   })
 })
+
+function run(prefix: string, count: number): string {
+  return Array.from({ length: count }, (_, i) => `${prefix} line ${i}`).join(
+    '\n',
+  )
+}
+
+describe('long comment blocks', () => {
+  it('should not report a run of exactly the checkpoint', () => {
+    const text = `${run('//', 20)}\nconst a = 1\n`
+    expect(countFile(file('a.ts', text), 'ts').longBlocks).toEqual([])
+  })
+
+  it('should report a run one past the checkpoint with its first line', () => {
+    const text = `const a = 1\n${run('//', 21)}\nconst b = 2\n`
+    expect(countFile(file('a.ts', text), 'ts').longBlocks).toEqual([
+      { file: 'a.ts', line: 2, lines: 21 },
+    ])
+  })
+
+  it('should end a run at a blank line outside a block comment', () => {
+    const text = `${run('//', 15)}\n\n${run('//', 15)}\n`
+    expect(countFile(file('a.ts', text), 'ts').longBlocks).toEqual([])
+  })
+
+  it('should end a run at a line of code', () => {
+    const text = `${run('//', 15)}\nconst a = 1\n${run('//', 15)}\n`
+    expect(countFile(file('a.ts', text), 'ts').longBlocks).toEqual([])
+  })
+
+  it('should keep a blank line inside a block comment in the run', () => {
+    const body = Array.from({ length: 22 }, () => '').join('\n')
+    const text = `/**\n${body}\n */\nconst a = 1\n`
+    expect(countFile(file('a.ts', text), 'ts').longBlocks).toEqual([
+      { file: 'a.ts', line: 1, lines: 24 },
+    ])
+  })
+
+  it('should join a one-line block comment and the // lines after it', () => {
+    const text = `/** summary */\n${run('//', 20)}\n`
+    expect(countFile(file('a.ts', text), 'ts').longBlocks).toEqual([
+      { file: 'a.ts', line: 1, lines: 21 },
+    ])
+  })
+
+  it('should list only the longest run of a file', () => {
+    const text = `${run('//', 22)}\nconst a = 1\n${run('//', 25)}\n`
+    expect(countFile(file('a.ts', text), 'ts').longBlocks).toEqual([
+      { file: 'a.ts', line: 24, lines: 25 },
+    ])
+  })
+
+  it('should measure a bash run and leave the shebang out of it', () => {
+    const text = `#!/usr/bin/env bash\n${run('#', 21)}\necho hi\n`
+    expect(countFile(file('a.sh', text), 'sh').longBlocks).toEqual([
+      { file: 'a.sh', line: 2, lines: 21 },
+    ])
+  })
+
+  it('should not read a heredoc body as a run', () => {
+    const text = `cat <<'EOF'\n${run('#', 30)}\nEOF\necho hi\n`
+    expect(countFile(file('a.sh', text), 'sh').longBlocks).toEqual([])
+  })
+
+  it('should gather the long runs of every file of a language', () => {
+    const [ts] = countFiles(
+      [file('a.ts', run('//', 21)), file('b.ts', run('//', 3))],
+      { languages: ['ts'] },
+    )
+    expect(ts.longBlocks).toEqual([{ file: 'a.ts', line: 1, lines: 21 }])
+  })
+})

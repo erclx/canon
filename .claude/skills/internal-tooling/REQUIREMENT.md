@@ -15,7 +15,7 @@ Manifest failures are silent by construction. A target receives less than the ma
 
 - A config, seed, or manifest change is done only once the stack's end-to-end verify passes
 - A child layer ships only what differs from its parent
-- A `base` config change reaches the repository root as a delta that keeps the local overrides
+- A change to a stack config or seed reaches the same-named root file as a delta that keeps the local overrides, and a root workflow, hook, script, or config change reaches its seed counterpart
 - A golden config change is committed without the pre-commit hook, which would rewrite the template being shipped
 
 ## Must not

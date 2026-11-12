@@ -417,20 +417,29 @@ function commentCounts(record: unknown): Record<string, number> | undefined {
   if (!Array.isArray(snapshot)) return undefined
 
   let degradationHits = 0
+  let longBlocks = 0
+  let hasLongBlocks = true
   for (const language of snapshot) {
     const hits = lengthOf(asObject(language)?.degradationHits)
     if (hits === undefined) return undefined
     degradationHits += hits
+
+    // A record from a binary older than the long-block measure carries no
+    // array. That leaves the key out rather than failing the hit count.
+    const blocks = lengthOf(asObject(language)?.longBlocks)
+    if (blocks === undefined) hasLongBlocks = false
+    else longBlocks += blocks
   }
 
-  return { degradationHits }
+  return hasLongBlocks ? { degradationHits, longBlocks } : { degradationHits }
 }
 
 /**
- * Reads the census's three headline totals, leaving the extension breakdown
- * out. The breakdown is what a caller reads for its own sake, and folding
- * every extension into the retained baseline would grow the recorded key set
- * with every language the tree ever picks up.
+ * Reads the census's three headline totals and the count of large folders,
+ * leaving the extension breakdown and the folder list out. Both are what a
+ * caller reads for its own sake, and folding every extension or folder into the
+ * retained baseline would grow the recorded key set with every language and
+ * path the tree ever picks up.
  */
 function censusCounts(record: unknown): Record<string, number> | undefined {
   const root = asObject(record)
@@ -440,6 +449,22 @@ function censusCounts(record: unknown): Record<string, number> | undefined {
     files: typeof root.files === 'number' ? root.files : undefined,
     skipped: typeof root.skipped === 'number' ? root.skipped : undefined,
     lines: typeof root.lines === 'number' ? root.lines : undefined,
+    largeFolders: lengthOf(root.folders),
+  })
+}
+
+/**
+ * Reads the long file and function counts, leaving embedded blocks out. Those
+ * already fail a push through the `embedded-programs` stage, so this audit
+ * retains length alone.
+ */
+function codeCounts(record: unknown): Record<string, number> | undefined {
+  const root = asObject(record)
+  if (root === undefined) return undefined
+
+  return allOf({
+    longFiles: lengthOf(root.longFiles),
+    longFunctions: lengthOf(root.longFunctions),
   })
 }
 
@@ -701,6 +726,17 @@ export const AUDITS: readonly AuditSpec[] = [
     gatingExits: [],
     corpus: 'tracked',
     counts: censusCounts,
+  },
+  {
+    id: 'code',
+    label: 'Code length',
+    argv: ['code', 'audit', '--json'],
+    // Reports rather than gates. The verb exits 2 on an embedded block, which
+    // the `embedded-programs` stage already fails a push on, and a long file or
+    // function is a measure retained against the baseline rather than a fact.
+    gatingExits: [],
+    corpus: 'tracked',
+    counts: codeCounts,
   },
   {
     id: 'deps',

@@ -1,4 +1,5 @@
 import type { ChecksState } from '@/targets/pulls'
+import type { StalledRun } from '@/pr/checks'
 import {
   coversHead,
   type ReviewRow,
@@ -8,7 +9,7 @@ import {
   type UiCounts,
 } from '@/pr/review-scope'
 import { readCarry } from '@/pr/carry'
-import { readWaivers } from '@/pr/waiver'
+import { readReelWaivers, readWaivers } from '@/pr/waiver'
 import { DEFAULT_PAINTED, isPainted, type PaintedPatterns } from '@/pr/painted'
 
 /** How long `--wait` holds for a pending CI run, in seconds, when none is named. */
@@ -31,12 +32,14 @@ export type LiftRefusal =
   | 'ui-undriven'
   | 'evidence-owed'
   | 'painted-uncaptured'
+  | 'reel-unsettled'
   | 'standing-stale'
   | 'standing-conflict'
   | 'standing-unknown'
   | 'ci-pending'
   | 'ci-failing'
   | 'ci-conflicted'
+  | 'ci-stalled'
   | 'ci-timeout'
   | 'head-moved'
   | 'ready-withdrawn'
@@ -56,10 +59,18 @@ export interface GateResult {
   readonly paintedPaths?: readonly string[]
   /** Every path a box can observe that kept a UI close from carrying forward. */
   readonly drivenPaths?: readonly string[]
+  /** The tip runs queued with no job past the bound, named on a `ci-stalled` refusal. */
+  readonly stalled?: readonly StalledRun[]
   /** The painted paths changed with no capture, reel at the head, or waiver, sorted. */
   readonly uncaptured?: readonly string[]
   /** The uncaptured paths a review waived, sorted. */
   readonly waived?: readonly string[]
+  /** The posted reel skip, named when a drivable checklist has no reel at the head. */
+  readonly reelSkip?: string
+  /** The reason on the standing reel waiver that settled a drivable checklist with no reel. */
+  readonly reelWaived?: string
+  /** The earlier commit a reel was filmed at, when it carried to the head across pushes no box can observe. */
+  readonly reelCarriedFrom?: string
 }
 
 /** How an earlier commit sits against the head, and what changed since. */
@@ -95,6 +106,25 @@ export interface EvidenceGate {
   readonly uncaptured?: readonly string[]
   /** The head the marked comment's reel was filmed at, when it embeds one. */
   readonly reelHead?: string
+  /** The text after the marked comment's `**No reel:**` label, when it carries one. */
+  readonly reelSkip?: string
+}
+
+/**
+ * The reel skip codes that settle a drivable checklist with no reel. Each is a
+ * filter result or a hosting limit no builder can change. Every other code,
+ * and free text no procedure emits, is fixable by the builder or its machine,
+ * so it holds the lift until a reel lands or a review waives it.
+ */
+export const SETTLING_REEL_SKIPS: readonly string[] = [
+  'no-interactive-box',
+  'no-visible-change',
+  'reel-too-large',
+]
+
+/** The reason code a skip line opens with, the text before its first colon. */
+function reelSkipCode(skip: string): string {
+  return (skip.split(':')[0] ?? '').trim()
 }
 
 /**
@@ -123,6 +153,11 @@ export interface ChecksGate {
   readonly isConflicted: boolean
   /** Failing checks outside the required set, which are reported and never gate. */
   readonly advisory?: readonly string[]
+  /**
+   * Tip runs GitHub queued and never gave a job, read only on a pending,
+   * unconflicted reading. Absent or empty leaves the reading `ci-pending`.
+   */
+  readonly stalled?: readonly StalledRun[]
 }
 
 /** The advisory field a record carries, absent when no advisory check failed. */
@@ -175,6 +210,8 @@ export interface LiftRecord {
   readonly carriedFrom?: string
   readonly paintedPaths?: readonly string[]
   readonly drivenPaths?: readonly string[]
+  /** The tip runs queued with no job past the bound, on a `ci-stalled` refusal. */
+  readonly stalled?: readonly StalledRun[]
   /** Failing checks the base does not require, named so a reader sees them before merging. */
   readonly advisory?: readonly string[]
   readonly isLifted: boolean
@@ -218,17 +255,23 @@ export function reviewGate(
   return pass('review')
 }
 
-/** What the UI gate says about a close carried across commits, for a record. */
+/**
+ * What the UI gate says about a close carried across commits, and the runs the
+ * ci gate found stalled, lifted from the gates onto a record.
+ */
 function carried(gates: readonly GateResult[]): {
   carriedFrom?: string
   paintedPaths?: readonly string[]
   drivenPaths?: readonly string[]
+  stalled?: readonly StalledRun[]
 } {
   const ui = gates.find((gate) => gate.gate === 'ui')
+  const ci = gates.find((gate) => gate.gate === 'ci')
   return {
     ...(ui?.carriedFrom !== undefined && { carriedFrom: ui.carriedFrom }),
     ...(ui?.paintedPaths !== undefined && { paintedPaths: ui.paintedPaths }),
     ...(ui?.drivenPaths !== undefined && { drivenPaths: ui.drivenPaths }),
+    ...(ci?.stalled !== undefined && { stalled: ci.stalled }),
   }
 }
 
@@ -303,20 +346,25 @@ export async function uiGate(
  * A reel at an earlier head clears nothing, since a later push may add the
  * path, and for the same reason a waiver counts only while the newest pass of
  * its family restates it.
+ *
+ * Last, a checklist holding a drivable box owes a reel at the head, or one
+ * `readReelCarry` carried to it. A skip whose code is in `SETTLING_REEL_SKIPS`
+ * settles it, and so does a standing reel waiver, and anything else refuses
+ * `reel-unsettled`.
  */
 export function evidenceGate(
   evidence: EvidenceGate,
   reviews: readonly ReviewRow[],
   head: string,
+  reelCarriedFrom?: string,
 ): GateResult {
   if (!evidence.isSettled) return fail('evidence', 'evidence-owed')
 
+  const standing = standingPasses(reviews)
   const isFilmed =
     evidence.reelHead !== undefined && coversHead(evidence.reelHead, head)
   const listed = isFilmed ? [] : (evidence.uncaptured ?? [])
-  const named = new Set(
-    readWaivers(standingPasses(reviews)).map((waiver) => waiver.path),
-  )
+  const named = new Set(readWaivers(standing).map((waiver) => waiver.path))
   const waived = listed.filter((path) => named.has(path)).toSorted()
   const uncaptured = listed.filter((path) => !named.has(path)).toSorted()
 
@@ -324,9 +372,50 @@ export function evidenceGate(
     ...(uncaptured.length > 0 && { uncaptured }),
     ...(waived.length > 0 && { waived }),
   }
-  return uncaptured.length > 0
-    ? { ...fail('evidence', 'painted-uncaptured'), ...lists }
-    : { ...pass('evidence'), ...lists }
+  if (uncaptured.length > 0) {
+    return { ...fail('evidence', 'painted-uncaptured'), ...lists }
+  }
+  if (!evidence.hasDrivableBox || isFilmed) {
+    return { ...pass('evidence'), ...lists }
+  }
+  if (reelCarriedFrom !== undefined) {
+    return { ...pass('evidence'), ...lists, reelCarriedFrom }
+  }
+
+  const { reelSkip } = evidence
+  const skipField = reelSkip !== undefined && { reelSkip }
+  if (
+    reelSkip !== undefined &&
+    SETTLING_REEL_SKIPS.includes(reelSkipCode(reelSkip))
+  ) {
+    return { ...pass('evidence'), ...lists, ...skipField }
+  }
+  const reelWaived = readReelWaivers(standing).at(-1)
+  if (reelWaived !== undefined) {
+    return { ...pass('evidence'), ...lists, ...skipField, reelWaived }
+  }
+  return { ...fail('evidence', 'reel-unsettled'), ...lists, ...skipField }
+}
+
+/**
+ * The commit a reel carries from when it was filmed before the head and every
+ * push since changed no path a box can observe, the rule `uiGate` carries a
+ * close by. A push a box can observe, a rewritten reel commit, or a failed
+ * read carries nothing, so the reel half decides on the skip and the waivers.
+ */
+async function readReelCarry(
+  api: Pick<LiftApi, 'readChanged'>,
+  evidence: EvidenceGate,
+  head: string,
+): Promise<string | undefined> {
+  const { reelHead } = evidence
+  if (!evidence.hasDrivableBox || reelHead === undefined) return undefined
+  const carry = await readCarry(
+    (from, to) => api.readChanged(from, to),
+    reelHead,
+    head,
+  )
+  return carry.kind === 'carried' ? carry.carriedFrom : undefined
 }
 
 function standingGate(standing: Standing): GateResult {
@@ -344,12 +433,23 @@ type CiOutcome =
       readonly kind: 'refused'
       readonly reason: LiftRefusal
       readonly waited: number
+      readonly stalled?: readonly StalledRun[]
     }
+
+/** The ci gate a refused wait leaves, carrying the runs a stall named. */
+function ciRefused(ci: Extract<CiOutcome, { kind: 'refused' }>): GateResult {
+  return {
+    ...fail('ci', ci.reason),
+    ...(ci.stalled !== undefined && { stalled: ci.stalled }),
+  }
+}
 
 /**
  * Reads the check runs until they conclude, the deadline passes, or a run can
  * no longer start. A conflicted branch gets no merge ref, so no run ever
- * starts and waiting on it is the one wait that cannot end.
+ * starts and waiting on it is the one wait that cannot end. A stalled run
+ * ends the wait the same way, since none of the measured stalls cleared
+ * before a close and reopen started a fresh run.
  */
 async function waitForChecks(
   api: LiftApi,
@@ -374,6 +474,14 @@ async function waitForChecks(
     }
     if (reading.isConflicted) {
       return { kind: 'refused', reason: 'ci-conflicted', waited }
+    }
+    if (reading.stalled !== undefined && reading.stalled.length > 0) {
+      return {
+        kind: 'refused',
+        reason: 'ci-stalled',
+        waited,
+        stalled: reading.stalled,
+      }
     }
     if (api.now() + pollMs > deadline) {
       return { kind: 'refused', reason: 'ci-timeout', waited }
@@ -407,6 +515,9 @@ function ciGate(reading: ChecksGate): GateResult {
   if (reading.state === 'passing') return pass('ci')
   if (reading.state === 'failing') return fail('ci', 'ci-failing')
   if (reading.isConflicted) return fail('ci', 'ci-conflicted')
+  if (reading.stalled !== undefined && reading.stalled.length > 0) {
+    return { ...fail('ci', 'ci-stalled'), stalled: reading.stalled }
+  }
   return fail('ci', 'ci-pending')
 }
 
@@ -502,7 +613,7 @@ async function settleReady(
 
   const ci = await waitForChecks(api, tip, opts.waitSeconds, pollMs)
   if (ci.kind === 'refused') {
-    const failed = [...gates, fail('ci', ci.reason)]
+    const failed = [...gates, ciRefused(ci)]
     return stillReady(refused(ci.reason, failed, tip, ci.waited))
   }
   return settleAfterWait(api, painted, pull, tip, hasDrivableBox, gates, ci)
@@ -617,7 +728,12 @@ export async function lift(
   const gates: GateResult[] = [
     reviewGate(reviews, tip),
     await uiGate(api, painted, reviews, tip, evidence.hasDrivableBox),
-    evidenceGate(evidence, reviews, tip),
+    evidenceGate(
+      evidence,
+      reviews,
+      tip,
+      await readReelCarry(api, evidence, tip),
+    ),
     standingGate(standing),
   ]
   if (!pull.isDraft) {
@@ -658,7 +774,7 @@ export async function lift(
 
   const ci = await waitForChecks(api, tip, opts.waitSeconds, pollMs)
   if (ci.kind === 'refused') {
-    return refused(ci.reason, [...gates, fail('ci', ci.reason)], tip, ci.waited)
+    return refused(ci.reason, [...gates, ciRefused(ci)], tip, ci.waited)
   }
   return settleAfterWait(
     api,
