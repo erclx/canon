@@ -16,19 +16,10 @@ import { type BlockedPath, guardPayload } from '@/records/push-guard'
  * carries no such mix, since nothing else lives there, which is what let the
  * bound move from this list to `EXCLUDED_ENTRIES`.
  *
- * Three counts describe what this list once bounded and each is right about a
- * different question, so they are stated apart rather than reconciled. Eleven
- * is what a disk loss would take, which is this list. Twelve is what sat under
- * `.claude/` as an ignored folder before the move, which adds the scratch folder
- * that is deletable without loss and `worktrees/`, whose contents belong to the
- * enclosing repository already. Thirteen is what the move relocated, which counts
- * ignore entries rather than folders: the twelve less `worktrees/`, which stayed,
- * plus `.records.git/` and the `README.md` a records pull writes back.
- *
- * Each entry is a top-level record folder and every archive sits inside the one
- * it archives, so the three former archive entries are covered by their parents
- * rather than named here. That is what keeps this list at one line per surface
- * as archives spread, which a sibling-per-archive layout could not.
+ * Each entry is a top-level record folder, and every archive sits inside the
+ * one it archives, so its parent covers it and the list stays one line per
+ * surface. The scratch folder and `worktrees/` are left out, being deletable
+ * without loss and owned by the enclosing repository.
  *
  * `RECORD_KINDS` in `validate.ts` overlaps this on four names and carries one
  * more that no backup reaches. The two lists differ on purpose: one is what a
@@ -191,16 +182,11 @@ function sanitizeRefSegment(segment: string): string {
  * The branch a records push or pull targets for the project at `root`,
  * one branch per project on the shared records repository.
  *
- * Reduces the project's own `origin` through the same `remoteIdentity`
- * reduction the shared-origin gate already applies, so two clones of the
- * same project land on the same branch regardless of transport. Falls back
- * to the project directory's own basename for a project with no `origin`,
- * such as a fresh scaffold, which is no worse than the single shared branch
- * this replaces: nothing else here distinguishes two such clones either.
- *
- * `enclosing` is `pushRecords`/`pullRecords`'s own already-fetched remote
- * read, reused here rather than shelled out for a second time. A caller with
- * none, such as a test reading this in isolation, gets one read of its own.
+ * Reduces `origin` through `remoteIdentity`, as the shared-origin gate does, so
+ * two clones land on one branch regardless of transport. A project with no
+ * `origin` falls back to its directory basename, since nothing else separates
+ * two such clones. `enclosing` reuses the caller's remote read, and a caller
+ * with none gets one read of its own.
  *
  * A project's `origin` can change (rename, fork, transfer) between one push
  * and the next, which silently starts writing to a new branch and orphans
@@ -293,16 +279,11 @@ interface GitResult {
  * dropping that flag on a single call reads the enclosing project as the tree
  * and stages everything in it.
  *
- * `-C` is what makes a bare pathspec like `groundwork` mean the work-tree root
- * wherever the caller stands. Git derives a pathspec prefix from the current
- * directory, so without it a caller sitting inside `.claude/`, which is every
- * session in a linked worktree under `.claude/worktrees/<name>/`, prefixes
- * each name with its own path and matches nothing. The root a caller names
- * does not reach that prefix, so `--root` cannot stand in for this.
- *
- * Both paths are absolute because `-C` takes effect before the other two flags
- * are read, so a relative root would otherwise send them looking inside the
- * work tree.
+ * `-C` makes a bare pathspec like `groundwork` mean the work-tree root, since
+ * git prefixes a pathspec with the current directory, and a session in a
+ * linked worktree under `.claude/worktrees/<name>/` would match nothing.
+ * `--root` cannot stand in, since it never reaches that prefix. Both paths are
+ * absolute because `-C` applies before the other two flags are read.
  */
 async function records(root: string, args: string[]): Promise<GitResult> {
   const gitDir = resolve(recordsGitDir(root))
@@ -518,21 +499,14 @@ interface FolderScope {
  * keeps it forever, and a later `pull` restores it past the gate that refuses
  * every other unpushed deletion.
  *
- * The retired names are the same case one level up, where the folder left the
- * disk before the index caught up, and the index is the only side that still
- * knows it existed. At a `.canon` root a folder can leave the same way under a
- * name `RETIRED_FOLDERS` never anticipated, which is what folding the index
- * into the candidate set (rather than only using it as a filter) covers.
+ * The index joins the candidate set rather than only filtering it, since a
+ * folder that left disk under a name `RETIRED_FOLDERS` never anticipated is
+ * known to the index alone.
  *
- * `firstSeen` is a folder in scope that disk carries but the index has never
- * tracked, which is the read a caller reports rather than acts on: a folder
- * `.canon` picked up that should have been excluded is visible in the push
- * report instead of entering the payload silently.
- *
- * The index half passes through `isExcluded` before the union, since the index
- * is the one side an excluded name can still reach the pathspec through. A
- * name it drops is returned as `dropped` rather than silently forgotten, so the
- * push can remove it from the history once and say so.
+ * `firstSeen` is a folder disk carries that the index never tracked, reported
+ * so a wrongly included folder shows in the push report. The index half passes
+ * `isExcluded` first, and a name it drops comes back as `dropped`, so the push
+ * removes it from history once and says so.
  */
 async function scopedFolders(root: string): Promise<FolderScope> {
   const tracked = await records(root, ['ls-files'])

@@ -1,5 +1,31 @@
 import { scenario } from '@/sandbox/scenario'
 
+/**
+ * The seeds the `01-initial` fixture carries, one per finding shape.
+ *
+ * Staleness seed in canon/context/api.md. Every path this entry names resolved
+ * when it was written and two of them no longer do, which is the axis no verb
+ * answers. The count in the Layout lead-in is the second testable claim shape.
+ *
+ * Length seed in docs/overview.md. One paragraph past the sentence and
+ * character checkpoints, and one top-level bullet carrying a paragraph's worth
+ * of text behind a dash.
+ *
+ * Structure seed in canon/context/pipeline.md. One entry past the line
+ * checkpoint holding three stage domains under Layout, which earns a
+ * structure line proposing a split by heading.
+ *
+ * Doubled seed in src/auth. Both canon/context/api.md and auth.md claim the
+ * folder as a Layout H3. auth.md holds the area's trap and api.md holds only
+ * the H3, so auth.md is the owner a structure line proposes.
+ *
+ * Design record seed in canon/DESIGN.md. The lead is past its word cap and
+ * the Colors table names --color-muted, which src/styles/tokens.css does
+ * not declare, so the design record row carries a prose and a token finding
+ * routed to design-record. The frontmatter declares a dark theme whose block
+ * overrides --color-ink alone, so a per-theme finding names that selector,
+ * and its reviewed date gives the reminder line.
+ */
 export default scenario({
   config: {
     SANDBOX_SKIP_AUTO_COMMIT: 'true',
@@ -7,28 +33,6 @@ export default scenario({
   },
   arms: {
     default: (ctx) => {
-      // Staleness seed in canon/context/api.md. Every path this entry names resolved
-      // when it was written and two of them no longer do, which is the axis no verb
-      // answers. The count in the Layout lead-in is the second testable claim shape.
-      //
-      // Length seed in docs/overview.md. One paragraph past the sentence and
-      // character checkpoints, and one top-level bullet carrying a paragraph's worth
-      // of text behind a dash.
-      //
-      // Structure seed in canon/context/pipeline.md. One entry past the line
-      // checkpoint holding three stage domains under Layout, which earns a
-      // structure line proposing a split by heading.
-      //
-      // Doubled seed in src/auth. Both canon/context/api.md and auth.md claim the
-      // folder as a Layout H3. auth.md holds the area's trap and api.md holds only
-      // the H3, so auth.md is the owner a structure line proposes.
-      //
-      // Design record seed in canon/DESIGN.md. The lead is past its word cap and
-      // the Colors table names --color-muted, which src/styles/tokens.css does
-      // not declare, so the design record row carries a prose and a token finding
-      // routed to design-record. The frontmatter declares a dark theme whose block
-      // overrides --color-ink alone, so a per-theme finding names that selector,
-      // and its reviewed date gives the reminder line.
       ctx.fixtures('claude', 'document-health', 'shared', '01-initial')
 
       ctx.git('add', '.')
