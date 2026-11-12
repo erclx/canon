@@ -141,7 +141,7 @@ The tracked-file boundary collides with `CLAUDE.md`, which says to handle a smal
 
 Record a change identified while orchestrating against the task that owns it, fold one no task owns into the next task touching the same surface, and file a task only when none exists or is expected.
 
-Read `${CLAUDE_SKILL_DIR}/references/orchestrator-filing.md` before offering a row, filing one, or placing a finding in another task, for whether it should exist, what a row may claim and which measurements stay in this seat. A pass filing nothing skips it.
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-filing.md` before offering a row, filing one, or placing a finding in another task, for whether it should exist, what a row may claim and which measurements stay in this seat.
 
 ### A relayed operator answer
 
