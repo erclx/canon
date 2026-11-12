@@ -57,6 +57,8 @@ const CONFIG_REFUSALS: Record<ConfigRefusal, string> = {
 
 const WALK_REFUSALS: Record<WalkRefusal, string> = {
   'browser-missing': 'The browser binary is not installed in this project.',
+  'sandbox-blocked':
+    'The browser could not start its sandbox, since this kernel refuses it a user namespace.',
   'server-unreachable':
     'Nothing answered at the base URL, so no route was read.',
   'walk-failed': 'The walk failed against a running server.',
@@ -105,6 +107,10 @@ export function register(program: Command): void {
         '',
         'A route walk needs a running server. Both need a browser binary. Install the browser with:',
         `  ${INSTALL_BROWSER}`,
+        '',
+        'The browser runs sandboxed. Where the kernel refuses it a user namespace,',
+        'as under AppArmor, the walk refuses as sandbox-blocked, carrying fix when',
+        'that setting reads 1.',
         '',
         'Subjects:',
         ...SUBJECTS.map((subject) => `  ${subject.name}  ${subject.summary}`),
@@ -207,6 +213,7 @@ async function runInventory(
     if (result.reason === 'browser-missing') {
       logWarn(`Install the browser binary with: ${INSTALL_BROWSER}`)
     }
+    if (result.fix) logWarn(`Allow it for this boot with: ${result.fix}`)
     logWarn(result.message.split('\n')[0] ?? '')
     outro()
     emit(emitJson, {
@@ -218,6 +225,7 @@ async function runInventory(
       ...(result.reason === 'browser-missing'
         ? { install: INSTALL_BROWSER }
         : {}),
+      ...(result.fix ? { fix: result.fix } : {}),
     })
     return 1
   }
@@ -327,13 +335,15 @@ async function runFrames(
   if (result.status === 'failed') {
     logStep('Refused')
     logWarn(
-      result.reason === 'browser-missing'
-        ? WALK_REFUSALS['browser-missing']
+      result.reason === 'browser-missing' ||
+        result.reason === 'sandbox-blocked'
+        ? WALK_REFUSALS[result.reason]
         : 'The walk failed while reading the frames.',
     )
     if (result.reason === 'browser-missing') {
       logWarn(`Install the browser binary with: ${INSTALL_BROWSER}`)
     }
+    if (result.fix) logWarn(`Allow it for this boot with: ${result.fix}`)
     logWarn(result.message.split('\n')[0] ?? '')
     outro()
     emit(emitJson, {
@@ -344,6 +354,7 @@ async function runFrames(
       ...(result.reason === 'browser-missing'
         ? { install: INSTALL_BROWSER }
         : {}),
+      ...(result.fix ? { fix: result.fix } : {}),
     })
     return 1
   }
