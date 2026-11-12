@@ -103,6 +103,27 @@ describe('readCarry', () => {
     })
   })
 
+  it('should carry across a source change the predicate lets through', async () => {
+    const read = changedRead({
+      isAncestor: true,
+      paths: ['src/capture/render.ts', 'src/gesture.ts'],
+    })
+
+    const carry = await readCarry(read, DRIVEN, TIP, (path) =>
+      path.startsWith('src/take/'),
+    )
+
+    expect(carry).toEqual({ kind: 'carried', carriedFrom: DRIVEN })
+  })
+
+  it('should move on a path the predicate names however inert it reads', async () => {
+    const read = changedRead({ isAncestor: true, paths: ['README.md'] })
+
+    const carry = await readCarry(read, DRIVEN, TIP, () => true)
+
+    expect(carry).toEqual({ kind: 'moved', drivenPaths: ['README.md'] })
+  })
+
   it('should never carry from a commit the head does not descend from', async () => {
     const read = changedRead({ isAncestor: false, paths: [] })
 
