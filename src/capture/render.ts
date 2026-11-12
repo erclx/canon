@@ -11,9 +11,9 @@ import type {
 } from 'playwright-core'
 import {
   SANDBOXED,
-  SANDBOX_FIX,
   USERNS_SETTING,
   isSandboxBlocked,
+  launchSandboxFix,
 } from '@/browser/engine'
 import {
   mergeBlocks,
@@ -84,10 +84,27 @@ async function launchSandboxed(): Promise<Browser> {
   } catch (error) {
     if (!isSandboxBlocked(error)) throw error
     throw new Error(
-      `Chromium found no usable sandbox. Where ${USERNS_SETTING} is 1, allow unprivileged user namespaces for this boot with: ${SANDBOX_FIX}`,
+      sandboxBlockedMessage(launchSandboxFix(), process.getuid?.()),
       { cause: error },
     )
   }
+}
+
+/**
+ * Names the sysctl only when it is the fix, so root and a seccomp profile are
+ * each sent to their own cause rather than to AppArmor.
+ */
+export function sandboxBlockedMessage(
+  fix: string | undefined,
+  uid: number | undefined,
+): string {
+  if (fix) {
+    return `Chromium found no usable sandbox, since ${USERNS_SETTING} is 1. Allow unprivileged user namespaces for this boot with: ${fix}`
+  }
+  if (uid === 0) {
+    return 'Chromium refuses its sandbox when run as root, so run canon capture as another user.'
+  }
+  return `Chromium found no usable sandbox, and ${USERNS_SETTING} is not the cause, such as under a container's seccomp profile.`
 }
 
 export async function captureSources(
