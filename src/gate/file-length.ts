@@ -7,8 +7,10 @@ import type { Measure } from '@/gate/measures'
 import { listRepositoryFiles } from '@/git/files'
 
 /**
- * Fails any tracked code file past the line limit, tests included, so a file
- * no single read can return never lands. The extension set and the line rule
+ * Fails any tracked code file past the line limit, tests included. One default
+ * Read returns 25,000 tokens, and 2,000 lines of this codebase's TypeScript is
+ * about 18,500 tokens, so a file under the limit fits one read with room to
+ * spare. The extension set and the line rule
  * come from `code/length`, the module the length report reads, so the report
  * and the gate agree on what a file is. No baseline and no exempt marker: the
  * first file to cross fails.
@@ -50,6 +52,6 @@ export const fileLength: Measure = async (ctx) => {
       kind: 'warn',
       text: `${file.path} has ${file.lines} lines, past the ${FILE_LINE_LIMIT} line limit`,
     })),
-    failure: `${long.length} ${long.length === 1 ? 'file' : 'files'} past ${FILE_LINE_LIMIT} lines. Split each at a seam into files of their own, since a file past the limit cannot be read in one call.`,
+    failure: `${long.length} ${long.length === 1 ? 'file' : 'files'} past ${FILE_LINE_LIMIT} lines. Split each at a seam into files of their own, so each fits one read.`,
   }
 }

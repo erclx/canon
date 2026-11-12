@@ -2,8 +2,10 @@ import { astroFrontmatter } from '@/code/astro'
 import { lex } from '@/code/lex'
 
 /**
- * Lines a file may run before the report names it. A file past it cannot be
- * read in one call, which is the cost the checkpoint measures.
+ * Lines a file may run before the report names it. One default Read returns
+ * 25,000 tokens, not a line count, and 2,000 lines of this codebase's
+ * TypeScript is about 18,500 tokens, so a file under the limit fits one read
+ * with room to spare.
  */
 export const FILE_LINE_LIMIT = 2000
 
