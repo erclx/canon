@@ -70,6 +70,26 @@ describe('loadPaintedPatterns', () => {
     expect(isPainted('src/App.tsx', patterns)).toBe(true)
   })
 
+  it('should let a project glob paint a fixture folder the default excludes', () => {
+    const patterns = loadPaintedPatterns(
+      rootWith('{"painted":["app/fixtures/**"]}'),
+    )
+
+    expect(isPainted('app/fixtures/index.html', patterns)).toBe(true)
+    expect(isPainted('src/take/fixtures/focus.html', patterns)).toBe(false)
+  })
+
+  it('should keep a test file and a project trim unpainted under a repainted fixture folder', () => {
+    const patterns = loadPaintedPatterns(
+      rootWith(
+        '{"painted":["app/fixtures/**"],"unpainted":["app/fixtures/data/**"]}',
+      ),
+    )
+
+    expect(isPainted('app/fixtures/page.test.tsx', patterns)).toBe(false)
+    expect(isPainted('app/fixtures/data/table.html', patterns)).toBe(false)
+  })
+
   it('should let a project trim a path the default paints', () => {
     const patterns = loadPaintedPatterns(
       rootWith('{"unpainted":["fixtures/**"]}'),
