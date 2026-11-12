@@ -82,13 +82,13 @@ A `blocks` entry is a page, stylesheet, or script embedded in a string past `lim
 
 ## Folder layout
 
-| Field          | Value                                                                       |
-| -------------- | --------------------------------------------------------------------------- |
-| Measures       | Whether a code folder holds so many files that it may hold two roles        |
-| Verb           | `canon census --json`                                                       |
-| Keys           | `folderCheckpoint`, and `folders` with `path`, `files`, `byExtension`       |
-| Second input   | `prefixGroupThreshold`, and `prefixGroups` with `folder`, `prefix`, `stems` |
-| Evidence class | `measured` for the count, `read` for the role judgment                      |
+| Field          | Value                                                                      |
+| -------------- | -------------------------------------------------------------------------- |
+| Measures       | Whether a code folder holds so many files that it may hold two roles       |
+| Verb           | `canon census --json`                                                      |
+| Keys           | `folderCheckpoint`, and `folders` with `path`, `files`, `byExtension`      |
+| Second input   | `prefixGroupCheckpoint`, and `prefixGroups` with `path`, `prefix`, `stems` |
+| Evidence class | `measured` for the count, `read` for the role judgment                     |
 
 A folder counts its own files and not its subfolders', and the census leaves out gitignored paths and fixtures.
 

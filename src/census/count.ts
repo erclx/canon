@@ -38,7 +38,7 @@ export interface CensusResult {
   readonly byExtension: readonly ExtensionCount[]
   /** Every folder at or past `FOLDER_FILE_CHECKPOINT`, empty when none is. */
   readonly folders: readonly FolderCount[]
-  /** Every prefix group at or past `PREFIX_GROUP_THRESHOLD`, at any folder size. */
+  /** Every prefix group at or past `PREFIX_GROUP_CHECKPOINT`, at any folder size. */
   readonly prefixGroups: readonly PrefixGroup[]
 }
 
@@ -47,14 +47,15 @@ export interface CensusResult {
  * hyphen or underscore, a role the folder may be holding without naming it.
  */
 export interface PrefixGroup {
-  readonly folder: string
+  /** The folder holding the group, in the form `folders[].path` takes. */
+  readonly path: string
   readonly prefix: string
   /** Distinct stems, sorted, so a module and its test count once. */
   readonly stems: readonly string[]
 }
 
 /** A prefix shared by this many distinct stems in one folder is reported. */
-export const PREFIX_GROUP_THRESHOLD = 3
+export const PREFIX_GROUP_CHECKPOINT = 3
 
 export interface CensusFailure {
   readonly kind: 'refused'
@@ -173,16 +174,16 @@ function prefixGroups(paths: readonly string[]): PrefixGroup[] {
   }
 
   return [...byKey.values()]
-    .filter((group) => group.stems.size >= PREFIX_GROUP_THRESHOLD)
+    .filter((group) => group.stems.size >= PREFIX_GROUP_CHECKPOINT)
     .map(({ folder, prefix, stems }) => ({
-      folder,
+      path: folder,
       prefix,
       stems: [...stems].sort(),
     }))
     .sort(
       (a, b) =>
         b.stems.length - a.stems.length ||
-        a.folder.localeCompare(b.folder) ||
+        a.path.localeCompare(b.path) ||
         a.prefix.localeCompare(b.prefix),
     )
 }

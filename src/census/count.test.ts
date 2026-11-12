@@ -248,7 +248,7 @@ describe('census', () => {
 
       expect(result.prefixGroups).toEqual([
         {
-          folder: 'src/take',
+          path: 'src/take',
           prefix: 'film',
           stems: ['film-crop', 'film-drag', 'film-zoom'],
         },
@@ -287,7 +287,7 @@ describe('census', () => {
 
       expect(result.prefixGroups).toEqual([
         {
-          folder: 'pkg',
+          path: 'pkg',
           prefix: 'test',
           stems: ['test_runner', 'test_utils_a', 'test_utils_b'],
         },
