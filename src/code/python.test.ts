@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { isPythonTestFile, pythonFunctionSpans } from '@/code/python'
+import {
+  isPythonTestFile,
+  pythonComments,
+  pythonFunctionSpans,
+} from '@/code/python'
 
 function spans(source: string, skipTests = false): unknown {
   const read = pythonFunctionSpans(source, { skipTests })
@@ -143,5 +147,72 @@ describe('isPythonTestFile', () => {
     ['src/test_a/b.py', false],
   ])('should read %s as a test file: %s', (file, expected) => {
     expect(isPythonTestFile(file)).toBe(expected)
+  })
+})
+
+describe('pythonComments', () => {
+  function layout(source: string): unknown {
+    const read = pythonComments(source)
+    return read.kind === 'read'
+      ? { comments: read.comments, docstrings: read.docstrings }
+      : read
+  }
+
+  it('should read a module, a class, and a method docstring', () => {
+    const source = [
+      '"""Module."""',
+      'class A:',
+      "    '''Class.",
+      '',
+      "    More.'''",
+      '    def b(self):',
+      '        r"""Method."""',
+      '        return 1',
+      '',
+    ].join('\n')
+
+    expect(layout(source)).toEqual({
+      comments: [],
+      docstrings: [
+        { start: 1, end: 1 },
+        { start: 3, end: 5 },
+        { start: 7, end: 7 },
+      ],
+    })
+  })
+
+  it('should not read a string that is not first in a body as a docstring', () => {
+    const source = 'def a():\n    x = 1\n    """Not a docstring."""\n'
+
+    expect(layout(source)).toEqual({ comments: [], docstrings: [] })
+  })
+
+  it('should not read a bytes or formatted string as a docstring', () => {
+    const source = 'def a():\n    f"""{x}"""\ndef b():\n    b"""x"""\n'
+
+    expect(layout(source)).toEqual({ comments: [], docstrings: [] })
+  })
+
+  it('should read a decorated function docstring under its header', () => {
+    const source = '@cache\ndef a():\n    """Doc."""\n'
+
+    expect(layout(source)).toEqual({
+      comments: [],
+      docstrings: [{ start: 3, end: 3 }],
+    })
+  })
+
+  it('should not read a # inside a string as a comment', () => {
+    const source = 'x = """\n# not a comment\n"""\n# a comment\n'
+
+    expect(layout(source)).toEqual({ comments: [4], docstrings: [] })
+  })
+
+  it('should return a file the lexer cannot close as unread', () => {
+    expect(layout('x = """\n# open\n')).toEqual({
+      kind: 'unread',
+      line: 1,
+      reason: 'unclosed-string',
+    })
   })
 })

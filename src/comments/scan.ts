@@ -1,15 +1,18 @@
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
+import type { UnreadFile } from '@/code/length'
+import { pythonComments } from '@/code/python'
 import { type Placement, placementReader } from '@/comments/placement'
 import { listIgnored } from '@/git/ignore'
 
-export type Language = 'ts' | 'sh'
+export type Language = 'ts' | 'sh' | 'py'
 
-export const LANGUAGES: readonly Language[] = ['ts', 'sh']
+export const LANGUAGES: readonly Language[] = ['ts', 'sh', 'py']
 
 const EXTENSIONS: Record<Language, readonly string[]> = {
   ts: ['.ts', '.tsx'],
   sh: ['.sh'],
+  py: ['.py'],
 }
 
 /**
@@ -85,6 +88,8 @@ export interface LanguageCount {
   readonly bodyBlocks: readonly LongBlock[]
   /** Every file holding a run of `LONG_BLOCK_FLOOR` or more, most lines first. */
   readonly longBlockFiles: readonly LongBlockFile[]
+  /** Every Python file whose runs went unplaced, with what refused it. */
+  readonly unreadFiles: readonly UnreadFile[]
 }
 
 export interface ScanOptions {
@@ -159,6 +164,9 @@ interface FileCount {
   readonly docBlocks: number
   readonly inlineComments: number
   readonly runs: readonly Run[]
+  /** Whether each long run carries a placement, so the head and body split holds. */
+  readonly placed: boolean
+  readonly unread?: Omit<UnreadFile, 'file'>
 }
 
 /** Tracks contiguous comment lines and keeps every run. */
@@ -268,6 +276,7 @@ function countTypeScript(
     docBlocks,
     inlineComments,
     runs: placeRuns(file, lines, runs.runs()),
+    placed: true,
   }
 }
 
@@ -332,8 +341,91 @@ function countBash(
     docBlocks: 0,
     inlineComments,
     runs: runs.runs().map((run) => ({ ...run, placement: null })),
+    placed: false,
   }
 }
+
+/**
+ * Counts one Python file, a `#` line as an inline comment and each docstring
+ * as one doc block whose every line counts.
+ *
+ * A docstring is always its own run and always `head`, being the contract of
+ * whatever it opens wherever that sits, and a `#` run is `body` when it starts
+ * inside a function span. A file the reader refuses still counts its `#`
+ * lines by their first character, unplaced, with the refusal on the record.
+ */
+function countPython(
+  file: SourceFile,
+  matchers: readonly { term: string; pattern: RegExp }[],
+  hits: DegradationHit[],
+): FileCount {
+  const lines = splitLines(file.text)
+  const read = pythonComments(file.text)
+  const kinds = new Map<number, string>()
+
+  if (read.kind === 'read') {
+    for (const line of read.comments) kinds.set(line, '#')
+    for (const doc of read.docstrings) {
+      for (let line = doc.start; line <= doc.end; line++) {
+        kinds.set(line, `doc:${doc.start}`)
+      }
+    }
+  } else {
+    for (const [index, line] of lines.entries()) {
+      if (line.trimStart().startsWith('#')) kinds.set(index + 1, '#')
+    }
+  }
+  if (lines[0]?.startsWith('#!') && kinds.get(1) === '#') kinds.delete(1)
+
+  let commentLines = 0
+  let inlineComments = 0
+  const runs: { line: number; lines: number; kind: string }[] = []
+  for (const [index, text] of lines.entries()) {
+    const kind = kinds.get(index + 1)
+    if (kind === undefined) continue
+    commentLines++
+    if (kind === '#') inlineComments++
+    sweep(text.trim(), file.path, index + 1, matchers, hits)
+    const last = runs.at(-1)
+    if (last?.kind === kind && last.line + last.lines === index + 1)
+      last.lines++
+    else runs.push({ line: index + 1, lines: 1, kind })
+  }
+
+  const inBody = (line: number): boolean =>
+    read.kind === 'read' &&
+    read.spans.some((span) => span.line < line && line < span.line + span.lines)
+
+  return {
+    lines: lines.length,
+    commentLines,
+    docBlocks: read.kind === 'read' ? read.docstrings.length : 0,
+    inlineComments,
+    runs: runs.map(({ line, lines: length, kind }) => ({
+      line,
+      lines: length,
+      placement:
+        read.kind === 'unread' || length < LONG_BLOCK_FLOOR
+          ? null
+          : kind === '#' && inBody(line)
+            ? 'body'
+            : 'head',
+    })),
+    placed: read.kind === 'read',
+    ...(read.kind === 'unread'
+      ? { unread: { line: read.line, reason: read.reason } }
+      : {}),
+  }
+}
+
+const COUNTERS: Record<
+  Language,
+  (
+    file: SourceFile,
+    matchers: readonly { term: string; pattern: RegExp }[],
+    hits: DegradationHit[],
+  ) => FileCount
+> = { ts: countTypeScript, sh: countBash, py: countPython }
 
 export function countFile(
   file: SourceFile,
@@ -346,10 +438,7 @@ export function countFile(
   }))
   const hits: DegradationHit[] = []
 
-  const counted =
-    language === 'ts'
-      ? countTypeScript(file, matchers, hits)
-      : countBash(file, matchers, hits)
+  const counted = COUNTERS[language](file, matchers, hits)
 
   const runs = counted.runs.map((run) => ({ file: file.path, ...run }))
   const longest = runs.reduce<(typeof runs)[number] | undefined>(
@@ -358,7 +447,7 @@ export function countFile(
   )
   const long = runs.filter((run) => run.lines >= LONG_BLOCK_FLOOR)
   const linesWhere = (placement: Placement): number | null =>
-    language === 'ts'
+    counted.placed
       ? long
           .filter((run) => run.placement === placement)
           .reduce((sum, run) => sum + run.lines, 0)
@@ -392,6 +481,10 @@ export function countFile(
               bodyLines: linesWhere('body'),
             },
           ],
+    unreadFiles:
+      counted.unread === undefined
+        ? []
+        : [{ file: file.path, ...counted.unread }],
   }
 }
 
@@ -416,6 +509,7 @@ export function countFiles(
       blocks: [] as Block[],
       bodyBlocks: [] as LongBlock[],
       longBlockFiles: [] as LongBlockFile[],
+      unreadFiles: [] as UnreadFile[],
     }
 
     for (const file of files) {
@@ -431,6 +525,7 @@ export function countFiles(
       totals.blocks.push(...count.blocks)
       totals.bodyBlocks.push(...count.bodyBlocks)
       totals.longBlockFiles.push(...count.longBlockFiles)
+      totals.unreadFiles.push(...count.unreadFiles)
     }
 
     totals.longBlockFiles.sort(

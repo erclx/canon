@@ -25,6 +25,7 @@ interface ScanCommandOptions {
 const LABELS: Record<Language, string> = {
   ts: 'TypeScript',
   sh: 'Bash',
+  py: 'Python',
 }
 
 export function register(program: Command): void {
