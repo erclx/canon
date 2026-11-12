@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
+import { plural } from '@/cli/ui'
 import { FILE_LINE_LIMIT, LENGTH_SOURCE, lineCount } from '@/code/length'
 import type { Measure } from '@/gate/measures'
 import { listRepositoryFiles } from '@/git/files'
@@ -25,15 +26,24 @@ export const fileLength: Measure = async (ctx) => {
     }
   }
 
-  const long = files
-    .filter((path) => LENGTH_SOURCE.test(path))
+  const sources = files.filter((path) => LENGTH_SOURCE.test(path))
+  const long = sources
     .map((path) => ({
       path,
       lines: lineCount(readFileSync(join(ctx.root, path), 'utf8')),
     }))
     .filter((file) => file.lines > FILE_LINE_LIMIT)
 
-  if (long.length === 0) return { emissions: [] }
+  if (long.length === 0) {
+    return {
+      emissions: [
+        {
+          kind: 'info',
+          text: `No code file past ${FILE_LINE_LIMIT} lines across ${plural(sources.length, 'source file')}`,
+        },
+      ],
+    }
+  }
 
   return {
     emissions: long.map((file) => ({

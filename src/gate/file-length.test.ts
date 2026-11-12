@@ -63,6 +63,21 @@ describe('fileLength', () => {
       expect(report.failure).toBeUndefined()
     })
 
+    it('should name how many files a passing run measured', async () => {
+      commit('src/a.ts', lines(10))
+      commit('src/b.ts', lines(10))
+      commit('docs/a.md', lines(10))
+
+      const report = await fileLength(context())
+
+      expect(report.emissions).toEqual([
+        {
+          kind: 'info',
+          text: 'No code file past 2000 lines across 2 source files',
+        },
+      ])
+    })
+
     it('should pass a 2,000 line file with no trailing newline', async () => {
       commit('src/a.ts', lines(2000, false))
 
