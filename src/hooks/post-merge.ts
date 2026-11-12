@@ -223,6 +223,24 @@ function reclaimLines(fields: Fields): string | undefined {
       `\n🧹 ${failed} worktree(s) could not be removed.\n` +
       'Run canon worktrees reclaim to read which step failed.\n\n'
   }
+
+  // A binary predating the branch half carries none of these fields, and
+  // `count` reads an absent one as zero, so that record stays quiet here.
+  const branchesRemoved = count(fields, 'branchesRemoved')
+  if (branchesRemoved > 0) {
+    lines += `\n🧹 Deleted ${branchesRemoved} merged branch(es) no worktree held.\n\n`
+  }
+
+  const branchesFailed = count(fields, 'branchesFailed')
+  if (reason === undefined && fields.branchesReclaimable === null) {
+    lines +=
+      '\n🧹 Merged branches not read, so none was deleted.\n' +
+      'Run canon worktrees reclaim --dry-run to read why.\n\n'
+  } else if (branchesFailed > 0) {
+    lines +=
+      `\n🧹 ${branchesFailed} merged branch(es) could not be deleted.\n` +
+      'Run canon worktrees reclaim to read why.\n\n'
+  }
   return lines.length > 0 ? lines : undefined
 }
 

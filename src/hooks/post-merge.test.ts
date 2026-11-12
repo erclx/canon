@@ -378,6 +378,63 @@ describe('runPostMerge reclaim lines', () => {
 
     expect(h.output()).toBe('')
   })
+
+  it('should print the branch deletion and the branch failure', async () => {
+    const h = harness({
+      reclaim: record(
+        {
+          reason: null,
+          removed: 0,
+          failed: 0,
+          branchesReclaimable: 3,
+          branchesRemoved: 2,
+          branchesFailed: 1,
+        },
+        1,
+      ),
+    })
+
+    await h.go()
+
+    expect(h.output()).toBe(
+      '\n🧹 Deleted 2 merged branch(es) no worktree held.\n\n' +
+        '\n🧹 1 merged branch(es) could not be deleted.\nRun canon worktrees reclaim to read why.\n\n',
+    )
+  })
+
+  it('should say the branch reading was skipped rather than stay quiet', async () => {
+    const h = harness({
+      reclaim: record(
+        {
+          reason: null,
+          removed: 0,
+          failed: 0,
+          branchesReclaimable: null,
+          branchesRemoved: 0,
+          branchesFailed: 0,
+        },
+        1,
+      ),
+    })
+
+    await h.go()
+
+    expect(h.output()).toBe(
+      '\n🧹 Merged branches not read, so none was deleted.\nRun canon worktrees reclaim --dry-run to read why.\n\n',
+    )
+  })
+
+  it('should read a record without the branch fields as before', async () => {
+    const h = harness({
+      reclaim: record({ reason: null, removed: 1, failed: 0 }),
+    })
+
+    await h.go()
+
+    expect(h.output()).toBe(
+      '\n🧹 Reclaimed 1 worktree(s) whose pull request merged.\n\n',
+    )
+  })
 })
 
 describe('runPostMerge member lines', () => {
