@@ -3,6 +3,7 @@ import { type Box, FPS, type LogEvent, START } from '@/take/log'
 import {
   type KeyInput,
   type PointerInput,
+  FOCUS_MOVED,
   type Stage,
   TargetOffscreen,
   performSteps,
@@ -26,7 +27,11 @@ type Sent =
  * input takes `pointerMs` of clip time, one frame by default, and longer for a
  * slow page that answers each input only once it paints.
  */
-function recordingStage(boxes: Record<string, Box>, pointerMs = FRAME_MS) {
+function recordingStage(
+  boxes: Record<string, Box>,
+  pointerMs = FRAME_MS,
+  focus: Box | null = null,
+) {
   const sent: Sent[] = []
   let ms = 0
   const stage: Stage = {
@@ -46,6 +51,7 @@ function recordingStage(boxes: Record<string, Box>, pointerMs = FRAME_MS) {
       ms += FRAME_MS
     },
     evaluate: async <T>(expression: string) => {
+      if (expression === FOCUS_MOVED) return focus as T
       const target = Object.keys(boxes).find((name) =>
         expression.includes(JSON.stringify(name)),
       )
@@ -252,6 +258,49 @@ describe('performSteps key', () => {
     expect(log).toEqual([
       { t: 0, kind: 'key', keys: 'Escape', ms: 2 * FRAME_MS },
     ])
+  })
+
+  describe('focus', () => {
+    const FIELD: Box = { x: 400, y: 300, width: 160, height: 32 }
+
+    async function tab(focus: Box | null) {
+      const { stage } = recordingStage({}, FRAME_MS, focus)
+      const log: LogEvent[] = []
+      await performSteps(
+        stage,
+        [
+          { kind: 'key', keys: 'Tab' },
+          { kind: 'key', keys: 'Escape' },
+        ],
+        { pointer: START, log },
+      )
+      return log
+    }
+
+    it('should log the box focus moved to on the key', async () => {
+      const [press] = await tab(FIELD)
+
+      expect(press).toEqual({
+        t: 0,
+        kind: 'key',
+        keys: 'Tab',
+        ms: 2 * FRAME_MS,
+        focus: FIELD,
+      })
+    })
+
+    it('should hold 500 ms on the focused box before the next step', async () => {
+      const [press, next] = await tab(FIELD)
+
+      expect(next?.t).toBeCloseTo(endOf(press) + 500)
+    })
+
+    it('should log no focus and add no hold when focus did not move', async () => {
+      const [press, next] = await tab(null)
+
+      expect(press).not.toHaveProperty('focus')
+      expect(next?.t).toBeCloseTo(endOf(press))
+    })
   })
 })
 
