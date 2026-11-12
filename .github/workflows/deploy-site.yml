@@ -39,6 +39,7 @@ jobs:
     name: 🌐 Deploy Site
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -90,6 +91,7 @@ jobs:
     # Dependabot branches publish no preview and the run holds no Cloudflare secrets
     if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       # The default branch, since a closed pull request may have no merge ref to
       # check out, and the script that holds the Cloudflare token should not
