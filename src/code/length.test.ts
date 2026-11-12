@@ -6,6 +6,7 @@ import {
   FUNCTION_LINE_CHECKPOINT,
   LENGTH_EXTENSIONS,
   LENGTH_SOURCE,
+  functionBodies,
   functionSpans,
   functionSpansInFile,
   lineCount,
@@ -233,6 +234,24 @@ describe('functionSpans in JSX mode', () => {
     expect(braceSpans(source, { jsx: true })).toEqual(
       compilerSpans(source, 'f.tsx'),
     )
+  })
+})
+
+describe('functionBodies', () => {
+  const bodyText = (source: string): string[] =>
+    functionBodies(source).map(({ start, end }) => source.slice(start, end))
+
+  it('should give each body from its opening brace past its closing one', () => {
+    const source =
+      'function a(x: number): { y: number } {\n  return { y: x }\n}\n'
+
+    expect(bodyText(source)).toEqual(['{\n  return { y: x }\n}'])
+  })
+
+  it('should count a test runner callback as a body', () => {
+    const source = "it('a', () => {\n  b()\n})\n"
+
+    expect(bodyText(source)).toEqual(['{\n  b()\n}'])
   })
 })
 
