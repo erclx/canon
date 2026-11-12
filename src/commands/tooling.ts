@@ -30,10 +30,14 @@ import {
   customize,
   decline,
   lift,
+  type GoldenPath,
   normalizeGoldenPath,
+  parseScriptAddress,
   readDispositions,
   resolveGolden,
+  scriptAddress,
 } from '@/tooling/disposition'
+import { readPackage, resolveScript } from '@/tooling/package'
 import { scan, type ScanResult } from '@/tooling/scan'
 import { recordToolingChain } from '@/tooling/stamp'
 import { subfolderPath } from '@/tooling/subfolder'
@@ -208,6 +212,7 @@ export function register(program: Command): void {
   const dispositionHelp = [
     '',
     '<path> is relative to the target, as `canon tooling diff` lists it, and',
+    'a package.json script is addressed as `package.json:<key>`. Either',
     'resolves against the chain the last sync recorded. These verbs are the',
     'only writers of the record, kept under domains.tooling.dispositions in',
     'canon/config/config.json. Nothing here deletes or edits the file itself.',
@@ -215,14 +220,20 @@ export function register(program: Command): void {
     'Exit codes:',
     '  0  recorded',
     '  1  refused: no-chain, bad-path, not-golden, already-held,',
-    '     seed-not-customizable, missing-file, not-held, or toolkit-root',
+    '     seed-not-customizable, missing-file, missing-script, not-held, or',
+    '     toolkit-root',
     '',
   ]
 
   tooling
     .command('decline')
-    .description('Keep sync and inject from ever writing one golden file')
-    .argument('<path>', 'Golden file path, relative to the target')
+    .description(
+      'Keep sync and inject from ever writing one golden file or script',
+    )
+    .argument(
+      '<path>',
+      'Golden file path relative to the target, or package.json:<key>',
+    )
     .argument('[target]', 'Target directory', '.')
     .helpOption('-h, --help', 'Show this help message')
     .option('--reason <text>', 'Record why the project declined it')
@@ -234,6 +245,7 @@ export function register(program: Command): void {
         'Examples:',
         '  canon tooling decline .github/workflows/readme-screenshot.yml',
         '  canon tooling decline .oxlintrc.json web --reason "lint runs in CI only"',
+        '  canon tooling decline package.json:test:e2e:changed',
         '',
       ].join('\n'),
     )
@@ -244,9 +256,12 @@ export function register(program: Command): void {
   tooling
     .command('customize')
     .description(
-      'Keep the project copy of one golden config through every write',
+      'Keep the project copy of one golden config or script through every write',
     )
-    .argument('<path>', 'Golden config path, relative to the target')
+    .argument(
+      '<path>',
+      'Golden config path relative to the target, or package.json:<key>',
+    )
     .argument('[target]', 'Target directory', '.')
     .helpOption('-h, --help', 'Show this help message')
     .option('--json', 'Add a machine-readable record on stdout')
@@ -255,11 +270,12 @@ export function register(program: Command): void {
       [
         ...dispositionHelp,
         'The golden hash is recorded, so `canon tooling diff` exits 1 once the',
-        'stack ships a different copy. A seed cannot be customized, since sync',
-        'never overwrites one.',
+        'stack ships a different copy or value. A seed cannot be customized,',
+        'since sync never overwrites one.',
         '',
         'Examples:',
         '  canon tooling customize e2e/screenshot.ts',
+        '  canon tooling customize package.json:test:run',
         '',
       ].join('\n'),
     )
@@ -269,8 +285,11 @@ export function register(program: Command): void {
 
   tooling
     .command('lift')
-    .description('Hand a declined or customized file back to sync')
-    .argument('<path>', 'Golden file path, relative to the target')
+    .description('Hand a declined or customized file or script back to sync')
+    .argument(
+      '<path>',
+      'Golden file path relative to the target, or package.json:<key>',
+    )
     .argument('[target]', 'Target directory', '.')
     .helpOption('-h, --help', 'Show this help message')
     .option('--json', 'Add a machine-readable record on stdout')
@@ -280,6 +299,7 @@ export function register(program: Command): void {
         ...dispositionHelp,
         'Examples:',
         '  canon tooling lift .github/workflows/readme-screenshot.yml',
+        '  canon tooling lift package.json:test:run',
         '',
       ].join('\n'),
     )
@@ -775,7 +795,8 @@ async function runDisposition(
     )
   }
 
-  const rel = normalizeGoldenPath(input)
+  const scriptKey = parseScriptAddress(input)
+  const rel = scriptKey === undefined ? normalizeGoldenPath(input) : input
   if (rel === undefined) {
     return refuse(
       opts.json,
@@ -802,11 +823,17 @@ async function runDisposition(
     action === 'decline'
       ? decline(current, golden, opts.reason)
       : action === 'customize'
-        ? customize(current, golden, existsSync(join(resolved, rel)))
+        ? customize(current, golden, isPresent(resolved, golden))
         : lift(current, rel)
 
   if (!transition.ok) {
-    return refuse(opts.json, transition.reason, transition.message)
+    return refuse(
+      opts.json,
+      transition.reason,
+      transition.reason === 'not-golden'
+        ? withScriptHint(transition.message, chain, input)
+        : transition.message,
+    )
   }
 
   await writeDispositions(
@@ -829,6 +856,28 @@ async function runDisposition(
       : `Recorded ${rel} as ${entry.disposition}. Sync and inject skip it.`,
   )
   return 0
+}
+
+/** A script is present when the target's scripts define its key. */
+function isPresent(target: string, golden: GoldenPath | undefined): boolean {
+  if (golden === undefined) return false
+  const key = parseScriptAddress(golden.rel)
+  if (key === undefined) return existsSync(join(target, golden.rel))
+  return readPackage(join(target, 'package.json'))?.scripts?.[key] !== undefined
+}
+
+/**
+ * Names the address a bare script name was likely meant as, rather than
+ * guessing file or script by lookup, which would make the positional
+ * ambiguous.
+ */
+function withScriptHint(
+  message: string,
+  chain: readonly Manifest[],
+  input: string,
+): string {
+  if (resolveScript(chain, input) === undefined) return message
+  return `${message} The chain ships a script named ${input}, which is addressed as \`${scriptAddress(input)}\`.`
 }
 
 type WriteMode = 'apply' | 'prompt' | 'report' | 'unauthorized'

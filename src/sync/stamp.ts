@@ -40,8 +40,9 @@ export const DISPOSITIONS = ['declined', 'customized'] as const
 export type Disposition = (typeof DISPOSITIONS)[number]
 
 /**
- * What a project decided about one golden file. `base` is the golden hash a
- * customized file was taken from, so a later scan can tell the copy moved.
+ * What a project decided about one golden file or script. `base` is the
+ * golden hash a customized file or script value was taken from, so a later
+ * scan can tell the copy moved.
  */
 export interface DispositionEntry {
   readonly disposition: Disposition
@@ -49,7 +50,12 @@ export interface DispositionEntry {
   readonly reason?: string
 }
 
-/** Golden posix path to the project's decision about it, for one domain. */
+/**
+ * Golden posix path, or `package.json:<key>` for a script, to the project's
+ * decision about it, for one domain. Scripts share this map rather than a
+ * sibling field, since an older binary rebuilds the record from the fields it
+ * knows and would drop one.
+ */
 export type DomainDispositions = Readonly<Record<string, DispositionEntry>>
 
 /**

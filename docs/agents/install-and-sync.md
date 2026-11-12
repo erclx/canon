@@ -88,11 +88,14 @@ A held path stays drifted, so the next headless run still exits 1. Pass `--repla
 
 ### Dispositions
 
-`decline <path> [target] [--reason <text>]`, `customize <path> [target]`, and `lift <path> [target]` set or clear one path's disposition, each with `--json`. The path is relative to the target and resolves against the recorded chain, never a stack argument.
+`decline <path> [target] [--reason <text>]`, `customize <path> [target]`, and `lift <path> [target]` set or clear one path's disposition, each with `--json`. The path is relative to the target, or `package.json:<key>` for a script, and resolves against the recorded chain, never a stack argument.
+
+A bare script name is not read as a script, so it refuses with `not-golden` and a message naming the address.
 
 - A success answers `{ ok: true, action, path, entry? }`, where `entry` is the recorded `{ disposition, base?, reason? }` and is absent after a lift
 - A declined or customized path leaves `configs`, `seeds`, and `withheld` for `dispositions`, as `{ rel, stack, kind, disposition, present, moved? }`
-- `moved` is set on a customized config alone, and counts toward the exit once the golden copy no longer matches `base`
+- A held script leaves `scripts` the same way, with `kind: 'script'`, `rel` its address, and `present` true when the target defines the key
+- `moved` is set on a customized config or script alone, and counts toward the exit once the golden copy no longer matches `base`
 - Sync and inject never write a path in `dispositions`, and nothing deletes one the project still holds
 
 A refusal answers `{ ok: false, reason, message }` with exit 1:
@@ -105,6 +108,7 @@ A refusal answers `{ ok: false, reason, message }` with exit 1:
 | `already-held`          | The path is already declined or customized, so lift it    |
 | `seed-not-customizable` | The path is a seed, which sync never overwrites           |
 | `missing-file`          | `customize` named a config the target does not hold       |
+| `missing-script`        | `customize` named a script the target does not define     |
 | `not-held`              | `lift` named a path with no disposition                   |
 | `toolkit-root`          | The target is the toolkit checkout, the source of truth   |
 

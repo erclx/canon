@@ -76,18 +76,20 @@ Try a scenario from [sandbox](../../canon/context/development/sandbox.md) before
 
 `--write` replaces a golden config only when canon changed it and the project did not. A config the project edited, or one no earlier write recorded, is held and listed with a `--replace` command that takes the golden copy. A config from a stack the target never synced is a first install and is never held.
 
-A project can also opt out of one golden file without leaving the stack. Each verb below takes the path relative to the target, as `canon tooling diff` lists it.
+A project can also opt out of one golden file or `package.json` script without leaving the stack. Each verb below takes the path relative to the target, as `canon tooling diff` lists it, or a script as `package.json:<key>`.
 
 ```bash
 canon tooling decline .github/workflows/readme-screenshot.yml --reason "no screenshots here"
 canon tooling customize e2e/screenshot.ts
 canon tooling lift .github/workflows/readme-screenshot.yml
+canon tooling customize package.json:test:run
 ```
 
 - `decline` keeps sync and inject from writing the file again, and leaves a copy the project still holds in place
 - `customize` keeps the project's copy of a config through every write, and `diff` exits 1 once the stack ships a newer golden copy
 - A seed cannot be customized, since sync never overwrites one, and the starter `e2e/home.spec.ts` is one
 - `lift` hands the file back, so the next sync writes it
+- For a script, `decline` keeps sync from adding the key, and `customize` keeps the project's value with the same `diff` warning once the stack's value changes
 
 These verbs are the only writers of the record in `canon/config/config.json`, so never edit it there by hand.
 

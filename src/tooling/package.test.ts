@@ -6,6 +6,7 @@ import {
   collectScripts,
   minimalPackage,
   parseSpec,
+  resolveScript,
 } from '@/tooling/package'
 
 function makeManifest(
@@ -290,6 +291,83 @@ describe('applyScripts', () => {
 
     expect(result.pkg.scripts?.lint).toBe('eslint . --max-warnings 0')
     expect(result.overridden).toContain('lint')
+  })
+
+  it('should neither add nor override a held key', () => {
+    const chain = [
+      makeManifest('web', {
+        scripts: { 'test:run': 'vitest run', lint: 'oxlint' },
+        scriptOverrides: { check: 'bun run lint' },
+      }),
+    ]
+    const pkg = { scripts: { check: 'mine' } }
+
+    const result = applyScripts(pkg, chain, new Set(['test:run', 'check']))
+
+    expect(result.pkg.scripts).toEqual({ check: 'mine', lint: 'oxlint' })
+    expect(result.added).toEqual(['lint'])
+    expect(result.overridden).toEqual([])
+  })
+})
+
+describe('collectScripts held keys', () => {
+  it('should leave a held key out of the report', () => {
+    const chain = [
+      makeManifest('web', { scripts: { 'test:run': 'vitest run', lint: 'x' } }),
+    ]
+    const pkg = { scripts: { 'test:run': 'mine', lint: 'x' } }
+
+    expect(collectScripts(chain, pkg, new Set(['test:run']))).toEqual([
+      { key: 'lint', state: 'matching' },
+    ])
+  })
+})
+
+describe('resolveScript', () => {
+  it('should pick the nearest stack for a plain key', () => {
+    const chain = [
+      makeManifest('web', { scripts: { lint: 'oxlint' } }),
+      makeManifest('base', { scripts: { lint: 'prettier' } }),
+    ]
+
+    expect(resolveScript(chain, 'lint')).toEqual({
+      stack: 'web',
+      value: 'oxlint',
+      override: false,
+    })
+  })
+
+  it('should pick an ancestor override over a nearer plain key', () => {
+    const chain = [
+      makeManifest('web', { scripts: { check: 'web check' } }),
+      makeManifest('base', { scriptOverrides: { check: 'base check' } }),
+    ]
+
+    expect(resolveScript(chain, 'check')).toEqual({
+      stack: 'base',
+      value: 'base check',
+      override: true,
+    })
+  })
+
+  it('should pick the nearest override when several stacks override', () => {
+    const chain = [
+      makeManifest('web', { scriptOverrides: { check: 'web check' } }),
+      makeManifest('base', {
+        scripts: { check: 'plain' },
+        scriptOverrides: { check: 'base check' },
+      }),
+    ]
+
+    expect(resolveScript(chain, 'check')).toEqual({
+      stack: 'web',
+      value: 'web check',
+      override: true,
+    })
+  })
+
+  it('should return undefined for a key no stack ships', () => {
+    expect(resolveScript([makeManifest('base')], 'lint')).toBeUndefined()
   })
 })
 
