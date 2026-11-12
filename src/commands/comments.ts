@@ -1,6 +1,7 @@
 import { resolve } from 'node:path'
 import type { Command } from 'commander'
 import {
+  BLOCK_LINE_CHECKPOINT,
   density,
   type Language,
   LANGUAGES,
@@ -31,7 +32,9 @@ export function register(program: Command): void {
 
   comments
     .command('scan')
-    .description('Report comment density by language and by comment kind')
+    .description(
+      'Report comment density by language and kind, and the longest comment run per file past the checkpoint',
+    )
     .argument('[path]', 'Tree to scan, defaulting to the current directory')
     .helpOption('-h, --help', 'Show this help message')
     .option('--json', 'Add a machine-readable record on stdout')
@@ -115,6 +118,7 @@ async function runScan(
 
   if (opts.since) reportTrend(points, languages)
 
+  reportLongBlocks(snapshot)
   reportVocabulary(vocabulary, snapshot)
   outro()
 
@@ -126,6 +130,7 @@ async function runScan(
           vocabulary.kind === 'loaded'
             ? { source: vocabulary.source, terms: vocabulary.terms }
             : null,
+        blockCheckpoint: BLOCK_LINE_CHECKPOINT,
         snapshot: snapshot.map(record),
         trend: points.map((point) => ({
           rev: point.rev,
@@ -149,6 +154,7 @@ function record(count: LanguageCount): Record<string, unknown> {
     docBlocks: count.docBlocks,
     inlineComments: count.inlineComments,
     degradationHits: count.degradationHits,
+    longBlocks: count.longBlocks,
   }
 }
 
@@ -208,6 +214,34 @@ function reportTrend(
     logInfo(LABELS[language])
     pipeOutput(rows.join('\n'))
   }
+}
+
+/**
+ * Lists each file's longest comment run past the checkpoint, longest first.
+ *
+ * A long run is a prompt to read it against the code beside it, and some
+ * belong where they are, so the step names the length and asks nothing of it.
+ */
+function reportLongBlocks(snapshot: readonly LanguageCount[]): void {
+  logStep('Long comment blocks')
+
+  const blocks = snapshot
+    .flatMap((count) => count.longBlocks)
+    .sort((a, b) => b.lines - a.lines || a.file.localeCompare(b.file))
+
+  if (blocks.length === 0) {
+    logInfo(`None past ${BLOCK_LINE_CHECKPOINT} lines.`)
+    return
+  }
+
+  logInfo(
+    `${blocks.length} files with a run past ${BLOCK_LINE_CHECKPOINT} lines`,
+  )
+  pipeOutput(
+    blocks
+      .map((block) => `${block.file}:${block.line}  ${block.lines} lines`)
+      .join('\n'),
+  )
 }
 
 /**

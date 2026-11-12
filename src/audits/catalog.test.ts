@@ -233,13 +233,38 @@ describe('reading counts out of each record shape', () => {
   it('should sum the degradation hits across every scanned language', () => {
     const record = {
       snapshot: [
-        { language: 'ts', degradationHits: [{}, {}] },
-        { language: 'sh', degradationHits: [{}] },
+        { language: 'ts', degradationHits: [{}, {}], longBlocks: [] },
+        { language: 'sh', degradationHits: [{}], longBlocks: [] },
       ],
     }
 
     expect(countsFor(specFor('comments'), record)).toEqual({
       degradationHits: 3,
+      longBlocks: 0,
+    })
+  })
+
+  it('should sum the long comment blocks across every scanned language', () => {
+    const record = {
+      snapshot: [
+        { language: 'ts', degradationHits: [], longBlocks: [{}, {}] },
+        { language: 'sh', degradationHits: [], longBlocks: [{}] },
+      ],
+    }
+
+    expect(countsFor(specFor('comments'), record)).toEqual({
+      degradationHits: 0,
+      longBlocks: 3,
+    })
+  })
+
+  it('should keep the hit count for a record with no long blocks', () => {
+    const record = {
+      snapshot: [{ language: 'ts', degradationHits: [{}, {}] }],
+    }
+
+    expect(countsFor(specFor('comments'), record)).toEqual({
+      degradationHits: 2,
     })
   })
 
