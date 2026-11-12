@@ -35,8 +35,9 @@ The value subjects and the frame input add a second walk beside the route one.
 
 The browser helpers and the step driver sit beside the walk.
 
-- `src/browser/` owns the engine helpers every browser-driving command needs, including the sandbox option every product launch spreads and the `sandbox-blocked` detector, and the pin and argument rewrite behind `canon browser`, the agent CLI `review-ui` drives through
+- `src/browser/` owns the engine helpers every browser-driving command needs, and the pin and argument rewrite behind `canon browser`, the agent CLI `review-ui` drives through
 - `src/driver/` owns `canon drive`, which runs a plan of steps and probes against a running page for `design-pick` and `review-ui`
+- Every product launch spreads `SANDBOXED` from `src/browser/engine.ts`, so a kernel refusing the sandbox reads as `sandbox-blocked` rather than a launch without it
 
 ## Gotchas
 
