@@ -482,6 +482,124 @@ describe('referencesIn', () => {
     })
   })
 
+  describe('SOURCE_PATH', () => {
+    const root = '/nonexistent-root'
+
+    it('should report a concrete stack configs path in a skill body', () => {
+      expect(
+        referencesIn(
+          'claude/skills/deploy-app/references/cloudflare.md',
+          'Copy `tooling/base/configs/wrangler.toml` into place.',
+          root,
+        ),
+      ).toEqual([
+        {
+          file: 'claude/skills/deploy-app/references/cloudflare.md',
+          line: 1,
+          kind: 'source-path',
+          text: 'tooling/base/configs/wrangler.toml',
+        },
+      ])
+    })
+
+    it('should report a placeholder stack seeds path, which no target holds under any name', () => {
+      expect(
+        referencesIn(
+          'claude/skills/plan-feature/references/plan.md',
+          'A counterpart under `tooling/<stack>/seeds/` ships with it.',
+          root,
+        ).map((reference) => [reference.kind, reference.text]),
+      ).toEqual([['source-path', 'tooling/<stack>/seeds/']])
+    })
+
+    it('should report a brace group listing either folder', () => {
+      expect(
+        referencesIn(
+          'claude/skills/alpha/SKILL.md',
+          'Never cite `tooling/<stack>/{configs,seeds}/` here, nor `tooling/base/{seeds}/x`.',
+          root,
+        ).map((reference) => reference.text),
+      ).toEqual(['tooling/<stack>/{configs,seeds}/', 'tooling/base/{seeds}/x'])
+    })
+
+    it('should pass a brace group listing neither folder', () => {
+      expect(
+        referencesIn(
+          'claude/skills/alpha/SKILL.md',
+          'Read `tooling/base/{manifest,reference}.toml`.',
+          root,
+        ),
+      ).toEqual([])
+    })
+
+    it('should pass a stack manifest, a bare tooling mention, and a tooling verb', () => {
+      expect(
+        referencesIn(
+          'claude/skills/alpha/SKILL.md',
+          'Read `tooling/base/manifest.toml`, the `tooling/` category, and run `canon tooling sync`.',
+          root,
+        ),
+      ).toEqual([])
+    })
+
+    it('should pass a path whose tooling segment belongs to another tree', () => {
+      expect(
+        referencesIn(
+          'claude/skills/alpha/SKILL.md',
+          'See `foo/tooling/base/configs/x.json`.',
+          root,
+        ),
+      ).toEqual([])
+    })
+
+    it("should pass a source path cited from a skill's own REQUIREMENT.md", () => {
+      expect(
+        referencesIn(
+          'claude/skills/alpha/REQUIREMENT.md',
+          'Seeds live in `tooling/base/seeds/`.',
+          root,
+        ),
+      ).toEqual([])
+    })
+
+    it('should pass a source path outside claude/skills/', () => {
+      expect(
+        referencesIn(
+          'docs/agents/alpha.md',
+          'Seeds live in `tooling/base/seeds/`.',
+          root,
+        ),
+      ).toEqual([])
+      expect(
+        referencesIn(
+          'governance/rules/canon/alpha.md',
+          'Seeds live in `tooling/base/seeds/`.',
+          root,
+        ),
+      ).toEqual([])
+    })
+
+    it('should mute a source path marked on its own line', () => {
+      expect(
+        referencesIn(
+          'claude/skills/alpha/SKILL.md',
+          `Seeds live in \`tooling/base/seeds/\`. <!-- ${REFERENCE_MARKER}: illustrates the banned form -->`,
+          root,
+        ),
+      ).toEqual([])
+    })
+
+    it('should mute a source path marked on the line above', () => {
+      expect(
+        referencesIn(
+          'claude/skills/alpha/SKILL.md',
+          `<!-- ${REFERENCE_MARKER}: illustrates the banned form -->\nSeeds live in \`tooling/base/seeds/\`.`,
+          root,
+        ),
+      ).toEqual([])
+    })
+  })
+
   describe('PHASE_LABEL', () => {
     let root: string
 

@@ -185,6 +185,32 @@ const PHASE_LABEL = /\bv\d+\.\d+(?!\.\d)\b/g
  */
 const RULE_PATH = /(?<![\w./-])\.claude\/rules\/[^\s`)\]]*?[\w-]+\.md\b/g
 
+/**
+ * A path into a stack's `configs/` or `seeds/` folder under `tooling/`, from a
+ * body under `claude/skills/`. That tree is this toolkit's own source layout,
+ * which a target never holds under any name, since install copies its contents
+ * to the target's root rather than reproducing the folders.
+ *
+ * Unlike `RULE_PATH`, a placeholder such as `tooling/<stack>/configs/` is
+ * reported too. The bracket spares an illustration of a path a target does
+ * hold, and no target holds this one, so the bracketed form still describes
+ * this checkout alone. The segment class admits `<` and `>` for that reason,
+ * and a brace group such as `{configs,seeds}` matches when it lists either.
+ *
+ * Only `configs` and `seeds` match. A bare `tooling/`, a stack's
+ * `manifest.toml`, and a `canon tooling sync` call pass. Three bare `tooling/`
+ * mentions name the category in shipped skill bodies today, and widening to
+ * other files under a stack is its own measured change. On 2026-11-12 the
+ * pattern matched two lines across `claude/skills/`, both removed before it
+ * gated.
+ *
+ * The leading boundary is `DOCS_PATH`'s, so `foo/tooling/base/configs/` reads
+ * as some other tree's folder and passes. No filesystem read backs the match,
+ * since a path resolving here proves nothing about a target.
+ */
+const SOURCE_PATH =
+  /(?<![\w./-])tooling\/[\w<>.*-]+\/(?:configs|seeds|\{[\w,]*\b(?:configs|seeds)\b[\w,]*\})(?![\w.-])[^\s`)\]]*/g
+
 export interface ShippedReference {
   readonly file: string
   /** One-based, matching the `file:line` form a reader clicks. */
@@ -196,6 +222,7 @@ export interface ShippedReference {
     | 'retired-verb'
     | 'phase-label'
     | 'rule-path'
+    | 'source-path'
   /** The reference as written, so a report names the token to qualify. */
   readonly text: string
   /**
@@ -242,8 +269,8 @@ function isDocsPathReportable(
 }
 
 /**
- * Whether `file` sits in the one corpus `RULE_PATH` gates: a shipped skill
- * body, minus its own `REQUIREMENT.md`.
+ * Whether `file` sits in the one corpus `RULE_PATH` and `SOURCE_PATH` gate:
+ * a shipped skill body, minus its own `REQUIREMENT.md`.
  *
  * The ban lives in `authoring-layout.md`, stated for one reader: a
  * session loading the `SKILL.md` body a target actually receives.
@@ -351,6 +378,15 @@ export function referencesIn(
           file,
           line: index + 1,
           kind: 'rule-path',
+          text: match[0],
+        })
+      }
+
+      for (const match of line.matchAll(SOURCE_PATH)) {
+        references.push({
+          file,
+          line: index + 1,
+          kind: 'source-path',
           text: match[0],
         })
       }

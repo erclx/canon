@@ -863,13 +863,16 @@ function describeShippedReference(reference: ShippedReference): string {
       return 'a phase label that names a board no target holds'
     case 'rule-path':
       return 'a numbered rule path that reaches a target only through a separate canon gov sync, and only where governance was installed at all'
+    case 'source-path':
+      return "a path into this toolkit's stack source tree, which install flattens into the target's root and no target holds"
   }
 }
 
 /**
- * A pull request number, a commit sha, a docs-path citation, or a phase
- * label that a reader in a target cannot resolve, over the seven corpora
- * that reach one.
+ * A pull request number, a commit sha, a docs-path citation, a phase label,
+ * or, from a shipped skill body, an installed rule path or a stack's
+ * `configs/` or `seeds/` source path, that a reader in a target cannot
+ * resolve, over the corpora that reach one.
  *
  * Every instance on the trunk was written by a branch that passed review, this
  * row's own planning session included, so the only instrument before this stage
@@ -919,8 +922,8 @@ export const shippedReferences: Measure = async (ctx) => {
     ),
     failure:
       found.length === 1
-        ? `One reference in the shipped corpora resolves wrong for a reader in a target. Qualify a cross-repository citation as owner/repo#123 or owner/repo@abc1234, cite a docs page through canon docs <name>, cite the owner skill's reference in place of a canon standards call, state a same-repository citation or a phase label as a fact instead and relocate the evidence to the owning canon/context/ entry, state the fact a shipped skill body's cited rule enforces instead of its path, or mark the line ${REFERENCE_MARKER}: <reason> where the bare form is the point.`
-        : `${found.length} references in the shipped corpora resolve wrong for a reader in a target. Qualify a cross-repository citation as owner/repo#123 or owner/repo@abc1234, cite a docs page through canon docs <name>, cite the owner skill's reference in place of a canon standards call, state a same-repository citation or a phase label as a fact instead and relocate the evidence to the owning canon/context/ entry, state the fact a shipped skill body's cited rule enforces instead of its path, or mark each line ${REFERENCE_MARKER}: <reason> where the bare form is the point.`,
+        ? `One reference in the shipped corpora resolves wrong for a reader in a target. Qualify a cross-repository citation as owner/repo#123 or owner/repo@abc1234, cite a docs page through canon docs <name>, cite the owner skill's reference in place of a canon standards call, state a same-repository citation or a phase label as a fact instead and relocate the evidence to the owning canon/context/ entry, state the fact a shipped skill body's cited rule enforces instead of its path, name the file install writes in place of a stack's source path, or mark the line ${REFERENCE_MARKER}: <reason> where the bare form is the point.`
+        : `${found.length} references in the shipped corpora resolve wrong for a reader in a target. Qualify a cross-repository citation as owner/repo#123 or owner/repo@abc1234, cite a docs page through canon docs <name>, cite the owner skill's reference in place of a canon standards call, state a same-repository citation or a phase label as a fact instead and relocate the evidence to the owning canon/context/ entry, state the fact a shipped skill body's cited rule enforces instead of its path, name the file install writes in place of a stack's source path, or mark each line ${REFERENCE_MARKER}: <reason> where the bare form is the point.`,
   }
 }
 
