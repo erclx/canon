@@ -65,6 +65,10 @@
       "skipped": 84,
       "lines": 245205,
       "largeFolders": 39
+    },
+    "code": {
+      "longFiles": 1,
+      "longFunctions": 72
     }
   }
 }
