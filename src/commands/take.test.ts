@@ -149,7 +149,7 @@ describe('canon take', () => {
   )
 
   it.skipIf(!hasFfmpeg)(
-    'should refuse sandbox-blocked with the fix when the shell finds no sandbox',
+    'should refuse sandbox-blocked naming the shell when it finds no sandbox',
     async () => {
       // A fake shell where Playwright would keep the real one, printing
       // Chromium's fatal line and dying on the signal Chromium dies on.
@@ -173,7 +173,6 @@ describe('canon take', () => {
           record: {
             reason: 'sandbox-blocked',
             beat: 'press go',
-            fix: 'sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0',
             message: expect.stringContaining(shell),
           },
         })

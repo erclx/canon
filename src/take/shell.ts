@@ -18,16 +18,24 @@ import { dirname, join } from 'node:path'
 export class ShellMissing extends Error {}
 
 /**
- * The shell aborted because the kernel refused it the user namespace its
- * sandbox needs, which AppArmor does by default from Ubuntu 23.10. Chromium
- * prints the marker from `zygote_host_impl_linux.cc` and dies on a signal.
+ * The shell aborted with no usable sandbox, printing the marker from
+ * `zygote_host_impl_linux.cc` and dying on a signal. AppArmor's default from
+ * Ubuntu 23.10 is one cause and a container's seccomp profile another, so
+ * `fix` is set only when the AppArmor setting reads 1 and the sysctl applies.
  */
-export class ShellSandboxBlocked extends Error {}
+export class ShellSandboxBlocked extends Error {
+  constructor(
+    message: string,
+    readonly fix?: string,
+  ) {
+    super(message)
+  }
+}
 
 const SANDBOX_MARKER = 'No usable sandbox!'
 const USERNS_SETTING = 'kernel.apparmor_restrict_unprivileged_userns'
 const USERNS_FILE = '/proc/sys/kernel/apparmor_restrict_unprivileged_userns'
-export const SANDBOX_FIX = `sudo sysctl -w ${USERNS_SETTING}=0`
+const SANDBOX_FIX = `sudo sysctl -w ${USERNS_SETTING}=0`
 const SANDBOX_GUIDE =
   'https://chromium.googlesource.com/chromium/src/+/main/docs/security/apparmor-userns-restrictions.md'
 
@@ -196,7 +204,7 @@ function devtoolsUrl(proc: ChildProcess, executable: string): Promise<string> {
       settled = true
       fail(
         output.includes(SANDBOX_MARKER)
-          ? new ShellSandboxBlocked(sandboxMessage(executable))
+          ? sandboxBlocked(executable, readSetting())
           : new Error(
               `the shell exited ${ending(code, signal)}: ${lastWords(output)}`,
             ),
@@ -205,14 +213,28 @@ function devtoolsUrl(proc: ChildProcess, executable: string): Promise<string> {
   })
 }
 
-/** Names the setting as this machine reads it, then the fix and the guide. */
-function sandboxMessage(executable: string): string {
-  const setting = readSetting()
-  const cause =
+/**
+ * Builds the refusal from the AppArmor setting as this machine reads it,
+ * naming the sysctl only at 1, where it is the fix, and the guide otherwise.
+ */
+export function sandboxBlocked(
+  executable: string,
+  setting: string | undefined,
+): ShellSandboxBlocked {
+  const opening = `the shell at ${executable} found no usable sandbox`
+  if (setting === '1') {
+    return new ShellSandboxBlocked(
+      `${opening}, since ${USERNS_SETTING} is 1. Allow unprivileged user namespaces for this boot with ${SANDBOX_FIX}, or see ${SANDBOX_GUIDE} for the persistent and per-binary forms.`,
+      SANDBOX_FIX,
+    )
+  }
+  const reading =
     setting === undefined
-      ? `the shell at ${executable} found no usable sandbox, and this kernel carries no ${USERNS_SETTING}`
-      : `the shell at ${executable} found no usable sandbox, with ${USERNS_SETTING} at ${setting}`
-  return `${cause}. Allow unprivileged user namespaces for this boot with ${SANDBOX_FIX}, or see ${SANDBOX_GUIDE} for the persistent and per-binary forms.`
+      ? `this kernel carries no ${USERNS_SETTING}`
+      : `${USERNS_SETTING} is ${setting}`
+  return new ShellSandboxBlocked(
+    `${opening}, and ${reading}, so something other than AppArmor blocks it, such as a container's seccomp profile. See ${SANDBOX_GUIDE}.`,
+  )
 }
 
 /** Read only after the marker, since a profiled shell starts with it at 1. */

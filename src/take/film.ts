@@ -68,6 +68,8 @@ export type TakeResult =
       readonly fallback?: string
       /** The page as the failing step met it, relative to the take's folder. */
       readonly still?: string
+      /** The command that clears a `sandbox-blocked` refusal, when one does. */
+      readonly fix?: string
     }
 
 export interface TakeRequest {
@@ -139,6 +141,9 @@ export async function take(request: TakeRequest): Promise<TakeResult> {
         ...failed(classify(cause), cause, beat.name),
         ...(error instanceof FellBack ? { fallback: error.fallback } : {}),
         ...(still ? { still } : {}),
+        ...(cause instanceof ShellSandboxBlocked && cause.fix
+          ? { fix: cause.fix }
+          : {}),
       }
     }
     // Checked after each beat rather than once at the end, so a take refused

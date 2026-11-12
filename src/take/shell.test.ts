@@ -2,7 +2,7 @@ import { chmodSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { ShellSandboxBlocked, openShell } from '@/take/shell'
+import { ShellSandboxBlocked, openShell, sandboxBlocked } from '@/take/shell'
 
 /**
  * Launches fake shells, so the refusal is proved with no AppArmor and no
@@ -79,4 +79,30 @@ describe('openShell', () => {
       'the shell exited on SIGTRAP: [1:FATAL:gpu_init.cc(1)] GPU died',
     )
   })
+})
+
+describe('sandboxBlocked', () => {
+  it('should carry the sysctl as its fix when the AppArmor setting reads 1', () => {
+    const refusal = sandboxBlocked('/opt/shell', '1')
+
+    expect(refusal.fix).toBe(
+      'sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0',
+    )
+    expect(refusal.message).toContain('/opt/shell')
+  })
+
+  it.each([
+    ['0', 'is 0'],
+    [undefined, 'carries no kernel.apparmor_restrict_unprivileged_userns'],
+  ])(
+    'should carry no fix and keep the guide when the setting reads %s',
+    (setting, reading) => {
+      const refusal = sandboxBlocked('/opt/shell', setting)
+
+      expect(refusal.fix).toBeUndefined()
+      expect(refusal.message).toContain(reading)
+      expect(refusal.message).not.toContain('sysctl -w')
+      expect(refusal.message).toContain('apparmor-userns-restrictions.md')
+    },
+  )
 })

@@ -8,7 +8,6 @@ import { readTakePlan } from '@/take/plan'
 import type { TakePlanRefusal } from '@/take/plan'
 import type { TakeRefusal } from '@/take/film'
 import { renderReel } from '@/take/reel'
-import { SANDBOX_FIX } from '@/take/shell'
 import {
   intro,
   logError,
@@ -196,7 +195,7 @@ export function register(program: Command): void {
         '  ffmpeg-missing      FFmpeg is not on the PATH',
         '  browser-missing     the headless shell or browser binary is not installed',
         '  sandbox-blocked     the headless shell found no usable sandbox, as under',
-        '                      AppArmor, carrying fix',
+        '                      AppArmor, carrying fix when that setting reads 1',
         '  server-unreachable  nothing answered at the URL',
         '  target-missing      a step names a target the page does not carry',
         '  target-offscreen    a step names a target outside the window, so a setup step must bring it into view first',
@@ -413,9 +412,7 @@ async function runTake(
     if (result.reason === 'browser-missing') {
       logWarn(`Install the headless shell with: ${INSTALL_BROWSER}`)
     }
-    if (result.reason === 'sandbox-blocked') {
-      logWarn(`Allow it for this boot with: ${SANDBOX_FIX}`)
-    }
+    if (result.fix) logWarn(`Allow it for this boot with: ${result.fix}`)
     if (result.reason === 'ffmpeg-missing') logWarn(`Then ${INSTALL_FFMPEG}.`)
     logWarn(result.message.split('\n')[0] ?? '')
     outro()
@@ -430,7 +427,7 @@ async function runTake(
       ...(result.reason === 'browser-missing'
         ? { install: INSTALL_BROWSER }
         : {}),
-      ...(result.reason === 'sandbox-blocked' ? { fix: SANDBOX_FIX } : {}),
+      ...(result.fix ? { fix: result.fix } : {}),
     })
     return 1
   }
