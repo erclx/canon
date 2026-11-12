@@ -14,6 +14,13 @@ export interface PaintedPatterns {
    * its capture gate. Test, story, and project exclusions still apply.
    */
   readonly repainted?: readonly string[]
+  /**
+   * Paths outside the painted set a reel reads, such as the engine that films
+   * it and the lockfile pinning its browser. Declared, a reel carries to a
+   * later head across any push changing neither a painted path nor one of
+   * these. Absent, it carries only across inert pushes.
+   */
+  readonly reelInputs?: readonly string[]
 }
 
 const RENDERED_EXTENSIONS = [
@@ -62,6 +69,18 @@ export const DEFAULT_PAINTED: PaintedPatterns = {
   ],
 }
 
+/**
+ * A list holding anything but strings reads as undeclared rather than
+ * filtered, since dropping an entry would let a reel carry past a change to
+ * the path it named.
+ */
+function stringList(value: unknown): string[] | undefined {
+  return Array.isArray(value) &&
+    value.every((item): item is string => typeof item === 'string')
+    ? value
+    : undefined
+}
+
 function strings(value: unknown): string[] {
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === 'string')
@@ -70,9 +89,9 @@ function strings(value: unknown): string[] {
 
 /**
  * The default list plus the project's own, read from `canon/config/painted.json`
- * as `{ "painted": [...], "unpainted": [...] }`. A file that is absent or does
- * not parse leaves the default, since a typo there must not make every push
- * read as unpainted.
+ * as `{ "painted": [...], "unpainted": [...], "reelInputs": [...] }`. A file
+ * that is absent or does not parse leaves the default, since a typo there must
+ * not make every push read as unpainted.
  */
 export function loadPaintedPatterns(root: string): PaintedPatterns {
   const path = join(root, PAINTED_CONFIG_REL)
@@ -81,11 +100,13 @@ export function loadPaintedPatterns(root: string): PaintedPatterns {
   try {
     const parsed: unknown = JSON.parse(readFileSync(path, 'utf8'))
     if (typeof parsed !== 'object' || parsed === null) return DEFAULT_PAINTED
-    const { painted, unpainted } = parsed as Record<string, unknown>
+    const { painted, unpainted, reelInputs } = parsed as Record<string, unknown>
+    const inputs = stringList(reelInputs)
     return {
       painted: [...DEFAULT_PAINTED.painted, ...strings(painted)],
       unpainted: [...DEFAULT_PAINTED.unpainted, ...strings(unpainted)],
       repainted: strings(painted),
+      ...(inputs !== undefined && { reelInputs: inputs }),
     }
   } catch {
     return DEFAULT_PAINTED

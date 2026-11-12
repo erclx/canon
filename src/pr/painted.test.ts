@@ -152,4 +152,22 @@ describe('loadPaintedPatterns', () => {
   it('should keep the default when the override does not parse', () => {
     expect(loadPaintedPatterns(rootWith('{nope'))).toEqual(DEFAULT_PAINTED)
   })
+
+  it('should load the declared reel inputs', () => {
+    const patterns = loadPaintedPatterns(
+      rootWith('{"reelInputs":["src/browser/engine.ts","bun.lock"]}'),
+    )
+
+    expect(patterns.reelInputs).toEqual(['src/browser/engine.ts', 'bun.lock'])
+  })
+
+  it.each([
+    ['absent', '{"painted":["src/take/**"]}'],
+    ['not an array', '{"reelInputs":"bun.lock"}'],
+    ['holding a non-string', '{"reelInputs":["bun.lock",3]}'],
+  ])('should leave the reel inputs absent when the key is %s', (_, config) => {
+    expect(loadPaintedPatterns(rootWith(config))).not.toHaveProperty(
+      'reelInputs',
+    )
+  })
 })
