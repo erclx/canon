@@ -28,6 +28,7 @@ The run commands, which stack references and `docs/target/projects.md` send a se
 | `bun run check:lint`    | Read-only oxlint at its default rules, failing on any warning, then html-validate on the sheets.  |
 | `bun run check:types`   | Read-only `tsc --noEmit` against `src/`.                                                          |
 | `bun run check:install` | Clones the repo to tmp and asserts `canon init` lands a fresh scaffold.                           |
+| `bun run test:e2e`      | The nine `*.e2e.test.ts` suites by hand, which a scoped `check` leaves out. Takes no Tests lock.  |
 | `bun run format`        | Auto-fix oxfmt, Prettier for `.astro`, and shfmt formatting.                                      |
 | `bun run design:sync`   | Lands the mapped board frames in `canon/design/`. `--check` writes nothing and exits 14 on drift. |
 | `bun run clean`         | Wipe `node_modules/`, clear bun cache, reinstall.                                                 |
@@ -39,7 +40,7 @@ Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`,
 
 - Stages run in table order and the first to find a fact halts the run. Unreferenced rules and Audit set report and never fail the push
 - The changed set unions the diff against `origin/main`, the working tree, and untracked files. Fallbacks widen, and `--all` forces every stage. On `main` the local ref is HEAD, so the base is remote.
-- A scoped run hands the changed `.ts` and `.tsx` files to `vitest related`, so a push with none runs no tests. A changed vitest config or setup, `tsconfig.json`, or `package.json` runs them all.
+- A scoped run hands changed `.ts` and `.tsx` files to `vitest related`, minus every `*.e2e.test.ts`, and names `bun run test:e2e`. A vitest config, `tsconfig.json`, or `package.json` change runs all.
 - Indexes and Consumed copies regenerate then assert, so the first run after an edit reports drift and `check:ci` writes the tree. Stage the rewrite and run again, since a rerun alone repeats the diff.
 - A stage that cannot read its input is `unmeasured`, which warns locally and refuses under CI. Plugin manifests skips locally without the CLI and fails when `CI` is set
 

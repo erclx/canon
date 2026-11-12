@@ -393,8 +393,16 @@ async function runCheck(
       ? check.changedArgv(ctx.changed)
       : check.argv
   const result = await run(argv, env)
+  const emissions: Emission[] = [{ kind: 'output', text: result.all }]
+  if (
+    check.kind === 'command' &&
+    check.scopedNote !== undefined &&
+    argv.join(' ') !== check.argv.join(' ')
+  ) {
+    emissions.push({ kind: 'info', text: check.scopedNote })
+  }
   return {
-    emissions: [{ kind: 'output', text: result.all }],
+    emissions,
     failure: result.exitCode === 0 ? undefined : check.failure,
   }
 }
