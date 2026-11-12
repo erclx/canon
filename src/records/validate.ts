@@ -63,6 +63,7 @@ export const FINDING_KINDS = [
   'operator-call-phrasing',
   'batch-unsplit',
   'source-unquoted',
+  'verification-load-unconfined',
   'stack-foldable',
   'fan-in-unmatched',
   'counterpart-unstated',
@@ -481,6 +482,26 @@ function checkSources(name: string, lines: readonly string[]): Finding[] {
     )
 }
 
+const LOAD_GENERATOR = /\b(?:hogs?|busy[ -]loops?|stress-ng)\b/i
+const LOAD_CONFINED = /\btaskset\b/
+
+/**
+ * Keys on the generator words rather than "under load", which ordinary plan
+ * wording uses to describe CI. A plan saying "saturate the CPU" slips past.
+ */
+function checkVerification(name: string, lines: readonly string[]): Finding[] {
+  return readSourceEntries(lines)
+    .filter((entry) => LOAD_GENERATOR.test(entry) && !LOAD_CONFINED.test(entry))
+    .map((entry) =>
+      finding(
+        'verification-load-unconfined',
+        name,
+        shorten(entry),
+        'names generated machine load with no taskset confining it to a few cores.',
+      ),
+    )
+}
+
 /**
  * `counterpart` is the root the plan sits under, read by `readCounterpartRoot`.
  * Left out, as in a project keeping no stack under `tooling/`, the plan owes no
@@ -570,6 +591,7 @@ export function checkPlan(
 
   findings.push(...checkQuestionContract(name, sections.get('Questions') ?? []))
   findings.push(...checkSources(name, sections.get('Sources') ?? []))
+  findings.push(...checkVerification(name, sections.get('Verification') ?? []))
 
   if (hasStagedBatches(text)) {
     const staged = linesOutsideFences(text).find((line) =>

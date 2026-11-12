@@ -755,6 +755,69 @@ describe('checkPlan', () => {
     })
   })
 
+  describe('Verification load', () => {
+    function withVerification(...entries: string[]): string {
+      return conformingPlan().replace(
+        '- The validator reports both sections: `bun test src/records`',
+        entries.join('\n'),
+      )
+    }
+
+    it('should report a bullet naming CPU hogs with no taskset', () => {
+      const body = withVerification(
+        '- The flake reproduces with 64 CPU hogs running: `bun test src/take`',
+      )
+
+      expect(kinds(checkPlan('feature-a-b.md', body))).toEqual([
+        'verification-load-unconfined',
+      ])
+    })
+
+    it('should report a busy-loop bullet with no taskset', () => {
+      const body = withVerification(
+        '- Start 8 busy loops, then run `bun test src/take`',
+      )
+
+      expect(kinds(checkPlan('feature-a-b.md', body))).toEqual([
+        'verification-load-unconfined',
+      ])
+    })
+
+    it('should pass the same bullet once it names taskset', () => {
+      const body = withVerification(
+        '- The flake reproduces with 4 CPU hogs pinned by `taskset -c 0-3`: `bun test src/take`',
+      )
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
+    it('should pass a bullet saying under CI load with no generator', () => {
+      const body = withVerification(
+        '- The suite stays green when it fails under CI load: `bun test src/take`',
+      )
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
+    it('should read taskset on a wrapped line as part of the bullet', () => {
+      const body = withVerification(
+        '- Run 4 CPU hogs',
+        '  pinned with `taskset -c 0-3`: `bun test src/take`',
+      )
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
+    it('should ignore a generator named outside Verification', () => {
+      const body = conformingPlan().replace(
+        '- The goal',
+        '- Goal: stop a plan writing 64 CPU hogs',
+      )
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+  })
+
   it('should not report a paraphrase once the Answer is filled', () => {
     const body = conformingPlan()
       .replace(
