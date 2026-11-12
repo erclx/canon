@@ -35,9 +35,9 @@ canon context audit --json
 canon census --json
 ```
 
-The first answers length, carrying the bullet, paragraph, and depth checkpoints and the per-file weights read against them. The second answers placement for the folders it resolves, carrying entry length, reference form, and index drift. Placement reads `shapeFindings`, `extraSections`, and each entry's `provenance`, all `measured`. The third answers folder layout, carrying the files each large folder holds of its own and their extensions.
+The first answers length, carrying the bullet, paragraph, and depth checkpoints and the per-file weights read against them. The second answers placement for the folders it resolves, carrying entry length, reference form, and index drift. Placement reads `shapeFindings`, `extraSections`, and each entry's `provenance`, all `measured`.
 
-Take the checkpoints from the record each verb returns rather than from a number written here. A checkpoint the CLI moves reaches this report with no edit, and a number held in this body goes stale on its own cadence.
+The census answers folder layout. Take the checkpoints from the record each verb returns rather than from a number written here. A checkpoint the CLI moves reaches this report with no edit, and a number held in this body goes stale on its own cadence.
 
 ### The structure line
 
