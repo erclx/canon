@@ -33,6 +33,7 @@
     "check:types": "tsc --noEmit",
     "check:install": "bun scripts/core/install-check.ts",
     "test": "bun --bun vitest run",
+    "test:e2e": "bun --bun vitest run .e2e.test",
     "prepare": "husky",
     "check": "bun src/cli.ts gate run",
     "check:ci": "bun src/cli.ts gate run --all",
