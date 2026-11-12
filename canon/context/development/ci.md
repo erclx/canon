@@ -39,7 +39,7 @@ A third job runs `bun run test:e2e` with the tools the nine `*.e2e.test.ts` suit
 - `bunx playwright install chromium` lands the engine's browsers, and `canon browser install-browser chromium` the agent CLI's own revision, which the swipe suite launches
 - The browser cache keys on `bun.lock` and `src/browser/agent-cli.ts` under its own prefix, since a hit on the capture job's cache would skip the agent CLI install
 - `scripts/ci/check-browsers.sh` and `scripts/ci/check-e2e-tools.sh` run first, so a missing revision or `libwebp_anim` encoder, or a Chromium that cannot launch, reddens the job
-- A sysctl clears `kernel.apparmor_restrict_unprivileged_userns`, since Ubuntu 24.04 kills the chrome-headless-shell the take engine spawns with its sandbox on
+- A sysctl clears `kernel.apparmor_restrict_unprivileged_userns`, since Ubuntu 24.04 kills every product launch of Chromium, which all run with the sandbox on
 
 ### `scripts/ci/docs-only.sh`
 
