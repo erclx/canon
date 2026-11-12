@@ -143,6 +143,14 @@ describe('functionSpans', () => {
     ['an each table', "it.each([1, 2])('a %i', (n) => {\n})\n"],
     ['a tagged each table', "describe.each`\n  a\n`('b', () => {\n})\n"],
     ['a guard holding a call', "describe.skipIf(!a())('b', () => {\n})\n"],
+    [
+      'an each table past a line of text',
+      `it.each([\n${"  ['a long row of cases', 1],\n".repeat(8)}])('c', (n) => {\n})\n`,
+    ],
+    [
+      'a guard nesting calls deeply',
+      "describe.skipIf(!a(b(c(d()))))('e', () => {\n})\n",
+    ],
   ])('should read no function in a callback passed to %s', (_call, source) => {
     expect(functionSpans(source)).toEqual([])
   })

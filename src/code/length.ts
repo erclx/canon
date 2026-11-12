@@ -237,13 +237,38 @@ function arrowHeader(code: string, arrow: number): Header | undefined {
   return { start, name: bindingBefore(code, start) }
 }
 
+const TEST_RUNNERS = new Set(['describe', 'it', 'test'])
+
 /**
- * A call to a test runner's `describe`, `it`, or `test`, with any chained
- * modifier such as `.each(table)` or `.skip`, ending where its arguments open.
+ * Whether the call whose arguments open at `paren` is a test runner's
+ * `describe`, `it`, or `test`, read backward over any chained modifier such
+ * as `.each(table)`, a tagged table, or `.skip`, to the name the chain starts
+ * from. A method such as `pattern.test` starts from `pattern` and is no runner.
  */
-const TEST_CALL = new RegExp(
-  `(?:^|[^\\w$.])(?:describe|it|test)(?:\\.[\\w$]+)*(?:\\((?:[^()]|\\([^()]*\\))*\\)|[${LITERAL}\\n]+)?\\s*$`,
-)
+function callsTestRunner(code: string, paren: number): boolean {
+  let i = previousToken(code, paren - 1)
+  while (i >= 0) {
+    const char = code[i] ?? ''
+    if (char === ')') {
+      const open = matchBack(code, i, '(')
+      if (open === -1) return false
+      i = previousToken(code, open - 1)
+    } else if (char === LITERAL) {
+      while (i >= 0 && (code[i] === LITERAL || code[i] === '\n')) i--
+      i = previousToken(code, i)
+    } else if (IDENTIFIER.test(char)) {
+      const start = wordStart(code, i)
+      const before = previousToken(code, start - 1)
+      if (code[before] !== '.') {
+        return TEST_RUNNERS.has(code.slice(start, i + 1))
+      }
+      i = previousToken(code, before - 1)
+    } else {
+      return false
+    }
+  }
+  return false
+}
 
 /**
  * Whether the function opening at `start` is an argument to a test runner's
@@ -265,7 +290,7 @@ function isTestCallback(code: string, start: number): boolean {
         continue
       }
       if (char !== '(') return false
-      return TEST_CALL.test(code.slice(Math.max(0, k - 120), k))
+      return callsTestRunner(code, k)
     } else if (depth === 0 && char === ';') {
       return false
     }
