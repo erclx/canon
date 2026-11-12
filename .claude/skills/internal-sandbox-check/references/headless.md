@@ -36,7 +36,7 @@ Print the target, prompt, and arm before running, since a wrong pairing is invis
 `canon sandbox run` merges a `verdict` object carrying `state`, `asserted`, `failed`, and `unchecked` into the JSON envelope on stdout. Report it rather than asserting it.
 
 - Print `state` as it came back, and say so when it is `unchecked`, which means the arm declared no expectations and asserted nothing
-- Read `unchecked` as neither a pass nor a failure. `--strict` covers a caller that has finished arming.
+- Read `unchecked` as neither a pass nor a failure. The run passes `--strict` to its check, so it exits 1 on `unchecked`, and that exit means nothing was asserted rather than something failed.
 - Do not fix a failing verdict. The skill surfaces the result and the user decides.
 
 Print one line after the run:
