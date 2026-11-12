@@ -389,6 +389,11 @@ describe('runPostMerge reclaim lines', () => {
           branchesReclaimable: 3,
           branchesRemoved: 2,
           branchesFailed: 1,
+          branches: [
+            { branch: 'feat/a', tip: 'a1', pullRequest: 41, removed: true },
+            { branch: 'feat/b', tip: 'b2', pullRequest: null, removed: true },
+            { branch: 'feat/c', tip: 'c3', pullRequest: 43, removed: false },
+          ],
         },
         1,
       ),
@@ -397,7 +402,9 @@ describe('runPostMerge reclaim lines', () => {
     await h.go()
 
     expect(h.output()).toBe(
-      '\n🧹 Deleted 2 merged branch(es) no worktree held.\n\n' +
+      '\n🧹 Deleted 2 merged branch(es) no worktree held.\n' +
+        '  feat/a a1 #41\n' +
+        '  feat/b b2\n\n' +
         '\n🧹 1 merged branch(es) could not be deleted.\nRun canon worktrees reclaim to read why.\n\n',
     )
   })

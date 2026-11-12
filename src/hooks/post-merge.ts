@@ -203,6 +203,25 @@ function pushLines(result: StepResult, fields: Fields): string | undefined {
  * removes one worktree and fails on another exits 1 with a directory already
  * deleted, so a report keyed on the exit would never name the removal.
  */
+/**
+ * One line per branch the reclaim deleted, naming its tip. `git branch -D`
+ * drops the branch's reflog with it and the verb's own lines go to a stderr the
+ * hook never prints, so this is where the restore point survives.
+ */
+function deletedBranchLines(fields: Fields): string {
+  const entries = Array.isArray(fields.branches) ? fields.branches : []
+  let lines = ''
+  for (const entry of entries) {
+    if (entry === null || typeof entry !== 'object') continue
+    const { branch, tip, pullRequest, removed } = entry as Fields
+    if (removed !== true || typeof branch !== 'string') continue
+    if (typeof tip !== 'string') continue
+    const merged = typeof pullRequest === 'number' ? ` #${pullRequest}` : ''
+    lines += `  ${branch} ${tip}${merged}\n`
+  }
+  return lines
+}
+
 function reclaimLines(fields: Fields): string | undefined {
   let lines = ''
   const removed = count(fields, 'removed')
@@ -228,7 +247,7 @@ function reclaimLines(fields: Fields): string | undefined {
   // `count` reads an absent one as zero, so that record stays quiet here.
   const branchesRemoved = count(fields, 'branchesRemoved')
   if (branchesRemoved > 0) {
-    lines += `\n🧹 Deleted ${branchesRemoved} merged branch(es) no worktree held.\n\n`
+    lines += `\n🧹 Deleted ${branchesRemoved} merged branch(es) no worktree held.\n${deletedBranchLines(fields)}\n`
   }
 
   const branchesFailed = count(fields, 'branchesFailed')

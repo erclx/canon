@@ -65,6 +65,7 @@ The hook then runs `canon worktrees reclaim`, which clears two kinds of leftover
 
 - A worktree whose pull request merged, with a clean tree and no live session, along with its branch
 - A local branch no worktree holds, once a merged pull request's head contains its tip. A commit past every merged head keeps it.
-- Each deleted tip is printed, so `git branch <name> <tip>` restores the branch
+
+The hook prints each deleted branch with its tip, so `git branch <name> <tip>` restores one.
 
 The hook also deletes the member branches and worktrees a merged fan-in integrator names, and `canon worktrees retire-members --pull-request <n>` does it for a merge the hook missed. `CANON_SKIP_RECLAIM` turns off that step and the reclaim, and `CANON_SKIP_UPGRADE` and `CANON_SKIP_PLUGIN_UPDATE` turn off the other two.
