@@ -819,6 +819,14 @@ describe('checkPlan', () => {
       ])
     })
 
+    it('should pass a bounded bullet that names macOS in place of a pin', () => {
+      const body = withVerification(
+        '- On macOS run 4 hogs under `gtimeout 90`, then `bun test src/take`',
+      )
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
     it('should report hogs pinned by taskset alone as unbounded', () => {
       const body = withVerification(
         '- Run 4 hogs under `taskset -c 0-3`, then `bun test src/take`',
