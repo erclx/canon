@@ -35,7 +35,7 @@ The value subjects and the frame input add a second walk beside the route one.
 
 The browser helpers and the step driver sit beside the walk.
 
-- `src/browser/` owns the engine helpers every browser-driving command needs, and the pin and argument rewrite behind `canon browser`, the agent CLI `review-ui` drives through
+- `src/browser/` owns the engine helpers every browser-driving command needs, including the sandbox option every product launch spreads and the `sandbox-blocked` detector, and the pin and argument rewrite behind `canon browser`, the agent CLI `review-ui` drives through
 - `src/driver/` owns `canon drive`, which runs a plan of steps and probes against a running page for `design-pick` and `review-ui`
 
 ## Gotchas
@@ -45,4 +45,3 @@ The browser helpers and the step driver sit beside the walk.
 - Only two of the four `keyboard.md` focus rules are measurable from computed style, since the 3:1 rule needs a background the walk lacks and a clipped ring shows in no computed property
 - The axe bundle sets `window.axe`, `doT`, and `_encodeHTML` as it loads, so the `axe` probe restores only what that load changed, and a default run leaves it out
 - A test for the server-unreachable refusal needs a port the kernel handed out and released, because a low reserved port fails in the engine first
-- The walk and `canon drive` launch with the Chromium sandbox on, since Playwright passes `--no-sandbox` otherwise. Where AppArmor refuses unprivileged user namespaces, both refuse as `sandbox-blocked` and carry the sysctl as `fix` only when that setting reads 1.
