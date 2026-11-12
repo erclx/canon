@@ -31,15 +31,17 @@ The record lists each code file past `fileLimit`, tests included. Read the limit
 
 ## Function length
 
-| Field          | Value                                                                          |
-| -------------- | ------------------------------------------------------------------------------ |
-| Measures       | Whether a top-level function runs long enough that a split would help          |
-| Verb           | `canon code audit --json`                                                      |
-| Keys           | `functionCheckpoint`, and `longFunctions` with `file`, `line`, `lines`, `name` |
-| Evidence class | `measured`                                                                     |
+| Field          | Value                                                                                         |
+| -------------- | --------------------------------------------------------------------------------------------- |
+| Measures       | Whether a top-level function runs long enough that a split would help                         |
+| Verb           | `canon code audit --json`                                                                     |
+| Keys           | `functionCheckpoint`, `longFunctions` with `file`, `line`, `lines`, `name`, and `unreadFiles` |
+| Evidence class | `measured`                                                                                    |
 
 A `name` of `null` is an unnamed function, such as a callback assigned nowhere. Function reading reaches a narrower set of languages than file length, named in the audit's `--help` paragraph on long functions, so a file in any other language is unread here alone and never on file length.
 
+- **Unread file:** an `unreadFiles` entry carries `file`, `line`, and `reason` for a file the reading could not follow. Report it unread on this axis with that reason, never as under the checkpoint.
+- **Missing key:** a record without `unreadFiles` came from a binary older than the unread report, so a file absent from `longFunctions` is only as covered as that binary's `--help` says
 - **Length is not complexity.** A `register` function holding help text runs long without branching. Report it as long and claim nothing about how hard it is to follow.
 - **Routes to:** `code-craft`, which decides whether the function splits and where
 - **Gate:** none. The figure reports and never fails.
