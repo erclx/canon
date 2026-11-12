@@ -39,7 +39,7 @@ The film suite is five files, one per describe block, so vitest runs them in par
 
 - A stepped case films at `deviceScale: 1` unless it asserts a 3840x2160 clip or still. `canon take` and the reel keep scale 2.
 - `bandLuma` takes its crop in CSS pixels and scales it to the clip it reads, so one crop reads the same element at either scale
-- A pointer-timing case such as the drag offset in `film-drag` reads worse beside the other film files, so a failure there is load before it is a defect
+- `film-drag` runs in the `timed` project of `vitest.e2e.config.ts`, after every parallel file, since its screencast pacing assertion fails beside them. A case like it joins that list.
 
 ## Gotchas
 
