@@ -110,9 +110,9 @@ Run this once `orchestrator-review-dispatch.md` has sent a code review to a disp
 
 ### Confirm the REST reads
 
-Confirm the VM's `canon` reads over REST before dispatching. In this repository the setup hook links the checkout's own CLI, so a pushed branch carries the reads.
+Confirm the VM's `canon` reads over REST before dispatching.
 
-- Any other repository's VM installs `canon` from npm, so its `pr` reads run on REST only once a release carrying them is published
+- The VM installs `canon` from npm, so its `pr` reads run on REST only once a release carrying them is published
 - Its copied skills carry the REST lookups only once that repository's skills are re-scaffolded from that release
 - Read `npm view @erclx/canon version` against the first release whose changelog names the REST reads
 - Run `grep -rnE 'gh pr (list|view|review|diff|comment)'` over the target's copied `review-pr` and expect no output

@@ -186,7 +186,7 @@ A `PreToolUse` hook on `Bash` runs the same scan against the `-F body=@<file>` o
 
 `phase-label-gate.yml` reads the same text again once posted, on its `pull_request_review` trigger, which covers a review a person posts by hand with no hook in front of it.
 
-- That workflow reaches every target on the `base` stack, seeded at `tooling/base/configs/.github/workflows/phase-label-gate.yml`
+- That workflow reaches every target on the `base` stack, seeded at `.github/workflows/phase-label-gate.yml`
 - It invokes the published CLI rather than a checkout's own source tree, so a target gets the same re-read past the hook
 
 ### The post

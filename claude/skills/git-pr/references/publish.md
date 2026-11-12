@@ -85,7 +85,6 @@ A skill body loads from a plugin cache and a docs page is read through `canon do
 - Write `owner/repo#123` and `owner/repo@abc1234` for a different, resolvable repository, which the reader can open without this one
 - Qualifying against `erclx/canon` fixes nothing, since a reader holding the cache or the package still cannot open this repository's history
 - A same-repository citation takes no number, so state the fact it stood in for, and carry a one-off incident's identifier into the `canon/context/` entry owning the surface
-- `canon gate run` fails a push on a bare reference there, and a line whose bare form is the point carries `canon-allow-reference: <reason>` on itself or the line above
 
 ### Number or sha
 
