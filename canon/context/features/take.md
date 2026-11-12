@@ -35,7 +35,7 @@ Owns the static pages the end to end takes film, two of which post each input th
 
 ## Gotchas
 
-- Frame time continues Chromium's monotonic clock, read off the load event's timestamp, since Bun's `process.hrtime` counts from its own start and a frame stamped on it freezes every animation
+- The frame ticks start at the load event's monotonic stamp and rise to the page clock at the pause, since a tick on Bun's clock freezes animation and ticks lagging the page film every later fade dead
 - Send an input, step a frame, then await the input, and begin a frame only once the last settles, since awaiting first deadlocks and Chromium refuses a second frame as pending
 - A JPEG frame is full range and H.264 is TV range, so the encoder scales between them. From FFmpeg 7.1 a conversion keeps the source range, so every call reading or writing a still names `out_range`.
 - The stepper advances virtual time plainly, since pausing on a fetch held the clock into the stall fallback. Stepped tests raise that limit to 8 s, save the fallback test, which stalls at 2 s.
