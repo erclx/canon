@@ -22,9 +22,10 @@ import { findShell } from '@/take/shell'
  * what it pressed and both routes meeting at one size, show only in the
  * frames the reel draws.
  *
- * The suite needs chrome-headless-shell and FFmpeg with libwebp. CI installs
- * neither the shell nor FFmpeg, so it skips there rather than failing, which
- * means a green pipeline is not evidence this passed. Run it locally.
+ * The suite needs chrome-headless-shell and FFmpeg with libwebp and skips
+ * without them. The E2E Suites job in verify.yml installs both and fails
+ * before any suite starts when the shell or the libwebp_anim encoder is
+ * missing.
  */
 
 const PAGE = readFileSync(

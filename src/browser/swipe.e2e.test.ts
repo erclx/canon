@@ -11,8 +11,9 @@ import { CHROMIUM_REVISION, browsersRoot } from '@/browser/agent-cli'
  * listeners and moves the page. The pinned CLI refuses a `file:` address, so
  * the fixture is served over http.
  *
- * The suite needs Chromium revision 1247. CI installs none, so it skips there,
- * which means a green pipeline is not evidence this passed. Run it locally.
+ * The suite needs Chromium revision 1247 and skips without it. The E2E Suites
+ * job in verify.yml installs that revision through the agent CLI and fails
+ * before any suite starts when it is missing.
  */
 
 const PAGE = readFileSync(

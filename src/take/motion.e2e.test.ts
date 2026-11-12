@@ -22,8 +22,8 @@ import { findShell } from '@/take/shell'
  * that keeps its target still. The page reports on its own clock, so each
  * check reads what the page saw rather than what the take meant to send.
  *
- * Needs chrome-headless-shell and FFmpeg, which CI installs neither of, so it
- * skips there. Run it locally.
+ * Needs chrome-headless-shell and FFmpeg and skips without either. The E2E
+ * Suites job in verify.yml installs both.
  */
 
 const FRAME_MS = 1000 / FPS
