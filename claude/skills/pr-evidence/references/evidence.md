@@ -71,6 +71,7 @@ It reads the filming rules in `ui-film`. Report it rather than proceeding silent
 - Hold a skip's reason and message for the closing report and for the evidence step's `--reel-skip`
 - A skip never stops the chain, and a reel already on the comment carries forward under the older head it names
 - A silent skip holds no reason, so it passes no `--reel-skip`
+- On a drivable checklist, a missing reel or a skip the lift does not settle holds the merge until a reel lands at the head or a review waives it
 
 ## Post the evidence comparison
 

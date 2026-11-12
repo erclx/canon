@@ -1,7 +1,7 @@
 {
   "name": "@erclx/canon",
   "type": "module",
-  "version": "5.84.0",
+  "version": "5.85.0",
   "description": "Runs your agent's work and keeps its code good, on one setup for every repo.",
   "license": "MIT",
   "bin": {
@@ -33,6 +33,7 @@
     "check:types": "tsc --noEmit",
     "check:install": "bun scripts/core/install-check.ts",
     "test": "bun --bun vitest run",
+    "test:e2e": "bun --bun vitest run .e2e.test",
     "prepare": "husky",
     "check": "bun src/cli.ts gate run",
     "check:ci": "bun src/cli.ts gate run --all",

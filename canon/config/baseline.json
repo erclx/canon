@@ -34,7 +34,8 @@
       "unmeasurable": 0
     },
     "comments": {
-      "degradationHits": 2
+      "degradationHits": 2,
+      "longBlocks": 31
     },
     "test-order": {
       "findings": 0,
@@ -62,7 +63,12 @@
     "census": {
       "files": 2170,
       "skipped": 84,
-      "lines": 245205
+      "lines": 245205,
+      "largeFolders": 39
+    },
+    "code": {
+      "longFiles": 1,
+      "longFunctions": 72
     }
   }
 }

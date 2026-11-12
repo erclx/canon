@@ -29,6 +29,7 @@ jobs:
     # The ruleset requires this name, so renaming it strands branch protection
     name: 🛡️ Static Checks
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     if: github.event_name != 'schedule'
     steps:
       - name: Checkout
@@ -83,6 +84,7 @@ jobs:
   macos-unit-tests:
     name: 🍎 macOS Unit Tests
     runs-on: macos-latest
+    timeout-minutes: 15
     needs: changes
     # The ruleset requires this check, so a Markdown-only pull request skips it
     # by condition, which reports success, rather than by a path filter, which
@@ -125,6 +127,7 @@ jobs:
   dependency-advisories:
     name: 📦 Dependency Advisories
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: github.event_name == 'schedule'
     steps:
       - name: Checkout

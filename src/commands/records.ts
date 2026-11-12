@@ -103,7 +103,9 @@ export function register(program: Command): void {
       [
         '',
         'Checks:',
-        '  plans       filename, required sections, and the suggested-and-answer contract',
+        '  plans       filename, required sections, and the suggested-and-answer contract,',
+        '              plus a Counterparts bullet for each canon CI, hook, script, root config,',
+        '              or stack configs or seeds path, where stacks sit under tooling/',
         '  groundwork  README and current-state files, numbering, dating, and a half-closed track',
         '  intake      overview file, numbering, dating, and the four bullets every item carries',
         "  sessions    each session map's words against its cap, under `length` and never in the exit",

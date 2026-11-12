@@ -150,6 +150,7 @@ export function collectDeps(
 export function collectScripts(
   chain: readonly Manifest[],
   pkg: PackageJson,
+  held: ReadonlySet<string> = new Set(),
 ): ScriptState[] {
   const scripts = pkg.scripts ?? {}
   const expected = applyScripts({}, chain).pkg.scripts ?? {}
@@ -162,22 +163,57 @@ export function collectScripts(
     for (const key of Object.keys(manifest.scriptOverrides)) keys.add(key)
   }
 
-  return [...keys].map((key): ScriptState => {
-    const current = scripts[key]
-    if (current === undefined) return { key, state: 'missing' }
-    return { key, state: current === expected[key] ? 'matching' : 'drifted' }
-  })
+  return [...keys]
+    .filter((key) => !held.has(key))
+    .map((key): ScriptState => {
+      const current = scripts[key]
+      if (current === undefined) return { key, state: 'missing' }
+      return { key, state: current === expected[key] ? 'matching' : 'drifted' }
+    })
+}
+
+/** The value a sync writes for one script key, and the stack it comes from. */
+export interface ResolvedScript {
+  readonly stack: string
+  readonly value: string
+  readonly override: boolean
+}
+
+/**
+ * Resolves one key in the order `applyScripts` writes it: the nearest
+ * `[scripts.override]` has the last word, and a plain key from the nearest
+ * stack stands only where no stack overrides it.
+ */
+export function resolveScript(
+  chain: readonly Manifest[],
+  key: string,
+): ResolvedScript | undefined {
+  for (const manifest of chain) {
+    const value = manifest.scriptOverrides[key]
+    if (value !== undefined) {
+      return { stack: manifest.name, value, override: true }
+    }
+  }
+  for (const manifest of chain) {
+    const value = manifest.scripts[key]
+    if (value !== undefined) {
+      return { stack: manifest.name, value, override: false }
+    }
+  }
+  return undefined
 }
 
 /**
  * Fills scripts the target does not define, nearest stack first, then replays
  * `[scripts.override]` from the furthest ancestor inward so the nearest stack
  * has the last word. This is the ordering `apply_stack_scripts` produced
- * through its recursion.
+ * through its recursion. A `held` key, one the project declined or
+ * customized, is left as the target has it in both passes.
  */
 export function applyScripts(
   pkg: PackageJson,
   chain: readonly Manifest[],
+  held: ReadonlySet<string> = new Set(),
 ): { pkg: PackageJson; added: string[]; overridden: string[] } {
   const scripts: Record<string, string> = { ...pkg.scripts }
   const added: string[] = []
@@ -185,6 +221,7 @@ export function applyScripts(
 
   for (const manifest of chain) {
     for (const [key, value] of Object.entries(manifest.scripts)) {
+      if (held.has(key)) continue
       if (scripts[key] === undefined) {
         scripts[key] = value
         added.push(key)
@@ -194,7 +231,7 @@ export function applyScripts(
 
   for (const manifest of [...chain].reverse()) {
     for (const [key, value] of Object.entries(manifest.scriptOverrides)) {
-      if (scripts[key] === value) continue
+      if (held.has(key) || scripts[key] === value) continue
       scripts[key] = value
       if (!overridden.includes(key)) overridden.push(key)
     }

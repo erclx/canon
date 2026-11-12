@@ -66,6 +66,7 @@ X critical, Y should-fix, Z minor. Reviewed against project docs and the board.
 - **minor** ([lines 30-34](<repo-url>/blob/<headRefOid>/path/to/file.ext#L30-L34)): what breaks, in one sentence.
   - Fix: the change
 - **Waived capture:** `src/client/board/overlay.tsx`: keyboard focus order only, no visible change in any reachable state
+- **Waived reel:** a hover tooltip the screenshots already show
 
 <details>
 <summary>Review focus, N checked</summary>
@@ -163,9 +164,7 @@ Every body this step writes carries it, being the full body under either heading
 
 ### Why the marker exists
 
-GitHub stamps `commit.oid` and `submittedAt` at submission, not at read. A push landing in the compose window moves both onto a commit this pass never opened, and the next pass reads it as covered.
-
-The marker is the read-time record those fields are not.
+GitHub stamps `commit.oid` and `submittedAt` at submission, not at read. A push landing in the compose window moves both onto a commit this pass never opened, and the next pass reads it as covered. The marker is the read-time record those fields are not.
 
 - `canon pr review-state` is the one place it is parsed, so Step 2 and the orchestrator poll read one answer rather than each copying the format
 - It is inert data, so `canon labels scan` has nothing to fire on

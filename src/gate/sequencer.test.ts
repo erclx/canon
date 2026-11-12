@@ -182,6 +182,55 @@ describe('a command check narrowed by the changed set', () => {
   })
 })
 
+describe('a command check carrying a scoped note', () => {
+  const NOTE = 'Browser suites were left out, so run them by hand'
+
+  function noting(): Stage {
+    return stage('tests', {
+      checks: [
+        {
+          kind: 'command',
+          argv: ['suite', 'all'],
+          changedArgv: (changed) =>
+            changed.includes('package.json')
+              ? ['suite', 'all']
+              : ['suite', 'related', ...changed],
+          scopedNote: NOTE,
+          failure: 'tests failed',
+        },
+      ],
+    })
+  }
+
+  function infoLines(emissions: readonly { kind: string; text: string }[]) {
+    return emissions
+      .filter((emission) => emission.kind === 'info')
+      .map((emission) => emission.text)
+  }
+
+  it('should print the note when the check ran its changed-set argv', async () => {
+    const ctx = contextWith({ changed: ['src/a.ts'] })
+
+    const outcome = await runStage(noting(), ctx)
+
+    expect(infoLines(outcome.emissions)).toContain(NOTE)
+  })
+
+  it('should print no note when scoping is off', async () => {
+    const outcome = await runStage(noting(), contextWith())
+
+    expect(infoLines(outcome.emissions)).not.toContain(NOTE)
+  })
+
+  it('should print no note when the changed set widened to the full argv', async () => {
+    const ctx = contextWith({ changed: ['src/a.ts', 'package.json'] })
+
+    const outcome = await runStage(noting(), ctx)
+
+    expect(infoLines(outcome.emissions)).not.toContain(NOTE)
+  })
+})
+
 describe('a stage holding a machine lock', () => {
   const lockPath = () => machineLockPath('suite')
 

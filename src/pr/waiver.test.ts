@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { readWaivers } from '@/pr/waiver'
+import { readReelWaivers, readWaivers } from '@/pr/waiver'
 
 function review(body: string): { body: string } {
   return { body }
@@ -73,5 +73,49 @@ describe('readWaivers', () => {
 
   it('reads nothing from a review with no body', () => {
     expect(readWaivers([{}, { body: '' }])).toEqual([])
+  })
+
+  it('never reads a reel waiver as a capture waiver', () => {
+    const body = '- **Waived reel:** hover-only change, nothing to film'
+
+    expect(readWaivers([review(body)])).toEqual([])
+  })
+})
+
+describe('readReelWaivers', () => {
+  it('reads the reason off a reel waiver line', () => {
+    const body = [
+      '## Review closed',
+      '',
+      '- **Waived reel:** the only drivable box toggles a tooltip on hover',
+    ].join('\n')
+
+    expect(readReelWaivers([review(body)])).toEqual([
+      'the only drivable box toggles a tooltip on hover',
+    ])
+  })
+
+  it('takes only its own line from a pass carrying both waiver kinds', () => {
+    const body = [
+      '- **Waived capture:** `src/a.tsx`: focus order only',
+      '- **Waived reel:** hover-only change',
+    ].join('\n')
+
+    expect(readReelWaivers([review(body)])).toEqual(['hover-only change'])
+    expect(readWaivers([review(body)])).toEqual([
+      { path: 'src/a.tsx', reason: 'focus order only' },
+    ])
+  })
+
+  it('never counts a reel waiver inside a fenced code block', () => {
+    const body = ['```markdown', '- **Waived reel:** sample', '```'].join('\n')
+
+    expect(readReelWaivers([review(body)])).toEqual([])
+  })
+
+  it('skips a reel waiver with no reason', () => {
+    const body = ['- **Waived reel:**', '- **Waived reel:**    '].join('\n')
+
+    expect(readReelWaivers([review(body)])).toEqual([])
   })
 })

@@ -1,5 +1,28 @@
 # Changelog
 
+## [5.85.0](https://github.com/erclx/canon/compare/v5.84.0...v5.85.0) (2026-11-12)
+
+
+### Features
+
+* **census:** report files per folder and read them in document-health ([#3013](https://github.com/erclx/canon/issues/3013)) ([ed10845](https://github.com/erclx/canon/commit/ed10845c038a854c18418b9f3f1d86aca2aac3e9))
+* **ci:** bound every canon workflow job with a timeout ([#3009](https://github.com/erclx/canon/issues/3009)) ([22f58db](https://github.com/erclx/canon/commit/22f58db02b5a0fbd6297d14f0daba374cfd52138))
+* **ci:** bound every seeded workflow job with a timeout ([#3022](https://github.com/erclx/canon/issues/3022)) ([e4b44a0](https://github.com/erclx/canon/commit/e4b44a06a75b2f2045cbfcc134a3c8fc7e57b73f))
+* **code:** report long files and functions from code audit ([#3018](https://github.com/erclx/canon/issues/3018)) ([bee73e9](https://github.com/erclx/canon/commit/bee73e97878e3f4fd4c47f9ba96c3152bf5ac299))
+* **comments:** report long comment blocks in the scan ([#3017](https://github.com/erclx/canon/issues/3017)) ([4c456dc](https://github.com/erclx/canon/commit/4c456dc415cc97056b3c1915828fbfebf46f3af3))
+* **design:** group the landing references by section ([#3002](https://github.com/erclx/canon/issues/3002)) ([8ec38d3](https://github.com/erclx/canon/commit/8ec38d3e171553bbfcbeb0297eb7da69c68bfff2))
+* **gate:** keep end-to-end suites out of the scoped pre-push run ([#3025](https://github.com/erclx/canon/issues/3025)) ([8db9c81](https://github.com/erclx/canon/commit/8db9c817da84c748a9a5894143b61680a854ba54))
+* **pr:** hold the lift on a reel skip a builder can fix ([#3006](https://github.com/erclx/canon/issues/3006)) ([6ba24b9](https://github.com/erclx/canon/commit/6ba24b96dc55599ab5b0bf3d3bb3fa0d674dad7b))
+* **pr:** refuse ci-stalled on a tip run queued with no job ([#3027](https://github.com/erclx/canon/issues/3027)) ([b71679f](https://github.com/erclx/canon/commit/b71679fef8e287530f3634697850704de3d9e775))
+* **records:** require a plan to state its seeded counterpart ([#3023](https://github.com/erclx/canon/issues/3023)) ([b803e57](https://github.com/erclx/canon/commit/b803e57045a1416a2d7c674015c19a666628dd74))
+* **tooling:** hold package.json scripts through decline and customize ([#3005](https://github.com/erclx/canon/issues/3005)) ([4d91e58](https://github.com/erclx/canon/commit/4d91e5816dd5b6ba90af9f14f7387a919e2ba608))
+
+
+### Bug Fixes
+
+* **comments:** load the vocabulary from the scanned path's repo root ([#3010](https://github.com/erclx/canon/issues/3010)) ([ce8a089](https://github.com/erclx/canon/commit/ce8a0896e7d51923a09a7c9e9ec4626baa179a6c))
+* **tooling:** drop the apt step from the seeded web workflows ([#3003](https://github.com/erclx/canon/issues/3003)) ([005ae6a](https://github.com/erclx/canon/commit/005ae6a5fb5a9fc61f7cb9579b6c3086e96dfe0b))
+
 ## [5.84.0](https://github.com/erclx/canon/compare/v5.83.0...v5.84.0) (2026-11-11)
 
 

@@ -25,7 +25,7 @@ Holds the terminal and process layer every command shares. A `--json` run goes q
 
 ### `src/commands/`
 
-Holds one file per subcommand, each exporting a `register(program)` that `src/cli.ts` calls.
+Holds one file per subcommand, each exporting `register(program)` for `src/cli.ts`. A long one splits into `src/commands/<name>/` by verb.
 
 - Add a command by writing its `register`, calling it from `src/cli.ts`, and adding its row to `COMMAND_GROUPS`
 - Define real options in commander and re-enable `helpOption` at each level, since the root disables it. Put a default on the flag, and read `getOptionValueSource` to tell it from an explicit pass
