@@ -2,7 +2,10 @@ import ts from 'typescript'
 import { describe, expect, it } from 'vitest'
 import {
   FILE_LINE_LIMIT,
+  FUNCTION_EXTENSIONS,
   FUNCTION_LINE_CHECKPOINT,
+  LENGTH_EXTENSIONS,
+  LENGTH_SOURCE,
   functionSpans,
   functionSpansInFile,
   lineCount,
@@ -382,5 +385,41 @@ describe('longCode', () => {
     expect(
       result.longFunctions.map(({ file, line }) => `${file}:${line}`),
     ).toEqual(['a.ts:1', 'a.ts:123', 'b.ts:1'])
+  })
+})
+
+describe('published extensions', () => {
+  it.each(LENGTH_EXTENSIONS)('should count a .%s file toward length', (ext) => {
+    expect(LENGTH_SOURCE.test(`src/a.${ext}`)).toBe(true)
+  })
+
+  it.each(['md', 'json', 'd', 'tsx.map', 'ts.bak'])(
+    'should not count a .%s file toward length',
+    (ext) => {
+      expect(LENGTH_SOURCE.test(`src/a.${ext}`)).toBe(false)
+    },
+  )
+
+  it('should not count a dotless name that ends in an extension', () => {
+    expect(LENGTH_SOURCE.test('src/ts')).toBe(false)
+  })
+
+  it('should read functions only in files the length counts', () => {
+    expect(
+      FUNCTION_EXTENSIONS.filter((ext) => !LENGTH_EXTENSIONS.includes(ext)),
+    ).toEqual([])
+  })
+
+  it.each(FUNCTION_EXTENSIONS)('should read functions in a .%s file', (ext) => {
+    const source = ext === 'py' ? 'def f():\n    pass\n' : 'function f() {\n}\n'
+    const read = functionSpansInFile(`src/a.${ext}`, source)
+    expect(read.kind).toBe('read')
+  })
+
+  it('should leave a css file out of the function read', () => {
+    expect(functionSpansInFile('src/a.css', 'a { b: c }\n')).toEqual({
+      kind: 'read',
+      spans: [],
+    })
   })
 })

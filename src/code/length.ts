@@ -19,17 +19,56 @@ export const FILE_LINE_LIMIT = 2000
 export const FUNCTION_LINE_CHECKPOINT = 100
 
 /**
- * Code files counted toward the file length, tests included. Markdown is out,
- * since `canon markdown audit` holds its own document ceiling.
+ * Extensions of the code files counted toward the file length, tests included,
+ * bare and in source order. Markdown is out, since `canon markdown audit` holds
+ * its own document ceiling. The matcher below is built from this list.
  */
-export const LENGTH_SOURCE =
-  /\.(?:ts|tsx|mts|cts|js|jsx|mjs|cjs|astro|vue|svelte|py|go|php|sh|bash|rs|css)$/
+export const LENGTH_EXTENSIONS = [
+  'ts',
+  'tsx',
+  'mts',
+  'cts',
+  'js',
+  'jsx',
+  'mjs',
+  'cjs',
+  'astro',
+  'vue',
+  'svelte',
+  'py',
+  'go',
+  'php',
+  'sh',
+  'bash',
+  'rs',
+  'css',
+] as const
 
 /**
- * Files whose functions the brace reading can find, an `.astro` file by its
- * frontmatter, and Python files, which the indentation reading finds.
+ * Extensions whose functions the brace reading can find, an `.astro` file by
+ * its frontmatter, and Python files, which the indentation reading finds.
  */
-const FUNCTION_SOURCE = /\.(?:ts|tsx|mts|cts|js|jsx|mjs|cjs|astro|py)$/
+export const FUNCTION_EXTENSIONS = [
+  'ts',
+  'tsx',
+  'mts',
+  'cts',
+  'js',
+  'jsx',
+  'mjs',
+  'cjs',
+  'astro',
+  'py',
+] as const
+
+function extensionMatcher(extensions: readonly string[]): RegExp {
+  return new RegExp(`\\.(?:${extensions.join('|')})$`)
+}
+
+/** Matches a path the file length counts. */
+export const LENGTH_SOURCE = extensionMatcher(LENGTH_EXTENSIONS)
+
+const FUNCTION_SOURCE = extensionMatcher(FUNCTION_EXTENSIONS)
 
 /**
  * Files `lex` reads in JSX mode. A `.js` file holding JSX stays out, since the
