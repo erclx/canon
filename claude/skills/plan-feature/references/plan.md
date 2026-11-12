@@ -207,9 +207,7 @@ A plan whose `## Files to touch` names a rendered-surface file (`.tsx`, `.jsx`, 
 
 ### Counterparts
 
-A project that keeps stacks under `tooling/<stack>/` holds two copies of much of its setup, its own at the root and the one it seeds into targets. A plan changing one side states what happens to the other.
-
-The section applies only in a project keeping a stack under `tooling/<stack>/` with a `manifest.toml`. Elsewhere there is no seeded side, so a plan leaves it out and the validator asks for nothing.
+A project that keeps stacks under `tooling/<stack>/` holds two copies of much of its setup, its own at the root and the one it seeds into targets. A plan changing one side states what happens to the other. A project with no stack folder holding a `manifest.toml` seeds nothing, so its plans owe no such section.
 
 A backticked path anywhere in `## Files to touch` fires when it falls in one of five classes, a path cited in an entry's reason included.
 
@@ -225,7 +223,9 @@ Each bullet names one or more paths before a colon and one verdict after it. A d
 - `none, <reason>` when no counterpart exists or none should change
 - `filed` followed by the backticked stem of the task row that carries the other side
 
-`canon records validate plans` reports `counterpart-unstated` for a firing path no bullet covers and `counterpart-malformed` for a bullet with no path or no valid verdict. A plan touching no such path owes nothing, and may write `None identified.` to show the check was made. A plan owing the section is written in Full mode, since Small mode writes no file for the validator to read.
+`canon records validate plans` reports `counterpart-unstated` for a firing path no bullet covers and `counterpart-malformed` for a bullet with no path or no valid verdict.
+
+A plan touching no such path owes nothing, and may write `None identified.` to show the check was made. A plan owing the section is written in Full mode, since Small mode writes no file for the validator to read.
 
 ### Reference images
 
