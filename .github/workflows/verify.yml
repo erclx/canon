@@ -185,6 +185,13 @@ jobs:
           scripts/ci/check-browsers.sh chromium chromium_headless_shell
           scripts/ci/check-e2e-tools.sh "$(bun -e "import { CHROMIUM_REVISION } from './src/browser/agent-cli'; console.log(CHROMIUM_REVISION)")"
 
+      # Ubuntu 24.04's AppArmor kills the chrome-headless-shell the take engine
+      # spawns with its sandbox on. Playwright's launches turn the sandbox off,
+      # so only the take suites need this.
+      - name: Allow Unprivileged User Namespaces
+        timeout-minutes: 1
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
       - name: Run E2E Suites
         timeout-minutes: 15
         run: bun run test:e2e
