@@ -86,7 +86,7 @@ Owns the handoff the orchestrator adds three sections to.
 - One file per session keeps two writers off one path, and `isReservedStem` in `src/tasks/archive.ts` stops the task verbs counting it, reading the `session-` prefix from `src/records/session-map.ts`
 - `canon records validate sessions` counts a map against the cap in `src/records/session-map.ts`, which a test pins to `session.md`
 - The count drops the closing block by its exact `## Resume` heading, so renaming it in `orchestrator-handoff.md` puts the block back in the count
-- `session-resume` filters `index`, `priority`, `backlog`, and `session-` rows before it counts tasks, so a new sibling in the folder must reach that reader
+- `session-resume` reads the compact note matching its own session id and never the board, so a sibling in the tasks folder reaches the orchestrator's resume alone
 
 ### `claude/skills/role-orchestrator/`
 

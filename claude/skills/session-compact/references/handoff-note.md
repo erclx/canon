@@ -20,8 +20,11 @@ A line failing either half comes out. The tree, the git log, a groundwork record
 title: <what the session settled, as a sentence>
 description: <what it decided, what it measured, what it left open, and the date>
 category: Compact
+session: <the writer's own sessionId>
 ---
 ```
+
+The `session` field is how `session-resume` finds this note again, since a compaction keeps the id and a resume matches it against its own. Omit the field rather than guess when `canon sessions list --self --json` refuses, and never fill it from another session's row.
 
 ## The sections
 

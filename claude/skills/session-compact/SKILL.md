@@ -21,11 +21,12 @@ Write only what a compaction destroys. Git, the tree, and durable records are al
 
 Write one file to `.canon/compact/<slug>.md`, overwriting any note of the same name.
 
-| Part     | Rule                                                                                                                     |
-| -------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `<slug>` | Short kebab-case phrase for what the session did, not the branch, so work on `main` still gets a name. `latest` if none. |
-| Sections | Follow `${CLAUDE_SKILL_DIR}/references/handoff-note.md`, read before drafting rather than worked from memory             |
-| Count    | One note per piece of work. A second file for the same work splits the handoff.                                          |
+| Part      | Rule                                                                                                                     |
+| --------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `<slug>`  | Short kebab-case phrase for what the session did, not the branch, so work on `main` still gets a name. `latest` if none. |
+| Sections  | Follow `${CLAUDE_SKILL_DIR}/references/handoff-note.md`, read before drafting rather than worked from memory             |
+| Count     | One note per piece of work. A second file for the same work splits the handoff.                                          |
+| `session` | The `sessionId` of `canon sessions list --self --json`, read before drafting. Write no field where the read refuses.     |
 
 ## Step 2: report
 
@@ -57,5 +58,5 @@ A decline reports itself so a caller can tell it from a failure:
 
 - The orchestrator's handoff, which carries a drift check and writes a task row: `canon:session-map`
 - Reading a handoff back at the start of the next session: `canon:session-resume`
-- Packing the session for another machine: `canon sessions export`, with `canon sessions import` and then `/canon:session-resume` on the arriving side
+- Packing the session for another machine: `canon sessions export`, with `canon sessions import` and then `/canon:session-resume <note>` on the arriving side
 - A decision a groundwork track owns, which belongs in its own `06-decision.md`: `canon:plan-groundwork`

@@ -174,6 +174,14 @@ function newestHandoff(root: string, startedAt: string | null): string | null {
   return newest === null ? null : newest.path
 }
 
+/**
+ * The skill argument naming the exported note. A fresh session holds a new id,
+ * so the note's id field matches nothing and its slug is the only way back to it.
+ */
+function noteArgument(handoff: string | null): string {
+  return handoff === null ? '' : ` ${basename(handoff, '.md')}`
+}
+
 async function isCommittedInRecords(
   root: string,
   note: string,
@@ -540,7 +548,7 @@ export async function importSession(
     behind,
     routes: [
       `cd ${options.root} && claude --resume ${id}`,
-      `cd ${options.root} && claude "/canon:session-resume"`,
+      `cd ${options.root} && claude "/canon:session-resume${noteArgument(manifest.handoff)}"`,
     ],
   }
 }

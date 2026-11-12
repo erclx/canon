@@ -1,53 +1,51 @@
 ---
 name: session-resume
-description: Resumes a previous session by reading the handoff it left behind, tracked work, and relevant context. Use when starting a new session, or when asked to "pick up where we left off", "what was I working on", or "resume".
+description: Resumes a session by reading the handoff note it wrote before compacting, matched by its own session id, and closing on that note's "Where to pick up" line. Use when starting after a compaction, or when asked to "pick up where we left off", "what was I working on", or "resume". Do NOT use for the task board, which is `canon tasks list`, or for an orchestrator, whose resume is its own.
 metadata:
   family: parallel
 ---
 
 # Session resume
 
-## Step 1: read tracked work
+This skill hands a session its own note back. It reads no board, no session map, and no plan, since a board that is never empty steers every resumed session off its own work.
 
-Resolve `.canon/plans/`, `.canon/compact/`, and `.canon/tasks/` at the main worktree root the way `session-worktree` does.
+## Step 1: find this session's note
 
-Read these in parallel, skipping any that do not exist:
+Resolve `.canon/compact/` at the main worktree root the way `session-worktree` does.
 
-- The newest `.canon/compact/*.md`, which is the note `session-compact` writes before a compaction
-- The newest `.canon/tasks/session-*.md`, the board-side map per `${CLAUDE_SKILL_DIR}/../session-map/references/session.md`. Whichever handoff exists leads the report, and both lead it when both exist.
-- `.canon/tasks/index.md`, the folder catalog, read before any task file. Drop its `index`, `priority`, `backlog`, and `session-` rows, which are siblings rather than tasks.
-- `.canon/plans/*.md`: execution detail for in-progress tasks
+- A call naming a note, such as `my-slug`, reads `.canon/compact/my-slug.md` whatever its `session` field holds, since an imported session has a new id
+- A call naming nothing reads the note whose `session` frontmatter field equals the `sessionId` of `canon sessions list --self --json`, the newest when several match
 
-Then read only the task files the summary needs, typically the top one, never the whole folder. Say nothing about an absent handoff, since a line reporting it every run trains a reader to skip it on the run where one exists.
+Read the id before the notes. When `--self` refuses, treat the session as matching no note rather than reading the newest.
 
-### Nothing tracked
+When a named note is absent from the folder, report it missing and point at `canon records pull`, since an imported session receives its notes through the records repository. Then take the path below, never the newest note.
 
-If the handoff, task, and plan surfaces are all absent or empty, stop: `✅ No tracked work found. Start a new task.`
+### When nothing matches
 
-## Step 2: summarize
+Never fall back to the newest note, since a note another session wrote is the wrong handoff. A note written before the `session` field existed matches nothing here.
 
-Output these sections, omitting the first when no handoff was found:
+- List the three newest notes by `title` and `description`, and ask which one is this session's. Offer none as an answer.
+- Stop with `✅ No handoff found. Start a new task.` when `.canon/compact/` is absent or holds no note.
 
-| Section          | Holds                                                                                                      |
-| ---------------- | ---------------------------------------------------------------------------------------------------------- |
-| **Carried over** | The handoff's reasoning, attributed to it rather than stated as fact. Re-measure any count before acting.  |
-| **Up next**      | One line per task row in `.canon/tasks/index.md`, in order. Session rows are not tasks, so leave them out. |
-| **Active plans** | One line per file in `.canon/plans/`, linked to its task file in `.canon/tasks/`. "None" if empty.         |
+## Step 2: report
 
-## Step 3: recommend
+Output the note's reasoning under **Carried over**, attributed to the note rather than stated as fact. Re-measure any count or size it quotes before acting on it.
 
-End with one line: `Start with: <first Up next item>` and note whether it has a linked plan.
+Say nothing about a surface this skill did not read.
 
-When the board is empty and a handoff was found, name what it leaves open instead: `Start with: <the open thread the handoff names>`. An empty recommendation reads as a failed run, and a handoff on an empty board is what a reasoning session leaves.
+## Step 3: close
+
+End with one line reading `Start with: <the note's "Where to pick up" instruction>`.
+
+Add one more line for a reader who wanted the board, reading `The board is one verb away, canon tasks list. An orchestrator resumes through its own reference.`
 
 ### Leave entries alone
 
-Do not offer to remove entries. A completed task is archived out of `.canon/tasks/` when work ships, and the git log is the record of shipped work. Plan files archive per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan-lifecycle.md`.
+Do not offer to remove, archive, or reorder a note or an entry. The git log is the record of shipped work, and a resume reports without mutating.
 
 ## Writing the next one
 
 This skill reads a handoff and never writes one, since the write happens at the close of a session rather than at its start.
 
-- Route a session asking how to leave a handoff to `session-compact`, which writes a note under `.canon/compact/`
+- Route a session asking how to leave a handoff to `session-compact`, which writes a note under `.canon/compact/` carrying the session's id
 - A session holding the orchestrator role takes `session-map`, which writes the board-side map the standard governs
-- A role carrying sections of its own adds them over the core per that role's own runbook
