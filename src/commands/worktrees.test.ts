@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   describe as describeVerdict,
+  reclaimExit,
   reclaimRecord,
   retireMembersExit,
   retireMembersRecord,
@@ -12,7 +13,12 @@ import type {
   MemberRefusal,
 } from '@/worktrees/members'
 import type { HeldSession, WorktreeVerdict } from '@/worktrees/reclaim'
-import type { RemovalOutcome, RemovalReport } from '@/worktrees/remove'
+import type { BranchVerdict } from '@/worktrees/branches'
+import type {
+  BranchOutcome,
+  RemovalOutcome,
+  RemovalReport,
+} from '@/worktrees/remove'
 
 function removed(path: string, branch: string): RemovalOutcome {
   return { path, branch, removed: true, failedAt: null, detail: null }
@@ -188,6 +194,185 @@ describe('reclaimRecord', () => {
     expect(serialized.indexOf('"outcomes"')).toBeGreaterThan(
       serialized.indexOf('"failed"'),
     )
+  })
+})
+
+function branchVerdict(branch: string): BranchVerdict {
+  return {
+    branch,
+    tip: 'a'.repeat(40),
+    reclaimable: true,
+    refusals: [],
+    pullRequest: 41,
+  }
+}
+
+function branchOutcome(branch: string, removed: boolean): BranchOutcome {
+  return {
+    branch,
+    tip: 'a'.repeat(40),
+    pullRequest: 41,
+    removed,
+    detail: removed ? null : 'error: cannot delete branch',
+  }
+}
+
+describe('reclaimRecord branches', () => {
+  it('should count the branches deleted and failed', () => {
+    const record = reclaimRecord({
+      kind: 'read',
+      dryRun: false,
+      reclaimable: 0,
+      removal: null,
+      branches: {
+        kind: 'read',
+        reclaimable: [branchVerdict('feat/a'), branchVerdict('feat/b')],
+        outcomes: [
+          branchOutcome('feat/a', true),
+          branchOutcome('feat/b', false),
+        ],
+      },
+    })
+
+    expect(record.branchesReclaimable).toBe(2)
+    expect(record.branchesRemoved).toBe(1)
+    expect(record.branchesFailed).toBe(1)
+    expect(record.branches).toHaveLength(2)
+  })
+
+  it('should list each branch with its tip on a dry run and count none deleted or failed', () => {
+    const record = reclaimRecord({
+      kind: 'read',
+      dryRun: true,
+      reclaimable: 0,
+      removal: null,
+      branches: {
+        kind: 'read',
+        reclaimable: [branchVerdict('feat/a')],
+        outcomes: null,
+      },
+    })
+
+    expect(record.branchesReclaimable).toBe(1)
+    expect(record.branchesRemoved).toBe(0)
+    expect(record.branchesFailed).toBe(0)
+    expect(record.branches).toEqual([
+      {
+        branch: 'feat/a',
+        tip: 'a'.repeat(40),
+        pullRequest: 41,
+        removed: false,
+        detail: null,
+      },
+    ])
+  })
+
+  it('should read null reclaimable branches when the branch reading was skipped', () => {
+    const record = reclaimRecord({
+      kind: 'read',
+      dryRun: false,
+      reclaimable: 0,
+      removal: null,
+      branches: { kind: 'unreadable', detail: 'git for-each-ref failed' },
+    })
+
+    expect(record.branchesReclaimable).toBeNull()
+    expect(record.branches).toEqual([])
+  })
+
+  it('should read zero branches from a source naming none', () => {
+    const record = reclaimRecord({
+      kind: 'read',
+      dryRun: false,
+      reclaimable: 1,
+      removal: removal([removed('/a', 'feat/a')]),
+    })
+
+    expect(record.branchesReclaimable).toBe(0)
+    expect(record.branches).toEqual([])
+  })
+
+  it('should place the branch counts before outcomes and branches after it', () => {
+    const serialized = JSON.stringify(
+      reclaimRecord({
+        kind: 'read',
+        dryRun: false,
+        reclaimable: 1,
+        removal: removal([removed('/a', 'feat/a')]),
+      }),
+    )
+
+    const outcomes = serialized.indexOf('"outcomes"')
+    expect(serialized.indexOf('"branchesFailed"')).toBeLessThan(outcomes)
+    expect(serialized.indexOf('"branches":')).toBeGreaterThan(outcomes)
+  })
+})
+
+describe('reclaimExit', () => {
+  it('should exit 0 when every worktree and branch went', () => {
+    const record = reclaimRecord({
+      kind: 'read',
+      dryRun: false,
+      reclaimable: 1,
+      removal: removal([removed('/a', 'feat/a')]),
+      branches: {
+        kind: 'read',
+        reclaimable: [branchVerdict('feat/b')],
+        outcomes: [branchOutcome('feat/b', true)],
+      },
+    })
+
+    expect(reclaimExit(record)).toBe(0)
+  })
+
+  it('should exit 1 when a branch delete failed', () => {
+    const record = reclaimRecord({
+      kind: 'read',
+      dryRun: false,
+      reclaimable: 0,
+      removal: null,
+      branches: {
+        kind: 'read',
+        reclaimable: [branchVerdict('feat/b')],
+        outcomes: [branchOutcome('feat/b', false)],
+      },
+    })
+
+    expect(reclaimExit(record)).toBe(1)
+  })
+
+  it('should exit 1 when the branch reading was skipped, even with every worktree removed', () => {
+    const record = reclaimRecord({
+      kind: 'read',
+      dryRun: false,
+      reclaimable: 1,
+      removal: removal([removed('/a', 'feat/a')]),
+      branches: { kind: 'unreadable', detail: 'git for-each-ref failed' },
+    })
+
+    expect(reclaimExit(record)).toBe(1)
+  })
+
+  it('should exit 1 when a worktree removal failed', () => {
+    const record = reclaimRecord({
+      kind: 'read',
+      dryRun: false,
+      reclaimable: 1,
+      removal: removal([failed('/a', 'feat/a')]),
+    })
+
+    expect(reclaimExit(record)).toBe(1)
+  })
+
+  it('should exit 1 when the whole reading was refused', () => {
+    const record = reclaimRecord({
+      kind: 'unreadable',
+      reason: 'gh-missing',
+      detail: 'gh is not on the path',
+      dryRun: false,
+    })
+
+    expect(reclaimExit(record)).toBe(1)
   })
 })
 

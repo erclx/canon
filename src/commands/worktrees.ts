@@ -29,10 +29,13 @@ import { machineListenerReader } from '@/listeners/machine'
 import { repairBareFlag } from '@/worktrees/bare-flag'
 import { type StopReport, stopListeners } from '@/worktrees/stop'
 import {
+  type BranchOutcome,
+  removeBranches,
   removeReclaimable,
   type RemovalOutcome,
   type RemovalReport,
 } from '@/worktrees/remove'
+import type { BranchReport, BranchVerdict } from '@/worktrees/branches'
 
 interface ListCommandOptions {
   readonly json?: boolean
@@ -98,8 +101,31 @@ export interface ReclaimRecord {
    * listeners, which says nothing about what is still running.
    */
   readonly stopped: number | null
+  /**
+   * Local branches no worktree holds whose tip a merged pull request's head
+   * contains. Null when the branch reading failed, which is a skipped step
+   * rather than a repository with none.
+   */
+  readonly branchesReclaimable: number | null
+  readonly branchesRemoved: number
+  readonly branchesFailed: number
   readonly outcomes: readonly RemovalOutcome[]
+  /**
+   * One entry per reclaimable branch, carrying the tip to restore it from. A
+   * dry run lists each with `removed` false, since nothing ran.
+   */
+  readonly branches: readonly BranchOutcome[]
 }
+
+/** What the branch half of a run read and did, beside the worktree half. */
+export type BranchSource =
+  | { readonly kind: 'unreadable'; readonly detail: string }
+  | {
+      readonly kind: 'read'
+      readonly reclaimable: readonly BranchVerdict[]
+      /** Null when no delete ran, on a dry run or with nothing to delete. */
+      readonly outcomes: readonly BranchOutcome[] | null
+    }
 
 /** Every value the record carries, in the two shapes a run can end in. */
 export type ReclaimSource =
@@ -122,6 +148,8 @@ export type ReclaimSource =
       readonly removal: RemovalReport | null
       /** Null when no stop ran, which is a reading with nothing reclaimable. */
       readonly stop?: StopReport | null
+      /** Absent reads as a branch reading with nothing to delete. */
+      readonly branches?: BranchSource
     }
 
 const REFUSALS: Record<Refusal, string> = {
@@ -275,7 +303,7 @@ export function register(program: Command): void {
   worktrees
     .command('reclaim')
     .description(
-      'Remove every reclaimable worktree and the branch behind it, unless --dry-run',
+      'Remove every reclaimable worktree and the branch behind it, and every merged branch no worktree holds, unless --dry-run',
     )
     .helpOption('-h, --help', 'Show this help message')
     .option('--dry-run', 'Report what would be removed without removing it')
@@ -285,8 +313,9 @@ export function register(program: Command): void {
       [
         '',
         'Exit codes:',
-        '  0  every reclaimable worktree was removed, or there were none',
-        '  1  refused, or a removal failed, with the reason on stderr',
+        '  0  every reclaimable worktree and branch was removed, or there were none',
+        '  1  refused, a removal failed, or the branches could not be read,',
+        '     with the reason on stderr',
         '',
         ...CONDITIONS,
         '',
@@ -309,6 +338,16 @@ export function register(program: Command): void {
         'is meant to remove the session and its worktree together, but its',
         'own report is not reliable, so run `canon worktrees list` again',
         'afterward to see what happened.',
+        '',
+        'It also deletes each local branch no worktree holds whose tip sits',
+        'inside the head of a merged pull request for that name. A branch with',
+        'a commit past every merged head is kept, so a reused name loses no',
+        'work, and so are main, master, the origin/HEAD target, and a branch a',
+        'live session holds. A merged head absent locally keeps the branch',
+        'rather than guessing. Each deleted tip is printed, so',
+        '`git branch <name> <tip>` restores one. A failed branch listing skips',
+        'the branch deletes, still removes the worktrees, and exits 1.',
+        '"branchesReclaimable" in the record reads null on that skip.',
         '',
         'The stale-registration sweep is the one step that reaches wider, since',
         'git takes no path to scope it. It clears the bookkeeping for every',
@@ -467,12 +506,33 @@ export function reclaimRecord(source: ReclaimSource): ReclaimRecord {
       failed: 0,
       pruned: false,
       stopped: 0,
+      branchesReclaimable: 0,
+      branchesRemoved: 0,
+      branchesFailed: 0,
       outcomes: [],
+      branches: [],
     }
   }
 
   const outcomes = source.removal?.outcomes ?? []
   const stop = source.stop ?? null
+  const branchSource = source.branches ?? {
+    kind: 'read',
+    reclaimable: [],
+    outcomes: null,
+  }
+  const branches: readonly BranchOutcome[] =
+    branchSource.kind === 'unreadable'
+      ? []
+      : (branchSource.outcomes ??
+        branchSource.reclaimable.map(({ branch, tip, pullRequest }) => ({
+          branch,
+          tip,
+          pullRequest,
+          removed: false,
+          detail: null,
+        })))
+  const deleted = branchSource.kind === 'read' && branchSource.outcomes !== null
 
   return {
     reason: null,
@@ -483,8 +543,29 @@ export function reclaimRecord(source: ReclaimSource): ReclaimRecord {
     failed: outcomes.filter((outcome) => !outcome.removed).length,
     pruned: source.removal?.pruned ?? false,
     stopped: stop === null ? 0 : countStopped(stop),
+    branchesReclaimable:
+      branchSource.kind === 'unreadable'
+        ? null
+        : branchSource.reclaimable.length,
+    branchesRemoved: deleted
+      ? branches.filter((branch) => branch.removed).length
+      : 0,
+    branchesFailed: deleted
+      ? branches.filter((branch) => !branch.removed).length
+      : 0,
     outcomes,
+    branches,
   }
+}
+
+/**
+ * The exit a record owes. A skipped branch reading fails the run beside a
+ * failed removal, since a step that did not run must not read as a pass.
+ */
+export function reclaimExit(record: ReclaimRecord): number {
+  if (record.reason !== null) return 1
+  if (record.branchesReclaimable === null) return 1
+  return record.failed > 0 || record.branchesFailed > 0 ? 1 : 0
 }
 
 function countStopped(stop: StopReport): number | null {
@@ -506,9 +587,51 @@ function reportStop(stop: StopReport, dryRun: boolean): void {
   }
 }
 
-function emitReclaim(opts: ReclaimCommandOptions, source: ReclaimSource): void {
-  if (opts.json !== true) return
-  process.stdout.write(`${JSON.stringify(reclaimRecord(source))}\n`)
+function emitReclaim(
+  opts: ReclaimCommandOptions,
+  source: ReclaimSource,
+): ReclaimRecord {
+  const record = reclaimRecord(source)
+  if (opts.json === true) process.stdout.write(`${JSON.stringify(record)}\n`)
+  return record
+}
+
+function branchCount(count: number): string {
+  return `${count} ${count === 1 ? 'branch' : 'branches'}`
+}
+
+function describeBranch(verdict: BranchVerdict): string {
+  const pullRequest =
+    verdict.pullRequest === null ? '' : `  #${verdict.pullRequest}`
+  return `  ${verdict.branch}  ${verdict.tip}${pullRequest}`
+}
+
+/** Names the branches a run would delete, or says the reading was skipped. */
+function reportBranchReading(
+  branches: BranchReport,
+  reclaimable: readonly BranchVerdict[],
+): void {
+  logStep('Merged branches')
+  if (branches.kind === 'unreadable') {
+    logWarn('The local branches were not read, so none was deleted.')
+    logInfo(branches.detail)
+    return
+  }
+  if (reclaimable.length === 0) {
+    logInfo('None. No branch outside a worktree sits inside a merged head.')
+    return
+  }
+  logInfo(branchCount(reclaimable.length))
+  pipeOutput(reclaimable.map(describeBranch).join('\n'))
+}
+
+function reportBranchOutcome(outcome: BranchOutcome): void {
+  if (outcome.removed) {
+    logRemove(`${outcome.branch}  ${outcome.tip}`)
+    return
+  }
+  logWarn(`${outcome.branch}  ${outcome.tip}: the branch could not be deleted.`)
+  if (outcome.detail) pipeOutput(outcome.detail)
 }
 
 async function runReclaim(opts: ReclaimCommandOptions): Promise<number> {
@@ -523,81 +646,125 @@ async function runReclaim(opts: ReclaimCommandOptions): Promise<number> {
   if (report.kind === 'unreadable') {
     reportUnreadable(report)
     outro()
-    emitReclaim(opts, {
-      kind: 'unreadable',
-      reason: report.reason,
-      detail: report.detail,
-      dryRun,
-    })
-    return 1
+    return reclaimExit(
+      emitReclaim(opts, {
+        kind: 'unreadable',
+        reason: report.reason,
+        detail: report.detail,
+        dryRun,
+      }),
+    )
   }
 
   const reclaimable = report.worktrees.filter((entry) => entry.reclaimable)
+  const branchVerdicts =
+    report.branches.kind === 'read'
+      ? report.branches.branches.filter((entry) => entry.reclaimable)
+      : []
+  const branchSource = (
+    outcomes: readonly BranchOutcome[] | null,
+  ): BranchSource =>
+    report.branches.kind === 'unreadable'
+      ? { kind: 'unreadable', detail: report.branches.detail }
+      : { kind: 'read', reclaimable: branchVerdicts, outcomes }
 
   logStep('Reclaimable')
   if (reclaimable.length === 0) {
     logInfo('None. Every worktree fails at least one condition.')
+  } else {
+    logInfo(plural(reclaimable.length, 'worktree'))
+    pipeOutput(reclaimable.map(describe).join('\n'))
+  }
+  reportBranchReading(report.branches, branchVerdicts)
+
+  if (reclaimable.length === 0 && branchVerdicts.length === 0) {
     outro()
-    emitReclaim(opts, { kind: 'read', dryRun, reclaimable: 0, removal: null })
-    return 0
+    return reclaimExit(
+      emitReclaim(opts, {
+        kind: 'read',
+        dryRun,
+        reclaimable: 0,
+        removal: null,
+        branches: branchSource(null),
+      }),
+    )
   }
 
-  logInfo(plural(reclaimable.length, 'worktree'))
-  pipeOutput(reclaimable.map(describe).join('\n'))
-
-  const stop = await stopListeners(
-    reclaimable.map((entry) => entry.path),
-    { reader: machineListenerReader(), dryRun },
-  )
+  const stop =
+    reclaimable.length === 0
+      ? null
+      : await stopListeners(
+          reclaimable.map((entry) => entry.path),
+          { reader: machineListenerReader(), dryRun },
+        )
 
   if (dryRun) {
     logStep('Dry run')
-    reportStop(stop, dryRun)
+    if (stop !== null) reportStop(stop, dryRun)
     logWarn('Nothing was removed. Run this again without --dry-run to remove.')
     outro()
-    emitReclaim(opts, {
-      kind: 'read',
-      dryRun,
-      reclaimable: reclaimable.length,
-      removal: null,
-      stop,
-    })
-    return 0
+    return reclaimExit(
+      emitReclaim(opts, {
+        kind: 'read',
+        dryRun,
+        reclaimable: reclaimable.length,
+        removal: null,
+        stop,
+        branches: branchSource(null),
+      }),
+    )
   }
 
   // Every git call in the removal is scoped to the main root rather than to the
   // caller's directory, which a removal earlier in the same run can delete out
   // from under the ones after it. The reading above stays on the caller's
   // directory, since that is what tells it which worktree it is standing in.
-  const removal = await removeReclaimable(reclaimable, {
-    cwd: await mainWorktreeRoot(),
-  })
+  const root = await mainWorktreeRoot()
+  const removal =
+    reclaimable.length === 0
+      ? null
+      : await removeReclaimable(reclaimable, { cwd: root })
+  const branchOutcomes =
+    branchVerdicts.length === 0
+      ? null
+      : await removeBranches(branchVerdicts, { cwd: root })
 
   logStep('Removed')
-  reportStop(stop, dryRun)
-  for (const outcome of removal.outcomes) reportOutcome(outcome)
-  if (removal.pruned) {
+  if (stop !== null) reportStop(stop, dryRun)
+  for (const outcome of removal?.outcomes ?? []) reportOutcome(outcome)
+  if (removal?.pruned) {
     logInfo(
       'Swept the stale worktree registrations left by a deleted directory.',
     )
   }
+  for (const outcome of branchOutcomes ?? []) reportBranchOutcome(outcome)
 
-  const failed = removal.outcomes.filter((outcome) => !outcome.removed)
+  const failed = (removal?.outcomes ?? []).filter((outcome) => !outcome.removed)
   if (failed.length > 0) {
     logWarn(
       `${plural(failed.length, 'worktree')} could not be removed. Read the reason above and clear it by hand.`,
     )
   }
+  const branchesFailed = (branchOutcomes ?? []).filter(
+    (outcome) => !outcome.removed,
+  )
+  if (branchesFailed.length > 0) {
+    logWarn(
+      `${branchCount(branchesFailed.length)} could not be deleted. Read the reason above and clear it by hand.`,
+    )
+  }
 
   outro()
-  emitReclaim(opts, {
-    kind: 'read',
-    dryRun,
-    reclaimable: reclaimable.length,
-    removal,
-    stop,
-  })
-  return failed.length > 0 ? 1 : 0
+  return reclaimExit(
+    emitReclaim(opts, {
+      kind: 'read',
+      dryRun,
+      reclaimable: reclaimable.length,
+      removal,
+      stop,
+      branches: branchSource(branchOutcomes),
+    }),
+  )
 }
 
 /** Names what happened to one entry, with the failing step where it did not close. */
