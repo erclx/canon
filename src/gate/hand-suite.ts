@@ -41,6 +41,20 @@ function isNameFilter(arg: string): boolean {
 }
 
 /**
+ * Whether an argument names `E2E_FILTER` as something to run. The value of
+ * `--exclude` names what to leave out, as in the gate's own scoped command, so
+ * it never counts.
+ */
+function selectsE2e(args: readonly string[]): boolean {
+  return args.some(
+    (arg, index) =>
+      arg.includes(E2E_FILTER) &&
+      !arg.startsWith('--exclude=') &&
+      args[index - 1] !== '--exclude',
+  )
+}
+
+/**
  * Whether a hand-run vitest invocation runs the whole suite and so queues on
  * the machine lock the gate's Tests stage holds.
  *
@@ -57,6 +71,6 @@ export function locksHandSuite(run: VitestRun): boolean {
   if (run.ci || run.watch || run.heldLock !== undefined) return false
 
   const args = SUBCOMMANDS.has(run.args[0] ?? '') ? run.args.slice(1) : run.args
-  if (args.some((arg) => arg.includes(E2E_FILTER))) return true
+  if (selectsE2e(args)) return true
   return !args.some((arg) => isNameFilter(arg) || !arg.startsWith('-'))
 }

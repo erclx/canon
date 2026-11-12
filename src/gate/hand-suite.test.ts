@@ -65,6 +65,45 @@ describe('a run selecting the end-to-end suites', () => {
   })
 })
 
+describe('a run that excludes the end-to-end suites', () => {
+  it('should not lock the gate scoped command with a spaced --exclude', () => {
+    expect(
+      locksHandSuite(
+        handRun({
+          args: [
+            'related',
+            '--run',
+            '--exclude',
+            `**/*${E2E_FILTER}.ts`,
+            'src/gate/hand-suite.ts',
+          ],
+        }),
+      ),
+    ).toBe(false)
+  })
+
+  it('should not lock the gate scoped command with --exclude=', () => {
+    expect(
+      locksHandSuite(
+        handRun({
+          args: [
+            'related',
+            '--run',
+            `--exclude=**/*${E2E_FILTER}.ts`,
+            'src/gate/hand-suite.ts',
+          ],
+        }),
+      ),
+    ).toBe(false)
+  })
+
+  it('should lock an end-to-end filter beside an --exclude', () => {
+    expect(
+      locksHandSuite(handRun({ args: ['run', '--exclude', 'x', E2E_FILTER] })),
+    ).toBe(true)
+  })
+})
+
 describe('a run that takes no lock', () => {
   it('should not lock a run filtered by path', () => {
     expect(
