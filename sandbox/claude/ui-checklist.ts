@@ -8,6 +8,12 @@ import { scenario } from '@/sandbox/scenario'
  * exact path. It sat in `manual` while the skill could correctly write no
  * checklist at all, which is the escape the shrink closed: the checklist is the
  * skill's whole output now, so a run producing none has produced nothing.
+ *
+ * The `02-task-filter` fixture keeps the filter input mounted alongside the
+ * empty state. Returning the paragraph alone would unmount it and strand a user
+ * who filtered to no matches with no way to clear the filter, and a skill
+ * reading that diff reviews the fixture's own defect instead of the change
+ * under test.
  */
 export default scenario({
   config: {
@@ -29,11 +35,6 @@ export default scenario({
       // routing this arm asserts. A spacing and color change is the visual half. All
       // three kinds have to be present or the skill takes its all-automatable branch
       // and writes no checklist, which is the file the fallback claim is about.
-      //
-      // The input stays mounted alongside the empty state. Returning the paragraph
-      // alone would unmount it and strand a user who filtered to no matches with no
-      // way to clear the filter, and a skill reading that diff reviews the fixture's
-      // own defect instead of the change under test.
       ctx.fixtures('claude', 'ui-checklist', 'shared', '02-task-filter')
 
       ctx.git('add', '.')

@@ -177,6 +177,26 @@ export const reviewPost = (
 ) => postPayload(`gh api ${method} ${endpoint} -f event=COMMENT ${args}`)
 
 /**
+ * Links `bash` and `jq` into `dir`, the PATH the degradation branch runs under.
+ * That branch needs a PATH carrying neither runner, and it still has to carry
+ * what the run itself depends on: `bash` to spawn the hook, and `jq`, which the
+ * hook reads its payload through before it reaches that branch. Missing either
+ * takes the run somewhere silent for an unrelated reason, which would pass the
+ * case against the wrong branch.
+ *
+ * Filtering the caller's PATH for a directory holding `jq` and no runner was
+ * the alternative, and it reads machine provisioning rather than behavior: a
+ * machine carrying `bun` in `/usr/bin` leaves no directory qualifying and the
+ * case fails on its own guard.
+ */
+function linkNoRunnerPath(dir: string): void {
+  for (const name of ['bash', 'jq'] as const) {
+    const found = findOnPath(name)
+    if (found) symlinkSync(found, join(dir, name))
+  }
+}
+
+/**
  * Registers the fixture setup and teardown on the calling test file, so each
  * file builds its own temp tree and none reads a path another file made.
  */
@@ -215,22 +235,7 @@ export function useFixture(): Context {
 
     ctx.readOnlyRoot = join(ctx.fixture, 'read-only')
 
-    // The degradation branch needs a PATH carrying neither runner, and it still
-    // has to carry what the run itself depends on: `bash` to spawn the hook, and
-    // `jq`, which the hook reads its payload through before it reaches that
-    // branch. Missing either takes the run somewhere silent for an unrelated
-    // reason, which would pass the case against the wrong branch.
-    //
-    // Linking both into a directory of its own is what holds all of that at
-    // once, the way the runner stubs beside it do. Filtering the caller's PATH
-    // for a directory holding `jq` and no runner was the alternative, and it
-    // reads machine provisioning rather than behavior: a machine carrying `bun`
-    // in `/usr/bin` leaves no directory qualifying and the case fails on its own
-    // guard.
-    for (const name of ['bash', 'jq'] as const) {
-      const found = findOnPath(name)
-      if (found) symlinkSync(found, join(ctx.fixture, 'bin-no-runner', name))
-    }
+    linkNoRunnerPath(join(ctx.fixture, 'bin-no-runner'))
 
     // A `jq` that fails loudly, so a hook that reached it on a payload it should
     // have dismissed by shell test alone says so on stderr. `bash` is linked in

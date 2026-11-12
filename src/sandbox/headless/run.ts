@@ -678,16 +678,7 @@ function takeVerdict(
 
   const check = spawnSync(
     process.execPath,
-    [
-      cli,
-      'sandbox',
-      'check',
-      target,
-      arm ?? '',
-      ...fileArgs,
-      ...(run.isEscapeWatched ? ['--escapes-watched'] : []),
-      '--json',
-    ],
+    checkArgs(cli, target, arm, fileArgs, run.isEscapeWatched),
     { encoding: 'utf8', stdio: ['inherit', 'pipe', 'inherit'] },
   )
 
@@ -699,6 +690,31 @@ function takeVerdict(
   }
 
   return { record, code: check.status ?? 1 }
+}
+
+/**
+ * The arguments of the `canon sandbox check` a run ends on. `--strict` makes an
+ * arm that declares nothing exit 1, since a billed run asserting nothing has
+ * earned no pass.
+ */
+export function checkArgs(
+  cli: string,
+  target: string,
+  arm: string | undefined,
+  fileArgs: readonly string[],
+  isEscapeWatched: boolean,
+): string[] {
+  return [
+    cli,
+    'sandbox',
+    'check',
+    target,
+    arm ?? '',
+    ...fileArgs,
+    ...(isEscapeWatched ? ['--escapes-watched'] : []),
+    '--strict',
+    '--json',
+  ]
 }
 
 export interface VerdictFile {

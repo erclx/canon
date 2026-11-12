@@ -1,9 +1,12 @@
 import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import {
+  armNames,
+  DEFAULT_ARM_NAME,
   FIXTURES_DIR,
   listCategories,
   listScenarioFiles,
+  loadScenario,
 } from '@/sandbox/scenario'
 
 /**
@@ -21,6 +24,8 @@ export interface ScenarioCoverage {
 
 export interface CoverageReport {
   readonly scenarios: readonly ScenarioCoverage[]
+  /** `category:command` of each scenario holding a `default/expect.toml` its runner never reads. */
+  readonly misplaced: readonly string[]
   readonly totalScenarios: number
   readonly armedScenarios: number
   readonly armedArms: number
@@ -40,14 +45,16 @@ function directories(path: string): string[] {
  * scenario with no fixtures has no directory to find, and counting only what
  * fixtures exist would hide exactly the arms this report exists to surface.
  */
-function listScenarios(sandboxDir: string): ScenarioCoverage[] {
-  const scenarios: ScenarioCoverage[] = []
+function listScenarios(
+  sandboxDir: string,
+): Array<ScenarioCoverage & { readonly file: string }> {
+  const scenarios: Array<ScenarioCoverage & { readonly file: string }> = []
 
   for (const category of listCategories(sandboxDir)) {
     const { scenarios: files } = listScenarioFiles(join(sandboxDir, category))
 
-    for (const { command } of files) {
-      scenarios.push({ category, command, armed: [] })
+    for (const { command, file } of files) {
+      scenarios.push({ category, command, armed: [], file })
     }
   }
 
@@ -61,20 +68,37 @@ function listScenarios(sandboxDir: string): ScenarioCoverage[] {
  */
 function armsFor(
   fixturesDir: string,
-  category: string,
-  command: string,
-): string[] {
-  const commandDir = join(fixturesDir, category, command)
-  if (!existsSync(commandDir)) return []
+  scenario: ScenarioCoverage & { readonly file: string },
+): { armed: string[]; isMisplaced: boolean } {
+  const commandDir = join(fixturesDir, scenario.category, scenario.command)
+  if (!existsSync(commandDir)) return { armed: [], isMisplaced: false }
 
+  const isMisplaced =
+    existsSync(join(commandDir, DEFAULT_ARM_NAME, 'expect.toml')) &&
+    !routesDefault(scenario.file)
   const armed: string[] = []
   if (existsSync(join(commandDir, 'expect.toml'))) armed.push(DEFAULT_ARM)
 
   for (const arm of directories(commandDir)) {
+    if (isMisplaced && arm === DEFAULT_ARM_NAME) continue
     if (existsSync(join(commandDir, arm, 'expect.toml'))) armed.push(arm)
   }
 
-  return armed
+  return { armed, isMisplaced }
+}
+
+/**
+ * Whether the runner reads a `default/` arm folder. It does only for a scenario
+ * naming `default` beside another arm, since a sole-default scenario reads its
+ * declaration at the command root. A file that fails to load counts as routing
+ * it, so the report neither crashes on a scenario it cannot read nor flags it.
+ */
+function routesDefault(file: string): boolean {
+  try {
+    return armNames(loadScenario(file)).includes(DEFAULT_ARM_NAME)
+  } catch {
+    return true
+  }
 }
 
 /**
@@ -86,13 +110,17 @@ export function collectCoverage(root: string): CoverageReport {
   const sandboxDir = join(root, 'sandbox')
   const fixturesDir = join(sandboxDir, FIXTURES_DIR)
 
-  const scenarios = listScenarios(sandboxDir).map((scenario) => ({
-    ...scenario,
-    armed: armsFor(fixturesDir, scenario.category, scenario.command),
-  }))
+  const misplaced: string[] = []
+  const scenarios = listScenarios(sandboxDir).map((scenario) => {
+    const { armed, isMisplaced } = armsFor(fixturesDir, scenario)
+    if (isMisplaced) misplaced.push(`${scenario.category}:${scenario.command}`)
+
+    return { category: scenario.category, command: scenario.command, armed }
+  })
 
   return {
     scenarios,
+    misplaced,
     totalScenarios: scenarios.length,
     armedScenarios: scenarios.filter((s) => s.armed.length > 0).length,
     armedArms: scenarios.reduce((total, s) => total + s.armed.length, 0),

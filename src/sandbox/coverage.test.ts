@@ -113,6 +113,63 @@ describe('collectCoverage', () => {
   })
 })
 
+describe('collectCoverage misplaced declarations', () => {
+  it('should report default/expect.toml under a sole-default scenario as misplaced', () => {
+    scenario('claude', 'document-health')
+    declaration('claude', 'document-health', 'default')
+
+    const report = collectCoverage(root)
+
+    expect(report.misplaced).toEqual(['claude:document-health'])
+    expect(report.scenarios[0]?.armed).toEqual([])
+    expect(report.armedScenarios).toBe(0)
+  })
+
+  it('should not report a command-root declaration under a sole-default scenario', () => {
+    scenario('claude', 'document-health')
+    declaration('claude', 'document-health', '')
+
+    const report = collectCoverage(root)
+
+    expect(report.misplaced).toEqual([])
+    expect(report.scenarios[0]?.armed).toEqual([DEFAULT_ARM])
+  })
+
+  it('should not report default/expect.toml beside another named arm', () => {
+    write(
+      'sandbox/claude/app-drive.ts',
+      'export default { arms: { default: () => {}, board: () => {} } }\n',
+    )
+    declaration('claude', 'app-drive', 'default')
+    declaration('claude', 'app-drive', 'board')
+
+    const report = collectCoverage(root)
+
+    expect(report.misplaced).toEqual([])
+    expect(report.scenarios[0]?.armed).toEqual(['board', 'default'])
+  })
+
+  it('should report default/expect.toml when no arm is named default', () => {
+    write(
+      'sandbox/claude/docs.ts',
+      'export default { arms: { drift: () => {} } }\n',
+    )
+    declaration('claude', 'docs', 'default')
+
+    expect(collectCoverage(root).misplaced).toEqual(['claude:docs'])
+  })
+
+  it('should skip a scenario file that fails to load rather than crash', () => {
+    write('sandbox/claude/broken.ts', 'throw new Error("nope")\n')
+    declaration('claude', 'broken', 'default')
+
+    const report = collectCoverage(root)
+
+    expect(report.misplaced).toEqual([])
+    expect(report.totalScenarios).toBe(1)
+  })
+})
+
 describe('coveragePercent', () => {
   it('should floor a partial rollout rather than rounding it up', () => {
     scenario('a', 'one')

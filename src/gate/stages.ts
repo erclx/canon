@@ -113,7 +113,7 @@ const RELATED_SOURCES = /\.tsx?$|^commitlint\.config\.js$/
 
 /** Files every test depends on without importing, so no related run sees them. */
 const FULL_SUITE_TRIGGERS =
-  /^vitest\.(config|setup|global-setup)\.ts$|^tsconfig\.json$|^package\.json$/
+  /^vitest\.(e2e\.)?(config|setup|global-setup)\.ts$|^tsconfig\.json$|^package\.json$/
 
 const TESTS_SCOPE = new RegExp(
   `${RELATED_SOURCES.source}|${FULL_SUITE_TRIGGERS.source}`,

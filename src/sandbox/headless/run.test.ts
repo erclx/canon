@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  checkArgs,
   deadRunRecord,
   mergeEnvelope,
   parseRunArgs,
@@ -176,5 +177,44 @@ describe('verdictFiles', () => {
       name: 'untied-escapes.txt',
       body: '/main/.canon/tasks/a.md\n/main/.canon/tasks/b.md\n',
     })
+  })
+})
+
+describe('checkArgs', () => {
+  // A run that asserts nothing has earned no pass, and the check reads an
+  // unchecked arm as exit 0 unless it is told to be strict.
+  it('should pass --strict so an arm declaring nothing fails the run', () => {
+    const args = checkArgs(
+      '/checkout/src/cli.ts',
+      'claude:x',
+      undefined,
+      [],
+      false,
+    )
+
+    expect(args).toContain('--strict')
+  })
+
+  it('should keep the target, the arm, the files, and --json in the call', () => {
+    const args = checkArgs(
+      '/checkout/src/cli.ts',
+      'claude:x',
+      'board',
+      ['--envelope', '/w/envelope.json'],
+      true,
+    )
+
+    expect(args).toEqual([
+      '/checkout/src/cli.ts',
+      'sandbox',
+      'check',
+      'claude:x',
+      'board',
+      '--envelope',
+      '/w/envelope.json',
+      '--escapes-watched',
+      '--strict',
+      '--json',
+    ])
   })
 })

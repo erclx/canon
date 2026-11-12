@@ -20,11 +20,20 @@ export interface VitestRun {
 }
 
 /**
- * The filter `bun run test:e2e` hands vitest and every end-to-end suite's name
- * carries. A run naming it films in a real browser, so it queues like a full
- * suite however it is scoped.
+ * The infix every end-to-end suite's name carries. A run naming it, as a hand
+ * run of `bun --bun vitest run .e2e.test` or one suite's path does, films in a
+ * real browser, so it queues like a full suite however it is scoped.
  */
 export const E2E_FILTER = '.e2e.test'
+
+/**
+ * The config `bun run test:e2e` hands vitest, whose `include` holds only the
+ * end-to-end suites so a path argument narrows the run rather than widening it.
+ * A run naming it queues like one naming `E2E_FILTER`.
+ */
+export const E2E_CONFIG = 'vitest.e2e.config.ts'
+
+const CONFIG_FLAGS = new Set(['--config', '-c'])
 
 const SUBCOMMANDS = new Set(['run'])
 
@@ -40,12 +49,29 @@ function isNameFilter(arg: string): boolean {
   )
 }
 
+/** Whether a config path, spelled bare or with a directory, names `E2E_CONFIG`. */
+function isE2eConfig(path: string): boolean {
+  return path === E2E_CONFIG || path.endsWith(`/${E2E_CONFIG}`)
+}
+
+/** Whether the run loads `E2E_CONFIG`, as `--config <path>` or `--config=<path>`. */
+function loadsE2eConfig(args: readonly string[]): boolean {
+  return args.some((arg, index) => {
+    if (CONFIG_FLAGS.has(args[index - 1] ?? '')) return isE2eConfig(arg)
+    const [flag, value] = arg.split('=', 2)
+    return (
+      CONFIG_FLAGS.has(flag ?? '') && value !== undefined && isE2eConfig(value)
+    )
+  })
+}
+
 /**
- * Whether an argument names `E2E_FILTER` as something to run. The value of
- * `--exclude` names what to leave out, as in the gate's own scoped command, so
- * it never counts.
+ * Whether the run selects the end-to-end suites, by loading `E2E_CONFIG` or by
+ * naming `E2E_FILTER` as something to run. The value of `--exclude` names what
+ * to leave out, as in the gate's own scoped command, so it never counts.
  */
 function selectsE2e(args: readonly string[]): boolean {
+  if (loadsE2eConfig(args)) return true
   return args.some(
     (arg, index) =>
       arg.includes(E2E_FILTER) &&
@@ -58,7 +84,7 @@ function selectsE2e(args: readonly string[]): boolean {
  * Whether a hand-run vitest invocation runs the whole suite and so queues on
  * the machine lock the gate's Tests stage holds.
  *
- * A run naming `E2E_FILTER` queues too, since the suites it selects film in a
+ * A run loading `E2E_CONFIG` or naming `E2E_FILTER` queues too, since the suites it selects film in a
  * real browser and two of them at once contend for CPU. Any other scoped run
  * is seconds of work, and queueing it behind a full suite costs more than any
  * collision it causes. Vitest exposes no setup-time API naming

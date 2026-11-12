@@ -520,16 +520,11 @@ function isPluginHooksManifest(path: string): boolean {
  * positive on a gate stage teaches a contributor to route around it, and a
  * widened match is cheap to add once a real echo slips through.
  *
- * `canon/context/context-model.md` is exempt, since "context model" is the
- * domain's own name and the entry reads as nothing else without the prefix.
- * So is a replay snapshot, which copies a consumer's paths verbatim, such as
- * `canon/config/config.json`, and a renamed copy would sync as another file.
- * So is `canon/design/assets/`, where Frameboard's references sync copies each
- * board asset under its project's name, so a rename reads to `--check` as drift.
- * So is `hooks/hooks.json` at a plugin root, being `claude/` or a bundle under
- * `plugins/`. It is the location Claude Code loads with no `hooks` key in the
- * manifest, and any other name would need one. The same name anywhere else is
- * still an echo.
+ * Exempt are `canon/context/context-model.md`, the domain's own name, a replay
+ * snapshot, which copies a consumer's paths verbatim, `canon/design/assets/`,
+ * where Frameboard's sync names each asset for its project and a rename reads
+ * to `--check` as drift, and `hooks/hooks.json` at a plugin root, the location
+ * Claude Code loads with no `hooks` key in the manifest.
  */
 export function isFolderEchoedName(path: string): boolean {
   if (path === 'canon/context/context-model.md') return false
@@ -874,21 +869,13 @@ function describeShippedReference(reference: ShippedReference): string {
  * `configs/` or `seeds/` source path, that a reader in a target cannot
  * resolve, over the corpora that reach one.
  *
- * Every instance on the trunk was written by a branch that passed review, this
- * row's own planning session included, so the only instrument before this stage
- * was a person noticing. That is the argument for gating rather than reporting:
- * `canon labels audit` already demonstrated that a finding nobody gates on goes
- * unread until a range happens to include it, and the count here grew from six
- * to eighteen while a report was the only instrument.
+ * It gates rather than reports, since every instance passed review and a
+ * finding nobody gates on goes unread, as `canon labels audit` showed.
  *
- * It is a prose pattern rather than a resolution. Nothing here asks GitHub
- * whether a number resolves, so a genuinely reachable citation written bare
- * fails it. That is the intended direction, since the repair is one token and
- * the alternative is a network read inside `bun run check`.
- *
- * The whole set is emitted before the failure returns. A stage halts the run on
- * its first failing check, so a branch carrying several references would
- * otherwise see one and repair one.
+ * It is a prose pattern rather than a resolution, so a reachable citation
+ * written bare fails. The repair is one token, and the alternative is a network
+ * read inside `bun run check`. The whole set is emitted before the failure
+ * returns, since a stage halts on its first failing check.
  */
 export const shippedReferences: Measure = async (ctx) => {
   const files = shippedCorpusFiles(ctx.root)

@@ -279,6 +279,14 @@ function reportCoverage(report: CoverageReport): void {
       logWarn(`${scenario.category}:${scenario.command}`)
   }
 
+  if (report.misplaced.length > 0) {
+    logStep('Declarations the runner never reads')
+    for (const scenario of report.misplaced)
+      logError(
+        `${scenario}: default/expect.toml belongs at the command root, or the arm needs a name`,
+      )
+  }
+
   logStep('Coverage')
   const summary =
     `${report.armedScenarios}/${report.totalScenarios} scenarios declared ` +
@@ -388,7 +396,8 @@ function runCoverage(options: CoverageOptions): void {
     (census?.supersededExemptions.length ?? 0) > 0
   const rolloutIncomplete =
     options.strict === true && report.armedScenarios < report.totalScenarios
-  process.exitCode = wrongExemption || rolloutIncomplete ? 1 : 0
+  const hasMisplaced = report.misplaced.length > 0
+  process.exitCode = wrongExemption || rolloutIncomplete || hasMisplaced ? 1 : 0
 }
 
 interface EquivalenceOptions {
@@ -849,7 +858,8 @@ export function register(program: Command): void {
         '  canon sandbox coverage --json',
         '  canon sandbox coverage --skills',
         '',
-        'Exit codes: 0, unless --strict and a scenario declares nothing, or',
+        'Exit codes: 0, unless --strict and a scenario declares nothing, a',
+        'scenario keeps a default/expect.toml the runner never reads, or',
         '--skills and an exemption names no shipped skill or one an arm asserts.',
         'Where the scenario tree does not ship, exits 1 without a report.',
       ].join('\n'),
