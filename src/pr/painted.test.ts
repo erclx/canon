@@ -18,6 +18,8 @@ describe('isPainted', () => {
     'assets/logo.png',
     'assets/icon.svg',
     'a/b/c/Card.vue',
+    'src/fixtures.tsx',
+    'src/myfixtures/page.html',
   ])('should classify %s as painted', (path) => {
     expect(isPainted(path, DEFAULT_PAINTED)).toBe(true)
   })
@@ -29,6 +31,12 @@ describe('isPainted', () => {
     'src/App.test.tsx',
     'src/Button.stories.tsx',
     'src/__tests__/render.tsx',
+    'src/take/fixtures/focus.html',
+    'src/take/fixtures/scrollbars.html',
+    'src/driver/probes/fixtures/page.html',
+    'sandbox/fixtures/claude/review-pr/evidence-mismatch/render/head/header.css',
+    'src/__fixtures__/card.tsx',
+    'pkg/testdata/golden.svg',
   ])('should classify %s as not painted', (path) => {
     expect(isPainted(path, DEFAULT_PAINTED)).toBe(false)
   })

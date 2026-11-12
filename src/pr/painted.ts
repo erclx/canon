@@ -34,9 +34,11 @@ const RENDERED_EXTENSIONS = [
 ]
 
 /**
- * What a browser renders, minus the tests and stories beside it. A test-only
- * push touches nothing a reviewer drove, which is the case the carry-forward
- * exists for.
+ * What a browser renders, minus the tests, stories, and fixtures beside it. A
+ * test-only push touches nothing a reviewer drove, which is the case the
+ * carry-forward exists for. A fixture is test input no app renders, the same
+ * judgment `INCIDENTAL` in `src/pr/bijection.ts` makes, so only a whole
+ * `fixtures`, `__fixtures__`, or `testdata` segment exempts a path.
  */
 export const DEFAULT_PAINTED: PaintedPatterns = {
   painted: [`**/*.{${RENDERED_EXTENSIONS.join(',')}}`],
@@ -44,6 +46,9 @@ export const DEFAULT_PAINTED: PaintedPatterns = {
     '**/*.{test,spec,stories}.*',
     '**/__tests__/**',
     '**/__snapshots__/**',
+    '**/fixtures/**',
+    '**/__fixtures__/**',
+    '**/testdata/**',
   ],
 }
 
