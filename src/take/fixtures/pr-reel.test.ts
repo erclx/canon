@@ -1,5 +1,44 @@
 import { describe, expect, it } from 'vitest'
-import { selectFixtures } from '@/take/fixtures/pr-reel'
+import { fitBeats, selectFixtures } from '@/take/fixtures/pr-reel'
+
+function beat(name: string, seconds: number) {
+  return { name, seconds }
+}
+
+describe('fitBeats', () => {
+  it('should keep every beat when they sum within the cap', () => {
+    const fit = fitBeats([beat('drag', 4), beat('click', 3)], 12)
+
+    expect(fit).toEqual({
+      kept: [beat('drag', 4), beat('click', 3)],
+      dropped: [],
+    })
+  })
+
+  it('should keep a beat that lands exactly on the cap', () => {
+    const fit = fitBeats([beat('drag', 6), beat('click', 6)], 12)
+
+    expect(fit.dropped).toEqual([])
+  })
+
+  it('should drop the beat that passes the cap and every beat after it', () => {
+    const fit = fitBeats(
+      [beat('drag', 4), beat('tag', 4), beat('publish', 3), beat('note', 3)],
+      12,
+    )
+
+    expect(fit).toEqual({
+      kept: [beat('drag', 4), beat('tag', 4), beat('publish', 3)],
+      dropped: [beat('note', 3)],
+    })
+  })
+
+  it('should drop a later short beat once an earlier one passed the cap', () => {
+    const fit = fitBeats([beat('drag', 10), beat('tag', 5), beat('tap', 1)], 12)
+
+    expect(fit.kept).toEqual([beat('drag', 10)])
+  })
+})
 
 const FOLDER = [
   'motion.html',

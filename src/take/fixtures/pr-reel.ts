@@ -60,6 +60,25 @@ export function selectFixtures(
   return { kind: 'film', stems: [FALLBACK], fallback: true }
 }
 
+/**
+ * The beats kept in plan order while their sum stays within `cap`, and the
+ * rest from the first beat that passes it. The fallback films a plan written
+ * for judging an engine change rather than for a reel, so it is cut to fit
+ * where a fixture's own plan refuses.
+ */
+export function fitBeats<T extends { readonly seconds: number }>(
+  beats: readonly T[],
+  cap: number,
+): { readonly kept: readonly T[]; readonly dropped: readonly T[] } {
+  let sum = 0
+  const passed = beats.findIndex((beat) => {
+    sum += beat.seconds
+    return sum > cap
+  })
+  if (passed === -1) return { kept: [...beats], dropped: [] }
+  return { kept: beats.slice(0, passed), dropped: beats.slice(passed) }
+}
+
 /** A beat filmed into `<stem>/` with its paths rebased onto the reel's folder. */
 function rebased(stem: string, beat: FilmedBeat): FilmedBeat {
   return {
@@ -80,6 +99,8 @@ type ReelRecord =
       readonly seconds: number
       readonly bytes: number
       readonly fallback: boolean
+      /** The fallback's beats past the cap, filmed and left out of the reel. */
+      readonly dropped?: readonly string[]
       readonly beats: readonly {
         readonly fixture: string
         readonly name: string
@@ -116,6 +137,7 @@ async function film(base: string, outDir: string): Promise<ReelRecord> {
   const joined: FilmedBeat[] = []
   const filmed: { fixture: string; name: string; still: string }[] = []
   let seconds = 0
+  let dropped: readonly string[] = []
   for (const stem of selection.stems) {
     const read = readTakePlan(
       readFileSync(new URL(`${stem}.json`, folder), 'utf8'),
@@ -134,7 +156,9 @@ async function film(base: string, outDir: string): Promise<ReelRecord> {
         url: server.url,
         plan: read.plan,
         out: join(out, stem),
-        maxSeconds: REEL_CAP_SECONDS - seconds,
+        ...(!selection.fallback && {
+          maxSeconds: REEL_CAP_SECONDS - seconds,
+        }),
       })
       if (result.status !== 'filmed') {
         return {
@@ -151,7 +175,11 @@ async function film(base: string, outDir: string): Promise<ReelRecord> {
           }),
         }
       }
-      for (const beat of result.beats) {
+      const fit = selection.fallback
+        ? fitBeats(result.beats, REEL_CAP_SECONDS)
+        : { kept: result.beats, dropped: [] }
+      dropped = fit.dropped.map((beat) => beat.name)
+      for (const beat of fit.kept) {
         seconds += beat.seconds
         joined.push(rebased(stem, beat))
         filmed.push({
@@ -174,6 +202,7 @@ async function film(base: string, outDir: string): Promise<ReelRecord> {
       seconds: reel.seconds,
       bytes: reel.bytes,
       fallback: selection.fallback,
+      ...(dropped.length > 0 && { dropped }),
       beats: filmed,
     }
   } catch (error) {
