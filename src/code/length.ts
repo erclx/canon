@@ -237,6 +237,42 @@ function arrowHeader(code: string, arrow: number): Header | undefined {
   return { start, name: bindingBefore(code, start) }
 }
 
+/**
+ * A call to a test runner's `describe`, `it`, or `test`, with any chained
+ * modifier such as `.each(table)` or `.skip`, ending where its arguments open.
+ */
+const TEST_CALL = new RegExp(
+  `(?:^|[^\\w$.])(?:describe|it|test)(?:\\.[\\w$]+)*(?:\\((?:[^()]|\\([^()]*\\))*\\)|[${LITERAL}\\n]+)?\\s*$`,
+)
+
+/**
+ * Whether the function opening at `start` is an argument to a test runner's
+ * `describe`, `it`, or `test`. Such a callback holds a suite or a case rather
+ * than a function a review reads, so it is no function here and adds no depth
+ * to the functions written inside it.
+ */
+function isTestCallback(code: string, start: number): boolean {
+  const before = previousToken(code, start - 1)
+  if (code[before] !== '(' && code[before] !== ',') return false
+  let depth = 0
+  for (let k = before; k >= 0; k--) {
+    const char = code[k] ?? ''
+    if (k !== before && ')]}'.includes(char)) {
+      depth++
+    } else if ('([{'.includes(char)) {
+      if (depth > 0) {
+        depth--
+        continue
+      }
+      if (char !== '(') return false
+      return TEST_CALL.test(code.slice(Math.max(0, k - 120), k))
+    } else if (depth === 0 && char === ';') {
+      return false
+    }
+  }
+  return false
+}
+
 /** The function header a `{` at `brace` opens the body of, if it opens one. */
 function headerAt(code: string, brace: number): Header | undefined {
   const last = previousToken(code, brace - 1)
@@ -265,7 +301,8 @@ function headerAt(code: string, brace: number): Header | undefined {
  * published CLI, so braces are matched over the code `lex` leaves outside
  * literals, comments, and regular expressions, and each `{` is read as a body
  * when the tokens before it are a parameter list, a return type, or `=>`. An
- * arrow with an expression body has no braces and is skipped.
+ * arrow with an expression body has no braces and is skipped, and so is a
+ * callback passed to `describe`, `it`, or `test`.
  */
 export function functionSpans(source: string): FunctionSpan[] {
   const code = codeOnly(source)
@@ -287,7 +324,11 @@ export function functionSpans(source: string): FunctionSpan[] {
   const spans: FunctionSpan[] = []
   for (let i = 0; i < code.length; i++) {
     if (code[i] === '{') {
-      const header = headerAt(code, i)
+      const found = headerAt(code, i)
+      const header =
+        found !== undefined && isTestCallback(code, found.start)
+          ? undefined
+          : found
       open.push({ header })
       if (header !== undefined) depth++
     } else if (code[i] === '}') {
@@ -334,17 +375,9 @@ export interface LongFunction {
 }
 
 /**
- * A test file, whose functions go unmeasured. Each `describe` callback is a
- * top-level arrow running the length of its suite, so counting them would
- * bury the source functions a review reads under every test file's outline.
- */
-const TEST_FILE = /\.(?:test|spec)\.[^/]+$/
-
-/**
  * The files past the line limit and the top-level functions past the
  * checkpoint, each sorted by path then line. A nested function is left out,
- * since the function around it already carries its lines. A test file counts
- * toward the file limit and not toward the functions.
+ * since the function around it already carries its lines.
  */
 export function longCode(
   sources: readonly { readonly file: string; readonly source: string }[],
@@ -354,7 +387,6 @@ export function longCode(
   for (const { file, source } of sources) {
     const lines = lineCount(source)
     if (lines > FILE_LINE_LIMIT) longFiles.push({ file, lines })
-    if (TEST_FILE.test(file)) continue
     for (const span of functionSpansInFile(file, source)) {
       if (span.depth > 0 || span.lines <= FUNCTION_LINE_CHECKPOINT) continue
       longFunctions.push({

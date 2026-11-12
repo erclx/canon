@@ -136,6 +136,24 @@ describe('functionSpans', () => {
   })
 
   it.each([
+    ['describe', "describe('a', () => {\n})\n"],
+    ['it', "it('a', async () => {\n})\n"],
+    ['test with a function expression', "test('a', function () {\n})\n"],
+    ['a chained modifier', "it.skip('a', () => {\n})\n"],
+    ['an each table', "it.each([1, 2])('a %i', (n) => {\n})\n"],
+    ['a tagged each table', "describe.each`\n  a\n`('b', () => {\n})\n"],
+    ['a guard holding a call', "describe.skipIf(!a())('b', () => {\n})\n"],
+  ])('should read no function in a callback passed to %s', (_call, source) => {
+    expect(functionSpans(source)).toEqual([])
+  })
+
+  it('should still read a callback passed to a method named test', () => {
+    const source = 'pattern.test(a, () => {\n  b()\n})\n'
+
+    expect(functionSpans(source)).toHaveLength(1)
+  })
+
+  it.each([
     ['a declaration', 'function load() {}', 'load'],
     ['a method', 'class A {\n  load() {}\n}', 'load'],
     ['an arrow binding', 'const load = async () => {}', 'load'],
@@ -198,7 +216,7 @@ describe('longCode', () => {
     ])
   })
 
-  it('should count a test file toward the file limit and not its functions', () => {
+  it('should count a test file toward the file limit and not its suite callback', () => {
     const suite = `describe('a', () => {\n${body(FILE_LINE_LIMIT)}})\n`
 
     const result = longCode([{ file: 'a.test.ts', source: suite }])
@@ -207,6 +225,15 @@ describe('longCode', () => {
       longFiles: [{ file: 'a.test.ts', lines: 2002 }],
       longFunctions: [],
     })
+  })
+
+  it('should count a long helper declared inside a suite as top-level', () => {
+    const helper = `  function build() {\n${body(110)}  }\n`
+    const source = `describe('a', () => {\n${helper}})\n`
+
+    expect(longCode([{ file: 'a.test.ts', source }]).longFunctions).toEqual([
+      { file: 'a.test.ts', line: 2, lines: 112, name: 'build' },
+    ])
   })
 
   it('should leave a function at the checkpoint', () => {
