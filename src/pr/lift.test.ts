@@ -1074,6 +1074,14 @@ describe('lift', () => {
         it.each([
           ['a painted path', { isAncestor: true, paths: ['src/take/film.ts'] }],
           [
+            'a filmed fixture',
+            { isAncestor: true, paths: ['src/take/fixtures/motion.html'] },
+          ],
+          [
+            'the fixture harness',
+            { isAncestor: true, paths: ['src/take/fixtures/film-suite.ts'] },
+          ],
+          [
             'a declared reel input',
             { isAncestor: true, paths: ['src/browser/engine.ts'] },
           ],
@@ -1098,6 +1106,24 @@ describe('lift', () => {
           const { api } = makeApi({
             evidence: filmedEarlier,
             changed: { isAncestor: true, paths: ['src/capture/render.ts'] },
+          })
+
+          const record = await lift(api, {
+            isCheck: true,
+            waitSeconds: 60,
+            painted: { ...TAKE, reelInputs: undefined },
+          })
+
+          expect(record.reason).toBe('painted-uncaptured')
+        })
+
+        it('should refuse across a filmed fixture push when the project declares no reel inputs', async () => {
+          const { api } = makeApi({
+            evidence: filmedEarlier,
+            changed: {
+              isAncestor: true,
+              paths: ['src/take/fixtures/motion.html'],
+            },
           })
 
           const record = await lift(api, {
