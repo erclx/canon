@@ -114,6 +114,19 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
       'Are our requirements and architecture docs still true, and when were they last reviewed?',
     expect: 'document-health',
   },
+  // Rot across a whole source tree rather than a document corpus, and a
+  // report over the tree as it stands rather than `code-craft` shaping code
+  // being written or `review-craft` reading one diff.
+  {
+    prompt:
+      'Our TypeScript modules keep getting bigger. Which source files and functions are oversized enough to split?',
+    expect: 'code-health',
+  },
+  {
+    prompt:
+      'Audit the codebase for rot: overloaded folders, comment blocks drifting from the code, and code stuffed in strings.',
+    expect: 'code-health',
+  },
   // A repair rather than a report, and folder by folder until each gates,
   // which is what separates it from `document-health` above.
   {
