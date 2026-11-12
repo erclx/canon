@@ -31,6 +31,16 @@ Runs `🛡️ Static Checks` on Linux and `🍎 macOS Unit Tests` beside it, nei
 - A test assuming `shellcheck`, `shfmt`, `claude`, or `/proc` skips on macOS without it, and the job never gains an install step
 - A macOS temp root under `/var` is a symlink to `/private/var`, so a test comparing it with a path git or a child reports wraps `mkdtempSync` in `realpathSync`
 
+### `🎬 E2E Suites`
+
+A third Linux job runs `bun run test:e2e` with the tools the nine `*.e2e.test.ts` suites gate on. It copies the macOS job's `if:`, so a Markdown-only pull request skips it and the cron never runs it. The ruleset does not require it, and the operator adds it after 20 consecutive green runs.
+
+- FFmpeg comes from apt with `Acquire::Retries=3` and a 5-minute step bound, since the runner image lists none
+- `bunx playwright install chromium` lands the engine's browsers, and `canon browser install-browser chromium` the agent CLI's own revision, which the swipe suite launches
+- The browser cache keys on `bun.lock` and `src/browser/agent-cli.ts` under its own prefix, since a hit on the capture job's cache would skip the agent CLI install
+- `scripts/ci/check-browsers.sh` and `scripts/ci/check-e2e-tools.sh` run before the suites, so a missing browser, revision, or `libwebp_anim` encoder reddens the job rather than skipping a suite green
+- Four probe tests under `src/driver/probes/` and `src/take/target.test.ts` skip in every job, since `test:e2e` selects `.e2e.test` files alone
+
 ### `scripts/ci/docs-only.sh`
 
 A pull request changing only `.md` files skips `🍎 macOS Unit Tests`, which is the slowest check. The `🔍 Changes` job runs `scripts/ci/docs-only.sh` against the pull request's base and outputs `code=false` only when every changed file ends in `.md`.
@@ -88,5 +98,5 @@ The CI programs, the install check, and a version pin sit beside the workflows.
 - `no checks reported on the '<branch>' branch` usually means a merge conflict, since such a branch has no merge ref to run on. Read `gh pr view --json mergeable,mergeStateStatus` and rebase.
 - A green `🛡️ Static Checks` tested `refs/pull/<n>/merge` as of the last push. No merge queue exists, so a sibling merge leaves it stale until the poll reads `STALE`.
 - The ruleset requires `🛡️ Static Checks` and `🍎 macOS Unit Tests` by name, so renaming either strands branch protection and leaves lift and merge waiting on a check no run reports
-- The runner installs no browser, so each `*.e2e.test.ts` skips itself and a green run does not show it ran. Verify those locally with `bun run test:e2e`, since a scoped pre-push leaves them out too.
+- `🛡️ Static Checks` has no browser or FFmpeg, so each `*.e2e.test.ts` skips itself there and its green says nothing about them. Read `🎬 E2E Suites` instead.
 - The `merge_group` trigger is inert, since a `merge_queue` rule returns `422` on a user-owned repository until a move to an organization
