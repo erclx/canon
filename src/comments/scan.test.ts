@@ -305,7 +305,7 @@ describe('long comment blocks', () => {
   })
 
   it('should keep a blank line inside a block comment in the run', () => {
-    const body = Array.from({ length: 22 }, () => ' *').join('\n')
+    const body = Array.from({ length: 22 }, () => '').join('\n')
     const text = `/**\n${body}\n */\nconst a = 1\n`
     expect(countFile(file('a.ts', text), 'ts').longBlocks).toEqual([
       { file: 'a.ts', line: 1, lines: 24 },

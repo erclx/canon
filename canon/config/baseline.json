@@ -34,7 +34,8 @@
       "unmeasurable": 0
     },
     "comments": {
-      "degradationHits": 2
+      "degradationHits": 2,
+      "longBlocks": 31
     },
     "test-order": {
       "findings": 0,
