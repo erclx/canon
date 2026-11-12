@@ -124,6 +124,71 @@ jobs:
       - name: Unit Tests
         run: bun run test
 
+  # Every *.e2e.test.ts skips itself when its browser or FFmpeg is missing, so
+  # Static Checks passes them as skipped. This job installs both and proves
+  # they landed before the suites start, so a missing tool reddens it rather
+  # than skipping green. Informational: the ruleset does not require it.
+  e2e-suites:
+    name: 🎬 E2E Suites
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: changes
+    # The macOS job's condition, so a Markdown-only pull request skips it and
+    # a push to main, where changes never runs, does not
+    if: >-
+      !cancelled() && github.event_name != 'schedule' &&
+      !(github.event_name == 'pull_request' &&
+      needs.changes.result == 'success' &&
+      needs.changes.outputs.code == 'false')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      # The runner image lists no FFmpeg. A stalled mirror connection hangs
+      # rather than fails, so the step bound turns a hang into a red step.
+      - name: Install FFmpeg
+        timeout-minutes: 5
+        run: sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 ffmpeg
+
+      # Its own key, since the capture job's cache holds no agent CLI revision
+      # and a hit on it would skip the install below
+      - name: Cache Playwright Browsers
+        id: playwright-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-e2e-suites-${{ hashFiles('bun.lock', 'src/browser/agent-cli.ts') }}
+
+      # Lands the chromium and headless shell revisions playwright-core reads
+      - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 5
+        run: bunx playwright install chromium
+
+      # The swipe suite launches the pinned agent CLI's Chromium, whose
+      # revision differs from the engine's
+      - name: Install Agent CLI Browser
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 5
+        run: bun src/cli.ts browser install-browser chromium
+
+      - name: Verify Tools Present
+        run: |
+          scripts/ci/check-browsers.sh chromium chromium_headless_shell
+          scripts/ci/check-e2e-tools.sh "$(bun -e "import { CHROMIUM_REVISION } from './src/browser/agent-cli'; console.log(CHROMIUM_REVISION)")"
+
+      - name: Run E2E Suites
+        timeout-minutes: 15
+        run: bun run test:e2e
+
   dependency-advisories:
     name: 📦 Dependency Advisories
     runs-on: ubuntu-latest
