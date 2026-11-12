@@ -227,6 +227,19 @@ describe('importSession', () => {
     ])
   })
 
+  it('should name the exported note in the resume route', async () => {
+    const compact = join(SOURCE, '.canon', 'compact')
+    mkdirSync(compact, { recursive: true })
+    writeFileSync(join(compact, 'index-rewrite.md'), '# Handoff\n')
+
+    const outcome = await importBundle(await exportBundle())
+
+    expect(outcome.ok && outcome.routes).toEqual([
+      `cd ${TARGET} && claude --resume ${ID}`,
+      `cd ${TARGET} && claude "/canon:session-resume index-rewrite"`,
+    ])
+  })
+
   it('should refuse when the target transcript already exists', async () => {
     const bundle = await exportBundle()
     await importBundle(bundle)
