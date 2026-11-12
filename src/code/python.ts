@@ -349,3 +349,56 @@ export function isPythonTestFile(file: string): boolean {
   const base = file.slice(file.lastIndexOf('/') + 1)
   return /^test_.*\.py$/.test(base) || base.endsWith('_test.py')
 }
+
+const CLASS_HEADER = /^class\s+[\p{L}_]/u
+
+/**
+ * A statement made only of string literals, read off a lexed logical line
+ * whose string characters are `LITERAL`. A bytes or formatted prefix leaves
+ * its letter outside the class, since neither literal is a docstring.
+ */
+const STRING_STATEMENT = new RegExp(`^(?:[rRuU]?${LITERAL}+\\s*)+$`)
+
+export interface PythonComments {
+  readonly kind: 'read'
+  readonly spans: FunctionSpan[]
+  /** The 1-based lines whose first token opens a `#` comment. */
+  readonly comments: number[]
+  /** Each docstring's first and last line, module, class, and function alike. */
+  readonly docstrings: { readonly start: number; readonly end: number }[]
+}
+
+/**
+ * Reads where a Python source's comments sit: its function spans, the lines a
+ * `#` comment opens, and every docstring, being a string statement first in a
+ * module or in a `class` or `def` body. A `#` inside a string is no comment.
+ */
+export function pythonComments(
+  source: string,
+): PythonComments | Exclude<FunctionRead, { kind: 'read' }> {
+  const read = pythonFunctionSpans(source)
+  if (read.kind === 'unread') return read
+  const lexResult = lexPython(source)
+  if (lexResult.kind === 'unread') return lexResult
+
+  const { code } = lexResult.lexed
+  const comments = source
+    .split('\n')
+    .flatMap((raw, index) =>
+      raw.trimStart().startsWith('#') && !/\S/.test(code[index] ?? '')
+        ? [index + 1]
+        : [],
+    )
+
+  const docstrings: { start: number; end: number }[] = []
+  let opensBody = true
+  for (const logical of logicalLines(source, lexResult.lexed)) {
+    if (opensBody && STRING_STATEMENT.test(logical.text)) {
+      docstrings.push({ start: logical.start, end: logical.end })
+    }
+    opensBody =
+      (DEF_HEADER.test(logical.text) || CLASS_HEADER.test(logical.text)) &&
+      !bodyOnHeader(logical.text)
+  }
+  return { kind: 'read', spans: read.spans, comments, docstrings }
+}

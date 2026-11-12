@@ -1,8 +1,11 @@
 import { execSync } from 'node:child_process'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { countFiles, type LanguageCount } from '@/comments/scan'
-import { listCommits, readRevision } from '@/comments/trend'
+import { listCommits, readRevision, trend } from '@/comments/trend'
+import { gitEnv } from '@/git/env'
 
 const REPO = process.cwd()
 
@@ -167,4 +170,32 @@ describe('scanRevision replay against the comment-discipline groundwork', () => 
     },
     30_000,
   )
+})
+
+describe('trend over Python', () => {
+  it('should carry a revision holding a .py file into the trend', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'canon-comments-trend-py-'))
+    try {
+      const git = (args: string): void => {
+        execSync(`git -c user.name=t -c user.email=t@t ${args}`, {
+          cwd: root,
+          stdio: 'ignore',
+          env: gitEnv(),
+        })
+      }
+      git('init -q')
+      writeFileSync(join(root, 'a.py'), '"""Module."""\n# note\nx = 1\n')
+      git('add .')
+      git('commit -qm one')
+
+      const points = await trend(root, { languages: ['py'], since: 'HEAD' })
+      const py = points
+        .at(-1)
+        ?.languages.find((entry) => entry.language === 'py')
+
+      expect(py).toMatchObject({ files: 1, commentLines: 2, docBlocks: 1 })
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
 })

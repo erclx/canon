@@ -25,6 +25,7 @@ interface ScanCommandOptions {
 const LABELS: Record<Language, string> = {
   ts: 'TypeScript',
   sh: 'Bash',
+  py: 'Python',
 }
 
 export function register(program: Command): void {
@@ -42,7 +43,10 @@ export function register(program: Command): void {
     .helpOption('-h, --help', 'Show this help message')
     .option('--json', 'Add a machine-readable record on stdout')
     .option('--since <rev>', 'Report the trend from this revision instead')
-    .option('--languages <list>', 'Comma-separated subset of ts,sh')
+    .option(
+      '--languages <list>',
+      `Comma-separated subset of ${LANGUAGES.join(',')}`,
+    )
     .addHelpText(
       'after',
       [
@@ -50,7 +54,8 @@ export function register(program: Command): void {
         'Placement:',
         '  head  outside every function body, such as a doc block above one',
         '  body  inside a function body, a nested function heading included',
-        '  -     unread, as for every bash run',
+        '  -     unread, as for every bash run and a Python file the reader',
+        '        refused, which the record lists under unreadFiles',
         '',
         'Caps, which canon gate run fails on and this report only lists:',
         `  an in-body run past ${BODY_BLOCK_CAP} lines`,
@@ -152,6 +157,7 @@ async function runScan(
           blocks: count.blocks,
           bodyBlocks: count.bodyBlocks,
           longBlockFiles: count.longBlockFiles,
+          unreadFiles: count.unreadFiles,
         })),
         // A trend point keeps the summary keys alone, so a long range does
         // not repeat every block list once per revision.
@@ -200,6 +206,11 @@ function reportSnapshot(snapshot: readonly LanguageCount[]): void {
     logInfo(
       `  ${count.docBlocks} doc blocks, ${count.inlineComments} inline comments`,
     )
+    for (const file of count.unreadFiles) {
+      logWarn(
+        `  ${file.file}:${file.line} was not read for placement: ${file.reason}`,
+      )
+    }
   }
 }
 

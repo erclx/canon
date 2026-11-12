@@ -71,15 +71,16 @@ const url = 'https://example.com//path'
 `
 
 describe('languageFor', () => {
-  it('should map TypeScript and bash extensions to their language', () => {
+  it('should map TypeScript, bash, and Python extensions to their language', () => {
     expect(languageFor('src/cli.ts')).toBe('ts')
     expect(languageFor('src/app.tsx')).toBe('ts')
     expect(languageFor('scripts/run.sh')).toBe('sh')
+    expect(languageFor('pkg/main.py')).toBe('py')
   })
 
   it('should return undefined for an extension the scan does not cover', () => {
     expect(languageFor('README.md')).toBeUndefined()
-    expect(languageFor('main.py')).toBeUndefined()
+    expect(languageFor('main.rb')).toBeUndefined()
   })
 })
 
@@ -408,5 +409,154 @@ describe('every block and its placement', () => {
       'b.ts',
       'a.ts',
     ])
+  })
+})
+
+describe('Python comments and their placement', () => {
+  const indented = (prefix: string, count: number): string =>
+    run(prefix, count)
+      .split('\n')
+      .map((line) => `    ${line}`)
+      .join('\n')
+
+  it('should read a # block inside a def as body', () => {
+    const text = ['def a():', indented('#', 11), '    return 1', ''].join('\n')
+    const count = countFile(file('a.py', text), 'py')
+
+    expect(count.bodyBlocks).toEqual([{ file: 'a.py', line: 2, lines: 11 }])
+    expect(count.longBlockFiles).toEqual([
+      { file: 'a.py', lines: 11, blocks: 1, headLines: 0, bodyLines: 11 },
+    ])
+  })
+
+  it('should read a # block trailing the last statement of a def as body', () => {
+    const text = [
+      'def f():',
+      '    x = 1',
+      '',
+      indented('#', 12),
+      'y = 2',
+      '',
+    ].join('\n')
+    const count = countFile(file('a.py', text), 'py')
+
+    expect(count.bodyBlocks).toEqual([{ file: 'a.py', line: 4, lines: 12 }])
+  })
+
+  it('should read a # block after a def at its header indent as head', () => {
+    const text = ['def f():', '    x = 1', run('#', 12), 'y = 2', ''].join('\n')
+    const count = countFile(file('a.py', text), 'py')
+
+    expect(count.bodyBlocks).toEqual([])
+    expect(count.longBlockFiles[0]?.headLines).toBe(12)
+  })
+
+  it('should read a # block above a def or between methods as head', () => {
+    const text = [
+      run('#', 10),
+      'class A:',
+      '    def b(self):',
+      '        return 1',
+      '',
+      indented('#', 11),
+      '    def c(self):',
+      '        return 2',
+      '',
+    ].join('\n')
+    const count = countFile(file('a.py', text), 'py')
+
+    expect(count.bodyBlocks).toEqual([])
+    expect(count.longBlockFiles).toEqual([
+      { file: 'a.py', lines: 21, blocks: 2, headLines: 21, bodyLines: 0 },
+    ])
+  })
+
+  it('should count module, class, and function docstrings as head doc blocks', () => {
+    const doc = (indent: string, length: number): string =>
+      [
+        `${indent}"""Summary.`,
+        ...run(indent, length - 2).split('\n'),
+        `${indent}"""`,
+      ].join('\n')
+    const text = [
+      doc('', 12),
+      'class A:',
+      doc('    ', 11),
+      '    def b(self):',
+      doc('        ', 11),
+      '        def inner():',
+      doc('            ', 11),
+      '            return 1',
+      '        return inner',
+      '',
+    ].join('\n')
+    const count = countFile(file('a.py', text), 'py')
+
+    expect(count.docBlocks).toBe(4)
+    expect(count.commentLines).toBe(45)
+    expect(count.inlineComments).toBe(0)
+    expect(count.bodyBlocks).toEqual([])
+    expect(count.longBlockFiles).toEqual([
+      { file: 'a.py', lines: 45, blocks: 4, headLines: 45, bodyLines: 0 },
+    ])
+  })
+
+  it('should keep a docstring and the # lines after it in separate runs', () => {
+    const text = [
+      'def a():',
+      '    """Doc."""',
+      indented('#', 11),
+      '    return 1',
+      '',
+    ].join('\n')
+    const count = countFile(file('a.py', text), 'py')
+
+    expect(count.bodyBlocks).toEqual([{ file: 'a.py', line: 3, lines: 11 }])
+  })
+
+  it('should count neither a # inside a string nor a string past a body opening', () => {
+    const text = [
+      'def a():',
+      '    x = 1',
+      '    """Not a docstring.',
+      '    # not a comment either',
+      '    """',
+      '    return x',
+      '',
+    ].join('\n')
+    const count = countFile(file('a.py', text), 'py')
+
+    expect([count.commentLines, count.docBlocks]).toEqual([0, 0])
+  })
+
+  it('should leave the shebang out and count the comment under it', () => {
+    const text = '#!/usr/bin/env python3\n# Entry point.\nprint(1)\n'
+    const count = countFile(file('a.py', text), 'py')
+
+    expect([count.commentLines, count.inlineComments]).toEqual([1, 1])
+  })
+
+  it('should count the # lines of a file the reader refuses and name it unplaced', () => {
+    const text = `${run('#', 21)}\nx = (\n`
+    const count = countFile(file('a.py', text), 'py')
+
+    expect(count.commentLines).toBe(21)
+    expect(count.unreadFiles).toEqual([
+      { file: 'a.py', line: 22, reason: 'unclosed-bracket' },
+    ])
+    expect(count.blocks).toEqual([
+      { file: 'a.py', line: 1, lines: 21, placement: null },
+    ])
+    expect(count.longBlockFiles).toEqual([
+      { file: 'a.py', lines: 21, blocks: 1, headLines: null, bodyLines: null },
+    ])
+  })
+
+  it('should report no files for a Python scan of a tree with none', () => {
+    const [py] = countFiles([file('a.ts', 'const a = 1\n')], {
+      languages: ['py'],
+    })
+
+    expect(py).toMatchObject({ language: 'py', files: 0, unreadFiles: [] })
   })
 })

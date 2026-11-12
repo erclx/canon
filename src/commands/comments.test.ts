@@ -174,3 +174,62 @@ describe('canon comments scan block record', () => {
     RUN_TIMEOUT_MS,
   )
 })
+
+describe('canon comments scan python', () => {
+  let TREE: string
+
+  beforeAll(async () => {
+    TREE = await realpath(await mkdtemp(join(tmpdir(), 'canon-comments-py-')))
+    const docstring = [
+      'def a():',
+      '    """Summary.',
+      '',
+      '    More.',
+      '    """',
+      '    return 1',
+      '',
+    ]
+    await writeFile(join(TREE, 'a.py'), docstring.join('\n'))
+    await writeFile(join(TREE, 'b.py'), '# open\nx = (\n')
+  }, SETUP_TIMEOUT_MS)
+
+  afterAll(async () => {
+    await rm(TREE, { recursive: true, force: true })
+  })
+
+  it(
+    'should accept py and carry its entry with the file the reader refused',
+    async () => {
+      const record = (await scan(TREE, '--languages', 'py')) as unknown as {
+        snapshot: Record<string, unknown>[]
+      }
+
+      expect(record.snapshot).toHaveLength(1)
+      expect(record.snapshot[0]).toMatchObject({
+        language: 'py',
+        files: 2,
+        commentLines: 5,
+        docBlocks: 1,
+        inlineComments: 1,
+        unreadFiles: [{ file: 'b.py', line: 2, reason: 'unclosed-bracket' }],
+      })
+    },
+    RUN_TIMEOUT_MS,
+  )
+
+  it(
+    'should read py in the default language set',
+    async () => {
+      const record = (await scan(TREE)) as unknown as {
+        snapshot: { language: string }[]
+      }
+
+      expect(record.snapshot.map((entry) => entry.language)).toEqual([
+        'ts',
+        'sh',
+        'py',
+      ])
+    },
+    RUN_TIMEOUT_MS,
+  )
+})
