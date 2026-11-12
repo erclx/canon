@@ -443,6 +443,21 @@ function censusCounts(record: unknown): Record<string, number> | undefined {
   })
 }
 
+/**
+ * Reads the long file and function counts, leaving embedded blocks out. Those
+ * already fail a push through the `embedded-programs` stage, so this audit
+ * retains length alone.
+ */
+function codeCounts(record: unknown): Record<string, number> | undefined {
+  const root = asObject(record)
+  if (root === undefined) return undefined
+
+  return allOf({
+    longFiles: lengthOf(root.longFiles),
+    longFunctions: lengthOf(root.longFunctions),
+  })
+}
+
 function testOrderCounts(record: unknown): Record<string, number> | undefined {
   const root = asObject(record)
   if (root === undefined) return undefined
@@ -701,6 +716,17 @@ export const AUDITS: readonly AuditSpec[] = [
     gatingExits: [],
     corpus: 'tracked',
     counts: censusCounts,
+  },
+  {
+    id: 'code',
+    label: 'Code length',
+    argv: ['code', 'audit', '--json'],
+    // Reports rather than gates. The verb exits 2 on an embedded block, which
+    // the `embedded-programs` stage already fails a push on, and a long file or
+    // function is a measure retained against the baseline rather than a fact.
+    gatingExits: [],
+    corpus: 'tracked',
+    counts: codeCounts,
   },
   {
     id: 'deps',
