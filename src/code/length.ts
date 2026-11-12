@@ -1,5 +1,11 @@
 import { astroFrontmatter } from '@/code/astro'
 import { lex } from '@/code/lex'
+import {
+  isPythonTestFile,
+  type FunctionRead,
+  type UnreadReason,
+  pythonFunctionSpans,
+} from '@/code/python'
 
 /**
  * Lines a file may run before the report names it. One default Read returns
@@ -21,9 +27,9 @@ export const LENGTH_SOURCE =
 
 /**
  * Files whose functions the brace reading can find, an `.astro` file by its
- * frontmatter.
+ * frontmatter, and Python files, which the indentation reading finds.
  */
-const FUNCTION_SOURCE = /\.(?:ts|tsx|mts|cts|js|jsx|mjs|cjs|astro)$/
+const FUNCTION_SOURCE = /\.(?:ts|tsx|mts|cts|js|jsx|mjs|cjs|astro|py)$/
 
 /**
  * Files `lex` reads in JSX mode. A `.js` file holding JSX stays out, since the
@@ -391,25 +397,43 @@ export function functionSpans(
 }
 
 /**
- * The functions a file holds, or none for a file the brace reading cannot
- * parse. An `.astro` file is read by its frontmatter alone, whose lines keep
- * their numbers in the file.
+ * The functions a file holds, or none for a language neither reading covers.
+ * An `.astro` file is read by its frontmatter alone, whose lines keep their
+ * numbers in the file. A Python file the indentation reading cannot follow
+ * comes back unread with its reason, never as an empty list, and a `test_`
+ * function in a pytest file is skipped as a test callback is.
  */
 export function functionSpansInFile(
   file: string,
   source: string,
-): FunctionSpan[] {
-  if (!FUNCTION_SOURCE.test(file)) return []
+): FunctionRead {
+  if (!FUNCTION_SOURCE.test(file)) return { kind: 'read', spans: [] }
+  if (file.endsWith('.py')) {
+    return pythonFunctionSpans(source, { skipTests: isPythonTestFile(file) })
+  }
   if (!file.endsWith('.astro')) {
-    return functionSpans(source, { jsx: JSX_SOURCE.test(file) })
+    return {
+      kind: 'read',
+      spans: functionSpans(source, { jsx: JSX_SOURCE.test(file) }),
+    }
   }
   const frontmatter = astroFrontmatter(source)
-  return frontmatter === undefined ? [] : functionSpans(frontmatter.source)
+  return {
+    kind: 'read',
+    spans: frontmatter === undefined ? [] : functionSpans(frontmatter.source),
+  }
 }
 
 export interface LongFile {
   readonly file: string
   readonly lines: number
+}
+
+export interface UnreadFile {
+  readonly file: string
+  /** The line the construct the reading could not close opens on. */
+  readonly line: number
+  readonly reason: UnreadReason
 }
 
 export interface LongFunction {
@@ -420,19 +444,30 @@ export interface LongFunction {
 }
 
 /**
- * The files past the line limit and the top-level functions past the
- * checkpoint, each sorted by path then line. A nested function is left out,
- * since the function around it already carries its lines.
+ * The files past the line limit, the top-level functions past the checkpoint,
+ * and the files whose functions could not be read, each sorted by path then
+ * line. A nested function is left out, since the function around it already
+ * carries its lines.
  */
 export function longCode(
   sources: readonly { readonly file: string; readonly source: string }[],
-): { longFiles: LongFile[]; longFunctions: LongFunction[] } {
+): {
+  longFiles: LongFile[]
+  longFunctions: LongFunction[]
+  unreadFiles: UnreadFile[]
+} {
   const longFiles: LongFile[] = []
   const longFunctions: LongFunction[] = []
+  const unreadFiles: UnreadFile[] = []
   for (const { file, source } of sources) {
     const lines = lineCount(source)
     if (lines > FILE_LINE_LIMIT) longFiles.push({ file, lines })
-    for (const span of functionSpansInFile(file, source)) {
+    const read = functionSpansInFile(file, source)
+    if (read.kind === 'unread') {
+      unreadFiles.push({ file, line: read.line, reason: read.reason })
+      continue
+    }
+    for (const span of read.spans) {
       if (span.depth > 0 || span.lines <= FUNCTION_LINE_CHECKPOINT) continue
       longFunctions.push({
         file,
@@ -449,5 +484,6 @@ export function longCode(
   return {
     longFiles: longFiles.sort(byPlace),
     longFunctions: longFunctions.sort(byPlace),
+    unreadFiles: unreadFiles.sort(byPlace),
   }
 }

@@ -16,6 +16,7 @@ import {
   type LongFile,
   type LongFunction,
   longCode,
+  type UnreadFile,
 } from '@/code/length'
 import { listRepositoryFiles } from '@/git/files'
 
@@ -62,9 +63,12 @@ export function register(program: Command): void {
         'where a block must stay inline.',
         '',
         `It also reports each code file past ${FILE_LINE_LIMIT} lines, tests included, and each`,
-        `top-level function past ${FUNCTION_LINE_CHECKPOINT} lines in TypeScript, JavaScript, JSX, and`,
-        'Astro frontmatter. Callbacks passed to describe, it, or test are not read.',
-        'Neither moves the exit code.',
+        `top-level function past ${FUNCTION_LINE_CHECKPOINT} lines in TypeScript, JavaScript, JSX,`,
+        'Astro frontmatter, and Python. Callbacks passed to describe, it, or test, and',
+        'test_ functions in a test_*.py or *_test.py file are not read. A Python file',
+        'whose strings, brackets, or indentation cannot be followed is listed under',
+        'unreadFiles with its line and reason, never skipped in silence.',
+        'None of these moves the exit code.',
         '',
         'Examples:',
         '  canon code audit',
@@ -123,7 +127,7 @@ async function runAudit(
     )
     .sort((a, b) => a.file.localeCompare(b.file) || a.line - b.line)
 
-  const { longFiles, longFunctions } = longCode(
+  const { longFiles, longFunctions, unreadFiles } = longCode(
     codeFiles.map((file) => ({
       file,
       source: readFileSync(join(root, file), 'utf8'),
@@ -132,7 +136,7 @@ async function runAudit(
 
   intro('canon code audit')
   report(files.length, blocks)
-  reportLength(codeFiles.length, longFiles, longFunctions)
+  reportLength(codeFiles.length, longFiles, longFunctions, unreadFiles)
   outro()
 
   if (emitJson) {
@@ -152,6 +156,7 @@ async function runAudit(
         functionCheckpoint: FUNCTION_LINE_CHECKPOINT,
         longFiles,
         longFunctions,
+        unreadFiles,
       })}\n`,
     )
   }
@@ -182,6 +187,7 @@ function reportLength(
   files: number,
   longFiles: readonly LongFile[],
   longFunctions: readonly LongFunction[],
+  unreadFiles: readonly UnreadFile[],
 ): void {
   logStep('Length')
   logInfo(plural(files, 'code file'))
@@ -197,6 +203,12 @@ function reportLength(
   for (const fn of longFunctions) {
     logWarn(
       `${fn.file}:${fn.line} ${fn.name ?? 'an unnamed function'} runs ${plural(fn.lines, 'line')}`,
+    )
+  }
+
+  for (const file of unreadFiles) {
+    logWarn(
+      `${file.file}:${file.line} was not read for functions: ${file.reason}`,
     )
   }
 }

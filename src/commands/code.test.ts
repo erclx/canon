@@ -101,6 +101,23 @@ describe('code audit', () => {
     })
   })
 
+  it('should record a long python function and an unread file and leave the exit at 0', async () => {
+    write('src/long.py', `def build():\n${'    x()\n'.repeat(120)}`)
+    write('src/broken.py', 'def a():\n    s = """\n    never closed\n')
+
+    const result = await run(['code', 'audit', '--json'])
+
+    expect(result.exitCode).toBe(0)
+    expect(JSON.parse(result.stdout)).toMatchObject({
+      longFunctions: [
+        { file: 'src/long.py', line: 1, lines: 121, name: 'build' },
+      ],
+      unreadFiles: [
+        { file: 'src/broken.py', line: 2, reason: 'unclosed-string' },
+      ],
+    })
+  })
+
   it('should read length only under the paths it is given', async () => {
     write('src/long.py', 'x = 1\n'.repeat(2001))
     write('lib/short.py', 'x = 1\n')

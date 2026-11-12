@@ -318,12 +318,24 @@ describe('reading counts out of each record shape', () => {
         { file: 'b.ts', line: 1, lines: 120, name: 'a' },
         { file: 'b.ts', line: 200, lines: 140, name: null },
       ],
+      unreadFiles: [{ file: 'c.py', line: 4, reason: 'unclosed-string' }],
     }
 
     expect(countsFor(specFor('code'), record)).toEqual({
       longFiles: 1,
       longFunctions: 2,
+      unreadFiles: 1,
     })
+  })
+
+  it('should read a code record predating unread files as unmeasured', () => {
+    const record = JSON.stringify({
+      blocks: [],
+      longFiles: [],
+      longFunctions: [],
+    })
+
+    expect(classify(specFor('code'), 0, record).status).toBe('unmeasured')
   })
 
   it('should read a code record from a binary predating length as unmeasured', () => {
@@ -342,6 +354,7 @@ describe('reading counts out of each record shape', () => {
       blocks: [{ file: 'a.ts', line: 1, kind: 'page', lines: 9 }],
       longFiles: [],
       longFunctions: [],
+      unreadFiles: [],
     })
 
     expect(classify(specFor('code'), 2, record).status).toBe('reported')
