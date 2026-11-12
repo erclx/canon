@@ -78,7 +78,7 @@ Each bullet names its paths in backticks before a colon and one verdict after it
 - `none, <reason>` when no counterpart exists or none should change
 - `filed` followed by the backticked stem of the task row carrying the other side
 
-The check runs only where a stack keeps a `tooling/<stack>/manifest.toml`, so a target project never sees it. A plan owing the section is written as a file, since a plan given only in chat reaches no validator.
+The check runs only where a stack keeps a `tooling/<stack>/manifest.toml`, so a target project never sees it.
 
 ## Verify command
 
