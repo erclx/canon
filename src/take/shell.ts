@@ -52,6 +52,20 @@ const FLAGS = [
 
 /** Resolves the installed shell, throwing `ShellMissing` naming where it looked. */
 export function findShell(env: NodeJS.ProcessEnv = process.env): string {
+  const path = shellPath(env)
+  if (!existsSync(path)) {
+    throw new ShellMissing(
+      `chrome-headless-shell executable doesn't exist at ${path}`,
+    )
+  }
+  return path
+}
+
+/**
+ * Where the shell would sit under `env`, installed or not. Throws
+ * `ShellMissing` when this platform or the engine's manifest names none.
+ */
+export function shellPath(env: NodeJS.ProcessEnv = process.env): string {
   const require = createRequire(import.meta.url)
   const engineRoot = dirname(require.resolve('playwright-core/package.json'))
   const manifest = JSON.parse(
@@ -67,17 +81,11 @@ export function findShell(env: NodeJS.ProcessEnv = process.env): string {
     )
   }
 
-  const path = join(
+  return join(
     registryRoot(env, engineRoot),
     `chromium_headless_shell-${revision}`,
     ...dirs,
   )
-  if (!existsSync(path)) {
-    throw new ShellMissing(
-      `chrome-headless-shell executable doesn't exist at ${path}`,
-    )
-  }
-  return path
 }
 
 /** Where Playwright keeps its browsers, read the way its own registry reads it. */
