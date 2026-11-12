@@ -110,7 +110,7 @@ A launch whose brief says it is a talk session puts the operator in this one. Ev
 - Owe the landing announcement as usual, plus a close message when the operator ends the conversation. Send an ask about a building row to the controller, never the worker.
 - Skip the before-prompt block message for a question put to the operator in the session. Keep it for a block the operator cannot answer, since a controller learns of a stall only from a message.
 
-Offer the operator a new row with one line naming the arm it passes in the `backlog-triage` cost-or-reach test, being a cost someone hit or a defect on a shipped path.
+Offer the operator a new row only when it passes Step 5 of `${CLAUDE_SKILL_DIR}/../backlog-triage/SKILL.md`, naming the arm in one line.
 
 The operator being present is an assumption the launch carries. A talk planner whose operator has walked away waits silently on its first question, so say what the session is waiting on in the turn it stops.
 
