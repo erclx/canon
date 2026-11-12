@@ -56,6 +56,8 @@ Two axes add a judgment to their count. Mark each as a reading, since no verb ba
 - **Long blocks.** Read only the functions the function axis listed, and skip test files, which `test-craft` owns. Look for a run inside the function that carries its own rule and wants a name.
 - **Folder roles.** Take each code folder the census lists past its checkpoint, list its files, and group them by what each is for. Two or more groups is a finding, and one role at any size is none.
 
+Read each group under `prefixGroups` as part of the folder roles reading, at any folder size. Keep the code groups, since markdown groups fall outside this report. A group is a finding only when its stems hold a role the folder never names, never for a shared verb over unrelated jobs.
+
 Read a comment block finding the same way. The count is measured, and whether the block belongs beside its code is a reading. Never propose deleting a comment to shrink a file.
 
 ## Step 4: report per file

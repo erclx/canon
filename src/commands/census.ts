@@ -3,6 +3,7 @@ import type { Command } from 'commander'
 import {
   census,
   FOLDER_FILE_CHECKPOINT,
+  PREFIX_GROUP_CHECKPOINT,
   type CensusRefusal,
 } from '@/census/count'
 import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
@@ -36,6 +37,13 @@ export function register(program: Command): void {
         'Folders:',
         `  Only folders holding ${FOLDER_FILE_CHECKPOINT} or more files of their own are listed, each`,
         '  counted without its subfolders. A fixtures folder is left out.',
+        '',
+        'Prefix groups:',
+        `  Sibling files in one folder whose stems share the text before the first`,
+        `  hyphen or underscore, listed at ${PREFIX_GROUP_CHECKPOINT} or more distinct stems and at any`,
+        '  folder size. A stem is the name up to its first dot, so a module and its',
+        '  test count once. A group is a pointer to read the roles, never a finding.',
+        '  A fixtures folder is left out.',
         '',
         'Exit codes:',
         '  0  the census completed',
@@ -103,6 +111,16 @@ async function runCensus(
     logInfo(`${folder.path}: ${plural(folder.files, 'file')} (${kinds})`)
   }
 
+  logStep('Prefix groups')
+  if (result.prefixGroups.length === 0) {
+    logInfo(`none reach ${PREFIX_GROUP_CHECKPOINT} sibling stems`)
+  }
+  for (const group of result.prefixGroups) {
+    logInfo(
+      `${group.path}: ${group.prefix}, ${plural(group.stems.length, 'stem')} (${group.stems.join(', ')})`,
+    )
+  }
+
   logStep('Lines')
   logInfo(`${result.lines} counted, skipping binary or unreadable files`)
 
@@ -118,6 +136,8 @@ async function runCensus(
         byExtension: result.byExtension,
         folderCheckpoint: FOLDER_FILE_CHECKPOINT,
         folders: result.folders,
+        prefixGroupCheckpoint: PREFIX_GROUP_CHECKPOINT,
+        prefixGroups: result.prefixGroups,
       })}\n`,
     )
   }

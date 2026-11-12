@@ -82,12 +82,13 @@ A `blocks` entry is a page, stylesheet, or script embedded in a string past `lim
 
 ## Folder layout
 
-| Field          | Value                                                                 |
-| -------------- | --------------------------------------------------------------------- |
-| Measures       | Whether a code folder holds so many files that it may hold two roles  |
-| Verb           | `canon census --json`                                                 |
-| Keys           | `folderCheckpoint`, and `folders` with `path`, `files`, `byExtension` |
-| Evidence class | `measured` for the count, `read` for the role judgment                |
+| Field          | Value                                                                      |
+| -------------- | -------------------------------------------------------------------------- |
+| Measures       | Whether a code folder holds so many files that it may hold two roles       |
+| Verb           | `canon census --json`                                                      |
+| Keys           | `folderCheckpoint`, and `folders` with `path`, `files`, `byExtension`      |
+| Second input   | `prefixGroupCheckpoint`, and `prefixGroups` with `path`, `prefix`, `stems` |
+| Evidence class | `measured` for the count, `read` for the role judgment                     |
 
 A folder counts its own files and not its subfolders', and the census leaves out gitignored paths and fixtures.
 
@@ -95,7 +96,11 @@ A folder counts its own files and not its subfolders', and the census leaves out
 - **Not code:** images, fonts, markup, and data, so an asset folder is no candidate, and a markdown-led folder belongs to `document-health`
 - **Roles:** list the folder's files and group them by what each is for, such as commands beside helpers or types. A test beside the file it covers shares that file's role.
 - **One role:** no finding at any size
+- **Prefix groups:** sibling stems in one folder sharing the text before their first hyphen or underscore, at any folder size
+- **Prefix reading:** whether the group is a role the folder should name, reported without proposing a folder name
+- **A shared verb:** a prefix such as `check` over files doing unrelated jobs is no role, so the group alone is never a finding
 - **Missing key:** a census record without `folders` came from an older binary, so the axis is unread with that cause
+- **Missing prefix key:** a record carrying `folders` without `prefixGroups` leaves the prefix reading unread, while the folder reading holds
 - **Routes to:** `codebase-layout`, which decides where each role's files go
 
 ## Why the classes stay apart

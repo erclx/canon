@@ -235,6 +235,119 @@ describe('census', () => {
       expect(result.folders).toEqual([])
     })
   })
+
+  describe('prefixGroups', () => {
+    it('should list three siblings sharing a prefix in a small folder', async () => {
+      write('src/take/film-drag.ts', 'x\n')
+      write('src/take/film-crop.ts', 'x\n')
+      write('src/take/film-zoom.ts', 'x\n')
+      write('src/take/reel.ts', 'x\n')
+      git('add', '--all')
+
+      const result = measured(await census(ROOT))
+
+      expect(result.prefixGroups).toEqual([
+        {
+          path: 'src/take',
+          prefix: 'film',
+          stems: ['film-crop', 'film-drag', 'film-zoom'],
+        },
+      ])
+    })
+
+    it('should leave a pair out', async () => {
+      write('src/a/film-drag.ts', 'x\n')
+      write('src/a/film-crop.ts', 'x\n')
+      git('add', '--all')
+
+      const result = measured(await census(ROOT))
+
+      expect(result.prefixGroups).toEqual([])
+    })
+
+    it('should count a module and its test once', async () => {
+      write('src/a/film-drag.ts', 'x\n')
+      write('src/a/film-drag.test.ts', 'x\n')
+      write('src/a/film-crop.ts', 'x\n')
+      write('src/a/film-crop.e2e.test.ts', 'x\n')
+      git('add', '--all')
+
+      const result = measured(await census(ROOT))
+
+      expect(result.prefixGroups).toEqual([])
+    })
+
+    it('should split a prefix on the first underscore', async () => {
+      write('pkg/test_utils_a.py', 'x\n')
+      write('pkg/test_utils_b.py', 'x\n')
+      write('pkg/test_runner.py', 'x\n')
+      git('add', '--all')
+
+      const result = measured(await census(ROOT))
+
+      expect(result.prefixGroups).toEqual([
+        {
+          path: 'pkg',
+          prefix: 'test',
+          stems: ['test_runner', 'test_utils_a', 'test_utils_b'],
+        },
+      ])
+    })
+
+    it('should not group stems that open on a separator or carry none', async () => {
+      write('pkg/__init__.py', 'x\n')
+      write('pkg/__main__.py', 'x\n')
+      write('pkg/_private.py', 'x\n')
+      write('pkg/film.ts', 'x\n')
+      write('pkg/film.test.ts', 'x\n')
+      write('pkg/film.d.ts', 'x\n')
+      git('add', '--all')
+
+      const result = measured(await census(ROOT))
+
+      expect(result.prefixGroups).toEqual([])
+    })
+
+    it('should keep the same prefix in two folders apart', async () => {
+      write('a/film-drag.ts', 'x\n')
+      write('a/film-crop.ts', 'x\n')
+      write('b/film-zoom.ts', 'x\n')
+      git('add', '--all')
+
+      const result = measured(await census(ROOT))
+
+      expect(result.prefixGroups).toEqual([])
+    })
+
+    it('should skip a fixtures folder', async () => {
+      write('src/fixtures/film-drag.ts', 'x\n')
+      write('src/fixtures/film-crop.ts', 'x\n')
+      write('src/fixtures/film-zoom.ts', 'x\n')
+      git('add', '--all')
+
+      const result = measured(await census(ROOT))
+
+      expect(result.prefixGroups).toEqual([])
+    })
+
+    it('should order larger groups first', async () => {
+      write('x/check-a.ts', 'x\n')
+      write('x/check-b.ts', 'x\n')
+      write('x/check-c.ts', 'x\n')
+      write('x/skills-a.ts', 'x\n')
+      write('x/skills-b.ts', 'x\n')
+      write('x/skills-c.ts', 'x\n')
+      write('x/skills-d.ts', 'x\n')
+      git('add', '--all')
+
+      const result = measured(await census(ROOT))
+
+      expect(result.prefixGroups.map((g) => g.prefix)).toEqual([
+        'skills',
+        'check',
+      ])
+    })
+  })
 })
 
 describe('censusAt', () => {
