@@ -1,5 +1,31 @@
 # Changelog
 
+## [5.87.0](https://github.com/erclx/canon/compare/v5.86.0...v5.87.0) (2026-11-12)
+
+
+### Features
+
+* **audits:** give the census keys a 10% growth tolerance ([#3044](https://github.com/erclx/canon/issues/3044)) ([4b904ab](https://github.com/erclx/canon/commit/4b904ab7041cf1e60a9212cd9e87ae843abc0b1e))
+* **browser:** launch chromium with its sandbox on ([#3060](https://github.com/erclx/canon/issues/3060)) ([52b8c18](https://github.com/erclx/canon/commit/52b8c1864835a2937ee75a4e125b1fd96609966a))
+* **code:** measure function length in tsx and jsx files ([#3053](https://github.com/erclx/canon/issues/3053)) ([1365cfd](https://github.com/erclx/canon/commit/1365cfdd7fedaae2ee81a10fcfd37fde4814aeef))
+* **code:** publish the audit's extension lists in its record ([#3058](https://github.com/erclx/canon/issues/3058)) ([cc4d7a4](https://github.com/erclx/canon/commit/cc4d7a4f703ab5c3c8ef18aa3bc54a79519330e5))
+* **code:** read python function length in code audit ([#3055](https://github.com/erclx/canon/issues/3055)) ([bf68e00](https://github.com/erclx/canon/commit/bf68e00eb21c4fb5cf0af4d360002a068abdef8c))
+* **comments:** place long comment blocks and gate two comment caps ([#3057](https://github.com/erclx/canon/issues/3057)) ([6285293](https://github.com/erclx/canon/commit/628529330389993bc294bf408be51b19e6c8cf72))
+* **comments:** read python comments and docstrings in the scan ([#3061](https://github.com/erclx/canon/issues/3061)) ([8f5b12d](https://github.com/erclx/canon/commit/8f5b12df09ec9ab1fb8085678480d2d8c2635127))
+* **gate:** narrow test:e2e to the end-to-end suites under a path ([#3048](https://github.com/erclx/canon/issues/3048)) ([92bb26c](https://github.com/erclx/canon/commit/92bb26cb9cf984dc06b75040c8b9298f3ec17b54))
+* **pr:** name the problem in a summary the result does not show ([#3052](https://github.com/erclx/canon/issues/3052)) ([f819b49](https://github.com/erclx/canon/commit/f819b4902a3985fd5e13ccca8343819baf61467d))
+* **pr:** unpaint fixture folders and design sources ([#3040](https://github.com/erclx/canon/issues/3040)) ([f7c4592](https://github.com/erclx/canon/commit/f7c45924fd68f3a99d96292a918dbc8ef6ea32f6))
+* **skills:** add code-health to report source rot across five axes ([#3045](https://github.com/erclx/canon/issues/3045)) ([40a6f63](https://github.com/erclx/canon/commit/40a6f632f438be4a52a84faa5c6b48ba2986d375))
+* **skills:** test a row's worth before the orchestrator files it ([#3056](https://github.com/erclx/canon/issues/3056)) ([39f73d9](https://github.com/erclx/canon/commit/39f73d9369f02db6c14ac397682f4db4c4abb8d6))
+* **take:** refuse a blocked shell sandbox as sandbox-blocked ([#3054](https://github.com/erclx/canon/issues/3054)) ([80da060](https://github.com/erclx/canon/commit/80da060b34ee4dbb92b3a8aa4f7c044f3dd8648a))
+
+
+### Bug Fixes
+
+* **sandbox:** assert single-arm skill expectations on a bare run ([#3051](https://github.com/erclx/canon/issues/3051)) ([5e9943a](https://github.com/erclx/canon/commit/5e9943a2d0837e9930cc5854d3aa5b55d8f78c10))
+* **take:** lift the stepper's frame ticks to the page clock at the pause ([#3062](https://github.com/erclx/canon/issues/3062)) ([981b31a](https://github.com/erclx/canon/commit/981b31aed75450ef4ac7be9e9f4e7b7aa1027cec))
+* **take:** name the color range on every still it reads ([#3059](https://github.com/erclx/canon/issues/3059)) ([189e75c](https://github.com/erclx/canon/commit/189e75cfb58412e01e5ed05d22a9e232fb594840))
+
 ## [5.86.0](https://github.com/erclx/canon/compare/v5.85.0...v5.86.0) (2026-11-12)
 
 
