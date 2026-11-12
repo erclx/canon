@@ -116,6 +116,8 @@ export const WEB_ONLY_DEPLOY = [
  * `listing.json` the branch lookup, `reviews.json` the reviews read (a stream
  * of arrays stands for several pages), and `reviews-fail` makes that read 403.
  * `merge-409` makes the REST merge answer a moved head, as gh reports it.
+ * `runs.json` answers the tip's workflow runs and `jobs.json` every run's
+ * jobs, and either read fails when its file is absent.
  * The caller's `--jq` filter runs over each answer, as gh runs it.
  */
 export const PROXY_GH = readFileSync(

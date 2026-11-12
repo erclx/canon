@@ -7,8 +7,14 @@ import { gitEnv } from '@/git/env'
 import {
   type CheckRunListing,
   collapseChecks,
+  missesGatingCheck,
   type RawStatus,
+  type RawWorkflowRun,
   requiredChecks,
+  STALL_SECONDS,
+  type StalledRun,
+  stallCandidates,
+  stalledRuns,
   withMergeState,
 } from '@/pr/checks'
 import {
@@ -634,8 +640,8 @@ export function register(program: Command): void {
         '  review-behind, ui-missing, ui-open, ui-unmarked, ui-behind,',
         '  ui-undriven, evidence-owed, painted-uncaptured, reel-unsettled,',
         '  standing-stale, standing-conflict, standing-unknown,',
-        '  ci-pending (--check), ci-failing, ci-conflicted, ci-timeout,',
-        '  head-moved, ready-withdrawn, gh-failed',
+        '  ci-pending (--check), ci-failing, ci-conflicted, ci-stalled,',
+        '  ci-timeout, head-moved, ready-withdrawn, gh-failed',
         '',
         'Every read is REST. The mutation is the one GraphQL call.',
         '',
@@ -697,8 +703,8 @@ export function register(program: Command): void {
         'Reasons:',
         '  merged, dry-run (--dry-run)',
         '  pull-closed, pull-draft, missing-summary, missing-key-changes,',
-        '  ci-failing, ci-conflicted, ci-pending, head-moved, not-mergeable,',
-        '  gh-failed',
+        '  ci-failing, ci-conflicted, ci-stalled, ci-pending, head-moved,',
+        '  not-mergeable, gh-failed',
         '',
         'The merge is the REST `PUT pulls/<number>/merge` with',
         '`merge_method=squash`, never `gh pr merge`, which runs on GraphQL.',
@@ -1810,6 +1816,8 @@ const LIFT_REFUSALS: Record<LiftRefusal | 'bad-wait' | 'gh-missing', string> = {
   'ci-failing': 'A check run on the tip failed.',
   'ci-conflicted':
     'The branch conflicts with its base, so no run will start for the tip.',
+  'ci-stalled':
+    'A workflow run on the tip has sat queued with no job past 10 minutes, and a cancel or rerun does not restart it. Close and reopen the pull request to start a fresh run.',
   'ci-timeout': 'A check run was still pending when --wait ran out.',
   'head-moved':
     'A push landed during the wait, so the gates cleared a commit that is no longer the head.',
@@ -1961,20 +1969,83 @@ async function readChecksGate(
         ? []
         : ((JSON.parse(combined) as { statuses?: readonly RawStatus[] })
             .statuses ?? [])
+    const listing = JSON.parse(listed) as CheckRunListing
     const reading = withMergeState(
       mergeStateOf(row?.mergeable_state),
-      collapseChecks(
-        tip,
-        JSON.parse(listed) as CheckRunListing,
-        required,
-        statuses,
-      ),
+      collapseChecks(tip, listing, required, statuses),
     )
+    // Only a reading that would refuse `ci-pending` pays for the runs read, so
+    // a pass, a failure, or a conflict keeps its reason and its cost. A gating
+    // check with a row is a run still going, which a stall elsewhere must not
+    // cut short.
+    const stalled =
+      reading.state === 'pending' &&
+      !reading.conflicted &&
+      missesGatingCheck(tip, listing, required, statuses)
+        ? await readStalledRuns(root, tip)
+        : []
     return {
       state: reading.state,
       isConflicted: reading.conflicted,
       ...(reading.advisory !== undefined && { advisory: reading.advisory }),
+      ...(stalled.length > 0 && { stalled }),
     }
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * The tip's workflow runs GitHub queued past the bound and never gave a job.
+ * Any read that fails or does not parse finds no stall, so the reading stays
+ * `ci-pending`, which still refuses the merge, rather than a pass or a
+ * refusal of its own.
+ */
+async function readStalledRuns(
+  root: string,
+  tip: string,
+): Promise<readonly StalledRun[]> {
+  const listed = await gh(root, [
+    'api',
+    `repos/{owner}/{repo}/actions/runs?head_sha=${tip}&per_page=100`,
+  ])
+  if (listed === null) return []
+  let runs: readonly RawWorkflowRun[]
+  try {
+    const parsed = JSON.parse(listed) as { workflow_runs?: unknown }
+    if (!Array.isArray(parsed.workflow_runs)) return []
+    runs = parsed.workflow_runs as readonly RawWorkflowRun[]
+  } catch {
+    return []
+  }
+
+  const now = Date.now()
+  const candidates = stallCandidates(tip, runs, now, STALL_SECONDS)
+  const counts = await Promise.all(
+    candidates.map(
+      async (run) => [run.id, await readJobCount(root, run.id)] as const,
+    ),
+  )
+  const jobCounts = new Map<number, number>()
+  for (const [id, count] of counts) {
+    if (count !== undefined) jobCounts.set(id, count)
+  }
+  return stalledRuns(tip, runs, jobCounts, now, STALL_SECONDS)
+}
+
+/** A run's job count, undefined when the read failed or carried none. */
+async function readJobCount(
+  root: string,
+  id: number,
+): Promise<number | undefined> {
+  const listed = await gh(root, [
+    'api',
+    `repos/{owner}/{repo}/actions/runs/${id}/jobs?per_page=1`,
+  ])
+  if (listed === null) return undefined
+  try {
+    const count = (JSON.parse(listed) as { total_count?: unknown }).total_count
+    return typeof count === 'number' ? count : undefined
   } catch {
     return undefined
   }
@@ -2161,6 +2232,8 @@ const MERGE_REFUSALS: Record<MergeRefusal | 'gh-missing', string> = {
     'The body carries no `## Key changes` with text under it, so the description has no change to state.',
   'ci-failing': 'A check run on the head failed.',
   'ci-conflicted': 'The branch conflicts with its base.',
+  'ci-stalled':
+    'A workflow run on the head has sat queued with no job past 10 minutes. Close and reopen the pull request to start a fresh run.',
   'ci-pending':
     'A check run on the head has yet to conclude. Run the verb again once it does.',
   'head-moved':

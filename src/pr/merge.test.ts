@@ -461,6 +461,19 @@ describe('merge', () => {
       'ci-conflicted',
     ],
     [
+      'a stalled run on the head',
+      {
+        checks: {
+          state: 'pending',
+          isConflicted: false,
+          stalled: [
+            { id: 43095326656, workflow: 'Verify', queuedSeconds: 900 },
+          ],
+        },
+      },
+      'ci-stalled',
+    ],
+    [
       'a missing summary',
       { pull: { body: KEY_CHANGES_BLOCK } },
       'missing-summary',

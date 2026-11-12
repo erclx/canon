@@ -1,4 +1,5 @@
 import type { ChecksState } from '@/targets/pulls'
+import type { StalledRun } from '@/pr/checks'
 import {
   coversHead,
   type ReviewRow,
@@ -38,6 +39,7 @@ export type LiftRefusal =
   | 'ci-pending'
   | 'ci-failing'
   | 'ci-conflicted'
+  | 'ci-stalled'
   | 'ci-timeout'
   | 'head-moved'
   | 'ready-withdrawn'
@@ -57,6 +59,8 @@ export interface GateResult {
   readonly paintedPaths?: readonly string[]
   /** Every path a box can observe that kept a UI close from carrying forward. */
   readonly drivenPaths?: readonly string[]
+  /** The tip runs queued with no job past the bound, named on a `ci-stalled` refusal. */
+  readonly stalled?: readonly StalledRun[]
   /** The painted paths changed with no capture, reel at the head, or waiver, sorted. */
   readonly uncaptured?: readonly string[]
   /** The uncaptured paths a review waived, sorted. */
@@ -149,6 +153,11 @@ export interface ChecksGate {
   readonly isConflicted: boolean
   /** Failing checks outside the required set, which are reported and never gate. */
   readonly advisory?: readonly string[]
+  /**
+   * Tip runs GitHub queued and never gave a job, read only on a pending,
+   * unconflicted reading. Absent or empty leaves the reading `ci-pending`.
+   */
+  readonly stalled?: readonly StalledRun[]
 }
 
 /** The advisory field a record carries, absent when no advisory check failed. */
@@ -201,6 +210,8 @@ export interface LiftRecord {
   readonly carriedFrom?: string
   readonly paintedPaths?: readonly string[]
   readonly drivenPaths?: readonly string[]
+  /** The tip runs queued with no job past the bound, on a `ci-stalled` refusal. */
+  readonly stalled?: readonly StalledRun[]
   /** Failing checks the base does not require, named so a reader sees them before merging. */
   readonly advisory?: readonly string[]
   readonly isLifted: boolean
@@ -244,17 +255,23 @@ export function reviewGate(
   return pass('review')
 }
 
-/** What the UI gate says about a close carried across commits, for a record. */
+/**
+ * What the UI gate says about a close carried across commits, and the runs the
+ * ci gate found stalled, lifted from the gates onto a record.
+ */
 function carried(gates: readonly GateResult[]): {
   carriedFrom?: string
   paintedPaths?: readonly string[]
   drivenPaths?: readonly string[]
+  stalled?: readonly StalledRun[]
 } {
   const ui = gates.find((gate) => gate.gate === 'ui')
+  const ci = gates.find((gate) => gate.gate === 'ci')
   return {
     ...(ui?.carriedFrom !== undefined && { carriedFrom: ui.carriedFrom }),
     ...(ui?.paintedPaths !== undefined && { paintedPaths: ui.paintedPaths }),
     ...(ui?.drivenPaths !== undefined && { drivenPaths: ui.drivenPaths }),
+    ...(ci?.stalled !== undefined && { stalled: ci.stalled }),
   }
 }
 
@@ -416,12 +433,23 @@ type CiOutcome =
       readonly kind: 'refused'
       readonly reason: LiftRefusal
       readonly waited: number
+      readonly stalled?: readonly StalledRun[]
     }
+
+/** The ci gate a refused wait leaves, carrying the runs a stall named. */
+function ciRefused(ci: Extract<CiOutcome, { kind: 'refused' }>): GateResult {
+  return {
+    ...fail('ci', ci.reason),
+    ...(ci.stalled !== undefined && { stalled: ci.stalled }),
+  }
+}
 
 /**
  * Reads the check runs until they conclude, the deadline passes, or a run can
  * no longer start. A conflicted branch gets no merge ref, so no run ever
- * starts and waiting on it is the one wait that cannot end.
+ * starts and waiting on it is the one wait that cannot end. A stalled run
+ * ends the wait the same way, since none of the measured stalls cleared
+ * before a close and reopen started a fresh run.
  */
 async function waitForChecks(
   api: LiftApi,
@@ -446,6 +474,14 @@ async function waitForChecks(
     }
     if (reading.isConflicted) {
       return { kind: 'refused', reason: 'ci-conflicted', waited }
+    }
+    if (reading.stalled !== undefined && reading.stalled.length > 0) {
+      return {
+        kind: 'refused',
+        reason: 'ci-stalled',
+        waited,
+        stalled: reading.stalled,
+      }
     }
     if (api.now() + pollMs > deadline) {
       return { kind: 'refused', reason: 'ci-timeout', waited }
@@ -479,6 +515,9 @@ function ciGate(reading: ChecksGate): GateResult {
   if (reading.state === 'passing') return pass('ci')
   if (reading.state === 'failing') return fail('ci', 'ci-failing')
   if (reading.isConflicted) return fail('ci', 'ci-conflicted')
+  if (reading.stalled !== undefined && reading.stalled.length > 0) {
+    return { ...fail('ci', 'ci-stalled'), stalled: reading.stalled }
+  }
   return fail('ci', 'ci-pending')
 }
 
@@ -574,7 +613,7 @@ async function settleReady(
 
   const ci = await waitForChecks(api, tip, opts.waitSeconds, pollMs)
   if (ci.kind === 'refused') {
-    const failed = [...gates, fail('ci', ci.reason)]
+    const failed = [...gates, ciRefused(ci)]
     return stillReady(refused(ci.reason, failed, tip, ci.waited))
   }
   return settleAfterWait(api, painted, pull, tip, hasDrivableBox, gates, ci)
@@ -735,7 +774,7 @@ export async function lift(
 
   const ci = await waitForChecks(api, tip, opts.waitSeconds, pollMs)
   if (ci.kind === 'refused') {
-    return refused(ci.reason, [...gates, fail('ci', ci.reason)], tip, ci.waited)
+    return refused(ci.reason, [...gates, ciRefused(ci)], tip, ci.waited)
   }
   return settleAfterWait(
     api,
