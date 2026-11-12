@@ -53,6 +53,7 @@ A body describes the new behavior and nothing the diff or the commits already sa
 ## Sections
 
 - `## Summary`: one paragraph following `<Action Verb> <Direct Object> to <Result>`, then the closing lines
+  - Add a second sentence naming what was broken, or what triggered the change, when the result alone does not show it, since the summary becomes the squash commit a later reader searches for the reason
 - `## Key changes`: bullets only, one change each, naming actual files, functions, or modules (e.g., `AuthService.verify()` not "auth handler")
 - Name each changed path in Key changes as a bare code span, which gets linked. A trim cuts a clause, never a path, since `canon pr key-changes` flags it.
 
@@ -99,8 +100,7 @@ The closing lines end `## Summary`, one `Closes #NNN` per issue and no trailing 
 - Run the check before writing its line. A `- [ ]` reports a check that has not run rather than one that is planned.
 - Tick the box and state the observed result. `- [x] npm test passes, 42 tests` beats `- [ ] run npm test`.
 - Quote the count or output the run reported, never a figure carried from elsewhere.
-- A ticked box describes the tree as it stands. A later commit removing or replacing what it names makes the box false.
-- The branch that made that commit corrects the box in the same pass, as with any other stale claim in the body
+- A ticked box describes the tree as it stands. A later commit removing or replacing what it names makes the box false, and that branch corrects it in the same pass.
 
 Leave the `UI pass` line to `canon pr tick`, and carry it on a rewrite.
 
@@ -108,8 +108,7 @@ Leave the `UI pass` line to `canon pr tick`, and carry it on a rewrite.
 
 Leave a box unchecked only when a human is required, and name which human and why on the same line. The agent runs everything else.
 
-- Human-only covers visual or aesthetic judgment, credentials or a live third-party service, and a second machine or a fresh OS
-- It also covers judgment about whether a boundary or an abstraction reads correctly
+- Human-only covers visual or aesthetic judgment, credentials or a live third-party service, a second machine or a fresh OS, and whether a boundary or an abstraction reads correctly
 - A human is required by a capability the agent lacks, never the cost of the run. Authorizing a spend is the operator's and performing the run is not.
 - An arm the repository ships a harness for gets driven once the operator has cleared the spend, and the box records what it returned
 - A tool refusal that actually fired is a capability gap, and the line names the refusal rather than the cost. A refusal predicted and never met is not one.
@@ -118,7 +117,7 @@ Leave a box unchecked only when a human is required, and name which human and wh
 
 A live agent session is never the human a box waits on.
 
-- A live agent session is not a human. A box reading `needs a live session driving the skill` names the thing writing the description, so that run is owed rather than blocked.
+- A box reading `needs a live session driving the skill` names the thing writing the description, so that run is owed rather than blocked.
 - Put a request for the reviewer under `## For the reviewer`. It is a request rather than unfinished testing, so it never appears as an unchecked Testing box.
 
 ## Formatting
