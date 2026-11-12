@@ -212,10 +212,6 @@ describe('comparing a count that carries a growth tolerance', () => {
     ])
   })
 
-  /**
-   * 2170 times 0.1 is not exactly 217 in floating point, so the boundary is
-   * floored to a whole count and held inclusive.
-   */
   it('should tolerate a growth exactly at the tolerance', () => {
     const deltas = compareBaseline(
       recorded,
@@ -224,6 +220,26 @@ describe('comparing a count that carries a growth tolerance', () => {
     )
 
     expect(compared(deltas[0]).moved[0]?.tolerated).toBe(true)
+  })
+
+  /**
+   * 100 times 0.29 evaluates to 28.999999999999996, so a plain floor would
+   * allow 28 and report a growth of exactly 29 as past the tolerance.
+   */
+  it('should tolerate a boundary growth whose product falls short in floating point', () => {
+    const deltas = compareBaseline(
+      {
+        recordedAt: '2026-11-12',
+        commit: 'aaaaaaa',
+        checks: { census: { files: 100 } },
+      },
+      [result('census', { files: 129 })],
+      { census: { files: 0.29 } },
+    )
+
+    expect(compared(deltas[0]).moved).toEqual([
+      { key: 'files', from: 100, to: 129, delta: 29, tolerated: true },
+    ])
   })
 
   it('should not tolerate a growth one past the tolerance', () => {

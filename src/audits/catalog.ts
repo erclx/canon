@@ -735,8 +735,9 @@ export const AUDITS: readonly AuditSpec[] = [
     counts: censusCounts,
     // Every merge grows the tree, so an exact compare reports ordinary growth
     // on each one. The fraction absorbs about a hundred merges at the rate
-    // measured when it was set, while a one-off jump such as a vendored folder
-    // still reports, and running out of headroom is the signal to re-record.
+    // measured when it was set. Headroom is cumulative from the record, so a
+    // one-off jump such as a vendored folder reports only past what earlier
+    // merges left unspent, and running out of it is the signal to re-record.
     tolerance: { files: 0.1, skipped: 0.1, lines: 0.1, largeFolders: 0.1 },
   },
   {
