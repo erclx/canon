@@ -15,7 +15,6 @@ The CLI holds every number. `canon markdown audit` measures, and `canon markdown
 
 - `canon` absent from the path: stop. `❌ canon is not on PATH, so nothing can be measured or gated.`
 - The audit refusing: stop and name its `reason`. A `malformed-config` refusal names the file to fix by hand, since the verb will not append to a file it cannot read.
-- `gated add` refusing with `canon-checkout`: stop. Canon's own checkout gates through a constant in its source, which a code change edits.
 - Branch on each record's own fields rather than on an exit status a shell wrapper can flatten. A call with no terminal on stdin already runs headless, so no command takes a prefix.
 
 ## Step 0: offer the restructure
