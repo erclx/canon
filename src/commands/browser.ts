@@ -80,6 +80,7 @@ async function runBrowser(args: readonly string[]): Promise<number> {
 
   const child = spawn('bunx', ['-y', AGENT_CLI, ...call.args], {
     stdio: 'inherit',
+    env: agentEnv(process.env),
   })
   // A killed pass must not leave a browser running behind the parent, which a
   // shell `exec` never had between the caller and the child.
@@ -103,6 +104,15 @@ async function runBrowser(args: readonly string[]): Promise<number> {
   } finally {
     for (const [signal, handler] of handlers) process.off(signal, handler)
   }
+}
+
+/**
+ * Turns the agent CLI's sandbox on, which its config path leaves off on Linux
+ * for the bundled Chromium. A caller's own value stands, so an operator on a
+ * kernel that refuses the sandbox can still choose to run without it.
+ */
+export function agentEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  return { PLAYWRIGHT_MCP_SANDBOX: 'true', ...env }
 }
 
 function refuse(message: string): number {
