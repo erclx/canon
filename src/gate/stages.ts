@@ -6,6 +6,7 @@ import {
   skillPaths,
 } from '@/gate/boundaries'
 import { embeddedPrograms } from '@/code/embedded'
+import { fileLength } from '@/gate/file-length'
 import {
   canonicalRecords,
   auditSet,
@@ -389,6 +390,13 @@ export const STAGES: readonly Stage[] = [
     id: 'embedded-programs',
     label: 'Embedded programs',
     checks: [{ kind: 'measure', measure: embeddedPrograms }],
+  },
+  {
+    // Unscoped, since any branch can grow any file past the cap, and counting
+    // the tracked sources costs well under a second.
+    id: 'file-length',
+    label: 'File length',
+    checks: [{ kind: 'measure', measure: fileLength }],
   },
   {
     // A rule citing a file that moved fails silently. The consumed-copy drift
