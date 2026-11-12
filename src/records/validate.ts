@@ -482,12 +482,15 @@ function checkSources(name: string, lines: readonly string[]): Finding[] {
     )
 }
 
-const LOAD_GENERATOR = /\b(?:hogs?|busy[ -]loops?|stress-ng)\b/i
-const LOAD_CONFINED = /\btaskset\b/
+const LOAD_GENERATOR =
+  /\b\d+\s+(?:[a-z]+[ -])?(?:hogs?|busy[ -]loops?)\b|\bstress-ng\s+-/i
+const LOAD_CONFINED = /\b(?:taskset|timeout)\b/
 
 /**
- * Keys on the generator words rather than "under load", which ordinary plan
- * wording uses to describe CI. A plan saying "saturate the CPU" slips past.
+ * Keys on a launched generator, being a digit count beside the word or
+ * `stress-ng` with arguments, so a bullet that only mentions a hog passes.
+ * `taskset` pins cores on Linux and `timeout` bounds the run on macOS. A plan
+ * saying "saturate the CPU" slips past.
  */
 function checkVerification(name: string, lines: readonly string[]): Finding[] {
   return readSourceEntries(lines)
@@ -497,7 +500,7 @@ function checkVerification(name: string, lines: readonly string[]): Finding[] {
         'verification-load-unconfined',
         name,
         shorten(entry),
-        'names generated machine load with no taskset confining it to a few cores.',
+        'names generated machine load with no taskset or timeout confining it.',
       ),
     )
 }

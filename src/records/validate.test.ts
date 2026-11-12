@@ -799,6 +799,34 @@ describe('checkPlan', () => {
       expect(checkPlan('feature-a-b.md', body)).toEqual([])
     })
 
+    it('should report stress-ng launched with arguments', () => {
+      const body = withVerification(
+        '- Run `stress-ng --cpu 8` beside `bun test src/take`',
+      )
+
+      expect(kinds(checkPlan('feature-a-b.md', body))).toEqual([
+        'verification-load-unconfined',
+      ])
+    })
+
+    it('should pass the macOS form that bounds the run with timeout', () => {
+      const body = withVerification(
+        '- Run 4 CPU hogs under `timeout 10`, then `bun test src/take`',
+      )
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
+    it.each([
+      'The poller no longer spins in a busy loop: `bun test src/take`',
+      'No hog or busy loop is started by any check: `bun test src/take`',
+      'A handler that hogs the event loop yields: `bun test src/take`',
+    ])('should pass a bullet only mentioning a generator: %s', (entry) => {
+      const body = withVerification(`- ${entry}`)
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
     it('should read taskset on a wrapped line as part of the bullet', () => {
       const body = withVerification(
         '- Run 4 CPU hogs',

@@ -222,9 +222,9 @@ Every outcome reaches the review with its proof named.
 - A permission mode can refuse a compound form, and a substituted check no longer matches the plan, so reach a filter through a verb's own argument or flag, or name a test that holds it.
 - Name the visual check where no test reaches, and say it is visual, so a reader can tell a proof from a look.
 
-A command that generates machine load runs again on every execution, so it stays confined.
+**Generated load**
 
-- Name no hog or busy loop without its `taskset`, or `canon records validate plans` reports `verification-load-unconfined`.
+- Name no launched hog or busy loop without `taskset` on Linux or `timeout` on macOS. `canon records validate plans` reports it as `verification-load-unconfined`.
 
 ### Risks
 
