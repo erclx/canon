@@ -799,7 +799,8 @@ export const seedStandards: Measure = async (ctx) => {
  */
 export function seedEntryCount(payload: string): number {
   const record = parseJson(payload) as
-    { folders?: { entries?: unknown }[] } | undefined
+    | { folders?: { entries?: unknown }[] }
+    | undefined
   const folders = Array.isArray(record?.folders) ? record.folders : []
   return folders.reduce(
     (total, folder) =>
@@ -1226,7 +1227,8 @@ export const sandboxCoverage: Measure = async (ctx) => {
   }
 
   const record = parseJson(run.stdout) as
-    { totalScenarios?: unknown; armedScenarios?: unknown } | undefined
+    | { totalScenarios?: unknown; armedScenarios?: unknown }
+    | undefined
   const total = record?.totalScenarios
   const armed = record?.armedScenarios
 
@@ -1260,7 +1262,8 @@ export const sandboxCoverage: Measure = async (ctx) => {
   }
 
   const skillsRecord = parseJson(skillsRun.stdout) as
-    { asserted?: unknown; totalSkills?: unknown } | undefined
+    | { asserted?: unknown; totalSkills?: unknown }
+    | undefined
   const asserted = skillsRecord?.asserted
   const totalSkills = skillsRecord?.totalSkills
 
