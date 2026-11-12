@@ -56,6 +56,7 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 
 | Skill                   | When to use                                    |
 | ----------------------- | ---------------------------------------------- |
+| `canon:code-health`     | Source files must answer for length and drift  |
 | `canon:document-health` | Documents must answer for length and staleness |
 | `canon:ui-audit`        | To read UI source for missing states           |
 | `canon:ui-measure`      | To measure paint, processor, and layout cost   |

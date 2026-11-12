@@ -1,0 +1,41 @@
+# What a correct `/canon:code-health` run leaves behind on the health fixture.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block. A bare key below
+# one belongs to that table in TOML and silently asserts nothing.
+#
+# The skill reports and repairs nothing, so the assertions pin what stays put
+# and what the reply names. The seeded comment block and the seeded page
+# surviving means neither seeded file was rewritten.
+
+paths = [
+  "src/report/columns.ts",
+  "src/cli/import.ts",
+  "src/server/routes.ts",
+  "src/email/welcome.ts",
+]
+
+reply = [
+  "src/report/columns.ts",
+  "runImport",
+  "src/handlers",
+  "codebase-layout",
+  "plan-intake",
+]
+
+manual = [
+  "Each finding carries 'measured' or 'read', with the long block in runImport and the src/handlers roles marked 'read'. Semantic: the label is wording.",
+  "The comment block on src/server/routes.ts asks whether it belongs beside its code and proposes no deletion. Semantic: a proposal is wording.",
+  "No folder line names docs/guides, which is markdown-led. Semantic: a negative substring passes on every reply that omits it.",
+  "No verdict across the axes and no score across the files. Semantic: wording.",
+  "A trend section follows the table and names src/report/columns.ts first as both long and a hotspot. Semantic: order is wording.",
+]
+
+[[content]]
+path = "src/server/routes.ts"
+pattern = 'Step 1 of the GET /items handler checks one field'
+
+[[content]]
+path = "src/email/welcome.ts"
+pattern = 'Your account is ready'
