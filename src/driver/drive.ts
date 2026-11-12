@@ -1,6 +1,13 @@
 import { chromium } from 'playwright-core'
 import type { Browser, Page } from 'playwright-core'
-import { isBrowserMissing, isServerUnreachable } from '@/browser/engine'
+import {
+  SANDBOXED,
+  isBrowserMissing,
+  isSandboxBlocked,
+  isServerUnreachable,
+  readUsernsSetting,
+  sandboxFix,
+} from '@/browser/engine'
 import { AxeEngineMissing, probeAxe } from '@/driver/probes/axe'
 import { probeDetails } from '@/driver/probes/details'
 import {
@@ -62,6 +69,11 @@ function inRunOrder(names: readonly ProbeName[]): ProbeName[] {
 export interface DriveOptions {
   readonly url: string
   readonly plan: DriverPlan
+  /**
+   * A browser binary in place of the engine's own, which a test points at a
+   * fake to prove a refusal no real launch on its machine would raise.
+   */
+  readonly executablePath?: string
 }
 
 /** One step measured at one viewport, so a sweep reads as passes rather than a total. */
@@ -74,6 +86,7 @@ export interface PassReading {
 
 export type DriverRefusal =
   | 'browser-missing'
+  | 'sandbox-blocked'
   | 'axe-missing'
   | 'server-unreachable'
   | 'drive-failed'
@@ -89,6 +102,8 @@ export type DriverResult =
       readonly status: 'failed'
       readonly reason: DriverRefusal
       readonly message: string
+      /** The command that clears a `sandbox-blocked` refusal, when one does. */
+      readonly fix?: string
     }
 
 function failed(reason: DriverRefusal, error: unknown): DriverResult {
@@ -104,12 +119,19 @@ export async function drive(options: DriveOptions): Promise<DriverResult> {
 
   let browser: Browser
   try {
-    browser = await chromium.launch()
+    browser = await chromium.launch({
+      ...SANDBOXED,
+      ...(options.executablePath
+        ? { executablePath: options.executablePath }
+        : {}),
+    })
   } catch (error) {
-    return failed(
-      isBrowserMissing(error) ? 'browser-missing' : 'drive-failed',
-      error,
-    )
+    if (isBrowserMissing(error)) return failed('browser-missing', error)
+    if (isSandboxBlocked(error)) {
+      const fix = sandboxFix(readUsernsSetting())
+      return { ...failed('sandbox-blocked', error), ...(fix ? { fix } : {}) }
+    }
+    return failed('drive-failed', error)
   }
 
   const findings: PlacedFinding[] = []

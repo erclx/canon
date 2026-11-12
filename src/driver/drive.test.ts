@@ -1,4 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import { chmodSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { drive } from '@/driver/drive'
 import { readDriverPlan, stepProbes } from '@/driver/steps'
 import type { DriverPlan, DriverStep } from '@/driver/steps'
 
@@ -163,5 +167,60 @@ describe('stepProbes', () => {
     }
 
     expect(stepProbes(plan, step)).toEqual(['diagram-strokes'])
+  })
+})
+
+/**
+ * Launches fake browsers, so the refusal is proved with no AppArmor and no
+ * Chromium. A real start never gets past the launch here, and a reworded box
+ * in a later engine falls this case back to `drive-failed`.
+ */
+describe('drive', () => {
+  let dir: string
+
+  beforeAll(() => {
+    dir = mkdtempSync(join(tmpdir(), 'canon-drive-'))
+  })
+
+  afterAll(() => {
+    rmSync(dir, { recursive: true, force: true })
+  })
+
+  function fake(name: string, body: string): string {
+    const path = join(dir, name)
+    writeFileSync(path, `#!/bin/sh\n${body}\n`)
+    chmodSync(path, 0o755)
+    return path
+  }
+
+  const plan: DriverPlan = {
+    viewports: [{ width: 800, height: 600 }],
+    probes: ['focus'],
+    steps: [{ name: 'hold', kind: 'wait', ms: 0 }],
+  }
+
+  it('should refuse as sandbox-blocked when the browser finds no usable sandbox', async () => {
+    const executablePath = fake(
+      'sandboxed',
+      "echo '[1112/101500.000000:FATAL:zygote_host_impl_linux.cc(128)] No usable sandbox!' >&2\nexit 1",
+    )
+
+    const result = await drive({ url: 'about:blank', plan, executablePath })
+
+    expect(result).toMatchObject({
+      status: 'failed',
+      reason: 'sandbox-blocked',
+    })
+  })
+
+  it('should refuse as drive-failed when the browser dies for another reason', async () => {
+    const executablePath = fake(
+      'broken',
+      "echo 'error while loading shared libraries: libnss3.so' >&2\nexit 1",
+    )
+
+    const result = await drive({ url: 'about:blank', plan, executablePath })
+
+    expect(result).toMatchObject({ status: 'failed', reason: 'drive-failed' })
   })
 })
