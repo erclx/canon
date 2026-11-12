@@ -14,7 +14,7 @@ import {
 import { TargetMissing, TargetOffscreen, TargetRefused } from '@/take/perform'
 import type { Beat, Route, TakePlan } from '@/take/plan'
 import { filmScreencast } from '@/take/screencast'
-import { ShellMissing, findShell } from '@/take/shell'
+import { ShellMissing, ShellSandboxBlocked, findShell } from '@/take/shell'
 import { StepperStalled, filmStepped } from '@/take/stepper'
 
 /**
@@ -28,6 +28,7 @@ export const TAKE_VERSION = 1
 export type TakeRefusal =
   | 'ffmpeg-missing'
   | 'browser-missing'
+  | 'sandbox-blocked'
   | 'server-unreachable'
   | 'target-missing'
   | 'target-offscreen'
@@ -255,6 +256,7 @@ function classify(error: unknown): TakeRefusal {
   if (error instanceof ShellMissing || isBrowserMissing(error)) {
     return 'browser-missing'
   }
+  if (error instanceof ShellSandboxBlocked) return 'sandbox-blocked'
   if (isServerUnreachable(error)) return 'server-unreachable'
   return 'take-failed'
 }
