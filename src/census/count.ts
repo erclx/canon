@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises'
-import { dirname, extname, join } from 'node:path'
+import { basename, dirname, extname, join } from 'node:path'
 import { isBinary } from '@/sweep/binary'
 import { listRepositoryFiles } from '@/git/files'
 import { readBlobsAt, SYMLINK_MODE } from '@/git/revision'
@@ -38,7 +38,23 @@ export interface CensusResult {
   readonly byExtension: readonly ExtensionCount[]
   /** Every folder at or past `FOLDER_FILE_CHECKPOINT`, empty when none is. */
   readonly folders: readonly FolderCount[]
+  /** Every prefix group at or past `PREFIX_GROUP_THRESHOLD`, at any folder size. */
+  readonly prefixGroups: readonly PrefixGroup[]
 }
+
+/**
+ * Sibling files in one folder whose stems share the text before their first
+ * hyphen or underscore, a role the folder may be holding without naming it.
+ */
+export interface PrefixGroup {
+  readonly folder: string
+  readonly prefix: string
+  /** Distinct stems, sorted, so a module and its test count once. */
+  readonly stems: readonly string[]
+}
+
+/** A prefix shared by this many distinct stems in one folder is reported. */
+export const PREFIX_GROUP_THRESHOLD = 3
 
 export interface CensusFailure {
   readonly kind: 'refused'
@@ -116,6 +132,62 @@ function largeFolders(paths: readonly string[]): FolderCount[] {
 }
 
 /**
+ * The basename up to its first dot, so `film-drag.e2e.test.ts` reads as
+ * `film-drag`, matching how `codebase-layout` reads a stem.
+ */
+function stemOf(path: string): string {
+  return basename(path).split('.')[0] ?? ''
+}
+
+/**
+ * Empty for a stem with no separator, or one opening on a separator such as
+ * `__init__`, since neither shares a prefix with a sibling.
+ */
+function prefixOf(stem: string): string {
+  const cut = stem.search(/[-_]/)
+  return cut <= 0 ? '' : stem.slice(0, cut)
+}
+
+/**
+ * Groups each folder's distinct stems by prefix, keeping the groups that reach
+ * the threshold. Fixture folders are left out, as `largeFolders` leaves them.
+ */
+function prefixGroups(paths: readonly string[]): PrefixGroup[] {
+  const byKey = new Map<
+    string,
+    { folder: string; prefix: string; stems: Set<string> }
+  >()
+
+  for (const path of paths) {
+    const folder = dirname(path)
+    if (underFixtures(folder)) continue
+
+    const stem = stemOf(path)
+    const prefix = prefixOf(stem)
+    if (prefix === '') continue
+
+    const key = `${folder}\0${prefix}`
+    const group = byKey.get(key) ?? { folder, prefix, stems: new Set<string>() }
+    group.stems.add(stem)
+    byKey.set(key, group)
+  }
+
+  return [...byKey.values()]
+    .filter((group) => group.stems.size >= PREFIX_GROUP_THRESHOLD)
+    .map(({ folder, prefix, stems }) => ({
+      folder,
+      prefix,
+      stems: [...stems].sort(),
+    }))
+    .sort(
+      (a, b) =>
+        b.stems.length - a.stems.length ||
+        a.folder.localeCompare(b.folder) ||
+        a.prefix.localeCompare(b.prefix),
+    )
+}
+
+/**
  * A trailing newline is the file's terminator rather than an empty final line,
  * which is what keeps a file ending `a\nb\n` at two lines rather than three.
  */
@@ -182,6 +254,7 @@ function tally(files: readonly Counted[]): CensusResult {
     lines,
     byExtension,
     folders: largeFolders(files.map((file) => file.path)),
+    prefixGroups: prefixGroups(files.map((file) => file.path)),
   }
 }
 
