@@ -201,6 +201,10 @@ describe('the tests stage command', () => {
     expect(argv).toEqual(['bun', 'run', 'test'])
   })
 
+  it('should point a scoped run at the by-hand end-to-end script', () => {
+    expect(testsCheck().scopedNote).toContain('bun run test:e2e')
+  })
+
   it('should exclude no end-to-end suite from the full run', () => {
     const argv = testsCheck().changedArgv?.([
       'src/take/film.ts',

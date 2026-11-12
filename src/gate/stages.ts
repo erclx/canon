@@ -51,6 +51,11 @@ export type Check =
        * command.
        */
       readonly changedArgv?: (changed: readonly string[]) => readonly string[]
+      /**
+       * What a run through `changedArgv` left out, printed whenever that argv
+       * differed from `argv`, so a scoped pass never reads as the full one.
+       */
+      readonly scopedNote?: string
       readonly failure: string
     }
   /** This checkout's own CLI, so a worktree gate never reads the main tree. */
@@ -606,6 +611,8 @@ export const STAGES: readonly Stage[] = [
         kind: 'command',
         argv: FULL_SUITE,
         changedArgv: relatedTests,
+        scopedNote:
+          'Scoped run left out every *.e2e.test.ts suite. Run bun run test:e2e when this change reaches a browser or FFmpeg path.',
         failure: 'Tests failed',
       },
     ],
