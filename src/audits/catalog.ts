@@ -463,7 +463,8 @@ function censusCounts(record: unknown): Record<string, number> | undefined {
 /**
  * Reads the long file and function counts, leaving embedded blocks out. Those
  * already fail a push through the `embedded-programs` stage, so this audit
- * retains length alone.
+ * retains length alone. The unread file count travels with them, since a
+ * function count alone claims coverage of files the reading never followed.
  */
 function codeCounts(record: unknown): Record<string, number> | undefined {
   const root = asObject(record)
@@ -472,6 +473,7 @@ function codeCounts(record: unknown): Record<string, number> | undefined {
   return allOf({
     longFiles: lengthOf(root.longFiles),
     longFunctions: lengthOf(root.longFunctions),
+    unreadFiles: lengthOf(root.unreadFiles),
   })
 }
 
