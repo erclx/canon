@@ -10,6 +10,12 @@ import type {
   Page,
 } from 'playwright-core'
 import {
+  SANDBOXED,
+  SANDBOX_FIX,
+  USERNS_SETTING,
+  isSandboxBlocked,
+} from '@/browser/engine'
+import {
   mergeBlocks,
   preparePage,
   revealSection,
@@ -67,6 +73,23 @@ export type CaptureResult =
     }
   | { status: 'failed'; source: string; reason: string }
 
+/**
+ * Replaces a blocked start's message, since Playwright's box advises turning
+ * the sandbox off, which a capture loading an outside page must not do. Every
+ * other launch failure, a missing binary included, propagates as thrown.
+ */
+async function launchSandboxed(): Promise<Browser> {
+  try {
+    return await chromium.launch(SANDBOXED)
+  } catch (error) {
+    if (!isSandboxBlocked(error)) throw error
+    throw new Error(
+      `Chromium found no usable sandbox. Where ${USERNS_SETTING} is 1, allow unprivileged user namespaces for this boot with: ${SANDBOX_FIX}`,
+      { cause: error },
+    )
+  }
+}
+
 export async function captureSources(
   sourcePath: string,
   options: CaptureOptions,
@@ -74,7 +97,7 @@ export async function captureSources(
   const sources = resolveCaptureSources(sourcePath, options.outDir)
   if (!sources.length) return []
 
-  const browser = await chromium.launch()
+  const browser = await launchSandboxed()
   try {
     return await Promise.all(
       sources.map((source) => captureOne(browser, source, options)),
@@ -224,7 +247,7 @@ export async function captureSections(
   const pageSource: CaptureSource = isUrlSource(sourcePath)
     ? { kind: 'url', url: sourcePath, pngPath: outDir }
     : { kind: 'file', htmlPath: sourcePath, pngPath: outDir }
-  const browser = await chromium.launch()
+  const browser = await launchSandboxed()
   try {
     const page = await browser.newPage(
       pageOptions({ width, colorScheme, touch }),
