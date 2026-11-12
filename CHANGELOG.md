@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.88.0](https://github.com/erclx/canon/compare/v5.87.0...v5.88.0) (2026-11-12)
+
+
+### Features
+
+* **census:** report sibling prefix groups for folder reads ([#3069](https://github.com/erclx/canon/issues/3069)) ([5daa0b6](https://github.com/erclx/canon/commit/5daa0b612283ee7283c6067d2830d66e1639faf0))
+* **pr:** carry a take reel across pushes that change nothing it shows ([#3065](https://github.com/erclx/canon/issues/3065)) ([296146a](https://github.com/erclx/canon/commit/296146a4280e9147a3da81a6d94ef9fa3b62bbeb))
+* **records:** flag unconfined load in plan verification ([#3063](https://github.com/erclx/canon/issues/3063)) ([9603dde](https://github.com/erclx/canon/commit/9603dde4774602fd78a44ab847a3a046921aa3b1))
+* **skills:** launch flaky rows under groundwork first ([#3066](https://github.com/erclx/canon/issues/3066)) ([54763e1](https://github.com/erclx/canon/commit/54763e1377916ff03ed2b16ab888ec95849c3847))
+* **skills:** resume reads the session's own note and no board ([#3068](https://github.com/erclx/canon/issues/3068)) ([1e91392](https://github.com/erclx/canon/commit/1e91392f52540dd93db79457bdc9caf5a9465d33))
+* **take:** add a device scale option and split the film e2e suite ([#3064](https://github.com/erclx/canon/issues/3064)) ([9c20d6e](https://github.com/erclx/canon/commit/9c20d6e0dc0107967241f9c4cc933c5d8ed35431))
+
 ## [5.87.0](https://github.com/erclx/canon/compare/v5.86.0...v5.87.0) (2026-11-12)
 
 
