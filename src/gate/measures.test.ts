@@ -371,6 +371,22 @@ describe('shippedReferences', () => {
     )
     expect(report.emissions[0]?.text).toContain('canon gov sync')
   })
+
+  it('fails on a stack source path cited from a skill body', async () => {
+    write(
+      'claude/skills/alpha/SKILL.md',
+      'Copy `tooling/base/configs/wrangler.toml` into place.\n',
+    )
+
+    const report = await shippedReferences(context())
+
+    expect(report.failure).toContain('One reference')
+    expect(report.emissions).toHaveLength(1)
+    expect(report.emissions[0]?.text).toContain(
+      'claude/skills/alpha/SKILL.md:1 carries tooling/base/configs/wrangler.toml',
+    )
+    expect(report.emissions[0]?.text).toContain('stack source tree')
+  })
 })
 
 describe('clientCommandCitations', () => {
