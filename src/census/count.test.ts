@@ -129,4 +129,110 @@ describe('census', () => {
 
     expect(result).toEqual({ kind: 'refused', reason: 'no-git' })
   })
+
+  describe('folders', () => {
+    function writeMany(folder: string, count: number, ext = 'ts'): void {
+      for (let i = 0; i < count; i += 1) write(`${folder}/f${i}.${ext}`, 'x\n')
+    }
+
+    it('should list a folder at 10 files and leave one at 9 out', async () => {
+      writeMany('ten', 10)
+      writeMany('nine', 9)
+      git('add', '--all')
+
+      const result = measured(await census(ROOT))
+
+      expect(result.folders.map((f) => f.path)).toEqual(['ten'])
+    })
+
+    it('should count a nested folder apart from its parent', async () => {
+      writeMany('parent', 4)
+      writeMany('parent/child', 10)
+      git('add', '--all')
+
+      const result = measured(await census(ROOT))
+
+      expect(result.folders).toEqual([
+        {
+          path: 'parent/child',
+          files: 10,
+          byExtension: [{ extension: 'ts', files: 10 }],
+        },
+      ])
+    })
+
+    it('should break a folder down by extension, then sort by count and path', async () => {
+      writeMany('b', 10)
+      writeMany('a', 8)
+      writeMany('a', 2, 'md')
+      git('add', '--all')
+
+      const result = measured(await census(ROOT))
+
+      expect(result.folders).toEqual([
+        {
+          path: 'a',
+          files: 10,
+          byExtension: [
+            { extension: 'ts', files: 8 },
+            { extension: 'md', files: 2 },
+          ],
+        },
+        {
+          path: 'b',
+          files: 10,
+          byExtension: [{ extension: 'ts', files: 10 }],
+        },
+      ])
+    })
+
+    it('should leave an ignored folder out', async () => {
+      write('.gitignore', 'ignored/\n')
+      writeMany('ignored', 10)
+      git('add', '--all')
+
+      const result = measured(await census(ROOT))
+
+      expect(result.folders).toEqual([])
+    })
+
+    it('should skip a fixtures folder from the list while the totals still count it', async () => {
+      writeMany('src/fixtures/a', 10)
+      writeMany('src/__fixtures__', 10)
+      git('add', '--all')
+
+      const result = measured(await census(ROOT))
+
+      expect(result.folders).toEqual([])
+      expect(result.files).toBe(20)
+    })
+
+    it('should count a file named fixtures toward its folder', async () => {
+      writeMany('src/a', 9)
+      write('src/a/fixtures.ts', 'x\n')
+      git('add', '--all')
+
+      const result = measured(await census(ROOT))
+
+      expect(result.folders.map((f) => f.path)).toEqual(['src/a'])
+    })
+
+    it('should count files at the repository root under .', async () => {
+      writeMany('.', 10)
+      git('add', '--all')
+
+      const result = measured(await census(ROOT))
+
+      expect(result.folders.map((f) => f.path)).toEqual(['.'])
+    })
+
+    it('should return an empty array when no folder reaches the checkpoint', async () => {
+      write('a.ts', 'x\n')
+      git('add', '--all')
+
+      const result = measured(await census(ROOT))
+
+      expect(result.folders).toEqual([])
+    })
+  })
 })

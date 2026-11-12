@@ -27,6 +27,7 @@ jobs:
   capture:
     name: 🖼️ Refresh README Screenshot
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     # The default GITHUB_TOKEN cannot push to a fork's branch, so a PR from
     # outside this repository is skipped rather than left to fail on the push
     # step below.
