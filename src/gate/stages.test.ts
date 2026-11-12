@@ -160,9 +160,27 @@ describe('the tests stage command', () => {
       'related',
       '--run',
       '--passWithNoTests',
+      '--exclude',
+      '**/*.e2e.test.ts',
       'src/gate/stages.ts',
       'web/src/components/hero.tsx',
     ])
+  })
+
+  it('should exclude every end-to-end suite ahead of the changed files', () => {
+    const argv = testsCheck().changedArgv?.(['src/take/film.ts']) ?? []
+
+    expect(argv.slice(-3)).toEqual([
+      '--exclude',
+      '**/*.e2e.test.ts',
+      'src/take/film.ts',
+    ])
+  })
+
+  it('should still hand a changed end-to-end file to the related run', () => {
+    const argv = testsCheck().changedArgv?.(['src/take/film.e2e.test.ts'])
+
+    expect(argv?.at(-1)).toBe('src/take/film.e2e.test.ts')
   })
 
   it('should pass the root commitlint config to the related run', () => {
@@ -181,6 +199,15 @@ describe('the tests stage command', () => {
     const argv = testsCheck().changedArgv?.(['src/gate/stages.ts', file])
 
     expect(argv).toEqual(['bun', 'run', 'test'])
+  })
+
+  it('should exclude no end-to-end suite from the full run', () => {
+    const argv = testsCheck().changedArgv?.([
+      'src/take/film.ts',
+      'package.json',
+    ])
+
+    expect(argv).not.toContain('--exclude')
   })
 })
 
