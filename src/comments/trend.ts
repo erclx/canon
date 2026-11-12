@@ -1,5 +1,6 @@
 import { $ } from 'bun'
 import { gitEnv } from '@/git/env'
+import { readBlobsAt, spaceEvenly } from '@/git/revision'
 import {
   countFiles,
   isPruned,
@@ -71,105 +72,23 @@ export async function listCommits(
 }
 
 /**
- * Picks evenly spaced commits from `commits`, always keeping the newest.
- *
- * Sample selection matters more than sample size here. The reading the
- * comment-discipline track needed came from four points spanning six months,
- * so spacing across the window is what the arm optimizes for rather than
- * density of coverage.
- */
-export function spaceEvenly(
-  commits: readonly Commit[],
-  points: number,
-): Commit[] {
-  if (commits.length <= points) return [...commits]
-  if (points <= 1) return [commits[commits.length - 1]]
-
-  const picked: Commit[] = []
-  const step = (commits.length - 1) / (points - 1)
-
-  for (let index = 0; index < points; index++) {
-    picked.push(commits[Math.round(index * step)])
-  }
-
-  return picked
-}
-
-/**
- * Reads every scannable blob at `rev` without checking anything out.
- *
- * `ls-tree` names the blobs and `cat-file --batch` streams their contents in
- * one process, so a six-point trend costs six subprocesses rather than one per
- * file per commit. Contents arrive as bytes, so the batch stream is walked by
- * byte offset rather than split as text.
+ * Reads every scannable blob at `rev` without checking anything out, keeping
+ * the paths whose language the scan reads.
  */
 export async function readRevision(
   root: string,
   rev: string,
   languages: readonly Language[] = LANGUAGES,
 ): Promise<SourceFile[]> {
-  const listed = await $`git -C ${root} ls-tree -r -z ${rev}`
-    .env(gitEnv())
-    .quiet()
-    .nothrow()
-  if (listed.exitCode !== 0) return []
-
-  const wanted: { oid: string; path: string }[] = []
-
-  for (const entry of listed.text().split('\0')) {
-    if (!entry) continue
-    const [meta, path] = entry.split('\t')
-    if (!path) continue
-
-    const [, type, oid] = meta.split(/\s+/)
-    if (type !== 'blob') continue
-    if (isPruned(path)) continue
-
+  const entries = await readBlobsAt(root, rev, (path) => {
+    if (isPruned(path)) return false
     const language = languageFor(path)
-    if (!language || !languages.includes(language)) continue
+    return language !== undefined && languages.includes(language)
+  })
 
-    wanted.push({ oid, path })
-  }
-
-  if (wanted.length === 0) return []
-
-  const stdin = Buffer.from(`${wanted.map(({ oid }) => oid).join('\n')}\n`)
-  const batch = await $`git -C ${root} cat-file --batch < ${stdin}`
-    .env(gitEnv())
-    .quiet()
-    .nothrow()
-
-  if (batch.exitCode !== 0) return []
-
-  return parseBatch(Buffer.from(batch.arrayBuffer()), wanted)
-}
-
-/**
- * Walks `git cat-file --batch` output, which frames each object as
- * `<oid> SP <type> SP <size> LF <contents> LF`. The size header is the only
- * safe way to find the next record, since contents may hold anything.
- */
-function parseBatch(
-  buffer: Buffer,
-  wanted: readonly { oid: string; path: string }[],
-): SourceFile[] {
-  const files: SourceFile[] = []
-  let offset = 0
-
-  for (const { path } of wanted) {
-    const headerEnd = buffer.indexOf(0x0a, offset)
-    if (headerEnd === -1) break
-
-    const header = buffer.toString('utf8', offset, headerEnd)
-    const size = Number(header.split(' ')[2])
-    if (!Number.isFinite(size)) break
-
-    const start = headerEnd + 1
-    files.push({ path, text: buffer.toString('utf8', start, start + size) })
-    offset = start + size + 1
-  }
-
-  return files
+  return entries.flatMap(({ path, text }) =>
+    text === undefined ? [] : [{ path, text }],
+  )
 }
 
 /** Counts one revision's tree, reusing the same pass the snapshot arm runs. */
