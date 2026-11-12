@@ -43,6 +43,36 @@ export interface MovedCount {
   readonly from: number
   readonly to: number
   readonly delta: number
+  /**
+   * Present only on a growth inside the key's tolerance, which the summary
+   * leaves out of `grown`. The key stays in `moved` rather than `steady`,
+   * since `steady` promises the count reproduced exactly.
+   */
+  readonly tolerated?: true
+}
+
+/**
+ * Growth fractions by audit id, then by count key. A key with no entry
+ * compares exactly.
+ */
+export type Tolerances = Readonly<
+  Record<string, Readonly<Record<string, number>> | undefined>
+>
+
+/**
+ * Whether a growth from `from` to `to` sits inside `fraction` of the recorded
+ * value. Inclusive, and floored to a whole count, since a fraction of a
+ * recorded integer is rarely one and float error must not decide a boundary.
+ * A shrink is never tolerated, since a fall is the ratchet the baseline locks.
+ */
+function withinTolerance(
+  from: number,
+  to: number,
+  fraction: number | undefined,
+): boolean {
+  if (fraction === undefined || to <= from) return false
+  const allowance = Math.floor(from * fraction + 1e-9)
+  return to - from <= allowance
 }
 
 export type Delta =
@@ -105,6 +135,7 @@ export function baselineFrom(
 export function compareBaseline(
   baseline: Baseline | undefined,
   results: readonly AuditResult[],
+  tolerances: Tolerances = {},
 ): Delta[] {
   return results.map((result) => {
     if (result.corpus === 'upstream') {
@@ -124,6 +155,7 @@ export function compareBaseline(
     const steady: string[] = []
     const added: { key: string; to: number }[] = []
     const dropped: { key: string; from: number }[] = []
+    const tolerance = tolerances[result.id] ?? {}
 
     for (const [key, to] of Object.entries(result.counts)) {
       const from = recorded[key]
@@ -132,7 +164,12 @@ export function compareBaseline(
       } else if (from === to) {
         steady.push(key)
       } else {
-        moved.push({ key, from, to, delta: to - from })
+        const count = { key, from, to, delta: to - from }
+        moved.push(
+          withinTolerance(from, to, tolerance[key])
+            ? { ...count, tolerated: true }
+            : count,
+        )
       }
     }
 

@@ -87,6 +87,13 @@ export interface AuditSpec {
    * defect this repository has already fixed elsewhere.
    */
   readonly counts: (record: unknown) => Record<string, number> | undefined
+  /**
+   * Growth fractions by count key, of the recorded value, that move a key
+   * without counting it toward `summary.grown`. A fraction rather than an
+   * absolute count, so it scales to each project's own baseline with no
+   * change to its `baseline.json`. A key with none compares exactly.
+   */
+  readonly tolerance?: Readonly<Record<string, number>>
 }
 
 export interface AuditResult {
@@ -726,6 +733,12 @@ export const AUDITS: readonly AuditSpec[] = [
     gatingExits: [],
     corpus: 'tracked',
     counts: censusCounts,
+    // Every merge grows the tree, so an exact compare reports ordinary growth
+    // on each one. The fraction absorbs about a hundred merges at the rate
+    // measured when it was set. Headroom is cumulative from the record, so a
+    // one-off jump such as a vendored folder reports only past what earlier
+    // merges left unspent, and running out of it is the signal to re-record.
+    tolerance: { files: 0.1, skipped: 0.1, lines: 0.1, largeFolders: 0.1 },
   },
   {
     id: 'code',

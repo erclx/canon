@@ -205,8 +205,8 @@ export function summarize(
     if (delta.kind !== 'compared') continue
 
     for (const moved of delta.moved) {
-      if (moved.delta > 0) grown += 1
-      else shrunk += 1
+      if (moved.delta < 0) shrunk += 1
+      else if (moved.tolerated !== true) grown += 1
     }
   }
 

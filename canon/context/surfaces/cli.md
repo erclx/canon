@@ -78,7 +78,7 @@ Holds the aggregate behind `canon audits run`, the only audit anything schedules
 - `catalog.ts` holds `AUDITS`, one `AuditSpec` per verb. Its `gatingExits` say which exits are facts, since a reporting verb sets 2 on findings it does not gate
 - Add an audit by adding its spec, with a `counts` extractor that returns `undefined` when the record lacks its keys, since zero would read as clean
 - `run.ts` runs the specs together and reports one verdict. `--corpus` scopes a run, and an exit 3 from a verb is a defect in the run
-- `baseline.ts` compares each count to the recorded baseline. Growth reports and never gates, and it is attributed rather than re-recorded to clear it
+- `baseline.ts` diffs each count against the record. Growth never gates, is attributed rather than re-recorded, and skips `grown` inside a spec's `tolerance`
 - `deps` runs weekly in `verify.yml` and times out at 120 seconds as `no-record`. A missing per-machine folder reports absent, but a missing tracked tree still warns
 
 ### `src/context/`

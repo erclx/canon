@@ -53,6 +53,8 @@ An audit that finds no corpus reports `absent`, which moves neither the verdict 
 - An audit that did not report is left out, never written as zero
 - A baseline that does not parse refuses the run
 
+A key may carry a growth tolerance, a fraction of its recorded value. A growth inside it shows in the delta as within the tolerance and stays out of `summary.grown`, and a shrink is never tolerated. The census keys carry 10%.
+
 `gov test-order` reads zero in a shallow clone, so read its delta only from a clone carrying the history.
 
 **In `bun run check`.**
