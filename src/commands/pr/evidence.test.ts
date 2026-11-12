@@ -130,10 +130,13 @@ describe('canon pr evidence --local', () => {
     ])
   })
 
-  it('should still report no-evidence when only a reel is given', async () => {
+  it('should render a reel alone with no evidence image and no checklist', async () => {
     const record = await runEvidenceCommand(['--reel', REEL_LINK])
 
-    expect(record.reason).toBe('no-evidence')
+    expect(record.reason).toBe('ok')
+    expect(record.body).toContain('<!-- pr-evidence:')
+    expect(record.body).toMatch(/\*\*Reel\*\* filmed at `[0-9a-f]{7}`:<br>/)
+    expect(record.body).toContain(`<img src="${REEL_LINK}"`)
   })
 
   it('should embed a passed reel under the addresses at the head it renders', async () => {
