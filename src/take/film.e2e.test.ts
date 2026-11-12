@@ -236,8 +236,11 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
     const luma = bandLuma(clip)
     expect(luma).toHaveLength(beat.frames)
     const ramp = luma.filter((value) => value > 17 && value < 234)
-    expect(ramp.length).toBeGreaterThanOrEqual(57)
-    expect(ramp.length).toBeLessThanOrEqual(60)
+    // The distinct values tell a fade that never started, one value held for
+    // every frame, apart from one that jumped past its middle.
+    const seen = `the clip's distinct band luma: ${[...new Set(luma)].join(' ')}`
+    expect(ramp.length, seen).toBeGreaterThanOrEqual(57)
+    expect(ramp.length, seen).toBeLessThanOrEqual(60)
     const rises = ramp.slice(1).map((value, i) => value - (ramp[i] ?? 0))
     expect(Math.min(...rises)).toBeGreaterThan(0)
 
