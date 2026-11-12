@@ -19,20 +19,20 @@ Owns the local development loop, being the run commands, the gate behind `bun ru
 
 The run commands, which stack references and `docs/target/projects.md` send a session to, so a command added elsewhere is invisible to them.
 
-| Command                 | Purpose                                                                                               |
-| ----------------------- | ----------------------------------------------------------------------------------------------------- |
-| `bun run check`         | Verification scoped to changed files. Fails on format drift, regenerates indexes, asserts clean.      |
-| `bun run check:ci`      | Every stage via `--all`, the run CI does. Still regenerates.                                          |
-| `bun run check:format`  | Read-only oxfmt, Prettier for `.astro`, and shfmt format check.                                       |
-| `bun run check:shell`   | Read-only shellcheck against `scripts/`, `tooling/`, `src/`, and `.claude/hooks/`.                    |
-| `bun run check:lint`    | Read-only oxlint at its default rules, failing on any warning, then html-validate on the sheets.      |
-| `bun run check:types`   | Read-only `tsc --noEmit` against `src/`.                                                              |
-| `bun run check:install` | Clones the repo to tmp and asserts `canon init` lands a fresh scaffold.                               |
-| `bun run test:e2e`      | The nine `*.e2e.test.ts` suites by hand, which a scoped `check` leaves out. Queues on the Tests lock. |
-| `bun run format`        | Auto-fix oxfmt, Prettier for `.astro`, and shfmt formatting.                                          |
-| `bun run design:sync`   | Lands the mapped board frames in `canon/design/`. `--check` writes nothing and exits 14 on drift.     |
-| `bun run clean`         | Wipe `node_modules/`, clear bun cache, reinstall.                                                     |
-| `bun run update`        | Interactive `bun update` followed by verification.                                                    |
+| Command                 | Purpose                                                                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `bun run check`         | Verification scoped to changed files. Fails on format drift, regenerates indexes, asserts clean.              |
+| `bun run check:ci`      | Every stage via `--all`, the run CI does. Still regenerates.                                                  |
+| `bun run check:format`  | Read-only oxfmt, Prettier for `.astro`, and shfmt format check.                                               |
+| `bun run check:shell`   | Read-only shellcheck against `scripts/`, `tooling/`, `src/`, and `.claude/hooks/`.                            |
+| `bun run check:lint`    | Read-only oxlint at its default rules, failing on any warning, then html-validate on the sheets.              |
+| `bun run check:types`   | Read-only `tsc --noEmit` against `src/`.                                                                      |
+| `bun run check:install` | Clones the repo to tmp and asserts `canon init` lands a fresh scaffold.                                       |
+| `bun run test:e2e`      | The nine `*.e2e.test.ts` suites a scoped `check` leaves out, or those under a path. Queues on the Tests lock. |
+| `bun run format`        | Auto-fix oxfmt, Prettier for `.astro`, and shfmt formatting.                                                  |
+| `bun run design:sync`   | Lands the mapped board frames in `canon/design/`. `--check` writes nothing and exits 14 on drift.             |
+| `bun run clean`         | Wipe `node_modules/`, clear bun cache, reinstall.                                                             |
+| `bun run update`        | Interactive `bun update` followed by verification.                                                            |
 
 ### `src/gate/`
 
@@ -60,7 +60,7 @@ Spawns `src/cli.ts` as a real process against a temporary directory, so a case a
 - To add a case, write the fixture under a per-test `mkdtempSync`, then assert the file tree, exit code, and parsed record together. Take a count from the verb's catalog.
 - `runCli` points `HOME` and the state folder under the case's `cwd` and throws `ContainmentViolation` when a spawn writes into the real `stateDir()`
 - Run one test file as `bun --bun vitest run <path>`. Without `--bun` a module importing `bun` fails at collection, and bare `bun test` runs Bun's own runner, which lacks vitest's `expect` context.
-- `vitest.global-setup.ts` queues a full hand run and any `.e2e.test` run on the Tests lock, never another filtered, watch, or CI run. `CANON_HELD_LOCK` skips it. `maxWorkers` is `'50%'` outside CI.
+- `vitest.global-setup.ts` queues a full hand run and any end-to-end run on the Tests lock, never another filtered, watch, or CI run. `CANON_HELD_LOCK` skips it. `maxWorkers` is `'50%'` outside CI.
 
 ### `.claude/hooks/`
 

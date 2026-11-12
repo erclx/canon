@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { E2E_FILTER, locksHandSuite, type VitestRun } from '@/gate/hand-suite'
+import {
+  E2E_CONFIG,
+  E2E_FILTER,
+  locksHandSuite,
+  type VitestRun,
+} from '@/gate/hand-suite'
 
 function handRun(overrides: Partial<VitestRun> = {}): VitestRun {
   return {
@@ -61,6 +66,58 @@ describe('a run selecting the end-to-end suites', () => {
   it('should not lock when the parent gate holds the lock', () => {
     expect(
       locksHandSuite(handRun({ args: ['run', E2E_FILTER], heldLock: 'tests' })),
+    ).toBe(false)
+  })
+})
+
+describe('a run loading the end-to-end config', () => {
+  it('should lock a bare run', () => {
+    expect(
+      locksHandSuite(handRun({ args: ['run', '--config', E2E_CONFIG] })),
+    ).toBe(true)
+  })
+
+  it('should lock a run narrowed to a path', () => {
+    expect(
+      locksHandSuite(
+        handRun({ args: ['run', '--config', E2E_CONFIG, 'src/inventory'] }),
+      ),
+    ).toBe(true)
+  })
+
+  it('should lock the --config= form', () => {
+    expect(
+      locksHandSuite(handRun({ args: ['run', `--config=${E2E_CONFIG}`] })),
+    ).toBe(true)
+  })
+
+  it('should lock the -c alias with a directory', () => {
+    expect(
+      locksHandSuite(handRun({ args: ['run', '-c', `./${E2E_CONFIG}`] })),
+    ).toBe(true)
+  })
+
+  it('should not lock under CI', () => {
+    expect(
+      locksHandSuite(
+        handRun({ args: ['run', '--config', E2E_CONFIG], ci: true }),
+      ),
+    ).toBe(false)
+  })
+
+  it('should not lock when the parent gate holds the lock', () => {
+    expect(
+      locksHandSuite(
+        handRun({ args: ['run', '--config', E2E_CONFIG], heldLock: 'tests' }),
+      ),
+    ).toBe(false)
+  })
+
+  it('should not lock a scoped run loading another config', () => {
+    expect(
+      locksHandSuite(
+        handRun({ args: ['run', '--config', 'vitest.config.ts', 'src/gate/'] }),
+      ),
     ).toBe(false)
   })
 })

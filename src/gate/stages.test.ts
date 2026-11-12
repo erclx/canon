@@ -123,6 +123,7 @@ describe('the tests stage scope', () => {
     const scope = scopeOf('tests')
 
     expect(scope.test('vitest.config.ts')).toBe(true)
+    expect(scope.test('vitest.e2e.config.ts')).toBe(true)
     expect(scope.test('tsconfig.json')).toBe(true)
     expect(scope.test('package.json')).toBe(true)
   })
@@ -192,6 +193,7 @@ describe('the tests stage command', () => {
 
   it.each([
     'vitest.config.ts',
+    'vitest.e2e.config.ts',
     'vitest.setup.ts',
     'vitest.global-setup.ts',
     'tsconfig.json',
