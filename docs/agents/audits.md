@@ -81,7 +81,7 @@ An audit that finds no corpus reports `absent`, which moves neither the verdict 
 | `restated`           | `canon gov restated`                | Instructions `CLAUDE.md` states that a second surface states too                              | Reports        |
 | `rules`              | `canon gov audit`                   | Rules past a shape limit or out of step with a ledger, and here rules short of one            | Reports        |
 | `counts`             | `canon gov counts`                  | Sentences stating a closed catalog's size that disagree with the tree                         | Reports        |
-| `census`             | `canon census`                      | File count, extension breakdown, and line total                                               | Reports        |
+| `census`             | `canon census`                      | File count, extension breakdown, files per folder, and line total                             | Reports        |
 | `deps`               | `canon deps audit`                  | Advisories against the resolved dependencies                                                  | Reports        |
 | `outside`            | `canon gov citations`               | Rule citations and internal frontmatter globs reaching nothing                                | Gates in check |
 | `outside`            | `canon code audit`                  | Pages, stylesheets, and scripts held inline in TypeScript or Astro source past five lines     | Gates in check |

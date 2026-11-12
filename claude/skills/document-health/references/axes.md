@@ -71,6 +71,21 @@ A proposal names headings and a reason, so an operator judges a concrete split. 
 
 The audit resolves its folders by surface root rather than by a path written into it, so a project laid out differently resolves nothing. It then refuses with `reason: "no-folders"`, naming the folders it looked for. Report that refusal as an unread axis.
 
+## Folder layout
+
+| Field          | Value                                                                             |
+| -------------- | --------------------------------------------------------------------------------- |
+| Measures       | Whether a folder holds so many markdown files that it may hold more than one role |
+| Verb           | `canon census --json`                                                             |
+| Evidence class | `measured` for the count, `read` for the role judgment                            |
+
+The record carries `folderCheckpoint` and `folders`, each entry holding `path`, `files`, and `byExtension`. A folder counts its own files and not its subfolders', and a fixtures folder is left out. Take the checkpoint from the record rather than from a number written here.
+
+- **Markdown folders:** an entry whose `byExtension` reaches the checkpoint on `md` alone. A code folder holding a few docs is left to the code check, and a folder under it is judged on its own entry.
+- **Roles:** list the folder's markdown files and group them by what each is for. Two or more groups is a finding, and this grouping is a `read`, since no verb measures a role.
+- **Empty `folders`:** no folder reaches the checkpoint, which is a result. A record without the `folders` key came from an older binary, so report the axis as unread with that cause.
+- **Routes to:** `codebase-layout`, which decides where each role's files go. Health proposes and applies nothing.
+
 ## The design record
 
 | Field          | Value                                                                                            |
