@@ -7,21 +7,12 @@ import { documentHeight } from '@/markdown/structure'
 import { isStubSeed } from '@/tooling/seed-marker'
 
 /**
- * Checkpoint quoted from the standard stating it. It is not a cap.
- *
- * Entry length rests on one entry per domain, which is a domain fact, so
- * `claude/skills/context-fold/references/context.md` keeps it. Depth and bullet weight read the same over
- * any markdown file, so they are stated at the attribute tier and measured by
- * `canon markdown audit` rather than here.
- */
-/**
  * Every reason `canon context audit` refuses for.
  *
- * `no-folders` is the one ordinary absence: a project that never adopted
- * `canon/context/`, and holds no `.canon/diagrams/`
- * folder an older install left, names no corpus this audit can measure, the
- * same state `no-skills` reads for the skill corpora. The other four are a malformed invocation or a checkout git
- * cannot read, which stay a break rather than an absence.
+ * `no-folders` is the one ordinary absence: a project holding neither
+ * `canon/context/` nor a `.canon/diagrams/` folder an older install left names
+ * no corpus to measure, the state `no-skills` reads for the skill corpora. The
+ * other four are a malformed invocation or a checkout git cannot read.
  */
 export type ContextAuditRefusal =
   | 'conflicting-options'
@@ -30,6 +21,14 @@ export type ContextAuditRefusal =
   | 'no-citation-scope'
   | 'no-git'
 
+/**
+ * Checkpoint quoted from the standard stating it. It is not a cap.
+ *
+ * Entry length rests on one entry per domain, a domain fact, so
+ * `claude/skills/context-fold/references/context.md` keeps it. Depth and bullet
+ * weight read the same over any markdown file, so `canon markdown audit`
+ * measures them rather than this.
+ */
 export const LENGTH_CHECKPOINT = 150
 
 /**
@@ -140,22 +139,15 @@ const NAMED_CELL = /`[^`]+`|\[[^\]]+\]\([^)]+\)/
  * and which release labelled it. A marker is a judgment rather than a defect,
  * so this is measured and reported and never gates.
  *
- * The change pattern matches any digit count rather than the three-plus this
- * used to require, since a project young enough to sit in single or double
- * digits, `PR #7`, went entirely unread under the old floor. Widening it reads
- * a change reference wherever a document is scanned as prose, so `provenance`
- * masks a line's displayed spans first, which is what keeps a heading's own
- * auto-derived link destination, `(#7-open-questions)`, from reading as a
- * change number: `#7` there names the heading, not a pull request.
+ * The change pattern matches any digit count, since a young project's `PR #7`
+ * is as much a change as `#700`. `provenance` masks displayed spans first, so a
+ * heading's own link destination, `(#7-open-questions)`, reads as no change.
  *
- * The release pattern accepts three segments without a leading `v`, since the
- * standard cuts a release label rather than a spelling of one and `a CLI at
- * 0.83.0` names a release exactly as `v0.83.0` does. Two segments still require
+ * The release pattern accepts three segments without a leading `v`, since
+ * `a CLI at 0.83.0` names a release as `v0.83.0` does. Two segments still need
  * the `v`, because an unprefixed pair is a dollar cost or a duration far more
- * often than a release in a corpus that records what its own runs cost. What
- * the widening reaches by accident is another tool's version, which the
- * standard asks nobody to cut, and those report rather than being excluded:
- * an exclusion keyed on a nearby tool name goes stale with nothing saying so.
+ * often. Another tool's version reports rather than being excluded, since an
+ * exclusion keyed on a nearby tool name goes stale with nothing saying so.
  */
 const PROVENANCE: readonly { kind: ProvenanceKind; pattern: RegExp }[] = [
   { kind: 'date', pattern: /\b\d{4}-\d{2}-\d{2}\b/g },
@@ -166,24 +158,16 @@ const PROVENANCE: readonly { kind: ProvenanceKind; pattern: RegExp }[] = [
 /**
  * Verbs that read the date behind them as stamping a measurement.
  *
- * `claude/skills/context-fold/references/context.md` cuts a date attached to a change and permits one
- * stamping a measurement, so a pattern matching every ISO date reports against
- * a rule that admits half of what it finds. Separating the two needs the clause
- * rather than the token, since `measured on 2026-08-19` and `overturned on
- * 2026-08-19` differ only in the verb.
+ * `claude/skills/context-fold/references/context.md` cuts a date attached to a
+ * change and permits one stamping a measurement. `measured on 2026-08-19` and
+ * `overturned on 2026-08-19` differ only in the verb, so the clause decides.
+ * These five are never a noun a change date attaches to, so they match at any
+ * distance from the date.
  *
- * These five are unambiguous wherever they appear in the clause, which is what
- * lets them match at any distance from the date. `Measured across the corpus on
- * 2026-08-14` puts four words between the two, and no line in the corpus uses
- * any of them as a noun a change date could attach to.
- *
- * The set is closed and drawn from what the corpus already writes, so a
- * phrasing nobody enumerated goes unmatched. That direction is the safe one: an
- * unmatched date falls back to the change marker it is today, which reports one
- * date too many rather than clearing one the standard cuts. Widening the set is
- * how a missed phrasing is fixed, and a date the clause cannot place is never a
- * third state, because the length finding already spends `unanswered` on the
- * two questions nothing measures at all.
+ * The set is closed, and an unenumerated phrasing falls back to a change
+ * marker, reporting one date too many rather than clearing one the standard
+ * cuts. A date the clause cannot place is never a third state, because the
+ * length finding already spends `unanswered` on the two unmeasured questions.
  */
 const STAMPING = /\b(?:measured|verified|driven|passed|fired)\b/i
 
@@ -201,30 +185,20 @@ const STAMPING_RUN = /\b(?:an?\s+)?runs?\s+(?:on|at|in)\s+$/i
 const SENTENCE_END = /[.!?:;]\s(?=[^.!?:;]*$)/
 
 /**
- * The folder whose standard carries the exclusion above.
+ * The folder whose standard carries the exclusion above, narrowing both
+ * provenance and the required sections. It keeps the provenance name because
+ * the JSON record publishes it as `checkpoints.provenanceFolder`.
  *
- * Two measures narrow here rather than one: provenance and the required
- * sections. The name is the first of them because it was the first, and it
- * stays because renaming a constant the
- * JSON record publishes as `checkpoints.provenanceFolder` breaks every consumer
- * reading that field for a gain of one word.
+ * `claude/skills/context-fold/references/context.md` hands figures to
+ * `draw-figure`, so a marker reported in a diagrams entry would cite a rule
+ * that entry's standard routes elsewhere. The length and table checkpoints
+ * reach every folder, since how far a reader travels generalizes across entry
+ * types while what an entry may say does not. Bullet weight stays ungated here,
+ * since `claude/skills/markdown-craft/references/markdown.md` owns it for every
+ * document type.
  *
- * `claude/skills/context-fold/references/context.md` opens its scope by handing figures to the
- * `draw-figure` skill, so a marker reported in a diagrams entry would cite a
- * rule that entry's own standard routes elsewhere. The length and table
- * checkpoints are quoted from the same standard and keep reaching every audited
- * folder, because a threshold on how far a reader travels generalizes across
- * entry types while a rule about what an entry may say does not.
- *
- * What gates here is a rule only this standard states. Bullet weight does not,
- * since `claude/skills/markdown-craft/references/markdown.md` owns that checkpoint across document types and
- * its remedy sends the overflow to prose, which any entry type can act on.
- * `claude/skills/context-fold/references/context.md` specializes that remedy for an entry carrying
- * decisions, and specializing a rule narrows the advice rather than the measure.
- *
- * Restating the exclusion in the sibling standards was the alternative for what
- * gates here. It duplicates one knowledge item across three surfaces, which the
- * root instruction file forbids, and pointing is not available because the
+ * Restating the exclusion in the sibling standards was the alternative. It
+ * duplicates one fact across three surfaces, and pointing fails because the
  * surface they would point at is the one disclaiming them.
  */
 export const PROVENANCE_FOLDER = 'context'
@@ -449,22 +423,13 @@ function catalogTables(entry: readonly BodyLine[]): TableFinding[] {
 /**
  * Finds the markers narrating a change rather than describing the domain.
  *
- * Fenced blocks are skipped for the same reason the table scan skips them: a
- * sample command or a fixture inside an example is content the entry displays
- * rather than a claim it makes, and a version pinned in an install line is the
- * ordinary shape of one.
+ * Fenced blocks are skipped and displayed spans masked, since a pinned install
+ * line, a hex color `#000`, or a heading anchor `(#7-open-questions)` is text
+ * the entry shows rather than a claim it makes.
  *
- * Displayed spans are masked for the same reason. A code span quoting a hex
- * color, `#000`, and a link destination naming a heading's own anchor,
- * `(#7-open-questions)`, both read as text the entry shows rather than a claim
- * it makes, which is the same distinction the fence skip draws at the block
- * level.
- *
- * A date stamping a measurement is dropped rather than reported under a kind of
- * its own. One list with one meaning is what lets every consumer read it
- * without filtering: the report names what the standard cuts, and the length
- * finding counts the same thing. A separate kind would put the split in three
- * places and leave each free to read it differently.
+ * A date stamping a measurement is dropped rather than given a kind of its own,
+ * so the report and the length finding read one list with one meaning rather
+ * than each filtering a split differently.
  */
 function provenance(lines: readonly BodyLine[]): ProvenanceFinding[] {
   // Scanning one pattern at a time emits a line's markers grouped by kind, so
@@ -759,17 +724,11 @@ function shapeIssues(
  * and nothing reads the break. A path is checkable and a bare name is not,
  * which is what makes this the one form rule worth measuring.
  *
- * Matching stops at the sibling set, which reaches less than the rule does. The
- * standard governs a reference to any other entry, so a split entry naming one
- * that sits in a different folder is a violation this never sees. What the set
- * buys is that a name resolving inside the folder is a reference by
- * construction, where a bare filename matched anywhere would report every
- * sentence that happens to name a file. The entry's own name is out of the set
- * on separate grounds, since naming itself points at nothing a split can strand.
- *
- * Fenced blocks are skipped for the reason the scans above skip them, and a line
- * carrying the citation ignore marker is skipped because that marker already
- * means the line displays a name rather than pointing at one.
+ * Matching stops at the sibling set, so a bare name for an entry in another
+ * folder goes unseen. The set buys that a match is a reference by
+ * construction, where a filename matched anywhere would report every sentence
+ * naming a file. Fenced lines and lines carrying the citation ignore marker
+ * display a name rather than point at one, so both are skipped.
  */
 function bareReferences(
   lines: readonly BodyLine[],
@@ -834,21 +793,11 @@ export function measureEntry(
  * Names each entry past the checkpoint with the standard's three questions
  * answered as far as anything measures them.
  *
- * Only accumulated history is mechanical, and it is already measured by the
- * provenance check, so this joins that count rather than counting again. What
- * it joins is a count of change markers, since a date stamping a measurement is
- * not one and an entry recording what its runs cost would otherwise report
- * accumulated history on the anchors dating those runs. The other two are read
- * by a person: whether an entry still covers one domain is a judgment about its
- * subject, and recognizing content `ls` or `--help` reproduces needs a reader
- * who knows what those emit.
- *
- * An entry outside the governed folder has no measured question at all, since
- * provenance is scoped to the standard stating it, and reporting `no` there
- * would answer from a scan that never ran.
- *
- * Sorted longest first, which is the order the report already printed and the
- * order the questions are worth asking in.
+ * Only accumulated history is mechanical, so this joins the provenance count,
+ * which already leaves out a date stamping a measurement. Whether an entry
+ * covers one domain and whether `ls` or `--help` reproduces it need a reader.
+ * An entry outside the governed folder answers nothing, since `no` there would
+ * come from a scan that never ran. Sorted longest first.
  */
 export function lengthFindings(
   entries: readonly EntryReport[],
@@ -946,15 +895,12 @@ export function retiredSections(folder: AuditedFolder): readonly string[] {
  * A split folder's entries are named for sub-areas of one domain, so a bare
  * name matching one of them points at it and nothing else. The folder named
  * under `.claude/` is where that stops holding, since its entries are named for
- * whole domains and a domain name is a common noun that a seed, a script, or
- * another tree spells the same way. Both false positives this measure was tuned
- * against sat there, naming a seed that shares a filename with the entry beside
- * them, and no signal in the name separates the two.
+ * whole domains, a common noun a seed or a script spells the same way, and no
+ * signal in the name separates the two.
  *
- * What the exemption costs is the references a future split of the named folder
- * would strand, which are the ones this measure would most like to hold. It is
- * taken because a report firing on correct prose is what teaches a reader to
- * stop reading the section.
+ * The exemption costs the references a future split of that folder would
+ * strand. It is taken because a report firing on correct prose teaches a reader
+ * to stop reading the section.
  */
 export function matchesSiblings(folder: AuditedFolder): boolean {
   return governsContent(folder) && folder.nested
@@ -963,22 +909,16 @@ export function matchesSiblings(folder: AuditedFolder): boolean {
 /**
  * Names what does not declare the sections the standard requires.
  *
- * Which unit answers depends on what the folder is. A split folder's entries
- * describe one domain between them and carry the overview and the layout in a
- * sibling named for them, so any one of them answers and a per-file rule there
- * would report every other child of all three shipped splits. The entries of
- * the folder named under `.claude/` are one domain each, so each answers for
- * itself. Rolling those up too was the first shape of this check, and it let a
- * single sibling stand in for thirteen domains it says nothing about.
+ * A split folder's entries describe one domain between them, with the overview
+ * and layout in a sibling named for them, so any one answers for the folder.
+ * The entries of the folder named under `.claude/` are one domain each, so each
+ * answers for itself. Rolling those up too let one sibling stand in for
+ * domains it says nothing about. This needs the folder's other entries, which
+ * `measureFolders` holds and `measureEntry` does not. A folder with no entries
+ * of its own is a split parent holding an index, owing no section.
  *
- * The judgment sits in the caller because the split case needs the folder's
- * other entries, which `measureFolders` holds and `measureEntry` does not. A
- * folder with no entries of its own is a split parent holding an index and
- * subfolders, and it has nothing to require a section of.
- *
- * The standard sanctions omitting `## Layout` from a domain owning no paths,
- * which no measure can tell from an entry that forgot it. An entry of that
- * shape therefore reports, which is a reason this is printed and never gated on.
+ * The standard lets a domain owning no paths omit `## Layout`, which no measure
+ * tells from an entry that forgot it, so this is printed and never gated on.
  */
 export function missingSections(
   root: string,
