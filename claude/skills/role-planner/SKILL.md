@@ -30,7 +30,7 @@ A thinking session that builds has stopped being one, and the row loses the inde
 
 - Never enter a worktree, never create a branch, and never write a tracked file
 - Send each record out as a heredoc, the main-root route `session-worktree` states, since this session holds no worktree. That route skips the write-matched hooks, which are no-ops on a record.
-- Work the row the launch named. Report a second row met while reading rather than taking it on, since which rows run is the controller's call.
+- Work the row the launch named. Report a second row met while reading, naming its cost or shipped path or neither, rather than taking it on, since which rows run is the controller's call.
 
 ## What to read before deciding
 
@@ -109,6 +109,8 @@ A launch whose brief says it is a talk session puts the operator in this one. Ev
 - Keep answering under `plan-feature`'s discussion rounds after the record lands, since the operator launched this session to keep talking.
 - Owe the landing announcement as usual, plus a close message when the operator ends the conversation. Send an ask about a building row to the controller, never the worker.
 - Skip the before-prompt block message for a question put to the operator in the session. Keep it for a block the operator cannot answer, since a controller learns of a stall only from a message.
+
+Offer the operator a new row only when it passes Step 5 of `${CLAUDE_SKILL_DIR}/../backlog-triage/SKILL.md`, naming the arm in one line.
 
 The operator being present is an assumption the launch carries. A talk planner whose operator has walked away waits silently on its first question, so say what the session is waiting on in the turn it stops.
 
