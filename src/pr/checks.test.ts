@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { collapseChecks, requiredChecks, withMergeState } from '@/pr/checks'
+import {
+  collapseChecks,
+  type RawWorkflowRun,
+  requiredChecks,
+  STALL_SECONDS,
+  stallCandidates,
+  stalledRuns,
+  withMergeState,
+} from '@/pr/checks'
 
 const TIP = 'a0cf1a39aa1d0d510e16360e98a18129a8fddc78'
 const PRIOR = '5653721cbb1d0d510e16360e98a18129a8fddc78'
@@ -463,5 +471,172 @@ describe('requiredChecks', () => {
 
   it('should read undefined when the answer is not a rule list', () => {
     expect(requiredChecks({ message: 'Not Found' })).toBeUndefined()
+  })
+})
+
+describe('stalledRuns', () => {
+  const NOW = Date.parse('2026-11-12T12:00:00Z')
+  const STUCK_AT = '2026-11-11T20:19:24Z'
+  const FRESH_AT = '2026-11-12T11:58:00Z'
+
+  function run(overrides: Partial<RawWorkflowRun> = {}): RawWorkflowRun {
+    return {
+      id: 100,
+      workflow_id: 7,
+      name: 'Verify',
+      event: 'pull_request',
+      status: 'queued',
+      head_sha: TIP,
+      created_at: STUCK_AT,
+      ...overrides,
+    }
+  }
+
+  it('should flag a run queued past the bound with zero jobs', () => {
+    const stalled = stalledRuns(
+      TIP,
+      [run()],
+      new Map([[100, 0]]),
+      NOW,
+      STALL_SECONDS,
+    )
+
+    expect(stalled).toEqual([
+      { id: 100, workflow: 'Verify', queuedSeconds: 56436 },
+    ])
+  })
+
+  it('should not flag a stuck run beside a newer completed run of the same workflow and event', () => {
+    const runs = [run(), run({ id: 200, status: 'completed' })]
+
+    const stalled = stalledRuns(
+      TIP,
+      runs,
+      new Map([[100, 0]]),
+      NOW,
+      STALL_SECONDS,
+    )
+
+    expect(stalled).toEqual([])
+  })
+
+  it('should flag a stuck pull_request run beside a newer workflow_dispatch run', () => {
+    const runs = [
+      run(),
+      run({ id: 200, event: 'workflow_dispatch', status: 'completed' }),
+    ]
+
+    const stalled = stalledRuns(
+      TIP,
+      runs,
+      new Map([[100, 0]]),
+      NOW,
+      STALL_SECONDS,
+    )
+
+    expect(stalled.map((row) => row.id)).toEqual([100])
+  })
+
+  it('should flag a stuck pull_request run beside a newer pull_request_review run', () => {
+    const runs = [
+      run(),
+      run({ id: 200, event: 'pull_request_review', status: 'completed' }),
+    ]
+
+    const stalled = stalledRuns(
+      TIP,
+      runs,
+      new Map([[100, 0]]),
+      NOW,
+      STALL_SECONDS,
+    )
+
+    expect(stalled.map((row) => row.id)).toEqual([100])
+  })
+
+  it('should not flag a queued run under the bound', () => {
+    const stalled = stalledRuns(
+      TIP,
+      [run({ created_at: FRESH_AT })],
+      new Map([[100, 0]]),
+      NOW,
+      STALL_SECONDS,
+    )
+
+    expect(stalled).toEqual([])
+  })
+
+  it('should not flag a queued run already carrying a job', () => {
+    const stalled = stalledRuns(
+      TIP,
+      [run()],
+      new Map([[100, 1]]),
+      NOW,
+      STALL_SECONDS,
+    )
+
+    expect(stalled).toEqual([])
+  })
+
+  it('should not flag a run whose jobs read failed', () => {
+    const stalled = stalledRuns(TIP, [run()], new Map(), NOW, STALL_SECONDS)
+
+    expect(stalled).toEqual([])
+  })
+
+  it('should not flag a run on another commit', () => {
+    const stalled = stalledRuns(
+      TIP,
+      [run({ head_sha: PRIOR })],
+      new Map([[100, 0]]),
+      NOW,
+      STALL_SECONDS,
+    )
+
+    expect(stalled).toEqual([])
+  })
+
+  it('should not flag a run whose creation time does not parse', () => {
+    const stalled = stalledRuns(
+      TIP,
+      [run({ created_at: 'never' })],
+      new Map([[100, 0]]),
+      NOW,
+      STALL_SECONDS,
+    )
+
+    expect(stalled).toEqual([])
+  })
+})
+
+describe('stallCandidates', () => {
+  it('should name only the queued newest run past the bound as worth a jobs read', () => {
+    const now = Date.parse('2026-11-12T12:00:00Z')
+    const runs: RawWorkflowRun[] = [
+      {
+        id: 1,
+        workflow_id: 7,
+        name: 'Verify',
+        event: 'pull_request',
+        status: 'queued',
+        head_sha: TIP,
+        created_at: '2026-11-11T20:19:24Z',
+      },
+      {
+        id: 2,
+        workflow_id: 8,
+        name: 'Phase Label Gate',
+        event: 'pull_request',
+        status: 'in_progress',
+        head_sha: TIP,
+        created_at: '2026-11-11T20:19:24Z',
+      },
+    ]
+
+    const ids = stallCandidates(TIP, runs, now, STALL_SECONDS).map(
+      (row) => row.id,
+    )
+
+    expect(ids).toEqual([1])
   })
 })

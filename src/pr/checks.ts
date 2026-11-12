@@ -225,3 +225,84 @@ export function collapseChecks(
     ...(required !== undefined && { advisory }),
   }
 }
+
+/** One row of `repos/{owner}/{repo}/actions/runs?head_sha=<sha>`. */
+export interface RawWorkflowRun {
+  readonly id?: number
+  readonly workflow_id?: number
+  readonly name?: string
+  readonly event?: string
+  readonly status?: string
+  readonly head_sha?: string
+  readonly created_at?: string
+}
+
+/** How long a run may sit queued with no job before it reads as stalled. */
+export const STALL_SECONDS = 600
+
+/** A run GitHub queued for the tip and never gave a job. */
+export interface StalledRun {
+  readonly id: number
+  readonly workflow: string
+  readonly queuedSeconds: number
+}
+
+/**
+ * The newest run per workflow and event on the tip that has sat queued past
+ * the bound, which are the only runs whose jobs are worth reading.
+ *
+ * A close and reopen starts a fresh run and leaves the stuck one queued
+ * forever, so a key on the workflow alone keeps the zombie out once its
+ * replacement exists. The event joins the key because a `workflow_dispatch`
+ * or `pull_request_review` run of the same workflow replaces nothing a stuck
+ * `pull_request` run gates. A higher id is the newer run, as in
+ * `newestPerCheck`.
+ */
+export function stallCandidates(
+  tip: string,
+  runs: readonly RawWorkflowRun[],
+  now: number,
+  boundSeconds: number,
+): readonly StalledRun[] {
+  const newest = new Map<string, RawWorkflowRun & { readonly id: number }>()
+  for (const run of runs) {
+    if (run.head_sha !== tip || run.id === undefined) continue
+    const key = `${run.workflow_id ?? run.name}:${run.event}`
+    const existing = newest.get(key)
+    if (existing === undefined || run.id > existing.id) {
+      newest.set(key, { ...run, id: run.id })
+    }
+  }
+
+  const candidates: StalledRun[] = []
+  for (const run of newest.values()) {
+    if (run.status !== 'queued') continue
+    const created = Date.parse(run.created_at ?? '')
+    if (Number.isNaN(created)) continue
+    const queuedSeconds = Math.floor((now - created) / 1000)
+    if (queuedSeconds < boundSeconds) continue
+    candidates.push({
+      id: run.id,
+      workflow: run.name ?? String(run.workflow_id ?? run.id),
+      queuedSeconds,
+    })
+  }
+  return candidates
+}
+
+/**
+ * The candidates whose jobs read answered zero. A run missing from
+ * `jobCounts`, whose read failed, is not stalled, so a failed read leaves the
+ * reading pending rather than inventing a stall.
+ */
+export function stalledRuns(
+  tip: string,
+  runs: readonly RawWorkflowRun[],
+  jobCounts: ReadonlyMap<number, number>,
+  now: number,
+  boundSeconds: number,
+): readonly StalledRun[] {
+  return stallCandidates(tip, runs, now, boundSeconds).filter(
+    (run) => jobCounts.get(run.id) === 0,
+  )
+}
