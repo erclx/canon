@@ -62,7 +62,8 @@
     "census": {
       "files": 2170,
       "skipped": 84,
-      "lines": 245205
+      "lines": 245205,
+      "largeFolders": 39
     }
   }
 }

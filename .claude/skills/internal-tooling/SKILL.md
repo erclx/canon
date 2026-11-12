@@ -35,10 +35,20 @@ A golden config under `tooling/<stack>/configs/` that extends or references a pa
 
 ## Sync checklist
 
-When modifying files in `tooling/base/configs/`:
+The toolkit dogfoods its own tooling, so a root file and its seeded or golden counterpart are one rule stated twice. A change on either side checks the other.
 
-- Apply the same change to the matching file at the repo root if it exists. The toolkit dogfoods base tooling as its own config source.
+When modifying files in `tooling/<stack>/configs/` or `tooling/<stack>/seeds/`, for any stack:
+
+- Apply the same change to the matching file at the repo root if it exists and states the same rule. A web or claude stack reaches such a root file the same way base does.
+- Port nothing onto a same-named root file that does different work, such as a root workflow and a seed workflow sharing only a filename.
 - Preserve local overrides in the root copy. Port the delta, not the whole file.
+
+When modifying a root CI workflow, hook, script, or config:
+
+- Check `tooling/<stack>/configs/` and `seeds/` for a counterpart and apply the change there if targets should receive it. This is the root to seed direction.
+- Name a deliberately root-only change in the commit.
+- Find a counterpart under another name by searching `tooling/` for the root file's distinctive command or key, since a list of pairs goes stale.
+- Point the change at the plan's counterparts section where `plan-feature` writes one, and do not depend on it having landed.
 
 When modifying `tooling/<stack>/configs/` or `tooling/<stack>/seeds/`:
 

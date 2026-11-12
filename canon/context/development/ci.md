@@ -80,6 +80,7 @@ The CI programs, the install check, and a version pin sit beside the workflows.
 
 - `scripts/ci/` owns the programs the long steps call, such as `publish-check.sh`, `refresh-frames-pr.sh`, and `install-playwright-deps.sh`, and a step past five lines moves there
 - `scripts/core/` owns `install-check.ts`, run in CI after `check:ci` and kept out of the local gate because a cold pack-and-install is unmeasured
+- `src/gate/workflow-timeouts.test.ts` fails a job with no `timeout-minutes` in canon's or any stack's workflows and skips one that sets `uses:`. A timeout never reaches a run that starts no job.
 - `package.json` pins `typescript` to the v5 line `@astrojs/check` expects, so `bun add -D typescript` selecting v7 is a compiler upgrade
 
 ## Gotchas

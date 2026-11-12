@@ -427,10 +427,11 @@ function commentCounts(record: unknown): Record<string, number> | undefined {
 }
 
 /**
- * Reads the census's three headline totals, leaving the extension breakdown
- * out. The breakdown is what a caller reads for its own sake, and folding
- * every extension into the retained baseline would grow the recorded key set
- * with every language the tree ever picks up.
+ * Reads the census's three headline totals and the count of large folders,
+ * leaving the extension breakdown and the folder list out. Both are what a
+ * caller reads for its own sake, and folding every extension or folder into the
+ * retained baseline would grow the recorded key set with every language and
+ * path the tree ever picks up.
  */
 function censusCounts(record: unknown): Record<string, number> | undefined {
   const root = asObject(record)
@@ -440,6 +441,7 @@ function censusCounts(record: unknown): Record<string, number> | undefined {
     files: typeof root.files === 'number' ? root.files : undefined,
     skipped: typeof root.skipped === 'number' ? root.skipped : undefined,
     lines: typeof root.lines === 'number' ? root.lines : undefined,
+    largeFolders: lengthOf(root.folders),
   })
 }
 

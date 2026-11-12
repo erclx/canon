@@ -322,19 +322,43 @@ describe('reading counts out of each record shape', () => {
     expect(classify(specFor('code'), 2, record).status).toBe('reported')
   })
 
-  it('should retain the census totals and leave the extension breakdown out', () => {
+  it('should retain the census totals and the large-folder count, leaving both lists out', () => {
     const record = {
       files: 1139,
       skipped: 4,
       lines: 42017,
       byExtension: [{ extension: 'md', files: 505, lines: 30000 }],
+      folderCheckpoint: 10,
+      folders: [
+        { path: 'src/a', files: 12, byExtension: [] },
+        { path: 'docs', files: 10, byExtension: [] },
+      ],
     }
 
     expect(countsFor(specFor('census'), record)).toEqual({
       files: 1139,
       skipped: 4,
       lines: 42017,
+      largeFolders: 2,
     })
+  })
+
+  it('should retain zero large folders for an empty list', () => {
+    const record = {
+      files: 3,
+      skipped: 0,
+      lines: 9,
+      byExtension: [],
+      folders: [],
+    }
+
+    expect(countsFor(specFor('census'), record)?.largeFolders).toBe(0)
+  })
+
+  it('should read a census record from a binary without folders as unmeasured', () => {
+    const record = { files: 3, skipped: 0, lines: 9, byExtension: [] }
+
+    expect(countsFor(specFor('census'), record)).toBeUndefined()
   })
 })
 
