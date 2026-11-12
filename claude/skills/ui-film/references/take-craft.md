@@ -134,6 +134,7 @@ A beat's view is part of what it shows, so set it before filming rather than let
 - Reach that view by opening the page on the finished state, letting the app fit to it, then emptying it in `setup`, rather than following the app's own view as each element lands
 - Film the selection a hand edit acts on, since `setup` is never filmed and a viewer who missed the selection cannot tell what changed
 - End a hand edit on the edited element rather than a wide view, where neighbors that already looked the same suggest several things changed
+- Set `"scrollbars": true` on a beat whose change is a scrollbar, since every take hides them by default on both routes, and leave it off otherwise because the classic gutter takes 15 px of layout width
 
 Frameboard's launch film followed the board's own view in its first cut, which centered each frame as it landed and left a tall frame cut off below a short one.
 

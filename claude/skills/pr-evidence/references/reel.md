@@ -59,6 +59,7 @@ Write one plan entry for each beat chosen, then skip when none was.
 - Write the plan per `${CLAUDE_SKILL_DIR}/../ui-film/references/take-craft.md`, finding each target on the served page rather than guessing it
 - With no interactive box, skip as `no-interactive-box` and film nothing
 - With interactive boxes that the filter removed, whether negative, static, or marked `(taste)`, skip as `no-visible-change` and film nothing
+- Film a box about a scrollbar with `"scrollbars": true` on its beat per the framing rule in `take-craft.md`, rather than skipping it as `no-capture`
 
 The negative test is a judgment over the box's text. A misread box costs a weaker reel and never a wrong pass, since the still check below guards the footage and the UI reviewer drives every box regardless.
 
