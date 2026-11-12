@@ -33,6 +33,16 @@ export interface DegradationHit {
   readonly term: string
 }
 
+/** Comment lines past which a run is reported, a prompt to read and not a limit. */
+export const BLOCK_LINE_CHECKPOINT = 20
+
+/** A file's longest run of contiguous comment lines, starting at `line`. */
+export interface LongBlock {
+  readonly file: string
+  readonly line: number
+  readonly lines: number
+}
+
 export interface LanguageCount {
   readonly language: Language
   readonly files: number
@@ -41,6 +51,7 @@ export interface LanguageCount {
   readonly docBlocks: number
   readonly inlineComments: number
   readonly degradationHits: readonly DegradationHit[]
+  readonly longBlocks: readonly LongBlock[]
 }
 
 export interface ScanOptions {
@@ -108,6 +119,26 @@ interface FileCount {
   readonly commentLines: number
   readonly docBlocks: number
   readonly inlineComments: number
+  readonly longest: { readonly line: number; readonly lines: number }
+}
+
+/** Tracks contiguous comment lines and keeps the longest run seen. */
+function runTracker() {
+  let start = 0
+  let length = 0
+  let best = { line: 0, lines: 0 }
+
+  return {
+    extend(line: number): void {
+      if (length === 0) start = line
+      length++
+      if (length > best.lines) best = { line: start, lines: length }
+    },
+    end(): void {
+      length = 0
+    },
+    longest: () => best,
+  }
 }
 
 /**
@@ -128,12 +159,14 @@ function countTypeScript(
   let docBlocks = 0
   let inlineComments = 0
   let inBlock = false
+  const runs = runTracker()
 
   for (const [index, line] of lines.entries()) {
     const trimmed = line.trim()
 
     if (inBlock) {
       commentLines++
+      runs.extend(index + 1)
       sweep(trimmed, file.path, index + 1, matchers, hits)
       if (trimmed.includes('*/')) inBlock = false
       continue
@@ -141,6 +174,7 @@ function countTypeScript(
 
     if (trimmed.startsWith('/*')) {
       commentLines++
+      runs.extend(index + 1)
       if (/^\/\*\*(?!\/)/.test(trimmed)) docBlocks++
       sweep(trimmed, file.path, index + 1, matchers, hits)
       if (trimmed.indexOf('*/', 2) === -1) inBlock = true
@@ -150,11 +184,21 @@ function countTypeScript(
     if (trimmed.startsWith('//')) {
       commentLines++
       inlineComments++
+      runs.extend(index + 1)
       sweep(trimmed, file.path, index + 1, matchers, hits)
+      continue
     }
+
+    runs.end()
   }
 
-  return { lines: lines.length, commentLines, docBlocks, inlineComments }
+  return {
+    lines: lines.length,
+    commentLines,
+    docBlocks,
+    inlineComments,
+    longest: runs.longest(),
+  }
 }
 
 const HEREDOC_OPENER = /<<-?\s*(['"]?)([A-Za-z_][A-Za-z0-9_]*)\1/
@@ -181,6 +225,7 @@ function countBash(
   let commentLines = 0
   let inlineComments = 0
   let delimiter: string | undefined
+  const runs = runTracker()
 
   for (const [index, line] of lines.entries()) {
     if (delimiter !== undefined) {
@@ -198,16 +243,26 @@ function countBash(
       if (!(index === 0 && trimmed.startsWith('#!'))) {
         commentLines++
         inlineComments++
+        runs.extend(index + 1)
         sweep(trimmed, file.path, index + 1, matchers, hits)
+        continue
       }
-      continue
     }
+
+    runs.end()
+    if (trimmed.startsWith('#')) continue
 
     const opener = HEREDOC_OPENER.exec(line)
     if (opener) delimiter = opener[2]
   }
 
-  return { lines: counted, commentLines, docBlocks: 0, inlineComments }
+  return {
+    lines: counted,
+    commentLines,
+    docBlocks: 0,
+    inlineComments,
+    longest: runs.longest(),
+  }
 }
 
 export function countFile(
@@ -234,6 +289,10 @@ export function countFile(
     docBlocks: counted.docBlocks,
     inlineComments: counted.inlineComments,
     degradationHits: hits,
+    longBlocks:
+      counted.longest.lines > BLOCK_LINE_CHECKPOINT
+        ? [{ file: file.path, ...counted.longest }]
+        : [],
   }
 }
 
@@ -254,6 +313,7 @@ export function countFiles(
       docBlocks: 0,
       inlineComments: 0,
       degradationHits: [] as DegradationHit[],
+      longBlocks: [] as LongBlock[],
     }
 
     for (const file of files) {
@@ -265,6 +325,7 @@ export function countFiles(
       totals.docBlocks += count.docBlocks
       totals.inlineComments += count.inlineComments
       totals.degradationHits.push(...count.degradationHits)
+      totals.longBlocks.push(...count.longBlocks)
     }
 
     return totals
