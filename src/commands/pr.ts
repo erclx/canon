@@ -1,25 +1,10 @@
 import { existsSync, statSync } from 'node:fs'
-import { mkdir, readFile, realpath, writeFile } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { basename, join, resolve } from 'node:path'
 import { $ } from 'bun'
 import type { Command } from 'commander'
 import { execa } from 'execa'
 import { gitEnv } from '@/git/env'
-import {
-  listChangedFiles,
-  listIgnoreAdditions,
-  listRenames,
-  listRepositoryFiles,
-  parseIgnoreAdditions,
-  type RenamePair,
-  resolveBaseRef,
-} from '@/git/files'
-import {
-  type Bijection,
-  type BijectionRefusal,
-  compareKeyChanges,
-  treeRoots,
-} from '@/pr/bijection'
 import {
   type CheckRunListing,
   collapseChecks,
@@ -73,13 +58,12 @@ import {
   referenceSlug,
   type TreeEntry,
 } from '@/pr/frames'
-import { type HeadRefusal, resolveHead, resolveTip } from '@/pr/head'
+import { type HeadRefusal, resolveTip } from '@/pr/head'
 import {
   type ChecksGate,
   DEFAULT_WAIT_SECONDS,
   SETTLING_REEL_SKIPS,
   type EvidenceGate,
-  type GitRunner,
   lift,
   type LiftApi,
   type LiftRefusal,
@@ -88,7 +72,6 @@ import {
   readChangedPaths,
   readsDrivableBox,
 } from '@/pr/lift'
-import { close, type CloseApi, type CloseRefusal } from '@/pr/close'
 import {
   merge,
   type MergeApi,
@@ -96,13 +79,6 @@ import {
   type MergeRefusal,
   type MergeRequest,
 } from '@/pr/merge'
-import { listWorktrees } from '@/git/worktree'
-import { branchSlug, buildDriveCopy, loadPreviewConfig } from '@/pr/drive-copy'
-import {
-  changedSince,
-  readWorktreeStatus,
-  type StatusEntry,
-} from '@/git/status'
 import { machineListenerReader } from '@/listeners/machine'
 import { loadPaintedPatterns } from '@/pr/painted'
 import { readCarry } from '@/pr/carry'
@@ -114,8 +90,6 @@ import {
   type LocalRefusal,
   type LocalRunner,
 } from '@/pr/local'
-import { linkKeyChanges } from '@/pr/links'
-import { KEY_CHANGES } from '@/pr/paths'
 import {
   findDeployWorkflow,
   mintPreview,
@@ -137,16 +111,10 @@ import {
   writeUiPassLine,
 } from '@/pr/tick'
 import {
-  commentRowOf,
-  identityOf,
   mergeStateOf,
-  type PullIdentity,
-  parseJsonLines,
-  type RestComment,
   type RestPull,
   type RestReview,
   reviewRowOf,
-  selectBranchPull,
 } from '@/pr/rest'
 import {
   readReviewState,
@@ -156,24 +124,32 @@ import {
 } from '@/pr/review-state'
 import { PROJECT_ROOT } from '@/roots/project'
 import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
-
-const GH_TIMEOUT_MS = 30_000
-
-/** How many unnamed files the frame prints before it names a count instead. */
-const UNNAMED_PRINT_LIMIT = 10
-
-interface KeyChangesOptions {
-  readonly link?: boolean
-  readonly body?: string
-  readonly base?: string
-  readonly root?: string
-  readonly json?: boolean
-}
-
-interface ReadOptions {
-  readonly root?: string
-  readonly json?: boolean
-}
+import {
+  GH_TIMEOUT_MS,
+  POSITIVE_WHOLE,
+  PULL_REFUSALS,
+  PullRefusal,
+  ReadOptions,
+  everyChangedPath,
+  gh,
+  gitRunner,
+  listComments,
+  listPullFiles,
+  listReviews,
+  patchPullBody,
+  readIdentity,
+  readPull,
+  readRepoName,
+  refReader,
+  refuseWith,
+  resolvePullNumber,
+  resolveWorktreeRoot,
+} from '@/commands/pr/pull'
+import { registerKeyChanges } from '@/commands/pr/key-changes'
+import { registerHead } from '@/commands/pr/head'
+import { registerChecks } from '@/commands/pr/checks'
+import { registerClose } from '@/commands/pr/close'
+import { registerDriveCopy } from '@/commands/pr/drive-copy'
 
 interface EvidenceOptions extends ReadOptions {
   readonly preview?: string
@@ -195,12 +171,6 @@ interface MergeCommandOptions extends ReadOptions {
   readonly dryRun?: boolean
 }
 
-interface CloseCommandOptions extends ReadOptions {
-  readonly reasonFile?: string
-  readonly head?: string
-  readonly keepBranch?: boolean
-}
-
 interface ReviewStateOptions extends ReadOptions {
   readonly wait?: string
 }
@@ -212,29 +182,6 @@ interface LocalOptions extends ReadOptions {
 interface TickOptions extends ReadOptions {
   readonly boxes?: string
   readonly head?: string
-}
-
-interface DriveCopyOptions extends ReadOptions {
-  readonly baseline?: boolean
-  readonly check?: boolean
-}
-
-type DriveCopyRefusal =
-  | 'no-worktree'
-  | 'no-branch'
-  | 'no-baseline'
-  | 'unreadable-tree'
-  | 'bad-flags'
-
-const DRIVE_COPY_REFUSALS: Record<DriveCopyRefusal, string> = {
-  'no-worktree':
-    'No local worktree holds the pull request branch, so there is no tree to copy from or check.',
-  'no-branch':
-    'The checkout holds no branch, so no copy root could be named. Pass the pull request number.',
-  'no-baseline':
-    'No baseline was recorded for this pull request. Run --baseline before --check.',
-  'unreadable-tree': 'git could not read the worktree status.',
-  'bad-flags': '--baseline and --check cannot be combined.',
 }
 
 type TickReason =
@@ -266,10 +213,6 @@ const TICK_REFUSALS: Record<TickReason | 'gh-failed', string> = {
   'gh-failed':
     'gh could not read or edit the marked comment on this pull request.',
 }
-
-/** Shared by every verb that resolves a pull request from the checkout's branch. */
-const AMBIGUOUS_PULL =
-  'More than one pull request is open on this branch, each against another base. Name the pull request number.'
 
 /** How long the probe waits on a listener before reading it as not a server. */
 const LOCAL_PROBE_TIMEOUT_MS = 2_000
@@ -400,36 +343,6 @@ const PREVIEW_HEAD_NOTES: Record<PreviewHeadReason, string> = {
     'No successful deploy exists for this branch. Mint one with canon pr preview.',
 }
 
-/** Why a head-sensitive read produced no answer about a commit. */
-type PullRefusal =
-  | 'gh-missing'
-  | 'gh-failed'
-  | 'ambiguous-pull'
-  | 'no-branch'
-  | 'runs-unreadable'
-  | 'reviews-unreadable'
-
-/** What a reader does about each way the two sha-keyed verbs produced nothing. */
-const PULL_REFUSALS: Record<PullRefusal | HeadRefusal, string> = {
-  'gh-missing':
-    'gh is not on the path, so no pull request could be resolved. Name the branch through a checkout that carries one.',
-  'gh-failed':
-    'gh could not answer for this branch. Name the pull request number instead.',
-  'ambiguous-pull': AMBIGUOUS_PULL,
-  'no-branch':
-    'The pull request carries no head branch name, so no ref could be read for it.',
-  'unresolvable-ref':
-    'git could not read the remote, so the branch tip is unknown. That is a failed read rather than an absent branch, so nothing is reported about the head.',
-  'no-remote-branch':
-    'The remote carries no branch by that name. It was deleted or never pushed, so there is no tip to compare against.',
-  'no-object-head':
-    'The pull request object reported no head commit, so there is nothing to compare the tip against.',
-  'runs-unreadable':
-    'The check runs for this commit could not be read. An empty answer here would report a commit as having no check rather than as unread, so nothing is reported.',
-  'reviews-unreadable':
-    'The reviews on this pull request could not be read. An empty answer here would report a reviewed pull request as never reviewed, which routes the next pass to the whole change, so nothing is reported.',
-}
-
 /**
  * Why `canon pr evidence` produced no comment body, past the ones
  * `readIdentity` already owns (`gh-missing`, `gh-failed`, `no-branch`) and the
@@ -458,235 +371,17 @@ const EVIDENCE_REFUSALS: Record<EvidenceRefusal, string> = {
     'This render holds no cases and the marked comment holds some, so posting it would replace a comparison with an empty one. Edit the comment by hand if every case was removed on purpose.',
 }
 
-/** Why the read produced no comparison, ahead of the ones the compare owns. */
-type SourceRefusal =
-  | 'gh-missing'
-  | 'gh-failed'
-  | 'ambiguous-pull'
-  | 'unreadable-body'
-  | 'unreadable-tree'
-  | 'no-base'
-  | 'bad-base'
-  | 'unreadable-changes'
-
-type Refusal = SourceRefusal | BijectionRefusal
-
-/** What a reader does about each way this produced no reading. */
-const REFUSALS: Record<Refusal, string> = {
-  'gh-missing':
-    'gh is not on the path, so no pull request body could be read. Pass --body <path> to read one off disk instead.',
-  'gh-failed':
-    'gh could not answer for this branch. Name the pull request number, or pass --body <path>.',
-  'ambiguous-pull': AMBIGUOUS_PULL,
-  'unreadable-body': 'The file named by --body could not be read.',
-  'unreadable-tree':
-    'git could not list this repository, so no path could be judged whole rather than partial.',
-  'no-base': 'No base resolves against the trunk. Fetch origin or pass --base.',
-  'bad-base':
-    'The ref passed to --base shares no history with HEAD here, either because it resolves to no commit or because it sits on an unrelated root. Pass a ref this branch was taken from.',
-  'unreadable-changes':
-    'git could not list what this branch changed, so the set is unknown.',
-  'no-section': `This body carries no ## ${KEY_CHANGES} section, so it claims nothing to compare.`,
-  'no-claims': `The ## ${KEY_CHANGES} section carried no path this reader could resolve. That is the extractor failing over prose rather than the body being wrong, so nothing is raised.`,
-  'no-changes':
-    'The pull request changed no files, so there is nothing for a claim to answer.',
-}
-
 export function register(program: Command): void {
   const pr = program
     .command('pr')
     .description('Read a pull request body against the change it describes')
     .helpOption('-h, --help', 'Show this help message')
 
-  pr.command('key-changes')
-    .description(
-      `Compare the files a body's ## ${KEY_CHANGES} names against its own diff`,
-    )
-    .argument('[number]', 'Pull request to read, defaulting to this branch')
-    .helpOption('-h, --help', 'Show this help message')
-    .option(
-      '--body <path>',
-      'Read the body from a file rather than the API, ignoring any number except the one --link needs',
-    )
-    .option(
-      '--base <ref>',
-      'Far side of the range when --body supplies the body',
-    )
-    .option('--root <path>', 'Repository to read, defaulting to the cwd')
-    .option(
-      '--link',
-      `Print the body with each ## ${KEY_CHANGES} path linked to its diff, needing a number`,
-    )
-    .option('--json', 'Add a machine-readable record on stdout')
-    .addHelpText(
-      'after',
-      [
-        '',
-        'This repository squash-merges, so a pull request body becomes the commit',
-        'message and the record on the trunk once the branch is gone. A bullet',
-        'claiming a change nobody made corrupts that record, and a changed file no',
-        'bullet names leaves it incomplete.',
-        '',
-        'The two directions carry different weight:',
-        "  unmet      a whole path the body claims ahead of its bullet's first",
-        '             comma and the diff does not carry, the graded direction',
-        '  unnamed    a changed file no bullet reached that a reader might have',
-        '             wanted one for, reported without a grade',
-        '  incidental a changed file no bullet reached that owes none: a test, a',
-        '             fixture, or a lockfile, held apart so the count above reads',
-        '  unresolved a path written partially, or one past its first comma,',
-        '             which can credit a changed file and never accuse one',
-        '',
-        `Only ## ${KEY_CHANGES} is read. ## Technical context legitimately names`,
-        'files a branch never touched, so widening the read manufactures findings.',
-        '',
-        'One class survives the reader: a bullet citing where something is defined',
-        'while claiming an edit elsewhere puts a real path in the claim region and',
-        'points the change at a locative the path does not name. Read the bullet on',
-        "the record's preview before filing an unmet path as a stale claim.",
-        '',
-        '--link prints the body and nothing else, with every path the section',
-        'names that the diff changes written as a link to its row in the Files',
-        'tab. The anchor is `diff-` and the SHA-256 of the path. Pass the pull',
-        'request number, since the link needs it. It also rewrites the anchor',
-        'of a link opening another file, and a plain run reports that link as',
-        "mislinked when its label is a changed path and its anchor hashes another's.",
-        '',
-        'Refusals, read off `reason`:',
-        '  no-section          the body carries no `## Key changes` heading, so it',
-        '                      claims nothing',
-        '  no-claims           the heading is there and no span resolved, which is',
-        '                      the extractor failing over prose and raises nothing',
-        '  no-changes          the pull request changed no files, so no claim has',
-        '                      anything to answer',
-        '  unreadable-body     the pull request body could not be read',
-        '  unreadable-tree     the file tree of the head could not be read',
-        '  no-base             GitHub reported no merge base for the pull request',
-        '  bad-base            `--base` names a ref sharing no history with HEAD',
-        '  unreadable-changes  the changed files could not be listed',
-        '  ambiguous-pull      two open pull requests share the branch against',
-        '                      different bases, so name a number',
-        '  gh-missing          `gh` is not on the path, so no pull request could be',
-        '                      resolved',
-        '  gh-failed           `gh` could not answer for this repository or branch',
-        '  no-number           --link was given with no pull request number',
-        '  no-repo-url         --link could not read the repository address',
-        '  link-json           --link was given with --json, though it prints the body',
-        '',
-        'Exit codes:',
-        '  0  every claimed path is in the diff, and every link opens its own file',
-        '  1  refused, with the reason on stderr or in the JSON record',
-        '  2  a claimed path is absent from the diff, or a link opens another file',
-        '',
-        'Examples:',
-        '  canon pr key-changes',
-        '  canon pr key-changes 1265 --link --body .canon/tmp/body.md',
-        '  canon pr key-changes 1265 --json',
-        '  canon pr key-changes --body .canon/tmp/body.md --base origin/main',
-        '',
-      ].join('\n'),
-    )
-    .action(async (number: string | undefined, opts: KeyChangesOptions) => {
-      process.exitCode = await runKeyChanges(number, opts)
-    })
+  registerKeyChanges(pr)
 
-  pr.command('head')
-    .description(
-      "Compare a pull request's reported head against the branch tip",
-    )
-    .argument('[number]', 'Pull request to read, defaulting to this branch')
-    .helpOption('-h, --help', 'Show this help message')
-    .option('--root <path>', 'Repository to read, defaulting to the cwd')
-    .option('--json', 'Add a machine-readable record on stdout')
-    .addHelpText(
-      'after',
-      [
-        '',
-        'The pull request object lags the branch ref by up to a minute after a',
-        'push and reports nothing about the lag, so a session reading',
-        '`headRefOid` alone calls a pushed commit unpushed. This resolves the',
-        'tip from the remote with `git ls-remote` and reports which commit each',
-        'source names.',
-        '',
-        'Refusals, read off `reason`:',
-        '  ambiguous-pull    two open pull requests share the branch against',
-        '                    different bases, so name a number',
-        '  no-branch         the pull request carries no head branch name',
-        '  unresolvable-ref  the remote read failed, which is not an absent branch',
-        '  no-remote-branch  the remote carries no branch by that name, so there',
-        '                    is no tip to compare against',
-        '  gh-missing        `gh` is not on the path, so no pull request resolved',
-        '  gh-failed         `gh` could not answer for this branch, so name a number',
-        '  no-object-head    the pull request object reported no head commit',
-        '',
-        'Read the verdict off the record rather than off the exit. A stale head',
-        'exits 0, because an operator shell profile can wrap this binary in a',
-        'function whose status comes from a trailing command.',
-        '',
-        'Exit codes:',
-        '  0  the tip resolved, whether the object agreed with it or not',
-        '  1  refused, with the reason on stderr or in the JSON record',
-        '',
-        'Examples:',
-        '  canon pr head',
-        '  canon pr head 1341 --json',
-        '',
-      ].join('\n'),
-    )
-    .action(async (number: string | undefined, opts: ReadOptions) => {
-      process.exitCode = await runHead(number, opts)
-    })
+  registerHead(pr)
 
-  pr.command('checks')
-    .description('Report the check runs belonging to the branch tip')
-    .argument('[number]', 'Pull request to read, defaulting to this branch')
-    .helpOption('-h, --help', 'Show this help message')
-    .option('--root <path>', 'Repository to read, defaulting to the cwd')
-    .option('--json', 'Add a machine-readable record on stdout')
-    .addHelpText(
-      'after',
-      [
-        '',
-        '`gh pr checks` cannot be made sha-aware at all: its field set carries no',
-        'sha, so a caller cannot learn which commit its answer describes. This',
-        'resolves the tip from the remote and reads the check runs keyed on it.',
-        '',
-        'Pending is reported for a tip carrying no run yet as well as for one',
-        'still going, since the endpoint has answered with a non-zero count and',
-        'an empty row list, and reading that as passing is the false green the',
-        'sha key alone does not close.',
-        '',
-        'Refusals, read off `reason`:',
-        '  ambiguous-pull    two open pull requests share the branch against',
-        '                    different bases, so name a number',
-        '  no-branch         the pull request carries no head branch name',
-        '  unresolvable-ref  the remote read failed, which is not an absent branch',
-        '  no-remote-branch  the remote carries no branch by that name, so there',
-        '                    is no tip to compare against',
-        '  runs-unreadable   the check runs for the tip could not be read, which is',
-        '                    unread rather than none',
-        '  gh-missing        `gh` is not on the path, so no pull request resolved',
-        '  gh-failed         `gh` could not answer for this branch, so name a number',
-        '  no-object-head    the pull request object reported no head commit',
-        '',
-        'A branch conflicting with its base gets no merge ref, so no run ever',
-        'starts for it and the state stays pending. The record carries',
-        '`conflicted: true` beside it when `mergeStateStatus` reads DIRTY and no',
-        'run belongs to the tip, and a caller stops waiting and rebases.',
-        '',
-        'Exit codes:',
-        '  0  the runs for the tip were read, whatever they say',
-        '  1  refused, with the reason on stderr or in the JSON record',
-        '',
-        'Examples:',
-        '  canon pr checks',
-        '  canon pr checks 1341 --json',
-        '',
-      ].join('\n'),
-    )
-    .action(async (number: string | undefined, opts: ReadOptions) => {
-      process.exitCode = await runChecks(number, opts)
-    })
+  registerChecks(pr)
 
   pr.command('review-state')
     .description(
@@ -1185,59 +880,7 @@ export function register(program: Command): void {
       process.exitCode = await runMerge(number, opts)
     })
 
-  pr.command('close')
-    .description(
-      'Close a pull request unmerged, posting the reason first and deleting its head branch',
-    )
-    .argument('<number>', 'Pull request to close')
-    .helpOption('-h, --help', 'Show this help message')
-    .option('--reason-file <path>', 'Closing comment to post, required')
-    .option(
-      '--head <branch>',
-      'Head branch the pull request must carry, defaulting to the current branch',
-    )
-    .option('--keep-branch', 'Leave the head branch in place')
-    .option('--root <path>', 'Repository to read, defaulting to the cwd')
-    .option('--json', 'Add a machine-readable record on stdout')
-    .addHelpText(
-      'after',
-      [
-        '',
-        'The reason is required, so a pull request this verb closes always says',
-        'why. It is checked before anything is read: banned characters, phase',
-        'labels, board references, session links, and density measured on the',
-        'reason itself. A finding refuses reason-unpublishable with the findings',
-        'in the record.',
-        '',
-        'Then the pull request is read and must be open with the head --head',
-        'names. The comment posts first, then the close, then the branch',
-        'delete, so a failure part way leaves a comment on an open pull request',
-        'rather than a close with no reason. A failed delete never fails the',
-        'close, and a head in another repository is never deleted.',
-        '',
-        'Record: number, commentUrl, branch (deleted, kept, fork, delete-failed),',
-        'findings on a reason-unpublishable refusal',
-        '',
-        'Reasons:',
-        '  closed',
-        '  no-reason, reason-unreadable, reason-unpublishable, no-head,',
-        '  gh-failed, pull-closed, head-mismatch, comment-failed, close-failed',
-        '',
-        'Every call is REST, never `gh pr close`, which runs on GraphQL.',
-        '',
-        'Exit codes:',
-        '  0  closed',
-        '  1  refused, with the reason in the JSON record',
-        '',
-        'Examples:',
-        '  canon pr close 1341 --reason-file reason.md --json',
-        '  canon pr close 1341 --reason-file reason.md --head feat/old --keep-branch',
-        '',
-      ].join('\n'),
-    )
-    .action(async (number: string, opts: CloseCommandOptions) => {
-      process.exitCode = await runClose(number, opts)
-    })
+  registerClose(pr)
 
   pr.command('preview')
     .description(
@@ -1484,92 +1127,7 @@ export function register(program: Command): void {
       process.exitCode = await runTick(number, opts)
     })
 
-  pr.command('drive-copy')
-    .description(
-      "Copy the folders a running preview saves into, so a UI pass drives a throwaway copy, and check the worker's worktree gained no change",
-    )
-    .argument(
-      '[number]',
-      'Pull request whose worktree to read, defaulting to the checkout at --root',
-    )
-    .helpOption('-h, --help', 'Show this help message')
-    .option('--root <path>', 'Repository to read, defaulting to the cwd')
-    .option('--json', 'Add a machine-readable record on stdout')
-    .option(
-      '--baseline',
-      "Rebuild the copy, then record the worktree's git status",
-    )
-    .option(
-      '--check',
-      'Report each path changed since the baseline, copying nothing',
-    )
-    .addHelpText(
-      'after',
-      [
-        '',
-        'A project names what its preview writes in',
-        '`canon/config/preview.json` as',
-        '`{ "writes": [path], "keep": [path], "env": "<NAME>" }`.',
-        'Each `writes` path is relative to the worktree, and `env`, defaulting',
-        'to `CANON_PREVIEW_ROOT`, is the variable the server reads for the copy',
-        'root. The server resolves each declared path under that root.',
-        '',
-        'Each `keep` path sits below a `writes` path, never equal to one, and',
-        'names state the running server owns there, such as a run file. A',
-        "rebuild leaves it in the copy and never copies the worktree's own, so",
-        'list it for a server that writes under a declared path. The key is',
-        'optional.',
-        '',
-        'The copy lives at `.canon/tmp/pr/review-ui/<slug>/board/` at the main',
-        'worktree root, where `<slug>` is the branch with a leading type',
-        'segment dropped and each `/` made `-`. With a number the branch is the',
-        "pull request's head, and without one it is the checkout's, so the",
-        'worker starting its server before a pull request exists and the',
-        'reviewer naming the number land on one copy. Every run but --check',
-        "resets each declared path from the worktree, dropping the last pass's",
-        'drives, and leaves the rest of the copy root and each `keep` path as',
-        'they are. A page added only to the copy, inside a declared path, is',
-        'wiped.',
-        '',
-        '--baseline records `git status` for the worktree under',
-        '`.canon/tmp/pr/review-ui/<number>/`, and --check reports each path',
-        'whose status or content changed since, an untracked file included.',
-        'Both run with no config, since a project that saves drives and never',
-        'declared it is the case the check exists for. An edit the worker makes',
-        'during the pass reads as changed too.',
-        '',
-        'Read `reason` on the JSON record:',
-        '  copied     the copy was rebuilt, with `copyRoot`, `env`, `copied`, and',
-        '             `missing` for a declared path the worktree does not hold',
-        '  no-config  the project declares no preview, so nothing was copied',
-        '  clean      --check found no change since the baseline',
-        '  changed    --check found changes, listed in `paths`, exit 1',
-        '',
-        'Refusals, read off `reason`:',
-        '  no-worktree      no local worktree holds the branch, as for a cloud',
-        "                   worker's, so there is no tree to check",
-        '  no-branch        the checkout holds no branch',
-        '  no-baseline      --check ran before any --baseline for this number',
-        '  bad-config       preview.json does not parse or lacks a writes list',
-        '  unsafe-path      a writes path is absolute or climbs with `..`',
-        '  unreadable-tree  git could not read the worktree status',
-        '  bad-flags        --baseline and --check were combined',
-        '  gh-failed, ambiguous-pull, gh-missing',
-        '',
-        'Exit codes:',
-        '  0  copied, no-config, or clean',
-        '  1  changed, or refused, with the reason in the JSON record',
-        '',
-        'Examples:',
-        '  canon pr drive-copy --json',
-        '  canon pr drive-copy 1341 --baseline --json',
-        '  canon pr drive-copy 1341 --check --json',
-        '',
-      ].join('\n'),
-    )
-    .action(async (number: string | undefined, opts: DriveCopyOptions) => {
-      process.exitCode = await runDriveCopy(number, opts)
-    })
+  registerDriveCopy(pr)
 
   pr.command('frames')
     .description(
@@ -1677,795 +1235,6 @@ export function register(program: Command): void {
     .action(async (number: string | undefined, opts: FramesOptions) => {
       process.exitCode = await runFrames(number, opts)
     })
-}
-
-interface PullRequestRead {
-  readonly body: string
-  readonly changed: readonly string[]
-  readonly head: string | undefined
-  readonly number: number | undefined
-  readonly renames: readonly RenamePair[]
-  readonly ignoreAdditions: readonly string[]
-  readonly evidenceUnread: boolean
-}
-
-type SourceRead =
-  | { readonly kind: 'read'; readonly source: PullRequestRead }
-  | { readonly kind: 'refused'; readonly reason: SourceRefusal }
-
-/**
- * Reads the body and the changed set from the pull request the caller named,
- * or from the one open on this branch.
- *
- * The body comes off the pull read and the files off the paginated files
- * endpoint, since GraphQL is the only route that returns both in one call and
- * a cloud session's proxy refuses it. A push between the two reads can compare
- * a body against the next commit's files, which the paginated read already
- * risked for any pull request past the old view's cap of 100 files.
- */
-async function readFromApi(
-  cwd: string,
-  number: string | undefined,
-): Promise<SourceRead> {
-  if (Bun.which('gh') === null) {
-    return { kind: 'refused', reason: 'gh-missing' }
-  }
-
-  const pull = await readPull(cwd, number)
-  if (pull.kind === 'refused') return pull
-
-  const { row } = pull
-  if (row.number === undefined) return { kind: 'refused', reason: 'gh-failed' }
-
-  const changed = await listFilesByPage(cwd, row.number)
-  if (changed === undefined) return { kind: 'refused', reason: 'gh-failed' }
-
-  const body = row.body ?? ''
-  const head = row.head?.sha
-  const sorted = [...changed].sort()
-  const evidence = await resolveApiEvidence(cwd, body, sorted, head, row.number)
-
-  return {
-    kind: 'read',
-    source: {
-      body,
-      changed: sorted,
-      head,
-      number: row.number,
-      renames: evidence.renames,
-      ignoreAdditions: evidence.ignoreAdditions,
-      evidenceUnread: evidence.unread,
-    },
-  }
-}
-
-/**
- * A rename's source path and a `.gitignore` addition, fetched only when a
- * first pass with neither already reports an unmet claim.
- *
- * The probe pays for a repository listing this read takes again a moment
- * later in `runKeyChanges`, and the full-row `gh api …/files` call besides it
- * only on the pass that already has something to double-check.
- *
- * `unread` separates a read that failed from one that succeeded and found
- * neither, which an empty `renames`/`ignoreAdditions` cannot do on its own.
- * `listFilesByPage` above refuses the whole comparison on exactly this
- * ground: a set known to be short would let a correct bullet accuse a file
- * nobody changed. This carries the same refusal as a flag rather than a
- * refused `Bijection`, since the base comparison can still run and most
- * claims never touch a rename or a `.gitignore` line at all.
- */
-async function resolveApiEvidence(
-  cwd: string,
-  body: string,
-  changed: readonly string[],
-  head: string | undefined,
-  number: number | undefined,
-): Promise<{
-  readonly renames: readonly RenamePair[]
-  readonly ignoreAdditions: readonly string[]
-  readonly unread: boolean
-}> {
-  const clean = { renames: [], ignoreAdditions: [], unread: false }
-  const unread = { renames: [], ignoreAdditions: [], unread: true }
-
-  const tracked = await listRepositoryFiles(cwd)
-  if (tracked === undefined) return unread
-
-  const probe = compareKeyChanges({
-    body,
-    changed,
-    roots: treeRoots(tracked, changed),
-    ...(head !== undefined && { head }),
-  })
-  // A refusal here means there is no claim to credit at all, and a clean
-  // pass means every claim already resolved without the extra evidence, so
-  // neither case leaves anything for unread evidence to have mattered to.
-  if (probe.kind !== 'measured' || probe.unmet.length === 0) return clean
-
-  // Only past this point does a missing pull request number become a real
-  // gap: there is a claim the probe could not credit, and no number to fetch
-  // the evidence that might explain it.
-  if (number === undefined) return unread
-
-  // No `--jq` filter here, unlike `listFilesByPage` above. Shaping each row to
-  // {filename, previous_filename, status, patch} would make `--paginate`
-  // concatenate one filtered value per page rather than one combined array,
-  // and gh's own pretty-printing of an object result (unlike the scalar
-  // strings `--jq '.[].filename'` yields) is not guaranteed to stay
-  // line-parseable. Parsing the raw paginated array is safe under both.
-  const stdout = await gh(cwd, [
-    'api',
-    '--paginate',
-    `repos/{owner}/{repo}/pulls/${number}/files`,
-  ])
-  if (stdout === null) return unread
-
-  let rows: readonly {
-    readonly filename: string
-    readonly previous_filename?: string
-    readonly status: string
-    readonly patch?: string
-  }[]
-  try {
-    rows = JSON.parse(stdout)
-  } catch {
-    return unread
-  }
-
-  const renames = rows
-    .filter(
-      (row): row is typeof row & { previous_filename: string } =>
-        row.status === 'renamed' && row.previous_filename !== undefined,
-    )
-    .map((row) => ({ from: row.previous_filename, to: row.filename }))
-
-  const ignoreRow = rows.find((row) => row.filename === '.gitignore')
-  const ignoreAdditions =
-    ignoreRow?.patch !== undefined ? parseIgnoreAdditions(ignoreRow.patch) : []
-
-  return { renames, ignoreAdditions, unread: false }
-}
-
-/**
- * Every file a pull request changed, read through the paginated endpoint.
- *
- * Returns undefined when any page fails, which refuses rather than comparing
- * the pages that arrived: a comparison run against a set known to be short
- * would accuse a correct bullet of naming a file nobody changed.
- */
-async function listFilesByPage(
-  cwd: string,
-  number: number,
-): Promise<string[] | undefined> {
-  try {
-    // See src/worktrees/reclaim.ts for why gh needs the stripped environment.
-    const result = await execa(
-      'gh',
-      [
-        'api',
-        '--paginate',
-        `repos/{owner}/{repo}/pulls/${number}/files`,
-        '--jq',
-        '.[].filename',
-      ],
-      { cwd, timeout: GH_TIMEOUT_MS, env: gitEnv(), extendEnv: false },
-    )
-    return result.stdout.split('\n').filter(Boolean)
-  } catch {
-    return undefined
-  }
-}
-
-/**
- * Reads the body off disk and the changed set from git, which is the shape a
- * fixture and a body still being drafted both need.
- *
- * `cwd` and `root` diverge when a caller passes `--root` to read a pull
- * request against a worktree other than the one they are standing in. The
- * body path is resolved against `cwd`, since it is correct from where the
- * caller stands regardless of which tree `--root` names.
- */
-async function readFromFile(
-  root: string,
-  cwd: string,
-  path: string,
-  base: string | undefined,
-): Promise<SourceRead> {
-  let body: string
-  try {
-    body = await readFile(resolve(cwd, path), 'utf8')
-  } catch {
-    return { kind: 'refused', reason: 'unreadable-body' }
-  }
-
-  const resolved = await resolveBaseRef(root, base)
-  if (resolved === undefined) {
-    return {
-      kind: 'refused',
-      reason: base === undefined ? 'no-base' : 'bad-base',
-    }
-  }
-
-  const changed = await listChangedFiles(root, resolved)
-  if (changed === undefined) {
-    return { kind: 'refused', reason: 'unreadable-changes' }
-  }
-
-  const [head, renames, ignoreAdditions] = await Promise.all([
-    $`git -C ${root} rev-parse HEAD`.env(gitEnv()).quiet().nothrow(),
-    listRenames(root, resolved),
-    listIgnoreAdditions(root, resolved),
-  ])
-
-  return {
-    kind: 'read',
-    source: {
-      body,
-      changed,
-      head: head.exitCode === 0 ? head.text().trim() : undefined,
-      number: undefined,
-      renames: renames ?? [],
-      ignoreAdditions: ignoreAdditions ?? [],
-      evidenceUnread: renames === undefined || ignoreAdditions === undefined,
-    },
-  }
-}
-
-async function runKeyChanges(
-  number: string | undefined,
-  opts: KeyChangesOptions,
-): Promise<number> {
-  const root = resolve(opts.root ?? process.cwd())
-  const emitJson = opts.json ?? false
-
-  if (opts.link === true) return runKeyChangesLink(number, opts, root)
-
-  intro('canon pr key-changes')
-
-  const source =
-    opts.body === undefined
-      ? await readFromApi(root, number)
-      : await readFromFile(root, process.cwd(), opts.body, opts.base)
-
-  if (source.kind === 'refused') return refuse(source.reason, emitJson, root)
-
-  const tracked = await listRepositoryFiles(root)
-  if (tracked === undefined) return refuse('unreadable-tree', emitJson, root)
-
-  const report: Bijection = compareKeyChanges({
-    body: source.source.body,
-    changed: source.source.changed,
-    roots: treeRoots(tracked, source.source.changed),
-    renames: source.source.renames,
-    ignoreAdditions: source.source.ignoreAdditions,
-    evidenceUnread: source.source.evidenceUnread,
-    ...(source.source.head !== undefined && { head: source.source.head }),
-  })
-
-  if (report.kind === 'refused') return refuse(report.reason, emitJson, root)
-
-  logStep('Scope')
-  logInfo(
-    `${plural(report.claims.length, 'claim')} against ${plural(report.changed.length, 'changed file')}${
-      report.head === undefined ? '' : ` at ${report.head.slice(0, 8)}`
-    }`,
-  )
-  if (report.evidenceUnread) {
-    logWarn(
-      'Rename or .gitignore-addition evidence could not be read, so a claim it might have credited or accused landed in unresolved rather than unmet.',
-    )
-  }
-
-  logStep(report.unmet.length === 0 ? 'Claimed' : 'Unmet')
-  if (report.unmet.length === 0) {
-    logInfo('every claimed path is in the diff')
-  } else {
-    logWarn(
-      `${plural(report.unmet.length, 'claimed path')} the diff does not carry. Correct the bullet, or make the change it describes.`,
-    )
-    for (const claim of report.unmet) {
-      logWarn(`${claim.path} — ${claim.preview}`)
-    }
-  }
-
-  // Named rather than counted into the verdict. A generated asset, a lockfile,
-  // and a regenerated index all change without earning a bullet, so grading
-  // this direction would fire on nearly every branch.
-  logStep('Unnamed')
-  if (report.unnamed.length === 0) {
-    logInfo('every changed file is reached by a bullet')
-  } else {
-    logInfo(
-      `${plural(report.unnamed.length, 'changed file')} no bullet reached. Add one where the change is worth a reader knowing about.`,
-    )
-    // Capped in the frame and whole in the record. A rename branch measured
-    // here left 71 of its 100 files unnamed, correctly, and printing all of
-    // them buries the graded direction above under a list nobody reads.
-    for (const path of report.unnamed.slice(0, UNNAMED_PRINT_LIMIT)) {
-      logInfo(path)
-    }
-    if (report.unnamed.length > UNNAMED_PRINT_LIMIT) {
-      logInfo(
-        `…and ${report.unnamed.length - UNNAMED_PRINT_LIMIT} more, whole in the --json record.`,
-      )
-    }
-  }
-  if (report.incidental.length > 0) {
-    logInfo(
-      `${plural(report.incidental.length, 'further changed file')} set aside as owing no bullet, whole in the --json record.`,
-    )
-  }
-
-  if (report.unresolved.length > 0) {
-    logStep('Unresolved')
-    logInfo(
-      `${plural(report.unresolved.length, 'path')} written partially or trailing its bullet's first comma, so neither direction judged it.`,
-    )
-    for (const claim of report.unresolved) logInfo(claim.path)
-  }
-
-  if (report.mislinked.length > 0) {
-    logStep('Mislinked')
-    logWarn(
-      `${plural(report.mislinked.length, 'link')} open another file's diff than the path they name. Re-run with --link to print the body with them corrected.`,
-    )
-    for (const link of report.mislinked) logWarn(link.path)
-  }
-
-  outro()
-
-  if (emitJson) {
-    process.stdout.write(
-      `${JSON.stringify({
-        root,
-        ...(source.source.number !== undefined && {
-          number: source.source.number,
-        }),
-        ...(report.head !== undefined && { head: report.head }),
-        changed: report.changed,
-        claims: report.claims,
-        unmet: report.unmet,
-        unnamed: report.unnamed,
-        incidental: report.incidental,
-        unresolved: report.unresolved,
-        evidenceUnread: report.evidenceUnread,
-        mislinked: report.mislinked,
-      })}\n`,
-    )
-  }
-
-  return report.unmet.length === 0 && report.mislinked.length === 0 ? 0 : 2
-}
-
-/**
- * Prints the body with each changed path in `## Key changes` linked to its
- * diff, and nothing else, so stdout pipes straight into a body file.
- *
- * Skips the frame `intro` opens, which would land in the piped body. Refusals
- * keep the framed shape on stdout like every other mode.
- */
-async function runKeyChangesLink(
-  number: string | undefined,
-  opts: KeyChangesOptions,
-  root: string,
-): Promise<number> {
-  const emitJson = opts.json ?? false
-
-  if (emitJson) {
-    return refuseWith(
-      'link-json',
-      '--link prints the body itself, so it takes no --json record.',
-      emitJson,
-      root,
-    )
-  }
-
-  const source =
-    opts.body === undefined
-      ? await readFromApi(root, number)
-      : await readFromFile(root, process.cwd(), opts.body, opts.base)
-  if (source.kind === 'refused') return refuse(source.reason, emitJson, root)
-
-  const pull = number ?? source.source.number?.toString()
-  if (pull === undefined) {
-    return refuseWith(
-      'no-number',
-      'The link needs the pull request number, so pass it as the argument.',
-      emitJson,
-      root,
-    )
-  }
-
-  const url = await readRepoUrl(root)
-  if (url === undefined) {
-    return refuseWith(
-      'no-repo-url',
-      'gh could not read the repository address, so no link was built.',
-      emitJson,
-      root,
-    )
-  }
-
-  process.stdout.write(
-    linkKeyChanges(
-      source.source.body,
-      source.source.changed,
-      `${url}/pull/${pull}/files`,
-    ),
-  )
-  return 0
-}
-
-type IdentityRead =
-  | { readonly kind: 'read'; readonly identity: PullIdentity }
-  | { readonly kind: 'refused'; readonly reason: PullRefusal }
-
-/**
- * Runs one `gh` invocation and hands back its stdout, or null when it failed.
- *
- * See src/worktrees/reclaim.ts for why gh needs the stripped environment: it
- * resolves its repository through the same variables git does and they beat
- * `cwd`, so a run from inside a hook would answer for another repository.
- */
-async function gh(
-  cwd: string,
-  args: readonly string[],
-): Promise<string | null> {
-  try {
-    const result = await execa('gh', [...args], {
-      cwd,
-      timeout: GH_TIMEOUT_MS,
-      env: gitEnv(),
-      extendEnv: false,
-    })
-    return result.stdout
-  } catch {
-    return null
-  }
-}
-
-type PullNumber =
-  | { readonly kind: 'found'; readonly number: string }
-  | {
-      readonly kind: 'refused'
-      readonly reason: 'gh-failed' | 'ambiguous-pull'
-    }
-
-/**
- * The number the caller named, or the one open pull request on the branch the
- * checkout at `cwd` holds.
- *
- * `{owner}` in the head filter is the base repository's owner, which is the
- * head owner for every pull request opened from a branch of this repository.
- */
-async function resolvePullNumber(
-  cwd: string,
-  number: string | undefined,
-): Promise<PullNumber> {
-  if (number !== undefined) return { kind: 'found', number }
-
-  const branch = await $`git -C ${cwd} symbolic-ref --short -q HEAD`
-    .env(gitEnv())
-    .quiet()
-    .nothrow()
-  const name = branch.exitCode === 0 ? branch.text().trim() : ''
-  if (name === '') return { kind: 'refused', reason: 'gh-failed' }
-
-  const stdout = await gh(cwd, [
-    'api',
-    `repos/{owner}/{repo}/pulls?head={owner}:${encodeURIComponent(name)}&state=open&per_page=100`,
-  ])
-  if (stdout === null) return { kind: 'refused', reason: 'gh-failed' }
-
-  let rows: readonly RestPull[]
-  try {
-    rows = JSON.parse(stdout)
-  } catch {
-    return { kind: 'refused', reason: 'gh-failed' }
-  }
-  const selected = selectBranchPull(rows)
-  return selected.kind === 'found'
-    ? { kind: 'found', number: String(selected.number) }
-    : selected
-}
-
-type PullRead =
-  | { readonly kind: 'read'; readonly row: RestPull }
-  | {
-      readonly kind: 'refused'
-      readonly reason: 'gh-failed' | 'ambiguous-pull'
-    }
-
-/**
- * The pull request object off the REST pull endpoint, which a cloud session's
- * proxy serves where it refuses the GraphQL every `gh pr view` runs on.
- */
-async function readPull(
-  cwd: string,
-  number: string | undefined,
-): Promise<PullRead> {
-  const resolved = await resolvePullNumber(cwd, number)
-  if (resolved.kind === 'refused') return resolved
-
-  const stdout = await gh(cwd, [
-    'api',
-    `repos/{owner}/{repo}/pulls/${resolved.number}`,
-  ])
-  if (stdout === null) return { kind: 'refused', reason: 'gh-failed' }
-  try {
-    return { kind: 'read', row: JSON.parse(stdout) as RestPull }
-  } catch {
-    return { kind: 'refused', reason: 'gh-failed' }
-  }
-}
-
-type PagesRead<T> =
-  | { readonly kind: 'read'; readonly rows: readonly T[] }
-  | { readonly kind: 'refused'; readonly reason: 'gh-failed' | 'unparsed' }
-
-/**
- * Every row of a paginated listing, or a refusal when any page failed.
- *
- * A refusal rather than an empty list, since a refused read that reads as no
- * reviews routes the next pass to the whole change.
- */
-async function listPages<T>(
-  cwd: string,
-  path: string,
-  fields: string,
-): Promise<PagesRead<T>> {
-  const stdout = await gh(cwd, [
-    'api',
-    '--paginate',
-    `${path}?per_page=100`,
-    '--jq',
-    `.[] | {${fields}} | @json`,
-  ])
-  if (stdout === null) return { kind: 'refused', reason: 'gh-failed' }
-  const rows = parseJsonLines<T>(stdout)
-  return rows === undefined
-    ? { kind: 'refused', reason: 'unparsed' }
-    : { kind: 'read', rows }
-}
-
-async function listReviews(cwd: string, number: string) {
-  return listPages<RestReview>(
-    cwd,
-    `repos/{owner}/{repo}/pulls/${number}/reviews`,
-    'id, body, commit_id, submitted_at, state',
-  )
-}
-
-/** The issue comments on a pull request, or undefined when the thread is unread. */
-async function listComments(
-  cwd: string,
-  number: string,
-): Promise<readonly { url?: string; body: string }[] | undefined> {
-  const read = await listPages<RestComment>(
-    cwd,
-    `repos/{owner}/{repo}/issues/${number}/comments`,
-    'html_url, body',
-  )
-  return read.kind === 'read' ? read.rows.map(commentRowOf) : undefined
-}
-
-/**
- * Reads the head branch and the head the pull request object reports.
- *
- * Both come from one call, so the branch a ref is read for and the head that
- * ref is compared against describe the same object.
- */
-async function readIdentity(
-  cwd: string,
-  number: string | undefined,
-): Promise<IdentityRead> {
-  if (Bun.which('gh') === null) {
-    return { kind: 'refused', reason: 'gh-missing' }
-  }
-
-  const pull = await readPull(cwd, number)
-  if (pull.kind === 'refused') return pull
-
-  const identity: PullIdentity = identityOf(pull.row)
-  if (identity.branch === '') return { kind: 'refused', reason: 'no-branch' }
-
-  return { kind: 'read', identity }
-}
-
-/**
- * Reads the branch tip from the remote rather than from a tracking ref.
- *
- * A tracking ref is only as current as the last fetch, and the push this is
- * meant to catch is one this process never saw.
- */
-function refReader(root: string) {
-  return async (branch: string): Promise<string | null> => {
-    const result = await $`git -C ${root} ls-remote --heads origin ${branch}`
-      .env(gitEnv())
-      .quiet()
-      .nothrow()
-    return result.exitCode === 0 ? result.text() : null
-  }
-}
-
-async function runHead(
-  number: string | undefined,
-  opts: ReadOptions,
-): Promise<number> {
-  const root = resolve(opts.root ?? process.cwd())
-  const emitJson = opts.json ?? false
-
-  intro('canon pr head')
-
-  const read = await readIdentity(root, number)
-  if (read.kind === 'refused') {
-    return refuseWith(read.reason, PULL_REFUSALS[read.reason], emitJson, root)
-  }
-
-  const { identity } = read
-  const reading = await resolveHead(
-    identity.branch,
-    identity.head,
-    refReader(root),
-  )
-
-  if (reading.kind === 'refused') {
-    return refuseWith(
-      reading.reason,
-      PULL_REFUSALS[reading.reason],
-      emitJson,
-      root,
-    )
-  }
-
-  logStep('Scope')
-  logInfo(
-    `${identity.number === undefined ? 'the pull request on' : `#${identity.number} on`} ${reading.branch}`,
-  )
-
-  logStep(reading.state === 'fresh' ? 'Fresh' : 'Stale')
-  if (reading.state === 'fresh') {
-    logInfo(
-      `the object and the remote both name ${reading.tip.slice(0, 8)}, so a read keyed on either describes the same commit`,
-    )
-  } else {
-    logWarn(
-      `the remote carries ${reading.tip.slice(0, 8)} and the pull request object still reports ${reading.object.slice(0, 8)}. Key every head-sensitive read on the tip.`,
-    )
-  }
-
-  outro()
-
-  if (emitJson) {
-    process.stdout.write(
-      `${JSON.stringify({
-        root,
-        ...(identity.number !== undefined && { number: identity.number }),
-        branch: reading.branch,
-        state: reading.state,
-        tip: reading.tip,
-        object: reading.object,
-      })}\n`,
-    )
-  }
-
-  return 0
-}
-
-async function runChecks(
-  number: string | undefined,
-  opts: ReadOptions,
-): Promise<number> {
-  const root = resolve(opts.root ?? process.cwd())
-  const emitJson = opts.json ?? false
-
-  intro('canon pr checks')
-
-  const read = await readIdentity(root, number)
-  if (read.kind === 'refused') {
-    return refuseWith(read.reason, PULL_REFUSALS[read.reason], emitJson, root)
-  }
-
-  const { identity } = read
-  const resolved = await resolveTip(identity.branch, refReader(root))
-  if (resolved.kind === 'refused') {
-    return refuseWith(
-      resolved.reason,
-      PULL_REFUSALS[resolved.reason],
-      emitJson,
-      root,
-    )
-  }
-
-  // The page size is raised rather than paged through. `collapseChecks` reads
-  // a count above the rows it was handed as pending, so a commit past the
-  // ceiling reports unread rather than clean, and 100 is the endpoint's own
-  // maximum against a default of 30.
-  const listed = await gh(root, [
-    'api',
-    `repos/{owner}/{repo}/commits/${resolved.tip}/check-runs?per_page=100`,
-  ])
-  if (listed === null) {
-    return refuseWith(
-      'runs-unreadable',
-      PULL_REFUSALS['runs-unreadable'],
-      emitJson,
-      root,
-    )
-  }
-
-  let listing: CheckRunListing
-  try {
-    listing = JSON.parse(listed)
-  } catch {
-    return refuseWith(
-      'runs-unreadable',
-      PULL_REFUSALS['runs-unreadable'],
-      emitJson,
-      root,
-    )
-  }
-
-  const reading = withMergeState(
-    identity.mergeState,
-    collapseChecks(resolved.tip, listing),
-  )
-
-  logStep('Scope')
-  logInfo(
-    `${identity.branch} at ${reading.tip.slice(0, 8)}, ${plural(reading.matched, 'run')} belonging to it`,
-  )
-  // Named rather than folded into the count above, since a listing carrying a
-  // run for another commit is what makes the verdict pending on its own.
-  if (reading.foreign > 0) {
-    logWarn(
-      `${plural(reading.foreign, 'further run')} belonging to another commit, so this listing does not describe the tip alone.`,
-    )
-  }
-  if (reading.collapsed > 0) {
-    logInfo(
-      `${plural(reading.collapsed, 'run')} folded into a newer run of the same check, so the count above includes a superseded run the state did not use.`,
-    )
-  }
-
-  logStep(
-    reading.state === 'passing'
-      ? 'Passing'
-      : reading.state === 'failing'
-        ? 'Failing'
-        : 'Pending',
-  )
-  if (reading.state === 'passing') {
-    logInfo('every run on the tip completed and none failed')
-  } else if (reading.state === 'failing') {
-    logWarn('a run on the tip failed, which no run still going can clear')
-  } else if (reading.conflicted) {
-    logWarn(
-      'the branch conflicts with its base, so no run will start for the tip. Rebase onto the base rather than waiting.',
-    )
-  } else if (reading.matched === 0) {
-    logInfo(
-      `no run belongs to the tip yet${reading.reported > 0 ? `, against a reported count of ${reading.reported}` : ''}. That is unread rather than clean.`,
-    )
-  } else {
-    logInfo('a run on the tip has yet to conclude')
-  }
-
-  outro()
-
-  if (emitJson) {
-    process.stdout.write(
-      `${JSON.stringify({
-        root,
-        ...(identity.number !== undefined && { number: identity.number }),
-        branch: identity.branch,
-        ...reading,
-      })}\n`,
-    )
-  }
-
-  return 0
 }
 
 async function runReviewState(
@@ -2611,55 +1380,6 @@ function logReviewState(number: number, record: ReviewStateRecord): void {
       'ui: the evidence carries no box a driver can run, so the family is unbound',
     )
   }
-}
-
-interface PullFiles {
-  /** Each path that still exists at the head, tagged with whether the pull request added it. */
-  readonly present: ReadonlyMap<string, boolean>
-  /** Each path the pull request removed, which a deploy's push filter still counts. */
-  readonly removed: readonly string[]
-  /** Each renamed path mapped to the path it sat at before the pull request. */
-  readonly renamedFrom: ReadonlyMap<string, string>
-}
-
-/**
- * The paths a pull request changed, read through the paginated files endpoint
- * so the set is the same from any checkout and never capped at the first
- * view. `copied` counts as added, since a copy leaves its source in place and
- * has no single base. `renamed` counts as added in `present` too, so the
- * changed set stays the same, and `renamedFrom` carries the old path of each
- * rename for a reader that compares against the base. Returns undefined when
- * the read fails, which refuses rather than rendering a short set.
- */
-async function listPullFiles(
-  cwd: string,
-  number: number,
-): Promise<PullFiles | undefined> {
-  const stdout = await gh(cwd, [
-    'api',
-    '--paginate',
-    `repos/{owner}/{repo}/pulls/${number}/files`,
-    '--jq',
-    '.[] | [.status, .filename, (.previous_filename // "")] | @tsv',
-  ])
-  if (stdout === null) return undefined
-  const present = new Map<string, boolean>()
-  const removed: string[] = []
-  const renamedFrom = new Map<string, string>()
-  for (const line of stdout.split('\n').filter(Boolean)) {
-    const [status, path, previous] = line.split('\t')
-    if (status === undefined || path === undefined) continue
-    if (status === 'removed') removed.push(path)
-    else present.set(path, status !== 'modified' && status !== 'changed')
-    if (status === 'renamed' && previous !== undefined && previous !== '') {
-      renamedFrom.set(path, previous)
-    }
-  }
-  return { present, removed, renamedFrom }
-}
-
-function everyChangedPath(files: PullFiles): string[] {
-  return [...files.present.keys(), ...files.removed]
 }
 
 /**
@@ -3522,16 +2242,6 @@ function machineLocalRunner(): LocalRunner {
   }
 }
 
-/** The worktree's toplevel with symlinks resolved, since a process cwd is read back resolved. */
-async function resolveWorktreeRoot(root: string): Promise<string> {
-  const result = await $`git -C ${root} rev-parse --show-toplevel`
-    .env(gitEnv())
-    .quiet()
-    .nothrow()
-  const toplevel = result.exitCode === 0 ? result.text().trim() : root
-  return realpath(toplevel).catch(() => toplevel)
-}
-
 async function runLocal(opts: LocalOptions): Promise<number> {
   const root = resolve(opts.root ?? process.cwd())
   const emitJson = opts.json ?? false
@@ -3742,8 +2452,6 @@ async function maskUiReviews(
   return { rewritten, failed: rewritten < results.length }
 }
 
-const POSITIVE_WHOLE = /^[1-9]\d*$/
-
 const MIN_TICK_HEAD_LENGTH = 7
 
 /**
@@ -3924,23 +2632,6 @@ async function runTick(
     )
   }
   return 0
-}
-
-/** Replaces a pull request's body, which `gh` takes through the REST pulls endpoint a cloud proxy serves. */
-async function patchPullBody(
-  root: string,
-  number: number,
-  body: string,
-): Promise<boolean> {
-  const patched = await gh(root, [
-    'api',
-    '-X',
-    'PATCH',
-    `repos/{owner}/{repo}/pulls/${number}`,
-    '-f',
-    `body=${body}`,
-  ])
-  return patched !== null
 }
 
 /** One `gh api` call, keeping the HTTP status of a failure so a refused write can be told from a missing ref. */
@@ -4156,30 +2847,6 @@ function framesArgumentRefusal(
     return 'bad-theme'
   }
   return undefined
-}
-
-/** `owner/repo` off the REST repository read, since `gh repo view` runs on GraphQL. */
-async function readRepoName(root: string): Promise<string | undefined> {
-  const row = await gh(root, ['api', 'repos/{owner}/{repo}'])
-  if (row === null) return undefined
-  try {
-    const name = (JSON.parse(row) as { full_name?: unknown }).full_name
-    return typeof name === 'string' ? name : undefined
-  } catch {
-    return undefined
-  }
-}
-
-/** The repository's web address off the REST repository read, for the same reason as `readRepoName`. */
-async function readRepoUrl(root: string): Promise<string | undefined> {
-  const row = await gh(root, ['api', 'repos/{owner}/{repo}'])
-  if (row === null) return undefined
-  try {
-    const url = (JSON.parse(row) as { html_url?: unknown }).html_url
-    return typeof url === 'string' && url !== '' ? url : undefined
-  } catch {
-    return undefined
-  }
 }
 
 async function runFrames(
@@ -4407,18 +3074,6 @@ async function flipDraft(
     return body.data?.[field]?.pullRequest?.isDraft === isDraft
   } catch {
     return false
-  }
-}
-
-function gitRunner(root: string): GitRunner {
-  return async (args) => {
-    const result = await execa('git', ['-C', root, ...args], {
-      reject: false,
-      timeout: GH_TIMEOUT_MS,
-      env: gitEnv(),
-      extendEnv: false,
-    })
-    return result.exitCode === 0 ? String(result.stdout) : undefined
   }
 }
 
@@ -4868,363 +3523,4 @@ async function runMerge(
   }
 
   return record.isOk ? 0 : 1
-}
-
-/**
- * Frames a refusal on stderr in both modes and puts the record on stdout alone,
- * so an operator reading the terminal sees the reason rather than a command
- * that appeared to do nothing.
- */
-function refuse(reason: Refusal, emitJson: boolean, root: string): number {
-  return refuseWith(reason, REFUSALS[reason], emitJson, root)
-}
-
-/** The scratch folder `review-ui` writes under, at the main worktree root. */
-const REVIEW_UI_SCRATCH = join('.canon', 'tmp', 'pr', 'review-ui')
-
-type DriveTarget =
-  | {
-      readonly kind: 'found'
-      readonly main: string
-      readonly worktree: string
-      readonly branch: string
-      readonly number: string | undefined
-    }
-  | {
-      readonly kind: 'refused'
-      readonly reason: DriveCopyRefusal | PullRefusal
-    }
-
-/**
- * The worker's worktree and its branch. A named pull request resolves through
- * its head ref, since a reviewer runs at the main root on the trunk. With no
- * number the checkout at `root` answers, and a number is looked up only when
- * the mode needs one, so a worker can build the copy before its pull request
- * exists.
- */
-async function resolveDriveTarget(
-  root: string,
-  number: string | undefined,
-  needsNumber: boolean,
-): Promise<DriveTarget> {
-  const worktrees = await listWorktrees(root)
-  const main = worktrees[0]?.path ?? root
-
-  if (number === undefined) {
-    const toplevel = await resolveWorktreeRoot(root)
-    const realPaths = await Promise.all(
-      worktrees.map((candidate) =>
-        realpath(candidate.path).catch(() => candidate.path),
-      ),
-    )
-    const entry = worktrees[realPaths.indexOf(toplevel)]
-    const branch = entry?.branch ?? null
-    if (branch === null) return { kind: 'refused', reason: 'no-branch' }
-    if (!needsNumber) {
-      return { kind: 'found', main, worktree: toplevel, branch, number }
-    }
-    if (Bun.which('gh') === null) {
-      return { kind: 'refused', reason: 'gh-missing' }
-    }
-    const resolved = await resolvePullNumber(root, undefined)
-    if (resolved.kind === 'refused') return resolved
-    return {
-      kind: 'found',
-      main,
-      worktree: toplevel,
-      branch,
-      number: resolved.number,
-    }
-  }
-
-  if (Bun.which('gh') === null) return { kind: 'refused', reason: 'gh-missing' }
-  const read = await readPull(root, number)
-  if (read.kind === 'refused') return read
-  const headRef = read.row.head?.ref
-  if (headRef === undefined || headRef === '') {
-    return { kind: 'refused', reason: 'no-worktree' }
-  }
-  const entry = worktrees.find((candidate) => candidate.branch === headRef)
-  if (entry === undefined) return { kind: 'refused', reason: 'no-worktree' }
-  return {
-    kind: 'found',
-    main,
-    worktree: entry.path,
-    branch: headRef,
-    number,
-  }
-}
-
-async function runDriveCopy(
-  number: string | undefined,
-  opts: DriveCopyOptions,
-): Promise<number> {
-  const root = resolve(opts.root ?? process.cwd())
-  const emitJson = opts.json ?? false
-  const baseline = opts.baseline ?? false
-  const check = opts.check ?? false
-
-  intro('canon pr drive-copy')
-
-  const refuse = (
-    reason: DriveCopyRefusal | PullRefusal | string,
-    message: string,
-  ) => refuseWith(reason, message, emitJson, root)
-
-  if (baseline && check) {
-    return refuse('bad-flags', DRIVE_COPY_REFUSALS['bad-flags'])
-  }
-
-  const target = await resolveDriveTarget(root, number, baseline || check)
-  if (target.kind === 'refused') {
-    const reason = target.reason
-    return refuse(
-      reason,
-      reason in DRIVE_COPY_REFUSALS
-        ? DRIVE_COPY_REFUSALS[reason as DriveCopyRefusal]
-        : PULL_REFUSALS[reason as PullRefusal],
-    )
-  }
-
-  const scratch = join(target.main, REVIEW_UI_SCRATCH)
-  const baselinePath =
-    target.number === undefined
-      ? undefined
-      : join(scratch, target.number, 'drive-baseline.json')
-  const emit = (record: Record<string, unknown>) => {
-    if (emitJson) {
-      process.stdout.write(
-        `${JSON.stringify({ root, worktree: target.worktree, branch: target.branch, ...record })}\n`,
-      )
-    }
-  }
-
-  if (check && baselinePath !== undefined) {
-    let prior: readonly StatusEntry[]
-    try {
-      prior = JSON.parse(await readFile(baselinePath, 'utf8'))
-    } catch {
-      return refuse('no-baseline', DRIVE_COPY_REFUSALS['no-baseline'])
-    }
-    const current = await readWorktreeStatus(target.worktree)
-    if (current === undefined) {
-      return refuse('unreadable-tree', DRIVE_COPY_REFUSALS['unreadable-tree'])
-    }
-    const paths = changedSince(prior, current)
-    if (paths.length === 0) {
-      logStep('Clean')
-      logInfo(`No change in ${target.worktree} since the baseline.`)
-      outro()
-      emit({ reason: 'clean', paths })
-      return 0
-    }
-    logStep('Changed')
-    for (const path of paths) logWarn(path)
-    outro()
-    emit({ reason: 'changed', paths })
-    return 1
-  }
-
-  const config = loadPreviewConfig(target.worktree)
-  if (config.kind === 'refused') return refuse(config.reason, config.detail)
-
-  let copy: Record<string, unknown>
-  if (config.kind === 'absent') {
-    logStep('No config')
-    logInfo('The project declares no preview writes, so nothing was copied.')
-    copy = { reason: 'no-config' }
-  } else {
-    const copyRoot = join(scratch, branchSlug(target.branch), 'board')
-    const { copied, missing } = buildDriveCopy(
-      target.worktree,
-      copyRoot,
-      config.config.writes,
-      config.config.keep,
-    )
-    logStep('Copied')
-    logInfo(`${config.config.env}=${copyRoot}`)
-    for (const path of missing) logWarn(`${path} is not in the worktree`)
-    copy = {
-      reason: 'copied',
-      copyRoot,
-      env: config.config.env,
-      copied,
-      missing,
-    }
-  }
-
-  if (baseline && baselinePath !== undefined) {
-    const status = await readWorktreeStatus(target.worktree)
-    if (status === undefined) {
-      return refuse('unreadable-tree', DRIVE_COPY_REFUSALS['unreadable-tree'])
-    }
-    await mkdir(join(baselinePath, '..'), { recursive: true })
-    await writeFile(baselinePath, `${JSON.stringify(status)}\n`)
-    logStep('Baseline')
-    logInfo(`Recorded ${plural(status.length, 'status line')}.`)
-    copy = { ...copy, baseline: baselinePath }
-  }
-
-  outro()
-  emit(copy)
-  return 0
-}
-
-type CloseCommandRefusal = 'reason-unreadable' | 'no-head'
-
-const CLOSE_REFUSALS: Record<CloseRefusal | CloseCommandRefusal, string> = {
-  'no-reason':
-    'No closing reason was given. Write it to a file and pass --reason-file.',
-  'reason-unreadable': 'The --reason-file could not be read.',
-  'reason-unpublishable':
-    'The reason carries text a reader on the remote cannot use or that breaks the density limits. The findings are in the record.',
-  'no-head':
-    'This checkout is on no branch, so pass --head with the branch the pull request carries.',
-  'gh-failed': 'gh could not read the pull request, so nothing was written.',
-  'pull-closed': 'The pull request is already closed.',
-  'head-mismatch':
-    'The pull request carries another head branch than the one expected. Nothing was written to it.',
-  'comment-failed':
-    'The closing comment did not post, so the pull request was left open.',
-  'close-failed':
-    'The comment posted but the close was refused, so the pull request is still open. Close it by hand or re-run.',
-}
-
-function closeApi(root: string, number: string): CloseApi {
-  return {
-    readPull: async () => {
-      const stdout = await gh(root, [
-        'api',
-        `repos/{owner}/{repo}/pulls/${number}`,
-      ])
-      if (stdout === null) return undefined
-      try {
-        const row = JSON.parse(stdout) as RestPull
-        if (typeof row.head?.ref !== 'string') return undefined
-        const headRepo = row.head.repo?.full_name
-        return {
-          isOpen: row.state === 'open',
-          branch: row.head.ref,
-          isFork:
-            headRepo === undefined || headRepo !== row.base?.repo?.full_name,
-        }
-      } catch {
-        return undefined
-      }
-    },
-    postComment: async (body) => {
-      const url = await gh(root, [
-        'api',
-        '-X',
-        'POST',
-        `repos/{owner}/{repo}/issues/${number}/comments`,
-        '-f',
-        `body=${body}`,
-        '--jq',
-        '.html_url',
-      ])
-      return url === null || url.trim() === '' ? undefined : url.trim()
-    },
-    patchClosed: async () =>
-      (await gh(root, [
-        'api',
-        '-X',
-        'PATCH',
-        `repos/{owner}/{repo}/pulls/${number}`,
-        '-f',
-        'state=closed',
-        '--silent',
-      ])) !== null,
-    deleteBranch: async (branch) =>
-      (await gh(root, [
-        'api',
-        '-X',
-        'DELETE',
-        `repos/{owner}/{repo}/git/refs/heads/${encodeURIComponent(branch)}`,
-        '--silent',
-      ])) !== null,
-  }
-}
-
-async function runClose(
-  number: string,
-  opts: CloseCommandOptions,
-): Promise<number> {
-  const root = resolve(opts.root ?? process.cwd())
-  const emitJson = opts.json ?? false
-
-  intro('canon pr close')
-
-  const refuseClose = (
-    reason: CloseRefusal | CloseCommandRefusal,
-    extra: Record<string, unknown> = {},
-  ): number =>
-    refuseWith(reason, CLOSE_REFUSALS[reason], emitJson, root, {
-      number: Number(number),
-      ...extra,
-    })
-
-  if (opts.reasonFile === undefined) return refuseClose('no-reason')
-  let reason: string
-  try {
-    reason = await readFile(resolve(root, opts.reasonFile), 'utf8')
-  } catch {
-    logWarn(`Could not read ${opts.reasonFile}`)
-    return refuseClose('reason-unreadable')
-  }
-
-  let head = opts.head
-  if (head === undefined) {
-    const branch = await $`git -C ${root} symbolic-ref --short -q HEAD`
-      .env(gitEnv())
-      .quiet()
-      .nothrow()
-    head = branch.exitCode === 0 ? branch.text().trim() : ''
-    if (head === '') return refuseClose('no-head')
-  }
-
-  const record = await close(closeApi(root, number), {
-    number: Number(number),
-    reason,
-    head,
-    isKeepBranch: opts.keepBranch ?? false,
-  })
-
-  if (!record.isOk) {
-    return refuseClose(record.reason as CloseRefusal, {
-      ...(record.commentUrl !== undefined && { commentUrl: record.commentUrl }),
-      ...(record.findings !== undefined && { findings: record.findings }),
-    })
-  }
-
-  logStep('Closed')
-  logInfo(`#${record.number} closed, branch ${record.branch}`)
-  if (record.branch === 'delete-failed') {
-    logWarn(`The branch ${head} could not be deleted. Delete it by hand.`)
-  }
-  outro()
-
-  if (emitJson) {
-    process.stdout.write(`${JSON.stringify({ root, ...record })}\n`)
-  }
-  return 0
-}
-
-function refuseWith(
-  reason: string,
-  message: string,
-  emitJson: boolean,
-  root: string,
-  extra: Record<string, unknown> = {},
-): number {
-  logStep('Refused')
-  logWarn(message)
-  outro()
-
-  if (emitJson) {
-    process.stdout.write(
-      `${JSON.stringify({ root, reason, message, ...extra })}\n`,
-    )
-  }
-  return 1
 }
