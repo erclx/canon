@@ -40,6 +40,10 @@ describe('lex in JSX mode', () => {
     expect(result.regexes).toHaveLength(1)
   })
 
+  it('should read parenthesized text after a tag as markup', () => {
+    expect(markup('return <b>(note)</b>\n')).toEqual(['<b>(note)</b>'])
+  })
+
   it('should read a fragment', () => {
     expect(markup('return <>a</>\n')).toEqual(['<>a</>'])
   })
@@ -74,6 +78,15 @@ describe('lex in JSX mode', () => {
       'a generic arrow with a constraint',
       'const f = <T extends U>(x: T) => x\n',
     ],
+    ['a const type parameter', 'const f = <const T,>(x: T) => x\n'],
+    ['a defaulted type parameter', 'const f = <T = unknown,>(x: T) => x\n'],
+    ['an annotated generic signature', 'const f: <T>(x: T) => T = g\n'],
+    ['a generic function type', 'type F = <T>(x: T) => T\n'],
+    [
+      'a generic member signature',
+      'interface A {\n  map: <U>(f: U) => U[]\n}\n',
+    ],
+    ['a generic call signature', 'type C = {\n  <T>(x: T): T\n}\n'],
     ['a type argument', 'const r = useRef<HTMLDivElement>(null)\n'],
     ['a comparison', 'if (a < b) c()\n'],
   ])('should read %s as code', (_shape, source) => {

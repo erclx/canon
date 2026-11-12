@@ -18,12 +18,37 @@ const REGEX_PRECEDERS = new Set('(,=:[!&|?{};+-*%<>~^'.split(''))
 const REGEX_KEYWORDS =
   /(?:^|[^\w$])(?:return|typeof|case|do|else|in|of|new|delete|void|throw|yield|await)$/
 
-/**
- * A `<` opening an element or a fragment, unless it opens a generic arrow's
- * type parameters, which a `.tsx` file writes as `<T,>` or `<T extends U>`.
- */
+/** A `<` opening an element or a fragment, unless it opens type parameters. */
 const TAG_START = /^<(?:>|[A-Za-z_$])/
-const TYPE_PARAMETERS = /^<[\w$]+\s*(?:,|extends\s)/
+
+/**
+ * Type parameters a tag cannot start with, being `<T,>`, `<T extends U>`,
+ * `<T = U>`, and `<const T>`, which a `.tsx` generic arrow is written with.
+ */
+const TYPE_PARAMETERS = /^<(?:const\s+[\w$]|[\w$]+\s*(?:,|extends\s|=))/
+
+/**
+ * A lone `<T>` before a parameter list, which opens a generic signature in a
+ * type, such as `: <T>(x: T) => T`, when `=>` or `:` follows the list. An
+ * element whose text opens on `(` is followed by more text or a tag instead.
+ */
+const SIGNATURE_START = /^<[\w$]+>\(/
+const SIGNATURE_END = /^\s*(?:=>|:)/
+
+/** Whether the `<` at `at` opens type parameters rather than an element. */
+function opensTypeParameters(source: string, at: number): boolean {
+  if (TYPE_PARAMETERS.test(source.slice(at, at + 80))) return true
+  const head = SIGNATURE_START.exec(source.slice(at, at + 80))
+  if (head === null) return false
+  let depth = 0
+  for (let k = at + head[0].length - 1; k < source.length; k++) {
+    if (source[k] === '(') depth++
+    else if (source[k] === ')' && --depth === 0) {
+      return SIGNATURE_END.test(source.slice(k + 1, k + 8))
+    }
+  }
+  return false
+}
 
 /** Offsets of a span, from its first character to just past its last. */
 export interface Range {
@@ -289,7 +314,7 @@ export function lex(
       char === '<' &&
       expressionStarts() &&
       TAG_START.test(source.slice(i, i + 2)) &&
-      !TYPE_PARAMETERS.test(source.slice(i, i + 80))
+      !opensTypeParameters(source, i)
     ) {
       const start = i
       i++

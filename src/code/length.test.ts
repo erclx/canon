@@ -215,6 +215,10 @@ describe('functionSpans in JSX mode', () => {
       'const f = <T,>(x: T) => {\n  return x\n}\n',
     ],
     [
+      'generic signatures before a function',
+      'const f: <T>(x: T) => T = g\ntype F = <T>(x: T) => T\ninterface A {\n  map: <U>(f: U) => U[]\n}\nconst h = <const T,>(x: T) => x\nconst k = <T = unknown,>(x: T) => x\nfunction B() {\n  return <b>x</b>\n}\n',
+    ],
+    [
       'a type argument before a call',
       'function A() {\n  const r = useRef<HTMLDivElement>(null)\n  return <div ref={r} />\n}\n',
     ],
