@@ -92,6 +92,11 @@ interface Aim {
   /** What the view has to keep in frame, being both ends of a drag. */
   readonly box: Box
   readonly depth: number
+  /**
+   * True for an aim no glide reaches, being a focus move, which eases in over
+   * `EASE_MS` before it rather than over whatever glide ran last.
+   */
+  readonly unglided?: true
 }
 
 /** A stretch of clip time, eased from its start to its end. */
@@ -128,6 +133,12 @@ export interface CameraOptions {
    * soft. The viewport's width by default.
    */
   readonly outputWidth?: number
+  /**
+   * Whether a key that moved focus aims the camera at the focused box. Off by
+   * default, since a launch take aims only where the drawn cursor is and a Tab
+   * moves focus away from it. The reel turns it on to show a focus ring.
+   */
+  readonly focus?: boolean
 }
 
 export function cameraTrack(
@@ -149,7 +160,9 @@ export function cameraTrack(
     )
 
   const aims = (log.push === false ? [] : log.events)
-    .flatMap((event): Aim[] => aimsOf(event, depthFor, deepest))
+    .flatMap((event): Aim[] =>
+      aimsOf(event, depthFor, deepest, options.focus === true),
+    )
     .filter((aim) => aim.depth >= MIN_ZOOM)
     .sort((a, b) => a.t - b.t)
 
@@ -211,6 +224,7 @@ function aimsOf(
   event: LogEvent,
   depthFor: (box: Box) => number,
   deepest: number,
+  focus: boolean,
 ): Aim[] {
   switch (event.kind) {
     case 'click':
@@ -248,7 +262,7 @@ function aimsOf(
         },
       ]
     case 'key': {
-      if (event.focus === undefined) return []
+      if (!focus || event.focus === undefined) return []
       // Aimed once the press lands, since focus moves on the key coming up.
       const moved = event.t + event.ms
       return [
@@ -258,6 +272,7 @@ function aimsOf(
           at: centerOf(event.focus),
           box: event.focus,
           depth: depthFor(event.focus),
+          unglided: true,
         },
       ]
     }
@@ -324,7 +339,9 @@ function zoomsOf(
     const depth = Math.min(...group.map((aim) => aim.depth))
     const floor = zooms.at(-1)?.out.end ?? 0
 
-    const into = arriving(glides, first.t, floor) ?? {
+    const into = (first.unglided
+      ? undefined
+      : arriving(glides, first.t, floor)) ?? {
       start: Math.max(floor, first.t - EASE_MS),
       end: first.t,
     }
@@ -341,7 +358,9 @@ function zoomsOf(
       if (stop && !inside(aim, stop.at, depth, page)) {
         stops.push({
           at: framed(aim, depth, page),
-          pan: arriving(glides, aim.t, previous.until) ?? {
+          pan: (aim.unglided
+            ? undefined
+            : arriving(glides, aim.t, previous.until)) ?? {
             start: Math.max(previous.until, aim.t - EASE_MS),
             end: aim.t,
           },

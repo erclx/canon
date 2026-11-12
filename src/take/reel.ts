@@ -126,6 +126,7 @@ function reelCamera(out: string, filmed: FilmedBeat): CameraTrack {
   return cameraTrack(read.log, {
     depth: REEL_DEPTH,
     outputWidth: REEL_WIDTH,
+    focus: true,
   })
 }
 

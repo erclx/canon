@@ -571,6 +571,7 @@ describe('cameraTrack input steps', () => {
 
 describe('cameraTrack focus', () => {
   const FIELD = { x: 400, y: 300, width: 160, height: 32 }
+  const FOCUS = { focus: true } as const
 
   function keyed(
     focus: { x: number; y: number; width: number; height: number } | undefined,
@@ -590,7 +591,7 @@ describe('cameraTrack focus', () => {
   }
 
   it('should zoom onto the box a key moved focus to', () => {
-    const { frames } = cameraTrack(keyed(FIELD))
+    const { frames } = cameraTrack(keyed(FIELD), FOCUS)
 
     const held = at(frames, 2100)
     expect(held.scale).toBe(1.8)
@@ -600,13 +601,13 @@ describe('cameraTrack focus', () => {
   })
 
   it('should pull back after the hold on the focused box', () => {
-    const { frames } = cameraTrack(keyed(FIELD))
+    const { frames } = cameraTrack(keyed(FIELD), FOCUS)
 
     expect(at(frames, 4000).scale).toBe(1)
   })
 
   it('should draw no ring for a key that moved focus', () => {
-    const { frames } = cameraTrack(keyed(FIELD))
+    const { frames } = cameraTrack(keyed(FIELD), FOCUS)
 
     expect(frames.every((frame) => frame.ring === null)).toBe(true)
   })
@@ -614,7 +615,7 @@ describe('cameraTrack focus', () => {
   it('should hold the whole page for a focus move on a beat with push off', () => {
     const log: TakeLog = { ...keyed(FIELD), push: false }
 
-    const { frames } = cameraTrack(log)
+    const { frames } = cameraTrack(log, FOCUS)
 
     expect(frames.every((frame) => frame.scale === 1)).toBe(true)
   })
@@ -622,9 +623,38 @@ describe('cameraTrack focus', () => {
   it('should not zoom onto a focused box that fills the page', () => {
     const { frames } = cameraTrack(
       keyed({ x: 0, y: 0, width: 1900, height: 1000 }),
+      FOCUS,
     )
 
     expect(frames.every((frame) => frame.scale === 1)).toBe(true)
+  })
+
+  it('should aim nowhere on a focus move unless asked to', () => {
+    const { frames } = cameraTrack(keyed(FIELD))
+
+    expect(frames.every((frame) => frame.scale === 1)).toBe(true)
+  })
+
+  it('should hold the whole page until shortly before the press after an earlier glide', () => {
+    const glided: TakeLog = {
+      ...keyed(FIELD),
+      events: [
+        {
+          t: 500,
+          kind: 'move',
+          from: START,
+          to: { x: 1500, y: 100 },
+          ms: 600,
+        },
+        ...keyed(FIELD).events,
+      ],
+    }
+
+    const { frames } = cameraTrack(glided, FOCUS)
+
+    expect(at(frames, 1200).scale).toBe(1)
+    expect(at(frames, 1300).scale).toBe(1)
+    expect(at(frames, 2100).scale).toBe(1.8)
   })
 })
 
