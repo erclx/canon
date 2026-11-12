@@ -351,7 +351,8 @@ function countBash(
  *
  * A docstring is always its own run and always `head`, being the contract of
  * whatever it opens wherever that sits, and a `#` run is `body` when it starts
- * inside a function span. A file the reader refuses still counts its `#`
+ * inside a function span, or trails one indented past its header, since a
+ * span ends at its last statement. A file the reader refuses still counts its `#`
  * lines by their first character, unplaced, with the refusal on the record.
  */
 function countPython(
@@ -392,9 +393,24 @@ function countPython(
     else runs.push({ line: index + 1, lines: 1, kind })
   }
 
+  const indent = (line: number): number =>
+    /^[ \t]*/.exec(lines[line - 1] ?? '')?.[0].length ?? 0
+  const quiet = (line: number): boolean =>
+    kinds.get(line) === '#' || (lines[line - 1] ?? '').trim() === ''
+  const trails = (end: number, line: number): boolean => {
+    for (let between = end + 1; between < line; between++) {
+      if (!quiet(between)) return false
+    }
+    return true
+  }
   const inBody = (line: number): boolean =>
     read.kind === 'read' &&
-    read.spans.some((span) => span.line < line && line < span.line + span.lines)
+    read.spans.some((span) => {
+      const end = span.line + span.lines - 1
+      if (line <= span.line) return false
+      if (line <= end) return true
+      return indent(line) > indent(span.line) && trails(end, line)
+    })
 
   return {
     lines: lines.length,

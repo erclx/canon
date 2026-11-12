@@ -429,6 +429,28 @@ describe('Python comments and their placement', () => {
     ])
   })
 
+  it('should read a # block trailing the last statement of a def as body', () => {
+    const text = [
+      'def f():',
+      '    x = 1',
+      '',
+      indented('#', 12),
+      'y = 2',
+      '',
+    ].join('\n')
+    const count = countFile(file('a.py', text), 'py')
+
+    expect(count.bodyBlocks).toEqual([{ file: 'a.py', line: 4, lines: 12 }])
+  })
+
+  it('should read a # block after a def at its header indent as head', () => {
+    const text = ['def f():', '    x = 1', run('#', 12), 'y = 2', ''].join('\n')
+    const count = countFile(file('a.py', text), 'py')
+
+    expect(count.bodyBlocks).toEqual([])
+    expect(count.longBlockFiles[0]?.headLines).toBe(12)
+  })
+
   it('should read a # block above a def or between methods as head', () => {
     const text = [
       run('#', 10),
