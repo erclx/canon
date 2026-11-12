@@ -130,10 +130,10 @@ jobs:
   # than skipping green. Informational: the ruleset does not require it.
   e2e-suites:
     name: 🎬 E2E Suites
-    # Pinned for FFmpeg: ubuntu-latest's FFmpeg 8 tags the take still and the
-    # clip with different color ranges, so the film suite fails. This image
-    # holds FFmpeg 6.1. Lift when take's FFmpeg 8 color range fix ships, and
-    # return to ubuntu-latest then.
+    # Pinned for FFmpeg: this image holds FFmpeg 6.1, since the take e2e luma
+    # reader assumes pre-7.1 range handling. From 7.1 FFmpeg no longer squeezes
+    # a full-range still to TV range, so the reader compares 255 against 235.
+    # Lift when the reader's range fix ships, and return to ubuntu-latest then.
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     needs: changes
