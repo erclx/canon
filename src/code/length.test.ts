@@ -156,6 +156,12 @@ describe('functionSpansInFile', () => {
     ])
   })
 
+  it('should read no function in a JSX file, whose text the lexer misreads', () => {
+    const source = "function A() {\n  return <span>Can't save</span>\n}\n"
+
+    expect(functionSpansInFile('a.tsx', source)).toEqual([])
+  })
+
   it('should read no function in a language it cannot parse', () => {
     expect(functionSpansInFile('a.py', 'def a():\n  return {}\n')).toEqual([])
   })

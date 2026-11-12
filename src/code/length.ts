@@ -17,8 +17,12 @@ export const FUNCTION_LINE_CHECKPOINT = 100
 export const LENGTH_SOURCE =
   /\.(?:ts|tsx|mts|cts|js|jsx|mjs|cjs|astro|vue|svelte|py|go|php|sh|bash|rs|css)$/
 
-/** Files whose functions the brace reading can find, an `.astro` file by its frontmatter. */
-const FUNCTION_SOURCE = /\.(?:ts|tsx|mts|cts|js|jsx|mjs|cjs|astro)$/
+/**
+ * Files whose functions the brace reading can find, an `.astro` file by its
+ * frontmatter. JSX is left out, since `lex` reads an apostrophe in JSX text as
+ * a quote and the braces after it go unbalanced.
+ */
+const FUNCTION_SOURCE = /\.(?:ts|mts|cts|js|mjs|cjs|astro)$/
 
 export interface FunctionSpan {
   /** The line the header opens on. */

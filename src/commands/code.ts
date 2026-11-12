@@ -63,7 +63,7 @@ export function register(program: Command): void {
         '',
         `It also reports each code file past ${FILE_LINE_LIMIT} lines, tests included, and each`,
         `top-level function past ${FUNCTION_LINE_CHECKPOINT} lines in TypeScript, JavaScript, and Astro`,
-        'frontmatter, tests excluded. Neither moves the exit code.',
+        'frontmatter, JSX and tests excluded. Neither moves the exit code.',
         '',
         'Examples:',
         '  canon code audit',
