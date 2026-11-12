@@ -181,14 +181,21 @@ export async function performSteps(
       case 'key': {
         const read = parseKeys(step.keys)
         if (read.kind === 'refused') throw new Error(read.detail)
+        if (state.log) await stage.evaluate(FOCUS_MARK)
         const start = stage.now()
         await pressChord(stage, read.chord)
+        const ms = stage.now() - start
+        const focus = state.log
+          ? await stage.evaluate<Box | null>(FOCUS_MOVED)
+          : null
         state.log?.push({
           t: start,
           kind: 'key',
           keys: step.keys,
-          ms: stage.now() - start,
+          ms,
+          ...(focus ? { focus } : {}),
         })
+        if (focus) await pause(stage, state, RESULT_MS)
         break
       }
       case 'fill': {
@@ -466,6 +473,41 @@ async function scrollPoint(stage: Stage, target: string): Promise<Point> {
   if (right <= left || bottom <= top) throw new TargetOffscreen(target, at)
   return { x: (left + right) / 2, y: (top + bottom) / 2 }
 }
+
+/**
+ * The element holding focus, followed into each open shadow root, since a
+ * focused control inside a component leaves its host as the document's
+ * active element.
+ */
+const ACTIVE = `(() => {
+  let node = document.activeElement
+  while (node?.shadowRoot?.activeElement) node = node.shadowRoot.activeElement
+  return node
+})()`
+
+/** Where the page keeps the element focused before a key, for `FOCUS_MOVED` to compare. */
+const FOCUS_KEY = `Symbol.for('canon.take.focus')`
+
+/** Notes the element holding focus before a key is pressed. */
+const FOCUS_MARK = `(() => {
+  window[${FOCUS_KEY}] = ${ACTIVE}
+  return null
+})()`
+
+/**
+ * The box of the element a key moved focus to, or null when focus rests on
+ * the page itself or on the element `FOCUS_MARK` noted, so a key that changes
+ * no focus aims no camera.
+ */
+export const FOCUS_MOVED = `(() => {
+  const node = ${ACTIVE}
+  const before = window[${FOCUS_KEY}]
+  delete window[${FOCUS_KEY}]
+  if (!node || node === before || node === document.body || node === document.documentElement) return null
+  const rect = node.getBoundingClientRect()
+  if (rect.width === 0 || rect.height === 0) return null
+  return { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
+})()`
 
 /**
  * Finds a target's box in CSS pixels, reading `text=<words>` as the first

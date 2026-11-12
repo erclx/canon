@@ -24,9 +24,9 @@ export const CAMERA_VERSION = 1
 const DEPTH = 1.8
 
 /**
- * How far a clip with one pixel per CSS pixel zooms before it goes soft, which
- * caps a screencast's depth well under `DEPTH` and leaves the stepper's 4K
- * clip at it.
+ * How far an output with one pixel per clip pixel zooms before it goes soft,
+ * which caps a screencast's depth well under `DEPTH` at a 1920-wide output and
+ * leaves the stepper's 4K clip at it.
  */
 const SHARP_DEPTH = 1.35
 
@@ -92,6 +92,11 @@ interface Aim {
   /** What the view has to keep in frame, being both ends of a drag. */
   readonly box: Box
   readonly depth: number
+  /**
+   * True for an aim no glide reaches, being a focus move, which eases in over
+   * `EASE_MS` before it rather than over whatever glide ran last.
+   */
+  readonly unglided?: true
 }
 
 /** A stretch of clip time, eased from its start to its end. */
@@ -117,6 +122,23 @@ export interface CameraOptions {
    * playback clock and a zoom settles at the speed a viewer sees. 1 by default.
    */
   readonly rate?: number
+  /**
+   * The depth every press zooms to, before the sharpness and fill caps lower
+   * it. `DEPTH` by default.
+   */
+  readonly depth?: number
+  /**
+   * How many pixels wide the track is rendered at, which the sharpness cap
+   * reads against, so a narrower output zooms deeper before the clip goes
+   * soft. The viewport's width by default.
+   */
+  readonly outputWidth?: number
+  /**
+   * Whether a key that moved focus aims the camera at the focused box. Off by
+   * default, since a launch take aims only where the drawn cursor is and a Tab
+   * moves focus away from it. The reel turns it on to show a focus ring.
+   */
+  readonly focus?: boolean
 }
 
 export function cameraTrack(
@@ -126,7 +148,10 @@ export function cameraTrack(
   const log = atRate(source, options.rate ?? 1)
   const { width, height } = log.viewport
   const clip = log.clip ?? CLIP_SIZES[log.route]
-  const deepest = Math.min(DEPTH, (SHARP_DEPTH * clip.width) / width)
+  const deepest = Math.min(
+    options.depth ?? DEPTH,
+    (SHARP_DEPTH * clip.width) / (options.outputWidth ?? width),
+  )
   const depthFor = (box: Box): number =>
     Math.min(
       deepest,
@@ -135,7 +160,9 @@ export function cameraTrack(
     )
 
   const aims = (log.push === false ? [] : log.events)
-    .flatMap((event): Aim[] => aimsOf(event, depthFor, deepest))
+    .flatMap((event): Aim[] =>
+      aimsOf(event, depthFor, deepest, options.focus === true),
+    )
     .filter((aim) => aim.depth >= MIN_ZOOM)
     .sort((a, b) => a.t - b.t)
 
@@ -197,6 +224,7 @@ function aimsOf(
   event: LogEvent,
   depthFor: (box: Box) => number,
   deepest: number,
+  focus: boolean,
 ): Aim[] {
   switch (event.kind) {
     case 'click':
@@ -233,6 +261,21 @@ function aimsOf(
           depth: depthFor(event.box),
         },
       ]
+    case 'key': {
+      if (!focus || event.focus === undefined) return []
+      // Aimed once the press lands, since focus moves on the key coming up.
+      const moved = event.t + event.ms
+      return [
+        {
+          t: moved,
+          until: moved,
+          at: centerOf(event.focus),
+          box: event.focus,
+          depth: depthFor(event.focus),
+          unglided: true,
+        },
+      ]
+    }
     case 'move': {
       if (event.hold === undefined) return []
       // A move logs no box, so a hold aims at the full depth.
@@ -296,7 +339,9 @@ function zoomsOf(
     const depth = Math.min(...group.map((aim) => aim.depth))
     const floor = zooms.at(-1)?.out.end ?? 0
 
-    const into = arriving(glides, first.t, floor) ?? {
+    const into = (first.unglided
+      ? undefined
+      : arriving(glides, first.t, floor)) ?? {
       start: Math.max(floor, first.t - EASE_MS),
       end: first.t,
     }
@@ -313,7 +358,9 @@ function zoomsOf(
       if (stop && !inside(aim, stop.at, depth, page)) {
         stops.push({
           at: framed(aim, depth, page),
-          pan: arriving(glides, aim.t, previous.until) ?? {
+          pan: (aim.unglided
+            ? undefined
+            : arriving(glides, aim.t, previous.until)) ?? {
             start: Math.max(previous.until, aim.t - EASE_MS),
             end: aim.t,
           },

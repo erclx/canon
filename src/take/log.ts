@@ -85,6 +85,11 @@ export type LogEvent =
       /** The combination as the plan wrote it, such as `Control+K`. */
       readonly keys: string
       readonly ms: number
+      /**
+       * The box focus moved to, absent when the press left focus on `body` or
+       * on the element that held it, so the camera aims only at a new focus.
+       */
+      readonly focus?: Box
     }
   | {
       readonly t: number

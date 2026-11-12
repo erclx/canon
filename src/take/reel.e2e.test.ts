@@ -145,11 +145,7 @@ describe.skipIf(!available())('a reel joined from a two-route take', () => {
       const camera = cameras[frame.beat]?.frames[frame.index * REEL_EVERY]
       if (!camera) throw new Error(`no camera frame for ${frame.index}`)
       // Just inside the arrow's tip, down its shaft, where the fill is solid.
-      const [r, g, b] = pixel(
-        frame,
-        camera.cursor.x / 2 + 2,
-        camera.cursor.y / 2 + 8,
-      )
+      const [r, g, b] = pixel(frame, frame.pointer.x + 2, frame.pointer.y + 8)
       seen.push({
         beat: frame.beat,
         index: frame.index,
@@ -235,24 +231,18 @@ describe.skipIf(!available())('a reel of a drag', () => {
   })
 
   it('should draw the held ring around the pointer through the drag', async () => {
-    const [beat] = beats
-    if (!beat) throw new Error('no drag beat')
-    const camera = JSON.parse(
-      readFileSync(join(out, beat.camera), 'utf8'),
-    ) as CameraTrack
     // The held ring is 0.7 of its full size, so its stroke centers about 12
     // reel pixels from the tip. Left of the tip, the arrow never covers it.
     const radius = RING_RADIUS * 0.7 - 0.7
 
     const held: boolean[] = []
     for await (const frame of reelFrames(out, beats)) {
-      const at = camera.frames[frame.index * REEL_EVERY]
-      if (at?.ring !== 0.3) continue
+      if (frame.ring !== 0.3) continue
       // Less half a pixel, since the ring's coverage is read at pixel centers.
       const [r = 0, , b = 0] = pixel(
         frame,
-        at.cursor.x / 2 - radius - 0.5,
-        at.cursor.y / 2 - 0.5,
+        frame.pointer.x - radius - 0.5,
+        frame.pointer.y - 0.5,
       )
       held.push(b > r + 40)
     }
@@ -444,4 +434,102 @@ describe.skipIf(!available())('a reel of a popover that fades out', () => {
     expect(reel.bytes).toBeLessThan(lossless.bytes)
     expect(readWebp(file).ms).toBe((reel.frames * 1000) / REEL_FPS)
   }, 240_000)
+})
+
+const FOCUS_PAGE = readFileSync(
+  new URL('./fixtures/focus.html', import.meta.url),
+  'utf8',
+)
+
+/**
+ * How wide the focus outline's sides draw in one frame: the widest run of
+ * pure red pixels along any row that is not the outline's top or bottom edge,
+ * which a row crosses as one long run instead.
+ */
+function sideWidth(frame: {
+  data: Uint8Array
+  width: number
+  height: number
+}): number {
+  let widest = 0
+  for (let y = 0; y < frame.height; y += 1) {
+    let run = 0
+    for (let x = 0; x <= frame.width; x += 1) {
+      const i = (y * frame.width + x) * 4
+      const red =
+        x < frame.width &&
+        (frame.data[i] ?? 0) > 200 &&
+        (frame.data[i + 1] ?? 255) < 60 &&
+        (frame.data[i + 2] ?? 255) < 60
+      if (red) run += 1
+      else {
+        if (run < 20) widest = Math.max(widest, run)
+        run = 0
+      }
+    }
+  }
+  return widest
+}
+
+describe.skipIf(!available())('a reel of a key that moves focus', () => {
+  let server: { url: string; stop: () => void }
+  let out: string
+  let beats: readonly FilmedBeat[] = []
+
+  beforeAll(async () => {
+    const served = Bun.serve({
+      port: 0,
+      fetch: () =>
+        new Response(FOCUS_PAGE, { headers: { 'content-type': 'text/html' } }),
+    })
+    server = {
+      url: `http://127.0.0.1:${served.port}/`,
+      stop: () => served.stop(true),
+    }
+    out = mkdtempSync(join(tmpdir(), 'canon-reel-focus-e2e-'))
+
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [
+          {
+            name: 'tab',
+            steps: [
+              { kind: 'wait', ms: 700 },
+              { kind: 'key', keys: 'Tab' },
+              { kind: 'wait', ms: 300 },
+            ],
+          },
+        ],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+    const result = await take({ url: server.url, plan: read.plan, out })
+    if (result.status !== 'filmed') throw new Error(result.message)
+    beats = result.beats
+  }, 240_000)
+
+  afterAll(() => {
+    server.stop()
+    rmSync(out, { recursive: true, force: true })
+  })
+
+  it('should draw a 2 px focus ring at least 2 reel pixels wide at the hold', async () => {
+    let held = 0
+    for await (const frame of reelFrames(out, beats)) {
+      held = Math.max(held, sideWidth(frame))
+    }
+
+    expect(held).toBeGreaterThanOrEqual(2)
+  }, 120_000)
+
+  it('should encode the zoomed reel lossless', async () => {
+    const file = join(out, 'focus.webp')
+
+    const reel = await renderReel(out, beats, file)
+
+    expect(reel.lossless).toBe(true)
+    // Printed rather than asserted, since a moving crop changes every pixel
+    // through an ease and the plan watches the size it costs against the cap.
+    console.info(`focus reel of ${reel.frames} frames, ${reel.bytes} bytes`)
+  }, 120_000)
 })
