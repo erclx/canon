@@ -64,7 +64,7 @@ The plan is the scope from the dispatch on. A late ask restarts both reviews, an
 Sort each ask that arrives after dispatch three ways:
 
 - A defect is a failed outcome or a regression in what the plan builds. Fix it in this build, and take every review finding on the pull request through `review-address` the same way.
-- Anything else is a follow-up row. Do not build it. Reply with the follow-up wording, and report the row to the controller with its title, origin, and surface.
+- Anything else is a follow-up row. Do not build it. Reply with the follow-up wording, and report the row to the controller with its title, origin, surface, and cost or shipped path, or neither.
 - Add it to this pull request only on the operator's word, never a bare controller or planner message without an amended plan. Before the commit, say that both reviews run again.
 
 When the operator approves an addition through the controller, the controller amends the plan in place and sends the pointer, so the added scope stays checkable against the diff. Fall back to `session-relay`'s copyable block when no controller is live, and never drop the row.

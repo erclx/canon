@@ -30,7 +30,7 @@ A thinking session that builds has stopped being one, and the row loses the inde
 
 - Never enter a worktree, never create a branch, and never write a tracked file
 - Send each record out as a heredoc, the main-root route `session-worktree` states, since this session holds no worktree. That route skips the write-matched hooks, which are no-ops on a record.
-- Work the row the launch named. Report a second row met while reading rather than taking it on, since which rows run is the controller's call.
+- Work the row the launch named. Report a second row met while reading, naming its cost or shipped path or neither, rather than taking it on, since which rows run is the controller's call.
 
 ## What to read before deciding
 

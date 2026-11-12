@@ -1,11 +1,21 @@
 ---
 title: Orchestrator filing
-description: What a row the orchestrator files may claim, why it carries no count or cause, and which measurements stay in the orchestrator's seat rather than going to the planner
+description: Whether a row should exist before it is offered or filed, what a row the orchestrator files may claim, why it carries no count or cause, and which measurements stay in the orchestrator's seat rather than going to the planner
 ---
 
 # Orchestrator filing
 
-Read from `### Filing a row` in `role-orchestrator` before this session files a row or places a finding in another task's `## Findings`. A pass that files nothing skips this file.
+Read from `### Filing a row` in `role-orchestrator` before this session offers a row, files one, or places a finding in another task's `## Findings`. A pass that offers and files nothing skips this file.
+
+## Whether a row should exist
+
+Run the test in `${CLAUDE_SKILL_DIR}/../backlog-triage/SKILL.md` under `### Step 5: pick the verdict` and `### What is not a reach` before offering or filing a row. Do not restate it here.
+
+- A row passing it is offered with one line naming the arm it passes
+- A failing row goes as one line to the owning task's `## Findings`, or to the next task on that surface. That task may archive at merge, which is the intent for bloat.
+- With no such task, put the line in this session's report and nothing on the board
+- An operator decision settled in groundwork or a plan is exempt, and so is an unprompted operator ask to file
+- A contested or large row goes to `proposal-critique`
 
 ## What a row claims
 
