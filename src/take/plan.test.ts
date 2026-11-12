@@ -190,6 +190,35 @@ describe('readTakePlan', () => {
     expect(read).toMatchObject({ kind: 'refused', reason: 'bad-beat' })
   })
 
+  it('should read a beat that asks for scrollbars', () => {
+    const read = readTakePlan(
+      planSource([beat([{ kind: 'wait', ms: 100 }], { scrollbars: true })]),
+    )
+
+    expect(read).toMatchObject({
+      kind: 'read',
+      plan: { beats: [{ scrollbars: true }] },
+    })
+  })
+
+  it('should read scrollbars false as absent', () => {
+    const read = readTakePlan(
+      planSource([beat([{ kind: 'wait', ms: 100 }], { scrollbars: false })]),
+    )
+
+    expect(read).toMatchObject({ kind: 'read' })
+    if (read.kind !== 'read') return
+    expect(read.plan.beats[0]).not.toHaveProperty('scrollbars')
+  })
+
+  it('should refuse scrollbars that is not a boolean', () => {
+    const read = readTakePlan(
+      planSource([beat([{ kind: 'wait', ms: 100 }], { scrollbars: 'yes' })]),
+    )
+
+    expect(read).toMatchObject({ kind: 'refused', reason: 'bad-beat' })
+  })
+
   it('should read the setup steps a beat runs before recording', () => {
     const read = readTakePlan(
       planSource([
