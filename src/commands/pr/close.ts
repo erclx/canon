@@ -1,12 +1,12 @@
 import { readFile } from 'node:fs/promises'
-import { join, resolve } from 'node:path'
+import { resolve } from 'node:path'
 import { $ } from 'bun'
 import type { Command } from 'commander'
 import { gitEnv } from '@/git/env'
 import { close, type CloseApi, type CloseRefusal } from '@/pr/close'
 import { type RestPull } from '@/pr/rest'
 import { intro, logInfo, logStep, logWarn, outro } from '@/cli/ui'
-import { ReadOptions, gh, readPull, refuseWith } from '@/commands/pr/pull'
+import { ReadOptions, gh, refuseWith } from '@/commands/pr/pull'
 
 interface CloseCommandOptions extends ReadOptions {
   readonly reasonFile?: string

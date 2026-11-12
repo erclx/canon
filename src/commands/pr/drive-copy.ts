@@ -1,6 +1,5 @@
 import { mkdir, readFile, realpath, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
-import { $ } from 'bun'
 import type { Command } from 'commander'
 import { listWorktrees } from '@/git/worktree'
 import { branchSlug, buildDriveCopy, loadPreviewConfig } from '@/pr/drive-copy'

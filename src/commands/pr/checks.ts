@@ -1,5 +1,4 @@
-import { join, resolve } from 'node:path'
-import { $ } from 'bun'
+import { resolve } from 'node:path'
 import type { Command } from 'commander'
 import {
   type CheckRunListing,

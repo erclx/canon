@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises'
-import { join, resolve } from 'node:path'
+import { resolve } from 'node:path'
 import { $ } from 'bun'
 import type { Command } from 'commander'
 import { execa } from 'execa'

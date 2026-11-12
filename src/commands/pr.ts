@@ -1,7 +1,6 @@
 import { existsSync, statSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { basename, join, resolve } from 'node:path'
-import { $ } from 'bun'
 import type { Command } from 'commander'
 import { execa } from 'execa'
 import { gitEnv } from '@/git/env'
