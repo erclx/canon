@@ -52,12 +52,13 @@ Reading is not restricted, so read documentation, comparable projects, and paper
 
 A track may run an experiment to settle an open question without stopping to ask. What it takes depends on what the experiment does.
 
-| Experiment                                | What it takes                                                          |
-| ----------------------------------------- | ---------------------------------------------------------------------- |
-| Reading or computing                      | Run it, since unrestricted reading covers it                           |
-| Processing an input                       | Start on a sample and scale up after it works, per the sample rule     |
-| Writing a fixture this session provisions | Run it under the fixtures path above, since provisioning costs nothing |
-| Spawning a billed headless session        | Run up to three, then ask before spawning more                         |
+| Experiment                                | What it takes                                                                      |
+| ----------------------------------------- | ---------------------------------------------------------------------------------- |
+| Reading or computing                      | Run it, since unrestricted reading covers it                                       |
+| Processing an input                       | Start on a sample and scale up after it works, per the sample rule                 |
+| Writing a fixture this session provisions | Run it under the fixtures path above, since provisioning costs nothing             |
+| Spawning a billed headless session        | Run up to three, then ask before spawning more                                     |
+| Generating machine load                   | Simulate the slowness first, per the Timing bullet of `canon:systematic-debugging` |
 
 The sample rule in `${CLAUDE_SKILL_DIR}/references/groundwork-spikes.md` bounds an input run on size, duration, and spend. The headless bound is a run count because a run reports its cost only after it finishes, so a count is checkable before spawning and a dollar ceiling is not.
 

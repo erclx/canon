@@ -222,6 +222,10 @@ Every outcome reaches the review with its proof named.
 - A permission mode can refuse a compound form, and a substituted check no longer matches the plan, so reach a filter through a verb's own argument or flag, or name a test that holds it.
 - Name the visual check where no test reaches, and say it is visual, so a reader can tell a proof from a look.
 
+A command that generates machine load runs again on every execution, so it stays confined.
+
+- Name no hog or busy loop without its `taskset`, or `canon records validate plans` reports `verification-load-unconfined`.
+
 ### Risks
 
 Name the collision rather than the category, since a risk a reader cannot act on is padding. Give each risk its own H3 and a short paragraph, so the outline lists every collision by name.
