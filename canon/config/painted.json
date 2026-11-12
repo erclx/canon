@@ -1,4 +1,4 @@
 {
-  "painted": ["src/design/**"],
+  "painted": ["src/design/**", "src/take/**"],
   "unpainted": ["tooling/**"]
 }
