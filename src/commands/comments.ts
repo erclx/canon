@@ -2,7 +2,10 @@ import { resolve } from 'node:path'
 import type { Command } from 'commander'
 import {
   BLOCK_LINE_CHECKPOINT,
+  BODY_BLOCK_CAP,
   density,
+  FILE_LONG_BLOCK_CAP,
+  LONG_BLOCK_FLOOR,
   type Language,
   LANGUAGES,
   type LanguageCount,
@@ -33,7 +36,7 @@ export function register(program: Command): void {
   comments
     .command('scan')
     .description(
-      'Report comment density by language and kind, and the longest comment run per file past the checkpoint',
+      'Report comment density by language and kind, every comment run past the checkpoint with its placement, and what the comment caps would fail',
     )
     .argument('[path]', 'Tree to scan, defaulting to the current directory')
     .helpOption('-h, --help', 'Show this help message')
@@ -43,6 +46,15 @@ export function register(program: Command): void {
     .addHelpText(
       'after',
       [
+        '',
+        'Placement:',
+        '  head  outside every function body, such as a doc block above one',
+        '  body  inside a function body, a nested function heading included',
+        '  -     unread, as for every bash run',
+        '',
+        'Caps, which canon gate run fails on and this report only lists:',
+        `  an in-body run past ${BODY_BLOCK_CAP} lines`,
+        `  a file past ${FILE_LONG_BLOCK_CAP} lines in runs of ${LONG_BLOCK_FLOOR} or more`,
         '',
         'Exit codes:',
         '  0  the scan completed',
@@ -119,6 +131,7 @@ async function runScan(
   if (opts.since) reportTrend(points, languages)
 
   reportLongBlocks(snapshot)
+  reportCaps(snapshot)
   reportVocabulary(vocabulary, snapshot)
   outro()
 
@@ -131,7 +144,17 @@ async function runScan(
             ? { source: vocabulary.source, terms: vocabulary.terms }
             : null,
         blockCheckpoint: BLOCK_LINE_CHECKPOINT,
-        snapshot: snapshot.map(record),
+        longBlockFloor: LONG_BLOCK_FLOOR,
+        bodyBlockCap: BODY_BLOCK_CAP,
+        fileLongBlockCap: FILE_LONG_BLOCK_CAP,
+        snapshot: snapshot.map((count) => ({
+          ...record(count),
+          blocks: count.blocks,
+          bodyBlocks: count.bodyBlocks,
+          longBlockFiles: count.longBlockFiles,
+        })),
+        // A trend point keeps the summary keys alone, so a long range does
+        // not repeat every block list once per revision.
         trend: points.map((point) => ({
           rev: point.rev,
           date: point.date,
@@ -217,7 +240,8 @@ function reportTrend(
 }
 
 /**
- * Lists each file's longest comment run past the checkpoint, longest first.
+ * Lists every comment run past the checkpoint, longest first, with where it
+ * sits.
  *
  * A long run is a prompt to read it against the code beside it, and some
  * belong where they are, so the step names the length and asks nothing of it.
@@ -226,7 +250,7 @@ function reportLongBlocks(snapshot: readonly LanguageCount[]): void {
   logStep('Long comment blocks')
 
   const blocks = snapshot
-    .flatMap((count) => count.longBlocks)
+    .flatMap((count) => count.blocks)
     .sort((a, b) => b.lines - a.lines || a.file.localeCompare(b.file))
 
   if (blocks.length === 0) {
@@ -234,14 +258,55 @@ function reportLongBlocks(snapshot: readonly LanguageCount[]): void {
     return
   }
 
+  const files = snapshot.reduce(
+    (sum, count) => sum + count.longBlocks.length,
+    0,
+  )
   logInfo(
-    `${blocks.length} files with a run past ${BLOCK_LINE_CHECKPOINT} lines`,
+    `${blocks.length} runs past ${BLOCK_LINE_CHECKPOINT} lines in ${files} files`,
   )
   pipeOutput(
     blocks
-      .map((block) => `${block.file}:${block.line}  ${block.lines} lines`)
+      .map(
+        (block) =>
+          `${block.file}:${block.line}  ${block.lines} lines  ${block.placement ?? '-'}`,
+      )
       .join('\n'),
   )
+}
+
+/** Lists what the two comment caps `canon gate run` holds would fail. */
+function reportCaps(snapshot: readonly LanguageCount[]): void {
+  logStep('Comment caps')
+
+  const body = snapshot.flatMap((count) => count.bodyBlocks)
+  const files = snapshot
+    .flatMap((count) => count.longBlockFiles)
+    .filter((file) => file.lines > FILE_LONG_BLOCK_CAP)
+
+  if (body.length === 0) {
+    logInfo(`No in-body run past ${BODY_BLOCK_CAP} lines.`)
+  } else {
+    logWarn(`${body.length} in-body runs past ${BODY_BLOCK_CAP} lines`)
+    pipeOutput(
+      body
+        .map((block) => `${block.file}:${block.line}  ${block.lines} lines`)
+        .join('\n'),
+    )
+  }
+
+  if (files.length === 0) {
+    logInfo(
+      `No file past ${FILE_LONG_BLOCK_CAP} lines in runs of ${LONG_BLOCK_FLOOR} or more.`,
+    )
+  } else {
+    logWarn(
+      `${files.length} files past ${FILE_LONG_BLOCK_CAP} lines in runs of ${LONG_BLOCK_FLOOR} or more`,
+    )
+    pipeOutput(
+      files.map((file) => `${file.file}  ${file.lines} lines`).join('\n'),
+    )
+  }
 }
 
 /**
