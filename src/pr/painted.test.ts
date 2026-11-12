@@ -122,6 +122,18 @@ describe('loadPaintedPatterns', () => {
     expect(isPainted('src/take/film.e2e.test.ts', patterns)).toBe(false)
   })
 
+  it('should paint a take fixture through the take glob while other fixture folders stay unpainted', () => {
+    const patterns = loadPaintedPatterns(
+      fileURLToPath(new URL('../..', import.meta.url)),
+    )
+
+    expect(isPainted('src/take/fixtures/focus.html', patterns)).toBe(true)
+    expect(isPainted('src/take/fixtures/pr-reel.test.ts', patterns)).toBe(false)
+    expect(isPainted('src/driver/probes/fixtures/page.html', patterns)).toBe(
+      false,
+    )
+  })
+
   it('should leave a synced stack config unpainted through its shipped override', () => {
     const patterns = loadPaintedPatterns(
       fileURLToPath(new URL('../..', import.meta.url)),
