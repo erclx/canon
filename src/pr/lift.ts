@@ -200,7 +200,11 @@ export interface LiftOptions {
 
 export interface LiftRecord {
   readonly reason:
-    'lifted' | 'already-ready' | 'redrafted' | 'clear' | LiftRefusal
+    | 'lifted'
+    | 'already-ready'
+    | 'redrafted'
+    | 'clear'
+    | LiftRefusal
   /** The gate that read not clear when a ready pull request went back to draft. */
   readonly failed?: LiftRefusal
   readonly carriedFrom?: string
