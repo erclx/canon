@@ -1,10 +1,10 @@
 {
-  "recordedAt": "2026-10-24",
-  "commit": "c78fe20eadc17792881a35862f836fea948e72c8",
+  "recordedAt": "2026-11-12",
+  "commit": "516d7ccdfa8c9b956ffdd5ad2cf5d03d2c8ff53f",
   "checks": {
     "context": {
       "unresolvedCitations": 0,
-      "longEntries": 5,
+      "longEntries": 8,
       "missingSections": 0,
       "indexDrift": 5,
       "bareReferences": 0,
@@ -12,10 +12,10 @@
     },
     "markdown": {
       "bans": 0,
-      "heavyBullets": 37,
-      "heavyParagraphs": 45,
-      "filesPastDepth": 13,
-      "flatParagraphs": 72
+      "heavyBullets": 38,
+      "heavyParagraphs": 49,
+      "filesPastDepth": 16,
+      "flatParagraphs": 77
     },
     "skills": {
       "missingRequirement": 0,
@@ -27,10 +27,10 @@
       "requirementSections": 0
     },
     "skills-reach": {
-      "unqualifiedCitations": 4
+      "unqualifiedCitations": 2
     },
     "skills-rank": {
-      "misses": 18,
+      "misses": 20,
       "unmeasurable": 0
     },
     "comments": {
@@ -39,7 +39,7 @@
     },
     "test-order": {
       "findings": 0,
-      "unclassified": 1
+      "unclassified": 0
     },
     "secrets": {
       "findings": 0
@@ -49,7 +49,7 @@
     },
     "restated": {
       "contradictions": 0,
-      "repetitions": 63
+      "repetitions": 68
     },
     "rules": {
       "shapeRules": 0,
@@ -61,14 +61,14 @@
       "findings": 0
     },
     "census": {
-      "files": 2170,
-      "skipped": 84,
-      "lines": 245205,
-      "largeFolders": 39
+      "files": 2758,
+      "skipped": 126,
+      "lines": 349258,
+      "largeFolders": 40
     },
     "code": {
-      "longFiles": 1,
-      "longFunctions": 72
+      "longFiles": 0,
+      "longFunctions": 75
     }
   }
 }
