@@ -9,6 +9,7 @@ import {
 } from '@/comments/scan'
 import { type TrendPoint, trend } from '@/comments/trend'
 import { loadVocabulary, type Vocabulary } from '@/comments/vocabulary'
+import { currentWorktreeRoot } from '@/git/worktree'
 import { intro, logInfo, logStep, logWarn, outro, pipeOutput } from '@/cli/ui'
 
 interface ScanCommandOptions {
@@ -97,7 +98,9 @@ async function runScan(
     return 1
   }
 
-  const vocabulary = await loadVocabulary(root)
+  // The rule roots sit at the project root, so a path argument reads them from
+  // the checkout holding it and keeps the scanned path for the file walk alone.
+  const vocabulary = await loadVocabulary(await currentWorktreeRoot(root))
   const scanOptions = {
     languages,
     vocabulary: vocabulary.kind === 'loaded' ? vocabulary.terms : [],

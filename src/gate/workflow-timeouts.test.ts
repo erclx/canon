@@ -10,6 +10,7 @@ interface WorkflowStep {
 
 interface WorkflowJob {
   'timeout-minutes'?: number
+  uses?: string
   steps?: WorkflowStep[]
 }
 
@@ -32,9 +33,9 @@ const shippedWorkflowDirs = readdirSync(TOOLING_DIR, { withFileTypes: true })
 
 const readJobs = (path: string): Record<string, WorkflowJob> => {
   const parsed = Bun.YAML.parse(readFileSync(path, 'utf8')) as {
-    jobs: Record<string, WorkflowJob>
+    jobs?: Record<string, WorkflowJob>
   }
-  return parsed.jobs
+  return parsed.jobs ?? {}
 }
 
 const workflowFiles = [WORKFLOWS_DIR, ...shippedWorkflowDirs].flatMap((dir) =>
@@ -53,18 +54,21 @@ const allSteps = (): { file: string; step: WorkflowStep }[] =>
     ),
   )
 
-describe.each(['pr-visual-checks.yml', 'refresh-capture-frames.yml'])(
-  '%s',
-  (file) => {
-    it('should bound every job with a timeout', () => {
-      const unbounded = Object.entries(readJobs(join(WORKFLOWS_DIR, file)))
-        .filter(([, job]) => typeof job['timeout-minutes'] !== 'number')
-        .map(([id]) => id)
+const canonWorkflowFiles = readdirSync(WORKFLOWS_DIR)
+  .filter((file) => /\.ya?ml$/.test(file))
+  .sort()
 
-      expect(unbounded).toEqual([])
-    })
-  },
-)
+describe.each(canonWorkflowFiles)('%s', (file) => {
+  // A job that sets uses: calls a reusable workflow and cannot carry the key
+  it('should bound every job with a timeout', () => {
+    const unbounded = Object.entries(readJobs(join(WORKFLOWS_DIR, file)))
+      .filter(([, job]) => job.uses === undefined)
+      .filter(([, job]) => typeof job['timeout-minutes'] !== 'number')
+      .map(([id]) => id)
+
+    expect(unbounded).toEqual([])
+  })
+})
 
 describe('every workflow', () => {
   // A direct call reaches apt with no retry, so one stalled mirror

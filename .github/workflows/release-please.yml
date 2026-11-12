@@ -21,6 +21,7 @@ jobs:
   release-please:
     name: 🏷️ Release Please
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     # A dispatch naming a tag republishes it, so no release is cut
     if: github.event_name == 'push' || inputs.tag == ''
     # Queues rather than cancels, since a cancel can land after the release exists and before its outputs do
@@ -58,6 +59,7 @@ jobs:
       && (needs.release-please.outputs.release_created == 'true'
       || (github.event_name == 'workflow_dispatch' && inputs.tag != ''))
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
@@ -86,6 +88,7 @@ jobs:
     # A tag dispatch is the repair for the gap this reports, so it never runs there
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
     steps:
