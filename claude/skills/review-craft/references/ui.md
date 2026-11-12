@@ -52,6 +52,16 @@ A worker may state why a listed path needs no capture, such as a change to keybo
 - Write the reason after the colon, since a line with none waives nothing
 - Restate it in every later pass, a close-out included, since the lift reads only the newest marked pass of each family and never a reply
 
+### Reading the reel skip
+
+A checklist holding a box a driver can run owes a reel filmed at the head. Read `reel` and `reelSkip` on the same check record when the reel is missing or names an earlier head.
+
+- A `reelSkip` whose code, the text before its first colon, is one `canon pr lift --help` lists as settling holds nothing. Leave it.
+- Any other skip, or no skip at all, makes `canon pr lift` refuse `reel-unsettled`. File a should-fix asking for the reel and quote the skip, since the builder or its machine can clear every such code.
+- Waive it instead when the diff shows no reel is needed, such as a change whose drivable boxes the screenshots already show
+- Write one `- **Waived reel:** <reason>` line per pull request, in the form `${CLAUDE_SKILL_DIR}/../review-pr/references/post.md` gives
+- Keep the waiver outside any code fence and restate it in every later pass, as with a capture waiver
+
 ### A recapture of the design
 
 A recapture under `canon/design/` redraws the accepted design rather than the built app, so it never stands in for an evidence capture. The verb leaves those paths out of `uncaptured`, and a pass clears a painted change on the evidence comment alone, however many design references beside it were redrawn.

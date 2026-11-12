@@ -1569,6 +1569,27 @@ describe('canon pr evidence --check', () => {
     expect(record).toMatchObject({ reason: 'settled', owed: [] })
   })
 
+  it('should carry the reel skip line the marked comment holds as reelSkip', async () => {
+    writeComment(
+      '**No reel:** target-missing: beat 2: no match\n\n## What to look at\n\n<!-- pr-evidence: head=abc -->',
+    )
+
+    const record = await runCheck()
+
+    expect(record).toMatchObject({
+      reason: 'settled',
+      reelSkip: 'target-missing: beat 2: no match',
+    })
+  })
+
+  it('should omit reelSkip when the marked comment holds no reel skip line', async () => {
+    writeComment('## What to look at\n\n<!-- pr-evidence: head=abc -->')
+
+    const record = await runCheck()
+
+    expect(record).not.toHaveProperty('reelSkip')
+  })
+
   it('should render no body and write nothing', async () => {
     writeFileSync(
       join(tempDir, 'files.tsv'),
@@ -3366,6 +3387,28 @@ describe('canon pr reads through REST alone', () => {
       expect(record).toMatchObject({ reason: 'clear', isLifted: false })
       expect(exit).toBe(0)
       expect(mutationCalls()).toBe(0)
+    })
+
+    it('should read the posted reel skip off the evidence check into the gate', async () => {
+      stageClearPull()
+      writeFixture('comments.json', [
+        {
+          id: 1,
+          body: markedCommentBody().replace(
+            '## What to look at',
+            '**No reel:** not-filmed: hand-written\n\n## What to look at',
+          ),
+        },
+      ])
+
+      const { record } = await runLift(['7', '--check'])
+
+      const gates = record.gates as readonly Record<string, unknown>[]
+      expect(gates.find((gate) => gate.gate === 'evidence')).toMatchObject({
+        isOk: false,
+        reason: 'reel-unsettled',
+        reelSkip: 'not-filmed: hand-written',
+      })
     })
 
     it('should refuse gh-failed on a blocked mutation rather than reporting a lift', async () => {

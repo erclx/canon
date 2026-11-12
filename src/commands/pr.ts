@@ -77,6 +77,7 @@ import { type HeadRefusal, resolveHead, resolveTip } from '@/pr/head'
 import {
   type ChecksGate,
   DEFAULT_WAIT_SECONDS,
+  SETTLING_REEL_SKIPS,
   type EvidenceGate,
   type GitRunner,
   lift,
@@ -905,9 +906,10 @@ export function register(program: Command): void {
         '**No local preview:** or **No reel:** followed by the text passed, a',
         'reason code and any one-line message joined to it, folded onto one',
         'line. Without the flag, a skip line the marked comment already carries',
-        'is carried forward. A skip line is dropped whenever its address or',
-        'reel renders, passed or carried, so a later run that posts the link or',
-        'films the reel replaces it. A passed --local-skip drops a carried',
+        'is carried forward. The local skip line is dropped whenever its',
+        'address renders, passed or carried. The reel skip line is dropped only',
+        'by a reel filmed at this head, so it stays beside a reel carried from',
+        'an earlier head. A passed --local-skip drops a carried',
         'local address, since that line names no head and would read as live,',
         'while a carried reel names its head and stays beside --reel-skip. Like',
         '--local, neither opens a comment alone.',
@@ -964,7 +966,11 @@ export function register(program: Command): void {
         'this checkout resolves, its push path filter matches a path the pull',
         'request changed, and the marked comment carries no **Preview:**',
         'address. A failed deploy reads the same as a skipped one.',
-        'The record carries `owed` and the same marked fields. --check refuses',
+        'The record carries `owed` and the same marked fields, plus',
+        '`reelSkip`, the text after **No reel:** on the marked comment, present',
+        'only when that line is posted. `canon pr lift` reads its reason code,',
+        'the text before the first colon, to decide whether a drivable',
+        'checklist with no reel at the head is settled. --check refuses',
         'with --preview, --local, --checklist, --no-checklist, --reel,',
         '--local-skip, or --reel-skip as check-writes.',
         '',
@@ -1046,7 +1052,19 @@ export function register(program: Command): void {
         '            refuses `painted-uncaptured`,',
         '            the gate entry naming what is left as `uncaptured` and what',
         '            a review waived as `waived`, each sorted. An absent list,',
-        '            in a project whose base keeps no captures, passes',
+        '            in a project whose base keeps no captures, passes. Last, a',
+        '            checklist holding a drivable box owes a reel at the head, or',
+        '            one filmed earlier that carries to it under the rule a UI',
+        '            close carries by, which the gate entry names as',
+        '            `reelCarriedFrom`. Otherwise a',
+        '            `reelSkip` on the evidence check whose code, the text before',
+        '            its first colon, is one of',
+        `            ${SETTLING_REEL_SKIPS.join(', ')}`,
+        '            settles it, since no builder can change those. So does a',
+        '            `- **Waived reel:** <reason>` line in a',
+        '            standing pass, read the way a capture waiver is. Anything',
+        '            else refuses `reel-unsettled`, the gate entry naming the skip',
+        '            as `reelSkip`, and a waiver that settled it as `reelWaived`',
         '  standing  the head is fresh against the base, not stale or conflicted',
         '  ci        every required check run on the tip passed, waited on up to --wait',
         '',
@@ -1082,8 +1100,8 @@ export function register(program: Command): void {
         '  lifted, already-ready, redrafted, clear (--check)',
         '  pull-closed, review-missing, review-open, review-unmarked,',
         '  review-behind, ui-missing, ui-open, ui-unmarked, ui-behind,',
-        '  ui-undriven, evidence-owed, painted-uncaptured, standing-stale,',
-        '  standing-conflict, standing-unknown,',
+        '  ui-undriven, evidence-owed, painted-uncaptured, reel-unsettled,',
+        '  standing-stale, standing-conflict, standing-unknown,',
         '  ci-pending (--check), ci-failing, ci-conflicted, ci-timeout,',
         '  head-moved, ready-withdrawn, gh-failed',
         '',
@@ -3009,6 +3027,9 @@ async function runEvidence(
     warnUncaptured()
     outro()
     if (emitJson) {
+      // The lift reads the skip to decide whether a drivable checklist with
+      // no reel at the head is settled, so the check carries it verbatim.
+      const reelSkip = findEvidenceSkips(comments).reel
       process.stdout.write(
         `${JSON.stringify({
           root,
@@ -3016,6 +3037,7 @@ async function runEvidence(
           reason: owed.length === 0 ? 'settled' : 'owed',
           owed,
           ...uncapturedField,
+          ...(reelSkip !== undefined && { reelSkip }),
           ...(commentId !== undefined && { commentId }),
           ...carried,
         })}\n`,
@@ -4328,6 +4350,8 @@ const LIFT_REFUSALS: Record<LiftRefusal | 'bad-wait' | 'gh-missing', string> = {
     'The evidence check reads owed, so the ship chain left a step undone.',
   'painted-uncaptured':
     'A painted path changed with no capture, no reel at the head, and no waiver in a review. Capture it, or have a review waive it.',
+  'reel-unsettled':
+    'The checklist holds a box a driver can run, and no reel is filmed at the head. The posted skip, if any, is one a builder can fix. Film the reel, or have a review waive it.',
   'standing-stale':
     'The base moved under a path this branch writes since it branched, so CI measured a tree that is gone.',
   'standing-conflict': 'The head does not merge cleanly into the base.',
@@ -4440,6 +4464,7 @@ async function readEvidenceGate(
     drivable?: unknown
     uncaptured?: unknown
     reel?: unknown
+    reelSkip?: unknown
   }
   try {
     record = JSON.parse(last)
@@ -4459,6 +4484,7 @@ async function readEvidenceGate(
       uncaptured: record.uncaptured.map(String),
     }),
     ...(reelHead !== undefined && { reelHead }),
+    ...(typeof record.reelSkip === 'string' && { reelSkip: record.reelSkip }),
   }
 }
 

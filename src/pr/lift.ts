@@ -8,7 +8,7 @@ import {
   type UiCounts,
 } from '@/pr/review-scope'
 import { readCarry } from '@/pr/carry'
-import { readWaivers } from '@/pr/waiver'
+import { readReelWaivers, readWaivers } from '@/pr/waiver'
 import { DEFAULT_PAINTED, isPainted, type PaintedPatterns } from '@/pr/painted'
 
 /** How long `--wait` holds for a pending CI run, in seconds, when none is named. */
@@ -31,6 +31,7 @@ export type LiftRefusal =
   | 'ui-undriven'
   | 'evidence-owed'
   | 'painted-uncaptured'
+  | 'reel-unsettled'
   | 'standing-stale'
   | 'standing-conflict'
   | 'standing-unknown'
@@ -60,6 +61,12 @@ export interface GateResult {
   readonly uncaptured?: readonly string[]
   /** The uncaptured paths a review waived, sorted. */
   readonly waived?: readonly string[]
+  /** The posted reel skip, named when a drivable checklist has no reel at the head. */
+  readonly reelSkip?: string
+  /** The reason on the standing reel waiver that settled a drivable checklist with no reel. */
+  readonly reelWaived?: string
+  /** The earlier commit a reel was filmed at, when it carried to the head across pushes no box can observe. */
+  readonly reelCarriedFrom?: string
 }
 
 /** How an earlier commit sits against the head, and what changed since. */
@@ -95,6 +102,25 @@ export interface EvidenceGate {
   readonly uncaptured?: readonly string[]
   /** The head the marked comment's reel was filmed at, when it embeds one. */
   readonly reelHead?: string
+  /** The text after the marked comment's `**No reel:**` label, when it carries one. */
+  readonly reelSkip?: string
+}
+
+/**
+ * The reel skip codes that settle a drivable checklist with no reel. Each is a
+ * filter result or a hosting limit no builder can change. Every other code,
+ * and free text no procedure emits, is fixable by the builder or its machine,
+ * so it holds the lift until a reel lands or a review waives it.
+ */
+export const SETTLING_REEL_SKIPS: readonly string[] = [
+  'no-interactive-box',
+  'no-visible-change',
+  'reel-too-large',
+]
+
+/** The reason code a skip line opens with, the text before its first colon. */
+function reelSkipCode(skip: string): string {
+  return (skip.split(':')[0] ?? '').trim()
 }
 
 /**
@@ -303,20 +329,25 @@ export async function uiGate(
  * A reel at an earlier head clears nothing, since a later push may add the
  * path, and for the same reason a waiver counts only while the newest pass of
  * its family restates it.
+ *
+ * Last, a checklist holding a drivable box owes a reel at the head, or one
+ * `readReelCarry` carried to it. A skip whose code is in `SETTLING_REEL_SKIPS`
+ * settles it, and so does a standing reel waiver, and anything else refuses
+ * `reel-unsettled`.
  */
 export function evidenceGate(
   evidence: EvidenceGate,
   reviews: readonly ReviewRow[],
   head: string,
+  reelCarriedFrom?: string,
 ): GateResult {
   if (!evidence.isSettled) return fail('evidence', 'evidence-owed')
 
+  const standing = standingPasses(reviews)
   const isFilmed =
     evidence.reelHead !== undefined && coversHead(evidence.reelHead, head)
   const listed = isFilmed ? [] : (evidence.uncaptured ?? [])
-  const named = new Set(
-    readWaivers(standingPasses(reviews)).map((waiver) => waiver.path),
-  )
+  const named = new Set(readWaivers(standing).map((waiver) => waiver.path))
   const waived = listed.filter((path) => named.has(path)).toSorted()
   const uncaptured = listed.filter((path) => !named.has(path)).toSorted()
 
@@ -324,9 +355,50 @@ export function evidenceGate(
     ...(uncaptured.length > 0 && { uncaptured }),
     ...(waived.length > 0 && { waived }),
   }
-  return uncaptured.length > 0
-    ? { ...fail('evidence', 'painted-uncaptured'), ...lists }
-    : { ...pass('evidence'), ...lists }
+  if (uncaptured.length > 0) {
+    return { ...fail('evidence', 'painted-uncaptured'), ...lists }
+  }
+  if (!evidence.hasDrivableBox || isFilmed) {
+    return { ...pass('evidence'), ...lists }
+  }
+  if (reelCarriedFrom !== undefined) {
+    return { ...pass('evidence'), ...lists, reelCarriedFrom }
+  }
+
+  const { reelSkip } = evidence
+  const skipField = reelSkip !== undefined && { reelSkip }
+  if (
+    reelSkip !== undefined &&
+    SETTLING_REEL_SKIPS.includes(reelSkipCode(reelSkip))
+  ) {
+    return { ...pass('evidence'), ...lists, ...skipField }
+  }
+  const reelWaived = readReelWaivers(standing).at(-1)
+  if (reelWaived !== undefined) {
+    return { ...pass('evidence'), ...lists, ...skipField, reelWaived }
+  }
+  return { ...fail('evidence', 'reel-unsettled'), ...lists, ...skipField }
+}
+
+/**
+ * The commit a reel carries from when it was filmed before the head and every
+ * push since changed no path a box can observe, the rule `uiGate` carries a
+ * close by. A push a box can observe, a rewritten reel commit, or a failed
+ * read carries nothing, so the reel half decides on the skip and the waivers.
+ */
+async function readReelCarry(
+  api: Pick<LiftApi, 'readChanged'>,
+  evidence: EvidenceGate,
+  head: string,
+): Promise<string | undefined> {
+  const { reelHead } = evidence
+  if (!evidence.hasDrivableBox || reelHead === undefined) return undefined
+  const carry = await readCarry(
+    (from, to) => api.readChanged(from, to),
+    reelHead,
+    head,
+  )
+  return carry.kind === 'carried' ? carry.carriedFrom : undefined
 }
 
 function standingGate(standing: Standing): GateResult {
@@ -617,7 +689,12 @@ export async function lift(
   const gates: GateResult[] = [
     reviewGate(reviews, tip),
     await uiGate(api, painted, reviews, tip, evidence.hasDrivableBox),
-    evidenceGate(evidence, reviews, tip),
+    evidenceGate(
+      evidence,
+      reviews,
+      tip,
+      await readReelCarry(api, evidence, tip),
+    ),
     standingGate(standing),
   ]
   if (!pull.isDraft) {

@@ -63,7 +63,7 @@ A pass carrying nothing at all takes `## Review closed` and a short body, with t
 - A prior finding this pass withdrew leaves the count, and its line names the fact that settled it rather than a fix, per the withdrawal rule below
 - A closing remark that fits no prior finding, such as a ticked Testing box, takes one line of its own after them
 
-Each capture waiver this pass still accepts takes its `- **Waived capture:**` line last, unfenced. The lift reads waivers from the newest pass alone, so a close-out that drops one withdraws it.
+Each waiver this pass still accepts takes its `- **Waived capture:**` or `- **Waived reel:**` line last, unfenced. The lift reads waivers from the newest pass alone, so a close-out that drops one withdraws it.
 
 ### Only minors
 
