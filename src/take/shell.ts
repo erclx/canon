@@ -55,7 +55,6 @@ const FLAGS = [
   '--disable-threaded-animation',
   '--disable-threaded-scrolling',
   '--disable-checker-imaging',
-  '--force-device-scale-factor=2',
   '--mute-audio',
   '--no-first-run',
 ]
@@ -132,7 +131,11 @@ export interface ShellPage {
 export async function openShell(
   executable: string,
   size: { readonly width: number; readonly height: number },
-  options: { readonly scrollbars?: boolean } = {},
+  options: {
+    readonly scrollbars?: boolean
+    /** Screenshots come back at this multiple of the viewport, 2 by default. */
+    readonly deviceScale?: 1 | 2
+  } = {},
 ): Promise<ShellPage> {
   const profile = mkdtempSync(join(tmpdir(), 'canon-take-'))
   const proc = spawn(
@@ -141,6 +144,7 @@ export async function openShell(
       '--remote-debugging-port=0',
       `--user-data-dir=${profile}`,
       ...FLAGS,
+      `--force-device-scale-factor=${options.deviceScale ?? 2}`,
       ...(options.scrollbars ? [] : ['--hide-scrollbars']),
       'about:blank',
     ],
