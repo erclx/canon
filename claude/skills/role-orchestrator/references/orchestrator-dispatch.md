@@ -115,7 +115,7 @@ This section binds every launch shape that names `<model>` and `<effort>`, the p
 
 A `claude --bg` session inherits the launching session's model, so an orchestrator on the larger model spends it on every launch. Name `<model>` on each with one test: `opus` where a wrong result is costly and nothing automatic would catch it, `sonnet` otherwise, never `haiku`.
 
-- Read the role's worst failure and whether a test, gate, or review stops it, beside the plan's `## Weight`, never the folder, its length, or its `Touches` count
+- Read the role's worst failure and whether a test, gate, or review stops it, beside the plan's `## Weight`, never the folder, the plan's length, or its `Touches` count
 - Planner: `opus` for a row that changes a contract others consume, spans modules, or needs slicing. `sonnet` for a narrow row, even one inside a hook or governance folder.
 - Worker, and the review-address pass against the findings in hand: `opus` where the plan is heavy or leaves a cross-module call tests will not settle. `sonnet` where it is light or pins the fix.
 - Code reviewer: `opus` on a heavy plan or where a miss would ship unseen, a change to behavior no test or gate exercises that other surfaces read. `sonnet` otherwise, a one-line hook edit included.

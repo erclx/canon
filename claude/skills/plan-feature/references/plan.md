@@ -153,9 +153,9 @@ The weight tells a dispatcher how hard the row is, so the session it launches is
 - **Reason:** <the criterion that fired>
 ```
 
-Grade the row from the code the planning pass read, taking the first level from the top whose criterion fires. A contract is anything other code consumes, such as an exported type, a verb's flags or record, a route, a file format, or a config key.
+Grade the row from the code the planning pass read. A mechanical change grades light before any other test runs, and any other row takes the first level from the top whose criterion fires. A contract is anything other code consumes, such as an exported type, a verb's flags or record, a route, a file format, or a config key.
 
-- **Heavy:** new behavior across modules, a changed contract, more than a few decisions the plan leaves open, a safety, concurrency, or data-loss risk, or a cause not yet known
+- **Heavy:** new behavior across modules, a changed contract whose consumers are not all named, more than a few open decisions, a safety, concurrency, or data-loss risk, or a cause not yet known
 - **Medium:** new logic in one module, a narrow contract change with every consumer named, or a mechanism tests only partly pin, such as processes, locks, timing, caches, or platform differences
 - **Light:** the plan pins the change, or the change is mechanical however many files it touches, such as a rename, a styling sweep, a regenerated baseline, or a docs pass
 

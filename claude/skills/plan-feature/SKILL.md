@@ -115,9 +115,14 @@ A consumer list is a `Risks` entry, which already forces Full. A resource with m
 
 ### Small mode
 
-Output the plan to chat, opening on the `## Weight` fields, and write no file. The markers match the standard's, so a grown plan keeps its shape.
+Output the plan to chat and write no file. The markers match the standard's, so a grown plan keeps its shape.
 
 ```markdown
+## Weight
+
+- **Weight:** <light, medium, or heavy>
+- **Reason:** <the criterion that fired>
+
 ## Files to touch
 
 - `path/to/file`: reason
@@ -125,13 +130,7 @@ Output the plan to chat, opening on the `## Weight` fields, and write no file. T
 ## Verification
 
 - <outcome>: `<test or command that proves it>`
-```
 
-Small mode carries no `## Review focus`, since its Risks already came out `None identified.` and the reviewer has no breaking input to name.
-
-If real questions exist, include a numbered `## Questions` section below, each with a `- Suggested:` line and an `- Answer:` slot:
-
-```markdown
 ## Questions
 
 1. <question>
@@ -139,7 +138,7 @@ If real questions exist, include a numbered `## Questions` section below, each w
    - Answer:
 ```
 
-Omit empty sections. Do not print `None identified.` in chat.
+Keep `## Questions` only for a real question, each with its `- Suggested:` line and `- Answer:` slot. Small mode carries no `## Review focus`, since its Risks came out empty. Omit empty sections, and print no `None identified.` in chat.
 
 ### Full mode
 
