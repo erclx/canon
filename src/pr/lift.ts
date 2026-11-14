@@ -359,12 +359,9 @@ export async function uiGate(
  * list when it was filmed at the head or `readReelCarry` carried it there,
  * since a reel at an earlier head that did not carry may miss a path a later
  * push added. For the same reason a waiver counts only while the newest pass
- * of its family restates it.
- *
- * Last, a checklist holding a drivable box owes a reel the same way. A skip
- * whose code is in `SETTLING_REEL_SKIPS` settles it, and so does a standing
- * reel waiver unless the skip's code is in `UNWAIVABLE_REEL_SKIPS`. Anything
- * else refuses `reel-unsettled`, naming a waiver it ignored.
+ * of its family restates it. Last, a drivable checklist owes a reel, which a
+ * `SETTLING_REEL_SKIPS` code settles, and so does a standing reel waiver over
+ * any code outside `UNWAIVABLE_REEL_SKIPS`.
  */
 export function evidenceGate(
   evidence: EvidenceGate,

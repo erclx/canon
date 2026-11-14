@@ -181,10 +181,8 @@ export async function readChecksGate(
       mergeStateOf(row?.mergeable_state),
       collapseChecks(tip, listing, required, statuses),
     )
-    // Only a reading that would refuse `ci-pending` pays for the runs read, so
-    // a pass, a failure, or a conflict keeps its reason and its cost. A gating
-    // check with a row is a run still going, which a stall elsewhere must not
-    // cut short.
+    // Only a reading that would refuse `ci-pending` pays for the runs read. A
+    // gating check with a row is a run still going, which no stall cuts short.
     const stalled =
       reading.state === 'pending' &&
       !reading.conflicted &&
