@@ -8,6 +8,7 @@ import { type LabelAuditRefusal, auditLabels } from '@/labels/audit'
 import { checkClosing } from '@/labels/closing'
 import {
   bodyDensity,
+  isFenceKind,
   isPost,
   POST_HEADINGS,
   postDensity,
@@ -303,8 +304,13 @@ export function register(program: Command): void {
         'bullets or 2 paragraphs in a row, a paragraph past 350 characters, any',
         'H3 or deeper heading, Technical context mixing bullets with',
         'paragraphs, and a fenced line past 90 characters in any section,',
-        'Testing included. A bold label alone on a line splits a Key changes run, a',
-        'bold-led paragraph starts a new Technical context run, and Testing',
+        'Testing included. Every section also reports a fence with no',
+        'identifier as fence-language, a `$ ` line outside a console fence as',
+        'fence-prompt, and a console line opening on neither `$ ` nor the',
+        'continuation of a line ending in `\\` as fence-output, reading no',
+        'prompt rule inside a markdown fence. A bold label alone on a line',
+        'splits a Key changes run, a bold-led paragraph starts a new',
+        'Technical context run, and Testing',
         'takes the heading limit alone. Each finding carries its section, kind,',
         'line in the whole body, value, and limit.',
         '',
@@ -893,13 +899,19 @@ async function runScan(opts: ScanOptions): Promise<number> {
     logInfo('every section is within its length, run, and heading limits')
   } else {
     const wide = density.some(({ kind }) => kind === 'fence-width')
-    const counted = density.some(({ kind }) => kind !== 'fence-width')
+    const fenced = density.some(({ kind }) => isFenceKind(kind))
+    const counted = density.some(
+      ({ kind }) => kind !== 'fence-width' && !isFenceKind(kind),
+    )
     const remedies = [
       counted
         ? 'Regroup the section under bold labels or split the long item rather than cutting a path.'
         : '',
       wide
         ? 'Break a wide fenced line by hand, or quote a lone message line in a blockquote.'
+        : '',
+      fenced
+        ? "Name each fence's identifier, and move a command into its own `console` fence and its output into a fence of its kind."
         : '',
     ].filter(Boolean)
     logWarn(

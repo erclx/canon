@@ -18,9 +18,15 @@ Read the record, output, or config the section names at `<headRefOid>`, through 
 - A placeholder standing where a fixed value sits, or the reverse, is a `minor` under the same block
 - An Outcome showing a UI result is a `minor` under the same block, since the evidence comment carries that result
 
+The fence form takes a finding the scan cannot reach, since it sees a command only by its prompt and reads no JSON.
+
+- A fence mixing kinds under one identifier, such as a command with no prompt beside its output, is a `minor` under the same block
+- A JSON record laid out other than as `jq .` prints it is a `minor` under the same block, since a placeholder value leaves nothing a parser could check
+
 ## What takes no finding
 
 - A body carrying no Outcome, since the section is optional
 - A changed shape the body leaves without one, since whether to write it is the author's judgment
 - A mixed change showing its text shape and pointing at the evidence comment in one line
 - A fenced line past the width limit, since `canon labels scan` fails it before review
+- A `fence-language`, `fence-prompt`, or `fence-output`, which the same scan fails before review

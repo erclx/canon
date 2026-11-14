@@ -21,6 +21,16 @@ export type BodyDensityKind =
   | 'subheading'
   | 'mixed-form'
   | 'fence-width'
+  | FenceKind
+
+const FENCE_KINDS = ['fence-language', 'fence-prompt', 'fence-output'] as const
+
+type FenceKind = (typeof FENCE_KINDS)[number]
+
+/** Whether a finding comes from a fence's identifier and prompt rules. */
+export function isFenceKind(kind: string): kind is FenceKind {
+  return (FENCE_KINDS as readonly string[]).includes(kind)
+}
 
 /** GitHub scrolls a wider fenced line sideways in the body column. */
 const FENCE_WIDTH = 90
@@ -59,14 +69,15 @@ interface Section {
  * each bold label alone on its own block, whatever its length, and Technical context
  * at each bold-led paragraph, so a lead-in starts a new run. Technical
  * context also reports mixing bullets with paragraphs. A fenced content line
- * past `FENCE_WIDTH` code points reports in every section, Testing included.
+ * past `FENCE_WIDTH` code points, and a fence's identifier and prompt rules,
+ * report in every section, Testing included.
  */
 export function bodyDensity(body: string): BodyDensityFinding[] {
   const found: BodyDensityFinding[] = []
 
   for (const section of sectionsOf(bodyLines(body))) {
     found.push(...subheadings(section))
-    found.push(...fenceWidths(section))
+    found.push(...fenceFindings(section))
     if (section.name === 'Testing') continue
 
     const chunks =
@@ -254,16 +265,28 @@ function subheadings(section: Section): BodyDensityFinding[] {
   })
 }
 
+/** A shell prompt, `$` and a space, the one form the fence rules key on. */
+const PROMPT = /^\$ /
+
 /**
- * Every fenced content line past `FENCE_WIDTH` code points, so an emoji counts
- * once. `bodyLines()` marks a fence's delimiters as fenced too, so this walk
- * re-reads them with the same open and close test as `markFences()` and skips
- * them, which leaves an info string and an inner fence's delimiters at the
- * right side of the count.
+ * Every fence finding in a section: a content line past `FENCE_WIDTH` code
+ * points, so an emoji counts once, an opening delimiter with no identifier, a
+ * prompt outside a `console` fence, and a `console` line opening on neither a
+ * prompt nor the continuation of a line ending in `\`.
+ *
+ * `bodyLines()` marks a fence's delimiters as fenced too, so this walk re-reads
+ * them with the same open and close test as `markFences()`. The identifier is
+ * the first word of the outer delimiter's info string, and an inner fence's
+ * delimiters are content, so a `markdown` fence quoting a body takes no prompt
+ * rule from the fences it quotes.
  */
-function fenceWidths(section: Section): BodyDensityFinding[] {
+function fenceFindings(section: Section): BodyDensityFinding[] {
   const found: BodyDensityFinding[] = []
+  const report = (kind: BodyDensityKind, line: number) =>
+    found.push({ section: section.name, kind, line, value: null, limit: null })
   let fence: string | undefined
+  let language = ''
+  let continues = false
 
   for (const line of section.lines) {
     if (!line.fenced) {
@@ -271,9 +294,19 @@ function fenceWidths(section: Section): BodyDensityFinding[] {
       continue
     }
 
-    const match = FENCE.exec(line.text.trim())
+    // An `edited` event carries the body the web editor stored, in CRLF.
+    const text = line.text.replace(/\r$/, '')
+    const match = FENCE.exec(text.trim())
     if (fence === undefined) {
       fence = match?.[1]
+      language = text
+        .trim()
+        .slice(fence?.length ?? 0)
+        .trim()
+        .split(/\s/)[0]
+        .toLowerCase()
+      continues = false
+      if (language === '') report('fence-language', line.number)
       continue
     }
     if (match && match[1][0] === fence[0] && match[1].length >= fence.length) {
@@ -281,8 +314,7 @@ function fenceWidths(section: Section): BodyDensityFinding[] {
       continue
     }
 
-    // An `edited` event carries the body the web editor stored, in CRLF.
-    const width = [...line.text.replace(/\r$/, '')].length
+    const width = [...text].length
     if (width > FENCE_WIDTH) {
       found.push({
         section: section.name,
@@ -291,6 +323,16 @@ function fenceWidths(section: Section): BodyDensityFinding[] {
         value: width,
         limit: FENCE_WIDTH,
       })
+    }
+
+    const content = text.trimStart()
+    if (language === 'console') {
+      if (content !== '' && !continues && !PROMPT.test(content)) {
+        report('fence-output', line.number)
+      }
+      continues = content.endsWith('\\')
+    } else if (language !== 'markdown' && PROMPT.test(content)) {
+      report('fence-prompt', line.number)
     }
   }
 

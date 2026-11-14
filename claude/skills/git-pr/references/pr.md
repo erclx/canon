@@ -85,8 +85,23 @@ The closing lines end `## Summary`, one `Closes #NNN` per issue and no trailing 
 - Write Outcome when the change alters a shape someone reads or writes: a record or template, a verb's output or flags, a config or settings format, or a report a skill produces
 - Omit Outcome for an internal refactor, a fix that changes no output, and a prose edit whose diff is its result
 - Show the new shape in a fenced block with placeholders for the values, about 20 lines at most and never a whole file
-- Keep each fenced line to 90 characters, breaking a long record or command by hand, since GitHub scrolls a wider line sideways
+- Keep each fenced line to 90 characters, breaking a long command by hand, since GitHub scrolls a wider line sideways
 - Quote a single message line in a blockquote rather than a fence, so it wraps at the body width, with each `<placeholder>` in a code span
+
+A command, its output, and the result it writes are different kinds, and GitHub highlights a fence by its identifier alone.
+
+- Give each kind its own fence, back to back, under the identifier below, since one identifier over mixed kinds highlights none of them
+- Lay a JSON record out as `jq .` prints it, two-space indent and one key or array element per line, rather than breaking a compact record wherever it reaches 90
+- Pipe the verb's real `--json` output through `jq .` and swap each value for a placeholder, rather than typing the layout by hand
+- Copy a YAML, TOML, or source excerpt from the formatted file as it stands, and break a `console` command past 90 characters with a trailing `\`
+
+| Kind                     | Identifier     | Form                                             |
+| ------------------------ | -------------- | ------------------------------------------------ |
+| A command run in a shell | `console`      | Each line opens on `$ `, with output elsewhere   |
+| A JSON record            | `json`         | As `jq .` prints it, `jsonc` with a `//` comment |
+| A markdown result        | `markdown`     | The rendered shape's source                      |
+| A YAML or TOML config    | `yaml`, `toml` | The file's own syntax                            |
+| A message, log, or table | `plaintext`    | Any shape without a grammar                      |
 
 The squash commit carries Summary, Key changes, and Technical context alone, so Outcome stays on the pull request.
 
@@ -149,3 +164,11 @@ A live agent session is never the human a box waits on.
 - A fenced line past 90 characters reports a `fence-width` in any section, Testing included
 - A bold label alone on a line breaks a Key changes run, and a bold lead-in starts a new Technical context run
 - Fix a count or heading finding by regrouping or splitting, never by cutting a path, and a `fence-width` by breaking the line by hand or moving a lone message line into a blockquote
+
+A fence also reports on its identifier and its prompts in any section, and never inside a `markdown` fence quoting a body.
+
+- A fence with no identifier reports a `fence-language`, and a `$ ` line outside a `console` fence a `fence-prompt`
+- A line in a `console` fence opening on neither `$ ` nor a continuation reports a `fence-output`
+- Fix a `fence-language` by naming the kind's identifier, and a `fence-prompt` or `fence-output` by moving the command into its own `console` fence and its output into a fence of its kind
+- Show a command under `$ ` even when it runs as root, since a `#` prompt reads as output and reports a `fence-output`
+- The scan sees a command only by its prompt, so a command with none in a `plaintext` fence passes it and falls to review

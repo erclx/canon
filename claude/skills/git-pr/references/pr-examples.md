@@ -37,7 +37,11 @@ Closes #<number>
 
 ## Outcome
 
-<The new shape in a fenced block, with placeholders for the values>
+<The command that produces the shape, in a console fence, each line opening on $>
+
+<Its record, in a json fence laid out as jq . prints it, with placeholders for the values>
+
+<The result it writes, in a fence of its own kind such as markdown or yaml>
 
 ## Testing
 
