@@ -138,7 +138,7 @@ gh api -X POST 'repos/{owner}/{repo}/issues/<number>/comments' -F body=@.canon/t
 
 After the push, read Watching CI in `${CLAUDE_SKILL_DIR}/../git-ship/SKILL.md` without invoking that skill, start its background watch, end the turn on its line, and run the rest of this step and Step 8 on the wake. Reuse a watch already running on this PR, since it reads the new tip.
 
-- On the wake, stop on `conflicted` naming a rebase, and on a timeout reporting CI unsettled
+- On the wake, stop on `conflicted` naming a rebase, and on the watch's limit line or a wake with no final record, reporting CI unsettled
 - Route a `reason` through the refused reads in `${CLAUDE_SKILL_DIR}/../git-ship/references/ci-watch.md`, which re-read a transient one once and stop on a permanent one naming it
 - If any check fails, skip the edit and report the failing check so it can be fixed first
 
