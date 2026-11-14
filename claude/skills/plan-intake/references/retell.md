@@ -44,7 +44,8 @@ Write each line fresh from the item for a reader who has not opened the file, co
 A declined item carries the operator's answer and the filed `Worth it:` and `Suggested:` lines, and the two can differ.
 
 - Take the reason from the answer when it gives one, as in `decline, the design board owns this`
-- Otherwise say the reason is the filed suggestion's, as in `Why declined: the filed suggestion, since the merge gate already catches it`
+- Otherwise, when the filed suggestion recommended declining, say the reason is the suggestion's, as in `Why declined: the filed suggestion, since the merge gate already catches it`
+- Otherwise say the answer gave no reason, since a suggestion to keep or promote carries no reason to decline
 - Never state a reason as the operator's that their answer does not give
 
 ## Wording rules
