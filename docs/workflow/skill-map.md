@@ -18,20 +18,20 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 
 ## Decide what to build
 
-| Skill                      | When to use                                        |
-| -------------------------- | -------------------------------------------------- |
-| `canon:plan-intake`        | The input is a pile of findings                    |
-| `canon:plan-intake-answer` | An intake folder holds unread slots                |
-| `canon:backlog-triage`     | The backlog needs pruning                          |
-| `canon:issue-triage`       | Open GitHub issues need measuring before planning  |
-| `canon:plan-groundwork`    | The state is unmeasured and approaches compete     |
-| `canon:decision-escalate`  | Open decisions turn on your preference             |
-| `canon:proposal-critique`  | A proposal needs questioning before it is built    |
-| `canon:design-references`  | A design round has no real site to look at         |
-| `canon:design-pick`        | The call is taste, wanting candidates side by side |
-| `canon:task-board`         | A decided item needs a file on the board           |
-| `canon:plan-feature`       | The approach is settled and needs a plan           |
-| `canon:codebase-layout`    | A change adds a file and needs a folder            |
+| Skill                      | When to use                                           |
+| -------------------------- | ----------------------------------------------------- |
+| `canon:plan-intake`        | The input is a pile of findings                       |
+| `canon:plan-intake-answer` | An intake folder holds unread slots or needs a retell |
+| `canon:backlog-triage`     | The backlog needs pruning                             |
+| `canon:issue-triage`       | Open GitHub issues need measuring before planning     |
+| `canon:plan-groundwork`    | The state is unmeasured and approaches compete        |
+| `canon:decision-escalate`  | Open decisions turn on your preference                |
+| `canon:proposal-critique`  | A proposal needs questioning before it is built       |
+| `canon:design-references`  | A design round has no real site to look at            |
+| `canon:design-pick`        | The call is taste, wanting candidates side by side    |
+| `canon:task-board`         | A decided item needs a file on the board              |
+| `canon:plan-feature`       | The approach is settled and needs a plan              |
+| `canon:codebase-layout`    | A change adds a file and needs a folder               |
 
 ## Build the feature
 
