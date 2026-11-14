@@ -51,13 +51,8 @@ describe('canon targets list --record', () => {
     await rm(sweepRoot, { recursive: true, force: true })
   })
 
-  // A write the registry cannot land, such as a state folder it has no
-  // permission to write, used to fall into the same "no readable stamp"
-  // bucket as a checkout with nothing to date the row by, which names the
-  // wrong cause and left the exit code at 0 over a real failure.
-  //
-  // The fixture sits under the OS temp folder, which the index refuses, so the
-  // child is handed a temp folder elsewhere to let the write be attempted.
+  // A write the registry cannot land reports apart and exits 1. The index refuses
+  // the OS temp folder, so the child gets another temp folder to attempt it in.
   it('should report a write failure distinctly and exit 1', async () => {
     await stamp(sweepRoot, 'caret')
 

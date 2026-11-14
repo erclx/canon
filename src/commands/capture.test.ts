@@ -209,10 +209,8 @@ describe('canon capture', () => {
   )
 
   describe('with a color scheme', () => {
-    /**
-     * Each theme sets a different width, so the PNG's width reads which theme
-     * the capture rendered without decoding a pixel.
-     */
+    // Each theme sets a different width, so the PNG's width reads which theme
+    // rendered without decoding a pixel.
     async function captureWidth(
       css: string,
       args: readonly string[],

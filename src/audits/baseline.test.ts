@@ -65,11 +65,8 @@ describe('recording a baseline from a run', () => {
     expect(baseline.commit).toBe('abc1234')
   })
 
-  /**
-   * A check that did not report has no counts, and writing zeros for it would
-   * record a clean corpus the run never measured. The next run then reads its
-   * real numbers as a regression against a floor nobody took.
-   */
+  // Writing zeros for a check that did not report would record a clean corpus,
+  // and the next run would read its real numbers as a regression.
   it('should leave an unmeasured check out of the record entirely', () => {
     const baseline = baselineFrom(
       [result('markdown', { bans: 0 }), result('context', undefined)],
@@ -135,11 +132,8 @@ describe('comparing a run against the recorded baseline', () => {
     ])
   })
 
-  /**
-   * The first run is the case the plan calls out. A delta of zero against an
-   * absent baseline is indistinguishable from a corpus that did not move, so
-   * the comparison says it had nothing to compare against instead.
-   */
+  // A delta of zero against an absent baseline would read as a corpus that did
+  // not move, so the comparison says it had nothing to compare against.
   it('should report a check with no recorded baseline as unrecorded', () => {
     const deltas = compareBaseline(recorded, [result('skills', { readme: 3 })])
 
@@ -163,11 +157,8 @@ describe('comparing a run against the recorded baseline', () => {
     expect(deltas).toEqual([{ id: 'records-plans', kind: 'per-machine' }])
   })
 
-  /**
-   * Named for its own corpus rather than folded into per-machine. Both stay
-   * out of the record, and the reasons are opposites: one count describes a
-   * disk nobody else has, and this one moves when somebody publishes.
-   */
+  // Named for its own corpus rather than per-machine, since this count moves
+  // when somebody publishes rather than describing one disk.
   it('should leave an upstream check out under its own kind', () => {
     const deltas = compareBaseline(recorded, [
       result('deps', { 'advisories-high': 21 }, false, 'upstream'),
@@ -222,10 +213,8 @@ describe('comparing a count that carries a growth tolerance', () => {
     expect(compared(deltas[0]).moved[0]?.tolerated).toBe(true)
   })
 
-  /**
-   * 100 times 0.29 evaluates to 28.999999999999996, so a plain floor would
-   * allow 28 and report a growth of exactly 29 as past the tolerance.
-   */
+  // 100 times 0.29 is just under 29 in floating point, so a plain floor would
+  // report a growth of exactly 29 as past the tolerance.
   it('should tolerate a boundary growth whose product falls short in floating point', () => {
     const deltas = compareBaseline(
       {
@@ -331,10 +320,8 @@ describe('reading and writing the baseline file', () => {
     expect(await readBaseline(ROOT)).toBeUndefined()
   })
 
-  /**
-   * A hand-edited baseline is a file someone can break, and reading a broken
-   * one as absent would silently reset the floor the record exists to hold.
-   */
+  // Reading a broken hand-edited baseline as absent would silently reset the
+  // floor the record exists to hold.
   it('should refuse a baseline that does not parse', async () => {
     const path = join(ROOT, BASELINE_REL)
     await mkdir(dirname(path), { recursive: true })
