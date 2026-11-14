@@ -37,7 +37,7 @@ Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and n
 
 - `.lintstagedrc` holds the glob map below.
 - `.github/workflows/verify.yml` runs on pull requests targeting `main` and on `workflow_dispatch`. A multi-root project adds its own jobs here.
-- `.github/pull_request_template.md` has `## Summary`, `## Key changes`, `## Technical context`, `## Outcome`, and `## Testing`, with the two optional ones commented. A project adds its own checklist lines.
+- `.github/pull_request_template.md` has `## Summary`, `## Key changes`, `## Technical context`, `## Outcome`, and `## Testing`, the optional two commented. A project adds its own checklist lines.
 - `canon/context/development/` holds the `setup` and `ci` entries under a folder index. Extend them with project-specific commands and workflows, and keep canonical rationale here.
 - `canon/config/pr-labels.toml` is the starter pull request label map, covering what the toolkit installs. A project adds a row per surface of its own.
 
