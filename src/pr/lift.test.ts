@@ -1314,7 +1314,7 @@ describe('lift', () => {
 
       it('should settle on a reel waiver in the newest pass, naming its reason', async () => {
         const { api } = makeApi({
-          evidence: { ...drivable, reelSkip: 'target-missing: beat 1' },
+          evidence: { ...drivable, reelSkip: 'wrong-state: beat 1' },
           reviews: [CODE_CLOSED, reelWaiver('hover-only tooltip')],
         })
 
@@ -1324,9 +1324,83 @@ describe('lift', () => {
         expect(evidenceEntry(record)).toEqual({
           gate: 'evidence',
           isOk: true,
-          reelSkip: 'target-missing: beat 1',
+          reelSkip: 'wrong-state: beat 1',
           reelWaived: 'hover-only tooltip',
         })
+      })
+
+      it('should settle on a reel waiver when no skip line is posted', async () => {
+        const { api } = makeApi({
+          evidence: drivable,
+          reviews: [CODE_CLOSED, reelWaiver('screenshots show every box')],
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('lifted')
+        expect(evidenceEntry(record)).toEqual({
+          gate: 'evidence',
+          isOk: true,
+          reelWaived: 'screenshots show every box',
+        })
+      })
+
+      it.each([
+        'target-missing: beat 1: button[name=Save]',
+        'target-offscreen: beat 2',
+        ' target-missing ',
+      ])(
+        'should refuse a reel waiver over the skip %s, naming the waiver',
+        async (reelSkip) => {
+          const { api, calls } = makeApi({
+            evidence: { ...drivable, reelSkip },
+            reviews: [CODE_CLOSED, reelWaiver('hover-only tooltip')],
+          })
+
+          const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+          expect(record.reason).toBe('reel-unsettled')
+          expect(evidenceEntry(record)).toEqual({
+            gate: 'evidence',
+            isOk: false,
+            reason: 'reel-unsettled',
+            reelSkip,
+            reelWaiverRefused: 'hover-only tooltip',
+          })
+          expect(calls.marks).toEqual([])
+        },
+      )
+
+      it('should settle on a settling skip beside a reel waiver without naming the waiver', async () => {
+        const { api } = makeApi({
+          evidence: { ...drivable, reelSkip: 'no-visible-change' },
+          reviews: [CODE_CLOSED, reelWaiver('hover-only tooltip')],
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('lifted')
+        expect(evidenceEntry(record)).toEqual({
+          gate: 'evidence',
+          isOk: true,
+          reelSkip: 'no-visible-change',
+        })
+      })
+
+      it('should settle on a reel filmed at the head beside a target-missing skip and a waiver', async () => {
+        const { api } = makeApi({
+          evidence: {
+            ...drivable,
+            reelHead: HEAD.slice(0, 7),
+            reelSkip: 'target-missing: beat 1',
+          },
+          reviews: [CODE_CLOSED, reelWaiver('hover-only tooltip')],
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('lifted')
+        expect(evidenceEntry(record)).toEqual({ gate: 'evidence', isOk: true })
       })
 
       it('should drop a reel waiver the newest pass of its family no longer restates', async () => {

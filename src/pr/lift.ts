@@ -69,6 +69,8 @@ export interface GateResult {
   readonly reelSkip?: string
   /** The reason on the standing reel waiver that settled a drivable checklist with no reel. */
   readonly reelWaived?: string
+  /** The reason on a standing reel waiver the gate ignored, since the skip is one no waiver settles. */
+  readonly reelWaiverRefused?: string
   /** The earlier commit a reel was filmed at, when it carried to the head across pushes no box can observe. */
   readonly reelCarriedFrom?: string
 }
@@ -120,6 +122,17 @@ export const SETTLING_REEL_SKIPS: readonly string[] = [
   'no-interactive-box',
   'no-visible-change',
   'reel-too-large',
+]
+
+/**
+ * The reel skip codes no review waiver settles. Each names a target the take
+ * plan could not find or bring into view, which a builder clears by fixing a
+ * selector, a setup step, or the seed, so a waiver over one stands in for
+ * work the builder owes.
+ */
+export const UNWAIVABLE_REEL_SKIPS: readonly string[] = [
+  'target-missing',
+  'target-offscreen',
 ]
 
 /** The reason code a skip line opens with, the text before its first colon. */
@@ -346,11 +359,9 @@ export async function uiGate(
  * list when it was filmed at the head or `readReelCarry` carried it there,
  * since a reel at an earlier head that did not carry may miss a path a later
  * push added. For the same reason a waiver counts only while the newest pass
- * of its family restates it.
- *
- * Last, a checklist holding a drivable box owes a reel the same way. A skip
- * whose code is in `SETTLING_REEL_SKIPS` settles it, and so does a standing
- * reel waiver, and anything else refuses `reel-unsettled`.
+ * of its family restates it. Last, a drivable checklist owes a reel, which a
+ * `SETTLING_REEL_SKIPS` code settles, and so does a standing reel waiver over
+ * any code outside `UNWAIVABLE_REEL_SKIPS`.
  */
 export function evidenceGate(
   evidence: EvidenceGate,
@@ -391,10 +402,21 @@ export function evidenceGate(
     return { ...pass('evidence'), ...lists, ...skipField }
   }
   const reelWaived = readReelWaivers(standing).at(-1)
-  if (reelWaived !== undefined) {
-    return { ...pass('evidence'), ...lists, ...skipField, reelWaived }
+  if (reelWaived === undefined) {
+    return { ...fail('evidence', 'reel-unsettled'), ...lists, ...skipField }
   }
-  return { ...fail('evidence', 'reel-unsettled'), ...lists, ...skipField }
+  if (
+    reelSkip !== undefined &&
+    UNWAIVABLE_REEL_SKIPS.includes(reelSkipCode(reelSkip))
+  ) {
+    return {
+      ...fail('evidence', 'reel-unsettled'),
+      ...lists,
+      ...skipField,
+      reelWaiverRefused: reelWaived,
+    }
+  }
+  return { ...pass('evidence'), ...lists, ...skipField, reelWaived }
 }
 
 /**

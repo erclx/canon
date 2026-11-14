@@ -11,6 +11,7 @@ import {
   readBaseStanding,
   readChangedPaths,
   SETTLING_REEL_SKIPS,
+  UNWAIVABLE_REEL_SKIPS,
 } from '@/pr/lift'
 import { loadPaintedPatterns } from '@/pr/painted'
 import { type RestPull, reviewRowOf } from '@/pr/rest'
@@ -101,9 +102,13 @@ export function registerLift(pr: Command): void {
         `            ${SETTLING_REEL_SKIPS.join(', ')}`,
         '            settles it, since no builder can change those. So does a',
         '            `- **Waived reel:** <reason>` line in a',
-        '            standing pass, read the way a capture waiver is. Anything',
-        '            else refuses `reel-unsettled`, the gate entry naming the skip',
-        '            as `reelSkip`, and a waiver that settled it as `reelWaived`',
+        '            standing pass, read the way a capture waiver is, unless the',
+        '            skip code is one of',
+        `            ${UNWAIVABLE_REEL_SKIPS.join(', ')}`,
+        '            which a builder clears by fixing the take plan or the seed.',
+        '            Anything else refuses `reel-unsettled`, the gate entry',
+        '            naming the skip as `reelSkip`, a waiver that settled it as',
+        '            `reelWaived`, and a waiver it ignored as `reelWaiverRefused`',
         '  standing  the head is fresh against the base, not stale or conflicted',
         '  ci        every required check run on the tip passed, waited on up to --wait',
         '',

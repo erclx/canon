@@ -58,7 +58,13 @@ A checklist holding a box a driver can run owes a reel filmed at the head. Read 
 
 - A `reelSkip` whose code, the text before its first colon, is one `canon pr lift --help` lists as settling holds nothing. Leave it.
 - Any other skip, or no skip at all, makes `canon pr lift` refuse `reel-unsettled`. File a should-fix asking for the reel and quote the skip, since the builder or its machine can clear every such code.
-- Waive it instead when the diff shows no reel is needed, such as a change whose drivable boxes the screenshots already show
+
+### Waiving a reel
+
+Waive the reel instead when the diff shows no reel is needed, such as a change whose drivable boxes the screenshots already show.
+
+- Never waive a skip whose code `canon pr lift --help` lists as one no waiver settles. The lift ignores the line and names it as refused, so file the should-fix instead.
+- A waiver over any other skip code names the state the beat needed and why no seed reaches it. A waiver that names neither reads as a reel nobody tried to film.
 - Write one `- **Waived reel:** <reason>` line per pull request, in the form `${CLAUDE_SKILL_DIR}/../review-pr/references/post.md` gives
 - Keep the waiver outside any code fence and restate it in every later pass, as with a capture waiver
 

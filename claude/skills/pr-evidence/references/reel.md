@@ -79,7 +79,7 @@ Branch on the record's `reason`, never on the exit code.
 | `reel-failed`      | Skip as `reel-failed` with the record's `message`                                                                                                                                                                                                                  |
 | `target-offscreen` | Add a setup step that brings the target into the window, being a scroll over an element already inside it, such as a fixed header, with `dy` covering the distance, or a click on a link to it, and film once more. Skip as `target-offscreen` on a second refusal |
 | `over-cap`         | Drop `beat` and each beat after it, then film once more. Skip as `over-cap` if `beat` is first or it refuses again                                                                                                                                                 |
-| `target-missing`   | Fix the plan off the record's `still` and `beat`, then film once more. A second refusal is owed, per the section below                                                                                                                                             |
+| `target-missing`   | Fix the plan off the record's `still` and `beat`, then film once more. A second refusal is owed, per the section below, and its skip line names the selector the beat tried                                                                                        |
 | Any other value    | Skip under that `reason`, naming its `beat` when the record carries one                                                                                                                                                                                            |
 
 ### A skip for a state the fixture lacks
@@ -87,7 +87,7 @@ Branch on the record's `reason`, never on the exit code.
 A skip whose cause is a state the drive fixture lacks, such as `target-missing` on a control only that state renders, is work the building session owes. So is a `target-missing` that survives the retry above, since the still showed a page the plan could not reach.
 
 - Film a beat from a box carrying `(needs fixture)` only if the state answers, and otherwise skip it as owed
-- Report the owed skip on the evidence comment's `--reel-skip` line and in the closing report, naming the state, the selector, or the setup step the beat needed
+- Report the owed skip on the evidence comment's `--reel-skip` line and in the closing report, naming the state, the selector, or the setup step the beat needed. A `target-missing` line also names the selector the beat tried.
 - Never report it as a plain skip, since the next pull request meets the same fixture and skips again
 - Name the project's seed as where the state goes when `canon/config/preview.json` declares a `seed` command, since a drive-only state laid there leaves the committed fixture alone
 - Read `canon pr drive-copy --help` for what the seed runs and when, rather than restating it on the comment
