@@ -74,7 +74,11 @@ Use H2 only, one-line bold-label bullets, and numbers only where they settle som
 
 ## Close
 
-Omit the uncited-claims block when the count is zero.
+Omit the uncited-claims block when the count is zero. The `Conclusion:` line names the close route that ran, so a later reader knows whether a row exists.
+
+- A named task reads `recorded into <task path>`
+- A controller handoff reads `handed to <controller sessionId>, no task file written`
+- A close with neither reads `wrote <task path>`, followed by `row placed` or `row unplaced` as `task-board` Step 4 reports
 
 ```plaintext
 ✅ Closed .canon/groundwork/<nn>-<slug>/
@@ -83,6 +87,8 @@ Omit the uncited-claims block when the count is zero.
 
 - `.canon/groundwork/<nn>-<slug>/06-decision.md`
 - `.canon/groundwork/<nn>-<slug>/07-next-session.md`
+
+**Conclusion:** <the route and its task path or addressee>
 
 **Uncited external claims:** <count, or none>
 
