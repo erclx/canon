@@ -74,7 +74,7 @@ Holds the runbooks for moments the model cannot detect, shipped inside the skill
 
 - `orchestrator-dispatch.md` launches a `## Up next` row through `claude --bg` after checking its branch, plan answers, claim, and conflicts, then promotes it to `## Run now`
 - A row holds behind a track in flight only on a dependency, a changed contract, a relocation, a sweep, or a stated reason, and a shared file is no hold
-- A launch names its model by the cost of a miss, and a worker is named `worker-<…>` and carries the controller's `sessionId`, resolved to a name at send time
+- A launch names its model and effort by the cost of a miss, and a worker is named `worker-<…>` and carries the controller's `sessionId`, resolved to a name at send time
 - `orchestrator-sweep.md` refills the queue and then fires `orchestrator-parked.md`, which re-tests untested blockers on a merge and walks every parked row and the backlog when idle
 - A planner brief states no worktree, branch, tracked file, or board write, and skips the build checks, and a talk session takes a `-talk` suffix and is retired only on the operator's word
 
