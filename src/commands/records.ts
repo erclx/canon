@@ -730,9 +730,8 @@ function reportRefusal(
     return 1
   }
 
-  // The setup refusals carry the commands to run on their own lines. A marker
-  // beside a command reads as a result rather than as something to copy, so the
-  // remainder goes out unmarked.
+  // A setup refusal's later lines are commands to copy, so they go out with no
+  // marker, which would make them read as results.
   const [reason, ...rest] = outcome.message.split('\n')
 
   intro(banner)
@@ -803,9 +802,8 @@ function report(
   root: string,
 ): number {
   if (!outcome.ok) {
-    // The framed branch below already reaches stderr through logError, so the
-    // bare write is what keeps the JSON mode from reporting the reason on
-    // stdout alone.
+    // The framed branch reaches stderr through logError, and this bare write
+    // keeps JSON mode from reporting the reason on stdout alone.
     if (emitJson) {
       process.stderr.write(`${outcome.message}\n`)
       process.stdout.write(

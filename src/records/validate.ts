@@ -167,17 +167,13 @@ const OPERATOR_CALL_PHRASES = [
 
 /**
  * Reads a recognized paraphrase as the canonical phrase, so a caller testing
- * `startsWith(OPERATOR_CALL)` sees one spelling regardless of which wording the
- * author used. Case-insensitive, since the corpus capitalizes a suggestion's
- * first word, and it rewrites only the matched span so the reason text either
- * side of it survives untouched.
+ * `startsWith(OPERATOR_CALL)` sees one spelling. Case-insensitive, since the
+ * corpus capitalizes a suggestion's first word, and it rewrites only the
+ * matched span so the reason text either side survives.
  *
- * Short-circuits on an already-canonical opening before scanning the rest of
- * the text. Without that, a suggestion already opening with `needs your call`
- * that goes on to mention a paraphrase inside its own reason, such as
- * `needs your call, since the operator's call outranks a default`, has that
- * later occurrence rewritten too, which garbles the reason the dispatcher
- * reports rather than leaving it as the author wrote it.
+ * Short-circuits on an already-canonical opening, since a reason that goes on
+ * to mention a paraphrase, as in `needs your call, since the operator's call
+ * outranks a default`, would otherwise have that later occurrence garbled.
  */
 export function normalizeOperatorCall(text: string): string {
   const lower = text.toLowerCase()
@@ -327,9 +323,8 @@ export function splitPlanSections(text: string): Map<string, string[]> {
   let current: string | undefined
 
   for (const line of linesOutsideFences(text)) {
-    // Any marker-shaped line closes the section above it, and only a recognized
-    // one opens a section. A plan carrying a label of its own would otherwise
-    // collect its bullets into whichever section came before.
+    // Any marker-shaped line closes the section above, so a plan's own label
+    // never collects its bullets into the section before it.
     if (MARKER_LINE.test(line.trim())) {
       current = sectionMarker(line)
       if (current) sections.set(current, [])
