@@ -66,7 +66,9 @@ Each reason has one resolution, and none of them is to archive around it.
 
 ### Abandoned outcomes
 
-When the work behind an open outcome is abandoned, cut it by striking the body, `- ~~<outcome>~~ <why>`, whatever the checkbox holds. The board then records what was dropped rather than meeting this refusal again.
+When the work behind an open outcome is abandoned, cut it through `canon tasks outcome <stem> --cut <n> --reason <why> --json`, never by hand or with `--close`. The verb writes `- [ ] ~~<outcome>~~ <why>` and keeps the checkbox, so no later position shifts, and the board then records what was dropped rather than meeting this refusal again.
+
+The archive still reads a struck body as cut whatever its checkbox holds, so a line struck by hand before the verb existed counts the same.
 
 ### Branches, matches, and input
 

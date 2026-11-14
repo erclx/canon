@@ -10,6 +10,7 @@ import {
   linkTo,
   listTaskStems,
   OUTCOME_PATTERN,
+  STRUCK_BODY_PATTERN,
   planLine,
   planLineIndex,
   readPendingBranches,
@@ -113,11 +114,19 @@ export interface OutcomesClosed {
   readonly path: string
   readonly closed: readonly string[]
   readonly alreadyClosed: readonly string[]
+  readonly cut: readonly string[]
+  readonly alreadyCut: readonly string[]
   /** Branches on the `Pending branch:` line after this write. */
   readonly pending: readonly string[]
 }
 
 export type CloseOutcome = OutcomesClosed | RecordRefused
+
+/** Outcomes the operator decided against, struck with one reason per call. */
+export interface OutcomeCuts {
+  readonly positions: readonly number[]
+  readonly reason: string
+}
 
 function refuse(
   reason: RecordRefusal,
@@ -370,19 +379,31 @@ export function writePlanLine(
  * which is the order the board format writes them. A caller reads the file
  * before deciding, so a position is what it already holds, while a text match
  * would need the wording handed back exactly.
+ *
+ * A cut strikes the body and keeps its `[ ]`, since `OUTCOME_PATTERN` counts
+ * only checkbox lines and a dropped box would shift every later position. A
+ * struck line is never ticked and a ticked one is never struck, since either
+ * write would make one line claim both shipped and cut.
  */
 export function closeOutcomeLines(
   text: string,
   positions: readonly number[],
+  cutPositions: readonly number[] = [],
+  reason = '',
 ): {
   readonly text: string
   readonly closed: readonly string[]
   readonly alreadyClosed: readonly string[]
+  readonly cut: readonly string[]
+  readonly alreadyCut: readonly string[]
   readonly total: number
 } {
   const wanted = new Set(positions)
+  const cutting = new Set(cutPositions)
   const closed: string[] = []
   const alreadyClosed: string[] = []
+  const cut: string[] = []
+  const alreadyCut: string[] = []
   const lines = text.split('\n')
   const fenced = fenceMask(lines)
   let seen = 0
@@ -394,19 +415,38 @@ export function closeOutcomeLines(
     if (!match) return line
 
     seen += 1
-    if (!wanted.has(seen)) return line
+    if (!wanted.has(seen) && !cutting.has(seen)) return line
 
     const [, box, body] = match
-    if (box !== ' ') {
-      alreadyClosed.push(body.trim())
+    const trimmed = body.trim()
+
+    if (STRUCK_BODY_PATTERN.test(trimmed)) {
+      alreadyCut.push(trimmed)
       return line
     }
 
-    closed.push(body.trim())
+    if (box !== ' ') {
+      alreadyClosed.push(trimmed)
+      return line
+    }
+
+    if (cutting.has(seen)) {
+      cut.push(trimmed)
+      return `- [ ] ~~${trimmed}~~ ${reason.trim()}`.trimEnd()
+    }
+
+    closed.push(trimmed)
     return body ? `- [x] ${body}` : '- [x]'
   })
 
-  return { text: rewritten.join('\n'), closed, alreadyClosed, total: seen }
+  return {
+    text: rewritten.join('\n'),
+    closed,
+    alreadyClosed,
+    cut,
+    alreadyCut,
+    total: seen,
+  }
 }
 
 async function matchByPlan(
@@ -685,7 +725,9 @@ export async function recordSession(
 }
 
 /**
- * Marks the named outcomes `[x]` in place. `task-complete` runs this against a
+ * Marks the named outcomes `[x]`, and strikes the `cuts` with their reason, in
+ * place. A cut alone writes no pending marker, since it ships nothing a merge
+ * could archive early. `task-complete` runs this against a
  * board it can read and cannot edit from a linked worktree, and the positions
  * come from the read it already made.
  *
@@ -705,18 +747,24 @@ export async function closeOutcomes(
   positions: readonly number[],
   branch?: string,
   branchPulls: readonly number[] = [],
+  cuts: OutcomeCuts = { positions: [], reason: '' },
 ): Promise<CloseOutcome> {
   const opened = await openTask(root, selector)
   if ('ok' in opened) return opened
 
   const { stem, path } = opened
-  const result = closeOutcomeLines(await readFile(path, 'utf8'), positions)
+  const result = closeOutcomeLines(
+    await readFile(path, 'utf8'),
+    positions,
+    cuts.positions,
+    cuts.reason,
+  )
 
   if (result.total === 0) {
     return refuse('no-outcomes', `${stem} carries no outcomes to close.`)
   }
 
-  const beyond = positions.filter(
+  const beyond = [...positions, ...cuts.positions].filter(
     (position) => position < 1 || position > result.total,
   )
 
@@ -737,7 +785,9 @@ export async function closeOutcomes(
       ? writePendingBranch(result.text, branch).text
       : result.text
 
-  if (result.closed.length > 0) await writeFile(path, text)
+  if (result.closed.length > 0 || result.cut.length > 0) {
+    await writeFile(path, text)
+  }
 
   return {
     ok: true,
@@ -745,6 +795,8 @@ export async function closeOutcomes(
     path,
     closed: result.closed,
     alreadyClosed: result.alreadyClosed,
+    cut: result.cut,
+    alreadyCut: result.alreadyCut,
     pending: readPendingBranches(text),
   }
 }

@@ -62,7 +62,7 @@ A bundle row is the one exception to a concern per file. It is a set of small fi
 
 - Write one file and one branch for the row, named for the shared surface
 - Give each item its own H3 under `## Files to touch`, holding the usual backticked-path bullets, since the parsers read the bullet and never the heading
-- Give each item its own `## Verification` bullet, so a dropped item is struck on the task file as `- ~~<outcome>~~ <reason>` and the rest ship as one pull request
+- Give each item its own `## Verification` bullet, so a dropped item is cut on the task file through `canon tasks outcome <stem> --cut <n> --reason <reason>` and the rest ship as one pull request
 - Record the operator's agreement as an answered question in `## Questions`, and never bundle without one
 - Never bundle fixes with no file in common
 
