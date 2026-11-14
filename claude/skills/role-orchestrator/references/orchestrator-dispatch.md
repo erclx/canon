@@ -115,13 +115,15 @@ This section binds every launch shape that names `<model>` and `<effort>`, the p
 
 A `claude --bg` session inherits the launching session's model, so an orchestrator on the larger model spends it on every launch. Name `<model>` on each with one test: `opus` where a wrong result is costly and nothing automatic would catch it, `sonnet` otherwise, never `haiku`.
 
-- Read the role's worst failure and whether a test, gate, or review stops it, never the folder, the plan's length, or its `Touches` count, none of which measures size
+- Read the role's worst failure and whether a test, gate, or review stops it, beside the plan's `## Weight`, never the folder, the plan's length, or its `Touches` count
 - Planner: `opus` for a row that changes a contract others consume, spans modules, or needs slicing. `sonnet` for a narrow row, even one inside a hook or governance folder.
-- Worker, and the review-address pass against the findings in hand: `opus` where the plan leaves a cross-module call tests will not settle. `sonnet` where it pins the fix, however long.
-- Code reviewer: `opus` where a miss would ship unseen, a change to behavior no test or gate exercises that other surfaces read. `sonnet` otherwise, a one-line hook edit included.
-- UI reviewer: always `sonnet`. A cheaper tier was measured on that checklist and passed real defects as clean while judging taste boxes it was told to leave.
+- Worker, and the review-address pass against the findings in hand: `opus` where the plan is heavy or leaves a cross-module call tests will not settle. `sonnet` where it is light or pins the fix.
+- Code reviewer: `opus` on a heavy plan or where a miss would ship unseen, a change to behavior no test or gate exercises that other surfaces read. `sonnet` otherwise, a one-line hook edit included.
+- UI reviewer: always `sonnet`, whatever the weight. A cheaper tier was measured on that checklist and passed real defects as clean while judging taste boxes it was told to leave.
 
 A model or effort the operator names binds for the session until the operator says otherwise, as a spoken worker cap does.
+
+A plan stating no `## Weight`, or stating medium, dispatches on the role's test alone.
 
 ### Effort
 

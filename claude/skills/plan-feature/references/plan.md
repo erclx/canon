@@ -82,6 +82,7 @@ The document opens with `# Feature: <short title>` and one paragraph stating wha
 | Section                | Holds                                                                       | Required                                          |
 | ---------------------- | --------------------------------------------------------------------------- | ------------------------------------------------- |
 | `## Summary`           | three to five one-line bullets: the goal, the deliverables, the trade-off   | Always                                            |
+| `## Weight`            | how hard the row is to build and review, and the criterion that set it      | Always                                            |
 | `## Current behavior`  | each command run against the thing being changed and what it showed         | When the change touches something that runs       |
 | `## Constraints`       | durable rules the work must respect                                         | When supplied                                     |
 | `## Files to touch`    | each file with a one-line reason                                            | Always                                            |
@@ -140,6 +141,32 @@ Group the entries by area under H3s once they pass 5, each H3 opening on the rea
 State every count and every claim about the tree as measured during the pass that wrote the plan. A figure carried in from a summary or an earlier session is the most common way a plan ships the wrong scope.
 
 Prefer a short plan over a padded one. A section filled to look thorough costs the reader the same attention as one that matters.
+
+### Weight
+
+The weight tells a dispatcher how hard the row is, so the session it launches is sized by difficulty rather than spread. The section holds two labeled fields and names no model and no effort, since that pick belongs to whoever dispatches.
+
+```markdown
+## Weight
+
+- **Weight:** <light, medium, or heavy>
+- **Reason:** <the criterion that fired>
+```
+
+Grade the row from the code the planning pass read. A mechanical change grades light before any other test runs, and any other row takes the first level from the top whose criterion fires. A contract is anything other code consumes, such as an exported type, a verb's flags or record, a route, a file format, or a config key.
+
+- **Heavy:** new behavior across modules, a changed contract whose consumers are not all named, more than a few open decisions, a safety, concurrency, or data-loss risk, or a cause not yet known
+- **Medium:** new logic in one module, a narrow contract change with every consumer named, or a mechanism tests only partly pin, such as processes, locks, timing, caches, or platform differences
+- **Light:** the plan pins the change, or the change is mechanical however many files it touches, such as a rename, a styling sweep, a regenerated baseline, or a docs pass
+
+### Grading rules
+
+The rules below keep a grade checkable.
+
+- Name the criterion that fired in the reason. A bare level gives a reader nothing to check the grade against, so a plan carrying one is non-conforming.
+- File count, folder spread, and plan length are no weight. A rename across hundreds of files grades light, since the plan pins every edit, and a one-line change to a lock can grade medium or heavy.
+- Re-grade whenever an amendment changes what fired, and rewrite the reason with it
+- Nothing checks that the section is present, so a dispatcher reading a plan without one falls back to its own test
 
 ### Current behavior
 
@@ -322,6 +349,11 @@ Each H3 below shows where a section groups once it passes 5 bullets. A section o
 - <one-line bullet covering the goal>
 - <one-line bullet covering the main deliverables>
 - <one-line bullet covering the key decision or trade-off>
+
+## Weight
+
+- **Weight:** <light, medium, or heavy>
+- **Reason:** <the criterion that fired>
 
 ## Current behavior
 
