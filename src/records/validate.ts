@@ -687,6 +687,7 @@ const GROUNDWORK_INDEX = 'README.md'
 const GROUNDWORK_STATE = '01-current-state.md'
 const GROUNDWORK_DECISION = '06-'
 const GROUNDWORK_HANDOFF = '07-'
+const GROUNDWORK_PAUSE = '99-next-session.md'
 
 async function checkTrack(dir: string, slug: string): Promise<Finding[]> {
   const files = await listMarkdown(dir)
@@ -714,19 +715,29 @@ async function checkTrack(dir: string, slug: string): Promise<Finding[]> {
     )
   }
 
-  // A track closes on the decision and the handoff together. One without the
-  // other reads as closed to anyone scanning filenames and strands the half a
-  // returning session actually opens.
+  // A track closes on its decision alone. A legacy handoff with no decision,
+  // or a pause note left beside one, reads as neither live nor closed.
   const decided = files.some((file) => file.startsWith(GROUNDWORK_DECISION))
   const handed = files.some((file) => file.startsWith(GROUNDWORK_HANDOFF))
 
-  if (decided !== handed) {
+  if (handed && !decided) {
     findings.push(
       finding(
         'closing-partial',
         slug,
-        decided ? GROUNDWORK_HANDOFF : GROUNDWORK_DECISION,
-        `is absent while ${decided ? '06' : '07'} is present, so the track is neither live nor closed.`,
+        GROUNDWORK_DECISION,
+        'is absent while 07 is present, so the track is neither live nor closed.',
+      ),
+    )
+  }
+
+  if (decided && files.includes(GROUNDWORK_PAUSE)) {
+    findings.push(
+      finding(
+        'closing-partial',
+        slug,
+        GROUNDWORK_PAUSE,
+        'is present beside 06, so a closed track still carries the note for resuming it.',
       ),
     )
   }
