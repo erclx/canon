@@ -133,15 +133,35 @@ What binds past the five holds is review attention and machine capacity, which `
 
 ## Pick the model
 
-This section binds every launch shape that names `<model>`, the planner and both reviewers as well as the step 4 build, none of which pass through that step.
+This section binds every launch shape that names `<model>` and `<effort>`, the planner and both reviewers as well as the step 4 build, none of which pass through that step.
 
 A `claude --bg` session inherits the launching session's model, so an orchestrator on the larger model spends it on every launch. Name `<model>` on each with one test: `opus` where a wrong result is costly and nothing automatic would catch it, `sonnet` otherwise, never `haiku`.
 
-- Read the role's worst failure and whether a test, gate, or review stops it, never the folder or the plan's length
+- Read the role's worst failure and whether a test, gate, or review stops it, never the folder, the plan's length, or its `Touches` count, none of which measures size
 - Planner: `opus` for a row that changes a contract others consume, spans modules, or needs slicing. `sonnet` for a narrow row, even one inside a hook or governance folder.
 - Worker, and the review-address pass against the findings in hand: `opus` where the plan leaves a cross-module call tests will not settle. `sonnet` where it pins the fix, however long.
 - Code reviewer: `opus` where a miss would ship unseen, a change to behavior no test or gate exercises that other surfaces read. `sonnet` otherwise, a one-line hook edit included.
 - UI reviewer: always `sonnet`. A cheaper tier was measured on that checklist and passed real defects as clean while judging taste boxes it was told to leave.
+
+A model or effort the operator names binds for the session until the operator says otherwise, as a spoken worker cap does.
+
+### Effort
+
+Name `<effort>` beside `<model>` on every launch, by the same test. No level is measured per role, so the two below are starting points rather than defaults.
+
+- `high` where the plan leaves a call that no test, gate, or review settles
+- `medium` where the plan pins the work or the pass follows a checklist, the UI reviewer's included
+- `xhigh` or `max` only on the operator's word
+- The review-address pass picks its own level against the findings in hand, as it picks its own model
+
+A launch naming no effort takes the saved setting or the model's default, never the launcher's level, so the dispatcher's pick reaches the session only through the flag. Two things still override it without a word.
+
+- `CLAUDE_CODE_EFFORT_LEVEL` outranks `--effort`, so a machine exporting it runs every launch at that level. Read it first when a session runs at the wrong one.
+- A level the model does not support, or one above an organization cap, falls to the highest level at or below it, so the dispatch report can name a level the session never ran at
+
+### The top tier
+
+`fable`, the tier above `opus`, runs only on the operator's word, for one dispatch or as a standing pick for the session. `haiku` stays never.
 
 ## Pick local or cloud
 
