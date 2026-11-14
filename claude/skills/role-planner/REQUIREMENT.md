@@ -17,7 +17,7 @@ It also reaches past its seat. A planner reading blockers and file sets writes a
 - The in-flight read composes the session roster with open pull requests once per task, and never counts a branch or a worktree as evidence
 - A plan rests on the task file's findings and the source files rather than on counts quoted from the row
 - Every record passes the validate and audit calls before it is announced, and the announcement carries the path and what the row got wrong
-- A block goes out as a message before it becomes a prompt, a correction to the dispatcher carries its evidence, and a talk launch puts each open question to the operator
+- A block goes to the controller as a message that ends the turn outside a talk launch, a correction to the dispatcher carries its evidence, and a talk launch puts each open question to the operator
 
 ## Must not
 

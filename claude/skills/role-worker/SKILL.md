@@ -107,7 +107,7 @@ Ask for the re-review as `review-address` Step 8 returns, carrying what was addr
 
 - Send it to the reviewer whose sessionId the review dispatch carried, resolved from that id at sending, since a reviewer holds the trunk branch and no branch lookup finds it
 - Send it to the controller instead when the dispatch named no reviewer or the id resolves to no live session
-- Send a block out as a message before it becomes an interactive prompt.
+- Send a block to the controller as a message and end the turn outside a talk launch, a skill step's question included, since the question tool is denied
 - Cite the slot an operator's answer was written in when relaying it to the controller, in the `Answer at:` line whose form `canon:session-relay` states
 - Send nothing on progress. A worker reporting progress rebuilds, on this side of the channel, the poll the announcement retired on the other.
 
