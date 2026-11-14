@@ -26,7 +26,7 @@ The record lists each code file past `fileLimit`, tests included. Read the limit
 - **`files` is not coverage:** the record's top-level `files` counts only what the embedded read covers, so never infer a length gap from it
 
 - **Routes to:** `codebase-layout` for a source file, which splits it along its roles, and a split by behavior for a test file
-- **Missing key:** no `longFiles` means a binary older than the length report, so the axis is unread with that cause. No `lengthExtensions` means one older than the published list, so coverage is unread.
+- **Missing key:** no `longFiles` means the binary predates the length report, so the axis is unread for that cause. No `lengthExtensions` means it predates the published list, so coverage is unread.
 - **Empty list:** no file passes the limit, which is a result rather than an unread axis
 
 ## Function length
@@ -41,7 +41,7 @@ The record lists each code file past `fileLimit`, tests included. Read the limit
 A `name` of `null` is an unnamed function, such as a callback assigned nowhere. Function reading reaches a narrower set of languages than file length, the bare extensions in `functionExtensions`, so a file in any other extension is unread here alone and never on file length.
 
 - **Unread file:** an `unreadFiles` entry carries `file`, `line`, and `reason` for a file the reading could not follow. Report it unread on this axis with that reason, never as under the checkpoint.
-- **Missing key:** no `unreadFiles` means a binary older than the unread report, so a file absent from `longFunctions` is only as covered as its `--help` says. No `functionExtensions` leaves the covered set unread.
+- **Missing key:** no `unreadFiles` means the binary predates the unread report, so only `--help` says whether a file outside `longFunctions` was read. No `functionExtensions` leaves coverage unread.
 - **Length is not complexity.** A `register` function holding help text runs long without branching. Report it as long and claim nothing about how hard it is to follow.
 - **Routes to:** `code-craft`, which decides whether the function splits and where
 - **Gate:** none. The figure reports and never fails.

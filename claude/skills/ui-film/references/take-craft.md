@@ -72,7 +72,7 @@ A screencast beat films in real time at 1920x1080, so its camera zooms only to a
 
 Two rules hold once a beat is filmed.
 
-- A stepped still is 3840x2160 and opens at 2000 wide. Crop it for text too small to read there, with `ffmpeg -v error -y -i <dir>/still.jpg -vf crop=<w>:<h>:<x>:<y> <dir>/crop.png` on the still's own pixels.
+- A stepped still is 3840x2160 and opens at 2000 wide. Crop text too small to read there from its own pixels with `ffmpeg -v error -y -i <dir>/still.jpg -vf crop=<w>:<h>:<x>:<y> <dir>/crop.png`.
 - Read when something happened from `log.json` and `camera.json`, both on the clip's clock, never from a clock printed in the page, which starts before the first kept frame
 
 ## Targets
