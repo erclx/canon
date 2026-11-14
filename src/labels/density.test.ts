@@ -124,6 +124,136 @@ describe('bodyDensity limits per section', () => {
   })
 })
 
+describe('bodyDensity fenced line width', () => {
+  const OUTCOME_3090 =
+    '❌ Verify hung: <command> ran past <limit>. Narrow the parallel work or raise the limit, then run /git-ship again with the same arguments.'
+
+  function widths(result: ReturnType<typeof bodyDensity>) {
+    return result
+      .filter((finding) => finding.kind === 'fence-width')
+      .map(({ section, line, value, limit }) => [section, line, value, limit])
+  }
+
+  it('should report a 91-character fenced line under Outcome and pass a 90', () => {
+    const result = bodyDensity(
+      body(
+        '## Outcome',
+        '',
+        '```plaintext',
+        'x'.repeat(91),
+        'x'.repeat(90),
+        '```',
+      ),
+    )
+
+    expect(widths(result)).toEqual([['Outcome', 4, 91, 90]])
+  })
+
+  it('should report a wide fenced line under Technical context and Testing', () => {
+    const result = bodyDensity(
+      body(
+        '## Technical context',
+        '',
+        '```json',
+        'y'.repeat(91),
+        '```',
+        '',
+        '## Testing',
+        '',
+        '```bash',
+        'z'.repeat(91),
+        'z'.repeat(90),
+        '```',
+      ),
+    )
+
+    expect(widths(result)).toEqual([
+      ['Technical context', 4, 91, 90],
+      ['Testing', 10, 91, 90],
+    ])
+  })
+
+  it("should report #3090's 137-character Outcome line", () => {
+    const result = bodyDensity(
+      body('## Outcome', '', '```plaintext', OUTCOME_3090, '```'),
+    )
+
+    expect(widths(result)).toEqual([['Outcome', 4, 137, 90]])
+  })
+
+  it('should leave a long info string on the opening fence uncounted', () => {
+    const result = bodyDensity(
+      body('## Outcome', '', `\`\`\`jsonc // ${'c'.repeat(100)}`, '{}', '```'),
+    )
+
+    expect(widths(result)).toEqual([])
+  })
+
+  it('should count an emoji as one character', () => {
+    const result = bodyDensity(
+      body(
+        '## Outcome',
+        '',
+        '```',
+        `❌${'x'.repeat(89)}`,
+        `🤖${'x'.repeat(90)}`,
+        '```',
+      ),
+    )
+
+    expect(widths(result)).toEqual([['Outcome', 5, 91, 90]])
+  })
+
+  it('should count the content of a tilde fence and of a nested fence, never a delimiter', () => {
+    const result = bodyDensity(
+      body(
+        '## Outcome',
+        '',
+        `~~~ ${'t'.repeat(100)}`,
+        't'.repeat(91),
+        '~~~',
+        '',
+        '````markdown',
+        '```',
+        'n'.repeat(91),
+        '```',
+        '````',
+        '```',
+        'w'.repeat(91),
+        '```',
+      ),
+    )
+
+    expect(widths(result)).toEqual([
+      ['Outcome', 4, 91, 90],
+      ['Outcome', 9, 91, 90],
+      ['Outcome', 13, 91, 90],
+    ])
+  })
+
+  it('should leave a wide line outside a fence to the other limits', () => {
+    const result = bodyDensity(body('## Outcome', '', `    ${'i'.repeat(100)}`))
+
+    expect(widths(result)).toEqual([])
+  })
+
+  it('should leave a CRLF line ending out of the width', () => {
+    const result = bodyDensity(
+      ['## Outcome', '', '```', 'x'.repeat(90), '```', ''].join('\r\n'),
+    )
+
+    expect(widths(result)).toEqual([])
+  })
+
+  it('should never report a fence width in a post', () => {
+    const result = postDensity(
+      body('## Review', '', '```', 'p'.repeat(120), '```'),
+    )
+
+    expect(result).toEqual([])
+  })
+})
+
 describe('bodyDensity in Key changes groups', () => {
   it('should break a bullet run at a bold label longer than the marker width', () => {
     const result = bodyDensity(

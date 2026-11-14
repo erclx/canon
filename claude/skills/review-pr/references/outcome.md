@@ -23,3 +23,4 @@ Read the record, output, or config the section names at `<headRefOid>`, through 
 - A body carrying no Outcome, since the section is optional
 - A changed shape the body leaves without one, since whether to write it is the author's judgment
 - A mixed change showing its text shape and pointing at the evidence comment in one line
+- A fenced line past the width limit, since `canon labels scan` fails it before review

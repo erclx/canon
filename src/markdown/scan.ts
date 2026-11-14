@@ -5,7 +5,8 @@
  * walker toggling on any run reads the second inner fence as an opening and
  * inverts the rest of the file.
  */
-const FENCE = /^(`{3,}|~{3,})/
+/** A fence delimiter on a trimmed line, with the run of backticks or tildes captured. */
+export const FENCE = /^(`{3,}|~{3,})/
 
 /** Anchored at position 0, so a `---` block inside a fenced template is body. */
 const FRONTMATTER = /^---\n[\s\S]*?\n---\n?/

@@ -301,8 +301,9 @@ export function register(program: Command): void {
         'It fails the density of that same body, reported per section under',
         '`density`: a bullet past 200 characters, more than 5 plain',
         'bullets or 2 paragraphs in a row, a paragraph past 350 characters, any',
-        'H3 or deeper heading, and Technical context mixing bullets with',
-        'paragraphs. A bold label alone on a line splits a Key changes run, a',
+        'H3 or deeper heading, Technical context mixing bullets with',
+        'paragraphs, and a fenced line past 90 characters in any section,',
+        'Testing included. A bold label alone on a line splits a Key changes run, a',
         'bold-led paragraph starts a new Technical context run, and Testing',
         'takes the heading limit alone. Each finding carries its section, kind,',
         'line in the whole body, value, and limit.',
@@ -891,8 +892,18 @@ async function runScan(opts: ScanOptions): Promise<number> {
   } else if (density.length === 0) {
     logInfo('every section is within its length, run, and heading limits')
   } else {
+    const wide = density.some(({ kind }) => kind === 'fence-width')
+    const counted = density.some(({ kind }) => kind !== 'fence-width')
+    const remedies = [
+      counted
+        ? 'Regroup the section under bold labels or split the long item rather than cutting a path.'
+        : '',
+      wide
+        ? 'Break a wide fenced line by hand, or quote a lone message line in a blockquote.'
+        : '',
+    ].filter(Boolean)
     logWarn(
-      `${plural(density.length, 'density finding')} in the ${post ? 'post' : 'body'}. Regroup the section under bold labels or split the long item rather than cutting a path.`,
+      `${plural(density.length, 'density finding')} in the ${post ? 'post' : 'body'}. ${remedies.join(' ')}`,
     )
     for (const finding of density) {
       const measured =
