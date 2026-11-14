@@ -5,17 +5,15 @@ import type { Finding } from '@/driver/steps'
 
 /**
  * Runs axe-core on the WCAG A and AA tags and reports what it found, marking
- * the findings a UI review holds open on.
- *
- * The engine is canon's own dependency and is read from canon's install at run
- * time, so nothing reaches a target's manifest or production build.
+ * the findings a UI review holds open on. The engine is read from canon's own
+ * install at run time, so nothing reaches a target's manifest or build.
  *
  * The bundle assigns `window.axe`, `doT`, and `_encodeHTML` as it loads, and
  * registers with any AMD loader the page carries. It is evaluated with
  * `define`, `module`, and `exports` shadowed, and every global it added or
- * replaced as it loaded is put back once the run settles, so a page owning a
- * global named `axe` keeps it, a global the page sets during the run survives,
- * and a probe running after this one reads the page it found.
+ * replaced is put back once the run settles, so a page owning a global named
+ * `axe` keeps it, a global set during the run survives, and a later probe reads
+ * the page it found.
  */
 
 /** The tags the groundwork measured on, which together are WCAG 2.2 A and AA. */

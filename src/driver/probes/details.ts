@@ -5,19 +5,13 @@ import type { Finding } from '@/driver/steps'
  * Measures every `<details>` on the page twice, once shut and once open, and
  * judges only the open reading.
  *
- * Two lessons meet here and they pull opposite ways. A closed `<details>` still
- * reports a layout box and the box is nonsense: at 390 pixels wide a shut menu
- * measures 13, so its rows read as 18-pixel tap targets hanging off the
- * viewport, which is where 134 false findings came from in a single run.
- * Filtering the closed ones out then opens a blind spot the same size, since
- * the one real menu defect on that page was an open dropdown sitting 35 pixels
- * off a phone screen and true only while open. Neither reading alone is enough,
- * so both are taken and the closed one is carried as context rather than judged.
+ * A closed `<details>` still reports a layout box, and the box is nonsense, so
+ * a shut menu's rows read as tiny tap targets hanging off the viewport.
+ * Filtering closed ones out instead hides a dropdown that overflows only while
+ * open, so both are taken and the closed one is context rather than judged.
  *
- * Discovery is automatic rather than selector-driven. The real defect was
- * missed because nobody thought to name that menu, and a probe that takes a
- * selector reproduces that failure every time the author's attention is the
- * thing at fault.
+ * Discovery is automatic rather than selector-driven, since a probe taking a
+ * selector misses every menu its author did not think to name.
  */
 
 /** The smallest a control may be before a finger cannot reliably hit it. */
@@ -57,10 +51,8 @@ export async function probeDetails(page: Page): Promise<Finding[]> {
       for (const element of Array.from(document.querySelectorAll('details'))) {
         if (!(element instanceof HTMLDetailsElement)) continue
 
-        // Named for the state it was actually in rather than assumed shut. A
-        // step that clicked the menu open leaves this reading an open one, and
-        // calling it shut would report a number as evidence of the opposite
-        // state to the one it was taken in.
+        // Named for the state it was actually in, since a step may have clicked the
+        // menu open, and calling that reading shut would misreport the evidence.
         const wasOpen = element.open
         const entry = box(element)
         const entryState = wasOpen ? 'already open' : 'shut'
@@ -70,9 +62,8 @@ export async function probeDetails(page: Page): Promise<Finding[]> {
           element.querySelectorAll('a[href], button, [role="menuitem"], li'),
         )
 
-        // The panel is routinely out of flow, so the element's own box stops at
-        // the summary and says nothing about where the menu landed. Every part
-        // is measured and the furthest overhang is the finding.
+        // The panel is routinely out of flow, so the element's own box says nothing
+        // of where the menu landed. Every part is measured for the worst overhang.
         let worst: { part: Element; off: number; left: number } | undefined
         for (const part of [element, ...element.querySelectorAll('*')]) {
           const partBox = box(part)
