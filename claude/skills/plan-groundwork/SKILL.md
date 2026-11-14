@@ -31,6 +31,7 @@ Apply it in open mode alone, after Step 1 resolves the mode and before the folde
 Write only inside `.canon/groundwork/<nn>-<slug>/`. A feature plan, source changes, a standard, a rule, and a reference doc all live outside it, so this one rule forbids every one of them.
 
 - One exception, at close only, is the conclusion recorded into the task the launch named, or one new task file when the launch named neither a task nor a controller
+- The plan close Step 7 writes is no exception, since `plan-feature` writes it under its own scope after this skill's steps end
 - A second exception is a large fixture a spike reads as bulk input, under `.canon/tmp/runs/groundwork-fixtures/<slug>/` so mode detection never matches it as a track
 - A fixture a headless run is pointed at goes outside the repository instead, per `## Running a spike`
 - An arm script and a checkout a claim rests on are not fixtures, and go inside the track under `scripts/` and `clones/`, per the standard
@@ -134,8 +135,9 @@ The standard sets the open question format inside a topic file and in `00-scope.
 4. Record the conclusion, even when it is to do nothing, by the route `### Close routes` below picks.
 5. When the conclusion Step 4 recorded or handed off does not cover every finding the track surfaced, route what it leaves out through `plan-intake`. Skip this step when it does.
 6. Report each statement about an outside source carrying neither a link nor a lead entry. Report and do not block, because judging what counts as an external claim is the call a checker gets wrong.
+7. Plan the conclusion in this session by the route Step 4 took, per `### Planning the conclusion` below, or name the handoff.
 
-Aside from an experiment fixture, Steps 4 and 5 are the only ways close mode reaches outside the folder. Do not close while an open question quietly fails an outcome. Resolve it, or record it in `06-decision.md` as knowingly accepted.
+Aside from an experiment fixture, Steps 4, 5, and 7 are the only ways close mode reaches outside the folder. Do not close while an open question quietly fails an outcome. Resolve it, or record it in `06-decision.md` as knowingly accepted.
 
 Name `proposal-critique` in the close report when the decision is a one-way change or a fix whose cause is unverified, and never invoke it from here.
 
@@ -152,6 +154,22 @@ Read the route from the origin record in `README.md`, never from the launch stri
 The handoff rides the close announcement `role-planner` already owes, as one message, since a second one is a second thing the controller reconciles. It carries the track path, the decision in one line, and the origin lines a task file would open with.
 
 A track opened from an intake item cites the item for the verdict rather than restating it. Its origin lines carry `Intake:` with the item number beside `Groundwork:`, on the handoff and in a new task file alike, so the row files from the item's bundle. A new task file takes the shape `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
+
+### Planning the conclusion
+
+The session that measured holds the evidence, so it plans the row by default rather than leaving a cold planner to re-read the same code. Skip this step when the conclusion is to do nothing, and hand off instead when the bar `role-planner` states under `### Planning what this session measured` holds.
+
+| Step 4 route             | Step 7 does                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------- |
+| A task                   | Invokes `canon:plan-feature` on that task                                                      |
+| A controller and no task | Says in the close announcement that this session is planning, and waits for the row named back |
+| Neither                  | Invokes `canon:plan-feature` on the task file Step 4 wrote                                     |
+
+Under a controller, plan only the row it names back, invoke `canon:plan-feature` on it, and write no task file. The close announcement says one of two things, that this session is planning or that it hands off and why, so the controller never launches a second planner beside this one.
+
+- A launch that already chains `plan-feature` after the close runs it once, here
+- An item Step 5 routed through `plan-intake` is planned only once its `You:` slot is answered and its row is named back
+- Each plan is written under `plan-feature`'s own write scope, which the rule above does not reach
 
 ## Check the folder
 

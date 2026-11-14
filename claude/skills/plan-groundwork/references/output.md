@@ -80,6 +80,12 @@ Omit the uncited-claims block when the count is zero. The `Conclusion:` line nam
 - A controller handoff reads `handed to <controller sessionId>, no task file written`
 - A close with neither reads `wrote <task path>`, followed by `row placed` or `row unplaced` as `task-board` Step 4 reports
 
+The `Next:` line names who plans the conclusion, per close Step 7, so the controller never reads a bare pointer and launches a second planner.
+
+- This session planning reads `planning in this session`, adding `once the row is named back` under a controller
+- A handoff reads `handed off, <the reason role-planner's bar gave>`
+- A conclusion to do nothing reads `nothing to plan`
+
 ```plaintext
 ✅ Closed .canon/groundwork/<nn>-<slug>/
 
@@ -96,5 +102,5 @@ Omit the uncited-claims block when the count is zero. The `Conclusion:` line nam
 
 <the decision in one line>
 
-Next: /plan-feature
+Next: <planning in this session | handed off, <reason> | nothing to plan>
 ```
