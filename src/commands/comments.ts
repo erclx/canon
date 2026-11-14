@@ -5,6 +5,7 @@ import {
   BODY_BLOCK_CAP,
   density,
   HEAD_BLOCK_CAP,
+  HISTORY_PATTERNS,
   type Language,
   LANGUAGES,
   type LanguageCount,
@@ -59,6 +60,7 @@ export function register(program: Command): void {
         'Caps, which canon gate run fails on in a touched file and this report only lists:',
         `  a head run past ${HEAD_BLOCK_CAP} lines, delimiters included`,
         `  an in-body run past ${BODY_BLOCK_CAP} lines`,
+        '  a comment carrying a date, a commit hash, or an issue reference',
         '',
         'Exit codes:',
         '  0  the scan completed',
@@ -149,6 +151,7 @@ async function runScan(
             : null,
         blockCheckpoint: BLOCK_LINE_CHECKPOINT,
         headBlockCap: HEAD_BLOCK_CAP,
+        historyTerms: HISTORY_PATTERNS.map(({ term }) => term),
         bodyBlockCap: BODY_BLOCK_CAP,
         snapshot: snapshot.map((count) => ({
           ...record(count),
@@ -315,7 +318,8 @@ function reportCaps(snapshot: readonly LanguageCount[]): void {
 }
 
 /**
- * Reports the sweep as skipped when no rule publishes a vocabulary.
+ * Reports the vocabulary as skipped when no rule publishes one, and the history
+ * patterns either way, since they live in code.
  *
  * Zero hits against an empty vocabulary is indistinguishable from a clean
  * codebase in the output, and the two mean opposite things, so the absent case
@@ -328,12 +332,15 @@ function reportVocabulary(
   logStep('Degradation sweep')
 
   if (vocabulary.kind === 'absent') {
-    logWarn('Skipped. No rule publishes a "Degradation vocabulary" heading.')
-    return
+    logWarn(
+      'Vocabulary skipped. No rule publishes a "Degradation vocabulary" heading.',
+    )
+  } else {
+    logInfo(`${vocabulary.terms.length} terms from ${vocabulary.source}`)
   }
+  logInfo(`${HISTORY_PATTERNS.length} history patterns`)
 
   const hits = snapshot.flatMap((count) => count.degradationHits)
-  logInfo(`${vocabulary.terms.length} terms from ${vocabulary.source}`)
 
   if (hits.length === 0) {
     logInfo('No hits.')
