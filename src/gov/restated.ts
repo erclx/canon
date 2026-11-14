@@ -36,15 +36,10 @@ const SKILL_ROOTS: readonly string[] = [SHIPPED_SKILLS_REL, PROJECT_SKILLS_REL]
 /**
  * Path pairs whose duplication is deliberate and already recorded.
  *
- * The seed is authored from the always-loaded file and a hand merge
- * reconciles the two, so a bullet appearing in both is the design
- * rather than a defect. Excluding by pair rather than by content is what the
- * plan settled on: the duplication is a location fact this repository already
- * records, and a content test would have to rediscover it on every run.
- *
- * The exclusion reaches a repetition alone. A mirror that disagrees is the one
- * shape the pairing cannot absorb, since the two files are meant to agree, so
- * a polarity split on a declared pair stays a finding.
+ * The seed is authored from the always-loaded file and a hand merge reconciles
+ * the two, so a bullet in both is the design. Excluding by pair rather than by
+ * content records that location fact once. The exclusion covers repetition
+ * alone, so a polarity split on a declared pair stays a finding.
  */
 const MIRRORS: readonly (readonly [string, string])[] = [
   [INSTRUCTIONS_REL, SEED_REL],
@@ -190,15 +185,10 @@ const PROHIBITIONS = ['never', 'do not', "don't", 'avoid', 'refuse']
  * A `no` opening a clause or a comma-set phrase directly on a code span, as in
  * `pinned to major tags, no `@latest``.
  *
- * `no` is admitted here and only here, since sitting on a backticked
- * identifier it names the thing ruled out rather than qualifying a verb. The
- * phrase boundary is what keeps description out: `returns no `jq` output` puts
- * the marker after a verb and reports what happens.
- *
- * `not` and `never` stay out. Admitting them turned two agreeing pairs into
- * contradictions, `, not `pwd`` and `, never `@latest``, because the subject
- * each matched spelled its own negation on plain words or in a clause the
- * anchors tied against, so the reading flipped on one side alone.
+ * Sitting on a backticked identifier, `no` names the thing ruled out, while
+ * after a verb, as in `returns no `jq` output`, it describes. `not` and `never`
+ * stay out, since each subject spells its own negation elsewhere and admitting
+ * them flipped agreeing pairs into contradictions.
  */
 const NEGATED_SPAN = /(?:^|[,;:(])\s*no\s+`/
 
@@ -325,17 +315,10 @@ export function analyze(text: string): Analysis {
  * Whether a clause instructs against something, rather than merely describing
  * something that does not happen.
  *
- * The marker has to open the clause. A prohibition is an instruction, and an
- * instruction leads with its verb, so `Never delete a task file` prohibits
- * where `a fallback never fires` reports. Reading the marker anywhere in the
- * clause cannot separate those two, and this corpus writes both: the third
- * false contradiction found here was `so a || fallback never fires` against a
- * seed clause saying the same thing in other words.
- *
- * What it costs is a prohibition written mid-clause, as in `edit with the tool,
- * never a stream editor`, which now reads as description. That miss lands the
- * pair in the repetition class rather than dropping it, so both surfaces still
- * reach the report and only the label is weaker.
+ * The marker has to open the clause, since an instruction leads with its verb:
+ * `Never delete a task file` prohibits where `a fallback never fires` reports.
+ * A prohibition written mid-clause reads as description, which lands the pair
+ * in the repetition class rather than dropping it.
  */
 function prohibits(text: string): boolean {
   const opening = text
@@ -369,16 +352,10 @@ function clauses(text: string): string[] {
  * The clause a match landed in, which is where a prohibition has to sit before
  * it says anything about the rule the two statements share.
  *
- * The densest clause rather than every clause carrying an anchor. A statement
- * states one rule across several clauses, and a union answers true whenever any
- * clause anywhere carries a marker, which is the whole statement again under
- * another name.
- *
- * Both contradictions this repository reported were that defect. The
- * always-loaded file splits the stream-editor rule across two bullets and the
- * seed folds them into one, so the subject was the exception half alone while
- * the seed's bullet carried the `never` from a clause the anchors never
- * touched, and the two agreed completely.
+ * The densest clause rather than every clause carrying an anchor, since a
+ * union answers true whenever any clause carries a marker. A rule split across
+ * two bullets on one side and folded into one on the other otherwise reads as
+ * a contradiction between statements that agree.
  */
 function anchoredClause(text: string, anchors: ReadonlySet<string>): string {
   const parts = clauses(text)
@@ -398,9 +375,8 @@ function anchoredClause(text: string, anchors: ReadonlySet<string>): string {
     }
   }
 
-  // No clause carries an anchor, which a boundary landing inside a code span
-  // can produce. Reading the whole statement is what this did before the clause
-  // scope, so it degrades to that rather than to no polarity at all.
+  // No clause carries an anchor, as a boundary inside a code span can cause,
+  // so read the whole statement rather than report no polarity.
   return bestHits === 0 ? text : best
 }
 
@@ -546,9 +522,8 @@ function readBodyLines(root: string, skillsRel: string): Candidate[] {
     for (const [index, line] of lines.entries()) {
       const trimmed = line.trim()
 
-      // Frontmatter is metadata rather than instruction, and every body's
-      // `description` restates that skill's own purpose, so sweeping it makes
-      // each skill match any subject naming its domain.
+      // Frontmatter is metadata, and each `description` restates its skill's
+      // purpose, so sweeping it would match any subject naming the domain.
       if (frontmatter) {
         if (index > 0 && trimmed === '---') frontmatter = false
         continue
@@ -670,22 +645,12 @@ function classify(
  * Every instruction the always-loaded file or a path-scoped rule states that a
  * further surface also states.
  *
- * Matching is recall-first, keyed on distinctive tokens two statements share
- * rather than on a phrase they spell the same way. The motivating case was one
- * rule written three different ways, so a near-exact matcher would miss the
- * defect the sweep exists for, and a recall-first reading can be narrowed from
- * real output where the reverse cannot.
- *
- * The always-loaded file and every rule under either rule root each open the
- * search as a subject, and the seed, the skill bodies under both skill roots,
- * and every rule again close it as a candidate.
- * A rule sits on both sides because a stack ships a whole rule folder, so a
- * bullet duplicated between two rules reaches a target exactly as a bullet
- * duplicated between the always-loaded file and a rule does, and neither shape
- * is visible from one side alone.
- *
- * It reports and never gates. A restatement is legitimate more often than not,
- * so a push failing on one would fail on the ordinary case.
+ * Matching is recall-first, keyed on distinctive shared tokens rather than a
+ * shared phrase, since one rule is often written several ways and recall can be
+ * narrowed from real output. Rules sit on both sides, since a stack ships a
+ * whole rule folder and a bullet duplicated between two rules reaches a target
+ * the same way. It reports and never gates, since a restatement is usually
+ * legitimate.
  */
 export function readRestated(root: string): RestatedReport {
   const instructions = readBullets(root, INSTRUCTIONS_REL)
@@ -717,12 +682,8 @@ export function readRestated(root: string): RestatedReport {
     return { kind: 'unreadable', reason: 'no-surfaces' }
   }
 
-  // A rule states a directive directly, the same as the always-loaded file, so
-  // it joins the subjects a match is searched from rather than sitting only on
-  // the candidate side. Without this, an instruction that moved out of the
-  // always-loaded file and into two rules has no subject left carrying it, and
-  // the pair the seed move produced would stay invisible to this sweep the
-  // same way it did before this corpus widened.
+  // Rules join the subjects, so an instruction moved out of the always-loaded
+  // file into two rules still has a subject carrying it.
   const subjects = [...instructions, ...rules].map(index)
   const candidates = [...seed, ...bodies, ...rules].map(index)
   const frequency = documentFrequency([subjects, candidates])
@@ -734,10 +695,8 @@ export function readRestated(root: string): RestatedReport {
       ),
     )
 
-  // Every candidate's rare set is invariant across the subject loop, so it is
-  // built once here rather than per pair. The corpora multiply out to hundreds
-  // of thousands of pairings, and rebuilding a set inside that would dominate
-  // the run.
+  // A candidate's rare set is invariant across the subject loop, so build it
+  // once rather than inside hundreds of thousands of pairings.
   const rareCandidates = candidates.map((candidate) => ({
     ...candidate,
     rare: distinctive(candidate.analysis),
@@ -748,15 +707,8 @@ export function readRestated(root: string): RestatedReport {
   let repetitions = 0
   let mirrors = 0
 
-  // A rule bullet sits on both sides now, so the pair it forms with another
-  // rule bullet would otherwise surface twice: once with each end read as the
-  // subject. Recording the pair the first time it is found and skipping it
-  // the second keeps one entry per duplicate regardless of which side a
-  // reader lands on, the way a seed-versus-body pair never could collide,
-  // since only a rule occupies both roles. The same skip is what fragments a
-  // cluster of mutually restating rules across several entries, which is why
-  // `countThreeSurfaceClusters` reads this set again below rather than the
-  // per-entry `surfaces.length` the loop produces.
+  // A rule pair would surface once per side, so the first find is recorded and
+  // the mirror skipped. `countThreeSurfaceClusters` reads this set for that.
   const reportedPairs = new Set<string>()
   const pairKey = (a: Statement, b: Statement): string => {
     const left = `${a.file}:${a.line}`
@@ -769,10 +721,8 @@ export function readRestated(root: string): RestatedReport {
     const surfaces: Surface[] = []
 
     for (const candidate of rareCandidates) {
-      // A second surface is a second file. Two bullets sharing anchors inside
-      // one rule are adjacent instructions on one topic rather than the same
-      // rule shipped twice, and only a rule can reach this branch at all,
-      // since it is the one kind read as both a subject and a candidate.
+      // A second surface is a second file. Two bullets in one rule are adjacent
+      // instructions on one topic, not one rule shipped twice.
       if (candidate.statement.file === subject.statement.file) continue
 
       const key = pairKey(subject.statement, candidate.statement)

@@ -57,21 +57,12 @@ export function writesBetween(before: Manifest, after: Manifest): string[] {
 }
 
 /**
- * The roots a run must not write shared session scratch to. `snapshotTree`
- * reads the sandbox alone, so before this a session that resolved that scratch
- * against a toolkit root wrote where no manifest looked: the run reported
- * success, the write list came back empty, and `write_scope` had nothing to
- * assert against.
- *
- * It makes an escape visible rather than impossible. A session can write to a
- * home directory, to a sibling worktree, or to any path outside these roots, and
- * none of that is watched. `canon/context/development/sandbox.md` names the four
- * directories the watch reads.
- *
- * A linked worktree is the normal place to develop this repository, and the
- * rule an escaping session follows sends scratch to the main root rather than to
- * the worktree it was launched from, so the main root joins the list whenever it
- * differs.
+ * The roots a run must not write shared session scratch to, since
+ * `snapshotTree` reads the sandbox alone and a write resolved against a
+ * toolkit root would otherwise go unseen. It makes an escape visible, not
+ * impossible: a write to a home directory or a sibling worktree is not watched.
+ * The main root joins the list whenever it differs from the launch root, since
+ * the scratch rule sends a session there from a linked worktree.
  */
 export function escapeRoots(projectRoot: string): string[] {
   const listing = spawnSync('git', ['worktree', 'list', '--porcelain'], {
@@ -90,26 +81,14 @@ export function escapeRoots(projectRoot: string): string[] {
 
 /**
  * The four directories the seed's shared-scratch rule names, and the whole of
- * where an escape lands. A session that resolves that rule against a toolkit
- * root writes here and nowhere else, so watching these rather than the whole
- * root costs no detection.
+ * where an escape lands, so watching only these costs no detection. A watch
+ * over the whole root would report the operator's own editing as an escape.
  *
- * It buys the difference between a signal and noise. Nothing distinguishes the
- * spawned session's writes from the operator's own, so a watch over the whole
- * root reports ordinary editing during a run as an escape. Measured 2026-08-02:
- * three runs against the relocated sandbox all wrote their report to the right
- * place, and two of the three still reported an escape under the wide watch,
- * naming a context entry being edited in the session that launched them.
- *
- * The scope stated for an arm author: `escapeRoots` times two, these times four.
- * This watch reaches nothing past those eight destinations, so a nested run's
- * own escape is invisible here whether or not an arm declares `escape_scope`. A
- * nested background dispatch reports through `sessions` instead, from
- * `dispatch.ts`, so the key defined against this file-write watch keeps one
- * meaning. An arm whose skill is meant to reach past the sandbox tree declares
- * `escape_scope` in its `expect.toml`, which bounds a legitimate write rather
- * than the run. Read `canon/context/development/sandbox.md` before writing a claim past
- * that.
+ * The watch reaches `escapeRoots` times these four and nothing past them, so a
+ * nested run's escape is invisible here and a nested background dispatch
+ * reports through `sessions` instead. An arm meant to write past the sandbox
+ * declares `escape_scope` in its `expect.toml`. Read
+ * `canon/context/development/sandbox.md` before claiming more.
  */
 export const ESCAPE_SCRATCH_DIRS = [
   '.canon/plans',
@@ -150,23 +129,13 @@ export interface AttributedEscapes {
 
 /**
  * Splits the watched writes into those a tool call of this session names and
- * those none does, so a parallel session's board write stops failing an arm.
- * A diffed path ties when a file-writing call targeted it, when a `Bash` command
- * spells it, or when a `Bash` command spells its scratch directory behind some
- * prefix, such as `"$main/.canon/plans"`.
+ * those none does, so a parallel session's write stops failing an arm.
  *
- * A bare relative `.canon/plans` or `./.canon/plans` ties nothing on its own,
- * since the session runs from the sandbox, which sits outside every watched
- * root. It ties once some command also spells the path's root and some command
- * spells the directory's top segment, `.canon`. That is how `rm -rf
- * /main/.canon`, or a `cd` into the root or `.canon` followed by a relative
- * write, reads, in one call or two.
- *
- * A stream carrying no call at all ties every path, so a dead or unparsable
- * stream keeps the verdict the watch gave before attribution. The one gap is a
- * shell write that never spells the root, nor the scratch directory behind a
- * prefix, such as a path read from `git worktree list` into a variable and
- * joined with `.canon` alone. It ties nothing and reads as foreign.
+ * A path ties when a file-writing call targeted it or a `Bash` command spells
+ * it or its scratch directory behind a prefix. A bare relative path ties only
+ * once commands also spell the path's root and the `.canon` segment. A stream
+ * with no call ties every path. A shell write that never spells the root nor
+ * the prefixed directory ties nothing and reads as foreign.
  */
 export function attributeEscapes(
   escapes: readonly string[],

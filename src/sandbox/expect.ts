@@ -178,24 +178,13 @@ function contentArray(value: unknown): ContentAssertion[] {
 
     const record = entry as Record<string, unknown>
 
-    // Dropping a half-written entry rather than throwing is deliberate, and it
-    // reads as the opposite of the stray-key check below. An entry missing its
-    // path or pattern declares no assertion to lose, and `checkExpectation`
-    // fails an arm whose surviving declaration asserts nothing, so the vacuous
-    // pass is already closed one level up. A stray key is the reverse: the entry
-    // is well-formed and the declaration around it silently lost a key it
-    // appears to carry, which nothing downstream can see.
+    // A half-written entry is dropped, since it declares nothing to lose and
+    // `checkExpectation` fails an arm left asserting nothing.
     if (typeof record.path !== 'string' || record.path === '') continue
     if (typeof record.pattern !== 'string' || record.pattern === '') continue
 
-    // A bare key written below a `[[content]]` header belongs to that table in
-    // TOML, not to the document, so a declaration listing `manual` or
-    // `max_turns` after its content blocks parses clean and silently asserts
-    // neither. The arm then named `claude/ui-test` (canon-keep-retired), now
-    // `claude/ui-checklist`, shipped that way: a turn ceiling that
-    // never ran and five manual entries that never reached the unchecked count,
-    // while `canon sandbox coverage` counted the arm as armed. Nothing at the
-    // top level can see the difference, so the check belongs here.
+    // In TOML a bare key below a `[[content]]` header joins that table, so a
+    // misplaced `manual` or `max_turns` would silently assert nothing.
     const stray = Object.keys(record).filter(
       (key) => key !== 'path' && key !== 'pattern',
     )
@@ -347,9 +336,9 @@ function checkContent(
 }
 
 /**
- * The probe on 2026-07-30 found no permission mode that both allows writes under
- * `.claude/` and scopes them, so the run goes wide and this assertion carries the
- * property the permission layer used to. An arm declaring no scope skips it.
+ * No permission mode both allows writes under `.claude/` and scopes them, so
+ * the run goes wide and this assertion carries the property the permission
+ * layer would. An arm declaring no scope skips it.
  */
 function checkWriteScope(
   expectation: Expectation,
@@ -364,13 +353,8 @@ function checkWriteScope(
     }
   }
 
-  // A scope produces one result per write, so a run that wrote nothing produces
-  // none, and without this the declaration vanishes from the verdict entirely:
-  // no result, no skipped entry, and no contribution to the unchecked count that
-  // exists to surface exactly this. The `undefined` branch above cannot stand in,
-  // since `canon sandbox run` always passes `--writes` and `readPathList` returns `[]` for an
-  // empty file. An arm whose output escaped the snapshot reads as a clean run,
-  // which is the vacuous pass the harness exists to remove.
+  // A run that wrote nothing yields no result here, so it is reported as
+  // skipped, or the declaration would vanish from the verdict as a vacuous pass.
   if (writes.length === 0) {
     return {
       results: [],
@@ -391,37 +375,16 @@ function checkWriteScope(
 }
 
 /**
- * `canon sandbox run` watches two toolkit roots for a write to shared session scratch
- * during a run, and splits what it finds by `attributeEscapes` in
- * `src/sandbox/headless/watch.ts`. A write a tool call of the session names
- * arrives as `escapes` and is asserted here. A write no call names arrives as
- * `untiedEscapes` and reports as one skipped line, since a parallel session
- * writing the board is not this skill escaping. An arm whose skill
- * legitimately reaches outside the sandbox tree declares the destinations
- * here, and the harness asserts them instead of trusting the skill to bound
- * itself.
+ * Asserts the writes `canon sandbox run` saw land in shared session scratch
+ * at a toolkit root, split by `attributeEscapes`: `escapes` a tool call of the
+ * session names, and `untiedEscapes` none does, which report as one skipped
+ * line. An arm whose skill legitimately writes outside the sandbox declares
+ * the destinations here.
  *
- * Declaring the scope inverts the empty case against `checkWriteScope`. A
- * write-scope declaration exists to bound required output, so a run that wrote
- * nothing skips rather than passing on a fabricated zero. An escape-scope
- * declaration exists to bound a side effect nothing requires, so zero escapes
- * is the outcome a correct run produces and reports as a pass outright,
- * provided a watched root held something to watch. `snapshotRoot` in
- * `src/sandbox/headless/watch.ts` returns an empty manifest both when a watch ran clean and when none of the
- * four watched directories existed under a root, and the two produce the same
- * empty `escapes` list. `watched` is what tells them apart: a run that had
- * nothing to watch reports unmeasured rather than passing on a diff it never
- * had the target to take.
- *
- * A caller passing no `untiedEscapes` gets every path asserted, which is the
- * verdict `--escapes` gave before attribution.
- *
- * A witnessed concurrent session never softens the verdict. `concurrentSessions`
- * is evidence a reader can act on without a second lookup, appended to the
- * message on an unbounded escape, never a reason to pass or skip one: a session
- * merely alive throughout the run proves someone else was busy, not that a
- * given file is theirs, and a real dispatch escape reads identically to an
- * innocent sibling's write either way.
+ * Zero escapes is a pass, unlike an empty write scope, but only when `watched`
+ * says a root held something, since an empty manifest also means nothing was
+ * watched. With no `untiedEscapes`, every path is asserted. A concurrent
+ * session is appended to the message as evidence and never softens the verdict.
  */
 function checkEscapeScope(
   expectation: Expectation,
@@ -634,11 +597,8 @@ export function checkExpectation(
 
   const failed = results.filter((result) => !result.ok).length
 
-  // A declaration counts what it declares, this counts what ran, and the two
-  // diverge on `write_scope`, which produces one result per write rather than one
-  // per glob. An arm declaring only a write scope against a run that wrote
-  // nothing would otherwise report pass having asserted nothing, which is the
-  // vacuous pass the whole feature exists to remove.
+  // A write scope yields one result per write, so a run that wrote nothing
+  // asserted nothing and fails rather than passing vacuously.
   if (results.length === 0) {
     return {
       state: 'fail',

@@ -12,28 +12,14 @@ import type { Beat } from '@/take/plan'
 import { type ShellPage, openShell } from '@/take/shell'
 
 /**
- * Films a beat by frame stepping. The page's clock is virtual and advances one
- * 60 fps frame per step, so every transition, animation, and timer moves
- * exactly one frame between screenshots however long a frame takes to render,
- * and each screenshot comes back at the request's device scale times the viewport,
- * 3840x2160 at the default scale of 2.
- *
- * These orderings hold a take together, and each one broken deadlocks or
- * freezes it rather than failing loudly:
- *
- * - An input is sent, a frame is stepped, and only then is the input awaited,
- *   since under begin-frame control an input is acknowledged by a frame
- * - Frame time continues Chromium's monotonic clock, since a frame stamped on
- *   any other base leaves every CSS animation at its first frame
- * - No frame is begun before the load event, since one sent mid-navigation can
- *   go unanswered
- * - Frame ticks sit at or ahead of the page's clock once virtual time pauses,
- *   since Blink starts a transition on the later of the two, and ticks lagging
- *   the real time setup spent leave every later transition starting in the
- *   future of the frames
- * - A frame is begun only once the one before it settles, since Chromium
- *   refuses a second while one is pending, and a frame left pending past the
- *   stall limit falls the beat back rather than hanging it
+ * Films a beat by frame stepping on a virtual 60 fps clock, so every transition
+ * and timer moves exactly one frame between screenshots, each at the device
+ * scale times the viewport. Each ordering below, broken, deadlocks or freezes
+ * a take: send an input, step a frame, then await it. Continue Chromium's
+ * monotonic clock, or CSS animations stay at frame one. Begin no frame before
+ * the load event. Keep ticks at or ahead of the page clock once virtual time
+ * pauses, or transitions start in the future. Begin a frame only once the last
+ * settles, and fall the beat back on a stall rather than hang.
  */
 
 const FRAME_MS = 1000 / FPS
@@ -131,10 +117,8 @@ export async function filmStepped(
 
     const frame = async (): Promise<void> => {
       const advanced = new Promise<void>((done) => expired.push(done))
-      // Plain advance rather than pausing on pending fetches, which held the
-      // clock through every page switch that loads its view, past the stall
-      // limit. A refused advance never expires its budget, which the stall
-      // reports.
+      // A plain advance, since pausing on pending fetches held the clock past
+      // the stall limit, and a refused advance never expires its budget.
       page
         .send('Emulation.setVirtualTimePolicy', {
           policy: 'advance',

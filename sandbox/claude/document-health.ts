@@ -1,30 +1,14 @@
 import { scenario } from '@/sandbox/scenario'
 
 /**
- * The seeds the `01-initial` fixture carries, one per finding shape.
- *
- * Staleness seed in canon/context/api.md. Every path this entry names resolved
- * when it was written and two of them no longer do, which is the axis no verb
- * answers. The count in the Layout lead-in is the second testable claim shape.
- *
- * Length seed in docs/overview.md. One paragraph past the sentence and
- * character checkpoints, and one top-level bullet carrying a paragraph's worth
- * of text behind a dash.
- *
- * Structure seed in canon/context/pipeline.md. One entry past the line
- * checkpoint holding three stage domains under Layout, which earns a
- * structure line proposing a split by heading.
- *
- * Doubled seed in src/auth. Both canon/context/api.md and auth.md claim the
- * folder as a Layout H3. auth.md holds the area's trap and api.md holds only
- * the H3, so auth.md is the owner a structure line proposes.
- *
- * Design record seed in canon/DESIGN.md. The lead is past its word cap and
- * the Colors table names --color-muted, which src/styles/tokens.css does
- * not declare, so the design record row carries a prose and a token finding
- * routed to design-record. The frontmatter declares a dark theme whose block
- * overrides --color-ink alone, so a per-theme finding names that selector,
- * and its reviewed date gives the reminder line.
+ * The seeds the `01-initial` fixture carries, one per finding shape:
+ * staleness in `canon/context/api.md`, with dead paths and a Layout count, and
+ * length in `docs/overview.md`, a long paragraph and bullet. Structure is in
+ * `canon/context/pipeline.md`, one long entry holding three stage domains. A
+ * doubled seed has `api.md` and `auth.md` both claim `src/auth`, with
+ * `auth.md` as owner since it holds the trap. The design record seed in
+ * `canon/DESIGN.md` has a lead past its cap, an undeclared `--color-muted`,
+ * a dark block overriding `--color-ink` alone, and a reviewed date.
  */
 export default scenario({
   config: {

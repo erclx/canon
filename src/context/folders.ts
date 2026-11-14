@@ -7,39 +7,22 @@ import { SURFACE_ROOTS } from '@/roots/surface'
 /**
  * Folder names under a record root audited by default.
  *
- * A named list rather than the index-plus-entry contract read off disk, so a
- * generated tree satisfying that contract is never measured against a rule
- * written for per-domain narrative. This list names the folders
- * `claude/skills/context-fold/references/context.md` governs, and `--folder` admits another without an edit
- * here.
- *
- * It doubles as the citation check's scope, since `citationPattern` spells only
- * these names. A folder left off the list is never resolved, so a path into one
- * goes stale silently rather than failing a push.
+ * A named list rather than a contract read off disk, so a generated tree is
+ * never measured against a rule written for per-domain narrative, and
+ * `--folder` admits another. It doubles as the citation check's scope, since
+ * `citationPattern` spells only these names, so a path into a folder left off
+ * goes stale silently.
  */
 export const DEFAULT_FOLDERS: readonly string[] = ['context', 'diagrams']
 
 /**
  * The bases every folder in the default list is looked for under.
  *
- * `diagrams` is a session record and resolves under `RECORD_ROOTS`, while
- * `context` is tracked and resolves under `SURFACE_ROOTS`, so two folders on
- * this list read from two different root lists. The base array is
- * their union rather than a per-name map, since a name resolving at the wrong
- * root costs one extra `existsSync` and nothing else, where a map states the
- * split a second time next to the one each resolver module already carries.
- *
- * `.claude` is pushed last because both lists name it, and each list's own
- * precedence otherwise survives: `canon` still precedes `.claude` for a
- * `SURFACE_ROOTS` name, and `.canon` still precedes `.claude` for a
- * `RECORD_ROOTS` one. Order between `canon` and `.canon` is unobserved, since
- * no name on this list resolves under both.
- *
- * Adding `canon` here means a target holding a root-level `canon/` folder of
- * its own now resolves it as the toolkit's, since a project writing about a
- * product called canon is a plausible name collision `canResolveAtRoot`'s own
- * project-root gate does not cover. The audit only reports, so the cost is a
- * wrong scope line rather than a wrong edit.
+ * `diagrams` resolves under `RECORD_ROOTS` and `context` under `SURFACE_ROOTS`,
+ * so the bases are their union rather than a per-name map, since a wrong root
+ * costs one `existsSync`. `.claude` goes last, keeping each list's precedence.
+ * A target holding its own root `canon/` folder resolves it as the toolkit's,
+ * which costs only a wrong scope line, since the audit only reports.
  */
 const CLAUDE_BASES: readonly string[] = [
   ...new Set(
@@ -83,18 +66,12 @@ export interface AuditedFolder {
 
 /**
  * Names the requested record-root folders that actually exist, which is the
- * citation check's scope.
+ * citation check's scope, since a pointer into an optional folder is no fault
+ * in a project that lacks it.
  *
- * A skill or seed pointing into an optional folder is a live instruction for
- * a project that carries the folder and says nothing about one that does not.
- * Checking a path into an absent folder would fail shipped references here for
- * the sole reason that this repository does not carry it.
- *
- * A folder resolved at the project root is measured and stays out of this. The
- * pattern the citation check builds spells the `.claude/` prefix, so admitting
- * a root name there would check `.claude/<name>/` paths the audit never read.
- * Widening the pattern to the root spelling is a separate change, since a bare
- * `docs/x.md` appears in prose that references nothing.
+ * A folder resolved at the project root stays out, since the citation pattern
+ * spells the `.claude/` prefix and widening it would match prose that
+ * references nothing.
  */
 export function presentNames(folders: readonly AuditedFolder[]): string[] {
   return [
@@ -158,23 +135,13 @@ function locate(
 /**
  * Resolves the folders to audit under `root`.
  *
- * A named folder contributes its own entries plus those of every nested index
- * folder beneath it, so a domain that outgrew one file and split is audited at
- * the same grain as one that did not. Discovery of the nested folders runs
- * through the shared walker, which is what keeps `.gitignore` and the vendored
- * prune governing this scan as well as index regeneration. That prune is what
- * lets a root folder be walked at all, since a name at the project root sits
- * beside `node_modules` and a build output.
- *
- * The project root is reached only when the caller opts in, so a target holding
- * a root folder of its own name is not audited against a standard it never adopted by
- * the mere act of running the command. `.claude/` still wins a name carried by
- * both, and the scope line prints the resolved path so a caller reads which
- * base was taken rather than inferring it.
- *
- * Nothing above this asks where a folder came from. A name that resolves at the
- * root is measured by every rule that generalizes and gated out of the rules a
- * single standard carries, which `governsContent` decides from the name.
+ * A named folder contributes its entries plus every nested index folder, so a
+ * split domain is audited at the same grain. Discovery runs through the shared
+ * walker, so `.gitignore` and the vendored prune govern it too. The project
+ * root is reached only on opt-in, so a target's own same-named folder is not
+ * audited unasked, and `.claude/` wins a name both carry. The scope line
+ * prints the resolved path, and `governsContent` gates root folders out of
+ * single-standard rules.
  */
 export async function resolveFolders(
   root: string,
