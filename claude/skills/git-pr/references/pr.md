@@ -88,10 +88,9 @@ The closing lines end `## Summary`, one `Closes #NNN` per issue and no trailing 
 - Keep each fenced line to 90 characters, breaking a long record or command by hand, since GitHub scrolls a wider line sideways
 - Quote a single message line in a blockquote rather than a fence, so it wraps at the body width, with each `<placeholder>` in a code span
 
-The section holds a text shape alone and never reaches the merged history.
+The squash commit carries Summary, Key changes, and Technical context alone, so Outcome stays on the pull request.
 
 - Keep a UI change's result in the evidence comment `pr-evidence` posts, never in the body. A mixed change shows its text shape here and points at that comment in one line.
-- The squash commit carries Summary, Key changes, and Technical context alone, so Outcome stays on the pull request
 
 ### Testing section
 
@@ -149,4 +148,4 @@ A live agent session is never the human a box waits on.
 - Any section reports a `subheading`, and Technical context reports a `mixed-form`
 - A fenced line past 90 characters reports a `fence-width` in any section, Testing included
 - A bold label alone on a line breaks a Key changes run, and a bold lead-in starts a new Technical context run
-- Fix a finding by regrouping or splitting, never by cutting a path
+- Fix a count or heading finding by regrouping or splitting, never by cutting a path, and a `fence-width` by breaking the line by hand or moving a lone message line into a blockquote

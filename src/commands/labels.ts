@@ -892,8 +892,18 @@ async function runScan(opts: ScanOptions): Promise<number> {
   } else if (density.length === 0) {
     logInfo('every section is within its length, run, and heading limits')
   } else {
+    const wide = density.some(({ kind }) => kind === 'fence-width')
+    const counted = density.some(({ kind }) => kind !== 'fence-width')
+    const remedies = [
+      counted
+        ? 'Regroup the section under bold labels or split the long item rather than cutting a path.'
+        : '',
+      wide
+        ? 'Break a wide fenced line by hand, or quote a lone message line in a blockquote.'
+        : '',
+    ].filter(Boolean)
     logWarn(
-      `${plural(density.length, 'density finding')} in the ${post ? 'post' : 'body'}. Regroup the section under bold labels or split the long item rather than cutting a path.`,
+      `${plural(density.length, 'density finding')} in the ${post ? 'post' : 'body'}. ${remedies.join(' ')}`,
     )
     for (const finding of density) {
       const measured =

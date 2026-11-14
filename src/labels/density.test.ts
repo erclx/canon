@@ -237,6 +237,14 @@ describe('bodyDensity fenced line width', () => {
     expect(widths(result)).toEqual([])
   })
 
+  it('should leave a CRLF line ending out of the width', () => {
+    const result = bodyDensity(
+      ['## Outcome', '', '```', 'x'.repeat(90), '```', ''].join('\r\n'),
+    )
+
+    expect(widths(result)).toEqual([])
+  })
+
   it('should never report a fence width in a post', () => {
     const result = postDensity(
       body('## Review', '', '```', 'p'.repeat(120), '```'),

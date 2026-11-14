@@ -281,7 +281,8 @@ function fenceWidths(section: Section): BodyDensityFinding[] {
       continue
     }
 
-    const width = [...line.text].length
+    // An `edited` event carries the body the web editor stored, in CRLF.
+    const width = [...line.text.replace(/\r$/, '')].length
     if (width > FENCE_WIDTH) {
       found.push({
         section: section.name,

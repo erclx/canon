@@ -215,6 +215,22 @@ describe('canon labels scan text checks', { timeout: RUN_TIMEOUT_MS }, () => {
     ])
   })
 
+  it('should name the wrap remedy alone for a body whose only finding is a fence width', async () => {
+    const body = await writeBody(
+      `## Summary\n\nOne.\n\n## Key changes\n\n- a\n\n\`\`\`\n${'x'.repeat(91)}\n\`\`\`\n`,
+    )
+
+    const result = await execa(
+      process.execPath,
+      [CLI, 'labels', 'scan', '--title', TITLE, '--body-file', body],
+      { reject: false, timeout: RUN_TIMEOUT_MS },
+    )
+
+    expect(result.exitCode).toBe(2)
+    expect(result.stderr).toContain('Break a wide fenced line by hand')
+    expect(result.stderr).not.toContain('Regroup the section')
+  })
+
   it('should fail a pull request event whose body is dense', async () => {
     const event = await writeEvent({
       pull_request: {
