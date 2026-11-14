@@ -163,7 +163,7 @@ describe('scanCounts', () => {
 
   it('should read past a total reached through an indirect noun, which is the false positive the gap axis would have admitted', async () => {
     // Widening the trigger-to-number gap to two words would read a domain's own
-    // membership here as the catalog's total, so the gap stays shut and this reads.
+    // membership here as the catalog's total, so the gap stays shut and this goes unread.
     seedSkills(63)
     write(
       'docs/overview.md',

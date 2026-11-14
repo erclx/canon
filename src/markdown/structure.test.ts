@@ -219,8 +219,8 @@ describe('longestRun', () => {
     const path = '**`src/markdown/structure.ts`**'
     const source = `${FRONTMATTER}# CI\n\n${half}\n\n${path}\n\n${half}\n`
 
-    // Past the width ceiling, so the span test holds it out, since `review-pr`
-    // heads each reviewed file with a bold path far past any ceiling.
+    // Width alone would hold it out, so the span test is what lets it break,
+    // since `review-pr` heads each reviewed file with a bold path past any ceiling.
     expect(measure(source).longestRun).toBeLessThan(RUN_CHECKPOINT)
   })
 
