@@ -19,10 +19,10 @@ export const DEFAULT_OLDER_THAN_DAYS = 14
 const RESERVED = ['runs', 'hooks', 'handoff', 'pr', 'render'] as const
 
 /**
- * Pre-split names `#1695` moved into a reserved subfolder, still sitting at
- * the scratch root on a tree the rename never touched. Reading them as
- * ordinary slugs would offer an unread handoff or the live poll baseline for
- * deletion, the one thing a wrong delete here loses for good.
+ * Pre-split names the scratch rename moved into a reserved subfolder, still
+ * sitting at the scratch root on a tree the rename never touched. Reading them
+ * as ordinary slugs would offer an unread handoff or the live poll baseline
+ * for deletion, the one thing a wrong delete here loses for good.
  */
 const LEGACY_MOVES: ReadonlyMap<string, string> = new Map([
   ['memory-routing', 'handoff/memory-routing'],

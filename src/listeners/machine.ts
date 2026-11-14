@@ -60,9 +60,8 @@ export function machineListenerReader(): ListenerReader {
   const hasLsof = Bun.which('lsof') !== null
   return {
     async listListeners() {
-      // lsof 4.95 drops every process whose kernel-truncated name holds an
-      // unmatched `(`, which Next's `next-server (vX.Y.Z)` title cuts down to,
-      // so `/proc` goes first despite costing several times what lsof does.
+      // Some lsof versions drop a process whose truncated name holds an unmatched
+      // `(`, as a Next server's title does, so `/proc` goes first despite its cost.
       if (existsSync('/proc/net/tcp')) {
         const listeners = await readProcListeners()
         if (listeners !== undefined) return listeners

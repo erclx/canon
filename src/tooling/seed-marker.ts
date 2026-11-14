@@ -58,17 +58,14 @@ export function stripSeedMarker(source: string): string {
     .filter((line) => !STUB_LINE.test(line))
     .join('\n')
 
-  // A function replacement, because a string one reads `$1` and `$&` in the
-  // kept fields as references to this match. A `description` naming a dollar
-  // amount would otherwise substitute the whole frontmatter into itself and
-  // carry the marker along with it.
+  // A function replacement, since a string one reads `$1` and `$&` in the kept
+  // fields, so a `description` naming a dollar amount would corrupt the file.
   if (kept.trim() !== '') {
     const replacement = `---\n${kept}\n---${block[2] ?? ''}`
     return source.replace(FRONTMATTER, () => replacement)
   }
 
-  // Dropping the block takes the blank line that separated it from the body
-  // with it. Leaving that behind opens the installed file on whitespace, which
-  // is a diff every target would carry against its own formatter.
+  // The blank line after the block goes with it, or the installed file would
+  // open on whitespace every target's formatter diffs against.
   return source.slice(block[0].length).replace(/^\n+/, '')
 }

@@ -127,17 +127,14 @@ export async function walk(options: WalkOptions): Promise<WalkResult> {
         continue
       }
 
-      // A frame's stylesheets and fonts change what computes, so the read
-      // waits for load. A stylesheet the frame cannot reach fails without
-      // failing the load, and the read reports what the frame shows without it.
+      // A frame's stylesheets and fonts change what computes, so the read waits for
+      // load, and a stylesheet the frame cannot reach is simply absent from it.
       await page.emulateMedia({ colorScheme: 'light' })
       await page.goto(target.url, { waitUntil: 'load' })
       await readInto(page, target.label)
 
-      // Board frames switch on `data-theme`, and a few on the media query, so
-      // the dark read sets both. Flipping the attribute starts any transition
-      // a frame declares on a color, and a read mid-transition reports a value
-      // between the two themes, so each one is finished first.
+      // The dark read sets both `data-theme` and the media query, and finishes each
+      // color transition the flip starts, so no value is read between themes.
       await page.emulateMedia({ colorScheme: 'dark' })
       await page.evaluate(() => {
         document.documentElement.setAttribute('data-theme', 'dark')
@@ -153,10 +150,8 @@ export async function walk(options: WalkOptions): Promise<WalkResult> {
       error,
     )
   } finally {
-    // The rejection is dropped rather than propagated, because a close that
-    // fails beside a walk that already failed would replace the refusal the
-    // caller was about to receive with a reason about teardown. Nothing the
-    // caller does depends on the browser having closed cleanly.
+    // Dropped, since a close failing beside a walk that already failed would
+    // replace the caller's refusal with a reason about teardown.
     await browser.close().catch(() => undefined)
   }
 

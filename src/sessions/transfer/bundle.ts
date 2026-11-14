@@ -237,9 +237,8 @@ export async function exportSession(
 
   const transcript = readTranscript(location.transcript)
   const facts = transcriptFacts(transcript)
-  // The branch and HEAD come from the checkout the caller stands in, which is
-  // the linked worktree a worker builds in, while the records and the handoff
-  // sit at the main root every worktree shares.
+  // The branch and HEAD come from the caller's checkout, the linked worktree,
+  // while the records and the handoff sit at the shared main root.
   const cwd = options.cwd ?? process.cwd()
   const root = await repositoryRoot(cwd)
   const handoffPath = newestHandoff(root, facts.startedAt)
@@ -491,10 +490,8 @@ export async function importSession(
     }
   }
 
-  // The existence check above and these writes are not atomic, so `wx` is what
-  // keeps a copy that appeared in between from being overwritten. A failure
-  // partway removes what this run placed, since a leftover would make the next
-  // import of the same bundle refuse on it.
+  // The existence check is not atomic, so `wx` keeps an appeared copy intact,
+  // and a failure removes what this run placed so a reimport does not refuse.
   const written: string[] = []
   const created: string[] = []
   // `mkdir` over a file raises EEXIST too, so the code alone cannot say a copy

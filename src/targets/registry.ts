@@ -89,15 +89,10 @@ function stateDirNamed(folder: string): string {
  * The registry this machine uses, current path first and the retired one
  * behind it.
  *
- * The rename moved the folder and nothing migrates it, so a machine that has
- * been recording targets for months would otherwise answer with an empty
- * registry the first time it ran the renamed binary. Empty is
- * indistinguishable from a machine that never installed anything, which is
- * exactly the confident wrong answer this record exists to prevent.
- *
- * Resolving one path for both the read and the write is deliberate. A machine
- * already holding the retired file keeps using it rather than being migrated
- * underneath, which mirrors how `readStamp` treats a target's retired config.
+ * Nothing migrates the folder, so without the fallback a machine with months
+ * of targets would answer empty, which reads as never having installed
+ * anything. One path serves read and write, so a machine holding the retired
+ * file keeps using it, as `readStamp` treats a retired config.
  */
 export function registryPath(): string {
   const current = join(stateDir(), 'targets.json')
@@ -188,15 +183,11 @@ function isLive(row: TargetRecord, roots: readonly string[]): boolean {
 /**
  * Reads every recorded target that is still live, sorted by path.
  *
- * A row missing either field is dropped rather than reported. This module is
- * the file's only writer, so a malformed row is a hand edit or a truncated
- * write and neither is a finding the caller can act on. What a caller can act
- * on is the file being absent, which is its own kind above.
- *
- * A row whose folder is gone or under a scratch root is left out too, so the
- * list is right on a machine whose file predates the prune, before any sync
- * rewrites it. A target on a drive that is unmounted reads as gone here, and
- * its next sync records it again.
+ * A row missing either field is dropped, since this module is the only
+ * writer and a malformed row is a hand edit or a truncated write. A row whose
+ * folder is gone or under a scratch root is left out too, so the list is right
+ * before any sync rewrites it. A target on an unmounted drive reads as gone,
+ * and its next sync records it again.
  */
 export function readTargetRegistry(
   path: string = registryPath(),
@@ -243,18 +234,11 @@ export type RecordOutcome = 'recorded' | 'unwritten' | 'scratch'
  * Records one target, keyed by its resolved path and replacing any row already
  * held for it, and refuses a path under a scratch root.
  *
- * The write is a temp file plus a rename, so a reader never meets a half
- * written file. Two syncs finishing together still resolve last-writer-wins on
- * the merged set, which can drop the row the loser added. That is left rather
- * than locked: the authoritative record of an install is the stamp inside the
- * target, this index is a cache over those, and the next sync of the dropped
- * target restores its row. The prune reads the same merged set the write
- * already reads, so it adds no second read and does not widen that window.
- *
- * Every write also drops the rows `readTargetRegistry` leaves out, being a
- * folder that is gone or one under a scratch root, so the file shrinks back to
- * the live projects rather than growing with every sandbox run. A target on a
- * drive that is unmounted drops with them, and its next sync restores it.
+ * A temp file plus a rename keeps a reader off a half-written file. Two syncs
+ * finishing together resolve last-writer-wins, which can drop a row, left
+ * unlocked since the stamp inside each target is authoritative and its next
+ * sync restores the row. Every write also drops the rows
+ * `readTargetRegistry` leaves out, so the file shrinks back to live projects.
  */
 export function recordTarget(
   target: string,

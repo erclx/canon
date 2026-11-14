@@ -21,21 +21,13 @@ const QUOTED_PHRASE = /"([^"]+)"/g
 /**
  * Every `README.md:` anchor comment in one file, classified by shape.
  *
- * `quoted` carries one or more verbatim phrases a caller checks against the
- * current `README.md` text, which is what replaces a line number that drifts
- * silently the moment the cited line moves. A quote is checked whether or not
- * the line also carries `README_PARAPHRASE_MARKER`, since a marker documents
- * that part of a string is synthesized and asserts nothing about a phrase the
- * same line puts in quotes: quoting a borrow verbatim and then never checking
- * it would let the exact drift this file exists to catch survive inside its
- * own escape hatch. `paraphrase` is what a marked line falls to only once it
- * carries no quote of its own, muted by `README_PARAPHRASE_MARKER` the way
- * `isMarked` mutes every other exemption in this repository. `bare` is the
- * retired `README.md:<n>` form, reported rather than accepted so the fragile
- * convention this replaces cannot come back on a later edit.
- *
- * Modeled on `clientCommandCitationsIn` in `src/gate/client-commands.ts`, including
- * its use of `isMarked` for the exemption.
+ * `quoted` carries verbatim phrases a caller checks against the current
+ * `README.md`. A quote is checked even on a line carrying
+ * `README_PARAPHRASE_MARKER`, since the marker says part of a string is
+ * synthesized and asserts nothing about a quoted phrase. `paraphrase` is a
+ * marked line with no quote, muted the way `isMarked` mutes exemptions. `bare`
+ * is the retired `README.md:<n>` form, reported so it cannot come back.
+ * Modeled on `clientCommandCitationsIn` in `src/gate/client-commands.ts`.
  */
 export function readmeCitationsIn(
   file: string,

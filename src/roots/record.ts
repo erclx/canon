@@ -51,19 +51,14 @@ const CANON_SCRATCH = 'tmp'
 /**
  * Every entry that lives under the record root, at the name `.claude/` gave it.
  *
- * These are the twelve ignore patterns the move to `.canon/` collapsed into
- * one, plus every record folder added since, so the list counts entries
- * rather than record folders: `.records.git` is the
- * backup history rather than a record, and `README.md` is a file a records pull
- * writes back. `worktrees` is absent because the harness creates a worktree
- * under `.claude/` and requires its target to sit there.
- *
- * Everything absent from this list is committed and never lands under the
- * record root, which is the rule the move ran on. `rules`, `skills`, and
- * `hooks` stay under `.claude/` because the vendor reads them there, while
- * `context` and the loose documents are tracked surfaces that
- * `surface.ts` resolves under `canon/` instead. A seed and a
- * superseded-layout report each ask this rather than assuming a root.
+ * These are the ignore patterns the move to `.canon/` collapsed into one, plus
+ * every record folder since, so the list counts entries, with `.records.git`
+ * the backup history and `README.md` a file a records pull writes back.
+ * `worktrees` is absent, since the harness requires it under `.claude/`.
+ * Everything absent is committed and never lands under the record root, so
+ * `rules`, `skills`, and `hooks` stay where the vendor reads them, and
+ * `context` and the loose documents resolve under `canon/` through
+ * `surface.ts`.
  */
 export const RECORD_ENTRIES: readonly string[] = [
   '.records.git',
@@ -165,16 +160,10 @@ export function recordDirs(
  * The creation destination relative to the project root, which is the form a
  * message displays and an option default carries.
  *
- * It resolves the root the same way a read does rather than pinning the
- * creation default, because the two stopped disagreeing when the move flipped
- * `CREATION_ROOT`. Pinning it now would write a new record to `.canon/` in a
- * project whose board is still `.claude/`, which splits one project's records
- * across two roots and leaves every reader answering from the half the writer
- * did not use.
- *
- * The root is a parameter rather than the working directory, because two of the
- * callers spell a path they later join onto a target root. Resolving against
- * the working directory there would read one project to answer about another.
+ * It resolves the root the way a read does rather than pinning the creation
+ * default, since pinning would write a new record to `.canon/` in a project
+ * whose board is still `.claude/`, splitting its records across two roots. The
+ * root is a parameter, since two callers join the result onto a target root.
  */
 export function creationRel(
   root: string,
@@ -200,18 +189,11 @@ function holdsRecords(root: string, candidate: RecordRoot): boolean {
  * The record root itself, for a caller whose subject is the root rather than a
  * folder inside it.
  *
- * A half-migrated tree resolves here on the root that exists rather than on the
- * folders under it, which is what makes the backup history and its work tree
- * one answer. Splitting them would let a push resolve a history at one root and
- * stage a work tree at the other, which stages the deletion of every folder the
- * move relocated.
- *
- * A root counts when it holds a `.records.git` or a record folder. The bare
- * directory does not, because `.claude/` exists in every installed project for
- * its hooks and rules, so testing it pinned a fresh clone to the retired root.
- * `README.md` and the scratch folder are left out: a records pull writes the
- * first back and the second is deletable, so a root holding only them has
- * nothing to protect.
+ * A half-migrated tree resolves on the root that exists, so a push never reads
+ * history at one root and stages a work tree at the other. A root counts when
+ * it holds a `.records.git` or a record folder, since `.claude/` exists in
+ * every installed project. `README.md` and the scratch folder are left out,
+ * since a records pull writes the first back and the second is deletable.
  */
 export function recordRoot(root: string): string {
   return join(

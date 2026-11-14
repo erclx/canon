@@ -23,15 +23,10 @@ const SIGNATURES: readonly (readonly [ManagerId, string])[] = [
  * Which package manager installed the package rooted at `root`, read off the
  * install path rather than guessed from what is on `PATH`.
  *
- * Removing the guess is the whole case for the upgrade verb, so a detection
- * that cannot be read back is worth no more than the guess it replaced. The
- * evidence travels with the answer and the verb prints it before running
- * anything, which lets an operator correct a wrong read without the detection
- * having to be right every time.
- *
- * Returns `undefined` for a path outside any install tree, which is a source
- * checkout. That is not a case to guess at either: reinstalling over a clone
- * would replace what the operator is working in.
+ * The evidence travels with the answer and the verb prints it before running
+ * anything, so an operator can correct a wrong read. Returns `undefined` for a
+ * path outside any install tree, which is a source checkout, since
+ * reinstalling over a clone would replace what the operator works in.
  */
 export function detectManager(root: string): Manager | undefined {
   const segments = root.split(/[/\\]/).filter((segment) => segment !== '')

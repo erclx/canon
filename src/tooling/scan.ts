@@ -109,22 +109,14 @@ function isIdentical(a: string, b: string): boolean {
 
 /**
  * Compares every stack in the chain against the target and reports what would
- * change. Nothing is written. Which stack wins a duplicate differs per
- * category and mirrors the bash: configs, seeds, and scripts resolve nearest
- * stack first, while dependencies and gitignore entries resolve from the
- * furthest ancestor inward.
+ * change, writing nothing. Configs, seeds, and scripts resolve nearest stack
+ * first, and dependencies and gitignore entries from the furthest ancestor in.
  *
- * A seed at a path the chain also ships as a config is left to the config,
- * so the path is reported once.
- *
- * A target below its git toplevel is scanned as a subfolder: a config or seed
- * GitHub reads only at the root moves to `withheld` and counts as no change.
- * The scope is read here so every caller of `scan` agrees without passing a
- * flag.
- *
- * A path the project declined or customized moves to `dispositions` ahead of
- * the subfolder test, so it is listed once. The record is read here for the
- * same reason as the scope.
+ * A seed at a path the chain also ships as a config is left to the config. A
+ * target below its git toplevel is scanned as a subfolder, so a file GitHub
+ * reads only at the root moves to `withheld`. A path the project declined or
+ * customized moves to `dispositions` ahead of that test. The scope and the
+ * record are read here so every caller agrees without a flag.
  */
 export function scan(chain: readonly Manifest[], target: string): ScanResult {
   const isSubfolder = isSubfolderTarget(target)

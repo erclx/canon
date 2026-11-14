@@ -4,17 +4,11 @@ import { join } from 'node:path'
 /**
  * The roots a tracked toolkit surface is read at, in precedence order.
  *
- * These are not `RECORD_ROOTS`, and the difference is what each root is for
- * rather than an oversight. A record folder moves into `.canon/` because it is
- * gitignored, so nothing tracked ever lands there. A surface here is committed,
- * so a single shared list would put a record folder under a root a tracked
- * file also resolves against, which is a collision this list never has to
- * consider on its own.
- *
- * `canon` wins because a tree that carries it has moved, and reading `.claude/`
- * there would answer from the copy the move left behind. Read precedence
- * agreeing with the eventual creation default means the flip a later batch
- * takes changes one line rather than two.
+ * These are not `RECORD_ROOTS`. A record folder moves into `.canon/` because
+ * it is gitignored, while a surface here is committed, so one shared list
+ * would put a record folder under a root a tracked file resolves against.
+ * `canon` wins because a tree carrying it has moved, and reading `.claude/`
+ * there would answer from the copy the move left behind.
  */
 export const SURFACE_ROOTS = ['canon', '.claude'] as const
 

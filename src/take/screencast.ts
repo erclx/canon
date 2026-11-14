@@ -118,10 +118,8 @@ export async function filmScreencast(request: {
       // The docs tie this to `path`, but 1.64.1 still reads it here, where it
       // doubles the frames Chromium may hold unacknowledged.
       fps: FPS,
-      // Spooled rather than held, since a busy page sends about 19 MB a second.
-      // The write stays synchronous, so the acknowledgement Chromium paces its
-      // frames on waits for no encoder. Playwright calls this from a listener
-      // nothing awaits, so a throw here would surface as an unhandled rejection.
+      // Spooled, since a busy page sends many megabytes a second, and synchronous,
+      // so Chromium's frame pacing waits on no encoder. A throw here goes unawaited.
       onFrame: ({ data, timestamp }) => {
         const stamp = frameStamp({
           presentedWall: timestamp,

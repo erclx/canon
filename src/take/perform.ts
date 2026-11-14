@@ -511,18 +511,14 @@ export const FOCUS_MOVED = `(() => {
 
 /**
  * Finds a target's box in CSS pixels, reading `text=<words>` as the first
- * innermost element with a size whose whole text is those words, so a hidden
- * copy earlier in the page cannot shadow a visible one, and anything else as a
- * CSS selector.
- * The document is searched first and every open shadow root after it in tree
- * order, so a document-tree match wins, except that innermost reads containment
- * through a shadow root to its host and a `text=` match holding a sized match
- * inside its subtree's roots gives way to it. A selector matches within one
- * root and never across a shadow boundary. A closed root and a frame stay
- * unreachable.
- * It runs inside the page so both routes resolve a target the same way, and a
- * match with no size counts as missing, since a click on it would land on
- * whatever sits behind.
+ * innermost sized element whose whole text is those words, so a hidden copy
+ * cannot shadow a visible one, and anything else as a CSS selector.
+ *
+ * The document is searched first, then every open shadow root in tree order.
+ * Innermost reads containment through a shadow root to its host. A selector
+ * never matches across a shadow boundary, and a closed root and a frame stay
+ * unreachable. It runs in the page so both routes resolve a target alike, and
+ * a match with no size counts as missing.
  */
 export function boxExpression(target: string): string {
   return `(() => {
