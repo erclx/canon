@@ -115,7 +115,7 @@ A consumer list is a `Risks` entry, which already forces Full. A resource with m
 
 ### Small mode
 
-Output the plan to chat and write no file. The markers match the standard's, so a grown plan keeps its shape.
+Output the plan to chat and write no file. When a caller asks for a file, write it as Full mode does and name the mode, since the caller builds on it. Markers match the standard's.
 
 ```markdown
 ## Weight

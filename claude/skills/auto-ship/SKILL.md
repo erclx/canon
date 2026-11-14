@@ -1,6 +1,6 @@
 ---
 name: auto-ship
-description: Chains implement → verify → ship after a feature plan is approved. Reads the plan the caller names, the plan a named task points at, or the plan for the current branch when none is named, runs the full pipeline in one session, and stops on any failure. Use when asked to "autoship", "ship this feature end to end", or "run the chain". Do NOT auto-trigger. Requires an approved plan file.
+description: Chains implement → verify → ship after a feature plan is approved. Reads the plan the caller names, the plan a named task points at, or the plan for the current branch when none is named, runs the full pipeline in one session, and stops on any failure. With `--plan-first <task>`, it writes and links that row's plan before building it. Use when asked to "autoship", "ship this feature end to end", or "run the chain". Do NOT auto-trigger. Requires an approved plan file, or `--plan-first` to write one.
 metadata:
   family: build
 ---
@@ -14,7 +14,7 @@ Chain the post-plan pipeline in a single run. Every step but the UI checklist ha
 - All `.canon/plans/` reads resolve at the main worktree root, not the current worktree. Resolve that root the way `session-worktree` does.
 - Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`, taking the stop over the `latest` fallback, since this skill opens a pull request
 - If the slug is empty, stop: `❌ Detached HEAD. Checkout the feature branch first.`
-- Resolve `<plan>` in Step 1, ahead of any other read.
+- Resolve `<plan>` in Step 1, ahead of any other read, once a `--plan-first` launch has written it at Step 0.
 - If the working tree has uncommitted changes unrelated to the plan, stop: `❌ Uncommitted changes outside the plan. Commit or stash before autoshipping.`
 
 Treat that slug as provisional. Once `session-worktree` runs, at Step 0 or before this chain began, every later step keys on the worktree and branch it resolved, whichever plan Step 1 reads.
@@ -23,7 +23,7 @@ Treat that slug as provisional. Once `session-worktree` runs, at Step 0 or befor
 
 Invoke `canon:role-worker` first, whatever the worktree state. That skill states the boundaries, the lifetime, and the channel obligations of a session building one branch under one plan, and a dispatched worker reaches the role here and nowhere else. Report it rather than proceeding silently when `canon:role-worker` does not resolve.
 
-Then compare `git rev-parse --git-dir` with `git rev-parse --git-common-dir`. The `session-worktree` wrapper handles branch alignment, so never call `EnterWorktree` directly.
+A launch carrying `--plan-first` runs the subsection below next. Then compare `git rev-parse --git-dir` with `git rev-parse --git-common-dir`. The `session-worktree` wrapper handles branch alignment, so never call `EnterWorktree` directly.
 
 | Reading          | Route                                                                                          |
 | ---------------- | ---------------------------------------------------------------------------------------------- |
@@ -31,9 +31,15 @@ Then compare `git rev-parse --git-dir` with `git rev-parse --git-common-dir`. Th
 | Different        | Already in a linked worktree, so continue                                                      |
 | Neither resolves | Stop: `❌ Not a git repository. Autoship needs git or a WorktreeCreate hook.`                  |
 
+### Write the plan first
+
+`/canon:auto-ship --plan-first <task>` writes the row's plan in this session and then builds it, so the plan lands as a validated, linked file before any edit to a tracked file. A launch without the argument skips this subsection.
+
+Read `${CLAUDE_SKILL_DIR}/references/plan-first.md` on a plan-first launch, for the steps, the size stop and its `--any-size` override, and the message the controller is owed.
+
 ### Name the worktree from the plan rather than leaving it to be derived
 
-When the invocation argument is a plan path or a bare slug, name the worktree from `canon tasks plan-branch <argument> --json` rather than from a reading of the plan. A task path or no argument at all invokes `canon:session-worktree` bare.
+When the invocation argument is a plan path or a bare slug, name the worktree from `canon tasks plan-branch <argument> --json` rather than from a reading of the plan. A plan-first launch takes the plan its step wrote or found as that argument. A task path or no argument at all invokes `canon:session-worktree` bare.
 
 Read `${CLAUDE_SKILL_DIR}/references/worktree-name.md` before invoking `canon:session-worktree`, for how each record shape reaches its tier 0 argument.
 

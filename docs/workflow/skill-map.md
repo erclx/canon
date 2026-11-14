@@ -35,22 +35,22 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 
 ## Build the feature
 
-| Skill                         | When to use                                        |
-| ----------------------------- | -------------------------------------------------- |
-| `canon:session-worktree`      | Before building a plan in this session             |
-| `canon:auto-ship`             | After plan approval, to chain implement through PR |
-| `canon:test-first`            | Before implementing a planned change               |
-| `canon:test-craft`            | Writing or changing a test                         |
-| `canon:build-in-slices`       | While building, to commit each slice               |
-| `canon:api-design`            | Changing what a caller sees                        |
-| `canon:deprecation-migration` | Deleting or replacing code something may call      |
-| `canon:code-craft`            | Before writing a function, class, or module        |
-| `canon:review-craft`          | Reviewing a change                                 |
-| `canon:search-craft`          | Before searching outside or quoting a source       |
-| `canon:systematic-debugging`  | A test fails or a bug surfaces                     |
-| `canon:design-taste`          | Drafting or judging an interface                   |
-| `canon:ui-craft`              | Building or judging a component's behavior         |
-| `canon:ui-checklist`          | After a UI change, to list what to check           |
+| Skill                         | When to use                                                                               |
+| ----------------------------- | ----------------------------------------------------------------------------------------- |
+| `canon:session-worktree`      | Before building a plan in this session                                                    |
+| `canon:auto-ship`             | After plan approval, or with `--plan-first` on a small row, to chain implement through PR |
+| `canon:test-first`            | Before implementing a planned change                                                      |
+| `canon:test-craft`            | Writing or changing a test                                                                |
+| `canon:build-in-slices`       | While building, to commit each slice                                                      |
+| `canon:api-design`            | Changing what a caller sees                                                               |
+| `canon:deprecation-migration` | Deleting or replacing code something may call                                             |
+| `canon:code-craft`            | Before writing a function, class, or module                                               |
+| `canon:review-craft`          | Reviewing a change                                                                        |
+| `canon:search-craft`          | Before searching outside or quoting a source                                              |
+| `canon:systematic-debugging`  | A test fails or a bug surfaces                                                            |
+| `canon:design-taste`          | Drafting or judging an interface                                                          |
+| `canon:ui-craft`              | Building or judging a component's behavior                                                |
+| `canon:ui-checklist`          | After a UI change, to list what to check                                                  |
 
 ## Check the work before it leaves the branch
 

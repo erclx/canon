@@ -29,3 +29,7 @@ Four notes on those routes:
 The dispatch runbook runs the same verb on the same plan to pick the branch its collision check clears, so calling it here is what makes the checked branch and the taken branch one string.
 
 A caller that supplied a task path, or supplied nothing at all, has no plan to hand the verb here, since resolving either is Step 1's work. Invoke `canon:session-worktree` bare in both cases.
+
+## After a plan-first step
+
+A `--plan-first` launch is the exception. Its step writes the plan, or finds the one the task links, before this read, so run the verb on that plan path as if the caller had passed it.
