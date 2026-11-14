@@ -133,9 +133,10 @@ export function registerDriveCopy(pr: Command): void {
         '  bad-config       preview.json does not parse, lacks a writes list, or',
         '                   names a seed that is not a list opening on a command',
         '  unsafe-path      a writes path is absolute or climbs with `..`',
-        '  seed-failed      the seed exited non-zero or ran past its limit, with',
-        '                   `seed` carrying `exit`, `timedOut`, and the last 20',
-        '                   lines of `stderr`',
+        '  seed-failed      the seed exited non-zero, ran past its limit, or never',
+        '                   started, with `seed` carrying `ran`, `exit`,',
+        '                   `timedOut`, the last 20 lines of `stderr`, and',
+        '                   `error` naming why a seed that never started failed',
         '  seed-wrote-worktree',
         "                   the seed changed the worktree's git status, with the",
         '                   paths in `paths`',
@@ -362,22 +363,21 @@ async function runDriveCopy(
       }
       if (run.kind === 'failed') {
         for (const line of run.stderr) logWarn(line)
-        return refuseWith(
-          'seed-failed',
-          run.timedOut
-            ? `The seed ran past ${SEED_TIMEOUT_MS / 1000} seconds and was stopped, so the copy holds no seeded state.`
-            : DRIVE_COPY_REFUSALS['seed-failed'],
-          emitJson,
-          root,
-          {
-            seed: {
-              ran: true,
-              exit: run.exit,
-              timedOut: run.timedOut,
-              stderr: run.stderr,
-            },
+        const message =
+          run.error !== undefined
+            ? `The seed command could not start: ${run.error}`
+            : run.timedOut
+              ? `The seed ran past ${SEED_TIMEOUT_MS / 1000} seconds and was stopped, so the copy holds no seeded state.`
+              : DRIVE_COPY_REFUSALS['seed-failed']
+        return refuseWith('seed-failed', message, emitJson, root, {
+          seed: {
+            ran: run.error === undefined,
+            exit: run.exit,
+            timedOut: run.timedOut,
+            stderr: run.stderr,
+            ...(run.error === undefined ? {} : { error: run.error }),
           },
-        )
+        })
       }
       logInfo(`Seeded with ${seed.join(' ')}.`)
       copy = { ...copy, seed: { ran: true, exit: run.exit } }

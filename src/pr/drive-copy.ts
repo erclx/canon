@@ -267,6 +267,8 @@ export type SeedRun =
       readonly exit: number | null
       readonly timedOut: boolean
       readonly stderr: readonly string[]
+      /** Why the seed never started, such as a command not on `PATH`. */
+      readonly error?: string
     }
 
 /**
@@ -317,5 +319,8 @@ export async function runSeed(
     exit: result.exitCode ?? null,
     timedOut,
     stderr: stderr.slice(-SEED_STDERR_LINES),
+    ...(result.exitCode === undefined && result.signal === undefined
+      ? { error: result.originalMessage ?? result.shortMessage }
+      : {}),
   }
 }

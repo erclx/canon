@@ -399,7 +399,23 @@ describe('runSeed', () => {
       'BOARD_ROOT',
     )
 
-    expect(run).toMatchObject({ kind: 'failed', timedOut: false })
+    expect(run).toMatchObject({
+      kind: 'failed',
+      exit: null,
+      timedOut: false,
+      error: expect.stringContaining('canon-no-such-seed-command'),
+    })
+  })
+
+  it('should carry no error on a seed that started and exited non-zero', async () => {
+    const run = await runSeed(
+      worktree,
+      copyRoot,
+      [process.execPath, '-e', 'process.exit(1)'],
+      'BOARD_ROOT',
+    )
+
+    expect(run).not.toHaveProperty('error')
   })
 })
 

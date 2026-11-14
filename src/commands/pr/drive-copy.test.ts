@@ -188,6 +188,28 @@ describe('canon pr drive-copy', () => {
       })
     })
 
+    it('should refuse as seed-failed with the cause and ran false when the seed command does not exist', async () => {
+      writeRepoFile(
+        'canon/config/preview.json',
+        '{"writes":["board"],"seed":["canon-no-such-seed-command"]}',
+      )
+
+      const outcome = await runDriveCopy(['7'])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({
+          reason: 'seed-failed',
+          message: expect.stringContaining('could not start'),
+          seed: expect.objectContaining({
+            ran: false,
+            exit: null,
+            error: expect.stringContaining('canon-no-such-seed-command'),
+          }),
+        }),
+        exit: 1,
+      })
+    })
+
     it('should refuse as seed-wrote-worktree, naming the path, when the seed edits a tracked file', async () => {
       writeSeed("require('fs').writeFileSync('board/frames.json', '{}')")
 
