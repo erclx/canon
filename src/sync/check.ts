@@ -323,18 +323,11 @@ function resolveCore(
 
 /**
  * Whether the target is a toolkit-managed project at all. Seeds are enumerated
- * from the source rather than from what a target installed, so without this gate
- * a directory the toolkit has never touched reports every seed as `missing` and
- * routes to a skill that reconciles section by section. `installedStampDomains`
- * gates the three scanned domains the same way, which is why they stay quiet on
- * the same directory.
- *
- * An unmigrated domain counts as a marker in its own right. `detectUnmigrated`
- * fires only on root files whose basename the toolkit ships, so it firing proves
- * the toolkit installed here before the layout moved under `.claude/`. Reading
- * only the markers would report such a target as unmanaged while the same report
- * carried its unmigrated domain, and a consumer reading the JSON would route to
- * the relocation while the rendered half routed to install.
+ * from the source, so without this gate an untouched directory reports every
+ * seed as `missing`. An unmigrated domain counts as a marker, since
+ * `detectUnmigrated` fires only on root files the toolkit ships, proving an
+ * install before the layout moved under `.claude/`. Reading markers alone would
+ * route the JSON and the rendered half of one report differently.
  */
 export function isManagedTarget(
   target: string,
@@ -364,34 +357,13 @@ export function countStates(entries: readonly ScanEntry[]): StateCounts {
 
 /**
  * Whether the target has diverged from the toolkit in a way a sync could close.
- * Orphaned files are excluded: a project-authored rule never converges, and
- * counting it would leave `--exit-code` failing forever with no remedy.
  *
- * An unmigrated domain counts, because running the relocation closes it. A
- * superseded artifact does not, for the same reason orphaned files do not: only
- * the user can move content they wrote, so failing a job on it leaves the job
- * red with no mechanical remedy. Seeds are excluded on the same grounds, since
- * every seed a project edits would otherwise fail the check forever.
- *
- * Tooling is excluded on exactly the seeds grounds: a golden config is one the
- * project is expected to edit, so a job counting it stays red with no remedy.
- * Being unmeasured is not what excludes it, since an unmeasured report carries
- * zero changes and would pass a count either way.
- *
- * The reverse report is excluded because every entry in it is a judgment about
- * a file the project may own. `detectUnmigrated` already shipped that exact
- * false positive once, failing a push with no action that cleared it, and a
- * walk that reports `unattributed` by design would repeat it.
- *
- * `missing` is excluded on the same grounds `newRules` already reports on: a
- * sync that adds a rule silently changes what a project is governed by, and
- * nobody chose that, so gating CI on the count would pressure a target into
- * adopting a rule nobody picked.
- *
- * `retired` counts, since a sync deletes it mechanically. A target's CI goes
- * red the day a release retires a rule it holds, and one sync clears it.
- * `renamed` counts on the same grounds, since the sync that moves it is
- * equally mechanical.
+ * Only mechanical remedies count: an unmigrated domain, a `retired` rule a
+ * sync deletes, and a `renamed` one a sync moves. Orphaned files, superseded
+ * artifacts, seeds, tooling configs, and the reverse report are excluded,
+ * since each is content the project may own and a job counting it stays red
+ * with no remedy. `missing` is excluded too, since gating CI on it would press
+ * a target into adopting a rule nobody picked.
  */
 export function hasDrift(report: CheckReport): boolean {
   if (report.unmigrated.length > 0) return true
@@ -531,14 +503,10 @@ export function parseNewSkills(paths: string): string[] {
  * What the target's `.claude/rules/` proves about its entitlement. `held` is
  * every rule name it carries and `folders` every rule folder those names sit in.
  *
- * Read off the installed tree rather than off a stack name, because
- * `gov install` records file hashes and never the stack it resolved, so the
- * chain a target consumed survives nowhere else. `installRules` copies each
- * rule into the subdirectory it was authored in, which is what makes the folder
- * folders legible as evidence.
- *
- * `successorOf` adds the name a held rule was renamed to, which the next sync
- * installs, so the fallback does not report it as new.
+ * Read off the installed tree, since `gov install` records file hashes and
+ * never the stack it resolved, and `installRules` keeps each rule in its
+ * authored subdirectory. `successorOf` adds a held rule's new name, which the
+ * next sync installs, so the fallback does not report it as new.
  */
 export function readInstalledRules(
   target: string,
@@ -574,19 +542,11 @@ export function readInstalledRules(
  * Narrows rules added upstream to the ones this target could receive and does
  * not already hold.
  *
- * The folder test is the entitlement filter, and `folders` carries two sources: the
- * folders the target already holds, and the folders holding a rule the base
- * stack resolves to.
- * A rule authored under `lang/` or `ui/` is named by an individual stack, so it
- * belongs to some targets and not others, and listing every added file would
- * tell a base consumer about rules it was never entitled to. The test
- * over-reports inside a folder a target already carries, since one folder can be
- * reached by more than one stack, and that costs a line where under-reporting
- * would cost the whole point of the section.
- *
- * The `held` test is what keeps a rule that moved folders upstream out. A rename
- * reaches this diff as an addition, and the target already has the file under
- * its old folder, so matching by name is what tells the two apart.
+ * The folder test is the entitlement filter, over the folders the target holds
+ * and those base reaches, since a rule under `lang/` or `ui/` belongs only to
+ * the stacks naming it. It over-reports inside a shared folder, which costs a
+ * line where under-reporting would defeat the section. The `held` test keeps a
+ * rule that moved folders out, since a rename reaches this diff as an addition.
  */
 export function selectNewRules(
   paths: string,
@@ -615,20 +575,12 @@ export function selectNewRules(
 }
 
 /**
- * Rule folders holding a rule the base stack resolves to. Every governance
- * stack extends base, so a new rule authored beside one of base's rules is
- * reported to every target the fallback below reads.
- *
- * This is what covers a folder no target can carry yet. Entitlement is otherwise
- * read off folders the target already holds, and a folder base reaches later
- * exists in no installed tree, so without this the rules inside it would reach
- * nobody. Read through `resolveRules` rather than off the stack's entries,
- * since base names its rules one by one and an entry is a slug rather than a
- * folder.
- *
- * A folder only a leaf stack reaches is deliberately absent. It is entitled to
- * some targets and not others, which is the distinction the folder test makes and
- * the installed tree is the only evidence of.
+ * Rule folders holding a rule the base stack resolves to. Every stack extends
+ * base, so a new rule beside one of base's reaches every target the fallback
+ * reads, including a folder no installed tree carries yet. Read through
+ * `resolveRules`, since base names rules one by one by slug. A folder only a
+ * leaf stack reaches stays absent, since the installed tree is the only
+ * evidence of that entitlement.
  */
 export function baseFolders(root: string): Set<string> {
   const resolution = resolveRules(root, 'base')
@@ -642,37 +594,15 @@ export function baseFolders(root: string): Set<string> {
 }
 
 /**
- * A recorded chain answers this without the anchor at all: `resolveMissingRules`
- * compares the entitled set against what the target holds right now, so a rule
- * that shipped before the target's anchor is not a permanent blind spot the
- * way the diff below leaves it. This is the primary path, and it is also what
- * `collectMissing` reports per file through the domain scan, so a rule the
- * chain names and the target lacks reaches both surfaces the same way.
+ * Rules the target is entitled to and lacks. A recorded chain answers this
+ * through `resolveMissingRules`, comparing the entitled set against what the
+ * target holds, as `collectMissing` does per file.
  *
- * The diff-and-folder path stays as the fallback for a target stamped before
- * governance recorded a chain. Rules are domain-scoped there too, so it
- * measures from governance's own anchor rather than from the oldest anchor
- * across domains the way `readNewSkills` does. A shared anchor would let
- * another domain's sync move the revision rules are measured from and drop a
- * rule out of the read.
- *
- * A target carrying no chain and no governance anchor reports nothing. It has
- * no date to measure against, and diffing from the beginning of history would
- * read every rule the toolkit ships as new.
- *
- * An anchor this clone cannot resolve reports nothing by a different route and
- * says so nowhere. `read` yields an empty string on a non-zero exit, so a stamp
- * naming a revision a registry install or a shallow clone has never seen reads
- * as a target holding everything. `readNewSkills` carries the same gap, and
- * neither has the `historyUnavailable` flag the per-domain scan uses to tell an
- * unmeasured result from a clean one.
- *
- * A recorded chain naming a stack the toolkit no longer ships falls through to
- * the folder-based path below rather than reporting the empty list an
- * unresolved chain would otherwise produce. That empty list reads exactly
- * like a target holding everything, which is the same failure this function
- * exists to close, so a retired stack name is read the same as no chain at
- * all instead of reintroducing it.
+ * A target stamped before chains were recorded, or naming a retired stack,
+ * falls back to a diff from governance's own anchor rather than a shared one,
+ * so another domain's sync cannot move it. With no chain and no anchor it
+ * reports nothing. An anchor this clone cannot resolve also reads empty and
+ * says so nowhere, the gap `readNewSkills` shares.
  */
 export async function readNewRules(
   root: string,

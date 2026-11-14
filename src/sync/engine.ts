@@ -62,23 +62,13 @@ export type SyncChange =
 /**
  * How an installed file compares to its toolkit source, and when it differs,
  * who moved it. `stale` and `customized` need the stamp to tell apart, so
- * `drifted` stays the verdict for a difference no stamp covers.
+ * `drifted` is the verdict for a difference no stamp covers.
  *
- * `orphaned`, `retired`, and `stranded` all mean the walk found no source, and
- * they are separate because they need different treatment. A project-authored
- * file is orphaned and stays that way forever. A file under a root the toolkit
- * owns outright is retired, since only the toolkit ever wrote there, and a
- * sync deletes it. A stamped file the toolkit no longer installs to is
- * stranded, which is a relocation waiting on a decision.
- *
- * `renamed` is the fourth sourceless state and the only one that installs.
- * It is a retired file whose rule the adapter declares still ships under a
- * new name, so the sync deletes the old file and copies the rule to the new
- * one.
- *
- * `missing` is the one state the walk cannot produce on its own, since the
- * walk only iterates files that exist. It comes from `collectMissing`
- * instead, an adapter naming an entitled file the target does not hold.
+ * With no source, a project-authored file is `orphaned` forever, one under a
+ * root the toolkit owns is `retired` and deleted, and a stamped file the
+ * toolkit no longer installs to is `stranded`. `renamed` is a retired file
+ * whose rule still ships under a new name, so the sync moves it. `missing`
+ * comes from `collectMissing`, since the walk only sees files that exist.
  */
 export type EntryState =
   | 'matching'
@@ -673,24 +663,12 @@ function isProjectAuthored(adapter: SyncAdapter, file: InstalledFile): boolean {
 
 /**
  * An orphan the name inference caught rather than the location test. No source
- * name matched, which is what a project-authored file looks like and also what
- * a file the toolkit shipped and later renamed looks like, so the line offers
- * the destination on a condition rather than asserting who wrote the file.
- * Moving a toolkit leftover into the project subfolder would mark it the
- * project's permanently, and only the operator can tell the two apart.
- *
- * The stamp cannot tell them apart either. `recordStamp` skips a file whose
- * source is gone and `writeStamp` replaces the domain's whole `files` map, so
- * a renamed rule's entry survives exactly one sync past the rename, and a
- * target installed before stamping shipped has no entry to read at all.
- *
- * Naming the destination is all this does. Moving the file rewrites a path the
- * project's own rules, skills, and docs may cite, so the sync leaves it where
- * it is.
- *
- * An adapter declaring `ownsInstalledRoot` never reaches this, since owning
- * the root answers the question neither the name nor the stamp can, and its
- * sourceless file is retired instead.
+ * name matched, which fits a project-authored file and a renamed toolkit file
+ * alike, and the stamp cannot tell them apart either, since a renamed entry
+ * survives one sync. So the line offers the destination on a condition and the
+ * sync never moves the file, since moving it rewrites paths the project cites
+ * and marks a toolkit leftover as the project's. An adapter declaring
+ * `ownsInstalledRoot` never reaches this, since its sourceless file is retired.
  */
 function misplacedOrphan(
   adapter: SyncAdapter,
