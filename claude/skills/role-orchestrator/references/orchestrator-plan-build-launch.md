@@ -8,7 +8,7 @@ description: The launch that hands a small row to one session that writes its pl
 A row that reads small goes to one session that plans and builds it, rather than a planner and then a cold worker re-reading the same files. `auto-ship --plan-first` writes and links the plan before its first edit, and review stays a separate session.
 
 ```bash
-claude --bg --model <model> --effort <effort> -n "worker-<project>-<slug>" "/canon:auto-ship --plan-first <task>
+claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion -n "worker-<project>-<slug>" "/canon:auto-ship --plan-first <task>
 Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the plan lands, carrying its path, and when the pull request opens, carrying the number, the branch, the head sha, the CI state, and every point you departed from the plan on, and message it again if you stop on a question."
 ```
 
