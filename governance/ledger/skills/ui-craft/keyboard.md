@@ -67,8 +67,8 @@ Every bullet the split removed or reshaped, grouped by why.
 
 ### Contradicted by the sources
 
-- Declined "a range input rings on a click", reported in issue #3070. [WPT focus-visible-003](https://github.com/web-platform-tests/wpt/blob/master/css/selectors/focus-visible-003.html) says `:focus-visible` is "not triggered by mouse focus on input elements which do not take text input".
-- Declined "a script focus always rings after a click", from the same issue. [Selectors 4](https://drafts.csswg.org/selectors-4/#the-focus-visible-pseudo) suggests "if the previously-focused element did not indicate focus... don't indicate focus".
+- Declined "a range input rings on a click", a claim from a field report. [WPT focus-visible-003](https://github.com/web-platform-tests/wpt/blob/master/css/selectors/focus-visible-003.html) says `:focus-visible` is "not triggered by mouse focus on input elements which do not take text input".
+- Declined "a script focus always rings after a click", from the same report. [Selectors 4](https://drafts.csswg.org/selectors-4/#the-focus-visible-pseudo) suggests "if the previously-focused element did not indicate focus... don't indicate focus".
 - Framed engine behavior as "may" in the held-key bullet, since [Selectors 4](https://drafts.csswg.org/selectors-4/#the-focus-visible-pseudo) says "User agents can choose their own heuristics for when to indicate focus".
 
 ### Cut without a source or a bug class
