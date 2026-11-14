@@ -518,42 +518,16 @@ export function evidenceMarker(head: string): string {
 }
 
 /**
- * Renders the whole comment body: one `<details>` block per view within each
- * state, a flat block for the case names that do not split into a view, and
- * the trailing marker naming the head this body describes. Each case shows its
- * head at the comment's width with its base folded beneath, since a table
- * split the column between the two and shrank both to a quarter of their size.
- * Every state opens while the comment carries at most `EVIDENCE_OPEN_LIMIT`
- * head images, and every state closes past it, so a comment is never half
- * open. A folded base takes no room until opened, so it is not counted. A case
- * whose pixels matched its base moves to one closed `Within tolerance` block
- * after the states, still named and embedded, and is not counted either. A visible line under
- * `## Evidence` names the base and head as short shas, each linking its commit. Every image URL is
- * pinned to a commit sha rather than a branch, so the comment keeps showing
- * what it claimed even after the branch moves.
+ * Renders the whole comment body in order: `## Evidence`, the address line,
+ * the skip, reel, and uncaptured lines, then with any states the base and head
+ * line, the moved count, one `<details>` block per view within each state plus
+ * a flat block, `Within tolerance`, and last the checklist and head marker.
  *
- * The body opens with `## Evidence` and, under it, one address line joining
- * whichever of the hosted and local previews apply, so the comment reads as
- * evidence first and a preview never stands where the heading should. With no
- * states the heading and the address are the whole body apart from the
- * marker, so a pull request whose screenshots did not change still gets one
- * comment a later call can find and edit in place.
- *
- * A checklist closes the body, below the comparison it annotates, so one
- * comment carries the addresses, the screenshots, and what to look at.
- *
- * A reel sits on its own line under the addresses, labeled with the head it
- * was filmed at, so a reel carried past a later push never reads as current.
- *
- * A skip names why the local address or the reel is missing, on its own line
- * where that address or reel would sit. The local skip is dropped whenever
- * its address renders, carried or passed. The reel skip is dropped only by a
- * reel filmed at the head, so a skip decided at a later head still reaches
- * the lift beside a reel carried from an earlier one.
- *
- * The uncaptured line names each painted path changed with no capture, under
- * the reel, and is computed fresh on every render rather than carried, so it
- * drops on the first render after a capture or a reel at the head lands.
+ * Every state opens while the head images stay within `EVIDENCE_OPEN_LIMIT`
+ * and closes past it, so a comment is never half open. Image URLs pin to a
+ * commit sha, so the comment keeps what it claimed after the branch moves. A
+ * reel skip drops only for a reel filmed at the head, and the uncaptured line
+ * is computed fresh on every render rather than carried.
  */
 export function renderEvidenceBody(
   states: readonly EvidenceState[],

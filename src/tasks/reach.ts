@@ -136,21 +136,10 @@ function namesFile(span: string): boolean {
  * Reads the paths a plan declares out of its `**Files to touch:**` section.
  *
  * A declaration is a backticked span standing as an entry's subject, ahead of
- * the colon opening its reason. Reading every span in the entry was the
- * alternative and it reports a pair that was never going to collide, since the
- * standard invites an entry to explain itself and an explanation names other
- * files: one archived plan cites `src/gate/measures.ts` inside a reason whose
- * subject is a sandbox arm, and never wrote it. Measured over the 2026-09-08
- * wave, the subject rule reports 6 crossing pairs against 14 for every span.
- *
- * An entry carrying no colon at all is taken whole. The standard requires a
- * reason rather than the punctuation introducing it, so the alternative is
- * reading such an entry as declaring nothing, which reports every path it
- * names as undeclared. `claude/skills/plan-feature/references/plan.md` fixes the colon form, so the
- * conforming entry never reaches this fallback.
- *
- * A rename declares both sides, since both are paths the branch writes and
- * both sit ahead of the colon.
+ * the colon opening its reason, since a reason names other files the branch
+ * never writes and reading every span reports collisions that never happen.
+ * An entry with no colon is taken whole rather than read as declaring nothing.
+ * A rename declares both sides, since both sit ahead of the colon.
  */
 export function readDeclarations(text: string): string[] {
   const section = splitPlanSections(text).get('Files to touch') ?? []
@@ -293,24 +282,11 @@ function holdersOf(
  * Reads a branch back against what was written down about it: the paths its own
  * plan declared, and the paths every other live plan or dispatch row holds.
  *
- * It reports and never gates, the way `canon gov test-order` does, and it
- * writes nothing. A `Touches` cell is the controller's to correct and a plan's
- * list is a prediction the branch outgrows, so a verb that repaired either
- * would be answering a question the reader has not been shown yet.
- *
- * What it reads is what is written down, so it inherits the dispatch runbook's
- * own blindness. A hand-launched track carries no row and a track with no plan
- * carries no declaration, which is why the report names how many plans and rows
- * it compared against rather than reporting clear and letting that read as a
- * proof.
- *
- * The live folder is trusted rather than tested, which cuts the other way: a
- * plan whose work merged keeps claiming its files until something archives it,
- * and `canon tasks archive` only runs on merge, so a stranded plan reports a
- * collision against every branch after it. The first run of this verb reported
- * five such paths and every one was a file nobody archived. Testing a holder for
- * liveness would put a second reading of what is in flight here, beside the
- * dispatch gate's own, so the report names the holder and the reader decides.
+ * It reports and never gates, and writes nothing, since a `Touches` cell is the
+ * controller's to correct and a plan's list is a prediction. A track with no
+ * row or plan is invisible, so the report names how many it compared against.
+ * The live folder is trusted, so a merged plan nobody archived still claims its
+ * files, and the report names the holder for the reader to judge.
  */
 export async function planReach(
   root: string,

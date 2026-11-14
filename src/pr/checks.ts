@@ -156,31 +156,13 @@ function newestPerCheck(runs: readonly RawCheckRun[]): {
 /**
  * Collapses a check-run listing to one word about one commit.
  *
- * Keying the query on a sha is necessary and not sufficient. The endpoint
- * returned `total_count` 2 with an empty row list during a measured window on
- * 2026-09-02, so a reader that finds no run for the tip and reports `passing`
- * reproduces the false green behind a better query. Both that case and a
- * listing carrying a run for another commit report `pending` instead.
- *
- * The foreign test runs ahead of the collapse rather than after it. A listing
- * that describes another commit says nothing about this one, so answering off
- * the matching half would report a verdict on a set known to be incomplete.
- *
- * The matched set can still repeat a check name, since a re-triggered gate
- * creates a second run rather than replacing the first. The final state
- * rolls up from `newestPerCheck`'s kept rows rather than from `matched`
- * directly, so a stale failing run left behind by a rerun no longer outvotes
- * the passing run beside it.
- *
- * A required set narrows only that last rollup. The foreign and partial
- * listing guards still read every run, since either says the set in hand is
- * incomplete whichever checks gate.
- *
- * A ruleset can require a commit status, which the check-run listing never
- * carries, so the statuses join the rollup by `context` once a non-empty
- * required set was read. An unread or empty set keeps them out, since the
- * every-check fallback is the reading these verbs gave before rules were read
- * and it saw no status.
+ * Keying on a sha is not sufficient, since the endpoint can report a count
+ * with an empty row list, so no run for the tip and a run for another commit
+ * both read `pending` rather than a false `passing`. The foreign test runs
+ * ahead of the collapse, and the rollup reads `newestPerCheck`'s kept rows so a
+ * stale failing run left by a rerun never outvotes the passing one. A required
+ * set narrows only that rollup, and commit statuses join it by `context` only
+ * once a non-empty required set was read.
  */
 export function collapseChecks(
   tip: string,
@@ -202,10 +184,8 @@ export function collapseChecks(
 
   if (reading.foreign > 0) return { ...reading, state: 'pending' }
 
-  // A count above the rows returned is a listing this reader holds only part
-  // of, whether the endpoint paged or answered inconsistently. Collapsing the
-  // part in hand would report `passing` off a set a failing run can still be
-  // sitting outside of, which is the false green keyed on a sha alone.
+  // A count above the rows returned is a partial listing, and collapsing it
+  // could report `passing` while a failing run sits outside the part in hand.
   if (reading.reported > runs.length) return { ...reading, state: 'pending' }
 
   const statusRows: RawCheck[] =

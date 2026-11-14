@@ -93,23 +93,13 @@ export type ResolveOutcome = PlanResolved | AnswersRefused
 /**
  * The spellings a caller reaches a plan by, in the order they are tried. A bare
  * slug names the live folder outright, and a path is resolved against the
- * project root and against the board directory both.
+ * project root first and then the board directory, since a board link reads
+ * `../plans/feature-<slug>.md` relative to `.canon/tasks/`.
  *
- * The second base is the one a dispatcher actually has to hand. A board row
- * writes its `Plan:` link relative to `.canon/tasks/`, so the href reads
- * `../plans/feature-<slug>.md`, and resolving that against the root alone lands
- * a directory above the repository and refuses a plan that exists.
- *
- * `resolveLivePlan` reads a task's own line against the same two bases and is
- * not this function. It tries the board first and tests containment under the
- * live plans folder, where this tries the root first and tests nothing, so the
- * two agree on the spellings a board writes and part company outside them.
- * Sharing the bases is what makes a board link resolve for both, and the
- * archive exclusion in `planAnswers` is stated separately for that reason.
- *
- * Root order is what keeps the documented forms unchanged. A reference that
- * resolves from the root is taken there, and the board base is reached only by
- * a path the root could not answer.
+ * `resolveLivePlan` shares the two bases but tries the board first and tests
+ * containment under the live folder, so the two agree on what a board writes
+ * and differ outside it. The archive exclusion in `planAnswers` is stated
+ * separately for that reason.
  */
 export function planCandidates(root: string, reference: string): string[] {
   if (reference.includes('/') || reference.endsWith('.md')) {
@@ -216,12 +206,8 @@ export function resolvePlanReference(
     return refuse('no-plan', `No plan at ${looked}.`, [reference])
   }
 
-  // An archived plan answers every question and would report as launchable, so
-  // the name would clear a dispatch that `auto-ship` Step 1 then refuses
-  // as already-shipped work. Catching it here is a step earlier than the worker.
-  // Both roots, for the reason `resolveLivePlan` carries: the reference is a
-  // string a caller wrote, and one spelling the root this tree has since left is
-  // still a path into the archive.
+  // An archived plan answers every question and would clear a dispatch that
+  // `auto-ship` then refuses, so it is refused here, under both record roots.
   if (recordDirs(root, PLANS, ARCHIVE).some((dir) => isUnder(path, dir))) {
     return refuse(
       'archived',
