@@ -284,22 +284,38 @@ export async function runSeed(
   timeoutMs: number = SEED_TIMEOUT_MS,
 ): Promise<SeedRun> {
   const [command = '', ...args] = seed
-  const result = await execa(command, args, {
+  // The seed leads its own process group, and the limit kills the group. A
+  // seed run through `sh -c` or a package script does its work in a
+  // grandchild, which execa's own `timeout` never signals, and which would
+  // hold the stderr pipe open past the limit.
+  const subprocess = execa(command, args, {
     cwd: worktree,
     env: { [env]: copyRoot },
     stdin: 'ignore',
     stdout: 2,
     stderr: ['pipe', 'inherit'],
-    timeout: timeoutMs,
+    detached: true,
     reject: false,
   })
-  if (result.exitCode === 0 && !result.timedOut) return { kind: 'ran', exit: 0 }
+  let timedOut = false
+  const timer = setTimeout(() => {
+    timedOut = true
+    if (subprocess.pid === undefined) return
+    try {
+      process.kill(-subprocess.pid, 'SIGKILL')
+    } catch {
+      // The group already exited between the limit and the signal.
+    }
+  }, timeoutMs)
+  const result = await subprocess
+  clearTimeout(timer)
+  if (result.exitCode === 0 && !timedOut) return { kind: 'ran', exit: 0 }
   const stderr = (result.stderr ?? '').split('\n')
   while (stderr.length > 0 && stderr.at(-1)?.trim() === '') stderr.pop()
   return {
     kind: 'failed',
     exit: result.exitCode ?? null,
-    timedOut: result.timedOut,
+    timedOut,
     stderr: stderr.slice(-SEED_STDERR_LINES),
   }
 }

@@ -376,6 +376,21 @@ describe('runSeed', () => {
     expect(run).toMatchObject({ kind: 'failed', timedOut: true })
   })
 
+  it('should stop a seed whose work runs in a grandchild at the limit', async () => {
+    const started = Date.now()
+
+    const run = await runSeed(
+      worktree,
+      copyRoot,
+      ['sh', '-c', 'sleep 10; true'],
+      'BOARD_ROOT',
+      200,
+    )
+
+    expect(run).toMatchObject({ kind: 'failed', timedOut: true })
+    expect(Date.now() - started).toBeLessThan(5000)
+  })
+
   it('should report a seed whose command does not exist as failed', async () => {
     const run = await runSeed(
       worktree,
