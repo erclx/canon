@@ -9,15 +9,22 @@ Applies to step 9 of `git-ship` once the watch wakes on anything but a `state` o
 
 ## The fallback watch
 
-When `canon pr checks <number> --json` returns no record at all, the target's CLI predates the verb, and the watch command is `gh pr checks <number> --watch`. The polling loop would never exit on such a target, since an empty read never satisfies its test.
+When `canon pr checks <number> --json` returns no record at all, the target's CLI predates the verb. The polling loop would never exit on such a target, since an empty read never satisfies its test. Start this loop instead, with `run_in_background` and the same 65-minute timeout:
 
-The fallback prints a check table rather than a record, and has no `conflicted` field to separate a conflict from lag.
+```bash
+SECONDS=0; until gh pr checks <number> >/dev/null 2>&1; [ $? -ne 8 ]; do if [ "$SECONDS" -ge 3600 ]; then echo "CI watch limit reached after 60 minutes"; break; fi; sleep 30; done; gh pr checks <number>
+```
 
-| Output                                | Route                                     |
-| ------------------------------------- | ----------------------------------------- |
-| At least one check, every one passing | Continue to After completion              |
-| Any failing check                     | Stop the sequence, naming it with its URL |
-| Empty or errored                      | Stop the sequence and report the message  |
+It polls while `gh pr checks` exits 8, which gh documents as checks pending, and ends on any other exit or at the 60-minute limit. `gh pr checks --watch` never ends on its own either, so the fallback carries the main loop's limit for the reason the body's `### Why the loop carries its own limit` states.
+
+The fallback prints a check table rather than a record, and has no `conflicted` field to separate a conflict from lag. The first matching row routes.
+
+| Output                                | Route                                                    |
+| ------------------------------------- | -------------------------------------------------------- |
+| At least one check, every one passing | Continue to After completion                             |
+| Any failing check                     | Stop the sequence, naming it with its URL                |
+| The limit line, or a backstop kill    | Stop on the unsettled read below, reporting CI unsettled |
+| Empty or errored                      | Stop the sequence and report the message                 |
 
 Empty output stops rather than waits, since `no checks reported on the '<branch>' branch` is what a conflicted branch prints.
 
@@ -38,7 +45,7 @@ The set lives in the watch command rather than in the verb, so a refusal `canon 
 
 ### The unsettled read
 
-A watch that printed `CI watch limit reached after 60 minutes` ran to its own limit with no terminal state. Stop and report CI unsettled after 60 minutes, naming the final record's `state` or `reason`, since a `pending` record or a transient refusal that never cleared both end here.
+A watch that printed `CI watch limit reached after 60 minutes` ran to its own limit with no terminal state. Stop and report CI unsettled after 60 minutes, naming the final record's `state` or `reason`, or the pending checks a fallback table lists, since a `pending` record or a transient refusal that never cleared both end here.
 
 - A `pending` record is never a pass and never enters the cancelled-run rerun below
 - A watch the tool's backstop killed prints no final record, which reads as CI unsettled the same way
