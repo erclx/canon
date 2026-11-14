@@ -14,7 +14,10 @@ Resume as orchestrator after a compaction. Read the board and the groundwork beh
    - `README.md` for the file map, then `06-decision.md` when the track is closed, or `99-next-session.md` when present and the topic files when open
    - A task's Findings section is a lossy summary, so planning against it re-derives what the folder already settled
 5. Run `gh pr list --state open` and `git log --oneline -5` to see what shipped since the folder was written.
-6. Report in this shape and stop:
+6. Read `### Acts and their runbooks` in `${CLAUDE_SKILL_DIR}/SKILL.md`, then `orchestrator-filing.md` in full.
+   - The summary keeps which act comes next and drops which runbook governs it, so the first act after this report reads the runbook rather than recall
+   - The table names the rest, which load on their triggers
+7. Report in this shape and stop:
 
 ```plaintext
 Read: <task files>, <groundwork folders>
