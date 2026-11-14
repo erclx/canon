@@ -22,7 +22,7 @@ Judge the row from its task file, since no plan exists yet. A fix naming one or 
 
 None of the three checks in `orchestrator-dispatch.md` can run at launch, since each reads a plan.
 
-- The plan-answer gate has no plan, and a plan passing the Small test carries no question
-- The branch check runs in the session on the plan it wrote, which stops on a claim
+- The plan-answer gate runs in the session under `--any-size`, and a plan passing the Small test carries no question for it to hold
+- The branch check runs in the session on the plan it wrote, which stops on a claim or an unverified reading
 - The conflict check runs on the announced plan, since its file list is the first this session can compare. Message the session to stop on a hold.
 - Promote the row with `canon tasks promote` when the plan announcement arrives, not at launch, since the session's link moves it to `## Up next` first

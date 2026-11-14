@@ -13,7 +13,7 @@ A pull request opened ready stays mergeable through its CI run, and a draft mark
 
 ## Must
 
-- The approved plan is the scope, written and linked before any tracked edit when `--plan-first` asks, built in tested slices through `build-in-slices`, and every stop names its recovery
+- The plan is the scope, written and linked before any tracked edit under `--plan-first`, built through `build-in-slices`, and every stop leaves the code on the branch and names its recovery
 - `git-ship` runs the ship sequence, the pull request opens as a draft, and a fallback mark before the CI watch repairs a ready one after proving its head is this branch and its state is open
 - A test-order finding between verify and ship is reported without gating, and a produced UI checklist is reported in the closing block without stopping
 - A fan-in member stops after verify with a push and a done message, and an integrator opens its build by merging the member branches
