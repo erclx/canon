@@ -16,7 +16,7 @@ A track fanning out to subagents returns findings without their reasoning. Under
 - Detect open, resume, and close from the folder itself, matching the topic against existing tracks first, and number a new folder past the highest ordinal across groundwork and intake
 - Measure the current state now, carry a lean and the finding that would overturn it on every open question, link every outside claim, and end a pass with every question leaned on a plain retell
 - Confine writes to the track folder, the fixture, the intake routing, and a close-time task file, whose row `task-board` places only when the launch named neither a task nor a controller
-- Hand a named controller the conclusion instead of a task file, route a finding it leaves out through `plan-intake`, and name the route that ran in the close report
+- Route a finding the conclusion leaves out through `plan-intake` in the same session on every route, hand a named controller the conclusion instead of a task file, and name the route in the report
 - Put a fixture a headless run is pointed at outside the repository, and write the next-session file self-contained
 
 ## Must not

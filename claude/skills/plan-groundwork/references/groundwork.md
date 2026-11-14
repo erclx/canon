@@ -90,7 +90,7 @@ A folder missing `06` and `07` is live, and that is its only status marker.
 
 Orients and holds no findings. It states the phase out loud in its first three lines, in the form `Groundwork phase. Nothing here is a feature plan.`
 
-- A one-line definition, and an `## Origin` line per task, controller, or intake item the launch named
+- A one-line definition, and an `## Origin` section holding a `Task: <path>`, `Controller: <sessionId>`, or `Intake: <item>` line per item the launch named
 - A `## Why` section stating why the track is running now
 - A file-map table of filename and what it holds, kept current
 - A `## Method` section splitting internal sources from external ones, naming which were used and which were not yet done, and listing under a leads heading any external source found but not opened
