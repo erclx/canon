@@ -258,16 +258,10 @@ function stemOf(target: string): string | undefined {
 
 /**
  * Reads the file set out of a `Touches` cell written as prose. Paths are the
- * backticked spans, which is the only marker the column carries, and a span
- * naming a skill or a command rather than a file is dropped by the same test.
- *
- * An extension opens with a letter, which is what separates `commands.md` from
- * a task version like `v40.2`. Reading the version as a path would collide two
- * rows that merely cite the same task.
- *
- * A cell a board verb derived opens with its file count, and its folders say
- * where the row works rather than claiming every file under them, so it yields
- * nothing. Its reader takes the declared paths from the plans instead.
+ * backticked spans, and a span naming a skill or a command is dropped by the
+ * same test. An extension opens with a letter, which separates `commands.md`
+ * from a task version. A cell a board verb derived opens with its file count
+ * and yields nothing, since its reader takes declared paths from the plans.
  */
 export function readPaths(cell: string): string[] {
   if (DERIVED_COUNT.test(cell.trim())) return []
@@ -381,19 +375,11 @@ const ORDINAL_HERE = new RegExp(
 const LAST_AT_END = /\blast\.?\s*$/i
 
 /**
- * Reads the ordinal phrase a `Waiting on` cell states about its own position,
- * searching the whole cell for `<ordinal> here` or the bare word `last` rather
- * than anchoring to where the cell opens. The phrase sits at the end of the
- * sentence on every row that carries one, as in `nothing, cleared 2026-08-31
- * when it merged. Third here`. The two-word phrase is safe to find anywhere,
- * since it needs both a closed vocabulary word and `here` beside it, but a
- * bare `last` is one of the commonest words in English and this corpus writes
- * it constantly, as in `the last of the two instruments this rename needs`.
- * Anchoring it to the end of the cell is what keeps that prose out of the
- * findings, since every row that actually declares itself last puts the word
- * there and nowhere else. A cell carrying neither reads as unordered rather
- * than as an error, which keeps a legitimately-phrased row out of the
- * findings.
+ * Reads the ordinal phrase a `Waiting on` cell states about its own position.
+ * `<ordinal> here` is found anywhere, since it needs a closed vocabulary word
+ * beside `here`. A bare `last` counts only at the end of the cell, since the
+ * word is common in prose and a row declaring itself last puts it there. A cell
+ * carrying neither reads as unordered rather than as an error.
  */
 function readOrdinal(cell: string): OrdinalWord | 'last' | undefined {
   const here = ORDINAL_HERE.exec(cell)
@@ -420,20 +406,12 @@ const CLAUSE_BREAK = /(?<!\d)[.;,](?!\d)|\band\b|\bbecause\b/i
 
 /**
  * Whether a `Waiting on` cell ranks its row against something rather than
- * arguing that the row matters. The two are indistinguishable to a reader
- * scanning the board, since a reason with no other row in it reads defensible
- * on every row at once, which is how insertion order became the ordering.
+ * arguing that the row matters, which reads defensible on every row at once.
  *
- * The test is a closed verb vocabulary sitting in one clause with a positional
- * object, which mirrors `readOrdinal` bounding itself to a closed word list for
- * the same reason: a parser loose enough to grade prose reports a correctly
- * phrased row. Both halves are needed, since `closes` alone matches `it closes
- * a gap the reference gate leaves open`, which claims no position at all. The
- * clause bound is what keeps a verb in one half of the cell from pairing with
- * an object in the other.
- *
- * A cell phrased comparatively and unusually reads as unranked, which is a
- * false negative and the safe direction for a check over prose.
+ * The test is a closed verb vocabulary in one clause with a positional object,
+ * since `closes` alone matches prose claiming no position and the clause bound
+ * keeps a verb from pairing with an object in another half. An unusual
+ * comparative phrasing reads as unranked, the safe direction over prose.
  */
 function readRank(cell: string): boolean {
   return cell
@@ -570,18 +548,12 @@ export function readBoard(text: string): {
 }
 
 /**
- * Reports the two ways a `## Needs a plan` row's stated position fails. A row
- * carrying an ordinal is checked against where it actually sits, and reading
- * the sequence for gaps and duplicates on its own would detect less, since row
- * position is contiguous by construction and a hand-renumbered sequence is
- * exactly a case where the prose and the position have come apart. A row
- * carrying no position claim of either form is reported for that instead,
- * since a cell arguing only that the task matters ranks it against nothing and
- * leaves the position recording when the row was filed.
- *
- * Both are one question rather than two checks. An ordinal is already a
- * comparative claim, so it exempts the row from the second half, and the two
- * findings read off one walk over the same group.
+ * Reports the two ways a `## Needs a plan` row's stated position fails, in one
+ * walk. A row carrying an ordinal is checked against where it actually sits,
+ * since a hand-renumbered sequence is where prose and position part. A row with
+ * no position claim is reported for that, since arguing the task matters ranks
+ * it against nothing. An ordinal is already comparative, so it exempts the row
+ * from the second half.
  */
 function checkOrdering(rows: readonly BoardRow[]): Finding[] {
   const findings: Finding[] = []
@@ -1046,8 +1018,7 @@ function checkTouches(rows: readonly BoardRow[]): Finding[] {
 
   for (const row of rows.filter((candidate) => candidate.group === 'Run now')) {
     // An absent column and an unreadable one both leave the row out of every
-    // pair, so reporting only the second would pass a board whose
-    // `## Run now` table declares no file set at all.
+    // pair, so both are reported, or a board declaring no file set would pass.
     if (!row.touches || row.touches.length === 0) {
       findings.push({
         kind: 'touches-unstated',
@@ -1132,16 +1103,10 @@ function joinShared(clauses: readonly string[]): string {
 
 /**
  * Reports a `Touches` cell naming a bare folder. The claim collides with every
- * row a later session writes under that folder, and it is legitimate whenever
- * the row does rewrite the directory, so this states the reach rather than
- * calling it a defect.
- *
- * The scan takes `## Run now` alone, where `checkSharedFiles` takes it. A cell in
- * another group describes work nobody has planned, so it is written as a
- * sentence and rewritten at planning time, and a claim read off one reports on
- * prose rather than on a file set. That is the shape that teaches a reader to
- * skip the report. A parked folder claim surfaces when the row is promoted,
- * which is also when its cell becomes a set anything can act on.
+ * later row under that folder and is legitimate when the row rewrites it, so
+ * this states the reach rather than a defect. Only `## Run now` is scanned, as
+ * `checkSharedFiles` does, since another group's cell is unplanned prose and
+ * reporting on it teaches a reader to skip the report.
  */
 function checkFolderClaims(
   rows: readonly BoardRow[],
@@ -1240,16 +1205,10 @@ function checkUnplaced(
 
 /**
  * Reads the task a blocker cell cites. A task pointer is a bare sibling
- * filename, the way every `Task` column spells one, so a target carrying a
- * directory names something else and yields nothing. A row waiting on a plan
- * links that plan, and reading its stem as a task would report the row settled
- * against a folder the plan does not sit in.
- *
- * A cell can carry more than one link, such as a `Waiting on` cell naming the
- * record answering the blocker before naming the sibling task it waits on, so
- * this walks every target rather than reading only the first. It stops at the
- * first bare one rather than trying a later link when that one fails to
- * resolve to a stem.
+ * filename, so a target carrying a directory names something else, such as a
+ * plan, and yields nothing. Every link in the cell is walked, since a cell can
+ * name an answering record before the task, and the walk stops at the first
+ * bare one.
  */
 function citedStem(cell: string): string | undefined {
   const target = linkTargets(cell)
@@ -1346,30 +1305,13 @@ function nothing(): CitedResult {
 }
 
 /**
- * Reports what a cited task does to the row waiting on it. A file sitting in
- * the archive settles the row, and a live file settles it only once the work it
- * carries is on the trunk. A file carrying no outcome box settles nothing,
- * since a file the check could not parse is not evidence of a finished one.
- *
- * A citation resolving in neither folder is a broken pointer rather than a
- * closed task, and the two take different findings. Reading an absent file as
- * archived states a specific fact about a file nobody ever wrote, which is what
- * a renamed task or a typo produces.
- *
- * A closed outcome is not the same fact as landed work. The ship chain marks
- * outcomes as its first step and opens the pull request several steps later, so
- * a check reading the checkbox reports the row settled while the branch is
- * still in review. The pull request the task names is what the trunk is asked
- * about, and a task naming none leaves the row untested rather than settled,
- * because the only local signal left is the checkbox that produced the defect.
- *
- * A task still carrying a pending branch is untested whatever its recorded
- * pull request says, since a slice is in flight that has recorded no number yet
- * and the landed one may belong to an earlier slice.
- *
- * The outcome list comes off `readOutcomes` rather than a pattern of its own,
- * so this check cannot disagree with the archive and outcome verbs about which
- * checkboxes are outcomes and which sit inside a block a task displays.
+ * Reports what a cited task does to the row waiting on it. An archived file
+ * settles the row, and a live file settles it only once its pull request is on
+ * the trunk, since outcomes are ticked before the pull request opens. A task
+ * naming no pull request, or carrying a pending branch, leaves the row
+ * untested. A file with no outcome box settles nothing, and a citation in
+ * neither folder is a broken pointer rather than a closed task. Outcomes come
+ * off `readOutcomes`, so this agrees with the archive and outcome verbs.
  */
 async function checkCitedTask(
   group: BoardGroup,
@@ -1478,19 +1420,12 @@ function untestedRow(
 /**
  * Re-takes the two blocker kinds a command can settle, over every row outside
  * `## Run now`. A cited task is settled by being archived or by closing every
- * outcome, and a cited path is settled by no `## Run now` row still holding it.
+ * outcome, and a cited path by no `## Run now` row still holding it.
  *
- * Both halves gate on a citation the cell carries, never on a column beside it.
- * The board standard gives a collision cell the file held by the running task,
- * so a row whose cell names no file was parked by something else and its
- * `Touches` column says nothing about what holds it. Reading that column
- * instead reports a cleared collision on a row no collision ever parked, and
- * counts the row as re-tested, which is the more expensive half of that error.
- *
- * The cell is read for citations rather than parsed into fields, since the
- * standard fixes three forms for it and leaves it prose. A row neither half
- * reached is returned as untested, because the other three kinds are a person's
- * to judge and silence about them reads as a board with nothing stale on it.
+ * Both gate on a citation the cell carries, never the `Touches` column, which
+ * says nothing about what parked a row. The cell is read for citations rather
+ * than parsed, and a row neither half reached is returned as untested, so
+ * silence never reads as a board with nothing stale on it.
  */
 async function checkParked(
   rows: readonly BoardRow[],
@@ -1795,9 +1730,8 @@ export async function validateBoard(
     )
   }
 
-  // An absent backlog reads as empty rather than refusing. A project that has
-  // never needed the second surface keeps every task on the board, which is the
-  // one-to-one mapping this check ran before the backlog existed.
+  // An absent backlog reads as empty rather than refusing, since a project that
+  // never needed it keeps every task on the board.
   const backlogFile = backlogPath(root)
   const backlog = existsSync(backlogFile)
     ? readBacklog(await readFile(backlogFile, 'utf8'))
