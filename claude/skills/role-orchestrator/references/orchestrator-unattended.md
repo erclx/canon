@@ -52,7 +52,7 @@ Read a session's state off `canon sessions list --json` and the watch, never off
 
 ## A question from a session
 
-Every launch but a talk one denies the question tool, so a background session asks its controller in a message and ends its turn. The run answers a technical question and parks every other kind.
+Every local `claude --bg` launch but a talk one denies the question tool, so such a session asks its controller in a message and ends its turn. The run answers a technical question and parks every other kind.
 
 ### What the run answers
 
@@ -78,8 +78,10 @@ Park a question by writing it as one line in the task's `## Findings`, under the
 The loop stops on the pass that finds nothing left to move. Every test below has to hold at once.
 
 - No `## Up next` row clears the dispatch checks
-- No planner or worker is live in the roster
+- No planner is live, and no live worker is still without a pull request
 - Every open pull request is merge-ready, parked, or stopped
+
+A worker stays in the roster until its branch merges, and this run merges nothing. Count a worker done once its pull request passes the last test, so a night that opened one still ends.
 
 On that pass, stop the poll and the watch, then push one notification through whatever surface the client offers, `PushNotification` in this repository's client. Name the merge-ready and parked counts, the way `orchestrator-watch.md` pushes a stall. Then write the report below.
 

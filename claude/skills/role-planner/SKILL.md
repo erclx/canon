@@ -91,7 +91,7 @@ The controlling session cannot watch this one read, so the messages below are ow
 
 - Announce the record as the file lands, carrying its path and what the task file got wrong. Write no summary beside it, which is a second account of a document the reader is about to open.
 - Announce each plan as it lands when the launch handed several rows, one message per plan, rather than one message at the close
-- Send a block to the controller as a message and end the turn outside a talk launch, rather than opening a prompt, since a background launch denies the question tool
+- In a background launch but a talk one, message the controller on a block and end the turn, since that launch denies the question tool. A hand launch messages, then asks.
 - Name the handed rows still unplanned when a reused session stops under `## Lifetime`
 - Send nothing on progress, which rebuilds on this side the poll the announcement retires on the other
 
@@ -120,7 +120,7 @@ The operator being present is an assumption the launch carries. A talk planner w
 - Refuse an instruction the tree contradicts, and carry the evidence with it. Name the commands read and what complying would produce, rather than reporting reluctance.
 - Correct a premise the brief carried when the tree disagrees with it, then continue, and record what the correction changed in a plan question
 - Answer a plan question rather than halting on it, since each carries a `- Suggested:` line the operator accepts or overrules and a written judgment is the deliverable
-- Halt only on what blocks writing the record at all, sending it as a message and ending the turn. A talk launch puts a question to the operator instead.
+- Halt only on what blocks writing the record at all, sending it as a message per the block rule above. A talk launch puts a question to the operator instead.
 
 ## Lifetime
 

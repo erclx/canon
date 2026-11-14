@@ -39,7 +39,7 @@ Each role keeps to its own writes, and five rules cover how the roles meet.
 
 Each worker halts at the PR, and the merge stays a human gate. `canon pr merge` squashes with the body's Summary, Key changes, and Technical context as the message, and the seeded deny rule covers the forms an agent writes by default. A release-please or Dependabot pull request merges the same way, from the bot's own body.
 
-An orchestrator can run this loop unattended, from now or from a set time. Every background launch but a talk one denies the question tool, so a session with a question messages its controller and waits for the reply. The run answers technical questions, parks the operator's, and ends on a report of merge-ready pull requests.
+An orchestrator can run this loop unattended, from now or from a set time. Every local `claude --bg` launch but a talk one denies the question tool, so a session with a question messages its controller and waits for the reply. The run answers technical questions, parks the operator's, and ends on a report of merge-ready pull requests.
 
 ## The review layer
 

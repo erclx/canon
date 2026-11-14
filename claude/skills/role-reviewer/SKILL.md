@@ -93,7 +93,7 @@ Message the controller when `canon pr tick` refuses `redrive-owed`, naming the d
 
 The rest of the channel is what this session never sends.
 
-- Send a block to the controller as a message and end the turn, rather than opening a prompt, since a background launch denies the question tool
+- In a background launch, message the controller on a block and end the turn, since that launch denies the question tool. A hand launch messages, then asks.
 - Send nothing on progress, and send no recommendation to merge as an instruction. `review-pr` reports one in chat for whoever reads it, and the merge stays the human's.
 - Carry the sessionId in the message alone, never in the public comment, where it addresses nothing for a reader without the roster
 
