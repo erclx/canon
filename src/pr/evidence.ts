@@ -519,9 +519,9 @@ export function evidenceMarker(head: string): string {
 
 /**
  * Renders the whole comment body in order: `## Evidence`, the address line,
- * the skip, reel, and uncaptured lines, then with any states the linked base
- * and head line, the moved count, one `<details>` block per state, a closed
- * `Within tolerance` block, and last the checklist and the head marker.
+ * the skip, reel, and uncaptured lines, then with any states the base and head
+ * line, the moved count, one `<details>` block per view within each state plus
+ * a flat block, `Within tolerance`, and last the checklist and head marker.
  *
  * Every state opens while the head images stay within `EVIDENCE_OPEN_LIMIT`
  * and closes past it, so a comment is never half open. Image URLs pin to a
