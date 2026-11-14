@@ -737,8 +737,8 @@ export async function pullRecords(root: string): Promise<PullOutcome> {
 
   const branch = await projectBranch(root, enclosing)
 
-    // Checked ahead of the fetch, since `--exit-code` answers by a code no
-    // locale changes: 2 for no matching ref, 0 for found, else unreachable.
+  // Checked ahead of the fetch, since `--exit-code` answers by a code no
+  // locale changes: 2 for no matching ref, 0 for found, else unreachable.
   const remoteBranch = await records(root, [
     'ls-remote',
     '--exit-code',
