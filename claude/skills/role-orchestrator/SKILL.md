@@ -158,7 +158,7 @@ Read `${CLAUDE_SKILL_DIR}/references/orchestrator-refill.md` on reaching any of 
 
 No fixed number caps worker tracks, and a shared file does not hold one. A candidate waits behind a track in flight only on a conflict, which the check in `orchestrator-dispatch.md` states once along with its sources.
 
-What binds is review attention and the one machine every worker shares, which bites first where tests run a browser or a server per worktree. Narrow the wave when you cannot review each track or a worker reports a hung verify run.
+What binds is review attention and the one machine every worker shares, which bites first where tests run a browser or a server per worktree. Add a track only while both still hold, and narrow the wave when a worker reports a hung verify run.
 
 - An operator can cap this session's workers by saying so, and a spoken cap binds for that session rather than standing as a number in a file
 - Read `${CLAUDE_SKILL_DIR}/references/orchestrator-inbound.md` before widening a wave, for what each inbound turn costs and why the one control over it stays unset

@@ -88,7 +88,7 @@ Do not loop. Do not bypass hooks.
 
 A command past its limit is a hang, not a failure, and takes no fix attempt. A rerun under the same contention hangs again, and only the controller can narrow the wave.
 
-- Stop on the hang line `git-ship` states, naming the command and the limit
+- Stop on the hang line `git-ship` states, whether the hang came at Step 3 or at the Step 6 gate, and resume per `${CLAUDE_SKILL_DIR}/references/failure-recovery.md`
 - Under a named controller, send it that line as a block per `canon:role-worker` before the turn ends, rather than idling on it
 
 ## Step 4: test order

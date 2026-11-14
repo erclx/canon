@@ -24,7 +24,7 @@ Run each verify command under a time limit, so a run that never exits stops the 
 - Wrap it as `timeout <limit> <command>`, or `gtimeout` where `timeout` is absent, putting a command with shell syntax inside `sh -c '<command>'`
 - With neither wrapper on the machine, run the command unbounded and say so on one line. Never report a bound the run did not have.
 - Run it in the background where the limit outlasts a foreground shell call, and act on the wake
-- Read exit 124 as a hang rather than a failure, and stop: `❌ Verify hung: <command> ran past <limit>. Narrow the parallel work, or raise the limit in CLAUDE.md, and re-run /git-ship.`
+- Read exit 124 as a hang rather than a failure, and stop: `❌ Verify hung: <command> ran past <limit>. Narrow the parallel work or raise the limit, then run /git-ship again with the same arguments.`
 
 A suite exiting 124 by itself reads as a hang too, which is why the stop names the command. A headless browser that starts its own process session can outlive the wrapper, so the hang stop does not prove the machine is clear.
 
