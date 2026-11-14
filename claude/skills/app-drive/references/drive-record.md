@@ -45,7 +45,7 @@ Write the log to `evidence/drive-log.md` inside the intake folder. It opens on a
 
 The setup table is written once, before the first finding, and every row stays even when its value is empty.
 
-- `Commit`, `Copy`, and `Launch` come from making the copy, per `isolate.md`
+- `Commit`, `Copy`, and `Launch` come from making the copy, per `isolate.md`, or read as `live.md` sets for a drive of the live app
 - `Address` is the `url` that `canon pr local --root <worktree> --json` confirmed in Step 1
 - `Board` is the `url` the board's serve record returned in Step 1 and the drive's board project, and stays empty when the drive draws no board
 - `In flight` names each open branch or live plan holding a path the drive covers, as `canon:role-planner` reads what is in flight, and reads `none` when nothing is
@@ -122,7 +122,7 @@ Write it to the intake folder root before the close. `canon intake drive-check` 
 - `goals` holds one entry per `## Goals` bullet, with the bullet's text. A bold label and a trailing period may stay or go, since the check strips both.
 - `status` is `driven` or `not-driven`, and a `not-driven` entry carries the `reason` the goal could not be reached
 - `evidence` lists every frame a finding cites and every image the operator pasted, reference shots included, each a path under `evidence/` relative to the intake folder
-- `worktree` is the throwaway worktree's path, which the check fails on while it still exists
+- `worktree` is the throwaway worktree's path, which the check fails on while it still exists. A drive of the live app writes `"worktree": null`, and the check refuses an empty string.
 
 ### What the check fails
 

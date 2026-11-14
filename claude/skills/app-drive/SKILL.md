@@ -21,7 +21,7 @@ A drive puts a built app in front of the operator and the session together, and 
 ## Write scope
 
 - Write inside `.canon/intake/<nn>-<slug>/`, the scratch folder `.canon/tmp/app-drive/<slug>/`, and the config's `proposals` folder at the main worktree root, resolved the way `session-worktree` does
-- Write frames into the drive's own board project, and into no other project on that board
+- Write frames into the drive's own board project alone, and into a live app only through a page or project made for the drive, per `${CLAUDE_SKILL_DIR}/references/live.md`
 - The one exception is the throwaway worktree outside the repository, which Step 1 adds and the close removes. It is not entered with `EnterWorktree`, and no branch is created.
 - Never write `canon/REQUIREMENTS.md`, a fixture, or any other tracked file, a requirements diff included. Draft that diff as text inside the intake item.
 - Send each intake file out as a heredoc, the main-root route `session-worktree` states
@@ -32,7 +32,7 @@ Read `${CLAUDE_SKILL_DIR}/references/config.md` for `canon/config/app-drive.toml
 
 1. Derive `<slug>` from the build being driven, such as `app-drive-0-12-0` for a tag. Claim the folder with `canon records ordinal intake <slug> --claim`.
 2. Record the baseline with `canon intake drive-check <slug> --baseline --json` from the main root, before the first build step. Stop on any `reason` other than `recorded`.
-3. Make the throwaway worktree, build it, and serve it per `${CLAUDE_SKILL_DIR}/references/isolate.md`, which also carries the close and the recovery after a crash.
+3. Make, build, and serve the throwaway worktree per `${CLAUDE_SKILL_DIR}/references/isolate.md`, which carries the close and crash recovery, or follow `live.md` when the operator names the live app.
 4. Confirm the address with `canon pr local --root <worktree> --json` and write it as the drive log's `Address` row.
 5. Start the board per the section below when the drive will draw on it, and write its address and project as the `Board` row. Leave the row empty otherwise.
 6. Draw the shipped page on `00-current` when the drive draws on the board, per the drawing guide the section below names.
@@ -127,7 +127,7 @@ Read `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md` before writing a 
 
 Close only on the operator's word, while the app stays up for as long as they keep talking.
 
-1. Confirm every drawn finding's mock source sits under `evidence/mocks/`, then stop the server and remove the worktree per `isolate.md`.
+1. Confirm every drawn finding's mock source sits under `evidence/mocks/`, then stop the server and remove the worktree per `isolate.md`, or close per `live.md` for a live drive.
 2. End the board's serve command only when `reused` read false, and keep the drive's board project, since the operator looks back at past drives there.
 3. Run `canon intake drive-check <slug> --json`, and on `failed` fix what each finding list names in the folder and re-run.
 4. Report each path under `changed` to the operator and never revert it, since only they know which to keep.
