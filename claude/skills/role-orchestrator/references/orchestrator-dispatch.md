@@ -101,7 +101,11 @@ No count binds this, and a shared file does not either. Hold a candidate behind 
 - **Sweep.** One plan rewrites a file or folder wholesale, such as a terminology pass or a `canon/context/` reflow, and the other writes inside it.
 - **A stated reason.** A singleton resource, or tracks interacting where no file reading shows, as a row creating a skill does with one counting that catalog.
 
-Read a contract off the changing plan's `**Risks:**`, and both sides of a rename before the colon of a `**Files to touch:**` entry, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`. Nothing verifies a stated reason, so it stands only while the dispatcher applies it. A shared file is not a hold, so dispatch both and name the shared paths. Read `${CLAUDE_SKILL_DIR}/references/orchestrator-shared-files.md` for how the second branch rebases, the evidence behind that call, and how to read the tracks in flight.
+Read a contract off the changing plan's `**Risks:**`, and both sides of a rename before the colon of a `**Files to touch:**` entry, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`. Nothing verifies a stated reason, so it stands only while the dispatcher applies it.
+
+### A shared file is not a hold
+
+Dispatch both and name the shared paths. Read `${CLAUDE_SKILL_DIR}/references/orchestrator-shared-files.md` for how the second branch rebases, the evidence behind that call, and how to read the tracks in flight.
 
 What binds past the five holds is review attention and machine capacity, which `## Parallelism` in the skill body states.
 
