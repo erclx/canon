@@ -246,6 +246,7 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/git-pr/SKILL.md',
   'claude/skills/git-pr/references/final-command.md',
   'claude/skills/git-pr/references/labels.md',
+  'claude/skills/git-pr/references/pr-examples.md',
   'claude/skills/git-pr/references/pr.md',
   'claude/skills/git-pr/references/publish.md',
   'claude/skills/git-pr/references/task-number.md',

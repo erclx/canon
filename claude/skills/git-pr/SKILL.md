@@ -13,6 +13,7 @@ Read these files in parallel:
 
 - `${CLAUDE_SKILL_DIR}/../git-branch/references/branch.md`: branch format, valid types, and constraints
 - `${CLAUDE_SKILL_DIR}/references/pr.md`: structure, rules, and banned phrases
+- `${CLAUDE_SKILL_DIR}/references/pr-examples.md`: the body template and a correct and an incorrect body
 - `${CLAUDE_SKILL_DIR}/references/labels.md`: label map format, matching, and the missing-label warning. Skip when the project has no `canon/config/pr-labels.toml` and no `.claude/canon/pr-labels.toml`.
 
 ### Writing standards
