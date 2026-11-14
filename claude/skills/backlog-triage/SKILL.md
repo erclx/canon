@@ -161,3 +161,5 @@ Apply phase, naming the path every write landed at:
 ```
 
 Drop a line that carries no rows.
+
+On the operator's ask, retell the rows one by one in plain words, per `${CLAUDE_SKILL_DIR}/../plan-intake/references/retell.md`, writing nothing.

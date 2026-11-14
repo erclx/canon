@@ -11,6 +11,10 @@ An operator answers a filed intake by opening each cluster file and typing under
 
 The write fails where no prose rule catches it. A worker's file-editing tools refuse a main-root path from a linked worktree, and a stream editor exits zero on no match, so the answer is lost behind a success report. Thirty items in one flat batch leave a file half answered.
 
+### Read in chat
+
+An item is written for the file, dense in paths and counts. An operator who reads the chat more than the files asks by hand for each item in plain words, as its problem, its fix, and why a declined one was declined.
+
 ## Must
 
 - Offer every item with an empty slot, batched by cluster in the folder's numbering and capped at four items, so a stop leaves whole clusters unread
@@ -19,9 +23,15 @@ The write fails where no prose rule catches it. A worker's file-editing tools re
 - Report what stays unread by count after each cluster, and stop when there is no folder or no unread item
 - Offer to close the issue an item headed `(#NNN)` names once its answer begins `decline`, with the drafted comment shown first, so closing takes one word
 
+### On a retell
+
+A retell restates the folder and decides nothing.
+
+- Retell a folder on the operator's ask, each item as its problem, its fix, and on a declined one why, in plain words, even when every slot carries an answer
+
 ## Must not
 
-- Fill a slot the operator did not answer, or infer an answer from the conversation having happened
+- Fill a slot the operator did not answer, or infer an answer from the conversation having happened, a retell included
 - Overwrite a slot already carrying an answer
 - Write anywhere but an item's answer slot, the index included, bar one exception, which is closing a declined item's issue on GitHub after a yes given for that issue in the turn its draft was shown
 - Close an issue when the operator says no to the offer, gives no answer, or when the only yes came from another issue

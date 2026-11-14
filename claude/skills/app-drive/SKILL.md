@@ -153,7 +153,7 @@ Run this tail by default after the close, since the intake records the session's
 
 ## Output
 
-Emit the full relative path of every file written, the drive-check `reason`, and the routing counts.
+Emit every written file's relative path, the drive-check `reason`, and counts.
 
 ```plaintext
 📂 Filed .canon/intake/<nn>-<slug>/
@@ -166,7 +166,7 @@ Next: <planning the ready rows in this session once named back | handed off, <re
 Slots unread: /plan-intake-answer, then /task-board
 ```
 
-Omit the `Board` line when the drive drew no board.
+Omit the `Board` line when the drive drew no board, then close on the retell `${CLAUDE_SKILL_DIR}/../plan-intake/references/retell.md` shapes.
 
 ## What this delegates
 

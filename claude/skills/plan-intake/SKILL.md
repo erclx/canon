@@ -127,6 +127,8 @@ into the files, then /task-board to promote what is ready
 
 Use `📂 Resumed` in place of `📂 Opened` on a resume pass.
 
+Close on a retell of the items this pass filed, after the report above, since the operator reads the chat more than the files. Read `${CLAUDE_SKILL_DIR}/references/retell.md` for its shape and wording, and mark every item `unread`, since none carries an answer yet.
+
 ## Answering what this pass wrote
 
 The operator answers the empty slots by editing each cluster file, or from chat through `plan-intake-answer`, which writes each selection back onto its item. Name that route in the closing line so the operator finds it.
