@@ -72,7 +72,7 @@ When a decision rests on an outside practice or a third-party behavior, invoke `
 
 ## Step 3: build the plan
 
-The section list, what each section holds, and the suggested-and-answer contract are fixed by `${CLAUDE_SKILL_DIR}/references/plan.md`, and the lifecycle by `${CLAUDE_SKILL_DIR}/references/plan-lifecycle.md`. Read it before writing the file and follow it rather than working the shape from memory.
+The section list, what each section holds, and the suggested-and-answer contract are fixed by `${CLAUDE_SKILL_DIR}/references/plan.md`, and the lifecycle by `${CLAUDE_SKILL_DIR}/references/plan-lifecycle.md`. Read it before writing, never from memory, and grade `## Weight` from the code Step 2 read.
 
 What this skill adds on top of the standard:
 
@@ -115,7 +115,7 @@ A consumer list is a `Risks` entry, which already forces Full. A resource with m
 
 ### Small mode
 
-Output the plan to chat and write no plan file. The markers match the standard's, so a plan that later grows into a file keeps its shape.
+Output the plan to chat, opening on the `## Weight` fields, and write no file. The markers match the standard's, so a grown plan keeps its shape.
 
 ```markdown
 ## Files to touch
