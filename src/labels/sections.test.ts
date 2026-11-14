@@ -11,7 +11,7 @@ describe('checkSections', () => {
   })
 
   it('should accept every heading in the closed list', () => {
-    const body = `${WELL_FORMED}\n## Technical context\n\n## Testing\n\n## For the reviewer\n`
+    const body = `${WELL_FORMED}\n## Technical context\n\n## Outcome\n\n## Testing\n\n## For the reviewer\n`
 
     const result = checkSections(body)
 
