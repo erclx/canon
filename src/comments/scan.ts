@@ -121,11 +121,10 @@ export function isPruned(relativePath: string): boolean {
 /**
  * Builds the matcher for one vocabulary term.
  *
- * Case sensitivity is derived from the term rather than from a second list:
- * a term carrying an uppercase letter is a marker convention (`TODO`, `HACK`)
- * and matches exactly, while an all-lowercase term is prose (`used to`) and
- * matches either casing. Matching `FIXED` case-insensitively would hit every
- * comment containing the word "fixed", which is why the split exists.
+ * Case sensitivity is derived from the term rather than from a second list. A
+ * term carrying an uppercase letter is a marker convention and matches
+ * exactly, while an all-lowercase term is prose (`used to`) and matches either
+ * casing, so an uppercase marker never hits the same word in ordinary prose.
  */
 function matcherFor(term: string): RegExp {
   const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')

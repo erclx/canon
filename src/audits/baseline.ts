@@ -6,15 +6,10 @@ import { resolveExisting } from '@/roots/legacy'
 /**
  * Where the retained counts live, relative to the project root.
  *
- * Committed rather than per-machine, because the question this half answers is
- * whether a number grew since anyone last looked, and a fresh checkout has to
- * inherit that answer. A per-machine record makes every contributor's first run
- * a first run.
- *
- * Under the project root rather than beside the aggregator in `src/`, because
- * the numbers describe one repository's corpus and `src/` ships to every target
- * that installs the CLI. A baseline in the package would hand a target this
- * repository's counts to measure its own tree against.
+ * Committed rather than per-machine, so a fresh checkout inherits whether a
+ * number grew since anyone last looked. Under the project root rather than in
+ * `src/`, which ships to every target, since a target would otherwise measure
+ * its tree against this repository's counts.
  */
 export const BASELINE_REL = join('canon', 'config', 'baseline.json')
 
@@ -99,16 +94,11 @@ export type Delta =
 /**
  * Builds the record a run leaves behind.
  *
- * Only a tracked corpus is retained. A gitignored record folder holds one
- * machine's session scratch, so committing its counts writes a floor no other
- * clone can reproduce, and every contributor would read a regression against a
- * number that describes somebody else's disk. An upstream count is left out
- * for the mirror-image reason: it moves when an advisory is published, so a
- * recorded floor would report growth against a tree nobody touched.
- *
- * An audit that did not report is left out rather than written as zero. Zeros
- * there record a clean corpus nobody measured, and the next run reads its real
- * numbers as a regression against a floor that was never taken.
+ * Only a tracked corpus is retained, since a gitignored folder's counts would
+ * set a floor no other clone reproduces. An upstream count is left out too,
+ * since it moves when an advisory is published. An audit that did not report
+ * is left out rather than written as zero, or the next run would read its real
+ * numbers as a regression against a floor never taken.
  */
 export function baselineFrom(
   results: readonly AuditResult[],

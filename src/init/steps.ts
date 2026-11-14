@@ -57,10 +57,8 @@ export function buildSteps(
     })
   }
 
-  // In-process rather than a child verb, since the audit reads the working
-  // directory and every child here is handed the target as an argument. It
-  // runs after every seeding domain so the roots it measures hold what they
-  // will ship with.
+  // In-process, since the audit reads the working directory, and after every
+  // seeding domain so the roots it measures hold what they will ship with.
   steps.push({
     kind: 'run',
     label: 'Markdown gating',

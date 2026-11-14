@@ -109,11 +109,8 @@ export function planSeeds(root: string, target: string): SeedEntry[] {
     const surface = isSurfaceEntry(subdir)
     const source = join(surface ? surfaceSource : claudeSource, subdir)
 
-    // Three of the `.claude/` subdirectories are record folders that install
-    // under the record root instead. A target that has not migrated resolves
-    // back to `.claude/`, so the same seed lands beside the records already
-    // there rather than opening a second root, and never outside the single
-    // `.canon/` ignore entry a target receives.
+    // Three `.claude/` subdirectories are record folders installing under the
+    // record root, which resolves back to `.claude/` for an unmigrated target.
     const installRel = surface
       ? surfaceRel(target, subdir)
       : isRecordEntry(subdir)

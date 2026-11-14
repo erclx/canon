@@ -6,20 +6,12 @@ import { SURFACE_ROOTS } from '@/roots/surface'
 /**
  * The authoring roots this repository owns and no install channel delivers.
  *
- * Every entry is a folder a target never holds under that spelling. Rules
- * install under `.claude/rules/`, and the rest are this repository's own
- * source, docs, and catalogs.
- *
- * `src/`, `scripts/`, and bare `docs/` are deliberately absent. A body naming
- * one of those is describing the reader's own tree, so listing them would
- * report a correct citation on every run and bury the defect this measures.
- * `docs/agents/` is the exception, being the reference pages for verbs run by
- * hand, which exist here alone.
- *
- * The context folder carries both surface-root spellings, since this list
- * decides whether a shipped body names this repository's own tree and a body
- * naming either root is doing that regardless of which root a given checkout
- * carries.
+ * Every entry is a folder a target never holds under that spelling. `src/`,
+ * `scripts/`, and bare `docs/` are absent, since a body naming one describes
+ * the reader's own tree. `docs/agents/` is the exception, holding the
+ * reference pages for verbs run by hand, which exist here alone. The context
+ * folder carries both surface-root spellings, since a body naming either
+ * names this repository's own tree.
  */
 const AUTHORING_ROOTS = [
   ...SURFACE_ROOTS.map((root) => `${root}/context/`),
@@ -85,14 +77,10 @@ export function isQualified(line: string): boolean {
  * The roots that belong to the toolkit rather than to the reader, read
  * against the corpus being measured.
  *
- * A target's `canon/context/` is the reader's own tree. A seed put the
- * entries there and the project owns them afterward, so a body under
- * `.claude/skills/` citing one names a file its reader holds. Measuring it
- * would report a correct citation on every run, which is exactly why `src/`
- * and `scripts/` are absent from the list above. In this repository the seed
- * tree settles the same question through `readReceivedPaths`, which a target
- * carrying no `tooling/` folder cannot answer at all, so the root comes out
- * by corpus instead.
+ * A target's `canon/context/` is the reader's own tree, seeded and then owned,
+ * so a body under `.claude/skills/` citing one names a file its reader holds.
+ * Here the seed tree settles that through `readReceivedPaths`, which a target
+ * with no `tooling/` cannot answer, so the root comes out by corpus instead.
  */
 export function authoringRootsFor(corpus: string): readonly string[] {
   if (!SURFACE_ROOTS.some((root) => corpus.startsWith(`${root}/`))) {
@@ -184,15 +172,11 @@ export function citationsIn(
  * Reads every body in the root's skill corpus for a path its reader cannot
  * open.
  *
- * A citation of a path this repository does not hold is dropped rather than
- * reported. The measure asks whether a claim true here is false in a target,
- * and a path true in neither is a different defect that `canon context audit`
- * already reports against its own corpus.
- *
- * `resolveSkillsCorpus` prefers `claude/skills/`, which is the tree that
- * installs into a target, so this repository's own reading is the one it
- * always was. A project carrying `.claude/skills/` alone has no shipped tree
- * and its own skills are the whole corpus a reader there opens.
+ * A citation of a path this repository does not hold is dropped, since a path
+ * true in neither place is a defect `canon context audit` already reports.
+ * `resolveSkillsCorpus` prefers `claude/skills/`, the tree that installs into
+ * a target. A project carrying `.claude/skills/` alone has no shipped tree, so
+ * its own skills are the whole corpus.
  */
 export function scanReach(root: string): ReachReport {
   const corpus = resolveSkillsCorpus(root)

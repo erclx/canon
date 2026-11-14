@@ -37,11 +37,8 @@ export function parseSections(body: string): Map<string, string> {
   }
 
   for (const line of body.split('\n')) {
-    // A Repro field routinely carries a fenced block, and a `###` comment
-    // inside one is shell rather than the next field. Reading it as a heading
-    // splits the section and drops everything under it. A Suggested shape
-    // wraps a template that holds its own fence in a longer one, so a fence
-    // closes only on the same marker at least as long, per CommonMark.
+    // A fence closes only on the same marker at least as long, per CommonMark, so
+    // a `###` inside a Repro fence is shell rather than the next field.
     const fenceMatch = line.match(FENCE)
     const run = fenceMatch?.[1]
     if (run !== undefined) {
@@ -109,9 +106,9 @@ export const FOLLOW_UP_FIELDS = [
 const YES_OR_NO = /^(?:yes|no)\b/i
 
 /**
- * A URL, or an issue reference such as `#2801`, `frameboard#156`, or
- * `erclx/canon#2801`. A bare name is what the hand-written follow-up carried,
- * and nothing a reader can open from it.
+ * A URL, or an issue reference, a hash sign and digits optionally led by a
+ * repository or by an owner and repository. A bare name is what the
+ * hand-written follow-up carried, and nothing a reader can open from it.
  */
 const REFERENCE = /https?:\/\/\S+|(?:^|[\s(])(?:[\w.-]+\/)?[\w.-]*#\d+\b/
 

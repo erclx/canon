@@ -35,16 +35,10 @@ import { formatStamp, hashSource, stampPath } from '@/capture/stamp'
  * `src/commands/capture.ts` reaches it through a dynamic import so `src/cli.ts`
  * never resolves the engine at startup.
  *
- * It ships, like `@/inventory/walk` and `@/driver/drive`.
- * Regenerating this repository's own committed images was the reason it stayed
- * behind, and it was a reason about one caller rather than about the mechanism:
- * a target renders its own generated pages and proves its own fonts resolved,
- * which is the whole of what this module does.
- *
- * It imports `playwright-core` rather than `@playwright/test` for the same
- * reason the three siblings do. The test runner is a development dependency the
- * published tarball never carries, so the earlier import resolved here and
- * threw `ERR_MODULE_NOT_FOUND` in every target install.
+ * It ships, like `@/inventory/walk` and `@/driver/drive`, since a target renders
+ * its own generated pages and proves its own fonts resolved. It imports
+ * `playwright-core` rather than `@playwright/test`, as the siblings do, since
+ * the test runner is a development dependency the tarball never carries.
  */
 
 const DEVICE_SCALE_FACTOR = 2
@@ -418,18 +412,13 @@ async function unresolvedFonts(page: Page): Promise<SectionFonts> {
 
 /**
  * Runs inside the render rather than in a wrapper around it, so a capture
- * cannot succeed and leave the provenance unrecorded. A throw here reaches the
- * caller's catch and reports the source as failed, which is correct: a PNG
- * whose stamp never landed is the state the verify stage exists to reject.
+ * cannot succeed with its provenance unrecorded, and a throw here reports the
+ * source as failed.
  *
- * A file source is stored as a bare filename. An absolute path would record
- * the machine that ran the capture into a tracked file and differ per
- * checkout. A URL source is stored as the URL itself, and its digest hashes
- * the URL string's UTF-8 bytes rather than any local file, since there is
- * none to hash.
- *
- * The image digest is taken over the buffer the screenshot returned rather than
- * by reading the file back, so the stamp describes the bytes this run wrote.
+ * A file source is stored as a bare filename, since an absolute path would
+ * differ per checkout. A URL source is stored as the URL, and its digest hashes
+ * the URL string's UTF-8 bytes. The image digest is taken over the buffer the
+ * screenshot returned, so the stamp describes the bytes this run wrote.
  */
 function writeStamp(source: CaptureSource, png: Uint8Array): void {
   writeFileSync(

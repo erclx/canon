@@ -46,15 +46,11 @@ const CATALOG_NAMED_RATIO = 0.6
  * Required sections per audited folder name, each in the order its standard
  * states them.
  *
- * The lists are held here rather than read out of the standards, the way the
- * four checkpoints above quote their numbers. A parser over a standard's prose
- * would decide which sections are required from the wording around them, so it
- * fails on a rewrite of that wording rather than on a defect in an entry.
- *
- * These names do not generalize the way a length threshold does, which is why
- * each list is keyed on the folder whose standard states it. `context.md`
- * requires an overview and a layout. A
- * diagram entry declares a heading per kind and its standard requires none.
+ * Held here rather than parsed from the standards, as the checkpoints above
+ * quote their numbers, since a parser would fail on a rewording rather than on
+ * a defect. Keyed on the folder whose standard states each list: `context.md`
+ * requires an overview and a layout, and a diagram entry declares a heading
+ * per kind and requires none.
  */
 export const REQUIRED_SECTIONS_BY_FOLDER: Readonly<
   Record<string, readonly string[]>
@@ -133,21 +129,14 @@ const NAMED_CELL = /`[^`]+`|\[[^\]]+\]\([^)]+\)/
 /**
  * Spellings of how the domain reached its shape rather than what it is now.
  *
- * The standard admits a rejected alternative and its reasoning while refusing
- * the provenance attached to it, and these three are what a session reaches for
- * when it records the second: when a change landed, which change carried it,
- * and which release labelled it. A marker is a judgment rather than a defect,
- * so this is measured and reported and never gates.
- *
- * The change pattern matches any digit count, since a young project's `PR #7`
- * is as much a change as `#700`. `provenance` masks displayed spans first, so a
- * heading's own link destination, `(#7-open-questions)`, reads as no change.
- *
- * The release pattern accepts three segments without a leading `v`, since
- * `a CLI at 0.83.0` names a release as `v0.83.0` does. Two segments still need
- * the `v`, because an unprefixed pair is a dollar cost or a duration far more
- * often. Another tool's version reports rather than being excluded, since an
- * exclusion keyed on a nearby tool name goes stale with nothing saying so.
+ * The standard admits a rejected alternative and refuses the provenance on it,
+ * being when a change landed, which change carried it, and which release
+ * labelled it. A marker is a judgment, so this reports and never gates. The
+ * change pattern takes a hash sign and any digit count, and `provenance` masks
+ * displayed spans first, so a heading's link anchor reads as no change. The
+ * release pattern takes three segments without a `v` and two only with one,
+ * since an unprefixed pair is more often a cost or a duration. Another tool's
+ * version reports, since a name-keyed exclusion goes stale silently.
  */
 const PROVENANCE: readonly { kind: ProvenanceKind; pattern: RegExp }[] = [
   { kind: 'date', pattern: /\b\d{4}-\d{2}-\d{2}\b/g },
@@ -159,25 +148,21 @@ const PROVENANCE: readonly { kind: ProvenanceKind; pattern: RegExp }[] = [
  * Verbs that read the date behind them as stamping a measurement.
  *
  * `claude/skills/context-fold/references/context.md` cuts a date attached to a
- * change and permits one stamping a measurement. `measured on 2026-08-19` and
- * `overturned on 2026-08-19` differ only in the verb, so the clause decides.
- * These five are never a noun a change date attaches to, so they match at any
- * distance from the date.
- *
- * The set is closed, and an unenumerated phrasing falls back to a change
- * marker, reporting one date too many rather than clearing one the standard
- * cuts. A date the clause cannot place is never a third state, because the
- * length finding already spends `unanswered` on the two unmeasured questions.
+ * change and permits one stamping a measurement, so `measured on` and
+ * `overturned on` before a date differ only in the verb. These five are never
+ * a noun a change date attaches to, so they match at any distance. The set is
+ * closed, and an unenumerated phrasing falls back to a change marker,
+ * reporting one date too many rather than clearing one the standard cuts.
  */
 const STAMPING = /\b(?:measured|verified|driven|passed|fired)\b/i
 
 /**
  * The noun form, which has to sit against the date to count.
  *
- * `A run on 2026-08-14` stamps a measurement and `Runs on #632 and #634 landed
- * 2026-08-02` dates a change, and the two differ only in what follows the noun.
- * Requiring the connector and then the date immediately is what separates them,
- * so this is anchored to the end of the clause where `STAMPING` is not.
+ * A run on a date stamps a measurement, while runs on two pull requests that
+ * then landed on a date date a change, and the two differ only in what follows
+ * the noun. Requiring the connector and then the date immediately separates
+ * them, so this is anchored to the clause end where `STAMPING` is not.
  */
 const STAMPING_RUN = /\b(?:an?\s+)?runs?\s+(?:on|at|in)\s+$/i
 
@@ -189,17 +174,11 @@ const SENTENCE_END = /[.!?:;]\s(?=[^.!?:;]*$)/
  * provenance and the required sections. It keeps the provenance name because
  * the JSON record publishes it as `checkpoints.provenanceFolder`.
  *
- * `claude/skills/context-fold/references/context.md` hands figures to
- * `draw-figure`, so a marker reported in a diagrams entry would cite a rule
- * that entry's standard routes elsewhere. The length and table checkpoints
- * reach every folder, since how far a reader travels generalizes across entry
- * types while what an entry may say does not. Bullet weight stays ungated here,
- * since `claude/skills/markdown-craft/references/markdown.md` owns it for every
- * document type.
- *
- * Restating the exclusion in the sibling standards was the alternative. It
- * duplicates one fact across three surfaces, and pointing fails because the
- * surface they would point at is the one disclaiming them.
+ * The context standard hands figures to `draw-figure`, so a marker in a
+ * diagrams entry would cite a rule routed elsewhere. The length and table
+ * checkpoints reach every folder, and bullet weight stays ungated here, owned
+ * by `claude/skills/markdown-craft/references/markdown.md`. Restating the
+ * exclusion in the sibling standards would duplicate one fact three times.
  */
 export const PROVENANCE_FOLDER = 'context'
 
@@ -255,16 +234,12 @@ export interface EntryReport {
   readonly rel: string
   /**
    * Rendered lines across the whole file, counting frontmatter and fenced
-   * blocks. It counts through `documentHeight` in `src/markdown/structure.ts`,
-   * which shares `renderedHeight` with the depth checkpoint and with the
-   * document ceiling, since all three sit beside each other in the standard
-   * and a reader compares them.
+   * blocks, through `documentHeight` in `src/markdown/structure.ts`, which
+   * shares `renderedHeight` with the depth checkpoint and the document ceiling.
    *
-   * Fences are counted here and excluded there. The depth measure skips one so
-   * an example cannot break the run around it, and a file measure has no run to
-   * protect. Excluding them here would change which entries report by one and
-   * would not reach the case that motivates it: the most fenced entry in the
-   * corpus runs 20 percent fenced and sits past the checkpoint either way.
+   * Fences count here though the depth measure skips them, since a file measure
+   * has no run to protect, and excluding them would barely change which entries
+   * report.
    */
   readonly lines: number
   readonly catalogTables: readonly TableFinding[]
@@ -424,18 +399,13 @@ function catalogTables(entry: readonly BodyLine[]): TableFinding[] {
  * Finds the markers narrating a change rather than describing the domain.
  *
  * Fenced blocks are skipped and displayed spans masked, since a pinned install
- * line, a hex color `#000`, or a heading anchor `(#7-open-questions)` is text
- * the entry shows rather than a claim it makes.
- *
- * A date stamping a measurement is dropped rather than given a kind of its own,
- * so the report and the length finding read one list with one meaning rather
- * than each filtering a split differently.
+ * line, a hex color, or a heading anchor is text the entry shows rather than a
+ * claim it makes. A date stamping a measurement is dropped rather than given a
+ * kind of its own, so the report and the length finding read one list.
  */
 function provenance(lines: readonly BodyLine[]): ProvenanceFinding[] {
-  // Scanning one pattern at a time emits a line's markers grouped by kind, so
-  // the column is carried out of the match and sorted on. Without it a line
-  // holding a date and two change numbers reports them in an order the reader
-  // cannot find by scanning left to right.
+  // Each pattern emits its markers grouped by kind, so the column is carried and
+  // sorted on, letting a reader find them left to right.
   const found: { finding: ProvenanceFinding; column: number }[] = []
 
   for (const line of lines) {
@@ -482,16 +452,11 @@ function stampsMeasurement(text: string, index: number): boolean {
 /**
  * Finds which required sections the entry declares.
  *
- * A heading at any level counts rather than the `##` the standard writes its
- * examples at. A domain that split into a folder puts its overview in a sibling
- * named for it, where the section is the `#` title and an `##` beneath it would
- * repeat the file's own name. All three split folders in this repository are
- * that shape, so matching `##` alone would report every one of them. Nothing is
- * titled for a required section without being about it, so the looser match
- * costs no precision.
- *
- * Fenced blocks are skipped for the reason the scans above skip them. A
- * standard quoted inside an example declares nothing about the entry quoting it.
+ * A heading at any level counts, since a split domain titles its overview file
+ * for the section, where an `##` beneath would repeat the file's name. Nothing
+ * is titled for a required section without being about it, so the looser
+ * match costs no precision. Fenced blocks are skipped, since a standard quoted
+ * in an example declares nothing about the entry.
  */
 function declaredSections(
   lines: readonly BodyLine[],
@@ -554,18 +519,13 @@ interface FolderHeading {
 /**
  * Finds where the entry breaks the section shape.
  *
- * Bullets are counted at any indent and across any paragraph, so a list split
- * by a bold label or nested one level down still counts against the cap it
- * would otherwise slip under. A line continuing a list item, lazily or
- * indented after a blank, belongs to the item rather than opening a paragraph,
- * which is what keeps a wrapped bullet from reading as prose.
- *
- * A cap reports once per section or folder heading however far past it the
- * count runs, since the fix is one cut either way. `Other folders` is exempt
- * from both folder caps, its one-line bullets being held by the bullet run
- * limit `canon markdown audit` already gates. The development entry's `Scripts`
- * H3 is exempt from the heading rule and both caps the same way, its table
- * being a run-command surface rather than a folder.
+ * Bullets count at any indent and across any paragraph, so a list split by a
+ * bold label or nested a level down still counts. A line continuing a list
+ * item belongs to the item, so a wrapped bullet never reads as prose. A cap
+ * reports once per heading however far past it the count runs. `Other
+ * folders` is exempt from both folder caps, held by the bullet run limit, and
+ * the development entry's `Scripts` H3 is exempt from the heading rule and
+ * both caps, its table being a run-command surface rather than a folder.
  */
 function shapeIssues(
   rel: string,
@@ -719,16 +679,12 @@ function shapeIssues(
 /**
  * Finds the references naming a sibling entry by bare filename.
  *
- * The standard asks for the path because a bare name resolves against whichever
- * folder the reader is in, so a folder split strands every inbound reference
- * and nothing reads the break. A path is checkable and a bare name is not,
- * which is what makes this the one form rule worth measuring.
- *
- * Matching stops at the sibling set, so a bare name for an entry in another
- * folder goes unseen. The set buys that a match is a reference by
- * construction, where a filename matched anywhere would report every sentence
- * naming a file. Fenced lines and lines carrying the citation ignore marker
- * display a name rather than point at one, so both are skipped.
+ * A bare name resolves against whichever folder the reader is in, so a folder
+ * split strands it silently, while a path is checkable. Matching stops at the
+ * sibling set, so a bare name for another folder's entry goes unseen, but a
+ * match is a reference by construction. Fenced lines and lines carrying the
+ * citation ignore marker display a name rather than point at one, so both are
+ * skipped.
  */
 function bareReferences(
   lines: readonly BodyLine[],
@@ -893,14 +849,10 @@ export function retiredSections(folder: AuditedFolder): readonly string[] {
  * Reports whether a bare sibling name here is a reference by construction.
  *
  * A split folder's entries are named for sub-areas of one domain, so a bare
- * name matching one of them points at it and nothing else. The folder named
- * under `.claude/` is where that stops holding, since its entries are named for
- * whole domains, a common noun a seed or a script spells the same way, and no
- * signal in the name separates the two.
- *
- * The exemption costs the references a future split of that folder would
- * strand. It is taken because a report firing on correct prose teaches a reader
- * to stop reading the section.
+ * name matching one points at it alone. The folder under `.claude/` names its
+ * entries for whole domains, common nouns a seed or script spells the same
+ * way, so it is exempt, at the cost of references a future split would
+ * strand, since a report firing on correct prose teaches readers to skip it.
  */
 export function matchesSiblings(folder: AuditedFolder): boolean {
   return governsContent(folder) && folder.nested
@@ -909,16 +861,12 @@ export function matchesSiblings(folder: AuditedFolder): boolean {
 /**
  * Names what does not declare the sections the standard requires.
  *
- * A split folder's entries describe one domain between them, with the overview
- * and layout in a sibling named for them, so any one answers for the folder.
- * The entries of the folder named under `.claude/` are one domain each, so each
- * answers for itself. Rolling those up too let one sibling stand in for
- * domains it says nothing about. This needs the folder's other entries, which
- * `measureFolders` holds and `measureEntry` does not. A folder with no entries
- * of its own is a split parent holding an index, owing no section.
- *
- * The standard lets a domain owning no paths omit `## Layout`, which no measure
- * tells from an entry that forgot it, so this is printed and never gated on.
+ * A split folder's entries describe one domain between them, so any one
+ * answers for the folder. The entries of the folder under `.claude/` are one
+ * domain each, so each answers for itself. This needs the folder's other
+ * entries, which `measureFolders` holds and `measureEntry` does not. A folder
+ * with no entries of its own is a split parent holding an index. A domain
+ * owning no paths may omit `## Layout`, so this prints and never gates.
  */
 export function missingSections(
   root: string,
@@ -935,9 +883,8 @@ export function missingSections(
     const shortOf = (declared: readonly string[]): string[] =>
       required.filter((name) => !declared.includes(name))
 
-    // A stub owes no sections, so it is dropped before either branch rather
-    // than inside them. Leaving one in the split-folder aggregate would let a
-    // skeleton answer for the siblings that do owe the sections.
+    // A stub owes no sections, so it is dropped before either branch, or it would
+    // answer for siblings that owe them in the split-folder aggregate.
     const reports = folder.entries
       .map((path) => byRel.get(relative(root, path)))
       .filter((entry) => entry !== undefined)
