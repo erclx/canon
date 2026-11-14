@@ -64,20 +64,13 @@ const SANDBOX_DIR = join(PROJECT_ROOT, 'sandbox')
  * Reports that the scenario tree does not ship, and answers whether it reported,
  * so a caller that sees `true` returns without touching the tree.
  *
- * `sandbox` sits outside the published package, so an installed
- * `canon` resolves `SANDBOX_DIR` to a directory that is not there. Both entry
- * points that walk the tree ask here rather than carrying a check each, because
- * absence is a property of the install rather than of a verb, and a second copy
- * of the question is a second message to keep true. `check` reads the tree as
- * well, through `expectFilePath`, and needs no guard because its provisioned-tree
- * check already stops an installed run before the read.
- *
- * The distinction it preserves is between an absent tree and an empty one. Only
- * the second is a real zero, and a coverage percentage over a denominator nobody
- * looked at reads as a suite that examined everything and found it clean.
- *
- * The frame opens and closes here, so this runs before `intro` rather than
- * inside an open frame.
+ * `sandbox` sits outside the published package, so an installed `canon`
+ * resolves `SANDBOX_DIR` to a directory that is not there. Both entry points
+ * that walk the tree ask here, since absence is a property of the install
+ * rather than of a verb. `check` needs no guard, since its provisioned-tree
+ * check stops an installed run first. An absent tree is not an empty one, and
+ * a coverage percentage over an unread denominator reads as a clean suite.
+ * The frame opens and closes here, so this runs before `intro`.
  */
 function reportAbsentScenarioTree(): boolean {
   if (existsSync(SANDBOX_DIR)) return false
@@ -319,10 +312,8 @@ function reportCensus(report: CensusReport): void {
     for (const entry of exempt) logInfo(`${entry.skill}: ${entry.reason}`)
   }
 
-  // A wrong exemption is the one way this report can overstate itself, so both
-  // kinds print as errors even on a run that is otherwise clean. They separate
-  // because the reader checks a different thing: whether the skill left the
-  // tree, or whether an arm landed and the entry outlived its reason.
+  // A wrong exemption is the one way this report overstates itself, so both
+  // kinds print as errors, apart, since each sends the reader somewhere else.
   if (report.staleExemptions.length > 0) {
     logStep('Exemptions naming no shipped skill')
     for (const skill of report.staleExemptions) logError(skill)
@@ -353,11 +344,8 @@ function runCoverage(options: CoverageOptions): void {
 
   const report = collectCoverage(PROJECT_ROOT)
 
-  // A broken `exempt.toml` reads as a caller error, not as a crash. The parser
-  // throws rather than returning a smaller set, since a dropped exemption is
-  // invisible in the counts, and the conversion belongs here for the reason
-  // `resolveVerdict` catches its own parse: a typo in a declaration should read
-  // the way a pattern that does not compile does rather than as a stack trace.
+  // A broken `exempt.toml` reads as a caller error rather than a stack trace,
+  // as `resolveVerdict` treats its own parse, since the parser throws on a loss.
   let census: CensusReport | undefined
   if (options.skills === true) {
     try {
@@ -374,9 +362,8 @@ function runCoverage(options: CoverageOptions): void {
     }
   }
 
-  // The scenario view stays whichever way `--skills` is set. The two count
-  // different denominators, and replacing one with the other loses the scenario
-  // rollout the strict gate is written against.
+  // The scenario view stays whichever way `--skills` is set, since the two count
+  // different denominators and the strict gate is written against this one.
   reportCoverage(report)
   if (census !== undefined) reportCensus(census)
 
@@ -387,10 +374,8 @@ function runCoverage(options: CoverageOptions): void {
 
   outro()
 
-  // A wrong exemption exits non-zero without `--strict`. It is a wrong claim in
-  // committed data rather than a rollout still in progress, and the whole point
-  // of the verdict is that an exemption someone can no longer check is worse
-  // than no exemption at all.
+  // A wrong exemption exits non-zero without `--strict`, since it is a wrong
+  // claim in committed data rather than a rollout still in progress.
   const wrongExemption =
     (census?.staleExemptions.length ?? 0) > 0 ||
     (census?.supersededExemptions.length ?? 0) > 0
@@ -675,9 +660,8 @@ function runCheck(
     return
   }
 
-  // A sandbox that was never provisioned fails every path assertion, reading as a
-  // skill that did nothing rather than a caller that ran check too early. The
-  // whole point of a verdict is that it means what it says.
+  // A sandbox never provisioned fails every path assertion, which would read as
+  // a skill that did nothing rather than a check run too early.
   const sandboxDir = sandboxTree()
   if (!existsSync(sandboxDir)) {
     logError(`No sandbox at ${sandboxDir}. Provision one with canon sandbox.`)
@@ -702,9 +686,8 @@ function runCheck(
     },
   )
 
-  // The report always renders on stderr. `--json` adds the machine copy on
-  // stdout rather than replacing the frame, per the stream contract in
-  // `docs/agents/output-shape.md`, so one invocation serves a human and a caller at once.
+  // `--json` adds the machine copy on stdout beside the stderr frame, per the
+  // stream contract in `docs/agents/output-shape.md`.
   reportVerdict(verdict)
   if (options.json === true)
     process.stdout.write(`${JSON.stringify(verdict)}\n`)

@@ -31,16 +31,12 @@ export function register(program: Command): void {
       ].join('\n'),
     )
     .action(() => {
-      // The guard below catches a `PROJECT_ROOT` with no record at all, which
-      // is an installed package. It cannot catch a second real checkout that
-      // has one, so both paths carry the warning. It is a frame-interior line,
-      // so each emits it after its own opener rather than ahead of the branch.
+      // The guard below catches an installed package, not a second checkout with
+      // its own record, so both paths emit this after their own opener.
       const mismatch = checkoutMismatchWarning(process.cwd())
 
-      // The output resolves from `PROJECT_ROOT`, which is the installed
-      // package directory when the CLI runs out of a target's `node_modules`.
-      // The record is already committed here and ships with no package, so
-      // its absence is what separates the two.
+      // `PROJECT_ROOT` is the package directory under a target's `node_modules`, and
+      // the committed record ships with no package, so its absence tells them apart.
       if (!existsSync(join(PROJECT_ROOT, DESIGN_DOCUMENT))) {
         intro('Regenerate design source')
         if (mismatch !== undefined) logWarn(mismatch)

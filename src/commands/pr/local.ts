@@ -143,8 +143,7 @@ function machineLocalRunner(): LocalRunner {
   return {
     ...machineListenerReader(),
     // An HTML page rather than any answer, since a test runner's server or a
-    // reload socket in the same tree answers too, and a reviewer opening one
-    // gets a bare 404 instead of the branch.
+    // reload socket in the tree answers too and would give a reviewer a bare 404.
     async probe(port) {
       try {
         const response = await fetch(`http://localhost:${port}/`, {

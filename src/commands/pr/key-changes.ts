@@ -231,19 +231,14 @@ async function readFromApi(
 
 /**
  * A rename's source path and a `.gitignore` addition, fetched only when a
- * first pass with neither already reports an unmet claim.
+ * first pass with neither already reports an unmet claim, since the fetch
+ * repeats a listing and adds a full-row `gh api …/files` call.
  *
- * The probe pays for a repository listing this read takes again a moment
- * later in `runKeyChanges`, and the full-row `gh api …/files` call besides it
- * only on the pass that already has something to double-check.
- *
- * `unread` separates a read that failed from one that succeeded and found
- * neither, which an empty `renames`/`ignoreAdditions` cannot do on its own.
- * `listFilesByPage` above refuses the whole comparison on exactly this
- * ground: a set known to be short would let a correct bullet accuse a file
- * nobody changed. This carries the same refusal as a flag rather than a
- * refused `Bijection`, since the base comparison can still run and most
- * claims never touch a rename or a `.gitignore` line at all.
+ * `unread` separates a read that failed from one that found neither, which an
+ * empty `renames`/`ignoreAdditions` cannot. A set known to be short would let
+ * a correct bullet accuse a file nobody changed. This carries that refusal as
+ * a flag rather than a refused `Bijection`, since the base comparison can
+ * still run and most claims never touch a rename or a `.gitignore` line.
  */
 async function resolveApiEvidence(
   cwd: string,
@@ -268,22 +263,16 @@ async function resolveApiEvidence(
     roots: treeRoots(tracked, changed),
     ...(head !== undefined && { head }),
   })
-  // A refusal here means there is no claim to credit at all, and a clean
-  // pass means every claim already resolved without the extra evidence, so
-  // neither case leaves anything for unread evidence to have mattered to.
+  // A refusal has no claim to credit, and a clean pass resolved every claim
+  // without the extra evidence, so neither needs it.
   if (probe.kind !== 'measured' || probe.unmet.length === 0) return clean
 
-  // Only past this point does a missing pull request number become a real
-  // gap: there is a claim the probe could not credit, and no number to fetch
-  // the evidence that might explain it.
+  // Only here is a missing pull request number a real gap, since a claim is
+  // uncredited and there is no number to fetch its evidence.
   if (number === undefined) return unread
 
-  // No `--jq` filter here, unlike `listFilesByPage` above. Shaping each row to
-  // {filename, previous_filename, status, patch} would make `--paginate`
-  // concatenate one filtered value per page rather than one combined array,
-  // and gh's own pretty-printing of an object result (unlike the scalar
-  // strings `--jq '.[].filename'` yields) is not guaranteed to stay
-  // line-parseable. Parsing the raw paginated array is safe under both.
+  // No `--jq` filter, since a filtered object per row makes `--paginate` emit one
+  // value per page. Parsing the raw paginated array is safe either way.
   const stdout = await gh(cwd, [
     'api',
     '--paginate',
@@ -459,9 +448,8 @@ async function runKeyChanges(
     }
   }
 
-  // Named rather than counted into the verdict. A generated asset, a lockfile,
-  // and a regenerated index all change without earning a bullet, so grading
-  // this direction would fire on nearly every branch.
+  // Named rather than counted into the verdict, since generated assets,
+  // lockfiles, and indexes change without earning a bullet.
   logStep('Unnamed')
   if (report.unnamed.length === 0) {
     logInfo('every changed file is reached by a bullet')
@@ -469,9 +457,8 @@ async function runKeyChanges(
     logInfo(
       `${plural(report.unnamed.length, 'changed file')} no bullet reached. Add one where the change is worth a reader knowing about.`,
     )
-    // Capped in the frame and whole in the record. A rename branch measured
-    // here left 71 of its 100 files unnamed, correctly, and printing all of
-    // them buries the graded direction above under a list nobody reads.
+    // Capped in the frame and whole in the record, since a rename branch can leave
+    // most files unnamed, correctly, and the list buries the graded direction.
     for (const path of report.unnamed.slice(0, UNNAMED_PRINT_LIMIT)) {
       logInfo(path)
     }

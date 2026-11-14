@@ -237,10 +237,8 @@ async function runInventory(
     logInfo(`${target.location}  ${plural(target.elements, 'element')}`)
   }
 
-  // A walk that matched nothing refuses rather than printing an empty listing,
-  // because no rows and one row read the same to anything counting them, and
-  // the first says the query reached nothing while the second says the site
-  // gives one consistent answer.
+  // A walk matching nothing refuses rather than printing an empty listing, since
+  // no rows would read the same as a site giving one consistent answer.
   if (groups.length === 0) {
     return refuse(
       emitJson,

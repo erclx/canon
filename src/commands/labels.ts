@@ -368,8 +368,7 @@ async function runAudit(paths: string[], opts: AuditOptions): Promise<number> {
   intro('canon labels audit')
 
   // The refusal reaches stderr in both modes and the record goes to stdout
-  // alone, so an operator reading the terminal sees the refusal rather than a
-  // command that appeared to do nothing.
+  // alone, so the terminal shows the refusal rather than silence.
   if (report.kind === 'refused') {
     logStep('Refused')
     logWarn(REFUSALS[report.reason])
@@ -403,9 +402,8 @@ async function runAudit(paths: string[], opts: AuditOptions): Promise<number> {
       : coverage.labels.join(', '),
   )
 
-  // Named rather than counted into the uncovered line. A path somebody decided
-  // against wants nothing done, and folding it in would ask for a row that was
-  // already refused.
+  // Named rather than counted into the uncovered line, since a path decided
+  // against wants nothing done.
   logStep('Declined')
   if (coverage.declined.length === 0) {
     logInfo('no changed path is deliberately unlabelled')
@@ -495,9 +493,8 @@ async function runApply(number: string, opts: ApplyOptions): Promise<number> {
   const head = branch.exitCode === 0 ? branch.text().trim() : ''
   if (head === '') return refuse('no-branch')
 
-  // Binding runs ahead of the audit, every label read, and every write, under
-  // --check and a project with no map as well, so a number this branch does
-  // not own costs the run and nothing else.
+  // Binding runs ahead of the audit, every read, and every write, under --check
+  // and with no map too, so a number this branch does not own costs only the run.
   const target = await gh(root, [
     'api',
     `repos/{owner}/{repo}/pulls/${number}`,
@@ -507,9 +504,8 @@ async function runApply(number: string, opts: ApplyOptions): Promise<number> {
   if (target === null) return refuse('gh-failed')
   if (target.trim() !== `${head} open`) return refuse('head-mismatch')
 
-  // An explicit --base is an explicit request for the git route. Otherwise the
-  // pull request's own file listing is the diff the labels describe, and a
-  // failed read refuses rather than falling back, since binding needed gh too.
+  // An explicit --base asks for the git route. Otherwise a failed listing read
+  // refuses rather than falling back, since binding needed gh too.
   let paths: string[] | undefined
   if (opts.base === undefined) {
     const listing = await gh(root, [
@@ -832,10 +828,8 @@ async function runScan(opts: ScanOptions): Promise<number> {
 
   const titleFormatIssues = titleFormat?.issues ?? []
 
-  // A review carries its own headings, a release-please body opens on a
-  // version link, and a scan with no title is a reply or a review body rather
-  // than a pull request description, so none of the three has the closed list
-  // to grade against.
+  // A review, a release-please body, and a scan with no title carry no pull
+  // request description, so none has the closed list to grade against.
   const sectionsChecked =
     resolved.source === 'pull-request' &&
     resolved.title !== '' &&
@@ -874,9 +868,8 @@ async function runScan(opts: ScanOptions): Promise<number> {
     }
   }
 
-  // A body's density fails the scan. A post's never does, since the review
-  // post hook denies on exit 2 and scans with no title, so a post-density
-  // fail would block every dense review or reply post.
+  // A post's density never fails the scan, since the review post hook denies on
+  // exit 2 and would block every dense review or reply.
   const post = !sectionsChecked && isPost(resolved.body)
   const density = sectionsChecked
     ? bodyDensity(resolved.body)

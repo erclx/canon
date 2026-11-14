@@ -11,17 +11,14 @@ export const FAKE_GH = join(import.meta.dirname, '..', 'fixtures', 'gh.sh')
 /**
  * A `gh` stand-in that answers the reads `pr evidence` and `pr local` make and
  * records the body of any `gh api` write, so the command surface runs end to
- * end without a network. The program is `fixtures/gh.sh`, and the `gh` written
- * here is a wrapper exporting the three paths it reads.
+ * end without a network. The program is `fixtures/gh.sh`, wrapped here.
  *
- * The pull request's files, head, and merge base come from the repository's
- * own `main...HEAD` unless a fixture beside `apiLog` names them: `files.tsv`
- * holds `status<TAB>path` rows, `head` a sha, `merge-base` a sha, and
- * `files-fail` makes the files read fail. `base-tree.json` answers the base
- * branch's recursive tree read, which fails without it. The rows become the files API's JSON
- * array and pass through the `--jq` filter the caller sent, so a filter that
- * mangles its own output fails here as it would against GitHub. Every files
- * read appends its arguments to `files-calls.log`.
+ * The files, head, and merge base come from the repository's own `main...HEAD`
+ * unless a fixture beside `apiLog` names them: `files.tsv` holds
+ * `status<TAB>path` rows, `head` and `merge-base` a sha each, `files-fail`
+ * fails the files read, and `base-tree.json` answers the base tree read. The
+ * rows pass through the caller's `--jq` filter, and every files read appends
+ * its arguments to `files-calls.log`.
  */
 export function writeFakeGh(
   bin: string,
@@ -108,17 +105,15 @@ export const WEB_ONLY_DEPLOY = [
 
 /**
  * A `gh` standing in for the GitHub proxy a cloud session runs behind, which
- * serves REST and refuses GraphQL with a 403. Every `pr` subcommand, every
- * `repo view`, and every `graphql` call runs on GraphQL, so each one fails
- * here and a verb that reintroduces one fails the test that drives it.
+ * serves REST and refuses GraphQL with a 403, so a verb that reintroduces a
+ * `pr` subcommand, `repo view`, or `graphql` call fails the test driving it.
  *
  * Fixtures live in `FAKE_DIR`: `pull.json` answers the single pull read,
  * `listing.json` the branch lookup, `reviews.json` the reviews read (a stream
  * of arrays stands for several pages), and `reviews-fail` makes that read 403.
- * `merge-409` makes the REST merge answer a moved head, as gh reports it.
- * `runs.json` answers the tip's workflow runs and `jobs.json` every run's
- * jobs, and either read fails when its file is absent.
- * The caller's `--jq` filter runs over each answer, as gh runs it.
+ * `merge-409` makes the REST merge answer a moved head. `runs.json` and
+ * `jobs.json` answer the runs and jobs reads, failing when absent, and the
+ * caller's `--jq` filter runs over each answer.
  */
 export const PROXY_GH = readFileSync(
   new URL('../fixtures/gh-proxy.sh', import.meta.url),

@@ -94,10 +94,8 @@ async function runChecks(
     )
   }
 
-  // The page size is raised rather than paged through. `collapseChecks` reads
-  // a count above the rows it was handed as pending, so a commit past the
-  // ceiling reports unread rather than clean, and 100 is the endpoint's own
-  // maximum against a default of 30.
+  // Raised to the endpoint's maximum rather than paged, since `collapseChecks`
+  // reads a count above its rows as pending, so a commit past it reads unread.
   const listed = await gh(root, [
     'api',
     `repos/{owner}/{repo}/commits/${resolved.tip}/check-runs?per_page=100`,

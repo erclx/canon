@@ -109,9 +109,8 @@ async function runScan(
   logInfo(
     `${plural(scan.files, 'file')} read, ${scan.skipped} skipped as binary or unreadable`,
   )
-  // Stated on every run, including a clean one. The corpus answers what the
-  // package publishes, and a reader who sees only the passing count reads the
-  // verdict as covering the repository.
+  // Stated on every run, since the corpus is what the package publishes and a
+  // passing count alone reads as covering the repository.
   logInfo(
     `${scan.listed - scan.files - scan.skipped} of ${scan.listed} listed files sit outside the published corpus and were not read`,
   )

@@ -170,9 +170,8 @@ async function runAudit(
   const gateOnly = opts.citationsOnly ?? false
   const widened = opts.gate ?? false
 
-  // `--citations-only` runs the citation check alone, so the two findings
-  // `--gate` adds are never measured. Honouring both would exit 0 on a seed
-  // short a required section, which is the pass a gate exists to prevent.
+  // `--citations-only` never measures the two findings `--gate` adds, so honoring
+  // both would exit 0 on a seed short a required section.
   if (gateOnly && widened) {
     return refuse(
       'conflicting-options',
@@ -187,9 +186,8 @@ async function runAudit(
     return refuse('bad-folder-list', names, gateOnly, root, opts.json ?? false)
   }
 
-  // The root base is opt-in. A target carrying a root folder of its own would
-  // otherwise be audited against a standard it never adopted, on a bare run
-  // that named nothing.
+  // The root base is opt-in, so a bare run never audits a target's own root
+  // folder against a standard it never adopted.
   const named = opts.folder !== undefined
   const { folders, missing } = await resolveFolders(root, names, {
     canResolveAtRoot: named,
@@ -204,15 +202,12 @@ async function runAudit(
     )
   }
 
-  // A default folder a project does not carry is the ordinary case and stays
-  // silent. A name passed by hand that resolves nowhere is a typo, and the run
-  // measuring the names that did resolve reads as a pass against a folder it
-  // never opened.
+  // A default folder a project does not carry stays silent. A name passed by
+  // hand that resolves nowhere is a typo, and is reported rather than passed.
   const unresolved = named ? missing : []
 
-  // The gate runs one check. Letting it exit 0 against a scope it could not
-  // build reports a pass on nothing measured, which is the outcome a gate is
-  // there to prevent.
+  // The gate refuses a scope it could not build rather than exiting 0 on
+  // nothing measured.
   const cited = presentNames(folders)
   if (gateOnly && cited.length === 0) {
     return refuse(
@@ -239,9 +234,8 @@ async function runAudit(
   const drift = gateOnly ? [] : await auditIndexes(folders)
   const sections = gateOnly ? [] : missingSections(root, folders, entries)
   const extras = gateOnly ? [] : extraSections(entries)
-  // The gated prefixes name paths from the repository root, while an entry's
-  // path runs from the audit root, which is a seed tree's own root when one is
-  // passed. Resolving here keeps a seed tree listed under its toolkit path.
+  // The gated prefixes run from the repository root and an entry's path from the
+  // audit root, so a seed tree stays listed under its toolkit path.
   const top = gateOnly ? root : await currentWorktreeRoot(root)
   const shape = gateOnly
     ? []
@@ -253,8 +247,7 @@ async function runAudit(
     ? undefined
     : measureCoverage(root, readRoots(root), folders)
   // Absent under `--citations-only` and null when the project carries no
-  // record. A run that never looked and a project with nothing to look at are
-  // different answers, and one value for both reports the second as the first.
+  // record, since a run that never looked differs from nothing to look at.
   const requirements = gateOnly ? undefined : await measureRequirements(root)
 
   if (gateOnly) {
@@ -292,16 +285,8 @@ async function runAudit(
           unresolved: citations.unresolved,
         },
         entries,
-        // The join is published rather than left to a consumer, since deriving
-        // it from `entries` means restating which question the provenance count
-        // answers, and one wrong restatement is a cause reported against the
-        // wrong entry.
-        //
-        // Absent rather than empty under `--citations-only`. That mode
-        // measures no entry, so an empty array here reads as a corpus with
-        // nothing past the checkpoint rather than as a run that never looked,
-        // and collapsing the two reports a measured answer for a run that
-        // never opened an entry.
+        // Published rather than left to a consumer to derive from `entries`. Absent
+        // rather than empty under `--citations-only`, which measures no entry.
         length,
         missingSections: sections,
         extraSections: extras,
@@ -309,18 +294,16 @@ async function runAudit(
         indexDrift: drift,
         // Absent under `--citations-only`, which never measures it.
         coverage,
-        // Null says the run opened the project and found no record, which a
-        // target that never wrote one is entitled to. Absent says the run
-        // never looked, which is `--citations-only`.
+        // Null is a project carrying no record, and absent is a run that never
+        // looked, which is `--citations-only`.
         requirements: gateOnly ? undefined : (requirements ?? null),
         checkpoints: {
           lines: LENGTH_CHECKPOINT,
           renderWidth: RENDER_WIDTH,
           provenanceFolder: PROVENANCE_FOLDER,
           requiredSections: REQUIRED_SECTIONS,
-          // Keyed on the audited folder name. The flat key above stays for a
-          // caller that read it first, since removing it would break that
-          // caller without an error.
+          // Keyed on the audited folder name. The flat key above stays for a caller
+          // that read it first, since removing it would break that caller silently.
           requiredSectionsByFolder: REQUIRED_SECTIONS_BY_FOLDER,
           allowedSectionsByFolder: ALLOWED_SECTIONS_BY_FOLDER,
           retiredSectionsByFolder: RETIRED_SECTIONS_BY_FOLDER,

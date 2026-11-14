@@ -434,10 +434,8 @@ async function runList(opts: ListCommandOptions): Promise<number> {
     return 1
   }
 
-  // The roster read returns every row and marks none of them as the caller, so
-  // the join runs here, ahead of any scope. Resolving it after the branch
-  // filter would answer "no row" for a caller whose row was merely filtered
-  // out, which is a different failure wearing the same reason.
+  // The roster marks no row as the caller, so the join runs ahead of any scope,
+  // since a caller filtered out by branch would read as one with no row.
   const own = opts.self ? selfOf(report.sessions, callerIdentity()) : null
 
   if (own?.kind === 'unresolved') {
@@ -462,13 +460,8 @@ async function runList(opts: ListCommandOptions): Promise<number> {
 
   const pool = own === null ? report.sessions : [own.session]
 
-  // A branch name identifies a branch inside one repository and nothing across
-  // a machine, so an unscoped match reaches a session working in a different
-  // project. `main` is the name that collides on every machine running two.
-  //
-  // Which repository that is is the caller's to name. The roster this filters
-  // is machine-wide already, so a dispatcher asking about another project was
-  // answered "unclaimed" about a branch a live session there was holding.
+  // A branch name is unique only inside one repository, and the roster is
+  // machine-wide, so the match is scoped to the repository the caller names.
   const at = opts.repository ? resolve(opts.repository) : process.cwd()
   const repository = opts.branch ? await repositoryOf(at) : null
 
@@ -587,9 +580,8 @@ function reportConfidence(
 ): void {
   logStep('Liveness')
 
-  // A roster of none decided nothing, so the confirmed line would claim a check
-  // over rows that do not exist. The registry is never pruned and holds a record
-  // per session ever run, which is what makes the empty result worth stating.
+  // A roster of none decided nothing, and the registry keeps a record per
+  // session ever run, so the empty result is stated rather than confirmed.
   if (shown.length === 0) {
     logInfo(
       report.foreignDead > 0 || report.sessions.length > 0
@@ -639,9 +631,8 @@ function reportSessions(
     )
   }
 
-  // An empty result under --self says nothing about the roster, since the pool
-  // was narrowed to one row before the branch filter ran. Reporting the wider
-  // answer there would claim a reading this run never took.
+  // Under --self the pool was narrowed to one row before the branch filter, so
+  // an empty result says nothing about the wider roster.
   if (sessions.length === 0) {
     if (stopsUnread !== null) {
       logInfo(noneStopped(branch, scoped, foreignDead, stopsUnread))

@@ -337,9 +337,8 @@ async function runReach(
   opts: ReachCommandOptions,
 ): Promise<number> {
   const root = opts.root ?? (await mainWorktreeRoot())
-  // The range belongs to the checkout the caller stands in, which is the linked
-  // worktree holding the branch on every dispatched run. The board root is the
-  // main worktree, where reading a range measures the trunk against itself.
+  // The range belongs to the caller's checkout, the linked worktree on a
+  // dispatched run, since the main worktree would measure trunk against itself.
   const outcome = await planReach(root, plan, {
     repo: process.cwd(),
     ref: opts.base,
@@ -422,9 +421,8 @@ function reportReach(
     )
   }
 
-  // The counts are the report's own bound. A verb reading what is written down
-  // sees no hand-launched track and no track without a plan, so a clear reading
-  // over nothing compared against would otherwise read as a proof.
+  // The counts bound the report, since a hand-launched track or one without a
+  // plan is unseen, and a clear reading over nothing would read as proof.
   logStep('Compared against')
   logInfo(
     `${outcome.plans} other live plan(s) and ${outcome.rows} Run now row(s)${outcome.board ? '' : ', with no board on disk to read'}`,

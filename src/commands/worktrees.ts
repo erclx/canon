@@ -715,10 +715,8 @@ async function runReclaim(opts: ReclaimCommandOptions): Promise<number> {
     )
   }
 
-  // Every git call in the removal is scoped to the main root rather than to the
-  // caller's directory, which a removal earlier in the same run can delete out
-  // from under the ones after it. The reading above stays on the caller's
-  // directory, since that is what tells it which worktree it is standing in.
+  // Removal runs from the main root, since an earlier removal can delete the
+  // caller's directory. The reading above stays on the caller's directory.
   const root = await mainWorktreeRoot()
   const removal =
     reclaimable.length === 0
@@ -822,10 +820,8 @@ export function describe(verdict: WorktreeVerdict): string {
 
   if (!verdict.reclaimable) {
     const reasons = verdict.refusals.map((refusal) => REFUSALS[refusal])
-    // Three cases rather than one line, since only a resolved background
-    // holder has a real command to print. An interactive holder has no id to
-    // look up at all, and an unresolved background one has an id somewhere in
-    // `claude agents --json` that this reading could not cross-reference.
+    // Only a resolved background holder has a real command to print. An
+    // interactive one has no id, and an unresolved one could not be looked up.
     const routes =
       verdict.route === 'session'
         ? verdict.sessions.map((session) => {
