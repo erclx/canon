@@ -397,3 +397,134 @@ describe('answerItems', () => {
     expect(outcome.reason).toBe('no-cluster')
   })
 })
+
+function decidedItem(label: string, pointer: string, answer?: string): string {
+  return item({ label, answer }).replace(
+    '- **You:**',
+    `- **Decided:** ${pointer}\n- **You:**`,
+  )
+}
+
+const DRIVE_LOG = [
+  '# Drive log',
+  '',
+  '## 02. Layers click leaves a frame',
+  '',
+  '- **Decision (operator):** close the frame on click',
+  '',
+  '## 04. Layers click on a nested frame',
+  '',
+  '- **Decision (operator):** see 02',
+  '',
+  '## 05. Export to PNG',
+  '',
+  '- **Did:** exported the board',
+].join('\n')
+
+async function seedDrive(...items: readonly string[]): Promise<string> {
+  const folder = await seedFolder('drive', {
+    '01-layers.md': cluster(...items),
+  })
+  mkdirSync(join(folder, 'evidence'))
+  await writeFile(join(folder, 'evidence', 'drive-log.md'), DRIVE_LOG)
+  return folder
+}
+
+describe('Decided route', () => {
+  it('should resolve each pointer into the decision it reaches on read', async () => {
+    await seedDrive(
+      decidedItem('1', 'evidence/drive-log.md, finding 2'),
+      decidedItem('2', 'evidence/drive-log.md, finding 04'),
+      item({ label: '3' }),
+    )
+
+    const outcome = await readFolder(ROOT, 'drive')
+
+    if (!outcome.ok) throw new Error(outcome.message)
+    expect(outcome.clusters[0].items.map((entry) => entry.decision)).toEqual([
+      'close the frame on click',
+      'close the frame on click',
+      undefined,
+    ])
+  })
+
+  it('should land the cited answer on every decided label', async () => {
+    const folder = await seedDrive(
+      decidedItem('1', 'evidence/drive-log.md, finding 2'),
+      decidedItem('2', 'evidence/drive-log.md, finding 04'),
+    )
+
+    const outcome = await answerItems(
+      ROOT,
+      'drive',
+      '01-layers.md',
+      [],
+      ['1', '2'],
+    )
+
+    expect(outcome.ok).toBe(true)
+    const text = await readFile(join(folder, '01-layers.md'), 'utf8')
+    expect(readItems(text).map((entry) => entry.answer)).toEqual([
+      'ok, as decided in drive-log finding 02',
+      'ok, as decided in drive-log finding 04',
+    ])
+  })
+
+  it.each([
+    ['an item with no Decided field', item({ label: '2' })],
+    [
+      'a finding carrying no decision',
+      decidedItem('2', 'evidence/drive-log.md, finding 05'),
+    ],
+    [
+      'a finding missing from the log',
+      decidedItem('2', 'evidence/drive-log.md, finding 09'),
+    ],
+    [
+      'a pointer at a path other than the folder log',
+      decidedItem('2', 'notes/drive-log.md, finding 02'),
+    ],
+  ])('should refuse undecided for %s and write no slot', async (_, second) => {
+    const folder = await seedDrive(
+      decidedItem('1', 'evidence/drive-log.md, finding 2'),
+      second,
+    )
+    const before = await readFile(join(folder, '01-layers.md'), 'utf8')
+
+    const outcome = await answerItems(
+      ROOT,
+      'drive',
+      '01-layers.md',
+      [],
+      ['1', '2'],
+    )
+
+    expect(outcome.ok).toBe(false)
+    if (!outcome.ok) expect(outcome.reason).toBe('undecided')
+    expect(await readFile(join(folder, '01-layers.md'), 'utf8')).toBe(before)
+  })
+
+  it('should refuse undecided when the folder holds no drive log', async () => {
+    await seedFolder('drive', {
+      '01-layers.md': cluster(
+        decidedItem('1', 'evidence/drive-log.md, finding 2'),
+      ),
+    })
+
+    const outcome = await answerItems(ROOT, 'drive', '01-layers.md', [], ['1'])
+
+    expect(outcome.ok).toBe(false)
+    if (!outcome.ok) expect(outcome.reason).toBe('undecided')
+  })
+
+  it('should refuse answered for a decided label whose slot is filled', async () => {
+    await seedDrive(
+      decidedItem('1', 'evidence/drive-log.md, finding 2', 'skip'),
+    )
+
+    const outcome = await answerItems(ROOT, 'drive', '01-layers.md', [], ['1'])
+
+    expect(outcome.ok).toBe(false)
+    if (!outcome.ok) expect(outcome.reason).toBe('answered')
+  })
+})

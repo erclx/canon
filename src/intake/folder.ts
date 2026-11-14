@@ -1,11 +1,13 @@
 import { existsSync } from 'node:fs'
 import { readdir, readFile, writeFile } from 'node:fs/promises'
-import { basename, join, relative } from 'node:path'
+import { basename, join, normalize, relative } from 'node:path'
+import { DRIVE_LOG, readDecisions } from '@/intake/drive-check'
 import {
   INDEX_FILE,
   type IntakeItem,
   isMalformed,
   isUnread,
+  parseDecided,
   readItems,
   writeAnswerLine,
 } from '@/intake/items'
@@ -19,6 +21,7 @@ export const INTAKE_REFUSALS = [
   'no-item',
   'answered',
   'bad-input',
+  'undecided',
 ] as const
 
 export type IntakeRefusal = (typeof INTAKE_REFUSALS)[number]
@@ -39,9 +42,15 @@ export interface FolderSummary {
   readonly malformed: number
 }
 
+/** An item with its `Decided:` pointer resolved against the folder's drive log. */
+export interface ResolvedItem extends IntakeItem {
+  /** The decision the pointer reaches, absent when it reaches none. */
+  readonly decision: string | undefined
+}
+
 export interface ClusterItems {
   readonly cluster: string
-  readonly items: readonly IntakeItem[]
+  readonly items: readonly ResolvedItem[]
 }
 
 export interface FolderListed {
@@ -198,13 +207,44 @@ export async function listFolders(root: string): Promise<ListOutcome> {
   return { ok: true, folders }
 }
 
+/**
+ * The folder's own drive log, read once per folder. A folder with no log
+ * resolves every pointer to nothing, which the answer route refuses.
+ */
+async function folderDecisions(folder: string): Promise<Map<number, string>> {
+  const path = join(folder, DRIVE_LOG)
+  if (!existsSync(path)) return new Map()
+  return readDecisions(await readFile(path, 'utf8'))
+}
+
+/**
+ * The decision a pointer reaches, read from this folder's log alone, so a
+ * pointer naming any other path resolves to nothing rather than being followed.
+ */
+function resolveDecision(
+  item: IntakeItem,
+  decisions: ReadonlyMap<number, string>,
+): string | undefined {
+  const pointer =
+    item.decided === undefined ? undefined : parseDecided(item.decided)
+  if (pointer === undefined || normalize(pointer.path) !== DRIVE_LOG) {
+    return undefined
+  }
+  return decisions.get(pointer.finding)
+}
+
 async function readClusters(folder: string): Promise<ClusterItems[]> {
-  const names = await listClusters(folder)
+  const [names, decisions] = await Promise.all([
+    listClusters(folder),
+    folderDecisions(folder),
+  ])
 
   return Promise.all(
     names.map(async (cluster) => ({
       cluster,
-      items: readItems(await readFile(join(folder, cluster), 'utf8')),
+      items: readItems(await readFile(join(folder, cluster), 'utf8')).map(
+        (item) => ({ ...item, decision: resolveDecision(item, decisions) }),
+      ),
     })),
   )
 }
@@ -230,12 +270,17 @@ export async function readFolder(
  * The batch is scoped to a cluster and applied in one read-modify-write because
  * the alternative is a call per selection, and four of those against the same
  * file race on the read and drop every answer but the last.
+ *
+ * A `decided` label accepts the decision its item's `Decided:` pointer reaches
+ * and writes that source into the slot. One that reaches no decision refuses
+ * the whole call, so an accept never lands on a decision nobody recorded.
  */
 export async function answerItems(
   root: string,
   slug: string,
   cluster: string,
   selections: readonly Selection[],
+  decided: readonly string[] = [],
 ): Promise<AnswerOutcome> {
   const opened = await openFolder(root, slug)
   if (typeof opened !== 'string') return opened
@@ -277,21 +322,20 @@ export async function answerItems(
   const find = (label: string) =>
     items.find((item) => item.label === label.toLowerCase())
 
-  const missing = selections.filter(
-    (selection) => find(selection.label)?.answerLine === undefined,
-  )
+  const named = [...selections.map((selection) => selection.label), ...decided]
+  const missing = named.filter((label) => find(label)?.answerLine === undefined)
 
   if (missing.length > 0) {
     return refuse(
       'no-item',
-      `${name} carries no answer slot for item ${missing.map((entry) => entry.label).join(', ')}.`,
+      `${name} carries no answer slot for item ${missing.join(', ')}.`,
       items.map((item) => `${item.label}. ${item.title}`),
     )
   }
 
-  const filled = selections.filter(
-    (selection) => find(selection.label)?.answer !== undefined,
-  )
+  const filled = named
+    .filter((label) => find(label)?.answer !== undefined)
+    .map((label) => ({ label }))
 
   if (filled.length > 0) {
     return refuse(
@@ -303,7 +347,12 @@ export async function answerItems(
     )
   }
 
-  for (const selection of selections) {
+  const accepted = await acceptDecided(opened, decided, find)
+  if (!Array.isArray(accepted)) return accepted
+
+  const landed = [...selections, ...accepted]
+
+  for (const selection of landed) {
     const item = find(selection.label)
     if (item?.answerLine === undefined) continue
     text = writeAnswerLine(text, item.answerLine, selection.answer)
@@ -316,6 +365,49 @@ export async function answerItems(
     slug: basename(opened),
     cluster: name,
     path,
-    answered: selections,
+    answered: landed,
   }
+}
+
+/**
+ * The answer each decided label lands, keeping `ok` first for every reader
+ * keying on it and the finding beside it so the slot names its source.
+ */
+async function acceptDecided(
+  folder: string,
+  labels: readonly string[],
+  find: (label: string) => IntakeItem | undefined,
+): Promise<Selection[] | IntakeRefused> {
+  if (labels.length === 0) return []
+
+  const decisions = await folderDecisions(folder)
+  const accepted: Selection[] = []
+  const undecided: IntakeItem[] = []
+
+  for (const label of labels) {
+    const item = find(label)
+    if (item === undefined) continue
+    const pointer =
+      item.decided === undefined ? undefined : parseDecided(item.decided)
+    if (pointer === undefined || !resolveDecision(item, decisions)) {
+      undecided.push(item)
+      continue
+    }
+    const finding = String(pointer.finding).padStart(2, '0')
+    accepted.push({
+      label: item.label,
+      answer: `ok, as decided in drive-log finding ${finding}`,
+    })
+  }
+
+  if (undecided.length > 0) {
+    return refuse(
+      'undecided',
+      `Item ${undecided.map((item) => item.label).join(', ')} reaches no decision in ${DRIVE_LOG}, so nothing was written.`,
+      undecided.map(
+        (item) => `${item.label}. ${item.decided ?? 'no Decided: field'}`,
+      ),
+    )
+  }
+  return accepted
 }
