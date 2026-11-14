@@ -54,6 +54,11 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'Can you retell the intake items in plain words, one at a time, before I answer any?',
+    expect: 'plan-intake-answer',
+  },
+  {
+    prompt:
       'Take on the orchestrator role and coordinate the parallel feature builds.',
     expect: 'role-orchestrator',
   },

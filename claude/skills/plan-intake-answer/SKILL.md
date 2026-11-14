@@ -1,6 +1,6 @@
 ---
 name: plan-intake-answer
-description: Walks an intake folder's unread items and puts them as batched questions in chat, writing each selection back onto the item it answers. Use when asked to "answer the intake", "work through the open items", "answer my intake questions", "go through the dump", or "let me answer these from here". Do NOT use to file a dump or write new items, which is `plan-intake`. Do NOT auto-trigger.
+description: Walks an intake folder's unread items and puts them as batched questions in chat, writing each selection back onto the item it answers. Use when asked to "answer the intake", "work through the open items", "answer my intake questions", "go through the dump", or "let me answer these from here", and to "retell the intake" in plain words without answering anything. Do NOT use to file a dump or write new items, which is `plan-intake`. Do NOT auto-trigger.
 metadata:
   family: decide
 ---
@@ -18,7 +18,7 @@ Read `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md` before writing an
 ## Guards
 
 - If `canon intake list --json` reports no folder, stop: `❌ No intake to answer. Run /plan-intake to file a dump first.`
-- If the named folder has no unread item, stop: `❌ Every item in <slug> carries an answer. Nothing to ask.`
+- If the named folder has no unread item and the ask is to answer rather than retell, stop: `❌ Every item in <slug> carries an answer. Nothing to ask.`
 - Never fill a slot the operator did not answer. An abandoned batch leaves every unreached item unread, which is what the empty slot already means.
 - Never infer an answer from the conversation having happened. A selection reaches the file through the verb or not at all.
 - Do not promote an item, edit a verdict, or write outside the answer slots, bar the close Step 5 offers on an explicit yes. Promoting runs through `task-board` after the answers land.
@@ -107,6 +107,14 @@ Never carry a yes from one issue or one turn to another.
 After each cluster, state how many clusters still carry unread items and continue to the next. Stop when the operator says to stop, and report what is left rather than pressing on.
 
 Answers are on disk as each cluster completes, so a session ending mid-folder loses nothing.
+
+## Retell on the operator's ask
+
+When the operator asks for a retell rather than answers, give one and skip Steps 2 to 6. Read `${CLAUDE_SKILL_DIR}/../plan-intake/references/retell.md` for the block each item takes and the wording rules.
+
+- Pick the folder as Step 1 does, then read every item through `canon intake list <slug> --json`, answered or not
+- Write nothing, and leave every `You:` slot as it stands, since the retell restates items and decides none
+- Offer to answer the unread items afterwards, and start Step 2 only on a yes
 
 ## Output
 
