@@ -78,6 +78,16 @@ The closing lines end `## Summary`, one `Closes #NNN` per issue and no trailing 
 - Use bullets when every reason fits one sentence under 200 characters
 - Otherwise write one paragraph per decision, opening on a bold lead-in that ends with a period and runs into the paragraph
 
+### Outcome section
+
+`## Outcome` is optional and shows the shape the change produces, for a reader who would otherwise rebuild it from the raw diff. It sits between Technical context and Testing.
+
+- Write Outcome when the change alters a shape someone reads or writes: a record or template, a verb's output or flags, a config or settings format, or a report a skill produces
+- Omit Outcome for an internal refactor, a fix that changes no output, and a prose edit whose diff is its result
+- Show the new shape in a fenced block with placeholders for the values, about 20 lines at most and never a whole file
+- Keep a UI change's result in the evidence comment `pr-evidence` posts, never in the body. A mixed change shows its text shape here and points at that comment in one line.
+- The squash commit carries Summary, Key changes, and Technical context alone, so Outcome stays on the pull request
+
 ### Testing section
 
 `## Testing` is optional and names the exact commands or test cases run.
@@ -92,7 +102,7 @@ The closing lines end `## Summary`, one `Closes #NNN` per issue and no trailing 
 
 - Visuals: include only when they clarify architecture, UI, or complex logic flows
 - The list is closed, so a body carries nothing after its last section, including a trailer a harness appends once the body is composed
-- `canon labels scan` fails a level-two heading outside the five above, and a body missing `## Summary` or `## Key changes`
+- `canon labels scan` fails a level-two heading outside the six above, and a body missing `## Summary` or `## Key changes`
 - A review body and a release-please body are exempt
 
 ## Testing discipline

@@ -35,6 +35,10 @@ Closes #<number>
 
 **<Next decision>.** <Why>
 
+## Outcome
+
+<The new shape in a fenced block, with placeholders for the values>
+
 ## Testing
 
 - [x] <Command run> <observed result>
