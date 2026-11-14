@@ -48,7 +48,7 @@ Reading is not restricted, so read documentation, comparable projects, and paper
 
 - Every claim about a source outside the project carries a link to it. A source found and not read is listed as a lead and is never cited.
 - Treat the folder as gitignored. `canon records push` and `canon records pull` back it up where a records remote is configured, and refuse with `no-remote` otherwise.
-- Neither protects against a compaction dropping unpushed reasoning, so `07-next-session.md` repeats what it needs instead of pointing at its siblings
+- Neither protects against a compaction dropping unpushed reasoning, so a session stopping mid-track writes `99-next-session.md` repeating what it needs instead of pointing at its siblings
 
 ## Running a spike
 
@@ -122,7 +122,7 @@ The standard sets the open question format inside a topic file and in `00-scope.
 
 ## Resume mode
 
-1. Read `README.md` and its file map first, then the numbered files in order.
+1. Read `99-next-session.md` first when present, then `README.md` and its file map, then the numbered files in order. Delete the pause note once its content is back in the topic files.
 2. Do not re-measure what `01-current-state.md` holds unless the project moved under it. When it did move, re-measure and mark what changed.
 3. Continue from the open questions carried at the end of each file. Add or rewrite files as those questions move.
 4. Update the file map in `README.md` whenever a file is added or retired.
@@ -130,7 +130,7 @@ The standard sets the open question format inside a topic file and in `00-scope.
 ## Close mode
 
 1. Write `06-decision.md`, stating the problem once, the goal, what to do, and what was dropped. Carry each adopted lean's "Overturned by" line into `## Revisit when`.
-2. Write `07-next-session.md` self-contained, so it survives a compaction that loses the conversation.
+2. Delete `99-next-session.md` when present, since `06-decision.md` alone closes the track and a pause note beside it is a stale second account.
 3. Update the file map in `README.md`.
 4. Record the conclusion, even when it is to do nothing, by the route `### Close routes` below picks.
 5. When the conclusion Step 4 recorded or handed off does not cover every finding the track surfaced, route what it leaves out through `plan-intake`. Skip this step when it does.

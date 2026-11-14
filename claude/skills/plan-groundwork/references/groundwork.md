@@ -7,7 +7,7 @@ description: Folder layout, ordinal naming, reserved numbering, frontmatter and 
 
 Applies to a groundwork track at `.canon/groundwork/<nn>-<slug>/`. A track measures one question that has to be settled before anyone can plan against it. The numbering inside the folder is its table of contents.
 
-The folder is gitignored, and backed by `canon records push` wherever a records remote is configured. Nothing backs it against a compaction dropping a session's reasoning before a push, so the handoff file has to be self-contained.
+The folder is gitignored, and backed by `canon records push` wherever a records remote is configured. Nothing backs it against a compaction dropping a session's reasoning before a push, so a pause note has to be self-contained.
 
 ## Contents
 
@@ -20,7 +20,7 @@ The folder is gitignored, and backed by `canon records push` wherever a records 
 - [01-current-state.md](#01-current-statemd) <!-- canon-allow-reference: a heading anchor, not a pull request number -->
 - [00-scope.md](#00-scopemd) <!-- canon-allow-reference: a heading anchor, not a pull request number -->
 - [06-decision.md](#06-decisionmd) <!-- canon-allow-reference: a heading anchor, not a pull request number -->
-- [07-next-session.md](#07-next-sessionmd) <!-- canon-allow-reference: a heading anchor, not a pull request number -->
+- [99-next-session.md](#99-next-sessionmd) <!-- canon-allow-reference: a heading anchor, not a pull request number -->
 - [Open questions](#open-questions)
 - [Conventions](#conventions)
 - [Anti-patterns](#anti-patterns)
@@ -79,10 +79,10 @@ Five slots carry a fixed meaning, and the rest are free.
 | `01`         | Current state, measured                         | Always                      |
 | `02` to `05` | Topic files, whatever the subject demands       | As needed                   |
 | `06`         | Decision                                        | To close                    |
-| `07`         | Handoff, self-contained                         | To close                    |
 | `08`         | Spikes: method, result, and cost per experiment | Tracks that run experiments |
+| `99`         | Pause note, self-contained                      | Stopped mid-track only      |
 
-A folder missing `06` and `07` is live, and that is its only status marker.
+A folder missing `06` is live, and that is its only status marker.
 
 `08` sits after the closing files because it is an appendix of evidence rather than a topic, and a track closes with or without one.
 
@@ -120,9 +120,9 @@ Closes the folder. Everything above it is input. Write it from the skeleton unde
 - `## Revisit when` carries the "Overturned by" line of each lean that became the decision, as written
 - A lean the decision did not take carries nothing, and a track whose deciding leans carried no overturn line omits the section
 
-## 07-next-session.md
+## 99-next-session.md
 
-Written to survive a compaction that loses the conversation. It repeats facts held elsewhere in the folder rather than pointing at them. That duplication is correct here and wrong everywhere else.
+Written only on stopping mid-track, to survive a compaction, so it repeats what the folder holds. Resume and close delete it, and `canon records validate` reports one beside `06`.
 
 ## Open questions
 

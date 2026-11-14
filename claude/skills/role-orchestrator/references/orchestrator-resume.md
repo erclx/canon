@@ -11,7 +11,7 @@ Resume as orchestrator after a compaction. Read the board and the groundwork beh
    - Treat it as the previous session's scratch rather than a source
 3. Read the task file for every entry under `## Run now`, plus any entry a live pull request names.
 4. Read the groundwork folder each of those tasks cites.
-   - `README.md` for the file map, then `06-decision.md` when the track is closed, or `07-next-session.md` and the topic files when open
+   - `README.md` for the file map, then `06-decision.md` when the track is closed, or `99-next-session.md` when present and the topic files when open
    - A task's Findings section is a lossy summary, so planning against it re-derives what the folder already settled
 5. Run `gh pr list --state open` and `git log --oneline -5` to see what shipped since the folder was written.
 6. Report in this shape and stop:
