@@ -1,6 +1,6 @@
 ---
 title: Orchestrator dispatch runbook
-description: The plan-answer gate, the collision check before a self-dispatch, the conflict check against the tracks in flight and the evidence it rests on, the branch the launch names, the one model test applied to each role, the fallback to a human launch, and the loop's stopping condition
+description: The plan-answer gate, the collision check before a self-dispatch, the conflict check against the tracks in flight, the branch the launch names, the one model and effort test applied to each role, the fallback to a human launch, and the loop's stopping condition
 ---
 
 Run this at loop step 4, for a `## Up next` row whose plan is verified, in place of handing the worktree to a human. The conflict check below is where that row is tested against every track in flight, and it is the one statement of what holds a row there.
@@ -105,43 +105,41 @@ Read a contract off the changing plan's `**Risks:**`, and both sides of a rename
 
 ### A shared file is not a hold
 
-Dispatch both and name the shared paths, so the merge order and the second branch's rebase are planned rather than discovered. The branch merging second resolves after the first merges, never against a sibling still building.
-
-- It resolves by running `review-address` in the session that built it, whose Step 5 rebases the branch once it no longer merges
-- A hunk needing a decision the tree does not carry goes to the controller
-- A branch no live session holds gets the review-address shape in `orchestrator-launch.md`
-
-### The evidence
-
-No practitioner source serializes on a shared file. Each builds in parallel and tests at integration, where the merge surfaces a textual conflict and the suite over the merged result a semantic one.
-
-- Fowler's [branching patterns](https://martinfowler.com/articles/branching-patterns.html) have the second integrator pull mainline in and check health "even if it's a clean merge"
-- His [Semantic Conflict](https://martinfowler.com/bliki/SemanticConflict.html) names self-testing code as the first defense, and [DORA](https://dora.dev/capabilities/trunk-based-development/) keeps branches to a few hours
-- GitHub's [merge queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue) tests each pull request against everything queued ahead of it
-- A candidate has no commits to trial-merge, so `git merge-tree` runs at integration and this check reads what a plan declares
-
-### Reading the tracks
-
-Read `canon sessions list --json` for the branches in flight as well as the board, since a hand-launched track carries no row, and read the plan of any branch no row names.
-
-- `canon tasks validate` and `canon tasks plan-reach` report the paths two rows share, a candidate list for the five holds and the paths a dispatch names
-- A shared folder means a plan declared it bare, so narrow that plan's list rather than reading the folder as a sweep
-- A declared set predicts rather than bounds, since `canon:context-fold`, `canon:docs-sync`, and the drift stages write past every plan
-- Such a crossing changes what the second branch rebases over, not whether a row holds, and `canon tasks plan-reach` at `canon:git-ship` step 5 names it
+Dispatch both and name the shared paths. Read `${CLAUDE_SKILL_DIR}/references/orchestrator-shared-files.md` for how the second branch rebases, the evidence behind that call, and how to read the tracks in flight.
 
 What binds past the five holds is review attention and machine capacity, which `## Parallelism` in the skill body states.
 
 ## Pick the model
 
-This section binds every launch shape that names `<model>`, the planner and both reviewers as well as the step 4 build, none of which pass through that step.
+This section binds every launch shape that names `<model>` and `<effort>`, the planner and both reviewers as well as the step 4 build, none of which pass through that step.
 
 A `claude --bg` session inherits the launching session's model, so an orchestrator on the larger model spends it on every launch. Name `<model>` on each with one test: `opus` where a wrong result is costly and nothing automatic would catch it, `sonnet` otherwise, never `haiku`.
 
-- Read the role's worst failure and whether a test, gate, or review stops it, never the folder or the plan's length
+- Read the role's worst failure and whether a test, gate, or review stops it, never the folder, the plan's length, or its `Touches` count, none of which measures size
 - Planner: `opus` for a row that changes a contract others consume, spans modules, or needs slicing. `sonnet` for a narrow row, even one inside a hook or governance folder.
 - Worker, and the review-address pass against the findings in hand: `opus` where the plan leaves a cross-module call tests will not settle. `sonnet` where it pins the fix, however long.
 - Code reviewer: `opus` where a miss would ship unseen, a change to behavior no test or gate exercises that other surfaces read. `sonnet` otherwise, a one-line hook edit included.
 - UI reviewer: always `sonnet`. A cheaper tier was measured on that checklist and passed real defects as clean while judging taste boxes it was told to leave.
+
+A model or effort the operator names binds for the session until the operator says otherwise, as a spoken worker cap does.
+
+### Effort
+
+Name `<effort>` beside `<model>` on every launch, by the same test. No level is measured per role, so the two below are starting points rather than defaults.
+
+- `high` where the plan leaves a call that no test, gate, or review settles
+- `medium` where the plan pins the work or the pass follows a checklist, the UI reviewer's included
+- `xhigh` or `max` only on the operator's word
+- The review-address pass picks its own level against the findings in hand, as it picks its own model
+
+A launch naming no effort takes the saved setting or the model's default, never the launcher's level, so the dispatcher's pick reaches the session only through the flag. Two things still override it without a word.
+
+- `CLAUDE_CODE_EFFORT_LEVEL` outranks `--effort`, so a machine exporting it runs every launch at that level. Read it first when a session runs at the wrong one.
+- A level the model does not support, or one above an organization cap, falls to the highest level at or below it, so the dispatch report can name a level the session never ran at
+
+### The top tier
+
+`fable`, the tier above `opus`, runs only on the operator's word, for one dispatch or as a standing pick for the session. `haiku` stays never.
 
 ## Pick local or cloud
 

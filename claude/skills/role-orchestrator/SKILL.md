@@ -156,7 +156,7 @@ Read `${CLAUDE_SKILL_DIR}/references/orchestrator-refill.md` on reaching any of 
 
 ## Parallelism
 
-No fixed number caps worker tracks, and a shared file does not hold one. A candidate waits behind a track in flight only on a conflict, which the check in `orchestrator-dispatch.md` states once along with its sources.
+No fixed number caps worker tracks, and a shared file does not hold one. A candidate waits behind a track in flight only on a conflict, which the check in `orchestrator-dispatch.md` states once, linking the sources behind it.
 
 What binds is review attention and the one machine every worker shares, which bites first where tests run a browser or a server per worktree. Add a track only while both still hold, and narrow the wave when a worker reports a hung verify run.
 

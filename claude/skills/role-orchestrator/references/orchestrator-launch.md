@@ -3,7 +3,7 @@ title: Orchestrator launch runbook
 description: The launch every dispatch kind shares, being the build, cloud build, review-address, and planning templates with a pointer to the talk variant, the session name and controller id each carries, why the command sits at position zero, and what the brief may carry
 ---
 
-Run this once `orchestrator-dispatch.md` has cleared a row, or from its planning or review-address shape below when that runbook's checks do not bind. The model each template names comes from `## Pick the model` in that runbook.
+Run this once `orchestrator-dispatch.md` has cleared a row, or from its planning or review-address shape below when that runbook's checks do not bind. The model and effort each template names come from `## Pick the model` in that runbook.
 
 ## Contents
 
@@ -18,11 +18,11 @@ Run this once `orchestrator-dispatch.md` has cleared a row, or from its planning
 ## Dispatch
 
 ```bash
-claude --bg --model <model> -n "worker-<project>-<slug>" "/canon:auto-ship <plan>
+claude --bg --model <model> --effort <effort> -n "worker-<project>-<slug>" "/canon:auto-ship <plan>
 Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the pull request opens, carrying the number, the branch, the head sha, the CI state, and every point you departed from the plan on, and message it again if you stop on a question."
 ```
 
-`--bg, --background` starts the session as a background agent and returns immediately, and `--model` overrides the inheritance `## Pick the model` states. `-n, --name` sets the display name that tells a self-dispatched worker from an operator's own launch in `canon sessions list`.
+`--bg, --background` starts the session as a background agent and returns immediately, and `--model` overrides the inheritance `## Pick the model` states. `--effort` sets the level picked beside it. `-n, --name` sets the display name that tells a self-dispatched worker from an operator's own launch in `canon sessions list`.
 
 - Pass `-n` on every dispatch, since a launch omitting it names the session for a fragment of its identifier, its send address and all the operator sees
 - The prefix reads `worker-` because that is the role it marks, since a prefix naming another role sends a worker filtering the roster to a sibling or itself
@@ -77,7 +77,7 @@ The prompt carries pointers and standing context, and stops there. The branch an
 - On a reviewer launch, carry the sibling pull requests in flight, the files each shares with this one, the merge order, and a settled constraint, all as facts
 - Leave out this session's read of the change and the author's argument, which cost the dispatch its independence, and any list of what to look for, which is `review-craft`'s
 
-Report the dispatch as loudly as the human-launch line it replaces, naming the branch, the model, the task, and the session name, so a person reading the transcript can follow what fired without watching it happen.
+Report the dispatch as loudly as the human-launch line it replaces, naming the branch, the model and its effort, the task, and the session name, so a person reading the transcript can follow what fired without watching it happen.
 
 ### Record the worker on its task
 
@@ -98,10 +98,10 @@ The branch already exists, so this shape skips the plan-derived name and takes `
 - Work in the folder directly with `Bash`, `Read`, and `Edit` instead of retrying the tool
 
 ```bash
-claude --bg --model <model> -n "worker-<project>-<slug>" "Enter the worktree for <branch> at .claude/worktrees/<slug>/, creating it from that branch if the folder is gone. Run /canon:role-worker, then /canon:review-address. Your controller is the session whose sessionId is <dispatcher-id>, and your reviewer is the session whose sessionId is <reviewer-id>. Resolve each current name from its id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message the reviewer when the address pass finishes, asking it to re-review and carrying what was addressed and the PR's CI state, and send that to the controller instead when the reviewer's id resolves to no live session. Message the controller if you stop on a question."
+claude --bg --model <model> --effort <effort> -n "worker-<project>-<slug>" "Enter the worktree for <branch> at .claude/worktrees/<slug>/, creating it from that branch if the folder is gone. Run /canon:role-worker, then /canon:review-address. Your controller is the session whose sessionId is <dispatcher-id>, and your reviewer is the session whose sessionId is <reviewer-id>. Resolve each current name from its id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message the reviewer when the address pass finishes, asking it to re-review and carrying what was addressed and the PR's CI state, and send that to the controller instead when the reviewer's id resolves to no live session. Message the controller if you stop on a question."
 ```
 
-`<dispatcher-id>`, `<model>`, and `<project>` resolve the same way the build shape resolves them above. `<reviewer-id>` is the sessionId the reviewer's own message carried, so a worker launched fresh answers the reviewer directly.
+`<dispatcher-id>`, `<model>`, `<effort>`, and `<project>` resolve the same way the build shape resolves them above. `<reviewer-id>` is the sessionId the reviewer's own message carried, so a worker launched fresh answers the reviewer directly.
 
 - Where no local reviewer is live, as a cloud reviewer always leaves, drop the reviewer clause and send the finished message to the controller
 - Take this shape wherever a review needs answering and no live session holds the branch. Where one does, message it per the loop's step 6.
@@ -118,17 +118,17 @@ No branch and no worktree exist here and none is created. A planner writes one g
 - `role-planner` therefore sends it as a `Bash` heredoc rather than through `Write`
 
 ```bash
-claude --bg --model <model> -n "planner-<project>-<slug>" "Run /canon:role-planner, then /canon:plan-feature <task>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the plan lands, carrying the path and what the task file got wrong, and message it again if you stop on a question."
+claude --bg --model <model> --effort <effort> -n "planner-<project>-<slug>" "Run /canon:role-planner, then /canon:plan-feature <task>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the plan lands, carrying the path and what the task file got wrong, and message it again if you stop on a question."
 ```
 
-`<task>` is the row's task file path and `<slug>` the slug its plan will take, resolved off the row. `<dispatcher-id>`, `<model>`, and `<project>` resolve as above, and the prefix reads `planner-` because it marks the role of the session it names. Then wait per `orchestrator-planning-wait.md`.
+`<task>` is the row's task file path and `<slug>` the slug its plan will take, resolved off the row. `<dispatcher-id>`, `<model>`, `<effort>`, and `<project>` resolve as above, and the prefix reads `planner-` because it marks the role of the session it names. Then wait per `orchestrator-planning-wait.md`.
 
 ### A flaky row
 
 A row whose task reports an intermittent failure with no finding naming its cause swaps the middle of the brief. The planner measures under groundwork's experiment rules, then plans the fix in the same session.
 
 ```bash
-claude --bg --model <model> -n "planner-<project>-<slug>" "Run /canon:role-planner, then /canon:plan-groundwork <task>, then /canon:plan-feature <task> once the track closes. Your controller is ..."
+claude --bg --model <model> --effort <effort> -n "planner-<project>-<slug>" "Run /canon:role-planner, then /canon:plan-groundwork <task>, then /canon:plan-feature <task> once the track closes. Your controller is ..."
 ```
 
 - Read intermittent as a failure that differs between runs of the same code and inputs, judged from the task rather than matched on a word
