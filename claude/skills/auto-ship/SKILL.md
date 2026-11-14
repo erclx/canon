@@ -76,13 +76,20 @@ When the plan's `**Constraints:**` carry a `Fans in` bullet, this run is a fan-i
 
 ## Step 3: verify
 
-Run the verify commands defined in `CLAUDE.md` (lint, typecheck, tests). On failure:
+Run the verify commands defined in `CLAUDE.md` (lint, typecheck, tests), each under the time limit `canon:git-ship` states in `### Bound each run`, so this step and the Step 6 gate share one bound. On failure:
 
 - Make **one** fix attempt targeting the reported errors
 - Re-run only the failing command
 - If it still fails, stop: `❌ Verify failed after one fix attempt. Review logs and retry manually.`
 
 Do not loop. Do not bypass hooks.
+
+### A hung run
+
+A command past its limit is a hang, not a failure, and takes no fix attempt. A rerun under the same contention hangs again, and only the controller can narrow the wave.
+
+- Stop on the hang line `git-ship` states, naming the command and the limit
+- Under a named controller, send it that line as a block per `canon:role-worker` before the turn ends, rather than idling on it
 
 ## Step 4: test order
 
