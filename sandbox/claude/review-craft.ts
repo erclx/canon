@@ -9,22 +9,14 @@ function stageBranch(ctx: StageContext): void {
 }
 
 /**
- * Four planted defects. The script now fetches and runs an unpinned package at
- * release time, so whoever publishes that package's next version runs code on
- * the release machine. The body before `review-craft` caught that under its
- * one-word security axis, and caught an `eval` draft of it too, so it guards a
- * floor rather than discriminating. The README's Usage section is edited on the
- * branch while its Safety section, two headings further down, still claims the
- * dirty-tree refusal the same diff deletes. A review reading only the changed
- * hunks misses it, since the stale claim sits outside every hunk. The branch
- * also edits `scripts/check.sh` to leave the changed script out of its
- * `shellcheck` run and states no reason, which lowers the bar the change has to
- * clear rather than meeting it. The body before the guard-the-bar axis caught
- * that too, so it is a floor as well. A fourth defect is an upgrade: one commit
- * bumps a dependency across a major version and a second one alongside it, and
- * the lockfile diff adds a transitive package the manifest never names,
- * carrying an install script. The body without a dependency reference caught
- * it, so it is a floor as well.
+ * Four planted defects, three of them floors an earlier body already caught.
+ *
+ * The script runs an unpinned package at release time, so whoever publishes
+ * its next version runs code on the release machine. The README's Safety
+ * section, outside every changed hunk, still claims a refusal the diff deletes.
+ * `scripts/check.sh` drops the changed script from its `shellcheck` run with no
+ * reason, lowering the bar. One commit bumps a dependency across a major
+ * version, and the lockfile adds a transitive package with an install script.
  */
 export default scenario({
   config: {

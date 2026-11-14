@@ -73,9 +73,8 @@ export default scenario({
       ctx.commit('feat(utils): add slugify helper')
       ctx.git('push', '-u', 'origin', 'feat/slugify', '-q')
 
-      // The arm closes rather than merges. `gh pr view` resolves by head branch
-      // and ignores state, so a closed pull request drives the same lookup a
-      // merged one does, without depending on the anchor permitting a squash.
+      // The arm closes rather than merges, since `gh pr view` resolves by head and
+      // ignores state, so a closed pull request drives the same lookup.
       const created = ctx.read('gh', [
         'pr',
         'create',

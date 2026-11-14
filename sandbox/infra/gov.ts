@@ -93,10 +93,8 @@ export default scenario({
     for (const file of rules)
       copyRule(ctx, file, ruleDest(rulesDir, file, 'build/.claude/rules/canon'))
 
-    // `regen/` is the one arm shaped like the toolkit rather than like a target,
-    // because `gov regen` produces a repository's own consumed copy and refuses
-    // nothing. It needs a stack catalog, a record, and an internal rule to reach
-    // every branch the producer has.
+    // `regen/` is shaped like the toolkit, since `gov regen` produces a consumed
+    // copy, and needs a catalog, a record, and an internal rule for every branch.
     ctx.mkdir('regen/internal/rules/claude')
     ctx.mkdir('regen/.claude/rules/canon/claude')
     ctx.run('cp', ['-R', join(ctx.root, 'governance'), 'regen/governance'])
@@ -119,10 +117,8 @@ export default scenario({
     ctx.git('add', '.')
     ctx.commit('chore(sandbox): scaffold gov test directories')
 
-    // A repository of its own, built after the outer commit so the outer tree
-    // never records it as a gitlink. `test-order` reads history rather than a
-    // tree, so its fixture has to be commits in an order rather than files in a
-    // directory. The three commits below produce one verdict each.
+    // A repository of its own, built after the outer commit so it is no gitlink,
+    // since `test-order` reads history, and each of the three commits is a verdict.
     seedTestOrderHistory(ctx)
 
     ctx.log.step('Governance sandbox')
@@ -192,14 +188,8 @@ export default scenario({
       )
     },
     'test-order': (ctx) => {
-      // Both streams and the status land on disk, because `canon sandbox check`
-      // reads the tree and nothing else. The record carries a verdict per module
-      // and the status carries the exit, so the arm asserts the classification
-      // separately from the code a finding is meant to produce.
-      //
-      // The status is held rather than left to stop the arm. A finding exits 2 by
-      // design, so an abort would kill the scenario on the outcome the arm exists
-      // to observe. The five arms above exec and leave theirs on the terminal.
+      // Streams and status land on disk for `canon sandbox check`, and the status is
+      // held, since a finding exits 2 by design and would otherwise abort the arm.
       ctx.log.step('Running: canon gov test-order --root test-order')
       const result = ctx.capture('bun', [
         join(ctx.root, 'src', 'cli.ts'),

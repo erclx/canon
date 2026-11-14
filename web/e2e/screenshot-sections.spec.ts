@@ -123,18 +123,14 @@ test.describe('the section capture', () => {
     })
     await page.emulateMedia({ colorScheme: 'dark' })
     await page.goto('/')
-    // A lazy image and a lazy frame each take their own height once they load,
-    // so a box read before the same settle the harness runs is the height of a
-    // section that has not finished arriving.
+    // Lazy images and frames take their height once loaded, so the box is read
+    // after the same settle the harness runs.
     await settle(page)
 
     const home = path.join(out, 'screenshots', 'localhost', 'home')
 
-    // Read what the run wrote before measuring what was asked for. The list
-    // below is a copy of the harness's own, so a section dropped from the
-    // harness fails the measurement loudly while one added to it would fail
-    // nothing, and the ninth frame would reach the committed baseline
-    // with nothing having checked where it was cut from.
+    // The list below copies the harness's own, so what the run wrote is checked
+    // first, or a section added to the harness would reach the baseline unchecked.
     const written = await readdir(home, { withFileTypes: true })
     expect(
       written

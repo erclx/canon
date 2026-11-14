@@ -1,10 +1,8 @@
 import { type StageContext, scenario } from '@/sandbox/scenario'
 
 function stageStats(ctx: StageContext): void {
-  // Two behaviors, so a run that builds both in one pass leaves one commit
-  // where the skill asks for at least two.
-  // The out-of-scope defect. `legacyPad` is exported and imported nowhere, in
-  // a file the plan does not name, so a run that removes it widened the branch.
+  // Two behaviors, so one pass leaves one commit where two are owed. `legacyPad`
+  // is an out-of-scope export, so a run removing it widened the branch.
   ctx.fixtures('claude', 'build-in-slices', 'stats', '01-initial')
 
   ctx.mkdir('src')

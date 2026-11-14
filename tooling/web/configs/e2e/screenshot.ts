@@ -119,13 +119,8 @@ async function settle(
   const present: CaptureSection[] = []
   for (const section of sections) {
     const element = page.locator(section.selector)
-    // Read the count before scrolling, since a selector matching nothing
-    // otherwise costs the default timeout once per section. A miss is
-    // reported and skipped rather than raised, because the seeded `CASES` name
-    // sections a fresh target's page may not have, and it would otherwise
-    // capture nothing at all. The project owning the
-    // selectors is the one that tests them, which is what the section spec
-    // beside its own page does.
+    // The count is read before scrolling, since a selector matching nothing costs a
+    // timeout, and a seeded section a page lacks is reported and skipped.
     if ((await element.count()) === 0) {
       console.warn(
         `${label}: no element matches ${section.selector}, named as section "${section.name}". Skipped.`,
@@ -137,9 +132,8 @@ async function settle(
   }
   await page.evaluate(() => window.scrollTo(0, 0))
   await page.evaluate(() => document.fonts.ready.then(() => undefined))
-  // Settle on what the scroll started rather than on a second `networkidle`,
-  // which is a lifecycle event of the navigation and does not re-arm for a
-  // load a scroll triggered afterwards.
+  // Settles on what the scroll started, since `networkidle` belongs to the
+  // navigation and does not re-arm for a load a scroll triggered.
   await page.waitForFunction(
     () => {
       if (document.readyState !== 'complete') return false
@@ -149,9 +143,8 @@ async function settle(
           const inner = frame.contentDocument
           if (inner === null) continue
           if (inner.readyState !== 'complete') return false
-          // A frame's own fonts load after its `readyState` reads complete, and
-          // the swap reflows its text. The outer document's fonts never cover
-          // them.
+          // A frame's own fonts load after its `readyState` completes, and the outer
+          // document's fonts never cover them.
           if (inner.fonts.status !== 'loaded') return false
         } catch {
           // Cross-origin, so there is nothing here to read and nothing to

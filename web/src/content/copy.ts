@@ -1,17 +1,12 @@
 /**
- * Every string on the page outside the product views, one module, each
- * carrying a verbatim phrase from `README.md` it derives from or a paraphrase
- * marker saying why it cannot. A phrase survives a line moving in `README.md`;
- * only a change to the phrase itself invalidates the citation, which
- * `readmeCitations` in `src/gate/measures.ts` checks against the current file.
+ * Every string on the page outside the product views, each carrying a
+ * verbatim phrase from `README.md` or a paraphrase marker saying why it cannot.
+ * A phrase survives a line moving, and only a change to the phrase itself fails
+ * `readmeCitations` in `src/gate/measures.ts`.
  *
- * The page runs in the README's own order, so most headings and ledes quote it
- * outright. What the product views show, being the sessions, the records, and
- * the craft rows, is page fiction drawn from real behavior and lives in its own
- * module beside its one consumer.
- *
- * A pair of backticks inside a string marks code, which the section setting
- * it renders as `<code>`.
+ * The page runs in the README's order, so most headings quote it. The product
+ * views are page fiction drawn from real behavior and live beside their one
+ * consumer. A pair of backticks in a string marks code, rendered as `<code>`.
  */
 
 const REPO = 'https://github.com/erclx/canon'

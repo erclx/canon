@@ -7,12 +7,8 @@ export default scenario({
   },
   arms: {
     default: (ctx) => {
-      // Every sentence in docs/cache.md clears the ban scan. The defect is
-      // distribution: nine sentences within a few words of each other, four openings
-      // on the same shape, two verbless fragments standing as sentences, one triad,
-      // one thing named four ways, and two adverbs standing in for a measurement. A
-      // run that reports a clean audit here has read the words rather than the
-      // passage.
+      // Every sentence clears the ban scan, and the defect is distribution, so a run
+      // reporting a clean audit has read the words rather than the passage.
       ctx.fixtures('claude', 'write-human', 'shared', '01-initial')
 
       ctx.git('add', '.')

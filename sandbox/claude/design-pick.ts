@@ -7,12 +7,8 @@ export default scenario({
   },
   arms: {
     default: (ctx) => {
-      // The page carries one unresolved treatment and nothing else worth deciding,
-      // so a run has one subject to draft arms against. The callout ships flat, which
-      // is arm 0 for any candidate set drawn off this page.
-      // The fixture also seeds the references page an earlier design-references run
-      // left on the board, so the reference step reuses it rather than reaching the
-      // network. Its frames are captioned with structure alone.
+      // One unresolved treatment, the callout shipping flat as arm 0, plus a seeded
+      // references page the reference step reuses rather than reaching the network.
       ctx.fixtures('claude', 'design-pick', 'shared', '01-initial')
       // Frameboard names its marker board.json, which the folder-name gate reads as a
       // repeat, so the scenario writes it rather than the fixture tree.

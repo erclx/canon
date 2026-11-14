@@ -73,10 +73,9 @@ export interface Baseline {
 }
 
 // An open pass this old has nobody on it. The cycle it has to clear is a review
-// landing and a worker pushing a follow-up, measured between ten and thirty
-// minutes across a day of runs on 2026-08-14, so two hours sits about four times
-// past the slowest observed and still well inside a working session. A project
-// whose workers run longer than that raises it here.
+// landing and a worker pushing a follow-up, which measured runs put well under
+// an hour, so two hours sits well past the slowest observed and inside a
+// working session. A project whose workers run longer raises it here.
 export const STALE_AFTER = 7200
 
 // The heading strings are owned elsewhere and pinned here. `review-pr` writes
@@ -350,9 +349,8 @@ export const classify = (
   const lines: string[] = []
   let state = row.heading
 
-  // A conflict arrives from the base moving, not from the branch, so it is
-  // reported on the transition rather than only when the head changes. A push
-  // that leaves it conflicting reports it again, for the same reason STALE does.
+  // A conflict comes from the base moving, so it reports on the transition, and
+  // again when a push leaves it conflicting, as STALE does.
   if (
     row.merges === 'conflict' &&
     (old.merges !== 'conflict' || row.head !== old.head)
@@ -360,17 +358,14 @@ export const classify = (
     lines.push(`CONFLICT  #${row.number} no longer merges into ${context.base}`)
   }
 
-  // Staleness arrives the same way, and reports on its transition so a branch
-  // left behind across several runs earns one handback rather than one a run.
-  // A push that leaves it behind reports it again, since the draft lift reads a
-  // MOVED with no STALE beside it as the rebase having landed.
+  // Staleness reports on its transition, once per branch rather than per run, and
+  // again after a push, since the lift reads MOVED without STALE as a rebase.
   if (old.stale !== 'stale' || row.head !== old.head) {
     lines.push(...staleLine(row, context.base))
   }
 
-  // A rising count is what is new here. It fires on a tracked pull request
-  // only: a first sighting takes whatever already sits on the thread as its
-  // baseline rather than flagging history retroactively.
+  // A rising count fires on a tracked pull request only, so a first sighting
+  // takes the thread's existing comments as its baseline.
   if (row.unmatchedCount > (Number.parseInt(old.unmatched, 10) || 0)) {
     lines.push(
       `UNMATCHED #${row.number} posted under '${row.unmatchedHeading}'`,
@@ -405,12 +400,8 @@ export const classify = (
     row.resp > oldResp &&
     (row.passAt === 0 || row.replyAt > row.passAt)
   ) {
-    // The count says the reply is new to this script and the stamp says it is
-    // newer than the pass, and both are needed. A worker answers a finding and
-    // the reviewing session closes out seconds later, so the count alone
-    // reports an answered thread on the next run. A pull request with no pass
-    // reads as stamp zero and reports. The gate sits in the condition so a
-    // suppressed reply falls through to STALLED below.
+    // The count says the reply is new to this script and the stamp that it follows
+    // the pass, since a quick close-out would otherwise report an answered thread.
     lines.push(`RESPONSE  #${row.number} answered with no new commit`)
   } else if (
     row.heading === 'open' &&
@@ -418,11 +409,8 @@ export const classify = (
     row.prior === row.head &&
     row.age >= STALE_AFTER
   ) {
-    // The last pass is open, it covers the head so no commit followed it, and
-    // no reply came either. Any two of these describe an ordinary review
-    // waiting on a worker, so the age carries the third. STALLED reports a
-    // standing condition, so the written marker keeps it from firing on every
-    // later run.
+    // An open pass covering the head with no reply, past the age, is stalled, and
+    // the written marker keeps this standing condition from firing every run.
     lines.push(
       `STALLED   #${row.number} open at ${short(row.head)}, no commit or reply in ${Math.floor(row.age / 3600)}h`,
     )
@@ -567,9 +555,8 @@ type Collected = { number: string; reason: string } | { row: Row }
 const nowSeconds = (): number => Math.floor(Date.now() / 1000)
 
 const readHead = async (number: string): Promise<string> => {
-  // The tip is the authority for the head, not the pull request object, which
-  // lags the ref by up to a minute after a push. The object's head is the
-  // fallback for a target on an older binary with no `pr head` verb.
+  // The tip is the authority for the head, since the object lags the ref after a
+  // push. The object's head is the fallback for a binary with no `pr head`.
   const record = parseJson(
     (await runAsync('canon', ['pr', 'head', number, '--json'])).stdout,
   )
@@ -945,9 +932,8 @@ const pollOnce = async (
 
   run('git', ['fetch', '-q', 'origin', base])
 
-  // A failed list reads as no open pull requests, which reports every tracked
-  // one as GONE. That is a louder wrong answer than the one this script was
-  // fixed for, so the run aborts rather than classify on it.
+  // A failed list would read as no open pull requests and report every tracked
+  // one GONE, so the run aborts rather than classify on it.
   const listed = run('gh', [
     'api',
     '--paginate',
@@ -969,9 +955,8 @@ const pollOnce = async (
     numbers,
     READ_POOL,
     async (number): Promise<Collected> => {
-      // A read that failed and a pull request with no reviews both arrive as an
-      // empty result, so each read returns null on failure and the payload gives
-      // the failure a single place to surface.
+      // A failed read and a pull request with no reviews both arrive empty, so each
+      // read returns null on failure, which the payload surfaces.
       const [payload, head] = await Promise.all([
         readPayload(number),
         readHead(number),
@@ -1108,10 +1093,8 @@ const main = async (args: string[]): Promise<number> => {
     return result.status
   }
 
-  // Only movement ends the wait early. A failed read, of one pull request or of
-  // the whole open list, holds to the cap, since one failing every run would end
-  // each wait at once and the re-arm would spin. Its lines ride with the exit,
-  // and a list still unreadable at the cap exits 1.
+  // Only movement ends the wait early. A failed read holds to the cap rather than
+  // ending each wait at once, and a list still unreadable at the cap exits 1.
   const deadline = Date.now() + wait * 1000
   const failed = new Set<string>()
   for (;;) {

@@ -1,17 +1,13 @@
 #!/usr/bin/env bash
 # Commits the recaptured home baseline onto the refresh branch and opens or
 # updates its pull request, called by refresh-capture-frames.yml after the
-# capture step. The step holds GH_TOKEN and HUSKY, since the token scope is
-# read off the workflow.
+# capture step, which holds GH_TOKEN and HUSKY.
 #
-# Hooks stay off, since pre-push runs a check whose format step needs shfmt,
-# which the runner lacks. verify.yml checks the pull request.
-#
-# The baseline commits where they rendered, then only the files that commit wrote
-# or dropped carry onto main fetched now, so a merge landing mid-run neither
-# leaves the branch on an older base nor loses a baseline frame it moved. The pull
-# request resolves by number, since every merged refresh leaves a closed one on
-# the same head.
+# Hooks stay off, since pre-push needs shfmt, which the runner lacks, and
+# verify.yml checks the pull request. Only the files the baseline commit wrote
+# or dropped carry onto a freshly fetched main, so a mid-run merge loses
+# nothing. The pull request resolves by number, since every merged refresh
+# leaves a closed one on the same head.
 set -e
 
 branch=chore/refresh-capture-frames

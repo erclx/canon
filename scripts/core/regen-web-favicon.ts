@@ -1,19 +1,12 @@
 /**
  * Writes web/public/favicon.svg and the README's `mark-color` pair from
- * assets/brand/mark.svg and the mark's own colors in src/design/favicon.ts,
- * apart from the page accent tokens.
+ * assets/brand/mark.svg and the mark's own colors in src/design/favicon.ts.
  *
- * The favicon is served at its own URL, so it has a CSS context and carries a
- * `prefers-color-scheme` branch over its tile, c, and pip. The README pair is
- * loaded as an image behind a `<picture>`, which picks the file by theme, so
- * each copy bakes its fills. Its c takes GitHub's own text color rather than
- * canon's ink, since GitHub's ground is what it has to clear.
- *
- * `web/public/favicon.svg` was a symlink to the source before this, and the
- * source fills `currentColor`, which resolves to black with no CSS context.
- * That is what painted the tab icon black on every surface the page reaches.
- * The source keeps `currentColor`, since the nav and the hero topbar inline it
- * and want it to inherit.
+ * The favicon has a CSS context, so it carries a `prefers-color-scheme` branch.
+ * The README pair loads as images behind a `<picture>`, so each copy bakes its
+ * fills, its c taking GitHub's text color. A source filling `currentColor`
+ * resolves to black with no CSS context, so the favicon is written rather than
+ * linked, and the source keeps `currentColor` for the inline uses.
  */
 import { writeFileSync } from 'node:fs'
 

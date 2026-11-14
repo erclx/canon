@@ -7,10 +7,8 @@ export default scenario({
   },
   arms: {
     default: (ctx) => {
-      // One function with the test that covers it, both already committed. The
-      // pairing convention is the one the loop reads: a subject at `foo.ts` takes
-      // its test at `foo.test.ts` beside it. Seeding the pair rather than
-      // describing it leaves the run a shape to copy instead of a rule to recall.
+      // A function and its test, paired at `foo.ts` and `foo.test.ts`, seeded rather
+      // than described so the run has a shape to copy.
       ctx.fixtures('claude', 'test-first', 'shared', 'greeter')
 
       ctx.mkdir('src')

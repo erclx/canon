@@ -19,15 +19,8 @@ export default scenario({
   },
   arms: {
     refusal: (ctx) => {
-      // The one arm this command can assert. A report that passes validation
-      // files a real issue, which sits outside the tree the snapshot covers,
-      // and `canon sandbox run` reports that as an escape. A refusal writes nowhere at
-      // all, so the whole behavior lands inside the sandbox.
-      //
-      // Both streams go to disk because `canon sandbox check` reads the tree and
-      // nothing else. The status is held rather than left to stop the arm, since
-      // a refusal exits 1 by design and an abort here would kill the scenario on
-      // the outcome it exists to record.
+      // A refusal writes nowhere, so the behavior lands in the sandbox, and the held
+      // status keeps its exit 1 from aborting the arm on the outcome it records.
       ctx.log.step(
         'Running: canon feedback (report missing its Proposed fix section)',
       )
@@ -52,9 +45,8 @@ export default scenario({
       ctx.write('install/refusal-stdout.log', result.stdout)
       ctx.write('install/refusal.log', result.stderr)
       ctx.write('install/refusal-status.txt', `${result.status}\n`)
-      // Byte count rather than the stream, because an assertion cannot pattern
-      // match an empty file and a refusal that printed a path is the failure
-      // this arm is watching for.
+      // Byte count rather than the stream, since an assertion cannot match an empty
+      // file, and a refusal printing a path is the failure watched for.
       ctx.write(
         'install/refusal-stdout-bytes.txt',
         `${Buffer.byteLength(result.stdout)}\n`,

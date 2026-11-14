@@ -305,9 +305,8 @@ export default scenario({
 
       const objectHead = ctx.read('git', ['rev-parse', 'HEAD']).trim()
 
-      // A second commit pushed after the pull request opened. The object keeps
-      // naming the commit it was created against for up to a minute, which is the
-      // window every head-sensitive read here has to survive.
+      // A second commit pushed after the pull request opened, so every head-sensitive
+      // read has to survive the object naming the older commit for a minute.
       ctx.fixtures('claude', 'review-address', 'stale-head', '01-list-handler')
 
       ctx.git('add', '.')
