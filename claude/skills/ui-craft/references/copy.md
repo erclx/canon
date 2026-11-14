@@ -4,7 +4,7 @@
 
 - Write no em dash (`—`) or semicolon in rendered copy. Use a comma or a period, or restructure the sentence.
 - Add no trailing period, colon, or exclamation mark to a heading, label, link, button, nav item, caption, status, or one-sentence tagline. Keep the question mark a question needs.
-- Rewrite a two-sentence tagline as one sentence rather than keeping a period inside it.
+- Rewrite a two-sentence heading or tagline as one sentence, or move its second sentence into the line under it, rather than keeping a period inside it.
 - End a one-sentence error or validation message with no period, such as `Enter an email address`.
 - Keep end punctuation on body copy, multi-sentence messages, and quoted text, which a reader reads as prose.
 
@@ -33,6 +33,7 @@
 ## Where it applies
 
 - Apply the same casing to interface copy kept outside the globs, such as a locale file, which this rule never fires on.
+- Apply these rules to a slide deck's titles and on-slide copy, which a reader takes in as rendered headings and labels rather than prose.
 
 ## Overriding
 
