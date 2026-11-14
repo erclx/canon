@@ -1,11 +1,19 @@
 ---
 title: Drive each box
-description: The access join Step 3 of review-ui makes, then Step 5, which maps a checklist line to browser calls, reads each value off the page, and gives the box one of four verdicts with the evidence that verdict carries
+description: The pass folder Step 4 makes, the access join Step 3 of review-ui makes, then Step 5, which maps a checklist line to browser calls, reads each value off the page, and gives the box one of four verdicts with the evidence that verdict carries
 ---
 
 # Drive each box
 
 Step 5 of `review-ui`. The browser is open at the address Step 3 picked, under the session Step 4 named. Every call below goes through `canon browser -s=<project>-<number>`, shortened here to `pw`.
+
+## The pass folder
+
+Step 4 makes `.canon/tmp/pr/review-ui/<number>/<pass>/` and runs every call from it. The CLI writes snapshots under the folder `open` ran in and resolves a relative save path against it, so a frame or a download a box names lands here.
+
+- It holds `frames/`, `dl/`, the sweep's run file, and the browser's `.playwright-cli/` snapshots, so a re-drive starts in an empty folder
+- `drive-baseline.json` and the drive copy stay at the number's root, where `canon pr drive-copy` writes them and Step 7 reads them back
+- An earlier pass's folder stays until scratch is cleared outside a pass, and this pass reads and writes none of it
 
 ## The access join
 
@@ -65,6 +73,26 @@ A box naming a tap, a swipe, or a hover at a phone width opens a second session,
 - Tap through `pw-mobile run-code` with `page.touchscreen.tap(<x>, <y>)` at the center `getBoundingClientRect()` gives, and swipe with `pw-mobile swipe <x> <y> <dy>`, a positive `<dy>` scrolling down
 - Take the box's frame through `pw-mobile screenshot`, and close the session with `pw-mobile close` once its boxes land
 - A phone-width box naming no touch or hover stays a resize of the desktop session, with no second session
+
+## Calls and frames per box
+
+A chained call hides which box a failure belongs to, and a copied frame shows a state the box never reached.
+
+- Keep a box's calls apart from setup, so Step 4's folder call and the browser's `open` never share a call with a box's actions
+- Chain the calls of one box at most, and never put two boxes in one call
+- Take each box's frame with its own `pw screenshot` at the state that box reached. Never copy one box's frame to another's file, even when the two boxes look alike.
+
+## A box that downloads
+
+A box asserting a download saves it into the pass folder's `dl/` and reads that folder alone, so a file an earlier pass saved can never satisfy it. The browser CLI names no download flag, so one `run-code` call clicks the control and awaits the page's download event:
+
+```bash
+pw run-code "async page => { const [d] = await Promise.all([page.waitForEvent('download'), page.getByRole('link', { name: '<control>' }).click()]); await d.saveAs('dl/' + d.suggestedFilename()); return d.suggestedFilename() }"
+```
+
+- `saveAs` resolves `dl/` against the folder `open` ran in, measured on `2026-11-14`, which is the pass folder Step 4 made
+- Read the result off the returned name and a listing of `dl/`, and open a file's contents only for the value the box names
+- The CLI also saves its own copy under `.playwright-cli/`. Read `dl/` alone, since that folder mixes every download with the snapshots.
 
 ## Finding the element
 
