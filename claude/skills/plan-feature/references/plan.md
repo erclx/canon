@@ -225,7 +225,8 @@ Every outcome reaches the review with its proof named.
 **Rendered surfaces**
 
 - Name the demo state a reel needs when the plan changes a rendered surface, such as a filled list or a failed save.
-- The build then lays that state in the project's seed before film time, rather than meeting it as a skipped beat.
+- The build then lays that state before film time, rather than meeting it as a skipped beat, in the project's seed where one is declared.
+- With no seed, the committed fixture or an inline setup step carries the state.
 
 **Generated load**
 

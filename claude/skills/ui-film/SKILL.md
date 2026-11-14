@@ -70,8 +70,9 @@ List the state each beat opens on, such as a filled list or a failed save, and c
 
 - Report a missing state to the operator rather than filming a take that fails on it, naming the state and the beat
 - Route it to the `seed` key of `canon/config/preview.json`, per `canon pr drive-copy --help`, which the building session extends in its own pull request, since this skill writes no tracked file
-- With no seed declared, the committed fixture or a setup step inside the beat carries the state
-- Leave out a beat whose state no seed can lay, such as a device capability the headless browser lacks, and name that state in the handoff
+- A seeded state reaches a take only through an address serving the drive copy, Step 1's first route, since the throwaway copy runs no seed
+- On the throwaway copy, or with no seed declared, the committed fixture or a setup step inside the beat carries the state
+- Leave out a beat whose state the page still lacks and name that state in the handoff, so a re-film picks it up once the state lands. A state no seed can lay takes the same exit.
 
 ## Step 4: film
 
