@@ -547,6 +547,7 @@ describe('placeTask', () => {
         ok: false,
         reason: 'group-rule',
         detail: ['plan-parked'],
+        message: expect.stringContaining('canon tasks block'),
       })
     })
   })
