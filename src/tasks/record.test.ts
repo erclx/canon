@@ -440,7 +440,8 @@ describe('closeOutcomeLines', () => {
   })
 
   it('should strike a cut outcome and keep its checkbox', () => {
-    const text = '- [ ] Outcome: one\n- [ ] Outcome: two\n- [ ] Outcome: three\n'
+    const text =
+      '- [ ] Outcome: one\n- [ ] Outcome: two\n- [ ] Outcome: three\n'
 
     const result = closeOutcomeLines(text, [], [2], 'dropped by the operator')
 
@@ -921,7 +922,11 @@ describe('closeOutcomes', () => {
       { positions: [1], reason: 'dropped' },
     )
 
-    expect(outcome).toMatchObject({ ok: true, cut: ['Outcome: one'], pending: [] })
+    expect(outcome).toMatchObject({
+      ok: true,
+      cut: ['Outcome: one'],
+      pending: [],
+    })
     await expect(readTask(stem)).resolves.toContain(
       '- [ ] ~~Outcome: one~~ dropped',
     )

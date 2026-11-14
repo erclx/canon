@@ -895,7 +895,10 @@ export function registerRecord(tasks: Command): void {
       collectPosition,
       [] as string[],
     )
-    .option('--reason <text>', 'Why the --cut outcomes were dropped, one per call')
+    .option(
+      '--reason <text>',
+      'Why the --cut outcomes were dropped, one per call',
+    )
     .option('--plan <slug>', 'Select the task whose Plan line names this plan')
     .option('--json', 'Emit a machine-readable record on stdout')
     .option('--root <path>', 'Board root, defaulting to the main worktree')
