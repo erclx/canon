@@ -108,7 +108,7 @@ describe('bodyDensity limits per section', () => {
         '',
         'One.',
         '',
-        '```',
+        '```markdown',
         '### not a heading',
         '',
         'Two.',
@@ -248,6 +248,194 @@ describe('bodyDensity fenced line width', () => {
   it('should never report a fence width in a post', () => {
     const result = postDensity(
       body('## Review', '', '```', 'p'.repeat(120), '```'),
+    )
+
+    expect(result).toEqual([])
+  })
+})
+
+describe('bodyDensity fence language and prompt', () => {
+  function fences(result: ReturnType<typeof bodyDensity>) {
+    return result
+      .filter(({ kind }) => kind.startsWith('fence-') && kind !== 'fence-width')
+      .map(({ section, kind, line }) => [section, kind, line])
+  }
+
+  it("should report one fence-prompt on #3099's mixed Outcome", () => {
+    const result = bodyDensity(
+      body(
+        '## Outcome',
+        '',
+        '```plaintext',
+        '$ canon tasks outcome <stem> --json',
+        '{"ok":true,"stem":"<stem>","removed":<n>,',
+        '"outcomes":["<outcome>"]}',
+        '- [x] <shipped outcome>',
+        '- [ ] <open outcome>',
+        '- [ ] <open outcome>',
+        '```',
+      ),
+    )
+
+    expect(fences(result)).toEqual([['Outcome', 'fence-prompt', 4]])
+  })
+
+  it('should pass the same Outcome split into one fence per kind', () => {
+    const result = bodyDensity(
+      body(
+        '## Outcome',
+        '',
+        '```console',
+        '$ canon tasks outcome <stem> --json',
+        '```',
+        '',
+        '```json',
+        '{',
+        '  "ok": true,',
+        '  "stem": "<stem>"',
+        '}',
+        '```',
+        '',
+        '```markdown',
+        '- [x] <shipped outcome>',
+        '```',
+      ),
+    )
+
+    expect(fences(result)).toEqual([])
+  })
+
+  it('should report a bare fence in Testing as a fence-language', () => {
+    const result = bodyDensity(
+      body('## Testing', '', '- [x] ran it', '', '```', 'bun run check', '```'),
+    )
+
+    expect(fences(result)).toEqual([['Testing', 'fence-language', 5]])
+  })
+
+  it('should report a bare tilde fence and read a four-backtick identifier from the outer delimiter', () => {
+    const result = bodyDensity(
+      body(
+        '## Outcome',
+        '',
+        '~~~',
+        'plain',
+        '~~~',
+        '',
+        '````plaintext',
+        '```',
+        'inner',
+        '```',
+        '````',
+      ),
+    )
+
+    expect(fences(result)).toEqual([['Outcome', 'fence-language', 3]])
+  })
+
+  it('should take the first word of an info string as the identifier', () => {
+    const result = bodyDensity(
+      body('## Outcome', '', '```json title="x"', '{}', '```'),
+    )
+
+    expect(fences(result)).toEqual([])
+  })
+
+  it('should pass a continuation line and a blank line in a console fence', () => {
+    const result = bodyDensity(
+      body(
+        '## Outcome',
+        '',
+        '```console',
+        '$ canon labels scan \\',
+        '  --title <title> \\',
+        '  --body-file <body>',
+        '',
+        '$ bun run check',
+        '```',
+      ),
+    )
+
+    expect(fences(result)).toEqual([])
+  })
+
+  it('should report an output line and a root prompt inside a console fence', () => {
+    const result = bodyDensity(
+      body(
+        '## Outcome',
+        '',
+        '```console',
+        '$ canon tasks outcome <stem>',
+        '✅ Marked 1 outcome',
+        '# rm -rf <path>',
+        '```',
+      ),
+    )
+
+    expect(fences(result)).toEqual([
+      ['Outcome', 'fence-output', 5],
+      ['Outcome', 'fence-output', 6],
+    ])
+  })
+
+  it('should leave a $VAR line and a lone $ outside console unreported', () => {
+    const result = bodyDensity(
+      body('## Outcome', '', '```plaintext', '$HOME is unset', '$', '```'),
+    )
+
+    expect(fences(result)).toEqual([])
+  })
+
+  it('should read no prompt rule inside a fence nested in markdown', () => {
+    const result = bodyDensity(
+      body(
+        '## Outcome',
+        '',
+        '````markdown',
+        '## Testing',
+        '',
+        '```console',
+        '$ bun run check',
+        'output',
+        '```',
+        '',
+        '$ quoted prompt',
+        '````',
+      ),
+    )
+
+    expect(fences(result)).toEqual([])
+  })
+
+  it('should strip a CRLF ending from the info string and the prompt test', () => {
+    const result = bodyDensity(
+      [
+        '## Outcome',
+        '',
+        '```console',
+        '$ bun run check',
+        '```',
+        '',
+        '```',
+        'x',
+        '```',
+        '',
+        '```plaintext',
+        '$ ls',
+        '```',
+        '',
+      ].join('\r\n'),
+    )
+
+    expect(fences(result)).toEqual([
+      ['Outcome', 'fence-language', 7],
+      ['Outcome', 'fence-prompt', 12],
+    ])
+  })
+
+  it('should never report a fence finding in a post', () => {
+    const result = postDensity(
+      body('## Review', '', '```', '$ bun run check', '```'),
     )
 
     expect(result).toEqual([])
