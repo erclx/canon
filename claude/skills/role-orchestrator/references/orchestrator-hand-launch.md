@@ -12,7 +12,7 @@ When the operator launches sessions by hand, write every prompt to one file, `.c
 The operator opens the file, reads one lead line, and pastes one fence per session. The shape is fixed:
 
 - An H1, `# Dispatch prompts`, then one lead line carrying the measured head, the merge order, and the folder to open each session in
-- An H2 per task as `## <label>: <title>`, an H3 per role as `### Worker` or `### Reviewer`, a `Model: <model>.` line, and a `text` fence
+- An H2 per task as `## <label>: <title>`, an H3 per role as `### Worker` or `### Reviewer`, a `Model: <model>, effort <effort>.` line, and a `text` fence
 - In the fence, the command at position zero, then `Controller: <sessionId>`, then only context the plan does not carry, one line each
 
 Keep the command at position zero per `### Position zero` in `orchestrator-launch.md`, and carry only what `### What the brief may carry` there allows. Leave out the answer-slot default and anything else the plan states.
@@ -35,7 +35,7 @@ Head `<head>`. Merge `<label-a>` first, then `<label-b>`. Open each session in t
 
 ### Worker
 
-Model: opus.
+Model: opus, effort high.
 
 ```text
 /canon:auto-ship .canon/plans/feature-<slug>.md
@@ -53,7 +53,7 @@ Head `<head>`. Merge `<label-a>` first, then `<label-b>`. Open each session in t
 
 ### Reviewer
 
-Model: opus.
+Model: opus, effort high.
 
 ```text
 Run /canon:role-reviewer, then /canon:review-pr <number>

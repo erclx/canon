@@ -12,8 +12,8 @@ Run this when the operator wants to talk with a planner or worker rather than le
 A planner or worker the operator will talk with takes the same launch as its cold shape in `orchestrator-launch.md`, with a `-talk` suffix on its name and one sentence added to its brief. A cold session works alone and reports back, and a talk session stays open after its plan or pull request lands so the operator can keep shaping the row.
 
 ```bash
-claude --bg --model <model> -n "planner-<project>-<slug>-talk" "Run /canon:role-planner, then /canon:plan-feature <task>. This is a talk session: the operator will talk with you here, so run your role's talk clause, and message your controller when the operator ends the conversation. Your controller is the session whose sessionId is <dispatcher-id>. ..."
-claude --bg --model <model> -n "worker-<project>-<slug>-talk" "/canon:auto-ship <plan>
+claude --bg --model <model> --effort <effort> -n "planner-<project>-<slug>-talk" "Run /canon:role-planner, then /canon:plan-feature <task>. This is a talk session: the operator will talk with you here, so run your role's talk clause, and message your controller when the operator ends the conversation. Your controller is the session whose sessionId is <dispatcher-id>. ..."
+claude --bg --model <model> --effort <effort> -n "worker-<project>-<slug>-talk" "/canon:auto-ship <plan>
 This is a talk session: the operator will talk with you here, so run your role's talk clause, and message your controller when the operator ends the conversation. Your controller is the session whose sessionId is <dispatcher-id>. ..."
 ```
 
