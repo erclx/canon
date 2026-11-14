@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Commits the recaptured home baseline onto the refresh branch and opens or
 # updates its pull request, called by refresh-capture-frames.yml after the
-# capture step, which holds GH_TOKEN and HUSKY.
+# capture step. The step running this sets GH_TOKEN and HUSKY.
 #
 # Hooks stay off, since pre-push needs shfmt, which the runner lacks, and
 # verify.yml checks the pull request. Only the files the baseline commit wrote
