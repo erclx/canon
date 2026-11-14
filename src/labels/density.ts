@@ -17,7 +17,10 @@ const COUNTED = [
 type CountedKind = (typeof COUNTED)[number]
 
 export type BodyDensityKind =
-  CountedKind | 'subheading' | 'mixed-form' | 'fence-width'
+  | CountedKind
+  | 'subheading'
+  | 'mixed-form'
+  | 'fence-width'
 
 /** GitHub scrolls a wider fenced line sideways in the body column. */
 const FENCE_WIDTH = 90
