@@ -129,6 +129,113 @@ describe('canon pr drive-copy', () => {
     expect(existsSync(join(copyRoot, 'board/dragged.json'))).toBe(false)
   })
 
+  describe('with a seed', () => {
+    function writeSeed(script: string): void {
+      writeRepoFile(
+        'canon/config/preview.json',
+        JSON.stringify({
+          writes: ['board'],
+          seed: [process.execPath, '-e', script],
+        }),
+      )
+      git('add', '.')
+      git('commit', '-q', '-m', 'seed')
+    }
+
+    it('should run the seed into the copy and report it on the record', async () => {
+      writeSeed(
+        "console.log('seeding'); require('fs').writeFileSync(process.env.CANON_PREVIEW_ROOT + '/board/seeded.json', '{}')",
+      )
+
+      const outcome = await runDriveCopy(['7'])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({
+          reason: 'copied',
+          seed: { ran: true, exit: 0 },
+        }),
+        exit: 0,
+      })
+      expect(
+        existsSync(join(String(outcome.record.copyRoot), 'board/seeded.json')),
+      ).toBe(true)
+    })
+
+    it('should carry no seed key when the project declares none', async () => {
+      writeRepoFile('canon/config/preview.json', '{"writes":["board"]}')
+
+      const outcome = await runDriveCopy(['7'])
+
+      expect(outcome.record).not.toHaveProperty('seed')
+    })
+
+    it('should refuse as seed-failed when the seed exits non-zero', async () => {
+      writeSeed("console.error('no fixtures'); process.exit(2)")
+
+      const outcome = await runDriveCopy(['7'])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({
+          reason: 'seed-failed',
+          seed: {
+            ran: true,
+            exit: 2,
+            timedOut: false,
+            stderr: ['no fixtures'],
+          },
+        }),
+        exit: 1,
+      })
+    })
+
+    it('should refuse as seed-failed with the cause and ran false when the seed command does not exist', async () => {
+      writeRepoFile(
+        'canon/config/preview.json',
+        '{"writes":["board"],"seed":["canon-no-such-seed-command"]}',
+      )
+
+      const outcome = await runDriveCopy(['7'])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({
+          reason: 'seed-failed',
+          message: expect.stringContaining('could not start'),
+          seed: expect.objectContaining({
+            ran: false,
+            exit: null,
+            error: expect.stringContaining('canon-no-such-seed-command'),
+          }),
+        }),
+        exit: 1,
+      })
+    })
+
+    it('should refuse as seed-wrote-worktree, naming the path, when the seed edits a tracked file', async () => {
+      writeSeed("require('fs').writeFileSync('board/frames.json', '{}')")
+
+      const outcome = await runDriveCopy(['7', '--baseline'])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({
+          reason: 'seed-wrote-worktree',
+          paths: ['board/frames.json'],
+        }),
+        exit: 1,
+      })
+    })
+
+    it('should run no seed under --check', async () => {
+      writeSeed(
+        "require('fs').appendFileSync(process.env.FAKE_DIR + '/seed-runs', 'x')",
+      )
+      await runDriveCopy(['7', '--baseline'])
+
+      await runDriveCopy(['7', '--check'])
+
+      expect(readFileSync(join(tempDir, 'seed-runs'), 'utf8')).toBe('x')
+    })
+  })
+
   it('should land the worker, named by no number, on the copy the reviewer rebuilds', async () => {
     writeRepoFile('canon/config/preview.json', '{"writes":["board"]}')
 

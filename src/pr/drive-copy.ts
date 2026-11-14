@@ -7,12 +7,19 @@ import {
   rmSync,
 } from 'node:fs'
 import { isAbsolute, join, relative, sep } from 'node:path'
+import { execa } from 'execa'
 
 /** Where a project names the folders its running preview saves into. */
 export const PREVIEW_CONFIG_REL = join('canon', 'config', 'preview.json')
 
 /** The variable a preview server reads for the copy root when the project names none. */
 export const DEFAULT_PREVIEW_ENV = 'CANON_PREVIEW_ROOT'
+
+/** How long a seed may run before the rebuild stops it and refuses. */
+export const SEED_TIMEOUT_MS = 120_000
+
+/** How many trailing stderr lines a failed seed carries on the record. */
+const SEED_STDERR_LINES = 20
 
 /** The type vocabulary of `git-branch`'s branch standard, which the slug transform drops. */
 const BRANCH_TYPES = new Set([
@@ -34,6 +41,11 @@ export interface PreviewConfig {
   readonly env: string
   /** Paths inside a declared path that a rebuild leaves as the server wrote them. */
   readonly keep: readonly string[]
+  /**
+   * An argv list, spawned with no shell, that lays state into the copy after
+   * each rebuild. Absent when the project declares none.
+   */
+  readonly seed?: readonly string[]
 }
 
 export type PreviewConfigRead =
@@ -78,7 +90,7 @@ function isWithin(path: string, parent: string): boolean {
 
 /**
  * Reads `canon/config/preview.json` as
- * `{ "writes": [...], "keep": [...], "env": "<NAME>" }`.
+ * `{ "writes": [...], "keep": [...], "env": "<NAME>", "seed": [...] }`.
  * A file that does not parse refuses rather than reading as absent, since a
  * typo there would otherwise drive the real folders while the pass reports a
  * copy. A `writes` or `keep` path that is absolute or climbs with `..`
@@ -109,7 +121,7 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
     }
   }
 
-  const { writes, env, keep = [] } = parsed as Record<string, unknown>
+  const { writes, env, keep = [], seed } = parsed as Record<string, unknown>
   if (
     !Array.isArray(writes) ||
     !writes.every((item): item is string => typeof item === 'string')
@@ -135,6 +147,19 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
       kind: 'refused',
       reason: 'bad-config',
       detail: `${PREVIEW_CONFIG_REL} names an "env" that is not a variable name.`,
+    }
+  }
+
+  if (
+    seed !== undefined &&
+    (!Array.isArray(seed) ||
+      !seed.every((item): item is string => typeof item === 'string') ||
+      (seed[0] ?? '') === '')
+  ) {
+    return {
+      kind: 'refused',
+      reason: 'bad-config',
+      detail: `${PREVIEW_CONFIG_REL} names a "seed" that is not a list opening on a command.`,
     }
   }
 
@@ -171,7 +196,12 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
 
   return {
     kind: 'read',
-    config: { writes, env: env ?? DEFAULT_PREVIEW_ENV, keep },
+    config: {
+      writes,
+      env: env ?? DEFAULT_PREVIEW_ENV,
+      keep,
+      ...(seed === undefined ? {} : { seed }),
+    },
   }
 }
 
@@ -228,4 +258,69 @@ export function buildDriveCopy(
     copied.push(path)
   }
   return { copied, missing }
+}
+
+export type SeedRun =
+  | { readonly kind: 'ran'; readonly exit: 0 }
+  | {
+      readonly kind: 'failed'
+      readonly exit: number | null
+      readonly timedOut: boolean
+      readonly stderr: readonly string[]
+      /** Why the seed never started, such as a command not on `PATH`. */
+      readonly error?: string
+    }
+
+/**
+ * Runs a project's seed against a rebuilt copy, from the worktree with the
+ * copy root in `env`. The child's stdout goes to this process's stderr, since
+ * stdout carries the verb's JSON record and a printing seed would corrupt it.
+ * The argv list is spawned with no shell, so a path holding a space or a
+ * metacharacter runs as written.
+ */
+export async function runSeed(
+  worktree: string,
+  copyRoot: string,
+  seed: readonly string[],
+  env: string,
+  timeoutMs: number = SEED_TIMEOUT_MS,
+): Promise<SeedRun> {
+  const [command = '', ...args] = seed
+  // The seed leads its own process group, and the limit kills the group. A
+  // seed run through `sh -c` or a package script does its work in a
+  // grandchild, which execa's own `timeout` never signals, and which would
+  // hold the stderr pipe open past the limit.
+  const subprocess = execa(command, args, {
+    cwd: worktree,
+    env: { [env]: copyRoot },
+    stdin: 'ignore',
+    stdout: 2,
+    stderr: ['pipe', 'inherit'],
+    detached: true,
+    reject: false,
+  })
+  let timedOut = false
+  const timer = setTimeout(() => {
+    timedOut = true
+    if (subprocess.pid === undefined) return
+    try {
+      process.kill(-subprocess.pid, 'SIGKILL')
+    } catch {
+      // The group already exited between the limit and the signal.
+    }
+  }, timeoutMs)
+  const result = await subprocess
+  clearTimeout(timer)
+  if (result.exitCode === 0 && !timedOut) return { kind: 'ran', exit: 0 }
+  const stderr = (result.stderr ?? '').split('\n')
+  while (stderr.length > 0 && stderr.at(-1)?.trim() === '') stderr.pop()
+  return {
+    kind: 'failed',
+    exit: result.exitCode ?? null,
+    timedOut,
+    stderr: stderr.slice(-SEED_STDERR_LINES),
+    ...(result.exitCode === undefined && result.signal === undefined
+      ? { error: result.originalMessage ?? result.shortMessage }
+      : {}),
+  }
 }

@@ -49,7 +49,8 @@ A painted pull request needs a server in this worktree for `canon pr local` to f
 
 Run `canon pr drive-copy --json` before starting `dev`. On `copied`, start it with `env` set to `copyRoot`, so the operator's address serves the copy. On `no-config`, start it as it is. On a refusal, start nothing and send the controller the `reason`, since a broken config would send drives into tracked folders.
 
-- Commit fixture state under a declared path, since the copy wipes added pages
+- Lay fixture state through the `seed` key in `canon/config/preview.json`, which every rebuild runs against the copy
+- Never seed by hand or into the worktree, where `--check` reads the write as a drive's
 
 A hand-run `git-ship` or `git-pr` starts no server, since only a worker has a lifetime to own one.
 
