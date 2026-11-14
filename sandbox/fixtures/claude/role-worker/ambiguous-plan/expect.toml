@@ -48,7 +48,7 @@ write_scope = [".canon/tmp/**"]
 reply = ["format"]
 
 manual = [
-  "The session reported the block through the channel before it became an interactive prompt. Unwired: the sandbox holds no controlling session to address and the runner drives a headless turn, so neither the message nor the prompt is observable here. This is the half the arm exists beside rather than covers.",
+  "The session reported the block to the controller as a message and ended its turn rather than opening an interactive prompt. Unwired: the sandbox holds no controlling session to address and the runner drives a headless turn, so neither the message nor the prompt is observable here. This is the half the arm exists beside rather than covers.",
   "The refusal names the plan standard's rule rather than reading as reluctance. Judgment: a correct halt can cite the standard, quote the suggestion line, or state the consequence, and no substring separates the three.",
   "The session offered to proceed once answered rather than treating the halt as terminal. Semantic: an offer and a flat refusal read alike to a substring, and the distinction is what decides whether the operator has to relaunch.",
 ]
