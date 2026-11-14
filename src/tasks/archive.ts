@@ -218,7 +218,7 @@ const BULLET_PATTERN = /^- (?:\[([ xX])\] ?)?(.*)$/
  * the body's start, since the canonical form trails the struck text with why
  * it was cut: `- ~~<outcome>~~ <why>` leaves `<why>` outside the `~~` pair.
  */
-const STRUCK_BODY_PATTERN = /^~~.+~~/
+export const STRUCK_BODY_PATTERN = /^~~.+~~/
 
 /** The one spelling of an operator-owned outcome, anchored to the body's start. */
 const OPERATOR_BODY_PATTERN = /^Operator check: ?\S/

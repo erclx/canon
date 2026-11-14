@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { recordDir } from '@/roots/record'
-import { readSessions, tasksDir } from '@/tasks/archive'
+import { readOutcomes, readSessions, tasksDir } from '@/tasks/archive'
 import {
   closeOutcomeLines,
   closeOutcomes,
@@ -438,6 +438,72 @@ describe('closeOutcomeLines', () => {
 
     expect(closeOutcomeLines(text, [2]).closed).toEqual(['Outcome: two'])
   })
+
+  it('should strike a cut outcome and keep its checkbox', () => {
+    const text = '- [ ] Outcome: one\n- [ ] Outcome: two\n- [ ] Outcome: three\n'
+
+    const result = closeOutcomeLines(text, [], [2], 'dropped by the operator')
+
+    expect(result.text).toBe(
+      '- [ ] Outcome: one\n- [ ] ~~Outcome: two~~ dropped by the operator\n- [ ] Outcome: three\n',
+    )
+    expect(result.cut).toEqual(['Outcome: two'])
+    expect(result.total).toBe(3)
+  })
+
+  it('should keep the position of an outcome after a cut', () => {
+    const cut = closeOutcomeLines(
+      '- [ ] Outcome: one\n- [ ] Outcome: two\n- [ ] Outcome: three\n',
+      [],
+      [2],
+      'why',
+    )
+
+    expect(closeOutcomeLines(cut.text, [3]).closed).toEqual(['Outcome: three'])
+  })
+
+  it('should report a rerun of a cut rather than striking it twice', () => {
+    const text = '- [ ] ~~Outcome: one~~ why\n'
+
+    const result = closeOutcomeLines(text, [], [1], 'why')
+
+    expect(result.text).toBe(text)
+    expect(result.cut).toEqual([])
+    expect(result.alreadyCut).toEqual(['~~Outcome: one~~ why'])
+  })
+
+  it('should leave a cut outcome unticked when a close names it', () => {
+    const text = '- [ ] ~~Outcome: one~~ why\n'
+
+    const result = closeOutcomeLines(text, [1])
+
+    expect(result.text).toBe(text)
+    expect(result.closed).toEqual([])
+    expect(result.alreadyCut).toEqual(['~~Outcome: one~~ why'])
+  })
+
+  it('should leave a shipped outcome unstruck when a cut names it', () => {
+    const text = '- [x] Outcome: one\n'
+
+    const result = closeOutcomeLines(text, [], [1], 'why')
+
+    expect(result.text).toBe(text)
+    expect(result.cut).toEqual([])
+    expect(result.alreadyClosed).toEqual(['Outcome: one'])
+  })
+
+  it('should close and cut different positions in one call', () => {
+    const result = closeOutcomeLines(
+      '- [ ] Outcome: one\n- [ ] Outcome: two\n',
+      [1],
+      [2],
+      'why',
+    )
+
+    expect(result.text).toBe('- [x] Outcome: one\n- [ ] ~~Outcome: two~~ why\n')
+    expect(result.closed).toEqual(['Outcome: one'])
+    expect(result.cut).toEqual(['Outcome: two'])
+  })
 })
 
 describe('recordPullRequest', () => {
@@ -813,6 +879,65 @@ describe('closeOutcomes', () => {
     const stem = await seedTask({ outcomes: ['- [ ] Outcome: one'] })
 
     const outcome = await closeOutcomes(ROOT, { kind: 'stem', stem }, [4])
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'out-of-range' })
+  })
+
+  it('should write a cut the archive counts as cut rather than closed', async () => {
+    const stem = await seedTask({
+      outcomes: ['- [ ] Outcome: one', '- [ ] Outcome: two'],
+    })
+
+    const outcome = await closeOutcomes(
+      ROOT,
+      { kind: 'stem', stem },
+      [1],
+      'feat/slice',
+      [],
+      { positions: [2], reason: 'dropped' },
+    )
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      closed: ['Outcome: one'],
+      cut: ['Outcome: two'],
+      alreadyCut: [],
+    })
+    const outcomes = readOutcomes(await readTask(stem))
+    expect(outcomes.open).toEqual([])
+    expect(outcomes.closed).toHaveLength(1)
+    expect(outcomes.cut).toHaveLength(1)
+  })
+
+  it('should write a cut alone without a pending branch', async () => {
+    const stem = await seedTask({ outcomes: ['- [ ] Outcome: one'] })
+
+    const outcome = await closeOutcomes(
+      ROOT,
+      { kind: 'stem', stem },
+      [],
+      'feat/slice',
+      [],
+      { positions: [1], reason: 'dropped' },
+    )
+
+    expect(outcome).toMatchObject({ ok: true, cut: ['Outcome: one'], pending: [] })
+    await expect(readTask(stem)).resolves.toContain(
+      '- [ ] ~~Outcome: one~~ dropped',
+    )
+  })
+
+  it('should refuse a cut position past the end of the list', async () => {
+    const stem = await seedTask({ outcomes: ['- [ ] Outcome: one'] })
+
+    const outcome = await closeOutcomes(
+      ROOT,
+      { kind: 'stem', stem },
+      [],
+      undefined,
+      [],
+      { positions: [3], reason: 'dropped' },
+    )
 
     expect(outcome).toMatchObject({ ok: false, reason: 'out-of-range' })
   })

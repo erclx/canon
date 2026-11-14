@@ -56,6 +56,8 @@ interface PlanLinkCommandOptions {
 
 interface OutcomeCommandOptions {
   readonly close?: readonly string[]
+  readonly cut?: readonly string[]
+  readonly reason?: string
   readonly json?: boolean
   readonly plan?: string
   readonly root?: string
@@ -375,6 +377,51 @@ async function runPlanLink(
   return reportPlanLink(outcome, emitJson, root)
 }
 
+/**
+ * A cut carries one reason for every position it names, and a position named
+ * twice, whether by both flags or by one flag repeated, is refused before any
+ * write, since the archive would read one line as both shipped and cut.
+ */
+function cutRefusal(
+  close: readonly string[],
+  cut: readonly string[],
+  reason: string | undefined,
+): RecordRefused | undefined {
+  const hasReason = (reason?.trim() ?? '') !== ''
+
+  if (cut.length > 0 && !hasReason) {
+    return {
+      ok: false,
+      reason: 'bad-input',
+      message: 'A cut needs its reason. Pass --reason <text> with --cut.',
+      detail: [],
+    }
+  }
+
+  if (cut.length === 0 && reason !== undefined) {
+    return {
+      ok: false,
+      reason: 'bad-input',
+      message: '--reason applies only to --cut. Pass --cut <position>.',
+      detail: [],
+    }
+  }
+
+  const named = [...close, ...cut].map(Number)
+  const twice = [...new Set(named.filter((n, i) => named.indexOf(n) !== i))]
+
+  if (twice.length > 0) {
+    return {
+      ok: false,
+      reason: 'bad-input',
+      message: `Position named more than once: ${twice.join(', ')}`,
+      detail: twice.map(String),
+    }
+  }
+
+  return undefined
+}
+
 async function runOutcome(
   task: string | undefined,
   opts: OutcomeCommandOptions,
@@ -392,14 +439,16 @@ async function runOutcome(
   }
 
   const raw = opts.close ?? []
+  const cuts = opts.cut ?? []
 
-  if (raw.length === 0) {
+  if (raw.length === 0 && cuts.length === 0) {
     return reportRecord(
       'canon tasks outcome',
       {
         ok: false,
         reason: 'bad-input',
-        message: 'No outcome named. Pass --close <position>.',
+        message:
+          'No outcome named. Pass --close <position> or --cut <position>.',
         detail: [],
       },
       emitJson,
@@ -407,7 +456,7 @@ async function runOutcome(
     )
   }
 
-  const invalid = raw.filter((value) => !/^\d+$/.test(value))
+  const invalid = [...raw, ...cuts].filter((value) => !/^\d+$/.test(value))
 
   if (invalid.length > 0) {
     return reportRecord(
@@ -423,6 +472,12 @@ async function runOutcome(
     )
   }
 
+  const refusal = cutRefusal(raw, cuts, opts.reason)
+
+  if (refusal) {
+    return reportRecord('canon tasks outcome', refusal, emitJson, process.cwd())
+  }
+
   const root = opts.root ?? (await mainWorktreeRoot())
   const branch = await workingBranch()
   const outcome = await closeOutcomes(
@@ -431,6 +486,7 @@ async function runOutcome(
     raw.map(Number),
     branch,
     await branchPullNumbers(branch),
+    { positions: cuts.map(Number), reason: opts.reason?.trim() ?? '' },
   )
 
   return reportOutcome(outcome, emitJson, root)
@@ -627,22 +683,30 @@ function reportOutcome(
         path: relative(root, outcome.path),
         closed: outcome.closed,
         alreadyClosed: outcome.alreadyClosed,
+        cut: outcome.cut,
+        alreadyCut: outcome.alreadyCut,
         pending: outcome.pending,
       })}\n`,
     )
     return 0
   }
 
-  intro('canon tasks outcome')
-  logStep(outcome.closed.length > 0 ? 'Closed' : 'Nothing to close')
+  const wrote = outcome.closed.length > 0 || outcome.cut.length > 0
 
-  for (const closed of outcome.closed) logAdd(closed)
+  intro('canon tasks outcome')
+  logStep(wrote ? 'Updated' : 'Nothing to change')
+
+  for (const closed of outcome.closed) logAdd(`${closed} (closed)`)
+  for (const cut of outcome.cut) logAdd(`${cut} (cut)`)
   for (const already of outcome.alreadyClosed) logInfo(`${already} (already)`)
+  for (const already of outcome.alreadyCut) {
+    logInfo(`${already} (already cut)`)
+  }
   if (outcome.pending.length > 0) {
     logInfo(`pending on ${outcome.pending.join(', ')}`)
   }
 
-  if (outcome.closed.length > 0) logInfo(relative(root, outcome.path))
+  if (wrote) logInfo(relative(root, outcome.path))
   outro()
 
   return 0
@@ -816,15 +880,22 @@ export function registerRecord(tasks: Command): void {
 
   tasks
     .command('outcome')
-    .description('Mark outcomes closed on a task by their position')
+    .description('Mark outcomes closed or cut on a task by their position')
     .argument('[task]', 'Task filename stem, as in v28.1-trigger-escalation')
     .helpOption('-h, --help', 'Show this help message')
     .option(
       '--close <position>',
-      'Outcome to mark [x], 1-based, repeatable',
+      'Outcome shipped, marked [x], 1-based, repeatable',
       collectPosition,
       [] as string[],
     )
+    .option(
+      '--cut <position>',
+      'Outcome decided against, struck with --reason, 1-based, repeatable',
+      collectPosition,
+      [] as string[],
+    )
+    .option('--reason <text>', 'Why the --cut outcomes were dropped, one per call')
     .option('--plan <slug>', 'Select the task whose Plan line names this plan')
     .option('--json', 'Emit a machine-readable record on stdout')
     .option('--root <path>', 'Board root, defaulting to the main worktree')
@@ -837,16 +908,24 @@ export function registerRecord(tasks: Command): void {
         '  no-match      no task matches the selector',
         '  ambiguous     more than one task matches the selector',
         '  no-outcomes   the task carries no outcomes',
-        '  out-of-range  a `--close` position past the end of the outcome list',
-        '  bad-input     a malformed position',
+        '  out-of-range  a `--close` or `--cut` position past the end of the list',
+        '  bad-input     a malformed position, a position named twice, or a',
+        '                `--cut` without `--reason`',
         '',
         'Exit codes:',
-        '  0  every named outcome is closed',
+        '  0  every named outcome is closed or cut',
         '  1  refused, with the reason on stderr or in the JSON record',
         '',
         'Positions count every outcome checkbox in file order, starting at 1.',
         'An outcome already closed is reported rather than refused, so a rerun',
         'against the same positions is safe.',
+        '',
+        '`--close` means shipped. `--cut` means the operator decided against the',
+        'outcome, and writes `- [ ] ~~<outcome>~~ <reason>`, keeping the',
+        'checkbox so no later position shifts. A cut outcome is never ticked and',
+        'a shipped one is never struck, and each is reported as already done.',
+        'One `--reason` covers every `--cut` in the call. A cut alone writes no',
+        'Pending branch: line, since it ships nothing.',
         '',
         'Run from a branch other than main or master, a close that ticks a new',
         'box names that branch on a Pending branch: line, which holds the task',
@@ -858,6 +937,7 @@ export function registerRecord(tasks: Command): void {
         'Examples:',
         '  canon tasks outcome v28.1-trigger-escalation --close 1 --close 3',
         '  canon tasks outcome --plan worktree-scratch-routing --close 2 --json',
+        "  canon tasks outcome v28.1-trigger-escalation --cut 2 --reason 'Superseded by v29.1'",
         '',
       ].join('\n'),
     )
