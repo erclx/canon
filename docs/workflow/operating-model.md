@@ -39,6 +39,8 @@ Each role keeps to its own writes, and five rules cover how the roles meet.
 
 Each worker halts at the PR, and the merge stays a human gate. `canon pr merge` squashes with the body's Summary, Key changes, and Technical context as the message, and the seeded deny rule covers the forms an agent writes by default. A release-please or Dependabot pull request merges the same way, from the bot's own body.
 
+An orchestrator can run this loop unattended, from now or from a set time. Every background launch but a talk one denies the question tool, so a session with a question messages its controller and waits for the reply. The run answers technical questions, parks the operator's, and ends on a report of merge-ready pull requests.
+
 ## The review layer
 
 The first review a change gets is a dispatched reviewer's. The worker's gate inside `auto-ship` decides whether the PR opens, and the draft mark holds the merge. The reviewer pass is the merge gate.
@@ -50,7 +52,7 @@ The first review a change gets is a dispatched reviewer's. The worker's gate ins
 Findings travel on the PR. `review-pr` posts them, `review-address` fixes them and pushes, and `review-pr` runs again on the added commits.
 
 - `canon pr head` resolves the tip a pass scopes against, and `canon pr checks` reports the runs for it. See `canon pr head --help`.
-- A worker messages its controller when the PR opens with any row it turned up, when each address pass ends with the CI state, and before a block becomes a prompt. It sends nothing on progress.
+- A worker messages its controller when the PR opens with any row it turned up, when each address pass ends with the CI state, and on a block, then ends its turn. It sends nothing on progress.
 - A declined finding carries the fact that settled it in its reply body, and a minor goes to the findings of the task the branch closes
 - A finding answered without a commit still owes a close-out, read from the worker's response
 - A branch `main` moved under is the worker's to rebase, in the same force-push as the fixes
