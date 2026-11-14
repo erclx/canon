@@ -11,7 +11,9 @@ A project names the folders its preview writes in `canon/config/preview.json`. T
 
 - The rebuild resets each declared `writes` path from the worktree and leaves the rest of the copy root alone
 - A `keep` path inside a declared path is state the server owns, so the rebuild neither clears it nor copies the worktree's own
-- A page added only to the copy is wiped by design, so a box can open only a page the worker committed under a declared path
+- The rebuild then runs the project's `seed`, when the config declares one, so state the project lays into the copy is back on every rebuild with no hand step
+- A page added only to the copy and laid by no seed is gone after the rebuild, so a box can open only a page the worker committed under a declared path or the seed lays
+- The seed is the worktree's own script, run from that tree against the copy. The operator accepted that trade over a snapshot the worker would have to refresh by hand.
 
 ## Before the browser opens
 
@@ -27,6 +29,7 @@ Branch on `reason` rather than on the exit code.
 - `no-config` means the project declares no preview writes, so drive as usual. The check below still runs.
 - `no-worktree` means no local worktree holds the branch, as for a cloud worker's. Drive, and say in the comment that the worktree check did not run.
 - Any other refusal stops the pass with nothing posted, naming the `reason` and `message` for the dispatcher, since a broken `canon/config/preview.json` would send the drives into the real folders
+- `seed-failed` and `seed-wrote-worktree` stop the pass the same way. The copy lacks its seeded pages, or the seed wrote the tracked files `paths` names.
 
 ## Before the post
 
