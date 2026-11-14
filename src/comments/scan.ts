@@ -38,7 +38,10 @@ export interface DegradationHit {
 }
 
 /** Comment lines past which a run is reported, a prompt to read and not a limit. */
-export const BLOCK_LINE_CHECKPOINT = 20
+export const BLOCK_LINE_CHECKPOINT = 8
+
+/** Lines past which the gate fails a run outside every function body. */
+export const HEAD_BLOCK_CAP = 12
 
 /** A file's longest run of contiguous comment lines, starting at `line`. */
 export interface LongBlock {
@@ -51,7 +54,7 @@ export interface LongBlock {
 export const LONG_BLOCK_FLOOR = 10
 
 /** In-body comment lines past which the gate fails a run. */
-export const BODY_BLOCK_CAP = 10
+export const BODY_BLOCK_CAP = 2
 
 /** Long-block lines past which the gate fails a file. */
 export const FILE_LONG_BLOCK_CAP = 200
@@ -84,6 +87,8 @@ export interface LanguageCount {
   readonly longBlocks: readonly LongBlock[]
   /** Every run past `BLOCK_LINE_CHECKPOINT`, not only each file's longest. */
   readonly blocks: readonly Block[]
+  /** Every run past `HEAD_BLOCK_CAP` outside a function body, unplaced included. */
+  readonly headBlocks: readonly LongBlock[]
   /** Every in-body run past `BODY_BLOCK_CAP`. */
   readonly bodyBlocks: readonly LongBlock[]
   /** Every file holding a run of `LONG_BLOCK_FLOOR` or more, most lines first. */
@@ -194,16 +199,16 @@ function runTracker() {
 }
 
 /**
- * Places each run of `LONG_BLOCK_FLOOR` lines or more by its first line's
- * first character. Shorter runs feed no placed figure, so a file holding none
- * is never read for its function bodies.
+ * Places each run past `BODY_BLOCK_CAP` by its first line's first character.
+ * Shorter runs pass every cap wherever they sit, so a file holding none is
+ * never read for its function bodies.
  */
 function placeRuns(
   file: SourceFile,
   lines: readonly string[],
   runs: readonly { line: number; lines: number }[],
 ): Run[] {
-  if (!runs.some((run) => run.lines >= LONG_BLOCK_FLOOR)) {
+  if (!runs.some((run) => run.lines > BODY_BLOCK_CAP)) {
     return runs.map((run) => ({ ...run, placement: null }))
   }
   const starts = [0]
@@ -211,7 +216,7 @@ function placeRuns(
   const read = placementReader(file.path, file.text)
 
   return runs.map((run) => {
-    if (run.lines < LONG_BLOCK_FLOOR) return { ...run, placement: null }
+    if (run.lines <= BODY_BLOCK_CAP) return { ...run, placement: null }
     const text = lines[run.line - 1] ?? ''
     const offset =
       (starts[run.line - 1] ?? 0) + text.length - text.trimStart().length
@@ -308,9 +313,8 @@ function countBash(
 
   for (const [index, line] of lines.entries()) {
     if (delimiter !== undefined) {
-      // `<<-` strips leading tabs from the terminator, and the plain form
-      // requires it at column zero. Trimming covers both without tracking
-      // which form opened the body.
+      // `<<-` strips leading tabs from the terminator and the plain form
+      // requires column zero, so trimming covers both.
       if (line.trim() === delimiter) delimiter = undefined
       continue
     }
@@ -421,7 +425,7 @@ function countPython(
       line,
       lines: length,
       placement:
-        read.kind === 'unread' || length < LONG_BLOCK_FLOOR
+        read.kind === 'unread' || length <= BODY_BLOCK_CAP
           ? null
           : kind === '#' && inBody(line)
             ? 'body'
@@ -482,6 +486,9 @@ export function countFile(
         ? [{ file: longest.file, line: longest.line, lines: longest.lines }]
         : [],
     blocks: runs.filter((run) => run.lines > BLOCK_LINE_CHECKPOINT),
+    headBlocks: runs
+      .filter((run) => run.placement !== 'body' && run.lines > HEAD_BLOCK_CAP)
+      .map(({ file: path, line, lines }) => ({ file: path, line, lines })),
     bodyBlocks: runs
       .filter((run) => run.placement === 'body' && run.lines > BODY_BLOCK_CAP)
       .map(({ file: path, line, lines }) => ({ file: path, line, lines })),
@@ -523,6 +530,7 @@ export function countFiles(
       degradationHits: [] as DegradationHit[],
       longBlocks: [] as LongBlock[],
       blocks: [] as Block[],
+      headBlocks: [] as LongBlock[],
       bodyBlocks: [] as LongBlock[],
       longBlockFiles: [] as LongBlockFile[],
       unreadFiles: [] as UnreadFile[],
@@ -539,6 +547,7 @@ export function countFiles(
       totals.degradationHits.push(...count.degradationHits)
       totals.longBlocks.push(...count.longBlocks)
       totals.blocks.push(...count.blocks)
+      totals.headBlocks.push(...count.headBlocks)
       totals.bodyBlocks.push(...count.bodyBlocks)
       totals.longBlockFiles.push(...count.longBlockFiles)
       totals.unreadFiles.push(...count.unreadFiles)

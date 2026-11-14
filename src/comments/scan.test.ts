@@ -284,24 +284,24 @@ function run(prefix: string, count: number): string {
 
 describe('long comment blocks', () => {
   it('should not report a run of exactly the checkpoint', () => {
-    const text = `${run('//', 20)}\nconst a = 1\n`
+    const text = `${run('//', 8)}\nconst a = 1\n`
     expect(countFile(file('a.ts', text), 'ts').longBlocks).toEqual([])
   })
 
   it('should report a run one past the checkpoint with its first line', () => {
-    const text = `const a = 1\n${run('//', 21)}\nconst b = 2\n`
+    const text = `const a = 1\n${run('//', 9)}\nconst b = 2\n`
     expect(countFile(file('a.ts', text), 'ts').longBlocks).toEqual([
-      { file: 'a.ts', line: 2, lines: 21 },
+      { file: 'a.ts', line: 2, lines: 9 },
     ])
   })
 
   it('should end a run at a blank line outside a block comment', () => {
-    const text = `${run('//', 15)}\n\n${run('//', 15)}\n`
+    const text = `${run('//', 6)}\n\n${run('//', 6)}\n`
     expect(countFile(file('a.ts', text), 'ts').longBlocks).toEqual([])
   })
 
   it('should end a run at a line of code', () => {
-    const text = `${run('//', 15)}\nconst a = 1\n${run('//', 15)}\n`
+    const text = `${run('//', 6)}\nconst a = 1\n${run('//', 6)}\n`
     expect(countFile(file('a.ts', text), 'ts').longBlocks).toEqual([])
   })
 
@@ -384,8 +384,39 @@ describe('every block and its placement', () => {
   })
 
   it('should pass an in-body block at the cap', () => {
-    const text = `function a() {\n${run('  //', 10)}\n}\n`
+    const text = `function a() {\n${run('  //', 2)}\n  return 1\n}\n`
     expect(countFile(file('a.ts', text), 'ts').bodyBlocks).toEqual([])
+  })
+
+  it('should list an in-body block one past the cap', () => {
+    const text = `function a() {\n${run('  //', 3)}\n  return 1\n}\n`
+    expect(countFile(file('a.ts', text), 'ts').bodyBlocks).toEqual([
+      { file: 'a.ts', line: 2, lines: 3 },
+    ])
+  })
+
+  it('should pass a head block of 12 lines counting its delimiters', () => {
+    const text = `/**\n${run(' *', 10)}\n */\nexport const a = 1\n`
+    expect(countFile(file('a.ts', text), 'ts').headBlocks).toEqual([])
+  })
+
+  it('should list a head block of 13 lines counting its delimiters', () => {
+    const text = `/**\n${run(' *', 11)}\n */\nexport const a = 1\n`
+    expect(countFile(file('a.ts', text), 'ts').headBlocks).toEqual([
+      { file: 'a.ts', line: 1, lines: 13 },
+    ])
+  })
+
+  it('should leave a long in-body block out of the head blocks', () => {
+    const text = `function a() {\n${run('  //', 13)}\n  return 1\n}\n`
+    expect(countFile(file('a.ts', text), 'ts').headBlocks).toEqual([])
+  })
+
+  it('should hold an unplaced bash block to the head cap', () => {
+    const text = `#!/usr/bin/env bash\n${run('#', 13)}\necho hi\n`
+    expect(countFile(file('a.sh', text), 'sh').headBlocks).toEqual([
+      { file: 'a.sh', line: 2, lines: 13 },
+    ])
   })
 
   it('should leave a bash block unplaced', () => {

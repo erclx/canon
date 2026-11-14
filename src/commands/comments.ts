@@ -5,6 +5,7 @@ import {
   BODY_BLOCK_CAP,
   density,
   FILE_LONG_BLOCK_CAP,
+  HEAD_BLOCK_CAP,
   LONG_BLOCK_FLOOR,
   type Language,
   LANGUAGES,
@@ -57,7 +58,8 @@ export function register(program: Command): void {
         '  -     unread, as for every bash run and a Python file the reader',
         '        refused, which the record lists under unreadFiles',
         '',
-        'Caps, which canon gate run fails on and this report only lists:',
+        'Caps, which canon gate run fails on in a touched file and this report only lists:',
+        `  a head run past ${HEAD_BLOCK_CAP} lines, delimiters included`,
         `  an in-body run past ${BODY_BLOCK_CAP} lines`,
         `  a file past ${FILE_LONG_BLOCK_CAP} lines in runs of ${LONG_BLOCK_FLOOR} or more`,
         '',
@@ -150,11 +152,13 @@ async function runScan(
             : null,
         blockCheckpoint: BLOCK_LINE_CHECKPOINT,
         longBlockFloor: LONG_BLOCK_FLOOR,
+        headBlockCap: HEAD_BLOCK_CAP,
         bodyBlockCap: BODY_BLOCK_CAP,
         fileLongBlockCap: FILE_LONG_BLOCK_CAP,
         snapshot: snapshot.map((count) => ({
           ...record(count),
           blocks: count.blocks,
+          headBlocks: count.headBlocks,
           bodyBlocks: count.bodyBlocks,
           longBlockFiles: count.longBlockFiles,
           unreadFiles: count.unreadFiles,
@@ -290,10 +294,22 @@ function reportLongBlocks(snapshot: readonly LanguageCount[]): void {
 function reportCaps(snapshot: readonly LanguageCount[]): void {
   logStep('Comment caps')
 
+  const head = snapshot.flatMap((count) => count.headBlocks)
   const body = snapshot.flatMap((count) => count.bodyBlocks)
   const files = snapshot
     .flatMap((count) => count.longBlockFiles)
     .filter((file) => file.lines > FILE_LONG_BLOCK_CAP)
+
+  if (head.length === 0) {
+    logInfo(`No head run past ${HEAD_BLOCK_CAP} lines.`)
+  } else {
+    logWarn(`${head.length} head runs past ${HEAD_BLOCK_CAP} lines`)
+    pipeOutput(
+      head
+        .map((block) => `${block.file}:${block.line}  ${block.lines} lines`)
+        .join('\n'),
+    )
+  }
 
   if (body.length === 0) {
     logInfo(`No in-body run past ${BODY_BLOCK_CAP} lines.`)

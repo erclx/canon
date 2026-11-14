@@ -145,6 +145,7 @@ describe('canon comments scan block record', () => {
         '--languages',
         'ts',
       )) as unknown as {
+        headBlockCap: number
         bodyBlockCap: number
         fileLongBlockCap: number
         longBlockFloor: number
@@ -154,9 +155,11 @@ describe('canon comments scan block record', () => {
 
       expect([
         record.longBlockFloor,
+        record.headBlockCap,
         record.bodyBlockCap,
         record.fileLongBlockCap,
-      ]).toEqual([10, 10, 200])
+      ]).toEqual([10, 12, 2, 200])
+      expect(record.snapshot[0]?.headBlocks).toEqual([])
       expect(record.snapshot[0]?.bodyBlocks).toEqual([
         { file: 'a.ts', line: 2, lines: 11 },
       ])
