@@ -66,6 +66,8 @@ A bundle row is the one exception to a concern per file. It is a set of small fi
 - Record the operator's agreement as an answered question in `## Questions`, and never bundle without one
 - Never bundle fixes with no file in common
 
+Several plans written by one session from a several-row launch are not a bundle row, since each task keeps its own file and branch.
+
 ### Staged batches
 
 A staged batch is a concern of its own and takes its own file rather than a `**Batch N**` sub-heading inside one plan's `## Files to touch`. One plan filename derives one branch, so batches sharing a file have nothing to open a pull request against once the first merges.

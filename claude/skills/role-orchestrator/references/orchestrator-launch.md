@@ -146,14 +146,9 @@ None of the three checks in `orchestrator-dispatch.md` binds this shape.
 
 What a planning dispatch owes instead is the reverse reading, since a row planned during a wave is planned against a tree that wave is changing. `role-planner` composes the session roster with the pull request list itself, which is why the brief carries no branch list.
 
-### One row per dispatch
+### Reusing a planner
 
-A reused session pays the context load once and ages its picture of the tree, which is why the in-flight read sits on each row. One that compacts loses the reasoning behind its earlier plans unreported, so `role-planner` stops it when the operator ends it or a compaction nears.
-
-The session that closed a groundwork track or an app drive is the default planner of the rows its record produced, talk session or not. Name each filed row back to it, since it holds the evidence and what the operator said about the row.
-
-- Launch a cold planner for such a row only on a close message handing off with a reason `role-planner` states, or on the operator's ask
-- Hold all planning of a row any other talk session has said by message it is planning, whether by a launch or by `plan-feature` here, unless the operator asks for a cold planner
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-planner-reuse.md` before handing a planner more than one row. Several rows in one launch take its batch brief, which asks for one plan file per task, and a row named back to a live planner takes its reuse rules.
 
 ## Dispatch a talk session
 

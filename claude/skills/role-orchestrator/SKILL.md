@@ -70,7 +70,7 @@ The cross-feature call stays in this warm session, being which rows conflict, wh
 
 - Per-row planning runs through `plan-feature` here, the session that measured the row, or a cold planner under `role-planner`, per `${CLAUDE_SKILL_DIR}/references/orchestrator-launch.md`
 - A flaky row with no named cause launches `plan-groundwork` ahead of `plan-feature`, per `### A flaky row` in that file
-- A talk planner launches from that file's talk shape when the operator wants to shape the row with the session
+- That file's talk shape launches a planner the operator shapes the row with, and its several-row shape one planner for rows sharing a surface
 
 ### 2. Decide parallelism and merge order
 
