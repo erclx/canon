@@ -717,6 +717,10 @@ async function runSync(target: string): Promise<number> {
     logWarn(
       'settings.json lacks the lease push allow. Run `canon migrate session-defaults --write`',
     )
+  } else if (defaults.kind === 'planned' && defaults.plan.lacksUiPassAllow) {
+    logWarn(
+      'settings.json lacks the UI pass allow. Run `canon migrate session-defaults --write`',
+    )
   }
 
   logStep('Scanning .gitignore')
