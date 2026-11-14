@@ -105,6 +105,22 @@ describe('densityGates', () => {
     ).toBe(true)
   })
 
+  it.each([
+    'claude/skills/new-skill/SKILL.md',
+    'claude/skills/new-skill/references/new.md',
+  ])('should gate an unlisted plugin skill file by default: %s', (rel) => {
+    expect(densityGates(rel, 'paragraph-length')).toBe(true)
+  })
+
+  it('should leave an unlisted plugin skill requirement ungated by default', () => {
+    expect(
+      densityGates(
+        'claude/skills/new-skill/REQUIREMENT.md',
+        'paragraph-length',
+      ),
+    ).toBe(false)
+  })
+
   it('should never gate an out-of-scope path, whatever the prefix', () => {
     expect(
       densityGates('canon/REQUIREMENTS.md', 'bullet-run', ['canon/']),
