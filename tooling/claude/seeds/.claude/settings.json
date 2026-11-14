@@ -19,7 +19,9 @@
       "Task",
       "Bash(canon pr merge:*)",
       "Bash(gh pr merge:*)",
-      "Bash(canon browser install-browser:*)"
+      "Bash(canon browser *install-browser*)",
+      "Bash(canon pr frames *--drop*)",
+      "Bash(canon pr frames *--prune*)"
     ]
   },
   "hooks": {

@@ -2,7 +2,7 @@
  * Adds the session defaults the seeded `.claude/settings.json` carries to a
  * target that was seeded before them: the subagent deny, the memory default,
  * the merge deny entries, the lease push and UI pass allow entries, the browser
- * install deny, and the plan guard's PreToolUse wiring where the project holds
+ * and frames rewrite deny, and the plan guard's PreToolUse wiring where the project holds
  * the guard script.
  *
  * `canon claude init` copies a seed only when the file is absent, so a target
@@ -61,9 +61,15 @@ export const UI_PASS_ALLOWED: readonly string[] = [
   'Bash(canon pr lift:*)',
 ]
 
-/** Keeps a pass from installing a browser it lacks. */
-export const BROWSER_INSTALL_DENIED: readonly string[] = [
-  'Bash(canon browser install-browser:*)',
+/**
+ * Keeps a pass from installing a browser, in the session form a pass types as
+ * well, and from `frames --drop` and `--prune`, which force-move the shared
+ * frames ref. A deny resolves ahead of the `canon pr frames` allow.
+ */
+export const UI_PASS_DENIED: readonly string[] = [
+  'Bash(canon browser *install-browser*)',
+  'Bash(canon pr frames *--drop*)',
+  'Bash(canon pr frames *--prune*)',
 ]
 
 /** The command the seed wires, as the seeded settings spell it. */
@@ -137,10 +143,10 @@ export function planSessionDefaults(
 
   const subagentsMissing = DENIED_TOOLS.filter((tool) => !deny.includes(tool))
   const mergeMissing = MERGE_DENIED.filter((entry) => !deny.includes(entry))
-  const browserMissing = BROWSER_INSTALL_DENIED.filter(
+  const uiPassDenyMissing = UI_PASS_DENIED.filter(
     (entry) => !deny.includes(entry),
   )
-  const missing = [...subagentsMissing, ...mergeMissing, ...browserMissing]
+  const missing = [...subagentsMissing, ...mergeMissing, ...uiPassDenyMissing]
   const pushMissing = PUSH_ALLOWED.filter((entry) => !allow.includes(entry))
   const uiPassMissing = UI_PASS_ALLOWED.filter(
     (entry) => !allow.includes(entry),

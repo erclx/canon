@@ -83,8 +83,12 @@ A dispatched UI reviewer stopped on a permission prompt mid-pass, so the seed's 
 - `Bash(canon drive:*)` and `canon pr` by subcommand, being `head`, `checks`, `evidence`, `local`, `drive-copy`, `frames`, `tick`, and `lift`
 - No `canon pr` wildcard, since it would also approve `close`, which deletes a branch, and `preview`, which deploys
 - No `canon browser` entry in any form, since its session flag sits before the subcommand and a rule allowing a screenshot also allows `run-code` and `eval`
-- `Bash(canon browser install-browser:*)` on the deny list, so a pass never installs a browser
 - No `rm`, `cp`, or `mkdir` entry. A pass folder sits at an absolute main-root path no seeded rule can name.
+
+The deny list carries what a pass must never run, and a deny wins over any allow.
+
+- `Bash(canon browser *install-browser*)`, so a pass never installs a browser, the `-s=<name>` session form included
+- `Bash(canon pr frames *--drop*)` and `Bash(canon pr frames *--prune*)`, since both force-move the shared frames ref and a pass runs only `--add` and `--reel`
 
 A pass still prompts for `gh api`, `curl`, and `canon pr preview --check` under a mode that asks for every command. `canon migrate session-defaults --write` adds the absent entries to an existing target, and `canon claude sync` warns while any is missing.
 

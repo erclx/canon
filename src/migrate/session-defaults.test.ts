@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   applySessionDefaults,
-  BROWSER_INSTALL_DENIED,
+  UI_PASS_DENIED,
   MERGE_DENIED,
   PLAN_GUARD_COMMAND,
   PUSH_ALLOWED,
@@ -15,6 +15,23 @@ import {
 } from '@/migrate/session-defaults'
 
 const SEEDED_ALLOW = [...PUSH_ALLOWED, ...UI_PASS_ALLOWED]
+
+/**
+ * A Bash rule as Claude Code's permissions page states it: `*` stands in for
+ * any text, a trailing `:*` equals ` *`, and a lone trailing ` *` also matches
+ * the bare command.
+ */
+function ruleMatches(rule: string, command: string): boolean {
+  const body = rule.replace(/^Bash\((.*)\)$/, '$1').replace(/:\*$/, ' *')
+  const escaped = body
+    .split('*')
+    .map((part) => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&'))
+  const pattern = escaped.join('.*')
+  const bare = escaped.length === 2 && body.endsWith(' *')
+  return new RegExp(
+    `^${bare ? `${escaped[0].trimEnd()}( .*)?` : pattern}$`,
+  ).test(command)
+}
 
 const dirs: string[] = []
 
@@ -39,7 +56,7 @@ const DEFAULTS = {
   autoMemoryEnabled: false,
   permissions: {
     allow: SEEDED_ALLOW,
-    deny: ['Agent', 'Task', ...MERGE_DENIED, ...BROWSER_INSTALL_DENIED],
+    deny: ['Agent', 'Task', ...MERGE_DENIED, ...UI_PASS_DENIED],
   },
 }
 
@@ -71,7 +88,7 @@ describe('planSessionDefaults', () => {
     expect(plan.next).toEqual({
       permissions: {
         allow: SEEDED_ALLOW,
-        deny: ['Agent', 'Task', ...MERGE_DENIED, ...BROWSER_INSTALL_DENIED],
+        deny: ['Agent', 'Task', ...MERGE_DENIED, ...UI_PASS_DENIED],
       },
       autoMemoryEnabled: false,
     })
@@ -90,7 +107,7 @@ describe('planSessionDefaults', () => {
         'Task',
         'Agent',
         ...MERGE_DENIED,
-        ...BROWSER_INSTALL_DENIED,
+        ...UI_PASS_DENIED,
       ],
     })
   })
@@ -111,7 +128,7 @@ describe('planSessionDefaults', () => {
         'Agent',
         'Task',
         'Bash(canon pr merge:*)',
-        ...BROWSER_INSTALL_DENIED,
+        ...UI_PASS_DENIED,
       ],
     })
   })
@@ -126,7 +143,7 @@ describe('planSessionDefaults', () => {
       autoMemoryEnabled: true,
       permissions: {
         allow: SEEDED_ALLOW,
-        deny: ['Agent', 'Task', ...MERGE_DENIED, ...BROWSER_INSTALL_DENIED],
+        deny: ['Agent', 'Task', ...MERGE_DENIED, ...UI_PASS_DENIED],
       },
     })
   })
@@ -160,7 +177,7 @@ describe('planSessionDefaults', () => {
     const plan = planSessionDefaults({
       autoMemoryEnabled: false,
       permissions: {
-        deny: ['Agent', 'Task', ...MERGE_DENIED, ...BROWSER_INSTALL_DENIED],
+        deny: ['Agent', 'Task', ...MERGE_DENIED, ...UI_PASS_DENIED],
       },
     })
 
@@ -202,7 +219,7 @@ describe('planSessionDefaults', () => {
       autoMemoryEnabled: false,
       permissions: {
         allow: SEEDED_ALLOW,
-        deny: ['Task', 'Agent', ...MERGE_DENIED, ...BROWSER_INSTALL_DENIED],
+        deny: ['Task', 'Agent', ...MERGE_DENIED, ...UI_PASS_DENIED],
       },
     })
 
@@ -214,13 +231,13 @@ describe('planSessionDefaults', () => {
       autoMemoryEnabled: false,
       permissions: {
         allow: ['Bash(ls)'],
-        deny: ['Agent', 'Task', ...MERGE_DENIED, ...BROWSER_INSTALL_DENIED],
+        deny: ['Agent', 'Task', ...MERGE_DENIED, ...UI_PASS_DENIED],
       },
     })
 
     expect(plan.next.permissions).toEqual({
       allow: ['Bash(ls)', ...SEEDED_ALLOW],
-      deny: ['Agent', 'Task', ...MERGE_DENIED, ...BROWSER_INSTALL_DENIED],
+      deny: ['Agent', 'Task', ...MERGE_DENIED, ...UI_PASS_DENIED],
     })
     expect(plan.lacksPushAllow).toBe(true)
     expect(plan.predates).toBe(false)
@@ -231,7 +248,7 @@ describe('planSessionDefaults', () => {
       autoMemoryEnabled: false,
       permissions: {
         allow: ['Bash(git push --force-with-lease)'],
-        deny: ['Agent', 'Task', ...MERGE_DENIED, ...BROWSER_INSTALL_DENIED],
+        deny: ['Agent', 'Task', ...MERGE_DENIED, ...UI_PASS_DENIED],
       },
     })
 
@@ -266,7 +283,7 @@ describe('planSessionDefaults for the UI pass entries', () => {
 
     expect(plan.next.permissions).toEqual({
       allow: ['Bash(ls)', ...PUSH_ALLOWED, ...UI_PASS_ALLOWED],
-      deny: ['Agent', 'Task', ...MERGE_DENIED, ...BROWSER_INSTALL_DENIED],
+      deny: ['Agent', 'Task', ...MERGE_DENIED, ...UI_PASS_DENIED],
     })
     expect(plan.lacksUiPassAllow).toBe(true)
     expect(plan.lacksPushAllow).toBe(false)
@@ -277,7 +294,7 @@ describe('planSessionDefaults for the UI pass entries', () => {
       autoMemoryEnabled: false,
       permissions: {
         allow: [...UI_PASS_ALLOWED].reverse().concat(PUSH_ALLOWED),
-        deny: ['Agent', 'Task', ...MERGE_DENIED, ...BROWSER_INSTALL_DENIED],
+        deny: ['Agent', 'Task', ...MERGE_DENIED, ...UI_PASS_DENIED],
       },
     })
 
@@ -299,7 +316,7 @@ describe('planSessionDefaults for the UI pass entries', () => {
         'Task',
         'Bash(canon pr lift:*)',
         ...MERGE_DENIED,
-        ...BROWSER_INSTALL_DENIED,
+        ...UI_PASS_DENIED,
       ],
     })
   })
@@ -315,6 +332,22 @@ describe('planSessionDefaults for the UI pass entries', () => {
     const whole = /^Bash\(canon( pr)?:\*\)$/
 
     expect(UI_PASS_ALLOWED.filter((entry) => whole.test(entry))).toEqual([])
+  })
+
+  it.each([
+    'canon browser -s=site-12 install-browser chromium',
+    'canon browser install-browser chromium',
+    'canon pr frames 12 --drop',
+    'canon pr frames --prune 14',
+  ])('should deny %s ahead of the frames allow', (command) => {
+    expect(UI_PASS_DENIED.some((rule) => ruleMatches(rule, command))).toBe(true)
+  })
+
+  it('should leave the frames forms a pass runs to the allow', () => {
+    const add = 'canon pr frames 12 --add shot.png --box 3 --json'
+
+    expect(UI_PASS_DENIED.some((rule) => ruleMatches(rule, add))).toBe(false)
+    expect(UI_PASS_ALLOWED.some((rule) => ruleMatches(rule, add))).toBe(true)
   })
 
   it('should match the seeded settings file entry for entry', async () => {
@@ -333,7 +366,7 @@ describe('planSessionDefaults for the UI pass entries', () => {
       'Agent',
       'Task',
       ...MERGE_DENIED,
-      ...BROWSER_INSTALL_DENIED,
+      ...UI_PASS_DENIED,
     ])
   })
 })
@@ -567,7 +600,7 @@ describe('applySessionDefaults', () => {
     await applySessionDefaults(read)
 
     expect(await readTargetSettings(dir)).toBe(
-      '{\n    "model": "opus",\n    "permissions": {\n        "deny": [\n            "Agent",\n            "Task",\n            "Bash(canon pr merge:*)",\n            "Bash(gh pr merge:*)",\n            "Bash(canon browser install-browser:*)"\n        ],\n        "allow": [\n            "Bash(git push --force-with-lease)",\n            "Bash(git push --force-with-lease origin HEAD)",\n            "Bash(canon drive:*)",\n            "Bash(canon pr head:*)",\n            "Bash(canon pr checks:*)",\n            "Bash(canon pr evidence:*)",\n            "Bash(canon pr local:*)",\n            "Bash(canon pr drive-copy:*)",\n            "Bash(canon pr frames:*)",\n            "Bash(canon pr tick:*)",\n            "Bash(canon pr lift:*)"\n        ]\n    },\n    "autoMemoryEnabled": false\n}\n',
+      '{\n    "model": "opus",\n    "permissions": {\n        "deny": [\n            "Agent",\n            "Task",\n            "Bash(canon pr merge:*)",\n            "Bash(gh pr merge:*)",\n            "Bash(canon browser *install-browser*)",\n            "Bash(canon pr frames *--drop*)",\n            "Bash(canon pr frames *--prune*)"\n        ],\n        "allow": [\n            "Bash(git push --force-with-lease)",\n            "Bash(git push --force-with-lease origin HEAD)",\n            "Bash(canon drive:*)",\n            "Bash(canon pr head:*)",\n            "Bash(canon pr checks:*)",\n            "Bash(canon pr evidence:*)",\n            "Bash(canon pr local:*)",\n            "Bash(canon pr drive-copy:*)",\n            "Bash(canon pr frames:*)",\n            "Bash(canon pr tick:*)",\n            "Bash(canon pr lift:*)"\n        ]\n    },\n    "autoMemoryEnabled": false\n}\n',
     )
   })
 
