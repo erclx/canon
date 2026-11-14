@@ -22,8 +22,11 @@ Ready to build (hand each to its own worker):
 
 In flight (this session's workers, building now):
 
-<session name>  <branch>  <model>  <effort>
+<session name>  <branch>
   task: <row>, <n> commits, <n> files changed
+  Model: <model>
+  Effort: <effort>
+  Why: <the plan's weight and the role, or no weight stated>
 
 In review (your turn):
 
@@ -46,7 +49,7 @@ Omit any section with nothing in it. Recommend a handoff only for a plan the con
 `In flight` covers the state between the other two, which lasts ten to thirty minutes and is most of what an operator sees once this session dispatches its own workers.
 
 - Read the progress figures off each worker's worktree, since a busy status says a session is alive and nothing about whether it is moving
-- Name the model and the effort, because a dispatcher now picks both per row
+- Declare the model, the effort, and why on labeled lines under the row, since a dispatcher picks both per row from the plan's weight and the role
 
 ## Every later turn
 
