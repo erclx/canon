@@ -206,6 +206,49 @@ describe('countFile', () => {
   })
 })
 
+describe('history in a comment', () => {
+  it.each([
+    ['date', 'shipped on 2026-08-20'],
+    ['commit hash', 'measured against 7165dc5eb'],
+    ['issue reference', 'see #723 for the thread'],
+  ])('should report a %s', (term, note) => {
+    const text = `// ${note}\nconst a = 1\n`
+    expect(countFile(file('a.ts', text), 'ts').degradationHits).toEqual([
+      { file: 'a.ts', line: 1, term },
+    ])
+  })
+
+  it('should report a date inside a code span', () => {
+    const text = '// the `2026-08-20` run\nconst a = 1\n'
+    expect(countFile(file('a.ts', text), 'ts').degradationHits).toEqual([
+      { file: 'a.ts', line: 1, term: 'date' },
+    ])
+  })
+
+  it('should report history in a bash comment', () => {
+    const text = '#!/usr/bin/env bash\n# fixed in #723\necho hi\n'
+    expect(countFile(file('a.sh', text), 'sh').degradationHits).toEqual([
+      { file: 'a.sh', line: 2, term: 'issue reference' },
+    ])
+  })
+
+  it.each([
+    ['a date placeholder', 'dates read as <YYYY-MM-DD>'],
+    ['a number with no letter', 'retries 1234567 times'],
+    ['a word with no digit', 'a defaced value'],
+    ['an entity reference', 'writes &#39; for a quote'],
+    ['a hex color', 'paints #1e1e1e behind it'],
+  ])('should pass %s', (_, note) => {
+    const text = `// ${note}\nconst a = 1\n`
+    expect(countFile(file('a.ts', text), 'ts').degradationHits).toEqual([])
+  })
+
+  it('should not report a date in a string literal', () => {
+    const text = "const a = '2026-08-20'\n"
+    expect(countFile(file('a.ts', text), 'ts').degradationHits).toEqual([])
+  })
+})
+
 describe('countFiles', () => {
   it('should total each language separately', () => {
     const counts = countFiles([

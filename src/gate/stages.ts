@@ -6,7 +6,11 @@ import {
   skillPaths,
 } from '@/gate/boundaries'
 import { embeddedPrograms } from '@/code/embedded'
-import { commentBodyBlocks, commentHeadBlocks } from '@/gate/comment-caps'
+import {
+  commentBodyBlocks,
+  commentHeadBlocks,
+  commentHistory,
+} from '@/gate/comment-caps'
 import { fileLength } from '@/gate/file-length'
 import {
   canonicalRecords,
@@ -422,6 +426,11 @@ export const STAGES: readonly Stage[] = [
     id: 'comment-body-blocks',
     label: 'In-body comment runs',
     checks: [{ kind: 'measure', measure: commentBodyBlocks }],
+  },
+  {
+    id: 'comment-history',
+    label: 'History in comments',
+    checks: [{ kind: 'measure', measure: commentHistory }],
   },
   {
     // A rule citing a file that moved fails silently. The consumed-copy drift

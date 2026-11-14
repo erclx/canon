@@ -4,7 +4,11 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { commentBodyBlocks, commentHeadBlocks } from '@/gate/comment-caps'
+import {
+  commentBodyBlocks,
+  commentHeadBlocks,
+  commentHistory,
+} from '@/gate/comment-caps'
 import { type GateContext, runStage } from '@/gate/sequencer'
 import { STAGES } from '@/gate/stages'
 import { gitEnv } from '@/git/env'
@@ -150,6 +154,34 @@ describe('comment caps', () => {
       expect(report.failure).toBeUndefined()
     })
 
+    it('should fail a touched comment carrying a date naming its place', async () => {
+      commit('src/a.ts', '// measured on 2026-08-20\nexport const a = 1\n')
+
+      const report = await commentHistory(context(['src/a.ts']))
+
+      expect(report.failure).toBeDefined()
+      expect(report.emissions.map((emission) => emission.text)).toEqual([
+        'src/a.ts:1 carries a date in a comment',
+      ])
+    })
+
+    it('should pass an untouched comment carrying a date', async () => {
+      commit('src/a.ts', '// measured on 2026-08-20\nexport const a = 1\n')
+      commit('src/b.ts', 'export const b = 1\n')
+
+      const report = await commentHistory(context(['src/b.ts']))
+
+      expect(report.failure).toBeUndefined()
+    })
+
+    it('should pass a touched comment carrying a placeholder date', async () => {
+      commit('src/a.ts', '// written as <YYYY-MM-DD>\nexport const a = 1\n')
+
+      const report = await commentHistory(context(['src/a.ts']))
+
+      expect(report.failure).toBeUndefined()
+    })
+
     it('should fail a touched file through the gate stage', async () => {
       commit('src/a.ts', headRuns(1, 13))
       const stage = STAGES.find(
@@ -166,6 +198,7 @@ describe('comment caps', () => {
   it.each([
     ['commentHeadBlocks', commentHeadBlocks],
     ['commentBodyBlocks', commentBodyBlocks],
+    ['commentHistory', commentHistory],
   ])(
     'should read a tree git cannot list as unmeasured in %s',
     async (_, measure) => {

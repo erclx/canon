@@ -5,10 +5,11 @@ import { plural } from '@/cli/ui'
 import {
   BODY_BLOCK_CAP,
   countFile,
+  type DegradationHit,
+  HISTORY_PATTERNS,
   HEAD_BLOCK_CAP,
   isPruned,
   type LanguageCount,
-  type LongBlock,
   languageFor,
 } from '@/comments/scan'
 import type { Measure, MeasureContext, MeasureReport } from '@/gate/measures'
@@ -53,9 +54,9 @@ interface ScopedContext extends MeasureContext {
   readonly changed?: readonly string[]
 }
 
-interface CapReading {
+interface CapReading<T> {
   readonly clean: string
-  readonly line: (block: LongBlock) => string
+  readonly line: (finding: T) => string
   readonly failure: (count: number) => string
 }
 
@@ -64,9 +65,9 @@ interface CapReading {
  * is off it reports them without failing, since a full run reads every legacy
  * file nobody is editing.
  */
-function capMeasure(
-  pick: (count: LanguageCount) => readonly LongBlock[],
-  reading: CapReading,
+function capMeasure<T>(
+  pick: (count: LanguageCount) => readonly T[],
+  reading: CapReading<T>,
 ): Measure {
   return async (ctx: ScopedContext) => {
     const counted = await countRepository(ctx.root, ctx.changed)
@@ -76,16 +77,16 @@ function capMeasure(
       counted.files,
       ctx.changed === undefined ? 'source file' : 'touched source file',
     )
-    const blocks = counted.counts.flatMap(pick)
-    if (blocks.length === 0) {
+    const findings = counted.counts.flatMap(pick)
+    if (findings.length === 0) {
       return {
         emissions: [{ kind: 'info', text: `${reading.clean} across ${scope}` }],
       }
     }
 
-    const emissions = blocks.map((block) => ({
+    const emissions = findings.map((finding) => ({
       kind: 'warn' as const,
-      text: reading.line(block),
+      text: reading.line(finding),
     }))
     if (ctx.changed === undefined) {
       return {
@@ -98,7 +99,7 @@ function capMeasure(
         ],
       }
     }
-    return { emissions, failure: reading.failure(blocks.length) }
+    return { emissions, failure: reading.failure(findings.length) }
   }
 }
 
@@ -123,5 +124,19 @@ export const commentBodyBlocks: Measure = capMeasure(
       `${block.file}:${block.line} runs ${block.lines} comment lines inside a function body, past ${BODY_BLOCK_CAP}`,
     failure: (count) =>
       `${plural(count, 'in-body comment run')} past ${BODY_BLOCK_CAP} lines. Move the reason above the function or into the code it explains.`,
+  },
+)
+
+const HISTORY_TERMS = new Set(HISTORY_PATTERNS.map(({ term }) => term))
+
+/** Fails a touched file's comment carrying a date, a commit hash, or an issue reference. */
+export const commentHistory: Measure = capMeasure(
+  (count): readonly DegradationHit[] =>
+    count.degradationHits.filter((hit) => HISTORY_TERMS.has(hit.term)),
+  {
+    clean: 'No date, commit hash, or issue reference in a comment',
+    line: (hit) => `${hit.file}:${hit.line} carries a ${hit.term} in a comment`,
+    failure: (count) =>
+      `${plural(count, 'comment')} carrying change history. Move the history to the pull request and keep the fact the code needs.`,
   },
 )

@@ -37,6 +37,23 @@ export interface DegradationHit {
   readonly term: string
 }
 
+/**
+ * Change history a comment carries, which belongs to the pull request. Patterns
+ * rather than vocabulary terms, so they live here and match with no rule
+ * loaded. A format example writes a placeholder such as `<YYYY-MM-DD>`.
+ */
+export const HISTORY_PATTERNS: readonly {
+  readonly term: string
+  readonly pattern: RegExp
+}[] = [
+  { term: 'date', pattern: /(?<!\d)\d{4}-\d{2}-\d{2}(?!\d)/ },
+  {
+    term: 'commit hash',
+    pattern: /(?<!\w)(?=[0-9a-f]*\d)(?=[0-9a-f]*[a-f])[0-9a-f]{7,40}(?!\w)/,
+  },
+  { term: 'issue reference', pattern: /(?<![\w&])#\d+(?!\w)/ },
+]
+
 /** Comment lines past which a run is reported, a prompt to read and not a limit. */
 export const BLOCK_LINE_CHECKPOINT = 8
 
@@ -427,10 +444,10 @@ export function countFile(
   language: Language,
   vocabulary: readonly string[] = [],
 ): LanguageCount {
-  const matchers = vocabulary.map((term) => ({
-    term,
-    pattern: matcherFor(term),
-  }))
+  const matchers = [
+    ...vocabulary.map((term) => ({ term, pattern: matcherFor(term) })),
+    ...HISTORY_PATTERNS,
+  ]
   const hits: DegradationHit[] = []
 
   const counted = COUNTERS[language](file, matchers, hits)
