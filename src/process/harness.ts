@@ -90,31 +90,16 @@ export function snapshotStateDir(): string {
 }
 
 /**
- * Spawns the real entry point rather than calling a command's action function
- * in-process, so a case answers whether a verb is registered, whether it
- * exits the way its own contract states, and whether its `--json` record
- * parses off stdout alone, none of which an in-process call can misreport.
+ * Spawns the real entry point rather than calling an action in-process, so a
+ * case proves the verb is registered, exits per its contract, and emits a
+ * `--json` record that parses off stdout alone.
  *
- * A git hook exports `GIT_DIR`, which would resolve a fixture's git-aware
- * reads against this checkout instead of the temporary directory a case
- * builds, so every spawn drops the `GIT_` prefix.
- *
- * `CANON_STATE_DIR` and `CANON_SANDBOX_DIR` get the same treatment as `GIT_DIR`,
- * each pointed at a folder under the case's own `cwd` rather than dropped,
- * since dropping either alone would still resolve through the inherited
- * `HOME` to this machine's real `~/.local/state/canon`. `stateDir()` and
- * `sandboxTree()` resolve the same three ways and share that parent, so both
- * overrides move together. A case explicitly passing its own value through
- * `options.env` still wins. The child's stdin is a pipe rather than a
- * terminal, so every case runs headless.
- *
- * The `stateDir()` snapshot before and after the spawn is what actually
- * catches an escape past that redirection, since a default can be wrong in a
- * way a case never asserts on its own, and it is what `CANON_SANDBOX_DIR`
- * rides for free: the sandbox tree already sits under `stateDir()`, so
- * walking the whole directory catches a leak there with no override of its
- * own to add. `ContainmentViolation` fails loud rather than leaving a dead
- * row for a reviewer to find on a real machine.
+ * Every spawn drops `GIT_` variables, since a hook's `GIT_DIR` would resolve
+ * fixture reads against this checkout. `CANON_STATE_DIR` and
+ * `CANON_SANDBOX_DIR` point under the case's `cwd`, since dropping them would
+ * fall back to the real `HOME`, and `options.env` still wins. Stdin is a pipe,
+ * so every case runs headless, and a `stateDir()` snapshot around the spawn
+ * raises `ContainmentViolation` on any escape.
  */
 export function runCli(
   args: readonly string[],
