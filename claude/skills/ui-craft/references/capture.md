@@ -13,6 +13,12 @@
 - Count a focus ring, an outline, a toast, a tooltip, a size change from server-written markup, and a state reachable only by interaction as visible states.
 - Read your capture against the `canon:ui-checklist` boxes before opening the pull request, reporting a skill that does not resolve.
 
+### The pointer-only pass
+
+A clean frame from this pass does not clear a script focus a pointer event causes, since synthetic input may never reach the browser's heuristic.
+
+- Drive a changed surface with the pointer alone in a session opened with `canon browser open --headed`, then capture it. Count any ring as a finding whatever the selectors read.
+
 ### The exemption
 
 Only a change with no visible result in any reachable state is exempt, such as a keyboard order that moves no ring. A capture costs one command and a missing one costs a review round, so the worker never judges the exemption alone.
