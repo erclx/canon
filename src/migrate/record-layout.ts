@@ -1,26 +1,14 @@
 /**
- * The record folder layout, moved one intake batch at a time.
+ * The record folder layout moves. `.canon/review/` keeps only reviews, with
+ * feedback, picks, evidence, renders, branch reports, and flat checklists each
+ * moved to its own folder. `canon records push` backs every top-level `.canon/`
+ * entry except `EXCLUDED_ENTRIES`, so new folders need no list edit, and
+ * `tmp/render/` is deliberately unbacked.
  *
- * Batch 2 folded the memory pen's review receipts and retired entries under
- * the pen itself. Batch 3 leaves `.canon/review/` holding only reviews: toolkit
- * feedback moves to `.canon/feedback/`, option captures to `.canon/picks/`,
- * claim-backing folders to a numbered `.canon/evidence/`, renders rebuilt from
- * committed sources to `.canon/tmp/render/`, a branch report flattens to
- * `review/branch-<slug>.md`, and a flat checklist joins the `tmp/handoff/ui-checklist/`
- * handoff folder. `canon records push` carries every top-level `.canon/`
- * entry except `EXCLUDED_ENTRIES`, so the new root folders are backed with no
- * list edit, and `tmp/render/` is deliberately not.
- *
- * The move and the citation repoint follow `scratch-evidence.ts`'s shape: a
- * dry run by default, `--write` to apply, a collision refusal, the
- * `canon-keep-record-root` marker honored, and archives swept on purpose,
- * since an archived receipt still cites the row it retired.
- *
- * `RECORD_LAYOUT_MOVES` is a data table rather than one function per pair, so
- * a later batch appends a row instead of restructuring the module. A row that
- * cannot name its destination ahead of time, being the pick-or-evidence split,
- * names the rule that derives it from what is on disk, never a list of slugs,
- * since every target holds folders of its own.
+ * The move follows `scratch-evidence.ts`: a dry run by default, `--write` to
+ * apply, a collision refusal, the `canon-keep-record-root` marker, and archives
+ * swept on purpose. A row whose destination depends on disk names the rule
+ * that derives it, never a list of slugs, since every target differs.
  */
 
 import { existsSync, readdirSync } from 'node:fs'

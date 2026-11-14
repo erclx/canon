@@ -1,23 +1,13 @@
 /**
  * The token rewrite behind a mechanical rename.
  *
- * The sweep is mechanical and its danger is entirely in what it must not
- * touch, so the scanner is one pass with the protected forms tried first
- * rather than a chain of replacements. A chain reprocesses its own output,
- * which is how a protected form that contains the token gets rewritten by a
- * later rule that cannot see it was already decided.
- *
- * The token map, the protected forms, and the exclusion set are a parameter
- * rather than module state, so one engine serves more than one rename. Two
- * sweeps sharing a module constant would have to agree on a single map, and
- * the second rename this repository needed shares nothing with the first
- * except the scanning discipline above.
- *
- * Two misses survive a clean run. The sweep reads spelled text only, so a path
- * assembled as `join('.claude', ...)` is never joined back into a token and
- * keeps its old spelling. And rewriting a test's fixtures can collapse a
- * fallback test into a copy of its neighbor, which keeps passing while it
- * covers nothing, so read the rewritten fixtures rather than trusting the run.
+ * The scanner is one pass with the protected forms tried first, since a chain
+ * of replacements reprocesses its own output and rewrites a protected form a
+ * later rule cannot see was already decided. The map, protected forms, and
+ * exclusions are a parameter, so one engine serves several renames. A path
+ * assembled as `join('.claude', ...)` is never seen, and a rewritten fixture
+ * can collapse a fallback test into a copy of its neighbor, so read the
+ * rewritten fixtures rather than trusting a clean run.
  */
 
 /**
@@ -174,33 +164,13 @@ const AITK_ARTICLE = /\b([Aa])n(\s+`?)(canon|CANON|Canon)(?![A-Za-z])/g
 /**
  * The `aitk` to `canon` rename.
  *
- * `aitk-sandbox` is the retired spelling of a repository that was later renamed
- * `canon-sandbox`, and GitHub still resolves the old name through a redirect.
- * It has to win against the bare token, and it also has to win against the
- * owner-scoped spelling, so a consumer's text naming `erclx/aitk-sandbox` keeps
- * the form that resolves rather than being rewritten.
- *
- * Case is carried in the map rather than derived, because the uppercase form
- * is an environment variable prefix and the title-case form is a heading word,
- * and a derived transform would have to guess which convention it was looking
- * at.
- *
- * The changelog is release history. Its entries record what shipped under the
- * old name, so rewriting them falsifies the record, and the pull request links
- * it carries keep resolving because GitHub redirects a renamed repository's
- * old URLs. An eval result is a transcript on the same argument, recording the
- * commands a session actually ran under whatever name was current then.
- *
- * The sweep's own source is the other excluded member, and it is not a
- * preference. This module states the `aitk` map as literal keys, so rewriting
- * it turns every key into its own replacement and leaves a rewriter that maps
- * `canon` to `canon` and matches nothing.
- *
- * The four test files below exist to prove the retired spellings still
- * resolve, so both names appear in each on purpose. Rewriting one is worse
- * than a broken test: the retired-variable case would collapse into a copy of
- * the current-variable case beside it and keep passing, reporting coverage for
- * a fallback nothing exercises any more.
+ * `aitk-sandbox`, bare or owner-scoped, is protected, since GitHub still
+ * redirects that retired repository name. Case is carried in the map rather
+ * than derived, because the uppercase form is an environment variable prefix
+ * and the title-case form a heading word. The changelog and eval results
+ * record what ran under the old name, this module states the map as literal
+ * keys, and the four tests below prove the retired spellings still resolve, so
+ * all are excluded.
  */
 export const AITK_RULES: RenameRules = defineRenameRules({
   replacements: {
