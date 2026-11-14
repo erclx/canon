@@ -78,7 +78,7 @@ Note which plans depend on another or change a contract another consumes, since 
 
 ### 3. Verify the plan against the tree
 
-Reading the plan is not enough, since a plan goes stale from whatever merged after it was written. Correct the plan before handing it over.
+A plan goes stale from whatever merged after it, so correct it before handing it over, its `## Weight` and reason included.
 
 - Grep for each construct it names and count the sites against the count it claims
 - Check that every phase label it cites is still open
