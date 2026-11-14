@@ -358,8 +358,8 @@ export function countStates(entries: readonly ScanEntry[]): StateCounts {
 /**
  * Whether the target has diverged from the toolkit in a way a sync could close.
  *
- * Only mechanical remedies count: an unmigrated domain, a `retired` rule a
- * sync deletes, and a `renamed` one a sync moves. Orphaned files, superseded
+ * An unmigrated domain counts, and so do `stale`, `customized`, `drifted`,
+ * `stranded`, `retired`, and `renamed` entries. Orphaned files, superseded
  * artifacts, seeds, tooling configs, and the reverse report are excluded,
  * since each is content the project may own and a job counting it stays red
  * with no remedy. `missing` is excluded too, since gating CI on it would press
