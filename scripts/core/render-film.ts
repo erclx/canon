@@ -1,24 +1,13 @@
 /**
- * Renders the launch film in assets/film/ once per theme and writes the
- * launch loops to assets/loops/launch.gif and launch-light.gif, and beside
- * them the landing page's web MP4 and poster PNG per theme.
+ * Renders the launch film in assets/film/ once per theme, writing the launch
+ * GIFs to assets/loops/ beside the landing page's web MP4 and poster per theme.
  *
- * Each theme renders to an MP4 at the canvas size under assets/film/renders/,
- * which git ignores, and the GIF comes from that MP4 through the ffmpeg pass
- * `assets/film/SPEC.md` gives, since no render preset scales below the canvas.
- * Every output is written to the renders folder first and copied into
- * assets/loops/ only once both themes exist, so a failed theme leaves the
- * committed set as it was rather than a half set.
- *
- * The web MP4 drops every audio stream with `-an` whatever the source
- * carries, since the repository is public and no music track's terms are
- * cleared for use outside the tool that made it.
- *
- * Run by hand, not by the gate. The film shows one merged change, so no
- * catalog edit makes it stale, and a render costs minutes of chromium.
- *
- * Clone-only. This script reads assets/film/, which a registry install does
- * not carry.
+ * Each theme renders an MP4 under the ignored assets/film/renders/, and the GIF
+ * comes from it through the ffmpeg pass `assets/film/SPEC.md` gives. Outputs
+ * reach assets/loops/ only once both themes exist, so a failure leaves the
+ * committed set whole. The web MP4 drops audio with `-an`, since no track is
+ * cleared for public use. Run by hand, since a render costs minutes, and only
+ * from a clone, since a registry install carries no assets/film/.
  */
 import { copyFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
