@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.91.0](https://github.com/erclx/canon/compare/v5.90.0...v5.91.0) (2026-11-14)
+
+
+### Features
+
+* **plan-groundwork:** close a track on its decision alone ([#3109](https://github.com/erclx/canon/issues/3109)) ([7fa65eb](https://github.com/erclx/canon/commit/7fa65ebf87c9fb6ed4c2d84e797c9bace567d4d3))
+* **pr:** refuse a reel waiver over a fixable target skip ([#3107](https://github.com/erclx/canon/issues/3107)) ([100b0bd](https://github.com/erclx/canon/commit/100b0bd3727bb3015caaf854507bd6ff07b5c784))
+* **seeds:** name the fence rules in the pull request template outcome ([#3105](https://github.com/erclx/canon/issues/3105)) ([2b1cb26](https://github.com/erclx/canon/commit/2b1cb262e5b4fad3b90b9bb226426120ec88a552))
+* **skills:** key ui review scratch per pass and forbid deletes ([#3106](https://github.com/erclx/canon/issues/3106)) ([09eb2bb](https://github.com/erclx/canon/commit/09eb2bbfb07f21e4497f600cadf0c1534df191f9))
+* **skills:** state a plan's weight for the model and effort pick ([#3108](https://github.com/erclx/canon/issues/3108)) ([8833bb8](https://github.com/erclx/canon/commit/8833bb8d2abc5d9a50a907caed5787e1293d245a))
+
 ## [5.90.0](https://github.com/erclx/canon/compare/v5.89.0...v5.90.0) (2026-11-14)
 
 
