@@ -386,6 +386,36 @@ describe('checkDrive', () => {
     })
   })
 
+  it('should pass a live drive whose record names no worktree', async () => {
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({ goals: BOTH_DRIVEN, worktree: null })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'clean',
+      findings: { worktreeLeft: [] },
+    })
+  })
+
+  it('should refuse an empty worktree path, naming null', async () => {
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({ goals: BOTH_DRIVEN, worktree: '' })
+
+    const outcome = await checkDrive(ROOT, 'app-drive-1-0')
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'bad-record' })
+    expect((outcome as { message: string }).message).toContain('null')
+  })
+
+  it('should refuse a blank worktree path', async () => {
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({ goals: BOTH_DRIVEN, worktree: '   ' })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      ok: false,
+      reason: 'bad-record',
+    })
+  })
+
   it('should pass a drive whose folder carries no drive log', async () => {
     await recordBaseline(ROOT, 'app-drive-1-0')
     writeRecord({ goals: BOTH_DRIVEN })
