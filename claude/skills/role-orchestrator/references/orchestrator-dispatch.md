@@ -129,7 +129,7 @@ Read `canon sessions list --json` for the branches in flight as well as the boar
 - A declared set predicts rather than bounds, since `canon:context-fold`, `canon:docs-sync`, and the drift stages write past every plan
 - Such a crossing changes what the second branch rebases over, not whether a row holds, and `canon tasks plan-reach` at `canon:git-ship` step 5 names it
 
-What binds past the five holds is review attention, which `## Parallelism` in the skill body states.
+What binds past the five holds is review attention and machine capacity, which `## Parallelism` in the skill body states.
 
 ## Pick the model
 
