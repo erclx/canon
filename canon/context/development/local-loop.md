@@ -36,7 +36,7 @@ The run commands, which stack references and `docs/target/projects.md` send a se
 
 ### `src/gate/`
 
-Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`, and every threshold comparison in `measures.ts`. Consumer replay runs the frozen snapshots on a synced-surface change, so before a release run `bun src/cli.ts sandbox replay <checkout>...` against the real consumers.
+Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`, and every threshold comparison in `measures.ts`. Consumer replay runs the frozen snapshots on a synced-surface change, so before a release run `bun src/cli.ts sandbox replay <checkout>...` against the real consumers. Comment stages fail a touched file's old comments.
 
 - Stages run in table order and the first to find a fact halts the run. Unreferenced rules and Audit set report and never fail the push
 - The changed set unions the diff against `origin/main`, the working tree, and untracked files. Fallbacks widen, and `--all` forces every stage. On `main` the local ref is HEAD, so the base is remote.
@@ -125,10 +125,3 @@ Smaller folders the loop touches.
 - A push runs no test that reads a file from disk rather than importing it, so a skill, rule, or hook script edit that breaks one fails in CI's `--all` run instead. That trade keeps pushes unqueued
 - A file whose name ends in `index.md`, staged or untracked, trips the Indexes stage even under `auto: false`
 - A line number cited into a file the entry does not own goes stale with nothing comparing it, so cite a named identifier
-
-### Comment stages
-
-The comment stages read the changed set themselves, so a one-line edit to a source file fails on a long comment it never touched.
-
-- Run `canon comments scan` before editing a file, which lists each block past a cap
-- Read a pass under `--all` or `check:ci` as a report, since a full run fails no file
