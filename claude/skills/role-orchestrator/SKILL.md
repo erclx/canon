@@ -59,11 +59,11 @@ The human asks for each side of a compaction, and this skill reads the runbook.
 
 ### The parked rows
 
-A board that is not moving is another such moment. On a request to re-test the parked rows, follow `${CLAUDE_SKILL_DIR}/references/orchestrator-parked.md`, which re-tests every blocker and backlog row against the tree and plans what it clears. The refill sweep fires on a merge instead.
+A board that is not moving is another such moment. On a request to re-test the parked rows, follow `${CLAUDE_SKILL_DIR}/references/orchestrator-parked.md`, which re-tests every blocker and backlog row and plans what it clears, while the refill sweep fires on a merge. An unattended run follows `references/orchestrator-unattended.md`.
 
 ### When the body has dropped
 
-That routing lives in this body and this skill is user-invoked, so a session that has dropped the body routes nothing and the request lands as ordinary conversation. Approaching a compaction, when the handoff matters, is when a long session is likeliest to have dropped it.
+That routing lives in this body and this skill is user-invoked, so a session that has dropped the body routes nothing and the request lands as ordinary conversation. A long session nearing a compaction is likeliest to have dropped it.
 
 Re-invoke `/canon:role-orchestrator` first whenever the session has run long or the ask goes unanswered. The runbooks sit under `references/`, so a person who knows their plugin root can follow one without this skill loaded.
 
