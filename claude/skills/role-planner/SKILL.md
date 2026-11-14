@@ -81,9 +81,9 @@ The plan standard fixes that block for a feature plan, and a groundwork or intak
 
 ### The groundwork exception
 
-One exception belongs to `plan-groundwork` alone, which at close records what the track concluded into the named task, or writes a single task file when the launch named none. Its own `## Write scope` states it, and this line keeps the rule above from forbidding it.
+One exception belongs to `plan-groundwork` alone, which at close records what the track concluded into the task the launch named. This line keeps the rule above from forbidding that write. Every other close route, including what a close under a controller hands back, is stated once in that skill's close Step 4.
 
-Each finding in that file opens with the bold source-and-date label that `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
+Each finding in a task written this way opens with the bold source-and-date label that `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
 
 ## The channel
 
