@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.90.0](https://github.com/erclx/canon/compare/v5.89.0...v5.90.0) (2026-11-14)
+
+
+### Features
+
+* **comments:** cap comment blocks and flag history in touched files ([#3103](https://github.com/erclx/canon/issues/3103)) ([dc5356b](https://github.com/erclx/canon/commit/dc5356bd665c0e63a8e24558b50860a975b7756b))
+* **labels:** fail an untagged fence and a misplaced prompt line ([#3104](https://github.com/erclx/canon/issues/3104)) ([5284061](https://github.com/erclx/canon/commit/5284061244c483e6f668f97e3cdb8257456c12db))
+* **skills:** bound the ci watch with its own 60-minute limit ([#3102](https://github.com/erclx/canon/issues/3102)) ([86bf240](https://github.com/erclx/canon/commit/86bf240d6e734a18fe6487ed9a26389d094a7554))
+* **skills:** name an effort beside the model on every launch ([#3098](https://github.com/erclx/canon/issues/3098)) ([30c9081](https://github.com/erclx/canon/commit/30c9081de280c6ab649edf90afa69968ef4fa68e))
+* **skills:** plan measured rows in the session that measured them ([#3097](https://github.com/erclx/canon/issues/3097)) ([592ce0b](https://github.com/erclx/canon/commit/592ce0b2438de7952c49c9a9390fd348afcbf9a3))
+* **skills:** route a missing reel state to the project seed ([#3096](https://github.com/erclx/canon/issues/3096)) ([61fea0b](https://github.com/erclx/canon/commit/61fea0b92be193cc75696e61b5386f4f64c91cb5))
+* **tasks:** cut an outcome with its reason through canon tasks outcome ([#3099](https://github.com/erclx/canon/issues/3099)) ([56b4121](https://github.com/erclx/canon/commit/56b41216f84ad1bb81a9a99889f9bd7cf2422cfe))
+* **tasks:** route an overturned plan to amend in place ([#3100](https://github.com/erclx/canon/issues/3100)) ([448c9f7](https://github.com/erclx/canon/commit/448c9f7d315d349b57538e189defe008d6c2cff0))
+
 ## [5.89.0](https://github.com/erclx/canon/compare/v5.88.0...v5.89.0) (2026-11-14)
 
 
