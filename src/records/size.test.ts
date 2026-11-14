@@ -229,12 +229,8 @@ describe('sizeRecords', () => {
     expect(entry.newest).toBe('2026-08-19')
   })
 
-  // The two cases below cover the two signs of a UTC offset, and each one is
-  // blind to the other's half. A machine west of Greenwich rolls a late-evening
-  // stamp forward into the next UTC day, and one east of it rolls an
-  // early-morning stamp back into the previous one. A single case therefore
-  // passes on half the world while the bug is present, and a machine sitting on
-  // UTC catches neither, which is where CI runs.
+  // The two cases cover the two signs of a UTC offset, each blind to the other,
+  // and a machine on UTC, where CI runs, catches neither.
 
   it('should date a late-evening file by the local day its writer saw', async () => {
     writeRecordAt(

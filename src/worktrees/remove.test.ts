@@ -88,9 +88,8 @@ describe('removeReclaimable', () => {
     expect(calls).toEqual([])
   })
 
-  // The sweep clears a registration a failed remove would leave behind, and a
-  // branch git still reads as held cannot be deleted, so it runs ahead of the
-  // deletes rather than at the end.
+  // The sweep clears a registration a failed remove leaves, and git cannot delete
+  // a branch it reads as held, so the sweep runs before the deletes.
   it('should sweep once before the branch deletes when a directory is gone', async () => {
     const { calls, git: spy } = recorder()
 

@@ -101,9 +101,8 @@ describe.skipIf(!hasBrowser)('walk against a served application', () => {
     const subject = findSubject('focus')
     if (!subject) return
 
-    // A port the kernel handed out and then released refuses the connection.
-    // A low reserved port would not: the engine blocks those before it
-    // connects, which is a different failure and correctly not this one.
+    // A port handed out and released refuses the connection. A low reserved port
+    // would not, since the engine blocks those before connecting.
     const closed = Bun.serve({ port: 0, fetch: () => new Response('') })
     const port = Number(closed.port)
     closed.stop(true)

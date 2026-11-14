@@ -38,9 +38,8 @@ function seedSkills(count: number): void {
 
 beforeEach(() => {
   ROOT = mkdtempSync(join(tmpdir(), 'canon-counts-scan-'))
-  // A git hook exports GIT_DIR into every process it runs, and it takes
-  // precedence over `cwd`, so an inherited environment initializes the
-  // repository somewhere other than the fixture and every case reads empty.
+  // A hook's `GIT_DIR` takes precedence over `cwd`, so an inherited one would
+  // initialize the repository away from the fixture and every case reads empty.
   execSync('git init --quiet', { cwd: ROOT, env: gitEnv() })
 })
 
@@ -84,9 +83,8 @@ describe('scanCounts', () => {
   })
 
   it('should name a stale count reached through an article rather than a verb', async () => {
-    // The shape a first review found live in the tree: the assertion verb
-    // sits after the noun rather than ahead of the number, which the
-    // verb-only gate could not reach.
+    // The assertion verb sits after the noun rather than ahead of the number, a
+    // shape the verb-only gate could not reach.
     seedSkills(20)
     write(
       'docs/history.md',
@@ -143,9 +141,8 @@ describe('scanCounts', () => {
   })
 
   it('should name a stale count reached through a production verb outside the original list', async () => {
-    // A context entry asserting `the toolkit
-    // authors 69 rules`, the assertion shape this gate was built for with a
-    // verb the first list did not carry.
+    // A context entry asserting `the toolkit authors 69 rules`, the assertion
+    // shape this gate was built for, with a verb the first list lacked.
     seedSkills(63)
     write(
       'docs/regeneration.md',
@@ -165,11 +162,8 @@ describe('scanCounts', () => {
   })
 
   it('should read past a total reached through an indirect noun, which is the false positive the gap axis would have admitted', async () => {
-    // Measured live at `canon/context/claude-plugin.md`: widening
-    // the trigger-to-number gap to two words reaches this sentence and reads
-    // a domain's own membership as the catalog's total. The trigger
-    // vocabulary carried both live misses without it, so the gap stayed shut
-    // and this shape stays unread.
+    // Widening the trigger-to-number gap to two words would read a domain's own
+    // membership here as the catalog's total, so the gap stays shut and this goes unread.
     seedSkills(63)
     write(
       'docs/overview.md',
@@ -182,10 +176,8 @@ describe('scanCounts', () => {
   })
 
   it('should read one figure per catalog per sentence, leaving a second figure in the same sentence unread', async () => {
-    // The structural limit `regex.exec` imposes. Both figures are stale, both
-    // sit inside the plausibility bound, and both carry a trigger against the
-    // number. Only the first is read, so what drops the second is the single
-    // match rather than any filter below it.
+    // `regex.exec` reads one match, so of two stale figures in range, each with a
+    // trigger, the second drops by the single match rather than a filter.
     seedSkills(63)
     write(
       'docs/regeneration.md',
@@ -286,11 +278,8 @@ describe('scanCounts', () => {
   })
 
   it('should drop a verb-gated match whose figure sits nowhere near the true count', async () => {
-    // The exact shape a live run against this repository's own tree
-    // produced: `standards/standard.md carries two rules about a
-    // standard's own lifecycle` reads `rules` as prescriptive statements in
-    // one document, not as this tree's governance-rule catalog, and 2 next
-    // to a true count of 63 is the signal that tells the two apart.
+    // `rules` here means prescriptive statements in one document, not the rule
+    // catalog, and 2 beside a true count of 63 is what tells the two apart.
     seedSkills(63)
     write(
       'docs/standard.md',
@@ -303,13 +292,8 @@ describe('scanCounts', () => {
   })
 
   it('should match a subset qualified by an adjective when the sentence carries no date', async () => {
-    // The trade the article gate carries: `flat` fills the same
-    // optional-word slot `sixty-one shipped skills` needs to match at all,
-    // so a named subset (skills outside some other group) reads the same as
-    // a restated whole. No syntactic rule tells the two apart, so the real
-    // fix for a case like this is dating the clause as a past state, not
-    // narrowing the matcher, which is what the equivalent instance in
-    // the retired standards destinations entry was repaired with.
+    // `flat` fills the optional-word slot a restated whole needs, so a named subset
+    // reads as one. The fix is dating the clause, not narrowing the matcher.
     seedSkills(27)
     write(
       'docs/history.md',

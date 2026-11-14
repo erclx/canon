@@ -55,7 +55,7 @@ const syncWeb = (dir: string): Run => tooling(['sync', 'web', dir, '--write'])
 
 /**
  * One synced target is copied per test, since a web sync costs seconds and
- * every case starts from the same state #2391 reported.
+ * every case starts from the same synced state.
  */
 beforeAll(() => {
   synced = mkdtempSync(join(tmpdir(), 'tooling-disposition-synced-'))

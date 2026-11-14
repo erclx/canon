@@ -127,9 +127,8 @@ describe.skipIf(!hasBrowser)('drive against a served application', () => {
     const read = readDriverPlan(RUN)
     if (read.kind !== 'read') return
 
-    // A port the kernel handed out and then released refuses the connection. A
-    // low reserved port would not: the engine blocks those before it connects,
-    // which is a different failure and correctly not this one.
+    // A port handed out and released refuses the connection. A low reserved port
+    // would not, since the engine blocks those before connecting.
     const closed = Bun.serve({ port: 0, fetch: () => new Response('') })
     const port = Number(closed.port)
     closed.stop(true)
@@ -140,8 +139,7 @@ describe.skipIf(!hasBrowser)('drive against a served application', () => {
     })
 
     // Nothing measured and nothing found read the same to a caller counting
-    // findings, which is why an unreachable page refuses rather than returning
-    // an empty report.
+    // findings, so an unreachable page refuses rather than reporting empty.
     expect(result).toMatchObject({
       status: 'failed',
       reason: 'server-unreachable',

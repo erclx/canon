@@ -88,9 +88,8 @@ describe('readDriverPlan', () => {
   })
 
   it('should refuse an empty probe list a single step names', () => {
-    // The run-level empty list already refuses. A step-level one that did not
-    // would run the step and measure nothing, and a pass reporting no findings
-    // reads the same as one that looked.
+    // A step-level empty list refuses like the run-level one, since running the
+    // step would measure nothing and read the same as a pass that looked.
     const read = readDriverPlan(
       planSource({ steps: [{ ...ONE_STEP[0], probes: [] }] }),
     )

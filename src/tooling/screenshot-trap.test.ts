@@ -139,9 +139,8 @@ describe('screenshot.sh EXIT trap', () => {
       expect(result.status).toBe(0)
       expect(portPidList()).toEqual([])
     } finally {
-      // A regression in the trap under test is exactly what would leave this
-      // bound, so a failed assertion above must not leak the listener into
-      // whatever runs against this port next.
+      // A regression in the trap would leave this bound, so a failed assertion above
+      // must not leak the listener into whatever runs on this port next.
       for (const pid of portPidList()) {
         spawnSync('kill', [pid])
       }

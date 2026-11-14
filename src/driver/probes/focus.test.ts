@@ -6,21 +6,12 @@ import { probeFocus } from '@/driver/probes/focus'
 /**
  * Pins the two false-finding classes this probe was built against.
  *
- * The first is the `.focus()`-versus-Tab divergence, and the control below is
- * the reader that produced 27 false findings against a page whose rings were
- * all present. It only diverges once the page has taken a pointer interaction,
- * which is why the control clicks first: on a page nobody has touched, Chromium
- * matches `:focus-visible` for a scripted focus and the cheap reader looks
- * correct. A driver clicks by definition, so every state it measures after its
- * first `click` step is the state where the cheap reader breaks.
- *
- * The second is an outline sub-property moving underneath an outline that
- * resolves to `none`, which is a computed difference that paints nothing.
- * `#quiet` in the fixture is that shape rather than an invented one: it clears
- * `outline` for itself while the broader rule still sets `outline-offset`.
- *
- * The suite needs a browser binary. CI installs none, so it skips there rather
- * than failing, which means a green pipeline is not evidence this passed.
+ * The first is `.focus()` diverging from Tab once the page has taken a pointer
+ * interaction, so the control clicks first, as every driver step does. The
+ * second is an outline sub-property moving under an outline resolving to
+ * `none`, which paints nothing, and `#quiet` clears `outline` while a broader
+ * rule still sets `outline-offset`. The suite needs a browser binary and CI
+ * installs none, so a green pipeline is no evidence this passed.
  */
 
 /** One ring written the way a stylesheet writes one, and one control with none. */
@@ -80,9 +71,8 @@ describe.skipIf(!hasBrowser)('probeFocus against a rendered page', () => {
     const findings = await probeFocus(page)
     await page.close()
 
-    // `#pinned` is positioned `fixed`, so its `offsetParent` is null while it
-    // is plainly on screen. A visibility test keyed on that property skips it
-    // and never reports the ring it does not draw.
+    // `#pinned` is `fixed`, so its `offsetParent` is null while it is on screen,
+    // and a test keyed on that property would skip its missing ring.
     expect(findings.map((finding) => finding.selector)).toEqual([
       'button#quiet',
       'button#pinned',
@@ -93,9 +83,8 @@ describe.skipIf(!hasBrowser)('probeFocus against a rendered page', () => {
   it('should differ from a reader that focuses without entering keyboard modality', async () => {
     const page = await browser.newPage()
     await page.setContent(PAGE)
-    // The click is the point. Chromium matches `:focus-visible` for a scripted
-    // focus on a page nobody has touched, so the cheap reader is only wrong
-    // once a pointer has set the modality, which every driver step does.
+    // The click is the point, since the cheap reader is only wrong once a pointer
+    // has set the modality, which every driver step does.
     await page.locator('#ring').click()
 
     const naive = await readWithoutTab(page)

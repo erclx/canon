@@ -144,9 +144,8 @@ describe('measureEntry', () => {
   })
 
   it('should leave a date in frontmatter unreported', () => {
-    // A diagram entry stamps `verified` with a short SHA and an ISO date, so
-    // the frontmatter strip is what keeps the field a record of the last check
-    // rather than a marker the report asks a reader to go and settle.
+    // A diagram entry stamps `verified` with a short sha and an ISO date, and the
+    // frontmatter strip keeps that field out of the report.
     const source = `---\ntitle: Components\nverified: 7b1107ac 2026-08-02\n---\n\n# Components\n\nThe boundary holds three layers.\n`
 
     expect(measureEntry('components.md', source).provenance).toEqual([])
@@ -193,9 +192,8 @@ describe('measureEntry', () => {
   })
 
   it('should report a date whose clause carries no stamping verb', () => {
-    // The set is closed, so a phrasing nobody enumerated falls back to the
-    // change marker it was. That reports one date too many rather than
-    // clearing one the standard cuts.
+    // The set is closed, so an unenumerated phrasing falls back to a change marker,
+    // reporting one date too many rather than clearing one the standard cuts.
     const source = `${FRONTMATTER}# CI\n\nThe sweep returned five matches on 2026-08-04.\n`
 
     expect(measureEntry('ci.md', source).provenance).toEqual([
@@ -241,9 +239,8 @@ describe('measureEntry', () => {
   })
 
   it('should report a required section carried by the entry title', () => {
-    // A split domain names the sibling holding its overview for the section,
-    // so the heading is the `#` title rather than an `##` under it repeating
-    // the filename. Every split folder in this repository is that shape.
+    // A split domain titles its overview file for the section, so the heading is
+    // the `#` title rather than an `##` under it repeating the filename.
     const source = `${FRONTMATTER}# Overview\n\n## Layout\n\n- \`scripts/\` owns them\n`
 
     expect(measureEntry('overview.md', source).sections).toEqual([
@@ -403,9 +400,8 @@ describe('measureFolders', () => {
     })
     const [entry] = await measureFolders(root, folders)
 
-    // Provenance is the context standard's own rule and stops at its folder.
-    // The attribute-tier measures reach `docs/` through `canon markdown audit`,
-    // which needs no folder to resolve at all.
+    // Provenance is the context standard's own rule and stops at its folder, while
+    // `canon markdown audit` reaches `docs/` with no folder to resolve.
     expect(entry.rel).toBe('docs/agents.md')
     expect(entry.provenance).toEqual([])
   })
@@ -625,8 +621,7 @@ describe('missingSections', () => {
 
   it('should hold each entry of the named folder to the sections itself', async () => {
     // The named folder's entries are one domain each, so a conforming sibling
-    // answers for nothing. Rolling this folder up let one entry stand in for
-    // every other domain beside it.
+    // answers for nothing beside it.
     seedFolder('canon/context', {
       'ci.md': CONFORMING,
       'web.md': '# Web\n\n## Overview\n\nOwns the client.\n',

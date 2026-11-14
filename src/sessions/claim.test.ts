@@ -89,9 +89,8 @@ describe('checkClaim', () => {
     expect(report.foreignDead).toBe(3)
   })
 
-  // The branch behind a merged pull request has no worktree and no session, and
-  // read across those two alone it answered clear. Dispatching onto it opens a
-  // second pull request against a head GitHub already shows merged.
+  // A merged pull request's branch has no worktree and no session, so only its
+  // local ref keeps a dispatch from opening a second pull request on it.
   it('should report a branch claimed by a local ref that no worktree or session holds', async () => {
     git('branch', 'feat/parser')
 
@@ -205,10 +204,8 @@ describe('checkClaim', () => {
     expect(report.sessions).toHaveLength(0)
   })
 
-  // The roster is machine-wide and the filter is what scopes it, so pointing
-  // the read at another project is how a dispatcher in one repository learns a
-  // branch is already held in another. Reading that as unclaimed is what sent
-  // two sessions onto branches live sessions were holding.
+  // The roster is machine-wide and the filter scopes it, so pointing the read at
+  // another project is how a dispatcher learns a branch is held there.
   it('should answer for another repository when handed its path', async () => {
     const other = realpathSync(
       mkdtempSync(join(tmpdir(), 'canon-claim-target-')),
@@ -312,9 +309,8 @@ describe('checkClaim', () => {
     expect(report.sessionsReadable).toBe(false)
   })
 
-  // A git hook exports GIT_DIR into every process it runs, and it takes
-  // precedence over `-C`, so a claim read from inside one answered about the
-  // hook's own repository rather than the directory it was handed.
+  // A hook's `GIT_DIR` takes precedence over `-C`, so a claim read inside one
+  // would answer about the hook's repository rather than the directory given.
   it('should read the directory it was given when the environment names another repository', async () => {
     const other = realpathSync(
       mkdtempSync(join(tmpdir(), 'canon-claim-other-')),

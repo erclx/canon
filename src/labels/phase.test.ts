@@ -9,8 +9,8 @@ const RELEASE_TITLE = 'chore(main): release 3.46.0'
 /**
  * The two session links that reached the trunk, carried verbatim.
  *
- * Both sit in public history already, at `ae69bfdd` and `834dbbf8`, so the
- * fixture records the defect it was measured against rather than imitating it.
+ * Both sit in public history already, so the fixture records the defect it
+ * was measured against rather than imitating it.
  */
 const MERGED_SESSION_LINK =
   'https://claude.ai/code/session_01VgM3xMwitxkp2EM3h5GPbt'

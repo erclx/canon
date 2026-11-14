@@ -49,9 +49,8 @@ describe('.claude/hooks/standards-audit.sh runner', () => {
   it.concurrent('should report that nothing ran when the machine carries neither runner', async ({
     expect,
   }) => {
-    // The linked dependencies and nothing else, so neither runner resolves
-    // whatever the machine carries. A missing link would take the run
-    // somewhere silent for a reason this test is not about.
+    // The linked dependencies alone, so neither runner resolves from the machine,
+    // and a missing link would fail the run for an unrelated reason.
     const path = join(ctx.fixture, 'bin-no-runner')
     expect(existsSync(join(path, 'bash')), 'no bash found to link').toBe(true)
     expect(existsSync(join(path, 'jq')), 'no jq found to link').toBe(true)
@@ -145,9 +144,8 @@ describe('seeds standards-audit.sh runner', () => {
   it.concurrent('should read its findings out of the installed binary', async ({
     expect,
   }) => {
-    // The seed resolves no checkout source, so the `canon` stub is the only
-    // branch it can take and `via-canon` is what proves it took one rather
-    // than reaching a verdict some other way.
+    // The seed resolves no checkout source, so the `canon` stub is its only branch
+    // and `via-canon` proves it took that one.
     const path = [join(ctx.fixture, 'bin'), ctx.hookPath].join(delimiter)
 
     const result = await run(hook, payload(), path)
@@ -159,9 +157,8 @@ describe('seeds standards-audit.sh runner', () => {
   it.concurrent('should report that nothing ran when the machine carries no binary', async ({
     expect,
   }) => {
-    // The linked dependencies and nothing else, so no runner resolves
-    // whatever the machine carries. A missing link would take the run
-    // somewhere silent for a reason this test is not about.
+    // The linked dependencies alone, so no runner resolves from the machine, and a
+    // missing link would fail the run for an unrelated reason.
     const path = join(ctx.fixture, 'bin-no-runner')
     expect(existsSync(join(path, 'bash')), 'no bash found to link').toBe(true)
     expect(existsSync(join(path, 'jq')), 'no jq found to link').toBe(true)
@@ -251,9 +248,8 @@ describe('seeds standards-audit.sh runner', () => {
   it.concurrent('should warn on a colon an edit introduced after an emoji in its line', async ({
     expect,
   }) => {
-    // The record names the word before each colon, so a line with an emoji
-    // is matched by that word. Slicing its text at a UTF-16 column lands one
-    // character off in jq and keys the match on `now::`, which drops it.
+    // The record keys each colon on the word before it, so slicing an emoji line at
+    // a UTF-16 column would land one character off in jq and drop the match.
     const path = [join(ctx.fixture, 'bin-advisory'), ctx.hookPath].join(
       delimiter,
     )
@@ -638,9 +634,8 @@ describe('memory-guard.sh boundaries', () => {
   const hook = join(ROOT, '.claude/hooks/memory-guard.sh')
   const home = '/home/x/.claude/projects/-home-x-repo'
 
-  // Every real payload carries the session transcript, which sits under the
-  // same projects folder the guard watches, so a case built without it never
-  // exercises the payload the hook receives.
+  // Every real payload carries the transcript, under the projects folder the
+  // guard watches, so a case without it skips the payload the hook receives.
   const transcript_path = `${home}/0f2c.jsonl`
 
   const fileTool = (tool: string, file: string): string =>

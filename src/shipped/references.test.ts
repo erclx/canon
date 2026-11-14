@@ -18,9 +18,8 @@ import {
 } from '@/shipped/references'
 
 describe('referencesIn', () => {
-  // No test in this top-level block exercises a `docs/`-shaped token, so this
-  // fixture root exists only to satisfy the required parameter and is never
-  // read. The `DOCS_PATH` describe below owns a root that resolves for real.
+  // No test in this block exercises a `docs/`-shaped token, so this root only
+  // fills the parameter. The `DOCS_PATH` describe below owns a real one.
   let noDocsRoot: string
 
   beforeAll(() => {

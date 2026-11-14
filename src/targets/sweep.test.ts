@@ -69,9 +69,8 @@ describe('sweepTargets', () => {
     expect(report.targets[0]?.legacyPaths).toEqual([stackr])
   })
 
-  // A pre-rename install still writes this form as its current path, so a
-  // sync from it after this row's own binary updated would otherwise drop the
-  // target out of the walk with nothing saying so.
+  // A pre-rename install still writes this form as its current path, so a sync
+  // from it would otherwise drop the target out of the walk silently.
   it('should find a target stamped only at the retired folder path', async () => {
     const diction = stampRetiredName('diction')
 
@@ -104,9 +103,8 @@ describe('sweepTargets', () => {
     expect(report.targets).toEqual([])
   })
 
-  // The census taken 2026-08-28 walked one clone of `caret` and the repair had
-  // run in a second clone it never saw, which is what let a ticked outcome
-  // contradict its own finding. Two clones are one project.
+  // A walk that counts only one clone misses a repair run in another, so two
+  // clones sharing an origin are one project.
   it('should count two clones sharing an origin as one target', async () => {
     const first = stamp('public', 'caret')
     const second = stamp('extensions', 'chrome', 'caret')
@@ -143,9 +141,8 @@ describe('sweepTargets', () => {
     expect(report.targets).toHaveLength(2)
   })
 
-  // Measured on this machine: one stamped repository holds the eight folders
-  // the hand census walked. Stopping at the outer one hides every target below
-  // it, which is the whole population the sweep exists to find.
+  // One stamped repository can hold others below it, and stopping at the outer
+  // one would hide every target the sweep exists to find.
   it('should keep walking below a target it already found', async () => {
     const outer = stamp('career')
     const inner = stamp('career', 'public', 'stackr')
@@ -169,9 +166,8 @@ describe('sweepTargets', () => {
     expect(report.targets.flatMap((target) => target.paths)).toEqual([career])
   })
 
-  // An answer that ran out of depth and an answer that found everything read
-  // identically without this, which is exactly how the population was
-  // undercounted by a folder nobody thought to look in.
+  // An answer that ran out of depth and one that found everything would read the
+  // same, undercounting by a folder nobody looked in.
   it('should name the folders it stopped at when the depth cap is reached', async () => {
     stamp('a', 'b', 'c', 'd', 'e', 'deep')
 
@@ -181,9 +177,8 @@ describe('sweepTargets', () => {
     expect(report.bound.truncated).toContain(join(ROOT, 'a', 'b'))
   })
 
-  // A depth that is not a number leaves every `level >= depth` test false, so
-  // the walk runs to the bottom of its root while the bound claims a cap. The
-  // command refuses such a value, and this holds the floor under that.
+  // A non-numeric depth leaves every `level >= depth` test false, so the walk is
+  // uncapped while the bound claims one. The command refuses it, and this holds.
   it('should walk without a cap when handed a depth that is not a number', async () => {
     stamp('a', 'b', 'c', 'd', 'e', 'f', 'deep')
 
@@ -231,8 +226,7 @@ describe('sweepTargets', () => {
   })
 
   // `readdirSync` with `withFileTypes` answers `isDirectory()` false for a
-  // symlink, so the walk neither follows it nor reports it anywhere unless the
-  // bound names it explicitly.
+  // symlink, so the walk reports one only if the bound names it.
   it('should name a symlinked directory in the bound rather than walking it', async () => {
     const real = stamp('real', 'caret')
     symlinkSync(join(ROOT, 'real'), join(ROOT, 'link'))
@@ -243,9 +237,8 @@ describe('sweepTargets', () => {
     expect(report.targets.flatMap((target) => target.paths)).toEqual([real])
   })
 
-  // A symlink to a file is not a directory the walk skipped, and naming it
-  // here would read as a walk candidate that was passed over when it never
-  // was one.
+  // A symlink to a file is no directory the walk skipped, so naming it would
+  // report a candidate that never was one.
   it('should not name a symlink to a file in the bound', async () => {
     writeFileSync(join(ROOT, 'note.txt'), 'hi')
     symlinkSync(join(ROOT, 'note.txt'), join(ROOT, 'note-link.txt'))
@@ -295,9 +288,8 @@ describe('originOf', () => {
     ).toBe('github.com/owner/repo')
   })
 
-  // A bare username in the userinfo component used to survive the strip and
-  // key the target under the username instead, which failed to group with
-  // the same project's ssh clone.
+  // A bare username in the userinfo would key the target on the username and
+  // fail to group with the same project's ssh clone.
   it('should strip a bare-username userinfo component', async () => {
     expect(await withRemote('https://someuser@github.com/owner/repo.git')).toBe(
       'github.com/owner/repo',

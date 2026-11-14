@@ -139,9 +139,8 @@ describe.skipIf(!hasBrowser)('probeAxe against a rendered page', () => {
     const findings = await probeAxe(page)
     await page.close()
 
-    // `color-contrast` is on the gate list, so this is the case where a
-    // probe keying the gate off the rule alone would hold the review open on
-    // a result axe itself says a person has to read.
+    // `color-contrast` is on the gate list, so a probe keying the gate off the
+    // rule alone would hold the review open on a result axe says needs a person.
     expect(findings).toEqual([
       expect.objectContaining({
         rule: 'color-contrast',

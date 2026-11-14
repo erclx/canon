@@ -127,10 +127,8 @@ const writeThread = (
   )
   writeFileSync(join(root, 'fixtures', 'head-7.txt'), `${head}\n`)
 
-  // The top-level fields carry the code family alone, so a UI pass posted
-  // after the code pass leaves the scope where the code pass put it. The UI
-  // family rides in `ui`, covered when its marker, or the stamp without one,
-  // names the head.
+  // The top-level fields carry the code family alone, and the UI family rides in
+  // `ui`, covered when its marker, or the stamp without one, names the head.
   const last = reviews
     .filter((review) => CODE_HEADINGS.has(review.heading))
     .at(-1)
@@ -210,19 +208,14 @@ beforeEach(() => {
   sh('git init -q repo')
   sh('git -C repo commit -q --allow-empty -m init')
 
-  // The stub answers the REST reads the script makes and refuses everything
-  // else. `pr`, `repo view`, and `graphql` exit non-zero, which is a host that
-  // blocks GraphQL, so a script still reaching one fails every case below. The
-  // open list is #7 alone unless a case writes `open.txt`, and every per-pull
-  // read answers from the fixture files carrying that number.
+  // The stub answers the script's REST reads and refuses `pr`, `repo view`, and
+  // `graphql`. The open list is one fixture number unless `open.txt` is written.
   const stub = join(root, 'bin', 'gh')
   copyFileSync(new URL('./fixtures/gh-poll.sh', import.meta.url), stub)
   chmodSync(stub, 0o755)
 
-  // `pr review-state` answers from the fixture the thread was written with, and
-  // every other verb refuses. `pr head` refusing is what the fixture already
-  // produced without a stub, since it has no remote for `git ls-remote` to
-  // reach, so the head still falls back to the pull read.
+  // `pr review-state` answers from the fixture and every other verb refuses, so
+  // `pr head` refuses with no remote and the head falls back to the pull read.
   const canon = join(root, 'bin', 'canon')
   copyFileSync(new URL('./fixtures/canon-poll.sh', import.meta.url), canon)
   chmodSync(canon, 0o755)
@@ -268,9 +261,8 @@ describe('poll', () => {
     expect(poll().stdout).toContain('RESPONSE  #7')
   })
 
-  // The baseline holds no stamp, so a carried line arrives with both of them
-  // empty. Nothing may read one as a number there, and the count test in front
-  // of them is the only thing standing between the two.
+  // The baseline holds no stamp, so a carried line arrives with both empty, and
+  // only the count test keeps either from being read as a number.
   it('should classify nothing when a carried line supplies no stamps', () => {
     writeThread(
       [{ heading: '## Review', submittedAt: FIRST_PASS }],
@@ -311,10 +303,8 @@ describe('poll', () => {
     expect(poll().stdout).toBe('No movement.')
   })
 
-  // The other unmatched case above still carries a `## ` prefix, just not one
-  // of the six. This is the shape none of them exercise: no prefix at all,
-  // which is what `review-address`'s folded closing confirmation now
-  // depends on reaching neither `UNMATCHED` nor any other classification.
+  // A comment with no `## ` prefix at all, the shape the folded closing
+  // confirmation takes, must reach neither `UNMATCHED` nor any classification.
   it('should report nothing when a comment carries no heading at all', () => {
     writeThread([], [])
     expect(poll().stdout).toContain('OPENED')
@@ -331,10 +321,8 @@ describe('poll', () => {
     expect(poll().stdout).toBe('No movement.')
   })
 
-  // The two cases below are one thread read two ways. A push landing between a
-  // pass's read and its post leaves GitHub's stamp on the new head, so the first
-  // case reports a commit nobody reviewed as already covered. The marker names
-  // what the pass read, which is what makes the second case report it.
+  // One thread read two ways. A push between a pass's read and its post leaves
+  // the stamp on the new head, and only the marker names what the pass read.
   it('should report a head the stamp claims is covered as seen', () => {
     writeThread(
       [{ heading: '## Review', submittedAt: FIRST_PASS }],
@@ -498,10 +486,8 @@ describe('poll', () => {
       return exited
     }
 
-    // The reply lands only once the first pass has finished. That pass rewrites
-    // the baseline as its last act, after every thread read, so the exit can
-    // only come from a later read, however slow the runner starts. A child that
-    // exits first ends the loop, and the exit assertion below reports it.
+    // The reply lands once the first pass rewrote the baseline as its last act, so
+    // the exit can only come from a later read, however slow the runner starts.
     while (!closed && statSync(baseline).mtimeMs <= 0) {
       await new Promise((resolve) => setTimeout(resolve, 50))
     }
@@ -559,9 +545,8 @@ describe('poll', () => {
     expect(refused.stderr).toContain('--wait')
   })
 
-  // Two reads feed one payload. A comments read that fails beside a reviews
-  // read that succeeds must not read as a thread with no replies, which would
-  // report the pull request as new or drop its RESPONSE.
+  // A comments read failing beside a reviews read that succeeds must not read as
+  // a thread with no replies, which would report it new or drop its RESPONSE.
   it('should carry a pull request forward when only the comments read fails', () => {
     writeThread(
       [{ heading: '## Review', submittedAt: FIRST_PASS }],
@@ -588,9 +573,8 @@ describe('poll', () => {
     expect(poll().stdout).toContain('SEEN      #7 at 1111111')
   })
 
-  // A regression that blanks the count on a carry makes the next healthy run
-  // read zero against the thread's real count and report every comment already
-  // there as UNMATCHED.
+  // A carry that blanks the count makes the next run read zero against the real
+  // count and report every comment already there as UNMATCHED.
   it('should keep the unmatched count and UI token on a carried line', () => {
     const dir = join(root, 'repo', '.canon', 'tmp', 'pr', 'poll')
     const baseline = join(dir, 'baseline.txt')
@@ -610,9 +594,8 @@ describe('poll', () => {
     )
   })
 
-  // A refusal that exits zero carries a reason and no source, and one that
-  // exits nonzero carries nothing, so both send the read to the fallback and
-  // neither changes the run's status.
+  // A refusal exiting zero carries a reason and no source, and one exiting
+  // nonzero carries nothing, so both fall back without changing the status.
   it('should fall back when the verb answers a refusal record', () => {
     writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
     writeScope({ reason: 'no-marker' })
@@ -755,9 +738,8 @@ describe('poll', () => {
     })
   })
 
-  // These cases need real commits on both sides, so the repository gets a bare
-  // origin carrying `main` and each pull request's head under the ref GitHub
-  // publishes it at. A five-line file lets two sides touch it without colliding.
+  // These cases need real commits on both sides, on a bare origin holding `main`
+  // and each head at GitHub's ref, with a five-line file two sides can share.
   describe('base movement', () => {
     const LINES = ['one', 'two', 'three', 'four', 'five']
 
@@ -920,9 +902,8 @@ describe('poll', () => {
       expect(rebased).not.toContain('STALE')
     })
 
-    // The draft lift reads a standing reading at lift time, which may be many
-    // runs after the line that reported it and after a sibling merged, so the
-    // check reads the base and the head live rather than the baseline.
+    // The draft lift reads a standing reading long after it was reported, so the
+    // check reads the base and head live rather than the baseline.
     describe('standing check', () => {
       const baselinePath = (): string =>
         join(root, 'repo', '.canon', 'tmp', 'pr', 'poll', 'baseline.txt')
@@ -1047,9 +1028,8 @@ describe('poll', () => {
     })
   })
 
-  // A carried line's shorter shape misreads the same way for the unmatched
-  // count that it does for the two stamps above. Nothing may read that one as
-  // a number either.
+  // A carried line's shorter shape misreads the unmatched count the way it does
+  // the two stamps, so nothing may read that one as a number either.
   it('should classify nothing when a carried line supplies no unmatched count', () => {
     writeThread([], [])
     expect(poll().stdout).toContain('OPENED')

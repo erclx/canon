@@ -105,10 +105,8 @@ describe('branchRefs', () => {
     ])
   })
 
-  // `git show-ref --verify` exits 128 for a half match and 128 for a directory
-  // that is no repository, which is why the read is `for-each-ref`. An absent
-  // branch and a failed read have to answer differently or the caller reads a
-  // failure as a clean branch.
+  // `git show-ref --verify` exits 128 for both a half match and no repository, so
+  // the read is `for-each-ref`, and an absent branch answers apart from a failure.
   it('should separate an unreadable tree from a branch that does not exist', async () => {
     const notARepo = mkdtempSync(join(tmpdir(), 'canon-refs-none-'))
 

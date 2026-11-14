@@ -179,9 +179,8 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
     expect(result.code).toBe(0)
   })
 
-  // A PreToolUse pass is not a landed write, so the retry after a refused
-  // heredoc and the main-root `cp` after a worktree `Write` both reach the
-  // guard a second time for one plan.
+  // A PreToolUse pass is not a landed write, so a retry or a main-root `cp`
+  // reaches the guard a second time for one plan.
   it('should pass a second write onto the plan an invocation already licensed', async () => {
     const project = planProject(`${SKILL_CALL}\n`)
     await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
@@ -558,10 +557,8 @@ describe('.claude/hooks/precompact-handoff.sh', () => {
   it.concurrent('should instruct on every automatic compaction rather than once', async ({
     expect,
   }) => {
-    // A precompute pass fires this hook with a payload identical to the real
-    // compaction's and drops its own record when refused, so it re-arms and
-    // fires again. Anything counted per session is drained by firings the
-    // session never sees, which is why the automatic path counts nothing.
+    // A precompute pass fires with the real payload and re-arms when refused, so
+    // anything counted per session drains unseen, and the automatic path counts none.
     const once = payload({ session_id: 'precompact-arms', trigger: 'auto' })
 
     const first = await run(hook, once)
@@ -602,10 +599,8 @@ describe('.claude/hooks/precompact-handoff.sh', () => {
   it.concurrent('should keep the blocking reason off stdout', async ({
     expect,
   }) => {
-    // Exit 2 makes stderr the blocking reason, and stdout on this event is
-    // merged into the summarizer's instructions. Writing there would address
-    // the summary of a compaction that is not going to happen, while the
-    // block itself stayed unexplained.
+    // Exit 2 makes stderr the blocking reason, and stdout here joins the
+    // summarizer's instructions for a compaction that will not happen.
     const result = await run(
       hook,
       payload({ session_id: 'precompact-out', trigger: 'manual' }),
@@ -618,10 +613,8 @@ describe('.claude/hooks/precompact-handoff.sh', () => {
   it.concurrent('should carry on rather than block when the marker cannot be written', async ({
     expect,
   }) => {
-    // The marker is what ends the block, so blocking without recording it
-    // would refuse every compaction the session takes. A project root the
-    // hook cannot write to is the case that reaches that, and it has to fail
-    // open: one unasked handoff costs less than a session that cannot compact.
+    // Blocking without the marker would refuse every compaction, so an unwritable
+    // root fails open, since one unasked handoff costs less.
     const result = await run(
       hook,
       payload({ session_id: 'precompact-readonly' }),

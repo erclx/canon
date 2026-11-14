@@ -56,12 +56,8 @@ describe('scanText', () => {
 })
 
 describe('the rule set against its own source', () => {
-  /**
-   * `src/` is inside the shipped corpus, so a pattern matching the text of its
-   * own definition would report this file on every run and train a reader to
-   * mute the check. Asserting it here keeps a later pattern from reintroducing
-   * the loop.
-   */
+  // `src/` is in the shipped corpus, so a pattern matching its own definition
+  // would report this file on every run and train a reader to mute the check.
   it('should not match the source text of any pattern', () => {
     const sources = PATTERNS.map((pattern) => pattern.match.source).join('\n')
 

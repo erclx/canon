@@ -42,11 +42,8 @@ describe('running the audit set', () => {
     )
   })
 
-  /**
-   * The verbs walk separate trees and share no state, so running them
-   * sequentially would make the aggregate the slowest thing in the pipeline
-   * for no reason. This pins the batching rather than trusting it.
-   */
+  // The verbs share no state, so running them in sequence would slow the
+  // aggregate for nothing. This pins the batching.
   it('should start every audit before any of them finishes', async () => {
     let running = 0
     let peak = 0
@@ -72,11 +69,8 @@ describe('running the audit set', () => {
     expect(results[0].counts).toEqual({ degradationHits: 2 })
   })
 
-  /**
-   * A spawn that throws is a binary that could not be started, which is a
-   * measure that did not run. Letting it reject would take the whole aggregate
-   * down over one absent verb and report nothing about the eleven that worked.
-   */
+  // A spawn that throws is a measure that did not run, and rejecting would take
+  // the aggregate down over one absent verb.
   it('should report an audit whose spawn threw as unmeasured', async () => {
     const results = await runAudits([specFor('markdown')], async () => {
       throw new Error('spawn ENOENT')
@@ -135,10 +129,8 @@ describe('the verdict over a set of results', () => {
     )
   })
 
-  /**
-   * An audit that did not report outranks a quiet set, because the alternative
-   * is publishing a pass over a tree that was never fully measured.
-   */
+  // An audit that did not report outranks a quiet set, or the set would publish
+  // a pass over a tree never fully measured.
   it('should read a set carrying an unmeasured audit as incomplete', () => {
     expect(verdictOf([result('a', 'clean'), result('b', 'unmeasured')])).toBe(
       'incomplete',
@@ -161,11 +153,8 @@ describe('the exit code the aggregate sets', () => {
     expect(exitCodeFor([result('a', 'clean'), result('b', 'reported')])).toBe(0)
   })
 
-  /**
-   * A judgment moves no exit code. Failing a push on one teaches contributors
-   * to route around the stage, which is the split this repository records and
-   * the reason the aggregate adds nothing to what already gates.
-   */
+  // A judgment moves no exit code, since failing a push on one teaches
+  // contributors to route around the stage.
   it('should not fail on a judgment finding alone', () => {
     expect(exitCodeFor([result('a', 'reported')])).toBe(0)
   })
@@ -215,10 +204,8 @@ describe('the flat summary a shell stage reads', () => {
     expect(summary.shrunk).toBe(1)
   })
 
-  /**
-   * A growth inside its tolerance stays visible in `moved` but leaves `grown`
-   * alone, so a gate reading `grown` sees only growth past the tolerance.
-   */
+  // A growth inside its tolerance stays in `moved` but not `grown`, so a gate
+  // reading `grown` sees only growth past the tolerance.
   it('should leave a tolerated growth out of grown and count one past it', () => {
     const summary = summarize(
       [result('census', 'reported')],
@@ -255,11 +242,8 @@ describe('the flat summary a shell stage reads', () => {
     expect(summarize([result('skills', 'clean')], deltas).unrecorded).toBe(1)
   })
 
-  /**
-   * A per-machine delta contributes to no growth figure. Its counts are one
-   * machine's, so folding them in would report movement every other clone
-   * cannot reproduce.
-   */
+  // A per-machine delta feeds no growth figure, since its counts are one
+  // machine's and no other clone could reproduce them.
   it('should leave a per-machine delta out of every count it publishes', () => {
     const summary = summarize(
       [result('records-plans', 'reported')],

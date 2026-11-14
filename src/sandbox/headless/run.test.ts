@@ -91,8 +91,7 @@ describe('mergeEnvelope', () => {
   })
 
   // A dying session's stdout can be partial, and a silent stdout would read as a
-  // run that never happened, so the verdict still prints with the run marked as
-  // an error.
+  // run that never happened, so the verdict prints marked as an error.
   it('should fall back to an error record when the envelope does not parse', () => {
     const { merged, isParsed } = mergeEnvelope(
       '{"is_error":false,"res',

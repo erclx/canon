@@ -586,7 +586,7 @@ describe('bodyDensity in Technical context', () => {
   })
 })
 
-/** Frameboard #27 as live, the accepted bold lead-in shape. */
+/** A sibling project's body as live, the accepted bold lead-in shape. */
 const FRAMEBOARD_27 = body(
   '## Summary',
   '',
@@ -664,7 +664,7 @@ const FRAMEBOARD_27 = body(
   '- Confirm outcome 3 stays open, since the per-frame flip ships as `flipFrame(ref)` with no control until the frame menu lands.',
 )
 
-/** The Key changes of frameboard #25 as shipped, flat with long bullets. */
+/** A sibling project's Key changes as shipped, flat with long bullets. */
 const FRAMEBOARD_25_KEY_CHANGES = body(
   '## Key changes',
   '',
@@ -702,7 +702,7 @@ const FB =
 const REVIEW_MARKER =
   '<!-- review-pr: commit=72a5268c1cc72fa28521e2a6a0aefdcdca8f35fe read-at=2026-10-19T06:14:57Z -->'
 
-/** Frameboard #27's first review as posted, trimmed to one finding and the focus run. */
+/** That pull request's first review as posted, trimmed to one finding and the focus run. */
 const REVIEW_BEFORE = body(
   '## Review',
   '',
@@ -756,7 +756,7 @@ const REVIEW_AFTER = body(
   REVIEW_MARKER,
 )
 
-/** Canon's closed review at `fbac6b0` as posted, trimmed. */
+/** A closed review from this repository as posted, trimmed. */
 const CLOSED_BEFORE = body(
   '## Review closed',
   '',
@@ -782,7 +782,7 @@ const CLOSED_AFTER = body(
   '<!-- review-pr: commit=fbac6b00c9c1ac144a5cc9f3763667b517fa7c51 read-at=2026-10-17T19:02:40Z -->',
 )
 
-/** Frameboard #27's review response as posted, trimmed to its first finding. */
+/** That pull request's review response as posted, trimmed to its first finding. */
 const RESPONSE_BEFORE = body(
   '## Review response',
   '',
@@ -806,7 +806,7 @@ const RESPONSE_AFTER = body(
   '🤖 Addressed by Claude Code',
 )
 
-/** Canon's rebase note onto `8af11ce78` as posted, trimmed. */
+/** A rebase note from this repository as posted, trimmed. */
 const REBASE_BEFORE = body(
   '## Rebase',
   '',
