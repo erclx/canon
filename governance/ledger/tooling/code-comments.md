@@ -30,6 +30,7 @@ The field is software engineering practice for source comments, which has no spe
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | Delete commented-out code | House choice: commented-out code escapes the type checker and the tests, so it rots while reading as an option still open, and version control already keeps it                                                                                                                                                        | 2026-10-18 |
 | No edit history           | House choice: a comment recording the edit that made the code goes stale at the next edit and duplicates what `git log` and `git blame` hold                                                                                                                                                                           | 2026-10-18 |
+| No date, hash, or issue   | House choice: each is history true only of the moment it was written, and the pull request keeps it beside the diff it explains. The scan matches each as a pattern, so a format example writes a placeholder such as `<YYYY-MM-DD>`.                                                                                  | 2026-11-14 |
 | No deferred work          | House choice: deferred work in a comment is work no tracker query finds, so nobody schedules it. [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html) asks for `TODO` comments carrying "the bug ID, name, e-mail address, or other identifier", which is Google's convention for its own code. | 2026-10-18 |
 
 ## Degradation vocabulary
@@ -37,6 +38,12 @@ The field is software engineering practice for source comments, which has no spe
 | Bullet                         | Source                                                                                                                                                                                                                                                                                                                                                                                    | Read       |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | `TODO`, `FIXME`, `HACK`, `XXX` | House choice: each term marks deferred work or a known defect in a place no tracker query reaches. Google's guides depart, asking for a `TODO` with an owner or a bug link so it "can be searched to find out how to get more details" (Python guide). Google's guide governs Google's code rather than settling the field, so this rule keeps the ban and sends the work to the tracker. | 2026-10-18 |
+
+## Practice
+
+| Bullet                  | Source                                                                                                                                                                          | Read       |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Load `canon:code-craft` | House choice: the practice of what a comment says lives in one skill reference that writing and auditing both read, so this rule points at it rather than holding a second copy | 2026-11-14 |
 
 ## Declined
 

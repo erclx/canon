@@ -72,6 +72,8 @@ Agents fail at writing time in recorded ways. Read the diff for each before call
 - An assumption filled in, such as a default value or a business rule the task never stated, where a question belonged.
 - A brute-force fix that silences a symptom, such as a broad catch, a disabled check, or a special case for one input.
 
+Read `${CLAUDE_SKILL_DIR}/references/comments.md` before writing or keeping a comment, for what one says, where it sits, and what it leaves out.
+
 Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidance or arguing against a rule in it. It records which external sources were adopted, which declined, and why.
 
 ## Excuses and rebuttals

@@ -28,7 +28,12 @@ paths:
 
 - Delete commented-out code. Do not park it beside the live path.
 - Do not record the edit that produced the code. Version control holds the change history.
+- Do not carry a date, a commit hash, or an issue number. The pull request holds them, and `canon comments scan` flags each one.
 - Do not defer work into a comment. Deferred work belongs in the tracker.
+
+## Practice
+
+- Load the `canon:code-craft` skill before writing a comment, for what one says and where it sits, and report it rather than proceeding silently when it does not resolve.
 
 ## Degradation vocabulary
 

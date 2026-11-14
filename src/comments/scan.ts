@@ -37,8 +37,28 @@ export interface DegradationHit {
   readonly term: string
 }
 
+/**
+ * Change history a comment carries, which belongs to the pull request. Patterns
+ * rather than vocabulary terms, so they live here and match with no rule
+ * loaded. A format example writes a placeholder such as `<YYYY-MM-DD>`.
+ */
+export const HISTORY_PATTERNS: readonly {
+  readonly term: string
+  readonly pattern: RegExp
+}[] = [
+  { term: 'date', pattern: /(?<!\d)\d{4}-\d{2}-\d{2}(?!\d)/ },
+  {
+    term: 'commit hash',
+    pattern: /(?<!\w)(?=[0-9a-f]*\d)(?=[0-9a-f]*[a-f])[0-9a-f]{7,40}(?!\w)/,
+  },
+  { term: 'issue reference', pattern: /(?<![\w&])#\d+(?!\w)/ },
+]
+
 /** Comment lines past which a run is reported, a prompt to read and not a limit. */
-export const BLOCK_LINE_CHECKPOINT = 20
+export const BLOCK_LINE_CHECKPOINT = 8
+
+/** Lines past which the gate fails a run outside every function body. */
+export const HEAD_BLOCK_CAP = 12
 
 /** A file's longest run of contiguous comment lines, starting at `line`. */
 export interface LongBlock {
@@ -47,30 +67,12 @@ export interface LongBlock {
   readonly lines: number
 }
 
-/** Comment lines from which a run counts toward its file's long-block lines. */
-export const LONG_BLOCK_FLOOR = 10
-
 /** In-body comment lines past which the gate fails a run. */
-export const BODY_BLOCK_CAP = 10
-
-/** Long-block lines past which the gate fails a file. */
-export const FILE_LONG_BLOCK_CAP = 200
+export const BODY_BLOCK_CAP = 2
 
 /** A run past the checkpoint, with `placement` null where it is unread. */
 export interface Block extends LongBlock {
   readonly placement: Placement | null
-}
-
-/**
- * One file's runs of `LONG_BLOCK_FLOOR` lines or more, summed. The head and
- * body split is null in a language whose placement is unread.
- */
-export interface LongBlockFile {
-  readonly file: string
-  readonly lines: number
-  readonly blocks: number
-  readonly headLines: number | null
-  readonly bodyLines: number | null
 }
 
 export interface LanguageCount {
@@ -84,10 +86,10 @@ export interface LanguageCount {
   readonly longBlocks: readonly LongBlock[]
   /** Every run past `BLOCK_LINE_CHECKPOINT`, not only each file's longest. */
   readonly blocks: readonly Block[]
+  /** Every run past `HEAD_BLOCK_CAP` outside a function body, unplaced included. */
+  readonly headBlocks: readonly LongBlock[]
   /** Every in-body run past `BODY_BLOCK_CAP`. */
   readonly bodyBlocks: readonly LongBlock[]
-  /** Every file holding a run of `LONG_BLOCK_FLOOR` or more, most lines first. */
-  readonly longBlockFiles: readonly LongBlockFile[]
   /** Every Python file whose runs went unplaced, with what refused it. */
   readonly unreadFiles: readonly UnreadFile[]
 }
@@ -164,8 +166,6 @@ interface FileCount {
   readonly docBlocks: number
   readonly inlineComments: number
   readonly runs: readonly Run[]
-  /** Whether each long run carries a placement, so the head and body split holds. */
-  readonly placed: boolean
   readonly unread?: Omit<UnreadFile, 'file'>
 }
 
@@ -194,16 +194,16 @@ function runTracker() {
 }
 
 /**
- * Places each run of `LONG_BLOCK_FLOOR` lines or more by its first line's
- * first character. Shorter runs feed no placed figure, so a file holding none
- * is never read for its function bodies.
+ * Places each run past `BODY_BLOCK_CAP` by its first line's first character.
+ * Shorter runs pass every cap wherever they sit, so a file holding none is
+ * never read for its function bodies.
  */
 function placeRuns(
   file: SourceFile,
   lines: readonly string[],
   runs: readonly { line: number; lines: number }[],
 ): Run[] {
-  if (!runs.some((run) => run.lines >= LONG_BLOCK_FLOOR)) {
+  if (!runs.some((run) => run.lines > BODY_BLOCK_CAP)) {
     return runs.map((run) => ({ ...run, placement: null }))
   }
   const starts = [0]
@@ -211,7 +211,7 @@ function placeRuns(
   const read = placementReader(file.path, file.text)
 
   return runs.map((run) => {
-    if (run.lines < LONG_BLOCK_FLOOR) return { ...run, placement: null }
+    if (run.lines <= BODY_BLOCK_CAP) return { ...run, placement: null }
     const text = lines[run.line - 1] ?? ''
     const offset =
       (starts[run.line - 1] ?? 0) + text.length - text.trimStart().length
@@ -276,7 +276,6 @@ function countTypeScript(
     docBlocks,
     inlineComments,
     runs: placeRuns(file, lines, runs.runs()),
-    placed: true,
   }
 }
 
@@ -308,9 +307,8 @@ function countBash(
 
   for (const [index, line] of lines.entries()) {
     if (delimiter !== undefined) {
-      // `<<-` strips leading tabs from the terminator, and the plain form
-      // requires it at column zero. Trimming covers both without tracking
-      // which form opened the body.
+      // `<<-` strips leading tabs from the terminator and the plain form
+      // requires column zero, so trimming covers both.
       if (line.trim() === delimiter) delimiter = undefined
       continue
     }
@@ -341,7 +339,6 @@ function countBash(
     docBlocks: 0,
     inlineComments,
     runs: runs.runs().map((run) => ({ ...run, placement: null })),
-    placed: false,
   }
 }
 
@@ -421,13 +418,12 @@ function countPython(
       line,
       lines: length,
       placement:
-        read.kind === 'unread' || length < LONG_BLOCK_FLOOR
+        read.kind === 'unread' || length <= BODY_BLOCK_CAP
           ? null
           : kind === '#' && inBody(line)
             ? 'body'
             : 'head',
     })),
-    placed: read.kind === 'read',
     ...(read.kind === 'unread'
       ? { unread: { line: read.line, reason: read.reason } }
       : {}),
@@ -448,10 +444,10 @@ export function countFile(
   language: Language,
   vocabulary: readonly string[] = [],
 ): LanguageCount {
-  const matchers = vocabulary.map((term) => ({
-    term,
-    pattern: matcherFor(term),
-  }))
+  const matchers = [
+    ...vocabulary.map((term) => ({ term, pattern: matcherFor(term) })),
+    ...HISTORY_PATTERNS,
+  ]
   const hits: DegradationHit[] = []
 
   const counted = COUNTERS[language](file, matchers, hits)
@@ -461,14 +457,6 @@ export function countFile(
     (best, run) => (best === undefined || run.lines > best.lines ? run : best),
     undefined,
   )
-  const long = runs.filter((run) => run.lines >= LONG_BLOCK_FLOOR)
-  const linesWhere = (placement: Placement): number | null =>
-    counted.placed
-      ? long
-          .filter((run) => run.placement === placement)
-          .reduce((sum, run) => sum + run.lines, 0)
-      : null
-
   return {
     language,
     files: 1,
@@ -482,21 +470,12 @@ export function countFile(
         ? [{ file: longest.file, line: longest.line, lines: longest.lines }]
         : [],
     blocks: runs.filter((run) => run.lines > BLOCK_LINE_CHECKPOINT),
+    headBlocks: runs
+      .filter((run) => run.placement !== 'body' && run.lines > HEAD_BLOCK_CAP)
+      .map(({ file: path, line, lines }) => ({ file: path, line, lines })),
     bodyBlocks: runs
       .filter((run) => run.placement === 'body' && run.lines > BODY_BLOCK_CAP)
       .map(({ file: path, line, lines }) => ({ file: path, line, lines })),
-    longBlockFiles:
-      long.length === 0
-        ? []
-        : [
-            {
-              file: file.path,
-              lines: long.reduce((sum, run) => sum + run.lines, 0),
-              blocks: long.length,
-              headLines: linesWhere('head'),
-              bodyLines: linesWhere('body'),
-            },
-          ],
     unreadFiles:
       counted.unread === undefined
         ? []
@@ -523,8 +502,8 @@ export function countFiles(
       degradationHits: [] as DegradationHit[],
       longBlocks: [] as LongBlock[],
       blocks: [] as Block[],
+      headBlocks: [] as LongBlock[],
       bodyBlocks: [] as LongBlock[],
-      longBlockFiles: [] as LongBlockFile[],
       unreadFiles: [] as UnreadFile[],
     }
 
@@ -539,14 +518,10 @@ export function countFiles(
       totals.degradationHits.push(...count.degradationHits)
       totals.longBlocks.push(...count.longBlocks)
       totals.blocks.push(...count.blocks)
+      totals.headBlocks.push(...count.headBlocks)
       totals.bodyBlocks.push(...count.bodyBlocks)
-      totals.longBlockFiles.push(...count.longBlockFiles)
       totals.unreadFiles.push(...count.unreadFiles)
     }
-
-    totals.longBlockFiles.sort(
-      (a, b) => b.lines - a.lines || a.file.localeCompare(b.file),
-    )
 
     return totals
   })

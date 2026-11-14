@@ -65,32 +65,32 @@ A key may carry a growth tolerance, a fraction of its recorded value. A growth i
 
 `canon audits list` reports the first 19 rows. The rows marked `outside` run by hand or from a skill and sit beside the aggregate.
 
-| Id                   | Verb                                | Measures                                                                                                     | Finding        |
-| -------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------ | -------------- |
-| `context`            | `canon context audit`               | Context folder structure, citations, and the requirements record's word cap                                  | Gates          |
-| `markdown`           | `canon markdown audit`              | Bans, dead links, density, and reference shape                                                               | Gates          |
-| `skills`             | `canon claude skills audit`         | Both skill corpora against the skill standards, and any ledger under `canon/ledger/skills/`                  | Gates          |
-| `skills-reach`       | `canon claude skills reach`         | Skill bodies citing a path no target receives                                                                | Reports        |
-| `skills-rank`        | `canon claude skills rank`          | Whether skill descriptions separate against a routing case corpus                                            | Reports        |
-| `tasks`              | `canon tasks validate`              | Board rows nothing resolves                                                                                  | Reports        |
-| `records-plans`      | `canon records validate plans`      | Plan records against their shape                                                                             | Reports        |
-| `records-groundwork` | `canon records validate groundwork` | Groundwork folders against their shape                                                                       | Reports        |
-| `records-intake`     | `canon records validate intake`     | Intake folders against their shape                                                                           | Reports        |
-| `comments`           | `canon comments scan`               | TypeScript, Bash, and Python density, long blocks, and `TODO`, `FIXME`, `HACK`, `XXX`. Both block caps gate. | Reports        |
-| `test-order`         | `canon gov test-order`              | Implementations that reached branch history before their test                                                | Reports        |
-| `secrets`            | `canon secrets scan`                | Credential-shaped values in the shipped tree                                                                 | Gates          |
-| `labels`             | `canon labels audit`                | Changed paths no row of the label map reaches                                                                | Reports        |
-| `restated`           | `canon gov restated`                | Instructions `CLAUDE.md` states that a second surface states too                                             | Reports        |
-| `rules`              | `canon gov audit`                   | Rules past a shape limit or out of step with a ledger, and here rules short of one                           | Reports        |
-| `counts`             | `canon gov counts`                  | Sentences stating a closed catalog's size that disagree with the tree                                        | Reports        |
-| `census`             | `canon census`                      | File count, extension breakdown, files per folder, sibling prefix groups, and line total                     | Reports        |
-| `code`               | `canon code audit`                  | Functions past 100, Python too. Files past 2,000 lines and embedded blocks gate in check.                    | Reports        |
-| `deps`               | `canon deps audit`                  | Advisories against the resolved dependencies                                                                 | Reports        |
-| `outside`            | `canon gov citations`               | Rule citations and internal frontmatter globs reaching nothing                                               | Gates in check |
-| `outside`            | `canon gov superseded <old> <new>`  | Where the tree still asserts a value a changed convention no longer produces                                 | Reports        |
-| `outside`            | `canon claude skills drift <ref>`   | Shipped skill bodies rewritten since a ref                                                                   | Reports        |
-| `outside`            | `canon claude routing`              | Per `CLAUDE.md` section, how many bullets name a path and whether a rule covers it                           | Reports        |
-| `outside`            | `canon history`                     | Weekly type mix, fix share, files per feat, size-weighted hotspots, and tree size from git                   | Reports        |
+| Id                   | Verb                                | Measures                                                                                                  | Finding        |
+| -------------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------- | -------------- |
+| `context`            | `canon context audit`               | Context folder structure, citations, and the requirements record's word cap                               | Gates          |
+| `markdown`           | `canon markdown audit`              | Bans, dead links, density, and reference shape                                                            | Gates          |
+| `skills`             | `canon claude skills audit`         | Both skill corpora against the skill standards, and any ledger under `canon/ledger/skills/`               | Gates          |
+| `skills-reach`       | `canon claude skills reach`         | Skill bodies citing a path no target receives                                                             | Reports        |
+| `skills-rank`        | `canon claude skills rank`          | Whether skill descriptions separate against a routing case corpus                                         | Reports        |
+| `tasks`              | `canon tasks validate`              | Board rows nothing resolves                                                                               | Reports        |
+| `records-plans`      | `canon records validate plans`      | Plan records against their shape                                                                          | Reports        |
+| `records-groundwork` | `canon records validate groundwork` | Groundwork folders against their shape                                                                    | Reports        |
+| `records-intake`     | `canon records validate intake`     | Intake folders against their shape                                                                        | Reports        |
+| `comments`           | `canon comments scan`               | Density, blocks past 8 lines, `TODO`, `FIXME`, `HACK`, `XXX`, and history. Touched caps and history gate. | Reports        |
+| `test-order`         | `canon gov test-order`              | Implementations that reached branch history before their test                                             | Reports        |
+| `secrets`            | `canon secrets scan`                | Credential-shaped values in the shipped tree                                                              | Gates          |
+| `labels`             | `canon labels audit`                | Changed paths no row of the label map reaches                                                             | Reports        |
+| `restated`           | `canon gov restated`                | Instructions `CLAUDE.md` states that a second surface states too                                          | Reports        |
+| `rules`              | `canon gov audit`                   | Rules past a shape limit or out of step with a ledger, and here rules short of one                        | Reports        |
+| `counts`             | `canon gov counts`                  | Sentences stating a closed catalog's size that disagree with the tree                                     | Reports        |
+| `census`             | `canon census`                      | File count, extension breakdown, files per folder, sibling prefix groups, and line total                  | Reports        |
+| `code`               | `canon code audit`                  | Functions past 100, Python too. Files past 2,000 lines and embedded blocks gate in check.                 | Reports        |
+| `deps`               | `canon deps audit`                  | Advisories against the resolved dependencies                                                              | Reports        |
+| `outside`            | `canon gov citations`               | Rule citations and internal frontmatter globs reaching nothing                                            | Gates in check |
+| `outside`            | `canon gov superseded <old> <new>`  | Where the tree still asserts a value a changed convention no longer produces                              | Reports        |
+| `outside`            | `canon claude skills drift <ref>`   | Shipped skill bodies rewritten since a ref                                                                | Reports        |
+| `outside`            | `canon claude routing`              | Per `CLAUDE.md` section, how many bullets name a path and whether a rule covers it                        | Reports        |
+| `outside`            | `canon history`                     | Weekly type mix, fix share, files per feat, size-weighted hotspots, and tree size from git                | Reports        |
 
 A deliberate secret takes a `canon-allow-secret: <reason>` marker. A deliberate citation takes `canon-allow-citation: <reason>`, a deliberate superseded value takes `canon-allow-superseded: <reason>`, and a block that must stay inline takes `canon-allow-embedded: <reason>`, each on its own line or the one above.
 

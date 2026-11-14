@@ -6,7 +6,11 @@ import {
   skillPaths,
 } from '@/gate/boundaries'
 import { embeddedPrograms } from '@/code/embedded'
-import { commentBodyBlocks, commentFileLines } from '@/gate/comment-caps'
+import {
+  commentBodyBlocks,
+  commentHeadBlocks,
+  commentHistory,
+} from '@/gate/comment-caps'
 import { fileLength } from '@/gate/file-length'
 import {
   canonicalRecords,
@@ -147,13 +151,12 @@ function relatedTests(changed: readonly string[]): readonly string[] {
 }
 
 /**
- * Every stage the gate runs, in the order it runs them.
- *
- * Order is the product here rather than an accident of the file. The four
- * regenerating stages run before anything reads what they wrote, the stages
- * calling this checkout's CLI sit together so a reader meets one group rather
- * than the same kind of stage at intervals, and the three scoped stages sit
- * last where a skip costs the run nothing it already paid for.
+ * Every stage the gate runs, in the order it runs them. Order is the product
+ * here rather than an accident of the file. The four regenerating stages run
+ * before anything reads what they wrote, the stages calling this checkout's
+ * CLI sit together so a reader meets one group rather than the same kind of
+ * stage at intervals, and the three scoped stages sit last where a skip costs
+ * the run nothing it already paid for.
  *
  * A stage halts the run when one of its checks fails, so clearing a
  * regenerate-then-assert stage reveals the next one behind it rather than the
@@ -413,16 +416,21 @@ export const STAGES: readonly Stage[] = [
     checks: [{ kind: 'measure', measure: fileLength }],
   },
   {
-    // Unscoped, since any branch can grow a comment anywhere. Reads the same
-    // file set `canon comments scan` reports on, tests and sandbox included.
+    // Unscoped as a stage, since each measure reads the changed set itself and
+    // fails a touched file alone.
+    id: 'comment-head-blocks',
+    label: 'Head comment runs',
+    checks: [{ kind: 'measure', measure: commentHeadBlocks }],
+  },
+  {
     id: 'comment-body-blocks',
     label: 'In-body comment runs',
     checks: [{ kind: 'measure', measure: commentBodyBlocks }],
   },
   {
-    id: 'comment-file-lines',
-    label: 'Long comment lines per file',
-    checks: [{ kind: 'measure', measure: commentFileLines }],
+    id: 'comment-history',
+    label: 'History in comments',
+    checks: [{ kind: 'measure', measure: commentHistory }],
   },
   {
     // A rule citing a file that moved fails silently. The consumed-copy drift

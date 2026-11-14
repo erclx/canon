@@ -107,6 +107,37 @@ describe('canon comments scan vocabulary root', () => {
     },
     RUN_TIMEOUT_MS,
   )
+
+  it(
+    'should report history in a comment with no vocabulary loaded',
+    async () => {
+      const tree = await realpath(
+        await mkdtemp(join(tmpdir(), 'canon-comments-history-')),
+      )
+      await writeFile(
+        join(tree, 'a.ts'),
+        '// measured on 2026-08-20\nexport const a = 1\n',
+      )
+
+      const record = (await scan(tree, '--languages', 'ts')) as unknown as {
+        vocabulary: null
+        historyTerms: string[]
+        snapshot: { degradationHits: unknown[] }[]
+      }
+      await rm(tree, { recursive: true, force: true })
+
+      expect(record.vocabulary).toBeNull()
+      expect(record.historyTerms).toEqual([
+        'date',
+        'commit hash',
+        'issue reference',
+      ])
+      expect(record.snapshot[0]?.degradationHits).toEqual([
+        { file: 'a.ts', line: 1, term: 'date' },
+      ])
+    },
+    RUN_TIMEOUT_MS,
+  )
 })
 
 describe('canon comments scan block record', () => {
@@ -145,23 +176,18 @@ describe('canon comments scan block record', () => {
         '--languages',
         'ts',
       )) as unknown as {
+        headBlockCap: number
         bodyBlockCap: number
-        fileLongBlockCap: number
-        longBlockFloor: number
         snapshot: Record<string, unknown>[]
         trend: { languages: Record<string, unknown>[] }[]
       }
 
-      expect([
-        record.longBlockFloor,
-        record.bodyBlockCap,
-        record.fileLongBlockCap,
-      ]).toEqual([10, 10, 200])
+      expect([record.headBlockCap, record.bodyBlockCap]).toEqual([12, 2])
+      expect(Object.keys(record)).not.toContain('fileLongBlockCap')
+      expect(Object.keys(record)).not.toContain('longBlockFloor')
+      expect(record.snapshot[0]?.headBlocks).toEqual([])
       expect(record.snapshot[0]?.bodyBlocks).toEqual([
         { file: 'a.ts', line: 2, lines: 11 },
-      ])
-      expect(record.snapshot[0]?.longBlockFiles).toEqual([
-        { file: 'a.ts', lines: 11, blocks: 1, headLines: 0, bodyLines: 11 },
       ])
       expect(record.trend.length).toBeGreaterThan(0)
       for (const point of record.trend) {
