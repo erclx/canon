@@ -9,13 +9,8 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { execaSync } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import {
-  checkDrive,
-  readDecisions,
-  readDrawn,
-  readGoals,
-  recordBaseline,
-} from '@/intake/drive-check'
+import { checkDrive, readGoals, recordBaseline } from '@/intake/drive-check'
+import { readDecisions, readDrawn } from '@/intake/drive-log'
 
 let ROOT: string
 

@@ -42,15 +42,6 @@ Work one cluster at a time, in the order the folder numbers them. A dump of six 
 
 Cap each batch at four items, which is what a structured question tool takes. A cluster carrying more than four unread items takes several batches in file order.
 
-### A cluster the drive already decided
-
-When every unread item in the cluster carries a `decision`, put the cluster as one question rather than one per item, however many items it holds. It is one question, so the four-item cap does not apply.
-
-- List each item on its own line as its label, its title, and its `decision`
-- Rank `accept every recorded decision` first, and offer `answer each item` as the alternative, which drops back to the batches above
-- A cluster mixing decided and undecided unread items takes the batches above, item by item
-- The operator's accept is the answer, so never land the cluster without it
-
 Offer every item with an empty slot, not only the ones carrying an open question. An item with a verdict and no question still asks whether the verdict stands, which is what the standard's one-token accept is for.
 
 | Item carries | Question shape                                                                  |
@@ -68,6 +59,15 @@ Open every question with a lead-in of one to three plain sentences, written fres
 Give every option what it means and what it costs. An option with no stated cost is not an option, since the operator picks it without knowing what the other one buys.
 
 Send the whole batch in one turn. When the session runs on a surface carrying a structured question tool, such as `AskUserQuestion` in Claude Code, send it through one call with one entry per item. Otherwise write it as a numbered list in one message with the suggestion marked.
+
+### A cluster the drive already decided
+
+When every unread item in the cluster carries a `decision`, put the cluster as one question rather than one per item, however many items it holds. It is one question, so the four-item cap does not apply.
+
+- List each item on its own line as its label, its title, and its `decision`
+- Rank `accept every recorded decision` first, and offer `answer each item` as the alternative, which drops back to the batches above
+- A cluster mixing decided and undecided unread items takes the batches above, item by item
+- The operator's accept is the answer, so never land the cluster without it
 
 ## Step 4: write the batch back
 

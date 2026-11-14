@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { readdir, readFile, writeFile } from 'node:fs/promises'
 import { basename, join, normalize, relative } from 'node:path'
-import { DRIVE_LOG, readDecisions } from '@/intake/drive-check'
+import { DRIVE_LOG, readDecisions } from '@/intake/drive-log'
 import {
   INDEX_FILE,
   type IntakeItem,
