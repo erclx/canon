@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   isMalformed,
   isUnread,
+  parseDecided,
   readItems,
   writeAnswerLine,
 } from '@/intake/items'
@@ -220,5 +221,38 @@ describe('writeAnswerLine', () => {
 
     expect(items[0].answer).toBe('ok')
     expect(items[1].answer).toBeUndefined()
+  })
+})
+
+describe('Decided field', () => {
+  it('should read the pointer an item carries as written', () => {
+    const text = cluster(item({ label: '1' })).replace(
+      '- **You:**',
+      '- **Decided:** evidence/drive-log.md, finding 02\n- **You:**',
+    )
+
+    expect(readItems(text)[0].decided).toBe('evidence/drive-log.md, finding 02')
+  })
+
+  it('should leave an item with no Decided line undecided', () => {
+    expect(readItems(cluster(item({ label: '1' })))[0].decided).toBeUndefined()
+  })
+
+  it('should read the finding as an integer so 02 meets 2', () => {
+    expect(parseDecided('evidence/drive-log.md, finding 02')).toEqual({
+      path: 'evidence/drive-log.md',
+      finding: 2,
+    })
+  })
+
+  it('should read a code-spanned path as the bare path', () => {
+    expect(parseDecided('`evidence/drive-log.md`, finding 7')).toEqual({
+      path: 'evidence/drive-log.md',
+      finding: 7,
+    })
+  })
+
+  it('should read no pointer from text naming no finding', () => {
+    expect(parseDecided('evidence/drive-log.md')).toBeUndefined()
   })
 })

@@ -131,7 +131,7 @@ Read `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md` before writing a 
 
 - An item answerable from the code or one read-only command stays in intake
 - An item needing experiments or outside sources before a plan is marked as a groundwork candidate in its item
-- An item already decided goes into the ready list for a row
+- An item already decided goes into the ready list for a row, and takes `Decided:` naming its drive-log finding when its `Fix:` states that decision
 
 ### Close
 

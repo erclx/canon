@@ -51,6 +51,14 @@ export interface IntakeItem {
   readonly open: string | undefined
   readonly suggested: string | undefined
   readonly worth: string | undefined
+  /** The `Decided:` pointer as written, absent when the item carries none. */
+  readonly decided: string | undefined
+}
+
+/** Where a `Decided:` pointer sends a reader, as `<path>, finding <nn>`. */
+export interface DecidedPointer {
+  readonly path: string
+  readonly finding: number
 }
 
 interface Draft {
@@ -64,6 +72,7 @@ interface Draft {
   open: string | undefined
   suggested: string | undefined
   worth: string | undefined
+  decided: string | undefined
 }
 
 function seal(draft: Draft): IntakeItem {
@@ -100,6 +109,7 @@ export function readItems(text: string): IntakeItem[] {
         open: undefined,
         suggested: undefined,
         worth: undefined,
+        decided: undefined,
       }
       continue
     }
@@ -137,6 +147,9 @@ export function readItems(text: string): IntakeItem[] {
       case 'worth it':
         draft.worth = value
         break
+      case 'decided':
+        draft.decided = value === '' ? undefined : value
+        break
     }
   }
 
@@ -146,19 +159,29 @@ export function readItems(text: string): IntakeItem[] {
 }
 
 /**
+ * Reads the finding a `Decided:` pointer names, compared as an integer so
+ * `finding 2` meets a `## 02.` heading. Undefined when the text names no
+ * finding, which the caller refuses rather than guesses at.
+ */
+export function parseDecided(text: string): DecidedPointer | undefined {
+  const match = /^(.+?),\s*finding\s+(\d+)\s*\.?$/i.exec(text.trim())
+  if (!match) return undefined
+  return {
+    path: match[1].trim().replace(/^`(.+)`$/, '$1'),
+    finding: Number(match[2]),
+  }
+}
+
+/**
  * Puts a selection in one item's slot, leaving every other line as it was.
  *
- * The rewrite replaces the whole line rather than patching inside it, which is
- * the reason this is a verb at all. A stream editor expands an unescaped
- * ampersand in the replacement to the whole match and exits zero on a
- * non-match, so an answer carrying one would rewrite the line it anchored to
- * and a missed slot would report success with the answer lost.
+ * It replaces the whole line, since a stream editor expands an unescaped
+ * ampersand to the whole match and exits zero on a non-match, losing the
+ * answer either way.
  *
  * The answer occupies one line, and the caller owes that guarantee. A line
- * break splices a bare continuation into the item matching none of the patterns
- * the reader tests, so the slot reads back as the text before the break while
- * the item counts as answered, which puts correcting it behind the refusal on
- * an item that already carries one.
+ * break splices a continuation no pattern reads, so the slot reads back
+ * truncated while the item counts as answered, behind the `answered` refusal.
  */
 export function writeAnswerLine(
   text: string,

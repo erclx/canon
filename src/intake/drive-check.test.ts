@@ -9,12 +9,8 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { execaSync } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import {
-  checkDrive,
-  readDrawn,
-  readGoals,
-  recordBaseline,
-} from '@/intake/drive-check'
+import { checkDrive, readGoals, recordBaseline } from '@/intake/drive-check'
+import { readDecisions, readDrawn } from '@/intake/drive-log'
 
 let ROOT: string
 
@@ -220,6 +216,77 @@ describe('readDrawn', () => {
     ].join('\n')
 
     expect(readDrawn(log).undrawn).toEqual([])
+  })
+})
+
+describe('readDecisions', () => {
+  it('should map each finding number to its operator decision', () => {
+    const log = [
+      '## 02. Layers click leaves a frame',
+      '',
+      '- **Decision (operator):** close the frame on click',
+      '',
+      '## 03. Export drops alpha',
+      '',
+      '- **Decision (operator):** keep alpha in PNG export',
+    ].join('\n')
+
+    expect([...readDecisions(log)]).toEqual([
+      [2, 'close the frame on click'],
+      [3, 'keep alpha in PNG export'],
+    ])
+  })
+
+  it('should follow a see hop to the decision it names', () => {
+    const log = [
+      '## 02. Layers click leaves a frame',
+      '',
+      '- **Decision (operator):** close the frame on click',
+      '',
+      '## 04. Layers click on a nested frame',
+      '',
+      '- **Decision (operator):** see 02',
+    ].join('\n')
+
+    expect(readDecisions(log).get(4)).toBe('close the frame on click')
+  })
+
+  it('should drop a see hop naming a missing finding', () => {
+    const log = [
+      '## 04. Layers click on a nested frame',
+      '',
+      '- **Decision (operator):** see 09',
+    ].join('\n')
+
+    expect(readDecisions(log).has(4)).toBe(false)
+  })
+
+  it('should drop a see hop landing on another see', () => {
+    const log = [
+      '## 02. First',
+      '',
+      '- **Decision (operator):** see 03',
+      '',
+      '## 03. Second',
+      '',
+      '- **Decision (operator):** see 02',
+    ].join('\n')
+
+    expect(readDecisions(log).size).toBe(0)
+  })
+
+  it('should map nothing for a finding with no decision or a ref heading', () => {
+    const log = [
+      '## ref-01. The operator Figma panel',
+      '',
+      '- **Decision (operator):** match this panel',
+      '',
+      '## 05. Export to PNG',
+      '',
+      '- **Did:** exported the board',
+    ].join('\n')
+
+    expect(readDecisions(log).size).toBe(0)
   })
 })
 

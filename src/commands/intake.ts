@@ -56,7 +56,10 @@ interface AnswerCommandOptions {
   readonly json?: boolean
   readonly root?: string
   readonly set?: readonly string[]
+  readonly decided?: readonly string[]
 }
+
+const LABEL = /^\d+[a-z]*$/i
 
 export function register(program: Command): void {
   const intake = program
@@ -120,6 +123,12 @@ export function register(program: Command): void {
       collectSelection,
       [] as string[],
     )
+    .option(
+      '--decided <item>',
+      "Accept the decision an item's Decided: field points at, repeatable",
+      collectSelection,
+      [] as string[],
+    )
     .option('--json', 'Emit a machine-readable record on stdout')
     .option('--root <path>', 'Intake root, defaulting to the main worktree')
     .addHelpText(
@@ -134,8 +143,12 @@ export function register(program: Command): void {
         '  no-cluster      the cluster file named does not exist',
         '  no-item         the item number named does not exist in the cluster',
         '  answered        the item already carries an answer',
+        '  undecided       a --decided item carries no Decided: field, or its',
+        "                  pointer reaches no decision in this folder's",
+        '                  evidence/drive-log.md',
         '  bad-input       a malformed command line, such as no selection, an empty',
-        '                  answer, or two answers for one item',
+        '                  answer, or two answers for one item, an item under',
+        '                  both --set and --decided among them',
         '',
         'Exit codes:',
         '  0  every named item now carries its answer',
@@ -148,9 +161,13 @@ export function register(program: Command): void {
         'An item already carrying an answer is refused rather than overwritten.',
         'A filled slot is a decision already made.',
         '',
+        '--decided writes "ok, as decided in drive-log finding <nn>", so the',
+        'slot names the decision it accepts. Any refusal writes no slot.',
+        '',
         'Examples:',
         '  canon intake answer toolkit-overview --cluster 05-coverage.md --set 3=ok',
         '  canon intake answer toolkit-overview --cluster 05-coverage.md --set 3=ok --set 4="not worth it" --json',
+        '  canon intake answer app-drive-1-0 --cluster 02-forms.md --decided 1 --decided 2 --json',
         '',
       ].join('\n'),
     )
@@ -272,14 +289,16 @@ async function runAnswer(
   }
 
   const raw = opts.set ?? []
+  const decided = opts.decided ?? []
 
-  if (raw.length === 0) {
+  if (raw.length === 0 && decided.length === 0) {
     return reportRefusal(
       'canon intake answer',
       {
         ok: false,
         reason: 'bad-input',
-        message: 'No selection given. Pass --set <item>=<answer>.',
+        message:
+          'No selection given. Pass --set <item>=<answer> or --decided <item>.',
         detail: [],
       },
       emitJson,
@@ -302,6 +321,10 @@ async function runAnswer(
     selections.push({ label: match[1].toLowerCase(), answer })
   }
 
+  for (const entry of decided) {
+    if (!LABEL.test(entry)) invalid.push(entry)
+  }
+
   if (invalid.length > 0) {
     return reportRefusal(
       'canon intake answer',
@@ -316,9 +339,11 @@ async function runAnswer(
     )
   }
 
-  const duplicated = selections
-    .map((selection) => selection.label)
-    .filter((label, index, all) => all.indexOf(label) !== index)
+  const accepted = decided.map((label) => label.toLowerCase())
+  const duplicated = [
+    ...selections.map((selection) => selection.label),
+    ...accepted,
+  ].filter((label, index, all) => all.indexOf(label) !== index)
 
   if (duplicated.length > 0) {
     return reportRefusal(
@@ -335,7 +360,13 @@ async function runAnswer(
   }
 
   const root = opts.root ?? (await mainWorktreeRoot())
-  const outcome = await answerItems(root, slug, opts.cluster, selections)
+  const outcome = await answerItems(
+    root,
+    slug,
+    opts.cluster,
+    selections,
+    accepted,
+  )
 
   return reportAnswer(outcome, emitJson, root)
 }
