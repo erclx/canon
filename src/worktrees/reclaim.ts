@@ -174,12 +174,8 @@ async function mergedPullRequests(cwd: string): Promise<MergedReport> {
   ]
 
   try {
-    // `gh` resolves its repository through git, so it reads the same
-    // resolution variables a hook exports and they take precedence over `cwd`.
-    // A run from inside one would answer with another repository's merged
-    // branches, and a branch name that recurs across repositories would then
-    // match a merge that happened somewhere else and read a live worktree as
-    // reclaimable, which is the unsafe direction on an unrecoverable removal.
+    // `gh` honors a hook's git variables over `cwd`, so they are cleared, or a
+    // same-named branch merged elsewhere would read a live worktree reclaimable.
     const result = await execa('gh', args, {
       cwd,
       timeout: GH_TIMEOUT_MS,
@@ -253,17 +249,11 @@ async function claudeAgentIds(
 /**
  * Reports whether a worktree holds work no history is behind.
  *
- * Untracked files count for a directory that still exists, since a worktree is
- * gitignored scratch and a directory removed with them takes them nowhere
- * recoverable.
- *
- * Three states rather than two. A directory that is gone holds nothing at all,
- * so it reads as clean and leaves the merged and session checks to decide. A
- * read that failed is separated from both, because it produces the same empty
- * output as a clean tree and only one of them is safe to act on. The directory
- * test runs first because `git status` exits 128 for a missing path and for an
- * unreadable one alike, which folded the two into one refusal and reported
- * every hand-deleted worktree as unreadable.
+ * Untracked files count, since a removed worktree takes them nowhere
+ * recoverable. A missing directory reads clean, leaving the merged and session
+ * checks to decide, and a failed read stays separate, since its empty output
+ * looks clean. The directory test runs first, since `git status` exits 128
+ * for a missing path and an unreadable one alike.
  */
 async function worktreeStatus(path: string): Promise<StatusReport> {
   if (!existsSync(path)) return { readable: true, dirty: false, missing: true }
@@ -315,9 +305,8 @@ function verdict(
   agentIds: ReadonlyMap<number, string>,
 ): WorktreeVerdict {
   const held = holders(entry, sessions, repository)
-  // An interactive holder carries no id to look up at all, so the branch is
-  // explicit rather than relying on `claude agents --json` never reporting one
-  // for a pid this repository's own registry marked interactive.
+  // An interactive holder carries no id, so the branch is explicit rather than
+  // trusting `claude agents --json` never to report one.
   const heldSessions: HeldSession[] = held.map((session) => ({
     name: session.name,
     kind: session.kind,
@@ -331,11 +320,8 @@ function verdict(
   const refusals: Refusal[] = []
 
   if (isMain) refusals.push('main-worktree')
-  // Git removes the directory a caller is standing in without complaint, and
-  // every later call scoped to that directory then fails, so a run that took it
-  // would leave the branches behind it undeleted and report the failures as the
-  // worktrees' own. The main worktree is already refused above, so this names
-  // only a linked one.
+  // Removing the caller's own directory breaks every later call scoped to it,
+  // so a linked worktree the caller stands in is refused.
   else if (isCurrent) refusals.push('current-worktree')
 
   if (entry.branch === null) refusals.push('detached-head')
@@ -353,10 +339,8 @@ function verdict(
     refusals,
     pullRequest,
     sessions: heldSessions,
-    // No removal shape reaches the main worktree, and reporting one there
-    // offers a command whose only effect is to break the checkout. Deciding it
-    // here rather than in the reporter keeps the record and the framed output
-    // answering the same way, since the two consumers act on different halves.
+    // No removal shape reaches the main worktree. Deciding it here keeps the
+    // record and the framed output answering the same way.
     route: isMain ? null : held.length > 0 ? 'session' : 'worktree',
     missing: status.missing,
   }
@@ -366,22 +350,11 @@ function verdict(
  * Reports which worktrees are reclaimable and which are not, with the reason on
  * each.
  *
- * Reclaimable means all three of a merged pull request, a clean working tree,
- * and no live session holding the directory. Each alone has a case where
- * removal loses something, and removal is unrecoverable here since a worktree
- * is gitignored and no history stands behind it.
- *
- * The pull request is what decides the first condition rather than git
- * ancestry. A repository that squash merges never makes a merged branch an
- * ancestor of its trunk, so the ancestry reading calls shipped work unmerged
- * and calls an abandoned branch sitting at a release commit merged, which is
- * wrong in the one direction that removes a directory.
- *
- * An unreadable input refuses the whole reading rather than producing verdicts
- * around it. An absent merge state and a branch with no merged pull request
- * produce the same empty answer, as do an absent session roster and a worktree
- * nobody holds, and reporting the second when it was the first is a false clean
- * that ends in a removal.
+ * Reclaimable needs a merged pull request, a clean tree, and no live session,
+ * since removal is unrecoverable. The pull request decides merged rather than
+ * git ancestry, which a squash-merging repository gets wrong in the direction
+ * that removes. An unreadable input refuses the whole reading, since an absent
+ * merge state or roster gives the same empty answer as a clean one.
  */
 export async function reclaimReport(
   opts: ReclaimOptions = {},
@@ -420,9 +393,8 @@ export async function reclaimReport(
     }
   }
 
-  // A foreign-namespace record whose socket is gone reads dead, but a reader
-  // that cannot see the pid may also be unable to see the socket, so it may be
-  // a live holder. The roster drops it, and a removal on that reading is final.
+  // A foreign record whose socket is gone may still be a live holder this reader
+  // cannot see, so the whole reading refuses rather than risk a final removal.
   if (sessions.foreignDead > 0) {
     return {
       kind: 'unreadable',
@@ -453,9 +425,8 @@ export async function reclaimReport(
     ),
   )
 
-  // `listWorktrees` answers a failed read with no entries, and every
-  // repository lists at least its main worktree, so an empty listing is the
-  // failure. Reading branches past it would offer every checked-out branch.
+  // An empty listing is a failed read, since every repository lists its main
+  // worktree, and reading branches past it would offer every checked-out one.
   const branches: BranchReport =
     entries.length === 0
       ? {

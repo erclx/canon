@@ -53,30 +53,13 @@ async function runGit(
 /**
  * Removes every worktree a reading called reclaimable, and the branch behind it.
  *
- * The sequence is unlock, remove, then delete the branch, and it is the same
- * whether the directory still exists or is already gone. `git worktree remove`
- * takes a stale registration as readily as a live directory, measured at git
- * 2.43.0, so the missing case needs no command of its own.
- *
- * Every command runs from `opts.cwd`, which belongs at the main worktree root
- * and never at the directory a caller happens to stand in. A removal earlier in
- * the run deletes that directory, and each `git -C` after it fails against a
- * path that is gone, so the branches behind those entries survive and the run
- * reports the failures against the worktrees rather than against the removal
- * that pulled the ground out.
- *
- * The unlock runs on every entry and its result is not read, since `git worktree
- * unlock` exits 128 with "is not locked" for the ordinary case. Reading the lock
- * state first would buy a second parse of the porcelain to answer what the next
- * command answers anyway, and a lock that genuinely refuses to lift surfaces as
- * the remove failing rather than being swallowed.
- *
- * `git worktree prune` sweeps once after the removals rather than per entry,
- * because it clears every stale registration in one pass and takes no path to
- * scope it. It runs ahead of the branch deletes rather than at the very end: a
- * branch git still reads as held by a worktree cannot be deleted, and a sweep
- * placed after that pass would leave the branch standing with nothing left in
- * the listing to find it by.
+ * The sequence is unlock, remove, then delete the branch, whether or not the
+ * directory still exists, since `git worktree remove` takes a stale
+ * registration too. Every command runs from `opts.cwd` at the main root, since
+ * an earlier removal can delete the caller's own directory. The unlock result
+ * is not read, since it fails on an unlocked tree, and a stuck lock surfaces
+ * as the remove failing. One `prune` runs before the branch deletes, since a
+ * branch git still reads as held cannot be deleted.
  */
 export async function removeReclaimable(
   verdicts: readonly WorktreeVerdict[],
@@ -137,9 +120,8 @@ async function deleteBranch(
     }
   }
 
-  // A reclaimable verdict always names a branch, since a detached head is one of
-  // the refusals. The read is here so a caller passing a verdict of its own is
-  // answered rather than handed a delete with no name in it.
+  // A reclaimable verdict always names a branch, so this answers a caller
+  // passing its own verdict rather than issuing a nameless delete.
   if (branch === null) {
     return { path, branch, removed: true, failedAt: null, detail: null }
   }
