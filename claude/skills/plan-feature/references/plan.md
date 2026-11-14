@@ -222,6 +222,11 @@ Every outcome reaches the review with its proof named.
 - A permission mode can refuse a compound form, and a substituted check no longer matches the plan, so reach a filter through a verb's own argument or flag, or name a test that holds it.
 - Name the visual check where no test reaches, and say it is visual, so a reader can tell a proof from a look.
 
+**Rendered surfaces**
+
+- Name the demo state a reel needs when the plan changes a rendered surface, such as a filled list or a failed save.
+- The build then lays that state in the project's seed before film time, rather than meeting it as a skipped beat.
+
 **Generated load**
 
 - Confine any load a reproduction needs, per the Timing bullet of `canon:systematic-debugging`, or `canon records validate plans` reports `verification-load-unconfined`.
