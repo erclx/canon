@@ -33,11 +33,23 @@ Never guess from the topic of the conversation. A session resuming against the w
 
 Run `canon intake list <slug> --unread --json`. It returns the unread items grouped by the cluster file holding them, each carrying its label, title, `problem`, `fix`, open question, and suggestion. The `problem` and `fix` fields are absent on an item that lacks the line, so write the lead-in from whichever are present.
 
+- An item carrying `Decided:` also carries `decision`, which the CLI resolved from the folder's drive log
+- Read it off the record and never open the log, since the CLI owns that parse
+
 Work one cluster at a time, in the order the folder numbers them. A dump of six clusters holding five items each is thirty questions, and a surface putting all of them at once is unusable. The cluster boundary is also where an operator who runs out of attention stops cleanly, leaving whole clusters unread rather than one file half answered.
 
 ## Step 3: put the batch
 
 Cap each batch at four items, which is what a structured question tool takes. A cluster carrying more than four unread items takes several batches in file order.
+
+### A cluster the drive already decided
+
+When every unread item in the cluster carries a `decision`, put the cluster as one question rather than one per item, however many items it holds. It is one question, so the four-item cap does not apply.
+
+- List each item on its own line as its label, its title, and its `decision`
+- Rank `accept every recorded decision` first, and offer `answer each item` as the alternative, which drops back to the batches above
+- A cluster mixing decided and undecided unread items takes the batches above, item by item
+- The operator's accept is the answer, so never land the cluster without it
 
 Offer every item with an empty slot, not only the ones carrying an open question. An item with a verdict and no question still asks whether the verdict stands, which is what the standard's one-token accept is for.
 
@@ -69,6 +81,14 @@ canon intake answer <slug> --cluster <file> --set <label>=<answer> --set <label>
 - Pass the label exactly as the heading spells it, including a letter suffix such as `3a`
 - Write the operator's selection as the answer, using `ok` for a verdict accepted as it stands
 - Omit an unanswered item from the call. An empty value writes a slot that reads as answered.
+
+On an accepted decided cluster, land every item through `--decided` in place of `--set`:
+
+```bash
+canon intake answer <slug> --cluster <file> --decided <label> --decided <label>
+```
+
+The verb writes `ok, as decided in drive-log finding <nn>` into each slot. It refuses the whole call as `undecided` when a label's pointer reaches no decision, so on that refusal put the named items singly through Step 3.
 
 The verb refuses the whole batch when any item in it already carries an answer, since a filled slot is a decision already made. On that refusal, drop the named item and send the rest.
 

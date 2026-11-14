@@ -23,6 +23,12 @@ An item is written for the file, dense in paths and counts. An operator who read
 - Report what stays unread by count after each cluster, and stop when there is no folder or no unread item
 - Offer to close the issue an item headed `(#NNN)` names once its answer begins `decline`, with the drafted comment shown first, so closing takes one word
 
+### On a decided cluster
+
+A drive that ends with every finding decided has already asked each question once.
+
+- Ask a cluster whose every unread item points at a decision in the folder's drive log as one question, uncapped, landing each accept with its source named in the slot
+
 ### On a retell
 
 A retell restates the folder and decides nothing.
@@ -32,6 +38,7 @@ A retell restates the folder and decides nothing.
 ## Must not
 
 - Fill a slot the operator did not answer, or infer an answer from the conversation having happened, a retell included
+- Accept a decided cluster without the operator's answer, or read a decision from anywhere but the CLI's resolution of the folder's own drive log
 - Overwrite a slot already carrying an answer
 - Write anywhere but an item's answer slot, the index included, bar one exception, which is closing a declined item's issue on GitHub after a yes given for that issue in the turn its draft was shown
 - Close an issue when the operator says no to the offer, gives no answer, or when the only yes came from another issue
