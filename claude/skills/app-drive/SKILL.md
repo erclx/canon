@@ -168,6 +168,8 @@ Slots unread: /plan-intake-answer, then /task-board
 
 Omit the `Board` line when the drive drew no board.
 
+Close on a retell of the filed items after the report, per `${CLAUDE_SKILL_DIR}/../plan-intake/references/retell.md`.
+
 ## What this delegates
 
 - The controller messages, the talk clause, and the session's end: `role-planner`

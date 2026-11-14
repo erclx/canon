@@ -157,4 +157,7 @@ Run `canon records validate groundwork <nn>-<slug>` on the folder this run wrote
 
 Emit the full relative path from the project root for every file written or updated, since a bare filename names a file the reader cannot open. Read `${CLAUDE_SKILL_DIR}/references/output.md` on reaching this step for the open and resume template, the retell, and the close template. A run that stops on a guard skips it.
 
-End on the retell in place of the open and resume template once every open question carries a lean. A question marked `none, needs measuring` keeps the open and resume template, unless the operator asks for a retell, which answers whatever the state. The retell lists written files under `**Written:**`, and close keeps its one-line report.
+End on the retell in place of the open and resume template once every open question carries a lean. A question marked `none, needs measuring` keeps the open and resume template, unless the operator asks for a retell, which answers whatever the state.
+
+- The retell lists written files under `**Written:**`
+- Close keeps its one-line report, then ends on a retell after it

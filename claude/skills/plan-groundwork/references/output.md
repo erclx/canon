@@ -30,7 +30,7 @@ Use `📂 Resumed` in place of `📂 Opened` on a resume pass.
 
 Replaces the open and resume template once every open question carries a lean. It also answers an operator who asks for one, whatever the questions' state. Chat only, and the retell itself writes no file.
 
-Use H2 only, one-line bold-label bullets, and numbers only where they settle something. Stay near 300 words.
+Use H2 only, one-line bold-label bullets, and numbers only where they settle something. Stay near 300 words. Word every line per `## Wording rules` in `${CLAUDE_SKILL_DIR}/../plan-intake/references/retell.md`, which an intake and an app drive share.
 
 - Keep the leans that decide the operator's call, five at most, and fold the rest into one line naming how many more there are and where they sit
 - Label each reversal `Overturned by`, as `groundwork.md` does
@@ -86,6 +86,8 @@ The `Next:` line names who plans the conclusion, per close Step 7, so the contro
 - A handoff reads `handed off, <the reason role-planner's bar gave>`
 - A conclusion to do nothing reads `nothing to plan`
 
+End the close on a retell after the one-line report, stating the decision, the leans behind it, and what it set aside, under the same wording rules.
+
 ```plaintext
 ✅ Closed .canon/groundwork/<nn>-<slug>/
 
@@ -102,4 +104,6 @@ The `Next:` line names who plans the conclusion, per close Step 7, so the contro
 <the decision in one line>
 
 Next: <planning in this session | handed off, <reason> | nothing to plan>
+
+<the retell, in plain words>
 ```
