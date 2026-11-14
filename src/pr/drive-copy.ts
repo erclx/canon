@@ -34,6 +34,11 @@ export interface PreviewConfig {
   readonly env: string
   /** Paths inside a declared path that a rebuild leaves as the server wrote them. */
   readonly keep: readonly string[]
+  /**
+   * An argv list, spawned with no shell, that lays state into the copy after
+   * each rebuild. Absent when the project declares none.
+   */
+  readonly seed?: readonly string[]
 }
 
 export type PreviewConfigRead =
@@ -78,7 +83,7 @@ function isWithin(path: string, parent: string): boolean {
 
 /**
  * Reads `canon/config/preview.json` as
- * `{ "writes": [...], "keep": [...], "env": "<NAME>" }`.
+ * `{ "writes": [...], "keep": [...], "env": "<NAME>", "seed": [...] }`.
  * A file that does not parse refuses rather than reading as absent, since a
  * typo there would otherwise drive the real folders while the pass reports a
  * copy. A `writes` or `keep` path that is absolute or climbs with `..`
@@ -109,7 +114,7 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
     }
   }
 
-  const { writes, env, keep = [] } = parsed as Record<string, unknown>
+  const { writes, env, keep = [], seed } = parsed as Record<string, unknown>
   if (
     !Array.isArray(writes) ||
     !writes.every((item): item is string => typeof item === 'string')
@@ -135,6 +140,19 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
       kind: 'refused',
       reason: 'bad-config',
       detail: `${PREVIEW_CONFIG_REL} names an "env" that is not a variable name.`,
+    }
+  }
+
+  if (
+    seed !== undefined &&
+    (!Array.isArray(seed) ||
+      !seed.every((item): item is string => typeof item === 'string') ||
+      (seed[0] ?? '') === '')
+  ) {
+    return {
+      kind: 'refused',
+      reason: 'bad-config',
+      detail: `${PREVIEW_CONFIG_REL} names a "seed" that is not a list opening on a command.`,
     }
   }
 
@@ -171,7 +189,12 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
 
   return {
     kind: 'read',
-    config: { writes, env: env ?? DEFAULT_PREVIEW_ENV, keep },
+    config: {
+      writes,
+      env: env ?? DEFAULT_PREVIEW_ENV,
+      keep,
+      ...(seed === undefined ? {} : { seed }),
+    },
   }
 }
 

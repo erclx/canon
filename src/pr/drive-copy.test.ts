@@ -169,6 +169,42 @@ describe('loadPreviewConfig', () => {
       reason: 'unsafe-path',
     })
   })
+
+  describe('with a seed', () => {
+    it('should read the seed as the argv list the project declares', () => {
+      write(
+        'canon/config/preview.json',
+        '{"writes":["board"],"seed":["bun","scripts/seed.ts"]}',
+      )
+
+      expect(loadPreviewConfig(worktree)).toMatchObject({
+        kind: 'read',
+        config: { seed: ['bun', 'scripts/seed.ts'] },
+      })
+    })
+
+    it('should carry no seed key when the project declares none', () => {
+      write('canon/config/preview.json', '{"writes":["board"]}')
+
+      const read = loadPreviewConfig(worktree)
+
+      expect(read.kind === 'read' && 'seed' in read.config).toBe(false)
+    })
+
+    it.each([
+      ['a string', '"bun scripts/seed.ts"'],
+      ['an empty list', '[]'],
+      ['a list holding a non-string', '["bun", 3]'],
+      ['a list opening on an empty command', '["", "seed.ts"]'],
+    ])('should refuse a seed that is %s', (_label, seed) => {
+      write('canon/config/preview.json', `{"writes":["board"],"seed":${seed}}`)
+
+      expect(loadPreviewConfig(worktree)).toMatchObject({
+        kind: 'refused',
+        reason: 'bad-config',
+      })
+    })
+  })
 })
 
 describe('buildDriveCopy', () => {
