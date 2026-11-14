@@ -144,7 +144,10 @@ Close only on the operator's word, while the app stays up for as long as they ke
 
 ### Planning the drive's rows
 
-Run this tail only when the operator, staying after the close, asks this session to plan the drive's rows. The session holds measurements and calls the intake records only as outcomes, so a drive the operator leaves at the close ends there.
+Run this tail by default once the close ends, while the operator stays to answer the slots. The session holds measurements and calls the intake records only as outcomes, so a cold planner reading the folder starts behind it.
+
+- A drive the operator leaves at the close, with its `You:` slots unread, ends there and plans nothing
+- Hand the rows off instead when the bar `role-planner` states under `### Planning what this session measured` holds, saying which reason held
 
 1. Answer the intake's `You:` slots with `plan-intake-answer` before any row is promoted from it.
 2. Send the controller the ready list, naming no item whose `You:` slot is still open, and say this session is planning those rows, so it holds a cold planner for each.
@@ -162,10 +165,10 @@ Emit the full relative path of every file written, the drive-check `reason`, and
 **Check:** drive-check clean, worktree removed
 **Board:** project <board-project> kept on <board>
 
-Next: /plan-intake-answer to answer the You: slots from here, then /task-board to promote what is ready, or ask this session to plan the rows per Planning the drive's rows
+Next: <planning the ready rows in this session once named back | handed off, <reason> | ended at the close, slots unread>
 ```
 
-Omit the `Board` line when the drive drew no board.
+Omit the `Board` line when the drive drew no board. The `Next:` line names who plans the rows, per `### Planning the drive's rows`, so the controller never launches a second planner beside this session.
 
 ## What this delegates
 
