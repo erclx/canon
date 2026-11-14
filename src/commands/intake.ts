@@ -395,10 +395,8 @@ function reportList(
     return reportRefusal('canon intake list', outcome, emitJson, root)
   }
 
-  // Malformed items are counted over every folder rather than the filtered
-  // set, since a folder whose only defect is an item nobody can answer carries
-  // no unread count to survive the filter and is exactly what the warning is
-  // for.
+  // Malformed items count over every folder, since one whose only defect is an
+  // unanswerable item has no unread count to survive the filter.
   const listed = unreadOnly
     ? outcome.folders.filter((folder) => folder.unread > 0)
     : outcome.folders
