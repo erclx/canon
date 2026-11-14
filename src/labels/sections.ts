@@ -8,6 +8,7 @@ const ALLOWED_HEADINGS: readonly string[] = [
   '## Summary',
   '## Key changes',
   '## Technical context',
+  '## Outcome',
   '## Testing',
   '## For the reviewer',
 ]
