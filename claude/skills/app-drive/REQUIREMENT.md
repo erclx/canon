@@ -17,7 +17,7 @@ An operator who judges design on the board has no way to see a drive's frames th
 
 ## Must
 
-- The drive runs from a copy outside the project, and the copy is gone when the drive closes
+- The drive runs from a copy outside the project, and the copy is gone when the drive closes. A drive of the live app runs only on the operator's word and writes only into a page or project made for it.
 - Every requirements goal is driven per persona, or marked not driven with its reason
 - Every finding names its source and its severity, and carries its evidence inside the intake folder, as does every image the operator pastes during the drive
 - The drive files one intake folder, each finding sorted as a bug, a requirements conflict, or a taste call, and a session staying to plan its rows answers it before any row is promoted

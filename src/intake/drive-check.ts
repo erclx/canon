@@ -99,6 +99,7 @@ interface DriveGoal {
 interface DriveRecord {
   readonly goals: readonly DriveGoal[]
   readonly evidence: readonly string[]
+  /** Absent or `null` for a drive of the live app, which made no copy. */
   readonly worktree?: string
 }
 
@@ -261,14 +262,21 @@ function parseRecord(raw: string): DriveRecord | string {
   ) {
     return `${DRIVE_RECORD} carries an "evidence" field that is not a list of paths.`
   }
-  if (worktree !== undefined && typeof worktree !== 'string') {
+  if (
+    worktree !== undefined &&
+    worktree !== null &&
+    typeof worktree !== 'string'
+  ) {
     return `${DRIVE_RECORD} carries a "worktree" that is not a path.`
+  }
+  if (typeof worktree === 'string' && worktree.trim() === '') {
+    return `${DRIVE_RECORD} carries an empty "worktree". A drive of the live app records null.`
   }
 
   return {
     goals: entries,
     evidence: evidence ?? [],
-    ...(worktree !== undefined && { worktree }),
+    ...(typeof worktree === 'string' && { worktree }),
   }
 }
 

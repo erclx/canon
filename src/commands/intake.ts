@@ -185,7 +185,8 @@ export function register(program: Command): void {
         '  changed          a checkout path that differs from the baseline',
         '  strayEvidence    an evidence path outside the folder evidence/',
         '  missingEvidence  an evidence path that holds no file',
-        '  worktreeLeft     the drive worktree the record names, still on disk',
+        '  worktreeLeft     the drive worktree the record names, still on disk,',
+        '                   where null records a drive of the live app',
         '  undrawn          a decision in evidence/drive-log.md with no Drawn',
         '                   path and no skipped reason',
         '',
@@ -394,10 +395,8 @@ function reportList(
     return reportRefusal('canon intake list', outcome, emitJson, root)
   }
 
-  // Malformed items are counted over every folder rather than the filtered
-  // set, since a folder whose only defect is an item nobody can answer carries
-  // no unread count to survive the filter and is exactly what the warning is
-  // for.
+  // Malformed items count over every folder, since one whose only defect is an
+  // unanswerable item has no unread count to survive the filter.
   const listed = unreadOnly
     ? outcome.folders.filter((folder) => folder.unread > 0)
     : outcome.folders
