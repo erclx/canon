@@ -66,11 +66,11 @@ Report the state of play in the invocation block, and open every later sweep rep
 
 ### 1. Plan the next feature
 
-The cross-feature call stays in this warm session, being which rows conflict, what merges before what, and whether a row should run at all. Every plan written from here carries a constraint per track in flight, which `### Constraints from the tracks in flight` below states.
+The cross-feature call stays here, being which rows conflict, what merges before what, and whether a row runs at all. Every plan written here carries a constraint per track in flight, per `### Constraints from the tracks in flight` below.
 
 - Per-row planning runs through `plan-feature` here, the session that measured the row, or a cold planner under `role-planner`, per `${CLAUDE_SKILL_DIR}/references/orchestrator-launch.md`
 - A flaky row with no named cause launches `plan-groundwork` ahead of `plan-feature`, per `### A flaky row` in that file
-- That file's talk shape launches a planner the operator shapes the row with, and its several-row shape one planner for rows sharing a surface
+- That file's talk shape launches a planner the operator shapes the row with, its several-row shape one planner for rows sharing a surface, and its plan-and-build shape a small row by default
 
 ### 2. Decide parallelism and merge order
 

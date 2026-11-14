@@ -11,6 +11,7 @@ Run this once `orchestrator-dispatch.md` has cleared a row, or from its planning
 - [Dispatch to a cloud worker](#dispatch-to-a-cloud-worker)
 - [Dispatch to address a review](#dispatch-to-address-a-review)
 - [Dispatch to plan a row](#dispatch-to-plan-a-row)
+- [Dispatch to plan and build a small row](#dispatch-to-plan-and-build-a-small-row)
 - [Dispatch a talk session](#dispatch-a-talk-session)
 - [Hand launch](#hand-launch)
 - [Dispatch a reviewer](#dispatch-a-reviewer)
@@ -53,13 +54,13 @@ The template carries no worktree call. `auto-ship` Step 0 invokes `canon:role-wo
 
 ### Position zero
 
-Put a command whose skill carries `disable-model-invocation: true` at position zero of the launch prompt, followed by a space and its argument, with nothing before it. The client expands a slash command there as a user invocation, which is the route the flag permits.
+Put a command whose skill is kept off automatic invocation at position zero of the launch prompt, followed by a space and its argument, with nothing before it. The client expands a slash command there as a user invocation, the route such a skill permits.
 
 - Anything reaching the session as prose falls to the model, which invokes it through the `Skill` tool, a route that answers a flagged skill inconsistently
-- `auto-ship` carries the flag
+- `auto-ship` carries no `disable-model-invocation` flag. Its description says not to auto-trigger, so a brief asking for it in prose may be refused, which keeps it at position zero.
 - A comma or other punctuation glued to the command name at position zero has failed to expand, so treat the space as part of the rule
 
-Never depend on the `Skill` tool route for a flagged skill. A refusal there tells the session not to replicate the workflow by other means, so a refused worker stops with a clean worktree, the correct outcome. The refusal is sticky inside a session, so recover by re-dispatching onto the same branch with the build template above.
+Never depend on the `Skill` tool route for such a skill. A refusal there tells the session not to replicate the workflow by other means, so a refused worker stops with a clean worktree, the correct outcome. The refusal is sticky inside a session, so recover by re-dispatching onto the same branch with the build template above.
 
 ### Shapes needing no expansion
 
@@ -149,6 +150,10 @@ What a planning dispatch owes instead is the reverse reading, since a row planne
 ### Reusing a planner
 
 Read `${CLAUDE_SKILL_DIR}/references/orchestrator-planner-reuse.md` before handing a planner more than one row. Several rows in one launch take its batch brief, which asks for one plan file per task, and a row named back to a live planner takes its reuse rules.
+
+## Dispatch to plan and build a small row
+
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-plan-build-launch.md` before launching a row that reads small, for the full brief, how a row reads small before it has a plan, and which dispatch checks bind. Its prompt opens on `/canon:auto-ship --plan-first <task>` at position zero.
 
 ## Dispatch a talk session
 
