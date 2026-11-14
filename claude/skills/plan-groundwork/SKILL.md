@@ -143,12 +143,13 @@ Name `proposal-critique` in the close report when the decision is a one-way chan
 
 Read the route from the origin record in `README.md`, never from the launch string, which a compaction drops. A launch names a controller only by a `Controller: <sessionId>` line. A roster name prefix is no test, since a controller can carry any name.
 
-| Launch named                                                                                                                                                                                                                                                 | Step 4 does                                                                                                   |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| A task                                                                                                                                                                                                                                                       | Writes the conclusion into that task as a `Groundwork:` origin line and a finding, and creates no second file |
-| A controller and no task                                                                                                                                                                                                                                     | Writes no task file and claims no label, and hands the conclusion to the controller, which places the row     |
-| Neither                                                                                                                                                                                                                                                      | Writes one task file in `.canon/tasks/` and places its row through `task-board` Step 4                        |
-| The handoff rides the close announcement `role-planner` already owes, as one message, since a second one is a second thing the controller reconciles. It carries the track path, the decision in one line, and the origin lines a task file would open with. |
+| Launch named             | Step 4 does                                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| A task                   | Writes the conclusion into that task as a `Groundwork:` origin line and a finding, and creates no second file |
+| A controller and no task | Writes no task file and claims no label, and hands the conclusion to the controller, which places the row     |
+| Neither                  | Writes one task file in `.canon/tasks/` and places its row through `task-board` Step 4                        |
+
+The handoff rides the close announcement `role-planner` already owes, as one message, since a second one is a second thing the controller reconciles. It carries the track path, the decision in one line, and the origin lines a task file would open with.
 
 A track opened from an intake item cites the item for the verdict rather than restating it. Its origin lines carry `Intake:` with the item number beside `Groundwork:`, on the handoff and in a new task file alike, so the row files from the item's bundle. A new task file takes the shape `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
 
