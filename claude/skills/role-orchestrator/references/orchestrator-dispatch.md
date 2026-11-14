@@ -1,6 +1,6 @@
 ---
 title: Orchestrator dispatch runbook
-description: The plan-answer gate, the collision check before a self-dispatch, the conflict check against the tracks in flight and the evidence it rests on, the branch the launch names, the one model test applied to each role, the fallback to a human launch, and the loop's stopping condition
+description: The plan-answer gate, the collision check before a self-dispatch, the conflict check against the tracks in flight, the branch the launch names, the one model and effort test applied to each role, the fallback to a human launch, and the loop's stopping condition
 ---
 
 Run this at loop step 4, for a `## Up next` row whose plan is verified, in place of handing the worktree to a human. The conflict check below is where that row is tested against every track in flight, and it is the one statement of what holds a row there.
@@ -101,33 +101,7 @@ No count binds this, and a shared file does not either. Hold a candidate behind 
 - **Sweep.** One plan rewrites a file or folder wholesale, such as a terminology pass or a `canon/context/` reflow, and the other writes inside it.
 - **A stated reason.** A singleton resource, or tracks interacting where no file reading shows, as a row creating a skill does with one counting that catalog.
 
-Read a contract off the changing plan's `**Risks:**`, and both sides of a rename before the colon of a `**Files to touch:**` entry, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`. Nothing verifies a stated reason, so it stands only while the dispatcher applies it.
-
-### A shared file is not a hold
-
-Dispatch both and name the shared paths, so the merge order and the second branch's rebase are planned rather than discovered. The branch merging second resolves after the first merges, never against a sibling still building.
-
-- It resolves by running `review-address` in the session that built it, whose Step 5 rebases the branch once it no longer merges
-- A hunk needing a decision the tree does not carry goes to the controller
-- A branch no live session holds gets the review-address shape in `orchestrator-launch.md`
-
-### The evidence
-
-No practitioner source serializes on a shared file. Each builds in parallel and tests at integration, where the merge surfaces a textual conflict and the suite over the merged result a semantic one.
-
-- Fowler's [branching patterns](https://martinfowler.com/articles/branching-patterns.html) have the second integrator pull mainline in and check health "even if it's a clean merge"
-- His [Semantic Conflict](https://martinfowler.com/bliki/SemanticConflict.html) names self-testing code as the first defense, and [DORA](https://dora.dev/capabilities/trunk-based-development/) keeps branches to a few hours
-- GitHub's [merge queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue) tests each pull request against everything queued ahead of it
-- A candidate has no commits to trial-merge, so `git merge-tree` runs at integration and this check reads what a plan declares
-
-### Reading the tracks
-
-Read `canon sessions list --json` for the branches in flight as well as the board, since a hand-launched track carries no row, and read the plan of any branch no row names.
-
-- `canon tasks validate` and `canon tasks plan-reach` report the paths two rows share, a candidate list for the five holds and the paths a dispatch names
-- A shared folder means a plan declared it bare, so narrow that plan's list rather than reading the folder as a sweep
-- A declared set predicts rather than bounds, since `canon:context-fold`, `canon:docs-sync`, and the drift stages write past every plan
-- Such a crossing changes what the second branch rebases over, not whether a row holds, and `canon tasks plan-reach` at `canon:git-ship` step 5 names it
+Read a contract off the changing plan's `**Risks:**`, and both sides of a rename before the colon of a `**Files to touch:**` entry, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`. Nothing verifies a stated reason, so it stands only while the dispatcher applies it. A shared file is not a hold, so dispatch both and name the shared paths. Read `${CLAUDE_SKILL_DIR}/references/orchestrator-shared-files.md` for how the second branch rebases, the evidence behind that call, and how to read the tracks in flight.
 
 What binds past the five holds is review attention and machine capacity, which `## Parallelism` in the skill body states.
 
