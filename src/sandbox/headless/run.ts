@@ -405,8 +405,8 @@ async function drive(
   logStep(`Sandbox: ${sandbox}`)
   logStep(`Canon: ${cli} at ${branchCli.head ?? 'an unread commit'}`)
 
-  // Created before provisioning and set on the cleanup first. The session runs
-  // the real binary by path, so only a `claude --bg` from inside meets the shim.
+  // Created before provisioning, which runs on the shim PATH too. The session's
+  // own launch calls the real binary by path, so a prompt naming `--bg` runs.
   cleanup.shimDir = mkdtempSync(join(tmpdir(), 'canon-dispatch-shim-'))
   installDispatchShim(cleanup.shimDir, realClaude)
   installCanonShim(cleanup.shimDir, process.execPath, cli)

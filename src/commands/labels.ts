@@ -828,8 +828,8 @@ async function runScan(opts: ScanOptions): Promise<number> {
 
   const titleFormatIssues = titleFormat?.issues ?? []
 
-  // A review, a release-please body, and a scan with no title carry no pull
-  // request description, so none has the closed list to grade against.
+  // A review, a release-please body, and a scan with no title each lack the
+  // closed section list, so none of the three is graded against it.
   const sectionsChecked =
     resolved.source === 'pull-request' &&
     resolved.title !== '' &&

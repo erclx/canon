@@ -156,8 +156,8 @@ async function runHistory(
 
   const { root, head } = repository
   const slots = windowWeeks(repository.headDate, weeks)
-  // A day either side of the rolling weeks, since git filters on the timestamp
-  // and the report buckets on the committer's own calendar date.
+  // The rolling weeks ahead of the window, plus one day of slack for a
+  // committer's zone, since the report buckets on the committer's own date.
   const since = addDays(slots[0].from, -(ROLLING_WEEKS - 1) * 7 - 1)
   const merges = await readLog(root, since)
   if (merges === undefined) return refuse(requested, 'no-git', emitJson)
