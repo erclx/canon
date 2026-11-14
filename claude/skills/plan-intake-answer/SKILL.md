@@ -112,7 +112,8 @@ Answers are on disk as each cluster completes, so a session ending mid-folder lo
 
 When the operator asks for a retell rather than answers, give one and skip Steps 2 to 6. Read `${CLAUDE_SKILL_DIR}/../plan-intake/references/retell.md` for the block each item takes and the wording rules.
 
-- Pick the folder as Step 1 does, then read every item through `canon intake list <slug> --json`, answered or not
+- Pick among every folder `canon intake list --json` returns, unread or not, rather than the unread-only pick Step 1 makes for answering
+- Read every item in it through `canon intake list <slug> --json`, answered or not
 - Write nothing, and leave every `You:` slot as it stands, since the retell restates items and decides none
 - Offer to answer the unread items afterwards, and start Step 2 only on a yes
 
