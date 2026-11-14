@@ -304,6 +304,7 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/review-pr/references/body-variants.md',
   'claude/skills/review-pr/references/close-out.md',
   'claude/skills/review-pr/references/key-changes.md',
+  'claude/skills/review-pr/references/outcome.md',
   'claude/skills/review-pr/references/post.md',
   'claude/skills/review-pr/references/scope.md',
   'claude/skills/review-ui/REQUIREMENT.md',

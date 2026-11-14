@@ -103,7 +103,7 @@ Read each test file the branch added or changed against the final filter in `can
 
 ### The testing section
 
-Then read the description's `## Testing` section, the one part of a pull request body this session can falsify. The author cannot see what a sibling branch drove the same day, so the arm list settles the claim rather than the diff.
+Then read the description's `## Testing` section, which this session can falsify. The author cannot see what a sibling branch drove the same day, so the arm list settles the claim rather than the diff.
 
 - Test every unchecked box against the testing discipline in `${CLAUDE_SKILL_DIR}/../git-pr/references/pr.md`, which reserves one for a capability the agent lacks
 - Raise a box naming no human, naming a live agent session, or naming a person for a step the repository ships a harness for, such as `canon sandbox run`
@@ -115,7 +115,7 @@ Test every ticked box too, bounded to one naming a file or a command. Confirm wh
 
 - A box naming neither stays untested, since nothing here confirms a claim carrying no artifact
 - A box ticked before a later commit removed what it names is a `should-fix` on the body, filed under a `**PR body**` block ahead of the file blocks, since it corrupts the merge record
-- Then test `## Key changes` against the diff. Read `${CLAUDE_SKILL_DIR}/references/key-changes.md` for the verb comparing them and which record field becomes a finding.
+- Then test `## Key changes` and any `## Outcome` against the diff, per `${CLAUDE_SKILL_DIR}/references/key-changes.md` and `${CLAUDE_SKILL_DIR}/references/outcome.md`
 
 ### Ask rather than grade
 
