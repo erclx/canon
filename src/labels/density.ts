@@ -1,5 +1,5 @@
 import { type DensityKind, densityFindings } from '@/markdown/density'
-import { type BodyLine, bodyLines } from '@/markdown/scan'
+import { type BodyLine, bodyLines, FENCE } from '@/markdown/scan'
 import { LIST_ITEM } from '@/markdown/structure'
 
 /**
@@ -16,7 +16,11 @@ const COUNTED = [
 
 type CountedKind = (typeof COUNTED)[number]
 
-export type BodyDensityKind = CountedKind | 'subheading' | 'mixed-form'
+export type BodyDensityKind =
+  CountedKind | 'subheading' | 'mixed-form' | 'fence-width'
+
+/** GitHub scrolls a wider fenced line sideways in the body column. */
+const FENCE_WIDTH = 90
 
 function isCounted(kind: DensityKind): kind is CountedKind {
   return (COUNTED as readonly DensityKind[]).includes(kind)
@@ -51,13 +55,15 @@ interface Section {
  * limit, since its checkboxes count as a bullet run. Key changes splits at
  * each bold label alone on its own block, whatever its length, and Technical context
  * at each bold-led paragraph, so a lead-in starts a new run. Technical
- * context also reports mixing bullets with paragraphs.
+ * context also reports mixing bullets with paragraphs. A fenced content line
+ * past `FENCE_WIDTH` code points reports in every section, Testing included.
  */
 export function bodyDensity(body: string): BodyDensityFinding[] {
   const found: BodyDensityFinding[] = []
 
   for (const section of sectionsOf(bodyLines(body))) {
     found.push(...subheadings(section))
+    found.push(...fenceWidths(section))
     if (section.name === 'Testing') continue
 
     const chunks =
@@ -243,6 +249,48 @@ function subheadings(section: Section): BodyDensityFinding[] {
       },
     ]
   })
+}
+
+/**
+ * Every fenced content line past `FENCE_WIDTH` code points, so an emoji counts
+ * once. `bodyLines()` marks a fence's delimiters as fenced too, so this walk
+ * re-reads them with the same open and close test as `markFences()` and skips
+ * them, which leaves an info string and an inner fence's delimiters at the
+ * right side of the count.
+ */
+function fenceWidths(section: Section): BodyDensityFinding[] {
+  const found: BodyDensityFinding[] = []
+  let fence: string | undefined
+
+  for (const line of section.lines) {
+    if (!line.fenced) {
+      fence = undefined
+      continue
+    }
+
+    const match = FENCE.exec(line.text.trim())
+    if (fence === undefined) {
+      fence = match?.[1]
+      continue
+    }
+    if (match && match[1][0] === fence[0] && match[1].length >= fence.length) {
+      fence = undefined
+      continue
+    }
+
+    const width = [...line.text].length
+    if (width > FENCE_WIDTH) {
+      found.push({
+        section: section.name,
+        kind: 'fence-width',
+        line: line.number,
+        value: width,
+        limit: FENCE_WIDTH,
+      })
+    }
+  }
+
+  return found
 }
 
 /**
