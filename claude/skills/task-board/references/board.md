@@ -76,7 +76,7 @@ Readiness is three groups under fixed headings, `## Run now`, `## Up next`, and 
 | `## Up next`      | A written plan exists and no worker holds it yet, and `Waiting on` names what is due |
 | `## Needs a plan` | Everything else, being a task with no plan                                           |
 
-The names are the contract, since a reader counting rows by heading sees a renamed group as empty, so add no fourth. A row whose plan proves wrong stays under `## Up next`, held with `canon tasks block` while its plan is amended in place.
+The names are the contract, since a heading count reads a renamed group as empty, so add no fourth. An overturned plan is amended in place, its row held under `## Up next` with `canon tasks block` and the reason a Findings line.
 
 ### Writing the board
 

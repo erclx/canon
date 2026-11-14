@@ -976,7 +976,7 @@ async function groupClaimFinding(
       kind: 'plan-parked',
       group: row.group,
       subject: row.stem,
-      message: `sits under ${row.group} and its task cites ${target}, a live plan. A row with a plan belongs under Up next or Run now. When the plan no longer describes the work, keep the row under Up next, amend the plan in place, and hold the row with canon tasks block until the amended plan lands.`,
+      message: `sits under ${row.group} and its task cites ${target}, a live plan. A row with a plan belongs under Up next or Run now. When the plan no longer describes the work, keep the row under Up next, amend the plan in place, hold the row with canon tasks block until the amended plan lands, and record why under the task's Findings.`,
     }
   }
 
