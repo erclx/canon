@@ -93,12 +93,8 @@ describe('readRevision', () => {
     expect(await readRevision(REPO, 'not-a-real-ref')).toEqual([])
   })
 
-  /**
-   * A git hook exports `GIT_DIR`, and it overrides `-C` when git resolves the
-   * repository. Without the strip, a scan scoped to a subtree silently returns
-   * the whole repository from any hook-invoked run, which is wrong output
-   * rather than a failure.
-   */
+  // A hook's `GIT_DIR` overrides `-C`, so without the strip a subtree scan from a
+  // hook silently returns the whole repository.
   it.skipIf(SHALLOW)(
     'should stay scoped to the subtree when GIT_DIR is set in the environment',
     async () => {
@@ -153,13 +149,8 @@ describe('scanRevision replay against the comment-discipline groundwork', () => 
     30_000,
   )
 
-  /**
-   * The folder's bash history table is the naive count its own snapshot
-   * section calls an error, so the arm is expected to disagree with it. What
-   * is asserted is the correction: heredoc bodies leave the count, which is
-   * the whole difference between the recorded 427 and what a real measurement
-   * of the same tree returns.
-   */
+  // The folder's recorded bash count is the naive one its own snapshot calls an
+  // error. What is asserted is the correction, heredoc bodies leaving the count.
   it.skipIf(SHALLOW)(
     'should report far fewer bash comments than the naive count the folder recorded',
     async () => {

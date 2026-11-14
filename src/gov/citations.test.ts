@@ -101,8 +101,7 @@ afterEach(() => {
 
 describe('classifySpan', () => {
   // Every span below is a real line from `governance/rules/` or
-  // `internal/rules/` at 2e912110, taken rather than invented, since the point
-  // of each case is that the corpus already writes the shape.
+  // `internal/rules/`, taken rather than invented, since the corpus writes it.
 
   it('should read a backticked path carrying a directory segment as a citation', () => {
     expect(classifySpan('.github/workflows/verify.yml')).toBe('path')
@@ -212,9 +211,8 @@ describe('readCitations', () => {
   })
 
   it('should anchor on the whole span rather than a trailing standards pattern', async () => {
-    // Cutting `standards/tooling-reference.md` out of this span and resolving
-    // it against another root reports a file that exists as missing, which is
-    // what a session measuring this corpus by hand actually did.
+    // Cutting the path out of this span and resolving it against another root
+    // would report a file that exists as missing.
     write('internal/standards/tooling-reference.md', '# Tooling reference')
     writeRule(
       'claude/authoring-layout.md',
@@ -241,9 +239,8 @@ describe('readCitations', () => {
   })
 
   it('should exempt a path the rule spells in its own frontmatter', async () => {
-    // The retired artifact class. `560-diagrams.md` tells its reader to convert
-    // a `.claude/DIAGRAMS.md` an older install left, so the file is correctly
-    // absent here and correctly named there.
+    // The retired artifact class. The rule tells its reader to convert a file an
+    // older install left, so it is correctly absent here and named there.
     writeRule(
       'claude/560-diagrams.md',
       '- Convert a `.claude/DIAGRAMS.md` left by an older install before editing it',
@@ -273,9 +270,8 @@ describe('readCitations', () => {
   })
 
   it('should exempt a cited path git ignores, which no clone is expected to hold', async () => {
-    // Session scratch. `.claude/tasks/index.md` is real in a live project and
-    // absent from a fresh clone, so resolving against the filesystem alone
-    // would make the verdict depend on which tree the check ran in.
+    // Session scratch is real in a live project and absent from a fresh clone, so
+    // the verdict cannot depend on the filesystem alone.
     write('.gitignore', '.claude/tasks/')
     writeRule(
       'claude/555-tasks.md',
@@ -418,9 +414,8 @@ describe('readCitations', () => {
   })
 
   it('should read no glob from the shipped corpus, whose globs name a target', async () => {
-    // `src/pages/**` in the Astro rule is indistinguishable by pattern from a
-    // path here, and 32 of the 72 shipped globs match nothing in this tree
-    // while every one of them is correct.
+    // `src/pages/**` in the Astro rule names a target's shape, so many shipped
+    // globs correctly match nothing in this tree.
     writeRule('lang/200-astro.md', '- Astro pages live here.', 'src/pages/**')
     git('add', '--all')
 

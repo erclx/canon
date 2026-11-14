@@ -4,18 +4,14 @@ import type { Browser } from 'playwright-core'
 import { probeDetails } from '@/driver/probes/details'
 
 /**
- * Pins both halves of the closed-menu lesson against one fixture, because the
- * two pull opposite ways and a suite covering either alone would pass a probe
- * that fails the other.
+ * Pins both halves of the closed-menu lesson against one fixture, since the two
+ * pull opposite ways and a suite covering either alone would pass a probe that
+ * fails the other.
  *
- * The menu here is the shape that produced 134 false findings: shut, the
- * element measures a summary and nothing else, so anything judged from that box
- * is judged from a number about the trigger rather than about the menu. Open,
- * it is the shape the same run missed, a panel hanging off the right edge of a
- * phone-width viewport and true only while open.
- *
- * The suite needs a browser binary. CI installs none, so it skips there rather
- * than failing, which means a green pipeline is not evidence this passed.
+ * Shut, the element measures only its summary, so anything judged from that box
+ * is judged from the trigger rather than the menu. Open, the panel hangs off the
+ * right edge of a phone-width viewport, true only while open. The suite needs a
+ * browser binary and CI installs none, so a green pipeline is no evidence.
  */
 
 const PHONE = { width: 390, height: 800 }
@@ -96,9 +92,8 @@ describe.skipIf(!hasBrowser)('probeDetails against a rendered menu', () => {
     const findings = await probeDetails(page)
     await page.close()
 
-    // Shut, the panel is 265px inside the right edge and a probe that stopped
-    // there reports the page clean. The defect is 35px over and true only while
-    // open, which is the blind spot skipping the closed menu leaves open.
+    // Shut, the panel sits inside the right edge and reads clean. The defect is
+    // over the edge only while open, the blind spot skipping a closed menu leaves.
     expect(shut).toBeLessThan(0)
     expect(findings).toHaveLength(1)
   }, 120_000)

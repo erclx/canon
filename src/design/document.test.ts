@@ -119,11 +119,8 @@ describe('renderDesignDocument', () => {
     expect(document).toContain('| background       | page canvas')
   })
 
-  /**
-   * The document has one reader that is not a person: the preview parses it
-   * back. A render the parser cannot read would leave the landing page's token
-   * preview reporting an empty record for a file full of values.
-   */
+  // The preview parses the document back, so a render it cannot read would show
+  // an empty record for a file full of values.
   it('round-trips through the parser the preview reads it with', () => {
     const path = join(root, 'DESIGN.md')
     writeFileSync(path, renderDesignDocument())

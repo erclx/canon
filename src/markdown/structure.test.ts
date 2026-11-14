@@ -97,10 +97,8 @@ function sentences(count: number, width = 20): string {
 
 describe('CHECKPOINTS', () => {
   it('should ship the numbers the structural measures run against', () => {
-    // Asserted rather than read back off `standards/markdown.md`, which is what
-    // the parser this replaced did. The standard states each number for a
-    // reader and no machine reads it, so a number moving in one place and not
-    // the other is caught by whoever edits rather than by a stage.
+    // Asserted rather than read off the standard, which states each number for a
+    // reader, so a number moving in one place is caught by whoever edits it.
     expect(CHECKPOINTS).toEqual({
       run: 40,
       peerBullet: 130,
@@ -126,9 +124,8 @@ describe('documentHeight', () => {
 
 describe('BASELINE', () => {
   it('should ship the reading a cadence rate is compared against', () => {
-    // Asserted the way `CHECKPOINTS` is, and for a different reason. No measure
-    // reads these, so nothing else in the suite would notice one moving, and
-    // the report prints all five straight into the legend a reader acts on.
+    // No measure reads these, so this is the only check on one moving, and the
+    // report prints all five into the legend a reader acts on.
     expect(BASELINE).toEqual({
       flatShare: 8,
       floor: 10,
@@ -174,10 +171,8 @@ describe('longestRun', () => {
   it('should still report a long section two markers sit either side of', () => {
     const source = `${FRONTMATTER}# CI\n\n**Constraints:**\n\n${prose(60)}\n\n**Risks:**\n\n${prose(2)}\n`
 
-    // The case separating this fix from one that disables the measure. Every
-    // plan in the folder cleared the checkpoint on the marker break, so without
-    // a deep run reported between two markers, a corpus reading clean says
-    // nothing about whether the checkpoint still discriminates.
+    // A deep run between two markers must still report, or a clean corpus says
+    // nothing about whether the checkpoint discriminates.
     expect(measure(source).longestRun).toBeGreaterThan(RUN_CHECKPOINT)
   })
 
@@ -185,9 +180,8 @@ describe('longestRun', () => {
     const half = prose(30)
     const source = `${FRONTMATTER}# CI\n\n${half}\n\n  **Risks:**\n\n${half}\n`
 
-    // An indented marker is a label inside a list item rather than a document
-    // seam. A false break shortens every run around it, which is the direction
-    // that quietly stops the measure reporting.
+    // An indented marker is a label inside a list item rather than a seam, and a
+    // false break would shorten every run around it.
     expect(measure(source).longestRun).toBeGreaterThan(RUN_CHECKPOINT)
   })
 
@@ -195,10 +189,8 @@ describe('longestRun', () => {
     const half = prose(30)
     const source = `${FRONTMATTER}# CI\n\n${half}\n\n**Testing**\n\n${half}\n`
 
-    // The fixture that proved the narrow pattern held this shape out, kept in
-    // place asserting the other direction. `review-pr` writes this
-    // marker into every body it posts, so the break is a shipped seam rather
-    // than a hypothetical one.
+    // The other direction. `review-pr` writes this marker into every body it posts,
+    // so the break is a shipped seam.
     expect(measure(source).longestRun).toBeLessThan(RUN_CHECKPOINT)
   })
 
@@ -207,8 +199,7 @@ describe('longestRun', () => {
     const sentence = '**The pass found four things, and it took one read.**'
     const source = `${FRONTMATTER}# CI\n\n${half}\n\n${sentence}\n\n${half}\n`
 
-    // The half of the widening that keeps the measure reporting. A colon-less
-    // bold line is a marker or a sentence set in bold, and a false break
+    // A colon-less bold line may be a sentence set in bold, and a false break
     // shortens every run around it until the measure stops reporting.
     expect(measure(source).longestRun).toBeGreaterThan(RUN_CHECKPOINT)
   })
@@ -218,9 +209,8 @@ describe('longestRun', () => {
     const band = '**Two seeds and a behavior line**'
     const source = `${FRONTMATTER}# CI\n\n${half}\n\n${band}\n\n${half}\n`
 
-    // 29 characters, from the 21 to 30 band the corpus cannot classify on
-    // sight. The ceiling sits under that band rather than over it, since a
-    // false break is the dearer error of the two.
+    // Inside the band the corpus cannot classify on sight, and the ceiling sits
+    // under it, since a false break is the dearer error.
     expect(measure(source).longestRun).toBeGreaterThan(RUN_CHECKPOINT)
   })
 
@@ -229,9 +219,8 @@ describe('longestRun', () => {
     const path = '**`src/markdown/structure.ts`**'
     const source = `${FRONTMATTER}# CI\n\n${half}\n\n${path}\n\n${half}\n`
 
-    // 27 characters, so width alone holds it out. `review-pr` heads each
-    // file it reviews this way and those paths run to 70 characters, which is
-    // the reach the span test buys that no ceiling can.
+    // Past the width ceiling, so the span test holds it out, since `review-pr`
+    // heads each reviewed file with a bold path far past any ceiling.
     expect(measure(source).longestRun).toBeLessThan(RUN_CHECKPOINT)
   })
 
@@ -266,8 +255,7 @@ describe('longestRun', () => {
     const source = `${FRONTMATTER}# CI\n\n${prose(20)}\n\n\`\`\`\`markdown\n${inner}\n\`\`\`\`\n\n${prose(20)}\n`
 
     // A walker toggling on any backtick run reads the inner closing fence as an
-    // opening and inverts the rest of the file, which is what reported ten
-    // closing fences as bare during intake.
+    // opening and inverts the rest of the file.
     expect(measure(source).longestRun).toBe(43)
   })
 
@@ -436,9 +424,8 @@ describe('heavyParagraphs', () => {
   it('should report a short-sentence-count paragraph past the weight checkpoint', () => {
     const source = `${FRONTMATTER}# CI\n\n${sentences(2, PARAGRAPH_CHECKPOINT)}\n`
 
-    // A sentence cap alone is satisfied by writing fewer and longer ones. The
-    // heaviest paragraph measured across the corpus ran 1159 characters in two
-    // sentences and passed every sentence count.
+    // A sentence cap alone is met by fewer, longer sentences, so the character
+    // weight catches a paragraph of two long ones.
     const [found] = measure(source).heavyParagraphs
     expect(found.sentences).toBe(2)
     expect(found.characters).toBeGreaterThan(PARAGRAPH_CHECKPOINT)
@@ -556,9 +543,8 @@ describe('measureCadence', () => {
     const spread = CHECKPOINTS.spread
     const source = `${FRONTMATTER}# CI\n\n${passage([10, 10, 10 + spread])}\n`
 
-    // The skill calls a longest and shortest sentence within roughly five words
-    // of each other one cadence, so the checkpoint is the last flat value
-    // rather than the first varied one.
+    // Sentences within roughly five words of each other are one cadence, so the
+    // checkpoint is the last flat value rather than the first varied one.
     expect(measure(source).cadence.flat).toBe(1)
   })
 
@@ -645,9 +631,8 @@ describe('measureCadence', () => {
   it('should keep a heading fragment out of the paragraph below it', () => {
     const source = `${FRONTMATTER}# CI\n\n## Facts before opinion\n\n${passage([10, 10, 10])}\n`
 
-    // A heading is legitimately verbless and legitimately one length, so a
-    // measure that let one join the paragraph under it would read the author's
-    // own signpost as a defect in the prose.
+    // A heading is legitimately verbless and one length, so joining it to the
+    // paragraph under it would read a signpost as flat prose.
     const { measured, flattest } = measure(source).cadence
     expect(measured).toBe(1)
     expect(flattest?.sentences).toBe(3)
@@ -668,10 +653,8 @@ describe('measureCadence', () => {
     const openers = ['Run', 'Check', 'Load']
     const source = `${FRONTMATTER}# CI\n\n${passage([10, 10, 10], openers)}\n`
 
-    // The three shapes above are excluded by where they sit, which needs no
-    // grammar. An imperative sits in ordinary paragraph prose and is separated
-    // from a verbless clause by grammar alone, which is why the verbless share
-    // stays unimplemented while these two measures ship. See `measureCadence`.
+    // These shapes are excluded by position, needing no grammar, while the
+    // verbless share needs grammar and stays unimplemented. See `measureCadence`.
     const { measured, flat } = measure(source).cadence
     expect(measured).toBe(1)
     expect(flat).toBe(1)

@@ -152,9 +152,8 @@ describe('visibleText', () => {
   })
 
   it('should keep an inline code span, which a reader reads', () => {
-    // The ban scan blanks a code span so a standard quoting its own banned
-    // character does not report itself. A backticked path is still text on the
-    // page, so discounting it here would under-report a paragraph full of them.
+    // A backticked path is still text on the page, so discounting it here would
+    // under-report a paragraph full of them, unlike the ban scan's blanking.
     expect(visibleText('Open `src/markdown/scan.ts` next.')).toBe(
       'Open `src/markdown/scan.ts` next.',
     )

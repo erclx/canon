@@ -84,11 +84,8 @@ describe('readings', () => {
 })
 
 describe('the shipped palette', () => {
-  /**
-   * The outcome this row was opened on. It asserts over the record rather than
-   * over a fixed list, so a role added later is measured without a second edit
-   * here and a role whose ground moves is re-measured against the new one.
-   */
+  // Asserts over the record rather than a fixed list, so a role added later is
+  // measured with no edit here, and a moved ground is re-measured.
   it('clears AA on every role against every ground it declares', () => {
     expect(
       failing().map((reading) => `${reading.role} on ${reading.ground}`),

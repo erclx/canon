@@ -79,10 +79,8 @@ for (const tree of TREES) {
 
         expect(result[expected.stream ?? 'stdout']).toContain(expected.expect)
         expect(result.code).toBe(expected.code ?? 0)
-        // A runtime error such as `declare -A` on bash 3.2 leaves the verdict
-        // and the exit intact, so only the diagnostic itself shows the break.
-        // Several hooks deliver their verdict on stderr, so the stream cannot
-        // be asserted empty, and the match is bash's `<file>: line <n>: ` form.
+        // A runtime error such as `declare -A` on bash 3.2 keeps the verdict and exit,
+        // so only bash's `<file>: line <n>: ` diagnostic on stderr shows the break.
         expect(result.stderr).not.toMatch(BASH_DIAGNOSTIC)
       })
     }

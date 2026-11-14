@@ -138,9 +138,8 @@ describe('resolveReviewScope', () => {
   })
 
   it('should read the marker a PUT rewrite left on the standing close-out', () => {
-    // `PUT` replaces the body and leaves `commit.oid` pinned to the commit the
-    // comment was first submitted against, which is the sibling defect the
-    // marker closes as a side effect.
+    // `PUT` replaces the body and leaves `commit.oid` at the first submission, so
+    // only the marker names the commit read.
     const rewritten = review(`${CLOSED}\n${marker(READ)}`, STAMPED)
     const scope = resolveReviewScope({ reviews: [rewritten] })
 
@@ -211,10 +210,8 @@ describe('resolveReviewScope', () => {
   })
 
   it('should ignore a marker a body displays on its own line', () => {
-    // The shape the inline case above does not reach. A fenced block trims to
-    // exactly the pattern, so a body that shows the format and carries no
-    // marker of its own would otherwise hand the next reader a covered commit
-    // taken from an illustration.
+    // A fenced block trims to exactly the pattern, so a body showing the format
+    // must not hand the next reader a commit taken from an illustration.
     const shown = `## Review
 
 - **should-fix**: end the body with the marker:
@@ -307,9 +304,8 @@ describe('resolveUiScope', () => {
   })
 
   it('should read the marker a PUT rewrite left on the standing UI close', () => {
-    // `PUT` keeps `commit.oid` at the head the close was first posted against
-    // and replaces the body, so only the marker names the head the clean
-    // re-pass drove.
+    // `PUT` keeps `commit.oid` at the first post and replaces the body, so only the
+    // marker names the head the clean re-pass drove.
     const rewritten = review(`${UI_CLOSED}\n${uiMarker(UI_HEAD)}`, STAMPED)
     const scope = resolveUiScope({ reviews: [rewritten] })
 

@@ -65,9 +65,8 @@ describe('listIndexes', () => {
 
 describe('isIgnored', () => {
   async function initRepo(ignoreBody: string): Promise<void> {
-    // Strips `GIT_DIR` for the same reason the production call does. Run from
-    // a git hook, an inherited one sends `init` at the hook's repository and
-    // leaves this fixture without one.
+    // Strips `GIT_DIR` as the production call does, since an inherited one from a
+    // hook would send `init` to the hook's repository.
     await $`git -C ${root} init --quiet`.env(gitEnv()).quiet()
     writeFileSync(join(root, '.gitignore'), ignoreBody)
   }

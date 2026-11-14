@@ -11,9 +11,8 @@ describe('checkTitleFormat', () => {
   })
 
   it('should report structure alone for a title carrying no type(scope): shape', () => {
-    // The title that actually reached #1523 before it was renamed, breaking
-    // every rule at once with no `<type>(<scope>): ` prefix to grade casing
-    // or length against.
+    // A real title that broke every rule at once, with no `<type>(<scope>): `
+    // prefix to grade casing or length against.
     const result = checkTitleFormat(
       'One derivation for the branch a dispatch checks and a worker takes',
     )
