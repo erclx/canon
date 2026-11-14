@@ -85,6 +85,11 @@ The closing lines end `## Summary`, one `Closes #NNN` per issue and no trailing 
 - Write Outcome when the change alters a shape someone reads or writes: a record or template, a verb's output or flags, a config or settings format, or a report a skill produces
 - Omit Outcome for an internal refactor, a fix that changes no output, and a prose edit whose diff is its result
 - Show the new shape in a fenced block with placeholders for the values, about 20 lines at most and never a whole file
+- Keep each fenced line to 90 characters, breaking a long record or command by hand, since GitHub scrolls a wider line sideways
+- Quote a single message line in a blockquote rather than a fence, so it wraps at the body width, with each `<placeholder>` in a code span
+
+The section holds a text shape alone and never reaches the merged history.
+
 - Keep a UI change's result in the evidence comment `pr-evidence` posts, never in the body. A mixed change shows its text shape here and points at that comment in one line.
 - The squash commit carries Summary, Key changes, and Technical context alone, so Outcome stays on the pull request
 
@@ -142,5 +147,6 @@ A live agent session is never the human a box waits on.
 
 - Every section but Testing holds bullets to 200 characters and 5 in a row, and paragraphs to 350 characters and 2 in a row
 - Any section reports a `subheading`, and Technical context reports a `mixed-form`
+- A fenced line past 90 characters reports a `fence-width` in any section, Testing included
 - A bold label alone on a line breaks a Key changes run, and a bold lead-in starts a new Technical context run
 - Fix a finding by regrouping or splitting, never by cutting a path
