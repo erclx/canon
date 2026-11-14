@@ -153,7 +153,7 @@ A reused session pays the context load once and ages its picture of the tree, wh
 The session that closed a groundwork track or an app drive is the default planner of the rows its record produced, talk session or not. Name each filed row back to it rather than launching a cold planner, since it holds the evidence and what the operator said about the row.
 
 - Launch a cold planner for such a row only when its close message hands off and names the reason `role-planner` states, or when the operator asks for one
-- Hold all planning of a row any other talk session has said by message it is planning, whether by a launch or by `plan-feature` here, and name it back the same way
+- Hold all planning of a row any other talk session has said by message it is planning, whether by a launch or by `plan-feature` here, unless the operator asks for a cold planner
 
 ## Dispatch a talk session
 
