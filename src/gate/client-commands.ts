@@ -28,16 +28,12 @@ export const CLIENT_COMMAND_MARKER = 'canon-allow-client-command'
 /**
  * A bracketed placeholder or a template interpolation, each optionally
  * single-quoted, which is the one call form this scanner reads. A sentence
- * naming the command with no bracketed argument carries no placeholder at all
- * and never matches, which is deliberate: the defect this closes is a wrong
- * argument shown as an invocation, not a sentence that never showed one.
+ * naming the command with no bracketed argument never matches, by design,
+ * since the defect is a wrong argument shown as an invocation.
  *
- * The interpolation half admits a dotted path, since a property access is the
- * ordinary shape a real call site interpolates, such as `${session.id}`, and a
- * bare `${id}` is the rarer one that only a fixture writes. A capture stopping
- * at the first `.` matched the command literal and missed the property access
- * beside it entirely, which is how the check went unable to read the one call
- * form this repository's own worktree listing writes.
+ * The interpolation half admits a dotted path, since a property access such as
+ * `${session.id}` is the ordinary shape a real call site interpolates. A capture
+ * stopping at the first `.` would miss it.
  */
 const PLACEHOLDER = `'?(?:<([\\w-]+)>|\\$\\{(\\w+(?:\\.\\w+)*)\\})'?`
 

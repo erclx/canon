@@ -84,14 +84,13 @@ function selectsE2e(args: readonly string[]): boolean {
  * Whether a hand-run vitest invocation runs the whole suite and so queues on
  * the machine lock the gate's Tests stage holds.
  *
- * A run loading `E2E_CONFIG` or naming `E2E_FILTER` queues too, since the suites it selects film in a
- * real browser and two of them at once contend for CPU. Any other scoped run
- * is seconds of work, and queueing it behind a full suite costs more than any
- * collision it causes. Vitest exposes no setup-time API naming
- * the CLI filters, so any bare argument other than the subcommand reads as a
- * file filter. That includes the value of a flag spelled `--flag value`, which
- * misreads such a run as scoped. The misread skips a lock rather than queueing
- * a scoped run, which is the side to err on.
+ * A run loading `E2E_CONFIG` or naming `E2E_FILTER` queues too, since its
+ * suites film in a real browser and two at once contend for CPU. Any other
+ * scoped run is seconds of work, cheaper to collide than to queue. Vitest
+ * exposes no setup-time API naming the CLI filters, so any bare argument other
+ * than the subcommand reads as a file filter, including the value of a flag
+ * spelled `--flag value`. That misread skips a lock rather than queueing a
+ * scoped run, which is the side to err on.
  */
 export function locksHandSuite(run: VitestRun): boolean {
   if (run.ci || run.watch || run.heldLock !== undefined) return false

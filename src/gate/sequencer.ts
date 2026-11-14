@@ -332,9 +332,8 @@ async function runChecks(
     }
 
     if (outcome.unmeasured !== undefined) {
-      // Under CI an absent input is a broken runner rather than a machine
-      // mid-setup, so the same reading refuses there and warns here. Skipping
-      // on both would report the pass the stage exists to withhold.
+      // Under CI an absent input is a broken runner rather than a machine mid-setup,
+      // so the same reading refuses there and warns here.
       if (ctx.ci) {
         return {
           id: stage.id,

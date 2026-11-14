@@ -104,16 +104,14 @@ function publish(path: string, text: string, pid: number): boolean {
 /**
  * Moves a dead holder's file aside, or puts back one that changed under it.
  *
- * Unlink then create is two calls, and two acquirers judging one stale file
- * would both get through. A rename moves the file to a name only this acquirer
- * uses, so only one of them gets it, and comparing what moved against what was
- * judged catches the case where another acquirer already replaced it.
+ * Unlink then create is two calls, so two acquirers judging one stale file
+ * would both get through. A rename moves it to a name only this acquirer uses,
+ * and comparing what moved against what was judged catches another acquirer
+ * having already replaced it.
  *
- * One interleaving still gets through. A third acquirer publishing between the
- * rename and the restore leaves the moved holder's file with nowhere to go, so
- * two suites run at once. That costs one oversubscribed run and never a hang,
- * and closing it needs a lock the kernel releases, which `node:fs` does not
- * offer.
+ * A third acquirer publishing between the rename and the restore still lets
+ * two suites run at once. That costs one oversubscribed run, never a hang, and
+ * closing it needs a lock the kernel releases, which `node:fs` does not offer.
  */
 function displace(path: string, judged: string, pid: number): void {
   const aside = `${path}.${pid}.stale`

@@ -121,16 +121,14 @@ function manifestEntries(text: string): string[] | undefined {
 /**
  * The claude manifest is the only route a target's ignore set travels, and it
  * is hand-maintained beside this repository's own `.gitignore` with nothing
- * comparing the two. Parity is exact, with no exception list behind it: an
- * empty one cannot be exercised, and a check nobody can test is a check nobody
- * should trust.
+ * comparing the two. Parity is exact, with no exception list, since an empty
+ * one could never be exercised.
  *
  * Both lists are compared with the trailing slash dropped. The `.gitignore` side
- * reads the whole file rather than one header, since a claude-scoped entry filed
- * under a header of its own would otherwise read as missing from a list that
- * carries it. It is scoped to `.claude/*` and `.canon` as a bare root as well as
- * a prefix, because the manifest says nothing about `node_modules/` or `.env`
- * and `.canon` is one line covering a whole tree.
+ * reads the whole file rather than one header, so a claude-scoped entry filed
+ * under a header of its own still counts. It is scoped to `.claude/*` and to
+ * `.canon` as a bare root and a prefix, since the manifest says nothing about
+ * `node_modules/` or `.env`.
  */
 export const ignoreParity: Measure = async (ctx) => {
   const gitignorePath = join(ctx.root, GITIGNORE)
@@ -150,9 +148,8 @@ export const ignoreParity: Measure = async (ctx) => {
   const ignored = gitignorePatterns(readFileSync(gitignorePath, 'utf8'))
   const shipped = manifestEntries(readFileSync(manifestPath, 'utf8'))
 
-  // An empty read on either side is a parse that failed rather than a
-  // repository ignoring nothing, and reporting parity off it would say the two
-  // lists agree having compared none of their entries.
+  // An empty read on either side is a failed parse rather than a repository
+  // ignoring nothing, and parity off it would compare no entries.
   if (ignored.length === 0) {
     return unmeasured(
       'No patterns read from .gitignore, ignore parity unverifiable.',
@@ -278,9 +275,8 @@ export const capabilitySeeding: Measure = async (ctx) => {
     listFiles(join(root, 'tooling/base/configs/.husky')),
   )
 
-  // The reverse direction: a destination whose source here is gone reaches
-  // neither pass reading forward from the source, and it ships a target a
-  // capability this repository has already deleted.
+  // The reverse direction. A destination whose source here is gone reaches no
+  // forward pass, and ships a target a capability this repository deleted.
   checkOrphans('Hooks', '.claude/hooks', seedHooksDir)
   for (const dir of workflowDirs) {
     checkOrphans('Workflows', '.github/workflows', posixRel(root, dir))
@@ -424,19 +420,15 @@ function grepLines(
 
 /**
  * Seed prose is installed into every scaffolded project and read there as
- * instruction about that project, so a line naming this repository's CLI hands a
- * target a verb it may not be able to run. This gates for the reason the seed
- * standards stage gates: a defect authored once propagates into every project
- * scaffolded after it.
+ * instruction, so a line naming this repository's CLI hands a target a verb it
+ * may not be able to run. Only the seed roots are walked, so a shipped rule
+ * citing the CLI passes.
  *
  * Markdown alone, since the seed tree also ships hooks that call the CLI on
- * purpose. A token followed by `/` is the tracked surface root, a folder the
- * seed itself installs, so every other spelling reports. No seed root, or roots
- * carrying no markdown, is unmeasured rather than a pass, which agrees with
- * `seedStandards` on the no-root case.
- *
- * The token matches as a substring, so `canonical` reports as `canon` does. The
- * walk covers the seed roots alone, so a shipped rule citing the CLI passes.
+ * purpose. A token followed by `/` is the tracked surface root, so every other
+ * spelling reports, and it matches as a substring, so `canonical` reports as
+ * `canon` does. No seed root, or roots carrying no markdown, is unmeasured
+ * rather than a pass, which agrees with `seedStandards`.
  */
 export const seedIndependence: Measure = async (ctx) => {
   if (!isDirectory(join(ctx.root, 'tooling'))) {
