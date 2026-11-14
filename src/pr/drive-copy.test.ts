@@ -10,7 +10,12 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { execaSync } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { branchSlug, buildDriveCopy, loadPreviewConfig } from '@/pr/drive-copy'
+import {
+  branchSlug,
+  buildDriveCopy,
+  loadPreviewConfig,
+  runSeed,
+} from '@/pr/drive-copy'
 
 let tempDir: string
 let worktree: string
@@ -324,6 +329,59 @@ describe('buildDriveCopy', () => {
       expect(existsSync(join(copyRoot, 'gone/.run/address.json'))).toBe(true)
       expect(existsSync(join(copyRoot, 'gone/stale.json'))).toBe(false)
     })
+  })
+})
+
+describe('runSeed', () => {
+  it('should run the seed from the worktree with the copy root in the variable', async () => {
+    mkdirSync(copyRoot, { recursive: true })
+    const seed = [
+      process.execPath,
+      '-e',
+      "require('fs').writeFileSync(process.env.BOARD_ROOT + '/seeded.txt', process.cwd())",
+    ]
+
+    const run = await runSeed(worktree, copyRoot, seed, 'BOARD_ROOT')
+
+    expect(run).toEqual({ kind: 'ran', exit: 0 })
+    expect(readFileSync(join(copyRoot, 'seeded.txt'), 'utf8')).toBe(worktree)
+  })
+
+  it('should report a seed that exits non-zero with the tail of its stderr', async () => {
+    const lines = Array.from({ length: 25 }, (_, index) => `line ${index + 1}`)
+    const seed = [
+      process.execPath,
+      '-e',
+      `console.error(${JSON.stringify(lines.join('\n'))}); process.exit(3)`,
+    ]
+
+    const run = await runSeed(worktree, copyRoot, seed, 'BOARD_ROOT')
+
+    expect(run).toEqual({
+      kind: 'failed',
+      exit: 3,
+      timedOut: false,
+      stderr: lines.slice(5),
+    })
+  })
+
+  it('should stop a seed that runs past its limit and report it timed out', async () => {
+    const seed = [process.execPath, '-e', 'setTimeout(() => {}, 10000)']
+
+    const run = await runSeed(worktree, copyRoot, seed, 'BOARD_ROOT', 200)
+
+    expect(run).toMatchObject({ kind: 'failed', timedOut: true })
+  })
+
+  it('should report a seed whose command does not exist as failed', async () => {
+    const run = await runSeed(
+      worktree,
+      copyRoot,
+      ['canon-no-such-seed-command'],
+      'BOARD_ROOT',
+    )
+
+    expect(run).toMatchObject({ kind: 'failed', timedOut: false })
   })
 })
 
