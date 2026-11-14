@@ -7,6 +7,13 @@
 - Give the focus ring 3:1 contrast against its background in every theme the project ships.
 - Keep the focus ring whole. Where an ancestor's `overflow` would clip it, inset it with a negative `outline-offset` or pad the edge items of the list.
 
+## When the ring shows
+
+- Style focus through `:focus-visible` and never bare `:focus`, so a click, a shift-click, or a drag on a control that takes no text draws no ring.
+- Pass `focusVisible: false` to a `focus()` call a pointer caused, such as a roving `tabindex` reaching a clicked row or a popover refocusing its trigger. A browser rings a script focus by heuristic.
+- Treat a key held through a click, Shift included, as keyboard use the browser may carry into that click's script focus. The heuristic exempts Ctrl, Alt, and Meta alone.
+- Keep the ring on a text-accepting control after a click, since it matches by design.
+
 ## Keyboard operation
 
 - Close a dialog, popover, menu, or inline confirmation on Escape, and cancel an in-progress edit the same way.
