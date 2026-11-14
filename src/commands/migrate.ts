@@ -569,13 +569,11 @@ interface RecordTreeOptions {
 }
 
 /**
- * Repoints the old-root citations left inside the record tree itself.
- *
- * The sibling verb sweeps a git listing, which reaches every tracked file and
- * none of the records, since those are gitignored by construction. This one
- * walks the new root directly and is scoped to the folders a session still
- * follows a path into, so the closed trails and the scratch folder keep saying
- * what they say.
+ * Repoints the old-root citations left inside the record tree itself. The
+ * sibling verb sweeps a git listing, which reaches every tracked file and none
+ * of the records, since those are gitignored by construction. This one walks
+ * the new root directly and is scoped to the folders a session still follows a
+ * path into, so the closed trails and the scratch folder keep what they say.
  *
  * No ignore gate here. Nothing moves, so there is no destination whose ignore
  * status could publish a record, and a run in a project the move has not
