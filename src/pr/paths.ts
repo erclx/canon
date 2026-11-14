@@ -91,19 +91,12 @@ const BARE_LINE = /^:\d+(?:-\d+)?$/
 /**
  * A character that puts the span outside a path this comparison resolves.
  *
- * Whitespace separates a backticked command from a backticked path, and it is
- * the whole answer to one of the four observed false-positive classes:
- * `canon markdown audit .claude/rules --json` carries a slash and names no file.
- * Angle brackets answer a second, since `.canon/plans/feature-<slug>.md`
- * describes a shape rather than naming a file. A glob and a caret describe a
- * shape too, `^src/` being a grep pattern one body spelled in Key changes, and
- * a leading anchor names something outside this repository.
- *
- * Deliberately not shared with `classifySpan` in `@/gov/citations`, which asks
- * a different question. That sweep resolves what a rule points a reader at,
- * against the filesystem, with a sibling resolving inside the citing rule's own
- * folder. This one resolves what a bullet claims to have changed, against a
- * changed-file list, and it admits a folder where that sweep declines one.
+ * Whitespace marks a backticked command, angle brackets a shape such as
+ * `feature-<slug>.md`, a glob or caret a pattern, and a leading anchor
+ * something outside this repository. Deliberately not shared with
+ * `classifySpan` in `@/gov/citations`, which resolves what a rule points at
+ * against the filesystem, where this resolves what a bullet claims changed
+ * against a changed-file list and admits a folder that sweep declines.
  */
 function isNotRepositoryPath(span: string): boolean {
   if (/[\s<>$*|?^]/.test(span)) return true
@@ -141,37 +134,12 @@ function maskSpans(text: string): string {
 /**
  * The part of a bullet that can accuse, which ends at its first comma.
  *
- * This is the one lever that separates a claim from a mention, and it was
- * chosen by measurement rather than by grammar. Over the 23 merged pull
- * requests in this repository that carry the section, reading whole bullets
- * reported 16 paths as claimed-but-untouched and every one of them was a file
- * the body named for context. Cutting at the comma left 110 claims of the
- * original 149 and took the false reports to 2. A list of clause-opening words
- * tried beside it (`which`, `since`, `because`, `rather than`, and eleven more)
- * removed nothing the comma had not already removed, because this corpus
- * punctuates every one of them.
- *
- * The cut used to bound what the scan collected at all, and that is the half
- * that came out. A path past the comma was left out of the claim set entirely
- * and fell to the unnamed direction, accepted here on the ground that the
- * direction reports without grading. It graded anyway, one consumer removed:
- * `review-pr` reads `unnamed` as a question to put to the branch author,
- * and on 2026-09-01 the question went to three pull requests over bullets that
- * had named the files all along, with `#1329` gaining bullets it did not need.
- *
- * Collecting the whole bullet as claims was measured against the 40 most recent
- * merged pull requests carrying the section and is not the repair: it takes
- * `unmet` from 10 to 19, and every one of the nine is the class the cut was
- * tuned to exclude, as in `#1276`'s "following the frame, the stream split, and
- * the exit ladder `src/commands/labels.ts` already carries". So the scan reads
- * the whole bullet and this cut decides `leading` instead, which is what lets a
- * trailing path credit a changed file while `unmet` stays where the corpus put
- * it. The same 40 give claims 243 to 314, unnamed 1124 to 1058, and unmet 10
- * either way.
- *
- * `disclaimsChange` reads this region too, and for its own reason rather than
- * by sharing this one: a disclaimer opens its bullet, so the cut reaches every
- * one the corpus carries, and `NO_CHANGE` below records what depends on that.
+ * The comma separates a claim from a mention: a path ahead of it is a claim,
+ * and one after it is context. The scan still reads the whole bullet, so a
+ * trailing path can credit a changed file, but only this region decides
+ * `leading`. Clause-opening words were weighed as a cut and added nothing the
+ * comma did not. `disclaimsChange` reads this region too, since a disclaimer
+ * opens its bullet.
  */
 function claimRegion(bullet: string): string {
   const at = maskSpans(bullet).indexOf(',')
@@ -181,25 +149,11 @@ function claimRegion(bullet: string): string {
 /**
  * A claim region that asserts nothing changed.
  *
- * A body writes such a bullet to record a decision it declined, and the path it
- * names is the file it deliberately did not touch, which is the exact inverse
- * of a claim. `#1274` opens one with "Leave `...expect.toml` untouched" and the
- * path sits ahead of the first comma, so the region cut cannot reach it: a
- * stricter cut would not catch this and a looser one would find more.
- *
- * The marker rather than the leading verb decides it, because `keep` and
- * `leave` both open a real claim often enough and neither is safe alone. The
- * set is deliberately three words. `in place` was measured and dropped, since
- * rewriting a file in place is an ordinary claim, and `no other line` was
- * dropped because `#1269` writes "as one insertion that touches no other line"
- * about a change it did make. `alone` was in the set and came out on review:
- * every occurrence across the 40-pull-request corpus sits past the first
- * comma, where the region cut already excludes it, so the word caught nothing
- * real there. Kept, it turns restrictive on a comma-free bullet, which is this
- * repository's more common use of the word: "Move the threshold read into
- * `src/gate/stages.ts` alone." asserts an edit and voided to an empty claim
- * set while the word was in the set, unlike the other three, which disclaim
- * wherever they land.
+ * A body writes such a bullet to record a decision it declined, so the path it
+ * names is the file it did not touch. The marker rather than the leading verb
+ * decides it, since `keep` and `leave` open real claims too. `in place`, `no
+ * other line`, and `alone` stay out, since each also appears in a bullet that
+ * asserts an edit.
  */
 const NO_CHANGE =
   /\b(?:untouched|unchanged)\b|\bas written\b|^\s*(?:do not|don't|never)\b/i
@@ -316,11 +270,8 @@ interface ResolvedSpan {
 function resolveSpan(span: string): ResolvedSpan | undefined {
   if (span === '' || isNotRepositoryPath(span)) return undefined
 
-  // A bare name cannot be resolved as a sibling of a path earlier in the
-  // bullet: that produced seven wrong paths across this corpus against two right
-  // ones, because a compound bullet names a sibling folder as often as a sibling
-  // file. It resolves to itself as a root-level path and is marked bare, which
-  // keeps it from ever accusing.
+  // A bare name resolves to itself as a root-level path and is marked bare so
+  // it never accuses, since guessing a sibling of an earlier path misfires.
   if (!span.includes('/')) {
     return isDottedNumber(span)
       ? undefined
@@ -328,9 +279,8 @@ function resolveSpan(span: string): ResolvedSpan | undefined {
   }
 
   if (span.endsWith('/')) {
-    // A single top-level folder is never a claim. Nobody reports having changed
-    // the whole of `src/`, and every body that spelled one was naming where
-    // something lives.
+    // A single top-level folder is never a claim, since a body spelling one
+    // is naming where something lives.
     return span.indexOf('/') === span.length - 1
       ? undefined
       : { path: span, directory: true, bare: false }
@@ -344,19 +294,11 @@ function resolveSpan(span: string): ResolvedSpan | undefined {
 /**
  * Every path the `## Key changes` section claims a change to.
  *
- * `roots` names the entries the tree holds at its top level, which is what
- * separates a whole path from one written partially. It is passed in rather
- * than read here so the extractor stays a pure function of the body, and there
- * is no default: an absent set would silently mark every claim anchored, which
- * is the direction that accuses.
- *
- * Reports `no-section` rather than an empty read when the heading is absent,
- * and an empty claim set with a bullet count when the heading is there and
- * nothing resolved. The caller needs those apart. A body with no section states
- * nothing, a section that produced no claim is this extractor failing over
- * prose, and only a section that produced claims supports a comparison. An
- * empty extraction read as a clean pass is the failure shape this repository
- * has already recorded twice.
+ * `roots` names the tree's top-level entries, which separates a whole path from
+ * a partial one. It has no default, since an absent set would mark every claim
+ * anchored, the direction that accuses. A missing heading reports
+ * `no-section`, and a section yielding no claim reports an empty set with a
+ * bullet count, so the caller never reads an extraction failure as a pass.
  */
 export function extractKeyChangePaths(
   body: string,
@@ -380,12 +322,8 @@ export function extractKeyChangePaths(
 
     const accusesBefore = claimRegion(trimmed).length
     const spans = findBacktickSpans(trimmed)
-    // Whether a `file:line` span citing an already-claimed file is a second
-    // claim or a citation into the file just claimed turns on this: a bullet
-    // that also carries a bare `:642`-shaped span alongside it is describing
-    // two lines in one file, where a bullet with no such companion is naming
-    // a second, genuinely distinct file. Computed once, up front, so the
-    // guard below reads it rather than scanning again for every span.
+    // A bare `:642`-shaped span beside a `file:line` span means two lines in
+    // one file, so it decides whether a repeated file is a second claim.
     const hasBareLineCompanion = spans.some((span) =>
       BARE_LINE.test(span.content),
     )
@@ -395,12 +333,8 @@ export function extractKeyChangePaths(
       const span = match.content
       const bare = span.replace(LINE_SUFFIX, '')
 
-      // A `file:line` span following another claim in the same bullet is a
-      // citation into a file being described rather than a second claim, which
-      // is what "the stages at `verify.sh:634` and `:642`" is doing inside a
-      // bullet whose claim is the context entry that describes them. Leading
-      // its bullet it is an ordinary claim, which is how a body names the exact
-      // line it rewrote.
+      // A `file:line` span after another claim in the bullet cites a file being
+      // described. Leading its bullet, it is an ordinary claim.
       const cited = bare !== span
       if (cited && claimed && hasBareLineCompanion) continue
 
@@ -409,9 +343,8 @@ export function extractKeyChangePaths(
       // A bare span is no evidence a path claim came first, so it leaves the
       // citation guard above reading only the claims it was written for.
       if (!resolved.bare) claimed = true
-      // First occurrence wins, across bullets as well as inside one. A path
-      // named trailing here and leading three bullets later keeps the weaker
-      // reading, which loses an accusation and can never add one.
+      // First occurrence wins across bullets, which can lose an accusation and
+      // never add one.
       if (seen.has(resolved.path)) continue
       seen.add(resolved.path)
 
