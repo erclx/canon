@@ -57,8 +57,8 @@ const VERSION_TOKEN = /\bv\d+(?:\.\d+){1,2}\b/g
  *
  * The closing delimiter refers back to the opening one, so a span opened on two
  * backticks closes on two, which is the rule `maskCodeSpans` reads a span by.
- * Content is the token alone rather than a token found inside longer content,
- * which is the whole of what separates a quoted phase label from `#1208`.
+ * Content is the token alone, which is the whole of what separates a quoted
+ * phase label from a version-shaped name quoted inside longer content.
  */
 const VERSION_SPAN = /(`+)(v\d+(?:\.\d+){1,2})\1/g
 
@@ -74,16 +74,9 @@ function escapeLiteral(text: string): string {
  * What is ignored under the tracked root beyond the entries the record move
  * relocated.
  *
- * `RECORD_ENTRIES` answers which folders that move carried across, and this
- * check asks which paths a reader on a remote cannot open under `.claude/`,
- * the one root still read by entry name below. The two questions differ by
- * exactly one entry: the worktrees folder is ignored and stays out of
- * `RECORD_ENTRIES` deliberately, since the harness creates a worktree there
- * and requires its target to sit there, so adding it upstream would tell the
- * migration to relocate a folder the harness pins.
- *
- * It is also the entry a worker announcement names most often, which is what
- * makes the gap a live class rather than a theoretical one.
+ * The worktrees folder is ignored but stays out of `RECORD_ENTRIES` on
+ * purpose, since the harness pins worktrees there and the migration must not
+ * relocate it. It is also the entry a worker announcement names most often.
  */
 const IGNORED_BEYOND_RECORDS: readonly string[] = ['worktrees']
 
@@ -107,30 +100,13 @@ const ROOT_READING: Record<RecordRoot, 'whole' | 'entries'> = {
 /**
  * A path a reader on a remote cannot open.
  *
- * The two roots differ by why they are unreadable rather than by which one
- * they are. A root reading `whole` matches on the root alone, since one
- * ignore line covers everything beneath it and no entry list can ever be
- * narrower than that. A root reading `entries` keeps the entry-list reading:
- * `.claude/` is tracked and holds `rules`, `skills`, `hooks`, and `context`,
- * so a rule path resolves in any clone and is not a board reference, and only
- * the entries the record move relocated are unreadable there. Reading the
- * roots and the relocated entries from `src/roots/record.ts` is what makes a
- * folder added there matched here without an edit, and the list above is what
- * covers the one thing that module deliberately does not carry.
- *
- * The root-alone branch requires at least one tail character ahead of the
- * shared tail capture, so a root written bare, such as the ignore line naming
- * it as a concept, reports nothing: there is no path there for an author to
- * remove. The entry-list branch instead bounds the entry name on the right
- * with a lookahead, so `plans` does not also match the prefix of a longer
- * word; that lookahead has to sit inside the entry branch rather than after
- * the whole alternation; the character right after a bare root is an ordinary
- * word character, and the same lookahead there would reject every root-alone
- * match.
- *
- * The tail runs to the first whitespace or closing delimiter, so a report
- * names the whole path an author has to remove rather than the prefix that
- * matched.
+ * A `whole` root matches on the root alone, since one ignore line covers all
+ * of it, and needs one tail character so a bare root names no path. An
+ * `entries` root is tracked, so only the relocated entries match there, with a
+ * lookahead inside that branch so `plans` skips a longer word. Roots and
+ * entries come from `src/roots/record.ts`, so a folder added there matches
+ * here with no edit. The tail runs to the first whitespace or closing
+ * delimiter, so a report names the whole path an author has to remove.
  */
 const RECORD_PATH = new RegExp(
   `(?<![\\w./-])(?:${RECORD_ROOTS.map((root) =>
@@ -150,18 +126,11 @@ const RECORD_PATH = new RegExp(
  * A link to one Claude Code session, matched on the host and the path segment
  * rather than on the identifier alphabet.
  *
- * The two instances on the trunk carry a 24-character identifier after
- * `session_`, and reading that shape into the pattern would empty this check
- * the moment the harness changed it, with nothing left to report and no
- * failure to notice. The host and the path segment are what the harness has to
- * keep for the link to resolve at all. A host change still gets past this and
- * nothing detects that.
- *
- * The scheme is optional because it is incidental to the two parts being
- * matched, so a link written without it is the same unresolvable reference.
- * The tail runs to the first whitespace or closing delimiter, which is how a
- * record path is read, so a report names the whole link rather than the prefix
- * that matched.
+ * Reading the identifier's shape into the pattern would empty this check the
+ * moment the harness changed it, while the host and segment must stay for the
+ * link to resolve. A host change still gets past this. The scheme is optional,
+ * and the tail runs to the first whitespace or closing delimiter, as a record
+ * path is read.
  */
 const SESSION_LINK =
   /(?<![\w./-])(?:https?:\/\/)?claude\.ai\/code\/session_[^\s`)\]]+/g
@@ -204,27 +173,15 @@ function unquoteVersionSpans(line: string): string {
 
 /**
  * Drops a fenced block outright and blanks a code span inside what remains,
- * so a token quoted rather than written is read the way a reader reads it:
- * shown, not asserted.
+ * so a quoted token reads as shown rather than asserted, as `canon markdown
+ * audit` reads the same text.
  *
- * `canon markdown audit` excludes a fenced block and a code span from its own
- * ban scan over the same kind of text, and this reuses that reading rather
- * than inventing a second one. `#1208` is the corpus case that forced it: a
- * backticked span quoting a test fixture's own version-shaped name, which the
- * shape-only scan below cannot tell from a leak on its own.
- *
- * A link destination stays unmasked, unlike the ban scan's own reading. A
- * release-please body's real semver reference sits inside the generated
- * compare link's URL, and masking it would empty `semverTags` on the one
- * pull request this check exists to pass, trading the corpus's one code-span
- * leak for a hole in every release.
- *
- * `keepVersionSpans` widens that reading for the board-reference pass alone. A
- * span whose whole content is a version token survives it, which is the shape
- * the leak reached the remote through, and longer content stays blanked, which
- * is what holds `#1208` closed. Two passes over one source rather than one pass
- * sorting its own output, because a token is a board reference by virtue of the
- * span it came out of and nothing downstream of the match can see that.
+ * A link destination stays unmasked, since a release body's real semver sits
+ * inside the generated compare link and masking it would empty `semverTags`.
+ * `keepVersionSpans` keeps a span holding only a version token for the board
+ * reference pass, while longer content stays blanked, so a quoted fixture name
+ * is never read as a leak. A token is a board reference by the span it came
+ * from, which nothing downstream of the match can see, hence two passes.
  */
 function readable(text: string, keepVersionSpans = false): string {
   return linesOutsideFences(text)
@@ -259,31 +216,14 @@ function sessionLinks(text: string): string[] {
 }
 
 /**
- * Reads a title and a body for version-shaped tokens and sorts every one
- * found into the namespace this pull request is allowed to carry.
+ * Reads a title and a body for version-shaped tokens and sorts each into the
+ * namespace this pull request may carry.
  *
- * The split runs on the pull request rather than on each token. A release
- * pull request's tokens are read as the semver references its generated body
- * legitimately carries, and every other pull request's tokens are read as
- * leaked phase labels, which is what `claude/skills/git-commit/references/versioning.md` names the
- * defect this exists to catch.
- *
- * A release pull request reports no board reference either, and the ground is
- * coverage rather than exemption. Release-please generates that body from
- * merged history, and every commit in that history came through a pull request
- * this same check already scanned, so a board reference cannot reach a release
- * body without passing the gate on its own. That its author has nothing to
- * rewrite is true as well and is the weaker half, since it would leave the
- * reference standing and unresolvable.
- *
- * A session link is reported on both paths, the release one included. Nothing
- * appends one to a release body, which release-please generates with no
- * session in the loop, so populating the field there costs nothing on every
- * run this repository has seen. What it buys is that the coverage argument
- * above never has to hold for this category: that argument reasons from every
- * commit in the generated history having passed this gate, and a link the gate
- * did not yet scan for would reach a release body under it. Reading the whole
- * body on both paths leaves no hole if the premise ever slips.
+ * A release pull request's tokens are semver references, and every other pull
+ * request's are leaked phase labels, the defect `versioning.md` names. A
+ * release reports no board reference, since every commit in its generated
+ * history already passed this check. A session link is reported on both
+ * paths, so that coverage argument never has to hold for links.
  */
 export function scanPhaseLabels(input: PhaseScanInput): PhaseScanResult {
   const source = `${input.title}\n${input.body}`

@@ -3,31 +3,15 @@ import { type BodyLine, visibleText } from '@/markdown/scan'
 export const HEADING = /^#{1,6}\s/
 
 /**
- * A section marker holding its line alone, which is the signpost a document
- * uses where its own template asks for bold rather than a heading.
+ * A section marker holding its line alone, the signpost a document uses where
+ * its template asks for bold rather than a heading, as plans do.
  *
- * `claude/skills/plan-feature/references/plan.md` marks its sections this way,
- * so without the break a conforming plan reads as one run and every plan
- * reports past the depth checkpoint. Moving the template to headings was the
- * alternative, and it clears no plan already written.
- *
- * The marker starts at column zero and fills the line, since a bold sentence
- * opener is emphasis and an indented one labels a list item. A false break
- * shortens every run around it until the measure stops reporting, so it is the
- * dearer error, and a missed break costs one unbroken run.
- *
- * A colon ends most markers, but `review-pr` writes colon-less ones and a bold
- * path heading per file, so two signals stand in where the colon is absent. A
- * label that is one whole code span breaks at any width, since a bold sentence
- * is never a single span. `MARKER_WIDTH` is read off the review bodies and the
- * records tree, where most colon-less labels sit at or under 20 visible
- * characters and the 21 to 30 band holds lines nobody can classify on sight,
- * such as `One change across four files.`. Terminal punctuation separates
- * nothing. A 48-character hand-written marker stays unbroken, since raising
- * the ceiling to reach it re-enters that band.
- *
- * Neither signal caps the colon form, which is its own evidence of a label and
- * reaches genuine markers between 31 and 50 characters.
+ * The marker starts at column zero and fills the line, since a bold opener is
+ * emphasis and an indented one labels a list item. A false break is the
+ * dearer error, since it shortens every run around it. A colon ends most
+ * markers. Without one, a label that is a single code span always breaks, and
+ * any other breaks at or under `MARKER_WIDTH`, past which bold lines turn into
+ * sentences nobody can classify on sight. The colon form has no width cap.
  */
 const BOLD_LINE = /^\*\*([^*]+)\*\*\s*$/
 const SPAN_LABEL = /^`[^`]+`$/
@@ -53,15 +37,11 @@ const SENTENCE_END = /[.!?]["'’”)\]]*(?=\s+(?:["'“([]*[A-Z]|`)|\s*$)/g
 /**
  * Checkpoints the structural measures run against.
  *
- * These are the definition rather than a fallback. Parsing each number out of
- * `claude/skills/markdown-craft/references/markdown.md` was the alternative,
- * and it put a parser contract on prose authored for people. The standard
- * still states every number, so moving one is an edit to both.
- *
+ * These are the definition rather than a fallback, since parsing them out of
+ * the markdown standard would put a parser contract on prose written for
+ * people. The standard still states every number, so moving one edits both.
  * `cadence`, `spread`, and `opener` come from the `## Rhythm` section of the
- * `write-human` skill: sentences within roughly five words are one cadence, an
- * opener repeating three times is a pattern, and a paragraph needs a third
- * sentence before either says anything.
+ * `write-human` skill.
  */
 export const CHECKPOINTS = {
   run: 40,
@@ -79,20 +59,11 @@ export const CHECKPOINTS = {
 /**
  * The reading a cadence rate is compared against, rather than a checkpoint.
  *
- * A count with nothing beside it reads as a finding, and the two counts the
- * cadence step reports have no range a reader can place them in: twelve flat
- * paragraphs out of forty says the same as two without one. Naming that a
- * healthy range differs by surface states that a range exists rather than what
- * it looks like, so the reading travels with the command.
- *
- * This is an observation rather than a rule, which is why it sits apart from
- * `CHECKPOINTS`. Nothing compares a run against it and no exit code reads it. A
- * project whose corpus is entirely terse reference prose is expected to sit
- * above the high end, and that is the measure working.
- *
- * Read across 483 markdown files at `6c273324` on 2026-08-20. A number here
- * goes stale against the corpus it describes with nothing comparing the two, so
- * re-measure before moving one.
+ * A count with nothing beside it reads as a finding, so a healthy range
+ * travels with the command. It is an observation rather than a rule: nothing
+ * compares a run against it, no exit code reads it, and a corpus of terse
+ * reference prose is expected to sit above the high end. A number here goes
+ * stale against the corpus it describes, so re-measure before moving one.
  */
 export const BASELINE = {
   /** Share of every measured paragraph sitting at or under the spread checkpoint. */
@@ -308,20 +279,11 @@ export function isSectionMarker(text: string): boolean {
 /**
  * Measures the longest run of lines no signpost breaks, in rendered lines.
  *
- * A heading breaks a run and so does a section marker, which is the same
- * signpost written the way a template asked for it. `isSectionMarker` above
- * fixes which lines qualify.
- *
- * Fenced lines are skipped rather than treated as breaks, per the standard:
- * they leave the count without ending the run, so prose either side of an
- * example still measures as the one stretch a reader scrolls through. Blank
- * lines do count, since the checkpoint is about how far a reader travels
- * between signposts and a blank line is distance like any other.
- *
- * Height is what a reader travels, and source lines only stand in for it while
- * lines stay short. A file authored one line per bullet puts a paragraph on
- * each, so a block of fifteen bullets measures as fifteen and renders past
- * sixty. Wrapping every line at a stated width is what closes that gap.
+ * A heading or a section marker breaks a run. Fenced lines leave the count
+ * without ending the run, so prose either side of an example measures as one
+ * stretch, and blank lines count, since they are distance a reader travels.
+ * Lines are wrapped at a stated width, since a file written one line per
+ * bullet renders far taller than its source line count.
  */
 export function longestRun(
   lines: readonly BodyLine[],
@@ -332,9 +294,8 @@ export function longestRun(
   let run: BodyLine[] = []
 
   const close = (): void => {
-    // The reported line is the run's first non-blank one, since that is what an
-    // editor should open. A run of nothing but blank lines is the gap between
-    // two headings rather than a stretch a reader travels, so it never counts.
+    // Report the run's first non-blank line, and never count a run of blank
+    // lines alone, since that is the gap between two headings.
     const first = run.find((line) => line.text.trim() !== '')
 
     if (
@@ -423,9 +384,8 @@ function foldBullets(
     const text = line.text.trim()
     const lead = line.text.length - line.text.trimStart().length
 
-    // Structure is read off the raw line and only the weight is masked. A line
-    // carrying nothing but an autolink has no visible text at all, and reading
-    // its masked form as blank would close the bullet it continues.
+    // Structure is read off the raw line, since an autolink-only line masks to
+    // blank and would otherwise close the bullet it continues.
     if (item) {
       close()
       open = {
@@ -629,26 +589,13 @@ function measureParagraph(block: readonly BodyLine[]): CadenceFinding {
 
 /**
  * Reports how a file's prose is distributed across sentence length and opening
- * word, which is the layer the ban sets cannot reach.
+ * word, the layer a ban list cannot reach, since each symptom is an absence.
  *
- * A banned-word list expresses negatives and every symptom this answers is the
- * absence of something, so no addition to that set catches a paragraph whose
- * sentences are all one length. The measure stops at what is countable. A
- * sentence's grammatical shape and whether it carries a finite verb are the two
- * rules `write-human` states that this does not implement, since reporting
- * them wrong names the exact failure this exists to measure.
- *
- * Two part-of-speech taggers were tried for the verb rule and rejected.
- * `compromise` tags a fronted past participle, `Measured at`, as a finite verb,
- * which is the exact shape the rule exists to catch. `wink-pos-tagger` fixes
- * that class, but about three quarters of what it flags is still wrong, split
- * between imperatives whose verb tags as a proper noun and declaratives whose
- * noun-ambiguous predicate, as in `Each maps to a skill.`, tags as a noun.
- * Separating those needs the predicate, which is syntax rather than a tag, and
- * no syntax parser was taken for a number nothing gates on.
- *
- * A heading fragment, a list item, and a table cell never reach this, since
- * `paragraphBlocks` ends a paragraph on each. A paragraph under the floor is
+ * It stops at what is countable. Sentence shape and whether a sentence carries
+ * a finite verb are not implemented, since part-of-speech taggers misread
+ * fronted participles, imperatives, and noun-ambiguous predicates, and telling
+ * them apart needs a syntax parser. Headings, list items, and table cells end
+ * a paragraph in `paragraphBlocks`, and a paragraph under the floor is
  * skipped, since the opener rule needs a third sentence to see a pattern.
  */
 export function measureCadence(

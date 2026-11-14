@@ -46,15 +46,11 @@ export function destinationPath(entry: string): string {
  * A citation into a moved entry.
  *
  * The tail rejects a following name character rather than asking for a word
- * boundary, and that is what protects the three retired flat archives without
- * an exception list: `.claude/plans-archive` continues into a `-` and never
- * matches, where `.claude/plans/` and a bare `.claude/plans` both do. A
- * boundary would treat the hyphen as a break and rewrite the archive to a root
- * it never sat under.
- *
- * The alternation is ordered longest first so `README.md` is decided before any
- * shorter entry can claim its prefix, and each entry is escaped because two of
- * them carry a dot.
+ * boundary, which protects the retired flat archives with no exception list:
+ * `.claude/plans-archive` continues into a `-` and never matches, where a
+ * boundary would treat the hyphen as a break and rewrite it. The alternation
+ * runs longest first so `README.md` is decided before a shorter entry claims
+ * its prefix, and each entry is escaped because two of them carry a dot.
  */
 const ENTRY_ALTERNATION = [...MOVED_ENTRIES]
   .sort((left, right) => right.length - left.length)
@@ -76,44 +72,15 @@ function escape(value: string): string {
 }
 
 /**
- * Files whose content is left alone entirely.
+ * Files whose content is left alone entirely, because each states the old root
+ * on purpose or records what happened under it.
  *
- * The changelog is release history, whose entries record what shipped while the
- * records were still under the old root. An eval result is a transcript of the
- * paths a session actually opened. Rewriting either makes it testify to
- * something that never happened.
- *
- * This module and `src/roots/record.ts` are two of the sources that state the
- * old root on purpose. Sweeping them turns every citation this expression is
- * built from into its own replacement, leaving a rewriter that maps `.canon/`
- * to `.canon/` and matches nothing. `src/roots/surface.ts` joins the list a
- * release early, for the same reason: it spells `.claude` as data the moment
- * it exists, and excluding it later would leave one release where a records
- * migration in a target could rewrite the resolver that migration itself
- * depends on.
- *
- * A test file is excluded because the fixtures that prove the old root still
- * resolves have to keep building it. Rewriting one is worse than a failing
- * test: the old-root case collapses into a copy of the new-root case beside it
- * and keeps passing, reporting coverage for a fallback nothing exercises.
- *
- * A hook is the third source that states both roots on purpose. Each one guards
- * on a `case` carrying an arm per root, so rewriting the old arm collapses the
- * pair into two copies of the new one and shellcheck reports a pattern that can
- * never match. The guard then stops firing in a project the move has not
- * reached, which is silent: the index goes stale while every save succeeds.
- *
- * A replay snapshot is a frozen copy of a consumer, its hooks included, and
- * the replay tests the upgrade from exactly that state. Sweeping one rewrites
- * the consumer's own old-root citations, so the snapshot stops matching the
- * release it was cut at.
- *
- * A file outside this list can still couple to one inside it, naming an
- * excluded path as plain text while it also carries a live citation of its
- * own, which `referencesExcluded` reports separately below. Widening this list
- * or `EXCLUDED_SUFFIXES` to catch that case would mean guessing at a naming
- * convention no project here declares, where the coupling check instead reads
- * what the file's own text already says.
+ * The changelog and eval results are history. This module and the root
+ * resolvers build the rewriter from the old spelling. Test fixtures prove the
+ * old root still resolves, hooks guard on a `case` arm per root, and replay
+ * snapshots freeze a consumer, so a rewrite collapses each into the new-root
+ * case and keeps passing. A file outside the list that quotes an excluded path
+ * is reported by `referencesExcluded` rather than guessed at here.
  */
 const EXCLUDED_PREFIXES: readonly string[] = [
   'src/migrate/',
@@ -139,15 +106,10 @@ export function isExcludedPath(path: string): boolean {
 
 /**
  * Whether `text` names an `EXCLUDED_PREFIXES` or `EXCLUDED_PATHS` entry as
- * literal substring text, which is how a rewritten file can couple to one this
- * module leaves alone: a citation gets rewritten clean while a line a few away
- * still spells the excluded path it was testing against.
- *
- * `EXCLUDED_SUFFIXES` plays no part here, since a suffix names a file's own
- * shape rather than text its content could quote. The one gap this cannot
- * close is a file that names the excluded surface by description rather than
- * by path, such as "the exemption hook" rather than `.claude/hooks/`, which is
- * the same limit `isExcludedPath` already carries for content it cannot parse.
+ * literal text, which is how a rewritten file couples to one this module leaves
+ * alone. `EXCLUDED_SUFFIXES` plays no part, since a suffix names a file's own
+ * shape. A file naming the excluded surface by description rather than by path
+ * is the one case this cannot see.
  */
 export function referencesExcluded(text: string): boolean {
   return (
@@ -160,17 +122,10 @@ export function referencesExcluded(text: string): boolean {
  * The roots holding nothing but records, so a path under one is a record
  * whatever it is named.
  *
- * `.canon/` qualifies by construction. `.claude/ARCHITECTURE.md` fixes the rule
- * that every gitignored session record moves there and nothing tracked ever
- * lands there, which covers a record folder `RECORD_ENTRIES` has yet to learn
- * about. The old root is the one that cannot take a whole-root reading, and it
- * is derived by exclusion rather than named, so a third root added later reads
- * as records-only unless someone says otherwise.
- *
- * Exported because `record-tree.ts` sweeps inside these roots and has to name
- * them rather than invert `isRecordArtifact`. That predicate is true for the old
- * root's record entries as well, so an inversion would sweep a project the move
- * has not run in, where the old spelling is the correct one.
+ * The old root is mixed and derived by exclusion, so a root added later reads
+ * as records-only unless someone says otherwise. Exported because
+ * `record-tree.ts` sweeps inside these roots, and inverting `isRecordArtifact`
+ * would also sweep the old root's record entries in a project not yet moved.
  */
 export const RECORD_ONLY_ROOTS: readonly RecordRoot[] = RECORD_ROOTS.filter(
   (root) => root !== FROM_ROOT,
@@ -179,17 +134,10 @@ export const RECORD_ONLY_ROOTS: readonly RecordRoot[] = RECORD_ROOTS.filter(
 /**
  * Every prefix under which a path is a record rather than a file to sweep.
  *
- * The asymmetry is the point. A whole-root prefix is correct for the new root
- * and wrong for the old one, which is mixed: this repository tracks 163 files
- * under `.claude/`, and a target's installed `.claude/rules/canon/core/035-tasks.md`
- * is the file the sweep exists to repoint, so a bare `.claude/` prefix strands
- * it silently. The old root is therefore entry-scoped, through `spell` so the
- * one naming variant stays decided in `roots/record.ts`.
- *
- * Joined with a literal separator rather than through `join`, the way
- * `EXCLUDED_PREFIXES` already is. These are matched against what `git ls-files`
- * returns, which is forward-slashed on every platform, where `join` would spell
- * a backslash on Windows and match nothing.
+ * The old root is entry-scoped, since it also tracks files the sweep exists to
+ * repoint, such as installed rules, and a bare `.claude/` prefix would strand
+ * them. Joined with a literal `/` rather than `join`, since `git ls-files`
+ * returns forward slashes on every platform.
  */
 const RECORD_PREFIXES: readonly string[] = [
   ...RECORD_ONLY_ROOTS,
@@ -197,23 +145,13 @@ const RECORD_PREFIXES: readonly string[] = [
 ]
 
 /**
- * Whether a path is a record artifact, which the sweep passes over entirely.
+ * Whether a path is a record artifact, which the sweep passes over silently.
  *
- * Separate from `isExcludedPath`, which reports what it skips because a reader
- * has to check those by hand. A record artifact is never something to check,
- * and a target's record tree is large enough that reporting each one would bury
- * the handful of exclusions that matter.
- *
- * A record folder becomes visible to the sweep at the moment `canon tooling
- * sync claude` prunes the twelve old ignore entries down to one `.canon/` line,
- * which is the step the documented first-run order puts immediately before this
- * verb. Without this predicate the run that follows reads the memory pen and
- * the groundwork trails as source and rewrites them.
- *
- * The three retired flat archives stay outside this, the way `CITATION` already
- * leaves them alone: `.claude/plans-archive/x.md` does not start with
- * `.claude/plans/`, and widening the entry list to catch it would change what
- * `MOVED_ENTRIES` means for the folder half of the verb.
+ * Kept apart from `isExcludedPath`, which reports what it skips for a reader to
+ * check, since a target's record tree would bury those few. Without it, a run
+ * after `canon tooling sync claude` prunes the ignore entries reads the record
+ * folders as source and rewrites them. The retired flat archives stay outside
+ * it, the way `CITATION` leaves them alone.
  */
 export function isRecordArtifact(path: string): boolean {
   return RECORD_PREFIXES.some(
@@ -603,16 +541,13 @@ export function planRecordsMove(
   let dated = 0
 
   for (const source of sources) {
-    // Silently, and ahead of the exclusion test. The command boundary filters
-    // these out before it reads them, so this is what keeps the pure function
-    // correct under a direct call rather than what the verb relies on.
+    // Ahead of the exclusion test, so a direct call stays correct even though
+    // the command boundary already filters these out.
     if (isRecordArtifact(source.path)) continue
 
     if (isExcludedPath(source.path)) {
-      // Only an excluded file that actually carries a citation is reported. The
-      // predicate covers every test file in the tree, so counting them all would
-      // report hundreds of exclusions the sweep was never going to touch and
-      // bury the handful a reader has to go and check by hand.
+      // Only an excluded file carrying a citation is reported, since the
+      // predicate covers every test file and would bury the few worth checking.
       if (scanText(source.text).rewritten > 0) excluded.push(source.path)
       continue
     }
@@ -627,9 +562,8 @@ export function planRecordsMove(
     crossRepo += counts.crossRepo
     dated += counts.dated
 
-    // Ahead of the rewritten === 0 continue below: a file whose only citation
-    // sits in its paths: glob, a cross-repo prefix, or a dated paragraph still
-    // needs to be reported.
+    // Ahead of the rewritten === 0 continue below, since a file whose only
+    // citation is a glob, a cross-repo prefix, or a dated line is still reported.
     const held = frontmatterGlobLines(source.text)
     if (held.length > 0)
       frontmatterGlobs.push({ path: source.path, lines: held })

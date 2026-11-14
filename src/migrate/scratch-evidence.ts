@@ -1,26 +1,12 @@
 /**
- * The promotion of nine cited measurement folders out of `.canon/tmp/` into
- * `.canon/evidence/<nn>-<folder>/`, which `canon records push` already backs.
+ * The promotion of cited measurement folders out of `.canon/tmp/` into
+ * `.canon/evidence/<nn>-<folder>/`, which `canon records push` backs.
  *
- * The scratch root is the one record root a disk loss takes with it, and a
- * durable record naming a folder under it as its evidence is a citation into
- * something the backup never covers. The nine promoted here are every folder
- * under scratch that a live or archived record cites and no source file under
- * `claude/`, `scripts/`, `src/`, or `governance/` names by path,
- * which is what separates them from a folder a script still writes into on its
- * own schedule.
- *
- * Distinct from `record-tree.ts`, which repoints a citation of the `.claude/`
- * to `.canon/` root move and prunes every `archive` segment on the way in,
- * since an archived record describes work that already closed. This move
- * reaches into an archive on purpose: `tasks/archive/`, `plans/archive/`, and
- * `groundwork/` are where most of the citations broken here already sit, and
- * a folder promoted out from under them stays gone whether the citing record
- * is open or closed.
- *
- * Honors the same `canon-keep-record-root` marker `records.ts` reads, since a
- * sentence describing what no target holds is not a live pointer this checkout
- * has to keep resolving.
+ * A disk loss takes the scratch root with it, so a durable record citing a
+ * folder there cites something no backup covers. Unlike `record-tree.ts`, this
+ * move reaches into archives on purpose, since most of the citing records sit
+ * there and a promoted folder is gone either way. Honors the same
+ * `canon-keep-record-root` marker `records.ts` reads.
  */
 
 import { existsSync } from 'node:fs'
@@ -39,18 +25,11 @@ import { LEGACY_SCRATCH_REL, recordDir, SCRATCH } from '@/roots/record'
 /**
  * Every folder this promotion moves, at the name it carries under scratch.
  *
- * Derived by the two-clause test `canon migrate scratch-evidence` exists to
- * apply mechanically: a durable record under a `BACKED_FOLDERS` entry, live
- * or archived, names the folder as its evidence, and no file under `claude/`,
- * `scripts/`, `src/`, or `governance/` names that path. Measured
- * 2026-09-06 against nine folders holding thirteen files.
- *
- * `verify-astro` and `verify-vite-react` pass the same test and are excluded
- * by name: both are scaffolds a command generates rather than records a
- * session wrote, and each is 100+ MB, which the review remote is not sized
- * for. `ablation`, `runs`, `memory-archive`, `hooks`, `pr`, and `handoff`
- * fail the second clause: a script or a skill body names each of those
- * paths, so moving one needs a code change first rather than a promotion.
+ * Each passes the test `canon migrate scratch-evidence` applies: a durable
+ * record cites it, and no file under `claude/`, `scripts/`, `src/`, or
+ * `governance/` names its path. `verify-astro` and `verify-vite-react` pass
+ * but are excluded, being generated scaffolds too large for the remote. A
+ * folder a script or skill names needs a code change first, not a promotion.
  */
 export const PROMOTED_FOLDERS: readonly string[] = [
   'hero-probe',
