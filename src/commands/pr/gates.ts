@@ -19,6 +19,7 @@ import {
   type EvidenceGate,
   type LiftRefusal,
   readsDrivableBox,
+  UNWAIVABLE_REEL_SKIPS,
 } from '@/pr/lift'
 import { mergeStateOf, type RestPull } from '@/pr/rest'
 import { PROJECT_ROOT } from '@/roots/project'
@@ -52,8 +53,7 @@ export const LIFT_REFUSALS: Record<
     'The evidence check reads owed, so the ship chain left a step undone.',
   'painted-uncaptured':
     'A painted path changed with no capture, no reel at the head, and no waiver in a review. Capture it, or have a review waive it.',
-  'reel-unsettled':
-    'The checklist holds a box a driver can run, and no reel is filmed at the head. The posted skip, if any, is one a builder can fix. Film the reel, or have a review waive it.',
+  'reel-unsettled': `The checklist holds a box a driver can run, and no reel is filmed at the head. The posted skip, if any, is one a builder can fix. Film the reel, or have a review waive it. A waiver over a ${UNWAIVABLE_REEL_SKIPS.join(' or ')} skip settles nothing, and the gate entry names one it ignored as \`reelWaiverRefused\`.`,
   'standing-stale':
     'The base moved under a path this branch writes since it branched, so CI measured a tree that is gone.',
   'standing-conflict': 'The head does not merge cleanly into the base.',
