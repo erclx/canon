@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.92.0](https://github.com/erclx/canon/compare/v5.91.0...v5.92.0) (2026-11-14)
+
+
+### Features
+
+* **app-drive:** drive the live app and guard joint drives and pastes ([#3113](https://github.com/erclx/canon/issues/3113)) ([7de1bc8](https://github.com/erclx/canon/commit/7de1bc8101d30848f8444a269edb22907653019d))
+* **claude:** allow the canon verbs a ui pass runs in seeded settings ([#3114](https://github.com/erclx/canon/issues/3114)) ([a32f72a](https://github.com/erclx/canon/commit/a32f72ae9c2af61d90594f94717b36560eae213b))
+* **plan-intake:** retell intake items in plain words ([#3112](https://github.com/erclx/canon/issues/3112)) ([1748ca3](https://github.com/erclx/canon/commit/1748ca3eac5b7c16df562564bde3222e4ae75d1a))
+* **skills:** hand one planner several rows in one launch ([#3111](https://github.com/erclx/canon/issues/3111)) ([93da6ae](https://github.com/erclx/canon/commit/93da6ae1ba03a5a1035f3abd1ed692e865790542))
+
 ## [5.91.0](https://github.com/erclx/canon/compare/v5.90.0...v5.91.0) (2026-11-14)
 
 
