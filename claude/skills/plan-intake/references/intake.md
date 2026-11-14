@@ -130,10 +130,11 @@ An item whose claim is a defect may carry one run of its repro, and the run is w
 - **Open:** only where the call is the operator's
 - **Suggested:** the pick in one sentence, then the reason and the main tradeoff in one or two
 - **Overlaps:** the live board task that already owns this item
+- **Decided:** evidence/drive-log.md, finding <nn>, only where the operator's decision in this folder's drive log is the Fix
 - **You:**
 ```
 
-- `Problem:`, `Fix:`, `Worth it:`, and the empty `You:` slot ship on every item, each on one line since the reader takes nothing after it. The other two are conditional.
+- `Problem:`, `Fix:`, `Worth it:`, and the empty `You:` slot ship on every item, each on one line since the reader takes nothing after it. The other three are conditional.
 - Number items per cluster file, giving a finding split later a letter suffix such as `3a` beside `3`, since renumbering moves every cited label
 - `Open:` reads on its own, with no bare "it" or "this" for the Fix, and `Suggested:` is required beside it, since `ok` against two options carries no information
 - Where the answer is the operator's preference rather than a technical call, say so in that form rather than inventing a default
@@ -167,6 +168,16 @@ The operator types into the cluster file, or answers in chat and a verb lands th
 - An answer given in conversation and never written back leaves the item unread, since the file is the record
 - An item already carrying an answer is refused rather than overwritten, whichever route the second answer takes
 - Revising a filled slot is the operator editing their own line
+
+### A decision already recorded
+
+An item carrying `Decided:` restates a decision the operator made during a drive, so asking it alone repeats the question. A cluster whose unread items all resolve a `decision` is asked once as a whole.
+
+- The pointer reaches this folder's own `evidence/drive-log.md` and nowhere else, and `canon intake list --json` resolves it into the item's `decision`
+- `canon intake answer <slug> --cluster <file> --decided <n>` lands each accept
+- The verb writes `ok, as decided in drive-log finding <nn>`, so the slot still carries `ok` and names its source
+- A pointer that reaches no decision in the folder's log refuses the whole call as `undecided`, with no slot written
+- The operator still answers the cluster question, so an empty slot stays unread until then
 
 ## Retrieval
 
