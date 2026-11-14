@@ -19,7 +19,8 @@ Read this before writing or keeping a comment. The figures live in `canon commen
 
 ## What it leaves out
 
-- Leave history to the pull request or a groundwork folder, being the date a figure was measured, the commit or issue it came from, and the alternative tried first. Write `<YYYY-MM-DD>` where a format needs an example date.
+- Leave history to the pull request or a groundwork folder, being the date a figure was measured, the commit or issue it came from, and the alternative tried first.
+- Write `<YYYY-MM-DD>` where a format needs an example date, since the scan flags a real one.
 - Read a block past three lines of text as a cue to cut. Keep what the code cannot carry and drop the rest.
 
 ## The limits

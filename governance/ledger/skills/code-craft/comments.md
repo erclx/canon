@@ -23,10 +23,11 @@ The field is software engineering practice for source comments, which has no spe
 
 ## What it leaves out
 
-| Bullet                        | Source                                                                                                                                                                                           | Read       |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
-| History to the pull request   | House choice: a measured date, a commit, or an issue number is true only of the moment it was written, and the pull request keeps it beside the diff it explains, where no later edit strands it | 2026-11-14 |
-| Past three lines of text, cut | House choice: three lines of text inside two delimiters is the longest head block the scan reads as clean, so a longer one is where a cut pays first                                             | 2026-11-14 |
+| Bullet                            | Source                                                                                                                                                                                           | Read       |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| History to the pull request       | House choice: a measured date, a commit, or an issue number is true only of the moment it was written, and the pull request keeps it beside the diff it explains, where no later edit strands it | 2026-11-14 |
+| A placeholder for an example date | House choice: the scan matches a date as a pattern and cannot tell an example from a record, so a placeholder keeps a format's contract without tripping it                                      | 2026-11-14 |
+| Past three lines of text, cut     | House choice: three lines of text inside two delimiters is the longest head block the scan reads as clean, so a longer one is where a cut pays first                                             | 2026-11-14 |
 
 ## The limits
 
