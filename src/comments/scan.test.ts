@@ -357,13 +357,6 @@ describe('every block and its placement', () => {
     ])
   })
 
-  it('should count a 10-line block toward the file and leave a 9-line one out', () => {
-    const text = `${run('//', 10)}\nconst a = 1\n${run('//', 9)}\n`
-    expect(countFile(file('a.ts', text), 'ts').longBlockFiles).toEqual([
-      { file: 'a.ts', lines: 10, blocks: 1, headLines: 10, bodyLines: 0 },
-    ])
-  })
-
   it('should read a JSDoc above a function as head and a block inside it as body', () => {
     const text = [
       '/**',
@@ -378,8 +371,9 @@ describe('every block and its placement', () => {
     const count = countFile(file('a.ts', text), 'ts')
 
     expect(count.bodyBlocks).toEqual([{ file: 'a.ts', line: 16, lines: 11 }])
-    expect(count.longBlockFiles).toEqual([
-      { file: 'a.ts', lines: 25, blocks: 2, headLines: 14, bodyLines: 11 },
+    expect(count.blocks.map((block) => block.placement)).toEqual([
+      'head',
+      'body',
     ])
   })
 
@@ -426,20 +420,6 @@ describe('every block and its placement', () => {
     expect(count.blocks).toEqual([
       { file: 'a.sh', line: 2, lines: 21, placement: null },
     ])
-    expect(count.longBlockFiles).toEqual([
-      { file: 'a.sh', lines: 21, blocks: 1, headLines: null, bodyLines: null },
-    ])
-  })
-
-  it('should sort the files of a language by long-block lines, most first', () => {
-    const [ts] = countFiles(
-      [file('a.ts', run('//', 12)), file('b.ts', run('//', 30))],
-      { languages: ['ts'] },
-    )
-    expect(ts?.longBlockFiles.map((entry) => entry.file)).toEqual([
-      'b.ts',
-      'a.ts',
-    ])
   })
 })
 
@@ -455,9 +435,6 @@ describe('Python comments and their placement', () => {
     const count = countFile(file('a.py', text), 'py')
 
     expect(count.bodyBlocks).toEqual([{ file: 'a.py', line: 2, lines: 11 }])
-    expect(count.longBlockFiles).toEqual([
-      { file: 'a.py', lines: 11, blocks: 1, headLines: 0, bodyLines: 11 },
-    ])
   })
 
   it('should read a # block trailing the last statement of a def as body', () => {
@@ -479,7 +456,9 @@ describe('Python comments and their placement', () => {
     const count = countFile(file('a.py', text), 'py')
 
     expect(count.bodyBlocks).toEqual([])
-    expect(count.longBlockFiles[0]?.headLines).toBe(12)
+    expect(count.blocks).toEqual([
+      { file: 'a.py', line: 3, lines: 12, placement: 'head' },
+    ])
   })
 
   it('should read a # block above a def or between methods as head', () => {
@@ -497,8 +476,9 @@ describe('Python comments and their placement', () => {
     const count = countFile(file('a.py', text), 'py')
 
     expect(count.bodyBlocks).toEqual([])
-    expect(count.longBlockFiles).toEqual([
-      { file: 'a.py', lines: 21, blocks: 2, headLines: 21, bodyLines: 0 },
+    expect(count.blocks.map((block) => block.placement)).toEqual([
+      'head',
+      'head',
     ])
   })
 
@@ -527,8 +507,11 @@ describe('Python comments and their placement', () => {
     expect(count.commentLines).toBe(45)
     expect(count.inlineComments).toBe(0)
     expect(count.bodyBlocks).toEqual([])
-    expect(count.longBlockFiles).toEqual([
-      { file: 'a.py', lines: 45, blocks: 4, headLines: 45, bodyLines: 0 },
+    expect(count.blocks.map((block) => block.placement)).toEqual([
+      'head',
+      'head',
+      'head',
+      'head',
     ])
   })
 
@@ -577,9 +560,6 @@ describe('Python comments and their placement', () => {
     ])
     expect(count.blocks).toEqual([
       { file: 'a.py', line: 1, lines: 21, placement: null },
-    ])
-    expect(count.longBlockFiles).toEqual([
-      { file: 'a.py', lines: 21, blocks: 1, headLines: null, bodyLines: null },
     ])
   })
 

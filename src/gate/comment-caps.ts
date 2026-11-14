@@ -5,10 +5,8 @@ import { plural } from '@/cli/ui'
 import {
   BODY_BLOCK_CAP,
   countFile,
-  FILE_LONG_BLOCK_CAP,
   HEAD_BLOCK_CAP,
   isPruned,
-  LONG_BLOCK_FLOOR,
   type LanguageCount,
   type LongBlock,
   languageFor,
@@ -127,34 +125,3 @@ export const commentBodyBlocks: Measure = capMeasure(
       `${plural(count, 'in-body comment run')} past ${BODY_BLOCK_CAP} lines. Move the reason above the function or into the code it explains.`,
   },
 )
-
-/**
- * Fails any file holding more than `FILE_LONG_BLOCK_CAP` comment lines in runs
- * of `LONG_BLOCK_FLOOR` lines or more.
- */
-export const commentFileLines: Measure = async (ctx) => {
-  const counted = await countRepository(ctx.root)
-  if (counted === undefined) return UNMEASURED
-
-  const files = counted.counts
-    .flatMap((count) => count.longBlockFiles)
-    .filter((file) => file.lines > FILE_LONG_BLOCK_CAP)
-  if (files.length === 0) {
-    return {
-      emissions: [
-        {
-          kind: 'info',
-          text: `No file past ${FILE_LONG_BLOCK_CAP} lines in comment runs of ${LONG_BLOCK_FLOOR} or more across ${plural(counted.files, 'source file')}`,
-        },
-      ],
-    }
-  }
-
-  return {
-    emissions: files.map((file) => ({
-      kind: 'warn',
-      text: `${file.file} has ${file.lines} lines in comment runs of ${LONG_BLOCK_FLOOR} or more, past ${FILE_LONG_BLOCK_CAP}`,
-    })),
-    failure: `${plural(files.length, 'file')} past ${FILE_LONG_BLOCK_CAP} lines in long comment runs. Cut each run to the fact the code cannot carry.`,
-  }
-}

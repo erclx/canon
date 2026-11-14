@@ -50,30 +50,12 @@ export interface LongBlock {
   readonly lines: number
 }
 
-/** Comment lines from which a run counts toward its file's long-block lines. */
-export const LONG_BLOCK_FLOOR = 10
-
 /** In-body comment lines past which the gate fails a run. */
 export const BODY_BLOCK_CAP = 2
-
-/** Long-block lines past which the gate fails a file. */
-export const FILE_LONG_BLOCK_CAP = 200
 
 /** A run past the checkpoint, with `placement` null where it is unread. */
 export interface Block extends LongBlock {
   readonly placement: Placement | null
-}
-
-/**
- * One file's runs of `LONG_BLOCK_FLOOR` lines or more, summed. The head and
- * body split is null in a language whose placement is unread.
- */
-export interface LongBlockFile {
-  readonly file: string
-  readonly lines: number
-  readonly blocks: number
-  readonly headLines: number | null
-  readonly bodyLines: number | null
 }
 
 export interface LanguageCount {
@@ -91,8 +73,6 @@ export interface LanguageCount {
   readonly headBlocks: readonly LongBlock[]
   /** Every in-body run past `BODY_BLOCK_CAP`. */
   readonly bodyBlocks: readonly LongBlock[]
-  /** Every file holding a run of `LONG_BLOCK_FLOOR` or more, most lines first. */
-  readonly longBlockFiles: readonly LongBlockFile[]
   /** Every Python file whose runs went unplaced, with what refused it. */
   readonly unreadFiles: readonly UnreadFile[]
 }
@@ -169,8 +149,6 @@ interface FileCount {
   readonly docBlocks: number
   readonly inlineComments: number
   readonly runs: readonly Run[]
-  /** Whether each long run carries a placement, so the head and body split holds. */
-  readonly placed: boolean
   readonly unread?: Omit<UnreadFile, 'file'>
 }
 
@@ -281,7 +259,6 @@ function countTypeScript(
     docBlocks,
     inlineComments,
     runs: placeRuns(file, lines, runs.runs()),
-    placed: true,
   }
 }
 
@@ -345,7 +322,6 @@ function countBash(
     docBlocks: 0,
     inlineComments,
     runs: runs.runs().map((run) => ({ ...run, placement: null })),
-    placed: false,
   }
 }
 
@@ -431,7 +407,6 @@ function countPython(
             ? 'body'
             : 'head',
     })),
-    placed: read.kind === 'read',
     ...(read.kind === 'unread'
       ? { unread: { line: read.line, reason: read.reason } }
       : {}),
@@ -465,14 +440,6 @@ export function countFile(
     (best, run) => (best === undefined || run.lines > best.lines ? run : best),
     undefined,
   )
-  const long = runs.filter((run) => run.lines >= LONG_BLOCK_FLOOR)
-  const linesWhere = (placement: Placement): number | null =>
-    counted.placed
-      ? long
-          .filter((run) => run.placement === placement)
-          .reduce((sum, run) => sum + run.lines, 0)
-      : null
-
   return {
     language,
     files: 1,
@@ -492,18 +459,6 @@ export function countFile(
     bodyBlocks: runs
       .filter((run) => run.placement === 'body' && run.lines > BODY_BLOCK_CAP)
       .map(({ file: path, line, lines }) => ({ file: path, line, lines })),
-    longBlockFiles:
-      long.length === 0
-        ? []
-        : [
-            {
-              file: file.path,
-              lines: long.reduce((sum, run) => sum + run.lines, 0),
-              blocks: long.length,
-              headLines: linesWhere('head'),
-              bodyLines: linesWhere('body'),
-            },
-          ],
     unreadFiles:
       counted.unread === undefined
         ? []
@@ -532,7 +487,6 @@ export function countFiles(
       blocks: [] as Block[],
       headBlocks: [] as LongBlock[],
       bodyBlocks: [] as LongBlock[],
-      longBlockFiles: [] as LongBlockFile[],
       unreadFiles: [] as UnreadFile[],
     }
 
@@ -549,13 +503,8 @@ export function countFiles(
       totals.blocks.push(...count.blocks)
       totals.headBlocks.push(...count.headBlocks)
       totals.bodyBlocks.push(...count.bodyBlocks)
-      totals.longBlockFiles.push(...count.longBlockFiles)
       totals.unreadFiles.push(...count.unreadFiles)
     }
-
-    totals.longBlockFiles.sort(
-      (a, b) => b.lines - a.lines || a.file.localeCompare(b.file),
-    )
 
     return totals
   })

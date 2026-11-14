@@ -4,11 +4,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import {
-  commentBodyBlocks,
-  commentFileLines,
-  commentHeadBlocks,
-} from '@/gate/comment-caps'
+import { commentBodyBlocks, commentHeadBlocks } from '@/gate/comment-caps'
 import { type GateContext, runStage } from '@/gate/sequencer'
 import { STAGES } from '@/gate/stages'
 import { gitEnv } from '@/git/env'
@@ -146,45 +142,6 @@ describe('comment caps', () => {
       expect(report.emissions[0]?.kind).toBe('warn')
     })
 
-    it('should pass a file at 200 lines in long runs', async () => {
-      commit('src/a.ts', headRuns(20, 10))
-
-      const report = await commentFileLines(context())
-
-      expect(report.failure).toBeUndefined()
-    })
-
-    it('should fail a file at 201 lines in long runs', async () => {
-      commit('src/a.ts', `${headRuns(19, 10)}${comments(11).join('\n')}\n`)
-
-      const report = await commentFileLines(context())
-
-      expect(report.failure).toBeDefined()
-      expect(report.emissions.map((emission) => emission.text)).toEqual([
-        'src/a.ts has 201 lines in comment runs of 10 or more, past 200',
-      ])
-    })
-
-    it('should leave runs under 10 lines out of the file count', async () => {
-      commit('src/a.ts', headRuns(30, 9))
-
-      const report = await commentFileLines(context())
-
-      expect(report.failure).toBeUndefined()
-    })
-
-    it('should count a bash file toward the file cap', async () => {
-      const bash = Array.from(
-        { length: 21 },
-        (_, n) => `${Array(10).fill('# note').join('\n')}\necho ${n}`,
-      ).join('\n')
-      commit('scripts/a.sh', `#!/usr/bin/env bash\n${bash}\n`)
-
-      const report = await commentFileLines(context())
-
-      expect(report.failure).toBeDefined()
-    })
-
     it('should skip a pruned fixture tree as the scan does', async () => {
       commit('src/fixtures/a.ts', inBody(30))
 
@@ -209,7 +166,6 @@ describe('comment caps', () => {
   it.each([
     ['commentHeadBlocks', commentHeadBlocks],
     ['commentBodyBlocks', commentBodyBlocks],
-    ['commentFileLines', commentFileLines],
   ])(
     'should read a tree git cannot list as unmeasured in %s',
     async (_, measure) => {

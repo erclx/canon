@@ -4,9 +4,7 @@ import {
   BLOCK_LINE_CHECKPOINT,
   BODY_BLOCK_CAP,
   density,
-  FILE_LONG_BLOCK_CAP,
   HEAD_BLOCK_CAP,
-  LONG_BLOCK_FLOOR,
   type Language,
   LANGUAGES,
   type LanguageCount,
@@ -61,7 +59,6 @@ export function register(program: Command): void {
         'Caps, which canon gate run fails on in a touched file and this report only lists:',
         `  a head run past ${HEAD_BLOCK_CAP} lines, delimiters included`,
         `  an in-body run past ${BODY_BLOCK_CAP} lines`,
-        `  a file past ${FILE_LONG_BLOCK_CAP} lines in runs of ${LONG_BLOCK_FLOOR} or more`,
         '',
         'Exit codes:',
         '  0  the scan completed',
@@ -151,16 +148,13 @@ async function runScan(
             ? { source: vocabulary.source, terms: vocabulary.terms }
             : null,
         blockCheckpoint: BLOCK_LINE_CHECKPOINT,
-        longBlockFloor: LONG_BLOCK_FLOOR,
         headBlockCap: HEAD_BLOCK_CAP,
         bodyBlockCap: BODY_BLOCK_CAP,
-        fileLongBlockCap: FILE_LONG_BLOCK_CAP,
         snapshot: snapshot.map((count) => ({
           ...record(count),
           blocks: count.blocks,
           headBlocks: count.headBlocks,
           bodyBlocks: count.bodyBlocks,
-          longBlockFiles: count.longBlockFiles,
           unreadFiles: count.unreadFiles,
         })),
         // A trend point keeps the summary keys alone, so a long range does
@@ -296,9 +290,6 @@ function reportCaps(snapshot: readonly LanguageCount[]): void {
 
   const head = snapshot.flatMap((count) => count.headBlocks)
   const body = snapshot.flatMap((count) => count.bodyBlocks)
-  const files = snapshot
-    .flatMap((count) => count.longBlockFiles)
-    .filter((file) => file.lines > FILE_LONG_BLOCK_CAP)
 
   if (head.length === 0) {
     logInfo(`No head run past ${HEAD_BLOCK_CAP} lines.`)
@@ -319,19 +310,6 @@ function reportCaps(snapshot: readonly LanguageCount[]): void {
       body
         .map((block) => `${block.file}:${block.line}  ${block.lines} lines`)
         .join('\n'),
-    )
-  }
-
-  if (files.length === 0) {
-    logInfo(
-      `No file past ${FILE_LONG_BLOCK_CAP} lines in runs of ${LONG_BLOCK_FLOOR} or more.`,
-    )
-  } else {
-    logWarn(
-      `${files.length} files past ${FILE_LONG_BLOCK_CAP} lines in runs of ${LONG_BLOCK_FLOOR} or more`,
-    )
-    pipeOutput(
-      files.map((file) => `${file.file}  ${file.lines} lines`).join('\n'),
     )
   }
 }
