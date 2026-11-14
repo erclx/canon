@@ -90,9 +90,8 @@ function run(
 
 function check(): void {
   logStep('Assert excluded path exists in source')
-  // An absence check over a path the source tree no longer holds passes on
-  // nothing, so the excluded tree has to exist here before its absence below
-  // can mean the publish left it out.
+  // An absence check over a path the tree no longer holds passes on nothing, so
+  // the excluded tree has to exist here first.
   if (!existsSync(join(root, 'sandbox/exempt.toml'))) {
     throw new Error(
       'sandbox/exempt.toml is missing from the source tree, so the absence check below would pass on nothing',

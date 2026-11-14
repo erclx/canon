@@ -453,10 +453,8 @@ export default scenario({
       logConfiguring(ctx, 'unchanged-head ')
       const prUrl = seedReviewablePr(ctx)
 
-      // A pass carrying a finding at any severity takes the open heading, so the
-      // seed models the state a conforming minors-only pass leaves. Both headings
-      // are in the family the next pass matches, so its commit.oid is still the
-      // head that pass reads.
+      // A pass with a finding at any severity takes the open heading, and both
+      // headings sit in the family the next pass matches.
       seedReview(ctx, prUrl, FIRST_PASS_MINOR, FAIL_FIRST_PASS)
 
       // The worker accepts the minor as recorded, so nothing is committed and the head stays put.
@@ -558,10 +556,8 @@ export default scenario({
 
       seedReview(ctx, prUrl, FIRST_PASS_MINOR, FAIL_FIRST_PASS)
 
-      // A finding a worker produces after the close-out rather than in answer to
-      // one already on the thread, with no commit behind it. The head stays put,
-      // so this is what the widened reply-family query has to reach instead of
-      // refusing ahead of it.
+      // A finding posted after the close-out with no commit behind it, which the
+      // widened reply-family query has to reach rather than refuse.
       seedComment(
         ctx,
         prUrl,
@@ -602,9 +598,8 @@ export default scenario({
       commitAll(ctx, 'fix(api): reject an empty task title')
       ctx.git('push', 'origin', 'HEAD', '-q')
 
-      // The standing verdict. Posting it here rather than after the next commit is
-      // what pins its commit.oid to this head, which is the state the guard reads
-      // back and the field a PUT rewrite cannot move.
+      // Posted here so its commit.oid pins to this head, the field the guard reads
+      // back and a PUT rewrite cannot move.
       const closedSha = ctx.read('git', ['rev-parse', '--short', 'HEAD']).trim()
       seedReview(
         ctx,
@@ -613,10 +608,8 @@ export default scenario({
         FAIL_CLOSE_OUT,
       )
 
-      // The producing shape, written out. The close-out above left nothing owed,
-      // the author makes a change that was their own call, and the delta reaching
-      // the next pass has nothing to say by construction. A conforming pass has to
-      // rewrite the standing close-out rather than post a second one beside it.
+      // An author's own change after a close-out leaves the next pass nothing to say,
+      // so a conforming pass rewrites the close-out rather than posting another.
       ctx.fixtures('claude', 'review-pr', 'repeat-close-out', '01-trim-once')
 
       commitAll(ctx, 'refactor(api): read the trimmed title once')
@@ -650,24 +643,20 @@ export default scenario({
       logConfiguring(ctx, 'marker-race ')
       const prUrl = seedReviewablePr(ctx)
 
-      // What the seeded pass read, captured before the push below. Everything
-      // between these two lines is the compose window, which is the stretch the
-      // real race lives in and the one nothing about GitHub's own stamps records.
+      // What the seeded pass read, captured before the push below. Between these
+      // lines is the compose window, which GitHub's own stamps never record.
       const readSha = ctx.read('git', ['rev-parse', 'HEAD']).trim()
       const readAt = `${new Date().toISOString().slice(0, 19)}Z`
 
-      // The push that lands inside that window. It is the same fix the close-out
-      // arm seeds, so what the delta raises is the pass's own call and this arm
-      // asserts only that the pass reached the delta at all.
+      // The push landing inside that window, the close-out arm's fix, so this arm
+      // asserts only that the pass reached the delta.
       ctx.fixtures('claude', 'review-pr', 'shared', '04-empty-title-guard')
 
       commitAll(ctx, 'fix(api): reject an empty task title')
       ctx.git('push', 'origin', 'HEAD', '-q')
 
-      // Posted after that push, so GitHub stamps commit.oid with the new head
-      // while the marker names the commit the pass actually read. That is the
-      // race reproduced exactly rather than waited for, and it is why this arm
-      // needs no timing.
+      // Posted after that push, so commit.oid names the new head while the marker
+      // names the commit read, reproducing the race with no timing.
       seedReview(
         ctx,
         prUrl,

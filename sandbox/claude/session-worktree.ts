@@ -17,19 +17,16 @@ function logCleanup(ctx: StageContext): void {
 function stageSubmodule(ctx: StageContext): void {
   ctx.fixtures('claude', 'session-worktree', 'shared', '01-plan')
 
-  // The origin the submodule is added from stays on disk for later fetches
-  // and is ignored, since an untracked nested repository inside the fixture
-  // shows up in every status read and enters the index as a gitlink on the
-  // next git add.
+  // The submodule's origin stays on disk and is ignored, since an untracked
+  // nested repository would show in every status read and stage as a gitlink.
   ctx.append('.gitignore', '.sandbox-submodule-origin/\n')
 
   ctx.git('add', '.')
   ctx.commit('feat(plans): seed grault plan')
   ctx.git('checkout', '-b', 'grault', '-q')
 
-  // An absorbed submodule returns one identical path from --git-dir and
-  // --git-common-dir, so the linked-worktree guard passes here and the
-  // superproject read is the only one that separates the two states.
+  // An absorbed submodule returns one path from --git-dir and --git-common-dir,
+  // so only the superproject read separates the two states.
   ctx.git('init', '-q', '.sandbox-submodule-origin')
   ctx.git(
     '-C',
@@ -230,9 +227,8 @@ export default scenario({
       ctx.commit('feat(scripts): seed corge plan and the port helper')
       ctx.git('checkout', '-b', 'corge', '-q')
 
-      // A folder left behind after its worktree was removed, which is the state
-      // the helper refuses. It is a sibling rather than the entry target, since
-      // Step 4 registers whatever it creates and a fresh entry never lands on one.
+      // A folder left behind by a removed worktree, the state the helper refuses,
+      // placed as a sibling since a fresh entry never lands on one.
       ctx.fixtures('claude', 'session-worktree', 'port-offset', '02-stale')
 
       ctx.log.step('Scenario ready: port report (Step 6)')

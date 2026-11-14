@@ -1,19 +1,14 @@
 import { scenario } from '@/sandbox/scenario'
 
 /**
- * No project copy of the corpus, for the same reason `claude/review-craft.ts`
- * carries none. The absent project copy forces `ui-checklist` onto the
- * slug standard fallback through the plugin, and the branch name
- * below turns that citation into a checklist filename `expect.toml` asserts by
- * exact path. It sat in `manual` while the skill could correctly write no
- * checklist at all, which is the escape the shrink closed: the checklist is the
- * skill's whole output now, so a run producing none has produced nothing.
+ * No project copy of the corpus, as in `claude/review-craft.ts`, so
+ * `ui-checklist` falls back to the plugin's slug standard, and the branch name
+ * below turns that into a checklist path `expect.toml` asserts exactly. The
+ * checklist is the skill's whole output, so a run producing none fails.
  *
- * The `02-task-filter` fixture keeps the filter input mounted alongside the
- * empty state. Returning the paragraph alone would unmount it and strand a user
- * who filtered to no matches with no way to clear the filter, and a skill
- * reading that diff reviews the fixture's own defect instead of the change
- * under test.
+ * The `02-task-filter` fixture keeps the filter input mounted beside the empty
+ * state, since unmounting it would strand a filtered user, and the skill would
+ * review that defect instead of the change under test.
  */
 export default scenario({
   config: {
@@ -29,12 +24,8 @@ export default scenario({
 
       ctx.git('checkout', '-b', 'feat/task-filter', '-q')
 
-      // The diff the skill classifies. `TaskList` gains an empty state, a loading
-      // state, a filter input, and a link to an archive route. The states belong to a
-      // component test and the route change to an end to end spec, which is the
-      // routing this arm asserts. A spacing and color change is the visual half. All
-      // three kinds have to be present or the skill takes its all-automatable branch
-      // and writes no checklist, which is the file the fallback claim is about.
+      // `TaskList` gains states for a component test, a route for an end to end spec,
+      // and a visual change, all three needed for the skill to write a checklist.
       ctx.fixtures('claude', 'ui-checklist', 'shared', '02-task-filter')
 
       ctx.git('add', '.')

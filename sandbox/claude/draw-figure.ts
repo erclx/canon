@@ -65,10 +65,8 @@ export default scenario({
       )
     },
     'architecture-set': (ctx) => {
-      // A small two-folder project with its requirements record and one context
-      // entry to draw into. The request names an architecture view, so the run
-      // shapes it through the architecture set and renders it through Mermaid,
-      // landing it in the entry rather than in a per-kind diagrams folder.
+      // The request names an architecture view, so the run renders it through
+      // Mermaid into the entry rather than a per-kind diagrams folder.
       ctx.fixtures('claude', 'draw-figure', 'architecture-set', '01-initial')
 
       ctx.git('add', '.')

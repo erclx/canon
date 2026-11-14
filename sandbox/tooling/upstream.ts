@@ -39,9 +39,8 @@ function collectUpstreamStacks(ctx: StageContext): UpstreamStack[] {
 export default scenario({
   arms: {
     default: async (ctx) => {
-      // Exported at stage time rather than declared in `config`, so provisioning
-      // reads it from the context's env after the arm returns, as the shell it
-      // replaced did, and the seed installs before it run without it.
+      // Exported at stage time so provisioning reads it after the arm returns, as the
+      // shell it replaced did, and the seed installs before it run without it.
       ctx.env.SANDBOX_SKIP_AUTO_COMMIT = 'true'
 
       const stacks = collectUpstreamStacks(ctx)

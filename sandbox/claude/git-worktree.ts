@@ -6,20 +6,15 @@ import { join, resolve } from 'node:path'
 import { type StageContext, scenario } from '@/sandbox/scenario'
 
 /**
- * Fakes a live session occupying `path`, so the cleanup arm can prove
- * occupancy holds a tree back independently of merge state. The registry this
- * writes to is the real one at CLAUDE_CONFIG_DIR (or $HOME/.claude/sessions):
- * provisioning and the later `claude -p` run are separate invocations with no
- * shared environment, so there is no sandbox-local registry to point at
- * instead. The spawned process bounds itself at six hours, comfortably past
- * any one drive and well under a day, so a record from an earlier drive dies
- * on its own and `canon sessions list` stops carrying it as live rather than
- * needing a teardown hook the harness does not have. The pid in the record's
- * filename is what keeps a second drive from overwriting the first run's
- * record and orphaning its still-running process.
+ * Fakes a live session occupying `path`, so the cleanup arm proves occupancy
+ * holds a tree back independently of merge state.
  *
- * The occupant stays in the provisioning process group, unref'd rather than
- * detached, because equivalence reaps it by killing that group.
+ * The registry is the real one at CLAUDE_CONFIG_DIR, since provisioning and
+ * the later `claude -p` run share no environment. The process bounds itself at
+ * six hours, so a record from an earlier drive dies on its own, and the pid in
+ * the filename keeps a second drive from overwriting the first. The occupant
+ * stays in the provisioning process group, unref'd rather than detached,
+ * because equivalence reaps it by killing that group.
  */
 function registerOccupant(ctx: StageContext, path: string): void {
   const worktreePath = resolve(ctx.dir, path)

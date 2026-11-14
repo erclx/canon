@@ -139,9 +139,8 @@ export default scenario({
       )
     },
     layout: (ctx) => {
-      // Two roles share one flat folder: generic primitives any screen renders
-      // and pieces only the cart screen renders. The arm scores whether the plan
-      // adds three more components beside them or places them by role.
+      // Generic primitives and cart-only pieces share one flat folder, so the arm
+      // scores whether the plan places three more by role.
       ctx.fixtures('claude', 'plan-feature', 'layout', '01-initial')
 
       ctx.mkdir('src/components')

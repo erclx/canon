@@ -85,18 +85,16 @@ export default scenario({
       // Wipe anchor content to start clean
       wipeTree(ctx)
       ctx.write('.gitignore', 'node_modules\n.canon/plans/\n')
-      // The branch has to carry the violating commits, and a worktree taken fresh
-      // off the remote default would carry none of them. Branching from local HEAD
-      // is what puts them in the range Step 4 reads.
+      // A fresh worktree off the remote default carries none of the violating
+      // commits, so branching from local HEAD puts them in the range Step 4 reads.
       ctx.fixtures('claude', 'auto-ship', 'test-order-violation', '01-tree')
 
       ctx.git('add', '.')
       ctx.commit('feat(project): initial greeting library')
       ctx.git('push', '--force', 'origin', 'HEAD:main')
 
-      // Two commits rather than one, because a subject carrying no test at all
-      // reads as unclassified. A finding needs both sides in the range with the
-      // test arriving second, which is the shape the check is named for.
+      // Two commits, since a subject with no test reads as unclassified, and a
+      // finding needs the test arriving second in the range.
       ctx.fixtures('claude', 'auto-ship', 'test-order-violation', '02-shout')
 
       ctx.git('add', 'src/shout.ts')

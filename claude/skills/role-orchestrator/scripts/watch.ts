@@ -1,18 +1,13 @@
 // Reports worker and pull request transitions as they happen. Reads only.
 //
-// The poll answers "what moved since the last run" on a schedule the session
-// holds. This answers "what just changed" on a loop of its own, and it exists
-// because the two readings a dispatch needs are not one reading: a worker that
-// finishes goes idle and a worker that crashes vanishes, so a watch matching
-// only the pull request list stays silent through the second. A third case is
-// neither: a worker that stops on a question or a prompt neither finishes nor
-// crashes, and sits reading "waiting" until something reports it, which is the
-// WORKER-STOPPED line below, or WORKER-UNMEASURABLE for a "waiting" row too old
-// to carry a stamp this reads.
+// The poll answers what moved since the last run, and this answers what just
+// changed, on a loop of its own. A finished worker goes idle and a crashed one
+// vanishes, so a watch on the pull request list alone misses the second. A
+// worker stopped on a question sits reading "waiting", reported as
+// WORKER-STOPPED, or WORKER-UNMEASURABLE when too old to carry a stamp.
 //
 // Run as `bun watch.ts`. A failed read never ends the loop, since it runs for
-// hours and one transient `gh` failure aborting it is a silent stop. Every read
-// states its own failure instead.
+// hours, so every read states its own failure instead.
 import { baseBranch, baseRef, gitPath, mainRoot, run } from './repo'
 
 // Seconds between passes. A pass costs two cheap reads and the transitions it

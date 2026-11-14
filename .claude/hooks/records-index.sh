@@ -26,20 +26,14 @@ esac
 file_path=$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty')
 [ -n "$file_path" ] || exit 0
 
-# Both record roots, since a project the move has reached keeps its records under
-# `.canon/` and a guard fixed at the old spelling stops matching with nothing
-# said. The index then goes stale while every save reports success.
+# Both record roots, since a moved project keeps its records under `.canon/`
+# and a guard at the old spelling would go stale silently.
 #
-# A shell `case` `*` crosses `/`, so each arm also matches a file in a subfolder
-# the index does not render: an archived or declined task, or the index itself.
-# Those exit here, before the regen call. A task under `review/` is
-# indexed, and no other folder is read.
-#
-# The walk-up boundary has to come from the path, not from the session. Shared
-# scratch resolves at the main worktree root, so a session inside a linked
-# worktree passes a path that sits outside its own project directory and the
-# default boundary would reject it. The messages below name the index read out
-# of the same match, so they name the file that actually went stale.
+# A shell `case` `*` crosses `/`, so a file in a subfolder the index does not
+# render exits here first. A task under `review/` is indexed, and no other
+# folder is read. The walk-up boundary comes from the path, since shared
+# scratch sits at the main root outside a linked worktree's project directory,
+# and the messages name the index read out of the same match.
 case "$file_path" in
 */.canon/tasks/index.md | */.canon/tasks/archive/* | */.canon/tasks/declined/*) exit 0 ;;
 */.claude/tasks/index.md | */.claude/tasks/archive/* | */.claude/tasks/declined/*) exit 0 ;;

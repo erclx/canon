@@ -14,9 +14,8 @@ export default scenario({
 
       ctx.git('checkout', '-b', 'feat/csv-export', '-q')
 
-      // Left untracked on purpose. `## State` owes the reader any untracked file that
-      // needs committing, so a map filled from boilerplate rather than from a read of
-      // the tree is separable from one filled correctly.
+      // Left untracked, since `## State` owes any untracked file needing a commit,
+      // which separates a map read off the tree from one filled from boilerplate.
       ctx.fixtures('claude', 'session-map', 'shared', '02-untracked')
 
       ctx.log.step(
