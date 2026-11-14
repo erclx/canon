@@ -39,6 +39,7 @@ The five restate the calibration list in Anthropic's [frontend-design](https://g
 - **Atmospheric strips.** City, time zone, temperature, coordinates, build version, last-sync time, placed for texture. Keep one only where it carries real state a reader acts on.
 - **Scroll cues.** "Scroll", an animated wheel, a downward arrow with a label. A reader looking at the top of a page knows what scrolling is.
 - **Decorative status dots.** A colored dot before every nav item, list row or badge. Keep it only where it reports genuine state, and then sparingly.
+- **The staccato title.** Three short sentences stacked as one heading, as in "You point. It draws. It ships.", split by periods or line breaks. Make it one phrase, per the `ui-craft` copy reference.
 - **Filler verbs.** A verb chosen for warmth rather than for what it reports, such as `elevate`, `unleash`, `empower` or `next-generation`. Name the thing the surface does.
 - **Placeholder that reads as placeholder.** Generic names, egg avatars, `Acme`-family companies, one portrait for several people, every item dated alike. Real collections are uneven and specific.
 - **A template token in a mock view.** A tab reading `<nn>-<slug>` over real file names, or a real id copied in. Fill each slot with an invented value the rest of the view agrees with.

@@ -117,6 +117,7 @@ Every word on the surface states what is true of it.
 
 - [ ] No filler verbs
 - [ ] Sentence case throughout, with exceptions per the `ui-craft` copy reference
+- [ ] Every heading and slide title reads as one phrase with no period, per the `ui-craft` copy reference
 - [ ] Every claim about what the product does is a thing it does
 
 ## Motion
