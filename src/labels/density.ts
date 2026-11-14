@@ -17,7 +17,11 @@ const COUNTED = [
 type CountedKind = (typeof COUNTED)[number]
 
 export type BodyDensityKind =
-  CountedKind | 'subheading' | 'mixed-form' | 'fence-width' | FenceKind
+  | CountedKind
+  | 'subheading'
+  | 'mixed-form'
+  | 'fence-width'
+  | FenceKind
 
 const FENCE_KINDS = ['fence-language', 'fence-prompt', 'fence-output'] as const
 
