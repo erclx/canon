@@ -5,18 +5,13 @@ import { isMarked } from '@/sweep/exempt-marker'
 /**
  * The corpora a target reader reaches, which is the `files` field less `src`.
  *
- * The field is the statement of what leaves this repository, and `src/secrets/
- * shipped.ts` reads it directly for the credential sweep. This list is narrower
- * on purpose rather than by omission. What decides membership here is whether
- * anything serves the file to a reader who does not hold this repository: a
- * skill body loads into a session, a docs page is read through `canon docs`, a
- * rule through a glob match, and a seed through an install. A `src/` doc comment
- * is read by someone working on the toolkit, in this checkout, where every
- * number resolves.
- *
- * That is also what keeps the check a prose pattern rather than a parser.
- * `src/design/tokens.ts` carries twenty values shaped `#191512`, which no width or boundary rule separates from a pull request
- * number, so telling them apart would need the line's syntactic position.
+ * `src/secrets/shipped.ts` reads that field directly. This list is narrower on
+ * purpose: membership means something serves the file to a reader outside this
+ * repository, as a skill, a docs page, a rule, or a seed is served. A `src/` doc
+ * comment is read in this checkout, where every number resolves. That is also
+ * what keeps the check a prose pattern, since `src/design/tokens.ts` carries
+ * hex colors in a hash-and-digits shape no boundary rule separates from a pull
+ * request number.
  */
 export const SHIPPED_CORPORA = [
   'claude',
@@ -46,22 +41,12 @@ export const REFERENCE_MARKER = 'canon-allow-reference'
 /**
  * A pull request number a target reader resolves against their own repository.
  *
- * The leading boundary is what excludes the repair form by construction rather
- * than by exemption, and that is load bearing. A lookbehind rejecting a word
- * character before `#` never matches `erclx/canon#1299`, so a qualified
- * reference passes with no marker, and `claude/skills/session-worktree/SKILL.md`
- * already ships `anthropics/claude-code#58345` in exactly that form.
- *
- * The trailing boundary is what the first shape of this pattern lacked, and it
- * costs a live finding to omit. `governance/rules/framework/tailwind.md`
- * writes `bg-[#316ff6]`, a Tailwind arbitrary hex color, which an unbounded
- * `#[0-9]+` reads as pull request 316. Requiring a non-word character after the
- * digits rejects it and rejects nothing real, since a citation is always
- * followed by a space, a backtick, or punctuation.
- *
- * Any digit run counts. This repository is past `#1300` so a four-digit pattern
- * reads as complete, and `#1`, `#12`, and `#123` all resolve to the wrong thing
- * in a target just as surely.
+ * The leading boundary rejects a word character before the hash, so a
+ * qualified `owner/repo` reference passes with no marker. The trailing boundary
+ * rejects a word character after the digits, so a Tailwind arbitrary color
+ * such as `bg-[` a hash and hex `]` is not read as a number, while a real
+ * citation is always followed by a space, a backtick, or punctuation. Any digit
+ * run counts, since a short number resolves wrongly in a target too.
  */
 const PULL_REQUEST = /(?<![0-9A-Za-z_])#([0-9]+)(?![0-9A-Za-z_])/g
 
@@ -69,38 +54,22 @@ const PULL_REQUEST = /(?<![0-9A-Za-z_])#([0-9]+)(?![0-9A-Za-z_])/g
  * A commit sha, which is the worse half: it resolves to nothing anywhere rather
  * than to the wrong pull request.
  *
- * Seven characters is git's own short-sha floor and forty is a full one. No
- * rule here requires a letter, because an all-digit sha is real:
- * `orchestrator-poll.md` cites `5653721`.
- *
- * The lookbehind rejects `@` and `/` so the repair form `erclx/canon@5653721`
- * passes the check that told the author to write it, and rejects `#` so a hex
- * color long enough to reach the floor is not reported twice under two names.
- *
- * Three false-positive classes survive by construction, and the marker answers
- * each: an all-digit hex color, a seven-letter word spelled from `a` through
- * `f` alone, such as `defaced`, and any run of seven or more decimal digits,
- * such as an unseparated date or a large count. No narrowing answers the third,
- * since requiring a letter loses the all-digit sha above.
+ * Seven characters is git's short-sha floor and forty a full one, and no letter
+ * is required, since an all-digit sha is real. The lookbehind rejects `@` and
+ * `/` so the qualified repair form passes, and `#` so a long hex color is not
+ * reported twice. An all-digit hex color, a word spelled only from `a` to `f`,
+ * and a long decimal run survive by construction, and the marker answers each.
  */
 const COMMIT_SHA = /(?<![0-9A-Za-z_@/#])([0-9a-f]{7,40})(?![0-9A-Za-z_])/g
 
 /**
- * A same-repository citation, qualified or not. Qualifying `#123` or a sha
- * against `erclx/canon` is the repair `PULL_REQUEST` and `COMMIT_SHA` above
- * read as the fix, and it fixes nothing here: a reader holding only the
- * plugin cache or the published package still cannot open this repository's
- * own history, so the qualified form resolves exactly as badly as the bare
- * one.
+ * A same-repository citation, qualified or not. Qualifying a number or a sha
+ * against `erclx/canon` fixes nothing, since a reader holding only the plugin
+ * cache or the package still cannot open this repository's history.
  *
- * The literal is hardcoded rather than read from `package.json` or
- * `git remote`, matching `src/feedback/github-format.ts` and `src/commands/repo.ts`,
- * which already hardcode it.
- *
- * Same word-boundary discipline as the two patterns above: a word character
- * ahead of `erclx` would mean this match is a suffix of some other token, and
- * a word character behind the digits would mean the citation continues past
- * what was captured.
+ * The literal is hardcoded, as `src/feedback/github-format.ts` and
+ * `src/commands/repo.ts` already do. Word boundaries on both ends keep a match
+ * from being the suffix of another token or stopping short of the citation.
  */
 const SAME_REPOSITORY =
   /(?<![0-9A-Za-z_/])erclx\/canon(#[0-9]+|@[0-9a-f]{7,40})(?![0-9A-Za-z_])/g
@@ -109,20 +78,12 @@ const SAME_REPOSITORY =
  * A repository-relative path under `docs/`, reported only where `isResolvable`
  * confirms it resolves against this checkout.
  *
- * Shape alone cannot separate a citation of this repository's own reference
- * corpus from an illustration naming a target's own tree, since both are
- * `docs/...md` tokens: `docs/agents/tasks.md` and `docs/retry.md` read
- * identically to a pattern with no filesystem behind it. Of 124 such tokens
- * across the shipped corpora, four distinct paths resolved here and the rest
- * named a target's own tree, measured on 2026-09-03. Resolving against `root`
- * is what turns that 124-hit pattern into the four-hit gate.
- *
- * `canon/context/` carries no equivalent pattern. The same resolution test
- * cannot separate a path every scaffolded project holds, such as
- * `canon/context/index.md`, from this repository's own domain entry, such
- * as `canon/context/context-model.md`, since both resolve here and only the
- * second is a defect. That is a semantic read no pattern makes, so it stays
- * with the rule and the review checklist rather than joining this reader.
+ * Shape alone cannot separate this repository's own docs from an illustration
+ * of a target's tree, such as `docs/retry.md`, and most such tokens name a
+ * target's tree, so resolving against `root` is what makes this a gate.
+ * `canon/context/` carries no equivalent, since every scaffolded project holds
+ * some of those paths too, and telling them apart is a semantic read left to
+ * the rule and the review checklist.
  */
 const DOCS_PATH = /(?<![\w./-])docs\/[^\s`)\]]*\.md\b/g
 
@@ -141,14 +102,11 @@ const STANDARDS_CALL = /\bcanon standards(?![\w-])/g
  * A phase-label-shaped token: exactly two numeric groups, with a negative
  * lookahead rejecting a third.
  *
- * `VERSION_TOKEN` in `src/labels/phase.ts` also matches a semver tag, which
- * fits there because `scanPhaseLabels` asks whether the carrying pull request
- * is release-please's own. A shipped file carries no pull request, so shape is
- * the only discriminator: a phase label has two groups and a semver tag three.
- *
- * A target holds no board to resolve a label against, so a bare instance
- * here is unresolvable the same way a same-repository citation is, and is
- * muted the same way when it names the label format rather than a real row.
+ * `VERSION_TOKEN` in `src/labels/phase.ts` also matches a semver tag, since
+ * `scanPhaseLabels` can ask whether a pull request is a release. A shipped
+ * file has no pull request, so two groups against three is the only
+ * discriminator. A bare label is muted the same way as a same-repository
+ * citation when it names the format rather than a row.
  */
 const PHASE_LABEL = /\bv\d+\.\d+(?!\.\d)\b/g
 
@@ -157,35 +115,22 @@ const PHASE_LABEL = /\bv\d+\.\d+(?!\.\d)\b/g
  * `claude/skills/`, the installed-path spelling `authoring-layout.md` bans a
  * shipped skill body from citing as authority for its own behavior.
  *
- * Anchored on a trailing `.md` file rather than on the bare `.claude/rules/`
- * prefix, which is what keeps a folder mention, such as `create-rule`,
- * `target-check`, and `target-setup` write, from matching: it ends in `/` or
- * names no `.md`. The segments between `rules/` and the file admit both a
- * governance-namespace path (`canon/canon/scratch.md`) and a
- * project-namespace one (`project/<subdir>/<slug>.md`) without distinguishing
- * them, since either shape is the same broken citation, and the placeholder
- * check spares the bracketed illustration.
+ * Anchored on a trailing `.md` file, so a folder mention ending in `/` passes.
+ * The segments admit a governance or a project namespace alike, since either
+ * is the same broken citation, and the placeholder check spares the bracketed
+ * illustration.
  */
 const RULE_PATH = /(?<![\w./-])\.claude\/rules\/[^\s`)\]]*?[\w-]+\.md\b/g
 
 /**
  * A path into a stack's `configs/` or `seeds/` folder under `tooling/`, from a
- * body under `claude/skills/`. That tree is this toolkit's own source layout,
- * which a target never holds under any name, since install copies its contents
- * to the target's root rather than reproducing the folders.
+ * body under `claude/skills/`, a source layout no target holds under any name.
  *
- * Unlike `RULE_PATH`, a placeholder such as `tooling/<stack>/configs/` is
- * reported too. The bracket spares an illustration of a path a target does
- * hold, and no target holds this one, so the bracketed form still describes
- * this checkout alone. The segment class admits `<` and `>` for that reason,
- * and a brace group such as `{configs,seeds}` matches when it lists either.
- *
- * Only `configs` and `seeds` match. A bare `tooling/`, which names the
- * category, a stack's `manifest.toml`, and a `canon tooling sync` call pass.
- *
- * The leading boundary is `DOCS_PATH`'s, so `foo/tooling/base/configs/` reads
- * as some other tree's folder and passes. No filesystem read backs the match,
- * since a path resolving here proves nothing about a target.
+ * Unlike `RULE_PATH`, a bracketed placeholder is reported too, since no target
+ * holds this path in any form, and a brace group matches when it lists either
+ * folder. A bare `tooling/`, a `manifest.toml`, and a `canon tooling sync` call
+ * pass. The leading boundary is `DOCS_PATH`'s, and no filesystem read backs
+ * the match, since resolving here proves nothing about a target.
  */
 const SOURCE_PATH =
   /(?<![\w./-])tooling\/[\w<>.*-]+\/(?:configs|seeds|\{[\w,]*\b(?:configs|seeds)\b[\w,]*\})(?![\w.-])[^\s`)\]]*/g
@@ -224,18 +169,11 @@ function isPlaceholderPath(path: string): boolean {
 /**
  * Whether a `DOCS_PATH` match should be reported.
  *
- * `file` gates the `docs/` corpus out by the caller's own location rather
- * than by a pattern exemption: a citation from inside `docs/` is read
- * together with the rest of that corpus through the same `canon docs`
- * resolution, which is a weaker claim than one from a skill body with no
- * `docs/` sibling at all.
- *
- * The placeholder check runs ahead of `existsSync` rather than replacing it.
- * Shape alone cannot separate a genuinely broken same-repository citation
- * from a legitimate illustration of a target project's own tree, such as
- * `docs/retry.md`, and no signal in the text draws that line, so existence
- * still does the work of muting those. The placeholder check only catches
- * the bracketed illustrations existence alone would report as broken.
+ * `file` gates out the `docs/` corpus by the caller's location, since a
+ * citation inside it resolves through `canon docs` with the rest. The
+ * placeholder check runs ahead of `existsSync` rather than replacing it, since
+ * existence still mutes an illustration of a target's tree and the check only
+ * catches bracketed illustrations existence would report as broken.
  */
 function isDocsPathReportable(
   file: string,
@@ -264,24 +202,13 @@ function isSkillBodyScope(file: string): boolean {
 /**
  * Every reference in one shipped file that no marker mutes.
  *
- * The corpus walk is deliberately absent, which lets most of the shape be
- * tested against a string rather than against a fixture. That is the seam
- * `headingCitationsIn` draws in `src/claude/skills-headings.ts` and `citationsIn`
- * draws in `skills-reach.ts`. `DOCS_PATH` is the one pattern that still
- * needs a filesystem, since resolving against this checkout is the only thing
- * that separates a real citation from an illustration, so `referencesIn`
- * takes `root` as the one caller-supplied exception to that rule. `root` is
- * required rather than defaulted, since a caller that dropped it silently
- * would report zero findings rather than raising, which is the wrong failure
- * direction for a gate.
- *
- * The unit is the match rather than the line, unlike those two, because one
- * line here can carry three separate tokens each needing its own repair and a
- * report naming the line once leaves two of them unsaid.
- *
- * `isMarked` reads the line itself and the line above and stops there, so the
- * marker mutes a line and nothing narrower. A real citation later added beside
- * a marked illustration ships unreported.
+ * The corpus walk is absent, so most of the shape tests against a string, the
+ * seam `headingCitationsIn` and `citationsIn` draw. `root` is the one exception,
+ * since `DOCS_PATH` resolves against this checkout, and it has no default, since
+ * a dropped root would report zero findings rather than raise. The unit is the
+ * match rather than the line, since one line can carry several tokens.
+ * `isMarked` reads a line and the one above it, so a real citation added
+ * beside a marked illustration ships unreported.
  */
 export function referencesIn(
   file: string,
