@@ -684,9 +684,8 @@ async function runSync(target: string): Promise<number> {
   const resolved = resolveTarget(target, PROJECT_ROOT)
   if (typeof resolved === 'number') return resolved
 
-  // A record folder resolves at either root, so a migrated target is reported as
-  // seeded rather than sent to `canon claude init` to re-create records it
-  // already holds.
+  // A record folder resolves at either root, so a migrated target reads as
+  // seeded rather than sent to `canon claude init` to re-create its records.
   logStep('Seeded')
   for (const name of SEEDED_FILES) {
     if (existsSync(seededFilePath(resolved, name))) logInfo(name)
@@ -716,6 +715,10 @@ async function runSync(target: string): Promise<number> {
   } else if (defaults.kind === 'planned' && defaults.plan.lacksPushAllow) {
     logWarn(
       'settings.json lacks the lease push allow. Run `canon migrate session-defaults --write`',
+    )
+  } else if (defaults.kind === 'planned' && defaults.plan.lacksUiPassAllow) {
+    logWarn(
+      'settings.json lacks the UI pass allow. Run `canon migrate session-defaults --write`',
     )
   }
 
@@ -832,9 +835,8 @@ async function sameContent(src: string, dest: string): Promise<boolean> {
  * human listing stays on the timeline. Only the human mode opens a frame.
  */
 async function runSeedsList(opts: SeedsListOptions): Promise<number> {
-  // The warning is a frame-interior line, so it goes out after `intro` on the
-  // path that opens one and bare on the two that return first and open none.
-  // One position cannot serve all three.
+  // A frame-interior line: after `intro` on the path that opens one, bare on
+  // the two that return first, so no one position serves all three.
   const mismatch = checkoutMismatchWarning(process.cwd())
   const listings = listSeeds(PROJECT_ROOT)
 
@@ -865,9 +867,8 @@ async function runSeedsList(opts: SeedsListOptions): Promise<number> {
 }
 
 function runSkillsList(opts: SkillsListOptions): number {
-  // The warning is a frame-interior line, so it goes out after `intro` on the
-  // path that opens one and bare on the two that return first and open none.
-  // One position cannot serve all three.
+  // A frame-interior line: after `intro` on the path that opens one, bare on
+  // the two that return first, so no one position serves all three.
   const mismatch = checkoutMismatchWarning(process.cwd())
   const listings = listSkills(PROJECT_ROOT)
 
@@ -938,10 +939,8 @@ async function runSkillsDrift(
     outro()
   } else {
     frameError(report.reason)
-    // The refusal path names the binary too. A project consuming the plugin
-    // from a marketplace cache is refused here for having no history, and that
-    // is the moment a skew warning is worth most, since an old binary is one
-    // reason the cache and the CLI disagree in the first place.
+    // Names the binary on refusal too, since a marketplace-cache project lands
+    // here for having no history, and an old binary is one cause of that skew.
     if (skew.state === 'behind') {
       const { GREY, NC } = palette(process.stderr)
       process.stderr.write(`${GREY}${describeSkew(skew)}${NC}\n`)

@@ -76,6 +76,22 @@ A project installed before the board became a folder still holds `.claude/TASKS.
 
 The seed's deny list also holds `Bash(canon pr merge:*)` and `Bash(gh pr merge:*)`, so the operator alone merges. An existing target gets both from `canon migrate session-defaults --write`, and `canon claude sync` warns while either is absent. Neither covers more than the form an agent writes by default.
 
+### The UI pass entries
+
+A dispatched UI reviewer stopped on a permission prompt mid-pass, so the seed's allow list names the canon verbs a pass runs. An allow rule resolves before auto mode's classifier, so each entry is as narrow as a pass needs.
+
+- `Bash(canon drive:*)` and `canon pr` by subcommand, being `head`, `checks`, `evidence`, `local`, `drive-copy`, `frames`, `tick`, and `lift`
+- No `canon pr` wildcard, since it would also approve `close`, which deletes a branch, and `preview`, which deploys
+- No `canon browser` entry in any form, since its session flag sits before the subcommand and a rule allowing a screenshot also allows `run-code` and `eval`
+- No `rm`, `cp`, or `mkdir` entry. A pass folder sits at an absolute main-root path no seeded rule can name.
+
+The deny list carries what a pass must never run, and a deny wins over any allow.
+
+- `Bash(canon browser *install-browser*)`, so a pass never installs a browser, the `-s=<name>` session form included
+- `Bash(canon pr frames *--drop*)` and `Bash(canon pr frames *--prune*)`, since both force-move the shared frames ref and a pass runs only `--add` and `--reel`
+
+A pass still prompts for `gh api`, `curl`, and `canon pr preview --check` under a mode that asks for every command. `canon migrate session-defaults --write` adds the absent entries to an existing target, and `canon claude sync` warns while any is missing.
+
 `plan-guard.sh` blocks a new plan under `.canon/plans/` until `plan-feature` is invoked for it, since a heredoc never loads the plan rule. It passes when the transcript holds no assistant tool call it can parse, though a format change confined to the Skill call still blocks. It logs each decision under `.canon/tmp/hooks/plan-guard/`.
 
 ## User settings

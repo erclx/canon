@@ -3,9 +3,26 @@
   "permissions": {
     "allow": [
       "Bash(git push --force-with-lease)",
-      "Bash(git push --force-with-lease origin HEAD)"
+      "Bash(git push --force-with-lease origin HEAD)",
+      "Bash(canon drive:*)",
+      "Bash(canon pr head:*)",
+      "Bash(canon pr checks:*)",
+      "Bash(canon pr evidence:*)",
+      "Bash(canon pr local:*)",
+      "Bash(canon pr drive-copy:*)",
+      "Bash(canon pr frames:*)",
+      "Bash(canon pr tick:*)",
+      "Bash(canon pr lift:*)"
     ],
-    "deny": ["Agent", "Task", "Bash(canon pr merge:*)", "Bash(gh pr merge:*)"]
+    "deny": [
+      "Agent",
+      "Task",
+      "Bash(canon pr merge:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(canon browser *install-browser*)",
+      "Bash(canon pr frames *--drop*)",
+      "Bash(canon pr frames *--prune*)"
+    ]
   },
   "hooks": {
     "PreToolUse": [

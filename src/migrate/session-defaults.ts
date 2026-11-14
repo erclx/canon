@@ -1,8 +1,9 @@
 /**
  * Adds the session defaults the seeded `.claude/settings.json` carries to a
  * target that was seeded before them: the subagent deny, the memory default,
- * the merge deny entries, the lease push allow entries, and the plan guard's
- * PreToolUse wiring where the project holds the guard script.
+ * the merge deny entries, the lease push and UI pass allow entries, the browser
+ * and frames rewrite deny, and the plan guard's PreToolUse wiring where the project holds
+ * the guard script.
  *
  * `canon claude init` copies a seed only when the file is absent, so a target
  * holding its own settings never sees a later seed change. This verb adds each
@@ -40,6 +41,37 @@ export const PUSH_ALLOWED: readonly string[] = [
   'Bash(git push --force-with-lease origin HEAD)',
 ]
 
+/**
+ * The canon verbs a UI review pass runs, each named so the wildcard sits after
+ * the subcommand. `canon pr` also holds `close`, which deletes a branch, and
+ * `preview`, which deploys, so a `canon pr` wildcard would approve both.
+ * `canon browser` is left out whole: its session flag sits before the
+ * subcommand, so no rule allows a screenshot without also allowing `run-code`
+ * and `eval`, whose script auto mode's classifier would stop reading.
+ */
+export const UI_PASS_ALLOWED: readonly string[] = [
+  'Bash(canon drive:*)',
+  'Bash(canon pr head:*)',
+  'Bash(canon pr checks:*)',
+  'Bash(canon pr evidence:*)',
+  'Bash(canon pr local:*)',
+  'Bash(canon pr drive-copy:*)',
+  'Bash(canon pr frames:*)',
+  'Bash(canon pr tick:*)',
+  'Bash(canon pr lift:*)',
+]
+
+/**
+ * Keeps a pass from installing a browser, in the session form a pass types as
+ * well, and from `frames --drop` and `--prune`, which force-move the shared
+ * frames ref. A deny resolves ahead of the `canon pr frames` allow.
+ */
+export const UI_PASS_DENIED: readonly string[] = [
+  'Bash(canon browser *install-browser*)',
+  'Bash(canon pr frames *--drop*)',
+  'Bash(canon pr frames *--prune*)',
+]
+
 /** The command the seed wires, as the seeded settings spell it. */
 export const PLAN_GUARD_COMMAND =
   '"$CLAUDE_PROJECT_DIR"/.claude/hooks/plan-guard.sh'
@@ -74,6 +106,8 @@ export interface SessionDefaultsPlan {
   readonly lacksMergeDeny: boolean
   /** True when the allow list lacks any lease push entry. */
   readonly lacksPushAllow: boolean
+  /** True when the allow list lacks any UI pass entry. */
+  readonly lacksUiPassAllow: boolean
 }
 
 export type SessionDefaultsRead =
@@ -95,7 +129,7 @@ function isRecord(value: unknown): value is SettingsRecord {
 }
 
 /**
- * Appends the denied tools and merge entries a list lacks, keeping the list's
+ * Appends the deny and allow entries each list lacks, keeping the list's
  * own order, so the diff a person reads is the added entries alone.
  */
 export function planSessionDefaults(
@@ -109,8 +143,15 @@ export function planSessionDefaults(
 
   const subagentsMissing = DENIED_TOOLS.filter((tool) => !deny.includes(tool))
   const mergeMissing = MERGE_DENIED.filter((entry) => !deny.includes(entry))
-  const missing = [...subagentsMissing, ...mergeMissing]
-  const allowMissing = PUSH_ALLOWED.filter((entry) => !allow.includes(entry))
+  const uiPassDenyMissing = UI_PASS_DENIED.filter(
+    (entry) => !deny.includes(entry),
+  )
+  const missing = [...subagentsMissing, ...mergeMissing, ...uiPassDenyMissing]
+  const pushMissing = PUSH_ALLOWED.filter((entry) => !allow.includes(entry))
+  const uiPassMissing = UI_PASS_ALLOWED.filter(
+    (entry) => !allow.includes(entry),
+  )
+  const allowMissing = [...pushMissing, ...uiPassMissing]
 
   const nextPermissions: SettingsRecord = { ...permissions }
   if (missing.length > 0) nextPermissions.deny = [...deny, ...missing]
@@ -145,7 +186,8 @@ export function planSessionDefaults(
       subagentsMissing.length === DENIED_TOOLS.length &&
       mergeMissing.length === MERGE_DENIED.length,
     lacksMergeDeny: mergeMissing.length > 0,
-    lacksPushAllow: allowMissing.length > 0,
+    lacksPushAllow: pushMissing.length > 0,
+    lacksUiPassAllow: uiPassMissing.length > 0,
   }
 }
 

@@ -120,5 +120,11 @@ The verb only adds a key or entry that is absent, so a project migrated before a
 - A person who wants auto memory back sets it in their own `.claude/settings.local.json`
 - `Bash(canon pr merge:*)` and `Bash(gh pr merge:*)` stop a session merging
 - A rerun restores `Agent` and `Task` for a person who removed them to allow subagents, so remove them again after
+
+The allow entries let a session run a command without waiting on a prompt, and each is as narrow as its caller needs.
+
 - `git push --force-with-lease` and its `origin HEAD` form are allowed exactly, so a worker pushes after a rebase without waiting
 - Any other lease push still goes through auto mode's review, and `canon claude sync` warns while either entry is missing
+- `canon drive` and the `canon pr` verbs a UI pass runs are allowed by subcommand, being `head`, `checks`, `evidence`, `local`, `drive-copy`, `frames`, `tick`, and `lift`
+- `canon browser`, `canon pr close`, `canon pr preview`, and any delete still prompt or go through auto mode's review, and a browser install or `canon pr frames --drop` or `--prune` is denied
+- A rerun restores a UI pass entry you removed, so remove it again after, or add a deny for it, which wins over the allow

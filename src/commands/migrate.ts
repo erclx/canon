@@ -127,9 +127,8 @@ async function runSweep(
   const sources = await readSources(root, scoped)
   const plan = planRename(sources, rules)
 
-  // A target scope reports the citations it did not rewrite, since prose the
-  // project wrote is theirs to change and a sweep editing it underneath them
-  // is the failure this scope exists to avoid.
+  // A target scope reports rather than rewrites these, since prose the project
+  // wrote is theirs to change.
   const citations =
     scope === 'target'
       ? planRename(
@@ -260,10 +259,8 @@ async function runRecords(opts: RecordsOptions): Promise<number> {
     return 1
   }
 
-  // Filtered before the read rather than inside the planner, because the
-  // records are the largest thing in the tree and `readSources` awaits one file
-  // at a time. This repository's own record tree is 9,744 files at 83M, and the
-  // backup history under it is object files read whole and discarded as binary.
+  // Filtered before the read, since the records are the largest thing in the
+  // tree and `readSources` awaits one file at a time.
   const toSweep = files.filter((path) => !isRecordArtifact(path))
   const records = files.length - toSweep.length
 
@@ -299,10 +296,8 @@ async function runRecords(opts: RecordsOptions): Promise<number> {
     `Rewrote ${plural(applied.written, 'file')} and moved ${plural(applied.moved, 'folder')}.`,
   )
 
-  // `failed` carries a citation the write loop could not land as well as a
-  // folder the rename loop stopped on, so the line names a path rather than a
-  // folder. Reading a rejected write back as a folder that would not move sends
-  // the reader looking at the wrong half of the verb.
+  // `failed` holds rejected writes as well as stopped folders, so the line
+  // names a path rather than a folder.
   if (applied.failed.length > 0) {
     logError(`Could not write ${plural(applied.failed.length, 'path')}.`)
     for (const path of applied.failed) logError(`  ${path}`)
@@ -333,10 +328,8 @@ function reportRecords(plan: RecordsPlan, records: number): void {
   }
   logInfo(`${plural(plan.kept, 'citation')} marked to keep the old root.`)
 
-  // A count rather than a list, and its own line rather than a place in
-  // `excluded`. That field exists so a reader can go and check a handful by
-  // hand, and a record tree would bury them. The count is what answers the
-  // question a target actually has, which is where the rest of the files went.
+  // A count on its own line, not in `excluded`, whose hand-check list a record
+  // tree would bury. The count says where the rest of the files went.
   if (records > 0) {
     logInfo(`${plural(records, 'file')} under a record root, left alone.`)
   }
@@ -354,9 +347,8 @@ function reportRecords(plan: RecordsPlan, records: number): void {
     for (const path of plan.coupled) logInfo(`  ${path}`)
   }
 
-  // Named individually rather than counted. A rewritten glob stops matching
-  // silently, which is the failure this boundary exists to surface, so the
-  // report gives the reader the file and line to go and check by hand.
+  // Named one by one, since a rewritten glob stops matching silently, so the
+  // reader gets the file and line to check by hand.
   if (plan.frontmatterGlobs.length > 0) {
     logInfo(
       `${plural(plan.frontmatterGlobs.length, 'file')} carry a frontmatter paths: glob left alone:`,
@@ -368,9 +360,8 @@ function reportRecords(plan: RecordsPlan, records: number): void {
     }
   }
 
-  // Named individually, same reasoning as the glob report above: an ownership
-  // boundary and a tense judgment stop being visible the moment either is
-  // rewritten, so the reader gets the file and line rather than a count.
+  // Named one by one like the globs: an ownership boundary or a tense judgment
+  // vanishes once rewritten, so the reader gets the file and line.
   if (plan.crossRepoCitations.length > 0) {
     logInfo(
       `${plural(plan.crossRepoCitations.length, 'file')} carry a citation into another repository, left alone:`,
@@ -569,13 +560,11 @@ interface RecordTreeOptions {
 }
 
 /**
- * Repoints the old-root citations left inside the record tree itself.
- *
- * The sibling verb sweeps a git listing, which reaches every tracked file and
- * none of the records, since those are gitignored by construction. This one
- * walks the new root directly and is scoped to the folders a session still
- * follows a path into, so the closed trails and the scratch folder keep saying
- * what they say.
+ * Repoints the old-root citations left inside the record tree itself. The
+ * sibling verb sweeps a git listing, which reaches every tracked file and none
+ * of the records, since those are gitignored by construction. This one walks
+ * the new root directly and is scoped to the folders a session still follows a
+ * path into, so the closed trails and the scratch folder keep what they say.
  *
  * No ignore gate here. Nothing moves, so there is no destination whose ignore
  * status could publish a record, and a run in a project the move has not
@@ -1488,6 +1477,13 @@ export function register(program: Command): void {
         'the list lacks without reordering it, and sets autoMemoryEnabled to',
         'false only when the key is absent. A deny entry is never removed and',
         'an existing autoMemoryEnabled is never changed.',
+        '',
+        'Adds the two exact git push --force-with-lease forms and the verbs a',
+        'UI pass runs to permissions.allow: canon drive and canon pr head,',
+        'checks, evidence, local, drive-copy, frames, tick, and lift. canon',
+        'browser gets no allow entry. The deny list gains a browser install in',
+        'any session form and canon pr frames --drop and --prune, which a deny',
+        'keeps ahead of the frames allow. An allow entry is never removed.',
         '',
         'Where .claude/hooks/plan-guard.sh exists, also wires it into',
         'hooks.PreToolUse for Bash and Write|Edit, skipping a tool whose',
