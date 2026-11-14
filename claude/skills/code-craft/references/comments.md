@@ -20,9 +20,9 @@ Read this before writing or keeping a comment. The figures live in `canon commen
 ## What it leaves out
 
 - Leave history to the pull request or a groundwork folder, being the date a figure was measured, the commit or issue it came from, and the alternative tried first.
-- Write `<YYYY-MM-DD>` where a format needs an example date, since the scan flags a real one.
+- Write `<YYYY-MM-DD>` for an example date and a token name for a color written in digits alone, since the scan reads a real date and an issue number.
 - Read a block past three lines of text as a cue to cut. Keep what the code cannot carry and drop the rest.
 
 ## The limits
 
-- Run `canon comments scan` for the head, in-body, and history limits and every block past the checkpoint. The gate fails a file a change touched past them, and a full run only reports.
+- Run `canon comments scan` for the head, in-body, and history limits and every block past the checkpoint, which it reports file by file.

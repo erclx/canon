@@ -12,7 +12,8 @@ import {
   type LanguageCount,
   languageFor,
 } from '@/comments/scan'
-import type { Measure, MeasureContext, MeasureReport } from '@/gate/measures'
+import type { Measure, MeasureReport } from '@/gate/measures'
+import type { GateContext } from '@/gate/sequencer'
 import { listRepositoryFiles } from '@/git/files'
 
 /**
@@ -46,14 +47,6 @@ const UNMEASURED: MeasureReport = {
     'The tracked file list could not be read, so no comment block was measured.',
 }
 
-/**
- * The sequencer hands every measure its whole gate context, which carries the
- * changed set where scoping is on and none under `--all` or a widening fallback.
- */
-interface ScopedContext extends MeasureContext {
-  readonly changed?: readonly string[]
-}
-
 interface CapReading<T> {
   readonly clean: string
   readonly line: (finding: T) => string
@@ -69,7 +62,9 @@ function capMeasure<T>(
   pick: (count: LanguageCount) => readonly T[],
   reading: CapReading<T>,
 ): Measure {
-  return async (ctx: ScopedContext) => {
+  // The sequencer hands a measure its whole gate context, and the stage test
+  // through `runStage` fails if it ever passes a narrower one.
+  return async (ctx: GateContext) => {
     const counted = await countRepository(ctx.root, ctx.changed)
     if (counted === undefined) return UNMEASURED
 

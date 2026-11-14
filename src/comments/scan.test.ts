@@ -237,10 +237,17 @@ describe('history in a comment', () => {
     ['a number with no letter', 'retries 1234567 times'],
     ['a word with no digit', 'a defaced value'],
     ['an entity reference', 'writes &#39; for a quote'],
-    ['a hex color', 'paints #1e1e1e behind it'],
+    ['a hex color carrying a letter', 'paints #1e1e1e behind it'],
   ])('should pass %s', (_, note) => {
     const text = `// ${note}\nconst a = 1\n`
     expect(countFile(file('a.ts', text), 'ts').degradationHits).toEqual([])
+  })
+
+  it('should report an all-digit hex color as an issue reference', () => {
+    const text = '// paints #191512 behind it\nconst a = 1\n'
+    expect(countFile(file('a.ts', text), 'ts').degradationHits).toEqual([
+      { file: 'a.ts', line: 1, term: 'issue reference' },
+    ])
   })
 
   it('should not report a date in a string literal', () => {
