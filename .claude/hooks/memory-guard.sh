@@ -2,9 +2,9 @@
 
 # canon-no-seed: this repository turned the harness's auto memory off through
 # autoMemoryEnabled, and this hook is the check behind that switch. A target's
-# own memory folder is inert since #2300, and turning off a harness feature in
-# someone else's project is that operator's preference rather than a fact canon
-# owns. See the command scanners context entry.
+# own memory folder is inert, and turning off a harness feature in someone
+# else's project is that operator's preference rather than a fact canon owns.
+# See the command scanners context entry.
 
 IFS= read -r -d '' -t 2 input
 [ -n "$input" ] || {
@@ -35,19 +35,14 @@ target=$(printf '%s' "$input" | jq -r '
 kind=${target:0:1}
 target=${target:1}
 
-# A command that only mentions the folder is not a write to it: a heredoc whose
-# body quotes the shape, a comment, or prose inside quotes. The command is cut
-# with a small awk pass that drops heredoc bodies, comments, and quoted spans
-# holding whitespace, and the shape is matched on what is left. A write target
-# is a path and carries no whitespace, so no verb list is needed, and a bare or
-# whitespace-free quoted token naming the folder still denies. A span or a
-# heredoc body handed to an interpreter is code rather than a target, so it
-# is kept when the command word is a shell, python, node, perl, ruby, or eval,
-# after any leading assignment or wrapper such as sudo, env, timeout, or xargs.
-# This is a
-# scanner and not a shell parser, so a substitution inside double quotes is
-# read as quoted text. The cut is copied from review-post-scan.sh, which is
-# seeded and so cannot be sourced from this unseeded hook.
+# A command that only mentions the folder is not a write to it. A small awk
+# pass drops heredoc bodies, comments, and quoted spans holding whitespace,
+# and the shape is matched on the rest, since a write target carries no
+# whitespace. A span or heredoc handed to an interpreter is kept when the
+# command word, after any assignment or wrapper such as sudo, env, timeout, or
+# xargs, is a shell, python, node, perl, ruby, or eval. This is a scanner, not
+# a parser, so a substitution in double quotes reads as quoted text. The cut
+# is copied from review-post-scan.sh, since this unseeded hook cannot source it.
 if [ "$kind" = B ]; then
   IFS= read -r -d '' cutter <<'AWK'
 { s = s (NR > 1 ? "\n" : "") $0 }

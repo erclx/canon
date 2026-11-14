@@ -37,20 +37,13 @@ esac
 root="${CLAUDE_PROJECT_DIR:-.}"
 
 # A checkout carrying the CLI source runs that source, so this hook and the
-# push stage read one build. A globally installed binary lags a branch by
-# whatever has not been released, which puts a ban kind added in
-# `src/markdown/bans.ts` into the push and not into the edit.
-# `cliRunner` in `src/gate/sequencer.ts` names the same reason for the same
-# choice on the push side.
+# push stage read one build, as `cliRunner` in `src/gate/sequencer.ts` does,
+# since a global binary lags the branch. A tree without the source falls back
+# to the binary, and a machine with neither reports that nothing ran.
 #
-# A tree without the source falls back to the binary. A machine with neither
-# reports that nothing ran rather than exiting clean, since an edit nobody
-# checked and an edit carrying no violation are the same silence to a reader.
-#
-# A completed run always writes the record, and a refusal writes nothing, so an
-# empty one means the verb declined to measure rather than measured and found
-# nothing. It refuses outside a git repository, and reading the findings alone
-# reports that as a clean file.
+# A completed run always writes the record and a refusal writes nothing, so an
+# empty one means the verb declined to measure, as it does outside a git
+# repository, and reading the findings alone would call that clean.
 unread=""
 record=""
 if [ -f "$root/src/cli.ts" ] && command -v bun >/dev/null 2>&1; then
