@@ -36,6 +36,17 @@ describe('base seeded context', () => {
       'setup.md',
     ])
   })
+
+  it('should seed the pull request template the toolkit itself uses', () => {
+    const template = '.github/pull_request_template.md'
+    const root = readFileSync(join(PROJECT_ROOT, template), 'utf8')
+    const seed = readFileSync(
+      join(PROJECT_ROOT, 'tooling/base/seeds', template),
+      'utf8',
+    )
+
+    expect(seed).toBe(root)
+  })
 })
 
 describe('web oxlint config', () => {
