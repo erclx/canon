@@ -98,7 +98,7 @@ Orients and holds no findings. It states the phase out loud in its first three l
 
 Every claim about a source outside the project carries a link to it, wherever the claim appears in the folder, so a later reader can tell a fetched page from recall. A source found and not read is listed as a lead and never cited, since a link to a page nobody opened is worse than none. Listing it stops a later pass re-searching for it.
 
-Where the track supersedes an earlier plan or an earlier folder, name it and say not to go looking for it. Without that, the old reasoning keeps circulating.
+Where the track supersedes an earlier plan or an earlier folder, name it and say not to go looking for it. Without that, the old reasoning keeps circulating. Under `## Origin`, give the task, controller `sessionId`, or intake item the launch named one line each, since close reads its route there.
 
 ## 01-current-state.md
 
