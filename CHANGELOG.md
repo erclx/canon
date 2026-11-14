@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.89.0](https://github.com/erclx/canon/compare/v5.88.0...v5.89.0) (2026-11-14)
+
+
+### Features
+
+* **labels:** fail a fenced pull request line past 90 characters ([#3095](https://github.com/erclx/canon/issues/3095)) ([fcf3f49](https://github.com/erclx/canon/commit/fcf3f49ee806a6d1cf0b630cb332a15001bb9473))
+* **pr:** add an optional outcome section to the pull request body ([#3088](https://github.com/erclx/canon/issues/3088)) ([f174133](https://github.com/erclx/canon/commit/f1741333e23474f6883c7cf316966a1c86bb2c69))
+* **pr:** run a project seed inside the drive copy rebuild ([#3093](https://github.com/erclx/canon/issues/3093)) ([23a2593](https://github.com/erclx/canon/commit/23a2593b4ca86e9994a57c3d27a1386be5d2f382))
+* **skills:** add the keyboard-only focus ring rule to ui-craft ([#3091](https://github.com/erclx/canon/issues/3091)) ([5049506](https://github.com/erclx/canon/commit/5049506db37db28901258990b87852040f222f31))
+* **skills:** bound verify runs and name machine capacity ([#3090](https://github.com/erclx/canon/issues/3090)) ([e02999c](https://github.com/erclx/canon/commit/e02999c88248cd804c956e5a79d2059ca733787e))
+* **skills:** catch two-sentence headings and the staccato title ([#3094](https://github.com/erclx/canon/issues/3094)) ([8c5fde8](https://github.com/erclx/canon/commit/8c5fde82d5754e6f815aee08460ddf67a351416f))
+* **skills:** route a groundwork close to a named controller ([#3092](https://github.com/erclx/canon/issues/3092)) ([f0d1b64](https://github.com/erclx/canon/commit/f0d1b64a744a1cd1ecf0b1bffb810c23b7c2c990))
+
 ## [5.88.0](https://github.com/erclx/canon/compare/v5.87.0...v5.88.0) (2026-11-12)
 
 
