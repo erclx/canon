@@ -28,7 +28,7 @@ The third trigger reaches a window the first two cannot. A session with three wo
    - An outcome marked `- [ ] Operator check: <outcome>` never blocks the archive, so leave it unticked
    - The hook prints no record, so read the archived file's `Operator check:` lines into the report's `Operator checks:` line
    - A merged task whose only open outcomes another repository owes, or that an operator owns and nobody marked, never archives, since `canon tasks archive` refuses `open-outcomes`
-   - Strike each one on the task file as `- ~~<outcome>~~ <reason>` with the reason on the same line, then archive. The task files are gitignored scratch, so this session may edit them.
+   - Strike each one through `canon tasks outcome <stem> --cut <n> --reason <reason>`, then archive. The verb keeps the checkbox, so every later position still names the outcome it did.
    - Strike only an outcome the operator or another repository owes. An open outcome this repository owes stays on the board, and the task stays with it.
    - Send a struck outcome that another repository owes to that repository's orchestrator through `session-relay`, which resolves the address
    - Let the receiver file it with `task-board` on its own board, since `task-board` here would file it on this board
