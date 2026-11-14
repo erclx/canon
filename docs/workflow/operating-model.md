@@ -20,7 +20,7 @@ One warm session holds the cross-feature call and reviews. Cold worker sessions 
 Each role keeps to its own writes, and five rules cover how the roles meet.
 
 - The orchestrator loads `role-orchestrator`, a worker loads `role-worker` through `auto-ship` Step 0, and a planner and a reviewer load theirs from the launch that dispatches them
-- The orchestrator decides which rows conflict, what merges first, and whether a row runs at all. Per-row planning can go cold.
+- The orchestrator decides which rows conflict, what merges first, and whether a row runs. Per-row planning can go cold, and a row a groundwork track or app drive measured returns to that session.
 - A dispatched planner writes only the plan, and reports what the task file got wrong rather than repairing it
 - A worker that halts on a plan question, or argues back against an instruction the tree contradicts, is working correctly
 - The orchestrator edits no tracked file. File a row with the defect and the surface, with no count or cause.
