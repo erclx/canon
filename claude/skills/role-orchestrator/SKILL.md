@@ -22,7 +22,18 @@ Read the board in parallel, resolving the paths at the main worktree root the wa
 - `.canon/plans/*.md`: features already planned and ready to hand off
 - open PRs via `gh pr list --json number,title,headRefName,isDraft`
 
-Then output the state of play, naming what to launch, review, and merge.
+Then read the table, `orchestrator-filing.md` in full, and `orchestrator-output.md`, and output the state of play, naming what to launch, review, and merge.
+
+### Acts and their runbooks
+
+| Act                                | Runbook under `references/`       |
+| ---------------------------------- | --------------------------------- |
+| Offer, file, or place a finding    | `orchestrator-filing.md`          |
+| Report the state of play, or later | `orchestrator-output.md`          |
+| Hand a plan to a worker            | `orchestrator-dispatch.md`        |
+| Dispatch a pull request's review   | `orchestrator-review-dispatch.md` |
+| Learn that a pull request moved    | `orchestrator-poll.md`            |
+| Route a posted pass back           | `orchestrator-handback.md`        |
 
 ### Reading the order
 
@@ -46,21 +57,15 @@ The human asks for each side of a compaction, and this skill reads the runbook.
 - A lesson about how to work goes to the owning task's Findings, as a bold-labeled line per `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`
 - On a request to resume after a compaction, read `${CLAUDE_SKILL_DIR}/references/orchestrator-resume.md`, which reads that file back with the board and the groundwork behind the live work
 
-### The poll and the parked rows
+### The parked rows
 
-The review trigger takes the same shape. `references/orchestrator-poll.md` holds the background start, the routing, and the condition, and `scripts/poll.ts --wait` is the command it runs. No hook starts or stops that poll, so the condition holds only while whoever holds it applies it.
-
-A board that is not moving is a third such moment. On a request to re-test the parked rows, follow `${CLAUDE_SKILL_DIR}/references/orchestrator-parked.md`, which re-tests every blocker and backlog row against the tree and plans what it clears. The refill sweep fires on a merge instead.
+A board that is not moving is another such moment. On a request to re-test the parked rows, follow `${CLAUDE_SKILL_DIR}/references/orchestrator-parked.md`, which re-tests every blocker and backlog row against the tree and plans what it clears. The refill sweep fires on a merge instead.
 
 ### When the body has dropped
 
 That routing lives in this body and this skill is user-invoked, so a session that has dropped the body routes nothing and the request lands as ordinary conversation. Approaching a compaction, when the handoff matters, is when a long session is likeliest to have dropped it.
 
 Re-invoke `/canon:role-orchestrator` first whenever the session has run long or the ask goes unanswered. The runbooks sit under `references/`, so a person who knows their plugin root can follow one without this skill loaded.
-
-## Output
-
-Report the state of play in the invocation block, and open every later sweep report, board report, and analysis with its state, the open decisions, and the next action, keeping the evidence below them. Read `${CLAUDE_SKILL_DIR}/references/orchestrator-output.md` for both shapes before writing either.
 
 ## The loop
 
