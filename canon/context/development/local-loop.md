@@ -125,3 +125,10 @@ Smaller folders the loop touches.
 - A push runs no test that reads a file from disk rather than importing it, so a skill, rule, or hook script edit that breaks one fails in CI's `--all` run instead. That trade keeps pushes unqueued
 - A file whose name ends in `index.md`, staged or untracked, trips the Indexes stage even under `auto: false`
 - A line number cited into a file the entry does not own goes stale with nothing comparing it, so cite a named identifier
+
+### Comment stages
+
+The comment stages read the changed set themselves, so a one-line edit to a source file fails on a long comment it never touched.
+
+- Run `canon comments scan` before editing a file, which lists each block past a cap
+- Read a pass under `--all` or `check:ci` as a report, since a full run fails no file
