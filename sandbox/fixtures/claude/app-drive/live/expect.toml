@@ -1,0 +1,56 @@
+# What a correct `/canon:app-drive` run leaves behind when the operator names
+# the live app. Read by `canon sandbox check`. Patterns use TOML literal strings
+# so a regex needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block, as in the
+# default arm.
+#
+# The arm drives the default app where it runs. The Action names the launch, so
+# the build output under `dist/` is the one checkout write a correct run makes.
+# Saving a frame writes the operator's own board, which a live drive never
+# edits, so the seed stays byte-exact and the Frames goal is driven as a read
+# or marked not-driven with its reason.
+#
+# No `max_turns` is declared until a billed run records a count.
+
+paths = [".canon/intake/*/drive.json", ".canon/intake/*/evidence/drive-log.md"]
+
+# No copy is made, so no registration appears at any point.
+absent = [".git/worktrees/*/HEAD"]
+
+write_scope = [
+  ".canon/intake/**",
+  ".canon/tmp/app-drive/**",
+  ".canon/picks/**",
+  "dist/**",
+]
+
+escape_scope = []
+
+manual = [
+  "The run's own `canon intake drive-check <slug> --json` returned clean. Unwired: a command's exit is not in the envelope.",
+  "The server was stopped only on a port `canon pr local --root <checkout>` reported. Unwired: a command's arguments are not in the tree.",
+  "No undo, redo, select-all, or bulk action ran in the page. Unwired: browser input is not in the tree.",
+]
+
+# The operator's board is untouched.
+[[content]]
+path = "boards/board.json"
+pattern = '^\{"frames":\["frame 1"\]\}$'
+
+[[content]]
+path = ".canon/intake/*/drive.json"
+pattern = 'adds a frame to the board and sees it saved'
+
+[[content]]
+path = ".canon/intake/*/drive.json"
+pattern = 'exports the board to PNG'
+
+# The live value, in a pretty-printed record and a compact one.
+[[content]]
+path = ".canon/intake/*/drive.json"
+pattern = '"worktree":\s*null'
+
+[[content]]
+path = ".canon/intake/*/evidence/drive-log.md"
+pattern = '^\| Copy\s.*live app'

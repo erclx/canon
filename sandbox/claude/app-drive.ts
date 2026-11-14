@@ -116,6 +116,30 @@ export default scenario({
         '         With no board configured, the Board row stays empty and no board server starts',
       )
     },
+    live: (ctx) => {
+      seedApp(ctx)
+      commitApp(ctx)
+
+      ctx.log.step(
+        'Scenario ready: app drive of the live app the operator named',
+      )
+      ctx.log.info(
+        'Context: the default board app, driven where it runs rather than from a copy',
+      )
+      ctx.log.info(
+        '  boards/board.json is the operator content, which a live drive reads and never saves over',
+      )
+      ctx.log.info('Before:  the default arm applies')
+      ctx.log.info(
+        'Action:  /canon:app-drive drive the board app I run from this checkout, live and with no copy. Start it here with bun run build && PREVIEW_PORT=4530 bun run preview, and close the drive once the findings are filed, since no operator is present',
+      )
+      ctx.log.info(
+        'Expect:  no worktree made, "worktree": null in drive.json, a Copy row naming the live app,',
+      )
+      ctx.log.info(
+        '         boards/board.json unchanged, and writes only under .canon/intake/ and the build output',
+      )
+    },
     board: (ctx) => {
       seedApp(ctx)
       ctx.write('canon/config/design.toml', 'board = ".canon/board"\n')
