@@ -1,16 +1,12 @@
 /**
  * The rule set the secret scan keys on.
  *
- * Every pattern matches an issued value and none of them matches a word. That
- * split is what lets the exclusion set start empty: a scan keyed on `password`,
- * `secret`, or `token` fires on the environment reads, the workflow inputs, and
- * the prose that name those things, and this repository ships all three. The
- * cost is a credential no issuer stamps with a recognizable prefix, which this
- * set does not reach and no exclusion would have helped with either.
- *
- * None of these sources matches itself, so this file is in scope like any
- * other. Each literal prefix is followed here by a character class rather than
- * by the class's own members, and `src/secrets/scan.test.ts` holds the check.
+ * Every pattern matches an issued value and none matches a word, so the
+ * exclusion set starts empty, since a scan keyed on `password` or `token`
+ * fires on the environment reads, workflow inputs, and prose naming them. The
+ * cost is a credential with no recognizable issuer prefix. Each literal prefix
+ * is followed by a character class, so none of these sources matches itself,
+ * and `src/secrets/scan.test.ts` holds the check.
  */
 export interface SecretPattern {
   readonly id: string

@@ -5,14 +5,10 @@ import { gitEnv } from '@/git/env'
  * Resolves the root of the checkout the caller is standing in, which is the
  * linked worktree rather than the main one when a session is inside one.
  *
- * A tracked tree differs per worktree, so a verb reading one answers about the
- * files the session has edited only if it resolves the root this way. The
- * working directory is not a substitute, since a caller invoking from a
- * subdirectory would resolve a root holding none of the trees a verb reads.
- *
- * The directory to resolve from is an argument so a caller holding a root of
- * its own asks about that one rather than about wherever the process happens to
- * stand, which is what a verb driven by an injected root needs.
+ * A tracked tree differs per worktree, so a verb answers about the session's
+ * edits only from this root, and the working directory is no substitute from a
+ * subdirectory. The directory is an argument so a verb driven by an injected
+ * root asks about that one rather than wherever the process stands.
  */
 export async function currentWorktreeRoot(
   cwd: string = process.cwd(),
@@ -66,20 +62,12 @@ export interface RefReport {
  * Reports which of the local head and the `origin` remote-tracking ref already
  * name a branch, separating an absent branch from a read that failed.
  *
- * `git for-each-ref` is what carries that separation. `git show-ref --verify`
- * handed the same two ref paths exits 128 when one of them is missing, which is
- * the code it also exits when the directory is no repository, so a caller
- * cannot tell a half match from an unreadable tree. `for-each-ref` exits zero
- * with empty output for absent and non-zero only for a failed read.
- *
- * A ref path is a pattern here rather than an exact name, so `refs/heads/x`
- * also matches `refs/heads/x/y`. Git forbids both existing at once, so the
- * over-match names the branch that blocks the candidate rather than a wrong
- * one.
- *
- * The remote-tracking ref is read at whatever the last fetch left, so a branch
- * pushed from another machine since then is invisible here. Closing that needs
- * `git ls-remote`, measured at 0.438s against 0.001s for a local read.
+ * `git show-ref --verify` exits 128 both for a missing ref and for no
+ * repository, while `for-each-ref` exits zero with empty output for absent. A
+ * ref path is a pattern here, so `refs/heads/x` also matches `refs/heads/x/y`,
+ * which git forbids beside it, so the over-match names the blocking branch.
+ * The remote-tracking ref is read as the last fetch left it, so a branch pushed
+ * elsewhere since is invisible, and `git ls-remote` costs a network read.
  */
 export async function branchRefs(
   branch: string,

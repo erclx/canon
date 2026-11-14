@@ -15,17 +15,12 @@ async function git(
  * The far side of a branch range: the merge base against the ref a caller
  * named, or against the first trunk this repository carries.
  *
- * A named ref names the far side rather than the comparison point, so it
- * resolves through the merge base exactly as the trunk below does. Reading it
- * literally is what let a trunk moving under an open branch report every path
- * merged in between as one the branch had written. A caller naming an ancestor
- * still gets that commit back, since the merge base of `HEAD` and an ancestor
- * is the ancestor.
- *
- * A named ref that produces no merge base refuses rather than falling back,
- * since measuring the trunk range instead would answer a question nobody
- * asked. That covers a ref resolving to nothing and a ref sharing no history
- * with `HEAD` alike, which no caller can separate.
+ * A named ref resolves through the merge base as the trunk does, so a trunk
+ * moving under an open branch never reports its merged paths as the branch's.
+ * A caller naming an ancestor still gets that commit back. A named ref with no
+ * merge base refuses rather than falling back, since the trunk range would
+ * answer a question nobody asked, whether the ref resolves to nothing or
+ * shares no history with `HEAD`.
  */
 export async function resolveBaseRef(
   root: string,
@@ -43,13 +38,9 @@ export async function resolveBaseRef(
  * Every path a branch has touched since `base`: the diff against the working
  * tree, plus untracked files git does not ignore.
  *
- * The working tree rather than `HEAD` on purpose. A check that runs before the
- * branch is committed has to see the surface a session just added, and reading
- * `HEAD` there returns a set the working tree has already moved past. Since the
- * range is a superset of `base..HEAD`, a caller running after the commits still
- * gets the whole branch.
- *
- * Returns undefined when git cannot answer, for the reason
+ * The working tree rather than `HEAD`, so a check before the commit sees the
+ * surface a session just added, and the range still covers `base..HEAD` after
+ * it. Returns undefined when git cannot answer, for the reason
  * `listRepositoryFiles` states: an empty list reads as a clean branch.
  */
 export async function listChangedFiles(

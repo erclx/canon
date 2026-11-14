@@ -1,16 +1,11 @@
 /**
  * The old-root citations left inside the record tree itself.
  *
- * `migrate records` sweeps a git listing, so it reaches every tracked file and
- * none of the records, which are gitignored by construction. What that leaves
- * behind is the tree's own citations: a pointer a session still follows, and a
- * far larger body of prose that has to keep saying what it says. This module
- * holds the scope that separates the two.
- *
- * Separate from `records.ts` because that module answers about a repository
- * listing and this one answers about a directory walk. Folding them would give
- * one file two enumeration models, and the predicates each needs are the
- * inverse of the other's.
+ * `migrate records` sweeps a git listing, so it reaches no record, since the
+ * records are gitignored. What remains is the tree's own citations, a pointer
+ * a session still follows and prose that must keep saying what it says, and
+ * this module holds the scope separating the two. It stays apart from
+ * `records.ts`, which answers about a repository listing rather than a walk.
  */
 
 import { readdir, readFile, writeFile } from 'node:fs/promises'
@@ -25,15 +20,10 @@ import {
 /**
  * The folders inside the record root a session still follows a path into.
  *
- * Every one of them holds a live pointer: a task naming its plan, a review
- * naming the branch it graded, a memory entry naming the folder that owns it.
- * The corpora left out are closed trails and scratch, which are the same class
- * of document the exclusion set in `records.ts` already refuses to rewrite, so
- * this is that reasoning applied one level down rather than a new rule.
- *
- * `proposals` is listed though the tree does not carry it here. The scope is a
- * statement about which folders are live rather than about what one machine
- * holds, and a folder absent from disk costs a `readdir` that finds nothing.
+ * Each holds a live pointer, such as a task naming its plan. The corpora left
+ * out are closed trails and scratch, which the exclusion set in `records.ts`
+ * already refuses to rewrite. `proposals` is listed though this tree does not
+ * carry it, since the scope names live folders, not one machine's disk.
  */
 export const LIVE_FOLDERS: readonly string[] = [
   'diagrams',
@@ -187,9 +177,8 @@ export async function walkRecordTree(root: string): Promise<RecordTreeWalk> {
     }).catch(() => undefined)
     if (entries === undefined) continue
 
-    // Each top-level entry is a separate subtree, so the scans are independent
-    // and run together. Nothing downstream depends on the order they settle in,
-    // since both lists are sorted once the whole root has been read.
+    // Each top-level entry is an independent subtree, so the scans run together,
+    // and both lists are sorted once the whole root is read.
     const scans = entries.map(async (entry) => {
       const relative = under(recordRoot, entry.name)
 

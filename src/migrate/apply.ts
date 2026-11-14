@@ -37,21 +37,12 @@ export interface ApplyResult {
 /**
  * Writes the records move: the citations first, then the folders.
  *
- * The order is the reverse of `applyRename`'s reasoning and lands in the same
- * place. Every folder here is untracked, so a failed move leaves the records
- * where they were and the rewritten citations point at a root nothing has
- * reached yet, which reads as pending. Moving first and failing the rewrite
- * strands the records at a root nothing points at, which reads as lost.
- *
- * A plain rename rather than `git mv`, since none of these paths is tracked and
- * git has no history to carry. The destination root is created once; a rename
- * across filesystems is not handled, because both paths sit inside one project.
- *
- * The folder loop stops on the first failure rather than carrying on. Each move
- * that lands makes the tree more split, and a split tree is what `pushRecords`
- * refuses on, so continuing turns one unmovable folder into a longer list of
- * folders to put back by hand. Stopping does not undo what already moved,
- * which is why the refusal on the push side exists as well.
+ * Every folder here is untracked, so a failed move after the rewrite reads as
+ * pending, where the reverse order would strand records nothing points at. A
+ * plain rename rather than `git mv`, since nothing here is tracked, and both
+ * paths sit inside one project. The folder loop stops on the first failure,
+ * since each landed move splits the tree further and `pushRecords` refuses a
+ * split tree. Stopping undoes nothing, which is why the push side refuses too.
  */
 export async function applyRecordsMove(
   root: string,
@@ -62,10 +53,8 @@ export async function applyRecordsMove(
   const failed: string[] = []
 
   for (const entry of plan.entries) {
-    // A rejected write leaves the tree half-rewritten with nothing said, since
-    // this runs inside a commander action that would unwind past the report.
-    // Reads still resolve through the root fallback, so the recorded failure is
-    // what a caller needs rather than a stop.
+    // A rejected write is recorded rather than thrown, since this runs inside a
+    // commander action that would unwind past the report.
     const done = await writeFile(join(root, entry.path), entry.text)
       .then(() => true)
       .catch(() => false)
@@ -88,10 +77,8 @@ export async function applyRecordsMove(
     moved += 1
   }
 
-  // The old root survives the moves as an empty directory when it held records
-  // and nothing else. `rmdir` refuses a directory that still holds anything, so
-  // a project keeping its rules, skills, and settings there is untouched and the
-  // refusal is ignored rather than reported.
+  // An emptied old root is removed. `rmdir` refuses one still holding anything,
+  // so a project keeping its rules there is untouched and the refusal ignored.
   if (moved > 0) {
     await rmdir(join(root, OLD_ROOT)).catch(() => undefined)
   }
@@ -147,16 +134,11 @@ export async function applyRename(
 /**
  * Removes the directories a move emptied.
  *
- * Git tracks files rather than directories, so moving the last file out of one
- * leaves the directory on disk with nothing in it and nothing in the diff to
- * say so. A renamed skill folder that keeps its old shell beside the new one
- * reads to a person, and to a plugin loader walking the tree, as though the
- * rename only half happened.
- *
- * `rmdir` refuses a directory that still holds anything, which is the guard:
- * a folder with an untracked file in it stays, and the refusal is ignored
- * rather than reported because it means the folder was not empty to begin
- * with.
+ * Git tracks files rather than directories, so moving the last file out leaves
+ * an empty directory the diff never shows, which reads to a person and a
+ * plugin loader as a half-done rename. `rmdir` refuses a directory still
+ * holding anything, so a folder with an untracked file stays, and the refusal
+ * is ignored since that folder was never empty.
  */
 async function pruneEmptyParents(
   root: string,

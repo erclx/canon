@@ -2,12 +2,10 @@
  * The move of a target's installed rules from the flat `.claude/rules/<subdir>/`
  * layout onto `.claude/rules/canon/<subdir>/`.
  *
- * `#1446` gave this repository's own installed tree a `canon/` wrapper and no
- * way for an already-synced target to follow. `canon gov sync` narrowed its
- * walk to that wrapper the same release, so a target still on the flat layout
- * reads back as unstamped rather than as needing this move, and `canon gov
- * install` writes a second copy beside the stale one rather than detecting it.
- * This module is the mover neither of those verbs is.
+ * `canon gov sync` walks the wrapper alone, so a target still on the flat
+ * layout reads back as unstamped rather than as needing this move, and
+ * `canon gov install` writes a second copy beside the stale one. This module
+ * is the mover neither of those verbs is.
  */
 
 import { existsSync, readFileSync } from 'node:fs'
@@ -23,11 +21,10 @@ import {
 } from '@/sync/stamp'
 
 /**
- * The one rule `#1446` renumbered, keyed and valued as `<subdir>/<name>` so a
- * future renumber that also changes subdirectory is representable without a
- * second field. A name match cannot find this rule under its old name, since
- * that name no longer exists in `governance/rules/`, so the table carries the
- * one case a lookup cannot.
+ * The one rule the wrapper move renumbered, keyed and valued as
+ * `<subdir>/<name>` so a renumber that also changes subdirectory needs no
+ * second field. A name match cannot find this rule under a name
+ * `governance/rules/` no longer carries, so the table holds that one case.
  */
 export const RENUMBERED_RULES: Readonly<Record<string, string>> = {
   'snippets/505-at-references': 'snippets/600-at-references',
@@ -206,19 +203,13 @@ export function planRuleLayout(
 }
 
 /**
- * The stamp's hashes, re-keyed for every entry this run actually moved and
- * otherwise carried forward only where the file they name still exists. A
- * key surviving neither test is dropped, so the stamp does not accumulate
- * entries for rules that no longer exist.
+ * The stamp's hashes, re-keyed for every entry this run moved and otherwise
+ * carried forward only where the file they name still exists.
  *
- * A file that moved on the catalog or renumber-table fallback carries no old
- * key to re-key, since `classifyRule` never required a stamp entry to call it
- * `clean`, so it lands under `canon/` still absent from the map. Hashing it
- * here to fill the gap would record an assumption the stamp never verified as
- * though a sync had confirmed it. That is no regression: the same file was
- * outside the walked root and invisible to `canon gov sync` before this move,
- * so it goes from unattributed to unattributed rather than from attributed to
- * not.
+ * A file moved on the catalog or renumber fallback has no old key, since
+ * `classifyRule` never required one to call it `clean`, so it lands under
+ * `canon/` unhashed. Hashing it here would record what no sync confirmed, and
+ * the file was unattributed before the move as well.
  */
 function nextHashes(
   root: string,

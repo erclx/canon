@@ -29,14 +29,10 @@ export const RULE_DIRS: readonly string[] = [
  * The corpus whose frontmatter globs resolve against this tree.
  *
  * Bodies are read across both corpora and globs across this one alone. A rule
- * under `governance/rules/` installs into a target and its `paths:` entries
- * name that project's shape, which is why 32 of the 72 globs there match
- * nothing here and every one of them is correct: `src/pages/**` in the Astro
- * rule is indistinguishable by pattern from a path this repository might hold.
- * Gating on them would ship a permanent exemption list the length of the
- * corpus. The internal corpus ships nowhere, so the tree it governs is the
- * tree present and a glob matching nothing there is a rule that stopped
- * firing.
+ * under `governance/rules/` installs into a target, so its `paths:` entries
+ * name that project's shape and many correctly match nothing here. The
+ * internal corpus ships nowhere, so a glob matching nothing there is a rule
+ * that stopped firing.
  */
 export const GLOB_CORPUS = join('internal', 'rules')
 
@@ -199,9 +195,8 @@ export function collectCitations(text: string): RawCitation[] {
         : trimmed
     const marked = isMarked(lines, index, CITATION_MARKER)
 
-    // A backticked span is the only carrier a rule writes a citation in. No
-    // rule in either corpus uses a markdown link, and matching running prose
-    // would report every sentence that happens to name a file.
+    // A backticked span is the only carrier a rule writes a citation in, and
+    // matching running prose would report every sentence naming a file.
     for (const { content: span } of findBacktickSpans(line)) {
       const form = classifySpan(span)
       if (form === undefined) continue
@@ -329,22 +324,14 @@ async function readIgnored(
 
 /**
  * Resolves every path the two rule corpora cite and names the ones reaching
- * nothing, plus every frontmatter glob under `GLOB_CORPUS`.
+ * nothing, plus every frontmatter glob under `GLOB_CORPUS`. Both fail the
+ * same way, silently after a move, so one stage reads both.
  *
- * Two questions rather than one, because they fail the same way. A citation
- * broken by a move sends a reader to an absence, and a glob broken by a move
- * stops the rule firing at all, and neither says anything when it happens. One
- * stage reads both rather than two reading one file each.
- *
- * This gates rather than reports, unlike the superseded sweep it sits beside. A
- * path resolving to nothing carries no judgment: either the file is there or the
- * citation is stale, and the classes where absence is correct are separated
- * before the verdict rather than left for a reader to settle.
- *
- * What it cannot see is a citation that resolves and points somewhere wrong,
- * a path written without backticks, a folder or module specifier carrying no
- * extension, which `namesAFile` declines rather than guessing at, and a glob
- * that matches real files while reaching none of the work it was scoped at.
+ * This gates rather than reports, since a path resolving to nothing carries no
+ * judgment, and the classes where absence is correct are separated first. It
+ * cannot see a citation that resolves somewhere wrong, a path without
+ * backticks, a folder or specifier with no extension, which `namesAFile`
+ * declines, or a glob matching real files but none of its intended work.
  */
 export async function readCitations(root: string): Promise<CitationReport> {
   const dirs = RULE_DIRS.map((rel) => ({
@@ -371,9 +358,8 @@ export async function readCitations(root: string): Promise<CitationReport> {
       try {
         text = await readFile(abs, 'utf8')
       } catch {
-        // A rule git listed and the filesystem will not open is a file removed
-        // since the glob answered. Skipping it under-reports rather than
-        // failing a push on a race.
+        // A rule removed since the glob answered is skipped, which under-reports
+        // rather than failing a push on a race.
         continue
       }
 

@@ -49,15 +49,12 @@ type Block =
  * Splits the body into the blocks the six limits read.
  *
  * Its own walk rather than `paragraphBlocks` in `src/markdown/structure.ts`,
- * because the two disagree on one construct and the disagreement is the point.
- * That walk reads an indented paragraph under a list item as a paragraph, and
- * here it belongs to the item: it counts toward the bullet's length and never
- * toward a paragraph run, since a reader sees it inside the list.
+ * since that walk reads an indented paragraph under a list item as a
+ * paragraph, and here it belongs to the item, as a reader sees it.
  *
  * A nested item is a block of its own, taking the lines indented past its
- * marker, and its parent leaves it out along with everything indented under it.
- * An indented fence inside an item joins neither and ends the nested item, and
- * a column-zero one ends both.
+ * marker, and its parent leaves it out. An indented fence inside an item joins
+ * neither and ends the nested item, and a column-zero one ends both.
  */
 function blocksOf(lines: readonly BodyLine[]): Block[] {
   const blocks: Block[] = []

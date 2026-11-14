@@ -421,11 +421,8 @@ function findOrphanLedgers(root: string): string[] {
  * authored corpora with a ledger asked of each outside-practice rule and of
  * each core rule in `touched`, and checked for any core rule carrying one.
  * Any other tree is a target, read at `.claude/rules/project/` alone, with
- * each rule's ledger under `canon/ledger/rules/` checked where one exists and
- * none owed, since the toolkit's ledgers never ship.
- *
- * `touched` holds paths relative to the root, and leaving it out reads no core
- * rule as touched.
+ * ledgers under `canon/ledger/rules/` checked where present and none owed.
+ * `touched` holds root-relative paths, and leaving it out touches no rule.
  */
 export async function readRuleAudit(
   root: string,

@@ -116,11 +116,8 @@ export async function regenConsumedRules(
     }
   }
 
-  // Clearing first is what makes a rule the record stopped naming disappear.
-  // Copying over the destination would leave it behind as an unsourced file,
-  // which is the state this producer exists to end. Each subtree clears on
-  // its own rather than through the shared `.claude/rules/` parent, so a
-  // `project/` folder landing beside them later is never in the blast radius.
+  // Cleared first so a rule the record stopped naming disappears. Each subtree
+  // clears on its own, so a `project/` folder beside them is never touched.
   await rm(canonRulesDir(root), { recursive: true, force: true })
   await rm(installedInternalRulesDir(root), { recursive: true, force: true })
 

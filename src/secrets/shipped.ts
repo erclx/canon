@@ -4,16 +4,11 @@ import { join } from 'node:path'
 /**
  * The corpus is the package's own `files` field rather than a list kept here.
  *
- * That field is what npm packs, so it is already the single statement of which
- * trees leave this repository, and a second list beside it would answer the
- * same question and drift. It also carries the negations the publish already
- * makes, so the sandbox tree, the eval tree, and every test file are out of
- * scope by the same rule that keeps them out of the tarball rather than by an
- * exclusion this check invented.
- *
- * What it does not cover is the plugin, which a marketplace install reads live
- * from `claude/` rather than from a tarball. That folder is a `files` entry
- * too, so both routes land inside the same corpus.
+ * That field is what npm packs, so a second list would drift, and its
+ * negations keep the sandbox tree, the eval tree, and every test file out by
+ * the rule that keeps them out of the tarball. The plugin, read live from
+ * `claude/` by a marketplace install, is a `files` entry too, so both routes
+ * land inside the same corpus.
  */
 export type ShipEntries =
   /** The field declares a corpus, which is what this check reads. */

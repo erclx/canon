@@ -3,17 +3,11 @@ import { isMarked } from '@/sweep/exempt-marker'
 /**
  * The inline token exempting one line from the secret scan.
  *
- * Shaped on the `stub: true` precedent in `src/tooling/seed-marker.ts`, which answers
- * a check whose own comment records a false-positive class. The exemption
- * travels with the line it exempts rather than sitting in a path list away
- * from it, so a reader meeting a muted match finds the reason on the spot.
- *
- * The set of files carrying one is empty today. What empties it is the keying
- * rather than this mechanism: `patterns.ts` matches issued values and never
- * the words around them, so nothing in the shipped tree matches on purpose.
- * A path allow-list was declined for the same reason, since the noise it would
- * target is word-keyed and spread past the fixture trees, so it would hide
- * part of the noise and none of the risk.
+ * Shaped on the `stub: true` precedent in `src/tooling/seed-marker.ts`. The
+ * exemption travels with the line it exempts, so a reader meeting a muted
+ * match finds the reason on the spot. No file carries one today, since
+ * `patterns.ts` matches issued values rather than words. A path allow-list
+ * was declined, since it would hide part of the noise and none of the risk.
  */
 export const SECRET_MARKER = 'canon-allow-secret'
 
