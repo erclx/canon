@@ -355,10 +355,10 @@ function labelCoverageCounts(
 /**
  * Reads the two classes that are findings, leaving the declared mirrors out.
  *
- * A mirror is an authoring root and its consumed copy, which duplicate on
- * purpose, the way the label audit drops its declined rows. The reach count is
- * left out too, since it counts surfaces reached rather than defects and moves
- * in lockstep with the two retained here.
+ * A mirror is an authoring root and its consumed copy, left out since the two
+ * duplicate on purpose, as the label audit drops its declined rows. The reach
+ * count is left out too, since it counts surfaces reached rather than
+ * defects and moves in lockstep with the two retained here.
  */
 function restatedCounts(record: unknown): Record<string, number> | undefined {
   const counts = asObject(asObject(record)?.counts)

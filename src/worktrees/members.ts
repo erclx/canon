@@ -203,12 +203,12 @@ interface Plan {
  * one's origin branch, its worktree, and its local branch.
  *
  * Merged means reachable from the integrator's merged head, since a squash
- * merge leaves no member an ancestor of the trunk, and a commit landing on a
- * member afterward stops its tip being one. Origin and local are judged apart.
- * The worktree takes the reclaim's reading with the members as its merged
- * answer, so a held, dirty, or current worktree is refused as anywhere else.
- * Every input is read before anything is deleted, and an unreadable one
- * refuses the whole run, for the reason `reclaimReport` states.
+ * merge leaves no member an ancestor of the trunk. A commit landing on a member
+ * afterward leaves its tip unreachable from that head. Origin and local are
+ * judged apart, and the worktree takes the reclaim's reading with the members
+ * as its merged answer, refusing a held, dirty, or current one as elsewhere.
+ * Every input is read before any delete, and an unreadable one refuses the
+ * run, for the reason `reclaimReport` states.
  */
 export async function retireMembers(
   pullRequest: number,
