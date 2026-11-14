@@ -44,13 +44,13 @@ Write `"worktree": null` in `drive.json`. The check reads `null` as a drive with
 
 - Stop or restart a server only on a port `canon pr local --root <checkout> --json` reported, never on a port picked by number
 - Restart it only on the operator's word, since they may be working in it
-- Follow the joint-drive rules under `### Driving the page` in `SKILL.md` for every click, since the operator shares the page
+- Follow the joint-drive rules under `### Driving beside the operator` in `SKILL.md` for every click, since the operator shares the page
 
 ## Close
 
 Close only on the operator's word, as `SKILL.md` states.
 
 1. Remove no worktree, since none was made.
-2. Leave the server up or stop it as the operator says.
+2. Leave the server up or stop it as the operator says, and stop a server this session started when no operator is present to say.
 3. Keep the scratch project the drive wrote into, as the board project is kept, and name it to the operator.
 4. Run `canon intake drive-check <slug> --json`, and report each path under `changed` without reverting it.

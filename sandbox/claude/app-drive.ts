@@ -131,7 +131,7 @@ export default scenario({
       )
       ctx.log.info('Before:  the default arm applies')
       ctx.log.info(
-        'Action:  /canon:app-drive drive the board app I run from this checkout, live and with no copy. Start it here with bun run build && PREVIEW_PORT=4530 bun run preview, and close the drive once the findings are filed, since no operator is present',
+        'Action:  /canon:app-drive drive the board app I run from this checkout, live and with no copy. Start it here with bun run build && PREVIEW_PORT=4530 bun run preview, close the drive once the findings are filed, and stop the server you started, since no operator is present',
       )
       ctx.log.info(
         'Expect:  no worktree made, "worktree": null in drive.json, a Copy row naming the live app,',
