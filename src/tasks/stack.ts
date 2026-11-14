@@ -96,14 +96,10 @@ function countShared(from: readonly string[], to: readonly string[]): number {
  * Every live plan that stacks on a live sibling it mostly shares files with and
  * has not written down why the two are judged apart.
  *
- * A parent absent from `plans` is never reported, which is how an archived
- * parent stays clear: the caller hands over the live folder only, so a merged
- * parent cannot be folded into. When two plans each name the other, the pair is
- * reported once, on the child sorting second.
- *
+ * A parent absent from `plans` is never reported, so an archived parent stays
+ * clear. A pair naming each other reports once, on the child sorting second.
  * A folder declaration counts as sharing the files under it, taking the larger
- * of the two directions and capping at the smaller set, so a folder and the
- * files beneath it are not undercounted as distinct strings.
+ * of the two directions and capping at the smaller set.
  */
 export function stackPairs(plans: readonly StackPlan[]): StackPair[] {
   const byStem = new Map(plans.map((plan) => [plan.stem, plan]))

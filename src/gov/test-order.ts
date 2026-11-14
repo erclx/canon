@@ -169,9 +169,8 @@ function classify(
   const findings: PairRecord[] = []
   const unclassified: PairRecord[] = []
 
-  // Keyed by subject so a module whose implementation and test both moved is
-  // one record rather than two, and so a test with no partner still reports
-  // under the implementation path a reader would go looking for.
+  // Keyed by subject, so a module whose two sides both moved is one record and a
+  // lone test reports under the implementation path a reader would look for.
   const subjects = new Set<string>()
   for (const change of changes) {
     if (isImplementation(change.path)) subjects.add(change.path)
@@ -228,9 +227,8 @@ function classify(
       continue
     }
 
-    // One commit carrying both sides counts as satisfied. The rule asks that
-    // the test not come after, and a single commit is the shape a small change
-    // takes here, so reporting it would flag most of the corpus.
+    // One commit carrying both sides is satisfied, since the rule asks only that
+    // the test not come after, and small changes land in one commit.
     const record: PairRecord = {
       subject,
       test,

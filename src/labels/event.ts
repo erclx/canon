@@ -122,9 +122,8 @@ export function resolveScanInput(opts: ScanInputOptions): ResolvedScanInput {
 
       title ??= ''
 
-      // Defense in depth for `isReleasePullRequest`, which already reads
-      // `cutsRelease` as false off the empty title above. A review carries no
-      // head ref of its own, so this reaches for the pull request's.
+      // Defense in depth for `isReleasePullRequest`. A review carries no head ref
+      // of its own, so this reaches for the pull request's.
       if (typeof pullRequest === 'object' && pullRequest !== null) {
         const head = (pullRequest as Record<string, unknown>).head
         headRefName ??=
@@ -154,9 +153,8 @@ export function resolveScanInput(opts: ScanInputOptions): ResolvedScanInput {
     }
   }
 
-  // Loosened from `title === undefined` alone so `--body` on its own, with no
-  // `--event` and no `--title`, exercises the same empty-title, review-style
-  // path a real review scans by hand.
+  // Refused only with no title and no body, so `--body` alone exercises the
+  // review-style path a real review scans by hand.
   if (title === undefined && body === undefined) {
     return {
       kind: 'refused',

@@ -30,17 +30,13 @@ import { checkWaiting, type LinkPromotion, promoteOnLink } from '@/tasks/board'
 const ORIGIN_PREFIXES = ['Plan:', 'Groundwork:', 'Intake:', 'Issue:'] as const
 
 /**
- * `bad-input` is separated from the board-state reasons on purpose. `git-pr`
- * swallows `no-board`, `no-match`, and `ambiguous`, because each is a case where
- * a guessed write would archive the wrong task. A caller that passed a
- * malformed argument has a defect nobody would otherwise hear about, so it
- * reports rather than joining the swallowed set.
+ * `bad-input` stands apart from the board-state reasons. `git-pr` swallows
+ * `no-board`, `no-match`, and `ambiguous`, where a guessed write would archive
+ * the wrong task, but a malformed argument is a defect nobody else would hear.
  *
- * `several-plans` answers a `Plan:` line that already links more than one plan.
- * `plan-link` cannot know which link to drop, so it writes nothing.
- *
- * `no-name` answers a session id the roster no longer lists, called with no
- * name, since an id written alone reads as nobody to the next reader.
+ * `several-plans` answers a `Plan:` line already linking more than one plan,
+ * since `plan-link` cannot know which link to drop. `no-name` answers a
+ * session id the roster no longer lists, called with no name.
  */
 export const RECORD_REFUSALS = [
   'no-board',
@@ -308,17 +304,12 @@ export type PlanLineWrite =
 
 /**
  * Places the `Plan:` line right after the H1, and corrects the target in place
- * when the line exists, since a task runs under one plan. `Plan:` is the first
- * origin line a task carries, so it anchors on the heading itself rather than
- * on the last origin line above it.
+ * when the line exists, since a task runs under one plan.
  *
- * A line already linking several plans is refused whole, even when one of them
- * is the target, since overwriting it drops links the caller never named and
- * reporting it unchanged hides a line that breaks the one-plan rule.
- *
- * `add` is the sliced task's writer, which links one plan per slice. It keeps
- * every link in order and appends the target, reports `unchanged` when the
- * target is already listed, and so never refuses a line holding several.
+ * A line already linking several plans is refused whole, since overwriting it
+ * drops links the caller never named. `add` is the sliced task's writer,
+ * which keeps every link in order, appends the target, reports `unchanged`
+ * when it is already listed, and so never refuses a line holding several.
  */
 export function writePlanLine(
   text: string,
@@ -727,19 +718,12 @@ export async function recordSession(
 /**
  * Marks the named outcomes `[x]`, and strikes the `cuts` with their reason, in
  * place. A cut alone writes no pending marker, since it ships nothing a merge
- * could archive early. `task-complete` runs this against a
- * board it can read and cannot edit from a linked worktree, and the positions
- * come from the read it already made.
+ * could archive early.
  *
- * A `branch` that ticks at least one new box goes on the `Pending branch:`
- * line, so the merge of an earlier slice cannot archive the task in the window
- * before this branch's own number is recorded. A rerun that ticks nothing adds
- * no marker, since its branch has already recorded or is already listed.
- *
- * `branchPulls` holds the pull request numbers the branch's own head carries.
- * One already on the task's `Pull request:` line means the branch recorded its
- * number, so a marker would outlive the branch with nothing left to clear it.
- * An absent or empty list keeps the marker, which is the first slice's case.
+ * A `branch` that ticks a new box goes on the `Pending branch:` line, so an
+ * earlier slice's merge cannot archive the task before this branch records
+ * its number. `branchPulls` holds the numbers the branch's head carries, and
+ * one already on the `Pull request:` line means no marker is needed.
  */
 export async function closeOutcomes(
   root: string,

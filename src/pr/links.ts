@@ -61,13 +61,10 @@ interface Edit {
  * Writes each code span in `## Key changes` that names a changed file as a link
  * to that file's diff, keeping the span as the label.
  *
- * Only an exact changed path is linked. A partial spelling or a folder names no
- * single row in the Files tab, and a link to a guessed row is worse than none.
- *
- * A span that is the whole label of an existing diff link has its destination
- * rewritten, which is how a wrong anchor clears. A span anywhere else inside a
- * link's brackets is left alone, since a link nested in a link breaks the
- * bullet, and the rewrite stays idempotent.
+ * Only an exact changed path is linked, since a link to a guessed row is worse
+ * than none. A span that is the whole label of an existing diff link has its
+ * destination rewritten, which clears a wrong anchor. A span elsewhere inside a
+ * link's brackets is left alone, so the rewrite stays idempotent.
  *
  * `filesUrl` is the pull request's `/files` address, absolute because the body
  * becomes the squash commit message, where a relative link resolves nowhere.

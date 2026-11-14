@@ -179,13 +179,8 @@ function renderIndex(
       }
     })
   } else {
-    /**
-     * Flat mode sorts sub-catalogs among the files rather than after them. A
-     * folder and a file are both one domain to a reader scanning the catalog,
-     * so a trailing folder reads as absent from the alphabetical run it belongs
-     * in. Grouped mode keeps its own heading below, where a category is the
-     * organizing key and alphabetical position carries no meaning.
-     */
+    // Flat mode sorts sub-catalogs among the files, since a trailing folder reads
+    // as absent from its alphabetical run. Grouped mode keeps its own heading.
     const lines = [
       ...entries.map((entry) => ({
         key: entry.name,

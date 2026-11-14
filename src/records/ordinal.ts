@@ -115,14 +115,10 @@ async function lockAgeMs(dir: string): Promise<number | undefined> {
  * `true` when a lock carries no leaf folder in either kind and is old enough
  * that an ordinary claim could not still be in flight.
  *
- * No backing folder alone is not enough: `claimOrdinal` awaits the leaf
- * `mkdir` after `reserve` returns, so a second process can observe another's
- * lock in that exact gap, with no folder behind it yet even though the first
- * process is seconds from creating one. Reading that gap as abandoned lets
- * both processes land a leaf folder at the same ordinal under their own
- * kind, which never collide with each other, reopening the race this verb
- * exists to close. Requiring the lock to also be older than `STALE_LOCK_MS`
- * is what keeps that window from being read as abandoned.
+ * No backing folder alone is not enough, since `claimOrdinal` awaits the leaf
+ * `mkdir` after `reserve` returns, and a second process seeing the lock in
+ * that gap would land its own leaf at the same ordinal. Requiring the lock to
+ * be older than `STALE_LOCK_MS` keeps that window from reading as abandoned.
  */
 async function isStale(root: string, ordinal: string): Promise<boolean> {
   if (await isBacked(root, ordinal)) return false
@@ -194,23 +190,15 @@ export type ClaimOutcome = Claimed | ClaimRefused
 
 /**
  * Computes the next ordinal and creates `.canon/<kind>/<nn>-<slug>/` in one
- * act, so no window sits between the read and the create for a second session
- * to land in, whichever kind that session is claiming.
+ * act, so no second session lands between the read and the create, whichever
+ * kind it claims.
  *
- * The reservation is what does the serializing: it is the one `mkdir` both an
- * `intake` claim and a `groundwork` claim resolve to the same path for when
- * they land on the same number, where the two kinds' own leaf folders never
- * share a path and so never collide with each other directly. A losing
- * reservation surfaces as `EEXIST`, `reserve` tells a live one from a stale
- * one left by a process that died before its own leaf create ran, and the
- * loser on a live one re-reads the highest ordinal and retries, bounded so a
- * run of contention past what an ordinary race produces surfaces as a refusal
- * instead of a longer silent retry.
- *
- * The kind's own leaf `mkdir` still runs with `recursive: false` once the
- * reservation is won, since a recursive `mkdir` succeeds silently against a
- * directory that already exists, and this call's own reservation ending up
- * stale is exactly the case the staleness check above exists to recover.
+ * The reservation serializes, being the one `mkdir` an `intake` and a
+ * `groundwork` claim share on the same number. A loser on a live reservation
+ * re-reads the highest ordinal and retries, bounded so heavy contention
+ * refuses, and `reserve` recovers a stale one. The leaf `mkdir` then runs with
+ * `recursive: false`, since a recursive one succeeds silently on an existing
+ * directory.
  */
 export async function claimOrdinal(
   root: string,

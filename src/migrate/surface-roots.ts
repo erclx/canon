@@ -78,20 +78,12 @@ function escape(value: string): string {
 /**
  * Files whose content is left alone entirely.
  *
- * The changelog is release history, and an eval result is a transcript of
- * paths a session actually opened; rewriting either makes it testify to
- * something that never happened. `src/roots/surface.ts` and
- * `src/roots/record.ts` are the two sources that spell the old root as data on
- * purpose, so sweeping either would turn the very literals this verb reads
- * into their own replacement. A hook is the third such source, guarding on a
- * `case` carrying an arm per root, so `.claude/hooks/` and the seed's copy of
- * it are excluded for the same reason `records.ts` excludes them.
- *
- * No suffix-wide test exclusion. Most of the `src/` test files naming these
- * paths use them as fixture data proving the fallback still resolves, not to
- * pin one particular assertion, so a wholesale ban would leave the majority
- * silently unswept. The two files that do pin a fallback carry `KEEP_MARKER`
- * on the line that needs it instead.
+ * The changelog is release history and an eval result a transcript, and
+ * rewriting either falsifies it. `src/roots/surface.ts`, `src/roots/record.ts`,
+ * and the hooks with their seed copies spell the old root as data on purpose,
+ * so sweeping them would rewrite the literals this verb reads. No suffix-wide
+ * test exclusion, since most test files use these paths as fixture data. The
+ * two that pin a fallback carry `KEEP_MARKER` on the line that needs it.
  */
 const EXCLUDED_PREFIXES: readonly string[] = [
   'src/migrate/',

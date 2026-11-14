@@ -48,20 +48,13 @@ const EMPTY_REVERSE: ReverseReport = {
 }
 
 /**
- * Asks the question every other detection surface asks backwards: what does the
- * target hold that no live catalog claims. The forward direction enumerates
- * toolkit-owned keys and tests the target against them, so a folder the toolkit
- * deleted appears in no section at all.
+ * Asks backwards what the target holds that no live catalog claims, since a
+ * forward scan over toolkit-owned keys never sees a folder the toolkit deleted.
  *
- * Scoped to roots the toolkit itself has dropped rather than to the whole tree.
- * Walking the tree reports every project folder as unclaimed, which is true and
- * useless, and the question here is only what the toolkit put there and then
- * stopped claiming.
- *
- * Reports beside `superseded`, `unmigrated`, and `newSkills` rather than
- * absorbing them. Each of those answers a narrower version of the same question
- * and none is wrong today, so folding them in would change what two shipped
- * sections print in the same change that introduces a third.
+ * Scoped to roots the toolkit has dropped rather than the whole tree, which
+ * would report every project folder as unclaimed. Reports beside
+ * `superseded`, `unmigrated`, and `newSkills` rather than absorbing them, since
+ * each answers a narrower version of the question and none is wrong.
  */
 export function buildReverseReport(
   toolkitRoot: string,

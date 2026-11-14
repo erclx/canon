@@ -69,11 +69,8 @@ export function spawnAudit(root: string): Spawn {
     const result = await execa(process.execPath, [cli, ...spec.argv], {
       cwd: root,
       reject: false,
-      // `gitEnv` already returns the whole ambient environment minus git's
-      // resolution variables, so it replaces the environment rather than
-      // extending it. Spreading `process.env` alongside would put back the very
-      // variables it strips, and a hook's `GIT_DIR` would then point every
-      // history-reading verb at a repository nobody asked about.
+      // `gitEnv` is the whole environment minus git's resolution variables, so it
+      // replaces the environment, since spreading `process.env` would restore them.
       env: gitEnv(),
       extendEnv: false,
     })

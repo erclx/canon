@@ -40,11 +40,8 @@ export const DEFAULT_DEPTH = 4
 /**
  * One project, with every path on this machine that holds a stamp for it.
  *
- * The paths are plural because a project can be cloned more than once, which
- * is not a hypothetical: the census taken on 2026-08-28 counted `caret` at the
- * clone it walked while the repair had run in a second clone it never saw, and
- * that gap is what left a task carrying a ticked outcome its own finding
- * contradicted.
+ * The paths are plural because a project can be cloned more than once, and
+ * counting only the clone a walk found misses a repair run in another.
  */
 export interface SweptTarget {
   readonly paths: readonly string[]
@@ -113,16 +110,10 @@ function isStamped(path: string): boolean {
  * Reads the origin a checkout pushes to, trimmed to a form two clones of one
  * project agree on.
  *
- * The scheme and the `.git` suffix are dropped because one project is commonly
- * cloned over ssh in one place and https in another, and a comparison keeping
- * either reports those as two projects, which is the count this exists to fix.
- *
- * Userinfo goes with them, and it is the component that has to. A checkout
- * cloned as `https://x-access-token:<token>@github.com/owner/repo.git` puts the
- * token in the key, and the key is returned on `SweptTarget.origin` and printed
- * by `canon targets list --json`. Dropping it also fixes the count, since
- * `https://someuser@github.com/owner/repo.git` keyed on the user and so failed
- * to group with the same project's ssh clone.
+ * The scheme and the `.git` suffix are dropped, since one project is commonly
+ * cloned over ssh and https. Userinfo goes too, since a token in the URL would
+ * reach the key that `canon targets list --json` prints, and a user name would
+ * keep a clone from grouping with the same project's ssh clone.
  */
 export async function originOf(path: string): Promise<string | null> {
   const result = await $`git -C ${path} remote get-url origin`
@@ -183,12 +174,8 @@ export async function sweepTargets(
         (entry) => !SKIP.has(entry.name),
       )
 
-      // A symlink is reported as neither a directory nor walked, so a directory
-      // symlink is named here rather than dropped. Following one is available,
-      // since `seen` already closes the cycle, and naming it is the answer the
-      // bound asks for: what the walk did not reach, stated rather than
-      // omitted. `isDirectory` follows the link, so a symlink to a file or a
-      // broken one is excluded rather than read as an unfollowed directory.
+      // A directory symlink is named rather than followed, so the walk states what it
+      // did not reach. A link to a file or a broken link is excluded.
       for (const entry of listed) {
         if (!entry.isSymbolicLink()) continue
         const full = join(dir, entry.name)

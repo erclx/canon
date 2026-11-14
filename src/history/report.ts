@@ -36,8 +36,8 @@ export function addDays(date: string, days: number): string {
 
 /**
  * The ISO week a calendar date falls in. The week belongs to the year holding
- * its Thursday, which is what puts 2026-12-31 in 2026-W53 and 2027-01-01 there
- * too.
+ * its Thursday, so the last days of December can fall in week 53 of that year
+ * and the first days of January in that same week.
  */
 export function isoWeek(date: string): WeekSlot {
   const ms = parseDay(date)

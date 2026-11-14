@@ -227,11 +227,8 @@ export function buildModel(catalog: readonly RankedSkill[]): RankModel {
   return {
     rank: (prompt: string): readonly RankedResult[] => {
       const promptVector = tfIdfVector(termCounts(tokenize(prompt)), idf)
-      // A prompt built entirely from stopwords and short words tokenizes to
-      // nothing, so every skill would score 0 and the sort would fall through
-      // to `localeCompare`, handing the alphabetically first skill a win no
-      // description earned. Reporting no ranking at all is what keeps that
-      // tie-break from reading as a measurement.
+      // A prompt of only stopwords tokenizes to nothing, and an all-zero sort would
+      // hand the alphabetically first skill a win, so no ranking is reported.
       if (promptVector.size === 0) return []
 
       return [...vectors]

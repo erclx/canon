@@ -203,9 +203,8 @@ function markdownCounts(record: unknown): Record<string, number> | undefined {
   if (!Array.isArray(entries)) return undefined
 
   const depth = asObject(root.checkpoints)?.run
-  // A depth reading needs the checkpoint it is measured against. Counting zero
-  // without it reports a corpus nobody measured for depth as one with no file
-  // past the line.
+  // A depth reading needs its checkpoint, or zero would report an unmeasured
+  // corpus as one with no file past the line.
   if (entries.length > 0 && typeof depth !== 'number') return undefined
 
   let bans = 0
@@ -356,15 +355,10 @@ function labelCoverageCounts(
 /**
  * Reads the two classes that are findings, leaving the declared mirrors out.
  *
- * A mirror is an authoring root and its consumed copy, which duplicate on
- * purpose, so folding them in would report a corpus getting worse every time a
- * seed is kept in step with the file it is authored from. Same reasoning the
- * label audit drops its declined rows on.
- *
- * The reach count is left out for a different reason. It counts how many
- * surfaces an instruction reached rather than whether anything is wrong, and it
- * moves in lockstep with the two retained here, so a baseline carrying it would
- * report one movement twice.
+ * A mirror is an authoring root and its consumed copy, left out since the two
+ * duplicate on purpose, as the label audit drops its declined rows. The reach
+ * count is left out too, since it counts surfaces reached rather than
+ * defects and moves in lockstep with the two retained here.
  */
 function restatedCounts(record: unknown): Record<string, number> | undefined {
   const counts = asObject(asObject(record)?.counts)
@@ -481,9 +475,8 @@ function testOrderCounts(record: unknown): Record<string, number> | undefined {
   const root = asObject(record)
   if (root === undefined) return undefined
 
-  // The unclassified count travels with the findings because it is the honest
-  // shape of this measure: a refactor and a new behavior cannot be told apart
-  // from history, and a findings count alone claims coverage it does not have.
+  // The unclassified count travels with the findings, since history cannot tell
+  // a refactor from new behavior and a findings count alone overclaims.
   return allOf({
     findings: lengthOf(root.findings),
     unclassified: lengthOf(root.unclassified),
@@ -505,14 +498,10 @@ const RECORD_KINDS: readonly (readonly [string, Corpus])[] = [
  * Every audit the aggregate runs.
  *
  * `context`, `markdown`, and `skills` gate because the merge gate in
- * `src/gate/stages.ts` already fails a push on each. `secrets` is the one entry that gates without
- * a stage behind it, added deliberately rather than as a side effect, since a
- * credential in the published tree is a fact and the split this repository
- * records gates a fact and reports a judgment. Weigh any further addition
- * against that test rather than against the count.
- *
- * Each verb runs once in its fullest form. Running the gating half separately
- * would walk the same tree twice for a number the full record already carries.
+ * `src/gate/stages.ts` already fails a push on each. `secrets` gates with no
+ * stage behind it, deliberately, since a credential in the published tree is a
+ * fact, and this repository gates facts and reports judgments. Each verb runs
+ * once in its fullest form rather than walking the tree twice.
  */
 export const AUDITS: readonly AuditSpec[] = [
   {
@@ -814,15 +803,10 @@ const ABSENT_REASONS: readonly (RecordRefusal | BoardRefusal)[] = [
 /**
  * Every reason the advisory verb refuses for, all of which are an absence.
  *
- * An index it could not reach, a project that is not JavaScript, and one whose
- * dependencies were never resolved are three states in which there is nothing
- * to measure rather than something broken. The verb has no fourth reason, so
- * this is its whole union rather than a chosen subset, and typing it that way
- * fails the build if a later reason arrives without this decision being made.
- *
- * Typed against that module's own union for the reason the record reasons are:
- * a literal here would go on matching nothing after a rename and turn every
- * offline run back into an unmeasured audit.
+ * An unreachable index, a project that is not JavaScript, and unresolved
+ * dependencies leave nothing to measure rather than something broken. This is
+ * the verb's whole union, typed against its own module, so a later reason or a
+ * rename fails the build rather than quietly matching nothing.
  */
 const ADVISORY_ABSENT_REASONS: readonly AuditRefusal[] = [
   'no-record',
@@ -833,19 +817,11 @@ const ADVISORY_ABSENT_REASONS: readonly AuditRefusal[] = [
 /**
  * Whether a refusal is a folder this machine never created rather than a break.
  *
- * Every gitignored record folder is absent on a fresh clone and in CI, so six
- * of the twelve refuse there on every run. Counting those as unmeasured pins
- * the verdict at `incomplete` forever, and a signal that never changes is one
- * nobody reads after the second time they see it.
- *
- * A tracked corpus gets no such allowance. That tree ships to targets, so a
- * checkout that cannot find it is broken, and reading the absence as ordinary
- * would report a pass over a corpus nobody measured.
- *
- * An upstream corpus takes the allowance for a different reason. Its index is
- * off this machine, so an offline run reaches nothing through no fault of the
- * tree, and pinning the verdict at incomplete every time the network is down
- * is the same signal-nobody-reads failure the per-machine case already names.
+ * Every gitignored record folder is absent on a fresh clone and in CI, so
+ * counting those as unmeasured would pin the verdict at `incomplete` forever.
+ * A tracked corpus gets no such allowance, since that tree ships and a
+ * checkout missing it is broken. An upstream corpus takes the allowance, since
+ * its index is off this machine and an offline run is no fault of the tree.
  */
 function absentReasonsFor(spec: AuditSpec): readonly string[] {
   if (spec.absentReasons !== undefined) return spec.absentReasons

@@ -68,9 +68,8 @@ async function readTrunk(
         // same name would otherwise fail the whole read as ambiguous.
         '--',
       ],
-      // `post-merge` drives the task verbs, and a hook exports the repository
-      // variables git reads ahead of `-C`, so the ambient environment would
-      // answer for whatever repository fired the hook.
+      // A hook exports the repository variables git reads ahead of `-C`, so the
+      // ambient environment would answer for whichever repository fired the hook.
       {
         reject: false,
         timeout: GIT_TIMEOUT_MS,
@@ -79,9 +78,8 @@ async function readTrunk(
       },
     )
 
-    // A missing ref exits non-zero, which is the next ref's turn rather than an
-    // answer. An exit of zero with no commit is the ref saying the work is not
-    // on it, which is an answer and stops the walk.
+    // A missing ref exits non-zero, the next ref's turn. Zero with no commit says
+    // the work is not on that ref, which is an answer and stops the walk.
     if (result.exitCode === 0) return result.stdout.trim().length > 0
   }
 

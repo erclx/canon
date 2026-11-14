@@ -50,9 +50,8 @@ export function resolveCoverage(
   for (const path of paths) {
     const labels = map.domains.filter((row) => matches(path, row.prefixes))
 
-    // A label wins over a decline. A path both tables claim already carries a
-    // subject, so reporting it as deliberately unlabelled would contradict the
-    // label the same run is about to apply.
+    // A label wins over a decline, since a path both tables claim already carries
+    // a subject, and calling it unlabelled would contradict the label applied.
     if (labels.length > 0) {
       for (const row of labels) earned.add(row.label)
       continue

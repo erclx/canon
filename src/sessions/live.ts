@@ -108,22 +108,15 @@ export const SYSTEM_PROBES: LivenessProbes = {
 }
 
 /**
- * Decides whether a record describes a session that is still running.
+ * Decides whether a record describes a session that is still running, and
+ * tells the caller which path ran.
  *
- * The two paths are not interchangeable and the caller is told which one ran.
- * Where the process filesystem answers, a start-time mismatch is a dead session
- * whose pid was reused and the record is discarded. Where it does not, the
- * probe alone stands, and every surviving row is marked so a caller never reads
- * a recycled pid as a confirmed identity.
- *
- * A record from another pid namespace is judged first, on its messaging
- * socket, because its pid names nothing in this namespace and either probe
- * would read an unrelated process or none. That answer is always `unverified`,
- * since a crashed session leaves its socket behind.
- *
- * The pid and start time are the only fields the rest needs, so a record that
- * is not a session, such as the gate's machine lock, carries the same proof and
- * takes the pid path for want of a `pidDomain`.
+ * Where the process filesystem answers, a start-time mismatch is a reused pid
+ * and the record is discarded. Where it does not, the probe alone stands and
+ * every surviving row is marked unverified. A record from another pid
+ * namespace is judged first on its messaging socket, always `unverified`,
+ * since a crashed session leaves its socket behind. A record that is not a
+ * session, such as the gate's machine lock, takes the pid path.
  */
 export function liveness(
   record: Pick<SessionRecord, 'pid' | 'procStart'> &

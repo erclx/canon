@@ -73,10 +73,8 @@ function formatLabel(label: Label): string {
 
 /**
  * The label after the one given, rolling a minor of 9 to the next major rather
- * than continuing to a second minor digit. Every one of the 587 labels measured
- * across the live board and its archive on 2026-09-06 stops at a single digit,
- * so this is the rollover the whole corpus already follows rather than a rule
- * this verb introduces.
+ * than continuing to a second minor digit. Every label on the live board and
+ * its archive stops at a single digit, so this follows the corpus.
  */
 function next(label: Label): Label {
   return label.minor >= MINOR_ROLLOVER

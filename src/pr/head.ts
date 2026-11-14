@@ -79,10 +79,9 @@ export async function resolveTip(
  *
  * `gh pr view --json headRefOid` answers from the pull request object, which
  * lags the branch ref by up to a minute after a push and reports nothing about
- * the lag. A session that trusts it calls a pushed commit unpushed and fires a
- * green claim against a commit CI never saw, both of which happened on
- * 2026-09-01. The tip is the authority and the object's head is the claim being
- * checked against it.
+ * the lag. A session trusting it calls a pushed commit unpushed and claims
+ * green against a commit CI never saw. The tip is the authority and the
+ * object's head is the claim being checked against it.
  */
 export async function resolveHead(
   branch: string,

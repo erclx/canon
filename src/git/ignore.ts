@@ -31,9 +31,8 @@ export async function listIgnored(
     .quiet()
     .nothrow()
 
-  // Exit 1 means nothing matched, which is a clean result rather than a
-  // failure. Anything above that is a real error and degrades to "ignores
-  // nothing" so a broken git never silently shrinks the scanned set.
+  // Exit 1 means nothing matched. Anything above is an error and degrades to
+  // ignoring nothing, so a broken git never shrinks the scanned set.
   if (result.exitCode > 1) return new Set()
 
   return new Set(

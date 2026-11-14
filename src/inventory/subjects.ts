@@ -38,17 +38,12 @@ export interface Subject {
 
 /**
  * Reports what each element changes about itself when it takes focus, which is
- * the reading the `ui-craft` keyboard reference states three rules against and
- * nothing measures.
+ * the reading the `ui-craft` keyboard reference states three rules against.
  *
- * The difference between rest and focus is the treatment, rather than the
- * focused style on its own. A card carrying a resting shadow computes a shadow
- * either way, so reading only the focused state would report a ring on an
- * element whose appearance never moves.
- *
- * An element the browser refuses to focus is named as such rather than folded
- * into the no-treatment row, since a disabled control and a control with no
- * ring are different findings with different remedies.
+ * The treatment is the difference between rest and focus, since a card with a
+ * resting shadow computes a shadow either way. An element the browser refuses
+ * to focus is named as such rather than folded into the no-treatment row,
+ * since a disabled control and a missing ring have different remedies.
  */
 function readFocusTreatments({ query }: ReaderArgs): SubjectReading[] {
   const PROPERTIES = [
@@ -78,10 +73,8 @@ function readFocusTreatments({ query }: ReaderArgs): SubjectReading[] {
 
   const rows: SubjectReading[] = []
 
-  // The walk presses Tab before this runs, which leaves one element focused.
-  // Reading that element's rest state while it holds focus reports no
-  // difference and hides whatever ring it actually draws, so the page starts
-  // from nothing focused and every element is blurred again after its turn.
+  // The walk's Tab press left one element focused, which would hide its ring, so
+  // the page starts from nothing focused and each element is blurred after.
   const entryFocus = document.activeElement
   if (entryFocus instanceof HTMLElement) entryFocus.blur()
 

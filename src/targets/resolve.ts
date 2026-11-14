@@ -93,10 +93,8 @@ export async function resolveTargets(
   const swept = await sweepTargets(opts.sweep, opts)
   const known = new Set(recorded.flatMap((target) => target.paths))
 
-  // A sweep row whose paths the record already holds is the same project read
-  // twice, so it adds nothing. A row holding one known path and one unknown one
-  // is the second-clone case, and it replaces the record's row rather than
-  // sitting beside it, since the sweep is the only source that can see both.
+  // A sweep row already held is the same project twice. One holding a known and
+  // an unknown path is a second clone, and replaces the record's row.
   const added: KnownTarget[] = []
   const superseded = new Set<string>()
 
@@ -107,19 +105,15 @@ export async function resolveTargets(
 
     for (const path of overlap) superseded.add(path)
 
-    // The recorded clone leads, because the record only names one a sync
-    // actually ran in, where the rest are checkouts a walk happened to find.
-    // Every caller reading a single path takes the first, and picking that by
-    // sort order is how a repair ran in one clone while the count was taken
-    // against another and the target read as untouched.
+    // The recorded clone leads, since a sync actually ran there, and a caller
+    // reading one path takes the first.
     const paths = [
       ...overlap,
       ...target.paths.filter((path) => !known.has(path)),
     ]
 
-    // Re-derived against this row's own order rather than carried from
-    // `target.legacyPaths`, which is ordered by the sweep's sort and mismatches
-    // `paths` the moment the recorded clone is not the one that sorts first.
+    // Re-derived against this row's order, since `target.legacyPaths` follows the
+    // sweep's sort and mismatches `paths` once the recorded clone is not first.
     added.push({
       paths,
       origin: target.origin,

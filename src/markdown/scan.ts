@@ -38,15 +38,11 @@ const AUTOLINK = /<[^>\s]+>/g
  * An HTML character reference by shape, whose closing semicolon is part of the
  * reference rather than prose.
  *
- * Only `scanBans` blanks it, so the colon and heading checks reading
- * `maskDisplayed` are unchanged. A name takes two characters at least, which
- * keeps `R&D; then` and `AT&T; and` a prose semicolon. No lookbehind refuses a
- * letter before the ampersand, since `project&gt;` is the case this exists for.
- * That trade lets a plural abbreviation such as `Q&As; then` or `M&Ms; then`
- * pass, and so does `rock&roll; x`, since no lookbehind separates them from
- * `Map&lt;K&gt;`, whose real reference follows a capital. A reference this shape
- * accepts and no browser knows is blanked too, since a closed list of names
- * would be a table to maintain.
+ * Only `scanBans` blanks it, so the colon and heading checks are unchanged. A
+ * name takes two characters at least, so `R&D; then` keeps a prose semicolon.
+ * No lookbehind refuses a letter before the ampersand, since `project&gt;` is
+ * the case this exists for, which lets `Q&As; then` pass. A reference no
+ * browser knows is blanked too, since a closed name list is a table to keep.
  */
 const CHARACTER_REFERENCE =
   /&(?:[A-Za-z][A-Za-z0-9]{1,31}|#[0-9]{1,7}|#[xX][0-9A-Fa-f]{1,6});/g
@@ -54,17 +50,11 @@ const CHARACTER_REFERENCE =
 /**
  * A whole inline link, capturing the anchor text a reader is shown.
  *
- * `LINK_DESTINATION` covers the span both measures drop and this covers the
- * brackets only the weight measure drops, which a reader is no more shown than
- * the destination. The narrower pattern still runs after this one, since a link
- * wrapped across two source lines puts its opening bracket on a line this one
- * never matches.
- *
- * Exported so `src/markdown/links.ts` matches a destination against the same
- * pattern rather than a second definition of the same shape. Take it through
- * `replace` or `matchAll` alone. Both clone the pattern before reading
- * `lastIndex`, where `test` or `exec` would mutate the shared instance and
- * leave the other module's next match starting from a nonzero offset.
+ * `LINK_DESTINATION` covers the span both measures drop and this the brackets
+ * only the weight measure drops. The narrower pattern still runs after, since a
+ * link wrapped across lines never matches here. Exported so
+ * `src/markdown/links.ts` shares it. Take it through `replace` or `matchAll`
+ * alone, which clone it, since `test` or `exec` would mutate `lastIndex`.
  */
 export const LINK = new RegExp(String.raw`\[([^\]]*)\]\(${LINK_TARGET}\)`, 'g')
 
@@ -195,20 +185,12 @@ export function maskDisplayed(text: string): string {
 /**
  * Drops the spans a reader is never shown, returning the text they read.
  *
- * This is what a weight measure counts, and it is deliberately not
- * `maskDisplayed`. That one holds each span's width so a ban finding can name a
- * column, which leaves behind the very characters a weight measure exists to
- * discount. The two also disagree on the span set: a backticked path is text a
- * reader reads and stays counted here, while the ban scan blanks it so a
- * standard quoting its own banned character does not report itself. One file
- * therefore holds two answers to what a reader sees, each correct for its own
- * measure, and collapsing them into one helper breaks whichever loses.
- *
- * A code span is walked around rather than through, since keeping it counted
- * and then dropping spans from inside it takes back the decision. The
- * placeholders this repository writes are the case: a reader is shown all of
- * `canon/context/<domain>.md` and the autolink pattern reaches the angle
- * brackets in the middle of it.
+ * This is what a weight measure counts, and deliberately not `maskDisplayed`,
+ * which holds each span's width for a ban column. The two also differ on the
+ * span set, since a backticked path stays counted here while the ban scan
+ * blanks it. Each is right for its measure, so they stay two helpers. A code
+ * span is walked around rather than through, so a placeholder such as
+ * `canon/context/<domain>.md` is not cut by the autolink pattern.
  */
 export function visibleText(text: string): string {
   const drop = (segment: string): string =>

@@ -5,17 +5,14 @@ import { RECORD_ROOTS, recordDir, SCRATCH } from '@/roots/record'
 import { candidateFolders } from '@/records/backup'
 
 /**
- * The folders a size reading covers at `root`, resolved the same way a push
- * resolves its scope rather than pinned to `BACKED_FOLDERS`, which is silently
- * wrong at a `.canon` root.
+ * The folders a size reading covers at `root`, resolved the way a push
+ * resolves its scope rather than pinned to `BACKED_FOLDERS`, which is wrong at
+ * a `.canon` root.
  *
- * It is the present backed set plus the scratch folder, which a backup skips
- * because it is deletable without loss and a reading covers because deletable
- * is not the same as empty: the routing handoffs and the memory archive both
- * sit there and both accumulate. `.records.git` stays out because it is the
- * backup history rather than a record, and `worktrees/` stays out because each
- * entry there is a checkout of the enclosing repository with its own removal
- * verb, and one of them outweighs every record folder combined.
+ * It is the backed set plus scratch, which a backup skips as deletable but
+ * which still accumulates handoffs and the memory archive. `.records.git` is
+ * the backup history rather than a record, and `worktrees/` holds checkouts
+ * with their own removal verb, so both stay out.
  */
 export function sizedFolders(root: string): string[] {
   return [...candidateFolders(root), SCRATCH]
@@ -97,18 +94,11 @@ export function day(ms: number): string {
 /**
  * Adds one file to the running totals.
  *
- * The window counts read `mtime`, so what they report is a file written inside
- * the window rather than one created there. An entry edited long after it
- * landed counts as recent, which overstates growth and never understates it.
- * That is the safe direction for a number whose whole job is to be noticed, and
- * these folders are append-mostly, so the two readings agree on nearly every
- * file.
- *
- * The one reading that is wrong rather than early is a machine restored by
- * `canon records pull`, which resets the work tree hard and re-dates every file
- * it writes. A window taken there counts the restore. Nothing separates the two
- * from the filesystem, since a restored file is new by every stamp it carries,
- * so the caveat is published rather than corrected.
+ * The window counts read `mtime`, so a file edited long after it landed counts
+ * as recent, which overstates growth and never understates it, and these
+ * folders are append-mostly. A machine restored by `canon records pull` is
+ * wrong rather than early, since the hard reset re-dates every file, and the
+ * filesystem cannot tell the two apart, so the caveat is published.
  */
 function absorb(into: Walked, bytes: number, mtime: number, now: number): void {
   into.files += 1
@@ -217,10 +207,8 @@ export async function sizeRecords(
   root: string,
   now: number = Date.now(),
 ): Promise<SizeOutcome> {
-  // Either root answers, so a migrated tree is read rather than refused. The
-  // roots are tested rather than the folders under them, since a project that
-  // holds the root and no records yet is empty rather than absent and the
-  // per-folder `present` flags already say which of the ten it carries.
+  // Either root answers, so a migrated tree is read. The roots are tested, since
+  // a root with no records yet is empty, and `present` names the folders held.
   if (!RECORD_ROOTS.some((name) => existsSync(join(root, name)))) {
     return {
       ok: false,
@@ -229,9 +217,8 @@ export async function sizeRecords(
     }
   }
 
-  // Each folder is walked independently, and the report is ordered by the
-  // caller rather than by arrival, so `Promise.all` keeps the input order while
-  // the walks overlap.
+  // Each folder is walked independently, and `Promise.all` keeps the caller's
+  // input order while the walks overlap.
   const folders = await Promise.all(
     sizedFolders(root).map((folder) => measure(root, folder, now)),
   )

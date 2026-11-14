@@ -11,16 +11,13 @@ import { readInstalled } from '@/version/installed'
 
 /**
  * Domains the stamp can record. Governance attributes file by file through
- * the sync engine. Tooling runs its own inject and manifest machinery, so it
- * records the stack chain it resolved, and hashes only the configs a target
- * matched, which is what lets a later write tell a stale copy from an edit.
+ * the sync engine. Tooling records the stack chain it resolved and hashes only
+ * the configs a target matched, so a later write tells a stale copy from an
+ * edit.
  *
- * A stamp written before the standards or snippets install channel closed
- * still carries a `standards` or `snippets` record, and one written before the
- * design install retired carries a `design` record. `isStamp` ignores the key,
- * `readStamp` drops it from what it returns, and `sortDomains` drops it from
- * the file on the next write, so the target loses a domain nothing can refresh
- * rather than losing the whole file.
+ * A stamp may still carry a retired `standards`, `snippets`, or `design`
+ * record. `isStamp` ignores the key, `readStamp` drops it, and `sortDomains`
+ * drops it from the file on the next write, so only that domain is lost.
  */
 export const STAMP_DOMAINS = ['governance', 'tooling'] as const
 
@@ -118,13 +115,12 @@ export function claudeCanonStampPath(target: string): string {
 }
 
 /**
- * Where `106115ba` moved the stamp from. No migration shipped with that move,
+ * Where the stamp lived before it moved. No migration shipped with that move,
  * so a target stamped before it still carries its config here, and `readStamp`
  * falls back to this path when the current one is absent.
  *
- * The old tool name is deliberate and this path never renames. It names what a
- * target already has on disk, so rewriting it to the current spelling would
- * point the fallback at a file that has never existed anywhere.
+ * The old tool name is deliberate and this path never renames, since it names
+ * what a target already has on disk.
  */
 export function legacyStampPath(target: string): string {
   // canon-keep-retired
@@ -133,8 +129,8 @@ export function legacyStampPath(target: string): string {
 
 /**
  * The stamp folder under the retired tool name, which is where every target
- * stamped between `106115ba` and the rename carries its config. Retired for
- * the same reason as the path above and kept readable on the same terms.
+ * stamped between the move above and the rename carries its config. Retired
+ * for the same reason as the path above and kept readable on the same terms.
  */
 export function retiredNameStampPath(target: string): string {
   // canon-keep-retired
@@ -396,17 +392,12 @@ async function persist(
   await mkdir(dirname(path), { recursive: true })
   await writeFile(path, `${serializeStamp(stamp)}\n`)
 
-  // The stamp hashes every file but itself, so reshaping it cannot read as
-  // drift. Seeds and goldens stay as copied for the opposite reason: their
-  // hashes are taken against the source bytes.
+  // The stamp hashes every file but itself, so reshaping it is no drift. Seeds
+  // and goldens stay as copied, since their hashes are taken on source bytes.
   await formatWritten(target, [path])
 
-  // Every install and sync that stamps a target passes through here, which is
-  // what makes this the one place the machine-level index can be kept without
-  // each command remembering to. Its outcome is dropped rather than reported:
-  // the stamp just written is the authoritative record of this install, the
-  // index is a cache over every such stamp, and a state folder nobody can
-  // write is not a reason to fail a sync that already landed its files.
+  // The one place every stamping install passes, so the machine index is kept
+  // here, and its outcome dropped, since the stamp just written is authoritative.
   recordTarget(target, now)
 }
 

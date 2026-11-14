@@ -48,14 +48,10 @@ export function indexSourceRules(root: string): Map<string, string> {
  * syncs into the subdirectory the target already uses.
  *
  * Declares `ownsInstalledRoot` and no `projectSubdir`. A project keeps its own
- * rules under `.claude/rules/project/`, which `installedRoot` narrowing to
- * `.claude/rules/canon/` leaves outside the walk, so everything the walk does
- * reach is the toolkit's. A rule there with no source is one the toolkit
- * retired or renamed, and the sync deletes it rather than leaving it loaded.
- * A rename `governance/renames.toml` declares also installs the rule under its
- * new name.
- * A `projectSubdir` would compute a stale `canon/project/` destination, which
- * is wrong rather than merely redundant.
+ * rules under `.claude/rules/project/`, outside the `.claude/rules/canon/`
+ * walk, so a rule the walk reaches with no source is one the toolkit retired,
+ * and the sync deletes it. A rename `governance/renames.toml` declares installs
+ * under the new name. A `projectSubdir` would compute a stale destination.
  */
 export function createGovAdapter(root: string): SyncAdapter {
   const index = indexSourceRules(root)

@@ -132,9 +132,8 @@ async function locate(cwd: string): Promise<Located> {
     .nothrow()
 
   if (top.exitCode !== 0) {
-    // git absent and git refusing the directory are both non-zero here. The
-    // first is the platform report the plan asked for and the second is an
-    // ordinary answer, so the distinguishing read is whether git ran at all.
+    // Git absent and git refusing the directory both exit non-zero, but only the
+    // first is the platform report, so the test is whether git ran at all.
     const version = await $`git --version`.quiet().nothrow()
     return {
       repository: null,
@@ -273,9 +272,8 @@ export async function resolveSessions(
     })
   }
 
-  // Only a row the start time left unverified is probed, so a machine that reads
-  // /proc pays nothing. An accept proves the session is running where a pid
-  // answering or a socket file existing does not.
+  // Only a row the start time left unverified is probed, since an accept proves
+  // the session runs where an answering pid or an existing socket does not.
   const upgraded = await Promise.all(
     live.map(async (row) => {
       const socket = row.record.messagingSocketPath
@@ -347,18 +345,12 @@ function pidOf(value: string | undefined): number | null {
 /**
  * Reads whatever the environment states about the calling session.
  *
- * Three identifier namespaces are in play and only two of them join to a
- * roster row. `CLAUDE_CODE_SESSION_ID` is the roster's own `sessionId` and is
- * read first because it survives a rename, where the name a session carries is
- * derived from what it turned out to be doing and rotates while a build runs.
- * `CLAUDE_CODE_HOST_SESSION_ID` is deliberately never read: it holds a
- * `local_`-prefixed value from the harness namespace that matches no row, and
- * it is the variable a reader searching the environment for a session id finds
- * first.
- *
- * The socket path is the last rung because its basename is the caller's pid by
- * a client convention rather than a published interface, so a client that
- * moves it drops this rung while leaving the two above it standing.
+ * `CLAUDE_CODE_SESSION_ID` is the roster's own `sessionId` and is read first,
+ * since it survives a rename. `CLAUDE_CODE_HOST_SESSION_ID` is never read,
+ * since it holds a harness-namespace value that matches no row, though a
+ * reader searching the environment finds it first. The socket path is the last
+ * rung, since its basename is the caller's pid by client convention rather
+ * than a published interface.
  */
 export function callerIdentity(env: Env = process.env): SelfIdentity {
   const stated = env.CLAUDE_CODE_SESSION_ID?.trim()

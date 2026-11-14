@@ -1,17 +1,13 @@
 /**
- * What every browser-driving command needs to know before it can report a
- * failure honestly: how the binary is installed, how each of the two ways it
- * can be absent reads when it is thrown, and the one press that decides whether
- * a focus reading means anything.
+ * What every browser-driving command needs before it can report a failure
+ * honestly: how the binary is installed, how each of its two absences reads
+ * when thrown, and the one press that decides whether a focus reading means
+ * anything.
  *
- * The two absences are different states with different remedies. A package that
- * never resolved means the target installed the CLI without the engine, and a
- * binary that was never downloaded means the engine is present and its browser
- * is not. Every command driving a browser reads both, so they sit here rather
- * than beside one caller.
- *
- * The sandbox policy sits here for the same reason. Every product launch asks
- * for it, and every refusal reading a blocked start names the same fix.
+ * A package that never resolved means the target installed the CLI without the
+ * engine, and a binary never downloaded means the engine lacks its browser.
+ * Every command driving a browser reads both, so they sit here, as does the
+ * sandbox policy every product launch asks for.
  */
 
 import { readFileSync } from 'node:fs'

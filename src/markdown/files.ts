@@ -46,15 +46,10 @@ function matchGlob(files: readonly string[], pattern: string): string[] {
 /**
  * Resolves the arguments to a markdown file list, repo-relative and sorted.
  *
- * The corpus is what git lists rather than a directory walk, which is what
- * keeps `node_modules` and the gitignored session-scratch folders out without
- * naming either. A directory argument narrows that list by prefix and a
- * pattern narrows it by match, so the three argument shapes read one corpus
- * and a file only the working tree has is in scope on the branch adding it.
- *
- * An explicit file path is taken as given. A caller naming one file means it,
- * and refusing a path git does not list would make the verb unusable against a
- * gitignored draft a session wants measured before it commits.
+ * The corpus is what git lists, which keeps `node_modules` and the gitignored
+ * scratch out unnamed. A directory narrows it by prefix and a pattern by
+ * match, so a file only the working tree has is in scope on its branch. An
+ * explicit file path is taken as given, so a gitignored draft can be measured.
  */
 export async function resolveMarkdown(
   root: string,

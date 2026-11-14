@@ -97,9 +97,8 @@ export async function scanShippedTree(root: string): Promise<SecretScan> {
     try {
       text = await readFile(join(root, path), 'utf8')
     } catch {
-      // A listed path that will not open is a symlink pointing outside the
-      // tree or a file removed since git answered. Counted rather than
-      // reported, so the run still states that it measured less than it listed.
+      // A listed path that will not open is counted rather than reported, so the run
+      // still states that it measured less than it listed.
       skipped += 1
       continue
     }

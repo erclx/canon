@@ -202,21 +202,13 @@ interface Plan {
  * Retires the fan-in members an integrator's merged pull request names: each
  * one's origin branch, its worktree, and its local branch.
  *
- * Merged here means reachable from the integrator's merged head, not merged
- * into the trunk. The integrator squash merges, so no member is ever an
- * ancestor of the trunk, but every member was merged into the integrator's
- * branch before it shipped. A commit landing on a member after that merge is
- * work the squash did not carry, and its tip stops being an ancestor.
- *
- * Origin and local are judged apart, since an unpushed local commit and a
- * commit pushed from elsewhere each keep only their own half. The worktree
- * takes the reclaim's reading with the members injected as its merged answer,
- * so a held, dirty, or current worktree is refused by the same rules as
- * everywhere else, and its local branch stays with it because git refuses to
- * delete a branch a registered worktree holds.
- *
- * Every input is read before anything is deleted, and an unreadable one
- * refuses the whole run, for the reason `reclaimReport` states.
+ * Merged means reachable from the integrator's merged head, since a squash
+ * merge leaves no member an ancestor of the trunk. A commit landing on a member
+ * afterward leaves its tip unreachable from that head. Origin and local are
+ * judged apart, and the worktree takes the reclaim's reading with the members
+ * as its merged answer, refusing a held, dirty, or current one as elsewhere.
+ * Every input is read before any delete, and an unreadable one refuses the
+ * run, for the reason `reclaimReport` states.
  */
 export async function retireMembers(
   pullRequest: number,

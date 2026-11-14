@@ -75,15 +75,11 @@ export function parseMovedBodies(output: string): MovedBody[] {
  * Which shipped skill bodies were rewritten between `ref` and the current
  * `HEAD` of the tree at `root`.
  *
- * This measures a file moving rather than a held copy differing. A session
- * cannot read its own loaded body as bytes, so the comparison runs against
- * history and a session passing a ref older than its oldest load over-reports.
- * That is the safe direction, since confirming a name costs one read of the
- * body while the failure this answers is silence.
- *
- * Every path that cannot answer returns `unreadable` with its own reason. A
- * target project loads the plugin from a marketplace cache with no history
- * behind it, where reporting an empty result would read as a clean tree.
+ * This measures a file moving, since a session cannot read its loaded body as
+ * bytes, so a ref older than the oldest load over-reports, the safe direction.
+ * Every path that cannot answer returns `unreadable` with its own reason,
+ * since a target loads the plugin from a marketplace cache with no history,
+ * where an empty result would read as a clean tree.
  */
 export function readDrift(root: string, ref: string): DriftReport {
   if (!existsSync(join(root, SHIPPED_SKILLS))) {

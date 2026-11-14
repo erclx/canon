@@ -1,18 +1,12 @@
 /**
  * The component layer, beside the token layer in `@/design/tokens`.
  *
- * A token says what a value is and a component says what a repeated piece of
- * interface is made of. The two repairs that produced this layer are both cases
- * where the tokens were already right and the surface still read as unrelated
- * to itself, so a token file alone would not have caught either.
- *
- * `COMPONENTS` is the generic default every project installing the `design`
- * domain receives. A caller wanting a different set passes an explicit list to
- * `buildDesignCss`'s `components` option, which takes
- * `boolean | readonly Component[]` for that reason.
- *
- * It does not live in `canon/DESIGN.md`. `claude/skills/design-record/references/design.md` keeps CSS class
- * names out of that record and says they live in code, which is here.
+ * A token says what a value is and a component what a repeated piece of
+ * interface is made of, which catches a surface reading as unrelated to itself
+ * while its tokens are right. `COMPONENTS` is the default every project
+ * installing the `design` domain receives, and a caller passes its own list
+ * through `buildDesignCss`'s `components` option. It stays out of
+ * `canon/DESIGN.md`, since the design-record standard keeps class names in code.
  */
 
 import { readTemplate } from '@/design/template'

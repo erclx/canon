@@ -202,9 +202,8 @@ function devtoolsUrl(proc: ChildProcess, executable: string): Promise<string> {
       settled = true
       fail(error)
     })
-    // `close` rather than `exit`, since only `close` waits for stderr to drain
-    // and the marker can sit in the last chunk. A shell that already printed
-    // its address is past the launch, so a later death is not read here.
+    // `close` waits for stderr to drain, where the marker can sit in the last
+    // chunk. A death after the address printed is past the launch.
     proc.on('close', (code, signal) => {
       if (settled) return
       settled = true

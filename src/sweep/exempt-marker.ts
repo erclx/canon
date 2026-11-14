@@ -15,17 +15,11 @@ export function escapeForPattern(token: string): string {
  * Whether the line at `index` carries `token` with a reason after it, reading
  * itself and the line above.
  *
- * Extracted from `src/secrets/marker.ts`, which shaped it, so the two sweeps
- * that mute a line share one answer to where a marker may sit. Two lines rather
- * than one, because a value is as often introduced by a preceding comment as
- * annotated inline, and a format taking no trailing comment has nowhere else to
- * put the marker. Nothing further up counts, so a marker cannot silence a block
- * it does not sit on.
- *
- * Only a marker naming a reason counts. A bare token is read as a line that
- * meant to say something and did not, and honoring it would let a typo mute a
- * finding, where the reason is the whole value of an exemption a later reader
- * has to weigh.
+ * Shared by the two sweeps that mute a line. The line above counts too, since
+ * a value is as often introduced by a preceding comment as annotated inline,
+ * and nothing further up counts, so a marker cannot silence a block it does
+ * not sit on. Only a marker naming a reason counts, so a typo cannot mute a
+ * finding.
  */
 export function isMarked(
   lines: readonly string[],

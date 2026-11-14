@@ -82,15 +82,11 @@ export function isFixture(rel: string): boolean {
 /**
  * The boundary a root's own leading character rules out.
  *
- * A dotted root cannot be a suffix of a path segment, since a segment boundary
- * is a slash and a slash can never sit inside the dot itself, so a preceding
- * slash is not a false match to guard against and the boundary admits it. That
- * is what a relative link into a dotted root needs. A bare root has no such
- * protection: it is a suffix of a dotted root's own name and of any
- * `/<root>/` path segment, such as a seed tree's own `canon/` folder, so its
- * boundary rejects a name character, a dot, and a slash, except a slash that
- * closes a `..` segment. That one exception is a relative link climbing out of
- * a folder into the bare root, which is the form a moved docs page writes.
+ * A dotted root cannot be a suffix of a path segment, so its boundary admits a
+ * preceding slash, which a relative link into it needs. A bare root is a
+ * suffix of a dotted root's name and of any `/<root>/` segment, such as a seed
+ * tree's own `canon/`, so its boundary rejects a name character, a dot, and a
+ * slash, except one closing a `..` segment, the form a moved docs page writes.
  */
 function rootBoundary(root: string): string {
   return root.startsWith('.') ? '(?<![\\w.])' : '(?<![\\w.])(?<!(?<!\\.\\.)/)'
@@ -129,16 +125,11 @@ function escape(value: string): string {
  * A backticked filename carrying no folder, the form a reference takes when it
  * names a sibling rather than a path.
  *
- * `citationPattern` spells a record-root prefix and cannot see this shape at
- * all, which is the reason the form rule exists. Widening that expression to
- * admit a bare name was the alternative and it puts one match in the position of
- * answering two questions, since a spelled path is a reference by construction
- * and a bare name is a candidate whichever caller found it still has to test
- * against the folder it sits in.
- *
- * The backticks are required rather than incidental. A filename written into
- * running prose without them is not a reference a reader follows, and matching
- * one would report every sentence that happens to name a file.
+ * `citationPattern` spells a record-root prefix and cannot see this shape.
+ * Widening it was declined, since a spelled path is a reference by
+ * construction and a bare name is a candidate its caller still tests against
+ * its folder. The backticks are required, since a filename in running prose is
+ * no reference, and matching one would report every sentence naming a file.
  */
 export const BARE_NAME = /`([A-Za-z0-9._-]+\.md)`/g
 

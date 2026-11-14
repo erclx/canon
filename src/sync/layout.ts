@@ -9,21 +9,14 @@ const CLAUDE_DIR = '.claude'
 
 /**
  * Domains an older toolkit installed at the project root, each with the source
- * folder naming what it owns. Governance is absent because its move stayed
- * inside `.claude/rules/`, from a flat `<subdir>/` layout to a `canon/`-wrapped
- * one, and this shape represents a domain stranded at the project root rather
- * than one stranded a folder short of where it belongs. `canon migrate
- * rule-layout` is the separate command that move needed instead. Standards and
- * snippets are absent because no copy installs into a target at all now, so a
- * root `standards/` or `snippets/` folder there is the project's own authoring
- * surface and reporting it as unmigrated would propose moving files nothing
- * installed.
+ * folder naming what it owns.
  *
- * A tuple array rather than a partial record, so the domain key stays typed
- * without asserting an `Object.entries` result back into the union. Empty
- * now that both former entries retired their install channels. A future
- * domain installing at a target's root, the way an older toolkit installed
- * standards and snippets there, would be the next entry to add.
+ * Governance is absent, since its move stayed inside `.claude/rules/` and
+ * `canon migrate rule-layout` handles it. Standards and snippets are absent,
+ * since no copy installs into a target now, so a root folder of that name is
+ * the project's own. A tuple array keeps the domain key typed without an
+ * assertion. It is empty now, and a future domain installing at a target's
+ * root would be the next entry.
  */
 const ROOT_LAYOUTS: readonly (readonly [
   StampDomain,
@@ -71,11 +64,8 @@ export function collectSuperseded(target: string): SupersededEntry[] {
     const rel = join(CLAUDE_DIR, `${subdir.toUpperCase()}.md`)
     if (!isFile(join(target, rel))) continue
 
-    // A record subdir lives under the record root and a tracked surface under
-    // the surface root, so the replacement this names is resolved against the
-    // target rather than fixed at `.claude/`. Naming a folder the target does
-    // not have sends a person to migrate their legacy file into a path nothing
-    // reads.
+    // A record subdir resolves under the record root and a tracked surface under
+    // the surface root, so the replacement names a path the target actually reads.
     const replacedBy = isRecordEntry(subdir)
       ? creationRel(target, subdir)
       : SURFACE_ENTRIES.includes(subdir)

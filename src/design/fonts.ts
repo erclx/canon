@@ -1,20 +1,14 @@
 /**
  * The faces `src/design/tokens.ts` names as each stack's primary family,
- * subset and compressed to WOFF2, and committed as a plain data module rather
- * than a build step, because a face never changes on its own the way
- * `DESIGN.md`'s tokens do. Embedding a face makes it always resolve, which
- * leaves a stack's fallbacks reachable only for a glyph the subset lacks.
+ * subset and compressed to WOFF2, committed as a data module rather than a
+ * build step, since a face never changes on its own. Embedding a face makes it
+ * always resolve, leaving a stack's fallbacks for glyphs the subset lacks.
  *
- * Geist is the variable face the visual-direction decision names for every
- * proportional role, embedded as one face declaring `font-weight: 100 900`
- * rather than a static per weight. It is Vercel's Geist 1.800, SIL Open Font
- * License 1.1, copyright 2024 The Geist Project Authors, sourced from
- * https://github.com/vercel/geist-font, whose LICENSE.txt is the licence text
- * and whose attribution this comment carries. The committed subset was
- * produced by an earlier session and is kept as found, since it is the exact
- * face the decision was judged against. It covers 226 codepoints, Latin and
- * basic punctuation, and lacks the box-drawing, arrow, check and diamond
- * glyphs the terminal surfaces print, which the mono face carries.
+ * Geist is the variable face for every proportional role, one face declaring
+ * `font-weight: 100 900`. Vercel's Geist 1.800, SIL Open Font License 1.1,
+ * copyright 2024 The Geist Project Authors, from
+ * https://github.com/vercel/geist-font, whose LICENSE.txt is the licence text.
+ * The subset lacks the box-drawing, arrow, check, and diamond glyphs.
  */
 
 export interface FontFace {
