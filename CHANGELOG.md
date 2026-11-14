@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.93.0](https://github.com/erclx/canon/compare/v5.92.0...v5.93.0) (2026-11-14)
+
+
+### Features
+
+* **markdown:** gate every plugin skill body and reference by prefix ([#3119](https://github.com/erclx/canon/issues/3119)) ([2b2fac1](https://github.com/erclx/canon/commit/2b2fac192ea4f03bc4adb8ed3a84b2a657cb2a5b))
+* **role-orchestrator:** name the runbook behind each everyday act ([#3118](https://github.com/erclx/canon/issues/3118)) ([8c3f436](https://github.com/erclx/canon/commit/8c3f4361a81b3754de60ca998ed52447030e06dd))
+* **skills:** run the board unattended from now or a set time ([#3120](https://github.com/erclx/canon/issues/3120)) ([3e34675](https://github.com/erclx/canon/commit/3e3467598af3d69f984984ffd3b9d9f6e18ba03c))
+
 ## [5.92.0](https://github.com/erclx/canon/compare/v5.91.0...v5.92.0) (2026-11-14)
 
 
