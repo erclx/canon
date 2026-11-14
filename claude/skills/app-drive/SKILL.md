@@ -88,7 +88,7 @@ The operator clicks in the same running app, a copy as much as a live one, so an
 Append each finding to the drive log as it happens, never batched at the end, since a compaction drops what chat alone holds.
 
 - Move each frame a finding cites from scratch into `evidence/<surface>/` in the intake folder, and cite it by that path
-- Copy each image the operator pastes into the evidence in the turn its message arrives, under its finding's number, or into `evidence/refs/` under a `ref-` prefix when no finding cites it yet
+- Confirm the file of each image the operator pastes, then copy it into the evidence in that turn under its finding's number, or under `evidence/refs/` as `ref-` when no finding cites it
 - Keep the measured number beside the claim in the log, never only in chat
 - Write an operator's decision under the finding it settles, even when later findings already sit below it, since it is the one edit above the end of the log
 - Write `drive.json` into the intake folder in the shape `drive-record.md` sets

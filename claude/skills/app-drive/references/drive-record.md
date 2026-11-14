@@ -89,6 +89,15 @@ Operator images count as evidence on arrival. One showing a finding takes that f
 - `ref-<nn>` numbers reference shots apart from findings, so a later finding citing one keeps the path it already has
 - Keep the pasted file's own extension when it is not a PNG
 
+### A paste with no file
+
+Confirm the pasted image's file exists on disk before writing any path to it. A paste can reach the session in chat alone, with no file behind it, and a path cited first points at nothing.
+
+- Write no `Evidence` path and no `drive.json` entry for an image with no file
+- Describe the image in the finding's `Saw` line, saying it arrived in chat alone
+- Tell the operator in the same turn, so they can save it or paste it again
+- Give a later paste of the same image the number it would have had
+
 ## Severity
 
 Each finding takes one level, judged by what the persona loses.
