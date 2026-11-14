@@ -13,7 +13,7 @@ The sequence also reaches the remote on work nothing re-checked. This skill is w
 
 ## Must
 
-- The project's verify commands run before the sequence and a failure stops it, and a project naming none is said so rather than read as passing
+- The project's verify commands run before the sequence under a time limit, a failure or a hang stops it, and a project naming none or a machine with no wrapper is said so rather than read as passing
 - Each step runs through the Skill tool in the stated order, with staging after the sync skills write, and the chain reaches the pull request on a branch already committed
 - Steps print nothing beyond a stop report and the watch line, and the body names a wrapping caller's one action point, its one forwarded argument, and when the closing block stays unemitted
 - CI is watched to a terminal state in the background, and a failure stops the chain naming the check, except a failure whose runs were all cancelled, which reruns once first

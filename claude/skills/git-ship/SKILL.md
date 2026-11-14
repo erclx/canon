@@ -17,6 +17,17 @@ Run the verify commands `CLAUDE.md` names (lint, typecheck, tests) before the se
 
 When `CLAUDE.md` names no verify command, say so on one line and continue. A project with no suite is not a project with a failing one.
 
+### Bound each run
+
+Run each verify command under a time limit, so a run that never exits stops the chain instead of holding it. The limit is 20 minutes per command, unless `CLAUDE.md` states another duration beside its verify commands.
+
+- Wrap it as `timeout <limit> <command>`, or `gtimeout` where `timeout` is absent, putting a command with shell syntax inside `sh -c '<command>'`
+- With neither wrapper on the machine, run the command unbounded and say so on one line. Never report a bound the run did not have.
+- Run it in the background where the limit outlasts a foreground shell call, and act on the wake
+- Read exit 124 as a hang rather than a failure, and stop: `❌ Verify hung: <command> ran past <limit>. Narrow the parallel work, or raise the limit in CLAUDE.md, and re-run /git-ship.`
+
+A suite exiting 124 by itself reads as a hang too, which is why the stop names the command. A headless browser that starts its own process session can outlive the wrapper, so the hang stop does not prove the machine is clear.
+
 ### Why verify runs first
 
 Verify runs ahead of the sync skills so a stop leaves the tree exactly as the user left it. Re-running a suite the caller already ran costs one command.
