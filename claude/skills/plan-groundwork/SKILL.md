@@ -31,6 +31,7 @@ Apply it in open mode alone, after Step 1 resolves the mode and before the folde
 Write only inside `.canon/groundwork/<nn>-<slug>/`. A feature plan, source changes, a standard, a rule, and a reference doc all live outside it, so this one rule forbids every one of them.
 
 - One exception, at close only, is the conclusion recorded into the task the launch named, or one new task file when the launch named neither a task nor a controller
+- The plan close Step 7 writes is no exception, since `plan-feature` writes it under its own scope after this skill's steps end
 - A second exception is a large fixture a spike reads as bulk input, under `.canon/tmp/runs/groundwork-fixtures/<slug>/` so mode detection never matches it as a track
 - A fixture a headless run is pointed at goes outside the repository instead, per `## Running a spike`
 - An arm script and a checkout a claim rests on are not fixtures, and go inside the track under `scripts/` and `clones/`, per the standard
@@ -134,24 +135,15 @@ The standard sets the open question format inside a topic file and in `00-scope.
 4. Record the conclusion, even when it is to do nothing, by the route `### Close routes` below picks.
 5. When the conclusion Step 4 recorded or handed off does not cover every finding the track surfaced, route what it leaves out through `plan-intake`. Skip this step when it does.
 6. Report each statement about an outside source carrying neither a link nor a lead entry. Report and do not block, because judging what counts as an external claim is the call a checker gets wrong.
+7. Plan the conclusion in this session through `canon:plan-feature` by the route Step 4 took, per `### Close routes` below, or name the handoff.
 
-Aside from an experiment fixture, Steps 4 and 5 are the only ways close mode reaches outside the folder. Do not close while an open question quietly fails an outcome. Resolve it, or record it in `06-decision.md` as knowingly accepted.
+Aside from an experiment fixture, Steps 4, 5, and 7 are the only ways close mode reaches outside the folder. Do not close while an open question quietly fails an outcome. Resolve it, or record it in `06-decision.md` as knowingly accepted.
 
 Name `proposal-critique` in the close report when the decision is a one-way change or a fix whose cause is unverified, and never invoke it from here.
 
 ### Close routes
 
-Read the route from the origin record in `README.md`, never from the launch string, which a compaction drops. A launch names a controller only by a `Controller: <sessionId>` line. A roster name prefix is no test, since a controller can carry any name.
-
-| Launch named             | Step 4 does                                                                                                   |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| A task                   | Writes the conclusion into that task as a `Groundwork:` origin line and a finding, and creates no second file |
-| A controller and no task | Writes no task file and claims no label, and hands the conclusion to the controller, which places the row     |
-| Neither                  | Writes one task file in `.canon/tasks/` and places its row through `task-board` Step 4                        |
-
-The handoff rides the close announcement `role-planner` already owes, as one message, since a second one is a second thing the controller reconciles. It carries the track path, the decision in one line, and the origin lines a task file would open with.
-
-A track opened from an intake item cites the item for the verdict rather than restating it. Its origin lines carry `Intake:` with the item number beside `Groundwork:`, on the handoff and in a new task file alike, so the row files from the item's bundle. A new task file takes the shape `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
+Read `${CLAUDE_SKILL_DIR}/references/close.md` on reaching Step 4. It holds the three routes Step 4 picks from the origin record in `README.md`, never from the launch string, and how Step 7 plans the conclusion by that route or names the handoff.
 
 ## Check the folder
 
