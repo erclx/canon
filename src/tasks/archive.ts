@@ -1045,7 +1045,7 @@ export async function archiveTask(
   if (open.length > 0) {
     const refused = refuse(
       'open-outcomes',
-      `${stem} has ${open.length} open outcome(s). Close them, or cut one with \`- ~~<outcome>~~ <why>\`, then archive.`,
+      `${stem} has ${open.length} open outcome(s). Close them, or cut one with \`canon tasks outcome ${stem} --cut N --reason <why>\`, then archive.`,
       open,
     )
     return selector.kind === 'pull-request'

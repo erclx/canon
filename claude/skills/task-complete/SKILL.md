@@ -51,6 +51,8 @@ For each unchecked outcome, decide whether the diff shipped the behavior it name
 
 Mark each completed outcome `[x]` in the task's own file through `canon tasks outcome <stem> --close <n> --json`, repeating `--close` for each. Positions count every outcome checkbox in file order from 1.
 
+`--close` means shipped and nothing else. Cut an outcome the operator decided against through `canon tasks outcome <stem> --cut <n> --reason <why> --json` instead, which strikes it and keeps its checkbox so no later position shifts. Never close one to clear it, since the archive then records unshipped work as shipped.
+
 - Do not move or archive the file, even when every outcome reads `[x]`. The pull request has not merged, and the `post-merge` hook archives the task once it does.
 - The verb resolves the board at the main worktree root in-process, the route `session-worktree` states for an edit inside a main-root file
 - Read `ok` and `reason` from the record rather than the exit, since a shell function wrapping `canon` can flatten a refusal to zero
