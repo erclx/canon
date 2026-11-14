@@ -28,9 +28,8 @@ function stubGh(pulls: unknown, reviews: unknown = { reviews: [] }): GhRunner {
 }
 
 describe('rollup', () => {
-  // No check and every check green are different answers. A target whose
-  // workflow never fired reads as passing without this, which is the reading
-  // that would let a wave merge on a suite that did not run.
+  // No check and every check green are different answers, or a target whose
+  // workflow never fired would read as passing.
   it('should report no check at all as null rather than as passing', () => {
     expect(rollup([])).toBeNull()
   })
@@ -53,9 +52,8 @@ describe('rollup', () => {
     ).toBe('pending')
   })
 
-  // A job that already failed cannot be cleared by one still running, so
-  // reporting the head as pending would invite a wait for an answer that has
-  // already arrived.
+  // A failed job cannot be cleared by one still running, so pending would invite
+  // a wait for an answer that already arrived.
   it('should let a failure outrank a run still going', () => {
     expect(
       rollup([
@@ -248,9 +246,8 @@ describe('readTargetPulls', () => {
     })
   })
 
-  // A list that failed and a target with nothing open both arrive as no rows.
-  // Reading the first as the second reports a target as done having read
-  // nothing, which is the failure the shell loop this replaces could not see.
+  // A failed list and a target with nothing open both arrive as no rows, and
+  // reading the first as the second reports a target done having read nothing.
   it('should refuse a list it could not read rather than reporting no pulls', async () => {
     const report = await readTargetPulls(ROOT, { run: async () => null })
 

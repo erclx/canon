@@ -154,9 +154,8 @@ describe('reapProcessGroup', () => {
     expect(reapProcessGroup(child.pid ?? 0)).toBe('clear')
   })
 
-  // The safety property travels with the function rather than living in one
-  // caller, because the cost of a later caller passing the wrong group id is the
-  // operator's own shell.
+  // The safety property travels with the function, since a later caller passing
+  // the wrong group id would cost the operator's own shell.
   it('should refuse a group id matching the calling process', () => {
     const own = Number(processGroupOf(process.pid))
 
@@ -169,9 +168,8 @@ describe('reapProcessGroup', () => {
     expect(reapProcessGroup(child.pid ?? 0)).toBe('reaped-term')
   })
 
-  // The measured detail behind the escalation. The dispatch this bound was
-  // filed against needed SIGKILL, so a reap that sends one signal and reports
-  // success would have left it running exactly as before.
+  // A survivor can ignore SIGTERM, so a reap sending one signal and reporting
+  // success would leave it running.
   it('should escalate to SIGKILL for a survivor that ignores SIGTERM', async () => {
     const ready = join(root, 'trap-installed')
     const stubborn = writeScript('stubborn', [
@@ -186,9 +184,8 @@ describe('reapProcessGroup', () => {
     expect(reapProcessGroup(child.pid ?? 0)).toBe('reaped-kill')
   }, 30_000)
 
-  // Every member, not the leader alone. A dispatch that survives the session
-  // that made it is a child of that session, so a reap reaching only the pid it
-  // holds would report success against the one process it was never about.
+  // Every member, not the leader alone, since a surviving dispatch is a child of
+  // the session, and reaping only the held pid would miss it.
   it('should reap a child the group leader left behind', async () => {
     const parent = writeScript('parent', ['sleep 30 &', 'exit 0'])
     const child = startGroup(parent)
@@ -296,9 +293,8 @@ describe('describeSession', () => {
     )
   })
 
-  // The name is written by whatever peer claimed the session, and the report is
-  // a list every reader takes as one line each, so a newline inside it would
-  // split one record into two entries.
+  // The name comes from whatever peer claimed the session, and a newline inside
+  // it would split one record into two entries.
   it('should keep one record to one line when the name spans lines', () => {
     const dir = sessionsDir()
     writeRecord('multiline.json', { cwd: '/sandbox', name: 'rollout\nkestrel' })

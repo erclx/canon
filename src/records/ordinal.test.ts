@@ -78,9 +78,8 @@ describe('claimOrdinal', () => {
   })
 
   it('should let two concurrent claims for different kinds land on distinct ordinals', async () => {
-    // The incident this verb exists for: two sessions independently taking
-    // one ordinal for two different record folders. Both calls here read the
-    // same starting state and race to claim it.
+    // Two sessions taking one ordinal for two different record folders, both
+    // calls reading the same starting state and racing to claim it.
     const [first, second] = await Promise.all([
       claimOrdinal(ROOT, 'intake', 'one'),
       claimOrdinal(ROOT, 'groundwork', 'two'),
@@ -93,9 +92,8 @@ describe('claimOrdinal', () => {
   })
 
   it('should recover a stale reservation left by a process that died before its leaf create', async () => {
-    // A lock with no folder behind it in either kind, old enough that no
-    // ordinary claim could still be creating its leaf folder: a process
-    // reserved 01 and never got to creating its own.
+    // A lock with no folder in either kind, old enough that no ordinary claim
+    // could still be creating its leaf: a process reserved 01 and stopped.
     mkdirSync(join(ROOT, '.canon', 'ordinal-locks', '01'), {
       recursive: true,
     })
@@ -107,12 +105,8 @@ describe('claimOrdinal', () => {
   })
 
   it('should not reclaim a lock too young to be abandoned', async () => {
-    // No folder behind it yet, but freshly created: indistinguishable from a
-    // claim mid-flight between its reservation and its own leaf create.
-    // Every retry keeps recomputing the same next ordinal, since nothing
-    // here ever backs the lock with a real folder, so the bounded spin ends
-    // in a refusal rather than skipping ahead of a claim that might still
-    // complete.
+    // A fresh lock with no folder reads as a claim mid-flight, so every retry
+    // recomputes the same ordinal and the bounded spin ends in a refusal.
     mkdirSync(join(ROOT, '.canon', 'ordinal-locks', '01'), {
       recursive: true,
     })

@@ -63,9 +63,8 @@ describe('drawPointer', () => {
     const frame = blank()
     drawPointer(frame, { x: 60, y: 60 }, 0.6)
 
-    // At 0.6 the ring is scaled to 1.0 of its size, its stroke centered just
-    // inside the outer radius. Read it straight up from the point, where the
-    // arrow does not reach.
+    // At 0.6 the ring is full size, its stroke just inside the outer radius, read
+    // straight up from the point where the arrow does not reach.
     const radius = Math.round(RING_RADIUS - 1)
     const [r, , b] = pixel(frame, 60, 60 - radius)
     expect(b).toBeGreaterThan(r)

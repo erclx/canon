@@ -140,9 +140,8 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
 
     expect(probe(clip)).toEqual({ width: 3840, height: 2160, rate: '60/1' })
 
-    // A one-second linear fade spans 60 frames when every frame advanced one
-    // sixtieth of a second, and each of them is brighter than the last. A
-    // stepper running on wall time would spread or bunch them.
+    // A one-second fade spans 60 frames, each brighter than the last, when every
+    // frame advanced a sixtieth. A wall-time stepper would spread or bunch them.
     const luma = bandLuma(clip)
     expect(luma).toHaveLength(beat.frames)
     const ramp = luma.filter((value) => value > 17 && value < 234)

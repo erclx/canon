@@ -186,8 +186,8 @@ describe('fanInFindings', () => {
 })
 
 describe('the density-references split as a fan-in', () => {
-  // The three constraint blocks as v151.8's plans carry them on 2026-10-18,
-  // with one member bullet added to each.
+  // The three constraint blocks as a real fan-in's plans carried them, with one
+  // member bullet added to each.
   const SHARED = [
     '- Measured against `74dfc2f02` on 2026-10-17',
     '- Waits on `feature-density-check` and `feature-density-standard` merging, since the audit has to report density and the standard has to state the shape before a rewrite starts',

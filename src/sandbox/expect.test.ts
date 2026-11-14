@@ -153,11 +153,8 @@ describe('checkExpectation', () => {
     })
   })
 
-  /**
-   * A checker exercised only against a correct tree cannot distinguish asserting
-   * correctly from asserting nothing, which is the defect this feature removes.
-   * Each case below violates one assertion kind and must go red.
-   */
+  // A checker run only against a correct tree cannot tell asserting from
+  // asserting nothing, so each case violates one assertion kind and goes red.
   describe('on a tree that violates one assertion', () => {
     it('should fail when the swept plan was deleted rather than archived', () => {
       seedCorrectTree()

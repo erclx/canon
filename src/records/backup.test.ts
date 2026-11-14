@@ -161,11 +161,8 @@ afterEach(() => {
 })
 
 describe('BACKED_FOLDERS', () => {
-  // One line per record surface is what the list is for, and an archive named
-  // beside the folder it archives is what used to cost a second. Both halves
-  // are asserted because either alone passes on the other's failure: a nested
-  // path satisfies the suffix test, and a sibling named `archive` satisfies
-  // the segment test.
+  // Both halves are asserted, since either alone passes on the other's failure:
+  // a nested path satisfies the suffix test and a sibling `archive` the segment.
   it('should name only top-level record folders', () => {
     expect(BACKED_FOLDERS.filter((folder) => folder.includes('/'))).toEqual([])
   })
@@ -176,9 +173,8 @@ describe('BACKED_FOLDERS', () => {
     ).toEqual([])
   })
 
-  // This is the legacy `.claude`-root allowlist now, read only for a project
-  // that has not moved to `.canon/` yet. A `.canon` root reads its own
-  // directory listing less EXCLUDED_ENTRIES instead, asserted below.
+  // The legacy `.claude`-root allowlist, read only for an unmoved project. A
+  // `.canon` root reads its own listing less EXCLUDED_ENTRIES, asserted below.
   it('should name exactly the record folders a legacy .claude root carries', () => {
     expect([...BACKED_FOLDERS]).toEqual([
       'diagrams',
@@ -347,10 +343,8 @@ describe('pushRecords', () => {
     expect(tracked).not.toContain('intake/')
   })
 
-  // The archives moved inside the records they archive, which takes a name off
-  // the backed list rather than off the disk. A pathspec built from that list
-  // alone never mentions the old name again, so its deletion never stages, the
-  // remote keeps it, and a pull restores it beside the folder that replaced it.
+  // A pathspec built from the backed list alone never names a retired folder, so
+  // its deletion never stages and a pull restores it beside its replacement.
   it('should carry a folder that left the backed list since the last push', async () => {
     const retired = join(ROOT, '.claude', 'plans-archive')
     mkdirSync(retired, { recursive: true })
@@ -358,9 +352,8 @@ describe('pushRecords', () => {
     await makeRecordsRepo(ROOT, ORIGIN)
     await pushRecords(ROOT)
 
-    // Asserted before the removal, because a name the pathspec never carries
-    // reaches the remote on no push and passes the absence test below having
-    // proved nothing.
+    // Asserted before the removal, since a name the pathspec never carries passes
+    // the absence test below having proved nothing.
     expect(await trackedOnOrigin(ROOT)).toContain('plans-archive/entry.md')
 
     rmSync(retired, { recursive: true, force: true })
@@ -404,9 +397,8 @@ describe('pushRecords', () => {
     expect(tracked).not.toContain('.tmp/')
   })
 
-  // The `.canon` counterpart of the allowlist test above: nothing bounds the
-  // folder set from outside any more, so a new top-level directory is carried
-  // and named as first seen, while the two excluded folder names are not.
+  // The `.canon` counterpart of the allowlist test: a new top-level directory is
+  // carried and named as first seen, while the two excluded names are not.
   it('should carry a new .canon folder as first seen, excluding tmp and ordinal-locks', async () => {
     const canonRoot = await makeCanonProject({
       'tasks/entry.md': '# tasks\n',
@@ -428,10 +420,8 @@ describe('pushRecords', () => {
     expect(tracked).not.toContain('ordinal-locks/')
   })
 
-  // An older binary put `tmp` into the records index, and folding the index
-  // into the scope re-admitted it on every later push through `add -f`,
-  // whatever the exclusion list said. The name leaves the history once and
-  // then stays out.
+  // An excluded name the records index still tracks would be re-admitted on
+  // every push through `add -f`, so it leaves the history once and stays out.
   it('should drop an excluded name the records index still tracks, once', async () => {
     const canonRoot = await makeCanonProject({
       'tasks/entry.md': '# tasks\n',
@@ -646,9 +636,8 @@ describe('pushRecords', () => {
     expect(tracked).not.toContain('tasks/entry.md')
   })
 
-  // Every worker runs from inside the work tree, so the folder set staged there
-  // and the folder set staged from the root are the same claim the verb makes
-  // everywhere else.
+  // Every worker runs from inside the work tree, so the folders staged there must
+  // match those staged from the root.
   it('should stage the same folders when run from inside the work tree', async () => {
     await makeRecordsRepo(ROOT, ORIGIN)
 
@@ -769,11 +758,8 @@ describe('pullRecords', () => {
     expect(outcome.reason).toBe('local-changes')
   })
 
-  // The push half of this fails loudly and the pull half fails quietly, which
-  // is the worse of the two. `git status` tolerates a pathspec matching
-  // nothing, so from inside the work tree the gate that refuses rather than
-  // discarding an unpushed record reads clean and the reset behind it takes
-  // the file.
+  // `git status` tolerates a pathspec matching nothing, so from inside the work
+  // tree the unpushed-record gate would read clean and the reset take the file.
   it('should still refuse an unpushed record when run from inside the work tree', async () => {
     await makeRecordsRepo(ROOT, ORIGIN)
     await pushRecords(ROOT)
@@ -789,10 +775,8 @@ describe('pullRecords', () => {
   })
 
   it('should write the records the remote carries onto a machine holding none', async () => {
-    // A second machine holding the same project resolves the same branch only
-    // because both clones name the same project origin. Two clones with no
-    // origin at all would each fall back to their own directory basename and
-    // never agree, which this shared remote is what rules out here.
+    // Both clones resolve one branch only because they share a project origin, and
+    // two clones with none would each fall back to their own basename.
     await git([
       '-C',
       ROOT,

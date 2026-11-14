@@ -108,9 +108,8 @@ describe('reclaimReport', () => {
     expect(verdict.route).toBe('worktree')
   })
 
-  // Ancestry is the reading anyone reaches for first, and this repository squash
-  // merges, so a merged branch is never an ancestor of main. The pull request
-  // state is the only surface that answers.
+  // This repository squash merges, so a merged branch is never an ancestor of
+  // main, and the pull request state is the only surface that answers.
   it('should report a merged branch reclaimable even though it sits ahead of main', async () => {
     const path = linked('wt-parser', 'feat/parser')
     execaSync(
@@ -297,9 +296,8 @@ describe('reclaimReport', () => {
     expect(verdict.route).toBeNull()
   })
 
-  // Git removes the directory a caller is standing in without complaint, and
-  // every later call scoped to that directory then fails, so the run would leave
-  // the branches after it undeleted and blame the worktrees for it.
+  // Git removes the caller's own directory without complaint, and every later
+  // call scoped to it then fails, leaving the branches after it undeleted.
   it('should refuse the linked worktree the reading is being run from', async () => {
     const path = linked('wt-parser', 'feat/parser')
 
@@ -359,10 +357,8 @@ describe('reclaimReport', () => {
     expect(verdict.refusals).toContain('unreadable-worktree')
   })
 
-  // A directory deleted by hand and a status read that failed both exit 128, and
-  // folding them together is what reported eight reclaimable worktrees as
-  // unreadable. The real status read runs here rather than an injected one,
-  // since the separation is the thing under test.
+  // A directory deleted by hand and a failed status read both exit 128, so the
+  // real status read runs here, since separating them is what is tested.
   it('should reclaim a worktree whose directory was already deleted by hand', async () => {
     const path = linked('wt-parser', 'feat/parser')
     rmSync(path, { recursive: true, force: true })
@@ -413,9 +409,8 @@ describe('reclaimReport', () => {
     ])
   })
 
-  // An unreadable merge state and a branch with no merged pull request produce
-  // the same empty answer, and reporting the second when it was the first is
-  // the false clean this reading exists against.
+  // An unreadable merge state and a branch with no merged pull request give the
+  // same empty answer, and reading the first as the second is a false clean.
   it('should refuse the whole reading when the pull request state is unreadable', async () => {
     linked('wt-parser', 'feat/parser')
 

@@ -243,12 +243,8 @@ describe('startServer', () => {
     expect(response.headers.get('location')).toBe('/workspace/')
   })
 
-  /**
-   * The outcome the redirect exists for. Serving the index at the directory
-   * URL leaves the browser resolving `course.css` against the parent, so the
-   * page renders unstyled, which is the failure this whole verb exists to
-   * close.
-   */
+  // Serving the index at the directory URL resolves `course.css` against the
+  // parent, so the page renders unstyled, which the redirect exists to prevent.
   it('should land a directory request on the url a relative asset resolves against', async () => {
     seed('workspace/index.html', '<h1>workspace</h1>')
     seed('workspace/course.css', 'body { color: red }')
@@ -261,11 +257,8 @@ describe('startServer', () => {
     expect(response.url).toBe(`http://${SERVE_HOST}:${server.port}/workspace/`)
   })
 
-  /**
-   * `resolve` is lexical and does not follow links, so a containment test
-   * built on it clears a path that `Bun.file` then reads straight out of the
-   * root.
-   */
+  // `resolve` is lexical and does not follow links, so a containment test built
+  // on it clears a path `Bun.file` then reads out of the root.
   it('should refuse a file reached through a symlink out of the root', async () => {
     const outside = mkdtempSync(join(tmpdir(), 'canon-serve-outside-'))
     writeFileSync(join(outside, 'private.txt'), 'secret')
@@ -280,12 +273,8 @@ describe('startServer', () => {
     expect(status).toBe(403)
   })
 
-  /**
-   * The directory branch appends the index after the request path has been
-   * checked, so a real directory holding a linked index reaches the read on a
-   * path nothing tested. The check sits immediately before the read for this
-   * reason, rather than beside the path that produced it.
-   */
+  // The directory branch appends the index after the path was checked, so the
+  // check sits immediately before the read rather than beside the path.
   it('should refuse a directory whose index is a symlink out of the root', async () => {
     const outside = mkdtempSync(join(tmpdir(), 'canon-serve-outside-'))
     writeFileSync(join(outside, 'secret.html'), '<h1>outside</h1>')
@@ -304,12 +293,8 @@ describe('startServer', () => {
     expect(status).toBe(403)
   })
 
-  /**
-   * The redirect fires on a directory, so answering it before containment is
-   * tested reports that an out-of-root directory exists. One that does not
-   * answers 404, and the pair is a fact about the filesystem outside the root
-   * that a reader there should not be able to read.
-   */
+  // Redirecting before containment would reveal that an out-of-root directory
+  // exists, since one that does not answers 404.
   it('should refuse an out-of-root directory rather than redirecting to it', async () => {
     const outside = mkdtempSync(join(tmpdir(), 'canon-serve-outside-'))
     mkdirSync(join(outside, 'pages'), { recursive: true })
@@ -354,13 +339,8 @@ describe('startServer', () => {
     expect(response.status).toBe(404)
   })
 
-  /**
-   * An encoded separator rather than an encoded dot. The URL parser resolves
-   * `..` and `%2e%2e` into the path before a handler sees it, so neither
-   * reaches the containment test and both answer 404 for want of a file. An
-   * encoded slash survives parsing intact and decodes into a traversal inside
-   * the handler, which is the one shape that reaches the guard.
-   */
+  // The parser resolves `..` and `%2e%2e` before a handler sees it, so only an
+  // encoded slash survives to decode into a traversal and reach the guard.
   it('should answer 403 for a traversal built from an encoded separator', async () => {
     seed('index.html', '<h1>root</h1>')
     const server = start(ROOT, { port: 0 })
@@ -393,17 +373,14 @@ describe('startServer', () => {
 
   it('should walk past a port already in use', () => {
     seed('index.html', '<h1>root</h1>')
-    // Binds the fixed default port, so any unrelated listener on a shared
-    // machine fails this with `bind-failed` whatever diff is under review.
-    // Check `ss` or `lsof` for the holder before blaming the change.
+    // Binds the fixed default port, so an unrelated listener fails this with
+    // `bind-failed`. Check `ss` or `lsof` for the holder before blaming the change.
     const first = start(ROOT, { port: DEFAULT_PORT })
 
     const second = start(ROOT, { port: DEFAULT_PORT })
 
-    // Greater than rather than exactly one above, because the walk skips every
-    // occupied port and this machine runs parallel worktree sessions that hold
-    // ports of their own. Pinning the offset asserts that nothing else was
-    // listening, which is a fact about the machine rather than about the walk.
+    // Greater than rather than one above, since the walk skips every occupied port
+    // and parallel sessions hold their own.
     expect(second.port).toBeGreaterThan(first.port)
   })
 })

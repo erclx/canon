@@ -123,9 +123,8 @@ describe('resolveTargets', () => {
     expect(report.targets[0]?.source).toBe('record')
   })
 
-  // The record knows one clone because that is where a sync ran, and only the
-  // sweep can see the second. Reporting both rows would count one project
-  // twice, and dropping the sweep's row would lose the clone the repair used.
+  // The record knows the clone a sync ran in and only the sweep sees the second,
+  // so the rows fold rather than counting one project twice.
   it('should fold a recorded clone into the sweep row that found its sibling', async () => {
     const first = stamp('public', 'caret')
     const second = stamp('extensions', 'caret')
@@ -146,9 +145,8 @@ describe('resolveTargets', () => {
     expect(report.targets[0]?.stampedAt).toBe('2026-08-30T00:00:00.000Z')
   })
 
-  // Every caller reading one path takes the first, and the repair that ran in
-  // one clone while the count was taken against another is what a sort order
-  // here costs. The record names a clone a sync actually ran in.
+  // Every caller reading one path takes the first, and the record names a clone
+  // a sync actually ran in, where sort order names an arbitrary one.
   it('should lead with the recorded clone rather than the one that sorts first', async () => {
     stamp('aaa-first-by-sort', 'caret')
 
@@ -165,10 +163,8 @@ describe('resolveTargets', () => {
     expect(report.targets[0]?.paths[0]).toBe(recorded)
   })
 
-  // The sweep's own order is sorted by path, which puts `extensions/caret`
-  // ahead of `public/caret`. The merge reorders `paths` to lead with the
-  // recorded clone instead, so a `legacyPaths` list carried straight from the
-  // sweep would answer in the wrong order relative to the row it sits beside.
+  // The sweep sorts the second clone first, and the merge leads with the
+  // recorded one, so a carried `legacyPaths` would answer in the wrong order.
   it('should re-derive legacy paths against the merged row rather than the sweep order', async () => {
     const recordedLegacy = stampLegacy('public', 'caret')
     const foundLegacy = stampLegacy('extensions', 'caret')

@@ -28,11 +28,8 @@ describe('readShipEntries', () => {
     })
   })
 
-  /**
-   * npm packs the whole tree when the field is absent, so this is the package
-   * that ships the most rather than one that ships nothing. It reports its own
-   * reason so no caller can turn it into an empty corpus.
-   */
+  // npm packs the whole tree when the field is absent, so this ships the most,
+  // and it reports its own reason so no caller reads it as an empty corpus.
   it('should separate a manifest carrying no files field', async () => {
     seedManifest({ name: 'x' })
 
@@ -45,10 +42,8 @@ describe('readShipEntries', () => {
     expect(await readShipEntries(ROOT)).toEqual({ kind: 'no-files-field' })
   })
 
-  /**
-   * The one declaration that means a project publishes nothing, which the
-   * files field alone cannot separate from one publishing everything.
-   */
+  // The one declaration that means a project publishes nothing, which the files
+  // field alone cannot separate from one publishing everything.
   it('should read a private manifest as publishing nothing', async () => {
     seedManifest({ name: 'x', private: true })
 
@@ -140,10 +135,8 @@ describe('selectShipped', () => {
     expect(selectShipped(FILES, ['missing'])).toEqual([])
   })
 
-  /**
-   * npm packs these whether or not the field names them, so a corpus built
-   * from the field alone would let a credential in one of them ship unseen.
-   */
+  // npm packs these whether or not the field names them, so a corpus from the
+  // field alone would let a credential in one ship unseen.
   it('should keep the root files npm packs regardless of the field', () => {
     const roots = ['package.json', 'README.md', 'LICENSE', 'src/a.ts']
 

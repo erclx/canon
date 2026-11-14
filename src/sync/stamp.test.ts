@@ -470,9 +470,8 @@ describe('the machine-level target index', () => {
     else process.env.TMPDIR = SETUP_TMPDIR
   })
 
-  // The fixture sits under the OS temp folder, so pointing that folder
-  // elsewhere for the case is what lets the stamp reach a recordable target.
-  // Without it, an absent row reads the same whether the call was made or not.
+  // The fixture is under the OS temp folder, so pointing that folder elsewhere
+  // lets the stamp reach a recordable target, or an absent row proves nothing.
   it('should gain a target outside every scratch root on a stamp write', async () => {
     process.env.TMPDIR = join(TARGET, 'elsewhere')
 

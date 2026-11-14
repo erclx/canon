@@ -136,10 +136,8 @@ describe('registryPath', () => {
 })
 
 describe('readTargetRegistry', () => {
-  // A machine no sync has ever run on and a machine whose targets were all
-  // removed answer differently. Reading the first as an empty population would
-  // report a confident zero from a lookup that never ran, which is the reading
-  // the sweep exists to stand in for.
+  // A machine no sync ran on and one whose targets were removed answer apart, or
+  // a lookup that never ran would report a confident zero.
   it('should report an absent file as absent rather than as no targets', () => {
     const registry = readTargetRegistry(FILE, NO_ROOTS)
 
@@ -288,9 +286,8 @@ describe('recordTarget', () => {
     })
   })
 
-  // Every sync of one target reaches this, so a second run has to move the
-  // stamp rather than add a row. A registry that grew per sync would report one
-  // project as many and inflate every count read off it.
+  // Every sync of one target reaches this, so a rerun moves the stamp rather
+  // than adding a row that would count one project as many.
   it('should replace the row for a target it already holds', () => {
     const caret = project('caret')
     recordTarget(caret, new Date('2026-08-01'), FILE, NO_ROOTS)
@@ -327,9 +324,8 @@ describe('recordTarget', () => {
     expect(paths(readTargetRegistry(FILE, NO_ROOTS))).toEqual([caret, stackr])
   })
 
-  // The stamp inside the target is the authoritative record and this index is a
-  // cache over those, so a state folder nobody can write must not fail the sync
-  // that was recording into it.
+  // The stamp inside the target is authoritative and this index a cache, so an
+  // unwritable state folder must not fail the sync recording into it.
   it('should report a location it cannot write rather than throwing', () => {
     const blocked = join(FILE, 'targets.json')
     writeFileSync(FILE, '{}\n')
@@ -346,8 +342,7 @@ describe('recordTarget', () => {
   })
 
   // Sandbox runs, job scratch, and test temp folders each pass through a
-  // stamping sync, and a row for each is how the index reached thousands of
-  // paths that no longer exist.
+  // stamping sync, and a row for each would fill the index with dead paths.
   it('should refuse a target under a scratch root and write nothing', () => {
     const { scratch, run } = scratchRun()
 
@@ -431,9 +426,8 @@ describe('backfillTarget', () => {
     })
   })
 
-  // A checkout whose stamp could not be read has no date to seed the row
-  // with, and dating it by the moment the backfill ran would claim a sync
-  // that never happened.
+  // A checkout with an unreadable stamp has no date, and dating it by the
+  // backfill would claim a sync that never happened.
   it('should skip a checkout with no readable stamp rather than dating it by now', () => {
     const outcome = backfillTarget(
       { path: project('caret'), stampedAt: null },

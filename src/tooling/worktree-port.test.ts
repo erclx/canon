@@ -67,10 +67,8 @@ beforeEach(() => {
   sh('mkdir -p repo/src repo/.claude/worktrees plain')
   sh('git -C repo worktree add -q .claude/worktrees/live -b live')
 
-  // The two shapes a removed worktree leaves behind. Deleting the folder's own
-  // `.git` sends git upward to the parent, and pruning the administrative
-  // directory it points at makes git refuse outright. Both reach the base port
-  // through a different branch of the helper.
+  // A removed worktree leaves two shapes, a deleted `.git` sending git upward and
+  // a pruned admin directory making git refuse, each reaching the base port.
   sh('mkdir -p repo/.claude/worktrees/unregistered/src')
   sh('git -C repo worktree add -q .claude/worktrees/pruned -b pruned')
   sh('rm -rf repo/.git/worktrees/pruned')
