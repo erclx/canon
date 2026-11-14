@@ -41,7 +41,7 @@ Dispatch every pull request's review to a reviewer under `role-reviewer`, first 
 - This session reviews nothing in place, since a warm pass reads the whole diff into the wave's one context and thins every later pull request's attention
 - A cold session pays for its own context instead
 - Nothing checks that a first pass was dispatched, so a pull request reviewed in place is a rule that went unread rather than a check that failed
-- Pick the reviewer's model by `## Pick the model` in `orchestrator-dispatch.md`, the one source for every role this session launches
+- Pick the reviewer's model and effort by `## Pick the model` in `orchestrator-dispatch.md`, the one source for every role this session launches
 
 ## The UI reviewer
 
