@@ -94,7 +94,7 @@ An address that exists and does not answer differs from no address. When every r
 
 ## Step 4: open the browser
 
-Drive from `.canon/tmp/pr/review-ui/<number>/` at the main worktree root, resolved the way `session-worktree` does, since the CLI writes snapshots under the folder it runs in. Name the browser session `<project>-<number>`, with `<project>` the main root's basename.
+Drive from `.canon/tmp/pr/review-ui/<number>/<pass>/` at the main root, made by a first call running `mkdir -p` alone, per `## The pass folder` in `${CLAUDE_SKILL_DIR}/references/driving.md`. Name the browser session `<project>-<number>`, with `<project>` the main root's basename.
 
 ```bash
 canon browser -s=<project>-<number> open <url>
@@ -133,7 +133,7 @@ Run four checks over every route the boxes reached, and nothing beyond them:
 
 - Console errors, through `canon browser`'s `console error` on each route.
 - Sideways overflow at each width a box named, as `document.documentElement.scrollWidth` against `clientWidth`.
-- The `focus` and `details` probes, through `canon drive <url> <run> --json` with a run file in the scratch folder.
+- The `focus` and `details` probes, through `canon drive <url> <run> --json` with a run file in the pass folder.
 - The `axe` probe, named in the same run file and read by each finding's `gate` rather than a copy of the CLI's rule list. On `axe-missing`, drop it and name the refusal as an unread check.
 
 The probes launch their own browser at a URL, so a state the boxes reached by clicks reaches them only as steps the run file repeats. Where a state needs a step kind `canon drive` lacks, probe the route on arrival and say so.
@@ -179,4 +179,4 @@ Add `Review-event checks: <passing|failing|unread>.` and `Ticks: <ticked N|reaso
 - Drive the checklist and the sweep, and nothing else. Open exploration has no end a dispatcher can predict.
 - Never check out, build, or serve the head. An address is handed to this pass or the pass refuses.
 - Never read a value off the snapshot file whole. Search it for the ref a box needs, and read text, styles, and geometry with `eval`.
-- Write only under `.canon/tmp/pr/review-ui/` at the main root, to the frames branch through `canon pr frames`, and to the evidence boxes through `canon pr tick`
+- Write only under `.canon/tmp/pr/review-ui/` at the main root, the frames branch through `canon pr frames`, and the evidence boxes through `canon pr tick`, and never delete a file there
