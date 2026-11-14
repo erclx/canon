@@ -2,7 +2,13 @@ import { mkdir, readFile, realpath, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import type { Command } from 'commander'
 import { listWorktrees } from '@/git/worktree'
-import { branchSlug, buildDriveCopy, loadPreviewConfig } from '@/pr/drive-copy'
+import {
+  branchSlug,
+  buildDriveCopy,
+  loadPreviewConfig,
+  runSeed,
+  SEED_TIMEOUT_MS,
+} from '@/pr/drive-copy'
 import {
   changedSince,
   readWorktreeStatus,
@@ -30,6 +36,8 @@ type DriveCopyRefusal =
   | 'no-baseline'
   | 'unreadable-tree'
   | 'bad-flags'
+  | 'seed-failed'
+  | 'seed-wrote-worktree'
 
 const DRIVE_COPY_REFUSALS: Record<DriveCopyRefusal, string> = {
   'no-worktree':
@@ -40,6 +48,10 @@ const DRIVE_COPY_REFUSALS: Record<DriveCopyRefusal, string> = {
     'No baseline was recorded for this pull request. Run --baseline before --check.',
   'unreadable-tree': 'git could not read the worktree status.',
   'bad-flags': '--baseline and --check cannot be combined.',
+  'seed-failed':
+    'The seed exited non-zero, so the copy holds no seeded state to drive against.',
+  'seed-wrote-worktree':
+    "The seed changed the worktree's git status, so it wrote outside the copy. Point it at the copy root variable.",
 }
 
 export function registerDriveCopy(pr: Command): void {
@@ -68,7 +80,7 @@ export function registerDriveCopy(pr: Command): void {
         '',
         'A project names what its preview writes in',
         '`canon/config/preview.json` as',
-        '`{ "writes": [path], "keep": [path], "env": "<NAME>" }`.',
+        '`{ "writes": [path], "keep": [path], "env": "<NAME>", "seed": [argv] }`.',
         'Each `writes` path is relative to the worktree, and `env`, defaulting',
         'to `CANON_PREVIEW_ROOT`, is the variable the server reads for the copy',
         'root. The server resolves each declared path under that root.',
@@ -77,7 +89,15 @@ export function registerDriveCopy(pr: Command): void {
         'names state the running server owns there, such as a run file. A',
         "rebuild leaves it in the copy and never copies the worktree's own, so",
         'list it for a server that writes under a declared path. The key is',
-        'optional.',
+        'optional. It preserves a path and never an index file above it, so',
+        'state a project lays into the copy belongs in `seed`.',
+        '',
+        '`seed` is an optional argv list, spawned with no shell from the',
+        'worktree with `env` set to the copy root, after each rebuild and',
+        'before --baseline records a status. It runs under a 120 second limit,',
+        "and its stdout and stderr go to this verb's stderr. A seed that exits",
+        'non-zero or runs past the limit refuses, and so does one that changes',
+        "the worktree's git status, since it wrote outside the copy.",
         '',
         'The copy lives at `.canon/tmp/pr/review-ui/<slug>/board/` at the main',
         'worktree root, where `<slug>` is the branch with a leading type',
@@ -86,9 +106,9 @@ export function registerDriveCopy(pr: Command): void {
         'worker starting its server before a pull request exists and the',
         'reviewer naming the number land on one copy. Every run but --check',
         "resets each declared path from the worktree, dropping the last pass's",
-        'drives, and leaves the rest of the copy root and each `keep` path as',
-        'they are. A page added only to the copy, inside a declared path, is',
-        'wiped.',
+        'drives, leaves the rest of the copy root and each `keep` path as they',
+        'are, and then runs the seed. A page added only to the copy, inside a',
+        'declared path, is wiped unless the seed lays it again.',
         '',
         '--baseline records `git status` for the worktree under',
         '`.canon/tmp/pr/review-ui/<number>/`, and --check reports each path',
@@ -99,7 +119,8 @@ export function registerDriveCopy(pr: Command): void {
         '',
         'Read `reason` on the JSON record:',
         '  copied     the copy was rebuilt, with `copyRoot`, `env`, `copied`, and',
-        '             `missing` for a declared path the worktree does not hold',
+        '             `missing` for a declared path the worktree does not hold,',
+        '             and `seed` as `{ ran, exit }` when the project declares one',
         '  no-config  the project declares no preview, so nothing was copied',
         '  clean      --check found no change since the baseline',
         '  changed    --check found changes, listed in `paths`, exit 1',
@@ -109,8 +130,15 @@ export function registerDriveCopy(pr: Command): void {
         "                   worker's, so there is no tree to check",
         '  no-branch        the checkout holds no branch',
         '  no-baseline      --check ran before any --baseline for this number',
-        '  bad-config       preview.json does not parse or lacks a writes list',
+        '  bad-config       preview.json does not parse, lacks a writes list, or',
+        '                   names a seed that is not a list opening on a command',
         '  unsafe-path      a writes path is absolute or climbs with `..`',
+        '  seed-failed      the seed exited non-zero or ran past its limit, with',
+        '                   `seed` carrying `exit`, `timedOut`, and the last 20',
+        '                   lines of `stderr`',
+        '  seed-wrote-worktree',
+        "                   the seed changed the worktree's git status, with the",
+        '                   paths in `paths`',
         '  unreadable-tree  git could not read the worktree status',
         '  bad-flags        --baseline and --check were combined',
         '  gh-failed, ambiguous-pull, gh-missing',
@@ -302,6 +330,57 @@ async function runDriveCopy(
       env: config.config.env,
       copied,
       missing,
+    }
+
+    const seed = config.config.seed
+    if (seed !== undefined) {
+      const before = await readWorktreeStatus(target.worktree)
+      if (before === undefined) {
+        return refuse('unreadable-tree', DRIVE_COPY_REFUSALS['unreadable-tree'])
+      }
+      logStep('Seed')
+      const run = await runSeed(
+        target.worktree,
+        copyRoot,
+        seed,
+        config.config.env,
+      )
+      const after = await readWorktreeStatus(target.worktree)
+      if (after === undefined) {
+        return refuse('unreadable-tree', DRIVE_COPY_REFUSALS['unreadable-tree'])
+      }
+      const wrote = changedSince(before, after)
+      if (wrote.length > 0) {
+        for (const path of wrote) logWarn(path)
+        return refuseWith(
+          'seed-wrote-worktree',
+          DRIVE_COPY_REFUSALS['seed-wrote-worktree'],
+          emitJson,
+          root,
+          { paths: wrote },
+        )
+      }
+      if (run.kind === 'failed') {
+        for (const line of run.stderr) logWarn(line)
+        return refuseWith(
+          'seed-failed',
+          run.timedOut
+            ? `The seed ran past ${SEED_TIMEOUT_MS / 1000} seconds and was stopped, so the copy holds no seeded state.`
+            : DRIVE_COPY_REFUSALS['seed-failed'],
+          emitJson,
+          root,
+          {
+            seed: {
+              ran: true,
+              exit: run.exit,
+              timedOut: run.timedOut,
+              stderr: run.stderr,
+            },
+          },
+        )
+      }
+      logInfo(`Seeded with ${seed.join(' ')}.`)
+      copy = { ...copy, seed: { ran: true, exit: run.exit } }
     }
   }
 
