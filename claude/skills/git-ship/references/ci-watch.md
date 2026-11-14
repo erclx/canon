@@ -1,6 +1,6 @@
 ---
 title: CI watch fallback and refusals
-description: What the git-ship CI watch does when the installed CLI predates the checks verb, when a read is refused, and when the watch times out
+description: What the git-ship CI watch does when the installed CLI predates the checks verb, when a read is refused, and when the watch reaches its own limit
 ---
 
 # CI watch fallback and refusals
@@ -33,9 +33,15 @@ None of these is a pass, and none emits `✅ Shipped`. A `reason` and no `state`
 The set lives in the watch command rather than in the verb, so a refusal `canon pr checks` adds later defaults to transient and waits, which is the safe side.
 
 - A permanent refusal ends the sequence. Stop and report that `reason`, such as `no-remote-branch` for a branch deleted on the remote.
-- A transient refusal in the final record came from the read after the loop, since the loop never exits on one. Read `canon pr checks <number> --json` once more and route on that.
+- A transient refusal in the final record with no limit line came from the read after the loop, which never exits on one. Read `canon pr checks <number> --json` once more and route on that.
 - A second refusal on that read stops the sequence with its `reason`
-- A watch that hit its timeout and printed no final record is CI unsettled after 60 minutes, so report it that way. A transient refusal that never cleared ends here too.
+
+### The unsettled read
+
+A watch that printed `CI watch limit reached after 60 minutes` ran to its own limit with no terminal state. Stop and report CI unsettled after 60 minutes, naming the final record's `state` or `reason`, since a `pending` record or a transient refusal that never cleared both end here.
+
+- A `pending` record is never a pass and never enters the cancelled-run rerun below
+- A watch the tool's backstop killed prints no final record, which reads as CI unsettled the same way
 
 Do not auto-fix any of these. A stop report is one of the two exceptions to the no-text-between-steps rule.
 

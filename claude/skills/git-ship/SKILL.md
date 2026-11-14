@@ -70,29 +70,38 @@ The verb ships with the CLI and this body with the plugin, so an older binary me
 
 ### Watching CI
 
-Run `canon pr checks <number> --json` once in the foreground. When no record comes back at all, the CLI predates the verb, so read `${CLAUDE_SKILL_DIR}/references/ci-watch.md` for the fallback watch. Otherwise start this loop through the Bash tool with `run_in_background` and a 60-minute timeout:
+Run `canon pr checks <number> --json` once in the foreground. When no record comes back at all, the CLI predates the verb, so read `${CLAUDE_SKILL_DIR}/references/ci-watch.md` for the fallback watch. Otherwise start this loop through the Bash tool with `run_in_background` and a 65-minute timeout:
 
 ```bash
-until canon pr checks <number> --json | jq -e '.conflicted == true or (.state | IN("passing", "failing")) or (.reason | IN("no-remote-branch", "ambiguous-pull", "no-branch"))' >/dev/null; do sleep 30; done; canon pr checks <number> --json
+SECONDS=0; until canon pr checks <number> --json | jq -e '.conflicted == true or (.state | IN("passing", "failing")) or (.reason | IN("no-remote-branch", "ambiguous-pull", "no-branch"))' >/dev/null; do if [ "$SECONDS" -ge 3600 ]; then echo "CI watch limit reached after 60 minutes"; break; fi; sleep 30; done; canon pr checks <number> --json
 ```
 
 The loop exits on a terminal state, a conflict, or one of the three permanent refusals, and polls through anything else. One failed GitHub call such as `gh-failed` never ends the watch while CI runs.
 
 - A record carrying neither field, or an empty line from a crashed binary, waits for the next read too
-- A refusal that never clears waits out the timeout rather than stopping at once
+- A refusal that never clears polls until the 60-minute limit, then prints the limit line rather than stopping at once
+- A terminal state read on the last pass before the limit exits the loop on its test, so the limit line never prints beside it
+
+### Why the loop carries its own limit
+
+Claude Code applies the Bash tool's timeout to a background command only in an unattended session, so a local or `claude --bg` watch would otherwise poll forever. The loop checks `SECONDS` on each pass, which bash and zsh both keep, so the limit fires in every session kind.
+
+- The tool's 65 minutes are a backstop past the loop's limit, so an unattended session reads the limit line and a final record before the tool kills anything
+- The loop checks a deadline rather than the `timeout` wrapper `### Bound each run` uses. The wrapper bounds a command this skill does not write, and the deadline bounds a loop it does.
 
 Emit `⏳ Watching CI on #<number> in the background` and end the turn, printing nothing more while the watch runs. The wake resumes this step rather than restarting at step 1, and a wake landing inside another skill, such as a `review-address` pass, goes to whichever step is waiting on CI.
 
 ### Reading the wake
 
-Branch on the final record's fields rather than on the exit. Do not auto-fix any reading except by the one cancelled-run rerun `ci-watch.md` states. The watch line and a stop report are the two exceptions to the no-text-between-steps rule.
+Branch on the final record's fields rather than on the exit. The first matching row routes. Do not auto-fix any reading except by the one cancelled-run rerun `ci-watch.md` states. The watch line and a stop report are the two exceptions to the no-text-between-steps rule.
 
-| Record                                  | Route                                                                                                 |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `state: passing`                        | Settle the evidence thread below, then continue to After completion on `settled`                      |
-| `state: failing`                        | Read the cancelled-run section of `${CLAUDE_SKILL_DIR}/references/ci-watch.md`, which reruns or stops |
-| `conflicted: true`                      | Stop and report the branch conflicts with its base, since no run will start. Rebase.                  |
-| A `reason` and no `state`, or a timeout | Read `${CLAUDE_SKILL_DIR}/references/ci-watch.md` for the refused and unsettled reads                 |
+| Record                                                  | Route                                                                                                 |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `state: passing`                                        | Settle the evidence thread below, then continue to After completion on `settled`                      |
+| `state: failing`                                        | Read the cancelled-run section of `${CLAUDE_SKILL_DIR}/references/ci-watch.md`, which reruns or stops |
+| `conflicted: true`                                      | Stop and report the branch conflicts with its base, since no run will start. Rebase.                  |
+| The limit line, a `state: pending`, or no final record  | Stop on the unsettled read `ci-watch.md` states, reporting CI unsettled                               |
+| A `reason` and no `state`, with no limit line before it | Read `${CLAUDE_SKILL_DIR}/references/ci-watch.md` for the refused reads                               |
 
 ### Settling the evidence thread
 
