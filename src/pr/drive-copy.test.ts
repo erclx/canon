@@ -3,6 +3,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  realpathSync,
   rmSync,
   writeFileSync,
 } from 'node:fs'
@@ -344,7 +345,9 @@ describe('runSeed', () => {
     const run = await runSeed(worktree, copyRoot, seed, 'BOARD_ROOT')
 
     expect(run).toEqual({ kind: 'ran', exit: 0 })
-    expect(readFileSync(join(copyRoot, 'seeded.txt'), 'utf8')).toBe(worktree)
+    expect(readFileSync(join(copyRoot, 'seeded.txt'), 'utf8')).toBe(
+      realpathSync(worktree),
+    )
   })
 
   it('should report a seed that exits non-zero with the tail of its stderr', async () => {
