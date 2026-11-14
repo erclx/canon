@@ -106,6 +106,7 @@ A fail names what was expected beside what was read. A not driven never reads as
 A box the pass could not drive because the drive fixture holds no such state is a cause on the branch, never a skip. The building session owes the state, and no other session can add it.
 
 - Name the cause as a missing fixture state, with the state to add and the selector or setup step the box needs
+- Name the project's seed beside the state when `canon/config/preview.json` declares a `seed` command, since the building session lays a drive-only state there
 - Count it as not driven, and never as a fail, since the page may be right
 - An address that did not answer stays a cause off the branch, and a `(local only)` box on a hosted address does too
 - A state no fixture file can hold is the exit, such as one a project with no `canon/config/app-drive.toml` cannot reach inline. Name it a cause off the branch, so the review stays closed.
