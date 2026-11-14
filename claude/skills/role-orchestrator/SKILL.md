@@ -22,7 +22,7 @@ Read the board in parallel, resolving the paths at the main worktree root the wa
 - `.canon/plans/*.md`: features already planned and ready to hand off
 - open PRs via `gh pr list --json number,title,headRefName,isDraft`
 
-Then read the table below and `references/orchestrator-filing.md` in full, and output the state of play, naming what to launch, review, and merge.
+Then read the table, `orchestrator-filing.md` in full, and `orchestrator-output.md`, and output the state of play, naming what to launch, review, and merge.
 
 ### Acts and their runbooks
 
