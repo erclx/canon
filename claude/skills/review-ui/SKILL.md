@@ -94,7 +94,7 @@ An address that exists and does not answer differs from no address. When every r
 
 ## Step 4: open the browser
 
-Drive from `.canon/tmp/pr/review-ui/<number>/<pass>/` at the main root, made by a first call running `mkdir -p` alone, per `## The pass folder` in `${CLAUDE_SKILL_DIR}/references/driving.md`. Name the browser session `<project>-<number>`, with `<project>` the main root's basename.
+Drive from `.canon/tmp/pr/review-ui/<number>/<pass>/` at the main worktree root, resolved the way `session-worktree` does, made by a lone `mkdir -p` call first, per `## The pass folder` in `${CLAUDE_SKILL_DIR}/references/driving.md`. Name the browser session `<project>-<number>`, with `<project>` that root's basename.
 
 ```bash
 canon browser -s=<project>-<number> open <url>
