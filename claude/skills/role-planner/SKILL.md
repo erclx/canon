@@ -90,6 +90,7 @@ Each finding in a task written this way opens with the bold source-and-date labe
 The controlling session cannot watch this one read, so the messages below are owed and nothing else.
 
 - Announce the record as the file lands, carrying its path and what the task file got wrong. Write no summary beside it, which is a second account of a document the reader is about to open.
+- Announce each plan as it lands when the launch handed several rows, one message per plan, rather than one message at the close
 - Send a block out as a message before it becomes an interactive prompt.
 - Name the handed rows still unplanned when a reused session stops under `## Lifetime`
 - Send nothing on progress, which rebuilds on this side the poll the announcement retires on the other
@@ -127,6 +128,9 @@ The operator being present is an assumption the launch carries. A talk planner w
 - Invoke that record's skill again for a second row, being `plan-feature`, `plan-groundwork`, or `plan-intake`, rather than writing from the reference of the one run before
 - A reused session's picture of the tree ages, and a compaction silently drops the reasoning behind its earlier records
 - Run the in-flight read again before each handed row, and stop when the operator ends the session or a compaction nears, telling the controller which rows are still unplanned
+
+Validate, link, and announce each plan before starting the next row a launch handed, so a stop mid-batch leaves every finished plan linked.
+
 - Treat this body as possibly older than the branch under it. A plugin skill loads from the marketplace cache rather than from the working tree.
 
 ### Planning what this session measured
