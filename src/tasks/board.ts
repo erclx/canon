@@ -21,9 +21,9 @@ import {
 } from '@/tasks/validate'
 
 /**
- * The columns each group owns, fixed by the operator on 2026-10-18. Every
- * cell but `Waiting on` is derived from the task and its plan, so the render
- * is the only writer of the other three.
+ * The columns each group owns, fixed by the operator. Every cell but
+ * `Waiting on` is derived from the task and its plan, so the render is the
+ * only writer of the other three.
  */
 export const GROUP_COLUMNS: Readonly<Record<BoardGroup, readonly string[]>> = {
   'Run now': ['Task', 'Touches', 'Plan'],
@@ -42,9 +42,8 @@ const TOUCHES_FOLDERS = 2
 const FOLDER_DEPTH = 2
 
 /**
- * The widest a `Waiting on` cell may render. The live board's cells measured 14
- * to 131 characters on 2026-10-18 with one table outlier set aside, and the
- * cap sits where all but the longest fit.
+ * The widest a `Waiting on` cell may render, set where all but the longest
+ * measured cells on the live board fit.
  */
 export const WAITING_LIMIT = 120
 

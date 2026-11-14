@@ -12,17 +12,12 @@ export interface LabelDiff {
  * Diffs what a branch earns against what its pull request already carries and
  * what the remote can attach.
  *
- * The diff only adds. A label on the pull request that the map does not earn
- * is a person's decision and never appears here, so nothing in the result can
- * be turned into a removal. Order follows `earned`, which the map declares, so
- * two runs over one branch produce one list.
- *
- * A label the remote lacks is separated from the addable set rather than
- * dropped, because the REST add endpoint creates any label it is handed and
- * that write to the repository settings is not the map's call.
- *
- * Names match regardless of case, as GitHub holds them, so this agrees with
- * `missingLabels` on which labels the remote carries.
+ * The diff only adds. A label the map does not earn is a person's decision and
+ * never appears here, so nothing in the result can become a removal. Order
+ * follows `earned`, so two runs over one branch produce one list. A label the
+ * remote lacks is set apart rather than dropped, since the REST add endpoint
+ * creates any label it is handed. Names match regardless of case, as GitHub
+ * holds them, which agrees with `missingLabels`.
  */
 export function diffLabels(
   earned: readonly string[],

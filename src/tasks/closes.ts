@@ -87,9 +87,8 @@ export function decideClosing(
   const listed = readPullRequest(text)
   const last = listed.at(-1)
 
-  // A failed lookup cannot rule out that this branch is an earlier slice, and
-  // closing early is the unsafe direction. With nothing recorded yet there is
-  // no earlier slice to confuse it with, so that case still closes.
+  // A failed lookup cannot rule out an earlier slice, so it does not close. With
+  // nothing recorded there is no earlier slice, so that case still closes.
   if (pulls === null && listed.length > 0) {
     return { issues, closing: false, reason: 'lookup-failed' }
   }

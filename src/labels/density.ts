@@ -63,12 +63,10 @@ interface Section {
  * Every density breach in a pull request body, graded per H2 section after
  * the shape `claude/skills/git-pr/references/pr.md` states.
  *
- * `densityFindings()` stays the docs measure, so the PR exemptions live here
- * as splits around it rather than as options on it. Testing takes no counted
- * limit, since its checkboxes count as a bullet run. Key changes splits at
- * each bold label alone on its own block, whatever its length, and Technical context
- * at each bold-led paragraph, so a lead-in starts a new run. Technical
- * context also reports mixing bullets with paragraphs. A fenced content line
+ * `densityFindings()` stays the docs measure, so the PR exemptions are splits
+ * around it. Testing takes no counted limit. Key changes splits at each bold
+ * label alone on its own block, and Technical context at each bold-led
+ * paragraph, and also reports mixing bullets with paragraphs. A fenced line
  * past `FENCE_WIDTH` code points, and a fence's identifier and prompt rules,
  * report in every section, Testing included.
  */
@@ -142,15 +140,12 @@ const FOOTER = /^🤖/
  * Every density breach in a post a skill writes to a pull request, keyed on
  * its opening H2, or none when that heading is not in `POST_HEADINGS`.
  *
- * A post allows H3s, which the UI review groups its verdicts under, so only a
- * heading past H3 reports. The `🤖` footer and the marker never report, and a
- * table never does. Inside `<details>` a block takes the length limits alone,
- * since a reader opens it on purpose. A bold-led paragraph starts a new
- * paragraph run, and a checklist box under `What to look at` takes no length
- * limit, since a driver needs its route, action, and result.
- *
- * A nested item is measured as a bullet of its own by `densityFindings()`, which
- * leaves it out of its parent, so a finding's subject and its evidence never sum.
+ * Only a heading past H3 reports, since the UI review groups verdicts under
+ * H3s. The `🤖` footer, the marker, and a table never report. Inside
+ * `<details>` a block takes the length limits alone. A bold-led paragraph
+ * starts a new run, and a box under `What to look at` takes no length limit.
+ * A nested item is measured as a bullet of its own by `densityFindings()`, so
+ * a finding's subject and its evidence never sum.
  */
 export function postDensity(body: string): PostDensityFinding[] {
   const lines = bodyLines(body).map((line) =>

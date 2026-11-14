@@ -47,11 +47,9 @@ export interface BijectionReport {
   /**
    * Changed files no claim reaches that owe no bullet in the first place.
    *
-   * Held apart rather than dropped, so a run still says what it set aside.
-   * `#1331` reported seven unnamed files of which four were a test or a
-   * fixture, which is what makes the raw count unreadable: a number mixing
-   * files that owe a bullet with files that never could cannot be acted on at
-   * any value, and the reviewing skill reads `unnamed` as a question to a
+   * Held apart rather than dropped, so a run still says what it set aside. A
+   * count mixing files that owe a bullet with files that never could is
+   * unreadable, and the reviewing skill reads `unnamed` as a question to the
    * branch author.
    */
   readonly incidental: readonly string[]
@@ -104,15 +102,9 @@ export interface BijectionInput {
  *
  * Three classes, each conventional rather than named for this repository: a
  * test beside the subject it covers, anything under a fixture or snapshot
- * folder, and a lockfile a package manager writes. All three change constantly
- * as a consequence of work the section describes in its own terms, which is why
- * a body naming them reads as noise rather than as diligence.
- *
- * A generated asset and a regenerated index belong in the class and are
- * deliberately absent, because neither has a spelling that holds outside one
- * project. Guessing at one would set aside a file that did owe a bullet, which
- * is the direction that hides a real omission, where leaving them out only
- * leaves the count where it already was.
+ * folder, and a lockfile a package manager writes. A generated asset and a
+ * regenerated index are deliberately absent, since neither has a spelling
+ * that holds outside one project, and guessing would hide a real omission.
  */
 const INCIDENTAL: readonly RegExp[] = [
   /(?:^|\/)[^/]+\.(?:test|spec)\.[A-Za-z0-9]+$/,
@@ -169,23 +161,14 @@ function covers(claim: PathClaim, path: string): boolean {
 
 /**
  * Compares what a pull request body claims to have changed against what it
- * actually changed, in both directions.
+ * actually changed, in both directions, reported apart. A claim nobody made
+ * good on is a defect in the squash record, and a changed file nobody
+ * recorded is often correct.
  *
- * The two directions are reported apart because they want different
- * tolerances. A claim nobody made good on is a defect in the record that
- * squash-merges onto the trunk, and a changed file nobody recorded is often
- * correct. Merging them into one count would either grade the second or excuse
- * the first.
- *
- * Each direction then splits again on the same question, which is whether the
- * evidence is strong enough to raise with a person. A claim reaches `unmet`
- * only when it is both whole and leading, and a changed file reaches `unnamed`
- * only when a bullet was owed for it. What each split sets aside is still
- * reported, under `unresolved` and `incidental`, so a count a reader can act on
- * never comes at the price of a file the run stayed silent about.
- *
- * Pure, so the whole judgment is testable against a fixture. The caller reads
- * the body, the changed set, and the tree roots and hands all three in.
+ * A claim reaches `unmet` only when it is both whole and leading, and a
+ * changed file reaches `unnamed` only when a bullet was owed for it. What each
+ * split sets aside is still reported, under `unresolved` and `incidental`.
+ * Pure, so the caller reads the body, the changed set, and the tree roots.
  */
 export function compareKeyChanges(input: BijectionInput): Bijection {
   if (input.changed.length === 0)

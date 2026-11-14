@@ -201,15 +201,12 @@ export const OUTCOME_PATTERN = /^- \[([ xX])\] ?(.*)$/
 /**
  * A bullet with an optional checkbox, wider than `OUTCOME_PATTERN` so a cut
  * line missing its checkbox still parses. `record.ts` positions outcomes off
- * the narrower pattern and stays that way, so a cut line with no checkbox
- * stays invisible to `canon tasks outcome` by design rather than by oversight.
+ * the narrower pattern, so a cut line with no checkbox stays invisible to
+ * `canon tasks outcome` by design.
  *
  * Unlike `OUTCOME_PATTERN`, this reaches a struck bullet under any heading,
- * not only `## Outcomes`, since a checkbox is what confined the narrower
- * pattern there and a cut line may carry none. No struck bullet sits outside
- * `## Outcomes` across the live board or the archive as of this change, so
- * the wider reach is not live, and a heading test is one to add if that stops
- * holding.
+ * since a cut line may carry no checkbox to confine it to `## Outcomes`. No
+ * struck bullet sits outside that section today.
  */
 const BULLET_PATTERN = /^- (?:\[([ xX])\] ?)?(.*)$/
 
@@ -243,16 +240,12 @@ export function fenceMask(lines: readonly string[]): boolean[] {
 
 /**
  * Splits a task's outcome list by checkbox state, cut outcomes pulled out
- * ahead of it. The board format puts every outcome at the top level of
- * `## Outcomes`, so an anchored match is enough and no heading tracking is
- * needed.
+ * ahead of it. Every outcome sits at the top level of `## Outcomes`, so an
+ * anchored match needs no heading tracking.
  *
- * A struck body reads as cut whatever its checkbox holds, since a dropped box
- * and a retained one both appear in the tree and neither is the abandoned
- * work's fault: `- ~~a thing~~` carries no box and would otherwise vanish
- * from both arrays, `- [ ] ~~a thing~~` would otherwise read as open, and
- * `- [x] ~~a thing~~` would otherwise read as shipped. Testing the body
- * before the checkbox is what catches all three under one rule.
+ * A struck body reads as cut whatever its checkbox holds, so `- ~~a thing~~`
+ * does not vanish, `- [ ] ~~a thing~~` does not read as open, and
+ * `- [x] ~~a thing~~` does not read as shipped.
  */
 export function readOutcomes(text: string): TaskOutcomes {
   const open: string[] = []
@@ -670,29 +663,22 @@ function isBulletFor(line: string, target: string): boolean {
 }
 
 /**
- * Resolves the `Plan:` target against the board and against the project root
- * both, which is how `task-complete` reads the same line. It accepts `../plans/x.md`
- * and `.canon/plans/x.md` as one file, so a gate reading only the first form
- * would pass the second and strand the plan this exists to protect.
+ * Resolves the `Plan:` target against the board and the project root both, as
+ * `task-complete` reads the line, so `../plans/x.md` and `.canon/plans/x.md`
+ * are one file.
  *
- * The resolved path is returned rather than a boolean, because the citation
- * count below compares two tasks by where their targets land and not by the
- * strings they wrote. A target outside the live plans folder yields nothing,
- * which is an archived plan or a pointer into somewhere else entirely.
- *
- * The archive sits inside the folder it archives, so containment alone reads an
- * archived plan as live. Subtracting it is what keeps a closed task from being
- * counted as a citation the sweep has yet to make.
+ * The resolved path is returned rather than a boolean, since the citation count
+ * below compares tasks by where their targets land. A target outside the live
+ * plans folder yields nothing. The archive sits inside the folder it archives,
+ * so it is subtracted, or an archived plan would read as live.
  */
 export function resolveLivePlan(
   target: string,
   dir: string,
   root: string,
 ): string | undefined {
-  // Both roots are tested rather than the one this tree resolves at, since a
-  // task's line is a string somebody wrote and a path spelling the root the tree
-  // has since left is still a path into the plans folder. Reading it as outside
-  // would report a shipped plan as still live.
+  // Both roots are tested, since a line spelling a root the tree has left still
+  // points into the plans folder, and reading it as outside keeps a plan live.
   const plans = recordDirs(root, PLANS)
   const archives = recordDirs(root, PLANS, ARCHIVE)
   const live = (path: string): boolean =>
@@ -1012,9 +998,8 @@ export async function archiveTask(
   const from = join(dir, `${stem}.md`)
   const text = await readFile(from, 'utf8')
 
-  // `task-complete` ticks outcomes at ship time, before the merge, so an earlier
-  // slice merging after the last slice shipped would find every box ticked
-  // while the last slice is still open. Only the last number closes the task.
+  // `task-complete` ticks outcomes before the merge, so an earlier slice merging
+  // late would find every box ticked. Only the last number closes the task.
   const last = readPullRequest(text).at(-1)
   if (selector.kind === 'pull-request' && last !== selector.number) {
     return withMergedSlice(
@@ -1027,10 +1012,8 @@ export async function archiveTask(
     )
   }
 
-  // A branch ticks its outcome before `git-pr` appends its number, so in that
-  // window the number above reads as last while it is not. The stem selector
-  // skips this check the way it skips the one above, since a hand archive is
-  // the route out of a pending branch that was abandoned.
+  // A branch ticks its outcome before `git-pr` records its number. The stem
+  // selector skips this check, since a hand archive clears an abandoned branch.
   const pending = readPendingBranches(text)
   if (selector.kind === 'pull-request' && pending.length > 0) {
     return refuse(
@@ -1071,12 +1054,8 @@ export async function archiveTask(
   const destination = archiveDir(root)
   const to = join(destination, `${stem}.md`)
 
-  // The plans move first so the line written below describes files already at
-  // their new paths. Writing the retarget first and failing a move would leave
-  // a pointer at a folder holding nothing, and `.canon/plans/` is gitignored, so
-  // no history recovers the target it named. The folder follows the plans and
-  // all precede the task, so a failed rename never leaves the task archived
-  // with its folder live, which the unattended post-merge hook cannot repair.
+  // Plans move first and the folder follows, all before the task, so a failed
+  // rename never leaves a pointer at an empty folder or the task archived alone.
   await movePlans(plans.moves)
 
   if (ready) {
@@ -1181,9 +1160,8 @@ async function withMergedSlice(
       new Map(targets.map((entry) => [entry.target, linkTo(dir, move.to)])),
     ),
   )
-  // The closing path clears its row, and this one keeps it, so the row is
-  // rendered again to drop the slice from its Plan and Touches cells. A row
-  // the board cannot write, being absent or busy, stays for `validate` to report.
+  // The row is rendered again to drop the slice from its Plan and Touches cells.
+  // A row the board cannot write stays for `validate` to report.
   await rerenderRow(root, stem)
 
   return { ...refused, slice: move }
@@ -1230,17 +1208,12 @@ interface PlansToArchive {
 
 /**
  * The plans this task carries into the archive with it, one per live target on
- * its `Plan:` line. The merge is what settles a plan, and the hook reaches this
- * with nobody watching, so the move sits inside the archive rather than in a
- * second call that could leave the task archived and a plan live.
+ * its `Plan:` line. The hook reaches this unwatched, so the move sits inside
+ * the archive rather than in a second call that could leave a plan live.
  *
- * A plan another live task still cites stays where it is. Moving it on the
- * first task to close strands every other pointer at a path that has gone, and
- * the sibling has no history behind it to repair the line from.
- *
- * A target resolving to no file moves nothing too. A pointer somebody typed
- * wrong is not a plan to move, and refusing the whole archive over it would
- * park the board behind a repair the merge cannot make.
+ * A plan another live task still cites stays, since moving it strands every
+ * other pointer. A target resolving to no file moves nothing, since refusing
+ * the whole archive over a mistyped pointer would park the board.
  */
 async function plansToArchive(
   dir: string,
