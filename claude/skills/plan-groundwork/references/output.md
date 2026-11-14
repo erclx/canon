@@ -92,7 +92,6 @@ The `Next:` line names who plans the conclusion, per close Step 7, so the contro
 **Written:**
 
 - `.canon/groundwork/<nn>-<slug>/06-decision.md`
-- `.canon/groundwork/<nn>-<slug>/07-next-session.md`
 
 **Conclusion:** <the route and its task path or addressee>
 

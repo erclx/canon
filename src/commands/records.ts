@@ -106,7 +106,8 @@ export function register(program: Command): void {
         '  plans       filename, required sections, and the suggested-and-answer contract,',
         '              plus a Counterparts bullet for each canon CI, hook, script, root config,',
         '              or stack configs or seeds path, where stacks sit under tooling/',
-        '  groundwork  README and current-state files, numbering, dating, and a half-closed track',
+        '  groundwork  README and current-state files, numbering, dating, a 07 handoff with no 06,',
+        "              and a pause note left beside a closed track's 06",
         '  intake      overview file, numbering, dating, and the four bullets every item carries',
         "  sessions    each session map's words against its cap, under `length` and never in the exit",
         '',
@@ -730,9 +731,8 @@ function reportRefusal(
     return 1
   }
 
-  // The setup refusals carry the commands to run on their own lines. A marker
-  // beside a command reads as a result rather than as something to copy, so the
-  // remainder goes out unmarked.
+  // A setup refusal's later lines are commands to copy, so they go out with no
+  // marker, which would make them read as results.
   const [reason, ...rest] = outcome.message.split('\n')
 
   intro(banner)
@@ -803,9 +803,8 @@ function report(
   root: string,
 ): number {
   if (!outcome.ok) {
-    // The framed branch below already reaches stderr through logError, so the
-    // bare write is what keeps the JSON mode from reporting the reason on
-    // stdout alone.
+    // The framed branch reaches stderr through logError, and this bare write
+    // keeps JSON mode from reporting the reason on stdout alone.
     if (emitJson) {
       process.stderr.write(`${outcome.message}\n`)
       process.stdout.write(

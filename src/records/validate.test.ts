@@ -1079,36 +1079,64 @@ describe('validateRecords', () => {
     expect(kinds(outcome.findings)).toEqual(['index-missing', 'state-missing'])
   })
 
-  it('should report a track holding a decision with no handoff', async () => {
-    await seedFolder('groundwork', 'skew', {
+  const track = (extra: Record<string, string>) =>
+    seedFolder('groundwork', 'skew', {
       'README.md': frontmatter(
         'title: Skew\ndescription: One line\ndate: 2026-08-04',
       ),
       '01-current-state.md': frontmatter('title: State\ndescription: One line'),
-      '06-decision.md': frontmatter('title: Decision\ndescription: One line'),
+      ...extra,
     })
-    const outcome = await validateRecords(ROOT, 'groundwork')
+  const decision = frontmatter('title: Decision\ndescription: One line')
+  const handoff = frontmatter('title: Handoff\ndescription: One line')
 
-    expect(outcome.ok).toBe(true)
-    if (!outcome.ok) return
-    expect(kinds(outcome.findings)).toEqual(['closing-partial'])
-  })
-
-  it('should report nothing on a closed conforming track', async () => {
-    await seedFolder('groundwork', 'skew', {
-      'README.md': frontmatter(
-        'title: Skew\ndescription: One line\ndate: 2026-08-04',
-      ),
-      '01-current-state.md': frontmatter('title: State\ndescription: One line'),
-      '06-decision.md': frontmatter('title: Decision\ndescription: One line'),
-      '07-next-session.md': frontmatter(
-        'title: Handoff\ndescription: One line',
-      ),
-    })
+  it('should report nothing on a track closed on its decision alone', async () => {
+    await track({ '06-decision.md': decision })
 
     expect(await validateRecords(ROOT, 'groundwork')).toMatchObject({
       ok: true,
       records: 1,
+      findings: [],
+    })
+  })
+
+  it('should report nothing on a legacy track closed with a handoff', async () => {
+    await track({ '06-decision.md': decision, '07-next-session.md': handoff })
+
+    expect(await validateRecords(ROOT, 'groundwork')).toMatchObject({
+      ok: true,
+      records: 1,
+      findings: [],
+    })
+  })
+
+  it('should report a track holding a handoff with no decision', async () => {
+    await track({ '07-next-session.md': handoff })
+    const outcome = await validateRecords(ROOT, 'groundwork')
+
+    expect(outcome.ok).toBe(true)
+    if (!outcome.ok) return
+    expect(outcome.findings).toMatchObject([
+      { kind: 'closing-partial', subject: '06-' },
+    ])
+  })
+
+  it('should report a pause note left beside a decision', async () => {
+    await track({ '06-decision.md': decision, '99-next-session.md': handoff })
+    const outcome = await validateRecords(ROOT, 'groundwork')
+
+    expect(outcome.ok).toBe(true)
+    if (!outcome.ok) return
+    expect(outcome.findings).toMatchObject([
+      { kind: 'closing-partial', subject: '99-next-session.md' },
+    ])
+  })
+
+  it('should report nothing on a live track holding a pause note', async () => {
+    await track({ '99-next-session.md': handoff })
+
+    expect(await validateRecords(ROOT, 'groundwork')).toMatchObject({
+      ok: true,
       findings: [],
     })
   })
