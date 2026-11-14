@@ -10,12 +10,12 @@ One warm session holds the cross-feature call and reviews. Cold worker sessions 
 
 ## Four roles
 
-| Role         | Session                                | Owns                                                  | Does not                           |
-| ------------ | -------------------------------------- | ----------------------------------------------------- | ---------------------------------- |
-| Orchestrator | One warm, long-lived session           | The cross-feature call, review dispatch, merge order  | Review in place, edit, merge PRs   |
-| Reviewer     | One cold session per PR or small batch | Each PR's read through `review-pr`, the lift on close | Fix findings, ready by hand, merge |
-| Planner      | One session per row, warm or cold      | Measure the row against the tree, write one plan      | Enter a worktree, write the board  |
-| Worker       | One cold worktree session per feature  | Implement, self-check, open PR, answer the reviewer   | Write the shared board, merge      |
+| Role         | Session                                    | Owns                                                      | Does not                           |
+| ------------ | ------------------------------------------ | --------------------------------------------------------- | ---------------------------------- |
+| Orchestrator | One warm, long-lived session               | The cross-feature call, review dispatch, merge order      | Review in place, edit, merge PRs   |
+| Reviewer     | One cold session per PR or small batch     | Each PR's read through `review-pr`, the lift on close     | Fix findings, ready by hand, merge |
+| Planner      | One session per row or batch, warm or cold | Measure each row against the tree, write one plan per row | Enter a worktree, write the board  |
+| Worker       | One cold worktree session per feature      | Implement, self-check, open PR, answer the reviewer       | Write the shared board, merge      |
 
 Each role keeps to its own writes, and five rules cover how the roles meet.
 
