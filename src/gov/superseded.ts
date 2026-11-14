@@ -44,17 +44,12 @@ export interface SupersededHit {
   readonly heading: string | undefined
   /**
    * Whether the replacement sits on the same line, outside the superseded
-   * occurrences themselves.
+   * occurrences themselves, since the replacement is routinely a substring of
+   * the value it replaced and plain containment separates nothing.
    *
-   * Read outside them because the replacement is routinely a substring of the
-   * value it replaced, which is what a convention dropping a segment produces.
-   * A plain containment test answers true for every line under that shape and
-   * separates nothing.
-   *
-   * A reading aid rather than a filter. The line stating the change carries
-   * both values and so does a fixture halfway through a repair, and nothing
-   * here can tell those apart. Suppressing on it would hide the second case,
-   * which is the whole class this sweep exists to reach.
+   * A reading aid rather than a filter, since a line stating the change and a
+   * fixture halfway through a repair both carry the two values, and
+   * suppressing on it would hide the second.
    */
   readonly carriesReplacement: boolean
   readonly preview: string
@@ -134,16 +129,10 @@ const FENCE = /^\s*(?:```|~~~)/
  * The segment the two values differ on, carried with everything they share
  * ahead of it.
  *
- * The shared prefix alone is what this exists against. `canon-cli` and
- * `canon-feedback-file` share `canon`, so a stem cut there matches every sibling
- * and reports the whole family on a rename of one folder. Including the
- * differing segment bounds the net to what actually changed, which leaves
- * `canon-cli` to `canon-shell` matching neither sibling and `toolkit-operator` to
- * `canon-operator` matching the family prefix that did move.
- *
- * An empty replacement yields nothing. Retiring a value outright leaves no
- * second value to diverge from, so every stem would run to the first segment
- * and match the family the retirement never touched.
+ * A shared prefix alone, such as `canon` in `canon-cli` and
+ * `canon-feedback-file`, would match every sibling, so including the differing
+ * segment bounds the net to what changed. An empty replacement yields nothing,
+ * since a retirement has no second value to diverge from.
  */
 export function deriveStems(
   options: SupersededOptions,
@@ -205,17 +194,11 @@ function classifyStem(
 }
 
 /**
- * Whether the value replacing whatever matched appears on the line somewhere
- * other than inside the matched occurrences, which is what makes the flag mean
- * anything when one value contains the other.
- *
- * An empty replacement carries nothing, so it answers false rather than the
- * true every line returns from a containment test against the empty string.
- * Retiring a value outright is what passes one, and reporting every finding as
- * carrying its replacement there says the opposite of what happened.
- *
- * A templated hit reads the stem pair instead, since the line repairing
- * `toolkit-*` carries `canon-*` and never the full name either value spells.
+ * Whether the replacement appears on the line outside the matched
+ * occurrences, which makes the flag mean anything when one value contains the
+ * other. An empty replacement answers false, since containment of the empty
+ * string is always true. A templated hit reads the stem pair instead, since
+ * the line repairing `toolkit-*` carries `canon-*` and neither full name.
  */
 function carriesReplacement(
   line: string,
@@ -324,27 +307,13 @@ export function sweepText(
 
 /**
  * Where the tree still asserts a value the convention behind it no longer
- * produces, keyed on the value rather than on the file stating the rule.
+ * produces, keyed on the value rather than on the file stating the rule, since
+ * a fixture asserting an old output names neither the rule nor its standard.
  *
- * The file-scoped map is what this exists against. A fixture asserting an old
- * output names neither the rule nor the standard, so nothing reaches it from
- * the change that superseded it, and the value it carries is the only key both
- * sides share.
- *
- * This reports and never gates. A string appears for reasons unrelated to the
- * convention, so the output is a reading a person settles, and the counts of
- * what was listed, opened, and skipped are what keep it from reading as a
- * verdict over the whole tree.
- *
- * Beside the literal comparison it matches the family stem the two values
- * differ on, so a citation writing the family as a pattern enters the report.
- * The trade is false positives, bounded at one across a sixteen-folder rename,
- * which is why this reports rather than gates.
- *
- * What it cannot see is a prose reference that went stale without carrying the
- * value, such as a declaration citing the wrong standard for the transform, and
- * a family written in a form neither the value nor the three stem shapes reach.
- * A value sweep closes most of this class and no part of either one.
+ * It also matches the family stem the values differ on, so a citation writing
+ * the family as a pattern is reported. It reports and never gates, with counts
+ * of what was listed, opened, and skipped, since a match can be unrelated. A
+ * stale prose reference not carrying the value stays out of reach.
  */
 export async function readSuperseded(
   root: string,
@@ -383,9 +352,8 @@ export async function readSuperseded(
     try {
       text = await readFile(join(root, path), 'utf8')
     } catch {
-      // A listed path that will not open is a symlink leaving the tree or a
-      // file removed since git answered. Counted rather than reported, so the
-      // run still states that it measured less than it listed.
+      // A listed path that will not open is counted rather than reported, so
+      // the run states that it measured less than it listed.
       skipped += 1
       continue
     }
