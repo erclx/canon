@@ -225,10 +225,8 @@ async function runTick(
   const result = tickBoxes(marked.body, numbers.map(Number), reading.tip)
   if (result.kind === 'refused') return refuseTick(result.reason)
 
-  // Read ahead of the write so a short list refuses before it leaves the
-  // comment half ticked. A verdict that covers neither the tip nor the head a
-  // carry came from, carries no count line, or cannot be read leaves the check
-  // unrun and says so.
+  // Read ahead of the write so a short list refuses before half ticking. A
+  // verdict that cannot be read or matched leaves the check unrun and says so.
   const ticked = countTicksAtHead(
     readChecklistBoxes(findEvidenceChecklist([{ body: result.body }]) ?? ''),
     reading.tip,

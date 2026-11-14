@@ -1,17 +1,13 @@
 /**
  * Resolves the viewport sweep a run is driven at.
  *
- * The lesson this carries is that a defect can be a function of how much scroll
- * remains rather than of the markup: a rail that skipped its middle sections
- * passed at 900 and failed at 1200 and 1500, so a single height reports clean
- * over a live defect. Every other probe measures a page, and this one decides
- * how many pages there are to measure.
+ * A defect can be a function of how much scroll remains rather than of the
+ * markup, so a single height can report clean over a live defect. Every other
+ * probe measures a page, and this one decides how many pages there are.
  *
  * It refuses rather than defaulting, which is the whole of its contract. The
- * heights that separate a passing render from a failing one are a property of
- * the layout being driven, and the only evidence on hand is one fixture's
- * 900-to-1500 failure range, far too narrow a sample to ship as a default that
- * every later caller would inherit without choosing it.
+ * heights that separate a passing render from a failing one belong to the
+ * layout being driven, and no sample is broad enough to ship as a default.
  */
 
 export interface Viewport {

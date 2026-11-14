@@ -359,10 +359,8 @@ export function diffManifests(
       masked.push({ key, reason })
   }
 
-  // A rewriting mask changes the value before the comparison. It counts as having
-  // fired only where the text it rewrites differs between the sides, since a
-  // match both sides share hides nothing and would otherwise take the credit for
-  // a difference another mask on the same key absorbed.
+  // A rewriting mask counts as fired only where the text it rewrites differs
+  // between the sides, so it never takes credit for another mask's difference.
   const rewrite = (
     key: string,
     value: string | undefined,
@@ -806,9 +804,8 @@ export async function runEquivalence(
         stubRemote && arm.anchor,
       )
 
-    // Anchor arms force-push `main` and recreate a pull request on one shared
-    // remote, so they run strictly one at a time. A stub remote is private to its
-    // arm, so those arms join the pool.
+    // Anchor arms force-push `main` on one shared remote, so they run one at a
+    // time. A stub remote is private to its arm, so those arms join the pool.
     const shared = (a: Arm): boolean => a.anchor && !stubRemote
     const offline = await pool(
       runnable.filter((a) => !shared(a)),

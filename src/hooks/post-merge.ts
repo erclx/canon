@@ -376,11 +376,8 @@ export async function runPostMerge(input: PostMergeInput): Promise<void> {
     pushLines,
   )
 
-  // No `--root` on either worktree step, and that is load-bearing. Each verb
-  // reads its own working directory to refuse the worktree it stands in, so a
-  // root would turn the running worktree into an ordinary candidate and let a
-  // pull inside a linked worktree delete the ground under itself. One switch
-  // covers both, since both remove worktrees.
+  // No `--root` on either worktree step. Each verb refuses the worktree it
+  // stands in, and a root would let a pull delete the ground under itself.
   if (!isSkipped('CANON_SKIP_RECLAIM')) {
     for (const number of pullRequestNumbers(input.subjects)) {
       await step(

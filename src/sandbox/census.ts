@@ -69,11 +69,10 @@ export function listSkills(root: string): string[] {
 /**
  * Maps a scenario to the skill it drives, trying two spellings in order.
  *
- * `<category>-<command>` is the rule `canon/context/development/sandbox.md` states, and it
- * alone pairs 29 of 54 skills. The bare `<command>` fallback is what reaches the
- * rest: `claude/target-setup.ts` drives the `target-setup` skill, not a `claude-target-setup` that
- * does not exist. Stating one spelling and shipping two is what let the audit
- * report a paired skill as unpaired.
+ * `<category>-<command>` is the rule `canon/context/development/sandbox.md`
+ * states. The bare `<command>` fallback reaches the rest, since
+ * `claude/target-setup.ts` drives the `target-setup` skill, not a
+ * `claude-target-setup` that does not exist.
  *
  * Returns undefined for a scenario driving no skill at all, which is every
  * `infra/` and `tooling/` scenario. Those exercise a CLI domain rather than a
@@ -94,20 +93,14 @@ export function skillForScenario(
 /**
  * Reads the exemption declarations, keyed by skill with a `reason` each.
  *
- * The reason cannot live in the arm's `manual` array, which is where `#723` put
- * prose a checker could not assert. `resolveVerdict` fails any declaration
- * carrying zero mechanical assertions, so an `expect.toml` holding only an
- * exempt reason goes red at the moment it is written. An exempt skill has no
- * assertion to pair the prose with, which is what makes it exempt, so the two
- * cases cannot share a home.
+ * The reason cannot live in the arm's `manual` array, since `resolveVerdict`
+ * fails any declaration carrying zero mechanical assertions, and an exempt
+ * skill has no assertion to pair the prose with.
  *
  * Throws on a malformed file and on a table carrying no usable `reason`, rather
- * than reporting a smaller set. Both losses are invisible downstream: the skill
- * reclassifies to should-be-asserted and rejoins a work queue someone already
- * ruled it out of, with nothing naming the entry that stopped counting. This is
- * the stray-key rule `contentArray` applies in `expect.ts` for the same reason,
- * where the declaration is well-formed and silently lost a key it appears to
- * carry. `runCoverage` catches both and frames them.
+ * than reporting a smaller set, since either loss silently reclassifies the
+ * skill to should-be-asserted. This is the stray-key rule `contentArray`
+ * applies in `expect.ts`. `runCoverage` catches both and frames them.
  */
 export function parseExemptions(source: string): Map<string, string> {
   const parsed = Bun.TOML.parse(source) as Record<string, unknown>
@@ -146,8 +139,7 @@ function readExemptions(root: string): Map<string, string> {
  *
  * A paired scenario is not an asserted skill. A scenario with no `expect.toml`
  * provisions a state and prints a human-readable `Expect:` line, so a run over
- * it exits zero having proved nothing. Counting pairs would report coverage the
- * suite does not have, which is the measure this report exists to replace.
+ * it exits zero having proved nothing.
  *
  * An armed arm outranks an exemption. A skill listed exempt that acquired an arm
  * is asserted in fact, and reporting the stale claim instead would hide the one
@@ -192,10 +184,8 @@ export function collectCensus(
     return { skill, verdict: 'should-be-asserted', scenarios, armed }
   })
 
-  // An exemption outranked by an arm is as wrong as one naming no skill, and it
-  // is the case the armed-wins rule creates rather than one the tree arrives
-  // with. Reading `entries` rather than recomputing keeps the two in step, so a
-  // change to the precedence cannot leave the report contradicting the verdict.
+  // An exemption outranked by an arm is reported as wrong. Reading `entries`
+  // rather than recomputing keeps the report in step with the verdict.
   const assertedSkills = new Set(
     entries.filter((e) => e.verdict === 'asserted').map((e) => e.skill),
   )

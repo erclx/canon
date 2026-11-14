@@ -425,10 +425,8 @@ export function createStageContext(options: ContextOptions): StageContext {
     git('config', 'user.email', env.SANDBOX_GIT_EMAIL)
   }
 
-  /**
-   * `gh` answers an absent repository and an unreachable host with one status,
-   * so the 404 alone separates them. Creating is the opt-in.
-   */
+  // `gh` answers an absent repository and an unreachable host with one status,
+  // so the 404 alone separates them. Creating is the opt-in.
   const ensureAnchorRepo = (org: string, repo: string): void => {
     const probe = spawn(
       'gh',

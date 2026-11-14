@@ -2,19 +2,13 @@
  * What a run reads from a `claude -p --output-format stream-json` session.
  *
  * `result` is the text of the final `result` message, the same object
- * `--output-format json` prints alone, so every reader of the old envelope
- * reads it unchanged. It is empty when no complete `result` line arrived,
- * which those readers already treat as an envelope that did not parse.
+ * `--output-format json` prints alone, and empty when no complete `result`
+ * line arrived, which readers treat as an envelope that did not parse.
  *
- * `skills` names each `Skill` tool call in the order the session made it, as
- * the `skill` argument the call carried. A slash command the prompt opened
- * with expands before the session starts, so it never appears here.
- *
+ * `skills` names each `Skill` call's argument in order. A slash command the
+ * prompt opened with expands before the session starts, so it never appears.
  * `writeTargets` and `commands` are what `attributeEscapes` ties a watched
- * write to this session by: the path each file-writing call named, and the
- * string each `Bash` call ran. A subagent's calls arrive as `assistant` lines
- * carrying `parent_tool_use_id`, measured 2026-11-10, so they are read here
- * too rather than lost to the session that spawned them.
+ * write to this session by, and a subagent's calls are read here too.
  */
 export interface SessionStream {
   readonly result: string

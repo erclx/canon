@@ -5,16 +5,13 @@ import type { Finding } from '@/driver/steps'
  * Reads SVG label geometry off the rendered page, in two probes that differ by
  * what they compare a label against.
  *
- * Everything here is measured in the browser after `document.fonts.ready` and
- * never computed from the markup, because a generated page is routinely
- * authored against one font and rendered in another. A stylesheet restyling
- * `figure svg text` to a hand face after the coordinates were picked against
- * monospace moves every label, so a label that cleared a line at its authored
- * width can overlap it once rendered and the markup still says it does not.
+ * Everything is measured in the browser after `document.fonts.ready`, never
+ * computed from the markup, because a generated page is routinely authored
+ * against one font and rendered in another, which moves every label.
  *
  * `clientWidth` is not the reading. Comparing it to `scrollWidth` flags every
  * label whose string is wider than its element box whether or not anything is
- * actually cut, which is why both probes are geometry against other geometry.
+ * cut, which is why both probes compare geometry against other geometry.
  */
 
 /**
@@ -151,13 +148,9 @@ export async function probeDiagramGeometry(page: Page): Promise<Finding[]> {
 /**
  * Reports a stroke crossing a label, sampled along the stroke's own geometry.
  *
- * A bounding box cannot answer this. The first version of the occlusion probe
- * counted a shape as occluding only when it carried a fill, which filtered out
- * every `line` and every `fill="none"` panel border before the comparison ran,
- * and a label sitting on an arrow passed every run until a person saw it. A
- * diagonal connector's box also covers most of the diagram while the stroke
- * itself touches almost none of it, so the box would report the opposite error
- * once the fill filter came off.
+ * A bounding box cannot answer this. Filtering to filled shapes drops every
+ * `line` and every `fill="none"` panel border, and a diagonal connector's box
+ * covers most of the diagram while the stroke touches almost none of it.
  *
  * Both paint orders are findings. A stroke drawn after the label crosses the
  * glyphs out, and one drawn before it shows through them, since SVG text
@@ -196,11 +189,8 @@ export async function probeDiagramStrokes(page: Page): Promise<Finding[]> {
           if (!(shape instanceof SVGGeometryElement)) continue
           if (getComputedStyle(shape).stroke === 'none') continue
 
-          // Read off the shape rather than off the root, because
-          // `getPointAtLength` answers in the shape's own user space and a
-          // generated diagram nests almost everything under a transformed `g`.
-          // The root's matrix drops that translation, which puts every sampled
-          // point somewhere the label is not and reports the page clean.
+          // Read off the shape, since `getPointAtLength` answers in the shape's own user
+          // space and a generated diagram nests most shapes under a transformed `g`.
           const matrix = shape.getScreenCTM()
           if (!matrix) continue
 

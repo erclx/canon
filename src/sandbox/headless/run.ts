@@ -48,21 +48,14 @@ import {
 
 /**
  * The flags and budget every run takes, each overridable through its
- * `CANON_SKILL_TEST_*` variable.
+ * `CANON_SKILL_TEST_*` variable. `maxTurns` is the only budget, since `max_turns` in an arm's `expect.toml` is
+ * a ceiling asserted after the run, and a truncated run's `error_max_turns`
+ * fails `canon sandbox check` by name. The check reads the cap from its own
+ * environment, so a raised-cap run checked later by hand reads the default.
  *
- * `maxTurns` is the only budget. `max_turns` in an arm's `expect.toml` is a
- * ceiling asserted after the run, not a cap enforced during it, so a
- * declaration cannot raise what it runs under. A truncated run exits 1 with
- * `subtype` `error_max_turns`, which `canon sandbox check` fails by name.
- * `num_turns` counts more than this cap does, so a ceiling at or above it is
- * held by the cap and compares nothing. The check reads the cap from its own
- * environment, so a run under a raised cap, checked later by hand without the
- * variable, reads the default.
- *
- * `bypassPermissions` is the only mode that lets a run write under `.claude/`,
- * which most arms need. The scoping the permission layer would have given
- * comes from `write_scope` instead, asserted after the run rather than enforced
- * during it, so a skill that writes where it should not still wrote there.
+ * `bypassPermissions` is the only mode that lets a run write under `.claude/`.
+ * The scoping it gives up comes from `write_scope`, asserted after the run, so
+ * a skill that writes where it should not still wrote there.
  */
 export function runSettings(env: NodeJS.ProcessEnv): {
   readonly model: string
@@ -113,19 +106,15 @@ export function parseRunArgs(
 
 /**
  * The four facts about nested sessions, kept in one field so a reader gets
- * them together. `watched` false means the registry was absent, which makes an
- * empty `new` say nothing at all rather than say the run dispatched nothing.
+ * them together. `watched` false means the registry was absent, so an empty
+ * `new` says nothing rather than that the run dispatched nothing.
  *
- * `concurrent` is a witness rather than a verdict. A record present before and
- * after the run rules that session out as this run's own dispatch and rules it
- * in as a candidate explanation for a file `escapes` names with no attribution
- * of its own, never a claim that it, rather than something else, made the
- * write.
+ * `concurrent` is a witness rather than a verdict. A session present before and
+ * after the run may explain an unattributed escape, never claim the write.
  *
- * `reap` carries `clear` for a group that was already empty, `reaped-term` or
- * `reaped-kill` for one this run signalled, `survived` for one that outlived
- * `SIGKILL`, `inherited` for a session that never led a group of its own, and
- * `no-session` for a run that stopped before the session began.
+ * `reap` carries the group's outcome, from `clear` through `survived`,
+ * `inherited` for a session that led no group of its own, and `no-session` for
+ * a run that stopped before the session began.
  */
 export interface SessionsReport {
   readonly watched: boolean
@@ -135,19 +124,14 @@ export interface SessionsReport {
 }
 
 /**
- * The envelope stays on stdout so existing readers keep working, with the
- * verdict merged in. A session that returned output that does not parse as an
- * object still emits its verdict, since a silent stdout would read as a run
- * that never happened, and `isParsed` false is what forces the exit to 1.
+ * The envelope stays on stdout with the verdict merged in. Output that does not
+ * parse as an object still emits its verdict, since a silent stdout would read
+ * as a run that never happened, and `isParsed` false forces the exit to 1.
  *
- * An escape rides alongside the verdict rather than inside it. The verdict
- * answers what the sandbox contains, and a file the session put somewhere else
- * is not in that tree to be asserted over.
- *
- * `canon` names the CLI every child of the run resolved, so a reader can tell
- * a run that drove the branch from one that drove the release. `skills` names
- * the skills the session loaded, read from the stream rather than the result
- * object, so it survives a result that did not parse.
+ * An escape rides beside the verdict, since a file written outside the sandbox
+ * is not in the tree the verdict asserts over. `canon` names the CLI every
+ * child resolved, telling a branch run from a release run, and `skills` names
+ * the skills loaded, read from the stream so it survives an unparsed result.
  */
 export function mergeEnvelope(
   out: string,
@@ -406,9 +390,8 @@ async function drive(
   }
   const { prompt } = args
 
-  // The agent pushes from inside the sandbox on its own, in the session this
-  // spawns, so the guard has to reach that environment and not only
-  // provisioning.
+  // The agent pushes from inside the session this spawns, so the guard must
+  // reach that environment and not only provisioning.
   process.env.GIT_TERMINAL_PROMPT = '0'
 
   // Minted into this process's env before any child starts, so provisioning,
@@ -422,24 +405,15 @@ async function drive(
   logStep(`Sandbox: ${sandbox}`)
   logStep(`Canon: ${cli} at ${branchCli.head ?? 'an unread commit'}`)
 
-  // Created ahead of provisioning, since a scenario's own `canon` spawns read
-  // the provisioning env, and set on the cleanup before the spawn so a failed
-  // provision still removes it. The `claude` shim's refusal is reachable from
-  // provisioning too, which no scenario dispatches from.
-  //
-  // The session calls the real binary by its resolved path and puts the shim on
-  // the PATH the session inherits, so a `claude --bg` from inside the run meets
-  // the refusal and this invocation does not. Routing the session through the
-  // shim too would read the arm's own prompt as arguments, so a prompt naming
-  // `--bg` would refuse the run the shim exists to allow.
+  // Created before provisioning, which runs on the shim PATH too. The session's
+  // own launch calls the real binary by path, so a prompt naming `--bg` runs.
   cleanup.shimDir = mkdtempSync(join(tmpdir(), 'canon-dispatch-shim-'))
   installDispatchShim(cleanup.shimDir, realClaude)
   installCanonShim(cleanup.shimDir, process.execPath, cli)
   const shimPath = `${cleanup.shimDir}:${process.env.PATH ?? ''}`
 
-  // The session below loads the branch's skills whole through --plugin-dir. A
-  // copied SKILL.md would outrank that and cite references beside it that were
-  // never copied, so provisioning injects nothing for a headless run.
+  // The session loads the branch's skills whole through --plugin-dir, which a
+  // copied SKILL.md would outrank, so provisioning injects nothing.
   logStep(`Provisioning ${target}`)
   const provision = spawnSync(
     process.execPath,
@@ -470,21 +444,15 @@ async function drive(
       return { root, manifest: snapshot.manifest }
     })
 
-  // Taken after provisioning, so a scenario that stages a live session record
-  // of its own is already in the before snapshot rather than reported as a
-  // dispatch this run made. A scenario that fakes a live session
-  // writes to the real registry, since provisioning and the driven run share
-  // no environment to repoint it.
+  // Taken after provisioning, so a session record a scenario stages is in the
+  // before snapshot rather than reported as this run's dispatch.
   const registry = sessionsDir()
   const sessionsBefore = snapshotSessions(registry)
 
   logStep(`Running ${prompt} on ${settings.model}`)
 
-  // Detached, so the session leads a process group of its own and the reap
-  // after the verdict signals a group this run created rather than the
-  // operator's. Stdout goes to a file rather than a pipe, since a child the
-  // session leaves behind would hold a pipe open and stall the read until it
-  // exits. Stdin is `/dev/null`, since no command here may wait on a terminal.
+  // Detached, so the reap signals a group this run created. Stdout goes to a
+  // file, since a left-behind child holding a pipe would stall the read.
   const sessionOut = join(workDir, 'session.out')
   const outFd = openSync(sessionOut, 'w')
   const session: ChildProcess = spawn(
@@ -524,9 +492,8 @@ async function drive(
     )
   })
 
-  // Read rather than assumed. A detached spawn makes the session lead its own
-  // group, so this equals its pid, and comparing it against this process's
-  // group before signalling is what keeps the reap off the operator's terminal.
+  // Read rather than assumed, and compared against this process's group before
+  // signalling, which keeps the reap off the operator's terminal.
   if (session.pid !== undefined) {
     cleanup.harnessPgid = processGroupOf(process.pid)
     const pgid = processGroupOf(session.pid)
@@ -595,15 +562,13 @@ async function drive(
     isEscapeWatched,
   })
 
-  // After the verdict, which is the last thing that reads what the run left
-  // behind. Nothing here fails the run: a survivor is a fact about the machine
-  // rather than a claim about the skill, and the verdict is already taken.
+  // After the verdict, the last read of what the run left. A survivor is a fact
+  // about the machine rather than the skill, so nothing here fails the run.
   cleanup.reapSession()
   cleanup.removeShim()
 
-  // A tied escape fails an arm declaring `escape_scope`, and an untied one
-  // reports as skipped there, since no tool call of this session names it. Both
-  // print here for every arm, since an arm declaring no scope asserts neither.
+  // A tied escape fails an arm declaring `escape_scope` and an untied one skips
+  // there. Both print for every arm, since an arm declaring no scope asserts none.
   if (tied.length > 0) {
     logWarn('This session wrote shared scratch under a toolkit root:')
     for (const path of tied) logRemove(path)

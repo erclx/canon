@@ -140,13 +140,8 @@ export function register(program: Command): void {
           return
         }
 
-        /**
-         * Refused rather than defaulted, and refused ahead of every other
-         * check, so the message names the invocation rather than whatever the
-         * working directory happens to hold. The element a capture crops to is
-         * a property of the page's own markup, and the class this command used
-         * to assume is declared by two committed sources in one repository.
-         */
+        // Refused rather than defaulted, ahead of every other check, since the
+        // element to crop to is a property of the page's own markup.
         if (!opts.selector) {
           frameError(
             '--selector names the element to capture and has no default. See canon capture --help.',

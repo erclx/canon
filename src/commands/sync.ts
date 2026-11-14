@@ -156,9 +156,8 @@ function renderCheck(report: CheckReport): void {
     if (stale + customized + drifted + stranded + retired + renamed === 0) {
       logInfo(orphaned === 0 ? 'up to date' : `up to date (${orphaned} local)`)
     }
-    // A local file is not a deficiency and a missing rule is, so this never
-    // shares the up-to-date line's parenthetical. It prints on its own,
-    // regardless of whether anything above needs a sync.
+    // A missing rule is a deficiency and a local file is not, so it prints on its
+    // own line whether or not anything above needs a sync.
     if (missing > 0) {
       logWarn(`${missing} listed by the stack, not installed`)
     }
@@ -203,9 +202,8 @@ function renderCheck(report: CheckReport): void {
     for (const name of report.newSkills) logInfo(name)
   }
 
-  // Warned where `newSkills` is noted, because a new skill loads live and needs
-  // nothing run while a rule reaches the target only when someone installs it.
-  // No sync closes any of this, so the remedy names the install command.
+  // Warned, since a new skill loads live but a rule reaches the target only on
+  // install, which no sync does, so the remedy names the install command.
   if (report.newRules.length > 0) {
     logStep('New rules, never installed')
     for (const name of report.newRules) logWarn(name)
@@ -219,10 +217,8 @@ function renderCheck(report: CheckReport): void {
   renderUnclaimed(report)
 
   outro()
-  // Scanned domains only. Tooling renders a section on every managed target, so
-  // naming it here repeats what that section already said under a second
-  // remedy, where a scanned domain nobody installed has no section at all and
-  // this line is the only place it appears.
+  // Scanned domains only, since tooling renders a section on every managed
+  // target and a scanned domain nobody installed appears nowhere else.
   const uncovered = uncoveredDomains(report)
   if (uncovered.length === 0) return
 

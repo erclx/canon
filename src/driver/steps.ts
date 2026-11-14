@@ -167,9 +167,8 @@ export function readDriverPlan(source: string): PlanRead {
     if (step.probes) {
       const named = readProbeList(step.probes)
       if (typeof named === 'string') return refused('unknown-probe', named)
-      // Refused for the same reason the run-level list is. An empty list here
-      // silently runs the step and measures nothing, and a pass reporting zero
-      // findings is indistinguishable from one that looked.
+      // Refused like the run-level list, since an empty list runs the step and
+      // measures nothing, which reads the same as a pass that looked.
       if (named.length === 0) {
         return refused(
           'no-probes',

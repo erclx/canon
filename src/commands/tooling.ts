@@ -483,9 +483,8 @@ async function runScaffold(
  * ran it opened no frame first.
  */
 function runList(opts: ListOptions): number {
-  // The warning is a frame-interior line, so it goes out after `intro` on the
-  // path that opens one and bare on the `--json` path, which returns first and
-  // opens none. One position cannot serve both.
+  // A frame-interior line, so it goes out after `intro` on the framed path and
+  // bare on the `--json` path, which returns first and opens no frame.
   const mismatch = checkoutMismatchWarning(process.cwd())
   const stacks = buildStackSummaries(PROJECT_ROOT)
 
@@ -645,9 +644,8 @@ async function runSync(
   const mode = resolveWriteMode(opts)
 
   if (result.totalChanges === 0) {
-    // The stamp is a write like any other, so a run with no authority to write
-    // leaves the target's record alone rather than claiming a sync it never
-    // performed.
+    // The stamp is a write, so a run with no authority to write leaves the
+    // target's record alone rather than claiming a sync it never performed.
     if (mode === 'apply' || mode === 'prompt') {
       await stampChain(prepared.chain, prepared.target)
     }
@@ -977,11 +975,8 @@ async function runInject(
     await injectGitignore(prepared.chain, prepared.target)
   }
 
-  // Only a whole-stack inject records the chain. A flag-scoped run installs one
-  // category, and a chain recorded from it would send the report scanning for
-  // configs and deps the caller never asked to install. The claude stack is
-  // excluded here rather than in `prepare`, which is what keeps `canon claude`
-  // able to drive injection while its stack stays out of the tooling record.
+  // Only a whole-stack inject records the chain, and never for the claude
+  // stack, which `canon claude` still drives through injection.
   if (applyAll && !isStackExcluded(stack)) {
     await stampChain(prepared.chain, prepared.target)
   }

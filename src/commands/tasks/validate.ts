@@ -69,9 +69,8 @@ function reportValidation(
       for (const finding of outcome.findings) logWarn(describe(finding))
     }
 
-    // The untested rows carry the warn glyph rather than the pass glyph. They
-    // move no exit code, and a green tick on a row nothing re-took is the
-    // misread this section exists to prevent.
+    // Untested rows warn and move no exit code, since a green tick on a row
+    // nothing re-took is the misread this section prevents.
     logStep('Parked rows')
     if (outcome.untested.length === 0) {
       logInfo('every parked row carried a citation or a file set to re-test')
@@ -82,9 +81,8 @@ function reportValidation(
       for (const row of outcome.untested) logWarn(describeUntested(row))
     }
 
-    // A folder claim is often the correct way to say a row rewrites a whole
-    // directory, so it reports beside the findings and moves no exit code. A
-    // measure that fails on a legitimate cell trains a reader to skip it.
+    // A folder claim is often correct for a row rewriting a directory, so it
+    // reports and moves no exit code.
     logStep('Folder claims')
     if (outcome.claims.length === 0) {
       logInfo('every run now row names files rather than folders')
@@ -92,9 +90,8 @@ function reportValidation(
       for (const claim of outcome.claims) logWarn(describeClaim(claim))
     }
 
-    // A shared file holds nothing under the dispatch gate, so the pairs report
-    // with the warn glyph and move no exit code. They stay listed for merge
-    // order and for the holds a Touches cell cannot state.
+    // A shared file holds nothing under the dispatch gate, so the pairs warn and
+    // move no exit code, listed for merge order and holds a cell cannot state.
     logStep('Shared files')
     if (outcome.shared.length === 0) {
       logInfo('no two run now rows name the same file')
@@ -103,8 +100,7 @@ function reportValidation(
     }
 
     // The width limit is a heuristic over one preview pane, so a wide token
-    // reports and moves no exit code, and a measure failing on a cell that
-    // fits would teach a reader to skip it.
+    // reports and moves no exit code.
     logStep('Wide tokens')
     if (outcome.wide.length === 0) {
       logInfo('every code span fits the preview pane')
@@ -112,10 +108,8 @@ function reportValidation(
       for (const token of outcome.wide) logWarn(describeWide(token))
     }
 
-    // Unplaced is the normal state between a session filing a task and an
-    // orchestrator placing its row, so it moves no exit code. It still reports,
-    // since it is the only local detector for a row a hand-edit dropped or a
-    // handoff that never arrived.
+    // Unplaced is normal between filing a task and placing its row, so it moves no
+    // exit code, yet it is the only local detector for a dropped row.
     logStep('Unplaced')
     if (outcome.unplaced.length === 0) {
       logInfo('every task file sits on the board or the backlog')

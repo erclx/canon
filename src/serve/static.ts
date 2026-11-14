@@ -170,10 +170,8 @@ export function resolveWithin(
   } catch {
     return undefined
   }
-  /**
-   * A NUL truncates the path at the filesystem layer, so a request carrying one
-   * asks for a different file than the one the containment test read.
-   */
+  // A NUL truncates the path at the filesystem layer, so the file read would
+  // differ from the one the containment test checked.
   if (decoded.includes('\0')) return undefined
 
   const relativePath = decoded.replace(/^\/+/, '')
@@ -232,20 +230,12 @@ export function bindFirstFree(
   for (let port = first; port < first + PORT_ATTEMPTS; port++) {
     try {
       const server = bind(port)
-      /**
-       * The bound port rather than the requested one. Port 0 asks the OS to
-       * choose, so reporting the request builds a URL pointing at nothing.
-       * The type admits undefined for a unix socket, which a bind carrying a
-       * hostname and a port never is, and the request is the honest fallback.
-       */
+      // The bound port, since port 0 asks the OS to choose. The type admits
+      // undefined for a unix socket, which this bind never is.
       return { server, port: server.port ?? port }
     } catch (error) {
-      /**
-       * Contention is the one cause worth walking past. A permission failure
-       * or an unavailable interface swallowed here would be retried twenty
-       * times and then reported as a port range being full, which names a
-       * cause nothing checked. The caller turns the rethrow into a refusal.
-       */
+      // Only contention is walked past. Any other bind failure is rethrown for the
+      // caller to refuse on, rather than retried and reported as a full range.
       if (!shouldWalkPast(error)) throw error
     }
   }
@@ -281,22 +271,14 @@ export async function respond(
   const target = resolveWithin(root, pathname)
   if (!target) return forbidden()
 
-  /**
-   * Tested here as well as before the read, because the redirect below answers
-   * ahead of that one. A redirect firing on an out-of-root directory reports
-   * that it exists, where one that does not answers 404, and the pair is a
-   * fact about the filesystem outside the root.
-   */
+  // Tested before the read as well, since the redirect below answers first and
+  // would otherwise reveal whether an out-of-root directory exists.
   if (escapesThroughLink(root, target)) return forbidden()
 
   let path = target
   if (existsSync(path) && statSync(path).isDirectory()) {
-    /**
-     * A browser resolves a relative asset against the last slash of the URL it
-     * is on, so answering a directory in place leaves `/lesson` asking for
-     * `/course.css` rather than `/lesson/course.css` and the page renders
-     * unstyled. The redirect moves the base before the index is served.
-     */
+    // A browser resolves a relative asset against the URL's last slash, so a
+    // directory answered without one loads its assets from the parent.
     if (!pathname.endsWith('/')) {
       return new Response(null, {
         status: 301,
@@ -318,12 +300,8 @@ export async function respond(
     path = indexPage
   }
 
-  /**
-   * Sits immediately before the read rather than beside the path that produced
-   * it, so every path reaching `Bun.file` has been tested whatever produced
-   * it. Checking the request path alone left the appended index untested, and
-   * a real directory holding a linked index was served.
-   */
+  // Sits immediately before the read, so every path reaching `Bun.file` is
+  // tested, the appended index included.
   if (escapesThroughLink(root, path)) return forbidden()
 
   const file = Bun.file(path)
@@ -337,11 +315,8 @@ export async function respond(
   return new Response(file, {
     headers: {
       'content-type': contentType(path),
-      /**
-       * A preview is edited and reloaded continuously, and a cached stylesheet
-       * reads as a fix that did not work. Revalidation is the whole point of
-       * the surface, so it is not negotiable per response.
-       */
+      // A preview is edited and reloaded continuously, and a cached stylesheet
+      // reads as a fix that did not work.
       'cache-control': 'no-store',
     },
   })
@@ -358,23 +333,15 @@ export function startServer(
 
   const entry = (options.entry ?? DEFAULT_ENTRY).replace(/^\/+/, '')
 
-  /**
-   * Checked before a port is taken, since `url` is the field a caller is told
-   * to read and hand to a reader. An entry the containment test rejects would
-   * otherwise be reported as a link the server then refuses. An entry that is
-   * merely absent is not this case and does not refuse, which `entryExists`
-   * reports instead.
-   */
+  // Checked before a port is taken, since `url` is what a caller hands on. An
+  // entry that is merely absent does not refuse, and `entryExists` reports it.
   const entryPath = resolveWithin(root, entry)
   if (!entryPath) return refuse('no-entry', `${entry} escapes ${dir}`)
 
   const first = options.port ?? DEFAULT_PORT
 
-  /**
-   * A bind failure that is not contention reaches here as a throw, and the
-   * command's own help promises a reason on stderr or in the record. A stack
-   * trace is neither, so it is caught and named.
-   */
+  // A bind failure other than contention throws here, and the help promises a
+  // reason on stderr or in the record, so it is caught and named.
   let bound: ReturnType<typeof listen>
   try {
     bound = listen(root, first, options.index ?? false)
@@ -393,11 +360,8 @@ export function startServer(
     )
   }
 
-  /**
-   * A listing answers `/` where no index page exists, so under the flag the
-   * default entry is the root itself. An explicit `--entry` keeps its own link
-   * and its own warning.
-   */
+  // A listing answers `/` where no index page exists, so under the flag the
+  // default entry is the root. An explicit `--entry` keeps its own link.
   const listsRoot =
     (options.index ?? false) &&
     options.entry === undefined &&

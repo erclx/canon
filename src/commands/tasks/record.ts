@@ -498,9 +498,8 @@ export function reportRecord(
   emitJson: boolean,
   root: string,
 ): number {
-  // The framed branch below already reaches stderr through logError, so the
-  // bare write is what keeps the JSON mode from reporting the reason on stdout
-  // alone.
+  // The framed branch reaches stderr through logError, so this bare write keeps
+  // JSON mode from reporting the reason on stdout alone.
   if (emitJson) {
     process.stderr.write(`${refused.message}\n`)
     process.stdout.write(

@@ -1159,9 +1159,8 @@ function reportSuperseded(
 
   const literal = report.findings.filter((hit) => hit.match === 'literal')
 
-  // Named for the kind rather than for a verdict. `Clean` over the literal half
-  // alone would read as a clean tree on a run whose templated half is the one
-  // carrying every finding.
+  // Named for the kind rather than a verdict, since `Clean` over the literal half
+  // would read as a clean tree when the templated half carries every finding.
   logStep('Literal')
   if (literal.length === 0) {
     logInfo('nothing in the corpus asserts the superseded value')
@@ -1202,9 +1201,7 @@ function runTestOrder(opts: TestOrderOptions): number {
   const emitJson = opts.json ?? false
 
   // The refusal reaches stderr in both modes and the record goes to stdout
-  // alone, which is the split `docs/agents/output-shape.md` fixes. A consumer
-  // reading stdout sees pure data either way, and an operator reading the
-  // terminal sees the refusal rather than a command that appeared to do nothing.
+  // alone, the split `docs/agents/output-shape.md` fixes.
   if (report.kind === 'unreadable') {
     intro('canon gov test-order')
     logStep('Refused')
@@ -1253,9 +1250,8 @@ function reportTestOrder(
   logStep('Satisfied')
   logInfo(`${report.satisfied.length} pair(s) whose test came first`)
 
-  // The unclassified rows carry the warn glyph and move no exit code. A pass
-  // over a change the pairing could not read is the claim this check exists to
-  // avoid making, so the rows are named rather than counted into the clean line.
+  // The unclassified rows warn and move no exit code, and are named rather than
+  // counted into the clean line, so no pass is claimed over an unread change.
   logStep('Unclassified')
   if (report.unclassified.length === 0) {
     logInfo('every changed module paired')
@@ -1370,9 +1366,8 @@ function selectedSections(opts: ListOptions): {
  * untouched by it.
  */
 function runList(opts: ListOptions): number {
-  // The warning is a frame-interior line, so it goes out after `intro` on the
-  // path that opens one and bare on the `--json` path, which returns first and
-  // opens none. One position cannot serve both.
+  // A frame-interior line, so it goes out after `intro` on the framed path and
+  // bare on the `--json` path, which returns first and opens no frame.
   const mismatch = checkoutMismatchWarning(process.cwd())
   const catalog = buildGovCatalog(PROJECT_ROOT)
   const sections = selectedSections(opts)
@@ -1466,9 +1461,8 @@ async function runRegen(
   opts: RegenOptions,
   rootPassed: boolean,
 ): Promise<number> {
-  // An operator naming `--root` names their own target on purpose, so only the
-  // default can silently regenerate against a checkout nobody is standing in.
-  // The value alone cannot separate the two, since the flag carries a default.
+  // Only the default root can silently regenerate a checkout nobody stands in,
+  // and the value alone cannot tell, since the flag carries a default.
   if (!rootPassed) {
     const mismatch = checkoutMismatchWarning(process.cwd())
     if (mismatch !== undefined) logWarn(mismatch)

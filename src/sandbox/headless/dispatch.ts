@@ -17,40 +17,25 @@ const DISPATCH_SHIM = fileURLToPath(
 /*
  * The bound on a nested background dispatch, and the recording behind it.
  *
- * An arm invoked without the narration its fixture states dispatched a real
- * `claude --bg` session against the machine's own process table, and nothing in
- * the harness noticed. The write and escape watches in `watch.ts` read the
- * sandbox and four scratch directories, and a dispatched session writes into
- * none of them, so the escape watch reported clean throughout and was right to.
- * The run spent real cost until a person found it, and `SIGTERM` alone did not
- * end it.
+ * A dispatched `claude --bg` session writes into neither the sandbox nor the
+ * scratch directories the watches in `watch.ts` read, so the escape watch
+ * cannot see one, and `SIGTERM` alone does not end it.
  *
  * The three mechanisms sit here rather than in `run.ts`, the only caller, so
- * each is reachable from a test that never launches a session: `dispatch.test.ts`
- * drives the shim against a stub binary and the reap against a `sleep`, where
- * proving either through the runner would mean spawning the thing the bound
- * exists to prevent.
+ * `dispatch.test.ts` can drive the shim against a stub binary and the reap
+ * against a `sleep` without spawning the thing the bound exists to prevent.
  */
 
 /**
  * The prevention. Writes a `claude` that refuses a background dispatch by flag
- * name and delegates everything else, for the runner to place first on the PATH
- * of the session it spawns. It stays a bash file, since it stands in for a
- * binary any shell in the session may exec. The refusal lives in
- * `dispatch-shim.sh`, so the shell gate lints it, and the `claude` written here
- * is a two-line wrapper that runs it with the real binary as its first argument.
+ * name and delegates everything else, placed first on the session's PATH. The
+ * refusal lives in `dispatch-shim.sh`, so the shell gate lints it, and the
+ * wrapper written here runs it with the real binary as its first argument.
  *
- * The real binary is baked into the wrapper rather than passed through the
- * environment. An env var carrying it would sit in the spawned session's own
- * environment, which hands any arm the exact string that walks around the shim.
- *
- * It names itself in its refusal. No arm shells to `claude` today, and one
- * written tomorrow would meet this and read it as the harness being broken
- * unless the text says which layer refused and why.
- *
- * It is not the whole bound. A dispatch reaching the binary by an absolute path
- * never resolves through PATH at all, which is what `reapProcessGroup`
- * backstops.
+ * The real binary is baked into the wrapper, since an env var carrying it would
+ * hand any arm the exact string that walks around the shim. The refusal names
+ * its layer, so an arm meeting it does not read it as the harness broken. A
+ * dispatch by absolute path skips PATH, which `reapProcessGroup` backstops.
  */
 export function installDispatchShim(dir: string, real: string): void {
   const wrapper = [
@@ -114,23 +99,15 @@ export type ReapState =
 
 /**
  * The backstop. Signals a process group the runner created, escalating rather
- * than sending one signal and reporting success, since the dispatch that
- * produced this bound took two signals to reap.
+ * than sending one signal and reporting success. Returns its outcome and never
+ * throws, since a survivor is reported rather than abandoning the verdict.
  *
- * Returns its outcome and never throws. A survivor is something to report
- * rather than a reason to abandon the verdict the run already took.
+ * It refuses this process's own group, so the property travels with the
+ * function rather than living in one caller, since getting the argument wrong
+ * costs the operator's own shell. Synchronous, so a signal handler can run it.
  *
- * The group has to be one the run created, and the refusal below is what makes
- * that property travel with the function rather than living in one caller. The
- * runner reports `inherited` when the session failed to lead a group of its
- * own, which is a diagnosis; this is the floor under it, and under every caller
- * after it, because the cost of getting the argument wrong is the operator's
- * own shell.
- *
- * Synchronous, so a signal handler can run it before the process exits.
- *
- * What it cannot reach is a dispatch that called `setsid` on its way out, which
- * leaves the group before this reads it. That is the half the shim covers.
+ * It cannot reach a dispatch that called `setsid` on its way out, which leaves
+ * the group before this reads it. That is the half the shim covers.
  */
 export function reapProcessGroup(pgid: number): ReapState {
   if (String(pgid) === processGroupOf(process.pid)) return 'refused-own-group'

@@ -613,11 +613,8 @@ async function runEvidence(
   let carriedPreview: string | undefined
   let carriedChecklist: string | undefined
   let carriedLocal: string | undefined
-  // An unread thread refuses rather than rendering, since a body built
-  // without it knows neither the comment to edit nor the preview address
-  // to carry, and posting it would duplicate the comment and drop the link.
-  // It refuses ahead of no-evidence too, so that record never reports an
-  // absent field it did not read.
+  // An unread thread refuses, ahead of no-evidence too, since a body built
+  // without it knows neither the comment to edit nor the preview to carry.
   const comments = await listComments(root, String(identity.number))
   if (comments === undefined) {
     return refuseWith(
@@ -703,15 +700,8 @@ async function runEvidence(
     return refuseWith('no-base', EVIDENCE_REFUSALS['no-base'], emitJson, root)
   }
 
-  // A checklist opens a comment on its own, so it always lands in the marked
-  // comment a later call edits. A passed reel opens one too, since it is
-  // evidence a branch filmed rather than a server it happens to run. A local
-  // address rides on a checklist or a hosted preview and never opens one
-  // alone, so a docs-only branch with a server up posts nothing. An uncaptured
-  // painted path opens one too, so the gap the lift refuses on shows on the
-  // thread.
-  // A dropped checklist still opens a render, so the marked comment holding
-  // it is edited without the block rather than left showing it.
+  // Evidence, a preview, a passed reel, a checklist supplied or posted, or an
+  // uncaptured painted path opens a comment, and a local address alone never does.
   const hasChecklist =
     suppliedChecklist !== undefined || postedChecklist !== undefined
   const hasUncaptured = uncaptured !== undefined && uncaptured.length > 0
@@ -753,9 +743,8 @@ async function runEvidence(
   }
 
   const preview = opts.preview ?? (isUnserved ? undefined : carriedPreview)
-  // A carried local line names no head and reads as live, so a passed skip
-  // drops it the way a passed address replaces it. A carried reel names the
-  // head it was filmed at, so it stays beside a passed skip.
+  // A carried local line reads as live at any head, so a passed skip drops it.
+  // A carried reel names its head, so it stays beside a passed skip.
   const local =
     opts.local ?? (opts.localSkip === undefined ? carriedLocal : undefined)
   const reel = nextEvidenceReel(opts.reel, identity.head, comments)
@@ -786,9 +775,8 @@ async function runEvidence(
 
   const caseCount = states.reduce((n, s) => n + s.items.length, 0)
 
-  // A render with no cases cannot tell a removal from a short read, so it
-  // never replaces a comment that carries some. The record keeps the comment
-  // id and the carried fields so the caller can still edit by hand.
+  // A render with no cases cannot tell a removal from a short read, so it never
+  // replaces a comment carrying some. The record keeps what a hand edit needs.
   if (caseCount === 0 && existingCases > 0) {
     logStep('Refused')
     logWarn(EVIDENCE_REFUSALS['would-empty'])
@@ -808,8 +796,7 @@ async function runEvidence(
     return 1
   }
 
-  // A UI pass line stamped at an earlier head describes a tree that is gone,
-  // so a render at a new head puts it back to unchecked. A line already
+  // A UI pass line stamped at an earlier head is put back to unchecked. One
   // naming this head is left alone, since each body edit reruns the label gate.
   const priorBody = identity.body ?? ''
   const stampedHead = readUiPassHead(priorBody)

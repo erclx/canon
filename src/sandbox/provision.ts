@@ -452,9 +452,8 @@ async function provisionScenario(
   configureCredentials(sandbox, env)
   setupAssets(root, sandbox, env)
 
-  // A scenario that execs a verb as its last step hands the run to that verb,
-  // whose own frame is the last one written, so nothing follows it here. An
-  // in-process arm writes its exports straight into `env`.
+  // A scenario that execs a verb last hands the run to that verb, whose frame
+  // is the last written. An in-process arm writes its exports into `env`.
   const staged = await stageScenarioInProcess(declared.definition, {
     root,
     dir: sandbox,

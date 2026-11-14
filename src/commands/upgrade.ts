@@ -98,10 +98,8 @@ async function runUpgrade(opts: UpgradeOptions): Promise<number> {
     )
   }
 
-  // A manifest that did not parse, or carried no `name`, would otherwise reach
-  // `installCommand` and produce a global install of whatever sits under that
-  // placeholder on the registry. The prompt below defaults to yes headlessly,
-  // so nothing downstream would stop it.
+  // A manifest with no `name` would reach `installCommand` and install whatever
+  // the placeholder names, and the prompt defaults to yes headlessly.
   if (installed.name === undefined) {
     return refuse(
       opts,
@@ -191,9 +189,8 @@ async function applyUpgrade(
 
   logStep('Upgrading')
   const [bin, ...args] = command
-  // The manager's own progress goes to stderr with the rest of the UI, leaving
-  // stdout carrying nothing but the record. Inheriting all three streams would
-  // put npm's output ahead of the JSON and break every wrapper parsing it.
+  // The manager's progress goes to stderr, since inheriting stdout would put
+  // its output ahead of the JSON record and break every wrapper parsing it.
   const result = await execa(bin, args, {
     reject: false,
     stdin: 'inherit',

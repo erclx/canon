@@ -28,20 +28,13 @@ import type {
  * Walks a page through a caller's interaction sequence and measures each state
  * it reaches. Every browser reference the driver adds lives here, and
  * `src/commands/driver.ts` reaches it through a dynamic import so no other
- * command resolves the engine at startup.
+ * command resolves the engine at startup. Like `@/inventory/walk` and
+ * `@/capture/render`, it ships, and it reaches nothing in `@/capture/`, so the
+ * two surfaces move independently.
  *
- * Like `@/inventory/walk` and `@/capture/render`, this module
- * ships. A command whose whole purpose is measuring someone else's page cannot
- * stay toolkit-only, and nothing here reaches into `@/capture/`, so the two
- * surfaces move independently.
- *
- * What separates it from `canon capture` is the axis it adds. A render answers
- * about a page as it loads, and every defect that exists only after a menu
- * opens, an answer is chosen, or the page scrolls is invisible to one. Probes
- * therefore run after a step rather than on arrival, and a run reaches the load
- * state by opening with a `wait` step of its own. That matters most where no
- * capture runs against the page, since this command is then the only thing
- * measuring it at all.
+ * A render answers about a page as it loads, so a defect that exists only after
+ * a menu opens, an answer is chosen, or the page scrolls is invisible to one.
+ * Probes run after a step, and a run reaches the load state with a `wait` step.
  */
 
 /** Each probe keyed by the name a caller writes in the run. */
@@ -149,9 +142,8 @@ export async function drive(options: DriveOptions): Promise<DriverResult> {
       error,
     )
   } finally {
-    // Dropped rather than propagated, because a close that fails beside a drive
-    // that already failed would replace the refusal the caller is about to
-    // receive with a reason about teardown.
+    // Dropped, since a close failing beside a drive that already failed would
+    // replace the caller's refusal with a reason about teardown.
     await browser.close().catch(() => undefined)
   }
 
