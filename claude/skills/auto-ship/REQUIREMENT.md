@@ -22,7 +22,7 @@ A pull request opened ready stays mergeable through its CI run, and a draft mark
 ## Must not
 
 - Expand past the plan, refactor a neighbor, or touch a file outside it without reason
-- Loop on a failed verify or auto-fix a failing check, since a green pull request reached that way hides what broke
+- Loop on a failed verify, retry or idle on a hung one, or auto-fix a failing check, since a green pull request reached that way hides what broke and a hang is the controller's to narrow
 - Restate the ship sequence, or skip `git-ship`'s own verify for repeating this chain's
 - Stop the chain or rewrite a commit over a test-order finding
 - Run on a detached HEAD, a missing plan, or uncommitted changes unrelated to the plan
