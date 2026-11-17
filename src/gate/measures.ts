@@ -19,7 +19,7 @@ import { familyKeys } from '@/claude/skills-families'
 import { measureDesignProse } from '@/design/budget'
 import { DESIGN_DOCUMENT } from '@/design/regen'
 import { listRepositoryFiles } from '@/git/files'
-import { ceilingFindings } from '@/markdown/ceiling'
+import { ceilingFindings, isChangelog } from '@/markdown/ceiling'
 import { resolveMarkdown } from '@/markdown/files'
 import { CHECKPOINTS } from '@/markdown/structure'
 import {
@@ -646,7 +646,23 @@ export const recordIdempotence: Measure = async (ctx) => {
  * stays silent and a failing one is re-run for its frame.
  */
 export const markdownBans: Measure = async (ctx) => {
-  const { exitCode } = await ctx.cli(['markdown', 'audit', '--json'])
+  const scope = await resolveMarkdown(ctx.root, [])
+  if (scope.kind === 'unavailable') {
+    return {
+      emissions: [],
+      unmeasured: 'git could not list the tree, so no markdown was audited.',
+    }
+  }
+
+  // The release tool writes the changelog and would not keep a ban fixed.
+  const files = scope.files.filter((rel) => !isChangelog(rel))
+  if (files.length === 0) {
+    return {
+      emissions: [info('No markdown file to audit outside the changelog')],
+    }
+  }
+
+  const { exitCode } = await ctx.cli(['markdown', 'audit', '--json', ...files])
 
   if (exitCode === 0) {
     return {
@@ -672,7 +688,7 @@ export const markdownBans: Measure = async (ctx) => {
   }
 
   if (exitCode === 2) {
-    const frame = await ctx.cli(['markdown', 'audit'])
+    const frame = await ctx.cli(['markdown', 'audit', ...files])
     return {
       emissions: [output(frame.all)],
       failure:
