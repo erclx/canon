@@ -135,7 +135,7 @@ The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project tha
 ## Verify script
 
 - Expect `scripts/verify.json` to require `typecheck`, `lint`, `test:run`, and `build`, which base's `scripts/verify.ts` runs in its fixed order
-- That order is typecheck, lint, format, shell where the `shell` stack declares it, unit tests, build, markdown bans, the card exclusion check, then the head tag check
+- That order is typecheck, lint, format, shell where the `shell` stack declares it, unit tests, build, the canon checks stage, the card exclusion check, then the head tag check
 - Expect the card stage to run `scripts/check-card-exclusion.sh` whenever that file is installed, so a project with no card route runs one less stage with no override
 - Expect the head tag stage to run `scripts/check-head-meta.sh` the same way, whenever that file is installed
 

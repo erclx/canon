@@ -56,7 +56,7 @@ Installs each domain `canon init` runs, as the steps `runDomains` walks in `run.
 
 Spawns `src/cli.ts` as a real process against a temporary directory, so a case asserts what an in-process call cannot, being whether a verb is registered, how it exits, and whether `--json` parses off stdout alone.
 
-- A case drives `gate run` only inside a target fixture, as `src/commands/gate.test.ts` does, since a run in canon's checkout reaches the Tests stage and re-enters the suite that spawned it.
+- A case drives `gate run` in a target fixture, as `gate.test.ts` does, or kills it at the warning, as `checkout-mismatch.test.ts` does, since a canon run reaches Tests and re-enters the suite.
 - To add a case, write the fixture under a per-test `mkdtempSync`, then assert the file tree, exit code, and parsed record together. Take a count from the verb's catalog.
 - `runCli` points `HOME` and the state folder under the case's `cwd` and throws `ContainmentViolation` when a spawn writes into the real `stateDir()`
 - Run one test file as `bun --bun vitest run <path>`. Without `--bun` a module importing `bun` fails at collection, and bare `bun test` runs Bun's own runner, which lacks vitest's `expect` context.

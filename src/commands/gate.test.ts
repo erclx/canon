@@ -30,7 +30,7 @@ describe('canon gate run in a target', () => {
   })
 
   it(
-    'should check the working directory with the shared stages alone',
+    'should check the working directory with the shared stages alone, skipping context with no folder',
     async () => {
       const result = await execa(
         process.execPath,
@@ -62,28 +62,6 @@ describe('canon gate run in a target', () => {
         'comment-history',
         'markdown',
       ])
-    },
-    RUN_TIMEOUT_MS,
-  )
-
-  it(
-    'should skip the context stage in a target carrying no context folder',
-    async () => {
-      const result = await execa(
-        process.execPath,
-        [CLI, 'gate', 'run', '--all', '--json'],
-        {
-          cwd: target,
-          env: { ...gitEnv(), CI: 'false' },
-          extendEnv: false,
-          reject: false,
-          timeout: RUN_TIMEOUT_MS,
-        },
-      )
-      const record = JSON.parse(result.stdout) as {
-        stages: { id: string; status: string }[]
-      }
-
       expect(
         record.stages.find((stage) => stage.id === 'context-citations')?.status,
       ).toBe('skipped')

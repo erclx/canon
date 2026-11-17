@@ -34,7 +34,7 @@ The stack ships `tests/test_smoke.py` as a copy-once seed. `pytest` then collect
 
 ### Verify list
 
-`scripts/verify.json` requires Typecheck (`mypy`), Lint (`ruff check && ruff format --check`), and Tests (`pytest -v`) on top of base's runner. It stops naming `uv` when `uv` is not on PATH, and the markdown bans phase runs as it does everywhere.
+`scripts/verify.json` requires Typecheck (`mypy`), Lint (`ruff check && ruff format --check`), and Tests (`pytest -v`) on top of base's runner. It stops naming `uv` when `uv` is not on PATH, and the canon checks stage runs as it does everywhere.
 
 ## Hybrid project shape
 

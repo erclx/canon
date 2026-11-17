@@ -11,6 +11,7 @@ import {
   summarize,
 } from '@/gate/sequencer'
 import { stagesFor } from '@/gate/stages'
+import { checkoutMismatchWarning } from '@/roots/project'
 import {
   intro,
   logError,
@@ -90,6 +91,9 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
   // The project the gate is typed in, rather than the canon install running
   // it, so a target's verify runner gates the target.
   const root = process.cwd()
+  // The stage table and every measure load from this install, so a canon
+  // checkout other than the install still gates on the install's code.
+  const mismatch = checkoutMismatchWarning(root)
   const emitJson = opts.json ?? false
   const nested = opts.nested ?? false
   const run = commandRunner(root)
@@ -103,6 +107,7 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
     ? { scoped: false, files: [] }
     : await collectChangedFiles(run)
   if (!emitJson && changed.notice !== undefined) logWarn(changed.notice)
+  if (mismatch !== undefined) logWarn(mismatch)
 
   const ctx: GateContext = {
     root,

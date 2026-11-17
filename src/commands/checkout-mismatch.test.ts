@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -103,6 +103,36 @@ describe('checkout-mismatch warning at each directly wired verb', () => {
 
   it('should warn on canon sandbox check', () => {
     expectWarns(['sandbox', 'check', 'claude:docs'])
+  })
+
+  // A completed `canon gate run` would run the real tests stage and re-enter this
+  // file without bound, so the child is killed once the warning reaches stderr.
+  it('should warn on canon gate run before the stage sequence starts', async () => {
+    const child = spawn('bun', [CLI, 'gate', 'run'], {
+      cwd: decoy,
+      env: buildEnv(),
+    })
+
+    const sawMismatch = await new Promise<boolean>((resolveWait) => {
+      let stderr = ''
+      let settled = false
+      const finish = (result: boolean): void => {
+        if (settled) return
+        settled = true
+        clearTimeout(timer)
+        child.kill('SIGKILL')
+        resolveWait(result)
+      }
+      const timer = setTimeout(() => finish(false), 15000)
+      child.stderr.on('data', (chunk: Buffer) => {
+        stderr += chunk.toString()
+        if (stderr.includes(decoy)) finish(true)
+      })
+      child.on('exit', () => finish(stderr.includes(decoy)))
+      child.on('error', () => finish(false))
+    })
+
+    expect(sawMismatch).toBe(true)
   })
 })
 
