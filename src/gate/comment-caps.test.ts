@@ -70,23 +70,41 @@ describe('comment caps', () => {
       git('config', 'user.name', 'Test')
     })
 
-    it('should pass a touched in-body run of 2 lines', async () => {
-      commit('src/a.ts', inBody(2))
+    it('should pass a touched in-body run of 1 line', async () => {
+      commit('src/a.ts', inBody(1))
 
       const report = await commentBodyBlocks(context(['src/a.ts']))
 
       expect(report.failure).toBeUndefined()
     })
 
-    it('should fail a touched in-body run of 3 lines naming its place', async () => {
-      commit('src/a.ts', inBody(3))
+    it('should fail a touched in-body run of 2 lines naming its place', async () => {
+      commit('src/a.ts', inBody(2))
 
       const report = await commentBodyBlocks(context(['src/a.ts']))
 
       expect(report.failure).toBeDefined()
       expect(report.emissions.map((emission) => emission.text)).toEqual([
-        'src/a.ts:2 runs 3 comment lines inside a function body, past 2',
+        'src/a.ts:2 runs 2 comment text lines inside a function body, past 1',
       ])
+    })
+
+    it('should pass a touched in-body run whose other line is a directive', async () => {
+      commit(
+        'src/a.ts',
+        [
+          'function a() {',
+          '  // @ts-expect-error the fixture is untyped',
+          '  // the fixture arrives untyped',
+          '  return 1',
+          '}',
+          '',
+        ].join('\n'),
+      )
+
+      const report = await commentBodyBlocks(context(['src/a.ts']))
+
+      expect(report.failure).toBeUndefined()
     })
 
     it('should pass a head run of any length under the body cap', async () => {
@@ -97,22 +115,22 @@ describe('comment caps', () => {
       expect(report.failure).toBeUndefined()
     })
 
-    it('should pass a touched head run of 12 lines', async () => {
-      commit('src/a.ts', headRuns(1, 12))
+    it('should pass a touched head run of 3 text lines', async () => {
+      commit('src/a.ts', headRuns(1, 3))
 
       const report = await commentHeadBlocks(context(['src/a.ts']))
 
       expect(report.failure).toBeUndefined()
     })
 
-    it('should fail a touched head run of 13 lines naming its place', async () => {
-      commit('src/a.ts', headRuns(1, 13))
+    it('should fail a touched head run of 4 text lines naming its place', async () => {
+      commit('src/a.ts', headRuns(1, 4))
 
       const report = await commentHeadBlocks(context(['src/a.ts']))
 
       expect(report.failure).toBeDefined()
       expect(report.emissions.map((emission) => emission.text)).toEqual([
-        'src/a.ts:1 runs 13 comment lines outside a function body, past 12',
+        'src/a.ts:1 runs 4 comment text lines outside a function body, past 3',
       ])
     })
 
@@ -133,7 +151,7 @@ describe('comment caps', () => {
       expect(report.failure).toBeUndefined()
       expect(report.emissions[0]).toEqual({
         kind: 'warn',
-        text: 'src/a.ts:1 runs 77 comment lines outside a function body, past 12',
+        text: 'src/a.ts:1 runs 77 comment text lines outside a function body, past 3',
       })
     })
 
@@ -183,7 +201,7 @@ describe('comment caps', () => {
     })
 
     it('should fail a touched file through the gate stage', async () => {
-      commit('src/a.ts', headRuns(1, 13))
+      commit('src/a.ts', headRuns(1, 4))
       const stage = STAGES.find(
         (candidate) => candidate.id === 'comment-head-blocks',
       )

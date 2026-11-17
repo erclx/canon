@@ -4,7 +4,9 @@ import {
   BLOCK_LINE_CHECKPOINT,
   BODY_BLOCK_CAP,
   density,
-  HEAD_BLOCK_CAP,
+  FILE_SHARE_CAP,
+  FILE_SHARE_FLOOR,
+  HEAD_TEXT_CAP,
   HISTORY_PATTERNS,
   type Language,
   LANGUAGES,
@@ -58,9 +60,18 @@ export function register(program: Command): void {
         '        refused, which the record lists under unreadFiles',
         '',
         'Caps, which canon gate run fails on in a touched file and this report only lists:',
-        `  a head run past ${HEAD_BLOCK_CAP} lines, delimiters included`,
-        `  an in-body run past ${BODY_BLOCK_CAP} lines`,
+        `  a head run past ${HEAD_TEXT_CAP} text lines`,
+        `  an in-body run past ${BODY_BLOCK_CAP} text line`,
         '  a comment carrying a date, a commit hash, or an issue reference',
+        '',
+        'A text line is a comment line carrying more than a bare delimiter, such',
+        'as /**, */, *, //, #, or """, and no tool directive, such as biome-ignore,',
+        '@ts-expect-error, shellcheck, noqa, or a canon-allow- or canon-keep- marker.',
+        '',
+        `Share, which canon gate run reports and fails nothing on: a file of`,
+        `${FILE_SHARE_FLOOR} or more non-blank lines whose comment text passes ${FILE_SHARE_CAP * 100}% of them.`,
+        '',
+        'The scan reports and never fails on a finding.',
         '',
         'Exit codes:',
         '  0  the scan completed',
@@ -119,8 +130,7 @@ async function runScan(
     return 1
   }
 
-  // The rule roots sit at the project root, so a path argument reads them from
-  // the checkout holding it and keeps the scanned path for the file walk alone.
+  // A path argument reads the rules from the checkout holding it, not the path.
   const vocabulary = await loadVocabulary(await currentWorktreeRoot(root))
   const scanOptions = {
     languages,
@@ -138,6 +148,7 @@ async function runScan(
 
   reportLongBlocks(snapshot)
   reportCaps(snapshot)
+  reportFileShares(snapshot)
   reportVocabulary(vocabulary, snapshot)
   outro()
 
@@ -150,18 +161,20 @@ async function runScan(
             ? { source: vocabulary.source, terms: vocabulary.terms }
             : null,
         blockCheckpoint: BLOCK_LINE_CHECKPOINT,
-        headBlockCap: HEAD_BLOCK_CAP,
+        headTextCap: HEAD_TEXT_CAP,
         historyTerms: HISTORY_PATTERNS.map(({ term }) => term),
         bodyBlockCap: BODY_BLOCK_CAP,
+        fileShareCap: FILE_SHARE_CAP,
+        fileShareFloor: FILE_SHARE_FLOOR,
         snapshot: snapshot.map((count) => ({
           ...record(count),
           blocks: count.blocks,
           headBlocks: count.headBlocks,
           bodyBlocks: count.bodyBlocks,
+          fileShares: count.fileShares,
           unreadFiles: count.unreadFiles,
         })),
-        // A trend point keeps the summary keys alone, so a long range does
-        // not repeat every block list once per revision.
+        // Summary keys alone, so a long range repeats no block list per revision.
         trend: points.map((point) => ({
           rev: point.rev,
           date: point.date,
@@ -237,8 +250,7 @@ function reportTrend(
       })
       .filter((row): row is string => row !== undefined)
 
-    // A language the tree does not carry would otherwise print a column of
-    // zeros, which reads as a measured decline rather than an absence.
+    // An absent language would print zeros, which read as a measured decline.
     const measured = points.some((point) =>
       point.languages.some(
         (entry) => entry.language === language && entry.files > 0,
@@ -252,11 +264,8 @@ function reportTrend(
 }
 
 /**
- * Lists every comment run past the checkpoint, longest first, with where it
- * sits.
- *
- * A long run is a prompt to read it against the code beside it, and some
- * belong where they are, so the step names the length and asks nothing of it.
+ * Lists every run past the checkpoint, longest first, as a prompt to read it
+ * against its code, since some belong where they are.
  */
 function reportLongBlocks(snapshot: readonly LanguageCount[]): void {
   logStep('Long comment blocks')
@@ -295,35 +304,68 @@ function reportCaps(snapshot: readonly LanguageCount[]): void {
   const body = snapshot.flatMap((count) => count.bodyBlocks)
 
   if (head.length === 0) {
-    logInfo(`No head run past ${HEAD_BLOCK_CAP} lines.`)
+    logInfo(`No head run past ${HEAD_TEXT_CAP} text lines.`)
   } else {
-    logWarn(`${head.length} head runs past ${HEAD_BLOCK_CAP} lines`)
+    logWarn(`${head.length} head runs past ${HEAD_TEXT_CAP} text lines`)
     pipeOutput(
       head
-        .map((block) => `${block.file}:${block.line}  ${block.lines} lines`)
+        .map(
+          (block) =>
+            `${block.file}:${block.line}  ${block.textLines} text lines`,
+        )
         .join('\n'),
     )
   }
 
   if (body.length === 0) {
-    logInfo(`No in-body run past ${BODY_BLOCK_CAP} lines.`)
+    logInfo(`No in-body run past ${BODY_BLOCK_CAP} text line.`)
   } else {
-    logWarn(`${body.length} in-body runs past ${BODY_BLOCK_CAP} lines`)
+    logWarn(`${body.length} in-body runs past ${BODY_BLOCK_CAP} text line`)
     pipeOutput(
       body
-        .map((block) => `${block.file}:${block.line}  ${block.lines} lines`)
+        .map(
+          (block) =>
+            `${block.file}:${block.line}  ${block.textLines} text lines`,
+        )
         .join('\n'),
     )
   }
 }
 
+/** Lists every file past the share cap, densest first. */
+function reportFileShares(snapshot: readonly LanguageCount[]): void {
+  logStep('Comment share')
+
+  const shares = snapshot
+    .flatMap((count) => count.fileShares)
+    .map((share) => ({
+      ...share,
+      share: share.textLines / share.nonBlankLines,
+    }))
+    .sort((a, b) => b.share - a.share || a.file.localeCompare(b.file))
+  const cap = `${FILE_SHARE_CAP * 100}%`
+
+  if (shares.length === 0) {
+    logInfo(
+      `No file of ${FILE_SHARE_FLOOR} lines or more past ${cap} comment text.`,
+    )
+    return
+  }
+
+  logWarn(`${shares.length} files past ${cap} comment text`)
+  pipeOutput(
+    shares
+      .map(
+        (share) =>
+          `${share.file}  ${(share.share * 100).toFixed(1)}%  ${share.textLines} of ${share.nonBlankLines} lines`,
+      )
+      .join('\n'),
+  )
+}
+
 /**
- * Reports the vocabulary as skipped when no rule publishes one, and the history
- * patterns either way, since they live in code.
- *
- * Zero hits against an empty vocabulary is indistinguishable from a clean
- * codebase in the output, and the two mean opposite things, so the absent case
- * says so rather than printing a count nobody looked for.
+ * Says the vocabulary was skipped when no rule publishes one, since zero hits
+ * against an empty vocabulary would read as a clean codebase.
  */
 function reportVocabulary(
   vocabulary: Vocabulary,
