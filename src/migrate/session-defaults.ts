@@ -168,11 +168,13 @@ export function planSessionDefaults(
     ...appendTo(['permissions', 'deny'], missing),
     ...appendTo(['permissions', 'allow'], allowMissing),
     ...(memoryAbsent
-      ? [{
+      ? [
+          {
             kind: 'set',
             path: ['autoMemoryEnabled'],
             value: false,
-          } satisfies SettingsEdit]
+          } satisfies SettingsEdit,
+        ]
       : []),
     ...wiring.events.flatMap((event) => event.edits),
   ]
