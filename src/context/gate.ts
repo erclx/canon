@@ -68,13 +68,9 @@ export function hasDrift(drift: readonly FolderDrift[]): boolean {
  * An unresolved citation is a broken pointer and gates unconditionally, and so
  * does a requirements record past its own word cap: the record states its rule
  * for itself, which makes it a fact rather than a threshold a reader weighs.
- * The findings `--gate` adds are the ones answerable from the file itself: a
- * required section it does not declare, an H2 outside the closed set, a shape
- * break in a gated folder, an index disagreeing with its folder, a code
- * folder no entry names or two entries claim, and a fault in the gate keys.
- * Entry length is a judgment unless the project set `gate-length`, and depth,
- * bullet, table, provenance, and the record's claim coverage stay out under
- * both modes.
+ * `--gate` adds the findings answerable from the file itself, each named on
+ * `GateInput`. Entry length is a judgment unless the project set
+ * `gate-length`, and depth, bullet, table, and provenance never gate.
  */
 export function isGating({
   unresolvedCitations,
