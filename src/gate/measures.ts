@@ -19,7 +19,7 @@ import { familyKeys } from '@/claude/skills-families'
 import { measureDesignProse } from '@/design/budget'
 import { DESIGN_DOCUMENT } from '@/design/regen'
 import { listRepositoryFiles } from '@/git/files'
-import { ceilingFindings } from '@/markdown/ceiling'
+import { ceilingFindings, isChangelog } from '@/markdown/ceiling'
 import { resolveMarkdown } from '@/markdown/files'
 import { CHECKPOINTS } from '@/markdown/structure'
 import {
@@ -48,10 +48,8 @@ export interface CommandResult {
    */
   readonly all: string
   /**
-   * Set when the binary could not be started at all, which is a different state
-   * from a binary that ran and refused. An absent tool on a contributor's
-   * machine is somebody mid-setup, and an absent tool under CI is a broken
-   * workflow step, so the two have to stay distinguishable.
+   * Set when the binary could not start at all, which is distinct from one
+   * that ran and refused: mid-setup locally, a broken step under CI.
    */
   readonly spawnError?: string
 }
@@ -76,10 +74,8 @@ export interface MeasureContext {
   /** Any binary, run from the project root. */
   readonly run: RunCommand
   /**
-   * This checkout's own CLI rather than whatever `canon` resolves to on PATH. A
-   * globally installed binary resolves to the main checkout no matter which
-   * worktree is running, so a gate reading through it would measure the wrong
-   * tree and report a pass over a branch it never opened.
+   * This checkout's own CLI, since a global `canon` resolves to the main
+   * checkout and would measure a tree other than the branch.
    */
   readonly cli: RunCommand
 }
@@ -95,12 +91,8 @@ export interface MeasureReport {
   /** The stage read its input and found a fact, so the run stops here. */
   readonly failure?: string
   /**
-   * The stage could not read its input at all, so it has no verdict to give.
-   *
-   * Distinct from a pass with nothing to report, which is what six places in
-   * the script this replaces used to print. A skip rendered as a passing line
-   * reports the pass the stage exists to withhold, so the sequencer renders
-   * this as a warning on a contributor's machine and refuses on it under CI.
+   * The stage could not read its input, so it has no verdict. The sequencer
+   * warns on it locally and refuses under CI, never rendering it as a pass.
    */
   readonly unmeasured?: string
 }
@@ -119,25 +111,15 @@ const output = (text: string): Emission => ({ kind: 'output', text })
 export const SANDBOX_UNDECLARED_CEILING = 47
 
 /**
- * Skills the sandbox skill census reports `asserted`, taken from `canon
- * sandbox coverage --skills` against a clean tree. A dropped pairing lowers
- * this directly, unlike the ceiling above, which a rename can starve without
- * moving: fourteen arms drifted off their skill's name in one branch and the
- * scenario-level ceiling stayed green throughout, since it counts scenarios
- * declaring an expectation rather than skills a scenario reaches. Lowering
- * this floor is a deliberate edit that says which skill lost its arm and why.
+ * Skills `canon sandbox coverage --skills` reports `asserted`. A dropped
+ * pairing lowers it where the scenario ceiling stays green, so lowering this
+ * floor is a deliberate edit naming the skill that lost its arm.
  */
 export const SANDBOX_ASSERTED_FLOOR = 26
 
 /**
- * Where the retained counts the audit stage compares each run against are
- * read, relative to `root`.
- *
- * A function rather than a spelled constant, since the read resolves at
- * either surface root and a constant naming one of them would be believed of
- * a project that has moved. `canon audits run` owns writing it, at
- * `canon/config/baseline.json` now that the write has flipped, falling back to
- * `.claude/canon/baseline.json` for a target that has not moved.
+ * Where the audit baseline is read relative to `root`, at either surface root,
+ * since a constant naming one would be believed of a project that moved.
  */
 export function auditsBaselineRel(root: string): string {
   return relative(root, surfaceDir(root, 'canon', 'baseline.json'))
@@ -152,14 +134,9 @@ function parseJson(payload: string): unknown {
 }
 
 /**
- * A rule no stack reaches arrives at a project only through `canon gov
- * detect`, so each one needs a `governance/detect.toml` entry or nothing ever
- * proposes it. A key naming a retired rule fails too, since it would hide from
- * the rename sweep that keys the file by basename.
- *
- * The catalog is parsed here rather than piped through `bun --eval`, whose
- * interpreter exits 0 when its script throws while stdin is a pipe, so a
- * payload that is not JSON would read as every rule reached.
+ * A rule no stack reaches needs a `governance/detect.toml` entry, and a key
+ * naming a retired rule fails too. The catalog is parsed here, since
+ * `bun --eval` exits 0 on a throw while stdin is a pipe.
  */
 export const unreferencedRules: Measure = async (ctx) => {
   const { exitCode, stdout } = await ctx.cli(['gov', 'list', '--json'])
@@ -237,13 +214,8 @@ export const unreferencedRules: Measure = async (ctx) => {
 }
 
 /**
- * The files the sweep would rewrite, each with its own count, taken from the
- * `paths` array the record carries beside the total.
- *
- * Every field is tested rather than trusted. The record reaches here as parsed
- * JSON rather than as a type the compiler checked, so a shape that moved
- * upstream drops the entries it can no longer read and leaves the count that
- * was read from a field of its own standing.
+ * The files the sweep would rewrite, from the record's `paths`. Each field is
+ * tested, so a shape that moved upstream drops entries and keeps the count.
  */
 function citedPaths(record: { paths?: unknown } | undefined): string[] {
   if (!Array.isArray(record?.paths)) return []
@@ -258,12 +230,8 @@ function citedPaths(record: { paths?: unknown } | undefined): string[] {
 }
 
 /**
- * The requirements record against the word cap it states for itself.
- *
- * Read in-process rather than through `context audit`, whose one gating stage
- * here runs `--citations-only` and never opens the record. A project carrying
- * no record, or a record stating no cap, passes, since the rule belongs to the
- * record rather than to the toolkit.
+ * The requirements record against the word cap it states, read in-process
+ * since `context audit` there never opens it. No record or no cap passes.
  */
 export const canonicalRecords: Measure = async (ctx) => {
   const requirements = await measureRequirements(ctx.root)
@@ -339,13 +307,8 @@ export const designProse: Measure = async (ctx) => {
 }
 
 /**
- * Every skill body and reference against the no-dated-provenance rule, across
- * both corpora `auditSkills` reads.
- *
- * Read in-process rather than through `claude skills audit`, whose exit code
- * stays a missing requirement only, so a target running the verb is told about
- * a date without failing on one. This repository holds the corpus at zero,
- * which is what lets the same finding fail here.
+ * Every skill body and reference against the no-dated-provenance rule. The
+ * verb only reports a date, so this holds the corpus at zero in-process.
  */
 export const skillProvenance: Measure = async (ctx) => {
   const report = await auditSkills(ctx.root)
@@ -375,13 +338,8 @@ export const skillProvenance: Measure = async (ctx) => {
 }
 
 /**
- * Every listed practice skill against the closing sections, and every skill on
- * the wider ledger list against a ledger that cites something, both of which
- * `claude/skills/create-skill/references/skill-practice.md` requires.
- *
- * Read in-process for the reason `skillProvenance` is, so the verb keeps its
- * missing-requirement-only exit. The list names shipped folders alone, so a
- * tree without `claude/skills/` reports unmeasured rather than a vacuous pass.
+ * Listed practice skills against the closing sections and a ledger citing a
+ * source. A tree without `claude/skills/` reports unmeasured, not a pass.
  */
 export const skillPracticeShape: Measure = async (ctx) => {
   const report = await auditSkills(ctx.root)
@@ -413,12 +371,8 @@ export const skillPracticeShape: Measure = async (ctx) => {
 }
 
 /**
- * Every shipped skill against the family vocabulary, since the landing page
- * groups the skill map by the field and a skill without one has no group.
- *
- * Read in-process for the reason `skillProvenance` is. Only the shipped corpus
- * takes a family, so a tree without `claude/skills/` reports unmeasured rather
- * than a vacuous pass.
+ * Every shipped skill against the family vocabulary the landing page groups
+ * by. A tree without `claude/skills/` reports unmeasured, not a pass.
  */
 export const skillFamily: Measure = async (ctx) => {
   const report = await auditSkills(ctx.root)
@@ -449,15 +403,9 @@ export const skillFamily: Measure = async (ctx) => {
 }
 
 /**
- * Every tracked markdown document against the whole-document ceiling.
- *
- * A document past the ceiling fails the stage. The failure names every one with
- * its height rather than the first, so a contributor sees the whole set in one
- * pass, and an exempt document is counted and never named.
- *
- * Read in-process rather than through `canon markdown audit`, whose exit code
- * stays bans and dead links only. The plan and groundwork skills run that audit
- * on a gitignored record, and a gating length there would fail every long plan.
+ * Every tracked document against the whole-document ceiling, naming each one
+ * past it. In-process, since a gating length in `canon markdown audit` would
+ * fail every long plan the planning skills audit.
  */
 export const documentCeiling: Measure = async (ctx) => {
   const scope = await resolveMarkdown(ctx.root, [])
@@ -508,15 +456,9 @@ function isPluginHooksManifest(path: string): boolean {
 }
 
 /**
- * Whether a path's stem, its basename up to the first `.`, repeats its
- * immediate parent folder, either whole or as a `<folder>-` prefix. Exact
- * rather than singular-aware, so `skills/skill.md` passes, since a false
- * positive teaches a contributor to route around the stage.
- *
- * Exempt are `canon/context/context-model.md`, the domain's own name, a replay
- * snapshot, which copies a consumer's paths verbatim, `canon/design/assets/`,
- * where Frameboard's sync names each asset for its project, and
- * `hooks/hooks.json` at a plugin root, which Claude Code loads unnamed.
+ * Whether a path's stem repeats its parent folder, whole or as a `<folder>-`
+ * prefix. Exempt are the context model, replay snapshots, Frameboard's design
+ * assets, and a plugin's `hooks/hooks.json`.
  */
 export function isFolderEchoedName(path: string): boolean {
   if (path === 'canon/context/context-model.md') return false
@@ -532,12 +474,8 @@ export function isFolderEchoedName(path: string): boolean {
 }
 
 /**
- * Every tracked file whose name repeats the folder it sits in, which says the
- * folder's name twice in every path that cites it.
- *
- * Reads paths only, so it runs over the whole tree rather than the markdown
- * corpus. It stays out of `canon markdown audit`, which runs inside every
- * target, where a folder-named file may be a convention the target chose.
+ * Every tracked file whose name repeats its folder. It stays out of
+ * `canon markdown audit`, since a target may choose that convention.
  */
 export const folderEchoedNames: Measure = async (ctx) => {
   const files = await listRepositoryFiles(ctx.root)
@@ -567,16 +505,8 @@ export const folderEchoedNames: Measure = async (ctx) => {
 }
 
 /**
- * A second run of the records move should rewrite nothing.
- *
- * `moves` empty means every record folder already sits at `.canon/`, so a
- * citation the sweep would still rewrite is one the move left stale. Where
- * `moves` is nonempty the tree has not migrated, and a nonzero rewrite count is
- * the verb describing its own first pass, so it is reported and never failed.
- *
- * Exit `0` is a tree with nothing to do and exit `2` is a plan drawn without
- * `--write`, so both carry a record. Every other exit is a refusal that
- * planned nothing, which is unmeasured.
+ * A second run of the records move should rewrite nothing once `moves` is
+ * empty. Exit `0` and `2` carry a record, and any other exit is unmeasured.
  */
 export const recordIdempotence: Measure = async (ctx) => {
   const run = await ctx.cli(['migrate', 'records', '--json'])
@@ -620,8 +550,7 @@ export const recordIdempotence: Measure = async (ctx) => {
 
   if (rewritten + dropped > 0) {
     return {
-      // Listing the paths turns the count into a remedy. A malformed `paths` costs
-      // the list and not the finding, since the count was read from its own field.
+      // A malformed `paths` costs the list, never the counted finding.
       emissions: citedPaths(record).map((path) => warn(path)),
       failure: `The records are at .canon/ and ${rewritten + dropped} citation(s) still name the old root, so a second run of canon migrate records would rewrite or drop them. Repoint each one, or mark it canon-keep-record-root where the sentence has to keep the old spelling.`,
     }
@@ -635,18 +564,27 @@ export const recordIdempotence: Measure = async (ctx) => {
 }
 
 /**
- * A banned character, a dead link, and a density finding on a gated path are
- * each a fact rather than a threshold, so any one fails the push while depth
- * weight and cadence stay advisory. The audit decides which density findings
- * gate, from `src/markdown/scope.ts`, so this stage reads its exit alone.
- *
- * The whole corpus is measured rather than the changed files, because a ban
- * added to a standard applies to files the push that adds it never edited.
- * `--json` sends the record to stdout and the frame to stderr, so a passing run
- * stays silent and a failing one is re-run for its frame.
+ * A ban, a dead link, and a gated density finding each fail the push, over the
+ * whole corpus but every changelog, since a new ban reaches unedited files.
  */
 export const markdownBans: Measure = async (ctx) => {
-  const { exitCode } = await ctx.cli(['markdown', 'audit', '--json'])
+  const scope = await resolveMarkdown(ctx.root, [])
+  if (scope.kind === 'unavailable') {
+    return {
+      emissions: [],
+      unmeasured: 'git could not list the tree, so no markdown was audited.',
+    }
+  }
+
+  // The release tool writes the changelog and would not keep a ban fixed.
+  const files = scope.files.filter((rel) => !isChangelog(rel))
+  if (files.length === 0) {
+    return {
+      emissions: [info('No markdown file to audit outside the changelog')],
+    }
+  }
+
+  const { exitCode } = await ctx.cli(['markdown', 'audit', '--json', ...files])
 
   if (exitCode === 0) {
     return {
@@ -672,7 +610,7 @@ export const markdownBans: Measure = async (ctx) => {
   }
 
   if (exitCode === 2) {
-    const frame = await ctx.cli(['markdown', 'audit'])
+    const frame = await ctx.cli(['markdown', 'audit', ...files])
     return {
       emissions: [output(frame.all)],
       failure:
@@ -687,14 +625,8 @@ export const markdownBans: Measure = async (ctx) => {
 }
 
 /**
- * The markdown stage audits this repository. The seed tree ships into every
- * scaffolded project, so a seed breaking the standard it seeds propagates, and
- * no rule path reaches the tree to report it.
- *
- * `--gate` fails on a missing required section and index drift, beside
- * citations, and leaves the thresholds advisory. The roots come from
- * `seedRoots`, which the Seed independence measure reads too, so a root seeded
- * later is covered with no edit here and the two stages agree on the roots.
+ * The seed tree against the standard it seeds, under `--gate`, since a broken
+ * seed propagates into every scaffolded project. Roots come from `seedRoots`.
  */
 export const seedStandards: Measure = async (ctx) => {
   const roots = seedRoots(ctx.root)
@@ -718,8 +650,7 @@ export const seedStandards: Measure = async (ctx) => {
       '--json',
     ])
 
-    // Exit 2 is a seed breaking the standard it seeds. Exit 1 is the audit
-    // refusing, as a seed root with no audited folder does, and is no violation.
+    // Exit 1 is the audit refusing, as a root with no audited folder does.
     if (run.exitCode === 1) {
       emissions.push(
         warn(
@@ -763,12 +694,8 @@ export const seedStandards: Measure = async (ctx) => {
 }
 
 /**
- * Entries the audit actually measured, summed across the folders it resolved.
- *
- * A root can resolve a folder and measure nothing in it, which is a passing
- * gate over an empty set. The caller states this per root rather than reporting
- * one verdict for every root, or a tree nobody measured reads as a tree that
- * passed.
+ * Entries the audit measured across the folders it resolved, so a root that
+ * measured nothing is stated rather than read as a pass.
  */
 export function seedEntryCount(payload: string): number {
   const record = parseJson(payload) as
@@ -783,14 +710,8 @@ export function seedEntryCount(payload: string): number {
 }
 
 /**
- * Every file in the gated corpus, walked from `ctx.root` rather than from the
- * changed set, since a walk keyed on the diff would pass a branch that moved a
- * reference between two files without changing it. The stage's `scope` already
- * decides whether the run happens at all.
- *
- * `dot` is what reaches the seeds. Every seeded `.claude/` tree, `.github/`
- * workflow, and `.husky/` hook sits behind a dotted segment, so the default
- * scan would return none of the files a scaffolded project receives.
+ * Every file in the gated corpus, walked whole so a reference moved between
+ * files is read. `dot` reaches the seeded `.claude/`, `.github/`, and `.husky/`.
  */
 function shippedCorpusFiles(root: string): string[] {
   const files: string[] = []
@@ -837,15 +758,9 @@ function describeShippedReference(reference: ShippedReference): string {
 }
 
 /**
- * A pull request number, a commit sha, a docs-path citation, a phase label,
- * or, from a shipped skill body, an installed rule path or a stack's
- * `configs/` or `seeds/` source path, that a reader in a target cannot
- * resolve, over the corpora that reach one.
- *
- * It gates rather than reports, since a finding nobody gates on goes unread. It
- * is a prose pattern rather than a resolution, so a reachable citation written
- * bare fails, and resolving would need a network read inside `bun run check`.
- * The whole set is emitted first, since a stage halts on its first failure.
+ * A citation a reader in a target cannot resolve, over the corpora that reach
+ * one. It matches prose rather than resolving, so a reachable citation written
+ * bare fails, and it emits the whole set before the stage halts.
  */
 export const shippedReferences: Measure = async (ctx) => {
   const files = shippedCorpusFiles(ctx.root)
@@ -887,14 +802,8 @@ export const shippedReferences: Measure = async (ctx) => {
 const RAW_FIELD_FILE_REFERENCE = /(?:^|\s)(?:-f|--raw-field)[ =]\S+=@/
 
 /**
- * A `gh api` raw-string flag carrying a file reference, over the shipped
- * corpora. `-f body=@<path>` sends the literal path as the field value, so a
- * comment edited that way is overwritten with the path and loses the marker a
- * later read resolves it by. `-F` reads the file. The pattern requires `=@`, so
- * `-F`, `--field`, and a raw string such as `-f body="text"` all pass.
- *
- * It scans prose rather than parsing a command, so a body quoting the wrong
- * spelling to explain it fails too. Reword it rather than exempting it.
+ * A `gh api` raw-string flag carrying a file reference, since `-f body=@<path>`
+ * sends the path itself as the value. Prose quoting it fails too, so reword it.
  */
 export const rawFieldFileReference: Measure = async (ctx) => {
   const files = shippedCorpusFiles(ctx.root)
@@ -938,13 +847,8 @@ export const rawFieldFileReference: Measure = async (ctx) => {
 }
 
 /**
- * Every git-tracked file quoting a listed client command with the wrong
- * argument, over the whole tree rather than one corpus, since a wrong
- * quotation can land in any file this repository writes.
- *
- * `commands` defaults to the shipped table and takes a narrower one only to
- * cover the case where that table ships empty, which is a broken check rather
- * than a clean tree, exactly as an empty ban set is for `markdownBans`.
+ * Every tracked file quoting a listed client command with the wrong argument.
+ * `commands` narrows only to cover the shipped table arriving empty.
  */
 export const clientCommandCitations = async (
   ctx: MeasureContext,
@@ -1001,14 +905,8 @@ export const clientCommandCitations = async (
 }
 
 /**
- * Every `README.md:` anchor in `web/src/content/copy.ts` whose quoted phrase no
- * longer appears in `README.md`, plus any bare `README.md:<n>` citation the
- * retired line-number convention left behind. That file is the only one
- * writing an anchor, so it alone is read.
- *
- * A phrase is a substring test against the whole `README.md` rather than the
- * cited line, so it fails only when the content moved or changed, never when a
- * line number did.
+ * Every `README.md:` anchor in `web/src/content/copy.ts` whose quoted phrase
+ * left `README.md`, plus any bare line-number citation, read as a substring.
  */
 export const readmeCitations: Measure = async (ctx) => {
   const copyPath = 'web/src/content/copy.ts'
@@ -1073,13 +971,8 @@ export const readmeCitations: Measure = async (ctx) => {
 const VISUAL_ONLY_GLOBS: readonly string[] = ['tooling/web/configs/e2e/**']
 
 /**
- * `deploy-site.yml` and `pr-visual-checks.yml` each carry their own literal
- * copy of the five path globs a landing-page change should trigger on, plus
- * the `VISUAL_ONLY_GLOBS` the visual workflow adds for itself, per
- * Question 2 in `.canon/plans/archive/feature-render-visibility.md`. A YAML
- * anchor cannot cross files here, so the two copies are read live and compared
- * rather than one asserting a literal the other could drift behind unnoticed,
- * mirroring how `web/e2e/home.spec.ts`'s rule-group test already reads live.
+ * The landing-page path globs `deploy-site.yml` and `pr-visual-checks.yml`
+ * each copy, read live and compared, since a YAML anchor cannot cross files.
  */
 export const visualPathGlobs: Measure = async (ctx) => {
   const deployPath = '.github/workflows/deploy-site.yml'
@@ -1155,15 +1048,8 @@ export const visualPathGlobs: Measure = async (ctx) => {
 }
 
 /**
- * `canon sandbox coverage` moves only when a person runs it, so a scenario added
- * with no expectation ships unnoticed.
- *
- * The gate is an absolute count of undeclared scenarios rather than a ratio or
- * a floor under the declared count. A floor passes the case this exists to
- * catch, since adding an unarmed scenario leaves that number where it was. A
- * ratio moves when a scenario is legitimately deleted, and this ceiling does
- * not: deleting an unarmed scenario lowers it and deleting an armed one leaves
- * it alone.
+ * An absolute ceiling on undeclared scenarios, since a floor passes an unarmed
+ * addition and a ratio moves on a legitimate deletion.
  */
 export const sandboxCoverage: Measure = async (ctx) => {
   const run = await ctx.cli(['sandbox', 'coverage', '--json'])
@@ -1252,16 +1138,8 @@ interface AuditSummary {
 }
 
 /**
- * The three stages gating on the findings here that are facts sit above, and
- * this stage reports the rest. It runs every tracked and per-machine audit,
- * since its value is one verdict over every corpus describing this tree.
- *
- * The upstream corpus is excluded, since `deps` reaches a network index and its
- * wall time dwarfs every other stage. A scheduled `verify.yml` job reports it.
- *
- * This reports and never fails, since failing on growth in a judgment count
- * teaches a contributor to route around the stage. A fact still fails the push
- * at the stage above that names its remedy.
+ * Every tracked and per-machine audit but `deps`, reported and never failed,
+ * since failing on judgment growth teaches routing around the stage.
  */
 export const auditSet: Measure = async (ctx) => {
   const run = await ctx.cli([
@@ -1284,8 +1162,7 @@ export const auditSet: Measure = async (ctx) => {
   const record = parseJson(run.stdout) as { summary?: AuditSummary } | undefined
   const summary = record?.summary
 
-  // An absent field is a record this stage cannot read, not a run with nothing
-  // to report, so it is never read as zero.
+  // An absent field is unreadable, never read as zero.
   if (
     typeof summary?.grown !== 'number' ||
     typeof summary.facts !== 'number' ||
@@ -1300,8 +1177,7 @@ export const auditSet: Measure = async (ctx) => {
 
   const emissions: Emission[] = []
 
-  // Every per-machine folder is gitignored and CI carries none, so absence is
-  // ordinary. It is still stated, so the stage claims no coverage it lacks.
+  // Per-machine folders are absent in CI, and the stage still says so.
   if (typeof summary.absent === 'number' && summary.absent > 0) {
     emissions.push(
       info(
@@ -1348,15 +1224,8 @@ export const auditSet: Measure = async (ctx) => {
 }
 
 /**
- * The plugin is the second delivery path and this is the only stage gating it,
- * so an absent binary is a contributor's machine rather than a clean tree. A
- * runner installs the CLI as a workflow step, which makes an absent binary
- * there a broken workflow, and passing would report a verdict for every
- * manifest on the way to a marketplace install.
- *
- * A global install can also land the wrapper and no platform-native binary,
- * which resolves on PATH and cannot run, so the two states are separated by
- * whether the spawn started at all rather than by a second lookup.
+ * The only stage gating the plugin. An absent binary is mid-setup locally and
+ * a broken step under CI, told apart by whether the spawn started at all.
  */
 export const pluginManifests: Measure = async (ctx) => {
   const version = await ctx.run(['claude', '--version'])

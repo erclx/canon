@@ -1,6 +1,5 @@
 import { type SpawnSyncReturns, spawnSync } from 'node:child_process'
 import {
-  chmodSync,
   copyFileSync,
   existsSync,
   mkdirSync,
@@ -43,8 +42,7 @@ beforeEach(() => {
   fixture = mkdtempSync(join(tmpdir(), 'verify-runner-'))
   bin = join(fixture, 'bin')
   mkdirSync(bin)
-  // Each stack's toolchain is only probed for presence, so a stub that
-  // succeeds keeps the run from stopping at the probe on a machine without it.
+  // Toolchains are probed for presence only, so a passing stub stands in.
   for (const tool of [
     'uv',
     'go',
@@ -291,8 +289,7 @@ describe('phase order', () => {
       Object.fromEntries(ALL_PHASES.map((key) => [key, `echo phase-${key}`])),
     )
 
-    // bun run echoes each command, colored on a terminal and plain under CI, so a
-    // match after the echo is the command line rather than the script's output.
+    // bun run echoes each command, so a match after the echo is the command.
     const ran = [
       ...runVerify().stdout.matchAll(/(?<!echo )phase-([a-z:]+)$/gm),
     ].map((match) => match[1])
@@ -373,217 +370,136 @@ describe('tools and preconditions', () => {
   })
 })
 
-describe('markdown bans', () => {
-  it('should fail and print the findings on exit 2', () => {
+// Stands in for canon or bunx, logging each call's argv on its own line and
+// printing a gate record whose root is the directory it runs in, or `root`.
+const argvLog = (): string => join(fixture, 'canon-argv.log')
+
+const writeGate = (
+  name: string,
+  exitCode: number,
+  stages: string,
+  root = '$(pwd -P)',
+): void => {
+  const ok = exitCode === 0 ? 'true' : 'false'
+  writeFileSync(
+    join(bin, name),
+    [
+      '#!/usr/bin/env bash',
+      `echo "$*" >> ${argvLog()}`,
+      `printf '{"ok":${ok},"root":"%s","stages":${stages}}\\n' "${root}"`,
+      `exit ${exitCode}`,
+      '',
+    ].join('\n'),
+    { mode: 0o755 },
+  )
+}
+
+const readArgv = (): string[] =>
+  existsSync(argvLog())
+    ? readFileSync(argvLog(), 'utf8').trim().split('\n')
+    : []
+
+const PASSED = '[{"label":"Markdown","status":"passed"}]'
+
+describe('canon checks', () => {
+  beforeEach(() => {
     setUp('web', STACK_SCRIPTS.web)
     initRepoWithMarkdown()
-    writeStub('canon', 2)
-
-    const result = runVerify()
-
-    expect(result.status).toBe(1)
-    expect(result.stdout).toContain('banned character')
   })
 
-  it('should pass on exit 0', () => {
-    setUp('web', STACK_SCRIPTS.web)
-    initRepoWithMarkdown()
-    writeStub('canon', 0)
+  it('should run the gate once, nested, for its record', () => {
+    writeGate('canon', 0, PASSED)
+
+    runVerify()
+
+    expect(readArgv()).toEqual(['gate run --nested --json'])
+  })
+
+  it('should pass and list each stage the gate passed', () => {
+    writeGate('canon', 0, PASSED)
 
     const result = runVerify()
 
     expect(result.status).toBe(0)
-    expect(result.stdout).toContain('No banned character')
+    expect(result.stdout).toMatch(/✓.*Markdown/)
   })
 
-  it('should log a skip on exit 1', () => {
-    setUp('web', STACK_SCRIPTS.web)
-    initRepoWithMarkdown()
+  it('should log a stage the gate skipped without a pass check', () => {
+    writeGate('canon', 0, '[{"label":"Context citations","status":"skipped"}]')
+
+    const skipped = runVerify()
+      .stdout.split('\n')
+      .filter((line) => line.includes('Context citations: skipped'))
+
+    expect(skipped).toHaveLength(1)
+    expect(skipped.filter((line) => line.includes('✓'))).toEqual([])
+  })
+
+  it('should fail, print the stage output, and name the failed stage', () => {
+    writeGate(
+      'canon',
+      1,
+      '[{"label":"File length","status":"failed","failure":"src/a.ts is too long","output":"src/a.ts 2400 lines"}]',
+    )
+
+    const result = runVerify()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('src/a.ts 2400 lines')
+    expect(result.stdout).toContain('File length: src/a.ts is too long')
+  })
+
+  it('should fail a nonzero exit whose record names no failed stage', () => {
+    writeGate('canon', 1, PASSED)
+
+    const result = runVerify()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('canon gate run exited 1')
+  })
+
+  it('should skip a canon whose output is no record outside CI', () => {
     writeStub('canon', 1)
 
     const result = runVerify()
 
     expect(result.status).toBe(0)
-    expect(result.stdout).toContain('refused or is missing')
+    expect(result.stdout).toContain('canon gate run refused')
   })
 
-  it('should fail and print the findings on exit 3', () => {
-    setUp('web', STACK_SCRIPTS.web)
-    initRepoWithMarkdown()
-    writeStub('canon', 3)
+  it('should fail a canon whose output is no record under CI', () => {
+    writeStub('canon', 1)
+
+    const result = runVerify({ CI: 'true' })
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('canon gate run refused')
+  })
+
+  it('should skip a canon whose gate checked another root outside CI', () => {
+    writeGate('canon', 0, PASSED, '/opt/canon')
 
     const result = runVerify()
 
-    expect(result.status).toBe(1)
-    expect(result.stdout).toContain('empty ban set')
-  })
-
-  it('should leave CHANGELOG.md at any depth out of the audit', () => {
-    setUp('web', STACK_SCRIPTS.web)
-    initRepoWithMarkdown()
-    mkdirSync(join(fixture, 'pkg'))
-    writeFileSync(join(fixture, 'CHANGELOG.md'), '# Log\n')
-    writeFileSync(join(fixture, 'pkg/CHANGELOG.md'), '# Log\n')
-    writeFileSync(
-      join(bin, 'canon'),
-      '#!/usr/bin/env bash\necho "audited: $*"\nexit 2\n',
-      { mode: 0o755 },
-    )
-
-    expect(runVerify().stdout).not.toContain('CHANGELOG')
-  })
-})
-
-describe('context audit', () => {
-  const CONTEXT_STUB = join(import.meta.dirname, 'fixtures/canon-context.sh')
-
-  // Puts the fake canon on PATH and returns the env setting the context
-  // audit's exit, since every other canon stage the stub serves passes.
-  const contextExit = (code: number): NodeJS.ProcessEnv => {
-    copyFileSync(CONTEXT_STUB, join(bin, 'canon'))
-    chmodSync(join(bin, 'canon'), 0o755)
-    return { CONTEXT_EXIT: String(code) }
-  }
-
-  beforeEach(() => {
-    setUp('web', STACK_SCRIPTS.web)
-    initRepoWithMarkdown()
-    mkdirSync(join(fixture, 'canon/context'), { recursive: true })
-  })
-
-  const writeContextConfig = (toml: string): void => {
-    mkdirSync(join(fixture, 'canon/config'), { recursive: true })
-    writeFileSync(join(fixture, 'canon/config/context.toml'), toml)
-  }
-
-  it('should run the audit after the code audit and pass on exit 0', () => {
-    const result = runVerify(contextExit(0))
-
-    expect(result.status).toBe(0)
-    expect(result.stdout.indexOf('Context audit')).toBeGreaterThan(
-      result.stdout.indexOf('Embedded code'),
-    )
-    expect(result.stdout).toContain('No gating context finding')
-  })
-
-  it('should fail, print the findings, and name the plain verb on exit 2', () => {
-    const result = runVerify(contextExit(2))
-
-    expect(result.status).toBe(1)
-    expect(result.stdout).toMatch(/context finding: context audit$/m)
-    expect(result.stdout).toContain("Run 'canon context audit' to read")
-  })
-
-  it('should run the plain audit where the config declares no gate key', () => {
-    writeContextConfig('roots = ["canon/context"]\n')
-
-    const result = runVerify(contextExit(2))
-
-    expect(result.stdout).toMatch(/context finding: context audit$/m)
-  })
-
-  it.each([
-    ['gated', 'gated = ["canon/context/"]\n'],
-    ['an empty gated', 'gated = []\n'],
-    ['gate-length as true', 'gate-length = true\n'],
-  ])(
-    'should add --gate and name it on failure where the config declares %s',
-    (_key, toml) => {
-      writeContextConfig(toml)
-
-      const result = runVerify(contextExit(2))
-
-      expect(result.status).toBe(1)
-      expect(result.stdout).toContain('context finding: context audit --gate')
-      expect(result.stdout).toContain("Run 'canon context audit --gate'")
-    },
-  )
-
-  it('should run the plain audit where gate-length is false and gated is absent', () => {
-    writeContextConfig('gate-length = false\n')
-
-    const result = runVerify(contextExit(2))
-
-    expect(result.stdout).toMatch(/context finding: context audit$/m)
-  })
-
-  it('should not read a gate key nested under a table header', () => {
-    writeContextConfig('[other]\ngated = ["canon/context/"]\n')
-
-    const result = runVerify(contextExit(2))
-
-    expect(result.stdout).toMatch(/context finding: context audit$/m)
-  })
-
-  it('should log a skip on exit 1 outside CI', () => {
-    const result = runVerify(contextExit(1))
-
-    expect(result.status).toBe(0)
-    expect(result.stdout).toContain('canon context audit refused or is missing')
-  })
-
-  it('should fail on exit 1 under CI', () => {
-    const result = runVerify({ ...contextExit(1), CI: 'true' })
-
-    expect(result.status).toBe(1)
-    expect(result.stdout).toContain('canon context audit refused')
-  })
-
-  it('should fail on an exit that is neither a pass nor a finding', () => {
-    const result = runVerify(contextExit(5))
-
-    expect(result.status).toBe(1)
-    expect(result.stdout).toContain('canon context audit exited 5')
-  })
-
-  it('should audit an unmoved project that keeps its entries under .claude/', () => {
-    rmSync(join(fixture, 'canon'), { force: true, recursive: true })
-    mkdirSync(join(fixture, '.claude/context'), { recursive: true })
-
-    const result = runVerify(contextExit(2))
-
-    expect(result.status).toBe(1)
-    expect(result.stdout).toMatch(/context finding: context audit$/m)
-  })
-
-  it('should skip without calling canon where no context folder exists', () => {
-    rmSync(join(fixture, 'canon'), { force: true, recursive: true })
-
-    const result = runVerify(contextExit(2))
-
     expect(result.status).toBe(0)
     expect(result.stdout).toContain(
-      'Skipped: no canon/context or .claude/context folder here',
+      'checked /opt/canon rather than this project',
     )
-    expect(result.stdout).not.toContain('context finding')
   })
 
-  it('should skip with the install hint when no canon is on PATH', () => {
-    linkTool('bun')
-    linkTool('git')
-    linkTool('bash')
+  it('should fail a canon whose gate checked another root under CI', () => {
+    writeGate('canon', 0, PASSED, '/opt/canon')
 
-    const result = run([process.execPath, RUNNER], { PATH: bin })
+    const result = runVerify({ CI: 'true' })
 
-    expect(result.status).toBe(0)
-    expect(
-      result.stdout.match(/Skipped: no canon binary on PATH/g),
-    ).toHaveLength(3)
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain(
+      'checked /opt/canon rather than this project',
+    )
   })
 })
 
 describe('canon resolution', () => {
-  const argvLog = (): string => join(fixture, 'bunx-argv.log')
-
-  // Stands in for bunx, recording each call's argv on its own line.
-  const writeBunx = (exitCode: number): void => {
-    writeFileSync(
-      join(bin, 'bunx'),
-      `#!/usr/bin/env bash\necho "$*" >> ${argvLog()}\nexit ${exitCode}\n`,
-      { mode: 0o755 },
-    )
-  }
-
   const writeStamp = (version: string): void => {
     mkdirSync(join(fixture, 'canon/config'), { recursive: true })
     writeFileSync(
@@ -592,8 +508,7 @@ describe('canon resolution', () => {
     )
   }
 
-  // Only bun, git, bash for the stubs' shebang, and the fixture stubs are on
-  // PATH, so no global canon is.
+  // Only bun, git, bash, and the stubs are on PATH, so no global canon is.
   const runWithoutCanon = (
     env: NodeJS.ProcessEnv = {},
   ): SpawnSyncReturns<string> => {
@@ -603,42 +518,36 @@ describe('canon resolution', () => {
     return run([process.execPath, RUNNER], { PATH: bin, ...env })
   }
 
-  const readArgv = (): string[] =>
-    existsSync(argvLog())
-      ? readFileSync(argvLog(), 'utf8').trim().split('\n')
-      : []
-
   beforeEach(() => {
     setUp('web', STACK_SCRIPTS.web)
     initRepoWithMarkdown()
   })
 
   describe('under CI', () => {
-    it('should run both stages through bunx pinned to the stamp', () => {
+    it('should run the gate through bunx pinned to the stamp', () => {
       writeStamp('5.83.0')
-      writeBunx(0)
+      writeGate('bunx', 0, PASSED)
 
       const result = runWithoutCanon({ CI: 'true' })
 
       expect(result.status).toBe(0)
       expect(readArgv()).toEqual([
-        '-y @erclx/canon@5.83.0 markdown audit note.md',
-        '-y @erclx/canon@5.83.0 code audit',
+        '-y @erclx/canon@5.83.0 gate run --nested --json',
       ])
     })
 
-    it('should fail and name the stage when bunx exits 1', () => {
+    it('should fail and name the gate when bunx prints no record', () => {
       writeStamp('5.83.0')
-      writeBunx(1)
+      writeStub('bunx', 1)
 
       const result = runWithoutCanon({ CI: 'true' })
 
       expect(result.status).toBe(1)
-      expect(result.stdout).toContain('canon markdown audit refused')
+      expect(result.stdout).toContain('canon gate run refused')
     })
 
     it('should fail and name canon tooling sync when no stamp exists', () => {
-      writeBunx(0)
+      writeGate('bunx', 0, PASSED)
 
       const result = runWithoutCanon({ CI: 'true' })
 
@@ -649,7 +558,7 @@ describe('canon resolution', () => {
 
     it('should fail rather than pass a stamp version that is not a release', () => {
       writeStamp('latest; touch pwned')
-      writeBunx(0)
+      writeGate('bunx', 0, PASSED)
 
       const result = runWithoutCanon({ CI: 'true' })
 
@@ -657,35 +566,29 @@ describe('canon resolution', () => {
       expect(readArgv()).toEqual([])
     })
 
-    it('should fail when a canon on PATH exits 1', () => {
-      writeStub('canon', 1)
-
-      expect(runVerify({ CI: 'true' }).status).toBe(1)
-    })
-
     it('should never call bunx when canon is on PATH', () => {
       writeStamp('5.83.0')
-      writeBunx(0)
-      writeStub('canon', 0)
+      writeStub('bunx', 0)
+      writeGate('canon', 0, PASSED)
 
       const result = runWithoutCanon({ CI: 'true' })
 
       expect(result.status).toBe(0)
-      expect(readArgv()).toEqual([])
+      expect(readArgv()).toEqual(['gate run --nested --json'])
     })
   })
 
   describe('outside CI', () => {
-    it('should skip both stages with the install hint when no canon is on PATH', () => {
+    it('should skip the canon checks once with the install hint when no canon is on PATH', () => {
       writeStamp('5.83.0')
-      writeBunx(0)
+      writeGate('bunx', 0, PASSED)
 
       const result = runWithoutCanon()
 
       expect(result.status).toBe(0)
       expect(
         result.stdout.match(/Skipped: no canon binary on PATH/g),
-      ).toHaveLength(2)
+      ).toHaveLength(1)
       expect(result.stdout).toContain('bun install --global @erclx/canon')
       expect(readArgv()).toEqual([])
     })
@@ -697,7 +600,7 @@ describe('canon resolution', () => {
         .split('\n')
         .filter((line) => line.includes('Skipped: no canon binary on PATH'))
 
-      expect(skipLines).toHaveLength(2)
+      expect(skipLines).toHaveLength(1)
       expect(skipLines.filter((line) => line.includes('✓'))).toEqual([])
     })
   })

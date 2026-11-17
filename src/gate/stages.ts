@@ -36,7 +36,12 @@ import {
   visualPathGlobs,
 } from '@/gate/measures'
 import { readersOf, readTestSources } from '@/gate/corpus-readers'
-import { PROJECT_ROOT } from '@/roots/project'
+import {
+  CONTEXT_FOLDERS,
+  declaresContextGate,
+  hasContextFolder,
+} from '@/context/gate'
+import { isOwnCheckout, PROJECT_ROOT } from '@/roots/project'
 import { SHIPPED_CORPORA } from '@/shipped/references'
 
 /**
@@ -65,7 +70,8 @@ export type Check =
   /** This checkout's own CLI, so a worktree gate never reads the main tree. */
   | {
       readonly kind: 'cli'
-      readonly argv: readonly string[]
+      /** A function where the arguments depend on the project being checked. */
+      readonly argv: readonly string[] | ((root: string) => readonly string[])
       readonly failure: string
     }
   /**
@@ -102,6 +108,12 @@ export interface Stage {
   readonly scope?: StageScope
   /** What a scoped-out stage says, so a skip never reads as a pass. */
   readonly skipped?: string
+  /**
+   * Why the project carries nothing this stage reads, which skips it, or
+   * `undefined` where it carries the input. Absent means the input is always
+   * there to read.
+   */
+  readonly absent?: (root: string) => string | undefined
   readonly checks: readonly Check[]
   /**
    * The machine lock this stage holds while its checks run, so one box runs it
@@ -110,6 +122,12 @@ export interface Stage {
   readonly lock?: string
   /** The line a clean stage prints, where the checks emit none of their own. */
   readonly success?: string
+  /**
+   * Whether the stage fits any project, so it also runs outside canon's own
+   * checkout. A stage left unshared reads or writes canon's own layout, or
+   * runs a script a target's verify runner already runs.
+   */
+  readonly shared?: boolean
 }
 
 /**
@@ -170,6 +188,12 @@ function relatedTests(changed: readonly string[]): readonly string[] {
   ]
 }
 
+export function contextAuditArgv(root: string): readonly string[] {
+  return isOwnCheckout(root) || declaresContextGate(root)
+    ? ['context', 'audit', '--gate']
+    : ['context', 'audit']
+}
+
 /**
  * Every stage in run order, which is the product: the regenerating stages run
  * before anything reads what they wrote, the CLI stages sit together, and the
@@ -227,8 +251,7 @@ export const STAGES: readonly Stage[] = [
   },
   {
     // Four artifacts are written from `src/design/`, and a render step is safe
-    // only while something fails when it did not run, which is this drift. The
-    // prose budget then reads what a drift assert cannot.
+    // only while something fails when it did not run, which is this drift.
     id: 'design',
     label: 'Design',
     checks: [
@@ -282,9 +305,17 @@ export const STAGES: readonly Stage[] = [
         failure:
           'The README mark pair drifted from the mark source. Run bun run check and commit assets/brand/mark-color.svg and assets/brand/mark-color-light.svg.',
       },
-      { kind: 'measure', measure: designProse },
     ],
     success: 'Design source clean',
+  },
+  {
+    // The prose budget, which a drift assert cannot see since a regenerated
+    // paragraph agrees with its source. It follows the regen, so canon counts
+    // the record it just wrote.
+    id: 'design-prose',
+    shared: true,
+    label: 'Design prose',
+    checks: [{ kind: 'measure', measure: designProse }],
   },
   {
     // The claude manifest carries a target's ignore set and is kept by hand
@@ -354,15 +385,20 @@ export const STAGES: readonly Stage[] = [
     success: 'Consumer replays clean',
   },
   {
-    // The audit's facts gate, and its judgment thresholds do not, since failing
-    // a push on one makes the stage something to route around. The length
-    // readings that gate sit in their own stages below.
+    // The audit's facts gate and its judgment thresholds do not. Canon's own
+    // checkout always widens the audit, and another project widens it only
+    // where its context config opts in.
     id: 'context-citations',
+    shared: true,
     label: 'Context citations',
+    absent: (root) =>
+      hasContextFolder(root)
+        ? undefined
+        : `Skipped, no ${CONTEXT_FOLDERS.join(' or ')} folder here, so there is no entry to audit`,
     checks: [
       {
         kind: 'cli',
-        argv: ['context', 'audit', '--gate'],
+        argv: contextAuditArgv,
         failure:
           'A cited context path does not resolve, an entry lacks a required section or carries an H2 outside Overview, Layout, and Gotchas, an entry under a shape-gated folder breaks the section shape, an index disagrees with its folder, or a code folder is named in no Layout or claimed by two entries. Run bun src/cli.ts context audit --gate.',
       },
@@ -373,6 +409,7 @@ export const STAGES: readonly Stage[] = [
     // Each record's caps are facts it states about itself, unlike the
     // judgment thresholds the stage above leaves out, so they gate here.
     id: 'canonical-records',
+    shared: true,
     label: 'Canonical records',
     checks: [{ kind: 'measure', measure: canonicalRecords }],
   },
@@ -380,6 +417,7 @@ export const STAGES: readonly Stage[] = [
     // Unscoped, since any branch can grow any document. A document past the
     // ceiling fails the push.
     id: 'document-ceiling',
+    shared: true,
     label: 'Document ceiling',
     checks: [{ kind: 'measure', measure: documentCeiling }],
   },
@@ -395,6 +433,7 @@ export const STAGES: readonly Stage[] = [
     // Unscoped, since a block one branch embeds stays embedded on every later
     // branch, and reading every tracked source costs well under a second.
     id: 'embedded-programs',
+    shared: true,
     label: 'Embedded programs',
     checks: [{ kind: 'measure', measure: embeddedPrograms }],
   },
@@ -402,6 +441,7 @@ export const STAGES: readonly Stage[] = [
     // Unscoped, since any branch can grow any file past the cap, and counting
     // the tracked sources costs well under a second.
     id: 'file-length',
+    shared: true,
     label: 'File length',
     checks: [{ kind: 'measure', measure: fileLength }],
   },
@@ -409,21 +449,25 @@ export const STAGES: readonly Stage[] = [
     // Unscoped as a stage, since each measure reads the changed set itself and
     // fails a touched file alone.
     id: 'comment-head-blocks',
+    shared: true,
     label: 'Head comment runs',
     checks: [{ kind: 'measure', measure: commentHeadBlocks }],
   },
   {
     id: 'comment-body-blocks',
+    shared: true,
     label: 'In-body comment runs',
     checks: [{ kind: 'measure', measure: commentBodyBlocks }],
   },
   {
     id: 'comment-history',
+    shared: true,
     label: 'History in comments',
     checks: [{ kind: 'measure', measure: commentHistory }],
   },
   {
     id: 'comment-file-share',
+    shared: true,
     label: 'Comment share per file',
     checks: [{ kind: 'measure', measure: commentFileShare }],
   },
@@ -470,6 +514,7 @@ export const STAGES: readonly Stage[] = [
     // Bans and dead links in every file, and a density finding on a path the
     // audit gates, all read off one exit code.
     id: 'markdown',
+    shared: true,
     label: 'Markdown',
     checks: [{ kind: 'measure', measure: markdownBans }],
   },
@@ -645,3 +690,11 @@ export const STAGES: readonly Stage[] = [
     success: 'Tests passed',
   },
 ]
+
+/**
+ * The stages the gate runs against `root`: every stage in canon's own
+ * checkout, and the shared ones elsewhere, in table order either way.
+ */
+export function stagesFor(root: string): readonly Stage[] {
+  return isOwnCheckout(root) ? STAGES : STAGES.filter((stage) => stage.shared)
+}

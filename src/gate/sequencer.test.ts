@@ -1,12 +1,14 @@
 import {
   existsSync,
   mkdirSync,
+  mkdtempSync,
   readFileSync,
   rmSync,
   unlinkSync,
   writeFileSync,
 } from 'node:fs'
-import { dirname } from 'node:path'
+import { tmpdir } from 'node:os'
+import { dirname, join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   type CommandResult,
@@ -14,7 +16,9 @@ import {
   type RunCommand,
   seedEntryCount,
 } from '@/gate/measures'
+import { PROJECT_ROOT } from '@/roots/project'
 import {
+  cliEntry,
   collectChangedFiles,
   exitCodeFor,
   type GateContext,
@@ -143,6 +147,85 @@ describe('changed-file scoping', () => {
     expect(outcome.emissions).toEqual([
       { kind: 'info', text: 'Skipped, no shell changes' },
     ])
+  })
+})
+
+describe('a stage whose input the project does not carry', () => {
+  it('should skip with the reason the stage gives, running no check', async () => {
+    const seen: string[] = []
+    const ctx = contextWith({ cli: runnerFor({}, seen) })
+
+    const outcome = await runStage(
+      stage('context', {
+        absent: (root) => `nothing under ${root}`,
+        checks: [{ kind: 'cli', argv: ['context', 'audit'], failure: 'x' }],
+      }),
+      ctx,
+    )
+
+    expect(outcome.status).toBe('skipped')
+    expect(outcome.emissions).toEqual([
+      { kind: 'info', text: 'nothing under /tmp/gate-fixture' },
+    ])
+    expect(seen).toEqual([])
+  })
+
+  it('should run the stage where the project carries the input', async () => {
+    const outcome = await runStage(
+      stage('context', { absent: () => undefined }),
+      contextWith(),
+    )
+
+    expect(outcome.status).toBe('passed')
+  })
+})
+
+describe('the CLI a stage spawns', () => {
+  let root: string
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it("should spawn the checked checkout's own CLI in a canon checkout", () => {
+    root = mkdtempSync(join(tmpdir(), 'canon-cli-entry-'))
+    writeFileSync(
+      join(root, 'package.json'),
+      JSON.stringify({ name: '@erclx/canon' }),
+    )
+    mkdirSync(join(root, 'src'))
+    writeFileSync(join(root, 'src', 'cli.ts'), '')
+
+    expect(cliEntry(root)).toBe(join(root, 'src', 'cli.ts'))
+  })
+
+  it("should spawn this install's CLI in a project with another name", () => {
+    root = mkdtempSync(join(tmpdir(), 'canon-cli-entry-'))
+    writeFileSync(join(root, 'package.json'), JSON.stringify({ name: 'app' }))
+
+    expect(cliEntry(root)).toBe(join(PROJECT_ROOT, 'src', 'cli.ts'))
+  })
+})
+
+describe('a CLI check whose arguments depend on the root', () => {
+  it('should build the arguments from the project being checked', async () => {
+    const seen: string[] = []
+    const ctx = contextWith({ cli: runnerFor({}, seen) })
+
+    await runStage(
+      stage('context', {
+        checks: [
+          {
+            kind: 'cli',
+            argv: (root) => ['context', 'audit', root],
+            failure: 'x',
+          },
+        ],
+      }),
+      ctx,
+    )
+
+    expect(seen).toEqual(['context audit /tmp/gate-fixture'])
   })
 })
 

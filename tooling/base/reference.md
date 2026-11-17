@@ -23,7 +23,7 @@ Two configs fix how output looks and how commits read.
 
 `scripts/verify.ts` is the one verify runner every stack shares, and the command behind `check`. It uses Node modules only, since a target's own lint and typecheck read it.
 
-- It runs typecheck, lint, format check, shell, unit tests, build, markdown bans, embedded code, card exclusion, then head tags, skipping a phase `scripts/verify.json` leaves out.
+- It runs typecheck, lint, format check, shell, unit tests, build, canon checks, card exclusion, then head tags, skipping a phase `scripts/verify.json` leaves out.
 - `scripts/verify.json` lists the phases a stack requires, plus any tools and preconditions it probes first. The nearest stack's copy wins.
 - A required phase whose script `package.json` lacks fails the run. A base phase the list leaves out runs only where the folder declares its script.
 - Base requires `check:format`, so a base-only target still fails on a missing one.
@@ -108,27 +108,16 @@ Base writes `check` as a `[scripts.override]`, so a sync replaces whatever `chec
 - Auto-fixing drift inside `check` rewrote files in a shared checkout on every push and left a gate that could not fail, so the writing pass stays in `bun run format`.
 - The pull request workflow calls `check:format` directly as well.
 
-### The markdown bans stage
+### The canon checks stage
 
-The `Markdown bans` stage of `scripts/verify.ts` runs `canon markdown audit` over every tracked markdown file except `CHANGELOG.md`, since a generated changelog carries commit subjects nobody wrote against the ban set.
+The `Canon checks` stage of `scripts/verify.ts` makes one call, `canon gate run --nested --json`, from the working directory. The gate checks the project it runs in, so a nested project is checked as itself, and a check canon adds to its shared set reaches the project with no edit to this script.
 
-- It exits `2` on a finding or `3` on a shipped-empty ban set, failing `bun run check` and the `pre-push` hook that calls it.
-- A refusal to measure exits `1` and is logged as a skip, as does a corpus with no file left once `CHANGELOG.md` is set aside.
-- The stage needs `canon` on PATH, and `canon docs projects` names the install command. Without it the stage is skipped and logged.
+The shared set covers markdown bans and dead links, embedded programs, file length, the document ceiling, the canonical records, the design record's prose budget, the comment caps, and the context audit.
 
-### The embedded code stage
+- A failed stage fails `bun run check` and the `pre-push` hook. Run `canon gate run` to read each finding.
+- The markdown stage leaves `CHANGELOG.md` out, since a generated changelog carries commit subjects nobody wrote against the ban set.
+- The context stage skips a project with no context folder, and adds `--gate` where `canon/config/context.toml` declares `gated` or sets `gate-length = true`.
+- Output with no gate record, or a record naming another root, means an older canon or a failed fetch. A local run logs a skip, and CI fails the stage.
+- Without `canon` on PATH a local run skips the stage with an install hint, and `canon docs projects` names the install command.
 
-The `Embedded code` stage runs `canon code audit` over every TypeScript and Astro file git lists, so a page, stylesheet, or script held as a string past five lines fails the check rather than resting on prose.
-
-- It exits `2` on a finding, failing `bun run check` and the `pre-push` hook. A block that must stay inline takes a `canon-allow-embedded: <reason>` marker on its opening line or the line above.
-- A refusal exits `1` and is logged as a skip, as does a canon too old to carry the verb, since an unknown command exits `1` too.
-- Without `canon` on PATH the stage is skipped and logged, the same as the markdown bans stage.
-
-### The context audit stage
-
-The `Context audit` stage runs `canon context audit` after the embedded code stage, so an unresolved citation or a requirements record past its word cap fails the check, and every other finding reports.
-
-- It adds `--gate` where `canon/config/context.toml` declares `gated` or sets `gate-length = true`, so an opted-in project also fails on a shape break or index drift.
-- It exits `2` on a finding, failing `bun run check` and the `pre-push` hook. The failure line names the command it ran, so run that to read each one.
-- A project with neither `canon/context/` nor `.claude/context/` under the working directory skips the stage, so a nested project is audited as itself.
-- A refusal exits `1` and is logged as a skip locally and fails under CI, the same as the two stages before it.
+An embedded block that must stay inline takes a `canon-allow-embedded: <reason>` marker on its opening line or the line above.

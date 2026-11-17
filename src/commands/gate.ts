@@ -10,8 +10,8 @@ import {
   runStages,
   summarize,
 } from '@/gate/sequencer'
-import { STAGES } from '@/gate/stages'
-import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
+import { stagesFor } from '@/gate/stages'
+import { checkoutMismatchWarning } from '@/roots/project'
 import {
   intro,
   logError,
@@ -41,7 +41,7 @@ export function register(program: Command): void {
   gate
     .command('run')
     .description(
-      'Run every gating stage in order, scoping shell, types, and tests to the changed set',
+      'Run every gating stage in order against the working directory, scoping shell, types, and tests to the changed set',
     )
     .helpOption('-h, --help', 'Show this help message')
     .option(
@@ -60,6 +60,10 @@ export function register(program: Command): void {
         'Exit codes:',
         '  0  every stage that ran reported, and none found a fact',
         '  1  a stage found a fact, or could not measure its input under CI',
+        '',
+        "The gate checks the directory it runs in. Canon's own checkout runs",
+        'every stage, and any other project runs the stages that fit any',
+        'project, so run it from the project root.',
         '',
         'A stage halts the run, so clearing a regenerate-then-assert stage',
         'reveals the next one behind it rather than the whole set at once.',
@@ -84,8 +88,10 @@ export function register(program: Command): void {
 }
 
 async function runGate(opts: RunCommandOptions): Promise<number> {
-  const root = PROJECT_ROOT
-  const mismatch = checkoutMismatchWarning(process.cwd())
+  // The directory typed in, so a target's verify runner gates the target.
+  const root = process.cwd()
+  // Stages load from this install, so another canon checkout is warned.
+  const mismatch = checkoutMismatchWarning(root)
   const emitJson = opts.json ?? false
   const nested = opts.nested ?? false
   const run = commandRunner(root)
@@ -116,7 +122,7 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
   }
 
   const results = await runStages(
-    STAGES,
+    stagesFor(root),
     ctx,
     emitJson ? undefined : (result) => report(result),
   )
@@ -125,8 +131,7 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
 
   if (emitJson) {
     const failed = results.find((result) => result.status === 'failed')
-    // Diagnostics reach stderr in every mode, so a caller reading the record
-    // alone is not the only one told what went wrong.
+    // Diagnostics reach stderr in every mode, beside the record.
     if (failed?.failure !== undefined) {
       process.stderr.write(`${failed.label}: ${failed.failure}\n`)
     }
@@ -157,11 +162,8 @@ interface GateRecordInput {
 }
 
 /**
- * The `--json` record. A failed stage carries the tail of the output its
- * checks printed, since a caller reading the record alone otherwise reruns
- * the stage by hand to learn which test failed. The tail rather than a parse
- * of the `FAIL` lines, so a generic stage stays free of one runner's format,
- * and a dot-reporter run prints its failures and summary last.
+ * The `--json` record. A failed stage carries the tail of its output, so a
+ * caller learns which test failed without a rerun or a parse of one runner.
  */
 export function gateRecord(input: GateRecordInput) {
   const { ok, root, changed, summary, results } = input
@@ -207,14 +209,8 @@ function report(result: StageResult): void {
 }
 
 /**
- * The closing verdict, which names what the run did not measure rather than
- * reporting a bare pass over it.
- *
- * A run where every stage read its input still closes on the line the script
- * this replaces closed on, so nothing about the ordinary case moved. A run
- * carrying an unmeasured stage says so, because a green line over a stage that
- * looked at nothing is exactly the silence the reporting outcome exists
- * against.
+ * The closing verdict, naming what the run did not measure, since a green
+ * line over a stage that looked at nothing is the silence the gate withholds.
  */
 function close(summary: Summary, code: number): void {
   const { NC, RED, YELLOW } = palette(process.stderr)

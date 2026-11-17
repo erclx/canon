@@ -84,14 +84,13 @@ Five measures report and never set the exit code on their own.
 
 Rewrite the sentence on a ban hit rather than swapping the token. A code span clears the report only where the token is an identifier under discussion, while a character reference such as `&lt;` or `&amp;` is never a hit, since the semicolon ends the reference rather than a clause.
 
-The audit runs in four places:
+The audit runs in three places:
 
 - `.claude/hooks/standards-audit.sh` after each markdown edit, handing back every finding
-- The `Markdown` stage of `canon gate run`, over the whole corpus
-- `scripts/verify.ts` in a scaffolded project, excluding `CHANGELOG.md`
+- The `Markdown` stage of `canon gate run`, over the whole corpus except `CHANGELOG.md`, which a scaffolded project reaches through `scripts/verify.ts`
 - The seeded hook in a target
 
-With no `canon` on `PATH`, a local `scripts/verify.ts` run skips with an install hint. Under `CI=true` it runs the release the project's stamp records through `bunx`, and fails when the stamp holds no version or the audit exits 1.
+With no `canon` on `PATH`, a local `scripts/verify.ts` run skips its canon checks with an install hint. Under `CI=true` it runs the release the project's stamp records through `bunx`, and fails when the stamp holds no version or the gate prints no record.
 
 ## Refusals
 

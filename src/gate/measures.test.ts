@@ -107,8 +107,7 @@ describe('recordIdempotence', () => {
     }),
   })
 
-  // What the verb writes on a readable tree, where exit `2` is a plan drawn and
-  // left unwritten, every reading but nothing to do.
+  // A readable tree, where exit `2` is a plan drawn and left unwritten.
   const planned = (
     moves: readonly unknown[],
     rewritten: number,
@@ -1029,8 +1028,7 @@ describe('skillPracticeShape', () => {
     )
   }
 
-  // Writes a conforming fixture for every listed skill but the one varied, so an
-  // append needs no edit here, with each exemption naming a real file.
+  // A conforming fixture for every listed skill but the one varied.
   const writeListedExcept = (omitted?: string): void => {
     for (const rel of LEDGER_SKILLS.filter((rel) => rel !== omitted)) {
       writePracticeSkill(CLOSED, rel)
@@ -1682,6 +1680,39 @@ describe('markdownBans', () => {
   it('should pass a bullet run outside a canon checkout', async () => {
     write('package.json', JSON.stringify({ name: 'target' }))
     write('canon/context/a.md', `# A\n\n${items(6)}\n`)
+    git('add', '-A')
+
+    const report = await markdownBans(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.unmeasured).toBeUndefined()
+  })
+
+  it('should leave a banned character in the changelog unread', async () => {
+    write('package.json', JSON.stringify({ name: 'target' }))
+    write('README.md', '# Target\n\nA plain line.\n')
+    write('CHANGELOG.md', '# Changelog\n\nA release — with a dash.\n')
+    git('add', '-A')
+
+    const report = await markdownBans(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.unmeasured).toBeUndefined()
+  })
+
+  it('should still fail the same banned character outside the changelog', async () => {
+    write('package.json', JSON.stringify({ name: 'target' }))
+    write('README.md', '# Target\n\nA release — with a dash.\n')
+    git('add', '-A')
+
+    const report = await markdownBans(context())
+
+    expect(report.failure).toContain('banned character')
+  })
+
+  it('should pass a project whose only markdown is the changelog', async () => {
+    write('package.json', JSON.stringify({ name: 'target' }))
+    write('CHANGELOG.md', '# Changelog\n\nA release — with a dash.\n')
     git('add', '-A')
 
     const report = await markdownBans(context())

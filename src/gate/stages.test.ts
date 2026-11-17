@@ -1,4 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { fileLength } from '@/gate/file-length'
 import {
   commentBodyBlocks,
@@ -6,8 +9,13 @@ import {
   commentHeadBlocks,
   commentHistory,
 } from '@/gate/comment-caps'
-import { clientCommandCitations } from '@/gate/measures'
-import { STAGES, type StageScope } from '@/gate/stages'
+import { clientCommandCitations, designProse } from '@/gate/measures'
+import {
+  contextAuditArgv,
+  STAGES,
+  type StageScope,
+  stagesFor,
+} from '@/gate/stages'
 
 function scopeOf(id: string): StageScope {
   const stage = STAGES.find((candidate) => candidate.id === id)
@@ -394,6 +402,23 @@ describe('the design stage', () => {
     expect(regen).toBeGreaterThan(-1)
     expect(drifted).toContain('web/public/previews/design-tokens')
   })
+
+  it('should leave the prose budget to its own stage, so a target can run it', () => {
+    const checks =
+      STAGES.find((candidate) => candidate.id === 'design')?.checks ?? []
+
+    expect(checks).not.toContainEqual({ kind: 'measure', measure: designProse })
+  })
+})
+
+describe('the design prose stage', () => {
+  it('should count the record right after the design regen writes it', () => {
+    const ids = STAGES.map((stage) => stage.id)
+    const stage = STAGES.find((candidate) => candidate.id === 'design-prose')
+
+    expect(ids.indexOf('design-prose')).toBe(ids.indexOf('design') + 1)
+    expect(stage?.checks).toEqual([{ kind: 'measure', measure: designProse }])
+  })
 })
 
 describe('the markdown stage', () => {
@@ -408,13 +433,51 @@ describe('the markdown stage', () => {
 })
 
 describe('the context-citations stage', () => {
-  it('should run the widened audit, so a section and an index finding gate', () => {
-    const stage = STAGES.find((stage) => stage.id === 'context-citations')
-    const argv = stage?.checks.flatMap((check) =>
-      check.kind === 'cli' ? [check.argv] : [],
-    )
+  let root: string
 
-    expect(argv).toEqual([['context', 'audit', '--gate']])
+  const write = (rel: string, body: string): void => {
+    mkdirSync(join(root, rel, '..'), { recursive: true })
+    writeFileSync(join(root, rel), body)
+  }
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-context-stage-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it("should run the widened audit in canon's own checkout", () => {
+    write('package.json', JSON.stringify({ name: '@erclx/canon' }))
+
+    expect(contextAuditArgv(root)).toEqual(['context', 'audit', '--gate'])
+  })
+
+  it('should run the plain audit in a target that declared no gate key', () => {
+    write('package.json', JSON.stringify({ name: 'target' }))
+
+    expect(contextAuditArgv(root)).toEqual(['context', 'audit'])
+  })
+
+  it('should run the widened audit in a target whose config opts in', () => {
+    write('package.json', JSON.stringify({ name: 'target' }))
+    write('canon/config/context.toml', 'gate-length = true\n')
+
+    expect(contextAuditArgv(root)).toEqual(['context', 'audit', '--gate'])
+  })
+
+  it('should skip a project carrying no context folder', () => {
+    const stage = STAGES.find((stage) => stage.id === 'context-citations')
+
+    expect(stage?.absent?.(root)).toContain('no entry to audit')
+  })
+
+  it('should run in a project carrying a context folder', () => {
+    mkdirSync(join(root, 'canon', 'context'), { recursive: true })
+    const stage = STAGES.find((stage) => stage.id === 'context-citations')
+
+    expect(stage?.absent?.(root)).toBeUndefined()
   })
 })
 
@@ -458,5 +521,55 @@ describe('the comment cap stages', () => {
       'comment-history',
       'comment-file-share',
     ])
+  })
+})
+
+describe('the shared stage set', () => {
+  let root: string
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-stage-set-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('should tag the eleven stages that fit any project as shared', () => {
+    const shared = STAGES.filter((stage) => stage.shared).map((s) => s.id)
+
+    expect(shared).toEqual([
+      'design-prose',
+      'context-citations',
+      'canonical-records',
+      'document-ceiling',
+      'embedded-programs',
+      'file-length',
+      'comment-head-blocks',
+      'comment-body-blocks',
+      'comment-history',
+      'comment-file-share',
+      'markdown',
+    ])
+  })
+
+  it("should run every stage in canon's own checkout", () => {
+    writeFileSync(
+      join(root, 'package.json'),
+      JSON.stringify({ name: '@erclx/canon' }),
+    )
+
+    expect(stagesFor(root)).toBe(STAGES)
+  })
+
+  it('should run the shared stages alone in a project with another name', () => {
+    writeFileSync(join(root, 'package.json'), JSON.stringify({ name: 'app' }))
+
+    expect(stagesFor(root).map((stage) => stage.id)).toContain('markdown')
+    expect(stagesFor(root).every((stage) => stage.shared)).toBe(true)
+  })
+
+  it('should run the shared stages alone in a project with no manifest', () => {
+    expect(stagesFor(root).every((stage) => stage.shared)).toBe(true)
   })
 })

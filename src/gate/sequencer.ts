@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { availableParallelism } from 'node:os'
 import { join } from 'node:path'
 import { execa } from 'execa'
@@ -16,7 +16,7 @@ import {
   machineLockPath,
 } from '@/gate/suite-lock'
 import { gitEnv } from '@/git/env'
-import { PROJECT_ROOT } from '@/roots/project'
+import { isOwnCheckout, PROJECT_ROOT } from '@/roots/project'
 
 export type StageStatus =
   /** Every check ran and none found a fact. */
@@ -142,12 +142,8 @@ export interface ChangedSet {
 
 /**
  * The branch's committed diff, the working tree, and untracked files as one
- * set. A wider set only means running more stages, so every fallback widens.
- *
- * The baseline is `origin/main` rather than local `main`. On `main` itself the
- * local ref is HEAD, so a merge base against it resolves to HEAD and every
- * commit not yet pushed drops out of the changed set, which would skip the
- * scoped stages on a direct push.
+ * set, against `origin/main`, since local `main` on `main` is HEAD. Every
+ * fallback widens.
  */
 export async function collectChangedFiles(
   run: RunCommand,
@@ -214,13 +210,8 @@ export function hasChanged(
 }
 
 /**
- * Runs one stage's checks in order, stopping at the first that finds a fact.
- *
- * Borrowed output is piped whether the check passed or failed, which is what
- * the script this replaces did with a `2>&1` capture and a single
- * `pipe_output`. Keeping the pass side means a run of the old script and a run
- * of this one can be diffed line for line, which is the only evidence
- * available that a port of this size changed no verdict.
+ * Runs one stage's checks in order, stopping at the first that finds a fact,
+ * and pipes borrowed output on a pass too.
  */
 export async function runStage(
   stage: Stage,
@@ -248,6 +239,16 @@ async function executeStage(
     }
   }
 
+  const absent = stage.absent?.(ctx.root)
+  if (absent !== undefined) {
+    return {
+      id: stage.id,
+      label: stage.label,
+      status: 'skipped',
+      emissions: [{ kind: 'info', text: absent }],
+    }
+  }
+
   // CI runs one suite per runner, so a lock there queues behind nothing.
   if (stage.lock === undefined || ctx.ci) return runChecks(stage, ctx, [], {})
 
@@ -267,8 +268,7 @@ async function executeStage(
         ]
 
   try {
-    // The suite's own global setup takes this lock for a hand run, so the
-    // child is told its parent holds it rather than waiting on the parent.
+    // The suite's own setup takes this lock, so the child is told it is held.
     const outcome = withLoadLine(
       await runChecks(stage, ctx, queued, { [HELD_LOCK_VARIABLE]: stage.lock }),
       stage,
@@ -332,8 +332,7 @@ async function runChecks(
     }
 
     if (outcome.unmeasured !== undefined) {
-      // Under CI an absent input is a broken runner rather than a machine mid-setup,
-      // so the same reading refuses there and warns here.
+      // Under CI an absent input is a broken runner, so it refuses there.
       if (ctx.ci) {
         return {
           id: stage.id,
@@ -386,11 +385,13 @@ async function runCheck(
 
   const run = check.kind === 'cli' ? ctx.cli : ctx.run
   const argv =
-    check.kind === 'command' &&
-    check.changedArgv !== undefined &&
-    ctx.changed !== undefined
-      ? check.changedArgv(ctx.changed)
-      : check.argv
+    check.kind === 'cli'
+      ? typeof check.argv === 'function'
+        ? check.argv(ctx.root)
+        : check.argv
+      : check.changedArgv !== undefined && ctx.changed !== undefined
+        ? check.changedArgv(ctx.changed)
+        : check.argv
   const result = await run(argv, env)
   const emissions: Emission[] = [{ kind: 'output', text: result.all }]
   if (
@@ -407,14 +408,8 @@ async function runCheck(
 }
 
 /**
- * A regenerated surface asserted against both the index and the untracked set.
- *
- * The diff alone passes a regen that emitted a file nobody ever committed, so
- * the listing beside it is what makes the assert cover an arrival as well as an
- * edit. Either read failing yields the stage's one remedy line rather than a
- * message of its own, which is what the shell this replaces did with the same
- * string on both of its calls: the remedy is the same either way, since the
- * fix is to stage what the regen wrote.
+ * A regenerated surface asserted against the index and the untracked set, so
+ * a regen emitting a file nobody committed fails. Either read takes one remedy.
  */
 async function runDrift(
   pathspec: string,
@@ -448,12 +443,8 @@ async function runDrift(
 }
 
 /**
- * Runs the stages in table order and stops at the first failure.
- *
- * Stopping is what the script this replaces did with `set -e` and an exiting
- * log line, and it is load bearing for the regenerate-then-assert stages:
- * clearing one reveals the next behind it, so a branch touching several
- * regenerated surfaces costs a stage per surface rather than one round.
+ * Runs the stages in table order and stops at the first failure, so clearing
+ * a regenerate-then-assert stage reveals the next one behind it.
  */
 export async function runStages(
   stages: readonly Stage[],
@@ -495,10 +486,8 @@ export function summarize(results: readonly StageResult[]): Summary {
 }
 
 /**
- * One code for a failure, which is what a `bun run` caller and a git hook both
- * read. A stage that could not measure does not take a code of its own here,
- * because it has already refused under CI and reports on a contributor's
- * machine, so a second code would name a state no caller branches on.
+ * One code for a failure. An unmeasured stage takes none, since it already
+ * refuses under CI and a second code would name a state nobody branches on.
  */
 export function exitCodeFor(results: readonly StageResult[]): number {
   return results.some((result) => result.status === 'failed') ? 1 : 0
@@ -506,25 +495,26 @@ export function exitCodeFor(results: readonly StageResult[]): number {
 
 /**
  * Spawns a command from the project root with git's resolution variables
- * stripped.
- *
- * A git hook exports `GIT_DIR`, which takes precedence over the working
- * directory, so a stage reading history would resolve against whatever
- * repository the hook points at rather than the tree being verified.
+ * stripped, since a hook's `GIT_DIR` beats the working directory.
  */
 export function commandRunner(root: string): RunCommand {
   return async (argv, env) => spawn(argv[0], argv.slice(1), root, env)
 }
 
 /**
- * Spawns this checkout's own CLI rather than whatever `canon` resolves to.
- *
- * A globally installed binary resolves to the main checkout no matter which
- * worktree is running, so a gate reading through it would measure the wrong
- * tree and report a pass over a branch it never opened.
+ * The CLI a stage spawns: a canon checkout's own, since several verbs write
+ * through the install's root, and this install's anywhere else.
  */
+export function cliEntry(root: string): string {
+  const own = join(root, 'src', 'cli.ts')
+  return isOwnCheckout(root) && existsSync(own)
+    ? own
+    : join(PROJECT_ROOT, 'src', 'cli.ts')
+}
+
+/** Spawns the CLI `cliEntry` names, with the checked project as its cwd. */
 export function cliRunner(root: string): RunCommand {
-  const cli = join(PROJECT_ROOT, 'src', 'cli.ts')
+  const cli = cliEntry(root)
   return async (argv, env) => spawn(process.execPath, [cli, ...argv], root, env)
 }
 

@@ -38,7 +38,7 @@ The run commands, which stack references and `docs/target/projects.md` send a se
 
 Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`, and every threshold comparison in `measures.ts`. Consumer replay runs the frozen snapshots on a synced-surface change, so before a release run `bun src/cli.ts sandbox replay <checkout>...` against the real consumers. Comment stages fail a touched file's old comments.
 
-- Stages run in table order and the first to find a fact halts the run. Unreferenced rules, Audit set, and Comment share per file report and never fail the push, the last until the comment sweep lands
+- Stages run in table order, all in canon's checkout and the `shared` ones elsewhere. The first fact halts the run. Unreferenced rules, Audit set, and Comment share per file only report
 - The changed set unions the diff against `origin/main`, the working tree, and untracked files. Fallbacks widen, and `--all` forces every stage. On `main` the local ref is HEAD, so the base is remote.
 - A scoped run hands `vitest related` changed `.ts` files plus the tests `corpus-readers.ts` finds naming another changed file's folder. A test config or `package.json` runs all. Both skip e2e suites.
 - Indexes and Consumed copies regenerate then assert, so the first run after an edit reports drift and `check:ci` writes the tree. Stage the rewrite and run again, since a rerun alone repeats the diff.
@@ -56,7 +56,7 @@ Installs each domain `canon init` runs, as the steps `runDomains` walks in `run.
 
 Spawns `src/cli.ts` as a real process against a temporary directory, so a case asserts what an in-process call cannot, being whether a verb is registered, how it exits, and whether `--json` parses off stdout alone.
 
-- No case drives `gate run`, since its last stage runs the suite that spawns the case. `checkout-mismatch.test.ts` is the one exception and kills the child once the warning reaches stderr.
+- A case drives `gate run` in a target fixture, as `gate.test.ts` does, or kills it at the warning, as `checkout-mismatch.test.ts` does, since a canon run reaches Tests and re-enters the suite.
 - To add a case, write the fixture under a per-test `mkdtempSync`, then assert the file tree, exit code, and parsed record together. Take a count from the verb's catalog.
 - `runCli` points `HOME` and the state folder under the case's `cwd` and throws `ContainmentViolation` when a spawn writes into the real `stateDir()`
 - Run one test file as `bun --bun vitest run <path>`. Without `--bun` a module importing `bun` fails at collection, and bare `bun test` runs Bun's own runner, which lacks vitest's `expect` context.

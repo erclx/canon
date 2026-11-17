@@ -1,9 +1,14 @@
-// Runs this folder's verify phases in a fixed order. The phases a stack
-// requires come from scripts/verify.json, which each stack ships and the
-// nearest one wins. Only node: modules, since a target's own linter and
-// tsc --noEmit read this file with no Bun types.
+// Runs this folder's verify phases in the order scripts/verify.json names.
+// Only node: modules, since a target's linter and tsc read it with no Bun
+// types.
 import { spawnSync } from 'node:child_process'
-import { accessSync, constants, existsSync, readFileSync } from 'node:fs'
+import {
+  accessSync,
+  constants,
+  existsSync,
+  readFileSync,
+  realpathSync,
+} from 'node:fs'
 import { delimiter, join } from 'node:path'
 
 interface Tool {
@@ -279,30 +284,9 @@ function runPhase(
   logInfo(phase.passed)
 }
 
-function listMarkdown(): string[] {
-  const result = spawnSync(
-    'git',
-    [
-      'ls-files',
-      '--cached',
-      '--others',
-      '--exclude-standard',
-      '--',
-      '*.md',
-      ':(exclude)CHANGELOG.md',
-      ':(exclude)**/CHANGELOG.md',
-    ],
-    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] },
-  )
-  return (result.stdout ?? '').split('\n').filter((line) => line !== '')
-}
-
-// Where canon comes from for the canon stages. A canon on PATH wins.
-// Under CI, where no canon is installed, bunx fetches the release the last
-// sync stamped, since that sync wrote this file and so carries every verb it
-// calls. A local run with neither skips, since a pre-push hook stalling on a
-// fetch costs more than the stage. CI reads as the literal 'true' only, the
-// form GitHub Actions sets.
+// A canon on PATH wins. Under CI, bunx fetches the release the last sync
+// stamped, and a local run with neither skips rather than stalling a hook on
+// a fetch. CI reads as the literal 'true' only.
 const STAMP = 'canon/config/config.json'
 const INSTALL_HINT = 'Install with `bun install --global @erclx/canon`.'
 const isCi = process.env.CI === 'true'
@@ -340,156 +324,121 @@ function skipNoCanon(): void {
 // Exit 1 is a refusal that measured nothing, and through bunx a failed fetch
 // too. Locally that skips. Under CI the stage fails, since a skip there is
 // the gate passing on nothing.
-function refused(verb: string, output: string): void {
+function refused(reason: string, output: string): void {
   if (!isCi) {
-    logSkip(
-      `Skipped: canon ${verb} refused or is missing from this canon, and measured nothing.`,
-    )
+    logSkip(`Skipped: ${reason}, and measured nothing.`)
     return
   }
   pipeOutput(output)
-  fail(
-    `canon ${verb} refused, is missing from this canon, or could not be fetched, and measured nothing. Under CI that fails the stage`,
-  )
+  fail(`${reason}, and measured nothing. Under CI that fails the stage`)
 }
 
-// canon markdown audit exits 0 on a pass, 1 on a refusal that measured
-// nothing, 2 on a finding, and 3 when it shipped an empty ban set.
-function checkMarkdownBans(): void {
-  const canon = resolveCanon()
-  if (canon.kind === 'skip') {
-    skipNoCanon()
-    return
-  }
+interface GateStage {
+  readonly label: string
+  readonly status: string
+  readonly failure?: string
+  readonly output?: string
+}
 
-  const files = listMarkdown()
-  if (files.length === 0) {
-    logInfo('No markdown file to check outside the exclusion set.')
-    return
-  }
+interface GateRecord {
+  readonly ok: boolean
+  readonly root: string
+  readonly stages: readonly GateStage[]
+}
 
-  const { code, output } = capture(
-    `${canon.command} markdown audit "$@"`,
-    files,
-  )
-  switch (code) {
-    case 0:
-      logInfo('No banned character')
-      return
-    case 1:
-      refused('markdown audit', output)
-      return
-    case 2:
-      pipeOutput(output)
-      fail(
-        'Markdown prose carries a banned character, a relative link resolves to nothing on disk, or a gated path breaks a density limit',
-      )
-      break
-    case 3:
-      pipeOutput(output)
-      fail(
-        'The markdown audit shipped an empty ban set, so the corpus was walked and nothing was looked for',
-      )
-      break
-    default:
-      fail(
-        `canon markdown audit exited ${code}, which is neither a pass nor a finding`,
-      )
+function parseGateRecord(stdout: string): GateRecord | undefined {
+  const lines = stdout.trim().split('\n')
+  const record = asRecord(readJsonText(lines[lines.length - 1] ?? ''))
+  if (typeof record.ok !== 'boolean' || typeof record.root !== 'string') {
+    return undefined
+  }
+  return {
+    ok: record.ok,
+    root: record.root,
+    stages: asArray(record.stages).flatMap((entry) => {
+      const stage = asRecord(entry)
+      if (typeof stage.label !== 'string' || typeof stage.status !== 'string') {
+        return []
+      }
+      return [
+        {
+          label: stage.label,
+          status: stage.status,
+          failure:
+            typeof stage.failure === 'string' ? stage.failure : undefined,
+          output: typeof stage.output === 'string' ? stage.output : undefined,
+        },
+      ]
+    }),
   }
 }
 
-// canon code audit exits 0 on a pass, 1 on a refusal that read nothing, and 2
-// on a finding. A canon too old to carry the verb exits 1 on the unknown
-// command, which the refusal branch covers.
-function checkEmbeddedCode(): void {
-  const canon = resolveCanon()
-  if (canon.kind === 'skip') {
-    skipNoCanon()
-    return
-  }
-
-  const { code, output } = capture(`${canon.command} code audit`)
-  switch (code) {
-    case 0:
-      logInfo('No page, stylesheet, or script embedded past the limit')
-      return
-    case 1:
-      refused('code audit', output)
-      return
-    case 2:
-      pipeOutput(output)
-      fail(
-        'Source embeds a page, stylesheet, or script past the line limit. Move each into its own file, or mark it where it must stay inline',
-      )
-      break
-    default:
-      fail(
-        `canon code audit exited ${code}, which is neither a pass nor a finding`,
-      )
-  }
-}
-
-// canon context audit exits 0 on a pass, 1 on a refusal, and 2 on a gating
-// finding. The folder test reads the working directory, so a nested project
-// is audited as itself rather than through the repository above it. The
-// audit resolves either root, and an unmoved project keeps .claude/context.
-const CONTEXT_FOLDERS = ['canon/context', '.claude/context']
-const CONTEXT_CONFIG = 'canon/config/context.toml'
-
-// A project opts into the shape and length gate by declaring gated with any
-// value or setting gate-length to true, and any other project gets the plain
-// audit, which gates citations and the requirements cap alone. The script
-// carries no TOML parser, so it reads top-level keys up to the first table
-// header, and canon itself reports a key declared in a shape it cannot use.
-function declaresGateKeys(): boolean {
-  let text: string
+function readJsonText(text: string): unknown {
   try {
-    text = readFileSync(CONTEXT_CONFIG, 'utf8')
+    return JSON.parse(text)
+  } catch {
+    return undefined
+  }
+}
+
+function sameDirectory(a: string, b: string): boolean {
+  try {
+    return realpathSync(a) === realpathSync(b)
   } catch {
     return false
   }
-  for (const line of text.split('\n')) {
-    const trimmed = line.trim()
-    if (trimmed.startsWith('[')) return false
-    if (/^["']?gated["']?\s*=/.test(trimmed)) return true
-    if (/^["']?gate-length["']?\s*=\s*true\b/.test(trimmed)) return true
-  }
-  return false
 }
 
-function checkContextAudit(): void {
-  if (!CONTEXT_FOLDERS.some((folder) => existsSync(folder))) {
-    logSkip(
-      `Skipped: no ${CONTEXT_FOLDERS.join(' or ')} folder here, so there is no entry to audit`,
+// canon gate run prints one JSON record, exiting 1 when a stage failed. No
+// record means an old canon or a failed fetch, and a record naming another
+// root means a gate that checked its own install.
+function checkCanonGate(): void {
+  const canon = resolveCanon()
+  if (canon.kind === 'skip') {
+    skipNoCanon()
+    return
+  }
+
+  const result = spawnSync(
+    '/bin/sh',
+    ['-c', `${canon.command} gate run --nested --json`],
+    { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 },
+  )
+  const stdout = result.stdout ?? ''
+  const output = `${stdout}${result.stderr ?? ''}`
+  const record = parseGateRecord(stdout)
+  if (record === undefined) {
+    refused(
+      'canon gate run refused, is missing from this canon, or could not be fetched',
+      output,
+    )
+    return
+  }
+  if (!sameDirectory(record.root, process.cwd())) {
+    refused(
+      `canon gate run checked ${record.root} rather than this project, so this canon predates the shared check set. ${INSTALL_HINT}`,
+      output,
     )
     return
   }
 
-  const canon = resolveCanon()
-  if (canon.kind === 'skip') {
-    skipNoCanon()
-    return
+  for (const stage of record.stages) {
+    if (stage.status === 'passed') logInfo(stage.label)
+    else if (stage.status === 'skipped') logSkip(`${stage.label}: skipped`)
+    else if (stage.status === 'unmeasured') {
+      logSkip(`${stage.label}: measured nothing`)
+    } else if (stage.status === 'failed') {
+      if (stage.output !== undefined) pipeOutput(stage.output)
+      fail(
+        `${stage.label}: ${stage.failure ?? 'failed'}. Run 'canon gate run' to read each finding`,
+      )
+    }
   }
 
-  const verb = declaresGateKeys() ? 'context audit --gate' : 'context audit'
-  const { code, output } = capture(`${canon.command} ${verb}`)
-  switch (code) {
-    case 0:
-      logInfo('No gating context finding')
-      return
-    case 1:
-      refused('context audit', output)
-      return
-    case 2:
-      pipeOutput(output)
-      fail(
-        `A context entry carries a gating finding. Run 'canon ${verb}' to read each one`,
-      )
-      break
-    default:
-      fail(
-        `canon context audit exited ${code}, which is neither a pass nor a finding`,
-      )
+  if (result.status !== 0 || !record.ok) {
+    fail(
+      `canon gate run exited ${result.status ?? 1} with no failed stage named`,
+    )
   }
 }
 
@@ -506,25 +455,17 @@ function main(): void {
     runPhase(phase, required.has(phase.script), declared)
   }
 
-  logStep('Markdown bans')
-  checkMarkdownBans()
+  logStep('Canon checks')
+  checkCanonGate()
 
-  logStep('Embedded code')
-  checkEmbeddedCode()
-
-  logStep('Context audit')
-  checkContextAudit()
-
-  // The card exclusion check reads the build, so it runs last, and only where
-  // the stack that owns the card route shipped it.
+  // The card check reads the build, so it runs last, where its stack shipped it.
   if (existsSync(CARD_EXCLUSION)) {
     logStep('Card exclusion')
     runCheck(`bash ${CARD_EXCLUSION}`, 'Card exclusion check failed')
     logInfo('Card exclusion passed')
   }
 
-  // The head tag check reads the build too, and runs only where the stack that
-  // writes the tags shipped it.
+  // The head tag check reads the build too, where its stack shipped it.
   if (existsSync(HEAD_META)) {
     logStep('Head tags')
     runCheck(`bash ${HEAD_META}`, 'Head tag check failed')
