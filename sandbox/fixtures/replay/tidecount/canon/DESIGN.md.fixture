@@ -1,0 +1,89 @@
+# Design
+
+The client is a working tool for coordinators who spend an evening going through a season of visits. It reads like a field notebook laid over a chart, quiet and dense, with color kept for the data.
+
+Three surfaces share one frame:
+
+- The chat panel on the left, where a question goes in and the answer comes back with its tool calls folded under it
+- The map canvas in the middle, where the agent places visits and the reader drags them
+- The detail drawer on the right, which opens on one visit and shows its counts and notes
+
+Every rule below serves the canvas first, since that is where a reader's eye rests longest.
+
+## Personality
+
+Calm, exact, and a little salty. The interface never celebrates. A count is a count, and a missing count says so plainly rather than hiding.
+
+## Color
+
+The palette starts from wet rock and open water. Neutrals carry the frame, and the two accents carry meaning.
+
+| Token          | Light     | Dark      | Use                                 |
+| -------------- | --------- | --------- | ----------------------------------- |
+| `--bg`         | `#f6f5f1` | `#14171a` | Page background                     |
+| `--surface`    | `#ffffff` | `#1c2024` | Panels and the drawer               |
+| `--surface-2`  | `#eceae4` | `#252a2f` | Hover rows and the canvas ground    |
+| `--border`     | `#d9d6cd` | `#343a40` | Hairlines between regions           |
+| `--text`       | `#1d2125` | `#e6e4de` | Body text                           |
+| `--text-muted` | `#666b70` | `#9aa0a6` | Captions, axis labels, timestamps   |
+| `--accent`     | `#1f6f8b` | `#56a8c4` | Links, the focused pin, the cursor  |
+| `--warn`       | `#b5562a` | `#e08a5c` | A count that fell past the cutoff   |
+| `--ok`         | `#3d7a4f` | `#7cbf8e` | A count that held or rose           |
+| `--edge`       | `#9fb6bf` | `#4a6470` | Edges from the question to a visit  |
+
+- Never use `--warn` and `--ok` for decoration. Each one means a direction of change and nothing else.
+- Edge weight maps to opacity between 0.25 and 0.9, never to color.
+- The map base style is desaturated so the pins carry all the color on screen.
+
+### Contrast
+
+Every text token passes 4.5 to 1 against `--bg` and `--surface` in both themes. The muted token passes against `--surface` and is not used on `--surface-2`.
+
+## Typography
+
+| Role    | Family         | Size | Weight | Line height |
+| ------- | -------------- | ---- | ------ | ----------- |
+| Display | Source Serif 4 | 22px | 600    | 1.25        |
+| Heading | Inter          | 15px | 600    | 1.35        |
+| Body    | Inter          | 14px | 400    | 1.5         |
+| Caption | Inter          | 12px | 400    | 1.4         |
+| Data    | JetBrains Mono | 13px | 400    | 1.4         |
+
+- Counts, tide heights, and dates set in the data face with tabular figures
+- The display face appears once per screen at most, on the drawer title
+- Never set body text below 13px, including inside a pin tooltip
+
+## Spacing
+
+A 4px base, used in the steps below.
+
+| Token     | Value | Use                                  |
+| --------- | ----- | ------------------------------------ |
+| `--sp-1`  | 4px   | Icon to label                        |
+| `--sp-2`  | 8px   | Rows inside a list                   |
+| `--sp-3`  | 12px  | Field groups                         |
+| `--sp-4`  | 16px  | Panel padding                        |
+| `--sp-6`  | 24px  | Between sections in the drawer       |
+| `--sp-8`  | 32px  | Between the three surfaces on wide   |
+
+- The chat panel is 360px wide and the drawer 400px. The canvas takes the rest.
+- Under 1100px the drawer overlays the canvas rather than pushing it.
+
+## Borders
+
+| Token        | Value                  | Use                         |
+| ------------ | ---------------------- | --------------------------- |
+| `--radius-1` | 4px                    | Inputs, chips               |
+| `--radius-2` | 8px                    | Cards, the drawer           |
+| `--hairline` | 1px solid var(--border) | Region dividers             |
+
+- Pins are circles, never rounded squares, so they read as points on a map
+- No drop shadows on the frame. The drawer alone carries one, since it floats.
+
+## Motion
+
+Layout changes on the canvas animate over 240ms with an ease-out curve, so a reader can follow a pin to its new place. Everything else is instant. Under `prefers-reduced-motion`, the canvas moves instantly too.
+
+## Iconography
+
+Lucide at 16px with a 1.5 stroke, in `--text-muted` unless the icon is the only label on a control, where it takes `--text`.

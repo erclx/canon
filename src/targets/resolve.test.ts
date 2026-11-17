@@ -44,7 +44,7 @@ afterEach(() => {
 describe('resolveTargets', () => {
   it('should take the paths the caller named and read no source of its own', async () => {
     const report = await resolveTargets({
-      paths: [join(ROOT, 'caret')],
+      paths: [join(ROOT, 'birch')],
       registryFile: FILE,
       scratchRoots: NO_ROOTS,
     })
@@ -56,8 +56,8 @@ describe('resolveTargets', () => {
   })
 
   it('should report every target the record holds', async () => {
-    recordTarget(stamp('caret'), new Date('2026-08-30'), FILE, NO_ROOTS)
-    recordTarget(stamp('stackr'), new Date('2026-08-30'), FILE, NO_ROOTS)
+    recordTarget(stamp('birch'), new Date('2026-08-30'), FILE, NO_ROOTS)
+    recordTarget(stamp('delta'), new Date('2026-08-30'), FILE, NO_ROOTS)
 
     const report = await resolveTargets({
       registryFile: FILE,
@@ -83,7 +83,7 @@ describe('resolveTargets', () => {
   })
 
   it('should run no sweep when the caller names no roots', async () => {
-    recordTarget(join(ROOT, 'caret'), new Date('2026-08-30'), FILE, NO_ROOTS)
+    recordTarget(join(ROOT, 'birch'), new Date('2026-08-30'), FILE, NO_ROOTS)
 
     const report = await resolveTargets({
       registryFile: FILE,
@@ -94,7 +94,7 @@ describe('resolveTargets', () => {
   })
 
   it('should add a target the sweep found and the record never held', async () => {
-    stamp('stackr')
+    stamp('delta')
 
     const report = await resolveTargets({
       registryFile: FILE,
@@ -109,8 +109,8 @@ describe('resolveTargets', () => {
   })
 
   it('should not report a target twice when both sources hold it', async () => {
-    const caret = stamp('caret')
-    recordTarget(caret, new Date('2026-08-30'), FILE, NO_ROOTS)
+    const birch = stamp('birch')
+    recordTarget(birch, new Date('2026-08-30'), FILE, NO_ROOTS)
 
     const report = await resolveTargets({
       registryFile: FILE,
@@ -126,15 +126,15 @@ describe('resolveTargets', () => {
   // The record knows the clone a sync ran in and only the sweep sees the second,
   // so the rows fold rather than counting one project twice.
   it('should fold a recorded clone into the sweep row that found its sibling', async () => {
-    const first = stamp('public', 'caret')
-    const second = stamp('extensions', 'caret')
+    const first = stamp('public', 'birch')
+    const second = stamp('extensions', 'birch')
     recordTarget(first, new Date('2026-08-30'), FILE, NO_ROOTS)
 
     const report = await resolveTargets({
       registryFile: FILE,
       scratchRoots: NO_ROOTS,
       sweep: [ROOT],
-      originOf: async () => 'github.com/erclx/caret',
+      originOf: async () => 'github.com/erclx/birch',
     })
 
     expect(report.targets).toHaveLength(1)
@@ -148,16 +148,16 @@ describe('resolveTargets', () => {
   // Every caller reading one path takes the first, and the record names a clone
   // a sync actually ran in, where sort order names an arbitrary one.
   it('should lead with the recorded clone rather than the one that sorts first', async () => {
-    stamp('aaa-first-by-sort', 'caret')
+    stamp('aaa-first-by-sort', 'birch')
 
-    const recorded = stamp('zzz-last-by-sort', 'caret')
+    const recorded = stamp('zzz-last-by-sort', 'birch')
     recordTarget(recorded, new Date('2026-08-30'), FILE, NO_ROOTS)
 
     const report = await resolveTargets({
       registryFile: FILE,
       scratchRoots: NO_ROOTS,
       sweep: [ROOT],
-      originOf: async () => 'github.com/erclx/caret',
+      originOf: async () => 'github.com/erclx/birch',
     })
 
     expect(report.targets[0]?.paths[0]).toBe(recorded)
@@ -166,15 +166,15 @@ describe('resolveTargets', () => {
   // The sweep sorts the second clone first, and the merge leads with the
   // recorded one, so a carried `legacyPaths` would answer in the wrong order.
   it('should re-derive legacy paths against the merged row rather than the sweep order', async () => {
-    const recordedLegacy = stampLegacy('public', 'caret')
-    const foundLegacy = stampLegacy('extensions', 'caret')
+    const recordedLegacy = stampLegacy('public', 'birch')
+    const foundLegacy = stampLegacy('extensions', 'birch')
     recordTarget(recordedLegacy, new Date('2026-08-30'), FILE, NO_ROOTS)
 
     const report = await resolveTargets({
       registryFile: FILE,
       scratchRoots: NO_ROOTS,
       sweep: [ROOT],
-      originOf: async () => 'github.com/erclx/caret',
+      originOf: async () => 'github.com/erclx/birch',
     })
 
     expect(report.targets).toHaveLength(1)
@@ -186,7 +186,7 @@ describe('resolveTargets', () => {
   })
 
   it('should keep a recorded target the sweep could not reach', async () => {
-    const elsewhere = join(ROOT, 'elsewhere', 'diction')
+    const elsewhere = join(ROOT, 'elsewhere', 'cedar')
     const swept = join(ROOT, 'swept')
     mkdirSync(elsewhere, { recursive: true })
     mkdirSync(swept, { recursive: true })

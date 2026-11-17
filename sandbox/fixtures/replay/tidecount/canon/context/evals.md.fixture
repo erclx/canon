@@ -1,0 +1,81 @@
+---
+title: Evals
+description: The search comparison runner and the agent cases, kept as two separate stacks
+---
+
+# Evals
+
+Two unrelated stacks share the word. The search comparison measures how well note search ranks known-relevant visits. The agent eval checks that the agent calls the right tools and answers in the right shape.
+
+## Stack 1: Search comparison
+
+### Layer responsibilities
+
+- `python/evals/queries.jsonl`: 64 questions, each with the visit ids a person marked relevant
+- `python/evals/compare.py`: runs every question through keyword, dense, and hybrid search and scores each
+- `python/evals/report.py`: writes a markdown table of recall at 10 and mean reciprocal rank per method
+
+### Commands
+
+```bash
+uv run python -m evals.compare --encoder default
+uv run python -m evals.report var/evals/latest.json
+```
+
+The comparison reads the local database, so rebuild it first when the export changed.
+
+### Gotchas
+
+- The relevance marks were made against the spring 2026 export. A visit added later can never count as relevant, so recall drifts down as the database grows.
+- Dense search over notes under 20 characters scores near random. Those notes are filtered out before scoring.
+
+## Stack 2: Agent eval
+
+### Layer responsibilities
+
+- `web/evals/cases/`: one JSON file per case
+- `web/scripts/agent-probe.ts`: runs one case against a route
+- `web/scripts/agent-eval.ts`: runs every case and writes a pass and fail summary
+- `.github/workflows/agent-eval.yml`: runs the full set on request
+
+### Case kinds
+
+| Kind      | Checks                                                     |
+| --------- | ---------------------------------------------------------- |
+| `tools`   | The run called each named tool at least once               |
+| `order`   | The named tools were called in the given order             |
+| `shape`   | The final text holds the given headings or list items      |
+| `refusal` | The run declined a question outside the survey data        |
+
+### Request shape
+
+Each case is the body the client would send, plus the checks.
+
+```json
+{
+  "messages": [{ "role": "user", "content": "Which sites lost sea stars after the August heat?" }],
+  "question": "Track sea star counts across the summer heat event.",
+  "provider": "local",
+  "checks": [
+    { "kind": "tools", "names": ["lookupSpecies", "searchVisits"] },
+    { "kind": "shape", "contains": ["NB-04"] }
+  ]
+}
+```
+
+### Running on request
+
+The workflow takes a provider as input and reads that provider's key from a secret. It never runs on a pull request, since a full run against a hosted model costs several dollars.
+
+### Forcing hosted mode locally
+
+Set `TIDECOUNT_MODE=hosted` before running the eval to check the hosted tool set against a local model.
+
+### Local model choice (v2.6)
+
+Four local models were compared on the agent cases. The one in use passed 41 of 44 cases and was the only one that never called a tool with a missing field at the 8192 context floor.
+
+## Gotchas
+
+- A case that passes locally and fails in the workflow usually depends on the local notes-file tools, which hosted mode removes
+- The `refusal` checks are brittle against a model upgrade, so read a failure before changing the case

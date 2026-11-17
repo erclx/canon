@@ -53,41 +53,41 @@ afterEach(() => {
 
 describe('sweepTargets', () => {
   it('should find a target stamped at the current path', async () => {
-    const caret = stamp('caret')
+    const birch = stamp('birch')
 
     const report = await sweepTargets([ROOT], { originOf: noOrigin })
 
-    expect(report.targets.map((target) => target.paths)).toEqual([[caret]])
+    expect(report.targets.map((target) => target.paths)).toEqual([[birch]])
   })
 
   it('should find a target still stamped at the retired path and mark it', async () => {
-    const stackr = stampLegacy('stackr')
+    const delta = stampLegacy('delta')
 
     const report = await sweepTargets([ROOT], { originOf: noOrigin })
 
     expect(report.targets).toHaveLength(1)
-    expect(report.targets[0]?.legacyPaths).toEqual([stackr])
+    expect(report.targets[0]?.legacyPaths).toEqual([delta])
   })
 
   // A pre-rename install still writes this form as its current path, so a sync
   // from it would otherwise drop the target out of the walk silently.
   it('should find a target stamped only at the retired folder path', async () => {
-    const diction = stampRetiredName('diction')
+    const cedar = stampRetiredName('cedar')
 
     const report = await sweepTargets([ROOT], { originOf: noOrigin })
 
     expect(report.targets).toHaveLength(1)
-    expect(report.targets[0]?.legacyPaths).toEqual([diction])
+    expect(report.targets[0]?.legacyPaths).toEqual([cedar])
   })
 
   // The group boolean this replaced cleared for the whole group the moment one
   // clone migrated, so a project half-migrated read as fully current.
   it('should name only the clone still at the retired path when its sibling migrated', async () => {
-    const current = stamp('public', 'caret')
-    const legacy = stampLegacy('extensions', 'caret')
+    const current = stamp('public', 'birch')
+    const legacy = stampLegacy('extensions', 'birch')
 
     const report = await sweepTargets([ROOT], {
-      originOf: async () => 'github.com/erclx/caret',
+      originOf: async () => 'github.com/erclx/birch',
     })
 
     expect(report.targets).toHaveLength(1)
@@ -106,11 +106,11 @@ describe('sweepTargets', () => {
   // A walk that counts only one clone misses a repair run in another, so two
   // clones sharing an origin are one project.
   it('should count two clones sharing an origin as one target', async () => {
-    const first = stamp('public', 'caret')
-    const second = stamp('extensions', 'chrome', 'caret')
+    const first = stamp('public', 'birch')
+    const second = stamp('extensions', 'chrome', 'birch')
 
     const report = await sweepTargets([ROOT], {
-      originOf: async () => 'github.com/erclx/caret',
+      originOf: async () => 'github.com/erclx/birch',
     })
 
     expect(report.targets).toHaveLength(1)
@@ -129,13 +129,13 @@ describe('sweepTargets', () => {
   })
 
   it('should separate two targets whose origins differ', async () => {
-    const caret = stamp('caret')
+    const birch = stamp('birch')
 
-    stamp('stackr')
+    stamp('delta')
 
     const report = await sweepTargets([ROOT], {
       originOf: async (path) =>
-        path === caret ? 'github.com/erclx/caret' : 'github.com/erclx/stackr',
+        path === birch ? 'github.com/erclx/birch' : 'github.com/erclx/delta',
     })
 
     expect(report.targets).toHaveLength(2)
@@ -144,8 +144,8 @@ describe('sweepTargets', () => {
   // One stamped repository can hold others below it, and stopping at the outer
   // one would hide every target the sweep exists to find.
   it('should keep walking below a target it already found', async () => {
-    const outer = stamp('career')
-    const inner = stamp('career', 'public', 'stackr')
+    const outer = stamp('atlas')
+    const inner = stamp('atlas', 'public', 'delta')
 
     const report = await sweepTargets([ROOT], { originOf: noOrigin })
 
@@ -157,13 +157,13 @@ describe('sweepTargets', () => {
   // A linked worktree holds a full checkout carrying a copy of its own target's
   // stamp. One target here had five, and each would have counted as a target.
   it('should not read a linked worktree as a target of its own', async () => {
-    const career = stamp('career')
+    const atlas = stamp('atlas')
 
-    stamp('career', '.claude', 'worktrees', 'linkedin-sync')
+    stamp('atlas', '.claude', 'worktrees', 'linkedin-sync')
 
     const report = await sweepTargets([ROOT], { originOf: noOrigin })
 
-    expect(report.targets.flatMap((target) => target.paths)).toEqual([career])
+    expect(report.targets.flatMap((target) => target.paths)).toEqual([atlas])
   })
 
   // An answer that ran out of depth and one that found everything would read the
@@ -216,7 +216,7 @@ describe('sweepTargets', () => {
   })
 
   it('should report one target when two roots overlap', async () => {
-    stamp('nested', 'caret')
+    stamp('nested', 'birch')
 
     const report = await sweepTargets([ROOT, join(ROOT, 'nested')], {
       originOf: noOrigin,
@@ -228,7 +228,7 @@ describe('sweepTargets', () => {
   // `readdirSync` with `withFileTypes` answers `isDirectory()` false for a
   // symlink, so the walk reports one only if the bound names it.
   it('should name a symlinked directory in the bound rather than walking it', async () => {
-    const real = stamp('real', 'caret')
+    const real = stamp('real', 'birch')
     symlinkSync(join(ROOT, 'real'), join(ROOT, 'link'))
 
     const report = await sweepTargets([ROOT], { originOf: noOrigin })

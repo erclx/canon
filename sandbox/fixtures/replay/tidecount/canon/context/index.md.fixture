@@ -1,0 +1,18 @@
+---
+title: Context
+subtitle: What a Claude Code session needs to know per domain
+---
+
+# Context
+
+What a Claude Code session needs to know per domain
+
+- [Agent](agent.md): The tool set, the system prompt, the model switch, and how hosted and local runs differ
+- [Canvas](canvas.md): The map surface, its reducer, the layout modes, and how a tool call becomes a canvas action
+- [CI](ci.md): Workflow triggers, the verify jobs, and the weekly snapshot refresh pull request
+- [Deploy](deploy.md): Where the service and the client are hosted, the domain, and the hosting traps behind them
+- [Development](development.md): The local loop, the scripts, the WSL2 limits, and the generate-then-check pattern
+- [Evals](evals.md): The search comparison runner and the agent cases, kept as two separate stacks
+- [Python](python.md): The FastAPI service, the search tools, and how the Typer CLI is laid out
+- [Retrieval](retrieval.md): How survey notes are split, the encoder input rule, and the score cutoff
+- [Web](web.md): How the Next.js client is laid out, its layers, and its conventions

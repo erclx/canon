@@ -1,0 +1,72 @@
+---
+title: Agent
+description: The tool set, the system prompt, the model switch, and how hosted and local runs differ
+---
+
+# Agent
+
+The agent route takes a chat turn, runs a tool loop against the model the reader picked, and streams text and tool calls back to the chat panel. Canvas tools never reach the service. They come back to the client as instructions the canvas applies.
+
+## Layer responsibilities
+
+- `web/app/api/chat/route.ts`: reads the request, picks the model, builds the tool set for the run, and streams the reply
+- `web/lib/agent/tools/`: one file per tool, each with a zod input schema and a call to the service or a canvas echo
+- `web/lib/agent/prompt.ts`: the system prompt, assembled from fixed sections plus the pasted research question
+- `web/lib/agent/models.ts`: maps a provider name from the request header to a model client and its id
+- `web/lib/agent/mode.ts`: decides whether the run is hosted or local, which sets the tool set and the step cap
+
+## Decisions
+
+### Two tool sets, one per mode (v2.1)
+
+Hosted runs get the search, match, and canvas tools. Local runs add the notes-file tools, which read and write the coordinator's report file. Splitting the set at build time rather than refusing at call time keeps the hosted model from ever seeing a tool it cannot use, which stopped it from promising to save notes it had no way to save.
+
+### The provider travels in a header
+
+The client sends `X-Model-Provider` on every chat request, and the route reads it before anything else. A query string was tried first (v1.4) and leaked into the access logs on the host, which recorded full URLs.
+
+### Prompt fixes name the rule, never an example
+
+When the model misbehaves, the fix goes into the prompt as the principle it broke. An example in the prompt became the answer the model gave to every similar question, so a fix written as "when asked about sea stars, search species code PIOC" turned every echinoderm question into a sea star search. The rule form, "map a common name to a species code with the lookup tool before searching", carried over.
+
+### Mode follows the host, with a local override
+
+`mode.ts` reads `process.env.VERCEL` to tell a hosted run from a local one. A local developer can force hosted mode with `TIDECOUNT_MODE=hosted` to test the hosted tool set. The override is ignored when the host variable is set, so a hosted run can never be pushed into local mode.
+
+## Gotchas
+
+### The override is local-only
+
+Setting `TIDECOUNT_MODE=local` on the host does nothing, by design. A preview deploy that seems to ignore it is working.
+
+### The step cap is hard
+
+A run stops after 12 steps in hosted mode and 24 locally. The model sometimes plans a sweep over every site and runs out. The prompt tells it to batch sites into one search call, which the search tool accepts as a list.
+
+### Canvas tools do no server work
+
+`placeVisits`, `setLayout`, and `linkQuestion` return their input unchanged. The client reads the tool call from the stream and applies it. A test that expects the service to receive a canvas call is testing the wrong layer.
+
+### The key header is case-sensitive on one provider
+
+One OpenAI-compatible host rejects `authorization` in lower case. The model client sets `Authorization` explicitly rather than relying on the fetch default.
+
+### Species codes are four letters, upper case
+
+The service rejects a lower-case code with a 422. The lookup tool returns codes in upper case, and the search tool schema upper-cases its input before sending, since the model sometimes copies a code from a note in lower case.
+
+## Probing the agent
+
+`web/scripts/agent-probe.ts` sends one case from `web/evals/` to a running route and prints each step with its tool name, input, and elapsed time.
+
+```bash
+bun web/scripts/agent-probe.ts web/evals/cases/heatwave-drop.json --provider local
+```
+
+The probe exits non-zero when the run ends without a final text message, which is how a step-cap stop shows up.
+
+## Hidden contracts
+
+- The tool names are part of the client's canvas reducer. Renaming `placeVisits` breaks the canvas silently, since the reducer ignores an unknown tool.
+- The research question node id is always `question`. The canvas and the edge builder both assume it.
+- The service's search response field `visits` is read by name in three tools. A rename on the service side needs all three updated in one change.

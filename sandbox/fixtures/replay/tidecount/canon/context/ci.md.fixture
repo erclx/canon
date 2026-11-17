@@ -1,0 +1,64 @@
+---
+title: CI
+description: Workflow triggers, the verify jobs, and the weekly snapshot refresh pull request
+---
+
+# CI
+
+Three workflows run under `.github/workflows/`. The verify workflow gates every pull request. The agent eval runs only on request. The snapshot refresh runs weekly and opens a pull request a person merges.
+
+## Layer responsibilities
+
+- `verify.yml`: runs on every pull request and every push to `main`, with one job per language root
+- `agent-eval.yml`: runs on `workflow_dispatch` only, sending the cases in `web/evals/` to a chosen provider
+- `snapshot-refresh.yml`: runs every Monday, regenerates the mock service responses the web tests read, and opens a pull request when they changed
+- `scripts/verify.sh`: the same cascade a developer runs locally with `bun run check`
+
+The jobs in `verify.yml` call the same scripts a developer runs, so a local pass predicts a CI pass apart from the network.
+
+## Verify jobs
+
+Each job installs only its own root's dependencies.
+
+### Root checks
+
+- Format check over the whole tree with prettier and shfmt
+- Spell check with cspell
+- Shell lint with shellcheck at warning level
+- Commit message lint on the pull request's commits
+
+### Python checks
+
+- `uv sync --frozen` from `python/`
+- Ruff lint and format check
+- Mypy in strict mode over `python/src/`
+- Pytest with the network blocked, so a test reaching the internet fails rather than flakes
+
+### Web checks
+
+- `bun install --frozen-lockfile` from `web/`
+- ESLint and the TypeScript compiler with no emit
+- Vitest over unit and component tests
+- A route test that runs the chat route against the mock service snapshots
+
+## Decisions
+
+### The agent eval runs on request only
+
+A full eval run costs real tokens on a hosted provider. Running it on every pull request would spend more in a week than the project costs to host in a year. A maintainer starts it from the Actions tab and picks the provider.
+
+### Snapshot refresh lands as a bot pull request
+
+The mock responses come from the real service run against a fixed database. The workflow regenerates them and opens a pull request rather than committing to `main`, so a person reads the diff before a changed response reaches the web tests.
+
+## Hidden contracts
+
+- The snapshot refresh writes to `web/test/snapshots/`. The web tests read that folder by path.
+- `verify.yml` job names are required checks on `main`. Renaming one leaves the ruleset waiting on a check that never reports.
+- The eval workflow reads the provider key from a repository secret named after the provider in upper case.
+
+## Gotchas
+
+### The refresh job formats with `bunx`
+
+The refresh runs in a job that installs no root dependencies, so it runs prettier through `bunx prettier` rather than the root script. A change to the root prettier version needs the same pin in the workflow.

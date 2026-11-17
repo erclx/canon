@@ -1,20 +1,20 @@
-# System
+# OS
 .DS_Store
 
-# Dependencies
+# Packages
 node_modules/
+.venv/
 
-# Secrets
+# Local secrets
 .env
 .env.*
-*.local
 !.env.example
 
 # Claude
 .canon/tmp/
 .claude/worktrees/
 
-# Runtime
-var/
+# Generated
+var/tiles/
 .vercel
 .canon/

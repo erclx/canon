@@ -69,12 +69,12 @@ Owns `canon sandbox replay`, which syncs a copy of a consumer with this checkout
 
 ### `sandbox/fixtures/replay/`
 
-Owns the frozen consumers the bare verb replays, one folder each, holding the consumer's tracked managed paths and a stub `.canon/tasks/index.md`.
+Owns the frozen consumers the bare verb replays, one folder each, holding the consumer's tracked managed paths and a stub `.canon/tasks/index.md`. `frameboard` copies a public consumer, and `tidecount` is an invented project whose prose was written for the fixture, since this repository is public.
 
 - A snapshot tests the upgrade from the release it was cut at and misses a state only a newer consumer holds, which `sandbox replay <checkout>` covers before a release
-- Refresh one by hand. Copy the consumer's tracked managed paths over its folder with the `.fixture` suffix, keep the stub task index, and name the consumer commit in the message.
+- Refresh `frameboard` by copying its tracked managed paths over the folder as `.fixture` files, naming the consumer commit. `tidecount` has no upstream to copy.
 - Re-record after a refresh with `bun src/cli.ts sandbox replay --record`, which refuses named paths and a run with a broken step, so a crash never becomes the answer
-- A governance rename moves jobtriage's `sync` count and drifts the stage. The drift is correct, and a `--record` in the same change settles it.
+- A governance rename moves tidecount's `sync` count and drifts the stage. The drift is correct, and a `--record` in the same change settles it.
 - A `.canon/` file here needs `git add -f`, since the root ignore reaches it
 
 ### Other folders

@@ -1,0 +1,142 @@
+---
+title: Development
+description: The local loop, the scripts, the WSL2 limits, and the generate-then-check pattern
+---
+
+# Development
+
+Local work runs on WSL2 with a GPU passed through for the local model. The two language roots install separately, and the root holds only the formatting and commit tooling.
+
+## Layer responsibilities
+
+- `scripts/`: root shell helpers, each one a single task such as serving, cleaning, or watching the GPU
+- `scripts/verify.sh`: the full check cascade, called by `bun run check` and by CI
+- `web/scripts/`: TypeScript helpers run with bun, such as the agent probe and the snapshot generator
+- `python/scripts/`: shell helpers for the service, such as serving with reload and rebuilding the database
+- `.husky/`: the pre-commit and pre-push hooks
+
+## Setup
+
+1. Install bun, uv, shfmt, and shellcheck
+2. Run `bun install` at the root, then in `web/`
+3. Run `uv sync` in `python/`
+4. Copy `.env.example` to `.env` in both roots and fill in at least one provider key
+5. Run `./python/scripts/rebuild-db.sh` to import the sample export into `var/tidecount.sqlite`
+6. Pull a local model with Ollama if the CLI or local mode is needed
+
+## Scripts
+
+### Verify cascade
+
+`bun run check` runs these in order and stops at the first failure.
+
+1. Root format check
+2. Root spell check
+3. Root shell lint
+4. Python lint, type check, and tests
+5. Web lint, type check, and tests
+
+### Root scripts
+
+| Script         | What it does                                                        |
+| -------------- | ------------------------------------------------------------------- |
+| `check`        | The verify cascade above                                            |
+| `format`       | Writes prettier and shfmt fixes across the tree                     |
+| `check:format` | Reports format drift without writing                                |
+| `check:spell`  | Spell check with the project word list                              |
+| `check:shell`  | Shell lint at warning level                                         |
+| `clean`        | Removes build output, caches, and stale logs                        |
+| `dev:api`      | Starts the service with reload on port 8000                         |
+| `serve:web`    | Stops any old client server, builds, and starts a fresh one         |
+| `update`       | Bumps root and both roots' dependencies within their ranges         |
+
+### Web scripts
+
+Run from `web/`.
+
+- `bun run lint`: ESLint over the client
+- `bun run typecheck`: the TypeScript compiler with no emit
+- `bun run test`: Vitest, unit and component
+- `bun run test:route`: the chat route against the mock snapshots
+- `bun run snapshots`: regenerates the mock snapshots from a running local service, then formats them
+- `bun run e2e`: Playwright against a built client and a running service, kept out of the cascade
+- `bun scripts/agent-probe.ts <case>`: one eval case against a running route, printing each step
+
+### Python commands
+
+Run from `python/`.
+
+- `uv run ruff check` and `uv run ruff format --check`
+- `uv run mypy src`
+- `uv run pytest`
+- `uv run tidecount search --site NB-04 --from 2026-06-01`: the CLI search
+- `uv run tidecount report --season 2026-summer`: the CLI report, which reads and writes the local notes file
+- `uv run tidecount import var/export/latest.csv`: imports an export into the local database
+
+## Local smoke
+
+Two terminals, after setup.
+
+```bash
+# terminal 1
+bun run dev:api
+
+# terminal 2
+bun run serve:web
+```
+
+Open the client, paste a short research question, and ask for visits at one site. The answer should arrive with at least one search call folded under it and pins on the map.
+
+## Decisions
+
+### `bun run dev` is switched off
+
+The Next.js dev server leaked worker processes on WSL2 whenever a file watcher restarted, and after an hour of edits the machine ran out of memory. `serve:web` builds and runs the production server, which is slower to start but never leaks. The dev script now prints a pointer to `serve:web` and exits.
+
+### Generated files need a prettier ignore entry
+
+The snapshot generator writes JSON that prettier would reformat differently on every run, since the key order comes from the service. Each generated folder is listed in `.prettierignore`, and the generator formats its own output with a fixed key order. Adding a generated folder without the ignore entry makes the format check fail on the next run.
+
+### The pre-push hook formats, then fails
+
+The pre-push hook runs `format` and fails the push when it changed anything, so the change lands in a commit rather than being pushed unformatted. A push that fails this way needs one more commit and nothing else.
+
+### Hosted-only gates read `process.env.VERCEL`
+
+Any code path that differs between hosted and local reads the host variable directly. A custom flag was tried (v2.4) and drifted out of sync with the host twice.
+
+### The local model's context floor is 8192
+
+Below a context of 8192 tokens, the local model truncated the tool schemas and called tools with missing fields. `python/scripts/ollama-setup.sh` sets the floor when it creates the model.
+
+### Preview deploys are the outer loop
+
+A change that only shows on the host, such as a rewrite or a header, is tested on a preview deploy. Everything else is tested locally first. A preview deploy takes four minutes, so iterating there costs an afternoon.
+
+## Hidden contracts
+
+- `var/` is the only folder scripts write to at runtime. `clean` removes everything in it except `var/export/`.
+- The client reads the service URL from `SERVICE_URL`, with no default. A missing value fails at build, not at the first request.
+- Port 8000 is fixed in the CLI's default config as well as the serve script.
+
+## Gotchas
+
+### Watch the GPU before loading a local model
+
+Loading a second model while one is resident pushes the first into system memory, and the next answer takes minutes rather than seconds. Run `./scripts/gpu-watch.sh` in a spare terminal before switching models. It prints resident models and free memory every two seconds.
+
+- An idle resident model holds its memory until Ollama's keep-alive expires
+- `ollama stop <model>` frees it at once
+- The watcher warns when free memory drops under 2 GB
+
+### Tooling sync covers the root alone
+
+`canon tooling sync` updates the shared root layer, being the format, spell, and commit configs. It does not reach `web/` or `python/`, which keep their own lint configs by hand.
+
+### Build and e2e stay out of the cascade
+
+`next build` and the Playwright suite take several minutes together and need a running service. They run before a release by hand, never in `check`.
+
+### A wall of module-not-found errors means stale installs
+
+When `bun run check` reports dozens of missing modules in `web/`, the cause is a `web/node_modules` from before a dependency bump. Run `bun install` in `web/` and the errors clear. No code change is needed.

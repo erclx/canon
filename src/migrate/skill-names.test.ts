@@ -389,7 +389,7 @@ describe('isExcludedPath under the skill preset', () => {
   it('should exclude a replay fixture, which records a real project tree as it was', () => {
     expect(
       isExcludedPath(
-        'sandbox/fixtures/replay/jobtriage/.claude/rules/canon/core/045-memory.md.fixture',
+        'sandbox/fixtures/replay/tidecount/.claude/rules/canon/core/045-memory.md.fixture',
         SKILL_NAME_RULES,
       ),
     ).toBe(true)

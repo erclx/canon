@@ -14,7 +14,7 @@
     },
     "markdown audit": {
       "exit": 0,
-      "findings": 8
+      "findings": 6
     },
     "migrate status": {
       "exit": 2,

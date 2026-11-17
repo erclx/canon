@@ -1,0 +1,87 @@
+---
+title: Web
+description: How the Next.js client is laid out, its layers, and its conventions
+---
+
+# Web
+
+The client is a Next.js App Router app with one page and one API route. The page holds the chat panel, the map canvas, and the detail drawer. The route runs the agent.
+
+## Stack
+
+- Next.js 15 with the App Router
+- The Vercel AI SDK for the chat stream and the tool loop
+- Tailwind with the tokens from `canon/DESIGN.md`
+- shadcn/ui for the drawer, inputs, and menus
+- MapLibre GL for the canvas, reading tiles from a PMTiles file
+- zod for every tool input and every service response
+- Vitest and Testing Library, with Playwright kept for a release check
+
+## Layout
+
+```plaintext
+web/
+├── app/
+│   ├── page.tsx                # the one page, laying out the three surfaces
+│   ├── layout.tsx              # fonts, theme, and providers
+│   └── api/chat/route.ts       # the agent route
+├── components/
+│   ├── chat/
+│   │   ├── ChatPanel.tsx       # message list and input
+│   │   ├── ToolCall.tsx        # one folded tool call with input and result
+│   │   └── QuestionInput.tsx   # the research question paste box
+│   ├── canvas/
+│   │   ├── MapCanvas.tsx       # map, pins, edges, drag
+│   │   ├── Pin.tsx             # one visit pin
+│   │   └── LayoutMenu.tsx      # the reader's layout switch
+│   └── drawer/
+│       ├── VisitDrawer.tsx     # the detail drawer
+│       └── CountTable.tsx      # species counts for one visit
+├── lib/
+│   ├── agent/                  # tools, prompt, models, mode
+│   ├── canvas/                 # reducer, layouts, bridge, storage
+│   ├── service/                # typed client for the FastAPI service
+│   └── visits/                 # the client cache for visit records
+├── evals/
+├── scripts/
+└── test/
+    ├── snapshots/              # mock service responses, generated
+    └── route/                  # chat route tests against the snapshots
+```
+
+## Conventions
+
+- Components read state through hooks in `lib/`, never by importing the reducer or the cache directly
+- Every service call goes through `lib/service/`, which parses the response with zod before returning it
+- Server-only code sits under `app/api/` or in files marked with `import 'server-only'`
+- Tool files export the tool and its zod schema, so tests can build inputs from the schema
+- One component per file, named as the file
+
+## Anti-patterns
+
+- Fetching the service from a component. Use the hooks in `lib/visits/`.
+- Storing a visit record in canvas state. Store the id and read the record from the cache.
+- Adding a tool without adding its name to the canvas bridge, when it is a canvas tool.
+- Reading `process.env` in a client component. Pass the value from the server or use a `NEXT_PUBLIC_` variable.
+
+## Scripts
+
+| Script           | What it does                                              |
+| ---------------- | --------------------------------------------------------- |
+| `lint`           | ESLint                                                    |
+| `typecheck`      | `tsc --noEmit`                                            |
+| `test`           | Vitest, unit and component                                |
+| `test:route`     | The chat route against the mock snapshots                 |
+| `snapshots`      | Regenerates the mock snapshots from a local service       |
+| `e2e`            | Playwright against a built client and a running service   |
+| `build`          | `next build`                                              |
+| `start`          | `next start`, used by the root `serve:web` script         |
+| `dev`            | Prints a pointer to `serve:web` and exits                 |
+
+## Provider switching
+
+The reader picks a provider in the chat panel's menu. The choice travels as the `X-Model-Provider` header and is kept in `localStorage`, so it survives a reload. `agent.md` covers how the route maps it to a model.
+
+## Deploy
+
+The client deploys through the Vercel integration on every push to `main`. `deploy.md` covers the rewrites and the domain.

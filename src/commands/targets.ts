@@ -162,7 +162,7 @@ const PULLS_HELP = [
   '',
   'Examples:',
   '  canon targets pulls',
-  '  canon targets pulls ../caret ../stackr --json',
+  '  canon targets pulls ../birch ../delta --json',
   '',
 ].join('\n')
 
