@@ -47,29 +47,42 @@ export type CoverageReport =
   | { readonly kind: 'no-root' }
   | { readonly kind: 'invalid'; readonly reason: string }
 
-/** Reads the declaration, falling back to `src` when that folder exists. */
-export function readRoots(root: string): RootDeclaration {
-  const path = join(root, CONTEXT_CONFIG_REL)
+type ParsedConfig =
+  | { readonly kind: 'absent' }
+  | { readonly kind: 'unparsable' }
+  | { readonly kind: 'parsed'; readonly table: Record<string, unknown> }
 
-  if (existsSync(path)) {
-    let parsed: Record<string, unknown>
-    try {
-      parsed = Bun.TOML.parse(readFileSync(path, 'utf8')) as Record<
+function parseConfig(root: string): ParsedConfig {
+  const path = join(root, CONTEXT_CONFIG_REL)
+  if (!existsSync(path)) return { kind: 'absent' }
+
+  try {
+    return {
+      kind: 'parsed',
+      table: Bun.TOML.parse(readFileSync(path, 'utf8')) as Record<
         string,
         unknown
-      >
-    } catch {
-      return {
-        kind: 'invalid',
-        reason: `${CONTEXT_CONFIG_REL} is not valid TOML`,
-      }
+      >,
     }
+  } catch {
+    return { kind: 'unparsable' }
+  }
+}
 
-    const declared = parsed.roots
-    if (
-      !Array.isArray(declared) ||
-      !declared.every((entry) => typeof entry === 'string' && entry !== '')
-    ) {
+/** Reads the declaration, falling back to `src` when that folder exists. */
+export function readRoots(root: string): RootDeclaration {
+  const config = parseConfig(root)
+
+  if (config.kind === 'unparsable') {
+    return {
+      kind: 'invalid',
+      reason: `${CONTEXT_CONFIG_REL} is not valid TOML`,
+    }
+  }
+
+  if (config.kind === 'parsed') {
+    const declared = config.table.roots
+    if (!isStringList(declared)) {
       return {
         kind: 'invalid',
         reason: `${CONTEXT_CONFIG_REL} needs roots as a list of folder or glob strings`,
@@ -78,12 +91,60 @@ export function readRoots(root: string): RootDeclaration {
 
     return declared.length === 0
       ? { kind: 'opted-out' }
-      : { kind: 'roots', patterns: declared as string[] }
+      : { kind: 'roots', patterns: declared }
   }
 
   return isDirectory(join(root, DEFAULT_ROOT))
     ? { kind: 'roots', patterns: [DEFAULT_ROOT] }
     : { kind: 'none' }
+}
+
+/**
+ * The gate keys a project declares beside its roots in the context config.
+ *
+ * `gated` is null where the key is absent, so the toolkit's own prefixes
+ * apply, and an empty list where the project gates no folder. `invalid` names
+ * each key declared in a shape the audit cannot use, which gates under
+ * `--gate` the way an invalid `roots` does, and the key then reads as absent.
+ * A file that is not valid TOML reports through `readRoots` alone, so one
+ * fault is not counted twice.
+ */
+export interface GateKeys {
+  readonly gated: readonly string[] | null
+  readonly gateLength: boolean
+  readonly invalid: readonly string[]
+}
+
+export function readGateKeys(root: string): GateKeys {
+  const config = parseConfig(root)
+  if (config.kind !== 'parsed') {
+    return { gated: null, gateLength: false, invalid: [] }
+  }
+
+  const invalid: string[] = []
+  const { gated, 'gate-length': gateLength } = config.table
+
+  if (gated !== undefined && !isStringList(gated)) {
+    invalid.push(
+      `${CONTEXT_CONFIG_REL} needs gated as a list of path prefix strings`,
+    )
+  }
+  if (gateLength !== undefined && typeof gateLength !== 'boolean') {
+    invalid.push(`${CONTEXT_CONFIG_REL} needs gate-length as true or false`)
+  }
+
+  return {
+    gated: isStringList(gated) ? gated : null,
+    gateLength: gateLength === true,
+    invalid,
+  }
+}
+
+function isStringList(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) &&
+    value.every((entry) => typeof entry === 'string' && entry !== '')
+  )
 }
 
 function isDirectory(path: string): boolean {

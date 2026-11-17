@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type {
   ExtraSectionFinding,
+  LengthFinding,
   SectionFinding,
   ShapeFinding,
 } from '@/context/audit'
@@ -35,6 +36,16 @@ function makeShape(overrides: Partial<ShapeFinding> = {}): ShapeFinding {
   }
 }
 
+function makeLength(overrides: Partial<LengthFinding> = {}): LengthFinding {
+  return {
+    rel: 'canon/context/ci.md',
+    lines: 210,
+    causes: [{ question: 'history', state: 'no' }],
+    exempt: null,
+    ...overrides,
+  }
+}
+
 const UNNAMED: CoverageReport = {
   kind: 'measured',
   roots: ['src'],
@@ -50,6 +61,9 @@ function makeInput(overrides: Partial<GateInput> = {}): GateInput {
     shape: [],
     drift: [],
     coverage: { kind: 'no-root' },
+    length: [],
+    gateLength: false,
+    gateKeyFaults: [],
     widened: false,
     ...overrides,
   }
@@ -173,5 +187,54 @@ describe('isGating', () => {
     expect(
       isGating(makeInput({ coverage: { kind: 'opted-out' }, widened: true })),
     ).toBe(false)
+  })
+
+  it('should fail a long entry under the widened gate with gate-length set', () => {
+    const input = makeInput({
+      length: [makeLength()],
+      gateLength: true,
+      widened: true,
+    })
+
+    expect(isGating(input)).toBe(true)
+  })
+
+  it('should pass a long entry under the widened gate without gate-length', () => {
+    const input = makeInput({ length: [makeLength()], widened: true })
+
+    expect(isGating(input)).toBe(false)
+  })
+
+  it('should pass a long entry with gate-length set outside the widened gate', () => {
+    const input = makeInput({ length: [makeLength()], gateLength: true })
+
+    expect(isGating(input)).toBe(false)
+  })
+
+  it('should pass a long entry carrying an exemption with gate-length set', () => {
+    const input = makeInput({
+      length: [makeLength({ exempt: 'a verbatim run record' })],
+      gateLength: true,
+      widened: true,
+    })
+
+    expect(isGating(input)).toBe(false)
+  })
+
+  it('should fail a gate key fault under the widened gate', () => {
+    const input = makeInput({
+      gateKeyFaults: ['canon/config/context.toml needs gate-length as true'],
+      widened: true,
+    })
+
+    expect(isGating(input)).toBe(true)
+  })
+
+  it('should leave a gate key fault advisory under the narrow gate', () => {
+    const input = makeInput({
+      gateKeyFaults: ['canon/config/context.toml needs gate-length as true'],
+    })
+
+    expect(isGating(input)).toBe(false)
   })
 })

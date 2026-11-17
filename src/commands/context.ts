@@ -37,12 +37,18 @@ import {
   resolveFolders,
 } from '@/context/folders'
 import {
+  CONTEXT_CONFIG_REL,
   type CoverageReport,
   measureCoverage,
+  readGateKeys,
   readRoots,
 } from '@/context/coverage'
 import { isGating } from '@/context/gate'
-import { isShapeGated, SHAPE_GATED_FOLDERS } from '@/context/shape-gated'
+import {
+  isShapeGated,
+  missingGatedPrefixes,
+  resolveGatedPrefixes,
+} from '@/context/shape-gated'
 import { currentWorktreeRoot } from '@/git/worktree'
 import {
   isOverWordCap,
@@ -120,8 +126,14 @@ export function register(program: Command): void {
         'A context entry requires Overview and Layout and allows Gotchas.',
         'A shape break, such as a Decisions section or a sixth gotcha, is',
         'reported everywhere and gated only under a shape-gated folder.',
-        'Entry length, reference form, table, and provenance are',
-        'judgments under both.',
+        'The gated folders come from gated in canon/config/context.toml, a',
+        'list of path prefixes from the project root that replaces the',
+        "toolkit's own layout, and gated = [] gates no folder. Setting",
+        'gate-length = true there gates an entry past the line checkpoint',
+        'under --gate, unless it carries a canon-length-exempt marker. A',
+        'wrongly shaped key, or a gated prefix naming nothing, gates too.',
+        'Without either key, entry length, reference form, table, and',
+        'provenance are judgments under both.',
         '',
         'Depth and bullet weight are stated over every markdown file rather',
         'than over a context entry, so `canon markdown audit` measures them.',
@@ -234,15 +246,29 @@ async function runAudit(
   const drift = gateOnly ? [] : await auditIndexes(folders)
   const sections = gateOnly ? [] : missingSections(root, folders, entries)
   const extras = gateOnly ? [] : extraSections(entries)
-  // The gated prefixes run from the repository root and an entry's path from the
-  // audit root, so a seed tree stays listed under its toolkit path.
-  const top = gateOnly ? root : await currentWorktreeRoot(root)
+  // `--citations-only` reads neither gate key, so a fault in one never fails the
+  // merge gate's citation stage.
+  const keys = gateOnly
+    ? { gated: null, gateLength: false, invalid: [] }
+    : readGateKeys(root)
+  const gatedPrefixes = resolveGatedPrefixes(keys.gated)
+  // Default prefixes read from the repository root, keeping a seed tree under its
+  // toolkit path. A declared list reads from the audit root, where its config is.
+  const top =
+    gateOnly || keys.gated !== null ? root : await currentWorktreeRoot(root)
   const shape = gateOnly
     ? []
     : shapeFindings(entries, (rel) =>
-        isShapeGated(relative(top, join(root, rel))),
+        isShapeGated(relative(top, join(root, rel)), gatedPrefixes),
       )
   const length = gateOnly ? undefined : lengthFindings(entries)
+  const gateKeyFaults = [
+    ...keys.invalid,
+    ...(keys.gated === null ? [] : missingGatedPrefixes(root, keys.gated)).map(
+      (prefix) =>
+        `${CONTEXT_CONFIG_REL} gates ${prefix}, which names nothing on disk`,
+    ),
+  ]
   const coverage: CoverageReport | undefined = gateOnly
     ? undefined
     : measureCoverage(root, readRoots(root), folders)
@@ -258,8 +284,9 @@ async function runAudit(
     reportCitations(citations, cited)
     reportReferenceForm(entries, folders)
     reportSections(sections, extras, folders)
-    reportShape(shape)
-    reportLength(length ?? [])
+    reportGateKeys(gateKeyFaults)
+    reportShape(shape, gatedPrefixes)
+    reportLength(length ?? [], keys.gateLength)
     reportTables(entries)
     reportProvenance(entries, folders)
     reportDrift(drift)
@@ -297,6 +324,8 @@ async function runAudit(
         // Null is a project carrying no record, and absent is a run that never
         // looked, which is `--citations-only`.
         requirements: gateOnly ? undefined : (requirements ?? null),
+        // Absent under `--citations-only`, which reads neither gate key.
+        gateKeyFaults: gateOnly ? undefined : gateKeyFaults,
         checkpoints: {
           lines: LENGTH_CHECKPOINT,
           renderWidth: RENDER_WIDTH,
@@ -310,7 +339,10 @@ async function runAudit(
           gotchaCap: GOTCHA_CAP,
           layoutBulletCap: LAYOUT_BULLET_CAP,
           layoutParagraphCap: LAYOUT_PARAGRAPH_CAP,
-          shapeGatedFolders: SHAPE_GATED_FOLDERS,
+          // The resolved list: the project's declared `gated` key, or the
+          // toolkit's own prefixes where it declares none.
+          shapeGatedFolders: gatedPrefixes,
+          lengthGate: keys.gateLength,
         },
       })}\n`,
     )
@@ -325,6 +357,9 @@ async function runAudit(
     shape,
     drift,
     coverage: coverage ?? { kind: 'no-root' },
+    length: length ?? [],
+    gateLength: keys.gateLength,
+    gateKeyFaults,
     widened,
   })
 
@@ -606,17 +641,32 @@ function readIssue(issue: ShapeIssue): string {
 }
 
 /**
+ * Prints nothing while the gate keys read clean, so a project that sets
+ * neither sees the report it always did.
+ */
+function reportGateKeys(faults: readonly string[]): void {
+  if (faults.length === 0) return
+
+  logStep('Gate keys')
+  logWarn(plural(faults.length, 'gate key fault'))
+  pipeOutput(faults.join('\n'))
+}
+
+/**
  * Names each entry breaking the section shape, gated ones first, and states
  * which prefixes gate on every run, since an empty gated list and a corpus that
  * conforms would otherwise print the same report.
  */
-function reportShape(shape: readonly ShapeFinding[]): void {
+function reportShape(
+  shape: readonly ShapeFinding[],
+  gatedPrefixes: readonly string[],
+): void {
   logStep('Shape')
 
   logInfo(
-    SHAPE_GATED_FOLDERS.length === 0
-      ? 'No folder is shape-gated yet, so every shape break reports and none gates.'
-      : `Gated under --gate: ${SHAPE_GATED_FOLDERS.join(', ')}. A break elsewhere reports and never gates.`,
+    gatedPrefixes.length === 0
+      ? 'No folder is shape-gated, so every shape break reports and none gates.'
+      : `Gated under --gate: ${gatedPrefixes.join(', ')}. A break elsewhere reports and never gates.`,
   )
 
   if (shape.length === 0) {
@@ -670,8 +720,16 @@ function readCause(cause: LengthCause): string {
  * standard stating there is no hard cap, and a run reporting success as a
  * smaller count would have adopted the number the standard declines.
  */
-function reportLength(over: readonly LengthFinding[]): void {
+function reportLength(
+  over: readonly LengthFinding[],
+  gateLength: boolean,
+): void {
   logStep('Length')
+  if (gateLength) {
+    logInfo(
+      `gate-length is set, so under --gate an entry past ${LENGTH_CHECKPOINT} lines fails unless it carries a canon-length-exempt marker naming a reason.`,
+    )
+  }
   logInfo(
     `Entries measure rendered lines at ${RENDER_WIDTH} columns, counting frontmatter and fenced blocks.`,
   )
@@ -695,7 +753,7 @@ function reportLength(over: readonly LengthFinding[]): void {
     over
       .map(
         (finding) =>
-          `${finding.rel}  ${finding.lines} rendered lines\n  ${finding.causes
+          `${finding.rel}  ${finding.lines} rendered lines${finding.exempt === null ? '' : `  exempt: ${finding.exempt}`}\n  ${finding.causes
             .map(readCause)
             .join('  ')}`,
       )

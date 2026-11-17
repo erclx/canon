@@ -44,7 +44,8 @@ Weight is a judgment a reader settles rather than a defect, as the verb states f
 The audit answers required sections, entry length, citation resolution, reference form, catalog tables, provenance, and index drift. Required sections reach context entries.
 
 - A citation resolving to nothing is a fact and gates
-- Entry length, reference form, table shape, and provenance are judgments under every flag
+- Entry length gates under `--gate` when the project sets `gate-length` and the entry carries no `canon-length-exempt` line, and is a judgment otherwise
+- Reference form, table shape, and provenance are judgments under every flag
 
 ### The audit's placement arrays
 

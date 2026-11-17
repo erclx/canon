@@ -5,4 +5,10 @@
 # entries. A glob such as "packages/*/src" expands to every match, and an
 # empty list opts the project out. Without this file the root defaults to
 # "src" when that folder exists.
+#
+# Two optional gate keys sit beside it, and this repository sets neither, so
+# its gated folders stay the toolkit default. `gated` lists path prefixes whose
+# entries gate on a shape break under `--gate`, replacing that default.
+# `gate-length = true` gates an entry past the line checkpoint that carries no
+# canon-length-exempt marker. docs/agents/context-audit.md covers both.
 roots = ["src"]

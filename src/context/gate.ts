@@ -1,5 +1,6 @@
 import type {
   ExtraSectionFinding,
+  LengthFinding,
   SectionFinding,
   ShapeFinding,
 } from '@/context/audit'
@@ -32,6 +33,20 @@ export interface GateInput {
    * not measured and never gates.
    */
   readonly coverage: CoverageReport
+  /** Entries past the line checkpoint, exempt ones included. */
+  readonly length: readonly LengthFinding[]
+  /**
+   * Whether the project set `gate-length`, which turns an entry past the
+   * checkpoint with no exemption into a gating finding under `--gate`.
+   */
+  readonly gateLength: boolean
+  /**
+   * Faults in the project's gate keys: a key declared in the wrong shape, or
+   * a declared `gated` prefix naming nothing on disk. Each gates under `--gate`,
+   * since a project that wrote the key meant it and a silent pass would hide
+   * the typo.
+   */
+  readonly gateKeyFaults: readonly string[]
   /**
    * Whether the caller asked for the widened gate. False leaves a missing
    * section and a drifted index advisory, which is what the project-root stage
@@ -53,11 +68,9 @@ export function hasDrift(drift: readonly FolderDrift[]): boolean {
  * An unresolved citation is a broken pointer and gates unconditionally, and so
  * does a requirements record past its own word cap: the record states its rule
  * for itself, which makes it a fact rather than a threshold a reader weighs.
- * The findings `--gate` adds are the ones answerable from the file itself: a
- * required section it does not declare, an H2 outside the closed set, a shape
- * break in a folder rebuilt to the shape, an index disagreeing with its
- * folder, and a code folder no entry names or two entries claim. Entry length, depth, bullet, table, provenance, and the record's
- * claim coverage are judgments, so they stay out under both modes.
+ * `--gate` adds the findings answerable from the file itself, each named on
+ * `GateInput`. Entry length is a judgment unless the project set
+ * `gate-length`, and depth, bullet, table, and provenance never gate.
  */
 export function isGating({
   unresolvedCitations,
@@ -67,6 +80,9 @@ export function isGating({
   shape,
   drift,
   coverage,
+  length,
+  gateLength,
+  gateKeyFaults,
   widened,
 }: GateInput): boolean {
   if (unresolvedCitations > 0) return true
@@ -78,6 +94,8 @@ export function isGating({
     extraSections.length > 0 ||
     shape.some((finding) => finding.gated) ||
     hasDrift(drift) ||
-    hasCoverageFindings(coverage)
+    hasCoverageFindings(coverage) ||
+    (gateLength && length.some((finding) => finding.exempt === null)) ||
+    gateKeyFaults.length > 0
   )
 }

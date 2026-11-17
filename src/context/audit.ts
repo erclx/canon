@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { basename, relative } from 'node:path'
 import { BARE_NAME, IGNORE_MARKER } from '@/context/citations'
 import type { AuditedFolder } from '@/context/folders'
+import { lengthExemption } from '@/markdown/ceiling'
 import { type BodyLine, bodyLines, maskDisplayed } from '@/markdown/scan'
 import { documentHeight } from '@/markdown/structure'
 import { isStubSeed } from '@/tooling/seed-marker'
@@ -282,6 +283,12 @@ export interface EntryReport {
    * outside the governed folder answers a question nothing asked.
    */
   readonly governed: boolean
+  /**
+   * The reason a `canon-length-exempt` marker states, or null where the entry
+   * carries none, read the way the document ceiling reads it so one marker
+   * exempts a file from both.
+   */
+  readonly lengthExempt: string | null
 }
 
 /**
@@ -323,6 +330,11 @@ export interface LengthFinding {
   readonly lines: number
   /** One entry per question in `LengthQuestion` order, never empty. */
   readonly causes: readonly LengthCause[]
+  /**
+   * The stated exemption reason, or null. An exempt entry still reports, so a
+   * reader can count it, and never gates under `gate-length`.
+   */
+  readonly exempt: string | null
 }
 
 export interface ExtraSectionFinding {
@@ -742,6 +754,7 @@ export function measureEntry(
     shape: governsContent ? shapeIssues(rel, lines, retired) : [],
     stub: isStubSeed(source),
     governed: governsContent,
+    lengthExempt: lengthExemption(rel, source),
   }
 }
 
@@ -769,6 +782,7 @@ export function lengthFindings(
         { question: 'reproduced', state: 'unanswered' },
         historyCause(entry),
       ] satisfies LengthCause[],
+      exempt: entry.lengthExempt,
     }))
 }
 
