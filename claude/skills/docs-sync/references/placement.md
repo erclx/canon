@@ -68,7 +68,8 @@ The third row reads an audit finding, which exists only once the rewrite has lan
 
 1. Audit each page this run wrote into, as the skill's audit step does.
 2. Take a bullet-run or ceiling finding on a qualifying page to the split below, in place of the in-place fix the audit step names for other findings.
-3. Audit the page left behind and the new page, and repeat until neither reports a limit.
+3. Audit the page left behind and the new page. Fix any finding on the new page in place, regrouping the bullet run it carried over, since a page a split opened never splits again.
+4. Repeat on the page left behind until it reports no limit, or until no H2 qualifies.
 
 The fourth row reads no audit, so a shelf move runs with the other placements, ahead of the rewrite.
 

@@ -89,7 +89,7 @@ Rewrite only the stale sections, and write each page or heading Placement create
 Run `canon markdown audit <path>` over every page this run rewrote, created, or moved, and fix each ban, density, and reference shape finding it reports per the markdown standard and the docs reference read above.
 
 - Fix a finding inside a section this run rewrote or a page it created, then re-run the audit on that page until it reports none there
-- Split rather than fix a bullet-run or ceiling finding on a page this run wrote into, per the split steps in `${CLAUDE_SKILL_DIR}/references/placement.md`, then audit both pages
+- Split rather than fix a bullet-run or ceiling finding on a page this run wrote into, per the split steps in `${CLAUDE_SKILL_DIR}/references/placement.md`, then fix the new page in place
 - Report a finding in a section the diff does not reach as an audit line in the summary, since the rule above leaves that section as it is
 - Report a refusal or a missing subcommand as an audit line and continue
 
