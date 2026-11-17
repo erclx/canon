@@ -26,7 +26,9 @@ let FILE: string
  * `vitest.setup.ts` points this at a temp folder for the whole file, so a test
  * calling either read with no path stays out of the developer's real state
  * folder. Restoring it is what keeps that true: deleting the key instead would
- * leave the rest of the file resolving to the home directory.
+ * leave the rest of the file resolving to the home directory. A runner that
+ * skips the setup file leaves it unset, and assigning that back would store the
+ * string `undefined`, which resolves as a relative folder under the cwd.
  */
 const SETUP_STATE_DIR = process.env.CANON_STATE_DIR
 
@@ -75,7 +77,8 @@ beforeEach(() => {
 
 afterEach(() => {
   rmSync(ROOT, { recursive: true, force: true })
-  process.env.CANON_STATE_DIR = SETUP_STATE_DIR
+  if (SETUP_STATE_DIR === undefined) delete process.env.CANON_STATE_DIR
+  else process.env.CANON_STATE_DIR = SETUP_STATE_DIR
   delete process.env.XDG_STATE_HOME
 })
 

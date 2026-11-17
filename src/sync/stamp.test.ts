@@ -464,10 +464,22 @@ describe('isLegacyStamped', () => {
 // real folder still records.
 describe('the machine-level target index', () => {
   const SETUP_TMPDIR = process.env.TMPDIR
+  const SETUP_STATE_DIR = process.env.CANON_STATE_DIR
+  let STATE: string
+
+  // A per-test state folder keeps the recorded row out of the operator's real
+  // index under a runner that skips `vitest.setup.ts`.
+  beforeEach(() => {
+    STATE = mkdtempSync(join(tmpdir(), 'canon-stamp-state-'))
+    process.env.CANON_STATE_DIR = STATE
+  })
 
   afterEach(() => {
     if (SETUP_TMPDIR === undefined) delete process.env.TMPDIR
     else process.env.TMPDIR = SETUP_TMPDIR
+    if (SETUP_STATE_DIR === undefined) delete process.env.CANON_STATE_DIR
+    else process.env.CANON_STATE_DIR = SETUP_STATE_DIR
+    rmSync(STATE, { recursive: true, force: true })
   })
 
   // The fixture is under the OS temp folder, so pointing that folder elsewhere
