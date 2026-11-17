@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { fileLength } from '@/gate/file-length'
 import {
   commentBodyBlocks,
+  commentFileShare,
   commentHeadBlocks,
   commentHistory,
 } from '@/gate/comment-caps'
@@ -502,6 +503,7 @@ describe('the comment cap stages', () => {
     ['comment-head-blocks', commentHeadBlocks],
     ['comment-body-blocks', commentBodyBlocks],
     ['comment-history', commentHistory],
+    ['comment-file-share', commentFileShare],
   ])('should run %s with no scope', (id, measure) => {
     const stage = STAGES.find((candidate) => candidate.id === id)
 
@@ -513,10 +515,11 @@ describe('the comment cap stages', () => {
     const ids = STAGES.map((stage) => stage.id)
     const after = ids.indexOf('file-length')
 
-    expect(ids.slice(after + 1, after + 4)).toEqual([
+    expect(ids.slice(after + 1, after + 5)).toEqual([
       'comment-head-blocks',
       'comment-body-blocks',
       'comment-history',
+      'comment-file-share',
     ])
   })
 })
@@ -532,7 +535,7 @@ describe('the shared stage set', () => {
     rmSync(root, { recursive: true, force: true })
   })
 
-  it('should tag the ten stages that fit any project as shared', () => {
+  it('should tag the eleven stages that fit any project as shared', () => {
     const shared = STAGES.filter((stage) => stage.shared).map((s) => s.id)
 
     expect(shared).toEqual([
@@ -545,6 +548,7 @@ describe('the shared stage set', () => {
       'comment-head-blocks',
       'comment-body-blocks',
       'comment-history',
+      'comment-file-share',
       'markdown',
     ])
   })

@@ -16,10 +16,8 @@ const EXTENSIONS: Record<Language, readonly string[]> = {
 }
 
 /**
- * Pruned by path segment rather than by glob, since `Bun.Glob` has no exclude.
- * `fixtures` and `__fixtures__` are here because fixture trees hold content
- * authored to be parsed rather than run, and counting it reports the harness
- * instead of the source.
+ * Pruned by path segment, since `Bun.Glob` has no exclude. A fixture tree holds
+ * content authored to be parsed, and counting it reports the harness.
  */
 const PRUNED_SEGMENTS = [
   '.git',
@@ -54,11 +52,32 @@ export const HISTORY_PATTERNS: readonly {
   { term: 'issue reference', pattern: /(?<![\w&])#\d+(?!\w)/ },
 ]
 
-/** Comment lines past which a run is reported, a prompt to read and not a limit. */
-export const BLOCK_LINE_CHECKPOINT = 8
+/** Run lines past which a run is reported, the length of a passing JSDoc. */
+export const BLOCK_LINE_CHECKPOINT = 5
 
-/** Lines past which the gate fails a run outside every function body. */
-export const HEAD_BLOCK_CAP = 12
+/** Text lines past which the gate fails a run outside every function body. */
+export const HEAD_TEXT_CAP = 3
+
+/** In-body text lines past which the gate fails a run. */
+export const BODY_BLOCK_CAP = 1
+
+/** Share of a file's non-blank lines past which its comment text is reported. */
+export const FILE_SHARE_CAP = 0.15
+
+/** Non-blank lines below which a share is not read, since one note tips it. */
+export const FILE_SHARE_FLOOR = 50
+
+/** A comment line that is only a delimiter, carrying no text. */
+const BARE_DELIMITERS = new Set(['/**', '/*', '*/', '*', '//', '#', '"""'])
+
+/** An instruction to a tool rather than a note to a reader. */
+export const DIRECTIVE_PATTERN =
+  /^(?:\/\/|\/\*+|\*|#)\s*(?:biome-ignore|eslint-disable|@ts-expect-error|@ts-ignore|prettier-ignore|shellcheck\s+(?:disable|enable|source|shell)=|noqa\b|type:\s*ignore\b|canon-allow-|canon-keep-)/
+
+/** Whether a trimmed comment line carries text a reader reads. */
+export function isTextLine(trimmed: string): boolean {
+  return !BARE_DELIMITERS.has(trimmed) && !DIRECTIVE_PATTERN.test(trimmed)
+}
 
 /** A file's longest run of contiguous comment lines, starting at `line`. */
 export interface LongBlock {
@@ -67,8 +86,17 @@ export interface LongBlock {
   readonly lines: number
 }
 
-/** In-body comment lines past which the gate fails a run. */
-export const BODY_BLOCK_CAP = 2
+/** A run past a cap, with the text lines the cap counts. */
+export interface CappedRun extends LongBlock {
+  readonly textLines: number
+}
+
+/** A file past the share cap, with the counts its share was read from. */
+export interface FileShare {
+  readonly file: string
+  readonly textLines: number
+  readonly nonBlankLines: number
+}
 
 /** A run past the checkpoint, with `placement` null where it is unread. */
 export interface Block extends LongBlock {
@@ -86,10 +114,12 @@ export interface LanguageCount {
   readonly longBlocks: readonly LongBlock[]
   /** Every run past `BLOCK_LINE_CHECKPOINT`, not only each file's longest. */
   readonly blocks: readonly Block[]
-  /** Every run past `HEAD_BLOCK_CAP` outside a function body, unplaced included. */
-  readonly headBlocks: readonly LongBlock[]
+  /** Every run past `HEAD_TEXT_CAP` outside a function body, unplaced included. */
+  readonly headBlocks: readonly CappedRun[]
   /** Every in-body run past `BODY_BLOCK_CAP`. */
-  readonly bodyBlocks: readonly LongBlock[]
+  readonly bodyBlocks: readonly CappedRun[]
+  /** Every file of `FILE_SHARE_FLOOR` lines or more past `FILE_SHARE_CAP`. */
+  readonly fileShares: readonly FileShare[]
   /** Every Python file whose runs went unplaced, with what refused it. */
   readonly unreadFiles: readonly UnreadFile[]
 }
@@ -119,12 +149,9 @@ export function isPruned(relativePath: string): boolean {
 }
 
 /**
- * Builds the matcher for one vocabulary term.
- *
- * Case sensitivity is derived from the term rather than from a second list. A
- * term carrying an uppercase letter is a marker convention and matches
- * exactly, while an all-lowercase term is prose (`used to`) and matches either
- * casing, so an uppercase marker never hits the same word in ordinary prose.
+ * A term carrying an uppercase letter is a marker and matches exactly, and an
+ * all-lowercase term is prose and matches either casing, so a marker never
+ * hits the same word in ordinary prose.
  */
 function matcherFor(term: string): RegExp {
   const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -153,14 +180,20 @@ function splitLines(text: string): string[] {
   return lines
 }
 
-interface Run {
-  readonly line: number
-  readonly lines: number
+interface RawRun {
+  line: number
+  lines: number
+  text: number
+}
+
+interface Run extends Readonly<RawRun> {
   readonly placement: Placement | null
 }
 
 interface FileCount {
   readonly lines: number
+  readonly nonBlankLines: number
+  readonly textLines: number
   readonly commentLines: number
   readonly docBlocks: number
   readonly inlineComments: number
@@ -168,28 +201,37 @@ interface FileCount {
   readonly unread?: Omit<UnreadFile, 'file'>
 }
 
-/** Tracks contiguous comment lines and keeps every run. */
+/** Tracks contiguous comment lines, keeping every run and its text lines. */
 function runTracker() {
-  let start = 0
-  let length = 0
-  const runs: { line: number; lines: number }[] = []
+  let current: RawRun | undefined
+  let textLines = 0
+  const runs: RawRun[] = []
 
   const close = (): void => {
-    if (length > 0) runs.push({ line: start, lines: length })
-    length = 0
+    if (current !== undefined) runs.push(current)
+    current = undefined
   }
 
   return {
-    extend(line: number): void {
-      if (length === 0) start = line
-      length++
+    extend(line: number, trimmed: string): void {
+      current ??= { line, lines: 0, text: 0 }
+      current.lines++
+      if (isTextLine(trimmed)) {
+        current.text++
+        textLines++
+      }
     },
     end: close,
-    runs(): { line: number; lines: number }[] {
+    runs(): RawRun[] {
       close()
       return runs
     },
+    textLines: (): number => textLines,
   }
+}
+
+function nonBlank(lines: readonly string[]): number {
+  return lines.filter((line) => line.trim() !== '').length
 }
 
 /**
@@ -200,9 +242,9 @@ function runTracker() {
 function placeRuns(
   file: SourceFile,
   lines: readonly string[],
-  runs: readonly { line: number; lines: number }[],
+  runs: readonly RawRun[],
 ): Run[] {
-  if (!runs.some((run) => run.lines > BODY_BLOCK_CAP)) {
+  if (!runs.some((run) => run.text > BODY_BLOCK_CAP)) {
     return runs.map((run) => ({ ...run, placement: null }))
   }
   const starts = [0]
@@ -210,7 +252,7 @@ function placeRuns(
   const read = placementReader(file.path, file.text)
 
   return runs.map((run) => {
-    if (run.lines <= BODY_BLOCK_CAP) return { ...run, placement: null }
+    if (run.text <= BODY_BLOCK_CAP) return { ...run, placement: null }
     const text = lines[run.line - 1] ?? ''
     const offset =
       (starts[run.line - 1] ?? 0) + text.length - text.trimStart().length
@@ -219,12 +261,9 @@ function placeRuns(
 }
 
 /**
- * Counts one TypeScript file.
- *
- * A line counts as a comment only when its first non-whitespace token opens
- * one, which is what keeps a URL in a string literal from reading as a `//`
- * comment without an AST. The cost is that a `//` line inside a template
- * literal counts, and a trailing comment after code does not.
+ * A line is a comment only when its first token opens one, which keeps a URL in
+ * a string from reading as `//` without an AST, at the cost of counting a `//`
+ * line in a template literal and missing a trailing comment.
  */
 function countTypeScript(
   file: SourceFile,
@@ -243,7 +282,7 @@ function countTypeScript(
 
     if (inBlock) {
       commentLines++
-      runs.extend(index + 1)
+      runs.extend(index + 1, trimmed)
       sweep(trimmed, file.path, index + 1, matchers, hits)
       if (trimmed.includes('*/')) inBlock = false
       continue
@@ -251,7 +290,7 @@ function countTypeScript(
 
     if (trimmed.startsWith('/*')) {
       commentLines++
-      runs.extend(index + 1)
+      runs.extend(index + 1, trimmed)
       if (/^\/\*\*(?!\/)/.test(trimmed)) docBlocks++
       sweep(trimmed, file.path, index + 1, matchers, hits)
       if (trimmed.indexOf('*/', 2) === -1) inBlock = true
@@ -261,7 +300,7 @@ function countTypeScript(
     if (trimmed.startsWith('//')) {
       commentLines++
       inlineComments++
-      runs.extend(index + 1)
+      runs.extend(index + 1, trimmed)
       sweep(trimmed, file.path, index + 1, matchers, hits)
       continue
     }
@@ -271,6 +310,8 @@ function countTypeScript(
 
   return {
     lines: lines.length,
+    nonBlankLines: nonBlank(lines),
+    textLines: runs.textLines(),
     commentLines,
     docBlocks,
     inlineComments,
@@ -281,16 +322,9 @@ function countTypeScript(
 const HEREDOC_OPENER = /<<-?\s*(['"]?)([A-Za-z_][A-Za-z0-9_]*)\1/
 
 /**
- * Counts one bash file, skipping heredoc bodies.
- *
- * A heredoc body is data, and this repository's sandbox scenarios carry
- * markdown inside one, where `#` opens a heading rather than a comment.
- * Counting those inflated a measured 112 comment lines to 427. Body lines
- * leave the denominator as well as the numerator, since a density that drops
- * the numerator alone understates by however much data the file carries.
- *
- * The line-1 shebang is excluded. Every script has one, so counting it puts a
- * floor under density that reports the file count rather than the discipline.
+ * A heredoc body is data, often markdown whose `#` opens a heading, so its lines
+ * leave the denominator as well as the numerator. The line-1 shebang is left
+ * out, since every script has one and counting it reports the file count.
  */
 function countBash(
   file: SourceFile,
@@ -299,6 +333,7 @@ function countBash(
 ): FileCount {
   const lines = splitLines(file.text)
   let counted = 0
+  let nonBlankLines = 0
   let commentLines = 0
   let inlineComments = 0
   let delimiter: string | undefined
@@ -306,20 +341,20 @@ function countBash(
 
   for (const [index, line] of lines.entries()) {
     if (delimiter !== undefined) {
-      // `<<-` strips leading tabs from the terminator and the plain form
-      // requires column zero, so trimming covers both.
+      // Trimming covers both `<<-`, which strips tabs, and the column-zero form.
       if (line.trim() === delimiter) delimiter = undefined
       continue
     }
 
     counted++
     const trimmed = line.trim()
+    if (trimmed !== '') nonBlankLines++
 
     if (trimmed.startsWith('#')) {
       if (!(index === 0 && trimmed.startsWith('#!'))) {
         commentLines++
         inlineComments++
-        runs.extend(index + 1)
+        runs.extend(index + 1, trimmed)
         sweep(trimmed, file.path, index + 1, matchers, hits)
         continue
       }
@@ -334,6 +369,8 @@ function countBash(
 
   return {
     lines: counted,
+    nonBlankLines,
+    textLines: runs.textLines(),
     commentLines,
     docBlocks: 0,
     inlineComments,
@@ -342,14 +379,9 @@ function countBash(
 }
 
 /**
- * Counts one Python file, a `#` line as an inline comment and each docstring
- * as one doc block whose every line counts.
- *
- * A docstring is always its own run and always `head`, being the contract of
- * whatever it opens wherever that sits, and a `#` run is `body` when it starts
- * inside a function span, or trails one indented past its header, since a
- * span ends at its last statement. A file the reader refuses still counts its `#`
- * lines by their first character, unplaced, with the refusal on the record.
+ * A docstring is its own run and always `head`, being the contract of what it
+ * opens. A `#` run is `body` inside a function span or trailing one indented
+ * past its header, and a refused file counts `#` lines unplaced.
  */
 function countPython(
   file: SourceFile,
@@ -376,17 +408,22 @@ function countPython(
 
   let commentLines = 0
   let inlineComments = 0
-  const runs: { line: number; lines: number; kind: string }[] = []
+  let textLines = 0
+  const runs: (RawRun & { kind: string })[] = []
   for (const [index, text] of lines.entries()) {
     const kind = kinds.get(index + 1)
     if (kind === undefined) continue
     commentLines++
     if (kind === '#') inlineComments++
-    sweep(text.trim(), file.path, index + 1, matchers, hits)
+    const trimmed = text.trim()
+    const isText = isTextLine(trimmed) ? 1 : 0
+    textLines += isText
+    sweep(trimmed, file.path, index + 1, matchers, hits)
     const last = runs.at(-1)
-    if (last?.kind === kind && last.line + last.lines === index + 1)
+    if (last?.kind === kind && last.line + last.lines === index + 1) {
       last.lines++
-    else runs.push({ line: index + 1, lines: 1, kind })
+      last.text += isText
+    } else runs.push({ line: index + 1, lines: 1, text: isText, kind })
   }
 
   const indent = (line: number): number =>
@@ -410,14 +447,17 @@ function countPython(
 
   return {
     lines: lines.length,
+    nonBlankLines: nonBlank(lines),
+    textLines,
     commentLines,
     docBlocks: read.kind === 'read' ? read.docstrings.length : 0,
     inlineComments,
-    runs: runs.map(({ line, lines: length, kind }) => ({
+    runs: runs.map(({ line, lines: length, text, kind }) => ({
       line,
       lines: length,
+      text,
       placement:
-        read.kind === 'unread' || length <= BODY_BLOCK_CAP
+        read.kind === 'unread' || text <= BODY_BLOCK_CAP
           ? null
           : kind === '#' && inBody(line)
             ? 'body'
@@ -426,6 +466,15 @@ function countPython(
     ...(read.kind === 'unread'
       ? { unread: { line: read.line, reason: read.reason } }
       : {}),
+  }
+}
+
+function capped(run: Run & { readonly file: string }): CappedRun {
+  return {
+    file: run.file,
+    line: run.line,
+    lines: run.lines,
+    textLines: run.text,
   }
 }
 
@@ -468,13 +517,31 @@ export function countFile(
       longest !== undefined && longest.lines > BLOCK_LINE_CHECKPOINT
         ? [{ file: longest.file, line: longest.line, lines: longest.lines }]
         : [],
-    blocks: runs.filter((run) => run.lines > BLOCK_LINE_CHECKPOINT),
+    blocks: runs
+      .filter((run) => run.lines > BLOCK_LINE_CHECKPOINT)
+      .map(({ file: path, line, lines, placement }) => ({
+        file: path,
+        line,
+        lines,
+        placement,
+      })),
     headBlocks: runs
-      .filter((run) => run.placement !== 'body' && run.lines > HEAD_BLOCK_CAP)
-      .map(({ file: path, line, lines }) => ({ file: path, line, lines })),
+      .filter((run) => run.placement !== 'body' && run.text > HEAD_TEXT_CAP)
+      .map(capped),
     bodyBlocks: runs
-      .filter((run) => run.placement === 'body' && run.lines > BODY_BLOCK_CAP)
-      .map(({ file: path, line, lines }) => ({ file: path, line, lines })),
+      .filter((run) => run.placement === 'body' && run.text > BODY_BLOCK_CAP)
+      .map(capped),
+    fileShares:
+      counted.nonBlankLines >= FILE_SHARE_FLOOR &&
+      counted.textLines / counted.nonBlankLines > FILE_SHARE_CAP
+        ? [
+            {
+              file: file.path,
+              textLines: counted.textLines,
+              nonBlankLines: counted.nonBlankLines,
+            },
+          ]
+        : [],
     unreadFiles:
       counted.unread === undefined
         ? []
@@ -501,8 +568,9 @@ export function countFiles(
       degradationHits: [] as DegradationHit[],
       longBlocks: [] as LongBlock[],
       blocks: [] as Block[],
-      headBlocks: [] as LongBlock[],
-      bodyBlocks: [] as LongBlock[],
+      headBlocks: [] as CappedRun[],
+      bodyBlocks: [] as CappedRun[],
+      fileShares: [] as FileShare[],
       unreadFiles: [] as UnreadFile[],
     }
 
@@ -519,6 +587,7 @@ export function countFiles(
       totals.blocks.push(...count.blocks)
       totals.headBlocks.push(...count.headBlocks)
       totals.bodyBlocks.push(...count.bodyBlocks)
+      totals.fileShares.push(...count.fileShares)
       totals.unreadFiles.push(...count.unreadFiles)
     }
 
@@ -561,12 +630,8 @@ export async function listSourceFiles(
 }
 
 /**
- * Open descriptors allowed at once while reading a tree.
- *
- * A single `Promise.all` over every path opens one descriptor per file, which
- * exhausts a default 1024 limit on any large repository and fails the whole
- * scan with EMFILE. Reading in bounded batches keeps the parallelism that
- * matters without letting the file count set the ceiling.
+ * Open descriptors allowed at once, since one `Promise.all` over every path
+ * exhausts a default 1024 limit on a large repository and fails with EMFILE.
  */
 const CONCURRENT_READS = 64
 

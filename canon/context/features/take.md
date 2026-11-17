@@ -40,7 +40,7 @@ The film suite is eight files, one per describe block, so vitest runs them in pa
 - A stepped case films at `deviceScale: 1` unless it asserts a 3840x2160 clip or still, stalls the page into a refusal, or proves the scale 1 retry. `canon take` and the reel keep scale 2.
 - `film-network` holds or aborts the data request `pending.html` makes on load, on both routes, and reads the state off the page color in each still
 - `bandLuma` takes its crop in CSS pixels and scales it to the clip it reads, so one crop reads the same element at either scale
-- `film-drag` and `film-glide` run in the `timed` project of `vitest.e2e.config.ts`, after every parallel file, since their screencast pacing fails beside them. A case like them joins that list.
+- `film-drag`, `film-glide`, and `film-step` run in the `timed` project of `vitest.e2e.config.ts`, after the parallel files, since their timing limits fail under load. A case like them joins that list.
 
 ## Gotchas
 

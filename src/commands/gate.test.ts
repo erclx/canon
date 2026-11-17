@@ -60,6 +60,7 @@ describe('canon gate run in a target', () => {
         'comment-head-blocks',
         'comment-body-blocks',
         'comment-history',
+        'comment-file-share',
         'markdown',
       ])
       expect(

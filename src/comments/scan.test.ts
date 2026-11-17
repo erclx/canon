@@ -334,24 +334,24 @@ function run(prefix: string, count: number): string {
 
 describe('long comment blocks', () => {
   it('should not report a run of exactly the checkpoint', () => {
-    const text = `${run('//', 8)}\nconst a = 1\n`
+    const text = `${run('//', 5)}\nconst a = 1\n`
     expect(countFile(file('a.ts', text), 'ts').longBlocks).toEqual([])
   })
 
   it('should report a run one past the checkpoint with its first line', () => {
-    const text = `const a = 1\n${run('//', 9)}\nconst b = 2\n`
+    const text = `const a = 1\n${run('//', 6)}\nconst b = 2\n`
     expect(countFile(file('a.ts', text), 'ts').longBlocks).toEqual([
-      { file: 'a.ts', line: 2, lines: 9 },
+      { file: 'a.ts', line: 2, lines: 6 },
     ])
   })
 
   it('should end a run at a blank line outside a block comment', () => {
-    const text = `${run('//', 6)}\n\n${run('//', 6)}\n`
+    const text = `${run('//', 4)}\n\n${run('//', 4)}\n`
     expect(countFile(file('a.ts', text), 'ts').longBlocks).toEqual([])
   })
 
   it('should end a run at a line of code', () => {
-    const text = `${run('//', 6)}\nconst a = 1\n${run('//', 6)}\n`
+    const text = `${run('//', 4)}\nconst a = 1\n${run('//', 4)}\n`
     expect(countFile(file('a.ts', text), 'ts').longBlocks).toEqual([])
   })
 
@@ -420,7 +420,9 @@ describe('every block and its placement', () => {
     ].join('\n')
     const count = countFile(file('a.ts', text), 'ts')
 
-    expect(count.bodyBlocks).toEqual([{ file: 'a.ts', line: 16, lines: 11 }])
+    expect(count.bodyBlocks).toEqual([
+      { file: 'a.ts', line: 16, lines: 11, textLines: 11 },
+    ])
     expect(count.blocks.map((block) => block.placement)).toEqual([
       'head',
       'body',
@@ -428,27 +430,63 @@ describe('every block and its placement', () => {
   })
 
   it('should pass an in-body block at the cap', () => {
-    const text = `function a() {\n${run('  //', 2)}\n  return 1\n}\n`
+    const text = `function a() {\n${run('  //', 1)}\n  return 1\n}\n`
     expect(countFile(file('a.ts', text), 'ts').bodyBlocks).toEqual([])
   })
 
   it('should list an in-body block one past the cap', () => {
-    const text = `function a() {\n${run('  //', 3)}\n  return 1\n}\n`
+    const text = `function a() {\n${run('  //', 2)}\n  return 1\n}\n`
     expect(countFile(file('a.ts', text), 'ts').bodyBlocks).toEqual([
-      { file: 'a.ts', line: 2, lines: 3 },
+      { file: 'a.ts', line: 2, lines: 2, textLines: 2 },
     ])
   })
 
-  it('should pass a head block of 12 lines counting its delimiters', () => {
-    const text = `/**\n${run(' *', 10)}\n */\nexport const a = 1\n`
+  it('should pass an in-body block whose other line is a directive', () => {
+    const text = [
+      'function a() {',
+      '  // biome-ignore lint/suspicious/noExplicitAny: an untyped payload',
+      '  // the payload arrives untyped from the hook',
+      '  return 1',
+      '}',
+      '',
+    ].join('\n')
+    expect(countFile(file('a.ts', text), 'ts').bodyBlocks).toEqual([])
+  })
+
+  it('should pass a head block of 3 text lines with its delimiters', () => {
+    const text = `/**\n${run(' *', 3)}\n */\nexport const a = 1\n`
     expect(countFile(file('a.ts', text), 'ts').headBlocks).toEqual([])
   })
 
-  it('should list a head block of 13 lines counting its delimiters', () => {
-    const text = `/**\n${run(' *', 11)}\n */\nexport const a = 1\n`
+  it('should list a head block of 4 text lines', () => {
+    const text = `/**\n${run(' *', 4)}\n */\nexport const a = 1\n`
     expect(countFile(file('a.ts', text), 'ts').headBlocks).toEqual([
-      { file: 'a.ts', line: 1, lines: 13 },
+      { file: 'a.ts', line: 1, lines: 6, textLines: 4 },
     ])
+  })
+
+  it('should pass a head block of 3 text lines split by a bare separator', () => {
+    const text =
+      '/**\n * One.\n *\n * Two.\n * Three.\n */\nexport const a = 1\n'
+    expect(countFile(file('a.ts', text), 'ts').headBlocks).toEqual([])
+  })
+
+  it('should pass a plain block comment of 3 text lines with a bare opener', () => {
+    const text = `/*\n${run(' *', 3)}\n */\nexport const a = 1\n`
+    expect(countFile(file('a.ts', text), 'ts').headBlocks).toEqual([])
+  })
+
+  it('should leave a bare // line and a directive out of a head run', () => {
+    const text = [
+      '// One.',
+      '//',
+      '// Two.',
+      '// canon-allow-embedded: a fixture under test',
+      '// Three.',
+      'export const a = 1',
+      '',
+    ].join('\n')
+    expect(countFile(file('a.ts', text), 'ts').headBlocks).toEqual([])
   })
 
   it('should leave a long in-body block out of the head blocks', () => {
@@ -457,10 +495,15 @@ describe('every block and its placement', () => {
   })
 
   it('should hold an unplaced bash block to the head cap', () => {
-    const text = `#!/usr/bin/env bash\n${run('#', 13)}\necho hi\n`
+    const text = `#!/usr/bin/env bash\n${run('#', 4)}\necho hi\n`
     expect(countFile(file('a.sh', text), 'sh').headBlocks).toEqual([
-      { file: 'a.sh', line: 2, lines: 13 },
+      { file: 'a.sh', line: 2, lines: 4, textLines: 4 },
     ])
+  })
+
+  it('should leave a shellcheck directive out of a bash head run', () => {
+    const text = `#!/usr/bin/env bash\n${run('#', 3)}\n# shellcheck disable=SC2034\necho hi\n`
+    expect(countFile(file('a.sh', text), 'sh').headBlocks).toEqual([])
   })
 
   it('should leave a bash block unplaced', () => {
@@ -484,7 +527,9 @@ describe('Python comments and their placement', () => {
     const text = ['def a():', indented('#', 11), '    return 1', ''].join('\n')
     const count = countFile(file('a.py', text), 'py')
 
-    expect(count.bodyBlocks).toEqual([{ file: 'a.py', line: 2, lines: 11 }])
+    expect(count.bodyBlocks).toEqual([
+      { file: 'a.py', line: 2, lines: 11, textLines: 11 },
+    ])
   })
 
   it('should read a # block trailing the last statement of a def as body', () => {
@@ -498,7 +543,9 @@ describe('Python comments and their placement', () => {
     ].join('\n')
     const count = countFile(file('a.py', text), 'py')
 
-    expect(count.bodyBlocks).toEqual([{ file: 'a.py', line: 4, lines: 12 }])
+    expect(count.bodyBlocks).toEqual([
+      { file: 'a.py', line: 4, lines: 12, textLines: 12 },
+    ])
   })
 
   it('should read a # block after a def at its header indent as head', () => {
@@ -575,7 +622,9 @@ describe('Python comments and their placement', () => {
     ].join('\n')
     const count = countFile(file('a.py', text), 'py')
 
-    expect(count.bodyBlocks).toEqual([{ file: 'a.py', line: 3, lines: 11 }])
+    expect(count.bodyBlocks).toEqual([
+      { file: 'a.py', line: 3, lines: 11, textLines: 11 },
+    ])
   })
 
   it('should count neither a # inside a string nor a string past a body opening', () => {
@@ -613,11 +662,91 @@ describe('Python comments and their placement', () => {
     ])
   })
 
+  it('should leave the bare quote lines of a docstring out of its text', () => {
+    const text = ['"""', run('', 3), '"""', 'x = 1', ''].join('\n')
+    expect(countFile(file('a.py', text), 'py').headBlocks).toEqual([])
+  })
+
+  it('should list a docstring of 4 text lines between bare quote lines', () => {
+    const text = ['"""', run('', 4), '"""', 'x = 1', ''].join('\n')
+    expect(countFile(file('a.py', text), 'py').headBlocks).toEqual([
+      { file: 'a.py', line: 1, lines: 6, textLines: 4 },
+    ])
+  })
+
+  it('should leave a noqa directive out of an in-body run', () => {
+    const text = [
+      'def a():',
+      '    # noqa: E501',
+      '    # the line below is a URL',
+      '    return 1',
+      '',
+    ].join('\n')
+    expect(countFile(file('a.py', text), 'py').bodyBlocks).toEqual([])
+  })
+
   it('should report no files for a Python scan of a tree with none', () => {
     const [py] = countFiles([file('a.ts', 'const a = 1\n')], {
       languages: ['py'],
     })
 
     expect(py).toMatchObject({ language: 'py', files: 0, unreadFiles: [] })
+  })
+})
+
+describe('comment share of a file', () => {
+  const dense = (lines: number): string => {
+    const comments = Math.ceil(lines * 0.16)
+    const code = Array.from(
+      { length: lines - comments },
+      (_, i) => `const a${i} = ${i}`,
+    )
+    const notes = Array.from({ length: comments }, (_, i) => `// note ${i}`)
+    return [
+      ...notes.flatMap((note, i) => [note, code[i] ?? '']),
+      ...code.slice(comments),
+    ]
+      .filter((line) => line !== '')
+      .join('\n')
+  }
+
+  it('should not read the share of a file of 49 non-blank lines', () => {
+    expect(countFile(file('a.ts', dense(49)), 'ts').fileShares).toEqual([])
+  })
+
+  it('should list a file of 50 non-blank lines at 16% text', () => {
+    expect(countFile(file('a.ts', dense(50)), 'ts').fileShares).toEqual([
+      { file: 'a.ts', textLines: 8, nonBlankLines: 50 },
+    ])
+  })
+
+  it('should leave blank lines out of the share', () => {
+    const text = `${dense(50)}\n\n\n\n`
+    expect(countFile(file('a.ts', text), 'ts').fileShares).toEqual([
+      { file: 'a.ts', textLines: 8, nonBlankLines: 50 },
+    ])
+  })
+
+  it('should pass a file at the cap', () => {
+    const code = Array.from({ length: 51 }, (_, i) => `const a${i} = ${i}`)
+    const notes = Array.from({ length: 9 }, (_, i) => `// note ${i}`)
+    const text = [
+      ...notes.flatMap((note, i) => [note, code[i]]),
+      ...code.slice(9),
+    ].join('\n')
+    expect(countFile(file('a.ts', text), 'ts').fileShares).toEqual([])
+  })
+
+  it('should leave directives out of a file share', () => {
+    const code = Array.from({ length: 42 }, (_, i) => `const a${i} = ${i}`)
+    const notes = Array.from(
+      { length: 8 },
+      () => '// biome-ignore lint/style: generated',
+    )
+    const text = [
+      ...notes.flatMap((note, i) => [note, code[i]]),
+      ...code.slice(8),
+    ].join('\n')
+    expect(countFile(file('a.ts', text), 'ts').fileShares).toEqual([])
   })
 })

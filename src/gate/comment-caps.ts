@@ -6,8 +6,10 @@ import {
   BODY_BLOCK_CAP,
   countFile,
   type DegradationHit,
+  FILE_SHARE_CAP,
+  FILE_SHARE_FLOOR,
   HISTORY_PATTERNS,
-  HEAD_BLOCK_CAP,
+  HEAD_TEXT_CAP,
   isPruned,
   type LanguageCount,
   languageFor,
@@ -17,11 +19,9 @@ import type { GateContext } from '@/gate/sequencer'
 import { listRepositoryFiles } from '@/git/files'
 
 /**
- * Counts every source `canon comments scan` reads, tests, `sandbox/`, and
- * `scripts/` included, through the scan's own counter, so the report and the
- * gate agree on what a block is and where it sits. A changed set narrows the
- * count to the files a change touched. No exempt marker, since a marker on a
- * long comment is one more comment line.
+ * Counts every source the scan reads through the scan's own counter, so the
+ * report and the gate agree. No exempt marker, since a marker on a long comment
+ * is one more comment line.
  */
 async function countRepository(
   root: string,
@@ -62,8 +62,7 @@ function capMeasure<T>(
   pick: (count: LanguageCount) => readonly T[],
   reading: CapReading<T>,
 ): Measure {
-  // The sequencer hands a measure its whole gate context, and the stage test
-  // through `runStage` fails if it ever passes a narrower one.
+  // The stage test through `runStage` fails if the sequencer passes less context.
   return async (ctx: GateContext) => {
     const counted = await countRepository(ctx.root, ctx.changed)
     if (counted === undefined) return UNMEASURED
@@ -98,29 +97,68 @@ function capMeasure<T>(
   }
 }
 
-/** Fails a touched file's run outside every function body past `HEAD_BLOCK_CAP` lines. */
+/** Fails a touched file's run outside every function body past `HEAD_TEXT_CAP` text lines. */
 export const commentHeadBlocks: Measure = capMeasure(
   (count) => count.headBlocks,
   {
-    clean: `No head comment run past ${HEAD_BLOCK_CAP} lines`,
+    clean: `No head comment run past ${HEAD_TEXT_CAP} text lines`,
     line: (block) =>
-      `${block.file}:${block.line} runs ${block.lines} comment lines outside a function body, past ${HEAD_BLOCK_CAP}`,
+      `${block.file}:${block.line} runs ${block.textLines} comment text lines outside a function body, past ${HEAD_TEXT_CAP}`,
     failure: (count) =>
-      `${plural(count, 'head comment run')} past ${HEAD_BLOCK_CAP} lines. Cut each to the contract or the constraint the code cannot carry.`,
+      `${plural(count, 'head comment run')} past ${HEAD_TEXT_CAP} text lines. Cut each to the contract or the constraint the code cannot carry.`,
   },
 )
 
-/** Fails a touched file's run inside a function body past `BODY_BLOCK_CAP` lines. */
+/** Fails a touched file's run inside a function body past `BODY_BLOCK_CAP` text lines. */
 export const commentBodyBlocks: Measure = capMeasure(
   (count) => count.bodyBlocks,
   {
-    clean: `No in-body comment run past ${BODY_BLOCK_CAP} lines`,
+    clean: `No in-body comment run past ${BODY_BLOCK_CAP} text line`,
     line: (block) =>
-      `${block.file}:${block.line} runs ${block.lines} comment lines inside a function body, past ${BODY_BLOCK_CAP}`,
+      `${block.file}:${block.line} runs ${block.textLines} comment text lines inside a function body, past ${BODY_BLOCK_CAP}`,
     failure: (count) =>
-      `${plural(count, 'in-body comment run')} past ${BODY_BLOCK_CAP} lines. Move the reason above the function or into the code it explains.`,
+      `${plural(count, 'in-body comment run')} past ${BODY_BLOCK_CAP} text line. Move the reason above the function or into the code it explains.`,
   },
 )
+
+/**
+ * Reports each file past `FILE_SHARE_CAP` comment text, touched or full, and
+ * fails nothing until the sweep lands and the CI-flip row turns it on.
+ */
+export const commentFileShare: Measure = async (ctx: GateContext) => {
+  const counted = await countRepository(ctx.root, ctx.changed)
+  if (counted === undefined) return UNMEASURED
+
+  const scope = plural(
+    counted.files,
+    ctx.changed === undefined ? 'source file' : 'touched source file',
+  )
+  const cap = `${FILE_SHARE_CAP * 100}%`
+  const shares = counted.counts.flatMap((count) => count.fileShares)
+  if (shares.length === 0) {
+    return {
+      emissions: [
+        {
+          kind: 'info',
+          text: `No file of ${FILE_SHARE_FLOOR} lines or more past ${cap} comment text across ${scope}`,
+        },
+      ],
+    }
+  }
+
+  return {
+    emissions: [
+      ...shares.map((share) => ({
+        kind: 'warn' as const,
+        text: `${share.file} carries ${share.textLines} comment text lines in ${share.nonBlankLines}, past ${cap}`,
+      })),
+      {
+        kind: 'info',
+        text: `Reported across ${scope} and not failed until the comment sweep lands`,
+      },
+    ],
+  }
+}
 
 const HISTORY_TERMS = new Set(HISTORY_PATTERNS.map(({ term }) => term))
 
