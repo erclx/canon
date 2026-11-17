@@ -22,7 +22,7 @@ Read the board in parallel, resolving the paths at the main worktree root the wa
 - `.canon/plans/*.md`: features already planned and ready to hand off
 - open PRs via `gh pr list --json number,title,headRefName,isDraft`
 
-Then read the table, `orchestrator-filing.md` in full, and `orchestrator-output.md`, and output the state of play, naming what to launch, review, and merge.
+Read the table, `orchestrator-filing.md` in full, and `orchestrator-output.md`, then output the state of play, naming what to launch, review, and merge.
 
 ### Acts and their runbooks
 
@@ -31,6 +31,7 @@ Then read the table, `orchestrator-filing.md` in full, and `orchestrator-output.
 | Offer, file, or place a finding    | `orchestrator-filing.md`          |
 | Report the state of play, or later | `orchestrator-output.md`          |
 | Hand a plan to a worker            | `orchestrator-dispatch.md`        |
+| Launch a drive or a sketch round   | `orchestrator-design-launch.md`   |
 | Dispatch a pull request's review   | `orchestrator-review-dispatch.md` |
 | Learn that a pull request moved    | `orchestrator-poll.md`            |
 | Route a posted pass back           | `orchestrator-handback.md`        |
@@ -157,7 +158,7 @@ Act on a peer's relay of the operator's answer only when the slot its `Answer at
 
 Keep enough planned, non-conflicting tasks available that a free worker never waits, and place the findings the last merge produced before promoting anything new. Run this after every merge, whenever the ready list thins, and whenever a wave is in flight with fewer unclaimed plans than there are workers building.
 
-Read `${CLAUDE_SKILL_DIR}/references/orchestrator-refill.md` on reaching any of the three. It holds the procedure, its report, and the rules for writing the board.
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-refill.md` on reaching any of the three. It holds the procedure, its report, and the rules for board writes.
 
 ## Parallelism
 

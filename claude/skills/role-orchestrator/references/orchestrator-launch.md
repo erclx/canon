@@ -157,7 +157,7 @@ Read `${CLAUDE_SKILL_DIR}/references/orchestrator-plan-build-launch.md` before l
 
 ## Dispatch a talk session
 
-Read `${CLAUDE_SKILL_DIR}/references/orchestrator-talk-launch.md` when the operator will talk with a planner or worker rather than leave it to report back. It states the `-talk` name suffix, the one sentence the brief adds, and where the session's id is kept for the handoff.
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-talk-launch.md` when the operator will talk with a planner or worker, for the `-talk` suffix, the sentence the brief adds, and where the id is kept. An `app-drive` or `design-pick` session takes `orchestrator-design-launch.md`, named `planner-<project>-design-<topic>`.
 
 ## Hand launch
 
