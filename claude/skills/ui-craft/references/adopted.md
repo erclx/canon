@@ -17,7 +17,7 @@ Each field below names the source its references cite, and a house choice covers
 - **Forms and copy.** The [GOV.UK Design System](https://design-system.service.gov.uk/) and its style guide back `forms.md` and the copy and casing sections of `copy.md`.
 - **Interaction design.** [Ben Shneiderman](https://www.cs.umd.edu/~ben/)'s direct manipulation paper and the motion system of [Material Components](https://github.com/material-components/material-components-android) back the reader-paced section of `motion.md`.
 - **Web performance.** Google's [web.dev](https://web.dev/) guidance on layout shift backs the held-size bullet in `motion.md`.
-- **Web architecture.** The W3C Technical Architecture Group's [Identifying Application State](https://www.w3.org/2001/tag/doc/IdentifyingApplicationState) finding backs the state held in the address in `states.md`.
+- **Web architecture.** The W3C [Technical Architecture Group](https://www.w3.org/2001/tag/)'s Identifying Application State finding backs the state held in the address in `states.md`.
 - **Usability research.** The [Nielsen Norman Group](https://www.nngroup.com/articles/) backs most of `states.md`, part of `controls.md`, and the link sections of `copy.md`.
 - **Capture.** `capture.md` is a house procedure, with its reflow width taken from the WCAG reflow criterion `a11y.md` cites. Its keyboard pass for a change that moves rests on WCAG 2.1.1 Keyboard.
 
