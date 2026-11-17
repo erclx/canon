@@ -55,4 +55,5 @@ Only a change with no visible result in any reachable state is exempt, such as a
 - Commit a flagged case's evidence output and never the sweep, unless the project already commits the same comparison elsewhere.
 - Commit a new evidence case only after two captures with no code change between them match byte for byte.
 - Mask the smallest element holding a value that moves between runs, such as a clock, before the double capture.
+- Expect a mask skipped where an opaque element such as a dialog covers its element, since the bar would land on the dialog. A value under a dimmed backdrop stays masked, since it still shows through.
 - Name the variance in the pull request when masked outputs still differ, never re-running toward a match.

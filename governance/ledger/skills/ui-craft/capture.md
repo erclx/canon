@@ -58,13 +58,14 @@ The rule states canon's own evidence procedure for a rendered change, so most ro
 
 ## Sharing a capture
 
-| Bullet                    | Source                                                                                                                                                                                                        | Read       |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| An `evidence` folder      | House choice: the pull request comment collects an image only when a path segment is literally `evidence`, so any other name drops the capture. Several such folders, one per surface, is the ordinary shape. | 2026-10-18 |
-| Commit flagged cases only | House choice: recommitting an unbounded sweep on every run reaches a gigabyte of history inside a hundred merges, while a small committed set lets GitHub draw its own before and after comparison            | 2026-10-18 |
-| Byte-identical twice      | House choice: a case whose output varies between runs shows a diff on every pull request, so the comparison stops meaning a change                                                                            | 2026-10-18 |
-| Mask the moving value     | House choice: an elapsed-time counter or a relative date differs on every run, and masking the smallest element keeps the check running on the rest of the frame                                              | 2026-10-18 |
-| Name the variance         | House choice: a value whose width reflows its neighbors survives the mask, and re-running until two frames match hides the variance rather than removing it                                                   | 2026-10-18 |
+| Bullet                    | Source                                                                                                                                                                                                                                                        | Read       |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| An `evidence` folder      | House choice: the pull request comment collects an image only when a path segment is literally `evidence`, so any other name drops the capture. Several such folders, one per surface, is the ordinary shape.                                                 | 2026-10-18 |
+| Commit flagged cases only | House choice: recommitting an unbounded sweep on every run reaches a gigabyte of history inside a hundred merges, while a small committed set lets GitHub draw its own before and after comparison                                                            | 2026-10-18 |
+| Byte-identical twice      | House choice: a case whose output varies between runs shows a diff on every pull request, so the comparison stops meaning a change                                                                                                                            | 2026-10-18 |
+| Mask the moving value     | House choice: an elapsed-time counter or a relative date differs on every run, and masking the smallest element keeps the check running on the rest of the frame                                                                                              | 2026-10-18 |
+| Skip a covered mask       | House choice: a mask's bar is drawn above every layer, so an edited time on a card under a new-project dialog drew a bar across the dialog in a pull request's evidence. A dimmed backdrop leaves the value readable, so only an opaque cover skips the mask. | 2026-11-17 |
+| Name the variance         | House choice: a value whose width reflows its neighbors survives the mask, and re-running until two frames match hides the variance rather than removing it                                                                                                   | 2026-10-18 |
 
 ## Declined
 

@@ -60,6 +60,7 @@ The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project tha
 - Expect a section frame at `screenshots/<hostname>/<section>/<name>/<width>--<theme>.png`, plus the same path under `EVIDENCE_ROOT` where flagged
 - Expect a selector matching nothing to be reported and skipped, since a seeded list may name sections the page lacks, and test that they resolve in the project owning the selectors
 - List under `mask` the selectors painted over in every frame, for a value that moves with no code change, so a double capture compares the rest
+- Expect a mask skipped and reported where an opaque element covers its element's center, such as an open dialog, since the bar is drawn above every layer. A dimmed backdrop does not count, and the reading taken before the whole-page frame holds for the section frames.
 
 ## Screenshot settling
 
