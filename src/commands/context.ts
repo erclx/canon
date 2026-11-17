@@ -252,9 +252,8 @@ async function runAudit(
     ? { gated: null, gateLength: false, invalid: [] }
     : readGateKeys(root)
   const gatedPrefixes = resolveGatedPrefixes(keys.gated)
-  // The default prefixes run from the repository root and an entry's path from
-  // the audit root, so a seed tree stays listed under its toolkit path. A
-  // declared list runs from the audit root, where the config declaring it sits.
+  // Default prefixes read from the repository root, keeping a seed tree under its
+  // toolkit path. A declared list reads from the audit root, where its config is.
   const top =
     gateOnly || keys.gated !== null ? root : await currentWorktreeRoot(root)
   const shape = gateOnly
