@@ -8,6 +8,7 @@ import {
 import { embeddedPrograms } from '@/code/embedded'
 import {
   commentBodyBlocks,
+  commentFileShare,
   commentHeadBlocks,
   commentHistory,
 } from '@/gate/comment-caps'
@@ -39,14 +40,9 @@ import { PROJECT_ROOT } from '@/roots/project'
 import { SHIPPED_CORPORA } from '@/shipped/references'
 
 /**
- * One thing a stage does, as an argument vector rather than a shell line.
- *
- * The script this replaces held every check as text and handed it to `eval`,
- * which made each stage a quoting question: whether the string wanted a shell
- * or was an argument list that should never see one. Nothing in the set turned
- * out to depend on expansion once the drift assertion stopped being a shell
- * line, so the whole table is vectors and the hazard is gone rather than
- * carried forward.
+ * One thing a stage does, as an argument vector rather than a shell line, since
+ * a string handed to `eval` makes every stage a quoting question and nothing in
+ * the set depends on expansion.
  */
 export type Check =
   /** Any binary on PATH, or a script named by path under the project root. */
@@ -73,12 +69,9 @@ export type Check =
       readonly failure: string
     }
   /**
-   * A regenerated surface asserted against the index and the working tree.
-   *
-   * Both halves are read, since a regen emitting a file nobody ever committed
-   * satisfies a diff and fails here. The pathspec is one argument rather than a
-   * shell word, which is what git already receives: `*` matches a slash in a
-   * pathspec, so `*index.md` reaches a nested index the way it always did.
+   * Both the index and the tree are read, since a regen emitting a file nobody
+   * committed satisfies a diff. `*` matches a slash in a pathspec, so
+   * `*index.md` reaches a nested index.
    */
   | {
       readonly kind: 'drift'
@@ -153,10 +146,8 @@ const TESTS_SCOPE: StageScope = {
 const FULL_SUITE = ['bun', 'run', 'test']
 
 /**
- * The end-to-end suites launch a browser and FFmpeg, so a scoped run that
- * reached them held the machine tests lock for minutes on one `src/take/`
- * change. They run only through `bun run test:e2e` and CI's E2E Suites job,
- * since the unit config excludes them from the full suite too.
+ * The end-to-end suites launch a browser and FFmpeg and held the tests lock for
+ * minutes, so they run only through `bun run test:e2e` and CI's E2E Suites job.
  */
 const END_TO_END = '**/*.e2e.test.ts'
 
@@ -169,8 +160,7 @@ function relatedTests(changed: readonly string[]): readonly string[] {
     'related',
     '--run',
     '--passWithNoTests',
-    // The glob has to follow its flag directly, or vitest reads the first
-    // changed file as the pattern.
+    // The glob follows its flag, or vitest reads the first file as the pattern.
     '--exclude',
     END_TO_END,
     ...new Set([
@@ -181,16 +171,9 @@ function relatedTests(changed: readonly string[]): readonly string[] {
 }
 
 /**
- * Every stage the gate runs, in the order it runs them. Order is the product
- * here rather than an accident of the file. The four regenerating stages run
- * before anything reads what they wrote, the stages calling this checkout's
- * CLI sit together so a reader meets one group rather than the same kind of
- * stage at intervals, and the three scoped stages sit last where a skip costs
- * the run nothing it already paid for.
- *
- * A stage halts the run when one of its checks fails, so clearing a
- * regenerate-then-assert stage reveals the next one behind it rather than the
- * whole set at once.
+ * Every stage in run order, which is the product: the regenerating stages run
+ * before anything reads what they wrote, the CLI stages sit together, and the
+ * scoped stages sit last where a skip costs nothing already paid for.
  */
 export const STAGES: readonly Stage[] = [
   {
@@ -243,15 +226,9 @@ export const STAGES: readonly Stage[] = [
     success: 'Consumed copies clean',
   },
   {
-    // `canon/DESIGN.md`, the web stylesheet, the tab icon, and the landing
-    // page's token preview are written from `src/design/`, and none is edited
-    // by hand. Four artifacts from one token source is the cost of the token
-    // move, and the preview's drift is what paints a `parse.ts` or `render.ts`
-    // change now that `src/design/**` is unpainted. A
-    // render step that has to run is only safe while something fails when it
-    // did not, which is this. The record and the worked example are
-    // then counted against the prose budget, which the drift asserts cannot
-    // see since a regenerated paragraph agrees with its source.
+    // Four artifacts are written from `src/design/`, and a render step is safe
+    // only while something fails when it did not run, which is this drift. The
+    // prose budget then reads what a drift assert cannot.
     id: 'design',
     label: 'Design',
     checks: [
@@ -310,12 +287,9 @@ export const STAGES: readonly Stage[] = [
     success: 'Design source clean',
   },
   {
-    // The claude manifest is the only route a target's ignore set travels, and
-    // it is hand-maintained beside this repository's own `.gitignore` with
-    // nothing comparing the two. A drift between them reaches every target on
-    // the next `canon tooling sync` and surfaces to nobody, which is why this
-    // gates rather than reports. It is not a drift assert: no generator
-    // produces either list, so there is nothing to regenerate and diff.
+    // The claude manifest carries a target's ignore set and is kept by hand
+    // beside `.gitignore`, so a drift reaches every target on the next sync and
+    // surfaces to nobody. No generator writes either list.
     id: 'ignore-parity',
     label: 'Ignore parity',
     checks: [{ kind: 'measure', measure: ignoreParity }],
@@ -334,11 +308,9 @@ export const STAGES: readonly Stage[] = [
     success: 'Plugin boundary clean',
   },
   {
-    // Seed prose is installed into every scaffolded project and read there as
-    // instruction about that project, so a line naming this repository's CLI
-    // hands a target a verb it may not be able to run. This gates for the
-    // reason the seed-standards stage below gates: a defect authored once
-    // propagates into every project scaffolded after it.
+    // Seed prose is read in a target as instruction, so a line naming this
+    // repository's CLI hands it a verb it may not run, in every project
+    // scaffolded after it.
     id: 'seed-independence',
     label: 'Seed independence',
     checks: [{ kind: 'measure', measure: seedIndependence }],
@@ -362,14 +334,9 @@ export const STAGES: readonly Stage[] = [
     checks: [{ kind: 'measure', measure: unreferencedRules }],
   },
   {
-    // A defect that only shows after a sync, such as a read crashing on a
-    // rule layout the sync just renamed, passes every unit test and every
-    // stage that reads this repository. Replaying the frozen consumer
-    // snapshots through this checkout's sync is what reaches it before a
-    // consumer does. Scoped to what a sync ships or reads, since a replay
-    // costs seconds a docs-only push should not pay. Governance is whole
-    // but for the ledger, since sync resolves stacks and renames as well as
-    // rules, and a rename is the class the stage was built against.
+    // A defect showing only after a sync passes every stage reading this
+    // repository, so frozen consumer snapshots replay through this sync. The
+    // scope is what a sync ships or reads, governance whole but the ledger.
     id: 'consumer-replay',
     label: 'Consumer replay',
     scope:
@@ -387,16 +354,9 @@ export const STAGES: readonly Stage[] = [
     success: 'Consumer replays clean',
   },
   {
-    // The facts the audit can answer from the files gate: a cited path that
-    // does not resolve, a required section an entry does not declare, an H2
-    // outside the closed set of three, a shape break in an entry under a
-    // shape-gated folder, and an index disagreeing with its folder.
-    // Its length, depth, bullet, table, and provenance findings are judgment
-    // thresholds, and failing a push on one would make the stage something to
-    // route around. The length readings that gate sit in their own stages
-    // below, apart from the audit's exit code: the whole-document ceiling, the
-    // bullet cap, and the growth of a paragraph or a bullet past its
-    // checkpoint.
+    // The audit's facts gate, and its judgment thresholds do not, since failing
+    // a push on one makes the stage something to route around. The length
+    // readings that gate sit in their own stages below.
     id: 'context-citations',
     label: 'Context citations',
     checks: [
@@ -463,12 +423,14 @@ export const STAGES: readonly Stage[] = [
     checks: [{ kind: 'measure', measure: commentHistory }],
   },
   {
-    // A rule citing a file that moved fails silently. The consumed-copy drift
-    // stage passes an authored rule and its copy that are wrong together, and
-    // nothing else resolves the path until a session opens it. A rule whose
-    // frontmatter glob names a directory that moved fails the same way, by
-    // never firing again. The classes where absence is correct are separated
-    // inside the verb rather than left as a threshold here.
+    id: 'comment-file-share',
+    label: 'Comment share per file',
+    checks: [{ kind: 'measure', measure: commentFileShare }],
+  },
+  {
+    // A rule citing a moved file, or globbing a moved directory, fails silently,
+    // and the drift stage passes a rule and its copy wrong together. The verb
+    // separates the classes where absence is correct.
     id: 'rule-citations',
     label: 'Rule citations',
     checks: [
@@ -497,12 +459,9 @@ export const STAGES: readonly Stage[] = [
     ],
   },
   {
-    // A citation naming the old record root resolves to nothing once the
-    // folders have moved, and the sweep that would repoint it only runs when a
-    // person calls it. Reading its plan back is what turns a silent stale
-    // citation into a stopped push, and it sits with the two citation stages
-    // above rather than at the end of the file because it answers their
-    // question about a root rather than a path.
+    // A citation of the old record root resolves to nothing, and the sweep
+    // repointing it runs only by hand, so its plan is read back here beside
+    // the citation stages it answers for a root.
     id: 'record-idempotence',
     label: 'Record idempotence',
     checks: [{ kind: 'measure', measure: recordIdempotence }],
@@ -522,10 +481,8 @@ export const STAGES: readonly Stage[] = [
     checks: [{ kind: 'measure', measure: clientCommandCitations }],
   },
   {
-    // Scoped to the corpora it reads rather than run unconditionally, so a
-    // branch touching only `src/` or `.claude/` skips it and says so. The
-    // measure walks the whole corpus once the scope lets it run, which is what
-    // reaches a reference moved between two files rather than written.
+    // Scoped to the corpora it reads, then walks the whole corpus, which is
+    // what reaches a reference moved between two files rather than written.
     id: 'shipped-references',
     label: 'Shipped references',
     scope: new RegExp(SHIPPED_CORPORA.map((corpus) => `^${corpus}/`).join('|')),
@@ -624,11 +581,8 @@ export const STAGES: readonly Stage[] = [
   {
     id: 'shell',
     label: 'Shell',
-    // `.husky/` is matched by prefix rather than by extension, since every hook
-    // there carries no extension and the `.sh` half reaches none. Without
-    // it `check:shell` lints those files only on a branch that happened to
-    // touch a `.sh` file or this manifest, which is the gap that let fifty
-    // lines of shell land in a hook with no stage firing on it.
+    // `.husky/` is matched by prefix, since its hooks carry no extension, and
+    // without it fifty lines of shell landed in a hook with no stage firing.
     scope: /\.sh$|^\.husky\/|^package\.json$/,
     skipped: 'Skipped, no shell changes',
     checks: [
@@ -675,9 +629,8 @@ export const STAGES: readonly Stage[] = [
     skipped:
       'Skipped, no TypeScript, test config, or corpus a test reads changed',
     // Concurrent suites from a wave of worktrees starve each other's spawn
-    // and browser tests past their timeouts, so the box runs one at a time.
-    // A related run excludes the browser suites but can still reach a spawn
-    // test, so it holds the lock too.
+    // tests past their timeouts, so the box runs one at a time, and a related
+    // run can reach a spawn test.
     lock: 'tests',
     checks: [
       {

@@ -176,19 +176,28 @@ describe('canon comments scan block record', () => {
         '--languages',
         'ts',
       )) as unknown as {
-        headBlockCap: number
+        headTextCap: number
         bodyBlockCap: number
+        fileShareCap: number
+        fileShareFloor: number
         snapshot: Record<string, unknown>[]
         trend: { languages: Record<string, unknown>[] }[]
       }
 
-      expect([record.headBlockCap, record.bodyBlockCap]).toEqual([12, 2])
+      expect([
+        record.headTextCap,
+        record.bodyBlockCap,
+        record.fileShareCap,
+        record.fileShareFloor,
+      ]).toEqual([3, 1, 0.15, 50])
+      expect(Object.keys(record)).not.toContain('headBlockCap')
       expect(Object.keys(record)).not.toContain('fileLongBlockCap')
       expect(Object.keys(record)).not.toContain('longBlockFloor')
       expect(record.snapshot[0]?.headBlocks).toEqual([])
       expect(record.snapshot[0]?.bodyBlocks).toEqual([
-        { file: 'a.ts', line: 2, lines: 11 },
+        { file: 'a.ts', line: 2, lines: 11, textLines: 11 },
       ])
+      expect(record.snapshot[0]?.fileShares).toEqual([])
       expect(record.trend.length).toBeGreaterThan(0)
       for (const point of record.trend) {
         expect(Object.keys(point.languages[0] ?? {})).not.toContain('blocks')
@@ -196,6 +205,20 @@ describe('canon comments scan block record', () => {
           'bodyBlocks',
         )
       }
+    },
+    RUN_TIMEOUT_MS,
+  )
+
+  it(
+    'should exit 0 over a tree holding a run past a cap',
+    async () => {
+      const { exitCode } = await execa(
+        'bun',
+        [CLI, 'comments', 'scan', '--json'],
+        { cwd: TREE, reject: false },
+      )
+
+      expect(exitCode).toBe(0)
     },
     RUN_TIMEOUT_MS,
   )
