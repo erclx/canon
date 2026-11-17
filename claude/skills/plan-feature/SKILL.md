@@ -45,7 +45,7 @@ Coding standards live in `.claude/rules/`. Claude Code loads them automatically,
 
 When the feature changes a verb, a route, or a rendered surface that already exists, run it once before reading its code and record what it showed. Read `onboarding.md` for the safe form per surface kind, the rules that keep the run from writing, and the not-run record.
 
-Then read the code and any outside source per `## Step 2` of `${CLAUDE_SKILL_DIR}/references/procedure.md`.
+Read the source files directly relevant to the feature, never whole directories speculatively. Then read the code and any outside source per `## Step 2` of `${CLAUDE_SKILL_DIR}/references/procedure.md`.
 
 ## Step 3: build the plan
 
@@ -61,12 +61,15 @@ A plan sequencing its work into batches declares where each pull request ends, s
 
 Decide the mode based on what Step 3 produced:
 
-- **Small** when the plan touches 2 files or fewer, has no architectural or cross-cutting choices, and both Risks and Questions come out `None identified.`
+- **Small** when the plan touches 2 files or fewer, has no architectural or cross-cutting choices, and both Risks and Questions come out `None identified.` Output the plan to chat and write no file.
 - **Full** otherwise
 
-Read `${CLAUDE_SKILL_DIR}/references/output.md` for each mode's shape, the checks on a written plan, and the chat output. The `.canon/plans/` directory is gitignored, so do not stage or commit the file.
+A consumer list is a `Risks` entry, which already forces Full. A resource with more than one consumer, at least one writing, is a cross-cutting choice, so such a plan stays Full even at two files.
 
-Do not proceed to implementation until the user explicitly says to continue.
+Read `${CLAUDE_SKILL_DIR}/references/output.md` for each mode's shape, the checks on a written plan, and the chat output.
+
+- The `.canon/plans/` directory is gitignored, so do not stage or commit the file.
+- Do not proceed to implementation until the user explicitly says to continue.
 
 ## Discussion rounds
 

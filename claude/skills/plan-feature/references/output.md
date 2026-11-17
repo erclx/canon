@@ -9,11 +9,11 @@ Applies to `plan-feature` Step 4, after Step 3 built the plan, and to the discus
 
 ## Step 4: output
 
-A consumer list is a `Risks` entry, which already forces Full. A resource with more than one consumer, at least one writing, is a cross-cutting choice, so such a plan stays Full even at two files.
+Each mode below follows the body's Small and Full test.
 
 ### Small mode
 
-Output the plan to chat and write no file. When a caller asks for a file, write it as Full mode does and name the mode, since the caller builds on it. Markers match the standard's.
+When a caller asks for a file, write it as Full mode does and name the mode, since the caller builds on it. Markers match the standard's.
 
 ```markdown
 ## Weight

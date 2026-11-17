@@ -11,7 +11,7 @@ Applies to `plan-feature` Step 2 and Step 3, between the onboarding reads and th
 
 ### Read the code
 
-Read the source files directly relevant to the feature, never whole directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at.
+The body bounds the read to the source files the feature touches. Where a folder carries an `index.md`, read it first and load only the files it points at.
 
 Measure against the tree rather than recall, since a count carried from an earlier session or a summary is the most common way a plan ships the wrong scope.
 
