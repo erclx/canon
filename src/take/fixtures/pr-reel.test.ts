@@ -3,46 +3,7 @@ import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { isPainted, loadPaintedPatterns } from '@/pr/painted'
-import { fitBeats, selectFixtures } from '@/take/fixtures/pr-reel'
-
-function beat(name: string, seconds: number) {
-  return { name, seconds }
-}
-
-describe('fitBeats', () => {
-  it('should keep every beat when they sum within the cap', () => {
-    const fit = fitBeats([beat('drag', 4), beat('click', 3)], 12)
-
-    expect(fit).toEqual({
-      kept: [beat('drag', 4), beat('click', 3)],
-      dropped: [],
-    })
-  })
-
-  it('should keep a beat that lands exactly on the cap', () => {
-    const fit = fitBeats([beat('drag', 6), beat('click', 6)], 12)
-
-    expect(fit.dropped).toEqual([])
-  })
-
-  it('should drop the beat that passes the cap and every beat after it', () => {
-    const fit = fitBeats(
-      [beat('drag', 4), beat('tag', 4), beat('publish', 3), beat('note', 3)],
-      12,
-    )
-
-    expect(fit).toEqual({
-      kept: [beat('drag', 4), beat('tag', 4), beat('publish', 3)],
-      dropped: [beat('note', 3)],
-    })
-  })
-
-  it('should drop a later short beat once an earlier one passed the cap', () => {
-    const fit = fitBeats([beat('drag', 10), beat('tag', 5), beat('tap', 1)], 12)
-
-    expect(fit.kept).toEqual([beat('drag', 10)])
-  })
-})
+import { selectFixtures } from '@/take/fixtures/pr-reel'
 
 const FOLDER = [
   'motion.html',
@@ -75,31 +36,37 @@ describe('selectFixtures', () => {
       FOLDER,
     )
 
-    expect(selection).toEqual({
-      kind: 'film',
-      stems: ['scrollbars'],
-      fallback: false,
-    })
+    expect(selection).toEqual({ kind: 'film', stems: ['scrollbars'] })
   })
 
-  it('should fall back to motion when the changed fixture has no plan', () => {
+  it('should refuse a changed fixture that has no plan, naming it', () => {
     const selection = selectFixtures(['src/take/fixtures/focus.html'], FOLDER)
 
     expect(selection).toEqual({
-      kind: 'film',
-      stems: ['motion'],
-      fallback: true,
+      kind: 'unplanned',
+      paths: ['src/take/fixtures/focus.html'],
     })
   })
 
-  it('should fall back to motion when an engine file changed and no fixture did', () => {
-    const selection = selectFixtures(['src/take/camera.ts'], FOLDER)
+  it('should refuse an engine change that touches no fixture, naming the engine paths', () => {
+    const selection = selectFixtures(
+      ['src/take/camera.ts', 'src/take/camera.test.ts', 'src/take/film.ts'],
+      FOLDER,
+    )
 
     expect(selection).toEqual({
-      kind: 'film',
-      stems: ['motion'],
-      fallback: true,
+      kind: 'unplanned',
+      paths: ['src/take/camera.ts', 'src/take/film.ts'],
     })
+  })
+
+  it('should film the planned fixture when an unplanned engine file changed beside it', () => {
+    const selection = selectFixtures(
+      ['src/take/camera.ts', 'src/take/fixtures/scrollbars.html'],
+      FOLDER,
+    )
+
+    expect(selection).toEqual({ kind: 'film', stems: ['scrollbars'] })
   })
 
   it('should film every changed planned fixture once, in name order', () => {
@@ -112,11 +79,7 @@ describe('selectFixtures', () => {
       FOLDER,
     )
 
-    expect(selection).toEqual({
-      kind: 'film',
-      stems: ['motion', 'scrollbars'],
-      fallback: false,
-    })
+    expect(selection).toEqual({ kind: 'film', stems: ['motion', 'scrollbars'] })
   })
 })
 

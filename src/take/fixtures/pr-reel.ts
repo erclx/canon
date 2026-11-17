@@ -5,10 +5,10 @@
  *
  * Usage: bun src/take/fixtures/pr-reel.ts --base <ref> --out <dir> [--json]
  *
- * A changed `<stem>.html` films with the `<stem>.json` plan beside it. An
- * engine change that touches no planned fixture films `motion.json` on
- * `motion.html`, the plan `watch.ts` judges an engine change on. Each fixture
- * films into `<out>/<stem>/` and every beat joins `<out>/reel.webp`.
+ * A changed `<stem>.html` films with the `<stem>.json` plan beside it. A diff
+ * whose take change reaches no planned fixture refuses as `unplanned`, naming
+ * the paths, rather than filming a stock board that shows none of it. Each
+ * fixture films into `<out>/<stem>/` and every beat joins `<out>/reel.webp`.
  */
 
 import { spawnSync } from 'node:child_process'
@@ -22,24 +22,21 @@ import { renderReel } from '@/take/reel'
 
 const ENGINE = 'src/take/'
 const FIXTURES = `${ENGINE}fixtures/`
-const FALLBACK = 'motion'
 
 /** The most filmed seconds the beats of every fixture may sum to. */
 export const REEL_CAP_SECONDS = 12
 
 export type Selection =
   | { readonly kind: 'untouched' }
-  | {
-      readonly kind: 'film'
-      readonly stems: readonly string[]
-      /** True when no changed fixture carried a plan, so motion films instead. */
-      readonly fallback: boolean
-    }
+  | { readonly kind: 'film'; readonly stems: readonly string[] }
+  /** The take paths changed with no plan to film them, being every engine path. */
+  | { readonly kind: 'unplanned'; readonly paths: readonly string[] }
 
 /**
  * Which fixtures a diff films, from the paths it changed and the file names
  * the fixture folder holds. A test is not the engine, so a diff touching only
- * tests films nothing.
+ * tests films nothing. A diff whose change reaches no fixture carrying a plan
+ * is `unplanned`, since nothing on the shelf was written to show it.
  */
 export function selectFixtures(
   changed: readonly string[],
@@ -56,27 +53,8 @@ export function selectFixtures(
     .map((path) => path.slice(FIXTURES.length, -'.html'.length))
     .filter((stem) => !stem.includes('/') && files.has(`${stem}.json`))
   const unique = [...new Set(stems)].sort()
-  if (unique.length > 0) return { kind: 'film', stems: unique, fallback: false }
-  return { kind: 'film', stems: [FALLBACK], fallback: true }
-}
-
-/**
- * The beats kept in plan order while their sum stays within `cap`, and the
- * rest from the first beat that passes it. The fallback films a plan written
- * for judging an engine change rather than for a reel, so it is cut to fit
- * where a fixture's own plan refuses.
- */
-export function fitBeats<T extends { readonly seconds: number }>(
-  beats: readonly T[],
-  cap: number,
-): { readonly kept: readonly T[]; readonly dropped: readonly T[] } {
-  let sum = 0
-  const passed = beats.findIndex((beat) => {
-    sum += beat.seconds
-    return sum > cap
-  })
-  if (passed === -1) return { kept: [...beats], dropped: [] }
-  return { kept: beats.slice(0, passed), dropped: beats.slice(passed) }
+  if (unique.length > 0) return { kind: 'film', stems: unique }
+  return { kind: 'unplanned', paths: engine }
 }
 
 /** A beat filmed into `<stem>/` with its paths rebased onto the reel's folder. */
@@ -98,9 +76,6 @@ type ReelRecord =
       readonly reel: string
       readonly seconds: number
       readonly bytes: number
-      readonly fallback: boolean
-      /** The fallback's beats past the cap, filmed and left out of the reel. */
-      readonly dropped?: readonly string[]
       readonly beats: readonly {
         readonly fixture: string
         readonly name: string
@@ -114,6 +89,8 @@ type ReelRecord =
       readonly fixture?: string
       readonly beat?: string
       readonly still?: string
+      /** On `unplanned`, the take paths no plan films. */
+      readonly paths?: readonly string[]
     }
 
 function changedPaths(base: string): string[] | string {
@@ -132,12 +109,19 @@ async function film(base: string, outDir: string): Promise<ReelRecord> {
   const folder = new URL('./', import.meta.url)
   const selection = selectFixtures(changed, readdirSync(folder))
   if (selection.kind === 'untouched') return { status: 'untouched' }
+  if (selection.kind === 'unplanned') {
+    return {
+      status: 'failed',
+      reason: 'unplanned',
+      message: `no changed fixture carries a plan, so nothing films ${selection.paths.join(', ')}`,
+      paths: selection.paths,
+    }
+  }
 
   const out = resolve(outDir)
   const joined: FilmedBeat[] = []
   const filmed: { fixture: string; name: string; still: string }[] = []
   let seconds = 0
-  let dropped: readonly string[] = []
   for (const stem of selection.stems) {
     const read = readTakePlan(
       readFileSync(new URL(`${stem}.json`, folder), 'utf8'),
@@ -156,9 +140,7 @@ async function film(base: string, outDir: string): Promise<ReelRecord> {
         url: server.url,
         plan: read.plan,
         out: join(out, stem),
-        ...(!selection.fallback && {
-          maxSeconds: REEL_CAP_SECONDS - seconds,
-        }),
+        maxSeconds: REEL_CAP_SECONDS - seconds,
       })
       if (result.status !== 'filmed') {
         return {
@@ -175,11 +157,7 @@ async function film(base: string, outDir: string): Promise<ReelRecord> {
           }),
         }
       }
-      const fit = selection.fallback
-        ? fitBeats(result.beats, REEL_CAP_SECONDS)
-        : { kept: result.beats, dropped: [] }
-      dropped = fit.dropped.map((beat) => beat.name)
-      for (const beat of fit.kept) {
+      for (const beat of result.beats) {
         seconds += beat.seconds
         joined.push(rebased(stem, beat))
         filmed.push({
@@ -201,8 +179,6 @@ async function film(base: string, outDir: string): Promise<ReelRecord> {
       reel: file,
       seconds: reel.seconds,
       bytes: reel.bytes,
-      fallback: selection.fallback,
-      ...(dropped.length > 0 && { dropped }),
       beats: filmed,
     }
   } catch (error) {
