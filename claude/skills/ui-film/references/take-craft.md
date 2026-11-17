@@ -92,7 +92,7 @@ Every beat films in a 1920x1080 window unless the take or the beat names another
 
 Two rules hold once a beat is filmed.
 
-- A stepped still is 3840x2160 and opens at 2000 wide. Crop text too small to read there on the still's own pixels, with `ffmpeg -v error -y -i <dir>/still.jpg -vf crop=<w>:<h>:<x>:<y> <dir>/crop.png`.
+- A stepped still is twice the beat's window. Crop text too small to read on the still's own pixels, with `ffmpeg -v error -y -i <dir>/still.jpg -vf crop=<w>:<h>:<x>:<y> <dir>/crop.png`.
 - Read when something happened from `log.json` and `camera.json`, both on the clip's clock, never from a clock printed in the page, which starts before the first kept frame
 
 ## Targets
