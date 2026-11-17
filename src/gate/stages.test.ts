@@ -5,7 +5,7 @@ import {
   commentHeadBlocks,
   commentHistory,
 } from '@/gate/comment-caps'
-import { clientCommandCitations } from '@/gate/measures'
+import { clientCommandCitations, designProse } from '@/gate/measures'
 import { STAGES, type StageScope } from '@/gate/stages'
 
 function scopeOf(id: string): StageScope {
@@ -392,6 +392,23 @@ describe('the design stage', () => {
 
     expect(regen).toBeGreaterThan(-1)
     expect(drifted).toContain('web/public/previews/design-tokens')
+  })
+
+  it('should leave the prose budget to its own stage, so a target can run it', () => {
+    const checks =
+      STAGES.find((candidate) => candidate.id === 'design')?.checks ?? []
+
+    expect(checks).not.toContainEqual({ kind: 'measure', measure: designProse })
+  })
+})
+
+describe('the design prose stage', () => {
+  it('should count the record right after the design regen writes it', () => {
+    const ids = STAGES.map((stage) => stage.id)
+    const stage = STAGES.find((candidate) => candidate.id === 'design-prose')
+
+    expect(ids.indexOf('design-prose')).toBe(ids.indexOf('design') + 1)
+    expect(stage?.checks).toEqual([{ kind: 'measure', measure: designProse }])
   })
 })
 

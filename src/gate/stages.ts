@@ -249,9 +249,7 @@ export const STAGES: readonly Stage[] = [
     // move, and the preview's drift is what paints a `parse.ts` or `render.ts`
     // change now that `src/design/**` is unpainted. A
     // render step that has to run is only safe while something fails when it
-    // did not, which is this. The record and the worked example are
-    // then counted against the prose budget, which the drift asserts cannot
-    // see since a regenerated paragraph agrees with its source.
+    // did not, which is this.
     id: 'design',
     label: 'Design',
     checks: [
@@ -305,9 +303,17 @@ export const STAGES: readonly Stage[] = [
         failure:
           'The README mark pair drifted from the mark source. Run bun run check and commit assets/brand/mark-color.svg and assets/brand/mark-color-light.svg.',
       },
-      { kind: 'measure', measure: designProse },
     ],
     success: 'Design source clean',
+  },
+  {
+    // The record and the worked example counted against the prose budget,
+    // which the drift asserts above cannot see since a regenerated paragraph
+    // agrees with its source. Placed after the regen, so canon counts the
+    // record it just wrote.
+    id: 'design-prose',
+    label: 'Design prose',
+    checks: [{ kind: 'measure', measure: designProse }],
   },
   {
     // The claude manifest is the only route a target's ignore set travels, and
