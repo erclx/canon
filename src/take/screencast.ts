@@ -83,9 +83,8 @@ export async function filmScreencast(request: {
     const network = request.beat.network
       ? new NetworkTally(request.beat.network)
       : undefined
-    // Every request is routed and matched in `network`, so both routes read a
-    // pattern alike. A held route is never answered and stays pending until
-    // the browser closes.
+    // Every request is routed, since `network` does the matching. A held route
+    // is never answered, so it stays pending until the browser closes.
     if (network) {
       await page.route(
         () => true,
