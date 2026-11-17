@@ -39,7 +39,7 @@ The config uses `version: '2'` and starts from `default: standard`.
 The go phase list requires three phases and probes the tools first.
 
 - Require Typecheck (`go vet`), Lint (`golangci-lint run`), and Unit tests (`go test -v`).
-- Base's runner adds the four base phases where the folder declares their scripts, then the markdown bans stage.
+- Base's runner adds the four base phases where the folder declares their scripts, then the canon checks stage.
 - Probe `go` and `golangci-lint` first, and name the `go install` command when `golangci-lint` is missing.
 
 ### Left out and prepared

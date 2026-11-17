@@ -50,7 +50,7 @@ The php phase list probes its tools and holds one precondition.
 - Probe `php` and `composer` first.
 - Hold a precondition on `vendor/bin/phpunit`, so the run stops and names `composer install` when it is missing.
 - Require Typecheck (`phpstan analyse`), Lint (`php-cs-fixer check`), and Unit tests (`phpunit --testdox`).
-- Base's runner adds its own four phases where the folder declares their scripts, then the markdown bans stage.
+- Base's runner adds its own four phases where the folder declares their scripts, then the canon checks stage.
 
 ### Prepare
 
