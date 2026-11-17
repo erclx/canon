@@ -27,6 +27,23 @@
         left: 100px;
         top: 1800px;
       }
+      .base {
+        position: absolute;
+        left: 1000px;
+        top: 100px;
+        width: 200px;
+        height: 40px;
+        background: #888;
+      }
+      .badge {
+        position: absolute;
+        left: 1050px;
+        top: 110px;
+        width: 100px;
+        height: 20px;
+        background: #ccc;
+        pointer-events: none;
+      }
       .backdrop {
         position: fixed;
         inset: 0;
@@ -46,6 +63,8 @@
     <span class="edited" id="under-panel"></span>
     <span class="edited" id="under-backdrop"></span>
     <span class="below"></span>
+    <div class="base"></div>
+    <span class="badge"></span>
     <div class="backdrop"></div>
     <div class="panel" role="dialog"></div>
     <script>

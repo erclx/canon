@@ -49,7 +49,7 @@ const hasBrowser = await browserAvailable()
 const CASES_SOURCE = `const only1280 = ['320', '768', '1536']
 export const EVIDENCE_ROOT = 'evidence'
 export const CASES = [
-  { section: 'open', theme: 'light', route: '/', excludeViewports: only1280, mask: ['.edited', '.below', '.missing'] },
+  { section: 'open', theme: 'light', route: '/', excludeViewports: only1280, mask: ['.edited', '.below', '.badge', '.missing'] },
   { section: 'closed', theme: 'light', route: '/?closed', excludeViewports: only1280, mask: ['.edited'] },
 ]
 `
@@ -116,6 +116,10 @@ describe.skipIf(!hasBrowser)('screenshot.ts masks', () => {
 
   it('should mask an element below the fold with nothing over it', () => {
     expect(maskedAt('open', 200, 1820)).toBe(true)
+  })
+
+  it('should mask a pointer-events none element over an opaque sibling', () => {
+    expect(maskedAt('open', 1100, 120)).toBe(true)
   })
 
   it('should mask the element once the dialog is closed', () => {

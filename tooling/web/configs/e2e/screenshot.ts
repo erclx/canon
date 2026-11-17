@@ -187,12 +187,13 @@ async function markFloatingChrome(page: Page) {
  * element lands across whatever covers it, such as an open dialog.
  *
  * Only an opaque box counts, since a value under a dimmed backdrop still shows
- * through and would differ between two captures. A center outside the window
- * reads as uncovered, since the hit test answers only inside it and the
- * whole-page frame still shows that element.
+ * through. A center outside the window reads as uncovered, since the hit test
+ * answers only inside it. The hit test also skips `pointer-events: none`, so
+ * the target is made hittable for the one test and restored after, or a
+ * pass-through badge would read as covered by whatever lies beneath it.
  */
 async function isCovered(element: Locator): Promise<boolean> {
-  return element.evaluate((target) => {
+  return element.evaluate((target: HTMLElement | SVGElement) => {
     const box = target.getBoundingClientRect()
     const x = box.left + box.width / 2
     const y = box.top + box.height / 2
@@ -212,13 +213,20 @@ async function isCovered(element: Locator): Promise<boolean> {
       }
       return true
     }
-    for (const hit of document.elementsFromPoint(x, y)) {
-      if (target === hit || target.contains(hit) || hit.contains(target)) {
-        return false
+    const { pointerEvents } = target.style
+    const priority = target.style.getPropertyPriority('pointer-events')
+    target.style.setProperty('pointer-events', 'auto', 'important')
+    try {
+      for (const hit of document.elementsFromPoint(x, y)) {
+        if (target === hit || target.contains(hit) || hit.contains(target)) {
+          return false
+        }
+        if (isOpaque(hit)) return true
       }
-      if (isOpaque(hit)) return true
+      return false
+    } finally {
+      target.style.setProperty('pointer-events', pointerEvents, priority)
     }
-    return false
   })
 }
 
