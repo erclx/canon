@@ -62,3 +62,7 @@ Run /canon:role-reviewer, then /canon:review-pr <number>
 Controller: <sessionId>
 ```
 ````
+
+## Reporting the file
+
+Report the file in the turn that writes it by its path, then one line per row naming its label and the roles the file carries for it. Paste no fence into the reply, since the operator copies from the file and a second copy in chat goes stale at the next overwrite.
