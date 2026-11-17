@@ -29,6 +29,8 @@ import {
   settleChecklist,
 } from '@/pr/evidence'
 import { isWithinTolerance } from '@/pr/pixels'
+import { readCarry, reelMoves } from '@/pr/carry'
+import { readChangedPaths } from '@/pr/lift'
 import { loadPaintedPatterns } from '@/pr/painted'
 import { findDeployWorkflow, servesChange } from '@/pr/preview'
 import { readUiPassHead, writeUiPassLine } from '@/pr/tick'
@@ -39,6 +41,7 @@ import {
   ReadOptions,
   everyChangedPath,
   gh,
+  gitRunner,
   listComments,
   listPullFiles,
   patchPullBody,
@@ -229,8 +232,8 @@ export function registerEvidence(pr: Command): void {
         'line. Without the flag, a skip line the marked comment already carries',
         'is carried forward. The local skip line is dropped whenever its',
         'address renders, passed or carried. The reel skip line is dropped only',
-        'by a reel filmed at this head, so it stays beside a reel carried from',
-        'an earlier head. A passed --local-skip drops a carried',
+        'by a reel that covers this head, so it stays beside an earlier reel',
+        'the lift would not carry. A passed --local-skip drops a carried',
         'local address, since that line names no head and would read as live,',
         'while a carried reel names its head and stays beside --reel-skip. Like',
         '--local, neither opens a comment alone.',
@@ -276,8 +279,9 @@ export function registerEvidence(pr: Command): void {
         'the way a checklist does, so a head whose only news is an uncaptured',
         'path reports ok rather than no-evidence. The line is computed on every',
         'render and never carried, so it drops once a capture empties the list',
-        'or a reel filmed at the head renders beside it. `canon pr lift`',
-        'refuses `painted-uncaptured` on the same list.',
+        'or a reel at the head, or carried to it as `canon pr lift` carries one,',
+        'renders beside it, which drops the warning too. The field stays raw.',
+        '`canon pr lift` refuses `painted-uncaptured` on the same list.',
         '',
         '--check reads the same changed set and thread, renders no body, and',
         'reports what the ship chain still owes the pull request:',
@@ -616,9 +620,10 @@ async function runEvidence(
     async (path) => pullFiles.present.get(path) === false,
     pullFiles.renamedFrom,
   )
+  const painted = loadPaintedPatterns(root)
   const uncaptured = readUncaptured(
     [...pullFiles.present.keys()],
-    loadPaintedPatterns(root),
+    painted,
     keepsCaptures,
   )
 
@@ -668,7 +673,8 @@ async function runEvidence(
   // Reported on every record that read the changed set, and never owed,
   // since no step of the ship chain can take the capture a skip left out.
   const uncapturedField = uncaptured !== undefined && { uncaptured }
-  const warnUncaptured = (): void => {
+  const warnUncaptured = (reelCovers = false): void => {
+    if (reelCovers) return
     if (uncaptured === undefined || uncaptured.length === 0) return
     logWarn(
       `${plural(uncaptured.length, 'painted path')} changed with no evidence capture: ${uncaptured.join(', ')}`,
@@ -772,6 +778,20 @@ async function runEvidence(
     comments,
     opts.reelCovers,
   )
+  // The reel covers the head exactly when `canon pr lift` would carry it
+  // there, and a failed read leaves the uncaptured line as the lift refuses.
+  const reelCovers =
+    reel !== undefined &&
+    ['covered', 'carried'].includes(
+      (
+        await readCarry(
+          (from, to) => readChangedPaths(gitRunner(root), from, to),
+          reel.head,
+          identity.head,
+          reelMoves(painted),
+        )
+      ).kind,
+    )
   const carriedSkips = findEvidenceSkips(comments)
   const skips = {
     local: opts.localSkip ?? carriedSkips.local,
@@ -795,6 +815,7 @@ async function runEvidence(
     reel,
     skips,
     uncaptured,
+    reelCovers,
   )
 
   const caseCount = states.reduce((n, s) => n + s.items.length, 0)
@@ -864,7 +885,7 @@ async function runEvidence(
         : 'checklist folded in below the comparison',
     )
   }
-  warnUncaptured()
+  warnUncaptured(reelCovers)
 
   outro()
 

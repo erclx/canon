@@ -1371,6 +1371,83 @@ describe('canon pr evidence --check', () => {
       expect(record.body).toContain('**Uncaptured:** `src/client/a.css`')
     })
 
+    describe('beside a reel filmed at an earlier head', () => {
+      function commitOnBranch(path: string, text: string): void {
+        const git = (...args: string[]) =>
+          execaSync('git', ['-C', repoRoot, ...args], {
+            env: {
+              GIT_AUTHOR_NAME: 't',
+              GIT_AUTHOR_EMAIL: 't@t',
+              GIT_COMMITTER_NAME: 't',
+              GIT_COMMITTER_EMAIL: 't@t',
+            },
+          })
+        mkdirSync(join(repoRoot, path, '..'), { recursive: true })
+        writeFileSync(join(repoRoot, path), text)
+        git('add', '.')
+        git('commit', '-q', '-m', `edit ${path}`)
+      }
+
+      function writeReelCommentAt(head: string): void {
+        const short = head.slice(0, 7)
+        writeComment(
+          `## Evidence\n\n**Reel** filmed at \`${short}\`:<br><img src="${REEL_LINK}" width="960" alt="reel filmed at ${short}">\n\n## What to look at\n\n<!-- pr-evidence: head=${short} -->`,
+        )
+      }
+
+      async function renderAtHead(): Promise<Record<string, unknown>> {
+        const result = await execa(
+          process.execPath,
+          [CLI, 'pr', 'evidence', '7', '--json', '--root', repoRoot],
+          {
+            cwd: repoRoot,
+            reject: false,
+            timeout: RUN_TIMEOUT_MS,
+            env: { PATH: `${join(tempDir, 'bin')}:${process.env.PATH}` },
+          },
+        )
+        return JSON.parse(result.stdout)
+      }
+
+      beforeEach(() => {
+        writeBaseTree(false, ['e2e/evidence/dark/board.png'])
+        writeFileSync(
+          join(tempDir, 'files.tsv'),
+          'modified\tsrc/client/a.css\n',
+        )
+        execaSync('git', ['-C', repoRoot, 'checkout', '-q', 'feat/x'])
+        writeReelCommentAt(
+          execaSync('git', ['-C', repoRoot, 'rev-parse', 'HEAD']).stdout,
+        )
+      })
+
+      it('should drop the uncaptured line when the gap changed only markdown', async () => {
+        commitOnBranch('docs/guide.md', '# guide, reworded\n')
+
+        const record = await renderAtHead()
+
+        expect(record.reason).toBe('ok')
+        expect(record.body).toContain('**Reel** filmed at')
+        expect(record.body).not.toContain('Uncaptured')
+      })
+
+      it('should keep the uncaptured line when the gap changed a source path', async () => {
+        commitOnBranch('src/client/a.css', 'a { color: red }\n')
+
+        const record = await renderAtHead()
+
+        expect(record.body).toContain('**Uncaptured:** `src/client/a.css`')
+      })
+
+      it('should keep the uncaptured field raw on a carried reel', async () => {
+        commitOnBranch('docs/guide.md', '# guide, reworded\n')
+
+        const record = await renderAtHead()
+
+        expect(record.uncaptured).toEqual(['src/client/a.css'])
+      })
+    })
+
     it('should still skip as no-evidence when the base keeps no capture', async () => {
       writeBaseTree(false, ['src/app.tsx'])
       writeFileSync(join(tempDir, 'files.tsv'), 'modified\tsrc/client/a.css\n')
