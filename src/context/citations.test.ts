@@ -268,6 +268,41 @@ describe('auditCitations against a real tree', () => {
     },
   )
 
+  it.each([
+    'packages/app/canon/config/config.json',
+    'packages/app/.claude/canon/config.json',
+    'packages/app/.claude/aitk.json',
+    'packages/app/.claude/aitk/config.json',
+  ])(
+    'should leave a missing path in the nested stamp at %s unreported',
+    async (rel) => {
+      mkdirSync(dirname(join(root, rel)), { recursive: true })
+      writeFileSync(
+        join(root, rel),
+        '{"dispositions":{"canon/context/missing.md":"declined"}}\n',
+      )
+
+      const report = await auditCitations(root, ['context'])
+
+      expect(report).toMatchObject({ kind: 'scanned', unresolved: [] })
+    },
+  )
+
+  it.each(['my.claude/aitk.json', 'xcanon/config/config.json'])(
+    'should still scan %s, which only ends like a stamp',
+    async (rel) => {
+      mkdirSync(dirname(join(root, rel)), { recursive: true })
+      writeFileSync(join(root, rel), '{"note":"canon/context/missing.md"}\n')
+
+      const report = await auditCitations(root, ['context'])
+
+      expect(report).toMatchObject({
+        kind: 'scanned',
+        unresolved: [{ file: rel, path: 'canon/context/missing.md' }],
+      })
+    },
+  )
+
   it('should still scan a project JSON file citing a missing path', async () => {
     writeFileSync(
       join(root, 'package.json'),
