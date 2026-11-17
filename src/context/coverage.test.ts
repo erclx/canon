@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   hasCoverageFindings,
   measureCoverage,
+  readGateKeys,
   readRoots,
   type RootDeclaration,
 } from '@/context/coverage'
@@ -178,6 +179,77 @@ describe('readRoots', () => {
     mkdirs('src')
     write('canon/config/context.toml', toml)
 
+    expect(readRoots(ROOT).kind).toBe('invalid')
+  })
+})
+
+describe('readGateKeys', () => {
+  it('reads both keys as absent without a config file', () => {
+    expect(readGateKeys(ROOT)).toEqual({
+      gated: null,
+      gateLength: false,
+      invalid: [],
+    })
+  })
+
+  it('reads both keys as absent from a file declaring only roots', () => {
+    write('canon/config/context.toml', 'roots = ["src"]\n')
+
+    expect(readGateKeys(ROOT)).toEqual({
+      gated: null,
+      gateLength: false,
+      invalid: [],
+    })
+  })
+
+  it('reads a declared gated list and gate-length', () => {
+    write(
+      'canon/config/context.toml',
+      'gated = ["canon/context/billing/", "canon/context/auth"]\ngate-length = true\n',
+    )
+
+    expect(readGateKeys(ROOT)).toEqual({
+      gated: ['canon/context/billing/', 'canon/context/auth'],
+      gateLength: true,
+      invalid: [],
+    })
+  })
+
+  it('keeps an empty gated list apart from an absent one', () => {
+    write('canon/config/context.toml', 'gated = []\n')
+
+    expect(readGateKeys(ROOT).gated).toEqual([])
+  })
+
+  it.each([
+    ['gated as a string', 'gated = "canon/context/"\n', 'gated'],
+    [
+      'gated with a non-string entry',
+      'gated = ["canon/context/", 3]\n',
+      'gated',
+    ],
+    ['gate-length as a string', 'gate-length = "yes"\n', 'gate-length'],
+  ])('names the file and the field for %s', (_label, toml, field) => {
+    write('canon/config/context.toml', toml)
+
+    const keys = readGateKeys(ROOT)
+    expect(keys.invalid).toEqual([
+      expect.stringContaining(`canon/config/context.toml needs ${field} as`),
+    ])
+  })
+
+  it('reads a wrongly shaped key as absent', () => {
+    write('canon/config/context.toml', 'gated = "x"\ngate-length = 1\n')
+
+    const keys = readGateKeys(ROOT)
+    expect(keys.gated).toBeNull()
+    expect(keys.gateLength).toBe(false)
+  })
+
+  it('leaves unparsable TOML to the roots reading', () => {
+    write('canon/config/context.toml', 'gated = [\n')
+
+    expect(readGateKeys(ROOT).invalid).toEqual([])
     expect(readRoots(ROOT).kind).toBe('invalid')
   })
 })
