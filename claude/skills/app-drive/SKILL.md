@@ -155,7 +155,7 @@ Run this tail by default after the close, since the intake records the session's
 
 ### A finding after the close
 
-One raised in this session on the build just driven joins the closed folder per `drive-record.md`, and the close's check and validate run again. Any other build or session opens a new intake.
+One raised in this session on the build just driven joins the closed log per `drive-record.md` and is sorted and filed by Steps 4 and 5, then the close's check and validate run again. Any other build or session opens a new intake.
 
 ## Output
 

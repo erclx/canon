@@ -50,7 +50,7 @@ A finding raised after the close, in the same session and on the build just driv
 - Give it the log's next number, since the numbers are one sequence
 - State in `Saw` whether it was measured on the live app or read from code, since the copy is gone
 - Rebuild no copy for it, since a second build is a second drive with a folder of its own
-- Send the controller the finding's number and kind once both checks pass, since it may already have filed the drive's rows
+- Send the controller the finding's number, kind, and intake item once both checks pass, since it may already have filed the drive's rows
 
 ### The length marker
 
