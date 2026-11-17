@@ -47,7 +47,7 @@ const PLAN_REFUSALS: Record<TakePlanRefusal, string> = {
     'The plan file is not valid JSON, so no beat could be read.',
   'no-beats': 'The plan names no beat, so there is nothing to film.',
   'bad-beat':
-    'A beat is missing its name or carries a setup that is not a list.',
+    'A beat is missing its name, carries a setup that is not a list, or carries a malformed network entry.',
   'no-steps': 'A beat names no step, so its take would film nothing.',
   'unknown-route':
     'The plan or a beat names a route this build does not record on.',
@@ -67,6 +67,8 @@ const TAKE_REFUSALS: Record<TakeRefusal, string> = {
     'The filmed beats ran past --max-seconds, so the take stopped at the beat that crossed it.',
   'clip-mismatch':
     'A clip measured a different size from the one its route films at, so the clip, its log, and its still stay in the beat folder.',
+  'network-unmatched':
+    'A network pattern matched no request the page made, so the beat filmed without the state it holds or fails. Widen the pattern or check the address.',
   'take-failed': 'The take failed against a reachable page.',
 }
 
@@ -172,6 +174,18 @@ export function register(program: Command): void {
         'scrollbars: true films with classic scrollbars drawn, which take a 15 px',
         'gutter of layout width, so set it only on a beat whose change is a scrollbar.',
         '',
+        'A beat carrying network films a loading or error state by holding or',
+        'failing the request that ends it, as in',
+        '  "network": [{ "match": "*/api/report", "action": "hold" }]',
+        'match is the whole request address with * matching any run of',
+        'characters. hold leaves the request pending for the whole beat, and',
+        'abort fails it. The list applies before the page loads, on either route',
+        'and on a fallback, and the first matching entry wins. A held script,',
+        'sheet, or image keeps the load event from firing, and the refusal names',
+        'the held pattern. A pattern no request matched refuses the beat as',
+        'network-unmatched. Each filmed beat records network, every pattern that',
+        'matched with its action and its count of requests, and never an address.',
+        '',
         'A target is a CSS selector, or text=<words> for the first innermost',
         'element with a size whose whole text is those words, so a hidden copy',
         'earlier in the page is skipped. Setup steps run before the first kept',
@@ -188,7 +202,8 @@ export function register(program: Command): void {
         '  no-plan-file        nothing readable at the plan path',
         '  unreadable-plan     the plan file is not valid JSON',
         '  no-beats            the plan names no beat',
-        '  bad-beat            a beat has no name or a setup that is not a list',
+        '  bad-beat            a beat has no name, a setup that is not a list, or a',
+        '                      malformed network entry',
         '  no-steps            a beat names no step',
         '  unknown-route       the plan or a beat names a route other than step or',
         '                      screencast',
@@ -206,6 +221,7 @@ export function register(program: Command): void {
         '                      beat that crossed it',
         '  clip-mismatch       a clip measured a different size from the one its',
         '                      route films at, naming both sizes',
+        '  network-unmatched   a network pattern matched no request, naming it',
         '  take-failed         the take failed against a reachable page',
         '  reel-failed         every beat was filmed and the reel did not encode',
         '',
@@ -213,6 +229,8 @@ export function register(program: Command): void {
         "carry still when the page answered a capture, the beat folder's",
         'still.jpg as the step met it. clip-mismatch carries still too, and',
         'leaves the clip and a log whose clip field is the measured size.',
+        'network-unmatched carries still and leaves the clip and its log, since',
+        'the beat filmed before the tally was read.',
         'A stall in recording retries the beat stepped at half size, device',
         'scale 1, before any fallback. A beat that fell back to the screencast',
         'before refusing carries fallback, the reason it fell back, and',

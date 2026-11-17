@@ -38,6 +38,7 @@ A box is filmable when it asks the reviewer to click, fill, or scroll something 
 
 - Skip a box whose trailing markers hold `(taste)`, in any order, since no driver judges it
 - Skip a box that asks only to look at a state the page opens on, since a screenshot already shows it
+- Keep a box about a loading or error state, since a beat holds or fails the request behind it per the take-craft reference, and the state shows nowhere else
 - Skip a negative box, one asserting that something does not happen, such as "no drop line draws", since footage of nothing shows nothing
 
 Read the box's text for the negative. A box asserting an unchanged result, such as "the board goes to all projects as before", is not negative, since the action still produces a visible change. Rank it behind a box in the same group that names new behavior.
@@ -84,15 +85,16 @@ canon take <url> .canon/tmp/pr/reel/<number>/plan.json --out .canon/tmp/pr/reel/
 
 Branch on the record's `reason`, never on the exit code.
 
-| Record             | Route                                                                                                                   |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| No `reason`        | Continue to the stills                                                                                                  |
-| `reel-failed`      | Skip as `reel-failed` with the record's `message`                                                                       |
-| `target-offscreen` | Add a setup step per the note below the table, then film once more. Skip as `target-offscreen` on a second refusal      |
-| `over-cap`         | Drop `beat` and each beat after it, then film once more. Skip as `over-cap` if `beat` is first or it refuses again      |
-| `target-missing`   | Fix the plan off the record's `still` and `beat`, then film once more. A second refusal is owed, per the section below  |
-| `clip-mismatch`    | Skip as `clip-mismatch` with the record's `beat` and `message`, never as `wrong-state`, since the clip came out cropped |
-| Any other value    | Skip under that `reason`, naming its `beat` when the record carries one                                                 |
+| Record              | Route                                                                                                                   |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| No `reason`         | Continue to the stills                                                                                                  |
+| `reel-failed`       | Skip as `reel-failed` with the record's `message`                                                                       |
+| `target-offscreen`  | Add a setup step per the note below the table, then film once more. Skip as `target-offscreen` on a second refusal      |
+| `over-cap`          | Drop `beat` and each beat after it, then film once more. Skip as `over-cap` if `beat` is first or it refuses again      |
+| `target-missing`    | Fix the plan off the record's `still` and `beat`, then film once more. A second refusal is owed, per the section below  |
+| `clip-mismatch`     | Skip as `clip-mismatch` with the record's `beat` and `message`, never as `wrong-state`, since the clip came out cropped |
+| `network-unmatched` | Fix the beat's pattern off the record's `message`, then film once more. Skip as `network-unmatched` on a second refusal |
+| Any other value     | Skip under that `reason`, naming its `beat` when the record carries one                                                 |
 
 The setup step for `target-offscreen` brings the target into the window. It is a scroll over an element already inside the window, such as a fixed header, with `dy` covering the distance, or a click on a link to the target.
 

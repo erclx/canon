@@ -69,9 +69,26 @@ export interface Beat {
    * layout width. Absent means they stay hidden.
    */
   readonly scrollbars?: true
+  /**
+   * Requests held pending or failed for the whole beat, applied before the
+   * page loads, so a loading or error state stays on screen to be filmed.
+   * Absent means no request is intercepted.
+   */
+  readonly network?: readonly NetworkRule[]
   /** Runs after the page loads and before the first frame is kept. */
   readonly setup: readonly TakeStep[]
   readonly steps: readonly TakeStep[]
+}
+
+/** What a beat does to a request the page makes. */
+export const NETWORK_ACTIONS = ['hold', 'abort'] as const
+
+export type NetworkAction = (typeof NETWORK_ACTIONS)[number]
+
+export interface NetworkRule {
+  /** The request's whole address, with `*` matching any run of characters. */
+  readonly match: string
+  readonly action: NetworkAction
 }
 
 export interface TakePlan {
@@ -192,11 +209,14 @@ function readBeat(entry: unknown, index: number, fallback: Route): Beat {
     )
   }
 
+  const network = readNetwork(entry.network, name)
+
   return {
     name,
     route: route as Route,
     ...(entry.push === false ? { push: false as const } : {}),
     ...(entry.scrollbars === true ? { scrollbars: true as const } : {}),
+    ...(network ? { network } : {}),
     setup: (entry.setup ?? []).map((step: unknown, i: number) =>
       readStep(step, `${name}, setup step ${i + 1}`),
     ),
@@ -278,6 +298,41 @@ function readStep(entry: unknown, at: string): TakeStep {
         `${at} names kind ${String(entry.kind)}, which is not ${KINDS.join(', ')}`,
       )
   }
+}
+
+function readNetwork(
+  value: unknown,
+  name: string,
+): readonly NetworkRule[] | undefined {
+  if (value === undefined) return undefined
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new Refusal(
+      'bad-beat',
+      `${name} carries a network that is not a list of entries`,
+    )
+  }
+  const rules: NetworkRule[] = []
+  for (const [i, entry] of value.entries()) {
+    const at = `${name}, network entry ${i + 1}`
+    if (!isRecord(entry)) {
+      throw new Refusal('bad-beat', `${at} is not an object`)
+    }
+    if (typeof entry.match !== 'string' || !entry.match) {
+      throw new Refusal('bad-beat', `${at} carries no match pattern`)
+    }
+    if (!NETWORK_ACTIONS.includes(entry.action as NetworkAction)) {
+      throw new Refusal(
+        'bad-beat',
+        `${at} names action ${String(entry.action)}, which is not ${NETWORK_ACTIONS.join(', ')}`,
+      )
+    }
+    const { match } = entry
+    if (rules.some((rule) => rule.match === match)) {
+      throw new Refusal('bad-beat', `${at} names ${match} a second time`)
+    }
+    rules.push({ match, action: entry.action as NetworkAction })
+  }
+  return rules
 }
 
 function readHold(entry: Record<string, unknown>, at: string): Aimed {

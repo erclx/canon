@@ -6,6 +6,7 @@ import { lastFrame, openFrameEncoder, probeFrames } from '@/take/encode'
 import { frameStamp, slotFrames } from '@/take/frame-clock'
 import { FULLSCREEN_SCRIPT } from '@/take/fullscreen'
 import { FPS, type LogEvent, START, VIEWPORT } from '@/take/log'
+import { NetworkTally, withHeld } from '@/take/network'
 import {
   type PointerInput,
   type Stage,
@@ -46,6 +47,8 @@ export interface ScreencastTake {
   readonly lag?: number
   /** The clip's closing frame as a JPEG. */
   readonly still: Buffer
+  /** What the beat's network list caught, absent when it names none. */
+  readonly network?: NetworkTally
 }
 
 export async function filmScreencast(request: {
@@ -77,7 +80,26 @@ export async function filmScreencast(request: {
         .screenshot({ type: 'jpeg', quality: 95, timeout: STILL_CAP_MS })
         .catch(() => undefined)
     await page.addInitScript({ content: FULLSCREEN_SCRIPT })
-    await page.goto(request.url, { waitUntil: 'load' })
+    const network = request.beat.network
+      ? new NetworkTally(request.beat.network)
+      : undefined
+    // Every request is routed, since `network` does the matching. A held route
+    // is never answered, so it stays pending until the browser closes.
+    if (network) {
+      await page.route(
+        () => true,
+        (route) => {
+          const action = network.actionFor(route.request().url())
+          if (action === 'hold') return
+          return action === 'abort' ? route.abort('failed') : route.continue()
+        },
+      )
+    }
+    await page
+      .goto(request.url, { waitUntil: 'load' })
+      .catch((error: unknown) => {
+        throw network ? withHeld(error, network) : error
+      })
     await page.waitForTimeout(SETTLE_MS)
 
     const stageOn = (clock: () => number): Stage => ({
@@ -152,12 +174,14 @@ export async function filmScreencast(request: {
     await encodeSpool(spool, request.clip, started, filmedMs)
     const frames = await probeFrames(request.clip)
     const closing = await lastFrame(request.clip, frames)
-    if (lag === undefined) return { frames, events, still: closing }
+    const caught = network ? { network } : {}
+    if (lag === undefined) return { frames, events, still: closing, ...caught }
     return {
       frames,
       events: events.map((event) => shifted(event, lag)),
       lag: Number(lag.toFixed(1)),
       still: closing,
+      ...caught,
     }
   } catch (error) {
     if (error instanceof TargetRefused && still) error.still = await still()

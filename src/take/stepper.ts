@@ -9,6 +9,7 @@ import {
   TargetRefused,
   performSteps,
 } from '@/take/perform'
+import { NetworkTally, withHeld } from '@/take/network'
 import type { Beat } from '@/take/plan'
 import { type ShellPage, openShell } from '@/take/shell'
 
@@ -77,6 +78,8 @@ export interface SteppedTake {
   readonly events: readonly LogEvent[]
   /** The last frame encoded, as the JPEG the shell returned. */
   readonly still: Buffer
+  /** What the beat's network list caught, absent when it names none. */
+  readonly network?: NetworkTally
 }
 
 export interface SteppedRequest {
@@ -100,8 +103,14 @@ export async function filmStepped(
   const encoder = openFrameEncoder(request.clip, FPS)
   const stallMs = request.stallMs ?? STALL_MS
   let still: (() => Promise<Buffer | undefined>) | undefined
+  const network = request.beat.network
+    ? new NetworkTally(request.beat.network)
+    : undefined
   try {
-    const loadTicks = await load(page, request.url)
+    if (network) await intercept(page, network)
+    const loadTicks = await load(page, request.url).catch((error: unknown) => {
+      throw network ? withHeld(error, network) : error
+    })
     let ticks = loadTicks
     let outstanding: Promise<unknown> = Promise.resolve()
     const beginFrame = (screenshot: boolean) => {
@@ -188,7 +197,7 @@ export async function filmStepped(
 
     await encoder.close()
     if (!last) throw new Error('the take encoded no frame')
-    return { frames, events, still: last }
+    return { frames, events, still: last, ...(network ? { network } : {}) }
   } catch (error) {
     encoder.abort()
     if (error instanceof TargetRefused && still) error.still = await still()
@@ -214,6 +223,35 @@ async function frameStill(
   return reply?.screenshotData
     ? Buffer.from(reply.screenshotData, 'base64')
     : undefined
+}
+
+/**
+ * Pauses every request the page makes and answers each by the beat's list:
+ * failed on `abort`, left paused for the shell's life on `hold`, and sent on
+ * otherwise. Enabled before navigation, so a request made on load or in
+ * setup is caught.
+ */
+async function intercept(
+  page: ShellPage,
+  network: NetworkTally,
+): Promise<void> {
+  page.on('Fetch.requestPaused', (params) => {
+    const { requestId, request } = params as {
+      requestId: string
+      request: { url: string }
+    }
+    const action = network.actionFor(request.url)
+    if (action === 'hold') return
+    page
+      .send(
+        action === 'abort' ? 'Fetch.failRequest' : 'Fetch.continueRequest',
+        action === 'abort'
+          ? { requestId, errorReason: 'Failed' }
+          : { requestId },
+      )
+      .catch(() => {})
+  })
+  await page.send('Fetch.enable', { patterns: [{ urlPattern: '*' }] })
 }
 
 /**

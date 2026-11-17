@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Pending</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <!--
+      A page that asks for its data on load and shows a placeholder until the
+      request answers, the loaded view once it does, and an error line when it
+      fails. A take holding the request films the placeholder, and one aborting
+      it films the error. The page color follows the state, so a suite reads
+      the state off one band of the still: mid gray loading, white loaded, and
+      near black failed.
+    -->
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        display: grid;
+        place-items: center;
+        font-family: Geist, system-ui, sans-serif;
+        background: #808080;
+      }
+
+      body[data-state='loaded'] {
+        background: #ffffff;
+      }
+
+      body[data-state='error'] {
+        background: #202020;
+      }
+
+      #card {
+        width: 640px;
+        padding: 40px;
+        border-radius: 16px;
+        background: #f4f4f5;
+        color: #18181b;
+        font-size: 28px;
+      }
+
+      .bar {
+        height: 24px;
+        margin-top: 16px;
+        border-radius: 8px;
+        background: #d4d4d8;
+      }
+
+      body:not([data-state='loading']) .bar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body data-state="loading">
+    <main id="card">
+      <p id="status" role="status">Loading the report</p>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </main>
+    <script>
+      const status = document.getElementById('status')
+      fetch('/data').then(
+        () => {
+          document.body.dataset.state = 'loaded'
+          status.textContent = 'Report loaded'
+        },
+        () => {
+          document.body.dataset.state = 'error'
+          status.textContent = 'Could not load the report'
+        },
+      )
+    </script>
+  </body>
+</html>
