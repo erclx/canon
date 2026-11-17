@@ -1,5 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { alignTicks, withinCap } from '@/take/stepper'
+import { StepperStalled, alignTicks, withinCap } from '@/take/stepper'
+
+describe('StepperStalled', () => {
+  it.each(['settle', 'setup', 'recording'] as const)(
+    'should carry the %s phase and keep the frame stepping text',
+    (phase) => {
+      const stall = new StepperStalled(0, 2000, phase)
+
+      expect(stall.phase).toBe(phase)
+      expect(stall.message).toBe(
+        `frame 0 took over 2 s in ${phase} under frame stepping`,
+      )
+    },
+  )
+})
 
 /**
  * Covers the capped race both stepper waits share. A cap timer that outlives

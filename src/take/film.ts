@@ -20,7 +20,7 @@ import { TargetMissing, TargetOffscreen, TargetRefused } from '@/take/perform'
 import type { Beat, Route, TakePlan } from '@/take/plan'
 import { filmScreencast } from '@/take/screencast'
 import { ShellMissing, ShellSandboxBlocked, findShell } from '@/take/shell'
-import { StepperStalled, filmStepped } from '@/take/stepper'
+import { type StallPhase, StepperStalled, filmStepped } from '@/take/stepper'
 
 /**
  * Films every beat of a plan into its own folder and writes the record the
@@ -48,6 +48,8 @@ export interface FilmedBeat {
   readonly route: Route
   /** Why a `step` beat was filmed by screencast instead, when it was. */
   readonly fallback?: string
+  /** Where the stepped frame that caused `fallback` was begun. */
+  readonly fallbackPhase?: StallPhase
   readonly frames: number
   readonly seconds: number
   readonly clip: string
@@ -71,6 +73,8 @@ export type TakeResult =
       readonly beat?: string
       /** Why the refused beat had fallen back to a screencast, when it had. */
       readonly fallback?: string
+      /** Where the stepped frame that caused `fallback` was begun. */
+      readonly fallbackPhase?: StallPhase
       /** The page as the failing step met it, relative to the take's folder. */
       readonly still?: string
       /** The command that clears a `sandbox-blocked` refusal, when one does. */
@@ -152,7 +156,9 @@ export async function take(request: TakeRequest): Promise<TakeResult> {
       const fix = sandboxFixFor(cause)
       return {
         ...failed(classify(cause), cause, beat.name),
-        ...(error instanceof FellBack ? { fallback: error.fallback } : {}),
+        ...(error instanceof FellBack
+          ? { fallback: error.fallback, fallbackPhase: error.phase }
+          : {}),
         ...(still ? { still } : {}),
         ...(fix ? { fix } : {}),
       }
@@ -189,7 +195,7 @@ async function filmBeat(
   const target = join(out, clip)
 
   let route: Route = beat.route
-  let fallback: string | undefined
+  let fallback: { message: string; phase: StallPhase } | undefined
   let filmed: {
     frames: number
     events: readonly LogEvent[]
@@ -209,11 +215,11 @@ async function filmBeat(
     } catch (error) {
       if (!(error instanceof StepperStalled)) throw error
       route = 'screencast'
-      fallback = error.message
+      fallback = { message: error.message, phase: error.phase }
       try {
         filmed = await filmScreencast({ url, beat, clip: target })
       } catch (cause) {
-        throw new FellBack(cause, fallback)
+        throw new FellBack(cause, fallback.message, fallback.phase)
       }
     }
   } else {
@@ -250,7 +256,9 @@ async function filmBeat(
     dir,
     requested: beat.route,
     route,
-    ...(fallback ? { fallback } : {}),
+    ...(fallback
+      ? { fallback: fallback.message, fallbackPhase: fallback.phase }
+      : {}),
     frames: filmed.frames,
     seconds: Number((filmed.frames / FPS).toFixed(2)),
     clip,
@@ -269,6 +277,7 @@ class FellBack extends Error {
   constructor(
     readonly error: unknown,
     readonly fallback: string,
+    readonly phase: StallPhase,
   ) {
     super(error instanceof Error ? error.message : String(error))
   }

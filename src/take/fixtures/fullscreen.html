@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <title>Present</title>
+    <!--
+      A slide whose button asks for fullscreen and toggles out of it, the way
+      a presenting app enters its stage during a beat's setup.
+
+      - #present asks for fullscreen on the root, or leaves it when held
+      - #state reads Presenting while document.fullscreenElement is set
+      - Every fullscreenchange posts to /report whether the page is held and
+        the window size it read, so a test sees the request was answered
+        without the window resizing
+    -->
+    <link rel="stylesheet" href="/tokens.css" />
+    <style>
+      @font-face {
+        font-family: 'Geist Variable';
+        src: url('/fonts/Geist-Regular.woff2') format('woff2');
+        font-weight: 400;
+      }
+      @font-face {
+        font-family: 'Geist Variable';
+        src: url('/fonts/Geist-SemiBold.woff2') format('woff2');
+        font-weight: 600 700;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+      }
+      body {
+        display: grid;
+        place-items: center;
+        background: var(--color-background);
+        color: var(--color-text-body);
+        font-family: var(--type-body-family);
+      }
+      main {
+        display: grid;
+        gap: var(--space-lg);
+        justify-items: center;
+        padding: 64px 96px;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-panel);
+      }
+      h1 {
+        margin: 0;
+        color: var(--color-text);
+        font-size: 64px;
+        font-weight: 600;
+      }
+      #state {
+        color: var(--color-muted);
+        font-size: 28px;
+      }
+      [data-presenting] #state {
+        color: var(--color-text);
+      }
+      #present {
+        padding: 12px 28px;
+        font: inherit;
+        font-size: 24px;
+        font-weight: 600;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-panel);
+        background: var(--color-chrome);
+        color: var(--color-text);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Release 4.2</h1>
+      <p id="state">Not presenting</p>
+      <button id="present" type="button">Present</button>
+    </main>
+    <script>
+      const present = document.getElementById('present')
+      const state = document.getElementById('state')
+      let seq = 0
+      present.addEventListener('click', () => {
+        if (document.fullscreenElement) document.exitFullscreen()
+        else document.documentElement.requestFullscreen()
+      })
+      document.addEventListener('fullscreenchange', () => {
+        const full = document.fullscreenElement !== null
+        document.body.toggleAttribute('data-presenting', full)
+        state.textContent = full ? 'Presenting' : 'Not presenting'
+        present.textContent = full ? 'Leave' : 'Present'
+        fetch('/report', {
+          method: 'POST',
+          body: JSON.stringify({
+            seq: seq++,
+            frame: 0,
+            type: 'fullscreenchange',
+            full,
+            width: innerWidth,
+            height: innerHeight,
+          }),
+        }).catch(() => {})
+      })
+    </script>
+  </body>
+</html>

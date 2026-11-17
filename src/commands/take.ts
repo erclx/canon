@@ -208,7 +208,9 @@ export function register(program: Command): void {
         'A refusal in a beat carries beat. target-missing and target-offscreen',
         "carry still when the page answered a capture, the beat folder's",
         'still.jpg as the step met it. A beat that fell back to the screencast',
-        'before refusing carries fallback, the reason it fell back. The',
+        'before refusing carries fallback, the reason it fell back, and',
+        'fallbackPhase, being settle, setup, or recording, where the stalled',
+        'frame was begun. A filmed beat that fell back carries both too. The',
         'screencast opens the address a second time, so a single-use link is',
         'spent by then: check the access before the selector.',
         '',
@@ -404,7 +406,7 @@ async function runTake(
     if (result.beat) logWarn(`in beat ${result.beat}`)
     if (result.fallback) {
       logWarn(
-        `after falling back to a screencast, which opened the address again: ${result.fallback}`,
+        `after a stall in ${result.fallbackPhase ?? 'an unknown phase'} fell back to a screencast, which opened the address again: ${result.fallback}`,
       )
     }
     if (result.reason === 'server-unreachable') {
@@ -424,6 +426,7 @@ async function runTake(
       message: result.message,
       ...(result.beat ? { beat: result.beat } : {}),
       ...(result.fallback ? { fallback: result.fallback } : {}),
+      ...(result.fallbackPhase ? { fallbackPhase: result.fallbackPhase } : {}),
       ...(result.still ? { still: result.still } : {}),
       ...(result.reason === 'browser-missing'
         ? { install: INSTALL_BROWSER }
@@ -437,7 +440,11 @@ async function runTake(
     logInfo(
       `${beat.dir}  ${beat.route}  ${plural(beat.frames, 'frame')}  ${beat.seconds} s`,
     )
-    if (beat.fallback) logWarn(`  filmed by screencast: ${beat.fallback}`)
+    if (beat.fallback) {
+      logWarn(
+        `  filmed by screencast after a stall in ${beat.fallbackPhase ?? 'an unknown phase'}: ${beat.fallback}`,
+      )
+    }
   }
 
   const filmed = {

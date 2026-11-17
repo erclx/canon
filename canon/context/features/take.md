@@ -25,7 +25,7 @@ Reads a take plan, films each beat from a fresh load, and writes the clip, the l
 
 ### `src/take/fixtures/`
 
-Owns the static pages the end to end takes film, two of which post each input they receive back to the test's server, and `film-suite.ts`, the harness the five `film-*.e2e.test.ts` files share.
+Owns the static pages the end to end takes film, two of which post each input they receive back to the test's server, and `film-suite.ts`, the harness the six `film-*.e2e.test.ts` files share.
 
 - `motion.html` is the release-checklist page every motion rule is measured on, and `motion-server.ts` serves any fixture with canon's token sheet and Geist from where they live
 - `motion.html` reports the animation frame each input paints in, since a stepped page's `performance.now()` runs ahead of the clip while inputs are dispatched
@@ -35,7 +35,7 @@ Owns the static pages the end to end takes film, two of which post each input th
 
 ### `src/take/film-*.e2e.test.ts`
 
-The film suite is five files, one per describe block, so vitest runs them in parallel.
+The film suite is six files, one per describe block, so vitest runs them in parallel.
 
 - A stepped case films at `deviceScale: 1` unless it asserts a 3840x2160 clip or still, or stalls the page into a refusal. `canon take` and the reel keep scale 2.
 - `bandLuma` takes its crop in CSS pixels and scales it to the clip it reads, so one crop reads the same element at either scale
@@ -46,5 +46,5 @@ The film suite is five files, one per describe block, so vitest runs them in par
 - The frame ticks start at the load event's monotonic stamp and rise to the page clock at the pause, since a tick on Bun's clock freezes animation and ticks lagging the page film every later fade dead
 - Send an input, step a frame, then await the input, and begin a frame only once the last settles, since awaiting first deadlocks and Chromium refuses a second frame as pending
 - A JPEG frame is full range and H.264 is TV range, so the encoder scales between them. From FFmpeg 7.1 a conversion keeps the source range, so every call reading or writing a still names `out_range`.
-- The stepper advances virtual time plainly, since pausing on a fetch held the clock into the stall fallback. Stepped tests raise that limit to 8 s, save the fallback test, which stalls at 2 s.
+- Virtual time advances plainly, since pausing on a fetch held it into a stall, and a loop timed on `performance.now()` never ends under it. Stepped tests stall at 8 s, fallback tests at 2 s.
 - A moved Playwright cache reads as `browser-missing`, and a reworded `No usable sandbox!` or `Chromium sandboxing failed!` reads as `take-failed`, not `sandbox-blocked`
