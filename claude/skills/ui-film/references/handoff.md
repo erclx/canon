@@ -65,7 +65,7 @@ Where composing from the main root is not possible, write each file whole throug
 
 Read the `hyperframes` skill's `references/format.md` for placing the clip and `references/motion.md` for the wrapper's transform before writing the composition.
 
-1. Size a stage at 1920x1080 and place the clip inside a non-timed wrapper that fills it, with `transform-origin: 0 0`. Time the video, never the wrapper too.
+1. Size a stage at 1920x1080 and place the clip inside a non-timed wrapper sized at the log's `viewport`, with `transform-origin: 0 0`. Time the video, never the wrapper too.
 2. Drive the wrapper from the track on the composition's registered timeline, setting `scale(s * k) translate(-x px, -y px)` at each frame's time from the clip's start.
    - `k` is the stage width over `viewport.width`, 1 at the default window
 3. Draw the cursor as its own element outside the wrapper, at a constant size, positioned at `(cursor.x - x) * s * k` and `(cursor.y - y) * s * k` on the stage.
