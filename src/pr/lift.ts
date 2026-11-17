@@ -8,7 +8,7 @@ import {
   standingPasses,
   type UiCounts,
 } from '@/pr/review-scope'
-import { isInert, readCarry } from '@/pr/carry'
+import { readCarry, reelMoves } from '@/pr/carry'
 import { readReelWaivers, readWaivers } from '@/pr/waiver'
 import { DEFAULT_PAINTED, isPainted, type PaintedPatterns } from '@/pr/painted'
 
@@ -417,23 +417,6 @@ export function evidenceGate(
     }
   }
   return { ...pass('evidence'), ...lists, ...skipField, reelWaived }
-}
-
-/**
- * Which changed paths move a reel. A painted path always does, tested ahead of
- * the inert set, since a fixture a reel films sits in a folder that set
- * exempts. A project declaring `reelInputs` names what a reel reads beyond the
- * painted set, so any other source change leaves the pixels alone. With no
- * declaration, every path outside the inert set moves it too.
- */
-function reelMoves(painted: PaintedPatterns): (path: string) => boolean {
-  const { reelInputs } = painted
-  const reads =
-    reelInputs === undefined
-      ? (path: string) => !isInert(path)
-      : (path: string) =>
-          reelInputs.some((glob) => new Bun.Glob(glob).match(path))
-  return (path) => isPainted(path, painted) || reads(path)
 }
 
 /**
