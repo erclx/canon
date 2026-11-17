@@ -471,6 +471,11 @@ describe('every block and its placement', () => {
     expect(countFile(file('a.ts', text), 'ts').headBlocks).toEqual([])
   })
 
+  it('should pass a plain block comment of 3 text lines with a bare opener', () => {
+    const text = `/*\n${run(' *', 3)}\n */\nexport const a = 1\n`
+    expect(countFile(file('a.ts', text), 'ts').headBlocks).toEqual([])
+  })
+
   it('should leave a bare // line and a directive out of a head run', () => {
     const text = [
       '// One.',

@@ -65,7 +65,7 @@ export function register(program: Command): void {
         '  a comment carrying a date, a commit hash, or an issue reference',
         '',
         'A text line is a comment line carrying more than a bare delimiter, such',
-        'as /**, */, *, //, #, or """, and no tool directive, such as biome-ignore,',
+        'as /**, /*, */, *, //, #, or """, and no tool directive, such as biome-ignore,',
         '@ts-expect-error, shellcheck, noqa, or a canon-allow- or canon-keep- marker.',
         '',
         `Share, which canon gate run reports and fails nothing on: a file of`,

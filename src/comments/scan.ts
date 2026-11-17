@@ -68,7 +68,7 @@ export const FILE_SHARE_CAP = 0.15
 export const FILE_SHARE_FLOOR = 50
 
 /** A comment line that is only a delimiter, carrying no text. */
-const BARE_DELIMITERS = new Set(['/**', '*/', '*', '//', '#', '"""'])
+const BARE_DELIMITERS = new Set(['/**', '/*', '*/', '*', '//', '#', '"""'])
 
 /** An instruction to a tool rather than a note to a reader. */
 export const DIRECTIVE_PATTERN =

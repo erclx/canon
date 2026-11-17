@@ -16,7 +16,7 @@ paths:
 - Write a comment only when it records a fact the reader cannot recover from the code: an external contract, a rejected alternative, or the reason a surprising line is correct.
 - Do not restate in prose what the line beside it already says.
 - Do not comment a self-contained function whose signature and body already carry its behavior.
-- Hold a file of 50 or more lines to 15% comment text, counted in text lines so a delimiter never costs a reason.
+- Hold a file of 50 or more non-blank lines to 15% comment text, counted in text lines so delimiters cost no reason.
 - Give a comment on an internal declaration or a member a reason or a constraint, never a description its name and type already carry.
 
 ## What a comment may claim
