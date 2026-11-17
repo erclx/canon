@@ -135,7 +135,7 @@ Read `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md` before writing a 
 
 ### Close
 
-Close only on the operator's word, while the app stays up for as long as they keep talking.
+Close only on the operator's word, and keep the app up while they keep talking.
 
 1. Confirm every drawn finding's mock source sits under `evidence/mocks/`, then stop the server and remove the worktree per `isolate.md`, or close per `live.md` for a live drive.
 2. End the board's serve command only when `reused` read false, and keep the drive's board project, since the operator looks back at past drives there.
@@ -152,6 +152,10 @@ Run this tail by default after the close, since the intake records the session's
 2. Send the controller the ready list, naming no item whose `You:` slot is still open, and say this session is planning those rows, so it holds a cold planner for each.
 3. Wait for the controller to file the rows and name each back. Plan only a row named to this session, and write no task file.
 4. Invoke `canon:plan-feature` for each named row, since its Step 1 loads the UI skills for a rendered surface. Link it with `canon tasks plan-link` and announce it per `role-planner` before the next.
+
+### A finding after the close
+
+One raised in this session on the build just driven joins the closed folder per `drive-record.md`, and the close's check and validate run again. Any other build or session opens a new intake.
 
 ## Output
 

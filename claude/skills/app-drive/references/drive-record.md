@@ -43,6 +43,13 @@ Write the log to `evidence/drive-log.md` inside the intake folder. It opens on a
 - The meta line holds the severity, the source, and the persona, in that order. The source is `goal`, `last-drive`, or `operator`, and a finding naming none sorts as taste.
 - A `last-drive` finding adds `fixed`, `still open`, or `changed` to its meta line
 
+### A finding after the close
+
+A finding raised after the close, in the same session and on the build just driven, appends to this log rather than opening another.
+
+- Give it the log's next number, since the numbers are one sequence
+- State in `Saw` whether it was measured on the live app or read from code, since the copy is gone
+
 ### The length marker
 
 A drive of any length runs past the markdown ceiling of 300 rendered lines, and `canon markdown audit` reports the log there. Write the marker as the log's first line, before the title, so the log stays one file and a planner reads it in finding order.
