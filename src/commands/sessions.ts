@@ -380,7 +380,11 @@ interface ReapCommandOptions {
 }
 
 type ReapRefusal =
-  'no-registry' | 'no-task' | 'no-repository' | 'needs-write' | 'bad-input'
+  | 'no-registry'
+  | 'no-task'
+  | 'no-repository'
+  | 'needs-write'
+  | 'bad-input'
 
 function refuseReap(
   json: boolean | undefined,
