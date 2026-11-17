@@ -52,6 +52,20 @@ const KEY_PATHS_SCOPE = /^(?:tooling\/claude\/seeds\/)?CLAUDE\.md$/
 const KEY_PATHS_HEADING = /^## Key paths\s*$/
 const KEY_PATHS_KINDS: readonly DensityKind[] = ['bullet-run', 'h3-opening']
 
+/**
+ * The design reference index, measured for its table cells alone. It is a
+ * catalog with one row per group, so it takes the cell limit that keeps a
+ * States cell short and none of the prose or row-count limits. `densityGates`
+ * leaves it out, so the finding reports and never gates, since a project past
+ * the limit fixes it by moving design folders rather than in one push.
+ */
+const DESIGN_INDEX_SCOPE = /^canon\/design\/index\.md$/
+
+/** Whether a path is the design reference index, whose fix is a group split. */
+export function isDesignIndex(rel: string): boolean {
+  return DESIGN_INDEX_SCOPE.test(rel)
+}
+
 /** The lines under `## Key paths` up to the next H1 or H2, keeping their numbers. */
 function keyPathsSection(lines: readonly BodyLine[]): readonly BodyLine[] {
   const start = lines.findIndex(
@@ -67,7 +81,8 @@ function keyPathsSection(lines: readonly BodyLine[]): readonly BodyLine[] {
 
 /**
  * The density findings a path takes, being every finding on a density-scope
- * file and the Key paths findings on a `CLAUDE.md`. The audit, the init probe,
+ * file, the Key paths findings on a `CLAUDE.md`, and the cell findings on the
+ * design index. The audit, the init probe,
  * and `canon claude sync` all read this, so the three agree on what counts.
  * The table cell and trailing-list findings join on a density-scope path only,
  * since `densityFindings` stays what its direct callers grade.
@@ -78,6 +93,11 @@ export function scopedDensityFindings(
 ): DensityFinding[] {
   if (inDensityScope(rel)) {
     return [...densityFindings(lines), ...tableDensityFindings(lines)]
+  }
+  if (isDesignIndex(rel)) {
+    return tableDensityFindings(lines).filter(
+      (finding) => finding.kind === 'table-cell',
+    )
   }
   if (!KEY_PATHS_SCOPE.test(rel)) return []
   return densityFindings(keyPathsSection(lines)).filter((finding) =>

@@ -41,6 +41,7 @@ import {
 import {
   densityGates,
   inDensityScope,
+  isDesignIndex,
   scopedDensityFindings,
 } from '@/markdown/scope'
 import {
@@ -671,7 +672,7 @@ function reportDensity(
     `Paragraphs past ${CHECKPOINTS.paragraph} characters, more than 2 paragraphs in a row, bullets past ${CHECKPOINTS.bullet} characters, more than 5 plain bullets in a row, a heading past H3, an H3 opening with neither a paragraph nor a table, a table cell past ${TABLE_CELL} characters, and a list directly after a table.`,
   )
   logInfo(
-    'Measured on context entries, docs, skill bodies, references, and requirements, tooling seeds and stack references, the wiki, README.md, and CONTRIBUTING.md. CLAUDE.md and its seed take the bullet run and the H3 opening inside Key paths alone, with no table finding. Every other path takes no density finding.',
+    'Measured on context entries, docs, skill bodies, references, and requirements, tooling seeds and stack references, the wiki, README.md, and CONTRIBUTING.md. CLAUDE.md and its seed take the bullet run and the H3 opening inside Key paths alone, with no table finding. The design index at canon/design/index.md takes the table cell finding alone, which reports. Every other path takes no density finding.',
   )
   logInfo(densityGatingLine(gated, source))
 
@@ -697,6 +698,11 @@ function reportDensity(
   logInfo(
     'Split a long block at its seam, put a heading or a table between paragraphs, give a long list H3s, open each H3 with a sentence or a table, move a long cell into a bullet under the lead, and give a trailing list its own lead sentence.',
   )
+  if (carrying.some((report) => isDesignIndex(report.rel))) {
+    logInfo(
+      "On the design index, split a group whose States cell runs long into one section folder per part of its code, each with its own row, per '### Sizing the state list' in the design-record skill's folder.md.",
+    )
+  }
   pipeOutput(
     carrying
       .map(

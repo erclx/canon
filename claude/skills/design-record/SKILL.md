@@ -46,7 +46,8 @@ Skip this step when `canon/design/index.md` exists, even as a stub, since a stub
 When the pick lands relative to the build is the design-reference rule's call, so follow it rather than choosing here.
 
 1. Name the group the surface belongs to, by where a user meets it in the app, per `folder.md`.
-2. Add or update the group's index row before running the sync, naming the code paths the surface governs and the states its frames show.
+2. Add or update the index row of the group, or of the section in a split group, before running the sync, naming the code paths the surface governs and the states its frames show.
+   - When the new state would push the States cell past 120 characters, follow `### Sizing the state list` in `folder.md`, which splits the group into sections before it shortens the list.
 3. Add the surface to the sync's mapping file, in the form the sync's own help gives.
 4. Run the sync, then its check, and report a missing or stray file the check names.
 5. Open each written PNG, light and dark, before reporting it landed, since a frame captured blank or in one theme passes the sync.
@@ -58,7 +59,7 @@ A redraw follows an intentional design change and nothing else. Keep the index r
 Retire a reference in the change that removes its surface from the app.
 
 - Drop the surface from the sync's mapping and run the sync, so the sync removes its files
-- Remove the group's index row when the group holds nothing else
+- Remove the index row of the group or section the surface sat in, once that folder holds nothing else
 - When the sync leaves the files and its check reports them stray, name each path and ask the operator, since no session deletes a reference by hand
 
 ## Step 6: carry a pick into the design document

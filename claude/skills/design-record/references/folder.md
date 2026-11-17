@@ -49,22 +49,30 @@ Each reference is one name in two themes, with a PNG and its frame HTML per them
 `canon/design/index.md` is prose for a reader. It names the link a file listing lacks, from a group to the code it governs.
 
 - Write one row per group, carrying the group, what the user sees there, the code paths it governs, and the states its frames show
+- Give a group split into section folders one row per section, with the section path such as `home/sidebar` as its Group, and no row for the parent
 - List no files, since the tree and the sync's own check already answer what exists
 - Keep the sync's canvas mapping out of the index, in a file the sync owns beside it
 
+### Sizing the state list
+
+The States cell names the kinds of state the frames show, such as themes, widths, and the empty and error states, rather than one entry per frame. Keep it to 120 characters, the table cell limit `canon markdown audit` reports on the index.
+
+A cap alone gets the same list squeezed into fewer words. A group that outgrows its cell splits instead, into one section folder per part of its code as `## Groups` allows, and each section takes its own row in the index. Where the code does not split, the group keeps one row and names broader kinds of state.
+
 ### Template
 
-The column headers stay verbatim. A row per group, `foundations` included.
+The column headers stay verbatim. A row per group, or per section of a split group, `foundations` included.
 
 ```markdown
 # Design references
 
 Each group holds accepted frames a build matches, light and dark.
 
-| Group         | What the user sees | Code               | States           |
-| ------------- | ------------------ | ------------------ | ---------------- |
-| `home`        | <the surface>      | `<path in source>` | <states shown>   |
-| `foundations` | Tokens and colors  | `<stylesheet>`     | <themes covered> |
+| Group          | What the user sees    | Code               | States           |
+| -------------- | --------------------- | ------------------ | ---------------- |
+| `inspector`    | <the surface>         | `<path in source>` | <kinds of state> |
+| `home/sidebar` | <one section of home> | `<section path>`   | <kinds of state> |
+| `foundations`  | Tokens and colors     | `<stylesheet>`     | <themes covered> |
 ```
 
 ## Lifetime

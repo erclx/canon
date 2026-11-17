@@ -135,6 +135,33 @@ describe('markdown audit', () => {
     ])
   })
 
+  it('should point a long States cell on the design index at the group split', async () => {
+    write(
+      'canon/design/index.md',
+      `# Design references\n\nThe lead.\n\n| Group | States |\n| - | - |\n| \`home\` | ${'s'.repeat(130)} |\n`,
+    )
+
+    const result = await run(['markdown', 'audit'])
+
+    expect(result.exitCode).toBe(0)
+    expect(`${result.stdout}${result.stderr}`).toContain(
+      '### Sizing the state list',
+    )
+  })
+
+  it('should leave the group split out of a finding off the design index', async () => {
+    write(
+      'docs/guide.md',
+      `# Guide\n\nThe lead.\n\n| A | B |\n| - | - |\n| ${'a'.repeat(130)} | b |\n`,
+    )
+
+    const result = await run(['markdown', 'audit'])
+
+    expect(`${result.stdout}${result.stderr}`).not.toContain(
+      '### Sizing the state list',
+    )
+  })
+
   it('should measure no table outside the density scope', async () => {
     write(
       'notes/scratch.md',
