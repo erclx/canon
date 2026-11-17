@@ -130,7 +130,7 @@ Holds the reads of which process listens on a port, shared by `canon pr local` a
 
 ### `src/sessions/`
 
-Holds the live-session roster and the branch claim, split by what a stub has to replace. `transfer/` moves a session between machines and treats a transcript as opaque bytes.
+Holds the live-session roster and the branch claim, split by what a stub has to replace. `transfer/` moves a session between machines and treats a transcript as opaque bytes. `reap.ts` judges each stop by a fresh roster read.
 
 - `registry.ts` reads one JSON file per session under `claudeConfigDir()`. No published contract describes it, so an absent registry refuses rather than reporting an empty roster
 - `live.ts` matches a record to its stamped start time, and marks it unverified where it can only probe a signal or, across pid namespaces, a socket file. `liveness()` stays synchronous for the gate

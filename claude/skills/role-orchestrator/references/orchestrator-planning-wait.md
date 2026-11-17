@@ -11,13 +11,18 @@ canon tasks launchable <task> --wait --json
 
 The verb resolves the task's `Plan:` line and runs the `plan-answers` gate on the plan it names, re-reading every 30 seconds for up to 1800 seconds by default. It keys on the line rather than the plan file. A planner links a plan only after it validates, so a half-written plan never wakes the loop.
 
-A planner handed several rows in one launch links each plan on its own, so arm one wait per task. A single wait over the batch wakes on the first plan and misses the rest.
+Two steps come before the first wait.
+
+- Record the planner on each task it took through `canon tasks session <planner-id> <task> --json`, the way a worker is recorded, so the reap below reaches it
+- Arm one wait per task when a planner took several rows, since each plan links on its own and a single wait wakes on the first
 
 ## Branch on the record
 
 Branch on the record's `reason` rather than on the exit code, which a shell function wrapping `canon` can flatten to zero.
 
-- `launchable`: the plan waits on nobody, so run `${CLAUDE_SKILL_DIR}/references/orchestrator-dispatch.md` from the candidate on, since the wait never reads the branch or the conflict check
+- `launchable`: the plan waits on nobody, so stop its planner and run `${CLAUDE_SKILL_DIR}/references/orchestrator-dispatch.md` from the candidate on, since the wait reads no branch or conflict check
+  - Run `canon sessions reap <task> --json` ahead of dispatch, while the planner is the only session the task records
+  - A planner `orchestrator-planner-reuse.md` holds for a row it is already recorded on reads `open-task`. Pass `--keep <sessionId>` for one not yet recorded there.
 - `timeout`: read `plan` and `open` off the last reading, then act on which one held the row
   - No `plan` means nothing was linked in time, so check the planner is still live and re-arm the wait
   - A non-empty `open` names the questions holding the row, so report each label and reason to the operator, then re-arm the wait

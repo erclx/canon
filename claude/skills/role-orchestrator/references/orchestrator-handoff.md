@@ -40,10 +40,15 @@ The read is the report this session is holding. Retire a session whose delivery 
 
 ### The act, and the order it runs in
 
-`claude rm <id>` is meant to remove a background session and its worktree together, though its own report is not reliable, so trust `canon worktrees list` afterward. It takes one target per call, so a wave costs one call per session.
+Run `canon sessions reap <task> --remove --json` once per task whose delivery arrived, rather than one `claude rm <id>` per session. The verb runs the client's remove on each session the task records and reads the roster back rather than trusting the client's report.
 
-- The argument is the id, which `claude agents --json` carries beside the name on every row, and the name form answers `No job matching`
+- It skips the caller, a busy, interactive, talk, or controller session, and one another live task records, each with a `reason` on its row
+- Pass `--keep <sessionId>` for each session the task records whose delivery has not arrived, since `waiting` reads the same for a blocked session and a delivered one
+- Remove a delivered session no task records by hand with `claude rm <id>`, taking the id `claude agents --json` carries, since the name form answers `No job matching`
 - The command belongs to the client, so a target running another client performs whatever removal that client offers
+
+Then close the act out.
+
 - Run `canon worktrees reclaim` after the retirements, since it refuses on `held-by-session` and a reclaim taken first finds nothing left to do
 - Report the retired sessions as a list, the hand-launched ones under it as a read rather than an act, and what the reclaim removed below both
 
