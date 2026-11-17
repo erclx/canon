@@ -286,6 +286,20 @@ export async function applySessionDefaults(
 ): Promise<void> {
   await writeSettings(
     read.path,
-    applySettingsEdits(read.source, read.plan.edits, read.indent),
+    applySettingsEdits(
+      editableSource(read.source),
+      read.plan.edits,
+      read.indent,
+    ),
   )
+}
+
+/**
+ * `readSettings` reads an empty or whitespace-only file as `{}`, so the edits
+ * start from an empty object in the file's own line ending, since there is no
+ * JSON text to insert into.
+ */
+function editableSource(source: string): string {
+  if (source.trim() !== '') return source
+  return `{}${source.includes('\r\n') ? '\r\n' : '\n'}`
 }

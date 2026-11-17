@@ -697,6 +697,28 @@ describe('applySessionDefaults', () => {
     )
   })
 
+  it.each([
+    ['an empty', ''],
+    ['a whitespace-only', '  \n'],
+  ])('should write %s settings file rather than throw', async (_, source) => {
+    const dir = await makeTarget(source, { scripts: ['reply-links.sh'] })
+
+    await applySessionDefaults(await readPlanned(dir))
+
+    expect(JSON.parse(await readTargetSettings(dir)).hooks).toEqual({
+      Stop: [
+        {
+          hooks: [
+            {
+              type: 'command',
+              command: '"$CLAUDE_PROJECT_DIR"/.claude/hooks/reply-links.sh',
+            },
+          ],
+        },
+      ],
+    })
+  })
+
   it('should change nothing on a second run', async () => {
     const dir = await makeTarget('{}\n', { planGuard: true })
     await applySessionDefaults(await readPlanned(dir))
