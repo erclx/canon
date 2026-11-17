@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.95.0](https://github.com/erclx/canon/compare/v5.94.0...v5.95.0) (2026-11-17)
+
+
+### Features
+
+* **context-fold:** open a sibling entry beside a full owner ([#3155](https://github.com/erclx/canon/issues/3155)) ([d89f652](https://github.com/erclx/canon/commit/d89f652bb12818823c8de0bfb55b1817236d8264))
+* **context:** gate a project's own context folders and entry length ([#3154](https://github.com/erclx/canon/issues/3154)) ([f2397bb](https://github.com/erclx/canon/commit/f2397bb72c5809f29fb91de2ec760551075d065a))
+* **design:** cap the index States cell and split a group past it ([#3153](https://github.com/erclx/canon/issues/3153)) ([cdca425](https://github.com/erclx/canon/commit/cdca425e47f50976177248c2e4acb7d4965e2c57))
+* **skills:** launch design work under the planner role ([#3160](https://github.com/erclx/canon/issues/3160)) ([86d70b3](https://github.com/erclx/canon/commit/86d70b39013eb0cd2e84eb4dd8e15d41afb02c97))
+* **skills:** move plan-feature's procedure into references ([#3158](https://github.com/erclx/canon/issues/3158)) ([946d0eb](https://github.com/erclx/canon/commit/946d0ebe23251425b2b9a9bb421287d36ceed6bf))
+* **ui-craft:** add loading placeholder and reload state rules ([#3159](https://github.com/erclx/canon/issues/3159)) ([546c630](https://github.com/erclx/canon/commit/546c630a6eafbd29eb589716db841ed6e6ec8e9a))
+
+
+### Bug Fixes
+
+* **tooling:** skip a screenshot mask whose element a dialog covers ([#3152](https://github.com/erclx/canon/issues/3152)) ([55ee490](https://github.com/erclx/canon/commit/55ee490e185d83c9ed602563a54e97b09a943cdf))
+
 ## [5.94.0](https://github.com/erclx/canon/compare/v5.93.1...v5.94.0) (2026-11-17)
 
 
