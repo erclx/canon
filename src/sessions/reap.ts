@@ -58,11 +58,19 @@ export type RosterRow = ResolvedSession & Pick<StopReading, 'stopped'>
 
 /**
  * `waiting` is the ordinary status of a background session that reported and
- * ended its turn, so it reads as finished beside `idle`. Every other status,
- * `busy` and a running `shell` among them, has a turn or a process still
- * going.
+ * ended its turn, so it reads as finished beside `idle`. `shell` is a turn
+ * ended with a background command still held, such as a worker's preview
+ * server or a review wait, which most finished workers and reviewers read, so
+ * a session a task recorded takes it as finished too. Every other status,
+ * `busy` among them, has a turn still running.
  */
-const SETTLED_STATUSES: readonly string[] = ['idle', 'waiting']
+const SETTLED_STATUSES: readonly string[] = ['idle', 'waiting', 'shell']
+
+/**
+ * A session no task records says nothing about its work but its status, so a
+ * held background command keeps it alive there.
+ */
+const UNTASKED_SETTLED: readonly string[] = ['idle', 'waiting']
 
 const TALK_MARKER = '-talk'
 
@@ -203,6 +211,16 @@ export function planFinishedReap(
     const recorded = tasks.some((task) =>
       task.entries.some((entry) => entry.sessionId === id),
     )
+    if (!recorded && !UNTASKED_SETTLED.includes(row.status)) {
+      settled.push({
+        sessionId: id,
+        name: row.name,
+        outcome: 'skipped',
+        reason: 'busy',
+        detail: row.status,
+      })
+      continue
+    }
     if (
       !recorded &&
       (row.statusDwellMs === null || row.statusDwellMs < idleMs)

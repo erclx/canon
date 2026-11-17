@@ -86,7 +86,6 @@ describe('planTaskReap', () => {
     ['caller', row({ sessionId: CALLER }), CALLER, null],
     ['interactive', row({ kind: 'interactive' }), WORKER, 'interactive'],
     ['busy', row({ status: 'busy' }), WORKER, 'busy'],
-    ['busy', row({ status: 'shell' }), WORKER, 'shell'],
     ['talk', row({ name: 'worker-canon-parser-talk' }), WORKER, null],
     [
       'controller',
@@ -110,6 +109,19 @@ describe('planTaskReap', () => {
       })
     },
   )
+
+  it('should target a recorded session holding a background shell', () => {
+    const merged = task('v1.0-parser', 'archived', [WORKER])
+
+    const plan = planTaskReap(
+      merged,
+      [row({ status: 'shell' })],
+      [merged],
+      GUARDS,
+    )
+
+    expect(plan.targets).toHaveLength(1)
+  })
 
   it('should skip a session the caller keeps', () => {
     const merged = task('v1.0-parser', 'archived', [WORKER])
@@ -177,6 +189,18 @@ describe('planFinishedReap', () => {
     const plan = planFinishedReap([row({})], [], GUARDS, REPOSITORY, HOUR)
 
     expect(plan.targets).toHaveLength(1)
+  })
+
+  it('should skip an untasked session holding a background shell', () => {
+    const plan = planFinishedReap(
+      [row({ status: 'shell' })],
+      [],
+      GUARDS,
+      REPOSITORY,
+      HOUR,
+    )
+
+    expect(plan.settled[0]).toMatchObject({ reason: 'busy', detail: 'shell' })
   })
 
   it('should skip an untasked session idle under the threshold', () => {

@@ -1,4 +1,4 @@
-import { resolve } from 'node:path'
+import { basename, resolve } from 'node:path'
 import type { Command } from 'commander'
 import { checkClaim, type ClaimReport } from '@/sessions/claim'
 import {
@@ -12,6 +12,15 @@ import {
   selfOf,
 } from '@/sessions/resolve'
 import { readStop, type StopReading } from '@/sessions/stop'
+import {
+  executeReap,
+  planFinishedReap,
+  planTaskReap,
+  type ReapPlan,
+  type ReapRow,
+  readTaskSessions,
+  type RosterRow,
+} from '@/sessions/reap'
 import {
   type Behind,
   exportSession,
@@ -274,6 +283,261 @@ export function register(program: Command): void {
     .action(async (bundle: string, opts: ImportCommandOptions) => {
       process.exitCode = await runImport(bundle, opts)
     })
+
+  sessions
+    .command('reap')
+    .description(
+      'Stop the background sessions a task recorded, or every finished one, once their work ends',
+    )
+    .helpOption('-h, --help', 'Show this help message')
+    .argument('[task]', 'The task stem whose Sessions: line names the targets')
+    .option(
+      '--finished',
+      'Reap every finished background session in this repository instead',
+    )
+    .option(
+      '--remove',
+      'Remove each session and its worktree rather than stop it',
+    )
+    .option('--dry-run', 'Report what would be reaped and run nothing')
+    .option('--write', 'Act on the --finished form, which refuses without it')
+    .option(
+      '--keep <sessionId>',
+      'Leave this session alone (repeatable)',
+      (value: string, previous: string[]) => [...previous, value],
+      [] as string[],
+    )
+    .option(
+      '--idle-minutes <n>',
+      'With --finished, how long a session no task records must sit idle',
+      '60',
+    )
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        "The task form reads one task's Sessions: line, live or archived, and",
+        'matches each entry to the roster by its full sessionId. No name or',
+        'prefix ever selects a session. Run it after a merge or a landed plan.',
+        '',
+        'The --finished form reads every background session in this repository',
+        'and takes one recorded on archived or declined tasks alone, or one no',
+        'task records that has sat idle past --idle-minutes. It refuses without',
+        '--write or --dry-run, since it reaches sessions nobody named.',
+        '',
+        'Skips, read off each row\'s "reason":',
+        '  caller       the session running this command',
+        '  kept         named by --keep, such as a planner held for reuse',
+        '  interactive  not a background session, so a person is in it',
+        '  controller   an orchestrator, the controller of its wave',
+        '  talk         a name carrying -talk, which waits on the operator',
+        '  busy         a status other than idle or waiting, named in "detail"',
+        '  usage-limit  stopped at a usage limit, which the operator resumes',
+        '  open-task    a live task also records it, named in "detail"',
+        '  recent       --finished only: no task records it and it has not sat',
+        '               idle past the threshold, or its dwell is unmeasured',
+        '',
+        'Outcomes, read off each row\'s "outcome":',
+        '  stopped, removed            the client ran and the roster dropped it',
+        '  would-stop, would-remove    --dry-run, so nothing ran',
+        '  skipped                     left alone, with a reason',
+        '  gone                        recorded, and no longer on the roster',
+        '  failed                      still on the roster after the client ran,',
+        '                              with its output in "detail"',
+        '',
+        "Each outcome is read off the roster after the client's stop or rm",
+        "rather than off its exit, since the client's own report is unreliable.",
+        '',
+        'Refusals, read off `reason`: "no-registry", "no-task", "no-repository",',
+        '"needs-write", and "bad-input".',
+        '',
+        'Exit codes:',
+        '  0  the reap ran and no row failed',
+        '  1  refused, or a row reads failed',
+        '',
+        'Examples:',
+        '  canon sessions reap v196.1-launch-report --json',
+        '  canon sessions reap v196.1-launch-report --dry-run',
+        '  canon sessions reap --finished --dry-run --json',
+        '  canon sessions reap --finished --remove --write --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (task: string | undefined, opts: ReapCommandOptions) => {
+      process.exitCode = await runReap(task, opts)
+    })
+}
+
+interface ReapCommandOptions {
+  readonly finished?: boolean
+  readonly remove?: boolean
+  readonly dryRun?: boolean
+  readonly write?: boolean
+  readonly keep: string[]
+  readonly idleMinutes: string
+  readonly json?: boolean
+}
+
+type ReapRefusal =
+  'no-registry' | 'no-task' | 'no-repository' | 'needs-write' | 'bad-input'
+
+function refuseReap(
+  json: boolean | undefined,
+  reason: ReapRefusal,
+  message: string,
+): number {
+  intro('canon sessions reap')
+  logStep('Refused')
+  logWarn(message)
+  outro()
+  writeRecord(json, { ok: false, reason, message, sessions: [] })
+  return 1
+}
+
+async function clientRun(
+  verb: 'stop' | 'rm',
+  id: string,
+): Promise<{ exitCode: number; output: string }> {
+  const proc = Bun.spawn(['claude', verb, id], {
+    stdout: 'pipe',
+    stderr: 'pipe',
+  })
+  const [stdout, stderr, exitCode] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+    proc.exited,
+  ])
+  return { exitCode, output: `${stdout}${stderr}` }
+}
+
+async function liveIds(): Promise<ReadonlySet<string>> {
+  const report = await resolveSessions()
+  if (report.kind === 'absent') return new Set()
+  return new Set(
+    report.sessions.flatMap((session) =>
+      session.sessionId === null ? [] : [session.sessionId],
+    ),
+  )
+}
+
+async function runReap(
+  task: string | undefined,
+  opts: ReapCommandOptions,
+): Promise<number> {
+  const idleMinutes = Number(opts.idleMinutes)
+  if ((task === undefined) === !opts.finished) {
+    return refuseReap(
+      opts.json,
+      'bad-input',
+      'Name a task stem or pass --finished, and not both.',
+    )
+  }
+  if (!Number.isFinite(idleMinutes) || idleMinutes < 0) {
+    return refuseReap(
+      opts.json,
+      'bad-input',
+      `--idle-minutes takes a number of minutes, and ${opts.idleMinutes} is not one.`,
+    )
+  }
+  if (opts.finished && !opts.write && !opts.dryRun) {
+    return refuseReap(
+      opts.json,
+      'needs-write',
+      'The --finished form reaches sessions no task named, so it acts only under --write. Pass --dry-run to read the list first.',
+    )
+  }
+
+  const report = await resolveSessions()
+  if (report.kind === 'absent') {
+    return refuseReap(
+      opts.json,
+      'no-registry',
+      `No session registry at ${report.dir}. Nothing was read, so nothing was reaped.`,
+    )
+  }
+
+  const root = await mainWorktreeRoot()
+  const tasks = await readTaskSessions(root)
+  const own = selfOf(report.sessions, callerIdentity())
+  const guards = {
+    self:
+      own.kind === 'unresolved'
+        ? own.identity.sessionId
+        : own.session.sessionId,
+    keep: opts.keep,
+  }
+  const roster: RosterRow[] = report.sessions.map((session) => ({
+    ...session,
+    stopped: session.kind === 'bg' ? readStop(session).stopped : null,
+  }))
+
+  let plan: ReapPlan
+  let stem: string | null = null
+  if (task !== undefined) {
+    stem = basename(task).replace(/\.md$/, '')
+    const found = tasks.find((entry) => entry.stem === stem)
+    if (found === undefined) {
+      return refuseReap(
+        opts.json,
+        'no-task',
+        `No task ${stem} on the board, in the archive, or among the declined at ${root}.`,
+      )
+    }
+    plan = planTaskReap(found, roster, tasks, guards)
+  } else {
+    const repository = await repositoryOf(process.cwd())
+    if (repository === null) {
+      return refuseReap(
+        opts.json,
+        'no-repository',
+        `--finished is scoped to one repository, and none resolved at ${process.cwd()}.`,
+      )
+    }
+    plan = planFinishedReap(
+      roster,
+      tasks,
+      guards,
+      repository,
+      idleMinutes * 60_000,
+    )
+  }
+
+  const acted = await executeReap(
+    plan.targets,
+    opts.remove === true,
+    opts.dryRun === true,
+    {
+      run: clientRun,
+      live: liveIds,
+      pause: (ms) => new Promise((done) => setTimeout(done, ms)),
+    },
+  )
+  const rows: readonly ReapRow[] = [...acted, ...plan.settled]
+
+  intro('canon sessions reap')
+  logStep(stem === null ? 'Finished sessions' : `Task ${stem}`)
+  if (rows.length === 0) logInfo('No session to reap.')
+  for (const row of rows) {
+    const why = row.reason
+      ? ` (${row.reason}${row.detail ? `: ${row.detail}` : ''})`
+      : ''
+    const line = `${row.name}  ${row.outcome}${why}`
+    if (row.outcome === 'failed') logWarn(`${line}: ${row.detail ?? ''}`)
+    else logInfo(line)
+  }
+  outro()
+
+  const failed = rows.some((row) => row.outcome === 'failed')
+  writeRecord(opts.json, {
+    ok: !failed,
+    form: stem === null ? 'finished' : 'task',
+    task: stem,
+    action: opts.remove ? 'remove' : 'stop',
+    dryRun: opts.dryRun === true,
+    sessions: rows,
+  })
+  return failed ? 1 : 0
 }
 
 interface ExportCommandOptions {
