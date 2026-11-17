@@ -86,6 +86,15 @@ export type Check =
   /** A reading whose verdict is a comparison rather than an exit code. */
   | { readonly kind: 'measure'; readonly measure: Measure }
 
+/**
+ * What a scoped stage asks of each changed file. A `RegExp` satisfies it, and
+ * a stage whose answer needs more than the path, such as which tests read the
+ * file, supplies its own.
+ */
+export interface StageScope {
+  test(file: string): boolean
+}
+
 export interface Stage {
   readonly id: string
   /** The heading this stage prints, matching the frame it replaces. */
@@ -95,7 +104,7 @@ export interface Stage {
    * stage always runs, which is correct wherever the input is diffuse enough
    * that no path predicts it.
    */
-  readonly scope?: RegExp
+  readonly scope?: StageScope
   /** What a scoped-out stage says, so a skip never reads as a pass. */
   readonly skipped?: string
   readonly checks: readonly Check[]

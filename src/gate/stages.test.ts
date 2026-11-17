@@ -6,9 +6,9 @@ import {
   commentHistory,
 } from '@/gate/comment-caps'
 import { clientCommandCitations } from '@/gate/measures'
-import { STAGES } from '@/gate/stages'
+import { STAGES, type StageScope } from '@/gate/stages'
 
-function scopeOf(id: string): RegExp {
+function scopeOf(id: string): StageScope {
   const stage = STAGES.find((candidate) => candidate.id === id)
   if (stage?.scope === undefined) throw new Error(`no scope on stage ${id}`)
   return stage.scope
