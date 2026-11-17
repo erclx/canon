@@ -76,7 +76,17 @@ A step beat runs the page on a virtual clock, one frame per step. Most pages fil
 
 A fallback films the beat again from a fresh load, replaying its setup and the steps the stepper already ran. A beat whose steps persist in the app, such as a fill that renames something, would then start from the changed state, so set `"route": "screencast"` on it when it risks a stall.
 
-A screencast beat films in real time at 1920x1080, so its camera zooms only to about 1.35x before it would go soft. Tell the operator which beats ran that way.
+A screencast beat films in real time at its window, 1920x1080 by default, so its camera zooms only to about 1.35x before it would go soft. Tell the operator which beats ran that way.
+
+## Window size
+
+Every beat films in a 1920x1080 window unless the take or the beat names another. A layout that changes below a width, such as a toolbar that folds, never shows at the default.
+
+- Set `--viewport <width>x<height>` when the whole take belongs at one smaller size
+- Set `"viewport": { "width": 800, "height": 600 }` on the one beat that needs a narrow window among wide ones, since the key wins over the option
+- Keep each side even, from 320x240 up to 1920x1080. The window only shrinks, since a stepped frame is twice the window and a larger one stalls on paint alone.
+- Expect the pointer to start at the beat's own center, and a target outside the smaller window to refuse as `target-offscreen` even where it sat inside the default
+- Give every beat of a `--reel` take one aspect ratio. Sizes may differ, since the reel shrinks each beat to one width, and two shapes refuse as `reel-shape` before anything films.
 
 ### Reading a take back
 
