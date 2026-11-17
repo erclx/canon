@@ -438,6 +438,7 @@ describe('context audit', () => {
   const writeContextStub = (exitCode: number): void => {
     writeFileSync(
       join(bin, 'canon'),
+      // canon-allow-embedded: a three-line stub whose exit depends on the verb, read nowhere else
       `#!/usr/bin/env bash\nif [ "$1" = context ]; then echo "context finding: $*"; exit ${exitCode}; fi\nexit 0\n`,
       { mode: 0o755 },
     )
