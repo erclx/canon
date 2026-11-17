@@ -55,9 +55,9 @@ The seeded runner reads the phases the nearest `scripts/verify.json` requires. I
 
 - `check:format` and the `shell` add-on's `check:shell` run only where `package.json` declares the script
 - A missing `package.json` in a subfolder verify tells the caller to sync the stack, and a missing `verify.json` names `canon tooling sync`
-- The two canon stages take `canon` from `PATH` first, then under `CI=true` a `bunx` pinned to `domains.tooling.version` in `canon/config/config.json`
+- The three canon stages take `canon` from `PATH` first, then under `CI=true` a `bunx` pinned to `domains.tooling.version` in `canon/config/config.json`
 - Under CI a missing stamp version fails the stage, and so does exit 1, which `bunx` also returns on a failed fetch
-- A local run with no `canon` skips both stages with an install hint and no pass check
+- A local run with no `canon` skips each canon stage with an install hint and no pass check, and the context audit skips first where the working directory holds no `canon/context/`
 
 ### `tooling/base/seeds/`
 
