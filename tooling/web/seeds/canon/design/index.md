@@ -17,7 +17,7 @@ Each group holds accepted frames a build matches, light and dark. The `design-re
 
 ## Groups
 
-One row per group, `foundations` included. List no files, since the tree answers what exists.
+One row per group, `foundations` included, and one per section for a group split into section folders. Keep each States cell to 120 characters by naming kinds of state rather than frames. List no files, since the tree answers what exists.
 
 | Group | What the user sees | Code | States |
 | ----- | ------------------ | ---- | ------ |

@@ -47,6 +47,7 @@ When the pick lands relative to the build is the design-reference rule's call, s
 
 1. Name the group the surface belongs to, by where a user meets it in the app, per `folder.md`.
 2. Add or update the group's index row before running the sync, naming the code paths the surface governs and the states its frames show.
+   - When the new state would push the States cell past 120 characters, follow `### Sizing the state list` in `folder.md`, which splits the group into sections before it shortens the list.
 3. Add the surface to the sync's mapping file, in the form the sync's own help gives.
 4. Run the sync, then its check, and report a missing or stray file the check names.
 5. Open each written PNG, light and dark, before reporting it landed, since a frame captured blank or in one theme passes the sync.
