@@ -14,7 +14,8 @@ The field is software engineering practice for source comments, which has no spe
 | Only a fact the code cannot carry        | [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html): "The final place to have comments is in tricky parts of the code. If you're going to have to explain it at the next code review, you should comment it now."        | 2026-10-18 |
 | Do not restate the line                  | [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html): "never describe the code. Assume the person reading the code knows Python (though not what you're trying to do) better than you do."                                | 2026-10-18 |
 | No comment on a self-describing function | [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html): "Method, parameter, and return descriptions may be omitted if they are obvious from the rest of the method's JSDoc or from the method name and type signature." | 2026-10-18 |
-| No comment moved to hit a density figure | House choice: a comment added to reach a figure restates the line beside it, and one deleted to reach it drops a contract the code cannot carry. No style guide states a density target to depart from.                                            | 2026-10-18 |
+| A file at 15% comment text               | House choice: run caps alone left about ten comments per file and the share at 19.1%, and counting run lines failed a cleaned file on its delimiters. Text lines with a 50-line floor beat both, since a smaller file tips on one note.            | 2026-11-17 |
+| A reason, not a description              | House choice: a fifth of sampled head comments restated the name they sat on. A description the name and type carry goes stale with no check to catch it, and it beat a ban on internal comments, which drops the reasons too.                     | 2026-11-17 |
 
 ## What a comment may claim
 
