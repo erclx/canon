@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vitest/config'
+import { configDefaults, defineConfig } from 'vitest/config'
 
 export default defineConfig({
   resolve: {
@@ -7,6 +7,10 @@ export default defineConfig({
   },
   test: {
     include: ['src/**/*.test.{ts,tsx}', 'web/src/**/*.test.ts', '*.test.ts'],
+    // The end-to-end suites read real-time pacing, so they run only through
+    // `vitest.e2e.config.ts`, whose timed project films them alone. Collected
+    // here they would join this parallel pool on every full-suite run.
+    exclude: [...configDefaults.exclude, '**/*.e2e.test.ts'],
     globalSetup: ['./vitest.global-setup.ts'],
     setupFiles: ['./vitest.setup.ts'],
     // One suite's spawn tests need headroom the machine lock cannot provide.

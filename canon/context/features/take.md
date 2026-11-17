@@ -25,7 +25,7 @@ Films each beat of a take plan from a fresh load and writes its clip, a log with
 
 ### `src/take/fixtures/`
 
-Owns the static pages the end to end takes film, two of which post each input they receive back to the test's server, and `film-suite.ts`, the harness the seven `film-*.e2e.test.ts` files share.
+Owns the static pages the end to end takes film, two of which post each input they receive back to the test's server, and `film-suite.ts`, the harness the eight `film-*.e2e.test.ts` files share.
 
 - `motion.html` is the release-checklist page every motion rule is measured on, and `motion-server.ts` serves any fixture with canon's token sheet and Geist from where they live
 - `motion.html` reports the animation frame each input paints in, since a stepped page's `performance.now()` runs ahead of the clip while inputs are dispatched
@@ -35,12 +35,12 @@ Owns the static pages the end to end takes film, two of which post each input th
 
 ### `src/take/film-*.e2e.test.ts`
 
-The film suite is seven files, one per describe block, so vitest runs them in parallel.
+The film suite is eight files, one per describe block, so vitest runs them in parallel.
 
 - A stepped case films at `deviceScale: 1` unless it asserts a 3840x2160 clip or still, stalls the page into a refusal, or proves the scale 1 retry. `canon take` and the reel keep scale 2.
 - `film-network` holds or aborts the data request `pending.html` makes on load, on both routes, and reads the state off the page color in each still
 - `bandLuma` takes its crop in CSS pixels and scales it to the clip it reads, so one crop reads the same element at either scale
-- `film-drag` runs in the `timed` project of `vitest.e2e.config.ts`, after every parallel file, since its screencast pacing assertion fails beside them. A case like it joins that list.
+- `film-drag` and `film-glide` run in the `timed` project of `vitest.e2e.config.ts`, after every parallel file, since their screencast pacing fails beside them. A case like them joins that list.
 
 ## Gotchas
 
