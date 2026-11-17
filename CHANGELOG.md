@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.93.1](https://github.com/erclx/canon/compare/v5.93.0...v5.93.1) (2026-11-17)
+
+
+### Bug Fixes
+
+* **take:** answer a fullscreen request without resizing the window ([#3143](https://github.com/erclx/canon/issues/3143)) ([1fa9cde](https://github.com/erclx/canon/commit/1fa9cde239c12b8314e740d28522276361ee4dcb))
+
 ## [5.93.0](https://github.com/erclx/canon/compare/v5.92.0...v5.93.0) (2026-11-14)
 
 
