@@ -18,16 +18,24 @@ Draw only when an open question is a judgment the operator settles by looking, s
 
 A track draws on the board when `canon/config/design.toml` exists or `.canon/board/` exists at the main root. With neither, it starts no server and draws standalone HTML mocks under `scripts/mocks/<question>/`, and the README's `## Method` says the track drew without a board.
 
-Reach and start the board per `board.md`, with one difference. `<project>` is `groundwork-<nn>`, the track's own ordinal, never the `project` key of `design.toml`, so a track's pages stay apart from pick rounds and accepted frames.
+Reach and start the board per `board.md`, with two differences. `<project>` is `groundwork-<nn>`, the track's own ordinal, never the `project` key of `design.toml`, so a track's pages stay apart from pick rounds and accepted frames.
 
-- Read `frameboard list --root <board> --json` with no `--project`, and run `project add` when the list lacks the project
+- Read `frameboard list --root <board> --json` with no `--project`, run `project add` when the list lacks the project, and name it in the README before the first frame
 - File the project under the `Groundwork` home folder once it exists, made or found, per `## Home folders` in `board.md`
 - Note `reused` off the serve record, since the close ends only a server this track started
-- Report a refusal that ends the board, and draw on as a project with no board does
+
+A refusal that ends the board ends the drawing on it rather than the track. Report it and draw on as a project with no board does, where `board.md` stops.
+
+### A project another track left
+
+A deleted track frees its ordinal while its kept project stays on the board, so a later track can claim the same `<nn>` and find `groundwork-<nn>` already there. The README names the project the track drew in, and that line decides whose it is.
+
+- Treat a found `groundwork-<nn>` the track's own README does not name as foreign, and never write into it
+- Take `groundwork-<nn>-<slug>` instead, run `project add` for it, and name it in the README before the first frame
 
 ### The write scope on the board
 
-The track writes into `groundwork-<nn>` alone. It never writes a frame into a pick round's project, the `project` key's project, or a page holding an accepted design, and a decision reaches those through `design-pick` or `design-record` once it ships.
+The track writes into the project its README names alone. It never writes a frame into a pick round's project, the `project` key's project, or a page holding an accepted design, and a decision reaches those through `design-pick` or `design-record` once it ships.
 
 ## Pages
 
