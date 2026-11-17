@@ -4,7 +4,13 @@ import type {
   SectionFinding,
   ShapeFinding,
 } from '@/context/audit'
-import { type CoverageReport, hasCoverageFindings } from '@/context/coverage'
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
+import {
+  type CoverageReport,
+  hasCoverageFindings,
+  readGateKeys,
+} from '@/context/coverage'
 import type { FolderDrift } from '@/context/index-drift'
 
 export interface GateInput {
@@ -98,4 +104,26 @@ export function isGating({
     (gateLength && length.some((finding) => finding.exempt === null)) ||
     gateKeyFaults.length > 0
   )
+}
+
+/** The context folders a project can carry, one per surface root. */
+export const CONTEXT_FOLDERS: readonly string[] = [
+  join('canon', 'context'),
+  join('.claude', 'context'),
+]
+
+/** Whether `root` carries a context folder under either surface root. */
+export function hasContextFolder(root: string): boolean {
+  return CONTEXT_FOLDERS.some((folder) => existsSync(join(root, folder)))
+}
+
+/**
+ * Whether a project opted into the widened gate in its context config, by
+ * declaring `gated` with any value or setting `gate-length` to true. A key
+ * declared in a shape the audit cannot use counts as declared, so `--gate`
+ * reports the fault rather than a plain audit passing over it.
+ */
+export function declaresContextGate(root: string): boolean {
+  const keys = readGateKeys(root)
+  return keys.gated !== null || keys.gateLength || keys.invalid.length > 0
 }

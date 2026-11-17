@@ -1,4 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { fileLength } from '@/gate/file-length'
 import {
   commentBodyBlocks,
@@ -6,7 +9,7 @@ import {
   commentHistory,
 } from '@/gate/comment-caps'
 import { clientCommandCitations, designProse } from '@/gate/measures'
-import { STAGES, type StageScope } from '@/gate/stages'
+import { contextAuditArgv, STAGES, type StageScope } from '@/gate/stages'
 
 function scopeOf(id: string): StageScope {
   const stage = STAGES.find((candidate) => candidate.id === id)
@@ -424,13 +427,51 @@ describe('the markdown stage', () => {
 })
 
 describe('the context-citations stage', () => {
-  it('should run the widened audit, so a section and an index finding gate', () => {
-    const stage = STAGES.find((stage) => stage.id === 'context-citations')
-    const argv = stage?.checks.flatMap((check) =>
-      check.kind === 'cli' ? [check.argv] : [],
-    )
+  let root: string
 
-    expect(argv).toEqual([['context', 'audit', '--gate']])
+  const write = (rel: string, body: string): void => {
+    mkdirSync(join(root, rel, '..'), { recursive: true })
+    writeFileSync(join(root, rel), body)
+  }
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-context-stage-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it("should run the widened audit in canon's own checkout", () => {
+    write('package.json', JSON.stringify({ name: '@erclx/canon' }))
+
+    expect(contextAuditArgv(root)).toEqual(['context', 'audit', '--gate'])
+  })
+
+  it('should run the plain audit in a target that declared no gate key', () => {
+    write('package.json', JSON.stringify({ name: 'target' }))
+
+    expect(contextAuditArgv(root)).toEqual(['context', 'audit'])
+  })
+
+  it('should run the widened audit in a target whose config opts in', () => {
+    write('package.json', JSON.stringify({ name: 'target' }))
+    write('canon/config/context.toml', 'gate-length = true\n')
+
+    expect(contextAuditArgv(root)).toEqual(['context', 'audit', '--gate'])
+  })
+
+  it('should skip a project carrying no context folder', () => {
+    const stage = STAGES.find((stage) => stage.id === 'context-citations')
+
+    expect(stage?.absent?.(root)).toContain('no entry to audit')
+  })
+
+  it('should run in a project carrying a context folder', () => {
+    mkdirSync(join(root, 'canon', 'context'), { recursive: true })
+    const stage = STAGES.find((stage) => stage.id === 'context-citations')
+
+    expect(stage?.absent?.(root)).toBeUndefined()
   })
 })
 

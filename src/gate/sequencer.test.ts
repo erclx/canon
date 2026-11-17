@@ -146,6 +146,58 @@ describe('changed-file scoping', () => {
   })
 })
 
+describe('a stage whose input the project does not carry', () => {
+  it('should skip with the reason the stage gives, running no check', async () => {
+    const seen: string[] = []
+    const ctx = contextWith({ cli: runnerFor({}, seen) })
+
+    const outcome = await runStage(
+      stage('context', {
+        absent: (root) => `nothing under ${root}`,
+        checks: [{ kind: 'cli', argv: ['context', 'audit'], failure: 'x' }],
+      }),
+      ctx,
+    )
+
+    expect(outcome.status).toBe('skipped')
+    expect(outcome.emissions).toEqual([
+      { kind: 'info', text: 'nothing under /tmp/gate-fixture' },
+    ])
+    expect(seen).toEqual([])
+  })
+
+  it('should run the stage where the project carries the input', async () => {
+    const outcome = await runStage(
+      stage('context', { absent: () => undefined }),
+      contextWith(),
+    )
+
+    expect(outcome.status).toBe('passed')
+  })
+})
+
+describe('a CLI check whose arguments depend on the root', () => {
+  it('should build the arguments from the project being checked', async () => {
+    const seen: string[] = []
+    const ctx = contextWith({ cli: runnerFor({}, seen) })
+
+    await runStage(
+      stage('context', {
+        checks: [
+          {
+            kind: 'cli',
+            argv: (root) => ['context', 'audit', root],
+            failure: 'x',
+          },
+        ],
+      }),
+      ctx,
+    )
+
+    expect(seen).toEqual(['context audit /tmp/gate-fixture'])
+  })
+})
+
 describe('a command check narrowed by the changed set', () => {
   function narrowing(): Stage {
     return stage('tests', {

@@ -35,7 +35,12 @@ import {
   visualPathGlobs,
 } from '@/gate/measures'
 import { readersOf, readTestSources } from '@/gate/corpus-readers'
-import { PROJECT_ROOT } from '@/roots/project'
+import {
+  CONTEXT_FOLDERS,
+  declaresContextGate,
+  hasContextFolder,
+} from '@/context/gate'
+import { isOwnCheckout, PROJECT_ROOT } from '@/roots/project'
 import { SHIPPED_CORPORA } from '@/shipped/references'
 
 /**
@@ -69,7 +74,8 @@ export type Check =
   /** This checkout's own CLI, so a worktree gate never reads the main tree. */
   | {
       readonly kind: 'cli'
-      readonly argv: readonly string[]
+      /** A function where the arguments depend on the project being checked. */
+      readonly argv: readonly string[] | ((root: string) => readonly string[])
       readonly failure: string
     }
   /**
@@ -109,6 +115,12 @@ export interface Stage {
   readonly scope?: StageScope
   /** What a scoped-out stage says, so a skip never reads as a pass. */
   readonly skipped?: string
+  /**
+   * Why the project carries nothing this stage reads, which skips it, or
+   * `undefined` where it carries the input. Absent means the input is always
+   * there to read.
+   */
+  readonly absent?: (root: string) => string | undefined
   readonly checks: readonly Check[]
   /**
    * The machine lock this stage holds while its checks run, so one box runs it
@@ -178,6 +190,12 @@ function relatedTests(changed: readonly string[]): readonly string[] {
       ...changed.flatMap(corpusReaders),
     ]),
   ]
+}
+
+export function contextAuditArgv(root: string): readonly string[] {
+  return isOwnCheckout(root) || declaresContextGate(root)
+    ? ['context', 'audit', '--gate']
+    : ['context', 'audit']
 }
 
 /**
@@ -402,13 +420,18 @@ export const STAGES: readonly Stage[] = [
     // route around. The length readings that gate sit in their own stages
     // below, apart from the audit's exit code: the whole-document ceiling, the
     // bullet cap, and the growth of a paragraph or a bullet past its
-    // checkpoint.
+    // checkpoint. Canon's checkout always runs the widened audit, and another
+    // project runs it only where its context config opts in.
     id: 'context-citations',
     label: 'Context citations',
+    absent: (root) =>
+      hasContextFolder(root)
+        ? undefined
+        : `Skipped, no ${CONTEXT_FOLDERS.join(' or ')} folder here, so there is no entry to audit`,
     checks: [
       {
         kind: 'cli',
-        argv: ['context', 'audit', '--gate'],
+        argv: contextAuditArgv,
         failure:
           'A cited context path does not resolve, an entry lacks a required section or carries an H2 outside Overview, Layout, and Gotchas, an entry under a shape-gated folder breaks the section shape, an index disagrees with its folder, or a code folder is named in no Layout or claimed by two entries. Run bun src/cli.ts context audit --gate.',
       },

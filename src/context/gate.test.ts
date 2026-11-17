@@ -1,4 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type {
   ExtraSectionFinding,
   LengthFinding,
@@ -6,7 +9,13 @@ import type {
   ShapeFinding,
 } from '@/context/audit'
 import type { CoverageReport } from '@/context/coverage'
-import { type GateInput, hasDrift, isGating } from '@/context/gate'
+import {
+  declaresContextGate,
+  type GateInput,
+  hasContextFolder,
+  hasDrift,
+  isGating,
+} from '@/context/gate'
 import type { FolderDrift } from '@/context/index-drift'
 
 function makeDrift(overrides: Partial<FolderDrift> = {}): FolderDrift {
@@ -236,5 +245,60 @@ describe('isGating', () => {
     })
 
     expect(isGating(input)).toBe(false)
+  })
+})
+
+describe('the context stage reads', () => {
+  let root: string
+
+  const write = (rel: string, body: string): void => {
+    mkdirSync(join(root, rel, '..'), { recursive: true })
+    writeFileSync(join(root, rel), body)
+  }
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-context-gate-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('should find a context folder under either surface root', () => {
+    mkdirSync(join(root, '.claude', 'context'), { recursive: true })
+
+    expect(hasContextFolder(root)).toBe(true)
+  })
+
+  it('should find no context folder in a project carrying neither', () => {
+    expect(hasContextFolder(root)).toBe(false)
+  })
+
+  it('should read no gate opt-in where the project has no context config', () => {
+    expect(declaresContextGate(root)).toBe(false)
+  })
+
+  it('should read the opt-in from a declared gated list, even an empty one', () => {
+    write('canon/config/context.toml', 'gated = []\n')
+
+    expect(declaresContextGate(root)).toBe(true)
+  })
+
+  it('should read the opt-in from gate-length set to true', () => {
+    write('canon/config/context.toml', 'gate-length = true\n')
+
+    expect(declaresContextGate(root)).toBe(true)
+  })
+
+  it('should read no opt-in from gate-length set to false', () => {
+    write('canon/config/context.toml', 'gate-length = false\n')
+
+    expect(declaresContextGate(root)).toBe(false)
+  })
+
+  it('should read the opt-in from a gated key in a shape the audit cannot use', () => {
+    write('canon/config/context.toml', 'gated = "canon/context"\n')
+
+    expect(declaresContextGate(root)).toBe(true)
   })
 })

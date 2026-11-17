@@ -248,6 +248,16 @@ async function executeStage(
     }
   }
 
+  const absent = stage.absent?.(ctx.root)
+  if (absent !== undefined) {
+    return {
+      id: stage.id,
+      label: stage.label,
+      status: 'skipped',
+      emissions: [{ kind: 'info', text: absent }],
+    }
+  }
+
   // CI runs one suite per runner, so a lock there queues behind nothing.
   if (stage.lock === undefined || ctx.ci) return runChecks(stage, ctx, [], {})
 
@@ -386,11 +396,13 @@ async function runCheck(
 
   const run = check.kind === 'cli' ? ctx.cli : ctx.run
   const argv =
-    check.kind === 'command' &&
-    check.changedArgv !== undefined &&
-    ctx.changed !== undefined
-      ? check.changedArgv(ctx.changed)
-      : check.argv
+    check.kind === 'cli'
+      ? typeof check.argv === 'function'
+        ? check.argv(ctx.root)
+        : check.argv
+      : check.changedArgv !== undefined && ctx.changed !== undefined
+        ? check.changedArgv(ctx.changed)
+        : check.argv
   const result = await run(argv, env)
   const emissions: Emission[] = [{ kind: 'output', text: result.all }]
   if (
