@@ -13,9 +13,10 @@
     Open
   </button>
   <script>
+    // Spins until the shell is killed, so the press stalls under any stall
+    // limit in whichever phase it lands.
     document.getElementById('open').addEventListener('click', () => {
-      const start = Date.now()
-      while (Date.now() - start < 4000) {}
+      for (;;) {}
     })
   </script>
 </body>
