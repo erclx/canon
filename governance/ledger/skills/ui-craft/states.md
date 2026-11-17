@@ -5,7 +5,7 @@ description: Sources for claude/skills/ui-craft/references/states.md, one row pe
 
 # UX completeness reference ledger
 
-The field is interaction design, and the authorities are the Nielsen Norman Group's research articles, WCAG 2.2 for timing, MDN for the `title` attribute and CSS truncation, and web.dev for layout shift.
+The field is interaction design, and the authorities are the Nielsen Norman Group's research articles, WCAG 2.2 for timing, MDN for the `title` attribute and CSS truncation, web.dev for layout shift, and the W3C Technical Architecture Group for state in the address.
 
 ## Feedback
 
@@ -25,10 +25,20 @@ The field is interaction design, and the authorities are the Nielsen Norman Grou
 
 ## Loading states
 
-| Bullet                         | Source                                                                                                                                                                                                  | Read       |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Indicator past one second      | [Progress indicators](https://www.nngroup.com/articles/progress-indicators/): "Use a progress indicator for any action that takes longer than about 1.0 second"                                         | 2026-10-18 |
-| Mark stale content as updating | [Progress indicators](https://www.nngroup.com/articles/progress-indicators/): "Without any visual change from the system, most users will assume the action was not registered and they will try again" | 2026-10-18 |
+| Bullet                         | Source                                                                                                                                                                                                                                                                                                                    | Read       |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Indicator past one second      | [Progress indicators](https://www.nngroup.com/articles/progress-indicators/): "Use a progress indicator for any action that takes longer than about 1.0 second"                                                                                                                                                           | 2026-10-18 |
+| Mark stale content as updating | [Progress indicators](https://www.nngroup.com/articles/progress-indicators/): "Without any visual change from the system, most users will assume the action was not registered and they will try again"                                                                                                                   | 2026-10-18 |
+| Placeholder for a whole view   | [Skeleton Screens 101](https://www.nngroup.com/articles/skeleton-screens/): "This specific type of progress indicator is used exclusively for full-page loads", and "Spinners are typically best used on a single module". Practitioner guides allow one for any predictable layout, and the row keeps the scoped reading | 2026-11-17 |
+| Neither under one second       | [Skeleton Screens 101](https://www.nngroup.com/articles/skeleton-screens/): "If a page takes less than 1 second to load, skeleton screens or spinners aren’t necessary"                                                                                                                                                   | 2026-11-17 |
+
+## State across a reload
+
+| Bullet                                | Source                                                                                                                                                                                                                                                                                                                                                                   | Read       |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| View state in the address             | [Identifying Application State](https://www.w3.org/2001/tag/doc/IdentifyingApplicationState): "Create URIs for intermediate states or documents in a Web application and manage the browser history so that states/documents can be bookmarked and the back button does the right thing". The list of kinds is the operator's, settled on 2026-11-17                     | 2026-11-17 |
+| Draft and panel sizes in storage      | House choice: the finding covers state that belongs in the address and says nothing of storage, so keeping a draft and panel sizes across a reload rests on the operator's stated default that most things reload as they were, settled on 2026-11-17. A password or payment field stays out, since browser storage is plain text that outlives the tab and the sign-out | 2026-11-17 |
+| Destructive and one-time state resets | House choice: a reopened confirm dialog invites a second destructive act, a replayed message reports an event twice, and a restored selection whose item is gone points at nothing. The list is the operator's, settled on 2026-11-17                                                                                                                                    | 2026-11-17 |
 
 ## Overflow
 
