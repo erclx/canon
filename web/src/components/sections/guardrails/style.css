@@ -1,5 +1,5 @@
 #guardrails .tray {
-  margin-top: 52px;
+  margin-top: 40px;
 }
 
 #guardrails .log {
@@ -96,17 +96,55 @@
   text-wrap: pretty;
 }
 
+/* Above 900 the four parts run along one line in the order they fire, a dot each, lit while its scene plays. */
 #guardrails .four {
-  --lit-inset: -14px -16px;
+  --lit-inset: -48px -16px -16px;
+  position: relative;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 40px;
-  margin-top: 48px;
+  gap: 32px;
+  margin-top: 52px;
+  padding-top: 34px;
+}
+
+#guardrails .four::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 7px;
+  right: 25%;
+  height: 2px;
+  border-radius: var(--radius-marker);
+  background: var(--line);
 }
 
 #guardrails .four > div {
   display: flex;
   flex-direction: column;
+}
+
+#guardrails .four > div::after {
+  content: '';
+  position: absolute;
+  top: -34px;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ground);
+  box-shadow: inset 0 0 0 2px var(--muted);
+}
+
+#guardrails .four > div.lit::after {
+  background: var(--accent);
+  box-shadow: none;
+}
+
+#guardrails .when {
+  display: block;
+  margin-bottom: 6px;
+  font-size: var(--size-small);
+  color: var(--muted);
 }
 
 #guardrails .four .go {
@@ -131,14 +169,33 @@
   color: var(--muted);
 }
 
+/* Below 900 the shipped stacking holds: the window under the heading, then the parts in columns with no line. */
 @media (max-width: 900px) {
+  #guardrails {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #guardrails .sec-head {
+    order: -2;
+  }
+
   #guardrails .tray {
-    margin-top: 40px;
+    order: -1;
   }
 
   #guardrails .four {
+    --lit-inset: -14px -16px;
     grid-template-columns: 1fr 1fr;
     gap: 32px 36px;
+    margin-top: 48px;
+    padding-top: 0;
+  }
+
+  #guardrails .four::before,
+  #guardrails .four > div::after,
+  #guardrails .when {
+    display: none;
   }
 }
 

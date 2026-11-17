@@ -4,8 +4,9 @@ import PauseButton from '../../pause-button/index.astro'
 import './style.css'
 
 /**
- * The refusal first: a Claude Code window on the tray above the four parts.
- * It loops one scene per part once it scrolls into view, holding while the
+ * The four parts on one line in the order they fire, each under when it
+ * fires, over a Claude Code window on the tray, which moves above them below
+ * 900. It loops one scene per part once it scrolls into view, holding while the
  * reader hovers it or presses pause, and still shows the plan guard's refusal.
  * A click on a part plays on from that scene. The window holds the height of
  * its tallest scene, so a scene never moves the page.
@@ -18,17 +19,11 @@ const REST = 1
     <h2>{guardrails.head}</h2>
     <p>{guardrails.lede}</p>
   </div>
-  <div class="tray">
-    <PauseButton />
-    <div class="win" aria-hidden="true">
-      <div class="win-bar"><i></i><i></i><i></i><span>claude</span></div>
-      <div class="log"></div>
-    </div>
-  </div>
   <div class="four">
     {
       guardrails.parts.map((part, index) => (
         <div class={`lit-row${index === REST ? ' lit' : ''}`} data-i={index}>
+          <span class="when">{part.when}</span>
           <button type="button" class="go" aria-label={part.play}>
             {part.name}
           </button>
@@ -37,6 +32,13 @@ const REST = 1
         </div>
       ))
     }
+  </div>
+  <div class="tray">
+    <PauseButton />
+    <div class="win" aria-hidden="true">
+      <div class="win-bar"><i></i><i></i><i></i><span>claude</span></div>
+      <div class="log"></div>
+    </div>
   </div>
   <p class="sr-only" role="status"></p>
   <script

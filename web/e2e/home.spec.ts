@@ -417,6 +417,34 @@ test.describe('the looping windows and their pause button', () => {
   })
 })
 
+test.describe('the Guardrails section', () => {
+  test('sets the four checks on one line above the window at 1440', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+    const parts = page.locator('#guardrails .four > div')
+    await expect(parts).toHaveCount(4)
+    const tops = await parts.evaluateAll((nodes) =>
+      nodes.map((node) => Math.round(node.getBoundingClientRect().top)),
+    )
+    const four = await page.locator('#guardrails .four').boundingBox()
+    const win = await page.locator('#guardrails .win').boundingBox()
+
+    expect(new Set(tops).size).toBe(1)
+    expect(four && win && four.y + four.height).toBeLessThanOrEqual(win?.y ?? 0)
+  })
+
+  test('keeps the window over the checks at 390', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/')
+    const four = await page.locator('#guardrails .four').boundingBox()
+    const win = await page.locator('#guardrails .win').boundingBox()
+
+    expect(win && four && win.y + win.height).toBeLessThanOrEqual(four?.y ?? 0)
+  })
+})
+
 test.describe('the setup section', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
