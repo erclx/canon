@@ -65,6 +65,9 @@ function ticketPage(fresh: boolean): string {
 /** Longer than the stall limit, so a stepper waiting on it falls back. */
 const SLOW_MS = LOADED_STALL_MS + 1000
 
+/** How long the ticket's press blocks, well past the loaded stall limit. */
+const HOLD_MS = 20_000
+
 const ONE_BEAT = JSON.stringify({
   beats: [
     {
@@ -88,9 +91,16 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
   beforeAll(() => {
     const served = Bun.serve({
       port: 0,
-      fetch: async (request) => {
+      fetch: async (request, bun) => {
         const { pathname } = new URL(request.url)
         if (pathname === '/fetch') return html(FETCH_PAGE)
+        if (pathname === '/ticket/hold') {
+          // Bun closes a connection idle for 10 s, a sleeping handler
+          // included, so the hold lifts the limit for this request alone.
+          bun.timeout(request, 30)
+          await Bun.sleep(HOLD_MS)
+          return new Response('ok')
+        }
         if (pathname === '/hidden') return html(HIDDEN_PAGE)
         if (pathname === '/slow') {
           await Bun.sleep(SLOW_MS)
@@ -416,7 +426,7 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       ticketOpens = 0
 
       // A loaded runner's settle frame can pass 2 s, so the loaded limit
-      // keeps the stall on the press, which spins about 20 s.
+      // keeps the stall on the press, which the server holds 20 s.
       const result = await take({
         url: new URL('/ticket', server.url).href,
         plan: read.plan,
