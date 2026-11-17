@@ -54,6 +54,16 @@ Every beat reloads the page, never the server. An app holding its state in serve
 - Undo the change in the next beat's `setup`, or order the beats so each one's result is the next one's start
 - Restart the server between beats only when neither works, since a restart costs the served address its warm start
 
+### Loading and error states
+
+A state that shows only while a request is pending, or only once it fails, has passed by the time a beat films. Hold or fail the request that ends it with the beat's `network` list, which `canon take --help` documents.
+
+- Hold the request to film a loading placeholder, and abort it to film the error view
+- Match the request's whole address with `*` for the parts that vary, such as `*/api/report*`, and read the address off the page's own requests rather than guessing it
+- Expect a refusal as `network-unmatched` when a pattern caught nothing, since the beat then filmed the page without the state it names
+- Hold a data request rather than a script, sheet, or image, since those keep the page from loading at all
+- Film the hand-off from a placeholder to the loaded view as two beats, one held and one not, since a held request stays pending for the whole beat
+
 ## Frame-stepping limits
 
 A step beat runs the page on a virtual clock, one frame per step. Most pages film this way, and some inputs are known to stall it.
