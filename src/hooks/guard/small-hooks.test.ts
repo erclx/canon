@@ -20,6 +20,7 @@ import {
   payloadFor,
   REFUSAL_TIMEOUT_MS,
   ROOT,
+  ROSTER_SESSION,
   run,
   stopPayload,
   TREES,
@@ -222,6 +223,110 @@ describe('reply-links.sh firing conditions', () => {
         symlinkSync(bash, join(bare, 'bash'))
       }
       const result = await run(hook, stopPayload('[it](src/gone.ts)'), bare)
+
+      expect(result.code).toBe(1)
+      expect(result.stderr).toContain('was not checked')
+    })
+  }
+})
+
+describe('session-name.sh firing conditions', () => {
+  for (const tree of TREES) {
+    const hook = join(tree.dir, 'session-name.sh')
+    const path = (): string =>
+      [join(ctx.fixture, 'bin-session-name'), ctx.hookPath].join(delimiter)
+    const calls = (name: string): string =>
+      join(ctx.fixture, `session-name-${name}.calls`)
+    const callCount = (name: string): number =>
+      existsSync(calls(name))
+        ? readFileSync(calls(name), 'utf8').split('\n').filter(Boolean).length
+        : 0
+    const key = (suffix: string): string =>
+      `${tree.label.replace(/\W/g, '_')}-${suffix}`
+    const runWith = (payload: string, name: string) =>
+      run(hook, payload, path(), undefined, {
+        SESSION_NAME_CALLS: calls(name),
+      })
+
+    it.concurrent(`should flag a bare roster id with its session's name on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const result = await runWith(
+        stopPayload('Launched 631880bb. It reviews next.'),
+        key('bare'),
+      )
+
+      expect(result.code).toBe(2)
+      expect(result.stderr).toContain('- 631880bb is Review of PR 42')
+    })
+
+    it.concurrent(`should pass a reply naming the session anywhere on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const result = await runWith(
+        stopPayload(
+          `## ${ROSTER_SESSION.name}\n\nStop it with \`claude rm 631880bb\`.`,
+        ),
+        key('named'),
+      )
+
+      expect(result.code).toBe(0)
+      expect(result.stderr).toBe('')
+    })
+
+    it.concurrent(`should pass a short commit hash no live session answers to on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const result = await runWith(
+        stopPayload('Merged at 5eb04ba4 on main.'),
+        key('hash'),
+      )
+
+      expect(result.code).toBe(0)
+      expect(result.stderr).toBe('')
+      expect(callCount(key('hash'))).toBe(1)
+    })
+
+    it.concurrent(`should never read the roster for a reply with no 8-character token on ${tree.label}`, async ({
+      expect,
+    }) => {
+      // A real payload carries the session's own id, so the reply is what decides.
+      const result = await runWith(
+        payloadFor({
+          hook_event_name: 'Stop',
+          last_assistant_message: 'Done, with commit 5eb04ba44 and PR 3144.',
+          session_id: ROSTER_SESSION.sessionId,
+          stop_hook_active: false,
+        }),
+        key('notoken'),
+      )
+
+      expect(result.code).toBe(0)
+      expect(result.stderr).toBe('')
+      expect(callCount(key('notoken'))).toBe(0)
+    })
+
+    it.concurrent(`should pass the continuation on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const result = await runWith(
+        stopPayload('Launched 631880bb.', true),
+        key('active'),
+      )
+
+      expect(result.code).toBe(0)
+      expect(result.stderr).toBe('')
+      expect(callCount(key('active'))).toBe(0)
+    })
+
+    it.concurrent(`should report rather than pass when no CLI resolves on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const result = await run(
+        hook,
+        stopPayload('Launched 631880bb.'),
+        join(ctx.fixture, 'bin-no-runner'),
+      )
 
       expect(result.code).toBe(1)
       expect(result.stderr).toContain('was not checked')
