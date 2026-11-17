@@ -429,6 +429,46 @@ function checkEmbeddedCode(): void {
   }
 }
 
+// canon context audit exits 0 on a pass, 1 on a refusal, and 2 on a gating
+// finding. The folder test reads the working directory, so a nested project
+// is audited as itself rather than through the repository above it.
+const CONTEXT_FOLDER = 'canon/context'
+
+function checkContextAudit(): void {
+  if (!existsSync(CONTEXT_FOLDER)) {
+    logSkip(
+      `Skipped: no ${CONTEXT_FOLDER} folder here, so there is no entry to audit`,
+    )
+    return
+  }
+
+  const canon = resolveCanon()
+  if (canon.kind === 'skip') {
+    skipNoCanon()
+    return
+  }
+
+  const { code, output } = capture(`${canon.command} context audit --gate`)
+  switch (code) {
+    case 0:
+      logInfo('No gating context finding')
+      return
+    case 1:
+      refused('context audit', output)
+      return
+    case 2:
+      pipeOutput(output)
+      fail(
+        "A context entry carries a gating finding. Run 'canon context audit --gate' to read each one",
+      )
+      break
+    default:
+      fail(
+        `canon context audit exited ${code}, which is neither a pass nor a finding`,
+      )
+  }
+}
+
 function main(): void {
   const declared = readDeclaredScripts()
   const list = readPhaseList()
@@ -447,6 +487,9 @@ function main(): void {
 
   logStep('Embedded code')
   checkEmbeddedCode()
+
+  logStep('Context audit')
+  checkContextAudit()
 
   // The card exclusion check reads the build, so it runs last, and only where
   // the stack that owns the card route shipped it.

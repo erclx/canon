@@ -433,6 +433,96 @@ describe('markdown bans', () => {
   })
 })
 
+describe('context audit', () => {
+  // Passes every other canon stage, so only the context audit's exit decides.
+  const writeContextStub = (exitCode: number): void => {
+    writeFileSync(
+      join(bin, 'canon'),
+      `#!/usr/bin/env bash\nif [ "$1" = context ]; then echo "context finding: $*"; exit ${exitCode}; fi\nexit 0\n`,
+      { mode: 0o755 },
+    )
+  }
+
+  beforeEach(() => {
+    setUp('web', STACK_SCRIPTS.web)
+    initRepoWithMarkdown()
+    mkdirSync(join(fixture, 'canon/context'), { recursive: true })
+  })
+
+  it('should run the gated audit after the code audit and pass on exit 0', () => {
+    writeContextStub(0)
+
+    const result = runVerify()
+
+    expect(result.status).toBe(0)
+    expect(result.stdout.indexOf('Context audit')).toBeGreaterThan(
+      result.stdout.indexOf('Embedded code'),
+    )
+    expect(result.stdout).toContain('No gating context finding')
+  })
+
+  it('should fail, print the findings, and name the verb on exit 2', () => {
+    writeContextStub(2)
+
+    const result = runVerify()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('context finding: context audit --gate')
+    expect(result.stdout).toContain("Run 'canon context audit --gate'")
+  })
+
+  it('should log a skip on exit 1 outside CI', () => {
+    writeContextStub(1)
+
+    const result = runVerify()
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('canon context audit refused or is missing')
+  })
+
+  it('should fail on exit 1 under CI', () => {
+    writeContextStub(1)
+
+    const result = runVerify({ CI: 'true' })
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('canon context audit refused')
+  })
+
+  it('should fail on an exit that is neither a pass nor a finding', () => {
+    writeContextStub(5)
+
+    const result = runVerify()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('canon context audit exited 5')
+  })
+
+  it('should skip without calling canon where no context folder exists', () => {
+    rmSync(join(fixture, 'canon'), { force: true, recursive: true })
+    writeContextStub(2)
+
+    const result = runVerify()
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('Skipped: no canon/context folder here')
+    expect(result.stdout).not.toContain('context finding')
+  })
+
+  it('should skip with the install hint when no canon is on PATH', () => {
+    linkTool('bun')
+    linkTool('git')
+    linkTool('bash')
+
+    const result = run([process.execPath, RUNNER], { PATH: bin })
+
+    expect(result.status).toBe(0)
+    expect(
+      result.stdout.match(/Skipped: no canon binary on PATH/g),
+    ).toHaveLength(3)
+  })
+})
+
 describe('canon resolution', () => {
   const argvLog = (): string => join(fixture, 'bunx-argv.log')
 
