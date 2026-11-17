@@ -77,14 +77,15 @@ describe('cursorAt', () => {
     expect(cursorAt([move], 1100)).toEqual({ x: 250, y: 100 })
   })
 
-  it('should interpolate between two sent points by time', () => {
+  it('should hold the last sent point until the next one is sent', () => {
     const move = sentMove([
       { t: 1000, x: 130, y: 100 },
       { t: 1100, x: 250, y: 100 },
       { t: 1200, x: 400, y: 100 },
     ])
 
-    expect(cursorAt([move], 1150)).toEqual({ x: 325, y: 100 })
+    expect(cursorAt([move], 1100)).toEqual({ x: 250, y: 100 })
+    expect(cursorAt([move], 1150)).toEqual({ x: 250, y: 100 })
   })
 
   it('should hold the last sent point once the glide has ended', () => {
@@ -96,13 +97,13 @@ describe('cursorAt', () => {
     expect(cursorAt([move], 5000)).toEqual({ x: 400, y: 100 })
   })
 
-  it('should follow points a slow page skipped frames between', () => {
+  it('should hold a point a slow page skipped frames after', () => {
     const move = sentMove([
       { t: 1000, x: 160, y: 100 },
       { t: 1250, x: 400, y: 100 },
     ])
 
-    expect(cursorAt([move], 1125)).toEqual({ x: 280, y: 100 })
+    expect(cursorAt([move], 1125)).toEqual({ x: 160, y: 100 })
   })
 
   it('should read the eased path off a move an older log wrote with no points', () => {
