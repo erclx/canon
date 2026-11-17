@@ -36,9 +36,7 @@ describe('isShapeGated', () => {
   it.each([['canon/context/auth'], ['canon/context/auth/']])(
     'should leave a sibling sharing the letters of %s ungated',
     (prefix) => {
-      expect(isShapeGated('canon/context/authz/roles.md', [prefix])).toBe(
-        false,
-      )
+      expect(isShapeGated('canon/context/authz/roles.md', [prefix])).toBe(false)
     },
   )
 
