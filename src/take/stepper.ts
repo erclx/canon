@@ -40,13 +40,22 @@ const SETTLE_MS = 2500
 /** How long a refusal waits on the frame it shows, since the page may be wedged. */
 const STILL_CAP_MS = 2000
 
+/**
+ * Where a stalled frame was begun: the settle after load, the beat's setup, or
+ * the recorded frames.
+ */
+export type StallPhase = 'settle' | 'setup' | 'recording'
+
 /** A frame that took longer than `STALL_MS`, so the beat is filmed another way. */
 export class StepperStalled extends Error {
   constructor(
     readonly frame: number,
     stallMs: number,
+    readonly phase: StallPhase,
   ) {
-    super(`frame ${frame} took over ${stallMs / 1000} s under frame stepping`)
+    super(
+      `frame ${frame} took over ${stallMs / 1000} s in ${phase} under frame stepping`,
+    )
   }
 }
 
@@ -99,7 +108,7 @@ export async function filmStepped(
       return reply
     }
     still = () => frameStill(beginFrame)
-    await pump(beginFrame, SETTLE_MS, stallMs)
+    await pump(beginFrame, SETTLE_MS, stallMs, 'settle')
 
     const live = liveStage(page, beginFrame, stallMs)
     await performSteps(live, request.beat.setup, { pointer: START })
@@ -130,6 +139,7 @@ export async function filmStepped(
         advanced.then(() => beginFrame(true)),
         frames,
         stallMs,
+        'recording',
       )
       const data = reply.screenshotData
         ? Buffer.from(reply.screenshotData, 'base64')
@@ -282,6 +292,7 @@ async function pump(
   beginFrame: (screenshot: boolean) => Promise<unknown>,
   ms: number,
   stallMs: number,
+  phase: StallPhase,
 ): Promise<void> {
   const end = Date.now() + ms
   while (Date.now() < end) {
@@ -289,6 +300,7 @@ async function pump(
       beginFrame(false).catch(() => {}),
       0,
       stallMs,
+      phase,
     )
     await sleep(12)
   }
@@ -306,13 +318,14 @@ function liveStage(
   const started = Date.now()
   return {
     now: () => Date.now() - started,
-    hold: (ms) => pump(beginFrame, ms, stallMs),
+    hold: (ms) => pump(beginFrame, ms, stallMs, 'setup'),
     pointer: (input) => {
       const sent = page.send('Input.dispatchMouseEvent', mouseEvent(input))
       return withinStall(
         Promise.all([beginFrame(false), sent]),
         0,
         stallMs,
+        'setup',
       ).then(() => {})
     },
     key: (text) => {
@@ -321,6 +334,7 @@ function liveStage(
         Promise.all([beginFrame(false), sent]),
         0,
         stallMs,
+        'setup',
       ).then(() => {})
     },
     press: (input) => {
@@ -329,6 +343,7 @@ function liveStage(
         Promise.all([beginFrame(false), sent]),
         0,
         stallMs,
+        'setup',
       ).then(() => {})
     },
     evaluate: (expression) => page.evaluate(expression),
@@ -418,10 +433,14 @@ async function withinStall<T>(
   work: Promise<T>,
   frame: number,
   stallMs: number,
+  phase: StallPhase,
 ): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined
   const stalled = new Promise<never>((_, fail) => {
-    timer = setTimeout(() => fail(new StepperStalled(frame, stallMs)), stallMs)
+    timer = setTimeout(
+      () => fail(new StepperStalled(frame, stallMs, phase)),
+      stallMs,
+    )
   })
   // A stall leaves the work pending until the shell closes and rejects it.
   work.catch(() => {})
