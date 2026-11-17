@@ -154,6 +154,29 @@ describe('canon pr evidence --local', () => {
     expect(line).toMatch(/^\*\*Reel\*\* filmed at `[0-9a-f]{7}`:<br>/)
     expect(line).toContain(`<img src="${REEL_LINK}"`)
   })
+
+  it('should put the passed coverage on its own line under the reel', async () => {
+    const record = await runEvidenceCommand([
+      '--reel',
+      REEL_LINK,
+      '--reel-covers',
+      'Board, Search; left out: Settings',
+    ])
+
+    const lines = record.body?.split('\n') ?? []
+    const reelAt = lines.findIndex((line) => line.startsWith('**Reel** '))
+    expect(lines.slice(reelAt + 1, reelAt + 3)).toEqual([
+      '',
+      '**Reel covers:** Board, Search; left out: Settings',
+    ])
+  })
+
+  it('should write no coverage line for a reel passed without --reel-covers', async () => {
+    const record = await runEvidenceCommand(['--reel', REEL_LINK])
+
+    expect(record.body).toContain('**Reel** filmed at')
+    expect(record.body).not.toContain('**Reel covers:**')
+  })
 })
 
 describe('canon pr evidence reports the marked comment', () => {
@@ -233,6 +256,43 @@ describe('canon pr evidence reports the marked comment', () => {
       reel: { link: REEL_LINK, head: 'abc1234' },
     })
     expect(record.body).toContain('**Reel** filmed at `abc1234`')
+  })
+
+  it('should carry the posted coverage line forward with its reel', async () => {
+    writeComments([
+      markedCommentBody().replace(
+        '## What to look at',
+        `**Reel** filmed at \`abc1234\`:<br><img src="${REEL_LINK}" width="960" alt="reel filmed at abc1234">\n\n**Reel covers:** Board; left out: none\n\n## What to look at`,
+      ),
+    ])
+
+    const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' })
+
+    expect(record).toMatchObject({
+      reel: {
+        link: REEL_LINK,
+        head: 'abc1234',
+        covers: 'Board; left out: none',
+      },
+    })
+    expect(record.body).toContain('**Reel covers:** Board; left out: none')
+  })
+
+  it('should drop the posted coverage line when a new reel replaces its reel', async () => {
+    writeComments([
+      markedCommentBody().replace(
+        '## What to look at',
+        `**Reel** filmed at \`abc1234\`:<br><img src="${REEL_LINK}" width="960" alt="reel filmed at abc1234">\n\n**Reel covers:** Board; left out: none\n\n## What to look at`,
+      ),
+    ])
+
+    const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' }, [
+      '--reel',
+      REEL_LINK,
+    ])
+
+    expect(record.body).toContain('**Reel** filmed at')
+    expect(record.body).not.toContain('**Reel covers:**')
   })
 
   describe('skip reasons', () => {
@@ -1104,6 +1164,16 @@ describe('canon pr evidence --check', () => {
     })
   })
 
+  it('should read the reel skip unchanged beside a reel coverage line', async () => {
+    writeComment(
+      '**Reel** filmed at `abc1234`:<br><img src="https://x/reel.webp" width="960" alt="reel filmed at abc1234">\n\n**Reel covers:** Board; left out: Settings\n\n**No reel:** wrong-state: beat 1\n\n## What to look at\n\n<!-- pr-evidence: head=abc -->',
+    )
+
+    const record = await runCheck()
+
+    expect(record).toMatchObject({ reelSkip: 'wrong-state: beat 1' })
+  })
+
   it('should omit reelSkip when the marked comment holds no reel skip line', async () => {
     writeComment('## What to look at\n\n<!-- pr-evidence: head=abc -->')
 
@@ -1129,6 +1199,7 @@ describe('canon pr evidence --check', () => {
     ['--local', 'http://localhost:5173'],
     ['--checklist', 'absent.md'],
     ['--reel', 'https://github.com/o/r/blob/canon/frames/reel.webp?raw=true'],
+    ['--reel-covers', 'Board; left out: none'],
   ])(
     'should refuse %s before any gh call and print no body',
     async (flag, value) => {

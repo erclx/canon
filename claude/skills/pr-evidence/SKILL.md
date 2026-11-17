@@ -48,6 +48,8 @@ Collect only the lines below whose condition holds, and nothing when none does. 
 | The reel step skipped with a reason                       | `🎞️ No reel: <reason>: <message>`                                  |
 | A git refusal or a preview refusal the reference reports  | `⚠️ <reason>: <message>`                                           |
 
+The reel line adds ` · <coverage>` after its link when the reel step handed a coverage line back, the same text the evidence comment carries under the reel.
+
 The no-local-preview and no-reel lines also land on the evidence comment, through the evidence call's `--local-skip` and `--reel-skip`, so the pull request shows why a link or a reel is missing after the session's report scrolls away.
 
 ### The uncaptured line

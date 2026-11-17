@@ -51,6 +51,17 @@ A group is the bold feature-area label above at most five boxes, as `ui-checklis
 
 A checklist with one group gives up to three beats from it. A checklist with four groups gives three beats, one from each of the first three.
 
+### Hold the coverage
+
+A reviewer watching three beats cannot tell whether the reel skipped a group or the group had nothing to film. Once the beats are ordered, hold two lists of group labels, in checklist order:
+
+- Filmed: each group with at least one beat
+- Left out: each other group, whether the filter emptied it or the cap of three ran out first
+
+Write the two as one line, `filmed: <labels> · left out: <labels>`, joining labels with a comma and writing `none` for an empty list. A checklist with one group and three beats reads `filmed: Board · left out: none`, and one with four groups names the fourth as left out.
+
+Recompute both lists when a refusal below drops a beat, so the line describes the reel that was pushed. A checklist with no bold group labels has no groups to name, so hold no coverage.
+
 ### Plan the beats
 
 Write one plan entry for each beat chosen, then skip when none was.
@@ -119,7 +130,7 @@ canon pr frames <number> --reel .canon/tmp/pr/reel/<number>/reel.webp --pass "$(
 
 Hand the reel step one of two things and print nothing of your own:
 
-- The `link` from the push, which the evidence step passes to `canon pr evidence --reel`
-- A skip, as the reason and a one-line message, which the closing report names
+- The `link` from the push, which the evidence step passes to `canon pr evidence --reel`, with the coverage line held above, which it passes to `--reel-covers`
+- A skip, as the reason and a one-line message, which the closing report names. A skip carries no coverage, since nothing was filmed.
 
 Put only a reason this procedure emits on `--reel-skip`, never one written by hand. `canon pr lift` reads the reason code and settles a drivable checklist only on the few codes no builder can change, which `canon pr lift --help` lists. Any other code holds the lift until a reel lands or a review waives it.
