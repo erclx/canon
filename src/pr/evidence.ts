@@ -532,13 +532,9 @@ export function evidenceMarker(head: string): string {
  *
  * Every state opens while the head images stay within `EVIDENCE_OPEN_LIMIT`
  * and closes past it, so a comment is never half open. Image URLs pin to a
- * commit sha, so the comment keeps what it claimed after the branch moves.
- *
- * The reel skip and the uncaptured line drop only while the reel covers the
- * head. `reelCovers` defaults to a reel filmed at the head, and a caller that
- * read the carry `canon pr lift` reads passes it, so a reel at an earlier head
- * covers exactly when the lift would carry it. The uncaptured line is computed
- * fresh on every render rather than carried.
+ * commit sha. The reel skip and uncaptured lines drop only while the reel
+ * covers the head, as the carry `canon pr lift` reads passes in `reelCovers`,
+ * which defaults to a reel filmed at the head.
  */
 export function renderEvidenceBody(
   states: readonly EvidenceState[],
