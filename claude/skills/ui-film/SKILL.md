@@ -89,6 +89,7 @@ Branch on the record's `reason`, never on the exit code, which a shell function 
 | `target-missing`                 | Open the record's `still`, find the target the record's `beat` names on the page, fix the plan, and film once more |
 | `target-offscreen`               | Add a `setup` step that scrolls by `dy` over an in-window element or clicks a link to the target, then film again  |
 | `server-unreachable`             | Restart the server from Step 1 and film once more                                                                  |
+| `clip-mismatch`                  | Report `message` and the beat folder's `still.jpg` to the operator and stop, since the page cropped the clip       |
 | Any other `reason`               | Report the `reason` and `message` to the operator and stop, since each is a setup step                             |
 
 A refusal carrying `fallback` means the screencast opened the address a second time, so a single-use link was spent before the step ran. Read `${CLAUDE_SKILL_DIR}/references/config.md` for the access the take opens with, and fix that before touching the target.
