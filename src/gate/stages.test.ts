@@ -6,9 +6,9 @@ import {
   commentHistory,
 } from '@/gate/comment-caps'
 import { clientCommandCitations } from '@/gate/measures'
-import { STAGES } from '@/gate/stages'
+import { STAGES, type StageScope } from '@/gate/stages'
 
-function scopeOf(id: string): RegExp {
+function scopeOf(id: string): StageScope {
   const stage = STAGES.find((candidate) => candidate.id === id)
   if (stage?.scope === undefined) throw new Error(`no scope on stage ${id}`)
   return stage.scope
@@ -133,11 +133,19 @@ describe('the tests stage scope', () => {
     expect(scope.test('package.json')).toBe(true)
   })
 
-  it('should not fire on a Markdown-only change to a corpus a test reads', () => {
+  it('should fire on a Markdown-only change to a corpus a test reads', () => {
     const scope = scopeOf('tests')
 
-    expect(scope.test('claude/skills/git-pr/SKILL.md')).toBe(false)
-    expect(scope.test('governance/rules/core/005-behavior.md')).toBe(false)
+    expect(
+      scope.test('claude/skills/app-drive/references/drive-record.md'),
+    ).toBe(true)
+    expect(scope.test('governance/rules/core/005-behavior.md')).toBe(true)
+  })
+
+  it('should not fire on a docs change no test reads', () => {
+    const scope = scopeOf('tests')
+
+    expect(scope.test('docs/workflow/ai-workflow.md')).toBe(false)
   })
 })
 
@@ -155,7 +163,7 @@ describe('the tests stage command', () => {
 
   it('should run only the tests related to the changed code files', () => {
     const argv = testsCheck().changedArgv?.([
-      'claude/skills/git-pr/SKILL.md',
+      'docs/workflow/ai-workflow.md',
       'src/gate/stages.ts',
       'web/src/components/hero.tsx',
     ])
@@ -172,6 +180,44 @@ describe('the tests stage command', () => {
       'src/gate/stages.ts',
       'web/src/components/hero.tsx',
     ])
+  })
+
+  it('should append the tests that read a changed corpus file', () => {
+    const argv = testsCheck().changedArgv?.([
+      'claude/skills/app-drive/references/drive-record.md',
+    ])
+
+    expect(argv).toContain('src/intake/drive-check.test.ts')
+  })
+
+  it('should list a changed test once when it also reads a changed corpus', () => {
+    const argv =
+      testsCheck().changedArgv?.([
+        'src/intake/drive-check.test.ts',
+        'claude/skills/app-drive/references/drive-record.md',
+      ]) ?? []
+
+    expect(
+      argv.filter((arg) => arg === 'src/intake/drive-check.test.ts'),
+    ).toHaveLength(1)
+  })
+
+  it('should keep the exclude glob directly after its flag on a mixed diff', () => {
+    const argv =
+      testsCheck().changedArgv?.([
+        'claude/skills/app-drive/references/drive-record.md',
+        'src/gate/stages.ts',
+      ]) ?? []
+
+    expect(argv[argv.indexOf('--exclude') + 1]).toBe('**/*.e2e.test.ts')
+  })
+
+  it('should select the readers of a deleted corpus file without throwing', () => {
+    const argv = testsCheck().changedArgv?.([
+      'claude/skills/app-drive/references/removed.md',
+    ])
+
+    expect(argv).toContain('src/intake/drive-check.test.ts')
   })
 
   it('should exclude every end-to-end suite ahead of the changed files', () => {

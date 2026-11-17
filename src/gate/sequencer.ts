@@ -9,7 +9,7 @@ import type {
   RunCommand,
 } from '@/gate/measures'
 import { HELD_LOCK_VARIABLE } from '@/gate/hand-suite'
-import type { Check, Stage } from '@/gate/stages'
+import type { Check, Stage, StageScope } from '@/gate/stages'
 import {
   acquireSuiteLock,
   type LockHolder,
@@ -206,7 +206,7 @@ export async function collectChangedFiles(
  * for every stage, which is what `--all` and an absent baseline both mean.
  */
 export function hasChanged(
-  scope: RegExp,
+  scope: StageScope,
   changed: readonly string[] | undefined,
 ): boolean {
   if (changed === undefined) return true
