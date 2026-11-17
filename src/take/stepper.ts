@@ -1,4 +1,5 @@
 import { openFrameEncoder } from '@/take/encode'
+import { FULLSCREEN_SCRIPT } from '@/take/fullscreen'
 import { describeKey, modifierBits } from '@/take/keys'
 import { FPS, type LogEvent, START, VIEWPORT } from '@/take/log'
 import {
@@ -199,6 +200,9 @@ async function frameStill(
  * start, and a frame stamped on the wrong base freezes every animation.
  */
 async function load(page: ShellPage, url: string): Promise<number> {
+  await page.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: FULLSCREEN_SCRIPT,
+  })
   const loaded = new Promise<number>((done) =>
     page.on('Page.loadEventFired', ({ timestamp }) => {
       if (typeof timestamp === 'number') done(timestamp * 1000)

@@ -1,0 +1,12 @@
+{
+  "beats": [
+    {
+      "name": "present at full size",
+      "setup": [{ "kind": "click", "target": "#present" }],
+      "steps": [
+        { "kind": "move", "target": "#state" },
+        { "kind": "wait", "ms": 400 }
+      ]
+    }
+  ]
+}

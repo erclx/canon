@@ -4,6 +4,7 @@ import { chromium } from 'playwright-core'
 import { SANDBOXED } from '@/browser/engine'
 import { lastFrame, openFrameEncoder, probeFrames } from '@/take/encode'
 import { frameStamp, slotFrames } from '@/take/frame-clock'
+import { FULLSCREEN_SCRIPT } from '@/take/fullscreen'
 import { FPS, type LogEvent, START, VIEWPORT } from '@/take/log'
 import {
   type PointerInput,
@@ -75,6 +76,7 @@ export async function filmScreencast(request: {
       page
         .screenshot({ type: 'jpeg', quality: 95, timeout: STILL_CAP_MS })
         .catch(() => undefined)
+    await page.addInitScript({ content: FULLSCREEN_SCRIPT })
     await page.goto(request.url, { waitUntil: 'load' })
     await page.waitForTimeout(SETTLE_MS)
 
