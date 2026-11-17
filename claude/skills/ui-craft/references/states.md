@@ -16,6 +16,8 @@
 
 - Show a progress indicator for any operation a person waits on for longer than about one second.
 - Mark previous content as updating while new content loads, rather than showing it unmarked as current.
+- Show a placeholder shaped like the content while a whole view or page loads, and keep a single module such as a card on the progress indicator.
+- Show neither a placeholder nor an indicator for a load under about one second, since the flash of either costs more than the wait.
 
 ## Overflow
 

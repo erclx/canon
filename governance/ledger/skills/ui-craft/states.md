@@ -25,10 +25,12 @@ The field is interaction design, and the authorities are the Nielsen Norman Grou
 
 ## Loading states
 
-| Bullet                         | Source                                                                                                                                                                                                  | Read       |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Indicator past one second      | [Progress indicators](https://www.nngroup.com/articles/progress-indicators/): "Use a progress indicator for any action that takes longer than about 1.0 second"                                         | 2026-10-18 |
-| Mark stale content as updating | [Progress indicators](https://www.nngroup.com/articles/progress-indicators/): "Without any visual change from the system, most users will assume the action was not registered and they will try again" | 2026-10-18 |
+| Bullet                         | Source                                                                                                                                                                                                                                                                                                                    | Read       |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Indicator past one second      | [Progress indicators](https://www.nngroup.com/articles/progress-indicators/): "Use a progress indicator for any action that takes longer than about 1.0 second"                                                                                                                                                           | 2026-10-18 |
+| Mark stale content as updating | [Progress indicators](https://www.nngroup.com/articles/progress-indicators/): "Without any visual change from the system, most users will assume the action was not registered and they will try again"                                                                                                                   | 2026-10-18 |
+| Placeholder for a whole view   | [Skeleton Screens 101](https://www.nngroup.com/articles/skeleton-screens/): "This specific type of progress indicator is used exclusively for full-page loads", and "Spinners are typically best used on a single module". Practitioner guides allow one for any predictable layout, and the row keeps the scoped reading | 2026-11-17 |
+| Neither under one second       | [Skeleton Screens 101](https://www.nngroup.com/articles/skeleton-screens/): "If a page takes less than 1 second to load, skeleton screens or spinners aren’t necessary"                                                                                                                                                   | 2026-11-17 |
 
 ## Overflow
 
