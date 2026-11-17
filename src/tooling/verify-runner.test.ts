@@ -1,5 +1,6 @@
 import { type SpawnSyncReturns, spawnSync } from 'node:child_process'
 import {
+  chmodSync,
   copyFileSync,
   existsSync,
   mkdirSync,
@@ -430,6 +431,144 @@ describe('markdown bans', () => {
     )
 
     expect(runVerify().stdout).not.toContain('CHANGELOG')
+  })
+})
+
+describe('context audit', () => {
+  const CONTEXT_STUB = join(import.meta.dirname, 'fixtures/canon-context.sh')
+
+  // Puts the fake canon on PATH and returns the env setting the context
+  // audit's exit, since every other canon stage the stub serves passes.
+  const contextExit = (code: number): NodeJS.ProcessEnv => {
+    copyFileSync(CONTEXT_STUB, join(bin, 'canon'))
+    chmodSync(join(bin, 'canon'), 0o755)
+    return { CONTEXT_EXIT: String(code) }
+  }
+
+  beforeEach(() => {
+    setUp('web', STACK_SCRIPTS.web)
+    initRepoWithMarkdown()
+    mkdirSync(join(fixture, 'canon/context'), { recursive: true })
+  })
+
+  const writeContextConfig = (toml: string): void => {
+    mkdirSync(join(fixture, 'canon/config'), { recursive: true })
+    writeFileSync(join(fixture, 'canon/config/context.toml'), toml)
+  }
+
+  it('should run the audit after the code audit and pass on exit 0', () => {
+    const result = runVerify(contextExit(0))
+
+    expect(result.status).toBe(0)
+    expect(result.stdout.indexOf('Context audit')).toBeGreaterThan(
+      result.stdout.indexOf('Embedded code'),
+    )
+    expect(result.stdout).toContain('No gating context finding')
+  })
+
+  it('should fail, print the findings, and name the plain verb on exit 2', () => {
+    const result = runVerify(contextExit(2))
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toMatch(/context finding: context audit$/m)
+    expect(result.stdout).toContain("Run 'canon context audit' to read")
+  })
+
+  it('should run the plain audit where the config declares no gate key', () => {
+    writeContextConfig('roots = ["canon/context"]\n')
+
+    const result = runVerify(contextExit(2))
+
+    expect(result.stdout).toMatch(/context finding: context audit$/m)
+  })
+
+  it.each([
+    ['gated', 'gated = ["canon/context/"]\n'],
+    ['an empty gated', 'gated = []\n'],
+    ['gate-length as true', 'gate-length = true\n'],
+  ])(
+    'should add --gate and name it on failure where the config declares %s',
+    (_key, toml) => {
+      writeContextConfig(toml)
+
+      const result = runVerify(contextExit(2))
+
+      expect(result.status).toBe(1)
+      expect(result.stdout).toContain('context finding: context audit --gate')
+      expect(result.stdout).toContain("Run 'canon context audit --gate'")
+    },
+  )
+
+  it('should run the plain audit where gate-length is false and gated is absent', () => {
+    writeContextConfig('gate-length = false\n')
+
+    const result = runVerify(contextExit(2))
+
+    expect(result.stdout).toMatch(/context finding: context audit$/m)
+  })
+
+  it('should not read a gate key nested under a table header', () => {
+    writeContextConfig('[other]\ngated = ["canon/context/"]\n')
+
+    const result = runVerify(contextExit(2))
+
+    expect(result.stdout).toMatch(/context finding: context audit$/m)
+  })
+
+  it('should log a skip on exit 1 outside CI', () => {
+    const result = runVerify(contextExit(1))
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('canon context audit refused or is missing')
+  })
+
+  it('should fail on exit 1 under CI', () => {
+    const result = runVerify({ ...contextExit(1), CI: 'true' })
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('canon context audit refused')
+  })
+
+  it('should fail on an exit that is neither a pass nor a finding', () => {
+    const result = runVerify(contextExit(5))
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('canon context audit exited 5')
+  })
+
+  it('should audit an unmoved project that keeps its entries under .claude/', () => {
+    rmSync(join(fixture, 'canon'), { force: true, recursive: true })
+    mkdirSync(join(fixture, '.claude/context'), { recursive: true })
+
+    const result = runVerify(contextExit(2))
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toMatch(/context finding: context audit$/m)
+  })
+
+  it('should skip without calling canon where no context folder exists', () => {
+    rmSync(join(fixture, 'canon'), { force: true, recursive: true })
+
+    const result = runVerify(contextExit(2))
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain(
+      'Skipped: no canon/context or .claude/context folder here',
+    )
+    expect(result.stdout).not.toContain('context finding')
+  })
+
+  it('should skip with the install hint when no canon is on PATH', () => {
+    linkTool('bun')
+    linkTool('git')
+    linkTool('bash')
+
+    const result = run([process.execPath, RUNNER], { PATH: bin })
+
+    expect(result.status).toBe(0)
+    expect(
+      result.stdout.match(/Skipped: no canon binary on PATH/g),
+    ).toHaveLength(3)
   })
 })
 

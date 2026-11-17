@@ -123,3 +123,12 @@ The `Embedded code` stage runs `canon code audit` over every TypeScript and Astr
 - It exits `2` on a finding, failing `bun run check` and the `pre-push` hook. A block that must stay inline takes a `canon-allow-embedded: <reason>` marker on its opening line or the line above.
 - A refusal exits `1` and is logged as a skip, as does a canon too old to carry the verb, since an unknown command exits `1` too.
 - Without `canon` on PATH the stage is skipped and logged, the same as the markdown bans stage.
+
+### The context audit stage
+
+The `Context audit` stage runs `canon context audit` after the embedded code stage, so an unresolved citation or a requirements record past its word cap fails the check, and every other finding reports.
+
+- It adds `--gate` where `canon/config/context.toml` declares `gated` or sets `gate-length = true`, so an opted-in project also fails on a shape break or index drift.
+- It exits `2` on a finding, failing `bun run check` and the `pre-push` hook. The failure line names the command it ran, so run that to read each one.
+- A project with neither `canon/context/` nor `.claude/context/` under the working directory skips the stage, so a nested project is audited as itself.
+- A refusal exits `1` and is logged as a skip locally and fails under CI, the same as the two stages before it.

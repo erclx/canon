@@ -297,7 +297,7 @@ function listMarkdown(): string[] {
   return (result.stdout ?? '').split('\n').filter((line) => line !== '')
 }
 
-// Where canon comes from for the two canon stages. A canon on PATH wins.
+// Where canon comes from for the canon stages. A canon on PATH wins.
 // Under CI, where no canon is installed, bunx fetches the release the last
 // sync stamped, since that sync wrote this file and so carries every verb it
 // calls. A local run with neither skips, since a pre-push hook stalling on a
@@ -429,6 +429,70 @@ function checkEmbeddedCode(): void {
   }
 }
 
+// canon context audit exits 0 on a pass, 1 on a refusal, and 2 on a gating
+// finding. The folder test reads the working directory, so a nested project
+// is audited as itself rather than through the repository above it. The
+// audit resolves either root, and an unmoved project keeps .claude/context.
+const CONTEXT_FOLDERS = ['canon/context', '.claude/context']
+const CONTEXT_CONFIG = 'canon/config/context.toml'
+
+// A project opts into the shape and length gate by declaring gated with any
+// value or setting gate-length to true, and any other project gets the plain
+// audit, which gates citations and the requirements cap alone. The script
+// carries no TOML parser, so it reads top-level keys up to the first table
+// header, and canon itself reports a key declared in a shape it cannot use.
+function declaresGateKeys(): boolean {
+  let text: string
+  try {
+    text = readFileSync(CONTEXT_CONFIG, 'utf8')
+  } catch {
+    return false
+  }
+  for (const line of text.split('\n')) {
+    const trimmed = line.trim()
+    if (trimmed.startsWith('[')) return false
+    if (/^["']?gated["']?\s*=/.test(trimmed)) return true
+    if (/^["']?gate-length["']?\s*=\s*true\b/.test(trimmed)) return true
+  }
+  return false
+}
+
+function checkContextAudit(): void {
+  if (!CONTEXT_FOLDERS.some((folder) => existsSync(folder))) {
+    logSkip(
+      `Skipped: no ${CONTEXT_FOLDERS.join(' or ')} folder here, so there is no entry to audit`,
+    )
+    return
+  }
+
+  const canon = resolveCanon()
+  if (canon.kind === 'skip') {
+    skipNoCanon()
+    return
+  }
+
+  const verb = declaresGateKeys() ? 'context audit --gate' : 'context audit'
+  const { code, output } = capture(`${canon.command} ${verb}`)
+  switch (code) {
+    case 0:
+      logInfo('No gating context finding')
+      return
+    case 1:
+      refused('context audit', output)
+      return
+    case 2:
+      pipeOutput(output)
+      fail(
+        `A context entry carries a gating finding. Run 'canon ${verb}' to read each one`,
+      )
+      break
+    default:
+      fail(
+        `canon context audit exited ${code}, which is neither a pass nor a finding`,
+      )
+  }
+}
+
 function main(): void {
   const declared = readDeclaredScripts()
   const list = readPhaseList()
@@ -447,6 +511,9 @@ function main(): void {
 
   logStep('Embedded code')
   checkEmbeddedCode()
+
+  logStep('Context audit')
+  checkContextAudit()
 
   // The card exclusion check reads the build, so it runs last, and only where
   // the stack that owns the card route shipped it.
