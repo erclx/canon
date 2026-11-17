@@ -9,7 +9,12 @@ import {
   commentHistory,
 } from '@/gate/comment-caps'
 import { clientCommandCitations, designProse } from '@/gate/measures'
-import { contextAuditArgv, STAGES, type StageScope } from '@/gate/stages'
+import {
+  contextAuditArgv,
+  STAGES,
+  type StageScope,
+  stagesFor,
+} from '@/gate/stages'
 
 function scopeOf(id: string): StageScope {
   const stage = STAGES.find((candidate) => candidate.id === id)
@@ -513,5 +518,54 @@ describe('the comment cap stages', () => {
       'comment-body-blocks',
       'comment-history',
     ])
+  })
+})
+
+describe('the shared stage set', () => {
+  let root: string
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-stage-set-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('should tag the ten stages that fit any project as shared', () => {
+    const shared = STAGES.filter((stage) => stage.shared).map((s) => s.id)
+
+    expect(shared).toEqual([
+      'design-prose',
+      'context-citations',
+      'canonical-records',
+      'document-ceiling',
+      'embedded-programs',
+      'file-length',
+      'comment-head-blocks',
+      'comment-body-blocks',
+      'comment-history',
+      'markdown',
+    ])
+  })
+
+  it("should run every stage in canon's own checkout", () => {
+    writeFileSync(
+      join(root, 'package.json'),
+      JSON.stringify({ name: '@erclx/canon' }),
+    )
+
+    expect(stagesFor(root)).toBe(STAGES)
+  })
+
+  it('should run the shared stages alone in a project with another name', () => {
+    writeFileSync(join(root, 'package.json'), JSON.stringify({ name: 'app' }))
+
+    expect(stagesFor(root).map((stage) => stage.id)).toContain('markdown')
+    expect(stagesFor(root).every((stage) => stage.shared)).toBe(true)
+  })
+
+  it('should run the shared stages alone in a project with no manifest', () => {
+    expect(stagesFor(root).every((stage) => stage.shared)).toBe(true)
   })
 })

@@ -10,8 +10,7 @@ import {
   runStages,
   summarize,
 } from '@/gate/sequencer'
-import { STAGES } from '@/gate/stages'
-import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
+import { stagesFor } from '@/gate/stages'
 import {
   intro,
   logError,
@@ -41,7 +40,7 @@ export function register(program: Command): void {
   gate
     .command('run')
     .description(
-      'Run every gating stage in order, scoping shell, types, and tests to the changed set',
+      'Run every gating stage in order against the working directory, scoping shell, types, and tests to the changed set',
     )
     .helpOption('-h, --help', 'Show this help message')
     .option(
@@ -60,6 +59,10 @@ export function register(program: Command): void {
         'Exit codes:',
         '  0  every stage that ran reported, and none found a fact',
         '  1  a stage found a fact, or could not measure its input under CI',
+        '',
+        "The gate checks the directory it runs in. Canon's own checkout runs",
+        'every stage, and any other project runs the stages that fit any',
+        'project, so run it from the project root.',
         '',
         'A stage halts the run, so clearing a regenerate-then-assert stage',
         'reveals the next one behind it rather than the whole set at once.',
@@ -84,8 +87,9 @@ export function register(program: Command): void {
 }
 
 async function runGate(opts: RunCommandOptions): Promise<number> {
-  const root = PROJECT_ROOT
-  const mismatch = checkoutMismatchWarning(process.cwd())
+  // The project the gate is typed in, rather than the canon install running
+  // it, so a target's verify runner gates the target.
+  const root = process.cwd()
   const emitJson = opts.json ?? false
   const nested = opts.nested ?? false
   const run = commandRunner(root)
@@ -99,7 +103,6 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
     ? { scoped: false, files: [] }
     : await collectChangedFiles(run)
   if (!emitJson && changed.notice !== undefined) logWarn(changed.notice)
-  if (mismatch !== undefined) logWarn(mismatch)
 
   const ctx: GateContext = {
     root,
@@ -116,7 +119,7 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
   }
 
   const results = await runStages(
-    STAGES,
+    stagesFor(root),
     ctx,
     emitJson ? undefined : (result) => report(result),
   )

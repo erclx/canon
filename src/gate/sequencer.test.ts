@@ -1,12 +1,14 @@
 import {
   existsSync,
   mkdirSync,
+  mkdtempSync,
   readFileSync,
   rmSync,
   unlinkSync,
   writeFileSync,
 } from 'node:fs'
-import { dirname } from 'node:path'
+import { tmpdir } from 'node:os'
+import { dirname, join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   type CommandResult,
@@ -14,7 +16,9 @@ import {
   type RunCommand,
   seedEntryCount,
 } from '@/gate/measures'
+import { PROJECT_ROOT } from '@/roots/project'
 import {
+  cliEntry,
   collectChangedFiles,
   exitCodeFor,
   type GateContext,
@@ -173,6 +177,33 @@ describe('a stage whose input the project does not carry', () => {
     )
 
     expect(outcome.status).toBe('passed')
+  })
+})
+
+describe('the CLI a stage spawns', () => {
+  let root: string
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it("should spawn the checked checkout's own CLI in a canon checkout", () => {
+    root = mkdtempSync(join(tmpdir(), 'canon-cli-entry-'))
+    writeFileSync(
+      join(root, 'package.json'),
+      JSON.stringify({ name: '@erclx/canon' }),
+    )
+    mkdirSync(join(root, 'src'))
+    writeFileSync(join(root, 'src', 'cli.ts'), '')
+
+    expect(cliEntry(root)).toBe(join(root, 'src', 'cli.ts'))
+  })
+
+  it("should spawn this install's CLI in a project with another name", () => {
+    root = mkdtempSync(join(tmpdir(), 'canon-cli-entry-'))
+    writeFileSync(join(root, 'package.json'), JSON.stringify({ name: 'app' }))
+
+    expect(cliEntry(root)).toBe(join(PROJECT_ROOT, 'src', 'cli.ts'))
   })
 })
 

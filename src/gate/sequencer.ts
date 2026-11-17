@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { availableParallelism } from 'node:os'
 import { join } from 'node:path'
 import { execa } from 'execa'
@@ -16,7 +16,7 @@ import {
   machineLockPath,
 } from '@/gate/suite-lock'
 import { gitEnv } from '@/git/env'
-import { PROJECT_ROOT } from '@/roots/project'
+import { isOwnCheckout, PROJECT_ROOT } from '@/roots/project'
 
 export type StageStatus =
   /** Every check ran and none found a fact. */
@@ -529,14 +529,23 @@ export function commandRunner(root: string): RunCommand {
 }
 
 /**
- * Spawns this checkout's own CLI rather than whatever `canon` resolves to.
+ * The CLI entry a stage spawns: the checked checkout's own where `root` is a
+ * canon checkout, and this install's elsewhere.
  *
  * A globally installed binary resolves to the main checkout no matter which
- * worktree is running, so a gate reading through it would measure the wrong
- * tree and report a pass over a branch it never opened.
+ * worktree is running, and several verbs write through that install's root,
+ * so a gate reading through it would regenerate one tree and assert another.
  */
+export function cliEntry(root: string): string {
+  const own = join(root, 'src', 'cli.ts')
+  return isOwnCheckout(root) && existsSync(own)
+    ? own
+    : join(PROJECT_ROOT, 'src', 'cli.ts')
+}
+
+/** Spawns the CLI `cliEntry` names, with the checked project as its cwd. */
 export function cliRunner(root: string): RunCommand {
-  const cli = join(PROJECT_ROOT, 'src', 'cli.ts')
+  const cli = cliEntry(root)
   return async (argv, env) => spawn(process.execPath, [cli, ...argv], root, env)
 }
 

@@ -129,6 +129,12 @@ export interface Stage {
   readonly lock?: string
   /** The line a clean stage prints, where the checks emit none of their own. */
   readonly success?: string
+  /**
+   * Whether the stage fits any project, so it also runs outside canon's own
+   * checkout. A stage left unshared reads or writes canon's own layout, or
+   * runs a script a target's verify runner already runs.
+   */
+  readonly shared?: boolean
 }
 
 /**
@@ -330,6 +336,7 @@ export const STAGES: readonly Stage[] = [
     // agrees with its source. Placed after the regen, so canon counts the
     // record it just wrote.
     id: 'design-prose',
+    shared: true,
     label: 'Design prose',
     checks: [{ kind: 'measure', measure: designProse }],
   },
@@ -423,6 +430,7 @@ export const STAGES: readonly Stage[] = [
     // checkpoint. Canon's checkout always runs the widened audit, and another
     // project runs it only where its context config opts in.
     id: 'context-citations',
+    shared: true,
     label: 'Context citations',
     absent: (root) =>
       hasContextFolder(root)
@@ -442,6 +450,7 @@ export const STAGES: readonly Stage[] = [
     // Each record's caps are facts it states about itself, unlike the
     // judgment thresholds the stage above leaves out, so they gate here.
     id: 'canonical-records',
+    shared: true,
     label: 'Canonical records',
     checks: [{ kind: 'measure', measure: canonicalRecords }],
   },
@@ -449,6 +458,7 @@ export const STAGES: readonly Stage[] = [
     // Unscoped, since any branch can grow any document. A document past the
     // ceiling fails the push.
     id: 'document-ceiling',
+    shared: true,
     label: 'Document ceiling',
     checks: [{ kind: 'measure', measure: documentCeiling }],
   },
@@ -464,6 +474,7 @@ export const STAGES: readonly Stage[] = [
     // Unscoped, since a block one branch embeds stays embedded on every later
     // branch, and reading every tracked source costs well under a second.
     id: 'embedded-programs',
+    shared: true,
     label: 'Embedded programs',
     checks: [{ kind: 'measure', measure: embeddedPrograms }],
   },
@@ -471,6 +482,7 @@ export const STAGES: readonly Stage[] = [
     // Unscoped, since any branch can grow any file past the cap, and counting
     // the tracked sources costs well under a second.
     id: 'file-length',
+    shared: true,
     label: 'File length',
     checks: [{ kind: 'measure', measure: fileLength }],
   },
@@ -478,16 +490,19 @@ export const STAGES: readonly Stage[] = [
     // Unscoped as a stage, since each measure reads the changed set itself and
     // fails a touched file alone.
     id: 'comment-head-blocks',
+    shared: true,
     label: 'Head comment runs',
     checks: [{ kind: 'measure', measure: commentHeadBlocks }],
   },
   {
     id: 'comment-body-blocks',
+    shared: true,
     label: 'In-body comment runs',
     checks: [{ kind: 'measure', measure: commentBodyBlocks }],
   },
   {
     id: 'comment-history',
+    shared: true,
     label: 'History in comments',
     checks: [{ kind: 'measure', measure: commentHistory }],
   },
@@ -540,6 +555,7 @@ export const STAGES: readonly Stage[] = [
     // Bans and dead links in every file, and a density finding on a path the
     // audit gates, all read off one exit code.
     id: 'markdown',
+    shared: true,
     label: 'Markdown',
     checks: [{ kind: 'measure', measure: markdownBans }],
   },
@@ -721,3 +737,11 @@ export const STAGES: readonly Stage[] = [
     success: 'Tests passed',
   },
 ]
+
+/**
+ * The stages the gate runs against `root`: every stage in canon's own
+ * checkout, and the shared ones elsewhere, in table order either way.
+ */
+export function stagesFor(root: string): readonly Stage[] {
+  return isOwnCheckout(root) ? STAGES : STAGES.filter((stage) => stage.shared)
+}
