@@ -1,5 +1,6 @@
 import { type SpawnSyncReturns, spawnSync } from 'node:child_process'
 import {
+  chmodSync,
   copyFileSync,
   existsSync,
   mkdirSync,
@@ -434,14 +435,14 @@ describe('markdown bans', () => {
 })
 
 describe('context audit', () => {
-  // Passes every other canon stage, so only the context audit's exit decides.
-  const writeContextStub = (exitCode: number): void => {
-    writeFileSync(
-      join(bin, 'canon'),
-      // canon-allow-embedded: a three-line stub whose exit depends on the verb, read nowhere else
-      `#!/usr/bin/env bash\nif [ "$1" = context ]; then echo "context finding: $*"; exit ${exitCode}; fi\nexit 0\n`,
-      { mode: 0o755 },
-    )
+  const CONTEXT_STUB = join(import.meta.dirname, 'fixtures/canon-context.sh')
+
+  // Puts the fake canon on PATH and returns the env setting the context
+  // audit's exit, since every other canon stage the stub serves passes.
+  const contextExit = (code: number): NodeJS.ProcessEnv => {
+    copyFileSync(CONTEXT_STUB, join(bin, 'canon'))
+    chmodSync(join(bin, 'canon'), 0o755)
+    return { CONTEXT_EXIT: String(code) }
   }
 
   beforeEach(() => {
@@ -451,9 +452,7 @@ describe('context audit', () => {
   })
 
   it('should run the gated audit after the code audit and pass on exit 0', () => {
-    writeContextStub(0)
-
-    const result = runVerify()
+    const result = runVerify(contextExit(0))
 
     expect(result.status).toBe(0)
     expect(result.stdout.indexOf('Context audit')).toBeGreaterThan(
@@ -463,9 +462,7 @@ describe('context audit', () => {
   })
 
   it('should fail, print the findings, and name the verb on exit 2', () => {
-    writeContextStub(2)
-
-    const result = runVerify()
+    const result = runVerify(contextExit(2))
 
     expect(result.status).toBe(1)
     expect(result.stdout).toContain('context finding: context audit --gate')
@@ -473,40 +470,45 @@ describe('context audit', () => {
   })
 
   it('should log a skip on exit 1 outside CI', () => {
-    writeContextStub(1)
-
-    const result = runVerify()
+    const result = runVerify(contextExit(1))
 
     expect(result.status).toBe(0)
     expect(result.stdout).toContain('canon context audit refused or is missing')
   })
 
   it('should fail on exit 1 under CI', () => {
-    writeContextStub(1)
-
-    const result = runVerify({ CI: 'true' })
+    const result = runVerify({ ...contextExit(1), CI: 'true' })
 
     expect(result.status).toBe(1)
     expect(result.stdout).toContain('canon context audit refused')
   })
 
   it('should fail on an exit that is neither a pass nor a finding', () => {
-    writeContextStub(5)
-
-    const result = runVerify()
+    const result = runVerify(contextExit(5))
 
     expect(result.status).toBe(1)
     expect(result.stdout).toContain('canon context audit exited 5')
   })
 
+  it('should audit an unmoved project that keeps its entries under .claude/', () => {
+    rmSync(join(fixture, 'canon'), { force: true, recursive: true })
+    mkdirSync(join(fixture, '.claude/context'), { recursive: true })
+
+    const result = runVerify(contextExit(2))
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('context finding: context audit --gate')
+  })
+
   it('should skip without calling canon where no context folder exists', () => {
     rmSync(join(fixture, 'canon'), { force: true, recursive: true })
-    writeContextStub(2)
 
-    const result = runVerify()
+    const result = runVerify(contextExit(2))
 
     expect(result.status).toBe(0)
-    expect(result.stdout).toContain('Skipped: no canon/context folder here')
+    expect(result.stdout).toContain(
+      'Skipped: no canon/context or .claude/context folder here',
+    )
     expect(result.stdout).not.toContain('context finding')
   })
 

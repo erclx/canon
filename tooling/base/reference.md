@@ -129,5 +129,5 @@ The `Embedded code` stage runs `canon code audit` over every TypeScript and Astr
 The `Context audit` stage runs `canon context audit --gate` after the embedded code stage, so a gating finding on a context entry fails the check, such as an unresolved citation, a missing required section, or index drift.
 
 - It exits `2` on a finding, failing `bun run check` and the `pre-push` hook. Run `canon context audit --gate` to read each one.
-- A project with no `canon/context/` folder under the working directory skips the stage, so a nested project is audited as itself.
+- A project with neither `canon/context/` nor `.claude/context/` under the working directory skips the stage, so a nested project is audited as itself.
 - A refusal exits `1` and is logged as a skip locally and fails under CI, the same as the two stages before it.

@@ -297,7 +297,7 @@ function listMarkdown(): string[] {
   return (result.stdout ?? '').split('\n').filter((line) => line !== '')
 }
 
-// Where canon comes from for the two canon stages. A canon on PATH wins.
+// Where canon comes from for the canon stages. A canon on PATH wins.
 // Under CI, where no canon is installed, bunx fetches the release the last
 // sync stamped, since that sync wrote this file and so carries every verb it
 // calls. A local run with neither skips, since a pre-push hook stalling on a
@@ -431,13 +431,14 @@ function checkEmbeddedCode(): void {
 
 // canon context audit exits 0 on a pass, 1 on a refusal, and 2 on a gating
 // finding. The folder test reads the working directory, so a nested project
-// is audited as itself rather than through the repository above it.
-const CONTEXT_FOLDER = 'canon/context'
+// is audited as itself rather than through the repository above it. The
+// audit resolves either root, and an unmoved project keeps .claude/context.
+const CONTEXT_FOLDERS = ['canon/context', '.claude/context']
 
 function checkContextAudit(): void {
-  if (!existsSync(CONTEXT_FOLDER)) {
+  if (!CONTEXT_FOLDERS.some((folder) => existsSync(folder))) {
     logSkip(
-      `Skipped: no ${CONTEXT_FOLDER} folder here, so there is no entry to audit`,
+      `Skipped: no ${CONTEXT_FOLDERS.join(' or ')} folder here, so there is no entry to audit`,
     )
     return
   }
