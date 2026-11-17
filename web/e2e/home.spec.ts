@@ -473,6 +473,58 @@ test.describe('the records stack', () => {
     await expect(files.first()).toBeVisible()
   })
 
+  test('every explorer folder row draws a chevron and every file row a mark', async ({
+    page,
+  }) => {
+    await page.goto('/')
+
+    const rows = await page
+      .locator('#records .explorer > *')
+      .evaluateAll((nodes) =>
+        nodes.map((node) => ({
+          file: node.hasAttribute('data-f'),
+          chevron: getComputedStyle(node, '::before').maskImage,
+          mark: Boolean(node.querySelector('.fi')),
+        })),
+      )
+
+    expect(rows.filter((row) => !row.file).length).toBeGreaterThan(0)
+    expect(rows.filter((row) => row.file).length).toBeGreaterThan(0)
+    expect(
+      rows.filter((row) => !row.file && !row.chevron.includes('url(')),
+    ).toEqual([])
+    expect(rows.filter((row) => row.file && !row.mark)).toEqual([])
+  })
+
+  test('a click on an empty explorer folder changes nothing', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const explorer = page.locator('#records .sheet[data-i="0"] .explorer')
+    const empty = explorer.locator('.dir').first()
+    await expect(empty).toBeVisible()
+    const before = await explorer.innerHTML()
+
+    await empty.click()
+
+    expect(await explorer.innerHTML()).toBe(before)
+  })
+
+  test('every view switch puts the source button first', async ({ page }) => {
+    await page.goto('/')
+
+    const firsts = await page
+      .locator('#records .vt')
+      .evaluateAll((groups) =>
+        groups.map(
+          (group) => (group.firstElementChild as HTMLElement | null)?.dataset.v,
+        ),
+      )
+
+    expect(firsts).toHaveLength(12)
+    expect(firsts.filter((view) => view !== 'src')).toEqual([])
+  })
+
   test('takes no pinned scroll under reduced motion', async ({ page }) => {
     await page.goto('/')
 
