@@ -120,6 +120,8 @@ export const craft = {
   // README.md: canon-allow-readme-paraphrase: the pane labels beside one skill's rule and source, which the README's table folds into its columns.
   ruleIn: 'The rule, in',
   source: 'The source it cites',
+  /** Where a rule's file opens on GitHub, its path appended. */
+  repoBlob: `${REPO}/blob/main/`,
 }
 
 export const guardrails = {

@@ -287,6 +287,57 @@ test.describe('the craft section', () => {
       'canon:systematic-debugging',
     )
   })
+
+  test('Practice sets the quote larger than the rule beside the window', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const size = (selector: string) =>
+      page
+        .locator(selector)
+        .evaluate((node) => parseFloat(getComputedStyle(node).fontSize))
+    const quote = await page.locator('#craft .said').boundingBox()
+    const win = await page.locator('#craft .win').boundingBox()
+
+    expect(await size('#craft .p-quote')).toBeGreaterThan(
+      await size('#craft .p-rule'),
+    )
+    expect(quote && win && quote.x + quote.width).toBeLessThanOrEqual(
+      win?.x ?? 0,
+    )
+  })
+
+  test('Practice stacks the window over the pickers at 390', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/')
+    const win = await page.locator('#craft .win').boundingBox()
+    const picks = await page.locator('#craft .picks').boundingBox()
+    const rule = await page.locator('#craft .rl').boundingBox()
+    const said = await page.locator('#craft .said').boundingBox()
+
+    expect(win && picks && win.y + win.height).toBeLessThanOrEqual(
+      picks?.y ?? 0,
+    )
+    expect(rule && said && rule.y).toBeLessThan(said?.y ?? 0)
+  })
+
+  test('a Practice pick points both links at that skill', async ({ page }) => {
+    await page.goto('/')
+    const last = page.locator('#craft .pick').last()
+
+    await last.click()
+
+    await expect(page.locator('#craft a.p-file')).toHaveAttribute(
+      'href',
+      /\/blob\/main\/claude\/skills\/systematic-debugging\//,
+    )
+    await expect(page.locator('#craft a.p-source')).toHaveAttribute(
+      'href',
+      /obra\/superpowers/,
+    )
+  })
 })
 
 test.describe('the looping windows and their pause button', () => {
