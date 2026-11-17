@@ -17,5 +17,6 @@ CLI catalog and invocation rules for agents, split by command domain. Start with
 - [Output shape](output-shape.md): The framed output shape every command renders into, the JSON and color modes, the exit discipline, the runtime catalogs, and a headless invocation per domain
 - [Overview](overview.md): What this folder covers, the invocation rules every command inherits, and how canon docs resolves a topic name
 - [Records](records.md): Backing the record folders to a private remote, restoring them on a new machine, reading folder size, and pruning stale scratch
+- [Sessions reap](sessions-reap.md): Stopping the background sessions a task recorded once its work ends, the finished sweep, the skips that protect live work, and the outcomes each row reads
 - [Sessions transfer](sessions-transfer.md): Moving a session to another machine with export and import, the manifest fields, the refusal reasons, and what a resume on the target depends on
 - [Targets](targets.md): The projects this toolkit installed into, where each answer comes from, the cross-target pull request read, and the releases since a target's install
