@@ -534,3 +534,53 @@ describe.skipIf(!available())('a reel of a key that moves focus', () => {
     console.info(`focus reel of ${reel.frames} frames, ${reel.bytes} bytes`)
   }, 120_000)
 })
+
+describe.skipIf(!available())(
+  'a reel over beats filmed in different windows',
+  () => {
+    let server: { url: string; stop: () => void }
+    let out: string
+    let beats: readonly FilmedBeat[] = []
+
+    beforeAll(async () => {
+      const served = Bun.serve({
+        port: 0,
+        fetch: () =>
+          new Response(PAGE, { headers: { 'content-type': 'text/html' } }),
+      })
+      server = {
+        url: `http://127.0.0.1:${served.port}/`,
+        stop: () => served.stop(true),
+      }
+      out = mkdtempSync(join(tmpdir(), 'canon-reel-shape-e2e-'))
+
+      const steps = [{ kind: 'wait', ms: 200 }]
+      const read = readTakePlan(
+        JSON.stringify({
+          route: 'screencast',
+          beats: [
+            { name: 'wide', viewport: { width: 1280, height: 720 }, steps },
+            { name: 'small', viewport: { width: 800, height: 450 }, steps },
+          ],
+        }),
+      )
+      if (read.kind !== 'read') throw new Error(read.detail)
+      const result = await take({ url: server.url, plan: read.plan, out })
+      if (result.status !== 'filmed') throw new Error(result.message)
+      beats = result.beats
+    }, 240_000)
+
+    afterAll(() => {
+      server.stop()
+      rmSync(out, { recursive: true, force: true })
+    })
+
+    it('should join beats of one aspect ratio filmed at two sizes', async () => {
+      const file = join(out, 'one-shape.webp')
+
+      await renderReel(out, beats, file)
+
+      expect(readWebp(file)).toMatchObject({ width: REEL_WIDTH, height: 540 })
+    }, 120_000)
+  },
+)

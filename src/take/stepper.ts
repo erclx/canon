@@ -1,7 +1,7 @@
 import { openFrameEncoder } from '@/take/encode'
 import { FULLSCREEN_SCRIPT } from '@/take/fullscreen'
 import { describeKey, modifierBits } from '@/take/keys'
-import { FPS, type LogEvent, START, VIEWPORT } from '@/take/log'
+import { FPS, type LogEvent, startOf } from '@/take/log'
 import {
   type KeyInput,
   type PointerInput,
@@ -10,7 +10,7 @@ import {
   performSteps,
 } from '@/take/perform'
 import { NetworkTally, withHeld } from '@/take/network'
-import type { Beat } from '@/take/plan'
+import type { Beat, Viewport } from '@/take/plan'
 import { type ShellPage, openShell } from '@/take/shell'
 
 /**
@@ -87,6 +87,8 @@ export interface SteppedRequest {
   readonly url: string
   readonly beat: Beat
   readonly clip: string
+  /** The window the page opens at, in CSS pixels. */
+  readonly viewport: Viewport
   /** How long one frame may take before the beat falls back, `STALL_MS` by default. */
   readonly stallMs?: number
   /** The multiple of the viewport each frame films at, 2 by default. */
@@ -96,7 +98,9 @@ export interface SteppedRequest {
 export async function filmStepped(
   request: SteppedRequest,
 ): Promise<SteppedTake> {
-  const page = await openShell(request.executable, VIEWPORT, {
+  const { viewport } = request
+  const start = startOf(viewport)
+  const page = await openShell(request.executable, viewport, {
     scrollbars: request.beat.scrollbars,
     deviceScale: request.deviceScale,
   })
@@ -132,10 +136,10 @@ export async function filmStepped(
     still = () => frameStill(beginFrame)
     await pump(beginFrame, SETTLE_MS, stallMs, 'settle')
 
-    const live = liveStage(page, beginFrame, stallMs)
-    await performSteps(live, request.beat.setup, { pointer: START })
+    const live = liveStage(page, viewport, beginFrame, stallMs)
+    await performSteps(live, request.beat.setup, { pointer: start })
     if (request.beat.setup.length > 0) await live.hold(1000)
-    await live.pointer({ type: 'move', ...START })
+    await live.pointer({ type: 'move', ...start })
 
     await page.send('Emulation.setVirtualTimePolicy', { policy: 'pause' })
     ticks = alignTicks({ ticks, loadTicks, ...(await readPageClock(page)) })
@@ -173,6 +177,7 @@ export async function filmStepped(
     }
 
     const recording: Stage = {
+      viewport,
       now: () => frames * FRAME_MS,
       hold: async (ms) => {
         for (let i = 0; i < Math.round(ms / FRAME_MS); i += 1) await frame()
@@ -190,7 +195,7 @@ export async function filmStepped(
 
     await recording.hold(HOLD_MS)
     await performSteps(recording, request.beat.steps, {
-      pointer: START,
+      pointer: start,
       log: events,
     })
     await recording.hold(HOLD_MS)
@@ -363,11 +368,13 @@ async function pump(
  */
 function liveStage(
   page: ShellPage,
+  viewport: Viewport,
   beginFrame: (screenshot: boolean) => Promise<unknown>,
   stallMs: number,
 ): Stage {
   const started = Date.now()
   return {
+    viewport,
     now: () => Date.now() - started,
     hold: (ms) => pump(beginFrame, ms, stallMs, 'setup'),
     pointer: (input) => {

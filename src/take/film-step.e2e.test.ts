@@ -222,6 +222,69 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
     expect(log.clip).toEqual({ width: 1920, height: 1080 })
   }, 180_000)
 
+  it('should film each beat at its own window on either route, its clip and log agreeing', async () => {
+    const steps = [
+      { kind: 'click', target: '#go' },
+      { kind: 'wait', ms: 400 },
+    ]
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [
+          { name: 'narrow', viewport: { width: 800, height: 600 }, steps },
+          { name: 'option', route: 'screencast', steps },
+        ],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+
+    const result = await take({
+      url: server.url,
+      plan: read.plan,
+      out,
+      stallMs: LOADED_STALL_MS,
+      viewport: { width: 1280, height: 720 },
+    })
+
+    expect(result).not.toHaveProperty('beats.0.fallback')
+    expect(result).toMatchObject({
+      status: 'filmed',
+      beats: [{ route: 'step' }, { route: 'screencast' }],
+    })
+    if (result.status !== 'filmed') return
+    const [narrow, option] = result.beats
+    if (!narrow || !option) return
+    expect(probe(join(out, narrow.clip))).toMatchObject({
+      width: 1600,
+      height: 1200,
+    })
+    expect(probe(join(out, option.clip))).toMatchObject({
+      width: 1280,
+      height: 720,
+    })
+    const narrowLog = JSON.parse(
+      readFileSync(join(out, narrow.log), 'utf8'),
+    ) as TakeLog
+    expect(narrowLog).toMatchObject({
+      viewport: { width: 800, height: 600 },
+      clip: { width: 1600, height: 1200 },
+    })
+    expect(narrowLog.events[0]).toMatchObject({
+      kind: 'move',
+      from: { x: 400, y: 300 },
+    })
+    const optionLog = JSON.parse(
+      readFileSync(join(out, option.log), 'utf8'),
+    ) as TakeLog
+    expect(optionLog).toMatchObject({
+      viewport: { width: 1280, height: 720 },
+      clip: { width: 1280, height: 720 },
+    })
+    expect(optionLog.events[0]).toMatchObject({
+      kind: 'move',
+      from: { x: 640, y: 360 },
+    })
+  }, 180_000)
+
   it('should film a screencast beat at the viewport size and the same rate', async () => {
     const read = readTakePlan(
       JSON.stringify({

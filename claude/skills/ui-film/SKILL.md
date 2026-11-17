@@ -108,7 +108,7 @@ A second refusal of the same kind stops the run and reports both records.
 Open each beat's `takes/<dir>/still.jpg` before handing off, since a clip can film the wrong state cleanly. The verb writes it from the clip's closing frame, where the action's result shows.
 
 - Say what each still shows beside the beat it belongs to
-- Report a beat the record marks with `fallback` as filmed in real time at 1080p, whose zoom stops near 1.35x rather than 1.8x, and offer to re-film it with the beat's input simplified
+- Report a beat the record marks with `fallback` as filmed in real time at its window, whose zoom stops near 1.35x rather than 1.8x, and offer to re-film it with the beat's input simplified
 
 ## Step 5: hand off
 

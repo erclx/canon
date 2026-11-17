@@ -13,6 +13,22 @@ export const ROUTES = ['step', 'screencast'] as const
 
 export type Route = (typeof ROUTES)[number]
 
+/** A window's size in CSS pixels. */
+export interface Viewport {
+  readonly width: number
+  readonly height: number
+}
+
+/**
+ * The window a beat films in when neither it nor the take names one. It is
+ * also the largest allowed, since the stepper films at twice it and a larger
+ * frame passes the stall limit on paint alone.
+ */
+export const DEFAULT_VIEWPORT: Viewport = { width: 1920, height: 1080 }
+
+/** The smallest window a beat may film in. */
+export const MIN_VIEWPORT: Viewport = { width: 320, height: 240 }
+
 /** The keys held through a press, absent when none is. */
 interface Held {
   readonly modifiers?: readonly Modifier[]
@@ -75,6 +91,11 @@ export interface Beat {
    * Absent means no request is intercepted.
    */
   readonly network?: readonly NetworkRule[]
+  /**
+   * The window this beat films in, over the take's `--viewport` and the
+   * default. Absent means the beat takes whichever of those applies.
+   */
+  readonly viewport?: Viewport
   /** Runs after the page loads and before the first frame is kept. */
   readonly setup: readonly TakeStep[]
   readonly steps: readonly TakeStep[]
@@ -102,6 +123,7 @@ export type TakePlanRefusal =
   | 'no-steps'
   | 'unknown-route'
   | 'bad-step'
+  | 'bad-viewport'
 
 export type TakePlanRead =
   | { readonly kind: 'read'; readonly plan: TakePlan }
@@ -210,6 +232,7 @@ function readBeat(entry: unknown, index: number, fallback: Route): Beat {
   }
 
   const network = readNetwork(entry.network, name)
+  const viewport = readBeatViewport(entry.viewport, name)
 
   return {
     name,
@@ -217,6 +240,7 @@ function readBeat(entry: unknown, index: number, fallback: Route): Beat {
     ...(entry.push === false ? { push: false as const } : {}),
     ...(entry.scrollbars === true ? { scrollbars: true as const } : {}),
     ...(network ? { network } : {}),
+    ...(viewport ? { viewport } : {}),
     setup: (entry.setup ?? []).map((step: unknown, i: number) =>
       readStep(step, `${name}, setup step ${i + 1}`),
     ),
@@ -333,6 +357,68 @@ function readNetwork(
     rules.push({ match, action: entry.action as NetworkAction })
   }
   return rules
+}
+
+function readBeatViewport(value: unknown, name: string): Viewport | undefined {
+  if (value === undefined) return undefined
+  if (!isRecord(value) || !isNumber(value.width) || !isNumber(value.height)) {
+    throw new Refusal(
+      'bad-viewport',
+      `${name} carries a viewport that is not a width and a height in pixels`,
+    )
+  }
+  const viewport = { width: value.width, height: value.height }
+  const problem = viewportProblem(viewport)
+  if (problem) throw new Refusal('bad-viewport', `${name} carries ${problem}`)
+  return viewport
+}
+
+export type ViewportRead =
+  | { readonly kind: 'read'; readonly viewport: Viewport }
+  | { readonly kind: 'refused'; readonly detail: string }
+
+/** Reads a window size written as `<width>x<height>`, such as `1280x720`. */
+export function parseViewport(text: string): ViewportRead {
+  const match = /^(\d+)x(\d+)$/.exec(text.trim())
+  if (!match) {
+    return {
+      kind: 'refused',
+      detail: `${text} is not a size written as <width>x<height>, such as 1280x720`,
+    }
+  }
+  const viewport = { width: Number(match[1]), height: Number(match[2]) }
+  const problem = viewportProblem(viewport)
+  return problem
+    ? { kind: 'refused', detail: problem }
+    : { kind: 'read', viewport }
+}
+
+/**
+ * Says why a size cannot be filmed, or nothing when it can. Each side is even,
+ * since the encoder refuses an odd dimension, and within the bounds above.
+ */
+function viewportProblem({ width, height }: Viewport): string | undefined {
+  const size = `${width}x${height}`
+  if (!Number.isInteger(width) || !Number.isInteger(height)) {
+    return `a viewport of ${size}, which is not whole pixels`
+  }
+  if (
+    width < MIN_VIEWPORT.width ||
+    height < MIN_VIEWPORT.height ||
+    width > DEFAULT_VIEWPORT.width ||
+    height > DEFAULT_VIEWPORT.height
+  ) {
+    return `a viewport of ${size}, outside ${MIN_VIEWPORT.width}x${MIN_VIEWPORT.height} to ${DEFAULT_VIEWPORT.width}x${DEFAULT_VIEWPORT.height}`
+  }
+  if (width % 2 !== 0 || height % 2 !== 0) {
+    return `a viewport of ${size}, with an odd side the encoder refuses`
+  }
+  return undefined
+}
+
+/** The window a beat films in: its own key, then the take's option, then the default. */
+export function beatViewport(beat: Beat, option?: Viewport): Viewport {
+  return beat.viewport ?? option ?? DEFAULT_VIEWPORT
 }
 
 function readHold(entry: Record<string, unknown>, at: string): Aimed {

@@ -1,5 +1,10 @@
 import type { Modifier } from '@/take/keys'
-import { ROUTES, type Route } from '@/take/plan'
+import {
+  DEFAULT_VIEWPORT,
+  ROUTES,
+  type Route,
+  type Viewport,
+} from '@/take/plan'
 
 /**
  * The click log a take writes beside its clip, and the pointer path both
@@ -16,8 +21,11 @@ export const LOG_VERSION = 1
 
 export const FPS = 60
 
-/** The page a take films, in CSS pixels. The stepper renders it at twice this. */
-export const VIEWPORT = { width: 1920, height: 1080 } as const
+/**
+ * The page a take films when no size is asked for, in CSS pixels. A beat can
+ * film a smaller one, so a module reads the beat's size rather than this.
+ */
+export const VIEWPORT = DEFAULT_VIEWPORT
 
 export interface Point {
   readonly x: number
@@ -134,13 +142,17 @@ export interface TakeLog {
   readonly events: readonly LogEvent[]
 }
 
-/** The size each route films at, the stepper at twice the viewport. */
-export const CLIP_SIZES: Record<
-  Route,
-  { readonly width: number; readonly height: number }
-> = {
-  step: { width: VIEWPORT.width * 2, height: VIEWPORT.height * 2 },
-  screencast: VIEWPORT,
+/**
+ * The size a route films a window at: the stepper at the device scale times
+ * the window, and a screencast at the window whatever the scale.
+ */
+export function clipSize(
+  route: Route,
+  viewport: Viewport,
+  deviceScale: 1 | 2 = 2,
+): ClipSize {
+  const scale = route === 'step' ? deviceScale : 1
+  return { width: viewport.width * scale, height: viewport.height * scale }
 }
 
 export interface ClipSize {
@@ -215,8 +227,13 @@ function isSize(value: unknown): boolean {
   return isCount(width) && isCount(height)
 }
 
-/** Where the pointer rests before a take's first move. */
-export const START: Point = { x: VIEWPORT.width / 2, y: VIEWPORT.height / 2 }
+/** Where the pointer rests before a take's first move, the window's center. */
+export function startOf(viewport: Viewport): Point {
+  return { x: viewport.width / 2, y: viewport.height / 2 }
+}
+
+/** The pointer's rest in the default window. */
+export const START: Point = startOf(VIEWPORT)
 
 /**
  * How long the pointer takes to travel, slower for longer reaches and never so
@@ -243,10 +260,15 @@ export function along(from: Point, to: Point, progress: number): Point {
 /**
  * The pointer's position at a time on the clip's clock, held at the last
  * point each move sent at or before it, or read off its eased curve when the
- * move carries no points.
+ * move carries no points. It rests on `start` before the first move, being the
+ * center of the window filmed.
  */
-export function cursorAt(events: readonly LogEvent[], ms: number): Point {
-  let position = START
+export function cursorAt(
+  events: readonly LogEvent[],
+  ms: number,
+  start: Point = START,
+): Point {
+  let position = start
   for (const event of events) {
     if (event.kind !== 'move') continue
     if (ms < event.t) break

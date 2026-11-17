@@ -5,7 +5,7 @@ import { SANDBOXED } from '@/browser/engine'
 import { lastFrame, openFrameEncoder, probeFrames } from '@/take/encode'
 import { frameStamp, slotFrames } from '@/take/frame-clock'
 import { FULLSCREEN_SCRIPT } from '@/take/fullscreen'
-import { FPS, type LogEvent, START, VIEWPORT } from '@/take/log'
+import { FPS, type LogEvent, type Point, startOf } from '@/take/log'
 import { NetworkTally, withHeld } from '@/take/network'
 import {
   type PointerInput,
@@ -13,12 +13,12 @@ import {
   TargetRefused,
   performSteps,
 } from '@/take/perform'
-import type { Beat } from '@/take/plan'
+import type { Beat, Viewport } from '@/take/plan'
 import { HOLD_MS, withinCap } from '@/take/stepper'
 
 /**
  * Films a beat in real time through Playwright's screencast, for a page frame
- * stepping cannot drive. It runs at the viewport's own 1920x1080, so it goes
+ * stepping cannot drive. It films the window one to one, so it goes
  * soft under a zoom where a stepped take stays sharp, and its frames land when
  * the page paints rather than one per step.
  */
@@ -55,7 +55,11 @@ export async function filmScreencast(request: {
   readonly url: string
   readonly beat: Beat
   readonly clip: string
+  /** The window the page opens at, which the clip films at one to one. */
+  readonly viewport: Viewport
 }): Promise<ScreencastTake> {
+  const { viewport } = request
+  const start = startOf(viewport)
   // Ahead of the launch, so a folder that refuses leaves no browser holding the
   // process open past its refusal.
   const scratch = openSpool(request.clip)
@@ -72,7 +76,7 @@ export async function filmScreencast(request: {
     })
   let still: (() => Promise<Buffer | undefined>) | undefined
   try {
-    const page = await browser.newPage({ viewport: VIEWPORT })
+    const page = await browser.newPage({ viewport })
     // Best effort, so a closed or crashed page leaves the refusal standing
     // without a still rather than replacing it.
     still = () =>
@@ -103,6 +107,7 @@ export async function filmScreencast(request: {
     await page.waitForTimeout(SETTLE_MS)
 
     const stageOn = (clock: () => number): Stage => ({
+      viewport,
       now: clock,
       hold: (ms) => page.waitForTimeout(ms),
       align: () => nextFrame(page, ALIGN_CAP_MS).then(() => undefined),
@@ -130,15 +135,15 @@ export async function filmScreencast(request: {
     })
 
     const live = stageOn(() => performance.now())
-    await performSteps(live, request.beat.setup, { pointer: START })
+    await performSteps(live, request.beat.setup, { pointer: start })
     if (request.beat.setup.length > 0) await live.hold(1000)
-    const lag = await calibrate(page)
+    const lag = await calibrate(page, start)
 
     const events: LogEvent[] = []
     const spool: SpooledFrame[] = []
     let spoolFailure: unknown
     await page.screencast.start({
-      size: VIEWPORT,
+      size: viewport,
       // The docs tie this to `path`, but 1.64.1 still reads it here, where it
       // doubles the frames Chromium may hold unacknowledged.
       fps: FPS,
@@ -163,7 +168,7 @@ export async function filmScreencast(request: {
     const recording = stageOn(() => performance.now() - started)
     await recording.hold(HOLD_MS)
     await performSteps(recording, request.beat.steps, {
-      pointer: START,
+      pointer: start,
       log: events,
     })
     await recording.hold(HOLD_MS)
@@ -288,17 +293,20 @@ const PAINTED = '__canonTakePainted'
 
 /**
  * How long a move takes to show in the clip, measured by sending one aligned
- * move to `START` and reading the animation frame after its handler against
+ * move to the window's center and reading the animation frame after its handler against
  * the frame it was aligned to. Both readings are page time, so no clock mapping
  * is needed. The screencast captures a frame once it is presented, one page
  * frame after that frame begins, so the lag counts one page frame past the
  * readings, read off two consecutive animation frames rather than assumed from
  * the clip's rate. That held a dragged box within 7 px on every run where the
  * readings alone left 10 to 15. Undefined when the page gives no frame to read,
- * and the pointer rests on `START` either way.
+ * and the pointer rests on `start` either way.
  */
-async function calibrate(page: Page): Promise<number | undefined> {
-  await page.mouse.move(START.x - 1, START.y)
+async function calibrate(
+  page: Page,
+  start: Point,
+): Promise<number | undefined> {
+  await page.mouse.move(start.x - 1, start.y)
   const interval = await withinCap(
     page
       .evaluate(
@@ -322,7 +330,7 @@ async function calibrate(page: Page): Promise<number | undefined> {
     })
   }, PAINTED)
   const aligned = await nextFrame(page, ALIGN_CAP_MS)
-  await page.mouse.move(START.x, START.y)
+  await page.mouse.move(start.x, start.y)
   const painted = await withinCap(
     page
       .evaluate((key) => {

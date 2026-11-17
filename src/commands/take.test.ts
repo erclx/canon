@@ -120,6 +120,56 @@ describe('canon take', () => {
     },
   )
 
+  it.each(['1280', '2560x1440', '801x600'])(
+    'should refuse bad-viewport for --viewport %s before filming',
+    async (value) => {
+      const result = await runTake([
+        'http://127.0.0.1:9/',
+        plan,
+        '--out',
+        dir,
+        '--viewport',
+        value,
+      ])
+
+      expect(result).toMatchObject({
+        exitCode: 1,
+        record: { reason: 'bad-viewport' },
+      })
+    },
+  )
+
+  it('should refuse reel-shape before filming beats of two aspect ratios', async () => {
+    const shapes = join(dir, 'shapes.json')
+    const steps = [{ kind: 'wait', ms: 100 }]
+    writeFileSync(
+      shapes,
+      JSON.stringify({
+        beats: [
+          { name: 'wide', steps },
+          { name: 'square', viewport: { width: 800, height: 600 }, steps },
+        ],
+      }),
+    )
+
+    const result = await runTake([
+      'http://127.0.0.1:9/',
+      shapes,
+      '--out',
+      dir,
+      '--reel',
+      join(dir, 'reel.webp'),
+    ])
+
+    expect(result).toMatchObject({
+      exitCode: 1,
+      record: {
+        reason: 'reel-shape',
+        message: expect.stringContaining('square'),
+      },
+    })
+  })
+
   it('should refuse ffmpeg-missing when FFmpeg is not on the PATH', async () => {
     const result = await runTake(['http://127.0.0.1:9/', plan, '--out', dir], {
       PATH: join(dir, 'no-bin'),

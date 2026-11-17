@@ -4,7 +4,8 @@ import { join } from 'node:path'
 import { type CameraTrack, cameraTrack } from '@/take/camera'
 import { finished } from '@/take/encode'
 import type { FilmedBeat } from '@/take/film'
-import { FPS, type Point, readTakeLog } from '@/take/log'
+import { FPS, type Point, type TakeLog, readTakeLog } from '@/take/log'
+import type { Viewport } from '@/take/plan'
 import { type Frame, drawPointer } from '@/take/pointer'
 
 /**
@@ -119,15 +120,39 @@ export async function* reelFrames(
  * from `camera.json`, which keeps the launch depth an edit at 1920 reads.
  */
 function reelCamera(out: string, filmed: FilmedBeat): CameraTrack {
-  const read = readTakeLog(readFileSync(join(out, filmed.log), 'utf8'))
-  if (read.kind === 'refused') {
-    throw new Error(`${filmed.log} is not a take's log.json: ${read.detail}`)
-  }
-  return cameraTrack(read.log, {
+  return cameraTrack(beatLog(out, filmed), {
     depth: REEL_DEPTH,
     outputWidth: REEL_WIDTH,
     focus: true,
   })
+}
+
+function beatLog(out: string, filmed: FilmedBeat): TakeLog {
+  const read = readTakeLog(readFileSync(join(out, filmed.log), 'utf8'))
+  if (read.kind === 'refused') {
+    throw new Error(`${filmed.log} is not a take's log.json: ${read.detail}`)
+  }
+  return read.log
+}
+
+/**
+ * Names the first beat whose window differs in aspect ratio from the first
+ * beat's, or nothing when every beat shares one. A reel shrinks each beat to
+ * one width, so beats of one shape join at any size and beats of two would
+ * make frames of two heights.
+ */
+export function reelShapeMismatch(
+  beats: readonly { readonly name: string; readonly viewport: Viewport }[],
+): string | undefined {
+  const [first, ...rest] = beats
+  if (!first) return undefined
+  const { width, height } = first.viewport
+  const differing = rest.find(
+    ({ viewport }) => viewport.width * height !== width * viewport.height,
+  )
+  if (!differing) return undefined
+  const size = (viewport: Viewport) => `${viewport.width}x${viewport.height}`
+  return `${differing.name} films a ${size(differing.viewport)} window, not the shape of ${first.name}'s ${size(first.viewport)}, so a reel cannot join them`
 }
 
 /**
@@ -252,6 +277,13 @@ export async function renderReel(
   file: string,
   maxBytes: number = REEL_MAX_BYTES,
 ): Promise<Reel> {
+  const mismatch = reelShapeMismatch(
+    beats.map((filmed) => ({
+      name: filmed.name,
+      viewport: beatLog(out, filmed).viewport,
+    })),
+  )
+  if (mismatch) throw new Error(mismatch)
   const lossless = await encode(out, beats, file, true)
   if (lossless.bytes <= maxBytes) return { ...lossless, lossless: true }
   return { ...(await encode(out, beats, file, false)), lossless: false }

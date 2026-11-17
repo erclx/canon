@@ -1,0 +1,20 @@
+{
+  "beats": [
+    {
+      "name": "every action at the default window",
+      "push": false,
+      "steps": [
+        { "kind": "move", "target": "#share" },
+        { "kind": "wait", "ms": 400 }
+      ]
+    },
+    {
+      "name": "the folded toolbar at 960x540",
+      "viewport": { "width": 960, "height": 540 },
+      "steps": [
+        { "kind": "click", "target": "#more" },
+        { "kind": "wait", "ms": 600 }
+      ]
+    }
+  ]
+}

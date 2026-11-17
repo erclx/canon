@@ -9,13 +9,12 @@ import {
 import { cameraTrack } from '@/take/camera'
 import { FfmpegMissing, probeSize, requireFfmpeg } from '@/take/encode'
 import {
-  CLIP_SIZES,
   FPS,
   clipMismatch,
   LOG_VERSION,
   type LogEvent,
   type TakeLog,
-  VIEWPORT,
+  clipSize,
 } from '@/take/log'
 import {
   type NetworkMatch,
@@ -23,7 +22,13 @@ import {
   NetworkUnmatched,
 } from '@/take/network'
 import { TargetMissing, TargetOffscreen, TargetRefused } from '@/take/perform'
-import type { Beat, Route, TakePlan } from '@/take/plan'
+import {
+  type Beat,
+  type Route,
+  type TakePlan,
+  type Viewport,
+  beatViewport,
+} from '@/take/plan'
 import { filmScreencast } from '@/take/screencast'
 import { ShellMissing, ShellSandboxBlocked, findShell } from '@/take/shell'
 import {
@@ -124,6 +129,11 @@ export interface TakeRequest {
    * pixels. A screencast beat films at the viewport either way.
    */
   readonly deviceScale?: 1 | 2
+  /**
+   * The window every beat carrying no `viewport` of its own films in, 1920x1080
+   * by default. The caller checks it against the bounds `parseViewport` holds.
+   */
+  readonly viewport?: Viewport
 }
 
 const REACH_TIMEOUT_MS = 5000
@@ -174,6 +184,7 @@ export async function take(request: TakeRequest): Promise<TakeResult> {
           executable,
           request.stallMs,
           request.deviceScale ?? 2,
+          beatViewport(beat, request.viewport),
         ),
       )
     } catch (error) {
@@ -227,29 +238,32 @@ async function filmBeat(
   executable: string,
   stallMs: number | undefined,
   deviceScale: 1 | 2,
+  viewport: Viewport,
 ): Promise<FilmedBeat> {
   const clip = join(dir, 'clip.mp4')
   const target = join(out, clip)
 
   const { filmed, route, fallback, scale } =
     beat.route === 'step'
-      ? await filmStep(url, beat, target, executable, stallMs, deviceScale)
+      ? await filmStep(
+          url,
+          beat,
+          target,
+          executable,
+          stallMs,
+          deviceScale,
+          viewport,
+        )
       : {
-          filmed: await filmScreencast({ url, beat, clip: target }),
+          filmed: await filmScreencast({ url, beat, clip: target, viewport }),
           route: beat.route,
         }
 
-  const expected =
-    route === 'step'
-      ? {
-          width: VIEWPORT.width * (scale ?? deviceScale),
-          height: VIEWPORT.height * (scale ?? deviceScale),
-        }
-      : CLIP_SIZES[route]
+  const expected = clipSize(route, viewport, scale ?? deviceScale)
   const measured = await probeSize(target)
   const log: TakeLog = {
     version: LOG_VERSION,
-    viewport: VIEWPORT,
+    viewport,
     fps: FPS,
     route,
     clip: measured,
@@ -324,9 +338,18 @@ async function filmStep(
   executable: string,
   stallMs: number | undefined,
   deviceScale: 1 | 2,
+  viewport: Viewport,
 ): Promise<FilmedRoute> {
   const stepped = (scale: 1 | 2) =>
-    filmStepped({ executable, url, beat, clip, stallMs, deviceScale: scale })
+    filmStepped({
+      executable,
+      url,
+      beat,
+      clip,
+      viewport,
+      stallMs,
+      deviceScale: scale,
+    })
   let stall: StepperStalled
   try {
     return { filmed: await stepped(deviceScale), route: 'step' }
@@ -350,7 +373,7 @@ async function filmStep(
   const fallback = { message, phase: stall.phase }
   try {
     return {
-      filmed: await filmScreencast({ url, beat, clip }),
+      filmed: await filmScreencast({ url, beat, clip, viewport }),
       route: 'screencast',
       fallback,
     }
