@@ -7,10 +7,11 @@ import {
   launchSandboxFix,
 } from '@/browser/engine'
 import { cameraTrack } from '@/take/camera'
-import { FfmpegMissing, requireFfmpeg } from '@/take/encode'
+import { FfmpegMissing, probeSize, requireFfmpeg } from '@/take/encode'
 import {
   CLIP_SIZES,
   FPS,
+  clipMismatch,
   LOG_VERSION,
   type LogEvent,
   type TakeLog,
@@ -38,6 +39,7 @@ export type TakeRefusal =
   | 'target-missing'
   | 'target-offscreen'
   | 'over-cap'
+  | 'clip-mismatch'
   | 'take-failed'
 
 export interface FilmedBeat {
@@ -151,7 +153,10 @@ export async function take(request: TakeRequest): Promise<TakeResult> {
     } catch (error) {
       const cause = error instanceof FellBack ? error.error : error
       const shot = cause instanceof TargetRefused ? cause.still : undefined
-      const still = shot ? join(dir, 'still.jpg') : undefined
+      const still =
+        shot || cause instanceof ClipMismatch
+          ? join(dir, 'still.jpg')
+          : undefined
       if (shot && still) writeFileSync(join(out, still), shot)
       const fix = sandboxFixFor(cause)
       return {
@@ -226,18 +231,20 @@ async function filmBeat(
     filmed = await filmScreencast({ url, beat, clip: target })
   }
 
+  const expected =
+    route === 'step'
+      ? {
+          width: VIEWPORT.width * deviceScale,
+          height: VIEWPORT.height * deviceScale,
+        }
+      : CLIP_SIZES[route]
+  const measured = await probeSize(target)
   const log: TakeLog = {
     version: LOG_VERSION,
     viewport: VIEWPORT,
     fps: FPS,
     route,
-    clip:
-      route === 'step'
-        ? {
-            width: VIEWPORT.width * deviceScale,
-            height: VIEWPORT.height * deviceScale,
-          }
-        : CLIP_SIZES[route],
+    clip: measured,
     ...(beat.push === false ? { push: false as const } : {}),
     ...(filmed.lag === undefined ? {} : { lag: filmed.lag }),
     frames: filmed.frames,
@@ -250,6 +257,15 @@ async function filmBeat(
   writeFileSync(join(out, cameraPath), `${JSON.stringify(cameraTrack(log))}\n`)
   const stillPath = join(dir, 'still.jpg')
   writeFileSync(join(out, stillPath), filmed.still)
+
+  // Thrown once the files are written, so a reader can open what was filmed.
+  const mismatch = clipMismatch(expected, measured)
+  if (mismatch) {
+    const refusal = new ClipMismatch(mismatch)
+    throw fallback
+      ? new FellBack(refusal, fallback.message, fallback.phase)
+      : refusal
+  }
 
   return {
     name: beat.name,
@@ -283,7 +299,11 @@ class FellBack extends Error {
   }
 }
 
+/** A clip that measured a different size from the one its route films at. */
+class ClipMismatch extends Error {}
+
 function classify(error: unknown): TakeRefusal {
+  if (error instanceof ClipMismatch) return 'clip-mismatch'
   if (error instanceof TargetMissing) return 'target-missing'
   if (error instanceof TargetOffscreen) return 'target-offscreen'
   if (error instanceof ShellMissing || isBrowserMissing(error)) {
