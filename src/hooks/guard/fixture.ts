@@ -148,6 +148,13 @@ export const run = (
     if (payload !== undefined) child.stdin.end(payload)
   })
 
+// The one live session the session-name stubs report, whose id prefix a reply
+// either names it beside or leaves bare.
+export const ROSTER_SESSION = {
+  name: 'Review of PR 42',
+  sessionId: '631880bb-5e1b-4a01-a360-b4d28698a4ac',
+}
+
 export const payloadFor = (fields: Record<string, unknown>): string =>
   JSON.stringify(fields)
 
@@ -213,6 +220,7 @@ export function useFixture(): Context {
       join(ctx.fixture, 'bin'),
       join(ctx.fixture, 'bin-no-runner'),
       join(ctx.fixture, 'bin-reply-links'),
+      join(ctx.fixture, 'bin-session-name'),
       join(ctx.fixture, 'bin-jq-trap'),
       join(ctx.fixture, 'bin-empty-set'),
       join(ctx.fixture, 'bin-advisory'),
@@ -342,6 +350,22 @@ export function useFixture(): Context {
           '#!/usr/bin/env bash',
           'echo called >> "${REPLY_LINKS_CALLS:-/dev/null}"',
           `printf '%s\\n' '{"ok":false,"missing":[{"destination":"src/gone.ts","path":"/x/src/gone.ts"}],"message":"The final reply links to paths that do not exist on disk:\\n- src/gone.ts"}'`,
+          '',
+        ].join('\n'),
+      )
+      chmodSync(stub, 0o755)
+    }
+
+    // The session-name hook decides on the roster, so these stubs answer one
+    // named session and log each call, which shows whether the hook spawned one.
+    for (const name of ['canon', 'bun']) {
+      const stub = join(ctx.fixture, 'bin-session-name', name)
+      writeFileSync(
+        stub,
+        [
+          '#!/usr/bin/env bash',
+          'echo called >> "${SESSION_NAME_CALLS:-/dev/null}"',
+          `printf '%s\\n' '${JSON.stringify({ sessions: [ROSTER_SESSION] })}'`,
           '',
         ].join('\n'),
       )
@@ -484,6 +508,15 @@ export function useFixture(): Context {
           delimiter,
         ),
         payload: () => stopPayload('See [it](src/gone.ts).'),
+        stream: 'stderr',
+      },
+      'session-name.sh': {
+        code: 2,
+        expect: ROSTER_SESSION.name,
+        path: [join(ctx.fixture, 'bin-session-name'), ctx.hookPath].join(
+          delimiter,
+        ),
+        payload: () => stopPayload('Launched 631880bb for the review.'),
         stream: 'stderr',
       },
       'records-index.sh': {
