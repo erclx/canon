@@ -68,9 +68,8 @@ Read `${CLAUDE_SKILL_DIR}/references/reel.md` and run it with the number, the lo
 It reads the filming rules in `ui-film`. Report it rather than proceeding silently when the `ui-film` skill does not resolve, and post the evidence without a reel.
 
 - Hold a `link` for the evidence step, which embeds it under the addresses
-- Hold a skip's reason and message for the closing report and for the evidence step's `--reel-skip`
+- Hold a skip's reason and message for the closing report and for the evidence step's `--reel-skip`, which a silent skip never passes
 - A skip never stops the chain, and a reel already on the comment carries forward under the older head it names
-- A silent skip holds no reason, so it passes no `--reel-skip`
 - On a drivable checklist, a missing reel or a skip the lift does not settle holds the merge until a reel lands at the head or a review waives it
 
 ## Post the evidence comparison
@@ -84,6 +83,7 @@ canon pr evidence <number> --checklist <main-root>/.canon/tmp/handoff/ui-checkli
 Pass `--local-skip '<reason>: <message>'` in place of `--local` when the local step held a refusal, and `--reel-skip '<reason>: <message>'` in place of `--reel` when the reel step held a skip. Each puts the line the closing report prints onto the comment as well, so a reader of the pull request sees why the link or the reel is missing.
 
 - Pass the same text the closing report carries, so the comment and the report agree
+- Pass `--reel-covers '<coverage>'` beside `--reel` with the reel's coverage
 - A later run that posts the link or films the reel drops the line, and one passing neither flag carries it forward
 
 One call answers both questions because a checklist decides `no-evidence`. A diff carrying a checklist and no evidence image renders `ok` with the checklist in a marked body, so the checklist lands in the one comment a later call finds and edits.
