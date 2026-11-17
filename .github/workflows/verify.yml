@@ -124,10 +124,11 @@ jobs:
       - name: Unit Tests
         run: bun run test
 
-  # Every *.e2e.test.ts skips itself when its browser or FFmpeg is missing, so
-  # Static Checks passes them as skipped. This job installs both and proves
-  # they landed before the suites start, so a missing tool reddens it rather
-  # than skipping green. Informational: the ruleset does not require it.
+  # The only job that runs *.e2e.test.ts, since vitest.config.ts excludes them
+  # from Static Checks. A suite skips itself when its browser or FFmpeg is
+  # missing, so this job installs both and proves they landed before the suites
+  # start, and a missing tool reddens it rather than skipping green.
+  # Informational: the ruleset does not require it.
   e2e-suites:
     name: 🎬 E2E Suites
     runs-on: ubuntu-latest

@@ -20,16 +20,9 @@ export interface VitestRun {
 }
 
 /**
- * The infix every end-to-end suite's name carries. A run naming it, as a hand
- * run of `bun --bun vitest run .e2e.test` or one suite's path does, films in a
- * real browser, so it queues like a full suite however it is scoped.
- */
-export const E2E_FILTER = '.e2e.test'
-
-/**
  * The config `bun run test:e2e` hands vitest, whose `include` holds only the
  * end-to-end suites so a path argument narrows the run rather than widening it.
- * A run naming it queues like one naming `E2E_FILTER`.
+ * It is the one hand route to them, since the unit config excludes every one.
  */
 export const E2E_CONFIG = 'vitest.e2e.config.ts'
 
@@ -66,36 +59,21 @@ function loadsE2eConfig(args: readonly string[]): boolean {
 }
 
 /**
- * Whether the run selects the end-to-end suites, by loading `E2E_CONFIG` or by
- * naming `E2E_FILTER` as something to run. The value of `--exclude` names what
- * to leave out, as in the gate's own scoped command, so it never counts.
- */
-function selectsE2e(args: readonly string[]): boolean {
-  if (loadsE2eConfig(args)) return true
-  return args.some(
-    (arg, index) =>
-      arg.includes(E2E_FILTER) &&
-      !arg.startsWith('--exclude=') &&
-      args[index - 1] !== '--exclude',
-  )
-}
-
-/**
  * Whether a hand-run vitest invocation runs the whole suite and so queues on
  * the machine lock the gate's Tests stage holds.
  *
- * A run loading `E2E_CONFIG` or naming `E2E_FILTER` queues too, since its
- * suites film in a real browser and two at once contend for CPU. Any other
- * scoped run is seconds of work, cheaper to collide than to queue. Vitest
- * exposes no setup-time API naming the CLI filters, so any bare argument other
- * than the subcommand reads as a file filter, including the value of a flag
- * spelled `--flag value`. That misread skips a lock rather than queueing a
- * scoped run, which is the side to err on.
+ * A run loading `E2E_CONFIG` queues too, since its suites film in a real
+ * browser and two at once contend for CPU. Any other scoped run is seconds of
+ * work, cheaper to collide than to queue. Vitest exposes no setup-time API
+ * naming the CLI filters, so any bare argument other than the subcommand reads
+ * as a file filter, including the value of a flag spelled `--flag value`. That
+ * misread skips a lock rather than queueing a scoped run, which is the side to
+ * err on.
  */
 export function locksHandSuite(run: VitestRun): boolean {
   if (run.ci || run.watch || run.heldLock !== undefined) return false
 
   const args = SUBCOMMANDS.has(run.args[0] ?? '') ? run.args.slice(1) : run.args
-  if (selectsE2e(args)) return true
+  if (loadsE2eConfig(args)) return true
   return !args.some((arg) => isNameFilter(arg) || !arg.startsWith('-'))
 }
