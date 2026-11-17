@@ -51,8 +51,8 @@ const HIDDEN_PAGE = PAGE.replace(
 
 /**
  * A single-use link, the way an app trades a ticket for a session: the first
- * open serves a button whose press never returns, and every later open serves
- * the spent page with no button.
+ * open serves a button whose press busies the page past the loaded stall
+ * limit, and every later open serves the spent page with no button.
  */
 function ticketPage(fresh: boolean): string {
   if (!fresh) return '<!doctype html><body><p>This link has expired.</p></body>'
@@ -416,7 +416,7 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       ticketOpens = 0
 
       // A loaded runner's settle frame can pass 2 s, so the loaded limit
-      // keeps the stall on the press, which never returns.
+      // keeps the stall on the press, which spins about 20 s.
       const result = await take({
         url: new URL('/ticket', server.url).href,
         plan: read.plan,
