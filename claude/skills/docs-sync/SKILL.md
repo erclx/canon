@@ -74,7 +74,7 @@ Place each surface the diff adds before rewriting any line, per `${CLAUDE_SKILL_
 
 - Create nothing when no row fires. The default rewrites stale lines in place, and a new flag or output field never earns a page.
 - Report a name the search places nowhere as unplaced, and write nothing for it
-- Split only a page or an H2 this run writes into. A page the diff does not reach stays as it is and is reported when it is past a limit.
+- Split only a page or an H2 this run writes into, and only from an audit finding, so the H2 split runs in the audit below. A page the diff does not reach stays as it is.
 - Placement runs ahead of the rewrite and never replaces it. A `departed` section stays unwritten wherever the surface it covers lands.
 
 ## Action
@@ -89,6 +89,7 @@ Rewrite only the stale sections, and write each page or heading Placement create
 Run `canon markdown audit <path>` over every page this run rewrote, created, or moved, and fix each ban, density, and reference shape finding it reports per the markdown standard and the docs reference read above.
 
 - Fix a finding inside a section this run rewrote or a page it created, then re-run the audit on that page until it reports none there
+- Split rather than fix a bullet-run or ceiling finding on a page this run wrote into, per the split steps in `${CLAUDE_SKILL_DIR}/references/placement.md`, then audit both pages
 - Report a finding in a section the diff does not reach as an audit line in the summary, since the rule above leaves that section as it is
 - Report a refusal or a missing subcommand as an audit line and continue
 
@@ -119,7 +120,7 @@ One line per file, using the same relative path format as the preview table (e.g
 🆕 Created: <relative-path>, by the <trigger> row
 🔀 Moved: <old-path> to <new-path>
 ⚠️ Unplaced: <name>, no page names <parent>. Nothing written.
-⚠️ Past limit: <relative-path>, <limit>. Left unsplit, since the diff does not reach it.
+⚠️ Past limit: <relative-path>, <limit>. Left unsplit, since <the diff does not reach it, or no H2 this run wrote into is left>.
 ⚠️ Audit: <relative-path>, <finding>
 ```
 

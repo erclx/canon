@@ -37,7 +37,7 @@ The second row adds a heading to the nearest page, and a judgment there lets two
 1. Read from the diff what the new name sits inside, such as the screen holding a new panel or the command group holding a new subcommand.
 2. Search every discovered page's title and H2s for that parent name.
 3. One match takes the new H2 on that page, placed beside the H2 that matched or under the title that did.
-4. Several matches take the page whose title names the parent, and a tie between titles counts as no match.
+4. Several matches take the page whose title names the parent. A tie between titles, or several H2 matches with no title match, counts as no match.
 5. No match writes nothing. Report the name as unplaced and let the author place it.
 
 An unplaced name is a correct result, never a reason to fall back to the closest-sounding page. That fallback is the habit this list exists to stop.
@@ -61,6 +61,25 @@ A page or an H2 qualifies only when this sync rewrites or adds a line in it, and
 
 - Leave a page the diff does not reach as it is, even past its ceiling, and report it in the summary
 - Leave a shelf this sync added no page to, whatever it reads as
+
+### When the split runs
+
+The third row reads an audit finding, which exists only once the rewrite has landed. So the H2 split runs inside the audit step rather than ahead of the write.
+
+1. Audit each page this run wrote into, as the skill's audit step does.
+2. Take a bullet-run or ceiling finding on a qualifying page to the split below, in place of the in-place fix the audit step names for other findings.
+3. Audit the page left behind and the new page, and repeat until neither reports a limit.
+
+The fourth row reads no audit, so a shelf move runs with the other placements, ahead of the rewrite.
+
+### Which H2 moves
+
+A bullet-run finding names its H2, so that H2 moves. A ceiling finding is page-wide, so pick by these steps.
+
+1. Take the H2s this run wrote into on that page.
+2. Move the one with the most rendered lines.
+3. Move the next largest of them while the page stays past its ceiling.
+4. Once none are left, report the page as past its limit and leave the rest, since an H2 this run never wrote into stays put.
 
 ### Moving an H2 to its own page
 
