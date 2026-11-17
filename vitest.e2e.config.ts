@@ -46,6 +46,9 @@ export default defineConfig({
           ...shared.test,
           name: 'timed',
           include: TIMED,
+          // A project runs its own files in parallel, so the timed suites
+          // would film beside each other without this.
+          fileParallelism: false,
           sequence: { groupOrder: 1 },
         },
       },
