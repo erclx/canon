@@ -48,17 +48,19 @@ A `name` of `null` is an unnamed function, such as a callback assigned nowhere. 
 
 ## Comments
 
-| Field          | Value                                                                                            |
-| -------------- | ------------------------------------------------------------------------------------------------ |
-| Measures       | A comment block past 8 lines, a head run past 12 or an in-body run past 2, and degradation terms |
-| Verb           | `canon comments scan --json`                                                                     |
-| Keys           | `blockCheckpoint`, `vocabulary`, and per `snapshot` language `longBlocks` and `degradationHits`  |
-| Evidence class | `measured` for the counts, `read` for whether a block belongs                                    |
+| Field          | Value                                                                                                          |
+| -------------- | -------------------------------------------------------------------------------------------------------------- |
+| Measures       | A block past 5 lines, a head run past 3 text lines, an in-body run past 1, a dense file, and degradation terms |
+| Verb           | `canon comments scan --json`                                                                                   |
+| Keys           | `blockCheckpoint`, `vocabulary`, and per `snapshot` language `longBlocks`, `fileShares`, and `degradationHits` |
+| Evidence class | `measured` for the counts, `read` for whether a block belongs                                                  |
 
-Each `snapshot` entry covers one language. A `longBlocks` entry carries `file`, `line`, and `lines`, the longest run of comment lines in that file. A `degradationHits` entry carries `file`, `line`, and `term`, where a `term` of `date`, `commit hash`, or `issue reference` is history the comment carries.
+Each `snapshot` entry covers one language. A `longBlocks` entry carries `file`, `line`, and `lines`, the longest run of comment lines in that file.
+
+A `fileShares` entry carries `file`, `textLines`, and `nonBlankLines` for a file past the share cap. A `degradationHits` entry carries `file`, `line`, and `term`, where a `term` of `date`, `commit hash`, or `issue reference` is history the comment carries.
 
 - **A long block** asks whether it belongs beside its code or describes several places at once, where it drifts from each
-- **Never a deletion:** the project's comment rule forbids moving a file toward a figure, so the report asks the question and proposes no cut
+- **A dense file** asks which of its comments restate the code beside them. The report proposes no cut, since the rule meets the share by cutting a restatement and never a reason.
 - **A degradation term** marks deferred work or an admitted shortcut. Route it to the tracker, through `plan-intake`.
 - **A history term** marks a date, a commit, or an issue the comment cites. Move it to the pull request or a groundwork folder, and keep the fact the code needs.
 - **`vocabulary: null`:** no rule publishes the terms, so the vocabulary half is unread while the blocks and the history patterns, which live in the scan, still read
