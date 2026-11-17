@@ -52,7 +52,7 @@ Create the entry for a domain `canon/context/index.md` already lists but carries
 
 ### A new code folder whose owner is full
 
-Open a sibling entry when the diff adds a code folder and the entry that would own its H3 is past its length checkpoint or a shape cap. The audit record the body runs before writing shows it, listing the owner's `rel` under `length` or `shapeFindings`. One more H3 in a full entry is how an entry grows past its domain one pull request at a time.
+Open a sibling entry when the diff adds a code folder and the entry that would own its H3 is past its length checkpoint or a shape cap. The audit record the body runs before writing shows it, per the full-entry test the body states. One more H3 in a full entry is how an entry grows past its domain one pull request at a time.
 
 - Place the sibling beside the owner, inside the same domain folder, as `canon/context/<domain>/<name>.md`, naming it for the code folder per the `codebase-layout` skill
 - Give it the frontmatter the folder's generated index reads and the `Overview` and `Layout` sections, with the new folder's H3 under Layout and no line in the owner claiming it

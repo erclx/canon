@@ -22,7 +22,9 @@ Do not shorten or paraphrase the audit lines here or in the reply, since the fin
 
 ## The past-cap line
 
-Print the past-cap line once per entry, for each entry Step 3 wrote whose `rel` the audit record lists under `length` or `shapeFindings`, opened sibling or not. The fold never splits it, since a split moves paths that queued plans cite.
+Print the past-cap line once per entry Step 3 wrote, opened sibling or not, that Step 4's `canon context audit --json` record reads as full. Step 3's pre-write record cannot see what this run wrote. Full takes the test Step 3 states, so a shape break that is no cap prints nothing here.
+
+The fold never splits the entry, since a split moves paths that queued plans cite.
 
 - `document-health` builds the split, so the line names it as the repair
 - When the finding is a folder H3 past its bullet cap, add the ways out under `### When a folder passes the cap` in `${CLAUDE_SKILL_DIR}/references/context.md` beside it

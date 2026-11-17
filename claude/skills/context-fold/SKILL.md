@@ -60,9 +60,9 @@ Write an entry only when the diff adds, moves, or removes a folder, makes a fold
 
 ### A full owner
 
-Run `canon context audit --json` before the first write and keep the record, since its `length` and `shapeFindings` arrays name each entry already past its length checkpoint or a shape cap.
+Run `canon context audit --json` before the first write and keep the record. An entry is full when its `rel` sits under `length`, or under `shapeFindings` with an issue whose `kind` is `layout-bullets`, `layout-paragraphs`, or `gotcha-count`. Any other shape kind is a break, not a cap.
 
-- Give a new code folder a sibling entry when its owner sits in a domain folder past its checkpoint or a cap, per the reference above. Add the H3 to the owner otherwise.
+- Give a new code folder a sibling entry when its owner is full and sits in a domain folder, per the reference above. Add the H3 to the owner otherwise.
 - Never split or move an existing entry, however far past a cap it reads, and report it in After completion instead
 
 ### Writing
