@@ -182,9 +182,52 @@ async function markFloatingChrome(page: Page) {
 }
 
 /**
+ * Whether an opaque element outside the given one paints over its center. A
+ * mask's bar is drawn above every layer, so one painted over a covered
+ * element lands across whatever covers it, such as an open dialog.
+ *
+ * Only an opaque box counts, since a value under a dimmed backdrop still shows
+ * through and would differ between two captures. A center outside the window
+ * reads as uncovered, since the hit test answers only inside it and the
+ * whole-page frame still shows that element.
+ */
+async function isCovered(element: Locator): Promise<boolean> {
+  return element.evaluate((target) => {
+    const box = target.getBoundingClientRect()
+    const x = box.left + box.width / 2
+    const y = box.top + box.height / 2
+    if (x < 0 || y < 0 || x >= window.innerWidth || y >= window.innerHeight) {
+      return false
+    }
+    const isOpaque = (node: Element) => {
+      const style = getComputedStyle(node)
+      if (style.visibility === 'hidden') return false
+      const alpha = style.backgroundColor.match(/[\d.]+/g)?.[3]
+      const solid =
+        style.backgroundColor !== 'transparent' &&
+        (alpha === undefined || Number(alpha) === 1)
+      if (!solid && !(node instanceof HTMLImageElement)) return false
+      for (let at: Element | null = node; at !== null; at = at.parentElement) {
+        if (Number(getComputedStyle(at).opacity) < 1) return false
+      }
+      return true
+    }
+    for (const hit of document.elementsFromPoint(x, y)) {
+      if (target === hit || target.contains(hit) || hit.contains(target)) {
+        return false
+      }
+      if (isOpaque(hit)) return true
+    }
+    return false
+  })
+}
+
+/**
  * Turns a case's mask selectors into the locators every frame paints over. A
  * selector matching nothing is reported and kept out rather than raised, for
- * the same reason `settle` gives for a missing section.
+ * the same reason `settle` gives for a missing section. A matched element an
+ * opaque element covers is reported and kept out too, and the answer taken
+ * here holds for the section frames, which flatten floating chrome.
  */
 async function resolveMask(
   page: Page,
@@ -194,13 +237,26 @@ async function resolveMask(
   const mask: Locator[] = []
   for (const selector of selectors) {
     const element = page.locator(selector)
-    if ((await element.count()) === 0) {
+    const count = await element.count()
+    if (count === 0) {
       console.warn(
         `${label}: no element matches ${selector}, named as a mask. Skipped.`,
       )
       continue
     }
-    mask.push(element)
+    const matches = Array.from({ length: count }, (_, index) =>
+      element.nth(index),
+    )
+    const covered = await Promise.all(matches.map(isCovered))
+    const shown = matches.filter((_, index) => !covered[index])
+    const skipped = count - shown.length
+    if (skipped > 0) {
+      console.warn(
+        `${label}: ${skipped} of ${count} elements matching ${selector}, named as a mask, are covered by another element. Skipped.`,
+      )
+    }
+    if (skipped === 0) mask.push(element)
+    else mask.push(...shown)
   }
   return mask
 }
