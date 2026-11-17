@@ -213,11 +213,14 @@ export function register(program: Command): void {
         "carry still when the page answered a capture, the beat folder's",
         'still.jpg as the step met it. clip-mismatch carries still too, and',
         'leaves the clip and a log whose clip field is the measured size.',
-        'A beat that fell back to the screencast',
+        'A stall in recording retries the beat stepped at half size, device',
+        'scale 1, before any fallback. A beat that fell back to the screencast',
         'before refusing carries fallback, the reason it fell back, and',
         'fallbackPhase, being settle, setup, or recording, where the stalled',
-        'frame was begun. A filmed beat that fell back carries both too. The',
-        'screencast opens the address a second time, so a single-use link is',
+        'frame was begun. A filmed beat that fell back carries both too. A',
+        'beat refused in the retry carries scale, the scale it retried at, and',
+        'a beat filmed by the retry carries it too. The retry and the',
+        'screencast each open the address again, so a single-use link is',
         'spent by then: check the access before the selector.',
         '',
         'Exit codes:',
@@ -415,6 +418,11 @@ async function runTake(
         `after a stall in ${result.fallbackPhase ?? 'an unknown phase'} fell back to a screencast, which opened the address again: ${result.fallback}`,
       )
     }
+    if (result.scale) {
+      logWarn(
+        `after a stall in recording retried stepped at device scale ${result.scale}, which opened the address again`,
+      )
+    }
     if (result.reason === 'server-unreachable') {
       logWarn(`Start whatever serves ${url}, then run this again.`)
     }
@@ -433,6 +441,7 @@ async function runTake(
       ...(result.beat ? { beat: result.beat } : {}),
       ...(result.fallback ? { fallback: result.fallback } : {}),
       ...(result.fallbackPhase ? { fallbackPhase: result.fallbackPhase } : {}),
+      ...(result.scale ? { scale: result.scale } : {}),
       ...(result.still ? { still: result.still } : {}),
       ...(result.reason === 'browser-missing'
         ? { install: INSTALL_BROWSER }
@@ -449,6 +458,11 @@ async function runTake(
     if (beat.fallback) {
       logWarn(
         `  filmed by screencast after a stall in ${beat.fallbackPhase ?? 'an unknown phase'}: ${beat.fallback}`,
+      )
+    }
+    if (beat.scale) {
+      logWarn(
+        `  filmed stepped at device scale ${beat.scale} after a stall in recording`,
       )
     }
   }

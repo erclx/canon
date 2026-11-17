@@ -13,9 +13,28 @@
     Open
   </button>
   <script>
+    // The press spins a count calibrated in real time on load, about 20 s,
+    // since a loop timed by a clock never ends under a paused virtual clock.
+    // It passes the loaded stall limit in whichever phase it lands, and still
+    // ends, so no renderer outliving its shell spins forever.
+    let sink = 0
+    const spin = (count) => {
+      for (let i = 0; i < count; i += 1) sink += Math.sqrt(i)
+    }
+    const measure = (ms) => {
+      let count = 0
+      const start = performance.now()
+      while (performance.now() - start < ms) {
+        spin(10000)
+        count += 10000
+      }
+      return count / ms
+    }
+    // Warmed first, so the count matches the optimized loop the press runs.
+    measure(100)
+    const work = Math.round(20000 * measure(200))
     document.getElementById('open').addEventListener('click', () => {
-      const start = Date.now()
-      while (Date.now() - start < 4000) {}
+      spin(work)
     })
   </script>
 </body>

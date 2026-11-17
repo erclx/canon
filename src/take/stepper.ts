@@ -59,6 +59,19 @@ export class StepperStalled extends Error {
   }
 }
 
+/**
+ * The device scale a stalled beat tries stepping again at, or nothing when it
+ * should go to the screencast. Only a stall in recording retries, since a page
+ * that will not settle or set up will not step at any size, and only from
+ * scale 2, since a retry at the scale that stalled stalls again.
+ */
+export function retryScale(
+  phase: StallPhase,
+  deviceScale: 1 | 2,
+): 1 | undefined {
+  return phase === 'recording' && deviceScale === 2 ? 1 : undefined
+}
+
 export interface SteppedTake {
   readonly frames: number
   readonly events: readonly LogEvent[]

@@ -71,6 +71,44 @@ describe.skipIf(!available())('a take of a page whose frames run slow', () => {
     expect(result).toMatchObject({ status: 'filmed' })
   }, 180_000)
 
+  it('should retry a page stuck in recording at scale 1, then film it by screencast', async () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [
+          {
+            name: 'stuck',
+            setup: TO_THE_CARDS,
+            steps: [{ kind: 'wait', ms: 300 }],
+          },
+        ],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+
+    // The clock-timed page settles in real time and never returns a frame
+    // once virtual time pauses, so it stalls in recording at both scales.
+    const result = await take({
+      url: `${server.url}?busy=400&timed=1`,
+      plan: read.plan,
+      out,
+      stallMs: LOADED_STALL_MS,
+    })
+
+    expect(result).not.toHaveProperty('message')
+    expect(result).toMatchObject({
+      status: 'filmed',
+      beats: [
+        {
+          name: 'stuck',
+          route: 'screencast',
+          fallback: expect.stringContaining('on a retry at device scale 1'),
+          fallbackPhase: 'recording',
+        },
+      ],
+    })
+    expect(result).not.toHaveProperty('beats.0.scale')
+  }, 180_000)
+
   it('should keep frame stepping on 400 ms frames under the stall limit', async () => {
     const read = readTakePlan(
       JSON.stringify({

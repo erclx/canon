@@ -17,8 +17,8 @@ The `ui-film` plugin skill drafts the beats and calls the verb for a launch vide
 
 Films each beat of a take plan from a fresh load and writes its clip, a log with its measured size, the camera track, and `still.jpg`, listed in `take.json`. With `--reel`, `reel.ts` crops each frame to a camera rebuilt at `REEL_DEPTH` 2, draws the cursor through it, and joins every third frame into a 960-wide WebP, lossy past `REEL_MAX_BYTES`.
 
-- The stepper drives chrome-headless-shell over raw CDP, since Playwright cannot ask for begin-frame control, and shoots frames at device scale 2, or 1 on a request's `deviceScale`
-- A `screencast` beat, or a stepped frame past 2 s, films through Playwright at 1920x1080, its record naming the route, and `frame-clock.ts` moves each wall-time frame stamp onto the stage clock
+- The stepper drives chrome-headless-shell over raw CDP, since Playwright cannot ask for begin-frame control, and shoots frames at device scale 2, or 1 on `deviceScale` or after a recording stall
+- A `screencast` beat, or a stall past 2 s no stepped retry clears, films through Playwright at 1920x1080, its record naming the route, and `frame-clock.ts` moves each frame stamp onto the stage clock
 - One choreography performs every step through each route's stage, logging each point a glide sends for the drawn cursor and resting 300 ms before a press, 500 ms after, and 400 ms before a fill types
 - The camera zooms onto a press over the glide reaching it, and in the reel onto the box a key moved focus to, at a depth the clip's width over the output's caps, and pans only at a steady scale
 - Stepped frames stream into the system FFmpeg, screencast frames spool beside the clip until the stop, and FFmpeg's absence refuses before any browser launches
@@ -37,7 +37,7 @@ Owns the static pages the end to end takes film, two of which post each input th
 
 The film suite is six files, one per describe block, so vitest runs them in parallel.
 
-- A stepped case films at `deviceScale: 1` unless it asserts a 3840x2160 clip or still, or stalls the page into a refusal. `canon take` and the reel keep scale 2.
+- A stepped case films at `deviceScale: 1` unless it asserts a 3840x2160 clip or still, stalls the page into a refusal, or proves the scale 1 retry. `canon take` and the reel keep scale 2.
 - `bandLuma` takes its crop in CSS pixels and scales it to the clip it reads, so one crop reads the same element at either scale
 - `film-drag` runs in the `timed` project of `vitest.e2e.config.ts`, after every parallel file, since its screencast pacing assertion fails beside them. A case like it joins that list.
 
@@ -46,5 +46,5 @@ The film suite is six files, one per describe block, so vitest runs them in para
 - The frame ticks start at the load event's monotonic stamp and rise to the page clock at the pause, since a tick on Bun's clock freezes animation and ticks lagging the page film every later fade dead
 - Send an input, step a frame, then await the input, and begin a frame only once the last settles, since awaiting first deadlocks and Chromium refuses a second frame as pending
 - A JPEG frame is full range and H.264 is TV range, so the encoder scales between them. From FFmpeg 7.1 a conversion keeps the source range, so every call reading or writing a still names `out_range`.
-- Virtual time advances plainly, since pausing on a fetch held it into a stall, and a loop timed on `performance.now()` never ends under it. Stepped tests stall at 8 s, fallback tests at 2 s.
+- Virtual time advances plainly, since pausing on a fetch held it into a stall, and a loop timed on `performance.now()` never ends under it. Stepped tests stall at 8 s, past a loaded settle frame.
 - A moved Playwright cache reads as `browser-missing`, and a reworded `No usable sandbox!` or `Chromium sandboxing failed!` reads as `take-failed`, not `sandbox-blocked`
