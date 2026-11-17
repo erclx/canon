@@ -40,11 +40,26 @@ Report each hit as an ordinary rewrite.
 
 ## Creating an entry
 
-Create a new entry only for a domain `canon/context/index.md` already lists but carries no file for, following `${CLAUDE_SKILL_DIR}/references/context.md` for its shape. A row in the catalog is the deliberate decision, taken by whoever added it, and this step only fills in what that decision left open.
+Create a new entry in two cases only, following `${CLAUDE_SKILL_DIR}/references/context.md` for its shape. Each one fills a place the catalog already holds, and neither adds a domain.
+
+### A listed domain with no file
+
+Create the entry for a domain `canon/context/index.md` already lists but carries no file for. A row in the catalog is the deliberate decision, taken by whoever added it, and this step only fills in what that decision left open.
 
 - Confirm the domain holds no entry under either spelling, `canon/context/<domain>.md` or `canon/context/<domain>/index.md`, since a split domain passes a check for the flat file alone
 - The next `canon indexes regen` rebuilds the catalog from each entry's frontmatter plus every sibling's, dropping a row whose file does not exist. Create the file before it runs.
 - A domain the catalog does not list at all is a different case. Report it and stop, rather than creating an entry or a catalog row for it.
+
+### A new code folder whose owner is full
+
+Open a sibling entry when the diff adds a code folder and the entry that would own its H3 is past its length checkpoint or a shape cap. The audit record the body runs before writing shows it, listing the owner's `rel` under `length` or `shapeFindings`. One more H3 in a full entry is how an entry grows past its domain one pull request at a time.
+
+- Place the sibling beside the owner, inside the same domain folder, as `canon/context/<domain>/<name>.md`, naming it for the code folder per the `codebase-layout` skill
+- Give it the frontmatter the folder's generated index reads and the `Overview` and `Layout` sections, with the new folder's H3 under Layout and no line in the owner claiming it
+- Leave the owner as it is apart from any bullet the diff made untrue, since moving its existing H3s across breaks paths that queued plans cite
+- An owner under its checkpoint and every cap takes the new H3 as before, since a sibling for every new folder multiplies entries the other way
+
+A flat owner at `canon/context/<domain>.md` has no folder to hold a sibling, and a file beside it would be a domain the catalog does not list. Add the H3 to the owner as before, and let the completion report name it as past its cap.
 
 ## Writing and reporting
 
