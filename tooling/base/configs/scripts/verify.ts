@@ -1,7 +1,6 @@
-// Runs this folder's verify phases in a fixed order. The phases a stack
-// requires come from scripts/verify.json, which each stack ships and the
-// nearest one wins. Only node: modules, since a target's own linter and
-// tsc --noEmit read this file with no Bun types.
+// Runs this folder's verify phases in the order scripts/verify.json names.
+// Only node: modules, since a target's linter and tsc read it with no Bun
+// types.
 import { spawnSync } from 'node:child_process'
 import {
   accessSync,
@@ -285,12 +284,9 @@ function runPhase(
   logInfo(phase.passed)
 }
 
-// Where canon comes from for the canon stages. A canon on PATH wins.
-// Under CI, where no canon is installed, bunx fetches the release the last
-// sync stamped, since that sync wrote this file and so carries every verb it
-// calls. A local run with neither skips, since a pre-push hook stalling on a
-// fetch costs more than the stage. CI reads as the literal 'true' only, the
-// form GitHub Actions sets.
+// A canon on PATH wins. Under CI, bunx fetches the release the last sync
+// stamped, and a local run with neither skips rather than stalling a hook on
+// a fetch. CI reads as the literal 'true' only.
 const STAMP = 'canon/config/config.json'
 const INSTALL_HINT = 'Install with `bun install --global @erclx/canon`.'
 const isCi = process.env.CI === 'true'
@@ -393,11 +389,9 @@ function sameDirectory(a: string, b: string): boolean {
   }
 }
 
-// canon gate run checks the directory it runs in and prints one JSON record
-// on stdout, exiting 0 when no stage failed and 1 when one did. Output that
-// is not a record is a canon too old to carry the verb, or a failed fetch. A
-// record naming another root is a canon whose gate still checks its own
-// install, so it measured nothing here.
+// canon gate run prints one JSON record, exiting 1 when a stage failed. No
+// record means an old canon or a failed fetch, and a record naming another
+// root means a gate that checked its own install.
 function checkCanonGate(): void {
   const canon = resolveCanon()
   if (canon.kind === 'skip') {
@@ -464,16 +458,14 @@ function main(): void {
   logStep('Canon checks')
   checkCanonGate()
 
-  // The card exclusion check reads the build, so it runs last, and only where
-  // the stack that owns the card route shipped it.
+  // The card check reads the build, so it runs last, where its stack shipped it.
   if (existsSync(CARD_EXCLUSION)) {
     logStep('Card exclusion')
     runCheck(`bash ${CARD_EXCLUSION}`, 'Card exclusion check failed')
     logInfo('Card exclusion passed')
   }
 
-  // The head tag check reads the build too, and runs only where the stack that
-  // writes the tags shipped it.
+  // The head tag check reads the build too, where its stack shipped it.
   if (existsSync(HEAD_META)) {
     logStep('Head tags')
     runCheck(`bash ${HEAD_META}`, 'Head tag check failed')

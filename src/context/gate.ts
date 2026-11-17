@@ -17,11 +17,8 @@ export interface GateInput {
   /** Cited paths that resolved to nothing, which gate under either mode. */
   readonly unresolvedCitations: number
   /**
-   * Whether the requirements record holds more words than the cap it states,
-   * which gates under either mode for the reason a citation does. False when
-   * the project carries no record and false under `--citations-only`, which
-   * never measures it. That mode runs one check by construction, so widening
-   * it here would gate on a reading it never took.
+   * Whether the requirements record exceeds the cap it states, gating in
+   * either mode. False with no record, and under `--citations-only`.
    */
   readonly requirementsOverWords: boolean
   readonly sections: readonly SectionFinding[]
@@ -47,10 +44,8 @@ export interface GateInput {
    */
   readonly gateLength: boolean
   /**
-   * Faults in the project's gate keys: a key declared in the wrong shape, or
-   * a declared `gated` prefix naming nothing on disk. Each gates under `--gate`,
-   * since a project that wrote the key meant it and a silent pass would hide
-   * the typo.
+   * A gate key in the wrong shape, or a `gated` prefix naming nothing on disk.
+   * Each gates under `--gate`, since a silent pass would hide the typo.
    */
   readonly gateKeyFaults: readonly string[]
   /**
@@ -69,14 +64,9 @@ export function hasDrift(drift: readonly FolderDrift[]): boolean {
 }
 
 /**
- * Whether the audit found something that should fail the caller.
- *
- * An unresolved citation is a broken pointer and gates unconditionally, and so
- * does a requirements record past its own word cap: the record states its rule
- * for itself, which makes it a fact rather than a threshold a reader weighs.
- * `--gate` adds the findings answerable from the file itself, each named on
- * `GateInput`. Entry length is a judgment unless the project set
- * `gate-length`, and depth, bullet, table, and provenance never gate.
+ * An unresolved citation or a requirements record past its own cap gates
+ * always. `--gate` adds the file facts named on `GateInput`, and length gates
+ * only under `gate-length`.
  */
 export function isGating({
   unresolvedCitations,
@@ -118,10 +108,8 @@ export function hasContextFolder(root: string): boolean {
 }
 
 /**
- * Whether a project opted into the widened gate in its context config, by
- * declaring `gated` with any value or setting `gate-length` to true. A key
- * declared in a shape the audit cannot use counts as declared, so `--gate`
- * reports the fault rather than a plain audit passing over it.
+ * Whether the context config opts into the widened gate. A key in a shape the
+ * audit cannot use counts, so `--gate` reports the fault rather than passing.
  */
 export function declaresContextGate(root: string): boolean {
   const keys = readGateKeys(root)

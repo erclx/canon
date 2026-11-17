@@ -88,11 +88,9 @@ export function register(program: Command): void {
 }
 
 async function runGate(opts: RunCommandOptions): Promise<number> {
-  // The project the gate is typed in, rather than the canon install running
-  // it, so a target's verify runner gates the target.
+  // The directory typed in, so a target's verify runner gates the target.
   const root = process.cwd()
-  // The stage table and every measure load from this install, so a canon
-  // checkout other than the install still gates on the install's code.
+  // Stages load from this install, so another canon checkout is warned.
   const mismatch = checkoutMismatchWarning(root)
   const emitJson = opts.json ?? false
   const nested = opts.nested ?? false
@@ -133,8 +131,7 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
 
   if (emitJson) {
     const failed = results.find((result) => result.status === 'failed')
-    // Diagnostics reach stderr in every mode, so a caller reading the record
-    // alone is not the only one told what went wrong.
+    // Diagnostics reach stderr in every mode, beside the record.
     if (failed?.failure !== undefined) {
       process.stderr.write(`${failed.label}: ${failed.failure}\n`)
     }
@@ -165,11 +162,8 @@ interface GateRecordInput {
 }
 
 /**
- * The `--json` record. A failed stage carries the tail of the output its
- * checks printed, since a caller reading the record alone otherwise reruns
- * the stage by hand to learn which test failed. The tail rather than a parse
- * of the `FAIL` lines, so a generic stage stays free of one runner's format,
- * and a dot-reporter run prints its failures and summary last.
+ * The `--json` record. A failed stage carries the tail of its output, so a
+ * caller learns which test failed without a rerun or a parse of one runner.
  */
 export function gateRecord(input: GateRecordInput) {
   const { ok, root, changed, summary, results } = input
@@ -215,14 +209,8 @@ function report(result: StageResult): void {
 }
 
 /**
- * The closing verdict, which names what the run did not measure rather than
- * reporting a bare pass over it.
- *
- * A run where every stage read its input still closes on the line the script
- * this replaces closed on, so nothing about the ordinary case moved. A run
- * carrying an unmeasured stage says so, because a green line over a stage that
- * looked at nothing is exactly the silence the reporting outcome exists
- * against.
+ * The closing verdict, naming what the run did not measure, since a green
+ * line over a stage that looked at nothing is the silence the gate withholds.
  */
 function close(summary: Summary, code: number): void {
   const { NC, RED, YELLOW } = palette(process.stderr)

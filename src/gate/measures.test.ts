@@ -107,8 +107,7 @@ describe('recordIdempotence', () => {
     }),
   })
 
-  // What the verb writes on a readable tree, where exit `2` is a plan drawn and
-  // left unwritten, every reading but nothing to do.
+  // A readable tree, where exit `2` is a plan drawn and left unwritten.
   const planned = (
     moves: readonly unknown[],
     rewritten: number,
@@ -1029,8 +1028,7 @@ describe('skillPracticeShape', () => {
     )
   }
 
-  // Writes a conforming fixture for every listed skill but the one varied, so an
-  // append needs no edit here, with each exemption naming a real file.
+  // A conforming fixture for every listed skill but the one varied.
   const writeListedExcept = (omitted?: string): void => {
     for (const rel of LEDGER_SKILLS.filter((rel) => rel !== omitted)) {
       writePracticeSkill(CLOSED, rel)

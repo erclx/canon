@@ -42,8 +42,7 @@ beforeEach(() => {
   fixture = mkdtempSync(join(tmpdir(), 'verify-runner-'))
   bin = join(fixture, 'bin')
   mkdirSync(bin)
-  // Each stack's toolchain is only probed for presence, so a stub that
-  // succeeds keeps the run from stopping at the probe on a machine without it.
+  // Toolchains are probed for presence only, so a passing stub stands in.
   for (const tool of [
     'uv',
     'go',
@@ -290,8 +289,7 @@ describe('phase order', () => {
       Object.fromEntries(ALL_PHASES.map((key) => [key, `echo phase-${key}`])),
     )
 
-    // bun run echoes each command, colored on a terminal and plain under CI, so a
-    // match after the echo is the command line rather than the script's output.
+    // bun run echoes each command, so a match after the echo is the command.
     const ran = [
       ...runVerify().stdout.matchAll(/(?<!echo )phase-([a-z:]+)$/gm),
     ].map((match) => match[1])
@@ -510,8 +508,7 @@ describe('canon resolution', () => {
     )
   }
 
-  // Only bun, git, bash for the stubs' shebang, and the fixture stubs are on
-  // PATH, so no global canon is.
+  // Only bun, git, bash, and the stubs are on PATH, so no global canon is.
   const runWithoutCanon = (
     env: NodeJS.ProcessEnv = {},
   ): SpawnSyncReturns<string> => {
