@@ -1157,6 +1157,25 @@ describe('the skip lines', () => {
     expect(body).toContain('**No reel:** reel-too-large')
   })
 
+  it('should drop the reel skip beside an earlier reel carried to the head', () => {
+    const body = renderEvidenceBody(
+      [],
+      'o/r',
+      'aaaa000',
+      'cccc222',
+      undefined,
+      '- [ ] look',
+      undefined,
+      { link: LINK, head: 'bbbb111' },
+      { reel: 'reel-too-large' },
+      [],
+      true,
+    )
+
+    expect(body).toContain('**Reel** filmed at `bbbb111`')
+    expect(body).not.toContain('No reel')
+  })
+
   it('should fold a multi-line reason onto one escaped line', () => {
     const body = renderEvidenceBody(
       [],
@@ -1263,6 +1282,7 @@ describe('the uncaptured line', () => {
     head: string,
     uncaptured: readonly string[],
     reel?: { link: string; head: string },
+    reelCovers?: boolean,
   ): string {
     return renderEvidenceBody(
       [],
@@ -1275,6 +1295,7 @@ describe('the uncaptured line', () => {
       reel,
       {},
       uncaptured,
+      reelCovers,
     )
   }
 
@@ -1309,6 +1330,35 @@ describe('the uncaptured line', () => {
 
   it('should keep the line beside a reel filmed at an earlier head', () => {
     const body = render(LATER, ['src/board.tsx'], { link: LINK, head: HEAD })
+
+    expect(body).toContain('**Uncaptured:** `src/board.tsx`')
+  })
+
+  it('should drop the line beside an earlier reel carried to the head', () => {
+    const body = render(
+      LATER,
+      ['src/board.tsx'],
+      { link: LINK, head: HEAD },
+      true,
+    )
+
+    expect(body).toContain('**Reel** filmed at `bbbb111`')
+    expect(body).not.toContain('Uncaptured')
+  })
+
+  it('should keep the line beside an earlier reel the carry did not reach', () => {
+    const body = render(
+      LATER,
+      ['src/board.tsx'],
+      { link: LINK, head: HEAD },
+      false,
+    )
+
+    expect(body).toContain('**Uncaptured:** `src/board.tsx`')
+  })
+
+  it('should keep the line when a covered flag arrives with no reel', () => {
+    const body = render(HEAD, ['src/board.tsx'], undefined, true)
 
     expect(body).toContain('**Uncaptured:** `src/board.tsx`')
   })

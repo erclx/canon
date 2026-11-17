@@ -507,17 +507,15 @@ function skipLines(prefix: string, reason: string | undefined): string[] {
 }
 
 /**
- * The uncaptured line, or nothing once the list is empty or a reel filmed at
- * this head shows the change. A reel at an earlier head leaves it, since a
- * later push may have added the path.
+ * The uncaptured line, or nothing once the list is empty or a reel covers the
+ * head and so shows the change.
  */
 function uncapturedLines(
   uncaptured: readonly string[],
-  head: string,
-  reel: EvidenceReel | undefined,
+  reelCovers: boolean,
 ): string[] {
   if (uncaptured.length === 0) return []
-  if (reel !== undefined && head.startsWith(reel.head)) return []
+  if (reelCovers) return []
   const paths = uncaptured.map((path) => `\`${path}\``).join(', ')
   return [`${UNCAPTURED_PREFIX} ${paths}`, '']
 }
@@ -534,9 +532,9 @@ export function evidenceMarker(head: string): string {
  *
  * Every state opens while the head images stay within `EVIDENCE_OPEN_LIMIT`
  * and closes past it, so a comment is never half open. Image URLs pin to a
- * commit sha, so the comment keeps what it claimed after the branch moves. A
- * reel skip drops only for a reel filmed at the head, and the uncaptured line
- * is computed fresh on every render rather than carried.
+ * commit sha. The reel skip and uncaptured lines drop only while the reel
+ * covers the head, as the carry `canon pr lift` reads passes in `reelCovers`,
+ * which defaults to a reel filmed at the head.
  */
 export function renderEvidenceBody(
   states: readonly EvidenceState[],
@@ -549,7 +547,9 @@ export function renderEvidenceBody(
   reel?: EvidenceReel,
   skips: EvidenceSkips = {},
   uncaptured: readonly string[] = [],
+  reelCovers: boolean = reel !== undefined && head.startsWith(reel.head),
 ): string {
+  const covered = reel !== undefined && reelCovers
   const segments = [
     ...(preview === undefined ? [] : [`${PREVIEW_PREFIX} ${preview}`]),
     ...(local === undefined ? [] : [`${LOCAL_PREFIX} ${local}`]),
@@ -560,10 +560,8 @@ export function renderEvidenceBody(
     ...(segments.length === 0 ? [] : [segments.join(ADDRESS_SEPARATOR), '']),
     ...(local === undefined ? skipLines(LOCAL_SKIP_PREFIX, skips.local) : []),
     ...(reel === undefined ? [] : reelLines(reel)),
-    ...(reel !== undefined && head.startsWith(reel.head)
-      ? []
-      : skipLines(REEL_SKIP_PREFIX, skips.reel)),
-    ...uncapturedLines(uncaptured, head, reel),
+    ...(covered ? [] : skipLines(REEL_SKIP_PREFIX, skips.reel)),
+    ...uncapturedLines(uncaptured, covered),
   ]
   const closing =
     checklist === undefined
