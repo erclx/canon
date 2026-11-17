@@ -18,7 +18,7 @@ Holds one folder per kind of domain, such as `development/`, `surfaces/`, `featu
 - A fact goes to `.claude/rules/` when it fires on a path being edited and violating it ships silently, otherwise to an entry or a skill body
 - A rule also buys conditional presence and a fix that governance sync carries to every project, which an eager `CLAUDE.md` line cannot
 - `index.md` is regenerated from each entry's `title` and `description` and is never hand-edited
-- An entry is created by hand to the shape in `claude/skills/context-fold/references/context.md`, which `context-fold` then keeps current at ship time and never creates
+- An entry is created by hand to the shape in `claude/skills/context-fold/references/context.md`, and `context-fold` keeps it current, opening one only beside an owner past a cap
 - The stacks ship `development/setup.md` and `development/ci.md` as user-owned seeds under `tooling/base/seeds/canon/context/`, so check both sources before calling an entry absent
 
 ### `canon/`
