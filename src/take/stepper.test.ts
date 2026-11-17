@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { StepperStalled, alignTicks, withinCap } from '@/take/stepper'
+import {
+  StepperStalled,
+  alignTicks,
+  retryScale,
+  withinCap,
+} from '@/take/stepper'
 
 describe('StepperStalled', () => {
   it.each(['settle', 'setup', 'recording'] as const)(
@@ -11,6 +16,25 @@ describe('StepperStalled', () => {
       expect(stall.message).toBe(
         `frame 0 took over 2 s in ${phase} under frame stepping`,
       )
+    },
+  )
+})
+
+describe('retryScale', () => {
+  it('should retry a stall in recording at scale 2 at scale 1', () => {
+    expect(retryScale('recording', 2)).toBe(1)
+  })
+
+  it.each([
+    ['settle', 2],
+    ['setup', 2],
+    ['settle', 1],
+    ['setup', 1],
+    ['recording', 1],
+  ] as const)(
+    'should send a stall in %s at scale %i to the screencast',
+    (phase, scale) => {
+      expect(retryScale(phase, scale)).toBeUndefined()
     },
   )
 })
