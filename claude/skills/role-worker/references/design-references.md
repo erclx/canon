@@ -18,7 +18,8 @@ A plan's `## Design references` names the accepted design per surface, and `## R
 
 An entry opening on `redrawn` names a folder this change leaves untrue, so the reference moves with the surface in the same pull request.
 
-- Build the surface first, then redraw the folder through `design-record`, which lands the new frame through the project's design sync
+- Land the redraw first, in the branch's first commit, through `design-record` once the board frame carries the change, then build against the redrawn folder
+- Report a redrawn entry whose board frame was never redrawn rather than building first, since the sync writes the folder from the frame and would put the old design back
 - Never edit the tracked copy under `canon/design/` by hand, since the next sync overwrites it from the board
 - Take the sync command from the plan's `## Files to touch` line for the folder, and report a redrawn entry with no such line rather than guessing one
 - Build against an entry opening on `built against` as above and leave its folder unchanged
