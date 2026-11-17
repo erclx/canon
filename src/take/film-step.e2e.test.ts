@@ -415,9 +415,8 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       if (read.kind !== 'read') throw new Error(read.detail)
       ticketOpens = 0
 
-      // The loaded limit, since a settle or setup frame on a loaded runner
-      // passed the product's 2 s and moved the stall out of the phase under
-      // test. The press never returns, so it stalls under any limit.
+      // A loaded runner's settle frame can pass 2 s, so the loaded limit
+      // keeps the stall on the press, which never returns.
       const result = await take({
         url: new URL('/ticket', server.url).href,
         plan: read.plan,
