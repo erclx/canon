@@ -36,14 +36,15 @@ export function resolveGatedPrefixes(
  *
  * A prefix matches on a path segment boundary, so `canon/context/auth` and
  * `canon/context/auth/` gate the same folder and neither reaches a sibling
- * such as `canon/context/authz/`. A prefix naming a file matches that file.
+ * such as `canon/context/authz/`. A prefix naming a file matches that file,
+ * and a leading `./` is dropped, since entry paths carry none.
  */
 export function isShapeGated(
   rel: string,
   prefixes: readonly string[] = SHAPE_GATED_FOLDERS,
 ): boolean {
   return prefixes.some((prefix) => {
-    const bare = prefix.replace(/\/+$/, '')
+    const bare = prefix.replace(/^(\.\/)+/, '').replace(/\/+$/, '')
     return rel === bare || rel.startsWith(`${bare}/`)
   })
 }

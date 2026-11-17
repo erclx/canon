@@ -26,12 +26,13 @@ describe('isShapeGated', () => {
     expect(isShapeGated('canon/context/cli/overview.md', [])).toBe(false)
   })
 
-  it.each([['canon/context/auth'], ['canon/context/auth/']])(
-    'should gate the folder written as %s',
-    (prefix) => {
-      expect(isShapeGated('canon/context/auth/login.md', [prefix])).toBe(true)
-    },
-  )
+  it.each([
+    ['canon/context/auth'],
+    ['canon/context/auth/'],
+    ['./canon/context/auth/'],
+  ])('should gate the folder written as %s', (prefix) => {
+    expect(isShapeGated('canon/context/auth/login.md', [prefix])).toBe(true)
+  })
 
   it.each([['canon/context/auth'], ['canon/context/auth/']])(
     'should leave a sibling sharing the letters of %s ungated',
