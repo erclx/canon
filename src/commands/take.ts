@@ -4,10 +4,10 @@ import type { Command } from 'commander'
 import { INSTALL_BROWSER, isEngineMissing } from '@/browser/engine'
 import { cameraTrack, readRate } from '@/take/camera'
 import { readTakeLog } from '@/take/log'
-import { readTakePlan } from '@/take/plan'
+import { beatViewport, parseViewport, readTakePlan } from '@/take/plan'
 import type { TakePlanRefusal } from '@/take/plan'
 import type { TakeRefusal } from '@/take/film'
-import { renderReel } from '@/take/reel'
+import { reelShapeMismatch, renderReel } from '@/take/reel'
 import {
   intro,
   logError,
@@ -29,6 +29,7 @@ interface RunOptions {
   readonly out?: string
   readonly reel?: string
   readonly maxSeconds?: string
+  readonly viewport?: string
   readonly json?: boolean
 }
 
@@ -97,6 +98,10 @@ export function register(program: Command): void {
       '--max-seconds <n>',
       'Refuse once the filmed beats run past n seconds in total',
     )
+    .option(
+      '--viewport <width>x<height>',
+      'Film every beat naming no viewport in a window of this size, 1920x1080 by default',
+    )
     .option('--json', 'Add a machine-readable record on stdout')
     .addHelpText(
       'after',
@@ -108,10 +113,10 @@ export function register(program: Command): void {
         'beat and the route that filmed it.',
         '',
         'A step beat is filmed by frame stepping in chrome-headless-shell, at',
-        '3840x2160 and exactly 60 fps, with the page clock advancing one frame',
-        'per step. A frame slower than 2 s falls back to a real-time screencast',
-        'at 1920x1080 for that beat, and the record says so. A screencast beat',
-        'skips the stepper.',
+        '3840x2160 by default and exactly 60 fps, with the page clock advancing',
+        'one frame per step. A frame slower than 2 s falls back to a real-time',
+        'screencast at 1920x1080 by default for that beat, in the same window,',
+        'and the record says so. A screencast beat skips the stepper.',
         '',
         'No cursor is drawn in a clip. The edit draws it from the log at a',
         'constant size, and the camera track carries the cursor and click ring',
@@ -172,6 +177,17 @@ export function register(program: Command): void {
         'records push: false. Each log.json carries clip, the clip size in',
         'pixels, which caps the zoom depth so a 1920-wide screencast stays sharp.',
         '',
+        '--viewport <width>x<height> sets the window every beat films in, and a',
+        'beat carrying viewport sets its own, as in',
+        '  "viewport": { "width": 800, "height": 600 }',
+        'which wins over the option. Each side is even, from 320x240 up to the',
+        'default 1920x1080, so a window shrinks and never grows past what is',
+        'filmed by default. A stepped beat films at twice its window and a',
+        'screencast at it, and the pointer starts at its center. Each log.json',
+        "records viewport, the beat's window. A take with --reel refuses beats",
+        'whose windows differ in aspect ratio before filming, naming the first',
+        'that differs, since a reel shrinks every beat to one width.',
+        '',
         'Scrollbars are hidden by default on both routes. A beat carrying',
         'scrollbars: true films with classic scrollbars drawn, which take a 15 px',
         'gutter of layout width, so set it only on a beat whose change is a scrollbar.',
@@ -201,6 +217,10 @@ export function register(program: Command): void {
         '',
         'Reasons:',
         '  bad-max-seconds     --max-seconds is not a positive number',
+        '  bad-viewport        --viewport or a beat viewport is malformed, odd, or',
+        '                      outside 320x240 to 1920x1080',
+        '  reel-shape          --reel over beats whose windows differ in aspect',
+        '                      ratio, naming the first that differs',
         '  no-plan-file        nothing readable at the plan path',
         '  unreadable-plan     the plan file is not valid JSON',
         '  no-beats            the plan names no beat',
@@ -378,6 +398,17 @@ async function runTake(
     )
   }
 
+  const viewport =
+    opts.viewport === undefined ? undefined : parseViewport(opts.viewport)
+  if (viewport?.kind === 'refused') {
+    return refuse(
+      emitJson,
+      url,
+      'bad-viewport',
+      `--viewport carries ${viewport.detail}.`,
+    )
+  }
+
   let source: string
   try {
     source = readFileSync(path, 'utf8')
@@ -401,6 +432,25 @@ async function runTake(
   }
 
   const { plan } = read
+  // Checked before filming, since the reel refuses the same beats only once
+  // every one of them has been filmed.
+  const mismatch = opts.reel
+    ? reelShapeMismatch(
+        plan.beats.map((beat) => ({
+          name: beat.name,
+          viewport: beatViewport(beat, viewport?.viewport),
+        })),
+      )
+    : undefined
+  if (mismatch) {
+    return refuse(
+      emitJson,
+      url,
+      'reel-shape',
+      `${mismatch}. Give every beat one aspect ratio, or film without --reel.`,
+    )
+  }
+
   logStep('Scope')
   logInfo(
     `${plural(plan.beats.length, 'beat')} into ${resolve(opts.out)}: ${plan.beats.map((beat) => beat.name).join(', ')}`,
@@ -427,6 +477,7 @@ async function runTake(
     plan,
     out: opts.out,
     ...(maxSeconds === undefined ? {} : { maxSeconds }),
+    ...(viewport ? { viewport: viewport.viewport } : {}),
   })
 
   if (result.status === 'failed') {
