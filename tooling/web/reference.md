@@ -53,14 +53,18 @@ The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project tha
 - `VIEWPORTS` holds 320, 768, 1280, and 1536. Width 320 is the base a page has to hold without wrapping or clipping.
 - Set `excludeViewports` to skip a width, for a route whose long-form prose reflows at 320 instead of breaking
 
-## Screenshot sections and masks
+## Screenshot sections
 
 - Set `evidence: true` to also write `<EVIDENCE_ROOT>/<section>/<width>--<theme>.png` at 320 and 1280 alone. `EVIDENCE_ROOT` defaults to `e2e/evidence`.
 - Name `sections` on a case, one `{ name, selector }` per addressable part of the route, each written as its own frame beside the whole-page one
 - Expect a section frame at `screenshots/<hostname>/<section>/<name>/<width>--<theme>.png`, plus the same path under `EVIDENCE_ROOT` where flagged
 - Expect a selector matching nothing to be reported and skipped, since a seeded list may name sections the page lacks, and test that they resolve in the project owning the selectors
+
+## Screenshot masks
+
 - List under `mask` the selectors painted over in every frame, for a value that moves with no code change, so a double capture compares the rest
-- Expect a mask skipped and reported where an opaque element covers its element's center, such as an open dialog, since the bar is drawn above every layer. A dimmed backdrop does not count, and the reading taken before the whole-page frame holds for the section frames.
+- Expect a mask skipped and reported where an opaque element, such as a dialog, covers its element's center, since the bar is drawn above every layer
+- A dimmed backdrop does not count as cover, and the reading taken before the whole-page frame holds for the section frames
 
 ## Screenshot settling
 
