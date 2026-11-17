@@ -367,7 +367,66 @@ describe('checkPlan', () => {
       const body = uiPlan([
         '**Design references:**',
         '',
+        '- `canon/design/button/`: built against, the pressed state stays as drawn',
+        '',
+      ])
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
+    it('should pass an entry whose role is redrawn', () => {
+      const body = uiPlan([
+        '## Design references',
+        '',
+        '- `canon/design/button/`: redrawn, the pressed state gains a ring',
+        '',
+      ])
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
+    it('should pass one folder cited once per role', () => {
+      const body = uiPlan([
+        '## Design references',
+        '',
+        '- `canon/design/button/`: built against, the resting state',
+        '- `canon/design/button/`: Redrawn, the pressed state gains a ring',
+        '',
+      ])
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
+    it('should report an entry that opens on neither role', () => {
+      const body = uiPlan([
+        '## Design references',
+        '',
         '- `canon/design/button/`: the pressed state',
+        '',
+      ])
+      const findings = checkPlan('feature-a-b.md', body)
+
+      expect(kinds(findings)).toEqual(['design-reference-unclassified'])
+      expect(findings[0].subject).toContain('canon/design/button/')
+    })
+
+    it('should read the role on a wrapped entry', () => {
+      const body = uiPlan([
+        '## Design references',
+        '',
+        '- `canon/design/button/`:',
+        '  redrawn, the pressed state gains a ring',
+        '',
+      ])
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
+    it('should report nothing on a bullet naming no design folder', () => {
+      const body = uiPlan([
+        '## Design references',
+        '',
+        '- None identified.',
         '',
       ])
 
