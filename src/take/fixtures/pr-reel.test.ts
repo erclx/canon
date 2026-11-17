@@ -69,6 +69,36 @@ describe('selectFixtures', () => {
     expect(selection).toEqual({ kind: 'film', stems: ['scrollbars'] })
   })
 
+  it('should film a fixture whose plan alone changed', () => {
+    const selection = selectFixtures(['src/take/fixtures/motion.json'], FOLDER)
+
+    expect(selection).toEqual({ kind: 'film', stems: ['motion'] })
+  })
+
+  it('should film a fixture once when its page and plan both changed', () => {
+    const selection = selectFixtures(
+      [
+        'src/take/fixtures/scrollbars.html',
+        'src/take/fixtures/scrollbars.json',
+      ],
+      FOLDER,
+    )
+
+    expect(selection).toEqual({ kind: 'film', stems: ['scrollbars'] })
+  })
+
+  it('should refuse a changed plan whose fixture page is gone', () => {
+    const selection = selectFixtures(
+      ['src/take/fixtures/stale.json'],
+      [...FOLDER, 'stale.json'],
+    )
+
+    expect(selection).toEqual({
+      kind: 'unplanned',
+      paths: ['src/take/fixtures/stale.json'],
+    })
+  })
+
   it('should film every changed planned fixture once, in name order', () => {
     const selection = selectFixtures(
       [

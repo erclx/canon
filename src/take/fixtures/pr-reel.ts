@@ -41,8 +41,9 @@ export type Selection =
 /**
  * Which fixtures a diff films, from the paths it changed and the file names
  * the fixture folder holds. A test is not the engine, so a diff touching only
- * tests films nothing. A diff whose change reaches no fixture carrying a plan
- * is `unplanned`, since nothing on the shelf was written to show it.
+ * tests films nothing. A changed page or plan films its fixture when both
+ * exist, and a diff reaching no such fixture is `unplanned`, since nothing on
+ * the shelf was written to show it.
  */
 export function selectFixtures(
   changed: readonly string[],
@@ -55,9 +56,14 @@ export function selectFixtures(
 
   const files = new Set(fixtureFiles)
   const stems = engine
-    .filter((path) => path.startsWith(FIXTURES) && path.endsWith('.html'))
-    .map((path) => path.slice(FIXTURES.length, -'.html'.length))
-    .filter((stem) => !stem.includes('/') && files.has(`${stem}.json`))
+    .filter((path) => path.startsWith(FIXTURES))
+    .map((path) => path.slice(FIXTURES.length).replace(/\.(html|json)$/, ''))
+    .filter(
+      (stem) =>
+        !stem.includes('/') &&
+        files.has(`${stem}.html`) &&
+        files.has(`${stem}.json`),
+    )
   const unique = [...new Set(stems)].sort()
   if (unique.length > 0) return { kind: 'film', stems: unique }
   return { kind: 'unplanned', paths: engine }
