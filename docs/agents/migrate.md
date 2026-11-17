@@ -23,13 +23,13 @@ kind: reference
 
 `record-tree` follows citations in `diagrams`, `memory`, `plans`, `proposals`, `review`, `tasks`, and `teach`.
 
-`session-defaults` denies subagents and both merge commands, allows the two lease push forms workers run and the canon verbs a UI pass runs, denies a browser install and a frames rewrite, turns auto memory off, and wires an installed `plan-guard.sh`. The bullets below add detail per verb.
+`session-defaults` denies subagents and both merge commands, allows the two lease push forms workers run and the canon verbs a UI pass runs, denies a browser install and a frames rewrite, turns auto memory off, and wires each seeded hook whose script sits in `.claude/hooks/`. The bullets below add detail per verb.
 
 - `skill-names` takes no `--scope`, and skips the changelog, eval transcripts, replay fixtures, and the pointer each renamed `draft-` skill leaves at its old name
 - `surface-roots` moves `context/`, `wireframes/`, `ARCHITECTURE.md`, `REQUIREMENTS.md`, `DESIGN.md`, and the stamp folder, and leaves `rules/`, `skills/`, `hooks/`, and `settings.json` in place
 - `rule-layout` classifies each flat file against the stamp as clean, edited, or unclaimed. Clean and edited files move untouched, and an unclaimed name stays.
 - `record-layout` labels each evidence folder `(pick)` or `(evidence)` in the dry run
-- `session-defaults` adds a key only when absent, merge entries included, and each older project runs it once. `--write` restores a removed `Agent` or `Task` and never removes a deny entry.
+- `session-defaults` adds a key only when absent, merge entries included, and each older project runs it once. `--write` restores a removed `Agent` or `Task` and never removes a deny entry. It inserts text into the file in place, so every line it does not add stays byte for byte.
 
 ## Output
 
@@ -58,15 +58,15 @@ Three markers keep an old spelling on a line. Each also covers the nearest non-b
 
 ## Refusals
 
-| Verb               | Refuses when                                                                                                       |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| `records`          | The project does not ignore `.canon/`. Run `canon tooling sync --write` first.                                     |
-| `records`          | A record folder already exists at the destination                                                                  |
-| `surface-roots`    | Any destination already exists under `canon/`, refusing the whole plan                                             |
-| `scratch-evidence` | A destination is occupied                                                                                          |
-| `record-layout`    | A destination already exists, each move refused on its own                                                         |
-| `rule-layout`      | A destination holds different bytes. Neither file is touched and other moves apply.                                |
-| `session-defaults` | The settings file is not valid JSON, or `permissions`, `deny`, `allow`, `hooks`, or `PreToolUse` has another shape |
+| Verb               | Refuses when                                                                                                         |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `records`          | The project does not ignore `.canon/`. Run `canon tooling sync --write` first.                                       |
+| `records`          | A record folder already exists at the destination                                                                    |
+| `surface-roots`    | Any destination already exists under `canon/`, refusing the whole plan                                               |
+| `scratch-evidence` | A destination is occupied                                                                                            |
+| `record-layout`    | A destination already exists, each move refused on its own                                                           |
+| `rule-layout`      | A destination holds different bytes. Neither file is touched and other moves apply.                                  |
+| `session-defaults` | The settings file is not valid JSON, or `permissions`, `deny`, `allow`, `hooks`, or a seeded event has another shape |
 
 A `rule-layout` destination holding the same bytes marks a duplicate, which `--write` deletes.
 

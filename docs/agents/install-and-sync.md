@@ -143,7 +143,7 @@ A refusal answers `{ ok: false, reason, message }` with exit 1:
 
 ## Side sections
 
-Seven sections sit outside the per-domain scan, and no sync applies them. Each returns empty when `managed` is false. A managed target holds `.claude/`, a `CLAUDE.md`, or a root-layout domain, and an unmanaged one is routed to `canon init`.
+Eight sections sit outside the per-domain scan, and no sync applies them. Each returns empty when `managed` is false. A managed target holds `.claude/`, a `CLAUDE.md`, or a root-layout domain, and an unmanaged one is routed to `canon init`.
 
 | Section           | Reports                                                                                 | Exit |
 | ----------------- | --------------------------------------------------------------------------------------- | ---- |
@@ -154,8 +154,9 @@ Seven sections sit outside the per-domain scan, and no sync applies them. Each r
 | `newRules`        | A rule the recorded stack lists and the tree lacks                                      | No   |
 | `newSkills`       | A plugin skill the target has not seen. Needs no command.                               | No   |
 | `reverse`         | `unclaimed` folders the toolkit once shipped                                            | No   |
+| `hooks`           | A seeded hook whose script the target holds and `settings.json` never runs              | Yes  |
 
-The Exit column marks what counts toward `--exit-code`. `canon migrate surface-roots` closes `unmovedSurfaces`, and `canon gov install` closes `newRules`. A `reverse` entry is attributed `dropped`, `project`, or `unattributed`.
+The Exit column marks what counts toward `--exit-code`. `canon migrate surface-roots` closes `unmovedSurfaces`, `canon gov install` closes `newRules`, and `canon migrate session-defaults --write` closes `hooks`. A `hooks` state of `unreadable` counts too, since the check could not read the settings file. A `reverse` entry is attributed `dropped`, `project`, or `unattributed`.
 
 `newRules` and `newSkills` come back empty on a shallow clone or registry install, which is unmeasured rather than clean.
 

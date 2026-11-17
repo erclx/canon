@@ -68,11 +68,12 @@ A project installed before the board became a folder still holds `.claude/TASKS.
 
 ## settings.json
 
-- Pair the seed's PreToolUse hooks with `index-reminder.sh`, `search-reminder.sh`, `scratch-guard.sh`, `review-post-scan.sh`, and `plan-guard.sh`, and its PostToolUse hook with `standards-audit.sh`
+- Pair the seed's PreToolUse hooks with `index-reminder.sh`, `search-reminder.sh`, `scratch-guard.sh`, `review-post-scan.sh`, and `plan-guard.sh`, its PostToolUse hooks with `standards-audit.sh`, `records-index.sh`, `board-validate.sh`, `path-form.sh`, and `pr-create-log.sh`, and its Stop hooks with `silent-turn.sh`, `reply-links.sh`, and `session-name.sh`
+- Delete a hook's script to opt out of it, since `canon migrate session-defaults --write` wires every seeded hook whose script is present and `canon sync --check --exit-code` fails while one is unwired
 - Keep only what is project-specific in the project file, since project settings layer over user settings
 - Expect `permissions.deny` to hold `Agent` and `Task`, so no session spawns a subagent and parallel work runs as separate background sessions
 - Expect `autoMemoryEnabled` to be `false`. A person turns it back on for themselves in `settings.local.json`.
-- Run `canon migrate session-defaults` on a target seeded before those defaults, the merge entries, or the plan guard below, since sync never rewrites an existing settings file
+- Run `canon migrate session-defaults` on a target seeded before those defaults, the merge entries, or a seeded hook, since sync never rewrites an existing settings file
 
 The seed's deny list also holds `Bash(canon pr merge:*)` and `Bash(gh pr merge:*)`, so the operator alone merges. An existing target gets both from `canon migrate session-defaults --write`, and `canon claude sync` warns while either is absent. Neither covers more than the form an agent writes by default.
 
