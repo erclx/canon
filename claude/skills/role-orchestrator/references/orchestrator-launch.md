@@ -123,7 +123,9 @@ No branch and no worktree exist here and none is created. A planner writes one g
 claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion -n "planner-<project>-<slug>" "Run /canon:role-planner, then /canon:plan-feature <task>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the plan lands, carrying the path and what the task file got wrong, and message it again if you stop on a question."
 ```
 
-`<task>` is the row's task file path and `<slug>` the slug its plan will take, resolved off the row. `<dispatcher-id>`, `<model>`, `<effort>`, and `<project>` resolve as above, and the prefix reads `planner-` because it marks the role of the session it names. Then wait per `orchestrator-planning-wait.md`.
+`<task>` is the row's task file path and `<slug>` the slug its plan will take, resolved off the row. `<dispatcher-id>`, `<model>`, `<effort>`, and `<project>` resolve as above, and the prefix reads `planner-` because it marks the role of the session it names.
+
+Record the planner on its task the way a worker is recorded, through `canon tasks session <planner-id> <task> --json`, so the reap after its plan lands reaches it. Then wait per `orchestrator-planning-wait.md`.
 
 ### A flaky row
 

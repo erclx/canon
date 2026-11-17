@@ -17,9 +17,9 @@ A planner handed several rows in one launch links each plan on its own, so arm o
 
 Branch on the record's `reason` rather than on the exit code, which a shell function wrapping `canon` can flatten to zero.
 
-- `launchable`: the plan waits on nobody, so run `${CLAUDE_SKILL_DIR}/references/orchestrator-dispatch.md` from the candidate on, since the wait never reads the branch or the conflict check
-  - Once the plan is announced, stop its planner with `canon sessions reap <task> --json`, which reaches only the sessions that task records
-  - Pass `--keep <sessionId>` for a planner `orchestrator-planner-reuse.md` holds for the next row, since nothing on disk marks a kept planner and the call is this session's
+- `launchable`: the plan waits on nobody, so stop its planner and run `${CLAUDE_SKILL_DIR}/references/orchestrator-dispatch.md` from the candidate on, since the wait reads no branch or conflict check
+  - Run `canon sessions reap <task> --json` ahead of dispatch, while the planner is the only session the task records
+  - A planner `orchestrator-planner-reuse.md` holds for a row it is already recorded on reads `open-task`. Pass `--keep <sessionId>` for one not yet recorded there.
 - `timeout`: read `plan` and `open` off the last reading, then act on which one held the row
   - No `plan` means nothing was linked in time, so check the planner is still live and re-arm the wait
   - A non-empty `open` names the questions holding the row, so report each label and reason to the operator, then re-arm the wait
