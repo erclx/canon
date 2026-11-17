@@ -29,6 +29,7 @@ A session composing the takes finds the footage guidance HyperFrames lacks, bein
 - Write a tracked file, the config included
 - Run the composition or render the video, or write any composition file
 - Trigger on anything but a request to record or film the app
+- Film a pull request's reel for its evidence comment, which `pr-evidence` films unattended
 
 ## Out of scope
 
