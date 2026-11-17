@@ -6,6 +6,7 @@ import {
   START,
   type SentPoint,
   VIEWPORT,
+  clipMismatch,
   cursorAt,
   readTakeLog,
 } from '@/take/log'
@@ -122,5 +123,31 @@ describe('cursorAt', () => {
     const move = sentMove([{ t: 1000, x: 130, y: 100 }])
 
     expect(cursorAt([move], 500)).toEqual(START)
+  })
+})
+
+describe('clipMismatch', () => {
+  it('should report nothing when the clip matches its route', () => {
+    expect(
+      clipMismatch(
+        { width: 3840, height: 2160 },
+        { width: 3840, height: 2160 },
+      ),
+    ).toBeUndefined()
+  })
+
+  it('should name both sizes when the clip came out smaller', () => {
+    expect(
+      clipMismatch({ width: 1920, height: 1080 }, { width: 800, height: 600 }),
+    ).toBe('the clip measured 800x600, not the 1920x1080 its route films at')
+  })
+
+  it('should report a clip larger on one side only', () => {
+    expect(
+      clipMismatch(
+        { width: 1920, height: 1080 },
+        { width: 1920, height: 1200 },
+      ),
+    ).toContain('1920x1200')
   })
 })

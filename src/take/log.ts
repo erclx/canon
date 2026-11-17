@@ -141,6 +141,29 @@ export const CLIP_SIZES: Record<
   screencast: VIEWPORT,
 }
 
+export interface ClipSize {
+  readonly width: number
+  readonly height: number
+}
+
+/**
+ * Says how a measured clip differs from the size its route filmed at, or
+ * nothing when the two match, since a page that resizes itself can crop the
+ * clip under settings that predicted a full frame.
+ */
+export function clipMismatch(
+  expected: ClipSize,
+  measured: ClipSize,
+): string | undefined {
+  if (
+    expected.width === measured.width &&
+    expected.height === measured.height
+  ) {
+    return undefined
+  }
+  return `the clip measured ${measured.width}x${measured.height}, not the ${expected.width}x${expected.height} its route films at`
+}
+
 export type TakeLogRead =
   | { readonly kind: 'read'; readonly log: TakeLog }
   | { readonly kind: 'refused'; readonly detail: string }
