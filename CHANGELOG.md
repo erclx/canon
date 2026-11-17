@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.98.0](https://github.com/erclx/canon/compare/v5.97.0...v5.98.0) (2026-11-17)
+
+
+### Features
+
+* **comments:** cap runs in text lines and report dense files ([#3181](https://github.com/erclx/canon/issues/3181)) ([8661f48](https://github.com/erclx/canon/commit/8661f48f24c23d2afd9a76b8ed6ce25f44ce1271))
+* **gate:** check the project the gate runs in with a shared stage set ([#3183](https://github.com/erclx/canon/issues/3183)) ([71c4f22](https://github.com/erclx/canon/commit/71c4f224982494f7df3c66bf39db4e5a4f70a894))
+* **migrate:** wire seeded hooks and report unwired ones as drift ([#3179](https://github.com/erclx/canon/issues/3179)) ([58dd6e8](https://github.com/erclx/canon/commit/58dd6e864e46e67192847567eddb4d667dbd7b40))
+
 ## [5.97.0](https://github.com/erclx/canon/compare/v5.96.0...v5.97.0) (2026-11-17)
 
 
