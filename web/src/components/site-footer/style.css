@@ -50,7 +50,7 @@
   border-radius: var(--radius-chip);
 }
 
-.site-footer a:hover {
+.site-footer a:not(.brand):hover {
   color: var(--ink);
   text-decoration: underline;
   text-underline-offset: 3px;

@@ -252,6 +252,25 @@ test('the footer mark takes the reader back to the top', async ({ page }) => {
   expect(new URL(page.url()).hash).toBe('#top')
 })
 
+test('the footer mark carries no underline under hover', async ({ page }) => {
+  await page.goto('/')
+  const brand = page.locator('.site-footer a.brand')
+  const link = page.locator('.site-footer a:not(.brand)').first()
+  await brand.scrollIntoViewIfNeeded()
+
+  await link.hover()
+  const linkLine = await link.evaluate(
+    (node) => getComputedStyle(node).textDecorationLine,
+  )
+  await brand.hover()
+  const brandLine = await brand.evaluate(
+    (node) => getComputedStyle(node).textDecorationLine,
+  )
+
+  expect(linkLine).toBe('underline')
+  expect(brandLine).toBe('none')
+})
+
 test.describe('the craft section', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
