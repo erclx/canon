@@ -19,6 +19,12 @@
 - Show a placeholder shaped like the content while a whole view or page loads, and keep a single module such as a card on the progress indicator.
 - Show neither a placeholder nor an indicator for a load under about one second, since the flash of either costs more than the wait.
 
+## State across a reload
+
+- Hold the route, the selected tab, filters and sort, search text, pagination, and the selected item in the address, so a reload, a bookmark, and the back button reach the same view.
+- Keep an unsent draft and panel sizes in browser storage, and restore them on reload.
+- Reset an open confirm or destructive dialog, a one-time message, hover and focus, an in-flight drag, and a selection whose item is gone, since restoring any of them repeats an act or points at nothing.
+
 ## Overflow
 
 - Truncate long text in a constrained container with an ellipsis rather than letting it overflow.
