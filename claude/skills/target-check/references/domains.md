@@ -110,7 +110,15 @@ A seed entry matching says the file's bytes match the shipped seed. It says noth
 
 One field reads part of this domain. Report the rest `unchecked` on every run, as a row rather than omitted.
 
-The report's `hooks` field answers whether `.claude/settings.json` registers the seeded hooks whose scripts the target holds. Each `unwired` entry names a script, its event, and the tools it lacks. An `unreadable` state means the settings file could not be read, and both count toward `--exit-code`. Name `canon migrate session-defaults --write` as the repair, or `canon claude init` when the state reads `absent`.
+### The hooks field
+
+The report's `hooks` field answers whether `.claude/settings.json` registers the seeded hooks whose scripts the target holds.
+
+- Each `unwired` entry names a script, its event, and the tools it lacks
+- An `unreadable` state means the settings file could not be read, and it counts toward `--exit-code` as an unwired entry does
+- Name `canon migrate session-defaults --write` as the repair, or `canon claude init` when the state reads `absent`
+
+### What stays unread
 
 What goes unread is whether the target's hooks fire, which plugin version the target's sessions load, and whether the marketplace cache matches what the toolkit ships.
 

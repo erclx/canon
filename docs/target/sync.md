@@ -34,7 +34,7 @@ Attribution reads `canon/config/config.json`, falling back to `.claude/canon/con
 - `unattributed` means the toolkit shipped the path, but the content matches no published version
 - `project` means it only shares a retired name
 
-Add `--json` for a machine-readable report and `--exit-code` to fail CI when a target falls behind. Project-authored files, superseded artifacts, seed drift, tooling, and `reverse` never count toward that code. An unmigrated domain does, and so does a seeded hook whose script you hold but `settings.json` never runs. Run `canon migrate session-defaults --write` to wire it.
+Add `--json` for a machine-readable report and `--exit-code` to fail CI when a target falls behind. Project-authored files, superseded artifacts, seed drift, tooling, and `reverse` never count toward that code. An unmigrated domain does, and so does a held hook script that `canon migrate session-defaults --write` has not wired.
 
 ## Update canon itself
 

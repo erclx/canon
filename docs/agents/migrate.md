@@ -29,7 +29,7 @@ kind: reference
 - `surface-roots` moves `context/`, `wireframes/`, `ARCHITECTURE.md`, `REQUIREMENTS.md`, `DESIGN.md`, and the stamp folder, and leaves `rules/`, `skills/`, `hooks/`, and `settings.json` in place
 - `rule-layout` classifies each flat file against the stamp as clean, edited, or unclaimed. Clean and edited files move untouched, and an unclaimed name stays.
 - `record-layout` labels each evidence folder `(pick)` or `(evidence)` in the dry run
-- `session-defaults` adds a key only when absent, merge entries included, and each older project runs it once. `--write` restores a removed `Agent` or `Task` and never removes a deny entry. It inserts text into the file in place, so every line it does not add stays byte for byte.
+- `session-defaults` adds a key only when absent, and each older project runs it once. `--write` restores a removed `Agent` or `Task`, never removes a deny entry, and edits the file in place.
 
 ## Output
 
