@@ -136,6 +136,37 @@ export async function probeFrames(clip: string): Promise<number> {
   return frames
 }
 
+/** Reads a clip's width and height, which a route's settings predict and a page can still crop. */
+export async function probeSize(
+  clip: string,
+): Promise<{ width: number; height: number }> {
+  const proc = spawn(
+    'ffprobe',
+    [
+      '-v',
+      'error',
+      '-select_streams',
+      'v:0',
+      '-show_entries',
+      'stream=width,height',
+      '-of',
+      'csv=p=0:s=x',
+      clip,
+    ],
+    { stdio: ['ignore', 'pipe', 'pipe'] },
+  )
+  let stdout = ''
+  proc.stdout?.on('data', (chunk: Buffer) => {
+    stdout += chunk.toString()
+  })
+  await finished(proc)
+  const [width, height] = stdout.trim().split('x').map(Number)
+  if (!Number.isInteger(width) || !Number.isInteger(height)) {
+    throw new Error(`ffprobe read no size from ${clip}`)
+  }
+  return { width: width as number, height: height as number }
+}
+
 /**
  * Reads the clip's closing frame as one JPEG. It selects the frame by index
  * rather than seeking from the end, since a seek lands on whichever frame
