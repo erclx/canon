@@ -33,7 +33,7 @@ Runs `🛡️ Static Checks` on Linux and `🍎 macOS Unit Tests` beside it, nei
 
 ### `🎬 E2E Suites`
 
-A third job runs `bun run test:e2e` with the tools the nine `*.e2e.test.ts` suites gate on. It copies the macOS job's `if:`, so a Markdown-only pull request skips it. The operator makes it required after 20 consecutive green runs.
+A third job runs `bun run test:e2e` with the tools the `*.e2e.test.ts` suites gate on. It copies the macOS job's `if:`, so a Markdown-only pull request skips it. The operator makes it required after 20 consecutive green runs.
 
 - FFmpeg comes from apt with `Acquire::Retries=3` and a 5-minute step bound, since the runner image lists none
 - `bunx playwright install chromium` lands the engine's browsers, and `canon browser install-browser chromium` the agent CLI's own revision, which the swipe suite launches
@@ -98,5 +98,5 @@ The CI programs, the install check, and a version pin sit beside the workflows.
 - `no checks reported on the '<branch>' branch` usually means a merge conflict, since such a branch has no merge ref to run on. Read `gh pr view --json mergeable,mergeStateStatus` and rebase.
 - A green `🛡️ Static Checks` tested `refs/pull/<n>/merge` as of the last push. No merge queue exists, so a sibling merge leaves it stale until the poll reads `STALE`.
 - The ruleset requires `🛡️ Static Checks` and `🍎 macOS Unit Tests` by name, so renaming either strands branch protection and leaves lift and merge waiting on a check no run reports
-- `🛡️ Static Checks` has no browser or FFmpeg, so every `*.e2e.test.ts` skips there. `🎬 E2E Suites` runs them, but not the probe tests under `src/driver/probes/` or `src/take/target.test.ts`.
+- `vitest.config.ts` keeps every `*.e2e.test.ts` out of `🛡️ Static Checks`. Only `🎬 E2E Suites` runs them, minus the probe tests under `src/driver/probes/` and `src/take/target.test.ts`.
 - The `merge_group` trigger is inert, since a `merge_queue` rule returns `422` on a user-owned repository until a move to an organization
