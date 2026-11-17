@@ -389,39 +389,53 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
     })
   }, 180_000)
 
-  it('should say a refused beat fell back first, with a still of the spent page', async () => {
-    const read = readTakePlan(
-      JSON.stringify({
-        beats: [
-          {
-            name: 'spent',
-            steps: [
-              { kind: 'click', target: '#open' },
-              { kind: 'wait', ms: 200 },
-            ],
-          },
+  it.each([
+    [
+      'steps',
+      'recording',
+      {
+        steps: [
+          { kind: 'click', target: '#open' },
+          { kind: 'wait', ms: 200 },
         ],
-      }),
-    )
-    if (read.kind !== 'read') throw new Error(read.detail)
-    ticketOpens = 0
+      },
+    ],
+    [
+      'setup',
+      'setup',
+      {
+        setup: [{ kind: 'click', target: '#open' }],
+        steps: [{ kind: 'wait', ms: 200 }],
+      },
+    ],
+  ])(
+    'should say a refused beat fell back from a stall in %s, with a still of the spent page',
+    async (_, phase, beat) => {
+      const read = readTakePlan(
+        JSON.stringify({ beats: [{ name: 'spent', ...beat }] }),
+      )
+      if (read.kind !== 'read') throw new Error(read.detail)
+      ticketOpens = 0
 
-    const result = await take({
-      url: new URL('/ticket', server.url).href,
-      plan: read.plan,
-      out,
-    })
+      const result = await take({
+        url: new URL('/ticket', server.url).href,
+        plan: read.plan,
+        out,
+      })
 
-    expect(result).toMatchObject({
-      status: 'failed',
-      reason: 'target-missing',
-      beat: 'spent',
-      fallback: expect.stringContaining('under frame stepping'),
-      still: '01-spent/still.jpg',
-    })
-    expect(ticketOpens).toBe(2)
-    expect(existsSync(join(out, '01-spent/still.jpg'))).toBe(true)
-  }, 180_000)
+      expect(result).toMatchObject({
+        status: 'failed',
+        reason: 'target-missing',
+        beat: 'spent',
+        fallback: expect.stringContaining('under frame stepping'),
+        fallbackPhase: phase,
+        still: '01-spent/still.jpg',
+      })
+      expect(ticketOpens).toBe(2)
+      expect(existsSync(join(out, '01-spent/still.jpg'))).toBe(true)
+    },
+    180_000,
+  )
 
   it('should click the visible text match behind a hidden duplicate', async () => {
     const read = readTakePlan(
