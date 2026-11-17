@@ -58,19 +58,18 @@ export type RosterRow = ResolvedSession & Pick<StopReading, 'stopped'>
 
 /**
  * `waiting` is the ordinary status of a background session that reported and
- * ended its turn, so it reads as finished beside `idle`. `shell` is a turn
- * ended with a background command still held, such as a worker's preview
- * server or a review wait, which most finished workers and reviewers read, so
- * a session a task recorded takes it as finished too. Every other status,
+ * ended its turn, so it reads as finished beside `idle`. Every other status,
  * `busy` among them, has a turn still running.
  */
-const SETTLED_STATUSES: readonly string[] = ['idle', 'waiting', 'shell']
+const IDLE_STATUSES: readonly string[] = ['idle', 'waiting']
 
 /**
- * A session no task records says nothing about its work but its status, so a
- * held background command keeps it alive there.
+ * `shell` is a turn ended with a background command still held, such as a
+ * worker's preview server or a review wait. It reads as finished only once the
+ * work is settled, being a task archived or declined, since on a live task the
+ * command is usually a check the session is still waiting on.
  */
-const UNTASKED_SETTLED: readonly string[] = ['idle', 'waiting']
+const SETTLED_STATUSES: readonly string[] = [...IDLE_STATUSES, 'shell']
 
 const TALK_MARKER = '-talk'
 
@@ -99,6 +98,7 @@ function sharedSkip(
   guards: ReapGuards,
   tasks: readonly TaskSessions[],
   exclude: string | null,
+  finished: readonly string[],
 ): Pick<ReapRow, 'reason' | 'detail'> | null {
   const id = row.sessionId ?? ''
   if (id === guards.self) return { reason: 'caller', detail: null }
@@ -108,7 +108,7 @@ function sharedSkip(
     return { reason: 'controller', detail: row.name }
   }
   if (row.name.includes(TALK_MARKER)) return { reason: 'talk', detail: null }
-  if (!SETTLED_STATUSES.includes(row.status)) {
+  if (!finished.includes(row.status)) {
     return { reason: 'busy', detail: row.status }
   }
   if (row.stopped === 'usage-limit') {
@@ -159,7 +159,13 @@ export function planTaskReap(
       continue
     }
 
-    const skip = sharedSkip(row, guards, tasks, task.stem)
+    const skip = sharedSkip(
+      row,
+      guards,
+      tasks,
+      task.stem,
+      task.state === 'live' ? IDLE_STATUSES : SETTLED_STATUSES,
+    )
     if (skip) {
       settled.push({
         sessionId: entry.sessionId,
@@ -197,7 +203,16 @@ export function planFinishedReap(
     if (row.kind !== 'bg') continue
 
     const id = row.sessionId
-    const skip = sharedSkip(row, guards, tasks, null)
+    const recorded = tasks.some((task) =>
+      task.entries.some((entry) => entry.sessionId === id),
+    )
+    const skip = sharedSkip(
+      row,
+      guards,
+      tasks,
+      null,
+      recorded ? SETTLED_STATUSES : IDLE_STATUSES,
+    )
     if (skip) {
       settled.push({
         sessionId: id,
@@ -208,19 +223,6 @@ export function planFinishedReap(
       continue
     }
 
-    const recorded = tasks.some((task) =>
-      task.entries.some((entry) => entry.sessionId === id),
-    )
-    if (!recorded && !UNTASKED_SETTLED.includes(row.status)) {
-      settled.push({
-        sessionId: id,
-        name: row.name,
-        outcome: 'skipped',
-        reason: 'busy',
-        detail: row.status,
-      })
-      continue
-    }
     if (
       !recorded &&
       (row.statusDwellMs === null || row.statusDwellMs < idleMs)

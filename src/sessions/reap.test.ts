@@ -16,6 +16,7 @@ const REPOSITORY = '/work/canon/.git'
 const WORKER = '11111111-1111-4111-8111-111111111111'
 const REVIEWER = '22222222-2222-4222-8222-222222222222'
 const CALLER = '33333333-3333-4333-8333-333333333333'
+const PLANNER = '44444444-4444-4444-8444-444444444444'
 const HOUR = 60 * 60 * 1000
 
 function row(overrides: Partial<RosterRow>): RosterRow {
@@ -146,12 +147,45 @@ describe('planTaskReap', () => {
     })
   })
 
-  it('should target the planner of a live task whose plan landed', () => {
-    const landed = task('v1.2-plan', 'live', [WORKER])
+  it('should target the planner a live task records once its plan landed', () => {
+    const landed = task('v1.2-plan', 'live', [PLANNER])
 
-    const plan = planTaskReap(landed, [row({})], [landed], GUARDS)
+    const plan = planTaskReap(
+      landed,
+      [row({ sessionId: PLANNER, name: 'planner-canon-plan' })],
+      [landed],
+      GUARDS,
+    )
 
-    expect(plan.targets).toHaveLength(1)
+    expect(plan.targets).toEqual([
+      { sessionId: PLANNER, name: 'planner-canon-plan' },
+    ])
+  })
+
+  it('should skip a session holding a background shell on a live task', () => {
+    const open = task('v1.2-plan', 'live', [WORKER])
+
+    const plan = planTaskReap(open, [row({ status: 'shell' })], [open], GUARDS)
+
+    expect(plan.targets).toEqual([])
+    expect(plan.settled[0]).toMatchObject({ reason: 'busy', detail: 'shell' })
+  })
+
+  it('should skip a reused planner another live task records', () => {
+    const landed = task('v1.2-plan', 'live', [PLANNER])
+    const next = task('v1.3-next', 'live', [PLANNER])
+
+    const plan = planTaskReap(
+      landed,
+      [row({ sessionId: PLANNER, name: 'planner-canon-plan' })],
+      [landed, next],
+      GUARDS,
+    )
+
+    expect(plan.settled[0]).toMatchObject({
+      reason: 'open-task',
+      detail: 'v1.3-next',
+    })
   })
 
   it('should never match a roster row by name alone', () => {

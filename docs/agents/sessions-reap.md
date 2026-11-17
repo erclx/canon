@@ -51,7 +51,7 @@ Every form leaves the sessions below alone, and the row's `reason` says which sk
 | `open-task`   | A live task other than the one named also records it, that task in `detail`               |
 | `recent`      | Finished form only: no task records it and its dwell is under the threshold or unmeasured |
 
-A recorded session reading `shell` holds a background command, such as a preview server or a review wait, and the stop ends it. A session no task records reads `busy` on `shell`, since its status is all the reap knows about it.
+A session reading `shell` holds a background command, such as a preview server or a review wait. It counts as finished only when every task recording it is archived or declined, and the stop ends the command. On a live task, or on no task, it reads `busy`, since the command is usually a check the session still waits on.
 
 ## Refusals
 
