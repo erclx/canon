@@ -1,0 +1,107 @@
+---
+title: Python
+description: The FastAPI service, the search tools, and how the Typer CLI is laid out
+---
+
+# Python
+
+The service answers the agent's tool calls over HTTP. The CLI runs the same tools in process for a coordinator's own reports. Both share one package under `python/src/tidecount/`.
+
+## Stack
+
+- Python 3.12, managed with uv
+- FastAPI with pydantic models for every request and response
+- Typer for the command line
+- SQLite with FTS5 for keyword search and a blob column for embeddings
+- httpx for the one outbound call, the hosted encoder endpoint
+- pytest, ruff, and mypy in strict mode
+
+## Layout
+
+```plaintext
+python/
+├── src/tidecount/
+│   ├── api/
+│   │   ├── app.py          # app factory, routers, error handlers
+│   │   ├── visits.py       # /v1/visits routes
+│   │   └── species.py      # /v1/species routes
+│   ├── cli/
+│   │   ├── main.py         # Typer app and shared options
+│   │   ├── search.py       # tidecount search
+│   │   └── report.py       # tidecount report
+│   ├── search/
+│   │   ├── keyword.py      # FTS5 queries
+│   │   ├── dense.py        # embedding similarity
+│   │   └── hybrid.py       # rank fusion and the score cutoff
+│   ├── store/
+│   │   ├── db.py           # connection and schema
+│   │   ├── importer.py     # CSV export to SQLite
+│   │   └── split.py        # note splitting
+│   ├── encoder.py          # local or hosted encoder, one interface
+│   ├── errors.py           # TidecountError and its subclasses
+│   └── settings.py         # pydantic-settings config
+├── evals/
+├── scripts/
+└── tests/
+```
+
+## Layer responsibilities
+
+- `api/`: request parsing, response shaping, and HTTP errors. No query logic.
+- `cli/`: argument parsing and terminal output. Calls `search/` and `store/` directly.
+- `search/`: every ranking decision. Takes parsed inputs and returns visits with scores.
+- `store/`: the database schema, the importer, and note splitting. Nothing above it writes SQL.
+- `encoder.py`: hides whether encoding runs locally or through the hosted endpoint.
+
+## Decisions
+
+### Species codes are checked in the request schema
+
+A code that is not four upper-case letters fails with a 422 before any query runs. Checking later meant a bad code ran a full search that matched nothing, and the agent read the empty result as "no sightings".
+
+### The score cutoff applies to note search only
+
+`/v1/visits/notes` and `/v1/visits/batch` drop results under the cutoff. `/v1/visits/search` filters by fields and has no score, so the cutoff does not apply there.
+
+### Batch match returns what it could score
+
+When scoring one visit in a batch fails, the response carries the rest with a `skipped` list naming the failures. Failing the whole batch on one bad note cost the agent a whole season.
+
+### Every handled error is a `TidecountError`
+
+The app registers one handler for the base class, which maps each subclass to a status code and a stable `code` field. A bare exception reaching the handler is a bug and returns 500 with no detail.
+
+### The encoder call times out before the client does
+
+The hosted encoder call has a 6 second timeout, under the client's 10 second tool timeout, so a slow encoder surfaces as a clear service error rather than a client-side abort with no message.
+
+## Conventions
+
+- Every route has a response model. No route returns a bare dict.
+- Settings come from `settings.py` alone. No module reads `os.environ`.
+- A test that touches the database uses the `db` fixture, which builds a fresh file per test from `tests/fixtures/sample.csv`.
+- CLI output goes through `rich` tables for lists and plain lines for single values.
+
+## Anti-patterns
+
+- Building SQL with f-strings. Use parameters, including for the FTS5 match string.
+- Catching `Exception` in a route. Raise a `TidecountError` subclass and let the handler map it.
+- Calling the encoder from `api/`. Go through `search/`, which batches.
+- Reading the notes file from the service. It belongs to the CLI only.
+
+## Commands
+
+```bash
+uv sync
+uv run ruff check
+uv run ruff format --check
+uv run mypy src
+uv run pytest
+uv run tidecount --help
+```
+
+Serve with reload from the root with `bun run dev:api`, which wraps `uv run uvicorn` with the right app factory and port.
+
+## Deploy
+
+The service image and its database are covered in `deploy.md`. The only Python-side concern is that `TIDECOUNT_IMAGE=lean` switches `encoder.py` to the hosted endpoint at import time.

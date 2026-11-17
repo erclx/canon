@@ -1,0 +1,24 @@
+---
+title: Retrieval
+description: How survey notes are split, the encoder input rule, and the score cutoff
+---
+
+# Retrieval
+
+How note search finds visits. The hosted demo runs keyword search plus a precomputed embedding column since v3.0, and the CLI runs the full hybrid locally. The comparison numbers behind these choices live in `docs/search-comparison.md`.
+
+## Splitting notes
+
+A visit's notes split into pieces of about 600 characters, breaking at sentence ends first and at the length limit only when one sentence runs past it. The splitter lives in `python/src/tidecount/store/split.py`.
+
+Each piece is one row in the keyword index and one row in the embedding table, so one piece is one search candidate on both sides and rank fusion compares like with like.
+
+## Encoder input rule
+
+The encoder in use expects a `passage: ` prefix on stored text and a `query: ` prefix on the question. `encoder.py` adds both, so a caller cannot mix them up. The comparison runner applies the same prefixes to every encoder it tests, including ones never trained on them, which costs those a little and keeps the inputs equal.
+
+## Score cutoff
+
+Rank fusion always returns something, however weak the match. A nonsense question such as "copper lighthouse ballet" still returned visits at fusion scores near 0.02 in the v2.3 review.
+
+The service drops results under `TIDECOUNT_FUSION_CUTOFF`, which defaults to `0.022`, at the note and batch routes only. The cutoff depends on how many pieces are indexed, so a much larger export needs it tuned again. `settings.py` exposes it so a deploy can change it without a code change.

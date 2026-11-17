@@ -1,0 +1,65 @@
+---
+title: Canvas
+description: The map surface, its reducer, the layout modes, and how a tool call becomes a canvas action
+---
+
+# Canvas
+
+The canvas is a MapLibre map with an overlay of visit pins and question edges. The agent decides which visits appear and which layout holds them. The reader can drag, pin, and open any of them.
+
+## Layer responsibilities
+
+- `web/components/canvas/MapCanvas.tsx`: mounts the map, draws pins and edges from canvas state, and handles drag
+- `web/lib/canvas/reducer.ts`: the only place canvas state changes, taking actions from tool calls and from the reader
+- `web/lib/canvas/layouts/`: one file per layout, each turning a list of visits into positions
+- `web/lib/canvas/bridge.ts`: reads tool calls off the chat stream and turns each into a reducer action
+- `web/lib/canvas/storage.ts`: writes canvas state to `sessionStorage` after each action and reads it back on load
+
+## Pins and records
+
+Each pin carries a visit id and nothing else. The drawer and the tooltip read the visit from the client cache by that id. Keeping records out of canvas state means a reload restores positions from storage and fetches records fresh, so a corrected count shows up without clearing the canvas.
+
+| Layout       | Positions from                        | Edges shown           |
+| ------------ | ------------------------------------- | --------------------- |
+| Clusters     | Site coordinates, jittered per visit  | Question to each pin  |
+| Season strip | Month on x, site on y                 | None                  |
+| Compare      | One column per site                   | Question to each pin  |
+| Picked       | A grid in the order the reader picked | None                  |
+
+## Decisions
+
+### Session storage owns canvas state
+
+The agent never reads canvas state back. It sends placements and a layout, and the client owns what happens after. A reload restores from `sessionStorage`, not from replaying the chat.
+
+### The agent picks a layout, never a position
+
+An early version (v1.2) let the model send coordinates. It placed pins in the sea. Layouts now compute every position, and the model only names the layout.
+
+### Pins stay on the client
+
+Pinning a visit is a reader action that never goes back to the agent. The next turn may ask for a new layout, and pinned visits keep their place through it.
+
+## Gotchas
+
+### New chat clears the canvas and the picks, never the question
+
+The research question stays on screen across a new chat, since a coordinator usually asks several questions against the same one.
+
+### A half-streamed reply cannot be restored
+
+If the tab closes mid-stream, the reload shows the chat up to the last whole message and the canvas as of the last applied action. A tool call that arrived without its result is dropped.
+
+### Switching layouts keeps dragged positions per layout
+
+A pin dragged in the clusters layout returns to its dragged spot when the reader comes back to clusters, even after a stop in compare.
+
+### Edges read match scores, not groups
+
+Edge opacity comes from `matchScores`, keyed by visit id. The batch-sort groups are for the chat text only.
+
+## Hidden contracts
+
+- The reducer ignores any tool name it does not know, so a renamed canvas tool fails silently
+- `storage.ts` keys state by chat id. Two tabs on one chat share a canvas.
+- The bridge applies actions in stream order. A layout action arriving before its placements lays out an empty canvas, then fills it on the next action.

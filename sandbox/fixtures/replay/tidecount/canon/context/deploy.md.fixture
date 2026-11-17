@@ -1,0 +1,111 @@
+---
+title: Deploy
+description: Where the service and the client are hosted, the domain, and the hosting traps behind them
+---
+
+# Deploy
+
+The hosted demo runs the FastAPI service as a container on Fly.io and the Next.js client on Vercel. The domain sits behind Cloudflare DNS. The demo brings its own key, so a visitor pastes a provider key and nothing is billed to the project.
+
+The service image ships the SQLite database built from the latest export, read-only. Nothing the demo does writes to it.
+
+## Layer responsibilities
+
+- `python/Dockerfile`: builds the service image, copying the database and the encoder weights in at build time
+- `python/fly.toml`: the machine size, the region, the health check, and the scaling rule
+- `web/vercel.json`: the rewrites that send `/api/service/*` to the Fly app
+- `scripts/deploy-service.sh`: rebuilds the database from the export, builds the image, and deploys it
+- `.github/workflows/deploy.yml`: runs the service deploy on a tag, and lets Vercel's own integration deploy the client
+
+The client deploys on every push to `main` through the Vercel integration. The service deploys only on a tag, since a new image means a new database and a new encoder cache.
+
+| Part     | Host       | Region | Trigger              |
+| -------- | ---------- | ------ | -------------------- |
+| Service  | Fly.io     | `ams`  | A `service-v*` tag   |
+| Client   | Vercel     | Auto   | Every push to `main` |
+| DNS      | Cloudflare | Global | By hand              |
+| Database | In image   | `ams`  | With the service     |
+
+## Decisions
+
+### The hosted image drops the encoder (`TIDECOUNT_IMAGE=lean`)
+
+The full image carries the encoder weights for note search, about 1.1 GB. The hosted demo searches with keywords plus a precomputed embedding column, so query-time encoding is the only thing the weights are for. The lean image (v3.0) encodes queries through a small hosted embedding endpoint instead, and the image dropped to 240 MB, which cut cold start from 19 seconds to 6.
+
+### The region is Amsterdam
+
+Most of the survey network's coordinators are in western Europe. Amsterdam was the closest region with spare capacity on the smallest machine.
+
+### Model ids come from per-provider variables
+
+Each provider has its own variable, such as `TIDECOUNT_MODEL_OPENAI` and `TIDECOUNT_MODEL_LOCAL`. A single `MODEL` variable broke the moment a reader switched providers mid-session, since the id belonged to the provider that was no longer in use.
+
+### Memory is pinned at 1 GB
+
+At 512 MB the service died under the batch-sort tool, which holds every visit for a season in memory while it scores them. 1 GB gives room for a full season on the largest site.
+
+### A cold start is acceptable
+
+The machine scales to zero after ten idle minutes. The first request after that waits about 6 seconds. For a demo where every visitor brings a key, paying for an always-on machine was not worth it.
+
+## Hidden contracts
+
+- The client rewrite path `/api/service/*` must match the service's `root_path`. Changing one without the other returns 404 on every tool call.
+- The health check path is `/health/live`. Fly restarts the machine when it fails three times in a row.
+- The database file name in the image is fixed at `/data/tidecount.sqlite`. The importer writes that name and the service opens it.
+- The encoder endpoint URL is read at start. Changing it needs a restart, not just a new secret.
+
+## Gotchas
+
+### `/healthz` collides with the edge
+
+A health route at `/healthz` was answered by the platform's edge before it reached the app, so a dead service reported healthy. The route moved to `/health/live`.
+
+### The Vercel framework preset must stay on Next.js
+
+Setting the preset to "Other" during a debugging session made every App Router API route return 404 on the next deploy. The preset is now noted in the repository README.
+
+### Cloudflare proxy mode breaks the Vercel certificate
+
+With the orange cloud on, Vercel could not renew the certificate and the domain served an expired one after 90 days. DNS-only mode is required for the client record.
+
+### Preview deploys ask for a login by default
+
+New Vercel projects turn on deployment protection for previews, so a reviewer opening a preview link hits a login page. It is turned off for this project, which has nothing private in a preview.
+
+## Deploy
+
+1. Pull the latest monthly export into `var/export/`
+2. Run `./scripts/deploy-service.sh --rebuild-db`, which imports, builds, and checks the database before building the image
+3. Tag the commit `service-v<n>` and push the tag
+4. Watch the deploy workflow, which runs `fly deploy` with the lean image
+5. Run the smoke checks below against the hosted domain
+
+The client needs nothing by hand. Its deploy follows `main`.
+
+## Custom domain
+
+The domain is registered at Cloudflare. Two records point at the hosts.
+
+- An `A` record for the apex, DNS-only, pointing at Vercel
+- A `CNAME` for `api`, DNS-only, pointing at the Fly app
+
+Both stay DNS-only. Proxy mode breaks certificate renewal on both hosts, for different reasons.
+
+## Smoke
+
+Run these after every service deploy. Each should answer within the cold-start window.
+
+```bash
+curl -fsS https://api.example.org/health/live
+curl -fsS "https://api.example.org/v1/visits/search?site=NB-04&from=2026-06-01" | jq '.visits | length'
+curl -fsS -X POST https://api.example.org/v1/visits/match -d @python/tests/fixtures/match.json -H 'content-type: application/json' | jq '.score'
+```
+
+A non-zero count from the search and a score between 0 and 1 from the match mean the database and the encoder endpoint both answered.
+
+### When a smoke check fails
+
+- A 404 on every path means the rewrite and the `root_path` disagree
+- A 502 on the first call only is a cold start that ran past the edge timeout, so retry once
+- A 500 on the match call alone points at the encoder endpoint, so check its secret

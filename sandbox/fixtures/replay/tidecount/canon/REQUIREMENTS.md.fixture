@@ -1,0 +1,50 @@
+# Requirements
+
+## Problem
+
+Volunteer groups survey the same tide pools every month and file their counts as spreadsheets and free-text notes. The shared portal they upload to filters by site and date and nothing else. A coordinator who wants to know "which sites saw sea stars drop after the August heat" or "where did anyone note invasive crabs near a low-tide mark under 0.3 m" has to open each sheet, read the notes column by hand, and keep a tally in a separate file with no consistent rules.
+
+## Goals
+
+- Take a free-form question in chat and return a ranked list of survey visits, each with its site, date, the counts that matched, and a one-line reason
+- Let a coordinator paste a research question as markdown to steer the ranking, with no account needed
+- Show every tool call the agent made so a reader can see which searches and steps led to an answer
+- Run the same agent from a CLI for a coordinator's own monthly report, reading and writing a local notes file
+
+## Non-goals
+
+- Species identification from photos. That is a vision problem and a different project.
+- Pulling in surveys from other monitoring networks. The value is depth on one network's records.
+- Population modeling or forecasting. This is search plus reasoning over what was written down.
+- Training or fine-tuning a model.
+- Accounts, roles, or several teams sharing one instance. The hosted demo is anonymous and holds one session.
+- Keeping chat history between sessions, for now.
+- A layout built for phones, for now.
+
+## MVP features
+
+1. Filtered search: query survey visits by site, date range, tide height, or species code
+2. Note search: hybrid search over the free-text field notes, merged by reciprocal rank fusion
+3. Question match: score one visit against the pasted research question, with a reason
+4. Batch sort: run search and match together across a season and group the visits by verdict
+5. Site compare: put several sites side by side against the same question
+6. Season view: a month-by-month strip of visits for the chosen sites
+7. Report notes: read the coordinator's local notes file to mark visits already written up (CLI only)
+8. Map canvas: matched visits appear as pins the agent arranges. The canvas has four layouts (clusters, season strip, compare, picked). The research question sits on the canvas as its own node, linked to each visit by a weighted edge. Pins stay put for the browser session.
+
+## Tech stack
+
+- Client: Next.js 15, the Vercel AI SDK, Tailwind, shadcn/ui, MapLibre
+- Service: FastAPI on Python 3.12
+- Records: the network's monthly CSV export, imported into SQLite
+- Embeddings: a multilingual sentence encoder, since about a third of the notes are not in English
+- Keyword search: FTS5 inside the same SQLite file
+- Model: any OpenAI-compatible endpoint, with a local Ollama model for the CLI
+- Map tiles: a self-hosted vector tile file
+
+## Constraints
+
+- The hosted demo brings its own key, so no request is billed to the project
+- Every survey record stays public data. Volunteer names are dropped at import.
+- The CLI runs with no network once the tile file and the database are local
+- A query answers within 20 seconds on the hosted demo, cold start aside

@@ -1,0 +1,24 @@
+{
+  "name": "tidecount",
+  "private": true,
+  "devDependencies": {
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
+    "cspell": "^10.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.5",
+    "prettier": "^3.8.3"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "format": "prettier --write --log-level warn --ignore-path .gitignore . && shfmt --write --indent 2 scripts/ python/scripts/",
+    "check:format": "prettier --check --log-level warn --ignore-path .gitignore . && shfmt --diff --indent 2 scripts/ python/scripts/",
+    "check:spell": "cspell '**' '.*/**' --no-progress --show-context",
+    "check:shell": "find scripts python/scripts -name '*.sh' -exec shellcheck --severity=warning {} +",
+    "check": "./scripts/verify.sh",
+    "clean": "./scripts/clean.sh",
+    "dev:api": "./python/scripts/serve.sh --reload",
+    "serve:web": "./scripts/serve-web.sh",
+    "update": "./scripts/update.sh"
+  }
+}

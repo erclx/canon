@@ -1,0 +1,52 @@
+---
+title: Map tiles offline
+subtitle: Serving vector map tiles from one local file for field use with no signal
+---
+
+Survey sites sit on coastlines where a phone often has no signal, and the CLI report runs on a laptop in a car park as often as at a desk. These notes cover serving the base map from a single file on disk, and the traps found while setting it up.
+
+## File format
+
+A PMTiles archive holds every tile in one file, read by byte range. No tile server runs, and the client fetches ranges straight from a static path or from disk.
+
+- A regional extract at zoom 0 to 14 covering the survey coastline is about 180 MB
+- Dropping zoom 14 cuts it to about 60 MB, and the pins stay readable at zoom 13
+- One archive per region beats one large archive, since an update rebuilds only the region that changed
+
+## Building an extract
+
+1. Download the planet build for the month from the upstream mirror
+2. Cut the region with `pmtiles extract`, passing the bounding box of every survey site plus a 5 km margin
+3. Check the archive with `pmtiles show`, which prints the zoom range and the tile count
+4. Copy it to `var/tiles/` on the machine that serves it
+
+The bounding box lives in `python/src/tidecount/sites/bbox.py`, generated from the site table, so a new site widens the box on the next build.
+
+## Style traps
+
+### Glyphs and sprites are separate requests
+
+The style file names a glyph URL and a sprite URL. Offline, both must point at local copies, or every label renders blank with no error in the console. Keep the glyph ranges for Latin and Latin Extended only, since the base map labels nothing else.
+
+### Fonts are per stack, not per family
+
+A style that asks for `Noto Sans Regular, Arial Unicode MS Regular` needs a glyph folder for that exact stack name. Copying the two families separately does not satisfy it.
+
+### The attribution control still fetches
+
+The default attribution control reads a remote source list. Turn it off and print the attribution text in the drawer footer instead.
+
+## Cache sizes
+
+| Zoom range | Region archive | Browser cache after a full pan |
+| ---------- | -------------- | ------------------------------ |
+| 0 to 12    | 31 MB          | 9 MB                           |
+| 0 to 13    | 60 MB          | 22 MB                          |
+| 0 to 14    | 180 MB         | 64 MB                          |
+
+The browser cache figure is what a reader panning the whole coastline once leaves behind. A typical session touches a fifth of it.
+
+## Sources
+
+- The PMTiles specification, version 3
+- The MapLibre GL style specification, sections on glyphs and sprites

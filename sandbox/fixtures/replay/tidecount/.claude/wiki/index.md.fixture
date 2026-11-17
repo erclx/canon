@@ -1,0 +1,11 @@
+---
+title: Wiki
+subtitle: Technical notes that stay useful after the decision behind them is gone
+auto: false
+---
+
+A page here holds something that keeps its value past one plan, one model release, or one redesign. A plan under `.canon/plans/` is removed once its task ships, so anything a later session would want goes here instead.
+
+## Pages
+
+- [Map tiles offline](./map-tiles-offline.md): Serving vector map tiles from one local file for field use with no signal, with cache sizes and the style traps found along the way

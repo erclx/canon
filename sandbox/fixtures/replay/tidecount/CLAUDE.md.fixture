@@ -1,0 +1,25 @@
+# tidecount
+
+Answers free-form questions about volunteer tide-pool surveys, plots the matching observations on a map canvas, and prints each tool call the agent made so a reader can check how an answer was reached. The Next.js client lives in `web/`, and the FastAPI service with its Typer CLI lives in `python/`.
+
+## Context
+
+- Read `canon/context/<domain>.md` before any change larger than a typo, and read `canon/wireframes/<surface>.md` before editing a screen. The index below says which entry covers what.
+
+@canon/context/index.md
+@canon/REQUIREMENTS.md
+@canon/ARCHITECTURE.md
+@canon/wireframes/index.md
+
+## Commands
+
+- `bun run check` runs every verify step in order. `canon/context/development.md` lists each script.
+- Never start the web server with `bun run dev`, which is switched off. Use `bun run serve:web` from the root, which stops any old server first, builds, starts a fresh one in the background with its log at `.canon/tmp/serve/web.log`, and confirms a new process holds the port. A bare `lsof` on the port can miss a server that forked.
+
+## Key paths
+
+- `web/`: the Next.js client, managed with bun, holding the chat panel, the map canvas, and the agent route
+- `python/`: the FastAPI service and Typer CLI, managed with uv, holding search and the survey importer
+- `scripts/`: shell helpers run from the root, such as the server restart and the GPU watcher
+- `web/evals/`: JSON cases read by `web/scripts/agent-probe.ts`, shaped as `canon/context/evals.md` describes
+- `.claude/wiki/`: technical notes worth keeping after the decision that produced them is gone

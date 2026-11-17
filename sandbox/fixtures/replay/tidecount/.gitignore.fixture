@@ -1,0 +1,20 @@
+# OS
+.DS_Store
+
+# Packages
+node_modules/
+.venv/
+
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# Claude
+.canon/tmp/
+.claude/worktrees/
+
+# Generated
+var/tiles/
+.vercel
+.canon/
