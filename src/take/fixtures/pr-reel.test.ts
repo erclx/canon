@@ -3,7 +3,7 @@ import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { isPainted, loadPaintedPatterns } from '@/pr/painted'
-import { selectFixtures } from '@/take/fixtures/pr-reel'
+import { readReelArgs, selectFixtures } from '@/take/fixtures/pr-reel'
 
 const FOLDER = [
   'motion.html',
@@ -80,6 +80,87 @@ describe('selectFixtures', () => {
     )
 
     expect(selection).toEqual({ kind: 'film', stems: ['motion', 'scrollbars'] })
+  })
+})
+
+describe('readReelArgs', () => {
+  it('should film no authored plan when none is passed', () => {
+    const args = readReelArgs(
+      ['--base', 'origin/main', '--out', 'reel'],
+      FOLDER,
+    )
+
+    expect(args).toEqual({
+      kind: 'run',
+      base: 'origin/main',
+      out: 'reel',
+      json: false,
+    })
+  })
+
+  it('should film an authored plan on motion when no fixture is named', () => {
+    const args = readReelArgs(
+      ['--base', 'origin/main', '--out', 'reel', '--plan', 'stall.json'],
+      FOLDER,
+    )
+
+    expect(args).toMatchObject({
+      kind: 'run',
+      authored: { plan: 'stall.json', fixture: 'motion' },
+    })
+  })
+
+  it('should film an authored plan on the fixture it names', () => {
+    const args = readReelArgs(
+      [
+        '--base',
+        'origin/main',
+        '--out',
+        'reel',
+        '--plan',
+        'focus.json',
+        '--fixture',
+        'focus',
+      ],
+      FOLDER,
+    )
+
+    expect(args).toMatchObject({
+      authored: { plan: 'focus.json', fixture: 'focus' },
+    })
+  })
+
+  it('should refuse a fixture named without a plan', () => {
+    const args = readReelArgs(
+      ['--base', 'origin/main', '--out', 'reel', '--fixture', 'focus'],
+      FOLDER,
+    )
+
+    expect(args.kind).toBe('usage')
+  })
+
+  it('should refuse a fixture the folder holds no page for', () => {
+    const args = readReelArgs(
+      [
+        '--base',
+        'origin/main',
+        '--out',
+        'reel',
+        '--plan',
+        'x.json',
+        '--fixture',
+        'ticket',
+      ],
+      FOLDER,
+    )
+
+    expect(args.kind).toBe('usage')
+  })
+
+  it('should refuse a run missing its base', () => {
+    const args = readReelArgs(['--out', 'reel'], FOLDER)
+
+    expect(args.kind).toBe('usage')
   })
 })
 

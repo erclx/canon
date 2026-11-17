@@ -3,17 +3,22 @@
  * one reel, so a pull request changing `canon take` carries evidence filmed by
  * the code under review rather than the published `canon` on PATH.
  *
- * Usage: bun src/take/fixtures/pr-reel.ts --base <ref> --out <dir> [--json]
+ * Usage: bun src/take/fixtures/pr-reel.ts --base <ref> --out <dir>
+ *   [--plan <file> [--fixture <stem>]] [--json]
  *
  * A changed `<stem>.html` films with the `<stem>.json` plan beside it. A diff
  * whose take change reaches no planned fixture refuses as `unplanned`, naming
  * the paths, rather than filming a stock board that shows none of it. Each
  * fixture films into `<out>/<stem>/` and every beat joins `<out>/reel.webp`.
+ *
+ * `--plan` films a plan written for the change on `--fixture`, `motion` by
+ * default, in place of the selection, under the same cap a fixture plan meets.
  */
 
 import { spawnSync } from 'node:child_process'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
 import { type FilmedBeat, take } from '@/take/film'
 import { serveFixture } from '@/take/fixtures/motion-server'
@@ -21,6 +26,7 @@ import { readTakePlan } from '@/take/plan'
 import { renderReel } from '@/take/reel'
 
 const ENGINE = 'src/take/'
+const DEFAULT_FIXTURE = 'motion'
 const FIXTURES = `${ENGINE}fixtures/`
 
 /** The most filmed seconds the beats of every fixture may sum to. */
@@ -55,6 +61,81 @@ export function selectFixtures(
   const unique = [...new Set(stems)].sort()
   if (unique.length > 0) return { kind: 'film', stems: unique }
   return { kind: 'unplanned', paths: engine }
+}
+
+const USAGE =
+  'Usage: bun src/take/fixtures/pr-reel.ts --base <ref> --out <dir> [--plan <file> [--fixture <stem>]] [--json]'
+
+/** A plan written for the change and the fixture page it films on. */
+export interface AuthoredPlan {
+  readonly plan: string
+  readonly fixture: string
+}
+
+export type ReelArgs =
+  | { readonly kind: 'usage'; readonly message: string }
+  | {
+      readonly kind: 'run'
+      readonly base: string
+      readonly out: string
+      readonly json: boolean
+      readonly authored?: AuthoredPlan
+    }
+
+/**
+ * The run the command line asks for, refusing a `--fixture` with no `--plan`
+ * to film on it and a fixture the folder holds no page for.
+ */
+export function readReelArgs(
+  argv: readonly string[],
+  fixtureFiles: readonly string[],
+): ReelArgs {
+  let values: {
+    base?: string
+    out?: string
+    plan?: string
+    fixture?: string
+    json?: boolean
+  }
+  try {
+    values = parseArgs({
+      args: [...argv],
+      options: {
+        base: { type: 'string' },
+        out: { type: 'string' },
+        plan: { type: 'string' },
+        fixture: { type: 'string' },
+        json: { type: 'boolean' },
+      },
+    }).values
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    return { kind: 'usage', message: `${message}\n${USAGE}` }
+  }
+  if (values.base === undefined || values.out === undefined) {
+    return { kind: 'usage', message: USAGE }
+  }
+  const run = {
+    kind: 'run' as const,
+    base: values.base,
+    out: values.out,
+    json: values.json ?? false,
+  }
+  if (values.plan === undefined) {
+    if (values.fixture === undefined) return run
+    return {
+      kind: 'usage',
+      message: `--fixture names the page a --plan films on, so it needs one\n${USAGE}`,
+    }
+  }
+  const fixture = values.fixture ?? DEFAULT_FIXTURE
+  if (fixture.includes('/') || !fixtureFiles.includes(`${fixture}.html`)) {
+    return {
+      kind: 'usage',
+      message: `no fixture page ${fixture}.html in src/take/fixtures/\n${USAGE}`,
+    }
+  }
+  return { ...run, authored: { plan: values.plan, fixture } }
 }
 
 /** A beat filmed into `<stem>/` with its paths rebased onto the reel's folder. */
@@ -101,7 +182,11 @@ function changedPaths(base: string): string[] | string {
   return diff.stdout.split('\n').filter((line) => line.length > 0)
 }
 
-async function film(base: string, outDir: string): Promise<ReelRecord> {
+async function film(
+  base: string,
+  outDir: string,
+  authored: AuthoredPlan | undefined,
+): Promise<ReelRecord> {
   const changed = changedPaths(base)
   if (typeof changed === 'string') {
     return { status: 'failed', reason: 'diff-unreadable', message: changed }
@@ -109,7 +194,7 @@ async function film(base: string, outDir: string): Promise<ReelRecord> {
   const folder = new URL('./', import.meta.url)
   const selection = selectFixtures(changed, readdirSync(folder))
   if (selection.kind === 'untouched') return { status: 'untouched' }
-  if (selection.kind === 'unplanned') {
+  if (selection.kind === 'unplanned' && authored === undefined) {
     return {
       status: 'failed',
       reason: 'unplanned',
@@ -122,15 +207,33 @@ async function film(base: string, outDir: string): Promise<ReelRecord> {
   const joined: FilmedBeat[] = []
   const filmed: { fixture: string; name: string; still: string }[] = []
   let seconds = 0
-  for (const stem of selection.stems) {
-    const read = readTakePlan(
-      readFileSync(new URL(`${stem}.json`, folder), 'utf8'),
-    )
+  const targets =
+    authored !== undefined
+      ? [{ stem: authored.fixture, plan: resolve(authored.plan) }]
+      : selection.kind === 'film'
+        ? selection.stems.map((stem) => ({
+            stem,
+            plan: fileURLToPath(new URL(`${stem}.json`, folder)),
+          }))
+        : []
+  for (const { stem, plan } of targets) {
+    let text: string
+    try {
+      text = readFileSync(plan, 'utf8')
+    } catch (error) {
+      return {
+        status: 'failed',
+        reason: 'plan-unreadable',
+        message: `${plan}: ${error instanceof Error ? error.message : error}`,
+        fixture: stem,
+      }
+    }
+    const read = readTakePlan(text)
     if (read.kind !== 'read') {
       return {
         status: 'failed',
         reason: 'plan-unreadable',
-        message: `${stem}.json: ${read.detail}`,
+        message: `${plan}: ${read.detail}`,
         fixture: stem,
       }
     }
@@ -208,30 +311,16 @@ function report(record: ReelRecord, json: boolean): void {
 }
 
 async function main(argv: readonly string[]): Promise<number> {
-  const usage =
-    'Usage: bun src/take/fixtures/pr-reel.ts --base <ref> --out <dir> [--json]\n'
-  let values: { base?: string; out?: string; json?: boolean }
-  try {
-    values = parseArgs({
-      args: [...argv],
-      options: {
-        base: { type: 'string' },
-        out: { type: 'string' },
-        json: { type: 'boolean' },
-      },
-    }).values
-  } catch (error) {
-    process.stderr.write(
-      `${error instanceof Error ? error.message : error}\n${usage}`,
-    )
+  const args = readReelArgs(
+    argv,
+    readdirSync(new URL('./', import.meta.url), 'utf8'),
+  )
+  if (args.kind === 'usage') {
+    process.stderr.write(`${args.message}\n`)
     return 2
   }
-  if (values.base === undefined || values.out === undefined) {
-    process.stderr.write(usage)
-    return 2
-  }
-  const record = await film(values.base, values.out)
-  report(record, values.json ?? false)
+  const record = await film(args.base, args.out, args.authored)
+  report(record, args.json)
   return record.status === 'failed' ? 1 : 0
 }
 
