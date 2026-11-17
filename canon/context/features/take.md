@@ -31,7 +31,7 @@ Owns the static pages the end to end takes film, two of which post each input th
 - `motion.html` reports the animation frame each input paints in, since a stepped page's `performance.now()` runs ahead of the clip while inputs are dispatched
 - `scrollbars.html` posts its scrollbar gutter, 0 on both routes since a take hides scrollbars until a beat sets `scrollbars: true`, which a stepped beat that falls back to the screencast keeps
 - `watch.ts` films `motion.json` on that page and renders each beat with its zoom and cursor burned in, for judging a camera change by eye
-- `pr-reel.ts` films each changed fixture with its `<stem>.json` plan, or `motion.json`, through the worktree's engine into the reel the lift owes, since canon's config paints `src/take/**`
+- `pr-reel.ts` films the reel the lift owes through the worktree's engine, from each changed fixture's `<stem>.json` or a `--plan <file>`, and refuses `unplanned` when neither covers the change
 
 ### `src/take/film-*.e2e.test.ts`
 
