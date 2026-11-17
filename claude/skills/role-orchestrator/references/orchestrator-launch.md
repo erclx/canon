@@ -79,7 +79,7 @@ The prompt carries pointers and standing context, and stops there. The branch an
 - On a reviewer launch, carry the sibling pull requests in flight, the files each shares with this one, the merge order, and a settled constraint, all as facts
 - Leave out this session's read of the change and the author's argument, which cost the dispatch its independence, and any list of what to look for, which is `review-craft`'s
 
-Report the dispatch as loudly as the human-launch line it replaces, naming the branch, the model, the effort, why the weight and role picked them, the task, and the session name, so a reader can follow what fired unwatched.
+Report the dispatch as loudly as the human-launch line it replaces, naming the branch, model, effort, why the weight and role picked them, the task, and the `-n` name with the id in brackets, so a reader can follow what fired unwatched.
 
 ### Record the worker on its task
 
