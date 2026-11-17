@@ -9,7 +9,7 @@ kind: reference
 `canon sessions reap` stops the background sessions that did a task's work, so the agent view shows live work rather than hundreds of finished runs. It stops by default, which keeps each conversation for `claude attach`, and removes only under `--remove`.
 
 ```bash
-canon sessions reap v196.1-launch-report --json
+canon sessions reap parser-rewrite --json
 canon sessions reap --finished --dry-run --json
 canon sessions reap --finished --remove --write --json
 ```
