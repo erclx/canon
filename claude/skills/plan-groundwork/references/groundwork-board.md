@@ -61,7 +61,7 @@ A capture cited from the board with no copy under `evidence/` makes the track no
 
 ## Close
 
-Keep the `groundwork-<nn>` project, since the operator looks back at a track's frames there. End the serve command only when `reused` read false.
+Keep the project the README names, `groundwork-<nn>` or its `-<slug>` fallback, since the operator looks back at a track's frames there. End the serve command only when `reused` read false.
 
 - Name the project and its board in the README's file map, beside the `evidence/` and `scripts/` paths that hold the copies
 - A `design-pick` round inside the same track is still removed by that skill's close

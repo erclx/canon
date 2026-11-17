@@ -44,7 +44,7 @@ A `design-pick` run invoked from inside a live track follows its own branch for 
 
 ### Drawing a judgment question
 
-When an open question is a choice the operator settles by looking, the track draws its options on its own board project, `groundwork-<nn>`. That project is a third exception to the write scope, and the track reaches no other project and no accepted frame.
+When an open question is a choice the operator settles by looking, the track draws its options on its own board project, `groundwork-<nn>`, or `groundwork-<nn>-<slug>` when another track left that name. That project is a third exception to the write scope, and the track reaches no other project and no accepted frame.
 
 Read `${CLAUDE_SKILL_DIR}/references/groundwork-board.md` before the first frame, for when a track draws, its pages, how it asks, and the copies it keeps under `evidence/` and `scripts/`.
 
