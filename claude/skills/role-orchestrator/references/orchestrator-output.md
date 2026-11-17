@@ -68,7 +68,7 @@ Keep the detail below the block and keep it skippable. A decision reached at the
 
 - Reuse the vocabulary above rather than inventing a second one
 - Keep a file set on the row claiming it, so the reader can check a hold or a shared-path claim instead of taking it
-- Name every session a report names by its launch name, with its role in plain words and the id in brackets, as in `the reviewer review-frameboard-design-reference-set [631880bb]`
+- Name every session a report names by its launch name, with its role in plain words and the id in brackets, as in `the reviewer review-frameboard-design-reference-set [<id>]`
   - A bare id tells the operator nothing about which session it is, and the operator's agent view lists sessions by name
   - A line sending the operator into a session gives the command with the name, such as `claude attach worker-frameboard-design-reference-set`
   - The `session-name` Stop hook flags a final reply carrying a live session's id with no name beside it, and forces one rewrite
