@@ -1,9 +1,6 @@
 /**
- * Craft's eight practice skills: when each loads, one rule taken from the
- * skill, and the source that rule cites with its quote. Each rule and quote is
- * typed here rather than parsed out of the ledger at build time, so `rule`
- * names the file the rule sits in and `ledger` names the ledger row holding
- * the quote, the two places a reviewer checks the line against.
+ * Craft's practice skills, typed here rather than parsed from the ledger, so
+ * `ruleFile` and `ledger` name the two places a reviewer checks each line.
  */
 
 export interface Practice {

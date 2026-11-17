@@ -1,22 +1,14 @@
 /**
- * Every string on the page outside the product views, each carrying a
- * verbatim phrase from `README.md` or a paraphrase marker saying why it cannot.
- * A phrase survives a line moving, and only a change to the phrase itself fails
- * `readmeCitations` in `src/gate/measures.ts`.
- *
- * The page runs in the README's order, so most headings quote it. The product
- * views are page fiction drawn from real behavior and live beside their one
- * consumer. A pair of backticks in a string marks code, rendered as `<code>`.
+ * Every string on the page, each quoting `README.md` or marked as a paraphrase,
+ * which `readmeCitations` checks. A pair of backticks marks code.
  */
 
 const REPO = 'https://github.com/erclx/canon'
 const NPM = 'https://www.npmjs.com/package/@erclx/canon'
 const DOCS = `${REPO}/tree/main/docs`
 /**
- * The deployed origin, which a social card's absolute image URL is resolved
- * against and which `astro.config.mjs` reads as its own `site` value. It is
- * the address `.github/workflows/deploy-site.yml` publishes to rather than
- * anything `README.md` states, so it carries no citation.
+ * The origin `.github/workflows/deploy-site.yml` publishes to, which the card's
+ * image URL and `astro.config.mjs` read. No README sentence states it.
  */
 const ORIGIN = 'https://canon.erclx.com'
 
@@ -328,9 +320,8 @@ export const roleScenes = [
 ]
 
 /**
- * What holds it: one scene per part, each a request and the lines the window
- * shows. A line is its kind, a lead, and its text, where `block` is a refusal
- * and `note` a line the harness reports back into the turn.
+ * One scene per part. A line is its kind, a lead, and its text, where `block`
+ * is a refusal and `note` a line the harness reports back into the turn.
  */
 // README.md: canon-allow-readme-paraphrase: page fiction drawn from the plan guard's real refusal and the seeded merge deny, which the README describes but never quotes.
 export const guardrailScenes: {
@@ -388,10 +379,8 @@ export const guardrailScenes: {
 ]
 
 /**
- * One worktree for each change: three worktrees side by side, each its folder,
- * its branch, and what the session in it is doing. Each card steps through its
- * status lines in turn, lighting the band folder the step writes, and rests on
- * its second.
+ * Three worktrees side by side. Each card steps through its status lines,
+ * lighting the band folder the step writes, and rests on its second.
  */
 // README.md: canon-allow-readme-paraphrase: page fiction drawn from the worktree layout the README describes. "Each worker builds in its own worktree on its own branch"
 export const worktreeCards = [

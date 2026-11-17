@@ -1,14 +1,6 @@
 /**
- * The opening's agent view: the changes it draws from, the lines each role
- * shows on one, the sessions it opens on, and the order its `/` menu lists the
- * workflow skills in. Every name and line is page fiction drawn from how the
- * roles really report, with no local path, version, or account detail.
- *
- * A change runs through its roles in order: a planner, then a worker, then a
- * code reviewer and, on a change with a rendered surface, a UI reviewer, each
- * session named for its role and the change. `completed` is the view's
- * starting tally of finished sessions inside the fiction, which ticks up as
- * the loop completes them, and states no count of anything in the repository.
+ * The opening's agent view, page fiction with no local path or account detail.
+ * `completed` is a tally inside the fiction, never a count of the repository.
  */
 
 export type Role = 'planner' | 'worker' | 'reviewer' | 'ui-reviewer'

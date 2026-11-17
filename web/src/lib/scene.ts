@@ -1,10 +1,6 @@
 /**
- * Pacing for the sections that play a scene in a product window. Each new
- * play takes a generation, and a wait reports false once a later play has
- * superseded it, so a click mid-scene cancels the scene it interrupts.
- *
- * A wait also stands still while the reader holds the window by pointer or
- * focus, so a looping window never moves under the person reading it.
+ * Paces a scene window. A later play cancels the waits of the one it
+ * interrupts, and a wait stands still while the reader holds the window.
  */
 export interface Pacer {
   /** Starts a new generation, cancelling every wait the last one holds. */
@@ -39,10 +35,8 @@ interface PauseButton extends EventTarget {
 }
 
 /**
- * Reports whether a pointer is over `node`, focus sits inside it, or the
- * reader pressed its pause button. The button sits outside the window, so its
- * own focus never holds the window, and it swaps its label between the
- * `data-pause` and `data-play` it carries.
+ * Holds while a pointer or focus is on `node` or `pause` is pressed. The button
+ * sits outside the window, and swaps its label between `data-pause` and `data-play`.
  */
 export function holdOn(
   node: Element | null,

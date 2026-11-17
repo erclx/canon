@@ -4,11 +4,8 @@ import { expect, test } from '@playwright/test'
 const SETTLE = { timeout: 5_000 }
 
 /**
- * Journeys and whole-page behavior only a real browser computes: the section
- * list and its anchors, the fixed bar at its folds, the stored theme, the
- * records stage pinned by scroll, and layout at the width floor. What the copy
- * says is unit tested beside `web/src/content/copy.ts`, so nothing here
- * asserts wording.
+ * Journeys and layout only a real browser computes. The copy is unit tested
+ * beside `web/src/content/copy.ts`, so nothing here asserts wording.
  */
 
 const SECTIONS = [
