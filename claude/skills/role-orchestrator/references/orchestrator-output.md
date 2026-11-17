@@ -67,6 +67,7 @@ Next: <the single most useful action>
 Keep the detail below the block and keep it skippable. A decision reached at the bottom of three paragraphs has been buried, which is the failure this shape exists to prevent.
 
 - Reuse the vocabulary above rather than inventing a second one
+- Report a hand-launch wave by the prompts file's path and the rows it holds, never a pasted fence, per `orchestrator-hand-launch.md`
 - Keep a file set on the row claiming it, so the reader can check a hold or a shared-path claim instead of taking it
 - Name every session a report names by its launch name, with its role in plain words and the id in brackets, as in `the reviewer review-frameboard-design-reference-set [<id>]`
   - A bare id tells the operator nothing about which session it is, and the operator's agent view lists sessions by name
