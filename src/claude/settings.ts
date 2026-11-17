@@ -45,12 +45,14 @@ export function serializeSettings(
  */
 export async function readSettings(
   path: string,
-): Promise<{ value: SettingsRecord; indent: string }> {
-  if (!existsSync(path)) return { value: {}, indent: DEFAULT_INDENT }
+): Promise<{ value: SettingsRecord; indent: string; source: string }> {
+  if (!existsSync(path)) {
+    return { value: {}, indent: DEFAULT_INDENT, source: '' }
+  }
 
   const source = await readFile(path, 'utf8')
   const indent = detectIndent(source)
-  if (source.trim() === '') return { value: {}, indent }
+  if (source.trim() === '') return { value: {}, indent, source }
 
   let parsed: unknown
   try {
@@ -63,7 +65,7 @@ export async function readSettings(
     throw new Error(`${path} is not a JSON object`)
   }
 
-  return { value: parsed as SettingsRecord, indent }
+  return { value: parsed as SettingsRecord, indent, source }
 }
 
 function asRecord(value: unknown): SettingsRecord {

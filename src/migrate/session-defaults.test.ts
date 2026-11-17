@@ -1,18 +1,21 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it } from 'vitest'
 import {
   applySessionDefaults,
   UI_PASS_DENIED,
   MERGE_DENIED,
-  PLAN_GUARD_COMMAND,
   PUSH_ALLOWED,
   planSessionDefaults,
   readSessionDefaults,
   type SessionDefaultsRead,
   UI_PASS_ALLOWED,
 } from '@/migrate/session-defaults'
+import { readSeededHooks } from '@/migrate/hook-wiring'
+
+const TOOLKIT_ROOT = join(import.meta.dirname, '../..')
+const PLAN_GUARD_COMMAND = '"$CLAUDE_PROJECT_DIR"/.claude/hooks/plan-guard.sh'
 
 const SEEDED_ALLOW = [...PUSH_ALLOWED, ...UI_PASS_ALLOWED]
 
@@ -37,7 +40,7 @@ const dirs: string[] = []
 
 async function makeTarget(
   settings?: string,
-  { planGuard = false } = {},
+  { planGuard = false, scripts = [] as string[] } = {},
 ): Promise<string> {
   const dir = await mkdtemp(join(tmpdir(), 'canon-session-defaults-'))
   dirs.push(dir)
@@ -45,9 +48,10 @@ async function makeTarget(
     await mkdir(join(dir, '.claude'), { recursive: true })
     await writeFile(join(dir, '.claude', 'settings.json'), settings)
   }
-  if (planGuard) {
-    await mkdir(join(dir, '.claude', 'hooks'), { recursive: true })
-    await writeFile(join(dir, '.claude', 'hooks', 'plan-guard.sh'), '')
+  const held = planGuard ? [...scripts, 'plan-guard.sh'] : scripts
+  await mkdir(join(dir, '.claude', 'hooks'), { recursive: true })
+  for (const script of held) {
+    await writeFile(join(dir, '.claude', 'hooks', script), '')
   }
   return dir
 }
@@ -62,10 +66,21 @@ const DEFAULTS = {
 
 const guardEntry = { type: 'command', command: PLAN_GUARD_COMMAND }
 
+let seeded: Record<string, unknown>
+
+beforeAll(async () => {
+  seeded = await readSeededHooks(TOOLKIT_ROOT)
+})
+
+/** The seeded hooks with only the plan guard's script held. */
+function guardOnly() {
+  return { seeded, holds: (script: string) => script === 'plan-guard.sh' }
+}
+
 async function readPlanned(
   dir: string,
 ): Promise<Extract<SessionDefaultsRead, { kind: 'planned' }>> {
-  const read = await readSessionDefaults(dir, '/toolkit')
+  const read = await readSessionDefaults(dir, TOOLKIT_ROOT)
   if (read.kind !== 'planned')
     throw new Error(`expected a plan, got ${read.kind}`)
   return read
@@ -373,12 +388,12 @@ describe('planSessionDefaults for the UI pass entries', () => {
 
 describe('planSessionDefaults with the plan guard installed', () => {
   it('should wire the guard into a settings file holding no hooks', () => {
-    const plan = planSessionDefaults(DEFAULTS, { planGuard: true })
+    const plan = planSessionDefaults(DEFAULTS, guardOnly())
 
     expect(plan.next.hooks).toEqual({
       PreToolUse: [
-        { matcher: 'Bash', hooks: [guardEntry] },
         { matcher: 'Write|Edit', hooks: [guardEntry] },
+        { matcher: 'Bash', hooks: [guardEntry] },
       ],
     })
     expect(plan.keys).toContainEqual({
@@ -402,7 +417,7 @@ describe('planSessionDefaults with the plan guard installed', () => {
           Stop: [],
         },
       },
-      { planGuard: true },
+      guardOnly(),
     )
 
     expect(plan.next.hooks).toEqual({
@@ -425,7 +440,7 @@ describe('planSessionDefaults with the plan guard installed', () => {
           ],
         },
       },
-      { planGuard: true },
+      guardOnly(),
     )
 
     expect(plan.changed).toBe(false)
@@ -443,18 +458,15 @@ describe('planSessionDefaults with the plan guard installed', () => {
       ],
     }
 
-    const plan = planSessionDefaults(
-      { ...DEFAULTS, hooks },
-      { planGuard: true },
-    )
+    const plan = planSessionDefaults({ ...DEFAULTS, hooks }, guardOnly())
 
     expect(plan.next.hooks).toEqual(hooks)
     expect(plan.changed).toBe(false)
   })
 
   it.each([
-    ['a comma list', 'Bash, Write'],
-    ['an unanchored pattern', '^(Bas|Writ)'],
+    ['a comma list', 'Bash, Write, Edit'],
+    ['an unanchored pattern', '^(Bas|Writ|Edi)'],
   ])('should leave a guard wired by hand under %s alone', (_, matcher) => {
     const hooks = {
       PreToolUse: [
@@ -465,10 +477,7 @@ describe('planSessionDefaults with the plan guard installed', () => {
       ],
     }
 
-    const plan = planSessionDefaults(
-      { ...DEFAULTS, hooks },
-      { planGuard: true },
-    )
+    const plan = planSessionDefaults({ ...DEFAULTS, hooks }, guardOnly())
 
     expect(plan.changed).toBe(false)
   })
@@ -484,7 +493,7 @@ describe('planSessionDefaults with the plan guard installed', () => {
           ],
         },
       },
-      { planGuard: true },
+      guardOnly(),
     )
 
     expect(plan.changed).toBe(true)
@@ -496,7 +505,7 @@ describe('planSessionDefaults with the plan guard installed', () => {
         ...DEFAULTS,
         hooks: { PreToolUse: [{ matcher: 'Bash', hooks: [guardEntry] }] },
       },
-      { planGuard: true },
+      guardOnly(),
     )
 
     expect(plan.next.hooks).toEqual({
@@ -540,11 +549,57 @@ describe('readSessionDefaults', () => {
       { planGuard: true },
     )
 
-    const read = await readSessionDefaults(dir, '/toolkit')
+    const read = await readSessionDefaults(dir, TOOLKIT_ROOT)
 
     expect(read).toMatchObject({
       kind: 'refused',
       reason: expect.stringContaining('hooks.PreToolUse'),
+    })
+  })
+
+  it('should plan the Stop and PostToolUse keys for held scripts', async () => {
+    const dir = await makeTarget(JSON.stringify(DEFAULTS), {
+      scripts: ['reply-links.sh', 'pr-create-log.sh'],
+    })
+
+    const read = await readPlanned(dir)
+
+    expect(read.plan.keys).toEqual([
+      { label: 'permissions.deny', changed: false },
+      { label: 'permissions.allow', changed: false },
+      { label: 'autoMemoryEnabled', changed: false },
+      { label: 'hooks.PreToolUse', changed: false },
+      { label: 'hooks.PostToolUse', changed: true },
+      { label: 'hooks.Stop', changed: true },
+    ])
+    expect(read.plan.unwired).toEqual([
+      { event: 'PostToolUse', script: 'pr-create-log.sh', tools: ['Bash'] },
+      { event: 'Stop', script: 'reply-links.sh', tools: [] },
+    ])
+  })
+
+  it('should report every held script unwired where settings are absent', async () => {
+    const dir = await makeTarget(undefined, { scripts: ['reply-links.sh'] })
+
+    const read = await readSessionDefaults(dir, TOOLKIT_ROOT)
+
+    expect(read).toEqual({
+      kind: 'absent',
+      path: join(dir, '.claude', 'settings.json'),
+      unwired: [{ event: 'Stop', script: 'reply-links.sh', tools: [] }],
+    })
+  })
+
+  it('should refuse a Stop that is not a list, naming the field', async () => {
+    const dir = await makeTarget(
+      JSON.stringify({ ...DEFAULTS, hooks: { Stop: {} } }),
+    )
+
+    const read = await readSessionDefaults(dir, TOOLKIT_ROOT)
+
+    expect(read).toMatchObject({
+      kind: 'refused',
+      reason: expect.stringContaining('hooks.Stop is not a list'),
     })
   })
 
@@ -559,7 +614,7 @@ describe('readSessionDefaults', () => {
   it('should report an absent settings file as nothing to migrate', async () => {
     const dir = await makeTarget()
 
-    const read = await readSessionDefaults(dir, '/toolkit')
+    const read = await readSessionDefaults(dir, TOOLKIT_ROOT)
 
     expect(read.kind).toBe('absent')
   })
@@ -567,7 +622,7 @@ describe('readSessionDefaults', () => {
   it('should refuse a file that is not valid JSON, naming it', async () => {
     const dir = await makeTarget('{\n  // a comment\n  "a": 1\n}\n')
 
-    const read = await readSessionDefaults(dir, '/toolkit')
+    const read = await readSessionDefaults(dir, TOOLKIT_ROOT)
 
     expect(read).toMatchObject({
       kind: 'refused',
@@ -578,7 +633,7 @@ describe('readSessionDefaults', () => {
   it('should refuse a deny that is not a list rather than replace it', async () => {
     const dir = await makeTarget('{ "permissions": { "deny": "Agent" } }\n')
 
-    const read = await readSessionDefaults(dir, '/toolkit')
+    const read = await readSessionDefaults(dir, TOOLKIT_ROOT)
 
     expect(read.kind).toBe('refused')
   })
@@ -586,7 +641,7 @@ describe('readSessionDefaults', () => {
   it('should refuse an allow that is not a list rather than replace it', async () => {
     const dir = await makeTarget('{ "permissions": { "allow": "Bash" } }\n')
 
-    const read = await readSessionDefaults(dir, '/toolkit')
+    const read = await readSessionDefaults(dir, TOOLKIT_ROOT)
 
     expect(read.kind).toBe('refused')
   })
@@ -604,11 +659,49 @@ describe('applySessionDefaults', () => {
     )
   })
 
+  it('should leave every untouched line byte-identical, a one-line list included', async () => {
+    const lines = [
+      '{',
+      '  "autoMemoryEnabled": false,',
+      `  "permissions": { "deny": ${JSON.stringify(DEFAULTS.permissions.deny)}, "allow": ${JSON.stringify(SEEDED_ALLOW)} },`,
+      '  "hooks": {',
+      '    "Stop": [',
+      '      {',
+      '        "hooks": [',
+      '          {',
+      '            "type": "command",',
+      '            "command": "\\"$CLAUDE_PROJECT_DIR\\"/.claude/hooks/silent-turn.sh"',
+      '          }',
+      '        ]',
+      '      }',
+      '    ]',
+      '  }',
+      '}',
+      '',
+    ]
+    const dir = await makeTarget(lines.join('\n'), {
+      scripts: ['silent-turn.sh', 'reply-links.sh'],
+    })
+
+    await applySessionDefaults(await readPlanned(dir))
+
+    expect(await readTargetSettings(dir)).toBe(
+      [
+        ...lines.slice(0, 10),
+        '          },',
+        '          {',
+        '            "type": "command",',
+        '            "command": "\\"$CLAUDE_PROJECT_DIR\\"/.claude/hooks/reply-links.sh"',
+        ...lines.slice(10),
+      ].join('\n'),
+    )
+  })
+
   it('should change nothing on a second run', async () => {
     const dir = await makeTarget('{}\n', { planGuard: true })
     await applySessionDefaults(await readPlanned(dir))
 
-    const second = await readSessionDefaults(dir, '/toolkit')
+    const second = await readSessionDefaults(dir, TOOLKIT_ROOT)
 
     expect(second).toMatchObject({
       kind: 'planned',
