@@ -34,6 +34,8 @@ import {
   unreferencedRules,
   visualPathGlobs,
 } from '@/gate/measures'
+import { readersOf, readTestSources } from '@/gate/corpus-readers'
+import { PROJECT_ROOT } from '@/roots/project'
 import { SHIPPED_CORPORA } from '@/shipped/references'
 
 /**
@@ -120,8 +122,7 @@ export interface Stage {
 /**
  * Files a scoped run hands to `vitest related`, which follows imports from
  * them to the tests that reach them. A corpus a test reads from disk is not
- * among them, so a Markdown-only push runs no tests locally and CI's full run
- * is what catches a broken corpus reader.
+ * among them, so its readers are selected by `readersOf` and passed by name.
  */
 const RELATED_SOURCES = /\.tsx?$|^commitlint\.config\.js$/
 
@@ -129,9 +130,25 @@ const RELATED_SOURCES = /\.tsx?$|^commitlint\.config\.js$/
 const FULL_SUITE_TRIGGERS =
   /^vitest\.(e2e\.)?(config|setup|global-setup)\.ts$|^tsconfig\.json$|^package\.json$/
 
-const TESTS_SCOPE = new RegExp(
-  `${RELATED_SOURCES.source}|${FULL_SUITE_TRIGGERS.source}`,
-)
+let testSources: ReadonlyMap<string, string> | undefined
+
+/** Read once per gate run, and only when a corpus file is in the changed set. */
+function corpusReaders(file: string): readonly string[] {
+  if (RELATED_SOURCES.test(file) || FULL_SUITE_TRIGGERS.test(file)) return []
+  testSources ??= readTestSources(PROJECT_ROOT)
+  return readersOf(file, testSources)
+}
+
+/**
+ * A corpus file with no reader leaves the stage scoped out, so the related run
+ * is never handed an empty file list.
+ */
+const TESTS_SCOPE: StageScope = {
+  test: (file) =>
+    RELATED_SOURCES.test(file) ||
+    FULL_SUITE_TRIGGERS.test(file) ||
+    corpusReaders(file).length > 0,
+}
 
 const FULL_SUITE = ['bun', 'run', 'test']
 
@@ -155,7 +172,10 @@ function relatedTests(changed: readonly string[]): readonly string[] {
     // changed file as the pattern.
     '--exclude',
     END_TO_END,
-    ...changed.filter((file) => RELATED_SOURCES.test(file)),
+    ...new Set([
+      ...changed.filter((file) => RELATED_SOURCES.test(file)),
+      ...changed.flatMap(corpusReaders),
+    ]),
   ]
 }
 
@@ -651,7 +671,8 @@ export const STAGES: readonly Stage[] = [
     id: 'tests',
     label: 'Tests',
     scope: TESTS_SCOPE,
-    skipped: 'Skipped, no TypeScript or test config changes',
+    skipped:
+      'Skipped, no TypeScript, test config, or corpus a test reads changed',
     // Concurrent suites from a wave of worktrees starve each other's spawn
     // and browser tests past their timeouts, so the box runs one at a time.
     // A related run excludes the browser suites but can still reach a spawn
