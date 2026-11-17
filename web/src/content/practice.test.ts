@@ -15,6 +15,17 @@ describe('practices', () => {
     },
   )
 
+  it.each(practices)(
+    'should link $name to the address its ledger row cites',
+    ({ quote, ledger, url }) => {
+      const row = read(ledger)
+        .split('\n')
+        .find((line) => line.includes(quote))
+
+      expect(row).toContain(`](${url})`)
+    },
+  )
+
   it('should load every listed skill in some scene of the window', () => {
     const loaded = craftScenes.flatMap((scene) =>
       scene.lines
