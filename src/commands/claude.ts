@@ -721,6 +721,12 @@ async function runSync(target: string): Promise<number> {
       'settings.json lacks the UI pass allow. Run `canon migrate session-defaults --write`',
     )
   }
+  if (defaults.kind === 'planned' && defaults.plan.unwired.length > 0) {
+    const count = defaults.plan.unwired.length
+    logWarn(
+      `settings.json leaves ${count} seeded ${count === 1 ? 'hook' : 'hooks'} unwired. Run \`canon migrate session-defaults --write\``,
+    )
+  }
 
   logStep('Scanning .gitignore')
   const chain = claudeChain(PROJECT_ROOT)
