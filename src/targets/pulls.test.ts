@@ -270,7 +270,7 @@ describe('readTargetPulls', () => {
         {
           number: 115,
           title: 'chore(agents): sync toolkit governance',
-          url: 'https://github.com/erclx/caret/pull/115',
+          url: 'https://github.com/erclx/birch/pull/115',
           headRefOid: 'c47f060',
           statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }],
         },
@@ -280,7 +280,7 @@ describe('readTargetPulls', () => {
     expect(report.kind === 'read' ? report.pulls[0] : null).toEqual({
       number: 115,
       title: 'chore(agents): sync toolkit governance',
-      url: 'https://github.com/erclx/caret/pull/115',
+      url: 'https://github.com/erclx/birch/pull/115',
       head: 'c47f060',
       checks: 'passing',
       review: null,

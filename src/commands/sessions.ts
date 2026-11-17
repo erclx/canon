@@ -187,7 +187,7 @@ export function register(program: Command): void {
         '  canon sessions list',
         '  canon sessions list --json',
         '  canon sessions list --branch feat/parser --json',
-        '  canon sessions list --branch chore/agents --repository ../caret --json',
+        '  canon sessions list --branch chore/agents --repository ../birch --json',
         '  canon sessions list --self --json',
         '  canon sessions list --stopped --json',
         '',
