@@ -61,6 +61,11 @@ const KEY_PATHS_KINDS: readonly DensityKind[] = ['bullet-run', 'h3-opening']
  */
 const DESIGN_INDEX_SCOPE = /^canon\/design\/index\.md$/
 
+/** Whether a path is the design reference index, whose fix is a group split. */
+export function isDesignIndex(rel: string): boolean {
+  return DESIGN_INDEX_SCOPE.test(rel)
+}
+
 /** The lines under `## Key paths` up to the next H1 or H2, keeping their numbers. */
 function keyPathsSection(lines: readonly BodyLine[]): readonly BodyLine[] {
   const start = lines.findIndex(
@@ -89,7 +94,7 @@ export function scopedDensityFindings(
   if (inDensityScope(rel)) {
     return [...densityFindings(lines), ...tableDensityFindings(lines)]
   }
-  if (DESIGN_INDEX_SCOPE.test(rel)) {
+  if (isDesignIndex(rel)) {
     return tableDensityFindings(lines).filter(
       (finding) => finding.kind === 'table-cell',
     )

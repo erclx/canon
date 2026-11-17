@@ -41,6 +41,7 @@ import {
 import {
   densityGates,
   inDensityScope,
+  isDesignIndex,
   scopedDensityFindings,
 } from '@/markdown/scope'
 import {
@@ -697,6 +698,11 @@ function reportDensity(
   logInfo(
     'Split a long block at its seam, put a heading or a table between paragraphs, give a long list H3s, open each H3 with a sentence or a table, move a long cell into a bullet under the lead, and give a trailing list its own lead sentence.',
   )
+  if (carrying.some((report) => isDesignIndex(report.rel))) {
+    logInfo(
+      "On the design index, split a group whose States cell runs long into one section folder per part of its code, each with its own row, per '### Sizing the state list' in the design-record skill's folder.md.",
+    )
+  }
   pipeOutput(
     carrying
       .map(
