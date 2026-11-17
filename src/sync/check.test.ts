@@ -9,6 +9,7 @@ import {
   buildToolingReport,
   type CheckReport,
   countStates,
+  buildHooksReport,
   hasDrift,
   installedStampDomains,
   isManagedTarget,
@@ -52,6 +53,7 @@ function buildReport(
     newSkills: [],
     newRules: [],
     reverse: emptyReverseReport(),
+    hooks: { state: 'read', unwired: [] },
     skew: {
       state: 'current',
       name: '@erclx/canon',
@@ -501,6 +503,29 @@ describe('hasDrift', () => {
     })
 
     expect(hasDrift(report)).toBe(false)
+  })
+
+  it('should report drift for a seeded hook left unwired', () => {
+    const report = buildReport([{ state: 'matching', rel: 'a.md' }], {
+      hooks: {
+        state: 'read',
+        unwired: [{ event: 'Stop', script: 'reply-links.sh', tools: [] }],
+      },
+    })
+
+    expect(hasDrift(report)).toBe(true)
+  })
+
+  it('should report drift for a settings file the hooks cannot be read from', () => {
+    const report = buildReport([{ state: 'matching', rel: 'a.md' }], {
+      hooks: {
+        state: 'unreadable',
+        unwired: [],
+        reason: 'settings.json: hooks.Stop is not a list',
+      },
+    })
+
+    expect(hasDrift(report)).toBe(true)
   })
 
   it('should not report drift for a seed the project edited', () => {
@@ -964,5 +989,53 @@ describe('uncoveredDomains', () => {
     })
 
     expect(uncoveredDomains(report)).not.toContain('governance')
+  })
+})
+
+describe('buildHooksReport', () => {
+  const toolkitRoot = join(import.meta.dirname, '../..')
+
+  function holdScript(script: string): void {
+    mkdirSync(join(TARGET, '.claude', 'hooks'), { recursive: true })
+    writeFileSync(join(TARGET, '.claude', 'hooks', script), '')
+  }
+
+  it('should report a held script settings.json never runs as drift', async () => {
+    holdScript('reply-links.sh')
+    writeFileSync(join(TARGET, '.claude', 'settings.json'), '{}\n')
+
+    const report = await buildHooksReport(toolkitRoot, TARGET)
+
+    expect(report).toEqual({
+      state: 'read',
+      unwired: [{ event: 'Stop', script: 'reply-links.sh', tools: [] }],
+    })
+    expect(hasDrift(buildReport([], { hooks: report }))).toBe(true)
+  })
+
+  it('should not report drift for a seeded hook whose script was deleted', async () => {
+    mkdirSync(join(TARGET, '.claude'), { recursive: true })
+    writeFileSync(join(TARGET, '.claude', 'settings.json'), '{}\n')
+
+    const report = await buildHooksReport(toolkitRoot, TARGET)
+
+    expect(hasDrift(buildReport([], { hooks: report }))).toBe(false)
+  })
+
+  it('should report a held script unwired where settings.json is absent', async () => {
+    holdScript('reply-links.sh')
+
+    const report = await buildHooksReport(toolkitRoot, TARGET)
+
+    expect(report).toEqual({
+      state: 'absent',
+      unwired: [{ event: 'Stop', script: 'reply-links.sh', tools: [] }],
+    })
+  })
+
+  it('should skip the toolkit root rather than refuse the check', async () => {
+    const report = await buildHooksReport(toolkitRoot, toolkitRoot)
+
+    expect(report).toEqual({ state: 'skipped', unwired: [] })
   })
 })

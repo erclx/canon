@@ -108,7 +108,7 @@ It moves each surface with `git mv` and repoints every tracked citation. No othe
 
 The seeded `.claude/settings.json` now denies the `Agent` and `Task` tools and both merge commands, and sets `autoMemoryEnabled` to `false`. `canon claude sync` never rewrites a settings file you hold, so it warns while the file holds no default or lacks a merge entry. Removing `Agent` and `Task` later draws no warning.
 
-The plan guard takes two steps. `canon claude init` adds the absent `.claude/hooks/plan-guard.sh`, and the verb below then wires it into `hooks.PreToolUse` for `Bash` and `Write|Edit`. It skips a tool whose matcher already runs the guard, and wires nothing while the script is absent.
+A seeded hook takes two steps. `canon claude init` adds each absent script under `.claude/hooks/`, and the verb below wires it where the seeded settings put it. It skips a tool whose matcher already runs the script, and wires nothing for a script you deleted. Until then, `canon sync --check --exit-code` fails.
 
 ```bash
 canon migrate session-defaults --json

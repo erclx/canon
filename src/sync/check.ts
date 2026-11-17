@@ -6,6 +6,8 @@ import { createGovAdapter } from '@/gov/adapter'
 import { successorResolver } from '@/gov/renames'
 import { lookupRules } from '@/gov/install'
 import { resolveMissingRules, resolveRules } from '@/gov/stacks'
+import type { UnwiredHook } from '@/migrate/hook-wiring'
+import { readSessionDefaults } from '@/migrate/session-defaults'
 import { planSync, type ScanEntry, type SyncAdapter } from '@/sync/engine'
 import {
   collectSuperseded,
@@ -151,6 +153,37 @@ const UNMEASURED_TOOLING: ToolingReport = {
   changes: 0,
 }
 
+/**
+ * Seeded hooks the target holds the script for and its `settings.json` never
+ * runs. Read from `settings.json` alone, since Claude Code gitignores
+ * `settings.local.json` and CI never sees it. `skipped` covers an unmanaged
+ * target and the toolkit root, `absent` a target with no settings file, and
+ * `unreadable` a settings file the migrate verb refuses, named in `reason`,
+ * which counts as drift since a check that cannot see the hooks must not
+ * pass. A deleted script never reaches `unwired`, which is the opt-out.
+ */
+export interface HooksReport {
+  readonly state: 'read' | 'absent' | 'unreadable' | 'skipped'
+  readonly unwired: readonly UnwiredHook[]
+  readonly reason?: string
+}
+
+const SKIPPED_HOOKS: HooksReport = { state: 'skipped', unwired: [] }
+
+export async function buildHooksReport(
+  toolkitRoot: string,
+  target: string,
+): Promise<HooksReport> {
+  if (target === toolkitRoot) return SKIPPED_HOOKS
+
+  const read = await readSessionDefaults(target, toolkitRoot)
+  if (read.kind === 'refused') {
+    return { state: 'unreadable', unwired: [], reason: read.reason }
+  }
+  if (read.kind === 'absent') return { state: 'absent', unwired: read.unwired }
+  return { state: 'read', unwired: read.plan.unwired }
+}
+
 export interface CheckReport {
   readonly covers: readonly StampDomain[]
   /**
@@ -198,6 +231,7 @@ export interface CheckReport {
    * the same question correctly. See `@/sync/reverse`.
    */
   readonly reverse: ReverseReport
+  readonly hooks: HooksReport
   /**
    * The binary running the check, not the target. It reports on an unmanaged
    * target too, since a reader told to run `canon init` is better off knowing
@@ -356,17 +390,21 @@ export function countStates(entries: readonly ScanEntry[]): StateCounts {
 }
 
 /**
- * Whether the target has diverged from the toolkit in a way a sync could close.
+ * Whether the target has diverged from the toolkit in a way a command could
+ * close.
  *
- * An unmigrated domain counts, and so do `stale`, `customized`, `drifted`,
- * `stranded`, `retired`, and `renamed` entries. Orphaned files, superseded
- * artifacts, seeds, tooling configs, and the reverse report are excluded,
- * since each is content the project may own and a job counting it stays red
- * with no remedy. `missing` is excluded too, since gating CI on it would press
- * a target into adopting a rule nobody picked.
+ * An unmigrated domain, an unwired or unreadable `hooks` report, and `stale`,
+ * `customized`, `drifted`, `stranded`, `retired`, and `renamed` entries count.
+ * Orphaned files, superseded artifacts, seeds, tooling configs, and the
+ * reverse report are excluded, since each is content the project may own and
+ * a job counting it stays red with no remedy. `missing` is excluded too, since
+ * gating CI on it would press a target into adopting a rule nobody picked.
  */
 export function hasDrift(report: CheckReport): boolean {
   if (report.unmigrated.length > 0) return true
+  if (report.hooks.state === 'unreadable' || report.hooks.unwired.length > 0) {
+    return true
+  }
 
   return report.domains.some(
     (domain) =>
@@ -422,6 +460,7 @@ export async function buildCheckReport(
       newSkills: [],
       newRules: [],
       reverse: emptyReverseReport(),
+      hooks: SKIPPED_HOOKS,
       skew: await skewRead,
     }
   }
@@ -439,6 +478,7 @@ export async function buildCheckReport(
     newSkills: await readNewSkills(toolkitRoot, anchors),
     newRules: await readNewRules(toolkitRoot, target, stamp),
     reverse: buildReverseReport(toolkitRoot, target),
+    hooks: await buildHooksReport(toolkitRoot, target),
     skew: await skewRead,
   }
 }

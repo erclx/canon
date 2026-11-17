@@ -29,7 +29,7 @@ canon sync --check . --json
 canon context audit --json
 ```
 
-The first answers five domains from one read, being `skew`, `domains`, `seeds`, `tooling`, and the layout fields `unmigrated`, `superseded`, `unmovedSurfaces`, and `reverse`. The second deepens a domain that first read only counts.
+The first answers five domains from one read, being `skew`, `domains`, `seeds`, `tooling`, and the layout fields `unmigrated`, `superseded`, `unmovedSurfaces`, and `reverse`. Its `hooks` field answers one question of the harness domain. The second deepens a domain that first read only counts.
 
 Then run `canon records validate <kind> --json` once per record folder the target carries, taking `<kind>` from what is present under the record root rather than from a list held here.
 
@@ -90,11 +90,11 @@ Target check: `<path>`, against canon `<version>`.
 | Governance rules | current / behind / unread | the per-state counts                           |
 | Tooling          | current / behind / unread | what a sync would change                       |
 | Seeds            | current / behind / unread | the per-state counts                           |
-| Claude harness   | unchecked                 | no verb reads it                               |
+| Claude harness   | behind / unchecked        | `hooks`, with the rest unread                  |
 
-No overall verdict. The harness row is unchecked rather than passing.
+No overall verdict. The harness row is never passing, being behind or unchecked.
 ```
 
-Keep the harness row `unchecked` on every run until a verb reads it. A domain left out of the table reads as a domain that passed, which is the one shape the row exists to prevent.
+Mark the harness row `behind` when `hooks` names an unwired entry or reads `unreadable`, and `unchecked` otherwise, since no verb reads the rest of it. A domain left out of the table reads as a domain that passed, which is the one shape the row exists to prevent.
 
 Close on one line naming `/canon:target-update` as the skill that applies the catch-up, when a domain reads behind and `target-update` did not invoke this check.

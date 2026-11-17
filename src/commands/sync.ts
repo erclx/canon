@@ -188,6 +188,7 @@ function renderCheck(report: CheckReport): void {
   }
 
   renderSeeds(report)
+  renderHooks(report)
 
   if (report.superseded.length > 0) {
     logStep('Superseded by a newer layout')
@@ -310,6 +311,32 @@ function renderSeeds(report: CheckReport): void {
 
   logInfo(
     'A stale seed is safe to take whole. Merge a drifted one by hand against the toolkit copy.',
+  )
+}
+
+/**
+ * Hooks print only when something is unwired or unreadable, and name the
+ * command that closes each, since both count toward `--exit-code`.
+ */
+function renderHooks(report: CheckReport): void {
+  const { hooks } = report
+  if (hooks.state === 'unreadable') {
+    logStep('hooks')
+    logWarn(`settings.json could not be read: ${hooks.reason}`)
+    logInfo('Fix the file, then run `canon migrate session-defaults --write`.')
+    return
+  }
+  if (hooks.unwired.length === 0) return
+
+  logStep('hooks')
+  for (const entry of hooks.unwired) {
+    const tools = entry.tools.length > 0 ? ` for ${entry.tools.join('|')}` : ''
+    logWarn(`${entry.script} (${entry.event}${tools}, unwired)`)
+  }
+  logInfo(
+    hooks.state === 'absent'
+      ? 'No settings.json runs these. Run `canon claude init` to seed it.'
+      : 'Run `canon migrate session-defaults --write` to wire them, or delete a script to opt out of it.',
   )
 }
 
