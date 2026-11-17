@@ -421,3 +421,63 @@ describe('readTakePlan input steps', () => {
     ).toMatchObject({ kind: 'refused', reason: 'bad-step' })
   })
 })
+
+describe('readTakePlan on a beat network list', () => {
+  function onlyBeat(network: unknown) {
+    return readTakePlan(
+      planSource([beat([{ kind: 'wait', ms: 100 }], { network })]),
+    )
+  }
+
+  it('should read each entry with its pattern and action', () => {
+    expect(
+      onlyBeat([
+        { match: '*/api/live', action: 'hold' },
+        { match: 'http://127.0.0.1:*/data', action: 'abort' },
+      ]),
+    ).toMatchObject({
+      kind: 'read',
+      plan: {
+        beats: [
+          {
+            network: [
+              { match: '*/api/live', action: 'hold' },
+              { match: 'http://127.0.0.1:*/data', action: 'abort' },
+            ],
+          },
+        ],
+      },
+    })
+  })
+
+  it('should leave the key off a beat that names none', () => {
+    const read = readTakePlan(planSource([beat([{ kind: 'wait', ms: 100 }])]))
+
+    expect(read).toMatchObject({ kind: 'read' })
+    expect(read.kind === 'read' && read.plan.beats[0]).not.toHaveProperty(
+      'network',
+    )
+  })
+
+  it.each([
+    ['a list that is not a list', { match: '*', action: 'hold' }],
+    ['an empty list', []],
+    ['an entry that is not an object', ['*/data']],
+    ['an entry with no pattern', [{ action: 'hold' }]],
+    ['an entry with an empty pattern', [{ match: '', action: 'hold' }]],
+    ['an action outside hold and abort', [{ match: '*', action: 'delay' }]],
+    [
+      'one pattern named twice',
+      [
+        { match: '*/data', action: 'hold' },
+        { match: '*/data', action: 'abort' },
+      ],
+    ],
+  ])('should refuse %s, naming the beat', (_case, network) => {
+    expect(onlyBeat(network)).toMatchObject({
+      kind: 'refused',
+      reason: 'bad-beat',
+      detail: expect.stringContaining('open the kit'),
+    })
+  })
+})
