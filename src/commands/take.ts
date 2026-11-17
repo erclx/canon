@@ -52,6 +52,8 @@ const PLAN_REFUSALS: Record<TakePlanRefusal, string> = {
   'unknown-route':
     'The plan or a beat names a route this build does not record on.',
   'bad-step': 'A step is missing something the take needs to perform it.',
+  'bad-viewport':
+    'A window size is malformed, odd, or outside 320x240 to 1920x1080.',
 }
 
 const TAKE_REFUSALS: Record<TakeRefusal, string> = {

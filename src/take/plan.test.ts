@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { readTakePlan } from '@/take/plan'
+import { beatViewport, parseViewport, readTakePlan } from '@/take/plan'
 
 /**
  * Covers what a take plan may say before any browser launches. A refusal here
@@ -478,6 +478,119 @@ describe('readTakePlan on a beat network list', () => {
       kind: 'refused',
       reason: 'bad-beat',
       detail: expect.stringContaining('open the kit'),
+    })
+  })
+})
+
+describe('readTakePlan on a beat viewport', () => {
+  function viewportPlan(viewport: unknown): string {
+    return planSource([beat([{ kind: 'wait', ms: 100 }], { viewport })])
+  }
+
+  it('should read a width and a height inside the bounds', () => {
+    const read = readTakePlan(viewportPlan({ width: 800, height: 600 }))
+
+    expect(read).toMatchObject({
+      kind: 'read',
+      plan: { beats: [{ viewport: { width: 800, height: 600 } }] },
+    })
+  })
+
+  it('should leave the key off a beat that names none', () => {
+    const read = readTakePlan(planSource([beat([{ kind: 'wait', ms: 100 }])]))
+
+    expect(read).toMatchObject({ kind: 'read' })
+    expect(read.kind === 'read' && read.plan.beats[0]).not.toHaveProperty(
+      'viewport',
+    )
+  })
+
+  it.each([
+    ['the smallest', { width: 320, height: 240 }],
+    ['the default', { width: 1920, height: 1080 }],
+  ])('should read %s size the bounds allow', (_label, viewport) => {
+    expect(readTakePlan(viewportPlan(viewport)).kind).toBe('read')
+  })
+
+  it.each([
+    ['too narrow', { width: 318, height: 600 }],
+    ['too short', { width: 800, height: 238 }],
+    ['wider than the default', { width: 1922, height: 600 }],
+    ['taller than the default', { width: 800, height: 1082 }],
+    ['an odd width', { width: 801, height: 600 }],
+    ['an odd height', { width: 800, height: 601 }],
+    ['a fraction', { width: 800.5, height: 600 }],
+    ['a string', '800x600'],
+    ['a missing height', { width: 800 }],
+  ])('should refuse %s as bad-viewport', (_label, viewport) => {
+    expect(readTakePlan(viewportPlan(viewport))).toMatchObject({
+      kind: 'refused',
+      reason: 'bad-viewport',
+    })
+  })
+
+  it('should name the beat and the size it refused', () => {
+    expect(
+      readTakePlan(viewportPlan({ width: 2560, height: 1440 })),
+    ).toMatchObject({
+      detail: expect.stringMatching(/open the kit.*2560x1440/),
+    })
+  })
+})
+
+describe('parseViewport', () => {
+  it('should read a width and a height joined by x', () => {
+    expect(parseViewport('1280x720')).toEqual({
+      kind: 'read',
+      viewport: { width: 1280, height: 720 },
+    })
+  })
+
+  it.each(['1280', '1280×720', '1280 x 720', 'x720', '-1280x720', 'wide'])(
+    'should refuse %s as malformed',
+    (text) => {
+      expect(parseViewport(text)).toMatchObject({
+        kind: 'refused',
+        detail: expect.stringContaining('<width>x<height>'),
+      })
+    },
+  )
+
+  it.each(['2560x1440', '200x200', '1281x720'])(
+    'should refuse %s, outside the bounds or odd',
+    (text) => {
+      expect(parseViewport(text)).toMatchObject({
+        kind: 'refused',
+        detail: expect.stringContaining(text),
+      })
+    },
+  )
+})
+
+describe('beatViewport', () => {
+  const plain = {
+    name: 'wide',
+    route: 'step',
+    setup: [],
+    steps: [{ kind: 'wait', ms: 100 }],
+  } as const
+  const narrow = { ...plain, viewport: { width: 800, height: 600 } }
+
+  it('should take the default when neither the beat nor the take names one', () => {
+    expect(beatViewport(plain)).toEqual({ width: 1920, height: 1080 })
+  })
+
+  it('should take the option for a beat that carries no key', () => {
+    expect(beatViewport(plain, { width: 1280, height: 720 })).toEqual({
+      width: 1280,
+      height: 720,
+    })
+  })
+
+  it("should take the beat's own key over the option", () => {
+    expect(beatViewport(narrow, { width: 1280, height: 720 })).toEqual({
+      width: 800,
+      height: 600,
     })
   })
 })
