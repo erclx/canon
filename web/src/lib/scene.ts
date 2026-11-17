@@ -32,9 +32,32 @@ export function pacer(held: () => boolean = () => false): Pacer {
   }
 }
 
-/** Reports whether a pointer is over `node` or focus sits inside it. */
-export function holdOn(node: Element | null): () => boolean {
-  if (!node) return () => false
+/** The part of a button `holdOn` reads, so a test can hand it a plain target. */
+interface PauseButton extends EventTarget {
+  dataset: DOMStringMap
+  setAttribute(name: string, value: string): void
+}
+
+/**
+ * Reports whether a pointer is over `node`, focus sits inside it, or the
+ * reader pressed its pause button. The button sits outside the window, so its
+ * own focus never holds the window, and it swaps its label between the
+ * `data-pause` and `data-play` it carries.
+ */
+export function holdOn(
+  node: Element | null,
+  pause?: PauseButton | null,
+): () => boolean {
+  let paused = false
+  pause?.addEventListener('click', () => {
+    paused = !paused
+    pause.setAttribute('data-paused', String(paused))
+    pause.setAttribute(
+      'aria-label',
+      (paused ? pause.dataset.play : pause.dataset.pause) ?? '',
+    )
+  })
+  if (!node) return () => paused
   let pointer = false
   let focus = false
   node.addEventListener('pointerenter', () => (pointer = true))
@@ -44,7 +67,7 @@ export function holdOn(node: Element | null): () => boolean {
     const next = (event as FocusEvent).relatedTarget
     focus = next instanceof Node && node.contains(next)
   })
-  return () => pointer || focus
+  return () => paused || pointer || focus
 }
 
 export const reducedMotion = () =>

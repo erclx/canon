@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { escapeHtml, pacer } from './scene'
+import { escapeHtml, holdOn, pacer } from './scene'
 
 describe('pacer', () => {
   beforeEach(() => {
@@ -47,6 +47,65 @@ describe('pacer', () => {
 
     expect(whileHeld).toBe(false)
     expect(done).toBe(true)
+  })
+})
+
+describe('holdOn with a pause button', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.runOnlyPendingTimers()
+    vi.useRealTimers()
+  })
+
+  const pauseButton = () =>
+    Object.assign(new EventTarget(), {
+      dataset: { pause: 'Pause the animation', play: 'Play the animation' },
+      attributes: {} as Record<string, string>,
+      setAttribute(name: string, value: string) {
+        this.attributes[name] = value
+      },
+    })
+
+  it('should hold a pacer while paused and resume once played again', async () => {
+    const button = pauseButton()
+    const pace = pacer(holdOn(new EventTarget() as Element, button))
+    const generation = pace.next()
+    let done = false
+
+    button.dispatchEvent(new Event('click'))
+    void pace.wait(100, generation).then(() => (done = true))
+    await vi.advanceTimersByTimeAsync(500)
+    const whilePaused = done
+    button.dispatchEvent(new Event('click'))
+    await vi.advanceTimersByTimeAsync(100)
+
+    expect(whilePaused).toBe(false)
+    expect(done).toBe(true)
+  })
+
+  it('should stay paused after the pointer enters and leaves the window', () => {
+    const win = new EventTarget() as Element
+    const button = pauseButton()
+    const held = holdOn(win, button)
+
+    button.dispatchEvent(new Event('click'))
+    win.dispatchEvent(new Event('pointerenter'))
+    win.dispatchEvent(new Event('pointerleave'))
+
+    expect(held()).toBe(true)
+  })
+
+  it('should name the action the button takes next', () => {
+    const button = pauseButton()
+    holdOn(new EventTarget() as Element, button)
+
+    button.dispatchEvent(new Event('click'))
+
+    expect(button.attributes['aria-label']).toBe('Play the animation')
+    expect(button.attributes['data-paused']).toBe('true')
   })
 })
 
