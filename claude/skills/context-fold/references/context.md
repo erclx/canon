@@ -79,6 +79,14 @@ Layout gives each folder doing real work its own H3, titled with the folder path
 
 The audit reports a Layout H3 titled neither a path nor `Other folders`, a folder H3 holding a second paragraph or a sixth bullet, and any H4 under Layout. Under `--gate` it also fails a code folder no Layout names. Bullets count at any indent and across any paragraph, so a list split by a bold label still counts as one list.
 
+### When a folder passes the cap
+
+A folder with more to say than five bullets hold has three ways out, and regrouping is not one, since the audit reads every run under the H3 as a single list.
+
+- Cut each bullet the code already says, keeping the traps and the behavior a session cannot read off the source or `--help`
+- Move a fixed set of like facts into the table the lead may already carry, which counts toward neither limit, unless the set grows a row per shipped thing
+- Split the code folder into subfolders when its work divides by role, per the `codebase-layout` skill, so each subfolder takes its own H3 and its own five bullets
+
 ### Ordering and headings
 
 Entries get read top-down and often partially, so the boundary sits above the folders and the folders above the traps.
