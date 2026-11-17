@@ -67,7 +67,9 @@ Read the `hyperframes` skill's `references/format.md` for placing the clip and `
 
 1. Size a stage at 1920x1080 and place the clip inside a non-timed wrapper sized at the log's `viewport`, with `transform-origin: 0 0`. Time the video, never the wrapper too.
 2. Drive the wrapper from the track on the composition's registered timeline, setting `scale(s * k) translate(-x px, -y px)` at each frame's time from the clip's start.
-   - `k` is the stage width over `viewport.width`, 1 at the default window
+   - `k` is the smaller of 1920 over `viewport.width` and 1080 over `viewport.height`, 1 at the default window
+   - A window not 16:9, such as 800x600, fits with bars on two sides. Hold the wrapper in a box `viewport` times `k` in size, centered on the stage with its overflow clipped.
+   - Add that box's offset from the stage corner to the cursor and the ring
 3. Draw the cursor as its own element outside the wrapper, at a constant size, positioned at `(cursor.x - x) * s * k` and `(cursor.y - y) * s * k` on the stage.
 4. Draw the click ring the same way while `ring` is not null, growing and fading with its value.
 
