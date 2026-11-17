@@ -19,10 +19,18 @@ The context entries describe the repository the session opened with. An entry ke
 - Close on `canon context audit` over the fold's whole baseline, reporting findings on files this run wrote or the diff carries
 - Continue the fold when a check cannot run
 
+### A full entry
+
+The fold reads the audit before it writes, so an entry already past its cap stops taking new folders.
+
+- Open a sibling entry for a new code folder whose owning entry, inside a domain folder, is past its length checkpoint or a shape cap
+- Report every written entry past a cap, naming `document-health` as its repair
+
 ## Must not
 
 - Write the task board, the design record, `CLAUDE.md`, the requirements record, or a promoted page
 - Create an entry for a domain the catalog does not list, or report a finding on an entry this run never touched
+- Split or move an existing entry, since a split moves paths that queued plans cite
 - Stop the fold on a finding, a refusal, or a missing subcommand
 
 ## Out of scope

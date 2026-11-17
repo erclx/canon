@@ -58,6 +58,15 @@ Write an entry only when the diff adds, moves, or removes a folder, makes a fold
 - Edit the bullet that went untrue in place, and never append a correction beside it, per `${CLAUDE_SKILL_DIR}/references/context.md`
 - Follow `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` and the `write-human` skill for all edits.
 
+### A full owner
+
+Run `canon context audit --json` before the first write and keep the record. An entry is full when its `rel` sits under `length`, or under `shapeFindings` with an issue whose `kind` is `layout-bullets`, `layout-paragraphs`, or `gotcha-count`. Any other shape kind is a break, not a cap.
+
+- Give a new code folder a sibling entry when its owner is full and sits in a domain folder, per the reference above. Add the H3 to the owner otherwise.
+- Never split or move an existing entry, however far past a cap it reads, and report it in After completion instead
+
+### Writing
+
 Write each updated file immediately. Claude Code's tool permission dialog is the confirmation gate. Do not wait for user input.
 
 ## Step 4: audit what the fold touched
