@@ -1,0 +1,20 @@
+{
+  "beats": [
+    {
+      "name": "hold the report request",
+      "network": [{ "match": "*/data", "action": "hold" }],
+      "steps": [
+        { "kind": "move", "target": "#status" },
+        { "kind": "wait", "ms": 400 }
+      ]
+    },
+    {
+      "name": "fail the report request",
+      "network": [{ "match": "*/data", "action": "abort" }],
+      "steps": [
+        { "kind": "move", "target": "#status" },
+        { "kind": "wait", "ms": 400 }
+      ]
+    }
+  ]
+}

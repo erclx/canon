@@ -17,6 +17,11 @@ import {
   type TakeLog,
   VIEWPORT,
 } from '@/take/log'
+import {
+  type NetworkMatch,
+  type NetworkTally,
+  NetworkUnmatched,
+} from '@/take/network'
 import { TargetMissing, TargetOffscreen, TargetRefused } from '@/take/perform'
 import type { Beat, Route, TakePlan } from '@/take/plan'
 import { filmScreencast } from '@/take/screencast'
@@ -45,6 +50,7 @@ export type TakeRefusal =
   | 'target-offscreen'
   | 'over-cap'
   | 'clip-mismatch'
+  | 'network-unmatched'
   | 'take-failed'
 
 export interface FilmedBeat {
@@ -69,6 +75,11 @@ export interface FilmedBeat {
   readonly camera: string
   /** The clip's closing frame, as a JPEG. */
   readonly still: string
+  /**
+   * Each network pattern with how many requests it caught, absent when the
+   * beat names no list. Never an address, which can carry a ticket.
+   */
+  readonly network?: readonly NetworkMatch[]
 }
 
 export type TakeResult =
@@ -172,7 +183,9 @@ export async function take(request: TakeRequest): Promise<TakeResult> {
           : error
       const shot = cause instanceof TargetRefused ? cause.still : undefined
       const still =
-        shot || cause instanceof ClipMismatch
+        shot ||
+        cause instanceof ClipMismatch ||
+        cause instanceof NetworkUnmatched
           ? join(dir, 'still.jpg')
           : undefined
       if (shot && still) writeFileSync(join(out, still), shot)
@@ -255,8 +268,13 @@ async function filmBeat(
 
   // Thrown once the files are written, so a reader can open what was filmed.
   const mismatch = clipMismatch(expected, measured)
-  if (mismatch) {
-    const refusal = new ClipMismatch(mismatch)
+  const unmatched = filmed.network?.unmatched() ?? []
+  const refusal = mismatch
+    ? new ClipMismatch(mismatch)
+    : unmatched.length > 0
+      ? new NetworkUnmatched(unmatched)
+      : undefined
+  if (refusal) {
     if (fallback) throw new FellBack(refusal, fallback.message, fallback.phase)
     throw scale ? new Retried(refusal, scale) : refusal
   }
@@ -276,6 +294,7 @@ async function filmBeat(
     log: logPath,
     camera: cameraPath,
     still: stillPath,
+    ...(filmed.network ? { network: filmed.network.matched() } : {}),
   }
 }
 
@@ -285,6 +304,7 @@ interface FilmedRoute {
     readonly events: readonly LogEvent[]
     readonly lag?: number
     readonly still: Buffer
+    readonly network?: NetworkTally
   }
   readonly route: Route
   readonly fallback?: { readonly message: string; readonly phase: StallPhase }
@@ -373,6 +393,7 @@ class ClipMismatch extends Error {}
 
 function classify(error: unknown): TakeRefusal {
   if (error instanceof ClipMismatch) return 'clip-mismatch'
+  if (error instanceof NetworkUnmatched) return 'network-unmatched'
   if (error instanceof TargetMissing) return 'target-missing'
   if (error instanceof TargetOffscreen) return 'target-offscreen'
   if (error instanceof ShellMissing || isBrowserMissing(error)) {
