@@ -256,9 +256,9 @@ describe('scopedDensityFindings', () => {
     })
 
     it('should leave an index.md nested under a group out', () => {
-      expect(
-        kinds('canon/design/home/index.md', row('s'.repeat(121))),
-      ).toEqual([])
+      expect(kinds('canon/design/home/index.md', row('s'.repeat(121)))).toEqual(
+        [],
+      )
     })
   })
 })
