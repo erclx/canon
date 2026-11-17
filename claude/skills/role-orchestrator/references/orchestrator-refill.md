@@ -34,6 +34,9 @@ The third trigger reaches a window the first two cannot. A session with three wo
    - Let the receiver file it with `task-board` on its own board, since `task-board` here would file it on this board
    - Name it in the report for the operator when no such session is live
    - List every struck outcome in the report's `Struck:` line, so the work is carried by a named owner rather than lost to the strike
+   - Then run `canon sessions reap <stem> --json` for each merged task, archived or not, so its worker and reviewers stop and the agent view keeps to live work
+   - The verb skips a busy, interactive, talk, or controller session, the caller, and one a live task still records, so read each `skipped` row's `reason` rather than stopping it by hand
+   - List what it stopped in the report's `Reaped:` line, and any `failed` row with its `detail`
 4. Read `.canon/tasks/priority.md` and count the `## Up next` rows whose `Waiting on` has cleared, since a blocked row is no reserve. `## Run now` is what is running, so keep one in reserve beyond it.
 5. Promote from the top of `## Needs a plan`, where the last sweep recorded what to plan next.
    - Depart from that order when something changed under it and say what, since a position nobody honors is the ordering going stale
@@ -49,6 +52,7 @@ The third trigger reaches a window the first two cannot. A session with three wo
 ```plaintext
 Findings placed: <finding> → <destination>
 Archived: <task>
+Reaped: <session names stopped>, failed <session: detail> or none
 Struck: <outcome>, owed by <operator or repository>, <reason>
 Operator checks: <outcome>, left unticked on <task>
 Promoted: <task>, touches <surfaces>, parallel with <task>, sharing <paths or none>
