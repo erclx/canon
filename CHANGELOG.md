@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.97.0](https://github.com/erclx/canon/compare/v5.96.0...v5.97.0) (2026-11-17)
+
+
+### Features
+
+* **gate:** run the tests that read a changed corpus file in the check ([#3175](https://github.com/erclx/canon/issues/3175)) ([bb9f83f](https://github.com/erclx/canon/commit/bb9f83f80cbe71e1d0c9f2a9166c4825fa2d43f8))
+* **role-orchestrator:** report a hand launch by the prompts file ([#3170](https://github.com/erclx/canon/issues/3170)) ([c1e00d7](https://github.com/erclx/canon/commit/c1e00d747351b4dcbb08e033fc1e4332c2a3597f))
+* **take:** film the change in a take reel or refuse as unplanned ([#3174](https://github.com/erclx/canon/issues/3174)) ([c0f59ca](https://github.com/erclx/canon/commit/c0f59cafcfe72f27124514d535867c907aaf90dc))
+* **take:** set a take's window size per take or per beat ([#3176](https://github.com/erclx/canon/issues/3176)) ([f97a8a5](https://github.com/erclx/canon/commit/f97a8a5635e94be4c071fc2cf3502c70a41f7c4d))
+
+
+### Bug Fixes
+
+* **take:** hold the drawn cursor at the last sent point ([#3169](https://github.com/erclx/canon/issues/3169)) ([3628f96](https://github.com/erclx/canon/commit/3628f96ffeecd2287e93646f3b59ec6d3f21c248))
+* **tooling:** point the web design seed at the assets folder ([#3171](https://github.com/erclx/canon/issues/3171)) ([d5128bb](https://github.com/erclx/canon/commit/d5128bbbb23fb64aa07fc085bd0a630c78463bf0))
+
 ## [5.96.0](https://github.com/erclx/canon/compare/v5.95.0...v5.96.0) (2026-11-17)
 
 
