@@ -13,7 +13,7 @@ import { readTakePlan } from '@/take/plan'
 
 /**
  * Films the pending fixture with its data request held or failed, and reads
- * the state off the page colour in each beat's still: mid grey while loading,
+ * the state off the page color in each beat's still: mid gray while loading,
  * white once loaded, and near black on an error.
  */
 
