@@ -57,7 +57,7 @@ The seeded runner reads the phases the nearest `scripts/verify.json` requires. I
 - A missing `package.json` in a subfolder verify tells the caller to sync the stack, and a missing `verify.json` names `canon tooling sync`
 - The three canon stages take `canon` from `PATH` first, then under `CI=true` a `bunx` pinned to `domains.tooling.version` in `canon/config/config.json`
 - Under CI a missing stamp version or an exit 1, which `bunx` returns on a failed fetch, fails the stage, and a local run with no `canon` skips it with an install hint
-- The context audit skips where no context folder sits at either root, and adds `--gate` only where `canon/config/context.toml` declares `gated` or `gate-length`
+- The context audit skips where no context folder sits at either root, and adds `--gate` only where `context.toml` declares `gated` or sets `gate-length = true`
 
 ### `tooling/base/seeds/`
 

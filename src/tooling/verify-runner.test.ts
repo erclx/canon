@@ -484,7 +484,8 @@ describe('context audit', () => {
 
   it.each([
     ['gated', 'gated = ["canon/context/"]\n'],
-    ['gate-length', 'gate-length = true\n'],
+    ['an empty gated', 'gated = []\n'],
+    ['gate-length as true', 'gate-length = true\n'],
   ])(
     'should add --gate and name it on failure where the config declares %s',
     (_key, toml) => {
@@ -497,6 +498,14 @@ describe('context audit', () => {
       expect(result.stdout).toContain("Run 'canon context audit --gate'")
     },
   )
+
+  it('should run the plain audit where gate-length is false and gated is absent', () => {
+    writeContextConfig('gate-length = false\n')
+
+    const result = runVerify(contextExit(2))
+
+    expect(result.stdout).toMatch(/context finding: context audit$/m)
+  })
 
   it('should not read a gate key nested under a table header', () => {
     writeContextConfig('[other]\ngated = ["canon/context/"]\n')

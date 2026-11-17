@@ -436,8 +436,8 @@ function checkEmbeddedCode(): void {
 const CONTEXT_FOLDERS = ['canon/context', '.claude/context']
 const CONTEXT_CONFIG = 'canon/config/context.toml'
 
-// A project opts into the shape and length gate by declaring gated or
-// gate-length in its context config, and any other project gets the plain
+// A project opts into the shape and length gate by declaring gated with any
+// value or setting gate-length to true, and any other project gets the plain
 // audit, which gates citations and the requirements cap alone. The script
 // carries no TOML parser, so it reads top-level keys up to the first table
 // header, and canon itself reports a key declared in a shape it cannot use.
@@ -451,7 +451,8 @@ function declaresGateKeys(): boolean {
   for (const line of text.split('\n')) {
     const trimmed = line.trim()
     if (trimmed.startsWith('[')) return false
-    if (/^["']?(gated|gate-length)["']?\s*=/.test(trimmed)) return true
+    if (/^["']?gated["']?\s*=/.test(trimmed)) return true
+    if (/^["']?gate-length["']?\s*=\s*true\b/.test(trimmed)) return true
   }
   return false
 }
