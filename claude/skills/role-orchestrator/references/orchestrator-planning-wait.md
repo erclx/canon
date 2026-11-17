@@ -11,7 +11,10 @@ canon tasks launchable <task> --wait --json
 
 The verb resolves the task's `Plan:` line and runs the `plan-answers` gate on the plan it names, re-reading every 30 seconds for up to 1800 seconds by default. It keys on the line rather than the plan file. A planner links a plan only after it validates, so a half-written plan never wakes the loop.
 
-A planner handed several rows in one launch links each plan on its own, so arm one wait per task. A single wait over the batch wakes on the first plan and misses the rest.
+Two steps come before the first wait.
+
+- Record the planner on each task it took through `canon tasks session <planner-id> <task> --json`, the way a worker is recorded, so the reap below reaches it
+- Arm one wait per task when a planner took several rows, since each plan links on its own and a single wait wakes on the first
 
 ## Branch on the record
 
