@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.94.0](https://github.com/erclx/canon/compare/v5.93.1...v5.94.0) (2026-11-17)
+
+
+### Features
+
+* **app-drive:** fix the drive log, board folder, and late finding ([#3151](https://github.com/erclx/canon/issues/3151)) ([6af1398](https://github.com/erclx/canon/commit/6af139825251b1e5983859a6329a7f077f01f7b6))
+* **context:** name the ways out when a folder passes the bullet cap ([#3148](https://github.com/erclx/canon/issues/3148)) ([f8aa894](https://github.com/erclx/canon/commit/f8aa8943413312f2af4b6e0443ad8e6242da8441))
+* **hooks:** flag a reply naming a live session by its id alone ([#3150](https://github.com/erclx/canon/issues/3150)) ([8884fb9](https://github.com/erclx/canon/commit/8884fb975d41579b188730bddaf40386184d288c))
+* **records:** require a role on each plan design reference ([#3149](https://github.com/erclx/canon/issues/3149)) ([686362f](https://github.com/erclx/canon/commit/686362fec6627956a099d664773201b1687af791))
+* **take:** measure each clip and refuse one off its route's size ([#3144](https://github.com/erclx/canon/issues/3144)) ([5eb04ba](https://github.com/erclx/canon/commit/5eb04ba4438d7bae8597eb9d19f518e5ea36777a))
+
+
+### Bug Fixes
+
+* **context:** skip a nested install stamp in the citation scan ([#3146](https://github.com/erclx/canon/issues/3146)) ([4804836](https://github.com/erclx/canon/commit/480483610364962b8f1ed673692892cfd6dbae59))
+
 ## [5.93.1](https://github.com/erclx/canon/compare/v5.93.0...v5.93.1) (2026-11-17)
 
 
