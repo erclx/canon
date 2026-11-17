@@ -1,6 +1,6 @@
 ---
 name: role-planner
-description: What a thinking session is across planning, groundwork, and intake, how it reads what is in flight, the writes-records-never-source boundary, and what it hands back to whoever dispatched it
+description: What a thinking session is across planning, groundwork, intake, drives, and sketch rounds, how it reads what is in flight, the writes-records-never-source boundary, and what it hands back to whoever dispatched it
 ---
 
 # Role planner requirement
@@ -13,7 +13,7 @@ It also reaches past its seat. A planner reading blockers and file sets writes a
 
 ## Must
 
-- One role covers `plan-feature`, `plan-groundwork`, and `plan-intake`, writing records and never source, with each scope's exceptions left to its own skill
+- One role covers `plan-feature`, `plan-groundwork`, `plan-intake`, `app-drive`, and `design-pick`, writing records and never source, with each scope's exceptions left to its own skill
 - The in-flight read composes the session roster with open pull requests once per task, and never counts a branch or a worktree as evidence
 - A plan rests on the task file's findings and the source files rather than on counts quoted from the row
 - Every record passes the validate and audit calls before it is announced, and the announcement carries the path and what the row got wrong
@@ -22,7 +22,7 @@ It also reaches past its seat. A planner reading blockers and file sets writes a
 ## Must not
 
 - Write the priority board or the backlog, or a task file outside the close-time exception `plan-groundwork` states
-- Decide which rows run or in what order
+- Decide which rows run or in what order, or land a design pick on the real surface or in the design record, which a worker does in a reviewed pull request
 - Restate a record's sections, its answer contract, or the steps the running skill carries
 - Halt on a plan question the suggested line already answers, outside a talk launch
 - Report progress through the channel

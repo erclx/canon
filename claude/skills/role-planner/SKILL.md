@@ -1,6 +1,6 @@
 ---
 name: role-planner
-description: Asserts the planner role for a session writing one plan, groundwork track, or intake pass under one row, holding what it reads before deciding, what may be written and where, how to read what is already in flight, and what it hands back. Use when asked to "be the planner", "you are a planner session", at the start of a dispatched or hand-launched planning, groundwork, or intake run, or when a planning session needs to know what it may not write. Do NOT use to write the record itself, which is `plan-feature`, `plan-groundwork`, `plan-intake`, or `app-drive`, to make the cross-feature merge call, or to implement.
+description: Asserts the planner role for a session writing one plan, groundwork track, intake pass, or sketch round under one row, holding what it reads before deciding, what may be written and where, how to read what is already in flight, and what it hands back. Use when asked to "be the planner", "you are a planner session", at the start of a dispatched or hand-launched planning, groundwork, intake, drive, or design run, or when a planning session needs to know what it may not write. Do NOT use to write the record itself, which is `plan-feature`, `plan-groundwork`, `plan-intake`, `app-drive`, or `design-pick`, to make the cross-feature merge call, or to implement.
 metadata:
   family: parallel
 ---
@@ -9,20 +9,29 @@ metadata:
 
 This session thinks rather than builds. It reads the row, measures what the row claims against the tree, writes one record, and hands back the path.
 
-The record is a feature plan under `plan-feature`, a groundwork track under `plan-groundwork`, or an intake pass under `plan-intake` or `app-drive`, and the role is the same across all three. It does not implement, decide what merges before what, or review, which belong to a worker, the controlling session, and the human.
+The record is a feature plan under `plan-feature`, a groundwork track under `plan-groundwork`, an intake pass under `plan-intake` or `app-drive`, or a sketch round under `design-pick`. The session does not implement, decide what merges before what, or review, which belong to a worker, the controlling session, and the human.
 
 ## What this body owns
 
-This body states the role, the reads, the boundaries, and the channel, and starts no step of its own. Each of the three skills owns the steps writing its record and cites the standard fixing its shape, so reach the procedure from the launch.
+This body states the role, the reads, the boundaries, and the channel, and starts no step of its own. Each of those skills owns the steps writing its record and cites the standard fixing its shape, so reach the procedure from the launch.
 
-"Planner" stretches to cover measuring and triage. The operator accepted that, since what the three share is the boundary below rather than the artifact each produces.
+"Planner" stretches to cover measuring, triage, and design. The operator accepted that, since what they share is the boundary below rather than the artifact each produces.
 
 ## Where the session stands
 
 - Write records, never source. A tracked file under `src/`, a standard, a rule, a reference doc, and a seed all sit outside what this session may touch.
 - Write only into the folder the running skill names, being `.canon/plans/`, `.canon/groundwork/<nn>-<slug>/`, or `.canon/intake/<nn>-<slug>/`
+- A sketch round's record is its own board pages and the archive `design-pick` captures under `.canon/`
 - Each skill's own `## Write scope` carries its exceptions, so a change to one scope edits one body
 - Resolve those folders, and `.canon/tasks/` and `.canon/review/`, at the main worktree root. They are gitignored, so a linked worktree's copy is absent and reads as unwritten.
+
+### Landing a design
+
+A sketch round ends on the operator's pick, and the pick reaches the project only through a worker. Applying it here would put a tracked change outside any reviewed pull request.
+
+- Never write under `canon/design/` or the real surface a round drafts for, so `design-pick`'s Step 6 items 1 to 3 never run in this role
+- Keep the picked page on the board and capture the archive as that step states, then hand the controller the winning arm's frame refs, the page ref, and the archive path
+- A worker lands the pick through `design-record` under a plan the controller dispatches, in a pull request the reviewers read
 
 ### Worktrees and rows
 

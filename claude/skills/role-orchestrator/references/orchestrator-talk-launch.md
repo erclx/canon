@@ -1,6 +1,6 @@
 ---
 title: Orchestrator talk launch
-description: The talk variant of the planning and build launches, being the name suffix, the one added brief sentence, and where the talk session's id is recorded for the handoff
+description: The talk variant of the planning, build, and design launches, being the name suffix, the one added brief sentence, and where the talk session's id is recorded for the handoff
 ---
 
 Run this when the operator wants to talk with a planner or worker rather than leave it to report back. The rules every launch shares stay in `orchestrator-launch.md`.
@@ -19,6 +19,7 @@ This is a talk session: the operator will talk with you here, so run your role's
 
 The ellipsis stands for the rest of the cold template's message clauses, unchanged. The build variant keeps `/canon:auto-ship <plan>` at position zero with nothing before it, per `### Position zero` in `orchestrator-launch.md`.
 
+- A design session always takes this form, as `planner-<project>-design-<topic>-talk`, with the brief `orchestrator-design-launch.md` carries
 - A flaky row takes the same swap here, running `/canon:plan-groundwork <task>` ahead of `/canon:plan-feature <task>` as `orchestrator-launch.md` states under `### A flaky row`
 - Keep the role prefix and add the suffix, since `orchestrator-handoff.md` separates dispatched sessions by `worker-` and `planner-` and a new prefix reads as a hand launch
 - A talk session is retired only on the operator's word, stated once in `orchestrator-handoff.md`, so do not restate it in a launch report
