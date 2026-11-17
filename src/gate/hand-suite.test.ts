@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  E2E_CONFIG,
-  E2E_FILTER,
-  locksHandSuite,
-  type VitestRun,
-} from '@/gate/hand-suite'
+import { E2E_CONFIG, locksHandSuite, type VitestRun } from '@/gate/hand-suite'
 
 function handRun(overrides: Partial<VitestRun> = {}): VitestRun {
   return {
@@ -25,48 +20,6 @@ describe('a full hand-run suite', () => {
     expect(
       locksHandSuite(handRun({ args: ['run', '--reporter=dot', '--silent'] })),
     ).toBe(true)
-  })
-})
-
-describe('a run selecting the end-to-end suites', () => {
-  it('should lock the bare end-to-end filter', () => {
-    expect(locksHandSuite(handRun({ args: ['run', E2E_FILTER] }))).toBe(true)
-  })
-
-  it('should lock the filter beside a name filter argument', () => {
-    expect(locksHandSuite(handRun({ args: ['run', E2E_FILTER, 'film'] }))).toBe(
-      true,
-    )
-  })
-
-  it('should lock the filter beside -t', () => {
-    expect(
-      locksHandSuite(handRun({ args: ['run', '-t', 'x', E2E_FILTER] })),
-    ).toBe(true)
-  })
-
-  it('should lock a path to an end-to-end file', () => {
-    expect(
-      locksHandSuite(handRun({ args: ['run', 'src/film/film.e2e.test.ts'] })),
-    ).toBe(true)
-  })
-
-  it('should not lock under CI', () => {
-    expect(
-      locksHandSuite(handRun({ args: ['run', E2E_FILTER], ci: true })),
-    ).toBe(false)
-  })
-
-  it('should not lock in watch mode', () => {
-    expect(locksHandSuite(handRun({ args: [E2E_FILTER], watch: true }))).toBe(
-      false,
-    )
-  })
-
-  it('should not lock when the parent gate holds the lock', () => {
-    expect(
-      locksHandSuite(handRun({ args: ['run', E2E_FILTER], heldLock: 'tests' })),
-    ).toBe(false)
   })
 })
 
@@ -131,7 +84,7 @@ describe('a run that excludes the end-to-end suites', () => {
             'related',
             '--run',
             '--exclude',
-            `**/*${E2E_FILTER}.ts`,
+            '**/*.e2e.test.ts',
             'src/gate/hand-suite.ts',
           ],
         }),
@@ -146,18 +99,12 @@ describe('a run that excludes the end-to-end suites', () => {
           args: [
             'related',
             '--run',
-            `--exclude=**/*${E2E_FILTER}.ts`,
+            '--exclude=**/*.e2e.test.ts',
             'src/gate/hand-suite.ts',
           ],
         }),
       ),
     ).toBe(false)
-  })
-
-  it('should lock an end-to-end filter beside an --exclude', () => {
-    expect(
-      locksHandSuite(handRun({ args: ['run', '--exclude', 'x', E2E_FILTER] })),
-    ).toBe(true)
   })
 })
 
@@ -170,6 +117,16 @@ describe('a run that takes no lock', () => {
 
   it('should not lock a run filtered by a bare file stem', () => {
     expect(locksHandSuite(handRun({ args: ['run', 'suite-lock'] }))).toBe(false)
+  })
+
+  it('should not lock a path to an end-to-end file under the unit config', () => {
+    expect(
+      locksHandSuite(handRun({ args: ['run', 'src/film/film.e2e.test.ts'] })),
+    ).toBe(false)
+  })
+
+  it('should not lock the end-to-end infix under the unit config', () => {
+    expect(locksHandSuite(handRun({ args: ['run', '.e2e.test'] }))).toBe(false)
   })
 
   it('should not lock a run filtered by a directory', () => {
