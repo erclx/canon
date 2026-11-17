@@ -13,7 +13,7 @@ Each group holds accepted frames a build matches, light and dark. The `design-re
 - Give each app part one plain kebab-case folder, such as `home` or `inspector`
 - Put tokens, colors, and the logo under `foundations/`
 - Name each file `<name>-dark` or `<name>-light`, a PNG beside its frame HTML
-- Put what every frame loads under `kit/`
+- Put what every frame loads under `assets/<project>/`, one folder per board project
 
 ## Groups
 
