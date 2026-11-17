@@ -1,6 +1,6 @@
 # The Frameboard board
 
-Read before the first `frameboard` verb a `design-pick` run sends. It carries where the board sits, how the verbs are reached, how the server starts, the references page a round draws beside, and how a selection resolves to an answer.
+Read before the first `frameboard` verb a `design-pick` run sends. It carries where the board sits, how the verbs are reached, how the server starts, which home folder a run's project files under, the references page a round draws beside, and how a selection resolves to an answer.
 
 ## Reaching the board
 
@@ -31,6 +31,22 @@ frameboard serve --root <board> --no-open --tokens <stylesheet> --json
 - Read `url` and `reused` off the record rather than composing an address
 - `reused: true` means a server was already up, so this run did not start it and its close leaves it running
 - Report a refusal's `error.code` and stop, since no file stands in for a board
+
+## Home folders
+
+The board's home lists every project, and a home folder gathers the projects of one kind of run so the operator finds a past drive without scrolling past every round. Each kind of run takes one folder, never one per project.
+
+| Run          | Home folder                                                                   |
+| ------------ | ----------------------------------------------------------------------------- |
+| `app-drive`  | The `board-folder` key of `canon/config/app-drive.toml`, `Drives` when absent |
+| A pick round | None, since a round draws in the `project` key's one project, opened by name  |
+
+A run that takes a folder files its project there once the project exists, whether this run added it or found it on the board.
+
+- File it with `frameboard project group <project> <folder> --root <board> --json`, which takes the project as its name rather than through `--project`, and makes the folder when no project holds it yet
+- Run the call on a found project too, since a project made before the folder existed sits loose on home
+- Skip the call when the folder resolves empty, which a config sets to keep a project on home
+- Report a refused group's `error.code` and draw on, since a loose project costs the operator a scroll and never a frame
 
 ## Drawing on the board
 

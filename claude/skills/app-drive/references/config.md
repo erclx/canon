@@ -1,6 +1,6 @@
 ---
 title: App drive config
-description: The canon/config/app-drive.toml keys launch, data, personas, proposals, and board-project, the named targets that let one file drive several apps, and what a drive does when the file is absent
+description: The canon/config/app-drive.toml keys launch, data, personas, proposals, board-project, and board-folder, the named targets that let one file drive several apps, and what a drive does when the file is absent
 ---
 
 # App drive config
@@ -13,6 +13,7 @@ data = "fixtures/demo-board"
 personas = ["a designer laying out a board", "an agent calling the CLI"]
 proposals = ".canon/picks"
 board-project = "drive-<nn>"
+board-folder = "Drives"
 ```
 
 ## Keys
@@ -24,6 +25,7 @@ board-project = "drive-<nn>"
 | `personas`      | Who uses the app, each driven through every goal                          |
 | `proposals`     | The folder for an undecided taste finding's frames and a fallback mock    |
 | `board-project` | The board project a drive draws in, where `<nn>` is the intake ordinal    |
+| `board-folder`  | The board's home folder the drive's project files under                   |
 
 Some of the keys carry a reading the table cannot hold.
 
@@ -39,6 +41,8 @@ Some of the keys carry a reading the table cannot hold.
 - Naming the key opts the project in, even with no board yet, while omitting it leaves the call to `canon/config/design.toml` or `.canon/board/`
 - Keep `<nn>` in a value you set, since one project across drives loses which frames came from which
 - The board's root comes from `canon/config/design.toml` and never from this file, since a second root setting would let `app-drive` and `design-pick` disagree on which board they draw on
+
+`board-folder` is optional and defaults to `Drives`, so every drive's project sits in one home folder beside the others. Set it to another name to file a project's drives apart, or to an empty string to leave each drive's project loose on home. `board.md` under `design-pick`'s references states the call that files it.
 
 ## Named targets
 
