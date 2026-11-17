@@ -1,21 +1,24 @@
+import type { Change, Role, Seat } from '../../../content/sessions'
 import { holdOn, reducedMotion } from '../../../lib/scene'
 
-interface Session {
+interface Live {
   n: string
   aw?: string
   wk: string
   dn: string
-}
-interface Live extends Session {
   age: number
   key: string
+  role: Role
+  slug: string
+  /** The status line a working session has stepped to. */
+  li: number
 }
 interface Data {
-  pool: Session[]
-  steps: string[]
+  changes: Change[]
+  lines: Record<Role, { wk: string[]; dn: string }>
   pinned: { name: string; line: string; age: string }
   completed: number
-  opening: { awaiting: number[]; working: number[]; done: number[] }
+  opening: { awaiting: Seat[]; working: Seat[]; done: Seat[]; next: string }
   flow: string[]
   skills: { name: string; line: string }[]
   noMatch: string
@@ -61,25 +64,32 @@ if (
   const rows = new Map<string, Row>()
   const heads = new Map<string, HTMLDivElement>()
 
-  const inUse = (name: string) =>
-    [...state.aw, ...state.wk, ...state.dn].some((s) => s.n === name)
-  function take(need?: (s: Session) => boolean): Live | null {
-    for (let i = 0; i < data.pool.length; i++) {
-      const s = data.pool[cursor % data.pool.length]
-      cursor++
-      if (!s || inUse(s.n) || (need && !need(s))) continue
-      return { ...s, age: 0, key: `${s.n}#${cursor}` }
+  let serial = 0
+  const changeOf = (slug: string) => data.changes.find((c) => c.slug === slug)
+  /** A session of `role` on the change `slug`, its status line stepped to `li`. */
+  function make(role: Role, slug: string, li = 0, age = 0): Live {
+    const lines = data.lines[role]
+    const asks = role === 'planner' ? changeOf(slug)?.asks : undefined
+    return {
+      n: `${role}-canon-${slug}`,
+      ...(asks ? { aw: asks } : {}),
+      wk: lines.wk[Math.min(li, lines.wk.length - 1)] ?? '',
+      dn: lines.dn,
+      age,
+      key: `${role}-${slug}#${serial++}`,
+      role,
+      slug,
+      li,
     }
-    return null
   }
-  const seed = (list: Live[], ages: number[], need?: (s: Session) => boolean) =>
-    ages.forEach((age) => {
-      const s = take(need)
-      if (s) list.push({ ...s, age })
-    })
-  seed(state.aw, data.opening.awaiting, (s) => Boolean(s.aw))
-  seed(state.wk, data.opening.working, (s) => !s.aw)
-  seed(state.dn, data.opening.done)
+  const seat = (s: Seat) => make(s.role, s.slug, s.line, s.age)
+  state.aw.push(...data.opening.awaiting.map(seat))
+  state.wk.push(...data.opening.working.map(seat))
+  state.dn.push(...data.opening.done.map(seat))
+  cursor = Math.max(
+    0,
+    data.changes.findIndex((c) => c.slug === data.opening.next),
+  )
 
   function head(id: string, text: string) {
     let node = heads.get(id)
@@ -209,41 +219,73 @@ if (
   }
   narrow.addEventListener('change', writeCounts)
 
+  const inFlight = (slug: string) =>
+    [...state.aw, ...state.wk].some((s) => s.slug === slug)
+
+  /** Finishes the oldest working session and starts whatever its change runs next. */
+  function finish() {
+    const s = state.wk.shift()
+    if (!s) return
+    s.age = 0
+    state.dn.unshift(s)
+    done++
+    if (s.role === 'planner') {
+      state.wk.push(make('worker', s.slug))
+      state.pin = `Plan in for ${s.slug}, a worker takes it`
+    } else if (s.role === 'worker') {
+      state.wk.push(make('reviewer', s.slug))
+      if (changeOf(s.slug)?.ui) state.wk.push(make('ui-reviewer', s.slug))
+      state.pin = `${s.slug} opened its pull request, both reviews start`
+    } else
+      state.pin = `${s.slug}: ${s.role === 'reviewer' ? 'code' : 'UI'} review closed`
+  }
+
+  /** Dispatches a planner on the next change nothing holds, into Awaiting when it opens on questions and none waits. */
+  function dispatch() {
+    for (let i = 0; i < data.changes.length; i++) {
+      const change = data.changes[cursor++ % data.changes.length]
+      if (!change || inFlight(change.slug)) continue
+      const s = make('planner', change.slug)
+      if (s.aw && !state.aw.length) {
+        state.aw.push(s)
+        state.pin = `Dispatched ${s.n}, it has questions`
+      } else {
+        state.wk.push(s)
+        state.pin = `Dispatched ${s.n}`
+      }
+      return
+    }
+  }
+
+  function event() {
+    if (state.aw.length && tick % 3 === 1) {
+      const s = state.aw.shift()
+      if (!s) return
+      s.age = 0
+      state.wk.push(s)
+      state.pin = `Answers in for ${s.n}, it starts the plan`
+    } else if (state.wk.length >= 5 || (state.wk.length > 2 && tick % 2 === 0))
+      finish()
+    else dispatch()
+  }
+
+  /**
+   * One tick: one event, a second on every other tick, and half the working
+   * sessions step their status line in place, so the view stays busy without a
+   * faster clock.
+   */
   function step() {
-    const kind = data.steps[tick % data.steps.length]
     tick++
     ;[...state.aw, ...state.wk, ...state.dn].forEach((s) => (s.age += 1))
-    if (kind === 'complete' && state.wk.length > 1) {
-      const s = state.wk.shift()
-      if (s) {
-        s.age = 0
-        state.dn.unshift(s)
-        done++
-        state.pin = `${s.n.replace(/^[a-z-]+?-canon-/, '')} merged, next row is ready`
-      }
-    } else if (kind === 'answer' && state.aw.length) {
-      const s = state.aw.shift()
-      if (s) {
-        s.age = 0
-        state.wk.push(s)
-        state.pin = `Answers in for ${s.n}, it starts the plan`
-      }
-    } else {
-      const s = take(
-        state.wk.length >= 4
-          ? (x) => Boolean(x.aw) && !state.aw.length
-          : undefined,
-      )
-      if (s) {
-        if (s.aw && state.aw.length < 1) {
-          state.aw.push(s)
-          state.pin = `Dispatched ${s.n}, it has questions`
-        } else {
-          state.wk.push(s)
-          state.pin = `Dispatched ${s.n}`
-        }
-      }
-    }
+    event()
+    if (tick % 2 === 0) event()
+    state.wk.forEach((s, i) => {
+      if ((i + tick) % 2) return
+      const lines = data.lines[s.role].wk
+      if (s.li >= lines.length - 1) return
+      s.li++
+      s.wk = lines[s.li] ?? s.wk
+    })
     if (state.dn.length > 8) state.dn.length = 8
     layout()
   }

@@ -417,6 +417,30 @@ test.describe('the looping windows and their pause button', () => {
   })
 })
 
+test.describe('the opening agent view', () => {
+  test('a finished worker puts both reviewers of its change into Working', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+    const working = () =>
+      page.locator('#av-list .r:not(.leave):has(.s.sp) .n').allTextContents()
+    expect(await working()).toContain('worker-canon-take-timer')
+
+    await expect
+      .poll(working, { timeout: 15_000 })
+      .not.toContain('worker-canon-take-timer')
+
+    expect(await working()).toEqual(
+      expect.arrayContaining([
+        'reviewer-canon-take-timer',
+        'ui-reviewer-canon-take-timer',
+      ]),
+    )
+  })
+})
+
 test.describe('the Guardrails section', () => {
   test('sets the four checks on one line above the window at 1440', async ({
     page,
