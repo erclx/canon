@@ -34,7 +34,7 @@ canon expects someone who already knows Claude Code well. It runs on Linux and m
 
 ## Five roles, each in its own session
 
-You talk to the orchestrator, which starts the others and hears back from each.
+One long session loses the thread. canon splits a change across a planner, a worker, and two reviewers, and you talk to the orchestrator that starts them.
 
 - The orchestrator dispatches the rows on the task board
 - A planner reads the code and writes one plan you approve
@@ -52,7 +52,7 @@ Each record has a fixed shape, so the next session knows where to read. Records 
 
 ## Practice skills with cited sources
 
-Each skill loads when its kind of work starts, and every rule names where it came from.
+An agent copies whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from.
 
 | Skill                  | Loads                           | Cites                                     |
 | ---------------------- | ------------------------------- | ----------------------------------------- |
@@ -66,7 +66,7 @@ Each rule has its own source row in a ledger, and the skill audit fails when a s
 
 ## Checks that catch a skipped step
 
-A skill says what good looks like. These four parts hold the agent to it.
+An instruction can be ignored. These four parts fail the run when a step is skipped.
 
 - Rules by path load when the agent opens a matching file, and each names the skill that owns that kind of file
 - Hooks read each action before or after it runs, refusing some and reporting others back into the same turn
@@ -75,11 +75,11 @@ A skill says what good looks like. These four parts hold the agent to it.
 
 ## One worktree for each change
 
-Changes run side by side. Each worker builds in its own worktree on its own branch, and every session reads and writes the one `.canon/` record in the main checkout, so no worktree keeps a copy of its own.
+Agents working in one checkout overwrite each other. Each worker builds in its own worktree on its own branch, and every session reads and writes the one `.canon/` record in the main checkout, so no worktree keeps a copy of its own.
 
 ## Setting up a project
 
-The project starts with its stack's own tool, such as `bun init` or `npm create vite`, or with `/canon:target-scaffold` in an empty folder, and canon layers on top.
+Every repository grows its own agent setup and lets it drift. The project starts with its stack's own tool, such as `bun init` or `npm create vite`, or with `/canon:target-scaffold` in an empty folder, and canon layers on top.
 
 1. `/canon:target-setup` detects the stack, shows the whole chain, and writes nothing until you say yes. Then it runs `canon init`, checks what landed, and indexes the docs.
 2. `/canon:target-check` reports, domain by domain, what the project holds against what canon now ships, and repairs nothing.

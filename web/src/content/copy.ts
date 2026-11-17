@@ -37,8 +37,8 @@ export const site = {
   // README.md: canon-allow-readme-paraphrase: the short variant of the README's opening sentence, which is also the `description` in `package.json` and both manifests, kept equal by `positioning.test.ts`.
   tagline:
     "Runs your agent's work and keeps its code good, on one setup for every repo.",
-  /** The copyright holder `LICENSE` names, which the social card signs with. */
-  author: 'Eric Le',
+  /** The handle the social card signs with, rather than the copyright holder `LICENSE` names. */
+  author: 'erclx',
 }
 
 export const skipLink = 'Skip to the page'
@@ -83,8 +83,8 @@ export const fold = {
   parts: ['Canon runs agent work from', 'plan to', 'merge'] as const,
   // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs agent work from plan to merge"
   headline: 'Canon runs agent work from plan to merge',
-  // README.md: canon-allow-readme-paraphrase: the opening sentence's subject, carried on to the plan and the merge the README's claim names. "A Claude Code plugin and CLI that"
-  lead: 'A Claude Code plugin and CLI that takes coding agents from the plan to the merge.',
+  // README.md: canon-allow-readme-paraphrase: the reason ahead of the opening sentence's subject, which the README opens on the claim alone. "Claude Code plugin and CLI that"
+  lead: 'Coding agents work fast and remember nothing between sessions. Canon is a Claude Code plugin and CLI that gives each step of a change its own session and a written record the next one reads.',
   view: {
     title: 'claude',
     // README.md: canon-allow-readme-paraphrase: the agent view's own prompt hint, which no README sentence carries.
@@ -99,8 +99,8 @@ export const fold = {
 export const roles = {
   // README.md: "Five roles, each in its own session"
   head: 'Five roles, each in its own session',
-  // README.md: "You talk to the orchestrator, which starts the others and hears back from each."
-  lede: 'You talk to the orchestrator, which starts the others and hears back from each.',
+  // README.md: canon-allow-readme-paraphrase: the README's sentences with the name capitalized as the page writes it. "One long session loses the thread." "splits a change across a planner, a worker, and two reviewers, and you talk to the orchestrator that starts them."
+  lede: 'One long session loses the thread. Canon splits a change across a planner, a worker, and two reviewers, and you talk to the orchestrator that starts them.',
 }
 
 export const records = {
@@ -115,8 +115,8 @@ export const records = {
 export const craft = {
   // README.md: "Practice skills with cited sources"
   head: 'Practice skills with cited sources',
-  // README.md: "Each skill loads when its kind of work starts, and every rule names where it came from."
-  lede: 'Each skill loads when its kind of work starts, and every rule names where it came from.',
+  // README.md: "An agent copies whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from."
+  lede: 'An agent copies whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from.',
   // README.md: canon-allow-readme-paraphrase: the pane labels beside one skill's rule and source, which the README's table folds into its columns.
   ruleIn: 'The rule, in',
   source: 'The source it cites',
@@ -127,31 +127,35 @@ export const craft = {
 export const guardrails = {
   // README.md: "Checks that catch a skipped step"
   head: 'Checks that catch a skipped step',
-  // README.md: "A skill says what good looks like. These four parts hold the agent to it."
-  lede: 'A skill says what good looks like. These four parts hold the agent to it.',
-  /** One part per README bullet, each with the real name it runs under. */
+  // README.md: "An instruction can be ignored. These four parts fail the run when a step is skipped."
+  lede: 'An instruction can be ignored. These four parts fail the run when a step is skipped.',
+  /** One part per README bullet in the order they fire, each with when it fires and the real name it runs under. */
   // README.md: canon-allow-readme-paraphrase: each part restates its README bullet as one sentence beside the file or command it runs as.
   parts: [
     {
       name: 'Rules by path',
+      when: 'When a file opens',
       play: 'Play rules by path in the window',
       line: 'Opening a matching file loads the rule naming its skill.',
       real: '.claude/rules/canon/ui/craft.md',
     },
     {
       name: 'Hooks',
+      when: 'As each action runs',
       play: 'Play hooks in the window',
       line: 'A hook checks each action as it runs, and refuses some.',
       real: 'plan-guard.sh, standards-audit.sh',
     },
     {
       name: 'The gate',
+      when: 'Before a pull request',
       play: 'Play the gate in the window',
       line: 'Every check runs before a pull request opens.',
       real: 'canon gate run',
     },
     {
       name: 'Deny rules',
+      when: 'At the merge',
       play: 'Play deny rules in the window',
       line: 'A permission rule, not a hook, stops the agent merging.',
       real: 'Bash(gh pr merge:*)',
@@ -162,8 +166,8 @@ export const guardrails = {
 export const worktrees = {
   // README.md: "One worktree for each change"
   head: 'One worktree for each change',
-  // README.md: canon-allow-readme-paraphrase: the README's sentence, cut to the branch each change builds on and the one record they share. "on its own branch"
-  lede: 'Every change builds on its own branch, and all of them share one record.',
+  // README.md: canon-allow-readme-paraphrase: the README's reason, then its sentence cut to the branch each change builds on and the one record they share. "Agents working in one checkout overwrite each other." "on its own branch"
+  lede: 'Agents working in one checkout overwrite each other. Every change builds on its own branch, and all of them share one record.',
   // README.md: canon-allow-readme-paraphrase: the band naming the shared folder, which the README states as the record in the main checkout. "the one `.canon/` record in the main checkout"
   band: {
     name: '.canon/',
@@ -175,8 +179,8 @@ export const worktrees = {
 export const setup = {
   // README.md: "Setting up a project"
   head: 'Setting up a project',
-  // README.md: canon-allow-readme-paraphrase: the README's three steps, compressed into the section's one-sentence lede.
-  lede: 'An agent sets the project up, and the same skills keep it current.',
+  // README.md: canon-allow-readme-paraphrase: the README's reason, then its three steps compressed into one sentence. "Every repository grows its own agent setup and lets it drift."
+  lede: 'Every repository grows its own agent setup and lets it drift. An agent sets the project up, and the same skills keep it current.',
   /** The four stages along the rule, each saying when it runs, the three skills set apart as `skill`. */
   // README.md: canon-allow-readme-paraphrase: each stage condenses its README step to one line, with the scaffold skill named in Start since v179.8. "such as `bun init` or `npm create vite`" "writes nothing until you say yes" "catches the project up on your go-ahead"
   stages: [
