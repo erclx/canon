@@ -1,5 +1,6 @@
 ---
 import { roleScenes, roles } from '../../../content/copy'
+import PauseButton from '../../pause-button/index.astro'
 import './style.css'
 
 /**
@@ -16,6 +17,7 @@ import './style.css'
     <p>{roles.lede}</p>
   </div>
   <div class="tray">
+    <PauseButton />
     <div class="two">
       <div class="win">
         <div class="win-bar"><i></i><i></i><i></i><span>claude</span></div>

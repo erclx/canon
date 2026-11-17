@@ -17,7 +17,12 @@ if (section && source?.textContent && log) {
   }
   const parts = [...section.querySelectorAll<HTMLElement>('.four > div')]
   const status = section.querySelector<HTMLElement>('[role="status"]')
-  const pace = pacer(holdOn(section.querySelector('.win')))
+  const pace = pacer(
+    holdOn(
+      section.querySelector('.win'),
+      section.querySelector<HTMLButtonElement>('.pz'),
+    ),
+  )
   const still = reducedMotion()
   let current = rest
 
@@ -83,17 +88,11 @@ if (section && source?.textContent && log) {
     return true
   }
 
-  async function tour(generation: number) {
-    for (let i = 0; i < scenes.length; i++) {
+  async function tour(generation: number, from = 0) {
+    for (let i = from; ; i = (i + 1) % scenes.length) {
       if (!(await play(i, generation))) return
-      if (!(await pace.wait(1200, generation))) return
+      if (!(await pace.wait(2600, generation))) return
     }
-    current = rest
-    mark(rest)
-    log!.classList.add('hide')
-    if (!(await pace.wait(300, generation))) return
-    full(rest)
-    log!.classList.remove('hide')
   }
 
   parts.forEach((part, index) =>
@@ -104,7 +103,7 @@ if (section && source?.textContent && log) {
         current = index
         mark(index)
         full(index)
-      } else void play(index, generation)
+      } else void tour(generation, index)
     }),
   )
 

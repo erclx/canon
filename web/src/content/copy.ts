@@ -43,6 +43,13 @@ export const site = {
 
 export const skipLink = 'Skip to the page'
 
+/** The two labels of the button on every looping window, naming what a press does next. */
+// README.md: canon-allow-readme-paraphrase: a control's label, which no README sentence carries.
+export const pause = {
+  pause: 'Pause the animation',
+  play: 'Play the animation',
+}
+
 /** The page's sections in the order they run, which the nav, its menus, and the in-view marker all read. */
 export const sections = [
   // README.md: canon-allow-readme-paraphrase: one-word jump labels for the README's own section headings.

@@ -1,13 +1,14 @@
 ---
 import { setup, setupSession } from '../../../content/copy'
+import PauseButton from '../../pause-button/index.astro'
 import './style.css'
 
 /**
  * A project's life with canon: four stages down one rule beside the setup
- * session, which they center on above 900. The session plays once when it
- * scrolls into view, the active stage's dot filling in the accent as its
- * command types and finished stages kept a quiet fill, and rests whole on the
- * last stage. A click on a stage replays from it and rests there, and the
+ * session, which they center on above 900. The session loops once it scrolls
+ * into view, the active stage's dot filling in the accent as its command
+ * types and finished stages kept a quiet fill, and holds while the reader
+ * hovers it or presses pause. A click on a stage plays on from it, and the
  * session holds one height so the page never jumps.
  */
 const code = (text: string) => text.split('`')
@@ -42,6 +43,7 @@ const code = (text: string) => text.split('`')
       }
     </div>
     <div class="tray">
+      <PauseButton />
       <div class="tx win" aria-hidden="true">
         <p class="cap">{setup.session}</p>
         <div class="log"></div>

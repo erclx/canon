@@ -1,13 +1,14 @@
 ---
 import { guardrailScenes, guardrails } from '../../../content/copy'
+import PauseButton from '../../pause-button/index.astro'
 import './style.css'
 
 /**
  * The refusal first: a Claude Code window on the tray above the four parts.
- * It plays one scene per part once, when it scrolls into view, and rests on
- * the plan guard's refusal. A click on a part plays that scene and rests
- * there. The window holds the height of its tallest scene, so a scene never
- * moves the page.
+ * It loops one scene per part once it scrolls into view, holding while the
+ * reader hovers it or presses pause, and still shows the plan guard's refusal.
+ * A click on a part plays on from that scene. The window holds the height of
+ * its tallest scene, so a scene never moves the page.
  */
 const REST = 1
 ---
@@ -18,6 +19,7 @@ const REST = 1
     <p>{guardrails.lede}</p>
   </div>
   <div class="tray">
+    <PauseButton />
     <div class="win" aria-hidden="true">
       <div class="win-bar"><i></i><i></i><i></i><span>claude</span></div>
       <div class="log"></div>

@@ -11,6 +11,7 @@ import {
 import { readSkills } from '../../../lib/skills'
 import DocIcon from './doc.svg'
 import MergeIcon from './merge.svg'
+import PauseButton from '../../pause-button/index.astro'
 import './style.css'
 
 /**
@@ -45,6 +46,7 @@ const [before, middle, last] = fold.parts
     <p>{fold.lead}</p>
   </div>
   <div class="tray">
+    <PauseButton />
     <div class="win term">
       <div class="win-bar">
         <i></i><i></i><i></i><span>{fold.view.title}</span>

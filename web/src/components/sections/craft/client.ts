@@ -28,7 +28,12 @@ if (section && source?.textContent && log && typed) {
   const pair = section.querySelector<HTMLElement>('.pair')
   const field = (name: string) =>
     section.querySelector<HTMLElement>(`.p-${name}`)
-  const pace = pacer(holdOn(section.querySelector('.win')))
+  const pace = pacer(
+    holdOn(
+      section.querySelector('.win'),
+      section.querySelector<HTMLButtonElement>('.pz'),
+    ),
+  )
   const still = reducedMotion()
   const indexOf = (name: string) => skills.findIndex((s) => s.name === name)
   const sceneOf = (name: string) =>

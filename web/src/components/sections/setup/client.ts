@@ -1,4 +1,4 @@
-import { escapeHtml, pacer, reducedMotion } from '../../../lib/scene'
+import { escapeHtml, holdOn, pacer, reducedMotion } from '../../../lib/scene'
 
 interface Block {
   ask: string
@@ -14,7 +14,9 @@ const tx = section?.querySelector<HTMLElement>('.tx')
 if (section && source?.textContent && log && tx) {
   const blocks = JSON.parse(source.textContent) as Block[]
   const stages = [...section.querySelectorAll<HTMLElement>('.st')]
-  const pace = pacer()
+  const pace = pacer(
+    holdOn(tx, section.querySelector<HTMLButtonElement>('.pz')),
+  )
   const still = reducedMotion()
   const last = blocks.length - 1
 
@@ -86,12 +88,11 @@ if (section && source?.textContent && log && tx) {
     return true
   }
 
-  async function tour(generation: number) {
-    for (let i = 0; i < blocks.length; i++) {
+  async function tour(generation: number, from = 0) {
+    for (let i = from; ; i = (i + 1) % blocks.length) {
       if (!(await play(i, generation))) return
-      if (!(await pace.wait(1100, generation))) return
+      if (!(await pace.wait(i === last ? 2600 : 1100, generation))) return
     }
-    mark(last)
   }
 
   stages.forEach((stage, index) =>
@@ -100,7 +101,7 @@ if (section && source?.textContent && log && tx) {
       if (still) {
         mark(index)
         upTo(index)
-      } else void play(index, generation)
+      } else void tour(generation, index)
     }),
   )
 

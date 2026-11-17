@@ -270,6 +270,83 @@ test.describe('the craft section', () => {
   })
 })
 
+test.describe('the looping windows and their pause button', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+
+  /** A loop that wraps has to outlast one scene and the rest after it. */
+  const WRAP = { timeout: 20_000 }
+
+  test('guardrails plays on past its last scene', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.goto('/')
+    const parts = page.locator('#guardrails .four > div')
+    await expect(parts).toHaveCount(4)
+    // The scroll-in tour lights the first part, so the click lands after it.
+    await page.locator('#guardrails .tray').scrollIntoViewIfNeeded()
+    await expect(parts.first()).toHaveClass(/(^| )lit( |$)/, SETTLE)
+
+    await parts.last().locator('.go').click()
+
+    await expect(parts.last()).toHaveClass(/(^| )lit( |$)/, SETTLE)
+    await expect(parts.first()).toHaveClass(/(^| )lit( |$)/, WRAP)
+  })
+
+  test('setup plays on past its last stage', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.goto('/')
+    const stages = page.locator('#setup .st')
+    await expect(stages).toHaveCount(4)
+    await page.locator('#setup .tx').scrollIntoViewIfNeeded()
+    await expect(stages.first()).toHaveClass(/(^| )on( |$)/, SETTLE)
+
+    await stages.last().locator('.go').click()
+
+    await expect(stages.last()).toHaveClass(/(^| )on( |$)/, SETTLE)
+    await expect(stages.first()).toHaveClass(/(^| )on( |$)/, WRAP)
+  })
+
+  test('a pressed pause button holds the window it sits on', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.goto('/')
+    const pause = page.locator('#guardrails .pz')
+    const log = page.locator('#guardrails .log')
+    await page.locator('#guardrails .four .go').nth(1).click()
+    await expect(log.locator('.tool')).toHaveCount(1, SETTLE)
+
+    await pause.click()
+    const held = await log.textContent()
+    await page.waitForTimeout(2_000)
+
+    await expect(pause).toHaveAttribute('data-paused', 'true')
+    expect(await log.textContent()).toBe(held)
+  })
+
+  test('the pause button toggles from the keyboard', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.goto('/')
+    const pause = page.locator('#roles .pz')
+
+    await pause.focus()
+    await page.keyboard.press('Enter')
+    const afterEnter = await pause.getAttribute('data-paused')
+    await page.keyboard.press('Space')
+
+    expect(afterEnter).toBe('true')
+    await expect(pause).toHaveAttribute('data-paused', 'false')
+  })
+
+  test('shows no pause button under reduced motion', async ({ page }) => {
+    await page.goto('/')
+    const buttons = page.locator('.pz')
+    await expect(buttons).toHaveCount(6)
+
+    await expect(buttons.first()).toBeHidden()
+    await expect(buttons.last()).toBeHidden()
+  })
+})
+
 test.describe('the records stack', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 

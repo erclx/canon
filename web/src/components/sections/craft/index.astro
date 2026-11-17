@@ -1,6 +1,7 @@
 ---
 import { craft } from '../../../content/copy'
 import { craftScenes, practices } from '../../../content/practice'
+import PauseButton from '../../pause-button/index.astro'
 import './style.css'
 
 /**
@@ -32,6 +33,7 @@ const first = practices[0]
       <p>{craft.lede}</p>
     </div>
     <div class="tray">
+      <PauseButton />
       <div class="win" aria-hidden="true">
         <div class="win-bar"><i></i><i></i><i></i><span>claude</span></div>
         <div class="log"></div>

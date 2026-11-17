@@ -519,7 +519,10 @@ if (
    * The loop halts while the reader holds the view, by pointer or focus,
    * so moving content stops under the person reading it.
    */
-  const held = holdOn(list.closest('.av'))
+  const held = holdOn(
+    list.closest('.av'),
+    document.querySelector<HTMLButtonElement>('#top .pz'),
+  )
   if (!reducedMotion())
     setInterval(() => {
       if (!held()) step()

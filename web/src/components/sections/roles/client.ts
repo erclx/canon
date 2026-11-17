@@ -18,7 +18,12 @@ const buttons = [
 
 if (section && source?.textContent && log && typed && who) {
   const scenes = JSON.parse(source.textContent) as Scene[]
-  const pace = pacer(holdOn(section.querySelector('.win')))
+  const pace = pacer(
+    holdOn(
+      section.querySelector('.win'),
+      section.querySelector<HTMLButtonElement>('.pz'),
+    ),
+  )
   const still = reducedMotion()
 
   const block = (className: string, html: string) => {
