@@ -155,7 +155,8 @@ const FULL_SUITE = ['bun', 'run', 'test']
 /**
  * The end-to-end suites launch a browser and FFmpeg, so a scoped run that
  * reached them held the machine tests lock for minutes on one `src/take/`
- * change. They run by hand through `bun run test:e2e` and on the full suite.
+ * change. They run only through `bun run test:e2e` and CI's E2E Suites job,
+ * since the unit config excludes them from the full suite too.
  */
 const END_TO_END = '**/*.e2e.test.ts'
 

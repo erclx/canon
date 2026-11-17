@@ -19,20 +19,20 @@ Owns the local development loop, being the run commands, the gate behind `bun ru
 
 The run commands, which stack references and `docs/target/projects.md` send a session to, so a command added elsewhere is invisible to them.
 
-| Command                 | Purpose                                                                                                              |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `bun run check`         | Verification scoped to changed files. Fails on format drift, regenerates indexes, asserts clean.                     |
-| `bun run check:ci`      | Every stage via `--all`, the run CI does. Still regenerates.                                                         |
-| `bun run check:format`  | Read-only oxfmt, Prettier for `.astro`, and shfmt format check.                                                      |
-| `bun run check:shell`   | Read-only shellcheck against `scripts/`, `tooling/`, `src/`, and `.claude/hooks/`.                                   |
-| `bun run check:lint`    | Read-only oxlint at its default rules, failing on any warning, then html-validate on the sheets.                     |
-| `bun run check:types`   | Read-only `tsc --noEmit` against `src/`.                                                                             |
-| `bun run check:install` | Clones the repo to tmp and asserts `canon init` lands a fresh scaffold.                                              |
-| `bun run test:e2e`      | The nine `*.e2e.test.ts` suites a scoped `check` skips and CI runs, or those under a path. Queues on the Tests lock. |
-| `bun run format`        | Auto-fix oxfmt, Prettier for `.astro`, and shfmt formatting.                                                         |
-| `bun run design:sync`   | Lands the mapped board frames in `canon/design/`. `--check` writes nothing and exits 14 on drift.                    |
-| `bun run clean`         | Wipe `node_modules/`, clear bun cache, reinstall.                                                                    |
-| `bun run update`        | Interactive `bun update` followed by verification.                                                                   |
+| Command                 | Purpose                                                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `bun run check`         | Verification scoped to changed files. Fails on format drift, regenerates indexes, asserts clean.             |
+| `bun run check:ci`      | Every stage via `--all`, the run CI does. Still regenerates.                                                 |
+| `bun run check:format`  | Read-only oxfmt, Prettier for `.astro`, and shfmt format check.                                              |
+| `bun run check:shell`   | Read-only shellcheck against `scripts/`, `tooling/`, `src/`, and `.claude/hooks/`.                           |
+| `bun run check:lint`    | Read-only oxlint at its default rules, failing on any warning, then html-validate on the sheets.             |
+| `bun run check:types`   | Read-only `tsc --noEmit` against `src/`.                                                                     |
+| `bun run check:install` | Clones the repo to tmp and asserts `canon init` lands a fresh scaffold.                                      |
+| `bun run test:e2e`      | The `*.e2e.test.ts` suites every `check` skips and CI runs, or those under a path. Queues on the Tests lock. |
+| `bun run format`        | Auto-fix oxfmt, Prettier for `.astro`, and shfmt formatting.                                                 |
+| `bun run design:sync`   | Lands the mapped board frames in `canon/design/`. `--check` writes nothing and exits 14 on drift.            |
+| `bun run clean`         | Wipe `node_modules/`, clear bun cache, reinstall.                                                            |
+| `bun run update`        | Interactive `bun update` followed by verification.                                                           |
 
 ### `src/gate/`
 
@@ -40,7 +40,7 @@ Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`,
 
 - Stages run in table order and the first to find a fact halts the run. Unreferenced rules and Audit set report and never fail the push
 - The changed set unions the diff against `origin/main`, the working tree, and untracked files. Fallbacks widen, and `--all` forces every stage. On `main` the local ref is HEAD, so the base is remote.
-- A scoped run hands `vitest related` changed `.ts` files plus the tests `corpus-readers.ts` finds naming another changed file's folder, minus e2e suites. A test config or `package.json` runs all.
+- A scoped run hands `vitest related` changed `.ts` files plus the tests `corpus-readers.ts` finds naming another changed file's folder. A test config or `package.json` runs all. Both skip e2e suites.
 - Indexes and Consumed copies regenerate then assert, so the first run after an edit reports drift and `check:ci` writes the tree. Stage the rewrite and run again, since a rerun alone repeats the diff.
 - A stage that cannot read its input is `unmeasured`, which warns locally and refuses under CI. Plugin manifests skips locally without the CLI and fails when `CI` is set
 
