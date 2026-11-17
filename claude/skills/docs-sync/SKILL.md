@@ -13,6 +13,7 @@ Read these files in parallel:
 - The `write-human` skill: voice, rhythm, and sentence construction for all generated text
 - `${CLAUDE_SKILL_DIR}/references/readme.md`: README structure, required sections, and content rules
 - `${CLAUDE_SKILL_DIR}/references/docs.md`: the reader a page under `docs/` serves, its frontmatter, structure, and what it links out rather than carrying
+- `${CLAUDE_SKILL_DIR}/references/placement.md`: the triggers that let a sync create a page or a heading, the default that creates nothing, and the split steps
 
 ## Diff baseline
 
@@ -67,18 +68,27 @@ The split between `stale` and `departed` is whether the doc was describing or pr
 
 Classify at the section level, not the file level. A doc edited earlier in the session can still be partially stale. For each diff surface, verify the corresponding section is synced.
 
+## Placement
+
+Place each surface the diff adds before rewriting any line, per `${CLAUDE_SKILL_DIR}/references/placement.md`. Take the first trigger row that fires for each surface, and run the nearest-page search for a new name rather than picking a page by judgment.
+
+- Create nothing when no row fires. The default rewrites stale lines in place, and a new flag or output field never earns a page.
+- Report a name the search places nowhere as unplaced, and write nothing for it
+- Split only a page or an H2 this run writes into. A page the diff does not reach stays as it is and is reported when it is past a limit.
+- Placement runs ahead of the rewrite and never replaces it. A `departed` section stays unwritten wherever the surface it covers lands.
+
 ## Action
 
-Rewrite only the stale sections. Do not touch sections unrelated to the diff.
+Rewrite only the stale sections, and write each page or heading Placement created. Do not touch sections unrelated to the diff.
 
 - Write the updated file immediately after the preview. Claude Code's tool permission dialog is the confirmation gate, so do not wait for user input.
 - Never rewrite a `departed` section. Leave it as written and report it as a finding, since the repair belongs in the code rather than in the prose.
 
 ## Audit
 
-Run `canon markdown audit <path>` over every page this run rewrote, and fix each ban, density, and reference shape finding it reports per the markdown standard and the docs reference read above.
+Run `canon markdown audit <path>` over every page this run rewrote, created, or moved, and fix each ban, density, and reference shape finding it reports per the markdown standard and the docs reference read above.
 
-- Fix a finding inside a section this run rewrote, then re-run the audit on that page until it reports none there
+- Fix a finding inside a section this run rewrote or a page it created, then re-run the audit on that page until it reports none there
 - Report a finding in a section the diff does not reach as an audit line in the summary, since the rule above leaves that section as it is
 - Report a refusal or a missing subcommand as an audit line and continue
 
@@ -94,8 +104,9 @@ Run `canon markdown audit <path>` over every page this run rewrote, and fix each
 | README.md   | stale     | update |
 | docs/cli.md | departed  | report |
 | docs/api.md | unrelated | skip   |
+| docs/run.md | created   | create |
 
-After outputting the preview, write all stale updates immediately.
+After outputting the preview, write all stale updates and placements immediately.
 
 ### Summary
 
@@ -105,5 +116,11 @@ One line per file, using the same relative path format as the preview table (e.g
 ✅ Updated: <relative-path>
 ⏭️  Skipped: <relative-path>
 ⚠️ Departed: <relative-path> records <the contract>, and the diff <what it did>. Left unwritten.
+🆕 Created: <relative-path>, by the <trigger> row
+🔀 Moved: <old-path> to <new-path>
+⚠️ Unplaced: <name>, no page names <parent>. Nothing written.
+⚠️ Past limit: <relative-path>, <limit>. Left unsplit, since the diff does not reach it.
 ⚠️ Audit: <relative-path>, <finding>
 ```
+
+Name every created and moved path, since another branch may cite the old one.
