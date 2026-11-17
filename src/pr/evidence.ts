@@ -25,6 +25,9 @@ const REEL_PREFIX = '**Reel** filmed at'
 const REEL_LINE =
   /^\*\*Reel\*\* filmed at `([0-9a-f]{7,40})`:<br><img src="([^"]+)"/
 
+/** How the line under the reel naming the checklist groups it films and leaves out opens. */
+const REEL_COVERS_PREFIX = '**Reel covers:**'
+
 /** How the line naming why no local address was posted opens. */
 const LOCAL_SKIP_PREFIX = '**No local preview:**'
 
@@ -474,15 +477,21 @@ function renderFolded(
   return block('<details>', `${FOLDED_SUMMARY} (${cases.length})`, cases)
 }
 
-/** A reel embedded in the comment, and the head it was filmed at. */
+/** A reel embedded in the comment, the head it was filmed at, and what it covers when the filming session said. */
 export interface EvidenceReel {
   readonly link: string
   readonly head: string
+  readonly covers?: string
 }
 
-function reelLine(reel: EvidenceReel): string {
+/** The reel line, then its coverage line when it carries one, which lives and dies with the reel. */
+function reelLines(reel: EvidenceReel): string[] {
   const head = reel.head.slice(0, SHORT_SHA_LENGTH)
-  return `${REEL_PREFIX} \`${head}\`:<br><img src="${escapeCell(reel.link)}" width="${REEL_WIDTH}" alt="reel filmed at ${head}">`
+  return [
+    `${REEL_PREFIX} \`${head}\`:<br><img src="${escapeCell(reel.link)}" width="${REEL_WIDTH}" alt="reel filmed at ${head}">`,
+    '',
+    ...skipLines(REEL_COVERS_PREFIX, reel.covers),
+  ]
 }
 
 /** Why a render carries no local address or no reel, each a reason code and any one-line message the caller joined to it. */
@@ -550,7 +559,7 @@ export function renderEvidenceBody(
     '',
     ...(segments.length === 0 ? [] : [segments.join(ADDRESS_SEPARATOR), '']),
     ...(local === undefined ? skipLines(LOCAL_SKIP_PREFIX, skips.local) : []),
-    ...(reel === undefined ? [] : [reelLine(reel), '']),
+    ...(reel === undefined ? [] : reelLines(reel)),
     ...(reel !== undefined && head.startsWith(reel.head)
       ? []
       : skipLines(REEL_SKIP_PREFIX, skips.reel)),
@@ -816,13 +825,24 @@ export function findEvidenceReel(
 ): EvidenceReel | undefined {
   const marked = findMarked(comments)
   if (marked === undefined) return undefined
-  for (const line of marked.body.split('\n')) {
-    const match = REEL_LINE.exec(line.trim())
+  const lines = marked.body.split('\n').map((line) => line.trim())
+  for (const [index, line] of lines.entries()) {
+    const match = REEL_LINE.exec(line)
     if (match?.[1] !== undefined && match[2] !== undefined) {
-      return { link: match[2].replaceAll('&amp;', '&'), head: match[1] }
+      const reel = { link: match[2].replaceAll('&amp;', '&'), head: match[1] }
+      const covers = readReelCovers(lines.slice(index + 1))
+      return covers === undefined ? reel : { ...reel, covers }
     }
   }
   return undefined
+}
+
+/** The coverage line directly under a reel line, past blank lines only, so a coverage line never attaches to a reel it does not follow. */
+function readReelCovers(after: readonly string[]): string | undefined {
+  const next = after.find((line) => line !== '')
+  const covers =
+    next === undefined ? undefined : readSegment(next, REEL_COVERS_PREFIX)
+  return covers === undefined ? undefined : unescapeCell(covers)
 }
 
 /**
@@ -853,15 +873,18 @@ export function findEvidenceSkips(
 
 /**
  * The reel a render embeds: a passed link, filmed at this head, replaces
- * whatever the comment carries, and with none passed the posted reel carries
- * forward under the head it was filmed at.
+ * whatever the comment carries along with its coverage, and with none passed
+ * the posted reel carries forward under the head it was filmed at, its
+ * coverage with it.
  */
 export function nextEvidenceReel(
   link: string | undefined,
   head: string,
   comments: readonly EvidenceComment[],
+  covers?: string,
 ): EvidenceReel | undefined {
-  return link === undefined ? findEvidenceReel(comments) : { link, head }
+  if (link === undefined) return findEvidenceReel(comments)
+  return covers === undefined ? { link, head } : { link, head, covers }
 }
 
 /**

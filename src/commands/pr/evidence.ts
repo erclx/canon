@@ -54,6 +54,7 @@ interface EvidenceOptions extends ReadOptions {
   readonly checklist?: string | false
   readonly local?: string
   readonly reel?: string
+  readonly reelCovers?: string
   readonly localSkip?: string
   readonly reelSkip?: string
   readonly check?: boolean
@@ -74,7 +75,7 @@ type EvidenceRefusal =
 
 const EVIDENCE_REFUSALS: Record<EvidenceRefusal, string> = {
   'check-writes':
-    '--check is a read and renders no body, so it takes none of --preview, --local, --checklist, --no-checklist, --reel, --local-skip, or --reel-skip. Run the check and the render as two calls.',
+    '--check is a read and renders no body, so it takes none of --preview, --local, --checklist, --no-checklist, --reel, --reel-covers, --local-skip, or --reel-skip. Run the check and the render as two calls.',
   'gh-failed':
     'gh could not answer for this repository. Name the pull request number.',
   'unreadable-checklist':
@@ -115,6 +116,10 @@ export function registerEvidence(pr: Command): void {
     .option(
       '--reel <link>',
       'Embed this reel under the address line, filmed at the head, from canon pr frames --reel',
+    )
+    .option(
+      '--reel-covers <text>',
+      'Name the checklist groups the passed --reel films and leaves out, on a line under it',
     )
     .option(
       '--local-skip <reason>',
@@ -211,6 +216,13 @@ export function registerEvidence(pr: Command): void {
         'opens a render alone, so a branch whose evidence is a filmed reel',
         'posts it with no checklist or comparison. A carried reel opens none.',
         '',
+        '--reel-covers puts one **Reel covers:** line under the passed reel,',
+        'naming the checklist groups it films and the ones it leaves out. The',
+        'line belongs to its reel: it is carried forward with a carried reel',
+        'and dropped when a passed reel replaces it, so it never describes a',
+        'reel that is gone. Without --reel it is ignored with a warning, since',
+        'nothing filmed at this head is there for it to describe.',
+        '',
         '--local-skip and --reel-skip each put one line under the addresses,',
         '**No local preview:** or **No reel:** followed by the text passed, a',
         'reason code and any one-line message joined to it, folded onto one',
@@ -232,7 +244,8 @@ export function registerEvidence(pr: Command): void {
         'present only when that comment holds it:',
         '  preview    the hosted **Preview:** address the comment carries',
         '  local      the **Local preview:** address beside it',
-        '  reel       the embedded reel, as `link` and the `head` it was filmed at',
+        '  reel       the embedded reel, as `link`, the `head` it was filmed at,',
+        '             and `covers` when its coverage line is posted',
         '  checklist  the checklist between its delimiters, ticks included',
         '  boxes      each checklist box with its number, tick, stamp, and taste',
         '             mark, the numbering `canon pr tick` takes',
@@ -281,7 +294,7 @@ export function registerEvidence(pr: Command): void {
         'the text before the first colon, to decide whether a drivable',
         'checklist with no reel at the head is settled. --check refuses',
         'with --preview, --local, --checklist, --no-checklist, --reel,',
-        '--local-skip, or --reel-skip as check-writes.',
+        '--reel-covers, --local-skip, or --reel-skip as check-writes.',
         '',
         'Refusals, read off `reason`:',
         '  unreadable-checklist  --checklist named a path that could not be read,',
@@ -529,6 +542,7 @@ async function runEvidence(
       opts.local !== undefined ||
       opts.checklist !== undefined ||
       opts.reel !== undefined ||
+      opts.reelCovers !== undefined ||
       opts.localSkip !== undefined ||
       opts.reelSkip !== undefined)
   ) {
@@ -747,7 +761,17 @@ async function runEvidence(
   // A carried reel names its head, so it stays beside a passed skip.
   const local =
     opts.local ?? (opts.localSkip === undefined ? carriedLocal : undefined)
-  const reel = nextEvidenceReel(opts.reel, identity.head, comments)
+  if (opts.reelCovers !== undefined && opts.reel === undefined) {
+    logWarn(
+      '--reel-covers ignored, since no --reel was passed for it to describe',
+    )
+  }
+  const reel = nextEvidenceReel(
+    opts.reel,
+    identity.head,
+    comments,
+    opts.reelCovers,
+  )
   const carriedSkips = findEvidenceSkips(comments)
   const skips = {
     local: opts.localSkip ?? carriedSkips.local,
