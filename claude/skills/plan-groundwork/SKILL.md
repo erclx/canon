@@ -42,6 +42,12 @@ What a spike produces stays inside the track, under `.canon/groundwork/<nn>-<slu
 
 A `design-pick` run invoked from inside a live track follows its own branch for this. It writes its renders to `evidence/` here, and drafts its candidates as pages on the Frameboard board `design-pick` resolves, where its close removes the round. On a board `canon/config/design.toml` names, the close keeps the picked page.
 
+### Drawing a judgment question
+
+When an open question is a choice the operator settles by looking, the track draws its options on its own board project, `groundwork-<nn>`, or `groundwork-<nn>-<slug>` when another track left that name. That project is a third exception to the write scope, and the track reaches no other project and no accepted frame.
+
+Read `${CLAUDE_SKILL_DIR}/references/groundwork-board.md` before the first frame, for when a track draws, its pages, how it asks, and the copies it keeps under `evidence/` and `scripts/`.
+
 ### Reading and backing
 
 Reading is not restricted, so read documentation, comparable projects, and papers whenever a live question needs them. Invoke `canon:search-craft` with the skill tool before an outside search, and report it rather than proceeding silently when the skill does not resolve.
@@ -131,13 +137,13 @@ The standard sets the open question format inside a topic file and in `00-scope.
 
 1. Write `06-decision.md`, stating the problem once, the goal, what to do, and what was dropped. Carry each adopted lean's "Overturned by" line into `## Revisit when`.
 2. Delete `99-next-session.md` when present, since `06-decision.md` alone closes the track and a pause note beside it is a stale second account.
-3. Update the file map in `README.md`.
+3. Update the file map in `README.md`, naming the board project when the track drew one. Keep that project, and confirm every capture the folder cites sits under `evidence/`, per `groundwork-board.md`.
 4. Record the conclusion, even when it is to do nothing, by the route `### Close routes` below picks.
 5. When the conclusion Step 4 recorded or handed off does not cover every finding the track surfaced, route what it leaves out through `plan-intake`. Skip this step when it does.
 6. Report each statement about an outside source carrying neither a link nor a lead entry. Report and do not block, because judging what counts as an external claim is the call a checker gets wrong.
 7. Plan the conclusion in this session through `canon:plan-feature` by the route Step 4 took, per `### Close routes` below, or name the handoff.
 
-Aside from an experiment fixture, Steps 4, 5, and 7 are the only ways close mode reaches outside the folder. Do not close while an open question quietly fails an outcome. Resolve it, or record it in `06-decision.md` as knowingly accepted.
+Aside from an experiment fixture and the track's board project, Steps 4, 5, and 7 are the only ways close mode reaches outside the folder. Do not close while an open question quietly fails an outcome. Resolve it, or record it in `06-decision.md` as knowingly accepted.
 
 Name `proposal-critique` in the close report when the decision is a one-way change or a fix whose cause is unverified, and never invoke it from here.
 

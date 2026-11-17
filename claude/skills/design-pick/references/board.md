@@ -36,10 +36,11 @@ frameboard serve --root <board> --no-open --tokens <stylesheet> --json
 
 The board's home lists every project, and a home folder gathers the projects of one kind of run so the operator finds a past drive without scrolling past every round. Each kind of run takes one folder, never one per project.
 
-| Run          | Home folder                                                                   |
-| ------------ | ----------------------------------------------------------------------------- |
-| `app-drive`  | The `board-folder` key of `canon/config/app-drive.toml`, `Drives` when absent |
-| A pick round | None, since a round draws in the `project` key's one project, opened by name  |
+| Run                | Home folder                                                                   |
+| ------------------ | ----------------------------------------------------------------------------- |
+| `app-drive`        | The `board-folder` key of `canon/config/app-drive.toml`, `Drives` when absent |
+| A groundwork track | `Groundwork`, holding each drawing track's `groundwork-<nn>` project          |
+| A pick round       | None, since a round draws in the `project` key's one project, opened by name  |
 
 A run that takes a folder files its project there once the project exists, whether this run added it or found it on the board.
 
