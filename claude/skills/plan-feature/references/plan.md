@@ -233,6 +233,16 @@ A plan whose `## Files to touch` names a rendered-surface file (`.tsx`, `.jsx`, 
 - Cite a tracked folder only, since the building session opens its light and dark images and its frame HTML from the working tree
 - `canon records validate plans` reports `section-missing` for a plan that names a rendered-surface file and omits the section
 
+**Roles**
+
+Each entry states whether the change leaves its folder true or alters it, so a redraw reaches the builder as a line rather than a contradiction found after merge.
+
+- Open the text after the colon on `built against` when the change leaves the folder true, or on `redrawn` when it alters what the folder shows
+- Follow the role with what stays true or what changes
+- Cite one folder twice, once per role, when the change keeps one part of a surface and alters another
+- Pair each `redrawn` entry with a `## Files to touch` line naming the folder and the project's own design sync command. Each project names its own, so the standard gives none.
+- `canon records validate plans` reports `design-reference-unclassified` for an entry naming a `canon/design/` folder that opens on neither role
+
 ### Reference images
 
 A plan shaped against an image no tracked folder holds carries this section, such as drive evidence, an image in an intake item, or a design board frame. It tells the building session which images to open before its first edit, and it stays apart from `## Design references`, which cites tracked folders alone.
@@ -398,7 +408,8 @@ Add as <where> in `<path/to/file>`, after <anchor>.
 
 ## Design references
 
-- `canon/design/<surface>/`: <the surface it governs>
+- `canon/design/<surface>/`: built against, <the surface it governs and what stays true>
+- `canon/design/<surface>/`: redrawn, <the surface it governs and what changes>
 
 ## Reference images
 
