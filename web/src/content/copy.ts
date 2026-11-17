@@ -177,26 +177,30 @@ export const setup = {
   head: 'Setting up a project',
   // README.md: canon-allow-readme-paraphrase: the README's three steps, compressed into the section's one-sentence lede.
   lede: 'An agent sets the project up, and the same skills keep it current.',
-  /** The four stages along the rule, the three skills set apart as `skill`. */
+  /** The four stages along the rule, each saying when it runs, the three skills set apart as `skill`. */
   // README.md: canon-allow-readme-paraphrase: each stage condenses its README step to one line, with the scaffold skill named in Start since v179.8. "such as `bun init` or `npm create vite`" "writes nothing until you say yes" "catches the project up on your go-ahead"
   stages: [
     {
       name: 'Start',
+      when: 'First',
       skill: false,
       line: '`bun init`, `npm create vite`, or `target-scaffold` starts the project.',
     },
     {
       name: 'target-setup',
+      when: 'Once per project',
       skill: true,
       line: 'Shows what it will lay down, and writes nothing until you say yes.',
     },
     {
       name: 'target-check',
+      when: 'Any time',
       skill: true,
       line: 'Reports what the project lacks against the current release.',
     },
     {
       name: 'target-update',
+      when: 'After each release',
       skill: true,
       line: 'After a release, catches the project up on your go-ahead.',
     },
@@ -423,7 +427,15 @@ export const setupSession: {
   shell: boolean
   rows: [string, string, string][]
 }[] = [
-  { ask: 'bun init', shell: true, rows: [] },
+  {
+    ask: 'bun init',
+    shell: true,
+    rows: [
+      ['f', '+', 'package.json'],
+      ['f', '+', 'tsconfig.json'],
+      ['f', '+', 'index.ts'],
+    ],
+  },
   {
     ask: '/canon:target-setup',
     shell: false,

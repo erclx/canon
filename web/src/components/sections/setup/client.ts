@@ -20,11 +20,16 @@ if (section && source?.textContent && log && tx) {
   const still = reducedMotion()
   const last = blocks.length - 1
 
+  const rail = section.querySelector<HTMLElement>('.stages')
+
+  /** Lights the running stage, and fills the rule down to its dot. */
   function mark(index: number) {
     stages.forEach((stage, j) => {
       stage.classList.toggle('on', j === index)
       stage.classList.toggle('done', j < index)
     })
+    const on = stages[index]
+    if (rail && on) rail.style.setProperty('--fill', `${on.offsetTop + 10}px`)
   }
 
   function block(index: number) {
@@ -40,7 +45,7 @@ if (section && source?.textContent && log && tx) {
     [kind, key, value]: [string, string, string],
   ) {
     const line = document.createElement('div')
-    line.className = `row${kind === 'q' ? ' q' : ''}`
+    line.className = `row${kind === 'q' || kind === 'f' ? ` ${kind}` : ''}`
     line.innerHTML = `<span class="k">${escapeHtml(key)}</span><span class="v">${escapeHtml(value)}</span>`
     node.append(line)
   }

@@ -417,6 +417,48 @@ test.describe('the looping windows and their pause button', () => {
   })
 })
 
+test.describe('the setup section', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+
+  test('the Start stage prints the files its command writes', async ({
+    page,
+  }) => {
+    await page.goto('/')
+
+    await page.locator('#setup .st').first().locator('.go').click()
+
+    await expect(page.locator('#setup .log .blk').first()).toBeVisible()
+    await expect(
+      page.locator('#setup .log .blk').first().locator('.row.f'),
+    ).toHaveCount(3)
+  })
+
+  test('the stage rail raises the running card and fills down to it', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const stages = page.locator('#setup .st')
+    const fill = () =>
+      page
+        .locator('#setup .stages')
+        .evaluate((node) => parseFloat(node.style.getPropertyValue('--fill')))
+    const surface = (index: number) =>
+      stages
+        .nth(index)
+        .evaluate((node) => getComputedStyle(node).backgroundColor)
+
+    await stages.nth(1).locator('.go').click()
+    const second = await fill()
+    const running = await surface(1)
+    const resting = await surface(2)
+    await stages.nth(3).locator('.go').click()
+
+    expect(running).not.toBe(resting)
+    expect(second).toBeGreaterThan(0)
+    expect(await fill()).toBeGreaterThan(second)
+  })
+})
+
 test.describe('the records stack', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 

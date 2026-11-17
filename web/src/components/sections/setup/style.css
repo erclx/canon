@@ -51,7 +51,58 @@
 }
 
 #setup .st.done::before {
-  background: var(--line);
+  background: var(--accent);
+  box-shadow: none;
+}
+
+/* The rule fills in the accent down to the running stage's dot, which the script measures. */
+#setup .stages::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 8px;
+  width: 2px;
+  height: var(--fill, 0px);
+  border-radius: var(--radius-marker);
+  background: var(--accent);
+  transition: height var(--duration-move) var(--ease-standard);
+}
+
+#setup .when {
+  display: block;
+  margin-bottom: 4px;
+  font-size: var(--size-small);
+  color: var(--muted);
+}
+
+/* Above 900 each stage is a card on the rule, and the running one rises onto the window surface. */
+@media (min-width: 901px) {
+  #setup .stages {
+    gap: 12px;
+  }
+
+  #setup .st {
+    padding: 16px 20px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-panel);
+    transition:
+      background-color var(--duration-fade) var(--ease-standard),
+      border-color var(--duration-fade) var(--ease-standard);
+  }
+
+  #setup .st.on {
+    background: var(--win);
+    border-color: var(--edge);
+    box-shadow: var(--shadow-window);
+  }
+
+  #setup .st::before {
+    top: 20px;
+  }
+
+  #setup .st .go::after {
+    inset: 0 0 0 -40px;
+  }
 }
 
 #setup .st .go {
@@ -144,6 +195,15 @@
   color: var(--accent);
 }
 
+/* A file line a shell command prints, its mark beside the name rather than in a key column. */
+#setup .tx .row.f {
+  display: block;
+}
+
+#setup .tx .row.f .k {
+  margin-right: 1ch;
+}
+
 #setup .tx .cur {
   height: 16px;
   margin-left: 1px;
@@ -163,7 +223,8 @@
     padding-left: 0;
   }
 
-  #setup .stages::before {
+  #setup .stages::before,
+  #setup .stages::after {
     display: none;
   }
 
