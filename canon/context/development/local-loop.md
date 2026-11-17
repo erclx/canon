@@ -41,6 +41,7 @@ Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`,
 - Stages run in table order and the first to find a fact halts the run. Unreferenced rules and Audit set report and never fail the push
 - The changed set unions the diff against `origin/main`, the working tree, and untracked files. Fallbacks widen, and `--all` forces every stage. On `main` the local ref is HEAD, so the base is remote.
 - A scoped run hands changed `.ts` and `.tsx` files to `vitest related`, minus every `*.e2e.test.ts`, and names `bun run test:e2e`. A vitest config, `tsconfig.json`, or `package.json` change runs all.
+- Any other changed file adds the tests `src/gate/corpus-readers.ts` selects, being each one that resolves from the root and names the file's first two path segments. A file no test names leaves the stage skipped, and the full suite never runs on a corpus edit.
 - Indexes and Consumed copies regenerate then assert, so the first run after an edit reports drift and `check:ci` writes the tree. Stage the rewrite and run again, since a rerun alone repeats the diff.
 - A stage that cannot read its input is `unmeasured`, which warns locally and refuses under CI. Plugin manifests skips locally without the CLI and fails when `CI` is set
 
@@ -122,6 +123,6 @@ Smaller folders the loop touches.
 
 - `check:lint` passes `--disable-nested-config` to skip the golden configs under `tooling/*/configs/`, and `check:types` needs `typescript` in `devDependencies`, not hoisted from an astro peer
 - `canon gov regen` defaults `--root` to wherever the binary is installed, so from a worktree pass `--root <literal-path>`
-- A push runs no test that reads a file from disk rather than importing it, so a skill, rule, or hook script edit that breaks one fails in CI's `--all` run instead. That trade keeps pushes unqueued
+- The reader selector reads test source for a path spelling, so a test building its path in a helper or a glob over the root is missed on a push and fails in CI's `--all` run instead. That trade keeps pushes unqueued
 - A file whose name ends in `index.md`, staged or untracked, trips the Indexes stage even under `auto: false`
 - A line number cited into a file the entry does not own goes stale with nothing comparing it, so cite a named identifier
