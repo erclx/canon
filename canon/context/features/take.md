@@ -17,6 +17,8 @@ The `ui-film` plugin skill drafts the beats and calls the verb for a launch vide
 
 Reads a take plan, films each beat from a fresh load, and writes the clip, the log, the camera track, and `still.jpg` per beat, listed in `take.json`. With `--reel`, `reel.ts` crops each frame to a camera rebuilt at `REEL_DEPTH` 2, draws the cursor through that view, and joins every third frame into a 960-wide WebP, lossy past `REEL_MAX_BYTES`.
 
+Each clip is measured with `ffprobe` for the log's `clip`, since a page can crop it, and one off its route's size refuses as `clip-mismatch` with its files kept.
+
 - The stepper drives chrome-headless-shell over raw CDP, since Playwright cannot ask for begin-frame control, and shoots frames at device scale 2, or 1 on a request's `deviceScale`
 - A `screencast` beat, or a stepped frame past 2 s, films through Playwright at 1920x1080, its record naming the route, and `frame-clock.ts` moves each wall-time frame stamp onto the stage clock
 - One choreography performs every step through each route's stage, logging each point a glide sends for the drawn cursor and resting 300 ms before a press, 500 ms after, and 400 ms before a fill types
