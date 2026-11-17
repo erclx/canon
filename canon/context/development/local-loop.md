@@ -36,11 +36,9 @@ The run commands, which stack references and `docs/target/projects.md` send a se
 
 ### `src/gate/`
 
-Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`, and every threshold comparison in `measures.ts`. Consumer replay runs the frozen snapshots on a synced-surface change, so before a release run `bun src/cli.ts sandbox replay <checkout>...` against the real consumers.
+Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`, and every threshold comparison in `measures.ts`. Consumer replay runs the frozen snapshots on a synced-surface change, so before a release run `bun src/cli.ts sandbox replay <checkout>...` against the real consumers. Comment stages fail a touched file's old comments.
 
-Comment stages fail a touched file's old comments, except the file-share stage, which reports and fails nothing until the comment sweep lands.
-
-- Stages run in table order and the first to find a fact halts the run. Unreferenced rules and Audit set report and never fail the push
+- Stages run in table order and the first to find a fact halts the run. Unreferenced rules, Audit set, and Comment share per file report and never fail the push, the last until the comment sweep lands
 - The changed set unions the diff against `origin/main`, the working tree, and untracked files. Fallbacks widen, and `--all` forces every stage. On `main` the local ref is HEAD, so the base is remote.
 - A scoped run hands `vitest related` changed `.ts` files plus the tests `corpus-readers.ts` finds naming another changed file's folder. A test config or `package.json` runs all. Both skip e2e suites.
 - Indexes and Consumed copies regenerate then assert, so the first run after an edit reports drift and `check:ci` writes the tree. Stage the rewrite and run again, since a rerun alone repeats the diff.
