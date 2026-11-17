@@ -325,6 +325,9 @@ async function runAudit(
     shape,
     drift,
     coverage: coverage ?? { kind: 'no-root' },
+    length: length ?? [],
+    gateLength: false,
+    gateKeyFaults: [],
     widened,
   })
 
