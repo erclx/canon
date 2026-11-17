@@ -91,7 +91,7 @@ describe('the consumer replay stage scope', () => {
     expect(scope.test('governance/renames.toml')).toBe(true)
     expect(scope.test('governance/stacks/node.toml')).toBe(true)
     expect(
-      scope.test('sandbox/fixtures/replay/jobtriage/CLAUDE.md.fixture'),
+      scope.test('sandbox/fixtures/replay/tidecount/CLAUDE.md.fixture'),
     ).toBe(true)
   })
 

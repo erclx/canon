@@ -74,7 +74,7 @@ Owns the frozen consumers the bare verb replays, one folder each, holding the co
 - A snapshot tests the upgrade from the release it was cut at and misses a state only a newer consumer holds, which `sandbox replay <checkout>` covers before a release
 - Refresh one by hand. Copy the consumer's tracked managed paths over its folder with the `.fixture` suffix, keep the stub task index, and name the consumer commit in the message.
 - Re-record after a refresh with `bun src/cli.ts sandbox replay --record`, which refuses named paths and a run with a broken step, so a crash never becomes the answer
-- A governance rename moves jobtriage's `sync` count and drifts the stage. The drift is correct, and a `--record` in the same change settles it.
+- A governance rename moves tidecount's `sync` count and drifts the stage. The drift is correct, and a `--record` in the same change settles it.
 - A `.canon/` file here needs `git add -f`, since the root ignore reaches it
 
 ### Other folders

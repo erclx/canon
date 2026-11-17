@@ -339,7 +339,7 @@ describe('isExcludedPath', () => {
   it('should exclude a replay snapshot, a frozen copy of another repository', () => {
     expect(
       isExcludedPath(
-        'sandbox/fixtures/replay/jobtriage/.claude/hooks/memory-index.sh.fixture',
+        'sandbox/fixtures/replay/tidecount/.claude/hooks/memory-index.sh.fixture',
       ),
     ).toBe(true)
   })

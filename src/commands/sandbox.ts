@@ -916,7 +916,7 @@ export function register(program: Command): void {
         'Examples:',
         '  canon sandbox replay',
         '  canon sandbox replay --record',
-        '  canon sandbox replay ../frameboard ../jobtriage --json',
+        '  canon sandbox replay ../frameboard ../tidecount --json',
         '',
         'Each replay copies the source to a temp tree outside the repository,',
         'runs sync, then sync --check, context audit, markdown audit, and',
