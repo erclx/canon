@@ -158,7 +158,9 @@ const UNMEASURED_TOOLING: ToolingReport = {
  * runs. Read from `settings.json` alone, since Claude Code gitignores
  * `settings.local.json` and CI never sees it. `skipped` covers an unmanaged
  * target and the toolkit root, `absent` a target with no settings file, and
- * `unreadable` a settings file the migrate verb refuses, named in `reason`.
+ * `unreadable` a settings file the migrate verb refuses, named in `reason`,
+ * which counts as drift since a check that cannot see the hooks must not
+ * pass. A deleted script never reaches `unwired`, which is the opt-out.
  */
 export interface HooksReport {
   readonly state: 'read' | 'absent' | 'unreadable' | 'skipped'
@@ -391,16 +393,12 @@ export function countStates(entries: readonly ScanEntry[]): StateCounts {
  * Whether the target has diverged from the toolkit in a way a command could
  * close.
  *
- * An unmigrated domain counts, and so do `stale`, `customized`, `drifted`,
- * `stranded`, `retired`, and `renamed` entries. An unwired seeded hook counts,
- * since `canon migrate session-defaults --write` wires it, and so does a
- * settings file that verb cannot read, since a check that cannot see the hooks
- * must not pass. Orphaned files, superseded artifacts, seeds, tooling configs,
- * and the reverse report are excluded, since each is content the project may
- * own and a job counting it stays red with no remedy. `missing` is excluded
- * too, since gating CI on it would press a target into adopting a rule nobody
- * picked, and a deleted hook script never reaches `unwired`, which is how a
- * project opts out of one.
+ * An unmigrated domain, an unwired or unreadable `hooks` report, and `stale`,
+ * `customized`, `drifted`, `stranded`, `retired`, and `renamed` entries count.
+ * Orphaned files, superseded artifacts, seeds, tooling configs, and the
+ * reverse report are excluded, since each is content the project may own and
+ * a job counting it stays red with no remedy. `missing` is excluded too, since
+ * gating CI on it would press a target into adopting a rule nobody picked.
  */
 export function hasDrift(report: CheckReport): boolean {
   if (report.unmigrated.length > 0) return true
