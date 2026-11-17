@@ -44,10 +44,12 @@ export type LogEvent =
       readonly to: Point
       readonly ms: number
       /**
-       * Every position the glide sent, in order. A reader draws the cursor off
-       * these rather than off the eased curve, since a page slower than a frame
-       * skips points the curve would still draw. Absent in a log written
-       * before the field and in a harness log, where the curve stands in.
+       * Every position the glide sent, in order. A reader draws the cursor
+       * holding each point until the next, rather than off the eased curve or
+       * between points, since the page paints only what it was last sent and
+       * the screencast sends one about every second frame. Absent in a log
+       * written before the field and in a harness log, where the curve stands
+       * in.
        */
       readonly points?: readonly SentPoint[]
       /** How long the camera holds aimed at `to` once the glide ends. */
@@ -239,8 +241,9 @@ export function along(from: Point, to: Point, progress: number): Point {
 }
 
 /**
- * The pointer's position at a time on the clip's clock, read off the points
- * each move sent, or off its eased curve when it carries none.
+ * The pointer's position at a time on the clip's clock, held at the last
+ * point each move sent at or before it, or read off its eased curve when the
+ * move carries no points.
  */
 export function cursorAt(events: readonly LogEvent[], ms: number): Point {
   let position = START
@@ -255,17 +258,10 @@ export function cursorAt(events: readonly LogEvent[], ms: number): Point {
 }
 
 function sentAt(from: Point, points: readonly SentPoint[], ms: number): Point {
-  let before: SentPoint | undefined
+  let held: Point = from
   for (const point of points) {
-    if (point.t > ms) {
-      if (!before) return from
-      const k = (ms - before.t) / (point.t - before.t)
-      return {
-        x: before.x + (point.x - before.x) * k,
-        y: before.y + (point.y - before.y) * k,
-      }
-    }
-    before = point
+    if (point.t > ms) break
+    held = { x: point.x, y: point.y }
   }
-  return before ? { x: before.x, y: before.y } : from
+  return held
 }

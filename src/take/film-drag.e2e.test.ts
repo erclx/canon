@@ -137,9 +137,9 @@ describe.skipIf(!available())(
       server.stop()
     })
 
-    it('should keep the drawn cursor within 10 px of the box on average', () => {
+    it('should keep the drawn cursor within 5 px of the box on average', () => {
       expect(offsets).toHaveLength(2)
-      for (const offset of offsets) expect(offset).toBeLessThan(10)
+      for (const offset of offsets) expect(offset).toBeLessThan(5)
     })
 
     it('should land two identical runs within 3 px of each other', () => {
