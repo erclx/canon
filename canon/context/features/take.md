@@ -19,7 +19,7 @@ Films each beat of a take plan from a fresh load and writes its clip, a log with
 
 - The stepper drives chrome-headless-shell over raw CDP, since Playwright cannot ask for begin-frame control, and shoots frames at device scale 2, or 1 on `deviceScale` or after a recording stall
 - A `screencast` beat, or a stall past 2 s no stepped retry clears, films through Playwright at 1920x1080, its record naming the route, and `frame-clock.ts` moves each frame stamp onto the stage clock
-- One choreography performs every step through each route's stage, logging each point a glide sends for the drawn cursor and resting 300 ms before a press, 500 ms after, and 400 ms before a fill types
+- One choreography runs each step on each route's stage, logging every glide point the drawn cursor holds until the next and resting 300 ms before a press, 500 ms after, and 400 ms before a fill types
 - The camera zooms onto a press over the glide reaching it, and in the reel onto the box a key moved focus to, at a depth the clip's width over the output's caps, and pans only at a steady scale
 - Stepped frames stream into the system FFmpeg, screencast frames spool beside the clip until the stop, and FFmpeg's absence refuses before any browser launches
 

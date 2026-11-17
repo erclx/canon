@@ -24,6 +24,12 @@ const TO_THE_CARDS = [
   { kind: 'wait', ms: 1200 },
 ]
 
+/**
+ * Half the 400 by 240 `.card` in `busy.html`, in CSS pixels, which a move to
+ * the card centers on. A change to the card's size changes this too.
+ */
+const CARD_HALF = { width: 200, height: 120 }
+
 describe.skipIf(!available())('a take of a page whose frames run slow', () => {
   let server: { url: string; stop: () => void }
   let out: string
@@ -178,12 +184,21 @@ describe.skipIf(!available())('a take of a page whose frames run slow', () => {
     // the clip shows at the frame its stored luma drops below 170.
     const card = bandLuma(join(out, beat.clip), '200:100:100:100')
     const landedMs = card.findIndex((value) => value < 170) * FRAME_MS
+    // The hover fires on the first point sent inside the card, ahead of the
+    // move's end.
+    const entered = move.points?.find(
+      (point) =>
+        Math.abs(point.x - move.to.x) <= CARD_HALF.width &&
+        Math.abs(point.y - move.to.y) <= CARD_HALF.height,
+    )
+    if (!entered) throw new Error('no sent point landed inside the card')
 
     // Within a second of its plan, where the unpaced glide ran about 15 times
-    // over, and landing in the clip within a few slow frames of the log.
+    // over, and landing in the clip within two slow frames of that point.
     expect(Math.abs(move.ms - glideMs)).toBeLessThan(1000)
     expect(landedMs).toBeGreaterThan(0)
-    expect(Math.abs(landedMs - (move.t + move.ms))).toBeLessThan(500)
+    expect(landedMs).toBeGreaterThanOrEqual(entered.t)
+    expect(landedMs).toBeLessThanOrEqual(entered.t + 2 * 200)
   }, 180_000)
 
   it('should end a screencast clip at the stage clock rather than past it', async () => {
