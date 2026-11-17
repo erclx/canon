@@ -92,7 +92,7 @@ Target check: `<path>`, against canon `<version>`.
 | Seeds            | current / behind / unread | the per-state counts                           |
 | Claude harness   | behind / unchecked        | `hooks`, with the rest unread                  |
 
-No overall verdict. The harness row is unchecked rather than passing.
+No overall verdict. The harness row is never passing, being behind or unchecked.
 ```
 
 Mark the harness row `behind` when `hooks` names an unwired entry or reads `unreadable`, and `unchecked` otherwise, since no verb reads the rest of it. A domain left out of the table reads as a domain that passed, which is the one shape the row exists to prevent.
