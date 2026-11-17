@@ -6,6 +6,8 @@ import {
   BODY_BLOCK_CAP,
   countFile,
   type DegradationHit,
+  FILE_SHARE_CAP,
+  FILE_SHARE_FLOOR,
   HISTORY_PATTERNS,
   HEAD_TEXT_CAP,
   isPruned,
@@ -118,6 +120,45 @@ export const commentBodyBlocks: Measure = capMeasure(
       `${plural(count, 'in-body comment run')} past ${BODY_BLOCK_CAP} text line. Move the reason above the function or into the code it explains.`,
   },
 )
+
+/**
+ * Reports each file past `FILE_SHARE_CAP` comment text, touched or full, and
+ * fails nothing until the sweep lands and the CI-flip row turns it on.
+ */
+export const commentFileShare: Measure = async (ctx: GateContext) => {
+  const counted = await countRepository(ctx.root, ctx.changed)
+  if (counted === undefined) return UNMEASURED
+
+  const scope = plural(
+    counted.files,
+    ctx.changed === undefined ? 'source file' : 'touched source file',
+  )
+  const cap = `${FILE_SHARE_CAP * 100}%`
+  const shares = counted.counts.flatMap((count) => count.fileShares)
+  if (shares.length === 0) {
+    return {
+      emissions: [
+        {
+          kind: 'info',
+          text: `No file of ${FILE_SHARE_FLOOR} lines or more past ${cap} comment text across ${scope}`,
+        },
+      ],
+    }
+  }
+
+  return {
+    emissions: [
+      ...shares.map((share) => ({
+        kind: 'warn' as const,
+        text: `${share.file} carries ${share.textLines} comment text lines in ${share.nonBlankLines}, past ${cap}`,
+      })),
+      {
+        kind: 'info',
+        text: `Reported across ${scope} and not failed until the comment sweep lands`,
+      },
+    ],
+  }
+}
 
 const HISTORY_TERMS = new Set(HISTORY_PATTERNS.map(({ term }) => term))
 

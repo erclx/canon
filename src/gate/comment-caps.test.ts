@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
   commentBodyBlocks,
+  commentFileShare,
   commentHeadBlocks,
   commentHistory,
 } from '@/gate/comment-caps'
@@ -200,6 +201,37 @@ describe('comment caps', () => {
       expect(report.failure).toBeUndefined()
     })
 
+    it('should report a dense touched file without failing', async () => {
+      commit('src/a.ts', headRuns(25, 1))
+
+      const report = await commentFileShare(context(['src/a.ts']))
+
+      expect(report.failure).toBeUndefined()
+      expect(report.emissions[0]).toEqual({
+        kind: 'warn',
+        text: 'src/a.ts carries 25 comment text lines in 50, past 15%',
+      })
+    })
+
+    it('should not read the share of a file under the floor', async () => {
+      commit('src/a.ts', headRuns(24, 1))
+
+      const report = await commentFileShare(context(['src/a.ts']))
+
+      expect(report.emissions.map((emission) => emission.kind)).toEqual([
+        'info',
+      ])
+    })
+
+    it('should report a dense file without failing when scoping is off', async () => {
+      commit('src/a.ts', headRuns(30, 1))
+
+      const report = await commentFileShare(context())
+
+      expect(report.failure).toBeUndefined()
+      expect(report.emissions[0]?.kind).toBe('warn')
+    })
+
     it('should fail a touched file through the gate stage', async () => {
       commit('src/a.ts', headRuns(1, 4))
       const stage = STAGES.find(
@@ -217,6 +249,7 @@ describe('comment caps', () => {
     ['commentHeadBlocks', commentHeadBlocks],
     ['commentBodyBlocks', commentBodyBlocks],
     ['commentHistory', commentHistory],
+    ['commentFileShare', commentFileShare],
   ])(
     'should read a tree git cannot list as unmeasured in %s',
     async (_, measure) => {
