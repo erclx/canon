@@ -392,28 +392,23 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
     })
   }, 180_000)
 
+  const PRESS_IN_STEPS = {
+    steps: [
+      { kind: 'click', target: '#open' },
+      { kind: 'wait', ms: 200 },
+    ],
+  }
+  const PRESS_IN_SETUP = {
+    setup: [{ kind: 'click', target: '#open' }],
+    steps: [{ kind: 'wait', ms: 200 }],
+  }
+
   it.each([
-    [
-      'steps',
-      'recording',
-      {
-        steps: [
-          { kind: 'click', target: '#open' },
-          { kind: 'wait', ms: 200 },
-        ],
-      },
-    ],
-    [
-      'setup',
-      'setup',
-      {
-        setup: [{ kind: 'click', target: '#open' }],
-        steps: [{ kind: 'wait', ms: 200 }],
-      },
-    ],
-  ])(
+    ['setup at scale 2', 'setup', PRESS_IN_SETUP, 2],
+    ['steps at scale 1', 'recording', PRESS_IN_STEPS, 1],
+  ] as const)(
     'should say a refused beat fell back from a stall in %s, with a still of the spent page',
-    async (_, phase, beat) => {
+    async (_, phase, beat, deviceScale) => {
       const read = readTakePlan(
         JSON.stringify({ beats: [{ name: 'spent', ...beat }] }),
       )
@@ -428,6 +423,7 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
         plan: read.plan,
         out,
         stallMs: LOADED_STALL_MS,
+        deviceScale,
       })
 
       expect(result).toMatchObject({
@@ -438,11 +434,43 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
         fallbackPhase: phase,
         still: '01-spent/still.jpg',
       })
+      expect(result).not.toHaveProperty('scale')
       expect(ticketOpens).toBe(2)
       expect(existsSync(join(out, '01-spent/still.jpg'))).toBe(true)
     },
     180_000,
   )
+
+  it('should say a refused beat was retried at scale 1 after a stall in recording, with a still of the spent page', async () => {
+    const read = readTakePlan(
+      JSON.stringify({ beats: [{ name: 'spent', ...PRESS_IN_STEPS }] }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+    ticketOpens = 0
+
+    const result = await take({
+      url: new URL('/ticket', server.url).href,
+      plan: read.plan,
+      out,
+      stallMs: LOADED_STALL_MS,
+    })
+
+    // The retry met the spent page, so it refused there and never reached
+    // the screencast.
+    expect(result).toMatchObject({
+      status: 'failed',
+      reason: 'target-missing',
+      beat: 'spent',
+      scale: 1,
+      still: '01-spent/still.jpg',
+    })
+    expect(result).not.toHaveProperty('fallback')
+    expect(ticketOpens).toBe(2)
+    expect(probe(join(out, '01-spent/still.jpg'))).toMatchObject({
+      width: 1920,
+      height: 1080,
+    })
+  }, 180_000)
 
   it('should click the visible text match behind a hidden duplicate', async () => {
     const read = readTakePlan(

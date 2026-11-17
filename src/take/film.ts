@@ -21,7 +21,12 @@ import { TargetMissing, TargetOffscreen, TargetRefused } from '@/take/perform'
 import type { Beat, Route, TakePlan } from '@/take/plan'
 import { filmScreencast } from '@/take/screencast'
 import { ShellMissing, ShellSandboxBlocked, findShell } from '@/take/shell'
-import { type StallPhase, StepperStalled, filmStepped } from '@/take/stepper'
+import {
+  type StallPhase,
+  StepperStalled,
+  filmStepped,
+  retryScale,
+} from '@/take/stepper'
 
 /**
  * Films every beat of a plan into its own folder and writes the record the
@@ -52,6 +57,11 @@ export interface FilmedBeat {
   readonly fallback?: string
   /** Where the stepped frame that caused `fallback` was begun. */
   readonly fallbackPhase?: StallPhase
+  /**
+   * The device scale a stepped clip filmed at, present only when it differs
+   * from the scale asked for, being a retry after a stall in recording.
+   */
+  readonly scale?: 1 | 2
   readonly frames: number
   readonly seconds: number
   readonly clip: string
@@ -77,6 +87,11 @@ export type TakeResult =
       readonly fallback?: string
       /** Where the stepped frame that caused `fallback` was begun. */
       readonly fallbackPhase?: StallPhase
+      /**
+       * The device scale the refused beat was retried at after a stall in
+       * recording, when it was. The retry opened the address again.
+       */
+      readonly scale?: 1 | 2
       /** The page as the failing step met it, relative to the take's folder. */
       readonly still?: string
       /** The command that clears a `sandbox-blocked` refusal, when one does. */
@@ -151,7 +166,10 @@ export async function take(request: TakeRequest): Promise<TakeResult> {
         ),
       )
     } catch (error) {
-      const cause = error instanceof FellBack ? error.error : error
+      const cause =
+        error instanceof FellBack || error instanceof Retried
+          ? error.error
+          : error
       const shot = cause instanceof TargetRefused ? cause.still : undefined
       const still =
         shot || cause instanceof ClipMismatch
@@ -164,6 +182,7 @@ export async function take(request: TakeRequest): Promise<TakeResult> {
         ...(error instanceof FellBack
           ? { fallback: error.fallback, fallbackPhase: error.phase }
           : {}),
+        ...(error instanceof Retried ? { scale: error.scale } : {}),
         ...(still ? { still } : {}),
         ...(fix ? { fix } : {}),
       }
@@ -199,43 +218,19 @@ async function filmBeat(
   const clip = join(dir, 'clip.mp4')
   const target = join(out, clip)
 
-  let route: Route = beat.route
-  let fallback: { message: string; phase: StallPhase } | undefined
-  let filmed: {
-    frames: number
-    events: readonly LogEvent[]
-    lag?: number
-    still: Buffer
-  }
-  if (beat.route === 'step') {
-    try {
-      filmed = await filmStepped({
-        executable,
-        url,
-        beat,
-        clip: target,
-        stallMs,
-        deviceScale,
-      })
-    } catch (error) {
-      if (!(error instanceof StepperStalled)) throw error
-      route = 'screencast'
-      fallback = { message: error.message, phase: error.phase }
-      try {
-        filmed = await filmScreencast({ url, beat, clip: target })
-      } catch (cause) {
-        throw new FellBack(cause, fallback.message, fallback.phase)
-      }
-    }
-  } else {
-    filmed = await filmScreencast({ url, beat, clip: target })
-  }
+  const { filmed, route, fallback, scale } =
+    beat.route === 'step'
+      ? await filmStep(url, beat, target, executable, stallMs, deviceScale)
+      : {
+          filmed: await filmScreencast({ url, beat, clip: target }),
+          route: beat.route,
+        }
 
   const expected =
     route === 'step'
       ? {
-          width: VIEWPORT.width * deviceScale,
-          height: VIEWPORT.height * deviceScale,
+          width: VIEWPORT.width * (scale ?? deviceScale),
+          height: VIEWPORT.height * (scale ?? deviceScale),
         }
       : CLIP_SIZES[route]
   const measured = await probeSize(target)
@@ -262,9 +257,8 @@ async function filmBeat(
   const mismatch = clipMismatch(expected, measured)
   if (mismatch) {
     const refusal = new ClipMismatch(mismatch)
-    throw fallback
-      ? new FellBack(refusal, fallback.message, fallback.phase)
-      : refusal
+    if (fallback) throw new FellBack(refusal, fallback.message, fallback.phase)
+    throw scale ? new Retried(refusal, scale) : refusal
   }
 
   return {
@@ -275,12 +269,87 @@ async function filmBeat(
     ...(fallback
       ? { fallback: fallback.message, fallbackPhase: fallback.phase }
       : {}),
+    ...(scale ? { scale } : {}),
     frames: filmed.frames,
     seconds: Number((filmed.frames / FPS).toFixed(2)),
     clip,
     log: logPath,
     camera: cameraPath,
     still: stillPath,
+  }
+}
+
+interface FilmedRoute {
+  readonly filmed: {
+    readonly frames: number
+    readonly events: readonly LogEvent[]
+    readonly lag?: number
+    readonly still: Buffer
+  }
+  readonly route: Route
+  readonly fallback?: { readonly message: string; readonly phase: StallPhase }
+  /** The scale a retry filmed at, when it differs from the one asked for. */
+  readonly scale?: 1 | 2
+}
+
+/**
+ * Films a `step` beat stepped at the scale asked for, then once more at the
+ * scale `retryScale` names after a stall in recording, then by screencast.
+ * Each try opens the address again, so a refusal after one names it.
+ */
+async function filmStep(
+  url: string,
+  beat: Beat,
+  clip: string,
+  executable: string,
+  stallMs: number | undefined,
+  deviceScale: 1 | 2,
+): Promise<FilmedRoute> {
+  const stepped = (scale: 1 | 2) =>
+    filmStepped({ executable, url, beat, clip, stallMs, deviceScale: scale })
+  let stall: StepperStalled
+  try {
+    return { filmed: await stepped(deviceScale), route: 'step' }
+  } catch (error) {
+    if (!(error instanceof StepperStalled)) throw error
+    stall = error
+  }
+
+  const retry = retryScale(stall.phase, deviceScale)
+  let message = stall.message
+  if (retry) {
+    try {
+      return { filmed: await stepped(retry), route: 'step', scale: retry }
+    } catch (error) {
+      if (!(error instanceof StepperStalled)) throw new Retried(error, retry)
+      stall = error
+      message = `${error.message} on a retry at device scale ${retry}`
+    }
+  }
+
+  const fallback = { message, phase: stall.phase }
+  try {
+    return {
+      filmed: await filmScreencast({ url, beat, clip }),
+      route: 'screencast',
+      fallback,
+    }
+  } catch (cause) {
+    throw new FellBack(cause, fallback.message, fallback.phase)
+  }
+}
+
+/**
+ * A beat that failed in the stepped retry after a stall in recording, carrying
+ * the scale it retried at, since the retry loads the page a second time and a
+ * single-use link is spent by then.
+ */
+class Retried extends Error {
+  constructor(
+    readonly error: unknown,
+    readonly scale: 1 | 2,
+  ) {
+    super(error instanceof Error ? error.message : String(error))
   }
 }
 
