@@ -1,9 +1,4 @@
-import {
-  mkdtempSync,
-  realpathSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs'
+import { mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { execa } from 'execa'
@@ -90,8 +85,7 @@ describe('canon gate run in a target', () => {
       }
 
       expect(
-        record.stages.find((stage) => stage.id === 'context-citations')
-          ?.status,
+        record.stages.find((stage) => stage.id === 'context-citations')?.status,
       ).toBe('skipped')
     },
     RUN_TIMEOUT_MS,
