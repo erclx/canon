@@ -228,4 +228,37 @@ describe('scopedDensityFindings', () => {
       expect(kinds('src/notes.md', longCell)).toEqual([])
     })
   })
+
+  describe('design index', () => {
+    const index = 'canon/design/index.md'
+    const row = (states: string) =>
+      `| Group | States |\n| - | - |\n| \`home\` | ${states} |\n`
+
+    it('should report a States cell past the cell limit', () => {
+      expect(kinds(index, row('s'.repeat(121)))).toEqual([['table-cell', 3]])
+    })
+
+    it('should pass a States cell at the cell limit', () => {
+      expect(kinds(index, row('s'.repeat(120)))).toEqual([])
+    })
+
+    it('should raise no other density or table finding', () => {
+      const rows = Array.from(
+        { length: 9 },
+        (_, n) => `| \`g${n}\` | default |`,
+      ).join('\n')
+      const source = `${'x'.repeat(400)}\n\n| Group | States |\n| - | - |\n${rows}\n\n${bullets(6)}\n`
+      expect(kinds(index, source)).toEqual([])
+    })
+
+    it('should never gate the cell finding', () => {
+      expect(densityGates(index, 'table-cell', ['canon/'])).toBe(false)
+    })
+
+    it('should leave an index.md nested under a group out', () => {
+      expect(
+        kinds('canon/design/home/index.md', row('s'.repeat(121))),
+      ).toEqual([])
+    })
+  })
 })
