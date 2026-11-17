@@ -30,7 +30,9 @@ access = "/write?token=demo"
 
 ### Single-use access
 
-Every beat opens the address fresh in its own browser, so a link the app honors once, such as a single-use edit ticket, serves one beat alone. A beat that falls back to the screencast opens the address a second time, so the fallback spends the link too, even within one beat. A stall in recording first retries the beat stepped at device scale 1, which opens it again, so a retry followed by a screencast opens it three times.
+Every beat opens the address fresh in its own browser, so a link the app honors once, such as a single-use edit ticket, serves one beat alone. A beat that falls back to the screencast opens the address a second time, so the fallback spends the link too, even within one beat.
+
+A stall in recording first retries the beat stepped at device scale 1, which opens it again, so a retry followed by a screencast opens it three times.
 
 - Point `access` at a local redirect minting a fresh link per request, so each open gets its own, the one pattern that held across beats and fallbacks alike
 - Run `canon take` once per beat with a freshly minted link only where no redirect can be served, with `"route": "screencast"` on each so no fallback reopens it
