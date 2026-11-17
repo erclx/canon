@@ -9,9 +9,11 @@ Read before the first finding of `app-drive`. A drive leaves two records in its 
 
 ## The drive log
 
-Write the log to `evidence/drive-log.md` inside the intake folder. It opens on a setup table, then takes one heading per finding, appended as the finding happens.
+Write the log to `evidence/drive-log.md` inside the intake folder. It opens on a length marker and a setup table, then takes one heading per finding, appended as the finding happens.
 
 ```markdown
+<!-- canon-length-exempt: a drive log is one record appended per finding, read top to bottom -->
+
 # Drive log
 
 | Setup     | Value                                             |
@@ -40,6 +42,14 @@ Write the log to `evidence/drive-log.md` inside the intake folder. It opens on a
 - The title names what the persona met, in sentence case with no trailing period
 - The meta line holds the severity, the source, and the persona, in that order. The source is `goal`, `last-drive`, or `operator`, and a finding naming none sorts as taste.
 - A `last-drive` finding adds `fixed`, `still open`, or `changed` to its meta line
+
+### The length marker
+
+A drive of any length runs past the markdown ceiling of 300 rendered lines, and `canon markdown audit` reports the log there. Write the marker as the log's first line, before the title, so the log stays one file and a planner reads it in finding order.
+
+- Keep the marker a whole line outside any fence, since the audit skips a fenced line and a marker sharing its line with other text matches nothing
+- Give it a reason after the colon, since a marker naming none exempts nothing
+- Never split the log to meet the ceiling, since a finding's number is its place in one sequence
 
 ### Setup rows
 
