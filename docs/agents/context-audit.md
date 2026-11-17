@@ -77,6 +77,7 @@ gate-length = true
 The exit code follows the mode the run took. The bullets cover where the gate runs, what refuses, and how a seed opts out.
 
 - `bun run check` runs `--gate` against every `tooling/<stack>/seeds/` directory carrying a `.claude/` folder
+- `scripts/verify.ts` in a scaffolded project runs `--gate`, skips where the working directory holds no `canon/context/`, and reads `1` as a skip locally and a failure under `CI=true`
 - A root resolving no audited folder refuses with `1` and warns, a root measuring no entry warns, and a seed short a section fails with `2`
 - A seed omitting a required section on purpose sets `stub: true` in its frontmatter. Only the value `true` counts, and both install paths strip the field.
 
