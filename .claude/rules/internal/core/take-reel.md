@@ -10,8 +10,12 @@ paths:
 
 - After opening or pushing a pull request changing a non-test path under `src/take/`, run `bun src/take/fixtures/pr-reel.ts --base origin/main --out .canon/tmp/take-reel/<number> --json`.
 - Never film with the `canon` on PATH, which is the published release rather than the engine under review.
-- Write a `<stem>.json` plan beside a fixture the change adds or alters, since a fixture with no plan films `motion.json` instead.
-- On `over-cap`, which only a fixture's own plan raises, cut its beats through the one named and film again. The motion fallback cuts itself and lists the rest in `dropped`.
+- Write a `<stem>.json` plan beside a fixture the change adds or alters, since the script films only a changed fixture carrying one.
+- On `unplanned`, which names the take paths no plan films, take one of three routes:
+  - Write a `<stem>.json` beside a changed fixture that shows the change
+  - Write a plan for the change and pass it as `--plan <file>`, on `--fixture <stem>` or the default `motion`, with `route: "screencast"` where the change shows only there
+  - Run `canon pr evidence <number> --reel-skip "unplanned, <why>"`, and get a review waiver for each path the record names
+- On `over-cap`, cut the plan's beats through the one named and film again, since the script trims nothing.
 - On `untouched`, post no reel, since the lift paints no test path.
 
 ## Checking
