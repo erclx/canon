@@ -451,7 +451,12 @@ describe('context audit', () => {
     mkdirSync(join(fixture, 'canon/context'), { recursive: true })
   })
 
-  it('should run the gated audit after the code audit and pass on exit 0', () => {
+  const writeContextConfig = (toml: string): void => {
+    mkdirSync(join(fixture, 'canon/config'), { recursive: true })
+    writeFileSync(join(fixture, 'canon/config/context.toml'), toml)
+  }
+
+  it('should run the audit after the code audit and pass on exit 0', () => {
     const result = runVerify(contextExit(0))
 
     expect(result.status).toBe(0)
@@ -461,12 +466,44 @@ describe('context audit', () => {
     expect(result.stdout).toContain('No gating context finding')
   })
 
-  it('should fail, print the findings, and name the verb on exit 2', () => {
+  it('should fail, print the findings, and name the plain verb on exit 2', () => {
     const result = runVerify(contextExit(2))
 
     expect(result.status).toBe(1)
-    expect(result.stdout).toContain('context finding: context audit --gate')
-    expect(result.stdout).toContain("Run 'canon context audit --gate'")
+    expect(result.stdout).toMatch(/context finding: context audit$/m)
+    expect(result.stdout).toContain("Run 'canon context audit' to read")
+  })
+
+  it('should run the plain audit where the config declares no gate key', () => {
+    writeContextConfig('roots = ["canon/context"]\n')
+
+    const result = runVerify(contextExit(2))
+
+    expect(result.stdout).toMatch(/context finding: context audit$/m)
+  })
+
+  it.each([
+    ['gated', 'gated = ["canon/context/"]\n'],
+    ['gate-length', 'gate-length = true\n'],
+  ])(
+    'should add --gate and name it on failure where the config declares %s',
+    (_key, toml) => {
+      writeContextConfig(toml)
+
+      const result = runVerify(contextExit(2))
+
+      expect(result.status).toBe(1)
+      expect(result.stdout).toContain('context finding: context audit --gate')
+      expect(result.stdout).toContain("Run 'canon context audit --gate'")
+    },
+  )
+
+  it('should not read a gate key nested under a table header', () => {
+    writeContextConfig('[other]\ngated = ["canon/context/"]\n')
+
+    const result = runVerify(contextExit(2))
+
+    expect(result.stdout).toMatch(/context finding: context audit$/m)
   })
 
   it('should log a skip on exit 1 outside CI', () => {
@@ -497,7 +534,7 @@ describe('context audit', () => {
     const result = runVerify(contextExit(2))
 
     expect(result.status).toBe(1)
-    expect(result.stdout).toContain('context finding: context audit --gate')
+    expect(result.stdout).toMatch(/context finding: context audit$/m)
   })
 
   it('should skip without calling canon where no context folder exists', () => {

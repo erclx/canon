@@ -434,6 +434,27 @@ function checkEmbeddedCode(): void {
 // is audited as itself rather than through the repository above it. The
 // audit resolves either root, and an unmoved project keeps .claude/context.
 const CONTEXT_FOLDERS = ['canon/context', '.claude/context']
+const CONTEXT_CONFIG = 'canon/config/context.toml'
+
+// A project opts into the shape and length gate by declaring gated or
+// gate-length in its context config, and any other project gets the plain
+// audit, which gates citations and the requirements cap alone. The script
+// carries no TOML parser, so it reads top-level keys up to the first table
+// header, and canon itself reports a key declared in a shape it cannot use.
+function declaresGateKeys(): boolean {
+  let text: string
+  try {
+    text = readFileSync(CONTEXT_CONFIG, 'utf8')
+  } catch {
+    return false
+  }
+  for (const line of text.split('\n')) {
+    const trimmed = line.trim()
+    if (trimmed.startsWith('[')) return false
+    if (/^["']?(gated|gate-length)["']?\s*=/.test(trimmed)) return true
+  }
+  return false
+}
 
 function checkContextAudit(): void {
   if (!CONTEXT_FOLDERS.some((folder) => existsSync(folder))) {
@@ -449,7 +470,8 @@ function checkContextAudit(): void {
     return
   }
 
-  const { code, output } = capture(`${canon.command} context audit --gate`)
+  const verb = declaresGateKeys() ? 'context audit --gate' : 'context audit'
+  const { code, output } = capture(`${canon.command} ${verb}`)
   switch (code) {
     case 0:
       logInfo('No gating context finding')
@@ -460,7 +482,7 @@ function checkContextAudit(): void {
     case 2:
       pipeOutput(output)
       fail(
-        "A context entry carries a gating finding. Run 'canon context audit --gate' to read each one",
+        `A context entry carries a gating finding. Run 'canon ${verb}' to read each one`,
       )
       break
     default:
