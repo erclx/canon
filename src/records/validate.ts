@@ -64,6 +64,7 @@ export const FINDING_KINDS = [
   'batch-unsplit',
   'source-unquoted',
   'verification-load-unconfined',
+  'design-reference-unclassified',
   'stack-foldable',
   'fan-in-unmatched',
   'counterpart-unstated',
@@ -505,6 +506,38 @@ function checkVerification(name: string, lines: readonly string[]): Finding[] {
     )
 }
 
+const DESIGN_FOLDER = /`[^`]*canon\/design\/[^`]*`/
+const DESIGN_ROLE = /^(?:built against|redrawn)\b/i
+
+/**
+ * The role is read after the first colon outside a code span, so a path
+ * carrying a colon cannot end the label early. The check sees that a role is
+ * stated and never whether it is the right one.
+ */
+function statesDesignRole(entry: string): boolean {
+  const masked = entry.replace(/`[^`]*`/g, (span) => 'x'.repeat(span.length))
+  const colon = masked.indexOf(':')
+  if (colon === -1) return false
+
+  return DESIGN_ROLE.test(entry.slice(colon + 1).trim())
+}
+
+function checkDesignReferences(
+  name: string,
+  lines: readonly string[],
+): Finding[] {
+  return readSourceEntries(lines)
+    .filter((entry) => DESIGN_FOLDER.test(entry) && !statesDesignRole(entry))
+    .map((entry) =>
+      finding(
+        'design-reference-unclassified',
+        name,
+        shorten(entry),
+        'opens on neither built against nor redrawn after its colon, so the builder cannot tell whether the change leaves this folder true or owes it a redraw.',
+      ),
+    )
+}
+
 /**
  * `counterpart` is the root the plan sits under, read by `readCounterpartRoot`.
  * Left out, as in a project keeping no stack under `tooling/`, the plan owes no
@@ -595,6 +628,9 @@ export function checkPlan(
   findings.push(...checkQuestionContract(name, sections.get('Questions') ?? []))
   findings.push(...checkSources(name, sections.get('Sources') ?? []))
   findings.push(...checkVerification(name, sections.get('Verification') ?? []))
+  findings.push(
+    ...checkDesignReferences(name, sections.get('Design references') ?? []),
+  )
 
   if (hasStagedBatches(text)) {
     const staged = linesOutsideFences(text).find((line) =>

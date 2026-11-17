@@ -13,6 +13,7 @@ Canon runs a UI feature through one loop. A plan cites the design, a worker buil
 `canon:plan-feature` reads `canon/DESIGN.md` and `canon/design/index.md` before it places a UI change. It loads `canon:design-taste`, which decides the layer order a surface is designed in, the coherence locks that keep it consistent, and the defaults a model reaches for that the surface should reach past.
 
 - The plan carries a `## Design references` section naming the accepted design for each surface it changes, or `None identified.` when there is none.
+- Each entry says whether the change is `built against` the reference or leaves it `redrawn`, and a redrawn one ships its new frame in the same pull request through `canon:design-record`.
 - A design becomes a reference through `canon:design-record`, which lands an accepted pick in `canon/design/` and carries its values into `canon/DESIGN.md`.
 
 ## Build
