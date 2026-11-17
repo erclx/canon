@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { type Box, FPS, type LogEvent, START } from '@/take/log'
+import {
+  type Box,
+  FPS,
+  type LogEvent,
+  START,
+  VIEWPORT,
+  startOf,
+} from '@/take/log'
 import {
   type KeyInput,
   type PointerInput,
@@ -8,7 +15,7 @@ import {
   TargetOffscreen,
   performSteps,
 } from '@/take/perform'
-import type { TakeStep } from '@/take/plan'
+import type { TakeStep, Viewport } from '@/take/plan'
 
 /**
  * Covers the choreography both routes share, through a stage that records
@@ -31,10 +38,12 @@ function recordingStage(
   boxes: Record<string, Box>,
   pointerMs = FRAME_MS,
   focus: Box | null = null,
+  viewport: Viewport = VIEWPORT,
 ) {
   const sent: Sent[] = []
   let ms = 0
   const stage: Stage = {
+    viewport,
     now: () => ms,
     hold: async (wait) => {
       ms += Math.round(wait / FRAME_MS) * FRAME_MS
@@ -520,6 +529,44 @@ const SLIVER: Box = { x: 100, y: 1075, width: 400, height: 240 }
 function wheels(sent: readonly Sent[]) {
   return sent.filter((input) => input.type === 'wheel')
 }
+
+describe('performSteps in a smaller window', () => {
+  const NARROW: Viewport = { width: 800, height: 600 }
+  const INSIDE_DEFAULT: Box = { x: 1000, y: 700, width: 40, height: 20 }
+
+  it('should refuse a target inside the default window and outside a smaller one', async () => {
+    const { stage } = recordingStage(
+      { '#card': INSIDE_DEFAULT },
+      FRAME_MS,
+      null,
+      NARROW,
+    )
+
+    const run = performSteps(stage, [{ kind: 'click', target: '#card' }], {
+      pointer: startOf(NARROW),
+    })
+
+    await expect(run).rejects.toThrow(TargetOffscreen)
+    await expect(run).rejects.toThrow(/outside the 800x600 window/)
+  })
+
+  it('should glide from the smaller window center rather than the default one', async () => {
+    const RIGHT: Box = { x: 580, y: 290, width: 40, height: 20 }
+    const { stage } = recordingStage({ '#card': RIGHT }, FRAME_MS, null, NARROW)
+    const log: LogEvent[] = []
+
+    await performSteps(stage, [{ kind: 'move', target: '#card' }], {
+      pointer: startOf(NARROW),
+      log,
+    })
+
+    expect(log[0]).toMatchObject({
+      kind: 'move',
+      from: { x: 400, y: 300 },
+      to: { x: 600, y: 300 },
+    })
+  })
+})
 
 describe('performSteps targets outside the window', () => {
   it('should refuse a move to a target whose center is below the window', async () => {

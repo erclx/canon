@@ -4,12 +4,11 @@ import {
   type LogEvent,
   type Point,
   type SentPoint,
-  VIEWPORT,
   along,
   travelMs,
 } from '@/take/log'
 import { type Chord, type Modifier, isModifier, parseKeys } from '@/take/keys'
-import type { TakeStep } from '@/take/plan'
+import type { TakeStep, Viewport } from '@/take/plan'
 
 /**
  * Performs a beat's steps through a stage and logs what the edit needs. The
@@ -72,6 +71,8 @@ export interface KeyInput {
 }
 
 export interface Stage {
+  /** The window the page is open at, which a target's center must lie inside. */
+  readonly viewport: Viewport
   /** Milliseconds on the clip's own clock. */
   now(): number
   /** Lets `ms` of clip time pass. */
@@ -121,10 +122,11 @@ export class TargetOffscreen extends TargetRefused {
   constructor(
     target: string,
     readonly at: Point,
+    viewport: Viewport,
   ) {
     super(
       target,
-      `${target} is centered at (${Math.round(at.x)}, ${Math.round(at.y)}), outside the ${VIEWPORT.width}x${VIEWPORT.height} window, so a setup step must bring it into view first`,
+      `${target} is centered at (${Math.round(at.x)}, ${Math.round(at.y)}), outside the ${viewport.width}x${viewport.height} window, so a setup step must bring it into view first`,
     )
   }
 }
@@ -437,9 +439,9 @@ function center(box: Box): Point {
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
 }
 
-function inWindow(at: Point): boolean {
+function inWindow(at: Point, viewport: Viewport): boolean {
   return (
-    at.x >= 0 && at.x <= VIEWPORT.width && at.y >= 0 && at.y <= VIEWPORT.height
+    at.x >= 0 && at.x <= viewport.width && at.y >= 0 && at.y <= viewport.height
   )
 }
 
@@ -452,7 +454,9 @@ async function foundBox(stage: Stage, target: string): Promise<Box> {
 async function boxOf(stage: Stage, target: string): Promise<Box> {
   const box = await foundBox(stage, target)
   const at = center(box)
-  if (!inWindow(at)) throw new TargetOffscreen(target, at)
+  if (!inWindow(at, stage.viewport)) {
+    throw new TargetOffscreen(target, at, stage.viewport)
+  }
   return box
 }
 
@@ -465,12 +469,15 @@ async function boxOf(stage: Stage, target: string): Promise<Box> {
 async function scrollPoint(stage: Stage, target: string): Promise<Point> {
   const box = await foundBox(stage, target)
   const at = center(box)
-  if (inWindow(at)) return at
+  const { viewport } = stage
+  if (inWindow(at, viewport)) return at
   const left = Math.max(box.x, 0)
-  const right = Math.min(box.x + box.width, VIEWPORT.width)
+  const right = Math.min(box.x + box.width, viewport.width)
   const top = Math.max(box.y, 0)
-  const bottom = Math.min(box.y + box.height, VIEWPORT.height)
-  if (right <= left || bottom <= top) throw new TargetOffscreen(target, at)
+  const bottom = Math.min(box.y + box.height, viewport.height)
+  if (right <= left || bottom <= top) {
+    throw new TargetOffscreen(target, at, viewport)
+  }
   return { x: (left + right) / 2, y: (top + bottom) / 2 }
 }
 
