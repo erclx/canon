@@ -333,6 +333,21 @@ describe('lengthFindings', () => {
     ])
   })
 
+  it('should carry the reason an exempt entry states', () => {
+    const entry = measureEntry(
+      'ci.md',
+      long('<!-- canon-length-exempt: a verbatim run record -->\n\n'),
+    )
+
+    expect(lengthFindings([entry])[0].exempt).toBe('a verbatim run record')
+  })
+
+  it('should read an entry with no marker as not exempt', () => {
+    const entry = measureEntry('ci.md', long())
+
+    expect(lengthFindings([entry])[0].exempt).toBeNull()
+  })
+
   it('should order the findings longest first', () => {
     const longer = measureEntry('ci.md', long(`${prose(40)}\n\n`))
     const shorter = measureEntry('cli.md', long())
