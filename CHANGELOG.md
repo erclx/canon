@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.96.0](https://github.com/erclx/canon/compare/v5.95.0...v5.96.0) (2026-11-17)
+
+
+### Features
+
+* **docs-sync:** place new surfaces before the rewrite ([#3157](https://github.com/erclx/canon/issues/3157)) ([509db10](https://github.com/erclx/canon/commit/509db109667e87fa4942507418c9498b911fc428))
+* **plan-groundwork:** keep a drawing track's board project ([#3156](https://github.com/erclx/canon/issues/3156)) ([e254072](https://github.com/erclx/canon/commit/e254072ce3e916fb055cc5537ae6b8df9130f464))
+* **pr:** route a pull request reel and post what it covers ([#3161](https://github.com/erclx/canon/issues/3161)) ([9d7ab78](https://github.com/erclx/canon/commit/9d7ab784e56169e95e9d16d3abd7d02a143fecf1))
+* **sessions:** add sessions reap to stop a task's finished sessions ([#3167](https://github.com/erclx/canon/issues/3167)) ([63b1723](https://github.com/erclx/canon/commit/63b1723f328ef357fe956edd0c318995c9708fe4))
+* **take:** hold or abort a beat's matched requests to film a state ([#3168](https://github.com/erclx/canon/issues/3168)) ([e9a77ba](https://github.com/erclx/canon/commit/e9a77ba5b0115c65e46b845a328151126800f983))
+* **take:** retry a recording stall stepped at scale 1 before screencast ([#3163](https://github.com/erclx/canon/issues/3163)) ([34d784b](https://github.com/erclx/canon/commit/34d784ba262021aab49eaba8c087f79b1046b012))
+* **tooling:** run the context audit in the seeded verify script ([#3166](https://github.com/erclx/canon/issues/3166)) ([b5373d6](https://github.com/erclx/canon/commit/b5373d6a9fd63f0ddca3fdc5a28721936d570bf9))
+
 ## [5.95.0](https://github.com/erclx/canon/compare/v5.94.0...v5.95.0) (2026-11-17)
 
 
