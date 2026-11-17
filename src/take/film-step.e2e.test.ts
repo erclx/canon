@@ -162,6 +162,7 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
     expect(Math.abs(stillLuma - (luma.at(-1) ?? 0))).toBeLessThanOrEqual(3)
 
     const log = JSON.parse(readFileSync(join(out, beat.log), 'utf8')) as TakeLog
+    expect(log.clip).toEqual({ width: 3840, height: 2160 })
     expect(log.frames).toBe(beat.frames)
     expect(log.events.filter((event) => event.kind === 'click')).toEqual([
       expect.objectContaining({
@@ -251,6 +252,8 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
     const [stillLuma = 0] = bandLuma(still)
     expect(stillLuma).toBeGreaterThan(230)
     expect(Math.abs(stillLuma - (luma.at(-1) ?? 0))).toBeLessThanOrEqual(3)
+    const log = JSON.parse(readFileSync(join(out, beat.log), 'utf8')) as TakeLog
+    expect(log.clip).toEqual({ width: 1920, height: 1080 })
   }, 180_000)
 
   it('should clear the spool a killed take left beside the clip', async () => {

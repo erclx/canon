@@ -65,6 +65,8 @@ const TAKE_REFUSALS: Record<TakeRefusal, string> = {
     'A step names a target outside the window, so a setup step must bring it into view first.',
   'over-cap':
     'The filmed beats ran past --max-seconds, so the take stopped at the beat that crossed it.',
+  'clip-mismatch':
+    'A clip measured a different size from the one its route films at, so the clip, its log, and its still stay in the beat folder.',
   'take-failed': 'The take failed against a reachable page.',
 }
 
@@ -202,12 +204,16 @@ export function register(program: Command): void {
         '  target-offscreen    a step names a target outside the window, so a setup step must bring it into view first',
         '  over-cap            the filmed beats ran past --max-seconds, naming the',
         '                      beat that crossed it',
+        '  clip-mismatch       a clip measured a different size from the one its',
+        '                      route films at, naming both sizes',
         '  take-failed         the take failed against a reachable page',
         '  reel-failed         every beat was filmed and the reel did not encode',
         '',
         'A refusal in a beat carries beat. target-missing and target-offscreen',
         "carry still when the page answered a capture, the beat folder's",
-        'still.jpg as the step met it. A beat that fell back to the screencast',
+        'still.jpg as the step met it. clip-mismatch carries still too, and',
+        'leaves the clip and a log whose clip field is the measured size.',
+        'A beat that fell back to the screencast',
         'before refusing carries fallback, the reason it fell back, and',
         'fallbackPhase, being settle, setup, or recording, where the stalled',
         'frame was begun. A filmed beat that fell back carries both too. The',
