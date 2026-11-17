@@ -9,13 +9,13 @@ import {
 import { cameraTrack } from '@/take/camera'
 import { FfmpegMissing, probeSize, requireFfmpeg } from '@/take/encode'
 import {
-  CLIP_SIZES,
   FPS,
   clipMismatch,
   LOG_VERSION,
   type LogEvent,
   type TakeLog,
   VIEWPORT,
+  clipSize,
 } from '@/take/log'
 import {
   type NetworkMatch,
@@ -239,13 +239,7 @@ async function filmBeat(
           route: beat.route,
         }
 
-  const expected =
-    route === 'step'
-      ? {
-          width: VIEWPORT.width * (scale ?? deviceScale),
-          height: VIEWPORT.height * (scale ?? deviceScale),
-        }
-      : CLIP_SIZES[route]
+  const expected = clipSize(route, VIEWPORT, scale ?? deviceScale)
   const measured = await probeSize(target)
   const log: TakeLog = {
     version: LOG_VERSION,

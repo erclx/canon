@@ -88,6 +88,15 @@ function inView(frame: CameraFrame, point: Point): boolean {
 }
 
 describe('cameraTrack', () => {
+  it("should rest the cursor at a smaller window's center before the first move", () => {
+    const log = { ...takeOf([]), viewport: { width: 800, height: 600 } }
+
+    const track = cameraTrack(log)
+
+    expect(track.viewport).toEqual({ width: 800, height: 600 })
+    expect(track.frames[0]?.cursor).toEqual({ x: 400, y: 300 })
+  })
+
   it('should carry one camera for every frame of the clip', () => {
     const log = takeOf([{ t: 2000, at: { x: 400, y: 300 } }], [], 5)
 

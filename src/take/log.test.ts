@@ -7,8 +7,10 @@ import {
   type SentPoint,
   VIEWPORT,
   clipMismatch,
+  clipSize,
   cursorAt,
   readTakeLog,
+  startOf,
 } from '@/take/log'
 
 /**
@@ -124,6 +126,51 @@ describe('cursorAt', () => {
     const move = sentMove([{ t: 1000, x: 130, y: 100 }])
 
     expect(cursorAt([move], 500)).toEqual(START)
+  })
+
+  it("should rest at a smaller window's center when given its start", () => {
+    const move = sentMove([{ t: 1000, x: 130, y: 100 }])
+
+    expect(cursorAt([move], 500, startOf({ width: 800, height: 600 }))).toEqual(
+      { x: 400, y: 300 },
+    )
+  })
+})
+
+describe('startOf', () => {
+  it('should place the default window start at 960, 540', () => {
+    expect(startOf({ width: 1920, height: 1080 })).toEqual({ x: 960, y: 540 })
+  })
+
+  it("should place a smaller window's start at its own center", () => {
+    expect(startOf({ width: 800, height: 600 })).toEqual({ x: 400, y: 300 })
+  })
+})
+
+describe('clipSize', () => {
+  const NARROW = { width: 800, height: 600 }
+
+  it('should film a stepped window at twice its size by default', () => {
+    expect(clipSize('step', NARROW)).toEqual({ width: 1600, height: 1200 })
+  })
+
+  it('should film a stepped window at its size at device scale 1', () => {
+    expect(clipSize('step', NARROW, 1)).toEqual({ width: 800, height: 600 })
+  })
+
+  it('should film a screencast at the window whatever the scale', () => {
+    expect(clipSize('screencast', NARROW, 2)).toEqual({
+      width: 800,
+      height: 600,
+    })
+  })
+
+  it('should keep the default window at the sizes filmed before', () => {
+    expect(clipSize('step', VIEWPORT)).toEqual({ width: 3840, height: 2160 })
+    expect(clipSize('screencast', VIEWPORT)).toEqual({
+      width: 1920,
+      height: 1080,
+    })
   })
 })
 

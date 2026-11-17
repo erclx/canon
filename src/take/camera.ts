@@ -1,11 +1,12 @@
 import {
   type Box,
-  CLIP_SIZES,
   type LogEvent,
   type Point,
   type TakeLog,
+  clipSize,
   cursorAt,
   easeInOutCubic,
+  startOf,
 } from '@/take/log'
 
 /**
@@ -147,7 +148,7 @@ export function cameraTrack(
 ): CameraTrack {
   const log = atRate(source, options.rate ?? 1)
   const { width, height } = log.viewport
-  const clip = log.clip ?? CLIP_SIZES[log.route]
+  const clip = log.clip ?? clipSize(log.route, log.viewport)
   const deepest = Math.min(
     options.depth ?? DEPTH,
     (SHARP_DEPTH * clip.width) / (options.outputWidth ?? width),
@@ -190,6 +191,7 @@ export function cameraTrack(
     return null
   }
 
+  const start = startOf(log.viewport)
   const frameMs = 1000 / log.fps
   const frames: CameraFrame[] = []
   for (let index = 0; index < log.frames; index += 1) {
@@ -201,7 +203,7 @@ export function cameraTrack(
       scale: round(scale, 4),
       x: round(originFor(anchor.x, scale, width), 2),
       y: round(originFor(anchor.y, scale, height), 2),
-      cursor: roundPoint(cursorAt(log.events, ms)),
+      cursor: roundPoint(cursorAt(log.events, ms, start)),
       ring: ring === null ? null : round(ring, 3),
     })
   }
