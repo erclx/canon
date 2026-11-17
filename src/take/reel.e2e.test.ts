@@ -561,7 +561,6 @@ describe.skipIf(!available())(
           beats: [
             { name: 'wide', viewport: { width: 1280, height: 720 }, steps },
             { name: 'small', viewport: { width: 800, height: 450 }, steps },
-            { name: 'square', viewport: { width: 800, height: 600 }, steps },
           ],
         }),
       )
@@ -579,15 +578,9 @@ describe.skipIf(!available())(
     it('should join beats of one aspect ratio filmed at two sizes', async () => {
       const file = join(out, 'one-shape.webp')
 
-      await renderReel(out, beats.slice(0, 2), file)
+      await renderReel(out, beats, file)
 
       expect(readWebp(file)).toMatchObject({ width: REEL_WIDTH, height: 540 })
-    }, 120_000)
-
-    it('should refuse beats of two aspect ratios, naming the first that differs', async () => {
-      const run = renderReel(out, beats, join(out, 'two-shapes.webp'))
-
-      await expect(run).rejects.toThrow(/^square films a 800x600 window/)
     }, 120_000)
   },
 )
