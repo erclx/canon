@@ -34,7 +34,7 @@ The ban set and checkpoints ship in `src/markdown/bans.ts` and `src/markdown/str
 
 A page marked `kind: reference` holds its opening, then `Output`, `Refusals`, and `See also` as H2s, each at most once and in that order. It takes no H3 and no table headed `Flag` or `Option`. An unmarked page is never measured.
 
-Tables take the four limits in the `markdown-craft` skill's `tables.md`, on the density paths but never `CLAUDE.md`.
+Tables take the four limits in the `markdown-craft` skill's `tables.md`, on the density paths but never `CLAUDE.md`, whose Key paths take the run and H3 limits alone. The design index at `canon/design/index.md` takes only the cell limit, and that finding never gates.
 
 - A cell past 120 visible characters reports as `table-cell` and a list after a table as `table-then-list`, both under `density`
 - More than 8 body rows reports as `table-rows` and a code span with a run past 30 characters as `table-token`, both under `tables` and neither setting the exit code
@@ -55,7 +55,7 @@ Five notes fix how the limits count and where they apply.
 - A paragraph under a list item counts toward that bullet, never as a paragraph
 - A table, fence, list, heading, or bold section marker ends a run of paragraphs
 - A run whose every item opens with a bold label or a link is exempt, and numbered items never count
-- Only context entries, docs, skills, tooling seeds and references, the wiki, `README.md`, and `CONTRIBUTING.md` take a finding, plus the Key paths of `CLAUDE.md` on the run and H3 limits
+- Only context entries, docs, skills, tooling seeds and references, the wiki, `README.md`, and `CONTRIBUTING.md` take a finding, plus `CLAUDE.md` Key paths on two limits and the design index on one
 - A requirement gates only once the gated list below names its own file, never through its skill's prefix and never on a bullet run alone
 
 | Root              | A density or reference shape finding gates                                                                 |
