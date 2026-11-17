@@ -122,6 +122,6 @@ Smaller folders the loop touches.
 
 - `check:lint` passes `--disable-nested-config` to skip the golden configs under `tooling/*/configs/`, and `check:types` needs `typescript` in `devDependencies`, not hoisted from an astro peer
 - `canon gov regen` defaults `--root` to wherever the binary is installed, so from a worktree pass `--root <literal-path>`
-- The reader selector reads test source for a path spelling, so a test building its path in a helper or a root glob is missed on a push and fails in CI's `--all` run. That trade keeps pushes unqueued
+- The reader selector reads a test and its sibling `fixture*.ts` for a path spelling, so a path built in any other helper or a root glob is missed on a push and fails in CI's `--all` run
 - A file whose name ends in `index.md`, staged or untracked, trips the Indexes stage even under `auto: false`
 - A line number cited into a file the entry does not own goes stale with nothing comparing it, so cite a named identifier

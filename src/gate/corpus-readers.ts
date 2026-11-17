@@ -1,6 +1,6 @@
 import { execaSync } from 'execa'
 import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 
 import { gitEnv } from '@/git/env'
 
@@ -16,25 +16,48 @@ const ROOT_MARKERS = [
   'process.cwd()',
 ]
 
+const readTracked = (root: string, path: string): string | undefined => {
+  try {
+    return readFileSync(join(root, path), 'utf8')
+  } catch {
+    return undefined
+  }
+}
+
 /**
- * Every tracked test file under `root`, mapped to its source. A file
- * the index lists and the working tree has deleted is left out rather than
- * read.
+ * Every tracked test file under `root`, mapped to its source with any
+ * `fixture*.ts` beside it appended, since a suite such as the hook guards takes
+ * its corpus paths from a fixture module in its own folder. Production modules
+ * beside a test stay out, since they name corpus folders as data and would
+ * select every test in their folder. A file the index lists and the working
+ * tree has deleted is left out.
  */
 export function readTestSources(root: string): ReadonlyMap<string, string> {
   const listing = execaSync(
     'git',
-    ['-C', root, 'ls-files', '-z', '--', '*.test.ts'],
+    ['-C', root, 'ls-files', '-z', '--', '*.ts'],
     { env: gitEnv(), extendEnv: false },
   ).stdout
-  const sources = new Map<string, string>()
+  const tests: string[] = []
+  const helpers = new Map<string, string[]>()
   for (const path of listing.split('\0')) {
     if (path === '') continue
-    try {
-      sources.set(path, readFileSync(join(root, path), 'utf8'))
-    } catch {
+    if (path.endsWith('.test.ts')) {
+      tests.push(path)
       continue
     }
+    if (!basename(path).startsWith('fixture')) continue
+    const folder = dirname(path)
+    helpers.set(folder, [...(helpers.get(folder) ?? []), path])
+  }
+  const sources = new Map<string, string>()
+  for (const path of tests) {
+    const own = readTracked(root, path)
+    if (own === undefined) continue
+    const beside = (helpers.get(dirname(path)) ?? []).map(
+      (helper) => readTracked(root, helper) ?? '',
+    )
+    sources.set(path, [own, ...beside].join('\n'))
   }
   return sources
 }

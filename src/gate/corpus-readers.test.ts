@@ -98,6 +98,32 @@ describe('readTestSources', () => {
     expect([...readTestSources(root)]).toEqual([['src/a.test.ts', 'tracked']])
   })
 
+  it('should append a fixture module beside a test to its source', () => {
+    write('src/hooks/guard/small-hooks.test.ts', 'runs ROOT hooks')
+    write(
+      'src/hooks/guard/fixture.ts',
+      "export const ROOT = join(import.meta.dirname, '.claude/hooks')",
+    )
+    git('add', '--all')
+
+    expect(
+      readersOf('.claude/hooks/plan-guard.sh', readTestSources(root)),
+    ).toEqual(['src/hooks/guard/small-hooks.test.ts'])
+  })
+
+  it('should not append a production module beside a test', () => {
+    write('src/claude/skills.test.ts', 'asserts the parser')
+    write(
+      'src/claude/skills.ts',
+      "export const SKILLS = join(PROJECT_ROOT, 'claude/skills')",
+    )
+    git('add', '--all')
+
+    expect(
+      readersOf('claude/skills/git-pr/SKILL.md', readTestSources(root)),
+    ).toEqual([])
+  })
+
   it('should leave out a tracked test the working tree deleted', () => {
     write('src/a.test.ts', 'tracked')
     git('add', '--all')
