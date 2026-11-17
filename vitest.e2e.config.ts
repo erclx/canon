@@ -7,9 +7,13 @@ import base from './vitest.config'
 // with `include`, so `bun run test:e2e src/take` runs only the end-to-end
 // suites under that path.
 
-// Suites whose assertion reads real-time screencast pacing, which a busy
-// machine skews past its limit. They run alone, after the parallel files.
-const TIMED = ['src/take/film-drag.e2e.test.ts']
+// Suites whose assertion reads real-time screencast pacing, being the drag's
+// pixel bounds and the glide's two-slow-frame landing, which a busy machine
+// skews past their limits. They run alone, after the parallel files.
+const TIMED = [
+  'src/take/film-drag.e2e.test.ts',
+  'src/take/film-glide.e2e.test.ts',
+]
 
 const shared = {
   resolve: base.resolve,
