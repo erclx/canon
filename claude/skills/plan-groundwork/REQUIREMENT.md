@@ -9,13 +9,13 @@ description: Why a question that has not been measured gets a disposable folder 
 
 A question nobody has measured is answered with a plan. The session commits before the current state is known, and its reasoning compacts away with the conversation, so the next session re-measures what this one counted or states a figure from recall as current.
 
-A track fanning out to subagents returns findings without their reasoning. Under the project root, a fixture loads its instruction files, so the arm measures the repository instead of the question. When a closing track holds several findings, one task is written and the rest have no route out.
+A track fanning out to subagents returns findings without their reasoning. Under the project root, a fixture loads its instruction files, so the arm measures the repository instead of the question. When a closing track holds several findings, one task is written and the rest have no route out. A drawing track's frames have no home.
 
 ## Must
 
 - Detect open, resume, and close from the folder itself, matching the topic against existing tracks first, and number a new folder past the highest ordinal across groundwork and intake
 - Measure the current state now, carry a lean and the finding that would overturn it on every open question, link every outside claim, and end a pass with every question leaned on a plain retell
-- Confine writes to the track folder, the fixture, the intake routing, and a close-time task file, whose row `task-board` places only when the launch named neither a task nor a controller
+- Confine writes to the track folder, the fixture, the intake routing, its own board project, and a close-time task file, whose row `task-board` places only when the launch named no task or controller
 - Route a finding the conclusion leaves out through `plan-intake` in the same session on every route, hand a named controller the conclusion instead of a task file, and name the route
 - Put a headless run's fixture outside the repository, write a mid-track pause note self-contained, and plan the conclusion in the closing session unless `role-planner`'s bar holds, saying which
 
@@ -25,6 +25,7 @@ A track fanning out to subagents returns findings without their reasoning. Under
 - Dispatch subagents, since a search too large to run inline is a finding that the question is too broad
 - Close while an open question quietly fails an outcome, or spawn more than three billed headless runs without asking
 - Pause for approval between steps, or open a track with no topic or fewer than two of the three qualifying conditions
+- Draw to settle a measurement, write into a pick round's project or an accepted frame, cite a frame from the board alone, or remove its own board project at close
 
 ## Out of scope
 

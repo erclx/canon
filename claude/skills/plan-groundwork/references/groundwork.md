@@ -92,8 +92,8 @@ Orients and holds no findings. It states the phase out loud in its first three l
 
 - A one-line definition, and an `## Origin` section holding a `Task: <path>`, `Controller: <sessionId>`, or `Intake: <item>` line per item the launch named
 - A `## Why` section stating why the track is running now
-- A file-map table of filename and what it holds, kept current
-- A `## Method` section splitting internal sources from external ones, naming which were used and which were not yet done, and listing under a leads heading any external source found but not opened
+- A file-map table of filename and what it holds, kept current, naming the board project of a track that drew, per `groundwork-board.md`
+- A `## Method` section naming the internal and external sources used and not yet done, with each external source found but not opened under a leads heading
 - Closing `## Prior art` and `## Source citation` sections, the second stating the rule below so a returning session finds it in the folder
 
 Every claim about a source outside the project carries a link to it, wherever the claim appears in the folder, so a later reader can tell a fetched page from recall. A source found and not read is listed as a lead so no later pass re-searches it, and never cited, since a link to a page nobody opened is worse than none.
