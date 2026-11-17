@@ -183,16 +183,16 @@ export type CitationReport =
   | { readonly kind: 'unavailable' }
 
 /**
- * Resolves every cited path outside the fixture trees and the install stamp.
+ * Resolves every cited path outside the fixture trees and the install stamps.
  *
- * The stamp is written by the toolkit, and `canon tooling decline` records the
- * declined path as a key in it, so scanning it reports a deliberate decline as
- * a stale citation.
+ * `canon tooling decline` records a declined path as a key in a stamp, so a
+ * scanned stamp reports a deliberate decline as a stale citation. A stamp
+ * matches at any depth, since a subfolder install carries its own, but only
+ * after a slash, so a file merely ending in the same letters is scanned.
  *
- * This is the only check that gates the repository check, which makes it the
- * only one whose false positives cost a contributor anything. It reports a
- * finding solely for a path that does not resolve on disk, and the exclusions
- * above are what keep that from firing on prose about paths.
+ * This is the only check gating the repository check, so its false positives
+ * are the only ones that cost a contributor. It reports only a path that does
+ * not resolve on disk, and the exclusions keep it off prose about paths.
  */
 export async function auditCitations(
   root: string,
@@ -202,8 +202,10 @@ export async function auditCitations(
   const listed = await listRepositoryFiles(root)
   if (!listed) return { kind: 'unavailable' }
 
-  const stamps = new Set(stampPaths(root).map((path) => relative(root, path)))
-  const candidates = listed.filter((rel) => !isFixture(rel) && !stamps.has(rel))
+  const stamps = stampPaths(root).map((path) => relative(root, path))
+  const isStamp = (rel: string): boolean =>
+    stamps.some((stamp) => rel === stamp || rel.endsWith(`/${stamp}`))
+  const candidates = listed.filter((rel) => !isFixture(rel) && !isStamp(rel))
   const citations: Citation[] = []
 
   for (const rel of candidates) {
