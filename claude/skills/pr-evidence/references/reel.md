@@ -38,7 +38,7 @@ A box is filmable when it asks the reviewer to click, fill, or scroll something 
 
 - Skip a box whose trailing markers hold `(taste)`, in any order, since no driver judges it
 - Skip a box that asks only to look at a state the page opens on, since a screenshot already shows it
-- Keep a box about a loading, empty, or error state, since a beat holds or fails the request behind it per the take-craft reference, and the state shows nowhere else
+- Keep a box about a loading or error state, since a beat holds or fails the request behind it per the take-craft reference, and the state shows nowhere else
 - Skip a negative box, one asserting that something does not happen, such as "no drop line draws", since footage of nothing shows nothing
 
 Read the box's text for the negative. A box asserting an unchanged result, such as "the board goes to all projects as before", is not negative, since the action still produces a visible change. Rank it behind a box in the same group that names new behavior.
