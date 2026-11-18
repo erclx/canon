@@ -50,8 +50,8 @@ hits=$(printf '%s' "$record" |
   jq -r '.entries[]?.bans[]? | ":\(.line):\(.column + 1)  \(.kind)  \(.term)"' 2>/dev/null)
 
 # Two advisory measures that never gate: heading case for the whole file, and
-# a colon only where its `lead` word and colon appear in this write's text,
-# since slicing at `column` miscounts after an emoji.
+# a colon only where its `lead` word appears in this write's text. A binary
+# predating `lead` falls back to slicing at `column`, which miscounts emoji.
 new=$(printf '%s' "$input" |
   jq -r '[.tool_input.new_string?, .tool_input.content?, (.tool_input.edits[]?.new_string?)] | map(select(. != null)) | join("\n")' 2>/dev/null)
 headings=$(printf '%s' "$record" |
