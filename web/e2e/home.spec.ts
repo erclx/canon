@@ -375,16 +375,19 @@ test.describe('the looping windows and their pause button', () => {
   test('a pressed pause button holds the window it sits on', async ({
     page,
   }) => {
+    await page.clock.install()
     await page.emulateMedia({ reducedMotion: 'no-preference' })
     await page.goto('/')
     const pause = page.locator('#guardrails .pz')
     const log = page.locator('#guardrails .log')
     await page.locator('#guardrails .four .go').nth(1).click()
+    await page.clock.runFor(600)
     await expect(log.locator('.tool')).toHaveCount(1, SETTLE)
 
     await pause.click()
     const held = await log.textContent()
-    await page.waitForTimeout(2_000)
+    // Unpaused, the scene appends its next line within 400 ms and moves on to the next scene inside 10 s.
+    await page.clock.runFor(10_000)
 
     await expect(pause).toHaveAttribute('data-paused', 'true')
     expect(await log.textContent()).toBe(held)
