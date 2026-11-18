@@ -1,0 +1,1 @@
+import{r as a,p as i,h as c}from"./scene.CcxsQJ4k.js";const t=document.getElementById("drive"),e=t?.querySelector(".dr");if(t&&e&&!a()){const o=i(c(e,t.querySelector(".pz")));async function r(){const n=o.next();for(;;)if(e.classList.remove("on"),!await o.wait(1800,n)||(e.classList.add("on"),!await o.wait(3400,n)))return}r()}
