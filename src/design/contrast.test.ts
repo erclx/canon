@@ -72,8 +72,7 @@ describe('readings', () => {
     expect(measured.map((reading) => reading.ground)).toEqual(grounds)
   })
 
-  // The page draws muted on the band in a typed request's glyph and a
-  // rendered record's frontmatter labels, on both themes.
+  // A typed request's glyph and a record's frontmatter labels sit on the band.
   it.each([
     ['muted', ['background', 'surface', 'window', 'band']],
     [
@@ -96,8 +95,7 @@ describe('readings', () => {
 })
 
 describe('the shipped palette', () => {
-  // Asserts over the record rather than a fixed list, so a role added later is
-  // measured with no edit here, and a moved ground is re-measured.
+  // Reads the record rather than a fixed list, so a new role or ground is measured.
   it('clears AA on every role against every ground it declares', () => {
     expect(
       failing().map((reading) => `${reading.role} on ${reading.ground}`),
