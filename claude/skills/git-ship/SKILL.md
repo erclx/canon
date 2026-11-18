@@ -110,7 +110,7 @@ On a `passing` wake, run `canon pr evidence <number> --check --json` against the
 | Reading                                 | Route                                                                                                   |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | `settled`                               | Nothing is owed, as on a branch that changed no rendered surface, so continue                           |
-| `owed`                                  | Run each step the `owed` list names, then re-read once, as below                                        |
+| `owed`                                  | Run each step the `owed` list names, a stale preview as a missing one, then re-read once, as below      |
 | Any other `reason`, such as `gh-failed` | Stop and report it, since an unread thread is not a settled one                                         |
 | No record, or an unknown flag error     | The binary predates `--check`, so report the thread unread and continue without claiming it was checked |
 
