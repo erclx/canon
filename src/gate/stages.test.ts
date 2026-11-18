@@ -8,6 +8,7 @@ import {
   commentFileShare,
   commentHeadBlocks,
   commentHistory,
+  shippedCommentCaps,
 } from '@/gate/comment-caps'
 import { clientCommandCitations, designProse } from '@/gate/measures'
 import {
@@ -504,6 +505,7 @@ describe('the comment cap stages', () => {
     ['comment-body-blocks', commentBodyBlocks],
     ['comment-history', commentHistory],
     ['comment-file-share', commentFileShare],
+    ['shipped-comment-caps', shippedCommentCaps],
   ])('should run %s with no scope', (id, measure) => {
     const stage = STAGES.find((candidate) => candidate.id === id)
 
@@ -515,12 +517,21 @@ describe('the comment cap stages', () => {
     const ids = STAGES.map((stage) => stage.id)
     const after = ids.indexOf('file-length')
 
-    expect(ids.slice(after + 1, after + 5)).toEqual([
+    expect(ids.slice(after + 1, after + 6)).toEqual([
       'comment-head-blocks',
       'comment-body-blocks',
       'comment-history',
       'comment-file-share',
+      'shipped-comment-caps',
     ])
+  })
+
+  it('should keep the shipped comment caps out of a target', () => {
+    const stage = STAGES.find(
+      (candidate) => candidate.id === 'shipped-comment-caps',
+    )
+
+    expect(stage?.shared).toBeUndefined()
   })
 })
 
