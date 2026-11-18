@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.99.0](https://github.com/erclx/canon/compare/v5.98.0...v5.99.0) (2026-11-18)
+
+
+### Features
+
+* **app-drive:** hand over the board address before the first frame ([#3186](https://github.com/erclx/canon/issues/3186)) ([7f67493](https://github.com/erclx/canon/commit/7f674935d6e333c32f4d495828eaae29ca39bb4a))
+* **design:** lift the dark surfaces so windows stand off the page ([#3191](https://github.com/erclx/canon/issues/3191)) ([6d8a337](https://github.com/erclx/canon/commit/6d8a33736ea54c1e9c51248170eaaf6fb58b1a7f))
+* **design:** measure muted text on the band ground ([#3196](https://github.com/erclx/canon/issues/3196)) ([a5699a1](https://github.com/erclx/canon/commit/a5699a18d0dbea52847e913ed58bde6b4c484838))
+* **pr:** owe a hosted preview that no longer serves the tip ([#3193](https://github.com/erclx/canon/issues/3193)) ([e5ed5f6](https://github.com/erclx/canon/commit/e5ed5f6203af76af5982c393e50814e5647b1fc8))
+* **web:** add four landing sections for shipped features ([#3194](https://github.com/erclx/canon/issues/3194)) ([5605685](https://github.com/erclx/canon/commit/5605685059dddcbce497a3630639d9fddc3c67c3))
+* **web:** apply fourteen landing page fixes ([#3185](https://github.com/erclx/canon/issues/3185)) ([d0fbab9](https://github.com/erclx/canon/commit/d0fbab989179399b744142df5592e8cc7e567ae2))
+
+
+### Bug Fixes
+
+* **tooling:** keep shipped seeds and configs under the comment caps ([#3192](https://github.com/erclx/canon/issues/3192)) ([3c7f51b](https://github.com/erclx/canon/commit/3c7f51b53bc2256dc1f9ea1e91361e3d4e6cc617))
+
 ## [5.98.0](https://github.com/erclx/canon/compare/v5.97.0...v5.98.0) (2026-11-17)
 
 
