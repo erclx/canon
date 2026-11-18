@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="../../assets/landing-v5/built/head.css" />
     <link
       rel="stylesheet"
-      href="../../assets/landing-v5/built/_astro/index.B3B0sxrB.css"
+      href="../../assets/landing-v5/built/_astro/index.Cae65jSx.css"
     />
     <style>
       body {
@@ -34,7 +34,7 @@
           : mm(q)
     </script>
     <main>
-      <section class="sec" id="roles">
+      <section class="sec split-right" id="roles">
         <div class="sec-head">
           <h2>Five roles, each in its own session</h2>
           <p>
@@ -42,6 +42,20 @@
             planner, a worker, and two reviewers, and you talk to the
             orchestrator that starts them.
           </p>
+          <div class="list" role="group" aria-label="Roles">
+            <button type="button" aria-pressed="true" data-i="0">
+              <b>Orchestrator</b> <span>dispatches the rows</span></button
+            ><button type="button" aria-pressed="false" data-i="1">
+              <b>Planner</b> <span>writes one plan</span></button
+            ><button type="button" aria-pressed="false" data-i="2">
+              <b>Worker</b>
+              <span>builds and opens the pull request</span></button
+            ><button type="button" aria-pressed="false" data-i="3">
+              <b>Code reviewer</b> <span>reads the diff</span></button
+            ><button type="button" aria-pressed="false" data-i="4">
+              <b>UI reviewer</b> <span>drives the checklist</span>
+            </button>
+          </div>
         </div>
         <div class="tray">
           <button
@@ -77,38 +91,20 @@
               <path d="M5.5 3.5l6.5 4.5-6.5 4.5z" fill="currentColor" />
             </svg>
           </button>
-          <div class="two">
-            <div class="win">
-              <div class="win-bar">
-                <i></i><i></i><i></i><span>claude</span>
+          <div class="win">
+            <div class="win-bar"><i></i><i></i><i></i><span>claude</span></div>
+            <div class="log" aria-live="polite"></div>
+            <div class="inp">
+              <div class="rule">
+                <i></i><span class="who"></span><i class="s"></i>
               </div>
-              <div class="log" aria-live="polite"></div>
-              <div class="inp">
-                <div class="rule">
-                  <i></i><span class="who"></span><i class="s"></i>
-                </div>
-                <div class="line">
-                  <span class="g">❯</span
-                  ><span
-                    ><span class="typed"></span><span class="cur"></span
-                  ></span>
-                </div>
-                <div class="bot"></div>
+              <div class="line">
+                <span class="g">❯</span
+                ><span
+                  ><span class="typed"></span><span class="cur"></span
+                ></span>
               </div>
-            </div>
-            <div class="list" role="group" aria-label="Roles">
-              <button type="button" aria-pressed="true" data-i="0">
-                <b>Orchestrator</b> <span>dispatches the rows</span></button
-              ><button type="button" aria-pressed="false" data-i="1">
-                <b>Planner</b> <span>writes one plan</span></button
-              ><button type="button" aria-pressed="false" data-i="2">
-                <b>Worker</b>
-                <span>builds and opens the pull request</span></button
-              ><button type="button" aria-pressed="false" data-i="3">
-                <b>Code reviewer</b> <span>reads the diff</span></button
-              ><button type="button" aria-pressed="false" data-i="4">
-                <b>UI reviewer</b> <span>drives the checklist</span>
-              </button>
+              <div class="bot"></div>
             </div>
           </div>
         </div>
