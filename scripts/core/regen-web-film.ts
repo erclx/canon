@@ -1,15 +1,6 @@
 /**
- * Checks, or with `--write` films, the reel the landing page's film section
- * plays: `canon take` over the built page's records section, once per theme,
- * as `web/film-plan.json` names the beats.
- *
- * Each reel carries a stamp beside it holding the plan's digest, the images'
- * digests, and each beat's seconds, which the section reads to step its beat
- * row in time. The check `web:build` runs refuses a reel whose stamp no longer
- * matches the plan or the image, so an edited plan cannot ship an old reel.
- *
- * The take encodes lossless, which runs to megabytes over a page this size,
- * so the reel is rendered again here under a cap that forces the lossy pass.
+ * Checks, or with `--write` films per theme, the film section's reel of the records section as `web/film-plan.json` names its beats.
+ * The check `web:build` runs refuses a reel whose stamp no longer matches the plan or the image, so an edited plan cannot ship an old reel.
  */
 import { createHash } from 'node:crypto'
 import { spawn, spawnSync } from 'node:child_process'
@@ -22,7 +13,7 @@ import { renderReel } from '../../src/take/reel'
 
 const root = new URL('../..', import.meta.url).pathname
 const PLAN = 'web/film-plan.json'
-/** Far under the take's own cap, so the reel always takes the lossy pass. */
+/** Far under the take's own cap, so a lossless reel of megabytes always takes the lossy pass. */
 const REEL_BYTES = 1_000_000
 const VIEWPORT = '1280x800'
 const PORT = Number(process.env.FILM_PORT ?? 4537)

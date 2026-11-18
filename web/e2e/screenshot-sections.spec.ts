@@ -110,13 +110,11 @@ test.describe('the section capture', () => {
     test.setTimeout(CAPTURE_TIMEOUT)
     expect(baseURL).toBeTruthy()
     const out = await mkdtemp(path.join(tmpdir(), 'canon-section-capture-'))
-    // The harness loads its cases from the working directory, so the run's
-    // temp folder gets the toolkit's own copy.
+    // The harness loads its cases from the working directory, so the temp folder gets a copy.
     await mkdir(path.join(out, 'e2e', 'capture'), { recursive: true })
     await copyFile(CASES, path.join(out, 'e2e', 'capture', 'cases.ts'))
 
-    // `--require-base-url` skips the case flagged `evidence: true`, leaving the
-    // dark case alone to run, which halves what this test waits for.
+    // `--require-base-url` skips the `evidence: true` case, halving what this test waits for.
     await run('bun', [HARNESS, '--require-base-url'], {
       cwd: out,
       env: {
@@ -127,14 +125,12 @@ test.describe('the section capture', () => {
     })
     await page.emulateMedia({ colorScheme: 'dark' })
     await page.goto('/')
-    // Lazy images and frames take their height once loaded, so the box is read
-    // after the same settle the harness runs.
+    // Lazy images take their height once loaded, so the box is read after the harness's settle.
     await settle(page)
 
     const home = path.join(out, 'screenshots', 'localhost', 'home')
 
-    // The list below copies the harness's own, so what the run wrote is checked
-    // first, or a section added to the harness would reach the baseline unchecked.
+    // The list copies the harness's, so a section the harness adds is caught here first.
     const written = await readdir(home, { withFileTypes: true })
     expect(
       written
