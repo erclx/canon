@@ -1,4 +1,5 @@
 import { isPainted, type PaintedPatterns } from '@/pr/painted'
+import type { PreviewHeadReason } from '@/pr/preview'
 
 /** The path segment that marks an image as evidence a pull request should compare. */
 const EVIDENCE_SEGMENT = 'evidence'
@@ -659,6 +660,19 @@ export interface OwedInput {
   readonly carriedPreview: boolean
   /** A deploy workflow resolves and its push filter matches a path the pull request changed. */
   readonly deployServesChange: boolean
+  /** How the newest successful deploy compares with the tip. Unread reads as fresh, the reading before the check compared heads. */
+  readonly previewHead?: PreviewHeadReason
+  /** Whether a served path changed between the built head and the tip. Unread reads as served, so a cut listing never settles. */
+  readonly servedSinceBuilt?: boolean
+}
+
+/**
+ * Whether a carried preview no longer serves the tip. A deploy still building
+ * owes one too, since until it lands the address shows the older head.
+ */
+function isPreviewBehind(input: OwedInput): boolean {
+  if (input.previewHead === 'stale') return input.servedSinceBuilt !== false
+  return input.previewHead === 'building' || input.previewHead === 'no-build'
 }
 
 /**
@@ -672,7 +686,7 @@ export function readOwed(input: OwedInput): OwedStep[] {
   if (
     (input.hasMarkedComment || input.hasEvidenceChange) &&
     input.deployServesChange &&
-    !input.carriedPreview
+    (!input.carriedPreview || isPreviewBehind(input))
   ) {
     owed.push('preview')
   }

@@ -603,6 +603,65 @@ describe('readOwed', () => {
 
     expect(owed).toEqual([])
   })
+
+  describe('with a carried preview read against the tip', () => {
+    function carried(overrides: Partial<OwedInput>): OwedInput {
+      return owedInput({
+        hasMarkedComment: true,
+        carriedPreview: true,
+        deployServesChange: true,
+        ...overrides,
+      })
+    }
+
+    it('should owe nothing for a preview built at the tip', () => {
+      expect(readOwed(carried({ previewHead: 'fresh' }))).toEqual([])
+    })
+
+    it('should owe a preview built before a served change landed', () => {
+      const owed = readOwed(
+        carried({ previewHead: 'stale', servedSinceBuilt: true }),
+      )
+
+      expect(owed).toEqual(['preview'])
+    })
+
+    it('should owe nothing for a preview built before a push touching no served path', () => {
+      const owed = readOwed(
+        carried({ previewHead: 'stale', servedSinceBuilt: false }),
+      )
+
+      expect(owed).toEqual([])
+    })
+
+    it('should owe a stale preview whose changes since were never read', () => {
+      expect(readOwed(carried({ previewHead: 'stale' }))).toEqual(['preview'])
+    })
+
+    it('should owe a preview while a deploy of the tip is still building', () => {
+      expect(readOwed(carried({ previewHead: 'building' }))).toEqual([
+        'preview',
+      ])
+    })
+
+    it('should owe a preview when no deploy of the branch succeeded', () => {
+      expect(readOwed(carried({ previewHead: 'no-build' }))).toEqual([
+        'preview',
+      ])
+    })
+
+    it('should owe nothing on a stale build when the deploy serves none of the pull request', () => {
+      const owed = readOwed(
+        carried({
+          deployServesChange: false,
+          previewHead: 'stale',
+          servedSinceBuilt: true,
+        }),
+      )
+
+      expect(owed).toEqual([])
+    })
+  })
 })
 
 describe('readUncaptured', () => {
