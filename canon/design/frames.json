@@ -27,8 +27,8 @@
     "readme/page": "readme/round-3-v2/arm-2",
     "foundations/mark": "brand/brand-mark-final/mark",
     "foundations/palette": "system/palette/arm-3",
-    "foundations/type": "system/type/arm-2",
-    "foundations/shape": "system/shape/arm-1",
-    "foundations/motion": "system/motion/arm-2"
+    "foundations/type": "system/type/arm-dark-surfaces",
+    "foundations/shape": "system/shape/arm-dark-surfaces",
+    "foundations/motion": "system/motion/arm-dark-surfaces"
   }
 }
