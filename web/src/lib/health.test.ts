@@ -107,12 +107,19 @@ describe('summarize', () => {
   })
 })
 
-describe('readHealth', () => {
-  it('should read this checkout into rows and a dated trend', () => {
-    const health = readHealth()
+/** Three CLI reads over the whole checkout, each spawning its own process. */
+const READ_TIMEOUT = 30_000
 
-    expect(health.functions).toHaveLength(3)
-    expect(health.weeks.length).toBeGreaterThan(1)
-    expect(health.to).toMatch(/^\d{4}-\d{2}-\d{2}$/)
-  })
+describe('readHealth', () => {
+  it(
+    'should read this checkout into rows and a dated trend',
+    () => {
+      const health = readHealth()
+
+      expect(health.functions).toHaveLength(3)
+      expect(health.weeks.length).toBeGreaterThan(1)
+      expect(health.to).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    },
+    READ_TIMEOUT,
+  )
 })
