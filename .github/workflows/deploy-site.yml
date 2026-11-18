@@ -6,10 +6,11 @@ on:
     branches:
       - main
     paths:
-      # The page builds from web/, assets/, and src/design/ alone and reads no
-      # catalog, so an edit to the skills, rules, or their index changes no
-      # byte of it. Add a path back in the change that makes the page read a
-      # file outside these globs.
+      # The page builds from web/, assets/, and src/design/ and reads no
+      # catalog. Its audits section reads the code and merge log outside these
+      # globs, so those figures refresh only on a page deploy. Keep the list as
+      # it is, since src/pr/preview.test.ts holds a change outside it, such as
+      # src/canvas/, off the site deploy.
       - 'web/**'
       - 'assets/**'
       # Pull request screenshots, which the page never reads.

@@ -104,7 +104,7 @@ async function waitFor(url: string) {
     if (ok) return
     await new Promise((resolve) => setTimeout(resolve, 500))
   }
-  fail(`the preview at ${url} never answered`)
+  throw new Error(`the preview at ${url} never answered`)
 }
 
 async function film(theme: Theme, url: string, plan: string) {
@@ -124,7 +124,7 @@ async function film(theme: Theme, url: string, plan: string) {
     ],
     { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] },
   )
-  if (take.status !== 0) fail(`canon take exited ${take.status}`)
+  if (take.status !== 0) throw new Error(`canon take exited ${take.status}`)
   const record = JSON.parse(take.stdout) as { beats: FilmedBeat[] }
   const reel = await renderReel(
     dir,
@@ -134,7 +134,7 @@ async function film(theme: Theme, url: string, plan: string) {
   )
 
   const last = record.beats.at(-1)
-  if (!last) fail('the take filmed no beat')
+  if (!last) throw new Error('the take filmed no beat')
   const still = spawnSync(
     'ffmpeg',
     [
@@ -151,7 +151,8 @@ async function film(theme: Theme, url: string, plan: string) {
     ],
     { stdio: 'inherit' },
   )
-  if (still.status !== 0) fail(`ffmpeg could not write ${theme.still}`)
+  if (still.status !== 0)
+    throw new Error(`ffmpeg could not write ${theme.still}`)
 
   writeFileSync(
     join(root, theme.stamp),
@@ -174,12 +175,16 @@ if (!process.argv.includes('--write')) {
   const reasons = THEMES.flatMap((theme) => staleness(theme, plan))
   if (reasons.length)
     fail(
-      `${reasons.join(', ')}. Build the page, then run bun run web:film -- --write to film it again.`,
+      `${reasons.join(', ')}. Run bun run web:film -- --write, which builds the page and films it again.`,
     )
   console.log(`regen-web-film: both reels match ${PLAN}`)
 } else {
-  if (!existsSync(join(root, 'web/dist/index.html')))
-    fail('web/dist holds no built page, so build it before filming')
+  // `web:build` runs the check above first, so it cannot build the page this films.
+  const build = spawnSync('bunx', ['astro', 'build'], {
+    cwd: join(root, 'web'),
+    stdio: 'inherit',
+  })
+  if (build.status !== 0) fail(`astro build exited ${build.status}`)
   const server = spawn(
     'bunx',
     ['astro', 'preview', '--host', '127.0.0.1', '--port', String(PORT)],
@@ -189,6 +194,11 @@ if (!process.argv.includes('--write')) {
     const base = `http://127.0.0.1:${PORT}/`
     await waitFor(base)
     for (const theme of THEMES) await film(theme, `${base}#records`, plan)
+  } catch (error) {
+    console.error(
+      `regen-web-film: ${error instanceof Error ? error.message : String(error)}`,
+    )
+    process.exitCode = 1
   } finally {
     server.kill()
   }

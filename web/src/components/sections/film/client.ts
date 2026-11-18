@@ -1,5 +1,12 @@
 import { holdOn, reducedMotion } from '../../../lib/scene'
 
+/**
+ * Every beat of a take closes on this hold, per `canon take --help`, so a line
+ * ticks as its beat's action lands, which also lets the last line tick before
+ * the reel loops.
+ */
+const HOLD = 0.6
+
 interface Reel {
   reel: string
   still: string
@@ -55,7 +62,7 @@ if (section && source?.textContent && image && still) {
       chip.classList.toggle('on', index === current),
     )
     checks.forEach((check, index) =>
-      check.classList.toggle('done', at >= (ends[index] ?? total)),
+      check.classList.toggle('done', at >= (ends[index] ?? total) - HOLD),
     )
   }
 

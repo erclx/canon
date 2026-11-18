@@ -7,9 +7,9 @@ on:
   pull_request:
     paths:
       # Mirrors deploy-site.yml's own list. The page builds from web/, assets/,
-      # and src/design/ alone and reads no catalog, so an edit to the skills,
-      # rules, or their index changes no byte of it. Add a path back in the
-      # change that makes the page read a file outside these globs. Question 2
+      # and src/design/ and reads no catalog. Its audits section reads code
+      # outside these globs and refreshes only on a page deploy, and the list
+      # stays as it is for the preview contract that file states. Question 2
       # in .canon/plans/archive/feature-render-visibility.md names
       # the two literal copies rather than a single shared source.
       # The e2e harness entry has no deploy counterpart: a harness edit changes
