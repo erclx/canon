@@ -7,7 +7,7 @@ description: The canon.erclx.com landing page, its composition and build-time re
 
 ## Overview
 
-Owns `web/`, the Astro app behind the `canon.erclx.com` landing page, and the images the page and the README carry. The page is one route of eight sections, from Claude Code's agent view down to the install. It ships to no target, so the application-code non-goal in `canon/REQUIREMENTS.md` does not reach it.
+Owns `web/`, the Astro app behind the `canon.erclx.com` landing page, and the images the page and the README carry. The page is one route of twelve sections, from Claude Code's agent view down to the install. It ships to no target, so the application-code non-goal in `canon/REQUIREMENTS.md` does not reach it.
 
 ## Layout
 
@@ -18,7 +18,7 @@ Holds the page, built from components that read their figures through `lib/`. A 
 - `components/` holds a folder per section, `site-nav/`, `site-footer/`, and `pause-button/`, each splitting `index.astro` from its style, script, and icons, which `pages/` assembles into one route
 - `content/copy.ts` holds the copy and the product views' scenes, each string cited to `README.md` or marked as a paraphrase, gated by `readmeCitations`
 - `content/` also holds the sessions, craft's practices with each quote's ledger row, and the record sheets under `content/records/`, one formatted HTML file each
-- `lib/skills.ts` reads the skill catalog for the opening's `/` menu, and `lib/scene.ts` paces every scene window, halting it while the reader holds it or presses its pause button
+- `lib/skills.ts` reads the skill catalog, `lib/health.ts` reads the code audits and `canon history` and refuses a shallow clone, and `lib/scene.ts` paces every scene window
 - `styles/global.css` imports Tailwind, then maps roles onto `tokens.css` in `@layer base` beside the shared tray, window, picker, split, and band classes, and `base.astro` embeds Geist and Geist Mono
 
 ### `web/`
@@ -37,7 +37,7 @@ This repository's self-portrait for a visitor who never opens the source, where 
 
 - `evidence/home/` is the committed baseline of the page, one folder per section holding a frame per theme at 320 and 1280 pixels
 - `frames/` holds the social card and its stamp, the one image the site's link preview shows
-- `loops/` holds the README's `readme` pair, taken by hand from the page's opening, beside the launch film's GIFs, MP4s, and posters, which `bun run film:render` writes and the page no longer plays
+- `loops/` holds the README's `readme` pair, the launch film's files, and the film section's stamped reels, which `web:build` refuses once `web/film-plan.json` moves until `web:film -- --write` runs
 - `merge/` and the whole-page frames come from a `workflow_dispatch` artifact on `main`, since a local capture falls back to another font
 - Every README image ships as a `<name>` and `<name>-light` pair behind a `<picture>`
 
@@ -75,4 +75,4 @@ Two folders outside `web/` shape what the page renders and captures.
 - `web/` has no `package.json` and sits outside the `types` stage, so `bun run web:build` through `astro check` is its only typecheck
 - A root `src/` module importing through `@/` cannot load from a `web/` config, which aliases `@` to `web/src`, so the card route spells its `@font-face` itself
 - The social card stamp digests the capture address, so an edit to `card-src`, `copy.ts`, the mark, or `FAVICON_COLORS` leaves the PNG stale until `bun run web:card` re-captures both themes
-- A lazy `<img>` or `<iframe>` stays unloaded in a hand-written capture until scrolled into view, and `networkidle` does not re-arm, so wait on `readyState`
+- A lazy `<img>` or `<iframe>` stays unloaded until scrolled into view, or forever under a hidden parent, and `networkidle` does not re-arm, so a capture waits on `readyState`
