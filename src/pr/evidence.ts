@@ -16,6 +16,9 @@ const MARKER_PREFIX = '<!-- pr-evidence:'
 /** How the address line names the branch's preview deployment. */
 const PREVIEW_PREFIX = '**Preview:**'
 
+/** How the segment naming the head the hosted preview was built from opens, which a reader before it drops as unknown. */
+const PREVIEW_BUILT_PREFIX = '**Preview built at:**'
+
 /** How the address line names the branch's server on the operator's own machine, after any hosted segment. */
 const LOCAL_PREFIX = '**Local preview:**'
 
@@ -535,7 +538,8 @@ export function evidenceMarker(head: string): string {
  * and closes past it, so a comment is never half open. Image URLs pin to a
  * commit sha. The reel skip and uncaptured lines drop only while the reel
  * covers the head, as the carry `canon pr lift` reads passes in `reelCovers`,
- * which defaults to a reel filmed at the head.
+ * which defaults to a reel filmed at the head. `previewBuilt` names the head
+ * the hosted preview serves, and prints only beside a hosted address.
  */
 export function renderEvidenceBody(
   states: readonly EvidenceState[],
@@ -549,10 +553,16 @@ export function renderEvidenceBody(
   skips: EvidenceSkips = {},
   uncaptured: readonly string[] = [],
   reelCovers: boolean = reel !== undefined && head.startsWith(reel.head),
+  previewBuilt?: string,
 ): string {
   const covered = reel !== undefined && reelCovers
   const segments = [
     ...(preview === undefined ? [] : [`${PREVIEW_PREFIX} ${preview}`]),
+    ...(preview === undefined || previewBuilt === undefined
+      ? []
+      : [
+          `${PREVIEW_BUILT_PREFIX} \`${previewBuilt.slice(0, SHORT_SHA_LENGTH)}\``,
+        ]),
     ...(local === undefined ? [] : [`${LOCAL_PREFIX} ${local}`]),
   ]
   const opening = [
