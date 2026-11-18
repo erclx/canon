@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
 
-# Reports what `canon tasks validate` finds after an edit to the task board's
-# ordering file, so a hand edit that broke a table or drifted a derived cell is
-# named in the turn that made it.
-#
-# It reports and never blocks. The board verbs do not yet cover every move a
-# controller makes by hand, so a block here would stop work the verbs cannot
-# yet do. A `Bash` write fires no `PostToolUse` hook for a file, so a heredoc
-# write stays unchecked until the next validate run.
+# Reports `canon tasks validate` findings after an edit to the board's ordering
+# file, and never blocks, since the verbs do not cover every hand move. A
+# `Bash` write fires no `PostToolUse` hook, so a heredoc goes unchecked.
 
 # Claude Code sends a payload and closes stdin. A bare read with nothing feeding
 # it blocks forever and holds the session open, so the read is bounded. `read`
@@ -26,10 +21,8 @@ esac
 
 file_path=$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty')
 
-# Both record roots, since a project the move has reached keeps its records
-# under `.canon/`. The root comes from the path rather than the session, since
-# the board resolves at the main worktree root and a linked worktree's session
-# edits it from outside its own project directory.
+# Both record roots, read off the path rather than the session, since a linked
+# worktree's session edits the main root's board from outside its own project.
 case "$file_path" in
 */.canon/tasks/priority.md) base=.canon ;;
 */.claude/tasks/priority.md) base=.claude ;;
