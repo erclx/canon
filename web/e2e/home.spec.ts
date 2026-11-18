@@ -330,7 +330,7 @@ test.describe('the craft section', () => {
       'href',
       /\/blob\/main\/claude\/skills\/systematic-debugging\//,
     )
-    await expect(page.locator('#craft a.p-source')).toHaveAttribute(
+    await expect(page.locator('#craft a.src-link')).toHaveAttribute(
       'href',
       /obra\/superpowers/,
     )

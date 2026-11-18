@@ -2,6 +2,7 @@
 import { craft } from '../../../content/copy'
 import { craftScenes, practices } from '../../../content/practice'
 import PauseButton from '../../pause-button/index.astro'
+import ArrowIcon from './arrow.svg'
 import './style.css'
 
 const { repoBlob } = craft
@@ -56,7 +57,11 @@ const first = practices[0]
       <div class="pane said">
         <p class="lbl">{craft.source}</p>
         <p class="srcname">
-          <a class="p-source" href={first?.url}>{first?.source}</a>
+          <a class="src-link" href={first?.url}
+            ><span class="p-source">{first?.source}</span><ArrowIcon
+              aria-hidden="true"
+            /></a
+          >
         </p>
         <p class="quote"><q class="p-quote">{first?.quote}</q></p>
       </div>

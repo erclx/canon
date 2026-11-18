@@ -203,6 +203,13 @@
   text-decoration-color: currentColor;
 }
 
+/* The source opens off the site, so its name carries the external arrow the pick drew. */
+#craft .src-link svg {
+  display: inline;
+  margin-left: 4px;
+  vertical-align: -1px;
+}
+
 #craft .pick {
   font-family: var(--mono);
 }

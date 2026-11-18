@@ -54,7 +54,7 @@ if (section && source?.textContent && log && typed) {
     set('loads', skill.loads)
     set('source', skill.source)
     set('quote', skill.quote)
-    field('source')?.setAttribute('href', skill.url)
+    field('source')?.closest('a')?.setAttribute('href', skill.url)
     const file = field('file')
     file?.setAttribute('href', `${repoBlob}${skill.ruleFile}`)
     const code = file?.querySelector('code')
