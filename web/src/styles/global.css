@@ -173,6 +173,18 @@
     display: none;
   }
 
+  /* Below 900 the tray's inset is narrower than the button, so a looping tray reserves its top edge for it. */
+  @media (max-width: 900px) and (prefers-reduced-motion: no-preference) {
+    .tray:has(> .pz) {
+      padding-top: 44px;
+    }
+
+    .pz {
+      top: 10px;
+      right: 10px;
+    }
+  }
+
   /* A Claude Code window: a chrome bar with three dots and a centered title, over a monospace view. */
   .win {
     display: flex;
