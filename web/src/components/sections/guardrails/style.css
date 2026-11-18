@@ -131,7 +131,7 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--ground);
+  background: var(--behind);
   box-shadow: inset 0 0 0 2px var(--muted);
 }
 

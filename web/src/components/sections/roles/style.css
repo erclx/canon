@@ -1,12 +1,11 @@
+/* Above 900 the window sits beside the heading, so only the stacked layouts space the tray off the list. */
 #roles .tray {
-  margin-top: 56px;
+  margin-top: 0;
 }
 
-#roles .two {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 36px;
-  align-items: center;
+#roles .list {
+  max-width: 340px;
+  margin-top: 28px;
 }
 
 #roles .win {
@@ -162,16 +161,11 @@
     margin-top: 40px;
   }
 
-  #roles .two {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 16px;
-  }
-
   #roles .list {
-    order: -1;
+    max-width: none;
+    margin-top: 24px;
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: center;
     gap: 8px;
   }
 

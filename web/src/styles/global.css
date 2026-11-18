@@ -28,6 +28,8 @@
     --muted: var(--color-muted);
     --accent: var(--color-accent);
     --hover: color-mix(in srgb, var(--ink) 5%, transparent);
+    /* What a hollow marker punches through to, which a band turns to its grey. */
+    --behind: var(--ground);
     --mono: var(--type-code-family);
     --sans: var(--type-body-family);
     --nav-h: 88px;
@@ -139,6 +141,46 @@
     background: var(--tray);
     border-radius: var(--radius-tray);
     padding: 40px;
+  }
+
+  /*
+   * A split sets the heading beside the tray in five twelfths of the width,
+   * on the left or the right, and stacks text first below 900. A section's own
+   * sheet clears its tray's top margin while split.
+   */
+  @media (min-width: 901px) {
+    .sec.split-left,
+    .sec.split-right {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      column-gap: 56px;
+      align-items: center;
+    }
+
+    .sec.split-right {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    }
+
+    .sec.split-right > .sec-head {
+      order: 2;
+    }
+  }
+
+  /*
+   * A band fills the section edge to edge in the tray grey, and its tray turns
+   * to the page ground so the window keeps two steps of contrast. The shadow
+   * carries the fill past the page width, and the clip keeps it off the
+   * sections above and below.
+   */
+  .sec.banded {
+    --behind: var(--tray);
+    background: var(--tray);
+    box-shadow: 0 0 0 100vmax var(--tray);
+    clip-path: inset(0 -100vmax);
+  }
+
+  .sec.banded .tray {
+    background: var(--ground);
   }
 
   /* The pause button at the tray's top right, outside every window, drawn in ink. */

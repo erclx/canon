@@ -12,9 +12,16 @@ import './style.css'
  * its tallest scene, so a scene never moves the page.
  */
 const REST = 1
+
+interface Props {
+  /** The shape `pages/index.astro` gives the section, read by `styles/global.css`. */
+  class?: string
+}
+
+const { class: shape } = Astro.props
 ---
 
-<section class="sec" id="guardrails">
+<section class:list={['sec', shape]} id="guardrails">
   <div class="sec-head">
     <h2>{guardrails.head}</h2>
     <p>{guardrails.lede}</p>

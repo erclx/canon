@@ -12,9 +12,16 @@ import './style.css'
  * and the session holds one height so the page never jumps.
  */
 const code = (text: string) => text.split('`')
+
+interface Props {
+  /** The shape `pages/index.astro` gives the section, read by `styles/global.css`. */
+  class?: string
+}
+
+const { class: shape } = Astro.props
 ---
 
-<section class="sec" id="setup">
+<section class:list={['sec', shape]} id="setup">
   <div class="sec-head">
     <h2>{setup.head}</h2>
     <p>{setup.lede}</p>
