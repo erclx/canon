@@ -1,27 +1,29 @@
 ---
 import { fold } from '../../../content/copy'
 import {
+  changes,
   completed,
   menuFlow,
   opening,
   pinned,
-  pool,
-  steps,
+  roleLines,
 } from '../../../content/sessions'
 import { readSkills } from '../../../lib/skills'
 import DocIcon from './doc.svg'
 import MergeIcon from './merge.svg'
+import PauseButton from '../../pause-button/index.astro'
 import './style.css'
 
 /**
  * The claim, its lede, and Claude Code's agent view on the tray. The view runs
- * one event a tick, completing, answering, and dispatching sessions, and its
+ * changes through their roles, a finished worker starting both reviewers of its
+ * change, with a second event on every other tick, and its
  * prompt takes typing, opening the canon skill menu on `/` and shell mode on
  * `!`. The menu reads the catalog at build time.
  */
 const data = {
-  pool,
-  steps,
+  changes,
+  lines: roleLines,
   pinned,
   completed,
   opening,
@@ -45,6 +47,7 @@ const [before, middle, last] = fold.parts
     <p>{fold.lead}</p>
   </div>
   <div class="tray">
+    <PauseButton />
     <div class="win term">
       <div class="win-bar">
         <i></i><i></i><i></i><span>{fold.view.title}</span>

@@ -556,3 +556,10 @@
     content: '✻';
   }
 }
+
+/* The opening sets its own tray padding, which outranks the layered rule in global.css, so it reserves the pause button's strip itself. */
+@media (max-width: 900px) and (prefers-reduced-motion: no-preference) {
+  #top .tray {
+    padding-top: 44px;
+  }
+}

@@ -15,7 +15,8 @@ import './style.css'
  * view, and its checkboxes and file tabs work. An editor sheet carries an
  * explorer, drawn from its breadcrumb, that lights the file its tabs have open.
  * A file entry opens its tab and a folder folds the rows under it, both out of
- * the tab order, since the file tabs already reach every file by keyboard.
+ * the tab order, since the file tabs already reach every file by keyboard. A
+ * folder with nothing under it is a still row, since a click would open nothing.
  */
 
 interface Entry {
@@ -158,25 +159,37 @@ function explorerOf(html: string): Entry[] {
                           data-d={entry.depth}
                           style={`--d:${entry.depth}`}
                         >
+                          <span class="fi md">M&#8595;</span>
                           {entry.name}
                         </button>
-                      ) : entry.depth > 0 ? (
+                      ) : entry.depth > 0 &&
+                        (tree[k + 1]?.depth ?? 0) > entry.depth ? (
                         <button
                           type="button"
                           tabindex="-1"
-                          class:list={[
-                            'fold',
-                            {
-                              shut: (tree[k + 1]?.depth ?? 0) <= entry.depth,
-                            },
-                          ]}
+                          class="fold"
                           data-d={entry.depth}
                           style={`--d:${entry.depth}`}
                         >
                           {entry.name}
                         </button>
+                      ) : entry.depth > 0 ? (
+                        <div
+                          class="dir"
+                          data-d={entry.depth}
+                          style={`--d:${entry.depth}`}
+                        >
+                          {entry.name}
+                        </div>
                       ) : (
-                        <div class="top" data-d="0" style="--d:0">
+                        <div
+                          class:list={[
+                            'top',
+                            { open: (tree[k + 1]?.depth ?? 0) > 0 },
+                          ]}
+                          data-d="0"
+                          style="--d:0"
+                        >
                           {entry.name}
                         </div>
                       ),

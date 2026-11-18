@@ -1,6 +1,7 @@
 ---
 import { worktreeCards, worktrees } from '../../../content/copy'
 import FolderIcon from './folder.svg'
+import PauseButton from '../../pause-button/index.astro'
 import './style.css'
 
 /**
@@ -23,6 +24,7 @@ const REST = 1
     <p>{worktrees.lede}</p>
   </div>
   <div class="tray">
+    <PauseButton />
     <div class="card">
       <ul class="wts" role="list">
         {

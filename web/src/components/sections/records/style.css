@@ -116,7 +116,8 @@
 }
 
 #records .explorer > * {
-  padding: 0 14px 0 calc(14px + var(--d) * 16px);
+  position: relative;
+  padding: 0 14px 0 calc(28px + var(--d) * 12px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -125,9 +126,10 @@
 #records .explorer button {
   all: unset;
   box-sizing: border-box;
+  position: relative;
   display: block;
   width: 100%;
-  padding: 0 14px 0 calc(14px + var(--d) * 16px);
+  padding: 0 14px 0 calc(28px + var(--d) * 12px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -155,23 +157,35 @@
   }
 }
 
-/* Out of flow, so the whitespace before a folder's name collapses and the name keeps its depth's indent. */
-#records .explorer .fold::before {
-  content: '\25BE';
+/*
+ * Out of flow, so the whitespace before a folder's name collapses and the name
+ * keeps its depth's indent. Every folder draws the chevron, turned down while
+ * its rows show and pointing right on a shut or empty one.
+ */
+#records .explorer :is(.fold, .dir, .top)::before {
+  content: '';
   position: absolute;
-  width: 12px;
-  margin-left: -12px;
-  font-size: 10px;
-  color: var(--muted);
+  top: calc((1.9em - 16px) / 2);
+  width: 16px;
+  height: 16px;
+  margin-left: -18px;
+  background: var(--muted);
+  mask: url('./fold.svg') center / 16px no-repeat;
   transition: transform var(--duration-feedback) var(--ease-standard);
 }
 
-#records .explorer .fold.shut::before {
-  transform: rotate(-90deg);
+#records .explorer :is(.fold:not(.shut), .top.open)::before {
+  transform: rotate(90deg);
+}
+
+#records .explorer .fi.md {
+  position: absolute;
+  margin: 1px 0 0 -19px;
+  font-size: 9px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #records .explorer .fold::before {
+  #records .explorer :is(.fold, .dir, .top)::before {
     transition: none;
   }
 }

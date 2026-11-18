@@ -15,7 +15,10 @@ if (section && source?.textContent && !reducedMotion()) {
       (node) => [node.dataset.dir ?? '', node],
     ),
   )
-  const held = holdOn(section.querySelector('.card'))
+  const held = holdOn(
+    section.querySelector('.card'),
+    section.querySelector<HTMLButtonElement>('.pz'),
+  )
   const at = cards.map(() => rest)
   let turn = 0
 

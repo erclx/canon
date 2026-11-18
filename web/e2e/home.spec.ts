@@ -4,11 +4,8 @@ import { expect, test } from '@playwright/test'
 const SETTLE = { timeout: 5_000 }
 
 /**
- * Journeys and whole-page behavior only a real browser computes: the section
- * list and its anchors, the fixed bar at its folds, the stored theme, the
- * records stage pinned by scroll, and layout at the width floor. What the copy
- * says is unit tested beside `web/src/content/copy.ts`, so nothing here
- * asserts wording.
+ * Journeys and layout only a real browser computes. The copy is unit tested
+ * beside `web/src/content/copy.ts`, so nothing here asserts wording.
  */
 
 const SECTIONS = [
@@ -252,6 +249,25 @@ test('the footer mark takes the reader back to the top', async ({ page }) => {
   expect(new URL(page.url()).hash).toBe('#top')
 })
 
+test('the footer mark carries no underline under hover', async ({ page }) => {
+  await page.goto('/')
+  const brand = page.locator('.site-footer a.brand')
+  const link = page.locator('.site-footer a:not(.brand)').first()
+  await brand.scrollIntoViewIfNeeded()
+
+  await link.hover()
+  const linkLine = await link.evaluate(
+    (node) => getComputedStyle(node).textDecorationLine,
+  )
+  await brand.hover()
+  const brandLine = await brand.evaluate(
+    (node) => getComputedStyle(node).textDecorationLine,
+  )
+
+  expect(linkLine).toBe('underline')
+  expect(brandLine).toBe('none')
+})
+
 test.describe('the craft section', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
@@ -267,6 +283,260 @@ test.describe('the craft section', () => {
     await expect(page.locator('#craft .log')).toContainText(
       'canon:systematic-debugging',
     )
+  })
+
+  test('Practice sets the quote larger than the rule beside the window', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const size = (selector: string) =>
+      page
+        .locator(selector)
+        .evaluate((node) => parseFloat(getComputedStyle(node).fontSize))
+    const quote = await page.locator('#craft .said').boundingBox()
+    const win = await page.locator('#craft .win').boundingBox()
+
+    expect(await size('#craft .p-quote')).toBeGreaterThan(
+      await size('#craft .p-rule'),
+    )
+    expect(quote && win && quote.x + quote.width).toBeLessThanOrEqual(
+      win?.x ?? 0,
+    )
+  })
+
+  test('Practice stacks the window over the pickers at 390', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/')
+    const win = await page.locator('#craft .win').boundingBox()
+    const picks = await page.locator('#craft .picks').boundingBox()
+    const rule = await page.locator('#craft .rl').boundingBox()
+    const said = await page.locator('#craft .said').boundingBox()
+
+    expect(win && picks && win.y + win.height).toBeLessThanOrEqual(
+      picks?.y ?? 0,
+    )
+    expect(rule && said && rule.y).toBeLessThan(said?.y ?? 0)
+  })
+
+  test('a Practice pick points both links at that skill', async ({ page }) => {
+    await page.goto('/')
+    const last = page.locator('#craft .pick').last()
+
+    await last.click()
+
+    await expect(page.locator('#craft a.p-file')).toHaveAttribute(
+      'href',
+      /\/blob\/main\/claude\/skills\/systematic-debugging\//,
+    )
+    await expect(page.locator('#craft a.src-link')).toHaveAttribute(
+      'href',
+      /obra\/superpowers/,
+    )
+  })
+})
+
+test.describe('the looping windows and their pause button', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+
+  /** A loop that wraps has to outlast one scene and the rest after it. */
+  const WRAP = { timeout: 20_000 }
+
+  test('guardrails plays on past its last scene', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.goto('/')
+    const parts = page.locator('#guardrails .four > div')
+    await expect(parts).toHaveCount(4)
+    // The scroll-in tour lights the first part, so the click lands after it.
+    await page.locator('#guardrails .tray').scrollIntoViewIfNeeded()
+    await expect(parts.first()).toHaveClass(/(^| )lit( |$)/, SETTLE)
+
+    await parts.last().locator('.go').click()
+
+    await expect(parts.last()).toHaveClass(/(^| )lit( |$)/, SETTLE)
+    await expect(parts.first()).toHaveClass(/(^| )lit( |$)/, WRAP)
+  })
+
+  test('setup plays on past its last stage', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.goto('/')
+    const stages = page.locator('#setup .st')
+    await expect(stages).toHaveCount(4)
+    await page.locator('#setup .tx').scrollIntoViewIfNeeded()
+    await expect(stages.first()).toHaveClass(/(^| )on( |$)/, SETTLE)
+
+    await stages.last().locator('.go').click()
+
+    await expect(stages.last()).toHaveClass(/(^| )on( |$)/, SETTLE)
+    await expect(stages.first()).toHaveClass(/(^| )on( |$)/, WRAP)
+  })
+
+  test('a pressed pause button holds the window it sits on', async ({
+    page,
+  }) => {
+    await page.clock.install()
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.goto('/')
+    const pause = page.locator('#guardrails .pz')
+    const log = page.locator('#guardrails .log')
+    await page.locator('#guardrails .four .go').nth(1).click()
+    await page.clock.runFor(600)
+    await expect(log.locator('.tool')).toHaveCount(1, SETTLE)
+
+    await pause.click()
+    const held = await log.textContent()
+    // Unpaused, the scene appends its next line within 400 ms and moves on to the next scene inside 10 s.
+    await page.clock.runFor(10_000)
+
+    await expect(pause).toHaveAttribute('data-paused', 'true')
+    expect(await log.textContent()).toBe(held)
+  })
+
+  test('the pause button toggles from the keyboard', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.goto('/')
+    const pause = page.locator('#roles .pz')
+
+    await pause.focus()
+    await page.keyboard.press('Enter')
+    const afterEnter = await pause.getAttribute('data-paused')
+    await page.keyboard.press('Space')
+
+    expect(afterEnter).toBe('true')
+    await expect(pause).toHaveAttribute('data-paused', 'false')
+  })
+
+  test('shows no pause button under reduced motion', async ({ page }) => {
+    await page.goto('/')
+    const buttons = page.locator('.pz')
+    await expect(buttons).toHaveCount(6)
+
+    await expect(buttons.first()).toBeHidden()
+    await expect(buttons.last()).toBeHidden()
+  })
+
+  for (const width of [320, 834, 1440]) {
+    test(`every pause button clears what its tray holds at ${width}`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: 'no-preference' })
+      await page.setViewportSize({ width, height: 900 })
+      await page.goto('/')
+
+      const overlaps = await page
+        .locator('.tray:has(> .pz)')
+        .evaluateAll((trays) =>
+          trays.flatMap((tray) => {
+            const button = tray.querySelector(':scope > .pz')
+            const content = tray.querySelector(':scope > :not(.pz)')
+            if (!button || !content)
+              return [`${tray.closest('section')?.id}: missing`]
+            const b = button.getBoundingClientRect()
+            const c = content.getBoundingClientRect()
+            return b.bottom > c.top && b.left < c.right
+              ? [tray.closest('section')?.id ?? '?']
+              : []
+          }),
+        )
+
+      expect(await page.locator('.tray:has(> .pz)').count()).toBe(6)
+      expect(overlaps).toEqual([])
+    })
+  }
+})
+
+test.describe('the opening agent view', () => {
+  test('a finished worker puts both reviewers of its change into Working', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+    const working = () =>
+      page.locator('#av-list .r:not(.leave):has(.s.sp) .n').allTextContents()
+    expect(await working()).toContain('worker-canon-take-timer')
+
+    await expect
+      .poll(working, { timeout: 15_000 })
+      .not.toContain('worker-canon-take-timer')
+
+    expect(await working()).toEqual(
+      expect.arrayContaining([
+        'reviewer-canon-take-timer',
+        'ui-reviewer-canon-take-timer',
+      ]),
+    )
+  })
+})
+
+test.describe('the Guardrails section', () => {
+  test('sets the four checks on one line above the window at 1440', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+    const parts = page.locator('#guardrails .four > div')
+    await expect(parts).toHaveCount(4)
+    const tops = await parts.evaluateAll((nodes) =>
+      nodes.map((node) => Math.round(node.getBoundingClientRect().top)),
+    )
+    const four = await page.locator('#guardrails .four').boundingBox()
+    const win = await page.locator('#guardrails .win').boundingBox()
+
+    expect(new Set(tops).size).toBe(1)
+    expect(four && win && four.y + four.height).toBeLessThanOrEqual(win?.y ?? 0)
+  })
+
+  test('keeps the window over the checks at 390', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/')
+    const four = await page.locator('#guardrails .four').boundingBox()
+    const win = await page.locator('#guardrails .win').boundingBox()
+
+    expect(win && four && win.y + win.height).toBeLessThanOrEqual(four?.y ?? 0)
+  })
+})
+
+test.describe('the setup section', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+
+  test('the Start stage prints the files its command writes', async ({
+    page,
+  }) => {
+    await page.goto('/')
+
+    await page.locator('#setup .st').first().locator('.go').click()
+
+    await expect(page.locator('#setup .log .blk').first()).toBeVisible()
+    await expect(
+      page.locator('#setup .log .blk').first().locator('.row.f'),
+    ).toHaveCount(3)
+  })
+
+  test('the stage rail raises the running card and fills down to it', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const stages = page.locator('#setup .st')
+    const fill = () =>
+      page
+        .locator('#setup .stages')
+        .evaluate((node) => parseFloat(node.style.getPropertyValue('--fill')))
+    const surface = (index: number) =>
+      stages
+        .nth(index)
+        .evaluate((node) => getComputedStyle(node).backgroundColor)
+
+    await stages.nth(1).locator('.go').click()
+    const second = await fill()
+    const running = await surface(1)
+    const resting = await surface(2)
+    await stages.nth(3).locator('.go').click()
+
+    expect(running).not.toBe(resting)
+    expect(second).toBeGreaterThan(0)
+    expect(await fill()).toBeGreaterThan(second)
   })
 })
 
@@ -377,6 +647,74 @@ test.describe('the records stack', () => {
     await expect(files.first()).toBeVisible()
   })
 
+  test('every explorer folder row draws a chevron and every file row a mark', async ({
+    page,
+  }) => {
+    await page.goto('/')
+
+    const rows = await page
+      .locator('#records .explorer > *')
+      .evaluateAll((nodes) =>
+        nodes.map((node) => ({
+          file: node.hasAttribute('data-f'),
+          chevron: getComputedStyle(node, '::before').maskImage,
+          mark: Boolean(node.querySelector('.fi')),
+        })),
+      )
+
+    expect(rows.filter((row) => !row.file).length).toBeGreaterThan(0)
+    expect(rows.filter((row) => row.file).length).toBeGreaterThan(0)
+    expect(
+      rows.filter((row) => !row.file && !row.chevron.includes('url(')),
+    ).toEqual([])
+    expect(rows.filter((row) => row.file && !row.mark)).toEqual([])
+  })
+
+  test('every explorer chevron and file mark sits on its own row', async ({
+    page,
+  }) => {
+    await page.goto('/')
+
+    // A static row hands its absolute chevron and mark to the explorer, which draws them at its top.
+    const positions = await page
+      .locator('#records .explorer > *')
+      .evaluateAll((nodes) =>
+        nodes.map((node) => getComputedStyle(node).position),
+      )
+
+    expect(positions.length).toBeGreaterThan(0)
+    expect(positions.filter((position) => position === 'static')).toEqual([])
+  })
+
+  test('a click on an empty explorer folder changes nothing', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const explorer = page.locator('#records .sheet[data-i="0"] .explorer')
+    const empty = explorer.locator('.dir').first()
+    await expect(empty).toBeVisible()
+    const before = await explorer.innerHTML()
+
+    await empty.click()
+
+    expect(await explorer.innerHTML()).toBe(before)
+  })
+
+  test('every view switch puts the source button first', async ({ page }) => {
+    await page.goto('/')
+
+    const firsts = await page
+      .locator('#records .vt')
+      .evaluateAll((groups) =>
+        groups.map(
+          (group) => (group.firstElementChild as HTMLElement | null)?.dataset.v,
+        ),
+      )
+
+    expect(firsts).toHaveLength(12)
+    expect(firsts.filter((view) => view !== 'src')).toEqual([])
+  })
+
   test('takes no pinned scroll under reduced motion', async ({ page }) => {
     await page.goto('/')
 
@@ -434,8 +772,7 @@ test.describe('the social card', () => {
     const response = await request.get(card)
     expect(response.ok()).toBe(true)
 
-    // A PNG carries its width and height as two big-endian words in the IHDR
-    // chunk, at a fixed offset after the eight-byte signature.
+    // IHDR holds width and height as big-endian words at bytes 16 and 20.
     const png = await response.body()
     const size = { width: png.readUInt32BE(16), height: png.readUInt32BE(20) }
 

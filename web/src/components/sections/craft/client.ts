@@ -7,6 +7,7 @@ interface Skill {
   ruleFile: string
   source: string
   quote: string
+  url: string
 }
 interface Scene {
   ask: string
@@ -19,16 +20,19 @@ const log = section?.querySelector<HTMLElement>('.log')
 const typed = section?.querySelector<HTMLElement>('.typed')
 
 if (section && source?.textContent && log && typed) {
-  const { skills, scenes } = JSON.parse(source.textContent) as {
+  const { skills, scenes, repoBlob } = JSON.parse(source.textContent) as {
     skills: Skill[]
     scenes: Scene[]
+    repoBlob: string
   }
   const picks = [...section.querySelectorAll<HTMLButtonElement>('.pick')]
   const panes = section.querySelector<HTMLElement>('.panes')
-  const pair = section.querySelector<HTMLElement>('.pair')
+  const win = section.querySelector<HTMLElement>('.win')
   const field = (name: string) =>
     section.querySelector<HTMLElement>(`.p-${name}`)
-  const pace = pacer(holdOn(section.querySelector('.win')))
+  const pace = pacer(
+    holdOn(win, section.querySelector<HTMLButtonElement>('.pz')),
+  )
   const still = reducedMotion()
   const indexOf = (name: string) => skills.findIndex((s) => s.name === name)
   const sceneOf = (name: string) =>
@@ -46,11 +50,15 @@ if (section && source?.textContent && log && typed) {
       const node = field(name)
       if (node) node.textContent = text
     }
-    set('file', skill.ruleFile)
     set('rule', skill.rule)
     set('loads', skill.loads)
     set('source', skill.source)
     set('quote', skill.quote)
+    field('source')?.closest('a')?.setAttribute('href', skill.url)
+    const file = field('file')
+    file?.setAttribute('href', `${repoBlob}${skill.ruleFile}`)
+    const code = file?.querySelector('code')
+    if (code) code.textContent = skill.ruleFile
   }
 
   /** Exactly one skill is lit at a time. */
@@ -66,7 +74,7 @@ if (section && source?.textContent && log && typed) {
 
   /** The panes keep the height of the tallest skill, so a pick never moves the page. */
   function settle() {
-    if (!panes || !pair) return
+    if (!panes) return
     panes.style.minHeight = ''
     const shown = Math.max(
       0,
@@ -167,6 +175,11 @@ if (section && source?.textContent && log && typed) {
     held = index
     only(index)
     typed!.textContent = ''
+    // The pickers sit above the window, so a pick brings the scene it plays into view.
+    win?.closest('.tray')?.scrollIntoView({
+      block: 'nearest',
+      behavior: still ? 'auto' : 'smooth',
+    })
     const scene = scenes[k]
     if (still) {
       if (scene) render(scene)
@@ -194,7 +207,6 @@ if (section && source?.textContent && log && typed) {
         void run(0, pace.next(), false)
       }
     })
-    const win = section.querySelector('.win')
     if (win) observer.observe(win)
   }
 }

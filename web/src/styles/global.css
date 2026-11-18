@@ -135,9 +135,54 @@
 
   /* The grey tray every section's object sits on. */
   .tray {
+    position: relative;
     background: var(--tray);
     border-radius: var(--radius-tray);
     padding: 40px;
+  }
+
+  /* The pause button at the tray's top right, outside every window, drawn in ink. */
+  .pz {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-action);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .pz:hover {
+    color: var(--ink);
+    background: var(--hover);
+  }
+
+  .pz[data-paused='true'] {
+    color: var(--ink);
+  }
+
+  .pz[data-paused='true'] .pz-off,
+  .pz[data-paused='false'] .pz-on {
+    display: none;
+  }
+
+  /* Below 900 the tray's inset is narrower than the button, so a looping tray reserves its top edge for it. */
+  @media (max-width: 900px) and (prefers-reduced-motion: no-preference) {
+    .tray:has(> .pz) {
+      padding-top: 44px;
+    }
+
+    .pz {
+      top: 10px;
+      right: 10px;
+    }
   }
 
   /* A Claude Code window: a chrome bar with three dots and a centered title, over a monospace view. */
@@ -364,6 +409,11 @@
       animation: none !important;
       transition: none !important;
       scroll-behavior: auto !important;
+    }
+
+    /* No window loops under reduced motion, so there is nothing to pause. */
+    .pz {
+      display: none;
     }
   }
 }

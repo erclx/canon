@@ -1,111 +1,83 @@
 /**
- * The opening's agent view: the sessions it draws from, the order its events
- * run in, and the order its `/` menu lists the workflow skills in. Every name
- * and line is page fiction drawn from how the roles really report, with no
- * local path, version, or account detail.
- *
- * `completed` is the view's starting tally of finished sessions inside the
- * fiction, which ticks up as the loop completes them, and states no count of
- * anything in the repository.
+ * The opening's agent view, page fiction with no local path or account detail.
+ * `completed` is a tally inside the fiction, never a count of the repository.
  */
 
-export interface Session {
-  readonly n: string
-  /** The line it shows while it waits on an answer, present only for a planner that opens on questions. */
-  readonly aw?: string
-  readonly wk: string
-  readonly dn: string
+export type Role = 'planner' | 'worker' | 'reviewer' | 'ui-reviewer'
+
+export interface Change {
+  readonly slug: string
+  /** Whether a UI reviewer drives it after the code reviewer starts. */
+  readonly ui: boolean
+  /** The line its planner shows while it waits on an answer, present only on a change whose plan opens on questions. */
+  readonly asks?: string
 }
 
-export const pool: readonly Session[] = [
+export const changes: readonly Change[] = [
+  { slug: 'take-timer', ui: true },
+  { slug: 'sync-stamp', ui: true },
   {
-    n: 'planner-canon-landing-page',
-    aw: 'Two questions, each with a suggested answer',
-    wk: 'Writing the plan from the answers',
-    dn: 'Plan written, linked to its task',
+    slug: 'gate-stages',
+    ui: false,
+    asks: 'Measure first? One question open',
   },
   {
-    n: 'worker-canon-take-timer',
-    wk: 'Gate: 9 of 14 stages passed',
-    dn: 'Pull request opened, evidence posted',
+    slug: 'landing-page',
+    ui: true,
+    asks: 'Two questions, each with a suggested answer',
   },
+  { slug: 'sync-coverage', ui: false },
   {
-    n: 'reviewer-canon-sync-stamp',
-    wk: 'Second pass on the added commits',
-    dn: 'Review closed, no findings',
+    slug: 'review-lift',
+    ui: false,
+    asks: 'Three questions, each with a suggested answer',
   },
-  {
-    n: 'ui-reviewer-canon-toolbar',
-    wk: 'Driving the checklist in the running app',
-    dn: '10 boxes passed, 2 sent back',
-  },
-  {
-    n: 'planner-canon-gate-stages',
-    aw: 'Measure first? One question open',
-    wk: 'Groundwork: measuring the gate stages',
-    dn: 'Groundwork closed into two tasks',
-  },
-  {
-    n: 'worker-canon-sync-coverage',
-    wk: 'Rules loaded: code-craft, test-craft',
-    dn: 'Merged by the operator, plan archived',
-  },
-  {
-    n: 'planner-canon-review-lift',
-    aw: 'Three questions, each with a suggested answer',
-    wk: 'Reading the review layer before planning',
-    dn: 'Plan written, linked to its task',
-  },
-  {
-    n: 'worker-canon-session-limits',
-    wk: 'Streaming src/sessions/limits.ts',
-    dn: 'Pull request opened, evidence posted',
-  },
-  {
-    n: 'worker-canon-drive-check',
-    wk: 'Slice 2 of 3: the baseline record',
-    dn: 'Pull request opened, evidence posted',
-  },
-  {
-    n: 'reviewer-canon-plan-guard',
-    wk: 'First pass against the whole change',
-    dn: 'Two findings posted',
-  },
-  {
-    n: 'planner-canon-intake-sort',
-    aw: 'Two items need a call',
-    wk: 'Sorting the drive findings',
-    dn: 'Intake filed, five items',
-  },
-  {
-    n: 'worker-canon-records-push',
-    wk: 'Tests green, checking the gate',
-    dn: 'Pull request opened, evidence posted',
-  },
-  {
-    n: 'ui-reviewer-canon-board-picks',
-    wk: 'Box 4 of 9: focus returns to the frame',
-    dn: 'All nine boxes passed',
-  },
-  {
-    n: 'planner-canon-film-beats',
-    aw: 'Which take opens the film?',
-    wk: 'Timing each take against 32 seconds',
-    dn: 'Plan written, linked to its task',
-  },
+  { slug: 'session-limits', ui: false },
+  { slug: 'toolbar', ui: true },
+  { slug: 'drive-check', ui: false },
+  { slug: 'plan-guard', ui: false },
+  { slug: 'intake-sort', ui: false, asks: 'Two items need a call' },
+  { slug: 'records-push', ui: false },
+  { slug: 'board-picks', ui: true },
+  { slug: 'film-beats', ui: true, asks: 'Which take opens the film?' },
 ]
 
-/** One event every tick, cycling. */
-export const steps = [
-  'complete',
-  'answer',
-  'dispatch',
-  'complete',
-  'dispatch',
-  'complete',
-  'answer',
-  'dispatch',
-] as const
+/** The status lines a working session steps through in place, and the line it finishes on. */
+export const roleLines: Readonly<
+  Record<Role, { readonly wk: readonly string[]; readonly dn: string }>
+> = {
+  planner: {
+    wk: [
+      'Reading the tree before planning',
+      'Writing the plan from the answers',
+    ],
+    dn: 'Plan written, linked to its task',
+  },
+  worker: {
+    wk: [
+      'Rules loaded: code-craft, test-craft',
+      'Committing the first slice',
+      'Tests green, checking the gate',
+      'Gate: 9 of 14 stages passed',
+    ],
+    dn: 'Pull request opened, evidence posted',
+  },
+  reviewer: {
+    wk: [
+      'First pass against the whole change',
+      'Second pass on the added commits',
+    ],
+    dn: 'Review closed, no findings',
+  },
+  'ui-reviewer': {
+    wk: [
+      'Starting the app from the branch',
+      'Driving the checklist in the running app',
+      'Box 4 of 9: focus returns to the frame',
+    ],
+    dn: 'All nine boxes passed',
+  },
+}
 
 export const pinned = {
   name: 'orchestrator-canon',
@@ -115,11 +87,40 @@ export const pinned = {
 
 export const completed = 41
 
-/** Ages in minutes for the sessions the view opens on, one per group. */
-export const opening = {
-  awaiting: [2],
-  working: [4, 9, 13],
-  done: [5, 25, 45, 70, 95, 130],
+/** One session the view opens on: its role and change, the status line it has reached, and its age in minutes. */
+export interface Seat {
+  readonly role: Role
+  readonly slug: string
+  readonly line: number
+  readonly age: number
+}
+
+/**
+ * The sessions the view opens on, a worker and both reviewers of one change
+ * already in flight so the first ticks show a handoff, and the change the
+ * next dispatch takes.
+ */
+export const opening: {
+  readonly awaiting: readonly Seat[]
+  readonly working: readonly Seat[]
+  readonly done: readonly Seat[]
+  readonly next: string
+} = {
+  awaiting: [{ role: 'planner', slug: 'landing-page', line: 0, age: 2 }],
+  working: [
+    { role: 'worker', slug: 'take-timer', line: 3, age: 9 },
+    { role: 'reviewer', slug: 'sync-stamp', line: 1, age: 4 },
+    { role: 'ui-reviewer', slug: 'sync-stamp', line: 1, age: 4 },
+    { role: 'planner', slug: 'gate-stages', line: 0, age: 1 },
+  ],
+  done: [
+    { role: 'worker', slug: 'sync-stamp', line: 0, age: 5 },
+    { role: 'planner', slug: 'take-timer', line: 0, age: 25 },
+    { role: 'planner', slug: 'sync-stamp', line: 0, age: 45 },
+    { role: 'reviewer', slug: 'sync-coverage', line: 0, age: 70 },
+    { role: 'worker', slug: 'sync-coverage', line: 0, age: 95 },
+  ],
+  next: 'review-lift',
 }
 
 /** The order an empty `/` lists the workflow skills in, ahead of the rest of the catalog. */

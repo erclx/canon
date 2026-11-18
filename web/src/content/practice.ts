@@ -1,9 +1,6 @@
 /**
- * Craft's eight practice skills: when each loads, one rule taken from the
- * skill, and the source that rule cites with its quote. Each rule and quote is
- * typed here rather than parsed out of the ledger at build time, so `rule`
- * names the file the rule sits in and `ledger` names the ledger row holding
- * the quote, the two places a reviewer checks the line against.
+ * Craft's practice skills, typed here rather than parsed from the ledger, so
+ * `ruleFile` and `ledger` name the two places a reviewer checks each line.
  */
 
 export interface Practice {
@@ -14,6 +11,8 @@ export interface Practice {
   readonly ruleFile: string
   readonly source: string
   readonly quote: string
+  /** The address the ledger row cites beside the quote, which the source's name links to. */
+  readonly url: string
   /** The ledger file whose source row carries the quote word for word. */
   readonly ledger: string
 }
@@ -28,6 +27,7 @@ export const practices: readonly Practice[] = [
     quote:
       'solve the problem they know needs to be solved now, not the problem that the developer speculates might need to be solved in the future',
     ledger: 'governance/ledger/skills/code-craft/SKILL.md',
+    url: 'https://google.github.io/eng-practices/review/reviewer/looking-for.html',
   },
   {
     name: 'test-craft',
@@ -37,6 +37,7 @@ export const practices: readonly Practice[] = [
     source: 'Ham Vocke, The Practical Test Pyramid',
     quote: 'Push your tests as far down the test pyramid as you can',
     ledger: 'governance/ledger/skills/test-craft/SKILL.md',
+    url: 'https://martinfowler.com/articles/practical-test-pyramid.html',
   },
   {
     name: 'api-design',
@@ -47,6 +48,7 @@ export const practices: readonly Practice[] = [
     quote:
       'all observable behaviors of your system will be depended on by somebody',
     ledger: 'governance/ledger/skills/api-design/SKILL.md',
+    url: 'https://abseil.io/resources/swe-book/html/ch01.html',
   },
   {
     name: 'ui-craft',
@@ -57,6 +59,7 @@ export const practices: readonly Practice[] = [
     quote:
       'If you can use a native HTML element or attribute with the semantics and behavior you require already built in',
     ledger: 'governance/ledger/skills/ui-craft/a11y.md',
+    url: 'https://www.w3.org/TR/using-aria/',
   },
   {
     name: 'design-taste',
@@ -66,6 +69,7 @@ export const practices: readonly Practice[] = [
     source: 'Jesse James Garrett, The Elements of User Experience',
     quote: 'Each plane is dependent on the planes below it.',
     ledger: 'governance/ledger/skills/design-taste/SKILL.md',
+    url: 'http://www.jjg.net/elements/pdf/elements_ch02.pdf',
   },
   {
     name: 'review-craft',
@@ -76,6 +80,7 @@ export const practices: readonly Practice[] = [
     quote:
       'The most important thing to cover in a review is the overall design of the CL',
     ledger: 'governance/ledger/skills/review-craft/SKILL.md',
+    url: 'https://google.github.io/eng-practices/review/reviewer/looking-for.html',
   },
   {
     name: 'write-human',
@@ -86,6 +91,7 @@ export const practices: readonly Practice[] = [
     quote:
       '79 percent of our test users always scanned any new page they came across',
     ledger: 'governance/ledger/skills/write-human/SKILL.md',
+    url: 'https://www.nngroup.com/articles/how-users-read-on-the-web/',
   },
   {
     name: 'systematic-debugging',
@@ -95,6 +101,7 @@ export const practices: readonly Practice[] = [
     source: 'Jesse Vincent, superpowers, Systematic Debugging',
     quote: 'Fix at source, not at symptom',
     ledger: 'governance/ledger/skills/systematic-debugging/SKILL.md',
+    url: 'https://github.com/obra/superpowers/blob/8ca22dba9a94f28898bbce59f2537ff4d87c747d/skills/systematic-debugging/SKILL.md',
   },
 ]
 

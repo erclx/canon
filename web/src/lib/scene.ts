@@ -1,10 +1,6 @@
 /**
- * Pacing for the sections that play a scene in a product window. Each new
- * play takes a generation, and a wait reports false once a later play has
- * superseded it, so a click mid-scene cancels the scene it interrupts.
- *
- * A wait also stands still while the reader holds the window by pointer or
- * focus, so a looping window never moves under the person reading it.
+ * Paces a scene window. A later play cancels the waits of the one it
+ * interrupts, and a wait stands still while the reader holds the window.
  */
 export interface Pacer {
   /** Starts a new generation, cancelling every wait the last one holds. */
@@ -32,9 +28,30 @@ export function pacer(held: () => boolean = () => false): Pacer {
   }
 }
 
-/** Reports whether a pointer is over `node` or focus sits inside it. */
-export function holdOn(node: Element | null): () => boolean {
-  if (!node) return () => false
+/** The part of a button `holdOn` reads, so a test can hand it a plain target. */
+interface PauseButton extends EventTarget {
+  dataset: DOMStringMap
+  setAttribute(name: string, value: string): void
+}
+
+/**
+ * Holds while a pointer or focus is on `node` or `pause` is pressed. The button
+ * sits outside the window, and swaps its label between `data-pause` and `data-play`.
+ */
+export function holdOn(
+  node: Element | null,
+  pause?: PauseButton | null,
+): () => boolean {
+  let paused = false
+  pause?.addEventListener('click', () => {
+    paused = !paused
+    pause.setAttribute('data-paused', String(paused))
+    pause.setAttribute(
+      'aria-label',
+      (paused ? pause.dataset.play : pause.dataset.pause) ?? '',
+    )
+  })
+  if (!node) return () => paused
   let pointer = false
   let focus = false
   node.addEventListener('pointerenter', () => (pointer = true))
@@ -44,7 +61,7 @@ export function holdOn(node: Element | null): () => boolean {
     const next = (event as FocusEvent).relatedTarget
     focus = next instanceof Node && node.contains(next)
   })
-  return () => pointer || focus
+  return () => paused || pointer || focus
 }
 
 export const reducedMotion = () =>

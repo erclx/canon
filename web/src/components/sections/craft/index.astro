@@ -1,15 +1,21 @@
 ---
 import { craft } from '../../../content/copy'
 import { craftScenes, practices } from '../../../content/practice'
+import PauseButton from '../../pause-button/index.astro'
+import ArrowIcon from './arrow.svg'
 import './style.css'
 
+const { repoBlob } = craft
+
 /**
- * The eight practice skills beside a Claude Code window that loops through
- * seven requests in the list's order, each loading its skill, the skill lit
- * before its request types. A pick fades the window to the scene that loads
- * that skill and holds the pick until it loads. One skill shows at a time
- * behind a row of pickers, beside the window above 900 and under it below, so
- * a pick never plays its scene off screen.
+ * The eight practice skills over the source's quote, the rule it became, and
+ * a Claude Code window that loops through seven requests in the list's order,
+ * each loading its skill, the skill lit before its request types. A pick fades
+ * the window to the scene that loads that skill and holds the pick until it
+ * loads. Above 900 the quote leads beside the window at full height, and below
+ * it the window sits under the heading with the pickers and panes under it, so
+ * a pick never plays its scene off screen. The source's name links to the
+ * address its ledger row cites, and the rule's file to the file on GitHub.
  */
 const data = {
   skills: practices.map((p) => ({
@@ -19,7 +25,9 @@ const data = {
     ruleFile: p.ruleFile,
     source: p.source,
     quote: p.quote,
+    url: p.url,
   })),
+  repoBlob,
   scenes: craftScenes,
 }
 const first = practices[0]
@@ -31,7 +39,45 @@ const first = practices[0]
       <h2>{craft.head}</h2>
       <p>{craft.lede}</p>
     </div>
+    <div class="picks" role="group" aria-label="Practice skills">
+      {
+        practices.map((p, index) => (
+          <button
+            type="button"
+            class="pick"
+            aria-pressed={index === 0 ? 'true' : 'false'}
+            data-i={index}
+          >
+            {p.name}
+          </button>
+        ))
+      }
+    </div>
+    <div class="panes">
+      <div class="pane said">
+        <p class="lbl">{craft.source}</p>
+        <p class="srcname">
+          <a class="src-link" href={first?.url}
+            ><span class="p-source">{first?.source}</span><ArrowIcon
+              aria-hidden="true"
+            /></a
+          >
+        </p>
+        <p class="quote"><q class="p-quote">{first?.quote}</q></p>
+      </div>
+      <div class="pane rl">
+        <p class="lbl">
+          {craft.ruleIn}
+          <a class="p-file" href={`${repoBlob}${first?.ruleFile}`}
+            ><code>{first?.ruleFile}</code></a
+          >
+        </p>
+        <p class="rule p-rule">{first?.rule}</p>
+        <span class="loads p-loads">{first?.loads}</span>
+      </div>
+    </div>
     <div class="tray">
+      <PauseButton />
       <div class="win" aria-hidden="true">
         <div class="win-bar"><i></i><i></i><i></i><span>claude</span></div>
         <div class="log"></div>
@@ -43,37 +89,6 @@ const first = practices[0]
             >
           </div>
           <div class="rule"></div>
-        </div>
-      </div>
-    </div>
-    <div class="pair">
-      <div class="picks" role="group" aria-label="Practice skills">
-        {
-          practices.map((p, index) => (
-            <button
-              type="button"
-              class="pick"
-              aria-pressed={index === 0 ? 'true' : 'false'}
-              data-i={index}
-            >
-              {p.name}
-            </button>
-          ))
-        }
-      </div>
-      <div class="panes">
-        <div class="pane">
-          <p class="lbl">
-            {craft.ruleIn}
-            <code class="p-file">{first?.ruleFile}</code>
-          </p>
-          <p class="rule p-rule">{first?.rule}</p>
-          <span class="loads p-loads">{first?.loads}</span>
-        </div>
-        <div class="pane">
-          <p class="lbl">{craft.source}</p>
-          <p class="srcname p-source">{first?.source}</p>
-          <p class="quote"><q class="p-quote">{first?.quote}</q></p>
         </div>
       </div>
     </div>

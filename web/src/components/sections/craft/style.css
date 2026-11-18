@@ -2,13 +2,17 @@
   quotes: '\201C' '\201D';
 }
 
+/*
+ * Above 900 the quote leads: the pickers run full width, then the source's
+ * quote over the rule it became, beside the window at full height.
+ */
 #craft .top {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 464px;
-  grid-template-rows: auto 1fr;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
   grid-template-areas:
-    'head tray'
-    'pair tray';
+    'head head'
+    'picks picks'
+    'panes tray';
   column-gap: 48px;
 }
 
@@ -16,9 +20,15 @@
   grid-area: head;
 }
 
+#craft .picks {
+  grid-area: picks;
+  margin-top: 36px;
+}
+
 #craft .top > .tray {
   grid-area: tray;
   display: flex;
+  margin-top: 28px;
 }
 
 #craft .win {
@@ -144,23 +154,11 @@
   text-wrap: pretty;
 }
 
-#craft .pair {
-  grid-area: pair;
-  margin-top: 36px;
-}
-
 #craft .panes {
+  grid-area: panes;
   display: grid;
-  gap: 12px;
-  margin-top: 20px;
-  align-content: start;
-}
-
-#craft .pane {
-  padding: 22px 24px;
-  background: var(--tray);
-  border: 1px solid var(--edge);
-  border-radius: var(--radius-panel);
+  grid-template-rows: 1fr auto;
+  margin-top: 28px;
 }
 
 #craft .pane .lbl {
@@ -173,30 +171,58 @@
   margin-top: 10px;
 }
 
-#craft .pane .quote {
-  margin-top: 6px;
+#craft .said {
+  padding: 8px 0 32px;
+}
+
+#craft .said .quote {
+  margin-top: 14px;
+  font-size: var(--size-lede);
+  line-height: var(--type-lede-lh);
+  font-weight: 500;
+  letter-spacing: -0.01em;
   color: var(--ink);
+  text-wrap: balance;
+}
+
+#craft .rl {
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+/* Both links draw in ink and open in the same tab, underlined in the rule color until hovered. */
+#craft .pane a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+  border-radius: var(--radius-chip);
+}
+
+#craft .pane a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* The source opens off the site, so its name carries the external arrow the pick drew. */
+#craft .src-link svg {
+  display: inline;
+  margin-left: 4px;
+  vertical-align: -1px;
 }
 
 #craft .pick {
   font-family: var(--mono);
 }
 
-@media (max-width: 1240px) {
-  #craft .top {
-    grid-template-columns: minmax(0, 1fr) 440px;
-  }
-}
-
+/* Below 900 the shipped stacking holds: the window under the heading, then the pickers, then the rule and its source as two panes. */
 @media (max-width: 900px) {
   #craft .top {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: none;
     grid-template-areas:
       'head'
       'tray'
-      'pair';
-    row-gap: 28px;
+      'picks'
+      'panes';
   }
 
   #craft .win {
@@ -204,8 +230,34 @@
     height: 364px;
   }
 
-  #craft .pair {
-    margin-top: 12px;
+  #craft .picks {
+    margin-top: 40px;
+  }
+
+  #craft .panes {
+    grid-template-rows: none;
+    gap: 12px;
+    margin-top: 20px;
+    align-content: start;
+  }
+
+  #craft .pane {
+    padding: 22px 24px;
+    background: var(--tray);
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-panel);
+  }
+
+  #craft .rl {
+    order: -1;
+  }
+
+  #craft .said .quote {
+    margin-top: 6px;
+    font-size: var(--size-body);
+    line-height: var(--type-body-lh);
+    font-weight: 400;
+    letter-spacing: normal;
   }
 }
 
