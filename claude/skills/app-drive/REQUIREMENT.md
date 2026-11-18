@@ -27,7 +27,7 @@ An operator who judges design on the board has no way to see a drive's frames th
 
 A project with a board gets its frames there, and a project with none draws as it did.
 
-- A drive draws in a board project of its own, and the operator holds the board's address before driving and inside every pick question
+- A drive draws in a board project of its own, and the operator holds the board's address before the first frame, each page's address as it is drawn, and the address inside every pick question
 - `evidence/mocks/` stays the record a finding cites, wherever its frames were drawn
 - Every frame follows the drawing guide `design-pick` shares, so the operator never restates a width, a name, or a page order
 - A drive draws the shipped page before its first finding, and the page with every pick applied once the picks settle

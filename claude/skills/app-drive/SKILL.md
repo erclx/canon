@@ -35,8 +35,8 @@ Read `${CLAUDE_SKILL_DIR}/references/config.md` for `canon/config/app-drive.toml
 3. Make, build, and serve the throwaway worktree per `${CLAUDE_SKILL_DIR}/references/isolate.md`, which carries the close and crash recovery, or follow `live.md` when the operator names the live app.
 4. Confirm the address with `canon pr local --root <worktree> --json` and write it as the drive log's `Address` row.
 5. Start the board per the section below when the drive will draw on it, and write its address and project as the `Board` row. Leave the row empty otherwise.
-6. Draw the shipped page on `00-current` when the drive draws on the board, per the drawing guide the section below names.
-7. Hand the operator the app's address and the board's together before driving.
+6. Hand the operator the app's address and any board's before the first frame.
+7. Draw the shipped page on `00-current` when the drive draws on the board, per the drawing guide the section below names.
 
 ### Starting the board
 
