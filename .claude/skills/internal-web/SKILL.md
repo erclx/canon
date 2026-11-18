@@ -21,6 +21,14 @@ Point an image at a file some script writes. `canon capture` writes a `.stamp` b
 
 - Never hand-edit a generated frame. The next regeneration overwrites it.
 
+## Release notes
+
+Title a pull request whose shipped change is the landing page alone `chore(web): ...`, never `feat(web)` or `fix(web)`.
+
+- `feat` and `fix` reach the release notes when the pull request also touches a path release-please does not exclude
+- `README.md`, `package.json`, `scripts/`, and a root config are such paths, and `exclude-paths` cannot hold them back
+- Put a change that ships to a consumer in its own pull request under its own type, rather than beside the page
+
 ## Sync checklist
 
 Before shipping any change under `web/`:
