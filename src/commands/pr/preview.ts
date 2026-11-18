@@ -165,7 +165,7 @@ function parseRun(stdout: string | null): RunRow | undefined {
  * The `gh` half of a preview. `--workflow` and `gh workflow run` both take the
  * workflow's file name rather than its repository path.
  */
-function ghPreviewRunner(root: string): PreviewRunner {
+export function ghPreviewRunner(root: string): PreviewRunner {
   return {
     async dispatch(workflow, ref) {
       const out = await gh(root, [

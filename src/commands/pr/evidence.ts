@@ -27,12 +27,20 @@ import {
   nextEvidenceReel,
   renderEvidenceBody,
   settleChecklist,
+  SHORT_SHA_LENGTH,
 } from '@/pr/evidence'
 import { isWithinTolerance } from '@/pr/pixels'
 import { readCarry, reelMoves } from '@/pr/carry'
 import { readChangedPaths } from '@/pr/lift'
 import { loadPaintedPatterns } from '@/pr/painted'
-import { findDeployWorkflow, servesChange } from '@/pr/preview'
+import { resolveTip, type TipRefusal } from '@/pr/head'
+import {
+  findDeployWorkflow,
+  type PreviewHeadReading,
+  readPreviewHead,
+  type ServedFilter,
+  servesChange,
+} from '@/pr/preview'
 import { readUiPassHead, writeUiPassLine } from '@/pr/tick'
 import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
 import {
@@ -43,12 +51,15 @@ import {
   gh,
   gitRunner,
   listComments,
+  listComparedPaths,
   listPullFiles,
   patchPullBody,
   readIdentity,
   readRepoName,
+  refReader,
   refuseWith,
 } from '@/commands/pr/pull'
+import { ghPreviewRunner } from '@/commands/pr/preview'
 import { readWorkflows } from '@/commands/pr/workflows'
 
 interface EvidenceOptions extends ReadOptions {
@@ -75,6 +86,10 @@ type EvidenceRefusal =
   | 'unreadable-changes'
   | 'unreadable-checklist'
   | 'would-empty'
+
+/** Why the check could not tell which head the carried preview serves, refused under `gh-failed` rather than read as settled. */
+const UNREAD_PREVIEW_HEAD =
+  'gh could not list the deploy runs for this branch, or the paths changed since the built head, so whether the carried preview serves the tip is unknown.'
 
 const EVIDENCE_REFUSALS: Record<EvidenceRefusal, string> = {
   'check-writes':
@@ -186,7 +201,9 @@ export function registerEvidence(pr: Command): void {
         'carried hosted address is dropped. An explicit --preview is always',
         'kept. The address region above the comparison is read for each',
         'prefix wherever it sits, so a comment that opens on the addresses',
-        'still carries them forward.',
+        'still carries them forward. Beside a hosted address the deploy serves,',
+        'a **Preview built at:** segment names the short head of the newest',
+        'successful deploy run, and is left off when the runs cannot be listed.',
         '',
         '--checklist closes the body with a visual checklist, below the',
         'comparison it annotates. A checklist the marked comment already',
@@ -292,6 +309,15 @@ export function registerEvidence(pr: Command): void {
         'this checkout resolves, its push path filter matches a path the pull',
         'request changed, and the marked comment carries no **Preview:**',
         'address. A failed deploy reads the same as a skipped one.',
+        'A carried address is read against the branch tip on the remote, the',
+        'way `canon pr preview --check` reads it, and reported as',
+        '`previewHead` with its `reason`, `built`, `tip`, and `runId`. It is',
+        'still owed while the tip is building, when no deploy of the branch',
+        'succeeded, and when the build is stale and a path the push filter',
+        'serves changed since, with `servedSinceBuilt` saying which. A stale',
+        'build whose later commits touch no served path stays settled, and a',
+        'compare GitHub cut at 300 files counts as served. A run listing or',
+        'compare that fails refuses as gh-failed rather than reading settled.',
         'The record carries `owed` and the same marked fields, plus',
         '`reelSkip`, the text after **No reel:** on the marked comment, present',
         'only when that line is posted. `canon pr lift` reads its reason code,',
@@ -308,7 +334,10 @@ export function registerEvidence(pr: Command): void {
         '  unreadable-changes    GitHub could not list what the pull request changed',
         '  gh-missing            `gh` is not on the path',
         '  gh-failed             `gh` could not read or edit the pull request or its',
-        '                        comments',
+        '                        comments, or with --check list the deploy runs',
+        '                        or the paths changed since the built head',
+        '  unresolvable-ref      --check could not read the branch tip off the remote',
+        '  no-remote-branch      --check found no remote branch to read a tip from',
         '  no-object-head        the pull request object reported no head commit',
         '',
         'Exit codes:',
@@ -530,6 +559,49 @@ async function withImageReads(
   }
 }
 
+type CarriedHead =
+  | {
+      readonly kind: 'read'
+      readonly reading: Exclude<PreviewHeadReading, { reason: 'gh-failed' }>
+      readonly servedSinceBuilt?: boolean
+    }
+  | { readonly kind: 'refused'; readonly reason: TipRefusal | 'gh-failed' }
+
+/**
+ * Reads which head the carried preview serves against the tip on the remote,
+ * through the same two reads `canon pr preview --check` makes, so the two
+ * checks agree. A stale build counts as behind only when a path the deploy
+ * serves changed since, and a cut listing counts as served.
+ */
+async function readCarriedHead(
+  root: string,
+  workflow: string,
+  filter: ServedFilter,
+  branch: string,
+): Promise<CarriedHead> {
+  const resolved = await resolveTip(branch, refReader(root))
+  if (resolved.kind === 'refused') return resolved
+  const reading = await readPreviewHead(ghPreviewRunner(root), {
+    workflow,
+    branch,
+    tip: resolved.tip,
+  })
+  if (reading.reason === 'gh-failed') {
+    return { kind: 'refused', reason: 'gh-failed' }
+  }
+  if (reading.reason !== 'stale' || reading.built === undefined) {
+    return { kind: 'read', reading }
+  }
+  const compared = await listComparedPaths(root, reading.built, reading.tip)
+  if (compared === undefined) return { kind: 'refused', reason: 'gh-failed' }
+  return {
+    kind: 'read',
+    reading,
+    servedSinceBuilt:
+      compared.kind === 'truncated' || servesChange(filter, compared.paths),
+  }
+}
+
 async function runEvidence(
   number: string | undefined,
   opts: EvidenceOptions,
@@ -682,11 +754,36 @@ async function runEvidence(
   }
 
   if (isCheck) {
+    const carriedHead =
+      carriedPreview !== undefined &&
+      deploy.kind === 'found' &&
+      deployServesChange
+        ? await readCarriedHead(
+            root,
+            deploy.path,
+            deploy.filter,
+            identity.branch,
+          )
+        : undefined
+    if (carriedHead?.kind === 'refused') {
+      return refuseWith(
+        carriedHead.reason,
+        carriedHead.reason === 'gh-failed'
+          ? UNREAD_PREVIEW_HEAD
+          : PULL_REFUSALS[carriedHead.reason],
+        emitJson,
+        root,
+      )
+    }
     const owed = readOwed({
       hasEvidenceChange: grouped.kind === 'read',
       hasMarkedComment: hasMarkedEvidenceComment(comments),
       carriedPreview: carriedPreview !== undefined,
       deployServesChange,
+      ...(carriedHead !== undefined && {
+        previewHead: carriedHead.reading.reason,
+        servedSinceBuilt: carriedHead.servedSinceBuilt,
+      }),
     })
     logStep(owed.length === 0 ? 'Settled' : 'Owed')
     logInfo(
@@ -694,6 +791,12 @@ async function runEvidence(
         ? 'Nothing the ship chain posts after the pull request is missing.'
         : `missing ${owed.join(', ')}`,
     )
+    if (carriedHead !== undefined) {
+      const { built, tip } = carriedHead.reading
+      logInfo(
+        `preview ${carriedHead.reading.reason}: built ${built?.slice(0, SHORT_SHA_LENGTH) ?? 'nothing'}, tip ${tip.slice(0, SHORT_SHA_LENGTH)}`,
+      )
+    }
     warnUncaptured()
     outro()
     if (emitJson) {
@@ -709,6 +812,14 @@ async function runEvidence(
           ...uncapturedField,
           ...(reelSkip !== undefined && { reelSkip }),
           ...(commentId !== undefined && { commentId }),
+          ...(carriedHead !== undefined && {
+            previewHead: {
+              ...carriedHead.reading,
+              ...(carriedHead.servedSinceBuilt !== undefined && {
+                servedSinceBuilt: carriedHead.servedSinceBuilt,
+              }),
+            },
+          }),
           ...carried,
         })}\n`,
       )
@@ -763,6 +874,25 @@ async function runEvidence(
   }
 
   const preview = opts.preview ?? (isUnserved ? undefined : carriedPreview)
+  // The render names the built head and leaves the verdict to the check, so a
+  // failed listing drops the segment rather than refusing the post.
+  const built =
+    preview !== undefined && deploy.kind === 'found' && deployServesChange
+      ? await readPreviewHead(ghPreviewRunner(root), {
+          workflow: deploy.path,
+          branch: identity.branch,
+          tip: identity.head,
+        })
+      : undefined
+  if (built?.reason === 'gh-failed') {
+    logWarn(
+      'gh could not list the deploy runs, so the preview line names no built head',
+    )
+  }
+  const previewBuilt =
+    built === undefined || built.reason === 'gh-failed'
+      ? undefined
+      : built.built
   // A carried local line reads as live at any head, so a passed skip drops it.
   // A carried reel names its head, so it stays beside a passed skip.
   const local =
@@ -816,6 +946,7 @@ async function runEvidence(
     skips,
     uncaptured,
     reelCovers,
+    previewBuilt,
   )
 
   const caseCount = states.reduce((n, s) => n + s.items.length, 0)

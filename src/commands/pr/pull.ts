@@ -298,6 +298,36 @@ export function everyChangedPath(files: PullFiles): string[] {
   return [...files.present.keys(), ...files.removed]
 }
 
+/** GitHub's cap on the files one compare lists, which it signals with no flag, so a listing that reaches it may be cut. */
+const COMPARE_FILES_CAP = 300
+
+export type ComparedPaths =
+  | { readonly kind: 'read'; readonly paths: readonly string[] }
+  | { readonly kind: 'truncated' }
+
+/**
+ * The paths changed between two commits, renamed ones under both names, as a
+ * push filter counts them. The files list arrives whole on the first page or
+ * not at all, so the call never paginates. Undefined when the read fails.
+ */
+export async function listComparedPaths(
+  cwd: string,
+  from: string,
+  to: string,
+): Promise<ComparedPaths | undefined> {
+  const stdout = await gh(cwd, [
+    'api',
+    `repos/{owner}/{repo}/compare/${from}...${to}`,
+    '--jq',
+    `if (.files | length) >= ${COMPARE_FILES_CAP} then "truncated" else "complete", (.files[] | .filename, (.previous_filename // empty)) end`,
+  ])
+  if (stdout === null) return undefined
+  const [state, ...paths] = stdout.split('\n').filter(Boolean)
+  if (state === 'truncated') return { kind: 'truncated' }
+  if (state !== 'complete') return undefined
+  return { kind: 'read', paths }
+}
+
 /** The worktree's toplevel with symlinks resolved, since a process cwd is read back resolved. */
 export async function resolveWorktreeRoot(root: string): Promise<string> {
   const result = await $`git -C ${root} rev-parse --show-toplevel`
