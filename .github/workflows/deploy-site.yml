@@ -6,23 +6,15 @@ on:
     branches:
       - main
     paths:
-      # The page builds from web/, assets/, and the code its audits measure,
-      # and reads no catalog, so an edit to the rules or their index changes
-      # no byte of it. Add a path back in the change that makes the page read
-      # a file outside these globs.
+      # The page builds from web/, assets/, and src/design/ alone and reads no
+      # catalog, so an edit to the skills, rules, or their index changes no
+      # byte of it. Add a path back in the change that makes the page read a
+      # file outside these globs.
       - 'web/**'
       - 'assets/**'
       # Pull request screenshots, which the page never reads.
       - '!assets/evidence/**'
-      # The health section reads the code audits and the merge log of this
-      # checkout at build time, so the folders holding the code they measure
-      # deploy too. src/** carries src/design/, which the tokens read.
-      - 'src/**'
-      - 'scripts/**'
-      - 'sandbox/**'
-      - 'tooling/**'
-      - 'claude/**'
-      - '.claude/hooks/**'
+      - 'src/design/**'
       - '.github/workflows/deploy-site.yml'
   workflow_dispatch:
   # A closed pull request runs only the cleanup job below, which deletes the
