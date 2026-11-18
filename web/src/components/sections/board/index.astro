@@ -46,10 +46,13 @@ const rest = boardAfter(
                 {rest
                   .filter((row) => row.lane === index)
                   .map((row) => (
-                    <li class:list={['row', { wait: row.waiting }]} data-name={row.name}>
+                    <li
+                      class:list={['row', { wait: row.waiting }]}
+                      data-name={row.name}
+                    >
                       <span class="nm">{row.name}</span>
                       <span class="st">{row.line}</span>
-                      <span class="sr-only wl">{boardScene.waitingLabel}</span>
+                      <span class="wl sr-only">{boardScene.waitingLabel}</span>
                     </li>
                   ))}
               </ul>

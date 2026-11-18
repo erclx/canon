@@ -31,10 +31,10 @@ const glyph = mark.replace(/<!--[\s\S]*?-->/, '').trim()
         sections
           .filter((section) => section.bar)
           .map((section) => (
-          <a class="sl" href={`#${section.id}`} data-section={section.id}>
-            {section.label}
-          </a>
-        ))
+            <a class="sl" href={`#${section.id}`} data-section={section.id}>
+              {section.label}
+            </a>
+          ))
       }
       <span class="nmw">
         <button
