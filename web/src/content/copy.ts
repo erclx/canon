@@ -168,6 +168,34 @@ export const worktrees = {
   },
 }
 
+export const film = {
+  // README.md: "A pull request arrives with a film of the change"
+  head: 'A pull request arrives with a film of the change',
+  // README.md: "A diff cannot show a hover or a focus ring. Canon films the change in the running app and posts the reel beside the checklist a reviewer ticks."
+  lede: 'A diff cannot show a hover or a focus ring. Canon films the change in the running app and posts the reel beside the checklist a reviewer ticks.',
+}
+
+export const board = {
+  // README.md: "The board runs while you are away"
+  head: 'The board runs while you are away',
+  // README.md: "Agent work stalls whenever you step out. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide."
+  lede: 'Agent work stalls whenever you step out. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide.',
+}
+
+export const drive = {
+  // README.md: "Design decided by looking"
+  head: 'Design decided by looking',
+  // README.md: "A description of a layout settles nothing. Canon drives the running app beside you and puts the options on a board for you to pick."
+  lede: 'A description of a layout settles nothing. Canon drives the running app beside you and puts the options on a board for you to pick.',
+}
+
+export const health = {
+  // README.md: "Audits that report where the code is rotting"
+  head: 'Audits that report where the code is rotting',
+  // README.md: "Generated code grows long files nobody reads. Canon measures file, function, and comment length, and charts what shipped each week."
+  lede: 'Generated code grows long files nobody reads. Canon measures file, function, and comment length, and charts what shipped each week.',
+}
+
 export const setup = {
   // README.md: "Setting up a project"
   head: 'Setting up a project',
