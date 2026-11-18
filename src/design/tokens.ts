@@ -177,7 +177,7 @@ export const TOKENS: DesignTokens = {
       role: 'muted',
       intent: 'ledes, labels, captions, trailing notes',
       value: '#a9a7a0',
-      grounds: DARK_GROUNDS,
+      grounds: [...DARK_GROUNDS, 'band'],
     },
     {
       role: 'accent',
@@ -249,7 +249,7 @@ export const TOKENS: DesignTokens = {
       role: 'light-muted',
       intent: 'ledes, labels, and captions on a light ground',
       value: '#6b6a66',
-      grounds: LIGHT_GROUNDS,
+      grounds: [...LIGHT_GROUNDS, 'light-band'],
     },
     {
       role: 'light-accent',

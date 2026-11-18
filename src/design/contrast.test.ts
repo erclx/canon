@@ -63,12 +63,24 @@ describe('readings', () => {
   it.each([
     ['text', ['background', 'surface', 'window']],
     ['text-body', ['background', 'surface', 'window']],
-    ['muted', ['background', 'surface', 'window']],
     ['accent', ['background', 'surface', 'window']],
     ['light-text', ['light-background', 'light-surface', 'light-window']],
     ['light-text-body', ['light-background', 'light-surface', 'light-window']],
-    ['light-muted', ['light-background', 'light-surface', 'light-window']],
   ])('measures %s on the canvas, the tray, and the window', (role, grounds) => {
+    const measured = readings().filter((reading) => reading.role === role)
+
+    expect(measured.map((reading) => reading.ground)).toEqual(grounds)
+  })
+
+  // The page draws muted on the band in a typed request's glyph and a
+  // rendered record's frontmatter labels, on both themes.
+  it.each([
+    ['muted', ['background', 'surface', 'window', 'band']],
+    [
+      'light-muted',
+      ['light-background', 'light-surface', 'light-window', 'light-band'],
+    ],
+  ])('measures %s on the band as well', (role, grounds) => {
     const measured = readings().filter((reading) => reading.role === role)
 
     expect(measured.map((reading) => reading.ground)).toEqual(grounds)
@@ -90,5 +102,20 @@ describe('the shipped palette', () => {
     expect(
       failing().map((reading) => `${reading.role} on ${reading.ground}`),
     ).toEqual([])
+  })
+
+  it('fails muted on the band at the values before v198.5, which read 4.45', () => {
+    const earlier: Record<string, string> = {
+      muted: '#8f8d88',
+      band: '#282826',
+    }
+    const before = TOKENS.color.map((token) => ({
+      ...token,
+      value: earlier[token.role] ?? token.value,
+    }))
+
+    expect(
+      failing(before).map((reading) => `${reading.role} on ${reading.ground}`),
+    ).toContain('muted on band')
   })
 })
