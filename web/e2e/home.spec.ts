@@ -724,8 +724,7 @@ test.describe('the social card', () => {
     const response = await request.get(card)
     expect(response.ok()).toBe(true)
 
-    // A PNG carries its width and height as two big-endian words in the IHDR
-    // chunk, at a fixed offset after the eight-byte signature.
+    // IHDR holds width and height as big-endian words at bytes 16 and 20.
     const png = await response.body()
     const size = { width: png.readUInt32BE(16), height: png.readUInt32BE(20) }
 
