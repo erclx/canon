@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>arm-1-390</title>
+    <link rel="stylesheet" href="../../assets/landing-v5/base/head.css" />
+    <link
+      rel="stylesheet"
+      href="../../assets/landing-v5/base/_astro/index.Dhznb_F8.css"
+    />
+    <style>
+      body {
+        background: var(--ground);
+      }
+      .fb-label {
+        position: relative;
+        z-index: 100;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 10px;
+        padding: 10px 16px;
+        font-family: 'Geist Variable', sans-serif;
+        font-size: 13px;
+        line-height: 1.4;
+        color: var(--body);
+        background: var(--band);
+        border-bottom: 1px solid var(--line);
+      }
+      .fb-label b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .fb-label span {
+        color: var(--muted);
+      }
+      .site-nav {
+        display: none;
+      }
+      main {
+        display: none;
+      }
+      .nv {
+        max-width: 1244px;
+        margin: 0 auto;
+        padding: 96px 32px;
+        font-family: var(--sans);
+        color: var(--ink);
+      }
+      .nv .split {
+        display: grid;
+        grid-template-columns: 5fr 7fr;
+        gap: 56px;
+        align-items: center;
+      }
+      .nv .split.r {
+        grid-template-columns: 7fr 5fr;
+      }
+      .nv .split.r > .txt {
+        order: 2;
+      }
+      .nv h2 {
+        margin: 0;
+        font-weight: 600;
+        font-size: clamp(28px, 3.4vw, 44px);
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        text-wrap: balance;
+      }
+      .nv .txt p {
+        margin: 16px 0 0;
+        font-size: 20px;
+        line-height: 1.5;
+        color: var(--muted);
+      }
+      .nv .tray {
+        padding: 36px;
+      }
+      .nv .win {
+        display: block;
+        overflow: hidden;
+        font-size: 13px;
+      }
+      .nv .pad {
+        padding: 18px 20px;
+      }
+      .nv .mono {
+        font-family: var(--mono);
+        font-size: 12.5px;
+      }
+      .nv .mu {
+        color: var(--muted);
+      }
+      .nv .ok {
+        color: var(--color-success);
+      }
+      .nv .ac {
+        color: var(--accent);
+      }
+      .nv .wt {
+        color: var(--color-waiting);
+      }
+      .nv .row {
+        display: flex;
+        gap: 10px;
+        align-items: baseline;
+        padding: 5px 0;
+      }
+      .nv .row > :last-child {
+        margin-left: auto;
+      }
+      .nv .hd {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--line);
+        background: var(--winbar);
+        font-weight: 500;
+      }
+      .nv .stage {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        margin: 16px 20px 0;
+        border-radius: 10px;
+        background: var(--tray);
+        border: 1px solid var(--line);
+        overflow: hidden;
+      }
+      .nv .stage i {
+        position: absolute;
+        border-radius: 6px;
+        background: var(--win);
+        border: 1px solid var(--line);
+      }
+      .nv .stage .ring {
+        outline: 2px solid var(--ink);
+        outline-offset: 2px;
+      }
+      .nv .scrub {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 12px 20px 0;
+      }
+      .nv .scrub b {
+        flex: 1;
+        height: 4px;
+        border-radius: 2px;
+        background: linear-gradient(90deg, var(--ink) 58%, var(--line) 58%);
+      }
+      .nv .beats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin: 14px 20px 0;
+      }
+      .nv .beats div {
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+      }
+      .nv .beats .on {
+        border-color: var(--ink);
+      }
+      .nv .checks {
+        margin: 14px 20px 18px;
+        padding-top: 12px;
+        border-top: 1px solid var(--line);
+      }
+      .nv .cols {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        padding: 18px 20px;
+      }
+      .nv .lane {
+        padding: 12px;
+        border-radius: 12px;
+        background: var(--tray);
+        min-height: 250px;
+      }
+      .nv .lane h4 {
+        margin: 0 0 10px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+      }
+      .nv .chip {
+        margin-bottom: 8px;
+        padding: 9px 10px;
+        border-radius: 8px;
+        background: var(--win);
+        border: 1px solid var(--line);
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+      .nv .chip span {
+        display: block;
+        margin-top: 3px;
+        font-family: var(--sans);
+        color: var(--muted);
+      }
+      .nv .chip.you {
+        border-color: var(--color-waiting);
+      }
+      .nv .tl {
+        padding: 16px 20px;
+      }
+      .nv .tl .row {
+        border-top: 1px solid var(--line);
+        padding: 9px 0;
+      }
+      .nv .tl .row:first-child {
+        border-top: 0;
+      }
+      .nv .tl time {
+        width: 52px;
+        font-family: var(--mono);
+        color: var(--muted);
+      }
+      .nv .sum {
+        margin: 0 20px 18px;
+        padding: 14px 16px;
+        border-radius: 10px;
+        background: var(--tray);
+        font-weight: 500;
+      }
+      .nv .arms {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        padding: 18px 20px 6px;
+      }
+      .nv .arm {
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        overflow: hidden;
+      }
+      .nv .arm .lb {
+        padding: 6px 10px;
+        font-family: var(--mono);
+        font-size: 11.5px;
+        color: var(--muted);
+        border-bottom: 1px solid var(--line);
+      }
+      .nv .arm .pv {
+        height: 150px;
+        padding: 12px;
+        display: grid;
+        gap: 8px;
+        align-content: start;
+      }
+      .nv .arm .pv i {
+        display: block;
+        height: 14px;
+        border-radius: 4px;
+        background: var(--tray);
+      }
+      .nv .arm.pick {
+        border-color: var(--ink);
+        box-shadow: 0 0 0 1px var(--ink);
+      }
+      .nv .q {
+        margin: 12px 20px 18px;
+        padding: 14px 16px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+      }
+      .nv .q .opt {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .nv .q .opt span {
+        padding: 4px 10px;
+        border-radius: 6px;
+        border: 1px solid var(--line);
+        font-size: 12px;
+      }
+      .nv .q .opt .sel {
+        background: var(--ink);
+        color: var(--ground);
+        border-color: var(--ink);
+      }
+      .nv .two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+      .nv .two > div + div {
+        border-left: 1px solid var(--line);
+      }
+      .nv .pin {
+        position: absolute;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #fff;
+        font-size: 11px;
+        display: grid;
+        place-items: center;
+        font-style: normal;
+      }
+      .nv table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: var(--mono);
+        font-size: 12.5px;
+      }
+      .nv td,
+      .nv th {
+        padding: 7px 0;
+        text-align: right;
+        border-top: 1px solid var(--line);
+        font-weight: 400;
+      }
+      .nv th {
+        color: var(--muted);
+        border-top: 0;
+      }
+      .nv td:first-child,
+      .nv th:first-child {
+        text-align: left;
+      }
+      .nv .bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+        height: 150px;
+        padding: 0 4px;
+      }
+      .nv .bars div {
+        flex: 1;
+        border-radius: 6px 6px 0 0;
+        background: var(--line);
+      }
+      .nv .bars .now {
+        background: var(--ink);
+      }
+      .nv .ax {
+        display: flex;
+        gap: 10px;
+        padding: 6px 4px 0;
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .nv .ax span {
+        flex: 1;
+        text-align: center;
+      }
+      @media (max-width: 899px) {
+        .nv {
+          padding: 56px 20px;
+        }
+        .nv .split,
+        .nv .split.r {
+          grid-template-columns: 1fr;
+          gap: 32px;
+        }
+        .nv .split.r > .txt {
+          order: 0;
+        }
+        .nv .tray {
+          padding: 14px;
+        }
+        .nv .cols,
+        .nv .arms {
+          grid-template-columns: 1fr;
+        }
+        .nv .two {
+          grid-template-columns: 1fr;
+        }
+        .nv .two > div + div {
+          border-left: 0;
+          border-top: 1px solid var(--line);
+        }
+        .nv .lane {
+          min-height: 0;
+        }
+        .nv .arm .pv {
+          height: 70px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="fb-label">
+      <b>arm-1-390</b> · the board: three lanes with rows moving right
+      overnight, and the two that wait for you marked · cost: one new section
+      and its scene data · reference: notion-com-1440-s02, a product view
+      cropped to the part that moves · figures are placeholders<span
+        >drive 241</span
+      >
+    </div>
+
+    <div class="nv">
+      <div class="split">
+        <div class="txt">
+          <h2>The board runs while you are away</h2>
+          <p>
+            Agent work stalls whenever you step out. The orchestrator works the
+            ready rows from now or from a set time, and stops at what only you
+            decide.
+          </p>
+        </div>
+        <div class="tray">
+          <div class="win">
+            <div class="hd">
+              Board <span class="mu">· unattended since 23:00</span
+              ><span class="mono mu" style="margin-left: auto">02:14</span>
+            </div>
+            <div class="cols">
+              <div class="lane">
+                <h4>Up next</h4>
+                <div class="chip">gate-stages<span>plan linked</span></div>
+                <div class="chip">film-beats<span>needs a plan</span></div>
+              </div>
+              <div class="lane">
+                <h4>In flight</h4>
+                <div class="chip">
+                  take-timer<span class="ac">worker, slice 2 of 3</span>
+                </div>
+                <div class="chip">
+                  sync-stamp<span class="ac">review, second pass</span>
+                </div>
+                <div class="chip you">
+                  review-lift<span class="wt">one question for you</span>
+                </div>
+              </div>
+              <div class="lane">
+                <h4>Ready to merge</h4>
+                <div class="chip">
+                  sync-coverage<span class="ok">review closed</span>
+                </div>
+                <div class="chip">
+                  drive-check<span class="ok">review closed</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
