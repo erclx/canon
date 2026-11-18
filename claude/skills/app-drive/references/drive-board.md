@@ -17,4 +17,6 @@ The drive's project holds `00-current`, a page per topic, and `00-next`, as `dra
 - Hide an earlier finding's frames with `frameboard frame hide` for that capture, and clear them with `--off`
 - Draw `00-next` once the operator's picks settle, and copy both whole-page captures into `evidence/baseline/`
 
+Give the operator each page's address in the turn the page is added, read off `frameboard show` as `drawing.md` states. The operator then opens a page while it holds only what was just drawn, rather than asking for the link.
+
 Repair a `font-missing` capture as `design-pick`'s Step 3 does, and answer a refusal `board.md` reads as it states. Any other refusal ends the board as Step 1 does, so redraw in the copy and take the options shot there. On `browser-not-found`, name `bunx playwright install chromium` as the repair.
