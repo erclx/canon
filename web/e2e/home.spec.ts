@@ -1075,7 +1075,7 @@ test.describe('new sections', () => {
     test('the film steps its beats with the reel, and the pause shows the still', async ({
       page,
     }) => {
-      const reel = page.locator('#film .stage picture:visible img')
+      const reel = page.locator('#film .stage img')
       await reel.scrollIntoViewIfNeeded()
       await expect
         .poll(
@@ -1108,9 +1108,22 @@ test.describe('new sections', () => {
     await expect(page.locator('#health .pz')).toBeHidden()
   })
 
+  test('the film follows the theme toggle to the reel filmed in it', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.goto('/')
+    const reel = page.locator('#film .stage img')
+    await expect(reel).toHaveAttribute('src', '/film.webp')
+
+    await page.locator('.theme-toggle').click()
+
+    await expect(reel).toHaveAttribute('src', '/film-light.webp')
+  })
+
   test('the film shows its still under reduced motion', async ({ page }) => {
     await page.goto('/')
-    const reel = page.locator('#film .stage picture:visible img')
+    const reel = page.locator('#film .stage img')
     await reel.scrollIntoViewIfNeeded()
 
     await expect

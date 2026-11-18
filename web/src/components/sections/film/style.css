@@ -33,12 +33,6 @@
   height: auto;
 }
 
-/* Each theme plays its own reel, so the page shows the one filmed in the theme it is in. */
-[data-theme='light'] #film .dk,
-[data-theme='dark'] #film .lt {
-  display: none;
-}
-
 #film .ctl {
   display: flex;
   align-items: center;
