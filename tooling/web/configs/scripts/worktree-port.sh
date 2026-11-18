@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Prints a port for this working directory: the base itself in a normal
-# checkout, and the base plus a per-worktree offset in a linked git worktree,
-# so two worktrees of one repository never serve on one port. A folder left
-# behind after its worktree was removed is refused rather than served, since
-# every port it derives lands on the one the main checkout wanted.
+# Prints the base port, plus a per-worktree offset in a linked worktree, so
+# two worktrees never share one. A folder its worktree left behind is refused,
+# since every port it derives lands on the main checkout's.
 
 base="${1:-0}"
 band=50
@@ -53,11 +51,9 @@ offset() {
   toplevel=$(cd "$toplevel" && pwd -P)
 
   if [[ "$(cd "$git_dir" && pwd -P)" == "$(cd "$common_dir" && pwd -P)" ]]; then
-    # The main checkout answers here, and so does every directory under it,
-    # including a folder whose `.git` was deleted along with its worktree,
-    # since git then walks upward and reports the parent repository. Location
-    # is the only signal separating the two, so a directory sitting under the
-    # worktrees folder is refused rather than handed the base port.
+    # A folder whose worktree was removed also reads as the main checkout, since
+    # the lookup walks up to the parent, so location under the worktrees folder
+    # is the only signal separating the two.
     if [[ "$here/" == "$toplevel/$worktrees_dir/"?* ]]; then
       refuse "$here" "no worktree is registered for it"
       return 1

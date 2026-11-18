@@ -1,10 +1,7 @@
 /**
- * The values every page's head reads, kept in one place so the title, the
- * site name a link preview shows, and the card agree across pages.
- *
- * The deployed address is deliberately absent. Each framework already holds it
- * in its own site setting, `ASTRO_SITE` under Astro, and a second copy here
- * would drift from the one the build resolves URLs against.
+ * The values every page's head reads, so the title, preview, and card agree.
+ * The deployed address stays in the framework's own site setting, since a
+ * second copy here would drift from the one the build resolves against.
  */
 export const site = {
   /** Follows a page's own title, and stands alone where a page passes none. */

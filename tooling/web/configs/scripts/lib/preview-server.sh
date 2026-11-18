@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # Sourced, not executed. Builds the site, serves it in the background on
-# PREVIEW_PORT, and blocks until it answers or exits with an error. Shared by
-# scripts/screenshot.sh and scripts/readme-screenshot.sh so the two don't
-# carry two copies of the same startup boilerplate.
+# PREVIEW_PORT, and blocks until it answers or exits with an error, for the
+# screenshot scripts to share.
 set -euo pipefail
 
 : "${PREVIEW_PORT:=4173}"
