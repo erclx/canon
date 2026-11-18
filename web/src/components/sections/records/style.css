@@ -126,6 +126,7 @@
 #records .explorer button {
   all: unset;
   box-sizing: border-box;
+  position: relative;
   display: block;
   width: 100%;
   padding: 0 14px 0 calc(28px + var(--d) * 12px);

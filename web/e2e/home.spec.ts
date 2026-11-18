@@ -638,6 +638,22 @@ test.describe('the records stack', () => {
     expect(rows.filter((row) => row.file && !row.mark)).toEqual([])
   })
 
+  test('every explorer chevron and file mark sits on its own row', async ({
+    page,
+  }) => {
+    await page.goto('/')
+
+    // A static row hands its absolute chevron and mark to the explorer, which draws them at its top.
+    const positions = await page
+      .locator('#records .explorer > *')
+      .evaluateAll((nodes) =>
+        nodes.map((node) => getComputedStyle(node).position),
+      )
+
+    expect(positions.length).toBeGreaterThan(0)
+    expect(positions.filter((position) => position === 'static')).toEqual([])
+  })
+
   test('a click on an empty explorer folder changes nothing', async ({
     page,
   }) => {
