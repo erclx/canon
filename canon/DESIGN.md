@@ -1,5 +1,5 @@
 ---
-reviewed: 2026-11-10
+reviewed: 2026-11-18
 ---
 
 # Design
@@ -18,16 +18,16 @@ Warm neutral grounds with ink text, set in Geist, and Geist Mono where a surface
 
 | Role             | Intent                                                  | Value   |
 | ---------------- | ------------------------------------------------------- | ------- |
-| background       | page canvas                                             | #121211 |
-| surface          | the tray a product window sits in, and cards            | #1a1a18 |
-| window           | the body of a product window                            | #1e1e1e |
-| chrome           | the window titlebar                                     | #252523 |
-| band             | a quiet fill inside a window, such as a prompt          | #282826 |
-| border           | every rule and divider                                  | #2e2e2c |
-| edge             | a control's outline                                     | #2a2a28 |
+| background       | page canvas                                             | #1e1e1c |
+| surface          | the tray a product window sits in, and cards            | #292927 |
+| window           | the body of a product window                            | #31312e |
+| chrome           | the window titlebar                                     | #383835 |
+| band             | a quiet fill inside a window, such as a prompt          | #3d3d39 |
+| border           | every rule and divider                                  | #474742 |
+| edge             | a control's outline                                     | #4d4d48 |
 | text             | headings, counts, emphasized runs                       | #f2f2f0 |
 | text-body        | default body copy                                       | #cfcdc8 |
-| muted            | ledes, labels, captions, trailing notes                 | #8f8d88 |
+| muted            | ledes, labels, captions, trailing notes                 | #a9a7a0 |
 | accent           | the pip, and a status the surface would color           | #ff6b42 |
 | success          | done, rendered and in the terminal                      | #6fae6a |
 | waiting          | a product-view glyph for work not yet done              | #e5b567 |

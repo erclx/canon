@@ -12,11 +12,9 @@ IFS= read -r -d '' -t 2 input
 event=$(printf '%s' "$input" | jq -r '.hook_event_name // empty')
 [ "$event" = "Stop" ] || exit 0
 
-# A forced continuation after a block fires this same hook again with a fresh
-# prompt_id and stop_hook_active: true. Reading that field is what proves the
-# guarantee, measured in a driven spike: the first Stop event blocked once and
-# the continuation's Stop event carried this field true and passed clean, with
-# no session-keyed marker needed to back it up.
+# A forced continuation after a block fires this hook again with
+# stop_hook_active true, measured to hold without a session-keyed marker, so
+# the field alone stops a second block.
 stop_hook_active=$(printf '%s' "$input" | jq -r '.stop_hook_active // false')
 [ "$stop_hook_active" = "true" ] && exit 0
 
@@ -30,10 +28,9 @@ prompt_id=$(printf '%s' "$input" | jq -r '.prompt_id // empty')
 [ -n "$transcript_path" ] && [ -f "$transcript_path" ] || exit 0
 [ -n "$prompt_id" ] || exit 0
 
-# transcript_path carries every prior turn too, so the scan starts at the line
-# where the turn began. A spike matched prompt_id against a transcript entry's
-# own promptId field and found it exact: the field is stamped on the turn's
-# initiating entry and its tool-result echoes, and on nothing before it.
+# The scan starts where the turn began, since the transcript holds every prior
+# turn. The turn's first entry is the first stamped with its promptId, measured
+# exact.
 line_start=$(grep -Fn "\"promptId\":\"$prompt_id\"" "$transcript_path" | head -1 | cut -d: -f1)
 [ -n "$line_start" ] || exit 0
 
@@ -47,10 +44,9 @@ paths=$(tail -n +"$line_start" "$transcript_path" | jq -r '
 ' 2>/dev/null | sort -u)
 [ -n "$paths" ] || exit 0
 
-# Two written paths can share a basename, and a bare basename match would then
-# read one mention as covering both. Counting first is what lets a collision
-# fall back to the full path, which the ordinary case never needs. The count
-# avoids an associative array, since macOS ships bash 3.2.
+# Two written paths sharing a basename fall back to the full path, so one
+# mention never covers both. The count avoids an associative array, since
+# macOS ships bash 3.2.
 colliding=$(while IFS= read -r path; do
   [ -n "$path" ] || continue
   printf '%s\n' "${path##*/}"

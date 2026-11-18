@@ -79,7 +79,7 @@ describe('buildDesignCss', () => {
   it('emits one custom property per color role a browser can render', () => {
     const css = buildDesignCss()
 
-    expect(css).toContain('--color-background: #121211;')
+    expect(css).toContain('--color-background: #1e1e1c;')
     expect(css).toContain('--color-light-muted: #6b6a66;')
   })
 
@@ -176,8 +176,7 @@ describe('buildDesignCss', () => {
   it('maps every role the light theme block stands in for', () => {
     const css = buildDesignCss()
 
-    // Each carries text on a light ground or is the surface step behind it, so
-    // a page reading one unmapped resolves a dark value against a light canvas.
+    // An unmapped one resolves a dark value against a light canvas.
     expect(css).toContain('--color-chrome: var(--color-light-chrome);')
     expect(css).toContain('--color-text-body: var(--color-light-text-body);')
     expect(css).toContain('--color-window: var(--color-light-window);')

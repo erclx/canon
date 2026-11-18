@@ -1,14 +1,8 @@
 #!/usr/bin/env bash
 
-# Reminds a worker session of the pull-request announcement it owes and logs
-# the creation as a denominator for the miss rate `role-worker` cannot
-# measure on its own. Follows path-form.sh's precedent: a PostToolUse hook
-# returning hookSpecificOutput.additionalContext is the shipped route back
-# into a session's own turn.
-#
-# The hook cannot know whether the announcement went out, only that a pull
-# request now exists to announce. It states the obligation and counts the
-# creation, and claims nothing about the send.
+# Reminds a worker of the pull-request announcement it owes and logs the
+# creation as the miss rate's denominator. It cannot see the send, so it
+# states the obligation and claims nothing about it.
 
 # Claude Code sends a payload and closes stdin. A bare read with nothing
 # feeding it blocks forever and holds the session open, so the read is
@@ -37,11 +31,8 @@ esac
 url=$(printf '%s' "$stdout" | grep -Eo 'https://github\.com/[^[:space:]]+/pull/[0-9]+' | tail -1)
 [ -n "$url" ] || exit 0
 
-# CLAUDE_PROJECT_DIR is the session's own worktree rather than the main root,
-# so a worker building in a linked worktree would log into a folder that dies
-# with the worktree. The log is a denominator across a wave rather than a
-# per-session record, so strip back to the main root the way
-# records-index.sh already derives its own, off a path suffix.
+# The log spans a wave, so it lands at the main root rather than in a linked
+# worktree that dies with its build, stripped off the path suffix.
 root="${CLAUDE_PROJECT_DIR:-.}"
 case "$root" in
 */.claude/worktrees/*) root="${root%/.claude/worktrees/*}" ;;

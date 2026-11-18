@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
 
-# A path-scoped rule loads on a Read, Write, or Edit of a matching file, and a
-# heredoc onto `.canon/plans/` is none of them, so the plan rule never reaches
-# the session writing most plans. This guard is the check behind that rule: a
-# new plan passes only when the transcript shows a `canon:plan-feature`
-# invocation this session has not already spent on an earlier new plan, or an
-# `auto-ship` invocation naming that plan's path. It
-# backs the rule up rather than replacing it, since a hook fails open on a
-# timeout and on anything below it cannot read.
+# A new plan passes only on an unspent `canon:plan-feature` invocation or an
+# `auto-ship` naming its path, since a heredoc loads no path-scoped rule. It
+# backs the rule up, since a hook fails open on a timeout or an unread input.
 IFS= read -r -d '' -t 2 input
 [ -n "$input" ] || {
   printf '%s reads a Claude Code hook payload on stdin and cannot be run by hand.\n' "${0##*/}" >&2
@@ -31,14 +26,9 @@ target=$(printf '%s' "$input" | jq -r '
 kind=${target:0:1}
 target=${target:1}
 
-# A command that only mentions the folder is not a write to it, as with
-# `canon tasks plan-link` or a heredoc body quoting a plan path. The awk pass
-# reads the command as words, drops heredoc bodies, and prints only the words a
-# write lands on: the word after a `>` or `>>`, and every argument of `tee` or
-# `cp`, whose source is an existing file and so never reads as a new plan. A
-# quoted span is one word, so a redirect inside quotes is text. This is a
-# scanner and not a shell parser, so a path built in a variable or written by
-# `printf` into an interpreter passes unseen.
+# Prints only the words a write lands on, after `>` or `>>` or as a `tee` or
+# `cp` argument, so a command merely naming a plan passes. A scanner, not a
+# parser: a path built in a variable or by `printf` passes unseen.
 if [ "$kind" = B ]; then
   IFS= read -r -d '' scanner <<'AWK'
 { s = s (NR > 1 ? "\n" : "") $0 }
@@ -140,12 +130,9 @@ session=${meta%%$'\t'*}
 transcript=${meta#*$'\t'}
 [ -n "$session" ] && [ -n "$transcript" ] && [ -r "$transcript" ] || exit 0
 
-# An invocation is a Skill tool call naming the skill, or the operator typing
-# its slash command, whose user line carries the command-name tag. Each one
-# prints as `P <line>`, the line ordering it against the invocation the last
-# new plan spent. An `auto-ship` invocation prints as `A <its arguments>`,
-# since a cloud worker writes the approved plan that launch names verbatim and
-# never plans it, so a write onto the path those arguments name passes.
+# A Skill call or a typed slash command prints as `P <line>`, ordered against
+# the spent marker, and `auto-ship` as `A <args>`, since a worker writes the
+# plan its launch names verbatim without planning it.
 invocations=$(grep -n -e 'plan-feature' -e 'auto-ship' "$transcript" 2>/dev/null | jq -Rr '
   def text: if type == "string" then . else (map(select(.type == "text") | .text) | join("\n")) end;
   def skill($name): .type == "tool_use" and .name == "Skill"
@@ -193,10 +180,9 @@ $invocations
 EOF
 latest=$(printf '%s\n' "$invocations" | awk '/^P /{n = $2} END {if (n != "") print n}')
 
-# The marker holds the line of the spent invocation and the plan it licensed.
-# A PreToolUse pass is not a landed write, so a retry after a refused heredoc,
-# or the `cp` that follows a worktree `Write`, lands on the same plan and
-# passes on the invocation it already spent.
+# The marker holds the spent invocation's line and the plan it licensed, so a
+# retry or the `cp` after a worktree `Write` passes on the same plan, since a
+# PreToolUse pass is not a landed write.
 marker="$marker_dir/$key"
 spent=0
 spent_plan=""
@@ -215,11 +201,9 @@ if [ -n "$latest" ] && [ "$latest" -gt "$spent" ]; then
   exit 0
 fi
 
-# A transcript holding no assistant `tool_use` line means Claude Code changed
-# its message format rather than that the session skipped the skill, and
-# blocking on that would stop every plan, so pass and log it apart. A change
-# confined to the Skill call's input or the typed command tag leaves other
-# tool calls readable, so this does not catch it and the guard still blocks.
+# No assistant `tool_use` line means the transcript format changed, so pass
+# and log it apart rather than block every plan. A change confined to the Skill
+# input or the command tag is not caught here, and the guard still blocks.
 calls=$(grep -F '"tool_use"' "$transcript" 2>/dev/null | jq -Rrn '
   first(inputs | fromjson? | select(type == "object" and .type == "assistant")
     | .message.content[]? | select(type == "object" and .type == "tool_use"

@@ -1,4 +1,5 @@
 import { isPainted, type PaintedPatterns } from '@/pr/painted'
+import type { PreviewHeadReason } from '@/pr/preview'
 
 /** The path segment that marks an image as evidence a pull request should compare. */
 const EVIDENCE_SEGMENT = 'evidence'
@@ -14,6 +15,9 @@ const MARKER_PREFIX = '<!-- pr-evidence:'
 
 /** How the address line names the branch's preview deployment. */
 const PREVIEW_PREFIX = '**Preview:**'
+
+/** How the segment naming the head the hosted preview was built from opens, which a reader before it drops as unknown. */
+const PREVIEW_BUILT_PREFIX = '**Preview built at:**'
 
 /** How the address line names the branch's server on the operator's own machine, after any hosted segment. */
 const LOCAL_PREFIX = '**Local preview:**'
@@ -78,10 +82,8 @@ const TRAILING_MARKERS = /(?:\s*\([^()]*\))+$/
 const ISSUE_COMMENT_ID = /#issuecomment-(\d+)$/
 
 /**
- * The image extensions this module embeds. An `evidence/` folder holds
- * whatever else a project keeps beside its captures, such as a README, a
- * capture script, or a raw data file, and none of those render as an
- * `<img>` without producing a broken embed.
+ * The image extensions this module embeds. A README, script, or data file kept
+ * beside the captures would render as a broken `<img>`.
  */
 const IMAGE_EXTENSION = /\.(png|jpe?g|gif|webp|avif|svg)$/i
 
@@ -139,10 +141,9 @@ function splitEvidencePath(path: string): {
 }
 
 /**
- * Groups every evidence path in `changed` by its state, keying each entry
- * inside a state by filename stem so a before/after pair sharing a name
- * across two states can be read as one case. A path in `renamedFrom` was moved
- * from the path it maps to, so it is not added and its base reads from there.
+ * Groups every evidence path by state, keyed by filename stem so a pair sharing
+ * a name across two states reads as one case. A path in `renamedFrom` is not
+ * added, and its base reads from the path it maps to.
  */
 export async function groupEvidence(
   changed: readonly string[],
@@ -191,12 +192,9 @@ function rawUrl(repo: string, sha: string, path: string): string {
 }
 
 /**
- * The most pixels a screenshot asks for. GitHub clamps an image to the comment
- * column, so a width past any comment fills the column, where `width="100%"`
- * would stretch a narrow screenshot to fill it too. An image
- * asks for the smaller of its own width and this ceiling, so a small crop
- * shows at its true size and is never scaled up. An image whose width was not
- * read asks for the ceiling.
+ * The most pixels a screenshot asks for, since `width="100%"` would stretch a
+ * narrow crop. An image asks for the smaller of its own width and this, and
+ * one whose width was not read asks for this.
  */
 const IMAGE_WIDTH = 1000
 
@@ -320,10 +318,8 @@ function headImage(item: EvidenceItem, repo: string, head: string): string {
 }
 
 /**
- * One case as a label line, its head image on a line of its own, and its base
- * folded beneath. An added case has no base, so it shows its head alone, and
- * its label carries the new mark only where the block also holds a base for
- * the mark to set it apart from.
+ * One case as a label line, its head image, and its base folded beneath. An
+ * added case shows its head alone, marked new only beside a block holding a base.
  */
 function caseLines(
   label: string,
@@ -525,16 +521,9 @@ export function evidenceMarker(head: string): string {
 }
 
 /**
- * Renders the whole comment body in order: `## Evidence`, the address line,
- * the skip, reel, and uncaptured lines, then with any states the base and head
- * line, the moved count, one `<details>` block per view within each state plus
- * a flat block, `Within tolerance`, and last the checklist and head marker.
- *
- * Every state opens while the head images stay within `EVIDENCE_OPEN_LIMIT`
- * and closes past it, so a comment is never half open. Image URLs pin to a
- * commit sha. The reel skip and uncaptured lines drop only while the reel
- * covers the head, as the carry `canon pr lift` reads passes in `reelCovers`,
- * which defaults to a reel filmed at the head.
+ * Every state opens within `EVIDENCE_OPEN_LIMIT` head images, so a comment is
+ * never half open. The reel skip and uncaptured lines drop only while the reel
+ * covers the head, as `canon pr lift` reads the carry passed in `reelCovers`.
  */
 export function renderEvidenceBody(
   states: readonly EvidenceState[],
@@ -548,10 +537,16 @@ export function renderEvidenceBody(
   skips: EvidenceSkips = {},
   uncaptured: readonly string[] = [],
   reelCovers: boolean = reel !== undefined && head.startsWith(reel.head),
+  previewBuilt?: string,
 ): string {
   const covered = reel !== undefined && reelCovers
   const segments = [
     ...(preview === undefined ? [] : [`${PREVIEW_PREFIX} ${preview}`]),
+    ...(preview === undefined || previewBuilt === undefined
+      ? []
+      : [
+          `${PREVIEW_BUILT_PREFIX} \`${previewBuilt.slice(0, SHORT_SHA_LENGTH)}\``,
+        ]),
     ...(local === undefined ? [] : [`${LOCAL_PREFIX} ${local}`]),
   ]
   const opening = [
@@ -613,12 +608,9 @@ export function renderEvidenceBody(
 }
 
 /**
- * How many cases a rendered body carries. Every case has exactly one head
- * image, so the count is the head images on any line, whether a table row
- * holding one or two or a line of its own. A table row from before the alt
- * text named its head image counts as one case when it matches the old row
- * shape, so a comment posted in any earlier layout still counts its cases and
- * the `would-empty` guard holds.
+ * How many cases a rendered body carries, one per head image. A table row from
+ * before the alt text named its head counts as one, so a comment in any earlier
+ * layout still counts and the `would-empty` guard holds.
  */
 export function countEvidenceCases(body: string): number {
   let total = 0
@@ -659,6 +651,19 @@ export interface OwedInput {
   readonly carriedPreview: boolean
   /** A deploy workflow resolves and its push filter matches a path the pull request changed. */
   readonly deployServesChange: boolean
+  /** How the newest successful deploy compares with the tip. Unread reads as fresh, the reading before the check compared heads. */
+  readonly previewHead?: PreviewHeadReason
+  /** Whether a served path changed between the built head and the tip. Unread reads as served, so a cut listing never settles. */
+  readonly servedSinceBuilt?: boolean
+}
+
+/**
+ * Whether a carried preview no longer serves the tip. A deploy still building
+ * owes one too, since until it lands the address shows the older head.
+ */
+function isPreviewBehind(input: OwedInput): boolean {
+  if (input.previewHead === 'stale') return input.servedSinceBuilt !== false
+  return input.previewHead === 'building' || input.previewHead === 'no-build'
 }
 
 /**
@@ -672,7 +677,7 @@ export function readOwed(input: OwedInput): OwedStep[] {
   if (
     (input.hasMarkedComment || input.hasEvidenceChange) &&
     input.deployServesChange &&
-    !input.carriedPreview
+    (!input.carriedPreview || isPreviewBehind(input))
   ) {
     owed.push('preview')
   }
@@ -686,11 +691,9 @@ export function readOwed(input: OwedInput): OwedStep[] {
 export const DESIGN_FOLDER = 'canon/design/'
 
 /**
- * The painted paths a pull request changed while no evidence image did, in a
- * project whose base keeps captures. Undefined when the base keeps none or
- * was not read, since an empty list reads as checked and clean. Any changed
- * evidence image clears the list, since this names a skipped capture rather
- * than judging which views a capture covered.
+ * The painted paths changed while no evidence image did. Undefined when the base
+ * keeps no captures or was not read, since an empty list reads as checked. Any
+ * changed image clears it, since this names a skipped capture, not its coverage.
  */
 export function readUncaptured(
   changed: readonly string[],
@@ -755,12 +758,9 @@ function readSegment(segment: string, prefix: string): string | undefined {
 }
 
 /**
- * Reads the addresses a body carries in the region above its commit line,
- * checklist, comparison, or marker, matching each prefix wherever it sits in
- * that region. One reader covers the layout that opens on the addresses as
- * well as the one that opens on the heading, so an open pull request keeps
- * its links across the first re-render, and a line quoted further down in a
- * checklist is never taken for an address.
+ * Reads each address prefix wherever it sits above the commit line, checklist,
+ * comparison, or marker, so both layouts keep their links across a re-render
+ * and a line quoted in a checklist is never taken for an address.
  */
 export function readAddresses(body: string): AddressReading {
   const lines: number[] = []
@@ -870,10 +870,8 @@ export function findEvidenceSkips(
 }
 
 /**
- * The reel a render embeds: a passed link, filmed at this head, replaces
- * whatever the comment carries along with its coverage, and with none passed
- * the posted reel carries forward under the head it was filmed at, its
- * coverage with it.
+ * The reel a render embeds. A passed link, filmed at this head, replaces the
+ * posted one and its coverage, which otherwise carry forward under their head.
  */
 export function nextEvidenceReel(
   link: string | undefined,
@@ -886,10 +884,8 @@ export function nextEvidenceReel(
 }
 
 /**
- * The checklist the marked comment already carries, read back out of its
- * delimiters. The handoff file is deleted once posted, so every later render
- * passes no checklist of its own, and carrying this one forward is what keeps
- * a re-render after a push from wiping the boxes a reviewer has ticked.
+ * The checklist the marked comment carries. The handoff file is deleted once
+ * posted, so carrying this forward keeps a re-render from wiping ticked boxes.
  */
 export function findEvidenceChecklist(
   comments: readonly EvidenceComment[],

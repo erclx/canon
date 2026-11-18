@@ -50,10 +50,9 @@ else
 fi
 [ -n "$roster" ] || unread 'The roster read returned no record.'
 
-# The record decides rather than the exit code. A refusal carries `reason` and
-# no `sessions`, and a binary predating the verb writes no record at all.
-# A session counts as named when its roster name appears anywhere in the reply,
-# so a heading naming it and a command below quoting its id both pass.
+# The record decides rather than the exit code, since a refusal carries no
+# `sessions`. A session counts as named when its roster name appears anywhere
+# in the reply, so a heading naming it beside its quoted id passes.
 flagged=$(printf '%s' "$roster" | jq -r --arg reply "$reply" '
   if (.sessions | type) != "array" then "unread"
   else

@@ -294,6 +294,50 @@ describe('renderEvidenceBody', () => {
     )
   })
 
+  describe('the built head', () => {
+    function renderWithBuilt(preview: string | undefined): string {
+      return renderEvidenceBody(
+        [],
+        'erclx/annex',
+        'aaaa000',
+        'bbbb111',
+        preview,
+        undefined,
+        'http://localhost:5173',
+        undefined,
+        {},
+        [],
+        undefined,
+        'cccc2223333444455556666777788889999aaaa',
+      )
+    }
+
+    it('should name the short head the hosted preview was built from beside its address', () => {
+      const body = renderWithBuilt('https://feat-thing.annex.pages.dev')
+
+      expect(body.split('\n')[2]).toBe(
+        '**Preview:** https://feat-thing.annex.pages.dev · **Preview built at:** `cccc222` · **Local preview:** http://localhost:5173',
+      )
+    })
+
+    it('should name no built head when no hosted preview is carried', () => {
+      const body = renderWithBuilt(undefined)
+
+      expect(body).not.toContain('Preview built at')
+    })
+
+    it('should read back the hosted and local addresses rather than the built head', () => {
+      const comments = [
+        { body: renderWithBuilt('https://feat-thing.annex.pages.dev') },
+      ]
+
+      expect(findEvidencePreview(comments)).toBe(
+        'https://feat-thing.annex.pages.dev',
+      )
+      expect(findEvidenceLocal(comments)).toBe('http://localhost:5173')
+    })
+  })
+
   it('should carry the local address alone on the line when no hosted preview is given', () => {
     const body = renderEvidenceBody(
       [],
