@@ -549,6 +549,46 @@ describe('canon pr evidence reports the marked comment', () => {
     expect(record.body).toContain('**Preview:** https://manual.pages.dev')
   })
 
+  it('should name the head the newest successful deploy built beside a carried preview', async () => {
+    writeComments([markedCommentBody()])
+    writeFileSync(
+      join(tempDir, 'runs.json'),
+      JSON.stringify([
+        {
+          databaseId: 7,
+          status: 'completed',
+          conclusion: 'success',
+          headSha: 'da60d8794da60d8794da60d8794da60d8794da60',
+          createdAt: '2026-11-18T00:18:00Z',
+        },
+      ]),
+    )
+
+    const record = await runEvidenceRecord({
+      'evidence/hero.png': 'png',
+      'web/index.html': '<p>hi</p>\n',
+      '.github/workflows/deploy.yml': WEB_ONLY_DEPLOY,
+    })
+
+    expect(record.body).toContain(
+      '**Preview:** https://feat-x.site.pages.dev · **Preview built at:** `da60d87`',
+    )
+  })
+
+  it('should post a carried preview naming no built head when the deploy runs cannot be listed', async () => {
+    writeComments([markedCommentBody()])
+
+    const record = await runEvidenceRecord({
+      'evidence/hero.png': 'png',
+      'web/index.html': '<p>hi</p>\n',
+      '.github/workflows/deploy.yml': WEB_ONLY_DEPLOY,
+    })
+
+    expect(record.reason).toBe('ok')
+    expect(record.body).toContain('**Preview:** https://feat-x.site.pages.dev')
+    expect(record.body).not.toContain('Preview built at')
+  })
+
   it('should omit every field when no comment carries the marker', async () => {
     writeComments(['- [ ] a checklist posted on its own'])
 
@@ -1055,6 +1095,166 @@ describe('canon pr evidence --check', () => {
     )
   }
 
+  /** Pushes the branch to a bare origin, so the check reads its tip off the remote, and returns that tip. */
+  function pushBranch(): string {
+    const origin = join(tempDir, 'origin.git')
+    execaSync('git', ['init', '-q', '--bare', origin])
+    execaSync('git', ['-C', repoRoot, 'remote', 'add', 'origin', origin])
+    execaSync('git', ['-C', repoRoot, 'push', '-q', 'origin', 'feat/x'])
+    return execaSync('git', ['-C', repoRoot, 'rev-parse', 'feat/x']).stdout
+  }
+
+  /** The deploy dispatch runs `gh run list` answers with, newest first by `createdAt`. */
+  function writeRuns(
+    rows: readonly {
+      headSha: string
+      status?: string
+      conclusion?: string
+      createdAt?: string
+    }[],
+  ): void {
+    writeFileSync(
+      join(tempDir, 'runs.json'),
+      JSON.stringify(
+        rows.map((row, index) => ({
+          databaseId: 100 + index,
+          status: row.status ?? 'completed',
+          conclusion: row.conclusion ?? 'success',
+          headSha: row.headSha,
+          createdAt: row.createdAt ?? '2026-11-18T00:00:00Z',
+        })),
+      ),
+    )
+  }
+
+  describe('with a carried preview read against the tip', () => {
+    const BUILT = 'da60d8794da60d8794da60d8794da60d8794da60'
+    let tip: string
+
+    function writeCompared(lines: readonly string[]): void {
+      writeFileSync(join(tempDir, 'compared.txt'), `${lines.join('\n')}\n`)
+    }
+
+    beforeEach(() => {
+      mkdirSync(join(repoRoot, '.github', 'workflows'), { recursive: true })
+      writeFileSync(
+        join(repoRoot, '.github', 'workflows', 'deploy.yml'),
+        WEB_ONLY_DEPLOY,
+      )
+      writeFileSync(join(tempDir, 'files.tsv'), 'modified\tweb/index.html\n')
+      writeComment(markedCommentBody())
+      tip = pushBranch()
+    })
+
+    it('should settle a preview built at the tip and name the build', async () => {
+      writeRuns([{ headSha: tip }])
+
+      const record = await runCheck()
+
+      expect(record).toMatchObject({
+        reason: 'settled',
+        owed: [],
+        previewHead: { reason: 'fresh', built: tip, tip, runId: 100 },
+      })
+    })
+
+    it('should owe a preview built before a served path changed', async () => {
+      writeRuns([{ headSha: BUILT }])
+      writeCompared(['complete', 'web/index.html', 'docs/guide.md'])
+
+      const record = await runCheck()
+
+      expect(record).toMatchObject({
+        reason: 'owed',
+        owed: ['preview'],
+        previewHead: {
+          reason: 'stale',
+          built: BUILT,
+          tip,
+          servedSinceBuilt: true,
+        },
+      })
+    })
+
+    it('should settle a preview built before a push touching no served path', async () => {
+      writeRuns([{ headSha: BUILT }])
+      writeCompared(['complete', 'assets/evidence/dark/hero.png', 'docs/a.md'])
+
+      const record = await runCheck()
+
+      expect(record).toMatchObject({
+        reason: 'settled',
+        previewHead: { reason: 'stale', servedSinceBuilt: false },
+      })
+    })
+
+    it('should owe a stale preview whose compare listing GitHub cut short', async () => {
+      writeRuns([{ headSha: BUILT }])
+      writeCompared(['truncated'])
+
+      const record = await runCheck()
+
+      expect(record).toMatchObject({
+        reason: 'owed',
+        previewHead: { reason: 'stale', servedSinceBuilt: true },
+      })
+    })
+
+    it('should owe a preview while a deploy of the tip is still building', async () => {
+      writeRuns([
+        {
+          headSha: tip,
+          status: 'in_progress',
+          conclusion: '',
+          createdAt: '2026-11-18T01:00:00Z',
+        },
+        { headSha: BUILT },
+      ])
+
+      const record = await runCheck()
+
+      expect(record).toMatchObject({
+        reason: 'owed',
+        owed: ['preview'],
+        previewHead: { reason: 'building', built: BUILT, tip },
+      })
+    })
+
+    it('should owe a carried preview no deploy of the branch built', async () => {
+      writeRuns([{ headSha: BUILT, conclusion: 'failure' }])
+
+      const record = await runCheck()
+
+      expect(record).toMatchObject({
+        reason: 'owed',
+        previewHead: { reason: 'no-build', tip },
+      })
+    })
+
+    it('should refuse as gh-failed when the deploy runs cannot be listed', async () => {
+      const record = await runCheck()
+
+      expect(record).toMatchObject({ reason: 'gh-failed' })
+    })
+
+    it('should refuse as gh-failed when the changes since the build cannot be listed', async () => {
+      writeRuns([{ headSha: BUILT }])
+
+      const record = await runCheck()
+
+      expect(record).toMatchObject({ reason: 'gh-failed' })
+    })
+
+    it('should read no built head when the comment carries no hosted preview', async () => {
+      writeComment('## What to look at\n\n<!-- pr-evidence: head=abc -->')
+
+      const record = await runCheck()
+
+      expect(record).toMatchObject({ reason: 'owed', owed: ['preview'] })
+      expect(record).not.toHaveProperty('previewHead')
+    })
+  })
+
   beforeEach(() => {
     tempDir = mkdtempSync(join(tmpdir(), 'canon-pr-evidence-check-'))
     repoRoot = join(tempDir, 'repo')
@@ -1130,6 +1330,7 @@ describe('canon pr evidence --check', () => {
       'modified\tevidence/dark/nav.png\n',
     )
     writeComment(markedCommentBody())
+    writeRuns([{ headSha: pushBranch() }])
 
     const record = await runCheck()
 

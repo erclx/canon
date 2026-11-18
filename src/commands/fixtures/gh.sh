@@ -32,6 +32,14 @@ api*contents/*)
   r=${a##*ref=}
   [ -f "$fx/img/$r-$(basename "$p")" ] && cat "$fx/img/$r-$(basename "$p")" || exit 1
   ;;
+"run list "*)
+  [ -f "$fx/runs.json" ] || exit 1
+  cat "$fx/runs.json"
+  ;;
+api*compare/*files*)
+  [ -f "$fx/compared.txt" ] || exit 1
+  cat "$fx/compared.txt"
+  ;;
 api*compare/*)
   if [ -f "$fx/merge-base" ]; then cat "$fx/merge-base"; else git merge-base main HEAD; fi
   ;;
