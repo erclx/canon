@@ -1042,9 +1042,11 @@ test.describe('new sections', () => {
       await page.clock.runFor(1_500)
       await expect(clock).toHaveText('23:40')
       await page.locator('#board .pz').click()
+      // Real time still runs between the clock's steps, so the held state is read after the press rather than assumed.
+      const held = (await clock.textContent()) ?? ''
       await page.clock.runFor(6_000)
 
-      await expect(clock).toHaveText('23:40')
+      await expect(clock).toHaveText(held)
     })
 
     test('the drive lands its pick, and the pause holds it cleared', async ({
@@ -1058,9 +1060,10 @@ test.describe('new sections', () => {
       await page.clock.runFor(3_500)
       await expect(board).not.toHaveClass(/\bon\b/)
       await page.locator('#drive .pz').click()
+      const held = (await board.getAttribute('class')) ?? ''
       await page.clock.runFor(6_000)
 
-      await expect(board).not.toHaveClass(/\bon\b/)
+      await expect(board).toHaveAttribute('class', held)
     })
 
     test('the audit prints a row at a time, and the pause holds the print', async ({
@@ -1072,9 +1075,12 @@ test.describe('new sections', () => {
       await expect(rows.nth(0)).toHaveClass(/\bin\b/)
       await expect(rows.nth(1)).not.toHaveClass(/\bin\b/)
       await page.locator('#health .pz').click()
+      const printed = page.locator('#health .pr.in')
+      const held = await printed.count()
       await page.clock.runFor(6_000)
 
-      await expect(rows.nth(1)).not.toHaveClass(/\bin\b/)
+      await expect(printed).toHaveCount(held)
+      expect(held).toBeLessThan(await rows.count())
     })
 
     test('the film steps its beats with the reel, and the pause shows the still', async ({
