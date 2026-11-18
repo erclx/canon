@@ -28,7 +28,7 @@ Owns the token module, the component layer, the renderers, the markdown parser, 
 Holds the accepted frames a build matches. `bun run design:sync` writes them from the board at the main worktree root through Frameboard's `references sync`, run from the `frameboard` on PATH, the same install that serves and checks the board.
 
 - `frames.json` maps each `<group>/<name>` to a board frame as `<project>/<page>/<frame>`, and it and `index.md` are the only files written by hand
-- Each frame links `assets/<project>/`, which also holds every font a copied stylesheet loads, so two projects loading an asset of the same name land apart
+- Each frame links `assets/<project>/`, holding every font and script it loads, so two projects' assets of one name land apart. oxfmt and oxlint skip it.
 - The sync removes a file below the folder's first level that no mapping writes. `--check` names it as stray and exits 14, while a PNG whose bytes alone differ only warns.
 - The output rests on two unpinned installs, the `frameboard` on PATH and the checkout's oxfmt, which formats each frame. A stale `node_modules` reads as drift, so run `bun install` first.
 - CI never runs the check, since `.canon/board/` is gitignored and CI holds no copy, so drift between board and record surfaces only when a session runs the sync
