@@ -125,7 +125,7 @@ const LIGHT_GROUNDS = [
 ] as const
 
 /** The day the record was last read whole, rendered into its frontmatter so `canon design regen` and the review point agree. */
-export const REVIEWED = '2026-11-10'
+export const REVIEWED = '2026-11-18'
 
 export const TOKENS: DesignTokens = {
   personality:
@@ -141,37 +141,37 @@ export const TOKENS: DesignTokens = {
     {
       role: 'background',
       intent: 'page canvas',
-      value: '#121211',
+      value: '#1e1e1c',
     },
     {
       role: 'surface',
       intent: 'the tray a product window sits in, and cards',
-      value: '#1a1a18',
+      value: '#292927',
     },
     {
       role: 'window',
       intent: 'the body of a product window',
-      value: '#1e1e1e',
+      value: '#31312e',
     },
     {
       role: 'chrome',
       intent: 'the window titlebar',
-      value: '#252523',
+      value: '#383835',
     },
     {
       role: 'band',
       intent: 'a quiet fill inside a window, such as a prompt',
-      value: '#282826',
+      value: '#3d3d39',
     },
     {
       role: 'border',
       intent: 'every rule and divider',
-      value: '#2e2e2c',
+      value: '#474742',
     },
     {
       role: 'edge',
       intent: "a control's outline",
-      value: '#2a2a28',
+      value: '#4d4d48',
     },
     {
       role: 'text',
@@ -188,7 +188,7 @@ export const TOKENS: DesignTokens = {
     {
       role: 'muted',
       intent: 'ledes, labels, captions, trailing notes',
-      value: '#8f8d88',
+      value: '#a9a7a0',
       grounds: DARK_GROUNDS,
     },
     {

@@ -79,7 +79,7 @@ describe('buildDesignCss', () => {
   it('emits one custom property per color role a browser can render', () => {
     const css = buildDesignCss()
 
-    expect(css).toContain('--color-background: #121211;')
+    expect(css).toContain('--color-background: #1e1e1c;')
     expect(css).toContain('--color-light-muted: #6b6a66;')
   })
 
