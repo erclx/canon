@@ -415,6 +415,35 @@ test.describe('the looping windows and their pause button', () => {
     await expect(buttons.first()).toBeHidden()
     await expect(buttons.last()).toBeHidden()
   })
+
+  for (const width of [320, 834, 1440]) {
+    test(`every pause button clears what its tray holds at ${width}`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: 'no-preference' })
+      await page.setViewportSize({ width, height: 900 })
+      await page.goto('/')
+
+      const overlaps = await page
+        .locator('.tray:has(> .pz)')
+        .evaluateAll((trays) =>
+          trays.flatMap((tray) => {
+            const button = tray.querySelector(':scope > .pz')
+            const content = tray.querySelector(':scope > :not(.pz)')
+            if (!button || !content)
+              return [`${tray.closest('section')?.id}: missing`]
+            const b = button.getBoundingClientRect()
+            const c = content.getBoundingClientRect()
+            return b.bottom > c.top && b.left < c.right
+              ? [tray.closest('section')?.id ?? '?']
+              : []
+          }),
+        )
+
+      expect(await page.locator('.tray:has(> .pz)').count()).toBe(6)
+      expect(overlaps).toEqual([])
+    })
+  }
 })
 
 test.describe('the opening agent view', () => {
