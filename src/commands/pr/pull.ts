@@ -62,11 +62,8 @@ type IdentityRead =
   | { readonly kind: 'refused'; readonly reason: PullRefusal }
 
 /**
- * Runs one `gh` invocation and hands back its stdout, or null when it failed.
- *
- * See src/worktrees/reclaim.ts for why gh needs the stripped environment: it
- * resolves its repository through the same variables git does and they beat
- * `cwd`, so a run from inside a hook would answer for another repository.
+ * One `gh` call's stdout, or null on failure. The environment is stripped since
+ * gh resolves its repository through git's variables, which beat `cwd` in a hook.
  */
 export async function gh(
   cwd: string,
@@ -93,11 +90,8 @@ type PullNumber =
     }
 
 /**
- * The number the caller named, or the one open pull request on the branch the
- * checkout at `cwd` holds.
- *
- * `{owner}` in the head filter is the base repository's owner, which is the
- * head owner for every pull request opened from a branch of this repository.
+ * The number the caller named, or the one open pull request on the checkout's
+ * branch. `{owner}` in the head filter is the base owner, which heads share here.
  */
 export async function resolvePullNumber(
   cwd: string,
@@ -259,13 +253,9 @@ interface PullFiles {
 }
 
 /**
- * The paths a pull request changed, read through the paginated files endpoint
- * so the set is the same from any checkout and never capped at the first
- * view. `copied` counts as added, since a copy leaves its source in place and
- * has no single base. `renamed` counts as added in `present` too, so the
- * changed set stays the same, and `renamedFrom` carries the old path of each
- * rename for a reader that compares against the base. Returns undefined when
- * the read fails, which refuses rather than rendering a short set.
+ * The paths a pull request changed, paginated so no view caps them. A copy or a
+ * rename counts as added, and `renamedFrom` keeps each rename's old path for a
+ * base read. Undefined on a failed read, which refuses rather than a short set.
  */
 export async function listPullFiles(
   cwd: string,

@@ -246,8 +246,7 @@ async function runPreview(
     )
   }
 
-  // Read ahead of the pull request, so a project with no fenced deploy is
-  // refused without a network call and never reaches a dispatch.
+  // Read first, so a project with no fenced deploy refuses with no network call.
   const pick = findDeployWorkflow(await readWorkflows(root))
   if (pick.kind === 'refused') {
     return refuseWith(
@@ -264,8 +263,7 @@ async function runPreview(
   }
   const { identity } = read
 
-  // A dispatch ignores the workflow's own push filter, so the filter is read
-  // here, ahead of both the mint and the check, rather than left to GitHub.
+  // A dispatch ignores the push filter, so it is read here ahead of mint and check.
   const changed =
     identity.number === undefined
       ? undefined
