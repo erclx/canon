@@ -726,10 +726,10 @@
 
 /* The dark tokens turn light under the light theme and no theme-fixed set exists, so a dark shot carries their dark values. */
 #records .thumb.dk {
-  --t-ground: #282826;
-  --t-bar: #1e1e1e;
-  --t-line: #2e2e2c;
-  --t-key: #252523;
+  --t-ground: #3d3d39;
+  --t-bar: #31312e;
+  --t-line: #474742;
+  --t-key: #383835;
   --t-text: #cfcdc8;
   --t-ring: #ff6b42;
 }

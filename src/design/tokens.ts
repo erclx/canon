@@ -1,12 +1,7 @@
 /**
- * The design system's one source of values.
- *
- * `canon/DESIGN.md` is rendered from this module rather than read by it, so
- * the document a person opens is a view and this file is the fact. A CSS
- * surface reads it as custom properties through `@/design/css`.
- *
- * The two artifacts can disagree, which is what the `design` gate stage exists
- * to catch. Nothing else compares them.
+ * The design system's one source of values. `canon/DESIGN.md` and the CSS
+ * from `@/design/css` are views of it, and only the `design` gate stage
+ * compares them.
  */
 
 /** A color role, its purpose, and the value every surface renders it at. */
@@ -105,15 +100,8 @@ export interface DesignTokens {
 const MONO = 'Geist Mono Variable, DejaVu Sans Mono, monospace'
 
 /**
- * The proportional stack every role but `code` and `view` declares. Geist is
- * the face the visual-direction track set throughout, embedded through
- * `FONT_FACES`.
- *
- * The stack stops at two names and a generic because
- * `web/src/styles/tokens.css` is written by `bun run web:tokens` and formatted
- * by oxfmt, and a declaration
- * past 80 columns is wrapped by the second and flattened by the first. Every
- * emitted line stays inside the width so the two writers never disagree.
+ * Stops at two names and a generic so its `web/src/styles/tokens.css` line
+ * stays under 80 columns, where oxfmt and `bun run web:tokens` disagree.
  */
 const SANS = 'Geist Variable, DejaVu Sans, sans-serif'
 
@@ -125,7 +113,7 @@ const LIGHT_GROUNDS = [
 ] as const
 
 /** The day the record was last read whole, rendered into its frontmatter so `canon design regen` and the review point agree. */
-export const REVIEWED = '2026-11-10'
+export const REVIEWED = '2026-11-18'
 
 export const TOKENS: DesignTokens = {
   personality:
@@ -141,37 +129,37 @@ export const TOKENS: DesignTokens = {
     {
       role: 'background',
       intent: 'page canvas',
-      value: '#121211',
+      value: '#1e1e1c',
     },
     {
       role: 'surface',
       intent: 'the tray a product window sits in, and cards',
-      value: '#1a1a18',
+      value: '#292927',
     },
     {
       role: 'window',
       intent: 'the body of a product window',
-      value: '#1e1e1e',
+      value: '#31312e',
     },
     {
       role: 'chrome',
       intent: 'the window titlebar',
-      value: '#252523',
+      value: '#383835',
     },
     {
       role: 'band',
       intent: 'a quiet fill inside a window, such as a prompt',
-      value: '#282826',
+      value: '#3d3d39',
     },
     {
       role: 'border',
       intent: 'every rule and divider',
-      value: '#2e2e2c',
+      value: '#474742',
     },
     {
       role: 'edge',
       intent: "a control's outline",
-      value: '#2a2a28',
+      value: '#4d4d48',
     },
     {
       role: 'text',
@@ -188,7 +176,7 @@ export const TOKENS: DesignTokens = {
     {
       role: 'muted',
       intent: 'ledes, labels, captions, trailing notes',
-      value: '#8f8d88',
+      value: '#a9a7a0',
       grounds: DARK_GROUNDS,
     },
     {
