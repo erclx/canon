@@ -1,21 +1,52 @@
 ---
 import mark from '../../../../assets/brand/mark.svg?raw'
-import { footer, nav } from '../../content/copy'
+import { footer, nav, sections, site } from '../../content/copy'
 import './style.css'
 
-/** One row under a rule: the mark back to the top, then the real destinations a reader goes next. */
+/**
+ * The mark and tagline beside three link columns, over a base line. The first
+ * column repeats the nav's section links, so they carry no `.sl` class and the
+ * nav's in-view marker never reads them.
+ */
 const glyph = mark.replace(/<!--[\s\S]*?-->/, '').trim()
+const columns = [
+  {
+    head: footer.heads.page,
+    links: sections.map((section) => ({
+      label: section.label,
+      href: `#${section.id}`,
+    })),
+  },
+  { head: footer.heads.read, links: footer.read },
+  { head: footer.heads.project, links: footer.project },
+]
 ---
 
 <footer class="site-footer">
   <div class="in">
-    <a class="brand" href="#top" aria-label={nav.back}>
-      <span class="glyph" aria-hidden="true" set:html={glyph} />
-      {nav.mark}
-    </a>
-    <nav aria-label="Project links">
-      {footer.links.map((link) => <a href={link.href}>{link.label}</a>)}
-      <a href={footer.license.href}>{footer.license.label}</a>
-    </nav>
+    <div class="lead">
+      <a class="brand" href="#top" aria-label={nav.back}>
+        <span class="glyph" aria-hidden="true" set:html={glyph} />
+        {nav.mark}
+      </a>
+      <p>{site.tagline}</p>
+    </div>
+    {
+      columns.map((column) => (
+        <div class="col">
+          <h2>{column.head}</h2>
+          <ul role="list">
+            {column.links.map((link) => (
+              <li>
+                <a href={link.href}>{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+    <div class="base">
+      {footer.base.map((part) => <span>{part}</span>)}
+    </div>
   </div>
 </footer>

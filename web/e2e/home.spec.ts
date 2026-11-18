@@ -249,6 +249,73 @@ test('the footer mark takes the reader back to the top', async ({ page }) => {
   expect(new URL(page.url()).hash).toBe('#top')
 })
 
+test.describe('the footer columns', () => {
+  test('sets three link columns beside the mark at 1440', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+
+    const tops = await page
+      .locator('.site-footer .col')
+      .evaluateAll((columns) =>
+        columns.map((column) => Math.round(column.getBoundingClientRect().top)),
+      )
+    const lead = await page.locator('.site-footer .lead').boundingBox()
+
+    expect(tops).toHaveLength(3)
+    expect(new Set(tops).size).toBe(1)
+    expect(lead).not.toBeNull()
+    expect(Math.abs(lead!.y - tops[0]!)).toBeLessThan(2)
+  })
+
+  test('every footer section link reaches its section, and none reads as a nav link', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const anchors = await page
+      .locator('.site-footer .col a[href^="#"]')
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href')))
+
+    const missing = await page.evaluate(
+      (ids) => ids.filter((id) => !id || !document.querySelector(id)),
+      anchors,
+    )
+
+    expect(anchors.length).toBeGreaterThan(6)
+    expect(missing).toEqual([])
+    await expect(page.locator('.site-footer a.sl')).toHaveCount(0)
+    await expect(page.locator('.links > a.sl')).toHaveCount(6)
+  })
+
+  test('a footer section link lands its section under the bar', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+
+    await page.locator('.site-footer .col a[href="#worktrees"]').click()
+
+    await expect(page.locator('#worktrees h2')).toBeInViewport(SETTLE)
+    expect(new URL(page.url()).hash).toBe('#worktrees')
+  })
+
+  test('pairs the columns two by two at 390', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 900 })
+    await page.goto('/')
+
+    const lefts = await page
+      .locator('.site-footer .col')
+      .evaluateAll((columns) =>
+        columns.map((column) =>
+          Math.round(column.getBoundingClientRect().left),
+        ),
+      )
+
+    expect(lefts).toHaveLength(3)
+    expect(lefts[0]).toBe(lefts[2])
+    expect(lefts[1]).toBeGreaterThan(lefts[0]!)
+  })
+})
+
 test('the footer mark carries no underline under hover', async ({ page }) => {
   await page.goto('/')
   const brand = page.locator('.site-footer a.brand')
