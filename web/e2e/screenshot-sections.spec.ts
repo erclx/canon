@@ -41,6 +41,10 @@ const SECTIONS = [
   'craft',
   'guardrails',
   'worktrees',
+  'film',
+  'board',
+  'drive',
+  'health',
   'setup',
   'try',
 ] as const

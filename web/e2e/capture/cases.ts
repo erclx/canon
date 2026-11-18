@@ -7,8 +7,8 @@ import type {
 export const EVIDENCE_ROOT = 'evidence'
 
 /**
- * The landing page's eight sections, top to bottom. Every entry is a section a
- * reviewer reads on its own, so a diff lands on the part that moved rather
+ * The landing page's twelve sections, top to bottom. Every entry is a section
+ * a reviewer reads on its own, so a diff lands on the part that moved rather
  * than on one image of the whole page.
  */
 const HOME_SECTIONS: CaptureSection[] = [
@@ -18,6 +18,10 @@ const HOME_SECTIONS: CaptureSection[] = [
   { name: 'craft', selector: '#craft' },
   { name: 'guardrails', selector: '#guardrails' },
   { name: 'worktrees', selector: '#worktrees' },
+  { name: 'film', selector: '#film' },
+  { name: 'board', selector: '#board' },
+  { name: 'drive', selector: '#drive' },
+  { name: 'health', selector: '#health' },
   { name: 'setup', selector: '#setup' },
   { name: 'try', selector: '#try' },
 ]
