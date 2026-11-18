@@ -42,15 +42,23 @@ export const pause = {
   play: 'Play the animation',
 }
 
-/** The page's sections in the order they run, which the nav, its menus, and the in-view marker all read. */
+/**
+ * The page's sections in the order they run, which the nav, its menus, and the
+ * in-view marker all read. Ten links do not fit the bar's one row at 1040, so
+ * a section off the bar is listed in the Sections menu and the footer alone.
+ */
 export const sections = [
   // README.md: canon-allow-readme-paraphrase: one-word jump labels for the README's own section headings.
-  { id: 'roles', label: 'Roles' },
-  { id: 'records', label: 'Records' },
-  { id: 'craft', label: 'Craft' },
-  { id: 'guardrails', label: 'Guardrails' },
-  { id: 'worktrees', label: 'Worktrees' },
-  { id: 'setup', label: 'Setup' },
+  { id: 'roles', label: 'Roles', bar: true },
+  { id: 'records', label: 'Records', bar: true },
+  { id: 'craft', label: 'Craft', bar: true },
+  { id: 'guardrails', label: 'Guardrails', bar: true },
+  { id: 'worktrees', label: 'Worktrees', bar: true },
+  { id: 'film', label: 'Film', bar: false },
+  { id: 'board', label: 'Board', bar: false },
+  { id: 'drive', label: 'Drive', bar: false },
+  { id: 'health', label: 'Audits', bar: false },
+  { id: 'setup', label: 'Setup', bar: true },
 ] as const
 
 export const nav = {
@@ -166,6 +174,118 @@ export const worktrees = {
     dirs: ['plans/', 'review/', 'tasks/'],
     shared: 'shared by every worktree',
   },
+}
+
+export const film = {
+  // README.md: "A pull request arrives with a film of the change"
+  head: 'A pull request arrives with a film of the change',
+  // README.md: "A diff cannot show a hover or a focus ring. Canon films the change in the running app and posts the reel beside the checklist a reviewer ticks."
+  lede: 'A diff cannot show a hover or a focus ring. Canon films the change in the running app and posts the reel beside the checklist a reviewer ticks.',
+  /**
+   * The evidence comment around the reel `web/film-plan.json` films from this
+   * page's records section, one checklist line per beat in the plan's order.
+   */
+  // README.md: canon-allow-readme-paraphrase: the comment's labels and the checklist naming what each filmed beat shows, which no README sentence carries.
+  view: {
+    title: 'Evidence',
+    source: 'pull request, the records section',
+    alt: 'A reel of the records section: the Task sheet is picked, an outcome is ticked, and the rendered view keeps the tick',
+    who: 'UI reviewer',
+    checks: [
+      'The Task sheet comes up on its pick',
+      'A ticked outcome reads [x] in the source',
+      'The rendered view keeps the tick',
+    ],
+  },
+}
+
+export const board = {
+  // README.md: "The board runs while you are away"
+  head: 'The board runs while you are away',
+  // README.md: "Agent work stalls whenever you step out. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide."
+  lede: 'Agent work stalls whenever you step out. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide.',
+}
+
+export const drive = {
+  // README.md: "Design decided by looking"
+  head: 'Design decided by looking',
+  // README.md: "A description of a layout settles nothing. Canon drives the running app beside you and puts the options on a board for you to pick."
+  lede: 'A description of a layout settles nothing. Canon drives the running app beside you and puts the options on a board for you to pick.',
+}
+
+export const health = {
+  // README.md: "Audits that report where the code is rotting"
+  head: 'Audits that report where the code is rotting',
+  // README.md: "Generated code grows long files nobody reads. Canon measures file, function, and comment length, and charts what shipped each week."
+  lede: 'Generated code grows long files nobody reads. Canon measures file, function, and comment length, and charts what shipped each week.',
+  /** The labels around the figures `web/src/lib/health.ts` reads at build time. */
+  // README.md: canon-allow-readme-paraphrase: column heads and captions for the two reports, which no README sentence carries.
+  view: {
+    audit: '$ canon code audit',
+    history: '$ canon history',
+    cols: { file: 'File', fn: 'Function', lines: 'Lines' },
+    longFiles: (count: number, limit: number) =>
+      `${count} files past ${limit.toLocaleString('en-US')} lines`,
+    dense: (count: number, cap: number) =>
+      `${count} files past ${Math.round(cap * 100)}% comments`,
+    read: (files: number) => `${files} files read`,
+    caption: (to: string) => `Pull requests merged each week, to ${to}`,
+  },
+}
+
+/**
+ * The unattended board, from the night's start to the state it rests on. Each
+ * move lands one row in a lane, or changes its line in place, at its clock time.
+ */
+// README.md: canon-allow-readme-paraphrase: page fiction of an unattended run drawn from how the orchestrator really moves rows, which the README describes but never quotes.
+export const boardScene = {
+  title: 'Board',
+  since: 'unattended since 23:00',
+  start: '23:00',
+  lanes: ['Up next', 'In flight', 'Ready to merge'],
+  rows: [
+    { name: 'gate-stages', lane: 0, line: 'plan linked' },
+    { name: 'film-beats', lane: 0, line: 'needs a plan' },
+    { name: 'take-timer', lane: 0, line: 'plan linked' },
+    { name: 'sync-stamp', lane: 1, line: 'worker, slice 3 of 3' },
+    { name: 'review-lift', lane: 1, line: 'worker, slice 2 of 2' },
+    { name: 'sync-coverage', lane: 1, line: 'review, first pass' },
+    { name: 'drive-check', lane: 1, line: 'review, second pass' },
+  ],
+  moves: [
+    { at: '23:40', name: 'take-timer', lane: 1, line: 'worker, slice 1 of 3' },
+    { at: '00:40', name: 'drive-check', lane: 2, line: 'review closed' },
+    { at: '01:20', name: 'sync-stamp', lane: 1, line: 'review, second pass' },
+    {
+      at: '01:55',
+      name: 'review-lift',
+      lane: 1,
+      line: 'one question for you',
+      waiting: true,
+    },
+    { at: '02:10', name: 'sync-coverage', lane: 2, line: 'review closed' },
+    { at: '02:14', name: 'take-timer', lane: 1, line: 'worker, slice 2 of 3' },
+  ],
+  /** Names the row that waits, since its edge alone carries the state. */
+  waitingLabel: 'waits for you',
+}
+
+/**
+ * The board a drive put up for the page's own footer, which settled on the
+ * columns option. Each option's bars sketch its layout as a grey box.
+ */
+// README.md: canon-allow-readme-paraphrase: the drive board the footer was picked on, drawn as grey boxes, which no README sentence carries.
+export const driveScene = {
+  title: 'Board',
+  board: 'footer-layout',
+  question: 'Which footer should the page take?',
+  options: [
+    { arm: 'arm-0', name: 'as it stands', bars: ['short'] },
+    { arm: 'arm-1', name: 'columns', bars: ['short', 'long', 'long', 'mid'] },
+    { arm: 'arm-2', name: 'wordmark', bars: ['short', 'mid', 'block'] },
+  ],
+  picked: 1,
+  pickedLabel: 'picked',
 }
 
 export const setup = {

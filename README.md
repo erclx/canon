@@ -77,6 +77,22 @@ An instruction can be ignored. These four parts fail the run when a step is skip
 
 Agents working in one checkout overwrite each other. Each worker builds in its own worktree on its own branch, and every session reads and writes the one `.canon/` record in the main checkout, so no worktree keeps a copy of its own.
 
+## A pull request arrives with a film of the change
+
+A diff cannot show a hover or a focus ring. Canon films the change in the running app and posts the reel beside the checklist a reviewer ticks.
+
+## The board runs while you are away
+
+Agent work stalls whenever you step out. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide.
+
+## Design decided by looking
+
+A description of a layout settles nothing. Canon drives the running app beside you and puts the options on a board for you to pick.
+
+## Audits that report where the code is rotting
+
+Generated code grows long files nobody reads. Canon measures file, function, and comment length, and charts what shipped each week.
+
 ## Setting up a project
 
 Every repository grows its own agent setup and lets it drift. The project starts with its stack's own tool, such as `bun init` or `npm create vite`, or with `/canon:target-scaffold` in an empty folder, and canon layers on top.

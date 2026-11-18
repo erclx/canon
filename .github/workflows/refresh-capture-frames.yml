@@ -41,6 +41,8 @@ jobs:
         with:
           # Not GITHUB_TOKEN, which opens a pull request no check ever runs on
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          # The health section charts merges a week, which a shallow clone cannot read.
+          fetch-depth: 0
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2

@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>board-built-834</title>
+    <link rel="stylesheet" href="../../assets/landing-v5/built/head.css" />
+    <link
+      rel="stylesheet"
+      href="../../assets/landing-v5/built/_astro/index.C_lVWl_E.css"
+    />
+    <style>
+      body {
+        background: var(--ground);
+      }
+      .site-nav {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      const mm = window.matchMedia.bind(window)
+      window.matchMedia = (q) =>
+        q.includes('prefers-reduced-motion')
+          ? {
+              matches: true,
+              media: q,
+              addEventListener() {},
+              removeEventListener() {},
+              addListener() {},
+              removeListener() {},
+            }
+          : mm(q)
+    </script>
+    <main>
+      <section class="sec split-left" id="board">
+        <div class="sec-head">
+          <h2>The board runs while you are away</h2>
+          <p>
+            Agent work stalls whenever you step out. The orchestrator works the
+            ready rows from now or from a set time, and stops at what only you
+            decide.
+          </p>
+        </div>
+        <div class="tray">
+          <button
+            type="button"
+            class="pz"
+            aria-label="Pause the animation"
+            data-pause="Pause the animation"
+            data-play="Play the animation"
+            data-paused="false"
+          >
+            <svg
+              viewBox="0 0 16 16"
+              width="14"
+              height="14"
+              class="pz-off"
+              aria-hidden="true"
+            >
+              <path
+                d="M5 3.5v9M11 3.5v9"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+            <svg
+              viewBox="0 0 16 16"
+              width="14"
+              height="14"
+              class="pz-on"
+              aria-hidden="true"
+            >
+              <path d="M5.5 3.5l6.5 4.5-6.5 4.5z" fill="currentColor" />
+            </svg>
+          </button>
+          <div class="win bd">
+            <div class="bh">
+              <b>Board</b> <span class="since">· unattended since 23:00</span>
+              <span class="clock">02:14</span>
+            </div>
+            <div class="lanes">
+              <div class="lane">
+                <p class="ln">Up next</p>
+                <ul role="list" data-lane="0">
+                  <li class="row" data-name="gate-stages">
+                    <span class="nm">gate-stages</span>
+                    <span class="st">plan linked</span>
+                    <span class="wl sr-only">waits for you</span>
+                  </li>
+                  <li class="row" data-name="film-beats">
+                    <span class="nm">film-beats</span>
+                    <span class="st">needs a plan</span>
+                    <span class="wl sr-only">waits for you</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="lane">
+                <p class="ln">In flight</p>
+                <ul role="list" data-lane="1">
+                  <li class="row" data-name="sync-stamp">
+                    <span class="nm">sync-stamp</span>
+                    <span class="st">review, second pass</span>
+                    <span class="wl sr-only">waits for you</span>
+                  </li>
+                  <li class="row wait" data-name="review-lift">
+                    <span class="nm">review-lift</span>
+                    <span class="st">one question for you</span>
+                    <span class="wl sr-only">waits for you</span>
+                  </li>
+                  <li class="row" data-name="take-timer">
+                    <span class="nm">take-timer</span>
+                    <span class="st">worker, slice 2 of 3</span>
+                    <span class="wl sr-only">waits for you</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="lane">
+                <p class="ln">Ready to merge</p>
+                <ul role="list" data-lane="2">
+                  <li class="row" data-name="drive-check">
+                    <span class="nm">drive-check</span>
+                    <span class="st">review closed</span>
+                    <span class="wl sr-only">waits for you</span>
+                  </li>
+                  <li class="row" data-name="sync-coverage">
+                    <span class="nm">sync-coverage</span>
+                    <span class="st">review closed</span>
+                    <span class="wl sr-only">waits for you</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <script type="application/json" class="board-data">
+          {
+            "start": "23:00",
+            "rows": [
+              { "name": "gate-stages", "lane": 0, "line": "plan linked" },
+              { "name": "film-beats", "lane": 0, "line": "needs a plan" },
+              { "name": "take-timer", "lane": 0, "line": "plan linked" },
+              {
+                "name": "sync-stamp",
+                "lane": 1,
+                "line": "worker, slice 3 of 3"
+              },
+              {
+                "name": "review-lift",
+                "lane": 1,
+                "line": "worker, slice 2 of 2"
+              },
+              {
+                "name": "sync-coverage",
+                "lane": 1,
+                "line": "review, first pass"
+              },
+              {
+                "name": "drive-check",
+                "lane": 1,
+                "line": "review, second pass"
+              }
+            ],
+            "moves": [
+              {
+                "at": "23:40",
+                "name": "take-timer",
+                "lane": 1,
+                "line": "worker, slice 1 of 3"
+              },
+              {
+                "at": "00:40",
+                "name": "drive-check",
+                "lane": 2,
+                "line": "review closed"
+              },
+              {
+                "at": "01:20",
+                "name": "sync-stamp",
+                "lane": 1,
+                "line": "review, second pass"
+              },
+              {
+                "at": "01:55",
+                "name": "review-lift",
+                "lane": 1,
+                "line": "one question for you",
+                "waiting": true
+              },
+              {
+                "at": "02:10",
+                "name": "sync-coverage",
+                "lane": 2,
+                "line": "review closed"
+              },
+              {
+                "at": "02:14",
+                "name": "take-timer",
+                "lane": 1,
+                "line": "worker, slice 2 of 3"
+              }
+            ]
+          }
+        </script>
+      </section>
+      <script
+        type="module"
+        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.BF3AODPo.js"
+      ></script>
+      <script
+        type="module"
+        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.B3RgzV6C.js"
+      ></script>
+      <script
+        type="module"
+        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.BdhR_KjZ.js"
+      ></script>
+      <script
+        type="module"
+        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.CKEh0Xvc.js"
+      ></script>
+      <script
+        type="module"
+        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.pg9BapPk.js"
+      ></script>
+      <script
+        type="module"
+        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.sTlfAzAI.js"
+      ></script>
+      <script
+        type="module"
+        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.DcqrLN8m.js"
+      ></script>
+      <script
+        type="module"
+        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.DXYsz3cf.js"
+      ></script>
+      <script
+        type="module"
+        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.ChZkksum.js"
+      ></script>
+      <script
+        type="module"
+        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.U0lo7e7T.js"
+      ></script>
+      <script
+        type="module"
+        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.CUV4coFf.js"
+      ></script>
+    </main>
+  </body>
+</html>

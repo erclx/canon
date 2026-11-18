@@ -1,0 +1,70 @@
+---
+import { drive, driveScene } from '../../../content/copy'
+import PauseButton from '../../pause-button/index.astro'
+import './style.css'
+
+/**
+ * The board a drive put up for this page's own footer: three options side by
+ * side over the question that asked for them, each sketched as grey bars. The
+ * pick lands on its card and its answer together, then clears and lands
+ * again. The page renders the landed pick, which reduced motion keeps.
+ */
+
+interface Props {
+  /** The shape `pages/index.astro` gives the section, read by `styles/global.css`. */
+  class?: string
+}
+
+const { class: shape } = Astro.props
+---
+
+<section class:list={['sec', shape]} id="drive">
+  <div class="sec-head">
+    <h2>{drive.head}</h2>
+    <p>{drive.lede}</p>
+  </div>
+  <div class="tray">
+    <PauseButton />
+    <div class="win dr on">
+      <div class="dh">
+        <b>{driveScene.title}</b>
+        <span>· {driveScene.board}</span>
+      </div>
+      <ul class="opts" role="list">
+        {
+          driveScene.options.map((option, index) => (
+            <li class:list={['opt', { pk: index === driveScene.picked }]}>
+              <p class="ol">
+                {option.arm}, {option.name}
+                {index === driveScene.picked && (
+                  <span class="sr-only">, {driveScene.pickedLabel}</span>
+                )}
+              </p>
+              <span class="bars" aria-hidden="true">
+                {option.bars.map((bar) => (
+                  <i class={bar} />
+                ))}
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="q">
+        <p>{driveScene.question}</p>
+        <span class="chips">
+          {
+            driveScene.options.map((option, index) => (
+              <span class:list={['chip', { pk: index === driveScene.picked }]}>
+                {index === driveScene.picked
+                  ? `${option.arm} ${option.name}`
+                  : option.arm}
+              </span>
+            ))
+          }
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="./client.ts"></script>

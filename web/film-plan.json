@@ -1,0 +1,45 @@
+{
+  "beats": [
+    {
+      "name": "pick the task",
+      "setup": [{ "kind": "wait", "ms": 600 }],
+      "steps": [
+        { "kind": "click", "target": "#records .pick[data-i=\"3\"]" },
+        { "kind": "wait", "ms": 900 }
+      ]
+    },
+    {
+      "name": "tick an outcome",
+      "setup": [
+        { "kind": "wait", "ms": 600 },
+        { "kind": "click", "target": "#records .pick[data-i=\"3\"]" },
+        { "kind": "wait", "ms": 1600 }
+      ],
+      "steps": [
+        {
+          "kind": "click",
+          "target": "#records .sheet[data-i=\"3\"] .rk[data-ck=\"1\"]"
+        }
+      ]
+    },
+    {
+      "name": "show it rendered",
+      "setup": [
+        { "kind": "wait", "ms": 600 },
+        { "kind": "click", "target": "#records .pick[data-i=\"3\"]" },
+        { "kind": "wait", "ms": 1600 },
+        {
+          "kind": "click",
+          "target": "#records .sheet[data-i=\"3\"] .rk[data-ck=\"1\"]"
+        },
+        { "kind": "wait", "ms": 400 }
+      ],
+      "steps": [
+        {
+          "kind": "click",
+          "target": "#records .sheet[data-i=\"3\"] .vt button[data-v=\"view\"]"
+        }
+      ]
+    }
+  ]
+}
