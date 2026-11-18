@@ -249,6 +249,73 @@ test('the footer mark takes the reader back to the top', async ({ page }) => {
   expect(new URL(page.url()).hash).toBe('#top')
 })
 
+test.describe('the footer columns', () => {
+  test('sets three link columns beside the mark at 1440', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+
+    const tops = await page
+      .locator('.site-footer .col')
+      .evaluateAll((columns) =>
+        columns.map((column) => Math.round(column.getBoundingClientRect().top)),
+      )
+    const lead = await page.locator('.site-footer .lead').boundingBox()
+
+    expect(tops).toHaveLength(3)
+    expect(new Set(tops).size).toBe(1)
+    expect(lead).not.toBeNull()
+    expect(Math.abs(lead!.y - tops[0]!)).toBeLessThan(2)
+  })
+
+  test('every footer section link reaches its section, and none reads as a nav link', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const anchors = await page
+      .locator('.site-footer .col a[href^="#"]')
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href')))
+
+    const missing = await page.evaluate(
+      (ids) => ids.filter((id) => !id || !document.querySelector(id)),
+      anchors,
+    )
+
+    expect(anchors.length).toBeGreaterThan(6)
+    expect(missing).toEqual([])
+    await expect(page.locator('.site-footer a.sl')).toHaveCount(0)
+    await expect(page.locator('.links > a.sl')).toHaveCount(6)
+  })
+
+  test('a footer section link lands its section under the bar', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+
+    await page.locator('.site-footer .col a[href="#worktrees"]').click()
+
+    await expect(page.locator('#worktrees h2')).toBeInViewport(SETTLE)
+    expect(new URL(page.url()).hash).toBe('#worktrees')
+  })
+
+  test('pairs the columns two by two at 390', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 900 })
+    await page.goto('/')
+
+    const lefts = await page
+      .locator('.site-footer .col')
+      .evaluateAll((columns) =>
+        columns.map((column) =>
+          Math.round(column.getBoundingClientRect().left),
+        ),
+      )
+
+    expect(lefts).toHaveLength(3)
+    expect(lefts[0]).toBe(lefts[2])
+    expect(lefts[1]).toBeGreaterThan(lefts[0]!)
+  })
+})
+
 test('the footer mark carries no underline under hover', async ({ page }) => {
   await page.goto('/')
   const brand = page.locator('.site-footer a.brand')
@@ -266,6 +333,147 @@ test('the footer mark carries no underline under hover', async ({ page }) => {
 
   expect(linkLine).toBe('underline')
   expect(brandLine).toBe('none')
+})
+
+test.describe('section shapes', () => {
+  test('roles sets its tray left of the heading at 1440', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+
+    const head = await page.locator('#roles .sec-head').boundingBox()
+    const tray = await page.locator('#roles .tray').boundingBox()
+
+    expect(head).not.toBeNull()
+    expect(tray).not.toBeNull()
+    expect(tray!.x + tray!.width).toBeLessThanOrEqual(head!.x)
+  })
+
+  test('worktrees sets its heading left of the tray at 1440', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+
+    const head = await page.locator('#worktrees .sec-head').boundingBox()
+    const tray = await page.locator('#worktrees .tray').boundingBox()
+
+    expect(head).not.toBeNull()
+    expect(tray).not.toBeNull()
+    expect(head!.x + head!.width).toBeLessThanOrEqual(tray!.x)
+  })
+
+  for (const width of [834, 390]) {
+    test(`every split stacks its text over its tray at ${width}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 })
+      await page.goto('/')
+
+      const misplaced = await page
+        .locator('main > section.split-left, main > section.split-right')
+        .evaluateAll((sections) =>
+          sections.flatMap((section) => {
+            const head = section.querySelector('.sec-head')
+            const tray = section.querySelector('.tray')
+            if (!head || !tray) return [`${section.id}: missing`]
+            const h = head.getBoundingClientRect()
+            const t = tray.getBoundingClientRect()
+            return h.bottom <= t.top ? [] : [section.id]
+          }),
+        )
+
+      expect(misplaced).toEqual([])
+    })
+  }
+
+  test('no two banded sections touch, and the opening carries no band', async ({
+    page,
+  }) => {
+    await page.goto('/')
+
+    const shapes = await page
+      .locator('main > section')
+      .evaluateAll((nodes) =>
+        nodes.map((node) => node.classList.contains('banded')),
+      )
+
+    expect(shapes[0]).toBe(false)
+    expect(shapes.some((banded, i) => banded && shapes[i + 1])).toBe(false)
+    expect(shapes.filter(Boolean)).toHaveLength(3)
+  })
+})
+
+test.describe('the band', () => {
+  for (const theme of ['light', 'dark'] as const) {
+    test(`a banded tray takes the ground and its band the tray grey in ${theme}`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme: theme })
+      await page.goto('/')
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
+
+      const colors = await page.evaluate(() => {
+        const probe = document.createElement('div')
+        document.body.append(probe)
+        const resolve = (role: string) => {
+          probe.style.backgroundColor = `var(${role})`
+          return getComputedStyle(probe).backgroundColor
+        }
+        const ground = resolve('--ground')
+        const grey = resolve('--tray')
+        probe.remove()
+        const banded = [
+          ...document.querySelectorAll<HTMLElement>('main > section.banded'),
+        ]
+        return {
+          ground,
+          grey,
+          bands: banded.map((node) => getComputedStyle(node).backgroundColor),
+          trays: banded.map((node) => {
+            const tray = node.querySelector('.tray')
+            return tray ? getComputedStyle(tray).backgroundColor : 'missing'
+          }),
+        }
+      })
+
+      expect(colors.ground).not.toBe(colors.grey)
+      expect(colors.bands).toEqual([colors.grey, colors.grey, colors.grey])
+      expect(colors.trays).toEqual([
+        colors.ground,
+        colors.ground,
+        colors.ground,
+      ])
+    })
+  }
+
+  test('the band fills the viewport edge to edge at 1440', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+    await page.locator('.site-nav').evaluate((node) => {
+      node.style.visibility = 'hidden'
+    })
+    const guardrails = page.locator('#guardrails')
+    await guardrails.evaluate((node) =>
+      window.scrollBy(0, node.getBoundingClientRect().top - 200),
+    )
+    const box = await guardrails.boundingBox()
+    expect(box).not.toBeNull()
+    // A row inside the section's top padding, above the heading.
+    const y = box!.y + 20
+    const pixel = (x: number) =>
+      page.screenshot({ clip: { x, y, width: 1, height: 1 } })
+
+    const left = await pixel(2)
+    const inside = await pixel(box!.x + 10)
+    const right = await pixel(1437)
+    const ground = await page.screenshot({
+      clip: { x: 2, y: box!.y - 20, width: 1, height: 1 },
+    })
+
+    expect(left.equals(inside)).toBe(true)
+    expect(right.equals(inside)).toBe(true)
+    expect(inside.equals(ground)).toBe(false)
+  })
 })
 
 test.describe('the craft section', () => {

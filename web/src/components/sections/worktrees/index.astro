@@ -16,9 +16,16 @@ import './style.css'
  * rests on its second step.
  */
 const REST = 1
+
+interface Props {
+  /** The shape `pages/index.astro` gives the section, read by `styles/global.css`. */
+  class?: string
+}
+
+const { class: shape } = Astro.props
 ---
 
-<section class="sec" id="worktrees">
+<section class:list={['sec', shape]} id="worktrees">
   <div class="sec-head">
     <h2>{worktrees.head}</h2>
     <p>{worktrees.lede}</p>

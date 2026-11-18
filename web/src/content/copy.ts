@@ -226,18 +226,31 @@ export const tryIt = {
   first: 'Then run `/canon:target-setup` in a project.',
 }
 
+/**
+ * The footer's three link columns in order, the first listing `sections`
+ * under its heading, then the base line under them.
+ */
 export const footer = {
-  links: [
+  // README.md: canon-allow-readme-paraphrase: column headings for the footer's links, which no README sentence carries.
+  heads: { page: 'On this page', read: 'Read', project: 'Project' },
+  read: [
     { label: 'Docs', href: DOCS },
     {
       label: 'Skill map',
       href: `${REPO}/blob/main/docs/workflow/skill-map.md`,
     },
+    // README.md: canon-allow-readme-paraphrase: the jump to the install section, which the README opens on as Quick start.
+    { label: 'Install', href: '#try' },
+  ],
+  project: [
     { label: 'GitHub', href: REPO },
     { label: 'npm', href: NPM },
+    // README.md: "MIT license"
+    { label: 'MIT licensed', href: `${REPO}/blob/main/LICENSE` },
   ],
+  /** The base line's two ends: the license plainly, then the author and the host. */
   // README.md: "MIT license"
-  license: { label: 'MIT licensed', href: `${REPO}/blob/main/LICENSE` },
+  base: ['MIT licensed', `${site.author} · ${site.label}`],
 }
 
 /**

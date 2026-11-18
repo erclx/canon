@@ -82,9 +82,16 @@ function explorerOf(html: string): Entry[] {
   }
   return tree
 }
+
+interface Props {
+  /** The shape `pages/index.astro` gives the section, read by `styles/global.css`. */
+  class?: string
+}
+
+const { class: shape } = Astro.props
 ---
 
-<section class="sec" id="records">
+<section class:list={['sec', shape]} id="records">
   <div class="sec-head">
     <h2>{copy.head}</h2>
     <p>{copy.lede}</p>

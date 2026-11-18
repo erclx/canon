@@ -4,6 +4,12 @@
   --pin: calc(var(--nav-h) + 24px);
 }
 
+/* On a band the tray takes the page ground, so the sheets stacked behind mix toward it. */
+#records.banded {
+  --back1: color-mix(in srgb, var(--win) 55%, var(--ground));
+  --back2: color-mix(in srgb, var(--win) 25%, var(--ground));
+}
+
 #records .skip-stack {
   display: inline-block;
   margin-top: 18px;

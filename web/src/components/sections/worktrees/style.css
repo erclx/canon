@@ -6,12 +6,13 @@
   --join: color-mix(in srgb, var(--ink) 15%, var(--win));
 }
 
+/* Above 900 the cards sit beside the heading, so only the stacked layouts space the tray off the lede. */
 #worktrees .tray {
-  margin-top: 52px;
+  margin-top: 0;
 }
 
 #worktrees .card {
-  padding: 28px 32px 26px;
+  padding: 24px;
   background: var(--win);
   border-radius: var(--radius-frame);
   box-shadow: var(--shadow-window);
@@ -20,7 +21,7 @@
 #worktrees .wts {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 12px;
   margin: 0;
   padding: 0;
   list-style: none;

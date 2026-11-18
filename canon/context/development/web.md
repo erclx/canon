@@ -19,7 +19,7 @@ Holds the page, built from components that read their figures through `lib/`. A 
 - `content/copy.ts` holds the copy and the product views' scenes, each string cited to `README.md` or marked as a paraphrase, gated by `readmeCitations`
 - `content/` also holds the sessions, craft's practices with each quote's ledger row, and the record sheets under `content/records/`, one formatted HTML file each
 - `lib/skills.ts` reads the skill catalog for the opening's `/` menu, and `lib/scene.ts` paces every scene window, halting it while the reader holds it or presses its pause button
-- `styles/global.css` imports Tailwind first, then maps role names onto `tokens.css` in `@layer base` beside the shared tray, window, and picker classes, and `base.astro` embeds Geist and Geist Mono
+- `styles/global.css` imports Tailwind, then maps roles onto `tokens.css` in `@layer base` beside the shared tray, window, picker, split, and band classes, and `base.astro` embeds Geist and Geist Mono
 
 ### `web/`
 
