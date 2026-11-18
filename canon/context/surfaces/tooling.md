@@ -13,7 +13,7 @@ Owns the golden configs a project inherits, layered across a `base` to `web` to 
 
 ### `tooling/<stack>/`
 
-Holds one stack, always with a `manifest.toml` and a `reference.md`, plus `configs/` and `seeds/`. A stack that stands alone, such as `cloudflare` or `shell`, sets `extends = ""` and layers onto a root already carrying another.
+Holds one stack, always with a `manifest.toml` and a `reference.md`, plus `configs/` and `seeds/`. A stack that stands alone, such as `cloudflare` or `shell`, sets `extends = ""` and layers onto a root already carrying another. `shippedCommentCaps` fails a file in either past a comment cap, touched or not, since every synced target fails on it.
 
 - Adding a stack means copying the closest one from `canon tooling list`, filling its manifest and reference, adding configs and seeds, and running `canon tooling verify <name>`
 - A manifest block injects one thing. `[dependencies.dev]` and `[scripts]` add only what is missing, `[gitignore]` adds a group, and `[verify] prepare` runs between scaffold and sync.
@@ -66,12 +66,8 @@ Holds the files every project starts with and then owns.
 - Base's `verify.yml` and PR template are seeds because a polyglot target extends them, so a later change to either reaches no installed target, as `canon tooling diff` compares seeds for presence only
 - `configPaths` shadows a seed at a path a stack ships as a config, and a seed is copy-once, so re-seeding a structured file means deleting it and syncing again
 - Per-stack `ci.md` and `development.md` seeds are not shipped, and each stack reference carries a `## CI docs (extend)` section telling the agent which rows to append
-
-Three gate stages hold what a seed may carry.
-
 - `seedIndependence` in `src/gate/boundaries.ts` fails on seed markdown naming the toolkit binary, so a seed describes an optional capability instead
 - `capabilitySeeding` fails a hook, workflow, or husky script with no seed unless the file carries a `canon-no-seed:` comment, and it compares filenames only
-- `shippedCommentCaps` fails a file under any stack's `configs/` or `seeds/` past the head, in-body, or history comment cap, touched or not
 
 ### `tooling/claude/`
 

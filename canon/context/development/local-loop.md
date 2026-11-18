@@ -36,9 +36,7 @@ The run commands, which stack references and `docs/target/projects.md` send a se
 
 ### `src/gate/`
 
-Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`, and every threshold comparison in `measures.ts`. Consumer replay runs the frozen snapshots on a synced-surface change, so before a release run `bun src/cli.ts sandbox replay <checkout>...` against the real consumers.
-
-Comment stages fail a touched file's old comments. Shipped comment caps fails a file under any stack's `configs/` or `seeds/` whether touched or not, since a target fails on every file sync writes.
+Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`, and thresholds in `measures.ts`. Consumer replay runs frozen snapshots on a synced-surface change, so before a release run `bun src/cli.ts sandbox replay <checkout>...` against real consumers. Comment stages fail touched files, and Shipped comment caps shipped ones.
 
 - Stages run in table order, all in canon's checkout and the `shared` ones elsewhere. The first fact halts the run. Unreferenced rules, Audit set, and Comment share per file only report
 - The changed set unions the diff against `origin/main`, the working tree, and untracked files. Fallbacks widen, and `--all` forces every stage. On `main` the local ref is HEAD, so the base is remote.
