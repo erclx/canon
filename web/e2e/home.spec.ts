@@ -1105,6 +1105,8 @@ test.describe('new sections', () => {
     test('the film ticks its last checklist line before the reel loops', async ({
       page,
     }) => {
+      // A paused clock starts the reel's time when it loads and moves it only by runFor, so real time cannot carry it past the loop.
+      await page.clock.pauseAt(Date.now() + 1_000)
       const reel = page.locator('#film .stage img')
       await reel.scrollIntoViewIfNeeded()
       await expect
