@@ -11,6 +11,7 @@ import {
   commentFileShare,
   commentHeadBlocks,
   commentHistory,
+  shippedCommentCaps,
 } from '@/gate/comment-caps'
 import { fileLength } from '@/gate/file-length'
 import {
@@ -470,6 +471,13 @@ export const STAGES: readonly Stage[] = [
     shared: true,
     label: 'Comment share per file',
     checks: [{ kind: 'measure', measure: commentFileShare }],
+  },
+  {
+    // Unshared, since a target holds no `tooling/`, and unscoped, since a
+    // target fails on every file sync writes, touched here or not.
+    id: 'shipped-comment-caps',
+    label: 'Shipped comment caps',
+    checks: [{ kind: 'measure', measure: shippedCommentCaps }],
   },
   {
     // A rule citing a moved file, or globbing a moved directory, fails silently,

@@ -20,12 +20,9 @@ case "$cmd" in
 *) exit 0 ;;
 esac
 
-# A command that only mentions a post is not one: a heredoc writing a review
-# body that quotes the command, or a search whose pattern holds it. The string
-# is cut into the commands it runs, with heredoc bodies dropped and quoted text
-# left whole, and only a command that starts with `gh api` is read further.
-# Splitting on the separators outside quotes is what keeps `echo 'a; gh api'`
-# one command rather than two.
+# Cuts the string into the commands it runs, dropping heredoc bodies and
+# splitting outside quotes only, so a quoted `gh api` is text and only a
+# command starting with `gh api` reads as a post.
 IFS= read -r -d '' splitter <<'AWK'
 { s = s (NR > 1 ? "\n" : "") $0 }
 function emit() {

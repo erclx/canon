@@ -2,15 +2,9 @@
 set -e
 set -o pipefail
 
-# `card.config.mjs` keeps the social card route out of the published build by
-# never pointing its srcDir at it. A later config change that widens srcDir, or
-# a card file moving under src/pages/, would publish a half-size scaffolding
-# page to a live domain with every other check still green.
-#
-# The card route has three consumers: the card server reads it, the capture
-# reads it, and the published build must not carry it. This is the only one of
-# the three a check can enforce, so the route's exclusion is a check rather than
-# a convention.
+# Fails when the social card route reaches the published build, as a widened
+# srcDir or a card file under src/pages/ would do with every other check green.
+# Of the route's three consumers, only its exclusion can be checked.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
@@ -35,11 +29,9 @@ if [ ! -d "$DIST" ]; then
   exit 1
 fi
 
-# The marker is a fixed <meta> tag the card route carries for exactly this, so
-# asserting it survives in the route's own source is what turns a dropped marker
-# into a loud failure here rather than a blind spot in the test below. A prose
-# notice is not load-bearing: rewording it silently retires the leak check it
-# backed with every workflow still green.
+# The route must still carry its marker, or a dropped one silently retires the
+# leak test below. A fixed <meta> tag rather than prose, since rewording prose
+# would retire it the same way.
 if ! grep -rl "$MARKER" "$PROJECT_ROOT/card-src" >/dev/null 2>&1; then
   echo "No $MARKER under $PROJECT_ROOT/card-src. The card route dropped its own marker, which is what the leak test below reads for." >&2
   exit 1
@@ -50,11 +42,9 @@ if grep -rl "$MARKER" "$DIST" >/dev/null 2>&1; then
   exit 1
 fi
 
-# Built pages only, since an image or font may carry the route's name without
-# being the route. The path test covers both formats Astro emits, being
-# og-card/index.html under build.format 'directory' and og-card.html under
-# 'file'. The search runs from inside dist so a project checked out under a
-# directory like blog-card-site cannot match on its own prefix.
+# Built pages only, in both build.format layouts Astro emits, searched from
+# inside dist so a checkout under a directory like blog-card-site cannot match
+# on its own prefix.
 if (cd "$DIST" && find . -ipath '*og-card*' -name '*.html' | grep -q .); then
   echo "A page named for the card route reached $DIST. See card.config.mjs's srcDir." >&2
   exit 1

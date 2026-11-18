@@ -12,10 +12,9 @@ import type {
 } from './capture-types'
 
 /**
- * The breakpoint buckets every case is crossed with, named by width. 320 is
- * the base a page has to hold without wrapping or clipping. Committing every
- * width multiplies the tracked frames by the width count, so only the base and
- * the desktop width carry `evidence`.
+ * The widths every case is crossed with, 320 being the base a page holds
+ * without clipping. Only the base and desktop carry `evidence`, since each
+ * committed width multiplies the tracked frames.
  */
 const VIEWPORTS: readonly Viewport[] = [
   { name: '320', width: 320, height: 800, evidence: true },
@@ -104,12 +103,9 @@ const SETTLE_TIMEOUT = 15_000
 const FLOATING_ATTRIBUTE = 'data-capture-floating'
 
 /**
- * Brings the page to the state a reader arrives at, before anything is shot.
- * A figure gated on an IntersectionObserver and a frame marked `loading=lazy`
- * both stay at their start state until something scrolls past them, and a full
- * page capture scrolls nothing, so each named section is scrolled into view
- * once and the page then returns to the top. Fonts, images and frames settle
- * afterwards, since the scroll is what starts the lazy loads.
+ * Scrolls each section into view once before the settle, since an observed
+ * figure or a lazy frame stays at its start state until scrolled past and a
+ * full-page capture scrolls nothing.
  */
 async function settle(
   page: Page,
@@ -119,8 +115,7 @@ async function settle(
   const present: CaptureSection[] = []
   for (const section of sections) {
     const element = page.locator(section.selector)
-    // The count is read before scrolling, since a selector matching nothing costs a
-    // timeout, and a seeded section a page lacks is reported and skipped.
+    // Counted first, since scrolling to a selector matching nothing costs a timeout.
     if ((await element.count()) === 0) {
       console.warn(
         `${label}: no element matches ${section.selector}, named as section "${section.name}". Skipped.`,
@@ -132,8 +127,7 @@ async function settle(
   }
   await page.evaluate(() => window.scrollTo(0, 0))
   await page.evaluate(() => document.fonts.ready.then(() => undefined))
-  // Settles on what the scroll started, since `networkidle` belongs to the
-  // navigation and does not re-arm for a load a scroll triggered.
+  // Not `networkidle`, which never re-arms for a load a scroll triggered.
   await page.waitForFunction(
     () => {
       if (document.readyState !== 'complete') return false
@@ -143,12 +137,10 @@ async function settle(
           const inner = frame.contentDocument
           if (inner === null) continue
           if (inner.readyState !== 'complete') return false
-          // A frame's own fonts load after its `readyState` completes, and the outer
-          // document's fonts never cover them.
+          // A frame's fonts load after its `readyState`, outside the outer document's.
           if (inner.fonts.status !== 'loaded') return false
         } catch {
-          // Cross-origin, so there is nothing here to read and nothing to
-          // wait on.
+          // Cross-origin, so there is nothing to read or wait on.
         }
       }
       return true
@@ -160,15 +152,9 @@ async function settle(
 }
 
 /**
- * Marks every element the page floats over its own content, which is chrome
- * such as a sticky bar or a fixed dialog. A section taller than the viewport
- * is scrolled into view to be shot, and the chrome rides that scroll into the
- * middle of the frame, painting over the part the frame exists to show. The
- * mark is an attribute rather than a style, so the rule that acts on it is
- * carried by the screenshot itself and no state is left behind to restore.
- *
- * Marking costs the whole-page frame nothing, since that one is shot before
- * this runs and carries the chrome where a reader meets it.
+ * Marks floating chrome, which rides a tall section's scroll over the frame.
+ * An attribute rather than a style, so the screenshot's own rule acts on it
+ * and nothing is left to restore. The whole-page frame is shot before this.
  */
 async function markFloatingChrome(page: Page) {
   await page.evaluate((attribute) => {
@@ -182,15 +168,9 @@ async function markFloatingChrome(page: Page) {
 }
 
 /**
- * Whether an opaque element outside the given one paints over its center. A
- * mask's bar is drawn above every layer, so one painted over a covered
- * element lands across whatever covers it, such as an open dialog.
- *
- * Only an opaque box counts, since a value under a dimmed backdrop still shows
- * through. A center outside the window reads as uncovered, since the hit test
- * answers only inside it. The hit test also skips `pointer-events: none`, so
- * the target is made hittable for the one test and restored after, or a
- * pass-through badge would read as covered by whatever lies beneath it.
+ * Whether an opaque element paints over this one's center, since a mask drawn
+ * there lands across the cover. A center off-window reads uncovered, and the
+ * target is made hittable for the test, since the hit test skips it otherwise.
  */
 async function isCovered(element: Locator): Promise<boolean> {
   return element.evaluate((target: HTMLElement | SVGElement) => {
@@ -231,11 +211,8 @@ async function isCovered(element: Locator): Promise<boolean> {
 }
 
 /**
- * Turns a case's mask selectors into the locators every frame paints over. A
- * selector matching nothing is reported and kept out rather than raised, for
- * the same reason `settle` gives for a missing section. A matched element an
- * opaque element covers is reported and kept out too, and the answer taken
- * here holds for the section frames, which flatten floating chrome.
+ * Turns mask selectors into locators, reporting and dropping one that matches
+ * nothing or sits covered, the cover read once for every frame.
  */
 async function resolveMask(
   page: Page,
@@ -281,8 +258,7 @@ async function shoot(
   if (selector === undefined) {
     await page.screenshot({ path: target, fullPage: true, mask })
   } else {
-    // Floating chrome keeps the space it already occupies, so dropping it out
-    // of its own layer moves nothing and leaves every box the size it was.
+    // Floating chrome already holds its space, so making it static moves no box.
     await page.locator(selector).screenshot({
       path: target,
       mask,

@@ -2,14 +2,9 @@
 set -e
 set -o pipefail
 
-# Every built page carries the six tags a link preview and a search result read:
-# a title, a description, a canonical link, og:site_name, og:image, and
-# twitter:card. `src/components/site-head.astro` writes them from `src/site.ts`,
-# and this check is what holds a page that skipped the component.
-#
-# Presence with a non-empty value is the whole test. The canonical address is
-# not judged, so an unset ASTRO_SITE's `.invalid` fallback passes here and
-# stays visible in the built page instead.
+# Fails a built page missing a non-empty value for any of the six tags a link
+# preview reads, catching a page that skipped `site-head.astro`. The canonical
+# address is not judged, so a `.invalid` fallback stays visible in the page.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"

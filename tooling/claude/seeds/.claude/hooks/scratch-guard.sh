@@ -23,20 +23,14 @@ case "$file_path" in
 */.canon/tmp/*) exit 0 ;;
 esac
 
-# A background session's temp folder is the harness's own, told to the session
-# and located under the home folder, outside every project. Matching its shape
-# rather than reading CLAUDE_JOB_DIR holds whether or not this hook's
-# environment carries the variable.
+# A background session's own temp folder, matched by shape since this hook's
+# environment may not carry CLAUDE_JOB_DIR.
 case "$file_path" in
 */.claude/jobs/*/tmp/*) exit 0 ;;
 esac
 
-# A project whose own root sits under a path carrying a tmp segment is not
-# writing to system temp, and the bare pattern below would trip on every source
-# file it holds. The project root is stripped before the match rather than
-# exiting on it, so the segments the patterns look for are the ones the write
-# adds. Exiting on any path under the project gives up <project>/tmp/ as well,
-# which is a genuine violation this still warns on.
+# The project root is stripped rather than exited on, so a root under a tmp
+# segment never trips the match and <project>/tmp/ still warns.
 matched=$file_path
 if [ -n "${CLAUDE_PROJECT_DIR:-}" ]; then
   case "$file_path" in

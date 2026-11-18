@@ -9,6 +9,7 @@ import {
   commentFileShare,
   commentHeadBlocks,
   commentHistory,
+  shippedCommentCaps,
 } from '@/gate/comment-caps'
 import { type GateContext, runStage } from '@/gate/sequencer'
 import { STAGES } from '@/gate/stages'
@@ -243,6 +244,73 @@ describe('comment caps', () => {
 
       expect(result.status).toBe('failed')
     })
+
+    describe('over shipped files', () => {
+      it('should fail an untouched seed past the head cap', async () => {
+        commit('tooling/web/seeds/src/a.ts', headRuns(1, 4))
+        commit('src/b.ts', 'export const b = 1\n')
+
+        const report = await shippedCommentCaps(context(['src/b.ts']))
+
+        expect(report.failure).toBeDefined()
+        expect(report.emissions[0]).toEqual({
+          kind: 'warn',
+          text: 'tooling/web/seeds/src/a.ts:1 runs 4 comment text lines outside a function body, past 3',
+        })
+      })
+
+      it('should fail a config past the in-body cap when scoping is off', async () => {
+        commit('tooling/astro/configs/a.ts', inBody(2))
+
+        const report = await shippedCommentCaps(context())
+
+        expect(report.failure).toBeDefined()
+      })
+
+      it('should fail a shipped comment carrying a date', async () => {
+        commit(
+          'tooling/claude/seeds/.claude/hooks/a.sh',
+          '# measured on 2026-08-20\necho a\n',
+        )
+
+        const report = await shippedCommentCaps(context())
+
+        expect(report.failure).toBeDefined()
+      })
+
+      it('should ignore a file outside configs and seeds', async () => {
+        commit('tooling/web/reference.ts', headRuns(1, 40))
+        commit('tooling/claude/user/a.ts', headRuns(1, 40))
+        commit('src/a.ts', headRuns(1, 40))
+
+        const report = await shippedCommentCaps(context())
+
+        expect(report.failure).toBeUndefined()
+      })
+
+      it('should report a dense shipped file without failing', async () => {
+        commit('tooling/web/configs/a.ts', headRuns(25, 1))
+
+        const report = await shippedCommentCaps(context())
+
+        expect(report.failure).toBeUndefined()
+        expect(report.emissions[0]).toEqual({
+          kind: 'warn',
+          text: 'tooling/web/configs/a.ts carries 25 comment text lines in 50, past 15%',
+        })
+      })
+
+      it('should pass shipped files under every cap', async () => {
+        commit('tooling/web/configs/a.ts', headRuns(1, 3))
+
+        const report = await shippedCommentCaps(context())
+
+        expect(report.failure).toBeUndefined()
+        expect(report.emissions.map((emission) => emission.kind)).toEqual([
+          'info',
+        ])
+      })
+    })
   })
 
   it.each([
@@ -250,6 +318,7 @@ describe('comment caps', () => {
     ['commentBodyBlocks', commentBodyBlocks],
     ['commentHistory', commentHistory],
     ['commentFileShare', commentFileShare],
+    ['shippedCommentCaps', shippedCommentCaps],
   ])(
     'should read a tree git cannot list as unmeasured in %s',
     async (_, measure) => {

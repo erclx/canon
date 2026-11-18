@@ -26,25 +26,14 @@ esac
 
 [ -f "$file" ] || exit 0
 
-# The audit verb owns the ban set, so this hook carries no copy of it. The awk
-# this replaces parsed its bans out of the project's own standards and
-# hardcoded the rest, so edit time and a later corpus check could disagree with
-# nothing in between explaining the difference. A ban added to the verb now
-# reaches this hook without an edit here.
-#
-# The verb resolves its own paths under the cwd, so the project root is named
-# rather than inherited. The payload carries an absolute file path, which is
-# what lets the runner move without taking the argument out of reach.
+# The audit verb owns the ban set, so edit time and a corpus check never
+# disagree. The verb resolves paths under the cwd, so the root is named, and
+# the payload's absolute file path survives the move.
 root="${CLAUDE_PROJECT_DIR:-.}"
 
-# A machine without the binary reports that nothing ran rather than exiting
-# clean. An edit nobody checked and an edit carrying no violation are the same
-# silence to a reader, so the enforcement a machine lacks is reported.
-#
-# A completed run always writes the record, and a refusal writes nothing, so an
-# empty one means the verb declined to measure rather than measured and found
-# nothing. It refuses outside a git repository, which is a project this hook can
-# be installed into, and reading the findings alone reports that as a clean file.
+# A missing binary or an empty record reports that nothing ran, since an
+# unchecked edit and a clean one are the same silence. The verb refuses
+# outside a git repository, where this hook can still be installed.
 unread=""
 record=""
 if command -v canon >/dev/null 2>&1; then
@@ -60,14 +49,9 @@ fi
 hits=$(printf '%s' "$record" |
   jq -r '.entries[]?.bans[]? | ":\(.line):\(.column + 1)  \(.kind)  \(.term)"' 2>/dev/null)
 
-# Two advisory measures ride in the same record and never gate. A heading's
-# case is read for the whole file, since it is cheap to fix where it stands. A
-# colon is kept only where the word before it and the colon appear in the text
-# this write carried, since an edit often rewrites part of a line and a
-# whole-line match would drop exactly that case. The verb names that word as
-# `lead`, since slicing `text` at `column` miscounts after an emoji, and a
-# binary predating the field falls back to the slice. A file holds colons nobody is
-# asking this edit to answer for.
+# Two advisory measures that never gate: heading case for the whole file, and
+# a colon only where its `lead` word appears in this write's text. A binary
+# predating `lead` falls back to slicing at `column`, which miscounts emoji.
 new=$(printf '%s' "$input" |
   jq -r '[.tool_input.new_string?, .tool_input.content?, (.tool_input.edits[]?.new_string?)] | map(select(. != null)) | join("\n")' 2>/dev/null)
 headings=$(printf '%s' "$record" |

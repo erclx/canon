@@ -9,10 +9,9 @@ IFS= read -r -d '' -t 2 input
   exit 1
 }
 
-# A reply with no link is the ordinary turn, so it leaves before anything
-# spawns. The payload holds the reply JSON-escaped, and `](` survives the
-# escaping untouched, so a shell test on the raw payload is enough. This is the
-# one quiet exit: every later failure to measure reports instead.
+# A reply with no link leaves before anything spawns, and `](` survives JSON
+# escaping, so the raw payload is enough. The one quiet exit: every later
+# failure to measure reports.
 case "$input" in
 *']('*) ;;
 *) exit 0 ;;
