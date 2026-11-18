@@ -63,12 +63,23 @@ describe('readings', () => {
   it.each([
     ['text', ['background', 'surface', 'window']],
     ['text-body', ['background', 'surface', 'window']],
-    ['muted', ['background', 'surface', 'window']],
     ['accent', ['background', 'surface', 'window']],
     ['light-text', ['light-background', 'light-surface', 'light-window']],
     ['light-text-body', ['light-background', 'light-surface', 'light-window']],
-    ['light-muted', ['light-background', 'light-surface', 'light-window']],
   ])('measures %s on the canvas, the tray, and the window', (role, grounds) => {
+    const measured = readings().filter((reading) => reading.role === role)
+
+    expect(measured.map((reading) => reading.ground)).toEqual(grounds)
+  })
+
+  // A typed request's glyph and a record's frontmatter labels sit on the band.
+  it.each([
+    ['muted', ['background', 'surface', 'window', 'band']],
+    [
+      'light-muted',
+      ['light-background', 'light-surface', 'light-window', 'light-band'],
+    ],
+  ])('measures %s on the band as well', (role, grounds) => {
     const measured = readings().filter((reading) => reading.role === role)
 
     expect(measured.map((reading) => reading.ground)).toEqual(grounds)
@@ -84,11 +95,25 @@ describe('readings', () => {
 })
 
 describe('the shipped palette', () => {
-  // Asserts over the record rather than a fixed list, so a role added later is
-  // measured with no edit here, and a moved ground is re-measured.
+  // Reads the record rather than a fixed list, so a new role or ground is measured.
   it('clears AA on every role against every ground it declares', () => {
     expect(
       failing().map((reading) => `${reading.role} on ${reading.ground}`),
     ).toEqual([])
+  })
+
+  it('fails muted on the band at the values before v198.5, which read 4.45', () => {
+    const earlier: Record<string, string> = {
+      muted: '#8f8d88',
+      band: '#282826',
+    }
+    const before = TOKENS.color.map((token) => ({
+      ...token,
+      value: earlier[token.role] ?? token.value,
+    }))
+
+    expect(
+      failing(before).map((reading) => `${reading.role} on ${reading.ground}`),
+    ).toContain('muted on band')
   })
 })
