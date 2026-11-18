@@ -234,8 +234,9 @@ if (
       state.pin = `Plan in for ${s.slug}, a worker takes it`
     } else if (s.role === 'worker') {
       state.wk.push(make('reviewer', s.slug))
-      if (changeOf(s.slug)?.ui) state.wk.push(make('ui-reviewer', s.slug))
-      state.pin = `${s.slug} opened its pull request, both reviews start`
+      const ui = Boolean(changeOf(s.slug)?.ui)
+      if (ui) state.wk.push(make('ui-reviewer', s.slug))
+      state.pin = `${s.slug} opened its pull request, ${ui ? 'both reviews start' : 'code review starts'}`
     } else
       state.pin = `${s.slug}: ${s.role === 'reviewer' ? 'code' : 'UI'} review closed`
   }
@@ -280,7 +281,8 @@ if (
     event()
     if (tick % 2 === 0) event()
     state.wk.forEach((s, i) => {
-      if ((i + tick) % 2) return
+      // A session that arrived this tick shows its first line before it steps.
+      if (s.age === 0 || (i + tick) % 2) return
       const lines = data.lines[s.role].wk
       if (s.li >= lines.length - 1) return
       s.li++
