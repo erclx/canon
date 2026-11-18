@@ -27,7 +27,9 @@ Title a pull request whose shipped change is the landing page alone `chore(web):
 
 - `feat` and `fix` reach the release notes when the pull request also touches a path release-please does not exclude
 - `README.md`, `package.json`, `scripts/`, and a root config are such paths, and `exclude-paths` cannot hold them back
-- Put a change that ships to a consumer in its own pull request under its own type, rather than beside the page
+- A shipped change is one a CLI or plugin user would notice, such as a verb, a skill, a rule, a config, or a doc they read
+- A change of that kind goes in its own pull request under its own type, rather than beside the page
+- A README section about the page, a `web:*` script in `package.json`, and a script under `scripts/` that only builds the page sit on the page's side, though npm packs them
 
 ## Sync checklist
 
