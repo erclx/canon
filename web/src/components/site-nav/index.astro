@@ -7,11 +7,11 @@ import SunIcon from './sun.svg'
 import './style.css'
 
 /**
- * The fixed bar: the mark back to the top, the six section jumps, Try it, then
- * Docs and GitHub after a thin rule, and the theme toggle. Below 1040 the
- * jumps fold into a Sections menu, and on a phone Docs and GitHub join it as
- * Menu, so the bar reads Menu, Try it, and the toggle, and focus order matches
- * what shows.
+ * The fixed bar: the mark back to the top, the jumps `sections` marks for the
+ * bar, Try it, then Docs and GitHub after a thin rule, and the theme toggle.
+ * Below 1040 the jumps fold into a Sections menu listing every section, and on
+ * a phone Docs and GitHub join it as Menu, so the bar reads Menu, Try it, and
+ * the toggle, and focus order matches what shows.
  *
  * The section in view takes ink and the accent underline. The mark is inlined
  * from its source so the c inherits the bar's ink through `currentColor`, and
@@ -28,7 +28,9 @@ const glyph = mark.replace(/<!--[\s\S]*?-->/, '').trim()
     </a>
     <span class="links">
       {
-        sections.map((section) => (
+        sections
+          .filter((section) => section.bar)
+          .map((section) => (
           <a class="sl" href={`#${section.id}`} data-section={section.id}>
             {section.label}
           </a>

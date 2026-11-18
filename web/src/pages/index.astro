@@ -1,6 +1,10 @@
 ---
+import Board from '../components/sections/board/index.astro'
 import Craft from '../components/sections/craft/index.astro'
+import Drive from '../components/sections/drive/index.astro'
+import Film from '../components/sections/film/index.astro'
 import Guardrails from '../components/sections/guardrails/index.astro'
+import Health from '../components/sections/health/index.astro'
 import Opening from '../components/sections/opening/index.astro'
 import Records from '../components/sections/records/index.astro'
 import Roles from '../components/sections/roles/index.astro'
@@ -18,6 +22,10 @@ import Base from '../layouts/base.astro'
   <Craft />
   <Guardrails class="banded" />
   <Worktrees class="split-left" />
+  <Film class="banded split-right" />
+  <Board class="split-left" />
+  <Drive class="banded split-right" />
+  <Health class="split-left" />
   <Setup class="banded" />
   <Try />
 </Base>

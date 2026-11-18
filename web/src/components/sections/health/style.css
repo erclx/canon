@@ -1,0 +1,183 @@
+/* Above 900 the report sits beside the heading, so only the stacked layouts space the tray off the lede. */
+#health .tray {
+  margin-top: 0;
+}
+
+#health .hl {
+  padding: 16px 18px 18px;
+  font-family: var(--mono);
+  font-size: var(--size-view-small);
+}
+
+#health .cmd {
+  margin: 0 0 8px;
+  color: var(--muted);
+}
+
+#health table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+#health th {
+  padding: 0 0 6px;
+  font-weight: 400;
+  text-align: left;
+  color: var(--muted);
+}
+
+#health th:nth-child(2) {
+  width: 28%;
+  padding-left: 10px;
+}
+
+#health th.n {
+  width: 4.5rem;
+}
+
+#health td {
+  padding: 7px 0;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+#health td.fn {
+  padding-left: 10px;
+}
+
+#health .n {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A figure past its limit takes a dot and the accent, so the mark reads without the color. */
+#health .past {
+  color: var(--accent);
+}
+
+#health .mk {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: 1px;
+}
+
+#health .sum {
+  margin: 4px 0 20px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+
+#health figure {
+  margin: 0;
+}
+
+#health .chart {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 8px;
+  align-items: end;
+  height: 128px;
+  /* Room above the tallest bar for its figure. */
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+#health .wk {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  height: 100%;
+  min-width: 0;
+}
+
+#health .b {
+  position: relative;
+  align-self: end;
+  height: calc(var(--h) * 100%);
+  min-height: 2px;
+  border-radius: 4px 4px 0 0;
+  background: var(--band);
+  transform-origin: bottom;
+}
+
+#health .now .b {
+  background: var(--ink);
+}
+
+#health .v {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  padding-bottom: 3px;
+  text-align: center;
+  font-size: 0.625rem;
+  color: var(--muted);
+}
+
+#health .w {
+  padding-top: 5px;
+  text-align: center;
+  font-size: 0.625rem;
+  color: var(--muted);
+}
+
+#health figcaption {
+  margin-top: 8px;
+  color: var(--muted);
+}
+
+/* The loop: the report prints a row at a time, then each week rises in order. */
+#health .play .pr {
+  opacity: 0;
+}
+
+#health .play .pr.in {
+  opacity: 1;
+}
+
+#health .play .wk .b {
+  transform: scaleY(0);
+  transition: transform 420ms var(--ease-standard);
+}
+
+#health .play .wk.in .b {
+  transform: none;
+}
+
+#health .play .wk .v {
+  opacity: 0;
+}
+
+#health .play .wk.in .v {
+  opacity: 1;
+}
+
+@media (max-width: 900px) {
+  #health .tray {
+    margin-top: 40px;
+  }
+}
+
+@media (max-width: 640px) {
+  #health .tray {
+    margin-top: 32px;
+  }
+
+  #health .hl {
+    padding: 12px;
+  }
+
+  #health th:nth-child(2) {
+    width: 34%;
+  }
+}

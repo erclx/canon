@@ -1,0 +1,146 @@
+/* Above 900 the board sits beside the heading, so only the stacked layouts space the tray off the lede. */
+#drive .tray {
+  margin-top: 0;
+}
+
+#drive .dh {
+  display: flex;
+  gap: 6px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--winbar);
+  font-family: var(--mono);
+  font-size: var(--size-view-small);
+  color: var(--muted);
+}
+
+#drive .dh b {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+#drive .opts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 14px 14px 0;
+  list-style: none;
+}
+
+#drive .opt {
+  min-width: 0;
+  min-height: 132px;
+  border-radius: 8px;
+  background: var(--win);
+  box-shadow: 0 0 0 1px var(--line);
+  transition: box-shadow var(--duration-fade) var(--ease-standard);
+}
+
+#drive .ol {
+  margin: 0;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--muted);
+}
+
+/* Each option's layout sketched in grey bars, the way the board draws an unbuilt arm. */
+#drive .bars {
+  display: grid;
+  gap: 7px;
+  padding: 12px 10px;
+}
+
+#drive .bars i {
+  display: block;
+  height: 8px;
+  border-radius: 3px;
+  background: var(--band);
+}
+
+#drive .bars .short {
+  width: 40%;
+}
+
+#drive .bars .mid {
+  width: 60%;
+}
+
+#drive .bars .long {
+  width: 85%;
+}
+
+#drive .bars .block {
+  height: 34px;
+}
+
+#drive .q {
+  margin: 12px 14px 14px;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+#drive .q p {
+  margin: 0 0 10px;
+  font-family: var(--mono);
+  font-size: var(--size-view-small);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+#drive .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+#drive .chip {
+  padding: 4px 9px;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--muted);
+  transition:
+    background-color var(--duration-fade) var(--ease-standard),
+    color var(--duration-fade) var(--ease-standard);
+}
+
+/* The pick lands on its card and its answer at once, both in ink. */
+#drive .on .opt.pk {
+  box-shadow: 0 0 0 2px var(--ink);
+}
+
+#drive .on .chip.pk {
+  background: var(--ink);
+  color: var(--ground);
+  box-shadow: none;
+}
+
+@media (max-width: 900px) {
+  #drive .tray {
+    margin-top: 40px;
+  }
+}
+
+@media (max-width: 640px) {
+  #drive .tray {
+    margin-top: 32px;
+  }
+
+  #drive .opts {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 10px 10px 0;
+  }
+
+  #drive .opt {
+    min-height: 0;
+  }
+
+  #drive .q {
+    margin: 10px;
+  }
+}

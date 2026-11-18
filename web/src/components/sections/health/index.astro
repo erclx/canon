@@ -1,0 +1,87 @@
+---
+import { health as copy } from '../../../content/copy'
+import { readHealth } from '../../../lib/health'
+import PauseButton from '../../pause-button/index.astro'
+import './style.css'
+
+/**
+ * This repository's own audits, read at build time: the three longest
+ * functions with each one past the checkpoint marked, the file and comment
+ * counts, then the pull requests merged each week, the latest in ink. The
+ * report prints row by row and the chart rises after it. The page renders
+ * the printed report, which reduced motion keeps.
+ */
+
+interface Props {
+  /** The shape `pages/index.astro` gives the section, read by `styles/global.css`. */
+  class?: string
+}
+
+const { class: shape } = Astro.props
+const health = readHealth()
+const most = Math.max(...health.weeks.map((week) => week.merges))
+const format = (count: number) => count.toLocaleString('en-US')
+const pastLabel = `, past the ${health.checkpoint}-line checkpoint`
+---
+
+<section class:list={['sec', shape]} id="health">
+  <div class="sec-head">
+    <h2>{copy.head}</h2>
+    <p>{copy.lede}</p>
+  </div>
+  <div class="tray">
+    <PauseButton />
+    <div class="win hl">
+      <p class="cmd">{copy.view.audit}</p>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{copy.view.cols.file}</th>
+            <th scope="col">{copy.view.cols.fn}</th>
+            <th scope="col" class="n">{copy.view.cols.lines}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            health.functions.map((fn) => (
+              <tr class="pr">
+                <td class="f">{fn.file}</td>
+                <td class="fn">{fn.name}</td>
+                <td class:list={['n', { past: fn.past }]}>
+                  {fn.past && <i class="mk" aria-hidden="true" />}
+                  {format(fn.lines)}
+                  {fn.past && <span class="sr-only">{pastLabel}</span>}
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+      <p class="sum pr">
+        {copy.view.read(health.files)} · {
+          copy.view.longFiles(health.longFiles, health.fileLimit)
+        } · {copy.view.dense(health.denseFiles, health.shareCap)}
+      </p>
+      <p class="cmd">{copy.view.history}</p>
+      <figure>
+        <ol class="chart" role="list">
+          {
+            health.weeks.map((week, index) => (
+              <li
+                class:list={['wk', { now: index === health.weeks.length - 1 }]}
+              >
+                <span class="b" style={`--h:${week.merges / most}`}>
+                  <span class="v">{format(week.merges)}</span>
+                </span>
+                <span class="w">{week.label}</span>
+              </li>
+            ))
+          }
+        </ol>
+        <figcaption>{copy.view.caption(health.to)}</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<script src="./client.ts"></script>

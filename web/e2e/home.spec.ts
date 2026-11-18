@@ -15,11 +15,15 @@ const SECTIONS = [
   'craft',
   'guardrails',
   'worktrees',
+  'film',
+  'board',
+  'drive',
+  'health',
   'setup',
   'try',
 ]
 
-test('renders the opening, six sections, and try in order', async ({
+test('renders the opening, ten sections, and try in order', async ({
   page,
 }) => {
   await page.goto('/')
@@ -399,7 +403,7 @@ test.describe('section shapes', () => {
 
     expect(shapes[0]).toBe(false)
     expect(shapes.some((banded, i) => banded && shapes[i + 1])).toBe(false)
-    expect(shapes.filter(Boolean)).toHaveLength(3)
+    expect(shapes.filter(Boolean)).toHaveLength(5)
   })
 })
 
@@ -437,12 +441,8 @@ test.describe('the band', () => {
       })
 
       expect(colors.ground).not.toBe(colors.grey)
-      expect(colors.bands).toEqual([colors.grey, colors.grey, colors.grey])
-      expect(colors.trays).toEqual([
-        colors.ground,
-        colors.ground,
-        colors.ground,
-      ])
+      expect(colors.bands).toEqual(Array(5).fill(colors.grey))
+      expect(colors.trays).toEqual(Array(5).fill(colors.ground))
     })
   }
 
@@ -1015,4 +1015,126 @@ test.describe('the page name', () => {
       'canon.erclx.com',
     )
   })
+})
+
+test.describe('new sections', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+
+  test.describe('with motion', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'no-preference' })
+      await page.clock.install()
+      await page.goto('/')
+    })
+
+    test('the board moves a row a beat, and the pause holds its clock', async ({
+      page,
+    }) => {
+      const clock = page.locator('#board .clock')
+
+      await page.clock.runFor(2_700)
+      await expect(clock).toHaveText('23:00')
+      await page.clock.runFor(1_500)
+      await expect(clock).toHaveText('23:40')
+      await page.locator('#board .pz').click()
+      await page.clock.runFor(6_000)
+
+      await expect(clock).toHaveText('23:40')
+    })
+
+    test('the drive lands its pick, and the pause holds it cleared', async ({
+      page,
+    }) => {
+      const board = page.locator('#drive .dr')
+
+      await expect(board).not.toHaveClass(/\bon\b/)
+      await page.clock.runFor(1_900)
+      await expect(board).toHaveClass(/\bon\b/)
+      await page.clock.runFor(3_500)
+      await expect(board).not.toHaveClass(/\bon\b/)
+      await page.locator('#drive .pz').click()
+      await page.clock.runFor(6_000)
+
+      await expect(board).not.toHaveClass(/\bon\b/)
+    })
+
+    test('the audit prints a row at a time, and the pause holds the print', async ({
+      page,
+    }) => {
+      const rows = page.locator('#health .pr')
+
+      await page.clock.runFor(800)
+      await expect(rows.nth(0)).toHaveClass(/\bin\b/)
+      await expect(rows.nth(1)).not.toHaveClass(/\bin\b/)
+      await page.locator('#health .pz').click()
+      await page.clock.runFor(6_000)
+
+      await expect(rows.nth(1)).not.toHaveClass(/\bin\b/)
+    })
+
+    test('the film steps its beats with the reel, and the pause shows the still', async ({
+      page,
+    }) => {
+      const reel = page.locator('#film .stage picture:visible img')
+      await reel.scrollIntoViewIfNeeded()
+      await expect
+        .poll(
+          () => reel.evaluate((node: HTMLImageElement) => node.naturalWidth),
+          SETTLE,
+        )
+        .toBeGreaterThan(0)
+
+      await page.clock.runFor(4_000)
+      await expect(page.locator('#film .beats li').nth(1)).toHaveClass(/\bon\b/)
+      await page.locator('#film .pz').click()
+
+      await expect(reel).toHaveAttribute('src', /film-still/)
+    })
+  })
+
+  test('each view lands its full state with no pause under reduced motion', async ({
+    page,
+  }) => {
+    await page.goto('/')
+
+    await expect(page.locator('#board .clock')).toHaveText('02:14')
+    await expect(page.locator('#board .row.wait')).toHaveCount(1)
+    await expect(page.locator('#drive .dr')).toHaveClass(/\bon\b/)
+    await expect(page.locator('#health .hl')).not.toHaveClass(/\bplay\b/)
+    await expect(page.locator('#film .checks li.done')).toHaveCount(3)
+    await expect(page.locator('#film .pz')).toBeHidden()
+    await expect(page.locator('#board .pz')).toBeHidden()
+    await expect(page.locator('#drive .pz')).toBeHidden()
+    await expect(page.locator('#health .pz')).toBeHidden()
+  })
+
+  test('the film shows its still under reduced motion', async ({ page }) => {
+    await page.goto('/')
+    const reel = page.locator('#film .stage picture:visible img')
+    await reel.scrollIntoViewIfNeeded()
+
+    await expect
+      .poll(
+        () => reel.evaluate((node: HTMLImageElement) => node.currentSrc),
+        SETTLE,
+      )
+      .toMatch(/film-still/)
+  })
+
+  for (const width of [390, 320]) {
+    test(`the page with the new views scrolls no sideways at ${width}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 844 })
+      await page.goto('/')
+
+      const overflow = await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth -
+          document.documentElement.clientWidth,
+      )
+
+      expect(overflow).toBe(0)
+    })
+  }
 })
