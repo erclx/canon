@@ -48,6 +48,8 @@ export interface Row {
   stale: Staleness
   staleFiles: string[]
   ui: string
+  /** The code close carried to the head across a rebase, with the UI family owing nothing. */
+  isRebased: boolean
   unmatchedCount: number
   unmatchedHeading: string
 }
@@ -214,6 +216,23 @@ export const uiFromVerb = (record: unknown): string => {
   const covered = fields.isCovered === true && commit !== 'none'
 
   return `${fields.state}-${covered ? 'head' : 'behind'}-${commit.slice(0, 7)}`
+}
+
+/**
+ * Whether the verb carried the code close across a rebase while the UI family
+ * reads covered, so a moved head owes neither reviewer a pass.
+ */
+export const rebasedFromVerb = (record: unknown): boolean => {
+  if (typeof record !== 'object' || record === null) return false
+  const { review, ui } = record as Record<string, unknown>
+  const family = (value: unknown) =>
+    typeof value === 'object' && value !== null
+      ? (value as Record<string, unknown>)
+      : {}
+
+  return (
+    family(review).carriedAcross === 'rebase' && family(ui).isCovered === true
+  )
 }
 
 /** Takes the first eleven fields and ignores the rest, so a short or padded line still reads. */
@@ -394,7 +413,11 @@ export const classify = (
 
   const oldResp = Number.parseInt(old.resp, 10)
   if (row.head !== old.head) {
-    if (row.prior === 'none') {
+    if (row.isRebased) {
+      lines.push(
+        `REBASED   #${row.number} -> ${short(row.head)}, verdicts carried`,
+      )
+    } else if (row.prior === 'none') {
       lines.push(
         `MOVED     #${row.number} -> ${short(row.head)}, never reviewed`,
       )
@@ -841,6 +864,7 @@ const buildRow = async (
     stale: stale.stale,
     staleFiles: stale.files,
     ui: uiFromVerb(record),
+    isRebased: rebasedFromVerb(record),
     unmatchedCount: unmatched.count,
     unmatchedHeading: unmatched.heading,
   }
