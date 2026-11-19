@@ -37,9 +37,9 @@ Owns the static pages the end to end takes film, two of which post each input th
 
 The film suite is nine files, one per describe block, so vitest runs them in parallel.
 
-- A stepped case films at `deviceScale: 1` unless it asserts a 3840x2160 clip or still, stalls the page into a refusal, or proves the scale 1 retry. `canon take` and the reel keep scale 2.
+- A stepped case films at `deviceScale: 1` unless it asserts a 3840x2160 frame, stalls the page into a refusal, proves the scale 1 retry, or tests paint at scale 2. `canon take` and the reel keep 2.
 - `film-network` holds or aborts the data request `pending.html` makes on load, on both routes, and reads the state off the page color in each still
-- `film-canvas` films `canvas-board.html`, a redrawing canvas with a frame under a pointer layer and a timer-run overlay, on each route as asked and with one load of its one-use link
+- `film-canvas` films `canvas-board.html` at scale 2, since its canvas drawn at device resolution is the paint load under test, on each route and with one load of its one-use link
 - `bandLuma` takes its crop in CSS pixels and scales it to the clip it reads, so one crop reads the same element at either scale
 - `film-drag`, `film-glide`, and `film-step` run in the `timed` project of `vitest.e2e.config.ts`, after the parallel files, since their timing limits fail under load. A case like them joins that list.
 
