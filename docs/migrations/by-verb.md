@@ -106,7 +106,7 @@ It moves each surface with `git mv` and repoints every tracked citation. No othe
 
 ## Deny subagents and merges, and turn auto memory off, once
 
-The seeded `.claude/settings.json` now denies the `Agent` and `Task` tools and both merge commands, and sets `autoMemoryEnabled` to `false`. `canon claude sync` never rewrites a settings file you hold, so it warns while the file holds no default or lacks a merge entry. Removing `Agent` and `Task` later draws no warning.
+The seeded `.claude/settings.json` denies `Agent`, `Task`, and the `gh` merge forms, asks before `canon pr merge`, and sets `autoMemoryEnabled` to `false`. `canon claude sync` never rewrites a settings file you hold, so it warns while the file holds no default or lacks a merge entry. Removing `Agent` and `Task` later draws no warning.
 
 A seeded hook takes two steps. `canon claude init` adds each absent script under `.claude/hooks/`, and the verb below wires it where the seeded settings put it. It skips a tool whose matcher already runs the script, and wires nothing for a script you deleted. Until then, `canon sync --check --exit-code` fails.
 
