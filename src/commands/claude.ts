@@ -190,11 +190,6 @@ export function seededDirPath(resolved: string, name: string): string {
     : recordDir(resolved, name)
 }
 
-/**
- * Each bullet run past the limit in the target's `CLAUDE.md` Key paths, read
- * through the scope the audit gates on. Sync warns rather than gates, since a
- * target gates only the prefixes its own config lists.
- */
 const MIGRATE_DEFAULTS = 'Run `canon migrate session-defaults --write`'
 
 /**
@@ -233,6 +228,11 @@ export function sessionDefaultsWarnings(plan: SessionDefaultsPlan): string[] {
   return warnings
 }
 
+/**
+ * Each bullet run past the limit in the target's `CLAUDE.md` Key paths, read
+ * through the scope the audit gates on. Sync warns rather than gates, since a
+ * target gates only the prefixes its own config lists.
+ */
 export async function longKeyPathsRuns(
   resolved: string,
 ): Promise<{ line: number; count: number }[]> {
