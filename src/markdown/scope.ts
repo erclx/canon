@@ -23,16 +23,8 @@ const REQUIREMENT_SCOPE =
   /^(?:claude|\.claude)\/skills\/[^/]+\/REQUIREMENT\.md$/
 
 /**
- * The tracked documents the density limits hold: the context entries, the docs
- * pages, the skill bodies, references, and requirements of both skill trees,
- * the tooling seeds and stack references, the wiki, and the two root guides.
- *
- * Rules stay out, since a rule is one imperative per bullet, and so does every
- * `CLAUDE.md` section but Key paths, which `KEY_PATHS_SCOPE` holds. So do the
- * project requirement and design records, a seed carrying one of those three
- * names, the changelog, the examples, and every `.canon/` record, each with a
- * shape and cap of its own. Named here and nowhere else, so the audit, the gate
- * stage reading its exit, and their tests read one scope.
+ * The one scope the audit, its gate stage, and their tests read. Rules, records,
+ * the changelog, and `CLAUDE.md` outside Key paths stay out, each capped apart.
  */
 const DENSITY_SCOPE = [
   ...BULLET_RUN_SCOPE,
@@ -53,11 +45,8 @@ const KEY_PATHS_HEADING = /^## Key paths\s*$/
 const KEY_PATHS_KINDS: readonly DensityKind[] = ['bullet-run', 'h3-opening']
 
 /**
- * The design reference index, measured for its table cells alone. It is a
- * catalog with one row per group, so it takes the cell limit that keeps a
- * States cell short and none of the prose or row-count limits. `densityGates`
- * leaves it out, so the finding reports and never gates, since a project past
- * the limit fixes it by moving design folders rather than in one push.
+ * Measured for table cells alone, and never gated, since a project past the
+ * limit fixes it by moving design folders rather than in one push.
  */
 const DESIGN_INDEX_SCOPE = /^canon\/design\/index\.md$/
 
@@ -80,12 +69,8 @@ function keyPathsSection(lines: readonly BodyLine[]): readonly BodyLine[] {
 }
 
 /**
- * The density findings a path takes, being every finding on a density-scope
- * file, the Key paths findings on a `CLAUDE.md`, and the cell findings on the
- * design index. The audit, the init probe,
- * and `canon claude sync` all read this, so the three agree on what counts.
- * The table cell and trailing-list findings join on a density-scope path only,
- * since `densityFindings` stays what its direct callers grade.
+ * The audit, the init probe, and `canon claude sync` all read this, so they
+ * agree. Cell and trailing-list findings join on a density-scope path only.
  */
 export function scopedDensityFindings(
   rel: string,
@@ -106,10 +91,8 @@ export function scopedDensityFindings(
 }
 
 /**
- * The roots `canon init` gates in a new project when each passes at init time:
- * every density surface a target authors itself and the Key paths of its
- * `CLAUDE.md`, leaving out the toolkit's own `claude/skills/` and `tooling/`
- * trees.
+ * What `canon init` gates when each passes at init, leaving out the toolkit's
+ * own `claude/skills/` and `tooling/` trees, which a target never authors.
  */
 export const GATED_SCOPE_ROOTS: readonly string[] = [
   'canon/context/',
@@ -122,14 +105,9 @@ export const GATED_SCOPE_ROOTS: readonly string[] = [
 ]
 
 /**
- * The path prefixes whose density findings fail a run. The plugin tree gates
- * as the one prefix `claude/skills/`, so a new body or reference gates on
- * arrival, and each requirement gates only on its exact path here, since
- * `densityGates` never reads a requirement off a prefix.
- *
- * It describes this repository's rewrite progress and nothing about a target's
- * corpus, which is why the audit reads it only inside a canon checkout. A
- * target keeps its own list in the file `src/markdown/gated.ts` reads.
+ * A requirement gates only on its exact path, since `densityGates` reads none
+ * off a prefix. Read inside a canon checkout alone, as `src/markdown/gated.ts`
+ * reads a target's own list.
  */
 export const GATED_PATHS: readonly string[] = [
   'canon/context/surfaces/',
@@ -228,13 +206,8 @@ export const GATED_PATHS: readonly string[] = [
 ]
 
 /**
- * The limit that gates before any folder is listed, and the surfaces it gates
- * on. A run of more than 5 plain bullets failed the push in the context
- * entries, the docs pages, and the skill bodies and references through a stage
- * of its own before this measure existed, and waiting on `GATED_PATHS` would
- * reopen that hole. The seeds, the stack references, the wiki, and the root
- * guides were never held to it, so they joined `GATED_PATHS` only once their
- * rewrite brought them to zero.
+ * Gates ahead of `GATED_PATHS`, since these surfaces already failed a push on a
+ * bullet run and waiting on the list would reopen that hole.
  */
 const ALWAYS_GATED: readonly DensityKind[] = ['bullet-run']
 
@@ -244,11 +217,8 @@ export function inDensityScope(rel: string): boolean {
 }
 
 /**
- * Whether a density finding of this kind on this path fails the run.
- *
- * `alwaysGated` is off for a target's list, since no stage of a target's ever
- * failed a push on a bullet run, and gating one unlisted would fail an older
- * project's push on prose it has not touched since the limit landed.
+ * `alwaysGated` is off for a target's list, since gating an unlisted bullet run
+ * would fail an older project's push on prose it has not touched.
  */
 export function densityGates(
   rel: string,

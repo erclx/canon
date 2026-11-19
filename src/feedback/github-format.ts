@@ -5,10 +5,8 @@ export interface CreateIssueOptions {
 }
 
 /**
- * Why a `gh issue create` call produced no URL. The two reasons reach the
- * operator as different repairs, which is the whole reason the helper returns a
- * discriminated result rather than a nullable string: an absent binary is
- * something to install, and a failed call is something the stderr explains.
+ * A discriminated result over a nullable string, since the two reasons reach
+ * the operator as different repairs: install gh, or read its stderr.
  */
 export type IssueFailureReason = 'missing-binary' | 'command-failed'
 
@@ -173,10 +171,8 @@ export function parseIssueRead(stdout: string): IssueRead | IssueFailure {
 }
 
 /**
- * Collapses to one line. Both callers write the detail inside a framed error or
- * a colored warning, and a newline in the middle of either breaks the frame and
- * leaves the color reset stranded after the last line. `gh` writes multi-line
- * diagnostics routinely, so this is the ordinary case rather than the edge.
+ * A newline inside a framed error breaks the frame and strands the color reset,
+ * and `gh` writes multi-line diagnostics routinely.
  */
 function oneLine(text: string): string {
   return text.trim().replace(/\s+/g, ' ')

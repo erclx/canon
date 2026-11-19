@@ -1,13 +1,8 @@
 import type { SkillCase } from '@/claude/skills-rank'
 
 /**
- * `target-setup`, `canon-*`, and `create-rule`: scaffolding and the
- * toolkit's own reference and feedback surfaces.
- *
- * The five `target-setup` cases are one skill read through five entry phrasings
- * rather than five rows that collapsed to a duplicate. Each names a different
- * phase, and the merged description has to carry every one of them, which is
- * the discrimination the six-skill family failed at from the other direction.
+ * Scaffolding and the toolkit's own surfaces. The five `target-setup` cases are
+ * five entry phrasings of one skill, which its description has to carry.
  */
 export const SETUP_CASES: readonly SkillCase[] = [
   {

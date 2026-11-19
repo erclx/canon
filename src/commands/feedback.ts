@@ -44,8 +44,7 @@ async function postFollowUp(issue: number, body: string): Promise<void> {
     return
   }
 
-  // An absent gh can post nothing, so the block goes out for a hand paste. A
-  // failed read is a refusal to repair, since the number may name no issue.
+  // An absent gh sends the block out for a hand paste. A failed read refuses.
   const read = await readFeedbackIssue(issue)
   if (!read.ok && read.reason === 'missing-binary') {
     frameError(commentFailureMessage(read, issue))
@@ -133,8 +132,7 @@ export function register(program: Command): void {
       'List the open feedback issues instead, reading nothing from stdin',
     )
     .option('--json', 'With --list, print the result as one JSON record')
-    // A cached plugin still pipes `--github`, and commander rejects an unknown
-    // option, so the flag stays accepted and hidden for one release.
+    // Hidden and accepted, since a cached plugin still pipes `--github`.
     .addOption(new Option('--github').hideHelp())
     .action(async (opts: { on?: string; list?: boolean; json?: boolean }) => {
       if (opts.list && opts.on !== undefined) {
@@ -177,8 +175,7 @@ export function register(program: Command): void {
         return
       }
 
-      // A report missing its surface is no more useful in the tracker than
-      // anywhere else, so validation runs before any `gh` call.
+      // Validation runs before any `gh` call, so nothing half-formed is filed.
       const absent = missingField(body)
       if (absent) {
         frameError(missingFieldMessage(absent))
@@ -196,8 +193,7 @@ export function register(program: Command): void {
         process.stdout.write(`${result.url}\n`)
         return
       }
-      // The block goes to stdout so the session can paste it where the issue
-      // would have gone, and the reason frames on stderr.
+      // The block goes to stdout for a hand paste, and the reason to stderr.
       frameError(issueFailureMessage(result))
       process.stdout.write(`${body}\n`)
       process.exitCode = 1
