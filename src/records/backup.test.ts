@@ -154,8 +154,7 @@ afterEach(() => {
 })
 
 describe('BACKED_FOLDERS', () => {
-  // Both halves are asserted, since either alone passes on the other's failure:
-  // a nested path satisfies the suffix test and a sibling `archive` the segment.
+  // Both halves asserted, since a nested path or a sibling `archive` passes either alone.
   it('should name only top-level record folders', () => {
     expect(BACKED_FOLDERS.filter((folder) => folder.includes('/'))).toEqual([])
   })
@@ -166,8 +165,7 @@ describe('BACKED_FOLDERS', () => {
     ).toEqual([])
   })
 
-  // The legacy `.claude`-root allowlist, read only for an unmoved project. A
-  // `.canon` root reads its own listing less EXCLUDED_ENTRIES, asserted below.
+  // The legacy allowlist alone. A `.canon` root reads its own listing, asserted below.
   it('should name exactly the record folders a legacy .claude root carries', () => {
     expect([...BACKED_FOLDERS]).toEqual([
       'diagrams',
@@ -336,8 +334,7 @@ describe('pushRecords', () => {
     expect(tracked).not.toContain('intake/')
   })
 
-  // A pathspec built from the backed list alone never names a retired folder, so
-  // its deletion never stages and a pull restores it beside its replacement.
+  // A pathspec from the backed list alone never stages a retired folder's deletion.
   it('should carry a folder that left the backed list since the last push', async () => {
     const retired = join(ROOT, '.claude', 'plans-archive')
     mkdirSync(retired, { recursive: true })
@@ -345,8 +342,7 @@ describe('pushRecords', () => {
     await makeRecordsRepo(ROOT, ORIGIN)
     await pushRecords(ROOT)
 
-    // Asserted before the removal, since a name the pathspec never carries passes
-    // the absence test below having proved nothing.
+    // Asserted first, since a name the pathspec never carries passes the test below.
     expect(await trackedOnOrigin(ROOT)).toContain('plans-archive/entry.md')
 
     rmSync(retired, { recursive: true, force: true })
@@ -390,8 +386,7 @@ describe('pushRecords', () => {
     expect(tracked).not.toContain('.tmp/')
   })
 
-  // The `.canon` counterpart of the allowlist test: a new top-level directory is
-  // carried and named as first seen, while the two excluded names are not.
+  // A new `.canon` directory is carried and first seen, and excluded names are not.
   it('should carry a new .canon folder as first seen, excluding tmp and ordinal-locks', async () => {
     const canonRoot = await makeCanonProject({
       'tasks/entry.md': '# tasks\n',
@@ -413,8 +408,7 @@ describe('pushRecords', () => {
     expect(tracked).not.toContain('ordinal-locks/')
   })
 
-  // An excluded name the records index still tracks would be re-admitted on
-  // every push through `add -f`, so it leaves the history once and stays out.
+  // A tracked excluded name would re-enter through `add -f`, so it leaves history once.
   it('should drop an excluded name the records index still tracks, once', async () => {
     const canonRoot = await makeCanonProject({
       'tasks/entry.md': '# tasks\n',
@@ -629,8 +623,7 @@ describe('pushRecords', () => {
     expect(tracked).not.toContain('tasks/entry.md')
   })
 
-  // Every worker runs from inside the work tree, so the folders staged there must
-  // match those staged from the root.
+  // Every worker runs inside the work tree, so its staging must match the root's.
   it('should stage the same folders when run from inside the work tree', async () => {
     await makeRecordsRepo(ROOT, ORIGIN)
 
@@ -751,8 +744,7 @@ describe('pullRecords', () => {
     expect(outcome.reason).toBe('local-changes')
   })
 
-  // `git status` tolerates a pathspec matching nothing, so from inside the work
-  // tree the unpushed-record gate would read clean and the reset take the file.
+  // `git status` passes a pathspec matching nothing, so the gate would read clean here.
   it('should still refuse an unpushed record when run from inside the work tree', async () => {
     await makeRecordsRepo(ROOT, ORIGIN)
     await pushRecords(ROOT)
@@ -768,8 +760,7 @@ describe('pullRecords', () => {
   })
 
   it('should write the records the remote carries onto a machine holding none', async () => {
-    // Both clones resolve one branch only because they share a project origin, and
-    // two clones with none would each fall back to their own basename.
+    // Both clones share one branch only through a shared project origin.
     await git([
       '-C',
       ROOT,

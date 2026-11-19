@@ -604,8 +604,7 @@ async function pushUnlocked(root: string): Promise<PushOutcome> {
   if (blocked.length > 0) return refuseBlocked(blocked)
 
   if (scope.length > 0) {
-    // `-f` carries the ignored payload, and the pathspecs are the whole list,
-    // so nothing outside them can enter the index.
+    // `-f` carries the ignored payload, and the pathspecs bound what enters the index.
     const staged = await records(root, [
       'add',
       '-A',
@@ -715,8 +714,7 @@ export async function pullRecords(root: string): Promise<PullOutcome> {
 
   const branch = await projectBranch(root, enclosing)
 
-  // Checked ahead of the fetch, since `--exit-code` answers by a code no
-  // locale changes: 2 for no matching ref, 0 for found, else unreachable.
+  // `--exit-code` answers by code no locale changes: 2 no ref, 0 found, else unreachable.
   const remoteBranch = await records(root, [
     'ls-remote',
     '--exit-code',

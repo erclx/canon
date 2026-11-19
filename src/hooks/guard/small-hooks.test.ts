@@ -36,8 +36,7 @@ for (const tree of TREES) {
   )
 
   describe(tree.label, () => {
-    // Concurrent because every refusal test spends the guard's two seconds
-    // waiting, and eleven of them in series would dominate the suite.
+    // Concurrent, since each refusal test waits out the guard's two seconds.
     for (const name of hooks) {
       const hook = join(tree.dir, name)
 
@@ -62,8 +61,7 @@ for (const tree of TREES) {
         expect(result.code).toBe(0)
       })
 
-      // A hook added without an acting case fails here rather than passing on
-      // the refusal test alone, which is what keeps the directory walk honest.
+      // A hook added without an acting case fails here, keeping the directory walk honest.
       it.concurrent(`should carry ${name} through to its verdict on an ctx.acting payload`, async ({
         expect,
       }) => {
@@ -80,8 +78,7 @@ for (const tree of TREES) {
 
         expect(result[expected.stream ?? 'stdout']).toContain(expected.expect)
         expect(result.code).toBe(expected.code ?? 0)
-        // A runtime error such as `declare -A` on bash 3.2 keeps the verdict and exit,
-        // so only bash's `<file>: line <n>: ` diagnostic on stderr shows the break.
+        // A bash 3.2 runtime error keeps the verdict and exit, so only its diagnostic shows it.
         expect(result.stderr).not.toMatch(BASH_DIAGNOSTIC)
       })
     }

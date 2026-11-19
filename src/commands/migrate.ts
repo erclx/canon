@@ -124,8 +124,7 @@ async function runSweep(
   const sources = await readSources(root, scoped)
   const plan = planRename(sources, rules)
 
-  // A target scope reports rather than rewrites these, since prose the project
-  // wrote is theirs to change.
+  // A target scope reports these rather than rewriting prose the project owns.
   const citations =
     scope === 'target'
       ? planRename(
@@ -137,8 +136,7 @@ async function runSweep(
         ).entries.length
       : 0
 
-  // stdout, so the record pipes clean. `pipeOutput` frames to stderr, which is
-  // where this command's report belongs and where a JSON record does not.
+  // stdout keeps the record clean, since `pipeOutput` frames the report to stderr.
   if (opts.json) {
     process.stdout.write(
       `${JSON.stringify(toRecord(plan, scope, citations, opts.write), null, 2)}\n`,
@@ -253,15 +251,13 @@ async function runRecords(opts: RecordsOptions): Promise<number> {
     return 1
   }
 
-  // Filtered before the read, since the records are the largest thing in the
-  // tree and `readSources` awaits one file at a time.
+  // Filtered before the read, since records are the largest thing `readSources` awaits.
   const toSweep = files.filter((path) => !isRecordArtifact(path))
   const records = files.length - toSweep.length
 
   const plan = planRecordsMove(root, await readSources(root, toSweep))
 
-  // stdout, so the record pipes clean. `pipeOutput` frames to stderr, which is
-  // where this command's report belongs and where a JSON record does not.
+  // stdout keeps the record clean, since `pipeOutput` frames the report to stderr.
   if (opts.json) {
     process.stdout.write(
       `${JSON.stringify(toRecordsRecord(plan, records, opts.write))}\n`,
@@ -290,8 +286,7 @@ async function runRecords(opts: RecordsOptions): Promise<number> {
     `Rewrote ${plural(applied.written, 'file')} and moved ${plural(applied.moved, 'folder')}.`,
   )
 
-  // `failed` holds rejected writes as well as stopped folders, so the line
-  // names a path rather than a folder.
+  // `failed` holds rejected writes too, so the line names a path, not a folder.
   if (applied.failed.length > 0) {
     logError(`Could not write ${plural(applied.failed.length, 'path')}.`)
     for (const path of applied.failed) logError(`  ${path}`)
@@ -322,8 +317,7 @@ function reportRecords(plan: RecordsPlan, records: number): void {
   }
   logInfo(`${plural(plan.kept, 'citation')} marked to keep the old root.`)
 
-  // A count on its own line, not in `excluded`, whose hand-check list a record
-  // tree would bury. The count says where the rest of the files went.
+  // A count on its own line, since `excluded` is a hand-check list it would bury.
   if (records > 0) {
     logInfo(`${plural(records, 'file')} under a record root, left alone.`)
   }
@@ -332,8 +326,7 @@ function reportRecords(plan: RecordsPlan, records: number): void {
     logInfo(`${plural(plan.excluded.length, 'file')} excluded from the sweep.`)
   }
 
-  // A list rather than a count. A coupled file is the handful an operator has
-  // to open by hand, and a bare count gives them nothing to act on.
+  // A list, since a coupled file is one an operator must open by hand.
   if (plan.coupled.length > 0) {
     logInfo(
       `${plural(plan.coupled.length, 'file')} couple to an excluded path:`,
@@ -341,8 +334,7 @@ function reportRecords(plan: RecordsPlan, records: number): void {
     for (const path of plan.coupled) logInfo(`  ${path}`)
   }
 
-  // Named one by one, since a rewritten glob stops matching silently, so the
-  // reader gets the file and line to check by hand.
+  // Named one by one, since a rewritten glob stops matching silently.
   if (plan.frontmatterGlobs.length > 0) {
     logInfo(
       `${plural(plan.frontmatterGlobs.length, 'file')} carry a frontmatter paths: glob left alone:`,
@@ -354,8 +346,7 @@ function reportRecords(plan: RecordsPlan, records: number): void {
     }
   }
 
-  // Named one by one like the globs: an ownership boundary or a tense judgment
-  // vanishes once rewritten, so the reader gets the file and line.
+  // Named one by one, since a rewritten boundary or tense judgment vanishes silently.
   if (plan.crossRepoCitations.length > 0) {
     logInfo(
       `${plural(plan.crossRepoCitations.length, 'file')} carry a citation into another repository, left alone:`,
@@ -564,8 +555,7 @@ async function runRecordTree(opts: RecordTreeOptions): Promise<number> {
     walk.skipped,
   )
 
-  // stdout, so the record pipes clean. `pipeOutput` frames to stderr, which is
-  // where this command's report belongs and where a JSON record does not.
+  // stdout keeps the record clean, since `pipeOutput` frames the report to stderr.
   if (opts.json) {
     process.stdout.write(
       `${JSON.stringify(toRecordTreeRecord(plan, walk.files.length, opts.write))}\n`,

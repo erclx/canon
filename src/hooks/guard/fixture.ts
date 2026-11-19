@@ -236,8 +236,7 @@ export function useFixture(): Context {
 
     linkNoRunnerPath(join(ctx.fixture, 'bin-no-runner'))
 
-    // A `jq` that fails loudly, so a hook reaching it on a payload a shell test
-    // should have dismissed says so. `bash` is linked so the hook has a shell.
+    // A `jq` that fails loudly when a shell test should have dismissed the payload.
     const bash = findOnPath('bash')
     if (bash) symlinkSync(bash, join(ctx.fixture, 'bin-jq-trap', 'bash'))
     const trap = join(ctx.fixture, 'bin-jq-trap/jq')
@@ -247,8 +246,7 @@ export function useFixture(): Context {
     )
     chmodSync(trap, 0o755)
 
-    // Both runners are stubbed so the record is the fixture's rather than the
-    // machine's build. Each reports a `kind` naming itself, so a test reads which ran.
+    // Both runners stubbed, each reporting a `kind` naming itself, so a test reads which ran.
     for (const [name, kind] of [
       ['canon', 'via-canon'],
       ['bun', 'via-bun'],
@@ -261,8 +259,7 @@ export function useFixture(): Context {
       chmodSync(stub, 0o755)
     }
 
-    // An empty shipped set, the narrowed check the hook reports rather than
-    // passing. `canon` alone is stubbed, so a root without `src/cli.ts` reaches it.
+    // An empty shipped set, which the hook reports rather than passing.
     const narrowed = join(ctx.fixture, 'bin-empty-set/canon')
     writeFileSync(
       narrowed,
@@ -270,8 +267,7 @@ export function useFixture(): Context {
     )
     chmodSync(narrowed, 0o755)
 
-    // No ban and two advisory findings, a colon and a heading, so the new-text
-    // filter and the unfiltered heading read are each observable.
+    // Two advisory findings, so the new-text filter and the heading read each show.
     const advisory = join(ctx.fixture, 'bin-advisory/canon')
     writeFileSync(
       advisory,
@@ -279,8 +275,7 @@ export function useFixture(): Context {
     )
     chmodSync(advisory, 0o755)
 
-    // A record carrying table findings alone: two gated density kinds, one counted
-    // and one a shape, and one that only reports, so each message is observable.
+    // Table findings alone, two gated and one reporting, so each message shows.
     const tables = join(ctx.fixture, 'bin-tables/canon')
     writeFileSync(
       tables,
@@ -288,14 +283,12 @@ export function useFixture(): Context {
     )
     chmodSync(tables, 0o755)
 
-    // A verb that declined to measure writes no record, as it does outside a git
-    // repository, so the stub writes nothing and the hooks answer emptiness.
+    // A verb that declined to measure writes no record, so the hooks answer emptiness.
     const silent = join(ctx.fixture, 'bin-no-record/canon')
     writeFileSync(silent, '#!/usr/bin/env bash\nexit 1\n')
     chmodSync(silent, 0o755)
 
-    // The reminder reads a due record off `bun src/cli.ts upstream due`, so the
-    // stub pins it rather than the machine's cursor and network.
+    // Pins the due record rather than the machine's cursor and network.
     const due = join(ctx.fixture, 'bin-due/bun')
     writeFileSync(
       due,
@@ -303,8 +296,7 @@ export function useFixture(): Context {
     )
     chmodSync(due, 0o755)
 
-    // The review post hook gates on the scan's exit code alone, so a stub exiting
-    // 2 with a warning stands in for a finding and one exiting 0 for a clean body.
+    // The hook gates on the scan's exit alone, so exit 2 stands in for a finding.
     const scanFail = join(ctx.fixture, 'bin-scan-fail/canon')
     writeFileSync(
       scanFail,
@@ -316,8 +308,7 @@ export function useFixture(): Context {
     writeFileSync(scanPass, '#!/usr/bin/env bash\nexit 0\n')
     chmodSync(scanPass, 0o755)
 
-    // The board hook reads findings from a `tasks validate --json` record and
-    // exits 0 whatever the verb exits, so this stub answers one finding and 2.
+    // One finding and exit 2, since the board hook exits 0 whatever the verb exits.
     const board = join(ctx.fixture, 'bin-board/canon')
     writeFileSync(
       board,
@@ -325,8 +316,7 @@ export function useFixture(): Context {
     )
     chmodSync(board, 0o755)
 
-    // A refused validation carries `ok:false`, which jq's `//` reads as absent,
-    // so this stub is what makes the refusal branch observable.
+    // `ok:false` reads as absent through jq's `//`, so this stub reaches the refusal branch.
     const refused = join(ctx.fixture, 'bin-board-refused/canon')
     writeFileSync(
       refused,
@@ -334,8 +324,7 @@ export function useFixture(): Context {
     )
     chmodSync(refused, 0o755)
 
-    // The reply-links hook decides on the verb's record, so these stubs answer a
-    // missing path and log each call, which shows whether the hook spawned one.
+    // Answers a missing path and logs each call, showing whether the hook spawned one.
     for (const name of ['canon', 'bun']) {
       const stub = join(ctx.fixture, 'bin-reply-links', name)
       writeFileSync(
@@ -367,8 +356,7 @@ export function useFixture(): Context {
     }
     writeFileSync(join(ctx.fixture, 'records-project/src/cli.ts'), '')
 
-    // The session-name hook decides on the roster, so these stubs answer one
-    // named session and log each call, which shows whether the hook spawned one.
+    // Answers one named session and logs each call, showing whether the hook spawned one.
     for (const name of ['canon', 'bun']) {
       const stub = join(ctx.fixture, 'bin-session-name', name)
       writeFileSync(
@@ -383,8 +371,7 @@ export function useFixture(): Context {
       chmodSync(stub, 0o755)
     }
 
-    // An empty file is enough, since the hook tests for the path alone. Without it
-    // the root takes the fallback and the preferred branch goes untested.
+    // Without this the root takes the fallback and the preferred branch goes untested.
     writeFileSync(join(project, 'src/cli.ts'), '')
 
     writeFileSync(join(project, 'review-body.md'), '## Review\n')
@@ -406,8 +393,7 @@ export function useFixture(): Context {
     writeFileSync(join(project, '.claude/tasks/sample.md'), 'no frontmatter\n')
     writeFileSync(join(project, '.claude/worktrees/demo/note.md'), 'note\n')
 
-    // One payload per hook reaching the branch doing the work, paired with a
-    // string only that branch emits, so a mangled read shows as a fall-through.
+    // One payload per hook, paired with a string only its acting branch emits.
     ctx.acting = {
       'board-validate.sh': {
         expect: 'cell-long: v1.0-a carries a long cell.',
@@ -466,8 +452,7 @@ export function useFixture(): Context {
         payload: (nonce) => {
           const key = nonce.replace(/[^A-Za-z0-9_.-]/g, '_')
           const transcriptPath = join(ctx.fixture, `plan-guard-${key}.jsonl`)
-          // A transcript holding no tool call reads as a changed format and
-          // passes, so the acting case carries one in today's shape.
+          // A transcript with no tool call reads as a changed format and passes.
           writeFileSync(
             transcriptPath,
             `${JSON.stringify({
@@ -627,8 +612,7 @@ export function useFixture(): Context {
           }),
       },
       'upstream-due.sh': {
-        // The runner may itself be a background session reading `0`, which the
-        // hook is built to stay silent for.
+        // The runner may itself be a background session, which the hook stays silent for.
         env: { CLAUDE_CODE_SESSION_ATTENDED: undefined },
         expect: '4 Claude Code releases since the last upstream digest',
         path: [join(ctx.fixture, 'bin-due'), ctx.hookPath].join(delimiter),
@@ -636,8 +620,7 @@ export function useFixture(): Context {
       },
     }
 
-    // Last, so nothing else here writes into it. An unwritable root is what
-    // reaches the fail-open branch without mocking the script.
+    // Last, so nothing writes into it, reaching the fail-open branch without a mock.
     chmodSync(ctx.readOnlyRoot, 0o555)
   })
 
