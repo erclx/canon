@@ -37,6 +37,8 @@ export interface Row {
   heading: string
   merges: string
   number: string
+  /** The proof reading this run took, empty when it took none or the read was refused. */
+  evidence: '' | EvidenceState
   passAt: number
   prior: string
   replyAt: number
@@ -57,8 +59,16 @@ export interface Row {
  */
 export type Staleness = 'fresh' | 'stale' | 'unknown'
 
+/**
+ * The routes the review dispatch table branches on. `unread` is stored only
+ * when no reading was ever taken, so an earlier reading stands over a refusal.
+ */
+export type EvidenceState = 'owed' | 'settled' | 'uncaptured' | 'unread'
+
 /** One baseline line, kept as the strings it was written with. */
 export interface Baseline {
+  /** An `EvidenceState`, or empty on a line written before the field existed. */
+  evidence: string
   head: string
   merges: string
   number: string
@@ -72,20 +82,14 @@ export interface Baseline {
   unmatched: string
 }
 
-// An open pass this old has nobody on it. The cycle it has to clear is a review
-// landing and a worker pushing a follow-up, which measured runs put well under
-// an hour, so two hours sits well past the slowest observed and inside a
-// working session. A project whose workers run longer raises it here.
+// An open pass this old has nobody on it. A review and a follow-up push run well
+// under an hour, so two hours sits past the slowest observed and inside a working
+// session. A project whose workers run longer raises it here.
 export const STALE_AFTER = 7200
 
-// The heading strings are owned elsewhere and pinned here. `review-pr` writes
-// the review pair, `review-address` the reply family, `canon pr evidence` the
-// evidence heading, and `review-ui` the UI pair. All of these ship separately,
-// so a heading added in one of them breaks a test here that no check reaches
-// across. The review family reaches this file through `canon pr review-state`,
-// so its two headings are pinned only for the fallback that answers a target
-// whose CLI predates that verb. The UI family reaches it through the same
-// record and is pinned nowhere here.
+// Pinned from `review-pr`, `review-address`, and `canon pr evidence`, which ship
+// separately, so a heading added there breaks a test no check reaches across. The
+// review pair serves only the fallback for a CLI predating `pr review-state`.
 const REVIEW_HEADINGS = ['## Review', '## Review closed']
 const REPLY_HEADINGS = [
   '## Review response',
@@ -142,10 +146,9 @@ export const unmatchedState = (
 }
 
 /**
- * Reads the verb's record. `source` is what this branches on rather than an
- * exit status, since a shell profile can wrap canon in a function that flattens
- * every refusal to zero. A refusal record carries `reason` and no `source`, and
- * yields null here, which sends the read to the fallback.
+ * Branches on `source` rather than the exit, which a shell function wrapping
+ * canon can flatten to zero. A refusal carries `reason` and no `source`, and
+ * yields null, which sends the read to the fallback.
  */
 export const scopeFromVerb = (record: unknown, now: number): null | Scope => {
   if (typeof record !== 'object' || record === null) return null
@@ -173,11 +176,9 @@ export const scopeFromVerb = (record: unknown, now: number): null | Scope => {
 }
 
 /**
- * The fallback for a target whose CLI predates the verb. It reads the
- * submission stamps, so it carries the defect the verb closes: a push landing
- * between a pass's read and its post moves the stamp onto a commit that pass
- * never opened. It does not parse the marker, since a second reader of that
- * format here is the drift the verb exists to prevent.
+ * The fallback for a CLI predating the verb. Its submission stamps let a push
+ * between a pass's read and its post land on a commit that pass never opened, and
+ * it parses no marker, since a second reader of that format is the drift.
  */
 export const scopeFallback = (payload: Payload, now: number): Scope => {
   const last = (payload.reviews ?? [])
@@ -199,9 +200,8 @@ export const scopeFallback = (payload: Payload, now: number): Scope => {
 
 /**
  * Reads the UI family off the verb's record, so the poll and the lift agree on
- * which head a close covers, a close carried across inert pushes included.
- * A record carrying no `ui` object is a refusal or a CLI predating the field,
- * and reads as unread, which leaves the baseline's value standing.
+ * which head a close covers. A record with no `ui` object is a refusal or an
+ * older CLI, and reads as unread, leaving the baseline's value standing.
  */
 export const uiFromVerb = (record: unknown): string => {
   if (typeof record !== 'object' || record === null) return ''
@@ -216,11 +216,12 @@ export const uiFromVerb = (record: unknown): string => {
   return `${fields.state}-${covered ? 'head' : 'behind'}-${commit.slice(0, 7)}`
 }
 
-/** Takes the first ten fields and ignores the rest, so a short or padded line still reads. */
+/** Takes the first eleven fields and ignores the rest, so a short or padded line still reads. */
 export const parseBaseline = (line: string): Baseline => {
   const fields = line.split(' ')
 
   return {
+    evidence: fields[10] ?? '',
     head: fields[1] ?? '',
     merges: fields[4] ?? '',
     number: fields[0] ?? '',
@@ -251,6 +252,7 @@ export const formatBaseline = (entry: Baseline): string =>
     entry.ui,
     entry.stale,
     entry.overlaps,
+    entry.evidence,
   ]
     .join(' ')
     .trimEnd()
@@ -295,6 +297,7 @@ const classifyFirstSighting = (
   context: ClassifyContext,
 ): Classification => {
   const baseline: Baseline = {
+    evidence: row.evidence === '' ? 'unread' : row.evidence,
     head: row.head,
     merges: row.merges,
     number: row.number,
@@ -320,6 +323,22 @@ const classifyFirstSighting = (
     lines: [line, ...staleLine(row, context.base)],
   }
 }
+
+/** A `settled` reading never carries onto a moved head, where it would stop every later read. */
+const carriedEvidence = (row: Row, old: Baseline): string =>
+  old.evidence === 'settled' && row.head !== old.head
+    ? 'unread'
+    : old.evidence || 'unread'
+
+/**
+ * Settled proof reports only off a reading that owed it, so a first sighting,
+ * an older line, and a refused read each stay silent.
+ */
+const classifyEvidence = (row: Row, old: Baseline): string[] =>
+  row.evidence === 'settled' &&
+  (old.evidence === 'owed' || old.evidence === 'uncaptured')
+    ? [`EVIDENCE  #${row.number} proof settled at ${short(row.head)}`]
+    : []
 
 const classifyUi = (row: Row, old: Baseline): string[] => {
   if (row.ui === '' || row.ui === 'none' || row.ui === old.ui) return []
@@ -349,8 +368,7 @@ export const classify = (
   const lines: string[] = []
   let state = row.heading
 
-  // A conflict comes from the base moving, so it reports on the transition, and
-  // again when a push leaves it conflicting, as STALE does.
+  // A conflict reports on its transition, and again when a push leaves it standing.
   if (
     row.merges === 'conflict' &&
     (old.merges !== 'conflict' || row.head !== old.head)
@@ -358,23 +376,21 @@ export const classify = (
     lines.push(`CONFLICT  #${row.number} no longer merges into ${context.base}`)
   }
 
-  // Staleness reports on its transition, once per branch rather than per run, and
-  // again after a push, since the lift reads MOVED without STALE as a rebase.
+  // Reported once per branch, and after a push, since the lift reads MOVED alone as a rebase.
   if (old.stale !== 'stale' || row.head !== old.head) {
     lines.push(...staleLine(row, context.base))
   }
 
-  // A rising count fires on a tracked pull request only, so a first sighting
-  // takes the thread's existing comments as its baseline.
+  // A first sighting takes the thread's existing comments as its baseline.
   if (row.unmatchedCount > (Number.parseInt(old.unmatched, 10) || 0)) {
     lines.push(
       `UNMATCHED #${row.number} posted under '${row.unmatchedHeading}'`,
     )
   }
 
-  // The UI pass reports on its transition, since its state moves on a post or
-  // on a push and either is the moment it is owed an action.
+  // A post or a push moves the UI state, and either is when an action is owed.
   lines.push(...classifyUi(row, old))
+  lines.push(...classifyEvidence(row, old))
 
   const oldResp = Number.parseInt(old.resp, 10)
   if (row.head !== old.head) {
@@ -383,8 +399,7 @@ export const classify = (
         `MOVED     #${row.number} -> ${short(row.head)}, never reviewed`,
       )
     } else if (row.prior === row.head) {
-      // An out-of-band pass reviewed this head before the poll saw it move, so
-      // the range is empty because it is covered rather than because it broke.
+      // A pass covered this head before the poll saw it move, so the range is empty, not broken.
       lines.push(
         `SEEN      #${row.number} -> ${short(row.head)}, already covered by the last pass`,
       )
@@ -400,8 +415,7 @@ export const classify = (
     row.resp > oldResp &&
     (row.passAt === 0 || row.replyAt > row.passAt)
   ) {
-    // The count says the reply is new to this script and the stamp that it follows
-    // the pass, since a quick close-out would otherwise report an answered thread.
+    // The stamp must follow the pass, or a quick close-out reports an answered thread.
     lines.push(`RESPONSE  #${row.number} answered with no new commit`)
   } else if (
     row.heading === 'open' &&
@@ -409,19 +423,18 @@ export const classify = (
     row.prior === row.head &&
     row.age >= STALE_AFTER
   ) {
-    // An open pass covering the head with no reply, past the age, is stalled, and
-    // the written marker keeps this standing condition from firing every run.
+    // The written marker keeps this standing condition from firing every run.
     lines.push(
       `STALLED   #${row.number} open at ${short(row.head)}, no commit or reply in ${Math.floor(row.age / 3600)}h`,
     )
     state = 'reported'
   } else if (row.heading === 'open' && old.state === 'reported') {
-    // Carry the marker rather than the freshly derived heading, or the state
-    // re-enters next run and STALLED oscillates instead of reporting once.
+    // Carrying the marker keeps STALLED from oscillating instead of reporting once.
     state = 'reported'
   }
 
   const baseline: Baseline = {
+    evidence: row.evidence === '' ? carriedEvidence(row, old) : row.evidence,
     head: row.head,
     merges: row.merges,
     number: row.number,
@@ -438,10 +451,9 @@ export const classify = (
 }
 
 /**
- * One pull request's base movement as a single line. STALE and CONFLICT print
- * in the poll only on a transition or a push, so a reader deciding a draft
- * lift reads this instead. A reading that could not be taken is unknown, never
- * clear.
+ * STALE and CONFLICT print in the poll only on a transition or a push, so a
+ * reader deciding a draft lift reads this standing line instead. A reading that
+ * could not be taken is unknown, never clear.
  */
 export const standingLine = (
   entry: Pick<Baseline, 'head' | 'merges' | 'number' | 'stale'>,
@@ -461,10 +473,9 @@ export const standingLine = (
 }
 
 /**
- * A pull request this run could not read keeps the line it had, so the GONE
- * sweep does not read the gap as a merge. Its heading is blanked to a value no
- * branch matches unless it already reads `reported`, since echoing it intact
- * would classify a pull request this run never reached.
+ * An unread pull request keeps its line, so the GONE sweep does not read the gap
+ * as a merge. Its heading is blanked to match no branch unless it reads
+ * `reported`, since echoing it would classify a pull request never reached.
  */
 export const carryForward = (old: Baseline): Baseline => ({
   ...old,
@@ -480,12 +491,9 @@ const parseJson = (text: string): unknown => {
 }
 
 /**
- * One JSON object per line, which is what `.[] | <projection> | @json` prints
- * across every page. The projection keeps stdout to the fields the mappers
- * read, since a whole REST row carries user objects and links and a long thread
- * could overrun the spawn buffer and read as unreadable. A failed read and a
- * line that does not parse both return null, so neither reads as a thread with
- * nothing on it.
+ * One JSON object per line across every page. The projection keeps stdout to the
+ * fields read, since whole REST rows could overrun the spawn buffer. A failed
+ * read and an unparsed line both return null, never an empty thread.
  */
 const readRows = async (
   path: string,
@@ -555,8 +563,7 @@ type Collected = { number: string; reason: string } | { row: Row }
 const nowSeconds = (): number => Math.floor(Date.now() / 1000)
 
 const readHead = async (number: string): Promise<string> => {
-  // The tip is the authority for the head, since the object lags the ref after a
-  // push. The object's head is the fallback for a binary with no `pr head`.
+  // The tip is authoritative, since the object lags the ref after a push.
   const record = parseJson(
     (await runAsync('canon', ['pr', 'head', number, '--json'])).stdout,
   )
@@ -578,10 +585,9 @@ const readHead = async (number: string): Promise<string> => {
 }
 
 /**
- * The pull read's `mergeable_state` reports unknown until GitHub finishes
- * computing it, which is exactly when a poll asks. merge-tree answers locally
- * against the base this machine has. It exits non-zero on a ref it cannot
- * resolve as well as on a real conflict, so both sides are checked first.
+ * `mergeable_state` reads unknown until GitHub computes it, which is when a poll
+ * asks, so merge-tree answers locally. It exits non-zero on an unresolved ref as
+ * well as a conflict, so both sides are checked first.
  */
 const readMerges = async (
   number: string,
@@ -616,10 +622,9 @@ const nonEmptyLines = (output: string): string[] =>
   output.split('\n').filter((line) => line !== '')
 
 /**
- * The paths a pull request writes, read from its own diff against the commit it
- * branched from. `--no-renames` lists both sides of a rename, since a change on
- * the base to either one is a change under the branch. A head or base that does
- * not resolve, which a fork or a deleted head leaves, reads as null.
+ * Diffs against the fork point. `--no-renames` lists both sides of a rename,
+ * since a base change to either is a change under the branch. An unresolved head
+ * or base, which a fork or a deleted head leaves, reads as null.
  */
 const readWritten = async (
   head: string,
@@ -641,10 +646,9 @@ const readWritten = async (
 }
 
 /**
- * Re-testing after every merge to the base is a merge queue's cost without its
- * batching, so only a change to a path the branch writes makes it stale. The
- * net diff rather than the log is read, so a change the base made and then
- * reverted moves nothing.
+ * Re-testing after every base merge is a merge queue's cost without its
+ * batching, so only a change to a written path makes it stale. The net diff is
+ * read rather than the log, so a change the base reverted moves nothing.
  */
 const readStale = async (
   written: null | Written,
@@ -741,10 +745,9 @@ export const overlapLines = (
     )
 
 /**
- * Two pull request heads merged against each other, which is the merge the
- * second to land will have to make. merge-tree exits 1 on a conflict and
- * prints the tree then one conflicted path a line. Any other failure prints no
- * tree, and reads as null beside a clean merge, since neither names a file.
+ * The merge the second to land will make. merge-tree exits 1 on a conflict and
+ * prints the tree then one path a line. Any other failure prints no tree, and
+ * reads as null beside a clean merge, since neither names a file.
  */
 const readOverlap = (first: string, second: string): null | string[] => {
   const merged = run('git', [
@@ -762,18 +765,61 @@ const readOverlap = (first: string, second: string): null | string[] => {
   return [...new Set(lines.slice(1))]
 }
 
+/**
+ * Branches on `reason`, since the verb exits non-zero on a refusal it still
+ * prints. `owed` holding only `preview` is the deploy wait rather than missing
+ * proof, so it reads as settled, and any other record reads as unread.
+ */
+export const evidenceFromCheck = (record: unknown): '' | EvidenceState => {
+  if (typeof record !== 'object' || record === null) return ''
+  const { owed, reason, uncaptured } = record as Record<string, unknown>
+  if (reason !== 'settled' && reason !== 'owed') return ''
+  if (Array.isArray(uncaptured) && uncaptured.length > 0) return 'uncaptured'
+
+  return Array.isArray(owed) && owed.includes('evidence') ? 'owed' : 'settled'
+}
+
+/** A settled reading at an unmoved head costs no read, so a settled wave adds none. */
+export const needsEvidenceRead = (
+  old: Baseline | undefined,
+  head: string,
+): boolean =>
+  old === undefined || old.evidence !== 'settled' || old.head !== head
+
+const readEvidence = async (
+  number: string,
+  isWanted: boolean,
+): Promise<'' | EvidenceState> =>
+  isWanted
+    ? evidenceFromCheck(
+        parseJson(
+          (
+            await runAsync('canon', [
+              'pr',
+              'evidence',
+              number,
+              '--check',
+              '--json',
+            ])
+          ).stdout,
+        ),
+      )
+    : ''
+
 const buildRow = async (
   number: string,
   payload: Payload,
   head: string,
   ref: string,
+  old: Baseline | undefined,
 ): Promise<Row> => {
   const now = nowSeconds()
   const replies = replyState(payload.comments ?? [])
   const unmatched = unmatchedState(payload.comments ?? [])
-  const [state, merges] = await Promise.all([
+  const [state, merges, evidence] = await Promise.all([
     runAsync('canon', ['pr', 'review-state', number, '--json']),
     readMerges(number, head, ref),
+    readEvidence(number, needsEvidenceRead(old, head)),
   ])
   const record = parseJson(state.stdout)
   const scope = scopeFromVerb(record, now) ?? scopeFallback(payload, now)
@@ -782,6 +828,7 @@ const buildRow = async (
 
   return {
     age: scope.age,
+    evidence,
     head,
     heading: scope.state,
     merges,
@@ -802,8 +849,7 @@ const buildRow = async (
 const countSince =
   (number: string) =>
   (prior: string, head: string): number => {
-    // The range needs both commits local, and a force-push leaves the prior one
-    // unreachable, so a range that does not resolve counts as zero.
+    // A force-push leaves the prior commit unreachable, so an unresolved range counts zero.
     run('git', ['fetch', '-q', 'origin', `pull/${number}/head`])
     const log = run('git', ['log', '--oneline', `${prior}..${head}`])
 
@@ -820,10 +866,9 @@ const LIFT_STANDING: Record<
 }
 
 /**
- * The standing `canon pr lift --check` read, so the lift and this check answer
- * from one authority. Null when the record names no head or no standing gate,
- * which a pull request already ready, a closed one, and an older binary with no
- * `pr lift` verb all leave.
+ * The lift's standing read, so the lift and this check answer from one
+ * authority. Null when the record names no head or no standing gate, as a ready
+ * or closed pull request and a binary with no `pr lift` leave it.
  */
 export const standingFromLift = (
   record: unknown,
@@ -849,14 +894,12 @@ export const standingFromLift = (
 }
 
 /**
- * `--check <number>` reads the base and the head at call time and writes
- * nothing. The baseline is as old as the last full run, and a sibling merging
- * after it would leave a stored reading claiming clear. The lift verb's reading
- * comes first, and the read below stays as the fallback for an older binary.
+ * Reads at call time and writes nothing, since a sibling merging after the last
+ * run would leave the baseline claiming clear. The lift verb's reading comes
+ * first, and the read below is the fallback for an older binary.
  */
 const check = async (number: string): Promise<number> => {
-  // The verb exits 1 on any refused gate and still prints its record, so the
-  // exit says nothing about whether the standing was read.
+  // The verb exits 1 on any refused gate and still prints its record.
   const lifted = standingFromLift(
     parseJson(run('canon', ['pr', 'lift', number, '--check', '--json']).stdout),
   )
@@ -912,8 +955,7 @@ const pollOnce = async (
   const out: string[] = []
   const err: string[] = []
 
-  // The baseline is per-machine mutable state, so it stays in gitignored
-  // scratch even though the script is tracked.
+  // Per-machine mutable state, so it stays in gitignored scratch.
   const stateDir = join(root, '.canon', 'tmp', 'pr', 'poll')
   const statePath = join(stateDir, 'baseline.txt')
   const previous = (
@@ -932,8 +974,7 @@ const pollOnce = async (
 
   run('git', ['fetch', '-q', 'origin', base])
 
-  // A failed list would read as no open pull requests and report every tracked
-  // one GONE, so the run aborts rather than classify on it.
+  // A failed list would report every tracked pull request GONE, so the run aborts.
   const listed = run('gh', [
     'api',
     '--paginate',
@@ -955,8 +996,7 @@ const pollOnce = async (
     numbers,
     READ_POOL,
     async (number): Promise<Collected> => {
-      // A failed read and a pull request with no reviews both arrive empty, so each
-      // read returns null on failure, which the payload surfaces.
+      // A failed read returns null, since an empty thread would look the same.
       const [payload, head] = await Promise.all([
         readPayload(number),
         readHead(number),
@@ -964,7 +1004,9 @@ const pollOnce = async (
       if (payload === null) return { number, reason: 'could not be read' }
       if (head === '') return { number, reason: 'returned no head' }
 
-      return { row: await buildRow(number, payload, head, ref) }
+      return {
+        row: await buildRow(number, payload, head, ref, known.get(number)),
+      }
     },
   )
 
@@ -1093,8 +1135,7 @@ const main = async (args: string[]): Promise<number> => {
     return result.status
   }
 
-  // Only movement ends the wait early. A failed read holds to the cap rather than
-  // ending each wait at once, and a list still unreadable at the cap exits 1.
+  // Only movement ends early, and a failed read holds to the cap rather than ending it.
   const deadline = Date.now() + wait * 1000
   const failed = new Set<string>()
   for (;;) {
@@ -1105,8 +1146,7 @@ const main = async (args: string[]): Promise<number> => {
 
       return 0
     }
-    // A quiet wait never ends before its cap, whatever `--every` says, since an
-    // early exit is a re-arm the orchestrator spends a turn on.
+    // An early exit is a re-arm the orchestrator spends a turn on, whatever `--every` says.
     const left = deadline - Date.now()
     if (left <= 0) {
       for (const line of failed) console.error(line)

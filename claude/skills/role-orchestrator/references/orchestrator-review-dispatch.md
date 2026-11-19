@@ -31,7 +31,9 @@ Message the session holding the branch, resolved the way `## Sending the handbac
 
 - A worker reporting that no capture can be taken, such as a state no fixture reaches, releases the hold, so launch the reviewers
 - Carry the uncaptured paths as a fact in the code reviewer's brief then, since only a review pass may write the waiver `canon pr lift` reads
-- Re-read the check on the worker's reply or the next `MOVED`, never on a timer
+- Re-read the check on the worker's reply, the next `MOVED`, or the poll's `EVIDENCE` line, never on a timer
+  - The poll prints `EVIDENCE` when a reading of `owed` evidence or an `uncaptured` path turns `settled`, kept in its eleventh baseline field beside `unread`
+  - It reads the check only while that field is unsettled or the head moved, and a refused read leaves the last reading standing
 - A refusal never reads as proof. `canon pr lift` reads the same record and holds the mark on its own gate, so a launch past an unread check costs no merge.
 
 ## Every pull request takes a reviewer
@@ -53,6 +55,8 @@ A pull request whose evidence record counts a drivable box takes a second review
 - A pull request that gains a drivable box in review takes its UI reviewer then, on the `MOVED` that brought it, since a first pass that read none launched nobody
 - The UI reviewer reads no diff and never hears the code verdict, so neither brief carries the other's result
 - Each posts its own family and runs `canon pr lift` on its close, and the verb lifts the draft mark only once both read closed at the head
+  - Send the worker each reviewer's sessionId as that reviewer launches, one launched later on `MOVED` included, since a clean UI close dispatches nothing
+  - The UI reviewer re-drives on the worker's re-review request at a new head, so message it only to state a hold, as when the merge order owes a rebase first
 
 ## A batch of small pull requests
 
