@@ -21,7 +21,12 @@ import {
   type NetworkTally,
   NetworkUnmatched,
 } from '@/take/network'
-import { TargetMissing, TargetOffscreen, TargetRefused } from '@/take/perform'
+import {
+  TargetCovered,
+  TargetMissing,
+  TargetOffscreen,
+  TargetRefused,
+} from '@/take/perform'
 import {
   type Beat,
   type Route,
@@ -53,6 +58,7 @@ export type TakeRefusal =
   | 'server-unreachable'
   | 'target-missing'
   | 'target-offscreen'
+  | 'target-covered'
   | 'over-cap'
   | 'clip-mismatch'
   | 'network-unmatched'
@@ -419,6 +425,7 @@ function classify(error: unknown): TakeRefusal {
   if (error instanceof NetworkUnmatched) return 'network-unmatched'
   if (error instanceof TargetMissing) return 'target-missing'
   if (error instanceof TargetOffscreen) return 'target-offscreen'
+  if (error instanceof TargetCovered) return 'target-covered'
   if (error instanceof ShellMissing || isBrowserMissing(error)) {
     return 'browser-missing'
   }

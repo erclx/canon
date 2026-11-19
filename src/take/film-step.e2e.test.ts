@@ -49,6 +49,12 @@ const HIDDEN_PAGE = PAGE.replace(
   '<body>\n    <div hidden><span>Go</span></div>',
 )
 
+/** The same page under a full-window layer that takes every press. */
+const COVERED_PAGE = PAGE.replace(
+  '</body>',
+  '<div class="hit-layer" style="position:fixed;inset:0"></div>\n  </body>',
+)
+
 /**
  * A single-use link, the way an app trades a ticket for a session: the first
  * open serves a button whose press busies the page past the loaded stall
@@ -102,6 +108,7 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
           return new Response('ok')
         }
         if (pathname === '/hidden') return html(HIDDEN_PAGE)
+        if (pathname === '/covered') return html(COVERED_PAGE)
         if (pathname === '/slow') {
           await Bun.sleep(SLOW_MS)
           return new Response('ok')
@@ -462,6 +469,30 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
     expect(probe(join(out, result.still))).toMatchObject({
       width: 3840,
       height: 2160,
+    })
+  }, 180_000)
+
+  it('should refuse a press a layer covers, naming the layer', async () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [{ name: 'cover', steps: [{ kind: 'click', target: '#go' }] }],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+
+    const result = await take({
+      url: new URL('/covered', server.url).href,
+      plan: read.plan,
+      out,
+      stallMs: LOADED_STALL_MS,
+    })
+
+    expect(result).toMatchObject({
+      status: 'failed',
+      reason: 'target-covered',
+      beat: 'cover',
+      message: expect.stringContaining('div.hit-layer'),
+      still: '01-cover/still.jpg',
     })
   }, 180_000)
 
