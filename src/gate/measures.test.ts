@@ -30,6 +30,8 @@ import {
   SANDBOX_UNDECLARED_CEILING,
   sandboxCoverage,
   shippedReferences,
+  SKILL_DESCRIPTION_CEILING,
+  skillDescriptionTotal,
   skillFamily,
   skillPracticeShape,
   skillProvenance,
@@ -1104,6 +1106,91 @@ describe('skillPracticeShape', () => {
 
     expect(report.failure).toBeUndefined()
     expect(report.unmeasured).toContain('no skill corpus')
+  })
+})
+
+describe('skillDescriptionTotal', () => {
+  let root: string
+
+  const refuse = () => {
+    throw new Error('skillDescriptionTotal reads the corpus and runs nothing')
+  }
+
+  const context = (): MeasureContext => ({
+    root,
+    ci: false,
+    run: refuse,
+    cli: refuse,
+  })
+
+  const writeSkill = (name: string, frontmatter: string): void => {
+    const dir = join(root, 'claude', 'skills', name)
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(
+      join(dir, 'SKILL.md'),
+      `---\nname: ${name}\n${frontmatter}---\n\n# Skill\n`,
+    )
+  }
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-skill-descriptions-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('reports the total of every shipped description under the ceiling', async () => {
+    writeSkill('git-commit', 'description: Commits.\n')
+    writeSkill('git-pr', 'description: Opens a PR.\n')
+
+    const report = await skillDescriptionTotal(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.emissions[0]?.text).toContain('19 description characters')
+  })
+
+  it('passes a total exactly at the ceiling', async () => {
+    writeSkill(
+      'git-commit',
+      `description: ${'a'.repeat(SKILL_DESCRIPTION_CEILING)}\n`,
+    )
+
+    const report = await skillDescriptionTotal(context())
+
+    expect(report.failure).toBeUndefined()
+  })
+
+  it('fails one character past the ceiling, naming the longest skill', async () => {
+    writeSkill(
+      'git-commit',
+      `description: ${'a'.repeat(SKILL_DESCRIPTION_CEILING)}\n`,
+    )
+    writeSkill('git-pr', 'description: b\n')
+
+    const report = await skillDescriptionTotal(context())
+
+    expect(report.failure).toContain(
+      `${SKILL_DESCRIPTION_CEILING + 1} description characters`,
+    )
+    expect(report.failure).toContain('git-commit')
+  })
+
+  it('counts a skill with no description as zero', async () => {
+    writeSkill('git-commit', 'description: Commits.\n')
+    writeSkill('git-pr', '')
+
+    const report = await skillDescriptionTotal(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.emissions[0]?.text).toContain('8 description characters')
+  })
+
+  it('reports a project carrying no shipped corpus as unmeasured', async () => {
+    const report = await skillDescriptionTotal(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.unmeasured).toContain('claude/skills')
   })
 })
 
