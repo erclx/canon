@@ -26,15 +26,25 @@ Read the table, `orchestrator-filing.md` in full, and `orchestrator-output.md`, 
 
 ### Acts and their runbooks
 
-| Act                                | Runbook under `references/`       |
-| ---------------------------------- | --------------------------------- |
-| Offer, file, or place a finding    | `orchestrator-filing.md`          |
-| Report the state of play, or later | `orchestrator-output.md`          |
-| Hand a plan to a worker            | `orchestrator-dispatch.md`        |
-| Launch a drive or a sketch round   | `orchestrator-design-launch.md`   |
-| Dispatch a pull request's review   | `orchestrator-review-dispatch.md` |
-| Learn that a pull request moved    | `orchestrator-poll.md`            |
-| Route a posted pass back           | `orchestrator-handback.md`        |
+| Act                                                           | Runbook under `references/`       |
+| ------------------------------------------------------------- | --------------------------------- |
+| Offer, file, or place a finding                               | `orchestrator-filing.md`          |
+| Report the state of play, or later                            | `orchestrator-output.md`          |
+| Hand a plan to a worker                                       | `orchestrator-dispatch.md`        |
+| Launch a drive or a sketch round                              | `orchestrator-design-launch.md`   |
+| Dispatch a pull request's review                              | `orchestrator-review-dispatch.md` |
+| Learn that a pull request moved                               | `orchestrator-poll.md`            |
+| Route a posted pass back                                      | `orchestrator-handback.md`        |
+| Launch a planner, a review-address pass, or a small row       | `orchestrator-launch.md`          |
+| Write prompts for sessions the operator launches              | `orchestrator-hand-launch.md`     |
+| Recommend a merge order where tracks share a file or a server | `orchestrator-merge-order.md`     |
+| Refill the ready queue after a merge                          | `orchestrator-refill.md`          |
+| Widen a wave                                                  | `orchestrator-inbound.md`         |
+| Write the handoff before a compaction                         | `orchestrator-handoff.md`         |
+| Resume after a compaction                                     | `orchestrator-resume.md`          |
+| List or resume sessions a usage limit stopped                 | `orchestrator-limit-stops.md`     |
+| Re-test the parked rows                                       | `orchestrator-parked.md`          |
+| Run unattended                                                | `orchestrator-unattended.md`      |
 
 ### Reading the order
 
