@@ -281,10 +281,9 @@ const SETTLE_READS = 6
 const SETTLE_PAUSE_MS = 500
 
 /**
- * Reads `claude agents --json` into the sessionId-to-client-id map. The client
- * lists a background session under a short `id` beside its full `sessionId`,
- * and its `stop` and `rm` match the short one alone. Anything but an array of
- * rows reads as unreadable, never as an empty listing.
+ * The client's `stop` and `rm` match the short `id` it lists beside each full
+ * `sessionId`, never the full one. Anything but an array of rows reads as
+ * unreadable rather than as an empty listing.
  */
 export function parseClientIds(text: string): ClientIds {
   let parsed: unknown
@@ -347,12 +346,9 @@ const UNLISTED =
 const UNREAD = 'the client listing could not be read, so nothing ran'
 
 /**
- * Acts on each target in turn and judges it by the roster rather than by the
- * client's exit, since the client's own report is not reliable. The client id
- * resolves ahead of the dry-run branch, so a dry run reports the id it would
- * pass, and a target the client does not list is never acted on under a
- * guessed id. A session still live after the reads settle is `failed`,
- * carrying the client's output.
+ * Judges each target by the roster rather than the client's unreliable exit.
+ * The client id resolves ahead of the dry-run branch, so a dry run reports
+ * it, and an unlisted target is never acted on under a guessed id.
  */
 export async function executeReap(
   targets: readonly Candidate[],
@@ -434,11 +430,9 @@ function isLinkedWorktree(worktree: string, repository: string | null) {
 }
 
 /**
- * The worktree whose listeners each target's reap ends, keyed by sessionId.
- * The main checkout is never one, since a reviewer or planner runs there and
- * every listener under it would match. A worktree another session outside
- * the targets still holds is never one either, since a server either session
- * started serves both.
+ * Never the main checkout, where a reviewer or planner runs and every listener
+ * would match, and never a worktree a session outside the targets still
+ * holds, since a server either one started serves both.
  */
 export function listenerWorktrees(
   targets: readonly Candidate[],
@@ -497,12 +491,9 @@ function merge(reports: readonly StopReport[]): StopReport | null {
 }
 
 /**
- * Reaps the targets and ends the listeners their worktrees hold. A stop ends
- * them once every target in that worktree has left the roster, so a session
- * still live keeps the server it owns. A remove ends them ahead of the
- * client's removal, the order `canon worktrees reclaim` keeps, since the
- * client may delete the directory the server runs in. A dry run reports what
- * would end and signals nothing.
+ * A stop ends listeners only once every target in that worktree left the
+ * roster, so a live session keeps its server. A remove ends them ahead of the
+ * client's removal, which may delete the directory the server runs in.
  */
 export async function reapTargets(
   targets: readonly Candidate[],
