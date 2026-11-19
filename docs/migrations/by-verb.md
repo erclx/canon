@@ -118,7 +118,8 @@ canon migrate session-defaults --write --json
 The verb only adds a key or entry that is absent, so a project migrated before an entry runs `--write` once more.
 
 - A person who wants auto memory back sets it in their own `.claude/settings.local.json`
-- `Bash(canon pr merge:*)` and `Bash(gh pr merge:*)` stop a session merging
+- `Bash(canon pr merge:*)` goes to `permissions.ask`, so each merge a session runs waits on the operator, and `Bash(gh pr merge:*)` and `Bash(gh api *pulls/*/merge*)` stop the forms that skip it
+- An older `canon pr merge` deny stays, since the verb never removes one, and it wins over the ask until the operator deletes it
 - A rerun restores `Agent` and `Task` for a person who removed them to allow subagents, so remove them again after
 
 The allow entries let a session run a command without waiting on a prompt, and each is as narrow as its caller needs.
