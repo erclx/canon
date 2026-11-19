@@ -231,6 +231,10 @@ export function useFixture(): Context {
       join(ctx.fixture, 'bin-scan-pass'),
       join(ctx.fixture, 'bin-board'),
       join(ctx.fixture, 'bin-board-refused'),
+      join(ctx.fixture, 'bin-records'),
+      join(ctx.fixture, 'records-project/.canon/.records.git'),
+      join(ctx.fixture, 'records-project/src'),
+      join(ctx.fixture, 'records-project/.claude/worktrees/demo'),
       join(ctx.fixture, 'no-source'),
       join(ctx.fixture, 'read-only'),
       join(ctx.fixture, 'elsewhere/tmp'),
@@ -355,6 +359,24 @@ export function useFixture(): Context {
       )
       chmodSync(stub, 0o755)
     }
+
+    // The records hook reports a refused push and nothing else, so these stubs
+    // refuse and log their arguments, which shows the root each runner got.
+    for (const name of ['canon', 'bun']) {
+      const stub = join(ctx.fixture, 'bin-records', name)
+      writeFileSync(
+        stub,
+        [
+          '#!/usr/bin/env bash',
+          `echo "${name} $*" >> "\${RECORDS_PUSH_CALLS:-/dev/null}"`,
+          `printf '%s\\n' '{"ok":false,"reason":"git-failed","message":"push rejected."}'`,
+          'exit 1',
+          '',
+        ].join('\n'),
+      )
+      chmodSync(stub, 0o755)
+    }
+    writeFileSync(join(ctx.fixture, 'records-project/src/cli.ts'), '')
 
     // The session-name hook decides on the roster, so these stubs answer one
     // named session and log each call, which shows whether the hook spawned one.
@@ -517,6 +539,13 @@ export function useFixture(): Context {
           delimiter,
         ),
         payload: () => stopPayload('Launched 631880bb for the review.'),
+        stream: 'stderr',
+      },
+      'records-push.sh': {
+        env: { CLAUDE_PROJECT_DIR: join(ctx.fixture, 'records-project') },
+        expect: 'Records push: not backed up (git-failed)',
+        path: [join(ctx.fixture, 'bin-records'), ctx.hookPath].join(delimiter),
+        payload: () => payloadFor({ hook_event_name: 'SessionEnd' }),
         stream: 'stderr',
       },
       'records-index.sh': {

@@ -736,3 +736,64 @@ describe('bash 3.2 compatibility', () => {
 // about which runner produced it, so a branch could stop resolving and stay
 // silent with every test still green. Each stub reports a `kind` naming
 // itself, which is what makes the answer readable.
+
+// The acting case proves a refusal reaches stderr and exits 0. These read the
+// call log the stubs write, which is what shows the root each push was handed
+// and whether a project with no records history spawned anything at all.
+describe('records-push.sh roots and silence', () => {
+  const sessionEnd = payloadFor({ hook_event_name: 'SessionEnd' })
+  const recordsPath = (): string =>
+    [join(ctx.fixture, 'bin-records'), ctx.hookPath].join(delimiter)
+  const callLog = (label: string): string =>
+    join(ctx.fixture, `records-push-${label.replace(/\W/g, '_')}.log`)
+
+  for (const tree of TREES) {
+    const hook = join(tree.dir, 'records-push.sh')
+    const runner = tree.label === '.claude/hooks' ? 'bun' : 'canon'
+
+    it.concurrent(`should push the main root from a linked worktree on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const main = join(ctx.fixture, 'records-project')
+      const log = callLog(`worktree-${tree.label}`)
+
+      const result = await run(hook, sessionEnd, recordsPath(), undefined, {
+        CLAUDE_PROJECT_DIR: join(main, '.claude/worktrees/demo'),
+        RECORDS_PUSH_CALLS: log,
+      })
+
+      expect(result.code).toBe(0)
+      expect(readFileSync(log, 'utf8')).toContain(
+        `records push --root ${main} --json`,
+      )
+    })
+
+    it.concurrent(`should run ${runner} on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const log = callLog(`runner-${tree.label}`)
+
+      await run(hook, sessionEnd, recordsPath(), undefined, {
+        CLAUDE_PROJECT_DIR: join(ctx.fixture, 'records-project'),
+        RECORDS_PUSH_CALLS: log,
+      })
+
+      expect(readFileSync(log, 'utf8')).toMatch(new RegExp(`^${runner} `))
+    })
+
+    it.concurrent(`should spawn nothing without a records history on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const log = callLog(`silent-${tree.label}`)
+
+      const result = await run(hook, sessionEnd, recordsPath(), undefined, {
+        CLAUDE_PROJECT_DIR: join(ctx.fixture, 'project'),
+        RECORDS_PUSH_CALLS: log,
+      })
+
+      expect(existsSync(log)).toBe(false)
+      expect(result.stderr).toBe('')
+      expect(result.code).toBe(0)
+    })
+  }
+})
