@@ -166,8 +166,7 @@ export function cameraTrack(
   const end = (log.frames * 1000) / log.fps
   const zooms = zoomsOf(aims, log.events, { width, height }, end)
 
-  // Read off every press rather than off the aims, which drop a click too large
-  // to zoom and add a typing burst that is no press.
+  // Read off the presses, since the aims drop unzoomed clicks and add typing.
   const presses = log.events.flatMap((event) =>
     event.kind === 'click'
       ? [{ t: event.t, release: event.t }]
@@ -226,8 +225,7 @@ function aimsOf(
 ): Aim[] {
   switch (event.kind) {
     case 'click': {
-      // A press aimed at a point logs no box, so it zooms at the full depth a
-      // held move's point does.
+      // A point press logs no box, so it zooms as deep as a held move's point.
       const box = event.box ?? pointBox(event.at)
       return [
         {
@@ -240,8 +238,7 @@ function aimsOf(
       ]
     }
     case 'drag': {
-      // One aim over both ends, held to the release, so a short drag stays
-      // framed whole and a long one asks for a depth under MIN_ZOOM.
+      // One aim over both ends to the release, so a long drag falls under MIN_ZOOM.
       const box = union(
         event.box ?? pointBox(event.from),
         event.drop ?? pointBox(event.to),

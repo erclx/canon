@@ -83,11 +83,9 @@ export function register(program: Command): void {
     )
     .argument('<url>', 'Address to film')
     .argument('<plan>', 'JSON file naming the beats and their steps')
-    // Checked in the action rather than required here, since commander checks
-    // a parent's required options on every subcommand, `camera` included.
+    // Checked in the action, since commander would demand it of `camera` too.
     .option('--out <dir>', 'Folder the clips, logs, and tracks land in')
-    // Keeps this command's options ahead of `camera`, which reuses --out and
-    // --json for its own.
+    // Keeps --out and --json apart from the ones `camera` reuses.
     .enablePositionalOptions()
     .helpOption('-h, --help', 'Show this help message')
     .option(
@@ -442,8 +440,7 @@ async function runTake(
   }
 
   const { plan } = read
-  // Checked before filming, since the reel refuses the same beats only once
-  // every one of them has been filmed.
+  // Checked before filming, since the reel would refuse only after every beat.
   const mismatch = opts.reel
     ? reelShapeMismatch(
         plan.beats.map((beat) => ({
