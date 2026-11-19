@@ -127,6 +127,24 @@ export class TargetOffscreen extends TargetRefused {
   }
 }
 
+/**
+ * A target whose press point lands on an element that is neither it, inside
+ * it, nor around it, so the press would reach the cover and film a press that
+ * did nothing.
+ */
+export class TargetCovered extends TargetRefused {
+  constructor(
+    target: string,
+    readonly cover: string,
+    at: Point,
+  ) {
+    super(
+      target,
+      `${target} is covered by ${cover} at (${Math.round(at.x)}, ${Math.round(at.y)}), so the press would land on ${cover}. Give the step "through": true when that layer is meant to take the press`,
+    )
+  }
+}
+
 /** A point the plan aimed at that lies outside the window. */
 export class PointOffscreen extends TargetOffscreen {
   constructor(at: Point, viewport: Viewport) {
@@ -170,7 +188,11 @@ export async function performSteps(
         await click(
           stage,
           state,
-          await pressAim(stage, 'target' in step ? step.target : step),
+          await pressAim(
+            stage,
+            'target' in step ? step.target : step,
+            step.through,
+          ),
           step.modifiers ?? [],
           step.kind === 'dblclick' ? 2 : 1,
         )
@@ -180,8 +202,8 @@ export async function performSteps(
         await drag(
           stage,
           state,
-          await pressAim(stage, step.from),
-          await pressAim(stage, step.to),
+          await pressAim(stage, step.from, step.through),
+          await pressAim(stage, step.to, step.through),
           step.modifiers ?? [],
         )
         break
@@ -207,6 +229,7 @@ export async function performSteps(
       }
       case 'fill': {
         const box = await boxOf(stage, step.target)
+        await refuseCovered(stage, step.target, center(box), step.through)
         await click(stage, state, { at: center(box), box }, [], 1)
         await pause(stage, state, TYPE_MS)
         const start = stage.now()
@@ -329,10 +352,31 @@ interface Pressed {
   readonly box?: Box
 }
 
-async function pressAim(stage: Stage, aim: DragEnd): Promise<Pressed> {
+/** A point aim names no target, so only a target's press is checked for a cover. */
+async function pressAim(
+  stage: Stage,
+  aim: DragEnd,
+  through?: true,
+): Promise<Pressed> {
   if (typeof aim !== 'string') return { at: pointIn(stage, aim) }
   const box = await boxOf(stage, aim)
+  await refuseCovered(stage, aim, center(box), through)
   return { at: center(box), box }
+}
+
+/**
+ * Read before the glide rather than at the press, since a dragged element
+ * follows the pointer and would read as covering its own drop target.
+ */
+async function refuseCovered(
+  stage: Stage,
+  target: string,
+  at: Point,
+  through?: true,
+): Promise<void> {
+  if (through) return
+  const cover = await stage.evaluate<string | null>(coverExpression(target, at))
+  if (cover) throw new TargetCovered(target, cover, at)
 }
 
 function pointIn(stage: Stage, aim: PointAim): Point {
