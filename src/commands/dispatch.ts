@@ -36,6 +36,7 @@ const REFUSALS_HELP = [
   '  bad-input  a flag carries a value the queue cannot hold',
   '  no-task    no live task under .canon/tasks/ matches the argument',
   '  no-plan    a worker row whose task links no single plan file',
+  '  claimed    a worker row whose branch a session, worktree, or ref holds',
   '  malformed  a hand edit broke the prompts file, which is left as it is',
 ]
 
@@ -113,6 +114,16 @@ async function runAdd(task: string, opts: AddOptions): Promise<number> {
         `${outcome.action === 'added' ? 'Queued' : 'Replaced'} the ${outcome.prompt.role} prompt for ${outcome.prompt.label}.`,
       )
       mergeLine(outcome.mergeOrder, outcome.mergeOrderDropped)
+      for (const entry of outcome.dropped) {
+        logWarn(
+          `Dropped the ${entry.role} prompt for ${entry.label}, since ${entry.branch} is claimed.`,
+        )
+      }
+      for (const branch of outcome.claimUnread) {
+        logWarn(
+          `The claim on ${branch} could not be read, so its row stays queued.`,
+        )
+      }
     },
   )
 }
@@ -215,6 +226,9 @@ export function register(program: Command): void {
         'row runs plan-feature on the task, and a reviewer row runs review-pr on',
         '--pr. Each fence carries the command, then Controller:, then each --line.',
         'A task and role already queued is replaced, so a retried call lands once.',
+        'Every add reads the claim on each worker branch, refusing a new row whose',
+        'branch is held and dropping a queued one, named under dropped. A claim it',
+        'cannot read keeps the row and names the branch under claimUnread.',
         '',
         ...REFUSALS_HELP,
         '',

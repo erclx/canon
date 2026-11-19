@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   type AddInput,
   addPrompt,
+  type ClaimReader,
   listPrompts,
   promptsPath,
   removePrompts,
@@ -55,9 +56,21 @@ const buildInput = (overrides: Partial<AddInput> = {}): AddInput => ({
   ...overrides,
 })
 
+let CLAIMED: Set<string>
+let UNREADABLE: Set<string>
+
+const readClaim: ClaimReader = async (branch) => ({
+  claimed: CLAIMED.has(branch),
+  readable: !UNREADABLE.has(branch),
+})
+
+const add = (input: AddInput) => addPrompt(ROOT, input, { readClaim })
+
 const readQueueFile = (): Promise<string> => readFile(promptsPath(ROOT), 'utf8')
 
 beforeEach(async () => {
+  CLAIMED = new Set()
+  UNREADABLE = new Set()
   ROOT = mkdtempSync(join(tmpdir(), 'dispatch-prompts-'))
   mkdirSync(join(ROOT, '.canon', 'plans'), { recursive: true })
   mkdirSync(join(ROOT, '.canon', 'tasks'), { recursive: true })
@@ -76,8 +89,7 @@ afterEach(() => {
 
 describe('addPrompt', () => {
   it('should write a worker fence carrying the plan command and the controller', async () => {
-    const outcome = await addPrompt(
-      ROOT,
+    const outcome = await add(
       buildInput({ lines: ['Rebase over v1.2 when told.'] }),
     )
 
@@ -108,9 +120,9 @@ describe('addPrompt', () => {
   })
 
   it('should replace a task and role already queued rather than queue it twice', async () => {
-    await addPrompt(ROOT, buildInput({ effort: 'high' }))
+    await add(buildInput({ effort: 'high' }))
 
-    const outcome = await addPrompt(ROOT, buildInput({ effort: 'low' }))
+    const outcome = await add(buildInput({ effort: 'low' }))
     const listed = await listPrompts(ROOT)
 
     expect(outcome).toMatchObject({ ok: true, action: 'replaced' })
@@ -121,17 +133,14 @@ describe('addPrompt', () => {
   })
 
   it('should refuse a worker row for a task that links no plan and write nothing', async () => {
-    const outcome = await addPrompt(ROOT, buildInput({ task: 'v1.4' }))
+    const outcome = await add(buildInput({ task: 'v1.4' }))
 
     expect(outcome).toMatchObject({ ok: false, reason: 'no-plan' })
     expect(await listPrompts(ROOT)).toMatchObject({ ok: true, prompts: [] })
   })
 
   it('should queue a planner row for a task that links no plan', async () => {
-    const outcome = await addPrompt(
-      ROOT,
-      buildInput({ task: 'v1.4', role: 'planner' }),
-    )
+    const outcome = await add(buildInput({ task: 'v1.4', role: 'planner' }))
 
     expect(outcome).toMatchObject({
       ok: true,
@@ -145,16 +154,13 @@ describe('addPrompt', () => {
   })
 
   it('should refuse a reviewer row with no pull request number', async () => {
-    const outcome = await addPrompt(ROOT, buildInput({ role: 'reviewer' }))
+    const outcome = await add(buildInput({ role: 'reviewer' }))
 
     expect(outcome).toMatchObject({ ok: false, reason: 'bad-input' })
   })
 
   it('should carry the pull request number on a reviewer row', async () => {
-    const outcome = await addPrompt(
-      ROOT,
-      buildInput({ role: 'reviewer', pr: '3230' }),
-    )
+    const outcome = await add(buildInput({ role: 'reviewer', pr: '3230' }))
 
     expect(outcome).toMatchObject({
       ok: true,
@@ -169,16 +175,13 @@ describe('addPrompt', () => {
   })
 
   it('should refuse a task no live file matches', async () => {
-    const outcome = await addPrompt(ROOT, buildInput({ task: 'v9.9' }))
+    const outcome = await add(buildInput({ task: 'v9.9' }))
 
     expect(outcome).toMatchObject({ ok: false, reason: 'no-task' })
   })
 
   it('should refuse a controller that is not a full sessionId', async () => {
-    const outcome = await addPrompt(
-      ROOT,
-      buildInput({ controller: 'ac740c2e' }),
-    )
+    const outcome = await add(buildInput({ controller: 'ac740c2e' }))
 
     expect(outcome).toMatchObject({ ok: false, reason: 'bad-input' })
   })
@@ -187,7 +190,7 @@ describe('addPrompt', () => {
     mkdirSync(join(ROOT, '.canon', 'dispatch'), { recursive: true })
     await writeFile(promptsPath(ROOT), '# Dispatch prompts\n\nstray\n', 'utf8')
 
-    const outcome = await addPrompt(ROOT, buildInput())
+    const outcome = await add(buildInput())
 
     expect(outcome).toMatchObject({ ok: false, reason: 'malformed' })
     expect(await readQueueFile()).toBe('# Dispatch prompts\n\nstray\n')
@@ -195,10 +198,9 @@ describe('addPrompt', () => {
 
   describe('merge order', () => {
     it('should keep the order while two queued plans share a file', async () => {
-      await addPrompt(ROOT, buildInput())
+      await add(buildInput())
 
-      const outcome = await addPrompt(
-        ROOT,
+      const outcome = await add(
         buildInput({ task: 'v1.2', mergeOrder: 'v1.1 first, then v1.2.' }),
       )
 
@@ -213,10 +215,9 @@ describe('addPrompt', () => {
     })
 
     it('should drop the order when no two queued plans share a file', async () => {
-      await addPrompt(ROOT, buildInput())
+      await add(buildInput())
 
-      const outcome = await addPrompt(
-        ROOT,
+      const outcome = await add(
         buildInput({ task: 'v1.3', mergeOrder: 'v1.1 first, then v1.3.' }),
       )
 
@@ -230,6 +231,68 @@ describe('addPrompt', () => {
   })
 })
 
+describe('claimed branches', () => {
+  it('should refuse a worker row whose branch is already claimed and write nothing', async () => {
+    CLAIMED.add('feat/alpha')
+
+    const outcome = await add(buildInput())
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'claimed' })
+    expect(await listPrompts(ROOT)).toMatchObject({ ok: true, prompts: [] })
+  })
+
+  it('should drop a queued worker row once its branch is claimed and name it', async () => {
+    await add(buildInput())
+    CLAIMED.add('feat/alpha')
+
+    const outcome = await add(buildInput({ task: 'v1.3' }))
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      dropped: [{ label: 'v1.1', role: 'worker', branch: 'feat/alpha' }],
+    })
+    expect(await listPrompts(ROOT)).toMatchObject({
+      prompts: [{ label: 'v1.3', role: 'worker' }],
+    })
+  })
+
+  it('should keep a queued row whose claim could not be read and report it unread', async () => {
+    await add(buildInput())
+    UNREADABLE.add('feat/alpha')
+
+    const outcome = await add(buildInput({ task: 'v1.3' }))
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      dropped: [],
+      claimUnread: ['feat/alpha'],
+    })
+    expect(await listPrompts(ROOT)).toMatchObject({
+      prompts: [{ label: 'v1.1' }, { label: 'v1.3' }],
+    })
+  })
+
+  it('should queue a worker row whose own claim could not be read and report it unread', async () => {
+    UNREADABLE.add('feat/alpha')
+
+    const outcome = await add(buildInput())
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      action: 'added',
+      claimUnread: ['feat/alpha'],
+    })
+  })
+
+  it('should queue a reviewer row for a task whose worker branch is claimed', async () => {
+    CLAIMED.add('feat/alpha')
+
+    const outcome = await add(buildInput({ role: 'reviewer', pr: '7' }))
+
+    expect(outcome).toMatchObject({ ok: true, action: 'added' })
+  })
+})
+
 describe('removePrompts', () => {
   it('should answer ok with nothing removed for a row not queued', async () => {
     const outcome = await removePrompts(ROOT, 'v1.1')
@@ -238,8 +301,8 @@ describe('removePrompts', () => {
   })
 
   it('should remove one role and leave the task’s other role queued', async () => {
-    await addPrompt(ROOT, buildInput())
-    await addPrompt(ROOT, buildInput({ role: 'reviewer', pr: '7' }))
+    await add(buildInput())
+    await add(buildInput({ role: 'reviewer', pr: '7' }))
 
     const outcome = await removePrompts(ROOT, 'v1.1-alpha', 'worker')
 
@@ -253,9 +316,8 @@ describe('removePrompts', () => {
   })
 
   it('should drop the merge order once the rows sharing a file are gone', async () => {
-    await addPrompt(ROOT, buildInput())
-    await addPrompt(
-      ROOT,
+    await add(buildInput())
+    await add(
       buildInput({ task: 'v1.2', mergeOrder: 'v1.1 first, then v1.2.' }),
     )
 
@@ -265,7 +327,7 @@ describe('removePrompts', () => {
   })
 
   it('should leave an emptied queue reading no prompts waiting with no lead line', async () => {
-    await addPrompt(ROOT, buildInput())
+    await add(buildInput())
 
     await removePrompts(ROOT, 'v1.1')
 
@@ -288,9 +350,9 @@ describe('listPrompts', () => {
   })
 
   it('should group two roles of one task under one heading', async () => {
-    await addPrompt(ROOT, buildInput({ role: 'planner' }))
-    await addPrompt(ROOT, buildInput({ task: 'v1.3' }))
-    await addPrompt(ROOT, buildInput({ role: 'reviewer', pr: '9' }))
+    await add(buildInput({ role: 'planner' }))
+    await add(buildInput({ task: 'v1.3' }))
+    await add(buildInput({ role: 'reviewer', pr: '9' }))
 
     const text = await readQueueFile()
 

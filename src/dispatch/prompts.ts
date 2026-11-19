@@ -7,6 +7,7 @@ import {
   SESSION_ID_PATTERN,
   tasksDir,
 } from '@/tasks/archive'
+import { checkClaim } from '@/sessions/claim'
 import { branchOfPlan } from '@/tasks/branch'
 import { LABEL_PATTERN } from '@/tasks/label'
 import { readDeclarations } from '@/tasks/reach'
@@ -16,13 +17,14 @@ export type PromptRole = (typeof PROMPT_ROLES)[number]
 
 /**
  * `bad-input` describes the command line, `no-task` and `no-plan` the board,
- * and `malformed` a prompts file a hand edit broke, which the verb refuses
- * rather than rewriting over.
+ * `claimed` a worker branch something already holds, and `malformed` a
+ * prompts file a hand edit broke, which the verb refuses rather than rewriting.
  */
 export const PROMPT_REFUSALS = [
   'bad-input',
   'no-task',
   'no-plan',
+  'claimed',
   'malformed',
 ] as const
 export type PromptRefusal = (typeof PROMPT_REFUSALS)[number]
@@ -62,6 +64,12 @@ export interface PromptsListed {
   readonly prompts: readonly ListedPrompt[]
 }
 
+export interface DroppedPrompt {
+  readonly label: string
+  readonly role: PromptRole
+  readonly branch: string
+}
+
 export interface PromptAdded {
   readonly ok: true
   readonly path: string
@@ -69,6 +77,21 @@ export interface PromptAdded {
   readonly prompt: ListedPrompt
   readonly mergeOrder: string | null
   readonly mergeOrderDropped: boolean
+  /** Queued worker rows whose branch a session, worktree, or ref now holds. */
+  readonly dropped: readonly DroppedPrompt[]
+  /** Branches whose claim could not be read, kept queued rather than dropped. */
+  readonly claimUnread: readonly string[]
+}
+
+export interface ClaimReading {
+  readonly claimed: boolean
+  readonly readable: boolean
+}
+
+export type ClaimReader = (branch: string) => Promise<ClaimReading>
+
+export interface AddOptions {
+  readonly readClaim?: ClaimReader
 }
 
 export interface PromptsRemoved {
@@ -449,7 +472,9 @@ function commandFor(
 export async function addPrompt(
   root: string,
   input: AddInput,
+  opts: AddOptions = {},
 ): Promise<AddOutcome> {
+  const readClaim = opts.readClaim ?? claimReaderAt(root)
   const invalid = checkInput(input)
   if (invalid) return invalid
   const role = input.role as PromptRole
@@ -481,13 +506,27 @@ export async function addPrompt(
     ],
   }
 
-  const index = queue.prompts.findIndex(
+  const listed = describe(prompt)
+  const ownUnread: string[] = []
+  if (listed.branch !== undefined) {
+    const reading = await readClaim(listed.branch)
+    if (!reading.readable) ownUnread.push(listed.branch)
+    if (reading.claimed) {
+      return refuse(
+        'claimed',
+        `${listed.branch} is already held by a session, a worktree, or a ref, so ${label} has launched. Clear its row rather than queue it again.`,
+      )
+    }
+  }
+
+  const pruned = await pruneClaimed(queue.prompts, readClaim)
+  const index = pruned.kept.findIndex(
     (queued) => queued.label === label && queued.role === role,
   )
   const prompts =
     index === -1
-      ? [...queue.prompts, prompt]
-      : queue.prompts.map((queued, at) => (at === index ? prompt : queued))
+      ? [...pruned.kept, prompt]
+      : pruned.kept.map((queued, at) => (at === index ? prompt : queued))
 
   const settled = await settleMergeOrder(
     root,
@@ -500,9 +539,59 @@ export async function addPrompt(
     ok: true,
     path: relative(root, promptsPath(root)),
     action: index === -1 ? 'added' : 'replaced',
-    prompt: describe(prompt),
+    prompt: listed,
     ...settled,
+    dropped: pruned.dropped,
+    claimUnread: [...pruned.unread, ...ownUnread],
   }
+}
+
+function claimReaderAt(root: string): ClaimReader {
+  return async (branch) => {
+    const report = await checkClaim(branch, { cwd: root })
+
+    return {
+      claimed: report.claimed,
+      readable: report.sessionsReadable && report.refsReadable,
+    }
+  }
+}
+
+/**
+ * Rows outlive a wave, so a launched row left queued would be pasted again.
+ * An unreadable claim keeps its row, since dropping on a failed read loses a
+ * prompt nobody launched.
+ */
+async function pruneClaimed(
+  prompts: readonly Prompt[],
+  readClaim: ClaimReader,
+): Promise<{ kept: Prompt[]; dropped: DroppedPrompt[]; unread: string[] }> {
+  const readings = await Promise.all(
+    prompts.map(async (prompt) => {
+      const branch = describe(prompt).branch
+      return branch === undefined
+        ? { prompt, branch, reading: null }
+        : { prompt, branch, reading: await readClaim(branch) }
+    }),
+  )
+
+  const kept: Prompt[] = []
+  const dropped: DroppedPrompt[] = []
+  const unread: string[] = []
+  for (const { prompt, branch, reading } of readings) {
+    if (branch === undefined || reading === null) {
+      kept.push(prompt)
+    } else if (!reading.readable) {
+      unread.push(branch)
+      kept.push(prompt)
+    } else if (reading.claimed) {
+      dropped.push({ label: prompt.label, role: prompt.role, branch })
+    } else {
+      kept.push(prompt)
+    }
+  }
+
+  return { kept, dropped, unread }
 }
 
 /**
