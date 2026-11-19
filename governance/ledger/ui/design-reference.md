@@ -12,10 +12,10 @@ The rule states canon's own design handoff, generalized from Frameboard's projec
 | Bullet                         | Source                                                                                                                                                            | Read       |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | Build against the tracked copy | House choice: a canvas changes under the build with no history, so a reviewer cannot tell which version a surface was built against                               | 2026-10-18 |
-| Load the keeper skill          | House choice: the rule governs an edit and carries no procedure, so a session without the skill copies frames in by hand or skips the index row                   | 2026-10-21 |
+| Load the keeper skill          | House choice: the rule governs an edit and carries no procedure, so a session without the skill copies frames in by hand or skips the group index file            | 2026-10-21 |
 | Land a design with its build   | House choice: a design merged as its own pull request waits on a review that reads a picture with no build beside it, and the pick drifts before anything uses it | 2026-10-21 |
 | No hand edits                  | House choice: a reference edited by hand drifts from its canvas source, and the next sync overwrites the edit or reports it as a change nobody made               | 2026-10-18 |
-| Index row before the sync      | House choice: the sync writes only the surfaces the index names, so a missing row drops the new surface's reference                                               | 2026-10-21 |
+| Group index before the sync    | House choice: a group with no index file drops out of the generated list, so a reader cannot find which code its new reference governs                            | 2026-11-19 |
 | Reference lifetime             | House choice: a reference kept past its surface misleads the next build, and one redrawn without a design change hides a departure the review should see          | 2026-10-21 |
 
 ## Building against a reference

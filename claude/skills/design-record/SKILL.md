@@ -23,10 +23,11 @@ The document holds the rules and each role's intent, and the folder holds the pi
 
 ## Step 1: read the record
 
-Read `canon/design/index.md` from the project root, and list the group folders beside it.
+Read `canon/design/index.md` from the project root, then the group files it links and the group folders beside them.
 
 - A missing folder or index is set up at Step 3, once Step 2 has found the sync
-- An index carrying a file list or a canvas mapping is an older shape. Leave its rows in place, add new rows in the form `folder.md` gives, and say the index predates the standard.
+- An index carrying one hand-kept table of groups, a file list, or a canvas mapping is an older shape, so say the index predates the standard
+- Add nothing to an older index in its own shape. Move it the way `folder.md` gives when this run's landing touches it.
 
 ## Step 2: find the project's design sync
 
@@ -38,28 +39,31 @@ When no sync resolves, skip Steps 3 to 5 and capture no frame in the sync's plac
 
 Skip this step when `canon/design/index.md` exists, even as a stub, since a stub the project's stack seeded is the setup.
 
-1. Write `canon/design/index.md` from the template in `folder.md`, with one row per group the first pick needs.
-2. Leave the group folders to the sync, since git tracks no empty folder and the sync creates each one as it writes.
+1. Write `canon/design/index.md` from the template in `folder.md`, as frontmatter alone.
+2. Leave the group folders to the sync, since git tracks no empty folder and the sync creates each one as it writes. Step 4 writes each group's file beside its folder.
 
 ## Step 4: land a pick
 
 When the pick lands relative to the build is the design-reference rule's call, so follow it rather than choosing here.
 
 1. Name the group the surface belongs to, by where a user meets it in the app, per `folder.md`.
-2. Add or update the index row of the group, or of the section in a split group, before running the sync, naming the code paths the surface governs and the states its frames show.
-   - When the new state would push the States cell past 120 characters, follow `### Sizing the state list` in `folder.md`, which splits the group into sections before it shortens the list.
+2. Create or update the group's file beside its folder before running the sync, naming the code paths the surface governs and the states its frames show.
+   - Run `canon indexes regen canon/design` after creating a group file, so the top-level list carries the group.
+   - In a split group, edit the H3 of the section the surface sits in.
+   - When the States list grows with each frame, follow `### Sizing the state list` in `folder.md`, which splits the group into sections before it names broader kinds.
 3. Add the surface to the sync's mapping file, in the form the sync's own help gives.
 4. Run the sync, then its check, and report a missing or stray file the check names.
 5. Open each written PNG, light and dark, before reporting it landed, since a frame captured blank or in one theme passes the sync.
 
 ## Step 5: redraw or retire a reference
 
-A redraw follows an intentional design change and nothing else. Keep the index row, change the sync's mapping only where the frame moved on the canvas, and run the sync so it rewrites the files.
+A redraw follows an intentional design change and nothing else. Keep the group file, change the sync's mapping only where the frame moved on the canvas, and run the sync so it rewrites the files.
 
 Retire a reference in the change that removes its surface from the app.
 
 - Drop the surface from the sync's mapping and run the sync, so the sync removes its files
-- Remove the index row of the group or section the surface sat in, once that folder holds nothing else
+- Remove the section's H3 from the group file once its folder holds nothing else, and the group file once the group folder holds nothing
+- Run `canon indexes regen canon/design` after removing a group file, so the top-level list drops its line
 - When the sync leaves the files and its check reports them stray, name each path and ask the operator, since no session deletes a reference by hand
 
 ## Step 6: carry a pick into the design document
@@ -78,7 +82,7 @@ Never cite a board frame path from the document or the index. The board folder i
 ✅ Design record: <landed, redrawn, retired, set up, or carried>
 Group:  <group>, <name>
 Files:  <each file the sync wrote or removed>
-Index:  <the row added, changed, or removed, or unchanged>
+Index:  <the group file created, changed, or removed, or unchanged>
 Design: <the stylesheet and design document the values went to, or unchanged>
 ```
 

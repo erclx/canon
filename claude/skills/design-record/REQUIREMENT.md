@@ -9,13 +9,13 @@ description: What keeping the design record is for, the gaps it closes, and wher
 
 Without this skill, no surface sets up the design reference folder or keeps it. A pick reaches the folder only when the operator remembers the sync, or a session copies frames in by hand and they drift. A reference outlives the surface it showed, since nothing removes it.
 
-Each project invents its own grouping, and its index restates the file tree rather than naming the code a group governs. A picked color reaches the stylesheet with no intent written down, or lands as a hand-typed value in the design document.
+Each project invents its own grouping, and its index restates the file tree rather than naming the code a group governs. One hand-kept index for every group makes two branches in different groups conflict on it. A picked color reaches the stylesheet with no intent written down, or lands as a hand-typed value in the design document.
 
 ## Must
 
-- The folder takes the groups, file names, support folder, and index row form the folder standard fixes, and a project without one gets it set up rather than refused
-- A pick lands through the design sync after its index row, and a project with no sync is told before any write and still gets the design document half
-- A redraw keeps the index row and leaves the files to the sync, and a retired surface takes its files and row out in the change that removes it
+- The folder takes the groups, file names, support folder, and group index files the folder standard fixes, and a project without one gets it set up rather than refused
+- A pick lands through the design sync after its group's index file, and a project with no sync is told before any write and still gets the design document half
+- A redraw keeps the group's index file and leaves the frames to the sync, and a retired surface takes its frames and index entry out in the change that removes it
 - The run looks at each landed picture in both themes before reporting it landed
 - A picked value lands in the stylesheet and its intent in the design document under the design document standard, and a generated record changes through its module alone
 
