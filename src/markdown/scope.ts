@@ -53,15 +53,15 @@ const KEY_PATHS_HEADING = /^## Key paths\s*$/
 const KEY_PATHS_KINDS: readonly DensityKind[] = ['bullet-run', 'h3-opening']
 
 /**
- * The design reference index, measured for its table cells alone. It is a
- * catalog with one row per group, so it takes the cell limit that keeps a
- * States cell short and none of the prose or row-count limits. `densityGates`
- * leaves it out, so the finding reports and never gates, since a project past
- * the limit fixes it by moving design folders rather than in one push.
+ * The design reference index, measured for its table cells alone. A project
+ * still on the older hand-kept table carries one row per group, so it takes the
+ * cell limit and none of the prose or row-count limits. `densityGates` leaves
+ * it out, so the finding reports and never gates, since the fix is moving the
+ * rows into group files rather than one push.
  */
 const DESIGN_INDEX_SCOPE = /^canon\/design\/index\.md$/
 
-/** Whether a path is the design reference index, whose fix is a group split. */
+/** Whether a path is the design reference index, whose table fix is the move to group files. */
 export function isDesignIndex(rel: string): boolean {
   return DESIGN_INDEX_SCOPE.test(rel)
 }

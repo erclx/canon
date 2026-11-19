@@ -700,7 +700,7 @@ function reportDensity(
   )
   if (carrying.some((report) => isDesignIndex(report.rel))) {
     logInfo(
-      "On the design index, split a group whose States cell runs long into one section folder per part of its code, each with its own row, per '### Sizing the state list' in the design-record skill's folder.md.",
+      "On a design index still kept as one table, move each row into a group file beside its folder and let canon indexes regen write the list, per '### An index in the older shape' in the design-record skill's folder.md.",
     )
   }
   pipeOutput(
