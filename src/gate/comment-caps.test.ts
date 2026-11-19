@@ -299,6 +299,20 @@ describe('comment caps', () => {
         )
       })
 
+      it('should fail an edited run where git config swaps the diff prefixes', async () => {
+        git('config', 'diff.mnemonicPrefix', 'true')
+        commit('src/a.ts', oldRun)
+        const base = git('rev-parse', 'HEAD')
+        writeFileSync(
+          join(root, 'src/a.ts'),
+          oldRun.replace('// line 2', '// line two'),
+        )
+
+        const report = await commentHeadBlocks(based(base))
+
+        expect(report.failure).toBeDefined()
+      })
+
       it('should fail an old run the branch deleted a line from', async () => {
         commit('src/a.ts', oldRun)
         const base = git('rev-parse', 'HEAD')

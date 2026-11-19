@@ -214,21 +214,35 @@ const HUNK_HEADER = /^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/
 
 /**
  * Reads `git diff -U0` output into changed spans per new-side path. A pure
- * deletion after line `n` reads as the span `n` to `n + 1`, so the lines on
- * either side of the cut count as changed.
+ * deletion after line `n` reads as the span `n` to `n + 1`. Answers `undefined`
+ * on a header it cannot place, so a caller widens rather than passes.
  */
-export function parseChangedLines(diff: string): Map<string, LineSpan[]> {
+export function parseChangedLines(
+  diff: string,
+): Map<string, LineSpan[]> | undefined {
   const spans = new Map<string, LineSpan[]>()
   let current: LineSpan[] | undefined
+  let inHeader = false
+  let deleted = false
   for (const line of diff.split('\n')) {
-    if (line.startsWith('+++ ')) {
+    if (line.startsWith('diff --git ')) {
+      inHeader = true
+      deleted = false
+      current = undefined
+      continue
+    }
+    if (inHeader && line.startsWith('+++ ')) {
       const path = line.slice(4)
-      current = path.startsWith('b/') ? [] : undefined
-      if (current !== undefined) spans.set(path.slice(2), current)
+      if (path === '/dev/null') deleted = true
+      else if (!path.startsWith('b/')) return undefined
+      else spans.set(path.slice(2), (current = []))
       continue
     }
     const hunk = HUNK_HEADER.exec(line)
-    if (hunk === null || current === undefined) continue
+    if (hunk === null) continue
+    inHeader = false
+    if (deleted) continue
+    if (current === undefined) return undefined
     const start = Number(hunk[1])
     const count = hunk[2] === undefined ? 1 : Number(hunk[2])
     current.push({ start, end: count === 0 ? start + 1 : start + count - 1 })
@@ -254,6 +268,8 @@ export async function readChangedLines(
       '-U0',
       '--no-color',
       '--no-ext-diff',
+      '--src-prefix=a/',
+      '--dst-prefix=b/',
       base,
       '--',
       ...paths,
@@ -262,7 +278,10 @@ export async function readChangedLines(
   ])
   if (diff.exitCode !== 0 || untracked.exitCode !== 0) return undefined
 
-  const lines = new Map<string, ChangedLines>(parseChangedLines(diff.stdout))
+  const spans = parseChangedLines(diff.stdout)
+  if (spans === undefined) return undefined
+
+  const lines = new Map<string, ChangedLines>(spans)
   for (const path of untracked.stdout.split('\n')) {
     if (path.trim() !== '') lines.set(path.trim(), 'whole')
   }
