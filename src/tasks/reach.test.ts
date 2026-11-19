@@ -286,6 +286,35 @@ describe('planReach', () => {
     expect(outcome.claimed).toEqual([])
   })
 
+  it('should skip the In flight row whose task cites the branch own plan', async () => {
+    await writePlan('mine', ['`src/a.ts`: mine.'])
+    await writeFile(
+      join(recordDir(ROOT, 'tasks'), 't1.md'),
+      '# t1\n\nPlan: [feature-mine](../plans/feature-mine.md)\n',
+      'utf8',
+    )
+    await writeFile(
+      orderingPath(ROOT),
+      [
+        '# Tasks',
+        '',
+        '## In flight',
+        '',
+        '| Task | Touches | Session |',
+        '| ---- | ------- | ------- |',
+        '| [t1](t1.md) | `src/a.ts` | worker-one |',
+        '',
+      ].join('\n'),
+      'utf8',
+    )
+    changed.mockResolvedValue(['src/a.ts'])
+
+    const outcome = await planReach(ROOT, 'mine')
+
+    assertOk(outcome)
+    expect(outcome.claimed).toEqual([])
+  })
+
   it('should report a plan claim with no board on disk', async () => {
     await writePlan('mine', ['`src/a.ts`: mine.'])
     await writePlan('theirs', ['`src/b.ts`: theirs.'])

@@ -141,7 +141,7 @@ describe('validateBoard verb-written shape', () => {
     expect(outcome.ok && outcome.findings).toEqual([])
     expect(outcome.ok && outcome.shared).toEqual([
       {
-        group: 'Run now',
+        group: 'In flight',
         subject: 'v1.0-first and v2.0-second',
         message: 'both touch docs/commands.md.',
       },

@@ -7,6 +7,7 @@ import {
   DEFAULT_WAIT_SECONDS,
   lift,
   type LiftApi,
+  type LiftRecord,
   type PullState,
   readBaseStanding,
   readChangedPaths,
@@ -270,6 +271,27 @@ function liftApi(root: string, number: string, baseRef: string): LiftApi {
     sleep: (ms) => new Promise((done) => setTimeout(done, ms)),
     now: () => Date.now(),
   }
+}
+
+/**
+ * The `canon pr lift <number> --check` reading, taken in-process for a caller
+ * reading many pull requests. It never marks or redrafts, and answers
+ * undefined where the verb would refuse before reading a gate.
+ */
+export async function checkLift(
+  root: string,
+  number: number,
+): Promise<LiftRecord | undefined> {
+  const initial = await readPull(root, String(number))
+  if (initial.kind === 'refused') return undefined
+  const base = initial.row.base?.ref
+  if (base === undefined || base === '') return undefined
+
+  return lift(liftApi(root, String(number), `origin/${base}`), {
+    isCheck: true,
+    waitSeconds: 0,
+    painted: loadPaintedPatterns(root),
+  })
 }
 
 async function runLift(

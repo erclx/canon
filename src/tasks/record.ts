@@ -21,7 +21,12 @@ import {
   SESSIONS_PREFIX,
   tasksDir,
 } from '@/tasks/archive'
-import { checkWaiting, type LinkPromotion, promoteOnLink } from '@/tasks/board'
+import {
+  checkWaiting,
+  type LinkPromotion,
+  promoteOnLink,
+  rerenderFlight,
+} from '@/tasks/board'
 
 /**
  * Lines a task carries above its outcomes naming where the work came from. The
@@ -699,7 +704,10 @@ export async function recordSession(
     trimmed,
     sessionId,
   )
-  if (written.action !== 'unchanged') await writeFile(path, written.text)
+  if (written.action !== 'unchanged') {
+    await writeFile(path, written.text)
+    await rerenderFlight(root, stem)
+  }
 
   const listed = readSessions(written.text).find(
     (entry) => entry.sessionId === sessionId,

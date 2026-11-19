@@ -81,6 +81,14 @@ describe('listTasks', () => {
     expect(readinessOf(outcome, 'c')).toBe('Needs a plan')
   })
 
+  it('should report a row under In flight as Run now, the readiness value scripts parse', async () => {
+    await seed(group('## In flight', 'a'), [], 'a')
+
+    const outcome = await listTasks(ROOT)
+
+    expect(readinessOf(outcome, 'a')).toBe('Run now')
+  })
+
   it('should read a backlog line as backlog', async () => {
     await seed(group('## Run now', 'a'), ['p'], 'a', 'p')
 

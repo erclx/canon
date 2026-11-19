@@ -779,17 +779,17 @@ describe('recordPlan', () => {
       })
     })
 
-    it('should leave a row already under Run now where it is', async () => {
+    it('should leave a row already under In flight where it is', async () => {
       const stem = await seedTask()
       await seedPlan('worktree-scratch-routing')
-      await seedGroup('Run now', 'Task | Touches | Plan')
+      await seedGroup('In flight', 'Task | Touches | Session')
       const before = await readFile(join(tasksDir(ROOT), 'priority.md'), 'utf8')
 
       const outcome = await recordPlan(ROOT, stem, 'worktree-scratch-routing')
 
       expect(outcome).toMatchObject({
         ok: true,
-        board: { moved: false, from: 'Run now' },
+        board: { moved: false, from: 'In flight' },
       })
       await expect(
         readFile(join(tasksDir(ROOT), 'priority.md'), 'utf8'),
@@ -1153,6 +1153,31 @@ describe('recordSession', () => {
     })
     await expect(readTask(stem)).resolves.toContain(
       `Sessions: worker-canon-a (${WORKER_ID})\n`,
+    )
+  })
+
+  it('should show the recorded session on the task row under In flight', async () => {
+    const stem = await seedTask()
+    await writeFile(
+      join(tasksDir(ROOT), 'priority.md'),
+      [
+        '# Priority',
+        '',
+        '## In flight',
+        '',
+        '| Task | Touches | Session |',
+        '| ---- | ------- | ------- |',
+        `| [v28.1: A task](${stem}.md) |  | no session recorded (opus, high) |`,
+        '',
+      ].join('\n'),
+    )
+
+    await recordSession(ROOT, { kind: 'stem', stem }, WORKER_ID, 'worker-a')
+
+    await expect(
+      readFile(join(tasksDir(ROOT), 'priority.md'), 'utf8'),
+    ).resolves.toContain(
+      `| [v28.1: A task](${stem}.md) |  | worker-a (opus, high) |`,
     )
   })
 

@@ -404,7 +404,9 @@ function reportReach(
 
   logStep(outcome.claimed.length === 0 ? 'Uncontested' : 'Claimed')
   if (outcome.claimed.length === 0) {
-    logInfo('no other live plan or Run now row holds a path this branch wrote')
+    logInfo(
+      'no other live plan or In flight row holds a path this branch wrote',
+    )
   } else {
     for (const claim of outcome.claimed) logWarn(describeReachClaim(claim))
   }
@@ -425,7 +427,7 @@ function reportReach(
   // plan is unseen, and a clear reading over nothing would read as proof.
   logStep('Compared against')
   logInfo(
-    `${outcome.plans} other live plan(s) and ${outcome.rows} Run now row(s)${outcome.board ? '' : ', with no board on disk to read'}`,
+    `${outcome.plans} other live plan(s) and ${outcome.rows} In flight row(s)${outcome.board ? '' : ', with no board on disk to read'}`,
   )
 
   outro()
@@ -625,7 +627,7 @@ export function registerPlans(tasks: Command): void {
         'Exit codes:',
         '  0  the reach was read and no other track claims a changed path',
         '  1  refused as no-plan, archived, bad-input, no-base, or no-diff',
-        '  2  read, and another live plan or Run now row claims a path',
+        '  2  read, and another live plan or In flight row claims a path',
         '',
         'It reports claimed first and undeclared second. A claimed path is one',
         'another track holds and is the half worth acting on; an undeclared one',

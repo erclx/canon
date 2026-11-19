@@ -4,9 +4,15 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { recordDir } from '@/roots/record'
 import { tasksDir } from '@/tasks/archive'
-import { type Finding, type FindingKind, validateBoard } from '@/tasks/validate'
+import {
+  type Finding,
+  type FindingKind,
+  groupTokens,
+  validateBoard,
+} from '@/tasks/validate'
 import {
   boardBody,
+  inFlightTable,
   kinds,
   NO_PLAN,
   needsPlanBoard,
@@ -28,6 +34,17 @@ import {
 } from './fixture'
 
 useRoot()
+
+function upNextLaunchTable(launch: string): string {
+  return [
+    '## Up next',
+    '',
+    '| Task | Touches | Launch | Waiting on |',
+    '| ---- | ------- | ------ | ---------- |',
+    `| [v1.0-first](v1.0-first.md) | \`src/a.ts\` | ${launch} | Planned, not dispatched yet |`,
+    '',
+  ].join('\n')
+}
 
 describe('validateBoard', () => {
   it('should refuse when the project carries no board', async () => {
@@ -74,6 +91,81 @@ describe('validateBoard', () => {
       rows: 2,
       tasks: 2,
       findings: [],
+    })
+  })
+
+  describe('the In flight shape', () => {
+    it('should pass a row whose task cites a live plan', async () => {
+      await seedTask('v1.0-first')
+      await seedPlan('v1.0-first')
+      await seedBoard(boardBody([inFlightTable([{ stem: 'v1.0-first' }])]))
+
+      expect(await validateBoard(ROOT)).toMatchObject({
+        ok: true,
+        findings: [],
+      })
+    })
+
+    it('should report a row whose task cites no plan', async () => {
+      await seedTask('v1.0-first', '', undefined, NO_PLAN)
+      await seedBoard(boardBody([inFlightTable([{ stem: 'v1.0-first' }])]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && kinds(outcome.findings)).toEqual(['plan-unstated'])
+    })
+
+    it('should report a row whose task cites a plan with no file', async () => {
+      await seedTask('v1.0-first')
+      await seedBoard(boardBody([inFlightTable([{ stem: 'v1.0-first' }])]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && kinds(outcome.findings)).toEqual(['plan-unresolved'])
+    })
+
+    it('should report a board opening the group under both headings', async () => {
+      await seedTask('v1.0-first')
+      await seedTask('v2.0-second')
+      await seedPlan('v1.0-first')
+      await seedPlan('v2.0-second')
+      await seedBoard(
+        boardBody([
+          readyTable([{ stem: 'v1.0-first' }]),
+          inFlightTable([{ stem: 'v2.0-second', touches: '`src/b.ts`' }]),
+        ]),
+      )
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && kinds(outcome.findings)).toEqual(['group-doubled'])
+    })
+
+    it('should pass an Up next row carrying a Launch cell', async () => {
+      await seedTask('v1.0-first')
+      await seedPlan('v1.0-first')
+      await seedBoard(
+        boardBody([
+          upNextLaunchTable('worker, opus, high, background (operator)'),
+        ]),
+      )
+
+      expect(await validateBoard(ROOT)).toMatchObject({
+        ok: true,
+        findings: [],
+      })
+    })
+
+    it('should report a Launch cell no verb wrote', async () => {
+      await seedTask('v1.0-first')
+      await seedPlan('v1.0-first')
+      await seedBoard(boardBody([upNextLaunchTable('opus, as usual')]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && kinds(outcome.findings)).toEqual([
+        'launch-misshapen',
+      ])
     })
   })
 
@@ -208,7 +300,7 @@ describe('validateBoard', () => {
 
     expect(outcome.ok && kinds(outcome.findings)).toEqual(['plan-several'])
     expect(outcome.ok && outcome.findings[0]).toMatchObject({
-      group: 'Run now',
+      group: 'In flight',
       subject: 'v1.0-first',
       message: expect.stringContaining('the same plan twice'),
     })
@@ -663,7 +755,7 @@ describe('validateBoard', () => {
 
     expect(outcome.ok && outcome.shared).toEqual([
       {
-        group: 'Run now',
+        group: 'In flight',
         subject: 'v1.0-first and v2.0-second',
         message: 'both touch docs/commands.md.',
       },
@@ -698,7 +790,7 @@ describe('validateBoard', () => {
     expect(outcome.ok && outcome.findings).toEqual([])
     expect(outcome.ok && outcome.claims).toMatchObject([
       {
-        group: 'Run now',
+        group: 'In flight',
         subject: 'v1.0-first',
         message:
           'claims the whole src/tasks folder, so it collides with every row written under it.',
@@ -1252,7 +1344,7 @@ describe('validateBoard', () => {
       {
         kind: 'blocker-settled',
         subject: 'v2.0-second',
-        message: 'waits on src/z.ts, which nothing under Run now holds.',
+        message: 'waits on src/z.ts, which nothing under In flight holds.',
       },
     ])
   })
@@ -1444,5 +1536,27 @@ describe('validateBoard', () => {
           'cites no task and no file, so neither half of its blocker is mechanical.',
       },
     ])
+  })
+})
+
+describe('groupTokens', () => {
+  it('should write the In flight group as Run now in a JSON record', () => {
+    const record = {
+      group: 'In flight',
+      from: 'In flight',
+      subject: 'In flight',
+    }
+
+    expect(JSON.parse(JSON.stringify(record, groupTokens))).toEqual({
+      group: 'Run now',
+      from: 'Run now',
+      subject: 'In flight',
+    })
+  })
+
+  it('should leave the other groups as they are', () => {
+    const record = { group: 'Up next', from: 'Needs a plan' }
+
+    expect(JSON.parse(JSON.stringify(record, groupTokens))).toEqual(record)
   })
 })

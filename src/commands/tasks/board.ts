@@ -5,14 +5,24 @@ import {
   type BoardOutcome,
   type BoardRefused,
   blockTask,
+  LAUNCH_EFFORTS,
+  LAUNCH_MODELS,
+  LAUNCH_ROLES,
+  LAUNCH_ROUTES,
+  type LaunchPick,
   moveTask,
+  oneOf,
   PLANNED_WAITING,
   type Position,
   placeTask,
   promoteTask,
   WAITING_LIMIT,
 } from '@/tasks/board'
-import { type BoardGroup } from '@/tasks/validate'
+import { writeLaunch } from '@/tasks/launch'
+import { checkLift } from '@/commands/pr/lift'
+import { type FlightReaders, readFlight } from '@/tasks/flight'
+import { resolveSessions } from '@/sessions/resolve'
+import { type BoardGroup, groupToken } from '@/tasks/validate'
 import { intro, logAdd, logInfo, logRemove, logStep, outro } from '@/cli/ui'
 import { mainWorktreeRoot } from '@/git/worktree'
 
@@ -41,18 +51,28 @@ interface PromoteCommandOptions extends BoardCommandOptions {
 interface MoveCommandOptions
   extends BoardCommandOptions, PositionCommandOptions {}
 
+interface LaunchCommandOptions extends BoardCommandOptions {
+  readonly role?: string
+  readonly model?: string
+  readonly effort?: string
+  readonly route?: string
+  readonly override?: boolean
+  readonly clear?: boolean
+}
+
 const BOARD_WRITE_REFUSALS = [
   'Refusals, read off `reason`:',
   '  no-board        the repository holds no `.canon/tasks/` board',
   '  no-ordering     the board has no priority.md',
   '  no-match        no task file carries the stem',
   '  no-row          the task has no row on the board',
-  '  unreadable-row  a row names no task, or its header cannot place its blocker',
+  '  unreadable-row  a row names no task, or its header cannot place its blocker or launch',
   '  board-busy      another board verb held the lock past the wait, so run it again',
   '  board-changed   a hand edit landed while this one rendered, so run it again',
   '  group-rule      the target group forbids the row, naming the validate kind',
-  '  no-column       the row sits under Run now, which has no Waiting on cell',
-  '  top-group       the row already sits under Run now',
+  '  no-column       the row sits under In flight, which has no Waiting on cell',
+  '  top-group       the row already sits under In flight',
+  '  group-doubled   the board opens one group twice, as Run now beside In flight',
   `  cell-long       the Waiting on cell renders past ${WAITING_LIMIT} characters`,
   '  bad-input       a malformed group, position, or Waiting on text',
   '',
@@ -61,13 +81,16 @@ const BOARD_WRITE_REFUSALS = [
   '  1  refused, with the reason on stderr or in the JSON record',
   '',
   'Every write reads priority.md once, renders every table from the task',
-  'files and their plans, and writes it once. Task, Touches, and Plan are',
-  'derived, so only Waiting on is typed. Safe from a linked worktree, since',
-  'it resolves the board root in-process.',
+  'files and their plans, and writes it once. Task, Touches, and Session',
+  'are derived, Waiting on is typed here, and Launch through canon tasks',
+  'launch. A board still headed ## Run now reads as In flight, and the write',
+  'renames the heading. Safe from a linked worktree, since it resolves the',
+  'board root in-process.',
 ]
 
 const GROUP_FLAGS: Readonly<Record<string, BoardGroup>> = {
-  'run-now': 'Run now',
+  'in-flight': 'In flight',
+  'run-now': 'In flight',
   'up-next': 'Up next',
   'needs-a-plan': 'Needs a plan',
 }
@@ -90,7 +113,7 @@ export function registerBoard(tasks: Command): void {
       .argument('<task>', 'Task filename stem, as in v28.1-trigger-escalation')
       .requiredOption(
         '--group <group>',
-        'Target group: run-now, up-next, or needs-a-plan',
+        'Target group: in-flight, up-next, or needs-a-plan, with run-now still read as in-flight',
       )
       .option('--waiting <text>', 'The Waiting on cell, kept when omitted'),
   )
@@ -119,7 +142,7 @@ export function registerBoard(tasks: Command): void {
 
   tasks
     .command('promote')
-    .description('Move a row one group closer to Run now, to its bottom')
+    .description('Move a row one group closer to In flight, to its bottom')
     .argument('<task>', 'Task filename stem, as in v28.1-trigger-escalation')
     .helpOption('-h, --help', 'Show this help message')
     .option(
@@ -134,7 +157,7 @@ export function registerBoard(tasks: Command): void {
         '',
         ...BOARD_WRITE_REFUSALS,
         '',
-        'Up next moves to Run now, which reads as dispatched, so a dispatcher',
+        'Up next moves to In flight, which reads as dispatched, so a dispatcher',
         'runs it once a launch succeeds. Needs a plan moves to Up next.',
         '',
         'Examples:',
@@ -203,6 +226,202 @@ export function registerBoard(tasks: Command): void {
         process.exitCode = await runBlock(task, waiting, opts)
       },
     )
+
+  tasks
+    .command('launch')
+    .description("Write, replace, or clear an Up next row's Launch cell")
+    .argument('<task>', 'Task filename stem, as in v28.1-trigger-escalation')
+    .helpOption('-h, --help', 'Show this help message')
+    .option(
+      '--role <role>',
+      `The session it launches: ${LAUNCH_ROLES.join(', ')}`,
+    )
+    .option('--model <model>', `The model: ${LAUNCH_MODELS.join(', ')}`)
+    .option('--effort <effort>', `The effort: ${LAUNCH_EFFORTS.join(', ')}`)
+    .option(
+      '--route <route>',
+      `How it launches: ${LAUNCH_ROUTES.join(', ')}, being claude --bg, a pasted prompt, or a cloud worker`,
+    )
+    .option('--override', "Mark the pick as the operator's, over the runbook's")
+    .option('--clear', 'Empty the cell, taking no other pick flag')
+    .option('--json', 'Emit a machine-readable record on stdout')
+    .option('--root <path>', 'Board root, defaulting to the main worktree')
+    .addHelpText(
+      'after',
+      [
+        '',
+        ...BOARD_WRITE_REFUSALS,
+        '',
+        'The cell stores a pick the dispatcher made from its runbook, and the',
+        'verb computes none. A row promoted to In flight carries the model and',
+        'effort into its Session cell and leaves the Launch cell behind.',
+        'no-column here means the row sits outside Up next.',
+        '',
+        'Examples:',
+        '  canon tasks launch v28.1-trigger-escalation --role worker --model opus --effort high --route background',
+        '  canon tasks launch v28.1-trigger-escalation --role worker --model sonnet --effort medium --route hand --override --json',
+        '  canon tasks launch v28.1-trigger-escalation --clear',
+        '',
+      ].join('\n'),
+    )
+    .action(async (task: string, opts: LaunchCommandOptions) => {
+      process.exitCode = await runLaunch(task, opts)
+    })
+
+  tasks
+    .command('flight')
+    .description('Read where each In flight row stands, storing nothing')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Emit a machine-readable record on stdout')
+    .option('--root <path>', 'Board root, defaulting to the main worktree')
+    .addHelpText(
+      'after',
+      [
+        '',
+        "Each row reads its task's last Sessions: and Pull request: entries,",
+        'the session roster once, and canon pr lift --check once per pull',
+        'request. The stage is one of:',
+        '  building    no pull request, and the session is on the roster',
+        '  stopped     no pull request, and the session is gone',
+        '  unrecorded  no pull request, and the task names no session',
+        '  reviewing   a review, UI, or evidence gate is open',
+        '  checks      CI is pending, failing, or stalled',
+        '  rebase      the head is stale against its base or conflicts',
+        '  mergeable   every gate the lift check reads is clear',
+        '  closed      the pull request is merged or closed',
+        '  unread      a read failed, so no stage is guessed',
+        '',
+        'A row read off its pull request carries the lift reason in `reason`.',
+        '',
+        'Refusals, read off `reason`:',
+        '  no-board          the repository holds no `.canon/tasks/` board',
+        '  no-ordering       the board has no priority.md',
+        '  unreadable-row    a row no board verb can place',
+        '  group-doubled     the board opens one group twice, as Run now beside In flight',
+        '',
+        'Exit codes:',
+        '  0  read, unread rows included, so read each `stage`',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '',
+        'Examples:',
+        '  canon tasks flight',
+        '  canon tasks flight --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (opts: BoardCommandOptions) => {
+      process.exitCode = await runFlight(opts)
+    })
+}
+
+function liveReaders(root: string): FlightReaders {
+  return {
+    roster: async () => {
+      try {
+        const report = await resolveSessions()
+        if (report.kind !== 'resolved') return undefined
+        return new Set(
+          report.sessions.flatMap((session) =>
+            session.sessionId ? [session.sessionId] : [],
+          ),
+        )
+      } catch {
+        return undefined
+      }
+    },
+    pull: async (number) => {
+      try {
+        return await checkLift(root, number)
+      } catch {
+        return undefined
+      }
+    },
+  }
+}
+
+async function runFlight(opts: BoardCommandOptions): Promise<number> {
+  const emitJson = opts.json ?? false
+  const root = opts.root ?? (await mainWorktreeRoot())
+  const outcome = await readFlight(root, liveReaders(root))
+
+  if (!outcome.ok) {
+    return reportRecord(
+      'canon tasks flight',
+      { ...outcome, detail: [] },
+      emitJson,
+      root,
+    )
+  }
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({ ok: true, root, rows: outcome.rows })}\n`,
+    )
+    return 0
+  }
+
+  intro('canon tasks flight')
+  if (outcome.rows.length === 0) logInfo('nothing sits under In flight')
+  for (const row of outcome.rows) {
+    logStep(`${row.task}: ${row.stage}`)
+    logInfo(
+      [
+        row.session ? `session ${row.session.name}` : 'no session recorded',
+        row.pullRequest === null ? 'no pull request' : `#${row.pullRequest}`,
+        ...(row.reason ? [row.reason] : []),
+      ].join(', '),
+    )
+  }
+  outro()
+
+  return 0
+}
+
+/**
+ * Reads the pick flags into a pick, or `undefined` for `--clear`. Every flag is
+ * checked here, once, so the board verb trusts what it is handed.
+ */
+function launchFrom(
+  opts: LaunchCommandOptions,
+): LaunchPick | undefined | BoardRefused {
+  const given = [opts.role, opts.model, opts.effort, opts.route]
+  if (opts.clear) {
+    return given.some((flag) => flag !== undefined) || opts.override
+      ? badInput('--clear takes no pick flag.')
+      : undefined
+  }
+
+  const role = oneOf(LAUNCH_ROLES, opts.role)
+  const model = oneOf(LAUNCH_MODELS, opts.model)
+  const effort = oneOf(LAUNCH_EFFORTS, opts.effort)
+  const route = oneOf(LAUNCH_ROUTES, opts.route)
+  if (!role || !model || !effort || !route) {
+    return badInput(
+      `Pass --role (${LAUNCH_ROLES.join(', ')}), --model (${LAUNCH_MODELS.join(', ')}), --effort (${LAUNCH_EFFORTS.join(', ')}), and --route (${LAUNCH_ROUTES.join(', ')}), or --clear.`,
+    )
+  }
+
+  return { role, model, effort, route, override: opts.override ?? false }
+}
+
+function badInput(message: string): BoardRefused {
+  return { ok: false, reason: 'bad-input', message, detail: [] }
+}
+
+async function runLaunch(
+  task: string,
+  opts: LaunchCommandOptions,
+): Promise<number> {
+  const emitJson = opts.json ?? false
+  const pick = launchFrom(opts)
+  if (pick && 'ok' in pick) {
+    return reportRecord('canon tasks launch', pick, emitJson, process.cwd())
+  }
+
+  const root = opts.root ?? (await mainWorktreeRoot())
+  const outcome = await writeLaunch(root, task, pick)
+
+  return reportBoardWrite('canon tasks launch', outcome, emitJson, root)
 }
 
 /**
@@ -244,7 +463,7 @@ async function runPlace(
       {
         ok: false,
         reason: 'bad-input',
-        message: `Not a group: ${opts.group}. Pass run-now, up-next, or needs-a-plan.`,
+        message: `Not a group: ${opts.group}. Pass in-flight, up-next, or needs-a-plan.`,
         detail: [opts.group],
       },
       emitJson,
@@ -339,8 +558,11 @@ function reportBoardWrite(
         root,
         task: outcome.stem,
         path: relative(root, outcome.path),
-        group: outcome.group,
-        from: outcome.from ?? null,
+        group: groupToken(outcome.group),
+        from:
+          outcome.from === undefined || outcome.from === 'backlog'
+            ? (outcome.from ?? null)
+            : groupToken(outcome.from),
         position: outcome.position,
         backlog: outcome.backlog,
       })}\n`,

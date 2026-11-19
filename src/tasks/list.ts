@@ -2,7 +2,6 @@ import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { listTaskStems, tasksDir } from '@/tasks/archive'
 import {
-  BOARD_GROUPS,
   type BoardGroup,
   backlogPath,
   orderingPath,
@@ -11,16 +10,23 @@ import {
 } from '@/tasks/validate'
 
 /**
- * The three board group names plus the states outside them. A file named on
- * both surfaces is `validate`'s finding, so it reports as `both` rather than
- * being judged here.
+ * One value per board group plus the states outside them, a machine contract,
+ * so `## In flight` still reports as the `Run now` scripts parse.
  */
 export const READINESS_VALUES = [
-  ...BOARD_GROUPS,
+  'Run now',
+  'Up next',
+  'Needs a plan',
   'backlog',
   'unplaced',
   'both',
 ] as const
+
+const READINESS_OF: Readonly<Record<BoardGroup, Readiness>> = {
+  'In flight': 'Run now',
+  'Up next': 'Up next',
+  'Needs a plan': 'Needs a plan',
+}
 
 export type Readiness = (typeof READINESS_VALUES)[number]
 
@@ -91,7 +97,7 @@ function readinessOf(
   isParked: boolean,
 ): Readiness {
   if (group && isParked) return 'both'
-  if (group) return group
+  if (group) return READINESS_OF[group]
   if (isParked) return 'backlog'
 
   return 'unplaced'
