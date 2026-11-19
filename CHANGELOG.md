@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.103.0](https://github.com/erclx/canon/compare/v5.102.0...v5.103.0) (2026-11-19)
+
+
+### Features
+
+* **design:** let a worker redraw a frame its diff decides ([#3236](https://github.com/erclx/canon/issues/3236)) ([9d5b399](https://github.com/erclx/canon/commit/9d5b399a238bc0b72db04f7de54575a3d5ae340f))
+* **gate:** fail only the comment runs a branch changed ([#3238](https://github.com/erclx/canon/issues/3238)) ([cc788b0](https://github.com/erclx/canon/commit/cc788b0c28ba21904cb7b2aa1e06bc0f5dce7bbf))
+* **tasks:** show each board row's launch pick and in-flight stage ([#3240](https://github.com/erclx/canon/issues/3240)) ([f725ae7](https://github.com/erclx/canon/commit/f725ae7dafe996f2723118db98539e99673b317d))
+* **ui-craft:** add a page copy reference for headlines and pitches ([#3237](https://github.com/erclx/canon/issues/3237)) ([1e455d0](https://github.com/erclx/canon/commit/1e455d001870e55d9763d8c107687d7909ec5a02))
+
 ## [5.102.0](https://github.com/erclx/canon/compare/v5.101.0...v5.102.0) (2026-11-19)
 
 
