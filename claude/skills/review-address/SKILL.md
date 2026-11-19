@@ -98,7 +98,7 @@ Write a summary reply to `.canon/tmp/pr/reply/reply-<number>.md`, keyed on the P
 | Docs     | Any `.claude/` docs refreshed as a result of the fixes                                                           |
 | Close    | `🤖 Addressed by Claude Code` on its own line, so the reply reads as a machine pass rather than a human sign-off |
 
-After a step 5 rebase, the summary says so and names the files resolved by hand and those the regen rebuilt, since the next review is a full pass.
+After a step 5 rebase, the summary says so and names the files resolved by hand and those the regen rebuilt, since a review still owed reads the rebased branch as a full pass. A close carries only when the rebase left the branch diff equal per path.
 
 ```markdown
 - **<severity>**, `<file>` line <n>: fixed in `<sha>`. <What now holds, in one sentence.>
