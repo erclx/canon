@@ -488,7 +488,7 @@ export const STAGES: readonly Stage[] = [
   },
   {
     // Unscoped as a stage, since each measure reads the changed set itself and
-    // fails a touched file alone.
+    // fails only a run the branch changed.
     id: 'comment-head-blocks',
     shared: true,
     label: 'Head comment runs',
