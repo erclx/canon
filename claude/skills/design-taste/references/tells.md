@@ -30,6 +30,8 @@ The five restate the calibration list in Anthropic's [frontend-design](https://g
 - **The centered hero over a dark wash.** Centered headline, centered subhead, two buttons, gradient behind. Reach for an asymmetric split, a full-bleed artifact, or content that starts immediately.
 - **Decoration standing in for structure.** Hairline grids, crosshairs, floating rules and corner marks added so a page feels designed. Keep them only where they organize real content.
 - **The corner floater.** A large left-aligned heading with a small paragraph floating top right, aligned to nothing. Put the sub-text under the heading or build a real two-column header.
+- **One motif down the page.** The same terminal, chat thread, or card pictures every section. Give each section the form of its own outcome, such as a record, a board, a diff, or a rendered page.
+- **Boxes everywhere in one tone.** Every block sits in a bordered panel of one surface color, so nothing leads. Set most content on the ground and box only a separate object, in its own tone.
 - **A figure of identical parts.** Three branch curves that share one shape, size, and spacing though each branch differs. Vary each part by its own data, never for variety alone.
 
 ## Content and labels
