@@ -55,7 +55,7 @@ A pull request whose evidence record counts a drivable box takes a second review
 - A pull request that gains a drivable box in review takes its UI reviewer then, on the `MOVED` that brought it, since a first pass that read none launched nobody
 - The UI reviewer reads no diff and never hears the code verdict, so neither brief carries the other's result
 - Each posts its own family and runs `canon pr lift` on its close, and the verb lifts the draft mark only once both read closed at the head
-  - Send the worker each reviewer's sessionId as the pair launches, since a clean UI close dispatches nothing and the request reaches only the ids it holds
+  - Send the worker each reviewer's sessionId as that reviewer launches, one launched later on `MOVED` included, since a clean UI close dispatches nothing
   - The UI reviewer re-drives on the worker's re-review request at a new head, so message it only to state a hold, as when the merge order owes a rebase first
 
 ## A batch of small pull requests
