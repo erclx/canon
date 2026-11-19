@@ -5,7 +5,7 @@ description: Keeping a skill body and its references under the ceiling, what mov
 
 # Skill disclosure reference
 
-Checked against the [skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices) page on `2026-10-18`.
+Checked against the [skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices) page on `2026-11-19`.
 
 Applies to the size and split of every `SKILL.md` and every file under a skill's `references/`.
 

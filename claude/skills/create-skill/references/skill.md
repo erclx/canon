@@ -5,7 +5,7 @@ description: Skill structure and authoring rules for Claude Code
 
 # Claude skill reference
 
-Checked against the [Claude Code skills](https://code.claude.com/docs/en/skills) and [skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices) pages on `2026-10-18`.
+Checked against the [Claude Code skills](https://code.claude.com/docs/en/skills) and [skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices) pages on `2026-11-19`.
 
 ## Contents
 
