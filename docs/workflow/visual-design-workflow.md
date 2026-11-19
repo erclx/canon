@@ -22,6 +22,8 @@ Each group keeps a file beside its folder, such as `canon/design/home.md`, namin
 
 The worker opens each cited reference, light and dark, before its first edit to that surface. It takes sizes, spacing, and colors from the frame HTML rather than the image, and reports a reference that does not resolve instead of building without it.
 
+When its change makes a reference untrue, the worker redraws the board frame itself only where the diff decides the new content, such as a removed element or a renamed label. A redraw needing a new layout, color, or component goes to a sketch round, and a plan keeps a redraw out of the build by holding the folder in its `## Constraints`.
+
 - The `craft` rule fires on the files the worker edits and loads `ui-craft` for behavior and `design-taste` for look.
 - The `ui-craft` capture reference has the worker capture the full page in every theme the surface ships, against a preview server and never a dev server.
 - It sets the widths too, being 320 plus each breakpoint in `canon/DESIGN.md` for a layout case, and one width for a state case.
