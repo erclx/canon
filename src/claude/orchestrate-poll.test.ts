@@ -28,11 +28,9 @@ const HEAD = '1111111111111111111111111111111111111111'
 // instead never sees this value at all.
 const READ_HEAD = '2222222222222222222222222222222222222222'
 
-// The three stamps replay the observed sequence: a pass lands, the worker
-// answers it, and the reviewing session closes out seconds later. Fixed values
-// keep the age the script derives far past `STALE_AFTER`, so a case reaching
-// the STALLED branch would report rather than fall silent, and no case here can
-// pass by drifting under the threshold.
+// A pass, the worker's answer, and a close-out seconds later. Fixed values keep
+// the derived age far past `STALE_AFTER`, so a case reaching STALLED reports
+// rather than passing by drifting under the threshold.
 const FIRST_PASS = '2026-08-20T02:00:00Z'
 const RESPONSE_AT = '2026-08-20T02:02:16Z'
 const CLOSE_OUT = '2026-08-20T02:03:52Z'
@@ -86,15 +84,9 @@ interface Comment {
   heading: string
 }
 
-// Writing the payload to disk rather than baking it into the stub is what lets
-// one run rewrite the thread and the next read the new shape against the
-// baseline the first one left.
-//
-// The scope record is written from the same reviews, in the shape
-// `canon pr review-state` returns for a thread carrying no marker. That is what
-// keeps every case below reading the same values the script derived before the
-// verb existed, so a case here fails on the behavior it names rather than on
-// the read having moved.
+// On disk so one run rewrites the thread and the next reads it against the
+// baseline. The scope record mirrors `pr review-state` for an unmarked thread, so
+// a case fails on its behavior rather than on the read having moved.
 const writeThread = (
   reviews: Review[],
   comments: Comment[],
