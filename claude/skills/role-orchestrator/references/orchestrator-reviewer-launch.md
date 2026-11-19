@@ -44,10 +44,10 @@ Read `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md` when the oper
 `review-ui` is the second pass `role-reviewer` may run, so this shape reaches the role first the way the code reviewer's does. `orchestrator-review-dispatch.md` decides whether a pull request takes it, and it runs beside the code reviewer rather than after it.
 
 ```bash
-claude --bg --model sonnet --effort <effort> --disallowedTools AskUserQuestion -n "reviewer-ui-<project>-<number>" "Run /canon:role-reviewer, then /canon:review-ui <number>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. When the pass posts under ## UI review, message the worker holding the branch to run review-address, carrying your own sessionId, and send it to the controller instead when no worker resolves. When it posts ## UI review closed, run canon pr lift <number> --json and message the controller with the heading, the count line, and the reason the verb returned, unless that reason names the code review as still open or missing. Message the controller again if you stop on a question."
+claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion -n "reviewer-ui-<project>-<number>" "Run /canon:role-reviewer, then /canon:review-ui <number>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. When the pass posts under ## UI review, message the worker holding the branch to run review-address, carrying your own sessionId, and send it to the controller instead when no worker resolves. When it posts ## UI review closed, run canon pr lift <number> --json and message the controller with the heading, the count line, and the reason the verb returned, unless that reason names the code review as still open or missing. Message the controller again if you stop on a question."
 ```
 
-The model is `sonnet`, always, as the UI reviewer line in `## Pick the model` in `orchestrator-dispatch.md` states with its measured reason. `<effort>` comes from `### Effort` under that heading. `<number>`, `<dispatcher-id>`, and `<project>` resolve the same way they do in `orchestrator-launch.md`.
+`<model>` comes from the UI reviewer line in `## Pick the model` in `orchestrator-dispatch.md`, which states the default and the one escalation with its measured reason. `<effort>` comes from `### Effort` under that heading. `<number>`, `<dispatcher-id>`, and `<project>` resolve the same way they do in `orchestrator-launch.md`.
 
 - The prefix reads `reviewer-ui-` so a roster read for `reviewer-<project>-<number>` never matches it, and the two passes stay two sessions
 - Carry no cross-branch facts, since the UI reviewer reads no diff and no code verdict
@@ -74,5 +74,5 @@ claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion 
 
 The UI reviewer takes `reviewer-ui-<project>-<n1>-<n2>` and `review-ui` once per number, with the code shape's clauses for that family. Name only the pull requests whose evidence record carries a `drivable` count above zero, since a pass on one without a checklist stops on arrival and one holding only taste boxes binds no UI gate.
 
-- The model is `sonnet` and the effort follows `### Effort`, as for the single UI shape
+- The model and the effort follow `## Pick the model` and `### Effort`, as for the single UI shape
 - `canon pr lift` runs once per number on that number's `## UI review closed`, unless the reason names the code review as still open or missing
