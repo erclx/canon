@@ -30,6 +30,11 @@ Dashboards, tools, admin surfaces, agentic and assistant interfaces. The reader 
 - **High density is correct.** Cramming is a failure and spaciousness is also a failure, since a surface that shows six rows where thirty fit costs the reader a scroll per glance.
 - **The states carry the design weight.** Loading, empty, error, partial and stale are most of what the reader sees on this kind, so they are composed rather than handled.
 - **Whether each state exists** is the `ui-craft` skill's question, not this file's.
+
+### What a screen keeps and shows
+
+A screen built under the tells can strip what its category relies on, and a build that never rendered can ship two states at once.
+
 - **One state per view.** Draw each composed state in a view or frame of its own, with the others reachable from it. An empty state drawn under a full list ships two states at once.
 - **Keep the category's conventions.** A reader expects grouped cards for records of one kind, status marks on rows, and a detail panel beside a list. Three equal cards is a tell on a feature list only.
 - **An agentic surface adds three states.** Work running with something to read, work that needs the person, and work finished with a result to inspect. Each rests visibly, never as a spinner.
