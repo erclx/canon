@@ -404,11 +404,9 @@ export const skillFamily: Measure = async (ctx) => {
 }
 
 /**
- * The shipped descriptions' total after the 400-character target brought it to
- * 30,522. Claude Code's listing budget is 1% of the context window in
- * characters, and `skillOverrides` cannot mark a plugin skill name-only, so
- * shortening is the plugin's only lever. Raising it is a deliberate edit that
- * says which skill grew the listing and why.
+ * Sized from the corpus total once the 400-character target applied, since
+ * `skillOverrides` cannot mark a plugin skill name-only. Raising it is a
+ * deliberate edit naming which skill grew the listing.
  */
 export const SKILL_DESCRIPTION_CEILING = 31_000
 
