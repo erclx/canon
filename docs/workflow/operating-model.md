@@ -33,7 +33,7 @@ Each role keeps to its own writes, and five rules cover how the roles meet.
 4. The orchestrator reads `canon pr evidence --check` and sends a painted PR with no capture or evidence comment back to its worker.
 5. Dispatch a reviewer under `role-reviewer` for every PR but a release one, or one pair per batch of small contract-free PRs. It posts `review-pr` findings, and `review-ui` drives any non-taste box.
 6. The reviewer tells the session holding the branch to run `review-address`, found with `canon sessions list --branch`, once a pass posts a finding at any severity.
-7. The worker addresses the findings, rebases onto `origin/main` if a sibling landed on its files, pushes, and asks that reviewer for a re-review of the added commits.
+7. The worker addresses the findings, rebases onto `origin/main` if a sibling landed on its files, pushes, and asks every reviewer on the PR for a re-review of the added commits without waiting on CI.
 8. A pass posts `## Review` while anything is open and `## Review closed` when nothing is. The reviewer then runs `canon pr lift`.
 9. The human merges with `canon pr merge <number>`, a batch as each pass closes. The orchestrator tells any trailing worker whose files the merge touched to run `review-address`, which rebases.
 
@@ -52,7 +52,7 @@ The first review a change gets is a dispatched reviewer's. The worker's gate ins
 Findings travel on the PR. `review-pr` posts them, `review-address` fixes them and pushes, and `review-pr` runs again on the added commits.
 
 - `canon pr head` resolves the tip a pass scopes against, and `canon pr checks` reports the runs for it. See `canon pr head --help`.
-- A worker messages its controller when the PR opens with any row it turned up, when each address pass ends with the CI state, and on a block, then ends its turn. It sends nothing on progress.
+- A worker messages its controller when the PR opens with any row it turned up, when each address pass pushes with CI still running, and on a block, then ends its turn. It sends nothing on progress.
 - A declined finding carries the fact that settled it in its reply body, and a minor goes to the findings of the task the branch closes
 - A finding answered without a commit still owes a close-out, read from the worker's response
 - A branch `main` moved under is the worker's to rebase, in the same force-push as the fixes
