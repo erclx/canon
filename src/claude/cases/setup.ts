@@ -77,6 +77,13 @@ export const SETUP_CASES: readonly SkillCase[] = [
       'Something about the toolkit itself is broken, write it up and send it back to the maintainers.',
     expect: 'canon-feedback',
   },
+  // This scans the whole session and files nothing unpicked, which is what
+  // separates it from the one-report skill above.
+  {
+    prompt:
+      'Look back over this session and tell me what, if anything, is worth filing as toolkit feedback.',
+    expect: 'session-retro',
+  },
   {
     prompt:
       "Whatever the right toolkit command is, get this project's rules installed.",

@@ -171,6 +171,7 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/session-map/REQUIREMENT.md',
   'claude/skills/session-relay/REQUIREMENT.md',
   'claude/skills/session-resume/REQUIREMENT.md',
+  'claude/skills/session-retro/REQUIREMENT.md',
   'claude/skills/session-worktree/REQUIREMENT.md',
   'claude/skills/systematic-debugging/REQUIREMENT.md',
   'claude/skills/target-check/REQUIREMENT.md',
