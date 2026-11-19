@@ -40,12 +40,9 @@ async function resolved(path: string): Promise<string> {
 }
 
 /**
- * Stops every server listening from inside one of the worktrees about to be
- * removed, so none outlives the directory it serves. Each path is tested by the
- * nesting rule `canon pr local` uses, so a listener in the main checkout or in
- * a sibling under `.claude/worktrees/` is never signaled. The cwd is read
- * against the given paths and never against `process.cwd()`, which a run from
- * inside another worktree would otherwise make the only match.
+ * Each path takes the nesting rule `canon pr local` uses, so the main checkout
+ * and a sibling worktree are never signaled. The cwd is read against the given
+ * paths, never `process.cwd()`, which a run from another worktree would match.
  */
 export async function stopListeners(
   paths: readonly string[],

@@ -123,7 +123,7 @@ Holds the readers and writers behind `canon pr`, all over REST since a cloud ses
 
 ### `src/listeners/`
 
-Holds the reads of which process listens on a port, shared by `canon pr local` and `canon worktrees reclaim`.
+Holds the port listener reads and their `stop.ts`, shared by `pr local`, `worktrees reclaim`, and `sessions reap`.
 
 - `machine.ts` reads through `/proc` first and lsof second, and reports no reader at all rather than an empty list on a machine with neither
 - `parse.ts` turns each tool's output into pid and port pairs. `belongs.ts` is the nesting test that keeps a listener in the main checkout or a sibling worktree out of a worktree's set
