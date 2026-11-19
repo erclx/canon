@@ -326,9 +326,9 @@ async function step(
 }
 
 /**
- * Runs archive, records push, member retirement, reclaim, upgrade, and plugin
- * update in that order, so the reclaim never races a retirement and slow network
- * moves go last. Never throws, since a failing hook aborts nothing useful.
+ * Runs archive, records push, retirement, reclaim, upgrade, and plugin update in
+ * order: retirement first so the reclaim never races it, and both before the
+ * upgrade, which reinstalls the binary later children run under. Never throws.
  */
 export async function runPostMerge(input: PostMergeInput): Promise<void> {
   const env = gitEnv()
