@@ -14,10 +14,12 @@ Checked against the [Claude Code skills](https://code.claude.com/docs/en/skills)
 - **Reserved in Claude Code**: outside a plugin, a skill folder named `synced` in any capitalization is skipped.
 - **Reserved namespace**: outside a plugin, a skill folder or command file named `anthropic-skills` or starting with `anthropic-skills:` does not load.
 - **`description`** (required): what it does + when to use it, under 1024 chars, no XML tags. That is the portable maximum.
+- **Length target**: a skill under `claude/skills/` aims at 400 characters, room for the lead use case, a few triggers, and one exclusion, since every loaded skill shares one budget.
 - **Listing cap**: Claude Code truncates `description` plus `when_to_use` at 1,536 characters in its skill listing, so put the key use case first.
 - **Listing budget**: past the whole listing's character budget, Claude Code drops descriptions starting with the least-invoked skills, so a new skill loses its description first.
 - **Budget size**: the budget scales at 1% of the model's context window. `skillListingBudgetFraction` raises it, and `skillListingMaxDescChars` sets the per-entry cap.
 - **Freeing budget**: `"name-only"` in `skillOverrides` lists a low-priority skill without its description, leaving room for the rest.
+- **Plugin skills**: `skillOverrides` never reaches one, so a plugin frees budget only by shortening its descriptions.
 - **Past the budget**: no wording brings a dropped description back. Short of a setting, route a case that has to fire from its first use through a hook or a rule.
 - **`disable-model-invocation: true`**: Claude will not auto-trigger, and the `Skill` tool also refuses the operator's request made in words. Set it only on a skill run by slash command alone.
 - **Invocation side effects**: the same flag keeps the skill from being preloaded into a subagent and from running when a session-scoped scheduled task fires with it as the prompt.
