@@ -32,6 +32,14 @@ interface Held {
 }
 
 /**
+ * True sends a press to whatever is on top at its point, for a layer built to
+ * take it. Absent means a press whose point lands outside its target refuses.
+ */
+interface Through {
+  readonly through?: true
+}
+
+/**
  * A move's milliseconds at its end with the camera aimed there, absent when the
  * move aims the camera nowhere.
  */
@@ -57,14 +65,19 @@ type Press = { readonly target: string } | PointAim
 export type TakeStep =
   | ({ readonly kind: 'move'; readonly target: string } & Aimed)
   | ({ readonly kind: 'move' } & PointAim & Aimed)
-  | ({ readonly kind: 'click' | 'dblclick' } & Press & Held)
+  | ({ readonly kind: 'click' | 'dblclick' } & Press & Held & Through)
   | ({
       readonly kind: 'drag'
       readonly from: DragEnd
       readonly to: DragEnd
-    } & Held)
+    } & Held &
+      Through)
   | { readonly kind: 'key'; readonly keys: string }
-  | { readonly kind: 'fill'; readonly target: string; readonly text: string }
+  | ({
+      readonly kind: 'fill'
+      readonly target: string
+      readonly text: string
+    } & Through)
   | { readonly kind: 'scroll'; readonly target: string; readonly dy: number }
   | { readonly kind: 'wait'; readonly ms: number }
 
@@ -285,7 +298,10 @@ function readStep(entry: unknown, at: string): TakeStep {
     }
     case 'click':
     case 'dblclick': {
-      const held = readModifiers(entry.modifiers, at)
+      const held = {
+        ...readModifiers(entry.modifiers, at),
+        ...readThrough(entry, at),
+      }
       const point = 'x' in entry || 'y' in entry
       if (target && point) {
         throw new Refusal(
@@ -308,6 +324,7 @@ function readStep(entry: unknown, at: string): TakeStep {
         from: readDragEnd(entry.from, at, 'from'),
         to: readDragEnd(entry.to, at, 'to'),
         ...readModifiers(entry.modifiers, at),
+        ...readThrough(entry, at),
       }
     case 'key': {
       if (typeof entry.keys !== 'string') {
@@ -323,7 +340,12 @@ function readStep(entry: unknown, at: string): TakeStep {
       if (typeof entry.text !== 'string') {
         throw new Refusal('bad-step', `${at} is a fill with no text`)
       }
-      return { kind: 'fill', target: needTarget(), text: entry.text }
+      return {
+        kind: 'fill',
+        target: needTarget(),
+        text: entry.text,
+        ...readThrough(entry, at),
+      }
     case 'scroll':
       if (!isNumber(entry.dy)) {
         throw new Refusal('bad-step', `${at} is a scroll with no dy in pixels`)
@@ -477,6 +499,17 @@ function readHold(entry: Record<string, unknown>, at: string): Aimed {
     )
   }
   return { hold: entry.hold }
+}
+
+function readThrough(entry: Record<string, unknown>, at: string): Through {
+  if (entry.through === undefined || entry.through === false) return {}
+  if (entry.through !== true) {
+    throw new Refusal(
+      'bad-step',
+      `${at} carries a through that is not true or false`,
+    )
+  }
+  return { through: true }
 }
 
 function readModifiers(value: unknown, at: string): Held {

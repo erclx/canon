@@ -95,6 +95,7 @@ Branch on the record's `reason`, never on the exit code, which a shell function 
 | `target-missing` with `fallback` | Check the access before the selector, per the note below the table                                                 |
 | `target-missing`                 | Open the record's `still`, find the target the record's `beat` names on the page, fix the plan, and film once more |
 | `target-offscreen`               | Add a `setup` step that scrolls by `dy` over an in-window element or clicks a link to the target, then film again  |
+| `target-covered`                 | Close the cover `message` names in a `setup` step, or set `"through": true` on a layer built to take it, then film |
 | `server-unreachable`             | Restart the server from Step 1 and film once more                                                                  |
 | `clip-mismatch`                  | Report `message` and the beat folder's `still.jpg` to the operator and stop, since the page cropped the clip       |
 | Any other `reason`               | Report the `reason` and `message` to the operator and stop, since each is a setup step                             |

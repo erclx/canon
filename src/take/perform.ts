@@ -127,6 +127,24 @@ export class TargetOffscreen extends TargetRefused {
   }
 }
 
+/**
+ * A target whose press point lands on an element that is neither it, inside
+ * it, nor around it, so the press would reach the cover and film a press that
+ * did nothing.
+ */
+export class TargetCovered extends TargetRefused {
+  constructor(
+    target: string,
+    readonly cover: string,
+    at: Point,
+  ) {
+    super(
+      target,
+      `${target} is covered by ${cover} at (${Math.round(at.x)}, ${Math.round(at.y)}), so the press would land on ${cover}. Give the step "through": true when that layer is meant to take the press`,
+    )
+  }
+}
+
 /** A point the plan aimed at that lies outside the window. */
 export class PointOffscreen extends TargetOffscreen {
   constructor(at: Point, viewport: Viewport) {
@@ -170,7 +188,11 @@ export async function performSteps(
         await click(
           stage,
           state,
-          await pressAim(stage, 'target' in step ? step.target : step),
+          await pressAim(
+            stage,
+            'target' in step ? step.target : step,
+            step.through,
+          ),
           step.modifiers ?? [],
           step.kind === 'dblclick' ? 2 : 1,
         )
@@ -180,8 +202,8 @@ export async function performSteps(
         await drag(
           stage,
           state,
-          await pressAim(stage, step.from),
-          await pressAim(stage, step.to),
+          await pressAim(stage, step.from, step.through),
+          await pressAim(stage, step.to, step.through),
           step.modifiers ?? [],
         )
         break
@@ -207,7 +229,8 @@ export async function performSteps(
       }
       case 'fill': {
         const box = await boxOf(stage, step.target)
-        await click(stage, state, { at: center(box), box }, [], 1)
+        const checks = step.through ? {} : { checks: step.target }
+        await click(stage, state, { at: center(box), box, ...checks }, [], 1)
         await pause(stage, state, TYPE_MS)
         const start = stage.now()
         for (const character of step.text) {
@@ -323,16 +346,37 @@ async function paced(
   }
 }
 
-/** Where a press lands, and the box it lands on when a target named one. */
+/**
+ * Where a press lands, the box it lands on when a target named one, and the
+ * target read for a cover, absent for a point aim or a step pressing through.
+ */
 interface Pressed {
   readonly at: Point
   readonly box?: Box
+  readonly checks?: string
 }
 
-async function pressAim(stage: Stage, aim: DragEnd): Promise<Pressed> {
+async function pressAim(
+  stage: Stage,
+  aim: DragEnd,
+  through?: true,
+): Promise<Pressed> {
   if (typeof aim !== 'string') return { at: pointIn(stage, aim) }
   const box = await boxOf(stage, aim)
-  return { at: center(box), box }
+  return { at: center(box), box, ...(through ? {} : { checks: aim }) }
+}
+
+/**
+ * Read once the pointer rests, since the glide can reveal a cover and the rest
+ * can let one close. A drop end reads then too, before the dragged element
+ * follows the pointer over it.
+ */
+async function refuseCovered(stage: Stage, pressed: Pressed): Promise<void> {
+  if (!pressed.checks) return
+  const cover = await stage.evaluate<string | null>(
+    coverExpression(pressed.checks, pressed.at),
+  )
+  if (cover) throw new TargetCovered(pressed.checks, cover, pressed.at)
 }
 
 function pointIn(stage: Stage, aim: PointAim): Point {
@@ -346,12 +390,14 @@ function pointIn(stage: Stage, aim: PointAim): Point {
 async function click(
   stage: Stage,
   state: Performance,
-  { at, box }: Pressed,
+  pressed: Pressed,
   modifiers: readonly Modifier[],
   count: number,
 ): Promise<void> {
+  const { at, box } = pressed
   await moveTo(stage, state, at)
   await pause(stage, state, REST_MS)
+  await refuseCovered(stage, pressed)
   await holding(stage, modifiers, async () => {
     state.log?.push({
       t: stage.now(),
@@ -396,6 +442,8 @@ async function drag(
   const to = target.at
   await moveTo(stage, state, from)
   await pause(stage, state, REST_MS)
+  await refuseCovered(stage, source)
+  await refuseCovered(stage, target)
   await holding(stage, modifiers, async () => {
     const start = stage.now()
     const press = { clickCount: 1, ...withModifiers(modifiers) }
@@ -535,13 +583,22 @@ export const FOCUS_MOVED = `(() => {
 })()`
 
 /**
- * Finds a target's box in the page, so both routes resolve alike. `text=` takes
- * the innermost sized match, and a selector searches the document, then each
- * open shadow root. A frame, a closed root, and a zero-size match stay missing.
+ * `text=` takes the innermost sized match, and a selector searches the
+ * document, then each open shadow root. A frame, a closed root, and a
+ * zero-size match stay missing, and `within` reads through shadow hosts.
  */
-export function boxExpression(target: string): string {
-  return `(() => {
-    const target = ${JSON.stringify(target)}
+const RESOLVER = `
+  const within = (outer, inner) => {
+    for (let node = inner; node; node = node.parentNode ?? node.host ?? null) {
+      if (node === outer) return true
+    }
+    return false
+  }
+  const sized = (node) => {
+    const rect = node.getBoundingClientRect()
+    return rect.width > 0 && rect.height > 0
+  }
+  const find = (target) => {
     const roots = []
     const collect = (root) => {
       roots.push(root)
@@ -550,12 +607,6 @@ export function boxExpression(target: string): string {
       }
     }
     collect(document)
-    const within = (outer, inner) => {
-      for (let node = inner; node; node = node.parentNode ?? node.host ?? null) {
-        if (node === outer) return true
-      }
-      return false
-    }
     let element = null
     if (target.startsWith('text=')) {
       const want = target.slice(5).trim()
@@ -565,19 +616,47 @@ export function boxExpression(target: string): string {
         ),
       )
       const innermost = matches.filter((node) => !matches.some((other) => other !== node && within(node, other)))
-      element = innermost.find((node) => {
-        const rect = node.getBoundingClientRect()
-        return rect.width > 0 && rect.height > 0
-      }) ?? null
+      element = innermost.find(sized) ?? null
     } else {
       for (const root of roots) {
         element = root.querySelector(target)
         if (element) break
       }
     }
+    return element && sized(element) ? element : null
+  }`
+
+/** Finds a target's box in the page, so both routes resolve alike. */
+export function boxExpression(target: string): string {
+  return `(() => {
+    ${RESOLVER}
+    const element = find(${JSON.stringify(target)})
     if (!element) return null
     const rect = element.getBoundingClientRect()
-    if (rect.width === 0 || rect.height === 0) return null
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
+  })()`
+}
+
+/**
+ * Names the element at `at` when it is neither the target, inside it, nor
+ * around it, or null. Its tag and id or first class find it, where a full
+ * selector runs long.
+ */
+export function coverExpression(target: string, at: Point): string {
+  return `(() => {
+    ${RESOLVER}
+    const element = find(${JSON.stringify(target)})
+    const x = ${at.x}
+    const y = ${at.y}
+    let hit = document.elementFromPoint(x, y)
+    while (hit?.shadowRoot) {
+      const inner = hit.shadowRoot.elementFromPoint(x, y)
+      if (!inner || inner === hit) break
+      hit = inner
+    }
+    if (!element || !hit || within(element, hit) || within(hit, element)) return null
+    const tag = hit.tagName.toLowerCase()
+    if (hit.id) return tag + '#' + hit.id
+    return hit.classList.length > 0 ? tag + '.' + hit.classList[0] : tag
   })()`
 }

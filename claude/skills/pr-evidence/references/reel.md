@@ -90,6 +90,7 @@ Branch on the record's `reason`, never on the exit code.
 | No `reason`         | Continue to the stills                                                                                                  |
 | `reel-failed`       | Skip as `reel-failed` with the record's `message`                                                                       |
 | `target-offscreen`  | Add a setup step per the note below the table, then film once more. Skip as `target-offscreen` on a second refusal      |
+| `target-covered`    | Clear the cover per the note below the table, then film once more. Skip as `target-covered` on a second refusal         |
 | `over-cap`          | Drop `beat` and each beat after it, then film once more. Skip as `over-cap` if `beat` is first or it refuses again      |
 | `target-missing`    | Fix the plan off the record's `still` and `beat`, then film once more. A second refusal is owed, per the section below  |
 | `clip-mismatch`     | Skip as `clip-mismatch` with the record's `beat` and `message`, never as `wrong-state`, since the clip came out cropped |
@@ -97,6 +98,8 @@ Branch on the record's `reason`, never on the exit code.
 | Any other value     | Skip under that `reason`, naming its `beat` when the record carries one                                                 |
 
 The setup step for `target-offscreen` brings the target into the window. It is a scroll over an element already inside the window, such as a fixed header, with `dy` covering the distance, or a click on a link to the target.
+
+The fix for `target-covered` depends on the cover the record's `message` names. A banner or a dialog takes a setup step that closes it. A layer built to take every press, such as a canvas board's, takes `"through": true` on the step instead.
 
 ### A skip for a state the fixture lacks
 
