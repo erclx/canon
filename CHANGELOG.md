@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.102.0](https://github.com/erclx/canon/compare/v5.101.0...v5.102.0) (2026-11-19)
+
+
+### Features
+
+* **review:** carry both closes across a rebase with an equal diff ([#3234](https://github.com/erclx/canon/issues/3234)) ([2aa1f0c](https://github.com/erclx/canon/commit/2aa1f0ca78984c48bb20871a130eb5ae7ebfbe20))
+* **take:** refuse a press whose point lands on a cover ([#3233](https://github.com/erclx/canon/issues/3233)) ([6342046](https://github.com/erclx/canon/commit/6342046efa205f6970e38cbc29008ffe63ccb1e3))
+
 ## [5.101.0](https://github.com/erclx/canon/compare/v5.100.0...v5.101.0) (2026-11-19)
 
 
