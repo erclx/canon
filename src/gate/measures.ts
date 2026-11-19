@@ -424,10 +424,7 @@ export const skillDescriptionTotal: Measure = async (ctx) => {
     }
   }
 
-  const total = skills.reduce(
-    (sum, skill) => sum + skill.description.length,
-    0,
-  )
+  const total = skills.reduce((sum, skill) => sum + skill.description.length, 0)
   const measured = `${total} description characters across ${plural(skills.length, 'shipped skill')}`
   if (total > SKILL_DESCRIPTION_CEILING) {
     const longest = [...skills]
