@@ -612,8 +612,7 @@ export async function pushRecords(
   root: string,
   timing: PushLockTiming = PUSH_LOCK,
 ): Promise<PushOutcome> {
-  // With no history there is no folder to hold a lock in, and the unlocked
-  // body refuses `no-repository` before it writes anything.
+  // No history means no folder for the lock, and the body refuses unwritten.
   if (!existsSync(recordsGitDir(root))) return pushUnlocked(root)
   return withPushLock(root, timing, () => pushUnlocked(root))
 }

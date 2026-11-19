@@ -360,8 +360,7 @@ export function useFixture(): Context {
       chmodSync(stub, 0o755)
     }
 
-    // The records hook reports a refused push and nothing else, so these stubs
-    // refuse and log their arguments, which shows the root each runner got.
+    // Refuse and log the arguments, which shows the root each runner was handed.
     for (const name of ['canon', 'bun']) {
       const stub = join(ctx.fixture, 'bin-records', name)
       writeFileSync(
