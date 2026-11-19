@@ -702,8 +702,7 @@ async function runReclaim(opts: ReclaimCommandOptions): Promise<number> {
     )
   }
 
-  // Removal runs from the main root, since an earlier removal can delete the
-  // caller's directory. The reading above stays on the caller's directory.
+  // An earlier removal can delete the caller's directory, so remove from root.
   const root = await mainWorktreeRoot()
   const removal =
     reclaimable.length === 0
@@ -804,8 +803,7 @@ export function describe(verdict: WorktreeVerdict): string {
 
   if (!verdict.reclaimable) {
     const reasons = verdict.refusals.map((refusal) => REFUSALS[refusal])
-    // Only a resolved background holder has a real command to print. An
-    // interactive one has no id, and an unresolved one could not be looked up.
+    // Only a resolved background holder has an id to print a command for.
     const routes =
       verdict.route === 'session'
         ? verdict.sessions.map((session) => {
@@ -821,8 +819,7 @@ export function describe(verdict: WorktreeVerdict): string {
     return `${head}\n  Refused: ${reasons.join('; ')}.${routes.join('')}`
   }
 
-  // The directory being gone already is the state that used to refuse, so the
-  // row says so rather than leaving a reader to wonder what it is acting on.
+  // Name an already-gone directory, so the reader knows what the row acts on.
   const tree = verdict.missing
     ? 'its directory is already gone'
     : 'the tree is clean'
@@ -929,8 +926,7 @@ async function runRetireMembers(
     return 1
   }
 
-  // The reading stays on the caller's directory, which is what refuses the
-  // worktree it stands in, and every write runs from the main root.
+  // Read from the caller's directory, which refuses its own worktree, write from root.
   const report = await retireMembers(pullRequest, {
     cwd: process.cwd(),
     root: await mainWorktreeRoot(),

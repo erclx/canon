@@ -729,8 +729,7 @@ async function runList(opts: ListCommandOptions): Promise<number> {
     return 1
   }
 
-  // The roster marks no row as the caller, so the join runs ahead of any scope,
-  // since a caller filtered out by branch would read as one with no row.
+  // Join the caller ahead of any scope, or a branch filter reads it as rowless.
   const own = opts.self ? selfOf(report.sessions, callerIdentity()) : null
 
   if (own?.kind === 'unresolved') {
@@ -755,8 +754,7 @@ async function runList(opts: ListCommandOptions): Promise<number> {
 
   const pool = own === null ? report.sessions : [own.session]
 
-  // A branch name is unique only inside one repository, and the roster is
-  // machine-wide, so the match is scoped to the repository the caller names.
+  // A branch is unique per repository and the roster is machine-wide.
   const at = opts.repository ? resolve(opts.repository) : process.cwd()
   const repository = opts.branch ? await repositoryOf(at) : null
 
@@ -872,8 +870,7 @@ function reportConfidence(
 ): void {
   logStep('Liveness')
 
-  // A roster of none decided nothing, and the registry keeps a record per
-  // session ever run, so the empty result is stated rather than confirmed.
+  // An empty roster decided nothing, so it is stated rather than confirmed.
   if (shown.length === 0) {
     logInfo(
       report.foreignDead > 0 || report.sessions.length > 0
@@ -923,8 +920,7 @@ function reportSessions(
     )
   }
 
-  // Under --self the pool was narrowed to one row before the branch filter, so
-  // an empty result says nothing about the wider roster.
+  // Under --self an empty result says nothing about the wider roster.
   if (sessions.length === 0) {
     if (stopsUnread !== null) {
       logInfo(noneStopped(branch, scoped, foreignDead, stopsUnread))
@@ -948,8 +944,7 @@ function reportSessions(
     return
   }
 
-  // The count is what a dispatch turns on. One row is a target and several are
-  // candidates, and the caller cannot tell them apart from a roster alone.
+  // One row is a dispatch target, and several are candidates to tell apart.
   if (branch && sessions.length > 1) {
     logWarn(
       `${sessions.length} sessions hold ${branch}. Confirm which one before addressing it.`,
