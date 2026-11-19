@@ -113,6 +113,7 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
     run,
     cli: cliRunner(root),
     changed: changed.scoped ? changed.files : undefined,
+    base: changed.scoped ? changed.base : undefined,
     onQueue: (label, holder) => {
       const text = `${label} is waiting for the suite pid ${holder.pid} runs at ${holder.root}`
       // stderr in both modes, so a JSON caller's stdout stays one record.

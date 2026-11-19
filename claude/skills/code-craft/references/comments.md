@@ -1,6 +1,6 @@
 ---
 title: Comments
-description: What a code comment says, where it sits, and what it leaves out, with the limits read from canon comments scan, which the gate fails a touched file on
+description: What a code comment says, where it sits, and what it leaves out, with the limits read from canon comments scan. The gate fails a comment run the branch changed, and a history term anywhere in a touched file
 ---
 
 # Comments

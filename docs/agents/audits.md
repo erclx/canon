@@ -76,7 +76,7 @@ A key may carry a growth tolerance, a fraction of its recorded value. A growth i
 | `records-plans`      | `canon records validate plans`      | Plan records against their shape                                                                                       | Reports        |
 | `records-groundwork` | `canon records validate groundwork` | Groundwork folders against their shape                                                                                 | Reports        |
 | `records-intake`     | `canon records validate intake`     | Intake folders against their shape                                                                                     | Reports        |
-| `comments`           | `canon comments scan`               | Density, blocks past 5 lines, dense files, `TODO`, `FIXME`, `HACK`, `XXX`, and history. Touched caps and history gate. | Reports        |
+| `comments`           | `canon comments scan`               | Density, blocks past 5 lines, dense files, `TODO`, `FIXME`, `HACK`, `XXX`, and history. Changed runs and history gate. | Reports        |
 | `test-order`         | `canon gov test-order`              | Implementations that reached branch history before their test                                                          | Reports        |
 | `secrets`            | `canon secrets scan`                | Credential-shaped values in the shipped tree                                                                           | Gates          |
 | `labels`             | `canon labels audit`                | Changed paths no row of the label map reaches                                                                          | Reports        |
