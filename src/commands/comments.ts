@@ -1,4 +1,5 @@
-import { resolve } from 'node:path'
+import { stat } from 'node:fs/promises'
+import { dirname, resolve } from 'node:path'
 import type { Command } from 'commander'
 import {
   BLOCK_LINE_CHECKPOINT,
@@ -11,7 +12,8 @@ import {
   type Language,
   LANGUAGES,
   type LanguageCount,
-  scanTree,
+  type ScanTarget,
+  scanPaths,
 } from '@/comments/scan'
 import { type TrendPoint, trend } from '@/comments/trend'
 import { loadVocabulary, type Vocabulary } from '@/comments/vocabulary'
@@ -41,7 +43,10 @@ export function register(program: Command): void {
     .description(
       'Report comment density by language and kind, every comment run past the checkpoint with its placement, and what the comment caps would fail',
     )
-    .argument('[path]', 'Tree to scan, defaulting to the current directory')
+    .argument(
+      '[paths...]',
+      'Directories or files to scan, defaulting to the current directory',
+    )
     .helpOption('-h, --help', 'Show this help message')
     .option('--json', 'Add a machine-readable record on stdout')
     .option('--since <rev>', 'Report the trend from this revision instead')
@@ -52,6 +57,11 @@ export function register(program: Command): void {
     .addHelpText(
       'after',
       [
+        '',
+        'Paths:',
+        '  A directory reports its files relative to itself, and a file as typed.',
+        '  A file in a language outside the scan is skipped. --since takes one',
+        '  directory alone.',
         '',
         'Placement:',
         '  head  outside every function body, such as a doc block above one',
@@ -80,12 +90,13 @@ export function register(program: Command): void {
         'Examples:',
         '  canon comments scan',
         '  canon comments scan src --json',
+        '  canon comments scan src/cli.ts src/cli/ui.ts',
         '  canon comments scan --since v0.5.0',
         '',
       ].join('\n'),
     )
-    .action(async (path: string | undefined, opts: ScanCommandOptions) => {
-      process.exitCode = await runScan(path, opts)
+    .action(async (paths: string[], opts: ScanCommandOptions) => {
+      process.exitCode = await runScan(paths, opts)
     })
 }
 
@@ -107,37 +118,89 @@ function parseLanguages(list: string | undefined): Language[] | string {
   return requested as Language[]
 }
 
+/** Sorts each path by kind, or names the first one missing from disk. */
+async function resolveTargets(
+  paths: readonly string[],
+): Promise<ScanTarget[] | { readonly missing: string }> {
+  const targets = await Promise.all(
+    paths.map(async (path) => {
+      const info = await stat(path).catch(() => undefined)
+      if (!info) return undefined
+      const kind: ScanTarget['kind'] = info.isDirectory() ? 'directory' : 'file'
+      return { path, kind }
+    }),
+  )
+
+  const missing = paths.find((_, index) => targets[index] === undefined)
+  if (missing !== undefined) return { missing }
+  return targets.filter((target) => target !== undefined)
+}
+
+function refuse(
+  root: string,
+  reason: string,
+  message: string,
+  emitJson: boolean,
+): number {
+  logStep('Refused')
+  logWarn(message)
+  outro()
+
+  if (emitJson) {
+    process.stdout.write(`${JSON.stringify({ root, reason, message })}\n`)
+  }
+  return 1
+}
+
 async function runScan(
-  path: string | undefined,
+  paths: readonly string[],
   opts: ScanCommandOptions,
 ): Promise<number> {
-  const root = resolve(path ?? process.cwd())
+  const resolved = (paths.length > 0 ? paths : [process.cwd()]).map((path) =>
+    resolve(path),
+  )
+  const root = resolved[0]
   const emitJson = opts.json ?? false
   const languages = parseLanguages(opts.languages)
 
   intro('canon comments scan')
 
   if (typeof languages === 'string') {
-    logStep('Refused')
-    logWarn(languages)
-    outro()
+    return refuse(root, 'bad-languages', languages, emitJson)
+  }
 
-    if (emitJson) {
-      process.stdout.write(
-        `${JSON.stringify({ root, reason: 'bad-languages', message: languages })}\n`,
-      )
-    }
-    return 1
+  const targets = await resolveTargets(resolved)
+  if ('missing' in targets) {
+    return refuse(
+      targets.missing,
+      'missing-path',
+      `No file or directory at ${targets.missing}.`,
+      emitJson,
+    )
+  }
+
+  const [first] = targets
+  if (opts.since && (targets.length > 1 || first.kind !== 'directory')) {
+    return refuse(
+      root,
+      'since-needs-tree',
+      '--since reads one directory. Pass a single directory, or drop --since.',
+      emitJson,
+    )
   }
 
   // A path argument reads the rules from the checkout holding it, not the path.
-  const vocabulary = await loadVocabulary(await currentWorktreeRoot(root))
+  const vocabulary = await loadVocabulary(
+    await currentWorktreeRoot(
+      first.kind === 'file' ? dirname(first.path) : first.path,
+    ),
+  )
   const scanOptions = {
     languages,
     vocabulary: vocabulary.kind === 'loaded' ? vocabulary.terms : [],
   }
 
-  const snapshot = await scanTree(root, scanOptions)
+  const snapshot = await scanPaths(targets, process.cwd(), scanOptions)
   reportSnapshot(snapshot)
 
   const points = opts.since
@@ -156,6 +219,7 @@ async function runScan(
     process.stdout.write(
       `${JSON.stringify({
         path: root,
+        paths: resolved,
         vocabulary:
           vocabulary.kind === 'loaded'
             ? { source: vocabulary.source, terms: vocabulary.terms }
