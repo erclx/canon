@@ -153,7 +153,7 @@ Read `${CLAUDE_SKILL_DIR}/references/orchestrator-planner-reuse.md` before handi
 
 ## Dispatch to plan and build a small row
 
-Read `${CLAUDE_SKILL_DIR}/references/orchestrator-plan-build-launch.md` before launching a row that reads small, for the full brief, the 5-file bound and weight stop the session applies to its plan, the arguments that change it, and which dispatch checks bind. Its prompt opens on `/canon:auto-ship --plan-first <task>` at position zero.
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-plan-build-launch.md` before launching a row that reads small, for the full brief, the bound its plan must meet, and which dispatch checks bind. Its prompt opens on `/canon:auto-ship --plan-first <task>` at position zero.
 
 ## Dispatch a talk session
 
