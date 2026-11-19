@@ -7,7 +7,7 @@ description: What the post-plan pipeline is for, the gaps it closes, and why eve
 
 ## Gap
 
-Without this skill, the run from an approved plan to an open pull request is a conversation, and what comes next varies by session. A run that halts leaves no stated resume point, so the user reconstructs how far it got from the working tree. A small row costs two sessions reading the same files, since the chain stops without a plan file.
+Without this skill, the run from an approved plan to a pull request is a conversation that varies by session. A run that halts leaves no stated resume point, so the user reconstructs how far it got from the working tree. A small row costs two sessions reading one set of files when the chain stops without a plan or on any plan-first question.
 
 A pull request opened ready stays mergeable through its CI run, and a draft mark typed against the wrong number holds someone else's release. Parallel batches sharing edge files conflict on each merge. A worker improvising the review wait polls issue comments and stalls with both reviewers idle.
 
@@ -19,13 +19,20 @@ A pull request opened ready stays mergeable through its CI run, and a draft mark
 - A fan-in member stops after verify with a push and a done message, and an integrator opens its build by merging the member branches
 - On a launch naming a controller, both review families are awaited through `canon pr review-state --wait`, and a timeout hands the record to the controller
 
+### Plan-first launch
+
+A launch carrying `--plan-first` builds its own plan only inside a bound.
+
+- A plan-first run builds a plan of 5 files or fewer not graded heavy, stops past that bound without `--any-size`, and stops after the plan under `--stop-after-plan`
+- A plan-first question needing the operator's call holds the run on a bounded wait that stops on its deadline, and a question carrying a suggestion holds nothing
+
 ## Must not
 
 - Expand past the plan, refactor a neighbor, or touch a file outside it without reason
 - Loop on a failed verify, retry or idle on a hung one, or auto-fix a failing check, since a green pull request reached that way hides what broke and a hang is the controller's to narrow
 - Restate the ship sequence, or skip `git-ship`'s own verify for repeating this chain's
 - Stop the chain or rewrite a commit over a test-order finding
-- Run on a detached HEAD, unrelated uncommitted changes, a missing plan without `--plan-first`, or a plan-first plan past the Small test without `--any-size`
+- Run on a detached HEAD, unrelated uncommitted changes, a missing plan without `--plan-first`, or a plan-first plan past the file bound or graded heavy without `--any-size`
 
 ## Out of scope
 

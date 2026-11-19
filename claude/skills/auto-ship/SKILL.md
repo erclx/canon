@@ -33,9 +33,9 @@ A launch carrying `--plan-first` runs the subsection below next. Then compare `g
 
 ### Write the plan first
 
-`/canon:auto-ship --plan-first <task>` writes the row's plan in this session and then builds it, so the plan lands as a validated, linked file before any edit to a tracked file. A launch without the argument skips this subsection.
+`/canon:auto-ship --plan-first <task>` writes the row's plan in this session and then builds it, so the plan lands as a validated, linked file before any edit to a tracked file. Adding `--stop-after-plan` ends the run once the plan is announced. A launch without `--plan-first` skips this subsection.
 
-Read `${CLAUDE_SKILL_DIR}/references/plan-first.md` on a plan-first launch, for the steps, the size stop and its `--any-size` override, and the message the controller is owed.
+Read `${CLAUDE_SKILL_DIR}/references/plan-first.md` on a plan-first launch, for the steps, the file bound and weight stop with their `--any-size` override, the bounded wait on a question needing the operator's call, and the message the controller is owed.
 
 ### Name the worktree from the plan rather than leaving it to be derived
 
