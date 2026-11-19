@@ -42,15 +42,29 @@ interface Aimed {
   readonly hold?: number
 }
 
+/**
+ * A point in CSS pixels of the window, measured at the beat's own viewport. It
+ * reaches what no top-document selector does, such as content in a frame or
+ * under a layer taking every pointer event, and breaks when the layout shifts.
+ */
+export interface PointAim {
+  readonly x: number
+  readonly y: number
+}
+
+/** What a drag end aims at: a target, or a point. */
+export type DragEnd = string | PointAim
+
+type Press = { readonly target: string } | PointAim
+
 export type TakeStep =
   | ({ readonly kind: 'move'; readonly target: string } & Aimed)
-  | ({ readonly kind: 'move'; readonly x: number; readonly y: number } & Aimed)
-  | ({ readonly kind: 'click'; readonly target: string } & Held)
-  | ({ readonly kind: 'dblclick'; readonly target: string } & Held)
+  | ({ readonly kind: 'move' } & PointAim & Aimed)
+  | ({ readonly kind: 'click' | 'dblclick' } & Press & Held)
   | ({
       readonly kind: 'drag'
-      readonly from: string
-      readonly to: string
+      readonly from: DragEnd
+      readonly to: DragEnd
     } & Held)
   | { readonly kind: 'key'; readonly keys: string }
   | { readonly kind: 'fill'; readonly target: string; readonly text: string }
@@ -254,6 +268,7 @@ function readStep(entry: unknown, at: string): TakeStep {
   if (!isRecord(entry)) throw new Refusal('bad-step', `${at} is not an object`)
 
   const target = typeof entry.target === 'string' ? entry.target : undefined
+  if (target) refusePointString(target, at, 'target')
   const needTarget = (): string => {
     if (target) return target
     throw new Refusal('bad-step', `${at} is a ${entry.kind} with no target`)
@@ -272,23 +287,29 @@ function readStep(entry: unknown, at: string): TakeStep {
       )
     }
     case 'click':
-    case 'dblclick':
-      return {
-        kind: entry.kind,
-        target: needTarget(),
-        ...readModifiers(entry.modifiers, at),
+    case 'dblclick': {
+      const held = readModifiers(entry.modifiers, at)
+      const point = 'x' in entry || 'y' in entry
+      if (target && point) {
+        throw new Refusal(
+          'bad-step',
+          `${at} is a ${entry.kind} carrying both a target and an x and y, so give it one aim`,
+        )
       }
+      if (target) return { kind: entry.kind, target, ...held }
+      if (isNumber(entry.x) && isNumber(entry.y)) {
+        return { kind: entry.kind, x: entry.x, y: entry.y, ...held }
+      }
+      throw new Refusal(
+        'bad-step',
+        `${at} is a ${entry.kind} with neither a target nor an x and y`,
+      )
+    }
     case 'drag':
-      if (typeof entry.from !== 'string' || !entry.from) {
-        throw new Refusal('bad-step', `${at} is a drag with no from target`)
-      }
-      if (typeof entry.to !== 'string' || !entry.to) {
-        throw new Refusal('bad-step', `${at} is a drag with no to target`)
-      }
       return {
         kind: 'drag',
-        from: entry.from,
-        to: entry.to,
+        from: readDragEnd(entry.from, at, 'from'),
+        to: readDragEnd(entry.to, at, 'to'),
         ...readModifiers(entry.modifiers, at),
       }
     case 'key': {
@@ -322,6 +343,35 @@ function readStep(entry: unknown, at: string): TakeStep {
         `${at} names kind ${String(entry.kind)}, which is not ${KINDS.join(', ')}`,
       )
   }
+}
+
+function readDragEnd(value: unknown, at: string, end: string): DragEnd {
+  if (typeof value === 'string' && value) {
+    refusePointString(value, at, end)
+    return value
+  }
+  if (isRecord(value) && isNumber(value.x) && isNumber(value.y)) {
+    return { x: value.x, y: value.y }
+  }
+  throw new Refusal(
+    'bad-step',
+    `${at} is a drag whose ${end} is neither a target nor an object with an x and y`,
+  )
+}
+
+/**
+ * Refuses a point written where a target goes, which would otherwise reach the
+ * page as a selector and fail there a beat into the take.
+ */
+function refusePointString(value: string, at: string, field: string): void {
+  const match = /^\s*(-?\d+(?:\.\d+)?)\s*[,\s]\s*(-?\d+(?:\.\d+)?)\s*$/.exec(
+    value,
+  )
+  if (!match) return
+  throw new Refusal(
+    'bad-step',
+    `${at} writes the point ${value} as its ${field}, which is read as a selector. Write it as { "x": ${match[1]}, "y": ${match[2]} }.`,
+  )
 }
 
 function readNetwork(

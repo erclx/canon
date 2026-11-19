@@ -229,20 +229,27 @@ function aimsOf(
   focus: boolean,
 ): Aim[] {
   switch (event.kind) {
-    case 'click':
+    case 'click': {
+      // A press aimed at a point logs no box, so it zooms at the full depth a
+      // held move's point does.
+      const box = event.box ?? pointBox(event.at)
       return [
         {
           t: event.t,
           until: event.t,
           at: event.at,
-          box: event.box,
-          depth: depthFor(event.box),
+          box,
+          depth: depthFor(box),
         },
       ]
+    }
     case 'drag': {
       // One aim over both ends, held to the release, so a short drag stays
       // framed whole and a long one asks for a depth under MIN_ZOOM.
-      const box = union(event.box, event.drop)
+      const box = union(
+        event.box ?? pointBox(event.from),
+        event.drop ?? pointBox(event.to),
+      )
       return [
         {
           t: event.t,
@@ -287,7 +294,7 @@ function aimsOf(
           t: arrived,
           until: arrived + event.hold,
           at: event.to,
-          box: { ...event.to, width: 0, height: 0 },
+          box: pointBox(event.to),
           depth: deepest,
         },
       ]
@@ -545,6 +552,10 @@ function atRate(log: TakeLog, rate: number): TakeLog {
         : { ...event, t }
     }),
   }
+}
+
+function pointBox(at: Point): Box {
+  return { x: at.x, y: at.y, width: 0, height: 0 }
 }
 
 function centerOf(box: Box): Point {

@@ -67,7 +67,8 @@ export type LogEvent =
       readonly t: number
       readonly kind: 'click'
       readonly at: Point
-      readonly box: Box
+      /** The box pressed, absent for a press the plan aimed at a point. */
+      readonly box?: Box
       /** The keys held through the press, absent when none is. */
       readonly modifiers?: readonly Modifier[]
       /** 2 for a double click, absent for a single one. */
@@ -79,9 +80,12 @@ export type LogEvent =
       /** Where the button went down and where it came up. */
       readonly from: Point
       readonly to: Point
-      /** The box pressed and the box it was dropped on. */
-      readonly box: Box
-      readonly drop: Box
+      /**
+       * The box pressed and the box it was dropped on, each absent for an end
+       * the plan aimed at a point.
+       */
+      readonly box?: Box
+      readonly drop?: Box
       readonly modifiers?: readonly Modifier[]
       /**
        * From press to release. The travel between is logged as `move` events,

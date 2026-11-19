@@ -710,6 +710,57 @@ describe('cameraTrack depth', () => {
   })
 })
 
+describe('cameraTrack press at a point', () => {
+  const POINT = { x: 400, y: 300 }
+
+  function pointPressOf(press: number): TakeLog {
+    const glide = travelMs(START, POINT)
+    return {
+      ...takeOf([]),
+      events: [
+        { t: press - glide, kind: 'move', from: START, to: POINT, ms: glide },
+        { t: press, kind: 'click', at: POINT },
+      ],
+    }
+  }
+
+  it('should zoom onto a click with no box at the depth of a held move', () => {
+    const { frames } = cameraTrack(pointPressOf(3000))
+
+    expect(at(frames, 3000).scale).toBe(1.8)
+    expect(screenOf(at(frames, 3000), POINT).x).toBeCloseTo(POINT.x, 0)
+  })
+
+  it('should draw the ring from a click with no box', () => {
+    const { frames } = cameraTrack(pointPressOf(3000))
+
+    expect(at(frames, 3000).ring).toBe(0)
+    expect(at(frames, 3000 + 225).ring).toBeCloseTo(0.5, 1)
+  })
+
+  it('should keep both ends of a drag between points in view through the release', () => {
+    const from = { x: 400, y: 300 }
+    const to = { x: 560, y: 380 }
+    const glide = travelMs(START, from)
+    const log: TakeLog = {
+      ...takeOf([]),
+      events: [
+        { t: 2000 - glide, kind: 'move', from: START, to: from, ms: glide },
+        { t: 2150, kind: 'move', from, to, ms: 900 },
+        { t: 2000, kind: 'drag', from, to, ms: 1050 },
+      ],
+    }
+
+    const held = cameraTrack(log).frames.filter(
+      (f) => f.ms >= 2000 && f.ms <= 3050,
+    )
+
+    expect(held.every((frame) => frame.scale > 1.3)).toBe(true)
+    expect(held.filter((frame) => !inView(frame, to))).toEqual([])
+    expect(held.filter((frame) => !inView(frame, from))).toEqual([])
+  })
+})
+
 describe('readRate', () => {
   it('should read a positive number', () => {
     expect(readRate('1.5')).toBe(1.5)

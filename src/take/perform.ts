@@ -8,7 +8,7 @@ import {
   travelMs,
 } from '@/take/log'
 import { type Chord, type Modifier, isModifier, parseKeys } from '@/take/keys'
-import type { TakeStep, Viewport } from '@/take/plan'
+import type { DragEnd, PointAim, TakeStep, Viewport } from '@/take/plan'
 
 /**
  * Performs a beat's steps through a stage and logs what the edit needs. The
@@ -131,6 +131,15 @@ export class TargetOffscreen extends TargetRefused {
   }
 }
 
+/** A point the plan aimed at that lies outside the window. */
+export class PointOffscreen extends TargetOffscreen {
+  constructor(at: Point, viewport: Viewport) {
+    const point = `(${Math.round(at.x)}, ${Math.round(at.y)})`
+    super(point, at, viewport)
+    this.message = `the point ${point} lies outside the ${viewport.width}x${viewport.height} window, measured at the beat's own viewport, so the press would land where the clip never shows`
+  }
+}
+
 export interface Performance {
   pointer: Point
   /** Omitted for setup steps, which run before the clip starts. */
@@ -165,7 +174,7 @@ export async function performSteps(
         await click(
           stage,
           state,
-          await boxOf(stage, step.target),
+          await pressAim(stage, 'target' in step ? step.target : step),
           step.modifiers ?? [],
           step.kind === 'dblclick' ? 2 : 1,
         )
@@ -175,8 +184,8 @@ export async function performSteps(
         await drag(
           stage,
           state,
-          await boxOf(stage, step.from),
-          await boxOf(stage, step.to),
+          await pressAim(stage, step.from),
+          await pressAim(stage, step.to),
           step.modifiers ?? [],
         )
         break
@@ -202,7 +211,7 @@ export async function performSteps(
       }
       case 'fill': {
         const box = await boxOf(stage, step.target)
-        await click(stage, state, box, [], 1)
+        await click(stage, state, { at: center(box), box }, [], 1)
         await pause(stage, state, TYPE_MS)
         const start = stage.now()
         for (const character of step.text) {
@@ -320,14 +329,33 @@ async function paced(
   }
 }
 
+/** Where a press lands, and the box it lands on when a target named one. */
+interface Pressed {
+  readonly at: Point
+  readonly box?: Box
+}
+
+async function pressAim(stage: Stage, aim: DragEnd): Promise<Pressed> {
+  if (typeof aim !== 'string') return { at: pointIn(stage, aim) }
+  const box = await boxOf(stage, aim)
+  return { at: center(box), box }
+}
+
+function pointIn(stage: Stage, aim: PointAim): Point {
+  const at = { x: aim.x, y: aim.y }
+  if (!inWindow(at, stage.viewport)) {
+    throw new PointOffscreen(at, stage.viewport)
+  }
+  return at
+}
+
 async function click(
   stage: Stage,
   state: Performance,
-  box: Box,
+  { at, box }: Pressed,
   modifiers: readonly Modifier[],
   count: number,
 ): Promise<void> {
-  const at = center(box)
   await moveTo(stage, state, at)
   await pause(stage, state, REST_MS)
   await holding(stage, modifiers, async () => {
@@ -335,7 +363,7 @@ async function click(
       t: stage.now(),
       kind: 'click',
       at,
-      box,
+      ...(box ? { box } : {}),
       ...withModifiers(modifiers),
       ...(count > 1 ? { count } : {}),
     })
@@ -368,12 +396,12 @@ async function pause(
 async function drag(
   stage: Stage,
   state: Performance,
-  box: Box,
-  drop: Box,
+  source: Pressed,
+  target: Pressed,
   modifiers: readonly Modifier[],
 ): Promise<void> {
-  const from = center(box)
-  const to = center(drop)
+  const from = source.at
+  const to = target.at
   await moveTo(stage, state, from)
   await pause(stage, state, REST_MS)
   await holding(stage, modifiers, async () => {
@@ -388,8 +416,8 @@ async function drag(
       kind: 'drag',
       from,
       to,
-      box,
-      drop,
+      ...(source.box ? { box: source.box } : {}),
+      ...(target.box ? { drop: target.box } : {}),
       ...withModifiers(modifiers),
       ms: stage.now() - start,
     })
