@@ -52,11 +52,13 @@ Read an empty `issues` array as a queue with nothing open, which is a match that
 
 ## Step 4: present the shortlist
 
-Show the shortlist and the dropped list in the shape `filter.md` fixes, and stop for the operator's pick. File nothing the operator did not pick.
+Run tests 5 and 6 on each survivor, then rank and cap per `filter.md`. Show the shortlist and the dropped list in the shape it fixes, and stop for the operator's pick. File nothing the operator did not pick.
 
 ## Step 5: file each pick
 
 Invoke `canon:canon-feedback` once per pick, carrying the candidate's evidence from this session in full, being the commands, the outputs, the rounds, and the cost.
+
+Each pick becomes a public issue. Strip every project path and project name from the carried evidence first, and name the project by kind, as `canon-feedback` does for its project field.
 
 - A new report goes through as a new issue
 - A follow-up names its issue number, so `canon-feedback` builds the follow-up block
