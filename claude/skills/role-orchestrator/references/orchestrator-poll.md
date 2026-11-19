@@ -126,9 +126,7 @@ Read a standing one with `--check <number>`, which fetches the base and reads th
 
 A review's `commit.oid` is stamped with the head at submission rather than the commit the reviewer read. An author pushing between the diff read and the post would leave the pass recorded against a commit it never saw, and `SEEN` would fire on an unread delta.
 
-The pass carries its own record instead. `review-pr` writes the commit it read and the instant it read it as a marker on the last line of every body, and both this script and that skill resolve the covered state through `canon pr review-state`, the one place the marker is parsed.
-
-- A commit pushed inside a pass's compose window falls outside the marked range, so it reads as `MOVED` rather than `SEEN`
+The pass carries its own record instead. `review-pr` ends every body on a marker naming the commit it read and when, and this script and that skill both resolve it through `canon pr review-state`. A commit pushed inside the compose window falls outside the marked range, so it reads as `MOVED` rather than `SEEN`.
 
 ### The source behind a SEEN
 
