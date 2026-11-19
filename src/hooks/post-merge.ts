@@ -62,14 +62,9 @@ export function pullRequestNumbers(subjects: readonly string[]): number[] {
 }
 
 /**
- * Every subject the pull brought in, not just the tip. One pull routinely
- * fast-forwards over several merges, and reading HEAD alone would archive the
- * last one's task and strand the rest. `git pull` sets ORIG_HEAD to the
- * pre-merge tip, so the range is exactly what arrived, and a merge leaving no
- * ORIG_HEAD falls back to the tip.
- *
- * A hook exports `GIT_DIR` and friends, which beat `-C`, so every read goes
- * through `gitEnv()` to answer for the checkout `cwd` names.
+ * Every subject the pull brought in, from ORIG_HEAD to the tip, since one pull
+ * can fast-forward over several merges. Reads go through `gitEnv()`, since a
+ * hook exports `GIT_DIR`, which beats `-C`.
  */
 export async function readMergedSubjects(cwd: string): Promise<string[]> {
   const options = {
@@ -293,11 +288,9 @@ function memberLines(number: number, fields: Fields): string | undefined {
 }
 
 /**
- * Shared by the binary reinstall and the plugin update. `current` is the
- * ordinary outcome on most merges and stays quiet, and `quiet` names the
- * refusal reasons that describe a permanent condition on the machine. `icon`
- * carries its own trailing spacing, since the two glyphs render at different
- * widths.
+ * Shared by the reinstall and the plugin update. `current` stays quiet,
+ * `quiet` names the reasons for a permanent condition on the machine, and
+ * `icon` carries its own spacing, since the two glyphs differ in width.
  */
 function moveLines(
   result: StepResult,
@@ -338,15 +331,9 @@ async function step(
 }
 
 /**
- * Runs the six post-merge steps in order: archive, records push, member
- * retirement, reclaim, upgrade, plugin update. The member retirement sits
- * before the reclaim, so the reclaim reads a retired member's worktree as
- * gone rather than racing it. Both sit before the upgrade, since the
- * upgrade reinstalls the binary every later child runs under, and the two
- * network-bound moves sit last so a slow registry delays nothing else.
- *
- * Never throws and reports nothing on the ordinary merge, since nobody is
- * watching and a hook failing aborts nothing useful.
+ * Runs archive, records push, member retirement, reclaim, upgrade, and plugin
+ * update in that order, so the reclaim never races a retirement and slow network
+ * moves go last. Never throws, since a failing hook aborts nothing useful.
  */
 export async function runPostMerge(input: PostMergeInput): Promise<void> {
   const env = gitEnv()

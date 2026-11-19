@@ -103,12 +103,9 @@ async function runSkillNames(opts: SweepOptions): Promise<number> {
 }
 
 /**
- * One sweep over a repository's tracked files under whichever rules it was
- * handed.
- *
- * Reports rather than writes without `--write`, matching `canon records
- * migrate`. A rename touching this many files has no undo short of the branch
- * it ran on, so the safe outcome sits on the default path.
+ * One sweep over a repository's tracked files under the rules it was handed.
+ * Reports without `--write`, since a rename this wide has no undo short of
+ * the branch it ran on, so the safe outcome sits on the default path.
  */
 async function runSweep(
   opts: SweepOptions,
@@ -226,11 +223,8 @@ interface RecordsOptions {
 
 /**
  * Moves a project's session records to `.canon/` and repoints what cites them.
- *
- * The ignore gate runs before anything is planned. Every folder being moved is
- * ignored where it stands, so landing them under a root the project does not
- * ignore publishes the memory pen into the next commit, and reporting a plan
- * the caller cannot safely apply is worse than refusing to draw one.
+ * The ignore gate runs before planning, since landing ignored folders under an
+ * unignored root would publish them in the next commit.
  */
 async function runRecords(opts: RecordsOptions): Promise<number> {
   const root = opts.root ?? process.cwd()
@@ -417,13 +411,9 @@ function toRecordsRecord(
 }
 
 /**
- * Moves the tracked toolkit surfaces to `canon/` and repoints what cites them.
- *
- * Every path here is tracked, so the write goes through `applyRename`'s
- * `git mv` rather than the records move's plain rename, and the history
- * follows each file. A destination already on disk refuses the whole plan,
- * since `git mv` onto an existing path fails per file and leaves a tree split
- * across both roots.
+ * Moves the tracked toolkit surfaces to `canon/` through `applyRename`, so
+ * history follows each file. A destination already on disk refuses the whole
+ * plan, since a per-file `mv` failure leaves the tree split across both roots.
  */
 async function runSurfaceRoots(opts: SweepOptions): Promise<number> {
   const root = opts.root ?? process.cwd()
@@ -560,15 +550,9 @@ interface RecordTreeOptions {
 }
 
 /**
- * Repoints the old-root citations left inside the record tree itself. The
- * sibling verb sweeps a git listing, which reaches every tracked file and none
- * of the records, since those are gitignored by construction. This one walks
- * the new root directly and is scoped to the folders a session still follows a
- * path into, so the closed trails and the scratch folder keep what they say.
- *
- * No ignore gate here. Nothing moves, so there is no destination whose ignore
- * status could publish a record, and a run in a project the move has not
- * reached finds no new root to walk and reports nothing.
+ * Repoints old-root citations inside the gitignored record tree, which the
+ * sibling sweep never reaches, scoped to folders a session still follows a
+ * path into. No ignore gate, since nothing moves.
  */
 async function runRecordTree(opts: RecordTreeOptions): Promise<number> {
   const root = opts.root ?? process.cwd()
@@ -617,13 +601,9 @@ function excerpt(text: string): string {
 }
 
 /**
- * Names every citation with the line it sits on.
- *
- * The record tree is untracked and unbacked, so a wrong rewrite has no git undo
- * and a count would give a reader nothing to judge before passing `--write`.
- * The excluded corpora take the opposite treatment for the same reason
- * `reportRecords` counts the records it skips: they are thousands of files
- * nobody is being asked to check.
+ * Names every citation with its line, since the record tree is untracked and
+ * a wrong rewrite has no undo, so a bare count gives a reader nothing to judge.
+ * The excluded corpora are counted alone, being thousands of unchecked files.
  */
 function reportRecordTree(plan: RecordTreePlan, swept: number): void {
   logInfo(`${plural(swept, 'file')} in the live record surface.`)
@@ -767,10 +747,8 @@ interface RecordLayoutOptions {
 }
 
 /**
- * Moves every row of `RECORD_LAYOUT_MOVES`: the memory pen's receipts and
- * retired entries under `.canon/memory/`, and everything under
- * `.canon/review/` that is not a review out to its own folder, then repoints
- * the citations that name any of them.
+ * Moves every row of `RECORD_LAYOUT_MOVES` out of `.canon/memory/` and
+ * `.canon/review/` into its own folder, then repoints the citations to them.
  */
 async function runRecordLayout(opts: RecordLayoutOptions): Promise<number> {
   const root = opts.root ?? process.cwd()
@@ -869,12 +847,9 @@ interface RuleLayoutOptions {
 }
 
 /**
- * Moves a target's flat `.claude/rules/<subdir>/` tree onto
- * `.claude/rules/canon/<subdir>/`.
- *
- * No ignore gate here, unlike `runRecords`. Nothing this verb moves is
- * gitignored: an installed rule is a file the target tracks, so relocating it
- * publishes nothing that was not already committed.
+ * Moves a target's flat `.claude/rules/<subdir>/` onto
+ * `.claude/rules/canon/<subdir>/`. No ignore gate, unlike `runRecords`, since an
+ * installed rule is tracked and moving it publishes nothing new.
  */
 async function runRuleLayout(opts: RuleLayoutOptions): Promise<number> {
   const root = opts.root ?? process.cwd()

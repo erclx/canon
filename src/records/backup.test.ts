@@ -29,10 +29,9 @@ let ORIGIN: string
 const RECORDS_GIT_DIR = join('.claude', '.records.git')
 
 /**
- * `gitEnv()` is what keeps these fixtures off the repository under test. The
- * pre-push hook exports `GIT_DIR` and `GIT_WORK_TREE`, and both take precedence
- * over `-C` and `--git-dir`, so a bare call here resolves against this
- * repository and the suite fails only when run from a hook.
+ * `gitEnv()` keeps these fixtures off the repository under test, since the
+ * pre-push hook exports `GIT_DIR` and `GIT_WORK_TREE`, which beat `-C`, and
+ * the suite would otherwise fail only when run from a hook.
  */
 async function git(args: string[]): Promise<string> {
   const result = await $`git ${args}`.env(gitEnv()).quiet().nothrow()
@@ -44,12 +43,9 @@ function recordsGit(root: string, args: string[]): Promise<string> {
 }
 
 /**
- * A git project holding one record in each backed folder, with no records
- * history yet.
- *
- * The `git init` is what a real root always carries. Both verbs read the
- * project's own remotes to clear the shared-origin gate and refuse when that
- * read fails, so a bare directory exercises the refusal rather than the flow.
+ * A git project with one record per backed folder and no records history.
+ * The `git init` matters, since both verbs refuse when the project's own
+ * remotes cannot be read, so a bare directory tests the refusal instead.
  */
 async function makeProject(): Promise<string> {
   const root = mkdtempSync(join(tmpdir(), 'canon-backup-'))
@@ -123,13 +119,9 @@ async function recordsState(root: string): Promise<string[]> {
 }
 
 /**
- * Runs `verb` with the process sitting inside the records work tree, which is
- * where a session in a linked worktree under `.claude/worktrees/<name>/`
- * stands and the one place neither verb could reach.
- *
- * A plain subdirectory reproduces that exactly, since what decides both cases
- * is git deriving a pathspec prefix from the current directory. Provisioning a
- * real worktree would cost the fixture without changing what is measured.
+ * Runs `verb` from inside the records work tree, where a linked worktree
+ * session stands. A plain subdirectory reproduces it, since the pathspec
+ * prefix from the current directory is what decides both cases.
  */
 async function fromInsideWorkTree<T>(
   root: string,

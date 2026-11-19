@@ -28,27 +28,23 @@ export const TREES = [
 export const UNGUARDED = new Set(['bare-flag-repair.sh', 'cloud-setup.sh'])
 
 // A tool name no hook acts on, so every guarded hook falls through to a quiet
-// exit 0. This covers the tool filter and nothing else: a mangled payload
-// reaches the same fall-through, which is why every hook also carries an
-// acting case below.
+// exit 0. A mangled payload reaches the same fall-through, which is why every
+// hook also carries an acting case below.
 export const INERT_PAYLOAD = JSON.stringify({
   session_id: 'hooks-guard-inert',
   tool_input: { file_path: '/nowhere/ignored.txt' },
   tool_name: 'Read',
 })
 
-// The payload takes a nonce because three hooks dedupe on `session_id`, writing
-// a marker under the project dir and staying silent for the rest of that
-// session. Both trees run the same hook against one fixture, so a shared id
-// silences whichever loses the race.
+// The payload takes a nonce because three hooks dedupe on `session_id`, and
+// both trees run one hook against one fixture, so a shared id silences
+// whichever loses the race.
 export interface ActingCase {
   /** Exit code the acting branch leaves, where a blocking hook leaves 2. */
   readonly code?: number
   /**
-   * Overrides applied on top of the spawned process's own environment, for a
-   * hook whose acting branch reads a variable rather than the payload. A key
-   * mapped to `undefined` is deleted rather than left at whatever the runner
-   * happens to carry.
+   * Overrides on the spawned environment, for a hook whose acting branch reads
+   * a variable. A key mapped to `undefined` is deleted rather than inherited.
    */
   readonly env?: Record<string, string | undefined>
   readonly expect: string
@@ -90,10 +86,9 @@ export interface Context {
 
 export const ctx = {} as Context
 
-// `canon indexes regen` succeeds on the index hook where the CLI is installed
-// and is absent on a CI runner, so the acting output would differ by machine.
-// Removing it from PATH pins both to the branch that reports a stale index,
-// which fires only after the payload parsed and the path guard matched.
+// `canon indexes regen` exists on a dev machine and not on a CI runner, so
+// removing it from PATH pins both to the stale-index branch, which fires only
+// after the payload parsed and the path guard matched.
 const pathWithoutCanon = (): string =>
   (process.env.PATH ?? '')
     .split(delimiter)
@@ -184,14 +179,9 @@ export const reviewPost = (
 ) => postPayload(`gh api ${method} ${endpoint} -f event=COMMENT ${args}`)
 
 /**
- * Links `bash` and `jq` into `dir`, the PATH the degradation branch runs under.
- * That branch needs a PATH carrying neither runner, yet the run still needs
- * `bash` to spawn the hook and `jq` to read its payload. Missing either takes
- * the run somewhere silent, which would pass the case against the wrong branch.
- *
- * Filtering the caller's PATH for a directory holding `jq` and no runner would
- * read machine provisioning rather than behavior, since a machine carrying
- * `bun` in `/usr/bin` leaves no directory qualifying.
+ * Links `bash` and `jq` into `dir`, a PATH with no runner where the hook can
+ * still spawn and read its payload. Filtering the caller's PATH instead would
+ * read machine provisioning, since `bun` in `/usr/bin` leaves no dir qualifying.
  */
 function linkNoRunnerPath(dir: string): void {
   for (const name of ['bash', 'jq'] as const) {

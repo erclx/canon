@@ -369,13 +369,9 @@ describe('records-index.sh folders and roots', () => {
   }
 })
 
-// A folder sits inside the one it archives, and the path guard is a shell
-// pattern whose wildcard crosses a separator, so `*/.claude/tasks/*.md` reaches
-// an archived task as readily as a live one. A regen fired on it rebuilds the
-// live index off a folder it was taken out of.
-//
-// Silence alone would also be the reading if the hook stopped working, and the
-// cases above are what separate the two.
+// The path guard's wildcard crosses a separator, so it reaches an archived
+// task as readily as a live one, and a regen on it rebuilds the live index off
+// the wrong folder. The cases above separate silence from a broken hook.
 describe('records-index.sh exclusions', () => {
   const excluded = [
     ['tasks', 'archive/v01.0-shipped.md'],
@@ -454,11 +450,9 @@ describe('search-reminder.sh firing conditions', () => {
   }
 })
 
-// CLAUDE_PROJECT_DIR is the session's own worktree rather than the main root,
-// so a naive read would log a pull request opened from a linked worktree into
-// a folder that dies with the worktree, losing exactly the row the log exists
-// to keep. The hook strips the worktree segment back to the main root before
-// writing, the way records-index.sh already derives its own.
+// CLAUDE_PROJECT_DIR is the session's own worktree, so a naive read would log
+// into a folder that dies with it. The hook strips the worktree segment back
+// to the main root first.
 describe('pr-create-log.sh root resolution', () => {
   const hook = join(ROOT, '.claude/hooks/pr-create-log.sh')
 
@@ -490,10 +484,9 @@ describe('pr-create-log.sh root resolution', () => {
   })
 })
 
-// git-pr opens a pull request over REST rather than through `gh pr create`, so
-// the command string carries no subcommand to match. Its output says which
-// path ran, and an edit prints a URL too, so that line is what separates an
-// opening from a rewrite of one that already existed.
+// git-pr opens a pull request over REST, so the command carries no subcommand
+// to match. Its output says which path ran, which separates an opening from a
+// rewrite of one that already existed.
 describe('pr-create-log.sh REST create', () => {
   for (const tree of TREES) {
     const hook = join(tree.dir, 'pr-create-log.sh')
@@ -599,10 +592,8 @@ describe('pr-create-log.sh label line', () => {
   }
 })
 
-// A bare basename match reads as covering both when two written paths share
-// one, since a single mention of the shared name would otherwise clear the
-// pair. The acting case above never exercises this, since its fixture writes
-// one path.
+// A bare basename match would let one mention of a shared name clear two
+// written paths. The acting case never reaches this, since it writes one path.
 describe('silent-turn.sh basename collision', () => {
   for (const tree of TREES) {
     const hook = join(tree.dir, 'silent-turn.sh')
@@ -729,13 +720,9 @@ describe('bash 3.2 compatibility', () => {
   })
 })
 
-// Both copies shell out to the audit verb, and this one resolves two runners
-// where the seed resolves one. The describe below covers the seed.
-//
-// The acting case above proves the hook reaches a verdict and says nothing
-// about which runner produced it, so a branch could stop resolving and stay
-// silent with every test still green. Each stub reports a `kind` naming
-// itself, which is what makes the answer readable.
+// This copy resolves two runners where the seed resolves one, and the acting
+// case cannot tell which ran, so a branch could stop resolving with every test
+// green. Each stub reports a `kind` naming itself. The seed is covered below.
 
 // The acting case proves a refusal reaches stderr and exits 0. These read the
 // call log the stubs write, which is what shows the root each push was handed
