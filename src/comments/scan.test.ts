@@ -9,6 +9,7 @@ import {
   isPruned,
   languageFor,
   type SourceFile,
+  scanPaths,
   scanTree,
 } from '@/comments/scan'
 
@@ -323,6 +324,104 @@ describe('scanTree', () => {
     expect(ts.degradationHits).toEqual([
       { file: 'src/a.ts', line: 1, term: 'HACK' },
     ])
+  })
+})
+
+describe('scanPaths', () => {
+  it('should count a file target as itself, reported relative to the base', async () => {
+    seed('src/a.ts', '// a decision\nexport const a = 1\n')
+
+    const [ts] = await scanPaths(
+      [{ path: join(ROOT, 'src/a.ts'), kind: 'file' }],
+      ROOT,
+      {
+        languages: ['ts'],
+        vocabulary: ['decision'],
+      },
+    )
+
+    expect(ts.files).toBe(1)
+    expect(ts.degradationHits).toEqual([
+      { file: 'src/a.ts', line: 1, term: 'decision' },
+    ])
+  })
+
+  it('should report a file outside the base by its absolute path', async () => {
+    seed('src/a.ts', '// HACK: temporary\nexport const a = 1\n')
+    const file = join(ROOT, 'src/a.ts')
+
+    const [ts] = await scanPaths(
+      [{ path: file, kind: 'file' }],
+      join(ROOT, 'other'),
+      {
+        languages: ['ts'],
+        vocabulary: ['HACK'],
+      },
+    )
+
+    expect(ts.degradationHits).toEqual([{ file, line: 1, term: 'HACK' }])
+  })
+
+  it('should count every file in a list of file targets', async () => {
+    seed('src/a.ts', 'export const a = 1\n')
+    seed('src/b.ts', 'export const b = 2\n')
+
+    const [ts] = await scanPaths(
+      [
+        { path: join(ROOT, 'src/a.ts'), kind: 'file' },
+        { path: join(ROOT, 'src/b.ts'), kind: 'file' },
+      ],
+      ROOT,
+      { languages: ['ts'] },
+    )
+
+    expect(ts.files).toBe(2)
+  })
+
+  it('should count a file once when a directory target also holds it', async () => {
+    seed('src/a.ts', 'export const a = 1\n')
+    seed('src/b.ts', 'export const b = 2\n')
+
+    const [ts] = await scanPaths(
+      [
+        { path: join(ROOT, 'src'), kind: 'directory' },
+        { path: join(ROOT, 'src/a.ts'), kind: 'file' },
+        { path: join(ROOT, 'src/a.ts'), kind: 'file' },
+      ],
+      ROOT,
+      { languages: ['ts'] },
+    )
+
+    expect(ts.files).toBe(2)
+  })
+
+  it('should skip a file target in a language the scan does not read', async () => {
+    seed('README.md', '# Title\n')
+    seed('src/a.ts', 'export const a = 1\n')
+
+    const counts = await scanPaths(
+      [
+        { path: join(ROOT, 'README.md'), kind: 'file' },
+        { path: join(ROOT, 'src/a.ts'), kind: 'file' },
+      ],
+      ROOT,
+    )
+
+    expect(counts.map((count) => count.files)).toEqual([1, 0, 0])
+  })
+
+  it('should skip a file target in a language left out of the scan', async () => {
+    seed('scripts/b.sh', '# why\necho hi\n')
+
+    const [ts] = await scanPaths(
+      [{ path: join(ROOT, 'scripts/b.sh'), kind: 'file' }],
+      ROOT,
+      {
+        languages: ['ts'],
+      },
+    )
+
+    expect(ts.files).toBe(0)
   })
 })
 
