@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #111;
+      }
+      #board {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+      #card {
+        position: fixed;
+        left: 760px;
+        top: 340px;
+        width: 400px;
+        height: 400px;
+        border: 0;
+        background: #fff;
+      }
+      #layer {
+        position: fixed;
+        inset: 0;
+      }
+      #overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        place-items: center;
+        background: rgb(0 0 0 / 0.7);
+        color: #fff;
+        font: 48px sans-serif;
+      }
+      #overlay[open] {
+        display: grid;
+      }
+      #bar {
+        width: 0;
+        height: 12px;
+        margin-top: 24px;
+        background: #2a2;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="board"></canvas>
+    <iframe
+      id="card"
+      srcdoc="<body style='margin:0;display:grid;place-items:center;height:100vh;font:32px sans-serif'><button id='pick' style='width:240px;height:120px;font:inherit'>Pick</button><script>pick.onclick=()=>{pick.textContent='Picked';document.body.style.background='#2a2'}</script></body>"
+    ></iframe>
+    <div id="layer"></div>
+    <div id="overlay">
+      <div>
+        <span id="saving">Saving</span>
+        <div id="bar"></div>
+      </div>
+    </div>
+    <script>
+      // A design board: a canvas at the device's full resolution redrawn on
+      // every animation frame, its content in a frame, and a layer over all of
+      // it taking every pointer event and handing a press to whatever lies
+      // under it, the way a board's own tools do.
+      const board = document.getElementById('board')
+      const context = board.getContext('2d')
+      const fit = () => {
+        board.width = innerWidth * devicePixelRatio
+        board.height = innerHeight * devicePixelRatio
+      }
+      fit()
+      addEventListener('resize', fit)
+
+      const draw = (time) => {
+        const { width, height } = board
+        context.fillStyle = '#111'
+        context.fillRect(0, 0, width, height)
+        const step = 24 * devicePixelRatio
+        for (let x = 0; x < width; x += step) {
+          for (let y = 0; y < height; y += step) {
+            const phase = Math.sin(time / 400 + x / 300 + y / 200)
+            context.fillStyle = `hsl(${(x + y + time / 10) % 360} 60% ${30 + phase * 15}%)`
+            context.fillRect(x, y, step - 2, step - 2)
+          }
+        }
+        requestAnimationFrame(draw)
+      }
+      requestAnimationFrame(draw)
+
+      const card = document.getElementById('card')
+      document.getElementById('layer').addEventListener('click', (event) => {
+        const box = card.getBoundingClientRect()
+        const x = event.clientX - box.left
+        const y = event.clientY - box.top
+        if (x < 0 || y < 0 || x > box.width || y > box.height) return
+        card.contentDocument.elementFromPoint(x, y)?.click()
+        save()
+      })
+
+      // A full-window overlay run by its own timers, an interval filling its
+      // bar against the wall clock and a timeout closing it.
+      const overlay = document.getElementById('overlay')
+      const bar = document.getElementById('bar')
+      const save = () => {
+        const started = Date.now()
+        overlay.setAttribute('open', '')
+        const tick = setInterval(() => {
+          const done = Math.min(1, (Date.now() - started) / 900)
+          bar.style.width = `${done * 600}px`
+        }, 50)
+        setTimeout(() => {
+          clearInterval(tick)
+          document.getElementById('saving').textContent = 'Saved'
+          setTimeout(() => overlay.removeAttribute('open'), 300)
+        }, 900)
+      }
+    </script>
+  </body>
+</html>

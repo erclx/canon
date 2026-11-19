@@ -12,7 +12,7 @@ One warm session holds the cross-feature call and reviews. Cold worker sessions 
 
 | Role         | Session                                    | Owns                                                                                     | Does not                                              |
 | ------------ | ------------------------------------------ | ---------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Orchestrator | One warm, long-lived session               | The cross-feature call, review dispatch, merge order                                     | Review in place, edit, merge PRs                      |
+| Orchestrator | One warm, long-lived session               | The cross-feature call, review dispatch, merge order                                     | Review in place, edit, merge an unnamed PR            |
 | Reviewer     | One cold session per PR or small batch     | Each PR's read through `review-pr`, the lift on close                                    | Fix findings, ready by hand, merge                    |
 | Planner      | One session per row or batch, warm or cold | Measure each row against the tree, write one plan per row, run a drive or a sketch round | Enter a worktree, write the board, land a design pick |
 | Worker       | One cold worktree session per feature      | Implement, self-check, open PR, answer the reviewer                                      | Write the shared board, merge                         |
@@ -35,9 +35,9 @@ Each role keeps to its own writes, and five rules cover how the roles meet.
 6. The reviewer tells the session holding the branch to run `review-address`, found with `canon sessions list --branch`, once a pass posts a finding at any severity.
 7. The worker addresses the findings, rebases onto `origin/main` if a sibling landed on its files, pushes, and asks every reviewer on the PR for a re-review of the added commits without waiting on CI.
 8. A pass posts `## Review` while anything is open and `## Review closed` when nothing is. The reviewer then runs `canon pr lift`.
-9. The human merges with `canon pr merge <number>`, a batch as each pass closes. The orchestrator tells any trailing worker whose files the merge touched to run `review-address`, which rebases.
+9. The operator runs `canon pr merge <number>` or names the PR for the orchestrator to merge, which then tells each trailing worker the merge touched to run `review-address` and rebase.
 
-Each worker halts at the PR, and the merge stays a human gate. `canon pr merge` squashes with the body's Summary, Key changes, and Technical context as the message, and the seeded deny rule covers the forms an agent writes by default. A release-please or Dependabot pull request merges the same way, from the bot's own body.
+Each worker halts at the PR, and the merge stays a human gate, since the seeded ask rule puts every `canon pr merge` an agent runs to the operator. The verb squashes with the body's Summary, Key changes, and Technical context as the message. A release-please or Dependabot pull request merges the same way, from the bot's own body.
 
 An orchestrator can run this loop unattended, from now or from a set time. Every local `claude --bg` launch but a talk one denies the question tool, so a session with a question messages its controller and waits for the reply. The run answers technical questions, parks the operator's, and ends on a report of merge-ready pull requests.
 

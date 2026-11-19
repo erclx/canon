@@ -106,7 +106,7 @@ It moves each surface with `git mv` and repoints every tracked citation. No othe
 
 ## Deny subagents and merges, and turn auto memory off, once
 
-The seeded `.claude/settings.json` now denies the `Agent` and `Task` tools and both merge commands, and sets `autoMemoryEnabled` to `false`. `canon claude sync` never rewrites a settings file you hold, so it warns while the file holds no default or lacks a merge entry. Removing `Agent` and `Task` later draws no warning.
+The seeded `.claude/settings.json` denies `Agent`, `Task`, and the `gh` merge forms, asks before `canon pr merge`, and sets `autoMemoryEnabled` to `false`. `canon claude sync` never rewrites a settings file you hold, so it warns while the file holds no default or lacks a merge entry. Removing `Agent` and `Task` later draws no warning.
 
 A seeded hook takes two steps. `canon claude init` adds each absent script under `.claude/hooks/`, and the verb below wires it where the seeded settings put it. It skips a tool whose matcher already runs the script, and wires nothing for a script you deleted. Until then, `canon sync --check --exit-code` fails.
 
@@ -118,7 +118,8 @@ canon migrate session-defaults --write --json
 The verb only adds a key or entry that is absent, so a project migrated before an entry runs `--write` once more.
 
 - A person who wants auto memory back sets it in their own `.claude/settings.local.json`
-- `Bash(canon pr merge:*)` and `Bash(gh pr merge:*)` stop a session merging
+- `Bash(canon pr merge:*)` goes to `permissions.ask`, so each merge a session runs waits on the operator, and `Bash(gh pr merge:*)` and `Bash(gh api *pulls/*/merge*)` stop the forms that skip it
+- An older `canon pr merge` deny stays, since the verb never removes one, and it wins over the ask until the operator deletes it
 - A rerun restores `Agent` and `Task` for a person who removed them to allow subagents, so remove them again after
 
 The allow entries let a session run a command without waiting on a prompt, and each is as narrow as its caller needs.

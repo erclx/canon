@@ -8,6 +8,7 @@ import {
 } from '@/feedback/body'
 import {
   createGithubIssue,
+  listFeedbackIssues,
   postIssueComment,
   readFeedbackIssue,
 } from '@/feedback/github'
@@ -16,6 +17,7 @@ import {
   issueFailureMessage,
   issueReadFailureMessage,
 } from '@/feedback/github-format'
+import { listFlagProblem, listRecord } from '@/feedback/list'
 import { frameError, frameSuccess } from '@/cli/ui'
 
 function readStdin(): Promise<string> {
@@ -42,8 +44,7 @@ async function postFollowUp(issue: number, body: string): Promise<void> {
     return
   }
 
-  // An absent gh can post nothing, so the block goes out for a hand paste. A
-  // failed read is a refusal to repair, since the number may name no issue.
+  // An absent gh sends the block out for a hand paste. A failed read refuses.
   const read = await readFeedbackIssue(issue)
   if (!read.ok && read.reason === 'missing-binary') {
     frameError(commentFailureMessage(read, issue))
@@ -82,6 +83,27 @@ async function postFollowUp(issue: number, body: string): Promise<void> {
   process.exitCode = 1
 }
 
+async function listOpen(json: boolean): Promise<void> {
+  const record = listRecord(await listFeedbackIssues())
+  if (!record.ok) {
+    frameError(record.message)
+    if (json) process.stdout.write(`${JSON.stringify(record)}\n`)
+    process.exitCode = 1
+    return
+  }
+  if (json) {
+    process.stdout.write(`${JSON.stringify(record)}\n`)
+    return
+  }
+  for (const issue of record.issues) {
+    process.stdout.write(`#${issue.number}\t${issue.title}\n`)
+  }
+  frameSuccess(
+    'canon feedback',
+    `${record.issues.length} open feedback issue${record.issues.length === 1 ? '' : 's'}`,
+  )
+}
+
 const ISSUE_NUMBER = /^[1-9]\d*$/
 
 export function register(program: Command): void {
@@ -95,10 +117,24 @@ export function register(program: Command): void {
       '--on <issue>',
       'Post a follow-up block as a comment on an open feedback issue instead',
     )
-    // A cached plugin still pipes `--github`, and commander rejects an unknown
-    // option, so the flag stays accepted and hidden for one release.
+    .option(
+      '--list',
+      'List the open feedback issues instead, reading nothing from stdin',
+    )
+    .option('--json', 'With --list, print the result as one JSON record')
+    // Hidden and accepted, since a cached plugin still pipes `--github`.
     .addOption(new Option('--github').hideHelp())
-    .action(async (opts: { on?: string }) => {
+    .action(async (opts: { on?: string; list?: boolean; json?: boolean }) => {
+      const flagProblem = listFlagProblem(opts)
+      if (flagProblem) {
+        frameError(flagProblem)
+        process.exitCode = 1
+        return
+      }
+      if (opts.list) {
+        await listOpen(opts.json ?? false)
+        return
+      }
       if (opts.on !== undefined && !ISSUE_NUMBER.test(opts.on)) {
         frameError(
           `--on takes an issue number, such as --on 2801, not "${opts.on}".`,
@@ -125,8 +161,7 @@ export function register(program: Command): void {
         return
       }
 
-      // A report missing its surface is no more useful in the tracker than
-      // anywhere else, so validation runs before any `gh` call.
+      // Validation runs before any `gh` call, so nothing half-formed is filed.
       const absent = missingField(body)
       if (absent) {
         frameError(missingFieldMessage(absent))
@@ -144,8 +179,7 @@ export function register(program: Command): void {
         process.stdout.write(`${result.url}\n`)
         return
       }
-      // The block goes to stdout so the session can paste it where the issue
-      // would have gone, and the reason frames on stderr.
+      // The block goes to stdout for a hand paste, and the reason to stderr.
       frameError(issueFailureMessage(result))
       process.stdout.write(`${body}\n`)
       process.exitCode = 1

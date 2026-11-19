@@ -2,11 +2,14 @@ import { describe, expect, it } from 'vitest'
 import {
   buildCommentArgs,
   buildIssueArgs,
+  buildIssueListArgs,
   buildIssueReadArgs,
   commentFailureMessage,
   failureDetail,
   issueFailureMessage,
+  issueListFailureMessage,
   issueReadFailureMessage,
+  parseIssueList,
   parseIssueRead,
 } from '@/feedback/github-format'
 
@@ -108,6 +111,106 @@ describe('parseIssueRead', () => {
 
   it('should fail on a record carrying no labels array', () => {
     expect(parseIssueRead('{"state":"OPEN"}')).toMatchObject({ ok: false })
+  })
+})
+
+describe('buildIssueListArgs', () => {
+  it('should list open feedback issues in the toolkit repository', () => {
+    const args = buildIssueListArgs()
+
+    expect(args.slice(0, 2)).toEqual(['issue', 'list'])
+    expect(args).toContain('feedback')
+    expect(args).toContain('open')
+    expect(args.slice(-2)).toEqual(['--repo', 'erclx/canon'])
+  })
+})
+
+describe('parseIssueList', () => {
+  function issue(number: number, title = `report ${number}`) {
+    return {
+      number,
+      title,
+      url: `https://github.com/erclx/canon/issues/${number}`,
+    }
+  }
+
+  it('should read each issue as its number, title, and url', () => {
+    const stdout = JSON.stringify([issue(3210, 'retro skill')])
+
+    expect(parseIssueList(stdout)).toEqual({
+      ok: true,
+      issues: [
+        {
+          number: 3210,
+          title: 'retro skill',
+          url: 'https://github.com/erclx/canon/issues/3210',
+        },
+      ],
+    })
+  })
+
+  it('should sort the issues by number, oldest first', () => {
+    const stdout = JSON.stringify([issue(30), issue(10), issue(20)])
+
+    const read = parseIssueList(stdout)
+
+    expect(read.ok && read.issues.map((entry) => entry.number)).toEqual([
+      10, 20, 30,
+    ])
+  })
+
+  it('should read an empty queue as no issues rather than a failure', () => {
+    expect(parseIssueList('[]')).toEqual({ ok: true, issues: [] })
+  })
+
+  it('should drop fields gh carries beyond the three it reports', () => {
+    const stdout = JSON.stringify([{ ...issue(5), body: 'long', author: {} }])
+
+    const read = parseIssueList(stdout)
+
+    expect(read.ok && Object.keys(read.issues[0] ?? {})).toEqual([
+      'number',
+      'title',
+      'url',
+    ])
+  })
+
+  it('should fail on output that is not JSON', () => {
+    expect(parseIssueList('not json')).toMatchObject({
+      ok: false,
+      reason: 'command-failed',
+    })
+  })
+
+  it('should fail on a record that is not an array', () => {
+    expect(parseIssueList('{"number":1}')).toMatchObject({ ok: false })
+  })
+
+  it('should fail on an entry carrying no number', () => {
+    const stdout = JSON.stringify([{ title: 'x', url: 'y' }])
+
+    expect(parseIssueList(stdout)).toMatchObject({ ok: false })
+  })
+})
+
+describe('issueListFailureMessage', () => {
+  it('should name installing gh when the binary is absent', () => {
+    const message = issueListFailureMessage({
+      ok: false,
+      reason: 'missing-binary',
+    })
+
+    expect(message).toContain('gh is not installed')
+  })
+
+  it('should carry the command diagnostic when the call failed', () => {
+    const message = issueListFailureMessage({
+      ok: false,
+      reason: 'command-failed',
+      detail: 'HTTP 401',
+    })
+
+    expect(message).toContain('HTTP 401')
   })
 })
 
