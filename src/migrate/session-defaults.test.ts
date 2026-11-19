@@ -5,6 +5,7 @@ import { afterEach, beforeAll, describe, expect, it } from 'vitest'
 import {
   applySessionDefaults,
   UI_PASS_DENIED,
+  MERGE_ASKED,
   MERGE_DENIED,
   PUSH_ALLOWED,
   planSessionDefaults,
@@ -60,6 +61,7 @@ const DEFAULTS = {
   autoMemoryEnabled: false,
   permissions: {
     allow: SEEDED_ALLOW,
+    ask: MERGE_ASKED,
     deny: ['Agent', 'Task', ...MERGE_DENIED, ...UI_PASS_DENIED],
   },
 }
@@ -103,6 +105,7 @@ describe('planSessionDefaults', () => {
     expect(plan.next).toEqual({
       permissions: {
         allow: SEEDED_ALLOW,
+        ask: MERGE_ASKED,
         deny: ['Agent', 'Task', ...MERGE_DENIED, ...UI_PASS_DENIED],
       },
       autoMemoryEnabled: false,
@@ -117,6 +120,7 @@ describe('planSessionDefaults', () => {
 
     expect(plan.next.permissions).toEqual({
       allow: ['Bash(ls)', ...SEEDED_ALLOW],
+      ask: MERGE_ASKED,
       deny: [
         'Read(**/.env)',
         'Task',
@@ -137,12 +141,13 @@ describe('planSessionDefaults', () => {
 
     expect(plan.next.permissions).toEqual({
       allow: SEEDED_ALLOW,
+      ask: MERGE_ASKED,
       deny: [
         'Read(**/.env)',
         'Bash(gh pr merge:*)',
         'Agent',
         'Task',
-        'Bash(canon pr merge:*)',
+        'Bash(gh api *pulls/*/merge*)',
         ...UI_PASS_DENIED,
       ],
     })
@@ -158,6 +163,7 @@ describe('planSessionDefaults', () => {
       autoMemoryEnabled: true,
       permissions: {
         allow: SEEDED_ALLOW,
+        ask: MERGE_ASKED,
         deny: ['Agent', 'Task', ...MERGE_DENIED, ...UI_PASS_DENIED],
       },
     })
@@ -234,6 +240,7 @@ describe('planSessionDefaults', () => {
       autoMemoryEnabled: false,
       permissions: {
         allow: SEEDED_ALLOW,
+        ask: MERGE_ASKED,
         deny: ['Task', 'Agent', ...MERGE_DENIED, ...UI_PASS_DENIED],
       },
     })
@@ -252,6 +259,7 @@ describe('planSessionDefaults', () => {
 
     expect(plan.next.permissions).toEqual({
       allow: ['Bash(ls)', ...SEEDED_ALLOW],
+      ask: MERGE_ASKED,
       deny: ['Agent', 'Task', ...MERGE_DENIED, ...UI_PASS_DENIED],
     })
     expect(plan.lacksPushAllow).toBe(true)
@@ -286,6 +294,94 @@ describe('planSessionDefaults', () => {
   })
 })
 
+describe('planSessionDefaults for the merge ask', () => {
+  it('should append the ask and leave the old merge deny in place', () => {
+    const plan = planSessionDefaults({
+      autoMemoryEnabled: false,
+      permissions: {
+        allow: SEEDED_ALLOW,
+        deny: [
+          'Agent',
+          'Task',
+          'Bash(canon pr merge:*)',
+          'Bash(gh pr merge:*)',
+          ...UI_PASS_DENIED,
+        ],
+      },
+    })
+
+    expect(plan.next.permissions).toEqual({
+      allow: SEEDED_ALLOW,
+      ask: ['Bash(canon pr merge:*)'],
+      deny: [
+        'Agent',
+        'Task',
+        'Bash(canon pr merge:*)',
+        'Bash(gh pr merge:*)',
+        ...UI_PASS_DENIED,
+        'Bash(gh api *pulls/*/merge*)',
+      ],
+    })
+    expect(plan.lacksMergeAsk).toBe(true)
+    expect(plan.holdsMergeDeny).toBe(true)
+    expect(plan.keys).toContainEqual({
+      label: 'permissions.ask',
+      changed: true,
+    })
+  })
+
+  it('should append only the ask an existing ask list lacks', () => {
+    const plan = planSessionDefaults({
+      ...DEFAULTS,
+      permissions: { ...DEFAULTS.permissions, ask: ['Bash(rm:*)'] },
+    })
+
+    expect(plan.next.permissions).toMatchObject({
+      ask: ['Bash(rm:*)', ...MERGE_ASKED],
+    })
+  })
+
+  it('should report neither flag on a file the current seed wrote', () => {
+    const plan = planSessionDefaults(DEFAULTS)
+
+    expect(plan.lacksMergeAsk).toBe(false)
+    expect(plan.holdsMergeDeny).toBe(false)
+    expect(plan.changed).toBe(false)
+  })
+
+  it('should not read a file holding the old merge pair alone as predating them', () => {
+    const plan = planSessionDefaults({
+      permissions: { deny: ['Bash(canon pr merge:*)', 'Bash(gh pr merge:*)'] },
+    })
+
+    expect(plan.predates).toBe(false)
+    expect(plan.lacksMergeDeny).toBe(true)
+  })
+
+  it('should read a file holding the merge ask alone as predating them', () => {
+    const plan = planSessionDefaults({ permissions: { ask: MERGE_ASKED } })
+
+    expect(plan.predates).toBe(true)
+  })
+
+  it.each([
+    'canon pr merge 12',
+    'canon pr merge 12 --dry-run',
+    'canon pr merge',
+  ])('should ask rather than deny %s', (command) => {
+    expect(MERGE_ASKED.some((rule) => ruleMatches(rule, command))).toBe(true)
+    expect(MERGE_DENIED.some((rule) => ruleMatches(rule, command))).toBe(false)
+  })
+
+  it.each([
+    'gh pr merge 12 --squash',
+    'gh api -X PUT repos/o/r/pulls/12/merge',
+    'gh api repos/o/r/pulls/12/merge --method PUT -f merge_method=squash',
+  ])('should deny %s', (command) => {
+    expect(MERGE_DENIED.some((rule) => ruleMatches(rule, command))).toBe(true)
+  })
+})
+
 describe('planSessionDefaults for the UI pass entries', () => {
   it('should add the UI pass entries to a file migrated before them', () => {
     const plan = planSessionDefaults({
@@ -298,6 +394,7 @@ describe('planSessionDefaults for the UI pass entries', () => {
 
     expect(plan.next.permissions).toEqual({
       allow: ['Bash(ls)', ...PUSH_ALLOWED, ...UI_PASS_ALLOWED],
+      ask: MERGE_ASKED,
       deny: ['Agent', 'Task', ...MERGE_DENIED, ...UI_PASS_DENIED],
     })
     expect(plan.lacksUiPassAllow).toBe(true)
@@ -309,6 +406,7 @@ describe('planSessionDefaults for the UI pass entries', () => {
       autoMemoryEnabled: false,
       permissions: {
         allow: [...UI_PASS_ALLOWED].reverse().concat(PUSH_ALLOWED),
+        ask: MERGE_ASKED,
         deny: ['Agent', 'Task', ...MERGE_DENIED, ...UI_PASS_DENIED],
       },
     })
@@ -377,6 +475,7 @@ describe('planSessionDefaults for the UI pass entries', () => {
     )
 
     expect(seed.permissions.allow).toEqual(SEEDED_ALLOW)
+    expect(seed.permissions.ask).toEqual(MERGE_ASKED)
     expect(seed.permissions.deny).toEqual([
       'Agent',
       'Task',
@@ -567,6 +666,7 @@ describe('readSessionDefaults', () => {
     expect(read.plan.keys).toEqual([
       { label: 'permissions.deny', changed: false },
       { label: 'permissions.allow', changed: false },
+      { label: 'permissions.ask', changed: false },
       { label: 'autoMemoryEnabled', changed: false },
       { label: 'hooks.PreToolUse', changed: false },
       { label: 'hooks.PostToolUse', changed: true },
@@ -651,6 +751,17 @@ describe('readSessionDefaults', () => {
     expect(read.kind).toBe('refused')
   })
 
+  it('should refuse an ask that is not a list rather than replace it', async () => {
+    const dir = await makeTarget('{ "permissions": { "ask": "Bash" } }\n')
+
+    const read = await readSessionDefaults(dir, TOOLKIT_ROOT)
+
+    expect(read).toMatchObject({
+      kind: 'refused',
+      reason: expect.stringContaining('permissions.ask'),
+    })
+  })
+
   it('should refuse an allow that is not a list rather than replace it', async () => {
     const dir = await makeTarget('{ "permissions": { "allow": "Bash" } }\n')
 
@@ -668,7 +779,7 @@ describe('applySessionDefaults', () => {
     await applySessionDefaults(read)
 
     expect(await readTargetSettings(dir)).toBe(
-      '{\n    "model": "opus",\n    "permissions": {\n        "deny": [\n            "Agent",\n            "Task",\n            "Bash(canon pr merge:*)",\n            "Bash(gh pr merge:*)",\n            "Bash(canon browser *install-browser*)",\n            "Bash(canon pr frames *--drop*)",\n            "Bash(canon pr frames *--prune*)"\n        ],\n        "allow": [\n            "Bash(git push --force-with-lease)",\n            "Bash(git push --force-with-lease origin HEAD)",\n            "Bash(canon drive:*)",\n            "Bash(canon pr head:*)",\n            "Bash(canon pr checks:*)",\n            "Bash(canon pr evidence:*)",\n            "Bash(canon pr local:*)",\n            "Bash(canon pr drive-copy:*)",\n            "Bash(canon pr frames:*)",\n            "Bash(canon pr tick:*)",\n            "Bash(canon pr lift:*)"\n        ]\n    },\n    "autoMemoryEnabled": false\n}\n',
+      '{\n    "model": "opus",\n    "permissions": {\n        "deny": [\n            "Agent",\n            "Task",\n            "Bash(gh pr merge:*)",\n            "Bash(gh api *pulls/*/merge*)",\n            "Bash(canon browser *install-browser*)",\n            "Bash(canon pr frames *--drop*)",\n            "Bash(canon pr frames *--prune*)"\n        ],\n        "allow": [\n            "Bash(git push --force-with-lease)",\n            "Bash(git push --force-with-lease origin HEAD)",\n            "Bash(canon drive:*)",\n            "Bash(canon pr head:*)",\n            "Bash(canon pr checks:*)",\n            "Bash(canon pr evidence:*)",\n            "Bash(canon pr local:*)",\n            "Bash(canon pr drive-copy:*)",\n            "Bash(canon pr frames:*)",\n            "Bash(canon pr tick:*)",\n            "Bash(canon pr lift:*)"\n        ],\n        "ask": [\n            "Bash(canon pr merge:*)"\n        ]\n    },\n    "autoMemoryEnabled": false\n}\n',
     )
   })
 
@@ -676,7 +787,7 @@ describe('applySessionDefaults', () => {
     const lines = [
       '{',
       '  "autoMemoryEnabled": false,',
-      `  "permissions": { "deny": ${JSON.stringify(DEFAULTS.permissions.deny)}, "allow": ${JSON.stringify(SEEDED_ALLOW)} },`,
+      `  "permissions": { "deny": ${JSON.stringify(DEFAULTS.permissions.deny)}, "allow": ${JSON.stringify(SEEDED_ALLOW)}, "ask": ${JSON.stringify(MERGE_ASKED)} },`,
       '  "hooks": {',
       '    "Stop": [',
       '      {',

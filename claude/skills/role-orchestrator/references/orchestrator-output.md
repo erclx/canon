@@ -91,6 +91,10 @@ Read the slot off `canon pr evidence <number> --json` at the moment the line is 
 - `waived` when neither is carried and `canon pr lift <number> --check --json` names every listed path under `waived`, quoting no token from the reason
 - `none` otherwise, and a pull request with no painted path takes no slot at all
 
+### Running the line
+
+The operator runs the line, or names the pull request for this session to run it. The client puts each `canon pr merge` call to the operator, and that prompt is their approval, so run the line only for the one pull request they named and never for a second they did not.
+
 ### Gate the line on CI at the tip
 
 Write the line only off `already-ready` or `clear` from `canon pr lift <number> --check --json`, read at the moment the line is written. A ready mark is not a merge-ready one, and `canon pr merge` refuses `ci-pending` on a pull request the mark alone vouched for.

@@ -1,4 +1,10 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -6,7 +12,9 @@ import {
   longKeyPathsRuns,
   seededDirPath,
   seededFilePath,
+  sessionDefaultsWarnings,
 } from '@/commands/claude'
+import { planSessionDefaults } from '@/migrate/session-defaults'
 
 let root: string
 
@@ -99,5 +107,69 @@ describe('longKeyPathsRuns', () => {
 
   it('should report nothing when the target has no CLAUDE.md', async () => {
     expect(await longKeyPathsRuns(root)).toEqual([])
+  })
+})
+
+describe('sessionDefaultsWarnings', () => {
+  const seed = JSON.parse(
+    readFileSync(
+      join(
+        import.meta.dirname,
+        '../../tooling/claude/seeds/.claude/settings.json',
+      ),
+      'utf8',
+    ),
+  )
+
+  it('should warn on nothing for a file the seed wrote', () => {
+    const plan = planSessionDefaults({ ...seed, hooks: undefined })
+
+    expect(sessionDefaultsWarnings(plan)).toEqual([])
+  })
+
+  it('should name the session defaults alone on a file predating them', () => {
+    const plan = planSessionDefaults({})
+
+    expect(sessionDefaultsWarnings(plan)).toEqual([
+      'settings.json lacks the session defaults. Run `canon migrate session-defaults --write`',
+    ])
+  })
+
+  it('should name the merge ask on a file lacking only it', () => {
+    const plan = planSessionDefaults({
+      ...seed,
+      hooks: undefined,
+      permissions: { ...seed.permissions, ask: [] },
+    })
+
+    expect(sessionDefaultsWarnings(plan)).toEqual([
+      'settings.json lacks the merge ask. Run `canon migrate session-defaults --write`',
+    ])
+  })
+
+  it('should say why the orchestrator cannot merge under the old deny', () => {
+    const plan = planSessionDefaults({
+      ...seed,
+      hooks: undefined,
+      permissions: {
+        ...seed.permissions,
+        deny: [...seed.permissions.deny, 'Bash(canon pr merge:*)'],
+      },
+    })
+
+    expect(sessionDefaultsWarnings(plan)).toEqual([
+      "settings.json still denies `canon pr merge`, which wins over the ask, so the orchestrator cannot merge here even on the operator's word. Remove that deny entry by hand to have each merge ask",
+    ])
+  })
+
+  it('should count the seeded hooks a file leaves unwired', () => {
+    const plan = {
+      ...planSessionDefaults({ ...seed, hooks: undefined }),
+      unwired: [{ event: 'Stop', script: 'reply-links.sh', tools: [] }],
+    }
+
+    expect(sessionDefaultsWarnings(plan)).toEqual([
+      'settings.json leaves 1 seeded hook unwired. Run `canon migrate session-defaults --write`',
+    ])
   })
 })
