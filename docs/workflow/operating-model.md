@@ -59,7 +59,9 @@ Findings travel on the PR. `review-pr` posts them, `review-address` fixes them a
 
 ## Feature sizing
 
-One feature is one plan, one worktree, one PR, one review sitting. Split a feature when a backend contract and its consumer both change, landing the contract first. Make a few-line change an ordinary edit. A small row goes to one session that plans and builds it through `auto-ship --plan-first`, and review stays a separate session.
+One feature is one plan, one worktree, one PR, one review sitting. Split a feature when a backend contract and its consumer both change, landing the contract first. Make a few-line change an ordinary edit.
+
+A row whose plan touches 5 files or fewer, not graded heavy, goes to one session that plans and builds it through `auto-ship --plan-first`. A question needing the operator's call holds that session on a bounded wait, and review stays a separate session.
 
 ## Where work comes from
 
