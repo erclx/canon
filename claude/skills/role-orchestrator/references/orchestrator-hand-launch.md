@@ -12,7 +12,7 @@ When the operator launches sessions by hand, queue every prompt through `canon d
 - The verb replaces a task and role already queued, so a retried call lands once
 - It refuses `malformed` on a hand edit that broke the shape rather than writing over it
 - The operator opens the file, opens each session in the repository root, and pastes one fence per session
-- A row launched twice from a stale prompt would build twice, and the branch check in `orchestrator-dispatch.md` stays the guard
+- Every `add` reads the claim on each worker branch, refusing `claimed` for a new row and dropping a queued one already launched, so a stale prompt never reaches the next paste
 
 ## Queue a prompt
 
@@ -28,7 +28,9 @@ canon dispatch prompts add <task> --role worker --model <model> --effort <effort
 - `--line <text>` adds one context line, and repeats. Carry only what `### What the brief may carry` in `orchestrator-launch.md` allows, never the answer-slot default or another fact the plan states.
 - `--merge-order <text>` writes the one lead line the file carries. The verb drops it while no two queued worker plans share a file, and says so in the record.
 
-Branch on the record's `ok` and `reason` rather than the exit. The `Controller:` line the verb writes replaces the background template's message clauses, which `role-worker` and `session-relay` already own. `auto-ship` Step 0 loads `role-worker`, so the fence needs nothing more.
+Branch on the record's `ok` and `reason` rather than the exit. Report a `dropped` row as launched and a `claimUnread` branch as unverified.
+
+The `Controller:` line the verb writes replaces the background template's message clauses, which `role-worker` and `session-relay` already own. `auto-ship` Step 0 loads `role-worker`, so the fence needs nothing more.
 
 ### The shape the verb writes
 

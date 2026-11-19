@@ -17,4 +17,5 @@ Owns the hand-launch queue behind `canon dispatch prompts add`, `rm`, and `list`
 
 - The parse refuses `malformed` on any line out of the fixed order rather than rewriting it, since a guessed hand edit could launch the wrong row
 - A worker row's branch is derived from the plan path in its command through `branchOfPlan`, so the watch and the dispatch branch check read one string
+- Every `add` reads `checkClaim` on each worker branch, refusing a claimed new row and dropping a claimed queued one, while an unreadable claim keeps its row
 - The merge-order line survives only while two queued worker plans share a declared path, read through `readDeclarations`
