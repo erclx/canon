@@ -26,7 +26,7 @@ The candidates live on the Frameboard board the project names, in a project of t
 4. Gather references before writing any arm, as `### Gather references before drafting` below states.
 5. Write one arm per candidate, each carrying an id, a label, what the arm costs, and the reference it draws on. An arm with no stated cost is not an option.
 6. Make the current state arm `0`, so the baseline is a candidate rather than an absence. A decision with nothing shipped yet says so and starts at arm `1`.
-7. Stop at three to five arms. Two is a comparison the operator can hold in prose, and past five the pick stops being a look and becomes a sort.
+7. Stop at three to five arms, plus a contrast arm. Two is a comparison the operator holds in prose, and past five the pick becomes a sort.
 
 Inside a live `plan-groundwork` track, renders land in the track's own `evidence/<slug>/renders/`, since a candidate render is evidence its decision file cites. Everywhere else they land in session scratch.
 
@@ -75,7 +75,7 @@ Vary one property across the arms, since a pick cannot say which of three differ
 - Vary the property the decision is about. Holding composition fixed and varying color produces five skins of one design, and a palette cannot be picked ahead of the composition it serves.
 - Grey-box the arms when the declared layer sits below typography, per `design-taste`, and say the set is grey-boxed when handing it over
 - Do not grey-box a set judged at composition that carries a finished palette, since the operator looks at the higher layers instead of the question
-- Add a contrast arm at composition or before, per `${CLAUDE_SKILL_DIR}/references/contrast-arm.md`
+- Add a contrast arm at composition, per `${CLAUDE_SKILL_DIR}/references/contrast-arm.md`
 
 ## Step 3: render and hand off
 
