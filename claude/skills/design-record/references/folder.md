@@ -46,7 +46,7 @@ Each reference is one name in two themes, with a PNG and its frame HTML per them
 
 ## The index
 
-The index tells a reader which code each group governs, the link a file listing lacks. It splits in two, so a branch landing a reference in one group edits no line another group's branch edits.
+The index tells a reader which code each group governs, the link a file listing lacks. It splits in two, so a branch landing a reference in an existing group edits no line another branch edits.
 
 - Give each group one file beside its folder, as `canon/design/home.md` beside `canon/design/home/`, holding what the user sees, the code the group governs, and the states its frames show
 - Keep every index file out of the group folders, since the sync reports a file no mapping writes inside them as stray
@@ -55,6 +55,8 @@ The index tells a reader which code each group governs, the link a file listing 
 - Keep the sync's canvas mapping out of the index, in a file the sync owns beside it
 
 The generator reads each group file's `title` and `description` into one line of the top-level list. A support folder such as `assets/` takes no group file and stays off the list.
+
+Two branches each adding a new group still meet on the generated list, since both insert a line there. The second to merge reruns `canon indexes regen canon/design` after its rebase rather than resolving the lines by hand.
 
 ### The group file
 

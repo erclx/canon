@@ -27,7 +27,7 @@ Read `canon/design/index.md` from the project root, then the group files it link
 
 - A missing folder or index is set up at Step 3, once Step 2 has found the sync
 - An index carrying one hand-kept table of groups, a file list, or a canvas mapping is an older shape, so say the index predates the standard
-- Add nothing to an older index in its own shape. Move it the way `folder.md` gives when this run's landing touches it.
+- Add nothing to an older index in its own shape. Step 4 moves it before writing a group file, and Step 5 drops a retired row from it.
 
 ## Step 2: find the project's design sync
 
@@ -46,14 +46,15 @@ Skip this step when `canon/design/index.md` exists, even as a stub, since a stub
 
 When the pick lands relative to the build is the design-reference rule's call, so follow it rather than choosing here.
 
-1. Name the group the surface belongs to, by where a user meets it in the app, per `folder.md`.
-2. Create or update the group's file beside its folder before running the sync, naming the code paths the surface governs and the states its frames show.
+1. Move an older index first, per `### An index in the older shape` in `folder.md`, writing one group file per row, dropping `auto: false`, and running `canon indexes regen canon/design`.
+2. Name the group the surface belongs to, by where a user meets it in the app, per `folder.md`.
+3. Create or update the group's file beside its folder before running the sync, naming the code paths the surface governs and the states its frames show.
    - Run `canon indexes regen canon/design` after creating a group file, so the top-level list carries the group.
    - In a split group, edit the H3 of the section the surface sits in.
    - When the States list grows with each frame, follow `### Sizing the state list` in `folder.md`, which splits the group into sections before it names broader kinds.
-3. Add the surface to the sync's mapping file, in the form the sync's own help gives.
-4. Run the sync, then its check, and report a missing or stray file the check names.
-5. Open each written PNG, light and dark, before reporting it landed, since a frame captured blank or in one theme passes the sync.
+4. Add the surface to the sync's mapping file, in the form the sync's own help gives.
+5. Run the sync, then its check, and report a missing or stray file the check names.
+6. Open each written PNG, light and dark, before reporting it landed, since a frame captured blank or in one theme passes the sync.
 
 ## Step 5: redraw or retire a reference
 
@@ -64,6 +65,7 @@ Retire a reference in the change that removes its surface from the app.
 - Drop the surface from the sync's mapping and run the sync, so the sync removes its files
 - Remove the section's H3 from the group file once its folder holds nothing else, and the group file once the group folder holds nothing
 - Run `canon indexes regen canon/design` after removing a group file, so the top-level list drops its line
+- On an older index, remove the retired group's row from its table instead, since the generator skips an index marked `auto: false`
 - When the sync leaves the files and its check reports them stray, name each path and ask the operator, since no session deletes a reference by hand
 
 ## Step 6: carry a pick into the design document
