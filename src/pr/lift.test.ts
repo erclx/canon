@@ -1348,6 +1348,7 @@ describe('lift', () => {
       it.each([
         'target-missing: beat 1: button[name=Save]',
         'target-offscreen: beat 2',
+        'target-covered: beat 1: div.hit-layer',
         ' target-missing ',
       ])(
         'should refuse a reel waiver over the skip %s, naming the waiver',

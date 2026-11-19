@@ -126,13 +126,14 @@ export const SETTLING_REEL_SKIPS: readonly string[] = [
 
 /**
  * The reel skip codes no review waiver settles. Each names a target the take
- * plan could not find or bring into view, which a builder clears by fixing a
- * selector, a setup step, or the seed, so a waiver over one stands in for
- * work the builder owes.
+ * plan could not find, bring into view, or press uncovered, which a builder
+ * clears by fixing a selector, a setup step, `through`, or the seed, so a
+ * waiver over one stands in for work the builder owes.
  */
 export const UNWAIVABLE_REEL_SKIPS: readonly string[] = [
   'target-missing',
   'target-offscreen',
+  'target-covered',
 ]
 
 /** The reason code a skip line opens with, the text before its first colon. */
