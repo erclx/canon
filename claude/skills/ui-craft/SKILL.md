@@ -23,6 +23,7 @@ Read every reference on the always row for any rendered change, then each row th
 | An animation, transition, autoplay, carousel, or scroll-driven or dragged motion                     | `motion.md`                           |
 | A destructive action, an edit cancel, a hover or disabled state, or chrome that looks like a control | `controls.md`                         |
 | A rendered string, heading, label, or link                                                           | `copy.md`                             |
+| A headline, supporting line, or section copy on a page a stranger reads to decide                    | `page-copy.md`                        |
 | A rendered surface has changed and is about to be handed over, or a change scrolls or snaps          | `capture.md`                          |
 
 Each name sits under `${CLAUDE_SKILL_DIR}/references/`. A row's reference is read whole, since its sections name the cases a change reaches without saying so.
@@ -41,4 +42,4 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 - The accepted designs under the design folder and how a reference lands there: `design-record`
 - The visual checklist a reviewer reads beside the screenshots: `ui-checklist`
 - Reading source for roughness a rule does not state: `ui-audit`
-- Prose on the surface beyond its interface copy: the `write-human` skill
+- Long-form body text on the surface, and the voice and word choice every string keeps: the `write-human` skill

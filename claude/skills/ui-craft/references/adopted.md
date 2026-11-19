@@ -15,6 +15,7 @@ Each field below names the source its references cite, and a house choice covers
 - **CSS behavior.** [MDN](https://developer.mozilla.org/en-US/docs/Web/CSS) and the CSS specifications back the focus ring, `color-scheme`, overflow, cursor, and hover query bullets.
 - **Native targets.** Apple's and Android's platform guidelines back the native touch target figures in `pointer.md`.
 - **Forms and copy.** The [GOV.UK Design System](https://design-system.service.gov.uk/) and its style guide back `forms.md` and the copy and casing sections of `copy.md`.
+- **Page copy.** The [GOV.UK writing guidelines](https://guidance.publishing.service.gov.uk/writing-to-gov-uk-standards/writing-guidelines/), the [Microsoft Writing Style Guide](https://learn.microsoft.com/en-us/style-guide/welcome/), and the Nielsen Norman Group's research on how people read a page back `page-copy.md`.
 - **Interaction design.** [Ben Shneiderman](https://www.cs.umd.edu/~ben/)'s direct manipulation paper and the motion system of [Material Components](https://github.com/material-components/material-components-android) back the reader-paced section of `motion.md`.
 - **Web performance.** Google's [web.dev](https://web.dev/) guidance on layout shift backs the held-size bullet in `motion.md`.
 - **Web architecture.** The W3C [Technical Architecture Group](https://www.w3.org/2001/tag/)'s Identifying Application State finding backs the state held in the address in `states.md`.
