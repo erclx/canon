@@ -77,7 +77,10 @@ import {
 import { bodyLines } from '@/markdown/scan'
 import { scopedDensityFindings } from '@/markdown/scope'
 import { CAP } from '@/markdown/stacks'
-import { readSessionDefaults } from '@/migrate/session-defaults'
+import {
+  readSessionDefaults,
+  type SessionDefaultsPlan,
+} from '@/migrate/session-defaults'
 import { copyPreservingMode } from '@/sync/copy'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import { recordDir } from '@/roots/record'
@@ -198,6 +201,36 @@ export function seededDirPath(resolved: string, name: string): string {
  * through the scope the audit gates on. Sync warns rather than gates, since a
  * target gates only the prefixes its own config lists.
  */
+const MIGRATE_DEFAULTS = 'Run `canon migrate session-defaults --write`'
+
+/**
+ * Sync never rewrites an existing settings file, so a target seeded before a
+ * session default learns of it only here. One missing default is named at a
+ * time, the most sweeping first, since the migration adds them all at once.
+ */
+export function sessionDefaultsWarnings(plan: SessionDefaultsPlan): string[] {
+  const warnings: string[] = []
+  const lacking = plan.predates
+    ? 'the session defaults'
+    : plan.lacksMergeDeny
+      ? 'the merge deny entries'
+      : plan.lacksPushAllow
+        ? 'the lease push allow'
+        : plan.lacksUiPassAllow
+          ? 'the UI pass allow'
+          : undefined
+  if (lacking !== undefined) {
+    warnings.push(`settings.json lacks ${lacking}. ${MIGRATE_DEFAULTS}`)
+  }
+  const count = plan.unwired.length
+  if (count > 0) {
+    warnings.push(
+      `settings.json leaves ${count} seeded ${count === 1 ? 'hook' : 'hooks'} unwired. ${MIGRATE_DEFAULTS}`,
+    )
+  }
+  return warnings
+}
+
 export async function longKeyPathsRuns(
   resolved: string,
 ): Promise<{ line: number; count: number }[]> {
@@ -701,31 +734,11 @@ async function runSync(target: string): Promise<number> {
     )
   }
 
-  // Sync never rewrites an existing settings file, so a target seeded before
-  // the session defaults learns of them only here.
   const defaults = await readSessionDefaults(resolved, PROJECT_ROOT)
-  if (defaults.kind === 'planned' && defaults.plan.predates) {
-    logWarn(
-      'settings.json lacks the session defaults. Run `canon migrate session-defaults --write`',
-    )
-  } else if (defaults.kind === 'planned' && defaults.plan.lacksMergeDeny) {
-    logWarn(
-      'settings.json lacks the merge deny entries. Run `canon migrate session-defaults --write`',
-    )
-  } else if (defaults.kind === 'planned' && defaults.plan.lacksPushAllow) {
-    logWarn(
-      'settings.json lacks the lease push allow. Run `canon migrate session-defaults --write`',
-    )
-  } else if (defaults.kind === 'planned' && defaults.plan.lacksUiPassAllow) {
-    logWarn(
-      'settings.json lacks the UI pass allow. Run `canon migrate session-defaults --write`',
-    )
-  }
-  if (defaults.kind === 'planned' && defaults.plan.unwired.length > 0) {
-    const count = defaults.plan.unwired.length
-    logWarn(
-      `settings.json leaves ${count} seeded ${count === 1 ? 'hook' : 'hooks'} unwired. Run \`canon migrate session-defaults --write\``,
-    )
+  if (defaults.kind === 'planned') {
+    for (const warning of sessionDefaultsWarnings(defaults.plan)) {
+      logWarn(warning)
+    }
   }
 
   logStep('Scanning .gitignore')
