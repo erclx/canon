@@ -927,7 +927,7 @@ function patchesByPath(patch: string): Map<string, string> {
   const flush = () => {
     if (path !== undefined) files.set(path, lines.join('\n'))
   }
-  for (const line of patch.split('\n')) {
+  for (const line of patch.replace(/\n+$/, '').split('\n')) {
     if (line.startsWith(FILE_HEADER)) {
       flush()
       const sides = line.slice(FILE_HEADER.length)

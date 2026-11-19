@@ -16,8 +16,13 @@ describe('readRebasedPaths', () => {
     return String(result.stdout).trim()
   }
 
+  // Keeps git's own trailing newline, which a `GitRunner` is not promised to strip.
   const runner: GitRunner = async (args) => {
-    const result = await execa('git', [...args], { cwd: root, reject: false })
+    const result = await execa('git', [...args], {
+      cwd: root,
+      reject: false,
+      stripFinalNewline: false,
+    })
     return result.exitCode === 0 ? String(result.stdout) : undefined
   }
 
@@ -94,6 +99,19 @@ describe('readRebasedPaths', () => {
 
     expect(await readRebasedPaths(runner, 'main', reviewed, head)).toEqual({
       differingPaths: ['shared.ts'],
+    })
+  })
+
+  it('should name only the added path when it sorts after an unchanged one', async () => {
+    const reviewed = await commit({ 'shared.ts': edit(17, 'branch') }, 'feat')
+    await git('checkout', '-q', '-b', 'rewritten', 'main')
+    const head = await commit(
+      { 'shared.ts': edit(17, 'branch'), 'z-notes.md': 'notes\n' },
+      'feat and notes',
+    )
+
+    expect(await readRebasedPaths(runner, 'main', reviewed, head)).toEqual({
+      differingPaths: ['z-notes.md'],
     })
   })
 
