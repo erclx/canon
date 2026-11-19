@@ -119,6 +119,8 @@ export interface GateContext extends MeasureContext {
    * scoping is off and every stage runs.
    */
   readonly changed?: readonly string[]
+  /** The merge base `changed` was read against, so a stage can read changed lines. */
+  readonly base?: string
   /**
    * Told when a stage starts queuing on its machine lock. A stage prints only
    * once it returns, so without this a queued gate is silent for the whole
@@ -136,6 +138,8 @@ export interface ChangedSet {
   /** `false` where no usable baseline resolved, which runs every stage. */
   readonly scoped: boolean
   readonly files: readonly string[]
+  /** The merge base the files were read against, present only when scoped. */
+  readonly base?: string
   /** What to say about a baseline that did not resolve, if anything. */
   readonly notice?: string
 }
@@ -194,7 +198,7 @@ export async function collectChangedFiles(
     ),
   ].sort()
 
-  return { scoped: true, files }
+  return { scoped: true, files, base }
 }
 
 /**

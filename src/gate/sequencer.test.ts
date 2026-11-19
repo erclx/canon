@@ -576,6 +576,16 @@ describe('the changed set', () => {
     expect(changed.files).toEqual(['src/one.ts', 'src/three.ts', 'src/two.ts'])
   })
 
+  it('should carry the merge base it read the files against', async () => {
+    const run = runnerFor({
+      'git merge-base HEAD origin/main': result({ stdout: 'abc123\n' }),
+    })
+
+    const changed = await collectChangedFiles(run)
+
+    expect(changed.base).toBe('abc123')
+  })
+
   it('should run every stage when no merge base resolves', async () => {
     const run = runnerFor({
       'git merge-base HEAD origin/main': result({ exitCode: 1 }),
