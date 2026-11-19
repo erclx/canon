@@ -1,35 +1,43 @@
 ---
 title: Orchestrator hand launch
-description: The one lean prompts file the orchestrator writes when the operator launches sessions by hand, with its path, overwrite rule, shape, and a filled example
+description: The prompts queue `canon dispatch prompts` owns when the operator launches sessions by hand, with the calls that fill and clear it, the shape the verb writes, and how a launch is recorded
 ---
 
 Run this when the operator launches sessions by hand rather than through `claude --bg`. The rules every launch shares stay in `orchestrator-launch.md`.
 
 # Hand launch
 
-When the operator launches sessions by hand, write every prompt to one file, `.canon/tmp/dispatch/prompts.md`, and overwrite it at each wave. It lists every row with a session not yet launched. A row launched from an older copy and again from a newer one would build twice, and the branch check in `orchestrator-dispatch.md` catches that.
+When the operator launches sessions by hand, queue every prompt through `canon dispatch prompts`, which owns one file at `.canon/dispatch/prompts.md`. Never write or edit that file yourself.
 
-The operator opens the file, reads one lead line, and pastes one fence per session. The shape is fixed:
+- The verb replaces a task and role already queued, so a retried call lands once
+- It refuses `malformed` on a hand edit that broke the shape rather than writing over it
+- The operator opens the file, opens each session in the repository root, and pastes one fence per session
+- A row launched twice from a stale prompt would build twice, and the branch check in `orchestrator-dispatch.md` stays the guard
 
-- An H1, `# Dispatch prompts`, then one lead line carrying the measured head, the merge order, and the folder to open each session in
-- An H2 per task as `## <label>: <title>`, an H3 per role as `### Worker` or `### Reviewer`, a `Model: <model>` line and an `Effort: <effort>` line, and a `text` fence
-- In the fence, the command at position zero, then `Controller: <sessionId>`, then only context the plan does not carry, one line each
+## Queue a prompt
 
-Keep the command at position zero per `### Position zero` in `orchestrator-launch.md`, and carry only what `### What the brief may carry` there allows. Leave out the answer-slot default and anything else the plan states.
+Run one `add` per session, with the model and effort the launch rules pick:
 
-The `Controller:` line replaces the background template's message clauses, which `role-worker` and `session-relay` already own. `auto-ship` Step 0 loads `role-worker`, so the fence needs nothing more.
+```bash
+canon dispatch prompts add <task> --role worker --model <model> --effort <effort> --controller <sessionId> --json
+```
 
-- A reviewer launched by hand takes the `### Reviewer` H3 under its row's H2, with the sibling facts `orchestrator-reviewer-launch.md` lists
-- Its `<number>` exists once the worker opened its pull request, so a later wave carries `### Reviewer` alone under the row, and the launched worker's H3 is gone
+- `--role worker` writes `/canon:auto-ship <plan>` from the plan the task links, and refuses `no-plan` for a task linking none
+- `--role planner` writes the `role-planner` then `plan-feature` command for the task
+- `--role reviewer` takes `--pr <number>` and writes the `role-reviewer` then `review-pr` command. Add the sibling facts `orchestrator-reviewer-launch.md` lists as lines.
+- `--line <text>` adds one context line, and repeats. Carry only what `### What the brief may carry` in `orchestrator-launch.md` allows, never the answer-slot default or another fact the plan states.
+- `--merge-order <text>` writes the one lead line the file carries. The verb drops it while no two queued worker plans share a file, and says so in the record.
 
-The first wave carries the worker. The wave after its pull request opens carries the reviewer alone.
+Branch on the record's `ok` and `reason` rather than the exit. The `Controller:` line the verb writes replaces the background template's message clauses, which `role-worker` and `session-relay` already own. `auto-ship` Step 0 loads `role-worker`, so the fence needs nothing more.
 
-Once the operator confirms a worker launched, run `canon tasks promote <stem>`, the same call a background launch makes. Nothing else moves a hand-launched row out of `## Up next`.
+### The shape the verb writes
+
+An H1, then the optional merge-order line, then an H2 per task as `## <label>: <title>` and an H3 per role. Each H3 carries a `Model:` line, an `Effort:` line, and a `text` fence with the command at position zero, per `### Position zero` in `orchestrator-launch.md`. An empty queue reads `No prompts waiting.` and carries no lead line.
 
 ````markdown
 # Dispatch prompts
 
-Head `<head>`. Merge `<label-a>` first, then `<label-b>`. Open each session in the repository root.
+Merge order: <label-a> first, then <label-b>.
 
 ## <label-b>: <title>
 
@@ -45,24 +53,21 @@ Controller: <sessionId>
 ```
 ````
 
-````markdown
-# Dispatch prompts
+## Record a launch
 
-Head `<head>`. Merge `<label-a>` first, then `<label-b>`. Open each session in the repository root.
+Start the watch in `orchestrator-watch.md` when a wave queues a worker prompt, if it is not running already. On the pass where a session first holds a queued worker row's branch, it prints `LAUNCHED <label> -> <name> [<id>]`.
 
-## <label-b>: <title>
+On that line, or on the operator's word that a session launched, clear the row and promote it:
 
-### Reviewer
-
-Model: opus
-Effort: high
-
-```text
-Run /canon:role-reviewer, then /canon:review-pr <number>
-Controller: <sessionId>
+```bash
+canon dispatch prompts rm <task> --role worker --json
+canon tasks promote <stem>
 ```
-````
 
-## Reporting the file
+The promote is the same call a background launch makes, and nothing else moves a hand-launched row out of `## Up next`. A planner or reviewer row takes no branch the watch can match, so it stays on the operator's word, then `rm` with its role.
 
-Report the file in the turn that writes it by its path, then one line per row naming its label and the roles the file carries for it. Paste no fence into the reply, since the operator copies from the file and a second copy in chat goes stale at the next overwrite.
+`rm` answers `ok` with nothing removed for a row no longer queued, so a second clear is harmless. The wave after a worker's pull request opens queues `--role reviewer` for that row alone, since the worker's prompt is already gone.
+
+## Reporting the queue
+
+Report the file in the turn that queues to it by its path, then one line per row naming its label and the roles it carries, read from `canon dispatch prompts list --json`. Paste no fence into the reply, since the operator copies from the file and a second copy in chat goes stale at the next `add`.
