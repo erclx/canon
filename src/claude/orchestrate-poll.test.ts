@@ -796,6 +796,30 @@ describe('poll', () => {
       expect(poll().stdout).toBe('EVIDENCE  #7 proof settled at 1111111')
     })
 
+    it('should store unread when the check refuses on a head that moved off settled proof', () => {
+      writeThread([], [])
+      writeEvidence({ owed: [], reason: 'settled', uncaptured: [] })
+      poll()
+      writeThread([], [], READ_HEAD)
+      writeEvidence({ message: 'gh could not read', reason: 'gh-failed' })
+
+      poll()
+
+      expect(baselineLine().split(' ')[10]).toBe('unread')
+    })
+
+    it('should keep an owed reading when the check refuses on a moved head', () => {
+      writeThread([], [])
+      writeEvidence({ owed: ['evidence'], reason: 'owed', uncaptured: [] })
+      poll()
+      writeThread([], [], READ_HEAD)
+      writeEvidence({ message: 'gh could not read', reason: 'gh-failed' })
+
+      poll()
+
+      expect(baselineLine().split(' ')[10]).toBe('owed')
+    })
+
     it('should skip the read once proof settled at an unmoved head', () => {
       writeThread([], [])
       writeEvidence({ owed: [], reason: 'settled', uncaptured: [] })

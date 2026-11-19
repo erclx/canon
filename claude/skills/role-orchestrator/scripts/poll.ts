@@ -324,6 +324,12 @@ const classifyFirstSighting = (
   }
 }
 
+/** A `settled` reading never carries onto a moved head, where it would stop every later read. */
+const carriedEvidence = (row: Row, old: Baseline): string =>
+  old.evidence === 'settled' && row.head !== old.head
+    ? 'unread'
+    : old.evidence || 'unread'
+
 /**
  * Settled proof reports only off a reading that owed it, so a first sighting,
  * an older line, and a refused read each stay silent.
@@ -428,7 +434,7 @@ export const classify = (
   }
 
   const baseline: Baseline = {
-    evidence: row.evidence === '' ? old.evidence || 'unread' : row.evidence,
+    evidence: row.evidence === '' ? carriedEvidence(row, old) : row.evidence,
     head: row.head,
     merges: row.merges,
     number: row.number,
