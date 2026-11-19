@@ -635,11 +635,13 @@ export async function listSourceFiles(
  */
 const CONCURRENT_READS = 64
 
-/** A path the caller named, already checked to exist. */
-export interface ScanTarget {
-  readonly path: string
-  readonly kind: 'file' | 'directory'
-}
+/**
+ * A path the caller named, already checked to exist. A file carries its
+ * checkout, since the gate prunes a touched path relative to the repository.
+ */
+export type ScanTarget =
+  | { readonly kind: 'directory'; readonly path: string }
+  | { readonly kind: 'file'; readonly path: string; readonly checkout: string }
 
 function relativeTo(base: string, path: string): string {
   return path.startsWith(`${base}/`) ? path.slice(base.length + 1) : path
@@ -655,7 +657,7 @@ export async function scanTree(
 
 /**
  * Scans each file once, reporting a directory's files relative to it and a
- * named file relative to `base`, so the file reads as the caller typed it.
+ * named file relative to `base`, or absolute outside it.
  */
 export async function scanPaths(
   targets: readonly ScanTarget[],
@@ -675,6 +677,7 @@ export async function scanPaths(
 
     const language = languageFor(target.path)
     if (!language || !languages.includes(language)) continue
+    if (isPruned(relativeTo(target.checkout, target.path))) continue
     if (!labels.has(target.path)) {
       labels.set(target.path, relativeTo(base, target.path))
     }

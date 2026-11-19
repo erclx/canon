@@ -332,7 +332,7 @@ describe('scanPaths', () => {
     seed('src/a.ts', '// a decision\nexport const a = 1\n')
 
     const [ts] = await scanPaths(
-      [{ path: join(ROOT, 'src/a.ts'), kind: 'file' }],
+      [{ path: join(ROOT, 'src/a.ts'), kind: 'file', checkout: ROOT }],
       ROOT,
       {
         languages: ['ts'],
@@ -351,7 +351,7 @@ describe('scanPaths', () => {
     const file = join(ROOT, 'src/a.ts')
 
     const [ts] = await scanPaths(
-      [{ path: file, kind: 'file' }],
+      [{ path: file, kind: 'file', checkout: ROOT }],
       join(ROOT, 'other'),
       {
         languages: ['ts'],
@@ -368,8 +368,8 @@ describe('scanPaths', () => {
 
     const [ts] = await scanPaths(
       [
-        { path: join(ROOT, 'src/a.ts'), kind: 'file' },
-        { path: join(ROOT, 'src/b.ts'), kind: 'file' },
+        { path: join(ROOT, 'src/a.ts'), kind: 'file', checkout: ROOT },
+        { path: join(ROOT, 'src/b.ts'), kind: 'file', checkout: ROOT },
       ],
       ROOT,
       { languages: ['ts'] },
@@ -385,8 +385,8 @@ describe('scanPaths', () => {
     const [ts] = await scanPaths(
       [
         { path: join(ROOT, 'src'), kind: 'directory' },
-        { path: join(ROOT, 'src/a.ts'), kind: 'file' },
-        { path: join(ROOT, 'src/a.ts'), kind: 'file' },
+        { path: join(ROOT, 'src/a.ts'), kind: 'file', checkout: ROOT },
+        { path: join(ROOT, 'src/a.ts'), kind: 'file', checkout: ROOT },
       ],
       ROOT,
       { languages: ['ts'] },
@@ -401,8 +401,8 @@ describe('scanPaths', () => {
 
     const counts = await scanPaths(
       [
-        { path: join(ROOT, 'README.md'), kind: 'file' },
-        { path: join(ROOT, 'src/a.ts'), kind: 'file' },
+        { path: join(ROOT, 'README.md'), kind: 'file', checkout: ROOT },
+        { path: join(ROOT, 'src/a.ts'), kind: 'file', checkout: ROOT },
       ],
       ROOT,
     )
@@ -414,7 +414,7 @@ describe('scanPaths', () => {
     seed('scripts/b.sh', '# why\necho hi\n')
 
     const [ts] = await scanPaths(
-      [{ path: join(ROOT, 'scripts/b.sh'), kind: 'file' }],
+      [{ path: join(ROOT, 'scripts/b.sh'), kind: 'file', checkout: ROOT }],
       ROOT,
       {
         languages: ['ts'],
@@ -422,6 +422,42 @@ describe('scanPaths', () => {
     )
 
     expect(ts.files).toBe(0)
+  })
+
+  it('should skip a file target under a fixture tree, as the gate does', async () => {
+    seed('src/fixtures/b.ts', '// parsed by a test\nexport const b = 2\n')
+
+    const [ts] = await scanPaths(
+      [
+        {
+          path: join(ROOT, 'src/fixtures/b.ts'),
+          kind: 'file',
+          checkout: ROOT,
+        },
+      ],
+      ROOT,
+      { languages: ['ts'] },
+    )
+
+    expect(ts.files).toBe(0)
+  })
+
+  it('should count a file whose checkout sits under a pruned folder name', async () => {
+    seed('build/src/a.ts', 'export const a = 1\n')
+
+    const [ts] = await scanPaths(
+      [
+        {
+          path: join(ROOT, 'build/src/a.ts'),
+          kind: 'file',
+          checkout: join(ROOT, 'build'),
+        },
+      ],
+      ROOT,
+      { languages: ['ts'] },
+    )
+
+    expect(ts.files).toBe(1)
   })
 })
 

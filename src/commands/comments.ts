@@ -59,9 +59,10 @@ export function register(program: Command): void {
       [
         '',
         'Paths:',
-        '  A directory reports its files relative to itself, and a file as typed.',
-        '  A file in a language outside the scan is skipped. --since takes one',
-        '  directory alone.',
+        '  A directory reports its files relative to itself, and a file relative',
+        '  to the current directory, or absolute outside it. A file in a language',
+        '  outside the scan, or under a pruned folder such as fixtures/, is',
+        '  skipped, as the gate skips it. --since takes one directory alone.',
         '',
         'Placement:',
         '  head  outside every function body, such as a doc block above one',
@@ -126,8 +127,9 @@ async function resolveTargets(
     paths.map(async (path) => {
       const info = await stat(path).catch(() => undefined)
       if (!info) return undefined
-      const kind: ScanTarget['kind'] = info.isDirectory() ? 'directory' : 'file'
-      return { path, kind }
+      if (info.isDirectory()) return { kind: 'directory' as const, path }
+      const checkout = await currentWorktreeRoot(dirname(path))
+      return { kind: 'file' as const, path, checkout }
     }),
   )
 
@@ -191,9 +193,9 @@ async function runScan(
 
   // A path argument reads the rules from the checkout holding it, not the path.
   const vocabulary = await loadVocabulary(
-    await currentWorktreeRoot(
-      first.kind === 'file' ? dirname(first.path) : first.path,
-    ),
+    first.kind === 'file'
+      ? first.checkout
+      : await currentWorktreeRoot(first.path),
   )
   const scanOptions = {
     languages,
