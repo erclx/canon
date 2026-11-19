@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.101.0](https://github.com/erclx/canon/compare/v5.100.0...v5.101.0) (2026-11-19)
+
+
+### Features
+
+* **comments:** accept file paths and path lists in the scan verb ([#3231](https://github.com/erclx/canon/issues/3231)) ([41df191](https://github.com/erclx/canon/commit/41df191c87210866edc9e2645a3a86bf6fbe9eba))
+* **design:** give each design group its own generated index file ([#3230](https://github.com/erclx/canon/issues/3230)) ([5d6a7fa](https://github.com/erclx/canon/commit/5d6a7fad18b4f40c0f81da6451869f08fa087b22))
+* **dispatch:** queue hand-launch prompts through canon dispatch prompts ([#3228](https://github.com/erclx/canon/issues/3228)) ([0e9ae1f](https://github.com/erclx/canon/commit/0e9ae1f19f2d8d3e4d2aadc5c085d74582b375f6))
+* **permissions:** ask before each canon pr merge, deny the REST merge ([#3229](https://github.com/erclx/canon/issues/3229)) ([13801f3](https://github.com/erclx/canon/commit/13801f3ad8653843a06555048d5040c4eb558940))
+* **skills:** add session-retro to sort a session's toolkit friction ([#3226](https://github.com/erclx/canon/issues/3226)) ([4071dd4](https://github.com/erclx/canon/commit/4071dd426afbf18fe16f089867629851465b009d))
+
 ## [5.100.0](https://github.com/erclx/canon/compare/v5.99.0...v5.100.0) (2026-11-19)
 
 
