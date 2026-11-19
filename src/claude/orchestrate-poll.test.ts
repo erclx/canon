@@ -738,6 +738,103 @@ describe('poll', () => {
     })
   })
 
+  describe('evidence state', () => {
+    const writeEvidence = (record: Record<string, unknown>): void => {
+      writeFileSync(
+        join(root, 'fixtures', 'evidence-7.json'),
+        JSON.stringify(record),
+      )
+    }
+
+    const baselineLine = (): string =>
+      readFileSync(
+        join(root, 'repo', '.canon', 'tmp', 'pr', 'poll', 'baseline.txt'),
+        'utf8',
+      ).trim()
+
+    it('should report proof that settles after a reading owed it', () => {
+      writeThread([], [])
+      writeEvidence({ owed: ['evidence'], reason: 'owed', uncaptured: [] })
+      expect(poll().stdout).toContain('OPENED')
+
+      writeEvidence({ owed: [], reason: 'settled', uncaptured: [] })
+
+      expect(poll().stdout).toBe('EVIDENCE  #7 proof settled at 1111111')
+    })
+
+    it('should report proof settling after an uncaptured path', () => {
+      writeThread([], [])
+      writeEvidence({ owed: [], reason: 'settled', uncaptured: ['src/a.tsx'] })
+      expect(poll().stdout).toContain('OPENED')
+
+      writeEvidence({ owed: [], reason: 'settled', uncaptured: [] })
+
+      expect(poll().stdout).toBe('EVIDENCE  #7 proof settled at 1111111')
+    })
+
+    it('should read a deploy wait alone as settled proof', () => {
+      writeThread([], [])
+      writeEvidence({ owed: ['evidence'], reason: 'owed', uncaptured: [] })
+      expect(poll().stdout).toContain('OPENED')
+
+      writeEvidence({ owed: ['preview'], reason: 'owed', uncaptured: [] })
+
+      expect(poll().stdout).toBe('EVIDENCE  #7 proof settled at 1111111')
+    })
+
+    it('should record a first sighting already settled and print nothing for it', () => {
+      writeThread([], [])
+      writeEvidence({ owed: [], reason: 'settled', uncaptured: [] })
+
+      const first = poll()
+
+      expect(first.stdout).not.toContain('EVIDENCE')
+      expect(baselineLine().split(' ')[10]).toBe('settled')
+    })
+
+    it('should print nothing when an older ten-field line meets settled proof', () => {
+      writeThread([], [])
+      writeEvidence({ owed: [], reason: 'settled', uncaptured: [] })
+      mkdirSync(join(root, 'repo', '.canon', 'tmp', 'pr', 'poll'), {
+        recursive: true,
+      })
+      writeFileSync(
+        join(root, 'repo', '.canon', 'tmp', 'pr', 'poll', 'baseline.txt'),
+        `7 ${HEAD} none 0 unknown none 0 none unknown none\n`,
+      )
+
+      const run = poll()
+
+      expect(run.stdout).not.toContain('EVIDENCE')
+      expect(baselineLine().split(' ')[10]).toBe('settled')
+    })
+
+    it('should keep the last reading standing when the check refuses', () => {
+      writeThread([], [])
+      writeEvidence({ owed: ['evidence'], reason: 'owed', uncaptured: [] })
+      expect(poll().stdout).toContain('OPENED')
+
+      writeEvidence({ message: 'gh could not read', reason: 'gh-failed' })
+      expect(poll().stdout).toBe('No movement.')
+      expect(baselineLine().split(' ')[10]).toBe('owed')
+
+      writeEvidence({ owed: [], reason: 'settled', uncaptured: [] })
+
+      expect(poll().stdout).toBe('EVIDENCE  #7 proof settled at 1111111')
+    })
+
+    it('should skip the read once proof settled at an unmoved head', () => {
+      writeThread([], [])
+      writeEvidence({ owed: [], reason: 'settled', uncaptured: [] })
+      poll()
+      rmSync(join(root, 'fixtures', 'evidence-reads.txt'))
+
+      poll()
+
+      expect(readCount(join(root, 'fixtures', 'evidence-reads.txt'))).toBe(0)
+    })
+  })
+
   // These cases need real commits on both sides, on a bare origin holding `main`
   // and each head at GitHub's ref, with a five-line file two sides can share.
   describe('base movement', () => {

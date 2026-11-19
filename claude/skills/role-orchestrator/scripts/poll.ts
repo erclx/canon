@@ -37,6 +37,8 @@ export interface Row {
   heading: string
   merges: string
   number: string
+  /** The proof reading this run took, empty when it took none or the read was refused. */
+  evidence: '' | EvidenceState
   passAt: number
   prior: string
   replyAt: number
@@ -57,8 +59,16 @@ export interface Row {
  */
 export type Staleness = 'fresh' | 'stale' | 'unknown'
 
+/**
+ * The routes the review dispatch table branches on. `unread` is stored only
+ * when no reading was ever taken, so an earlier reading stands over a refusal.
+ */
+export type EvidenceState = 'owed' | 'settled' | 'uncaptured' | 'unread'
+
 /** One baseline line, kept as the strings it was written with. */
 export interface Baseline {
+  /** An `EvidenceState`, or empty on a line written before the field existed. */
+  evidence: string
   head: string
   merges: string
   number: string
@@ -216,11 +226,12 @@ export const uiFromVerb = (record: unknown): string => {
   return `${fields.state}-${covered ? 'head' : 'behind'}-${commit.slice(0, 7)}`
 }
 
-/** Takes the first ten fields and ignores the rest, so a short or padded line still reads. */
+/** Takes the first eleven fields and ignores the rest, so a short or padded line still reads. */
 export const parseBaseline = (line: string): Baseline => {
   const fields = line.split(' ')
 
   return {
+    evidence: fields[10] ?? '',
     head: fields[1] ?? '',
     merges: fields[4] ?? '',
     number: fields[0] ?? '',
@@ -251,6 +262,7 @@ export const formatBaseline = (entry: Baseline): string =>
     entry.ui,
     entry.stale,
     entry.overlaps,
+    entry.evidence,
   ]
     .join(' ')
     .trimEnd()
@@ -295,6 +307,7 @@ const classifyFirstSighting = (
   context: ClassifyContext,
 ): Classification => {
   const baseline: Baseline = {
+    evidence: row.evidence === '' ? 'unread' : row.evidence,
     head: row.head,
     merges: row.merges,
     number: row.number,
@@ -320,6 +333,16 @@ const classifyFirstSighting = (
     lines: [line, ...staleLine(row, context.base)],
   }
 }
+
+/**
+ * Settled proof reports only off a reading that owed it, so a first sighting,
+ * an older line, and a refused read each stay silent.
+ */
+const classifyEvidence = (row: Row, old: Baseline): string[] =>
+  row.evidence === 'settled' &&
+  (old.evidence === 'owed' || old.evidence === 'uncaptured')
+    ? [`EVIDENCE  #${row.number} proof settled at ${short(row.head)}`]
+    : []
 
 const classifyUi = (row: Row, old: Baseline): string[] => {
   if (row.ui === '' || row.ui === 'none' || row.ui === old.ui) return []
@@ -375,6 +398,7 @@ export const classify = (
   // The UI pass reports on its transition, since its state moves on a post or
   // on a push and either is the moment it is owed an action.
   lines.push(...classifyUi(row, old))
+  lines.push(...classifyEvidence(row, old))
 
   const oldResp = Number.parseInt(old.resp, 10)
   if (row.head !== old.head) {
@@ -422,6 +446,7 @@ export const classify = (
   }
 
   const baseline: Baseline = {
+    evidence: row.evidence === '' ? old.evidence || 'unread' : row.evidence,
     head: row.head,
     merges: row.merges,
     number: row.number,
@@ -762,18 +787,62 @@ const readOverlap = (first: string, second: string): null | string[] => {
   return [...new Set(lines.slice(1))]
 }
 
+/**
+ * Reads `canon pr evidence --check`'s record, branching on `reason` since the
+ * verb exits non-zero on a refusal that still prints one. `owed` holding only
+ * `preview` is the ship chain's deploy wait rather than missing proof, so it
+ * reads as settled. Anything but a `settled` or `owed` record is unread.
+ */
+export const evidenceFromCheck = (record: unknown): '' | EvidenceState => {
+  if (typeof record !== 'object' || record === null) return ''
+  const { owed, reason, uncaptured } = record as Record<string, unknown>
+  if (reason !== 'settled' && reason !== 'owed') return ''
+  if (Array.isArray(uncaptured) && uncaptured.length > 0) return 'uncaptured'
+
+  return Array.isArray(owed) && owed.includes('evidence') ? 'owed' : 'settled'
+}
+
+/** A settled reading at an unmoved head costs no read, so a settled wave adds none. */
+export const needsEvidenceRead = (
+  old: Baseline | undefined,
+  head: string,
+): boolean =>
+  old === undefined || old.evidence !== 'settled' || old.head !== head
+
+const readEvidence = async (
+  number: string,
+  isWanted: boolean,
+): Promise<'' | EvidenceState> =>
+  isWanted
+    ? evidenceFromCheck(
+        parseJson(
+          (
+            await runAsync('canon', [
+              'pr',
+              'evidence',
+              number,
+              '--check',
+              '--json',
+            ])
+          ).stdout,
+        ),
+      )
+    : ''
+
 const buildRow = async (
   number: string,
   payload: Payload,
   head: string,
   ref: string,
+  old: Baseline | undefined,
 ): Promise<Row> => {
   const now = nowSeconds()
   const replies = replyState(payload.comments ?? [])
   const unmatched = unmatchedState(payload.comments ?? [])
-  const [state, merges] = await Promise.all([
+  const [state, merges, evidence] = await Promise.all([
     runAsync('canon', ['pr', 'review-state', number, '--json']),
     readMerges(number, head, ref),
+    readEvidence(number, needsEvidenceRead(old, head)),
   ])
   const record = parseJson(state.stdout)
   const scope = scopeFromVerb(record, now) ?? scopeFallback(payload, now)
@@ -782,6 +851,7 @@ const buildRow = async (
 
   return {
     age: scope.age,
+    evidence,
     head,
     heading: scope.state,
     merges,
@@ -964,7 +1034,9 @@ const pollOnce = async (
       if (payload === null) return { number, reason: 'could not be read' }
       if (head === '') return { number, reason: 'returned no head' }
 
-      return { row: await buildRow(number, payload, head, ref) }
+      return {
+        row: await buildRow(number, payload, head, ref, known.get(number)),
+      }
     },
   )
 
