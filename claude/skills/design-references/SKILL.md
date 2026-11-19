@@ -1,6 +1,6 @@
 ---
 name: design-references
-description: Gathers design references from live sites onto a Frameboard references page, being one shot per section at each width the project draws at, a filmed scroll read as stills, and a few filmed hovers, named in the vocabulary of the site's community DESIGN.md. Takes a site address, or none and falls back to the project's own list and then a default one. Use when asked to "gather references", "pull references from this site", "capture this site's sections", "show me how good sites do this", or before drafting a design round that has nothing real to look at. Do NOT use to draft or pick candidates, which is `design-pick`, to land a picked design in the record, which is `design-record`, or to film the project's own app, which is `ui-film`.
+description: Gathers design references from live sites onto a Frameboard references page, one shot per section at each width, plus filmed scrolls and hovers, falling back to the project's list without an address. Use when asked to "gather references", "pull references from this site", or before a design round with nothing real to look at. Do NOT use to pick candidates, which is `design-pick`.
 metadata:
   family: decide
 ---

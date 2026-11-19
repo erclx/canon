@@ -16,6 +16,7 @@ import {
   SHIPPED_CORPUS,
 } from '@/claude/skills-audit'
 import { familyKeys } from '@/claude/skills-families'
+import { listSkills } from '@/claude/skills-list'
 import { measureDesignProse } from '@/design/budget'
 import { DESIGN_DOCUMENT } from '@/design/regen'
 import { listRepositoryFiles } from '@/git/files'
@@ -398,6 +399,48 @@ export const skillFamily: Measure = async (ctx) => {
   return {
     emissions: [
       info(`${plural(shipped.skills, 'shipped skill')} declare a known family`),
+    ],
+  }
+}
+
+/**
+ * Sized from the corpus total once the 400-character target applied, since
+ * `skillOverrides` cannot mark a plugin skill name-only. Raising it is a
+ * deliberate edit naming which skill grew the listing.
+ */
+export const SKILL_DESCRIPTION_CEILING = 31_000
+
+/**
+ * The plugin's description characters against one ceiling, since past the
+ * listing budget Claude Code drops the least-invoked skills' descriptions and
+ * a skill with none has nothing to trigger on.
+ */
+export const skillDescriptionTotal: Measure = async (ctx) => {
+  const skills = listSkills(ctx.root)
+  if (skills.length === 0) {
+    return {
+      emissions: [],
+      unmeasured: `no skill corpus at ${SHIPPED_CORPUS} resolved, so no description was read.`,
+    }
+  }
+
+  const total = skills.reduce((sum, skill) => sum + skill.description.length, 0)
+  const measured = `${total} description characters across ${plural(skills.length, 'shipped skill')}`
+  if (total > SKILL_DESCRIPTION_CEILING) {
+    const longest = [...skills]
+      .sort((a, b) => b.description.length - a.description.length)
+      .slice(0, 3)
+      .map((skill) => `${skill.name} (${skill.description.length})`)
+      .join(', ')
+    return {
+      emissions: [],
+      failure: `${measured}, over the ceiling of ${SKILL_DESCRIPTION_CEILING}. The longest are ${longest}. Shorten toward the 400-character target in claude/skills/create-skill/references/skill-frontmatter.md, or raise SKILL_DESCRIPTION_CEILING in src/gate/measures.ts and say which skill grew it.`,
+    }
+  }
+
+  return {
+    emissions: [
+      info(`${measured}, under the ceiling of ${SKILL_DESCRIPTION_CEILING}`),
     ],
   }
 }

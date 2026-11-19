@@ -1,6 +1,6 @@
 ---
 name: review-pr
-description: Reviews an open pull request from an independent session and posts findings as a review comment on the PR. Posts a first pass against the whole change and every later pass against only the commits added since, under `## Review` while any finding is open and `## Review closed` once a pass carries none. Reads project docs and the task board for cross-feature context a self-review lacks. Use when asked to "review the PR", "review this feature's PR", "post a PR review", "re-review the PR", "close out the review", "confirm the findings are fixed", or acting as the dispatched reviewer of a worker's PR. Do NOT use to review local uncommitted changes.
+description: Reviews an open pull request from an independent session and posts findings as a review, a first pass over the whole change and later passes over new commits, under `## Review` while a finding is open and `## Review closed` once none is. Use when asked to "review the PR", "re-review the PR", or acting as a worker's dispatched reviewer. Do NOT use to review local uncommitted changes.
 metadata:
   family: after-pr
 ---

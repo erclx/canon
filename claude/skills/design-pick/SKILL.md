@@ -1,6 +1,6 @@
 ---
 name: design-pick
-description: Drafts several candidates for a decision judged by looking, lays them out side by side as frames on one Frameboard page, hands the operator the address, takes the pick through the structured question surface, and loops on the pick until they stop. Use when asked to "draft some options", "show me a few versions", "try a few variations", "mock up alternatives", "give me candidates for X", or when a choice is taste rather than correctness. Do NOT use when the request already names the answer and asks for it to be built, which is `plan-feature`. Do NOT use to read source for roughness, which is `ui-audit`, to measure what a running interface costs to paint, which is `ui-measure`, or to write what to look at on a change already made, which is `ui-checklist`.
+description: Drafts several candidates for a decision judged by looking, lays them side by side on one Frameboard page, and takes the operator's pick through the structured question surface, looping until they stop. Use when asked to "draft some options", "show me a few versions", or "mock up alternatives", or when a choice is taste. Do NOT use when the request names the answer, which is `plan-feature`.
 metadata:
   family: decide
 ---

@@ -1,6 +1,6 @@
 ---
 name: target-update
-description: Catches a target project up to the toolkit after a release. Upgrades the binary and plugin, previews the changelog summary, the pending migrations, and the drift, then on the operator's go-ahead migrates, syncs, regenerates the indexes, and ends on a clean `target-check` or named remainders. Use when asked to "update this project to the latest canon", "catch this target up", "apply the new release here", "run the pending migrations", or "bring this project current with the toolkit". Do NOT use on a project without the toolkit, which is `target-setup`, or to report drift without repairing it, which is `target-check`.
+description: Catches a target project up to the toolkit after a release, upgrading the binary and plugin, previewing the changelog, migrations, and drift, then migrating and syncing on the operator's go-ahead and ending on a clean `target-check`. Use when asked to "update this project to the latest canon" or "run the pending migrations". Do NOT use on a project without the toolkit, which is `target-setup`.
 metadata:
   family: upkeep
 ---

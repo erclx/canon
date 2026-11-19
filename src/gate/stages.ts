@@ -30,6 +30,7 @@ import {
   seedStandards,
   rawFieldFileReference,
   shippedReferences,
+  skillDescriptionTotal,
   skillFamily,
   skillPracticeShape,
   skillProvenance,
@@ -654,6 +655,11 @@ export const STAGES: readonly Stage[] = [
     id: 'skill-family',
     label: 'Skill family',
     checks: [{ kind: 'measure', measure: skillFamily }],
+  },
+  {
+    id: 'skill-description-total',
+    label: 'Skill description total',
+    checks: [{ kind: 'measure', measure: skillDescriptionTotal }],
   },
   {
     id: 'sandbox-coverage',

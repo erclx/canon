@@ -1,6 +1,6 @@
 ---
 name: search-craft
-description: Carries the thinking step a session takes before it searches outside the project, naming the field, deriving who that field treats as authoritative, and running a search scoped to those sources beside an open one, plus a dated note on which sites refuse access and the rule that a quote comes from a page read rather than recall. Use before any outside search for evidence, papers, documentation, statistics, or opinion, before quoting a source on any surface, when a procedure loads it at its sourcing step, or when asked "find me the strongest evidence on X", "where should I look for this", "what does the research say", "find papers on", "look up the docs for", or "what are people saying about". Do NOT use to format a citation, which belongs to the surface writing it, to source a Claude Code subject, which is a direct fetch of Anthropic's docs index, or to generate an image, which is not search.
+description: Carries the step before an outside search, naming the field, deriving who it treats as authoritative, and scoping a search to them beside an open one. Use before searching for evidence, papers, docs, or opinion, before quoting a source, or when asked "find the strongest evidence on X" or "what does the research say". Do NOT use to format a citation or to source a Claude Code subject.
 metadata:
   family: build
 ---

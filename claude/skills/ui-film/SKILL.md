@@ -1,6 +1,6 @@
 ---
 name: ui-film
-description: Records real footage of a project's own web app for a video. Drafts a plain beat list from the ask, a HyperFrames storyboard, or a `ui-checklist`, gets the operator's approval, writes the take plan, films each beat through `canon take` as a sharp 4K clip with a click log and a per-frame camera track, and hands the set to HyperFrames to compose. Use when asked to "record the app", "film a demo of this feature", "get footage for the launch video", or "shoot the takes for this storyboard". Do NOT use to compose, caption, or render the video, which HyperFrames owns, to film a pull request's reel for its evidence comment, which is `pr-evidence`, to drive a pull request's checklist, which is `review-ui`, or to drive the app looking for defects, which is `app-drive`.
+description: Records footage of the project's own web app for a video, filming each beat of an approved list through `canon take` as a 4K clip with a click log and camera track, then handing the set to HyperFrames. Use when asked to "record the app", "film a demo of this feature", or "shoot the takes for this storyboard". Do NOT use to compose the video or for a pull request's reel, which is `pr-evidence`.
 metadata:
   family: generate
 ---
