@@ -145,12 +145,8 @@ export interface FolderClaim {
 }
 
 /**
- * A path two `## In flight` rows both name in their `Touches` cells. A shared
- * file is no hold, since the dispatch gate starts both rows and the branch
- * merging second rebases, so the pair reports beside the findings and moves no
- * exit code. It stays listed because merge order reads it, and because it is
- * the candidate list a dispatcher reads for the dependency, contract,
- * relocation, and sweep holds a `Touches` cell cannot state.
+ * A path two `## In flight` rows both name. It is no hold and moves no exit
+ * code, and stays listed for merge order and the dispatcher's conflict check.
  */
 export interface SharedFiles {
   readonly group: BoardGroup
@@ -843,14 +839,8 @@ async function checkPlans(
 }
 
 /**
- * Compares the two places one task's plan is written down. The `## In flight` row
- * carries a `Plan` column and the task file carries its own `Plan:` line, and
- * the archive reads the second while an operator reads the first, so a pair
- * that disagrees settles the wrong plan on the merge.
- *
- * Both sides resolve before they compare. A row writing `../plans/x.md` and a
- * task writing `.canon/plans/x.md` name one file, and comparing the strings
- * would report every such pair as a mismatch.
+ * Compares a retired Plan cell with the task's `Plan:` line, which the archive
+ * reads, after resolving both, since two spellings can name one file.
  */
 async function checkPlanAgreement(
   rows: readonly BoardRow[],
@@ -1177,11 +1167,8 @@ function joinShared(clauses: readonly string[]): string {
 }
 
 /**
- * Reports a `Touches` cell naming a bare folder. The claim collides with every
- * later row under that folder and is legitimate when the row rewrites it, so
- * this states the reach rather than a defect. Only `## In flight` is scanned, as
- * `checkSharedFiles` does, since another group's cell is unplanned prose and
- * reporting on it teaches a reader to skip the report.
+ * Reports an `## In flight` `Touches` cell naming a bare folder, as a reach
+ * rather than a defect, since a row rewriting the folder claims it rightly.
  */
 function checkFolderClaims(
   rows: readonly BoardRow[],
@@ -1495,14 +1482,8 @@ function untestedRow(
 }
 
 /**
- * Re-takes the two blocker kinds a command can settle, over every row outside
- * `## In flight`. A cited task is settled by being archived or by closing every
- * outcome, and a cited path by no `## In flight` row still holding it.
- *
- * Both gate on a citation the cell carries, never the `Touches` column, which
- * says nothing about what parked a row. The cell is read for citations rather
- * than parsed, and a row neither half reached is returned as untested, so
- * silence never reads as a board with nothing stale on it.
+ * Re-takes the cited-task and cited-path blockers outside `## In flight`, and
+ * returns a row neither half reached as untested, so silence never reads clean.
  */
 async function checkParked(
   rows: readonly BoardRow[],
@@ -1650,11 +1631,8 @@ export async function declaredRows(
 }
 
 /**
- * The claims a group name makes about a row, being a stated plan and file set
- * under `## In flight`, a live plan under `## Up next`, and none under
- * `## Needs a plan`. The board verbs read these same findings off the board
- * they are about to write, so a placement and a validation cannot disagree on
- * what a group allows.
+ * The claims a group name makes about a row, which the board verbs read off
+ * the board they are about to write, so placing and validating cannot disagree.
  */
 export async function groupRuleFindings(
   rows: readonly BoardRow[],
@@ -1670,16 +1648,8 @@ export async function groupRuleFindings(
 }
 
 /**
- * Reports a row outside `## In flight` whose task a live session or an open pull
- * request holds, tied through the branch each live plan on its `Plan:` line
- * derives. A row whose worker renamed its branch has nothing to match, and an
- * archived plan's branch is finished work, so neither is reported.
- *
- * A session outlives its merge, so a session still on a branch a merged pull
- * request names is finished work too, until the merge reaches this clone and the
- * hook archives the row. A merged read that fails leaves the hold standing, since
- * the session is still there, and reads `pulls` as unread, since that hold may be
- * finished work the open list could not rule out.
+ * Reports a row outside `## In flight` held by a live session or open pull
+ * request on its plan's branch, skipping a session whose branch already merged.
  */
 async function checkHeld(
   rows: readonly BoardRow[],

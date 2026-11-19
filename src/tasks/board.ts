@@ -904,10 +904,8 @@ export interface PromoteOptions {
 }
 
 /**
- * Moves a row one group closer to `## In flight`, to the bottom of that group.
- * Dispatch runs it once a launch succeeds, so `## In flight` reads as
- * dispatched, and `plan-link` runs it on a `## Needs a plan` row once the plan
- * is linked.
+ * Moves a row one group closer to `## In flight`, to its bottom. Dispatch runs
+ * it after a launch, and `plan-link` once a parked row's plan is linked.
  */
 export async function promoteTask(
   root: string,
@@ -955,10 +953,8 @@ export interface LinkPromotion {
 }
 
 /**
- * Promotes a task's row out of `## Needs a plan` once its plan is linked, and
- * leaves every other row where it is. A row already under `## Up next` or
- * `## In flight` is past the planning a link records, and a task with no row was
- * never placed, which is the controller's call rather than the link's.
+ * Promotes a row out of `## Needs a plan` once its plan is linked. Any other
+ * row is past that planning, and a task with no row is the controller's call.
  */
 export async function promoteOnLink(
   root: string,

@@ -41,14 +41,8 @@ export interface Holder {
   readonly source: 'plan' | 'row'
   readonly declaration: string
   /**
-   * Whether a holding plan also carries a row in `## In flight`, and undefined on
-   * a row holder, which is one by construction.
-   *
-   * A plan with no row is the shape a plan nobody archived takes, and it is
-   * also the shape of one whose task is merely not dispatched yet, so this
-   * narrows a reader's search rather than answering it. Testing whether the
-   * holder is genuinely in flight would put a second liveness reading here
-   * beside the dispatch gate's own, which the report declines.
+   * Whether a holding plan carries an `## In flight` row, undefined on a row
+   * holder. It narrows a search, since a plan without a row may be unarchived.
    */
   readonly rowed?: boolean
 }
