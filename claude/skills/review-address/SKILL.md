@@ -134,9 +134,13 @@ Then post and keep the `id` the POST answers with, since Step 7 edits this exact
 gh api -X POST 'repos/{owner}/{repo}/issues/<number>/comments' -F body=@.canon/tmp/pr/reply/reply-<number>.md --jq .id > .canon/tmp/pr/reply/reply-<number>.id
 ```
 
+### Hand back for re-review
+
+Hand back to the reviewer for re-review once the reply posts, or to the orchestrator where no live reviewer answers, with CI marked running. Neither side waits on Step 7's watch. A check failing later takes its own fix, push, and hand-back naming only what changed.
+
 ## Step 7: confirm resolution
 
-After the push, read Watching CI in `${CLAUDE_SKILL_DIR}/../git-ship/SKILL.md` without invoking that skill, start its background watch, end the turn on its line, and run the rest of this step and Step 8 on the wake.
+The re-review runs beside this watch, since Step 6 already handed back. After the push, read Watching CI in `${CLAUDE_SKILL_DIR}/../git-ship/SKILL.md` without invoking that skill, start its background watch, end the turn on its line, and run the rest of this step and Step 8 on the wake.
 
 - Start a fresh watch after the push and stop any watch still running on this PR, since a running watch's limit counts from its own start
 - On the wake, a final record reading `passing` or `failing` routes on its state, even after the watch's limit line
@@ -182,7 +186,7 @@ Addressed <N> findings on PR #<number>. Follow-up pushed.
 
 Omit the second line when the branch still merged. Name any finding left as a reply rather than a code change, with its one-line reason. A rebase-only run reports the line `${CLAUDE_SKILL_DIR}/references/rebase-only.md` gives instead.
 
-Do not merge. Hand back to the reviewer for re-review, or to the orchestrator where no live reviewer answers.
+Do not merge. This step reports only, since the hand-back went out when Step 6 posted the reply.
 
 ## Post-review findings
 
