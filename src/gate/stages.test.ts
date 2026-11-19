@@ -1,3 +1,4 @@
+import { execaSync } from 'execa'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -17,6 +18,7 @@ import {
   type StageScope,
   stagesFor,
 } from '@/gate/stages'
+import { gitEnv } from '@/git/env'
 
 function scopeOf(id: string): StageScope {
   const stage = STAGES.find((candidate) => candidate.id === id)
@@ -570,7 +572,37 @@ describe('the shared stage set', () => {
       JSON.stringify({ name: '@erclx/canon' }),
     )
 
-    expect(stagesFor(root)).toBe(STAGES)
+    expect(stagesFor(root).map((stage) => stage.id)).toEqual(
+      STAGES.map((stage) => stage.id),
+    )
+  })
+
+  it('should scope the tests stage from the tests of the checked root', () => {
+    const git = (...args: string[]): void => {
+      execaSync('git', ['-C', root, ...args], {
+        env: gitEnv(),
+        extendEnv: false,
+      })
+    }
+    writeFileSync(
+      join(root, 'package.json'),
+      JSON.stringify({ name: '@erclx/canon' }),
+    )
+    // Built, so this file never reads as a corpus reader of what it names.
+    const marker = ['PROJECT', 'ROOT'].join('_')
+    const corpus = 'only-in-temp-root'
+    mkdirSync(join(root, 'src'))
+    writeFileSync(
+      join(root, 'src/guide.test.ts'),
+      `readFileSync(join(${marker}, '${corpus}/guide/page.md'))`,
+    )
+    git('init', '--initial-branch=main')
+    git('add', '--all')
+
+    const scope = stagesFor(root).find((stage) => stage.id === 'tests')?.scope
+
+    expect(scope?.test(`${corpus}/guide/page.md`)).toBe(true)
+    expect(scope?.test(`${corpus}/other/page.md`)).toBe(false)
   })
 
   it('should run the shared stages alone in a project with another name', () => {
