@@ -49,14 +49,6 @@ Owns the `canon tasks` verbs that validate, archive, derive from, and write the 
 - The overlap checks read a row's paths from its plans, since a `Touches` cell only counts them. `sharesPath` collides a folder a plan declares with every file under it on purpose.
 - `plan-reach` reports the paths a branch wrote beyond its plan and gates nothing
 
-### `src/dispatch/`
-
-Owns the hand-launch queue behind `canon dispatch prompts add`, `rm`, and `list`, one markdown file at `.canon/dispatch/prompts.md` that the verb alone writes and the operator pastes from.
-
-- The parse refuses `malformed` on any line out of the fixed order rather than rewriting it, since a guessed hand edit could launch the wrong row
-- A worker row's branch is derived from the plan path in its command through `branchOfPlan`, so the watch and the dispatch branch check read one string
-- The merge-order line survives only while two queued worker plans share a declared path, read through `readDeclarations`
-
 ### `src/intake/`
 
 Reads and answers the intake folders under `.canon/intake/`, behind `canon intake list`, `canon intake answer`, and `canon intake drive-check`.
@@ -113,7 +105,7 @@ Holds `poll.ts`, `watch.ts`, and the `repo.ts` they share. Tests sit in `src/cla
 - `RESPONSE` needs a new reply count and a reply newer than the last pass, and `canon pr review-state` is the only parser of the `review-pr` and `review-ui` markers
 - `STALE` and `OVERLAP` read the base from the pull request's diff against `git merge-base`, and `OVERLAP` merges only pairs sharing a written path
 - `poll.ts --check <number>` rereads base and head without writing, since the draft lift cannot trust a baseline as old as the last run
-- `watch.ts` reads pull requests and the roster every 60 seconds, and `WORKER-STOPPED` fires on a `waiting` row past `STALL_THRESHOLD_S`
+- `watch.ts` reads pull requests, the roster, and the dispatch queue every 60 seconds, firing `WORKER-STOPPED` past `STALL_THRESHOLD_S` and `LAUNCHED` on a queued worker branch
 
 ### `.claude/hooks/`
 
