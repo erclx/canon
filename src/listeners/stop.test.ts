@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { ListenerReader } from '@/listeners/machine'
-import { stopListeners } from '@/worktrees/stop'
+import { stopListeners } from '@/listeners/stop'
 
 const MAIN = '/repo'
 const GONE = '/repo/.claude/worktrees/feat-a'

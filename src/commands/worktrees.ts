@@ -27,7 +27,7 @@ import {
 } from '@/worktrees/members'
 import { machineListenerReader } from '@/listeners/machine'
 import { repairBareFlag } from '@/worktrees/bare-flag'
-import { type StopReport, stopListeners } from '@/worktrees/stop'
+import { type StopReport, stopListeners } from '@/listeners/stop'
 import {
   type BranchOutcome,
   removeBranches,
