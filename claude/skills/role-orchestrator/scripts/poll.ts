@@ -788,10 +788,9 @@ const readOverlap = (first: string, second: string): null | string[] => {
 }
 
 /**
- * Reads `canon pr evidence --check`'s record, branching on `reason` since the
- * verb exits non-zero on a refusal that still prints one. `owed` holding only
- * `preview` is the ship chain's deploy wait rather than missing proof, so it
- * reads as settled. Anything but a `settled` or `owed` record is unread.
+ * Branches on `reason`, since the verb exits non-zero on a refusal it still
+ * prints. `owed` holding only `preview` is the deploy wait rather than missing
+ * proof, so it reads as settled, and any other record reads as unread.
  */
 export const evidenceFromCheck = (record: unknown): '' | EvidenceState => {
   if (typeof record !== 'object' || record === null) return ''
