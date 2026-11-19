@@ -1,6 +1,6 @@
 ---
 name: design-taste
-description: Carries the layer model that decides which design decision settles first, the rules that keep a surface coherent, and the defaults a model reaches for. Use when drafting or judging a rendered surface, when output reads generic, or when asked to "make this look designed" or "why does this look like AI made it". Do NOT use for accessibility or states, which is `ui-craft`, or to run candidates.
+description: Carries the layer model that decides which design decision settles first, the rules that keep a surface coherent, and the defaults a model reaches for. Use when drafting, judging, or redesigning a rendered surface, or when asked "why does this look like AI made it" or "grey-box this first". Do NOT use for accessibility, which is `ui-craft`, or to run candidates, which is `design-pick`.
 metadata:
   family: build
 ---

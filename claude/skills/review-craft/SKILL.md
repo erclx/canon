@@ -1,6 +1,6 @@
 ---
 name: review-craft
-description: Carries what a code review looks for and how much evidence a finding needs, from design and scope through breakage outside the diff, weakened tests, performance, stale docs, security, and rendered screenshots. Use when reviewing a change or when asked "what should a review look for" or "how sure do I need to be before flagging this". Do NOT use to run or post a review, which is `review-pr`.
+description: Carries what a code review looks for and how much evidence a finding needs, from design and scope through breakage outside the diff, weakened tests, performance, stale docs, and rendered screenshots. Use when reviewing a change or when asked "what should a review look for". Do NOT use to run or post a review, which is `review-pr`, or for a full security audit, which is `security-review`.
 metadata:
   family: build
 ---

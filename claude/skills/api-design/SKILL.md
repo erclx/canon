@@ -1,6 +1,6 @@
 ---
 name: api-design
-description: Carries the rules for shaping what a caller can see and depend on, being exports, flags and output, a file format, an endpoint, or a module boundary, so no existing caller breaks. Use when adding or changing a public function, flag, schema, or caller-handled error, or when asked "is this a breaking change" or "can I rename this field". Do NOT use for a visual interface, which is `design-taste`.
+description: Carries the rules for shaping what a caller can see and depend on, being exports, flags, output, a format, or an endpoint. Use when adding or changing a public function, flag, schema, caller-handled error, or retried write, or when asked "is this a breaking change", "is this safe to retry", or "how should I version this". Do NOT use for a visual interface, which is `design-taste`.
 metadata:
   family: build
 ---

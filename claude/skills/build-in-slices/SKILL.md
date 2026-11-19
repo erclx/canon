@@ -1,6 +1,6 @@
 ---
 name: build-in-slices
-description: Carries how a building session works through an approved plan in thin slices, each tested, committed, and green before the next, noting what it saw outside the plan rather than fixing it. Use before implementing a plan touching more than one behavior or file, or when asked "how do I avoid one giant diff" or "should I fix this while I'm here". Do NOT use for the red, green, refactor loop.
+description: Carries how a building session works through an approved plan in thin slices, each tested, committed, and green before the next, noting rather than fixing what lies outside the plan. Use before building a plan touching more than one behavior or file, or when asked "should I commit this now" or "should I fix this while I'm here". Do NOT use for the red, green, refactor loop, which is `test-first`.
 metadata:
   family: build
 ---
