@@ -61,7 +61,7 @@ Reads and answers the intake folders under `.canon/intake/`, behind `canon intak
 
 ### `src/worktrees/`
 
-Owns the reclaim reading behind `canon worktrees list` and `reclaim`, over worktrees and over the local branches no worktree holds. `stop.ts` signals every listener inside a reclaimable path ahead of the removal, and a machine with no listener reader removes anyway and records `stopped` as null, never zero.
+Owns the reclaim reading behind `canon worktrees list` and `reclaim`, over worktrees and over the local branches no worktree holds. The reclaim signals every listener inside a reclaimable path ahead of the removal, through the stop in `src/listeners/`, and a machine with no listener reader removes anyway and records `stopped` as null, never zero.
 
 - A worktree is reclaimable only with a merged pull request, a clean tree, and no live session in the roster `src/sessions/` holds, and `refusals` names every failing condition
 - Ancestry to `main` cannot decide after a squash, so `members.ts` and `branches.ts` test a tip for containment in a merged head, and a branch name merged twice is tested against both heads
