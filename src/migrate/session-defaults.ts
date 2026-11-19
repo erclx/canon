@@ -1,14 +1,7 @@
 /**
- * Adds the session defaults the seeded `.claude/settings.json` carries to a
- * target that was seeded before them: the subagent deny, the memory default,
- * the merge deny and ask entries, the lease push and UI pass allow entries, the
- * browser and frames rewrite deny, and every seeded hook entry whose script the
- * project holds, planned by `@/migrate/hook-wiring`.
- *
- * `canon claude init` copies a seed only when the file is absent, so a target
- * holding its own settings never sees a later seed change. This verb adds each
- * default only where the key is absent: a deny entry is never removed, and a
- * person's `autoMemoryEnabled: true` is never overwritten.
+ * Adds the seeded settings defaults to a target seeded before them, since init
+ * copies a seed only into an absent file. Each default is added only where
+ * absent: no deny entry is removed and no `autoMemoryEnabled` overwritten.
  */
 
 import { existsSync } from 'node:fs'
@@ -48,10 +41,9 @@ export const MERGE_DENIED: readonly string[] = [
 export const MERGE_ASKED: readonly string[] = ['Bash(canon pr merge:*)']
 
 /**
- * The two lease pushes a worker runs after rebasing onto a merged pull request,
- * each pushing the current branch to its own name. An allow rule resolves
- * before auto mode's classifier, so each entry is exact: a wildcard would also
- * approve a refspec, a remote, or a flag that reaches the default branch.
+ * The lease pushes a worker runs after a rebase. An allow resolves before auto
+ * mode's classifier, so each is exact, since a wildcard would also approve a
+ * refspec, a remote, or a flag that reaches the default branch.
  */
 export const PUSH_ALLOWED: readonly string[] = [
   'Bash(git push --force-with-lease)',
@@ -59,12 +51,9 @@ export const PUSH_ALLOWED: readonly string[] = [
 ]
 
 /**
- * The canon verbs a UI review pass runs, each named so the wildcard sits after
- * the subcommand. `canon pr` also holds `close`, which deletes a branch, and
- * `preview`, which deploys, so a `canon pr` wildcard would approve both.
- * `canon browser` is left out whole: its session flag sits before the
- * subcommand, so no rule allows a screenshot without also allowing `run-code`
- * and `eval`, whose script auto mode's classifier would stop reading.
+ * Named per subcommand, since a `canon pr` wildcard would approve `close` and
+ * `preview`. `canon browser` is left out, since its session flag precedes the
+ * subcommand and no rule could allow a screenshot without `run-code` and `eval`.
  */
 export const UI_PASS_ALLOWED: readonly string[] = [
   'Bash(canon drive:*)',
@@ -232,10 +221,9 @@ export function planSessionDefaults(
 }
 
 /**
- * Refuses rather than plans whenever a write could replace something the
- * person owns: the toolkit's own settings, a file `JSON.parse` cannot read,
- * or a `permissions`, `deny`, `allow`, `ask`, `hooks`, or seeded event value of an
- * unexpected shape. The seeded settings are read from `toolkitRoot`.
+ * Refuses whenever a write could replace something the person owns: the
+ * toolkit's own settings, unparsable JSON, or a permissions list, `hooks`, or
+ * seeded event of an unexpected shape. The seed is read from `toolkitRoot`.
  */
 export async function readSessionDefaults(
   root: string,

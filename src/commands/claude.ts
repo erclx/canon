@@ -130,11 +130,9 @@ interface PluginUpdateOptions {
 }
 
 /**
- * `no-claude` and `no-plugin` name permanent conditions on a machine that
- * never carries the marketplace plugin at all, matching the `gh-missing` and
- * `no-repository` reasons the post-merge hook's other two steps already stay
- * quiet on forever rather than nagging a project that will never fix them.
- * Every other reason is a real defect and prints.
+ * `no-claude` and `no-plugin` are permanent on a machine without the plugin,
+ * so the post-merge hook stays quiet on them as on `gh-missing` and
+ * `no-repository`. Every other reason is a real defect and prints.
  */
 type PluginUpdateReason =
   | 'no-claude'
@@ -182,13 +180,9 @@ export function seededFilePath(resolved: string, name: string): string {
 }
 
 /**
- * Where a `SEEDED_DIRS` entry resolves for the sync presence check.
- *
- * A tracked surface entry resolves under `canon/` ahead of `.claude/`, while
- * `tasks` is a session record resolved under `.canon/` ahead of
- * `.claude/`. Routing every name through `recordDir` would report a migrated
- * target's surface folder as missing, since that resolver never checks
- * `canon/`.
+ * A surface entry resolves under `canon/` and `tasks` under `.canon/`, each
+ * ahead of `.claude/`. `recordDir` never checks `canon/`, so routing every
+ * name through it would report a migrated target's surface folder missing.
  */
 export function seededDirPath(resolved: string, name: string): string {
   return SURFACE_ENTRIES.includes(name)
@@ -224,8 +218,7 @@ export function sessionDefaultsWarnings(plan: SessionDefaultsPlan): string[] {
   if (lacking !== undefined) {
     warnings.push(`settings.json lacks ${lacking}. ${MIGRATE_DEFAULTS}`)
   }
-  // The migration never removes a deny entry, so this one stays the
-  // operator's to remove.
+  // The migration never removes a deny entry, so the operator removes this one.
   if (plan.holdsMergeDeny) {
     warnings.push(
       "settings.json still denies `canon pr merge`, which wins over the ask, so the orchestrator cannot merge here even on the operator's word. Remove that deny entry by hand to have each merge ask",
@@ -726,8 +719,7 @@ async function runSync(target: string): Promise<number> {
   const resolved = resolveTarget(target, PROJECT_ROOT)
   if (typeof resolved === 'number') return resolved
 
-  // A record folder resolves at either root, so a migrated target reads as
-  // seeded rather than sent to `canon claude init` to re-create its records.
+  // A record folder resolves at either root, so a migrated target reads seeded.
   logStep('Seeded')
   for (const name of SEEDED_FILES) {
     if (existsSync(seededFilePath(resolved, name))) logInfo(name)
@@ -863,8 +855,7 @@ async function sameContent(src: string, dest: string): Promise<boolean> {
  * human listing stays on the timeline. Only the human mode opens a frame.
  */
 async function runSeedsList(opts: SeedsListOptions): Promise<number> {
-  // A frame-interior line: after `intro` on the path that opens one, bare on
-  // the two that return first, so no one position serves all three.
+  // Read here, since it prints after `intro` on one path and bare on two.
   const mismatch = checkoutMismatchWarning(process.cwd())
   const listings = listSeeds(PROJECT_ROOT)
 
@@ -895,8 +886,7 @@ async function runSeedsList(opts: SeedsListOptions): Promise<number> {
 }
 
 function runSkillsList(opts: SkillsListOptions): number {
-  // A frame-interior line: after `intro` on the path that opens one, bare on
-  // the two that return first, so no one position serves all three.
+  // Read here, since it prints after `intro` on one path and bare on two.
   const mismatch = checkoutMismatchWarning(process.cwd())
   const listings = listSkills(PROJECT_ROOT)
 
@@ -947,10 +937,8 @@ function reportByFamily(grouping: FamilyGrouping): void {
 }
 
 /**
- * Measures the cwd for the same reason the audit does, and takes the ref as a
- * required argument with no default. `HEAD` would be the only defensible one and
- * it answers every run with nothing moved, which is the silence this reports
- * against.
+ * Measures the cwd as the audit does. The ref has no default, since `HEAD`,
+ * the only defensible one, answers every run with nothing moved.
  */
 async function runSkillsDrift(
   ref: string,
@@ -967,8 +955,7 @@ async function runSkillsDrift(
     outro()
   } else {
     frameError(report.reason)
-    // Names the binary on refusal too, since a marketplace-cache project lands
-    // here for having no history, and an old binary is one cause of that skew.
+    // Names the binary on refusal too, as an old binary can cause no history.
     if (skew.state === 'behind') {
       const { GREY, NC } = palette(process.stderr)
       process.stderr.write(`${GREY}${describeSkew(skew)}${NC}\n`)
@@ -996,10 +983,8 @@ async function runSkillsDrift(
 }
 
 /**
- * The binary reports before the range does, for the reason the range section
- * states about itself: the command answers what changed on disk, and a binary
- * behind the published one is a second way the tree a session reads differs
- * from the tree it holds.
+ * Reports ahead of the range, since a binary behind the published one is a
+ * second way the tree a session reads differs from the tree it holds.
  */
 function reportSkew(skew: SkewReport): void {
   logStep('Toolkit version')
@@ -1092,11 +1077,8 @@ function reportRouting(
 }
 
 /**
- * Reads the plugin name off the manifest, matches it against an installed row,
- * runs the update, and reads the version back off the same list rather than
- * trusting the update call's own report, since `claude plugin update` carries
- * no `--json` to answer with. `canon upgrade` makes the identical move for the
- * package managers it drives.
+ * Reads the version back off the installed list rather than trusting the
+ * update's own report, since `claude plugin update` carries no `--json`.
  */
 async function runPluginUpdate(opts: PluginUpdateOptions): Promise<number> {
   const mismatch = checkoutMismatchWarning(process.cwd())
@@ -1224,10 +1206,9 @@ type ListInstallsResult =
   | { readonly kind: 'failed'; readonly detail: string }
 
 /**
- * `missing` separates a `claude` binary that is not on PATH from every other
- * failure, since only that condition is permanent enough for the hook to
- * silence forever. execa reports it as `ENOENT` on the result rather than by
- * throwing, because the call runs with `reject: false`.
+ * `missing` separates a `claude` absent from PATH, the one failure permanent
+ * enough for the hook to silence. With `reject: false`, execa reports it as
+ * `ENOENT` on the result rather than by throwing.
  */
 async function listPluginInstalls(): Promise<ListInstallsResult> {
   const result = await execa('claude', ['plugin', 'list', '--json'], {
@@ -1292,10 +1273,8 @@ const REACH_REFUSALS: Record<ReachRefusal, string> = {
 }
 
 /**
- * Measures the cwd rather than the toolkit root, matching the audit and drift
- * verbs, so a linked worktree reads its own branch instead of `main`, and a
- * target carrying `.claude/skills/` alone is in scope the way the audit
- * already has it.
+ * Measures the cwd rather than the toolkit root, so a linked worktree reads
+ * its own branch and a target carrying `.claude/skills/` alone is in scope.
  */
 function runSkillsReach(
   path: string | undefined,
@@ -1372,14 +1351,9 @@ const RANK_REFUSALS: Record<RankRefusal, string> = {
 }
 
 /**
- * Measures the cwd rather than the toolkit root, matching the reach and audit
- * verbs, so a linked worktree reads its own branch instead of `main`, and a
- * target carrying `.claude/skills/` alone is in scope.
- *
- * The toolkit's own cases are the default and answer for this catalog alone.
- * A project measuring its own skills supplies its own prompts through
- * `--cases`, since a corpus written against skills it did not author scores
- * vocabulary it never uses.
+ * Measures the cwd, as the reach verb does. The default cases answer for this
+ * catalog alone, so a project supplies its own through `--cases`, since a
+ * corpus written for other skills scores vocabulary it never uses.
  */
 function runSkillsRank(
   path: string | undefined,
@@ -1624,11 +1598,9 @@ function refuseAudit(
 }
 
 /**
- * Prints nothing when every skill carries a requirement.
- *
- * `--requirements-only` is what the merge gate runs on every push, and it pipes
- * a stage's whole output into its own frame. A passing gate that printed
- * its frame would nest one inside the other on every contributor's push.
+ * Prints nothing when every skill carries a requirement, since the merge gate
+ * pipes `--requirements-only` into its own frame on every push, and a printed
+ * pass would nest one frame inside the other.
  */
 function reportRequirementGate(report: SkillsAudit): void {
   const missing = report.missingRequirement
