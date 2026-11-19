@@ -73,14 +73,26 @@ export function registerReviewState(pr: Command): void {
         '             its gate passes, read through the same gate function',
         '  isCovered  a pass covers the tip: the gate passes, or the newest pass,',
         '             open or unmarked, names the tip',
+        '  carriedFrom    the commit a close was read at when the lift carried',
+        '                 it to the tip, with `carriedAcross` naming how:',
+        '                 push    a UI close across commits no box can observe',
+        '                 rebase  a close across a rebase that left the',
+        '                         branch diff equal per path, each side read',
+        '                         against its own merge base with the base',
+        '  differingPaths  the paths whose branch diff differs across a rebase,',
+        '                  which kept a code review close from carrying',
+        '',
+        'A code review close carries across a rebase only when every path is',
+        'equal, and never across a push on top of it. A carried close vouches',
+        'for the branch diff and not for what the base moved under it, so CI at',
+        'the new head is still required.',
         '',
         '`ui` also carries the newest `## UI review` pass (`heading`, `state`,',
         '`commit`, `source`), `isBound`, which is whether the evidence comment',
         'carries a checklist holding a box a driver can run or the newest UI',
         'pass is open, so a checklist of taste boxes alone binds nothing until',
-        'a pass opens, and `carriedFrom` when the lift carried a close',
-        'forward, or `drivenPaths` and the painted subset `paintedPaths` when',
-        'it refused to. An unbound family reads covered.',
+        'a pass opens, or `drivenPaths` and the painted subset `paintedPaths`',
+        'when the lift refused to carry. An unbound family reads covered.',
         '',
         'Both families post as pull request reviews, so this reads',
         '`pulls/<n>/reviews` alone, as the lift does. Issue comments are not',
@@ -266,6 +278,11 @@ function logReviewState(number: number, record: ReviewStateRecord): void {
     const line = `${name}: ${family.reason ?? 'clear'}, ${family.isCovered ? 'a pass covers the tip' : 'no pass covers the tip'}`
     if (family.isCovered) logInfo(line)
     else logWarn(line)
+    if (family.carriedFrom !== undefined) {
+      logInfo(
+        `${name}: carried from ${family.carriedFrom.slice(0, 8)} across a ${family.carriedAcross ?? 'push'}`,
+      )
+    }
   }
   if (!record.ui.isBound) {
     logInfo(

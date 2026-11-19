@@ -45,12 +45,15 @@ export interface FamilyState {
    * before it reads currency.
    */
   readonly isCovered: boolean
+  /** The commit the close covering the tip was read at, beside the record's `head`. */
+  readonly carriedFrom?: string
+  readonly carriedAcross?: 'push' | 'rebase'
+  readonly differingPaths?: readonly string[]
 }
 
 export interface UiState extends UiScope, FamilyState {
   /** Whether the evidence comment carries a checklist, which binds the family. */
   readonly isBound: boolean
-  readonly carriedFrom?: string
   readonly paintedPaths?: readonly string[]
   readonly drivenPaths?: readonly string[]
 }
@@ -85,10 +88,18 @@ export interface WaitOptions {
   readonly painted?: PaintedPatterns
 }
 
-function familyOf(gate: GateResult, commit: string | undefined, tip: string) {
+function familyOf(
+  gate: GateResult,
+  commit: string | undefined,
+  tip: string,
+): FamilyState {
+  const { reason, carriedFrom, carriedAcross, differingPaths } = gate
   return {
-    ...(gate.reason !== undefined && { reason: gate.reason }),
+    ...(reason !== undefined && { reason }),
     isCovered: gate.isOk || (commit !== undefined && coversHead(commit, tip)),
+    ...(carriedFrom !== undefined && { carriedFrom }),
+    ...(carriedAcross !== undefined && { carriedAcross }),
+    ...(differingPaths !== undefined && { differingPaths }),
   }
 }
 
@@ -123,7 +134,6 @@ async function readAt(
         ...uiScope,
         ...familyOf(ui, uiScope.commit, tip),
         isBound: hasDrivableBox || uiScope.state === 'open',
-        ...(ui.carriedFrom !== undefined && { carriedFrom: ui.carriedFrom }),
         ...(ui.paintedPaths !== undefined && { paintedPaths: ui.paintedPaths }),
         ...(ui.drivenPaths !== undefined && { drivenPaths: ui.drivenPaths }),
       },

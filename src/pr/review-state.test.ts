@@ -234,6 +234,53 @@ describe('readReviewState', () => {
     })
   })
 
+  it('should cover the tip with both closes carried across an equal rebase', async () => {
+    const { api } = makeApi({
+      tips: [PUSHED],
+      reviews: [
+        [
+          codePass('## Review closed', HEAD),
+          uiPass('## UI review closed', HEAD),
+        ],
+      ],
+      changed: { isAncestor: false, paths: [] },
+      rebased: { differingPaths: [] },
+    })
+
+    const result = await readReviewState(api)
+
+    expect(result).toMatchObject({
+      kind: 'read',
+      record: {
+        head: PUSHED,
+        review: { isCovered: true, carriedFrom: HEAD, carriedAcross: 'rebase' },
+        ui: { isCovered: true, carriedFrom: HEAD, carriedAcross: 'rebase' },
+      },
+    })
+  })
+
+  it('should name the differing path that kept a code close from carrying', async () => {
+    const { api } = makeApi({
+      tips: [PUSHED],
+      reviews: [[codePass('## Review closed', HEAD)]],
+      changed: { isAncestor: false, paths: [] },
+      rebased: { differingPaths: ['README.md'] },
+    })
+
+    const result = await readReviewState(api)
+
+    expect(result).toMatchObject({
+      kind: 'read',
+      record: {
+        review: {
+          reason: 'review-behind',
+          isCovered: false,
+          differingPaths: ['README.md'],
+        },
+      },
+    })
+  })
+
   it('should not cover the tip with a UI close behind a source push', async () => {
     const { api } = makeApi({
       tips: [PUSHED],
@@ -446,6 +493,34 @@ describe('agrees with lift', () => {
           ],
         ],
         changed: { isAncestor: true, paths: ['src/cli.ts'] },
+      },
+    ],
+    [
+      'both closes across an equal rebase',
+      {
+        tips: [PUSHED],
+        reviews: [
+          [
+            codePass('## Review closed', HEAD),
+            uiPass('## UI review closed', HEAD),
+          ],
+        ],
+        changed: { isAncestor: false, paths: [] },
+        rebased: { differingPaths: [] },
+      },
+    ],
+    [
+      'a rebase that changed a driven path',
+      {
+        tips: [PUSHED],
+        reviews: [
+          [
+            codePass('## Review closed', HEAD),
+            uiPass('## UI review closed', HEAD),
+          ],
+        ],
+        changed: { isAncestor: false, paths: [] },
+        rebased: { differingPaths: ['src/cli.ts'] },
       },
     ],
   ]
