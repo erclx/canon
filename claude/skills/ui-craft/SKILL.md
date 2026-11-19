@@ -42,4 +42,4 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 - The accepted designs under the design folder and how a reference lands there: `design-record`
 - The visual checklist a reviewer reads beside the screenshots: `ui-checklist`
 - Reading source for roughness a rule does not state: `ui-audit`
-- Long-form body text on the surface, beyond its interface and page copy: the `write-human` skill
+- Long-form body text on the surface, and the voice and word choice every string keeps: the `write-human` skill

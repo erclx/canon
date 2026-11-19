@@ -22,7 +22,7 @@ The reference came out of a measurement rather than a complaint. Over half of ca
 
 | Bullet                   | Source                                                                                                                                                                                                                                                                                                                                                      | Read       |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Open on a verb or reader | [Top 10 tips for Microsoft style and voice](https://learn.microsoft.com/en-us/style-guide/top-10-tips-style-voice): "Most of the time, start each statement with a verb." The reach to the reader as an opening, and the example, come from [Linear](https://linear.app/)'s landing page in the measurement above.                                          | 2026-11-19 |
+| Open on a verb or reader | [Top 10 tips for Microsoft style and voice](https://learn.microsoft.com/en-us/style-guide/top-10-tips-style-voice): "Most of the time, start each statement with a verb." The reader as an opening, and the example, are a house choice from the measurement above, where the landing pages read opened on a verb or on the reader.                         | 2026-11-19 |
 | Outcome before mechanism | [Create a clear structure for your content](https://guidance.publishing.service.gov.uk/writing-to-gov-uk-standards/writing-guidelines/clear-structure/): "Put the most important information first." [Top 10 tips for Microsoft style and voice](https://learn.microsoft.com/en-us/style-guide/top-10-tips-style-voice): "Lead with what's most important." | 2026-11-19 |
 | Facts keep their opening | House choice: a reader who arrived for a fact is served by a sentence that names the thing first, which is why the opening rule stops at page copy rather than reaching every document                                                                                                                                                                      | 2026-11-19 |
 
@@ -44,10 +44,11 @@ The reference came out of a measurement rather than a complaint. Over half of ca
 
 ## Where it applies
 
-| Bullet                 | Source                                                                                                                                                       | Read       |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
-| Pages a stranger reads | House choice: the measurement that drove the reference read landing pages, and long-form body text keeps the reference register the `write-human` skill sets | 2026-11-19 |
-| `copy.md` stays        | House choice: a headline is a rendered heading, so casing and punctuation stay with `copy.md` and this reference adds none of its own                        | 2026-11-19 |
+| Bullet                 | Source                                                                                                                                                                           | Read       |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Pages a stranger reads | House choice: the measurement that drove the reference read landing pages, and long-form body text keeps the reference register the `write-human` skill sets                     | 2026-11-19 |
+| `copy.md` stays        | House choice: a headline is a rendered heading, so casing and punctuation stay with `copy.md` and this reference adds none of its own                                            | 2026-11-19 |
+| `write-human` stays    | House choice: page copy is still prose a person reads, so the voice and word rules `write-human` states for every surface stay in force, and this reference adds none of its own | 2026-11-19 |
 
 ## Declined
 

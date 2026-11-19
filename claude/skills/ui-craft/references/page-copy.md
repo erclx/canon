@@ -27,3 +27,4 @@
 
 - Apply these rules to the headlines, supporting lines, and section copy of a page a stranger reads to decide, such as a landing or pricing page. Long-form body text stays with `write-human`.
 - Keep `copy.md` in force on page copy, since a headline is still a rendered heading.
+- Keep `write-human`'s voice and word choice in force on page copy, since this reference adds who it speaks to and how it opens, never a word list.
