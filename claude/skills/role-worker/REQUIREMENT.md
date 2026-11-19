@@ -21,10 +21,10 @@ The channel fails on the worker's side. Blocks open prompts nobody is attached t
 
 ## Must not
 
-- Write the priority board or the backlog, at any size
-- Create a task file for work the build turns up
+- Write the priority board or the backlog at any size, or create a task file for work the build turns up
 - Ready the pull request directly, or re-draft one someone readied
 - Report progress through the channel
+- Leave a design reference its build made untrue, or redraw a board frame with content the diff does not decide
 - Restate a procedure `session-worktree`, `auto-ship`, or `review-address` carries
 
 ## Out of scope
