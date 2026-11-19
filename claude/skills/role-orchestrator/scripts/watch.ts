@@ -4,7 +4,9 @@
 // changed, on a loop of its own. A finished worker goes idle and a crashed one
 // vanishes, so a watch on the pull request list alone misses the second. A
 // worker stopped on a question sits reading "waiting", reported as
-// WORKER-STOPPED, or WORKER-UNMEASURABLE when too old to carry a stamp.
+// WORKER-STOPPED, or WORKER-UNMEASURABLE when too old to carry a stamp. A
+// session appearing on a branch the hand-launch queue holds for a worker is
+// reported as LAUNCHED, so the operator's word is no longer the only record.
 //
 // Run as `bun watch.ts`. A failed read never ends the loop, since it runs for
 // hours, so every read states its own failure instead.
@@ -30,11 +32,20 @@ export type Read<T> = { isOk: false } | { isOk: true; value: T }
 export interface Worker {
   branch: string
   dwellMs: number
+  id: string
   name: string
   status: string
 }
 
+/** A worker row the hand-launch queue holds, by the branch its plan derives. */
+export interface QueuedWorker {
+  branch: string
+  label: string
+}
+
 export interface WatchState {
+  /** Queued rows already reported launched, so a launch prints once. */
+  launched: ReadonlySet<string>
   /** Names currently reported as stalled, so a stall prints once. */
   stalled: ReadonlySet<string>
   /** Null until a read succeeds, so each source keeps its own baseline flag. */
@@ -43,6 +54,7 @@ export interface WatchState {
 }
 
 export const initialState = (): WatchState => ({
+  launched: new Set(),
   pulls: null,
   stalled: new Set(),
   workers: null,
@@ -107,8 +119,39 @@ const stallLines = (
   return { lines, stalled }
 }
 
+const launchKey = (queued: QueuedWorker): string =>
+  `${queued.label}\t${queued.branch}`
+
+// A key leaves the set once its row leaves the queue, so a row queued again
+// after a failed launch reports its next launch too.
+const launchLines = (
+  queue: readonly QueuedWorker[],
+  workers: readonly Worker[],
+  previous: ReadonlySet<string>,
+): { launched: Set<string>; lines: string[] } => {
+  const launched = new Set<string>()
+  const lines: string[] = []
+
+  const ordered = [...queue].sort((a, b) => byBytes(launchKey(a), launchKey(b)))
+  for (const queued of ordered) {
+    const key = launchKey(queued)
+    if (previous.has(key)) {
+      launched.add(key)
+      continue
+    }
+
+    const holder = workers.find((worker) => worker.branch === queued.branch)
+    if (holder === undefined) continue
+
+    lines.push(`LAUNCHED ${queued.label} -> ${holder.name} [${holder.id}]`)
+    launched.add(key)
+  }
+
+  return { launched, lines }
+}
+
 /**
- * One pass over two reads. A failed read is reported and the previous baseline
+ * One pass over three reads. A failed read is reported and the previous baseline
  * kept, since reading an empty result as the current state would report every
  * worker gone and every pull request new on the pass after.
  */
@@ -116,6 +159,7 @@ export const pass = (
   state: WatchState,
   pulls: Read<string[]>,
   workers: Read<Worker[]>,
+  queue: Read<QueuedWorker[]> = { isOk: true, value: [] },
   thresholdS = STALL_THRESHOLD_S,
 ): { lines: string[]; state: WatchState } => {
   const lines: string[] = []
@@ -130,6 +174,11 @@ export const pass = (
       'watch: the session roster failed to load, so no worker is classified this pass',
     )
   }
+  if (!queue.isOk) {
+    lines.push(
+      'watch: the dispatch queue failed to load, so no hand launch is matched this pass',
+    )
+  }
 
   if (pulls.isOk && state.pulls !== null) {
     lines.push(
@@ -137,6 +186,7 @@ export const pass = (
     )
   }
 
+  let launched = state.launched
   let stalled = state.stalled
   if (workers.isOk) {
     const sorted = [...workers.value].sort((a, b) =>
@@ -156,11 +206,20 @@ export const pass = (
     const stalls = stallLines(sorted, stalled, thresholdS)
     lines.push(...stalls.lines)
     stalled = stalls.stalled
+
+    if (queue.isOk && queue.value.length === 0) {
+      launched = new Set()
+    } else if (queue.isOk) {
+      const launches = launchLines(queue.value, sorted, launched)
+      lines.push(...launches.lines)
+      launched = launches.launched
+    }
   }
 
   return {
     lines,
     state: {
+      launched,
       pulls: pulls.isOk ? pulls.value : state.pulls,
       stalled,
       workers: workers.isOk ? workers.value : state.workers,
@@ -228,12 +287,50 @@ const readWorkers = (repository: string, base: string): Read<Worker[]> => {
     workers.push({
       branch: asText(row.branch, ''),
       dwellMs: typeof row.statusDwellMs === 'number' ? row.statusDwellMs : -1,
+      id: asText(row.sessionId, ''),
       name: asText(row.name, ''),
       status: asText(row.status, ''),
     })
   }
 
   return { isOk: true, value: workers }
+}
+
+/**
+ * The worker rows the hand-launch queue holds. Planner and reviewer rows stay
+ * on the operator's word, since neither takes a branch of its own.
+ */
+export const parseQueue = (stdout: string): Read<QueuedWorker[]> => {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(stdout.trimEnd().split('\n').at(-1) ?? '')
+  } catch {
+    return { isOk: false }
+  }
+
+  const prompts =
+    typeof parsed === 'object' &&
+    parsed !== null &&
+    Array.isArray((parsed as { prompts?: unknown }).prompts)
+      ? (parsed as { prompts: unknown[] }).prompts
+      : null
+  if (prompts === null) return { isOk: false }
+
+  const queued: QueuedWorker[] = []
+  for (const prompt of prompts) {
+    if (typeof prompt !== 'object' || prompt === null) continue
+    const row = prompt as Record<string, unknown>
+    if (row.role !== 'worker' || typeof row.branch !== 'string') continue
+    queued.push({ branch: row.branch, label: asText(row.label, '') })
+  }
+
+  return { isOk: true, value: queued }
+}
+
+const readQueue = (): Read<QueuedWorker[]> => {
+  const listed = run('canon', ['dispatch', 'prompts', 'list', '--json'])
+
+  return listed.isOk ? parseQueue(listed.stdout) : { isOk: false }
 }
 
 const main = async (): Promise<number> => {
@@ -249,7 +346,12 @@ const main = async (): Promise<number> => {
   let state = initialState()
 
   for (;;) {
-    const result = pass(state, readPulls(), readWorkers(repository, base))
+    const result = pass(
+      state,
+      readPulls(),
+      readWorkers(repository, base),
+      readQueue(),
+    )
     for (const line of result.lines) console.log(line)
     state = result.state
     await new Promise((resolve) => setTimeout(resolve, INTERVAL_S * 1000))
