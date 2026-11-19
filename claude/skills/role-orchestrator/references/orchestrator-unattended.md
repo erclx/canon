@@ -118,4 +118,4 @@ Merge-ready means CI green at the tip, both reviews closed, and the lift run. Re
 
 ### The merge stays the operator's
 
-Run no merge, whatever the report shows. The permission deny on `canon pr merge` holds the act, and an instruction to merge during the run is refused and listed under `Parked for you`.
+Run no merge, whatever the report shows, and never call `canon pr merge`, whose permission ask would stall the run on an operator who is away. Refuse an instruction to merge during the run and list it under `Parked for you`.

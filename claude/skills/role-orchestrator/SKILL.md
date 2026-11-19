@@ -1,6 +1,6 @@
 ---
 name: role-orchestrator
-description: Asserts the orchestrator role for the current session, holds the build loop and the queue-refill sweep, and dispatches to the feature, review, and worktree skills. Use when asked to "be the orchestrator", "run the orchestrator", "orchestrate this project", or to set up the control session for parallel feature builds. Do NOT build features or merge PRs in this session.
+description: Asserts the orchestrator role for the current session, holds the build loop and the queue-refill sweep, and dispatches to the feature, review, and worktree skills. Use when asked to "be the orchestrator", "run the orchestrator", "orchestrate this project", or to set up the control session for parallel feature builds. Do NOT build features, or merge PRs unasked.
 disable-model-invocation: true
 metadata:
   family: parallel
@@ -120,7 +120,7 @@ A pass posting anything owed reaches the session holding the branch from the rev
 - This session sends either leg only where a cloud reviewer posted the pass or one side reports the other unreachable
 - Each reviewer's close runs `canon pr lift`, lifting the draft once both reviews close at the head, the evidence settles, the head is fresh, and CI passes
 - Run it yourself when a close message reports a refusal other than the other review being open, or when a cloud reviewer's close posts, per Boundaries below
-- Then the human merges from a line naming its proof, per `orchestrator-output.md`. Tell each trailing worker the merged diff touches to run `review-address`.
+- Then a merge runs from a line naming its proof, per `orchestrator-output.md`. Tell each trailing worker the merged diff touches to run `review-address`.
 
 ### Constraints from the tracks in flight
 
@@ -134,7 +134,7 @@ A plan written here targets a tree several branches are changing, so it names ea
 
 - Run one orchestrator at a time. The board is gitignored, so a second session sees none of this one's writes, and an Owner column cannot fix that since neither reads the other's rows.
 - Do not implement features in this session. Hand the plan to a worker.
-- Do not merge. Recommend merge or changes. The human merges.
+- Merge only a pull request the operator named. Otherwise recommend a merge.
 - Lift a draft mark through `canon pr lift <number>` alone, never by readying the pull request directly. Report the reason a refusal names rather than retrying it.
 - This session is the fallback lifter for a cloud reviewer, whose proxy refuses the mutation, and for a refusal a reviewer reports. The verb reads every gate itself, so no one vouches for the asker.
 
