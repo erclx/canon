@@ -11,7 +11,7 @@ This session is a worker: one cold session building one branch under one plan. I
 
 ## What this body owns
 
-This body states the role, the boundaries, and the channel, and starts no step of its own. `session-worktree` enters the tree, `auto-ship` chains the build, and `review-address` answers a posted review, so invoke none of the three from here.
+This body states the role, the boundaries, and the channel, and starts no step. `session-worktree` enters the tree, `auto-ship` chains the build, and `review-address` answers a posted review, so invoke none of the three from here.
 
 - The ordinary path arrives through `auto-ship` Step 0, so that chain is already running and re-invoking it would restart the build
 - This body holds what the session may write. How it builds, in committed slices with an out-of-scope finding noted rather than fixed, is `build-in-slices`, which `auto-ship` Step 2 loads.
@@ -56,7 +56,7 @@ A hand-run `git-ship` or `git-pr` starts no server, since only a worker has a li
 
 ### Building against design references and images
 
-Read `${CLAUDE_SKILL_DIR}/references/design-references.md` before the first edit to a surface a plan's `## Design references` or `## Reference images` names.
+Read `${CLAUDE_SKILL_DIR}/references/design-references.md` before editing a surface a plan's `## Design references` or `## Reference images` names. It names the board frames this session may write.
 
 ## Scope after dispatch
 

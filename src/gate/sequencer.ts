@@ -119,6 +119,8 @@ export interface GateContext extends MeasureContext {
    * scoping is off and every stage runs.
    */
   readonly changed?: readonly string[]
+  /** The merge base `changed` was read against, so a stage can read changed lines. */
+  readonly base?: string
   /**
    * Told when a stage starts queuing on its machine lock. A stage prints only
    * once it returns, so without this a queued gate is silent for the whole
@@ -136,6 +138,8 @@ export interface ChangedSet {
   /** `false` where no usable baseline resolved, which runs every stage. */
   readonly scoped: boolean
   readonly files: readonly string[]
+  /** The merge base the files were read against, present only when scoped. */
+  readonly base?: string
   /** What to say about a baseline that did not resolve, if anything. */
   readonly notice?: string
 }
@@ -194,7 +198,94 @@ export async function collectChangedFiles(
     ),
   ].sort()
 
-  return { scoped: true, files }
+  return { scoped: true, files, base }
+}
+
+/** An inclusive range of new-side line numbers a branch wrote. */
+export interface LineSpan {
+  readonly start: number
+  readonly end: number
+}
+
+/** A file's changed lines, or `whole` for a file git does not track yet. */
+export type ChangedLines = 'whole' | readonly LineSpan[]
+
+const HUNK_HEADER = /^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/
+
+/**
+ * Reads `git diff -U0` output into changed spans per new-side path. A pure
+ * deletion after line `n` reads as the span `n` to `n + 1`. Answers `undefined`
+ * on a header it cannot place, so a caller widens rather than passes.
+ */
+export function parseChangedLines(
+  diff: string,
+): Map<string, LineSpan[]> | undefined {
+  const spans = new Map<string, LineSpan[]>()
+  let current: LineSpan[] | undefined
+  let inHeader = false
+  let deleted = false
+  for (const line of diff.split('\n')) {
+    if (line.startsWith('diff --git ')) {
+      inHeader = true
+      deleted = false
+      current = undefined
+      continue
+    }
+    if (inHeader && line.startsWith('+++ ')) {
+      const path = line.slice(4)
+      if (path === '/dev/null') deleted = true
+      else if (!path.startsWith('b/')) return undefined
+      else spans.set(path.slice(2), (current = []))
+      continue
+    }
+    const hunk = HUNK_HEADER.exec(line)
+    if (hunk === null) continue
+    inHeader = false
+    if (deleted) continue
+    if (current === undefined) return undefined
+    const start = Number(hunk[1])
+    const count = hunk[2] === undefined ? 1 : Number(hunk[2])
+    current.push({ start, end: count === 0 ? start + 1 : start + count - 1 })
+  }
+  return spans
+}
+
+/**
+ * The lines each of `paths` changed since `base`, across commits, the working
+ * tree, and untracked files. A path with no entry changed no line. Answers
+ * `undefined` when git cannot, so a caller widens rather than passes.
+ */
+export async function readChangedLines(
+  run: RunCommand,
+  base: string,
+  paths: readonly string[],
+): Promise<ReadonlyMap<string, ChangedLines> | undefined> {
+  if (paths.length === 0) return new Map()
+  const [diff, untracked] = await Promise.all([
+    run([
+      'git',
+      'diff',
+      '-U0',
+      '--no-color',
+      '--no-ext-diff',
+      '--src-prefix=a/',
+      '--dst-prefix=b/',
+      base,
+      '--',
+      ...paths,
+    ]),
+    run(['git', 'ls-files', '--others', '--exclude-standard', '--', ...paths]),
+  ])
+  if (diff.exitCode !== 0 || untracked.exitCode !== 0) return undefined
+
+  const spans = parseChangedLines(diff.stdout)
+  if (spans === undefined) return undefined
+
+  const lines = new Map<string, ChangedLines>(spans)
+  for (const path of untracked.stdout.split('\n')) {
+    if (path.trim() !== '') lines.set(path.trim(), 'whole')
+  }
+  return lines
 }
 
 /**

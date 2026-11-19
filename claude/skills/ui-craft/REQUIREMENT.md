@@ -14,6 +14,7 @@ Without this skill, the UI behavior practice reaches a session only as path rule
 - Every rule the retired ui practice rules carried sits in a reference, unchanged in wording, with its source row in a ledger beside the reference
 - A rendered change reaches accessibility, keyboard, and state coverage on every read, and the other references by the change that needs them
 - A rendered change that is about to be handed over reaches the capture reference
+- A headline, supporting line, or section pitch reaches a page copy reference, rather than falling to the reference register `write-human` sets
 - A planning, building, or reviewing role reaches the skill by name, with or without the governance pointer installed
 
 ## Must not

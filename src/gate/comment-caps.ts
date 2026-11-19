@@ -17,7 +17,7 @@ import {
   languageFor,
 } from '@/comments/scan'
 import type { Measure, Emission, MeasureReport } from '@/gate/measures'
-import type { GateContext } from '@/gate/sequencer'
+import { type GateContext, readChangedLines } from '@/gate/sequencer'
 import { listRepositoryFiles } from '@/git/files'
 
 /**
@@ -68,14 +68,59 @@ interface CapReading<T> {
   readonly failure: (count: number) => string
 }
 
+interface FindingSplit<T> {
+  readonly changed: readonly T[]
+  readonly untouched: readonly T[]
+  readonly notice?: string
+}
+
+const runEnd = (run: CappedRun): number => run.line + run.lines - 1
+
 /**
- * Fails the runs `pick` returns from the files a change touched. Where scoping
- * is off it reports them without failing, since a full run reads every legacy
- * file nobody is editing.
+ * Splits runs by whether the branch wrote a line in them. With no base every
+ * run counts as changed, and a failed read widens to the same with a notice.
+ */
+async function splitByChangedLines(
+  ctx: GateContext,
+  runs: readonly CappedRun[],
+): Promise<FindingSplit<CappedRun>> {
+  if (ctx.base === undefined) return { changed: runs, untouched: [] }
+  const files = [...new Set(runs.map((run) => run.file))]
+  const lines = await readChangedLines(ctx.run, ctx.base, files)
+  if (lines === undefined) {
+    return {
+      changed: runs,
+      untouched: [],
+      notice:
+        'The changed lines could not be read, so every run in a touched file fails',
+    }
+  }
+
+  const wrote = (run: CappedRun): boolean => {
+    const changed = lines.get(run.file)
+    if (changed === undefined) return false
+    if (changed === 'whole') return true
+    return changed.some(
+      (span) => span.start <= runEnd(run) && span.end >= run.line,
+    )
+  }
+  return {
+    changed: runs.filter(wrote),
+    untouched: runs.filter((run) => !wrote(run)),
+  }
+}
+
+/**
+ * Fails the runs `pick` returns from the files a change touched, or only those
+ * `split` reads as changed. A full run reports without failing.
  */
 function capMeasure<T>(
   pick: (count: LanguageCount) => readonly T[],
   reading: CapReading<T>,
+  split?: (
+    ctx: GateContext,
+    findings: readonly T[],
+  ) => Promise<FindingSplit<T>>,
 ): Measure {
   // The stage test through `runStage` fails if the sequencer passes less context.
   return async (ctx: GateContext) => {
@@ -108,7 +153,36 @@ function capMeasure<T>(
         ],
       }
     }
-    return { emissions, failure: reading.failure(findings.length) }
+    const { changed, untouched, notice } =
+      split === undefined
+        ? { changed: findings, untouched: [], notice: undefined }
+        : await split(ctx, findings)
+    const reported: Emission[] = [
+      ...untouched.map((finding) => ({
+        kind: 'warn' as const,
+        text: `${reading.line(finding)}, untouched by this branch`,
+      })),
+      ...(notice === undefined
+        ? []
+        : [{ kind: 'info' as const, text: notice }]),
+      ...(untouched.length === 0
+        ? []
+        : [
+            {
+              kind: 'info' as const,
+              text: `${plural(untouched.length, 'untouched run')} reported and not failed, since only a run the branch changed fails`,
+            },
+          ]),
+    ]
+    const failing = changed.map((finding) => ({
+      kind: 'warn' as const,
+      text: reading.line(finding),
+    }))
+    if (failing.length === 0) return { emissions: reported }
+    return {
+      emissions: [...failing, ...reported],
+      failure: reading.failure(failing.length),
+    }
   }
 }
 
@@ -128,16 +202,18 @@ const BODY_READING: CapReading<CappedRun> = {
     `${plural(count, 'in-body comment run')} past ${BODY_BLOCK_CAP} text line. Move the reason above the function or into the code it explains.`,
 }
 
-/** Fails a touched file's run outside every function body past `HEAD_TEXT_CAP` text lines. */
+/** Fails a changed run outside every function body past `HEAD_TEXT_CAP` text lines. */
 export const commentHeadBlocks: Measure = capMeasure(
   (count) => count.headBlocks,
   HEAD_READING,
+  splitByChangedLines,
 )
 
-/** Fails a touched file's run inside a function body past `BODY_BLOCK_CAP` text lines. */
+/** Fails a changed run inside a function body past `BODY_BLOCK_CAP` text lines. */
 export const commentBodyBlocks: Measure = capMeasure(
   (count) => count.bodyBlocks,
   BODY_READING,
+  splitByChangedLines,
 )
 
 const SHARE_CAP = `${FILE_SHARE_CAP * 100}%`

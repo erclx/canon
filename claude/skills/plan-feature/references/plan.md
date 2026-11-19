@@ -243,6 +243,13 @@ Each entry states whether the change leaves its folder true or alters it, so a r
 - Pair each `redrawn` entry with a `## Files to touch` line naming the folder and the project's own design sync command. Each project names its own, so the standard gives none.
 - `canon records validate plans` reports `design-reference-unclassified` for an entry naming a `canon/design/` folder that opens on neither role
 
+**Holding a redraw**
+
+A worker redraws a board frame its build makes untrue when the diff decides the new content, cited or not. A plan keeps a redraw out of the build with a hold rather than a third role.
+
+- Hold the folder in `## Constraints`, naming the row that owns its redraw, and cite it `built against` if the build still reads it
+- Name every reference the change makes untrue that the planner can see, since the worker's own check is the backstop rather than the list
+
 ### Reference images
 
 A plan shaped against an image no tracked folder holds carries this section, such as drive evidence, an image in an intake item, or a design board frame. It tells the building session which images to open before its first edit, and it stays apart from `## Design references`, which cites tracked folders alone.
