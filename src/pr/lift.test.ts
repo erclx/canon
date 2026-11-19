@@ -544,8 +544,7 @@ describe('lift', () => {
   })
 
   describe('UI gate', () => {
-    // A reel at the head settles the evidence gate's reel half, so these
-    // cases read the UI gate alone.
+    // A reel at the head settles the evidence reel half, isolating the UI gate.
     const withDrivable = { hasDrivableBox: true, reelHead: HEAD }
 
     it('should still refuse ui-open when the checklist holds no drivable box', async () => {
