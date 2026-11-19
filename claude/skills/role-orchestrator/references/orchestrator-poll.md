@@ -47,10 +47,11 @@ bun <POLL_SCRIPT> --wait 1200
 Act on what the poll printed when it exited, then start it again.
 
 - A release pull request, whatever state follows it: report it and stop. Its sweep carries no findings, so no pass is owed. Test this before any rule below, since a release pull request is reported OPENED like any other and would otherwise match that rule first.
-- MOVED or EVIDENCE, before the rule below: run the review dispatch runbook's proof check on the head, and route on its table. A head first carrying an uncaptured path, or owing evidence, goes back to its worker and holds the re-review. One first carrying a `drivable` box with no UI reviewer launched takes one now.
+- MOVED, REBASED, or EVIDENCE, before the rule below: run the review dispatch runbook's proof check on the head, and route on its table. A head first carrying an uncaptured path, or owing evidence, goes back to its worker and holds the re-review. One first carrying a `drivable` box with no UI reviewer launched takes one now.
 - MOVED or RESPONSE on a pull request already reviewed: when a live local reviewer holds it, report it and stop, since the worker asks that reviewer for the re-review directly. When none does, which a cloud reviewer always leaves, launch a fresh reviewer under the review dispatch runbook of the canon:role-orchestrator skill. Never run the canon:review-pr skill here. Re-reviews read prior..head and gain nothing from waiting.
 - OPENED, or a pull request with no prior review pass: once that runbook's proof check reads proof, launch its reviewer under the review dispatch runbook of the canon:role-orchestrator skill, and its UI reviewer beside it when the evidence record counts a `drivable` box. Never run the first pass here. A draft counts, since every pull request here opens as one and skipping drafts skips everything.
 - SEEN: report it and stop. A pass already covers that head, whether it arrived out of band or before the poll first saw the pull request, so no review follows.
+- REBASED: both closes carried, so report it and stop, first running `canon pr lift <number> --json` on a draft.
 - STALLED: read the last pass and report what it carried. The pass has sat open for hours with nothing following it, so a worker mid-task is already ruled out and the dispatch either never went out or the session holding it is gone. Confirm and re-send it under the dispatch rule below, whatever grades the pass carried. Do not re-run a review to correct the heading, since a pass on an unchanged head with no response behind it stops by design.
 - CONFLICT or STALE: send the session holding that branch the rebase handback in the canon:role-orchestrator skill's handback runbook, resolving it the way the handback rule below does. The branch owner rebases, not this session. The poll prints one of the two for a pull request, never both, so it earns one message. The canon pr lift verb refuses on either standing itself, since the green run tested a main that no longer exists, so nothing here lifts the mark.
 - OVERLAP: report the pair and the files, and settle their merge order now under the Parallelism rule of the canon:role-orchestrator skill. Dispatch nobody. The second to merge reads STALE or CONFLICT once the first lands, and the handback goes out then.
@@ -80,7 +81,7 @@ The eight headings the script knows are written by `review-pr`, `review-address`
 
 - The reply family matches by a filter in `poll.ts`, so a project posting it under different headings edits that
 - The review and UI families match inside `canon pr review-state`, which the script and `review-pr` both read, so renaming one changes the verb
-- The `UI-` states report the newest UI pass on its transition, and `UI-STALE` fires beside the `MOVED` of a push that left its marker behind
+- The `UI-` states report the newest UI pass on its transition, and `UI-STALE` fires beside the `MOVED` of a push or a rebase that left its marker behind, never beside a `REBASED`
 - A first sighting reports no `UI-` state at no cost to the mark, since `canon pr lift` reads the UI review itself and holds the mark on a drivable checklist until a UI close names the head
 
 ### UNMATCHED and RESPONSE
@@ -119,7 +120,7 @@ Read a standing one with `--check <number>`, which fetches the base and reads th
 
 ### OVERLAP
 
-`OVERLAP` names two open pull requests that conflict with each other, read by merging their heads locally. Only pairs sharing a written path are tried, which keeps a wave of ten to a handful of merges. It reports once per pair, carried in the tenth baseline field, so the merge order is settled before the second branch has to rebase.
+`OVERLAP` names two open pull requests that conflict with each other, read by merging their heads locally. Only pairs sharing a written path are tried. It reports once per pair, carried in the tenth baseline field, so the merge order is settled before the second branch has to rebase.
 
 ### What a SEEN rests on
 
@@ -128,7 +129,6 @@ A review's `commit.oid` is stamped with the head at submission rather than the c
 The pass carries its own record instead. `review-pr` writes the commit it read and the instant it read it as a marker on the last line of every body, and both this script and that skill resolve the covered state through `canon pr review-state`, the one place the marker is parsed.
 
 - A commit pushed inside a pass's compose window falls outside the marked range, so it reads as `MOVED` rather than `SEEN`
-- A `SEEN` is a claim about what a session read rather than what GitHub stamped, so it wants no second read to be believed
 
 ### The source behind a SEEN
 

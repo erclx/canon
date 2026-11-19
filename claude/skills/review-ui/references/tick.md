@@ -23,11 +23,13 @@ A push that landed while this pass drove carries the ticks to the tip when it ch
 - Markdown carries only in the root and under `canon/`, `.claude/`, `.github/`, and `docs/`.
 - Markdown anywhere else, such as a page a stack renders, is driven.
 
+A rebase carries the ticks the same way, with `carriedAcross` reading `rebase`, when every path whose branch diff differs at the two commits is one no box observes.
+
 The verb refuses a taste box and a head the tip moved past in any other way, writing nothing in either case. Branch on the record's `reason`.
 
 - `count-mismatch`: nothing was written. With `ticked` below `passed`, re-run once with every passed box. With it above, a box ticked earlier has failed, so report it on `Ticks:` for the operator.
-- `redrive-owed`: a push since `<head>` changed a path a box can observe. Report `driven`, `head`, and `drivenPaths` on the `Ticks:` line of Step 10, and never retry at the tip.
-- `stale-head`: the driven head was rewritten away, by a force-push or a rebase, or the gap could not be read. Report it on the `Ticks:` line and never retry at the new tip.
+- `redrive-owed`: a push or a rebase since `<head>` changed a path a box can observe. Report `driven`, `head`, and `drivenPaths` on the `Ticks:` line of Step 10, and never retry at the tip.
+- `stale-head`: the driven head was rewritten away and neither the gap nor the branch diff across the rebase could be read. Report it on the `Ticks:` line and never retry at the new tip.
 - `body-refused`: the comment is ticked and the body is not. Retry the same call once, then report the partial result on the `Ticks:` line rather than claiming both.
 - Any other refusal: report the `reason` on the `Ticks:` line and tick nothing further.
 
