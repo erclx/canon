@@ -535,13 +535,23 @@ export const FOCUS_MOVED = `(() => {
 })()`
 
 /**
- * Finds a target's box in the page, so both routes resolve alike. `text=` takes
- * the innermost sized match, and a selector searches the document, then each
- * open shadow root. A frame, a closed root, and a zero-size match stay missing.
+ * Defines `find`, the page-side target lookup both routes share, and `within`,
+ * containment read through shadow hosts. `text=` takes the innermost sized
+ * match, and a selector searches the document, then each open shadow root. A
+ * frame, a closed root, and a zero-size match stay missing.
  */
-export function boxExpression(target: string): string {
-  return `(() => {
-    const target = ${JSON.stringify(target)}
+const RESOLVER = `
+  const within = (outer, inner) => {
+    for (let node = inner; node; node = node.parentNode ?? node.host ?? null) {
+      if (node === outer) return true
+    }
+    return false
+  }
+  const sized = (node) => {
+    const rect = node.getBoundingClientRect()
+    return rect.width > 0 && rect.height > 0
+  }
+  const find = (target) => {
     const roots = []
     const collect = (root) => {
       roots.push(root)
@@ -550,12 +560,6 @@ export function boxExpression(target: string): string {
       }
     }
     collect(document)
-    const within = (outer, inner) => {
-      for (let node = inner; node; node = node.parentNode ?? node.host ?? null) {
-        if (node === outer) return true
-      }
-      return false
-    }
     let element = null
     if (target.startsWith('text=')) {
       const want = target.slice(5).trim()
@@ -565,19 +569,48 @@ export function boxExpression(target: string): string {
         ),
       )
       const innermost = matches.filter((node) => !matches.some((other) => other !== node && within(node, other)))
-      element = innermost.find((node) => {
-        const rect = node.getBoundingClientRect()
-        return rect.width > 0 && rect.height > 0
-      }) ?? null
+      element = innermost.find(sized) ?? null
     } else {
       for (const root of roots) {
         element = root.querySelector(target)
         if (element) break
       }
     }
+    return element && sized(element) ? element : null
+  }`
+
+/** Finds a target's box in the page, so both routes resolve alike. */
+export function boxExpression(target: string): string {
+  return `(() => {
+    ${RESOLVER}
+    const element = find(${JSON.stringify(target)})
     if (!element) return null
     const rect = element.getBoundingClientRect()
-    if (rect.width === 0 || rect.height === 0) return null
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
+  })()`
+}
+
+/**
+ * Names the element a press at `at` would land on when it is neither the
+ * target, inside it, nor around it, or null when the press lands. The hit is
+ * followed into each open shadow root, and named by its tag and its id or
+ * first class, which finds it without a selector that runs long.
+ */
+export function coverExpression(target: string, at: Point): string {
+  return `(() => {
+    ${RESOLVER}
+    const element = find(${JSON.stringify(target)})
+    const x = ${at.x}
+    const y = ${at.y}
+    let hit = document.elementFromPoint(x, y)
+    while (hit?.shadowRoot) {
+      const inner = hit.shadowRoot.elementFromPoint(x, y)
+      if (!inner || inner === hit) break
+      hit = inner
+    }
+    if (!element || !hit || within(element, hit) || within(hit, element)) return null
+    const tag = hit.tagName.toLowerCase()
+    if (hit.id) return tag + '#' + hit.id
+    return hit.classList.length > 0 ? tag + '.' + hit.classList[0] : tag
   })()`
 }
