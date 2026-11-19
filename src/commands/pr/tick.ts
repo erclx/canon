@@ -6,13 +6,14 @@ import {
   readChecklistBoxes,
 } from '@/pr/evidence'
 import { resolveTip } from '@/pr/head'
-import { readChangedPaths } from '@/pr/lift'
-import { readCarry } from '@/pr/carry'
+import { readChangedPaths, readRebasedPaths } from '@/pr/lift'
+import { readUiCarry } from '@/pr/carry'
 import { coversHead, resolveUiScope } from '@/pr/review-scope'
 import {
   countTicksAtHead,
   type TickRefusal,
   tickBoxes,
+  tickCarryOf,
   type UiPassSummary,
   writeUiPassLine,
 } from '@/pr/tick'
@@ -50,9 +51,9 @@ const TICK_REFUSALS: Record<TickReason | 'gh-failed', string> = {
   'body-refused':
     'The boxes are ticked on the evidence comment, but gh could not edit the pull request body, so its UI pass line still shows the earlier result. Re-run the tick to retry the body.',
   'stale-head':
-    'The head named is not the branch tip on the remote, and the tip does not descend from it or the gap could not be read, so a tick would claim a pass on a commit that is no longer the pull request. Re-drive the checklist at the tip.',
+    'The head named is not the branch tip on the remote, and neither the gap since it nor the branch diff across a rebase could be read, so a tick would claim a pass on a commit that is no longer the pull request. Re-drive the checklist at the tip.',
   'redrive-owed':
-    'A push since the driven head changed a path a box can observe, so the pass does not carry to the tip. Nothing was written. Re-drive the checklist at the tip rather than retrying the tick there.',
+    'A push or a rebase since the driven head changed a path a box can observe, so the pass does not carry to the tip. Nothing was written. Re-drive the checklist at the tip rather than retrying the tick there.',
   'bad-boxes':
     '--boxes takes box numbers as a comma-separated list of positive whole numbers, such as 1,3, and --head takes the commit that was driven.',
   'count-mismatch':
@@ -101,8 +102,14 @@ export function registerTick(pr: Command): void {
         'changed since is one no box can observe, being tests, stories,',
         'snapshots, markdown in the root and in `canon/`, `.claude/`,',
         '`.github/`, and `docs/`, evidence captures, and `canon/design/`. The',
-        'boxes are then stamped at the tip and the record names `carriedFrom`.',
-        'Any other changed path, markdown elsewhere included, owes a re-drive.',
+        'boxes are then stamped at the tip and the record names `carriedFrom`',
+        'with `carriedAcross` reading `push`. Any other changed path, markdown',
+        'elsewhere included, owes a re-drive.',
+        '',
+        'A --head the tip does not descend from carries the same way across a',
+        'rebase, with `carriedAcross` reading `rebase`, when every path whose',
+        'branch diff differs at the two commits, each against its own merge',
+        'base, is one no box can observe.',
         '',
         'Before writing it reads the newest UI verdict. One that covers the tip,',
         'or the driven head on a carry, and carries a count line must match the',
@@ -113,7 +120,8 @@ export function registerTick(pr: Command): void {
         'Read `reason` on the JSON record:',
         '  ticked       the boxes were ticked and the body line written, with the',
         '               tip in `head`, `countCheck` as matched or unchecked, and',
-        '               `carriedFrom` when --head was carried to the tip',
+        '               `carriedFrom` and `carriedAcross` when --head was',
+        '               carried to the tip',
         '  count-mismatch the verdict passed a different number of boxes than',
         '               this call leaves ticked at the tip, nothing written,',
         '               `passed` and `ticked` carry the two counts. Fewer ticks',
@@ -121,10 +129,11 @@ export function registerTick(pr: Command): void {
         '               operator an untick of a box that has since failed',
         '  body-refused the comment is ticked but gh could not edit the body,',
         '               exit 1 with `commentTicked`. Re-run to retry the body.',
-        '  redrive-owed a push since --head changed a path a box can observe,',
-        '               nothing written, with `driven`, `head`, and `drivenPaths`',
-        '  stale-head   --head is behind the tip with no readable linear gap,',
-        '               as a force-push or a rebase leaves, nothing written',
+        '  redrive-owed a push or a rebase since --head changed a path a box',
+        '               can observe, nothing written, with `driven`, `head`, and',
+        '               `drivenPaths`',
+        '  stale-head   --head is behind the tip and neither the linear gap nor',
+        '               the rebase comparison could be read, nothing written',
         '  taste-box    a named box carries (taste), nothing written',
         '  no-box       a named number is past the checklist, nothing written',
         '  no-checklist the evidence comment carries no checklist',
@@ -191,26 +200,32 @@ async function runTick(
       root,
     )
   }
-  const carry = await readCarry(
-    (from, to) => readChangedPaths(gitRunner(root), from, to),
-    head,
-    reading.tip,
+  const git = gitRunner(root)
+  const base = identity.base
+  const decision = tickCarryOf(
+    await readUiCarry(
+      {
+        readChanged: (from, to) => readChangedPaths(git, from, to),
+        readRebased: async (from, to) =>
+          base === undefined
+            ? undefined
+            : readRebasedPaths(git, `origin/${base}`, from, to),
+      },
+      head,
+      reading.tip,
+    ),
   )
-  if (carry.kind === 'moved') {
+  if (decision.kind === 'refused') {
+    if (decision.reason === 'stale-head') return refuseTick('stale-head')
     return refuseWith(
       'redrive-owed',
       TICK_REFUSALS['redrive-owed'],
       emitJson,
       root,
-      { driven: head, head: reading.tip, drivenPaths: carry.drivenPaths },
+      { driven: head, head: reading.tip, drivenPaths: decision.drivenPaths },
     )
   }
-  // A gap that could not be read refuses as a rewrite does, which is what the
-  // verb answered for every moved tip before the carry.
-  if (carry.kind === 'not-ancestor' || carry.kind === 'failed') {
-    return refuseTick('stale-head')
-  }
-  const carriedFrom = carry.kind === 'carried' ? carry.carriedFrom : undefined
+  const { carriedFrom, carriedAcross } = decision
 
   const comments = await listComments(root, String(identity.number))
   if (comments === undefined) return refuseTick('gh-failed')
@@ -316,7 +331,7 @@ async function runTick(
         reason: 'ticked',
         countCheck,
         head: reading.tip,
-        ...(carriedFrom !== undefined && { carriedFrom }),
+        ...(carriedFrom !== undefined && { carriedFrom, carriedAcross }),
         boxes: numbers.map(Number),
         commentId,
       })}\n`,

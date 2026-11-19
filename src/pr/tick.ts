@@ -1,3 +1,4 @@
+import type { UiCarry } from '@/pr/carry'
 import {
   type ChecklistBox,
   CHECKLIST_END,
@@ -113,6 +114,37 @@ export function writeUiPassLine(body: string, summary: UiPassSummary): string {
     lines.splice(heading + 1, 0, '', line)
   }
   return lines.join('\n')
+}
+
+/** Whether a pass driven at one head may tick at the tip, read off the carry the UI gate reads. */
+export type TickCarry =
+  | {
+      readonly kind: 'ticks'
+      readonly carriedFrom?: string
+      readonly carriedAcross?: 'push' | 'rebase'
+    }
+  | {
+      readonly kind: 'refused'
+      readonly reason: 'redrive-owed'
+      readonly drivenPaths: readonly string[]
+    }
+  | { readonly kind: 'refused'; readonly reason: 'stale-head' }
+
+/**
+ * A gap that could not be read refuses as a rewrite does, so the tick never
+ * stamps a tip the lift would refuse.
+ */
+export function tickCarryOf(carry: UiCarry): TickCarry {
+  if (carry.kind === 'covered') return { kind: 'ticks' }
+  if (carry.kind === 'carried') {
+    const { carriedFrom, carriedAcross } = carry
+    return { kind: 'ticks', carriedFrom, carriedAcross }
+  }
+  if (carry.kind === 'moved') {
+    const { drivenPaths } = carry
+    return { kind: 'refused', reason: 'redrive-owed', drivenPaths }
+  }
+  return { kind: 'refused', reason: 'stale-head' }
 }
 
 export type TickRefusal = 'no-checklist' | 'no-box' | 'taste-box'
