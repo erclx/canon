@@ -128,7 +128,7 @@ The remaining surfaces each own one slice.
 ## Gotchas
 
 - A plan carried as an intro link rather than a `Plan:` line is skipped silently by the `git-pr` number write, so the merge archives no plan
-- `canon tasks archive` retargets only the closing task's `Plan:` line, so a sibling row in `priority.md` keeps a dead link until the next board verb re-derives its Plan cell
+- `canon tasks archive` retargets only the closing task's `Plan:` line, so a sibling row in `priority.md` keeps a stale Touches cell until the next board verb re-derives it
 - A review's `commit.oid` is the head at submission, so a `SEEN` with `source` reading `fallback` may cover a commit the pass never read
 - `src/gate/boundaries.ts` bans only `wiki/` in the Skill paths measure, so a skill citing a toolkit-only path passes clean
 - `OPERATOR_CALL_PHRASES` in `src/records/validate.ts` covers two paraphrases of the operator-call phrase, so a third reads `launchable: true`
