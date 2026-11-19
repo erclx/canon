@@ -571,10 +571,23 @@ describe('readSessionDefaults', () => {
       { label: 'hooks.PreToolUse', changed: false },
       { label: 'hooks.PostToolUse', changed: true },
       { label: 'hooks.Stop', changed: true },
+      { label: 'hooks.SessionEnd', changed: false },
     ])
     expect(read.plan.unwired).toEqual([
       { event: 'PostToolUse', script: 'pr-create-log.sh', tools: ['Bash'] },
       { event: 'Stop', script: 'reply-links.sh', tools: [] },
+    ])
+  })
+
+  it('should plan the SessionEnd key for a held records push script', async () => {
+    const dir = await makeTarget(JSON.stringify(DEFAULTS), {
+      scripts: ['records-push.sh'],
+    })
+
+    const read = await readPlanned(dir)
+
+    expect(read.plan.unwired).toEqual([
+      { event: 'SessionEnd', script: 'records-push.sh', tools: [] },
     ])
   })
 
