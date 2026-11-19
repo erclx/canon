@@ -120,7 +120,7 @@ A planned rewrite can reach a line that names an old spelling on purpose, such a
 
 ### The record-tree backup
 
-The record tree is untracked, so a `record-tree` rewrite has no undo. Run `canon records push --json` before its write. When that reports no backup repository, copy `.canon/` to a dated folder outside the project and name the path in the report.
+The record tree is untracked, so a `record-tree` rewrite has no undo. Run `canon records push --json` before its write. When that reports no backup repository, copy `.canon/` to a dated folder outside the project and name the path in the report. On `busy`, another push holds the lock, so run it once more and take the copy if it refuses again.
 
 ## Step 5: sync
 
