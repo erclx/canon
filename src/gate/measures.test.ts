@@ -1161,7 +1161,7 @@ describe('skillDescriptionTotal', () => {
     expect(report.failure).toBeUndefined()
   })
 
-  it('fails one character past the ceiling, naming the longest skill', async () => {
+  it('fails one character past the ceiling', async () => {
     writeSkill(
       'git-commit',
       `description: ${'a'.repeat(SKILL_DESCRIPTION_CEILING)}\n`,
@@ -1173,7 +1173,23 @@ describe('skillDescriptionTotal', () => {
     expect(report.failure).toContain(
       `${SKILL_DESCRIPTION_CEILING + 1} description characters`,
     )
-    expect(report.failure).toContain('git-commit')
+  })
+
+  it('names the three longest skills and leaves the shortest out', async () => {
+    writeSkill(
+      'git-commit',
+      `description: ${'a'.repeat(SKILL_DESCRIPTION_CEILING)}\n`,
+    )
+    writeSkill('git-pr', 'description: bbbb\n')
+    writeSkill('git-ship', 'description: ccc\n')
+    writeSkill('git-branch', 'description: d\n')
+
+    const report = await skillDescriptionTotal(context())
+
+    expect(report.failure).toContain(
+      `git-commit (${SKILL_DESCRIPTION_CEILING}), git-pr (4), git-ship (3)`,
+    )
+    expect(report.failure).not.toContain('git-branch')
   })
 
   it('counts a skill with no description as zero', async () => {
