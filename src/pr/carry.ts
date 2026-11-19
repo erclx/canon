@@ -65,6 +65,41 @@ export async function readCarry(
 }
 
 /**
+ * How the branch's own change compares at a commit and a head that does not
+ * descend from it, each diffed against its own merge base with the base.
+ */
+export interface RebaseRead {
+  readonly differingPaths: readonly string[]
+}
+
+/** Whether a verdict holds across a rebase of the branch under it. */
+export type RebaseCarry =
+  | { readonly kind: 'rebased'; readonly carriedFrom: string }
+  | { readonly kind: 'changed'; readonly differingPaths: readonly string[] }
+  | { readonly kind: 'unread' }
+
+/**
+ * Carries a verdict across a rebase only when no path `moves` differs in the
+ * branch's diff. Every path moves by default, which is the code review's rule,
+ * so a caller relaxes it only by naming what a verdict cannot observe. A
+ * comparison that could not be read carries nothing.
+ */
+export async function readRebaseCarry(
+  readRebased: (from: string, to: string) => Promise<RebaseRead | undefined>,
+  from: string,
+  to: string,
+  moves: (path: string) => boolean = () => true,
+): Promise<RebaseCarry> {
+  const read = await readRebased(from, to)
+  if (read === undefined) return { kind: 'unread' }
+
+  const differingPaths = read.differingPaths.filter(moves)
+  return differingPaths.length > 0
+    ? { kind: 'changed', differingPaths }
+    : { kind: 'rebased', carriedFrom: from }
+}
+
+/**
  * Which changed paths move a reel. A painted path always does, tested ahead of
  * the inert set, since a fixture a reel films sits in a folder that set
  * exempts. A project declaring `reelInputs` names what a reel reads beyond the

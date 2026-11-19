@@ -8,7 +8,7 @@ import {
   standingPasses,
   type UiCounts,
 } from '@/pr/review-scope'
-import { readCarry, reelMoves } from '@/pr/carry'
+import { type RebaseRead, readCarry, reelMoves } from '@/pr/carry'
 import { readReelWaivers, readWaivers } from '@/pr/waiver'
 import { DEFAULT_PAINTED, isPainted, type PaintedPatterns } from '@/pr/painted'
 
@@ -911,4 +911,84 @@ export async function readChangedPaths(
   if (diff === undefined) return undefined
 
   return { isAncestor: true, paths: nonEmptyLines(diff) }
+}
+
+const FILE_HEADER = 'diff --git '
+
+/**
+ * Splits a patch into one text per path, dropping the blob ids and hunk line
+ * numbers a rebase changes when main moved the file elsewhere. Context lines
+ * stay, so a change main made beside the branch's own still differs. A quoted
+ * path stays as git printed it, which no inert glob matches.
+ */
+function patchesByPath(patch: string): Map<string, string> {
+  const files = new Map<string, string>()
+  let path: string | undefined
+  let lines: string[] = []
+  const flush = () => {
+    if (path !== undefined) files.set(path, lines.join('\n'))
+  }
+  for (const line of patch.split('\n')) {
+    if (line.startsWith(FILE_HEADER)) {
+      flush()
+      const sides = line.slice(FILE_HEADER.length)
+      path = sides.startsWith('a/')
+        ? sides.slice(2, (sides.length - 1) / 2)
+        : sides
+      lines = []
+    } else if (line.startsWith('@@')) {
+      lines.push('@@')
+    } else if (!line.startsWith('index ')) {
+      lines.push(line)
+    }
+  }
+  flush()
+  return files
+}
+
+/**
+ * Reads which paths of the branch's own diff differ between a reviewed commit
+ * and a head, each diffed against its own merge base with `ref`. A commit or a
+ * base that does not resolve, or a diff that fails, reads as undefined, which
+ * carries nothing.
+ */
+export async function readRebasedPaths(
+  git: GitRunner,
+  ref: string,
+  from: string,
+  to: string,
+): Promise<RebaseRead | undefined> {
+  if (ref.startsWith('origin/')) {
+    await git(['fetch', '-q', 'origin', ref.slice('origin/'.length)])
+  }
+  const branchDiff = async (commit: string) => {
+    const base = (await git(['merge-base', ref, commit]))?.trim()
+    if (base === undefined || base === '') return undefined
+    const patch = await git([
+      'diff',
+      '--no-renames',
+      '--binary',
+      '--no-color',
+      '--no-ext-diff',
+      '--no-textconv',
+      '--src-prefix=a/',
+      '--dst-prefix=b/',
+      base,
+      commit,
+    ])
+    return patch === undefined ? undefined : patchesByPath(patch)
+  }
+
+  const full = (
+    await git(['rev-parse', '--verify', '-q', `${from}^{commit}`])
+  )?.trim()
+  if (full === undefined || full === '') return undefined
+  const [before, after] = await Promise.all([branchDiff(full), branchDiff(to)])
+  if (before === undefined || after === undefined) return undefined
+
+  const paths = new Set([...before.keys(), ...after.keys()])
+  const differingPaths = [...paths]
+    .filter((path) => before.get(path) !== after.get(path))
+    .toSorted()
+  return { differingPaths }
 }
