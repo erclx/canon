@@ -1,6 +1,6 @@
 ---
 name: proposal-critique
-description: Questions a plan, a fix, a triage call, or a feature ask before it is built, in both directions, whether it does too much and whether it is too cautious, scaling the questions to how reversible the change is and how far it reaches, and ends on one verdict of go, probe first, absorb, or stop. Use when asked to "critique this plan", "poke holes in this", "is this fix worth it", "should we even build this", "challenge this proposal", or "is the cause actually ours". Do NOT use to batch open decisions that turn on the operator's preference, which is `decision-escalate`, to investigate a failing test, which is `systematic-debugging`, or to review a finished change, which is `review-pr`. Do NOT auto-trigger.
+description: Questions a plan, fix, triage call, or feature ask before it is built, both for doing too much and for being too cautious, scaled to how reversible it is, and ends on one verdict of go, probe first, absorb, or stop. Use when asked to "critique this plan", "poke holes in this", or "should we even build this". Do NOT use to review a finished change, which is `review-pr`. Do NOT auto-trigger.
 metadata:
   family: decide
 ---

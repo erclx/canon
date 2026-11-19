@@ -1,6 +1,6 @@
 ---
 name: teach-craft
-description: Carries the judgment for teaching a subject so it sticks, being retrieval over review, spacing, interleaving, placing the learner just past what they can do unaided, quiz design that leaks no answer, the teach-back, and what makes a lesson worth returning to. Use before teaching a subject over more than one exchange, when writing a quiz, a lesson, or a study plan, or when asked "teach me X", "quiz me on this", "how should I learn X", or "is this a good quiz question". Do NOT use to answer one question, which is an ordinary reply, or to write project documentation, which belongs to the surface owning that document.
+description: Carries the judgment for teaching a subject so it sticks, being retrieval, spacing, interleaving, pitching just past what the learner can do, quizzes that leak no answer, and the teach-back. Use before teaching over more than one exchange, when writing a quiz or study plan, or when asked "teach me X" or "quiz me on this". Do NOT use to answer one question or to write project documentation.
 metadata:
   family: answer
 ---

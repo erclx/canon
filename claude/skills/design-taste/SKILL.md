@@ -1,6 +1,6 @@
 ---
 name: design-taste
-description: Carries the layer model that decides which design decision settles first, the rules that keep a surface coherent across sections, and the catalog of defaults a model reaches for when nothing states a direction. Use when drafting or judging an interface, a page, or any rendered surface, when output reads generic or templated, when redesigning something that already exists, or when asked to "make this look designed", "why does this look like AI made it", "give it taste", "what layer is this decision at", or "grey-box this first". Do NOT use for accessibility, forms, or state coverage, which `ui-craft` carries, for the shape of the project's design document, which `design.md` governs, or to run the candidate loop, which is `design-pick`.
+description: Carries the layer model that decides which design decision settles first, the rules that keep a surface coherent, and the defaults a model reaches for. Use when drafting or judging a rendered surface, when output reads generic, or when asked to "make this look designed" or "why does this look like AI made it". Do NOT use for accessibility or states, which is `ui-craft`, or to run candidates.
 metadata:
   family: build
 ---

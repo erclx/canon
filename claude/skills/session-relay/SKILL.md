@@ -1,6 +1,6 @@
 ---
 name: session-relay
-description: Relays a message to another session, turning the sessionId the caller named into an address at the moment of sending and composing a copyable block where no send tool exists. Use when asked to "relay this", "message the controller", "send this over to the session that dispatched me", or "tell the other session", with or without a role, and when a session stuck on a question owes the session that dispatched it a message before it stops to ask. Do NOT use to decide what the message says, and do NOT use to assert what a session may write or is on the hook for, which is `role-worker` or `role-planner`.
+description: Relays a message to another session, turning the sessionId the caller named into an address at sending, or composing a copyable block where no send tool exists. Use when asked to "relay this", "message the controller", or "tell the other session", and when a stuck session owes its dispatcher a message. Do NOT use to decide what the message says or what a session may write.
 metadata:
   family: parallel
 ---

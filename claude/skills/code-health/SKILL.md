@@ -1,6 +1,6 @@
 ---
 name: code-health
-description: Reports which of a project's source files have rotted, one row per file, across file length, function length, comment blocks, inline code, and folder layout. Reads each axis through the verb that owns it and marks the evidence class each answer carries. Use when asked to "check code health", "which source files are oversized", "audit the source tree for rot", "which functions need splitting", "where have code comments drifted", or "which code folders are overloaded". Do NOT use to repair a finding, which the owning skill does, such as `code-craft` for a long block or `codebase-layout` for a folder split, do NOT use to review one diff, which is `review-craft`, and do NOT use for markdown, which is `document-health`.
+description: Reports which source files have rotted, one row per file, across file length, function length, comment blocks, inline code, and folder layout, marking each answer's evidence class. Use when asked to "check code health", "which source files are oversized", or "which functions need splitting". Do NOT use to repair a finding, to review one diff, or for markdown, which is `document-health`.
 metadata:
   family: check
 ---

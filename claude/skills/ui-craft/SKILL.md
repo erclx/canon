@@ -1,6 +1,6 @@
 ---
 name: ui-craft
-description: Carries the behavior practice for rendered UI, being accessibility, keyboard and pointer operation, forms, motion, controls, state coverage, interface copy, and the capture a rendered change owes, routed from the kind of change to the references it reads. Use before building or changing a component, a page, a form, or any rendered surface, when judging one in review, or when asked "is this accessible", "what states does this need", "how should this form validate", "what should the button say", or "what do I capture after this change". Do NOT use for how a surface looks, being layout, type, color, and the layer order, which is `design-taste`, or for the design folder and its references, which is `design-record`.
+description: Carries the behavior practice for rendered UI, being accessibility, keyboard and pointer use, forms, motion, controls, state coverage, interface copy, and the capture a change owes. Use before building or changing a component, page, or form, when judging one, or when asked "is this accessible" or "what states does this need". Do NOT use for layout, type, and color, which is `design-taste`.
 metadata:
   family: build
 ---

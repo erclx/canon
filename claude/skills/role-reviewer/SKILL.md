@@ -1,6 +1,6 @@
 ---
 name: role-reviewer
-description: Asserts the reviewer role for a session dispatched to review one pull request another session built, or a batch of small ones, holding what it may write, what it reads and never reads, the messages it owes the worker and the controller, the lift it runs on a close, and the acts it refuses. Use when asked to "be the reviewer", "you are a reviewer session", at the start of a dispatched or hand-launched review of one pull request or a batch, or when a reviewing session needs to know what it may not write or who it answers to. Do NOT use to run the pass itself, which is `review-pr` for the code and `review-ui` for the running app, or to make the cross-branch call across a wave.
+description: Asserts the reviewer role for a session dispatched to review one pull request another session built, or a batch, holding what it may write and read, the messages it owes, and the lift it runs on a close. Use when asked to "be the reviewer", at the start of a dispatched or hand-launched review, or when a reviewer needs its limits. Do NOT use to run the pass, which is `review-pr` or `review-ui`.
 metadata:
   family: parallel
 ---

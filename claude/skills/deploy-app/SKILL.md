@@ -1,6 +1,6 @@
 ---
 name: deploy-app
-description: Sets up a deploy for the current project on Cloudflare Pages or Vercel by picking the host the project already carries, creating the host's project, setting the IDs it needs as repository secrets, and stopping for the operator to issue the API token and attach the custom domain. Calls `wrangler`, `vercel`, and `gh` rather than reimplementing them. Use when asked to "set up the deploy", "deploy this to Cloudflare Pages", "deploy this to Vercel", "set up the Pages project", "set up a Vercel project", or "connect this repo to Cloudflare". Do NOT use to run an already-configured deploy, which the host's own push trigger does, or to reconfigure an existing project's build settings.
+description: Sets up a deploy on Cloudflare Pages or Vercel, picking the host the project carries, creating its project, setting the IDs as repository secrets, and stopping for the operator to issue the token and attach the domain. Use when asked to "set up the deploy", "deploy this to Vercel", or "connect this repo to Cloudflare". Do NOT use to run a configured deploy or change a project's build settings.
 metadata:
   family: setup
 ---

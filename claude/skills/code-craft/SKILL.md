@@ -1,6 +1,6 @@
 ---
 name: code-craft
-description: Carries the rules for shaping code while it is being written, being a function, a class, or a module's internals, so a session picks the shape the next change needs rather than copying its neighbor, splitting by step, or building for a case nobody asked for. Use before writing a new function, class, or module, when deciding whether to extract duplicated code, add an abstraction, a pattern, or a seam, or when asked "should I extract this", "is this abstraction worth it", "should this be a strategy", "is this class doing too much", or "should I just copy this". Do NOT use for the red, green, refactor loop, which is `test-first`, to decide where a file sits, which is `codebase-layout`, to shape what a caller sees, which is `api-design`, or to judge a finished diff, which is `review-craft`.
+description: Carries the rules for shaping a function, class, or module while writing it, so the shape fits the next change rather than the neighbor's. Use before writing new code, when deciding whether to extract or abstract, or when asked "should I extract this" or "is this abstraction worth it". Do NOT use for where a file sits, which is `codebase-layout`, or what a caller sees, which is `api-design`.
 metadata:
   family: build
 ---

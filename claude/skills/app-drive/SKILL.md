@@ -1,6 +1,6 @@
 ---
 name: app-drive
-description: Drives a throwaway copy of a built app with the operator, tries every requirements goal per persona, re-checks the last drive's findings, measures each operator ask, sorts each finding as a bug, a requirements conflict, or a taste call, and files the lot as an intake folder that `canon intake drive-check` holds. Use when asked to "drive the app", "kick the tires", "run an app drive", or "drive the build with me", typically after a release or a wave and before planning the next. Do NOT use to read source for UI roughness, which is `ui-audit`, to drive one pull request's checklist, which is `review-ui`, to measure paint or layout cost, which is `ui-measure`, or to fix anything the drive finds.
+description: Drives a throwaway copy of a built app with the operator, tries each requirements goal per persona, re-checks the last drive's findings, sorts each as a bug, a requirements conflict, or a taste call, and files them as an intake folder. Use when asked to "drive the app" or "kick the tires", typically after a release. Do NOT use to drive one pull request's checklist, which is `review-ui`.
 metadata:
   family: check
 ---
