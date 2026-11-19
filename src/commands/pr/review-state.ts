@@ -159,8 +159,7 @@ async function runReviewState(
     return refuseWith('gh-missing', PULL_REFUSALS['gh-missing'], emitJson, root)
   }
 
-  // The number is resolved up front so the record names the pull request a
-  // caller that passed no argument was answered about.
+  // Resolved up front, so a record answering a bare call still names its pull request.
   const resolved = await resolvePullNumber(root, number)
   if (resolved.kind === 'refused') {
     return refuseWith(
@@ -176,8 +175,7 @@ async function runReviewState(
     return refuseWith(read.reason, PULL_REFUSALS[read.reason], emitJson, root)
   }
 
-  // The module refuses every failed read as `gh-failed`, and the api keeps each
-  // read's own reason, so a caller tells a thread from a remote.
+  // The api keeps each read's own reason, so a caller tells a thread from a remote.
   let failure: PullRefusal | HeadRefusal = 'gh-failed'
   const git = gitRunner(root)
   const { base } = read.identity
@@ -264,8 +262,7 @@ function logReviewState(number: number, record: ReviewStateRecord): void {
     )
   } else {
     logStep(scope.state === 'open' ? 'Open' : 'Closed')
-    // Named apart, since these fields then describe the submission rather than
-    // the read, and a caller cannot tell the two from the values alone.
+    // Named apart, since these values then describe the submission, not the read.
     logWarn(
       `the last pass carries no read-time marker, so ${scope.commit === undefined ? 'no commit' : scope.commit.slice(0, 8)} and ${scope.submittedAt ?? 'no instant'} come off GitHub's submission stamps. A push inside that pass's compose window is invisible here.`,
     )

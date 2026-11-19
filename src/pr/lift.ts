@@ -122,10 +122,9 @@ export interface EvidenceGate {
 }
 
 /**
- * The reel skip codes that settle a drivable checklist with no reel. Each is a
- * filter result or a hosting limit no builder can change. Every other code,
- * and free text no procedure emits, is fixable by the builder or its machine,
- * so it holds the lift until a reel lands or a review waives it.
+ * The reel skip codes that settle a drivable checklist with no reel, each a
+ * filter result or hosting limit no builder can change. Any other code is
+ * fixable, so it holds the lift until a reel lands or a review waives it.
  */
 export const SETTLING_REEL_SKIPS: readonly string[] = [
   'no-interactive-box',
@@ -135,9 +134,8 @@ export const SETTLING_REEL_SKIPS: readonly string[] = [
 
 /**
  * The reel skip codes no review waiver settles. Each names a target the take
- * plan could not find or bring into view, which a builder clears by fixing a
- * selector, a setup step, or the seed, so a waiver over one stands in for
- * work the builder owes.
+ * plan could not find or bring into view, which the builder clears by fixing a
+ * selector, a setup step, or the seed, so a waiver would stand in for that work.
  */
 export const UNWAIVABLE_REEL_SKIPS: readonly string[] = [
   'target-missing',
@@ -262,13 +260,9 @@ function fail(gate: GateName, reason: LiftRefusal): GateResult {
 }
 
 /**
- * The code review gate. A pass with no marker is refused rather than lifted,
- * since the commit it covers is a stamp GitHub wrote at submission, which the
- * marker exists to replace.
- *
- * A close behind the head carries only across a rebase leaving every path of
- * the branch's diff equal. A push the head descends from carries nothing, so
- * new commits on top of a close always owe a pass.
+ * The code review gate. An unmarked pass is refused, since its commit is a
+ * submission stamp. A close behind the head carries only across a rebase
+ * leaving every branch path equal, never across commits pushed on top of it.
  */
 export async function reviewGate(
   api: Pick<LiftApi, 'readChanged' | 'readRebased'>,
@@ -344,14 +338,9 @@ function droveNothing(counts: UiCounts | undefined): boolean {
 }
 
 /**
- * Binds only where the evidence record carries a checklist to drive.
- *
- * A close behind the head still holds across the gap `readCarry` carries,
- * one changing no path a box can observe. A box drives behavior, so a push to
- * a non-painted source file moves the verdict too, and `drivenPaths` names
- * every such path while `paintedPaths` keeps the painted subset. A close the
- * head does not descend from carries across a rebase only when no path a box
- * can observe differs in the branch's diff.
+ * Binds only where the evidence record carries a checklist to drive. A close
+ * behind the head holds across what `readUiCarry` carries, and a refusal names
+ * every observable path in `drivenPaths` with the painted subset beside it.
  */
 export async function uiGate(
   api: Pick<LiftApi, 'readChanged' | 'readRebased'>,
@@ -361,15 +350,13 @@ export async function uiGate(
   hasDrivableBox: boolean,
 ): Promise<GateResult> {
   const scope = resolveUiScope({ reviews })
-  // An open verdict holds the gate even once no drivable box remains, so
-  // dropping the checklist or marking a failed box taste never clears it.
+  // Ahead of the binding test, so dropping the checklist never clears an open verdict.
   if (scope.state === 'open') return fail('ui', 'ui-open')
   if (!hasDrivableBox) return pass('ui')
   if (scope.state === 'none') return fail('ui', 'ui-missing')
   if (scope.source !== 'marker') return fail('ui', 'ui-unmarked')
   if (scope.commit === undefined) return fail('ui', 'ui-behind')
-  // Ahead of the head test so a close carried across commits is refused too.
-  // A verdict whose count line did not parse reads as unchecked and goes on.
+  // Ahead of the head test, so a carried close that drove nothing is refused too.
   if (droveNothing(scope.counts)) return fail('ui', 'ui-undriven')
 
   const carry = await readUiCarry(
@@ -399,15 +386,9 @@ export async function uiGate(
 }
 
 /**
- * The evidence gate. An owed step refuses first. Then every painted path the
- * pull request changed with no capture refuses, unless a reel shows it or a
- * standing pass waived it by the path as the list spells it. A reel shows the
- * list when it was filmed at the head or `readReelCarry` carried it there,
- * since a reel at an earlier head that did not carry may miss a path a later
- * push added. For the same reason a waiver counts only while the newest pass
- * of its family restates it. Last, a drivable checklist owes a reel, which a
- * `SETTLING_REEL_SKIPS` code settles, and so does a standing reel waiver over
- * any code outside `UNWAIVABLE_REEL_SKIPS`.
+ * An uncaptured painted path refuses unless a reel at or carried to the head
+ * shows it or a standing pass waives it, since an older reel may miss a later
+ * path. A drivable checklist then owes a reel, a settling skip, or a waiver.
  */
 export function evidenceGate(
   evidence: EvidenceGate,
@@ -466,10 +447,9 @@ export function evidenceGate(
 }
 
 /**
- * The commit a reel carries from when it was filmed before the head and no
- * push since changed a path `reelMoves` names. A rewritten reel commit or a
- * failed read carries nothing, so both evidence halves decide as if no reel
- * stood at the head.
+ * The commit a reel carries from when no push since it changed a path
+ * `reelMoves` names. A rewritten reel commit or a failed read carries nothing,
+ * so the evidence gate decides as if no reel stood at the head.
  */
 async function readReelCarry(
   api: Pick<LiftApi, 'readChanged'>,
@@ -516,10 +496,8 @@ function ciRefused(ci: Extract<CiOutcome, { kind: 'refused' }>): GateResult {
 
 /**
  * Reads the check runs until they conclude, the deadline passes, or a run can
- * no longer start. A conflicted branch gets no merge ref, so no run ever
- * starts and waiting on it is the one wait that cannot end. A stalled run
- * ends the wait the same way, since none of the measured stalls cleared
- * before a close and reopen started a fresh run.
+ * no longer start. A conflicted branch gets no merge ref, and no measured
+ * stall cleared before a close and reopen, so both end the wait at once.
  */
 async function waitForChecks(
   api: LiftApi,
@@ -641,12 +619,9 @@ async function redraft(
 }
 
 /**
- * Reads a ready pull request against every gate, and reports `already-ready`
- * only when all of them, standing and CI included, read clear at the tip.
- *
- * A failing review, UI, or evidence gate returns it to draft, since the mark
- * no longer holds. A failing standing or CI gate refuses and writes nothing,
- * as either would flap a merge-ready pull request on a run still going.
+ * Reads a ready pull request against every gate. A failing review, UI, or
+ * evidence gate returns it to draft, and a failing standing or CI gate refuses
+ * and writes nothing, since either would flap it on a run still going.
  */
 async function settleReady(
   api: LiftApi,
@@ -672,8 +647,7 @@ async function settleReady(
     return alreadyReady(all, tip, 0, reading)
   }
 
-  // The redraft gates come first in the list, so a standing failure reaches
-  // this branch only once the mark itself still holds.
+  // The redraft gates lead the list, so a standing failure lands here only once the mark holds.
   const blocked = gates.find((gate) => !gate.isOk)
   if (blocked?.reason !== undefined) {
     return REDRAFT_GATES.includes(blocked.gate)
@@ -690,11 +664,9 @@ async function settleReady(
 }
 
 /**
- * Settles a run whose gates and CI cleared at `tip`, after a wait that could
- * have moved any of them. The head, the reviews, and the standing are read
- * again, and the draft state too, so a pull request another session readied
- * or drafted during the wait is settled by the state it holds now. CI read at
- * `tip` vouches for nothing else, so a moved head refuses before any branch.
+ * Settles a run whose gates and CI cleared at `tip` after a wait that could
+ * have moved any of them, so the head, reviews, standing, and draft state are
+ * read again. CI at `tip` vouches for nothing else, so a moved head refuses.
  */
 async function settleAfterWait(
   api: LiftApi,
@@ -731,8 +703,7 @@ async function settleAfterWait(
   ].find((gate) => !gate.isOk)
   if (reread?.reason !== undefined) return refuse(reread.reason, nowTip)
 
-  // Standing is read again too, since a sibling merging during the wait can
-  // leave a branch that read fresh before it stale.
+  // A sibling merging during the wait can leave a branch that read fresh stale.
   const laterStanding = standingGate(await api.readStanding(nowTip))
   if (laterStanding.reason !== undefined) {
     return refuse(laterStanding.reason, nowTip)
@@ -741,8 +712,7 @@ async function settleAfterWait(
   if (!nowPull.isDraft) {
     return alreadyReady(cleared, nowTip, ci.waited, ci.reading)
   }
-  // Evidence is not read again, so a draft written during the wait may rest on
-  // a gate this run never saw fail. Re-marking it would undo that write.
+  // A draft written during the wait may rest on evidence this run never reread.
   if (!pull.isDraft) return refuse('ready-withdrawn', nowTip)
 
   const isMarked = await api.markReady(pull.nodeId)
@@ -762,13 +732,9 @@ async function settleAfterWait(
 }
 
 /**
- * Lifts the draft mark when every gate reads clear at the head.
- *
- * The reads that need no wait all run before the CI wait, so a reviewer whose
- * partner is still driving refuses at once rather than holding a turn through
- * a CI run. The head and the reviews are read again after the wait and before
- * the mutation, since a push during the wait moves the head off the commit
- * every earlier gate cleared.
+ * Lifts the draft mark when every gate reads clear at the head. Every read
+ * needing no wait runs before the CI wait, so a reviewer whose partner is still
+ * driving refuses at once rather than holding a turn through a CI run.
  */
 export async function lift(
   api: LiftApi,
@@ -781,8 +747,7 @@ export async function lift(
   if (pull === undefined) return refused('gh-failed', [], undefined)
   if (!pull.isOpen) return refused('pull-closed', [], pull.head)
 
-  // The tip, not the object's head, since the object lags the ref by up to a
-  // minute after a push and a review marker names the commit it read.
+  // The tip, since the pull object's head lags the ref by up to a minute after a push.
   const tip = await api.readTip(pull.branch)
   if (tip === undefined) return refused('gh-failed', [], pull.head)
 
@@ -865,14 +830,9 @@ function nonEmptyLines(output: string): string[] {
 }
 
 /**
- * Reads where a head stands against the base, ported from the orchestrator
- * poll's own read so the lift and the poll answer one question the same way.
- *
- * merge-tree answers locally, because `mergeable_state` reads unknown while
- * GitHub computes it, which is exactly when a verb asks. Only a change to a
- * path the branch writes makes it stale, since re-testing after every merge to
- * the base is a merge queue's cost without its batching. A head or base that
- * does not resolve, which a fork or a deleted head leaves, reads `unknown`.
+ * Where a head stands against the base, read as the orchestrator poll reads it.
+ * merge-tree answers locally, since `mergeable_state` reads unknown exactly
+ * when a verb asks, and only a change to a path the branch writes is stale.
  */
 export async function readBaseStanding(
   git: GitRunner,
@@ -880,8 +840,7 @@ export async function readBaseStanding(
   head: string,
   ref: string,
 ): Promise<Standing> {
-  // The base is fetched as well as the head. A tracking ref is only as current
-  // as the last fetch, so a sibling merging since then would read as fresh.
+  // A stale tracking ref would read a sibling merged since the last fetch as fresh.
   const baseBranch = ref.startsWith('origin/')
     ? ref.slice('origin/'.length)
     : ref
@@ -927,14 +886,9 @@ export async function readBaseStanding(
 }
 
 /**
- * Reads what changed between a close commit and the head. A commit that does
- * not resolve, or that the head does not descend from, reads as not an
- * ancestor and carries nothing. A head that does not resolve, or a diff that
- * fails, is a read that failed, so the gate refuses rather than passes.
- *
- * The abbreviated marker resolves first, so the ancestry test runs on the full
- * sha. Renames are split into both sides so a move out of a painted path
- * still reads as painted.
+ * What changed from a close commit to the head. An unresolved or rewritten
+ * close reads as not an ancestor, an unresolved head or failed diff as a failed
+ * read, and renames split so a move out of a painted path still reads painted.
  */
 export async function readChangedPaths(
   git: GitRunner,
@@ -962,10 +916,9 @@ export async function readChangedPaths(
 const FILE_HEADER = 'diff --git '
 
 /**
- * Splits a patch into one text per path, dropping the blob ids and hunk line
- * numbers a rebase changes when main moved the file elsewhere. Context lines
- * stay, so a change main made beside the branch's own still differs. A quoted
- * path stays as git printed it, which no inert glob matches.
+ * One patch text per path, without the blob ids and hunk line numbers a rebase
+ * shifts. Context stays, so a base change beside the branch's own differs, and a
+ * quoted path stays quoted, which no inert glob matches.
  */
 function patchesByPath(patch: string): Map<string, string> {
   const files = new Map<string, string>()
@@ -993,10 +946,9 @@ function patchesByPath(patch: string): Map<string, string> {
 }
 
 /**
- * Reads which paths of the branch's own diff differ between a reviewed commit
- * and a head, each diffed against its own merge base with `ref`. A commit or a
- * base that does not resolve, or a diff that fails, reads as undefined, which
- * carries nothing.
+ * Which paths of the branch's own diff differ between a reviewed commit and a
+ * head, each diffed against its own merge base with `ref`. Any read that fails
+ * answers undefined, which carries nothing.
  */
 export async function readRebasedPaths(
   git: GitRunner,

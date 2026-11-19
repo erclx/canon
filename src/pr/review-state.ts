@@ -39,10 +39,8 @@ export interface FamilyState {
   /** The lift's refusal for this family, absent when its gate passes. */
   readonly reason?: LiftRefusal
   /**
-   * Whether a pass covers the tip, which is what a waiting worker reads. True
-   * when the gate passes, or when the newest pass, open or unmarked, names the
-   * tip. The reason alone cannot answer it, since the lift reads an open pass
-   * before it reads currency.
+   * True when the gate passes or the newest pass, open or unmarked, names the
+   * tip. The reason cannot answer it, since the lift reads an open pass first.
    */
   readonly isCovered: boolean
   /** The commit the close covering the tip was read at, beside the record's `head`. */
@@ -151,11 +149,9 @@ export async function readReviewState(
 }
 
 /**
- * Holds until every bound family has a pass covering the tip, or the deadline
- * passes. The tip is read again every poll, so a push during the wait moves
- * what a pass has to cover. The evidence is read once, since a checklist
- * appearing mid-wait is a ship-chain write the waiting worker made before it
- * started.
+ * Holds until a pass covers the tip in every bound family, or the deadline.
+ * The tip is reread every poll, so a push moves the target, and the evidence
+ * once, since the waiting worker wrote any checklist before it started.
  */
 export async function waitForReviews(
   api: ReviewStateApi,

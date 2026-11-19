@@ -303,8 +303,7 @@ async function runLift(
     )
   }
 
-  // Read once up front for the base the standing is measured against. The
-  // injected `readPull` re-reads the object on every gate that needs it.
+  // Read once for the base, while the injected `readPull` rereads it per gate.
   const initial = await readPull(root, resolved.number)
   if (initial.kind === 'refused') {
     return refuseWith(

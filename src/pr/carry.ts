@@ -4,11 +4,9 @@ import { DEFAULT_PAINTED, isPainted, type PaintedPatterns } from '@/pr/painted'
 import { coversHead } from '@/pr/review-scope'
 
 /**
- * The globs no checklist box can observe: tests, stories, snapshots, and
- * markdown where a project keeps docs. The rule lists what is inert rather than
- * what is driven, so a kind nobody listed, such as a `.json` data file, fails
- * closed. Markdown elsewhere, such as an Astro page or content entry, renders,
- * so it is driven like `.mdx`.
+ * The globs no checklist box can observe. Listing the inert rather than the
+ * driven makes an unlisted kind, such as a `.json` data file, fail closed, and
+ * markdown outside the docs folders renders, so it is driven like `.mdx`.
  */
 export const DEFAULT_INERT: readonly string[] = [
   ...DEFAULT_PAINTED.unpainted,
@@ -41,10 +39,9 @@ export type Carry =
   | { readonly kind: 'failed' }
 
 /**
- * Carries a verdict driven at `from` to `to` only across a gap where no changed
- * path `moves` it. By default that is every path outside the inert set, since a
- * box drives behavior, which lives in any source file and not only in a painted
- * one. A `from` that `to` does not descend from never carries.
+ * Carries a verdict from `from` to `to` only across a gap no changed path
+ * `moves`, by default any path outside the inert set, since behavior lives in
+ * any source file. A `from` that `to` does not descend from never carries.
  */
 export async function readCarry(
   readChanged: (from: string, to: string) => Promise<ChangedRead | undefined>,
@@ -80,8 +77,7 @@ export type RebaseCarry =
 
 /**
  * Carries a verdict across a rebase only when no path `moves` differs in the
- * branch's diff. Every path moves by default, which is the code review's rule,
- * so a caller relaxes it only by naming what a verdict cannot observe. A
+ * branch's diff. Every path moves by default, the code review's rule, and a
  * comparison that could not be read carries nothing.
  */
 export async function readRebaseCarry(
@@ -112,10 +108,9 @@ export type UiCarry =
   | { readonly kind: 'failed' }
 
 /**
- * The one rule the UI gate and the tick share. A head descending from the
- * verdict carries across inert commits. One that does not carries across a
- * rebase whose differing branch paths are all inert, and reads `behind` when
- * that comparison could not be read.
+ * The rule the UI gate and the tick share, so neither passes a head the other
+ * refuses. A rebase carries when every differing branch path is inert, and an
+ * unreadable comparison reads `behind`.
  */
 export async function readUiCarry(
   reads: {
@@ -150,11 +145,9 @@ export async function readUiCarry(
 }
 
 /**
- * Which changed paths move a reel. A painted path always does, tested ahead of
- * the inert set, since a fixture a reel films sits in a folder that set
- * exempts. A project declaring `reelInputs` names what a reel reads beyond the
- * painted set, so any other source change leaves the pixels alone. With no
- * declaration, every path outside the inert set moves it too.
+ * Which changed paths move a reel. A painted path always does, ahead of the
+ * inert set, since a filmed fixture sits in a folder that set exempts. Declared
+ * `reelInputs` name the rest, and with none every non-inert path moves it.
  */
 export function reelMoves(painted: PaintedPatterns): (path: string) => boolean {
   const { reelInputs } = painted

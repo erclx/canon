@@ -51,10 +51,9 @@ export function uiPassLine(summary: UiPassSummary): string {
 }
 
 /**
- * The driven boxes ticked at the head. A tick counts as this pass's only when
- * stamped at the head, since an unstamped one is the author's claim and an
- * older stamp names another head. Taste boxes are left out, as the body line
- * leaves them out.
+ * The driven boxes ticked at the head. A tick counts only when stamped at the
+ * head, since an unstamped one is the author's claim and an older stamp names
+ * another head. Taste boxes stay out, as the body line leaves them out.
  */
 export function countTicksAtHead(
   boxes: readonly ChecklistBox[],
@@ -154,10 +153,9 @@ export type TickResult =
   | { readonly kind: 'refused'; readonly reason: TickRefusal }
 
 /**
- * Ticks the named boxes of a marked body's checklist and stamps each with the
- * commit it passed at. A refusal writes nothing, so a taste box named among
- * passed ones leaves every box as it was. A box already ticked is restamped,
- * which makes a repeat at one head a no-op.
+ * Ticks and stamps the named boxes of a marked body's checklist. A refusal
+ * writes nothing, so one taste box leaves every box as it was, and a restamp
+ * makes a repeat at one head a no-op.
  */
 export function tickBoxes(
   body: string,
