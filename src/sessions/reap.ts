@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import type { StopReport } from '@/listeners/stop'
 import type { ResolvedSession } from '@/sessions/resolve'
 import type { StopReading } from '@/sessions/stop'
 import {
@@ -272,6 +273,8 @@ export interface ReapEffects {
   readonly live: () => Promise<ReadonlySet<string>>
   /** Waits between roster reads while a stopped process exits. */
   readonly pause: (ms: number) => Promise<void>
+  /** Runs ahead of the client's `rm` on a listed target, outside a dry run. */
+  readonly beforeRemove?: (sessionId: string) => Promise<void>
 }
 
 const SETTLE_READS = 6
@@ -386,6 +389,7 @@ export async function executeReap(
       continue
     }
 
+    if (remove) await effects.beforeRemove?.(target.sessionId)
     const result = await effects.run(remove ? 'rm' : 'stop', clientId)
     let still = true
     for (let read = 0; read < SETTLE_READS; read++) {
@@ -414,6 +418,125 @@ export async function executeReap(
   }
 
   return rows
+}
+
+const LINKED_WORKTREES = '/.claude/worktrees/'
+
+/**
+ * Only a worktree the session tooling creates counts, so a submodule or a
+ * checkout made by hand elsewhere, whose common directory never names its
+ * toplevel, is not mistaken for one.
+ */
+function isLinkedWorktree(worktree: string, repository: string | null) {
+  return (
+    worktree.includes(LINKED_WORKTREES) && `${worktree}/.git` !== repository
+  )
+}
+
+/**
+ * The worktree whose listeners each target's reap ends, keyed by sessionId.
+ * The main checkout is never one, since a reviewer or planner runs there and
+ * every listener under it would match. A worktree another session outside
+ * the targets still holds is never one either, since a server either session
+ * started serves both.
+ */
+export function listenerWorktrees(
+  targets: readonly Candidate[],
+  roster: readonly RosterRow[],
+): ReadonlyMap<string, string> {
+  const ids = new Set(targets.map((target) => target.sessionId))
+  const paths = new Map<string, string>()
+  for (const target of targets) {
+    const row = roster.find((session) => session.sessionId === target.sessionId)
+    const worktree = row?.worktree ?? null
+    if (row === undefined || worktree === null) continue
+    if (!isLinkedWorktree(worktree, row.repository)) continue
+    const shared = roster.some(
+      (session) =>
+        session.worktree === worktree && !ids.has(session.sessionId ?? ''),
+    )
+    if (!shared) paths.set(target.sessionId, worktree)
+  }
+  return paths
+}
+
+export interface ListenerEffects {
+  /** Ends every listener inside the given worktrees, or reports what would end. */
+  readonly stop: (
+    paths: readonly string[],
+    dryRun: boolean,
+  ) => Promise<StopReport>
+}
+
+export interface ReapResult {
+  readonly sessions: readonly ReapRow[]
+  /** What the listener step ended, or null where no target had a worktree it could end. */
+  readonly listeners: StopReport | null
+}
+
+/** `gone` is a session already off the roster, whose server is the orphan this step exists for. */
+const ENDS_LISTENERS: readonly ReapOutcome[] = [
+  'gone',
+  'stopped',
+  'removed',
+  'would-stop',
+  'would-remove',
+]
+
+function merge(reports: readonly StopReport[]): StopReport | null {
+  if (reports.length === 0) return null
+  if (reports.some((report) => report.kind === 'unread')) {
+    return { kind: 'unread' }
+  }
+  return {
+    kind: 'read',
+    stopped: reports.flatMap((report) =>
+      report.kind === 'read' ? report.stopped : [],
+    ),
+  }
+}
+
+/**
+ * Reaps the targets and ends the listeners their worktrees hold. A stop ends
+ * them once every target in that worktree has left the roster, so a session
+ * still live keeps the server it owns. A remove ends them ahead of the
+ * client's removal, the order `canon worktrees reclaim` keeps, since the
+ * client may delete the directory the server runs in. A dry run reports what
+ * would end and signals nothing.
+ */
+export async function reapTargets(
+  targets: readonly Candidate[],
+  roster: readonly RosterRow[],
+  remove: boolean,
+  dryRun: boolean,
+  effects: ReapEffects & ListenerEffects,
+): Promise<ReapResult> {
+  const worktrees = listenerWorktrees(targets, roster)
+  const reports: StopReport[] = []
+  const ended = new Set<string>()
+
+  const sessions = await executeReap(targets, remove, dryRun, {
+    ...effects,
+    beforeRemove: async (sessionId) => {
+      const path = worktrees.get(sessionId)
+      if (path === undefined || ended.has(path)) return
+      ended.add(path)
+      reports.push(await effects.stop([path], false))
+    },
+  })
+
+  if (!remove || dryRun) {
+    const paths = [...new Set(worktrees.values())].filter((path) =>
+      sessions.every(
+        (row) =>
+          worktrees.get(row.sessionId) !== path ||
+          ENDS_LISTENERS.includes(row.outcome),
+      ),
+    )
+    if (paths.length > 0) reports.push(await effects.stop(paths, dryRun))
+  }
+
+  return { sessions, listeners: merge(reports) }
 }
 
 const DIRS: readonly [TaskState, (root: string) => string][] = [

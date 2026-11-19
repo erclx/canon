@@ -2,11 +2,14 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
+import type { StopReport } from '@/listeners/stop'
 import {
   type ClientIds,
   clientEffects,
   executeReap,
+  type ListenerEffects,
   parseClientIds,
+  reapTargets,
   planFinishedReap,
   planTaskReap,
   readTaskSessions,
@@ -403,6 +406,131 @@ describe('executeReap', () => {
       outcome: 'failed',
       detail: 'No session matching',
     })
+  })
+})
+
+const LINKED = '/work/canon/.claude/worktrees/parser'
+
+function listenerStop(
+  calls: string[],
+  report: StopReport = {
+    kind: 'read',
+    stopped: [{ path: LINKED, pids: [4242], ports: [4321] }],
+  },
+): ListenerEffects {
+  return {
+    stop: async (paths, dryRun) => {
+      calls.push(`listeners ${paths.join(',')}${dryRun ? ' dry' : ''}`)
+      return report
+    },
+  }
+}
+
+describe('reapTargets', () => {
+  const target = { sessionId: WORKER, name: 'worker-canon-parser' }
+  const inLinked = row({ worktree: LINKED })
+
+  it('should end the listeners in a stopped session linked worktree', async () => {
+    const fake = effects([WORKER], true)
+    const ended: string[] = []
+
+    const result = await reapTargets([target], [inLinked], false, false, {
+      ...fake,
+      ...listenerStop(ended),
+    })
+
+    expect(ended).toEqual([`listeners ${LINKED}`])
+    expect(result.listeners).toEqual({
+      kind: 'read',
+      stopped: [{ path: LINKED, pids: [4242], ports: [4321] }],
+    })
+  })
+
+  it('should never end listeners for a session in the main checkout', async () => {
+    const fake = effects([WORKER], true)
+    const ended: string[] = []
+
+    const result = await reapTargets(
+      [target],
+      [row({ worktree: '/work/canon' })],
+      false,
+      false,
+      { ...fake, ...listenerStop(ended) },
+    )
+
+    expect(ended).toEqual([])
+    expect(result.listeners).toBeNull()
+  })
+
+  it('should keep the listeners of a worktree another session still holds', async () => {
+    const fake = effects([WORKER, REVIEWER], true)
+    const ended: string[] = []
+    const resumed = row({
+      sessionId: REVIEWER,
+      name: 'worker-canon-parser-resumed',
+      worktree: LINKED,
+    })
+
+    await reapTargets([target], [inLinked, resumed], false, false, {
+      ...fake,
+      ...listenerStop(ended),
+    })
+
+    expect(ended).toEqual([])
+  })
+
+  it('should keep the listeners of a session still live after its stop', async () => {
+    const fake = effects([WORKER], false)
+    const ended: string[] = []
+
+    const result = await reapTargets([target], [inLinked], false, false, {
+      ...fake,
+      ...listenerStop(ended),
+    })
+
+    expect(result.sessions[0]).toMatchObject({ outcome: 'failed' })
+    expect(ended).toEqual([])
+  })
+
+  it('should report what would end on a dry run without signaling', async () => {
+    const fake = effects([WORKER], true)
+    const ended: string[] = []
+
+    await reapTargets([target], [inLinked], false, true, {
+      ...fake,
+      ...listenerStop(ended),
+    })
+
+    expect(ended).toEqual([`listeners ${LINKED} dry`])
+    expect(fake.calls).toEqual([])
+  })
+
+  it('should end the listeners ahead of the client remove', async () => {
+    const order: string[] = []
+    const fake = effects([WORKER], true)
+
+    const result = await reapTargets([target], [inLinked], true, false, {
+      ...fake,
+      run: async (verb, id) => {
+        order.push(`${verb} ${id}`)
+        return fake.run(verb, id)
+      },
+      ...listenerStop(order),
+    })
+
+    expect(order).toEqual([`listeners ${LINKED}`, 'rm 11111111'])
+    expect(result.sessions[0]).toMatchObject({ outcome: 'removed' })
+  })
+
+  it('should carry an unread machine as unread rather than as nothing ended', async () => {
+    const fake = effects([WORKER], true)
+
+    const result = await reapTargets([target], [inLinked], false, false, {
+      ...fake,
+      ...listenerStop([], { kind: 'unread' }),
+    })
+
+    expect(result.listeners).toEqual({ kind: 'unread' })
   })
 })
 

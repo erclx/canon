@@ -12,14 +12,16 @@ import {
   selfOf,
 } from '@/sessions/resolve'
 import { readStop, type StopReading } from '@/sessions/stop'
+import { machineListenerReader } from '@/listeners/machine'
+import { type StopReport, stopListeners } from '@/listeners/stop'
 import {
   clientEffects,
-  executeReap,
   planFinishedReap,
   planTaskReap,
   type ReapPlan,
   type ReapRow,
   readTaskSessions,
+  reapTargets,
   type RosterRow,
 } from '@/sessions/reap'
 import {
@@ -327,6 +329,19 @@ export function register(program: Command): void {
         'task records that has sat idle past --idle-minutes. It refuses without',
         '--write or --dry-run, since it reaches sessions nobody named.',
         '',
+        'Each act passes the client the short id `claude agents` lists beside',
+        'the sessionId, read at reap time, since its stop and rm refuse the',
+        'full one. A target the client does not list is never acted on.',
+        '',
+        'Every reap also ends the listeners, such as a preview server, inside',
+        "each reaped session's linked worktree under .claude/worktrees/. A stop",
+        'ends them once the roster drops the session, and --remove ends them',
+        'ahead of the removal. The main checkout, a sibling worktree, and a',
+        'worktree another live session still holds are never signaled. The',
+        'record\'s "listeners" names each path, pid, and port ended, reads',
+        '"unread" where the machine cannot list sockets, and is null where no',
+        'target had a worktree to end. The worktree and its branch stay.',
+        '',
         'Skips, read off each row\'s "reason":',
         '  caller       the session running this command',
         '  kept         named by --keep, such as a planner held for reuse',
@@ -347,7 +362,8 @@ export function register(program: Command): void {
         '  skipped                     left alone, with a reason',
         '  gone                        recorded, and no longer on the roster',
         '  failed                      still on the roster after the client ran,',
-        '                              with its output in "detail"',
+        '                              with its output in "detail", or one the',
+        '                              client does not list, with nothing run',
         '',
         "Each outcome is read off the roster after the client's stop or rm",
         "rather than off its exit, since the client's own report is unreliable.",
@@ -494,17 +510,20 @@ async function runReap(
     )
   }
 
-  const acted = await executeReap(
+  const reader = machineListenerReader()
+  const acted = await reapTargets(
     plan.targets,
+    roster,
     opts.remove === true,
     opts.dryRun === true,
     {
       ...clientEffects(),
       live: liveIds,
       pause: (ms) => new Promise((done) => setTimeout(done, ms)),
+      stop: (paths, dryRun) => stopListeners(paths, { reader, dryRun }),
     },
   )
-  const rows: readonly ReapRow[] = [...acted, ...plan.settled]
+  const rows: readonly ReapRow[] = [...acted.sessions, ...plan.settled]
 
   intro('canon sessions reap')
   logStep(stem === null ? 'Finished sessions' : `Task ${stem}`)
@@ -517,6 +536,9 @@ async function runReap(
     if (row.outcome === 'failed') logWarn(`${line}: ${row.detail ?? ''}`)
     else logInfo(line)
   }
+  if (acted.listeners !== null) {
+    reportListeners(acted.listeners, opts.dryRun === true)
+  }
   outro()
 
   const failed = rows.some((row) => row.outcome === 'failed')
@@ -527,8 +549,26 @@ async function runReap(
     action: opts.remove ? 'remove' : 'stop',
     dryRun: opts.dryRun === true,
     sessions: rows,
+    listeners: acted.listeners,
   })
   return failed ? 1 : 0
+}
+
+function reportListeners(report: StopReport, dryRun: boolean): void {
+  logStep('Listeners')
+  if (report.kind === 'unread') {
+    logWarn(
+      'This machine offers neither lsof nor /proc, so no listener was read and none was ended.',
+    )
+    return
+  }
+  if (report.stopped.length === 0) logInfo('No listener in a reaped worktree.')
+  const verb = dryRun ? 'Would end' : 'Ended'
+  for (const { path, pids, ports } of report.stopped) {
+    logInfo(
+      `${verb} pid ${pids.join(', ')} on port ${ports.join(', ')} in ${path}`,
+    )
+  }
 }
 
 interface ExportCommandOptions {
