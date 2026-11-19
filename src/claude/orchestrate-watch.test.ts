@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 
 import {
   initialState,
+  parseQueue,
   pass,
+  type QueuedWorker,
   type Read,
   type Worker,
   type WatchState,
@@ -11,6 +13,7 @@ import {
 const buildWorker = (overrides: Partial<Worker> = {}): Worker => ({
   branch: 'feat/thing',
   dwellMs: 1000,
+  id: 'id-1',
   name: 'worker-one',
   status: 'busy',
   ...overrides,
@@ -149,5 +152,99 @@ describe('pass', () => {
       ])
       expect(second.lines).toEqual([])
     })
+  })
+
+  describe('launch', () => {
+    const queued = (overrides: Partial<QueuedWorker> = {}): QueuedWorker => ({
+      branch: 'feat/thing',
+      label: 'v1.1',
+      ...overrides,
+    })
+
+    it('should print a queued worker row once a session holds its branch', () => {
+      const state = seed([])
+
+      const next = pass(state, ok([]), ok([buildWorker()]), ok([queued()]))
+
+      expect(next.lines).toContain('LAUNCHED v1.1 -> worker-one [id-1]')
+    })
+
+    it('should print a launch once while the row stays queued', () => {
+      const state = seed([])
+      const first = pass(state, ok([]), ok([buildWorker()]), ok([queued()]))
+
+      const second = pass(
+        first.state,
+        ok([]),
+        ok([buildWorker()]),
+        ok([queued()]),
+      )
+
+      expect(second.lines).toEqual([])
+    })
+
+    it('should print nothing for a queued row no session holds', () => {
+      const state = seed([buildWorker({ branch: 'feat/other' })])
+
+      const next = pass(
+        state,
+        ok([]),
+        ok([buildWorker({ branch: 'feat/other' })]),
+        ok([queued()]),
+      )
+
+      expect(next.lines).toEqual([])
+    })
+
+    it('should print nothing when the queue is empty', () => {
+      const state = seed([buildWorker()])
+
+      const next = pass(state, ok([]), ok([buildWorker()]), ok([]))
+
+      expect(next.lines).toEqual([])
+    })
+
+    it('should report a failed queue read and print the launch once it recovers', () => {
+      const state = seed([buildWorker()])
+
+      const broken = pass(state, ok([]), ok([buildWorker()]), failed)
+      const recovered = pass(
+        broken.state,
+        ok([]),
+        ok([buildWorker()]),
+        ok([queued()]),
+      )
+
+      expect(broken.lines).toEqual([
+        'watch: the dispatch queue failed to load, so no hand launch is matched this pass',
+      ])
+      expect(recovered.lines).toEqual(['LAUNCHED v1.1 -> worker-one [id-1]'])
+    })
+  })
+})
+
+describe('parseQueue', () => {
+  it('should keep worker rows and leave planner and reviewer rows out', () => {
+    const record = JSON.stringify({
+      ok: true,
+      prompts: [
+        { label: 'v1.1', role: 'planner' },
+        { label: 'v1.2', role: 'worker', branch: 'feat/two' },
+        { label: 'v1.3', role: 'reviewer', pr: 7 },
+      ],
+    })
+
+    const read = parseQueue(`${record}\n`)
+
+    expect(read).toEqual({
+      isOk: true,
+      value: [{ branch: 'feat/two', label: 'v1.2' }],
+    })
+  })
+
+  it('should read a refusal record as a failed read', () => {
+    const record = JSON.stringify({ ok: false, reason: 'malformed' })
+
+    expect(parseQueue(record)).toEqual({ isOk: false })
   })
 })

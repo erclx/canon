@@ -635,21 +635,65 @@ export async function listSourceFiles(
  */
 const CONCURRENT_READS = 64
 
+/**
+ * A path the caller named, already checked to exist. A file carries its
+ * checkout, since the gate prunes a touched path relative to the repository.
+ */
+export type ScanTarget =
+  | { readonly kind: 'directory'; readonly path: string }
+  | { readonly kind: 'file'; readonly path: string; readonly checkout: string }
+
+function relativeTo(base: string, path: string): string {
+  return path.startsWith(`${base}/`) ? path.slice(base.length + 1) : path
+}
+
 /** Scans a working tree on disk. */
 export async function scanTree(
   root: string,
   opts: ScanOptions = {},
 ): Promise<LanguageCount[]> {
+  return scanPaths([{ path: root, kind: 'directory' }], root, opts)
+}
+
+/**
+ * Scans each file once, reporting a directory's files relative to it and a
+ * named file relative to `base`, or absolute outside it.
+ */
+export async function scanPaths(
+  targets: readonly ScanTarget[],
+  base: string,
+  opts: ScanOptions = {},
+): Promise<LanguageCount[]> {
   const languages = opts.languages ?? LANGUAGES
-  const paths = await listSourceFiles(root, languages)
+  const labels = new Map<string, string>()
+
+  for (const target of targets) {
+    if (target.kind === 'directory') {
+      for (const path of await listSourceFiles(target.path, languages)) {
+        if (!labels.has(path)) labels.set(path, relativeTo(target.path, path))
+      }
+      continue
+    }
+
+    const language = languageFor(target.path)
+    if (!language || !languages.includes(language)) continue
+    if (isPruned(relativeTo(target.checkout, target.path))) continue
+    if (!labels.has(target.path)) {
+      labels.set(target.path, relativeTo(base, target.path))
+    }
+  }
+
+  const entries = [...labels]
   const files: SourceFile[] = []
 
-  for (let start = 0; start < paths.length; start += CONCURRENT_READS) {
+  for (let start = 0; start < entries.length; start += CONCURRENT_READS) {
     const batch = await Promise.all(
-      paths.slice(start, start + CONCURRENT_READS).map(async (path) => ({
-        path: path.startsWith(`${root}/`) ? path.slice(root.length + 1) : path,
-        text: await readFile(path, 'utf8'),
-      })),
+      entries
+        .slice(start, start + CONCURRENT_READS)
+        .map(async ([path, label]) => ({
+          path: label,
+          text: await readFile(path, 'utf8'),
+        })),
     )
     files.push(...batch)
   }

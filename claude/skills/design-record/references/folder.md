@@ -9,7 +9,7 @@ Applies to `canon/design/`. Each file is an accepted design a build matches, kep
 
 ## Scope
 
-Governs the folder's groups, the file names inside them, the support folder, and the index at `canon/design/index.md`.
+Governs the folder's groups, the file names inside them, the support folder, the group files beside them, and the generated index at `canon/design/index.md`.
 
 Does not govern:
 
@@ -23,7 +23,7 @@ A folder works when a builder opening it finds the reference for the surface the
 
 - Does the group a surface sits in match where a user meets it in the app?
 - Does each reference carry both themes, as a picture and as frame HTML?
-- Does the index say which code each group governs?
+- Does each group's file say which code it governs?
 
 ## Groups
 
@@ -46,33 +46,83 @@ Each reference is one name in two themes, with a PNG and its frame HTML per them
 
 ## The index
 
-`canon/design/index.md` is prose for a reader. It names the link a file listing lacks, from a group to the code it governs.
+The index tells a reader which code each group governs, the link a file listing lacks. It splits in two, so a branch landing a reference in an existing group edits no line another branch edits.
 
-- Write one row per group, carrying the group, what the user sees there, the code paths it governs, and the states its frames show
-- Give a group split into section folders one row per section, with the section path such as `home/sidebar` as its Group, and no row for the parent
+- Give each group one file beside its folder, as `canon/design/home.md` beside `canon/design/home/`, holding what the user sees, the code the group governs, and the states its frames show
+- Keep every index file out of the group folders, since the sync reports a file no mapping writes inside them as stray
+- Generate `canon/design/index.md` from the group files with `canon indexes regen canon/design`, and never edit its list by hand
 - List no files, since the tree and the sync's own check already answer what exists
 - Keep the sync's canvas mapping out of the index, in a file the sync owns beside it
 
+The generator reads each group file's `title` and `description` into one line of the top-level list. A support folder such as `assets/` takes no group file and stays off the list.
+
+Two branches each adding a new group still meet on the generated list, since both insert a line there. The second to merge reruns `canon indexes regen canon/design` after its rebase rather than resolving the lines by hand.
+
+### The group file
+
+The frontmatter `description` says what the user sees, so the generated list carries it. The body holds an H1 and two lists under `## Code` and `## States`.
+
+A group split into section folders keeps one file for the whole group, since a file per section would sit inside the group folder. Its body gives each section an H3 named by the section path, opening with a sentence on what the user sees there, then the section's code and states.
+
 ### Sizing the state list
 
-The States cell names the kinds of state the frames show, such as themes, widths, and the empty and error states, rather than one entry per frame. Keep it to 120 characters, the table cell limit `canon markdown audit` reports on the index.
+The States list names the kinds of state the frames show, such as themes, widths, and the empty and error states, rather than one entry per frame. A list that grows with every frame has stopped naming kinds.
 
-A cap alone gets the same list squeezed into fewer words. A group that outgrows its cell splits instead, into one section folder per part of its code as `## Groups` allows, and each section takes its own row in the index. Where the code does not split, the group keeps one row and names broader kinds of state.
+A group whose list keeps growing splits instead, into one section folder per part of its code as `## Groups` allows, and each section takes its own H3 in the group file. Where the code does not split, the group names broader kinds of state.
 
-### Template
+### An index in the older shape
 
-The column headers stay verbatim. A row per group, or per section of a split group, `foundations` included.
+An index carrying one hand-kept table of groups predates this standard. It stays valid, and `canon markdown audit` still reports a table cell in it past 120 characters. A project moves to group files when a landing next touches its index, writing one file per row and dropping `auto: false` from the top-level index so the generator writes it.
+
+### Templates
+
+The top-level index carries frontmatter alone, and the generator writes the body from its `title` and `subtitle`.
 
 ```markdown
-# Design references
+---
+title: Design references
+description: The accepted design frames a build matches, grouped by app part
+subtitle: Each group holds accepted frames a build matches, light and dark. Each line links the group file naming the code it governs.
+---
+```
 
-Each group holds accepted frames a build matches, light and dark.
+A group file, `foundations` included, takes this shape.
 
-| Group          | What the user sees    | Code               | States           |
-| -------------- | --------------------- | ------------------ | ---------------- |
-| `inspector`    | <the surface>         | `<path in source>` | <kinds of state> |
-| `home/sidebar` | <one section of home> | `<section path>`   | <kinds of state> |
-| `foundations`  | Tokens and colors     | `<stylesheet>`     | <themes covered> |
+```markdown
+---
+title: Inspector
+description: <the surface the user sees>
+---
+
+# Inspector
+
+## Code
+
+- `<path in source>`
+
+## States
+
+- <kinds of state>
+```
+
+A split group gives each section its own H3 in place of the two lists.
+
+```markdown
+---
+title: Home
+description: <the surface the user sees>
+---
+
+# Home
+
+## Sections
+
+### `home/sidebar`
+
+<what the user sees in this section>
+
+- Code: `<section path>`
+- States: <kinds of state>
 ```
 
 ## Lifetime

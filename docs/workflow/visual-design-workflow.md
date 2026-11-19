@@ -10,11 +10,13 @@ Canon runs a UI feature through one loop. A plan cites the design, a worker buil
 
 ## Plan
 
-`canon:plan-feature` reads `canon/DESIGN.md` and `canon/design/index.md` before it places a UI change. It loads `canon:design-taste`, which decides the layer order a surface is designed in, the coherence locks that keep it consistent, and the defaults a model reaches for that the surface should reach past.
+`canon:plan-feature` reads `canon/DESIGN.md`, `canon/design/index.md`, and the group files it links before it places a UI change. It loads `canon:design-taste`, which decides the layer order a surface is designed in, the coherence locks that keep it consistent, and the defaults a model reaches for that the surface should reach past.
 
 - The plan carries a `## Design references` section naming the accepted design for each surface it changes, or `None identified.` when there is none.
 - Each entry says whether the change is `built against` the reference or leaves it `redrawn`, and a redrawn one ships its new frame in the same pull request through `canon:design-record`.
 - A design becomes a reference through `canon:design-record`, which lands an accepted pick in `canon/design/` and carries its values into `canon/DESIGN.md`.
+
+Each group keeps a file beside its folder, such as `canon/design/home.md`, naming the code it governs. `canon indexes regen canon/design` writes the top-level index from those files, so branches landing in different existing groups share no line. Two branches adding new groups both insert one, so the second to merge reruns the regen.
 
 ## Build
 

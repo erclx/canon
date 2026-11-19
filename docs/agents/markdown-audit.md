@@ -34,7 +34,7 @@ The ban set and checkpoints ship in `src/markdown/bans.ts` and `src/markdown/str
 
 A page marked `kind: reference` holds its opening, then `Output`, `Refusals`, and `See also` as H2s, each at most once and in that order. It takes no H3 and no table headed `Flag` or `Option`. An unmarked page is never measured.
 
-Tables take the four limits in the `markdown-craft` skill's `tables.md`, on the density paths but never `CLAUDE.md`, whose Key paths take the run and H3 limits alone. The design index at `canon/design/index.md` takes only the cell limit, and that finding never gates.
+Tables take the four limits in the `markdown-craft` skill's `tables.md`, on the density paths but never `CLAUDE.md`, whose Key paths take the run and H3 limits alone. A design index at `canon/design/index.md` still kept as one table of groups takes only the cell limit, and that finding never gates. The generated index holds no table.
 
 - A cell past 120 visible characters reports as `table-cell` and a list after a table as `table-then-list`, both under `density`
 - More than 8 body rows reports as `table-rows` and a code span with a run past 30 characters as `table-token`, both under `tables` and neither setting the exit code

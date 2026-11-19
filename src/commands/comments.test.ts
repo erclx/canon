@@ -282,3 +282,111 @@ describe('canon comments scan python', () => {
     RUN_TIMEOUT_MS,
   )
 })
+
+describe('canon comments scan file paths', () => {
+  let TREE: string
+
+  interface PathRecord {
+    readonly path: string
+    readonly paths: string[]
+    readonly reason?: string
+    readonly vocabulary: { readonly source: string } | null
+    readonly snapshot: {
+      readonly files: number
+      readonly degradationHits: unknown[]
+    }[]
+  }
+
+  async function run(...args: string[]) {
+    const result = await execa(
+      'bun',
+      [CLI, 'comments', 'scan', ...args, '--json'],
+      { cwd: TREE, reject: false },
+    )
+    const line = result.stdout
+      .split('\n')
+      .findLast((row) => row.startsWith('{'))
+    return {
+      exitCode: result.exitCode,
+      record: JSON.parse(line ?? '{}') as PathRecord,
+    }
+  }
+
+  beforeAll(async () => {
+    TREE = await realpath(await mkdtemp(join(tmpdir(), 'canon-comments-file-')))
+    await mkdir(join(TREE, '.claude', 'rules'), { recursive: true })
+    await mkdir(join(TREE, 'src'), { recursive: true })
+    await writeFile(join(TREE, RULE_PATH), RULE)
+    await writeFile(
+      join(TREE, 'src', 'a.ts'),
+      '// TODO later\nexport const a = 1\n',
+    )
+    await writeFile(join(TREE, 'src', 'b.ts'), 'export const b = 2\n')
+    await writeFile(join(TREE, 'README.md'), '# Title\n')
+    await execa('git', ['init', '-q'], { cwd: TREE })
+  }, SETUP_TIMEOUT_MS)
+
+  afterAll(async () => {
+    await rm(TREE, { recursive: true, force: true })
+  })
+
+  it(
+    'should scan a file path with the rules of the checkout holding it',
+    async () => {
+      const { exitCode, record } = await run('src/a.ts', '--languages', 'ts')
+
+      expect(exitCode).toBe(0)
+      expect(record.path).toBe(join(TREE, 'src', 'a.ts'))
+      expect(record.vocabulary?.source).toBe(RULE_PATH)
+      expect(record.snapshot[0]?.files).toBe(1)
+      expect(record.snapshot[0]?.degradationHits).toEqual([
+        { file: 'src/a.ts', line: 1, term: 'TODO' },
+      ])
+    },
+    RUN_TIMEOUT_MS,
+  )
+
+  it(
+    'should scan each file in a list and skip one in an unscanned language',
+    async () => {
+      const { exitCode, record } = await run(
+        'src/a.ts',
+        'src/b.ts',
+        'README.md',
+        '--languages',
+        'ts',
+      )
+
+      expect(exitCode).toBe(0)
+      expect(record.paths).toEqual([
+        join(TREE, 'src', 'a.ts'),
+        join(TREE, 'src', 'b.ts'),
+        join(TREE, 'README.md'),
+      ])
+      expect(record.snapshot[0]?.files).toBe(2)
+    },
+    RUN_TIMEOUT_MS,
+  )
+
+  it(
+    'should refuse a path that does not exist',
+    async () => {
+      const { exitCode, record } = await run('src/a.ts', 'src/gone.ts')
+
+      expect(exitCode).toBe(1)
+      expect(record.reason).toBe('missing-path')
+    },
+    RUN_TIMEOUT_MS,
+  )
+
+  it(
+    'should refuse a trend over a file path',
+    async () => {
+      const { exitCode, record } = await run('src/a.ts', '--since', 'HEAD')
+
+      expect(exitCode).toBe(1)
+      expect(record.reason).toBe('since-needs-tree')
+    },
+    RUN_TIMEOUT_MS,
+  )
+})

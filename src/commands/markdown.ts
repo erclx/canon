@@ -78,12 +78,9 @@ const EXIT_REFUSED = 1
 const EXIT_GATE = 2
 
 /**
- * A set shipped empty, so the run measured a corpus against nothing.
- *
- * Distinct from `EXIT_REFUSED` because the two want different responses. A
- * refusal means no corpus was built and a push stage is right to skip, while an
- * empty set means the corpus was walked and nothing was looked for, which is a
- * defect in the build and has to fail.
+ * A set shipped empty, so a walked corpus was measured against nothing. Kept
+ * apart from `EXIT_REFUSED`, which a push stage may skip, since this is a build
+ * defect that has to fail.
  */
 const EXIT_UNUSABLE = 3
 
@@ -468,8 +465,7 @@ async function runAudit(
     )
   }
 
-  // An empty set finds nothing and would exit clean, which reports a corpus
-  // nobody checked as a corpus carrying no violation.
+  // An empty set would exit clean on a corpus nobody checked.
   if (empty.length > 0) return EXIT_UNUSABLE
 
   const gating = isGating({
@@ -516,12 +512,9 @@ function reportScope(
 }
 
 /**
- * Names what the closed sets reach and what they leave to a reader.
- *
- * The two standards state bans in three shapes and only two of them are a
- * closed set. A phrase ban carries a placeholder standing in for the rest of
- * the sentence and every voice rule is a judgment, so a report listing hits
- * without naming those would read as a verdict on the whole standard.
+ * Names what the closed sets reach and what they leave to a reader, since a
+ * phrase ban carries a placeholder and a voice rule is a judgment, and hits
+ * alone would read as a verdict on the whole standard.
  */
 function reportBans(
   reports: readonly FileReport[],
@@ -700,7 +693,7 @@ function reportDensity(
   )
   if (carrying.some((report) => isDesignIndex(report.rel))) {
     logInfo(
-      "On the design index, split a group whose States cell runs long into one section folder per part of its code, each with its own row, per '### Sizing the state list' in the design-record skill's folder.md.",
+      "On a design index still kept as one table, move each row into a group file beside its folder and let canon indexes regen write the list, per '### An index in the older shape' in the design-record skill's folder.md.",
     )
   }
   pipeOutput(
@@ -962,11 +955,8 @@ function reportBullets(
 }
 
 /**
- * States both halves of the checkpoint on every run.
- *
- * The standard states a sentence cap and a weight, and a report naming only the
- * first would leave a reader unable to tell why a two-sentence paragraph is
- * listed.
+ * States both the sentence cap and the weight on every run, or a reader cannot
+ * tell why a two-sentence paragraph is listed.
  */
 function reportParagraphs(
   reports: readonly FileReport[],
@@ -1018,16 +1008,9 @@ function reportParagraphs(
 }
 
 /**
- * Reports the distribution rather than a verdict, which is what separates this
- * step from the three above it.
- *
- * Bullet, paragraph, and depth weight each report a count against a checkpoint
- * a reader settles. Cadence reports a count as well, and the range behind it is
- * drawn from one surface class rather than from the corpus, so the step states
- * where the numbers came from beside them. A reader whose file is terse
- * reference prose is meant to read a flat paragraph as correct, and a number
- * printed with no comparison beside it reads as a finding whatever the step is
- * called.
+ * Reports the distribution rather than a verdict. Its range comes from one
+ * surface class, so the step prints where the numbers came from, or a flat
+ * paragraph in terse reference prose would read as a finding.
  */
 function reportCadence(
   reports: readonly FileReport[],
@@ -1111,13 +1094,8 @@ function reportCadence(
 }
 
 /**
- * Names the render width and the blank-line convention on every run.
- *
- * The standard settles heading level and fenced blocks and stops there, so a
- * hand reader who drops blank lines lands a line or two below this number.
- * Stating both keeps the two measurements reconcilable, and the width matters
- * more, since a number counted in rendered lines cannot be reproduced without
- * it.
+ * Names the render width and the blank-line convention on every run, since a
+ * count in rendered lines cannot be reproduced without the width.
  */
 function reportDepth(
   reports: readonly FileReport[],

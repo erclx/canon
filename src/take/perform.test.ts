@@ -12,7 +12,9 @@ import {
   type PointerInput,
   FOCUS_MOVED,
   type Stage,
+  TargetCovered,
   TargetOffscreen,
+  coverExpression,
   performSteps,
 } from '@/take/perform'
 import type { TakeStep, Viewport } from '@/take/plan'
@@ -30,17 +32,19 @@ type Sent =
   | ({ readonly via: 'press' } & KeyInput)
 
 /**
- * A stage on a frame clock whose targets resolve to fixed boxes. A pointer
- * input takes `pointerMs` of clip time, one frame by default, and longer for a
- * slow page that answers each input only once it paints.
+ * A frame-clock stage with fixed boxes. `pointerMs` above a frame stands in
+ * for a slow page, and a target in `covers` reads as covered by that element.
  */
 function recordingStage(
   boxes: Record<string, Box>,
   pointerMs = FRAME_MS,
   focus: Box | null = null,
   viewport: Viewport = VIEWPORT,
+  covers: Record<string, string> = {},
 ) {
   const sent: Sent[] = []
+  const coverReads: string[] = []
+  const readsAt: { readonly inputs: number; readonly ms: number }[] = []
   let ms = 0
   const stage: Stage = {
     viewport,
@@ -61,13 +65,26 @@ function recordingStage(
     },
     evaluate: async <T>(expression: string) => {
       if (expression === FOCUS_MOVED) return focus as T
+      const covered = Object.entries(boxes).find(
+        ([name, box]) =>
+          expression ===
+          coverExpression(name, {
+            x: box.x + box.width / 2,
+            y: box.y + box.height / 2,
+          }),
+      )
+      if (covered) {
+        coverReads.push(covered[0])
+        readsAt.push({ inputs: sent.length, ms })
+        return (covers[covered[0]] ?? null) as T
+      }
       const target = Object.keys(boxes).find((name) =>
         expression.includes(JSON.stringify(name)),
       )
       return (target ? boxes[target] : null) as T
     },
   }
-  return { stage, sent }
+  return { stage, sent, coverReads, readsAt }
 }
 
 async function perform(
@@ -822,5 +839,145 @@ describe('performSteps press at a point', () => {
     ])
 
     await expect(run).rejects.toThrow(TargetOffscreen)
+  })
+})
+
+describe('performSteps on a covered target', () => {
+  const SAVE: Box = { x: 200, y: 100, width: 80, height: 30 }
+
+  async function performCovered(
+    steps: TakeStep[],
+    covers: Record<string, string>,
+  ) {
+    const { stage, sent, coverReads, readsAt } = recordingStage(
+      { '#save': SAVE, '#card': CARD, '#lane': LANE },
+      FRAME_MS,
+      null,
+      VIEWPORT,
+      covers,
+    )
+    const run = performSteps(stage, steps, { pointer: START, log: [] })
+    return { run, sent, coverReads, readsAt }
+  }
+
+  const isPress = (input: Sent) => input.type === 'down'
+
+  it('should refuse a click whose point lands on a cover, naming the cover', async () => {
+    const { run } = await performCovered([{ kind: 'click', target: '#save' }], {
+      '#save': 'div.hit-layer',
+    })
+
+    await expect(run).rejects.toThrow(TargetCovered)
+    await expect(run).rejects.toThrow(/#save .*div\.hit-layer/)
+  })
+
+  it('should send no press toward a covered target', async () => {
+    const { run, sent } = await performCovered(
+      [{ kind: 'dblclick', target: '#save' }],
+      { '#save': 'div.hit-layer' },
+    )
+
+    await run.catch(() => undefined)
+    expect(sent.some(isPress)).toBe(false)
+  })
+
+  it('should read the cover after the glide and the rest, right before the press', async () => {
+    const { run, sent, readsAt } = await performCovered(
+      [{ kind: 'click', target: '#save' }],
+      {},
+    )
+
+    await run
+    const [read] = readsAt
+    const glide = sent.slice(0, read?.inputs)
+    expect(glide.length).toBeGreaterThan(1)
+    expect(glide.every((input) => input.type === 'move')).toBe(true)
+    expect(sent[read?.inputs ?? 0]).toMatchObject({ type: 'down' })
+    expect(read?.ms).toBeCloseTo(glide.length * FRAME_MS + 300, 5)
+  })
+
+  it('should press a target the cover read clears', async () => {
+    const { run, sent } = await performCovered(
+      [{ kind: 'click', target: '#save' }],
+      {},
+    )
+
+    await run
+    expect(sent.find((input) => input.type === 'down')).toMatchObject({
+      x: 240,
+      y: 115,
+    })
+  })
+
+  it('should press through a cover with no read when the step says through', async () => {
+    const { run, sent, coverReads } = await performCovered(
+      [{ kind: 'click', target: '#save', through: true }],
+      { '#save': 'div.hit-layer' },
+    )
+
+    await run
+    expect(coverReads).toEqual([])
+    expect(sent.some((input) => input.type === 'down')).toBe(true)
+  })
+
+  it('should refuse a fill whose field is covered, before typing', async () => {
+    const { run, sent } = await performCovered(
+      [{ kind: 'fill', target: '#save', text: 'a' }],
+      { '#save': 'div#scrim' },
+    )
+
+    await expect(run).rejects.toThrow(TargetCovered)
+    expect(sent.some(isPress)).toBe(false)
+  })
+
+  it('should refuse a drag whose drop target is covered, before the press', async () => {
+    const { run, sent } = await performCovered(
+      [{ kind: 'drag', from: '#card', to: '#lane' }],
+      { '#lane': 'div.toast' },
+    )
+
+    await expect(run).rejects.toThrow(TargetCovered)
+    expect(sent.some(isPress)).toBe(false)
+  })
+
+  it('should read both drag ends once the pointer rests on the source, before the press', async () => {
+    const { run, sent, readsAt } = await performCovered(
+      [{ kind: 'drag', from: '#card', to: '#lane' }],
+      {},
+    )
+
+    await run
+    const down = sent.findIndex(isPress)
+    expect(readsAt.map((read) => read.inputs)).toEqual([down, down])
+  })
+
+  it('should read both drag ends and neither when the drag says through', async () => {
+    const checked = await performCovered(
+      [{ kind: 'drag', from: '#card', to: '#lane' }],
+      {},
+    )
+    const through = await performCovered(
+      [{ kind: 'drag', from: '#card', to: '#lane', through: true }],
+      { '#card': 'div.canvas', '#lane': 'div.canvas' },
+    )
+
+    await Promise.all([checked.run, through.run])
+    expect([checked.coverReads, through.coverReads]).toEqual([
+      ['#card', '#lane'],
+      [],
+    ])
+  })
+
+  it('should read no cover on a move or a scroll, which press nothing', async () => {
+    const { run, coverReads } = await performCovered(
+      [
+        { kind: 'move', target: '#save' },
+        { kind: 'scroll', target: '#save', dy: 100 },
+      ],
+      { '#save': 'div.hit-layer' },
+    )
+
+    await run
+    expect(coverReads).toEqual([])
   })
 })

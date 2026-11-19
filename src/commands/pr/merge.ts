@@ -39,8 +39,10 @@ export function registerMerge(pr: Command): void {
       'after',
       [
         '',
-        'The operator runs this verb, and no skill calls it. A permissions deny',
-        'rule on `canon pr merge` and `gh pr merge` keeps an agent off it.',
+        'The operator runs this verb, or an orchestrator runs it on the',
+        "operator's word for one named pull request. A permissions ask rule on",
+        '`canon pr merge` puts each agent call to the operator, and a deny on',
+        '`gh pr merge` and the REST merge keeps an agent off the other forms.',
         '',
         'The title is the pull request title plus ` (#<number>)`. The',
         "description is the body's `## Summary`, `## Key changes`, and",

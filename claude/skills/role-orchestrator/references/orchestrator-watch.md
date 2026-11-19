@@ -7,11 +7,12 @@ Run the watch beside the poll when the dispatch fallback in `orchestrator-poll.m
 
 ## The watch beside it
 
-`${CLAUDE_SKILL_DIR}/scripts/watch.ts` is a long-running loop rather than a scheduled prompt, started as `bun <path>` in the background. It writes nothing. Every sixty seconds it reads the open pull request list and the session roster together and prints one line per event.
+`${CLAUDE_SKILL_DIR}/scripts/watch.ts` is a long-running loop rather than a scheduled prompt, started as `bun <path>` in the background. It writes nothing. Every sixty seconds it reads the open pull request list, the session roster, and the hand-launch queue together and prints one line per event.
 
 - A new pull request
 - A worker whose name, branch, or status changed
 - A worker that dropped out of the roster
+- A session that first holds the branch of a worker row `canon dispatch prompts` queued
 
 ### What it buys over the poll
 
@@ -24,7 +25,15 @@ A worker that finishes goes idle and one that crashes disappears, so a trigger r
 
 Every session in the repository holding a branch other than the base one counts as a worker, whoever launched it, since matching the `orchestrator-` prefix would miss every hand-launched one.
 
-A failed read of either source reports itself on a `watch:` line and leaves the baseline untouched, since reading an empty result as current state would report every worker gone on the pass after.
+A failed read of any source reports itself on a `watch:` line and leaves the baseline untouched, since reading an empty result as current state would report every worker gone on the pass after.
+
+### A hand launch
+
+`orchestrator-hand-launch.md` starts the watch when a wave queues a worker prompt. Each pass reads `canon dispatch prompts list --json` beside the roster and prints `LAUNCHED <label> -> <name> [<id>]` once a session holds a queued worker row's branch, which records the launch without waiting on the operator's word.
+
+- It prints once per queued row and again only after the row leaves the queue and returns
+- Planner and reviewer rows take no branch of their own, so the watch never matches them
+- An empty queue skips the match, and the watch only reads the queue, never clearing a row
 
 ## The stall alarm
 

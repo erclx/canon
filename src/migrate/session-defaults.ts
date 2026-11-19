@@ -1,14 +1,7 @@
 /**
- * Adds the session defaults the seeded `.claude/settings.json` carries to a
- * target that was seeded before them: the subagent deny, the memory default,
- * the merge deny entries, the lease push and UI pass allow entries, the browser
- * and frames rewrite deny, and every seeded hook entry whose script the project
- * holds, planned by `@/migrate/hook-wiring`.
- *
- * `canon claude init` copies a seed only when the file is absent, so a target
- * holding its own settings never sees a later seed change. This verb adds each
- * default only where the key is absent: a deny entry is never removed, and a
- * person's `autoMemoryEnabled: true` is never overwritten.
+ * Adds the seeded settings defaults to a target seeded before them, since init
+ * copies a seed only into an absent file. Each default is added only where
+ * absent: no deny entry is removed and no `autoMemoryEnabled` overwritten.
  */
 
 import { existsSync } from 'node:fs'
@@ -31,17 +24,26 @@ import { applySettingsEdits, type SettingsEdit } from '@/migrate/settings-edit'
 /** Both names, since `Task` is the tool's name before Claude Code renamed it. */
 export const DENIED_TOOLS: readonly string[] = ['Agent', 'Task']
 
-/** The merge entries the seeded deny list carries, so a session cannot merge. */
+/**
+ * The merge forms the seeded deny list carries, being every merge an agent
+ * writes by default that bypasses `canon pr merge`. The REST form is matched
+ * on its path, since `gh api` puts its flags anywhere on the line.
+ */
 export const MERGE_DENIED: readonly string[] = [
-  'Bash(canon pr merge:*)',
   'Bash(gh pr merge:*)',
+  'Bash(gh api *pulls/*/merge*)',
 ]
 
 /**
- * The two lease pushes a worker runs after rebasing onto a merged pull request,
- * each pushing the current branch to its own name. An allow rule resolves
- * before auto mode's classifier, so each entry is exact: a wildcard would also
- * approve a refspec, a remote, or a flag that reaches the default branch.
+ * The merge verb the seeded ask list carries, so the client puts each merge to
+ * the operator. A target denying it keeps the deny, which wins over the ask.
+ */
+export const MERGE_ASKED: readonly string[] = ['Bash(canon pr merge:*)']
+
+/**
+ * The lease pushes a worker runs after a rebase. An allow resolves before auto
+ * mode's classifier, so each is exact, since a wildcard would also approve a
+ * refspec, a remote, or a flag that reaches the default branch.
  */
 export const PUSH_ALLOWED: readonly string[] = [
   'Bash(git push --force-with-lease)',
@@ -49,12 +51,9 @@ export const PUSH_ALLOWED: readonly string[] = [
 ]
 
 /**
- * The canon verbs a UI review pass runs, each named so the wildcard sits after
- * the subcommand. `canon pr` also holds `close`, which deletes a branch, and
- * `preview`, which deploys, so a `canon pr` wildcard would approve both.
- * `canon browser` is left out whole: its session flag sits before the
- * subcommand, so no rule allows a screenshot without also allowing `run-code`
- * and `eval`, whose script auto mode's classifier would stop reading.
+ * Named per subcommand, since a `canon pr` wildcard would approve `close` and
+ * `preview`. `canon browser` is left out, since its session flag precedes the
+ * subcommand and no rule could allow a screenshot without `run-code` and `eval`.
  */
 export const UI_PASS_ALLOWED: readonly string[] = [
   'Bash(canon drive:*)',
@@ -101,6 +100,13 @@ export interface SessionDefaultsPlan {
   readonly predates: boolean
   /** True when the deny list lacks any merge entry, whatever else it holds. */
   readonly lacksMergeDeny: boolean
+  /** True when the ask list lacks the merge verb. */
+  readonly lacksMergeAsk: boolean
+  /**
+   * True when the deny list still holds the merge verb the ask now carries,
+   * which this verb reports and never removes.
+   */
+  readonly holdsMergeDeny: boolean
   /** True when the allow list lacks any lease push entry. */
   readonly lacksPushAllow: boolean
   /** True when the allow list lacks any UI pass entry. */
@@ -149,6 +155,7 @@ export function planSessionDefaults(
   const permissions = isRecord(current.permissions) ? current.permissions : {}
   const deny = Array.isArray(permissions.deny) ? permissions.deny : []
   const allow = Array.isArray(permissions.allow) ? permissions.allow : []
+  const ask = Array.isArray(permissions.ask) ? permissions.ask : []
 
   const subagentsMissing = DENIED_TOOLS.filter((tool) => !deny.includes(tool))
   const mergeMissing = MERGE_DENIED.filter((entry) => !deny.includes(entry))
@@ -161,12 +168,14 @@ export function planSessionDefaults(
     (entry) => !allow.includes(entry),
   )
   const allowMissing = [...pushMissing, ...uiPassMissing]
+  const askMissing = MERGE_ASKED.filter((entry) => !ask.includes(entry))
   const memoryAbsent = !('autoMemoryEnabled' in current)
   const wiring = planHookWiring(current.hooks, seeded, holds)
 
   const edits: SettingsEdit[] = [
     ...appendTo(['permissions', 'deny'], missing),
     ...appendTo(['permissions', 'allow'], allowMissing),
+    ...appendTo(['permissions', 'ask'], askMissing),
     ...(memoryAbsent
       ? [
           {
@@ -182,6 +191,7 @@ export function planSessionDefaults(
   const keys: SettingsKey[] = [
     { label: 'permissions.deny', changed: missing.length > 0 },
     { label: 'permissions.allow', changed: allowMissing.length > 0 },
+    { label: 'permissions.ask', changed: askMissing.length > 0 },
     { label: 'autoMemoryEnabled', changed: memoryAbsent },
     ...wiring.events.map((event) => ({
       label: `hooks.${event.event}`,
@@ -202,6 +212,8 @@ export function planSessionDefaults(
       subagentsMissing.length === DENIED_TOOLS.length &&
       mergeMissing.length === MERGE_DENIED.length,
     lacksMergeDeny: mergeMissing.length > 0,
+    lacksMergeAsk: askMissing.length > 0,
+    holdsMergeDeny: MERGE_ASKED.some((entry) => deny.includes(entry)),
     lacksPushAllow: pushMissing.length > 0,
     lacksUiPassAllow: uiPassMissing.length > 0,
     unwired: wiring.unwired,
@@ -209,10 +221,9 @@ export function planSessionDefaults(
 }
 
 /**
- * Refuses rather than plans whenever a write could replace something the
- * person owns: the toolkit's own settings, a file `JSON.parse` cannot read,
- * or a `permissions`, `deny`, `allow`, `hooks`, or seeded event value of an
- * unexpected shape. The seeded settings are read from `toolkitRoot`.
+ * Refuses whenever a write could replace something the person owns: the
+ * toolkit's own settings, unparsable JSON, or a permissions list, `hooks`, or
+ * seeded event of an unexpected shape. The seed is read from `toolkitRoot`.
  */
 export async function readSessionDefaults(
   root: string,
@@ -251,7 +262,7 @@ export async function readSessionDefaults(
   if (permissions !== undefined && !isRecord(permissions)) {
     return { kind: 'refused', reason: `${path}: permissions is not an object` }
   }
-  for (const list of ['deny', 'allow'] as const) {
+  for (const list of ['deny', 'allow', 'ask'] as const) {
     if (
       permissions?.[list] !== undefined &&
       !Array.isArray(permissions[list])

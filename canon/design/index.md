@@ -1,19 +1,13 @@
 ---
 title: Design references
 description: The accepted design frames a build matches, grouped by app part, with the code each group governs
-auto: false
+subtitle: Each group holds accepted frames a build matches, light and dark, and its file names the code it governs. Load the `design-record` skill before adding, redrawing, or removing a reference. Run `bun run design:sync` to land a mapped frame and `bun run design:sync --check` to compare the folder with the board.
 ---
 
 # Design references
 
-Each group holds accepted frames a build matches, light and dark. The `design-record` skill carries the folder standard, so load it before adding, redrawing, or removing a reference. Run `bun run design:sync` to land a mapped frame and `bun run design:sync --check` to compare the folder with the board.
+Each group holds accepted frames a build matches, light and dark, and its file names the code it governs. Load the `design-record` skill before adding, redrawing, or removing a reference. Run `bun run design:sync` to land a mapped frame and `bun run design:sync --check` to compare the folder with the board.
 
-## Groups
-
-One row per group. List no files, since the tree answers what exists.
-
-| Group         | What the user sees                                                        | Code                                                                     | States                                                                                                        |
-| ------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `landing`     | The public page at canon.erclx.com, one folder a section, a frame a width | `web/src/`, `web/src/styles/global.css`                                  | Light and dark at 1440, 834, and 390, each of the eight sections at rest, try with the footer under it        |
-| `readme`      | The repository README on GitHub                                           | `README.md`, `assets/loops/`                                             | Light and dark, the mark, claim, the hero slot as a placeholder, and quick start                              |
-| `foundations` | The canon mark, and the design system its tokens carry                    | `assets/brand/mark.svg`, `src/design/favicon.ts`, `src/design/tokens.ts` | Light and dark, the mark from 16 to 96 with its construction, and the palette, type, shape, and motion sheets |
+- [Foundations](foundations.md): The canon mark, and the design system its tokens carry
+- [Landing](landing.md): The public page at canon.erclx.com, one folder a section, a frame a width
+- [Readme](readme.md): The repository README on GitHub

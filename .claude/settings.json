@@ -14,11 +14,12 @@
       "Bash(canon pr tick:*)",
       "Bash(canon pr lift:*)"
     ],
+    "ask": ["Bash(canon pr merge:*)"],
     "deny": [
       "Agent",
       "Task",
-      "Bash(canon pr merge:*)",
       "Bash(gh pr merge:*)",
+      "Bash(gh api *pulls/*/merge*)",
       "Bash(canon browser *install-browser*)",
       "Bash(canon pr frames *--drop*)",
       "Bash(canon pr frames *--prune*)"

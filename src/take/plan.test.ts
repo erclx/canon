@@ -364,6 +364,40 @@ describe('readTakePlan input steps', () => {
     ).toEqual({ kind: 'click', target: '#layer' })
   })
 
+  describe('through', () => {
+    it('should keep through on a click meant to press a layer over its target', () => {
+      expect(
+        onlyStep({ kind: 'click', target: '#cell', through: true }),
+      ).toEqual({ kind: 'click', target: '#cell', through: true })
+    })
+
+    it('should keep through on a fill and a drag', () => {
+      expect([
+        onlyStep({ kind: 'fill', target: '#name', text: 'a', through: true }),
+        onlyStep({ kind: 'drag', from: '#a', to: '#b', through: true }),
+      ]).toEqual([
+        { kind: 'fill', target: '#name', text: 'a', through: true },
+        { kind: 'drag', from: '#a', to: '#b', through: true },
+      ])
+    })
+
+    it('should read through false as absent, so the press stays checked', () => {
+      expect(
+        onlyStep({ kind: 'dblclick', target: '#cell', through: false }),
+      ).toEqual({ kind: 'dblclick', target: '#cell' })
+    })
+
+    it('should refuse a through that is not true or false', () => {
+      expect(
+        onlyStep({ kind: 'click', target: '#cell', through: 'yes' }),
+      ).toMatchObject({
+        kind: 'refused',
+        reason: 'bad-step',
+        detail: expect.stringContaining('through'),
+      })
+    })
+  })
+
   it('should refuse a drag with no drop target', () => {
     expect(onlyStep({ kind: 'drag', from: '#card' })).toMatchObject({
       kind: 'refused',

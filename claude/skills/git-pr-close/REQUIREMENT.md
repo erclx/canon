@@ -25,5 +25,5 @@ Without this skill, a session asked to close a pull request improvises a bare cl
 ## Out of scope
 
 - Writing the gate on the reason, which the verb owns
-- Merging, which the operator runs through `canon pr merge`
+- Merging, which `canon pr merge` runs, by the operator or on the operator's word
 - Closing an issue, which `git-issue` covers
