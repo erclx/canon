@@ -4,12 +4,15 @@ import { PROJECT_ROOT } from '@/roots/project'
 import {
   buildCommentArgs,
   buildIssueArgs,
+  buildIssueListArgs,
   buildIssueReadArgs,
   failureDetail,
+  parseIssueList,
   parseIssueRead,
   type CreateIssueOptions,
   type CreateIssueResult,
   type IssueFailure,
+  type IssueList,
   type IssueRead,
 } from '@/feedback/github-format'
 
@@ -61,6 +64,12 @@ export async function readFeedbackIssue(
   const result = await runGh(buildIssueReadArgs(issue))
   if (!result.ok) return result
   return parseIssueRead(result.stdout)
+}
+
+export async function listFeedbackIssues(): Promise<IssueList | IssueFailure> {
+  const result = await runGh(buildIssueListArgs())
+  if (!result.ok) return result
+  return parseIssueList(result.stdout)
 }
 
 export function postIssueComment(

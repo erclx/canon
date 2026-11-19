@@ -8,12 +8,14 @@ import {
 } from '@/feedback/body'
 import {
   createGithubIssue,
+  listFeedbackIssues,
   postIssueComment,
   readFeedbackIssue,
 } from '@/feedback/github'
 import {
   commentFailureMessage,
   issueFailureMessage,
+  issueListFailureMessage,
   issueReadFailureMessage,
 } from '@/feedback/github-format'
 import { frameError, frameSuccess } from '@/cli/ui'
@@ -82,6 +84,37 @@ async function postFollowUp(issue: number, body: string): Promise<void> {
   process.exitCode = 1
 }
 
+/**
+ * The read `session-retro` matches its candidates against, so a repeat goes
+ * out as a follow-up. A refusal carries its reason, since the caller must say
+ * the match did not run rather than read an empty queue.
+ */
+async function listOpen(json: boolean): Promise<void> {
+  const result = await listFeedbackIssues()
+  if (!result.ok) {
+    const message = issueListFailureMessage(result)
+    frameError(message)
+    if (json) {
+      process.stdout.write(
+        `${JSON.stringify({ ok: false, reason: result.reason, message })}\n`,
+      )
+    }
+    process.exitCode = 1
+    return
+  }
+  if (json) {
+    process.stdout.write(`${JSON.stringify(result)}\n`)
+    return
+  }
+  for (const issue of result.issues) {
+    process.stdout.write(`#${issue.number}\t${issue.title}\n`)
+  }
+  frameSuccess(
+    'canon feedback',
+    `${result.issues.length} open feedback issue${result.issues.length === 1 ? '' : 's'}`,
+  )
+}
+
 const ISSUE_NUMBER = /^[1-9]\d*$/
 
 export function register(program: Command): void {
@@ -95,10 +128,29 @@ export function register(program: Command): void {
       '--on <issue>',
       'Post a follow-up block as a comment on an open feedback issue instead',
     )
+    .option(
+      '--list',
+      'List the open feedback issues instead, reading nothing from stdin',
+    )
+    .option('--json', 'With --list, print the result as one JSON record')
     // A cached plugin still pipes `--github`, and commander rejects an unknown
     // option, so the flag stays accepted and hidden for one release.
     .addOption(new Option('--github').hideHelp())
-    .action(async (opts: { on?: string }) => {
+    .action(async (opts: { on?: string; list?: boolean; json?: boolean }) => {
+      if (opts.list && opts.on !== undefined) {
+        frameError('--list reads the queue and --on posts to it. Pass one.')
+        process.exitCode = 1
+        return
+      }
+      if (opts.json && !opts.list) {
+        frameError('--json shapes the --list read only. Add --list.')
+        process.exitCode = 1
+        return
+      }
+      if (opts.list) {
+        await listOpen(opts.json ?? false)
+        return
+      }
       if (opts.on !== undefined && !ISSUE_NUMBER.test(opts.on)) {
         frameError(
           `--on takes an issue number, such as --on 2801, not "${opts.on}".`,

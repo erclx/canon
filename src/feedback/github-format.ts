@@ -53,6 +53,86 @@ export function buildIssueReadArgs(issue: number): string[] {
   ]
 }
 
+/**
+ * gh lists 30 issues by default, and a match against a truncated queue would
+ * offer a repeat as new, so the limit sits well past any queue triage keeps.
+ */
+const LIST_LIMIT = '500'
+
+export function buildIssueListArgs(): string[] {
+  return [
+    'issue',
+    'list',
+    '--label',
+    'feedback',
+    '--state',
+    'open',
+    '--limit',
+    LIST_LIMIT,
+    '--json',
+    'number,title,url',
+    '--repo',
+    REPO,
+  ]
+}
+
+export interface FeedbackIssue {
+  readonly number: number
+  readonly title: string
+  readonly url: string
+}
+
+export interface IssueList {
+  readonly ok: true
+  readonly issues: readonly FeedbackIssue[]
+}
+
+function readListEntry(entry: unknown): FeedbackIssue | undefined {
+  const { number, title, url } = (entry ?? {}) as Record<string, unknown>
+  if (typeof number !== 'number') return undefined
+  if (typeof title !== 'string' || typeof url !== 'string') return undefined
+  return { number, title, url }
+}
+
+/**
+ * Reads the `gh issue list --json number,title,url` array. One malformed entry
+ * fails the whole read, since a caller matching against a list with a hole in
+ * it would offer the missing issue's repeat as a new report.
+ */
+export function parseIssueList(stdout: string): IssueList | IssueFailure {
+  let record: unknown
+  try {
+    record = JSON.parse(stdout)
+  } catch {
+    return {
+      ok: false,
+      reason: 'command-failed',
+      detail: 'gh printed no JSON issue list',
+    }
+  }
+  if (!Array.isArray(record)) {
+    return {
+      ok: false,
+      reason: 'command-failed',
+      detail: 'gh printed an issue list that is not an array',
+    }
+  }
+  const issues: FeedbackIssue[] = []
+  for (const entry of record) {
+    const issue = readListEntry(entry)
+    if (!issue) {
+      return {
+        ok: false,
+        reason: 'command-failed',
+        detail: 'gh printed an issue with no number, title, or url',
+      }
+    }
+    issues.push(issue)
+  }
+  issues.sort((a, b) => a.number - b.number)
+  return { ok: true, issues }
+}
+
 export interface IssueRead {
   readonly ok: true
   readonly state: string
@@ -151,4 +231,12 @@ export function issueReadFailureMessage(
   issue: number,
 ): string {
   return `gh could not read issue #${issue}: ${failure.detail ?? 'no diagnostic on stderr'}. Check the number and re-run.`
+}
+
+export function issueListFailureMessage(failure: IssueFailure): string {
+  const target = `https://github.com/${REPO}/issues?q=is%3Aopen+label%3Afeedback`
+  if (failure.reason === 'missing-binary') {
+    return `gh is not installed, so the open feedback issues were not read. Install gh, or read them at ${target}`
+  }
+  return `gh could not list the open feedback issues: ${failure.detail ?? 'no diagnostic on stderr'}. Read them at ${target} instead.`
 }
