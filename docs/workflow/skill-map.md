@@ -111,3 +111,4 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | `canon:target-update`   | After a release, to catch a target up to the toolkit    |
 | `canon:document-repair` | Rewrite a failing docs folder to the limits and gate it |
 | `canon:canon-feedback`  | The toolkit is broken, missing, or off                  |
+| `canon:session-retro`   | Run by name, to find what a session is worth filing     |
