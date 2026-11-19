@@ -3,6 +3,7 @@ import {
   isInert,
   readCarry,
   readRebaseCarry,
+  readUiCarry,
   type RebaseRead,
 } from '@/pr/carry'
 import type { ChangedRead } from '@/pr/lift'
@@ -143,6 +144,78 @@ describe('readCarry', () => {
 
   it('should read failed when the gap could not be read', async () => {
     const carry = await readCarry(changedRead(undefined), DRIVEN, TIP)
+
+    expect(carry).toEqual({ kind: 'failed' })
+  })
+})
+
+describe('readUiCarry', () => {
+  function reads(
+    changed: ChangedRead | undefined,
+    rebased?: RebaseRead,
+  ): Parameters<typeof readUiCarry>[0] {
+    return {
+      readChanged: changedRead(changed),
+      readRebased: rebaseRead(rebased),
+    }
+  }
+
+  it('should carry across a push of tests and markdown', async () => {
+    const carry = await readUiCarry(
+      reads({ isAncestor: true, paths: ['README.md'] }),
+      DRIVEN,
+      TIP,
+    )
+
+    expect(carry).toEqual({
+      kind: 'carried',
+      carriedFrom: DRIVEN,
+      carriedAcross: 'push',
+    })
+  })
+
+  it('should carry across a rebase whose differing paths are inert', async () => {
+    const carry = await readUiCarry(
+      reads(
+        { isAncestor: false, paths: [] },
+        { differingPaths: ['README.md'] },
+      ),
+      DRIVEN,
+      TIP,
+    )
+
+    expect(carry).toEqual({
+      kind: 'carried',
+      carriedFrom: DRIVEN,
+      carriedAcross: 'rebase',
+    })
+  })
+
+  it('should move on a rebase that changed a driven path', async () => {
+    const carry = await readUiCarry(
+      reads(
+        { isAncestor: false, paths: [] },
+        { differingPaths: ['README.md', 'src/App.tsx'] },
+      ),
+      DRIVEN,
+      TIP,
+    )
+
+    expect(carry).toEqual({ kind: 'moved', drivenPaths: ['src/App.tsx'] })
+  })
+
+  it('should read behind when the rebase comparison could not be read', async () => {
+    const carry = await readUiCarry(
+      reads({ isAncestor: false, paths: [] }),
+      DRIVEN,
+      TIP,
+    )
+
+    expect(carry).toEqual({ kind: 'behind' })
+  })
+
+  it('should read failed when the gap could not be read', async () => {
+    const carry = await readUiCarry(reads(undefined), DRIVEN, TIP)
 
     expect(carry).toEqual({ kind: 'failed' })
   })

@@ -9,10 +9,10 @@ import {
   type UiCounts,
 } from '@/pr/review-scope'
 import {
-  isInert,
   type RebaseRead,
   readCarry,
   readRebaseCarry,
+  readUiCarry,
   reelMoves,
 } from '@/pr/carry'
 import { readReelWaivers, readWaivers } from '@/pr/waiver'
@@ -372,49 +372,29 @@ export async function uiGate(
   // A verdict whose count line did not parse reads as unchecked and goes on.
   if (droveNothing(scope.counts)) return fail('ui', 'ui-undriven')
 
-  const carry = await readCarry(
-    (from, to) => api.readChanged(from, to),
+  const carry = await readUiCarry(
+    {
+      readChanged: (from, to) => api.readChanged(from, to),
+      readRebased: (from, to) => api.readRebased(from, to),
+    },
     scope.commit,
     head,
   )
   if (carry.kind === 'covered') return pass('ui')
   if (carry.kind === 'failed') return fail('ui', 'gh-failed')
+  if (carry.kind === 'behind') return fail('ui', 'ui-behind')
   if (carry.kind === 'carried') {
-    return {
-      ...pass('ui'),
-      carriedFrom: carry.carriedFrom,
-      carriedAcross: 'push',
-    }
+    const { carriedFrom, carriedAcross } = carry
+    return { ...pass('ui'), carriedFrom, carriedAcross }
   }
-  if (carry.kind === 'moved') return uiBehind(painted, carry.drivenPaths)
 
-  const rebase = await readRebaseCarry(
-    (from, to) => api.readRebased(from, to),
-    scope.commit,
-    head,
-    (path) => !isInert(path),
+  const paintedPaths = carry.drivenPaths.filter((path) =>
+    isPainted(path, painted),
   )
-  if (rebase.kind === 'rebased') {
-    return {
-      ...pass('ui'),
-      carriedFrom: rebase.carriedFrom,
-      carriedAcross: 'rebase',
-    }
-  }
-  return rebase.kind === 'changed'
-    ? uiBehind(painted, rebase.differingPaths)
-    : fail('ui', 'ui-behind')
-}
-
-function uiBehind(
-  painted: PaintedPatterns,
-  drivenPaths: readonly string[],
-): GateResult {
-  const paintedPaths = drivenPaths.filter((path) => isPainted(path, painted))
   return {
     ...fail('ui', 'ui-behind'),
     ...(paintedPaths.length > 0 && { paintedPaths }),
-    drivenPaths,
+    drivenPaths: carry.drivenPaths,
   }
 }
 

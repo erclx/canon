@@ -99,6 +99,56 @@ export async function readRebaseCarry(
     : { kind: 'rebased', carriedFrom: from }
 }
 
+/** Whether a UI verdict at one commit holds at the head, across a push or a rebase. */
+export type UiCarry =
+  | { readonly kind: 'covered' }
+  | {
+      readonly kind: 'carried'
+      readonly carriedFrom: string
+      readonly carriedAcross: 'push' | 'rebase'
+    }
+  | { readonly kind: 'moved'; readonly drivenPaths: readonly string[] }
+  | { readonly kind: 'behind' }
+  | { readonly kind: 'failed' }
+
+/**
+ * The one rule the UI gate and the tick share. A head descending from the
+ * verdict carries across inert commits. One that does not carries across a
+ * rebase whose differing branch paths are all inert, and reads `behind` when
+ * that comparison could not be read.
+ */
+export async function readUiCarry(
+  reads: {
+    readonly readChanged: (
+      from: string,
+      to: string,
+    ) => Promise<ChangedRead | undefined>
+    readonly readRebased: (
+      from: string,
+      to: string,
+    ) => Promise<RebaseRead | undefined>
+  },
+  from: string,
+  to: string,
+): Promise<UiCarry> {
+  const carry = await readCarry(reads.readChanged, from, to)
+  if (carry.kind === 'carried') return { ...carry, carriedAcross: 'push' }
+  if (carry.kind !== 'not-ancestor') return carry
+
+  const moves = (path: string) => !isInert(path)
+  const rebase = await readRebaseCarry(reads.readRebased, from, to, moves)
+  if (rebase.kind === 'rebased') {
+    return {
+      kind: 'carried',
+      carriedFrom: rebase.carriedFrom,
+      carriedAcross: 'rebase',
+    }
+  }
+  return rebase.kind === 'changed'
+    ? { kind: 'moved', drivenPaths: rebase.differingPaths }
+    : { kind: 'behind' }
+}
+
 /**
  * Which changed paths move a reel. A painted path always does, tested ahead of
  * the inert set, since a fixture a reel films sits in a folder that set
