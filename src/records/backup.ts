@@ -1,4 +1,5 @@
 import { existsSync, lstatSync, readdirSync } from 'node:fs'
+import { open, rm, stat } from 'node:fs/promises'
 import { basename, join, relative, resolve } from 'node:path'
 import { $ } from 'bun'
 import { gitEnv } from '@/git/env'
@@ -201,6 +202,7 @@ export const BACKUP_REFUSALS = [
   'local-ahead',
   'unsafe-payload',
   'git-failed',
+  'busy',
 ] as const
 
 export type BackupRefusal = (typeof BACKUP_REFUSALS)[number]
@@ -606,7 +608,73 @@ async function undoCommit(
  * network. A commit this call made is undone when the push fails, so a
  * rejecting remote is not handed it again on every run.
  */
-export async function pushRecords(root: string): Promise<PushOutcome> {
+export async function pushRecords(
+  root: string,
+  timing: PushLockTiming = PUSH_LOCK,
+): Promise<PushOutcome> {
+  // With no history there is no folder to hold a lock in, and the unlocked
+  // body refuses `no-repository` before it writes anything.
+  if (!existsSync(recordsGitDir(root))) return pushUnlocked(root)
+  return withPushLock(root, timing, () => pushUnlocked(root))
+}
+
+/** How long a push waits on another push's lock, and the age past which a lock is a dead push's. */
+export interface PushLockTiming {
+  readonly waitMs: number
+  readonly staleMs: number
+}
+
+/**
+ * A wave of ending sessions queues here, so the wait covers a few pushes. The
+ * stale age sits at the 60 second ceiling Claude Code puts on a hook, past
+ * which no hook-run push still holds the lock it took.
+ */
+const PUSH_LOCK: PushLockTiming = { waitMs: 10_000, staleMs: 60_000 }
+
+const PUSH_LOCK_POLL_MS = 50
+
+/**
+ * Holds an exclusive lock file inside the records history for one stage,
+ * commit, push, and undo, so two pushes never collide on the records index or
+ * have one undo reset past a commit the other made.
+ */
+async function withPushLock(
+  root: string,
+  timing: PushLockTiming,
+  run: () => Promise<PushOutcome>,
+): Promise<PushOutcome> {
+  const lock = join(recordsGitDir(root), 'canon-push.lock')
+  const deadline = Date.now() + timing.waitMs
+
+  for (;;) {
+    try {
+      await (await open(lock, 'wx')).close()
+      break
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
+      const modified = (await stat(lock).catch(() => undefined))?.mtimeMs
+      if (modified !== undefined && Date.now() - modified > timing.staleMs) {
+        await rm(lock, { force: true })
+        continue
+      }
+      if (Date.now() >= deadline) {
+        return refuse(
+          'busy',
+          `Another records push holds ${relative(root, lock)}. Run canon records push again once it finishes.`,
+        )
+      }
+      await new Promise((settle) => setTimeout(settle, PUSH_LOCK_POLL_MS))
+    }
+  }
+
+  try {
+    return await run()
+  } finally {
+    await rm(lock, { force: true })
+  }
+}
+
+async function pushUnlocked(root: string): Promise<PushOutcome> {
   const split = refuseSplitRoots(root)
   if (split) return split
 

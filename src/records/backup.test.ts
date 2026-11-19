@@ -6,6 +6,7 @@ import {
   renameSync,
   rmSync,
   truncateSync,
+  utimesSync,
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -918,5 +919,70 @@ describe('a tree whose records sit under both roots', () => {
     expect(outcome.ok).toBe(false)
     if (outcome.ok) return
     expect(outcome.reason).toBe('no-repository')
+  })
+})
+
+describe('the push lock', () => {
+  const LOCK = join(RECORDS_GIT_DIR, 'canon-push.lock')
+  const SHORT_WAIT = { waitMs: 200, staleMs: 60_000 }
+
+  it('should refuse busy and push nothing while another push holds the lock', async () => {
+    await makeRecordsRepo(ROOT, ORIGIN)
+    writeFileSync(join(ROOT, LOCK), '')
+
+    const outcome = await pushRecords(ROOT, SHORT_WAIT)
+
+    expect(outcome.ok).toBe(false)
+    if (outcome.ok) return
+    expect(outcome.reason).toBe('busy')
+    expect(await git(['-C', ORIGIN, 'branch', '--list'])).toBe('')
+    expect(existsSync(join(ROOT, LOCK))).toBe(true)
+  })
+
+  it('should clear a lock older than the stale age and push', async () => {
+    await makeRecordsRepo(ROOT, ORIGIN)
+    writeFileSync(join(ROOT, LOCK), '')
+    const past = new Date(Date.now() - 120_000)
+    utimesSync(join(ROOT, LOCK), past, past)
+
+    const outcome = await pushRecords(ROOT, SHORT_WAIT)
+
+    expect(outcome.ok).toBe(true)
+    expect(existsSync(join(ROOT, LOCK))).toBe(false)
+  })
+
+  it('should serialize two pushes started together so both succeed', async () => {
+    await makeRecordsRepo(ROOT, ORIGIN)
+
+    const outcomes = await Promise.all([pushRecords(ROOT), pushRecords(ROOT)])
+
+    expect(outcomes.map((outcome) => outcome.ok)).toEqual([true, true])
+    expect(await recordsGit(ROOT, ['status', '--porcelain'])).toBe('')
+  })
+
+  it('should release the lock when the push refuses an unsafe payload', async () => {
+    await makeRecordsRepo(ROOT, ORIGIN)
+    writeFileSync(
+      join(ROOT, '.claude', 'plans', '.env'),
+      `TOKEN=ghp_${'a'.repeat(36)}\n`,
+    )
+
+    const outcome = await pushRecords(ROOT, SHORT_WAIT)
+
+    expect(outcome.ok).toBe(false)
+    if (outcome.ok) return
+    expect(outcome.reason).toBe('unsafe-payload')
+    expect(existsSync(join(ROOT, LOCK))).toBe(false)
+  })
+
+  it('should release the lock when the push itself fails', async () => {
+    await makeRecordsRepo(ROOT, join(ORIGIN, 'missing'))
+
+    const outcome = await pushRecords(ROOT, SHORT_WAIT)
+
+    expect(outcome.ok).toBe(false)
+    if (outcome.ok) return
+    expect(outcome.reason).toBe('git-failed')
+    expect(existsSync(join(ROOT, LOCK))).toBe(false)
   })
 })
