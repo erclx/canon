@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import type { RebaseRead } from '@/pr/carry'
 import {
   type ChangedRead,
   type ChecksGate,
@@ -35,6 +36,8 @@ interface Fixture {
   reviews?: readonly (readonly ReviewRow[] | null)[]
   evidence?: Partial<EvidenceGate> | null
   changed?: ChangedRead | null
+  /** What the rebase comparison answers, a failed read when absent. */
+  rebased?: RebaseRead
 }
 
 interface Harness {
@@ -76,6 +79,7 @@ function makeApi(fixture: Fixture = {}): Harness {
       if (fixture.changed === null) return undefined
       return fixture.changed ?? { isAncestor: true, paths: [] }
     },
+    readRebased: async () => fixture.rebased,
     sleep: async (ms) => {
       calls.sleeps.push(ms)
       clock += ms

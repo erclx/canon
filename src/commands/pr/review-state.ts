@@ -1,7 +1,11 @@
 import type { Command } from 'commander'
 import { resolve } from 'node:path'
 import { type HeadRefusal, resolveTip } from '@/pr/head'
-import { DEFAULT_WAIT_SECONDS, readChangedPaths } from '@/pr/lift'
+import {
+  DEFAULT_WAIT_SECONDS,
+  readChangedPaths,
+  readRebasedPaths,
+} from '@/pr/lift'
 import { loadPaintedPatterns } from '@/pr/painted'
 import { reviewRowOf } from '@/pr/rest'
 import {
@@ -164,6 +168,7 @@ async function runReviewState(
   // read's own reason, so a caller tells a thread from a remote.
   let failure: PullRefusal | HeadRefusal = 'gh-failed'
   const git = gitRunner(root)
+  const { base } = read.identity
   const api: ReviewStateApi = {
     readTip: async () => {
       const tip = await resolveTip(read.identity.branch, refReader(root))
@@ -180,6 +185,10 @@ async function runReviewState(
     },
     readEvidence: () => readEvidenceGate(root, resolved.number),
     readChanged: (from, to) => readChangedPaths(git, from, to),
+    readRebased: async (from, to) =>
+      base === undefined
+        ? undefined
+        : readRebasedPaths(git, `origin/${base}`, from, to),
     sleep: (ms) => new Promise((done) => setTimeout(done, ms)),
     now: () => Date.now(),
   }

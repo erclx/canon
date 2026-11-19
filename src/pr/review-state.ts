@@ -23,7 +23,12 @@ import {
  */
 export type ReviewStateApi = Pick<
   LiftApi,
-  'readReviews' | 'readEvidence' | 'readChanged' | 'sleep' | 'now'
+  | 'readReviews'
+  | 'readEvidence'
+  | 'readChanged'
+  | 'readRebased'
+  | 'sleep'
+  | 'now'
 > & {
   /** The branch tip from the remote, which is what a pass has to cover. */
   readTip(): Promise<string | undefined>
@@ -113,7 +118,7 @@ async function readAt(
     record: {
       head: tip,
       scope,
-      review: familyOf(reviewGate(reviews, tip), scope.commit, tip),
+      review: familyOf(await reviewGate(api, reviews, tip), scope.commit, tip),
       ui: {
         ...uiScope,
         ...familyOf(ui, uiScope.commit, tip),

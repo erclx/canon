@@ -10,6 +10,7 @@ import {
   type PullState,
   readBaseStanding,
   readChangedPaths,
+  readRebasedPaths,
   SETTLING_REEL_SKIPS,
   UNWAIVABLE_REEL_SKIPS,
 } from '@/pr/lift'
@@ -265,6 +266,7 @@ function liftApi(root: string, number: string, baseRef: string): LiftApi {
         true,
       ),
     readChanged: (from, to) => readChangedPaths(git, from, to),
+    readRebased: (from, to) => readRebasedPaths(git, baseRef, from, to),
     sleep: (ms) => new Promise((done) => setTimeout(done, ms)),
     now: () => Date.now(),
   }
