@@ -56,7 +56,7 @@ A hand-run `git-ship` or `git-pr` starts no server, since only a worker has a li
 
 ### Building against design references and images
 
-Read `${CLAUDE_SKILL_DIR}/references/design-references.md` before editing a surface a plan's `## Design references` or `## Reference images` names. It names the one board frame this session may write.
+Read `${CLAUDE_SKILL_DIR}/references/design-references.md` before editing a surface a plan's `## Design references` or `## Reference images` names. It names the board frames this session may write.
 
 ## Scope after dispatch
 

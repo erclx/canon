@@ -29,6 +29,7 @@ A worker redraws the board frame itself when the redraw follows from the build, 
 
 - A redraw follows from the build when it removes an element, renames a label, or changes a count the diff changed, and adds no layout, color, or component
 - Report a redraw needing any other choice, draw nothing on the frame, and leave it for a sketch round, since a worker lands no candidate the operator has not picked
+- Treat a `redrawn` entry failing the test as a block, sent to the controller before the build, since the plan promised a folder this build cannot move
 - Leave a folder the plan's `## Constraints` holds for another row, frame included, and build against it as it stands
 
 ### Drawing on the board
@@ -46,5 +47,5 @@ The board folder is gitignored and sits at the main root, one copy every worktre
 A change can make a reference untrue that the plan's `## Design references` never cited. Check each `canon/design/` group whose `## Code` names a file this branch touches.
 
 - Redraw an unnamed reference under the same test, and name it as a departure from the plan in the pull request announcement
-- Report an unnamed reference failing the test the same way as a named one, and build without moving it
-- Name each frame this session drew in the pull request description, since no pick stands behind it and both reviewers read it there
+- Report an unnamed reference failing the test in the announcement and build without moving it, since the plan never promised its redraw
+- Name each frame this session drew under the pull request's `## For the reviewer`, and give it a box in the UI checklist the UI reviewer drives, since no pick stands behind it
