@@ -52,6 +52,12 @@ export interface ReapRow {
   readonly reason: SkipReason | null
   /** The status, the open task, the dwell, or the client's output on a failure. */
   readonly detail: string | null
+  /**
+   * The id the client lists the session under, which the reap passed it or
+   * would pass on a dry run. Null where the client listed none, and absent
+   * on a row the reap never acted on.
+   */
+  readonly clientId?: string | null
 }
 
 export type RosterRow = ResolvedSession & Pick<StopReading, 'stopped'>
@@ -251,9 +257,17 @@ export interface ClientResult {
   readonly output: string
 }
 
+/**
+ * Each sessionId the client lists, mapped to the id its `stop` and `rm` take,
+ * or undefined when the listing could not be read.
+ */
+export type ClientIds = ReadonlyMap<string, string> | undefined
+
 export interface ReapEffects {
-  /** Runs `claude stop <id>` or `claude rm <id>`. */
+  /** Runs `claude stop <id>` or `claude rm <id>` with the client's own id. */
   readonly run: (verb: 'stop' | 'rm', id: string) => Promise<ClientResult>
+  /** The client's listing, read fresh, which names the id its verbs take. */
+  readonly clientIds: () => Promise<ClientIds>
   /** The sessionIds still live on the roster, read fresh. */
   readonly live: () => Promise<ReadonlySet<string>>
   /** Waits between roster reads while a stopped process exits. */
@@ -264,9 +278,78 @@ const SETTLE_READS = 6
 const SETTLE_PAUSE_MS = 500
 
 /**
+ * Reads `claude agents --json` into the sessionId-to-client-id map. The client
+ * lists a background session under a short `id` beside its full `sessionId`,
+ * and its `stop` and `rm` match the short one alone. Anything but an array of
+ * rows reads as unreadable, never as an empty listing.
+ */
+export function parseClientIds(text: string): ClientIds {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(text)
+  } catch {
+    return undefined
+  }
+  if (!Array.isArray(parsed)) return undefined
+  const ids = new Map<string, string>()
+  for (const entry of parsed) {
+    if (typeof entry !== 'object' || entry === null) continue
+    const { id, sessionId } = entry as Record<string, unknown>
+    if (typeof id === 'string' && typeof sessionId === 'string') {
+      ids.set(sessionId, id)
+    }
+  }
+  return ids
+}
+
+async function spawnClient(
+  binary: string,
+  args: readonly string[],
+): Promise<ClientResult & { readonly stdout: string }> {
+  try {
+    const proc = Bun.spawn([binary, ...args], {
+      stdin: 'ignore',
+      stdout: 'pipe',
+      stderr: 'pipe',
+    })
+    const [stdout, stderr, exitCode] = await Promise.all([
+      new Response(proc.stdout).text(),
+      new Response(proc.stderr).text(),
+      proc.exited,
+    ])
+    return { exitCode, output: `${stdout}${stderr}`, stdout }
+  } catch (error) {
+    return { exitCode: 127, output: String(error), stdout: '' }
+  }
+}
+
+/** The two effects that reach the client binary, found on `PATH` by name. */
+export function clientEffects(
+  binary = 'claude',
+): Pick<ReapEffects, 'run' | 'clientIds'> {
+  return {
+    run: async (verb, id) => {
+      const { exitCode, output } = await spawnClient(binary, [verb, id])
+      return { exitCode, output }
+    },
+    clientIds: async () => {
+      const result = await spawnClient(binary, ['agents', '--json'])
+      return result.exitCode === 0 ? parseClientIds(result.stdout) : undefined
+    },
+  }
+}
+
+const UNLISTED =
+  'the client lists no session under this sessionId, so nothing ran'
+const UNREAD = 'the client listing could not be read, so nothing ran'
+
+/**
  * Acts on each target in turn and judges it by the roster rather than by the
- * client's exit, since the client's own report is not reliable. A session
- * still live after the reads settle is `failed`, carrying the client's output.
+ * client's exit, since the client's own report is not reliable. The client id
+ * resolves ahead of the dry-run branch, so a dry run reports the id it would
+ * pass, and a target the client does not list is never acted on under a
+ * guessed id. A session still live after the reads settle is `failed`,
+ * carrying the client's output.
  */
 export async function executeReap(
   targets: readonly Candidate[],
@@ -275,19 +358,35 @@ export async function executeReap(
   effects: ReapEffects,
 ): Promise<readonly ReapRow[]> {
   const rows: ReapRow[] = []
+  if (targets.length === 0) return rows
+  const ids = await effects.clientIds()
 
   for (const target of targets) {
+    const clientId = ids?.get(target.sessionId)
+    if (clientId === undefined) {
+      const gone = !(await effects.live()).has(target.sessionId)
+      rows.push({
+        ...target,
+        outcome: gone ? 'gone' : 'failed',
+        reason: null,
+        detail: gone ? null : ids === undefined ? UNREAD : UNLISTED,
+        clientId: null,
+      })
+      continue
+    }
+
     if (dryRun) {
       rows.push({
         ...target,
         outcome: remove ? 'would-remove' : 'would-stop',
         reason: null,
         detail: null,
+        clientId,
       })
       continue
     }
 
-    const result = await effects.run(remove ? 'rm' : 'stop', target.sessionId)
+    const result = await effects.run(remove ? 'rm' : 'stop', clientId)
     let still = true
     for (let read = 0; read < SETTLE_READS; read++) {
       if (read > 0) await effects.pause(SETTLE_PAUSE_MS)
@@ -302,12 +401,14 @@ export async function executeReap(
             outcome: 'failed',
             reason: null,
             detail: result.output.trim() || `exit ${result.exitCode}`,
+            clientId,
           }
         : {
             ...target,
             outcome: remove ? 'removed' : 'stopped',
             reason: null,
             detail: null,
+            clientId,
           },
     )
   }

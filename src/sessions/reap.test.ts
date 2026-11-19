@@ -3,7 +3,10 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import {
+  type ClientIds,
+  clientEffects,
   executeReap,
+  parseClientIds,
   planFinishedReap,
   planTaskReap,
   readTaskSessions,
@@ -292,17 +295,28 @@ describe('planFinishedReap', () => {
   })
 })
 
+/** The short id the client lists a session under, its first eight characters. */
+function short(sessionId: string): string {
+  return sessionId.slice(0, 8)
+}
+
 function effects(
   live: string[],
   vanish: boolean,
+  listed: ClientIds = new Map(live.map((id) => [id, short(id)])),
 ): ReapEffects & { calls: string[] } {
   const calls: string[] = []
   const held = new Set(live)
+  const byShort = new Map(
+    [...(listed ?? new Map<string, string>())].map(([full, id]) => [id, full]),
+  )
   return {
+    clientIds: async () => listed,
     calls,
     run: async (verb, id) => {
       calls.push(`${verb} ${id}`)
-      if (vanish) held.delete(id)
+      const full = byShort.get(id)
+      if (vanish && full !== undefined) held.delete(full)
       return { exitCode: vanish ? 0 : 1, output: 'No session matching\n' }
     },
     live: async () => held,
@@ -318,8 +332,8 @@ describe('executeReap', () => {
 
     const rows = await executeReap([target], false, false, fake)
 
-    expect(fake.calls).toEqual([`stop ${WORKER}`])
-    expect(rows[0]).toMatchObject({ outcome: 'stopped' })
+    expect(fake.calls).toEqual(['stop 11111111'])
+    expect(rows[0]).toMatchObject({ outcome: 'stopped', clientId: '11111111' })
   })
 
   it('should run the client remove in place of its stop under remove', async () => {
@@ -327,17 +341,57 @@ describe('executeReap', () => {
 
     const rows = await executeReap([target], true, false, fake)
 
-    expect(fake.calls).toEqual([`rm ${WORKER}`])
+    expect(fake.calls).toEqual(['rm 11111111'])
     expect(rows[0]).toMatchObject({ outcome: 'removed' })
   })
 
-  it('should run no client command on a dry run', async () => {
+  it('should run no client command on a dry run and report the id it would pass', async () => {
     const fake = effects([WORKER], true)
 
     const rows = await executeReap([target], true, true, fake)
 
     expect(fake.calls).toEqual([])
-    expect(rows[0]).toMatchObject({ outcome: 'would-remove' })
+    expect(rows[0]).toMatchObject({
+      outcome: 'would-remove',
+      clientId: '11111111',
+    })
+  })
+
+  it('should read a live session the client does not list as failed, running nothing', async () => {
+    const fake = effects([WORKER], true, new Map())
+
+    const rows = await executeReap([target], false, false, fake)
+
+    expect(fake.calls).toEqual([])
+    expect(rows[0]).toMatchObject({
+      outcome: 'failed',
+      clientId: null,
+      detail: expect.stringContaining('lists no session'),
+    })
+  })
+
+  it('should read an unlisted session the roster also dropped as gone', async () => {
+    const fake = effects([], true, new Map())
+
+    const rows = await executeReap([target], false, false, fake)
+
+    expect(fake.calls).toEqual([])
+    expect(rows[0]).toMatchObject({ outcome: 'gone', clientId: null })
+  })
+
+  it('should read a failed client listing as failed, running nothing', async () => {
+    const fake = {
+      ...effects([WORKER], true),
+      clientIds: async () => undefined,
+    }
+
+    const rows = await executeReap([target], false, true, fake)
+
+    expect(fake.calls).toEqual([])
+    expect(rows[0]).toMatchObject({
+      outcome: 'failed',
+      detail: expect.stringContaining('could not be read'),
+    })
   })
 
   it('should read a session still on the roster as failed with the output', async () => {
@@ -349,6 +403,69 @@ describe('executeReap', () => {
       outcome: 'failed',
       detail: 'No session matching',
     })
+  })
+})
+
+describe('parseClientIds', () => {
+  it('should map each listed sessionId to the short id the client lists', () => {
+    const ids = parseClientIds(
+      JSON.stringify([
+        { id: '11111111', sessionId: WORKER, kind: 'background' },
+        { pid: 9, sessionId: REVIEWER, kind: 'interactive' },
+      ]),
+    )
+
+    expect(ids).toEqual(new Map([[WORKER, '11111111']]))
+  })
+
+  it('should read output that is not a JSON array as unreadable', () => {
+    expect(parseClientIds('{"error":"no daemon"}')).toBeUndefined()
+  })
+
+  it('should read text that is not JSON as unreadable', () => {
+    expect(parseClientIds('daemon not running')).toBeUndefined()
+  })
+})
+
+describe('clientEffects', () => {
+  const standIn = join(import.meta.dirname, 'fixtures', 'claude-stand-in.sh')
+
+  it('should stop a session through a client that matches the short id alone', async () => {
+    const client = clientEffects(standIn)
+    const held = new Set([WORKER])
+    const fake: ReapEffects = {
+      ...client,
+      run: async (verb, id) => {
+        const result = await client.run(verb, id)
+        if (result.exitCode === 0) held.delete(WORKER)
+        return result
+      },
+      live: async () => held,
+      pause: async () => {},
+    }
+
+    const rows = await executeReap(
+      [{ sessionId: WORKER, name: 'worker-canon-parser' }],
+      false,
+      false,
+      fake,
+    )
+
+    expect(rows[0]).toMatchObject({ outcome: 'stopped', clientId: '11111111' })
+  })
+
+  it('should be refused by that client when handed the full sessionId', async () => {
+    const result = await clientEffects(standIn).run('stop', WORKER)
+
+    expect(result.exitCode).toBe(1)
+  })
+
+  it('should read a client binary that cannot run as an unreadable listing', async () => {
+    const ids = await clientEffects(
+      join(tmpdir(), 'no-such-claude'),
+    ).clientIds()
+
+    expect(ids).toBeUndefined()
   })
 })
 

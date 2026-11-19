@@ -13,6 +13,7 @@ import {
 } from '@/sessions/resolve'
 import { readStop, type StopReading } from '@/sessions/stop'
 import {
+  clientEffects,
   executeReap,
   planFinishedReap,
   planTaskReap,
@@ -401,22 +402,6 @@ function refuseReap(
   return 1
 }
 
-async function clientRun(
-  verb: 'stop' | 'rm',
-  id: string,
-): Promise<{ exitCode: number; output: string }> {
-  const proc = Bun.spawn(['claude', verb, id], {
-    stdout: 'pipe',
-    stderr: 'pipe',
-  })
-  const [stdout, stderr, exitCode] = await Promise.all([
-    new Response(proc.stdout).text(),
-    new Response(proc.stderr).text(),
-    proc.exited,
-  ])
-  return { exitCode, output: `${stdout}${stderr}` }
-}
-
 async function liveIds(): Promise<ReadonlySet<string>> {
   const report = await resolveSessions()
   if (report.kind === 'absent') return new Set()
@@ -514,7 +499,7 @@ async function runReap(
     opts.remove === true,
     opts.dryRun === true,
     {
-      run: clientRun,
+      ...clientEffects(),
       live: liveIds,
       pause: (ms) => new Promise((done) => setTimeout(done, ms)),
     },
