@@ -15,8 +15,10 @@ Landing pages, campaign pages, portfolios. The reader has never used the thing a
 - **Composition carries the weight.** A marketing page is judged on section order and variation first, so a palette round against a flat composition changes nothing a reader notices.
 - **The story carries an arc.** It states the order a stranger meets the claims in, settled before any composition, so section order follows the argument rather than a template.
 - **Vary the section shape.** Alternate alignment, container width and the ratio between sections. Every section a centered heading over centered body reads as a template whatever its values.
-- **Low density.** Whitespace is the argument that the thing is considered. This is the one kind where less information on screen is usually better.
+- **Low density around a finished picture.** Whitespace argues the thing is considered, so less on screen usually wins here. A section holding only a heading and a sentence in open space reads as bare.
 - **Every claim names a real thing.** A page asserting what a tool does, illustrated by something the tool did not produce, breaks its own thesis in the place it is making it.
+- **Each section shows an outcome.** It carries its own picture of what the reader ends up with, such as the finished record. Describing the mechanism alone leaves a stranger to imagine the result.
+- **No motif carries two sections.** A real thing takes several forms, such as a record, a board, a diff, or a rendered page. Once one form pictures a section, every other section reaches for another.
 - **Motion is permitted and rationed.** Entrance motion for what genuinely leads the eye, nothing looping forever.
 - **Where a rule from another kind is wrong here:** dense tabular comparison, persistent chrome, and state indicators all read as product UI leaking onto a marketing page.
 
@@ -28,6 +30,8 @@ Dashboards, tools, admin surfaces, agentic and assistant interfaces. The reader 
 - **High density is correct.** Cramming is a failure and spaciousness is also a failure, since a surface that shows six rows where thirty fit costs the reader a scroll per glance.
 - **The states carry the design weight.** Loading, empty, error, partial and stale are most of what the reader sees on this kind, so they are composed rather than handled.
 - **Whether each state exists** is the `ui-craft` skill's question, not this file's.
+- **One state per view.** Draw each composed state in a view or frame of its own, with the others reachable from it. An empty state drawn under a full list ships two states at once.
+- **Keep the category's conventions.** A reader expects grouped cards for records of one kind, status marks on rows, and a detail panel beside a list. Three equal cards is a tell on a feature list only.
 - **An agentic surface adds three states.** Work running with something to read, work that needs the person, and work finished with a result to inspect. Each rests visibly, never as a spinner.
 - **Chrome is persistent and quiet.** Navigation, status and context stay put and stay recessive, since they are read constantly and looked at rarely.
 - **Motion is feedback, not entrance.** A thing moving should be reporting that something changed.
