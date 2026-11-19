@@ -77,15 +77,9 @@ export interface RetireMembersRecord {
 }
 
 /**
- * What a caller reads instead of the frame.
- *
- * The post-merge hooks are the callers that are not a person, and they branch
- * on a parsed field rather than on the exit code, since a shell profile
- * wrapping `canon` in a function flattens every status to zero. The base
- * stack's hook, and any hook installed before `canon hooks post-merge`, reads
- * the record with a pattern rather than a parser, so every field it branches on is
- * a number or a fixed word, and `outcomes` sits last so a greedy pattern
- * anchored on a scalar never reaches into it.
+ * Older post-merge hooks read this record with a pattern rather than a parser,
+ * so every field they branch on is a number or a fixed word, and `outcomes`
+ * sits last so a greedy pattern anchored on a scalar never reaches into it.
  */
 export interface ReclaimRecord {
   readonly reason: Unreadable | null
@@ -140,10 +134,9 @@ export type ReclaimSource =
       readonly dryRun: boolean
       readonly reclaimable: number
       /**
-       * Null when no removal ran at all, which covers a reading that found
-       * nothing reclaimable and a dry run alike. The two differ on
-       * `reclaimable` rather than here, so a caller can tell a quiet repository
-       * from a run that was asked not to act.
+       * Null when no removal ran, on a quiet reading and a dry run alike. The
+       * two differ on `reclaimable`, which tells a quiet repository from a run
+       * asked not to act.
        */
       readonly removal: RemovalReport | null
       /** Null when no stop ran, which is a reading with nothing reclaimable. */
@@ -434,12 +427,9 @@ export function register(program: Command): void {
 }
 
 /**
- * Frames an unreadable reading the same way for both verbs.
- *
- * The merge state is the one input that decides whether a branch is safe to
- * delete, so a reading that could not reach it refuses every entry rather than
- * falling back to a default. Sharing the frame keeps the removal from growing a
- * second answer to the question the report already answers.
+ * The merge state alone decides whether a branch is safe to delete, so a
+ * reading that could not reach it refuses every entry rather than defaulting,
+ * framed alike for both verbs so the removal grows no second answer.
  */
 function reportUnreadable(
   report: Extract<ReclaimReport, { kind: 'unreadable' }>,
@@ -488,12 +478,9 @@ async function runList(opts: ListCommandOptions): Promise<number> {
 }
 
 /**
- * Builds the record from the values a run already holds.
- *
- * Separate from the run so the record is testable without a repository, a `gh`
- * credential, or a directory the test would then have to remove. The counts are
- * derived from `outcomes` rather than passed in, since two numbers a caller
- * computes are two numbers a caller can get wrong.
+ * Separate from the run so the record is testable without a repository or a
+ * `gh` credential. The counts derive from `outcomes` rather than being passed
+ * in, since a number a caller computes is one it can get wrong.
  */
 export function reclaimRecord(source: ReclaimSource): ReclaimRecord {
   if (source.kind === 'unreadable') {
@@ -807,12 +794,9 @@ function reportWorktrees(worktrees: readonly WorktreeVerdict[]): void {
 }
 
 /**
- * Names the evidence beside the conclusion on every row.
- *
- * The reading has two consumers and they act on different halves. The sweep
- * reads the verdict to decide what to offer, and a person reads it to decide
- * what to remove, so a row phrased for the first alone leaves the second
- * removing a directory on a conclusion it cannot check.
+ * Names the evidence beside the conclusion on every row, since the sweep acts
+ * on the verdict while a person removing a directory needs the evidence to
+ * check it.
  */
 export function describe(verdict: WorktreeVerdict): string {
   const held = verdict.branch ?? 'detached'
@@ -856,10 +840,9 @@ function halves(member: MemberOutcome): readonly Half[] {
 }
 
 /**
- * Builds the record from the report, separate from the run so the counts are
- * testable without a repository. A member already gone everywhere counts
- * nowhere, so a run repeated by hand does not report a retirement it did not
- * make.
+ * Separate from the run so the counts are testable without a repository. A
+ * member already gone everywhere counts nowhere, so a repeated run reports no
+ * retirement it did not make.
  */
 export function retireMembersRecord(
   pullRequest: number,

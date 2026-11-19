@@ -71,10 +71,9 @@ export type RosterRow = ResolvedSession & Pick<StopReading, 'stopped'>
 const IDLE_STATUSES: readonly string[] = ['idle', 'waiting']
 
 /**
- * `shell` is a turn ended with a background command still held, such as a
- * worker's preview server or a review wait. It reads as finished only once the
- * work is settled, being a task archived or declined, since on a live task the
- * command is usually a check the session is still waiting on.
+ * `shell` holds a background command, such as a preview server or a review
+ * wait. It reads as finished only on archived or declined work, since on a
+ * live task the command is usually a check the session still waits on.
  */
 const SETTLED_STATUSES: readonly string[] = [...IDLE_STATUSES, 'shell']
 
@@ -190,10 +189,9 @@ export function planTaskReap(
 }
 
 /**
- * The finished form: every background session in one repository whose work is
- * over, being one recorded on settled tasks alone, or one no task records that
- * has sat idle past the threshold. Status alone never says done, so a session
- * with no task and no measured dwell is left alone.
+ * The finished form takes a session recorded on settled tasks alone, or one no
+ * task records idle past the threshold. Status alone never says done, so an
+ * untasked session with no measured dwell is left alone.
  */
 export function planFinishedReap(
   roster: readonly RosterRow[],

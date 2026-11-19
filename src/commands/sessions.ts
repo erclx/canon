@@ -862,12 +862,9 @@ function selfRefusal(own: Extract<SelfReport, { kind: 'unresolved' }>): string {
 }
 
 /**
- * States how liveness was decided on every run, including the run that decided
- * it the strong way.
- *
- * A caller reading a roster has no other way to tell a confirmed identity from
- * a pid that merely answered, and the two support different actions: the first
- * addresses a session directly and the second opens by asking to be corrected.
+ * States how liveness was decided on every run, since a confirmed identity is
+ * addressed directly and a pid that merely answered opens by asking to be
+ * corrected, and a roster reader has no other way to tell them apart.
  */
 function reportConfidence(
   shown: readonly ResolvedSession[],
@@ -1005,10 +1002,9 @@ function stopLine(session: StopReading): string[] {
 }
 
 /**
- * Renders the dwell at the coarsest unit that keeps it a whole number, since a
- * reader scanning a roster wants an age at a glance rather than a millisecond
- * count. An absent dwell renders as nothing, folding a status carrying no
- * stamp back to the bare status line the reader already knew.
+ * Renders the dwell at the coarsest whole unit, an age at a glance rather than
+ * a millisecond count. An absent dwell renders as nothing, leaving the bare
+ * status line.
  */
 function formatDwell(ms: number | null): string {
   if (ms === null) return ''
