@@ -35,6 +35,10 @@ Reaching past a default means choosing something else on purpose, not avoiding t
 
 `${CLAUDE_SKILL_DIR}/references/tells.md` holds the full catalog, of which these ten are the most common. Read it on the trigger stated below rather than now.
 
+### What to build toward
+
+The catalog names what to reach past and never what to build toward. That direction sits in `${CLAUDE_SKILL_DIR}/references/kinds.md`, as an outcome pictured in each marketing section and the conventions an app screen keeps.
+
 ## Declare the read
 
 State one line before authoring any candidate, page, or component, and put it in the output rather than holding it privately. Where the surface already exists, name the mode first, since the mode decides how much of the read is yours to set:

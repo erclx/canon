@@ -128,5 +128,6 @@ Every word on the surface states what is true of it.
 
 ## Handover
 
+- [ ] The surface was rendered and looked at before handover, with each composed state in a view of its own per `kinds.md`
 - [ ] The weakest thing on the surface is named out loud, per `design-pick` Step 3, and fixed where naming it would embarrass the work
 - [ ] The floor the `ui-craft` skill carries has been applied, not assumed

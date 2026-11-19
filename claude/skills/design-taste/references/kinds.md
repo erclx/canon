@@ -15,8 +15,10 @@ Landing pages, campaign pages, portfolios. The reader has never used the thing a
 - **Composition carries the weight.** A marketing page is judged on section order and variation first, so a palette round against a flat composition changes nothing a reader notices.
 - **The story carries an arc.** It states the order a stranger meets the claims in, settled before any composition, so section order follows the argument rather than a template.
 - **Vary the section shape.** Alternate alignment, container width and the ratio between sections. Every section a centered heading over centered body reads as a template whatever its values.
-- **Low density.** Whitespace is the argument that the thing is considered. This is the one kind where less information on screen is usually better.
+- **Low density around a finished picture.** Whitespace argues the thing is considered, so less on screen usually wins here. A section holding only a heading and a sentence in open space reads as bare.
 - **Every claim names a real thing.** A page asserting what a tool does, illustrated by something the tool did not produce, breaks its own thesis in the place it is making it.
+- **Each section shows an outcome.** It carries its own picture of what the reader ends up with, such as the finished record. Describing the mechanism alone leaves a stranger to imagine the result.
+- **No motif carries two sections.** A real thing takes several forms, such as a record, a board, a diff, or a rendered page. Once one form pictures a section, every other section reaches for another.
 - **Motion is permitted and rationed.** Entrance motion for what genuinely leads the eye, nothing looping forever.
 - **Where a rule from another kind is wrong here:** dense tabular comparison, persistent chrome, and state indicators all read as product UI leaking onto a marketing page.
 
@@ -38,6 +40,13 @@ Dashboards, tools, admin surfaces, agentic and assistant interfaces. The reader 
 - **Where a rule from another kind is wrong here:** generous whitespace, entrance animation on every panel, and hero-scale typography all read as a marketing page wearing a product's clothes.
 
 The direction limits and the category check restate [Impeccable](https://github.com/pbakaus/impeccable)'s guidance for app screens. The shortcut placement follows [NN/g](https://www.nngroup.com/articles/ui-copy/).
+
+### What a screen keeps and shows
+
+A screen built under the tells can strip what its category relies on, and a build that never rendered can ship two states at once.
+
+- **One state per view.** Draw each composed state in a view or frame of its own, with the others reachable from it. An empty state drawn under a full list ships two states at once.
+- **Keep the category's conventions.** A reader expects grouped cards for records of one kind, in one tone, with status marks and a detail panel. The card and one-tone tells in `tells.md` yield here.
 
 ## Content and long-form
 
