@@ -30,7 +30,8 @@ Does not govern:
 
 - **`tasks-decline.md`**: the declined folder, the `Declined:` line, and what declining does to a plan and a board row
 - **`tasks-record-lines.md`**: the `Pull request:`, `Pending branch:`, and `Sessions:` lines a verb writes below the origin lines
-- **`board.md`**: execution order, readiness groups, the backlog, and the generated index beside the tasks
+- **`board.md`**: execution order, readiness groups, and the generated index beside the tasks
+- **`backlog.md`**: the unordered backlog beside the board
 - **`plan.md`**: the plan file a task cites, its sections, and its answer contract
 - **`versioning.md`**: phase-label format and which surfaces a label may appear on
 - **`session.md`**: the pre-compaction handoff sitting in the folder, its filename and its sections
@@ -52,7 +53,7 @@ Does not govern:
 
 One file per task keeps the board safe under parallel sessions, since a gitignored board has no history to recover a clobbered write from.
 
-- Siblings are governed elsewhere, `index.md`, `priority.md`, and `backlog.md` by `board.md` and each `session-` file by `session.md`. A name outside that set is a task.
+- Siblings are governed elsewhere, `index.md` and `priority.md` by `board.md`, the backlog by the backlog reference, and each `session-` file by `session.md`. A name outside that set is a task.
 - `task-board` creates and declines task files, and `task-complete` marks outcomes `[x]` and archives a shipped task with its plan
 
 ## Filenames

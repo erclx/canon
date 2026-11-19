@@ -574,7 +574,7 @@ export function readBoard(text: string): {
         kind: 'launch-misshapen',
         group,
         subject: line.trim(),
-        message: `carries the Launch cell "${launch}", which does not read as a role, model, effort, and route. Rewrite it through canon tasks launch.`,
+        message: `carries the Launch cell "${launch}", which does not read as a role, model, effort, and route. Every board verb refuses the board until the cell is fixed or emptied by hand.`,
       })
     }
 

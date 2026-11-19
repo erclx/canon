@@ -54,5 +54,5 @@ fi
 findings=$(printf '%s' "$record" | jq -r '.findings[] | "- \(.kind): \(.subject) \(.message)"' | head -10)
 [ -n "$findings" ] || exit 0
 
-report "The board edit left findings. Rewrite the rows through canon tasks place, promote, move, or block, which derive every cell but Waiting on.
+report "The board edit left findings. Rewrite the rows through canon tasks place, promote, move, block, or launch, which derive every cell but Waiting on and Launch.
 $findings"

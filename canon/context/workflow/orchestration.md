@@ -13,7 +13,7 @@ description: The task, plan, and ready artifacts coordinating multi-session work
 
 ### `.canon/tasks/`
 
-Holds one task file per task, the board surfaces `priority.md` and `backlog.md`, and one `session-<slug>.md` handoff per session. `canon tasks place`, `promote`, `move`, `block`, and `plan-link` write `priority.md`, each rendering every table from the task files and their plans, so only `Waiting on` is typed.
+Holds one task file per task, the board surfaces `priority.md` and `backlog.md`, and one `session-<slug>.md` handoff per session. `canon tasks place`, `promote`, `move`, `block`, `launch`, and `plan-link` write `priority.md`, each rendering every table from the task files and their plans, so only `Waiting on` and `Launch` are typed.
 
 - `priority.md` groups rows under `## In flight`, `## Up next`, and `## Needs a plan`, and `backlog.md` holds decided work nobody has scheduled, which is no fourth group
 - `canon tasks validate` reads and never writes, since a validator repairing a row asserts the claim it tests, and lists `## In flight` overlaps in `shared` without moving an exit code

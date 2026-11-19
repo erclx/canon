@@ -26,7 +26,7 @@ Every row under `## Up next` and `## Needs a plan` in `.canon/tasks/priority.md`
 
 - Take the board rows in board order and finish one before opening the next, since clearing a row changes what the next row holds behind
 - A pass that measures every row first and writes afterwards writes against a board it has already invalidated
-- On the idle trigger, walk the backlog after the board in filename order, since `${CLAUDE_SKILL_DIR}/../task-board/references/board.md` fixes it as unordered
+- On the idle trigger, walk the backlog after the board in filename order, since `${CLAUDE_SKILL_DIR}/../task-board/references/backlog.md` fixes it as unordered
 
 ## Re-testing a row
 
@@ -63,7 +63,7 @@ Write the result into the row, since a re-test reported in chat is lost at the n
 
 ## Re-testing a backlog row
 
-A backlog row carries no blocker cell, since `${CLAUDE_SKILL_DIR}/../task-board/references/board.md` fixes `backlog.md` as a flat list of links with no state of its own. This pass asks the standard's board-or-backlog question instead, whether the work in front of the row landed or the world changed under it.
+A backlog row carries no blocker cell, since `${CLAUDE_SKILL_DIR}/../task-board/references/backlog.md` fixes `backlog.md` as a flat list of links with no state of its own. This pass asks the standard's board-or-backlog question instead, whether the work in front of the row landed or the world changed under it.
 
 - Read the answer from the task file's `## Findings` and its origin line, `Plan:`, `Groundwork:`, `Intake:`, or `Issue:`
 - Clearing a row answers yes, never a count of how long it waited, since age is refused as evidence here on the same ground as for a board row
