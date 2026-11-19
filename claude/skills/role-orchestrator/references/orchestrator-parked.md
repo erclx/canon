@@ -22,7 +22,7 @@ Three points hold for both triggers.
 
 ## Scope
 
-Every row under `## Up next` and `## Needs a plan` in `.canon/tasks/priority.md`, plus every row in `.canon/tasks/backlog.md` on the idle trigger when the file exists. A `## Run now` row carries no blocker, so the pass skips it. Resolve the board, the backlog, and each task file at the main worktree root, the way `session-worktree` does.
+Every row under `## Up next` and `## Needs a plan` in `.canon/tasks/priority.md`, plus every row in `.canon/tasks/backlog.md` on the idle trigger when the file exists. An `## In flight` row carries no blocker, so the pass skips it. Resolve the board, the backlog, and each task file at the main worktree root, the way `session-worktree` does.
 
 - Take the board rows in board order and finish one before opening the next, since clearing a row changes what the next row holds behind
 - A pass that measures every row first and writes afterwards writes against a board it has already invalidated
@@ -34,7 +34,7 @@ The blocker cell states what the row waits on, and each kind is tested different
 
 ### A hold behind a track in flight
 
-The validator tests the file the cell cites against the files every `## Run now` row's plans declare. A track that merged since the row was parked is no longer in flight, whatever the sets still share.
+The validator tests the file the cell cites against the files every `## In flight` row's plans declare. A track that merged since the row was parked is no longer in flight, whatever the sets still share.
 
 - Re-test the cell under the conflict check in `orchestrator-dispatch.md` too, since a row parked on a shared file alone holds on nothing and moves up
 - A cell naming the file in prose rather than backticks cites nothing, so rewrite the hold in the board's spelling and the next run picks it up

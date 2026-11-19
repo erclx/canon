@@ -23,7 +23,7 @@ Governs the board files under `.canon/tasks/`: the readiness groups and their co
 Does not govern:
 
 - The task files the rows link to, their filenames, format, origin lines, and archiving: `tasks.md`
-- The plan a `## Run now` row cites and the file set it declares: `plan.md`
+- The plan an `## In flight` row's task cites and the file set it declares: `plan.md`
 - The pre-compaction handoff sitting in the same folder: `session.md`
 
 ## What a working board looks like
@@ -68,19 +68,23 @@ Group tasks by readiness rather than by status, one row per task, under the colu
 
 ### Readiness groups
 
-Readiness is three groups under fixed headings, `## Run now`, `## Up next`, and `## Needs a plan`, in that order. A task belongs to exactly one, and the tests are read in order.
+Readiness is three groups under fixed headings, `## In flight`, `## Up next`, and `## Needs a plan`, in that order. A task belongs to exactly one, and the tests are read in order.
 
 | Group             | Test                                                                                 |
 | ----------------- | ------------------------------------------------------------------------------------ |
-| `## Run now`      | A worker was dispatched on it, under a written plan covering every open outcome      |
+| `## In flight`    | A worker was dispatched on it, under a written plan covering every open outcome      |
 | `## Up next`      | A written plan exists and no worker holds it yet, and `Waiting on` names what is due |
 | `## Needs a plan` | Everything else, being a task with no plan                                           |
 
 The names are the contract, since a heading count reads a renamed group as empty, so add no fourth. An overturned plan is amended in place, its row held under `## Up next` with `canon tasks block` and the reason a Findings line.
 
+Every verb reads the older heading `Run now` as `In flight` and writes the new one, while `readiness` keeps the value `Run now`.
+
 ### Writing the board
 
-Every write goes through `canon tasks place`, `promote`, `move`, or `block`, each reading the file once, rendering the columns the template fixes, and writing it once. `plan-link` promotes a parked row the same way. Only `Waiting on` is typed, since every other cell derives from the task and its live plans.
+Every write goes through `canon tasks place`, `promote`, `move`, `block`, or `launch`, each reading the file once, rendering the columns the template fixes, and writing it once. `plan-link` promotes a parked row the same way. `Waiting on` and `Launch` are typed, and every other cell derives from the task and its live plans.
+
+`canon tasks flight` reads each in-flight row's stage live and stores none.
 
 ### What blocks a run
 
@@ -95,6 +99,10 @@ A `Touches` cell counts its plans' declared files and names the two fullest fold
 
 - `canon tasks plan-reach <plan>` reads the reach a running branch grew to
 - Change the plan's list to change the cell. A worker never edits this board.
+
+### The `Launch` and `Session` cells
+
+`Launch` holds the dispatcher's pick, as in `worker, opus, high, background`, with `(operator)` marking an override. `Session` names the last session the task records, and a promote carries the model and effort into it, as in `worker-a (opus, high)`.
 
 ### Cell width
 
@@ -150,16 +158,16 @@ description: One line on what the board covers
 
 # Priority
 
-## Run now
+## In flight
 
-| Task                            | Touches                 | Plan                                 |
-| ------------------------------- | ----------------------- | ------------------------------------ |
-| [vXX.Y <slug>](vXX.Y-<slug>.md) | <what the task touches> | [<slug>](../plans/feature-<slug>.md) |
+| Task                            | Touches                 | Session                            |
+| ------------------------------- | ----------------------- | ---------------------------------- |
+| [vXX.Y <slug>](vXX.Y-<slug>.md) | <what the task touches> | <session name> (<model>, <effort>) |
 
 ## Up next
 
-| Task | Touches | Waiting on |
-| ---- | ------- | ---------- |
+| Task | Touches | Launch | Waiting on |
+| ---- | ------- | ------ | ---------- |
 
 ## Needs a plan
 
@@ -170,36 +178,7 @@ description: One line on what the board covers
 
 ## The backlog
 
-A task sits on the board when it would plausibly be planned within the next few waves, and on `backlog.md` otherwise. Restate that judgment whenever the board is swept, since a backlogged task rises when the work in front of it lands and a board row falls when it stops being near-term.
-
-### Why a split
-
-A test over age or origin was the alternative, and neither predicts what gets picked next. Leaving everything on the board produces a group too long to rank.
-
-- The split keeps the board short enough for its order to be read, at the cost of a second surface
-- The trade pays only while the backlog carries no order, no groups, and no readiness claim
-
-### Shape
-
-Nothing is deleted. A backlogged task keeps its file, findings, and frontmatter, and the row points at that file. The folder has no history, so a row dropped without landing somewhere readable is gone.
-
-The backlog is a flat list of links under one heading, sorted by filename. The order matches the index, so no position on it reads as a queue.
-
-```markdown
----
-title: Backlog
-description: One line on what the backlog holds
----
-
-# Backlog
-
-Unordered. Nothing here is scheduled, and a task rises to `priority.md` when it becomes near-term.
-
-- [vXX.Y <slug>](vXX.Y-<slug>.md)
-- [vXX.Y <slug>](vXX.Y-<slug>.md)
-```
-
-Add no fourth readiness group in place of this file. A backlog makes no readiness claim, only that nobody has scheduled the task, a fact about attention rather than whether the work can start.
+When a task sits on `backlog.md` rather than the board, and that file's shape, are in `backlog.md` beside this file.
 
 ## Validation
 

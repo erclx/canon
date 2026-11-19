@@ -73,7 +73,7 @@ Write `.canon/tasks/vXX.Y-<slug>.md` under the claimed label, reading the file f
 
 ### Step 4: place it on a surface
 
-A task file with no row is a dropped task, so name its surface in the same pass that creates it. The test and both file shapes are in `${CLAUDE_SKILL_DIR}/references/board.md`.
+A task file with no row is a dropped task, so name its surface in the same pass that creates it. The test is in `${CLAUDE_SKILL_DIR}/references/backlog.md`, and the board shape in `${CLAUDE_SKILL_DIR}/references/board.md` beside it.
 
 - A task plausibly planned within the next few waves takes a row under `## Needs a plan` in `.canon/tasks/priority.md`, through `canon tasks place <stem> --group needs-a-plan --waiting "<reason>"`.
 - Any other task takes a line in `.canon/tasks/backlog.md`, which is unordered.

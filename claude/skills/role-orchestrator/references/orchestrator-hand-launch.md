@@ -66,7 +66,7 @@ canon dispatch prompts rm <task> --role worker --json
 canon tasks promote <stem>
 ```
 
-The promote is the same call a background launch makes, and nothing else moves a hand-launched row out of `## Up next`. A planner or reviewer row takes no branch the watch can match, so it stays on the operator's word, then `rm` with its role.
+The promote is the same call a background launch makes, and nothing else moves a hand-launched row out of `## Up next` into `## In flight`. It carries the model and effort from the row's `Launch` cell into its `Session` cell, so write that cell with `--route hand` when the prompt is queued. A planner or reviewer row takes no branch the watch can match, so it stays on the operator's word, then `rm` with its role.
 
 `rm` answers `ok` with nothing removed for a row no longer queued, so a second clear is harmless. The wave after a worker's pull request opens queues `--role reviewer` for that row alone, since the worker's prompt is already gone.
 
