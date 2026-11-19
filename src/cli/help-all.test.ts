@@ -38,7 +38,7 @@ describe('renderAll', () => {
 
     const text = renderAll(find(program, ['tasks']))
 
-    expect(usageLines(text)).toHaveLength(20)
+    expect(usageLines(text)).toHaveLength(22)
   })
 
   it('should carry the help text a leaf adds after its usage', () => {
