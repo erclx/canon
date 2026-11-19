@@ -15,6 +15,8 @@ Canon runs a UI feature through one loop. A plan cites the design, a worker buil
 - The plan carries a `## Design references` section naming the accepted design for each surface it changes, or `None identified.` when there is none.
 - Each entry says whether the change is `built against` the reference or leaves it `redrawn`, and a redrawn one ships its new frame in the same pull request through `canon:design-record`.
 - A design becomes a reference through `canon:design-record`, which lands an accepted pick in `canon/design/` and carries its values into `canon/DESIGN.md`.
+- Each group keeps a file beside its folder, such as `canon/design/home.md`, naming the code it governs.
+- `canon indexes regen canon/design` writes the top-level index from the group files, so branches landing references in different groups share no line.
 
 ## Build
 
