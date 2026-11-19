@@ -65,7 +65,7 @@ const TAKE_REFUSALS: Record<TakeRefusal, string> = {
   'server-unreachable': 'Nothing answered at the URL, so no beat was filmed.',
   'target-missing': 'A step names a target the page does not carry.',
   'target-offscreen':
-    'A step names a target outside the window, so a setup step must bring it into view first.',
+    'A step names a target or a point outside the window. A setup step brings a target into view, and a point has to move inside the window.',
   'over-cap':
     'The filmed beats ran past --max-seconds, so the take stopped at the beat that crossed it.',
   'clip-mismatch':
@@ -246,7 +246,9 @@ export function register(program: Command): void {
         '                      that setting reads 1',
         '  server-unreachable  nothing answered at the URL',
         '  target-missing      a step names a target the page does not carry',
-        '  target-offscreen    a step names a target outside the window, so a setup step must bring it into view first',
+        '  target-offscreen    a step names a target outside the window, so a setup',
+        '                      step must bring it into view first, or a point',
+        '                      outside it, which has to move inside the window',
         '  over-cap            the filmed beats ran past --max-seconds, naming the',
         '                      beat that crossed it',
         '  clip-mismatch       a clip measured a different size from the one its',
