@@ -330,6 +330,18 @@ describe('runPostMerge records push lines', () => {
     )
   })
 
+  it('should name a push another session held as the reason to retry', async () => {
+    const h = harness({
+      push: record({ ok: false, reason: 'busy' }, 1),
+    })
+
+    await h.go()
+
+    expect(h.output()).toBe(
+      '\n🗄️  Records not backed up: busy\nAnother session was pushing. Run canon records push once it finishes.\n\n',
+    )
+  })
+
   it('should point any other refusal at a retry', async () => {
     const h = harness({
       push: record({ ok: false, reason: 'push-failed' }, 1),

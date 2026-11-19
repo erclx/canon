@@ -103,12 +103,9 @@ async function runSkillNames(opts: SweepOptions): Promise<number> {
 }
 
 /**
- * One sweep over a repository's tracked files under whichever rules it was
- * handed.
- *
- * Reports rather than writes without `--write`, matching `canon records
- * migrate`. A rename touching this many files has no undo short of the branch
- * it ran on, so the safe outcome sits on the default path.
+ * One sweep over a repository's tracked files under the rules it was handed.
+ * Reports without `--write`, since a rename this wide has no undo short of
+ * the branch it ran on, so the safe outcome sits on the default path.
  */
 async function runSweep(
   opts: SweepOptions,
@@ -127,8 +124,7 @@ async function runSweep(
   const sources = await readSources(root, scoped)
   const plan = planRename(sources, rules)
 
-  // A target scope reports rather than rewrites these, since prose the project
-  // wrote is theirs to change.
+  // A target scope reports these rather than rewriting prose the project owns.
   const citations =
     scope === 'target'
       ? planRename(
@@ -140,8 +136,7 @@ async function runSweep(
         ).entries.length
       : 0
 
-  // stdout, so the record pipes clean. `pipeOutput` frames to stderr, which is
-  // where this command's report belongs and where a JSON record does not.
+  // stdout keeps the record clean, since `pipeOutput` frames the report to stderr.
   if (opts.json) {
     process.stdout.write(
       `${JSON.stringify(toRecord(plan, scope, citations, opts.write), null, 2)}\n`,
@@ -226,11 +221,8 @@ interface RecordsOptions {
 
 /**
  * Moves a project's session records to `.canon/` and repoints what cites them.
- *
- * The ignore gate runs before anything is planned. Every folder being moved is
- * ignored where it stands, so landing them under a root the project does not
- * ignore publishes the memory pen into the next commit, and reporting a plan
- * the caller cannot safely apply is worse than refusing to draw one.
+ * The ignore gate runs before planning, since landing ignored folders under an
+ * unignored root would publish them in the next commit.
  */
 async function runRecords(opts: RecordsOptions): Promise<number> {
   const root = opts.root ?? process.cwd()
@@ -259,15 +251,13 @@ async function runRecords(opts: RecordsOptions): Promise<number> {
     return 1
   }
 
-  // Filtered before the read, since the records are the largest thing in the
-  // tree and `readSources` awaits one file at a time.
+  // Filtered before the read, since records are the largest thing `readSources` awaits.
   const toSweep = files.filter((path) => !isRecordArtifact(path))
   const records = files.length - toSweep.length
 
   const plan = planRecordsMove(root, await readSources(root, toSweep))
 
-  // stdout, so the record pipes clean. `pipeOutput` frames to stderr, which is
-  // where this command's report belongs and where a JSON record does not.
+  // stdout keeps the record clean, since `pipeOutput` frames the report to stderr.
   if (opts.json) {
     process.stdout.write(
       `${JSON.stringify(toRecordsRecord(plan, records, opts.write))}\n`,
@@ -296,8 +286,7 @@ async function runRecords(opts: RecordsOptions): Promise<number> {
     `Rewrote ${plural(applied.written, 'file')} and moved ${plural(applied.moved, 'folder')}.`,
   )
 
-  // `failed` holds rejected writes as well as stopped folders, so the line
-  // names a path rather than a folder.
+  // `failed` holds rejected writes too, so the line names a path, not a folder.
   if (applied.failed.length > 0) {
     logError(`Could not write ${plural(applied.failed.length, 'path')}.`)
     for (const path of applied.failed) logError(`  ${path}`)
@@ -328,8 +317,7 @@ function reportRecords(plan: RecordsPlan, records: number): void {
   }
   logInfo(`${plural(plan.kept, 'citation')} marked to keep the old root.`)
 
-  // A count on its own line, not in `excluded`, whose hand-check list a record
-  // tree would bury. The count says where the rest of the files went.
+  // A count on its own line, since `excluded` is a hand-check list it would bury.
   if (records > 0) {
     logInfo(`${plural(records, 'file')} under a record root, left alone.`)
   }
@@ -338,8 +326,7 @@ function reportRecords(plan: RecordsPlan, records: number): void {
     logInfo(`${plural(plan.excluded.length, 'file')} excluded from the sweep.`)
   }
 
-  // A list rather than a count. A coupled file is the handful an operator has
-  // to open by hand, and a bare count gives them nothing to act on.
+  // A list, since a coupled file is one an operator must open by hand.
   if (plan.coupled.length > 0) {
     logInfo(
       `${plural(plan.coupled.length, 'file')} couple to an excluded path:`,
@@ -347,8 +334,7 @@ function reportRecords(plan: RecordsPlan, records: number): void {
     for (const path of plan.coupled) logInfo(`  ${path}`)
   }
 
-  // Named one by one, since a rewritten glob stops matching silently, so the
-  // reader gets the file and line to check by hand.
+  // Named one by one, since a rewritten glob stops matching silently.
   if (plan.frontmatterGlobs.length > 0) {
     logInfo(
       `${plural(plan.frontmatterGlobs.length, 'file')} carry a frontmatter paths: glob left alone:`,
@@ -360,8 +346,7 @@ function reportRecords(plan: RecordsPlan, records: number): void {
     }
   }
 
-  // Named one by one like the globs: an ownership boundary or a tense judgment
-  // vanishes once rewritten, so the reader gets the file and line.
+  // Named one by one, since a rewritten boundary or tense judgment vanishes silently.
   if (plan.crossRepoCitations.length > 0) {
     logInfo(
       `${plural(plan.crossRepoCitations.length, 'file')} carry a citation into another repository, left alone:`,
@@ -417,13 +402,9 @@ function toRecordsRecord(
 }
 
 /**
- * Moves the tracked toolkit surfaces to `canon/` and repoints what cites them.
- *
- * Every path here is tracked, so the write goes through `applyRename`'s
- * `git mv` rather than the records move's plain rename, and the history
- * follows each file. A destination already on disk refuses the whole plan,
- * since `git mv` onto an existing path fails per file and leaves a tree split
- * across both roots.
+ * Moves the tracked toolkit surfaces to `canon/` through `applyRename`, so
+ * history follows each file. A destination already on disk refuses the whole
+ * plan, since a per-file `mv` failure leaves the tree split across both roots.
  */
 async function runSurfaceRoots(opts: SweepOptions): Promise<number> {
   const root = opts.root ?? process.cwd()
@@ -560,15 +541,9 @@ interface RecordTreeOptions {
 }
 
 /**
- * Repoints the old-root citations left inside the record tree itself. The
- * sibling verb sweeps a git listing, which reaches every tracked file and none
- * of the records, since those are gitignored by construction. This one walks
- * the new root directly and is scoped to the folders a session still follows a
- * path into, so the closed trails and the scratch folder keep what they say.
- *
- * No ignore gate here. Nothing moves, so there is no destination whose ignore
- * status could publish a record, and a run in a project the move has not
- * reached finds no new root to walk and reports nothing.
+ * Repoints old-root citations inside the gitignored record tree, which the
+ * sibling sweep never reaches, scoped to folders a session still follows a
+ * path into. No ignore gate, since nothing moves.
  */
 async function runRecordTree(opts: RecordTreeOptions): Promise<number> {
   const root = opts.root ?? process.cwd()
@@ -580,8 +555,7 @@ async function runRecordTree(opts: RecordTreeOptions): Promise<number> {
     walk.skipped,
   )
 
-  // stdout, so the record pipes clean. `pipeOutput` frames to stderr, which is
-  // where this command's report belongs and where a JSON record does not.
+  // stdout keeps the record clean, since `pipeOutput` frames the report to stderr.
   if (opts.json) {
     process.stdout.write(
       `${JSON.stringify(toRecordTreeRecord(plan, walk.files.length, opts.write))}\n`,
@@ -617,13 +591,9 @@ function excerpt(text: string): string {
 }
 
 /**
- * Names every citation with the line it sits on.
- *
- * The record tree is untracked and unbacked, so a wrong rewrite has no git undo
- * and a count would give a reader nothing to judge before passing `--write`.
- * The excluded corpora take the opposite treatment for the same reason
- * `reportRecords` counts the records it skips: they are thousands of files
- * nobody is being asked to check.
+ * Names every citation with its line, since the record tree is untracked and
+ * a wrong rewrite has no undo, so a bare count gives a reader nothing to judge.
+ * The excluded corpora are counted alone, being thousands of unchecked files.
  */
 function reportRecordTree(plan: RecordTreePlan, swept: number): void {
   logInfo(`${plural(swept, 'file')} in the live record surface.`)
@@ -767,10 +737,8 @@ interface RecordLayoutOptions {
 }
 
 /**
- * Moves every row of `RECORD_LAYOUT_MOVES`: the memory pen's receipts and
- * retired entries under `.canon/memory/`, and everything under
- * `.canon/review/` that is not a review out to its own folder, then repoints
- * the citations that name any of them.
+ * Moves every row of `RECORD_LAYOUT_MOVES` out of `.canon/memory/` and
+ * `.canon/review/` into its own folder, then repoints the citations to them.
  */
 async function runRecordLayout(opts: RecordLayoutOptions): Promise<number> {
   const root = opts.root ?? process.cwd()
@@ -869,12 +837,9 @@ interface RuleLayoutOptions {
 }
 
 /**
- * Moves a target's flat `.claude/rules/<subdir>/` tree onto
- * `.claude/rules/canon/<subdir>/`.
- *
- * No ignore gate here, unlike `runRecords`. Nothing this verb moves is
- * gitignored: an installed rule is a file the target tracks, so relocating it
- * publishes nothing that was not already committed.
+ * Moves a target's flat `.claude/rules/<subdir>/` onto
+ * `.claude/rules/canon/<subdir>/`. No ignore gate, unlike `runRecords`, since an
+ * installed rule is tracked and moving it publishes nothing new.
  */
 async function runRuleLayout(opts: RuleLayoutOptions): Promise<number> {
   const root = opts.root ?? process.cwd()
@@ -1487,10 +1452,11 @@ export function register(program: Command): void {
         '',
         'Also wires every seeded hook whose script exists under .claude/hooks/,',
         'under the event and matcher the seeded settings give it, being',
-        'hooks.PreToolUse, hooks.PostToolUse, and hooks.Stop. A tool whose',
-        'matcher already runs the script is skipped, so a hand wiring is never',
-        'doubled, and a deleted script is never wired. The write inserts text',
-        'in place, so every line it does not add stays as written.',
+        'hooks.PreToolUse, hooks.PostToolUse, hooks.Stop, and hooks.SessionEnd.',
+        'A tool whose matcher already runs the script is skipped, so a hand',
+        'wiring is never doubled, and a deleted script is never wired. The',
+        'write inserts text in place, so every line it does not add stays as',
+        'written.',
         '',
         'A missing settings file is nothing to do. A file that is not valid',
         'JSON, or whose permissions, deny, allow, hooks, or a seeded event has',

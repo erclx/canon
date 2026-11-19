@@ -6,7 +6,7 @@ kind: reference
 
 # Records
 
-`canon records` backs the record folders under `.canon/` to a private remote and reports on them. `canon hooks post-merge` runs `push` after every merge.
+`canon records` backs the record folders under `.canon/` to a private remote and reports on them. `canon hooks post-merge` runs `push` after every merge, and the seeded `records-push.sh` hook runs it when a Claude Code session ends.
 
 ```bash
 canon records push
@@ -54,6 +54,7 @@ Branch on `reason` in the `--json` record, not the exit code.
 | `local-ahead`       | `pull` found local commits that never reached the origin. Run `push` first     |
 | `unsafe-payload`    | `push` found a file over 25 MB or carrying a credential                        |
 | `git-failed`        | A git call failed, with its stderr in the message                              |
+| `busy`              | `push` waited 10 seconds on another push's lock. Run it again                  |
 
 ## See also
 

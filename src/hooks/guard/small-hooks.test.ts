@@ -36,8 +36,7 @@ for (const tree of TREES) {
   )
 
   describe(tree.label, () => {
-    // Concurrent because every refusal test spends the guard's two seconds
-    // waiting, and eleven of them in series would dominate the suite.
+    // Concurrent, since each refusal test waits out the guard's two seconds.
     for (const name of hooks) {
       const hook = join(tree.dir, name)
 
@@ -62,8 +61,7 @@ for (const tree of TREES) {
         expect(result.code).toBe(0)
       })
 
-      // A hook added without an acting case fails here rather than passing on
-      // the refusal test alone, which is what keeps the directory walk honest.
+      // A hook added without an acting case fails here, keeping the directory walk honest.
       it.concurrent(`should carry ${name} through to its verdict on an ctx.acting payload`, async ({
         expect,
       }) => {
@@ -80,8 +78,7 @@ for (const tree of TREES) {
 
         expect(result[expected.stream ?? 'stdout']).toContain(expected.expect)
         expect(result.code).toBe(expected.code ?? 0)
-        // A runtime error such as `declare -A` on bash 3.2 keeps the verdict and exit,
-        // so only bash's `<file>: line <n>: ` diagnostic on stderr shows the break.
+        // A bash 3.2 runtime error keeps the verdict and exit, so only its diagnostic shows it.
         expect(result.stderr).not.toMatch(BASH_DIAGNOSTIC)
       })
     }
@@ -369,13 +366,9 @@ describe('records-index.sh folders and roots', () => {
   }
 })
 
-// A folder sits inside the one it archives, and the path guard is a shell
-// pattern whose wildcard crosses a separator, so `*/.claude/tasks/*.md` reaches
-// an archived task as readily as a live one. A regen fired on it rebuilds the
-// live index off a folder it was taken out of.
-//
-// Silence alone would also be the reading if the hook stopped working, and the
-// cases above are what separate the two.
+// The path guard's wildcard crosses a separator, so it reaches an archived
+// task as readily as a live one, and a regen on it rebuilds the live index off
+// the wrong folder. The cases above separate silence from a broken hook.
 describe('records-index.sh exclusions', () => {
   const excluded = [
     ['tasks', 'archive/v01.0-shipped.md'],
@@ -454,11 +447,9 @@ describe('search-reminder.sh firing conditions', () => {
   }
 })
 
-// CLAUDE_PROJECT_DIR is the session's own worktree rather than the main root,
-// so a naive read would log a pull request opened from a linked worktree into
-// a folder that dies with the worktree, losing exactly the row the log exists
-// to keep. The hook strips the worktree segment back to the main root before
-// writing, the way records-index.sh already derives its own.
+// CLAUDE_PROJECT_DIR is the session's own worktree, so a naive read would log
+// into a folder that dies with it. The hook strips the worktree segment back
+// to the main root first.
 describe('pr-create-log.sh root resolution', () => {
   const hook = join(ROOT, '.claude/hooks/pr-create-log.sh')
 
@@ -490,10 +481,9 @@ describe('pr-create-log.sh root resolution', () => {
   })
 })
 
-// git-pr opens a pull request over REST rather than through `gh pr create`, so
-// the command string carries no subcommand to match. Its output says which
-// path ran, and an edit prints a URL too, so that line is what separates an
-// opening from a rewrite of one that already existed.
+// git-pr opens a pull request over REST, so the command carries no subcommand
+// to match. Its output says which path ran, which separates an opening from a
+// rewrite of one that already existed.
 describe('pr-create-log.sh REST create', () => {
   for (const tree of TREES) {
     const hook = join(tree.dir, 'pr-create-log.sh')
@@ -599,10 +589,8 @@ describe('pr-create-log.sh label line', () => {
   }
 })
 
-// A bare basename match reads as covering both when two written paths share
-// one, since a single mention of the shared name would otherwise clear the
-// pair. The acting case above never exercises this, since its fixture writes
-// one path.
+// A bare basename match would let one mention of a shared name clear two
+// written paths. The acting case never reaches this, since it writes one path.
 describe('silent-turn.sh basename collision', () => {
   for (const tree of TREES) {
     const hook = join(tree.dir, 'silent-turn.sh')
@@ -729,10 +717,67 @@ describe('bash 3.2 compatibility', () => {
   })
 })
 
-// Both copies shell out to the audit verb, and this one resolves two runners
-// where the seed resolves one. The describe below covers the seed.
-//
-// The acting case above proves the hook reaches a verdict and says nothing
-// about which runner produced it, so a branch could stop resolving and stay
-// silent with every test still green. Each stub reports a `kind` naming
-// itself, which is what makes the answer readable.
+// This copy resolves two runners where the seed resolves one, and the acting
+// case cannot tell which ran, so a branch could stop resolving with every test
+// green. Each stub reports a `kind` naming itself. The seed is covered below.
+
+// The acting case proves a refusal reaches stderr and exits 0. These read the
+// call log the stubs write, which is what shows the root each push was handed
+// and whether a project with no records history spawned anything at all.
+describe('records-push.sh roots and silence', () => {
+  const sessionEnd = payloadFor({ hook_event_name: 'SessionEnd' })
+  const recordsPath = (): string =>
+    [join(ctx.fixture, 'bin-records'), ctx.hookPath].join(delimiter)
+  const callLog = (label: string): string =>
+    join(ctx.fixture, `records-push-${label.replace(/\W/g, '_')}.log`)
+
+  for (const tree of TREES) {
+    const hook = join(tree.dir, 'records-push.sh')
+    const runner = tree.label === '.claude/hooks' ? 'bun' : 'canon'
+
+    it.concurrent(`should push the main root from a linked worktree on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const main = join(ctx.fixture, 'records-project')
+      const log = callLog(`worktree-${tree.label}`)
+
+      const result = await run(hook, sessionEnd, recordsPath(), undefined, {
+        CLAUDE_PROJECT_DIR: join(main, '.claude/worktrees/demo'),
+        RECORDS_PUSH_CALLS: log,
+      })
+
+      expect(result.code).toBe(0)
+      expect(readFileSync(log, 'utf8')).toContain(
+        `records push --root ${main} --json`,
+      )
+    })
+
+    it.concurrent(`should run ${runner} on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const log = callLog(`runner-${tree.label}`)
+
+      await run(hook, sessionEnd, recordsPath(), undefined, {
+        CLAUDE_PROJECT_DIR: join(ctx.fixture, 'records-project'),
+        RECORDS_PUSH_CALLS: log,
+      })
+
+      expect(readFileSync(log, 'utf8')).toMatch(new RegExp(`^${runner} `))
+    })
+
+    it.concurrent(`should spawn nothing without a records history on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const log = callLog(`silent-${tree.label}`)
+
+      const result = await run(hook, sessionEnd, recordsPath(), undefined, {
+        CLAUDE_PROJECT_DIR: join(ctx.fixture, 'project'),
+        RECORDS_PUSH_CALLS: log,
+      })
+
+      expect(existsSync(log)).toBe(false)
+      expect(result.stderr).toBe('')
+      expect(result.code).toBe(0)
+    })
+  }
+})

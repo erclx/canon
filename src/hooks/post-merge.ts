@@ -62,14 +62,9 @@ export function pullRequestNumbers(subjects: readonly string[]): number[] {
 }
 
 /**
- * Every subject the pull brought in, not just the tip. One pull routinely
- * fast-forwards over several merges, and reading HEAD alone would archive the
- * last one's task and strand the rest. `git pull` sets ORIG_HEAD to the
- * pre-merge tip, so the range is exactly what arrived, and a merge leaving no
- * ORIG_HEAD falls back to the tip.
- *
- * A hook exports `GIT_DIR` and friends, which beat `-C`, so every read goes
- * through `gitEnv()` to answer for the checkout `cwd` names.
+ * Every subject the pull brought in, from ORIG_HEAD to the tip, since one pull
+ * can fast-forward over several merges. Reads go through `gitEnv()`, since a
+ * hook exports `GIT_DIR`, which beats `-C`.
  */
 export async function readMergedSubjects(cwd: string): Promise<string[]> {
   const options = {
@@ -139,8 +134,7 @@ function archiveLines(
     const task = text(fields, 'task')
     if (task === undefined) return undefined
 
-    // A binary predating the relink pass carries no `relinkFailed`, which
-    // reads as empty.
+    // A binary predating the relink pass carries no `relinkFailed`, read as empty.
     const failed = Array.isArray(fields.relinkFailed)
       ? fields.relinkFailed.flatMap((entry: unknown) =>
           entry !== null &&
@@ -162,8 +156,7 @@ function archiveLines(
   if (reason === undefined || reason === 'no-match' || reason === 'no-board') {
     return undefined
   }
-  // A merged slice moves its own plan while the task stays open, so the line
-  // names the plan that dropped off the board row.
+  // A merged slice moves its own plan while the task stays open.
   const slice =
     fields.slice !== null && typeof fields.slice === 'object'
       ? text(fields.slice as Fields, 'from')
@@ -187,14 +180,15 @@ function pushLines(result: StepResult, fields: Fields): string | undefined {
       : undefined
   }
 
-  // No records history on this machine, which is every checkout that never
-  // ran the one-time setup.
+  // No records history, which is every checkout that never ran the setup.
   const reason = text(fields, 'reason') ?? 'unknown'
   if (reason === 'no-repository') return undefined
   const hint =
     reason === 'unsafe-payload'
       ? 'Run canon records push to see the blocked paths.'
-      : 'Run canon records push when the remote is reachable.'
+      : reason === 'busy'
+        ? 'Another session was pushing. Run canon records push once it finishes.'
+        : 'Run canon records push when the remote is reachable.'
   return `\n🗄️  Records not backed up: ${reason}\n${hint}\n\n`
 }
 
@@ -229,8 +223,7 @@ function reclaimLines(fields: Fields): string | undefined {
     lines += `\n🧹 Reclaimed ${removed} worktree(s) whose pull request merged.\n\n`
   }
 
-  // `gh-missing` answers on every merge forever on a machine without `gh`, so
-  // the hook header carries that gap rather than a line nobody acts on twice.
+  // `gh-missing` would answer on every merge forever, so the hook header carries it.
   const reason = text(fields, 'reason')
   const failed = count(fields, 'failed')
   if (reason !== undefined && reason !== 'gh-missing') {
@@ -243,8 +236,7 @@ function reclaimLines(fields: Fields): string | undefined {
       'Run canon worktrees reclaim to read which step failed.\n\n'
   }
 
-  // A binary predating the branch half carries none of these fields, and
-  // `count` reads an absent one as zero, so that record stays quiet here.
+  // An older binary carries none of these fields, which `count` reads as zero.
   const branchesRemoved = count(fields, 'branchesRemoved')
   if (branchesRemoved > 0) {
     lines += `\n🧹 Deleted ${branchesRemoved} merged branch(es) no worktree held.\n${deletedBranchLines(fields)}\n`
@@ -291,11 +283,9 @@ function memberLines(number: number, fields: Fields): string | undefined {
 }
 
 /**
- * Shared by the binary reinstall and the plugin update. `current` is the
- * ordinary outcome on most merges and stays quiet, and `quiet` names the
- * refusal reasons that describe a permanent condition on the machine. `icon`
- * carries its own trailing spacing, since the two glyphs render at different
- * widths.
+ * Shared by the reinstall and the plugin update. `current` stays quiet,
+ * `quiet` names the reasons for a permanent condition on the machine, and
+ * `icon` carries its own spacing, since the two glyphs differ in width.
  */
 function moveLines(
   result: StepResult,
@@ -336,15 +326,9 @@ async function step(
 }
 
 /**
- * Runs the six post-merge steps in order: archive, records push, member
- * retirement, reclaim, upgrade, plugin update. The member retirement sits
- * before the reclaim, so the reclaim reads a retired member's worktree as
- * gone rather than racing it. Both sit before the upgrade, since the
- * upgrade reinstalls the binary every later child runs under, and the two
- * network-bound moves sit last so a slow registry delays nothing else.
- *
- * Never throws and reports nothing on the ordinary merge, since nobody is
- * watching and a hook failing aborts nothing useful.
+ * Runs archive, records push, retirement, reclaim, upgrade, and plugin update in
+ * order: retirement first so the reclaim never races it, and both before the
+ * upgrade, which reinstalls the binary later children run under. Never throws.
  */
 export async function runPostMerge(input: PostMergeInput): Promise<void> {
   const env = gitEnv()
@@ -376,8 +360,7 @@ export async function runPostMerge(input: PostMergeInput): Promise<void> {
     pushLines,
   )
 
-  // No `--root` on either worktree step. Each verb refuses the worktree it
-  // stands in, and a root would let a pull delete the ground under itself.
+  // No `--root`, since each verb refuses its own worktree and a pull would delete it.
   if (!isSkipped('CANON_SKIP_RECLAIM')) {
     for (const number of pullRequestNumbers(input.subjects)) {
       await step(

@@ -4,17 +4,12 @@ import { $ } from 'bun'
 import { gitEnv } from '@/git/env'
 import { RECORD_ROOTS, recordRoot, SCRATCH } from '@/roots/record'
 import { type BlockedPath, guardPayload } from '@/records/push-guard'
+import { type LockTiming, withLock } from '@/records/push-lock'
 
 /**
- * The legacy `.claude`-root allowlist, read only when a project has not moved
- * to `.canon/` yet.
- *
- * That root also tracks `skills/`, `rules/`, and `hooks/`, so only an
- * allowlist separates record folders there, where `.canon/` holds nothing else
- * and takes `EXCLUDED_ENTRIES` instead. Each entry is a top-level folder whose
- * archive sits inside it. Scratch and `worktrees/` stay out. `RECORD_KINDS` in
- * `validate.ts` differs on purpose: it names what a standard governs, and this
- * names what a disk loss would take.
+ * The legacy `.claude`-root allowlist. That root also tracks `skills/`,
+ * `rules/`, and `hooks/`, so only a list separates record folders there.
+ * `RECORD_KINDS` differs on purpose: it names what a standard governs.
  */
 export const BACKED_FOLDERS = [
   'diagrams',
@@ -32,22 +27,16 @@ export const BACKED_FOLDERS = [
 ] as const
 
 /**
- * Folders a retired kind left at a legacy `.claude` root that the allowlist
- * must still read, so a half-finished move that strands one still trips
- * `split-roots`. Absent from `BACKED_FOLDERS` because nothing writes them, and
- * absent from `RETIRED_FOLDERS` because that list stages a deletion and this
- * folder is an archive to keep.
+ * Folders a retired kind left at a legacy `.claude` root, read so a stranded
+ * one still trips `split-roots`. Nothing writes them, and `RETIRED_FOLDERS`
+ * would stage their deletion, so they sit in neither list.
  */
 const LEGACY_RECORD_FOLDERS = ['memory'] as const
 
 /**
- * Names that have left `BACKED_FOLDERS` and whose removal still has to reach a
- * records history once.
- *
- * Dropping a name from the list above stops `add` staging its deletion, so
- * the remote keeps the folder and a `pull` restores it beside its replacement.
- * Retire a name here once no history still carries it. Nothing measures that,
- * but a leftover entry matches nothing and is filtered out before `add`.
+ * Names that left `BACKED_FOLDERS` and whose removal must still reach a
+ * records history once, since dropping a name stops `add` staging its
+ * deletion and a `pull` would restore it. Retire one once no history carries it.
  */
 const RETIRED_FOLDERS = [
   'plans-archive',
@@ -59,14 +48,9 @@ const RETIRED_FOLDERS = [
 const RECORDS_GIT_NAME = '.records.git'
 
 /**
- * Top-level `.canon/` entries a backup never carries, named rather than
- * matched by pattern so the whole exemption reads in one place.
- *
- * `tmp` is deletable without loss, `ordinal-locks` is transient per claim, and
- * `.records.git` is the history itself, which would otherwise stage into
- * itself. The list bounds the records index too, since `scopedFolders` filters
- * through `isExcluded`, so a name an older binary committed is removed once
- * rather than re-staged by the `-f` on every push.
+ * Top-level `.canon/` entries a backup never carries. `.records.git` would
+ * stage into itself, and `scopedFolders` filters the index through this list,
+ * so a name an older binary committed is removed once rather than re-staged.
  */
 export const EXCLUDED_ENTRIES = [
   'tmp',
@@ -87,11 +71,8 @@ export const MEDIA_PATHSPECS = [
 ] as const
 
 /**
- * Whether a top-level name stays out of every push, at either root.
- *
- * `SCRATCH` is the retired `.tmp` spelling. It is a guard rather than a lookup,
- * keeping a stray `.tmp` out of a push, and `EXCLUDED_ENTRIES` names the
- * `.canon` spelling only.
+ * `SCRATCH` is the retired `.tmp` spelling, kept as a guard so a stray `.tmp`
+ * stays out of a push, since `EXCLUDED_ENTRIES` names the `.canon` spelling.
  */
 function isExcluded(name: string): boolean {
   return (
@@ -101,16 +82,9 @@ function isExcluded(name: string): boolean {
 }
 
 /**
- * The record folders sitting at `dir` right now, at either root spelling.
- *
- * A `.claude`-spelled directory reads the fixed allowlist, filtered to what
- * exists, since that root also holds `skills/`, `rules/`, and `hooks/` no
- * exclusion set names. A `.canon`-spelled directory reads its own top-level
- * directories less `EXCLUDED_ENTRIES` instead, since nothing else shares that
- * root and a folder added there is a record folder by construction.
- *
- * Takes a directory rather than a project root so `strandedFolders` can ask it
- * about a candidate root other than the one `workTree` resolved.
+ * A `.claude` root reads the fixed allowlist, since it also holds `skills/`
+ * and `rules/`. A `.canon` root reads its own directories less
+ * `EXCLUDED_ENTRIES`. Takes a directory so `strandedFolders` can ask any root.
  */
 function foldersAt(dir: string): string[] {
   if (basename(dir) === '.claude') {
@@ -130,12 +104,9 @@ function foldersAt(dir: string): string[] {
 }
 
 /**
- * The tree a backup stages, which is the record root itself.
- *
- * It resolves the root rather than each folder under it, so the history and the
- * work tree are one answer. Resolving them apart would let a half-migrated tree
- * open a history at one root and stage a work tree at the other, which stages
- * the deletion of every folder the move relocated and pushes it.
+ * The record root, resolved once so the history and the work tree are one
+ * answer. Apart, a half-migrated tree would stage every relocated folder as
+ * deleted and push it.
  */
 function workTree(root: string): string {
   return recordRoot(root)
@@ -158,14 +129,9 @@ function sanitizeRefSegment(segment: string): string {
 }
 
 /**
- * The branch a records push or pull targets for the project at `root`,
- * one branch per project on the shared records repository.
- *
- * Reduces `origin` through `remoteIdentity`, so clones land on one branch
- * whatever the transport, and falls back to the directory basename with no
- * `origin`. `enclosing` reuses the caller's remote read. An `origin` that
- * changes between pushes silently starts a new branch and orphans the old one,
- * and nothing migrates it.
+ * One branch per project on the shared records repository, reduced through
+ * `remoteIdentity` so every transport lands on one branch. An `origin` that
+ * changes between pushes starts a new branch and orphans the old one.
  */
 export async function projectBranch(
   root: string,
@@ -201,6 +167,7 @@ export const BACKUP_REFUSALS = [
   'local-ahead',
   'unsafe-payload',
   'git-failed',
+  'busy',
 ] as const
 
 export type BackupRefusal = (typeof BACKUP_REFUSALS)[number]
@@ -247,13 +214,9 @@ interface GitResult {
 }
 
 /**
- * Runs one git command against the records history, from the work tree.
- *
  * All three flags go on every call. `init` with `--git-dir` writes
- * `core.bare = true`, which only `--work-tree` overrides, so dropping it stages
- * the enclosing project. `-C` makes a bare pathspec mean the work-tree root,
- * which a session in a linked worktree would otherwise miss, and `--root`
- * cannot stand in. Paths are absolute, since `-C` applies first.
+ * `core.bare = true`, which only `--work-tree` overrides, and `-C` makes a bare
+ * pathspec mean the work-tree root, which a linked worktree would otherwise miss.
  */
 async function records(root: string, args: string[]): Promise<GitResult> {
   const gitDir = resolve(recordsGitDir(root))
@@ -285,13 +248,9 @@ function failed(action: string, result: GitResult): BackupRefused {
 }
 
 /**
- * Reduces a remote URL to `host/path`, so every spelling of one repository
- * compares equal.
- *
- * Transport is what the reduction drops. `git@github.com:owner/repo.git` and
- * `https://github.com/owner/repo` name the same repository, and comparing them
- * as written passes a records origin that publishes the payload through the
- * other protocol.
+ * Reduces a remote URL to `host/path`, dropping the transport, so an SSH and
+ * an HTTPS spelling of one repository compare equal and a records origin
+ * cannot publish the payload through the other protocol.
  */
 export function remoteIdentity(url: string): string {
   return url
@@ -311,13 +270,9 @@ interface EnclosingRemotes {
 }
 
 /**
- * Reads every remote of the enclosing project in one call, or undefined when
- * git cannot answer, since `resolveRemote`'s gate and `projectBranch` both
- * need it.
- *
- * The caller refuses on undefined rather than reading an empty list, which
- * would clear the shared-origin gate for every URL. A project with no remotes
- * answers an empty list with exit zero, so the two states stay distinct.
+ * Every remote of the enclosing project, or undefined when the read fails.
+ * The caller refuses on undefined, since an empty list would clear the
+ * shared-origin gate for every URL.
  */
 async function enclosingRemotes(
   root: string,
@@ -344,13 +299,8 @@ async function enclosingRemotes(
 
 /**
  * Clears the four gates both verbs share and returns the records remote URL.
- *
- * The last two are the ones the payload depends on. This repository is public,
- * so a records branch on any of its remotes serves the plans and the
- * groundwork trails to anyone who fetches all refs. Comparing the configured
- * URL against every remote of the enclosing repository is what keeps a
- * misconfigured `origin` from publishing them, and refusing when that list
- * cannot be read is what keeps a failed comparison from reading as a pass.
+ * A records branch on any remote of this public repository would publish the
+ * plans, so an unreadable remote list refuses rather than passing.
  */
 async function resolveRemote(
   root: string,
@@ -400,13 +350,9 @@ async function resolveRemote(
 }
 
 /**
- * Backed folders sitting at a record root other than the one `workTree` chose.
- *
- * A move that failed partway leaves a folder at the old root while the records
- * index still names it, so a push would stage its deletion and drop it from
- * the remote. Both verbs refuse on it, since a `pull` would leave two roots
- * disagreeing. Each candidate is read through `foldersAt`, so `.canon` uses its
- * own exclusion set, and scratch and `worktrees/` never count as stranded.
+ * Backed folders left at the record root `workTree` did not choose. A push
+ * would stage their deletion and drop them from the remote, and a `pull` would
+ * leave two roots disagreeing, so both verbs refuse on any.
  */
 function strandedFolders(root: string): string[] {
   const resolved = resolve(workTree(root))
@@ -445,14 +391,9 @@ interface FolderScope {
 }
 
 /**
- * The subset of the present, retired, and previously-tracked names a pathspec
- * can name, since a pathspec matching nothing fails the whole `add`.
- *
- * The index joins the candidates, so a folder deleted in full, or under a name
- * `RETIRED_FOLDERS` never listed, still has its deletion staged. `firstSeen`
- * is a folder on disk the index never tracked, shown in the push report. An
- * indexed name `isExcluded` drops comes back as `dropped`, so the push removes
- * it from history once and says so.
+ * The present, retired, and indexed names a pathspec can name, since one
+ * matching nothing fails the whole `add`. The index joins in so a fully
+ * deleted folder still stages its deletion, and excluded names come back `dropped`.
  */
 async function scopedFolders(root: string): Promise<FolderScope> {
   const tracked = await records(root, ['ls-files'])
@@ -479,27 +420,17 @@ function topSegment(path: string): string {
 }
 
 /**
- * What a report names, which is the folders a reader can go and open.
- *
- * Exported so the scratch-evidence walk and the push and pull help text read
- * the same resolved set rather than each re-deriving it against
- * `BACKED_FOLDERS`, which is silently wrong at a `.canon` root.
+ * The folders a report names. Exported so the scratch-evidence walk and the
+ * help text read one resolved set, since `BACKED_FOLDERS` is wrong at `.canon`.
  */
 export function presentFolders(root: string): string[] {
   return foldersAt(workTree(root))
 }
 
 /**
- * The record folder names a project could ever carry, without regard to
- * whether each currently exists: `BACKED_FOLDERS` at the legacy `.claude`
- * root, since nothing else names a folder there, and the live directory
- * listing at `.canon`, since nothing bounds that root's names from outside
- * any more and a name nobody has created yet cannot be listed.
- *
- * Exported for `canon records size`, whose own contract reports every folder
- * whether or not it exists so a caller reading the record gets a stable set
- * of keys. `presentFolders` filters by existence instead, which is right for
- * a push report naming what a reader can go and open and wrong here.
+ * Every record folder a project could carry, present or not, for
+ * `canon records size`, whose record keeps a stable set of keys.
+ * `presentFolders` filters by existence instead, which is wrong here.
  */
 export function candidateFolders(root: string): string[] {
   const tree = workTree(root)
@@ -515,13 +446,9 @@ function splitNul(text: string): string[] {
 }
 
 /**
- * The files `add -A -f` is about to stage from `scope`, split into those the
- * history has never carried and every pending one.
- *
- * `ls-files -o` without `--exclude-standard` lists ignored files too, which is
- * what `-f` stages. `-m` also lists a deleted file and `-o` lists an embedded
- * repository as a `dir/` entry, so both are filtered down to regular files,
- * which is all a payload check has bytes to read.
+ * The files `add -A -f` is about to stage, split into never-carried and all
+ * pending. `-o` without `--exclude-standard` lists ignored files as `-f`
+ * stages them, filtered to regular files, which is all a payload check reads.
  */
 async function pendingFiles(
   root: string,
@@ -571,16 +498,9 @@ function refuseBlocked(blocked: readonly BlockedPath[]): BackupRefused {
 }
 
 /**
- * Puts HEAD and the index back where they stood before this run committed.
- *
- * A mixed reset to the recorded HEAD rather than `reset --soft HEAD~1`. A soft
- * reset leaves a dropped name's deletion staged while the next run's index read
- * no longer lists the name, so that run's diff never sees the deletion and it
- * is never committed. The recorded HEAD also covers the root commit, where
- * `HEAD~1` does not exist and only removing the ref restores an unborn branch.
- *
- * Returns an error sentence when the undo itself failed, so the caller appends
- * it rather than reporting a clean history that is not.
+ * Resets to the recorded head, since a soft reset leaves a dropped name's
+ * deletion staged, and removes the ref at the root commit, where `HEAD~1` does
+ * not exist. Returns an error sentence when the undo itself failed.
  */
 async function undoCommit(
   root: string,
@@ -598,15 +518,45 @@ async function undoCommit(
 }
 
 /**
- * Stages the backed folders, commits when any of them changed, and pushes.
- *
- * The payload guard reads every pending file ahead of the stage, so a refusal
- * leaves the index and object store untouched. The push runs even with no new
- * commit, since an older binary may have committed and failed to reach the
- * network. A commit this call made is undone when the push fails, so a
- * rejecting remote is not handed it again on every run.
+ * Stages, commits when anything changed, and pushes. The payload guard runs
+ * before the stage, the push runs even with no new commit to reach an older
+ * one, and a commit this call made is undone when the push fails.
  */
-export async function pushRecords(root: string): Promise<PushOutcome> {
+export async function pushRecords(
+  root: string,
+  timing: LockTiming = PUSH_LOCK,
+): Promise<PushOutcome> {
+  // No history means no folder for the lock, and the body refuses unwritten.
+  if (!existsSync(recordsGitDir(root))) return pushUnlocked(root)
+  return withPushLock(root, timing, () => pushUnlocked(root))
+}
+
+/**
+ * A wave of ending sessions queues here, so the wait covers a few pushes and
+ * still fits the session-end hook's timeout with a push behind it.
+ */
+const PUSH_LOCK: LockTiming = { waitMs: 10_000, staleMs: 30_000 }
+
+/**
+ * Holds the lock inside the records history for one stage, commit, push, and
+ * undo, so two pushes never collide on the records index or have one undo
+ * reset past a commit the other made.
+ */
+async function withPushLock(
+  root: string,
+  timing: LockTiming,
+  run: () => Promise<PushOutcome>,
+): Promise<PushOutcome> {
+  const lock = join(recordsGitDir(root), 'canon-push.lock')
+  const held = await withLock(lock, timing, run)
+  if (!held.busy) return held.value
+  return refuse(
+    'busy',
+    `Another records push holds ${relative(root, lock)}. Run canon records push again once it finishes.`,
+  )
+}
+
+async function pushUnlocked(root: string): Promise<PushOutcome> {
   const split = refuseSplitRoots(root)
   if (split) return split
 
@@ -623,8 +573,7 @@ export async function pushRecords(root: string): Promise<PushOutcome> {
   if (blocked.length > 0) return refuseBlocked(blocked)
 
   if (scope.length > 0) {
-    // `-f` carries the ignored payload, and the pathspecs are the whole list,
-    // so nothing outside them can enter the index.
+    // `-f` carries the ignored payload, and the pathspecs bound what enters the index.
     const staged = await records(root, [
       'add',
       '-A',
@@ -720,12 +669,9 @@ export async function pushRecords(root: string): Promise<PushOutcome> {
 }
 
 /**
- * Fetches the records history and writes it into the backed folders.
- *
- * The two directions are not symmetric. A push only ever adds, while a pull
- * onto a machine holding work that never reached the remote would discard it,
- * so both gates below refuse rather than choosing a merge strategy. A person
- * resolves by pushing first or by moving the local folders aside.
+ * Fetches the records history into the backed folders. A pull onto unpushed
+ * work would discard it, so both gates refuse rather than choosing a merge
+ * strategy, and a person pushes first or moves the folders aside.
  */
 export async function pullRecords(root: string): Promise<PullOutcome> {
   const split = refuseSplitRoots(root)
@@ -737,8 +683,7 @@ export async function pullRecords(root: string): Promise<PullOutcome> {
 
   const branch = await projectBranch(root, enclosing)
 
-  // Checked ahead of the fetch, since `--exit-code` answers by a code no
-  // locale changes: 2 for no matching ref, 0 for found, else unreachable.
+  // `--exit-code` answers by code no locale changes: 2 no ref, 0 found, else unreachable.
   const remoteBranch = await records(root, [
     'ls-remote',
     '--exit-code',

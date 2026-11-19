@@ -6,6 +6,7 @@ import {
   renameSync,
   rmSync,
   truncateSync,
+  utimesSync,
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -28,10 +29,9 @@ let ORIGIN: string
 const RECORDS_GIT_DIR = join('.claude', '.records.git')
 
 /**
- * `gitEnv()` is what keeps these fixtures off the repository under test. The
- * pre-push hook exports `GIT_DIR` and `GIT_WORK_TREE`, and both take precedence
- * over `-C` and `--git-dir`, so a bare call here resolves against this
- * repository and the suite fails only when run from a hook.
+ * `gitEnv()` keeps these fixtures off the repository under test, since the
+ * pre-push hook exports `GIT_DIR` and `GIT_WORK_TREE`, which beat `-C`, and
+ * the suite would otherwise fail only when run from a hook.
  */
 async function git(args: string[]): Promise<string> {
   const result = await $`git ${args}`.env(gitEnv()).quiet().nothrow()
@@ -43,12 +43,9 @@ function recordsGit(root: string, args: string[]): Promise<string> {
 }
 
 /**
- * A git project holding one record in each backed folder, with no records
- * history yet.
- *
- * The `git init` is what a real root always carries. Both verbs read the
- * project's own remotes to clear the shared-origin gate and refuse when that
- * read fails, so a bare directory exercises the refusal rather than the flow.
+ * A git project with one record per backed folder and no records history.
+ * The `git init` matters, since both verbs refuse when the project's own
+ * remotes cannot be read, so a bare directory tests the refusal instead.
  */
 async function makeProject(): Promise<string> {
   const root = mkdtempSync(join(tmpdir(), 'canon-backup-'))
@@ -122,13 +119,9 @@ async function recordsState(root: string): Promise<string[]> {
 }
 
 /**
- * Runs `verb` with the process sitting inside the records work tree, which is
- * where a session in a linked worktree under `.claude/worktrees/<name>/`
- * stands and the one place neither verb could reach.
- *
- * A plain subdirectory reproduces that exactly, since what decides both cases
- * is git deriving a pathspec prefix from the current directory. Provisioning a
- * real worktree would cost the fixture without changing what is measured.
+ * Runs `verb` from inside the records work tree, where a linked worktree
+ * session stands. A plain subdirectory reproduces it, since the pathspec
+ * prefix from the current directory is what decides both cases.
  */
 async function fromInsideWorkTree<T>(
   root: string,
@@ -161,8 +154,7 @@ afterEach(() => {
 })
 
 describe('BACKED_FOLDERS', () => {
-  // Both halves are asserted, since either alone passes on the other's failure:
-  // a nested path satisfies the suffix test and a sibling `archive` the segment.
+  // Both halves asserted, since a nested path or a sibling `archive` passes either alone.
   it('should name only top-level record folders', () => {
     expect(BACKED_FOLDERS.filter((folder) => folder.includes('/'))).toEqual([])
   })
@@ -173,8 +165,7 @@ describe('BACKED_FOLDERS', () => {
     ).toEqual([])
   })
 
-  // The legacy `.claude`-root allowlist, read only for an unmoved project. A
-  // `.canon` root reads its own listing less EXCLUDED_ENTRIES, asserted below.
+  // The legacy allowlist alone. A `.canon` root reads its own listing, asserted below.
   it('should name exactly the record folders a legacy .claude root carries', () => {
     expect([...BACKED_FOLDERS]).toEqual([
       'diagrams',
@@ -343,8 +334,7 @@ describe('pushRecords', () => {
     expect(tracked).not.toContain('intake/')
   })
 
-  // A pathspec built from the backed list alone never names a retired folder, so
-  // its deletion never stages and a pull restores it beside its replacement.
+  // A pathspec from the backed list alone never stages a retired folder's deletion.
   it('should carry a folder that left the backed list since the last push', async () => {
     const retired = join(ROOT, '.claude', 'plans-archive')
     mkdirSync(retired, { recursive: true })
@@ -352,8 +342,7 @@ describe('pushRecords', () => {
     await makeRecordsRepo(ROOT, ORIGIN)
     await pushRecords(ROOT)
 
-    // Asserted before the removal, since a name the pathspec never carries passes
-    // the absence test below having proved nothing.
+    // Asserted first, since a name the pathspec never carries passes the test below.
     expect(await trackedOnOrigin(ROOT)).toContain('plans-archive/entry.md')
 
     rmSync(retired, { recursive: true, force: true })
@@ -397,8 +386,7 @@ describe('pushRecords', () => {
     expect(tracked).not.toContain('.tmp/')
   })
 
-  // The `.canon` counterpart of the allowlist test: a new top-level directory is
-  // carried and named as first seen, while the two excluded names are not.
+  // A new `.canon` directory is carried and first seen, and excluded names are not.
   it('should carry a new .canon folder as first seen, excluding tmp and ordinal-locks', async () => {
     const canonRoot = await makeCanonProject({
       'tasks/entry.md': '# tasks\n',
@@ -420,8 +408,7 @@ describe('pushRecords', () => {
     expect(tracked).not.toContain('ordinal-locks/')
   })
 
-  // An excluded name the records index still tracks would be re-admitted on
-  // every push through `add -f`, so it leaves the history once and stays out.
+  // A tracked excluded name would re-enter through `add -f`, so it leaves history once.
   it('should drop an excluded name the records index still tracks, once', async () => {
     const canonRoot = await makeCanonProject({
       'tasks/entry.md': '# tasks\n',
@@ -636,8 +623,7 @@ describe('pushRecords', () => {
     expect(tracked).not.toContain('tasks/entry.md')
   })
 
-  // Every worker runs from inside the work tree, so the folders staged there must
-  // match those staged from the root.
+  // Every worker runs inside the work tree, so its staging must match the root's.
   it('should stage the same folders when run from inside the work tree', async () => {
     await makeRecordsRepo(ROOT, ORIGIN)
 
@@ -758,8 +744,7 @@ describe('pullRecords', () => {
     expect(outcome.reason).toBe('local-changes')
   })
 
-  // `git status` tolerates a pathspec matching nothing, so from inside the work
-  // tree the unpushed-record gate would read clean and the reset take the file.
+  // `git status` passes a pathspec matching nothing, so the gate would read clean here.
   it('should still refuse an unpushed record when run from inside the work tree', async () => {
     await makeRecordsRepo(ROOT, ORIGIN)
     await pushRecords(ROOT)
@@ -775,8 +760,7 @@ describe('pullRecords', () => {
   })
 
   it('should write the records the remote carries onto a machine holding none', async () => {
-    // Both clones resolve one branch only because they share a project origin, and
-    // two clones with none would each fall back to their own basename.
+    // Both clones share one branch only through a shared project origin.
     await git([
       '-C',
       ROOT,
@@ -918,5 +902,70 @@ describe('a tree whose records sit under both roots', () => {
     expect(outcome.ok).toBe(false)
     if (outcome.ok) return
     expect(outcome.reason).toBe('no-repository')
+  })
+})
+
+describe('the push lock', () => {
+  const LOCK = join(RECORDS_GIT_DIR, 'canon-push.lock')
+  const SHORT_WAIT = { waitMs: 200, staleMs: 60_000 }
+
+  it('should refuse busy and push nothing while another push holds the lock', async () => {
+    await makeRecordsRepo(ROOT, ORIGIN)
+    writeFileSync(join(ROOT, LOCK), '')
+
+    const outcome = await pushRecords(ROOT, SHORT_WAIT)
+
+    expect(outcome.ok).toBe(false)
+    if (outcome.ok) return
+    expect(outcome.reason).toBe('busy')
+    expect(await git(['-C', ORIGIN, 'branch', '--list'])).toBe('')
+    expect(existsSync(join(ROOT, LOCK))).toBe(true)
+  })
+
+  it('should clear a lock older than the stale age and push', async () => {
+    await makeRecordsRepo(ROOT, ORIGIN)
+    writeFileSync(join(ROOT, LOCK), '')
+    const past = new Date(Date.now() - 120_000)
+    utimesSync(join(ROOT, LOCK), past, past)
+
+    const outcome = await pushRecords(ROOT, SHORT_WAIT)
+
+    expect(outcome.ok).toBe(true)
+    expect(existsSync(join(ROOT, LOCK))).toBe(false)
+  })
+
+  it('should serialize two pushes started together so both succeed', async () => {
+    await makeRecordsRepo(ROOT, ORIGIN)
+
+    const outcomes = await Promise.all([pushRecords(ROOT), pushRecords(ROOT)])
+
+    expect(outcomes.map((outcome) => outcome.ok)).toEqual([true, true])
+    expect(await recordsGit(ROOT, ['status', '--porcelain'])).toBe('')
+  })
+
+  it('should release the lock when the push refuses an unsafe payload', async () => {
+    await makeRecordsRepo(ROOT, ORIGIN)
+    writeFileSync(
+      join(ROOT, '.claude', 'plans', '.env'),
+      `TOKEN=ghp_${'a'.repeat(36)}\n`,
+    )
+
+    const outcome = await pushRecords(ROOT, SHORT_WAIT)
+
+    expect(outcome.ok).toBe(false)
+    if (outcome.ok) return
+    expect(outcome.reason).toBe('unsafe-payload')
+    expect(existsSync(join(ROOT, LOCK))).toBe(false)
+  })
+
+  it('should release the lock when the push itself fails', async () => {
+    await makeRecordsRepo(ROOT, join(ORIGIN, 'missing'))
+
+    const outcome = await pushRecords(ROOT, SHORT_WAIT)
+
+    expect(outcome.ok).toBe(false)
+    if (outcome.ok) return
+    expect(outcome.reason).toBe('git-failed')
+    expect(existsSync(join(ROOT, LOCK))).toBe(false)
   })
 })
