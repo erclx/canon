@@ -44,6 +44,7 @@ function recordingStage(
 ) {
   const sent: Sent[] = []
   const coverReads: string[] = []
+  const readsAt: { readonly inputs: number; readonly ms: number }[] = []
   let ms = 0
   const stage: Stage = {
     viewport,
@@ -74,6 +75,7 @@ function recordingStage(
       )
       if (covered) {
         coverReads.push(covered[0])
+        readsAt.push({ inputs: sent.length, ms })
         return (covers[covered[0]] ?? null) as T
       }
       const target = Object.keys(boxes).find((name) =>
@@ -82,7 +84,7 @@ function recordingStage(
       return (target ? boxes[target] : null) as T
     },
   }
-  return { stage, sent, coverReads }
+  return { stage, sent, coverReads, readsAt }
 }
 
 async function perform(
@@ -847,7 +849,7 @@ describe('performSteps on a covered target', () => {
     steps: TakeStep[],
     covers: Record<string, string>,
   ) {
-    const { stage, sent, coverReads } = recordingStage(
+    const { stage, sent, coverReads, readsAt } = recordingStage(
       { '#save': SAVE, '#card': CARD, '#lane': LANE },
       FRAME_MS,
       null,
@@ -855,8 +857,10 @@ describe('performSteps on a covered target', () => {
       covers,
     )
     const run = performSteps(stage, steps, { pointer: START, log: [] })
-    return { run, sent, coverReads }
+    return { run, sent, coverReads, readsAt }
   }
+
+  const isPress = (input: Sent) => input.type === 'down'
 
   it('should refuse a click whose point lands on a cover, naming the cover', async () => {
     const { run } = await performCovered([{ kind: 'click', target: '#save' }], {
@@ -867,14 +871,29 @@ describe('performSteps on a covered target', () => {
     await expect(run).rejects.toThrow(/#save .*div\.hit-layer/)
   })
 
-  it('should send no input toward a covered target', async () => {
+  it('should send no press toward a covered target', async () => {
     const { run, sent } = await performCovered(
       [{ kind: 'dblclick', target: '#save' }],
       { '#save': 'div.hit-layer' },
     )
 
     await run.catch(() => undefined)
-    expect(sent).toEqual([])
+    expect(sent.some(isPress)).toBe(false)
+  })
+
+  it('should read the cover after the glide and the rest, right before the press', async () => {
+    const { run, sent, readsAt } = await performCovered(
+      [{ kind: 'click', target: '#save' }],
+      {},
+    )
+
+    await run
+    const [read] = readsAt
+    const glide = sent.slice(0, read?.inputs)
+    expect(glide.length).toBeGreaterThan(1)
+    expect(glide.every((input) => input.type === 'move')).toBe(true)
+    expect(sent[read?.inputs ?? 0]).toMatchObject({ type: 'down' })
+    expect(read?.ms).toBeCloseTo(glide.length * FRAME_MS + 300, 5)
   })
 
   it('should press a target the cover read clears', async () => {
@@ -908,7 +927,7 @@ describe('performSteps on a covered target', () => {
     )
 
     await expect(run).rejects.toThrow(TargetCovered)
-    expect(sent).toEqual([])
+    expect(sent.some(isPress)).toBe(false)
   })
 
   it('should refuse a drag whose drop target is covered, before the press', async () => {
@@ -918,7 +937,18 @@ describe('performSteps on a covered target', () => {
     )
 
     await expect(run).rejects.toThrow(TargetCovered)
-    expect(sent).toEqual([])
+    expect(sent.some(isPress)).toBe(false)
+  })
+
+  it('should read both drag ends once the pointer rests on the source, before the press', async () => {
+    const { run, sent, readsAt } = await performCovered(
+      [{ kind: 'drag', from: '#card', to: '#lane' }],
+      {},
+    )
+
+    await run
+    const down = sent.findIndex(isPress)
+    expect(readsAt.map((read) => read.inputs)).toEqual([down, down])
   })
 
   it('should read both drag ends and neither when the drag says through', async () => {

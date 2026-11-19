@@ -229,8 +229,8 @@ export async function performSteps(
       }
       case 'fill': {
         const box = await boxOf(stage, step.target)
-        await refuseCovered(stage, step.target, center(box), step.through)
-        await click(stage, state, { at: center(box), box }, [], 1)
+        const checks = step.through ? {} : { checks: step.target }
+        await click(stage, state, { at: center(box), box, ...checks }, [], 1)
         await pause(stage, state, TYPE_MS)
         const start = stage.now()
         for (const character of step.text) {
@@ -346,13 +346,16 @@ async function paced(
   }
 }
 
-/** Where a press lands, and the box it lands on when a target named one. */
+/**
+ * Where a press lands, the box it lands on when a target named one, and the
+ * target read for a cover, absent for a point aim or a step pressing through.
+ */
 interface Pressed {
   readonly at: Point
   readonly box?: Box
+  readonly checks?: string
 }
 
-/** A point aim names no target, so only a target's press is checked for a cover. */
 async function pressAim(
   stage: Stage,
   aim: DragEnd,
@@ -360,23 +363,20 @@ async function pressAim(
 ): Promise<Pressed> {
   if (typeof aim !== 'string') return { at: pointIn(stage, aim) }
   const box = await boxOf(stage, aim)
-  await refuseCovered(stage, aim, center(box), through)
-  return { at: center(box), box }
+  return { at: center(box), box, ...(through ? {} : { checks: aim }) }
 }
 
 /**
- * Read before the glide rather than at the press, since a dragged element
- * follows the pointer and would read as covering its own drop target.
+ * Read once the pointer rests, since the glide can reveal a cover and the rest
+ * can let one close. A drop end reads then too, before the dragged element
+ * follows the pointer over it.
  */
-async function refuseCovered(
-  stage: Stage,
-  target: string,
-  at: Point,
-  through?: true,
-): Promise<void> {
-  if (through) return
-  const cover = await stage.evaluate<string | null>(coverExpression(target, at))
-  if (cover) throw new TargetCovered(target, cover, at)
+async function refuseCovered(stage: Stage, pressed: Pressed): Promise<void> {
+  if (!pressed.checks) return
+  const cover = await stage.evaluate<string | null>(
+    coverExpression(pressed.checks, pressed.at),
+  )
+  if (cover) throw new TargetCovered(pressed.checks, cover, pressed.at)
 }
 
 function pointIn(stage: Stage, aim: PointAim): Point {
@@ -390,12 +390,14 @@ function pointIn(stage: Stage, aim: PointAim): Point {
 async function click(
   stage: Stage,
   state: Performance,
-  { at, box }: Pressed,
+  pressed: Pressed,
   modifiers: readonly Modifier[],
   count: number,
 ): Promise<void> {
+  const { at, box } = pressed
   await moveTo(stage, state, at)
   await pause(stage, state, REST_MS)
+  await refuseCovered(stage, pressed)
   await holding(stage, modifiers, async () => {
     state.log?.push({
       t: stage.now(),
@@ -440,6 +442,8 @@ async function drag(
   const to = target.at
   await moveTo(stage, state, from)
   await pause(stage, state, REST_MS)
+  await refuseCovered(stage, source)
+  await refuseCovered(stage, target)
   await holding(stage, modifiers, async () => {
     const start = stage.now()
     const press = { clickCount: 1, ...withModifiers(modifiers) }
