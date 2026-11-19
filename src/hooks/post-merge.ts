@@ -194,7 +194,9 @@ function pushLines(result: StepResult, fields: Fields): string | undefined {
   const hint =
     reason === 'unsafe-payload'
       ? 'Run canon records push to see the blocked paths.'
-      : 'Run canon records push when the remote is reachable.'
+      : reason === 'busy'
+        ? 'Another session was pushing. Run canon records push once it finishes.'
+        : 'Run canon records push when the remote is reachable.'
   return `\n🗄️  Records not backed up: ${reason}\n${hint}\n\n`
 }
 
