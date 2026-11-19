@@ -713,3 +713,114 @@ describe('performSteps align', () => {
     })
   })
 })
+
+describe('performSteps press at a point', () => {
+  it('should press at the point without looking up a box', async () => {
+    const { stage, sent } = recordingStage({})
+    const expressions: string[] = []
+    const counted: Stage = {
+      ...stage,
+      evaluate: async <T>(expression: string) => {
+        expressions.push(expression)
+        return stage.evaluate<T>(expression)
+      },
+    }
+
+    await performSteps(counted, [{ kind: 'click', x: 300, y: 200 }], {
+      pointer: START,
+    })
+
+    expect(expressions).toEqual([])
+    expect(sent.find((input) => input.type === 'down')).toMatchObject({
+      x: 300,
+      y: 200,
+    })
+  })
+
+  it('should log the click at its point with no box', async () => {
+    const { log } = await perform({}, [{ kind: 'click', x: 300, y: 200 }])
+
+    const click = log.find((event) => event.kind === 'click')
+    expect(click).toMatchObject({ kind: 'click', at: { x: 300, y: 200 } })
+    expect(click).not.toHaveProperty('box')
+  })
+
+  it('should send two presses at the point for a double click', async () => {
+    const { sent } = await perform({}, [{ kind: 'dblclick', x: 50, y: 60 }])
+
+    expect(sent.filter((input) => input.type === 'down')).toEqual([
+      expect.objectContaining({ x: 50, y: 60, clickCount: 1 }),
+      expect.objectContaining({ x: 50, y: 60, clickCount: 2 }),
+    ])
+  })
+
+  it('should hold the modifiers through a press at a point', async () => {
+    const { sent } = await perform({}, [
+      { kind: 'click', x: 50, y: 60, modifiers: ['Alt'] },
+    ])
+
+    const order = sent
+      .filter((input) => input.type === 'down' || input.type === 'up')
+      .map((input) => `${input.via} ${input.type}`)
+    expect(order).toEqual([
+      'press down',
+      'pointer down',
+      'pointer up',
+      'press up',
+    ])
+  })
+
+  it('should refuse a point outside the window as offscreen', async () => {
+    const run = perform({}, [{ kind: 'click', x: 2000, y: 200 }])
+
+    await expect(run).rejects.toThrow(TargetOffscreen)
+    await expect(run).rejects.toThrow(/\(2000, 200\).*outside the 1920x1080/)
+  })
+
+  it('should send no input toward a point outside the window', async () => {
+    const { stage, sent } = recordingStage({})
+
+    const run = performSteps(stage, [{ kind: 'click', x: 10, y: -5 }], {
+      pointer: START,
+    })
+
+    await expect(run).rejects.toThrow(TargetOffscreen)
+    expect(sent).toEqual([])
+  })
+
+  it('should drag from a target to a point, logging no drop box', async () => {
+    const { sent, log } = await perform({ '#card': CARD }, [
+      { kind: 'drag', from: '#card', to: { x: 700, y: 450 } },
+    ])
+
+    expect(sent.find((input) => input.type === 'up')).toMatchObject({
+      x: 700,
+      y: 450,
+    })
+    const drag = log.find((event) => event.kind === 'drag')
+    expect(drag).toMatchObject({ box: CARD, to: { x: 700, y: 450 } })
+    expect(drag).not.toHaveProperty('drop')
+  })
+
+  it('should drag from a point to a target, logging no source box', async () => {
+    const { sent, log } = await perform({ '#lane': LANE }, [
+      { kind: 'drag', from: { x: 120, y: 110 }, to: '#lane' },
+    ])
+
+    expect(sent.find((input) => input.type === 'down')).toMatchObject({
+      x: 120,
+      y: 110,
+    })
+    const drag = log.find((event) => event.kind === 'drag')
+    expect(drag).toMatchObject({ drop: LANE, from: { x: 120, y: 110 } })
+    expect(drag).not.toHaveProperty('box')
+  })
+
+  it('should refuse a drag whose drop point is outside the window', async () => {
+    const run = perform({ '#card': CARD }, [
+      { kind: 'drag', from: '#card', to: { x: 100, y: 1200 } },
+    ])
+
+    await expect(run).rejects.toThrow(TargetOffscreen)
+  })
+})

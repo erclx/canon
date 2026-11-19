@@ -65,7 +65,7 @@ const TAKE_REFUSALS: Record<TakeRefusal, string> = {
   'server-unreachable': 'Nothing answered at the URL, so no beat was filmed.',
   'target-missing': 'A step names a target the page does not carry.',
   'target-offscreen':
-    'A step names a target outside the window, so a setup step must bring it into view first.',
+    'A step names a target or a point outside the window. A setup step brings a target into view, and a point has to move inside the window.',
   'over-cap':
     'The filmed beats ran past --max-seconds, so the take stopped at the beat that crossed it.',
   'clip-mismatch':
@@ -83,11 +83,9 @@ export function register(program: Command): void {
     )
     .argument('<url>', 'Address to film')
     .argument('<plan>', 'JSON file naming the beats and their steps')
-    // Checked in the action rather than required here, since commander checks
-    // a parent's required options on every subcommand, `camera` included.
+    // Checked in the action, since commander would demand it of `camera` too.
     .option('--out <dir>', 'Folder the clips, logs, and tracks land in')
-    // Keeps this command's options ahead of `camera`, which reuses --out and
-    // --json for its own.
+    // Keeps --out and --json apart from the ones `camera` reuses.
     .enablePositionalOptions()
     .helpOption('-h, --help', 'Show this help message')
     .option(
@@ -145,13 +143,23 @@ export function register(program: Command): void {
         'Step kinds:',
         '  move <target>|<x,y>    glide the pointer to a target or a point, and',
         '                         with hold <ms>, zoom onto its end for that long',
-        '  click <target>         glide to the target and press it',
-        '  dblclick <target>      glide to the target and press it twice',
-        '  drag <from> <to>       press the from target, glide held, release on to',
+        '  click <target>|<x,y>   glide to the target or the point and press it',
+        '  dblclick <target>|<x,y>',
+        '                         glide to the target or the point, press twice',
+        '  drag <from> <to>       press the from aim, glide held, release on to',
         '  key <keys>             press a combination such as Control+K',
         '  fill <target> <text>   press the target and type the text',
         '  scroll <target> <dy>   glide to the target and wheel dy pixels',
         '  wait <ms>              hold, for a state the page reaches on its own',
+        '',
+        'A point is an x and a y in CSS pixels of the beat window, written as',
+        '"x": 592, "y": 314 on the step, or as { "x": 592, "y": 314 } for a',
+        'drag from or to. It reaches content no top-document selector does, such',
+        'as inside a frame or under a layer taking every pointer event, and it',
+        'refuses as target-offscreen outside the window. A click or dblclick',
+        'carrying both a target and a point refuses, and a move carrying both',
+        'takes its target. A point written as a target string, such as "592,314",',
+        'refuses before filming.',
         '',
         'click, dblclick, and drag take modifiers, a list of Alt, Control, Meta,',
         'and Shift held through the press, as in "modifiers": ["Shift"]. keys',
@@ -238,7 +246,9 @@ export function register(program: Command): void {
         '                      that setting reads 1',
         '  server-unreachable  nothing answered at the URL',
         '  target-missing      a step names a target the page does not carry',
-        '  target-offscreen    a step names a target outside the window, so a setup step must bring it into view first',
+        '  target-offscreen    a step names a target outside the window, so a setup',
+        '                      step must bring it into view first, or a point',
+        '                      outside it, which has to move inside the window',
         '  over-cap            the filmed beats ran past --max-seconds, naming the',
         '                      beat that crossed it',
         '  clip-mismatch       a clip measured a different size from the one its',
@@ -432,8 +442,7 @@ async function runTake(
   }
 
   const { plan } = read
-  // Checked before filming, since the reel refuses the same beats only once
-  // every one of them has been filmed.
+  // Checked before filming, since the reel would refuse only after every beat.
   const mismatch = opts.reel
     ? reelShapeMismatch(
         plan.beats.map((beat) => ({

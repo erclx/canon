@@ -7,14 +7,9 @@ import {
 } from '@/take/plan'
 
 /**
- * The click log a take writes beside its clip, and the pointer path both
- * capture routes move along and the camera reads back. Every coordinate is in
- * CSS pixels of the page, and every time is in milliseconds on the clip's own
- * clock, so frame `n` sits at `n * 1000 / FPS` whatever route filmed it.
- *
- * The path lives here rather than in a capture route because the edit draws the
- * cursor from this log, so the route moving the real pointer and the reader
- * redrawing it have to agree on one curve.
+ * The take's log and the pointer path, in CSS pixels and clip milliseconds. The
+ * path lives here, not in a route, since the route moving the pointer and the
+ * edit redrawing it from this log must agree on one curve.
  */
 
 export const LOG_VERSION = 1
@@ -52,12 +47,8 @@ export type LogEvent =
       readonly to: Point
       readonly ms: number
       /**
-       * Every position the glide sent, in order. A reader draws the cursor
-       * holding each point until the next, rather than off the eased curve or
-       * between points, since the page paints only what it was last sent and
-       * the screencast sends one about every second frame. Absent in a log
-       * written before the field and in a harness log, where the curve stands
-       * in.
+       * Every position sent, which a reader holds until the next, since the page
+       * paints only its last one. Absent in an older or harness log.
        */
       readonly points?: readonly SentPoint[]
       /** How long the camera holds aimed at `to` once the glide ends. */
@@ -67,7 +58,8 @@ export type LogEvent =
       readonly t: number
       readonly kind: 'click'
       readonly at: Point
-      readonly box: Box
+      /** The box pressed, absent for a press the plan aimed at a point. */
+      readonly box?: Box
       /** The keys held through the press, absent when none is. */
       readonly modifiers?: readonly Modifier[]
       /** 2 for a double click, absent for a single one. */
@@ -79,9 +71,9 @@ export type LogEvent =
       /** Where the button went down and where it came up. */
       readonly from: Point
       readonly to: Point
-      /** The box pressed and the box it was dropped on. */
-      readonly box: Box
-      readonly drop: Box
+      /** The box pressed and the drop box, each absent on a point end. */
+      readonly box?: Box
+      readonly drop?: Box
       readonly modifiers?: readonly Modifier[]
       /**
        * From press to release. The travel between is logged as `move` events,
@@ -258,10 +250,8 @@ export function along(from: Point, to: Point, progress: number): Point {
 }
 
 /**
- * The pointer's position at a time on the clip's clock, held at the last
- * point each move sent at or before it, or read off its eased curve when the
- * move carries no points. It rests on `start` before the first move, being the
- * center of the window filmed.
+ * The pointer at a clip time, held at the last point sent or read off the eased
+ * curve when a move carries none, resting on `start` before the first move.
  */
 export function cursorAt(
   events: readonly LogEvent[],

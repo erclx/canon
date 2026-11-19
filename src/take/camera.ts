@@ -10,13 +10,9 @@ import {
 } from '@/take/log'
 
 /**
- * Turns a take's log into one camera per frame, on the motion the operator
- * settled by eye in groundwork track `210-film-craft-and-soundtrack`. A zoom in
- * rides the glide that reaches its target and lands as the cursor arrives, a
- * zoom out rides the glide that leaves it, and the view scales about the
- * target so it holds still on screen. The view pans only at a steady scale,
- * along the glide between two targets. HyperFrames renders the track as it
- * stands, so it carries no curve a renderer would have to agree on.
+ * Turns a take's log into one camera per frame, on the motion settled by eye in
+ * groundwork track `210-film-craft-and-soundtrack`. The track carries no curve,
+ * so HyperFrames renders it as it stands.
  */
 
 export const CAMERA_VERSION = 1
@@ -170,8 +166,7 @@ export function cameraTrack(
   const end = (log.frames * 1000) / log.fps
   const zooms = zoomsOf(aims, log.events, { width, height }, end)
 
-  // Read off every press rather than off the aims, which drop a click too large
-  // to zoom and add a typing burst that is no press.
+  // Read off the presses, since the aims drop unzoomed clicks and add typing.
   const presses = log.events.flatMap((event) =>
     event.kind === 'click'
       ? [{ t: event.t, release: event.t }]
@@ -229,20 +224,25 @@ function aimsOf(
   focus: boolean,
 ): Aim[] {
   switch (event.kind) {
-    case 'click':
+    case 'click': {
+      // A point press logs no box, so it zooms as deep as a held move's point.
+      const box = event.box ?? pointBox(event.at)
       return [
         {
           t: event.t,
           until: event.t,
           at: event.at,
-          box: event.box,
-          depth: depthFor(event.box),
+          box,
+          depth: depthFor(box),
         },
       ]
+    }
     case 'drag': {
-      // One aim over both ends, held to the release, so a short drag stays
-      // framed whole and a long one asks for a depth under MIN_ZOOM.
-      const box = union(event.box, event.drop)
+      // One aim over both ends to the release, so a long drag falls under MIN_ZOOM.
+      const box = union(
+        event.box ?? pointBox(event.from),
+        event.drop ?? pointBox(event.to),
+      )
       return [
         {
           t: event.t,
@@ -287,7 +287,7 @@ function aimsOf(
           t: arrived,
           until: arrived + event.hold,
           at: event.to,
-          box: { ...event.to, width: 0, height: 0 },
+          box: pointBox(event.to),
           depth: deepest,
         },
       ]
@@ -298,10 +298,8 @@ function aimsOf(
 }
 
 /**
- * Groups aims into zooms and times each one off the glides around it. The next
- * aim joins a zoom while at most one glide and no scroll lies between them,
- * since that glide then both leaves one target and reaches the other, and the
- * view pans along it rather than pulling back and pushing in at once.
+ * Groups aims into zooms. An aim joins a zoom while at most one glide and no
+ * scroll lie between, so the view pans along that glide rather than pulling out.
  */
 function zoomsOf(
   aims: readonly Aim[],
@@ -545,6 +543,10 @@ function atRate(log: TakeLog, rate: number): TakeLog {
         : { ...event, t }
     }),
   }
+}
+
+function pointBox(at: Point): Box {
+  return { x: at.x, y: at.y, width: 0, height: 0 }
 }
 
 function centerOf(box: Box): Point {
