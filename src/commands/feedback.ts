@@ -15,9 +15,9 @@ import {
 import {
   commentFailureMessage,
   issueFailureMessage,
-  issueListFailureMessage,
   issueReadFailureMessage,
 } from '@/feedback/github-format'
+import { listFlagProblem, listRecord } from '@/feedback/list'
 import { frameError, frameSuccess } from '@/cli/ui'
 
 function readStdin(): Promise<string> {
@@ -83,34 +83,24 @@ async function postFollowUp(issue: number, body: string): Promise<void> {
   process.exitCode = 1
 }
 
-/**
- * The read `session-retro` matches its candidates against, so a repeat goes
- * out as a follow-up. A refusal carries its reason, since the caller must say
- * the match did not run rather than read an empty queue.
- */
 async function listOpen(json: boolean): Promise<void> {
-  const result = await listFeedbackIssues()
-  if (!result.ok) {
-    const message = issueListFailureMessage(result)
-    frameError(message)
-    if (json) {
-      process.stdout.write(
-        `${JSON.stringify({ ok: false, reason: result.reason, message })}\n`,
-      )
-    }
+  const record = listRecord(await listFeedbackIssues())
+  if (!record.ok) {
+    frameError(record.message)
+    if (json) process.stdout.write(`${JSON.stringify(record)}\n`)
     process.exitCode = 1
     return
   }
   if (json) {
-    process.stdout.write(`${JSON.stringify(result)}\n`)
+    process.stdout.write(`${JSON.stringify(record)}\n`)
     return
   }
-  for (const issue of result.issues) {
+  for (const issue of record.issues) {
     process.stdout.write(`#${issue.number}\t${issue.title}\n`)
   }
   frameSuccess(
     'canon feedback',
-    `${result.issues.length} open feedback issue${result.issues.length === 1 ? '' : 's'}`,
+    `${record.issues.length} open feedback issue${record.issues.length === 1 ? '' : 's'}`,
   )
 }
 
@@ -135,13 +125,9 @@ export function register(program: Command): void {
     // Hidden and accepted, since a cached plugin still pipes `--github`.
     .addOption(new Option('--github').hideHelp())
     .action(async (opts: { on?: string; list?: boolean; json?: boolean }) => {
-      if (opts.list && opts.on !== undefined) {
-        frameError('--list reads the queue and --on posts to it. Pass one.')
-        process.exitCode = 1
-        return
-      }
-      if (opts.json && !opts.list) {
-        frameError('--json shapes the --list read only. Add --list.')
+      const flagProblem = listFlagProblem(opts)
+      if (flagProblem) {
+        frameError(flagProblem)
         process.exitCode = 1
         return
       }
