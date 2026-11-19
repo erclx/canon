@@ -28,7 +28,7 @@ canon dispatch prompts add <task> --role worker --model <model> --effort <effort
 - `--line <text>` adds one context line, and repeats. Carry only what `### What the brief may carry` in `orchestrator-launch.md` allows, never the answer-slot default or another fact the plan states.
 - `--merge-order <text>` writes the one lead line the file carries. The verb drops it while no two queued worker plans share a file, and says so in the record.
 
-Branch on the record's `ok` and `reason` rather than the exit. Report a `dropped` row as launched and a `claimUnread` branch as unverified.
+Branch on the record's `ok` and `reason` rather than the exit. Treat a `dropped` row as launched and run `canon tasks promote <stem>` for it, as `## Record a launch` states, and report a `claimUnread` branch as unverified.
 
 The `Controller:` line the verb writes replaces the background template's message clauses, which `role-worker` and `session-relay` already own. `auto-ship` Step 0 loads `role-worker`, so the fence needs nothing more.
 
