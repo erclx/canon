@@ -362,8 +362,7 @@ export const classify = (
   const lines: string[] = []
   let state = row.heading
 
-  // A conflict comes from the base moving, so it reports on the transition, and
-  // again when a push leaves it conflicting, as STALE does.
+  // A conflict reports on its transition, and again when a push leaves it standing.
   if (
     row.merges === 'conflict' &&
     (old.merges !== 'conflict' || row.head !== old.head)
@@ -371,22 +370,19 @@ export const classify = (
     lines.push(`CONFLICT  #${row.number} no longer merges into ${context.base}`)
   }
 
-  // Staleness reports on its transition, once per branch rather than per run, and
-  // again after a push, since the lift reads MOVED without STALE as a rebase.
+  // Reported once per branch, and after a push, since the lift reads MOVED alone as a rebase.
   if (old.stale !== 'stale' || row.head !== old.head) {
     lines.push(...staleLine(row, context.base))
   }
 
-  // A rising count fires on a tracked pull request only, so a first sighting
-  // takes the thread's existing comments as its baseline.
+  // A first sighting takes the thread's existing comments as its baseline.
   if (row.unmatchedCount > (Number.parseInt(old.unmatched, 10) || 0)) {
     lines.push(
       `UNMATCHED #${row.number} posted under '${row.unmatchedHeading}'`,
     )
   }
 
-  // The UI pass reports on its transition, since its state moves on a post or
-  // on a push and either is the moment it is owed an action.
+  // A post or a push moves the UI state, and either is when an action is owed.
   lines.push(...classifyUi(row, old))
   lines.push(...classifyEvidence(row, old))
 
@@ -397,8 +393,7 @@ export const classify = (
         `MOVED     #${row.number} -> ${short(row.head)}, never reviewed`,
       )
     } else if (row.prior === row.head) {
-      // An out-of-band pass reviewed this head before the poll saw it move, so
-      // the range is empty because it is covered rather than because it broke.
+      // A pass covered this head before the poll saw it move, so the range is empty, not broken.
       lines.push(
         `SEEN      #${row.number} -> ${short(row.head)}, already covered by the last pass`,
       )
@@ -414,8 +409,7 @@ export const classify = (
     row.resp > oldResp &&
     (row.passAt === 0 || row.replyAt > row.passAt)
   ) {
-    // The count says the reply is new to this script and the stamp that it follows
-    // the pass, since a quick close-out would otherwise report an answered thread.
+    // The stamp must follow the pass, or a quick close-out reports an answered thread.
     lines.push(`RESPONSE  #${row.number} answered with no new commit`)
   } else if (
     row.heading === 'open' &&
@@ -423,15 +417,13 @@ export const classify = (
     row.prior === row.head &&
     row.age >= STALE_AFTER
   ) {
-    // An open pass covering the head with no reply, past the age, is stalled, and
-    // the written marker keeps this standing condition from firing every run.
+    // The written marker keeps this standing condition from firing every run.
     lines.push(
       `STALLED   #${row.number} open at ${short(row.head)}, no commit or reply in ${Math.floor(row.age / 3600)}h`,
     )
     state = 'reported'
   } else if (row.heading === 'open' && old.state === 'reported') {
-    // Carry the marker rather than the freshly derived heading, or the state
-    // re-enters next run and STALLED oscillates instead of reporting once.
+    // Carrying the marker keeps STALLED from oscillating instead of reporting once.
     state = 'reported'
   }
 
@@ -565,8 +557,7 @@ type Collected = { number: string; reason: string } | { row: Row }
 const nowSeconds = (): number => Math.floor(Date.now() / 1000)
 
 const readHead = async (number: string): Promise<string> => {
-  // The tip is the authority for the head, since the object lags the ref after a
-  // push. The object's head is the fallback for a binary with no `pr head`.
+  // The tip is authoritative, since the object lags the ref after a push.
   const record = parseJson(
     (await runAsync('canon', ['pr', 'head', number, '--json'])).stdout,
   )
@@ -852,8 +843,7 @@ const buildRow = async (
 const countSince =
   (number: string) =>
   (prior: string, head: string): number => {
-    // The range needs both commits local, and a force-push leaves the prior one
-    // unreachable, so a range that does not resolve counts as zero.
+    // A force-push leaves the prior commit unreachable, so an unresolved range counts zero.
     run('git', ['fetch', '-q', 'origin', `pull/${number}/head`])
     const log = run('git', ['log', '--oneline', `${prior}..${head}`])
 
@@ -903,8 +893,7 @@ export const standingFromLift = (
  * first, and the read below is the fallback for an older binary.
  */
 const check = async (number: string): Promise<number> => {
-  // The verb exits 1 on any refused gate and still prints its record, so the
-  // exit says nothing about whether the standing was read.
+  // The verb exits 1 on any refused gate and still prints its record.
   const lifted = standingFromLift(
     parseJson(run('canon', ['pr', 'lift', number, '--check', '--json']).stdout),
   )
@@ -960,8 +949,7 @@ const pollOnce = async (
   const out: string[] = []
   const err: string[] = []
 
-  // The baseline is per-machine mutable state, so it stays in gitignored
-  // scratch even though the script is tracked.
+  // Per-machine mutable state, so it stays in gitignored scratch.
   const stateDir = join(root, '.canon', 'tmp', 'pr', 'poll')
   const statePath = join(stateDir, 'baseline.txt')
   const previous = (
@@ -980,8 +968,7 @@ const pollOnce = async (
 
   run('git', ['fetch', '-q', 'origin', base])
 
-  // A failed list would read as no open pull requests and report every tracked
-  // one GONE, so the run aborts rather than classify on it.
+  // A failed list would report every tracked pull request GONE, so the run aborts.
   const listed = run('gh', [
     'api',
     '--paginate',
@@ -1003,8 +990,7 @@ const pollOnce = async (
     numbers,
     READ_POOL,
     async (number): Promise<Collected> => {
-      // A failed read and a pull request with no reviews both arrive empty, so each
-      // read returns null on failure, which the payload surfaces.
+      // A failed read returns null, since an empty thread would look the same.
       const [payload, head] = await Promise.all([
         readPayload(number),
         readHead(number),
@@ -1143,8 +1129,7 @@ const main = async (args: string[]): Promise<number> => {
     return result.status
   }
 
-  // Only movement ends the wait early. A failed read holds to the cap rather than
-  // ending each wait at once, and a list still unreadable at the cap exits 1.
+  // Only movement ends early, and a failed read holds to the cap rather than ending it.
   const deadline = Date.now() + wait * 1000
   const failed = new Set<string>()
   for (;;) {
@@ -1155,8 +1140,7 @@ const main = async (args: string[]): Promise<number> => {
 
       return 0
     }
-    // A quiet wait never ends before its cap, whatever `--every` says, since an
-    // early exit is a re-arm the orchestrator spends a turn on.
+    // An early exit is a re-arm the orchestrator spends a turn on, whatever `--every` says.
     const left = deadline - Date.now()
     if (left <= 0) {
       for (const line of failed) console.error(line)

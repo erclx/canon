@@ -119,8 +119,7 @@ const writeThread = (
   )
   writeFileSync(join(root, 'fixtures', 'head-7.txt'), `${head}\n`)
 
-  // The top-level fields carry the code family alone, and the UI family rides in
-  // `ui`, covered when its marker, or the stamp without one, names the head.
+  // Code family on top, UI in `ui`, covered when its marker or else its stamp names the head.
   const last = reviews
     .filter((review) => CODE_HEADINGS.has(review.heading))
     .at(-1)
@@ -200,14 +199,12 @@ beforeEach(() => {
   sh('git init -q repo')
   sh('git -C repo commit -q --allow-empty -m init')
 
-  // The stub answers the script's REST reads and refuses `pr`, `repo view`, and
-  // `graphql`. The open list is one fixture number unless `open.txt` is written.
+  // Answers the REST reads and refuses the rest, and the open list is one number unless `open.txt` exists.
   const stub = join(root, 'bin', 'gh')
   copyFileSync(new URL('./fixtures/gh-poll.sh', import.meta.url), stub)
   chmodSync(stub, 0o755)
 
-  // `pr review-state` answers from the fixture and every other verb refuses, so
-  // `pr head` refuses with no remote and the head falls back to the pull read.
+  // Only `pr review-state` answers, so the head falls back to the pull read.
   const canon = join(root, 'bin', 'canon')
   copyFileSync(new URL('./fixtures/canon-poll.sh', import.meta.url), canon)
   chmodSync(canon, 0o755)
@@ -253,8 +250,7 @@ describe('poll', () => {
     expect(poll().stdout).toContain('RESPONSE  #7')
   })
 
-  // The baseline holds no stamp, so a carried line arrives with both empty, and
-  // only the count test keeps either from being read as a number.
+  // A carried line has no stamps, so only the count test keeps them from reading as numbers.
   it('should classify nothing when a carried line supplies no stamps', () => {
     writeThread(
       [{ heading: '## Review', submittedAt: FIRST_PASS }],
@@ -282,8 +278,7 @@ describe('poll', () => {
     expect(unmatched.stdout).toContain('UNMATCHED #7')
     expect(unmatched.stdout).toContain('## Something Unexpected')
 
-    // The count caught up with the baseline the line above wrote, so the same
-    // comment does not report a second time.
+    // The count caught up, so the same comment does not report a second time.
     expect(poll().stdout).toBe('No movement.')
   })
 
@@ -295,8 +290,7 @@ describe('poll', () => {
     expect(poll().stdout).toBe('No movement.')
   })
 
-  // A comment with no `## ` prefix at all, the shape the folded closing
-  // confirmation takes, must reach neither `UNMATCHED` nor any classification.
+  // The folded closing confirmation's shape must reach no classification at all.
   it('should report nothing when a comment carries no heading at all', () => {
     writeThread([], [])
     expect(poll().stdout).toContain('OPENED')
@@ -313,8 +307,7 @@ describe('poll', () => {
     expect(poll().stdout).toBe('No movement.')
   })
 
-  // One thread read two ways. A push between a pass's read and its post leaves
-  // the stamp on the new head, and only the marker names what the pass read.
+  // A push between a pass's read and its post moves the stamp, and only the marker holds.
   it('should report a head the stamp claims is covered as seen', () => {
     writeThread(
       [{ heading: '## Review', submittedAt: FIRST_PASS }],
@@ -323,8 +316,7 @@ describe('poll', () => {
     )
     expect(poll().stdout).toContain('SEEN')
 
-    // The push. `writeThread` moves the stamp onto the new head with it, which
-    // is what GitHub does to a review submitted after a push it never read.
+    // GitHub stamps a review submitted after a push with the new head.
     writeThread([{ heading: '## Review', submittedAt: FIRST_PASS }], [], HEAD)
 
     expect(poll().stdout).toContain(
@@ -340,8 +332,7 @@ describe('poll', () => {
     )
     expect(poll().stdout).toContain('SEEN')
 
-    // The push. The stamp follows the head and the marker does not, so only the
-    // marker still names the commit that pass actually read.
+    // Only the marker still names the commit that pass actually read.
     writeThread([{ heading: '## Review', submittedAt: FIRST_PASS }], [], HEAD)
     writeScope({
       commit: READ_HEAD,
@@ -366,8 +357,7 @@ describe('poll', () => {
     expect(poll().stdout).toContain('RESPONSE  #7')
   })
 
-  // A baseline the bash script wrote reads under the port with no first-run
-  // flood, so the first run after the swap says nothing.
+  // A baseline the bash script wrote reads with no first-run flood.
   it('should read a baseline line the bash script wrote without reporting it', () => {
     writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
     mkdirSync(join(root, 'repo', '.canon', 'tmp', 'pr', 'poll'), {
@@ -381,8 +371,7 @@ describe('poll', () => {
     expect(poll().stdout).toBe('No movement.')
   })
 
-  // A run made to time or inspect the board must leave the movement it saw for
-  // the next real run, rather than swallowing it into the baseline.
+  // A timing run must leave the movement it saw for the next real run.
   it('should report movement without recording it under --no-record', () => {
     writeThread([{ heading: '## Review', submittedAt: FIRST_PASS }], [])
     const baseline = join(root, 'repo', '.canon', 'tmp', 'pr', 'poll')
@@ -394,8 +383,7 @@ describe('poll', () => {
     expect(poll().stdout).toBe(inspected.stdout)
   })
 
-  // A background wait costs the orchestrator nothing until it exits, so a still
-  // board must hold it to the cap and leave the baseline as a plain run did.
+  // A still board holds the wait to its cap and leaves the baseline as a plain run did.
   it('should print one No movement line at the wait cap and record nothing new', () => {
     writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
     poll()
@@ -417,8 +405,7 @@ describe('poll', () => {
     expect(readFileSync(baseline, 'utf8')).toBe(settled)
   })
 
-  // An interval as long as the cap once ended the wait after its first read, so
-  // a re-arm under a cloud reviewer spun every few seconds.
+  // An interval as long as the cap once ended the wait after its first read.
   it('should hold a quiet wait to its cap when the interval matches it', () => {
     writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
     poll()
@@ -478,8 +465,7 @@ describe('poll', () => {
       return exited
     }
 
-    // The reply lands once the first pass rewrote the baseline as its last act, so
-    // the exit can only come from a later read, however slow the runner starts.
+    // The reply lands after the first pass wrote the baseline, so only a later read exits.
     while (!closed && statSync(baseline).mtimeMs <= 0) {
       await new Promise((resolve) => setTimeout(resolve, 50))
     }
@@ -537,8 +523,7 @@ describe('poll', () => {
     expect(refused.stderr).toContain('--wait')
   })
 
-  // A comments read failing beside a reviews read that succeeds must not read as
-  // a thread with no replies, which would report it new or drop its RESPONSE.
+  // A failed comments read must not read as a thread with no replies.
   it('should carry a pull request forward when only the comments read fails', () => {
     writeThread(
       [{ heading: '## Review', submittedAt: FIRST_PASS }],
@@ -565,8 +550,7 @@ describe('poll', () => {
     expect(poll().stdout).toContain('SEEN      #7 at 1111111')
   })
 
-  // A carry that blanks the count makes the next run read zero against the real
-  // count and report every comment already there as UNMATCHED.
+  // A blanked count would report every existing comment as UNMATCHED next run.
   it('should keep the unmatched count and UI token on a carried line', () => {
     const dir = join(root, 'repo', '.canon', 'tmp', 'pr', 'poll')
     const baseline = join(dir, 'baseline.txt')
@@ -586,8 +570,7 @@ describe('poll', () => {
     )
   })
 
-  // A refusal exiting zero carries a reason and no source, and one exiting
-  // nonzero carries nothing, so both fall back without changing the status.
+  // Both refusal shapes fall back without changing the status.
   it('should fall back when the verb answers a refusal record', () => {
     writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
     writeScope({ reason: 'no-marker' })
@@ -676,8 +659,7 @@ describe('poll', () => {
       writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
       expect(poll().stdout).toContain('SEEN')
 
-      // A `PUT` rewrite leaves the stamp on the head the close was first posted
-      // at and moves the marker onto the head the clean re-pass drove.
+      // A `PUT` rewrite keeps the old stamp and moves the marker to the re-driven head.
       writeThread(
         [
           { heading: '## Review closed', submittedAt: CLOSE_OUT },
@@ -709,8 +691,7 @@ describe('poll', () => {
       )
       expect(poll().stdout).toContain('SEEN')
 
-      // The push. The stamp follows the head and the marker does not, so only
-      // the marker says the verdict is about the older commit.
+      // Only the marker says the verdict is about the older commit.
       writeThread(
         [
           { heading: '## Review closed', submittedAt: CLOSE_OUT },
@@ -827,8 +808,7 @@ describe('poll', () => {
     })
   })
 
-  // These cases need real commits on both sides, on a bare origin holding `main`
-  // and each head at GitHub's ref, with a five-line file two sides can share.
+  // Real commits on a bare origin, with a five-line file two sides can share.
   describe('base movement', () => {
     const LINES = ['one', 'two', 'three', 'four', 'five']
 
@@ -900,8 +880,7 @@ describe('poll', () => {
       expect(poll().stdout).toBe('No movement.')
     })
 
-    // More pull requests than the read pool holds, so a run finishing reads out
-    // of order would print its lines out of order too.
+    // More pull requests than the read pool, so out-of-order reads would print out of order.
     it('should report pull requests in list order however their reads finish', () => {
       const numbers = ['3', '5', '7', '9', '11']
       for (const number of numbers) {
@@ -943,8 +922,7 @@ describe('poll', () => {
       expect(poll().stdout).toContain('STALE     #7')
     })
 
-    // The draft lift waits for a push carrying no STALE beside its MOVED, so a
-    // push that left the branch behind has to say so again.
+    // The lift waits for a MOVED with no STALE, so a branch left behind says so again.
     it('should report a stale branch again when a push leaves it behind', () => {
       const first = commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') })
       openPull('7', first)
@@ -991,8 +969,7 @@ describe('poll', () => {
       expect(rebased).not.toContain('STALE')
     })
 
-    // The draft lift reads a standing reading long after it was reported, so the
-    // check reads the base and head live rather than the baseline.
+    // The lift reads standing long after it was reported, so the check reads live.
     describe('standing check', () => {
       const baselinePath = (): string =>
         join(root, 'repo', '.canon', 'tmp', 'pr', 'poll', 'baseline.txt')
@@ -1050,8 +1027,7 @@ describe('poll', () => {
         expect(readFileSync(baselinePath(), 'utf8')).toBe(written)
       })
 
-      // The lift verb exits 1 on every refusal and still prints its record, so
-      // the stub does too.
+      // The stub exits 1 with its record, as the lift verb does on every refusal.
       const liftRecord = (number: string, gates: object[]): void => {
         writeFileSync(
           join(root, 'fixtures', `lift-${number}.json`),
@@ -1117,8 +1093,7 @@ describe('poll', () => {
     })
   })
 
-  // A carried line's shorter shape misreads the unmatched count the way it does
-  // the two stamps, so nothing may read that one as a number either.
+  // A carried line misreads the unmatched count too, so nothing may read it as a number.
   it('should classify nothing when a carried line supplies no unmatched count', () => {
     writeThread([], [])
     expect(poll().stdout).toContain('OPENED')
