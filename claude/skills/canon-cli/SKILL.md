@@ -64,6 +64,7 @@ The design board is Frameboard, a separate CLI outside canon, so a board job run
 | ---------------------------------------------- | ----------------- |
 | Read and close tasks on the board              | `canon tasks`     |
 | Read and answer intake folders                 | `canon intake`    |
+| Queue the prompts an operator launches by hand | `canon dispatch`  |
 | Validate, size, and move session records       | `canon records`   |
 | Resolve live sessions to a worktree and branch | `canon sessions`  |
 | Reclaim worktrees whose branches merged        | `canon worktrees` |

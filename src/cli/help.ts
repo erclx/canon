@@ -52,6 +52,7 @@ export const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
     rows: [
       ['sandbox [cat:cmd]', 'Provision and run sandbox scenarios'],
       ['tasks [cmd]', 'Task board'],
+      ['dispatch [cmd]', 'Hand-launch prompts queue'],
       ['intake [cmd]', 'Intake folders under .canon/intake/'],
       ['records [cmd]', 'Session records'],
       ['sessions [cmd]', 'Resolve live sessions to worktree and branch'],

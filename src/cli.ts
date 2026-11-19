@@ -19,6 +19,7 @@ import { register as take } from '@/commands/take'
 import { register as feedback } from '@/commands/feedback'
 import { register as transcripts } from '@/commands/transcripts'
 import { register as tasks } from '@/commands/tasks'
+import { register as dispatch } from '@/commands/dispatch'
 import { register as intake } from '@/commands/intake'
 import { register as comments } from '@/commands/comments'
 import { register as code } from '@/commands/code'
@@ -87,6 +88,7 @@ take(program)
 feedback(program)
 transcripts(program)
 tasks(program)
+dispatch(program)
 intake(program)
 comments(program)
 code(program)
