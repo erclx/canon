@@ -11,6 +11,7 @@ import {
   commentHistory,
   shippedCommentCaps,
 } from '@/gate/comment-caps'
+import type { RunCommand } from '@/gate/measures'
 import { type GateContext, runStage } from '@/gate/sequencer'
 import { STAGES } from '@/gate/stages'
 import { gitEnv } from '@/git/env'
@@ -243,6 +244,108 @@ describe('comment caps', () => {
       const result = await runStage(stage, context(['src/a.ts']))
 
       expect(result.status).toBe('failed')
+    })
+
+    describe('against a merge base', () => {
+      const gitRun: RunCommand = async (argv) => {
+        const done = execaSync(argv[0] ?? '', argv.slice(1), {
+          cwd: root,
+          env: gitEnv(),
+          extendEnv: false,
+          reject: false,
+        })
+        return {
+          exitCode: done.exitCode ?? 1,
+          stdout: done.stdout,
+          stderr: done.stderr,
+          all: '',
+        }
+      }
+
+      const based = (base: string): GateContext => ({
+        ...context(['src/a.ts']),
+        run: gitRun,
+        base,
+      })
+
+      const oldRun = [...comments(5), 'export const a = 1', ''].join('\n')
+
+      it('should report an old run in a touched file without failing it', async () => {
+        commit('src/a.ts', oldRun)
+        const base = git('rev-parse', 'HEAD')
+        writeFileSync(join(root, 'src/a.ts'), `${oldRun}export const b = 2\n`)
+
+        const report = await commentHeadBlocks(based(base))
+
+        expect(report.failure).toBeUndefined()
+        expect(report.emissions.map((emission) => emission.text)).toEqual([
+          'src/a.ts:1 runs 5 comment text lines outside a function body, past 3, untouched by this branch',
+          '1 untouched run reported and not failed, since only a run the branch changed fails',
+        ])
+      })
+
+      it('should fail an old run the branch edited one line of', async () => {
+        commit('src/a.ts', oldRun)
+        const base = git('rev-parse', 'HEAD')
+        writeFileSync(
+          join(root, 'src/a.ts'),
+          oldRun.replace('// line 2', '// line two'),
+        )
+
+        const report = await commentHeadBlocks(based(base))
+
+        expect(report.failure).toBe(
+          '1 head comment run past 3 text lines. Cut each to the contract or the constraint the code cannot carry.',
+        )
+      })
+
+      it('should fail an old run the branch deleted a line from', async () => {
+        commit('src/a.ts', oldRun)
+        const base = git('rev-parse', 'HEAD')
+        writeFileSync(join(root, 'src/a.ts'), oldRun.replace('// line 2\n', ''))
+
+        const report = await commentHeadBlocks(based(base))
+
+        expect(report.failure).toBeDefined()
+      })
+
+      it('should fail a new run beside an old one and report the old', async () => {
+        commit('src/a.ts', oldRun)
+        const base = git('rev-parse', 'HEAD')
+        writeFileSync(
+          join(root, 'src/a.ts'),
+          `${oldRun}${[...comments(4), 'export const b = 2', ''].join('\n')}`,
+        )
+
+        const report = await commentHeadBlocks(based(base))
+
+        expect(report.emissions.map((emission) => emission.text)).toEqual([
+          'src/a.ts:7 runs 4 comment text lines outside a function body, past 3',
+          'src/a.ts:1 runs 5 comment text lines outside a function body, past 3, untouched by this branch',
+          '1 untouched run reported and not failed, since only a run the branch changed fails',
+        ])
+      })
+
+      it('should fail every run in a file git does not track yet', async () => {
+        commit('src/other.ts', 'export const c = 3\n')
+        const base = git('rev-parse', 'HEAD')
+        writeFileSync(join(root, 'src/a.ts'), inBody(2))
+
+        const report = await commentBodyBlocks(based(base))
+
+        expect(report.failure).toBeDefined()
+      })
+
+      it('should fail every run and say why when the diff cannot be read', async () => {
+        commit('src/a.ts', oldRun)
+
+        const report = await commentHeadBlocks(based('not-a-revision'))
+
+        expect(report.emissions.map((emission) => emission.text)).toEqual([
+          'src/a.ts:1 runs 5 comment text lines outside a function body, past 3',
+          'The changed lines could not be read, so every run in a touched file fails',
+        ])
+      })
     })
 
     describe('over shipped files', () => {
