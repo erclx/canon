@@ -18,6 +18,8 @@ Read at Step 5 of `ui-film`. Canon stops at the clip, and a HyperFrames composit
 | `camera.json` | One camera per frame of the clip, with the cursor and the click ring         |
 | `still.jpg`   | The clip's closing frame, the check on each take, which no composition needs |
 
+A press the plan aimed at a point logs `at` with no `box`, and a drag end aimed at a point logs no `box` or `drop`.
+
 The window is the log's `viewport`, 1920x1080 unless the plan set a smaller one. Every coordinate in the log and the track is in CSS pixels of that window, whatever size the clip is. Every time is in milliseconds on the clip's own clock, so frame `n` sits at `n * 1000 / 60`.
 
 ## The camera track

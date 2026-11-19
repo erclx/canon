@@ -12,13 +12,16 @@ import {
   selfOf,
 } from '@/sessions/resolve'
 import { readStop, type StopReading } from '@/sessions/stop'
+import { machineListenerReader } from '@/listeners/machine'
+import { type StopReport, stopListeners } from '@/listeners/stop'
 import {
-  executeReap,
+  clientEffects,
   planFinishedReap,
   planTaskReap,
   type ReapPlan,
   type ReapRow,
   readTaskSessions,
+  reapTargets,
   type RosterRow,
 } from '@/sessions/reap'
 import {
@@ -326,6 +329,19 @@ export function register(program: Command): void {
         'task records that has sat idle past --idle-minutes. It refuses without',
         '--write or --dry-run, since it reaches sessions nobody named.',
         '',
+        'Each act passes the client the short id `claude agents` lists beside',
+        'the sessionId, read at reap time, since its stop and rm refuse the',
+        'full one. A target the client does not list is never acted on.',
+        '',
+        'Every reap also ends the listeners, such as a preview server, inside',
+        "each reaped session's linked worktree under .claude/worktrees/. A stop",
+        'ends them once the roster drops the session, and --remove ends them',
+        'ahead of the removal. The main checkout, a sibling worktree, and a',
+        'worktree another live session still holds are never signaled. The',
+        'record\'s "listeners" names each path, pid, and port ended, reads',
+        '"unread" where the machine cannot list sockets, and is null where no',
+        'target had a worktree to end. The worktree and its branch stay.',
+        '',
         'Skips, read off each row\'s "reason":',
         '  caller       the session running this command',
         '  kept         named by --keep, such as a planner held for reuse',
@@ -346,7 +362,8 @@ export function register(program: Command): void {
         '  skipped                     left alone, with a reason',
         '  gone                        recorded, and no longer on the roster',
         '  failed                      still on the roster after the client ran,',
-        '                              with its output in "detail"',
+        '                              with its output in "detail", or one the',
+        '                              client does not list, with nothing run',
         '',
         "Each outcome is read off the roster after the client's stop or rm",
         "rather than off its exit, since the client's own report is unreliable.",
@@ -399,22 +416,6 @@ function refuseReap(
   outro()
   writeRecord(json, { ok: false, reason, message, sessions: [] })
   return 1
-}
-
-async function clientRun(
-  verb: 'stop' | 'rm',
-  id: string,
-): Promise<{ exitCode: number; output: string }> {
-  const proc = Bun.spawn(['claude', verb, id], {
-    stdout: 'pipe',
-    stderr: 'pipe',
-  })
-  const [stdout, stderr, exitCode] = await Promise.all([
-    new Response(proc.stdout).text(),
-    new Response(proc.stderr).text(),
-    proc.exited,
-  ])
-  return { exitCode, output: `${stdout}${stderr}` }
 }
 
 async function liveIds(): Promise<ReadonlySet<string>> {
@@ -509,17 +510,20 @@ async function runReap(
     )
   }
 
-  const acted = await executeReap(
+  const reader = machineListenerReader()
+  const acted = await reapTargets(
     plan.targets,
+    roster,
     opts.remove === true,
     opts.dryRun === true,
     {
-      run: clientRun,
+      ...clientEffects(),
       live: liveIds,
       pause: (ms) => new Promise((done) => setTimeout(done, ms)),
+      stop: (paths, dryRun) => stopListeners(paths, { reader, dryRun }),
     },
   )
-  const rows: readonly ReapRow[] = [...acted, ...plan.settled]
+  const rows: readonly ReapRow[] = [...acted.sessions, ...plan.settled]
 
   intro('canon sessions reap')
   logStep(stem === null ? 'Finished sessions' : `Task ${stem}`)
@@ -532,6 +536,9 @@ async function runReap(
     if (row.outcome === 'failed') logWarn(`${line}: ${row.detail ?? ''}`)
     else logInfo(line)
   }
+  if (acted.listeners !== null) {
+    reportListeners(acted.listeners, opts.dryRun === true)
+  }
   outro()
 
   const failed = rows.some((row) => row.outcome === 'failed')
@@ -542,8 +549,26 @@ async function runReap(
     action: opts.remove ? 'remove' : 'stop',
     dryRun: opts.dryRun === true,
     sessions: rows,
+    listeners: acted.listeners,
   })
   return failed ? 1 : 0
+}
+
+function reportListeners(report: StopReport, dryRun: boolean): void {
+  logStep('Listeners')
+  if (report.kind === 'unread') {
+    logWarn(
+      'This machine offers neither lsof nor /proc, so no listener was read and none was ended.',
+    )
+    return
+  }
+  if (report.stopped.length === 0) logInfo('No listener in a reaped worktree.')
+  const verb = dryRun ? 'Would end' : 'Ended'
+  for (const { path, pids, ports } of report.stopped) {
+    logInfo(
+      `${verb} pid ${pids.join(', ')} on port ${ports.join(', ')} in ${path}`,
+    )
+  }
 }
 
 interface ExportCommandOptions {
@@ -704,8 +729,7 @@ async function runList(opts: ListCommandOptions): Promise<number> {
     return 1
   }
 
-  // The roster marks no row as the caller, so the join runs ahead of any scope,
-  // since a caller filtered out by branch would read as one with no row.
+  // Join the caller ahead of any scope, or a branch filter reads it as rowless.
   const own = opts.self ? selfOf(report.sessions, callerIdentity()) : null
 
   if (own?.kind === 'unresolved') {
@@ -730,8 +754,7 @@ async function runList(opts: ListCommandOptions): Promise<number> {
 
   const pool = own === null ? report.sessions : [own.session]
 
-  // A branch name is unique only inside one repository, and the roster is
-  // machine-wide, so the match is scoped to the repository the caller names.
+  // A branch is unique per repository and the roster is machine-wide.
   const at = opts.repository ? resolve(opts.repository) : process.cwd()
   const repository = opts.branch ? await repositoryOf(at) : null
 
@@ -837,12 +860,9 @@ function selfRefusal(own: Extract<SelfReport, { kind: 'unresolved' }>): string {
 }
 
 /**
- * States how liveness was decided on every run, including the run that decided
- * it the strong way.
- *
- * A caller reading a roster has no other way to tell a confirmed identity from
- * a pid that merely answered, and the two support different actions: the first
- * addresses a session directly and the second opens by asking to be corrected.
+ * States how liveness was decided on every run, since a confirmed identity is
+ * addressed directly and a pid that merely answered opens by asking to be
+ * corrected, and a roster reader has no other way to tell them apart.
  */
 function reportConfidence(
   shown: readonly ResolvedSession[],
@@ -850,8 +870,7 @@ function reportConfidence(
 ): void {
   logStep('Liveness')
 
-  // A roster of none decided nothing, and the registry keeps a record per
-  // session ever run, so the empty result is stated rather than confirmed.
+  // An empty roster decided nothing, so it is stated rather than confirmed.
   if (shown.length === 0) {
     logInfo(
       report.foreignDead > 0 || report.sessions.length > 0
@@ -901,8 +920,7 @@ function reportSessions(
     )
   }
 
-  // Under --self the pool was narrowed to one row before the branch filter, so
-  // an empty result says nothing about the wider roster.
+  // Under --self an empty result says nothing about the wider roster.
   if (sessions.length === 0) {
     if (stopsUnread !== null) {
       logInfo(noneStopped(branch, scoped, foreignDead, stopsUnread))
@@ -926,8 +944,7 @@ function reportSessions(
     return
   }
 
-  // The count is what a dispatch turns on. One row is a target and several are
-  // candidates, and the caller cannot tell them apart from a roster alone.
+  // One row is a dispatch target, and several are candidates to tell apart.
   if (branch && sessions.length > 1) {
     logWarn(
       `${sessions.length} sessions hold ${branch}. Confirm which one before addressing it.`,
@@ -980,10 +997,9 @@ function stopLine(session: StopReading): string[] {
 }
 
 /**
- * Renders the dwell at the coarsest unit that keeps it a whole number, since a
- * reader scanning a roster wants an age at a glance rather than a millisecond
- * count. An absent dwell renders as nothing, folding a status carrying no
- * stamp back to the bare status line the reader already knew.
+ * Renders the dwell at the coarsest whole unit, an age at a glance rather than
+ * a millisecond count. An absent dwell renders as nothing, leaving the bare
+ * status line.
  */
 function formatDwell(ms: number | null): string {
   if (ms === null) return ''

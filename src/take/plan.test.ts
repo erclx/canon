@@ -371,9 +371,80 @@ describe('readTakePlan input steps', () => {
     })
   })
 
-  it('should refuse a drag to a point, which takes targets only', () => {
+  it('should read a drag from a target to a point', () => {
     expect(
       onlyStep({ kind: 'drag', from: '#card', to: { x: 4, y: 9 } }),
+    ).toEqual({ kind: 'drag', from: '#card', to: { x: 4, y: 9 } })
+  })
+
+  it('should read a drag from a point to a target', () => {
+    expect(
+      onlyStep({ kind: 'drag', from: { x: 4, y: 9 }, to: '#lane' }),
+    ).toEqual({ kind: 'drag', from: { x: 4, y: 9 }, to: '#lane' })
+  })
+
+  it('should refuse a drag end that is an object with no y', () => {
+    expect(
+      onlyStep({ kind: 'drag', from: { x: 4 }, to: '#lane' }),
+    ).toMatchObject({ kind: 'refused', reason: 'bad-step' })
+  })
+
+  it('should read a click at a point in place of a target', () => {
+    expect(onlyStep({ kind: 'click', x: 592, y: 314 })).toEqual({
+      kind: 'click',
+      x: 592,
+      y: 314,
+    })
+  })
+
+  it('should read a double click at a point with the modifiers it holds', () => {
+    expect(
+      onlyStep({ kind: 'dblclick', x: 10, y: 20, modifiers: ['Shift'] }),
+    ).toEqual({ kind: 'dblclick', x: 10, y: 20, modifiers: ['Shift'] })
+  })
+
+  it('should refuse a click carrying both a target and a point', () => {
+    expect(
+      onlyStep({ kind: 'click', target: '#kit', x: 10, y: 20 }),
+    ).toMatchObject({
+      kind: 'refused',
+      reason: 'bad-step',
+      detail: expect.stringContaining('both'),
+    })
+  })
+
+  it('should refuse a click with an x and no y', () => {
+    expect(onlyStep({ kind: 'click', x: 10 })).toMatchObject({
+      kind: 'refused',
+      reason: 'bad-step',
+    })
+  })
+
+  it('should refuse a point written as a target string, naming x and y', () => {
+    expect(onlyStep({ kind: 'click', target: '592,314' })).toMatchObject({
+      kind: 'refused',
+      reason: 'bad-step',
+      detail: expect.stringMatching(/"x": 592, "y": 314/),
+    })
+  })
+
+  it('should refuse a point written as a move target string', () => {
+    expect(onlyStep({ kind: 'move', target: '12 34' })).toMatchObject({
+      kind: 'refused',
+      reason: 'bad-step',
+    })
+  })
+
+  it('should keep a move carrying both a target and a point on its target', () => {
+    expect(onlyStep({ kind: 'move', target: '#kit', x: 1, y: 2 })).toEqual({
+      kind: 'move',
+      target: '#kit',
+    })
+  })
+
+  it('should refuse a point written as a drag end string', () => {
+    expect(
+      onlyStep({ kind: 'drag', from: '#card', to: '40, 90' }),
     ).toMatchObject({ kind: 'refused', reason: 'bad-step' })
   })
 

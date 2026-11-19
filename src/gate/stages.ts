@@ -143,24 +143,34 @@ const RELATED_SOURCES = /\.tsx?$|^commitlint\.config\.js$/
 const FULL_SUITE_TRIGGERS =
   /^vitest\.(e2e\.)?(config|setup|global-setup)\.ts$|^tsconfig\.json$|^package\.json$/
 
-let testSources: ReadonlyMap<string, string> | undefined
+const testSources = new Map<string, ReadonlyMap<string, string>>()
 
-/** Read once per gate run, and only when a corpus file is in the changed set. */
-function corpusReaders(file: string): readonly string[] {
+/**
+ * Read once per root per gate run, and only when a corpus file is in the
+ * changed set. The root is the checked project rather than `PROJECT_ROOT`,
+ * which an installed binary resolves to its own package folder.
+ */
+function corpusReaders(file: string, root: string): readonly string[] {
   if (RELATED_SOURCES.test(file) || FULL_SUITE_TRIGGERS.test(file)) return []
-  testSources ??= readTestSources(PROJECT_ROOT)
-  return readersOf(file, testSources)
+  let sources = testSources.get(root)
+  if (sources === undefined) {
+    sources = readTestSources(root)
+    testSources.set(root, sources)
+  }
+  return readersOf(file, sources)
 }
 
 /**
  * A corpus file with no reader leaves the stage scoped out, so the related run
  * is never handed an empty file list.
  */
-const TESTS_SCOPE: StageScope = {
-  test: (file) =>
-    RELATED_SOURCES.test(file) ||
-    FULL_SUITE_TRIGGERS.test(file) ||
-    corpusReaders(file).length > 0,
+function testsScope(root: string): StageScope {
+  return {
+    test: (file) =>
+      RELATED_SOURCES.test(file) ||
+      FULL_SUITE_TRIGGERS.test(file) ||
+      corpusReaders(file, root).length > 0,
+  }
 }
 
 const FULL_SUITE = ['bun', 'run', 'test']
@@ -171,7 +181,10 @@ const FULL_SUITE = ['bun', 'run', 'test']
  */
 const END_TO_END = '**/*.e2e.test.ts'
 
-function relatedTests(changed: readonly string[]): readonly string[] {
+function relatedTests(
+  changed: readonly string[],
+  root: string,
+): readonly string[] {
   if (changed.some((file) => FULL_SUITE_TRIGGERS.test(file))) return FULL_SUITE
   return [
     'bun',
@@ -185,7 +198,7 @@ function relatedTests(changed: readonly string[]): readonly string[] {
     END_TO_END,
     ...new Set([
       ...changed.filter((file) => RELATED_SOURCES.test(file)),
-      ...changed.flatMap(corpusReaders),
+      ...changed.flatMap((file) => corpusReaders(file, root)),
     ]),
   ]
 }
@@ -194,6 +207,32 @@ export function contextAuditArgv(root: string): readonly string[] {
   return isOwnCheckout(root) || declaresContextGate(root)
     ? ['context', 'audit', '--gate']
     : ['context', 'audit']
+}
+
+/**
+ * Bound to the project `stagesFor` checks. It holds a lock, since concurrent
+ * suites starve each other's spawn tests and a related run can reach one.
+ */
+function testsStage(root: string): Stage {
+  return {
+    id: 'tests',
+    label: 'Tests',
+    scope: testsScope(root),
+    skipped:
+      'Skipped, no TypeScript, test config, or corpus a test reads changed',
+    lock: 'tests',
+    checks: [
+      {
+        kind: 'command',
+        argv: FULL_SUITE,
+        changedArgv: (changed) => relatedTests(changed, root),
+        scopedNote:
+          'Scoped run left out every *.e2e.test.ts suite. Run bun run test:e2e when this change reaches a browser or FFmpeg path.',
+        failure: 'Tests failed',
+      },
+    ],
+    success: 'Tests passed',
+  }
 }
 
 /**
@@ -681,28 +720,7 @@ export const STAGES: readonly Stage[] = [
     ],
     success: 'Typecheck passed',
   },
-  {
-    id: 'tests',
-    label: 'Tests',
-    scope: TESTS_SCOPE,
-    skipped:
-      'Skipped, no TypeScript, test config, or corpus a test reads changed',
-    // Concurrent suites from a wave of worktrees starve each other's spawn
-    // tests past their timeouts, so the box runs one at a time, and a related
-    // run can reach a spawn test.
-    lock: 'tests',
-    checks: [
-      {
-        kind: 'command',
-        argv: FULL_SUITE,
-        changedArgv: relatedTests,
-        scopedNote:
-          'Scoped run left out every *.e2e.test.ts suite. Run bun run test:e2e when this change reaches a browser or FFmpeg path.',
-        failure: 'Tests failed',
-      },
-    ],
-    success: 'Tests passed',
-  },
+  testsStage(PROJECT_ROOT),
 ]
 
 /**
@@ -710,5 +728,8 @@ export const STAGES: readonly Stage[] = [
  * checkout, and the shared ones elsewhere, in table order either way.
  */
 export function stagesFor(root: string): readonly Stage[] {
-  return isOwnCheckout(root) ? STAGES : STAGES.filter((stage) => stage.shared)
+  if (!isOwnCheckout(root)) return STAGES.filter((stage) => stage.shared)
+  return STAGES.map((stage) =>
+    stage.id === 'tests' ? testsStage(root) : stage,
+  )
 }

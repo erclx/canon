@@ -25,15 +25,28 @@ The finished form reaches sessions nobody named, which is why it refuses without
 
 ## Output
 
-Each row in `sessions` carries `sessionId`, `name`, `outcome`, `reason`, and `detail`.
+Each row in `sessions` carries `sessionId`, `name`, `outcome`, `reason`, and `detail`. A row the reap acted on also carries `clientId`.
 
 - `stopped` or `removed`: the client ran and the roster dropped the session
 - `would-stop` or `would-remove`: a dry run, so nothing ran
 - `skipped`: left alone, with a reason
 - `gone`: recorded on the task and no longer on the roster, which is not an error
-- `failed`: still on the roster after the client ran, with its output in `detail`
+- `failed`: still on the roster after the client ran, with its output in `detail`, or not listed by the client at all, so nothing ran
 
 The reap judges each session by reading the roster again after `claude stop` or `claude rm`, never by the client's exit, since the client's own report is unreliable. A `failed` row exits 1.
+
+The client's `stop` and `rm` take the short `id` that `claude agents --json` lists beside each `sessionId`, and refuse the full one. The reap reads that listing at reap time, before the dry-run branch, and `clientId` names the id it passed or would pass. It reads `null` where the client listed no such session, and the reap never guesses one.
+
+**Listeners**
+
+Every reap ends the listeners inside each reaped session's linked worktree under `.claude/worktrees/`, so a preview server the worker left behind gives up its port. The worktree and its branch stay in place.
+
+- A stop ends them once the roster drops the session, so a `failed` row keeps the server its live session owns
+- `--remove` ends them ahead of the client's removal, the order `canon worktrees reclaim` keeps
+- A dry run lists what would end and sends no signal
+- The main checkout, a sibling worktree, and a worktree another session on the roster still holds are never signaled
+
+The record's top-level `listeners` reads `{ kind: 'read', stopped: [{ path, pids, ports }] }` for what ended. It reads `{ kind: 'unread' }` on a machine with neither `/proc` nor `lsof`, which says nothing about what still listens. It is `null` where no target had a worktree to end.
 
 **Skips**
 
