@@ -135,6 +135,33 @@ describe('sessionDefaultsWarnings', () => {
     ])
   })
 
+  it('should name the merge ask on a file lacking only it', () => {
+    const plan = planSessionDefaults({
+      ...seed,
+      hooks: undefined,
+      permissions: { ...seed.permissions, ask: [] },
+    })
+
+    expect(sessionDefaultsWarnings(plan)).toEqual([
+      'settings.json lacks the merge ask. Run `canon migrate session-defaults --write`',
+    ])
+  })
+
+  it('should say why the orchestrator cannot merge under the old deny', () => {
+    const plan = planSessionDefaults({
+      ...seed,
+      hooks: undefined,
+      permissions: {
+        ...seed.permissions,
+        deny: [...seed.permissions.deny, 'Bash(canon pr merge:*)'],
+      },
+    })
+
+    expect(sessionDefaultsWarnings(plan)).toEqual([
+      "settings.json still denies `canon pr merge`, which wins over the ask, so the orchestrator cannot merge here even on the operator's word. Remove that deny entry by hand to have each merge ask",
+    ])
+  })
+
   it('should count the seeded hooks a file leaves unwired', () => {
     const plan = {
       ...planSessionDefaults({ ...seed, hooks: undefined }),

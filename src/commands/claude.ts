@@ -218,9 +218,18 @@ export function sessionDefaultsWarnings(plan: SessionDefaultsPlan): string[] {
         ? 'the lease push allow'
         : plan.lacksUiPassAllow
           ? 'the UI pass allow'
-          : undefined
+          : plan.lacksMergeAsk
+            ? 'the merge ask'
+            : undefined
   if (lacking !== undefined) {
     warnings.push(`settings.json lacks ${lacking}. ${MIGRATE_DEFAULTS}`)
+  }
+  // The migration never removes a deny entry, so this one stays the
+  // operator's to remove.
+  if (plan.holdsMergeDeny) {
+    warnings.push(
+      "settings.json still denies `canon pr merge`, which wins over the ask, so the orchestrator cannot merge here even on the operator's word. Remove that deny entry by hand to have each merge ask",
+    )
   }
   const count = plan.unwired.length
   if (count > 0) {
