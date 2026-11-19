@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.100.0](https://github.com/erclx/canon/compare/v5.99.0...v5.100.0) (2026-11-19)
+
+
+### Features
+
+* **auto-ship:** build small plan-first plans and wait on open calls ([#3220](https://github.com/erclx/canon/issues/3220)) ([6103488](https://github.com/erclx/canon/commit/610348876e7e6507672cac05c18b321705700ca9))
+* **design:** give the design skills a direction to build toward ([#3222](https://github.com/erclx/canon/issues/3222)) ([991c75b](https://github.com/erclx/canon/commit/991c75b041bc184ffe3f0611471f86d5a38e99ea))
+* **records:** push the record folders when a session ends ([#3224](https://github.com/erclx/canon/issues/3224)) ([eef6212](https://github.com/erclx/canon/commit/eef621264edbec9dc3670b112254ce0b59baf158))
+* **review:** start each review pass on the event that enables it ([#3218](https://github.com/erclx/canon/issues/3218)) ([5742e68](https://github.com/erclx/canon/commit/5742e684d921820997cb3509b4e5cb19b8534487))
+* **sessions:** end reaped listeners and pass the client its short id ([#3219](https://github.com/erclx/canon/issues/3219)) ([db9c009](https://github.com/erclx/canon/commit/db9c009bf2ad2fd479c752e7d08c709049414d6f))
+* **skills:** fit plugin skill descriptions inside the listing budget ([#3223](https://github.com/erclx/canon/issues/3223)) ([0115cf6](https://github.com/erclx/canon/commit/0115cf6ce88bf9435048d841ecfd4bf5a8135e21))
+* **take:** aim a click, a double click, and a drag end at a point ([#3217](https://github.com/erclx/canon/issues/3217)) ([a2067f3](https://github.com/erclx/canon/commit/a2067f35fe5adbfb6647e68d6554be8a36509680))
+
+
+### Bug Fixes
+
+* **gate:** read corpus test sources from the checked root ([#3221](https://github.com/erclx/canon/issues/3221)) ([d053b5e](https://github.com/erclx/canon/commit/d053b5e97431c61d510cb6dbce4567d7a9400c0d))
+
 ## [5.99.0](https://github.com/erclx/canon/compare/v5.98.0...v5.99.0) (2026-11-18)
 
 
