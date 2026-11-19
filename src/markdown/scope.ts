@@ -45,8 +45,8 @@ const KEY_PATHS_HEADING = /^## Key paths\s*$/
 const KEY_PATHS_KINDS: readonly DensityKind[] = ['bullet-run', 'h3-opening']
 
 /**
- * Measured for table cells alone, and never gated, since a project past the
- * limit fixes it by moving design folders rather than in one push.
+ * Measured for table cells alone, which only an index kept as one table
+ * carries, and never gated, since the fix is the move to group files.
  */
 const DESIGN_INDEX_SCOPE = /^canon\/design\/index\.md$/
 
