@@ -676,6 +676,71 @@ describe('poll', () => {
       expect(poll().stdout).toContain('UI-CLOSED #7 closed at 1111111')
     })
 
+    describe('a rebase under both closes', () => {
+      const closes: Review[] = [
+        { heading: '## Review closed', submittedAt: CLOSE_OUT },
+        {
+          heading: '## UI review closed',
+          marker: READ_HEAD,
+          submittedAt: UI_AT,
+        },
+      ]
+      const rebasedScope = (ui: Record<string, unknown>) => ({
+        commit: READ_HEAD,
+        heading: '## Review closed',
+        readAt: CLOSE_OUT,
+        review: {
+          carriedAcross: 'rebase',
+          carriedFrom: READ_HEAD,
+          isCovered: true,
+        },
+        source: 'marker',
+        state: 'closed',
+        submittedAt: CLOSE_OUT,
+        ui: {
+          commit: READ_HEAD,
+          heading: '## UI review closed',
+          source: 'marker',
+          state: 'closed',
+          ...ui,
+        },
+      })
+
+      it('should print one quiet line when both verdicts carried', () => {
+        writeThread(closes, [], READ_HEAD)
+        expect(poll().stdout).toContain('SEEN')
+
+        writeThread(closes, [], HEAD)
+        writeScope(
+          rebasedScope({
+            carriedAcross: 'rebase',
+            carriedFrom: READ_HEAD,
+            isCovered: true,
+          }),
+        )
+        const rebased = poll().stdout
+
+        expect(rebased).toContain('REBASED   #7 -> 1111111, verdicts carried')
+        expect(rebased).not.toContain('MOVED')
+        expect(rebased).not.toContain('UI-STALE')
+      })
+
+      it('should keep MOVED and UI-STALE when the rebase changed a driven path', () => {
+        writeThread(closes, [], READ_HEAD)
+        expect(poll().stdout).toContain('SEEN')
+
+        writeThread(closes, [], HEAD)
+        writeScope(rebasedScope({ isCovered: false, reason: 'ui-behind' }))
+        const rebased = poll().stdout
+
+        expect(rebased).toContain('MOVED     #7 -> 1111111')
+        expect(rebased).toContain(
+          'UI-STALE  #7 closed at 2222222, behind 1111111',
+        )
+        expect(rebased).not.toContain('REBASED')
+      })
+    })
+
     it('should report a closed UI pass a later push left behind the head', () => {
       writeThread(
         [

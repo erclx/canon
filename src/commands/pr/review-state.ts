@@ -1,7 +1,11 @@
 import type { Command } from 'commander'
 import { resolve } from 'node:path'
 import { type HeadRefusal, resolveTip } from '@/pr/head'
-import { DEFAULT_WAIT_SECONDS, readChangedPaths } from '@/pr/lift'
+import {
+  DEFAULT_WAIT_SECONDS,
+  readChangedPaths,
+  readRebasedPaths,
+} from '@/pr/lift'
 import { loadPaintedPatterns } from '@/pr/painted'
 import { reviewRowOf } from '@/pr/rest'
 import {
@@ -69,14 +73,28 @@ export function registerReviewState(pr: Command): void {
         '             its gate passes, read through the same gate function',
         '  isCovered  a pass covers the tip: the gate passes, or the newest pass,',
         '             open or unmarked, names the tip',
+        '  carriedFrom    the commit a close was read at when the lift carried',
+        '                 it to the tip, with `carriedAcross` naming how:',
+        '                 push    a UI close across commits no box can observe',
+        '                 rebase  a close across a rebase that left the',
+        '                         branch diff equal per path, each side read',
+        '                         against its own merge base with the base',
+        '  differingPaths  the paths whose branch diff differs across a rebase,',
+        '                  which kept a code review close from carrying',
+        '',
+        'A code review close carries across a rebase only when every path is',
+        'equal, and never across a push on top of it. A carried close vouches',
+        'for the branch diff and not for what the base moved under it, so CI at',
+        'the new head is still required. Hunk positions are not compared, so an',
+        'edit moved into an identical block of the same file by a hand-resolved',
+        'conflict reads equal too.',
         '',
         '`ui` also carries the newest `## UI review` pass (`heading`, `state`,',
         '`commit`, `source`), `isBound`, which is whether the evidence comment',
         'carries a checklist holding a box a driver can run or the newest UI',
         'pass is open, so a checklist of taste boxes alone binds nothing until',
-        'a pass opens, and `carriedFrom` when the lift carried a close',
-        'forward, or `drivenPaths` and the painted subset `paintedPaths` when',
-        'it refused to. An unbound family reads covered.',
+        'a pass opens, or `drivenPaths` and the painted subset `paintedPaths`',
+        'when the lift refused to carry. An unbound family reads covered.',
         '',
         'Both families post as pull request reviews, so this reads',
         '`pulls/<n>/reviews` alone, as the lift does. Issue comments are not',
@@ -143,8 +161,7 @@ async function runReviewState(
     return refuseWith('gh-missing', PULL_REFUSALS['gh-missing'], emitJson, root)
   }
 
-  // The number is resolved up front so the record names the pull request a
-  // caller that passed no argument was answered about.
+  // Resolved up front, so a record answering a bare call still names its pull request.
   const resolved = await resolvePullNumber(root, number)
   if (resolved.kind === 'refused') {
     return refuseWith(
@@ -160,10 +177,10 @@ async function runReviewState(
     return refuseWith(read.reason, PULL_REFUSALS[read.reason], emitJson, root)
   }
 
-  // The module refuses every failed read as `gh-failed`, and the api keeps each
-  // read's own reason, so a caller tells a thread from a remote.
+  // The api keeps each read's own reason, so a caller tells a thread from a remote.
   let failure: PullRefusal | HeadRefusal = 'gh-failed'
   const git = gitRunner(root)
+  const { base } = read.identity
   const api: ReviewStateApi = {
     readTip: async () => {
       const tip = await resolveTip(read.identity.branch, refReader(root))
@@ -180,6 +197,10 @@ async function runReviewState(
     },
     readEvidence: () => readEvidenceGate(root, resolved.number),
     readChanged: (from, to) => readChangedPaths(git, from, to),
+    readRebased: async (from, to) =>
+      base === undefined
+        ? undefined
+        : readRebasedPaths(git, `origin/${base}`, from, to),
     sleep: (ms) => new Promise((done) => setTimeout(done, ms)),
     now: () => Date.now(),
   }
@@ -243,8 +264,7 @@ function logReviewState(number: number, record: ReviewStateRecord): void {
     )
   } else {
     logStep(scope.state === 'open' ? 'Open' : 'Closed')
-    // Named apart, since these fields then describe the submission rather than
-    // the read, and a caller cannot tell the two from the values alone.
+    // Named apart, since these values then describe the submission, not the read.
     logWarn(
       `the last pass carries no read-time marker, so ${scope.commit === undefined ? 'no commit' : scope.commit.slice(0, 8)} and ${scope.submittedAt ?? 'no instant'} come off GitHub's submission stamps. A push inside that pass's compose window is invisible here.`,
     )
@@ -257,6 +277,11 @@ function logReviewState(number: number, record: ReviewStateRecord): void {
     const line = `${name}: ${family.reason ?? 'clear'}, ${family.isCovered ? 'a pass covers the tip' : 'no pass covers the tip'}`
     if (family.isCovered) logInfo(line)
     else logWarn(line)
+    if (family.carriedFrom !== undefined) {
+      logInfo(
+        `${name}: carried from ${family.carriedFrom.slice(0, 8)} across a ${family.carriedAcross ?? 'push'}`,
+      )
+    }
   }
   if (!record.ui.isBound) {
     logInfo(

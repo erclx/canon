@@ -10,6 +10,7 @@ import {
   type PullState,
   readBaseStanding,
   readChangedPaths,
+  readRebasedPaths,
   SETTLING_REEL_SKIPS,
   UNWAIVABLE_REEL_SKIPS,
 } from '@/pr/lift'
@@ -265,6 +266,7 @@ function liftApi(root: string, number: string, baseRef: string): LiftApi {
         true,
       ),
     readChanged: (from, to) => readChangedPaths(git, from, to),
+    readRebased: (from, to) => readRebasedPaths(git, baseRef, from, to),
     sleep: (ms) => new Promise((done) => setTimeout(done, ms)),
     now: () => Date.now(),
   }
@@ -301,8 +303,7 @@ async function runLift(
     )
   }
 
-  // Read once up front for the base the standing is measured against. The
-  // injected `readPull` re-reads the object on every gate that needs it.
+  // Read once for the base, while the injected `readPull` rereads it per gate.
   const initial = await readPull(root, resolved.number)
   if (initial.kind === 'refused') {
     return refuseWith(

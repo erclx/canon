@@ -8,7 +8,13 @@ import {
   standingPasses,
   type UiCounts,
 } from '@/pr/review-scope'
-import { readCarry, reelMoves } from '@/pr/carry'
+import {
+  type RebaseRead,
+  readCarry,
+  readRebaseCarry,
+  readUiCarry,
+  reelMoves,
+} from '@/pr/carry'
 import { readReelWaivers, readWaivers } from '@/pr/waiver'
 import { DEFAULT_PAINTED, isPainted, type PaintedPatterns } from '@/pr/painted'
 
@@ -53,8 +59,11 @@ export interface GateResult {
   readonly isOk: boolean
   /** Absent when the gate passed. */
   readonly reason?: LiftRefusal
-  /** The commit a UI close was carried forward from, when it covered an earlier head. */
+  /** The commit a close was carried forward from, when it covered an earlier head. */
   readonly carriedFrom?: string
+  readonly carriedAcross?: 'push' | 'rebase'
+  /** The paths whose branch diff differs across a rebase, which kept a code review close from carrying. */
+  readonly differingPaths?: readonly string[]
   /** The painted paths that kept a UI close from carrying forward. */
   readonly paintedPaths?: readonly string[]
   /** Every path a box can observe that kept a UI close from carrying forward. */
@@ -195,6 +204,8 @@ export interface LiftApi {
   markReady(nodeId: string): Promise<boolean>
   /** The paths changed from an earlier commit to the head, undefined when the read failed. */
   readChanged(from: string, to: string): Promise<ChangedRead | undefined>
+  /** The branch diff compared at an earlier commit and the head, undefined when the read failed. */
+  readRebased(from: string, to: string): Promise<RebaseRead | undefined>
   /** The one GraphQL call that returns a ready pull request to draft. */
   markDraft(nodeId: string): Promise<boolean>
   sleep(ms: number): Promise<void>
@@ -218,6 +229,7 @@ export interface LiftRecord {
   /** The gate that read not clear when a ready pull request went back to draft. */
   readonly failed?: LiftRefusal
   readonly carriedFrom?: string
+  readonly reviewCarriedFrom?: string
   readonly paintedPaths?: readonly string[]
   readonly drivenPaths?: readonly string[]
   /** The tip runs queued with no job past the bound, on a `ci-stalled` refusal. */
@@ -247,38 +259,63 @@ function fail(gate: GateName, reason: LiftRefusal): GateResult {
 }
 
 /**
- * The code review gate. A pass with no marker is refused rather than lifted,
- * since the commit it covers is a stamp GitHub wrote at submission, which the
- * marker exists to replace.
+ * The code review gate. An unmarked pass is refused, since its commit is a
+ * submission stamp. A close behind the head carries only across a rebase
+ * leaving every branch path equal, never across commits pushed on top of it.
  */
-export function reviewGate(
+export async function reviewGate(
+  api: Pick<LiftApi, 'readChanged' | 'readRebased'>,
   reviews: readonly ReviewRow[],
   head: string,
-): GateResult {
+): Promise<GateResult> {
   const scope = resolveReviewScope({ reviews })
   if (scope.state === 'none') return fail('review', 'review-missing')
   if (scope.state === 'open') return fail('review', 'review-open')
   if (scope.source !== 'marker') return fail('review', 'review-unmarked')
-  if (scope.commit === undefined || !coversHead(scope.commit, head)) {
+  if (scope.commit === undefined) return fail('review', 'review-behind')
+  if (coversHead(scope.commit, head)) return pass('review')
+
+  const changed = await api.readChanged(scope.commit, head)
+  if (changed === undefined || changed.isAncestor) {
     return fail('review', 'review-behind')
   }
-  return pass('review')
+  const carry = await readRebaseCarry(
+    (from, to) => api.readRebased(from, to),
+    scope.commit,
+    head,
+  )
+  if (carry.kind === 'rebased') {
+    return {
+      ...pass('review'),
+      carriedFrom: carry.carriedFrom,
+      carriedAcross: 'rebase',
+    }
+  }
+  return {
+    ...fail('review', 'review-behind'),
+    ...(carry.kind === 'changed' && { differingPaths: carry.differingPaths }),
+  }
 }
 
 /**
- * What the UI gate says about a close carried across commits, and the runs the
- * ci gate found stalled, lifted from the gates onto a record.
+ * What the review gates say about a close carried across commits, and the
+ * runs the ci gate found stalled, lifted from the gates onto a record.
  */
 function carried(gates: readonly GateResult[]): {
   carriedFrom?: string
+  reviewCarriedFrom?: string
   paintedPaths?: readonly string[]
   drivenPaths?: readonly string[]
   stalled?: readonly StalledRun[]
 } {
+  const review = gates.find((gate) => gate.gate === 'review')
   const ui = gates.find((gate) => gate.gate === 'ui')
   const ci = gates.find((gate) => gate.gate === 'ci')
   return {
     ...(ui?.carriedFrom !== undefined && { carriedFrom: ui.carriedFrom }),
+    ...(review?.carriedFrom !== undefined && {
+      reviewCarriedFrom: review.carriedFrom,
+    }),
     ...(ui?.paintedPaths !== undefined && { paintedPaths: ui.paintedPaths }),
     ...(ui?.drivenPaths !== undefined && { drivenPaths: ui.drivenPaths }),
     ...(ci?.stalled !== undefined && { stalled: ci.stalled }),
@@ -300,11 +337,12 @@ function droveNothing(counts: UiCounts | undefined): boolean {
 }
 
 /**
- * Binds only on a checklist. A close carries across a gap touching no driven
- * path, `paintedPaths` being their painted subset, and never from a non-ancestor.
+ * Binds only where the evidence record carries a checklist to drive. A close
+ * behind the head holds across what `readUiCarry` carries, and a refusal names
+ * every observable path in `drivenPaths` with the painted subset beside it.
  */
 export async function uiGate(
-  api: Pick<LiftApi, 'readChanged'>,
+  api: Pick<LiftApi, 'readChanged' | 'readRebased'>,
   painted: PaintedPatterns,
   reviews: readonly ReviewRow[],
   head: string,
@@ -320,16 +358,20 @@ export async function uiGate(
   // Before the head test, so a carried close is refused too. An unparsed count reads unchecked.
   if (droveNothing(scope.counts)) return fail('ui', 'ui-undriven')
 
-  const carry = await readCarry(
-    (from, to) => api.readChanged(from, to),
+  const carry = await readUiCarry(
+    {
+      readChanged: (from, to) => api.readChanged(from, to),
+      readRebased: (from, to) => api.readRebased(from, to),
+    },
     scope.commit,
     head,
   )
   if (carry.kind === 'covered') return pass('ui')
   if (carry.kind === 'failed') return fail('ui', 'gh-failed')
-  if (carry.kind === 'not-ancestor') return fail('ui', 'ui-behind')
+  if (carry.kind === 'behind') return fail('ui', 'ui-behind')
   if (carry.kind === 'carried') {
-    return { ...pass('ui'), carriedFrom: carry.carriedFrom }
+    const { carriedFrom, carriedAcross } = carry
+    return { ...pass('ui'), carriedFrom, carriedAcross }
   }
 
   const paintedPaths = carry.drivenPaths.filter((path) =>
@@ -650,7 +692,7 @@ async function settleAfterWait(
   if (nowTip !== tip) return refuse('head-moved', nowTip)
 
   const reread = [
-    reviewGate(nowReviews, nowTip),
+    await reviewGate(api, nowReviews, nowTip),
     await uiGate(api, painted, nowReviews, nowTip, hasDrivableBox),
   ].find((gate) => !gate.isOk)
   if (reread?.reason !== undefined) return refuse(reread.reason, nowTip)
@@ -712,7 +754,7 @@ export async function lift(
   }
 
   const gates: GateResult[] = [
-    reviewGate(reviews, tip),
+    await reviewGate(api, reviews, tip),
     await uiGate(api, painted, reviews, tip, evidence.hasDrivableBox),
     evidenceGate(
       evidence,
@@ -860,4 +902,82 @@ export async function readChangedPaths(
   if (diff === undefined) return undefined
 
   return { isAncestor: true, paths: nonEmptyLines(diff) }
+}
+
+const FILE_HEADER = 'diff --git '
+
+/**
+ * One patch text per path, without the blob ids and hunk line numbers a rebase
+ * shifts. Context stays, so a base change beside the branch's own differs, and a
+ * quoted path stays quoted, which no inert glob matches.
+ */
+function patchesByPath(patch: string): Map<string, string> {
+  const files = new Map<string, string>()
+  let path: string | undefined
+  let lines: string[] = []
+  const flush = () => {
+    if (path !== undefined) files.set(path, lines.join('\n'))
+  }
+  for (const line of patch.replace(/\n+$/, '').split('\n')) {
+    if (line.startsWith(FILE_HEADER)) {
+      flush()
+      const sides = line.slice(FILE_HEADER.length)
+      path = sides.startsWith('a/')
+        ? sides.slice(2, (sides.length - 1) / 2)
+        : sides
+      lines = []
+    } else if (line.startsWith('@@')) {
+      lines.push('@@')
+    } else if (!line.startsWith('index ')) {
+      lines.push(line)
+    }
+  }
+  flush()
+  return files
+}
+
+/**
+ * Which paths of the branch's own diff differ between a reviewed commit and a
+ * head, each diffed against its own merge base with `ref`. Any read that fails
+ * answers undefined, which carries nothing.
+ */
+export async function readRebasedPaths(
+  git: GitRunner,
+  ref: string,
+  from: string,
+  to: string,
+): Promise<RebaseRead | undefined> {
+  if (ref.startsWith('origin/')) {
+    await git(['fetch', '-q', 'origin', ref.slice('origin/'.length)])
+  }
+  const branchDiff = async (commit: string) => {
+    const base = (await git(['merge-base', ref, commit]))?.trim()
+    if (base === undefined || base === '') return undefined
+    const patch = await git([
+      'diff',
+      '--no-renames',
+      '--binary',
+      '--no-color',
+      '--no-ext-diff',
+      '--no-textconv',
+      '--src-prefix=a/',
+      '--dst-prefix=b/',
+      base,
+      commit,
+    ])
+    return patch === undefined ? undefined : patchesByPath(patch)
+  }
+
+  const full = (
+    await git(['rev-parse', '--verify', '-q', `${from}^{commit}`])
+  )?.trim()
+  if (full === undefined || full === '') return undefined
+  const [before, after] = await Promise.all([branchDiff(full), branchDiff(to)])
+  if (before === undefined || after === undefined) return undefined
+
+  const paths = new Set([...before.keys(), ...after.keys()])
+  const differingPaths = [...paths]
+    .filter((path) => before.get(path) !== after.get(path))
+    .toSorted()
+  return { differingPaths }
 }

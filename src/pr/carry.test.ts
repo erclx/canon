@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { isInert, readCarry } from '@/pr/carry'
+import {
+  isInert,
+  readCarry,
+  readRebaseCarry,
+  readUiCarry,
+  type RebaseRead,
+} from '@/pr/carry'
 import type { ChangedRead } from '@/pr/lift'
 
 const DRIVEN = '1111111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
@@ -7,6 +13,10 @@ const TIP = '2222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
 
 function changedRead(read: ChangedRead | undefined) {
   return async (): Promise<ChangedRead | undefined> => read
+}
+
+function rebaseRead(read: RebaseRead | undefined) {
+  return async (): Promise<RebaseRead | undefined> => read
 }
 
 describe('isInert', () => {
@@ -136,5 +146,127 @@ describe('readCarry', () => {
     const carry = await readCarry(changedRead(undefined), DRIVEN, TIP)
 
     expect(carry).toEqual({ kind: 'failed' })
+  })
+})
+
+describe('readUiCarry', () => {
+  function reads(
+    changed: ChangedRead | undefined,
+    rebased?: RebaseRead,
+  ): Parameters<typeof readUiCarry>[0] {
+    return {
+      readChanged: changedRead(changed),
+      readRebased: rebaseRead(rebased),
+    }
+  }
+
+  it('should carry across a push of tests and markdown', async () => {
+    const carry = await readUiCarry(
+      reads({ isAncestor: true, paths: ['README.md'] }),
+      DRIVEN,
+      TIP,
+    )
+
+    expect(carry).toEqual({
+      kind: 'carried',
+      carriedFrom: DRIVEN,
+      carriedAcross: 'push',
+    })
+  })
+
+  it('should carry across a rebase whose differing paths are inert', async () => {
+    const carry = await readUiCarry(
+      reads(
+        { isAncestor: false, paths: [] },
+        { differingPaths: ['README.md'] },
+      ),
+      DRIVEN,
+      TIP,
+    )
+
+    expect(carry).toEqual({
+      kind: 'carried',
+      carriedFrom: DRIVEN,
+      carriedAcross: 'rebase',
+    })
+  })
+
+  it('should move on a rebase that changed a driven path', async () => {
+    const carry = await readUiCarry(
+      reads(
+        { isAncestor: false, paths: [] },
+        { differingPaths: ['README.md', 'src/App.tsx'] },
+      ),
+      DRIVEN,
+      TIP,
+    )
+
+    expect(carry).toEqual({ kind: 'moved', drivenPaths: ['src/App.tsx'] })
+  })
+
+  it('should read behind when the rebase comparison could not be read', async () => {
+    const carry = await readUiCarry(
+      reads({ isAncestor: false, paths: [] }),
+      DRIVEN,
+      TIP,
+    )
+
+    expect(carry).toEqual({ kind: 'behind' })
+  })
+
+  it('should read failed when the gap could not be read', async () => {
+    const carry = await readUiCarry(reads(undefined), DRIVEN, TIP)
+
+    expect(carry).toEqual({ kind: 'failed' })
+  })
+})
+
+describe('readRebaseCarry', () => {
+  it('should carry when the branch diff is equal at both commits', async () => {
+    const carry = await readRebaseCarry(
+      rebaseRead({ differingPaths: [] }),
+      DRIVEN,
+      TIP,
+    )
+
+    expect(carry).toEqual({ kind: 'rebased', carriedFrom: DRIVEN })
+  })
+
+  it('should refuse a differing inert path by default', async () => {
+    const carry = await readRebaseCarry(
+      rebaseRead({ differingPaths: ['README.md'] }),
+      DRIVEN,
+      TIP,
+    )
+
+    expect(carry).toEqual({ kind: 'changed', differingPaths: ['README.md'] })
+  })
+
+  it('should carry across a differing inert path the predicate lets through', async () => {
+    const carry = await readRebaseCarry(
+      rebaseRead({ differingPaths: ['README.md', 'src/a.test.ts'] }),
+      DRIVEN,
+      TIP,
+      (path) => !isInert(path),
+    )
+
+    expect(carry).toEqual({ kind: 'rebased', carriedFrom: DRIVEN })
+  })
+
+  it('should name only the differing driven paths', async () => {
+    const carry = await readRebaseCarry(
+      rebaseRead({ differingPaths: ['README.md', 'src/App.tsx'] }),
+      DRIVEN,
+      TIP,
+      (path) => !isInert(path),
+    )
+
+    expect(carry).toEqual({ kind: 'changed', differingPaths: ['src/App.tsx'] })
+  })
+
+  it('should carry nothing when the comparison could not be read', async () => {
+    const carry = await readRebaseCarry(rebaseRead(undefined), DRIVEN, TIP)
+
+    expect(carry).toEqual({ kind: 'unread' })
   })
 })

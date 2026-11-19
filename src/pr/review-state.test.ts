@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import type { RebaseRead } from '@/pr/carry'
 import {
   type ChangedRead,
   type ChecksGate,
@@ -35,6 +36,8 @@ interface Fixture {
   reviews?: readonly (readonly ReviewRow[] | null)[]
   evidence?: Partial<EvidenceGate> | null
   changed?: ChangedRead | null
+  /** What the rebase comparison answers, a failed read when absent. */
+  rebased?: RebaseRead
 }
 
 interface Harness {
@@ -76,6 +79,7 @@ function makeApi(fixture: Fixture = {}): Harness {
       if (fixture.changed === null) return undefined
       return fixture.changed ?? { isAncestor: true, paths: [] }
     },
+    readRebased: async () => fixture.rebased,
     sleep: async (ms) => {
       calls.sleeps.push(ms)
       clock += ms
@@ -227,6 +231,53 @@ describe('readReviewState', () => {
     expect(result).toMatchObject({
       kind: 'read',
       record: { ui: { carriedFrom: HEAD, isCovered: true } },
+    })
+  })
+
+  it('should cover the tip with both closes carried across an equal rebase', async () => {
+    const { api } = makeApi({
+      tips: [PUSHED],
+      reviews: [
+        [
+          codePass('## Review closed', HEAD),
+          uiPass('## UI review closed', HEAD),
+        ],
+      ],
+      changed: { isAncestor: false, paths: [] },
+      rebased: { differingPaths: [] },
+    })
+
+    const result = await readReviewState(api)
+
+    expect(result).toMatchObject({
+      kind: 'read',
+      record: {
+        head: PUSHED,
+        review: { isCovered: true, carriedFrom: HEAD, carriedAcross: 'rebase' },
+        ui: { isCovered: true, carriedFrom: HEAD, carriedAcross: 'rebase' },
+      },
+    })
+  })
+
+  it('should name the differing path that kept a code close from carrying', async () => {
+    const { api } = makeApi({
+      tips: [PUSHED],
+      reviews: [[codePass('## Review closed', HEAD)]],
+      changed: { isAncestor: false, paths: [] },
+      rebased: { differingPaths: ['README.md'] },
+    })
+
+    const result = await readReviewState(api)
+
+    expect(result).toMatchObject({
+      kind: 'read',
+      record: {
+        review: {
+          reason: 'review-behind',
+          isCovered: false,
+          differingPaths: ['README.md'],
+        },
+      },
     })
   })
 
@@ -442,6 +493,34 @@ describe('agrees with lift', () => {
           ],
         ],
         changed: { isAncestor: true, paths: ['src/cli.ts'] },
+      },
+    ],
+    [
+      'both closes across an equal rebase',
+      {
+        tips: [PUSHED],
+        reviews: [
+          [
+            codePass('## Review closed', HEAD),
+            uiPass('## UI review closed', HEAD),
+          ],
+        ],
+        changed: { isAncestor: false, paths: [] },
+        rebased: { differingPaths: [] },
+      },
+    ],
+    [
+      'a rebase that changed a driven path',
+      {
+        tips: [PUSHED],
+        reviews: [
+          [
+            codePass('## Review closed', HEAD),
+            uiPass('## UI review closed', HEAD),
+          ],
+        ],
+        changed: { isAncestor: false, paths: [] },
+        rebased: { differingPaths: ['src/cli.ts'] },
       },
     ],
   ]

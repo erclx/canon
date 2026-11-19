@@ -13,6 +13,7 @@ import {
   readsDrivableBox,
   type Standing,
 } from '@/pr/lift'
+import type { RebaseRead } from '@/pr/carry'
 import { DEFAULT_PAINTED, type PaintedPatterns } from '@/pr/painted'
 import type { ReviewRow } from '@/pr/review-scope'
 
@@ -48,6 +49,9 @@ const UI_CLOSED_EMPTY: ReviewRow = {
 const UI_CLOSED_AT_MOVED: ReviewRow = {
   body: `## UI review closed\n\nall boxes\n<!-- review-ui: head=${MOVED} -->`,
 }
+const CODE_CLOSED_AT_MOVED: ReviewRow = {
+  body: `## Review closed\n\nclean\n<!-- review-pr: commit=${MOVED} read-at=${READ_AT} -->`,
+}
 
 // A close rewritten in place by a `PUT`: GitHub keeps the stamp on the head the
 // comment was first posted against, and the body's marker names the new head.
@@ -72,6 +76,8 @@ interface Fixture {
   isDrafted?: boolean
   /** What the read answers, null for one that failed. */
   changed?: ChangedRead | null
+  /** What the rebase comparison answers, a failed read when absent. */
+  rebased?: RebaseRead
 }
 
 interface Harness {
@@ -80,6 +86,7 @@ interface Harness {
     marks: string[]
     drafts: string[]
     reads: (readonly [string, string])[]
+    rebases: (readonly [string, string])[]
     checks: number
     sleeps: number[]
   }
@@ -91,6 +98,7 @@ function makeApi(fixture: Fixture = {}): Harness {
     marks: [] as string[],
     drafts: [] as string[],
     reads: [] as (readonly [string, string])[],
+    rebases: [] as (readonly [string, string])[],
     checks: 0,
     sleeps: [] as number[],
   }
@@ -130,6 +138,10 @@ function makeApi(fixture: Fixture = {}): Harness {
       calls.reads.push([from, to])
       if (fixture.changed === null) return undefined
       return fixture.changed ?? { isAncestor: true, paths: [] }
+    },
+    readRebased: async (from, to) => {
+      calls.rebases.push([from, to])
+      return fixture.rebased
     },
     markDraft: async (nodeId) => {
       calls.drafts.push(nodeId)
@@ -528,6 +540,124 @@ describe('lift', () => {
 
         expect(record.reason).toBe(reason)
         expect(calls.marks).toEqual([])
+      },
+    )
+  })
+
+  describe('both closes across a rebase', () => {
+    const rebasedFrom = {
+      evidence: { hasDrivableBox: true, reelHead: HEAD },
+      reviews: [CODE_CLOSED_AT_MOVED, UI_CLOSED_AT_MOVED],
+      changed: { isAncestor: false, paths: [] },
+    }
+
+    it('should lift when the branch diff is equal at both commits', async () => {
+      const { api, calls } = makeApi({
+        ...rebasedFrom,
+        rebased: { differingPaths: [] },
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record).toMatchObject({
+        reason: 'lifted',
+        carriedFrom: MOVED,
+        reviewCarriedFrom: MOVED,
+      })
+      expect(record.gates).toContainEqual({
+        gate: 'review',
+        isOk: true,
+        carriedFrom: MOVED,
+        carriedAcross: 'rebase',
+      })
+      expect(calls.rebases[0]).toEqual([MOVED, HEAD])
+    })
+
+    it('should refuse the code review on one differing inert path and carry the UI close', async () => {
+      const { api } = makeApi({
+        ...rebasedFrom,
+        rebased: { differingPaths: ['README.md'] },
+      })
+
+      const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+      expect(record.reason).toBe('review-behind')
+      expect(record.gates).toContainEqual({
+        gate: 'review',
+        isOk: false,
+        reason: 'review-behind',
+        differingPaths: ['README.md'],
+      })
+      expect(record.gates).toContainEqual({
+        gate: 'ui',
+        isOk: true,
+        carriedFrom: MOVED,
+        carriedAcross: 'rebase',
+      })
+    })
+
+    it('should refuse ui-behind on a differing driven path', async () => {
+      const { api } = makeApi({
+        ...rebasedFrom,
+        reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
+        rebased: { differingPaths: ['src/App.tsx'] },
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record).toMatchObject({
+        reason: 'ui-behind',
+        paintedPaths: ['src/App.tsx'],
+        drivenPaths: ['src/App.tsx'],
+      })
+      expect(record.carriedFrom).toBeUndefined()
+    })
+
+    it('should refuse both closes when the comparison could not be read', async () => {
+      const { api } = makeApi({ ...rebasedFrom })
+
+      const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+      expect(record.reason).toBe('review-behind')
+      expect(record.gates).toContainEqual({
+        gate: 'ui',
+        isOk: false,
+        reason: 'ui-behind',
+      })
+    })
+
+    it('should keep a code review behind across a push it descends from', async () => {
+      const { api, calls } = makeApi({
+        reviews: [CODE_CLOSED_AT_MOVED],
+        changed: { isAncestor: true, paths: ['README.md'] },
+        rebased: { differingPaths: [] },
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('review-behind')
+      expect(calls.rebases).toEqual([])
+    })
+
+    it.each([
+      ['ci-failing', { checks: [{ state: 'failing', isConflicted: false }] }],
+      ['standing-stale', { standing: 'stale' }],
+      [
+        'reel-unsettled',
+        { evidence: { hasDrivableBox: true, reelHead: MOVED } },
+      ],
+    ] as const)(
+      'should still refuse %s on a carried rebase',
+      async (reason, fixture) => {
+        const { api } = makeApi({
+          ...rebasedFrom,
+          rebased: { differingPaths: [] },
+          ...fixture,
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe(reason)
       },
     )
   })

@@ -9,6 +9,7 @@ import {
   countTicksAtHead,
   readUiPassHead,
   tickBoxes,
+  tickCarryOf,
   uiPassLine,
   writeUiPassLine,
 } from '@/pr/tick'
@@ -88,6 +89,49 @@ describe('tickBoxes', () => {
       reason: 'no-checklist',
     })
   })
+})
+
+describe('tickCarryOf', () => {
+  it('should tick at the tip across a rebase that left the branch diff equal', () => {
+    const decision = tickCarryOf({
+      kind: 'carried',
+      carriedFrom: HEAD,
+      carriedAcross: 'rebase',
+    })
+
+    expect(decision).toEqual({
+      kind: 'ticks',
+      carriedFrom: HEAD,
+      carriedAcross: 'rebase',
+    })
+  })
+
+  it('should tick a head that is the tip with nothing carried', () => {
+    expect(tickCarryOf({ kind: 'covered' })).toEqual({ kind: 'ticks' })
+  })
+
+  it('should owe a redrive on a rebase that changed a driven path', () => {
+    const decision = tickCarryOf({
+      kind: 'moved',
+      drivenPaths: ['src/App.tsx'],
+    })
+
+    expect(decision).toEqual({
+      kind: 'refused',
+      reason: 'redrive-owed',
+      drivenPaths: ['src/App.tsx'],
+    })
+  })
+
+  it.each(['behind', 'failed'] as const)(
+    'should refuse stale-head when the carry reads %s',
+    (kind) => {
+      expect(tickCarryOf({ kind })).toEqual({
+        kind: 'refused',
+        reason: 'stale-head',
+      })
+    },
+  )
 })
 
 describe('countTicksAtHead', () => {
