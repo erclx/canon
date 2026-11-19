@@ -23,7 +23,9 @@ import {
   exitCodeFor,
   type GateContext,
   hasChanged,
+  parseChangedLines,
   parsePressure,
+  readChangedLines,
   runStage,
   runStages,
   summarize,
@@ -622,6 +624,66 @@ describe('the changed set', () => {
     const changed = await collectChangedFiles(run)
 
     expect(changed).toMatchObject({ scoped: true, files: ['src/one.ts'] })
+  })
+})
+
+describe('the changed lines', () => {
+  const diffOf = (...hunks: string[]): string =>
+    [
+      'diff --git a/src/a.ts b/src/a.ts',
+      '--- a/src/a.ts',
+      '+++ b/src/a.ts',
+      ...hunks,
+    ].join('\n')
+
+  it('should read an added range as its new-side span', () => {
+    const spans = parseChangedLines(diffOf('@@ -4,0 +5,3 @@', '+a', '+b', '+c'))
+
+    expect(spans.get('src/a.ts')).toEqual([{ start: 5, end: 7 }])
+  })
+
+  it('should read a hunk with no count as one line', () => {
+    const spans = parseChangedLines(diffOf('@@ -9 +9 @@', '-old', '+new'))
+
+    expect(spans.get('src/a.ts')).toEqual([{ start: 9, end: 9 }])
+  })
+
+  it('should read a pure deletion as the two lines either side of the cut', () => {
+    const spans = parseChangedLines(diffOf('@@ -6,2 +5,0 @@', '-x', '-y'))
+
+    expect(spans.get('src/a.ts')).toEqual([{ start: 5, end: 6 }])
+  })
+
+  it('should leave out a file the branch deleted', () => {
+    const spans = parseChangedLines(
+      ['--- a/src/gone.ts', '+++ /dev/null', '@@ -1,2 +0,0 @@'].join('\n'),
+    )
+
+    expect(spans.size).toBe(0)
+  })
+
+  it('should read an untracked file as changed whole', async () => {
+    const run = runnerFor({
+      'git ls-files --others --exclude-standard -- src/new.ts': result({
+        stdout: 'src/new.ts\n',
+      }),
+    })
+
+    const lines = await readChangedLines(run, 'abc123', ['src/new.ts'])
+
+    expect(lines?.get('src/new.ts')).toBe('whole')
+  })
+
+  it('should answer nothing when git cannot read the diff', async () => {
+    const run = runnerFor({
+      'git diff -U0 --no-color --no-ext-diff abc123 -- src/a.ts': result({
+        exitCode: 128,
+      }),
+    })
+
+    const lines = await readChangedLines(run, 'abc123', ['src/a.ts'])
+
+    expect(lines).toBeUndefined()
   })
 })
 
