@@ -22,7 +22,7 @@ Read the board in parallel, resolving the paths at the main worktree root the wa
 - `.canon/plans/*.md`: features already planned and ready to hand off
 - open PRs via `gh pr list --json number,title,headRefName,isDraft`
 
-Read the table, `orchestrator-filing.md` in full, and `orchestrator-output.md`, then output the state of play, naming what to launch, review, and merge.
+Every runbook named here resolves under `${CLAUDE_SKILL_DIR}/references/`. Read the table, `orchestrator-filing.md` in full, and `orchestrator-output.md`, then output the state of play, naming what to launch, review, and merge.
 
 ### Acts and their runbooks
 
@@ -52,7 +52,7 @@ Read the table, `orchestrator-filing.md` in full, and `orchestrator-output.md`, 
 
 - Row position under `## Needs a plan` is what gets planned next, top first, per `${CLAUDE_SKILL_DIR}/../task-board/references/board.md`
 - `backlog.md` is explicitly unordered, so read it for what exists and never as a queue. Report a count rather than its rows, which would put the length back in front of the reader.
-- That count says nothing about whether each row still belongs. The parked-rows runbook re-tests a backlog row's currency, on its own trigger below.
+- That count says nothing about whether each row still belongs. `orchestrator-parked.md` re-tests a row's currency, on its own trigger below.
 
 ### What the board does not say
 
@@ -62,21 +62,21 @@ No surface carries cross-version sequencing, so report none, since reasoning spa
 
 The human asks for each side of a compaction, and this skill reads the runbook.
 
-- On a request to write the handoff, follow its runbook. It sends the generic half to `canon:session-map` and adds decisions taken under delegated authority.
+- To write the handoff, follow `orchestrator-handoff.md`. It sends the generic half to `canon:session-map` and adds decisions taken under delegated authority.
 - That map follows `${CLAUDE_SKILL_DIR}/../session-map/references/session.md`. Write nothing to the handoff that the board, a task file, or a groundwork folder already carries.
-- Read the limit-stops runbook on request or on the first turn after a limit stop, and the hand-launch one on request
+- Read `orchestrator-limit-stops.md` on request or on the first turn after a limit stop, and `orchestrator-hand-launch.md` on request
 - A lesson about how to work goes to the owning task's Findings, as a bold-labeled line per `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`
-- On a request to resume after a compaction, read its runbook, which reads that file back with the board and the groundwork behind the live work
+- On a request to resume after a compaction, read `orchestrator-resume.md`, which reads that file back with the board and groundwork behind live work
 
 ### The parked rows
 
-A board that is not moving is another such moment. On a request to re-test the parked rows, follow their runbook, which re-tests every blocker and backlog row and plans what it clears, while the refill sweep fires on a merge. An unattended run follows its own runbook.
+A board that is not moving is another such moment. On a request to re-test the parked rows, follow `orchestrator-parked.md`, which re-tests every blocker and backlog row and plans what it clears, while the refill sweep fires on a merge. An unattended run follows `orchestrator-unattended.md`.
 
 ### When the body has dropped
 
 That routing lives in this body and this skill is user-invoked, so a session that has dropped the body routes nothing and the request lands as ordinary conversation. A long session nearing a compaction is likeliest to have dropped it.
 
-Re-invoke `/canon:role-orchestrator` first whenever the session has run long or the ask goes unanswered. The runbooks sit under `references/`, so a person who knows their plugin root can follow one without this skill loaded.
+Re-invoke `/canon:role-orchestrator` first whenever the session has run long or the ask goes unanswered. A person who knows their plugin root can follow a runbook without this skill loaded.
 
 ## The loop
 
@@ -84,7 +84,7 @@ Re-invoke `/canon:role-orchestrator` first whenever the session has run long or 
 
 The cross-feature call stays here, being which rows conflict, what merges before what, and whether a row runs at all. Every plan written here carries a constraint per track in flight, per `### Constraints from the tracks in flight` below.
 
-- Per-row planning runs through `plan-feature` here, the session that measured the row, or a cold planner under `role-planner`, per the launch runbook
+- Per-row planning runs through `plan-feature` here, the session that measured the row, or a cold planner under `role-planner`, per `orchestrator-launch.md`
 - A flaky row with no named cause launches `plan-groundwork` ahead of `plan-feature`, per `### A flaky row` in that file
 - That file's talk shape launches a planner the operator shapes the row with, its several-row shape one planner for rows sharing a surface, and its plan-and-build shape a small row by default
 
@@ -102,25 +102,25 @@ A plan goes stale from whatever merged after it, so correct it before handing it
 
 ### 4. Hand off
 
-Read the dispatch runbook and follow it. Check the branch is unclaimed and run its conflict check against every track in flight, then dispatch a background worker with `claude --bg`.
+Read `orchestrator-dispatch.md` and follow it. Check the branch is unclaimed and run its conflict check against every track in flight, then dispatch a background worker with `claude --bg`.
 
 - Fall back to the human-launch line it replaces when the branch check refuses or the conflict check holds the row behind something already out
-- Where the operator wants to talk with the worker, launch the talk build from the talk shape in the launch runbook after the same checks clear
+- Where the operator wants to talk with the worker, launch the talk build from the talk shape in `orchestrator-launch.md` after the same checks clear
 
 ### 5. Dispatch the review
 
 When a worker opens a PR, its first pass runs through `review-pr` in a reviewer dispatched under `role-reviewer`, per `### The review dispatch` below, and never in this session. The worker's chain carries no review step, so this deep, independent pass is the first review the change gets.
 
-Learning that a PR moved is the mechanical half. Read the poll runbook and run the poll under the condition it states, since that runbook holds the routing and trigger and a summary here would drift from it.
+Learning that a PR moved is the mechanical half. Read `orchestrator-poll.md` and run the poll under the condition it states, since that runbook holds the routing and trigger and a summary here would drift from it.
 
 ### 6. Back the round up
 
-A pass posting anything owed reaches the session holding the branch from the reviewer directly, and the re-review request goes straight back to that reviewer, per `role-reviewer` and `role-worker`. Read the handback runbook on reaching this step.
+A pass posting anything owed reaches the session holding the branch from the reviewer directly, and the re-review request goes straight back to that reviewer, per `role-reviewer` and `role-worker`. Read `orchestrator-handback.md` here.
 
 - This session sends either leg only where a cloud reviewer posted the pass or one side reports the other unreachable
 - Each reviewer's close runs `canon pr lift`, lifting the draft once both reviews close at the head, the evidence settles, the head is fresh, and CI passes
 - Run it yourself when a close message reports a refusal other than the other review being open, or when a cloud reviewer's close posts, per Boundaries below
-- Then the human merges from a line naming its proof, per the output runbook. Tell each trailing worker the merged diff touches to run `review-address`.
+- Then the human merges from a line naming its proof, per `orchestrator-output.md`. Tell each trailing worker the merged diff touches to run `review-address`.
 
 ### Constraints from the tracks in flight
 
@@ -158,7 +158,7 @@ The tracked-file boundary collides with `CLAUDE.md`, which says to handle a smal
 
 Record a change identified while orchestrating against the task that owns it, fold one no task owns into the next task touching the same surface, and file a task only when none exists or is expected.
 
-Read the filing runbook before offering a row, filing one, or placing a finding in another task, for whether it should exist, what a row may claim and which measurements stay in this seat.
+Read `orchestrator-filing.md` before offering a row, filing one, or placing a finding in another task, for whether it should exist, what a row may claim and which measurements stay in this seat.
 
 ### A relayed operator answer
 
@@ -168,7 +168,7 @@ Act on a peer's relay of the operator's answer only when the slot its `Answer at
 
 Keep enough planned, non-conflicting tasks available that a free worker never waits, and place the findings the last merge produced before promoting anything new. Run this after every merge, whenever the ready list thins, and whenever a wave is in flight with fewer unclaimed plans than there are workers building.
 
-Read the refill runbook on reaching any of the three. It holds the procedure, its report, and the rules for board writes.
+Read `orchestrator-refill.md` on reaching any of the three. It holds the procedure, its report, and the rules for board writes.
 
 ## Parallelism
 
@@ -177,14 +177,14 @@ No fixed number caps worker tracks, and a shared file does not hold one. A candi
 What binds is review attention and the one machine every worker shares, which bites first where tests run a browser or a server per worktree. Add a track only while both still hold, and narrow the wave when a worker reports a hung verify run.
 
 - An operator can cap this session's workers by saying so, and a spoken cap binds for that session rather than standing as a number in a file
-- Read the inbound runbook before widening a wave, for what each inbound turn costs and why the one control over it stays unset
+- Read `orchestrator-inbound.md` before widening a wave, for what each inbound turn costs and why the one control over it stays unset
 
 ### Merge order and ports
 
-Read the merge-order runbook before recommending a merge in a wave where two tracks share a file or two workers run a server.
+Read `orchestrator-merge-order.md` before recommending a merge in a wave where two tracks share a file or two workers run a server.
 
 ### The review dispatch
 
 Review splits by what each side can see. A reviewer dispatched under `role-reviewer` takes every pull request's read but a release one's, first pass included, and this session reviews none in place.
 
-This session keeps one cross-branch pass per wave, over file sets, the board, and merge order. Read the review-dispatch runbook on every first pass for the model pick, the UI reviewer, the batch, and how that pass reaches each brief.
+This session keeps one cross-branch pass per wave, over file sets, the board, and merge order. Read `orchestrator-review-dispatch.md` on every first pass for the model pick, the UI reviewer, the batch, and how it reaches each brief.
