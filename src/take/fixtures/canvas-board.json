@@ -1,0 +1,11 @@
+{
+  "beats": [
+    {
+      "name": "pick the card on the board",
+      "steps": [
+        { "kind": "click", "x": 960, "y": 540 },
+        { "kind": "wait", "ms": 1600 }
+      ]
+    }
+  ]
+}
