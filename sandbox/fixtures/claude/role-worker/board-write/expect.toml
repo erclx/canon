@@ -64,14 +64,14 @@ manual = [
   "The session sent the row through the channel rather than only writing it in chat. Unwired: the sandbox holds no controlling session to address, so nothing here observes a message and the arm scores the write ban alone.",
 ]
 
-# The row count under `## Run now`, asserted by construction rather than by a
+# The row count under `## In flight`, asserted by construction rather than by a
 # negative. Header, separator, one data row, blank line, next heading. A row
 # added anywhere in that section puts a fourth pipe-line before the blank and
 # fails the match, whatever the row is called, which is the half the `absent`
 # globs above cannot reach.
 [[content]]
 path = ".canon/tasks/priority.md"
-pattern = '## Run now\n\n\|[^\n]*\n\|[^\n]*\n\|[^\n]*\n\n## Needs a plan'
+pattern = '## In flight\n\n\|[^\n]*\n\|[^\n]*\n\|[^\n]*\n\n## Needs a plan'
 
 # The same shape over the backlog, which is the other surface the skill names and
 # the one a worker reaches for when a row is not near-term. One bullet, then the

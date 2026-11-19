@@ -123,7 +123,7 @@ A `claude --bg` session inherits the launching session's model, so an orchestrat
 
 A model or effort the operator names binds for the session until the operator says otherwise, as a spoken worker cap does.
 
-A plan stating no `## Weight`, or stating medium, dispatches on the role's test alone.
+A plan stating no `## Weight`, or stating medium, dispatches on the role's test alone. Record each pick on the row through `canon tasks launch` right after `plan-link`, with `--override` for the operator's.
 
 ### Effort
 
@@ -145,15 +145,13 @@ A launch naming no effort takes the saved setting or the model's default, never 
 
 ## Pick local or cloud
 
-Dispatch to a cloud worker only on the operator's explicit pick for that dispatch, until three cloud rows have merged. Whether a cloud session is worth its cost is the operator's account to judge, and the review load a cloud pull request adds is unmeasured, so the pick stays a person's until that count gives a reading.
-
-A row qualifies for that pick when its plan carries no open question and touches no surface needing local state, such as the sandbox, the records remote, or a browser. A cloud worker cannot reach any of the three, and it cannot ask the operator mid-build except through a draft pull request.
+Read `## Pick local or cloud` in `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md` before picking cloud for a row, since the pick stays the operator's.
 
 ## Dispatch
 
 Read `${CLAUDE_SKILL_DIR}/references/orchestrator-launch.md` once every check above clears, and launch from its build template, which sits beside the review-address and planning shapes that skip these checks. A cloud row launches from `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md`, since the VM shares no plugin or board.
 
-Once the launch succeeds, run `canon tasks promote <stem>`.
+Once the launch succeeds, run `canon tasks promote <stem>`, moving the row to `## In flight`.
 
 ## Fall back to the human
 

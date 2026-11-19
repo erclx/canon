@@ -27,6 +27,7 @@ import {
   pipeOutput,
 } from '@/cli/ui'
 import { mainWorktreeRoot } from '@/git/worktree'
+import { groupToken } from '@/tasks/validate'
 
 /** Matches `trunk.ts`'s bound on a git subprocess this verb also shells out to. */
 const GIT_TIMEOUT_MS = 10_000
@@ -578,7 +579,13 @@ function reportPlanLink(
         plan: outcome.plan,
         action: outcome.action,
         replaced: outcome.replaced,
-        board: { ...outcome.board, from: outcome.board.from ?? null },
+        board: {
+          ...outcome.board,
+          from:
+            outcome.board.from === undefined
+              ? null
+              : groupToken(outcome.board.from),
+        },
       })}\n`,
     )
     return 0

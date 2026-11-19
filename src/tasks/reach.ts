@@ -5,14 +5,15 @@ import { listChangedFiles, resolveBaseRef } from '@/git/files'
 import { recordDir } from '@/roots/record'
 import { splitPlanSections } from '@/records/validate'
 import { type AnswersRefused, resolvePlanReference } from '@/tasks/answers'
-import { orderingPath, readBoard } from '@/tasks/validate'
+import { tasksDir } from '@/tasks/archive'
+import { orderingPath, readBoard, rowPlan } from '@/tasks/validate'
 
 const PLANS = 'plans'
 const MARKDOWN = '.md'
 const NONE_IDENTIFIED = 'None identified.'
 
 /** The one group a dispatch reads, per `claude/skills/task-board/references/board.md`. */
-const DISPATCH_GROUP = 'Run now'
+const DISPATCH_GROUP = 'In flight'
 
 export const REACH_REFUSALS = [
   'no-plan',
@@ -33,21 +34,15 @@ export interface ReachRefused {
 
 /**
  * One surface holding a path: a live plan, named by its filename stem, or a
- * `## Run now` row, named by its task label.
+ * `## In flight` row, named by its task label.
  */
 export interface Holder {
   readonly name: string
   readonly source: 'plan' | 'row'
   readonly declaration: string
   /**
-   * Whether a holding plan also carries a row in `## Run now`, and undefined on
-   * a row holder, which is one by construction.
-   *
-   * A plan with no row is the shape a plan nobody archived takes, and it is
-   * also the shape of one whose task is merely not dispatched yet, so this
-   * narrows a reader's search rather than answering it. Testing whether the
-   * holder is genuinely in flight would put a second liveness reading here
-   * beside the dispatch gate's own, which the report declines.
+   * Whether a holding plan carries an `## In flight` row, undefined on a row
+   * holder. It narrows a search, since a plan without a row may be unarchived.
    */
   readonly rowed?: boolean
 }
@@ -78,7 +73,7 @@ export interface ReachReport {
   readonly undeclared: readonly string[]
   /** Live plans compared against, this branch's own excluded. */
   readonly plans: number
-  /** `## Run now` rows compared against, the row citing this plan excluded. */
+  /** `## In flight` rows compared against, the row citing this plan excluded. */
   readonly rows: number
   /** Whether an ordering file was on disk to read rows from at all. */
   readonly board: boolean
@@ -210,7 +205,7 @@ async function otherPlans(
 }
 
 /**
- * Every `## Run now` cell beside this branch's own row. A cell is copied from a
+ * Every `## In flight` cell beside this branch's own row. A cell is copied from a
  * plan's own list, so the board catches a row whose plan is absent and the
  * plans folder catches a claim no cell carried.
  */
@@ -226,17 +221,24 @@ async function dispatchRows(
 
   const { rows } = readBoard(await readFile(ordering, 'utf8'))
   const ownStem = stemOf(own)
+  const dir = tasksDir(root)
+
+  const running = await Promise.all(
+    rows
+      .filter((row) => row.group === DISPATCH_GROUP)
+      .map(async (row) => {
+        const plan = (await rowPlan(row, dir))?.plan
+        return {
+          label: row.label,
+          plan: plan === undefined ? undefined : stemOf(plan),
+          touches: [...(row.touches ?? [])],
+        }
+      }),
+  )
 
   return {
     read: true,
-    rows: rows
-      .filter((row) => row.group === DISPATCH_GROUP)
-      .filter((row) => row.plan === undefined || stemOf(row.plan) !== ownStem)
-      .map((row) => ({
-        label: row.label,
-        plan: row.plan === undefined ? undefined : stemOf(row.plan),
-        touches: [...(row.touches ?? [])],
-      })),
+    rows: running.filter((row) => row.plan !== ownStem),
   }
 }
 

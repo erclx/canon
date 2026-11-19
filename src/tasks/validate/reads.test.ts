@@ -63,9 +63,9 @@ describe('readBoard', () => {
 
     const { rows, groups, findings } = readBoard(text)
 
-    expect(groups).toEqual(['Run now', 'Up next'])
+    expect(groups).toEqual(['In flight', 'Up next'])
     expect(rows.map((row) => [row.group, row.stem])).toEqual([
-      ['Run now', 'v1.0-first'],
+      ['In flight', 'v1.0-first'],
       ['Up next', 'v2.0-second'],
     ])
     expect(findings).toEqual([])
@@ -127,7 +127,7 @@ describe('readBoard', () => {
 
     expect(rows).toEqual([])
     expect(findings).toMatchObject([
-      { kind: 'row-misshapen', group: 'Run now' },
+      { kind: 'row-misshapen', group: 'In flight' },
     ])
   })
 
@@ -146,7 +146,9 @@ describe('readBoard', () => {
     const { rows, findings } = readBoard(text)
 
     expect(rows.map((row) => row.stem)).toEqual(['v1.0-first'])
-    expect(findings).toMatchObject([{ kind: 'row-untabled', group: 'Run now' }])
+    expect(findings).toMatchObject([
+      { kind: 'row-untabled', group: 'In flight' },
+    ])
   })
 
   it('should read the ordinal phrase from the end of the cell rather than only its start', () => {
@@ -289,36 +291,36 @@ describe('checkWideTokens', () => {
   }
 
   it('should flag a 77-character span and name the row and the token', async () => {
-    const wide = await wideFor('Run now', wideSpan)
+    const wide = await wideFor('In flight', wideSpan)
 
-    expect(wide).toMatchObject([{ group: 'Run now', subject: 'v1.0-first' }])
+    expect(wide).toMatchObject([{ group: 'In flight', subject: 'v1.0-first' }])
     expect(wide?.[0]?.message).toContain('a'.repeat(74))
   })
 
   it('should not flag a 53-character span', async () => {
-    expect(await wideFor('Run now', fitSpan)).toEqual([])
+    expect(await wideFor('In flight', fitSpan)).toEqual([])
   })
 
   it('should not flag a long link target', async () => {
     const cell = `[label](../${'a'.repeat(90)}.md) \`src/a.ts\``
 
-    expect(await wideFor('Run now', cell)).toEqual([])
+    expect(await wideFor('In flight', cell)).toEqual([])
   })
 
   it('should measure the longest run between spaces rather than the span', async () => {
     const cell = `\`${`${'a'.repeat(40)} `.repeat(3)}\``
 
-    expect(await wideFor('Run now', cell)).toEqual([])
+    expect(await wideFor('In flight', cell)).toEqual([])
   })
 
   it('should flag a brace-glob however short', async () => {
-    const wide = await wideFor('Run now', '`src/{a,b}.ts`')
+    const wide = await wideFor('In flight', '`src/{a,b}.ts`')
 
     expect(wide).toHaveLength(1)
     expect(wide?.[0]?.message).toContain('brace')
   })
 
-  it.each(['Run now', 'Up next', 'Needs a plan'])(
+  it.each(['In flight', 'Up next', 'Needs a plan'])(
     'should flag a wide span under %s',
     async (group) => {
       expect(await wideFor(group, wideSpan)).toMatchObject([{ group }])

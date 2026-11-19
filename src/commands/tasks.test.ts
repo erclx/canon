@@ -125,3 +125,46 @@ describe('canon tasks closes with no task or plan named', () => {
     expect(record).toMatchObject({ ok: false, reason: 'bad-input' })
   })
 })
+
+describe('canon tasks plan-link --json', () => {
+  let root: string
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'tasks-plan-link-'))
+    const tasks = join(root, '.canon', 'tasks')
+    const plans = join(root, '.canon', 'plans')
+    mkdirSync(tasks, { recursive: true })
+    mkdirSync(plans, { recursive: true })
+    writeFileSync(join(plans, 'feature-one.md'), '# Feature: one\n')
+    writeFileSync(
+      join(tasks, 'v1.0-one.md'),
+      '# v1.0: One\n\n## Outcomes\n\n- [ ] it ships\n',
+    )
+    writeFileSync(
+      join(tasks, 'priority.md'),
+      [
+        '## In flight',
+        '',
+        '| Task | Touches | Session |',
+        '| ---- | ------- | ------- |',
+        '| [v1.0: One](v1.0-one.md) |  | worker-one |',
+        '',
+      ].join('\n'),
+    )
+  })
+
+  afterEach(() => rmSync(root, { recursive: true, force: true }))
+
+  it('should report an In flight row as Run now, the value scripts parse', async () => {
+    const result = await execa(
+      process.execPath,
+      [CLI, 'tasks', 'plan-link', 'v1.0-one', 'one', '--json', '--root', root],
+      { cwd: root, reject: false, timeout: RUN_TIMEOUT_MS },
+    )
+
+    const record = JSON.parse(result.stdout) as {
+      board: { moved: boolean; from: string | null }
+    }
+    expect(record.board).toMatchObject({ moved: false, from: 'Run now' })
+  })
+})

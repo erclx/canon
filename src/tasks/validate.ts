@@ -19,7 +19,9 @@ import {
 import {
   deriveCells,
   GROUP_COLUMNS,
+  readLaunch,
   renderedLength,
+  RETIRED_COLUMNS,
   WAITING_LIMIT,
 } from '@/tasks/board'
 import { branchOfPlan } from '@/tasks/branch'
@@ -38,9 +40,40 @@ const DERIVED_COUNT = /^\d+ files?(?: under |$)/
  * reads as carrying no group at all and the run refuses instead of reporting a
  * clean board it never parsed.
  */
-export const BOARD_GROUPS = ['Run now', 'Up next', 'Needs a plan'] as const
+export const BOARD_GROUPS = ['In flight', 'Up next', 'Needs a plan'] as const
 
 export type BoardGroup = (typeof BOARD_GROUPS)[number]
+
+/**
+ * Headings a board written before a rename still carries, read as the group
+ * they became. No verb writes one, so the first board write migrates the file.
+ */
+export const RETIRED_HEADINGS: Readonly<Record<string, BoardGroup>> = {
+  'Run now': 'In flight',
+}
+
+/**
+ * The value a `group` or `from` field carries in a JSON record. Scripts parse
+ * those values, so the group renamed `In flight` still reports as `Run now`.
+ */
+export function groupToken(group: BoardGroup): string {
+  return group === 'In flight' ? 'Run now' : group
+}
+
+/** A `JSON.stringify` replacer writing every `group` and `from` field through `groupToken`. */
+export function groupTokens(key: string, value: unknown): unknown {
+  return (key === 'group' || key === 'from') && value === 'In flight'
+    ? groupToken(value)
+    : value
+}
+
+/** The group a `##` heading names under either spelling, undefined for any other section. */
+export function groupOfHeading(heading: string): BoardGroup | undefined {
+  if ((BOARD_GROUPS as readonly string[]).includes(heading)) {
+    return heading as BoardGroup
+  }
+  return RETIRED_HEADINGS[heading]
+}
 
 export const VALIDATE_REFUSALS = [
   'no-board',
@@ -68,6 +101,8 @@ export const FINDING_KINDS = [
   'touches-unstated',
   'touches-stale',
   'columns-mismatched',
+  'group-doubled',
+  'launch-misshapen',
   'cell-long',
   'blocker-settled',
   'blocker-unresolved',
@@ -110,12 +145,8 @@ export interface FolderClaim {
 }
 
 /**
- * A path two `## Run now` rows both name in their `Touches` cells. A shared
- * file is no hold, since the dispatch gate starts both rows and the branch
- * merging second rebases, so the pair reports beside the findings and moves no
- * exit code. It stays listed because merge order reads it, and because it is
- * the candidate list a dispatcher reads for the dependency, contract,
- * relocation, and sweep holds a `Touches` cell cannot state.
+ * A path two `## In flight` rows both name. It is no hold and moves no exit
+ * code, and stays listed for merge order and the dispatcher's conflict check.
  */
 export interface SharedFiles {
   readonly group: BoardGroup
@@ -163,7 +194,9 @@ export interface BoardRow {
   readonly group: BoardGroup
   readonly label: string
   readonly stem: string | undefined
+  /** The Plan cell's target on a board still carrying one, which the task's own `Plan:` line replaced. */
   readonly plan: string | undefined
+  readonly hasPlanCell: boolean
   /**
    * Absent when the group fixes no `Touches` column, empty when it read none.
    * `readBoard` reads the written cell, and `declaredRows` replaces it with the
@@ -172,7 +205,7 @@ export interface BoardRow {
   readonly touches: readonly string[] | undefined
   /** The `Touches` cell as written, which the stale check compares against the derivation. */
   readonly touchesText: string | undefined
-  /** Absent when the group fixes no `Waiting on` column, which is `## Run now`. */
+  /** Absent when the group fixes no `Waiting on` column, which is `## In flight`. */
   readonly waiting: string | undefined
   /** The ordinal phrase a `Waiting on` cell states about its own position, undefined when the cell carries none. */
   readonly ordinal: OrdinalWord | 'last' | undefined
@@ -324,23 +357,20 @@ function columnIndex(header: readonly string[], name: string): number {
   return header.findIndex((cell) => cell.toLowerCase() === name)
 }
 
-function isGroup(heading: string): heading is BoardGroup {
-  return (BOARD_GROUPS as readonly string[]).includes(heading)
-}
-
 /**
- * Whether a header is the set of columns its group owns. Order is left to the
- * reader, which resolves every column by name, so only a missing or a foreign
- * column is a finding.
+ * Whether a header is the set of columns its group owns now or owned before,
+ * in any order, since the reader resolves every column by name.
  */
 function ownsColumns(group: BoardGroup, header: readonly string[]): boolean {
-  const owned = GROUP_COLUMNS[group].map((column) => column.toLowerCase())
   const named = header.map((cell) => cell.toLowerCase())
 
-  return (
-    named.length === owned.length &&
-    owned.every((column) => named.includes(column))
-  )
+  return [GROUP_COLUMNS[group], RETIRED_COLUMNS[group]].some((columns) => {
+    const owned = columns.map((column) => column.toLowerCase())
+    return (
+      named.length === owned.length &&
+      owned.every((column) => named.includes(column))
+    )
+  })
 }
 
 const ORDINAL_WORDS = [
@@ -469,9 +499,16 @@ export function readBoard(text: string): {
     const line = lines[i] ?? ''
     const heading = /^##\s+(.+?)\s*$/.exec(line)
     if (heading) {
-      const title = heading[1]
-      group = isGroup(title) ? title : undefined
+      group = groupOfHeading(heading[1])
       header = undefined
+      if (group && groups.includes(group)) {
+        findings.push({
+          kind: 'group-doubled',
+          group,
+          subject: line.trim(),
+          message: `opens ${group} a second time. Merge the two tables by hand, since a board verb refuses to pick which one holds the group.`,
+        })
+      }
       if (group && !groups.includes(group)) groups.push(group)
       continue
     }
@@ -524,17 +561,29 @@ export function readBoard(text: string): {
     const planAt = columnIndex(header, 'plan')
     const touchesAt = columnIndex(header, 'touches')
     const waitingAt = columnIndex(header, 'waiting on')
+    const launchAt = columnIndex(header, 'launch')
 
     const task = taskAt >= 0 ? (cells[taskAt] ?? '') : ''
     const target = linkTarget(task)
     const plan = planAt >= 0 ? linkTarget(cells[planAt] ?? '') : undefined
     const waiting = waitingAt >= 0 ? (cells[waitingAt] ?? '') : undefined
+    const launch = launchAt >= 0 ? (cells[launchAt] ?? '') : undefined
+
+    if (launch && readLaunch(launch) === undefined) {
+      findings.push({
+        kind: 'launch-misshapen',
+        group,
+        subject: line.trim(),
+        message: `carries the Launch cell "${launch}", which does not read as a role, model, effort, and route. Every board verb refuses the board until the cell is fixed or emptied by hand.`,
+      })
+    }
 
     rows.push({
       group,
       label: linkText(task) || task,
       stem: target ? stemOf(target) : undefined,
       plan,
+      hasPlanCell: planAt >= 0,
       touches: touchesAt >= 0 ? readPaths(cells[touchesAt] ?? '') : undefined,
       touchesText: touchesAt >= 0 ? (cells[touchesAt] ?? '') : undefined,
       waiting,
@@ -735,56 +784,70 @@ function checkMapping(
   return findings
 }
 
-function checkPlans(
+/**
+ * An `## In flight` row's plan pointer, off a retired Plan cell or else the
+ * task's `Plan:` line. A gone task file answers undefined for `task-unresolved`.
+ */
+export async function rowPlan(
+  row: BoardRow,
+  dir: string,
+): Promise<{ readonly plan: string | undefined } | undefined> {
+  if (row.hasPlanCell) return { plan: row.plan }
+  if (!row.stem) return { plan: undefined }
+
+  const file = join(dir, `${row.stem}.md`)
+  if (!existsSync(file)) return undefined
+
+  return { plan: readPlanTargets(await readFile(file, 'utf8'))[0] }
+}
+
+async function checkPlans(
   rows: readonly BoardRow[],
   dir: string,
   root: string,
-): Finding[] {
-  const findings: Finding[] = []
+): Promise<Finding[]> {
+  const running = rows.filter((row) => row.group === 'In flight')
 
-  for (const row of rows) {
-    if (row.group !== 'Run now') continue
+  const found = await Promise.all(
+    running.map(async (row): Promise<Finding | undefined> => {
+      const read = await rowPlan(row, dir)
+      if (read === undefined) return undefined
 
-    if (!row.plan) {
-      findings.push({
-        kind: 'plan-unstated',
-        group: row.group,
-        subject: row.stem ?? row.label,
-        message:
-          'states no plan pointer, so the readiness claim cannot be checked.',
-      })
-      continue
-    }
+      if (!read.plan) {
+        return {
+          kind: 'plan-unstated',
+          group: row.group,
+          subject: row.stem ?? row.label,
+          message: row.hasPlanCell
+            ? 'states no plan pointer, so the readiness claim cannot be checked.'
+            : 'has a task carrying no Plan: line, so the readiness claim cannot be checked.',
+        }
+      }
 
-    if (!resolves(row.plan, dir, root)) {
-      findings.push({
+      if (resolves(read.plan, dir, root)) return undefined
+
+      return {
         kind: 'plan-unresolved',
         group: row.group,
         subject: row.stem ?? row.label,
-        message: `points at ${row.plan}, which resolves to no file.`,
-      })
-    }
-  }
+        message: `points at ${read.plan}, which resolves to no file.`,
+      }
+    }),
+  )
 
-  return findings
+  return found.filter((finding): finding is Finding => finding !== undefined)
 }
 
 /**
- * Compares the two places one task's plan is written down. The `## Run now` row
- * carries a `Plan` column and the task file carries its own `Plan:` line, and
- * the archive reads the second while an operator reads the first, so a pair
- * that disagrees settles the wrong plan on the merge.
- *
- * Both sides resolve before they compare. A row writing `../plans/x.md` and a
- * task writing `.canon/plans/x.md` name one file, and comparing the strings
- * would report every such pair as a mismatch.
+ * Compares a retired Plan cell with the task's `Plan:` line, which the archive
+ * reads, after resolving both, since two spellings can name one file.
  */
 async function checkPlanAgreement(
   rows: readonly BoardRow[],
   dir: string,
   root: string,
 ): Promise<Finding[]> {
-  const ready = rows.filter((row) => row.group === 'Run now' && row.plan)
+  const ready = rows.filter((row) => row.group === 'In flight' && row.plan)
 
   const found = await Promise.all(
     ready.map(async (row) => planDisagreement(row, dir, root)),
@@ -809,13 +872,13 @@ async function planDisagreement(
   if (targets.length === 0) {
     return {
       kind: 'plan-uncited',
-      group: 'Run now',
+      group: 'In flight',
       subject,
       message: `is rowed against ${row.plan}, and the task file carries no Plan: line, so the archive settles no plan when it ships.`,
     }
   }
 
-  const twice = duplicatePlans(targets, 'Run now', subject, dir, root)
+  const twice = duplicatePlans(targets, 'In flight', subject, dir, root)
   if (twice) return twice
 
   const rowed = planPath(row.plan, dir, root)
@@ -825,7 +888,7 @@ async function planDisagreement(
 
   return {
     kind: 'plan-mismatched',
-    group: 'Run now',
+    group: 'In flight',
     subject,
     message:
       targets.length === 1
@@ -948,7 +1011,7 @@ async function groupClaimFinding(
       kind: 'plan-parked',
       group: row.group,
       subject: row.stem,
-      message: `sits under ${row.group} and its task cites ${target}, a live plan. A row with a plan belongs under Up next or Run now. When the plan no longer describes the work, keep the row under Up next, amend the plan in place, hold the row with canon tasks block until the amended plan lands, and record why under the task's Findings.`,
+      message: `sits under ${row.group} and its task cites ${target}, a live plan. A row with a plan belongs under Up next or In flight. When the plan no longer describes the work, keep the row under Up next, amend the plan in place, hold the row with canon tasks block until the amended plan lands, and record why under the task's Findings.`,
     }
   }
 
@@ -1009,14 +1072,16 @@ function planPath(target: string, dir: string, root: string): string {
 }
 
 /**
- * Reports a `## Run now` row stating no file set. The `Touches` column is the
+ * Reports a `## In flight` row stating no file set. The `Touches` column is the
  * only place a row's set is written down, so a row stating none drops out of
  * every pair `checkSharedFiles` reads, and its merge order and reach go unread.
  */
 function checkTouches(rows: readonly BoardRow[]): Finding[] {
   const findings: Finding[] = []
 
-  for (const row of rows.filter((candidate) => candidate.group === 'Run now')) {
+  for (const row of rows.filter(
+    (candidate) => candidate.group === 'In flight',
+  )) {
     // An absent column and an unreadable one both leave the row out of every
     // pair, so both are reported, or a board declaring no file set would pass.
     if (!row.touches || row.touches.length === 0) {
@@ -1033,12 +1098,12 @@ function checkTouches(rows: readonly BoardRow[]): Finding[] {
 }
 
 /**
- * Lists every path two `## Run now` rows both name, one entry per pair of
+ * Lists every path two `## In flight` rows both name, one entry per pair of
  * rows. It reports rather than fails, since sharing a file holds nothing.
  */
 function checkSharedFiles(rows: readonly BoardRow[]): SharedFiles[] {
   const pairs: SharedFiles[] = []
-  const ready = rows.filter((row) => row.group === 'Run now')
+  const ready = rows.filter((row) => row.group === 'In flight')
 
   for (let i = 0; i < ready.length; i += 1) {
     for (let j = i + 1; j < ready.length; j += 1) {
@@ -1056,7 +1121,7 @@ function checkSharedFiles(rows: readonly BoardRow[]): SharedFiles[] {
       if (shared.length === 0) continue
 
       pairs.push({
-        group: 'Run now',
+        group: 'In flight',
         subject: `${subjectOf(left)} and ${subjectOf(right)}`,
         message: `both touch ${joinShared(shared)}.`,
       })
@@ -1102,11 +1167,8 @@ function joinShared(clauses: readonly string[]): string {
 }
 
 /**
- * Reports a `Touches` cell naming a bare folder. The claim collides with every
- * later row under that folder and is legitimate when the row rewrites it, so
- * this states the reach rather than a defect. Only `## Run now` is scanned, as
- * `checkSharedFiles` does, since another group's cell is unplanned prose and
- * reporting on it teaches a reader to skip the report.
+ * Reports an `## In flight` `Touches` cell naming a bare folder, as a reach
+ * rather than a defect, since a row rewriting the folder claims it rightly.
  */
 function checkFolderClaims(
   rows: readonly BoardRow[],
@@ -1114,7 +1176,9 @@ function checkFolderClaims(
 ): FolderClaim[] {
   const claims: FolderClaim[] = []
 
-  for (const row of rows.filter((candidate) => candidate.group === 'Run now')) {
+  for (const row of rows.filter(
+    (candidate) => candidate.group === 'In flight',
+  )) {
     for (const path of row.touches ?? []) {
       if (!isFolder(path, root)) continue
 
@@ -1418,14 +1482,8 @@ function untestedRow(
 }
 
 /**
- * Re-takes the two blocker kinds a command can settle, over every row outside
- * `## Run now`. A cited task is settled by being archived or by closing every
- * outcome, and a cited path by no `## Run now` row still holding it.
- *
- * Both gate on a citation the cell carries, never the `Touches` column, which
- * says nothing about what parked a row. The cell is read for citations rather
- * than parsed, and a row neither half reached is returned as untested, so
- * silence never reads as a board with nothing stale on it.
+ * Re-takes the cited-task and cited-path blockers outside `## In flight`, and
+ * returns a row neither half reached as untested, so silence never reads clean.
  */
 async function checkParked(
   rows: readonly BoardRow[],
@@ -1434,11 +1492,11 @@ async function checkParked(
 ): Promise<{ findings: Finding[]; untested: Untested[] }> {
   const findings: Finding[] = []
   const untested: Untested[] = []
-  const running = rows.filter((row) => row.group === 'Run now')
+  const running = rows.filter((row) => row.group === 'In flight')
   const folders = await readLabelFolders(root)
 
   for (const row of rows) {
-    if (row.group === 'Run now') continue
+    if (row.group === 'In flight') continue
 
     const subject = row.stem ?? row.label
     const cell = row.waiting ?? ''
@@ -1479,7 +1537,7 @@ async function checkParked(
         kind: 'blocker-settled',
         group: row.group,
         subject,
-        message: `waits on ${contested.join(', ')}, which nothing under Run now holds.`,
+        message: `waits on ${contested.join(', ')}, which nothing under In flight holds.`,
       })
     }
 
@@ -1573,11 +1631,8 @@ export async function declaredRows(
 }
 
 /**
- * The claims a group name makes about a row, being a stated plan and file set
- * under `## Run now`, a live plan under `## Up next`, and none under
- * `## Needs a plan`. The board verbs read these same findings off the board
- * they are about to write, so a placement and a validation cannot disagree on
- * what a group allows.
+ * The claims a group name makes about a row, which the board verbs read off
+ * the board they are about to write, so placing and validating cannot disagree.
  */
 export async function groupRuleFindings(
   rows: readonly BoardRow[],
@@ -1586,23 +1641,15 @@ export async function groupRuleFindings(
   const dir = tasksDir(root)
 
   return [
-    ...checkPlans(rows, dir, root),
+    ...(await checkPlans(rows, dir, root)),
     ...(await checkGroupClaims(rows, dir, root)),
     ...checkTouches(rows),
   ]
 }
 
 /**
- * Reports a row outside `## Run now` whose task a live session or an open pull
- * request holds, tied through the branch each live plan on its `Plan:` line
- * derives. A row whose worker renamed its branch has nothing to match, and an
- * archived plan's branch is finished work, so neither is reported.
- *
- * A session outlives its merge, so a session still on a branch a merged pull
- * request names is finished work too, until the merge reaches this clone and the
- * hook archives the row. A merged read that fails leaves the hold standing, since
- * the session is still there, and reads `pulls` as unread, since that hold may be
- * finished work the open list could not rule out.
+ * Reports a row outside `## In flight` held by a live session or open pull
+ * request on its plan's branch, skipping a session whose branch already merged.
  */
 async function checkHeld(
   rows: readonly BoardRow[],
@@ -1624,7 +1671,7 @@ async function checkHeld(
 
   const found = await Promise.all(
     rows.map(async (row): Promise<Finding | undefined> => {
-      if (row.group === 'Run now' || !row.stem) return undefined
+      if (row.group === 'In flight' || !row.stem) return undefined
       const file = join(dir, `${row.stem}.md`)
       if (!existsSync(file)) return undefined
 
@@ -1642,7 +1689,7 @@ async function checkHeld(
         kind: 'row-held',
         group: row.group,
         subject: row.stem,
-        message: `sits under ${row.group} and is held by ${held.join(' and ')}. A row with a worker belongs under Run now.`,
+        message: `sits under ${row.group} and is held by ${held.join(' and ')}. A row with a worker belongs under In flight.`,
       }
     }),
   )

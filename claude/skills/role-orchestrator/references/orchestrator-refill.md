@@ -7,7 +7,7 @@ Run this when `## Refilling the ready queue` in the skill body names one of its 
 
 ## The mid-wave trigger
 
-The third trigger reaches a window the first two cannot. A session with three workers mid-build has merged nothing and watched its ready list sit still, so both reactive triggers stay silent across the one stretch where planning costs nothing, and the wave finishes into an empty `## Run now`.
+The third trigger reaches a window the first two cannot. A session with three workers mid-build has merged nothing and watched its ready list sit still, so both reactive triggers stay silent across the one stretch where planning costs nothing, and the wave finishes into an empty `## In flight`.
 
 - Nothing starts this pass, as nothing starts the review poll, so it holds only while the session applies it
 - It counts unclaimed plans against workers rather than reading step 4's reserve, which is sized for one worker finishing and falls short of a wave landing together
@@ -37,7 +37,7 @@ The third trigger reaches a window the first two cannot. A session with three wo
    - Then run `canon sessions reap <stem> --json` for each merged task, archived or not, so its worker and reviewers stop and the agent view keeps to live work
    - The verb skips a busy, interactive, talk, or controller session, the caller, and one a live task still records, so read each `skipped` row's `reason` rather than stopping it by hand
    - List what it stopped in the report's `Reaped:` line, any `failed` row with its `detail`, and each listener the record's `listeners` ended, by port and path
-4. Read `.canon/tasks/priority.md` and count the `## Up next` rows whose `Waiting on` has cleared, since a blocked row is no reserve. `## Run now` is what is running, so keep one in reserve beyond it.
+4. Read `.canon/tasks/priority.md` and count the `## Up next` rows whose `Waiting on` has cleared, since a blocked row is no reserve. `## In flight` is what is running, so keep one in reserve beyond it.
 5. Promote from the top of `## Needs a plan`, where the last sweep recorded what to plan next.
    - Depart from that order when something changed under it and say what, since a position nobody honors is the ordering going stale
    - The order is set by whether a task establishes functionality, so prefer one that adds or proves a mechanism over one that trims, tidies, or audits
@@ -70,12 +70,12 @@ That block is the detail. Lead the reply with the three slots under `## Every la
 
 Write `.canon/tasks/priority.md` through the `canon tasks` verbs alone, each reading the file once, rendering every table, and writing it once. Beside this session, `canon tasks archive` drops a shipped row and `plan-link` promotes a parked one.
 
-| Move                                      | Verb                                                       |
-| ----------------------------------------- | ---------------------------------------------------------- |
-| A backlog row onto the board, or across   | `canon tasks place <stem> --group <group> --waiting "..."` |
-| A planned row to `## Run now` on dispatch | `canon tasks promote <stem>`                               |
-| A row up or down inside its group         | `canon tasks move <stem> --before <stem>`                  |
-| What a row waits on, or why it sits there | `canon tasks block <stem> "<reason>"`                      |
+| Move                                        | Verb                                                       |
+| ------------------------------------------- | ---------------------------------------------------------- |
+| A backlog row onto the board, or across     | `canon tasks place <stem> --group <group> --waiting "..."` |
+| A planned row to `## In flight` on dispatch | `canon tasks promote <stem>`                               |
+| A row up or down inside its group           | `canon tasks move <stem> --before <stem>`                  |
+| What a row waits on, or why it sits there   | `canon tasks block <stem> "<reason>"`                      |
 
 The points below govern writing the board through those verbs.
 

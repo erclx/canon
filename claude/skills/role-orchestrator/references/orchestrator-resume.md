@@ -9,7 +9,9 @@ Resume as orchestrator after a compaction. Read the board and the groundwork beh
 2. Read `.canon/tasks/priority.md` for the ordering and what each task waits on.
    - Read the newest `.canon/tasks/session-*.md` when one exists, per `${CLAUDE_SKILL_DIR}/../session-map/references/session.md`
    - Treat it as the previous session's scratch rather than a source
-3. Read the task file for every entry under `## Run now`, plus any entry a live pull request names.
+3. Read the task file for every entry under `## In flight`, plus any entry a live pull request names.
+   - Run `canon tasks flight --json` for where each of those rows stands, and branch on each row's `stage`
+   - Re-read a row whose `stage` is `unread` rather than taking it as stopped, since the verb guesses no stage it could not read
 4. Read the groundwork folder each of those tasks cites.
    - `README.md` for the file map, then `06-decision.md` when the track is closed, or `99-next-session.md` when present and the topic files when open
    - A task's Findings section is a lossy summary, so planning against it re-derives what the folder already settled

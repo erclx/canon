@@ -2,6 +2,7 @@ import { type Command } from 'commander'
 import { WAITING_LIMIT } from '@/tasks/board'
 import {
   type Finding,
+  groupTokens,
   type FolderClaim,
   type SharedFiles,
   type WideToken,
@@ -143,21 +144,24 @@ function reportValidation(
 
   if (emitJson) {
     process.stdout.write(
-      `${JSON.stringify({
-        ok: true,
-        root,
-        rows: outcome.rows,
-        backlog: outcome.backlog,
-        tasks: outcome.tasks,
-        declined: outcome.declined,
-        findings: outcome.findings,
-        untested: outcome.untested,
-        claims: outcome.claims,
-        shared: outcome.shared,
-        wide: outcome.wide,
-        unplaced: outcome.unplaced,
-        live: outcome.live,
-      })}\n`,
+      `${JSON.stringify(
+        {
+          ok: true,
+          root,
+          rows: outcome.rows,
+          backlog: outcome.backlog,
+          tasks: outcome.tasks,
+          declined: outcome.declined,
+          findings: outcome.findings,
+          untested: outcome.untested,
+          claims: outcome.claims,
+          shared: outcome.shared,
+          wide: outcome.wide,
+          unplaced: outcome.unplaced,
+          live: outcome.live,
+        },
+        groupTokens,
+      )}\n`,
     )
   }
 
@@ -207,16 +211,19 @@ export function registerValidate(tasks: Command): void {
       [
         '',
         'Checks:',
-        '  every Run now row points at a plan file that resolves',
+        '  every In flight row resolves to a plan file through its task',
         '  no Needs a plan row has a live plan, and every Up next row has one',
         '  every task file carries a board row or a backlog line, never both',
         '  no task carries more than one row',
-        '  every Run now row names the files it touches',
+        '  every In flight row names the files it touches',
         '  every Touches cell matches what its plans derive',
-        '  every group header is the set of columns the group owns',
+        '  every group header is the set of columns the group owns, or the set',
+        '  it owned before the Launch and Session cells',
+        '  every Launch cell reads as a role, model, effort, and route',
+        '  no group opens twice, as Run now beside In flight',
         `  no Waiting on cell renders past ${WAITING_LIMIT} characters`,
         '  a blocker citing a bare vNNN.N label settles like a linked one',
-        '  a file two Run now rows share is listed, never failed',
+        '  a file two In flight rows share is listed, never failed',
         '  with --live, no Up next or Needs a plan row is held by a live session',
         "  or an open pull request on its plan's branch",
         '',

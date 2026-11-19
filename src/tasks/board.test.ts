@@ -108,7 +108,7 @@ describe('parseBoard', () => {
     expect(parsed(text).groups['Up next'][0]?.waiting).toBe('the gate')
   })
 
-  it('should drop the blocker of a row under Run now, which owns no such column', () => {
+  it('should read a board still headed Run now as In flight', () => {
     const text = board(
       '## Run now',
       '',
@@ -117,7 +117,76 @@ describe('parseBoard', () => {
       '| [v1.0: One](v1.0-one.md) | `a.ts` | [one](../plans/feature-one.md) |',
     )
 
-    expect(parsed(text).groups['Run now'][0]?.waiting).toBeUndefined()
+    expect(parsed(text).groups['In flight']).toEqual([
+      { stem: 'v1.0-one', label: 'v1.0: One', waiting: undefined },
+    ])
+  })
+
+  it('should refuse a board opening In flight beside Run now', () => {
+    const text = board(
+      '## Run now',
+      '',
+      '| Task | Touches | Plan |',
+      '| ---- | ------- | ---- |',
+      '| [v1.0: One](v1.0-one.md) | `a.ts` | [one](../plans/feature-one.md) |',
+      '',
+      '## In flight',
+      '',
+      '| Task | Touches | Session |',
+      '| ---- | ------- | ------- |',
+      '| [v1.1: Two](v1.1-two.md) | `b.ts` | worker-two |',
+    )
+
+    expect(parseBoard(text)).toEqual({
+      ok: false,
+      line: '## In flight',
+      kind: 'doubled',
+    })
+  })
+
+  it('should read the Launch cell of an Up next row', () => {
+    const text = board(
+      '## Up next',
+      '',
+      '| Task | Touches | Launch | Waiting on |',
+      '| ---- | ------- | ------ | ---------- |',
+      '| [v1.0: One](v1.0-one.md) | `a.ts` | worker, opus, high, hand (operator) | the gate |',
+    )
+
+    expect(parsed(text).groups['Up next'][0]?.launch).toEqual({
+      role: 'worker',
+      model: 'opus',
+      effort: 'high',
+      route: 'hand',
+      override: true,
+    })
+  })
+
+  it('should refuse a Launch cell it cannot read rather than drop it', () => {
+    const text = board(
+      '## Up next',
+      '',
+      '| Task | Touches | Launch | Waiting on |',
+      '| ---- | ------- | ------ | ---------- |',
+      '| [v1.0: One](v1.0-one.md) | `a.ts` | opus please | the gate |',
+    )
+
+    expect(parseBoard(text)).toMatchObject({ ok: false, kind: 'row' })
+  })
+
+  it('should keep the model and effort an In flight Session cell carries', () => {
+    const text = board(
+      '## In flight',
+      '',
+      '| Task | Touches | Session |',
+      '| ---- | ------- | ------- |',
+      '| [v1.0: One](v1.0-one.md) | `a.ts` | worker-one (sonnet, medium) |',
+    )
+
+    expect(parsed(text).groups['In flight'][0]?.pick).toEqual({
+      model: 'sonnet',
+      effort: 'medium',
+    })
   })
 
   it('should refuse a pipe line that names no task', () => {
@@ -132,6 +201,7 @@ describe('parseBoard', () => {
     expect(parseBoard(text)).toEqual({
       ok: false,
       line: '| a loose note | nothing |',
+      kind: 'row',
     })
   })
 
@@ -310,16 +380,16 @@ describe('renderBoard', () => {
       [
         ...FRONTMATTER,
         '',
-        '## Run now',
+        '## In flight',
         '',
-        '| Task | Touches | Plan |',
-        '| ---- | ------- | ---- |',
-        '| [v1.0: One](v1.0-one.md) | 1 file under `src/` | [one](../plans/feature-one.md) |',
+        '| Task | Touches | Session |',
+        '| ---- | ------- | ------- |',
+        '| [v1.0: One](v1.0-one.md) | 1 file under `src/` | no session recorded |',
         '',
         '## Up next',
         '',
-        '| Task | Touches | Waiting on |',
-        '| ---- | ------- | ---------- |',
+        '| Task | Touches | Launch | Waiting on |',
+        '| ---- | ------- | ------ | ---------- |',
         '',
         '## Needs a plan',
         '',
@@ -359,7 +429,7 @@ async function seedBoard(...sections: readonly string[]): Promise<void> {
   await writeFile(orderingPath(ROOT), board(...sections))
 }
 
-type GroupName = 'Run now' | 'Up next' | 'Needs a plan'
+type GroupName = 'In flight' | 'Up next' | 'Needs a plan'
 
 async function stemsUnder(group: GroupName): Promise<string[]> {
   const outcome = parseBoard(await readFile(orderingPath(ROOT), 'utf8'))
@@ -386,6 +456,13 @@ const RUN_NOW_ONE = [
   '| Task | Touches | Plan |',
   '| ---- | ------- | ---- |',
   '| [v1.0: One](v1.0-one.md) | 1 file | [one](../plans/feature-one.md) |',
+]
+
+const IN_FLIGHT = [
+  '## In flight',
+  '',
+  '| Task | Touches | Session |',
+  '| ---- | ------- | ------- |',
 ]
 
 describe('placeTask', () => {
@@ -485,11 +562,11 @@ describe('placeTask', () => {
   })
 
   describe('refuses', () => {
-    it('a Run now row with no plan, on plan-unstated', async () => {
+    it('an In flight row whose task cites no plan, on plan-unstated', async () => {
       await seedTask('v1.0-one')
       await seedBoard(...NEEDS_A_PLAN)
 
-      const outcome = await placeTask(ROOT, 'v1.0-one', 'Run now')
+      const outcome = await placeTask(ROOT, 'v1.0-one', 'In flight')
 
       expect(outcome).toMatchObject({
         ok: false,
@@ -498,12 +575,12 @@ describe('placeTask', () => {
       })
     })
 
-    it('a Run now row whose plan lists no file, on touches-unstated', async () => {
+    it('an In flight row whose plan lists no file, on touches-unstated', async () => {
       await seedPlan('one', [])
       await seedTask('v1.0-one', { plans: ['one'] })
       await seedBoard(...NEEDS_A_PLAN)
 
-      const outcome = await placeTask(ROOT, 'v1.0-one', 'Run now')
+      const outcome = await placeTask(ROOT, 'v1.0-one', 'In flight')
 
       expect(outcome).toMatchObject({
         ok: false,
@@ -554,7 +631,7 @@ describe('placeTask', () => {
 })
 
 describe('promoteTask', () => {
-  it('should move an Up next row to the bottom of Run now and drop its blocker', async () => {
+  it('should move an Up next row to the bottom of In flight and drop its blocker', async () => {
     await seedPlan('one', ['a.ts'])
     await seedTask('v1.0-one', { title: 'v1.0: One', plans: ['one'] })
     await seedBoard(
@@ -566,11 +643,64 @@ describe('promoteTask', () => {
 
     expect(outcome).toMatchObject({
       ok: true,
-      group: 'Run now',
+      group: 'In flight',
       from: 'Up next',
       position: 1,
     })
-    expect(await readFile(orderingPath(ROOT), 'utf8')).toContain(RUN_NOW_ONE[4])
+    expect(await readFile(orderingPath(ROOT), 'utf8')).toContain(
+      '| [v1.0: One](v1.0-one.md) | 1 file | no session recorded |',
+    )
+  })
+
+  it('should carry the Launch pick into the Session cell and leave the Launch cell behind', async () => {
+    await seedPlan('one', ['a.ts'])
+    await seedTask('v1.0-one', { title: 'v1.0: One', plans: ['one'] })
+    await seedBoard(
+      ...IN_FLIGHT,
+      '',
+      '## Up next',
+      '',
+      '| Task | Touches | Launch | Waiting on |',
+      '| ---- | ------- | ------ | ---------- |',
+      '| [v1.0: One](v1.0-one.md) | `a.ts` | worker, sonnet, medium, background | Planned, not dispatched yet |',
+    )
+
+    await promoteTask(ROOT, 'v1.0-one')
+
+    const text = await readFile(orderingPath(ROOT), 'utf8')
+    expect(text).toContain(
+      '| [v1.0: One](v1.0-one.md) | 1 file | no session recorded (sonnet, medium) |',
+    )
+    expect(text).not.toContain('worker, sonnet')
+  })
+
+  it('should name the last session the task records in the Session cell', async () => {
+    await seedPlan('one', ['a.ts'])
+    mkdirSync(tasksDir(ROOT), { recursive: true })
+    await writeFile(
+      join(tasksDir(ROOT), 'v1.0-one.md'),
+      [
+        '# v1.0: One',
+        '',
+        'Plan: [feature-one](../plans/feature-one.md)',
+        'Sessions: planner-one (11111111-1111-4111-8111-111111111111), worker-one (22222222-2222-4222-8222-222222222222)',
+        '',
+        '## Outcomes',
+        '',
+        '- [ ] it ships',
+        '',
+      ].join('\n'),
+    )
+    await seedBoard(
+      ...UP_NEXT,
+      '| [v1.0: One](v1.0-one.md) | `a.ts` | Planned, not dispatched yet |',
+    )
+
+    await promoteTask(ROOT, 'v1.0-one')
+
+    expect(await readFile(orderingPath(ROOT), 'utf8')).toContain(
+      '| [v1.0: One](v1.0-one.md) | 1 file | worker-one |',
+    )
   })
 
   it('should carry a Needs a plan row into Up next as planned', async () => {
@@ -584,11 +714,11 @@ describe('promoteTask', () => {
     await promoteTask(ROOT, 'v1.0-one')
 
     expect(await readFile(orderingPath(ROOT), 'utf8')).toContain(
-      '| [v1.0: One](v1.0-one.md) | 1 file | Planned, not dispatched yet |',
+      '| [v1.0: One](v1.0-one.md) | 1 file |  | Planned, not dispatched yet |',
     )
   })
 
-  it('should refuse a row already under Run now', async () => {
+  it('should refuse a row already under In flight', async () => {
     await seedPlan('one', ['a.ts'])
     await seedTask('v1.0-one', { plans: ['one'] })
     await seedBoard(...RUN_NOW_ONE)

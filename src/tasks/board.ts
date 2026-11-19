@@ -4,6 +4,7 @@ import { basename, join } from 'node:path'
 import {
   linkTo,
   readPlanTargets,
+  readSessions,
   removeBacklogRow,
   resolveLivePlan,
   tasksDir,
@@ -15,20 +16,110 @@ import {
   backlogPath,
   declaredRows,
   type FindingKind,
+  groupOfHeading,
   groupRuleFindings,
   orderingPath,
   readBoard,
 } from '@/tasks/validate'
 
 /**
- * The columns each group owns, fixed by the operator. Every cell but
- * `Waiting on` is derived from the task and its plan, so the render is the
- * only writer of the other three.
+ * The columns each group owns. `Waiting on` and `Launch` are typed through a
+ * verb, and every other cell is derived, so the render is their only writer.
  */
 export const GROUP_COLUMNS: Readonly<Record<BoardGroup, readonly string[]>> = {
-  'Run now': ['Task', 'Touches', 'Plan'],
-  'Up next': ['Task', 'Touches', 'Waiting on'],
+  'In flight': ['Task', 'Touches', 'Session'],
+  'Up next': ['Task', 'Touches', 'Launch', 'Waiting on'],
   'Needs a plan': ['Task', 'Waiting on'],
+}
+
+/** The columns each group carried before the Launch and Session cells, read and never written. */
+export const RETIRED_COLUMNS: Readonly<Record<BoardGroup, readonly string[]>> =
+  {
+    'In flight': ['Task', 'Touches', 'Plan'],
+    'Up next': ['Task', 'Touches', 'Waiting on'],
+    'Needs a plan': ['Task', 'Waiting on'],
+  }
+
+export const LAUNCH_ROLES = ['worker', 'planner'] as const
+export const LAUNCH_MODELS = ['opus', 'sonnet', 'fable'] as const
+export const LAUNCH_EFFORTS = ['low', 'medium', 'high', 'xhigh', 'max'] as const
+/** `background` is a `claude --bg` dispatch, `hand` a prompt the operator pastes, `cloud` a cloud worker. */
+export const LAUNCH_ROUTES = ['background', 'hand', 'cloud'] as const
+
+export type LaunchRole = (typeof LAUNCH_ROLES)[number]
+export type LaunchModel = (typeof LAUNCH_MODELS)[number]
+export type LaunchEffort = (typeof LAUNCH_EFFORTS)[number]
+export type LaunchRoute = (typeof LAUNCH_ROUTES)[number]
+
+/** How a queued row will launch, as the dispatcher picked it or the operator overrode it. */
+export interface LaunchPick {
+  readonly role: LaunchRole
+  readonly model: LaunchModel
+  readonly effort: LaunchEffort
+  readonly route: LaunchRoute
+  readonly override: boolean
+}
+
+/** The part of a pick an in-flight row keeps, since its role and route were spent at launch. */
+export interface FlightPick {
+  readonly model: LaunchModel
+  readonly effort: LaunchEffort
+}
+
+export function oneOf<T extends string>(
+  values: readonly T[],
+  value: string | undefined,
+): T | undefined {
+  return values.find((entry) => entry === value)
+}
+
+const OVERRIDE_MARK = ' (operator)'
+
+export function formatLaunch(pick: LaunchPick): string {
+  const cell = [pick.role, pick.model, pick.effort, pick.route].join(', ')
+  return pick.override ? `${cell}${OVERRIDE_MARK}` : cell
+}
+
+/** Reads a Launch cell back, undefined for any text `formatLaunch` would not write. */
+export function readLaunch(cell: string): LaunchPick | undefined {
+  const trimmed = cell.trim()
+  const override = trimmed.endsWith(OVERRIDE_MARK)
+  const body = override ? trimmed.slice(0, -OVERRIDE_MARK.length) : trimmed
+  const parts = body.split(', ')
+  if (parts.length !== 4) return undefined
+
+  const role = oneOf(LAUNCH_ROLES, parts[0])
+  const model = oneOf(LAUNCH_MODELS, parts[1])
+  const effort = oneOf(LAUNCH_EFFORTS, parts[2])
+  const route = oneOf(LAUNCH_ROUTES, parts[3])
+  if (!role || !model || !effort || !route) return undefined
+
+  return { role, model, effort, route, override }
+}
+
+/** What a Session cell reads when the task's `Sessions:` line names nobody. */
+export const NO_SESSION = 'no session recorded'
+
+const FLIGHT_PICK = /^(.*) \((\w+), (\w+)\)$/
+
+export function formatSession(
+  session: string | undefined,
+  pick: FlightPick | undefined,
+): string {
+  const name = session ?? NO_SESSION
+  return pick ? `${name} (${pick.model}, ${pick.effort})` : name
+}
+
+/**
+ * Reads the stored pick off a Session cell. The session name is derived on
+ * every render, so only a trailing model and effort pair survives the read,
+ * and a name ending in parentheses of its own reads as carrying none.
+ */
+export function readFlightPick(cell: string): FlightPick | undefined {
+  const match = FLIGHT_PICK.exec(cell.trim())
+  const model = oneOf(LAUNCH_MODELS, match?.[2])
+  const effort = oneOf(LAUNCH_EFFORTS, match?.[3])
+  return model && effort ? { model, effort } : undefined
 }
 
 /**
@@ -55,12 +146,16 @@ const LOCK_STALE_MS = 30_000
 
 const LOCK_POLL_MS = 20
 
-/** One row as the board holds it: the task it points at and the one typed cell. */
+/** One row as the board holds it: the task it points at and the cells no derivation recovers. */
 export interface PlacedRow {
   readonly stem: string
   /** The label the row's Task cell carried, used when the task file is gone. */
   readonly label: string
   readonly waiting: string | undefined
+  /** The Launch cell under `## Up next`, absent until a pick is written. */
+  readonly launch?: LaunchPick
+  /** The model and effort an `## In flight` row launched on, carried from its Launch cell. */
+  readonly pick?: FlightPick
 }
 
 /**
@@ -78,14 +173,25 @@ export interface Board {
 
 export type BoardParse =
   | { readonly ok: true; readonly board: Board }
-  | { readonly ok: false; readonly line: string }
+  | {
+      readonly ok: false
+      readonly line: string
+      /** `doubled` when the line reopens a group already read, under either heading. */
+      readonly kind: 'row' | 'doubled'
+    }
 
 function emptyGroups<T>(): Record<BoardGroup, T[]> {
-  return { 'Run now': [], 'Up next': [], 'Needs a plan': [] }
+  return { 'In flight': [], 'Up next': [], 'Needs a plan': [] }
 }
 
-function isGroup(heading: string): heading is BoardGroup {
-  return (BOARD_GROUPS as readonly string[]).includes(heading)
+function namedCell(
+  cells: readonly string[],
+  header: readonly string[] | undefined,
+  name: string,
+): string | undefined {
+  if (!header || cells.length !== header.length) return undefined
+  const at = header.findIndex((cell) => cell.toLowerCase() === name)
+  return at === -1 ? undefined : cells[at]
 }
 
 function splitCells(line: string): string[] {
@@ -160,11 +266,18 @@ export function parseBoard(text: string): BoardParse {
 
   let section: BoardGroup | 'head' | 'other' = 'head'
   let header: string[] | undefined
+  const seen = new Set<BoardGroup>()
 
   for (const line of lines) {
     const heading = /^##\s+(.+?)\s*$/.exec(line)
     if (heading) {
-      section = isGroup(heading[1]) ? heading[1] : 'other'
+      const group = groupOfHeading(heading[1])
+      // A render folding two tables would rank rows nobody ranked together.
+      if (group && seen.has(group)) {
+        return { ok: false, line: line.trim(), kind: 'doubled' }
+      }
+      if (group) seen.add(group)
+      section = group ?? 'other'
       header = undefined
       if (section === 'other') trailing.push(line)
       continue
@@ -194,14 +307,31 @@ export function parseBoard(text: string): BoardParse {
         header = cells
         continue
       }
-      return { ok: false, line: line.trim() }
+      return { ok: false, line: line.trim(), kind: 'row' }
     }
 
     const owned = GROUP_COLUMNS[section].includes('Waiting on')
     const waiting = owned ? waitingCell(cells, header) : undefined
-    if (owned && waiting === undefined) return { ok: false, line: line.trim() }
+    if (owned && waiting === undefined) {
+      return { ok: false, line: line.trim(), kind: 'row' }
+    }
 
-    groups[section].push({ stem: link.stem, label: link.label, waiting })
+    const launchCell = namedCell(cells, header, 'launch')
+    const launch = launchCell ? readLaunch(launchCell) : undefined
+    if (launchCell && !launch) {
+      return { ok: false, line: line.trim(), kind: 'row' }
+    }
+
+    const sessionCell = namedCell(cells, header, 'session')
+    const pick = sessionCell ? readFlightPick(sessionCell) : undefined
+
+    groups[section].push({
+      stem: link.stem,
+      label: link.label,
+      waiting,
+      ...(launch && section === 'Up next' ? { launch } : {}),
+      ...(pick && section === 'In flight' ? { pick } : {}),
+    })
   }
 
   return { ok: true, board: { head, groups, notes, trailing } }
@@ -212,6 +342,8 @@ export interface DerivedCells {
   readonly task: string
   readonly touches: string
   readonly plan: string
+  /** The last session the task's `Sessions:` line names, undefined when it names none. */
+  readonly session: string | undefined
   /** The declared paths the Touches cell counts, which the overlap checks read in its place. */
   readonly paths: readonly string[]
 }
@@ -303,6 +435,7 @@ export async function deriveCells(
       task: `[${row.label || row.stem}](${row.stem}.md)`,
       touches: '',
       plan: '',
+      session: undefined,
       paths: [],
     }
   }
@@ -321,6 +454,7 @@ export async function deriveCells(
     plan: plans
       .map((plan) => `[${planLabel(plan)}](${linkTo(dir, plan)})`)
       .join(', '),
+    session: readSessions(text).at(-1)?.name,
     paths,
   }
 }
@@ -337,6 +471,8 @@ function cellFor(
   if (column === 'Task') return derived.task
   if (column === 'Touches') return derived.touches
   if (column === 'Plan') return derived.plan
+  if (column === 'Launch') return row.launch ? formatLaunch(row.launch) : ''
+  if (column === 'Session') return formatSession(derived.session, row.pick)
   return row.waiting ?? ''
 }
 
@@ -382,6 +518,7 @@ export const BOARD_REFUSALS = [
   'no-match',
   'no-row',
   'unreadable-row',
+  'group-doubled',
   'board-busy',
   'board-changed',
   'group-rule',
@@ -430,16 +567,32 @@ export const PLANNED_WAITING = 'Planned, not dispatched yet'
  * `canon tasks validate` reports through `groupRuleFindings`.
  */
 const GROUP_RULES: Readonly<Record<BoardGroup, readonly FindingKind[]>> = {
-  'Run now': ['plan-unstated', 'touches-unstated'],
+  'In flight': ['plan-unstated', 'touches-unstated'],
   'Up next': ['plan-absent'],
   'Needs a plan': ['plan-parked'],
 }
 
-/** The group one step closer to `## Run now`, which is where `promote` sends a row. */
+/** The group one step closer to `## In flight`, which is where `promote` sends a row. */
 const PROMOTES_TO: Readonly<Record<BoardGroup, BoardGroup | undefined>> = {
-  'Run now': undefined,
-  'Up next': 'Run now',
+  'In flight': undefined,
+  'Up next': 'In flight',
   'Needs a plan': 'Up next',
+}
+
+/**
+ * The row as it enters a group. A row reaching `## In flight` keeps the model
+ * and effort its Launch cell picked, and the Launch cell itself stays behind,
+ * since the pick it records is spent once the row launched.
+ */
+function entering(row: PlacedRow, group: BoardGroup): PlacedRow {
+  const { launch, pick, ...rest } = row
+  if (group === 'Up next') return launch ? { ...rest, launch } : rest
+  if (group !== 'In flight') return rest
+
+  const carried =
+    pick ??
+    (launch ? { model: launch.model, effort: launch.effort } : undefined)
+  return carried ? { ...rest, pick: carried } : rest
 }
 
 function refuse(
@@ -476,7 +629,7 @@ export function checkWaiting(text: string): BoardRefused | undefined {
   return undefined
 }
 
-function findRow(
+export function findRow(
   board: Board,
   stem: string,
 ): { readonly group: BoardGroup; readonly row: PlacedRow } | undefined {
@@ -531,7 +684,7 @@ function placed(
   return { ...board, groups }
 }
 
-interface Edited {
+export interface Edited {
   readonly board: Board
   readonly group: BoardGroup
   readonly from: BoardGroup | undefined
@@ -545,7 +698,7 @@ interface Edited {
  * against the target group's rule on the rendered board before anything is
  * written, which reads the board exactly as `validate` will.
  */
-async function writeBoard(
+export async function writeBoard(
   root: string,
   stem: string,
   edit: (board: Board) => Edited | BoardRefused,
@@ -616,11 +769,17 @@ async function writeLocked(
   const before = await readFile(path, 'utf8')
   const parse = parseBoard(before)
   if (!parse.ok) {
-    return refuse(
-      'unreadable-row',
-      `${path} holds a row naming no task or carrying a Waiting on cell its header cannot place, so a render would drop or rewrite it. Fix that row by hand first.`,
-      [parse.line],
-    )
+    return parse.kind === 'doubled'
+      ? refuse(
+          'group-doubled',
+          `${path} opens one group twice, as ## Run now beside ## In flight after a bad merge, so a render would rank rows nobody ranked. Merge the two tables by hand first.`,
+          [parse.line],
+        )
+      : refuse(
+          'unreadable-row',
+          `${path} holds a row naming no task, or carrying a Waiting on or Launch cell its header cannot place or read, so a render would drop or rewrite it. Fix that row by hand first.`,
+          [parse.line],
+        )
   }
 
   const edited = edit(parse.board)
@@ -706,7 +865,10 @@ export async function placeTask(
     const next = placed(
       board,
       group,
-      { stem, label: found?.row.label ?? stem, waiting },
+      entering(
+        { ...found?.row, stem, label: found?.row.label ?? stem, waiting },
+        group,
+      ),
       options.position ?? { at: 'bottom' },
     )
     if ('ok' in next) return next
@@ -742,10 +904,8 @@ export interface PromoteOptions {
 }
 
 /**
- * Moves a row one group closer to `## Run now`, to the bottom of that group.
- * Dispatch runs it once a launch succeeds, so `## Run now` reads as
- * dispatched, and `plan-link` runs it on a `## Needs a plan` row once the plan
- * is linked.
+ * Moves a row one group closer to `## In flight`, to its bottom. Dispatch runs
+ * it after a launch, and `plan-link` once a parked row's plan is linked.
  */
 export async function promoteTask(
   root: string,
@@ -765,7 +925,7 @@ export async function promoteTask(
     if (!target) {
       return refuse(
         'top-group',
-        `${stem} already sits under Run now, the top group.`,
+        `${stem} already sits under In flight, the top group.`,
       )
     }
 
@@ -775,10 +935,8 @@ export async function promoteTask(
     const next = placed(
       board,
       target,
-      { ...found.row, waiting },
-      {
-        at: 'bottom',
-      },
+      entering({ ...found.row, waiting }, target),
+      { at: 'bottom' },
     )
     if ('ok' in next) return next
 
@@ -795,10 +953,8 @@ export interface LinkPromotion {
 }
 
 /**
- * Promotes a task's row out of `## Needs a plan` once its plan is linked, and
- * leaves every other row where it is. A row already under `## Up next` or
- * `## Run now` is past the planning a link records, and a task with no row was
- * never placed, which is the controller's call rather than the link's.
+ * Promotes a row out of `## Needs a plan` once its plan is linked. Any other
+ * row is past that planning, and a task with no row is the controller's call.
  */
 export async function promoteOnLink(
   root: string,
@@ -845,6 +1001,26 @@ export async function rerenderRow(
 
     return { board, group: found.group, from: found.group, ruled: undefined }
   })
+}
+
+/**
+ * Re-renders a task's row when it sits under `## In flight`, so a session
+ * recorded after the promote shows in its Session cell. Every other row
+ * renders no session, so nothing is written for it.
+ */
+export async function rerenderFlight(
+  root: string,
+  stem: string,
+): Promise<BoardOutcome | undefined> {
+  const path = orderingPath(root)
+  if (!existsSync(path)) return undefined
+
+  const parse = parseBoard(await readFile(path, 'utf8'))
+  if (!parse.ok || findRow(parse.board, stem)?.group !== 'In flight') {
+    return undefined
+  }
+
+  return rerenderRow(root, stem)
 }
 
 /** Repositions a row inside the group it already sits in. */

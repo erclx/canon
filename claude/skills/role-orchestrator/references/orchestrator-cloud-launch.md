@@ -14,11 +14,18 @@ The shape needs a `SessionStart` hook in the repository that, on the VM alone, c
 
 ## Contents
 
+- [Pick local or cloud](#pick-local-or-cloud)
 - [Check the row is unclaimed](#check-the-row-is-unclaimed)
 - [The prompt](#the-prompt)
 - [The create](#the-create)
 - [Recognize the pull request](#recognize-the-pull-request)
 - [Dispatch a review to a cloud reviewer](#dispatch-a-review-to-a-cloud-reviewer)
+
+## Pick local or cloud
+
+Dispatch to a cloud worker only on the operator's explicit pick for that dispatch, until three cloud rows have merged. Whether a cloud session is worth its cost is the operator's account to judge, and the review load a cloud pull request adds is unmeasured, so the pick stays a person's until that count gives a reading.
+
+A row qualifies for that pick when its plan carries no open question and touches no surface needing local state, such as the sandbox, the records remote, or a browser. A cloud worker cannot reach any of the three, and it cannot ask the operator mid-build except through a draft pull request.
 
 ## Check the row is unclaimed
 

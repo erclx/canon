@@ -471,9 +471,11 @@ describe('archiveTask', () => {
         headOf({ 12: 'feat/middle' }),
       )
 
-      expect(await readFile(priority, 'utf8')).toContain(
-        `| [v28.1: A task](${stem}.md) |  | [first](../plans/feature-first.md), [last](../plans/feature-last.md) |`,
+      const text = await readFile(priority, 'utf8')
+      expect(text).toContain(
+        `| [v28.1: A task](${stem}.md) |  | no session recorded |`,
       )
+      expect(text).not.toContain('feature-middle')
     })
 
     it('should archive the merged slice plan when the task keeps open outcomes', async () => {

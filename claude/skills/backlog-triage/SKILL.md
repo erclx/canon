@@ -12,7 +12,7 @@ A backlog only grows while nothing can decline a row. This pass reads every row 
 The record is an ordinary intake folder at `.canon/intake/<nn>-backlog-triage/`, so three sibling references bind it.
 
 - `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md`, read before writing any file in the folder, holds the item format, the frontmatter, the index shape, and the answer contract
-- `${CLAUDE_SKILL_DIR}/../task-board/references/board.md`, read before applying, holds the backlog and the ordering file
+- `${CLAUDE_SKILL_DIR}/../task-board/references/board.md` holds the ordering file and `${CLAUDE_SKILL_DIR}/../task-board/references/backlog.md` the backlog, both read before applying
 - `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`, read before applying, holds the `Declined:` line
 
 ## Guards

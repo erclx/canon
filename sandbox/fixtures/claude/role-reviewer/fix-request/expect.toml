@@ -38,7 +38,7 @@ manual = [
 path = "src/log.ts"
 pattern = 'day: string\) \{\n  return entries\n\}'
 
-# The board, one row under `## Run now` and nothing after it.
+# The board, one row under `## In flight` and nothing after it.
 [[content]]
 path = ".canon/tasks/priority.md"
 pattern = '\| `v00\.1-log-entry` [^\n]*\n(?![\s\S])'

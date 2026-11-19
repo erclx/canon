@@ -49,7 +49,7 @@ Merge order matters only when two branches touch the same file. Expect to rebase
 
 ## The task board
 
-`.canon/tasks/` is gitignored and resolves at the main worktree root, one file per task. A hook generates `index.md`, and `priority.md` carries execution order and blockers. `canon tasks place`, `promote`, `move`, and `block` write it, deriving every cell but `Waiting on`.
+`.canon/tasks/` is gitignored and resolves at the main worktree root, one file per task, beside a generated `index.md`. `priority.md` carries execution order, written by `canon tasks place`, `promote`, `move`, `block`, and `launch`, and `canon tasks flight` reads each in-flight row's stage.
 
 `canon tasks validate` reports and never writes:
 

@@ -37,6 +37,25 @@ export function readyTable(rows: readonly RowFixture[]): string {
   ].join('\n')
 }
 
+/** The In flight table a board verb writes, whose plan is read off the task's own `Plan:` line. */
+export function inFlightTable(
+  rows: readonly { readonly stem: string; readonly touches?: string }[],
+): string {
+  const body = rows.map(
+    ({ stem, touches = '`src/a.ts`' }) =>
+      `| [${stem}](${stem}.md) | ${touches} | no session recorded |`,
+  )
+
+  return [
+    '## In flight',
+    '',
+    '| Task | Touches | Session |',
+    '| ---- | ------- | ------- |',
+    ...body,
+    '',
+  ].join('\n')
+}
+
 export function boardBody(sections: readonly string[]): string {
   return [
     '---',
