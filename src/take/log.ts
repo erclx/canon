@@ -80,10 +80,7 @@ export type LogEvent =
       /** Where the button went down and where it came up. */
       readonly from: Point
       readonly to: Point
-      /**
-       * The box pressed and the box it was dropped on, each absent for an end
-       * the plan aimed at a point.
-       */
+      /** The box pressed and the drop box, each absent on a point end. */
       readonly box?: Box
       readonly drop?: Box
       readonly modifiers?: readonly Modifier[]
