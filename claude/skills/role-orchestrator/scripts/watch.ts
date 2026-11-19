@@ -1,15 +1,6 @@
-// Reports worker and pull request transitions as they happen. Reads only.
-//
-// The poll answers what moved since the last run, and this answers what just
-// changed, on a loop of its own. A finished worker goes idle and a crashed one
-// vanishes, so a watch on the pull request list alone misses the second. A
-// worker stopped on a question sits reading "waiting", reported as
-// WORKER-STOPPED, or WORKER-UNMEASURABLE when too old to carry a stamp. A
-// session appearing on a branch the hand-launch queue holds for a worker is
-// reported as LAUNCHED, so the operator's word is no longer the only record.
-//
-// Run as `bun watch.ts`. A failed read never ends the loop, since it runs for
-// hours, so every read states its own failure instead.
+// Reports worker, pull request, and hand-launch transitions as they happen,
+// reading only. A crashed worker vanishes from the roster, which a watch on
+// pull requests alone misses. A failed read never ends the hours-long loop.
 import { baseBranch, baseRef, gitPath, mainRoot, run } from './repo'
 
 // Seconds between passes. A pass costs two cheap reads and the transitions it
@@ -17,14 +8,9 @@ import { baseBranch, baseRef, gitPath, mainRoot, run } from './repo'
 // in a project whose workers run long.
 const INTERVAL_S = 60
 
-// Seconds a worker can sit in "waiting" before this reports it as stopped
-// rather than folding it into the ordinary status-change lines. "busy" and
-// "idle" resolve on their own; "waiting" does not, so a dwell that keeps
-// growing there is a session blocked on something outside itself. The number
-// sits well above INTERVAL_S, so a handful of passes confirm the row before it
-// reports, and well inside the ten-to-thirty-minute span a dispatched build
-// ordinarily runs. A permission prompt clears the moment a person approves it
-// and a question can sit legitimately, and one number serves both.
+// "waiting" never resolves on its own, unlike "busy" and "idle". The number sits
+// well above INTERVAL_S, so several passes confirm a row, and well inside the
+// ten-to-thirty-minute span a dispatched build ordinarily runs.
 export const STALL_THRESHOLD_S = 300
 
 export type Read<T> = { isOk: false } | { isOk: true; value: T }
@@ -246,12 +232,9 @@ const readPulls = (): Read<string[]> => {
 const asText = (value: unknown, fallback: string): string =>
   typeof value === 'string' ? value : fallback
 
-/**
- * Every session in this repository holding a branch other than the base one is
- * a worker, whoever launched it. A match on the `orchestrator-` name prefix
- * reads a dispatched worker and misses every hand-launched one. The name stays whole, since one
- * this client writes carries spaces.
- */
+// Every session holding a non-base branch is a worker, since an `orchestrator-`
+// prefix match misses every hand-launched one. The name stays whole, since one
+// this client writes carries spaces.
 const readWorkers = (repository: string, base: string): Read<Worker[]> => {
   const listed = run('canon', ['sessions', 'list', '--json'])
   if (!listed.isOk) return { isOk: false }

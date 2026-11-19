@@ -8,10 +8,9 @@ const ROW_INDENT = '│    '.length
 type CommandRow = [signature: string, description: string]
 type HelpStream = { isTTY?: boolean }
 
-// The grouping mirrors the README's domain table and has no other source, so a
-// command added to the program needs a row here or help-option.test.ts fails.
-// A row here also needs a `canon <verb>` line in claude/skills/canon-cli, or a
-// name in TOOLKIT_ONLY in canon-cli-skill.test.ts, which reads this list.
+// Mirrors the README's domain table. A command needs a row here, or
+// help-option.test.ts fails, and a `canon <verb>` line in claude/skills/canon-cli
+// or a TOOLKIT_ONLY name, or canon-cli-skill.test.ts fails.
 export const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
   {
     title: 'Project',
