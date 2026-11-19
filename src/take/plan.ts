@@ -1,9 +1,6 @@
 /**
- * The take plan: the beats a take films, each a list of steps. It reuses
- * `canon drive`'s kind names for the steps the two share and adds `move`,
- * since a take films the pointer's travel and a drive skips it. `tab` is left
- * out because a take draws its cursor from the log, and focus moved by the
- * keyboard leaves nothing in the log to draw.
+ * The take plan, reusing `canon drive`'s step kinds plus `move`, which films the
+ * pointer's travel. `tab` is left out, since keyboard focus leaves no cursor.
  */
 
 import { MODIFIERS, type Modifier, isModifier, parseKeys } from '@/take/keys'

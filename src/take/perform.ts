@@ -11,10 +11,8 @@ import { type Chord, type Modifier, isModifier, parseKeys } from '@/take/keys'
 import type { DragEnd, PointAim, TakeStep, Viewport } from '@/take/plan'
 
 /**
- * Performs a beat's steps through a stage and logs what the edit needs. The
- * choreography sits here once, and each capture route supplies the stage, being
- * how an input reaches the page and how clip time passes, so a beat moves the
- * same way whichever route filmed it.
+ * Performs a beat's steps through a stage and logs what the edit needs. Each
+ * route supplies only the stage, so a beat moves alike whichever route filmed it.
  */
 
 const FRAME_MS = 1000 / FPS
@@ -29,10 +27,8 @@ const SCROLL_MS = 900
 const GRAB_MS = 150
 
 /**
- * The pacing the operator settled by eye in groundwork track
- * `210-film-craft-and-soundtrack`: a rest on the target before a press, a hold
- * on its result before the pointer leaves, and a pause between clicking a
- * field and its first key, so the camera lands before anything changes.
+ * Pacing settled by eye in groundwork track `210-film-craft-and-soundtrack`, so
+ * the camera lands before a press, a result, or a field's first key changes.
  */
 const REST_MS = 300
 const RESULT_MS = 500
@@ -311,10 +307,8 @@ function stillAt(stage: Stage, at: Point): Glide {
 }
 
 /**
- * Runs a motion planned as `frames` inputs, sending each at the frame the
- * stage's clock has reached, so a page slower than a frame per input skips the
- * points it is behind on and the motion still ends near its planned length. A
- * clock advancing one frame per input, as the stepper's does, gets every frame.
+ * Sends a motion's inputs at the frame the stage's clock has reached, so a slow
+ * page skips the points it is behind on and still ends near the planned length.
  */
 async function paced(
   stage: Stage,
@@ -388,10 +382,8 @@ async function pause(
 }
 
 /**
- * Presses on the source, holds a moment so the page reads a grab rather than
- * a click, glides held to the target, and releases there. The drop target is
- * read before the press, so a page that moves it once a drag starts is
- * dropped on where it stood.
+ * Holds after the press so the page reads a grab rather than a click. The drop
+ * aim is read before the press, so a drop target the drag moves is hit where it stood.
  */
 async function drag(
   stage: Stage,
@@ -489,10 +481,8 @@ async function boxOf(stage: Stage, target: string): Promise<Box> {
 }
 
 /**
- * Aims a wheel at the target's center, or, when that lies outside the window,
- * at the center of the part the window shows. A wheel scrolls whatever sits
- * under it, so any visible point of the target serves, and a page-tall element
- * such as `body` has a center no setup step can bring into view.
+ * Aims a wheel at the target's center, or at the center of its visible part,
+ * since a page-tall element such as `body` has a center no setup can reveal.
  */
 async function scrollPoint(stage: Stage, target: string): Promise<Point> {
   const box = await foundBox(stage, target)
@@ -545,15 +535,9 @@ export const FOCUS_MOVED = `(() => {
 })()`
 
 /**
- * Finds a target's box in CSS pixels, reading `text=<words>` as the first
- * innermost sized element whose whole text is those words, so a hidden copy
- * cannot shadow a visible one, and anything else as a CSS selector.
- *
- * The document is searched first, then every open shadow root in tree order.
- * Innermost reads containment through a shadow root to its host. A selector
- * never matches across a shadow boundary, and a closed root and a frame stay
- * unreachable. It runs in the page so both routes resolve a target alike, and
- * a match with no size counts as missing.
+ * Finds a target's box in the page, so both routes resolve alike. `text=` takes
+ * the innermost sized match, and a selector searches the document, then each
+ * open shadow root. A frame, a closed root, and a zero-size match stay missing.
  */
 export function boxExpression(target: string): string {
   return `(() => {

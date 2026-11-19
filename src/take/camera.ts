@@ -10,13 +10,9 @@ import {
 } from '@/take/log'
 
 /**
- * Turns a take's log into one camera per frame, on the motion the operator
- * settled by eye in groundwork track `210-film-craft-and-soundtrack`. A zoom in
- * rides the glide that reaches its target and lands as the cursor arrives, a
- * zoom out rides the glide that leaves it, and the view scales about the
- * target so it holds still on screen. The view pans only at a steady scale,
- * along the glide between two targets. HyperFrames renders the track as it
- * stands, so it carries no curve a renderer would have to agree on.
+ * Turns a take's log into one camera per frame, on the motion settled by eye in
+ * groundwork track `210-film-craft-and-soundtrack`. The track carries no curve,
+ * so HyperFrames renders it as it stands.
  */
 
 export const CAMERA_VERSION = 1
@@ -305,10 +301,8 @@ function aimsOf(
 }
 
 /**
- * Groups aims into zooms and times each one off the glides around it. The next
- * aim joins a zoom while at most one glide and no scroll lies between them,
- * since that glide then both leaves one target and reaches the other, and the
- * view pans along it rather than pulling back and pushing in at once.
+ * Groups aims into zooms. An aim joins a zoom while at most one glide and no
+ * scroll lie between, so the view pans along that glide rather than pulling out.
  */
 function zoomsOf(
   aims: readonly Aim[],

@@ -12,10 +12,8 @@ import {
 } from '@/take/log'
 
 /**
- * Pins the camera against the properties the groundwork judged preset O4 on,
- * over logs shaped like the board takes it scored: a zoom that settles as fast
- * as Screen Studio's, a focus that holds across nearby clicks, and a cursor
- * that never leaves the frame.
+ * Pins the camera against the properties the groundwork judged preset O4 on: a
+ * fast-settling zoom, a focus held across nearby clicks, and a cursor in frame.
  */
 
 const FRAME_MS = 1000 / FPS
