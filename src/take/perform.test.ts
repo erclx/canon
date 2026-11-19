@@ -32,10 +32,8 @@ type Sent =
   | ({ readonly via: 'press' } & KeyInput)
 
 /**
- * A stage on a frame clock whose targets resolve to fixed boxes. A pointer
- * input takes `pointerMs` of clip time, one frame by default, and longer for a
- * slow page that answers each input only once it paints. A target named in
- * `covers` reads as covered by that element at its center.
+ * A frame-clock stage with fixed boxes. `pointerMs` above a frame stands in
+ * for a slow page, and a target in `covers` reads as covered by that element.
  */
 function recordingStage(
   boxes: Record<string, Box>,

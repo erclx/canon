@@ -4,12 +4,9 @@ import { boxExpression, coverExpression } from '@/take/perform'
 import { findShell } from '@/take/shell'
 
 /**
- * Evaluates the page-side target lookup on a real page, since shadow roots and
- * boxes exist only where a browser lays the page out. Every element a case
- * aims at is placed absolutely, so the box it should resolve to is a literal.
- *
- * The suite needs chrome-headless-shell. CI installs none, so it skips there
- * rather than failing, which means a green pipeline is not evidence this ran.
+ * Shadow roots and hit tests exist only on a laid-out page. CI installs no
+ * chrome-headless-shell, so this skips there, and a green pipeline is not
+ * evidence it ran.
  */
 
 function shellPath(): string | null {

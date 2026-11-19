@@ -89,8 +89,7 @@ const ONE_BEAT = JSON.stringify({
 describe.skipIf(!available())('a frame-stepped take of a served page', () => {
   let server: { url: string; stop: () => void }
   let out: string
-  // Counts each open of the single-use address, the way an app redeems a
-  // ticket in its access link.
+  // Opens of the single-use address, as an app redeems an access ticket.
   let onceHits = 0
   let ticketOpens = 0
 
@@ -101,8 +100,7 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
         const { pathname } = new URL(request.url)
         if (pathname === '/fetch') return html(FETCH_PAGE)
         if (pathname === '/ticket/hold') {
-          // Bun closes a connection idle for 10 s, a sleeping handler
-          // included, so the hold lifts the limit for this request alone.
+          // Bun closes a connection idle 10 s, so lift it for this hold alone.
           bun.timeout(request, 30)
           await Bun.sleep(HOLD_MS)
           return new Response('ok')
@@ -157,21 +155,18 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
 
     expect(probe(clip)).toEqual({ width: 3840, height: 2160, rate: '60/1' })
 
-    // A one-second fade spans 60 frames, each brighter than the last, when every
-    // frame advanced a sixtieth. A wall-time stepper would spread or bunch them.
+    // 60 frames each a sixtieth apart brighten in turn, unlike wall-time steps.
     const luma = bandLuma(clip)
     expect(luma).toHaveLength(beat.frames)
     const ramp = luma.filter((value) => value > 17 && value < 234)
-    // The distinct values tell a fade that never started, one value held for
-    // every frame, apart from one that jumped past its middle.
+    // Distinct values tell a fade that never started from one that jumped.
     const seen = `the clip's distinct band luma: ${[...new Set(luma)].join(' ')}`
     expect(ramp.length, seen).toBeGreaterThanOrEqual(57)
     expect(ramp.length, seen).toBeLessThanOrEqual(60)
     const rises = ramp.slice(1).map((value, i) => value - (ramp[i] ?? 0))
     expect(Math.min(...rises)).toBeGreaterThan(0)
 
-    // The still is the clip's closing frame, so the band has finished its
-    // fade to white in both.
+    // The still is the closing frame, so the band reads white in both.
     const still = join(out, beat.still)
     expect(probe(still)).toMatchObject({ width: 3840, height: 2160 })
     const [stillLuma = 0] = bandLuma(still)
@@ -221,8 +216,7 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
     })
     const still = join(out, beat.still)
     expect(probe(still)).toMatchObject({ width: 1920, height: 1080 })
-    // The band's CSS crop lands on the same element at this scale, so the
-    // still reads white where the scale-2 case reads it.
+    // The CSS crop finds the same band at this scale, so the still reads white.
     const [stillLuma = 0] = bandLuma(still)
     expect(stillLuma).toBeGreaterThan(230)
     const log = JSON.parse(readFileSync(join(out, beat.log), 'utf8')) as TakeLog
@@ -326,8 +320,7 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
     const still = join(out, beat.still)
     expect(probe(still)).toMatchObject({ width: 1920, height: 1080 })
 
-    // The band opens black and ends white, so a still read off the wrong end
-    // of the clip fails both checks. The crop is the stepped one at half size.
+    // Black to white, so a still off the wrong end fails, cropped at half size.
     const luma = bandLuma(join(out, beat.clip))
     const [stillLuma = 0] = bandLuma(still)
     expect(stillLuma).toBeGreaterThan(230)
@@ -427,8 +420,7 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       [cli, 'take', server.url, plan, '--out', join(own, 'takes')],
       { stdio: 'ignore' },
     )
-    // Registered here rather than in a `finally`, which a process that never
-    // exits would hold past the timeout.
+    // Not a `finally`, which a process that never exits holds past the timeout.
     onTestFinished(() => {
       running.kill('SIGKILL')
       chmodSync(beat, 0o755)
@@ -519,8 +511,7 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       if (read.kind !== 'read') throw new Error(read.detail)
       ticketOpens = 0
 
-      // A loaded runner's settle frame can pass 2 s, so the loaded limit
-      // keeps the stall on the press, which the server holds 20 s.
+      // The loaded limit outlasts a slow settle, so the 20 s press stalls.
       const result = await take({
         url: new URL('/ticket', server.url).href,
         plan: read.plan,
@@ -558,8 +549,7 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       stallMs: LOADED_STALL_MS,
     })
 
-    // The retry met the spent page, so it refused there and never reached
-    // the screencast.
+    // The retry met the spent page and refused before any screencast.
     expect(result).toMatchObject({
       status: 'failed',
       reason: 'target-missing',

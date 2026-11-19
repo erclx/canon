@@ -579,10 +579,9 @@ export const FOCUS_MOVED = `(() => {
 })()`
 
 /**
- * Defines `find`, the page-side target lookup both routes share, and `within`,
- * containment read through shadow hosts. `text=` takes the innermost sized
- * match, and a selector searches the document, then each open shadow root. A
- * frame, a closed root, and a zero-size match stay missing.
+ * `text=` takes the innermost sized match, and a selector searches the
+ * document, then each open shadow root. A frame, a closed root, and a
+ * zero-size match stay missing, and `within` reads through shadow hosts.
  */
 const RESOLVER = `
   const within = (outer, inner) => {
@@ -635,10 +634,9 @@ export function boxExpression(target: string): string {
 }
 
 /**
- * Names the element a press at `at` would land on when it is neither the
- * target, inside it, nor around it, or null when the press lands. The hit is
- * followed into each open shadow root, and named by its tag and its id or
- * first class, which finds it without a selector that runs long.
+ * Names the element at `at` when it is neither the target, inside it, nor
+ * around it, or null. Its tag and id or first class find it, where a full
+ * selector runs long.
  */
 export function coverExpression(target: string, at: Point): string {
   return `(() => {
