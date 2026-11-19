@@ -161,7 +161,7 @@ Read `${CLAUDE_SKILL_DIR}/references/orchestrator-talk-launch.md` when the opera
 
 ## Hand launch
 
-Read `${CLAUDE_SKILL_DIR}/references/orchestrator-hand-launch.md` when the operator launches sessions by hand. It states the `canon dispatch prompts` calls that queue and clear each prompt, the lean shape the verb writes, and how a launch is recorded, while the background templates above keep their full controller paragraph.
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-hand-launch.md` when the operator launches sessions by hand. It states the `canon dispatch prompts` calls that queue each prompt and the lean shape they write, while the background templates above keep their full controller paragraph.
 
 ## Dispatch a reviewer
 
