@@ -1,10 +1,10 @@
 import { existsSync, lstatSync, readdirSync } from 'node:fs'
-import { open, rm, stat } from 'node:fs/promises'
 import { basename, join, relative, resolve } from 'node:path'
 import { $ } from 'bun'
 import { gitEnv } from '@/git/env'
 import { RECORD_ROOTS, recordRoot, SCRATCH } from '@/roots/record'
 import { type BlockedPath, guardPayload } from '@/records/push-guard'
+import { type LockTiming, withLock } from '@/records/push-lock'
 
 /**
  * The legacy `.claude`-root allowlist. That root also tracks `skills/`,
@@ -498,9 +498,9 @@ function refuseBlocked(blocked: readonly BlockedPath[]): BackupRefused {
 }
 
 /**
- * Resets HEAD and the index to the recorded head, since a soft reset leaves a
- * dropped name's deletion staged where the next diff never sees it. Returns
- * an error sentence when the undo itself failed, for the caller to append.
+ * Resets to the recorded head, since a soft reset leaves a dropped name's
+ * deletion staged, and removes the ref at the root commit, where `HEAD~1` does
+ * not exist. Returns an error sentence when the undo itself failed.
  */
 async function undoCommit(
   root: string,
@@ -524,67 +524,36 @@ async function undoCommit(
  */
 export async function pushRecords(
   root: string,
-  timing: PushLockTiming = PUSH_LOCK,
+  timing: LockTiming = PUSH_LOCK,
 ): Promise<PushOutcome> {
   // No history means no folder for the lock, and the body refuses unwritten.
   if (!existsSync(recordsGitDir(root))) return pushUnlocked(root)
   return withPushLock(root, timing, () => pushUnlocked(root))
 }
 
-/** How long a push waits on another push's lock, and the age past which a lock is a dead push's. */
-export interface PushLockTiming {
-  readonly waitMs: number
-  readonly staleMs: number
-}
-
 /**
- * A wave of ending sessions queues here, so the wait covers a few pushes. The
- * stale age sits at the 60 second ceiling Claude Code puts on a hook, past
- * which no hook-run push still holds the lock it took.
+ * A wave of ending sessions queues here, so the wait covers a few pushes and
+ * still fits the session-end hook's timeout with a push behind it.
  */
-const PUSH_LOCK: PushLockTiming = { waitMs: 10_000, staleMs: 60_000 }
-
-const PUSH_LOCK_POLL_MS = 50
+const PUSH_LOCK: LockTiming = { waitMs: 10_000, staleMs: 30_000 }
 
 /**
- * Holds an exclusive lock file inside the records history for one stage,
- * commit, push, and undo, so two pushes never collide on the records index or
- * have one undo reset past a commit the other made.
+ * Holds the lock inside the records history for one stage, commit, push, and
+ * undo, so two pushes never collide on the records index or have one undo
+ * reset past a commit the other made.
  */
 async function withPushLock(
   root: string,
-  timing: PushLockTiming,
+  timing: LockTiming,
   run: () => Promise<PushOutcome>,
 ): Promise<PushOutcome> {
   const lock = join(recordsGitDir(root), 'canon-push.lock')
-  const deadline = Date.now() + timing.waitMs
-
-  for (;;) {
-    try {
-      await (await open(lock, 'wx')).close()
-      break
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
-      const modified = (await stat(lock).catch(() => undefined))?.mtimeMs
-      if (modified !== undefined && Date.now() - modified > timing.staleMs) {
-        await rm(lock, { force: true })
-        continue
-      }
-      if (Date.now() >= deadline) {
-        return refuse(
-          'busy',
-          `Another records push holds ${relative(root, lock)}. Run canon records push again once it finishes.`,
-        )
-      }
-      await new Promise((settle) => setTimeout(settle, PUSH_LOCK_POLL_MS))
-    }
-  }
-
-  try {
-    return await run()
-  } finally {
-    await rm(lock, { force: true })
-  }
+  const held = await withLock(lock, timing, run)
+  if (!held.busy) return held.value
+  return refuse(
+    'busy',
+    `Another records push holds ${relative(root, lock)}. Run canon records push again once it finishes.`,
+  )
 }
 
 async function pushUnlocked(root: string): Promise<PushOutcome> {
