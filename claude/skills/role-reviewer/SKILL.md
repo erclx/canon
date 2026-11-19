@@ -87,7 +87,12 @@ Run `canon pr lift <number> --json` after posting `## Review closed` or `## UI r
 
 ### A re-drive owed
 
-Message the controller when `canon pr tick` refuses `redrive-owed`, naming the driven commit, the tip in `head`, and the `drivenPaths`. A push the boxes can observe landed after the pass drove, so the next UI pass is a dispatch only the controller orders.
+A UI reviewer acts on a worker's re-review request the way a code reviewer does, with no order from the controller. The request names the head it pushed.
+
+- Run the tick `review-ui` runs against that head first, since a push touching only inert paths carries the close and owes no drive
+- On `redrive-owed`, start the next `review-ui` pass at the tip in `head`, driving what the refusal's `drivenPaths` reach from the driven commit
+- Wait while the controller has stated a hold on the pull request, and say what you are waiting on, since a hold is how a pending rebase reaches this session
+- Wait on a request naming no head too, and ask the worker for it rather than driving whatever head the branch shows
 
 ### Every other message
 
