@@ -75,6 +75,7 @@ Vary one property across the arms, since a pick cannot say which of three differ
 - Vary the property the decision is about. Holding composition fixed and varying color produces five skins of one design, and a palette cannot be picked ahead of the composition it serves.
 - Grey-box the arms when the declared layer sits below typography, per `design-taste`, and say the set is grey-boxed when handing it over
 - Do not grey-box a set judged at composition that carries a finished palette, since the operator looks at the higher layers instead of the question
+- Add a contrast arm at composition or before, per `${CLAUDE_SKILL_DIR}/references/contrast-arm.md`
 
 ## Step 3: render and hand off
 
@@ -103,7 +104,7 @@ Hand over the address rather than a description. Emit the board link first on it
 Put the choice to the operator through the structured question surface, since a call the operator's preference decides always routes through it rather than through prose. Ask one round per question, behind `frameboard show` on its frames, as `${CLAUDE_SKILL_DIR}/references/drawing.md` states under Asking.
 
 - Emit the link ahead of the question call and again in the question's text, since some surfaces render the card alone
-- One option per arm, labeled with the arm's id and carrying its cost as the description
+- One option per arm, labeled by its id, with its cost as the description
 - Rank the recommendation first and mark it `(Recommended)`
 - Author the real arms only. The surface appends its own free-text and reopen escapes, and a duplicate is rejected.
 
@@ -167,7 +168,7 @@ Cite these rather than restating them. A step reimplemented here rots against th
 
 Commits, review, and the board mechanics each have an owner.
 
-- `git-stage`, `git-pr`, and `git-followup` carry the commits and the pull request
+- `git-stage`, `git-pr`, and `git-followup` carry commits and the pull request
 - `review-pr` and `review-address` run the review pass
 - `session-worktree` carries the main-root write route for a frame written from a linked worktree
 - Frameboard carries the board itself, and `frameboard docs --json` prints its verbs, record shapes, content format, and refusals
