@@ -128,7 +128,7 @@ The cursor stays outside the wrapper because a cursor inside it would scale with
 
 Every film and the pull request reel draw one look, the one Frameboard's launch film drew, so two films never disagree about the pointer.
 
-- The cursor is a dark arrow, `#111` outlined 1.5 units in white, on a 24-unit box drawn 56 px at a 1920-wide stage with its tip on the point, under `drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35))`
+- The cursor is an `rgb(17, 17, 17)` arrow outlined 1.5 units in white, on a 24-unit box drawn 56 px at a 1920-wide stage with its tip on the point, under `drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35))`
 - The ring is a 72 px circle with a 4 px `#2f7bf0` border, centered on the point, scaled `0.4 + ring` as a whole at opacity `1 - ring`, so its line thickens only as it fades
 - One arrow holds on every frame, since the log records no page cursor and a hand or a text cursor would be a guess
 
