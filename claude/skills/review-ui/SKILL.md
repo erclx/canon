@@ -133,7 +133,7 @@ Run four checks over every route the boxes reached, and nothing beyond them:
 
 - Console errors, through `canon browser`'s `console error` on each route.
 - Sideways overflow at each width a box named, as `document.documentElement.scrollWidth` against `clientWidth`.
-- The `focus` and `details` probes, through `canon drive <url> <run> --json` with a run file in the pass folder.
+- The `focus` and `details` probes, through `canon drive <url> <run> --json` with a run file in the pass folder naming `"colorScheme": ["light", "dark"]`, so every route is read in both themes.
 - The `axe` probe, named in the same run file and read by each finding's `gate` rather than a copy of the CLI's rule list. On `axe-missing`, drop it and name the refusal as an unread check.
 
 The probes launch their own browser at a URL, so a state the boxes reached by clicks reaches them only as steps the run file repeats. Where a state needs a step kind `canon drive` lacks, probe the route on arrival and say so.

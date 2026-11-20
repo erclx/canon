@@ -80,7 +80,7 @@ Driven at `<short-sha>` on <address>, rendered by <renderer>.
 
 **Sweep**
 
-- <route>, <width>: <console error, overflow, axe gate finding with its rule, or probe reading to confirm>
+- <route>, <width>, <theme>: <console error, overflow, axe gate finding with its rule, probe reading to confirm, or a theme not driven since both painted one background>
 
 **Guessed wording**
 
@@ -141,6 +141,7 @@ A needs-eyes box shows its dark and light shots in a two-cell table ahead of any
 The Passed block holds one row per passed box, with its measurement and the evidence stem it matched in backticks, so every reading stays one click away. A row citing a stem links it as the evidence image in the form above when the record holds the item.
 
 - Omit the Passed block when nothing passed, and the Sweep block when it found nothing
+- Read the light and dark pass of one step at one route and width carrying one `background` as a page that never answered `prefers-color-scheme`, and name dark not driven
 - Omit the Guessed wording block when every box named its route and width, and drop the folded block when both are empty
 
 ### An all-pass body

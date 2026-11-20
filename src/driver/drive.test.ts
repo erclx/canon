@@ -133,6 +133,47 @@ describe('readDriverPlan', () => {
     expect(read.detail).toContain('hover')
   })
 
+  it('should leave the color scheme unset when the document names none', () => {
+    const read = readDriverPlan(planSource({ steps: ONE_STEP }))
+
+    expect(read.kind).toBe('read')
+    if (read.kind !== 'read') return
+    expect(read.plan.colorSchemes).toBeUndefined()
+  })
+
+  it('should read a single color scheme as a sweep of one', () => {
+    const read = readDriverPlan(
+      planSource({ colorScheme: 'dark', steps: ONE_STEP }),
+    )
+
+    expect(read).toMatchObject({
+      kind: 'read',
+      plan: { colorSchemes: ['dark'] },
+    })
+  })
+
+  it('should read a list of color schemes in the order written', () => {
+    const read = readDriverPlan(
+      planSource({ colorScheme: ['light', 'dark'], steps: ONE_STEP }),
+    )
+
+    expect(read).toMatchObject({
+      kind: 'read',
+      plan: { colorSchemes: ['light', 'dark'] },
+    })
+  })
+
+  it.each([
+    ['a scheme outside light and dark', 'sepia'],
+    ['an empty list', []],
+    ['a list naming one scheme twice', ['dark', 'dark']],
+    ['a value that is neither a string nor a list', 1],
+  ])('should refuse %s as an unreadable plan', (_case, colorScheme) => {
+    const read = readDriverPlan(planSource({ colorScheme, steps: ONE_STEP }))
+
+    expect(read).toMatchObject({ kind: 'refused', reason: 'unreadable-plan' })
+  })
+
   it('should default a tab step to one press', () => {
     const read = readDriverPlan(
       planSource({ steps: [{ name: 'advance focus', kind: 'tab' }] }),
