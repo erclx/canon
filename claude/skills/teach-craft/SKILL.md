@@ -44,6 +44,15 @@ A board frame runs a quiz and cannot save what the learner picked, so the surfac
 - Keep the learning record on the board as a frame the session writes from what the learner reports, beside the lesson it records
 - Keep the record as a file beside the standalone lessons when the project has no board
 
+## The lesson kit
+
+Every lesson takes one look, shipped as the Frameboard kit folder `${CLAUDE_SKILL_DIR}/assets/lesson/`. Read its `kit.md` before writing a lesson page, for the page a lesson writes, the course map, and the classes to reach for.
+
+- On a board, run `frameboard kit add <project> --from ${CLAUDE_SKILL_DIR}/assets/lesson --json`, then `frameboard frame kit <page>/<frame> lesson --json` on each lesson frame
+- Without a board, copy the folder to `assets/kits/lesson/` in the lessons' folder, the path a board project holds it at, so one lesson page loads on both
+- Write the course's map as `course.js` in that same `assets/` folder, outside the kit, so a newer kit replaces the folder and the map survives
+- Move a board course to a newer kit with `frameboard kit remove`, then `kit add`, then `frame kit` on each lesson frame again, since the board refuses a kit the project already holds
+
 ## Excuses and rebuttals
 
 | Excuse                                    | Rebuttal                                                                                     |

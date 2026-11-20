@@ -43,3 +43,12 @@ The closing sections and `## What this delegates` restate these rules or route, 
 | Standalone HTML otherwise                  | House choice: a session refusing for want of a board teaches nothing in most projects, which keep no board                                                             | 2026-11-20 |
 | The record as a board frame                | House choice: a board frame runs a quiz and cannot save the learner's pick, so a record left to the frame is lost when the page reloads                                | 2026-11-20 |
 | The record as a file with no board         | House choice: a record kept only in the conversation is gone when it ends, so the next session places the learner from nothing                                         | 2026-11-20 |
+
+## The lesson kit
+
+| Bullet                                | Source                                                                                                                                             | Read       |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Add the kit on a board and set frames | House choice: adding a kit changes no frame, so a lesson frame never set to the kit draws on the board's own look and the course reads as two      | 2026-11-20 |
+| Copy the folder to `assets/kits/`     | House choice: a standalone course keeping the kit at another path needs a second copy of every lesson page's script tags, which drift between them | 2026-11-20 |
+| Keep `course.js` outside the kit      | House choice: a course map inside the kit folder is deleted with it when a newer kit replaces the folder                                           | 2026-11-20 |
+| Remove, add, and set a newer kit      | House choice: the board refuses a kit the project holds, and `kit remove` clears it from every frame, so a skipped step leaves frames on no kit    | 2026-11-20 |
