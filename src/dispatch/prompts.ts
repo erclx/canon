@@ -134,6 +134,8 @@ const ROLE_HEADINGS: Record<PromptRole, string> = {
 }
 
 const WORKER_COMMAND = /^\/canon:auto-ship (\S+)$/
+const PLAN_FIRST_COMMAND =
+  /^\/canon:auto-ship --plan-first(?: --any-size)? \.canon\/tasks\/(\S+)\.md$/
 const REVIEWER_COMMAND = /\/canon:review-pr (\d+)$/
 
 export function promptsPath(root: string): string {
@@ -281,10 +283,35 @@ async function writeQueue(root: string, queue: PromptQueue): Promise<void> {
   await writeFile(path, renderPrompts(queue), 'utf8')
 }
 
-function describe(prompt: Prompt): ListedPrompt {
+function isPlanFirst(prompt: Prompt): boolean {
+  return (
+    prompt.role === 'worker' && PLAN_FIRST_COMMAND.test(prompt.lines[0] ?? '')
+  )
+}
+
+/**
+ * A plan-first row carries no plan until its session links one, so its plan
+ * and branch are read off the task each time and stay absent until then.
+ */
+async function linkedPlan(root: string, stem: string): Promise<string | null> {
+  const path = join(tasksDir(root), `${stem}.md`)
+  if (!existsSync(path)) return null
+  const plan = planOf(root, { stem, path, text: await readFile(path, 'utf8') })
+
+  return typeof plan === 'string' ? plan : null
+}
+
+async function describe(root: string, prompt: Prompt): Promise<ListedPrompt> {
   const command = prompt.lines[0] ?? ''
 
   if (prompt.role === 'worker') {
+    const planFirst = PLAN_FIRST_COMMAND.exec(command)
+    if (planFirst) {
+      const plan = await linkedPlan(root, planFirst[1])
+      return plan === null
+        ? prompt
+        : { ...prompt, plan, branch: branchOfPlan(plan) }
+    }
     const worker = WORKER_COMMAND.exec(command)
     if (worker) {
       return { ...prompt, plan: worker[1], branch: branchOfPlan(worker[1]) }
@@ -307,9 +334,9 @@ async function sharesPath(
   root: string,
   prompts: readonly Prompt[],
 ): Promise<boolean> {
-  const plans = prompts
-    .map(describe)
-    .flatMap((prompt) => (prompt.plan === undefined ? [] : [prompt.plan]))
+  const plans = (
+    await Promise.all(prompts.map((prompt) => describe(root, prompt)))
+  ).flatMap((prompt) => (prompt.plan === undefined ? [] : [prompt.plan]))
   const declared = await Promise.all(
     plans.map(async (plan) => {
       const path = join(root, plan)
@@ -531,9 +558,11 @@ export async function addPrompt(
     ],
   }
 
-  const listed = describe(prompt)
+  const listed = await describe(root, prompt)
   const ownUnread: string[] = []
-  if (listed.branch !== undefined) {
+  if (isPlanFirst(prompt) && listed.branch === undefined) {
+    ownUnread.push(label)
+  } else if (listed.branch !== undefined) {
     const reading = await readClaim(listed.branch)
     if (!reading.readable) ownUnread.push(listed.branch)
     if (reading.claimed) {
@@ -544,7 +573,7 @@ export async function addPrompt(
     }
   }
 
-  const pruned = await pruneClaimed(queue.prompts, readClaim)
+  const pruned = await pruneClaimed(root, queue.prompts, readClaim)
   const index = pruned.kept.findIndex(
     (queued) => queued.label === label && queued.role === role,
   )
@@ -588,12 +617,13 @@ function claimReaderAt(root: string): ClaimReader {
  * prompt nobody launched.
  */
 async function pruneClaimed(
+  root: string,
   prompts: readonly Prompt[],
   readClaim: ClaimReader,
 ): Promise<{ kept: Prompt[]; dropped: DroppedPrompt[]; unread: string[] }> {
   const readings = await Promise.all(
     prompts.map(async (prompt) => {
-      const branch = describe(prompt).branch
+      const branch = (await describe(root, prompt)).branch
       return branch === undefined
         ? { prompt, branch, reading: null }
         : { prompt, branch, reading: await readClaim(branch) }
@@ -605,6 +635,7 @@ async function pruneClaimed(
   const unread: string[] = []
   for (const { prompt, branch, reading } of readings) {
     if (branch === undefined || reading === null) {
+      if (isPlanFirst(prompt)) unread.push(prompt.label)
       kept.push(prompt)
     } else if (!reading.readable) {
       unread.push(branch)
@@ -671,6 +702,8 @@ export async function listPrompts(root: string): Promise<ListOutcome> {
     ok: true,
     path: relative(root, promptsPath(root)),
     mergeOrder: queue.mergeOrder,
-    prompts: queue.prompts.map(describe),
+    prompts: await Promise.all(
+      queue.prompts.map((prompt) => describe(root, prompt)),
+    ),
   }
 }

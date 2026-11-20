@@ -357,6 +357,67 @@ describe('claimed branches', () => {
     })
   })
 
+  describe('plan-first rows', () => {
+    const linkPlan = async (): Promise<void> => {
+      await writePlan('delta', ['src/d.ts'])
+      await writeTask('v1.4-unplanned', 'Unplanned row', 'feature-delta')
+    }
+
+    it('should report its own row under claimUnread by label before a plan links', async () => {
+      const outcome = await add(buildInput({ task: 'v1.4', planFirst: true }))
+
+      expect(outcome).toMatchObject({ ok: true, claimUnread: ['v1.4'] })
+      expect(outcome).not.toHaveProperty('prompt.branch')
+    })
+
+    it('should keep a queued row with no plan and report it under claimUnread', async () => {
+      await add(buildInput({ task: 'v1.4', planFirst: true }))
+
+      const outcome = await add(buildInput({ task: 'v1.3' }))
+
+      expect(outcome).toMatchObject({
+        ok: true,
+        dropped: [],
+        claimUnread: ['v1.4'],
+      })
+      expect(await listPrompts(ROOT)).toMatchObject({
+        prompts: [{ label: 'v1.4' }, { label: 'v1.3' }],
+      })
+    })
+
+    it('should list the branch and plan once the task links a plan', async () => {
+      await add(buildInput({ task: 'v1.4', planFirst: true }))
+      await linkPlan()
+
+      const listed = await listPrompts(ROOT)
+
+      expect(listed).toMatchObject({
+        prompts: [
+          {
+            label: 'v1.4',
+            role: 'worker',
+            plan: '.canon/plans/feature-delta.md',
+            branch: 'feat/delta',
+          },
+        ],
+      })
+    })
+
+    it('should drop a queued row once the branch its linked plan names is claimed', async () => {
+      await add(buildInput({ task: 'v1.4', planFirst: true }))
+      await linkPlan()
+      CLAIMED.add('feat/delta')
+
+      const outcome = await add(buildInput({ task: 'v1.3' }))
+
+      expect(outcome).toMatchObject({
+        ok: true,
+        dropped: [{ label: 'v1.4', role: 'worker', branch: 'feat/delta' }],
+        claimUnread: [],
+      })
+    })
+  })
+
   it('should queue a reviewer row for a task whose worker branch is claimed', async () => {
     CLAIMED.add('feat/alpha')
 
