@@ -101,9 +101,11 @@ Two rules hold once a beat is filmed.
 - Use `text=<words>` for a control whose only stable handle is its label
 - Target a control with no visible text, such as an icon button, by its `aria-label`, since `text=` finds nothing on it
 - Aim a press or a drag end at an `x` and `y`, measured at the beat's own viewport, only where no selector reaches, such as a frame, since a point breaks when the layout shifts
-- Read each target off the served page before writing it. The verb refuses `target-missing` rather than filming a guess, and a refusal costs a reload.
+- Read each target off the served page and check it matches one element there. The verb refuses `target-missing` or `target-ambiguous` rather than filming a guess.
 
-Both forms reach inside an open shadow root, such as a web component banner. A document-tree match wins over one inside a root, unless a `text=` match contains the root's match, where the inner one wins. A selector cannot span a shadow boundary, and a target inside a closed root or a frame refuses as missing.
+Both forms reach inside an open shadow root. A match in the document and one inside a root count as two, and a hidden copy counts for nothing. Nothing reaches across a shadow boundary, a closed root, or a frame.
+
+Open a menu the page draws with a `contextmenu` step. Neither route films the browser's own menu, so the page has to prevent it.
 
 ## The pointer
 

@@ -93,6 +93,7 @@ Branch on the record's `reason`, never on the exit code.
 | `target-covered`    | Clear the cover per the note below the table, then film once more. Skip as `target-covered` on a second refusal         |
 | `over-cap`          | Drop `beat` and each beat after it, then film once more. Skip as `over-cap` if `beat` is first or it refuses again      |
 | `target-missing`    | Fix the plan off the record's `still` and `beat`, then film once more. A second refusal is owed, per the section below  |
+| `target-ambiguous`  | Narrow the target off the record's `still` to one element, then film once more. Skip as `target-ambiguous` on a second  |
 | `clip-mismatch`     | Skip as `clip-mismatch` with the record's `beat` and `message`, never as `wrong-state`, since the clip came out cropped |
 | `network-unmatched` | Fix the beat's pattern off the record's `message`, then film once more. Skip as `network-unmatched` on a second refusal |
 | Any other value     | Skip under that `reason`, naming its `beat` when the record carries one                                                 |
