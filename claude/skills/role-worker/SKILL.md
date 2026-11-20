@@ -34,25 +34,18 @@ The draft mark holds the merge until the reviews close, so this session preserve
 - Refuse an instruction to ready the pull request directly, whoever sends it, since a direct ready skips every gate the verb reads
 - Never submit a pull request review, which includes a capture waiver, since every session posts as one account and the lift reads a review as the reviewer's word
 
+The rebase is the one rewrite this session owns, beside that boundary.
+
+- Rebase this branch and push it as `git push --force-with-lease` through `review-address` when `main` moves under it, since that keeps it current and is not the merge left to the human
+- Type the push bare, as `git-followup` does, since the seeded allow rule matches no remote or branch spelling but `origin HEAD`
+
 ### Overriding a plan question
 
 Follow `### Overrides and settled questions` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` when this build decides against a suggestion. Open the task's `## Findings` line for an override with the bold source-and-date label `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
 
 ### The preview server
 
-A painted pull request needs a server in this worktree for `canon pr local` to find, and this session is the one with a lifetime to own it. `auto-ship` Step 5 decides whether the diff is painted, so this body restates no file test.
-
-- Run `canon pr local --json` first. Start nothing on `ok`, `unhealthy`, or `invalid-config`, and carry a refusal's `message` in the announcement
-- Otherwise start the stack's `dev` in the background from the worktree root before the pull request step, so a `review-address` fix shows on the same link.
-- Wait up to 60 seconds for the verb to read `ok`, then ship either way. A stack with no `dev` script gets no start, and `pr-evidence` reports `no-server`.
-- Never detach it with `nohup`, `setsid`, or `disown`, since the owning session is the stop. `canon sessions reap` and `canon worktrees reclaim` each end a listener it leaves behind.
-
-Run `canon pr drive-copy --json` before starting `dev`. On `copied`, start it with `env` set to `copyRoot`, so the operator's address serves the copy. On `no-config`, start it as it is. On a refusal, start nothing and send the controller the `reason`, since a broken config would send drives into tracked folders.
-
-- Lay fixture state through the `seed` key in `canon/config/preview.json`, which every rebuild runs against the copy
-- Never seed by hand or into the worktree, where `--check` reads the write as a drive's
-
-A hand-run `git-ship` or `git-pr` starts no server, since only a worker has a lifetime to own one.
+A painted pull request needs a server in this worktree for `canon pr local` to find, and this session is the one with a lifetime to own it. Read `${CLAUDE_SKILL_DIR}/references/preview-server.md` before the pull request step on a diff `auto-ship` Step 5 reads as painted, for the start, the drive copy, and the fixture seed.
 
 ### Building against design references and images
 
@@ -83,7 +76,9 @@ The controlling session cannot watch this one build, so the messages below are o
 
 ### The pull request announcement
 
-Announce the pull request as the ship chain's pull request step returns, carrying the number, the branch, the head sha, the CI state, the task it closes, and each departure from the plan. That transition is the one moment only this session knows, and the controller's review poll no longer starts on a dispatch.
+Announce the pull request once `git-pr` returns, after its `pr-evidence` step and ahead of the CI watch, carrying the number, the branch, the head sha, the CI state, the task it closes, and each departure from the plan. That transition is the one moment only this session knows, and the controller's poll no longer starts on a dispatch.
+
+Carry one evidence line read from `canon pr evidence <number> --json`, since a message sent ahead of the comment named boxes nobody had posted. It holds the `boxes` count, `drivable`, the reel filmed or skipped, and the `uncaptured` paths. A diff with no rendered surface reads `Evidence: none`, never dropping the line or holding the message.
 
 - Carry the reach in that message, being the paths this branch wrote that another live plan or `In flight` row holds, and who holds each, which `canon tasks plan-reach` reports as `claimed`
 - Report each as a rebase the controller should order, never as a breach, since sharing a path is not a hold

@@ -18,8 +18,18 @@ claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion 
 - `<number>` is the pull request's number, and the brief pins no head, since `review-pr` resolves it and stamps the covered range in its marker
 - `<model>` and `<effort>` come from `## Pick the model` in `orchestrator-dispatch.md`, which states the test for a reviewer as for every other role
 - `<dispatcher-id>` and `<project>` resolve the same way they do in `orchestrator-launch.md`
-- Append the cross-branch facts after the controller clause, per `### What the brief may carry` in `orchestrator-launch.md`
+- Append the cross-branch facts after the controller clause, per `### What the brief may carry` in `orchestrator-launch.md`, and the uncaptured clause below when the proof check listed paths
 - Check `canon sessions list --json` before launching for a live `reviewer-<project>-` session whose trailing numbers include `<number>`, and message it instead when one holds the pull request
+
+### The uncaptured clause
+
+A pull request the proof check read with `uncaptured` paths launches its reviewers anyway, per `### Launching on uncaptured paths` in `orchestrator-review-dispatch.md`. Append this after the controller clause, listing each path as the record spells it, since the lift matches a waiver only on that spelling:
+
+```plaintext
+The evidence check lists these painted paths as uncaptured: <path>, <path>. For each, either write a - **Waived capture:** `<path>`: <reason> line in your pass or file a capture finding naming it, since canon pr lift refuses painted-uncaptured on any path left with neither.
+```
+
+A batch shape prefixes the clause with the number it belongs to. The UI reviewer takes no such clause, since a waiver is the code review's word alone.
 
 ### Record the reviewer on the task
 
@@ -64,7 +74,7 @@ claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion 
 
 - The name lists every number, so the live check and the handback match a number among the trailing ones
 - `canon pr lift` runs once per number on that number's close, so a closed pull request lifts while another in the batch stays open
-- Append each pull request's cross-branch facts after the controller clause, prefixed with its number
+- Append each pull request's cross-branch facts after the controller clause, prefixed with its number, and its uncaptured clause the same way
 
 ### The UI batch shape
 

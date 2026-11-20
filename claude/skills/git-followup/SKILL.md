@@ -49,9 +49,9 @@ Steps 1 to 3 run only when the tree is dirty. A clean tree carrying unpushed com
 3. Invoke `canon:git-commit` to generate one conventional commit from the staged diff
 4. Push, in one of two cases.
    - When `git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null` is empty, no ref tracks the branch, so run `git push -u origin HEAD` to push and set the ref in one step.
-   - Otherwise run `git push`, and when `git merge-base --is-ancestor @{u} HEAD` exits non-zero, a caller rewrote the branch, so use `--force-with-lease`, since a plain push is rejected.
+   - Otherwise run `git push`, and when `git merge-base --is-ancestor @{u} HEAD` exits non-zero, a caller rewrote the branch, so run `git push --force-with-lease`, since a plain push is rejected.
 
-   The lease is what stops the force from overwriting a commit this session never read. Run the ancestry test only where an upstream resolves, since it reads `@{u}`.
+   The lease is what stops the force from overwriting a commit this session never read. Type it with no remote or branch, the form the seeded allow rule matches. Run the ancestry test only where an upstream resolves, since it reads `@{u}`.
 
 5. Invoke `canon:pr-evidence` with `<number>` on every invocation, `reply-owned` included, since it is not step 8's reply.
    - It edits the marked comment in place, carries the checklist forward, and mints the preview only when the thread still owes one
