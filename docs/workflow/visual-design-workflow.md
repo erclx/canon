@@ -41,7 +41,7 @@ Before the pull request opens, the worker runs two checks.
 - `details` reads disclosure state
 - `axe` runs the accessibility engine
 
-Run `canon drive --help` for the step kinds and the run file shape.
+Run `canon drive --help` for the step kinds and the run file shape. A run file naming `"colorScheme": ["light", "dark"]` drives every viewport once per theme, and each pass and finding then carries its `colorScheme`. A run naming none renders the page's default theme alone.
 
 ## Review
 
@@ -57,7 +57,7 @@ After the boxes, `review-ui` sweeps every route they reached:
 
 - console errors on each route
 - sideways overflow at each width a box named
-- the `focus`, `details`, and `axe` probes through `canon drive`
+- the `focus`, `details`, and `axe` probes through `canon drive`, in light and dark
 
 ## What holds a review open
 
