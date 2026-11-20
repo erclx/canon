@@ -31,9 +31,10 @@ No operator is present, so the run is unattended end to end.
 
 ## With no server to film
 
-A reel the comment already carries goes forward under the older head it names. With no reason beside it, the lift's `reel-unsettled` reads as unexplained, so a local reason other than `ok` films nothing and ends here.
+A reel the comment already carries goes forward under the older head it names. With no reason beside it, the lift's `reel-unsettled` reads as unexplained, so any local reading other than `ok` films nothing and ends here, a missing one included.
 
 - When the record carries a `reel` whose head the caller found trailing the tip, skip as `no-server: <local reason>`, naming the reason the local read returned
+- When the local step held no record at all, as an older binary answers, skip as `no-server: unread` on a trailing reel
 - When the record carries no reel, skip silently, since nothing trails
 - The lift reads `no-server` as a skip no waiver settles, since the builder clears it by starting the server and pushing again
 

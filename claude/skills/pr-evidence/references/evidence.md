@@ -51,7 +51,7 @@ Pass `--local` to the evidence step only on an `ok`. The binary answering `ok` i
 
 ## Film the reel
 
-A screenshot cannot show an interaction move, so a pull request whose checklist asks a reviewer to click, fill, or scroll gets one short looping reel of it in the evidence comment. This skill never starts a server, so on a local reason other than `ok`, `reel.md` turns a trailing reel into a skip.
+A screenshot cannot show an interaction move, so a pull request whose checklist asks a reviewer to click, fill, or scroll gets one short looping reel of it in the evidence comment. This skill never starts a server, so on any local reading but `ok`, a missing one included, `reel.md` turns a trailing reel into a skip.
 
 Read what the comment already carries first, since a later head reaches this step with the handoff file deleted:
 
