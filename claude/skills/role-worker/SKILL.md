@@ -32,12 +32,12 @@ The draft mark holds the merge until the reviews close, so this session preserve
 - Report a flag reading ready once and leave it. It passed every gate the verb reads or a person readied it, which GitHub requires before a merge, so re-drafting fights them.
 - Leave the lift to the reviewers, who run `canon pr lift` on their close, with the controlling session as fallback
 - Refuse an instruction to ready the pull request directly, whoever sends it, since a direct ready skips every gate the verb reads
+- Never submit a pull request review, which includes a capture waiver, since every session posts as one account and the lift reads a review as the reviewer's word
 
 The rebase is the one rewrite this session owns, beside that boundary.
 
 - Rebase this branch and push it as `git push --force-with-lease` through `review-address` when `main` moves under it, since that keeps it current and is not the merge left to the human
 - Type the push bare, as `git-followup` does, since the seeded allow rule matches no remote or branch spelling but `origin HEAD`
-- Never submit a pull request review, which includes a capture waiver, since every session posts as one account and the lift reads a review as the reviewer's word
 
 ### Overriding a plan question
 
