@@ -75,6 +75,12 @@ export interface CameraTrack {
   readonly version: typeof CAMERA_VERSION
   readonly viewport: { readonly width: number; readonly height: number }
   readonly fps: number
+  /**
+   * False on a beat no hand drives, where a composition draws no cursor and
+   * no ring. Every frame still carries a cursor point, so a reader of frames
+   * alone changes nothing.
+   */
+  readonly hand?: false
   readonly frames: readonly CameraFrame[]
 }
 
@@ -156,7 +162,8 @@ export function cameraTrack(
       (height * FILL) / Math.max(box.height, 1),
     )
 
-  const aims = (log.push === false ? [] : log.events)
+  const held = log.push === false || log.hand === false
+  const aims = (held ? [] : log.events)
     .flatMap((event): Aim[] =>
       aimsOf(event, depthFor, deepest, options.focus === true),
     )
@@ -213,6 +220,7 @@ export function cameraTrack(
     version: CAMERA_VERSION,
     viewport: log.viewport,
     fps: log.fps,
+    ...(log.hand === false ? { hand: false as const } : {}),
     frames,
   }
 }

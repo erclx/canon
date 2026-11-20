@@ -45,7 +45,10 @@ export interface ReelFrame extends Frame {
   readonly beat: number
   /** The frame's place in its beat, which draws camera frame `index * REEL_EVERY`. */
   readonly index: number
-  /** Where the pointer's tip was drawn, in reel pixels. */
+  /**
+   * Where the pointer's tip was drawn, in reel pixels, or would sit on a beat
+   * no hand drives, which draws none.
+   */
   readonly pointer: Point
   /** How far the click ring had expanded, 0 to 1, or null with none drawn. */
   readonly ring: number | null
@@ -98,7 +101,8 @@ export async function* reelFrames(
         x: (cursor.x - view.x) * view.scale * factor,
         y: (cursor.y - view.y) * view.scale * factor,
       }
-      const ring = at?.ring ?? null
+      const hand = camera.hand !== false
+      const ring = hand ? (at?.ring ?? null) : null
       const frame = {
         data: crop({ data, ...source }, view, width, height),
         width,
@@ -108,7 +112,7 @@ export async function* reelFrames(
         pointer,
         ring,
       }
-      if (at) drawPointer(frame, pointer, ring)
+      if (at && hand) drawPointer(frame, pointer, ring)
       yield frame
       index += 1
     }

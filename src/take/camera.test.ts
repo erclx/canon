@@ -444,6 +444,34 @@ describe('cameraTrack', () => {
     })
   })
 
+  describe('no hand', () => {
+    const log: TakeLog = {
+      ...takeOf([{ t: 2000, at: { x: 400, y: 300 } }]),
+      hand: false,
+    }
+
+    it('should aim nowhere, even at a click the beat ran', () => {
+      const { frames } = cameraTrack(log)
+
+      expect(new Set(frames.map((f) => `${f.scale} ${f.x} ${f.y}`))).toEqual(
+        new Set(['1 0 0']),
+      )
+    })
+
+    it('should carry the flag on the track and keep each frame a point', () => {
+      const track = cameraTrack(log)
+
+      expect(track.hand).toBe(false)
+      expect(at(track.frames, 2000).cursor).toEqual({ x: 400, y: 300 })
+    })
+
+    it('should carry no flag on a track whose beat a hand drives', () => {
+      const track = cameraTrack(takeOf([{ t: 2000, at: { x: 400, y: 300 } }]))
+
+      expect(track).not.toHaveProperty('hand')
+    })
+  })
+
   describe('playback rate', () => {
     const log = takeOf([{ t: 4000, at: { x: 400, y: 300 } }])
 
