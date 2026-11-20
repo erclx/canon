@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { escapeHtml, holdOn, pacer } from './scene'
+import { armEntry, escapeHtml, holdOn, pacer } from './scene'
 
 describe('pacer', () => {
   beforeEach(() => {
@@ -106,6 +106,41 @@ describe('holdOn with a pause button', () => {
 
     expect(button.attributes['aria-label']).toBe('Play the animation')
     expect(button.attributes['data-paused']).toBe('true')
+  })
+})
+
+describe('armEntry', () => {
+  const stage = () => {
+    const classes = new Set<string>()
+    return { classes, classList: { add: (name: string) => classes.add(name) } }
+  }
+
+  it('should arm the section and play once it comes into view', () => {
+    const node = stage()
+    let enter = () => {}
+    const play = vi.fn()
+
+    const armed = armEntry(node, false, (_, onEnter) => (enter = onEnter), play)
+    const before = [...node.classes]
+    enter()
+
+    expect(armed).toBe(true)
+    expect(before).toEqual(['armed'])
+    expect([...node.classes]).toEqual(['armed', 'in'])
+    expect(play).toHaveBeenCalledOnce()
+  })
+
+  it('should leave the section at its end state under reduced motion', () => {
+    const node = stage()
+    const watch = vi.fn()
+    const play = vi.fn()
+
+    const armed = armEntry(node, true, watch, play)
+
+    expect(armed).toBe(false)
+    expect([...node.classes]).toEqual([])
+    expect(watch).not.toHaveBeenCalled()
+    expect(play).not.toHaveBeenCalled()
   })
 })
 

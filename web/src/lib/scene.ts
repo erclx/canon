@@ -67,5 +67,46 @@ export function holdOn(
 export const reducedMotion = () =>
   matchMedia('(prefers-reduced-motion: reduce)').matches
 
+/** The part of a section `armEntry` marks, so a test can hand it a plain object. */
+interface Stage {
+  readonly classList: { add(token: string): void }
+}
+
+/**
+ * Marks a section `armed`, which its sheet reads to hold the motion's start
+ * state, then `in` and `play` once `watch` reports it in view. Under reduced
+ * motion it marks nothing, so the sheet's unmarked rules show the end state.
+ */
+export function armEntry<T extends Stage>(
+  node: T,
+  reduced: boolean,
+  watch: (node: T, enter: () => void) => void,
+  play: () => void = () => {},
+): boolean {
+  if (reduced) return false
+  node.classList.add('armed')
+  watch(node, () => {
+    node.classList.add('in')
+    play()
+  })
+  return true
+}
+
+function watchOnce(node: Element, enter: () => void) {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return
+      observer.disconnect()
+      enter()
+    },
+    { threshold: 0.25 },
+  )
+  observer.observe(node)
+}
+
+/** Plays a section's motion once, the first time a quarter of it is in view. */
+export const playOnEntry = (node: Element | null, play?: () => void) =>
+  node ? armEntry(node, reducedMotion(), watchOnce, play) : false
+
 export const escapeHtml = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;')
