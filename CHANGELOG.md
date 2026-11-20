@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.106.0](https://github.com/erclx/canon/compare/v5.105.0...v5.106.0) (2026-11-20)
+
+
+### Features
+
+* **take:** fail a take's beats on the camera and cursor timing rules ([#3284](https://github.com/erclx/canon/issues/3284)) ([59a95a7](https://github.com/erclx/canon/commit/59a95a78182f01087b3d32a3d8540d5208942212))
+* **take:** pace the cursor, hold one zoom per glide, and add a hand key ([#3280](https://github.com/erclx/canon/issues/3280)) ([57423d2](https://github.com/erclx/canon/commit/57423d289fe54896a89d73f0f9cfafb9e1c6fa22))
+* **teach-craft:** add explanation and presentation references ([#3281](https://github.com/erclx/canon/issues/3281)) ([64975d0](https://github.com/erclx/canon/commit/64975d0a8822cd70e90816af3c5d2918cc109ec3))
+* **teach-craft:** ship the lesson look as a Frameboard kit folder ([#3283](https://github.com/erclx/canon/issues/3283)) ([fc41ff9](https://github.com/erclx/canon/commit/fc41ff98e829e9f9a52cdb51f7fabf422e653f40))
+
 ## [5.105.0](https://github.com/erclx/canon/compare/v5.104.0...v5.105.0) (2026-11-20)
 
 
