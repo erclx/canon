@@ -38,7 +38,7 @@ A harness runs the page and whatever acts on it in one script, so anything that 
 
 ## The page
 
-A headless browser answers some page requests in ways a take cannot film, and `canon take` stubs them on both its routes. A harness drives its own browser, so it installs the same stub before the page loads.
+A headless browser answers some page requests in ways a take cannot film. `canon take` stubs fullscreen on both its routes, and a harness drives its own browser, so it installs that stub before the page loads and adds a pointer lock no-op the verb lacks.
 
 - Answer `requestFullscreen` without resizing the window. Headless Chromium paints a real request at its 800x600 default screen, so a 1920x1080 screencast films that corner.
 - Answer `requestPointerLock` as a no-op, since a pointer-locked scrub closed the headless page mid-take on one app's film
@@ -132,10 +132,10 @@ The route comes from the verb's help, and the script, server, and step rules fro
 
 The page and log rules come from the verb's own behavior and from a second app's present mode.
 
-| Rule                           | Source                                                                                                 |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `ms` and `points` on the log   | The `type` and `move` events `canon take` writes, which the camera and the drawn cursor read           |
-| Paced drags                    | Frameboard's split compare, whose divider lagged a burst of moves until each step was paced and logged |
-| Measured times and drag helper | A launch film whose hand-timed drag log ran ahead of the drag, per the verb's own `move` events        |
-| Fullscreen and pointer lock    | A launch film whose present mode filmed an 800x600 corner, matching the stub `canon take` installs     |
-| The still from the clip        | The same film, whose `page.screenshot` still passed a clip holding the corner                          |
+| Rule                           | Source                                                                                                    |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `ms` and `points` on the log   | The `type` and `move` events `canon take` writes, which the camera and the drawn cursor read              |
+| Paced drags                    | Frameboard's split compare, whose divider lagged a burst of moves until each step was paced and logged    |
+| Measured times and drag helper | A launch film whose hand-timed drag log ran ahead of the drag, per the verb's own `move` events           |
+| Fullscreen and pointer lock    | A launch film whose present mode filmed a corner, matching the verb's fullscreen stub, and a closed scrub |
+| The still from the clip        | The same film, whose `page.screenshot` still passed a clip holding the corner                             |

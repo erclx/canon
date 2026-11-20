@@ -135,7 +135,7 @@ Close the throwaway copy per `isolate.md` when Step 1 built one, after the still
 
 ### Write the footage page
 
-Write `.canon/video/<slug>/footage.html` from `takes/take.json` before handing off, through the same whole-file route as `plan.json`, so the operator watches every take before anything is composed. `handoff.md` states each card and what the page must never copy.
+Write `.canon/video/<slug>/footage.html` from `takes/take.json` and any harness beat folder beside it before handing off, through the same whole-file route as `plan.json`, so the operator watches every take before anything is composed. `handoff.md` states each card and what the page must never copy.
 
 ### Write the workspace README
 

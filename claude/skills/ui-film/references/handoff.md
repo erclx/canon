@@ -29,7 +29,7 @@ A refilm replaces the beat's folder whole, so every file in it is rebuilt or gon
 Regenerate a refilmed harness take in this order, since each step reads the one before it.
 
 1. Film the beat again with its script in `harness/`, transcoding its recording to `clip.mp4` beside the new `log.json`.
-2. Write `still.jpg` from the new clip, per `harness.md`, and read it with the motion check in Step 4.
+2. Write `still.jpg` from the new clip, per `harness.md`, and read it the way Step 4 reads each take's still.
 3. Rebuild the camera track with `canon take camera <dir>/log.json --out <dir>/camera.json`.
 4. Write the footage page again, so its card shows the new take.
 
@@ -37,9 +37,14 @@ Stop a composition before it renders when a take holds a `log.json` and no `came
 
 ## The footage page
 
-The operator approves the beats in words and sees no footage until a cut, so a bad take found then has compose work resting on it. Step 5 writes `.canon/video/<slug>/footage.html` from `take.json`, one page where every take plays before anything is composed.
+The operator approves the beats in words and sees no footage until a cut, so a bad take found then has compose work resting on it. Step 5 writes `.canon/video/<slug>/footage.html` from the takes folder, one page where every take plays before anything is composed.
 
-Write the page whole each time Step 5 runs, since `take.json` is its only source and a refilm changes it. One card per beat, in `take.json` order, carries what a reviewer needs to judge the take.
+Write the page whole each time Step 5 runs, since a refilm changes its sources. One card per beat carries what a reviewer needs to judge the take.
+
+- Take the beats `take.json` lists, in its order
+- Add each folder under `takes/` holding a `clip.mp4` that `take.json` does not list, since a harness beat films outside the verb and never reaches it. Order these by folder name after the listed beats.
+
+The table reads a listed beat's record. A harness beat has no record, so its card takes the folder's name, `harness` as its route, and its length from `ffprobe` on the clip.
 
 | Card part | Read from                                                                           |
 | --------- | ----------------------------------------------------------------------------------- |
@@ -48,7 +53,7 @@ Write the page whole each time Step 5 runs, since `take.json` is its only source
 | Length    | The beat's `seconds`                                                                |
 | Route     | The beat's `route`, with `fallback` named when the record carries it                |
 | File      | The clip's path relative to the workspace                                           |
-| Flaw      | What the still and the motion check found, or nothing when both passed              |
+| Flaw      | What Step 4's read of the still found, or nothing when it passed                    |
 
 ### Building the page
 
