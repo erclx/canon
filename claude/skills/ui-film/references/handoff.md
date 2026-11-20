@@ -51,13 +51,14 @@ The workspace holds what a re-film and a re-render need, and the rest clears.
 - Hold dry runs, debug passes, and candidate media in `scratch/` only until the take or pick they served lands, then clear them
 - Promote a dry run to `takes/` before a composition reads it, since `scratch/` clears
 
-A cut in another shape and the README loop are each a project of their own beside `composition/`, so one shape's edit never reflows another's. Each reads the takes from `../takes/` the same way.
+A cut in another shape, the README loop, and a grid's loop clips are each a project of their own beside `composition/`, so one shape's edit never reflows another's. Each reads the takes from `../takes/` the same way.
 
-| Project                | Holds                                            |
-| ---------------------- | ------------------------------------------------ |
-| `composition/`         | The main cut, in the takes' 16:9 shape           |
-| `composition-<shape>/` | One other shape, such as `composition-square/`   |
-| `readme-loop/`         | The short silent loop a README plays as its hero |
+| Project                | Holds                                                    |
+| ---------------------- | -------------------------------------------------------- |
+| `composition/`         | The main cut, in the takes' 16:9 shape                   |
+| `composition-<shape>/` | One other shape, such as `composition-square/`           |
+| `readme-loop/`         | The short silent loop a README plays as its hero         |
+| `grid-loops/`          | The short silent loops a page's grid plays, one per cell |
 
 Compose from a session started at the main worktree root. From a linked worktree or an isolated background session, `Write` and `Edit` refuse every file in `composition/` and redirect to a worktree copy no later session reads, so never take that redirect.
 

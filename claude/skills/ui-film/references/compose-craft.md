@@ -40,18 +40,19 @@ Cut a square or vertical version only when the operator asks for one. A film wit
 
 Cut a loop only when the operator asks for one, such as a README hero or a set of short clips for a page's grid. A loop plays inline and silently, so it is a short clip rather than a cut of the film.
 
-- Cut it from the raw take showing the app's core action, rather than from a render, in the workspace folder `handoff.md` names for it
+- Cut it from the raw take showing the app's core action, rather than from a render, in the workspace folder `handoff.md` names for its kind
 - Crop it to the canvas, or for a grid to its cell's own shape such as 16:10, so no browser margin or page chrome outside the app shows
-- End it on the finished state, held long enough to read before the loop restarts
+- End it on the finished state, held long enough to read before the restart
 - Export a README hero as an animated WebP under about 2 MB, since a README renders one inline where a video needs a player. Frameboard's loop played inline at 1.72 MB.
 - Give each grid clip a size budget, and step the encoder quality down until the clip fits
 
 ### The seam
 
-A loop that jumps on restart reads as broken on every cycle. A dissolve back to the first frame that finishes on the clip's last frame leaves that frame mid-fade, which one grid clip measured at 25.8 dB.
+A loop that jumps on restart reads as broken on every cycle. A dissolve ending on the clip's last frame leaves it mid-fade, which one grid clip's seam measured at 25.8 dB.
 
 - End the dissolve to the first frame at least two frames before the clip ends, and hold it, so the rendered last frames match the first
 - Check the seam on the rendered file with ffmpeg `psnr` between its first and last frames, since a preview snapshot just before the end passed a seam the render failed
+- Pass a seam that reads about as high as two neighboring frames of the held end, which is the encoder's own noise, and fail one well below that pair
 
 ## Pacing
 
