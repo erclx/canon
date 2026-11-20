@@ -91,7 +91,7 @@ A description of a layout settles nothing. Canon drives the running app beside y
 
 ## Audits that report where the code is rotting
 
-Generated code grows long files nobody reads. Canon measures file, function, and comment length, and charts what shipped each week.
+Find the long files and functions generated code piles up. canon measures file, function, and comment length, and charts what shipped each week.
 
 ## Setting up a project
 

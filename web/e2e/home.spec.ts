@@ -745,6 +745,41 @@ test.describe('the board night', () => {
   })
 })
 
+test.describe('the health ranking', () => {
+  test('grows its bars past the checkpoint once in view', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+    const bar = page.locator('#health .trk i').first()
+    const check = page.locator('#health .ck').first()
+    await expect(page.locator('#health .rk')).toHaveCount(3)
+    await expect(bar).toHaveCSS('width', '0px')
+
+    await page.locator('#health .rank').scrollIntoViewIfNeeded()
+
+    await expect(page.locator('#health')).toHaveClass(/(^| )in( |$)/, SETTLE)
+    await expect
+      .poll(
+        async () =>
+          ((await bar.boundingBox())?.width ?? 0) >
+          ((await check.boundingBox())?.x ?? 0) -
+            ((await bar.boundingBox())?.x ?? 0),
+        SETTLE,
+      )
+      .toBe(true)
+  })
+
+  test('shows its bars grown under reduced motion', async ({ page }) => {
+    await page.goto('/')
+    const bars = page.locator('#health .trk i')
+    await expect(bars).toHaveCount(3)
+
+    await expect(page.locator('#health')).not.toHaveClass(/(^| )armed( |$)/)
+    expect((await bars.first().boundingBox())?.width ?? 0).toBeGreaterThan(0)
+    await expect(page.locator('#health .sp li')).toHaveCount(6)
+  })
+})
+
 test.describe('new sections', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
@@ -770,23 +805,6 @@ test.describe('new sections', () => {
       await page.clock.runFor(6_000)
 
       await expect(board).toHaveAttribute('class', held)
-    })
-
-    test('the audit prints a row at a time, and the pause holds the print', async ({
-      page,
-    }) => {
-      const rows = page.locator('#health .pr')
-
-      await page.clock.runFor(800)
-      await expect(rows.nth(0)).toHaveClass(/\bin\b/)
-      await expect(rows.nth(1)).not.toHaveClass(/\bin\b/)
-      await page.locator('#health .pz').click()
-      const printed = page.locator('#health .pr.in')
-      const held = await printed.count()
-      await page.clock.runFor(6_000)
-
-      await expect(printed).toHaveCount(held)
-      expect(held).toBeLessThan(await rows.count())
     })
 
     test('the film steps its beats with the reel, and the pause shows the still', async ({
@@ -834,11 +852,9 @@ test.describe('new sections', () => {
     await page.goto('/')
 
     await expect(page.locator('#drive .dr')).toHaveClass(/\bon\b/)
-    await expect(page.locator('#health .hl')).not.toHaveClass(/\bplay\b/)
     await expect(page.locator('#film .checks li.done')).toHaveCount(3)
     await expect(page.locator('#film .pz')).toBeHidden()
     await expect(page.locator('#drive .pz')).toBeHidden()
-    await expect(page.locator('#health .pz')).toBeHidden()
   })
 
   test('the film follows the theme toggle to the reel filmed in it', async ({

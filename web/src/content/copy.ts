@@ -295,8 +295,8 @@ export const drive = {
 export const health = {
   // README.md: "Audits that report where the code is rotting"
   head: 'Audits that report where the code is rotting',
-  // README.md: "Generated code grows long files nobody reads. Canon measures file, function, and comment length, and charts what shipped each week."
-  lede: 'Generated code grows long files nobody reads. Canon measures file, function, and comment length, and charts what shipped each week.',
+  // README.md: canon-allow-readme-paraphrase: the README's opening sentence, then its second with the audits as the subject in place of the lowercase name. "Find the long files and functions generated code piles up." "measures file, function, and comment length, and charts what shipped each week"
+  lede: 'Find the long files and functions generated code piles up. The audits measure file, function, and comment length, and chart what shipped each week.',
   /** The labels around the figures `web/src/lib/health.ts` reads at build time. */
   // README.md: canon-allow-readme-paraphrase: column heads and captions for the two reports, which no README sentence carries.
   view: {
@@ -309,6 +309,10 @@ export const health = {
       `${count} files past ${Math.round(cap * 100)}% comments`,
     read: (files: number) => `${files} files read`,
     caption: (to: string) => `Pull requests merged each week, to ${to}`,
+    longest: 'the longest functions, against the',
+    checkpoint: (lines: number) => `${lines}-line checkpoint`,
+    past: (lines: number) => `, past the ${lines}-line checkpoint`,
+    weeks: (from: string, to: string) => `merged, ${from} to ${to}`,
   },
 }
 
