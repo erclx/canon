@@ -129,7 +129,8 @@
     overflow-x: clip;
   }
 
-  main > section + section {
+  /* `~` rather than `+`, since each section's hoisted script sits between it and the next. */
+  main > section ~ section {
     border-top: 1px solid var(--rule);
   }
 

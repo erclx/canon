@@ -30,6 +30,20 @@ test('renders the opening and eight sections in order', async ({ page }) => {
   expect(ids).toEqual(SECTIONS)
 })
 
+test('parts each section from the one above by a 1 px soft rule', async ({
+  page,
+}) => {
+  await page.goto('/')
+
+  const tops = await page
+    .locator('main > section')
+    .evaluateAll((nodes) =>
+      nodes.map((node) => getComputedStyle(node).borderTopWidth),
+    )
+
+  expect(tops).toEqual(['0px', ...SECTIONS.slice(1).map(() => '1px')])
+})
+
 test('every nav link and menu entry resolves to a section or an absolute address', async ({
   page,
 }) => {
