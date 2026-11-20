@@ -1,22 +1,26 @@
 /**
- * Films `motion.json` on the motion fixture and renders each beat the way an
- * edit plays it, with the camera track's zoom applied and the drawn cursor
- * burned in, so the operator can judge a change to `canon take` by eye. The
- * reel `canon take --reel` writes draws the cursor and leaves the zoom out,
- * and the zoom is the half a change to the camera moves.
+ * Films a fixture's plan on its page and renders each beat the way an edit
+ * plays it, with the camera track's zoom applied and the drawn cursor burned
+ * in, so the operator can judge a change to `canon take` by eye. The reel
+ * `canon take --reel` writes draws the cursor and leaves the zoom out, and the
+ * zoom is the half a change to the camera moves.
  *
- * Usage: bun src/take/fixtures/watch.ts <out dir>
+ * Usage: bun src/take/fixtures/watch.ts <out dir> [stem]
  *
- * Writes each beat's take into its own folder under `<out dir>`, beside a
- * `watch.mp4` at 1920x1080. Needs FFmpeg and the headless shell, as a take does.
+ * `stem` names the `<stem>.html` page beside this file, `motion` by default and
+ * `camera` for the camera scenarios, filmed with `<stem>.json` or else
+ * `<stem>-scenarios.json`, a plan too long for the reel that `pr-reel.ts`
+ * never pairs with the page. Writes each beat's take into its own folder under
+ * `<out dir>`, beside a `watch.mp4` at 1920x1080. Needs FFmpeg and the
+ * headless shell, as a take does.
  */
 
 import { spawnSync } from 'node:child_process'
-import { readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import type { CameraTrack } from '@/take/camera'
 import { take } from '@/take/film'
-import { MOTION_PLAN, serveMotion } from '@/take/fixtures/motion-server'
+import { serveFixture } from '@/take/fixtures/motion-server'
 import { VIEWPORT } from '@/take/log'
 import { readTakePlan } from '@/take/plan'
 
@@ -48,7 +52,11 @@ function commands(track: CameraTrack): string {
       const cy = (frame.cursor.y - frame.y) * frame.scale - CURSOR / 2
       return [
         `${at} scale@z w ${scaled.w}, scale@z h ${scaled.h}, crop@k x ${x}, crop@k y ${y};`,
-        `${at} drawbox@c x ${cx.toFixed(1)}, drawbox@c y ${cy.toFixed(1)};`,
+        ...(track.hand === false
+          ? []
+          : [
+              `${at} drawbox@c x ${cx.toFixed(1)}, drawbox@c y ${cy.toFixed(1)};`,
+            ]),
       ]
     })
     .join('\n')
@@ -63,7 +71,10 @@ function render(clip: string, track: CameraTrack, out: string): void {
     `sendcmd=f=${script}`,
     `scale@z=w=${width}:h=${height}:eval=frame`,
     `crop@k=w=${width}:h=${height}:x=0:y=0`,
-    `drawbox@c=x=0:y=0:w=${CURSOR}:h=${CURSOR}:color=black:t=fill`,
+    // A beat no hand drives draws no cursor, as the reel draws none.
+    ...(track.hand === false
+      ? []
+      : [`drawbox@c=x=0:y=0:w=${CURSOR}:h=${CURSOR}:color=black:t=fill`]),
   ].join(',')
   const run = spawnSync(
     'ffmpeg',
@@ -89,18 +100,30 @@ function render(clip: string, track: CameraTrack, out: string): void {
   if (run.status !== 0) throw new Error(`ffmpeg refused ${clip}: ${run.stderr}`)
 }
 
-async function main(dir: string | undefined): Promise<number> {
+const USAGE = 'Usage: bun src/take/fixtures/watch.ts <out dir> [stem]\n'
+
+async function main(dir: string | undefined, stem = 'motion'): Promise<number> {
   if (!dir) {
-    process.stderr.write('Usage: bun src/take/fixtures/watch.ts <out dir>\n')
+    process.stderr.write(USAGE)
+    return 2
+  }
+  const page = new URL(`./${stem}.html`, import.meta.url)
+  const plan = [`${stem}.json`, `${stem}-scenarios.json`]
+    .map((name) => new URL(`./${name}`, import.meta.url))
+    .find((url) => existsSync(url))
+  if (stem.includes('/') || !existsSync(page) || !plan) {
+    process.stderr.write(
+      `no fixture ${stem}: src/take/fixtures/ needs ${stem}.html and ${stem}.json or ${stem}-scenarios.json\n${USAGE}`,
+    )
     return 2
   }
   const out = resolve(dir)
-  const read = readTakePlan(readFileSync(MOTION_PLAN, 'utf8'))
+  const read = readTakePlan(readFileSync(plan, 'utf8'))
   if (read.kind !== 'read') {
-    process.stderr.write(`motion.json: ${read.detail}\n`)
+    process.stderr.write(`${plan.pathname}: ${read.detail}\n`)
     return 1
   }
-  const server = serveMotion()
+  const server = serveFixture(page)
   try {
     const result = await take({ url: server.url, plan: read.plan, out })
     if (result.status !== 'filmed') {
@@ -121,4 +144,4 @@ async function main(dir: string | undefined): Promise<number> {
   }
 }
 
-process.exitCode = await main(process.argv[2])
+process.exitCode = await main(process.argv[2], process.argv[3])

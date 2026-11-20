@@ -265,6 +265,56 @@ describe('cameraTrack', () => {
       expect(glide.at(-1)?.x).toBeGreaterThan((glide[0]?.x ?? 0) + 300)
     })
 
+    describe('a glide a harness logged in pieces', () => {
+      const FROM = { x: 120, y: 192 }
+      const TO = { x: 1800, y: 140 }
+
+      /** The glide from the first click to the second, logged as six moves. */
+      function splitInto(pieces: number, gap: number): LogEvent[] {
+        const ms = 150
+        const events: LogEvent[] = []
+        for (let i = 0; i < pieces; i += 1) {
+          const along = (k: number) => ({
+            x: FROM.x + ((TO.x - FROM.x) * k) / pieces,
+            y: FROM.y + ((TO.y - FROM.y) * k) / pieces,
+          })
+          events.push({
+            t: 2600 + i * (ms + gap),
+            kind: 'move',
+            from: along(i),
+            to: along(i + 1),
+            ms,
+          })
+        }
+        const end = 2600 + pieces * (ms + gap) - gap
+        events.push({
+          t: end + 300,
+          kind: 'click',
+          at: TO,
+          box: { x: TO.x - 12, y: TO.y - 12, width: 24, height: 24 },
+        })
+        return events
+      }
+
+      it('should hold one zoom across six back-to-back moves', () => {
+        const log = takeOf([{ t: 2000, at: FROM }], splitInto(6, 0))
+
+        const { frames } = cameraTrack(log)
+
+        const glide = frames.filter((f) => f.ms > 2000 && f.ms < 3800)
+        expect(glide.every((frame) => frame.scale === 1.8)).toBe(true)
+      })
+
+      it('should pull out between moves a rest separates', () => {
+        const log = takeOf([{ t: 2000, at: FROM }], splitInto(2, 200))
+
+        const { frames } = cameraTrack(log)
+
+        const glide = frames.filter((f) => f.ms > 2000 && f.ms < 3300)
+        expect(Math.min(...glide.map((frame) => frame.scale))).toBeLessThan(1.8)
+      })
+    })
+
     it('should never pan while the scale changes', () => {
       const { frames } = cameraTrack(takeOf(CHAIN))
 
@@ -391,6 +441,34 @@ describe('cameraTrack', () => {
       )
       expect(at(frames, 2000).cursor).toEqual({ x: 400, y: 300 })
       expect(at(frames, 2000).ring).toBe(0)
+    })
+  })
+
+  describe('no hand', () => {
+    const log: TakeLog = {
+      ...takeOf([{ t: 2000, at: { x: 400, y: 300 } }]),
+      hand: false,
+    }
+
+    it('should aim nowhere, even at a click the beat ran', () => {
+      const { frames } = cameraTrack(log)
+
+      expect(new Set(frames.map((f) => `${f.scale} ${f.x} ${f.y}`))).toEqual(
+        new Set(['1 0 0']),
+      )
+    })
+
+    it('should carry the flag on the track and keep each frame a point', () => {
+      const track = cameraTrack(log)
+
+      expect(track.hand).toBe(false)
+      expect(at(track.frames, 2000).cursor).toEqual({ x: 400, y: 300 })
+    })
+
+    it('should carry no flag on a track whose beat a hand drives', () => {
+      const track = cameraTrack(takeOf([{ t: 2000, at: { x: 400, y: 300 } }]))
+
+      expect(track).not.toHaveProperty('hand')
     })
   })
 

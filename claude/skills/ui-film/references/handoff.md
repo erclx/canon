@@ -74,6 +74,8 @@ Each frame carries `scale`, the view's top-left `x` and `y`, the `cursor`, and `
 - `cursor` is the pointer's position on the page
 - `ring` runs from 0 to 1 across the 450 ms after a click and is `null` otherwise. On a drag it grows to 0.3, holds there from press to release, and runs on to 1 from the release.
 
+A track whose beat set `hand: false` carries `hand: false` at its top level beside `fps`. Its frames hold at scale 1 and still carry a `cursor` point, so a reader of frames alone changes nothing, and the composition draws neither the cursor nor the ring on that beat.
+
 The track is final. It already carries the easing and the hold, so a composition sets each frame's values and never tweens between them.
 
 ## Where the composition lives
@@ -118,8 +120,19 @@ Read the `hyperframes` skill's `references/format.md` for placing the clip and `
    - Add that box's offset from the stage corner to the cursor and the ring
 3. Draw the cursor as its own element outside the wrapper, at a constant size, positioned at `(cursor.x - x) * s * k` and `(cursor.y - y) * s * k` on the stage.
 4. Draw the click ring the same way while `ring` is not null, growing and fading with its value.
+5. Draw neither on a track carrying `hand: false`.
 
 The cursor stays outside the wrapper because a cursor inside it would scale with the zoom, which is the reason no clip carries one.
+
+### The cursor and ring look
+
+Every film and the pull request reel draw one look, the one Frameboard's launch film drew, so two films never disagree about the pointer.
+
+- The cursor is an `rgb(17, 17, 17)` arrow outlined 1.5 units in white, on a 24-unit box drawn 56 px at a 1920-wide stage with its tip on the point, under `drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35))`
+- The ring is a 72 px circle with a 4 px `#2f7bf0` border, centered on the point, scaled `0.4 + ring` as a whole at opacity `1 - ring`, so its line thickens only as it fades
+- One arrow holds on every frame, since the log records no page cursor and a hand or a text cursor would be a guess
+
+The arrow's path in its 24-unit box is `M4 2 L4 19 L8.5 14.5 L11.5 21 L14 20 L11 13.5 L17.5 13.5 Z`, with its tip at 4, 2.
 
 ## What the composition still owns
 

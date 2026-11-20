@@ -111,6 +111,12 @@ export interface Beat {
    */
   readonly push?: false
   /**
+   * False marks a beat no person drives, such as an agent changing the page,
+   * whose track aims nowhere and whose reel draws no cursor. Its steps still
+   * run and log. Absent means a hand drives it.
+   */
+  readonly hand?: false
+  /**
    * True films the page with its classic scrollbars drawn, which take 15 px of
    * layout width. Absent means they stay hidden.
    */
@@ -254,6 +260,12 @@ function readBeat(entry: unknown, index: number, fallback: Route): Beat {
       `${name} carries a push that is not true or false`,
     )
   }
+  if (entry.hand !== undefined && typeof entry.hand !== 'boolean') {
+    throw new Refusal(
+      'bad-beat',
+      `${name} carries a hand that is not true or false`,
+    )
+  }
   if (entry.scrollbars !== undefined && typeof entry.scrollbars !== 'boolean') {
     throw new Refusal(
       'bad-beat',
@@ -268,6 +280,7 @@ function readBeat(entry: unknown, index: number, fallback: Route): Beat {
     name,
     route: route as Route,
     ...(entry.push === false ? { push: false as const } : {}),
+    ...(entry.hand === false ? { hand: false as const } : {}),
     ...(entry.scrollbars === true ? { scrollbars: true as const } : {}),
     ...(network ? { network } : {}),
     ...(viewport ? { viewport } : {}),

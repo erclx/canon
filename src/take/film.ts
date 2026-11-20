@@ -274,6 +274,7 @@ async function filmBeat(
     route,
     clip: measured,
     ...(beat.push === false ? { push: false as const } : {}),
+    ...(beat.hand === false ? { hand: false as const } : {}),
     ...(filmed.lag === undefined ? {} : { lag: filmed.lag }),
     frames: filmed.frames,
     events: filmed.events,

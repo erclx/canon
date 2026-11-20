@@ -3,7 +3,11 @@ import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { isPainted, loadPaintedPatterns } from '@/pr/painted'
-import { readReelArgs, selectFixtures } from '@/take/fixtures/pr-reel'
+import {
+  REEL_CAP_SECONDS,
+  readReelArgs,
+  selectFixtures,
+} from '@/take/fixtures/pr-reel'
 
 const FOLDER = [
   'motion.html',
@@ -191,6 +195,32 @@ describe('readReelArgs', () => {
     const args = readReelArgs(['--out', 'reel'], FOLDER)
 
     expect(args.kind).toBe('usage')
+  })
+})
+
+describe('the fixture shelf', () => {
+  it('should hold every page-and-plan pair under the reel cap on its waits alone', () => {
+    const shelf = readdirSync(fileURLToPath(new URL('.', import.meta.url)))
+    const paired = shelf
+      .filter((name) => name.endsWith('.json'))
+      .map((name) => name.slice(0, -'.json'.length))
+      .filter((stem) => shelf.includes(`${stem}.html`))
+
+    const over = paired.filter((stem) => {
+      const plan = JSON.parse(
+        readFileSync(new URL(`./${stem}.json`, import.meta.url), 'utf8'),
+      ) as { beats: { steps: { kind: string; ms?: number }[] }[] }
+      const waits = plan.beats
+        .flatMap((beat) => beat.steps)
+        .reduce(
+          (sum, step) => sum + (step.kind === 'wait' ? (step.ms ?? 0) : 0),
+          0,
+        )
+      return waits >= REEL_CAP_SECONDS * 1000
+    })
+
+    expect(paired).toContain('motion')
+    expect(over).toEqual([])
   })
 })
 

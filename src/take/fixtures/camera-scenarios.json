@@ -1,0 +1,105 @@
+{
+  "beats": [
+    {
+      "name": "s1 one action in the right sidebar",
+      "steps": [
+        { "kind": "click", "target": "#priority" },
+        { "kind": "wait", "ms": 900 }
+      ]
+    },
+    {
+      "name": "s2 two actions in one area",
+      "steps": [
+        { "kind": "click", "target": "#priority" },
+        { "kind": "wait", "ms": 300 },
+        { "kind": "click", "target": "#opt-high" },
+        { "kind": "wait", "ms": 900 }
+      ]
+    },
+    {
+      "name": "s3 far jump right sidebar to left nav",
+      "steps": [
+        { "kind": "click", "target": "#priority" },
+        { "kind": "wait", "ms": 300 },
+        { "kind": "click", "target": "#opt-high" },
+        { "kind": "wait", "ms": 400 },
+        { "kind": "click", "target": "#nav-releases" },
+        { "kind": "wait", "ms": 900 }
+      ]
+    },
+    {
+      "name": "s4 save then look at the result in main",
+      "steps": [
+        { "kind": "click", "target": "#priority" },
+        { "kind": "wait", "ms": 300 },
+        { "kind": "click", "target": "#opt-high" },
+        { "kind": "wait", "ms": 300 },
+        { "kind": "click", "target": "#save" },
+        { "kind": "wait", "ms": 300 },
+        { "kind": "move", "target": "#card-0", "hold": 1200 },
+        { "kind": "wait", "ms": 300 }
+      ]
+    },
+    {
+      "name": "s5 type a name then save",
+      "steps": [
+        { "kind": "fill", "target": "#assignee", "text": "Dana Reyes" },
+        { "kind": "wait", "ms": 300 },
+        { "kind": "click", "target": "#save" },
+        { "kind": "wait", "ms": 900 }
+      ]
+    },
+    {
+      "name": "s6 tour across all three regions",
+      "steps": [
+        { "kind": "click", "target": "#nav-issues" },
+        { "kind": "wait", "ms": 400 },
+        { "kind": "click", "target": "#card-4" },
+        { "kind": "wait", "ms": 400 },
+        { "kind": "click", "target": "#priority" },
+        { "kind": "wait", "ms": 900 }
+      ]
+    },
+    {
+      "name": "s7 drag the progress slider",
+      "steps": [
+        { "kind": "drag", "from": "#thumb", "to": "#tick-90" },
+        { "kind": "wait", "ms": 900 }
+      ]
+    },
+    {
+      "name": "s8 scroll the cards then open one",
+      "steps": [
+        { "kind": "scroll", "target": "#card-4", "dy": 600 },
+        { "kind": "wait", "ms": 300 },
+        { "kind": "click", "target": "#card-25" },
+        { "kind": "wait", "ms": 900 }
+      ]
+    },
+    {
+      "name": "s9 switch to dark mode",
+      "push": false,
+      "steps": [
+        { "kind": "click", "target": "#theme" },
+        { "kind": "wait", "ms": 1200 }
+      ]
+    },
+    {
+      "name": "s10 the agent adds three cards",
+      "hand": false,
+      "setup": [{ "kind": "click", "target": "#agent-run", "through": true }],
+      "steps": [{ "kind": "wait", "ms": 4200 }]
+    },
+    {
+      "name": "s11 zoomed on a card, scroll, open another",
+      "steps": [
+        { "kind": "click", "target": "#card-1" },
+        { "kind": "wait", "ms": 500 },
+        { "kind": "scroll", "target": "#card-4", "dy": 600 },
+        { "kind": "wait", "ms": 300 },
+        { "kind": "click", "target": "#card-25" },
+        { "kind": "wait", "ms": 900 }
+      ]
+    }
+  ]
+}

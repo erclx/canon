@@ -1,13 +1,9 @@
 import type { Point } from '@/take/log'
 
 /**
- * Draws the cursor arrow and the click ring onto one decoded frame, in the
- * shape groundwork track `193-ui-record` rendered them (canon-keep-retired):
- * a dark arrow outlined
- * in white, and a blue ring that grows from its tip and fades out. Both stay
- * one size whatever the frame shows, so the pointer reads the same in every
- * beat of a reel. Drawn in TypeScript rather than a browser, so the reel needs
- * no page and no seek, and a test can read the pixels it leaves.
+ * Draws Frameboard's arrow and click ring onto one decoded frame, one size
+ * whatever the frame shows. Drawn in TypeScript rather than a browser, so the
+ * reel needs no page and no seek, and a test can read the pixels it leaves.
  */
 
 export interface Frame {
@@ -17,7 +13,10 @@ export interface Frame {
   readonly height: number
 }
 
-/** The arrow, relative to its tip, from the groundwork's 24 px cursor path. */
+/**
+ * The arrow relative to its tip, in the units of Frameboard's 24-unit cursor
+ * box, which its film drew 56 px wide on a 1920-wide output.
+ */
 const ARROW: readonly Point[] = [
   { x: 0, y: 0 },
   { x: 0, y: 17 },
@@ -30,12 +29,29 @@ const ARROW: readonly Point[] = [
 
 const ARROW_FILL = [17, 17, 17] as const
 const ARROW_STROKE = [255, 255, 255] as const
+/** Half the outline, in box units. */
 const STROKE_HALF = 0.75
+
+/** The output width Frameboard's sizes are stated at. */
+const FILM_WIDTH = 1920
+
+/** Pixels a box unit takes at `FILM_WIDTH`, 56 px over 24 units. */
+const UNIT_AT_1920 = 56 / 24
+
+/**
+ * The shadow, `drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35))` at 1920 wide: its
+ * drop and its blur's standard deviation, half the blur radius, in pixels.
+ */
+const SHADOW_DROP = 2
+const SHADOW_SIGMA = 1.5
+const SHADOW_ALPHA = 0.35
+const SHADOW_COLOR = [0, 0, 0] as const
 
 /** The ring's outer radius at full size, and its stroke at that size. */
 export const RING_RADIUS = 18
 const RING_STROKE = 2
-const RING_COLOR = [37, 99, 235] as const
+/** Frameboard's accent, `#2f7bf0`. */
+const RING_COLOR = [47, 123, 240] as const
 /** The ring starts at this share of its size and grows by the expansion. */
 const RING_START = 0.4
 
@@ -70,30 +86,59 @@ function drawRing(frame: Frame, at: Point, ring: number): void {
   })
 }
 
+/**
+ * Draws the arrow at Frameboard's size scaled to the frame's width, so a
+ * 960-wide reel draws it at half the 1920 size. Distances are taken in box
+ * units and antialiased in pixels.
+ */
 function drawArrow(frame: Frame, at: Point): void {
-  const reach = STROKE_HALF + 1
-  forEachPixel(frame, at, reach, 13.5 + reach, reach, 19 + reach, (px, py) => {
-    const d = signedDistance({ x: px - at.x, y: py - at.y })
-    // Coverage of the outlined shape, then of the fill inside the outline,
-    // each antialiased across one pixel.
-    const outer = clamp01(0.5 - (d - STROKE_HALF))
-    if (outer <= 0) return null
-    const inner = clamp01(0.5 - (d + STROKE_HALF))
-    return {
-      color: ARROW_STROKE,
-      alpha: outer,
-      over: ARROW_FILL,
-      overAlpha: inner,
-    }
-  })
+  const k = frame.width / FILM_WIDTH
+  const unit = UNIT_AT_1920 * k
+  const stroke = STROKE_HALF * unit
+  const drop = SHADOW_DROP * k
+  const sigma = SHADOW_SIGMA * k
+  const blur = 3 * sigma
+  const reach = stroke + blur + 1
+  const edge = (x: number, y: number) =>
+    signedDistance({ x: (x - at.x) / unit, y: (y - at.y) / unit }) * unit
+
+  forEachPixel(
+    frame,
+    at,
+    reach,
+    13.5 * unit + reach,
+    reach,
+    19 * unit + drop + reach,
+    (px, py) => {
+      // A logistic edge stands in for the blur's falloff, past which it is clear.
+      const cast = edge(px, py - drop) - stroke
+      const shade =
+        cast > blur ? 0 : SHADOW_ALPHA / (1 + Math.exp((1.7 * cast) / sigma))
+      const d = edge(px, py)
+      const outer = clamp01(0.5 - (d - stroke))
+      const inner = clamp01(0.5 - (d + stroke))
+      if (shade < 1 / 512 && outer <= 0) return null
+      return {
+        color: SHADOW_COLOR,
+        alpha: shade,
+        over: ARROW_STROKE,
+        overAlpha: outer,
+        top: ARROW_FILL,
+        topAlpha: inner,
+      }
+    },
+  )
 }
 
 interface Paint {
   readonly color: readonly [number, number, number]
   readonly alpha: number
-  /** A second color laid over the first, for the fill inside the outline. */
+  /** A second color laid over the first, for the outline over its shadow. */
   readonly over?: readonly [number, number, number]
   readonly overAlpha?: number
+  /** A third over the second, for the fill inside the outline. */
+  readonly top?: readonly [number, number, number]
+  readonly topAlpha?: number
 }
 
 /**
@@ -118,9 +163,12 @@ function forEachPixel(
       const result = paint(x + 0.5, y + 0.5)
       if (!result) continue
       const i = (y * frame.width + x) * 4
-      blend(frame.data, i, result.color, result.alpha)
+      if (result.alpha > 0) blend(frame.data, i, result.color, result.alpha)
       if (result.over && result.overAlpha) {
         blend(frame.data, i, result.over, result.overAlpha)
+      }
+      if (result.top && result.topAlpha) {
+        blend(frame.data, i, result.top, result.topAlpha)
       }
     }
   }

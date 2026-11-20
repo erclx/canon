@@ -190,6 +190,35 @@ describe('readTakePlan', () => {
     expect(read).toMatchObject({ kind: 'refused', reason: 'bad-beat' })
   })
 
+  it('should read a beat no hand drives', () => {
+    const read = readTakePlan(
+      planSource([beat([{ kind: 'wait', ms: 100 }], { hand: false })]),
+    )
+
+    expect(read).toMatchObject({
+      kind: 'read',
+      plan: { beats: [{ hand: false }] },
+    })
+  })
+
+  it('should read a beat with a hand as one carrying no hand key', () => {
+    const read = readTakePlan(
+      planSource([beat([{ kind: 'wait', ms: 100 }], { hand: true })]),
+    )
+
+    expect(read.kind === 'read' && read.plan.beats[0]).not.toHaveProperty(
+      'hand',
+    )
+  })
+
+  it('should refuse a hand that is not a boolean', () => {
+    const read = readTakePlan(
+      planSource([beat([{ kind: 'wait', ms: 100 }], { hand: 'off' })]),
+    )
+
+    expect(read).toMatchObject({ kind: 'refused', reason: 'bad-beat' })
+  })
+
   it('should read a beat that asks for scrollbars', () => {
     const read = readTakePlan(
       planSource([beat([{ kind: 'wait', ms: 100 }], { scrollbars: true })]),

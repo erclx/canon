@@ -1,6 +1,6 @@
 ---
 title: Take craft
-description: The filming rules a take plan follows, the frame-stepping limits, the pointer and zoom rules the camera relies on, and how a beat is framed, each with its source
+description: The filming rules a take plan follows, the frame-stepping limits, the pointer rules, where the zoom rules live, and how a beat is framed, each with its source
 ---
 
 # Take craft
@@ -117,36 +117,7 @@ Open a menu the page draws with a `contextmenu` step. Neither route films the br
 
 ## The zoom
 
-The camera track already carries the zoom, so these rules decide what to film for it to aim at.
-
-- Earn a zoom with an action. The camera aims at a press, typing, and a `move` carrying `hold`, so a result too small to read needs one of those on it.
-- Expect a wait, a plain move, or a scroll to aim nowhere
-- Expect a scroll to end a zoom, since the content moves under the camera
-- Expect a target filling most of the view to get less zoom, and one filling the page to get none
-- The push rides the glide onto its target and lands as the cursor arrives, so it lasts as long as that glide, between 300 ms and 1.2 s
-
-### Depth, opt-out, and speed
-
-Three controls change the push itself.
-
-- Expect a screencast beat's zoom to stop near 1.35x, since its clip has one pixel per page pixel, and a stepped beat's to reach 1.8x
-- Set `"push": false` on a beat the edit holds wide, such as one showing a whole layout change. Its track keeps the cursor and the click ring and drops the zoom.
-- Rebuild a beat's track with `canon take camera <dir>/log.json --rate <n> --out <file>` for a clip the edit plays `n` times faster, so the zoom settles on the clock a viewer sees
-
-### The cursor leads the camera
-
-The viewer follows the cursor, so the camera zooms where the cursor acts and never anywhere the cursor is not.
-
-- Film a look-back at a changed element as a `move` to it carrying `hold`, so the cursor glides there and the camera holds on its arrival
-- Never aim the camera at a point the cursor left behind, since a push onto a button while the drawn cursor sits elsewhere reads as broken
-- End a hold when the cursor leaves. A glide onto the next target plus about 1 s of hold fit Frameboard's launch film, where a 3.2 s camera-only hold read as too long.
-
-### One track per take
-
-A camera track is read off one take's log and is true of that take alone.
-
-- Rebuild every camera track from the new log after a re-film, each `--rate` track included, since a track left from the old take aims at moments that no longer happen
-- Never hand-tune a track, since the next re-film overwrites the log under it and leaves the tuning aimed at the old clock
+The camera track carries the zoom. Read `camera-and-cursor.md` beside this file for what to film for it to aim at, the `push` and `hand` keys, and what each beat shape films as.
 
 ## Framing
 
@@ -174,14 +145,10 @@ A beat driven from outside the page, such as a drag between two windows or an in
 
 ## Sources
 
-| Rule                          | Source                                                                                                                         |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Zoom on a click               | Screen Studio's [auto zoom guide](https://screen.studio/guide/auto-zoom) keys its zoom on click positions                      |
-| The push riding the glide     | The operator judged renders of a fixture page by eye and kept a zoom landing with the cursor over one leading it               |
-| The typing and scroll risk    | Takes of a canvas design board filmed while the stepper was built                                                              |
-| The cursor leading the camera | Frameboard's launch film, whose operator flagged every push the drawn cursor did not lead                                      |
-| One track per take            | Frameboard's launch film, where tracks left from an earlier take drove two beats off sync                                      |
-| Framing                       | Frameboard's launch film, refilmed into a fixed view fitted to its finished frames                                             |
-| Jumping scrolls and GIFs      | [hasuwini77/demo-reel#28](https://github.com/hasuwini77/demo-reel/pull/28), read through a search summary rather than the page |
+| Rule                       | Source                                                                                                                         |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| The typing and scroll risk | Takes of a canvas design board filmed while the stepper was built                                                              |
+| Framing                    | Frameboard's launch film, refilmed into a fixed view fitted to its finished frames                                             |
+| Jumping scrolls and GIFs   | [hasuwini77/demo-reel#28](https://github.com/hasuwini77/demo-reel/pull/28), read through a search summary rather than the page |
 
 The pointer rules carry no number. One pointer and a click inside its box follow from the log recording each target's box.

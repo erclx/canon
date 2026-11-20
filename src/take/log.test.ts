@@ -99,6 +99,16 @@ describe('cursorAt', () => {
     expect(cursorAt([move], 5000)).toEqual({ x: 400, y: 100 })
   })
 
+  it('should draw a point stamped a rounding error past the frame it was sent in', () => {
+    // A stage clock summing frame lengths lands past a reader's frame time.
+    const move = sentMove([
+      { t: 1000, x: 130, y: 100 },
+      { t: 1733.3333333333335, x: 250, y: 100 },
+    ])
+
+    expect(cursorAt([move], 1733.333333333333)).toEqual({ x: 250, y: 100 })
+  })
+
   it('should hold a point a slow page skipped frames after', () => {
     const move = sentMove([
       { t: 1000, x: 160, y: 100 },

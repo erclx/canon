@@ -126,6 +126,8 @@ export interface TakeLog {
   readonly clip?: { readonly width: number; readonly height: number }
   /** False when the beat turned the camera's zoom off. */
   readonly push?: false
+  /** False when no hand drives the beat, so nothing aims and no cursor draws. */
+  readonly hand?: false
   /**
    * Milliseconds a screencast take shifted every event by, being how long a
    * move took to show in the clip. Absent on the stepped route, which needs
@@ -231,13 +233,13 @@ export const START: Point = startOf(VIEWPORT)
 
 /**
  * How long the pointer takes to travel, slower for longer reaches and never so
- * quick that a viewer loses it. Carried over from the groundwork takes the
- * camera presets were judged on.
+ * quick that a viewer loses it, since a 300 ms floor read as a jump on every
+ * short reach the operator judged.
  */
 export function travelMs(from: Point, to: Point): number {
   return Math.min(
     1200,
-    Math.max(300, Math.hypot(to.x - from.x, to.y - from.y) * 0.9),
+    Math.max(600, Math.hypot(to.x - from.x, to.y - from.y) * 0.9),
   )
 }
 
@@ -252,6 +254,13 @@ export function along(from: Point, to: Point, progress: number): Point {
 }
 
 /**
+ * How far past a clip time a stamp may sit and still count as sent by then,
+ * since a stage clock summing frame lengths and a reader multiplying a frame
+ * index reach the same frame a rounding error apart.
+ */
+const STAMP_SLACK_MS = 1e-6
+
+/**
  * The pointer at a clip time, held at the last point sent or read off the eased
  * curve when a move carries none, resting on `start` before the first move.
  */
@@ -263,7 +272,7 @@ export function cursorAt(
   let position = start
   for (const event of events) {
     if (event.kind !== 'move') continue
-    if (ms < event.t) break
+    if (ms + STAMP_SLACK_MS < event.t) break
     position = event.points?.length
       ? sentAt(event.from, event.points, ms)
       : along(event.from, event.to, (ms - event.t) / event.ms)
@@ -274,7 +283,7 @@ export function cursorAt(
 function sentAt(from: Point, points: readonly SentPoint[], ms: number): Point {
   let held: Point = from
   for (const point of points) {
-    if (point.t > ms) break
+    if (point.t > ms + STAMP_SLACK_MS) break
     held = { x: point.x, y: point.y }
   }
   return held

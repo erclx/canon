@@ -30,7 +30,7 @@ const DEFAULT_FIXTURE = 'motion'
 const FIXTURES = `${ENGINE}fixtures/`
 
 /** The most filmed seconds the beats of every fixture may sum to. */
-export const REEL_CAP_SECONDS = 12
+export const REEL_CAP_SECONDS = 15
 
 export type Selection =
   | { readonly kind: 'untouched' }

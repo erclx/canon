@@ -430,14 +430,83 @@ describe('performSteps pacing around a press', () => {
     expect((key?.t ?? 0) - endOf(drag)).toBeCloseTo(500, 5)
   })
 
-  it('should wait 400 ms between the field click and the first key', async () => {
-    const { log } = await perform({ '#note': NOTE }, [
-      { kind: 'fill', target: '#note', text: 'hi' },
+  describe('fill', () => {
+    it('should rest 450 ms on the field click before it steps off', async () => {
+      const { log } = await perform({ '#note': NOTE }, [
+        { kind: 'fill', target: '#note', text: 'hi' },
+      ])
+
+      const [, press, stepOff] = log
+      expect(stepOff?.kind).toBe('move')
+      expect((stepOff?.t ?? 0) - (press?.t ?? 0)).toBeCloseTo(
+        2 * FRAME_MS + 450,
+        5,
+      )
+    })
+
+    it('should step off over 300 ms to just past the bottom-right corner', async () => {
+      const { log } = await perform({ '#note': NOTE }, [
+        { kind: 'fill', target: '#note', text: 'hi' },
+      ])
+
+      const [, , stepOff] = log
+      expect(stepOff).toMatchObject({ kind: 'move', to: { x: 494, y: 654 } })
+      expect(stepOff && 'ms' in stepOff ? stepOff.ms : 0).toBeCloseTo(300, 5)
+    })
+
+    it('should settle 150 ms off the field before the first key', async () => {
+      const { log } = await perform({ '#note': NOTE }, [
+        { kind: 'fill', target: '#note', text: 'hi' },
+      ])
+
+      const [, , stepOff, typed] = log
+      expect(typed?.kind).toBe('type')
+      expect((typed?.t ?? 0) - endOf(stepOff)).toBeCloseTo(150, 5)
+    })
+
+    it('should log the typing at the point the pointer stepped off to', async () => {
+      const { log } = await perform({ '#note': NOTE }, [
+        { kind: 'fill', target: '#note', text: 'hi' },
+      ])
+
+      expect(log.find((event) => event.kind === 'type')).toMatchObject({
+        at: { x: 494, y: 654 },
+        box: NOTE,
+      })
+    })
+
+    it('should keep the step-off inside the window for a field in its corner', async () => {
+      const corner: Box = { x: 1720, y: 1040, width: 200, height: 40 }
+      const { log } = await perform({ '#corner': corner }, [
+        { kind: 'fill', target: '#corner', text: 'hi' },
+      ])
+
+      const typed = log.find((event) => event.kind === 'type')
+      expect(typed?.kind === 'type' ? typed.at : undefined).toEqual({
+        x: 1914,
+        y: 1079,
+      })
+    })
+  })
+
+  it('should rest 300 ms on a scroll target before the wheel turns', async () => {
+    const { log } = await perform({ '#card': CARD }, [
+      { kind: 'scroll', target: '#card', dy: 300 },
     ])
 
-    const [, press, typed] = log
-    expect(typed?.kind).toBe('type')
-    expect((typed?.t ?? 0) - (press?.t ?? 0)).toBeCloseTo(2 * FRAME_MS + 400, 5)
+    const [glide, scroll] = log
+    expect(scroll?.kind).toBe('scroll')
+    expect((scroll?.t ?? 0) - endOf(glide)).toBeCloseTo(300, 5)
+  })
+
+  it('should take 600 ms over a glide too short to set its own pace', async () => {
+    const { log } = await perform({ '#near': { ...CARD, x: 930, y: 520 } }, [
+      { kind: 'move', target: '#near' },
+    ])
+
+    const [glide] = log
+    expect(glide?.kind).toBe('move')
+    expect(glide && 'ms' in glide ? glide.ms : 0).toBeCloseTo(600, 5)
   })
 
   it('should hold 500 ms on the typed field once the last key lands', async () => {
@@ -446,7 +515,7 @@ describe('performSteps pacing around a press', () => {
       { kind: 'key', keys: 'Escape' },
     ])
 
-    const [, , typed, key] = log
+    const [, , , typed, key] = log
     expect((key?.t ?? 0) - endOf(typed)).toBeCloseTo(500, 5)
   })
 

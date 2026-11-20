@@ -75,6 +75,12 @@ export interface CameraTrack {
   readonly version: typeof CAMERA_VERSION
   readonly viewport: { readonly width: number; readonly height: number }
   readonly fps: number
+  /**
+   * False on a beat no hand drives, where a composition draws no cursor and
+   * no ring. Every frame still carries a cursor point, so a reader of frames
+   * alone changes nothing.
+   */
+  readonly hand?: false
   readonly frames: readonly CameraFrame[]
 }
 
@@ -156,7 +162,8 @@ export function cameraTrack(
       (height * FILL) / Math.max(box.height, 1),
     )
 
-  const aims = (log.push === false ? [] : log.events)
+  const held = log.push === false || log.hand === false
+  const aims = (held ? [] : log.events)
     .flatMap((event): Aim[] =>
       aimsOf(event, depthFor, deepest, options.focus === true),
     )
@@ -164,7 +171,13 @@ export function cameraTrack(
     .sort((a, b) => a.t - b.t)
 
   const end = (log.frames * 1000) / log.fps
-  const zooms = zoomsOf(aims, log.events, { width, height }, end)
+  const zooms = zoomsOf(
+    aims,
+    log.events,
+    { width, height },
+    end,
+    1000 / log.fps,
+  )
 
   // Read off the presses, since the aims drop unzoomed clicks and add typing.
   const presses = log.events.flatMap((event) =>
@@ -207,6 +220,7 @@ export function cameraTrack(
     version: CAMERA_VERSION,
     viewport: log.viewport,
     fps: log.fps,
+    ...(log.hand === false ? { hand: false as const } : {}),
     frames,
   }
 }
@@ -306,12 +320,9 @@ function zoomsOf(
   events: readonly LogEvent[],
   page: { readonly width: number; readonly height: number },
   end: number,
+  frameMs: number,
 ): Zoom[] {
-  const glides = events.flatMap((event): Span[] =>
-    event.kind === 'move' && event.ms > 0
-      ? [{ start: event.t, end: event.t + event.ms }]
-      : [],
-  )
+  const glides = gliding(events, frameMs)
   const scrolls = events
     .filter((event) => event.kind === 'scroll')
     .map((event) => event.t)
@@ -382,6 +393,36 @@ function zoomsOf(
     zooms.push({ depth, into, stops, out })
   }
   return zooms
+}
+
+/**
+ * Counts moves logged back to back, each within a frame of the last, as one
+ * glide, since a harness logging a reach in pieces pumped the zoom at each.
+ * Any other event between two moves ends the run.
+ */
+function gliding(events: readonly LogEvent[], frameMs: number): Span[] {
+  const glides: Span[] = []
+  let running = false
+  for (const event of events) {
+    if (event.kind !== 'move' || event.ms <= 0) {
+      running = false
+      continue
+    }
+    const last = glides.at(-1)
+    const end = event.t + event.ms
+    if (
+      running &&
+      last &&
+      event.t >= last.end - 0.5 &&
+      event.t <= last.end + frameMs
+    ) {
+      glides[glides.length - 1] = { start: last.start, end }
+    } else {
+      glides.push({ start: event.t, end })
+    }
+    running = true
+  }
+  return glides
 }
 
 /** The glide ending as an aim starts, when one does after `floor`. */

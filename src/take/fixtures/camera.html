@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Camera scenarios</title>
+    <!--
+  The three-column page the camera and cursor rules were judged on, filmed by
+  camera-scenarios.json one scenario a beat. Every control the scenarios reach sits in
+  one of the three regions, so a beat can stay in one area or jump across.
+
+  - #priority opens a dropdown whose #opt-high sets the priority, and #save
+    writes it onto #card-0's chip
+  - #assignee is the field a fill types into
+  - #thumb drags along the progress slider to #tick-90
+  - main scrolls a list of 36 cards, each selecting on a click
+  - #theme switches the whole page dark, a page-wide change
+  - #agent-run, hidden, has an agent add three cards with no hand on the page
+-->
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 1080px;
+        overflow: hidden;
+        cursor: none;
+        font:
+          15px/1.45 system-ui,
+          'Noto Sans',
+          sans-serif;
+        color: #1d2330;
+        background: #f4f5f8;
+      }
+      header {
+        height: 64px;
+        display: flex;
+        align-items: center;
+        padding: 0 28px;
+        gap: 16px;
+        background: #fff;
+        border-bottom: 1px solid #e2e5ec;
+        font-weight: 600;
+      }
+      header .crumb {
+        color: #6b7385;
+        font-weight: 400;
+      }
+      .app {
+        display: grid;
+        grid-template-columns: 260px 1fr 380px;
+        height: calc(1080px - 64px);
+      }
+      nav {
+        background: #fff;
+        border-right: 1px solid #e2e5ec;
+        padding: 20px 14px;
+      }
+      nav h2,
+      aside h2 {
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #6b7385;
+        margin: 0 10px 12px;
+      }
+      nav button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        border: 0;
+        background: none;
+        cursor: none;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font: inherit;
+        color: inherit;
+        margin-bottom: 2px;
+      }
+      nav button.on {
+        background: #e9eefc;
+        color: #2448c8;
+        font-weight: 600;
+      }
+      main {
+        padding: 28px 32px;
+        overflow-y: auto;
+      }
+      main h1 {
+        margin: 0 0 20px;
+        font-size: 24px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #e2e5ec;
+        border-radius: 12px;
+        padding: 16px 18px;
+        height: 132px;
+      }
+      .card.sel {
+        outline: 2px solid #2448c8;
+        outline-offset: -1px;
+      }
+      .card h3 {
+        margin: 0 0 6px;
+        font-size: 16px;
+      }
+      .card p {
+        margin: 0 0 12px;
+        color: #6b7385;
+        font-size: 13px;
+      }
+      .chip {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 99px;
+        font-size: 12px;
+        font-weight: 600;
+        background: #eef0f4;
+        color: #4a5266;
+      }
+      .chip.high {
+        background: #fde7e7;
+        color: #b42318;
+      }
+      aside {
+        background: #fff;
+        border-left: 1px solid #e2e5ec;
+        padding: 20px 22px;
+        position: relative;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        color: #4a5266;
+        margin: 18px 0 6px;
+        font-weight: 600;
+      }
+      .select {
+        position: relative;
+      }
+      .select > button,
+      input {
+        width: 100%;
+        height: 42px;
+        border: 1px solid #cfd4de;
+        border-radius: 8px;
+        background: #fff;
+        font: inherit;
+        padding: 0 12px;
+        text-align: left;
+        cursor: none;
+        color: inherit;
+      }
+      .select > button::after {
+        content: '\25BE';
+        position: absolute;
+        right: 14px;
+        color: #6b7385;
+      }
+      .list {
+        display: none;
+        position: absolute;
+        top: 46px;
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid #cfd4de;
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(20, 30, 60, 0.15);
+        padding: 6px;
+        z-index: 5;
+      }
+      .select.open .list {
+        display: block;
+      }
+      .list button {
+        display: block;
+        width: 100%;
+        border: 0;
+        background: none;
+        text-align: left;
+        padding: 9px 10px;
+        border-radius: 6px;
+        font: inherit;
+        cursor: none;
+      }
+      .list button:hover {
+        background: #f1f3f7;
+      }
+      .save {
+        margin-top: 28px;
+        width: 100%;
+        height: 44px;
+        border: 0;
+        border-radius: 8px;
+        background: #2448c8;
+        color: #fff;
+        font: inherit;
+        font-weight: 600;
+        cursor: none;
+      }
+      .ghost {
+        border: 1px solid #cfd4de;
+        background: #fff;
+        border-radius: 8px;
+        height: 36px;
+        padding: 0 14px;
+        font: inherit;
+        cursor: none;
+        color: inherit;
+      }
+      .slider {
+        position: relative;
+        height: 28px;
+        margin-top: 4px;
+      }
+      .slider::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 12px;
+        height: 4px;
+        border-radius: 2px;
+        background: #e2e5ec;
+      }
+      .fill {
+        position: absolute;
+        left: 0;
+        top: 12px;
+        height: 4px;
+        border-radius: 2px;
+        background: #2448c8;
+        width: 40%;
+      }
+      .thumb {
+        position: absolute;
+        top: 4px;
+        left: 40%;
+        width: 20px;
+        height: 20px;
+        margin-left: -10px;
+        border-radius: 50%;
+        background: #fff;
+        border: 2px solid #2448c8;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      }
+      .tick {
+        position: absolute;
+        top: 6px;
+        width: 2px;
+        height: 16px;
+        margin-left: -1px;
+      }
+      body.dark {
+        background: #12151c;
+        color: #e6e9f0;
+      }
+      body.dark header,
+      body.dark nav,
+      body.dark aside,
+      body.dark .card,
+      body.dark .ghost,
+      body.dark .select > button,
+      body.dark input,
+      body.dark .list {
+        background: #1b1f29;
+        border-color: #2c3240;
+        color: #e6e9f0;
+      }
+      body.dark .card p,
+      body.dark nav h2,
+      body.dark aside h2,
+      body.dark label,
+      body.dark header .crumb {
+        color: #9aa3b5;
+      }
+      .card.new {
+        animation: pop 0.45s ease-out both;
+      }
+      @keyframes pop {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .toast {
+        position: absolute;
+        left: 50%;
+        bottom: 28px;
+        transform: translateX(-50%);
+        background: #1d2330;
+        color: #fff;
+        padding: 12px 18px;
+        border-radius: 10px;
+        font-weight: 600;
+        opacity: 0;
+        transition: opacity 0.25s;
+      }
+      .toast.show {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      Northwind <span class="crumb">/ Projects / Q4 launch</span
+      ><span style="flex: 1"></span
+      ><button id="theme" class="ghost">Dark mode</button
+      ><button
+        id="agent-run"
+        class="ghost"
+        style="opacity: 0; width: 1px; padding: 0"
+      >
+        Run agent
+      </button>
+    </header>
+    <div class="app">
+      <nav aria-label="Sections">
+        <h2>Workspace</h2>
+        <button id="nav-overview">Overview</button>
+        <button id="nav-projects" class="on">Projects</button>
+        <button id="nav-issues">Issues</button>
+        <button id="nav-releases">Releases</button>
+        <button id="nav-settings">Settings</button>
+      </nav>
+      <main>
+        <h1 id="title">Projects</h1>
+        <div class="grid" id="grid"></div>
+      </main>
+      <aside aria-label="Inspector">
+        <h2>Inspector</h2>
+        <div style="font-weight: 600; font-size: 18px">
+          Billing page redesign
+        </div>
+        <label for="priority">Priority</label>
+        <div class="select" id="sel">
+          <button id="priority" aria-haspopup="listbox">Medium</button>
+          <div class="list" role="listbox">
+            <button id="opt-low">Low</button>
+            <button id="opt-medium">Medium</button>
+            <button id="opt-high">High</button>
+          </div>
+        </div>
+        <label for="assignee">Assignee</label>
+        <input id="assignee" placeholder="Type a name" />
+        <label for="due">Due date</label>
+        <input id="due" value="Dec 12" />
+        <label
+          >Progress
+          <span id="pct" style="float: right; font-weight: 400"
+            >40%</span
+          ></label
+        >
+        <div class="slider" id="slider">
+          <div class="fill" id="fill"></div>
+          <div class="thumb" id="thumb" aria-label="Progress"></div>
+          <span class="tick" id="tick-90" style="left: 90%"></span>
+        </div>
+        <button class="save" id="save">Save changes</button>
+      </aside>
+    </div>
+    <div class="toast" id="toast">
+      Saved. Billing page redesign is now High.
+    </div>
+    <script>
+      const names = [
+        'Billing page redesign',
+        'Onboarding emails',
+        'Search latency',
+        'Mobile nav',
+        'Usage export',
+        'Audit log',
+        'SSO for teams',
+        'Invoice PDFs',
+        'Dark mode',
+        'Webhooks v2',
+        'Rate limits',
+        'Team roles',
+        'CSV import',
+        'Status page',
+        'Slack alerts',
+        'Data retention',
+        'Public API docs',
+        'Trial extension',
+        'Billing alerts',
+        'Seat limits',
+        'Login history',
+        'Email digests',
+        'Custom domains',
+        'Backups',
+        'Usage alerts',
+        'Tax settings',
+        'Partner portal',
+        'Changelog',
+        'Feature flags',
+        'Session timeouts',
+        'Payment retries',
+        'Locale support',
+        'Admin audit',
+        'Export to Sheets',
+        'Bulk invite',
+        'Read replicas',
+      ]
+      const grid = document.getElementById('grid')
+      names.forEach((n, i) => {
+        const c = document.createElement('div')
+        c.className = 'card' + (i === 0 ? ' sel' : '')
+        c.id = 'card-' + i
+        c.innerHTML = `<h3>${n}</h3><p>Owned by the platform team, due this quarter.</p><span class="chip" id="chip-${i}">Medium</span>`
+        c.onclick = () => {
+          document
+            .querySelectorAll('.card.sel')
+            .forEach((x) => x.classList.remove('sel'))
+          c.classList.add('sel')
+        }
+        grid.appendChild(c)
+      })
+      const sel = document.getElementById('sel')
+      document.getElementById('priority').onclick = () =>
+        sel.classList.toggle('open')
+      for (const id of ['opt-low', 'opt-medium', 'opt-high']) {
+        document.getElementById(id).onclick = (e) => {
+          document.getElementById('priority').textContent = e.target.textContent
+          sel.classList.remove('open')
+        }
+      }
+      document.getElementById('save').onclick = () => {
+        const v = document.getElementById('priority').textContent
+        const chip = document.getElementById('chip-0')
+        chip.textContent = v
+        chip.className = 'chip' + (v === 'High' ? ' high' : '')
+        const t = document.getElementById('toast')
+        t.classList.add('show')
+      }
+      document.querySelectorAll('nav button').forEach(
+        (b) =>
+          (b.onclick = () => {
+            document
+              .querySelectorAll('nav button')
+              .forEach((x) => x.classList.remove('on'))
+            b.classList.add('on')
+            document.getElementById('title').textContent = b.textContent
+          }),
+      )
+      document.getElementById('theme').onclick = (e) => {
+        const dark = document.body.classList.toggle('dark')
+        e.target.textContent = dark ? 'Light mode' : 'Dark mode'
+      }
+      // Drag the progress thumb with pointer events.
+      const slider = document.getElementById('slider'),
+        thumb = document.getElementById('thumb')
+      let dragging = false
+      const setAt = (clientX) => {
+        const r = slider.getBoundingClientRect()
+        const v = Math.max(0, Math.min(1, (clientX - r.left) / r.width))
+        thumb.style.left = fill.style.width = (v * 100).toFixed(1) + '%'
+        document.getElementById('pct').textContent = Math.round(v * 100) + '%'
+      }
+      const fill = document.getElementById('fill')
+      thumb.addEventListener('pointerdown', (e) => {
+        dragging = true
+        thumb.setPointerCapture(e.pointerId)
+      })
+      thumb.addEventListener('pointermove', (e) => {
+        if (dragging) setAt(e.clientX)
+      })
+      thumb.addEventListener('pointerup', () => {
+        dragging = false
+      })
+      // The agent: three new cards land one after another, with no hand on the page.
+      document.getElementById('agent-run').onclick = () => {
+        const drafts = ['Churn survey', 'Referral credits', 'Billing alerts']
+        drafts.forEach((n, i) =>
+          setTimeout(
+            () => {
+              const c = document.createElement('div')
+              c.className = 'card new'
+              c.innerHTML = `<h3>${n}</h3><p>Drafted by the agent from last week's feedback.</p><span class="chip">New</span>`
+              grid.insertBefore(c, grid.firstChild)
+            },
+            900 + i * 900,
+          ),
+        )
+      }
+    </script>
+  </body>
+</html>
