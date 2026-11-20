@@ -27,7 +27,7 @@ Branch on `reason` rather than on the exit code.
 
 - `copied` means the address serves a throwaway copy rebuilt from the worker's worktree. Keep `copied` for the comment.
 - `no-config` means the project declares no preview writes, so drive as usual. The check below still runs.
-- `no-worktree` means no local worktree holds the branch, as for a cloud worker's. Drive, and say in the comment that the worktree check did not run.
+- `no-worktree` means no local worktree holds the branch. Drive, and say in the comment that the worktree check did not run.
 - Any other refusal stops the pass with nothing posted, naming the `reason` and `message` for the dispatcher, since a broken `canon/config/preview.json` would send the drives into the real folders
 - `seed-failed` and `seed-wrote-worktree` stop the pass the same way. The copy lacks its seeded pages, or the seed wrote the tracked files `paths` names.
 

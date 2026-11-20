@@ -12,7 +12,7 @@ The diff touches a file that paints: markup, a stylesheet, a component or templa
 
 Run this before any other section, since a pass that finds nothing to open otherwise reads the stylesheet instead and reports as if it had looked. Read its answer before composing any report or body, never in the same batch as the write, since what it decides is a finding the report has to carry.
 
-Read the thread over REST, which a cloud session's GitHub proxy serves where it refuses GraphQL, and take the head off `canon pr head <number> --json`, from the record's `tip`:
+Read the thread over REST, and take the head off `canon pr head <number> --json`, from the record's `tip`:
 
 ```bash
 gh api --paginate 'repos/{owner}/{repo}/issues/<number>/comments?per_page=100' --jq '.[] | select((.body // "") | contains("<!-- pr-evidence: head=")) | .body'

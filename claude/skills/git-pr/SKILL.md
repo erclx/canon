@@ -128,7 +128,7 @@ The run resolves the pull request once, in the final command below, and every la
 
 - Never detect by head branch alone. A lookup ignoring state returns the closed pull request a reused branch name left behind, so scope it to `state=open`.
 - Scope the lookup to the base as well as the head, resolved from the default branch, so detection and create agree on one pull request. A head can carry two bases.
-- Call `gh api` against REST rather than `gh pr` or `gh repo view`, which run on GraphQL. A cloud session's GitHub access blocks GraphQL and serves REST.
+- Call `gh api` against REST rather than `gh pr` or `gh repo view`, which run on GraphQL.
 
 A detached HEAD gives `git branch --show-current` an empty result, which would read as no open pull request and create a second one. The branch-name guard above stops the run first, since an empty name does not match `<type>/<description>`.
 

@@ -103,7 +103,7 @@ Read `reason` on the record rather than the exit code.
 gh api -X POST repos/{owner}/{repo}/issues/<number>/comments -F body=@<main-root>/.canon/tmp/pr/evidence/body-<number>.md --silent
 ```
 
-Both posts in this file use the REST issue-comments endpoint, since the `gh pr` subcommands run on GraphQL and a cloud session's GitHub proxy refuses it. `git-followup` runs this skill, so a GraphQL post here would break the cloud review-address leg.
+Both posts in this file use the REST issue-comments endpoint rather than the `gh pr` subcommands, which run on GraphQL.
 
 When the record carries a `commentId`, edit that comment in place instead of posting a second. The body reads from the tmp file with `@`, which needs `-F`, since `-f` posts the path itself as the body:
 

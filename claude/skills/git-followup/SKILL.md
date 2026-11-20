@@ -36,7 +36,7 @@ gh api "repos/{owner}/{repo}/pulls?head={owner}:$(git branch --show-current | jq
 
 ### REST and the tracking ref
 
-Every read and write in this skill runs on REST, since the `gh pr` subcommands run on GraphQL and a cloud session's GitHub proxy refuses it. A cloud worker reaches this skill through `review-address`, so one GraphQL call breaks that whole leg.
+Every read and write in this skill runs on REST rather than the `gh pr` subcommands, which run on GraphQL.
 
 A missing tracking ref is not a guard, since an open pull request proves the branch reached the remote. A branch created by worktree entry carries an open pull request with no tracking ref, so step 4 sets the ref instead.
 

@@ -23,7 +23,6 @@ A session judging from the diff whether an evidence image changed cannot see a r
 
 - Dispatch a deploy whose command names no branch, since Cloudflare Pages publishes such a deploy to production
 - Create a pull request, or post against a number it guessed
-- Call a GraphQL-backed `gh` subcommand, since the cloud review leg runs this skill through `git-followup`
 - Print a result line of its own, since `git-pr` closes its report with the lines this skill returns
 - Run without a number when none was passed and no open pull request resolves for the branch, and instead ask for it
 

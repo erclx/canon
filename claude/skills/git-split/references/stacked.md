@@ -63,7 +63,7 @@ When the user signals the previous stacked PR has merged, restack the next one.
 2. Verify the base auto-retargeted to main with `gh api repos/{owner}/{repo}/pulls/<num> --jq .base.ref`. If not, run `gh api -X PATCH repos/{owner}/{repo}/pulls/<num> -f base=main --silent`.
 3. Reply: `✅ <branch> rebased onto main. Ready for squash-merge.`
 
-Both reads go through REST, which a cloud session's GitHub proxy serves where it refuses GraphQL.
+Both reads go through REST rather than GraphQL.
 
 ### Edge cases
 

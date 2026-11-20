@@ -64,7 +64,7 @@ Resolve the PR through `canon pr head --json` for the current branch, or `canon 
 gh api repos/{owner}/{repo}/pulls/<number> --jq '{title, body, head: .head.sha, repo: .base.repo.html_url}'
 ```
 
-- Every read here runs on REST, since `gh pr` runs on GraphQL and a cloud session's proxy refuses it
+- Every read here runs on REST rather than `gh pr`, which runs on GraphQL
 - A target whose CLI predates the verb gets no record. Take `<headRefOid>` from the `head` field above instead.
 - With no number named there, read `gh api "repos/{owner}/{repo}/pulls?head={owner}:<branch>&state=open" --jq '.[].number'`, and stop on the guard unless it prints one number
 - `<headRefOid>` and `<read-at>` travel into Step 4's marker, and `<headRefOid>` with `repo` as `<repo-url>` into its links. Re-reading the head later would name a commit this pass did not review.

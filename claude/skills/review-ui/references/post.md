@@ -186,7 +186,7 @@ date -u +%Y-%m-%dT%H:%M:%SZ
 gh api -X POST 'repos/{owner}/{repo}/pulls/<number>/reviews' -f event=COMMENT -F body=@.canon/tmp/pr/review-ui/body-<number>-<short-sha>.md --jq .html_url
 ```
 
-The post goes through the REST reviews endpoint, since the `gh pr` review subcommand runs on GraphQL and fails where a cloud session's GitHub proxy refuses it.
+The post goes through the REST reviews endpoint rather than the `gh pr` review subcommand, which runs on GraphQL.
 
 - `-F` reads the file into the body, where `-f` would post the path itself
 - The ticks come after the post, in Step 8, so the verdict and the ticks report the same `<head>`. A pass that stops before posting ticks nothing.
