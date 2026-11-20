@@ -15,7 +15,7 @@ The plan lands as a validated, linked file before any edit to a tracked file, so
 2. Otherwise invoke `canon:plan-feature <task>` and ask it for a file. It validates the plan and links it, which moves the row to `## Up next`.
 3. Decide whether this session builds the plan, reading the tests under `## Whether this session builds` in their order.
 4. Run `canon tasks plan-branch <plan> --json`, then `canon sessions list --branch <branch> --json`, and read `claimed` against the stops below.
-5. Send the controller the plan path per `canon:role-worker`, naming each suggested question this run executes and any it waits on. The controller promotes the row and runs its conflict check on it.
+5. Send the controller the plan path per `canon:role-worker`, naming each suggested question this run executes and any it waits on. The controller checks conflicts and promotes only a row built here.
 6. Run `canon tasks plan-answers <plan> --json`. On `launchable`, continue. On an open question, wait on it as `## The wait` states.
 
 Before the worktree entry, act on any controller message that arrived since step 5. A stop on a hold ends the run with the plan linked and nothing built.
