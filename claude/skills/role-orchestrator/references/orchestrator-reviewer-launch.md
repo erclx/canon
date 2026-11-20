@@ -1,6 +1,6 @@
 ---
 title: Orchestrator reviewer launch runbook
-description: The launch shapes that start a reviewer rather than a builder, being the code reviewer, the cloud reviewer, the UI reviewer driving a pull request's checklist, and the batch shapes holding several small pull requests
+description: The launch shapes that start a reviewer rather than a builder, being the code reviewer, the UI reviewer driving a pull request's checklist, and the batch shapes holding several small pull requests
 ---
 
 Run this once `orchestrator-review-dispatch.md` has sent a pull request to a dispatched reviewer. The build, review-address, and planning shapes, and the rules every launch shares, stay in `orchestrator-launch.md`.
@@ -34,10 +34,6 @@ Record the UI reviewer below the same way after its launch, and a batch reviewer
 ### The channel clauses
 
 The channel clauses restate what `role-reviewer` holds, so a reviewer whose plugin cache predates that body still sends the dispatch itself. The worker reads the reviewer's sessionId off that message and sends its re-review request back to it, since a reviewer holds the trunk branch and no branch lookup finds it.
-
-## Dispatch a review to a cloud reviewer
-
-Read `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md` when the operator picked cloud for a code review. Its prompt opens with `/role-reviewer`, carries the cross-branch facts, and makes the posted review the announcement.
 
 ## Dispatch to drive a pull request's checklist
 

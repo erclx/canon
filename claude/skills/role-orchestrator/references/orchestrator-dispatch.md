@@ -13,7 +13,6 @@ Run this at loop step 4, for a `## Up next` row whose plan is verified, in place
 - [Hold what this pass already launched](#hold-what-this-pass-already-launched)
 - [Check for a conflict with the tracks in flight](#check-for-a-conflict-with-the-tracks-in-flight)
 - [Pick the model](#pick-the-model)
-- [Pick local or cloud](#pick-local-or-cloud)
 - [Dispatch](#dispatch)
 - [Fall back to the human](#fall-back-to-the-human)
 - [Stop the loop](#stop-the-loop)
@@ -81,10 +80,6 @@ Run `canon sessions list --branch <type>/<slug> --json` and read `claimed` off t
 
 The ref read cannot see a branch pushed from another machine since the last fetch. A `git ls-remote` per dispatch costs 0.438s against 0.001s, so the gap is recorded rather than closed.
 
-### A cloud worker's claim
-
-A cloud worker never appears in the roster and never pushes the derived branch, so run the local check above and then the cloud claim in `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md` before a cloud dispatch.
-
 ## Hold what this pass already launched
 
 A worker registers with `branch: main` and the main worktree as its `cwd` until `auto-ship` Step 0 moves it, which took several seconds on both measured runs. Neither the roster nor the refs name the candidate during that window, so a second check inside it reads clear.
@@ -143,13 +138,9 @@ A launch naming no effort takes the saved setting or the model's default, never 
 
 `fable`, the tier above `opus`, runs only on the operator's word, for one dispatch or as a standing pick for the session. `haiku` stays never.
 
-## Pick local or cloud
-
-Read `## Pick local or cloud` in `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md` before picking cloud for a row, since the pick stays the operator's.
-
 ## Dispatch
 
-Read `${CLAUDE_SKILL_DIR}/references/orchestrator-launch.md` once every check above clears, and launch from its build template, which sits beside the review-address and planning shapes that skip these checks. A cloud row launches from `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md`, since the VM shares no plugin or board.
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-launch.md` once every check above clears, and launch from its build template, which sits beside the review-address and planning shapes that skip these checks.
 
 Once the launch succeeds, run `canon tasks promote <stem>`, moving the row to `## In flight`.
 

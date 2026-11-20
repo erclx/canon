@@ -35,10 +35,6 @@ The worker that built the branch rebases it, not this session. It holds the plan
 
 A dispatched reviewer sends the `review-address` dispatch to the worker itself, carrying its own sessionId, and the worker sends the re-review request straight back to it. Neither leg passes through this session, which sends either one only as a fallback.
 
-### A cloud reviewer's pass
-
-A cloud session can send no message, and the script reports no code review posting on an unchanged head. The poll's cloud-reviewer rule reads `canon pr review-state` for each pull request a cloud reviewer holds and routes the dispatch here.
-
 ### No worker resolved
 
 A reviewer reports that `canon sessions list --branch` returned no session or an unconfirmed match. Route it the way the poll's dispatch rule routes the count.
