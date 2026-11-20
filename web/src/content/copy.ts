@@ -230,14 +230,16 @@ export const guardrails = {
 export const worktrees = {
   // README.md: "One worktree for each change"
   head: 'One worktree for each change',
-  // README.md: canon-allow-readme-paraphrase: the README's reason, then its sentence cut to the branch each change builds on and the one record they share. "Agents working in one checkout overwrite each other." "on its own branch"
-  lede: 'Agents working in one checkout overwrite each other. Every change builds on its own branch, and all of them share one record.',
+  // README.md: canon-allow-readme-paraphrase: the README's reason, then its sentence cut to the branch each change builds on and the one record they share. "Run several changes at once without one agent overwriting another." "on its own branch"
+  lede: 'Run several changes at once without one agent overwriting another. Every change builds on its own branch, and all of them share one record.',
   // README.md: canon-allow-readme-paraphrase: the band naming the shared folder, which the README states as the record in the main checkout. "the one `.canon/` record in the main checkout"
   band: {
     name: '.canon/',
     dirs: ['plans/', 'review/', 'tasks/'],
     shared: 'shared by every worktree',
   },
+  main: 'main',
+  writes: '→ writes',
 }
 
 export const film = {
@@ -576,37 +578,28 @@ export const guardrailScenes: {
 ]
 
 /**
- * Three worktrees side by side. Each card steps through its status lines,
- * lighting the band folder the step writes, and rests on its second.
+ * Three worktrees branching off main together, each naming its folder, its
+ * branch, where its session stands, and the shared folder that step writes.
  */
 // README.md: canon-allow-readme-paraphrase: page fiction drawn from the worktree layout the README describes. "Each worker builds in its own worktree on its own branch"
 export const worktreeCards = [
   {
     path: '.claude/worktrees/take-timer/',
     branch: 'feat/take-timer',
-    steps: [
-      { line: 'Slice 2 of 4 committed', dir: 'plans/' },
-      { line: 'Gate: 9 of 14 stages passed', dir: 'plans/' },
-      { line: 'Pull request opened', dir: 'tasks/' },
-    ],
+    line: 'Gate: 9 of 14 stages passed',
+    dir: 'plans/',
   },
   {
     path: '.claude/worktrees/sync-stamp/',
     branch: 'feat/sync-stamp',
-    steps: [
-      { line: 'Reading the added commits', dir: 'review/' },
-      { line: 'Second pass on the added commits', dir: 'review/' },
-      { line: 'Two findings posted', dir: 'review/' },
-    ],
+    line: 'Second pass on the added commits',
+    dir: 'review/',
   },
   {
     path: '.claude/worktrees/toolbar/',
     branch: 'feat/toolbar',
-    steps: [
-      { line: 'Starting the app from the branch', dir: 'review/' },
-      { line: 'Driving the checklist in the running app', dir: 'review/' },
-      { line: 'Box 3 sent back to the worker', dir: 'review/' },
-    ],
+    line: 'Box 3 sent back to the worker',
+    dir: 'review/',
   },
 ]
 

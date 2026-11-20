@@ -75,7 +75,7 @@ An instruction can be ignored. These four parts fail the run when a step is skip
 
 ## One worktree for each change
 
-Agents working in one checkout overwrite each other. Each worker builds in its own worktree on its own branch, and every session reads and writes the one `.canon/` record in the main checkout, so no worktree keeps a copy of its own.
+Run several changes at once without one agent overwriting another. Each worker builds in its own worktree on its own branch, and every session reads and writes the one `.canon/` record in the main checkout, so no worktree keeps a copy of its own.
 
 ## A pull request arrives with a film of the change
 

@@ -43,13 +43,12 @@ describe('copy', () => {
 })
 
 describe('worktreeCards', () => {
-  it('should light only a folder the band names on every status step', () => {
-    const steps = copy.worktreeCards.flatMap((card) => card.steps)
-    const strays = steps.filter(
-      (step) => !copy.worktrees.band.dirs.includes(step.dir),
+  it('should light only a folder the band names on every card', () => {
+    const strays = copy.worktreeCards.filter(
+      (card) => !copy.worktrees.band.dirs.includes(card.dir),
     )
 
-    expect(steps.length).toBeGreaterThan(0)
+    expect(copy.worktreeCards.length).toBeGreaterThan(0)
     expect(strays).toEqual([])
   })
 })

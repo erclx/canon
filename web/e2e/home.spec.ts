@@ -269,20 +269,6 @@ test.describe('section shapes', () => {
     expect(tray!.x + tray!.width).toBeLessThanOrEqual(head!.x)
   })
 
-  test('worktrees sets its heading left of the tray at 1440', async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto('/')
-
-    const head = await page.locator('#worktrees .sec-head').boundingBox()
-    const tray = await page.locator('#worktrees .tray').boundingBox()
-
-    expect(head).not.toBeNull()
-    expect(tray).not.toBeNull()
-    expect(head!.x + head!.width).toBeLessThanOrEqual(tray!.x)
-  })
-
   for (const width of [834, 390]) {
     test(`every split stacks its text over its tray at ${width}`, async ({
       page,
@@ -617,6 +603,39 @@ test.describe('the opening relay', () => {
     expect(first).not.toBeNull()
 
     expect(bar!.y + bar!.height).toBeLessThanOrEqual(first!.y)
+  })
+})
+
+test.describe('the worktree graph', () => {
+  test('draws its branches out of main once the graph is in view', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+    const section = page.locator('#worktrees')
+    const tracks = page.locator('#worktrees .track')
+    await expect(section).toHaveClass(/(^| )armed( |$)/)
+    await expect(section).not.toHaveClass(/(^| )in( |$)/)
+
+    await page.locator('#worktrees .graph').scrollIntoViewIfNeeded()
+
+    await expect(section).toHaveClass(/(^| )in( |$)/, SETTLE)
+    await expect(tracks).toHaveCount(3)
+    await expect(tracks.first()).toHaveCSS('transform', 'none', SETTLE)
+  })
+
+  test('shows its branches drawn under reduced motion', async ({ page }) => {
+    await page.goto('/')
+    const tracks = page.locator('#worktrees .track')
+    await expect(tracks).toHaveCount(3)
+
+    await expect(page.locator('#worktrees')).not.toHaveClass(/(^| )armed( |$)/)
+    await expect(tracks.first()).toHaveCSS('transform', 'none')
+    await expect(page.locator('#worktrees .meta').first()).toHaveCSS(
+      'opacity',
+      '1',
+    )
   })
 })
 
