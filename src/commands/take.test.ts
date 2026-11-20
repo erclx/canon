@@ -383,3 +383,142 @@ describe('canon take', () => {
     120_000,
   )
 })
+
+/** A stepped beat's log, whose glide lands 300 ms before its click. */
+function steppedLog(glideMs = 600): string {
+  return JSON.stringify({
+    version: 1,
+    viewport: { width: 1920, height: 1080 },
+    fps: 60,
+    route: 'step',
+    frames: 120,
+    events: [
+      {
+        t: 600,
+        kind: 'move',
+        from: { x: 960, y: 540 },
+        to: { x: 500, y: 300 },
+        ms: glideMs,
+      },
+      { t: 1500, kind: 'click', at: { x: 500, y: 300 } },
+    ],
+  })
+}
+
+/** A track holding the whole page, so no zoom rule can fire. */
+const WIDE_TRACK = JSON.stringify({
+  version: 1,
+  viewport: { width: 1920, height: 1080 },
+  fps: 60,
+  frames: [0, 1, 2].map((index) => ({
+    ms: index * (1000 / 60),
+    scale: 1,
+    x: 0,
+    y: 0,
+    cursor: { x: 960, y: 540 },
+    ring: null,
+  })),
+})
+
+function writeBeat(
+  takes: string,
+  dir: string,
+  files: { log?: string; track?: string; clip?: boolean },
+): void {
+  mkdirSync(join(takes, dir), { recursive: true })
+  if (files.log) writeFileSync(join(takes, dir, 'log.json'), files.log)
+  if (files.track) writeFileSync(join(takes, dir, 'camera.json'), files.track)
+  if (files.clip) writeFileSync(join(takes, dir, 'clip.mp4'), '')
+}
+
+describe('canon take check', () => {
+  let dir: string
+
+  beforeAll(() => {
+    dir = mkdtempSync(join(tmpdir(), 'canon-take-check-'))
+  })
+
+  afterAll(() => {
+    rmSync(dir, { recursive: true, force: true })
+  })
+
+  it('should refuse a folder with no take.json as no-takes', async () => {
+    const takes = join(dir, 'empty')
+    writeBeat(takes, '01-open', { log: steppedLog(), track: WIDE_TRACK })
+
+    const result = await runTake(['check', takes])
+
+    expect(result).toMatchObject({
+      exitCode: 1,
+      record: { ok: false, reason: 'no-takes' },
+    })
+  })
+
+  it('should refuse a beat with no camera.json as no-track, naming it', async () => {
+    const takes = join(dir, 'lost-track')
+    writeBeat(takes, '01-open', { log: steppedLog() })
+    writeFileSync(
+      join(takes, 'take.json'),
+      JSON.stringify({ beats: [{ name: 'open', dir: '01-open' }] }),
+    )
+
+    const result = await runTake(['check', takes])
+
+    expect(result).toMatchObject({
+      exitCode: 1,
+      record: { ok: false, reason: 'no-track', beat: '01-open' },
+    })
+  })
+
+  it('should check a harness folder take.json does not list after the listed beats', async () => {
+    const takes = join(dir, 'with-harness')
+    writeBeat(takes, '02-listed', { log: steppedLog(), track: WIDE_TRACK })
+    writeBeat(takes, '01-harness', {
+      log: steppedLog(),
+      track: WIDE_TRACK,
+      clip: true,
+    })
+    writeFileSync(
+      join(takes, 'take.json'),
+      JSON.stringify({ beats: [{ name: 'listed', dir: '02-listed' }] }),
+    )
+
+    const result = await runTake(['check', takes])
+
+    expect(result).toMatchObject({
+      exitCode: 0,
+      record: {
+        ok: true,
+        beats: [
+          { dir: '02-listed', breaches: [] },
+          { dir: '01-harness', breaches: [] },
+        ],
+      },
+    })
+  })
+
+  it('should fail a beat breaking a rule with exit 2 and reason breach', async () => {
+    const takes = join(dir, 'fast-glide')
+    writeBeat(takes, '01-open', { log: steppedLog(300), track: WIDE_TRACK })
+    writeFileSync(
+      join(takes, 'take.json'),
+      JSON.stringify({ beats: [{ name: 'open', dir: '01-open' }] }),
+    )
+
+    const result = await runTake(['check', takes])
+
+    expect(result).toMatchObject({
+      exitCode: 2,
+      record: {
+        ok: false,
+        reason: 'breach',
+        beats: [
+          {
+            dir: '01-open',
+            breaches: [{ rule: 'glide-fast', t: 600, measured: 300 }],
+          },
+        ],
+      },
+    })
+  })
+})
