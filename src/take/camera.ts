@@ -164,7 +164,13 @@ export function cameraTrack(
     .sort((a, b) => a.t - b.t)
 
   const end = (log.frames * 1000) / log.fps
-  const zooms = zoomsOf(aims, log.events, { width, height }, end)
+  const zooms = zoomsOf(
+    aims,
+    log.events,
+    { width, height },
+    end,
+    1000 / log.fps,
+  )
 
   // Read off the presses, since the aims drop unzoomed clicks and add typing.
   const presses = log.events.flatMap((event) =>
@@ -306,12 +312,9 @@ function zoomsOf(
   events: readonly LogEvent[],
   page: { readonly width: number; readonly height: number },
   end: number,
+  frameMs: number,
 ): Zoom[] {
-  const glides = events.flatMap((event): Span[] =>
-    event.kind === 'move' && event.ms > 0
-      ? [{ start: event.t, end: event.t + event.ms }]
-      : [],
-  )
+  const glides = gliding(events, frameMs)
   const scrolls = events
     .filter((event) => event.kind === 'scroll')
     .map((event) => event.t)
@@ -382,6 +385,37 @@ function zoomsOf(
     zooms.push({ depth, into, stops, out })
   }
   return zooms
+}
+
+/**
+ * The glides a viewer sees, with a run of moves logged one after another, each
+ * starting within a frame of the last one's end, counted as one, since a
+ * harness logging a reach in pieces would otherwise pull the zoom out and back
+ * in at every piece. Any other event between two moves ends the run.
+ */
+function gliding(events: readonly LogEvent[], frameMs: number): Span[] {
+  const glides: Span[] = []
+  let running = false
+  for (const event of events) {
+    if (event.kind !== 'move' || event.ms <= 0) {
+      running = false
+      continue
+    }
+    const last = glides.at(-1)
+    const end = event.t + event.ms
+    if (
+      running &&
+      last &&
+      event.t >= last.end - 0.5 &&
+      event.t <= last.end + frameMs
+    ) {
+      glides[glides.length - 1] = { start: last.start, end }
+    } else {
+      glides.push({ start: event.t, end })
+    }
+    running = true
+  }
+  return glides
 }
 
 /** The glide ending as an aim starts, when one does after `floor`. */
