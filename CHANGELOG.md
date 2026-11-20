@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.104.0](https://github.com/erclx/canon/compare/v5.103.0...v5.104.0) (2026-11-20)
+
+
+### Features
+
+* **app-drive:** run fixed scenario scripts once per persona ([#3272](https://github.com/erclx/canon/issues/3272)) ([76c5bec](https://github.com/erclx/canon/commit/76c5bec4cbf43133ac3fff20fd0cc4f26519a1a7))
+* **dispatch:** queue a plan-and-build worker prompt with --plan-first ([#3267](https://github.com/erclx/canon/issues/3267)) ([08733eb](https://github.com/erclx/canon/commit/08733eb99df9e2a87e619e572bc915292084dbf7))
+* **orchestrator:** retire cloud worker and reviewer dispatch ([#3268](https://github.com/erclx/canon/issues/3268)) ([0d394ea](https://github.com/erclx/canon/commit/0d394ea74e69c359ba3238ded23570e0ae447045))
+* **orchestrator:** scope the promote line to building sessions ([#3270](https://github.com/erclx/canon/issues/3270)) ([b5bffbe](https://github.com/erclx/canon/commit/b5bffbe858633e848d5b6a3877706673ed8b538e))
+* **skills:** run every close lift in the background ([#3274](https://github.com/erclx/canon/issues/3274)) ([f2dcd1a](https://github.com/erclx/canon/commit/f2dcd1a4a6970e602a6b5619d688d29f0b084612))
+* **ui-craft:** add drag, layer, shortcut, and context menu rules ([#3266](https://github.com/erclx/canon/issues/3266)) ([facefb8](https://github.com/erclx/canon/commit/facefb83873bec9a56f24f7dcef2c60697bfab9b))
+* **worker:** route uncaptured paths to review and spell the lease push ([#3271](https://github.com/erclx/canon/issues/3271)) ([53dea8e](https://github.com/erclx/canon/commit/53dea8e39ff4ce5a03cc74317146341dab0d511d))
+
+
+### Bug Fixes
+
+* **orchestrate:** hold a UI line until the verb and payload heads agree ([#3265](https://github.com/erclx/canon/issues/3265)) ([c76f2c0](https://github.com/erclx/canon/commit/c76f2c0e3c1aaee12cece5b600d1db5e2c4f4373))
+
 ## [5.103.0](https://github.com/erclx/canon/compare/v5.102.0...v5.103.0) (2026-11-19)
 
 
