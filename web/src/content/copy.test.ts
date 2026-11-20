@@ -25,7 +25,7 @@ describe('copy', () => {
 
   it('should read every exported string, including those built from counts', () => {
     expect(strings).toContain(copy.guardrails.parts[1]?.verdict)
-    expect(strings).toContain(copy.setup.stages[0]?.line)
+    expect(strings).toContain(copy.install.stages[0]?.line)
     expect(strings).toContain(copy.footer.read[0]?.label)
   })
 

@@ -36,7 +36,7 @@
     --behind: var(--ground);
     --mono: var(--type-code-family);
     --sans: var(--type-body-family);
-    --nav-h: 88px;
+    --nav-h: 76px;
     --page-w: 1180px;
     --gutter: 32px;
     color-scheme: dark;

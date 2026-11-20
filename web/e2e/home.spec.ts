@@ -10,24 +10,17 @@ const SETTLE = { timeout: 5_000 }
 
 const SECTIONS = [
   'top',
-  'roles',
   'worktrees',
   'records',
   'craft',
   'guardrails',
   'evidence',
-  'film',
-  'drive',
   'board',
   'health',
   'install',
-  'setup',
-  'try',
 ]
 
-test('renders the opening, ten sections, and try in order', async ({
-  page,
-}) => {
+test('renders the opening and eight sections in order', async ({ page }) => {
   await page.goto('/')
 
   const ids = await page
@@ -91,7 +84,7 @@ test.describe('the fixed bar', () => {
     expect(Math.abs(section!.y - (bar!.y + bar!.height))).toBeLessThan(2)
   })
 
-  for (const width of [1041, 1039, 641, 639]) {
+  for (const width of [1101, 1099, 901, 899, 641, 639]) {
     test(`fits the bar at ${width} with no sideways scroll`, async ({
       page,
     }) => {
@@ -108,45 +101,48 @@ test.describe('the fixed bar', () => {
     })
   }
 
-  test('shows the six section links above 1040', async ({ page }) => {
-    await page.setViewportSize({ width: 1041, height: 800 })
+  test('shows all eight section links above 1100', async ({ page }) => {
+    await page.setViewportSize({ width: 1101, height: 800 })
     await page.goto('/')
 
-    await expect(page.locator('.links > a.sl:visible')).toHaveCount(6)
+    await expect(page.locator('.links > a.sl:visible')).toHaveCount(8)
     await expect(page.locator('.nbtn')).toBeHidden()
   })
 
-  test('folds the sections into a menu that reaches each one below 1040', async ({
+  test('drops Worktrees and Health from the bar under 1100', async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 1039, height: 800 })
+    await page.setViewportSize({ width: 1099, height: 800 })
+    await page.goto('/')
+
+    const shown = page.locator('.links > a.sl:visible')
+    await expect(shown).toHaveCount(6)
+    await expect(shown.filter({ hasText: /Worktrees|Health/ })).toHaveCount(0)
+  })
+
+  test('folds the sections, Docs, and GitHub into Menu under 900', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 899, height: 800 })
     await page.goto('/')
 
     await expect(page.locator('.links > a.sl:visible')).toHaveCount(0)
+    await expect(page.locator('.links > a.ext:visible')).toHaveCount(0)
     await page.locator('.nbtn').click()
-    await page.locator('#nav-panel a[href="#setup"]').click()
+    await expect(page.locator('#nav-panel a.pext:visible')).toHaveCount(2)
+    await page.locator('#nav-panel a[href="#install"]').click()
 
-    await expect(page.locator('#setup')).toBeInViewport(SETTLE)
+    await expect(page.locator('#install')).toBeInViewport(SETTLE)
     await expect(page.locator('.nbtn')).toHaveAttribute(
       'aria-expanded',
       'false',
     )
   })
 
-  test('moves Docs and GitHub into the menu on a phone', async ({ page }) => {
-    await page.setViewportSize({ width: 639, height: 800 })
-    await page.goto('/')
-
-    await expect(page.locator('.links > a.ext:visible')).toHaveCount(0)
-    await page.locator('.nbtn').click()
-
-    await expect(page.locator('#nav-panel a.pext:visible')).toHaveCount(2)
-  })
-
   test('closes the menu on Escape and returns focus to its button', async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 1039, height: 800 })
+    await page.setViewportSize({ width: 899, height: 800 })
     await page.goto('/')
     await page.locator('.nbtn').click()
 
@@ -158,18 +154,19 @@ test.describe('the fixed bar', () => {
     )
     await expect(page.locator('.nbtn')).toBeFocused()
   })
-})
 
-test('the footer mark takes the reader back to the top', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto('/')
-  const brand = page.locator('.site-footer a.brand')
-  await brand.scrollIntoViewIfNeeded()
+  test('shows its rule only once the page scrolls', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+    const bar = page.locator('.site-nav')
+    await expect(bar).not.toHaveClass(/(^| )scrolled( |$)/)
+    await expect(bar).toHaveCSS('border-bottom-color', 'rgba(0, 0, 0, 0)')
 
-  await brand.click()
+    await page.mouse.wheel(0, 400)
 
-  await expect(page.locator('#top h1')).toBeInViewport(SETTLE)
-  expect(new URL(page.url()).hash).toBe('#top')
+    await expect(bar).toHaveClass(/(^| )scrolled( |$)/, SETTLE)
+    await expect(bar).not.toHaveCSS('border-bottom-color', 'rgba(0, 0, 0, 0)')
+  })
 })
 
 test.describe('the footer columns', () => {
@@ -206,7 +203,7 @@ test.describe('the footer columns', () => {
     expect(anchors.length).toBeGreaterThan(6)
     expect(missing).toEqual([])
     await expect(page.locator('.site-footer a.sl')).toHaveCount(0)
-    await expect(page.locator('.links > a.sl')).toHaveCount(6)
+    await expect(page.locator('.links > a.sl')).toHaveCount(8)
   })
 
   test('a footer section link lands its section under the bar', async ({
@@ -258,44 +255,6 @@ test('the footer mark carries no underline under hover', async ({ page }) => {
   expect(brandLine).toBe('none')
 })
 
-test.describe('section shapes', () => {
-  test('roles sets its tray left of the heading at 1440', async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto('/')
-
-    const head = await page.locator('#roles .sec-head').boundingBox()
-    const tray = await page.locator('#roles .tray').boundingBox()
-
-    expect(head).not.toBeNull()
-    expect(tray).not.toBeNull()
-    expect(tray!.x + tray!.width).toBeLessThanOrEqual(head!.x)
-  })
-
-  for (const width of [834, 390]) {
-    test(`every split stacks its text over its tray at ${width}`, async ({
-      page,
-    }) => {
-      await page.setViewportSize({ width, height: 900 })
-      await page.goto('/')
-
-      const misplaced = await page
-        .locator('main > section.split-left, main > section.split-right')
-        .evaluateAll((sections) =>
-          sections.flatMap((section) => {
-            const head = section.querySelector('.sec-head')
-            const tray = section.querySelector('.tray')
-            if (!head || !tray) return [`${section.id}: missing`]
-            const h = head.getBoundingClientRect()
-            const t = tray.getBoundingClientRect()
-            return h.bottom <= t.top ? [] : [section.id]
-          }),
-        )
-
-      expect(misplaced).toEqual([])
-    })
-  }
-})
-
 test.describe('the craft section', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
@@ -333,84 +292,6 @@ test.describe('the craft section', () => {
       await size('#craft .pair:visible .rule .text'),
     )
   })
-})
-
-test.describe('the looping windows and their pause button', () => {
-  test.use({ viewport: { width: 1440, height: 900 } })
-
-  /** A loop that wraps has to outlast one scene and the rest after it. */
-  const WRAP = { timeout: 20_000 }
-
-  test('setup plays on past its last stage', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await page.goto('/')
-    const stages = page.locator('#setup .st')
-    await expect(stages).toHaveCount(4)
-    await page.locator('#setup .tx').scrollIntoViewIfNeeded()
-    await expect(stages.first()).toHaveClass(/(^| )on( |$)/, SETTLE)
-
-    await stages.last().locator('.go').click()
-
-    await expect(stages.last()).toHaveClass(/(^| )on( |$)/, SETTLE)
-    await expect(stages.first()).toHaveClass(/(^| )on( |$)/, WRAP)
-  })
-
-  test('the pause button toggles from the keyboard', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await page.goto('/')
-    const pause = page.locator('#roles .pz')
-
-    await pause.focus()
-    await page.keyboard.press('Enter')
-    const afterEnter = await pause.getAttribute('data-paused')
-    await page.keyboard.press('Space')
-
-    expect(afterEnter).toBe('true')
-    await expect(pause).toHaveAttribute('data-paused', 'false')
-  })
-
-  test('shows no pause button under reduced motion', async ({ page }) => {
-    await page.goto('/')
-    const buttons = page.locator('.pz')
-    expect(await buttons.count()).toBeGreaterThan(0)
-
-    const shown = await buttons.evaluateAll((nodes) =>
-      nodes
-        .filter((node) => getComputedStyle(node).display !== 'none')
-        .map((node) => node.closest('section')?.id ?? '?'),
-    )
-
-    expect(shown).toEqual([])
-  })
-
-  for (const width of [320, 834, 1440]) {
-    test(`every pause button clears what its tray holds at ${width}`, async ({
-      page,
-    }) => {
-      await page.emulateMedia({ reducedMotion: 'no-preference' })
-      await page.setViewportSize({ width, height: 900 })
-      await page.goto('/')
-
-      const overlaps = await page
-        .locator('.tray:has(> .pz)')
-        .evaluateAll((trays) =>
-          trays.flatMap((tray) => {
-            const button = tray.querySelector(':scope > .pz')
-            const content = tray.querySelector(':scope > :not(.pz)')
-            if (!button || !content)
-              return [`${tray.closest('section')?.id}: missing`]
-            const b = button.getBoundingClientRect()
-            const c = content.getBoundingClientRect()
-            return b.bottom > c.top && b.left < c.right
-              ? [tray.closest('section')?.id ?? '?']
-              : []
-          }),
-        )
-
-      expect(await page.locator('.tray:has(> .pz)').count()).toBeGreaterThan(0)
-      expect(overlaps).toEqual([])
-    })
-  }
 })
 
 test.describe('the opening relay', () => {
@@ -534,48 +415,6 @@ test.describe('the guardrail stamps', () => {
 
     expect(boxes).toHaveLength(4)
     expect(new Set(boxes).size).toBe(1)
-  })
-})
-
-test.describe('the setup section', () => {
-  test.use({ viewport: { width: 1440, height: 900 } })
-
-  test('the Start stage prints the files its command writes', async ({
-    page,
-  }) => {
-    await page.goto('/')
-
-    await page.locator('#setup .st').first().locator('.go').click()
-
-    await expect(page.locator('#setup .log .blk').first()).toBeVisible()
-    await expect(
-      page.locator('#setup .log .blk').first().locator('.row.f'),
-    ).toHaveCount(3)
-  })
-
-  test('the stage rail raises the running card and fills down to it', async ({
-    page,
-  }) => {
-    await page.goto('/')
-    const stages = page.locator('#setup .st')
-    const fill = () =>
-      page
-        .locator('#setup .stages')
-        .evaluate((node) => parseFloat(node.style.getPropertyValue('--fill')))
-    const surface = (index: number) =>
-      stages
-        .nth(index)
-        .evaluate((node) => getComputedStyle(node).backgroundColor)
-
-    await stages.nth(1).locator('.go').click()
-    const second = await fill()
-    const running = await surface(1)
-    const resting = await surface(2)
-    await stages.nth(3).locator('.go').click()
-
-    expect(running).not.toBe(resting)
-    expect(second).toBeGreaterThan(0)
-    expect(await fill()).toBeGreaterThan(second)
   })
 })
 
@@ -866,125 +705,4 @@ test.describe('the install section', () => {
     const copied = await page.evaluate(() => navigator.clipboard.readText())
     expect(copied.split('\n')).toHaveLength(3)
   })
-})
-
-test.describe('new sections', () => {
-  test.use({ viewport: { width: 1440, height: 900 } })
-
-  test.describe('with motion', () => {
-    test.beforeEach(async ({ page }) => {
-      await page.emulateMedia({ reducedMotion: 'no-preference' })
-      await page.clock.install()
-      await page.goto('/')
-    })
-
-    test('the drive lands its pick, and the pause holds it cleared', async ({
-      page,
-    }) => {
-      const board = page.locator('#drive .dr')
-
-      await expect(board).not.toHaveClass(/\bon\b/)
-      await page.clock.runFor(1_900)
-      await expect(board).toHaveClass(/\bon\b/)
-      await page.clock.runFor(3_500)
-      await expect(board).not.toHaveClass(/\bon\b/)
-      await page.locator('#drive .pz').click()
-      const held = (await board.getAttribute('class')) ?? ''
-      await page.clock.runFor(6_000)
-
-      await expect(board).toHaveAttribute('class', held)
-    })
-
-    test('the film steps its beats with the reel, and the pause shows the still', async ({
-      page,
-    }) => {
-      const reel = page.locator('#film .stage img')
-      await reel.scrollIntoViewIfNeeded()
-      await expect
-        .poll(
-          () => reel.evaluate((node: HTMLImageElement) => node.naturalWidth),
-          SETTLE,
-        )
-        .toBeGreaterThan(0)
-
-      await page.clock.runFor(4_000)
-      await expect(page.locator('#film .beats li').nth(1)).toHaveClass(/\bon\b/)
-      await page.locator('#film .pz').click()
-
-      await expect(reel).toHaveAttribute('src', /film-still/)
-    })
-
-    test('the film ticks its last checklist line before the reel loops', async ({
-      page,
-    }) => {
-      // A paused clock starts the reel's time when it loads and moves it only by runFor, so real time cannot carry it past the loop.
-      await page.clock.pauseAt(Date.now() + 1_000)
-      const reel = page.locator('#film .stage img')
-      await reel.scrollIntoViewIfNeeded()
-      await expect
-        .poll(
-          () => reel.evaluate((node: HTMLImageElement) => node.naturalWidth),
-          SETTLE,
-        )
-        .toBeGreaterThan(0)
-
-      await page.clock.runFor(17_500)
-
-      await expect(page.locator('#film .checks li.done')).toHaveCount(5)
-    })
-  })
-
-  test('each view lands its full state with no pause under reduced motion', async ({
-    page,
-  }) => {
-    await page.goto('/')
-
-    await expect(page.locator('#drive .dr')).toHaveClass(/\bon\b/)
-    await expect(page.locator('#film .checks li.done')).toHaveCount(5)
-    await expect(page.locator('#film .pz')).toBeHidden()
-    await expect(page.locator('#drive .pz')).toBeHidden()
-  })
-
-  test('the film follows the theme toggle to the reel filmed in it', async ({
-    page,
-  }) => {
-    await page.emulateMedia({ colorScheme: 'dark' })
-    await page.goto('/')
-    const reel = page.locator('#film .stage img')
-    await expect(reel).toHaveAttribute('src', '/film.webp')
-
-    await page.locator('.theme-toggle').click()
-
-    await expect(reel).toHaveAttribute('src', '/film-light.webp')
-  })
-
-  test('the film shows its still under reduced motion', async ({ page }) => {
-    await page.goto('/')
-    const reel = page.locator('#film .stage img')
-    await reel.scrollIntoViewIfNeeded()
-
-    await expect
-      .poll(
-        () => reel.evaluate((node: HTMLImageElement) => node.currentSrc),
-        SETTLE,
-      )
-      .toMatch(/film-still/)
-  })
-
-  for (const width of [390, 320]) {
-    test(`the page with the new views scrolls no sideways at ${width}`, async ({
-      page,
-    }) => {
-      await page.setViewportSize({ width, height: 844 })
-      await page.goto('/')
-
-      const overflow = await page.evaluate(
-        () =>
-          document.documentElement.scrollWidth -
-          document.documentElement.clientWidth,
-      )
-
-      expect(overflow).toBe(0)
-    })
-  }
 })

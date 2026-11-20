@@ -4,7 +4,13 @@
   left: 0;
   right: 0;
   z-index: 40;
-  background: var(--ground);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--duration-fade) var(--ease-standard);
+}
+
+/* The rule shows only once content starts to pass under the bar. */
+.site-nav.scrolled {
+  border-bottom-color: var(--rule);
 }
 
 .site-nav nav {
@@ -12,15 +18,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1240px;
+  max-width: calc(var(--page-w) + 128px);
   height: var(--nav-h);
   margin: 0 auto;
-  padding: 0 var(--gutter);
-  font-size: var(--size-body);
+  padding: 0 64px;
+  font-size: var(--size-label);
+  font-weight: 500;
 }
 
 .site-nav a {
-  color: var(--body);
+  color: var(--ink);
   text-decoration: none;
   border-radius: var(--radius-action);
 }
@@ -53,7 +60,7 @@
 .site-nav .links {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 22px;
 }
 
 .site-nav .links > a {
@@ -80,7 +87,7 @@
   align-self: center;
   width: 1px;
   height: 16px;
-  background: var(--line);
+  background: var(--rule);
 }
 
 .site-nav .theme-toggle {
@@ -92,7 +99,7 @@
   height: 34px;
   margin-left: -6px;
   border-radius: var(--radius-action);
-  color: var(--body);
+  color: var(--ink);
   cursor: pointer;
 }
 
@@ -149,14 +156,10 @@
   transform: rotate(180deg);
 }
 
-.site-nav .nbtn .lp {
-  display: none;
-}
-
 @media (hover: hover) {
   .site-nav .theme-toggle:hover,
   .site-nav .nbtn:hover {
-    background: var(--line);
+    background: var(--hover);
     color: var(--ink);
   }
 }
@@ -169,9 +172,10 @@
   z-index: 20;
   min-width: 232px;
   padding: 6px;
-  background: var(--win);
-  border-radius: var(--radius-panel);
-  box-shadow: var(--shadow-popover);
+  background: var(--card);
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-offset-small);
 }
 
 .site-nav .nbtn[aria-expanded='true'] + .npanel {
@@ -182,7 +186,7 @@
   position: relative;
   display: block;
   padding: 9px 12px 9px 14px;
-  color: var(--body);
+  color: var(--ink);
 }
 
 .site-nav .npanel a:focus-visible {
@@ -209,44 +213,49 @@
   display: none;
   height: 1px;
   margin: 6px 8px;
-  background: var(--line);
+  background: var(--rule);
 }
 
 .site-nav .npanel .pext {
   display: none;
 }
 
-@media (max-width: 1040px) {
-  .site-nav .links > .sl {
+/* Under 1100 the bar drops Worktrees and Health, which the footer still lists. */
+@media (max-width: 1100px) {
+  .site-nav .links > .sl.fold {
+    display: none;
+  }
+}
+
+/* Under 900 every section, Docs, and GitHub fold into Menu beside the toggle. */
+@media (max-width: 900px) {
+  .site-nav nav {
+    padding: 0 32px;
+  }
+
+  .site-nav .links > .sl,
+  .site-nav .links > .ext,
+  .site-nav .links > .sep {
     display: none;
   }
 
   .site-nav .nmw {
     display: block;
   }
-}
-
-@media (max-width: 640px) {
-  .site-nav .links {
-    gap: 14px;
-  }
-
-  .site-nav .links > .ext,
-  .site-nav .links > .sep {
-    display: none;
-  }
-
-  .site-nav .nbtn .lw {
-    display: none;
-  }
-
-  .site-nav .nbtn .lp {
-    display: inline;
-  }
 
   .site-nav .ndiv,
   .site-nav .npanel .pext {
     display: block;
+  }
+}
+
+@media (max-width: 640px) {
+  .site-nav nav {
+    padding: 0 20px;
+  }
+
+  .site-nav .links {
+    gap: 14px;
   }
 
   .site-nav .nmw {
@@ -254,9 +263,15 @@
   }
 
   .site-nav .npanel {
-    left: var(--gutter);
-    right: var(--gutter);
+    left: 20px;
+    right: 20px;
     top: calc(100% - 4px);
     min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-nav {
+    transition: none;
   }
 }

@@ -7,11 +7,11 @@ import SunIcon from './sun.svg'
 import './style.css'
 
 /**
- * The fixed bar: the mark back to the top, the jumps `sections` marks for the
- * bar, Try it, then Docs and GitHub after a thin rule, and the theme toggle.
- * Below 1040 the jumps fold into a Sections menu listing every section, and on
- * a phone Docs and GitHub join it as Menu, so the bar reads Menu, Try it, and
- * the toggle, and focus order matches what shows.
+ * The fixed bar on the page's own grid ground: the mark back to the top, a
+ * jump to each section, then Docs and GitHub after a thin rule, and the theme
+ * toggle. Below 1100 it drops the jumps `sections` marks to fold, and below
+ * 900 every jump, Docs, and GitHub fold into Menu, so focus order matches what
+ * shows. Its soft rule shows only once the page scrolls.
  *
  * The section in view takes ink and the accent underline. The mark is inlined
  * from its source so the c inherits the bar's ink through `currentColor`, and
@@ -28,13 +28,15 @@ const glyph = mark.replace(/<!--[\s\S]*?-->/, '').trim()
     </a>
     <span class="links">
       {
-        sections
-          .filter((section) => section.bar)
-          .map((section) => (
-            <a class="sl" href={`#${section.id}`} data-section={section.id}>
-              {section.label}
-            </a>
-          ))
+        sections.map((section) => (
+          <a
+            class:list={['sl', { fold: section.fold }]}
+            href={`#${section.id}`}
+            data-section={section.id}
+          >
+            {section.label}
+          </a>
+        ))
       }
       <span class="nmw">
         <button
@@ -43,8 +45,7 @@ const glyph = mark.replace(/<!--[\s\S]*?-->/, '').trim()
           aria-expanded="false"
           aria-controls="nav-panel"
         >
-          <span class="lw">{nav.menu.wide}</span>
-          <span class="lp">{nav.menu.phone}</span>
+          <span>{nav.menu}</span>
           <ChevronIcon class="chev" aria-hidden="true" />
         </button>
         <span class="npanel" id="nav-panel">
@@ -60,7 +61,6 @@ const glyph = mark.replace(/<!--[\s\S]*?-->/, '').trim()
           <a class="pext" href={nav.github.href}>{nav.github.label}</a>
         </span>
       </span>
-      <a class="try" href={nav.try.href}>{nav.try.label}</a>
       <i class="sep" aria-hidden="true"></i>
       <a class="ext" href={nav.docs.href}>{nav.docs.label}</a>
       <a class="ext" href={nav.github.href}>{nav.github.label}</a>

@@ -1,17 +1,17 @@
 .site-footer {
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--rule);
   font-size: var(--size-body);
   color: var(--muted);
 }
 
 .site-footer .in {
   display: grid;
-  grid-template-columns: minmax(0, 5fr) repeat(3, minmax(0, 2fr));
-  gap: 40px 32px;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 3fr) repeat(2, minmax(0, 2fr));
+  gap: 40px;
   align-items: start;
-  max-width: calc(var(--page-w) + var(--gutter) * 2);
+  max-width: calc(var(--page-w) + 128px);
   margin: 0 auto;
-  padding: 64px var(--gutter) 40px;
+  padding: 64px 64px 32px;
 }
 
 .site-footer .brand {
@@ -44,18 +44,26 @@
 }
 
 .site-footer h2 {
-  margin: 0 0 14px;
-  font-size: var(--size-small);
+  margin: 2px 0 16px;
+  font-family: var(--mono);
+  font-size: var(--size-view-small);
   font-weight: 500;
+  line-height: 1;
   color: var(--muted);
 }
 
 .site-footer ul {
   display: grid;
-  gap: 10px;
+  gap: 11px;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* The page's own sections run in two columns, so the eight sit level with the other lists. */
+.site-footer .col.page ul {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
 }
 
 .site-footer .base {
@@ -64,13 +72,13 @@
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 8px 24px;
-  padding-top: 28px;
-  border-top: 1px solid var(--line);
+  margin-top: 16px;
+  font-family: var(--mono);
   font-size: var(--size-small);
 }
 
 .site-footer a {
-  color: var(--body);
+  color: var(--ink);
   text-decoration: none;
   border-radius: var(--radius-chip);
 }
@@ -81,13 +89,24 @@
   text-underline-offset: 3px;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .site-footer .in {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    padding-top: 44px;
+    gap: 32px;
+    padding: 48px 32px 32px;
   }
 
   .site-footer .lead {
     grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .site-footer .in {
+    padding: 40px 20px 32px;
+  }
+
+  .site-footer .base {
+    flex-direction: column;
   }
 }
