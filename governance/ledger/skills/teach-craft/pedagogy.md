@@ -65,13 +65,14 @@ The reference labels the rest as house judgment, being the ladder, production ov
 
 ## Sourcing
 
-| Bullet                                   | Source                                                                                                                                                  | Read       |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Read the subject from sources first      | House choice: parametric recall is confident where it is wrong, and a learner cannot audit a claim nobody read                                          | 2026-10-24 |
-| Mark a claim resting on recall           | House choice: an unmarked recalled claim reads with the authority of a sourced one, so the learner trusts the part most likely to be wrong              | 2026-10-24 |
-| A source not opened is a lead            | House choice: a citation to a page nobody read can say the opposite of the claim, and the link makes the claim look checked                             | 2026-10-24 |
-| The highest rung covering the claim      | House choice: a claim resting on a tutorial when the owner's docs cover it inherits the tutorial's errors and its age                                   | 2026-10-24 |
-| No personal or employer proof            | House choice: one project or one employer's practice stands for a general rule only by accident, so a lesson built on it teaches a local habit as a law | 2026-10-24 |
-| Owner documentation or specification     | House choice: the owner's own docs track the current version, so a claim read anywhere lower drifts the first time the subject changes                  | 2026-10-24 |
-| A canonical work                         | House choice: a subject nobody owns has no docs to rank first, so the standard text or primary paper is the most checked source left                    | 2026-10-24 |
-| Other material, recorded with its reason | House choice: a third-rung source recorded without why no higher rung covers the claim cannot be rechecked when a better source appears                 | 2026-10-24 |
+| Bullet                                     | Source                                                                                                                                                               | Read       |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Read the subject from sources first        | House choice: parametric recall is confident where it is wrong, and a learner cannot audit a claim nobody read                                                       | 2026-10-24 |
+| Mark a claim resting on recall             | House choice: an unmarked recalled claim reads with the authority of a sourced one, so the learner trusts the part most likely to be wrong                           | 2026-10-24 |
+| A source not opened is a lead              | House choice: a citation to a page nobody read can say the opposite of the claim, and the link makes the claim look checked                                          | 2026-10-24 |
+| The highest rung covering the claim        | House choice: a claim resting on a tutorial when the owner's docs cover it inherits the tutorial's errors and its age                                                | 2026-10-24 |
+| No personal or employer proof              | House choice: one project or one employer's practice stands for a general rule only by accident, so a lesson built on it teaches a local habit as a law              | 2026-10-24 |
+| The project's own docs or code at a commit | House choice: code changes under a lesson, so a claim cited to code with no commit stops matching it, and a project's docs are the only owner of its own conventions | 2026-11-20 |
+| Owner documentation or specification       | House choice: the owner's own docs track the current version, so a claim read anywhere lower drifts the first time the subject changes                               | 2026-10-24 |
+| A canonical work                           | House choice: a subject nobody owns has no docs to rank first, so the standard text or primary paper is the most checked source left                                 | 2026-10-24 |
+| Other material, recorded with its reason   | House choice: a fourth-rung source recorded without why no higher rung covers the claim cannot be rechecked when a better source appears                             | 2026-10-24 |

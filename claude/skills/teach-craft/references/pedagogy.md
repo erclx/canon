@@ -107,10 +107,13 @@ Parametric recall is confident where it is wrong, and a learner cannot audit it.
 - Rest each general claim on the highest rung of the ladder below that covers it
 - Never take the learner's own projects, or material specific to one employer, as proof of a general claim. Either may appear as a worked application labeled with whose it is.
 
-The ladder runs in three rungs, highest first.
+The ladder runs in four rungs, highest first.
 
-1. Documentation or a specification published by whoever owns the subject
-2. A canonical work on the subject, such as the standard text, a reference book, or a primary paper
-3. Other material, such as a tutorial, a course, or a post, and only for a claim the first two rungs do not cover
+1. The project's own docs, or its code read at a named commit, for a subject the project owns, such as its architecture or its conventions
+2. Documentation or a specification published by whoever owns the subject
+3. A canonical work on the subject, such as the standard text, a reference book, or a primary paper
+4. Other material, such as a tutorial, a course, or a post, and only for a claim the rungs above do not cover
 
-A subject nobody owns, such as a mathematical topic or a craft, has no first rung, so its list starts at the second. Record a third-rung source with the claim it covers and why no higher rung does, since that reason is what a later session checks the choice against.
+The first rung covers the project's own subject alone. A project's docs never prove a general claim, which the bullet above already bars, so a lesson on HTTP caching cites the RFCs even when the project documents its cache.
+
+A subject the project does not own starts at the second rung, and one nobody owns, such as a mathematical topic or a craft, starts at the third. Record a fourth-rung source with the claim it covers and why no higher rung does, since that reason is what a later session checks the choice against.
