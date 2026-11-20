@@ -1,6 +1,6 @@
 ---
 title: Compose craft
-description: The footage rules a session composing ui-film takes follows where the HyperFrames skills say nothing, being other shapes, loop clips and their seam, pacing, sped-up clips, transitions, reviewing a cut, music and its license record, storyboard headings, and the workspace README, with captions in captions.md
+description: The footage rules a session composing ui-film takes follows where the HyperFrames skills say nothing, being other shapes, loop clips and their seam, pacing, sped-up clips, transitions, reviewing a cut and the block it goes out with, music and its license record, storyboard headings, and the workspace README, with captions in captions.md
 ---
 
 # Compose craft
@@ -107,6 +107,26 @@ Stills at beat midpoints pass a cut whose motion is wrong, as they passed every 
 - Step a dense frame strip with `snapshot --range START,END --frames 8` around every take's action and every transition, rather than only the hero move `review.md` names
 - Check the drawn cursor against the element it acts on in each strip, since the cursor is drawn from the log and nothing but a look shows it leaving what the page moved
 
+### The block a cut goes out with
+
+The operator reviews a cut by watching it, so a description stands in poorly. A scene file a script writes also loses any edit made to it by hand on the next build, and nothing on the page says which files those are.
+
+- Start the HyperFrames preview in the background before sending the cut, and give its address
+- Name the generator and its table as the place to change timing or placement when a script writes the scene files, and mark each generated file as overwritten on the next build
+- Stop generating a file the operator wants to edit in the HyperFrames app, or have the generator read the edit back
+- Send every cut in the block below, with the length the cut landed at and one line per change since the last cut
+
+```plaintext
+Cut <n> to review
+Preview: <address>
+Length: <seconds> s
+Built from:
+- <generator script>: the scene table, rates, windows, and camera focus (edit here)
+- <generated scene files>: written by the generator, overwritten on each build
+- <hand-written scene files>: safe to edit in the HyperFrames app
+Changed since the last cut: <one line per change>
+```
+
 ## Music
 
 HyperFrames owns the soundtrack, so score the film by its `sound.md` and `film.md`. On Frameboard's launch film the music faults hid in the first 2 s and the last 10 s, being a silent lead and a drop that landed early, which is one film's case rather than a rule.
@@ -137,8 +157,6 @@ Step 5 writes the filming half of `.canon/video/<slug>/README.md`. The composing
 
 ## Sources
 
-Each rule carries the case or the source it came from rather than a default.
-
 ### Frameboard's launch film
 
 The rules measured on Frameboard's launch film carry its case beside them.
@@ -152,13 +170,14 @@ The rules measured on Frameboard's launch film carry its case beside them.
 
 ### Later films
 
-Films cut from app takes after Frameboard's added the rules below, each from a fault the operator caught.
+Later films added these, each from a fault the operator caught.
 
-| Rule                | Source                                                                                                              |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Length and reshoots | A reshoot whose length target pushed hand actions to 1.5x to 1.8x and retuned beats already approved                |
-| The loop seam       | A grid of loop clips whose dissolves ended on the last frame, which a preview passed and the render failed          |
-| The license record  | A library track whose provider's terms said nothing of use outside their editor, found only at the end of two films |
+| Rule                | Source                                            |
+| ------------------- | ------------------------------------------------- |
+| Length and reshoots | A reshoot that sped hand actions to 1.5x to 1.8x  |
+| The loop seam       | Grid loops a preview passed and the render failed |
+| The license record  | A library track left unchecked through two films  |
+| The review block    | Cuts sent as descriptions over generated scenes   |
 
 ### HyperFrames, the verb, and other deliverables
 
