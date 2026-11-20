@@ -8,7 +8,7 @@
 <style>
   :root {
     --preview-paper: #fdfdfc;
-    --preview-panel: #f2f2f0;
+    --preview-panel: #ffffff;
     --preview-ink: #121212;
     --preview-muted: #6b6a66;
     --preview-rule: #ececea;
@@ -30,16 +30,19 @@
 <body>
 <h1>Design tokens</h1>
 <p class="note">Generated from <code>canon/DESIGN.md</code> by <code>bun run web:previews</code>. Token preview only, not a screen mock.</p>
-<p class="note">112 of 113 cells are anchored to a source. The other 1 carries <code>? verify</code>, so nothing anchors them yet.</p>
+<p class="note">128 of 129 cells are anchored to a source. The other 1 carries <code>? verify</code>, so nothing anchors them yet.</p>
 <h2>Overview</h2>
-<p>Warm neutral grounds with ink text, set in Geist, and Geist Mono where a surface shows a path, a command, or what a shell printed. Product windows sit on a soft tray. The vermilion pip of the mark is the one accent, marking a status the surface would color.</p>
+<p>A drawn system: a warm neutral ground ruled in a 32px grid, ink text in Geist, and Geist Mono for a path, a command, or shell output. Cards take an ink outline and a hard offset shadow. The vermilion pip of the mark is the one accent, marking a status.</p>
 <h2>Colors</h2>
 <table><thead><tr><th>Role</th><th>Intent</th><th>Value</th></tr></thead><tbody><tr><td><span class="swatch" style="background:#1e1e1c"></span>background</td><td>page canvas</td><td><code>#1e1e1c</code></td></tr>
-<tr><td><span class="swatch" style="background:#292927"></span>surface</td><td>the tray a product window sits in, and cards</td><td><code>#292927</code></td></tr>
+<tr><td><span class="swatch" style="background:#292927"></span>surface</td><td>a drawn card, a stamp, or a control</td><td><code>#292927</code></td></tr>
 <tr><td><span class="swatch" style="background:#31312e"></span>window</td><td>the body of a product window</td><td><code>#31312e</code></td></tr>
 <tr><td><span class="swatch" style="background:#383835"></span>chrome</td><td>the window titlebar</td><td><code>#383835</code></td></tr>
 <tr><td><span class="swatch" style="background:#3d3d39"></span>band</td><td>a quiet fill inside a window, such as a prompt</td><td><code>#3d3d39</code></td></tr>
-<tr><td><span class="swatch" style="background:#474742"></span>border</td><td>every rule and divider</td><td><code>#474742</code></td></tr>
+<tr><td><span class="swatch" style="background:#31312e"></span>grid</td><td>the lines the page ground rules every 32px</td><td><code>#31312e</code></td></tr>
+<tr><td><span class="swatch" style="background:#3d3d39"></span>rule</td><td>the soft seam between sections, and under a scrolled nav</td><td><code>#3d3d39</code></td></tr>
+<tr><td><span class="swatch" style="background:#474742"></span>border</td><td>every rule and divider inside a card</td><td><code>#474742</code></td></tr>
+<tr><td><span class="swatch" style="background:#8d8c86"></span>outline</td><td>the drawn border around a card, a control, or a stamp</td><td><code>#8d8c86</code></td></tr>
 <tr><td><span class="swatch" style="background:#4d4d48"></span>edge</td><td>a control's outline</td><td><code>#4d4d48</code></td></tr>
 <tr><td><span class="swatch" style="background:#f2f2f0"></span>text</td><td>headings, counts, emphasized runs</td><td><code>#f2f2f0</code></td></tr>
 <tr><td><span class="swatch" style="background:#cfcdc8"></span>text-body</td><td>default body copy</td><td><code>#cfcdc8</code></td></tr>
@@ -50,11 +53,14 @@
 <tr><td><span class="swatch" style="background:ANSI 33"></span>warning</td><td>terminal cautions</td><td><code>ANSI 33</code></td></tr>
 <tr><td><span class="swatch" style="background:ANSI 31"></span>error</td><td>terminal failures</td><td><code>ANSI 31</code></td></tr>
 <tr><td><span class="swatch" style="background:#fdfdfc"></span>light-background</td><td>page canvas on a light ground</td><td><code>#fdfdfc</code></td></tr>
-<tr><td><span class="swatch" style="background:#f2f2f0"></span>light-surface</td><td>the tray and cards on a light ground</td><td><code>#f2f2f0</code></td></tr>
+<tr><td><span class="swatch" style="background:#ffffff"></span>light-surface</td><td>a drawn card, a stamp, or a control, on light</td><td><code>#ffffff</code></td></tr>
 <tr><td><span class="swatch" style="background:#ffffff"></span>light-window</td><td>the body of a product window on light</td><td><code>#ffffff</code></td></tr>
 <tr><td><span class="swatch" style="background:#f7f7f5"></span>light-chrome</td><td>the window titlebar on light</td><td><code>#f7f7f5</code></td></tr>
 <tr><td><span class="swatch" style="background:#f0f0ee"></span>light-band</td><td>a quiet fill inside a window, on light</td><td><code>#f0f0ee</code></td></tr>
-<tr><td><span class="swatch" style="background:#ececea"></span>light-border</td><td>rules and dividers on light</td><td><code>#ececea</code></td></tr>
+<tr><td><span class="swatch" style="background:#ececea"></span>light-grid</td><td>the lines the page ground rules every 32px, on light</td><td><code>#ececea</code></td></tr>
+<tr><td><span class="swatch" style="background:#d6d6d2"></span>light-rule</td><td>the soft seam between sections, and under a scrolled nav, on light</td><td><code>#d6d6d2</code></td></tr>
+<tr><td><span class="swatch" style="background:#ececea"></span>light-border</td><td>rules and dividers inside a card, on light</td><td><code>#ececea</code></td></tr>
+<tr><td><span class="swatch" style="background:#121212"></span>light-outline</td><td>the drawn border around a card, a control, or a stamp, on light</td><td><code>#121212</code></td></tr>
 <tr><td><span class="swatch" style="background:#e4e4e1"></span>light-edge</td><td>a control's outline, on light</td><td><code>#e4e4e1</code></td></tr>
 <tr><td><span class="swatch" style="background:#121212"></span>light-text</td><td>primary text on a light ground</td><td><code>#121212</code></td></tr>
 <tr><td><span class="swatch" style="background:#3b3b38"></span>light-text-body</td><td>default body copy on a light ground</td><td><code>#3b3b38</code></td></tr>
@@ -63,11 +69,12 @@
 <tr><td><span class="swatch" style="background:#3f7f3e"></span>light-success</td><td>done, rendered and in the terminal, on light</td><td><code>#3f7f3e</code></td></tr>
 <tr><td><span class="swatch" style="background:#b07d1a"></span>light-waiting</td><td>a product-view glyph for work not yet done, on light</td><td><code>#b07d1a</code></td></tr></tbody></table>
 <h2>Typography</h2>
-<table><thead><tr><th>Role</th><th>Family</th><th>Weight</th><th>Size</th><th>Line height</th><th>Sample</th></tr></thead><tbody><tr><td>hero</td><td>Geist Variable, DejaVu Sans, sans-serif</td><td>600</td><td>5.625rem</td><td>1</td><td><span style="font-family:Geist Variable, DejaVu Sans, sans-serif;font-weight:600;font-size:5.625rem;line-height:1">The quick brown fox</span></td></tr>
+<table><thead><tr><th>Role</th><th>Family</th><th>Weight</th><th>Size</th><th>Line height</th><th>Sample</th></tr></thead><tbody><tr><td>hero</td><td>Geist Variable, DejaVu Sans, sans-serif</td><td>600</td><td>4.5rem</td><td>1</td><td><span style="font-family:Geist Variable, DejaVu Sans, sans-serif;font-weight:600;font-size:4.5rem;line-height:1">The quick brown fox</span></td></tr>
 <tr><td>display</td><td>Geist Variable, DejaVu Sans, sans-serif</td><td>600</td><td>3.125rem</td><td>1.06</td><td><span style="font-family:Geist Variable, DejaVu Sans, sans-serif;font-weight:600;font-size:3.125rem;line-height:1.06">The quick brown fox</span></td></tr>
 <tr><td>lede</td><td>Geist Variable, DejaVu Sans, sans-serif</td><td>400</td><td>1.3125rem</td><td>1.48</td><td><span style="font-family:Geist Variable, DejaVu Sans, sans-serif;font-weight:400;font-size:1.3125rem;line-height:1.48">The quick brown fox</span></td></tr>
 <tr><td>title</td><td>Geist Variable, DejaVu Sans, sans-serif</td><td>600</td><td>1rem</td><td>1.55</td><td><span style="font-family:Geist Variable, DejaVu Sans, sans-serif;font-weight:600;font-size:1rem;line-height:1.55">The quick brown fox</span></td></tr>
 <tr><td>body</td><td>Geist Variable, DejaVu Sans, sans-serif</td><td>400</td><td>1rem</td><td>1.55</td><td><span style="font-family:Geist Variable, DejaVu Sans, sans-serif;font-weight:400;font-size:1rem;line-height:1.55">The quick brown fox</span></td></tr>
+<tr><td>label</td><td>Geist Variable, DejaVu Sans, sans-serif</td><td>600</td><td>0.875rem</td><td>1.3</td><td><span style="font-family:Geist Variable, DejaVu Sans, sans-serif;font-weight:600;font-size:0.875rem;line-height:1.3">The quick brown fox</span></td></tr>
 <tr><td>small</td><td>Geist Variable, DejaVu Sans, sans-serif</td><td>500</td><td>0.8125rem</td><td>1.45</td><td><span style="font-family:Geist Variable, DejaVu Sans, sans-serif;font-weight:500;font-size:0.8125rem;line-height:1.45">The quick brown fox</span></td></tr>
 <tr><td>view</td><td>Geist Mono Variable, DejaVu Sans Mono, monospace</td><td>400</td><td>0.8125rem</td><td>1.6</td><td><span style="font-family:Geist Mono Variable, DejaVu Sans Mono, monospace;font-weight:400;font-size:0.8125rem;line-height:1.6">The quick brown fox</span></td></tr>
 <tr><td>view-small</td><td>Geist Variable, DejaVu Sans, sans-serif</td><td>500</td><td>0.75rem</td><td>1.45</td><td><span style="font-family:Geist Variable, DejaVu Sans, sans-serif;font-weight:500;font-size:0.75rem;line-height:1.45">The quick brown fox</span></td></tr>
@@ -81,12 +88,12 @@
 <tr><td>2xl</td><td>16</td><td><code>4rem</code></td><td><span class="bar" style="width:4rem"></span></td></tr>
 <tr><td>3xl</td><td>24</td><td><code>6rem</code></td><td><span class="bar" style="width:6rem"></span></td></tr></tbody></table>
 <h2>Shapes</h2>
-<table><thead><tr><th>Role</th><th>Radius</th><th>Width</th><th>When used</th><th>Sample</th></tr></thead><tbody><tr><td>tray</td><td><code>36px</code></td><td><code>none</code></td><td>the soft tray a product window sits in</td><td><span style="display:inline-block;width:2rem;height:1.5rem;background:#eee;border:none solid #888;border-radius:36px;vertical-align:middle"></span></td></tr>
+<table><thead><tr><th>Role</th><th>Radius</th><th>Width</th><th>When used</th><th>Sample</th></tr></thead><tbody><tr><td>card</td><td><code>10px</code></td><td><code>1.5px</code></td><td>a drawn card, a stamp, or the terminal</td><td><span style="display:inline-block;width:2rem;height:1.5rem;background:#eee;border:1.5px solid #888;border-radius:10px;vertical-align:middle"></span></td></tr>
 <tr><td>frame</td><td><code>12px</code></td><td><code>none</code></td><td>windows, sheets, popovers, a picked or hovered row</td><td><span style="display:inline-block;width:2rem;height:1.5rem;background:#eee;border:none solid #888;border-radius:12px;vertical-align:middle"></span></td></tr>
 <tr><td>panel</td><td><code>12px</code></td><td><code>1px</code></td><td>cards and columns</td><td><span style="display:inline-block;width:2rem;height:1.5rem;background:#eee;border:1px solid #888;border-radius:12px;vertical-align:middle"></span></td></tr>
 <tr><td>action</td><td><code>8px</code></td><td><code>none</code></td><td>controls, the install command, one-line pickers</td><td><span style="display:inline-block;width:2rem;height:1.5rem;background:#eee;border:none solid #888;border-radius:8px;vertical-align:middle"></span></td></tr>
 <tr><td>chip</td><td><code>4px</code></td><td><code>none</code></td><td>chips and tags</td><td><span style="display:inline-block;width:2rem;height:1.5rem;background:#eee;border:none solid #888;border-radius:4px;vertical-align:middle"></span></td></tr>
-<tr><td>rule</td><td><code>none</code></td><td><code>1px</code></td><td>horizontal dividers between bands</td><td><span style="display:inline-block;width:2rem;height:1.5rem;background:#eee;border:1px solid #888;border-radius:none;vertical-align:middle"></span></td></tr>
+<tr><td>rule</td><td><code>none</code></td><td><code>1px</code></td><td>the soft seam between sections</td><td><span style="display:inline-block;width:2rem;height:1.5rem;background:#eee;border:1px solid #888;border-radius:none;vertical-align:middle"></span></td></tr>
 <tr><td>marker</td><td><code>2px</code></td><td><code>none</code></td><td>status marks and the status dot, sized at 6px</td><td><span style="display:inline-block;width:2rem;height:1.5rem;background:#eee;border:none solid #888;border-radius:2px;vertical-align:middle"></span></td></tr></tbody></table>
 <h2>Motion</h2>
 <ul><li>Four durations and two curves. Progress runs linear, and nothing sets a timing of its own.</li><li>Product-view loops keep Claude Code's rhythm: a 1.6s spinner, a 1.4s pulse, a 1.1s cursor blink.</li><li>Under reduced motion every end state renders at once, so a duration is never the only way to reach one.</li></ul>

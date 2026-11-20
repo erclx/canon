@@ -139,7 +139,7 @@
   .tray {
     position: relative;
     background: var(--tray);
-    border-radius: var(--radius-tray);
+    border-radius: var(--radius-frame);
     padding: 40px;
   }
 
