@@ -62,6 +62,8 @@ Show the list in plain words, one line per beat naming the one action and what t
 
 Wait for the operator's approval or edits before Step 3. Read silence as no approval.
 
+This list approves what the takes show and leaves the words for later. Every caption, hook title, and other on-screen line gets its own approval before the first cut, per `${CLAUDE_SKILL_DIR}/references/captions.md`.
+
 ## Step 3: write the take plan
 
 Read `${CLAUDE_SKILL_DIR}/references/take-craft.md` before writing the first beat. It holds the filming rules and the plan's step kinds.
@@ -126,6 +128,7 @@ Check that the `hyperframes` skill resolves before handing anything to it, as `h
 Read `${CLAUDE_SKILL_DIR}/references/handoff.md` on reaching this step, for what HyperFrames receives, where each composition lives, and how one applies the camera track and draws the cursor.
 
 - Read `${CLAUDE_SKILL_DIR}/references/compose-craft.md` beside it, for the footage rules the HyperFrames skills lack
+- Read `${CLAUDE_SKILL_DIR}/references/captions.md` with them, for where each beat's caption sits and the approval every on-screen line gets
 - Hold each cut to its motion review before the operator sees it, since a still at a beat's midpoint passes a cut whose motion is wrong
 
 Close the throwaway copy per `isolate.md` when Step 1 built one, after the stills are read.
@@ -150,7 +153,7 @@ Emit the takes folder, one line per beat, and the next step.
 01-open-the-kit  step  4.2 s  the board's first page with its frames filled in
 02-search-for-color  screencast (fallback)  3.8 s  the page list narrowed to two results
 
-Next: load hyperframes to compose, reading takes/take.json, handoff.md, and compose-craft.md
+Next: load hyperframes to compose, reading takes/take.json, handoff.md, compose-craft.md, and captions.md
 ```
 
 ## What this delegates
