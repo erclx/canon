@@ -167,8 +167,7 @@ describe.skipIf(!hasBrowser)('drive against a served application', () => {
       colorScheme: 'dark',
     })
 
-    // Each pass names its scheme and the background it painted, which is how a
-    // reader tells a page with no second theme from one that passed in both.
+    // The background is how a reader tells a page with no second theme apart.
     expect(result.passes).toEqual([
       expect.objectContaining({
         colorScheme: 'light',

@@ -139,9 +139,7 @@ export async function drive(options: DriveOptions): Promise<DriverResult> {
   const passes: PassReading[] = []
 
   try {
-    // A run naming no scheme takes one unset pass per viewport, which leaves
-    // the context, the passes, and the findings exactly as they were before
-    // the sweep existed.
+    // Unset rather than light, so a run naming no scheme keeps its record.
     const schemes = options.plan.colorSchemes ?? [undefined]
     for (const colorScheme of schemes) {
       for (const viewport of options.plan.viewports) {
