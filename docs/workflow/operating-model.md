@@ -30,7 +30,7 @@ Each role keeps to its own writes, and five rules cover how the roles meet.
 1. Plan the next feature with `plan-feature` into `.canon/plans/`. Run it warm when the row turns on a contract other rows consume, and dispatch a planner otherwise.
 2. Check the plan waits on nobody, the branch is unclaimed, and no track in flight conflicts. Dispatch a background worker with `claude --bg`, naming the branch, the model, and the effort.
 3. The worker enters its own worktree, builds, self-checks, opens a PR, and stops there.
-4. The orchestrator reads `canon pr evidence --check` and sends a painted PR with no capture or evidence comment back to its worker.
+4. The orchestrator reads `canon pr evidence --check` and sends a painted PR with no evidence comment back to its worker. The code reviewer waives an uncaptured path or files a finding on it.
 5. Dispatch a reviewer under `role-reviewer` for every PR but a release one, or one pair per batch of small contract-free PRs. It posts `review-pr` findings, and `review-ui` drives any non-taste box.
 6. The reviewer tells the session holding the branch to run `review-address`, found with `canon sessions list --branch`, once a pass posts a finding at any severity.
 7. The worker addresses the findings, rebases onto `origin/main` if a sibling landed on its files, pushes, and asks every reviewer on the PR for a re-review of the added commits without waiting on CI.
