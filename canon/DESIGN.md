@@ -113,13 +113,13 @@ A drawn system: a warm neutral ground ruled in a 32px grid, ink text in Geist, a
 | `--shadow-offset`              | 5px 5px 0 #0b0b0a                                                         | a drawn card, dropped down and right               |
 | `--shadow-offset-small`        | 3px 3px 0 #0b0b0a                                                         | a drawn control or a small card                    |
 | `--shadow-offset-raised`       | 8px 8px 0 #0b0b0a                                                         | the card brought to the front of a stack           |
-| `--shadow-window`              | 0 0 0 1px rgba(255, 255, 255, 0.06), 0 24px 60px -28px rgba(0, 0, 0, 0.6) | a product window on its tray                       |
+| `--shadow-window`              | 0 0 0 1px rgba(255, 255, 255, 0.06), 0 24px 60px -28px rgba(0, 0, 0, 0.6) | a Claude Code window set on the page               |
 | `--shadow-popover`             | 0 0 0 1px rgba(255, 255, 255, 0.06), 0 16px 36px -16px rgba(0, 0, 0, 0.6) | a menu or popover over content                     |
 | `--shadow-ring`                | 0 0 0 1px rgba(255, 255, 255, 0.06)                                       | a hairline around a picked row                     |
 | `--shadow-light-offset`        | 5px 5px 0 #121212                                                         | a drawn card, on light                             |
 | `--shadow-light-offset-small`  | 3px 3px 0 #121212                                                         | a drawn control or a small card, on light          |
 | `--shadow-light-offset-raised` | 8px 8px 0 #121212                                                         | the card brought to the front of a stack, on light |
-| `--shadow-light-window`        | 0 0 0 1px rgba(0, 0, 0, 0.07), 0 24px 60px -28px rgba(0, 0, 0, 0.3)       | a product window on its tray, on light             |
+| `--shadow-light-window`        | 0 0 0 1px rgba(0, 0, 0, 0.07), 0 24px 60px -28px rgba(0, 0, 0, 0.3)       | a Claude Code window set on the page, on light     |
 | `--shadow-light-popover`       | 0 0 0 1px rgba(0, 0, 0, 0.07), 0 16px 36px -16px rgba(0, 0, 0, 0.3)       | a menu or popover over content, on light           |
 | `--shadow-light-ring`          | 0 0 0 1px rgba(0, 0, 0, 0.07)                                             | a hairline around a picked row, on light           |
 

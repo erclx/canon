@@ -44,7 +44,7 @@ Three kinds of file land in your repo:
 
 ## Five roles, each in its own session
 
-One long session loses the thread. canon splits a change across a planner, a worker, and two reviewers, and you talk to the orchestrator that starts them.
+Give each step of a change its own session and a written record the next one reads. canon splits a change across a planner, a worker, and two reviewers, and you talk to the orchestrator that starts them.
 
 - The orchestrator dispatches the rows on the task board
 - A planner reads the code and writes one plan you approve

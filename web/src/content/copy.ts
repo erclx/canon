@@ -75,8 +75,8 @@ export const fold = {
   parts: ['Canon runs agent work from', 'plan to', 'merge'] as const,
   // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs agent work from plan to merge"
   headline: 'Canon runs agent work from plan to merge',
-  // README.md: canon-allow-readme-paraphrase: the reason ahead of the opening sentence's subject, which the README opens on the claim alone. "Claude Code plugin and CLI that"
-  lead: 'Coding agents work fast and remember nothing between sessions. Canon is a Claude Code plugin and CLI that gives each step of a change its own session and a written record the next one reads.',
+  // README.md: canon-allow-readme-paraphrase: the opening sentence's subject joined to the roles section's first sentence, led by the reader's verb. "Claude Code plugin and CLI that" "its own session and a written record the next one reads"
+  lead: "Hand your agent's work to a Claude Code plugin and CLI that gives each step of a change its own session and a written record the next one reads, so nothing rides on what it remembers.",
   view: {
     title: 'claude',
     // README.md: canon-allow-readme-paraphrase: the agent view's own prompt hint, which no README sentence carries.

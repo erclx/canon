@@ -35,6 +35,7 @@ if (section && source && stamp && replay && lanes.length) {
     if (row.waiting) {
       const glyph = document.createElement('i')
       glyph.className = 'gl'
+      glyph.setAttribute('role', 'img')
       glyph.setAttribute('aria-label', data.waiting)
       glyph.textContent = '◆'
       line.append(glyph)

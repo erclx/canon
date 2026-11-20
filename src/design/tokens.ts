@@ -493,7 +493,7 @@ export const TOKENS: DesignTokens = {
       role: 'window',
       value:
         '0 0 0 1px rgba(255, 255, 255, 0.06), 0 24px 60px -28px rgba(0, 0, 0, 0.6)',
-      when: 'a product window on its tray',
+      when: 'a Claude Code window set on the page',
     },
     {
       role: 'popover',
@@ -525,7 +525,7 @@ export const TOKENS: DesignTokens = {
       role: 'light-window',
       value:
         '0 0 0 1px rgba(0, 0, 0, 0.07), 0 24px 60px -28px rgba(0, 0, 0, 0.3)',
-      when: 'a product window on its tray, on light',
+      when: 'a Claude Code window set on the page, on light',
     },
     {
       role: 'light-popover',
