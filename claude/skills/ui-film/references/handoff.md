@@ -1,6 +1,6 @@
 ---
 title: UI film handoff
-description: What HyperFrames receives from a take, the footage page the operator reviews, the shape of the click log and camera track, and how a composition applies the camera and draws the cursor
+description: What HyperFrames receives from a take, what a refilm regenerates, the footage page the operator reviews, the shape of the click log and camera track, and how a composition applies the camera and draws the cursor
 ---
 
 # UI film handoff
@@ -21,6 +21,19 @@ Read at Step 5 of `ui-film`. Canon stops at the clip, and a HyperFrames composit
 A press the plan aimed at a point logs `at` with no `box`, and a drag end aimed at a point logs no `box` or `drop`.
 
 The window is the log's `viewport`, 1920x1080 unless the plan set a smaller one. Every coordinate in the log and the track is in CSS pixels of that window, whatever size the clip is. Every time is in milliseconds on the clip's own clock, so frame `n` sits at `n * 1000 / 60`.
+
+## After a refilm
+
+A refilm replaces the beat's folder whole, so every file in it is rebuilt or gone. `canon take` rebuilds all four. A harness take rebuilds only what its script writes, and a camera track lost that way leaves the cut drawing no cursor, with no warning from the build.
+
+Regenerate a refilmed harness take in this order, since each step reads the one before it.
+
+1. Film the beat again with its script in `harness/`, transcoding its recording to `clip.mp4` beside the new `log.json`.
+2. Write `still.jpg` from the new clip, per `harness.md`, and read it with the motion check in Step 4.
+3. Rebuild the camera track with `canon take camera <dir>/log.json --out <dir>/camera.json`.
+4. Write the footage page again, so its card shows the new take.
+
+Stop a composition before it renders when a take holds a `log.json` and no `camera.json`, and name the take. Rendering it draws no cursor on the beat, which only a close look at the cut reveals.
 
 ## The footage page
 
