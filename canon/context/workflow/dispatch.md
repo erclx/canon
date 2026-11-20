@@ -16,6 +16,7 @@ Owns the queue of prompts an operator launches by hand, which the orchestrator f
 Owns the hand-launch queue behind `canon dispatch prompts add`, `rm`, and `list`, one markdown file at `.canon/dispatch/prompts.md` that the verb alone writes and the operator pastes from.
 
 - The parse refuses `malformed` on any line out of the fixed order rather than rewriting it, since a guessed hand edit could launch the wrong row
-- A worker row's branch is derived from the plan path in its command through `branchOfPlan`, so the watch and the dispatch branch check read one string
+- A worker row's branch comes from `branchOfPlan`, so the watch and the dispatch check read one string. A `--plan-first` row takes the plan from its task's link.
+- A plan-first row has no branch until its session links a plan, so it lands under `claimUnread` by label rather than reading as claimed or free
 - Every `add` reads `checkClaim` on each worker branch, refusing a claimed new row and dropping a claimed queued one, while an unreadable claim keeps its row
 - The merge-order line survives only while two queued worker plans share a declared path, read through `readDeclarations`

@@ -23,6 +23,8 @@ interface AddOptions extends RootOptions {
   readonly effort: string
   readonly controller: string
   readonly pr?: string
+  readonly planFirst?: boolean
+  readonly anySize?: boolean
   readonly line?: readonly string[]
   readonly mergeOrder?: string
 }
@@ -33,9 +35,11 @@ interface RemoveOptions extends RootOptions {
 
 const REFUSALS_HELP = [
   'Refusals:',
-  '  bad-input  a flag carries a value the queue cannot hold',
+  '  bad-input  a flag carries a value the queue cannot hold, --plan-first or',
+  '             --any-size off a worker row, --any-size without --plan-first,',
+  '             or --plan-first on a task that already links a plan',
   '  no-task    no live task under .canon/tasks/ matches the argument',
-  '  no-plan    a worker row whose task links no single plan file',
+  '  no-plan    a plain worker row whose task links no single plan file',
   '  claimed    a worker row whose branch a session, worktree, or ref holds',
   '  malformed  a hand edit broke the prompts file, which is left as it is',
 ]
@@ -99,6 +103,8 @@ async function runAdd(task: string, opts: AddOptions): Promise<number> {
     effort: opts.effort,
     controller: opts.controller,
     pr: opts.pr,
+    planFirst: opts.planFirst,
+    anySize: opts.anySize,
     lines: opts.line,
     mergeOrder: opts.mergeOrder,
   })
@@ -119,9 +125,12 @@ async function runAdd(task: string, opts: AddOptions): Promise<number> {
           `Dropped the ${entry.role} prompt for ${entry.label}, since ${entry.branch} is claimed.`,
         )
       }
-      for (const branch of outcome.claimUnread) {
+      for (const entry of outcome.claimUnread) {
+        // A branch always carries its type segment, and a label never does.
         logWarn(
-          `The claim on ${branch} could not be read, so its row stays queued.`,
+          entry.includes('/')
+            ? `The claim on ${entry} could not be read, so its row stays queued.`
+            : `${entry} has no branch until its plan links, so its row stays queued.`,
         )
       }
     },
@@ -208,6 +217,14 @@ export function register(program: Command): void {
       'Pull request a reviewer row reviews, required for that role',
     )
     .option(
+      '--plan-first',
+      'Worker row that writes the task plan, then builds it, for a task with no plan',
+    )
+    .option(
+      '--any-size',
+      'Pass --any-size to a plan-first build, past its file bound and weight stop',
+    )
+    .option(
       '--line <text>',
       'One context line the plan does not carry, repeatable',
       collect,
@@ -224,8 +241,12 @@ export function register(program: Command): void {
         '',
         'A worker row runs /canon:auto-ship on the plan the task links, a planner',
         'row runs plan-feature on the task, and a reviewer row runs review-pr on',
-        '--pr. Each fence carries the command, then Controller:, then each --line.',
-        'A task and role already queued is replaced, so a retried call lands once.',
+        '--pr. A worker row with --plan-first runs /canon:auto-ship --plan-first',
+        'on the task instead, and takes its branch from the plan the task links',
+        'once that session writes one, naming the row by label under claimUnread',
+        'until then. Each fence carries the command, then Controller:, then each',
+        '--line. A task and role already queued is replaced, so a retried call',
+        'lands once.',
         'Every add reads the claim on each worker branch, refusing a new row whose',
         'branch is held and dropping a queued one, named under dropped. A claim it',
         'cannot read keeps the row and names the branch under claimUnread.',
@@ -237,6 +258,8 @@ export function register(program: Command): void {
         'Examples:',
         '  canon dispatch prompts add v199.6 --role worker --model opus \\',
         '    --effort high --controller <sessionId> --json',
+        '  canon dispatch prompts add v199.7 --role worker --plan-first \\',
+        '    --model opus --effort high --controller <sessionId> --json',
         '  canon dispatch prompts add v199.6 --role reviewer --pr 3230 \\',
         '    --model opus --effort high --controller <sessionId>',
         '',

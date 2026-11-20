@@ -139,6 +139,79 @@ describe('addPrompt', () => {
     expect(await listPrompts(ROOT)).toMatchObject({ ok: true, prompts: [] })
   })
 
+  describe('plan-first worker rows', () => {
+    it('should queue a plan-first row for a task that links no plan', async () => {
+      const outcome = await add(buildInput({ task: 'v1.4', planFirst: true }))
+
+      expect(outcome).toMatchObject({
+        ok: true,
+        action: 'added',
+        prompt: {
+          role: 'worker',
+          lines: [
+            '/canon:auto-ship --plan-first .canon/tasks/v1.4-unplanned.md',
+            `Controller: ${CONTROLLER}`,
+          ],
+        },
+      })
+    })
+
+    it('should pass --any-size through on a plan-first row', async () => {
+      const outcome = await add(
+        buildInput({ task: 'v1.4', planFirst: true, anySize: true }),
+      )
+
+      expect(outcome).toMatchObject({
+        ok: true,
+        prompt: {
+          lines: [
+            '/canon:auto-ship --plan-first .canon/tasks/v1.4-unplanned.md --any-size',
+            `Controller: ${CONTROLLER}`,
+          ],
+        },
+      })
+    })
+
+    it('should refuse a plan-first row for a task that already links a plan', async () => {
+      const outcome = await add(buildInput({ planFirst: true }))
+
+      expect(outcome).toMatchObject({ ok: false, reason: 'bad-input' })
+      expect(outcome).toHaveProperty(
+        'message',
+        expect.stringContaining('--role worker without --plan-first'),
+      )
+      expect(await listPrompts(ROOT)).toMatchObject({ ok: true, prompts: [] })
+    })
+
+    it.each(['planner', 'reviewer'])(
+      'should refuse --plan-first on a %s row',
+      async (role) => {
+        const outcome = await add(
+          buildInput({ task: 'v1.4', role, pr: '7', planFirst: true }),
+        )
+
+        expect(outcome).toMatchObject({ ok: false, reason: 'bad-input' })
+      },
+    )
+
+    it.each(['planner', 'reviewer'])(
+      'should refuse --any-size on a %s row',
+      async (role) => {
+        const outcome = await add(
+          buildInput({ task: 'v1.4', role, pr: '7', anySize: true }),
+        )
+
+        expect(outcome).toMatchObject({ ok: false, reason: 'bad-input' })
+      },
+    )
+
+    it('should refuse --any-size on a worker row without --plan-first', async () => {
+      const outcome = await add(buildInput({ anySize: true }))
+
+      expect(outcome).toMatchObject({ ok: false, reason: 'bad-input' })
+    })
+  })
+
   it('should queue a planner row for a task that links no plan', async () => {
     const outcome = await add(buildInput({ task: 'v1.4', role: 'planner' }))
 
@@ -281,6 +354,78 @@ describe('claimed branches', () => {
       ok: true,
       action: 'added',
       claimUnread: ['feat/alpha'],
+    })
+  })
+
+  describe('plan-first rows', () => {
+    const linkPlan = async (): Promise<void> => {
+      await writePlan('delta', ['src/d.ts'])
+      await writeTask('v1.4-unplanned', 'Unplanned row', 'feature-delta')
+    }
+
+    it('should report its own row under claimUnread by label before a plan links', async () => {
+      const outcome = await add(buildInput({ task: 'v1.4', planFirst: true }))
+
+      expect(outcome).toMatchObject({ ok: true, claimUnread: ['v1.4'] })
+      expect(outcome).not.toHaveProperty('prompt.branch')
+    })
+
+    it('should keep a queued row with no plan and report it under claimUnread', async () => {
+      await add(buildInput({ task: 'v1.4', planFirst: true }))
+
+      const outcome = await add(buildInput({ task: 'v1.3' }))
+
+      expect(outcome).toMatchObject({
+        ok: true,
+        dropped: [],
+        claimUnread: ['v1.4'],
+      })
+      expect(await listPrompts(ROOT)).toMatchObject({
+        prompts: [{ label: 'v1.4' }, { label: 'v1.3' }],
+      })
+    })
+
+    it('should list the branch and plan once the task links a plan', async () => {
+      await add(buildInput({ task: 'v1.4', planFirst: true }))
+      await linkPlan()
+
+      const listed = await listPrompts(ROOT)
+
+      expect(listed).toMatchObject({
+        prompts: [
+          {
+            label: 'v1.4',
+            role: 'worker',
+            plan: '.canon/plans/feature-delta.md',
+            branch: 'feat/delta',
+          },
+        ],
+      })
+    })
+
+    it('should list the branch of an --any-size row once the task links a plan', async () => {
+      await add(buildInput({ task: 'v1.4', planFirst: true, anySize: true }))
+      await linkPlan()
+
+      const listed = await listPrompts(ROOT)
+
+      expect(listed).toMatchObject({
+        prompts: [{ label: 'v1.4', branch: 'feat/delta' }],
+      })
+    })
+
+    it('should drop a queued row once the branch its linked plan names is claimed', async () => {
+      await add(buildInput({ task: 'v1.4', planFirst: true }))
+      await linkPlan()
+      CLAIMED.add('feat/delta')
+
+      const outcome = await add(buildInput({ task: 'v1.3' }))
+
+      expect(outcome).toMatchObject({
+        ok: true,
+        dropped: [{ label: 'v1.4', role: 'worker', branch: 'feat/delta' }],
+        claimUnread: [],
+      })
     })
   })
 
