@@ -25,7 +25,7 @@ Films each beat of a take plan from a fresh load and writes its clip, a log with
 
 ### `src/take/fixtures/`
 
-Owns the static pages the end to end takes film, two of which post each input they receive back to the test's server, and `film-suite.ts`, the harness the nine `film-*.e2e.test.ts` files share.
+Owns the static pages the end to end takes film, four of which post each input they receive back to the test's server, and `film-suite.ts`, the harness the ten `film-*.e2e.test.ts` files share.
 
 - `motion.html` is the release-checklist page every motion rule is measured on, and `motion-server.ts` serves any fixture with canon's token sheet and Geist from where they live
 - `motion.html` reports the animation frame each input paints in, since a stepped page's `performance.now()` runs ahead of the clip while inputs are dispatched
@@ -35,7 +35,7 @@ Owns the static pages the end to end takes film, two of which post each input th
 
 ### `src/take/film-*.e2e.test.ts`
 
-The film suite is nine files, one per describe block, so vitest runs them in parallel.
+The film suite is ten files, one per describe block, so vitest runs them in parallel.
 
 - A stepped case films at `deviceScale: 1` unless it asserts a 3840x2160 frame, stalls the page into a refusal, proves the scale 1 retry, or tests paint at scale 2. `canon take` and the reel keep 2.
 - `film-network` holds or aborts the data request `pending.html` makes on load, on both routes, and reads the state off the page color in each still
