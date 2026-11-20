@@ -300,10 +300,9 @@ async function branchPullNumbers(
 }
 
 /**
- * The pull request numbers whose head is `branch`, read over REST.
- * Unlike `branchPullNumbers`, a failed or unreadable answer is null rather
- * than an empty list, since the closing decision must not read a failure as
- * a branch with no pull request.
+ * The pull request numbers whose head is `branch`, read over REST, and null on
+ * a failed read where `branchPullNumbers` returns an empty list, so the closing
+ * decision never reads a failure as a branch with no pull request.
  */
 async function branchPullNumbersRest(
   branch: string | undefined,

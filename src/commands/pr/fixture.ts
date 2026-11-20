@@ -104,16 +104,9 @@ export const WEB_ONLY_DEPLOY = [
 ].join('\n')
 
 /**
- * A `gh` stand-in serving REST fixtures, which refuses GraphQL with a 403 so
- * the verbs stay on REST, and a verb that reintroduces a
- * `pr` subcommand, `repo view`, or `graphql` call fails the test driving it.
- *
- * Fixtures live in `FAKE_DIR`: `pull.json` answers the single pull read,
- * `listing.json` the branch lookup, `reviews.json` the reviews read (a stream
- * of arrays stands for several pages), and `reviews-fail` makes that read 403.
- * `merge-409` makes the REST merge answer a moved head. `runs.json` and
- * `jobs.json` answer the runs and jobs reads, failing when absent, and the
- * caller's `--jq` filter runs over each answer.
+ * A `gh` stand-in serving the REST fixtures in `FAKE_DIR` and refusing GraphQL
+ * with a 403, so a verb that reintroduces a `pr` subcommand, `repo view`, or
+ * `graphql` call fails the test driving it.
  */
 export const PROXY_GH = readFileSync(
   new URL('../fixtures/gh-proxy.sh', import.meta.url),

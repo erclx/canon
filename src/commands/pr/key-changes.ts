@@ -184,13 +184,9 @@ type SourceRead =
   | { readonly kind: 'refused'; readonly reason: SourceRefusal }
 
 /**
- * Reads the body and the changed set from the pull request the caller named,
- * or from the one open on this branch.
- *
- * The body comes off the pull read and the files off the paginated files
- * endpoint, since only GraphQL returns both in one call. A push between the two reads can compare
- * a body against the next commit's files, which the paginated read already
- * risked for any pull request past the old view's cap of 100 files.
+ * Reads the body off the pull read and the changed set off the paginated files
+ * endpoint, so a push between the two can pair a body with the next commit's
+ * files, as any read past the old view's 100-file cap already risked.
  */
 async function readFromApi(
   cwd: string,
