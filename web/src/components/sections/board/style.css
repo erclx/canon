@@ -1,105 +1,139 @@
-/* Above 900 the board sits beside the heading, so only the stacked layouts space the tray off the lede. */
-#board .tray {
-  margin-top: 0;
+#board .top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 64px;
+  align-items: end;
 }
 
-#board .bh {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--line);
-  background: var(--winbar);
-  font-family: var(--mono);
-  font-size: var(--size-view-small);
-  color: var(--muted);
+#board .top .lede {
+  margin: 0;
 }
 
-#board .bh b {
+/* The board as you leave it, the moves between, and the board you come back to. */
+#board .ba {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  margin-top: 64px;
+}
+
+#board .side {
+  margin: 0;
+}
+
+#board .stamp {
+  margin: 0 0 12px;
+  font-size: var(--size-small);
+}
+
+#board .after .stamp {
   font-weight: 600;
   color: var(--ink);
 }
 
-#board .clock {
-  margin-left: auto;
-  font-variant-numeric: tabular-nums;
+#board .mid {
+  align-self: center;
+  margin: 0;
+  text-align: center;
+  color: var(--ink);
 }
 
-#board .lanes {
+#board .bd {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  padding: 14px;
-}
-
-#board .lane {
-  min-width: 0;
-  padding: 10px;
-  border-radius: var(--radius-panel);
-  background: var(--band);
+  gap: 8px;
 }
 
 #board .ln {
-  margin: 0 0 10px;
-  font-family: var(--mono);
-  font-size: var(--size-view-small);
-  color: var(--muted);
+  min-height: 200px;
+  padding: 9px;
+  border-radius: var(--radius-action);
+  background: var(--band);
 }
 
-#board ul {
-  display: grid;
-  align-content: start;
-  gap: 8px;
-  min-height: 52px;
+#board .lh {
+  margin: 0 0 10px;
+}
+
+#board .cards {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-#board .row {
-  display: grid;
-  gap: 2px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: var(--win);
-  box-shadow: 0 0 0 1px var(--line);
-}
-
-/* The row waiting on you carries the state on its edge, never on its text. */
-#board .row.wait {
-  box-shadow: 0 0 0 1.5px var(--color-waiting);
-}
-
-#board .row:not(.wait) .wl {
-  display: none;
-}
-
-#board .nm {
+#board .cd {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 8px;
+  padding: 7px 9px;
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-chip);
+  background: var(--card);
   font-family: var(--mono);
+}
+
+#board .cd b {
   font-size: var(--size-view-small);
+  font-weight: 500;
   color: var(--ink);
   overflow-wrap: anywhere;
 }
 
-#board .st {
-  font-size: 0.6875rem;
-  line-height: 1.4;
+#board .cd span {
+  font-size: var(--size-view-small);
+  line-height: 1.35;
   color: var(--muted);
 }
 
+/* The board as you left it: drawn dashed and flat, since nothing on it has moved yet. */
+#board .before .cd {
+  border-style: dashed;
+}
+
+#board .cd.wt {
+  border-color: var(--color-waiting);
+  box-shadow: 3px 3px 0 var(--color-waiting);
+}
+
+#board .cd.wt span {
+  color: var(--ink);
+}
+
+#board .gl {
+  margin-right: 6px;
+  font-style: normal;
+  color: var(--color-waiting);
+}
+
+#board .replay {
+  margin-top: 14px;
+}
+
+@media (max-width: 1100px) {
+  #board .ba {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #board .mid {
+    text-align: left;
+  }
+}
+
 @media (max-width: 900px) {
-  #board .tray {
-    margin-top: 40px;
+  #board .top {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
   }
 }
 
 @media (max-width: 640px) {
-  #board .tray {
-    margin-top: 32px;
+  #board .bd {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  #board .lanes {
-    grid-template-columns: minmax(0, 1fr);
-    padding: 10px;
+  #board .ln {
+    min-height: 0;
   }
 }

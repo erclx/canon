@@ -1,220 +1,147 @@
-#guardrails .tray {
-  margin-top: 40px;
-}
-
-#guardrails .log {
-  padding: 18px 26px 22px;
-  transition: opacity var(--duration-fade) var(--ease-standard);
-}
-
-#guardrails .log.hide {
-  opacity: 0;
-}
-
-/* Each line the tour appends rises into place, so the order the checks fire in reads as it plays. */
-#guardrails .log > .in {
-  animation: gr-in 180ms var(--ease-standard) both;
-}
-
-@keyframes gr-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  #guardrails .log > .in {
-    animation: none;
-  }
-}
-
-#guardrails .log .ask {
-  margin: 0 -26px 14px;
-  padding: 8px 26px;
-}
-
-#guardrails .log .tool,
-#guardrails .log .say {
-  position: relative;
-  padding-left: 22px;
-  color: var(--ink);
-}
-
-#guardrails .log .tool::before,
-#guardrails .log .say::before {
-  content: '\25CF';
-  position: absolute;
-  left: 0;
-  top: 0;
-  font-size: var(--size-view-small);
-  color: var(--accent);
-  user-select: none;
-}
-
-#guardrails .log .say {
-  margin-top: 6px;
-}
-
-#guardrails .log .say::before {
-  color: var(--ink);
-}
-
-#guardrails .log .tool b {
-  font-weight: 500;
-}
-
-#guardrails .log :is(.tool, .res, .note, .block) + .tool {
-  margin-top: 6px;
-}
-
-#guardrails .log :is(.res, .note, .block) {
-  display: flex;
-  gap: 10px;
-  padding-left: 24px;
-}
-
-#guardrails .log :is(.res, .note, .block)::before {
-  content: '\23BF';
-  flex: none;
-  color: var(--muted);
-  user-select: none;
-}
-
-#guardrails .log .note {
-  color: var(--muted);
-}
-
-#guardrails .log .why {
-  color: var(--accent);
-}
-
-#guardrails .log .msg {
-  display: block;
-  margin-top: 2px;
-  color: var(--body);
-  text-wrap: pretty;
-}
-
-/* Above 900 the four parts run along one line in the order they fire, a dot each, lit while its scene plays. */
-#guardrails .four {
-  --lit-inset: -48px -16px -16px;
-  position: relative;
+#guardrails .top {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 32px;
-  margin-top: 52px;
-  padding-top: 34px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 64px;
+  align-items: end;
 }
 
-#guardrails .four::before {
-  content: '';
-  position: absolute;
-  top: 6px;
-  left: 7px;
-  right: 25%;
-  height: 2px;
-  border-radius: var(--radius-marker);
-  background: var(--line);
+#guardrails .top .lede {
+  margin: 0;
 }
 
-#guardrails .four > div {
+#guardrails .grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin: 64px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A stamp: a drawn card whose verdict is set large, the type as the picture. */
+#guardrails .stamp {
+  padding: 22px 24px 24px;
+  background: var(--card);
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-offset);
+}
+
+#guardrails .stamp p {
+  margin: 0;
+}
+
+#guardrails .hd {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
-#guardrails .four > div::after {
-  content: '';
-  position: absolute;
-  top: -34px;
-  left: 0;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--behind);
-  box-shadow: inset 0 0 0 2px var(--muted);
+#guardrails .sm {
+  font-family: var(--mono);
+  font-size: var(--size-view-small);
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
-#guardrails .four > div.lit::after {
-  background: var(--accent);
-  box-shadow: none;
+#guardrails .big {
+  margin-bottom: 18px;
+  font-size: calc(var(--type-hero-size) * 0.9);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--ink);
 }
 
-#guardrails .when {
-  display: block;
-  margin-bottom: 6px;
-  font-size: var(--size-small);
+#guardrails .act,
+#guardrails .res {
+  font-family: var(--mono);
+  font-size: var(--size-view-small);
+  line-height: 1.45;
+  color: var(--body);
+}
+
+#guardrails .res {
+  margin-top: 4px;
   color: var(--muted);
 }
 
-#guardrails .four .go {
-  font-family: var(--sans);
-  font-size: var(--size-body);
+#guardrails .nm {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1.5px dashed var(--line);
+  font-size: var(--size-label);
+  line-height: 1.45;
+  color: var(--body);
+}
+
+#guardrails .nm b {
   font-weight: 600;
   color: var(--ink);
 }
 
-#guardrails .four p {
-  margin: 8px 0 0;
-  font-size: var(--size-body);
-  line-height: var(--type-body-lh);
-  text-wrap: pretty;
+/*
+ * The refusal at the merge: the deeper of the accent pair in both themes, so
+ * its white text holds contrast on dark as it does on light.
+ */
+#guardrails .stamp.hot {
+  border-color: var(--ink);
+  background: var(--color-light-accent);
 }
 
-#guardrails .four code {
-  display: block;
-  margin-top: auto;
-  padding-top: 12px;
-  font-size: var(--size-small);
-  color: var(--muted);
+#guardrails .stamp.hot :is(.note, .sm, .big, .act, .res, .nm, .nm b) {
+  color: var(--color-light-window);
 }
 
-/* Below 900 the shipped stacking holds: the window under the heading, then the parts in columns with no line. */
+#guardrails .stamp.hot .nm {
+  border-color: color-mix(in srgb, var(--color-light-window) 40%, transparent);
+}
+
+/* The stamps land one after another, in the order the parts fire. */
+#guardrails.armed .stamp {
+  opacity: 0;
+  transform: scale(1.12) rotate(-2deg);
+  transition:
+    opacity var(--duration-fade) var(--ease-standard),
+    transform var(--duration-move) var(--ease-standard);
+}
+
+#guardrails.armed.in .stamp {
+  opacity: 1;
+  transform: none;
+}
+
+#guardrails.armed.in .stamp:nth-child(2) {
+  transition-delay: 400ms;
+}
+
+#guardrails.armed.in .stamp:nth-child(3) {
+  transition-delay: 800ms;
+}
+
+#guardrails.armed.in .stamp:nth-child(4) {
+  transition-delay: 1200ms;
+}
+
 @media (max-width: 900px) {
-  #guardrails {
-    display: flex;
-    flex-direction: column;
+  #guardrails .top {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
   }
 
-  #guardrails .sec-head {
-    order: -2;
-  }
-
-  #guardrails .tray {
-    order: -1;
-  }
-
-  #guardrails .four {
-    --lit-inset: -14px -16px;
-    grid-template-columns: 1fr 1fr;
-    gap: 32px 36px;
+  #guardrails .grid {
     margin-top: 48px;
-    padding-top: 0;
-  }
-
-  #guardrails .four::before,
-  #guardrails .four > div::after,
-  #guardrails .when {
-    display: none;
   }
 }
 
 @media (max-width: 640px) {
-  #guardrails .tray {
-    margin-top: 32px;
+  #guardrails .grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  #guardrails .log {
-    padding: 14px 16px 18px;
-  }
-
-  #guardrails .log .ask {
-    margin: 0 -16px 12px;
-    padding: 7px 16px;
-  }
-
-  #guardrails .four {
-    grid-template-columns: 1fr;
-    gap: 26px;
+  #guardrails .hd {
+    flex-direction: column;
+    gap: 4px;
   }
 }

@@ -10,22 +10,17 @@ const SETTLE = { timeout: 5_000 }
 
 const SECTIONS = [
   'top',
-  'roles',
+  'worktrees',
   'records',
   'craft',
   'guardrails',
-  'worktrees',
-  'film',
+  'evidence',
   'board',
-  'drive',
   'health',
-  'setup',
-  'try',
+  'install',
 ]
 
-test('renders the opening, ten sections, and try in order', async ({
-  page,
-}) => {
+test('renders the opening and eight sections in order', async ({ page }) => {
   await page.goto('/')
 
   const ids = await page
@@ -33,6 +28,20 @@ test('renders the opening, ten sections, and try in order', async ({
     .evaluateAll((nodes) => nodes.map((node) => node.id))
 
   expect(ids).toEqual(SECTIONS)
+})
+
+test('parts each section from the one above by a 1 px soft rule', async ({
+  page,
+}) => {
+  await page.goto('/')
+
+  const tops = await page
+    .locator('main > section')
+    .evaluateAll((nodes) =>
+      nodes.map((node) => getComputedStyle(node).borderTopWidth),
+    )
+
+  expect(tops).toEqual(['0px', ...SECTIONS.slice(1).map(() => '1px')])
 })
 
 test('every nav link and menu entry resolves to a section or an absolute address', async ({
@@ -71,35 +80,6 @@ test('the toggle flips the theme and a reload keeps it', async ({ page }) => {
   await expect(root).toHaveAttribute('data-theme', after as string, SETTLE)
 })
 
-test('the opening prompt shows a focus ring when it takes focus', async ({
-  page,
-}) => {
-  await page.goto('/')
-
-  await page.locator('#av-ask').focus()
-
-  await expect(page.locator('#top .fld')).toHaveCSS('outline-style', 'solid')
-})
-
-test('a click into the opening prompt draws no ring, and Tab back draws it', async ({
-  page,
-}) => {
-  await page.goto('/')
-  const ask = page.locator('#av-ask')
-  const field = page.locator('#top .fld')
-
-  await ask.click()
-  await expect(ask).toBeFocused()
-  await expect(field).toHaveCSS('outline-style', 'none')
-
-  await page.keyboard.press('Shift+Tab')
-  await expect(ask).not.toBeFocused()
-  await page.keyboard.press('Tab')
-
-  await expect(ask).toBeFocused()
-  await expect(field).toHaveCSS('outline-style', 'solid')
-})
-
 test.describe('the fixed bar', () => {
   test('lands a section jump with its heading below the bar', async ({
     page,
@@ -118,7 +98,7 @@ test.describe('the fixed bar', () => {
     expect(Math.abs(section!.y - (bar!.y + bar!.height))).toBeLessThan(2)
   })
 
-  for (const width of [1041, 1039, 641, 639]) {
+  for (const width of [1101, 1099, 901, 899, 641, 639]) {
     test(`fits the bar at ${width} with no sideways scroll`, async ({
       page,
     }) => {
@@ -135,45 +115,48 @@ test.describe('the fixed bar', () => {
     })
   }
 
-  test('shows the six section links above 1040', async ({ page }) => {
-    await page.setViewportSize({ width: 1041, height: 800 })
+  test('shows all eight section links above 1100', async ({ page }) => {
+    await page.setViewportSize({ width: 1101, height: 800 })
     await page.goto('/')
 
-    await expect(page.locator('.links > a.sl:visible')).toHaveCount(6)
+    await expect(page.locator('.links > a.sl:visible')).toHaveCount(8)
     await expect(page.locator('.nbtn')).toBeHidden()
   })
 
-  test('folds the sections into a menu that reaches each one below 1040', async ({
+  test('drops Worktrees and Health from the bar under 1100', async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 1039, height: 800 })
+    await page.setViewportSize({ width: 1099, height: 800 })
+    await page.goto('/')
+
+    const shown = page.locator('.links > a.sl:visible')
+    await expect(shown).toHaveCount(6)
+    await expect(shown.filter({ hasText: /Worktrees|Health/ })).toHaveCount(0)
+  })
+
+  test('folds the sections, Docs, and GitHub into Menu under 900', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 899, height: 800 })
     await page.goto('/')
 
     await expect(page.locator('.links > a.sl:visible')).toHaveCount(0)
+    await expect(page.locator('.links > a.ext:visible')).toHaveCount(0)
     await page.locator('.nbtn').click()
-    await page.locator('#nav-panel a[href="#setup"]').click()
+    await expect(page.locator('#nav-panel a.pext:visible')).toHaveCount(2)
+    await page.locator('#nav-panel a[href="#install"]').click()
 
-    await expect(page.locator('#setup')).toBeInViewport(SETTLE)
+    await expect(page.locator('#install')).toBeInViewport(SETTLE)
     await expect(page.locator('.nbtn')).toHaveAttribute(
       'aria-expanded',
       'false',
     )
   })
 
-  test('moves Docs and GitHub into the menu on a phone', async ({ page }) => {
-    await page.setViewportSize({ width: 639, height: 800 })
-    await page.goto('/')
-
-    await expect(page.locator('.links > a.ext:visible')).toHaveCount(0)
-    await page.locator('.nbtn').click()
-
-    await expect(page.locator('#nav-panel a.pext:visible')).toHaveCount(2)
-  })
-
   test('closes the menu on Escape and returns focus to its button', async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 1039, height: 800 })
+    await page.setViewportSize({ width: 899, height: 800 })
     await page.goto('/')
     await page.locator('.nbtn').click()
 
@@ -185,72 +168,19 @@ test.describe('the fixed bar', () => {
     )
     await expect(page.locator('.nbtn')).toBeFocused()
   })
-})
 
-test('a click on the prompt mark focuses the input with no ring', async ({
-  page,
-}) => {
-  await page.goto('/')
+  test('shows its rule only once the page scrolls', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+    const bar = page.locator('.site-nav')
+    await expect(bar).not.toHaveClass(/(^| )scrolled( |$)/)
+    await expect(bar).toHaveCSS('border-bottom-color', 'rgba(0, 0, 0, 0)')
 
-  await page.locator('#top .ask-line .p').click()
+    await page.mouse.wheel(0, 400)
 
-  await expect(page.locator('#av-ask')).toBeFocused()
-  await expect(page.locator('#top .fld')).toHaveCSS('outline-style', 'none')
-})
-
-test('a press on the prompt dragged off before release leaves Tab its ring', async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto('/')
-  const ask = page.locator('#av-ask')
-  const mark = await page.locator('#top .ask-line .p').boundingBox()
-  expect(mark).not.toBeNull()
-
-  await page.mouse.move(mark!.x + mark!.width / 2, mark!.y + mark!.height / 2)
-  await page.mouse.down()
-  await page.mouse.move(5, 5)
-  await page.mouse.up()
-  await expect(ask).not.toBeFocused()
-  // Focus the control just ahead of the prompt in tab order, so Tab is what lands on it.
-  await page.evaluate(() => {
-    const target = document.getElementById('av-ask')
-    const focusable = [
-      ...document.querySelectorAll<HTMLElement>(
-        'a[href], button, input, [tabindex]:not([tabindex="-1"])',
-      ),
-    ].filter((node) => node.offsetParent !== null || node === target)
-    const index = target ? focusable.indexOf(target) : -1
-    if (index < 1) throw new Error('no control sits ahead of the prompt')
-    focusable[index - 1]?.focus()
+    await expect(bar).toHaveClass(/(^| )scrolled( |$)/, SETTLE)
+    await expect(bar).not.toHaveCSS('border-bottom-color', 'rgba(0, 0, 0, 0)')
   })
-  await page.keyboard.press('Tab')
-
-  await expect(ask).toBeFocused()
-  await expect(page.locator('#top .fld')).toHaveCSS('outline-style', 'solid')
-})
-
-test('the opening status line fits on one row at 360', async ({ page }) => {
-  await page.setViewportSize({ width: 360, height: 800 })
-  await page.goto('/')
-  const line = page.locator('#av-counts')
-  await expect(line).toHaveText(/\S/)
-
-  const cut = await line.evaluate((node) => node.scrollWidth - node.clientWidth)
-
-  expect(cut).toBeLessThanOrEqual(0)
-})
-
-test('the footer mark takes the reader back to the top', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto('/')
-  const brand = page.locator('.site-footer a.brand')
-  await brand.scrollIntoViewIfNeeded()
-
-  await brand.click()
-
-  await expect(page.locator('#top h1')).toBeInViewport(SETTLE)
-  expect(new URL(page.url()).hash).toBe('#top')
 })
 
 test.describe('the footer columns', () => {
@@ -287,7 +217,7 @@ test.describe('the footer columns', () => {
     expect(anchors.length).toBeGreaterThan(6)
     expect(missing).toEqual([])
     await expect(page.locator('.site-footer a.sl')).toHaveCount(0)
-    await expect(page.locator('.links > a.sl')).toHaveCount(6)
+    await expect(page.locator('.links > a.sl')).toHaveCount(8)
   })
 
   test('a footer section link lands its section under the bar', async ({
@@ -339,601 +269,214 @@ test('the footer mark carries no underline under hover', async ({ page }) => {
   expect(brandLine).toBe('none')
 })
 
-test.describe('section shapes', () => {
-  test('roles sets its tray left of the heading at 1440', async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto('/')
-
-    const head = await page.locator('#roles .sec-head').boundingBox()
-    const tray = await page.locator('#roles .tray').boundingBox()
-
-    expect(head).not.toBeNull()
-    expect(tray).not.toBeNull()
-    expect(tray!.x + tray!.width).toBeLessThanOrEqual(head!.x)
-  })
-
-  test('worktrees sets its heading left of the tray at 1440', async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto('/')
-
-    const head = await page.locator('#worktrees .sec-head').boundingBox()
-    const tray = await page.locator('#worktrees .tray').boundingBox()
-
-    expect(head).not.toBeNull()
-    expect(tray).not.toBeNull()
-    expect(head!.x + head!.width).toBeLessThanOrEqual(tray!.x)
-  })
-
-  for (const width of [834, 390]) {
-    test(`every split stacks its text over its tray at ${width}`, async ({
-      page,
-    }) => {
-      await page.setViewportSize({ width, height: 900 })
-      await page.goto('/')
-
-      const misplaced = await page
-        .locator('main > section.split-left, main > section.split-right')
-        .evaluateAll((sections) =>
-          sections.flatMap((section) => {
-            const head = section.querySelector('.sec-head')
-            const tray = section.querySelector('.tray')
-            if (!head || !tray) return [`${section.id}: missing`]
-            const h = head.getBoundingClientRect()
-            const t = tray.getBoundingClientRect()
-            return h.bottom <= t.top ? [] : [section.id]
-          }),
-        )
-
-      expect(misplaced).toEqual([])
-    })
-  }
-
-  test('no two banded sections touch, and the opening carries no band', async ({
-    page,
-  }) => {
-    await page.goto('/')
-
-    const shapes = await page
-      .locator('main > section')
-      .evaluateAll((nodes) =>
-        nodes.map((node) => node.classList.contains('banded')),
-      )
-
-    expect(shapes[0]).toBe(false)
-    expect(shapes.some((banded, i) => banded && shapes[i + 1])).toBe(false)
-    expect(shapes.filter(Boolean)).toHaveLength(5)
-  })
-})
-
-test.describe('the band', () => {
-  for (const theme of ['light', 'dark'] as const) {
-    test(`a banded tray takes the ground and its band the tray grey in ${theme}`, async ({
-      page,
-    }) => {
-      await page.emulateMedia({ colorScheme: theme })
-      await page.goto('/')
-      await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
-
-      const colors = await page.evaluate(() => {
-        const probe = document.createElement('div')
-        document.body.append(probe)
-        const resolve = (role: string) => {
-          probe.style.backgroundColor = `var(${role})`
-          return getComputedStyle(probe).backgroundColor
-        }
-        const ground = resolve('--ground')
-        const grey = resolve('--tray')
-        probe.remove()
-        const banded = [
-          ...document.querySelectorAll<HTMLElement>('main > section.banded'),
-        ]
-        return {
-          ground,
-          grey,
-          bands: banded.map((node) => getComputedStyle(node).backgroundColor),
-          trays: banded.map((node) => {
-            const tray = node.querySelector('.tray')
-            return tray ? getComputedStyle(tray).backgroundColor : 'missing'
-          }),
-        }
-      })
-
-      expect(colors.ground).not.toBe(colors.grey)
-      expect(colors.bands).toEqual(Array(5).fill(colors.grey))
-      expect(colors.trays).toEqual(Array(5).fill(colors.ground))
-    })
-  }
-
-  test('the band fills the viewport edge to edge at 1440', async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto('/')
-    await page.locator('.site-nav').evaluate((node) => {
-      node.style.visibility = 'hidden'
-    })
-    const guardrails = page.locator('#guardrails')
-    await guardrails.evaluate((node) =>
-      window.scrollBy(0, node.getBoundingClientRect().top - 200),
-    )
-    const box = await guardrails.boundingBox()
-    expect(box).not.toBeNull()
-    // A row inside the section's top padding, above the heading.
-    const y = box!.y + 20
-    const pixel = (x: number) =>
-      page.screenshot({ clip: { x, y, width: 1, height: 1 } })
-
-    const left = await pixel(2)
-    const inside = await pixel(box!.x + 10)
-    const right = await pixel(1437)
-    const ground = await page.screenshot({
-      clip: { x: 2, y: box!.y - 20, width: 1, height: 1 },
-    })
-
-    expect(left.equals(inside)).toBe(true)
-    expect(right.equals(inside)).toBe(true)
-    expect(inside.equals(ground)).toBe(false)
-  })
-})
-
 test.describe('the craft section', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
-  test('plays the last craft scene with the window in view', async ({
+  test('a chip swaps the quote and points both links at that skill', async ({
     page,
   }) => {
     await page.goto('/')
-    const last = page.locator('#craft .pick').last()
+    const chips = page.locator('#craft .chip')
+    await expect(chips).toHaveCount(8)
 
-    await last.click()
+    await chips.last().click()
 
-    await expect(page.locator('#craft .win')).toBeInViewport({ ratio: 1 })
-    await expect(page.locator('#craft .log')).toContainText(
-      'canon:systematic-debugging',
+    const shown = page.locator('#craft .pair:visible')
+    await expect(shown).toHaveCount(1)
+    await expect(shown.locator('a.path')).toHaveAttribute(
+      'href',
+      /\/blob\/main\/claude\/skills\/systematic-debugging\//,
     )
+    await expect(shown.locator('a.src')).toHaveAttribute(
+      'href',
+      /obra\/superpowers/,
+    )
+    await expect(chips.last()).toHaveAttribute('aria-pressed', 'true')
   })
 
-  test('Practice sets the quote larger than the rule beside the window', async ({
-    page,
-  }) => {
+  test('sets the quote larger than the rule it became', async ({ page }) => {
     await page.goto('/')
     const size = (selector: string) =>
       page
         .locator(selector)
+        .first()
         .evaluate((node) => parseFloat(getComputedStyle(node).fontSize))
-    const quote = await page.locator('#craft .said').boundingBox()
-    const win = await page.locator('#craft .win').boundingBox()
 
-    expect(await size('#craft .p-quote')).toBeGreaterThan(
-      await size('#craft .p-rule'),
-    )
-    expect(quote && win && quote.x + quote.width).toBeLessThanOrEqual(
-      win?.x ?? 0,
-    )
-  })
-
-  test('Practice stacks the window over the pickers at 390', async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 390, height: 844 })
-    await page.goto('/')
-    const win = await page.locator('#craft .win').boundingBox()
-    const picks = await page.locator('#craft .picks').boundingBox()
-    const rule = await page.locator('#craft .rl').boundingBox()
-    const said = await page.locator('#craft .said').boundingBox()
-
-    expect(win && picks && win.y + win.height).toBeLessThanOrEqual(
-      picks?.y ?? 0,
-    )
-    expect(rule && said && rule.y).toBeLessThan(said?.y ?? 0)
-  })
-
-  test('a Practice pick points both links at that skill', async ({ page }) => {
-    await page.goto('/')
-    const last = page.locator('#craft .pick').last()
-
-    await last.click()
-
-    await expect(page.locator('#craft a.p-file')).toHaveAttribute(
-      'href',
-      /\/blob\/main\/claude\/skills\/systematic-debugging\//,
-    )
-    await expect(page.locator('#craft a.src-link')).toHaveAttribute(
-      'href',
-      /obra\/superpowers/,
+    expect(await size('#craft .pair:visible blockquote')).toBeGreaterThan(
+      await size('#craft .pair:visible .rule .text'),
     )
   })
 })
 
-test.describe('the looping windows and their pause button', () => {
-  test.use({ viewport: { width: 1440, height: 900 } })
-
-  /** A loop that wraps has to outlast one scene and the rest after it. */
-  const WRAP = { timeout: 20_000 }
-
-  test('guardrails plays on past its last scene', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await page.goto('/')
-    const parts = page.locator('#guardrails .four > div')
-    await expect(parts).toHaveCount(4)
-    // The scroll-in tour lights the first part, so the click lands after it.
-    await page.locator('#guardrails .tray').scrollIntoViewIfNeeded()
-    await expect(parts.first()).toHaveClass(/(^| )lit( |$)/, SETTLE)
-
-    await parts.last().locator('.go').click()
-
-    await expect(parts.last()).toHaveClass(/(^| )lit( |$)/, SETTLE)
-    await expect(parts.first()).toHaveClass(/(^| )lit( |$)/, WRAP)
-  })
-
-  test('setup plays on past its last stage', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await page.goto('/')
-    const stages = page.locator('#setup .st')
-    await expect(stages).toHaveCount(4)
-    await page.locator('#setup .tx').scrollIntoViewIfNeeded()
-    await expect(stages.first()).toHaveClass(/(^| )on( |$)/, SETTLE)
-
-    await stages.last().locator('.go').click()
-
-    await expect(stages.last()).toHaveClass(/(^| )on( |$)/, SETTLE)
-    await expect(stages.first()).toHaveClass(/(^| )on( |$)/, WRAP)
-  })
-
-  test('a pressed pause button holds the window it sits on', async ({
+test.describe('the opening relay', () => {
+  test('passes the change card to card, and Pause holds it', async ({
     page,
   }) => {
     await page.clock.install()
     await page.emulateMedia({ reducedMotion: 'no-preference' })
     await page.goto('/')
-    const pause = page.locator('#guardrails .pz')
-    const log = page.locator('#guardrails .log')
-    await page.locator('#guardrails .four .go').nth(1).click()
-    await page.clock.runFor(600)
-    await expect(log.locator('.tool')).toHaveCount(1, SETTLE)
+    const cards = page.locator('#top .relay .st')
+    const pause = page.locator('#top .pz-relay')
+    await expect(cards).toHaveCount(5)
+    await expect(cards.nth(0)).toHaveClass(/(^| )act( |$)/, SETTLE)
 
+    await page.clock.runFor(1_400)
+    await expect(cards.nth(1)).toHaveClass(/(^| )act( |$)/, SETTLE)
     await pause.click()
-    const held = await log.textContent()
-    // Unpaused, the scene appends its next line within 400 ms and moves on to the next scene inside 10 s.
-    await page.clock.runFor(10_000)
+    await page.clock.runFor(5_000)
 
-    await expect(pause).toHaveAttribute('data-paused', 'true')
-    expect(await log.textContent()).toBe(held)
+    await expect(cards.nth(1)).toHaveClass(/(^| )act( |$)/)
+    await expect(pause).toHaveText('Play')
+    await expect(pause).toHaveAccessibleName('Play the handoff')
   })
 
-  test('the pause button toggles from the keyboard', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'no-preference' })
+  test('rests with every card unlit and no pause under reduced motion', async ({
+    page,
+  }) => {
     await page.goto('/')
-    const pause = page.locator('#roles .pz')
+    await expect(page.locator('#top .relay .st')).toHaveCount(5)
 
-    await pause.focus()
-    await page.keyboard.press('Enter')
-    const afterEnter = await pause.getAttribute('data-paused')
-    await page.keyboard.press('Space')
-
-    expect(afterEnter).toBe('true')
-    await expect(pause).toHaveAttribute('data-paused', 'false')
+    await expect(page.locator('#top .relay .st.act')).toHaveCount(0)
+    await expect(page.locator('#top .pz-relay')).toBeHidden()
   })
 
-  test('shows no pause button under reduced motion', async ({ page }) => {
+  test('stacks the orchestrator above the cards at 390', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 900 })
     await page.goto('/')
-    const buttons = page.locator('.pz')
-    expect(await buttons.count()).toBeGreaterThan(0)
+    const bar = await page.locator('#top .ob').boundingBox()
+    const first = await page.locator('#top .relay .st').first().boundingBox()
+    expect(bar).not.toBeNull()
+    expect(first).not.toBeNull()
 
-    const shown = await buttons.evaluateAll((nodes) =>
-      nodes
-        .filter((node) => getComputedStyle(node).display !== 'none')
-        .map((node) => node.closest('section')?.id ?? '?'),
-    )
-
-    expect(shown).toEqual([])
+    expect(bar!.y + bar!.height).toBeLessThanOrEqual(first!.y)
   })
-
-  for (const width of [320, 834, 1440]) {
-    test(`every pause button clears what its tray holds at ${width}`, async ({
-      page,
-    }) => {
-      await page.emulateMedia({ reducedMotion: 'no-preference' })
-      await page.setViewportSize({ width, height: 900 })
-      await page.goto('/')
-
-      const overlaps = await page
-        .locator('.tray:has(> .pz)')
-        .evaluateAll((trays) =>
-          trays.flatMap((tray) => {
-            const button = tray.querySelector(':scope > .pz')
-            const content = tray.querySelector(':scope > :not(.pz)')
-            if (!button || !content)
-              return [`${tray.closest('section')?.id}: missing`]
-            const b = button.getBoundingClientRect()
-            const c = content.getBoundingClientRect()
-            return b.bottom > c.top && b.left < c.right
-              ? [tray.closest('section')?.id ?? '?']
-              : []
-          }),
-        )
-
-      expect(await page.locator('.tray:has(> .pz)').count()).toBeGreaterThan(0)
-      expect(overlaps).toEqual([])
-    })
-  }
 })
 
-test.describe('the opening agent view', () => {
-  test('a finished worker puts both reviewers of its change into Working', async ({
+test.describe('the worktree graph', () => {
+  test('draws its branches out of main once the graph is in view', async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: 'no-preference' })
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto('/')
-    const working = () =>
-      page.locator('#av-list .r:not(.leave):has(.s.sp) .n').allTextContents()
-    expect(await working()).toContain('worker-canon-take-timer')
+    const section = page.locator('#worktrees')
+    const tracks = page.locator('#worktrees .track')
+    await expect(section).toHaveClass(/(^| )armed( |$)/)
+    await expect(section).not.toHaveClass(/(^| )in( |$)/)
 
-    await expect
-      .poll(working, { timeout: 15_000 })
-      .not.toContain('worker-canon-take-timer')
+    await page.locator('#worktrees .graph').scrollIntoViewIfNeeded()
 
-    expect(await working()).toEqual(
-      expect.arrayContaining([
-        'reviewer-canon-take-timer',
-        'ui-reviewer-canon-take-timer',
-      ]),
+    await expect(section).toHaveClass(/(^| )in( |$)/, SETTLE)
+    await expect(tracks).toHaveCount(3)
+    await expect(tracks.first()).toHaveCSS('transform', 'none', SETTLE)
+  })
+
+  test('shows its branches drawn under reduced motion', async ({ page }) => {
+    await page.goto('/')
+    const tracks = page.locator('#worktrees .track')
+    await expect(tracks).toHaveCount(3)
+
+    await expect(page.locator('#worktrees')).not.toHaveClass(/(^| )armed( |$)/)
+    await expect(tracks.first()).toHaveCSS('transform', 'none')
+    await expect(page.locator('#worktrees .meta').first()).toHaveCSS(
+      'opacity',
+      '1',
     )
   })
 })
 
-test.describe('the Guardrails section', () => {
-  test('sets the four checks on one line above the window at 1440', async ({
-    page,
-  }) => {
+test.describe('the guardrail stamps', () => {
+  test('land in firing order once the grid is in view', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto('/')
-    const parts = page.locator('#guardrails .four > div')
-    await expect(parts).toHaveCount(4)
-    const tops = await parts.evaluateAll((nodes) =>
-      nodes.map((node) => Math.round(node.getBoundingClientRect().top)),
+    const stamps = page.locator('#guardrails .stamp')
+    await expect(stamps).toHaveCount(4)
+    await expect(page.locator('#guardrails')).toHaveClass(/(^| )armed( |$)/)
+    await expect(stamps.first()).toHaveCSS('opacity', '0')
+
+    await page.locator('#guardrails .grid').scrollIntoViewIfNeeded()
+    await expect(page.locator('#guardrails')).toHaveClass(
+      /(^| )in( |$)/,
+      SETTLE,
     )
-    const four = await page.locator('#guardrails .four').boundingBox()
-    const win = await page.locator('#guardrails .win').boundingBox()
+    const delays = await stamps.evaluateAll((nodes) =>
+      nodes.map((node) => parseFloat(getComputedStyle(node).transitionDelay)),
+    )
 
-    expect(new Set(tops).size).toBe(1)
-    expect(four && win && four.y + four.height).toBeLessThanOrEqual(win?.y ?? 0)
+    expect(delays).toEqual([...delays].sort((a, b) => a - b))
+    expect(new Set(delays).size).toBe(4)
+    await expect(stamps.last()).toHaveCSS('opacity', '1', SETTLE)
   })
 
-  test('keeps the window over the checks at 390', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 })
+  test('show all four landed under reduced motion', async ({ page }) => {
     await page.goto('/')
-    const four = await page.locator('#guardrails .four').boundingBox()
-    const win = await page.locator('#guardrails .win').boundingBox()
+    const stamps = page.locator('#guardrails .stamp')
+    await expect(stamps).toHaveCount(4)
 
-    expect(win && four && win.y + win.height).toBeLessThanOrEqual(four?.y ?? 0)
-  })
-})
-
-test.describe('the setup section', () => {
-  test.use({ viewport: { width: 1440, height: 900 } })
-
-  test('the Start stage prints the files its command writes', async ({
-    page,
-  }) => {
-    await page.goto('/')
-
-    await page.locator('#setup .st').first().locator('.go').click()
-
-    await expect(page.locator('#setup .log .blk').first()).toBeVisible()
-    await expect(
-      page.locator('#setup .log .blk').first().locator('.row.f'),
-    ).toHaveCount(3)
+    await expect(page.locator('#guardrails')).not.toHaveClass(/(^| )armed( |$)/)
+    await expect(stamps.last()).toHaveCSS('opacity', '1')
   })
 
-  test('the stage rail raises the running card and fills down to it', async ({
-    page,
-  }) => {
+  test('stack one stamp a row at 390', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 900 })
     await page.goto('/')
-    const stages = page.locator('#setup .st')
-    const fill = () =>
-      page
-        .locator('#setup .stages')
-        .evaluate((node) => parseFloat(node.style.getPropertyValue('--fill')))
-    const surface = (index: number) =>
-      stages
-        .nth(index)
-        .evaluate((node) => getComputedStyle(node).backgroundColor)
+    const boxes = await page
+      .locator('#guardrails .stamp')
+      .evaluateAll((nodes) =>
+        nodes.map((node) => node.getBoundingClientRect().left),
+      )
 
-    await stages.nth(1).locator('.go').click()
-    const second = await fill()
-    const running = await surface(1)
-    const resting = await surface(2)
-    await stages.nth(3).locator('.go').click()
-
-    expect(running).not.toBe(resting)
-    expect(second).toBeGreaterThan(0)
-    expect(await fill()).toBeGreaterThan(second)
+    expect(boxes).toHaveLength(4)
+    expect(new Set(boxes).size).toBe(1)
   })
 })
 
-test.describe('the records stack', () => {
-  test.use({ viewport: { width: 1440, height: 900 } })
-
-  /** The stage's top, less the place it pins to, at a scroll offset into the stack. */
-  async function stageAt(
-    page: import('@playwright/test').Page,
-    offset: number,
-  ) {
-    return page.evaluate((into) => {
-      const box = document.querySelector<HTMLElement>('#records .scrolly')
-      const stick = box?.querySelector<HTMLElement>('.stick')
-      if (!box || !stick) throw new Error('the records stage did not render')
-      const start = box.getBoundingClientRect().top + window.scrollY
-      const pin = parseFloat(getComputedStyle(stick).top)
-      window.scrollTo(0, start - pin + into)
-      return {
-        drift: stick.getBoundingClientRect().top - pin,
-        length: box.offsetHeight - stick.offsetHeight,
-      }
-    }, offset)
-  }
-
-  test('pins below the bar for the length of its sheets', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'no-preference' })
+test.describe('the records fan', () => {
+  test('a chip brings its record to the front', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto('/')
-    const { length } = await stageAt(page, 0)
+    const chips = page.locator('#records .chip')
+    await expect(chips).toHaveCount(12)
+    const front = page.locator('#records .sheet[data-at="0"]')
+    await expect(front).toHaveAttribute('aria-label', 'Plan')
 
-    const midway = await stageAt(page, Math.round(length / 2))
-    const atLast = await stageAt(page, length - 1)
+    await chips.filter({ hasText: 'Board' }).click()
 
-    expect(Math.abs(midway.drift)).toBeLessThan(1)
-    expect(Math.abs(atLast.drift)).toBeLessThan(1)
-  })
-
-  test('lets go of the stage after the last sheet', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await page.goto('/')
-    const { length } = await stageAt(page, 0)
-
-    const past = await stageAt(page, length + 200)
-
-    expect(past.drift).toBeLessThan(-100)
-  })
-
-  test('turns the sheets as the page scrolls', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await page.goto('/')
-    const { length } = await stageAt(page, 0)
-
-    await stageAt(page, length)
-
-    await expect(
-      page.locator('#records .tabs .pick[aria-pressed="true"]'),
-    ).toHaveAttribute('data-i', '11', SETTLE)
-  })
-
-  test('the explorer lights the file the front record has open', async ({
-    page,
-  }) => {
-    await page.goto('/')
-    const front = page.locator('#records .sheet[data-i="0"]')
-    const lit = front.locator('.explorer .on')
-    // Intake opens on its second file, so the first tab is the one to switch to.
-    await expect(lit).toHaveAttribute('data-f', '1')
-
-    await front.locator('.ftab[data-f="0"]').click()
-
-    await expect(lit).toHaveCount(1)
-    await expect(lit).toHaveAttribute('data-f', '0')
-    await expect(lit).toBeVisible()
-  })
-
-  test('a click on an explorer file opens its tab, out of the tab order', async ({
-    page,
-  }) => {
-    await page.goto('/')
-    const front = page.locator('#records .sheet[data-i="0"]')
-    const entry = front.locator('.explorer button[data-f="0"]')
-    await expect(entry).toHaveAttribute('tabindex', '-1')
-
-    await entry.click()
-
-    await expect(front.locator('.ftab[data-f="0"]')).toHaveAttribute(
-      'aria-selected',
+    await expect(front).toHaveAttribute('aria-label', 'Board')
+    await expect(front).toContainText('In flight')
+    await expect(chips.filter({ hasText: 'Board' })).toHaveAttribute(
+      'aria-pressed',
       'true',
     )
-    await expect(entry).toHaveClass(/\bon\b/)
+    await expect(
+      page.locator('#records .sheet:not([aria-hidden])'),
+    ).toHaveCount(1)
   })
 
-  test('a click on an explorer folder folds the rows under it', async ({
+  test('fans the two records either side of the front one', async ({
     page,
   }) => {
-    await page.goto('/')
-    const explorer = page.locator('#records .sheet[data-i="0"] .explorer')
-    const files = explorer.locator('button[data-f]')
-    const folder = explorer.locator('.fold:has(+ button[data-f])')
-    await expect(folder).toHaveCount(1)
-    await expect(files.first()).toBeVisible()
-
-    await folder.click()
-
-    await expect(files.first()).toBeHidden()
-    await expect(folder).toHaveClass(/\bshut\b/)
-    await folder.click()
-    await expect(files.first()).toBeVisible()
-  })
-
-  test('every explorer folder row draws a chevron and every file row a mark', async ({
-    page,
-  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto('/')
 
-    const rows = await page
-      .locator('#records .explorer > *')
+    const shown = await page
+      .locator('#records .sheet')
       .evaluateAll((nodes) =>
-        nodes.map((node) => ({
-          file: node.hasAttribute('data-f'),
-          chevron: getComputedStyle(node, '::before').maskImage,
-          mark: Boolean(node.querySelector('.fi')),
-        })),
+        nodes
+          .filter((node) => getComputedStyle(node).visibility === 'visible')
+          .map((node) => node.getAttribute('aria-label')),
       )
 
-    expect(rows.filter((row) => !row.file).length).toBeGreaterThan(0)
-    expect(rows.filter((row) => row.file).length).toBeGreaterThan(0)
-    expect(
-      rows.filter((row) => !row.file && !row.chevron.includes('url(')),
-    ).toEqual([])
-    expect(rows.filter((row) => row.file && !row.mark)).toEqual([])
+    expect(shown).toEqual(['Intake', 'Groundwork', 'Plan', 'Task', 'Board'])
   })
 
-  test('every explorer chevron and file mark sits on its own row', async ({
-    page,
-  }) => {
+  test('shows the front record alone at 390', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 900 })
     await page.goto('/')
+    await expect(page.locator('#records .sheet')).toHaveCount(12)
 
-    // A static row hands its absolute chevron and mark to the explorer, which draws them at its top.
-    const positions = await page
-      .locator('#records .explorer > *')
-      .evaluateAll((nodes) =>
-        nodes.map((node) => getComputedStyle(node).position),
-      )
-
-    expect(positions.length).toBeGreaterThan(0)
-    expect(positions.filter((position) => position === 'static')).toEqual([])
-  })
-
-  test('a click on an empty explorer folder changes nothing', async ({
-    page,
-  }) => {
-    await page.goto('/')
-    const explorer = page.locator('#records .sheet[data-i="0"] .explorer')
-    const empty = explorer.locator('.dir').first()
-    await expect(empty).toBeVisible()
-    const before = await explorer.innerHTML()
-
-    await empty.click()
-
-    expect(await explorer.innerHTML()).toBe(before)
-  })
-
-  test('every view switch puts the source button first', async ({ page }) => {
-    await page.goto('/')
-
-    const firsts = await page
-      .locator('#records .vt')
-      .evaluateAll((groups) =>
-        groups.map(
-          (group) => (group.firstElementChild as HTMLElement | null)?.dataset.v,
-        ),
-      )
-
-    expect(firsts).toHaveLength(12)
-    expect(firsts.filter((view) => view !== 'src')).toEqual([])
-  })
-
-  test('takes no pinned scroll under reduced motion', async ({ page }) => {
-    await page.goto('/')
-
-    const { length } = await stageAt(page, 0)
-
-    expect(length).toBeLessThan(10)
+    await expect(page.locator('#records .sheet:visible')).toHaveCount(1)
   })
 })
 
@@ -1022,162 +565,158 @@ test.describe('the page name', () => {
   })
 })
 
-test.describe('new sections', () => {
+test.describe('the board night', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
-  test.describe('with motion', () => {
-    test.beforeEach(async ({ page }) => {
-      await page.emulateMedia({ reducedMotion: 'no-preference' })
-      await page.clock.install()
-      await page.goto('/')
-    })
+  test('replays the night a move a beat, and Replay starts it again', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.clock.install()
+    await page.goto('/')
+    const stamp = page.locator('#board .after .stamp')
+    const replay = page.locator('#board .replay')
 
-    test('the board moves a row a beat, and the pause holds its clock', async ({
-      page,
-    }) => {
-      const clock = page.locator('#board .clock')
+    await page.locator('#board .ba').scrollIntoViewIfNeeded()
+    await expect(stamp).toHaveText(/^23:00 /, SETTLE)
+    await page.clock.runFor(700)
+    await expect(stamp).toHaveText(/^23:40 /)
+    await page.clock.runFor(5_000)
+    await expect(stamp).toHaveText(/what you come back to$/)
+    await expect(page.locator('#board .after .cd.wt')).toHaveCount(1)
+    await replay.click()
 
-      await page.clock.runFor(2_700)
-      await expect(clock).toHaveText('23:00')
-      await page.clock.runFor(1_500)
-      await expect(clock).toHaveText('23:40')
-      await page.locator('#board .pz').click()
-      // Real time still runs between the clock's steps, so the held state is read after the press rather than assumed.
-      const held = (await clock.textContent()) ?? ''
-      await page.clock.runFor(6_000)
-
-      await expect(clock).toHaveText(held)
-    })
-
-    test('the drive lands its pick, and the pause holds it cleared', async ({
-      page,
-    }) => {
-      const board = page.locator('#drive .dr')
-
-      await expect(board).not.toHaveClass(/\bon\b/)
-      await page.clock.runFor(1_900)
-      await expect(board).toHaveClass(/\bon\b/)
-      await page.clock.runFor(3_500)
-      await expect(board).not.toHaveClass(/\bon\b/)
-      await page.locator('#drive .pz').click()
-      const held = (await board.getAttribute('class')) ?? ''
-      await page.clock.runFor(6_000)
-
-      await expect(board).toHaveAttribute('class', held)
-    })
-
-    test('the audit prints a row at a time, and the pause holds the print', async ({
-      page,
-    }) => {
-      const rows = page.locator('#health .pr')
-
-      await page.clock.runFor(800)
-      await expect(rows.nth(0)).toHaveClass(/\bin\b/)
-      await expect(rows.nth(1)).not.toHaveClass(/\bin\b/)
-      await page.locator('#health .pz').click()
-      const printed = page.locator('#health .pr.in')
-      const held = await printed.count()
-      await page.clock.runFor(6_000)
-
-      await expect(printed).toHaveCount(held)
-      expect(held).toBeLessThan(await rows.count())
-    })
-
-    test('the film steps its beats with the reel, and the pause shows the still', async ({
-      page,
-    }) => {
-      const reel = page.locator('#film .stage img')
-      await reel.scrollIntoViewIfNeeded()
-      await expect
-        .poll(
-          () => reel.evaluate((node: HTMLImageElement) => node.naturalWidth),
-          SETTLE,
-        )
-        .toBeGreaterThan(0)
-
-      await page.clock.runFor(4_000)
-      await expect(page.locator('#film .beats li').nth(1)).toHaveClass(/\bon\b/)
-      await page.locator('#film .pz').click()
-
-      await expect(reel).toHaveAttribute('src', /film-still/)
-    })
-
-    test('the film ticks its last checklist line before the reel loops', async ({
-      page,
-    }) => {
-      // A paused clock starts the reel's time when it loads and moves it only by runFor, so real time cannot carry it past the loop.
-      await page.clock.pauseAt(Date.now() + 1_000)
-      const reel = page.locator('#film .stage img')
-      await reel.scrollIntoViewIfNeeded()
-      await expect
-        .poll(
-          () => reel.evaluate((node: HTMLImageElement) => node.naturalWidth),
-          SETTLE,
-        )
-        .toBeGreaterThan(0)
-
-      await page.clock.runFor(7_700)
-
-      await expect(page.locator('#film .checks li.done')).toHaveCount(3)
-    })
+    await expect(stamp).toHaveText(/^23:00 /)
   })
 
-  test('each view lands its full state with no pause under reduced motion', async ({
+  test('rests where the night ends under reduced motion', async ({ page }) => {
+    await page.goto('/')
+
+    await expect(page.locator('#board .after .stamp')).toHaveText(
+      /what you come back to\s*$/,
+    )
+    await expect(page.locator('#board .after .cd.wt')).toHaveCount(1)
+    await expect(page.locator('#board .replay')).toBeHidden()
+  })
+})
+
+test.describe('the health ranking', () => {
+  test('grows its bars past the checkpoint once in view', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+    const bar = page.locator('#health .trk i').first()
+    const check = page.locator('#health .ck').first()
+    await expect(page.locator('#health .rk')).toHaveCount(3)
+    await expect(bar).toHaveCSS('width', '0px')
+
+    await page.locator('#health .rank').scrollIntoViewIfNeeded()
+
+    await expect(page.locator('#health')).toHaveClass(/(^| )in( |$)/, SETTLE)
+    await expect
+      .poll(
+        async () =>
+          ((await bar.boundingBox())?.width ?? 0) >
+          ((await check.boundingBox())?.x ?? 0) -
+            ((await bar.boundingBox())?.x ?? 0),
+        SETTLE,
+      )
+      .toBe(true)
+  })
+
+  test('shows its bars grown under reduced motion', async ({ page }) => {
+    await page.goto('/')
+    const bars = page.locator('#health .trk i')
+    await expect(bars).toHaveCount(3)
+
+    await expect(page.locator('#health')).not.toHaveClass(/(^| )armed( |$)/)
+    expect((await bars.first().boundingBox())?.width ?? 0).toBeGreaterThan(0)
+    await expect(page.locator('#health .sp li')).toHaveCount(6)
+  })
+})
+
+test.describe('the evidence section', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+
+  test('steps the reel through its stills and ticks each line', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.clock.install()
+    await page.goto('/')
+    const lines = page.locator('#evidence .ck li')
+    const replay = page.locator('#evidence .replay')
+    await expect(lines).toHaveCount(5)
+
+    await page.locator('#evidence .film').scrollIntoViewIfNeeded()
+    await expect(page.locator('#evidence')).toHaveClass(/(^| )in( |$)/, SETTLE)
+    await expect(page.locator('#evidence .strip li.now')).not.toHaveCount(0)
+    await expect(lines.nth(0)).toHaveClass(/(^| )done( |$)/)
+    await expect(lines.nth(4)).not.toHaveClass(/(^| )done( |$)/)
+    await page.clock.runFor(8_000)
+
+    await expect(page.locator('#evidence .ck li.done')).toHaveCount(5)
+    await expect(page.locator('#evidence .strip li.now')).toHaveCount(0)
+    await expect(replay).toBeVisible()
+  })
+
+  test('shows every line ticked and its stills under reduced motion', async ({
     page,
   }) => {
     await page.goto('/')
+    await expect(page.locator('#evidence .ck li')).toHaveCount(5)
 
-    await expect(page.locator('#board .clock')).toHaveText('02:14')
-    await expect(page.locator('#board .row.wait')).toHaveCount(1)
-    await expect(page.locator('#drive .dr')).toHaveClass(/\bon\b/)
-    await expect(page.locator('#health .hl')).not.toHaveClass(/\bplay\b/)
-    await expect(page.locator('#film .checks li.done')).toHaveCount(3)
-    await expect(page.locator('#film .pz')).toBeHidden()
-    await expect(page.locator('#board .pz')).toBeHidden()
-    await expect(page.locator('#drive .pz')).toBeHidden()
-    await expect(page.locator('#health .pz')).toBeHidden()
+    await expect(page.locator('#evidence .ck li.done')).toHaveCount(5)
+    await expect(page.locator('#evidence .replay')).toBeHidden()
+    const stills = page.locator('#evidence .strip:visible img')
+    await expect(stills).toHaveCount(5)
+    await stills.first().scrollIntoViewIfNeeded()
+    await expect
+      .poll(
+        () =>
+          stills
+            .first()
+            .evaluate((node: HTMLImageElement) => node.naturalWidth),
+        SETTLE,
+      )
+      .toBeGreaterThan(0)
   })
 
-  test('the film follows the theme toggle to the reel filmed in it', async ({
+  test('shows the stills filmed in the theme the page is in', async ({
     page,
   }) => {
     await page.emulateMedia({ colorScheme: 'dark' })
     await page.goto('/')
-    const reel = page.locator('#film .stage img')
-    await expect(reel).toHaveAttribute('src', '/film.webp')
+    const still = page.locator('#evidence .strip:visible img').first()
+    await expect(still).toHaveAttribute('src', '/film-beat-1.webp')
 
     await page.locator('.theme-toggle').click()
 
-    await expect(reel).toHaveAttribute('src', '/film-light.webp')
+    await expect(still).toHaveAttribute('src', '/film-beat-1-light.webp')
   })
+})
 
-  test('the film shows its still under reduced motion', async ({ page }) => {
+test.describe('the install section', () => {
+  test('the copy control says it copied the three commands', async ({
+    page,
+    context,
+    browserName,
+  }) => {
+    test.skip(
+      browserName !== 'chromium',
+      'Only Chromium grants clipboard permissions to a test',
+    )
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     await page.goto('/')
-    const reel = page.locator('#film .stage img')
-    await reel.scrollIntoViewIfNeeded()
+    const copy = page.locator('#install .copy')
 
-    await expect
-      .poll(
-        () => reel.evaluate((node: HTMLImageElement) => node.currentSrc),
-        SETTLE,
-      )
-      .toMatch(/film-still/)
+    await copy.click()
+
+    await expect(copy).toHaveText('Copied')
+    await expect(page.locator('#install [role="status"]')).toHaveText(
+      'Copied the three commands',
+    )
+    const copied = await page.evaluate(() => navigator.clipboard.readText())
+    expect(copied.split('\n')).toHaveLength(3)
   })
-
-  for (const width of [390, 320]) {
-    test(`the page with the new views scrolls no sideways at ${width}`, async ({
-      page,
-    }) => {
-      await page.setViewportSize({ width, height: 844 })
-      await page.goto('/')
-
-      const overflow = await page.evaluate(
-        () =>
-          document.documentElement.scrollWidth -
-          document.documentElement.clientWidth,
-      )
-
-      expect(overflow).toBe(0)
-    })
-  }
 })

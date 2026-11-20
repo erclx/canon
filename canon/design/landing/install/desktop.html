@@ -1,0 +1,372 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../assets/landing-v6/lang/fonts.css" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+      }
+      body {
+        background: #fbfbfa;
+        color: #141413;
+        font-family: 'Geist Variable', Geist, sans-serif;
+        background-image:
+          linear-gradient(#ececea 1px, transparent 1px),
+          linear-gradient(90deg, #ececea 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+      .lab {
+        font:
+          500 12px/1.4 'Geist Variable',
+          Geist,
+          sans-serif;
+        padding: 8px 14px;
+        color: #55544f;
+        border-bottom: 1px solid #e0e0dd;
+        background: #fbfbfa;
+      }
+      .hero {
+        padding: 112px 64px 112px;
+      }
+      .w {
+        max-width: 1180px;
+        margin: 0 auto;
+      }
+      .kick {
+        font:
+          500 13px/1 'Geist Mono Variable',
+          monospace;
+        color: #c2380e;
+        margin-bottom: 24px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .kick:before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: #c2380e;
+        border-radius: 2px;
+      }
+      h1 {
+        margin: 0;
+        font-weight: 600;
+        letter-spacing: -0.045em;
+        line-height: 1;
+      }
+      .lede {
+        font-size: 20px;
+        line-height: 1.5;
+        color: #55544f;
+        margin: 24px 0 0;
+        max-width: 44ch;
+      }
+      .mono {
+        font-family: 'Geist Mono Variable', 'DejaVu Sans Mono', monospace;
+      }
+      .ink {
+        background: #fff;
+        border: 1.5px solid #141413;
+        border-radius: 10px;
+        box-shadow: 5px 5px 0 #141413;
+      }
+      .note {
+        font:
+          500 12px/1.35 'Geist Mono Variable',
+          monospace;
+        color: #55544f;
+      }
+      .acc {
+        color: #c2380e;
+      }
+      .wait {
+        color: #b07d1a;
+      }
+      .ic {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 0.9em;
+        height: 0.9em;
+        vertical-align: -0.08em;
+        border: 1.5px dashed #141413;
+        border-radius: 8px;
+        background: #fbfbfa;
+      }
+      .ic svg {
+        width: 0.55em;
+        height: 0.55em;
+      }
+      .ic.m {
+        border-style: solid;
+        background: #141413;
+        color: #fbfbfa;
+      }
+      @media (max-width: 900px) {
+        .hero {
+          padding: 80px 32px;
+        }
+      }
+      @media (max-width: 640px) {
+        .hero {
+          padding: 48px 20px;
+        }
+        .lede {
+          font-size: 17px;
+        }
+      }
+      h2.s {
+        margin: 0;
+        font-weight: 600;
+        font-size: 52px;
+        line-height: 1.04;
+        letter-spacing: -0.035em;
+        max-width: 16ch;
+      }
+      .sec {
+        padding: 112px 64px;
+      }
+      .m {
+        font-family: 'Geist Mono Variable', 'DejaVu Sans Mono', monospace;
+      }
+      .term {
+        background: #141413;
+        color: #e7e6e1;
+        border-radius: 10px;
+        box-shadow: 5px 5px 0 #c9c8c3;
+        overflow: hidden;
+      }
+      .tb {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 11px 14px;
+        border-bottom: 1px solid #2e2e2b;
+        font:
+          500 12px/1 'Geist Variable',
+          sans-serif;
+        color: #8d8c86;
+      }
+      .tb i {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #3d3d39;
+      }
+      .tb span {
+        flex: 1;
+        text-align: center;
+        margin-right: 48px;
+      }
+      .tbody {
+        padding: 20px 22px;
+        font:
+          400 13.5px/1.75 'Geist Mono Variable',
+          monospace;
+        overflow-wrap: anywhere;
+      }
+      .pr {
+        color: #8d8c86;
+      }
+      .ok {
+        color: #8bc487;
+      }
+      .k {
+        color: #8d8c86;
+        display: inline-block;
+        min-width: 96px;
+      }
+      .q {
+        color: #e5b567;
+      }
+      .mut {
+        color: #8d8c86;
+      }
+      .acc {
+        color: #ff8a66;
+      }
+      .copy {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font:
+          500 13px/1 'Geist Variable',
+          sans-serif;
+        padding: 10px 14px;
+        border: 1.5px solid #141413;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 3px 3px 0 #141413;
+        color: #141413;
+      }
+      @media (max-width: 900px) {
+        .sec {
+          padding: 80px 32px;
+        }
+        h2.s {
+          font-size: 40px;
+        }
+      }
+      @media (max-width: 640px) {
+        .sec {
+          padding: 48px 20px;
+        }
+        h2.s {
+          font-size: 30px;
+        }
+        .tbody {
+          font-size: 12px;
+          padding: 16px;
+        }
+      }
+      .split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 56px;
+        align-items: start;
+      }
+      .cmd {
+        margin-top: 36px;
+        padding: 0;
+      }
+      .cbody {
+        padding: 18px 20px;
+        font-size: 13px;
+        line-height: 1.75;
+        overflow-wrap: anywhere;
+      }
+      .cfoot {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 14px 20px;
+        border-top: 1.5px solid #141413;
+      }
+      .stg {
+        list-style: none;
+        margin: 28px 0 0;
+        padding: 0;
+      }
+      .stg li {
+        display: grid;
+        grid-template-columns: 140px 130px 1fr;
+        gap: 12px;
+        padding: 10px 0;
+        border-top: 1px solid #e3e3e0;
+        font:
+          400 13.5px/1.45 'Geist Variable',
+          sans-serif;
+      }
+      .stg b {
+        font-size: 13px;
+        font-weight: 600;
+      }
+      @media (max-width: 1100px) {
+        .stg li {
+          grid-template-columns: 1fr;
+          gap: 2px;
+        }
+      }
+      @media (max-width: 900px) {
+        .split {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="lab">
+      arm-1 · Commands beside the setup run · cost: two code surfaces in one
+      section, the commands on paper and the session in the dark terminal · ref:
+      resend-com s07, source beside its result
+    </div>
+    <section class="sec">
+      <div class="w split">
+        <div>
+          <h2 class="s">Install, then set up a project</h2>
+          <p class="lede">
+            Canon expects someone who already knows Claude Code well. It runs on
+            Linux and macOS, and the CLI needs Bun.
+          </p>
+          <div class="cmd ink">
+            <div class="m cbody">
+              <div>
+                <span class="pr">$ </span>claude plugin marketplace add
+                https://github.com/erclx/canon
+              </div>
+              <div>
+                <span class="pr">$ </span>claude plugin install canon@canon
+              </div>
+              <div>
+                <span class="pr">$ </span>bun install --global @erclx/canon
+              </div>
+            </div>
+            <div class="cfoot">
+              <span class="copy">Copy the three commands</span
+              ><span class="note"
+                >then run /canon:target-setup in a project</span
+              >
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="term">
+            <div class="tb">
+              <i></i><i></i><i></i><span>a fresh project</span>
+            </div>
+            <div class="tbody">
+              <div><span class="acc">❯</span> /canon:target-setup</div>
+              <div><span class="k">Stack</span>bun, react</div>
+              <div>
+                <span class="k">Lays down</span>base tooling, the react stack,
+                governance rules, the Claude seeds
+              </div>
+              <div><span class="q"> ? Run it?</span> yes</div>
+              <div>
+                <span class="k">Verified</span>format, lint, types, tests
+              </div>
+            </div>
+          </div>
+          <ul class="stg">
+            <li>
+              <span class="note">First</span><b class="m">Start</b
+              ><span
+                >bun init, npm create vite, or target-scaffold starts the
+                project.</span
+              >
+            </li>
+            <li>
+              <span class="note">Once per project</span
+              ><b class="m">target-setup</b
+              ><span
+                >Shows what it will lay down, and writes nothing until you say
+                yes.</span
+              >
+            </li>
+            <li>
+              <span class="note">Any time</span><b class="m">target-check</b
+              ><span
+                >Reports what the project lacks against the current
+                release.</span
+              >
+            </li>
+            <li>
+              <span class="note">After each release</span
+              ><b class="m">target-update</b
+              ><span
+                >After a release, catches the project up on your go-ahead.</span
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

@@ -4,21 +4,23 @@ import { footer, nav, sections, site } from '../../content/copy'
 import './style.css'
 
 /**
- * The mark and tagline beside three link columns, over a base line. The first
- * column repeats the nav's section links, so they carry no `.sl` class and the
- * nav's in-view marker never reads them.
+ * The mark and tagline beside three link columns on the page's grid ground,
+ * parted from the page by one soft rule, over a base row set apart by spacing
+ * alone. The first column repeats the nav's section links in two columns, so
+ * they carry no `.sl` class and the nav's in-view marker never reads them.
  */
 const glyph = mark.replace(/<!--[\s\S]*?-->/, '').trim()
 const columns = [
   {
+    kind: 'page',
     head: footer.heads.page,
     links: sections.map((section) => ({
       label: section.label,
       href: `#${section.id}`,
     })),
   },
-  { head: footer.heads.read, links: footer.read },
-  { head: footer.heads.project, links: footer.project },
+  { kind: 'read', head: footer.heads.read, links: footer.read },
+  { kind: 'project', head: footer.heads.project, links: footer.project },
 ]
 ---
 
@@ -33,7 +35,7 @@ const columns = [
     </div>
     {
       columns.map((column) => (
-        <div class="col">
+        <div class:list={['col', column.kind]}>
           <h2>{column.head}</h2>
           <ul role="list">
             {column.links.map((link) => (

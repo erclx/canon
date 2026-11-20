@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
 import { describe, expect, it } from 'vitest'
 
 import * as copy from './copy'
@@ -24,8 +27,8 @@ describe('copy', () => {
   const strings = collectStrings(copy)
 
   it('should read every exported string, including those built from counts', () => {
-    expect(strings).toContain(copy.guardrails.parts[1]?.play)
-    expect(strings).toContain(copy.setup.stages[0]?.line)
+    expect(strings).toContain(copy.guardrails.parts[1]?.verdict)
+    expect(strings).toContain(copy.install.stages[0]?.line)
     expect(strings).toContain(copy.footer.read[0]?.label)
   })
 
@@ -43,13 +46,22 @@ describe('copy', () => {
 })
 
 describe('worktreeCards', () => {
-  it('should light only a folder the band names on every status step', () => {
-    const steps = copy.worktreeCards.flatMap((card) => card.steps)
-    const strays = steps.filter(
-      (step) => !copy.worktrees.band.dirs.includes(step.dir),
+  it('should light only a folder the band names on every card', () => {
+    const strays = copy.worktreeCards.filter(
+      (card) => !copy.worktrees.band.dirs.includes(card.dir),
     )
 
-    expect(steps.length).toBeGreaterThan(0)
+    expect(copy.worktreeCards.length).toBeGreaterThan(0)
     expect(strays).toEqual([])
+  })
+})
+
+describe('evidence', () => {
+  it('should carry one checklist line per beat the film plan films', () => {
+    const plan = JSON.parse(
+      readFileSync(join(import.meta.dirname, '../../film-plan.json'), 'utf8'),
+    ) as { beats: unknown[] }
+
+    expect(copy.evidence.checks).toHaveLength(plan.beats.length)
   })
 })

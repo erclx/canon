@@ -7,7 +7,7 @@
 
 # canon
 
-A Claude Code plugin and CLI that runs agent work from plan to merge.
+A Claude Code plugin and CLI that runs agent work from plan to merge. Runs your agent's work and keeps its code good, on one setup for every repo.
 
 [![npm version](https://img.shields.io/npm/v/@erclx/canon)](https://www.npmjs.com/package/@erclx/canon)
 [![CI status](https://img.shields.io/github/actions/workflow/status/erclx/canon/verify.yml?branch=main)](https://github.com/erclx/canon/actions/workflows/verify.yml)
@@ -20,7 +20,9 @@ A Claude Code plugin and CLI that runs agent work from plan to merge.
 
 </div>
 
-## Quick start
+## Install, then set up a project
+
+Start in three commands once you know Claude Code well. It runs on Linux and macOS, and the CLI needs Bun.
 
 ```bash
 claude plugin marketplace add https://github.com/erclx/canon
@@ -28,13 +30,21 @@ claude plugin install canon@canon
 bun install --global @erclx/canon
 ```
 
-Then open a project in Claude Code and run `/canon:target-setup`, which brings it onto canon.
+Then open a project in Claude Code and run `/canon:target-setup`, which brings it onto canon. The project starts with its stack's own tool, such as `bun init` or `npm create vite`, or with `/canon:target-scaffold` in an empty folder, and canon layers on top.
 
-canon expects someone who already knows Claude Code well. It runs on Linux and macOS, and the CLI needs Bun.
+1. `/canon:target-setup` detects the stack, shows the whole chain, and writes nothing until you say yes. Then it runs `canon init`, checks what landed, and indexes the docs.
+2. `/canon:target-check` reports, domain by domain, what the project holds against what canon now ships, and repairs nothing.
+3. `/canon:target-update` upgrades the CLI and plugin after a release, previews the changelog and any migrations, and catches the project up on your go-ahead.
+
+Three kinds of file land in your repo:
+
+- Skills load live from the plugin, so there is no copy to drift
+- Rules are files under `.claude/rules/` that load when you edit a matching path
+- Configs and seeds are real files you own, laid down by `canon init` and kept current by `canon sync`
 
 ## Five roles, each in its own session
 
-One long session loses the thread. canon splits a change across a planner, a worker, and two reviewers, and you talk to the orchestrator that starts them.
+Give each step of a change its own session and a written record the next one reads. canon splits a change across a planner, a worker, and two reviewers, and you talk to the orchestrator that starts them.
 
 - The orchestrator dispatches the rows on the task board
 - A planner reads the code and writes one plan you approve
@@ -44,7 +54,7 @@ One long session loses the thread. canon splits a change across a planner, a wor
 
 ## The record each step writes
 
-Each record has a fixed shape, so the next session knows where to read. Records live under `.canon/` in the main checkout.
+Pick up a change where the last session stopped. Each record has a fixed shape, so the next session knows where to read. Records live under `.canon/` in the main checkout.
 
 - Before a build: intake, groundwork, the plan, its task, and the board
 - Around a pull request: the code review, the UI review, and the screenshot evidence
@@ -52,7 +62,7 @@ Each record has a fixed shape, so the next session knows where to read. Records 
 
 ## Practice skills with cited sources
 
-An agent copies whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from.
+Keep your agent from copying whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from.
 
 | Skill                  | Loads                           | Cites                                     |
 | ---------------------- | ------------------------------- | ----------------------------------------- |
@@ -66,7 +76,7 @@ Each rule has its own source row in a ledger, and the skill audit fails when a s
 
 ## Checks that catch a skipped step
 
-An instruction can be ignored. These four parts fail the run when a step is skipped.
+Write a rule down and an agent can still ignore it. These four parts fail the run when that happens.
 
 - Rules by path load when the agent opens a matching file, and each names the skill that owns that kind of file
 - Hooks read each action before or after it runs, refusing some and reporting others back into the same turn
@@ -75,37 +85,22 @@ An instruction can be ignored. These four parts fail the run when a step is skip
 
 ## One worktree for each change
 
-Agents working in one checkout overwrite each other. Each worker builds in its own worktree on its own branch, and every session reads and writes the one `.canon/` record in the main checkout, so no worktree keeps a copy of its own.
+Run several changes at once without one agent overwriting another. Each worker builds in its own worktree on its own branch, and every session reads and writes the one `.canon/` record in the main checkout, so no worktree keeps a copy of its own.
 
-## A pull request arrives with a film of the change
+## See the change before it merges
 
-A diff cannot show a hover or a focus ring. Canon films the change in the running app and posts the reel beside the checklist a reviewer ticks.
+Watch the hover and focus ring a diff cannot show. Each pull request carries a film of the work, and you pick a design on a board by looking.
+
+- canon films the change in the running app and posts the reel beside the checklist a reviewer ticks
+- canon drives the running app beside you and puts the options on a board for you to pick
 
 ## The board runs while you are away
 
-Agent work stalls whenever you step out. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide.
-
-## Design decided by looking
-
-A description of a layout settles nothing. Canon drives the running app beside you and puts the options on a board for you to pick.
+Step out and the work keeps going. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide.
 
 ## Audits that report where the code is rotting
 
-Generated code grows long files nobody reads. Canon measures file, function, and comment length, and charts what shipped each week.
-
-## Setting up a project
-
-Every repository grows its own agent setup and lets it drift. The project starts with its stack's own tool, such as `bun init` or `npm create vite`, or with `/canon:target-scaffold` in an empty folder, and canon layers on top.
-
-1. `/canon:target-setup` detects the stack, shows the whole chain, and writes nothing until you say yes. Then it runs `canon init`, checks what landed, and indexes the docs.
-2. `/canon:target-check` reports, domain by domain, what the project holds against what canon now ships, and repairs nothing.
-3. `/canon:target-update` upgrades the CLI and plugin after a release, previews the changelog and any migrations, and catches the project up on your go-ahead.
-
-Three kinds of file land in your repo:
-
-- Skills load live from the plugin, so there is no copy to drift
-- Rules are files under `.claude/rules/` that load when you edit a matching path
-- Configs and seeds are real files you own, laid down by `canon init` and kept current by `canon sync`
+Find the long files and functions generated code piles up. canon measures file, function, and comment length, and charts what shipped each week.
 
 ## For your agent
 

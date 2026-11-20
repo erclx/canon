@@ -105,3 +105,52 @@ export const records: readonly RecordSheet[] = [
     html: handoff,
   },
 ]
+
+/** A sheet as a page in the records fan: where it lives, and its rendered view. */
+export interface RecordPage {
+  readonly path: string
+  readonly body: string
+}
+
+const text = (html: string) =>
+  html
+    .replace(/<[^>]+>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+/** The markup inside the element opening at `start`, closed at its own depth. */
+function inner(html: string, start: number): string {
+  const open = html.indexOf('>', start) + 1
+  const tag = /<(\/?)div\b/g
+  tag.lastIndex = open
+  let depth = 1
+  for (let match = tag.exec(html); match; match = tag.exec(html)) {
+    depth += match[1] ? -1 : 1
+    if (depth === 0) return html.slice(open, match.index)
+  }
+  return ''
+}
+
+/**
+ * Reads a sheet's first file as a page: its path from the editor's crumb, or
+ * the browser's address, and its rendered view. A checkbox becomes a mark
+ * naming its state, since a page in the fan is read rather than edited.
+ */
+export function renderedPage(html: string): RecordPage {
+  const crumb = /<div class="crumb">([\s\S]*?)<\/div>/.exec(html)
+  const url = /<div class="url">([\s\S]*?)<\/div>/.exec(html)
+  const path = crumb
+    ? text(crumb[1] ?? '').replace(/\s*›\s*/g, '/')
+    : text(url?.[1] ?? '')
+  const at = html.indexOf('<div class="ren">')
+  const body = (at < 0 ? '' : inner(html, at))
+    .trim()
+    .replace(
+      /<input type="checkbox" class="cbx" data-ck="\d+"( checked)? \/>/g,
+      (_, checked: string | undefined) =>
+        checked
+          ? '<span class="box x" role="img" aria-label="done"></span>'
+          : '<span class="box" role="img" aria-label="not done"></span>',
+    )
+  return { path, body }
+}

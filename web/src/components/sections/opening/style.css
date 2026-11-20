@@ -1,565 +1,286 @@
-#top {
-  padding-top: 88px;
-  padding-bottom: 80px;
+#top .kick {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 24px;
+  font-family: var(--mono);
+  font-size: var(--size-small);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--muted);
 }
 
-#top .hero {
-  text-align: center;
+/* The mark's pip ahead of the kicker, the one accent the opening's still frame carries. */
+#top .kick::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-marker);
+  background: var(--pip);
 }
 
 #top h1 {
-  max-width: 1060px;
-  margin: 0 auto;
+  margin: 0;
+  max-width: 18ch;
   font-size: var(--type-hero-size);
-  line-height: 1.08;
-  letter-spacing: -0.045em;
+  line-height: var(--type-hero-lh);
+  letter-spacing: -0.04em;
   font-weight: 600;
   color: var(--ink);
 }
 
-#top .ico {
-  position: relative;
-  top: -0.06em;
-  display: inline-grid;
-  place-items: center;
-  width: 78px;
-  height: 78px;
-  margin: 0 6px;
-  border-radius: 20px;
-  vertical-align: middle;
-  box-shadow: var(--shadow-window);
-}
-
-#top .ico svg {
-  width: 40px;
-  height: 40px;
-}
-
-#top .ico.doc {
-  background: var(--win);
+#top .ic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.9em;
+  height: 0.9em;
+  vertical-align: -0.08em;
+  border: 1.5px dashed var(--outline);
+  border-radius: var(--radius-action);
+  background: var(--ground);
   color: var(--ink);
 }
 
-#top .ico.doc .fill {
-  fill: var(--accent);
+#top .ic svg {
+  width: 0.55em;
+  height: 0.55em;
 }
 
-#top .ico.mg {
-  background: var(--accent);
-  color: var(--color-light-window);
+#top .ic.m {
+  border-style: solid;
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ground);
 }
 
-#top .hero p {
-  max-width: 52ch;
-  margin: 32px auto 0;
-  font-size: var(--type-lede-size);
-  line-height: var(--type-lede-lh);
+/* The orchestrator spans the four role cards, and the line beside it sits over the merge. */
+#top .orch {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 28px;
+  align-items: end;
+  margin-top: 72px;
+}
+
+#top .ob {
+  grid-column: 1 / 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 14px;
+  padding: 14px 18px;
+}
+
+#top .ob b {
+  font-size: var(--type-label-size);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+#top .ob .m2 {
+  font-family: var(--mono);
+  font-size: var(--size-view-small);
   color: var(--muted);
 }
 
-#top .tray {
-  max-width: var(--page-w);
-  margin: 88px auto 0;
-  padding: 44px 40px;
-}
-
-#top .term {
-  max-width: 1040px;
-  margin: 0 auto;
-}
-
-#top .win-bar {
-  height: 44px;
-}
-
-#top .win-bar i {
-  top: 16px;
-}
-
-#top .win-bar i:nth-child(1) {
-  left: 16px;
-}
-
-#top .win-bar i:nth-child(2) {
-  left: 36px;
-}
-
-#top .win-bar i:nth-child(3) {
-  left: 56px;
-}
-
-#top .av {
-  position: relative;
-  padding: 22px 28px 0;
-}
-
-#top .cnts {
-  color: var(--muted);
-}
-
-#top .cnts b {
+#top .you {
+  margin: 0;
+  padding-bottom: 16px;
+  font-family: var(--mono);
+  font-size: var(--size-view-small);
   font-weight: 500;
   color: var(--ink);
 }
 
-#top .lst {
+#top .you::before {
+  content: '←  ' / '';
+}
+
+#top .relay {
   position: relative;
-  height: 404px;
-  margin-top: 14px;
-  overflow: hidden;
-}
-
-#top .lst .g,
-#top .lst .r {
-  position: absolute;
-  left: 0;
-  right: 0;
-  transition:
-    top var(--duration-move) var(--ease-standard) 300ms,
-    opacity var(--duration-fade) var(--ease-standard);
-}
-
-#top .lst .g {
-  font-family: var(--sans);
-  font-size: var(--size-small);
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: var(--ink);
-}
-
-#top .lst .r {
-  isolation: isolate;
   display: grid;
-  grid-template-columns: 22px 360px minmax(0, 1fr) 46px;
-  column-gap: 18px;
-  align-items: center;
-  height: 30px;
-  white-space: nowrap;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 28px;
+  margin: 32px 0 0;
+  padding: 0;
+  list-style: none;
 }
 
-#top .lst .r > span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-#top .lst .r.enter,
-#top .lst .r.arriving {
+#top .st {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  padding: 16px 16px 18px;
   transition:
-    top 0s,
-    opacity var(--duration-fade) var(--ease-standard) 750ms;
+    transform var(--duration-fade) var(--ease-standard),
+    box-shadow var(--duration-fade) var(--ease-standard);
 }
 
-#top .lst .r.enter,
-#top .lst .r.leave {
-  opacity: 0;
-}
-
-#top .lst .r::before {
+/* The dashed line from the orchestrator down to each card it starts. */
+#top .st:not(.done)::after {
   content: '';
   position: absolute;
-  inset: 1px -10px;
-  z-index: -1;
-  border-radius: var(--radius-action);
-  background: var(--hover);
-  opacity: 0;
-  transition: opacity var(--duration-feedback) var(--ease-standard);
-  pointer-events: none;
+  left: 50%;
+  top: -34px;
+  height: 32px;
+  border-left: 1.5px dashed var(--outline);
 }
 
-#top .lst .r.hot::before {
-  opacity: 1;
-}
-
-#top .lst .r.hot .n {
-  color: var(--ink);
-}
-
-#top .lst .r.hot .d,
-#top .lst .r.hot .t {
-  color: var(--body);
-}
-
-#top .lst .s {
-  display: inline-block;
-  width: 16px;
-  text-align: center;
-  color: var(--accent);
-}
-
-#top .lst .s.sp::after {
-  content: '✻';
-  animation: av-glyph 1.2s steps(1) infinite;
-}
-
-#top .lst .s.wt {
-  color: var(--color-waiting);
-  animation: av-pulse 1.4s ease-in-out infinite;
-}
-
-#top .lst .s.dn {
-  color: var(--color-success);
-}
-
-#top .lst .s.old {
-  color: var(--muted);
-}
-
-#top .lst .n {
-  font-weight: 500;
-  color: var(--body);
-}
-
-#top .lst .r.pin .n {
-  color: var(--ink);
-}
-
-#top .lst .d,
-#top .lst .t {
-  color: var(--muted);
-}
-
-#top .lst .t {
-  text-align: right;
-}
-
-#top .lst .r.flash .d {
-  animation: av-flash 0.9s ease;
-}
-
-#top .lst .under {
-  filter: opacity(0);
-}
-
-@keyframes av-glyph {
-  0% {
-    content: '·';
-  }
-  16.6% {
-    content: '✢';
-  }
-  33.3% {
-    content: '✳';
-  }
-  50% {
-    content: '✶';
-  }
-  66.6% {
-    content: '✻';
-  }
-  83.3% {
-    content: '✽';
-  }
-}
-
-@keyframes av-pulse {
-  50% {
-    opacity: 0.35;
-  }
-}
-
-@keyframes av-flash {
-  0% {
-    opacity: 0.2;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-#top .prompt {
-  position: relative;
-  margin: 0 -28px;
-  padding: 18px 28px 20px;
-  border-top: 1px solid var(--line);
-  color: var(--muted);
-}
-
-#top .ask-line {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  cursor: text;
-}
-
-#top .ask-line .p {
-  flex: none;
-  color: var(--ink);
-}
-
-#top .ask-line:focus-within .p {
-  color: var(--accent);
-}
-
-/* The input draws no outline of its own, since the block caret stands in for the text caret, so its field carries the ring. */
-#top .fld:has(input:focus-visible) {
-  outline: 2px solid var(--ink);
-  outline-offset: 4px;
-  border-radius: var(--radius-action);
-}
-
-/* A click matches :focus-visible on a text input, so the script flags a pointer press and the ring waits for the keyboard. */
-#top .fld[data-pointer]:has(input:focus-visible) {
-  outline: none;
-}
-
-#top .fld {
-  position: relative;
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-}
-
-#top .fld input {
-  flex: 1;
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  font: inherit;
-  color: var(--ink);
-  caret-color: transparent;
-}
-
-#top .fld input::placeholder {
-  color: transparent;
-}
-
-#top .fld .c {
+#top .st + .st::before {
+  content: '→' / '';
   position: absolute;
-  left: 0;
+  left: -24px;
   top: 50%;
-  width: 9px;
-  height: 17px;
-  margin-top: -9px;
-  background: var(--color-light-window);
-  mix-blend-mode: difference;
-  pointer-events: none;
-}
-
-#top .fld .mz {
-  position: absolute;
-  visibility: hidden;
-  white-space: pre;
-}
-
-#top .fld .ph {
-  position: absolute;
-  inset: 0 auto 0 0;
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-  color: var(--muted);
-  pointer-events: none;
-}
-
-#top .fld input:not(:placeholder-shown) ~ .ph {
-  display: none;
-}
-
-#top .fld input:not(:placeholder-shown):not(:focus) ~ .c {
-  display: none;
-}
-
-/* Shell mode takes the accent on the mark, the hint, and the rule. */
-#top .prompt.shell {
-  border-top-color: var(--accent);
-}
-
-#top .prompt.shell .p,
-#top .prompt.shell .ph {
-  color: var(--accent);
-}
-
-/* The menu opens upward over the list, so the window never grows. */
-#top .menu {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: calc(100% + 11px);
-  z-index: 5;
-  max-height: 172px;
-  padding: 4px 28px 0;
-  overflow: hidden;
-  background: var(--win);
-}
-
-#top .menu[hidden] {
-  display: none;
-}
-
-#top .menu .mi {
-  display: grid;
-  grid-template-columns: 22px 360px minmax(0, 1fr);
-  column-gap: 18px;
-  align-items: center;
-  height: 28px;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-#top .menu .mk {
-  color: transparent;
-}
-
-#top .menu .mn,
-#top .menu .md {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--muted);
-}
-
-#top .menu .mi.on .mk,
-#top .menu .mi.on .mn {
-  color: var(--accent);
-}
-
-#top .menu .mi.on .md {
+  transform: translateY(-50%);
+  font-size: 18px;
+  line-height: 1;
   color: var(--ink);
 }
 
-#top .menu .none {
-  height: 28px;
-  padding-left: 40px;
-  line-height: 28px;
+#top .role {
+  margin: 8px 0 2px;
+  font-size: var(--type-label-size);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+#top .sess {
+  font-family: var(--mono);
+  font-size: var(--size-view-small);
+  line-height: 1.4;
   color: var(--muted);
 }
 
-@media (max-width: 1240px) {
-  #top .tray {
-    margin-left: 0;
-    margin-right: 0;
-  }
+#top .line {
+  flex: 1;
+  margin-top: 14px;
+  font-size: var(--size-small);
+  line-height: 1.45;
+  color: var(--body);
+}
+
+#top .hand {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1.5px dashed var(--outline);
+  font-family: var(--mono);
+  font-size: var(--size-view-small);
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+/* The merge is the reader's, so its card inverts to ink. */
+#top .st.done {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+#top .st.done .note,
+#top .st.done .sess,
+#top .st.done .line {
+  color: color-mix(in srgb, var(--ground) 80%, var(--ink));
+}
+
+#top .st.done .role,
+#top .st.done .hand {
+  color: var(--ground);
+}
+
+#top .st.done .hand {
+  border-color: var(--ground);
+}
+
+/* The card holding the change lifts, and its handoff takes the accent as the live state. */
+#top .relay.run .st.act {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-offset-raised);
+}
+
+#top .relay.run .st.act .hand {
+  color: var(--accent);
+}
+
+#top .relay.run .st.done.act .hand {
+  color: var(--ground);
+}
+
+#top .foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+#top .strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--size-view-small);
+  color: var(--muted);
+}
+
+#top .strip b {
+  color: var(--ink);
+}
+
+#top .strip b.wt {
+  color: var(--color-waiting);
+}
+
+#top .strip b.ac {
+  color: var(--accent);
 }
 
 @media (max-width: 900px) {
-  #top {
-    padding-top: 64px;
-  }
-
-  #top h1 {
-    max-width: 640px;
-  }
-
-  #top .ico {
-    width: 56px;
-    height: 56px;
-    border-radius: 15px;
-  }
-
-  #top .ico svg {
-    width: 28px;
-    height: 28px;
-  }
-
-  #top .hero p {
-    margin-top: 24px;
-  }
-
-  #top .tray {
+  #top .orch {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
     margin-top: 56px;
-    padding: 24px 18px;
   }
 
-  #top .lst .r {
-    grid-template-columns: 22px 250px minmax(0, 1fr) 40px;
-    column-gap: 14px;
+  #top .ob {
+    grid-column: auto;
   }
 
-  #top .menu .mi {
-    grid-template-columns: 22px 250px minmax(0, 1fr);
-    column-gap: 14px;
+  #top .you {
+    order: -1;
+    padding: 0;
+  }
+
+  #top .you::before {
+    content: '↓  ' / '';
+  }
+
+  #top .relay {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  #top .st {
+    min-height: 0;
+  }
+
+  #top .st + .st::before,
+  #top .st:not(.done)::after {
+    display: none;
   }
 }
 
 @media (max-width: 640px) {
-  #top {
-    padding-top: 40px;
-    padding-left: 8px;
-    padding-right: 8px;
+  #top .orch {
+    margin-top: 40px;
   }
 
-  #top .hero {
-    padding: 0 8px;
-  }
-
-  #top h1 {
-    line-height: 1.12;
-    letter-spacing: -0.035em;
-  }
-
-  #top .ico {
-    width: 40px;
-    height: 40px;
-    margin: 0 2px;
-    border-radius: 11px;
-  }
-
-  #top .ico svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  #top .hero p {
-    margin-top: 18px;
-  }
-
-  #top .tray {
-    margin-top: 36px;
-    padding: 12px 8px;
-  }
-
-  #top .av {
-    padding: 16px 16px 0;
-  }
-
-  #top .prompt {
-    margin: 0 -16px;
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  #top .cnts {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-
-  #top .lst .r {
-    grid-template-columns: 18px minmax(0, 1fr) 34px;
-    column-gap: 10px;
-  }
-
-  #top .lst .d {
-    display: none;
-  }
-
-  #top .menu {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  #top .menu .mi {
-    grid-template-columns: 18px minmax(0, 1fr);
-    column-gap: 10px;
-  }
-
-  #top .menu .md {
-    display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  #top .lst .s.sp::after {
-    content: '✻';
-  }
-}
-
-/* The opening sets its own tray padding, which outranks the layered rule in global.css, so it reserves the pause button's strip itself. */
-@media (max-width: 900px) and (prefers-reduced-motion: no-preference) {
-  #top .tray {
-    padding-top: 44px;
+  #top .relay {
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 24px;
   }
 }

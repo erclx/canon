@@ -36,17 +36,14 @@ const FILTER = 'home/1280--dark'
  */
 const SECTIONS = [
   'top',
-  'roles',
+  'worktrees',
   'records',
   'craft',
   'guardrails',
-  'worktrees',
-  'film',
+  'evidence',
   'board',
-  'drive',
   'health',
-  'setup',
-  'try',
+  'install',
 ] as const
 
 interface Size {

@@ -105,7 +105,7 @@ describe('buildDesignCss', () => {
     expect(css).toContain(
       '--type-code-family: Geist Mono Variable, DejaVu Sans Mono, monospace;',
     )
-    expect(css).toContain('--size-hero: 5.625rem;')
+    expect(css).toContain('--size-hero: 4.5rem;')
     expect(css).toContain('--size-view-small: 0.75rem;')
     expect(css).toContain('--radius-marker: 2px;')
   })

@@ -117,7 +117,7 @@ export const REVIEWED = '2026-11-18'
 
 export const TOKENS: DesignTokens = {
   personality:
-    'Warm neutral grounds with ink text, set in Geist, and Geist Mono where a surface shows a path, a command, or what a shell printed. Product windows sit on a soft tray. The vermilion pip of the mark is the one accent, marking a status the surface would color.',
+    'A drawn system: a warm neutral ground ruled in a 32px grid, ink text in Geist, and Geist Mono for a path, a command, or shell output. Cards take an ink outline and a hard offset shadow. The vermilion pip of the mark is the one accent, marking a status.',
 
   colorRules: [
     "One accent, the mark's pip. Never promote a second color into a structural role.",
@@ -133,7 +133,7 @@ export const TOKENS: DesignTokens = {
     },
     {
       role: 'surface',
-      intent: 'the tray a product window sits in, and cards',
+      intent: 'a drawn card, a stamp, or a control',
       value: '#292927',
     },
     {
@@ -152,9 +152,24 @@ export const TOKENS: DesignTokens = {
       value: '#3d3d39',
     },
     {
+      role: 'grid',
+      intent: 'the lines the page ground rules every 32px',
+      value: '#31312e',
+    },
+    {
+      role: 'rule',
+      intent: 'the soft seam between sections, and under a scrolled nav',
+      value: '#3d3d39',
+    },
+    {
       role: 'border',
-      intent: 'every rule and divider',
+      intent: 'every rule and divider inside a card',
       value: '#474742',
+    },
+    {
+      role: 'outline',
+      intent: 'the drawn border around a card, a control, or a stamp',
+      value: '#8d8c86',
     },
     {
       role: 'edge',
@@ -205,8 +220,8 @@ export const TOKENS: DesignTokens = {
     },
     {
       role: 'light-surface',
-      intent: 'the tray and cards on a light ground',
-      value: '#f2f2f0',
+      intent: 'a drawn card, a stamp, or a control, on light',
+      value: '#ffffff',
     },
     {
       role: 'light-window',
@@ -224,9 +239,25 @@ export const TOKENS: DesignTokens = {
       value: '#f0f0ee',
     },
     {
-      role: 'light-border',
-      intent: 'rules and dividers on light',
+      role: 'light-grid',
+      intent: 'the lines the page ground rules every 32px, on light',
       value: '#ececea',
+    },
+    {
+      role: 'light-rule',
+      intent:
+        'the soft seam between sections, and under a scrolled nav, on light',
+      value: '#d6d6d2',
+    },
+    {
+      role: 'light-border',
+      intent: 'rules and dividers inside a card, on light',
+      value: '#ececea',
+    },
+    {
+      role: 'light-outline',
+      intent: 'the drawn border around a card, a control, or a stamp, on light',
+      value: '#121212',
     },
     {
       role: 'light-edge',
@@ -273,14 +304,15 @@ export const TOKENS: DesignTokens = {
   typographyRules: [
     'Geist for every role except `code` and `view`, which take Geist Mono.',
     'Tracking: `hero` at `-0.04em`, `display` at `-0.03em`, nothing else.',
-    'Seven steps, five on a 4:3 ratio from body 16 and two inside product windows. A role takes one step.',
+    'Eight steps: five on a 4:3 ratio from body 16, `label` for links and card titles, two in product windows. A role takes one.',
   ],
 
   typeScale: [
-    { step: 'hero', size: '5.625rem', tablet: '4rem', phone: '2.5rem' },
+    { step: 'hero', size: '4.5rem', tablet: '3.375rem', phone: '2.5rem' },
     { step: 'display', size: '3.125rem', tablet: '2.5rem', phone: '2rem' },
     { step: 'lede', size: '1.3125rem', tablet: '1.125rem', phone: '1.0625rem' },
     { step: 'body', size: '1rem', phone: '0.9375rem' },
+    { step: 'label', size: '0.875rem' },
     { step: 'small', size: '0.8125rem', phone: '0.78125rem' },
     { step: 'view', size: '0.8125rem', phone: '0.75rem' },
     { step: 'view-small', size: '0.75rem', tablet: '0.6875rem' },
@@ -291,7 +323,7 @@ export const TOKENS: DesignTokens = {
       role: 'hero',
       family: SANS,
       weight: '600',
-      size: '5.625rem',
+      size: '4.5rem',
       lineHeight: '1',
       step: 'hero',
     },
@@ -326,6 +358,14 @@ export const TOKENS: DesignTokens = {
       size: '1rem',
       lineHeight: '1.55',
       step: 'body',
+    },
+    {
+      role: 'label',
+      family: SANS,
+      weight: '600',
+      size: '0.875rem',
+      lineHeight: '1.3',
+      step: 'label',
     },
     {
       role: 'small',
@@ -377,19 +417,17 @@ export const TOKENS: DesignTokens = {
   ],
 
   bordersRules: [
-    'Every border is one pixel solid, in `border` for a rule and `edge` around a control. Radius and width are independent.',
-    'The tray steps down to 28px under 900 and 22px under 640.',
+    'A drawn surface takes a 1.5px `outline` border and an offset shadow. Inside one, a rule is 1px `border`. A section seam is 1px `rule`.',
+    'Radius and width are independent.',
     'No pill. A one-line picker takes `action` at 28px high.',
   ],
 
   borders: [
     {
-      role: 'tray',
-      radius: '36px',
-      width: 'none',
-      when: 'the soft tray a product window sits in',
-      tablet: '28px',
-      phone: '22px',
+      role: 'card',
+      radius: '10px',
+      width: '1.5px',
+      when: 'a drawn card, a stamp, or the terminal',
     },
     {
       role: 'frame',
@@ -419,7 +457,7 @@ export const TOKENS: DesignTokens = {
       role: 'rule',
       radius: 'none',
       width: '1px',
-      when: 'horizontal dividers between bands',
+      when: 'the soft seam between sections',
     },
     {
       role: 'marker',
@@ -437,10 +475,25 @@ export const TOKENS: DesignTokens = {
 
   shadows: [
     {
+      role: 'offset',
+      value: '5px 5px 0 #0b0b0a',
+      when: 'a drawn card, dropped down and right',
+    },
+    {
+      role: 'offset-small',
+      value: '3px 3px 0 #0b0b0a',
+      when: 'a drawn control or a small card',
+    },
+    {
+      role: 'offset-raised',
+      value: '8px 8px 0 #0b0b0a',
+      when: 'the card brought to the front of a stack',
+    },
+    {
       role: 'window',
       value:
         '0 0 0 1px rgba(255, 255, 255, 0.06), 0 24px 60px -28px rgba(0, 0, 0, 0.6)',
-      when: 'a product window on its tray',
+      when: 'a Claude Code window set on the page',
     },
     {
       role: 'popover',
@@ -454,10 +507,25 @@ export const TOKENS: DesignTokens = {
       when: 'a hairline around a picked row',
     },
     {
+      role: 'light-offset',
+      value: '5px 5px 0 #121212',
+      when: 'a drawn card, on light',
+    },
+    {
+      role: 'light-offset-small',
+      value: '3px 3px 0 #121212',
+      when: 'a drawn control or a small card, on light',
+    },
+    {
+      role: 'light-offset-raised',
+      value: '8px 8px 0 #121212',
+      when: 'the card brought to the front of a stack, on light',
+    },
+    {
       role: 'light-window',
       value:
         '0 0 0 1px rgba(0, 0, 0, 0.07), 0 24px 60px -28px rgba(0, 0, 0, 0.3)',
-      when: 'a product window on its tray, on light',
+      when: 'a Claude Code window set on the page, on light',
     },
     {
       role: 'light-popover',

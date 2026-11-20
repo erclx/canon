@@ -2,10 +2,10 @@
 @import './tokens.css';
 
 /*
- * The page is built to the drive 215 mocks, the `landing-v2` board, on the
- * design system `src/design/tokens.ts` generates into `tokens.css`. Every
- * size, color, corner, shadow, and duration reads a token. Layout spacing
- * reads the mocks' pixels, since the system sets no spacing ladder.
+ * The page is built to the picked arms on the `landing-v6` board, in the drawn
+ * system `src/design/tokens.ts` generates into `tokens.css`. Every size,
+ * color, corner, shadow, and duration reads a token. Layout spacing reads the
+ * arms' pixels, since the system sets no spacing ladder.
  *
  * Tailwind v4 generates its utility classes inside `@layer utilities`, and an
  * unlayered rule always wins over a layered one regardless of specificity, so
@@ -17,7 +17,6 @@
   /* Role names over tokens, in the mocks' vocabulary. */
   :root {
     --ground: var(--color-background);
-    --tray: var(--color-surface);
     --win: var(--color-window);
     --winbar: var(--color-chrome);
     --band: var(--color-band);
@@ -27,14 +26,15 @@
     --body: var(--color-text-body);
     --muted: var(--color-muted);
     --accent: var(--color-accent);
+    --grid: var(--color-grid);
+    --rule: var(--color-rule);
+    --outline: var(--color-outline);
+    --card: var(--color-surface);
     --hover: color-mix(in srgb, var(--ink) 5%, transparent);
-    /* What a hollow marker punches through to, which a band turns to its grey. */
-    --behind: var(--ground);
     --mono: var(--type-code-family);
     --sans: var(--type-body-family);
-    --nav-h: 88px;
+    --nav-h: 76px;
     --page-w: 1180px;
-    --gutter: 32px;
     color-scheme: dark;
   }
 
@@ -51,9 +51,25 @@
     scroll-padding-top: var(--nav-h);
   }
 
+  /*
+   * The ground: the canvas ruled in a 32px grid, fixed to the viewport so its
+   * lines run unbroken behind the nav and footer, which paint the same ground.
+   * A color change goes through `background-color`, since the shorthand resets
+   * the tile and the attachment.
+   */
+  body,
+  .site-nav,
+  .site-footer {
+    background-color: var(--ground);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 32px 32px;
+    background-attachment: fixed;
+  }
+
   body {
     margin: 0;
-    background: var(--ground);
     color: var(--body);
     font-family: var(--sans);
     font-size: var(--size-body);
@@ -104,127 +120,103 @@
     white-space: nowrap;
   }
 
-  /* A section: one column at the page width, its heading and lede, then its object. */
-  .sec {
-    max-width: calc(var(--page-w) + var(--gutter) * 2);
-    margin: 0 auto;
-    padding: 120px var(--gutter) 128px;
+  /*
+   * A part of the drawn page: full width, so the soft rule between two parts
+   * runs edge to edge, with its content held to the page width inside `.w`.
+   */
+  .part {
+    padding: 112px 64px;
+    overflow-x: clip;
   }
 
-  .sec-head h2 {
+  /* `~` rather than `+`, since each section's hoisted script sits between it and the next. */
+  main > section ~ section {
+    border-top: 1px solid var(--rule);
+  }
+
+  .part .w {
+    max-width: var(--page-w);
+    margin: 0 auto;
+  }
+
+  .part h2 {
     margin: 0;
+    max-width: 16ch;
     font-size: var(--type-display-size);
     line-height: var(--type-display-lh);
     letter-spacing: -0.03em;
     font-weight: 600;
     color: var(--ink);
+    text-wrap: balance;
   }
 
-  .sec-head p {
-    margin: 18px 0 0;
-    max-width: 60ch;
+  .part .lede {
+    margin: 24px 0 0;
+    max-width: 44ch;
     font-size: var(--type-lede-size);
     line-height: var(--type-lede-lh);
     color: var(--muted);
     text-wrap: pretty;
   }
 
-  .sec code {
+  .part code {
     font-family: var(--mono);
     font-size: 0.9em;
     color: var(--ink);
   }
 
-  /* The grey tray every section's object sits on. */
-  .tray {
-    position: relative;
-    background: var(--tray);
-    border-radius: var(--radius-tray);
-    padding: 40px;
+  /* A drawn card: the outline in ink and a hard shadow dropped down and right. */
+  .ink {
+    background: var(--card);
+    border: 1.5px solid var(--outline);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-offset);
   }
 
-  /*
-   * A split sets the heading beside the tray in five twelfths of the width,
-   * on the left or the right, and stacks text first below 900. A section's own
-   * sheet clears its tray's top margin while split.
-   */
-  @media (min-width: 901px) {
-    .sec.split-left,
-    .sec.split-right {
-      display: grid;
-      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-      column-gap: 56px;
-      align-items: center;
-    }
-
-    .sec.split-right {
-      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    }
-
-    .sec.split-right > .sec-head {
-      order: 2;
-    }
-  }
-
-  /*
-   * A band fills the section edge to edge in the tray grey, and its tray turns
-   * to the page ground so the window keeps two steps of contrast. The shadow
-   * carries the fill past the page width, and the clip keeps it off the
-   * sections above and below.
-   */
-  .sec.banded {
-    --behind: var(--tray);
-    background: var(--tray);
-    box-shadow: 0 0 0 100vmax var(--tray);
-    clip-path: inset(0 -100vmax);
-  }
-
-  .sec.banded .tray {
-    background: var(--ground);
-  }
-
-  /* The pause button at the tray's top right, outside every window, drawn in ink. */
-  .pz {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    z-index: 2;
-    display: grid;
-    place-items: center;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    border: 0;
-    border-radius: var(--radius-action);
-    background: transparent;
+  /* A mono label: a path, a step, a session name. */
+  .note {
+    font-family: var(--mono);
+    font-size: var(--size-view-small);
+    font-weight: 500;
+    line-height: 1.35;
     color: var(--muted);
+  }
+
+  /* A drawn control: ink outline, the small offset, pressed flat. */
+  .drawn {
+    all: unset;
+    box-sizing: border-box;
     cursor: pointer;
-  }
-
-  .pz:hover {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1.5px solid var(--outline);
+    border-radius: var(--radius-action);
+    background: var(--card);
+    box-shadow: var(--shadow-offset-small);
+    font-family: var(--mono);
+    font-size: var(--size-view-small);
+    font-weight: 500;
+    line-height: 1;
     color: var(--ink);
-    background: var(--hover);
+    transition:
+      transform var(--duration-feedback) var(--ease-standard),
+      box-shadow var(--duration-feedback) var(--ease-standard);
   }
 
-  .pz[data-paused='true'] {
-    color: var(--ink);
+  .drawn:active {
+    transform: translate(3px, 3px);
+    box-shadow: none;
   }
 
-  .pz[data-paused='true'] .pz-off,
-  .pz[data-paused='false'] .pz-on {
+  .drawn:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  .drawn[hidden] {
     display: none;
-  }
-
-  /* Below 900 the tray's inset is narrower than the button, so a looping tray reserves its top edge for it. */
-  @media (max-width: 900px) and (prefers-reduced-motion: no-preference) {
-    .tray:has(> .pz) {
-      padding-top: 44px;
-    }
-
-    .pz {
-      top: 10px;
-      right: 10px;
-    }
   }
 
   /* A Claude Code window: a chrome bar with three dots and a centered title, over a monospace view. */
@@ -278,127 +270,6 @@
     left: 54px;
   }
 
-  /* A typed request in a window, on its band. */
-  .win .ask {
-    display: flex;
-    gap: 10px;
-    background: var(--band);
-    color: var(--ink);
-  }
-
-  .win .ask .g {
-    flex: none;
-    color: var(--muted);
-    user-select: none;
-  }
-
-  .win .cur {
-    display: inline-block;
-    width: 8px;
-    height: 17px;
-    background: var(--ink);
-    vertical-align: -4px;
-  }
-
-  /* A one-line picker: the control step's 8px corners at 28px high, the picked one filled in ink. */
-  .pick {
-    all: unset;
-    box-sizing: border-box;
-    cursor: pointer;
-    padding: 5px 14px;
-    border-radius: var(--radius-action);
-    box-shadow: inset 0 0 0 1px var(--line);
-    font-family: var(--sans);
-    font-size: var(--size-small);
-    font-weight: 500;
-    line-height: 18px;
-    color: var(--body);
-    white-space: nowrap;
-    transition:
-      background-color var(--duration-feedback) var(--ease-standard),
-      color var(--duration-feedback) var(--ease-standard);
-  }
-
-  .pick[aria-pressed='true'] {
-    background: var(--ink);
-    color: var(--ground);
-    box-shadow: none;
-  }
-
-  .pick:focus-visible {
-    outline: 2px solid var(--ink);
-    outline-offset: 2px;
-  }
-
-  @media (hover: hover) {
-    .pick:hover {
-      background: var(--tray);
-      color: var(--ink);
-    }
-
-    .pick[aria-pressed='true']:hover {
-      background: var(--ink);
-      color: var(--ground);
-    }
-  }
-
-  .picks {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  /*
-   * A pickable row: a button whose hit area covers the row, and a lit state
-   * painted on the row behind it. Hover shows only where a pointer hovers.
-   */
-  .lit-row {
-    position: relative;
-    z-index: 0;
-  }
-
-  .lit-row::before {
-    content: '';
-    position: absolute;
-    inset: var(--lit-inset, 0 -16px);
-    z-index: -1;
-    border-radius: var(--radius-panel);
-    background: var(--tray);
-    opacity: 0;
-    transition: opacity var(--duration-fade) var(--ease-standard);
-  }
-
-  .lit-row.lit::before {
-    opacity: 1;
-  }
-
-  .lit-row .go {
-    all: unset;
-    cursor: pointer;
-  }
-
-  .lit-row .go::after {
-    content: '';
-    position: absolute;
-    inset: var(--lit-inset, 0 -16px);
-    border-radius: var(--radius-panel);
-  }
-
-  .lit-row:has(.go:focus-visible)::before {
-    opacity: 1;
-    outline: 2px solid var(--ink);
-  }
-
-  @media (hover: hover) {
-    .lit-row:hover::before {
-      opacity: 0.6;
-    }
-
-    .lit-row.lit:hover::before {
-      opacity: 1;
-    }
-  }
-
   @media (max-width: 1240px) {
     :root {
       --page-w: 100%;
@@ -406,41 +277,18 @@
   }
 
   @media (max-width: 900px) {
-    :root {
-      --gutter: 24px;
-    }
-
-    .sec {
-      padding-top: 88px;
-      padding-bottom: 96px;
-    }
-
-    .tray {
-      padding: 24px;
+    .part {
+      padding: 80px 32px;
     }
   }
 
   @media (max-width: 640px) {
     :root {
       --nav-h: 64px;
-      --gutter: 16px;
     }
 
-    .sec {
-      padding-top: 64px;
-      padding-bottom: 72px;
-    }
-
-    .tray {
-      padding: 12px;
-    }
-
-    .pick {
-      padding: 5px 12px;
-    }
-
-    .picks {
-      gap: 6px;
+    .part {
+      padding: 48px 20px;
     }
   }
 
@@ -451,11 +299,6 @@
       animation: none !important;
       transition: none !important;
       scroll-behavior: auto !important;
-    }
-
-    /* No window loops under reduced motion, so there is nothing to pause. */
-    .pz {
-      display: none;
     }
   }
 }

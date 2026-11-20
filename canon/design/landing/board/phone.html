@@ -1,255 +1,361 @@
 <!doctype html>
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>board-built-390</title>
-    <link rel="stylesheet" href="../../assets/landing-v5/built/head.css" />
-    <link
-      rel="stylesheet"
-      href="../../assets/landing-v5/built/_astro/index.C_lVWl_E.css"
-    />
+    <link rel="stylesheet" href="../../assets/landing-v6/lang/fonts.css" />
     <style>
-      body {
-        background: var(--ground);
+      * {
+        box-sizing: border-box;
       }
-      .site-nav {
-        display: none;
+      html,
+      body {
+        margin: 0;
+      }
+      body {
+        background: #fbfbfa;
+        color: #141413;
+        font-family: 'Geist Variable', Geist, sans-serif;
+        background-image:
+          linear-gradient(#ececea 1px, transparent 1px),
+          linear-gradient(90deg, #ececea 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+      .lab {
+        font:
+          500 12px/1.4 'Geist Variable',
+          Geist,
+          sans-serif;
+        padding: 8px 14px;
+        color: #55544f;
+        border-bottom: 1px solid #e0e0dd;
+        background: #fbfbfa;
+      }
+      .hero {
+        padding: 112px 64px 112px;
+      }
+      .w {
+        max-width: 1180px;
+        margin: 0 auto;
+      }
+      .kick {
+        font:
+          500 13px/1 'Geist Mono Variable',
+          monospace;
+        color: #c2380e;
+        margin-bottom: 24px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .kick:before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: #c2380e;
+        border-radius: 2px;
+      }
+      h1 {
+        margin: 0;
+        font-weight: 600;
+        letter-spacing: -0.045em;
+        line-height: 1;
+      }
+      .lede {
+        font-size: 20px;
+        line-height: 1.5;
+        color: #55544f;
+        margin: 24px 0 0;
+        max-width: 44ch;
+      }
+      .mono {
+        font-family: 'Geist Mono Variable', 'DejaVu Sans Mono', monospace;
+      }
+      .ink {
+        background: #fff;
+        border: 1.5px solid #141413;
+        border-radius: 10px;
+        box-shadow: 5px 5px 0 #141413;
+      }
+      .note {
+        font:
+          500 12px/1.35 'Geist Mono Variable',
+          monospace;
+        color: #55544f;
+      }
+      .acc {
+        color: #c2380e;
+      }
+      .wait {
+        color: #b07d1a;
+      }
+      .ic {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 0.9em;
+        height: 0.9em;
+        vertical-align: -0.08em;
+        border: 1.5px dashed #141413;
+        border-radius: 8px;
+        background: #fbfbfa;
+      }
+      .ic svg {
+        width: 0.55em;
+        height: 0.55em;
+      }
+      .ic.m {
+        border-style: solid;
+        background: #141413;
+        color: #fbfbfa;
+      }
+      @media (max-width: 900px) {
+        .hero {
+          padding: 80px 32px;
+        }
+      }
+      @media (max-width: 640px) {
+        .hero {
+          padding: 48px 20px;
+        }
+        .lede {
+          font-size: 17px;
+        }
+      }
+      h2.s {
+        margin: 0;
+        font-weight: 600;
+        font-size: 52px;
+        line-height: 1.04;
+        letter-spacing: -0.035em;
+        max-width: 16ch;
+      }
+      .sec {
+        padding: 112px 64px;
+      }
+      .m {
+        font-family: 'Geist Mono Variable', 'DejaVu Sans Mono', monospace;
+      }
+      .top {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 64px;
+        align-items: end;
+      }
+      .top .lede {
+        margin: 0;
+      }
+      .bd {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+      .ln {
+        background: #f0f0ee;
+        border-radius: 8px;
+        padding: 12px;
+        min-height: 120px;
+      }
+      .lh {
+        font-size: 12px;
+        color: #55544f;
+        margin-bottom: 10px;
+      }
+      .cd {
+        background: #fff;
+        border: 1.5px solid #141413;
+        border-radius: 6px;
+        padding: 9px 11px;
+        margin-bottom: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .cd b {
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .cd span {
+        font-size: 11.5px;
+        color: #6b6a66;
+      }
+      .cd.wt {
+        border-color: #b07d1a;
+        box-shadow: 3px 3px 0 #b07d1a;
+      }
+      .cd.wt span {
+        color: #b07d1a;
+      }
+      @media (max-width: 900px) {
+        .sec {
+          padding: 80px 32px;
+        }
+        h2.s {
+          font-size: 40px;
+        }
+        .top {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+      }
+      @media (max-width: 640px) {
+        .sec {
+          padding: 48px 20px;
+        }
+        h2.s {
+          font-size: 30px;
+        }
+        .bd {
+          grid-template-columns: 1fr;
+        }
+      }
+      .ba {
+        margin-top: 64px;
+        display: grid;
+        grid-template-columns: 1fr 80px 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      .stamp {
+        font-size: 13px;
+        color: #6b6a66;
+        margin-bottom: 12px;
+      }
+      .stamp.on {
+        color: #141413;
+        font-weight: 600;
+      }
+      .mid {
+        align-self: center;
+        text-align: center;
+        font-size: 12px;
+        color: #c2380e;
+      }
+      .dim {
+        opacity: 0.55;
+      }
+      .ba .bd {
+        gap: 8px;
+      }
+      .ba .ln {
+        padding: 9px;
+        min-height: 200px;
+      }
+      .ba .cd {
+        padding: 7px 9px;
+      }
+      .ba .cd b {
+        font-size: 12px;
+      }
+      .ba .cd span {
+        font-size: 11px;
+      }
+      @media (max-width: 1100px) {
+        .ba {
+          grid-template-columns: 1fr;
+        }
+        .mid {
+          text-align: left;
+        }
       }
     </style>
   </head>
   <body>
-    <script>
-      const mm = window.matchMedia.bind(window)
-      window.matchMedia = (q) =>
-        q.includes('prefers-reduced-motion')
-          ? {
-              matches: true,
-              media: q,
-              addEventListener() {},
-              removeEventListener() {},
-              addListener() {},
-              removeListener() {},
-            }
-          : mm(q)
-    </script>
-    <main>
-      <section class="sec split-left" id="board">
-        <div class="sec-head">
-          <h2>The board runs while you are away</h2>
-          <p>
+    <div class="lab">
+      arm-3 · Before and after · cost: two boards side by side, so each card is
+      small, and the move between them is told rather than shown · ref:
+      resend-com s07, two states side by side
+    </div>
+    <section class="sec">
+      <div class="w">
+        <div class="top">
+          <h2 class="s">The board runs while you are away</h2>
+          <p class="lede">
             Agent work stalls whenever you step out. The orchestrator works the
             ready rows from now or from a set time, and stops at what only you
             decide.
           </p>
         </div>
-        <div class="tray">
-          <button
-            type="button"
-            class="pz"
-            aria-label="Pause the animation"
-            data-pause="Pause the animation"
-            data-play="Play the animation"
-            data-paused="false"
-          >
-            <svg
-              viewBox="0 0 16 16"
-              width="14"
-              height="14"
-              class="pz-off"
-              aria-hidden="true"
-            >
-              <path
-                d="M5 3.5v9M11 3.5v9"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-              />
-            </svg>
-            <svg
-              viewBox="0 0 16 16"
-              width="14"
-              height="14"
-              class="pz-on"
-              aria-hidden="true"
-            >
-              <path d="M5.5 3.5l6.5 4.5-6.5 4.5z" fill="currentColor" />
-            </svg>
-          </button>
-          <div class="win bd">
-            <div class="bh">
-              <b>Board</b> <span class="since">· unattended since 23:00</span>
-              <span class="clock">02:14</span>
+        <div class="ba">
+          <div>
+            <div class="stamp m">23:00 · you step out</div>
+            <div class="bd dim">
+              <div class="ln">
+                <div class="lh m">Up next</div>
+                <div class="cd">
+                  <b class="m">gate-stages</b><span class="m">plan linked</span>
+                </div>
+                <div class="cd">
+                  <b class="m">film-beats</b><span class="m">needs a plan</span>
+                </div>
+                <div class="cd">
+                  <b class="m">take-timer</b><span class="m">plan linked</span>
+                </div>
+              </div>
+              <div class="ln">
+                <div class="lh m">In flight</div>
+                <div class="cd">
+                  <b class="m">sync-stamp</b
+                  ><span class="m">worker, slice 3 of 3</span>
+                </div>
+                <div class="cd">
+                  <b class="m">review-lift</b
+                  ><span class="m">worker, slice 2 of 2</span>
+                </div>
+                <div class="cd">
+                  <b class="m">sync-coverage</b
+                  ><span class="m">review, first pass</span>
+                </div>
+                <div class="cd">
+                  <b class="m">drive-check</b
+                  ><span class="m">review, second pass</span>
+                </div>
+              </div>
+              <div class="ln"><div class="lh m">Ready to merge</div></div>
             </div>
-            <div class="lanes">
-              <div class="lane">
-                <p class="ln">Up next</p>
-                <ul role="list" data-lane="0">
-                  <li class="row" data-name="gate-stages">
-                    <span class="nm">gate-stages</span>
-                    <span class="st">plan linked</span>
-                    <span class="wl sr-only">waits for you</span>
-                  </li>
-                  <li class="row" data-name="film-beats">
-                    <span class="nm">film-beats</span>
-                    <span class="st">needs a plan</span>
-                    <span class="wl sr-only">waits for you</span>
-                  </li>
-                </ul>
+          </div>
+          <div class="mid m">six moves →</div>
+          <div>
+            <div class="stamp m on">02:14 · what you come back to</div>
+            <div class="bd">
+              <div class="ln">
+                <div class="lh m">Up next</div>
+                <div class="cd">
+                  <b class="m">gate-stages</b><span class="m">plan linked</span>
+                </div>
+                <div class="cd">
+                  <b class="m">film-beats</b><span class="m">needs a plan</span>
+                </div>
               </div>
-              <div class="lane">
-                <p class="ln">In flight</p>
-                <ul role="list" data-lane="1">
-                  <li class="row" data-name="sync-stamp">
-                    <span class="nm">sync-stamp</span>
-                    <span class="st">review, second pass</span>
-                    <span class="wl sr-only">waits for you</span>
-                  </li>
-                  <li class="row wait" data-name="review-lift">
-                    <span class="nm">review-lift</span>
-                    <span class="st">one question for you</span>
-                    <span class="wl sr-only">waits for you</span>
-                  </li>
-                  <li class="row" data-name="take-timer">
-                    <span class="nm">take-timer</span>
-                    <span class="st">worker, slice 2 of 3</span>
-                    <span class="wl sr-only">waits for you</span>
-                  </li>
-                </ul>
+              <div class="ln">
+                <div class="lh m">In flight</div>
+                <div class="cd">
+                  <b class="m">take-timer</b
+                  ><span class="m">worker, slice 2 of 3</span>
+                </div>
+                <div class="cd">
+                  <b class="m">sync-stamp</b
+                  ><span class="m">review, second pass</span>
+                </div>
+                <div class="cd wt">
+                  <b class="m">review-lift</b
+                  ><span class="m">one question for you</span>
+                </div>
               </div>
-              <div class="lane">
-                <p class="ln">Ready to merge</p>
-                <ul role="list" data-lane="2">
-                  <li class="row" data-name="drive-check">
-                    <span class="nm">drive-check</span>
-                    <span class="st">review closed</span>
-                    <span class="wl sr-only">waits for you</span>
-                  </li>
-                  <li class="row" data-name="sync-coverage">
-                    <span class="nm">sync-coverage</span>
-                    <span class="st">review closed</span>
-                    <span class="wl sr-only">waits for you</span>
-                  </li>
-                </ul>
+              <div class="ln">
+                <div class="lh m">Ready to merge</div>
+                <div class="cd">
+                  <b class="m">sync-coverage</b
+                  ><span class="m">review closed</span>
+                </div>
+                <div class="cd">
+                  <b class="m">drive-check</b
+                  ><span class="m">review closed</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <script type="application/json" class="board-data">
-          {
-            "start": "23:00",
-            "rows": [
-              { "name": "gate-stages", "lane": 0, "line": "plan linked" },
-              { "name": "film-beats", "lane": 0, "line": "needs a plan" },
-              { "name": "take-timer", "lane": 0, "line": "plan linked" },
-              {
-                "name": "sync-stamp",
-                "lane": 1,
-                "line": "worker, slice 3 of 3"
-              },
-              {
-                "name": "review-lift",
-                "lane": 1,
-                "line": "worker, slice 2 of 2"
-              },
-              {
-                "name": "sync-coverage",
-                "lane": 1,
-                "line": "review, first pass"
-              },
-              {
-                "name": "drive-check",
-                "lane": 1,
-                "line": "review, second pass"
-              }
-            ],
-            "moves": [
-              {
-                "at": "23:40",
-                "name": "take-timer",
-                "lane": 1,
-                "line": "worker, slice 1 of 3"
-              },
-              {
-                "at": "00:40",
-                "name": "drive-check",
-                "lane": 2,
-                "line": "review closed"
-              },
-              {
-                "at": "01:20",
-                "name": "sync-stamp",
-                "lane": 1,
-                "line": "review, second pass"
-              },
-              {
-                "at": "01:55",
-                "name": "review-lift",
-                "lane": 1,
-                "line": "one question for you",
-                "waiting": true
-              },
-              {
-                "at": "02:10",
-                "name": "sync-coverage",
-                "lane": 2,
-                "line": "review closed"
-              },
-              {
-                "at": "02:14",
-                "name": "take-timer",
-                "lane": 1,
-                "line": "worker, slice 2 of 3"
-              }
-            ]
-          }
-        </script>
-      </section>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.BF3AODPo.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.B3RgzV6C.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.BdhR_KjZ.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.CKEh0Xvc.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.pg9BapPk.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.sTlfAzAI.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.DcqrLN8m.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.DXYsz3cf.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.ChZkksum.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.U0lo7e7T.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.CUV4coFf.js"
-      ></script>
-    </main>
+      </div>
+    </section>
   </body>
 </html>

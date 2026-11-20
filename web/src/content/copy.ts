@@ -26,7 +26,8 @@ export const site = {
   // README.md: "A Claude Code plugin and CLI that runs agent work from plan to merge."
   description:
     'A Claude Code plugin and CLI that runs agent work from plan to merge.',
-  // README.md: canon-allow-readme-paraphrase: the short variant of the README's opening sentence, which is also the `description` in `package.json` and both manifests, kept equal by `positioning.test.ts`.
+  /** The README's payoff line, also the `description` in `package.json` and both manifests, kept equal by `positioning.test.ts`. */
+  // README.md: "Runs your agent's work and keeps its code good, on one setup for every repo."
   tagline:
     "Runs your agent's work and keeps its code good, on one setup for every repo.",
   /** The handle the social card signs with, rather than the copyright holder `LICENSE` names. */
@@ -35,42 +36,31 @@ export const site = {
 
 export const skipLink = 'Skip to the page'
 
-/** The two labels of the button on every looping window, naming what a press does next. */
-// README.md: canon-allow-readme-paraphrase: a control's label, which no README sentence carries.
-export const pause = {
-  pause: 'Pause the animation',
-  play: 'Play the animation',
-}
-
 /**
- * The page's sections in the order they run, which the nav, its menus, and the
- * in-view marker all read. Ten links do not fit the bar's one row at 1040, so
- * a section off the bar is listed in the Sections menu and the footer alone.
+ * The page's sections in the order they run, which the nav, its menu, the
+ * footer, and the in-view marker all read. The bar drops a section marked
+ * `fold` under 1100, where all eight no longer fit its one row.
  */
 export const sections = [
   // README.md: canon-allow-readme-paraphrase: one-word jump labels for the README's own section headings.
-  { id: 'roles', label: 'Roles', bar: true },
-  { id: 'records', label: 'Records', bar: true },
-  { id: 'craft', label: 'Craft', bar: true },
-  { id: 'guardrails', label: 'Guardrails', bar: true },
-  { id: 'worktrees', label: 'Worktrees', bar: true },
-  { id: 'film', label: 'Film', bar: false },
-  { id: 'board', label: 'Board', bar: false },
-  { id: 'drive', label: 'Drive', bar: false },
-  { id: 'health', label: 'Audits', bar: false },
-  { id: 'setup', label: 'Setup', bar: true },
+  { id: 'worktrees', label: 'Worktrees', fold: true },
+  { id: 'records', label: 'Records', fold: false },
+  { id: 'craft', label: 'Craft', fold: false },
+  { id: 'guardrails', label: 'Guardrails', fold: false },
+  { id: 'evidence', label: 'Evidence', fold: false },
+  { id: 'board', label: 'Board', fold: false },
+  { id: 'health', label: 'Health', fold: true },
+  { id: 'install', label: 'Install', fold: false },
 ] as const
 
 export const nav = {
   mark: 'Canon',
   back: 'Canon, back to top',
-  // README.md: canon-allow-readme-paraphrase: the jump to the install section, which the README opens on as Quick start.
-  try: { href: '#try', label: 'Try it' },
   // README.md: "Docs"
   docs: { href: DOCS, label: 'Docs' },
   github: { href: REPO, label: 'GitHub' },
-  /** The Sections menu below 1040, which on a phone carries Docs and GitHub too and reads Menu. */
-  menu: { wide: 'Sections', phone: 'Menu' },
+  /** The menu below 900, carrying every section, Docs, and GitHub. */
+  menu: 'Menu',
   toggle: {
     toDark: 'Switch to dark theme',
     toLight: 'Switch to light theme',
@@ -78,13 +68,15 @@ export const nav = {
 }
 
 export const fold = {
+  // README.md: "Claude Code plugin and CLI"
+  kick: 'Claude Code plugin and CLI',
   /** The claim in three runs, with the record icon set before `plan` and the merge icon before `merge`. */
   // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs agent work from" "plan to merge"
   parts: ['Canon runs agent work from', 'plan to', 'merge'] as const,
   // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs agent work from plan to merge"
   headline: 'Canon runs agent work from plan to merge',
-  // README.md: canon-allow-readme-paraphrase: the reason ahead of the opening sentence's subject, which the README opens on the claim alone. "Claude Code plugin and CLI that"
-  lead: 'Coding agents work fast and remember nothing between sessions. Canon is a Claude Code plugin and CLI that gives each step of a change its own session and a written record the next one reads.',
+  // README.md: canon-allow-readme-paraphrase: the opening sentence's subject joined to the roles section's first sentence, led by the reader's verb. "Claude Code plugin and CLI that" "its own session and a written record the next one reads"
+  lead: "Hand your agent's work to a Claude Code plugin and CLI that gives each step of a change its own session and a written record the next one reads, so nothing rides on what it remembers.",
   view: {
     title: 'claude',
     // README.md: canon-allow-readme-paraphrase: the agent view's own prompt hint, which no README sentence carries.
@@ -96,30 +88,87 @@ export const fold = {
   },
 }
 
-export const roles = {
-  // README.md: "Five roles, each in its own session"
-  head: 'Five roles, each in its own session',
-  // README.md: canon-allow-readme-paraphrase: the README's sentences with the name capitalized as the page writes it. "One long session loses the thread." "splits a change across a planner, a worker, and two reviewers, and you talk to the orchestrator that starts them."
-  lede: 'One long session loses the thread. Canon splits a change across a planner, a worker, and two reviewers, and you talk to the orchestrator that starts them.',
-}
+/**
+ * The opening's relay: the orchestrator over the four role cards it starts,
+ * then the merge left to the reader. Each card's session and status line come
+ * from `sessions.ts`, so the relay and the agent view tell one story.
+ */
+export const relay = {
+  // README.md: canon-allow-readme-paraphrase: the orchestrator's bar and the line beside it condense the README's roles sentence. "you talk to the orchestrator that starts them"
+  orchestrator: {
+    label: 'starts each session',
+    name: 'Orchestrator',
+    you: 'you talk to this one session',
+  },
+  // README.md: canon-allow-readme-paraphrase: the list's name and each card's step, role, and handoff, page fiction drawn from the README's roles list. "A planner reads the code and writes one plan you approve" "A worker builds the plan and opens the pull request"
+  label: 'One change handed from session to session',
+  slug: 'landing-page',
+  handsOn: 'hands on →',
+  steps: [
+    {
+      step: '1 · plan',
+      role: 'Planner',
+      seat: 'planner',
+      hand: 'feature-landing-page.md',
+    },
+    {
+      step: '2 · build',
+      role: 'Worker',
+      seat: 'worker',
+      hand: 'the pull request',
+    },
+    {
+      step: '3 · review',
+      role: 'Code reviewer',
+      seat: 'reviewer',
+      hand: '## Review closed',
+    },
+    {
+      step: '4 · drive',
+      role: 'UI reviewer',
+      seat: 'ui-reviewer',
+      hand: '## UI review closed',
+    },
+  ],
+  you: {
+    step: '5 · merge',
+    role: 'You',
+    session: 'the one call that stays yours',
+    line: 'Merge, or send it back',
+    hand: 'landing-page merged',
+  },
+  counts: {
+    awaiting: 'awaiting input',
+    working: 'working',
+    completed: 'completed',
+  },
+  pause: {
+    pause: 'Pause',
+    play: 'Play',
+    pauseLabel: 'Pause the handoff',
+    playLabel: 'Play the handoff',
+  },
+} as const
 
 export const records = {
   // README.md: "The record each step writes"
   head: 'The record each step writes',
-  // README.md: "Each record has a fixed shape, so the next session knows where to read."
-  lede: 'Each record has a fixed shape, so the next session knows where to read.',
-  // README.md: canon-allow-readme-paraphrase: the skip link past the scroll-driven stack, which the README has no stack to need.
-  skip: 'Skip past the records',
+  // README.md: "Pick up a change where the last session stopped. Each record has a fixed shape, so the next session knows where to read."
+  lede: 'Pick up a change where the last session stopped. Each record has a fixed shape, so the next session knows where to read.',
+  // README.md: canon-allow-readme-paraphrase: the name of the chips that bring a record to the front, which no README sentence carries.
+  pick: 'Bring a record to the front',
 }
 
 export const craft = {
   // README.md: "Practice skills with cited sources"
   head: 'Practice skills with cited sources',
-  // README.md: "An agent copies whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from."
-  lede: 'An agent copies whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from.',
-  // README.md: canon-allow-readme-paraphrase: the pane labels beside one skill's rule and source, which the README's table folds into its columns.
-  ruleIn: 'The rule, in',
-  source: 'The source it cites',
+  // README.md: "Keep your agent from copying whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from."
+  lede: 'Keep your agent from copying whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from.',
+  // README.md: canon-allow-readme-paraphrase: the labels around one skill's source and the rule it became, which the README's table folds into its columns.
+  ruleIn: 'the rule, in',
+  source: 'the source',
+  becomes: 'becomes the rule',
+  pick: 'Pick a practice skill',
   /** Where a rule's file opens on GitHub, its path appended. */
   repoBlob: `${REPO}/blob/main/`,
 }
@@ -127,38 +176,49 @@ export const craft = {
 export const guardrails = {
   // README.md: "Checks that catch a skipped step"
   head: 'Checks that catch a skipped step',
-  // README.md: "An instruction can be ignored. These four parts fail the run when a step is skipped."
-  lede: 'An instruction can be ignored. These four parts fail the run when a step is skipped.',
-  /** One part per README bullet in the order they fire, each with when it fires and the real name it runs under. */
-  // README.md: canon-allow-readme-paraphrase: each part restates its README bullet as one sentence beside the file or command it runs as.
+  // README.md: "Write a rule down and an agent can still ignore it. These four parts fail the run when that happens."
+  lede: 'Write a rule down and an agent can still ignore it. These four parts fail the run when that happens.',
+  /**
+   * One stamp per README bullet in the order they fire: when it fires, the
+   * real name it runs under, its verdict, and the action it caught.
+   */
+  // README.md: canon-allow-readme-paraphrase: each stamp restates its README bullet as one sentence beside page fiction drawn from the plan guard's real refusal and the seeded merge deny.
   parts: [
     {
       name: 'Rules by path',
       when: 'When a file opens',
-      play: 'Play rules by path in the window',
-      line: 'Opening a matching file loads the rule naming its skill.',
       real: '.claude/rules/canon/ui/craft.md',
+      verdict: 'Loaded',
+      act: 'Read src/components/SaveButton.tsx',
+      res: 'Loaded rule .claude/rules/canon/ui/craft.md',
+      line: 'Opening a matching file loads the rule naming its skill.',
     },
     {
       name: 'Hooks',
       when: 'As each action runs',
-      play: 'Play hooks in the window',
-      line: 'A hook checks each action as it runs, and refuses some.',
       real: 'plan-guard.sh, standards-audit.sh',
+      verdict: 'Blocked',
+      act: 'Write .canon/plans/feature-export-json.md',
+      res: 'PreToolUse:Write hook blocked the write',
+      line: 'A hook checks each action as it runs, and refuses some.',
     },
     {
       name: 'The gate',
       when: 'Before a pull request',
-      play: 'Play the gate in the window',
-      line: 'Every check runs before a pull request opens.',
       real: 'canon gate run',
+      verdict: 'Failed',
+      act: 'Bash canon gate run',
+      res: 'Tests failed: src/cart/total.test.ts, 1 of 212',
+      line: 'Every check runs before a pull request opens.',
     },
     {
       name: 'Deny rules',
       when: 'At the merge',
-      play: 'Play deny rules in the window',
-      line: 'A permission rule, not a hook, stops the agent merging.',
       real: 'Bash(gh pr merge:*)',
+      verdict: 'Denied',
+      act: 'Bash gh pr merge 412',
+      res: 'Denied by a permission rule: Bash(gh pr merge:*)',
+      line: 'A permission rule, not a hook, stops the agent merging.',
     },
   ],
 }
@@ -166,58 +226,69 @@ export const guardrails = {
 export const worktrees = {
   // README.md: "One worktree for each change"
   head: 'One worktree for each change',
-  // README.md: canon-allow-readme-paraphrase: the README's reason, then its sentence cut to the branch each change builds on and the one record they share. "Agents working in one checkout overwrite each other." "on its own branch"
-  lede: 'Agents working in one checkout overwrite each other. Every change builds on its own branch, and all of them share one record.',
+  // README.md: canon-allow-readme-paraphrase: the README's reason, then its sentence cut to the branch each change builds on and the one record they share. "Run several changes at once without one agent overwriting another." "on its own branch"
+  lede: 'Run several changes at once without one agent overwriting another. Every change builds on its own branch, and all of them share one record.',
   // README.md: canon-allow-readme-paraphrase: the band naming the shared folder, which the README states as the record in the main checkout. "the one `.canon/` record in the main checkout"
   band: {
     name: '.canon/',
     dirs: ['plans/', 'review/', 'tasks/'],
     shared: 'shared by every worktree',
   },
+  main: 'main',
+  writes: '→ writes',
 }
 
-export const film = {
-  // README.md: "A pull request arrives with a film of the change"
-  head: 'A pull request arrives with a film of the change',
-  // README.md: "A diff cannot show a hover or a focus ring. Canon films the change in the running app and posts the reel beside the checklist a reviewer ticks."
-  lede: 'A diff cannot show a hover or a focus ring. Canon films the change in the running app and posts the reel beside the checklist a reviewer ticks.',
-  /**
-   * The evidence comment around the reel `web/film-plan.json` films from this
-   * page's records section, one checklist line per beat in the plan's order.
-   */
-  // README.md: canon-allow-readme-paraphrase: the comment's labels and the checklist naming what each filmed beat shows, which no README sentence carries.
-  view: {
-    title: 'Evidence',
-    source: 'pull request, the records section',
-    alt: 'A reel of the records section: the Task sheet is picked, an outcome is ticked, and the rendered view keeps the tick',
-    who: 'UI reviewer',
-    checks: [
-      'The Task sheet comes up on its pick',
-      'A ticked outcome reads [x] in the source',
-      'The rendered view keeps the tick',
-    ],
-  },
+/**
+ * The film and the design board side by side: the reel's stills with the
+ * checklist they prove, beside the board the page's own footer was picked on.
+ */
+export const evidence = {
+  // README.md: "See the change before it merges"
+  head: 'See the change before it merges',
+  // README.md: "Watch the hover and focus ring a diff cannot show. Each pull request carries a film of the work, and you pick a design on a board by looking."
+  lede: 'Watch the hover and focus ring a diff cannot show. Each pull request carries a film of the work, and you pick a design on a board by looking.',
+  // README.md: canon-allow-readme-paraphrase: the labels around the reel's stills and the drive's board, which no README sentence carries.
+  reel: (seconds: number) => `the reel on pull request #412 · ${seconds} s`,
+  frame: (at: string) => `The reel at ${at}`,
+  replay: 'Replay the reel',
+  board: 'the board · footer-layout',
+  question: 'Which footer should the page take?',
+  arms: [
+    { name: 'arm-0', alt: 'Footer arm 0: the mark and a line of links' },
+    {
+      name: 'arm-1 · picked',
+      alt: 'Footer arm 1: the mark and tagline beside three link columns',
+    },
+    {
+      name: 'arm-2',
+      alt: 'Footer arm 2: a large wordmark over the link columns',
+    },
+  ],
+  picked: 1,
+  snapshot: "snapshots from the drive that picked this page's footer",
+  /** One checklist line per beat `web/film-plan.json` films, in its order. */
+  checks: [
+    'The Task chip brings its sheet to the front',
+    'The board sheet heads its running rows In flight',
+    'The pull request comes up as a page in the browser',
+    'The code review keeps its findings on the page',
+    'The handoff fans the records either side of it',
+  ],
+  who: 'UI reviewer',
 }
 
 export const board = {
   // README.md: "The board runs while you are away"
   head: 'The board runs while you are away',
-  // README.md: "Agent work stalls whenever you step out. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide."
-  lede: 'Agent work stalls whenever you step out. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide.',
-}
-
-export const drive = {
-  // README.md: "Design decided by looking"
-  head: 'Design decided by looking',
-  // README.md: "A description of a layout settles nothing. Canon drives the running app beside you and puts the options on a board for you to pick."
-  lede: 'A description of a layout settles nothing. Canon drives the running app beside you and puts the options on a board for you to pick.',
+  // README.md: "Step out and the work keeps going. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide."
+  lede: 'Step out and the work keeps going. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide.',
 }
 
 export const health = {
   // README.md: "Audits that report where the code is rotting"
   head: 'Audits that report where the code is rotting',
-  // README.md: "Generated code grows long files nobody reads. Canon measures file, function, and comment length, and charts what shipped each week."
-  lede: 'Generated code grows long files nobody reads. Canon measures file, function, and comment length, and charts what shipped each week.',
+  // README.md: canon-allow-readme-paraphrase: the README's opening sentence, then its second with the audits as the subject in place of the lowercase name. "Find the long files and functions generated code piles up." "measures file, function, and comment length, and charts what shipped each week"
+  lede: 'Find the long files and functions generated code piles up. The audits measure file, function, and comment length, and chart what shipped each week.',
   /** The labels around the figures `web/src/lib/health.ts` reads at build time. */
   // README.md: canon-allow-readme-paraphrase: column heads and captions for the two reports, which no README sentence carries.
   view: {
@@ -230,6 +301,10 @@ export const health = {
       `${count} files past ${Math.round(cap * 100)}% comments`,
     read: (files: number) => `${files} files read`,
     caption: (to: string) => `Pull requests merged each week, to ${to}`,
+    longest: 'the longest functions, against the',
+    checkpoint: (lines: number) => `${lines}-line checkpoint`,
+    past: (lines: number) => `, past the ${lines}-line checkpoint`,
+    weeks: (from: string, to: string) => `merged, ${from} to ${to}`,
   },
 }
 
@@ -268,82 +343,14 @@ export const boardScene = {
   ],
   /** Names the row that waits, since its edge alone carries the state. */
   waitingLabel: 'waits for you',
-}
-
-/**
- * The board a drive put up for the page's own footer, which settled on the
- * columns option. Each option's bars sketch its layout as a grey box.
- */
-// README.md: canon-allow-readme-paraphrase: the drive board the footer was picked on, drawn as grey boxes, which no README sentence carries.
-export const driveScene = {
-  title: 'Board',
-  board: 'footer-layout',
-  question: 'Which footer should the page take?',
-  options: [
-    { arm: 'arm-0', name: 'as it stands', bars: ['short'] },
-    { arm: 'arm-1', name: 'columns', bars: ['short', 'long', 'long', 'mid'] },
-    { arm: 'arm-2', name: 'wordmark', bars: ['short', 'mid', 'block'] },
-  ],
-  picked: 1,
-  pickedLabel: 'picked',
-}
-
-export const setup = {
-  // README.md: "Setting up a project"
-  head: 'Setting up a project',
-  // README.md: canon-allow-readme-paraphrase: the README's reason, then its three steps compressed into one sentence. "Every repository grows its own agent setup and lets it drift."
-  lede: 'Every repository grows its own agent setup and lets it drift. An agent sets the project up, and the same skills keep it current.',
-  /** The four stages along the rule, each saying when it runs, the three skills set apart as `skill`. */
-  // README.md: canon-allow-readme-paraphrase: each stage condenses its README step to one line, with the scaffold skill named in Start since v179.8. "such as `bun init` or `npm create vite`" "writes nothing until you say yes" "catches the project up on your go-ahead"
-  stages: [
-    {
-      name: 'Start',
-      when: 'First',
-      skill: false,
-      line: '`bun init`, `npm create vite`, or `target-scaffold` starts the project.',
-    },
-    {
-      name: 'target-setup',
-      when: 'Once per project',
-      skill: true,
-      line: 'Shows what it will lay down, and writes nothing until you say yes.',
-    },
-    {
-      name: 'target-check',
-      when: 'Any time',
-      skill: true,
-      line: 'Reports what the project lacks against the current release.',
-    },
-    {
-      name: 'target-update',
-      when: 'After each release',
-      skill: true,
-      line: 'After a release, catches the project up on your go-ahead.',
-    },
-  ],
-  session: 'A session in a fresh project',
-  play: (name: string) => `Play ${name} in the session`,
-}
-
-export const tryIt = {
-  // README.md: canon-allow-readme-paraphrase: the README's Quick start, headed for what the three commands do rather than how fast they run.
-  head: 'Installing Canon',
-  // README.md: canon-allow-readme-paraphrase: the README's sentence with the name capitalized as the page writes it. "expects someone who already knows Claude Code well. It runs on Linux and macOS, and the CLI needs Bun."
-  lede: 'Canon expects someone who already knows Claude Code well. It runs on Linux and macOS, and the CLI needs Bun.',
-  // README.md: "claude plugin marketplace add https://github.com/erclx/canon" "claude plugin install canon@canon" "bun install --global @erclx/canon"
-  commands: [
-    'claude plugin marketplace add https://github.com/erclx/canon',
-    'claude plugin install canon@canon',
-    'bun install --global @erclx/canon',
-  ],
-  copy: {
-    label: 'Copy the three commands',
-    tip: 'Copy',
-    done: 'Copied',
-    status: 'Copied the three commands',
-  },
-  // README.md: canon-allow-readme-paraphrase: the README's first-run sentence, cut to the command and where it runs. "run `/canon:target-setup`"
-  first: 'Then run `/canon:target-setup` in a project.',
+  stepOut: (at: string) => `${at} · you step out`,
+  nightStarts: (at: string) => `${at} · the night starts`,
+  moved: (at: string, name: string) => `${at} · ${name} moved`,
+  comeBack: (at: string) => `${at} · what you come back to`,
+  movesLabel: (count: number) => `${count} moves →`,
+  before: 'The board when you step out',
+  after: 'The board when you come back',
+  replay: 'Replay the night',
 }
 
 /**
@@ -359,8 +366,8 @@ export const footer = {
       label: 'Skill map',
       href: `${REPO}/blob/main/docs/workflow/skill-map.md`,
     },
-    // README.md: canon-allow-readme-paraphrase: the jump to the install section, which the README opens on as Quick start.
-    { label: 'Install', href: '#try' },
+    // README.md: canon-allow-readme-paraphrase: the jump to the install section, which the README opens on.
+    { label: 'Install', href: '#install' },
   ],
   project: [
     { label: 'GitHub', href: REPO },
@@ -374,197 +381,59 @@ export const footer = {
 }
 
 /**
- * The five roles beside the window, each with the scene the window plays for
- * it: the request it receives, what it did, and what it said back.
- */
-// README.md: canon-allow-readme-paraphrase: each role's line condenses its README bullet, and each scene is page fiction drawn from how that role really reports.
-export const roleScenes = [
-  {
-    name: 'Orchestrator',
-    line: 'dispatches the rows',
-    session: 'orchestrator-canon',
-    prompt: 'dispatch the ready rows',
-    act: [
-      'Read the board, ran 3 shell commands',
-      'Checked each row against what is in flight',
-    ],
-    say: [
-      'Two rows are ready. relayed-answer-citation has its plan, so a worker takes it now.',
-      'board-arm-expect has none, so a cold planner writes it first and I launch it when the plan lands.',
-    ],
-  },
-  {
-    name: 'Planner',
-    line: 'writes one plan',
-    session: 'planner-canon-board-arm-expect',
-    prompt:
-      '/canon:role-planner, then /canon:plan-feature board-arm-expect. Write one plan against the current tree and message the orchestrator when it lands.',
-    act: [
-      'Read 7 files, ran 4 shell commands',
-      'Measured the row against main',
-    ],
-    say: [
-      'Wrote the plan for board-arm-expect. Two questions, both with suggested answers.',
-      'Launchable.',
-    ],
-  },
-  {
-    name: 'Worker',
-    line: 'builds and opens the pull request',
-    session: 'worker-canon-relayed-answer-citation',
-    prompt:
-      "/canon:auto-ship relayed-answer-citation's plan. Controller: the orchestrator. Message it when the pull request opens.",
-    act: [
-      'Edited 5 files in its own worktree, ran the check',
-      'Committed 3 slices, each tested',
-    ],
-    say: [
-      'Opened the pull request as a draft for relayed-answer-citation.',
-      'Check passed, and evidence is posted.',
-    ],
-  },
-  {
-    name: 'Code reviewer',
-    line: 'reads the diff',
-    session: 'reviewer-canon-relayed-answer-citation',
-    prompt:
-      "/canon:role-reviewer, then /canon:review-pr on relayed-answer-citation. Read the plan's review focus first.",
-    act: [
-      'Read the diff and the plan, ran 2 shell commands',
-      'Loaded review-craft',
-    ],
-    say: [
-      '0 critical, 2 should-fix, 1 minor.',
-      'Posted to the pull request and sent to the worker.',
-    ],
-  },
-  {
-    name: 'UI reviewer',
-    line: 'drives the checklist',
-    session: 'ui-reviewer-canon-relayed-answer-citation',
-    prompt:
-      '/canon:role-reviewer, then /canon:review-ui on relayed-answer-citation. One verdict per box, and skip any box marked as taste.',
-    act: ['Drove 7 boxes in the running app', 'Loaded ui-craft'],
-    say: [
-      '6 of 7 boxes pass. One fails: the focus ring is clipped on mobile.',
-      'Posted under UI review.',
-    ],
-  },
-]
-
-/**
- * One scene per part. A line is its kind, a lead, and its text, where `block`
- * is a refusal and `note` a line the harness reports back into the turn.
- */
-// README.md: canon-allow-readme-paraphrase: page fiction drawn from the plan guard's real refusal and the seeded merge deny, which the README describes but never quotes.
-export const guardrailScenes: {
-  ask: string
-  lines: [string, string, string][]
-}[] = [
-  {
-    ask: 'add a disabled state to the save button',
-    lines: [
-      ['tool', 'Read', 'src/components/SaveButton.tsx'],
-      ['res', '', 'Read 48 lines'],
-      ['note', '', 'Loaded rule .claude/rules/canon/ui/craft.md'],
-      ['tool', 'Skill', 'canon:ui-craft'],
-      ['res', '', 'Loaded'],
-    ],
-  },
-  {
-    ask: 'plan the --json flag for the export command',
-    lines: [
-      ['tool', 'Write', '.canon/plans/feature-export-json.md'],
-      [
-        'block',
-        'PreToolUse:Write hook blocked the write',
-        'This session has not invoked canon:plan-feature, so .canon/plans/feature-export-json.md would be written outside the skill that owns its shape. Invoke the canon:plan-feature skill for this plan, then resend the write.',
-      ],
-      ['tool', 'Skill', 'canon:plan-feature'],
-      ['res', '', 'Loaded'],
-      ['tool', 'Write', '.canon/plans/feature-export-json.md'],
-      ['res', '', 'Wrote 42 lines'],
-    ],
-  },
-  {
-    ask: 'open the pull request',
-    lines: [
-      ['tool', 'Bash', 'canon gate run'],
-      ['block', 'Tests failed', 'src/cart/total.test.ts, 1 of 212'],
-      ['tool', 'Update', 'src/cart/total.ts'],
-      ['res', '', '1 addition, 1 removal'],
-      ['tool', 'Bash', 'canon gate run'],
-      ['res', '', 'Every stage passed'],
-    ],
-  },
-  {
-    ask: 'merge it',
-    lines: [
-      ['tool', 'Bash', 'gh pr merge 412'],
-      ['block', 'Denied by a permission rule', 'Bash(gh pr merge:*)'],
-      [
-        'say',
-        '',
-        'The merge is yours. #412 is ready, and its review is closed.',
-      ],
-    ],
-  },
-]
-
-/**
- * Three worktrees side by side. Each card steps through its status lines,
- * lighting the band folder the step writes, and rests on its second.
+ * Three worktrees branching off main together, each naming its folder, its
+ * branch, where its session stands, and the shared folder that step writes.
  */
 // README.md: canon-allow-readme-paraphrase: page fiction drawn from the worktree layout the README describes. "Each worker builds in its own worktree on its own branch"
 export const worktreeCards = [
   {
     path: '.claude/worktrees/take-timer/',
     branch: 'feat/take-timer',
-    steps: [
-      { line: 'Slice 2 of 4 committed', dir: 'plans/' },
-      { line: 'Gate: 9 of 14 stages passed', dir: 'plans/' },
-      { line: 'Pull request opened', dir: 'tasks/' },
-    ],
+    line: 'Gate: 9 of 14 stages passed',
+    dir: 'plans/',
   },
   {
     path: '.claude/worktrees/sync-stamp/',
     branch: 'feat/sync-stamp',
-    steps: [
-      { line: 'Reading the added commits', dir: 'review/' },
-      { line: 'Second pass on the added commits', dir: 'review/' },
-      { line: 'Two findings posted', dir: 'review/' },
-    ],
+    line: 'Second pass on the added commits',
+    dir: 'review/',
   },
   {
     path: '.claude/worktrees/toolbar/',
     branch: 'feat/toolbar',
-    steps: [
-      { line: 'Starting the app from the branch', dir: 'review/' },
-      { line: 'Driving the checklist in the running app', dir: 'review/' },
-      { line: 'Box 3 sent back to the worker', dir: 'review/' },
-    ],
+    line: 'Box 3 sent back to the worker',
+    dir: 'review/',
   },
 ]
 
-/** How a repo comes onto canon: the session the setup window plays, one block per stage. */
-// README.md: canon-allow-readme-paraphrase: page fiction of a setup session, each block condensing what its README step says the skill does.
-export const setupSession: {
-  ask: string
-  shell: boolean
-  rows: [string, string, string][]
-}[] = [
-  {
-    ask: 'bun init',
-    shell: true,
-    rows: [
-      ['f', '+', 'package.json'],
-      ['f', '+', 'tsconfig.json'],
-      ['f', '+', 'index.ts'],
-    ],
+/**
+ * The three install commands with one copy control, beside the setup run in a
+ * fresh project and the four stages a project goes through.
+ */
+export const install = {
+  // README.md: "Install, then set up a project"
+  head: 'Install, then set up a project',
+  // README.md: "Start in three commands once you know Claude Code well. It runs on Linux and macOS, and the CLI needs Bun."
+  lede: 'Start in three commands once you know Claude Code well. It runs on Linux and macOS, and the CLI needs Bun.',
+  // README.md: "claude plugin marketplace add https://github.com/erclx/canon" "claude plugin install canon@canon" "bun install --global @erclx/canon"
+  commands: [
+    'claude plugin marketplace add https://github.com/erclx/canon',
+    'claude plugin install canon@canon',
+    'bun install --global @erclx/canon',
+  ],
+  // README.md: canon-allow-readme-paraphrase: the copy control's labels and the terminal's title, which no README sentence carries.
+  copy: {
+    label: 'Copy the three commands',
+    done: 'Copied',
+    status: 'Copied the three commands',
   },
-  {
+  session: 'a fresh project',
+  // README.md: canon-allow-readme-paraphrase: the README's first-run sentence, cut to the command and where it runs. "run `/canon:target-setup`"
+  first: 'then run /canon:target-setup in a project',
+  /** The setup the terminal runs: a line is its kind, a key, and its value, where `q` is a question it puts to you. */
+  // README.md: canon-allow-readme-paraphrase: page fiction of a setup run, condensing what the README's first step says the skill does.
+  run: {
     ask: '/canon:target-setup',
-    shell: false,
     rows: [
       ['k', 'Stack', 'bun, react'],
       [
@@ -574,23 +443,30 @@ export const setupSession: {
       ],
       ['q', 'Run it?', 'yes'],
       ['k', 'Verified', 'format, lint, types, tests'],
-    ],
+    ] as [string, string, string][],
   },
-  {
-    ask: '/canon:target-check',
-    shell: false,
-    rows: [
-      ['k', 'Domains', 'tooling, governance, Claude, indexes'],
-      ['k', 'Behind', 'nothing, every domain current'],
-    ],
-  },
-  {
-    ask: '/canon:target-update',
-    shell: false,
-    rows: [
-      ['k', 'Release', 'the installed one to the latest'],
-      ['q', 'Go ahead?', 'yes'],
-      ['k', 'Done', 'one migration, synced, check clean'],
-    ],
-  },
-]
+  /** The four stages, each saying when it runs, the skills set apart as code. */
+  // README.md: canon-allow-readme-paraphrase: each stage condenses its README step to one line. "such as `bun init` or `npm create vite`" "writes nothing until you say yes" "catches the project up on your go-ahead"
+  stages: [
+    {
+      name: 'Start',
+      when: 'First',
+      line: '`bun init`, `npm create vite`, or `target-scaffold` starts the project.',
+    },
+    {
+      name: 'target-setup',
+      when: 'Once per project',
+      line: 'Shows what it will lay down, and writes nothing until you say yes.',
+    },
+    {
+      name: 'target-check',
+      when: 'Any time',
+      line: 'Reports what the project lacks against the current release.',
+    },
+    {
+      name: 'target-update',
+      when: 'After each release',
+      line: 'After a release, catches the project up on your go-ahead.',
+    },
+  ],
+}

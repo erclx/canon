@@ -1,316 +1,279 @@
 <!doctype html>
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>craft-built-834</title>
-    <link rel="stylesheet" href="../../assets/landing-v5/built/head.css" />
-    <link
-      rel="stylesheet"
-      href="../../assets/landing-v5/built/_astro/index.B3B0sxrB.dark-surfaces.css"
-    />
+    <link rel="stylesheet" href="../../assets/landing-v6/lang/fonts.css" />
     <style>
-      body {
-        background: var(--ground);
+      * {
+        box-sizing: border-box;
       }
-      .site-nav {
-        display: none;
+      html,
+      body {
+        margin: 0;
+      }
+      body {
+        background: #fbfbfa;
+        color: #141413;
+        font-family: 'Geist Variable', Geist, sans-serif;
+        background-image:
+          linear-gradient(#ececea 1px, transparent 1px),
+          linear-gradient(90deg, #ececea 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+      .lab {
+        font:
+          500 12px/1.4 'Geist Variable',
+          Geist,
+          sans-serif;
+        padding: 8px 14px;
+        color: #55544f;
+        border-bottom: 1px solid #e0e0dd;
+        background: #fbfbfa;
+      }
+      .hero {
+        padding: 112px 64px 112px;
+      }
+      .w {
+        max-width: 1180px;
+        margin: 0 auto;
+      }
+      .kick {
+        font:
+          500 13px/1 'Geist Mono Variable',
+          monospace;
+        color: #c2380e;
+        margin-bottom: 24px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .kick:before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: #c2380e;
+        border-radius: 2px;
+      }
+      h1 {
+        margin: 0;
+        font-weight: 600;
+        letter-spacing: -0.045em;
+        line-height: 1;
+      }
+      .lede {
+        font-size: 20px;
+        line-height: 1.5;
+        color: #55544f;
+        margin: 24px 0 0;
+        max-width: 44ch;
+      }
+      .mono {
+        font-family: 'Geist Mono Variable', 'DejaVu Sans Mono', monospace;
+      }
+      .ink {
+        background: #fff;
+        border: 1.5px solid #141413;
+        border-radius: 10px;
+        box-shadow: 5px 5px 0 #141413;
+      }
+      .note {
+        font:
+          500 12px/1.35 'Geist Mono Variable',
+          monospace;
+        color: #55544f;
+      }
+      .acc {
+        color: #c2380e;
+      }
+      .wait {
+        color: #b07d1a;
+      }
+      .ic {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 0.9em;
+        height: 0.9em;
+        vertical-align: -0.08em;
+        border: 1.5px dashed #141413;
+        border-radius: 8px;
+        background: #fbfbfa;
+      }
+      .ic svg {
+        width: 0.55em;
+        height: 0.55em;
+      }
+      .ic.m {
+        border-style: solid;
+        background: #141413;
+        color: #fbfbfa;
+      }
+      @media (max-width: 900px) {
+        .hero {
+          padding: 80px 32px;
+        }
+      }
+      @media (max-width: 640px) {
+        .hero {
+          padding: 48px 20px;
+        }
+        .lede {
+          font-size: 17px;
+        }
+      }
+      h2.s {
+        margin: 0;
+        font-weight: 600;
+        font-size: 52px;
+        line-height: 1.04;
+        letter-spacing: -0.035em;
+        max-width: 18ch;
+      }
+      .sec {
+        padding: 112px 64px;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .chips span {
+        font:
+          500 12.5px/1 'Geist Mono Variable',
+          monospace;
+        padding: 8px 11px;
+        border: 1.5px solid #141413;
+        border-radius: 6px;
+        background: #fbfbfa;
+      }
+      .chips span.on {
+        background: #141413;
+        color: #fbfbfa;
+      }
+      .src {
+        font:
+          500 13px/1.4 'Geist Variable',
+          sans-serif;
+        color: #141413;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      .path {
+        font:
+          400 12px/1.4 'Geist Mono Variable',
+          monospace;
+        color: #6b6a66;
+      }
+      @media (max-width: 900px) {
+        .sec {
+          padding: 80px 32px;
+        }
+        h2.s {
+          font-size: 40px;
+        }
+      }
+      @media (max-width: 640px) {
+        .sec {
+          padding: 48px 20px;
+        }
+        h2.s {
+          font-size: 30px;
+        }
+      }
+      .top {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 64px;
+        align-items: end;
+      }
+      .lbl {
+        margin-bottom: 14px;
+      }
+      blockquote {
+        margin: 0 0 20px;
+        font:
+          500 48px/1.12 'Geist Variable',
+          sans-serif;
+        letter-spacing: -0.025em;
+        max-width: 24ch;
+      }
+      .arrow {
+        margin: 40px 0 16px;
+        color: #c2380e;
+      }
+      .rule {
+        padding: 20px 24px;
+        max-width: 760px;
+      }
+      .rule p {
+        margin: 0;
+        font:
+          500 19px/1.45 'Geist Variable',
+          sans-serif;
+      }
+      @media (max-width: 900px) {
+        .top {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+        blockquote {
+          font-size: 34px;
+        }
+      }
+      @media (max-width: 640px) {
+        blockquote {
+          font-size: 25px;
+        }
+        .rule p {
+          font-size: 16px;
+        }
       }
     </style>
   </head>
   <body>
-    <script>
-      const mm = window.matchMedia.bind(window)
-      window.matchMedia = (q) =>
-        q.includes('prefers-reduced-motion')
-          ? {
-              matches: true,
-              media: q,
-              addEventListener() {},
-              removeEventListener() {},
-              addListener() {},
-              removeListener() {},
-            }
-          : mm(q)
-    </script>
-    <main>
-      <section class="sec" id="craft">
+    <div class="lab">
+      arm-1 · One quote, large · cost: one practice shown at a time, picked by
+      the chips · ref: resend-com s09, one quote alone in open space
+    </div>
+    <section class="sec">
+      <div class="w">
         <div class="top">
-          <div class="sec-head">
-            <h2>Practice skills with cited sources</h2>
-            <p>
-              An agent copies whatever code sits nearest. Each skill loads when
-              its kind of work starts, and every rule names where it came from.
-            </p>
+          <h2 class="s">Practice skills with cited sources</h2>
+          <p class="lede" style="margin: 0">
+            An agent copies whatever code sits nearest. Each skill loads when
+            its kind of work starts, and every rule names where it came from.
+          </p>
+        </div>
+        <div class="chips" style="margin: 56px 0 64px">
+          <span class="on">code-craft</span><span class="">test-craft</span
+          ><span class="">api-design</span><span class="">ui-craft</span
+          ><span class="">design-taste</span><span class="">review-craft</span
+          ><span class="">write-human</span
+          ><span class="">systematic-debugging</span>
+        </div>
+        <div class="big">
+          <div class="lbl note">the source</div>
+          <blockquote>
+            “solve the problem they know needs to be solved now, not the problem
+            that the developer speculates might need to be solved in the future”
+          </blockquote>
+          <a class="src">Google, What to look for in a code review ↗</a>
+        </div>
+        <div class="arrow note">↓ becomes the rule</div>
+        <div class="rule ink">
+          <div class="lbl note">
+            the rule, in
+            <span class="path">claude/skills/code-craft/SKILL.md</span>
           </div>
-          <div class="picks" role="group" aria-label="Practice skills">
-            <button type="button" class="pick" aria-pressed="true" data-i="0">
-              code-craft</button
-            ><button type="button" class="pick" aria-pressed="false" data-i="1">
-              test-craft</button
-            ><button type="button" class="pick" aria-pressed="false" data-i="2">
-              api-design</button
-            ><button type="button" class="pick" aria-pressed="false" data-i="3">
-              ui-craft</button
-            ><button type="button" class="pick" aria-pressed="false" data-i="4">
-              design-taste</button
-            ><button type="button" class="pick" aria-pressed="false" data-i="5">
-              review-craft</button
-            ><button type="button" class="pick" aria-pressed="false" data-i="6">
-              write-human</button
-            ><button type="button" class="pick" aria-pressed="false" data-i="7">
-              systematic-debugging
-            </button>
-          </div>
-          <div class="panes">
-            <div class="pane said">
-              <p class="lbl">The source it cites</p>
-              <p class="srcname">
-                <a
-                  class="src-link"
-                  href="https://google.github.io/eng-practices/review/reviewer/looking-for.html"
-                  ><span class="p-source"
-                    >Google, What to look for in a code review</span
-                  ><svg
-                    viewBox="0 0 12 12"
-                    width="11"
-                    height="11"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M4 2.5h5.5V8M9.5 2.5L2.5 9.5"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.4"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    /></svg
-                ></a>
-              </p>
-              <p class="quote">
-                <q class="p-quote"
-                  >solve the problem they know needs to be solved now, not the
-                  problem that the developer speculates might need to be solved
-                  in the future</q
-                >
-              </p>
-            </div>
-            <div class="pane rl">
-              <p class="lbl">
-                The rule, in
-                <a
-                  class="p-file"
-                  href="https://github.com/erclx/canon/blob/main/claude/skills/code-craft/SKILL.md"
-                  ><code>claude/skills/code-craft/SKILL.md</code></a
-                >
-              </p>
-              <p class="rule p-rule">
-                When no next change can be named, write the plainest code that
-                passes, since a shape built for an unnamed change is a guess.
-              </p>
-              <span class="loads p-loads"
-                >loads before a new function or module</span
-              >
-            </div>
-          </div>
-          <div class="tray">
-            <button
-              type="button"
-              class="pz"
-              aria-label="Pause the animation"
-              data-pause="Pause the animation"
-              data-play="Play the animation"
-              data-paused="false"
-            >
-              <svg
-                viewBox="0 0 16 16"
-                width="14"
-                height="14"
-                class="pz-off"
-                aria-hidden="true"
-              >
-                <path
-                  d="M5 3.5v9M11 3.5v9"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                />
-              </svg>
-              <svg
-                viewBox="0 0 16 16"
-                width="14"
-                height="14"
-                class="pz-on"
-                aria-hidden="true"
-              >
-                <path d="M5.5 3.5l6.5 4.5-6.5 4.5z" fill="currentColor" />
-              </svg>
-            </button>
-            <div class="win" aria-hidden="true">
-              <div class="win-bar">
-                <i></i><i></i><i></i><span>claude</span>
-              </div>
-              <div class="log"></div>
-              <div class="inp">
-                <div class="rule"></div>
-                <div class="line">
-                  <span class="g">❯</span
-                  ><span
-                    ><span class="typed"></span><span class="cur"></span
-                  ></span>
-                </div>
-                <div class="rule"></div>
-              </div>
-            </div>
+          <p>
+            When no next change can be named, write the plainest code that
+            passes, since a shape built for an unnamed change is a guess.
+          </p>
+          <div class="note" style="margin-top: 8px">
+            loads before a new function or module
           </div>
         </div>
-        <script type="application/json" class="craft-data">
-          {
-            "skills": [
-              {
-                "name": "code-craft",
-                "loads": "loads before a new function or module",
-                "rule": "When no next change can be named, write the plainest code that passes, since a shape built for an unnamed change is a guess.",
-                "ruleFile": "claude/skills/code-craft/SKILL.md",
-                "source": "Google, What to look for in a code review",
-                "quote": "solve the problem they know needs to be solved now, not the problem that the developer speculates might need to be solved in the future",
-                "url": "https://google.github.io/eng-practices/review/reviewer/looking-for.html"
-              },
-              {
-                "name": "test-craft",
-                "loads": "loads before writing a test",
-                "rule": "Write the lower test when a higher one catches a break no lower test did.",
-                "ruleFile": "claude/skills/test-craft/SKILL.md",
-                "source": "Ham Vocke, The Practical Test Pyramid",
-                "quote": "Push your tests as far down the test pyramid as you can",
-                "url": "https://martinfowler.com/articles/practical-test-pyramid.html"
-              },
-              {
-                "name": "api-design",
-                "loads": "loads before shaping a flag, output, or format",
-                "rule": "Treat ordering, timing, default values, and the exact text of an error as observable.",
-                "ruleFile": "claude/skills/api-design/SKILL.md",
-                "source": "Software Engineering at Google, chapter 1",
-                "quote": "all observable behaviors of your system will be depended on by somebody",
-                "url": "https://abseil.io/resources/swe-book/html/ch01.html"
-              },
-              {
-                "name": "ui-craft",
-                "loads": "loads when a rendered file changes",
-                "rule": "Use a native <button> or <a> over a <div> carrying a click handler.",
-                "ruleFile": "claude/skills/ui-craft/references/a11y.md",
-                "source": "W3C, Using ARIA, the first rule",
-                "quote": "If you can use a native HTML element or attribute with the semantics and behavior you require already built in",
-                "url": "https://www.w3.org/TR/using-aria/"
-              },
-              {
-                "name": "design-taste",
-                "loads": "loads when a rendered file changes",
-                "rule": "Never settle a higher layer before the one below it.",
-                "ruleFile": "claude/skills/design-taste/SKILL.md",
-                "source": "Jesse James Garrett, The Elements of User Experience",
-                "quote": "Each plane is dependent on the planes below it.",
-                "url": "http://www.jjg.net/elements/pdf/elements_ch02.pdf"
-              },
-              {
-                "name": "review-craft",
-                "loads": "loads in every code review",
-                "rule": "Design and scope come first: does the change do one thing, and does it build what nobody asked for?",
-                "ruleFile": "claude/skills/review-craft/SKILL.md",
-                "source": "Google, What to look for in a code review",
-                "quote": "The most important thing to cover in a review is the overall design of the CL",
-                "url": "https://google.github.io/eng-practices/review/reviewer/looking-for.html"
-              },
-              {
-                "name": "write-human",
-                "loads": "loads before writing prose",
-                "rule": "Write for a developer who is scanning rather than studying.",
-                "ruleFile": "claude/skills/write-human/SKILL.md",
-                "source": "Nielsen Norman Group, How users read on the web",
-                "quote": "79 percent of our test users always scanned any new page they came across",
-                "url": "https://www.nngroup.com/articles/how-users-read-on-the-web/"
-              },
-              {
-                "name": "systematic-debugging",
-                "loads": "loads on a bug nobody has explained",
-                "rule": "Trace bad values backward to their source. Fix at the origin, not the symptom.",
-                "ruleFile": "claude/skills/systematic-debugging/SKILL.md",
-                "source": "Jesse Vincent, superpowers, Systematic Debugging",
-                "quote": "Fix at source, not at symptom",
-                "url": "https://github.com/obra/superpowers/blob/8ca22dba9a94f28898bbce59f2537ff4d87c747d/skills/systematic-debugging/SKILL.md"
-              }
-            ],
-            "repoBlob": "https://github.com/erclx/canon/blob/main/",
-            "scenes": [
-              {
-                "ask": "move the pricing rules out of the cart",
-                "lines": [
-                  ["Skill", "canon:code-craft", "Loaded"],
-                  ["Write", "src/pricing/rules.ts", "Wrote 37 lines"]
-                ]
-              },
-              {
-                "ask": "cover an empty cart total with a test",
-                "lines": [
-                  ["Read", "src/cart/total.ts", "Read 31 lines"],
-                  ["Skill", "canon:test-craft", "Loaded"],
-                  ["Write", "src/cart/total.test.ts", "Wrote 24 lines"]
-                ]
-              },
-              {
-                "ask": "add a --json flag to the export command",
-                "lines": [
-                  ["Skill", "canon:api-design", "Loaded"],
-                  ["Update", "src/commands/export.ts", "9 additions"]
-                ]
-              },
-              {
-                "ask": "add a disabled state to the save button",
-                "lines": [
-                  ["Read", "src/components/SaveButton.tsx", "Read 48 lines"],
-                  ["Skill", "canon:ui-craft", "Loaded"],
-                  ["Skill", "canon:design-taste", "Loaded"],
-                  [
-                    "Update",
-                    "src/components/SaveButton.tsx",
-                    "2 additions, 1 removal"
-                  ]
-                ]
-              },
-              {
-                "ask": "review the open pull request",
-                "lines": [
-                  ["Skill", "canon:review-pr", "Loaded"],
-                  ["Skill", "canon:review-craft", "Loaded"]
-                ]
-              },
-              {
-                "ask": "write the release notes for this change",
-                "lines": [
-                  ["Skill", "canon:write-human", "Loaded"],
-                  ["Update", "CHANGELOG.md", "6 additions"]
-                ]
-              },
-              {
-                "ask": "the totals are a cent off since the refactor",
-                "lines": [
-                  ["Skill", "canon:systematic-debugging", "Loaded"],
-                  [
-                    "Bash",
-                    "git bisect run bun test src/cart",
-                    "first bad commit 3f9c2a1"
-                  ]
-                ]
-              }
-            ]
-          }
-        </script>
-      </section>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.CKEh0Xvc.js"
-      ></script>
-    </main>
+      </div>
+    </section>
   </body>
 </html>

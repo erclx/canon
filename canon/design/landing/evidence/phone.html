@@ -1,0 +1,430 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../assets/landing-v6/lang/fonts.css" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+      }
+      body {
+        background: #fbfbfa;
+        color: #141413;
+        font-family: 'Geist Variable', Geist, sans-serif;
+        background-image:
+          linear-gradient(#ececea 1px, transparent 1px),
+          linear-gradient(90deg, #ececea 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+      .lab {
+        font:
+          500 12px/1.4 'Geist Variable',
+          Geist,
+          sans-serif;
+        padding: 8px 14px;
+        color: #55544f;
+        border-bottom: 1px solid #e0e0dd;
+        background: #fbfbfa;
+      }
+      .hero {
+        padding: 112px 64px 112px;
+      }
+      .w {
+        max-width: 1180px;
+        margin: 0 auto;
+      }
+      .kick {
+        font:
+          500 13px/1 'Geist Mono Variable',
+          monospace;
+        color: #c2380e;
+        margin-bottom: 24px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .kick:before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: #c2380e;
+        border-radius: 2px;
+      }
+      h1 {
+        margin: 0;
+        font-weight: 600;
+        letter-spacing: -0.045em;
+        line-height: 1;
+      }
+      .lede {
+        font-size: 20px;
+        line-height: 1.5;
+        color: #55544f;
+        margin: 24px 0 0;
+        max-width: 44ch;
+      }
+      .mono {
+        font-family: 'Geist Mono Variable', 'DejaVu Sans Mono', monospace;
+      }
+      .ink {
+        background: #fff;
+        border: 1.5px solid #141413;
+        border-radius: 10px;
+        box-shadow: 5px 5px 0 #141413;
+      }
+      .note {
+        font:
+          500 12px/1.35 'Geist Mono Variable',
+          monospace;
+        color: #55544f;
+      }
+      .acc {
+        color: #c2380e;
+      }
+      .wait {
+        color: #b07d1a;
+      }
+      .ic {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 0.9em;
+        height: 0.9em;
+        vertical-align: -0.08em;
+        border: 1.5px dashed #141413;
+        border-radius: 8px;
+        background: #fbfbfa;
+      }
+      .ic svg {
+        width: 0.55em;
+        height: 0.55em;
+      }
+      .ic.m {
+        border-style: solid;
+        background: #141413;
+        color: #fbfbfa;
+      }
+      @media (max-width: 900px) {
+        .hero {
+          padding: 80px 32px;
+        }
+      }
+      @media (max-width: 640px) {
+        .hero {
+          padding: 48px 20px;
+        }
+        .lede {
+          font-size: 17px;
+        }
+      }
+      h2.s {
+        margin: 0;
+        font-weight: 600;
+        font-size: 52px;
+        line-height: 1.04;
+        letter-spacing: -0.035em;
+        max-width: 16ch;
+      }
+      .sec {
+        padding: 112px 64px;
+      }
+      .tag {
+        font:
+          500 12px/1 'Geist Mono Variable',
+          monospace;
+        color: #c2380e;
+        margin-bottom: 14px;
+        display: block;
+      }
+      .top {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 64px;
+        align-items: end;
+      }
+      .top .lede {
+        margin: 0;
+      }
+      .still {
+        display: block;
+        width: 100%;
+        aspect-ratio: 16/10;
+        object-fit: cover;
+        object-position: top;
+        border-radius: 4px;
+        background: #222;
+      }
+      .ck {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .ck li {
+        display: grid;
+        grid-template-columns: 20px 1fr auto;
+        gap: 8px;
+        font:
+          400 13px/1.5 'Geist Variable',
+          sans-serif;
+        padding: 6px 0;
+        border-top: 1px solid #ececea;
+      }
+      .ck li:first-child {
+        border-top: 0;
+      }
+      .ck .b {
+        color: #c2380e;
+      }
+      .ck .who {
+        font:
+          400 11.5px/1.5 'Geist Mono Variable',
+          monospace;
+        color: #6b6a66;
+      }
+      .arms {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      .arm {
+        border: 1.5px solid #d6d6d2;
+        border-radius: 6px;
+        overflow: hidden;
+        background: #fff;
+      }
+      .arm img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .arms.col {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .arms.col .arm {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+      }
+      .arms.col .arm .n {
+        border-top: 0;
+        border-left: 1px solid #ececea;
+        align-self: stretch;
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        white-space: nowrap;
+      }
+      .arm .n {
+        font:
+          500 11px/1 'Geist Mono Variable',
+          monospace;
+        color: #6b6a66;
+        padding: 7px 8px;
+        border-top: 1px solid #ececea;
+      }
+      .arm.pk {
+        border: 2px solid #c2380e;
+        box-shadow: 3px 3px 0 #c2380e;
+      }
+      .arm.pk .n {
+        color: #c2380e;
+        font-weight: 600;
+      }
+      .q {
+        font:
+          600 14px/1.3 'Geist Variable',
+          sans-serif;
+        margin: 0 0 12px;
+      }
+      @media (max-width: 900px) {
+        .sec {
+          padding: 80px 32px;
+        }
+        h2.s {
+          font-size: 40px;
+        }
+        .top {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+      }
+      @media (max-width: 640px) {
+        .sec {
+          padding: 48px 20px;
+        }
+        h2.s {
+          font-size: 30px;
+        }
+      }
+      .bento {
+        margin-top: 64px;
+        display: grid;
+        grid-template-columns: 7fr 5fr;
+        gap: 24px;
+        align-items: start;
+      }
+      .film,
+      .board {
+        padding: 22px 24px;
+      }
+      .strip {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+        background: #141413;
+        padding: 10px 8px;
+        border-radius: 6px;
+        margin-bottom: 16px;
+      }
+      .strip figure {
+        margin: 0;
+      }
+      .strip figcaption {
+        font:
+          500 10.5px/1 'Geist Mono Variable',
+          monospace;
+        color: #bdbcb6;
+        margin-top: 6px;
+        text-align: center;
+      }
+      @media (max-width: 900px) {
+        .bento {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 640px) {
+        .strip {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .strip figure:nth-child(n + 4) {
+          display: none;
+        }
+        .arms.col .arm {
+          grid-template-columns: 1fr;
+        }
+        .arms.col .arm .n {
+          border-left: 0;
+          border-top: 1px solid #ececea;
+          padding: 7px 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="lab">
+      arm-1 · Filmstrip beside the pick · cost: five stills and three arms, each
+      a real capture the build has to carry under assets/ · ref: notion-com s02,
+      unequal tiles each holding a different fragment
+    </div>
+    <section class="sec">
+      <div class="w">
+        <div class="top">
+          <h2 class="s">See the change before it merges</h2>
+          <p class="lede">
+            A diff cannot show a hover or a focus ring. The pull request carries
+            a film of the change, and design is picked on a board by looking.
+          </p>
+        </div>
+        <div class="bento">
+          <div class="film ink">
+            <span class="tag">the reel on pull request #412 · 8 s</span>
+            <div class="strip">
+              <figure>
+                <img
+                  class="still"
+                  src="../../assets/landing-v6/evidence/f-1.png"
+                  alt="reel frame at 0:00"
+                />
+                <figcaption>0:00</figcaption>
+              </figure>
+              <figure>
+                <img
+                  class="still"
+                  src="../../assets/landing-v6/evidence/f-2.png"
+                  alt="reel frame at 0:02"
+                />
+                <figcaption>0:02</figcaption>
+              </figure>
+              <figure>
+                <img
+                  class="still"
+                  src="../../assets/landing-v6/evidence/f-3.png"
+                  alt="reel frame at 0:04"
+                />
+                <figcaption>0:04</figcaption>
+              </figure>
+              <figure>
+                <img
+                  class="still"
+                  src="../../assets/landing-v6/evidence/f-4.png"
+                  alt="reel frame at 0:06"
+                />
+                <figcaption>0:06</figcaption>
+              </figure>
+              <figure>
+                <img
+                  class="still"
+                  src="../../assets/landing-v6/evidence/f-5.png"
+                  alt="reel frame at 0:08"
+                />
+                <figcaption>0:08</figcaption>
+              </figure>
+            </div>
+            <ul class="ck">
+              <li>
+                <span class="b">☑</span
+                ><span>The Task sheet comes up on its pick</span
+                ><span class="who">UI reviewer</span>
+              </li>
+              <li>
+                <span class="b">☑</span
+                ><span>A ticked outcome reads [x] in the source</span
+                ><span class="who">UI reviewer</span>
+              </li>
+              <li>
+                <span class="b">☑</span
+                ><span>The rendered view keeps the tick</span
+                ><span class="who">UI reviewer</span>
+              </li>
+            </ul>
+          </div>
+          <div class="board ink">
+            <span class="tag">the board · footer-layout</span>
+            <p class="q">Which footer should the page take?</p>
+            <div class="arms col">
+              <div class="arm">
+                <img
+                  src="../../assets/landing-v6/evidence/arm-0-1440.light.png"
+                  alt="footer arm 0"
+                />
+                <div class="n">arm-0</div>
+              </div>
+              <div class="arm pk">
+                <img
+                  src="../../assets/landing-v6/evidence/arm-1-1440.light.png"
+                  alt="footer arm 1"
+                />
+                <div class="n">arm-1 · picked</div>
+              </div>
+              <div class="arm">
+                <img
+                  src="../../assets/landing-v6/evidence/arm-2-1440.light.png"
+                  alt="footer arm 2"
+                />
+                <div class="n">arm-2</div>
+              </div>
+            </div>
+            <p class="note" style="margin-top: 12px">
+              picked by the operator, by looking
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

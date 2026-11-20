@@ -1,6 +1,6 @@
 /**
- * Checks, or with `--write` films per theme, the film section's reel of the records section as `web/film-plan.json` names its beats.
- * The check `web:build` runs refuses a reel whose stamp no longer matches the plan or the image, so an edited plan cannot ship an old reel.
+ * Checks, or with `--write` films per theme, the reel of the records section `web/film-plan.json` names the beats of, with one still per beat for the evidence section's filmstrip.
+ * The check `web:build` runs refuses a reel whose stamp no longer matches the plan, the image, or a still, so an edited plan cannot ship an old reel.
  */
 import { createHash } from 'node:crypto'
 import { spawn, spawnSync } from 'node:child_process'
@@ -23,6 +23,8 @@ interface Theme {
   readonly reel: string
   readonly still: string
   readonly stamp: string
+  /** Where the still closing beat `n`, counted from 1, lands. */
+  readonly beat: (n: number) => string
 }
 
 const THEMES: readonly Theme[] = [
@@ -31,12 +33,14 @@ const THEMES: readonly Theme[] = [
     reel: 'assets/loops/film.webp',
     still: 'assets/loops/film-still.webp',
     stamp: 'assets/loops/film.stamp',
+    beat: (n) => `assets/loops/film-beat-${n}.webp`,
   },
   {
     name: 'light',
     reel: 'assets/loops/film-light.webp',
     still: 'assets/loops/film-still-light.webp',
     stamp: 'assets/loops/film-light.stamp',
+    beat: (n) => `assets/loops/film-beat-${n}-light.webp`,
   },
 ]
 
@@ -64,6 +68,14 @@ function staleness(theme: Theme, plan: string): string[] {
     reasons.push(`${theme.reel} differs from the image its stamp names`)
   if (stamp['still-sha256'] !== sha(theme.still))
     reasons.push(`${theme.still} differs from the still its stamp names`)
+  const beats = (stamp['beat-stills-sha256'] ?? '').split(' ').filter(Boolean)
+  if (beats.length === 0) reasons.push(`${theme.stamp} names no beat still`)
+  beats.forEach((digest, index) => {
+    const path = theme.beat(index + 1)
+    if (!existsSync(join(root, path))) reasons.push(`${path} is missing`)
+    else if (digest !== sha(path))
+      reasons.push(`${path} differs from the still its stamp names`)
+  })
   return reasons
 }
 
@@ -107,6 +119,27 @@ async function waitFor(url: string) {
   throw new Error(`the preview at ${url} never answered`)
 }
 
+/** Scales a filmed frame down to `width` and writes it as WebP at `path` under the root. */
+function writeStill(frame: string, path: string, width: number) {
+  const still = spawnSync(
+    'ffmpeg',
+    [
+      '-y',
+      '-loglevel',
+      'error',
+      '-i',
+      frame,
+      '-vf',
+      `scale=${width}:-2`,
+      '-quality',
+      '80',
+      join(root, path),
+    ],
+    { stdio: 'inherit' },
+  )
+  if (still.status !== 0) throw new Error(`ffmpeg could not write ${path}`)
+}
+
 async function film(theme: Theme, url: string, plan: string) {
   const dir = mkdtempSync(join(tmpdir(), `canon-film-${theme.name}-`))
   const take = spawnSync(
@@ -135,24 +168,12 @@ async function film(theme: Theme, url: string, plan: string) {
 
   const last = record.beats.at(-1)
   if (!last) throw new Error('the take filmed no beat')
-  const still = spawnSync(
-    'ffmpeg',
-    [
-      '-y',
-      '-loglevel',
-      'error',
-      '-i',
-      join(dir, last.still),
-      '-vf',
-      'scale=960:-2',
-      '-quality',
-      '80',
-      join(root, theme.still),
-    ],
-    { stdio: 'inherit' },
-  )
-  if (still.status !== 0)
-    throw new Error(`ffmpeg could not write ${theme.still}`)
+  writeStill(join(dir, last.still), theme.still, 960)
+  const beats = record.beats.map((beat, index) => {
+    const path = theme.beat(index + 1)
+    writeStill(join(dir, beat.still), path, 640)
+    return path
+  })
 
   writeFileSync(
     join(root, theme.stamp),
@@ -161,12 +182,15 @@ async function film(theme: Theme, url: string, plan: string) {
       `plan-sha256: ${plan}`,
       `image-sha256: ${sha(theme.reel)}`,
       `still-sha256: ${sha(theme.still)}`,
+      `beat-stills-sha256: ${beats.map(sha).join(' ')}`,
       `reel-seconds: ${reel.seconds}`,
       `beats: ${record.beats.map((beat) => beat.seconds).join(' ')}`,
       '',
     ].join('\n'),
   )
-  console.log(`regen-web-film: wrote ${theme.reel} and ${theme.still}`)
+  console.log(
+    `regen-web-film: wrote ${theme.reel}, ${theme.still}, and ${beats.length} beat stills`,
+  )
 }
 
 const plan = sha(PLAN)

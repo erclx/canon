@@ -1,201 +1,328 @@
 <!doctype html>
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>guardrails-built-390</title>
-    <link rel="stylesheet" href="../../assets/landing-v5/built/head.css" />
-    <link
-      rel="stylesheet"
-      href="../../assets/landing-v5/built/_astro/index.Cae65jSx.dark-surfaces.css"
-    />
+    <link rel="stylesheet" href="../../assets/landing-v6/lang/fonts.css" />
     <style>
-      body {
-        background: var(--ground);
+      * {
+        box-sizing: border-box;
       }
-      .site-nav {
-        display: none;
+      html,
+      body {
+        margin: 0;
+      }
+      body {
+        background: #fbfbfa;
+        color: #141413;
+        font-family: 'Geist Variable', Geist, sans-serif;
+        background-image:
+          linear-gradient(#ececea 1px, transparent 1px),
+          linear-gradient(90deg, #ececea 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+      .lab {
+        font:
+          500 12px/1.4 'Geist Variable',
+          Geist,
+          sans-serif;
+        padding: 8px 14px;
+        color: #55544f;
+        border-bottom: 1px solid #e0e0dd;
+        background: #fbfbfa;
+      }
+      .hero {
+        padding: 112px 64px 112px;
+      }
+      .w {
+        max-width: 1180px;
+        margin: 0 auto;
+      }
+      .kick {
+        font:
+          500 13px/1 'Geist Mono Variable',
+          monospace;
+        color: #c2380e;
+        margin-bottom: 24px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .kick:before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: #c2380e;
+        border-radius: 2px;
+      }
+      h1 {
+        margin: 0;
+        font-weight: 600;
+        letter-spacing: -0.045em;
+        line-height: 1;
+      }
+      .lede {
+        font-size: 20px;
+        line-height: 1.5;
+        color: #55544f;
+        margin: 24px 0 0;
+        max-width: 44ch;
+      }
+      .mono {
+        font-family: 'Geist Mono Variable', 'DejaVu Sans Mono', monospace;
+      }
+      .ink {
+        background: #fff;
+        border: 1.5px solid #141413;
+        border-radius: 10px;
+        box-shadow: 5px 5px 0 #141413;
+      }
+      .note {
+        font:
+          500 12px/1.35 'Geist Mono Variable',
+          monospace;
+        color: #55544f;
+      }
+      .acc {
+        color: #c2380e;
+      }
+      .wait {
+        color: #b07d1a;
+      }
+      .ic {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 0.9em;
+        height: 0.9em;
+        vertical-align: -0.08em;
+        border: 1.5px dashed #141413;
+        border-radius: 8px;
+        background: #fbfbfa;
+      }
+      .ic svg {
+        width: 0.55em;
+        height: 0.55em;
+      }
+      .ic.m {
+        border-style: solid;
+        background: #141413;
+        color: #fbfbfa;
+      }
+      @media (max-width: 900px) {
+        .hero {
+          padding: 80px 32px;
+        }
+      }
+      @media (max-width: 640px) {
+        .hero {
+          padding: 48px 20px;
+        }
+        .lede {
+          font-size: 17px;
+        }
+      }
+      h2.s {
+        margin: 0;
+        font-weight: 600;
+        font-size: 52px;
+        line-height: 1.04;
+        letter-spacing: -0.035em;
+        max-width: 18ch;
+      }
+      .sec {
+        padding: 112px 64px;
+      }
+      .top {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 64px;
+        align-items: end;
+      }
+      .top .lede {
+        margin: 0;
+      }
+      .m {
+        font-family: 'Geist Mono Variable', 'DejaVu Sans Mono', monospace;
+      }
+      @media (max-width: 900px) {
+        .sec {
+          padding: 80px 32px;
+        }
+        h2.s {
+          font-size: 40px;
+        }
+        .top {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+      }
+      @media (max-width: 640px) {
+        .sec {
+          padding: 48px 20px;
+        }
+        h2.s {
+          font-size: 30px;
+        }
+      }
+      .grid {
+        margin-top: 64px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+      .stamp {
+        border: 1.5px solid #141413;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 5px 5px 0 #141413;
+        padding: 22px 24px 24px;
+      }
+      .hd {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+      .sm {
+        font-size: 11.5px;
+        color: #6b6a66;
+      }
+      .big {
+        font:
+          700 64px/1 'Geist Variable',
+          sans-serif;
+        letter-spacing: -0.04em;
+        margin-bottom: 18px;
+        color: #141413;
+      }
+      .act {
+        font-size: 12.5px;
+        color: #33332f;
+      }
+      .res {
+        font-size: 12.5px;
+        color: #55544f;
+        margin-top: 4px;
+      }
+      .nm {
+        margin-top: 18px;
+        padding-top: 14px;
+        border-top: 1.5px dashed #d0d0cc;
+        font:
+          400 14px/1.45 'Geist Variable',
+          sans-serif;
+        color: #33332f;
+      }
+      .hot {
+        background: #c2380e;
+        border-color: #141413;
+        color: #fff8f2;
+      }
+      .hot .big {
+        color: #fff8f2;
+      }
+      .hot .note,
+      .hot .sm,
+      .hot .act,
+      .hot .res,
+      .hot .nm {
+        color: #ffe3d8;
+      }
+      .hot .nm {
+        border-color: rgba(255, 255, 255, 0.4);
+      }
+      @media (max-width: 900px) {
+        .big {
+          font-size: 48px;
+        }
+      }
+      @media (max-width: 640px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .big {
+          font-size: 40px;
+        }
+        .hd {
+          flex-direction: column;
+          gap: 4px;
+        }
       }
     </style>
   </head>
   <body>
-    <script>
-      const mm = window.matchMedia.bind(window)
-      window.matchMedia = (q) =>
-        q.includes('prefers-reduced-motion')
-          ? {
-              matches: true,
-              media: q,
-              addEventListener() {},
-              removeEventListener() {},
-              addListener() {},
-              removeListener() {},
-            }
-          : mm(q)
-    </script>
-    <main>
-      <section class="sec banded" id="guardrails">
-        <div class="sec-head">
-          <h2>Checks that catch a skipped step</h2>
-          <p>
+    <div class="lab">
+      arm-2 · Four stamps · cost: a large verb per check carries the section, so
+      the words have to stay exactly true to what each part does · ref:
+      raycast-com s04, cards each on their own ground
+    </div>
+    <section class="sec">
+      <div class="w">
+        <div class="top">
+          <h2 class="s">Checks that catch a skipped step</h2>
+          <p class="lede">
             An instruction can be ignored. These four parts fail the run when a
             step is skipped.
           </p>
         </div>
-        <div class="four">
-          <div class="lit-row" data-i="0">
-            <span class="when">When a file opens</span>
-            <button
-              type="button"
-              class="go"
-              aria-label="Play rules by path in the window"
-            >
-              Rules by path
-            </button>
-            <p>Opening a matching file loads the rule naming its skill.</p>
-            <code>.claude/rules/canon/ui/craft.md</code>
+        <div class="grid">
+          <div class="stamp">
+            <div class="hd">
+              <span class="note">When a file opens</span
+              ><span class="m sm">.claude/rules/canon/ui/craft.md</span>
+            </div>
+            <div class="big">Loaded</div>
+            <div class="act m">Read src/components/SaveButton.tsx</div>
+            <div class="res m">Loaded rule .claude/rules/canon/ui/craft.md</div>
+            <div class="nm">
+              <b>Rules by path</b> · Opening a matching file loads the rule
+              naming its skill.
+            </div>
           </div>
-          <div class="lit-row lit" data-i="1">
-            <span class="when">As each action runs</span>
-            <button
-              type="button"
-              class="go"
-              aria-label="Play hooks in the window"
-            >
-              Hooks
-            </button>
-            <p>A hook checks each action as it runs, and refuses some.</p>
-            <code>plan-guard.sh, standards-audit.sh</code>
+          <div class="stamp">
+            <div class="hd">
+              <span class="note">As each action runs</span
+              ><span class="m sm">plan-guard.sh, standards-audit.sh</span>
+            </div>
+            <div class="big">Blocked</div>
+            <div class="act m">Write .canon/plans/feature-export-json.md</div>
+            <div class="res m">PreToolUse:Write hook blocked the write</div>
+            <div class="nm">
+              <b>Hooks</b> · A hook checks each action as it runs, and refuses
+              some.
+            </div>
           </div>
-          <div class="lit-row" data-i="2">
-            <span class="when">Before a pull request</span>
-            <button
-              type="button"
-              class="go"
-              aria-label="Play the gate in the window"
-            >
-              The gate
-            </button>
-            <p>Every check runs before a pull request opens.</p>
-            <code>canon gate run</code>
+          <div class="stamp">
+            <div class="hd">
+              <span class="note">Before a pull request</span
+              ><span class="m sm">canon gate run</span>
+            </div>
+            <div class="big">Failed</div>
+            <div class="act m">Bash canon gate run</div>
+            <div class="res m">
+              Tests failed: src/cart/total.test.ts, 1 of 212
+            </div>
+            <div class="nm">
+              <b>The gate</b> · Every check runs before a pull request opens.
+            </div>
           </div>
-          <div class="lit-row" data-i="3">
-            <span class="when">At the merge</span>
-            <button
-              type="button"
-              class="go"
-              aria-label="Play deny rules in the window"
-            >
-              Deny rules
-            </button>
-            <p>A permission rule, not a hook, stops the agent merging.</p>
-            <code>Bash(gh pr merge:*)</code>
-          </div>
-        </div>
-        <div class="tray">
-          <button
-            type="button"
-            class="pz"
-            aria-label="Pause the animation"
-            data-pause="Pause the animation"
-            data-play="Play the animation"
-            data-paused="false"
-          >
-            <svg
-              viewBox="0 0 16 16"
-              width="14"
-              height="14"
-              class="pz-off"
-              aria-hidden="true"
-            >
-              <path
-                d="M5 3.5v9M11 3.5v9"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-              />
-            </svg>
-            <svg
-              viewBox="0 0 16 16"
-              width="14"
-              height="14"
-              class="pz-on"
-              aria-hidden="true"
-            >
-              <path d="M5.5 3.5l6.5 4.5-6.5 4.5z" fill="currentColor" />
-            </svg>
-          </button>
-          <div class="win" aria-hidden="true">
-            <div class="win-bar"><i></i><i></i><i></i><span>claude</span></div>
-            <div class="log"></div>
+          <div class="stamp hot">
+            <div class="hd">
+              <span class="note">At the merge</span
+              ><span class="m sm">Bash(gh pr merge:*)</span>
+            </div>
+            <div class="big">Denied</div>
+            <div class="act m">Bash gh pr merge 412</div>
+            <div class="res m">
+              Denied by a permission rule: Bash(gh pr merge:*)
+            </div>
+            <div class="nm">
+              <b>Deny rules</b> · A permission rule, not a hook, stops the agent
+              merging.
+            </div>
           </div>
         </div>
-        <p class="sr-only" role="status"></p>
-        <script type="application/json" class="guardrails-data">
-          {
-            "scenes": [
-              {
-                "ask": "add a disabled state to the save button",
-                "lines": [
-                  ["tool", "Read", "src/components/SaveButton.tsx"],
-                  ["res", "", "Read 48 lines"],
-                  ["note", "", "Loaded rule .claude/rules/canon/ui/craft.md"],
-                  ["tool", "Skill", "canon:ui-craft"],
-                  ["res", "", "Loaded"]
-                ]
-              },
-              {
-                "ask": "plan the --json flag for the export command",
-                "lines": [
-                  ["tool", "Write", ".canon/plans/feature-export-json.md"],
-                  [
-                    "block",
-                    "PreToolUse:Write hook blocked the write",
-                    "This session has not invoked canon:plan-feature, so .canon/plans/feature-export-json.md would be written outside the skill that owns its shape. Invoke the canon:plan-feature skill for this plan, then resend the write."
-                  ],
-                  ["tool", "Skill", "canon:plan-feature"],
-                  ["res", "", "Loaded"],
-                  ["tool", "Write", ".canon/plans/feature-export-json.md"],
-                  ["res", "", "Wrote 42 lines"]
-                ]
-              },
-              {
-                "ask": "open the pull request",
-                "lines": [
-                  ["tool", "Bash", "canon gate run"],
-                  ["block", "Tests failed", "src/cart/total.test.ts, 1 of 212"],
-                  ["tool", "Update", "src/cart/total.ts"],
-                  ["res", "", "1 addition, 1 removal"],
-                  ["tool", "Bash", "canon gate run"],
-                  ["res", "", "Every stage passed"]
-                ]
-              },
-              {
-                "ask": "merge it",
-                "lines": [
-                  ["tool", "Bash", "gh pr merge 412"],
-                  [
-                    "block",
-                    "Denied by a permission rule",
-                    "Bash(gh pr merge:*)"
-                  ],
-                  [
-                    "say",
-                    "",
-                    "The merge is yours. #412 is ready, and its review is closed."
-                  ]
-                ]
-              }
-            ],
-            "rest": 1
-          }
-        </script>
-      </section>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.pg9BapPk.js"
-      ></script>
-    </main>
+      </div>
+    </section>
   </body>
 </html>

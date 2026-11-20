@@ -51,6 +51,24 @@ if (button && panel) {
     .forEach((link) => link.addEventListener('click', () => set(false)))
 }
 
+/* The bar's rule shows once the page scrolls past its top, so it reads as part of the page there. */
+const bar = document.querySelector<HTMLElement>('.site-nav')
+let ticking = false
+const sync = () => {
+  bar?.classList.toggle('scrolled', window.scrollY > 4)
+  ticking = false
+}
+window.addEventListener(
+  'scroll',
+  () => {
+    if (ticking) return
+    ticking = true
+    requestAnimationFrame(sync)
+  },
+  { passive: true },
+)
+sync()
+
 /* The section in view marks its link in the bar and in the menu. */
 const links = [
   ...document.querySelectorAll<HTMLAnchorElement>('[data-section]'),

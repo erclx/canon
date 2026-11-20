@@ -1,213 +1,405 @@
 <!doctype html>
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>health-built-390</title>
-    <link rel="stylesheet" href="../../assets/landing-v5/built/head.css" />
-    <link
-      rel="stylesheet"
-      href="../../assets/landing-v5/built/_astro/index.C_lVWl_E.css"
-    />
+    <link rel="stylesheet" href="../../assets/landing-v6/lang/fonts.css" />
     <style>
-      body {
-        background: var(--ground);
+      * {
+        box-sizing: border-box;
       }
-      .site-nav {
-        display: none;
+      html,
+      body {
+        margin: 0;
+      }
+      body {
+        background: #fbfbfa;
+        color: #141413;
+        font-family: 'Geist Variable', Geist, sans-serif;
+        background-image:
+          linear-gradient(#ececea 1px, transparent 1px),
+          linear-gradient(90deg, #ececea 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+      .lab {
+        font:
+          500 12px/1.4 'Geist Variable',
+          Geist,
+          sans-serif;
+        padding: 8px 14px;
+        color: #55544f;
+        border-bottom: 1px solid #e0e0dd;
+        background: #fbfbfa;
+      }
+      .hero {
+        padding: 112px 64px 112px;
+      }
+      .w {
+        max-width: 1180px;
+        margin: 0 auto;
+      }
+      .kick {
+        font:
+          500 13px/1 'Geist Mono Variable',
+          monospace;
+        color: #c2380e;
+        margin-bottom: 24px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .kick:before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: #c2380e;
+        border-radius: 2px;
+      }
+      h1 {
+        margin: 0;
+        font-weight: 600;
+        letter-spacing: -0.045em;
+        line-height: 1;
+      }
+      .lede {
+        font-size: 20px;
+        line-height: 1.5;
+        color: #55544f;
+        margin: 24px 0 0;
+        max-width: 44ch;
+      }
+      .mono {
+        font-family: 'Geist Mono Variable', 'DejaVu Sans Mono', monospace;
+      }
+      .ink {
+        background: #fff;
+        border: 1.5px solid #141413;
+        border-radius: 10px;
+        box-shadow: 5px 5px 0 #141413;
+      }
+      .note {
+        font:
+          500 12px/1.35 'Geist Mono Variable',
+          monospace;
+        color: #55544f;
+      }
+      .acc {
+        color: #c2380e;
+      }
+      .wait {
+        color: #b07d1a;
+      }
+      .ic {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 0.9em;
+        height: 0.9em;
+        vertical-align: -0.08em;
+        border: 1.5px dashed #141413;
+        border-radius: 8px;
+        background: #fbfbfa;
+      }
+      .ic svg {
+        width: 0.55em;
+        height: 0.55em;
+      }
+      .ic.m {
+        border-style: solid;
+        background: #141413;
+        color: #fbfbfa;
+      }
+      @media (max-width: 900px) {
+        .hero {
+          padding: 80px 32px;
+        }
+      }
+      @media (max-width: 640px) {
+        .hero {
+          padding: 48px 20px;
+        }
+        .lede {
+          font-size: 17px;
+        }
+      }
+      h2.s {
+        margin: 0;
+        font-weight: 600;
+        font-size: 52px;
+        line-height: 1.04;
+        letter-spacing: -0.035em;
+        max-width: 16ch;
+      }
+      .sec {
+        padding: 112px 64px;
+      }
+      .m {
+        font-family: 'Geist Mono Variable', 'DejaVu Sans Mono', monospace;
+      }
+      .top {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 64px;
+        align-items: end;
+      }
+      .top .lede {
+        margin: 0;
+      }
+      .cmd {
+        font-size: 12.5px;
+        color: #6b6a66;
+        margin-bottom: 14px;
+      }
+      .bars {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 16px;
+        align-items: end;
+        border-bottom: 2px solid #141413;
+      }
+      .bar {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: stretch;
+        height: 100%;
+      }
+      .bar i {
+        display: block;
+        background: #141413;
+        border-radius: 4px 4px 0 0;
+      }
+      .bar.cur i {
+        background: repeating-linear-gradient(
+          135deg,
+          #c2380e 0 6px,
+          #e8714f 6px 9px
+        );
+      }
+      .bar .v {
+        font:
+          500 13px/1 'Geist Mono Variable',
+          monospace;
+        margin-bottom: 8px;
+        text-align: center;
+      }
+      .wl {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 16px;
+        margin-top: 8px;
+      }
+      .wl span {
+        text-align: center;
+        font:
+          400 12px/1 'Geist Mono Variable',
+          monospace;
+        color: #6b6a66;
+      }
+      .cap {
+        font:
+          400 12.5px/1.4 'Geist Mono Variable',
+          monospace;
+        color: #55544f;
+        margin-top: 14px;
+      }
+      @media (max-width: 900px) {
+        .sec {
+          padding: 80px 32px;
+        }
+        h2.s {
+          font-size: 40px;
+        }
+        .top {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+      }
+      @media (max-width: 640px) {
+        .sec {
+          padding: 48px 20px;
+        }
+        h2.s {
+          font-size: 30px;
+        }
+        .bars,
+        .wl {
+          gap: 8px;
+        }
+      }
+      .rank {
+        margin-top: 72px;
+        padding: 24px 28px 20px;
+      }
+      .rk {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 24px;
+        align-items: center;
+        padding: 14px 0;
+        border-top: 1px solid #ececea;
+      }
+      .rk:first-of-type {
+        border-top: 0;
+      }
+      .nm {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        font-size: 13px;
+      }
+      .nm .fn {
+        color: #6b6a66;
+        font-size: 12px;
+      }
+      .trk {
+        position: relative;
+        height: 28px;
+        margin-right: 56px;
+      }
+      .trk i {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        background: #141413;
+        border-radius: 0 4px 4px 0;
+      }
+      .ck {
+        position: absolute;
+        top: -8px;
+        bottom: -8px;
+        border-left: 2px dashed #c2380e;
+      }
+      .trk b {
+        position: absolute;
+        top: 50%;
+        transform: translate(10px, -50%);
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .leg {
+        font-size: 12px;
+        color: #55544f;
+        margin-top: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .ckk {
+        display: inline-block;
+        width: 0;
+        height: 14px;
+        border-left: 2px dashed #c2380e;
+      }
+      .hist {
+        display: flex;
+        align-items: flex-end;
+        gap: 20px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .sp {
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+        height: 44px;
+        border-bottom: 1.5px solid #141413;
+      }
+      .sp i {
+        width: 14px;
+        background: #141413;
+        border-radius: 2px 2px 0 0;
+      }
+      .sp i.cur {
+        background: #c2380e;
+      }
+      .sm {
+        font-size: 12px;
+        color: #55544f;
+      }
+      @media (max-width: 900px) {
+        .rk {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
       }
     </style>
   </head>
   <body>
-    <script>
-      const mm = window.matchMedia.bind(window)
-      window.matchMedia = (q) =>
-        q.includes('prefers-reduced-motion')
-          ? {
-              matches: true,
-              media: q,
-              addEventListener() {},
-              removeEventListener() {},
-              addListener() {},
-              removeListener() {},
-            }
-          : mm(q)
-    </script>
-    <main>
-      <section class="sec split-left" id="health">
-        <div class="sec-head">
-          <h2>Audits that report where the code is rotting</h2>
-          <p>
+    <div class="lab">
+      arm-2 · The longest functions, ranked · cost: three bars against a
+      checkpoint line that must stay the threshold the audit uses, and the
+      weekly history shrunk to a sparkline · ref: linear-app s04, one frame
+      whose picture is a chart
+    </div>
+    <section class="sec">
+      <div class="w">
+        <div class="top">
+          <h2 class="s">Audits that report where the code is rotting</h2>
+          <p class="lede">
             Generated code grows long files nobody reads. Canon measures file,
             function, and comment length, and charts what shipped each week.
           </p>
         </div>
-        <div class="tray">
-          <button
-            type="button"
-            class="pz"
-            aria-label="Pause the animation"
-            data-pause="Pause the animation"
-            data-play="Play the animation"
-            data-paused="false"
-          >
-            <svg
-              viewBox="0 0 16 16"
-              width="14"
-              height="14"
-              class="pz-off"
-              aria-hidden="true"
-            >
-              <path
-                d="M5 3.5v9M11 3.5v9"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-              />
-            </svg>
-            <svg
-              viewBox="0 0 16 16"
-              width="14"
-              height="14"
-              class="pz-on"
-              aria-hidden="true"
-            >
-              <path d="M5.5 3.5l6.5 4.5-6.5 4.5z" fill="currentColor" />
-            </svg>
-          </button>
-          <div class="win hl">
-            <p class="cmd">$ canon code audit</p>
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col">File</th>
-                  <th scope="col">Function</th>
-                  <th scope="col" class="n">Lines</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="pr">
-                  <td class="f">src/commands/gov.ts</td>
-                  <td class="fn">register</td>
-                  <td class="n past">
-                    <i class="mk" aria-hidden="true"></i> 519
-                    <span class="sr-only">, past the 100-line checkpoint</span>
-                  </td>
-                </tr>
-                <tr class="pr">
-                  <td class="f">src/commands/migrate.ts</td>
-                  <td class="fn">register</td>
-                  <td class="n past">
-                    <i class="mk" aria-hidden="true"></i> 470
-                    <span class="sr-only">, past the 100-line checkpoint</span>
-                  </td>
-                </tr>
-                <tr class="pr">
-                  <td class="f">src/hooks/guard/fixture.ts</td>
-                  <td class="fn">useFixture</td>
-                  <td class="n past">
-                    <i class="mk" aria-hidden="true"></i> 427
-                    <span class="sr-only">, past the 100-line checkpoint</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <p class="sum pr">
-              982 files read · 0 files past 2,000 lines · 199 files past 15%
-              comments
-            </p>
-            <p class="cmd">$ canon history</p>
-            <figure>
-              <ol class="chart" role="list">
-                <li class="wk">
-                  <span class="b" style="--h: 1">
-                    <span class="v">151</span>
-                  </span>
-                  <span class="w">w42</span>
-                </li>
-                <li class="wk">
-                  <span class="b" style="--h: 0.9072847682119205">
-                    <span class="v">137</span>
-                  </span>
-                  <span class="w">w43</span>
-                </li>
-                <li class="wk">
-                  <span class="b" style="--h: 0.7218543046357616">
-                    <span class="v">109</span>
-                  </span>
-                  <span class="w">w44</span>
-                </li>
-                <li class="wk">
-                  <span class="b" style="--h: 0.23178807947019867">
-                    <span class="v">35</span>
-                  </span>
-                  <span class="w">w45</span>
-                </li>
-                <li class="wk">
-                  <span class="b" style="--h: 0.9536423841059603">
-                    <span class="v">144</span>
-                  </span>
-                  <span class="w">w46</span>
-                </li>
-                <li class="wk now">
-                  <span class="b" style="--h: 0.3576158940397351">
-                    <span class="v">54</span>
-                  </span>
-                  <span class="w">w47</span>
-                </li>
-              </ol>
-              <figcaption>
-                Pull requests merged each week, to 2026-11-18
-              </figcaption>
-            </figure>
+        <div class="rank ink">
+          <div class="cmd m">
+            $ canon code audit · the longest functions, against the 100-line
+            checkpoint
+          </div>
+          <div class="rk">
+            <div class="nm">
+              <span class="m">src/commands/gov.ts</span
+              ><span class="m fn">register</span>
+            </div>
+            <div class="trk">
+              <i style="width: 92.7%"></i
+              ><span class="ck" style="left: 17.9%"></span
+              ><b class="m" style="left: 92.7%">519</b>
+            </div>
+          </div>
+          <div class="rk">
+            <div class="nm">
+              <span class="m">src/commands/migrate.ts</span
+              ><span class="m fn">register</span>
+            </div>
+            <div class="trk">
+              <i style="width: 85.2%"></i
+              ><span class="ck" style="left: 17.9%"></span
+              ><b class="m" style="left: 85.2%">477</b>
+            </div>
+          </div>
+          <div class="rk">
+            <div class="nm">
+              <span class="m">src/hooks/guard/fixture.ts</span
+              ><span class="m fn">useFixture</span>
+            </div>
+            <div class="trk">
+              <i style="width: 78.2%"></i
+              ><span class="ck" style="left: 17.9%"></span
+              ><b class="m" style="left: 78.2%">438</b>
+            </div>
+          </div>
+          <div class="leg m">
+            <span class="ckk"></span> 100-line checkpoint · 995 files read · 0
+            files past 2,000 lines · 193 files past 15% comments
           </div>
         </div>
-      </section>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.BF3AODPo.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.B3RgzV6C.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.BdhR_KjZ.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.CKEh0Xvc.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.pg9BapPk.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.sTlfAzAI.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.DcqrLN8m.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.DXYsz3cf.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.ChZkksum.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.U0lo7e7T.js"
-      ></script>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.CUV4coFf.js"
-      ></script>
-    </main>
+        <div class="hist">
+          <span class="m cmd" style="margin: 0">$ canon history</span>
+          <div class="sp">
+            <i class="" style="height: 44px" title="w42: 151"></i
+            ><i class="" style="height: 40px" title="w43: 137"></i
+            ><i class="" style="height: 32px" title="w44: 109"></i
+            ><i class="" style="height: 10px" title="w45: 35"></i
+            ><i class="" style="height: 42px" title="w46: 144"></i
+            ><i class="cur" style="height: 24px" title="w47: 83"></i>
+          </div>
+          <span class="m sm"
+            >151 · 137 · 109 · 35 · 144 · 83 merged, w42 to w47</span
+          >
+        </div>
+      </div>
+    </section>
   </body>
 </html>
