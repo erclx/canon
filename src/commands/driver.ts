@@ -100,8 +100,17 @@ export function register(program: Command): void {
         'defaulted: the heights a defect hides at are a property of the layout',
         'rather than of this command.',
         '',
+        'colorScheme takes light, dark, or a list of both, and drives every',
+        'viewport once per scheme through an emulated prefers-color-scheme. A run',
+        'naming none renders the page default alone, and its passes and findings',
+        'carry no colorScheme. A swept pass carries colorScheme and background,',
+        'the painted background read after the step. Two schemes reading the',
+        'same background mean the page themes by something other than the media',
+        'query, so the second scheme was not driven.',
+        '',
         '  {',
         '    "viewport": { "width": 1440, "heights": [900, 1200, 1500] },',
+        '    "colorScheme": ["light", "dark"],',
         '    "probes": ["focus", "details"],',
         '    "steps": [',
         '      { "name": "open the menu", "kind": "click", "target": "#menu" },',
@@ -130,7 +139,8 @@ export function register(program: Command): void {
         '',
         'Reasons:',
         '  no-run-file         nothing readable at the run path',
-        '  unreadable-plan     the run file is not valid JSON',
+        '  unreadable-plan     the run file is not valid JSON, or colorScheme names',
+        '                      something other than light, dark, or a list of both',
         '  no-steps            the run names no step',
         '  no-probes           the run names an empty probe list',
         '  unknown-probe       the run names a probe this build does not ship',
@@ -219,7 +229,7 @@ async function runDriver(
 
   logStep('Scope')
   logInfo(
-    `${plural(plan.steps.length, 'step')} at ${plan.viewports.map(describeViewport).join(', ')}, measuring ${plan.probes.join(', ')}`,
+    `${plural(plan.steps.length, 'step')} at ${plan.viewports.map(describeViewport).join(', ')}${plan.colorSchemes ? ` in ${plan.colorSchemes.join(' and ')}` : ''}, measuring ${plan.probes.join(', ')}`,
   )
 
   const driver = await loadDriver()
@@ -267,7 +277,7 @@ async function runDriver(
   logStep('Passes')
   for (const pass of result.passes) {
     logInfo(
-      `${pass.viewport}  ${pass.step}  ${plural(pass.probes, 'probe')}  ${plural(pass.findings, 'finding')}`,
+      `${pass.viewport}${pass.colorScheme ? ` ${pass.colorScheme}` : ''}  ${pass.step}  ${plural(pass.probes, 'probe')}  ${plural(pass.findings, 'finding')}${pass.background ? `  on ${pass.background}` : ''}`,
     )
   }
 
@@ -283,7 +293,9 @@ async function runDriver(
     for (const finding of result.findings) {
       logInfo(`  ${finding.probe}  ${finding.selector}`)
       logInfo(`      ${finding.detail}`)
-      logInfo(`      after ${finding.step} at ${finding.viewport}`)
+      logInfo(
+        `      after ${finding.step} at ${finding.viewport}${finding.colorScheme ? ` in ${finding.colorScheme}` : ''}`,
+      )
       logInfo(`      ${finding.measured}`)
     }
   }
@@ -293,6 +305,7 @@ async function runDriver(
     url,
     run: path,
     viewports: plan.viewports,
+    ...(plan.colorSchemes ? { colorSchemes: plan.colorSchemes } : {}),
     passes: result.passes,
     findings: result.findings,
     durationMs: result.durationMs,
