@@ -32,7 +32,18 @@ const GRAB_MS = 150
  */
 const REST_MS = 300
 const RESULT_MS = 500
-const TYPE_MS = 400
+
+/**
+ * A fill rests on its click for the ring's full run, steps off the field so
+ * the typing stays readable, and settles before the first key, the timing the
+ * operator picked in groundwork track `252-multi-action-camera`.
+ */
+const DWELL_MS = 450
+const STEP_OFF_MS = 300
+const SETTLE_MS = 150
+
+/** Where a fill steps off to, from the field's bottom-right corner. */
+const STEP_OFF = { x: -6, y: 14 } as const
 
 /** The press a context menu opens on, which a page reads as `button` 2. */
 const RIGHT = { button: 'right' } as const
@@ -261,7 +272,13 @@ export async function performSteps(
           1,
           {},
         )
-        await pause(stage, state, TYPE_MS)
+        if (state.log) {
+          await stage.hold(DWELL_MS)
+          await moveTo(stage, state, stepOff(box, stage.viewport), {
+            ms: STEP_OFF_MS,
+          })
+          await stage.hold(SETTLE_MS)
+        }
         const start = stage.now()
         for (const character of step.text) {
           await stage.key(character)
@@ -281,6 +298,7 @@ export async function performSteps(
       case 'scroll': {
         const at = await scrollPoint(stage, step.target)
         await moveTo(stage, state, at)
+        await pause(stage, state, REST_MS)
         const frames = Math.round(SCROLL_MS / FRAME_MS)
         const start = stage.now()
         let sent = 0
@@ -324,11 +342,16 @@ async function moveTo(
   options: {
     readonly held?: { readonly modifiers: readonly Modifier[] }
     readonly unlogged?: true
+    /** A fixed length for a short step, over the pace `travelMs` sets. */
+    readonly ms?: number
   } = {},
 ): Promise<Glide | undefined> {
   const from = state.pointer
   if (Math.hypot(to.x - from.x, to.y - from.y) < 1) return undefined
-  const frames = Math.max(1, Math.round(travelMs(from, to) / FRAME_MS))
+  const frames = Math.max(
+    1,
+    Math.round((options.ms ?? travelMs(from, to)) / FRAME_MS),
+  )
   const pressed = options.held
     ? { held: true as const, ...withModifiers(options.held.modifiers) }
     : {}
@@ -542,6 +565,23 @@ function withModifiers(modifiers: readonly Modifier[]): {
 
 function center(box: Box): Point {
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+}
+
+/**
+ * Just past a field's bottom-right corner, held inside the window so a field
+ * against its edge still films the step rather than refusing as offscreen.
+ */
+function stepOff(box: Box, viewport: Viewport): Point {
+  return {
+    x: Math.min(
+      Math.max(box.x + box.width + STEP_OFF.x, 0),
+      viewport.width - 1,
+    ),
+    y: Math.min(
+      Math.max(box.y + box.height + STEP_OFF.y, 0),
+      viewport.height - 1,
+    ),
+  }
 }
 
 function inWindow(at: Point, viewport: Viewport): boolean {

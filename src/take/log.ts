@@ -231,13 +231,13 @@ export const START: Point = startOf(VIEWPORT)
 
 /**
  * How long the pointer takes to travel, slower for longer reaches and never so
- * quick that a viewer loses it. Carried over from the groundwork takes the
- * camera presets were judged on.
+ * quick that a viewer loses it, since a 300 ms floor read as a jump on every
+ * short reach the operator judged.
  */
 export function travelMs(from: Point, to: Point): number {
   return Math.min(
     1200,
-    Math.max(300, Math.hypot(to.x - from.x, to.y - from.y) * 0.9),
+    Math.max(600, Math.hypot(to.x - from.x, to.y - from.y) * 0.9),
   )
 }
 

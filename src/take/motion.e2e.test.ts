@@ -180,15 +180,16 @@ describe.skipIf(!available())('the settled motion on the fixture', () => {
   })
 
   describe('write the release note', () => {
-    it('should type the first key 400 ms after the field click', () => {
+    it('should type the first key once the pointer rests, steps off, and settles', () => {
       const { reports } = beat('write the release note')
       const release = reports.find((r) => r.type === 'pointerup')
       const typed = reports.find((r) => r.type === 'input')
 
       const pause = between(release, typed)
 
-      expect(pause).toBeGreaterThanOrEqual(400)
-      expect(pause).toBeLessThanOrEqual(400 + FRAME_MS + 1)
+      // A 450 ms rest on the click, a 300 ms step off, and a 150 ms settle.
+      expect(pause).toBeGreaterThanOrEqual(900)
+      expect(pause).toBeLessThanOrEqual(900 + FRAME_MS + 1)
     })
   })
 })
