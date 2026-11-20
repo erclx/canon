@@ -23,7 +23,7 @@ Films each beat of a take plan from a fresh load and writes its clip, a log with
 - The camera zooms onto a press over the glide reaching it, and in the reel onto the box a key moved focus to, at a depth the clip's width over the output's caps, and pans only at a steady scale
 - Stepped frames stream into the system FFmpeg, screencast frames spool beside the clip until the stop, and FFmpeg's absence refuses before any browser launches
 
-### `src/take/check.ts` and `stall.ts`
+### `src/take/check.ts`
 
 `check.ts` holds the timing rules over a beat's log and track, each limit a frame under the engine's pacing. `stall.ts` runs FFmpeg `freezedetect` over each typing burst and drag of a beat not filmed stepped. FFmpeg's default -60 dB read a whole 4K typing burst as frozen, so it reads at -100 dB.
 
