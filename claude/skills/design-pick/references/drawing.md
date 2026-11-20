@@ -52,24 +52,35 @@ Copy both pages' captures into the drive's `evidence/baseline/` as its whole-pag
 
 ## Layout
 
-Place every frame with `--width <px>`, `--x`, and `--y` on its add, the width being its column's. A frame added without them hugs its content and lands past every other one. Leave 80px between columns and 80px below the tallest frame of the row above, so a tall phone frame never overlaps the next row.
+Down is page order and across is what is compared. Each design on a page is one group, being a pick round's arm, a drive's current set or option, or a reference site, and the groups sit side by side, left to right.
+
+Place every frame with `--width <px>`, `--x`, and `--y` on its add, the width being its column's. A frame added without them hugs its content and lands past every other one.
+
+### Inside a group
+
+A group runs its widths as columns and its sections as rows, so one row reads as one section at every width.
+
+- Put desktop at the group's x, tablet 80px past the desktop's right edge, and phone 80px past the tablet's, so at the fallback widths at the group's x plus 0, 1520, and 2434
+- Stack the sections down in page order, one row per section, each row starting 80px below the tallest frame of the row above
+- Put a shot in its own section's row whatever its width, so a section split into more phone shots than desktop ones stacks the extra shots inside that row and never shifts the rows below
+- Start the next group 400px past the right edge of the group's last column
+
+A page set on `00-current` or `00-next` is one group at x 0.
 
 ### A pick round
 
-A round draws each arm once per width, as a grid the operator scans both ways.
+A round draws each arm as one group, in arm order from the left, so the operator reads across for the comparison and down for the page.
 
-- Give each arm one row in arm order, and each width one column in ascending order
-- Start each column 80px past the right edge of the column before it
+- Start every arm's group at the same y, so a section reads across all the arms on one line
+- Give a later round its own page, as `## Pages` states, rather than a row on this one
 
 ### A drive's topic page
 
 A topic page opens with the section as shipped and puts each round of options to its right.
 
-- Put the section's current set in the column at the far left, desktop at the top and tablet and phone under it
-- Put each arm in a column of its own, its desktop at the top of the round and its tablet and phone under that desktop
-- Draw each later round below the tallest frame of the round before it, keeping the current column where it is
-
-A page set on `00-current` or `00-next` places desktop at x 0, tablet 80px past the desktop's right edge, and phone 80px past the tablet's, so at the fallback widths at 0, 1520, and 2434.
+- Put the section's current set as the leftmost group
+- Put each arm of a round in a group of its own to the right of the current set, in arm order
+- Draw each later round below the tallest frame of the round before it, keeping the current group where it is
 
 ## Names
 

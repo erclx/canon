@@ -102,7 +102,7 @@ Every frame follows the same layout rules, so the page reads as one set.
 
 - Caption every frame above its image with the site, the source URL, the width, and one line on the structure an arm may take
 - Link each image as `../assets/references/<site>/<px>/section-<nn>.png`, and a film's still and reel under `../assets/references/<site>/takes/`, one folder up from `<page-dir>`
-- Lay each site out as one band, a column per width in ascending order and the films in a column after them, with the notes frame heading the band
+- Lay each site out as one group per `## Layout` in `${CLAUDE_SKILL_DIR}/../design-pick/references/drawing.md`, the notes frame on top and the films in a column after the phone
 - Theme the caption off the `data-theme` attribute the board sets on each frame's root, and leave the image as it was shot
 
 ## Step 8: hand over
