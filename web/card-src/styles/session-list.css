@@ -1,0 +1,10 @@
+/* The README loop's frame: the window alone at README width, inset from the grid ground on every side. */
+body {
+  margin: 0;
+}
+
+.loop {
+  box-sizing: border-box;
+  width: 960px;
+  padding: 48px;
+}

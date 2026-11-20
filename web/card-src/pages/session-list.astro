@@ -1,0 +1,51 @@
+---
+/**
+ * The agent view alone on the grid ground, the route the README's hero loop
+ * is filmed from, since the landing page opens on the relay instead. It reads
+ * the page's own stylesheet, tokens, and fonts, and `?theme=light` renders the
+ * `-light` twin every README image pairs with.
+ *
+ * `card.config.mjs` is the only config whose router reaches this file, which
+ * keeps it out of the published site.
+ */
+import '@/styles/global.css'
+import '../styles/session-list.css'
+import SessionList from '@/components/session-list/index.astro'
+
+import { FONT_FACES } from '../../../src/design/fonts'
+
+const faces = FONT_FACES.filter(
+  (face) =>
+    face.family === 'Geist Variable' || face.family === 'Geist Mono Variable',
+)
+if (faces.length < 2)
+  throw new Error('src/design/fonts.ts carries no Geist or Geist Mono face')
+const fontFace = faces
+  .map(
+    (face) =>
+      `@font-face{font-family:'${face.family}';font-weight:${face.weight};font-display:block;src:url(data:font/woff2;base64,${face.base64}) format('woff2');}`,
+  )
+  .join('')
+---
+
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <title>Session list</title>
+    <!-- Read by bun run web:card:check. A build carrying this tag
+         published a card route. Do not reword it. -->
+    <meta name="og-card-marker" content="og-card-marker" />
+    <style is:inline set:html={fontFace}></style>
+    <!-- canon-allow-embedded: picks the ground before the capture paints, which a bundled module runs too late for -->
+    <script is:inline>
+      if (new URLSearchParams(location.search).get('theme') === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light')
+      }
+    </script>
+  </head>
+  <body>
+    <div class="loop">
+      <SessionList />
+    </div>
+  </body>
+</html>

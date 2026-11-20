@@ -1,0 +1,82 @@
+---
+import { fold } from '../../content/copy'
+import {
+  changes,
+  completed,
+  menuFlow,
+  opening,
+  pinned,
+  roleLines,
+} from '../../content/sessions'
+import { readSkills } from '../../lib/skills'
+import './style.css'
+
+/**
+ * Claude Code's agent view, which the README loop is filmed from. It runs
+ * changes through their roles, a finished worker starting both reviewers of
+ * its change, and its prompt takes typing, opening the canon skill menu on `/`
+ * and shell mode on `!`. The menu reads the catalog at build time. A pause
+ * button holds the loop when an ancestor marked `data-loop` carries one.
+ */
+const data = {
+  changes,
+  lines: roleLines,
+  pinned,
+  completed,
+  opening,
+  flow: menuFlow,
+  skills: readSkills(),
+  noMatch: fold.view.noMatch,
+  shellHint: fold.view.shellHint,
+}
+---
+
+<div class="session-list">
+  <div class="win term">
+    <div class="win-bar">
+      <i></i><i></i><i></i><span>{fold.view.title}</span>
+    </div>
+    <div class="av">
+      <div class="cnts" id="av-counts"></div>
+      <div class="lst" id="av-list"></div>
+      <div class="prompt">
+        <label class="ask-line">
+          <span class="p">❯</span>
+          <span class="fld">
+            <input
+              id="av-ask"
+              type="text"
+              placeholder=" "
+              aria-label={fold.view.askLabel}
+              autocomplete="off"
+              spellcheck="false"
+              maxlength="120"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-controls="av-menu"
+              aria-expanded="false"
+            />
+            <span class="c"></span>
+            <span class="ph">{fold.view.hint}</span>
+            <span class="mz" aria-hidden="true">xxxxxxxxxxxxxxxxxxxx</span>
+          </span>
+        </label>
+        <div
+          class="menu"
+          id="av-menu"
+          role="listbox"
+          aria-label={fold.view.menuLabel}
+          hidden
+        >
+        </div>
+      </div>
+    </div>
+  </div>
+  <script
+    type="application/json"
+    id="av-data"
+    set:html={JSON.stringify(data)}
+  />
+</div>
+
+<script src="./client.ts"></script>
