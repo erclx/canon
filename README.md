@@ -44,7 +44,7 @@ One long session loses the thread. canon splits a change across a planner, a wor
 
 ## The record each step writes
 
-Each record has a fixed shape, so the next session knows where to read. Records live under `.canon/` in the main checkout.
+Pick up a change where the last session stopped. Each record has a fixed shape, so the next session knows where to read. Records live under `.canon/` in the main checkout.
 
 - Before a build: intake, groundwork, the plan, its task, and the board
 - Around a pull request: the code review, the UI review, and the screenshot evidence

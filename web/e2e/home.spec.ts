@@ -292,22 +292,6 @@ test.describe('section shapes', () => {
       expect(misplaced).toEqual([])
     })
   }
-
-  test('no two banded sections touch, and the opening carries no band', async ({
-    page,
-  }) => {
-    await page.goto('/')
-
-    const shapes = await page
-      .locator('main > section')
-      .evaluateAll((nodes) =>
-        nodes.map((node) => node.classList.contains('banded')),
-      )
-
-    expect(shapes[0]).toBe(false)
-    expect(shapes.some((banded, i) => banded && shapes[i + 1])).toBe(false)
-    expect(shapes.filter(Boolean)).toHaveLength(5)
-  })
 })
 
 test.describe('the band', () => {
@@ -709,187 +693,51 @@ test.describe('the setup section', () => {
   })
 })
 
-test.describe('the records stack', () => {
-  test.use({ viewport: { width: 1440, height: 900 } })
-
-  /** The stage's top, less the place it pins to, at a scroll offset into the stack. */
-  async function stageAt(
-    page: import('@playwright/test').Page,
-    offset: number,
-  ) {
-    return page.evaluate((into) => {
-      const box = document.querySelector<HTMLElement>('#records .scrolly')
-      const stick = box?.querySelector<HTMLElement>('.stick')
-      if (!box || !stick) throw new Error('the records stage did not render')
-      const start = box.getBoundingClientRect().top + window.scrollY
-      const pin = parseFloat(getComputedStyle(stick).top)
-      window.scrollTo(0, start - pin + into)
-      return {
-        drift: stick.getBoundingClientRect().top - pin,
-        length: box.offsetHeight - stick.offsetHeight,
-      }
-    }, offset)
-  }
-
-  test('pins below the bar for the length of its sheets', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'no-preference' })
+test.describe('the records fan', () => {
+  test('a chip brings its record to the front', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto('/')
-    const { length } = await stageAt(page, 0)
+    const chips = page.locator('#records .chip')
+    await expect(chips).toHaveCount(12)
+    const front = page.locator('#records .sheet[data-at="0"]')
+    await expect(front).toHaveAttribute('aria-label', 'Plan')
 
-    const midway = await stageAt(page, Math.round(length / 2))
-    const atLast = await stageAt(page, length - 1)
+    await chips.filter({ hasText: 'Board' }).click()
 
-    expect(Math.abs(midway.drift)).toBeLessThan(1)
-    expect(Math.abs(atLast.drift)).toBeLessThan(1)
-  })
-
-  test('lets go of the stage after the last sheet', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await page.goto('/')
-    const { length } = await stageAt(page, 0)
-
-    const past = await stageAt(page, length + 200)
-
-    expect(past.drift).toBeLessThan(-100)
-  })
-
-  test('turns the sheets as the page scrolls', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await page.goto('/')
-    const { length } = await stageAt(page, 0)
-
-    await stageAt(page, length)
-
-    await expect(
-      page.locator('#records .tabs .pick[aria-pressed="true"]'),
-    ).toHaveAttribute('data-i', '11', SETTLE)
-  })
-
-  test('the explorer lights the file the front record has open', async ({
-    page,
-  }) => {
-    await page.goto('/')
-    const front = page.locator('#records .sheet[data-i="0"]')
-    const lit = front.locator('.explorer .on')
-    // Intake opens on its second file, so the first tab is the one to switch to.
-    await expect(lit).toHaveAttribute('data-f', '1')
-
-    await front.locator('.ftab[data-f="0"]').click()
-
-    await expect(lit).toHaveCount(1)
-    await expect(lit).toHaveAttribute('data-f', '0')
-    await expect(lit).toBeVisible()
-  })
-
-  test('a click on an explorer file opens its tab, out of the tab order', async ({
-    page,
-  }) => {
-    await page.goto('/')
-    const front = page.locator('#records .sheet[data-i="0"]')
-    const entry = front.locator('.explorer button[data-f="0"]')
-    await expect(entry).toHaveAttribute('tabindex', '-1')
-
-    await entry.click()
-
-    await expect(front.locator('.ftab[data-f="0"]')).toHaveAttribute(
-      'aria-selected',
+    await expect(front).toHaveAttribute('aria-label', 'Board')
+    await expect(front).toContainText('In flight')
+    await expect(chips.filter({ hasText: 'Board' })).toHaveAttribute(
+      'aria-pressed',
       'true',
     )
-    await expect(entry).toHaveClass(/\bon\b/)
+    await expect(
+      page.locator('#records .sheet:not([aria-hidden])'),
+    ).toHaveCount(1)
   })
 
-  test('a click on an explorer folder folds the rows under it', async ({
+  test('fans the two records either side of the front one', async ({
     page,
   }) => {
-    await page.goto('/')
-    const explorer = page.locator('#records .sheet[data-i="0"] .explorer')
-    const files = explorer.locator('button[data-f]')
-    const folder = explorer.locator('.fold:has(+ button[data-f])')
-    await expect(folder).toHaveCount(1)
-    await expect(files.first()).toBeVisible()
-
-    await folder.click()
-
-    await expect(files.first()).toBeHidden()
-    await expect(folder).toHaveClass(/\bshut\b/)
-    await folder.click()
-    await expect(files.first()).toBeVisible()
-  })
-
-  test('every explorer folder row draws a chevron and every file row a mark', async ({
-    page,
-  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto('/')
 
-    const rows = await page
-      .locator('#records .explorer > *')
+    const shown = await page
+      .locator('#records .sheet')
       .evaluateAll((nodes) =>
-        nodes.map((node) => ({
-          file: node.hasAttribute('data-f'),
-          chevron: getComputedStyle(node, '::before').maskImage,
-          mark: Boolean(node.querySelector('.fi')),
-        })),
+        nodes
+          .filter((node) => getComputedStyle(node).visibility === 'visible')
+          .map((node) => node.getAttribute('aria-label')),
       )
 
-    expect(rows.filter((row) => !row.file).length).toBeGreaterThan(0)
-    expect(rows.filter((row) => row.file).length).toBeGreaterThan(0)
-    expect(
-      rows.filter((row) => !row.file && !row.chevron.includes('url(')),
-    ).toEqual([])
-    expect(rows.filter((row) => row.file && !row.mark)).toEqual([])
+    expect(shown).toEqual(['Intake', 'Groundwork', 'Plan', 'Task', 'Board'])
   })
 
-  test('every explorer chevron and file mark sits on its own row', async ({
-    page,
-  }) => {
+  test('shows the front record alone at 390', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 900 })
     await page.goto('/')
+    await expect(page.locator('#records .sheet')).toHaveCount(12)
 
-    // A static row hands its absolute chevron and mark to the explorer, which draws them at its top.
-    const positions = await page
-      .locator('#records .explorer > *')
-      .evaluateAll((nodes) =>
-        nodes.map((node) => getComputedStyle(node).position),
-      )
-
-    expect(positions.length).toBeGreaterThan(0)
-    expect(positions.filter((position) => position === 'static')).toEqual([])
-  })
-
-  test('a click on an empty explorer folder changes nothing', async ({
-    page,
-  }) => {
-    await page.goto('/')
-    const explorer = page.locator('#records .sheet[data-i="0"] .explorer')
-    const empty = explorer.locator('.dir').first()
-    await expect(empty).toBeVisible()
-    const before = await explorer.innerHTML()
-
-    await empty.click()
-
-    expect(await explorer.innerHTML()).toBe(before)
-  })
-
-  test('every view switch puts the source button first', async ({ page }) => {
-    await page.goto('/')
-
-    const firsts = await page
-      .locator('#records .vt')
-      .evaluateAll((groups) =>
-        groups.map(
-          (group) => (group.firstElementChild as HTMLElement | null)?.dataset.v,
-        ),
-      )
-
-    expect(firsts).toHaveLength(12)
-    expect(firsts.filter((view) => view !== 'src')).toEqual([])
-  })
-
-  test('takes no pinned scroll under reduced motion', async ({ page }) => {
-    await page.goto('/')
-
-    const { length } = await stageAt(page, 0)
-
-    expect(length).toBeLessThan(10)
+    await expect(page.locator('#records .sheet:visible')).toHaveCount(1)
   })
 })
 

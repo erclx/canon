@@ -170,10 +170,10 @@ export const roles = {
 export const records = {
   // README.md: "The record each step writes"
   head: 'The record each step writes',
-  // README.md: "Each record has a fixed shape, so the next session knows where to read."
-  lede: 'Each record has a fixed shape, so the next session knows where to read.',
-  // README.md: canon-allow-readme-paraphrase: the skip link past the scroll-driven stack, which the README has no stack to need.
-  skip: 'Skip past the records',
+  // README.md: "Pick up a change where the last session stopped. Each record has a fixed shape, so the next session knows where to read."
+  lede: 'Pick up a change where the last session stopped. Each record has a fixed shape, so the next session knows where to read.',
+  // README.md: canon-allow-readme-paraphrase: the name of the chips that bring a record to the front, which no README sentence carries.
+  pick: 'Bring a record to the front',
 }
 
 export const craft = {
