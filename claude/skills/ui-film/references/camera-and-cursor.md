@@ -1,15 +1,16 @@
 ---
 title: Camera and cursor
-description: Eleven filmed scenarios on a three-column app page, what the camera and cursor do in each beat shape, the pace a take keeps, the pointer look, and the rules a beat writer follows
+description: Eleven filmed scenarios on a three-column app page, the zoom rules and the push and hand keys, the pace a take keeps, the pointer look, and the rules a beat writer follows
 ---
 
 # Camera and cursor
 
-Read beside `take-craft.md` at Step 3 of `ui-film`, before writing a beat that holds more than one action or no hand at all. The verb applies every rule here on its own, so this file tells a beat writer what a beat shape will film as and which key changes it.
+Read beside `take-craft.md` at Step 3 of `ui-film`, before writing the first beat. The verb applies the pace and the camera on its own, so this file tells a beat writer what to film for the camera to aim at, what a beat shape will film as, and which key changes it.
 
 ## Contents
 
 - [The scenarios](#the-scenarios)
+- [The zoom](#the-zoom)
 - [The pace](#the-pace)
 - [The look](#the-look)
 - [Rules for a beat writer](#rules-for-a-beat-writer)
@@ -53,6 +54,42 @@ These beats move content or the whole page rather than one control.
 
 A harness log that splits one glide into several moves used to pump the zoom out and in at every piece. The camera now reads moves logged back to back as one glide, so a beat's zoom count follows its presses rather than how its log was written.
 
+## The zoom
+
+The camera track already carries the zoom, so these rules decide what to film for it to aim at.
+
+- Earn a zoom with an action. The camera aims at a press, typing, and a `move` carrying `hold`, so a result too small to read needs one of those on it.
+- Expect a wait, a plain move, or a scroll to aim nowhere
+- Expect a scroll to end a zoom, since the content moves under the camera
+- Expect a target filling most of the view to get less zoom, and one filling the page to get none
+- The push rides the glide onto its target and lands as the cursor arrives, so it lasts as long as that glide, between 600 ms and 1.2 s
+
+### Depth, opt-out, and speed
+
+Three controls change the push itself.
+
+- Expect a screencast beat's zoom to stop near 1.35x, since its clip has one pixel per page pixel, and a stepped beat's to reach 1.8x
+- Set `"push": false` on a beat whose change covers the whole page, such as a theme switch or a layout change. Its track keeps the cursor and the click ring and drops the zoom.
+- Set `"hand": false` on a beat no person drives, such as an agent editing the page. Its steps still run, and the camera holds wide with no cursor or ring drawn.
+- Rebuild a beat's track with `canon take camera <dir>/log.json --rate <n> --out <file>` for a clip the edit plays `n` times faster, so the zoom settles on the clock a viewer sees
+
+### The cursor leads the camera
+
+The viewer follows the cursor, so the camera zooms where the cursor acts and never anywhere the cursor is not.
+
+- Reach a hand action through a control the viewer can see, such as a menu item, a button, or an inspector field, since a viewer cannot repeat an action whose entry point the film never shows
+- Keep a keyboard shortcut off camera unless the beat is about the shortcut, and then give it a key overlay in the edit
+- Film a look-back at a changed element as a `move` to it carrying `hold`, so the cursor glides there and the camera holds on its arrival
+- Never aim the camera at a point the cursor left behind, since a push onto a button while the drawn cursor sits elsewhere reads as broken
+- End a hold when the cursor leaves. A glide onto the next target plus about 1 s of hold fit Frameboard's launch film, where a 3.2 s camera-only hold read as too long.
+
+### One track per take
+
+A camera track is read off one take's log and is true of that take alone.
+
+- Rebuild every camera track from the new log after a re-film, each `--rate` track included, since a track left from the old take aims at moments that no longer happen
+- Never hand-tune a track, since the next re-film overwrites the log under it and leaves the tuning aimed at the old clock
+
 ## The pace
 
 Each move takes the time a person's would, and the verb paces it without a `wait` from the plan.
@@ -86,9 +123,21 @@ Set `"hand": false` on a beat no person drives, such as an agent editing the pag
 
 ## Sources
 
+The scenarios, the pace, and the look come from the takes the operator judged and from Frameboard's launch film.
+
 | Rule                          | Source                                                                                  |
 | ----------------------------- | --------------------------------------------------------------------------------------- |
 | The scenarios and their calls | Eleven takes of the page above, each judged by the operator on a rendered view          |
 | The pace                      | Side by side renders at 300 and 600 ms floors, and at a 300 and a 450 ms rest on a fill |
 | The look                      | Frameboard's launch film, whose ring and arrow the operator picked for every reel       |
 | No cursorless zoom            | The same film, where a zoom onto an agent's edit with no cursor read as fake            |
+
+The zoom rules come from a recorder's guide, a fixture page, and the same film.
+
+| Rule                          | Source                                                                                                           |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Zoom on a click               | Screen Studio's [auto zoom guide](https://screen.studio/guide/auto-zoom) keys its zoom on click positions        |
+| The push riding the glide     | The operator judged renders of a fixture page by eye and kept a zoom landing with the cursor over one leading it |
+| The cursor leading the camera | Frameboard's launch film, whose operator flagged every push the drawn cursor did not lead                        |
+| A visible entry point         | Frameboard's launch film, where a hand edit reached with no visible click cost a composed round and a refilm     |
+| One track per take            | Frameboard's launch film, where tracks left from an earlier take drove two beats off sync                        |
