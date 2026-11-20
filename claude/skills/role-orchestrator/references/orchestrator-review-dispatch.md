@@ -7,7 +7,7 @@ Run this on every first pass, from `### The review dispatch` in the skill body. 
 
 ## Proof before any reviewer
 
-A painted pull request missing proof goes back to its worker before any reviewer launches. Read it on every first pass, ahead of every launch below, and on every `MOVED` the poll routes here:
+A painted pull request owing its evidence comment goes back to its worker before any reviewer launches, and one with an uncaptured path goes to the reviewers. Read it on every first pass, ahead of every launch below, and on every `MOVED` the poll routes here:
 
 ```bash
 canon pr evidence <number> --check --json
@@ -17,24 +17,32 @@ Branch on the record's fields rather than on the exit code, and never derive the
 
 | Record                         | Route                                                                                      |
 | ------------------------------ | ------------------------------------------------------------------------------------------ |
-| `uncaptured` lists paths       | Send it back for a capture and `pr-evidence`, naming each path as the record spells it     |
 | `owed` holds `evidence`        | Send it back to run `pr-evidence`, since an evidence image changed and no comment shows it |
+| `uncaptured` lists paths       | Launch both reviewers below, carrying each path into the code reviewer's brief             |
 | `settled`, `uncaptured` empty  | Proof stands, so launch the reviewers below                                                |
 | `uncaptured` absent            | The base keeps no captures, so route on `owed` alone and never send it back for a capture  |
 | A refusal, such as `gh-failed` | Report the `reason`, launch the reviewers, and name the check unread in each brief         |
 
 `owed` holding only `preview` is the ship chain's deploy wait rather than missing proof, so it holds no reviewer.
 
+Read the rows in order, so a record owing `evidence` goes back even when it also lists `uncaptured` paths, and its reviewers launch once a re-read finds the comment posted.
+
 ### Sending it back
 
-Message the session holding the branch, resolved the way `## Sending the handback` in `orchestrator-handback.md` resolves it, with the paths and the skill to run. Hold both reviewers until a re-read reads proof, since a code review on a head about to gain captures runs twice.
+Send a pull request back for `owed` evidence alone, naming `pr-evidence` to the session holding the branch, resolved the way `## Sending the handback` in `orchestrator-handback.md` resolves it. Hold both reviewers until a re-read finds the comment posted, since a code review on a head about to gain it runs twice.
 
-- A worker reporting that no capture can be taken, such as a state no fixture reaches, releases the hold, so launch the reviewers
-- Carry the uncaptured paths as a fact in the code reviewer's brief then, since only a review pass may write the waiver `canon pr lift` reads
 - Re-read the check on the worker's reply, the next `MOVED`, or the poll's `EVIDENCE` line, never on a timer
   - The poll prints `EVIDENCE` when a reading of `owed` evidence or an `uncaptured` path turns `settled`, kept in its eleventh baseline field beside `unread`
   - It reads the check only while that field is unsettled or the head moved, and a refused read leaves the last reading standing
 - A refusal never reads as proof. `canon pr lift` reads the same record and holds the mark on its own gate, so a launch past an unread check costs no merge.
+
+### Launching on uncaptured paths
+
+An uncaptured path is a judgment the code reviewer makes rather than proof the worker owes, since only a review pass may write the waiver `canon pr lift` reads. Sending it back held both reviewers on a capture the worker could not always take.
+
+- Launch both reviewers and carry each path, as the record spells it, in the code reviewer's brief through the uncaptured clause in `orchestrator-reviewer-launch.md`
+- The code reviewer waives each path with a `Waived capture:` line or files a capture finding on it, which the worker answers through `review-address`
+- A capture the worker could have taken arrives one round later as that finding, the cost of keeping the worker off the dispatch path
 
 ## Every pull request takes a reviewer
 
@@ -49,6 +57,8 @@ Dispatch every pull request's review to a reviewer under `role-reviewer`, first 
 ## The UI reviewer
 
 A pull request whose evidence record counts a drivable box takes a second reviewer, a UI reviewer under `review-ui`, dispatched beside the code reviewer so the two passes run at once. Read the record with `canon pr evidence <number> --json` and branch on `drivable` above zero rather than on the exit code.
+
+The record decides this dispatch rather than the worker's announcement, since it reads the checklist `pr-evidence` posted and a message carries only what its sender read.
 
 - A record carrying no checklist dispatches no UI reviewer, since the pass would stop on arrival
 - A record whose `drivable` reads zero, every box being `(taste)`, dispatches none either, while a `checklist` with no readable `drivable` dispatches one, as the lift binds on it
