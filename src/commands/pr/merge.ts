@@ -114,8 +114,7 @@ const MERGE_REFUSALS: Record<MergeRefusal | 'gh-missing', string> = {
 }
 
 /**
- * The REST merge, never `gh pr merge`, which runs on the GraphQL a cloud
- * session's proxy refuses. gh reports the status only as the `(HTTP <code>)`
+ * The REST merge, never `gh pr merge`. gh reports the status only as the `(HTTP <code>)`
  * tail of its stderr, so 409 and 405 are read off it.
  */
 async function putSquashMerge(

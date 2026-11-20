@@ -104,8 +104,8 @@ export const WEB_ONLY_DEPLOY = [
 ].join('\n')
 
 /**
- * A `gh` standing in for the GitHub proxy a cloud session runs behind, which
- * serves REST and refuses GraphQL with a 403, so a verb that reintroduces a
+ * A `gh` stand-in serving REST fixtures, which refuses GraphQL with a 403 so
+ * the verbs stay on REST, and a verb that reintroduces a
  * `pr` subcommand, `repo view`, or `graphql` call fails the test driving it.
  *
  * Fixtures live in `FAKE_DIR`: `pull.json` answers the single pull read,

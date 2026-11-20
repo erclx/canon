@@ -188,8 +188,7 @@ type SourceRead =
  * or from the one open on this branch.
  *
  * The body comes off the pull read and the files off the paginated files
- * endpoint, since GraphQL is the only route that returns both in one call and
- * a cloud session's proxy refuses it. A push between the two reads can compare
+ * endpoint, since only GraphQL returns both in one call. A push between the two reads can compare
  * a body against the next commit's files, which the paginated read already
  * risked for any pull request past the old view's cap of 100 files.
  */

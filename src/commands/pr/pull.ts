@@ -131,10 +131,7 @@ type PullRead =
       readonly reason: 'gh-failed' | 'ambiguous-pull'
     }
 
-/**
- * The pull request object off the REST pull endpoint, which a cloud session's
- * proxy serves where it refuses the GraphQL every `gh pr view` runs on.
- */
+/** The pull request object off the REST pull endpoint. */
 export async function readPull(
   cwd: string,
   number: string | undefined,
@@ -330,7 +327,7 @@ export async function resolveWorktreeRoot(root: string): Promise<string> {
 
 export const POSITIVE_WHOLE = /^[1-9]\d*$/
 
-/** Replaces a pull request's body, which `gh` takes through the REST pulls endpoint a cloud proxy serves. */
+/** Replaces a pull request's body through the REST pulls endpoint. */
 export async function patchPullBody(
   root: string,
   number: number,
