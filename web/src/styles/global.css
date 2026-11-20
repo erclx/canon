@@ -27,6 +27,10 @@
     --body: var(--color-text-body);
     --muted: var(--color-muted);
     --accent: var(--color-accent);
+    --grid: var(--color-grid);
+    --rule: var(--color-rule);
+    --outline: var(--color-outline);
+    --card: var(--color-surface);
     --hover: color-mix(in srgb, var(--ink) 5%, transparent);
     /* What a hollow marker punches through to, which a band turns to its grey. */
     --behind: var(--ground);
@@ -51,9 +55,25 @@
     scroll-padding-top: var(--nav-h);
   }
 
+  /*
+   * The ground: the canvas ruled in a 32px grid, fixed to the viewport so its
+   * lines run unbroken behind the nav and footer, which paint the same ground.
+   * A color change goes through `background-color`, since the shorthand resets
+   * the tile and the attachment.
+   */
+  body,
+  .site-nav,
+  .site-footer {
+    background-color: var(--ground);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 32px 32px;
+    background-attachment: fixed;
+  }
+
   body {
     margin: 0;
-    background: var(--ground);
     color: var(--body);
     font-family: var(--sans);
     font-size: var(--size-body);
@@ -133,6 +153,103 @@
     font-family: var(--mono);
     font-size: 0.9em;
     color: var(--ink);
+  }
+
+  /*
+   * A part of the drawn page: full width, so the soft rule between two parts
+   * runs edge to edge, with its content held to the page width inside `.w`.
+   */
+  .part {
+    padding: 112px 64px;
+  }
+
+  main > section + section {
+    border-top: 1px solid var(--rule);
+  }
+
+  .part .w {
+    max-width: var(--page-w);
+    margin: 0 auto;
+  }
+
+  .part h2 {
+    margin: 0;
+    max-width: 16ch;
+    font-size: var(--type-display-size);
+    line-height: var(--type-display-lh);
+    letter-spacing: -0.03em;
+    font-weight: 600;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+
+  .part .lede {
+    margin: 24px 0 0;
+    max-width: 44ch;
+    font-size: var(--type-lede-size);
+    line-height: var(--type-lede-lh);
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  .part code {
+    font-family: var(--mono);
+    font-size: 0.9em;
+    color: var(--ink);
+  }
+
+  /* A drawn card: the outline in ink and a hard shadow dropped down and right. */
+  .ink {
+    background: var(--card);
+    border: 1.5px solid var(--outline);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-offset);
+  }
+
+  /* A mono label: a path, a step, a session name. */
+  .note {
+    font-family: var(--mono);
+    font-size: var(--size-view-small);
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--muted);
+  }
+
+  /* A drawn control: ink outline, the small offset, pressed flat. */
+  .drawn {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1.5px solid var(--outline);
+    border-radius: var(--radius-action);
+    background: var(--card);
+    box-shadow: var(--shadow-offset-small);
+    font-family: var(--mono);
+    font-size: var(--size-view-small);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--ink);
+    transition:
+      transform var(--duration-feedback) var(--ease-standard),
+      box-shadow var(--duration-feedback) var(--ease-standard);
+  }
+
+  .drawn:active {
+    transform: translate(3px, 3px);
+    box-shadow: none;
+  }
+
+  .drawn:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  .drawn[hidden] {
+    display: none;
   }
 
   /* The grey tray every section's object sits on. */
@@ -415,6 +532,10 @@
       padding-bottom: 96px;
     }
 
+    .part {
+      padding: 80px 32px;
+    }
+
     .tray {
       padding: 24px;
     }
@@ -429,6 +550,10 @@
     .sec {
       padding-top: 64px;
       padding-bottom: 72px;
+    }
+
+    .part {
+      padding: 48px 20px;
     }
 
     .tray {
