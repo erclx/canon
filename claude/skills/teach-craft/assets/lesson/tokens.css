@@ -8,7 +8,7 @@
   --accent-strong: #1f5fcc;
   --on-accent: #ffffff;
   --surface: #ffffff;
-  --text: #111111;
+  --text: #111111; /* canon-allow-reference: a hex color, not a pull request */
   --muted: #6b7280;
   --border: #e5e7eb;
   --line: #d1d5db;
@@ -26,8 +26,8 @@
   color-scheme: dark;
   --accent: #4e92f6;
   --accent-strong: #6ea8ff;
-  --on-accent: #111111;
-  --surface: #111111;
+  --on-accent: #111111; /* canon-allow-reference: a hex color, not a pull request */
+  --surface: #111111; /* canon-allow-reference: a hex color, not a pull request */
   --text: #ededed;
   --muted: #9ca3af;
   --border: #2e2e2e;
