@@ -18,10 +18,10 @@ An operator who judges design on the board has no way to see a drive's frames th
 ## Must
 
 - The drive runs from a copy outside the project, and the copy is gone when the drive closes. A drive of the live app runs only on the operator's word and writes only into a page or project made for it.
-- Every requirements goal is driven per persona, or marked not driven with its reason
+- Every requirements goal is driven per persona, or marked not driven with its reason, after every script the config names has run once per persona
 - Every finding names its source and its severity, and carries its evidence inside the intake folder, as does every image the operator pastes during the drive
 - The drive files one intake folder, each finding sorted as a bug, a requirements conflict, or a taste call, and a session staying to plan its rows answers it before any row is promoted
-- `canon intake drive-check` fails a drive that skipped a goal, touched the checkout, left evidence outside the folder, or decided a visible change without drawing it
+- `canon intake drive-check` fails a drive that skipped a goal or a script, touched the checkout, left evidence outside the folder, or decided a visible change without drawing it
 
 ### On a project with a board
 

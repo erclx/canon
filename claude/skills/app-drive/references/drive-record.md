@@ -40,7 +40,7 @@ Write the log to `evidence/drive-log.md` inside the intake folder. It opens on i
 - `<nn>` numbers findings in the order they were found, and the frame carries the same number
 - A screenshot is `frames/<nn>-<name>.png`, moved under `evidence/<surface>/` once cited. A drawn frame takes the drawing guide's name, such as `<section>-<arm>-<px>`.
 - The title names what the persona met, in sentence case with no trailing period
-- The meta line holds the severity, the source, and the persona, in that order. The source is `goal`, `last-drive`, or `operator`, and a finding naming none sorts as taste.
+- The meta line holds the severity, the source, and the persona, in that order. The source is `script`, `goal`, `last-drive`, or `operator`, and a finding naming none sorts as taste.
 - A `last-drive` finding adds `fixed`, `still open`, or `changed` to its meta line
 
 ### A finding after the close
@@ -95,6 +95,12 @@ Leave a board page out of `Drawn`, since the check reads every code span there a
 
 A goal tried and passed takes a heading too, so the next drive can tell a goal checked from one skipped. Its meta line reads `pass` · goal · persona, and it carries `Did` and `Evidence` alone.
 
+### Passed scripts
+
+A script run and passed takes a heading per persona, as a passed goal does. Its meta line reads `pass` · script · persona, its `Did` names the script path and each numbered step that passed, and it carries `Evidence`.
+
+A step that fails ends the run of that script for that persona. It becomes a finding with source `script`, its `Did` naming the step number, and the steps after it go unrun.
+
 ### Operator images
 
 Operator images count as evidence on arrival. One showing a finding takes that finding's number and is cited from its `Evidence` field. One no finding cites yet is a reference shot with a heading of its own.
@@ -142,6 +148,14 @@ Write it to the intake folder root before the close. `canon intake drive-check` 
       "reason": "export needs a signed build"
     }
   ],
+  "target": null,
+  "scripts": [
+    {
+      "script": "canon/drive/basics.md",
+      "persona": "a designer laying out a board",
+      "status": "driven"
+    }
+  ],
   "evidence": ["evidence/board/01-board.png"],
   "worktree": "/tmp/tmp.Xy12/app"
 }
@@ -152,17 +166,26 @@ Write it to the intake folder root before the close. `canon intake drive-check` 
 - `evidence` lists every frame a finding cites and every image the operator pasted, reference shots included, each a path under `evidence/` relative to the intake folder
 - `worktree` is the throwaway worktree's path, which the check fails on while it still exists. A drive of the live app writes `"worktree": null`, and the check refuses an empty string.
 
+### Target and scripts
+
+Two fields tie the record to the config, so the check reads the scripts the drive was meant to run.
+
+- `target` names the config target the drive ran, or `null` for the flat default, and the check reads that target's scripts and personas
+- `scripts` holds one entry per configured script and persona, with the path as the config writes it
+- A script entry takes the `status` and `reason` a goal entry takes, and the list is empty or absent when the config names no scripts
+
 ### What the check fails
 
 A failed check names each finding by list, and an empty list is a clean axis.
 
-| List              | Fails on                                           |
-| ----------------- | -------------------------------------------------- |
-| `unmapped`        | a goal with no entry                               |
-| `unreasoned`      | a `not-driven` goal with no reason                 |
-| `unknown`         | an entry naming no goal the requirements hold      |
-| `changed`         | a main checkout path that moved since the baseline |
-| `strayEvidence`   | an evidence path outside `evidence/`               |
-| `missingEvidence` | an evidence path holding no file                   |
-| `undrawn`         | a logged decision with no drawn outcome or reason  |
-| `worktreeLeft`    | the `worktree` path still on disk                  |
+| List              | Fails on                                                             |
+| ----------------- | -------------------------------------------------------------------- |
+| `unmapped`        | a goal with no entry                                                 |
+| `unreasoned`      | a `not-driven` goal with no reason                                   |
+| `unknown`         | an entry naming no goal the requirements hold                        |
+| `unscripted`      | a configured script a persona did not run, or skipped with no reason |
+| `changed`         | a main checkout path that moved since the baseline                   |
+| `strayEvidence`   | an evidence path outside `evidence/`                                 |
+| `missingEvidence` | an evidence path holding no file                                     |
+| `undrawn`         | a logged decision with no drawn outcome or reason                    |
+| `worktreeLeft`    | the `worktree` path still on disk                                    |

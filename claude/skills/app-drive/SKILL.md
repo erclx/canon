@@ -9,7 +9,7 @@ metadata:
 
 A drive puts a built app in front of the operator and the session together, and turns what the two find into intake items a planner can promote. The app runs from a throwaway copy, so nothing the drive clicks reaches the project.
 
-`canon intake drive-check` fails the drive that skipped a goal, touched the checkout, or left its evidence in scratch.
+`canon intake drive-check` fails the drive that skipped a goal or a script, touched the checkout, or left its evidence in scratch.
 
 ## Guards
 
@@ -55,13 +55,14 @@ Note `reused` off the serve record, since the close ends only a server this run 
 
 Read `${CLAUDE_SKILL_DIR}/references/drive-record.md` before the first finding, for the drive log's shape, the severity scale, and the record the check reads.
 
-Work through three sources in this order, and name the source on every finding:
+Work through four sources in this order, and name the source on every finding:
 
-1. **`last-drive`.** Open the previous drive's intake folder, when one exists, and re-drive each of its findings. Mark each as fixed, still open, or changed.
-2. **`goal`.** Turn each `## Goals` bullet into a drive step, once per persona the config names. A goal the build cannot reach is marked `not-driven` with the reason, never left out.
-3. **`operator`.** Take each ask as it arrives. Reproduce and measure it before answering, and record the operator's call as a decision rather than a proposal.
+1. **`script`.** Run each file the config's `scripts` key names once per persona, first, so the basics run alike every drive. A missing file is `not-driven` with the reason.
+2. **`last-drive`.** Open the previous drive's intake folder, when one exists, and re-drive each of its findings. Mark each as fixed, still open, or changed.
+3. **`goal`.** Turn each `## Goals` bullet into a drive step, once per persona the config names. A goal the build cannot reach is marked `not-driven` with the reason, never left out.
+4. **`operator`.** Take each ask as it arrives. Reproduce and measure it before answering, and record the operator's call as a decision rather than a proposal.
 
-A finding naming none of the three is opinion and sorts as taste.
+A finding naming none of the four is opinion and sorts as taste.
 
 ### Driving the page
 
@@ -164,7 +165,7 @@ Emit every written file's relative path, the drive-check `reason`, and counts.
 ```plaintext
 📂 Filed .canon/intake/<nn>-<slug>/
 
-**Drive:** <N> goals across <P> personas, <F> findings (<B> bugs, <R> requirements conflicts, <T> taste)
+**Drive:** <N> goals and <S> scripts across <P> personas, <F> findings (<B> bugs, <R> requirements conflicts, <T> taste)
 **Check:** drive-check clean, worktree removed
 **Board:** project <board-project> kept on <board>
 
