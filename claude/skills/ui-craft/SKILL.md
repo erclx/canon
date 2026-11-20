@@ -19,6 +19,7 @@ Read every reference on the always row for any rendered change, then each row th
 | ---------------------------------------------------------------------------------------------------- | ------------------------------------- |
 | Any rendered change                                                                                  | `a11y.md`, `keyboard.md`, `states.md` |
 | A click, press, drag, gesture, or popover dismissal                                                  | `pointer.md`                          |
+| A context menu, a right-click, or a touch and hold                                                   | `menus.md`                            |
 | A form, a field, validation, or a sign-in step                                                       | `forms.md`                            |
 | An animation, transition, autoplay, carousel, or scroll-driven or dragged motion                     | `motion.md`                           |
 | A destructive action, an edit cancel, a hover or disabled state, or chrome that looks like a control | `controls.md`                         |

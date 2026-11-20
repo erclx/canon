@@ -59,6 +59,7 @@ The UI review runs axe over every route it reaches, so a box restating what axe 
 - **Hover content.** Content shown on hover or focus stays while the pointer moves onto it, and Escape dismisses it, per WCAG 1.4.13.
 - **Keyboard trap.** Tab and Shift+Tab leave every widget the change added, per WCAG 2.1.2.
 - **Outside press.** A menu, popover, or dialog the change added closes on a press outside it and when focus leaves it.
+- **Context menu.** A context menu the change added opens on right-click, Shift+F10, and touch and hold, and every row's action is reachable outside it.
 - **Change on input.** Choosing an option or typing changes no route and moves no focus until the person submits, per WCAG 3.2.2.
 - **Clipped focus ring.** Tab to each control the change added and judge from the capture whether a parent clips its ring, per WCAG 2.4.7.
 

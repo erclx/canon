@@ -6,6 +6,7 @@
 - Auto-dismiss a success message only when its outcome stays visible elsewhere. Keep a message carrying the only copy of its information until dismissed (WCAG 2.2.1).
 - Pause a timed message while it has pointer hover or keyboard focus, and take no focus for it. A person finishes reading it, and a status message never interrupts typing (WCAG 4.1.3).
 - Show no optimistic status, such as a green dot or "connected", while unsaved edits are pending.
+- Place a toast, hint, or docked card clear of fixed chrome and of the label of the target it annotates.
 
 ## Empty states
 
