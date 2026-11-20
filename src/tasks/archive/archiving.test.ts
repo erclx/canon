@@ -45,7 +45,7 @@ describe('archiveTask', () => {
     const path = join(tasksDir(ROOT), `${stem}.md`)
     const text = await readFile(path, 'utf8')
     const line =
-      'Sessions: worker-canon-a (0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0), cloud-a (session_01AbC)'
+      'Sessions: worker-canon-a (0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0), review-a (1a2b3c4d-5e6f-4a70-8b91-c2d3e4f5a6b7)'
     await writeFile(
       path,
       text.replace('# v28.1: A task\n', `# v28.1: A task\n\n${line}\n`),

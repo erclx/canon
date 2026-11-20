@@ -1,6 +1,6 @@
 ---
 title: Orchestrator launch runbook
-description: The launch every dispatch kind shares, being the build, cloud build, review-address, and planning templates with a pointer to the talk variant, the session name and controller id each carries, why the command sits at position zero, and what the brief may carry
+description: The launch every dispatch kind shares, being the build, review-address, and planning templates with a pointer to the talk variant, the session name and controller id each carries, why the command sits at position zero, and what the brief may carry
 ---
 
 Run this once `orchestrator-dispatch.md` has cleared a row, or from its planning or review-address shape below when that runbook's checks do not bind. The model and effort each template names come from `## Pick the model` in that runbook.
@@ -8,7 +8,6 @@ Run this once `orchestrator-dispatch.md` has cleared a row, or from its planning
 ## Contents
 
 - [Dispatch](#dispatch)
-- [Dispatch to a cloud worker](#dispatch-to-a-cloud-worker)
 - [Dispatch to address a review](#dispatch-to-address-a-review)
 - [Dispatch to plan a row](#dispatch-to-plan-a-row)
 - [Dispatch to plan and build a small row](#dispatch-to-plan-and-build-a-small-row)
@@ -85,10 +84,6 @@ Report the dispatch as loudly as the human-launch line it replaces, naming the b
 
 Once a build or review-address launch returns, run `canon tasks session <worker-id> <task> --json` with the sessionId the launch output carries. On `no-name`, the worker already exited, so rerun with `--name` and the name passed to `-n`.
 
-## Dispatch to a cloud worker
-
-Read `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md` when `orchestrator-dispatch.md` picked cloud for the row. It holds the prompt that carries the plan as text and announces over GitHub, the create under `script`, and the readout that refuses to record a missing session id.
-
 ## Dispatch to address a review
 
 `review-address` is a single pass, not a chain, so a launch naming it alone reaches no `role-worker` and owes no message. Reach the role directly on this launch instead of wrapping a second chain around one skill.
@@ -105,7 +100,7 @@ claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion 
 
 `<dispatcher-id>`, `<model>`, `<effort>`, and `<project>` resolve the same way the build shape resolves them above. `<reviewer-id>` is the sessionId the reviewer's own message carried, so a worker launched fresh answers the reviewer directly.
 
-- Where no local reviewer is live, as a cloud reviewer always leaves, drop the reviewer clause and send the finished message to the controller
+- Where no local reviewer is live, drop the reviewer clause and send the finished message to the controller
 - Take this shape wherever a review needs answering and no live session holds the branch. Where one does, message it per the loop's step 6.
 - That check is blind to a session working through the direct-path fallback, since it never moves its registered branch off `main`
 - `canon sessions list --branch` then reports nothing holding the branch, so a dispatch landing there collides with nothing the check can see
@@ -165,4 +160,4 @@ Read `${CLAUDE_SKILL_DIR}/references/orchestrator-hand-launch.md` when the opera
 
 ## Dispatch a reviewer
 
-Read `${CLAUDE_SKILL_DIR}/references/orchestrator-reviewer-launch.md` when `orchestrator-review-dispatch.md` sends a pull request to a dispatched reviewer, for the code, cloud, and UI reviewer shapes.
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-reviewer-launch.md` when `orchestrator-review-dispatch.md` sends a pull request to a dispatched reviewer, for the code and UI reviewer shapes.

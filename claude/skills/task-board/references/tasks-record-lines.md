@@ -33,7 +33,7 @@ The line lets a merge close its own task. `canon tasks archive --pull-request <n
 `Sessions:` names each session that built or reviewed the task, by roster name and full sessionId, as in `Sessions: <name> (<sessionId>), <name> (<sessionId>)`. A retro or a regression hunt reaches each transcript through `canon sessions export <sessionId>`, which takes the full id alone. It is not an origin either.
 
 - `canon tasks session <sessionId> <task>` writes it, or `--plan <slug>` in place of the stem, so it is never hand-edited
-- The verb reads the name off the live roster. A session that already exited takes `--name`, and so does a cloud session's `session_` id, since the roster never lists one.
+- The verb reads the name off the live roster. A session that already exited takes `--name`, since the roster no longer lists it.
 - The id is the key. A repeat call for a listed id keeps the name first recorded, so two callers recording one worker write it once.
 - The dispatcher records each worker and reviewer it launches, and `git-pr` records the session opening the pull request, which covers a hand launch
 

@@ -197,6 +197,6 @@ Do not run the command below when `<prior-heading>` from Step 2 reads `## Review
 gh api -X POST 'repos/{owner}/{repo}/pulls/<number>/reviews' -f event=COMMENT -F body=@.canon/tmp/pr/review/body-<number>-<short-sha>.md --jq .html_url
 ```
 
-- The post uses the REST reviews endpoint, since the `gh pr` review subcommand runs on GraphQL and fails where a cloud session's proxy refuses it
+- The post uses the REST reviews endpoint rather than the `gh pr` review subcommand, which runs on GraphQL
 - `event=COMMENT` submits the review as a comment, the same state the old `--comment` flag produced
 - A pass carrying nothing, a withdrawal, or only answered requests takes a close-out body, and only minors keep the full shape, per `${CLAUDE_SKILL_DIR}/references/body-variants.md`

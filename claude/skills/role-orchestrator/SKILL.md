@@ -117,9 +117,9 @@ Learning that a PR moved is the mechanical half. Read `orchestrator-poll.md` and
 
 A pass posting anything owed reaches the session holding the branch from the reviewer directly, and the re-review request goes straight back to that reviewer, per `role-reviewer` and `role-worker`. Read `orchestrator-handback.md` here.
 
-- This session sends either leg only where a cloud reviewer posted the pass or one side reports the other unreachable
+- This session sends either leg only where one side reports the other unreachable
 - Each reviewer's close runs `canon pr lift`, lifting the draft once both reviews close at the head, the evidence settles, the head is fresh, and CI passes
-- Run it yourself when a close message reports a refusal other than the other review being open, or when a cloud reviewer's close posts, per Boundaries below
+- Run it yourself when a close message reports a refusal other than the other review being open, per Boundaries below
 - Then a merge runs from a line naming its proof, per `orchestrator-output.md`. Tell each trailing worker the merged diff touches to run `review-address`.
 
 ### Constraints from the tracks in flight
@@ -136,7 +136,7 @@ A plan written here targets a tree several branches are changing, so it names ea
 - Do not implement features in this session. Hand the plan to a worker.
 - Merge only a pull request the operator named. Otherwise recommend a merge.
 - Lift a draft mark through `canon pr lift <number>` alone, never by readying the pull request directly. Report the reason a refusal names rather than retrying it.
-- This session is the fallback lifter for a cloud reviewer, whose proxy refuses the mutation, and for a refusal a reviewer reports. The verb reads every gate itself, so no one vouches for the asker.
+- This session is the fallback lifter for a refusal a reviewer reports. The verb reads every gate itself, so no one vouches for the asker.
 
 ### Workers and files
 

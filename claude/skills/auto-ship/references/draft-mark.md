@@ -33,14 +33,10 @@ The loop wraps the mutation alone, and it runs only on a flag reading ready. The
 
 - A mutation exiting non-zero runs again after five seconds, up to three tries, which clears a transient server error
 - The read-back runs once after the loop, whichever try succeeded or none did
-- A cloud session's blocked GraphQL fails every try, which costs ten seconds of waiting before the same `false` read
 
 ## Why the mark is a fallback
 
 The target check, the flag read, and the read-back go through REST. The mark itself is a GraphQL mutation, because the REST pull request update carries no draft field. The create is the only REST write that can set the flag.
-
-- A create that drafted never reaches the mutation, so a cloud session whose GraphQL is blocked can still hold a draft, unverified until a cloud run opens one
-- A pull request the create left ready stays ready in a cloud session, since the mutation fails there and the read-back reports `false`
 
 ## The number
 

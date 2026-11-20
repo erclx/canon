@@ -1,12 +1,7 @@
 /**
- * The REST shapes `canon pr` reads a pull request through, put into the shapes
- * its readers already take.
- *
- * A cloud session's GitHub proxy refuses GraphQL and serves REST, and every
- * `gh pr view` runs on GraphQL. The verbs therefore read the pulls, reviews,
- * and issue-comments endpoints, and this module is the one boundary where
- * those payloads meet the field names the rest of `src/pr/` was written
- * against.
+ * The REST shapes `canon pr` reads a pull request through, and the one boundary
+ * where pulls, reviews, and issue-comments payloads meet the field names the
+ * rest of `src/pr/` was written against.
  */
 import type { ReviewRow } from '@/pr/review-scope'
 

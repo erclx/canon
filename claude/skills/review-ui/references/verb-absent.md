@@ -7,7 +7,7 @@ description: Step 1 of review-ui on a target whose CLI predates canon pr head, w
 
 Step 1 of `review-ui`, read when `canon pr head` returns no record.
 
-Every read here runs on REST, since `gh pr` runs on GraphQL and a cloud session's proxy refuses it. A target whose CLI predates the verb gets no record back, so read the pull request directly:
+Every read here runs on REST rather than `gh pr`, which runs on GraphQL. A target whose CLI predates the verb gets no record back, so read the pull request directly:
 
 ```bash
 gh api "repos/{owner}/{repo}/pulls?head={owner}:$(git branch --show-current | jq -Rr @uri)&state=open" --jq '.[].number'

@@ -25,7 +25,7 @@ export const TREES = [
 ]
 
 // The hooks that read no payload, and so carry no guard to assert on.
-export const UNGUARDED = new Set(['bare-flag-repair.sh', 'cloud-setup.sh'])
+export const UNGUARDED = new Set(['bare-flag-repair.sh'])
 
 // A tool name no hook acts on, so every guarded hook falls through to a quiet
 // exit 0. A mangled payload reaches the same fall-through, which is why every

@@ -101,7 +101,7 @@ Read the command block for the run's mode on reaching this step, and skip the ot
 - Independent mode: `${CLAUDE_SKILL_DIR}/references/independent.md`
 - Stacked mode: `${CLAUDE_SKILL_DIR}/references/stacked.md`
 
-Every pull request opens through the REST pulls endpoint rather than the `gh pr` create subcommand, which runs on GraphQL and fails where a cloud session's GitHub proxy refuses it. The endpoint requires `base`, so each call names its layer's branch, and `-F` reads the body file where `-f` would post the path.
+Every pull request opens through the REST pulls endpoint rather than the `gh pr` create subcommand, which runs on GraphQL. The endpoint requires `base`, so each call names its layer's branch, and `-F` reads the body file where `-f` would post the path.
 
 A create the endpoint refuses, such as one for a head with an open pull request, exits non-zero and stops the chain before `opened=true` prints and the body file is removed. A pull request creation log counts openings off `opened=true`, since the REST call prints a URL and never names itself.
 

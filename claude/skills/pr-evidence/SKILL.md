@@ -29,7 +29,7 @@ Read `reason` on the record rather than the exit code, since a shell function wr
 
 Read `${CLAUDE_SKILL_DIR}/references/evidence.md` and run its sections in order against the number, being the checklist, the local server, the reel, the evidence comparison, the checklist alone, and the preview address.
 
-- Every post and edit goes through `gh api` over REST, since a cloud session's proxy refuses the GraphQL that `gh pr` runs on
+- Every post and edit goes through `gh api` over REST rather than `gh pr`, which runs on GraphQL
 - Never judge from the diff whether an evidence image changed, since the verb answers `no-evidence` for a branch that changed none and a session cannot see an image it did not author
 - A lone run on a later head edits the marked comment through the record's `commentId` and passes no `--checklist` for a handoff already deleted, since the verb carries the checklist forward
 

@@ -282,7 +282,7 @@ describe('canon pr drive-copy', () => {
   })
 
   it('should refuse as no-worktree when no local worktree holds the branch', async () => {
-    writePull('feat/cloud')
+    writePull('feat/elsewhere')
 
     const outcome = await runDriveCopy(['7', '--baseline'])
 
