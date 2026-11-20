@@ -89,6 +89,12 @@ Keep the whole reel at or under 15 seconds, which the take below enforces. Each 
 
 ## Film the reel
 
+Empty the takes folder before every film, refilms included. `canon take` never clears it, and the timing check below reads a beat folder a dropped or renamed beat left as a harness beat.
+
+```bash
+rm -rf .canon/tmp/pr/reel/<number>/takes
+```
+
 ```bash
 canon take <url> .canon/tmp/pr/reel/<number>/plan.json --out .canon/tmp/pr/reel/<number>/takes --reel .canon/tmp/pr/reel/<number>/reel.webp --max-seconds 15 --json
 ```
