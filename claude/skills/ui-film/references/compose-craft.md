@@ -1,6 +1,6 @@
 ---
 title: Compose craft
-description: The footage rules a session composing ui-film takes follows where the HyperFrames skills say nothing, being other shapes, the README loop, pacing, sped-up clips, transitions, reviewing a cut, music, storyboard headings, and the workspace README, with captions in captions.md
+description: The footage rules a session composing ui-film takes follows where the HyperFrames skills say nothing, being other shapes, loop clips and their seam, pacing, sped-up clips, transitions, reviewing a cut, music, storyboard headings, and the workspace README, with captions in captions.md
 ---
 
 # Compose craft
@@ -13,7 +13,7 @@ Each rule states the principle. Where a number appears, it is the case measured 
 
 - [Captions](#captions)
 - [Other shapes](#other-shapes)
-- [The README loop](#the-readme-loop)
+- [Loop clips](#loop-clips)
 - [Pacing](#pacing)
 - [Sped-up clips](#sped-up-clips)
 - [Transitions](#transitions)
@@ -36,14 +36,22 @@ Cut a square or vertical version only when the operator asks for one. A film wit
 - Pan the window along the camera track's view center, so it follows the action the zoom would have aimed at. Frameboard's square cut used a 1080x1080 window.
 - Expect a screencast take to hold at 1x from a softer 1080p source, while a stepped take gives the same window two clip pixels per page pixel
 
-## The README loop
+## Loop clips
 
-Cut a README loop only when the operator asks for one. A README hero plays inline and silently, so it is a short loop rather than a cut of the film.
+Cut a loop only when the operator asks for one, such as a README hero or a set of short clips for a page's grid. A loop plays inline and silently, so it is a short clip rather than a cut of the film.
 
 - Cut it from the raw take showing the app's core action, rather than from a render, in the workspace folder `handoff.md` names for it
-- Crop it to the canvas, so no browser margin or page chrome outside the app shows
+- Crop it to the canvas, or for a grid to its cell's own shape such as 16:10, so no browser margin or page chrome outside the app shows
 - End it on the finished state, held long enough to read before the loop restarts
-- Export an animated WebP under about 2 MB, since a README renders one inline where a video needs a player. Frameboard's loop played inline at 1.72 MB.
+- Export a README hero as an animated WebP under about 2 MB, since a README renders one inline where a video needs a player. Frameboard's loop played inline at 1.72 MB.
+- Give each grid clip a size budget, and step the encoder quality down until the clip fits
+
+### The seam
+
+A loop that jumps on restart reads as broken on every cycle. A dissolve back to the first frame that finishes on the clip's last frame leaves that frame mid-fade, which one grid clip measured at 25.8 dB.
+
+- End the dissolve to the first frame at least two frames before the clip ends, and hold it, so the rendered last frames match the first
+- Check the seam on the rendered file with ffmpeg `psnr` between its first and last frames, since a preview snapshot just before the end passed a seam the render failed
 
 ## Pacing
 
@@ -131,12 +139,13 @@ The rules measured on Frameboard's launch film carry its case beside them rather
 
 The rest come from HyperFrames, the verb, Frameboard's other deliverables, or later films cut from app takes.
 
-| Rule                       | Source                                                                                                    |
-| -------------------------- | --------------------------------------------------------------------------------------------------------- |
-| A new project per shape    | The `hyperframes` skill's `types/vertical.md`, which recomposes a vertical film rather than squeezing it  |
-| The 2 MB WebP loop         | Frameboard's README hero, an animated WebP cut from a raw take, which played inline at 1.72 MB            |
-| Reviewing motion           | HyperFrames' `review.md`, widened to every action after midpoint stills passed cuts the operator rejected |
-| Length and reshoots        | A reshoot whose length target pushed hand actions to 1.5x to 1.8x and retuned beats already approved      |
-| Rebuilding a sped-up track | `canon take camera --help`, whose `--rate` divides every time in the log                                  |
-| Storyboard heading form    | HyperFrames' `storyboard-format.md` and the markdown audit's character bans, with the colon read assumed  |
-| The README's two halves    | Frameboard's workspace, whose README recorded how to re-film and re-render after a session ended          |
+| Rule                       | Source                                                                                                     |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| A new project per shape    | The `hyperframes` skill's `types/vertical.md`, which recomposes a vertical film rather than squeezing it   |
+| The 2 MB WebP loop         | Frameboard's README hero, an animated WebP cut from a raw take, which played inline at 1.72 MB             |
+| Reviewing motion           | HyperFrames' `review.md`, widened to every action after midpoint stills passed cuts the operator rejected  |
+| Length and reshoots        | A reshoot whose length target pushed hand actions to 1.5x to 1.8x and retuned beats already approved       |
+| The loop seam              | A grid of loop clips whose dissolves ended on the last frame, which a preview passed and the render failed |
+| Rebuilding a sped-up track | `canon take camera --help`, whose `--rate` divides every time in the log                                   |
+| Storyboard heading form    | HyperFrames' `storyboard-format.md` and the markdown audit's character bans, with the colon read assumed   |
+| The README's two halves    | Frameboard's workspace, whose README recorded how to re-film and re-render after a session ended           |
