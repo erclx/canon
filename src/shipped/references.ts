@@ -45,11 +45,15 @@ const CSS_HEX_DIGITS = new Set([3, 4, 6, 8])
 /** A code span drops `#RGBA`, since a current pull request number runs four digits. */
 const CODE_SPAN_HEX_DIGITS = new Set([3, 6, 8])
 
-/** Blanks every block comment in a stylesheet, keeping columns and line breaks. */
-function blankComments(text: string): string {
-  return text.replace(/\/\*[\s\S]*?(?:\*\/|$)/g, (comment) =>
-    comment.replace(/[^\n]/g, ' '),
-  )
+/**
+ * Blanks a stylesheet's comments, keeping columns and line breaks. Plain CSS
+ * has no `//` comment, where it opens a protocol-relative `url()` instead.
+ */
+function blankComments(text: string, lineComments: boolean): string {
+  const comments = lineComments
+    ? /\/\*[\s\S]*?(?:\*\/|$)|\/\/[^\n]*/g
+    : /\/\*[\s\S]*?(?:\*\/|$)/g
+  return text.replace(comments, (comment) => comment.replace(/[^\n]/g, ' '))
 }
 
 /**
@@ -242,7 +246,7 @@ export function referencesIn(
 ): ShippedReference[] {
   const lines = text.split('\n')
   const codeLines = STYLESHEET.test(file)
-    ? blankComments(text).split('\n')
+    ? blankComments(text, !file.endsWith('.css')).split('\n')
     : undefined
   const references: ShippedReference[] = []
 

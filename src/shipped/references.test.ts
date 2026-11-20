@@ -322,6 +322,27 @@ describe('referencesIn', () => {
       )
     })
 
+    it.each(['tokens.scss', 'tokens.sass', 'tokens.less'])(
+      'should report a citation in a line comment in %s while passing the color beside it',
+      (name) => {
+        const file = `claude/skills/alpha/assets/${name}`
+
+        expect(
+          referencesIn(file, '$text: #111111; // see #3280', noDocsRoot),
+        ).toEqual([pullRequest(file, 1, '#3280')])
+      },
+    )
+
+    it('should pass a color after a protocol-relative url in a css file, which has no line comment', () => {
+      expect(
+        referencesIn(
+          'claude/skills/alpha/assets/tokens.css',
+          '  background: url(//cdn.test/a.png) #111111;',
+          noDocsRoot,
+        ),
+      ).toEqual([])
+    })
+
     it.each(['--x: #11111;', '--x: #1111111;'])(
       'should report %s, a digit run no CSS color takes',
       (declaration) => {
