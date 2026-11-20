@@ -366,68 +366,38 @@ test.describe('the band', () => {
 test.describe('the craft section', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
-  test('plays the last craft scene with the window in view', async ({
+  test('a chip swaps the quote and points both links at that skill', async ({
     page,
   }) => {
     await page.goto('/')
-    const last = page.locator('#craft .pick').last()
+    const chips = page.locator('#craft .chip')
+    await expect(chips).toHaveCount(8)
 
-    await last.click()
+    await chips.last().click()
 
-    await expect(page.locator('#craft .win')).toBeInViewport({ ratio: 1 })
-    await expect(page.locator('#craft .log')).toContainText(
-      'canon:systematic-debugging',
+    const shown = page.locator('#craft .pair:visible')
+    await expect(shown).toHaveCount(1)
+    await expect(shown.locator('a.path')).toHaveAttribute(
+      'href',
+      /\/blob\/main\/claude\/skills\/systematic-debugging\//,
     )
+    await expect(shown.locator('a.src')).toHaveAttribute(
+      'href',
+      /obra\/superpowers/,
+    )
+    await expect(chips.last()).toHaveAttribute('aria-pressed', 'true')
   })
 
-  test('Practice sets the quote larger than the rule beside the window', async ({
-    page,
-  }) => {
+  test('sets the quote larger than the rule it became', async ({ page }) => {
     await page.goto('/')
     const size = (selector: string) =>
       page
         .locator(selector)
+        .first()
         .evaluate((node) => parseFloat(getComputedStyle(node).fontSize))
-    const quote = await page.locator('#craft .said').boundingBox()
-    const win = await page.locator('#craft .win').boundingBox()
 
-    expect(await size('#craft .p-quote')).toBeGreaterThan(
-      await size('#craft .p-rule'),
-    )
-    expect(quote && win && quote.x + quote.width).toBeLessThanOrEqual(
-      win?.x ?? 0,
-    )
-  })
-
-  test('Practice stacks the window over the pickers at 390', async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 390, height: 844 })
-    await page.goto('/')
-    const win = await page.locator('#craft .win').boundingBox()
-    const picks = await page.locator('#craft .picks').boundingBox()
-    const rule = await page.locator('#craft .rl').boundingBox()
-    const said = await page.locator('#craft .said').boundingBox()
-
-    expect(win && picks && win.y + win.height).toBeLessThanOrEqual(
-      picks?.y ?? 0,
-    )
-    expect(rule && said && rule.y).toBeLessThan(said?.y ?? 0)
-  })
-
-  test('a Practice pick points both links at that skill', async ({ page }) => {
-    await page.goto('/')
-    const last = page.locator('#craft .pick').last()
-
-    await last.click()
-
-    await expect(page.locator('#craft a.p-file')).toHaveAttribute(
-      'href',
-      /\/blob\/main\/claude\/skills\/systematic-debugging\//,
-    )
-    await expect(page.locator('#craft a.src-link')).toHaveAttribute(
-      'href',
-      /obra\/superpowers/,
+    expect(await size('#craft .pair:visible blockquote')).toBeGreaterThan(
+      await size('#craft .pair:visible .rule .text'),
     )
   })
 })

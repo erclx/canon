@@ -52,7 +52,7 @@ Pick up a change where the last session stopped. Each record has a fixed shape, 
 
 ## Practice skills with cited sources
 
-An agent copies whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from.
+Keep your agent from copying whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from.
 
 | Skill                  | Loads                           | Cites                                     |
 | ---------------------- | ------------------------------- | ----------------------------------------- |

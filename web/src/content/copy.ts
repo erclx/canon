@@ -179,11 +179,13 @@ export const records = {
 export const craft = {
   // README.md: "Practice skills with cited sources"
   head: 'Practice skills with cited sources',
-  // README.md: "An agent copies whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from."
-  lede: 'An agent copies whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from.',
-  // README.md: canon-allow-readme-paraphrase: the pane labels beside one skill's rule and source, which the README's table folds into its columns.
-  ruleIn: 'The rule, in',
-  source: 'The source it cites',
+  // README.md: "Keep your agent from copying whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from."
+  lede: 'Keep your agent from copying whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from.',
+  // README.md: canon-allow-readme-paraphrase: the labels around one skill's source and the rule it became, which the README's table folds into its columns.
+  ruleIn: 'the rule, in',
+  source: 'the source',
+  becomes: 'becomes the rule',
+  pick: 'Pick a practice skill',
   /** Where a rule's file opens on GitHub, its path appended. */
   repoBlob: `${REPO}/blob/main/`,
 }

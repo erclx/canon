@@ -1,292 +1,139 @@
-#craft q {
-  quotes: '\201C' '\201D';
-}
-
-/*
- * Above 900 the quote leads: the pickers run full width, then the source's
- * quote over the rule it became, beside the window at full height.
- */
 #craft .top {
   display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  grid-template-areas:
-    'head head'
-    'picks picks'
-    'panes tray';
-  column-gap: 48px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 64px;
+  align-items: end;
 }
 
-#craft .sec-head {
-  grid-area: head;
+#craft h2 {
+  max-width: 18ch;
 }
 
-#craft .picks {
-  grid-area: picks;
-  margin-top: 36px;
+#craft .top .lede {
+  margin: 0;
 }
 
-#craft .top > .tray {
-  grid-area: tray;
+#craft .chips {
   display: flex;
-  margin-top: 28px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 56px 0 64px;
 }
 
-#craft .win {
-  flex: 1;
-  min-height: 380px;
-  user-select: none;
+#craft .chip {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  padding: 8px 11px;
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-action);
+  background: var(--ground);
+  font-family: var(--mono);
+  font-size: var(--size-view-small);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ink);
+  transition:
+    background-color var(--duration-feedback) var(--ease-standard),
+    color var(--duration-feedback) var(--ease-standard);
 }
 
-#craft .log {
-  flex: 1;
-  min-height: 0;
-  padding: 16px 22px 0;
-  overflow: hidden;
+#craft .chip[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ground);
+}
+
+#craft .chip:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  #craft .chip[aria-pressed='false']:hover {
+    background: var(--card);
+  }
+}
+
+#craft .pairs {
   transition: opacity var(--duration-fade) var(--ease-standard);
 }
 
-#craft .log.hide {
+#craft .pairs.swap {
   opacity: 0;
 }
 
-#craft .log .ask {
-  margin: 0 -22px 12px;
-  padding: 7px 22px;
+#craft .pair > .note:first-child {
+  margin: 0 0 14px;
 }
 
-#craft .log .tool {
-  position: relative;
-  padding-left: 20px;
+/* The source's own words, set large: the type is the picture. */
+#craft blockquote {
+  max-width: 24ch;
+  margin: 0 0 20px;
+  font-size: var(--type-display-size);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
   color: var(--ink);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-wrap: pretty;
 }
 
-#craft .log .tool::before {
-  content: '\25CF';
-  position: absolute;
-  left: 0;
-  top: 0;
-  font-size: var(--size-view-small);
-  color: var(--muted);
+#craft .src,
+#craft .path {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--outline);
+  text-underline-offset: 3px;
 }
 
-#craft .log .tool.sk::before {
-  color: var(--accent);
-}
-
-#craft .log .tool b {
+#craft .src {
+  font-size: var(--size-small);
   font-weight: 500;
 }
 
-#craft .log .res {
-  margin-bottom: 6px;
-  padding-left: 24px;
-  color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-#craft .log .res::before {
-  content: '\23BF  ';
-  white-space: pre;
-}
-
-#craft .inp {
-  flex: none;
-  padding: 0 22px 14px;
-}
-
-#craft .inp .rule {
-  height: 1px;
-  background: var(--line);
-}
-
-#craft .inp .line {
-  display: flex;
-  gap: 10px;
-  padding: 9px 0;
-  white-space: pre-wrap;
+#craft .becomes {
+  margin: 40px 0 16px;
   color: var(--ink);
-}
-
-#craft .inp .line .g {
-  flex: none;
-  color: var(--muted);
-}
-
-#craft .name {
-  font-family: var(--mono);
-  font-size: var(--size-body);
-  font-weight: 600;
-  color: var(--ink);
-}
-
-#craft .loads {
-  display: block;
-  margin-top: 4px;
-  font-size: var(--size-small);
-  line-height: var(--type-small-lh);
-  color: var(--muted);
 }
 
 #craft .rule {
+  max-width: 760px;
+  padding: 20px 24px;
+}
+
+#craft .rule p {
   margin: 0;
-  font-size: var(--size-body);
-  line-height: var(--type-body-lh);
-  color: var(--ink);
-  text-wrap: pretty;
 }
 
-#craft .srcname {
-  margin: 0;
-  font-size: var(--size-small);
-  color: var(--muted);
+#craft .rule .note:first-child {
+  margin-bottom: 14px;
 }
 
-#craft .quote {
-  margin: 4px 0 0;
-  font-size: var(--size-body);
-  line-height: var(--type-body-lh);
-  color: var(--body);
-  text-wrap: pretty;
-}
-
-#craft .panes {
-  grid-area: panes;
-  display: grid;
-  grid-template-rows: 1fr auto;
-  margin-top: 28px;
-}
-
-#craft .pane .lbl {
-  margin: 0 0 8px;
-  font-size: var(--size-small);
-  color: var(--muted);
-}
-
-#craft .pane .loads {
-  margin-top: 10px;
-}
-
-#craft .said {
-  padding: 8px 0 32px;
-}
-
-#craft .said .quote {
-  margin-top: 14px;
-  font-size: var(--size-lede);
-  line-height: var(--type-lede-lh);
+#craft .rule .text {
+  font-size: var(--type-lede-size);
   font-weight: 500;
-  letter-spacing: -0.01em;
+  line-height: 1.45;
   color: var(--ink);
-  text-wrap: balance;
 }
 
-#craft .rl {
-  padding-top: 24px;
-  border-top: 1px solid var(--line);
+#craft .rule .text + .note {
+  margin-top: 8px;
 }
 
-/* Both links draw in ink and open in the same tab, underlined in the rule color until hovered. */
-#craft .pane a {
-  color: var(--ink);
-  text-decoration: underline;
-  text-decoration-color: var(--line);
-  text-underline-offset: 3px;
-  border-radius: var(--radius-chip);
-}
-
-#craft .pane a:hover {
-  text-decoration-color: currentColor;
-}
-
-/* The source opens off the site, so its name carries the external arrow the pick drew. */
-#craft .src-link svg {
-  display: inline;
-  margin-left: 4px;
-  vertical-align: -1px;
-}
-
-#craft .pick {
-  font-family: var(--mono);
-}
-
-/* Below 900 the shipped stacking holds: the window under the heading, then the pickers, then the rule and its source as two panes. */
 @media (max-width: 900px) {
   #craft .top {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      'head'
-      'tray'
-      'picks'
-      'panes';
+    gap: 20px;
   }
 
-  #craft .win {
-    min-height: 0;
-    height: 364px;
-  }
-
-  #craft .picks {
-    margin-top: 40px;
-  }
-
-  #craft .panes {
-    grid-template-rows: none;
-    gap: 12px;
-    margin-top: 20px;
-    align-content: start;
-  }
-
-  #craft .pane {
-    padding: 22px 24px;
-    background: var(--tray);
-    border: 1px solid var(--edge);
-    border-radius: var(--radius-panel);
-  }
-
-  #craft .rl {
-    order: -1;
-  }
-
-  #craft .said .quote {
-    margin-top: 6px;
-    font-size: var(--size-body);
-    line-height: var(--type-body-lh);
-    font-weight: 400;
-    letter-spacing: normal;
-  }
-}
-
-@media (min-width: 641px) and (max-width: 900px) {
-  #craft .panes {
-    grid-template-columns: 1fr 1fr;
+  #craft .chips {
+    margin: 40px 0 48px;
   }
 }
 
 @media (max-width: 640px) {
-  #craft .win {
-    min-height: 0;
-    height: 332px;
-  }
-
-  #craft .log {
-    padding: 12px 14px 0;
-  }
-
-  #craft .log .ask {
-    margin: 0 -14px 10px;
-    padding: 6px 14px;
-  }
-
-  #craft .inp {
-    padding: 0 14px 12px;
-  }
-
-  #craft .pane {
-    padding: 18px;
+  #craft .rule {
+    padding: 16px 18px;
   }
 }

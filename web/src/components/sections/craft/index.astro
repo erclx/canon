@@ -1,103 +1,64 @@
 ---
 import { craft } from '../../../content/copy'
-import { craftScenes, practices } from '../../../content/practice'
-import PauseButton from '../../pause-button/index.astro'
-import ArrowIcon from './arrow.svg'
+import { practices } from '../../../content/practice'
 import './style.css'
 
-const { repoBlob } = craft
-
 /**
- * The eight practice skills over the source's quote, the rule it became, and
- * a Claude Code window that loops through seven requests in the list's order,
- * each loading its skill, the skill lit before its request types. A pick fades
- * the window to the scene that loads that skill and holds the pick until it
- * loads. Above 900 the quote leads beside the window at full height, and below
- * it the window sits under the heading with the pickers and panes under it, so
- * a pick never plays its scene off screen. The source's name links to the
- * address its ledger row cites, and the rule's file to the file on GitHub.
+ * One practice at a time: the source's own words set large, the link to the
+ * address its ledger row cites, and under them the rule those words became,
+ * with the skill file it sits in. A chip per practice skill swaps the pair.
+ * Every pair is rendered and the unpicked ones hidden, so the page reads whole
+ * before the script runs.
  */
-const data = {
-  skills: practices.map((p) => ({
-    name: p.name,
-    loads: p.loads,
-    rule: p.rule,
-    ruleFile: p.ruleFile,
-    source: p.source,
-    quote: p.quote,
-    url: p.url,
-  })),
-  repoBlob,
-  scenes: craftScenes,
-}
-const first = practices[0]
 ---
 
-<section class="sec" id="craft">
-  <div class="top">
-    <div class="sec-head">
+<section class="part" id="craft">
+  <div class="w">
+    <div class="top">
       <h2>{craft.head}</h2>
-      <p>{craft.lede}</p>
+      <p class="lede">{craft.lede}</p>
     </div>
-    <div class="picks" role="group" aria-label="Practice skills">
+    <div class="chips" role="group" aria-label={craft.pick}>
       {
-        practices.map((p, index) => (
+        practices.map((practice, index) => (
           <button
             type="button"
-            class="pick"
-            aria-pressed={index === 0 ? 'true' : 'false'}
+            class="chip"
             data-i={index}
+            aria-pressed={index === 0 ? 'true' : 'false'}
           >
-            {p.name}
+            {practice.name}
           </button>
         ))
       }
     </div>
-    <div class="panes">
-      <div class="pane said">
-        <p class="lbl">{craft.source}</p>
-        <p class="srcname">
-          <a class="src-link" href={first?.url}
-            ><span class="p-source">{first?.source}</span><ArrowIcon
-              aria-hidden="true"
-            /></a
-          >
-        </p>
-        <p class="quote"><q class="p-quote">{first?.quote}</q></p>
-      </div>
-      <div class="pane rl">
-        <p class="lbl">
-          {craft.ruleIn}
-          <a class="p-file" href={`${repoBlob}${first?.ruleFile}`}
-            ><code>{first?.ruleFile}</code></a
-          >
-        </p>
-        <p class="rule p-rule">{first?.rule}</p>
-        <span class="loads p-loads">{first?.loads}</span>
-      </div>
-    </div>
-    <div class="tray">
-      <PauseButton />
-      <div class="win" aria-hidden="true">
-        <div class="win-bar"><i></i><i></i><i></i><span>claude</span></div>
-        <div class="log"></div>
-        <div class="inp">
-          <div class="rule"></div>
-          <div class="line">
-            <span class="g">❯</span><span
-              ><span class="typed"></span><span class="cur"></span></span
-            >
+    <div class="pairs" aria-live="polite">
+      {
+        practices.map((practice, index) => (
+          <div class="pair" data-i={index} hidden={index !== 0}>
+            <p class="note">{craft.source}</p>
+            <blockquote>“{practice.quote}”</blockquote>
+            <a class="src" href={practice.url}>
+              {practice.source} ↗
+            </a>
+            <p class="becomes note" aria-hidden="true">
+              ↓ {craft.becomes}
+            </p>
+            <div class="rule ink">
+              <p class="note">
+                {craft.ruleIn}{' '}
+                <a class="path" href={`${craft.repoBlob}${practice.ruleFile}`}>
+                  {practice.ruleFile}
+                </a>
+              </p>
+              <p class="text">{practice.rule}</p>
+              <p class="note">{practice.loads}</p>
+            </div>
           </div>
-          <div class="rule"></div>
-        </div>
-      </div>
+        ))
+      }
     </div>
   </div>
-  <script
-    type="application/json"
-    class="craft-data"
-    set:html={JSON.stringify(data)}
-  />
 </section>
 
 <script src="./client.ts"></script>
