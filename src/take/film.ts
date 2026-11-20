@@ -22,6 +22,7 @@ import {
   NetworkUnmatched,
 } from '@/take/network'
 import {
+  TargetAmbiguous,
   TargetCovered,
   TargetMissing,
   TargetOffscreen,
@@ -59,6 +60,7 @@ export type TakeRefusal =
   | 'target-missing'
   | 'target-offscreen'
   | 'target-covered'
+  | 'target-ambiguous'
   | 'over-cap'
   | 'clip-mismatch'
   | 'network-unmatched'
@@ -424,6 +426,7 @@ function classify(error: unknown): TakeRefusal {
   if (error instanceof TargetMissing) return 'target-missing'
   if (error instanceof TargetOffscreen) return 'target-offscreen'
   if (error instanceof TargetCovered) return 'target-covered'
+  if (error instanceof TargetAmbiguous) return 'target-ambiguous'
   if (error instanceof ShellMissing || isBrowserMissing(error)) {
     return 'browser-missing'
   }

@@ -51,6 +51,40 @@ describe.skipIf(!available())('a take of a context menu', () => {
     rmSync(out, { recursive: true, force: true })
   })
 
+  it('should refuse a selector matching both menu rows as target-ambiguous, with a still', async () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [
+          {
+            name: 'pick any row',
+            viewport: { width: 1280, height: 720 },
+            setup: [{ kind: 'contextmenu', target: '#files' }],
+            steps: [{ kind: 'click', target: '[role="menuitem"]' }],
+          },
+        ],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+    sink = []
+
+    const result = await take({
+      url: server.url,
+      plan: read.plan,
+      out: join(out, 'ambiguous'),
+      stallMs: LOADED_STALL_MS,
+      deviceScale: 1,
+    })
+
+    expect(result).toMatchObject({
+      status: 'failed',
+      reason: 'target-ambiguous',
+      beat: 'pick any row',
+      message: expect.stringContaining('2'),
+      still: '01-pick-any-row/still.jpg',
+    })
+    expect(sink.filter((r) => r.type === 'pick')).toEqual([])
+  }, 180_000)
+
   describe.each(['step', 'screencast'] as const)('on the %s route', (route) => {
     it('should film both beats on the route asked for', () => {
       expect(results[route]).not.toHaveProperty('message')

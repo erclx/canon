@@ -12,6 +12,7 @@ import {
   type PointerInput,
   FOCUS_MOVED,
   type Stage,
+  TargetAmbiguous,
   TargetCovered,
   TargetOffscreen,
   coverExpression,
@@ -1058,5 +1059,53 @@ describe('performSteps on a covered target', () => {
 
     await run
     expect(coverReads).toEqual([])
+  })
+})
+
+describe('performSteps on an ambiguous target', () => {
+  /** A stage whose page answers every lookup with two sized matches. */
+  function ambiguousStage() {
+    const { stage, sent } = recordingStage({})
+    const twoMatches: Stage = {
+      ...stage,
+      evaluate: async <T>() => ({ matches: 2 }) as T,
+    }
+    return { stage: twoMatches, sent }
+  }
+
+  it('should refuse a selector matching two sized elements, naming the count', async () => {
+    const { stage } = ambiguousStage()
+
+    const run = performSteps(stage, [{ kind: 'click', target: '.row' }], {
+      pointer: START,
+    })
+
+    await expect(run).rejects.toThrow(TargetAmbiguous)
+    await expect(run).rejects.toMatchObject({ target: '.row', matches: 2 })
+  })
+
+  it('should refuse a text target matching two sized rows', async () => {
+    const { stage } = ambiguousStage()
+
+    const run = performSteps(
+      stage,
+      [{ kind: 'contextmenu', target: 'text=New file' }],
+      { pointer: START },
+    )
+
+    await expect(run).rejects.toMatchObject({
+      target: 'text=New file',
+      matches: 2,
+    })
+  })
+
+  it('should send no input toward an ambiguous target', async () => {
+    const { stage, sent } = ambiguousStage()
+
+    await performSteps(stage, [{ kind: 'move', target: '.row' }], {
+      pointer: START,
+    }).catch(() => {})
+
+    expect(sent).toEqual([])
   })
 })

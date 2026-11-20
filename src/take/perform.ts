@@ -115,6 +115,22 @@ export class TargetMissing extends TargetRefused {
 }
 
 /**
+ * A target matching more than one sized element, so a press on the first
+ * could film the wrong one. A narrower selector names the one meant.
+ */
+export class TargetAmbiguous extends TargetRefused {
+  constructor(
+    target: string,
+    readonly matches: number,
+  ) {
+    super(
+      target,
+      `${target} matches ${matches} elements on the page, so the step could press the wrong one. Narrow it to one`,
+    )
+  }
+}
+
+/**
  * A target whose center lies outside the window, so the pointer would aim at
  * a point the clip never shows, or for a scroll, a target with no part inside
  * it. A setup step brings it into view first.
@@ -535,9 +551,10 @@ function inWindow(at: Point, viewport: Viewport): boolean {
 }
 
 async function foundBox(stage: Stage, target: string): Promise<Box> {
-  const box = await stage.evaluate<Box | null>(boxExpression(target))
-  if (!box) throw new TargetMissing(target)
-  return box
+  const found = await stage.evaluate<Lookup>(boxExpression(target))
+  if (!found) throw new TargetMissing(target)
+  if ('matches' in found) throw new TargetAmbiguous(target, found.matches)
+  return found
 }
 
 async function boxOf(stage: Stage, target: string): Promise<Box> {
@@ -604,9 +621,11 @@ export const FOCUS_MOVED = `(() => {
 })()`
 
 /**
- * `text=` takes the innermost sized match, and a selector searches the
- * document, then each open shadow root. A frame, a closed root, and a
- * zero-size match stay missing, and `within` reads through shadow hosts.
+ * A target resolves only to its one sized match, counted across the document
+ * and each open shadow root, with `text=` counting innermost matches alone.
+ * More than one refuses rather than taking the first, which filmed the wrong
+ * row. A frame, a closed root, and a zero-size match stay uncounted, and
+ * `within` reads through shadow hosts.
  */
 const RESOLVER = `
   const within = (outer, inner) => {
@@ -628,7 +647,7 @@ const RESOLVER = `
       }
     }
     collect(document)
-    let element = null
+    let candidates
     if (target.startsWith('text=')) {
       const want = target.slice(5).trim()
       const matches = roots.flatMap((root) =>
@@ -636,22 +655,23 @@ const RESOLVER = `
           (node) => node.textContent.trim() === want,
         ),
       )
-      const innermost = matches.filter((node) => !matches.some((other) => other !== node && within(node, other)))
-      element = innermost.find(sized) ?? null
+      candidates = matches.filter((node) => !matches.some((other) => other !== node && within(node, other)))
     } else {
-      for (const root of roots) {
-        element = root.querySelector(target)
-        if (element) break
-      }
+      candidates = roots.flatMap((root) => [...root.querySelectorAll(target)])
     }
-    return element && sized(element) ? element : null
+    const found = candidates.filter(sized)
+    return { element: found.length === 1 ? found[0] : null, matches: found.length }
   }`
+
+/** What `boxExpression` reads back: the one match's box, a count past one, or nothing. */
+type Lookup = Box | { readonly matches: number } | null
 
 /** Finds a target's box in the page, so both routes resolve alike. */
 export function boxExpression(target: string): string {
   return `(() => {
     ${RESOLVER}
-    const element = find(${JSON.stringify(target)})
+    const { element, matches } = find(${JSON.stringify(target)})
+    if (matches > 1) return { matches }
     if (!element) return null
     const rect = element.getBoundingClientRect()
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
@@ -666,7 +686,7 @@ export function boxExpression(target: string): string {
 export function coverExpression(target: string, at: Point): string {
   return `(() => {
     ${RESOLVER}
-    const element = find(${JSON.stringify(target)})
+    const { element } = find(${JSON.stringify(target)})
     const x = ${at.x}
     const y = ${at.y}
     let hit = document.elementFromPoint(x, y)

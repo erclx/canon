@@ -106,22 +106,58 @@ describe.skipIf(!shell)('boxExpression on a rendered page', () => {
     })
   })
 
-  describe('a document-tree match', () => {
+  describe('a match in the document and in a shadow root', () => {
     const both = `<button id="go" style="${AT(200, 300)}">Go</button><div id="host"></div><script>
       document.getElementById('host').attachShadow({ mode: 'open' }).innerHTML =
         '<button id="go" style="${AT(10, 20)}">Go</button>'
     </script>`
 
-    it('should win over a shadow-root match of the same selector', async () => {
+    it('should count a shadow-root match of the same selector beside it', async () => {
       const box = await resolve(both, '#go')
 
-      expect(box).toEqual({ x: 200, y: 300, width: 100, height: 40 })
+      expect(box).toEqual({ matches: 2 })
     })
 
-    it('should win over a shadow-root match of the same text', async () => {
+    it('should count a shadow-root match of the same text beside it', async () => {
       const box = await resolve(both, 'text=Go')
 
-      expect(box).toEqual({ x: 200, y: 300, width: 100, height: 40 })
+      expect(box).toEqual({ matches: 2 })
+    })
+  })
+
+  describe('several matches', () => {
+    const rows = `<ul>
+      <li class="row" style="${AT(10, 20)}">New file</li>
+      <li class="row" style="${AT(10, 80)}">New file</li>
+      <li class="row" style="${AT(10, 140)}">New file from template</li>
+    </ul>`
+
+    it('should count every sized match of a selector', async () => {
+      const box = await resolve(rows, '.row')
+
+      expect(box).toEqual({ matches: 3 })
+    })
+
+    it('should count every sized innermost match of a text target', async () => {
+      const box = await resolve(rows, 'text=New file')
+
+      expect(box).toEqual({ matches: 2 })
+    })
+
+    it('should resolve the one sized match of a selector beside hidden ones', async () => {
+      const html = `<button class="go" hidden>Go</button><button class="go" style="${AT(30, 50)}">Go</button>`
+
+      const box = await resolve(html, '.go')
+
+      expect(box).toEqual({ x: 30, y: 50, width: 100, height: 40 })
+    })
+
+    it('should resolve the one sized match of a text target beside a hidden duplicate', async () => {
+      const html = `<div hidden><span>Rename</span></div><span style="${AT(30, 50)}">Rename</span>`
+
+      const box = await resolve(html, 'text=Rename')
+
+      expect(box).toEqual({ x: 30, y: 50, width: 100, height: 40 })
     })
   })
 
