@@ -139,6 +139,7 @@ export const UNWAIVABLE_REEL_SKIPS: readonly string[] = [
   'target-missing',
   'target-offscreen',
   'target-covered',
+  'target-ambiguous',
 ]
 
 /** The reason code a skip line opens with, the text before its first colon. */
