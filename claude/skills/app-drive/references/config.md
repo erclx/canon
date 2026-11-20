@@ -81,7 +81,7 @@ personas = ["a developer reading the landing page"]
 board-project = "landing-<nn>"
 ```
 
-A `[targets.<name>]` table takes the five keys above and one more.
+A `[targets.<name>]` table takes the keys above and one more.
 
 - `root` is the folder inside the worktree the target's `launch` runs from, defaulting to the worktree root
 - A key the table leaves out falls back to the flat key of the same name, except `board-project`

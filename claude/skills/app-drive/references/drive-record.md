@@ -171,7 +171,7 @@ Write it to the intake folder root before the close. `canon intake drive-check` 
 Two fields tie the record to the config, so the check reads the scripts the drive was meant to run.
 
 - `target` names the config target the drive ran, or `null` for the flat default, and the check reads that target's scripts and personas
-- `scripts` holds one entry per configured script and persona, with the path as the config writes it
+- `scripts` holds one entry per configured script and persona, with the path and the persona copied from the config verbatim, since the check matches both exactly
 - A script entry takes the `status` and `reason` a goal entry takes, and the list is empty or absent when the config names no scripts
 
 ### What the check fails
