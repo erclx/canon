@@ -100,8 +100,7 @@ describe('cursorAt', () => {
   })
 
   it('should draw a point stamped a rounding error past the frame it was sent in', () => {
-    // A stage clock summing frame lengths lands a hair past the frame time a
-    // reader computes for the same frame.
+    // A stage clock summing frame lengths lands past a reader's frame time.
     const move = sentMove([
       { t: 1000, x: 130, y: 100 },
       { t: 1733.3333333333335, x: 250, y: 100 },

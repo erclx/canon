@@ -396,10 +396,9 @@ function zoomsOf(
 }
 
 /**
- * The glides a viewer sees, with a run of moves logged one after another, each
- * starting within a frame of the last one's end, counted as one, since a
- * harness logging a reach in pieces would otherwise pull the zoom out and back
- * in at every piece. Any other event between two moves ends the run.
+ * Counts moves logged back to back, each within a frame of the last, as one
+ * glide, since a harness logging a reach in pieces pumped the zoom at each.
+ * Any other event between two moves ends the run.
  */
 function gliding(events: readonly LogEvent[], frameMs: number): Span[] {
   const glides: Span[] = []

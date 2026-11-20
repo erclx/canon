@@ -1,13 +1,9 @@
 import type { Point } from '@/take/log'
 
 /**
- * Draws the cursor arrow and the click ring onto one decoded frame, in the
- * look Frameboard's launch film drew them, which the operator picked for every
- * reel: a dark arrow outlined in white over a soft shadow, and a blue ring that
- * grows from its tip and fades out. Both stay one size whatever the frame
- * shows, so the pointer reads the same in every beat of a reel. Drawn in
- * TypeScript rather than a browser, so the reel needs no page and no seek, and
- * a test can read the pixels it leaves.
+ * Draws Frameboard's arrow and click ring onto one decoded frame, one size
+ * whatever the frame shows. Drawn in TypeScript rather than a browser, so the
+ * reel needs no page and no seek, and a test can read the pixels it leaves.
  */
 
 export interface Frame {
