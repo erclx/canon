@@ -1,8 +1,11 @@
-import { readFileSync, writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { basename, join, resolve } from 'node:path'
 import type { Command } from 'commander'
 import { INSTALL_BROWSER, isEngineMissing } from '@/browser/engine'
-import { cameraTrack, readRate } from '@/take/camera'
+import { type CameraTrack, cameraTrack, readRate } from '@/take/camera'
+import { type Breach, checkBeat, sortBreaches } from '@/take/check'
+import { requireFfmpeg } from '@/take/encode'
+import { findStalls, stallWindows } from '@/take/stall'
 import { readTakeLog } from '@/take/log'
 import { beatViewport, parseViewport, readTakePlan } from '@/take/plan'
 import type { TakePlanRefusal } from '@/take/plan'
@@ -36,6 +39,11 @@ interface RunOptions {
 interface CameraOptions {
   readonly out?: string
   readonly rate?: string
+  readonly json?: boolean
+}
+
+interface CheckOptions {
+  readonly camera?: string
   readonly json?: boolean
 }
 
@@ -378,6 +386,277 @@ export function register(program: Command): void {
     .action((log: string, opts: CameraOptions) => {
       process.exitCode = runCamera(log, opts)
     })
+
+  take
+    .command('check')
+    .description("Check a take's beats against the timing rules")
+    .argument('<takes>', 'The folder a take wrote, holding take.json')
+    .helpOption('-h, --help', 'Show this help message')
+    .option(
+      '--camera <name>',
+      'The track file to read in each beat folder, camera.json by default',
+    )
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        "Reads every beat take.json lists, in its order, from the beat's log.json",
+        'and camera track, and fails a beat breaking any rule below with the rule,',
+        'the time, and the measured value. The limits are fixed, each a frame or',
+        "more under the engine's own pacing, so a take the engine filmed passes",
+        'on a 60 fps clock and a harness log or a trimmed beat is held to the same.',
+        '',
+        'Rules:',
+        '  glide-fast   a glide under 550 ms. A fill steps off its field in 300 ms,',
+        '               which is no glide and is exempt',
+        '  no-rest      a press, wheel, type, or drag under 250 ms after the glide',
+        '               reaching it ends',
+        '  left-early   a glide leaving under 400 ms after a press',
+        '  typed-under  typing with the cursor still on the field',
+        '  zoom-fast    a zoom in or out over under 500 ms',
+        '  pump         zooming back in under 1500 ms after zooming out',
+        '  stall        a screencast or harness clip holding still past 500 ms',
+        '               inside a typing burst or a drag, read by FFmpeg',
+        '               freezedetect. A stepped beat skips it, since its clock',
+        '               cannot stall',
+        '',
+        'A beat whose log carries hand: false skips glide-fast, no-rest,',
+        'left-early, and typed-under, since no cursor is drawn, and still checks',
+        'the zoom rules and stall. Times are clip milliseconds, but zoom-fast and',
+        "pump read the track's own clock, so --camera camera-2x.json, a track",
+        'rebuilt with canon take camera --rate 2, checks the zooms a viewer sees.',
+        '',
+        'The record is { takes, ok, beats: [{ name, dir, breaches: [{ rule, t,',
+        'measured, limit }] }] }, beats in take.json order and breaches in time',
+        'order, with reason breach and a message when any beat fails. A refusal',
+        'carries ok false, reason, message, and beat when one beat refused.',
+        '',
+        'Reasons:',
+        '  breach            a beat broke a rule',
+        '  bad-camera        --camera names a path rather than a file name',
+        '  no-takes          no readable take.json listing beats in the folder',
+        "  unreadable-log    a beat's log.json is missing or not a take's log",
+        '  no-track          a beat has no track file, as after a refilm that',
+        '                    deleted its folder. Rebuild it with canon take camera',
+        "  unreadable-track  a beat's track is not a camera track",
+        '  ffmpeg-missing    a beat needs the stall rule and FFmpeg is not on the',
+        '                    PATH, so the beat refuses rather than passing',
+        '  stall-failed      FFmpeg could not read the clip of a beat the stall',
+        '                    rule reads',
+        '',
+        'Exit codes:',
+        '  0  every beat passed every rule',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '  2  a beat broke a rule',
+        '',
+        'Examples:',
+        '  canon take check .canon/tmp/demo/takes',
+        '  canon take check takes --camera camera-2x.json --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (takes: string, opts: CheckOptions) => {
+      process.exitCode = await runCheck(takes, opts)
+    })
+}
+
+interface CheckedBeat {
+  readonly name: string
+  readonly dir: string
+  readonly breaches: readonly Breach[]
+}
+
+class CheckRefusal extends Error {
+  constructor(
+    readonly reason: string,
+    message: string,
+    readonly beat?: string,
+  ) {
+    super(message)
+  }
+}
+
+async function runCheck(
+  takesPath: string,
+  opts: CheckOptions,
+): Promise<number> {
+  const emitJson = opts.json ?? false
+  const takes = resolve(takesPath)
+  const camera = opts.camera ?? 'camera.json'
+  intro(`canon take check ${takes}`)
+  try {
+    if (camera !== basename(camera) || camera === '..') {
+      throw new CheckRefusal(
+        'bad-camera',
+        `--camera ${camera} names a path. Name a file inside each beat folder, such as camera-2x.json.`,
+      )
+    }
+    const beats: CheckedBeat[] = []
+    for (const beat of readTakeBeats(takes)) {
+      beats.push(await checkOne(takes, beat, camera))
+    }
+    const failed = beats.filter((beat) => beat.breaches.length > 0)
+    logStep('Beats')
+    for (const beat of beats) {
+      if (beat.breaches.length === 0) logInfo(`${beat.dir}  pass`)
+      else logWarn(`${beat.dir}  ${beat.breaches.length === 1 ? '1 breach' : `${beat.breaches.length} breaches`}`)
+      for (const found of beat.breaches) {
+        logWarn(
+          `  ${found.rule}  ${(found.t / 1000).toFixed(2)} s  ${found.measured} ms against ${found.limit} ms`,
+        )
+      }
+    }
+    outro()
+    if (failed.length === 0) {
+      emit(emitJson, { takes, ok: true, beats })
+      return 0
+    }
+    emit(emitJson, {
+      takes,
+      ok: false,
+      beats,
+      reason: 'breach',
+      message: `${plural(failed.length, 'beat')} broke a timing rule: ${failed.map((beat) => beat.dir).join(', ')}. Refilm each rather than editing its log.`,
+    })
+    return 2
+  } catch (error) {
+    if (!(error instanceof CheckRefusal)) throw error
+    logStep('Refused')
+    logWarn(error.message)
+    outro()
+    emit(emitJson, {
+      takes,
+      ok: false,
+      reason: error.reason,
+      message: error.message,
+      ...(error.beat ? { beat: error.beat } : {}),
+    })
+    return 1
+  }
+}
+
+function readTakeBeats(
+  takes: string,
+): readonly { readonly name: string; readonly dir: string }[] {
+  const path = join(takes, 'take.json')
+  let document: unknown
+  try {
+    document = JSON.parse(readFileSync(path, 'utf8'))
+  } catch (error) {
+    throw new CheckRefusal(
+      'no-takes',
+      `No readable take.json at ${path}. ${error instanceof Error ? error.message : String(error)}`,
+    )
+  }
+  const beats = (document as { beats?: unknown } | null)?.beats
+  const valid =
+    Array.isArray(beats) &&
+    beats.length > 0 &&
+    beats.every(
+      (beat) => typeof beat?.name === 'string' && typeof beat?.dir === 'string',
+    )
+  if (!valid) {
+    throw new CheckRefusal(
+      'no-takes',
+      `${path} lists no beat with a name and a dir, so it is not a take's take.json.`,
+    )
+  }
+  return beats as { name: string; dir: string }[]
+}
+
+async function checkOne(
+  takes: string,
+  beat: { readonly name: string; readonly dir: string },
+  camera: string,
+): Promise<CheckedBeat> {
+  const dir = join(takes, beat.dir)
+  const logPath = join(dir, 'log.json')
+  let logSource: string
+  try {
+    logSource = readFileSync(logPath, 'utf8')
+  } catch {
+    throw new CheckRefusal(
+      'unreadable-log',
+      `Beat ${beat.dir} has no log.json at ${logPath}.`,
+      beat.dir,
+    )
+  }
+  const log = readTakeLog(logSource)
+  if (log.kind === 'refused') {
+    throw new CheckRefusal(
+      'unreadable-log',
+      `${logPath} is not a take's log.json. ${log.detail}`,
+      beat.dir,
+    )
+  }
+
+  const trackPath = join(dir, camera)
+  if (!existsSync(trackPath)) {
+    throw new CheckRefusal(
+      'no-track',
+      `Beat ${beat.dir} has no ${camera}, so its zooms cannot be checked and no cursor would draw. Rebuild it with: canon take camera ${logPath} --out ${trackPath}`,
+      beat.dir,
+    )
+  }
+  const track = readTrack(trackPath)
+  if (!track) {
+    throw new CheckRefusal(
+      'unreadable-track',
+      `${trackPath} is not a camera track, being JSON carrying frames with ms and scale.`,
+      beat.dir,
+    )
+  }
+
+  const breaches = checkBeat(log.log, track)
+  if (stallWindows(log.log).length === 0) {
+    return { name: beat.name, dir: beat.dir, breaches }
+  }
+  try {
+    await requireFfmpeg()
+  } catch {
+    throw new CheckRefusal(
+      'ffmpeg-missing',
+      `Beat ${beat.dir} types or drags on the ${log.log.route} route, so the stall rule reads its clip, and FFmpeg is not on the PATH. Then ${INSTALL_FFMPEG}.`,
+      beat.dir,
+    )
+  }
+  let stalls: Breach[]
+  try {
+    stalls = await findStalls(join(dir, 'clip.mp4'), log.log)
+  } catch (error) {
+    throw new CheckRefusal(
+      'stall-failed',
+      `FFmpeg could not read ${join(dir, 'clip.mp4')} for the stall rule. ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
+      beat.dir,
+    )
+  }
+  return {
+    name: beat.name,
+    dir: beat.dir,
+    breaches: sortBreaches([...breaches, ...stalls]),
+  }
+}
+
+function readTrack(path: string): CameraTrack | undefined {
+  try {
+    const track = JSON.parse(readFileSync(path, 'utf8')) as {
+      frames?: unknown
+    } | null
+    const frames = track?.frames
+    if (
+      !Array.isArray(frames) ||
+      !frames.every(
+        (frame) =>
+          typeof frame?.ms === 'number' && typeof frame?.scale === 'number',
+      )
+    ) {
+      return undefined
+    }
+    return track as CameraTrack
+  } catch {
+    return undefined
+  }
 }
 
 function runCamera(logPath: string, opts: CameraOptions): number {
