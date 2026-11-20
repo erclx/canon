@@ -165,7 +165,7 @@ describe('addPrompt', () => {
         ok: true,
         prompt: {
           lines: [
-            '/canon:auto-ship --plan-first --any-size .canon/tasks/v1.4-unplanned.md',
+            '/canon:auto-ship --plan-first .canon/tasks/v1.4-unplanned.md --any-size',
             `Controller: ${CONTROLLER}`,
           ],
         },
@@ -400,6 +400,17 @@ describe('claimed branches', () => {
             branch: 'feat/delta',
           },
         ],
+      })
+    })
+
+    it('should list the branch of an --any-size row once the task links a plan', async () => {
+      await add(buildInput({ task: 'v1.4', planFirst: true, anySize: true }))
+      await linkPlan()
+
+      const listed = await listPrompts(ROOT)
+
+      expect(listed).toMatchObject({
+        prompts: [{ label: 'v1.4', branch: 'feat/delta' }],
       })
     })
 

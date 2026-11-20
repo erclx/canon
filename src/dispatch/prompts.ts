@@ -79,7 +79,10 @@ export interface PromptAdded {
   readonly mergeOrderDropped: boolean
   /** Queued worker rows whose branch a session, worktree, or ref now holds. */
   readonly dropped: readonly DroppedPrompt[]
-  /** Branches whose claim could not be read, kept queued rather than dropped. */
+  /**
+   * Rows kept queued with no claim read: a worker branch whose claim could not
+   * be read, or the label of a plan-first row whose task links no plan yet.
+   */
   readonly claimUnread: readonly string[]
 }
 
@@ -135,7 +138,7 @@ const ROLE_HEADINGS: Record<PromptRole, string> = {
 
 const WORKER_COMMAND = /^\/canon:auto-ship (\S+)$/
 const PLAN_FIRST_COMMAND =
-  /^\/canon:auto-ship --plan-first(?: --any-size)? \.canon\/tasks\/(\S+)\.md$/
+  /^\/canon:auto-ship --plan-first \.canon\/tasks\/(\S+)\.md(?: --any-size)?$/
 const REVIEWER_COMMAND = /\/canon:review-pr (\d+)$/
 
 export function promptsPath(root: string): string {
@@ -499,7 +502,7 @@ function commandFor(
 ): string {
   if (role === 'worker' && input.planFirst === true) {
     const anySize = input.anySize === true ? ' --any-size' : ''
-    return `/canon:auto-ship --plan-first${anySize} .canon/tasks/${task.stem}.md`
+    return `/canon:auto-ship --plan-first .canon/tasks/${task.stem}.md${anySize}`
   }
   if (role === 'worker') return `/canon:auto-ship ${plan}`
   const pr = input.pr

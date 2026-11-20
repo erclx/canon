@@ -125,9 +125,12 @@ async function runAdd(task: string, opts: AddOptions): Promise<number> {
           `Dropped the ${entry.role} prompt for ${entry.label}, since ${entry.branch} is claimed.`,
         )
       }
-      for (const branch of outcome.claimUnread) {
+      for (const entry of outcome.claimUnread) {
+        // A branch always carries its type segment, and a label never does.
         logWarn(
-          `The claim on ${branch} could not be read, so its row stays queued.`,
+          entry.includes('/')
+            ? `The claim on ${entry} could not be read, so its row stays queued.`
+            : `${entry} has no branch until its plan links, so its row stays queued.`,
         )
       }
     },

@@ -28,7 +28,7 @@ canon dispatch prompts add <task> --role worker --model <model> --effort <effort
 - `--line <text>` adds one context line, and repeats. Carry only what `### What the brief may carry` in `orchestrator-launch.md` allows, never the answer-slot default or another fact the plan states.
 - `--merge-order <text>` writes the one lead line the file carries. The verb drops it while no two queued worker plans share a file, and says so in the record.
 
-Branch on the record's `ok` and `reason` rather than the exit. Treat a `dropped` row as launched and run `canon tasks promote <stem>` for it, as `## Record a launch` states, and report a `claimUnread` branch as unverified.
+Branch on the record's `ok` and `reason` rather than the exit. Treat a `dropped` row as launched and run `canon tasks promote <stem>` for it, as `## Record a launch` states, and report a `claimUnread` branch as unverified. A `claimUnread` label is a plan-first row waiting on its plan, per `### A task with no plan`.
 
 The `Controller:` line the verb writes replaces the background template's message clauses, which `role-worker` and `session-relay` already own. `auto-ship` Step 0 loads `role-worker`, so the fence needs nothing more.
 
@@ -38,7 +38,7 @@ Queue a plan-and-build launch from `orchestrator-plan-build-launch.md` as a work
 
 - The row writes `/canon:auto-ship --plan-first .canon/tasks/<stem>.md` for a task linking no plan
 - The verb refuses `bad-input` for a task already linking one, which takes the plain worker form
-- Add `--any-size` only when `## The arguments after the task` in that runbook passes it
+- Add `--any-size`, which the verb writes after the task path, only when `## The arguments after the task` in that runbook passes it
 - The row carries no branch until its session links a plan, so the record names it by label under `claimUnread`
 - The watch matches the row only once the plan lands, so record its launch the same way from then on
 
