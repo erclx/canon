@@ -118,7 +118,7 @@ Open each beat's `takes/<dir>/still.jpg` before handing off, since a clip can fi
 
 Check that the `hyperframes` skill resolves before handing anything to it, as `hyperframes:hyperframes` from its plugin or `hyperframes` installed alone. Canon never installs or updates it, since the plugin manager owns both.
 
-- When neither resolves, close the throwaway copy, write the workspace README below, and stop on the line after this list
+- When neither resolves, close the throwaway copy, write the footage page and the workspace README below, and stop on the line after this list
 - Leave the takes as filmed on that stop, since a session composing after the install needs no second filming
 
 ```plaintext
@@ -133,6 +133,10 @@ Read `${CLAUDE_SKILL_DIR}/references/handoff.md` on reaching this step, for what
 
 Close the throwaway copy per `isolate.md` when Step 1 built one, after the stills are read.
 
+### Write the footage page
+
+Write `.canon/video/<slug>/footage.html` from `takes/take.json` and any harness beat folder beside it before handing off, through the same whole-file route as `plan.json`, so the operator watches every take before anything is composed. `handoff.md` states each card and what the page must never copy.
+
 ### Write the workspace README
 
 Write the filming half of `.canon/video/<slug>/README.md`, so a later session can re-film without this one. The composing session adds the re-render half under its own heading, as `compose-craft.md` states.
@@ -145,10 +149,11 @@ Write the filming half of `.canon/video/<slug>/README.md`, so a later session ca
 
 ## Output
 
-Emit the takes folder, one line per beat, and the next step.
+Emit the takes folder, the footage page, one line per beat, and the next step.
 
 ```plaintext
 🎬 Filmed .canon/video/<slug>/takes/, re-film notes in .canon/video/<slug>/README.md
+📼 Watch every take in .canon/video/<slug>/footage.html before composing
 
 01-open-the-kit  step  4.2 s  the board's first page with its frames filled in
 02-search-for-color  screencast (fallback)  3.8 s  the page list narrowed to two results

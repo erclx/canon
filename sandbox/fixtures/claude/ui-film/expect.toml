@@ -15,6 +15,7 @@
 paths = [
   ".canon/video/*/plan.json",
   ".canon/video/*/README.md",
+  ".canon/video/*/footage.html",
   ".canon/video/*/takes/take.json",
   ".canon/video/*/takes/01-*/clip.mp4",
   ".canon/video/*/takes/01-*/log.json",
@@ -64,6 +65,11 @@ pattern = '"kind":\s*"fill"'
 [[content]]
 path = ".canon/video/*/README.md"
 pattern = 'canon take '
+
+# The footage page carries a player per take, read by its relative path.
+[[content]]
+path = ".canon/video/*/footage.html"
+pattern = 'takes/02-[^/]*/clip\.mp4'
 
 # The record lists both beats and the route that filmed each.
 [[content]]
