@@ -79,7 +79,7 @@ The cursor stays outside the wrapper because a cursor inside it would scale with
 
 ## What the composition still owns
 
-Read `${CLAUDE_SKILL_DIR}/references/compose-craft.md` for the captions, the other shapes, the loop, and a sped-up clip, where app footage changes what HyperFrames advises.
+Read `${CLAUDE_SKILL_DIR}/references/compose-craft.md` for the other shapes, the loops, and a sped-up clip, and `${CLAUDE_SKILL_DIR}/references/captions.md` for the captions, where app footage changes what HyperFrames advises.
 
 - The order and the cuts between takes, the captions, and any music or voice
 - Whether a take plays whole or trimmed. A trim keeps the track aligned only when it shifts the track by the same frames.
