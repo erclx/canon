@@ -42,6 +42,8 @@ Scoped to the README at a repository root. A nested README documenting a folder,
 - Ground a claim in something concrete rather than an adjective. A command, a number, or a named constraint carries more than a description of quality.
 - Be honest about limits. Naming what the project does not do reads as more credible, not less.
 
+Open each sentence per `## How a sentence opens` in `${CLAUDE_SKILL_DIR}/../ui-craft/references/page-copy.md`, which owns the rule.
+
 ## Structure
 
 - H1 title, H2 major sections, H3 subsections. Maintain proper hierarchy for GitHub's auto-generated table of contents.
