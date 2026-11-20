@@ -1,0 +1,87 @@
+---
+import { install } from '../../../content/copy'
+import './style.css'
+
+/**
+ * The install beside the setup it leads to: the three commands in a drawn
+ * card with one copy control and the first run under them, then a terminal
+ * running the setup in a fresh project over the four stages a project goes
+ * through. The terminal stays dark in both themes, as a terminal does.
+ */
+const code = (text: string) => text.split('`')
+---
+
+<section class="part" id="install">
+  <div class="w split">
+    <div>
+      <h2>{install.head}</h2>
+      <p class="lede">{install.lede}</p>
+      <div class="cmd ink" data-commands={install.commands.join('\n')}>
+        <div class="cbody">
+          {
+            install.commands.map((command) => (
+              <code>
+                <span class="pr" aria-hidden="true">
+                  ${' '}
+                </span>
+                {command}
+              </code>
+            ))
+          }
+        </div>
+        <div class="cfoot">
+          <button
+            type="button"
+            class="drawn copy"
+            data-label={install.copy.label}
+            data-done={install.copy.done}
+            data-status={install.copy.status}
+          >
+            {install.copy.label}
+          </button>
+          <span class="note">{install.first}</span>
+          <span class="sr-only" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="term">
+        <p class="tb" aria-hidden="true">
+          <i></i><i></i><i></i><span>{install.session}</span>
+        </p>
+        <div class="tbody">
+          <p><span class="acc">❯</span> {install.run?.ask}</p>
+          {
+            install.run?.rows.map(([kind, key, value]) => (
+              <p>
+                {kind === 'q' ? (
+                  <span class="q">? {key}</span>
+                ) : (
+                  <span class="k">{key}</span>
+                )}{' '}
+                {value}
+              </p>
+            ))
+          }
+        </div>
+      </div>
+      <ol class="stg" role="list">
+        {
+          install.stages.map((stage) => (
+            <li>
+              <span class="note">{stage.when}</span>
+              <b>{stage.name}</b>
+              <span>
+                {code(stage.line).map((part, k) =>
+                  k % 2 ? <code>{part}</code> : part,
+                )}
+              </span>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </div>
+</section>
+
+<script src="./client.ts"></script>

@@ -20,6 +20,10 @@ A Claude Code plugin and CLI that runs agent work from plan to merge.
 
 </div>
 
+## Install, then set up a project
+
+Start in three commands once you know Claude Code well. It runs on Linux and macOS, and the CLI needs Bun.
+
 ## Quick start
 
 ```bash

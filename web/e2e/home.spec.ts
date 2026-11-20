@@ -20,6 +20,7 @@ const SECTIONS = [
   'drive',
   'board',
   'health',
+  'install',
   'setup',
   'try',
 ]
@@ -839,6 +840,31 @@ test.describe('the evidence section', () => {
     await page.locator('.theme-toggle').click()
 
     await expect(still).toHaveAttribute('src', '/film-beat-1-light.webp')
+  })
+})
+
+test.describe('the install section', () => {
+  test('the copy control says it copied the three commands', async ({
+    page,
+    context,
+    browserName,
+  }) => {
+    test.skip(
+      browserName !== 'chromium',
+      'Only Chromium grants clipboard permissions to a test',
+    )
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+    await page.goto('/')
+    const copy = page.locator('#install .copy')
+
+    await copy.click()
+
+    await expect(copy).toHaveText('Copied')
+    await expect(page.locator('#install [role="status"]')).toHaveText(
+      'Copied the three commands',
+    )
+    const copied = await page.evaluate(() => navigator.clipboard.readText())
+    expect(copied.split('\n')).toHaveLength(3)
   })
 })
 

@@ -651,3 +651,22 @@ export const setupSession: {
     ],
   },
 ]
+
+/**
+ * The three install commands with one copy control, beside the setup run in a
+ * fresh project and the four stages a project goes through.
+ */
+export const install = {
+  // README.md: "Install, then set up a project"
+  head: 'Install, then set up a project',
+  // README.md: "Start in three commands once you know Claude Code well. It runs on Linux and macOS, and the CLI needs Bun."
+  lede: 'Start in three commands once you know Claude Code well. It runs on Linux and macOS, and the CLI needs Bun.',
+  commands: tryIt.commands,
+  copy: tryIt.copy,
+  // README.md: canon-allow-readme-paraphrase: the README's first-run sentence, cut to the command and where it runs. "run `/canon:target-setup`"
+  first: 'then run /canon:target-setup in a project',
+  // README.md: canon-allow-readme-paraphrase: the terminal's title, which no README sentence carries.
+  session: 'a fresh project',
+  run: setupSession[1],
+  stages: setup.stages,
+}
