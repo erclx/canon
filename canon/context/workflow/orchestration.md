@@ -107,22 +107,13 @@ Holds `poll.ts`, `watch.ts`, and the `repo.ts` they share. Tests sit in `src/cla
 - `poll.ts --check <number>` rereads base and head without writing, since the draft lift cannot trust a baseline as old as the last run
 - `watch.ts` reads pull requests, the roster, and the dispatch queue every 60 seconds, firing `WORKER-STOPPED` past `STALL_THRESHOLD_S` and `LAUNCHED` on a queued worker branch
 
-### `.claude/hooks/`
-
-Holds the hooks, and `cloud-setup.sh` stages a cloud build.
-
-- It runs on `SessionStart` only when `CLAUDE_CODE_REMOTE=true`, copying `claude/skills/*` into `.claude/skills/` and linking `canon` to the checkout
-- Every path it writes goes into `.git/info/exclude`, since `.gitignore` would itself be a diff
-- The plan travels as launch-prompt text, since the VM holds no `.canon/`, and the claim reads open `claude/` pull request comments for an `ANNOUNCE:` or `QUESTION:` line naming the plan
-
 ### Other folders
 
 The remaining surfaces each own one slice.
 
 - `.canon/ready/` holds only archived folders under `archive/`, which `canon tasks archive` still moves and retargets for an older task's `Ready:` line
 - A posted finding reaches the worker as a message from the reviewer, who receives the re-review request directly, so the controller hears only a close, a refusal, or a block
-- The controller falls back as sender for a cloud reviewer or an unreachable side, as `orchestrator-handback.md` states, and the poll's after-finding rule skips a pass a live reviewer sent on
-- A cloud worker has no GraphQL, so only the create can draft its pull request, and `git-pr` deletes the session link the harness appends
+- The controller falls back as sender for an unreachable side, as `orchestrator-handback.md` states, and the poll's after-finding rule skips a pass a live reviewer sent on
 - `crossSessionInbound` stays unset, since `hold` and `refuse` break the worker handback and `accept` bounds nothing
 
 ## Gotchas
