@@ -113,6 +113,10 @@ export interface AddInput {
   readonly effort: string
   readonly controller: string
   readonly pr?: string
+  /** A worker row that writes its task's plan, then builds it. */
+  readonly planFirst?: boolean
+  /** Passed through to a plan-first build, past its file bound and weight stop. */
+  readonly anySize?: boolean
   readonly lines?: readonly string[]
   readonly mergeOrder?: string
 }
@@ -435,6 +439,15 @@ function checkInput(input: AddInput): PromptRefused | null {
   if (input.role !== 'reviewer' && input.pr !== undefined) {
     return refuse('bad-input', '--pr belongs to a reviewer row alone.')
   }
+  if (input.planFirst === true && input.role !== 'worker') {
+    return refuse('bad-input', '--plan-first belongs to a worker row alone.')
+  }
+  if (input.anySize === true && input.planFirst !== true) {
+    return refuse(
+      'bad-input',
+      '--any-size passes through to a plan-first build, so it needs --role worker --plan-first.',
+    )
+  }
   const bad = (input.lines ?? []).find(
     (line) => line.trim() === '' || line.includes('\n') || line.includes('```'),
   )
@@ -455,9 +468,14 @@ function commandFor(
   role: PromptRole,
   task: TaskFile,
   plan: string | null,
-  pr: string | undefined,
+  input: AddInput,
 ): string {
+  if (role === 'worker' && input.planFirst === true) {
+    const anySize = input.anySize === true ? ' --any-size' : ''
+    return `/canon:auto-ship --plan-first${anySize} .canon/tasks/${task.stem}.md`
+  }
   if (role === 'worker') return `/canon:auto-ship ${plan}`
+  const pr = input.pr
   if (role === 'reviewer') {
     return `Run /canon:role-reviewer, then /canon:review-pr ${pr}`
   }
@@ -486,7 +504,14 @@ export async function addPrompt(
   if ('ok' in task) return task
 
   let plan: string | null = null
-  if (role === 'worker') {
+  if (role === 'worker' && input.planFirst === true) {
+    if (readPlanTargets(task.text).length > 0) {
+      return refuse(
+        'bad-input',
+        `${task.stem} already links a plan, so it takes --role worker without --plan-first.`,
+      )
+    }
+  } else if (role === 'worker') {
     const resolved = planOf(root, task)
     if (typeof resolved !== 'string') return resolved
     plan = resolved
@@ -500,7 +525,7 @@ export async function addPrompt(
     model: input.model,
     effort: input.effort,
     lines: [
-      commandFor(role, task, plan, input.pr),
+      commandFor(role, task, plan, input),
       `Controller: ${input.controller}`,
       ...(input.lines ?? []).map((line) => line.trim()),
     ],

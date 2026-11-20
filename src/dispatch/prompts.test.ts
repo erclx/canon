@@ -139,6 +139,79 @@ describe('addPrompt', () => {
     expect(await listPrompts(ROOT)).toMatchObject({ ok: true, prompts: [] })
   })
 
+  describe('plan-first worker rows', () => {
+    it('should queue a plan-first row for a task that links no plan', async () => {
+      const outcome = await add(buildInput({ task: 'v1.4', planFirst: true }))
+
+      expect(outcome).toMatchObject({
+        ok: true,
+        action: 'added',
+        prompt: {
+          role: 'worker',
+          lines: [
+            '/canon:auto-ship --plan-first .canon/tasks/v1.4-unplanned.md',
+            `Controller: ${CONTROLLER}`,
+          ],
+        },
+      })
+    })
+
+    it('should pass --any-size through on a plan-first row', async () => {
+      const outcome = await add(
+        buildInput({ task: 'v1.4', planFirst: true, anySize: true }),
+      )
+
+      expect(outcome).toMatchObject({
+        ok: true,
+        prompt: {
+          lines: [
+            '/canon:auto-ship --plan-first --any-size .canon/tasks/v1.4-unplanned.md',
+            `Controller: ${CONTROLLER}`,
+          ],
+        },
+      })
+    })
+
+    it('should refuse a plan-first row for a task that already links a plan', async () => {
+      const outcome = await add(buildInput({ planFirst: true }))
+
+      expect(outcome).toMatchObject({ ok: false, reason: 'bad-input' })
+      expect(outcome).toHaveProperty(
+        'message',
+        expect.stringContaining('--role worker without --plan-first'),
+      )
+      expect(await listPrompts(ROOT)).toMatchObject({ ok: true, prompts: [] })
+    })
+
+    it.each(['planner', 'reviewer'])(
+      'should refuse --plan-first on a %s row',
+      async (role) => {
+        const outcome = await add(
+          buildInput({ task: 'v1.4', role, pr: '7', planFirst: true }),
+        )
+
+        expect(outcome).toMatchObject({ ok: false, reason: 'bad-input' })
+      },
+    )
+
+    it.each(['planner', 'reviewer'])(
+      'should refuse --any-size on a %s row',
+      async (role) => {
+        const outcome = await add(
+          buildInput({ task: 'v1.4', role, pr: '7', anySize: true }),
+        )
+
+        expect(outcome).toMatchObject({ ok: false, reason: 'bad-input' })
+      },
+    )
+
+    it('should refuse --any-size on a worker row without --plan-first', async () => {
+      const outcome = await add(buildInput({ anySize: true }))
+
+      expect(outcome).toMatchObject({ ok: false, reason: 'bad-input' })
+    })
+  })
+
   it('should queue a planner row for a task that links no plan', async () => {
     const outcome = await add(buildInput({ task: 'v1.4', role: 'planner' }))
 
