@@ -12,6 +12,7 @@ Read beside `take-craft.md` at Step 3 of `ui-film`, before writing the first bea
 - [The scenarios](#the-scenarios)
 - [The zoom](#the-zoom)
 - [The pace](#the-pace)
+- [The timing check](#the-timing-check)
 - [The look](#the-look)
 - [Rules for a beat writer](#rules-for-a-beat-writer)
 - [Sources](#sources)
@@ -100,6 +101,21 @@ Each move takes the time a person's would, and the verb paces it without a `wait
 - A fill rests 450 ms on its click while the ring plays, steps the cursor over 300 ms to just past the field's bottom-right corner, and settles 150 ms before the first key
 
 The step-off keeps the cursor from covering the text it types. It stays inside the window, so a field against the window's edge steps as far as the edge allows rather than refusing.
+
+## The timing check
+
+`canon take check` holds a finished take to the pace above, a frame under each constant, so an engine take passes and a harness take, a trimmed beat, or a sped-up track is held to the same. Refilm a beat on a breach, per the refilm order in `handoff.md`.
+
+| Record or `rule`                                           | Route                                                                                                      |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `glide-fast`, `no-rest`, `left-early`, `zoom-fast`, `pump` | Film the beat again with the current `canon`, whose pacing passes, or fix the pacing in its harness script |
+| `typed-under`                                              | Move the pointer off the field before the first key in the harness script, then film the beat again        |
+| `stall`                                                    | Film the beat again, and read `harness.md` when the same stall films twice                                 |
+| `no-track`                                                 | Rebuild the track with the `canon take camera` command the `message` names, then check again               |
+| `ffmpeg-missing`                                           | Report it to the operator and stop, since the stall rule refuses a beat it cannot read rather than pass it |
+| Any other `reason`                                         | Report the `reason`, `beat`, and `message` to the operator and stop                                        |
+
+Check a sped-up track by passing its file as `--camera <name>`, since its zooms play on the faster clock a viewer sees.
 
 ## The look
 

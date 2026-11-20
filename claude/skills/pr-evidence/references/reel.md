@@ -130,6 +130,16 @@ Open each beat's `still.jpg`, the closing frame the record names in its `still` 
 - A record whose beats carry no `still` field comes from a `canon` predating the still, so skip as `no-still` rather than posting a reel nothing checked
 - Read `fallback` on each beat. A beat filmed by screencast still joins the reel, since the reel shrinks every beat to one width.
 
+Then check the takes' timing before pushing, since a still shows the closing frame and none of the motion before it.
+
+```bash
+canon take check .canon/tmp/pr/reel/<number>/takes --json
+```
+
+- No `reason` means every beat passed, so continue to the push
+- `reason: breach` means a beat broke a rule. Film the reel once more and check again, then skip as `timing` on a second breach, naming each beat's `dir` and `rule`.
+- Any other `reason` skips under that `reason`, naming its `beat` when the record carries one
+
 ## Push the reel
 
 Stamp the pass in compact UTC and push the file:
