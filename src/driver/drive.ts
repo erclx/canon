@@ -176,13 +176,9 @@ export async function drive(options: DriveOptions): Promise<DriverResult> {
 }
 
 /**
- * One full pass of the sequence at one viewport and scheme, in a context of its
- * own.
- *
- * A fresh context per height rather than a resize of the last one, because a
- * step already run has left the page in a state the next height would inherit,
- * and a sweep exists to ask the same question of each rather than to ask a
- * later one of a page the earlier heights already drove.
+ * One pass at one viewport and scheme, in a fresh context rather than a resize
+ * or a re-emulation of the last, since a step already run leaves the page in a
+ * state the next pass would inherit instead of asking the same question again.
  */
 async function driveViewport(
   browser: Browser,
