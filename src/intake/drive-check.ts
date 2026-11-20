@@ -19,6 +19,9 @@ import { bodyLines } from '@/markdown/scan'
 /** The record a drive leaves in its intake folder, which this check reads. */
 export const DRIVE_RECORD = 'drive.json'
 
+/** The project's drive config, which the drive reads at Step 1 and this check reads for scripts. */
+export const DRIVE_CONFIG = join('canon', 'config', 'app-drive.toml')
+
 const SCRATCH = join('.canon', 'tmp', 'app-drive')
 
 /**
@@ -29,6 +32,7 @@ export const DRIVE_REFUSALS = [
   'bad-input',
   'no-record',
   'bad-record',
+  'bad-config',
   'no-requirements',
   'no-baseline',
   'unreadable-tree',
@@ -58,6 +62,11 @@ export interface DriveFindings {
   readonly unreasoned: readonly string[]
   /** Entries naming a goal the requirements record does not hold. */
   readonly unknown: readonly string[]
+  /**
+   * Configured scripts a persona never ran, or skipped with no reason, each as
+   * `<script> (<persona>)`, or the bare script when the config names no personas.
+   */
+  readonly unscripted: readonly string[]
   /** Paths in the main checkout that differ from the baseline. */
   readonly changed: readonly string[]
   /** Evidence paths that resolve outside the folder's `evidence/`. */
@@ -89,8 +98,18 @@ interface DriveGoal {
   readonly reason?: string
 }
 
+interface DriveScript {
+  readonly script: string
+  readonly persona: string
+  readonly status: GoalStatus
+  readonly reason?: string
+}
+
 interface DriveRecord {
   readonly goals: readonly DriveGoal[]
+  /** Absent for the flat default target. */
+  readonly target?: string
+  readonly scripts: readonly DriveScript[]
   readonly evidence: readonly string[]
   /** Absent or `null` for a drive of the live app, which made no copy. */
   readonly worktree?: string
@@ -176,7 +195,10 @@ function parseRecord(raw: string): DriveRecord | string {
     return `${DRIVE_RECORD} is not an object.`
   }
 
-  const { goals, evidence, worktree } = parsed as Record<string, unknown>
+  const { goals, evidence, worktree, target, scripts } = parsed as Record<
+    string,
+    unknown
+  >
   if (!Array.isArray(goals)) {
     return `${DRIVE_RECORD} carries no "goals" list.`
   }
@@ -215,11 +237,156 @@ function parseRecord(raw: string): DriveRecord | string {
     return `${DRIVE_RECORD} carries an empty "worktree". A drive of the live app records null.`
   }
 
+  if (target !== undefined && target !== null && typeof target !== 'string') {
+    return `${DRIVE_RECORD} carries a "target" that is not a name.`
+  }
+  if (typeof target === 'string' && target.trim() === '') {
+    return `${DRIVE_RECORD} carries an empty "target". A drive of the default target records null.`
+  }
+
+  const runs = parseScripts(scripts)
+  if (typeof runs === 'string') return runs
+
   return {
     goals: entries,
+    ...(typeof target === 'string' && { target }),
+    scripts: runs,
     evidence: evidence ?? [],
     ...(typeof worktree === 'string' && { worktree }),
   }
+}
+
+function parseScripts(scripts: unknown): DriveScript[] | string {
+  if (scripts === undefined) return []
+  if (!Array.isArray(scripts)) {
+    return `${DRIVE_RECORD} carries a "scripts" field that is not a list.`
+  }
+
+  const runs: DriveScript[] = []
+  for (const [index, entry] of scripts.entries()) {
+    const { script, persona, status, reason } = (entry ?? {}) as Record<
+      string,
+      unknown
+    >
+    if (typeof script !== 'string' || script.trim() === '') {
+      return `${DRIVE_RECORD} scripts[${index}] carries no "script" path.`
+    }
+    if (typeof persona !== 'string' || persona.trim() === '') {
+      return `${DRIVE_RECORD} scripts[${index}] carries no "persona".`
+    }
+    if (status !== 'driven' && status !== 'not-driven') {
+      return `${DRIVE_RECORD} scripts[${index}] has a "status" other than "driven" or "not-driven".`
+    }
+    runs.push({
+      script,
+      persona,
+      status,
+      ...(typeof reason === 'string' && { reason }),
+    })
+  }
+  return runs
+}
+
+interface ScriptPlan {
+  readonly scripts: readonly string[]
+  readonly personas: readonly string[]
+}
+
+function isStringList(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) &&
+    value.every((item) => typeof item === 'string' && item.trim() !== '')
+  )
+}
+
+/**
+ * The scripts and personas the drive's target owes, a named target's table
+ * falling back to the flat key the way `app-drive` reads it. A project with no
+ * config owes no scripts.
+ */
+function readScriptPlan(
+  source: string | undefined,
+  target: string | undefined,
+): ScriptPlan | DriveRefused {
+  const none: ScriptPlan = { scripts: [], personas: [] }
+  if (source === undefined) {
+    return target === undefined
+      ? none
+      : refuse(
+          'bad-record',
+          `${DRIVE_RECORD} names target "${target}", but ${DRIVE_CONFIG} does not exist.`,
+        )
+  }
+
+  let parsed: Record<string, unknown>
+  try {
+    parsed = Bun.TOML.parse(source) as Record<string, unknown>
+  } catch {
+    return refuse('bad-config', `${DRIVE_CONFIG} is not valid TOML.`)
+  }
+
+  let table: Record<string, unknown> = {}
+  if (target !== undefined) {
+    const targets = parsed.targets as Record<string, unknown> | undefined
+    const named = targets?.[target]
+    if (typeof named !== 'object' || named === null) {
+      return refuse(
+        'bad-record',
+        `${DRIVE_RECORD} names target "${target}", which ${DRIVE_CONFIG} does not hold under [targets].`,
+      )
+    }
+    table = named as Record<string, unknown>
+  }
+
+  const read = (key: 'scripts' | 'personas'): string[] | DriveRefused => {
+    const value = key in table ? table[key] : parsed[key]
+    if (value === undefined) return []
+    if (!isStringList(value)) {
+      const where = key in table ? `targets.${target}.${key}` : key
+      return refuse(
+        'bad-config',
+        `${DRIVE_CONFIG} carries a "${where}" that is not a list of strings.`,
+      )
+    }
+    return value
+  }
+
+  const scripts = read('scripts')
+  if (!Array.isArray(scripts)) return scripts
+  const personas = read('personas')
+  if (!Array.isArray(personas)) return personas
+  return { scripts, personas }
+}
+
+/**
+ * Each configured script and persona pair the record carries no passing or
+ * reasoned entry for. With no personas configured, a script needs one such
+ * entry under any persona, since the drive asked for them instead.
+ */
+function unscriptedPairs(
+  plan: ScriptPlan,
+  runs: readonly DriveScript[],
+): string[] {
+  const settled = (run: DriveScript) =>
+    run.status === 'driven' || Boolean(run.reason?.trim())
+
+  if (plan.personas.length === 0) {
+    return plan.scripts.filter(
+      (script) => !runs.some((run) => run.script === script && settled(run)),
+    )
+  }
+
+  return plan.scripts.flatMap((script) =>
+    plan.personas
+      .filter(
+        (persona) =>
+          !runs.some(
+            (run) =>
+              run.script === script && run.persona === persona && settled(run),
+          ),
+      )
+      .map((persona) => `${script} (${persona})`),
+  )
 }
 
 function isEvidencePath(path: string): boolean {
@@ -282,11 +449,8 @@ export async function recordBaseline(
 }
 
 /**
- * Checks a finished drive against its intake folder's `drive.json`: every
- * goal mapped or skipped with a reason, the main checkout unchanged since the
- * baseline, the evidence inside the folder's `evidence/`, every decision in
- * the drive log drawn, and the drive's worktree gone. A folder with no log
- * reads as nothing undrawn. It reports what failed and never reverts a changed path,
+ * Checks a finished drive against its `drive.json`, failing each axis
+ * `DriveFindings` names. It reports a changed path and never reverts it,
  * since only the operator knows which of them to keep.
  */
 export async function checkDrive(
@@ -317,6 +481,13 @@ export async function checkDrive(
     )
   }
   const goals = readGoals(await readFile(requirements, 'utf8'))
+
+  const configPath = join(root, DRIVE_CONFIG)
+  const plan = readScriptPlan(
+    existsSync(configPath) ? await readFile(configPath, 'utf8') : undefined,
+    record.target,
+  )
+  if ('ok' in plan) return plan
 
   let baseline: readonly StatusEntry[]
   try {
@@ -353,6 +524,7 @@ export async function checkDrive(
     unknown: record.goals
       .filter((entry) => !known.has(normalizeGoal(entry.goal)))
       .map((entry) => entry.goal),
+    unscripted: unscriptedPairs(plan, record.scripts),
     changed: changedSince(baseline, current),
     strayEvidence: evidence.filter((path) => !isEvidencePath(path)),
     missingEvidence: evidence.filter(

@@ -1,6 +1,6 @@
 ---
 title: App drive config
-description: The canon/config/app-drive.toml keys launch, data, personas, proposals, board-project, and board-folder, the named targets that let one file drive several apps, and what a drive does when the file is absent
+description: The canon/config/app-drive.toml keys launch, data, personas, scripts, proposals, board-project, and board-folder, the script format, the named targets that let one file drive several apps, and what a drive does when the file is absent
 ---
 
 # App drive config
@@ -11,6 +11,7 @@ Read at Step 1 of `app-drive`. A project describes how its app is driven in `can
 launch = "bun install --frozen-lockfile && bun run build && PREVIEW_PORT=4530 bun run preview"
 data = "fixtures/demo-board"
 personas = ["a designer laying out a board", "an agent calling the CLI"]
+scripts = ["canon/drive/basics.md"]
 proposals = ".canon/picks"
 board-project = "drive-<nn>"
 board-folder = "Drives"
@@ -23,6 +24,7 @@ board-folder = "Drives"
 | `launch`        | The shell command that installs, builds, and serves the app in a worktree |
 | `data`          | A fixture path inside the worktree to load before serving, if any         |
 | `personas`      | Who uses the app, each driven through every goal                          |
+| `scripts`       | Tracked scenario files, each run once per persona before any goal         |
 | `proposals`     | The folder for an undecided taste finding's frames and a fallback mock    |
 | `board-project` | The board project a drive draws in, where `<nn>` is the intake ordinal    |
 | `board-folder`  | The board's home folder the drive's project files under                   |
@@ -33,6 +35,26 @@ Some of the keys carry a reading the table cannot hold.
 - `personas` covers an agent or API caller as well as a person in the UI, when the app has one
 - An absent `data` means the app starts empty, and an absent `proposals` means the frames stay in the intake folder's `evidence/`
 - A fallback mock is the standalone HTML a decided finding's frames are lifted into when the copy cannot host them
+
+### Scripts
+
+`scripts` is optional, and a config naming none drives as it did. It holds the basics a drive should run the same way every time, which a goal turned into a step does not, since each drive words the step afresh.
+
+A script is a tracked markdown file the project writes. It takes one H2 per scenario, numbered steps under it, and one `Check:` line naming what a pass looks like.
+
+```markdown
+## Open a board
+
+1. Open the app at its address
+2. Create a board named `drive`
+3. Add one frame and rename it
+
+Check: the frame keeps its name after a reload
+```
+
+- A path resolves from the project root, never the worktree's `root`
+- A path naming no file is recorded `not-driven` with the reason, and the drive goes on
+- `canon intake drive-check` reads the same key for the same target, so a script the config names and the drive skipped fails the check
 
 ### The board key
 
@@ -59,10 +81,11 @@ personas = ["a developer reading the landing page"]
 board-project = "landing-<nn>"
 ```
 
-A `[targets.<name>]` table takes the five keys above and one more.
+A `[targets.<name>]` table takes the keys above and one more.
 
 - `root` is the folder inside the worktree the target's `launch` runs from, defaulting to the worktree root
 - A key the table leaves out falls back to the flat key of the same name, except `board-project`
+- A table may name its own `scripts`, and one leaving the key out runs the flat list
 - A target's `board-project` defaults to `<name>-<nn>`, such as `web-<nn>`, while the flat default stays `drive-<nn>`
 - A static site with no health path reaches `canon pr local` through `page-only` in `canon/config/local.toml`, so a target carries no health key
 
