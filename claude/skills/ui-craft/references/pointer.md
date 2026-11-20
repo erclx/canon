@@ -5,7 +5,12 @@
 - Dismiss a popover or menu on a press outside it and when focus leaves it, as well as on Escape.
 - Run a pointer action on release rather than press, so a person can slide off the target to abort it (WCAG 2.5.2).
 - Give a path-based or multipoint gesture, such as a swipe or pinch, a single-pointer alternative with no path (WCAG 2.5.1).
+
+## Drags
+
 - Give every author-defined drag a single-pointer alternative and a keyboard path, such as move buttons or arrow-key reordering (WCAG 2.5.7).
+- Show a dragged item as grabbed, by an outline, shadow, or offset, and preview where it lands by highlighting the drop target before the pointer reaches it.
+- Let a person grab a draggable item anywhere on it, and add a handle only when the item holds controls of its own.
 
 ## Pointer targets
 

@@ -19,6 +19,8 @@
 - Close a dialog, popover, menu, or inline confirmation on Escape, and cancel an in-progress edit the same way.
 - Never trap keyboard focus. A person who tabs into a component can leave it by keyboard alone, and a modal dialog leaves on Escape (WCAG 2.1.2).
 - Bind no single printable character as a shortcut unless a person can turn it off or remap it, or it fires only while its control has focus (WCAG 2.1.4).
+- Close one layer per Escape press, innermost first, and return focus to the control that opened it.
+- Keep app shortcuts working while focus sits in a toast, panel, or other surface that takes no text, and stop them only inside text entry.
 
 ## Composite widgets
 
@@ -29,4 +31,4 @@
 ## Focus management
 
 - Move focus into a dialog when it opens, and return it to the element that opened it when it closes.
-- Never let a sticky header, footer, or overlay fully cover the focused control. Scroll it clear of them (WCAG 2.4.11).
+- Never let a sticky header, footer, toast, hint, or docked card fully cover the focused control. Scroll it clear or place the layer elsewhere (WCAG 2.4.11).
