@@ -19,18 +19,18 @@ Films each beat of a take plan from a fresh load and writes its clip, a log with
 
 - The stepper drives chrome-headless-shell over raw CDP, since Playwright cannot ask for begin-frame control, and shoots frames at device scale 2, or 1 on `deviceScale` or after a recording stall
 - A `screencast` beat, or a stall past 2 s no stepped retry clears, films through Playwright at its window, naming the route, and `frame-clock.ts` moves each frame stamp onto the stage clock
-- One choreography runs each step on each route's stage, logging every glide point the drawn cursor holds until the next and resting 300 ms before a press, 500 ms after, and 400 ms before a fill types
+- One choreography runs each step on each route's stage and logs every glide point. A glide takes 600 ms to 1.2 s, and a fill rests, steps off its field, and settles before typing.
 - The camera zooms onto a press over the glide reaching it, and in the reel onto the box a key moved focus to, at a depth the clip's width over the output's caps, and pans only at a steady scale
 - Stepped frames stream into the system FFmpeg, screencast frames spool beside the clip until the stop, and FFmpeg's absence refuses before any browser launches
 
 ### `src/take/fixtures/`
 
-Owns the static pages the end to end takes film, four of which post each input they receive back to the test's server, and `film-suite.ts`, the harness the ten `film-*.e2e.test.ts` files share.
+Owns the static pages the end to end takes film, four of which post each input they receive back to the test's server, and `film-suite.ts`, the harness the ten `film-*.e2e.test.ts` files share. `camera.html` is the three-column app page the camera and cursor rules were judged on, and `camera.json` films its eleven scenarios.
 
 - `motion.html` is the release-checklist page every motion rule is measured on, and `motion-server.ts` serves any fixture with canon's token sheet and Geist from where they live
 - `motion.html` reports the animation frame each input paints in, since a stepped page's `performance.now()` runs ahead of the clip while inputs are dispatched
 - `scrollbars.html` posts its scrollbar gutter, 0 on both routes since a take hides scrollbars until a beat sets `scrollbars: true`, which a stepped beat that falls back to the screencast keeps
-- `watch.ts` films `motion.json` on that page and renders each beat with its zoom and cursor burned in, for judging a camera change by eye
+- `watch.ts` films a fixture stem's plan on its page, `motion` by default, and renders each beat with its zoom and cursor burned in, for judging a camera change by eye
 - `pr-reel.ts` films the reel the lift owes through the worktree's engine, from each changed fixture's `<stem>.json` or a `--plan <file>`, and refuses `unplanned` when neither covers the change
 
 ### `src/take/film-*.e2e.test.ts`
