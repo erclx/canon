@@ -1,6 +1,6 @@
 ---
 title: Compose craft
-description: The footage rules a session composing ui-film takes follows where the HyperFrames skills say nothing, being captions over app UI, other shapes, the README loop, pacing, sped-up clips, transitions, reviewing a cut, music, storyboard headings, and the workspace README
+description: The footage rules a session composing ui-film takes follows where the HyperFrames skills say nothing, being other shapes, loop clips and their seam, pacing, sped-up clips, transitions, reviewing a cut and the block it goes out with, music and its license record, storyboard headings, and the workspace README, with captions in captions.md
 ---
 
 # Compose craft
@@ -11,9 +11,9 @@ Each rule states the principle. Where a number appears, it is the case measured 
 
 ## Contents
 
-- [Captions over app footage](#captions-over-app-footage)
+- [Captions](#captions)
 - [Other shapes](#other-shapes)
-- [The README loop](#the-readme-loop)
+- [Loop clips](#loop-clips)
 - [Pacing](#pacing)
 - [Sped-up clips](#sped-up-clips)
 - [Transitions](#transitions)
@@ -23,14 +23,9 @@ Each rule states the principle. Where a number appears, it is the case measured 
 - [The workspace README](#the-workspace-readme)
 - [Sources](#sources)
 
-## Captions over app footage
+## Captions
 
-HyperFrames' caption guide places a landscape caption 80 to 120 px from the bottom and keeps it off a speaker's face. App footage has no speaker, and its bottom edge is often a toolbar where the beat's click lands.
-
-- Pick one caption position for the whole film, clear of the app's chrome where actions land, and keep every caption there, since a caption that moves between beats makes the viewer hunt for it
-- Back a caption over bright UI with the scrim HyperFrames' caption guide sizes to the text
-- Snapshot each caption's moment, and move a caption only when it covers its own beat's action
-- Write caption text by the interface copy rules in `ui-craft`'s `copy.md`, so a caption ends with no period
+Where each beat's caption sits, the scorer that picks the spot, caption text, and the approval every on-screen line gets before the first cut live in `captions.md`. Read it beside this file.
 
 ## Other shapes
 
@@ -41,14 +36,23 @@ Cut a square or vertical version only when the operator asks for one. A film wit
 - Pan the window along the camera track's view center, so it follows the action the zoom would have aimed at. Frameboard's square cut used a 1080x1080 window.
 - Expect a screencast take to hold at 1x from a softer 1080p source, while a stepped take gives the same window two clip pixels per page pixel
 
-## The README loop
+## Loop clips
 
-Cut a README loop only when the operator asks for one. A README hero plays inline and silently, so it is a short loop rather than a cut of the film.
+Cut a loop only when the operator asks for one, such as a README hero or a set of short clips for a page's grid. A loop plays inline and silently, so it is a short clip rather than a cut of the film.
 
-- Cut it from the raw take showing the app's core action, rather than from a render, in the workspace folder `handoff.md` names for it
-- Crop it to the canvas, so no browser margin or page chrome outside the app shows
-- End it on the finished state, held long enough to read before the loop restarts
-- Export an animated WebP under about 2 MB, since a README renders one inline where a video needs a player. Frameboard's loop played inline at 1.72 MB.
+- Cut it from the raw take showing the app's core action, rather than from a render, in the workspace folder `handoff.md` names for its kind
+- Crop it to the canvas, or for a grid to its cell's own shape such as 16:10, so no browser margin or page chrome outside the app shows
+- End it on the finished state, held long enough to read before the restart
+- Export a README hero as an animated WebP under about 2 MB, since a README renders one inline where a video needs a player. Frameboard's loop played inline at 1.72 MB.
+- Give each grid clip a size budget, and step the encoder quality down until the clip fits
+
+### The seam
+
+A loop that jumps on restart reads as broken on every cycle. A dissolve ending on the clip's last frame leaves it mid-fade, which one grid clip's seam measured at 25.8 dB.
+
+- End the dissolve to the first frame at least two frames before the clip ends, and hold it, so the rendered last frames match the first
+- Check the seam on the rendered file with ffmpeg `psnr` between its first and last frames, since a preview snapshot just before the end passed a seam the render failed
+- Pass a seam that reads about as high as two neighboring frames of the held end, which is the encoder's own noise, and fail one well below that pair
 
 ## Pacing
 
@@ -74,6 +78,14 @@ Every result and every line of text holds still long enough to land before the c
 
 Read each scene's window off the take's `log.json`, from its first event less a lead to its last result plus that result's hold, then set the rate from the scene's length. Reusing an old cut's offsets against a new take lands the camera on moments that moved.
 
+### Length and reshoots
+
+A length target pushes the beats a viewer has to follow past the rate they read at, and a reshoot that retunes every beat undoes the ones the operator already accepted.
+
+- The length is an outcome of the cut, so never speed a hand action or trim a hold to meet a target, and tell the operator the length the cut landed at
+- On a reshoot, carry over the rate, window, and camera of every beat the operator approved before, and tune only the new beats
+- Reread an approved beat's window from its new `log.json` when its take was refilmed, keeping its rate and camera
+
 ## Sped-up clips
 
 A clip the edit plays faster runs its zoom faster too, so a push that settled in real time pumps several times a beat.
@@ -96,9 +108,38 @@ Stills at beat midpoints pass a cut whose motion is wrong, as they passed every 
 - Step a dense frame strip with `snapshot --range START,END --frames 8` around every take's action and every transition, rather than only the hero move `review.md` names
 - Check the drawn cursor against the element it acts on in each strip, since the cursor is drawn from the log and nothing but a look shows it leaving what the page moved
 
+### The block a cut goes out with
+
+The operator reviews a cut by watching it, so a description stands in poorly. A scene file a script writes also loses any edit made to it by hand on the next build, and nothing on the page says which files those are.
+
+- Start the HyperFrames preview in the background before sending the cut, and give its address
+- Name the generator and its table as the place to change timing or placement when a script writes the scene files, and mark each generated file as overwritten on the next build
+- Stop generating a file the operator wants to edit in the HyperFrames app, or have the generator read the edit back
+- Send every cut in the block below, with the length the cut landed at and one line per change since the last cut
+
+```plaintext
+Cut <n> to review
+Preview: <address>
+Length: <seconds> s
+Built from:
+- <generator script>: the scene table, rates, windows, and camera focus (edit here)
+- <generated scene files>: written by the generator, overwritten on each build
+- <hand-written scene files>: safe to edit in the HyperFrames app
+Changed since the last cut: <one line per change>
+```
+
 ## Music
 
 HyperFrames owns the soundtrack, so score the film by its `sound.md` and `film.md`. On Frameboard's launch film the music faults hid in the first 2 s and the last 10 s, being a silent lead and a drop that landed early, which is one film's case rather than a rule.
+
+### The license record
+
+HyperFrames' `media-use` audio guidance records a license for a sound effect and none for a library music track. A library's terms can hang on a plan tier or a live account, which no file on disk shows, and a license found wrong at the end costs a re-time and a re-render.
+
+- Keep a license record beside each audio file, naming its source, its license, the credit it owes, and any account or plan the license depends on
+- Check every record against where the film publishes, such as a public site, a video platform, or a paid ad, before the delivery render
+- Replace a track whose terms do not plainly cover that target, or get them confirmed in writing, before the render rather than after it
+- Prefer a public-domain CC0 track, which owes no credit and hangs on no account, and take a licensed track when the film needs one only a library carries
 
 ## Storyboard headings
 
@@ -117,7 +158,9 @@ Step 5 writes the filming half of `.canon/video/<slug>/README.md`. The composing
 
 ## Sources
 
-The rules measured on Frameboard's launch film carry its case beside them rather than a default.
+### Frameboard's launch film
+
+The rules measured on Frameboard's launch film carry its case beside them.
 
 | Rule                      | Source                                                                                              |
 | ------------------------- | --------------------------------------------------------------------------------------------------- |
@@ -126,14 +169,26 @@ The rules measured on Frameboard's launch film carry its case beside them rather
 | Settling wide             | Frameboard's launch film, whose dissolves ghosted two boards at different scales until each settled |
 | Where music faults hide   | Frameboard's launch film, which opened silent and ended over near silence                           |
 
-The rest come from HyperFrames, the verb, or Frameboard's other deliverables.
+### Later films
 
-| Rule                        | Source                                                                                                    |
-| --------------------------- | --------------------------------------------------------------------------------------------------------- |
-| Caption placement and scrim | HyperFrames' `captions.md`, adjusted for footage with chrome along its bottom edge                        |
-| A new project per shape     | The `hyperframes` skill's `types/vertical.md`, which recomposes a vertical film rather than squeezing it  |
-| The 2 MB WebP loop          | Frameboard's README hero, an animated WebP cut from a raw take, which played inline at 1.72 MB            |
-| Reviewing motion            | HyperFrames' `review.md`, widened to every action after midpoint stills passed cuts the operator rejected |
-| Rebuilding a sped-up track  | `canon take camera --help`, whose `--rate` divides every time in the log                                  |
-| Storyboard heading form     | HyperFrames' `storyboard-format.md` and the markdown audit's character bans, with the colon read assumed  |
-| The README's two halves     | Frameboard's workspace, whose README recorded how to re-film and re-render after a session ended          |
+Later films added these, each from a fault the operator caught.
+
+| Rule                | Source                                            |
+| ------------------- | ------------------------------------------------- |
+| Length and reshoots | A reshoot that sped hand actions to 1.5x to 1.8x  |
+| The loop seam       | Grid loops a preview passed and the render failed |
+| The license record  | A library track left unchecked through two films  |
+| The review block    | Cuts sent as descriptions over generated scenes   |
+
+### HyperFrames, the verb, and other deliverables
+
+The rest come from HyperFrames, `canon take`, or Frameboard's other deliverables.
+
+| Rule                       | Source                                                                                                    |
+| -------------------------- | --------------------------------------------------------------------------------------------------------- |
+| A new project per shape    | The `hyperframes` skill's `types/vertical.md`, which recomposes a vertical film rather than squeezing it  |
+| The 2 MB WebP loop         | Frameboard's README hero, an animated WebP cut from a raw take, which played inline at 1.72 MB            |
+| Reviewing motion           | HyperFrames' `review.md`, widened to every action after midpoint stills passed cuts the operator rejected |
+| Rebuilding a sped-up track | `canon take camera --help`, whose `--rate` divides every time in the log                                  |
+| Storyboard heading form    | HyperFrames' `storyboard-format.md` and the markdown audit's character bans, with the colon read assumed  |
+| The README's two halves    | Frameboard's workspace, whose README recorded how to re-film and re-render after a session ended          |
