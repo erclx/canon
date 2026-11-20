@@ -25,7 +25,7 @@ Films each beat of a take plan from a fresh load and writes its clip, a log with
 
 ### `src/take/fixtures/`
 
-Owns the static pages the end to end takes film, four of which post each input they receive back to the test's server, and `film-suite.ts`, the harness the ten `film-*.e2e.test.ts` files share. `camera.html` is the three-column app page the camera and cursor rules were judged on, and `camera.json` films its eleven scenarios.
+Owns the static pages the end to end takes film, four of which post each input they receive back to the test's server, and `film-suite.ts`, the harness the ten `film-*.e2e.test.ts` files share. `camera-scenarios.json` films the camera rules' eleven scenarios on `camera.html`, named so `pr-reel.ts` never pairs the two.
 
 - `motion.html` is the release-checklist page every motion rule is measured on, and `motion-server.ts` serves any fixture with canon's token sheet and Geist from where they live
 - `motion.html` reports the animation frame each input paints in, since a stepped page's `performance.now()` runs ahead of the clip while inputs are dispatched

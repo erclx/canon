@@ -7,10 +7,12 @@
  *
  * Usage: bun src/take/fixtures/watch.ts <out dir> [stem]
  *
- * `stem` names the `<stem>.html` page and the `<stem>.json` plan beside this
- * file, `motion` by default and `camera` for the camera scenarios. Writes each
- * beat's take into its own folder under `<out dir>`, beside a `watch.mp4` at
- * 1920x1080. Needs FFmpeg and the headless shell, as a take does.
+ * `stem` names the `<stem>.html` page beside this file, `motion` by default and
+ * `camera` for the camera scenarios, filmed with `<stem>.json` or else
+ * `<stem>-scenarios.json`, a plan too long for the reel that `pr-reel.ts`
+ * never pairs with the page. Writes each beat's take into its own folder under
+ * `<out dir>`, beside a `watch.mp4` at 1920x1080. Needs FFmpeg and the
+ * headless shell, as a take does.
  */
 
 import { spawnSync } from 'node:child_process'
@@ -106,17 +108,19 @@ async function main(dir: string | undefined, stem = 'motion'): Promise<number> {
     return 2
   }
   const page = new URL(`./${stem}.html`, import.meta.url)
-  const plan = new URL(`./${stem}.json`, import.meta.url)
-  if (stem.includes('/') || !existsSync(page) || !existsSync(plan)) {
+  const plan = [`${stem}.json`, `${stem}-scenarios.json`]
+    .map((name) => new URL(`./${name}`, import.meta.url))
+    .find((url) => existsSync(url))
+  if (stem.includes('/') || !existsSync(page) || !plan) {
     process.stderr.write(
-      `no fixture ${stem}: src/take/fixtures/ needs both ${stem}.html and ${stem}.json\n${USAGE}`,
+      `no fixture ${stem}: src/take/fixtures/ needs ${stem}.html and ${stem}.json or ${stem}-scenarios.json\n${USAGE}`,
     )
     return 2
   }
   const out = resolve(dir)
   const read = readTakePlan(readFileSync(plan, 'utf8'))
   if (read.kind !== 'read') {
-    process.stderr.write(`${stem}.json: ${read.detail}\n`)
+    process.stderr.write(`${plan.pathname}: ${read.detail}\n`)
     return 1
   }
   const server = serveFixture(page)
