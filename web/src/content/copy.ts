@@ -281,8 +281,8 @@ export const film = {
 export const board = {
   // README.md: "The board runs while you are away"
   head: 'The board runs while you are away',
-  // README.md: "Agent work stalls whenever you step out. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide."
-  lede: 'Agent work stalls whenever you step out. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide.',
+  // README.md: "Step out and the work keeps going. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide."
+  lede: 'Step out and the work keeps going. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide.',
 }
 
 export const drive = {
@@ -347,6 +347,14 @@ export const boardScene = {
   ],
   /** Names the row that waits, since its edge alone carries the state. */
   waitingLabel: 'waits for you',
+  stepOut: (at: string) => `${at} · you step out`,
+  nightStarts: (at: string) => `${at} · the night starts`,
+  moved: (at: string, name: string) => `${at} · ${name} moved`,
+  comeBack: (at: string) => `${at} · what you come back to`,
+  movesLabel: (count: number) => `${count} moves →`,
+  before: 'The board when you step out',
+  after: 'The board when you come back',
+  replay: 'Replay the night',
 }
 
 /**

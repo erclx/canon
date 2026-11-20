@@ -83,7 +83,7 @@ A diff cannot show a hover or a focus ring. Canon films the change in the runnin
 
 ## The board runs while you are away
 
-Agent work stalls whenever you step out. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide.
+Step out and the work keeps going. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide.
 
 ## Design decided by looking
 

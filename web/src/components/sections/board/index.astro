@@ -1,75 +1,114 @@
 ---
 import { board, boardScene } from '../../../content/copy'
-import PauseButton from '../../pause-button/index.astro'
+import type { BoardRow } from './state'
 import { boardAfter } from './state'
 import './style.css'
 
 /**
- * The board an unattended run works overnight: three lanes, a row crossing
- * one lane a beat as the clock runs on, until it rests where the morning finds
- * it, with the one row that waits on you edged in the waiting color. The page
- * renders that resting state, which reduced motion keeps.
+ * The board twice: as you leave it at the night's start, and as you find it
+ * when you come back, with the moves between them counted. The second board
+ * replays the night once it comes into view, a row a beat as the clock runs
+ * on, with a replay beside it. The page renders where the night rests, which
+ * reduced motion keeps, and the one row that waits on you takes the waiting
+ * glyph and edge.
  */
-
-interface Props {
-  /** The shape `pages/index.astro` gives the section, read by `styles/global.css`. */
-  class?: string
+const { rows, moves, lanes, start } = boardScene
+const rest = boardAfter(rows, moves, moves.length)
+const last = moves.at(-1)?.at ?? start
+const boards: {
+  kind: string
+  label: string
+  rows: readonly BoardRow[]
+  stamp: string
+}[] = [
+  {
+    kind: 'before',
+    label: boardScene.before,
+    rows,
+    stamp: boardScene.stepOut(start),
+  },
+  {
+    kind: 'after',
+    label: boardScene.after,
+    rows: rest,
+    stamp: boardScene.comeBack(last),
+  },
+]
+const data = {
+  rows,
+  moves,
+  starts: boardScene.nightStarts(start),
+  stamps: moves.map((move, index) =>
+    index === moves.length - 1
+      ? boardScene.comeBack(move.at)
+      : boardScene.moved(move.at, move.name),
+  ),
+  waiting: boardScene.waitingLabel,
 }
-
-const { class: shape } = Astro.props
-const rest = boardAfter(
-  boardScene.rows,
-  boardScene.moves,
-  boardScene.moves.length,
-)
 ---
 
-<section class:list={['sec', shape]} id="board">
-  <div class="sec-head">
-    <h2>{board.head}</h2>
-    <p>{board.lede}</p>
-  </div>
-  <div class="tray">
-    <PauseButton />
-    <div class="win bd">
-      <div class="bh">
-        <b>{boardScene.title}</b>
-        <span class="since">· {boardScene.since}</span>
-        <span class="clock">{boardScene.moves.at(-1)?.at}</span>
-      </div>
-      <div class="lanes">
-        {
-          boardScene.lanes.map((lane, index) => (
-            <div class="lane">
-              <p class="ln">{lane}</p>
-              <ul role="list" data-lane={index}>
-                {rest
-                  .filter((row) => row.lane === index)
-                  .map((row) => (
-                    <li
-                      class:list={['row', { wait: row.waiting }]}
-                      data-name={row.name}
-                    >
-                      <span class="nm">{row.name}</span>
-                      <span class="st">{row.line}</span>
-                      <span class="wl sr-only">{boardScene.waitingLabel}</span>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          ))
-        }
-      </div>
+<section class="part" id="board">
+  <div class="w">
+    <div class="top">
+      <h2>{board.head}</h2>
+      <p class="lede">{board.lede}</p>
+    </div>
+    <div class="ba">
+      {
+        boards.map((side, index) => (
+          <>
+            {index === 1 && (
+              <p class="mid note">{boardScene.movesLabel(moves.length)}</p>
+            )}
+            <figure class:list={['side', side.kind]} aria-label={side.label}>
+              <p
+                class="stamp note"
+                aria-live={index === 1 ? 'polite' : undefined}
+              >
+                {side.stamp}
+              </p>
+              <div class="bd">
+                {lanes.map((lane, l) => (
+                  <div class="ln">
+                    <p class="lh note">{lane}</p>
+                    <ul class="cards" role="list">
+                      {side.rows
+                        .filter((row) => row.lane === l)
+                        .map((row) => (
+                          <li class:list={['cd', { wt: row.waiting }]}>
+                            <b>{row.name}</b>
+                            <span>
+                              {row.waiting && (
+                                <i
+                                  class="gl"
+                                  aria-label={boardScene.waitingLabel}
+                                >
+                                  ◆
+                                </i>
+                              )}
+                              {row.line}
+                            </span>
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+              {index === 1 && (
+                <button type="button" class="drawn replay" hidden>
+                  {boardScene.replay}
+                </button>
+              )}
+            </figure>
+          </>
+        ))
+      }
     </div>
   </div>
   <script
     type="application/json"
-    class="board-data"
-    set:html={JSON.stringify({
-      start: boardScene.start,
-      rows: boardScene.rows,
-      moves: boardScene.moves,
-    })}
+    id="board-data"
+    set:html={JSON.stringify(data)}
   />
 </section>
 

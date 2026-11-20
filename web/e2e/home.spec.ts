@@ -710,6 +710,41 @@ test.describe('the page name', () => {
   })
 })
 
+test.describe('the board night', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+
+  test('replays the night a move a beat, and Replay starts it again', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.clock.install()
+    await page.goto('/')
+    const stamp = page.locator('#board .after .stamp')
+    const replay = page.locator('#board .replay')
+
+    await page.locator('#board .ba').scrollIntoViewIfNeeded()
+    await expect(stamp).toHaveText(/^23:00 /, SETTLE)
+    await page.clock.runFor(700)
+    await expect(stamp).toHaveText(/^23:40 /)
+    await page.clock.runFor(5_000)
+    await expect(stamp).toHaveText(/what you come back to$/)
+    await expect(page.locator('#board .after .cd.wt')).toHaveCount(1)
+    await replay.click()
+
+    await expect(stamp).toHaveText(/^23:00 /)
+  })
+
+  test('rests where the night ends under reduced motion', async ({ page }) => {
+    await page.goto('/')
+
+    await expect(page.locator('#board .after .stamp')).toHaveText(
+      /what you come back to\s*$/,
+    )
+    await expect(page.locator('#board .after .cd.wt')).toHaveCount(1)
+    await expect(page.locator('#board .replay')).toBeHidden()
+  })
+})
+
 test.describe('new sections', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
@@ -718,23 +753,6 @@ test.describe('new sections', () => {
       await page.emulateMedia({ reducedMotion: 'no-preference' })
       await page.clock.install()
       await page.goto('/')
-    })
-
-    test('the board moves a row a beat, and the pause holds its clock', async ({
-      page,
-    }) => {
-      const clock = page.locator('#board .clock')
-
-      await page.clock.runFor(2_700)
-      await expect(clock).toHaveText('23:00')
-      await page.clock.runFor(1_500)
-      await expect(clock).toHaveText('23:40')
-      await page.locator('#board .pz').click()
-      // Real time still runs between the clock's steps, so the held state is read after the press rather than assumed.
-      const held = (await clock.textContent()) ?? ''
-      await page.clock.runFor(6_000)
-
-      await expect(clock).toHaveText(held)
     })
 
     test('the drive lands its pick, and the pause holds it cleared', async ({
@@ -815,13 +833,10 @@ test.describe('new sections', () => {
   }) => {
     await page.goto('/')
 
-    await expect(page.locator('#board .clock')).toHaveText('02:14')
-    await expect(page.locator('#board .row.wait')).toHaveCount(1)
     await expect(page.locator('#drive .dr')).toHaveClass(/\bon\b/)
     await expect(page.locator('#health .hl')).not.toHaveClass(/\bplay\b/)
     await expect(page.locator('#film .checks li.done')).toHaveCount(3)
     await expect(page.locator('#film .pz')).toBeHidden()
-    await expect(page.locator('#board .pz')).toBeHidden()
     await expect(page.locator('#drive .pz')).toBeHidden()
     await expect(page.locator('#health .pz')).toBeHidden()
   })

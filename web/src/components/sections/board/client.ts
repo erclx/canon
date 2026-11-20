@@ -1,74 +1,77 @@
-import { holdOn, pacer, reducedMotion } from '../../../lib/scene'
-import { boardAfter, type BoardMove, type BoardRow } from './state'
+import { playOnEntry } from '../../../lib/scene'
+import type { BoardMove, BoardRow } from './state'
+import { boardAfter } from './state'
 
+interface Data {
+  rows: BoardRow[]
+  moves: BoardMove[]
+  starts: string
+  stamps: string[]
+  waiting: string
+}
+
+/**
+ * Replays the night on the second board once it comes into view: the board
+ * as you left it, then one move a beat with the clock reading its time, until
+ * it rests where the page rendered it. Replay starts the night again.
+ */
 const section = document.getElementById('board')
-const source = section?.querySelector('.board-data')
-const clock = section?.querySelector<HTMLElement>('.clock')
+const source = document.getElementById('board-data')
+const after = section?.querySelector<HTMLElement>('.side.after')
+const stamp = after?.querySelector<HTMLElement>('.stamp')
+const replay = after?.querySelector<HTMLButtonElement>('.replay')
+const lanes = [...(after?.querySelectorAll<HTMLElement>('.cards') ?? [])]
 
-if (section && source?.textContent && clock && !reducedMotion()) {
-  const { start, rows, moves } = JSON.parse(source.textContent) as {
-    start: string
-    rows: BoardRow[]
-    moves: BoardMove[]
-  }
-  const lanes = [...section.querySelectorAll<HTMLElement>('ul[data-lane]')]
-  const nodes = new Map(
-    [...section.querySelectorAll<HTMLElement>('.row')].map((node) => [
-      node.dataset.name ?? '',
-      node,
-    ]),
-  )
-  const pace = pacer(
-    holdOn(
-      section.querySelector('.bd'),
-      section.querySelector<HTMLButtonElement>('.pz'),
-    ),
-  )
+if (section && source && stamp && replay && lanes.length) {
+  const data = JSON.parse(source.textContent ?? '{}') as Data
+  const timers: number[] = []
 
-  /** Lays the board out as it stands after `count` moves, sliding each row from where it sat. */
-  function lay(count: number) {
-    const before = new Map(
-      [...nodes].map(([name, node]) => [name, node.getBoundingClientRect()]),
-    )
-    for (const row of boardAfter(rows, moves, count)) {
-      const node = nodes.get(row.name)
-      if (!node) continue
-      node.querySelector('.st')!.textContent = row.line
-      node.classList.toggle('wait', Boolean(row.waiting))
-      lanes[row.lane]?.append(node)
+  const card = (row: BoardRow) => {
+    const li = document.createElement('li')
+    li.className = row.waiting ? 'cd wt' : 'cd'
+    const name = document.createElement('b')
+    name.textContent = row.name
+    const line = document.createElement('span')
+    if (row.waiting) {
+      const glyph = document.createElement('i')
+      glyph.className = 'gl'
+      glyph.setAttribute('aria-label', data.waiting)
+      glyph.textContent = '◆'
+      line.append(glyph)
     }
-    clock!.textContent = count === 0 ? start : (moves[count - 1]?.at ?? start)
-    for (const [name, node] of nodes) {
-      const from = before.get(name)
-      const to = node.getBoundingClientRect()
-      if (!from || (from.x === to.x && from.y === to.y)) continue
-      node.animate(
-        [
-          { transform: `translate(${from.x - to.x}px, ${from.y - to.y}px)` },
-          { transform: 'none' },
-        ],
-        { duration: 520, easing: 'cubic-bezier(0.2, 0, 0, 1)' },
+    line.append(row.line)
+    li.append(name, line)
+    return li
+  }
+
+  const draw = (count: number) => {
+    const rows = boardAfter(data.rows, data.moves, count)
+    lanes.forEach((lane, index) =>
+      lane.replaceChildren(
+        ...rows.filter((row) => row.lane === index).map(card),
+      ),
+    )
+  }
+
+  const night = () => {
+    timers.splice(0).forEach(clearTimeout)
+    draw(0)
+    stamp.textContent = data.starts
+    data.moves.forEach((_, index) => {
+      timers.push(
+        window.setTimeout(
+          () => {
+            draw(index + 1)
+            stamp.textContent = data.stamps[index] ?? ''
+          },
+          700 + index * 900,
+        ),
       )
-    }
-    const moved = moves[count - 1]
-    if (moved) nodes.get(moved.name)?.classList.add('just')
-    setTimeout(
-      () => moved && nodes.get(moved.name)?.classList.remove('just'),
-      900,
-    )
+    })
   }
 
-  async function loop() {
-    const generation = pace.next()
-    for (;;) {
-      if (!(await pace.wait(2600, generation))) return
-      lay(0)
-      for (let count = 1; count <= moves.length; count += 1) {
-        if (!(await pace.wait(1400, generation))) return
-        lay(count)
-      }
-    }
+  if (playOnEntry(section, night)) {
+    replay.hidden = false
+    replay.addEventListener('click', night)
   }
-
-  void loop()
 }
