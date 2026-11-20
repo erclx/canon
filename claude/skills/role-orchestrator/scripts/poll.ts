@@ -48,6 +48,8 @@ export interface Row {
   stale: Staleness
   staleFiles: string[]
   ui: string
+  /** The tip the verb read `ui` against, empty when its record names none. */
+  uiHead: string
   /** The code close carried to the head across a rebase, with the UI family owing nothing. */
   isRebased: boolean
   unmatchedCount: number
@@ -218,6 +220,14 @@ export const uiFromVerb = (record: unknown): string => {
   return `${fields.state}-${covered ? 'head' : 'behind'}-${commit.slice(0, 7)}`
 }
 
+/** The tip the verb read, empty on a refusal or an older CLI whose record names none. */
+const headFromVerb = (record: unknown): string => {
+  if (typeof record !== 'object' || record === null) return ''
+  const { head } = record as Record<string, unknown>
+
+  return typeof head === 'string' ? head : ''
+}
+
 /**
  * Whether the verb carried the code close across a rebase while the UI family
  * reads covered, so a moved head owes neither reviewer a pass.
@@ -359,8 +369,17 @@ const classifyEvidence = (row: Row, old: Baseline): string[] =>
     ? [`EVIDENCE  #${row.number} proof settled at ${short(row.head)}`]
     : []
 
+/**
+ * The UI token and the head come from two reads taken moments apart, so a push
+ * between them pairs a token with a head it was never judged against. Neither
+ * read alone is known current, so the transition waits for a run where both agree.
+ */
+const isUiSplit = (row: Row): boolean =>
+  row.uiHead !== '' && row.uiHead !== row.head
+
 const classifyUi = (row: Row, old: Baseline): string[] => {
   if (row.ui === '' || row.ui === 'none' || row.ui === old.ui) return []
+  if (isUiSplit(row)) return []
 
   const heading = row.ui.split('-')[0]
   const commit = row.ui.split('-').at(-1)
@@ -466,7 +485,7 @@ export const classify = (
     resp: String(row.resp),
     stale: row.stale,
     state,
-    ui: row.ui === '' ? old.ui : row.ui,
+    ui: row.ui === '' || isUiSplit(row) ? old.ui : row.ui,
     unmatched: String(row.unmatchedCount),
   }
 
@@ -864,6 +883,7 @@ const buildRow = async (
     stale: stale.stale,
     staleFiles: stale.files,
     ui: uiFromVerb(record),
+    uiHead: headFromVerb(record),
     isRebased: rebasedFromVerb(record),
     unmatchedCount: unmatched.count,
     unmatchedHeading: unmatched.heading,
