@@ -1,0 +1,588 @@
+/* Lesson: a course shell around one reading column, on seamless surfaces where a tint or space separates parts and a border marks only a control. */
+
+html {
+  scroll-padding-top: 80px;
+}
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-text);
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* The header: breadcrumb, position, and the theme toggle. */
+
+.kit-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 56px;
+  padding: 0 24px;
+  background: var(--surface);
+  font-size: 14px;
+  transition: box-shadow 0.15s;
+}
+
+.kit-header.kit-scrolled {
+  box-shadow: 0 1px 0 var(--border);
+}
+
+.kit-trail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.kit-trail a {
+  color: var(--muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.kit-trail a:hover {
+  color: var(--text);
+}
+
+.kit-trail .kit-sep {
+  color: var(--muted);
+}
+
+.kit-trail .kit-now {
+  overflow: hidden;
+  color: var(--text);
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.kit-header-end {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+}
+
+.kit-pos {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.kit-theme {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.kit-theme:hover {
+  background: var(--tint-strong);
+}
+
+.kit-theme svg {
+  width: 18px;
+  height: 18px;
+}
+
+.kit-theme .kit-sun,
+:root[data-theme='dark'] .kit-theme .kit-moon {
+  display: none;
+}
+
+:root[data-theme='dark'] .kit-theme .kit-sun {
+  display: block;
+}
+
+/* The shell: the sidebar beside the content. */
+
+.kit-shell {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  align-items: start;
+}
+
+.kit-side {
+  position: sticky;
+  top: 56px;
+  padding: 24px 20px;
+  font-size: 14px;
+}
+
+.kit-side ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kit-side > ol > li {
+  margin-bottom: 14px;
+}
+
+.kit-side .kit-lt {
+  display: flex;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.kit-side .kit-lt > span:first-child {
+  flex: none;
+  width: 14px;
+  color: var(--muted);
+}
+
+.kit-side .kit-later .kit-lt > span:last-child {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.kit-steps {
+  margin: 6px 0 0 24px;
+}
+
+.kit-steps a {
+  display: block;
+  padding: 5px 10px;
+  border-radius: 6px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.kit-steps a:hover {
+  color: var(--text);
+}
+
+.kit-steps a[aria-current='page'] {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.kit-soon {
+  margin-left: 6px;
+  padding: 0 7px;
+  border: var(--stroke) solid var(--border);
+  border-radius: 99px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.kit-due {
+  display: block;
+  margin-top: 24px;
+  color: var(--muted);
+}
+
+/* The content: a centered reading column, with the rail beside it from 1280 px. */
+
+.kit-lesson {
+  display: grid;
+  grid-template-columns: minmax(0, 680px) 200px;
+  justify-content: center;
+  gap: 64px;
+  min-width: 0;
+  padding: 48px 40px 120px;
+}
+
+.kit-lesson:not(:has(.kit-rail)) {
+  grid-template-columns: minmax(0, 680px);
+}
+
+.kit-article {
+  min-width: 0;
+}
+
+.kit-article h1 {
+  margin: 0 0 10px;
+  font-size: 28px;
+  line-height: 1.25;
+  font-weight: 600;
+}
+
+.kit-article h2 {
+  margin: 34px 0 10px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.kit-article p {
+  margin: 0 0 14px;
+}
+
+.kit-article code {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: var(--tint);
+  font-family: var(--font-code);
+  font-size: 0.86em;
+}
+
+.kit-article table {
+  width: 100%;
+  margin: 0 0 14px;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+
+.kit-article th,
+.kit-article td {
+  padding: 9px 10px;
+  border-bottom: var(--stroke) solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.kit-article th {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.kit-kicker {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.kit-article .kit-assumes {
+  margin: 0 0 26px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.kit-rail {
+  position: sticky;
+  top: 80px;
+  font-size: 14px;
+}
+
+.kit-rail p {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.kit-rail a {
+  display: block;
+  padding: 4px 0 4px 12px;
+  border-left: 2px solid transparent;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.kit-rail a:hover {
+  color: var(--text);
+}
+
+.kit-rail a.kit-here {
+  border-left-color: var(--accent-strong);
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Parts a lesson is written from. */
+
+.kit-figure {
+  margin: 18px 0 8px -180px;
+  padding: 18px;
+  border-radius: var(--radius);
+  background: var(--tint);
+}
+
+.kit-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.kit-figure svg text {
+  fill: var(--text);
+  font-family: var(--font-text);
+}
+
+.kit-figure svg .kit-soft {
+  fill: var(--muted);
+}
+
+/* Each variant is only ever hidden, so it keeps the display its frame gives it. Two classes deep, so that display cannot undo the hiding. */
+@media (min-width: 641px) {
+  .kit-figure .kit-stacked {
+    display: none;
+  }
+}
+
+.kit-caption {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.kit-cite {
+  color: var(--accent-strong);
+  font-size: 0.78em;
+  vertical-align: super;
+  text-decoration: none;
+}
+
+.kit-note {
+  margin: 0 0 14px;
+  padding: 16px 24px;
+  border-radius: calc(var(--radius) / 2);
+  background: var(--note);
+}
+
+.kit-card {
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--tint);
+}
+
+.kit-muted {
+  color: var(--muted);
+}
+
+.kit-line {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.kit-refs {
+  margin-top: 36px;
+  padding-top: 14px;
+  border-top: var(--stroke) solid var(--border);
+  font-size: 14px;
+}
+
+.kit-refs ol {
+  margin: 8px 0 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.kit-refs li {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  margin-bottom: 8px;
+}
+
+.kit-refs a {
+  color: inherit;
+}
+
+/* Controls: one filled primary per page, and ghost controls a label or icon identifies. */
+
+.kit-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.kit-button:hover {
+  background: var(--tint-strong);
+}
+
+.kit-button.kit-primary {
+  background: var(--accent-strong);
+  color: var(--on-accent);
+}
+
+.kit-button.kit-primary:hover {
+  background: color-mix(in srgb, var(--accent-strong) 88%, black);
+}
+
+.kit-button svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+.kit-pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 44px;
+}
+
+/* The quiz: options on a tint, and one feedback block after the attempt. */
+
+.kit-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  background: var(--tint);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.kit-option input {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border: 1.5px solid var(--muted);
+  border-radius: 50%;
+  appearance: none;
+}
+
+.kit-option:has(input:checked) {
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+
+.kit-option input:checked {
+  border: 5px solid var(--accent-strong);
+}
+
+.kit-feedback {
+  margin: 0 0 14px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--accent-strong);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--tint);
+  font-size: 16px;
+}
+
+/* The teach-back reveal, closed until the learner has written an answer. */
+
+.kit-reveal {
+  margin: 0 0 14px;
+  padding: 16px 24px;
+  border-radius: var(--radius);
+  background: var(--tint);
+}
+
+.kit-reveal summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+}
+
+.kit-reveal summary::-webkit-details-marker {
+  display: none;
+}
+
+.kit-reveal summary svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.15s;
+}
+
+.kit-reveal[open] summary svg {
+  transform: rotate(90deg);
+}
+
+/* Narrower windows: the rail goes under 1280, the sidebar folds over the content under 900. */
+
+@media (max-width: 1279px) {
+  .kit-lesson {
+    display: block;
+  }
+
+  .kit-article {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .kit-figure {
+    margin-right: -100px;
+    margin-left: -100px;
+  }
+
+  .kit-rail {
+    display: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .kit-figure {
+    margin-right: 0;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .kit-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kit-side {
+    position: static;
+    padding: 12px 18px;
+  }
+
+  .kit-side > ol > li.kit-later,
+  .kit-due,
+  .kit-pos {
+    display: none;
+  }
+
+  .kit-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 6px 0 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .kit-figure:has(.kit-stacked) .kit-wide {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .kit-header {
+    padding: 0 14px;
+  }
+
+  .kit-trail .kit-course,
+  .kit-trail .kit-sep {
+    display: none;
+  }
+
+  .kit-lesson {
+    padding: 28px 18px 96px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kit-header,
+  .kit-reveal summary svg {
+    transition: none;
+  }
+}

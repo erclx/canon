@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson components</title>
+    <script src="../nav.js"></script>
+    <style>
+      /* Every gap on one scale: 8, 12, 16, 24, 32, 48. */
+      body {
+        font-size: 16px;
+      }
+
+      .sheet {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 48px 48px 120px;
+      }
+
+      .sheet > h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+        line-height: 1.25;
+      }
+
+      .lede {
+        margin: 0;
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      .group {
+        margin-top: 48px;
+      }
+
+      .label {
+        margin: 0 0 12px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .spec {
+        margin: 12px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 32px 48px;
+      }
+
+      .anatomy {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        grid-template-rows: 48px 1fr;
+        height: 376px;
+        overflow: hidden;
+        border: var(--stroke) solid var(--border);
+        border-radius: var(--radius);
+        font-size: 13px;
+      }
+
+      .a-head {
+        display: flex;
+        grid-column: 1 / -1;
+        align-items: center;
+        gap: 8px;
+        padding: 0 12px;
+        border-bottom: var(--stroke) solid var(--border);
+      }
+
+      .a-head .end {
+        display: flex;
+        gap: 8px;
+        margin-left: auto;
+      }
+
+      .slot {
+        padding: 4px 8px;
+        border: var(--stroke) solid var(--border);
+        border-radius: 4px;
+      }
+
+      .a-side {
+        padding: 16px;
+        border-right: var(--stroke) solid var(--border);
+      }
+
+      .a-main {
+        position: relative;
+        display: grid;
+        place-items: center;
+      }
+
+      .a-col {
+        display: grid;
+        gap: 8px;
+        width: 46%;
+        padding: 12px;
+        border: 1px dashed var(--line);
+        border-radius: 6px;
+      }
+
+      .a-col .blk {
+        padding: 8px;
+        border: var(--stroke) solid var(--border);
+        border-radius: 4px;
+        text-align: center;
+      }
+
+      .a-col .fig {
+        margin-left: -34%;
+        background: var(--tint);
+      }
+
+      .a-col .note {
+        border-color: transparent;
+        background: var(--note);
+      }
+
+      .a-col .pg {
+        justify-self: end;
+      }
+
+      .a-rail {
+        position: absolute;
+        top: 24px;
+        right: 16px;
+        width: 128px;
+        padding: 8px 12px;
+        border-left: 2px solid var(--accent-strong);
+        font-size: 12px;
+      }
+
+      .types {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .types td {
+        padding: 8px 0;
+        vertical-align: baseline;
+      }
+
+      .types td.meta {
+        width: 280px;
+        color: var(--muted);
+        font-size: 13px;
+        text-align: right;
+      }
+
+      .t-h1 {
+        font-size: 28px;
+        line-height: 1.25;
+        font-weight: 600;
+      }
+
+      .t-h2 {
+        font-size: 20px;
+        font-weight: 600;
+      }
+
+      .t-body {
+        font-size: 18px;
+        line-height: 1.55;
+      }
+
+      .t-muted {
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      .t-small {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .types code {
+        padding: 1px 6px;
+        border-radius: 5px;
+        background: var(--tint);
+        font-family: var(--font-code);
+        font-size: 0.86em;
+      }
+
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 24px;
+      }
+
+      .state {
+        display: grid;
+        justify-items: start;
+        gap: 8px;
+      }
+
+      .state > span:last-child {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .is-hover {
+        background: var(--tint-strong);
+      }
+
+      .kit-primary.is-hover {
+        background: color-mix(in srgb, var(--accent-strong) 88%, black);
+      }
+
+      .is-focus {
+        outline: 2px solid var(--accent-strong);
+        outline-offset: 2px;
+      }
+
+      .navgrid {
+        display: grid;
+        grid-template-columns: 260px 200px minmax(0, 1fr);
+        align-items: start;
+        gap: 48px;
+      }
+
+      .figbox {
+        display: grid;
+        place-items: center;
+        height: 200px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .specimen-figure {
+        margin: 0;
+      }
+
+      @media (max-width: 1279px) {
+        .a-rail {
+          display: none;
+        }
+
+        .a-col .fig {
+          margin: 0 -34%;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .grid,
+        .navgrid {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .sheet {
+          padding: 32px 16px 96px;
+        }
+
+        .anatomy {
+          grid-template-columns: 1fr;
+          grid-template-rows: 48px 48px 1fr;
+          height: 432px;
+        }
+
+        .a-side {
+          padding: 12px 16px;
+          border-right: 0;
+          border-bottom: var(--stroke) solid var(--border);
+        }
+
+        .a-col {
+          width: 88%;
+        }
+
+        .a-col .fig {
+          margin: 0;
+        }
+
+        .types td.meta {
+          width: auto;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .types tr {
+          display: block;
+          padding: 8px 0;
+          border-bottom: var(--stroke) solid var(--border);
+        }
+
+        .types td {
+          display: block;
+          padding: 4px 0;
+        }
+
+        .types td.meta {
+          text-align: left;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="sheet">
+      <p class="kit-kicker">Lesson kit</p>
+      <h1>Lesson components</h1>
+      <p class="lede">
+        Every part a lesson page is built from, by role. FPO marks a placeholder
+        at its true size.
+      </p>
+
+      <section class="group">
+        <p class="label">Page anatomy</p>
+        <div class="anatomy">
+          <div class="a-head">
+            <span class="slot">Breadcrumb</span
+            ><span class="end"
+              ><span class="slot">Position</span
+              ><span class="slot">Theme toggle</span></span
+            >
+          </div>
+          <div class="a-side">
+            Sidebar<br /><span class="kit-muted">Course outline, 260</span>
+          </div>
+          <div class="a-main">
+            <div class="a-col">
+              <div class="blk">FPO · Kicker, Heading 1, Assumes</div>
+              <div class="blk">FPO · Body, reading column 680</div>
+              <div class="blk fig">FPO · Figure, breaks out left</div>
+              <div class="blk note">Callout</div>
+              <div class="blk pg">Pager</div>
+            </div>
+            <div class="a-rail">
+              On this page<br /><span class="t-small">From 1280</span>
+            </div>
+          </div>
+        </div>
+        <p class="spec">
+          Sticky header 56 px. Content centered beside the sidebar, and a sticky
+          rail of the lesson's headings from 1280 px marking the section in
+          view. Figures break out to the left beside the rail, and to both sides
+          without it. 120 px below the last element. nav.js builds the header,
+          sidebar, rail, and pager, so a lesson writes only its column.
+        </p>
+      </section>
+
+      <section class="group">
+        <p class="label">Navigation</p>
+        <header class="kit-header" style="position: static">
+          <nav class="kit-trail" aria-label="Breadcrumb">
+            <span class="kit-course kit-muted">Course</span
+            ><span class="kit-sep" aria-hidden="true">/</span
+            ><span class="kit-now">Lesson title</span>
+          </nav>
+          <div class="kit-header-end">
+            <span class="kit-pos">Lesson 1 of 3</span>
+            <span class="kit-theme" aria-hidden="true"
+              ><svg
+                class="kit-moon"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+              >
+                <path
+                  d="M16 12.5A6.5 6.5 0 0 1 7.5 4a6.5 6.5 0 1 0 8.5 8.5Z"
+                /></svg
+              ><svg
+                class="kit-sun"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+              >
+                <path
+                  d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M4.3 15.7l1.4-1.4M14.3 5.7l1.4-1.4"
+                />
+                <path d="M13.5 10a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z" /></svg
+            ></span>
+          </div>
+        </header>
+        <p class="spec">
+          Header at rest, with no rule. Once content scrolls under it, a
+          hairline draws.
+        </p>
+        <div class="navgrid" style="margin-top: 32px">
+          <div>
+            <aside
+              class="kit-side"
+              aria-label="Course"
+              style="position: static; padding: 0"
+            >
+              <ol>
+                <li>
+                  <div class="kit-lt">
+                    <span>1</span><span>Lesson title</span>
+                  </div>
+                  <div class="kit-steps">
+                    <span
+                      style="
+                        display: block;
+                        padding: 5px 10px;
+                        border-radius: 6px;
+                        background: color-mix(
+                          in srgb,
+                          var(--accent) 12%,
+                          transparent
+                        );
+                        font-weight: 600;
+                      "
+                      >Lesson</span
+                    ><span
+                      style="
+                        display: block;
+                        padding: 5px 10px;
+                        color: var(--muted);
+                      "
+                      >Check</span
+                    >
+                  </div>
+                </li>
+                <li class="kit-later">
+                  <div class="kit-lt">
+                    <span>2</span
+                    ><span
+                      >Lesson not built<span class="kit-soon">Soon</span></span
+                    >
+                  </div>
+                </li>
+              </ol>
+              <span class="kit-due">Review due date</span>
+            </aside>
+            <p class="spec">
+              Sidebar, 260. The current step takes the accent tint and weight,
+              and a lesson not built stays muted with a tag.
+            </p>
+          </div>
+          <div>
+            <p class="t-small" style="margin: 0 0 8px; font-weight: 600">
+              On this page
+            </p>
+            <span
+              style="
+                display: block;
+                padding: 4px 0 4px 12px;
+                border-left: 2px solid var(--accent-strong);
+                font-size: 14px;
+                font-weight: 600;
+              "
+              >Section in view</span
+            >
+            <span
+              style="
+                display: block;
+                padding: 4px 0 4px 12px;
+                color: var(--muted);
+                font-size: 14px;
+              "
+              >Next section</span
+            >
+            <p class="spec">
+              Rail, 200, from 1280 px. Only the section in view carries a mark.
+            </p>
+          </div>
+          <div>
+            <div class="kit-pager" style="margin: 0">
+              <span class="kit-button"
+                ><svg
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M10 3.5 5.5 8l4.5 4.5" /></svg
+                >Previous step</span
+              ><span class="kit-button kit-primary"
+                >Next step<svg
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6 3.5 10.5 8 6 12.5" /></svg
+              ></span>
+            </div>
+            <p class="spec">
+              Pager, at the foot of the reading column. A ghost back and a
+              filled forward, each named for its step.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="group">
+        <p class="label">Type</p>
+        <table class="types">
+          <tbody>
+            <tr>
+              <td><span class="t-h1">Heading 1</span></td>
+              <td class="meta">28 / 1.25, 600</td>
+            </tr>
+            <tr>
+              <td><span class="t-h2">Heading 2</span></td>
+              <td class="meta">20, 600</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="t-body"
+                  >Body, the reading voice of the lesson</span
+                >
+              </td>
+              <td class="meta">18 / 1.55, 400</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="t-muted"
+                  >Muted, for the assumes line and captions</span
+                >
+              </td>
+              <td class="meta">15, muted</td>
+            </tr>
+            <tr>
+              <td><span class="t-small">Small, for labels and specs</span></td>
+              <td class="meta">13, muted</td>
+            </tr>
+            <tr>
+              <td><code>Code</code></td>
+              <td class="meta">Noto Sans Mono, 0.86 em</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="spec">
+          Five steps that each read as different. Weight and grey carry the
+          hierarchy rather than size alone.
+        </p>
+      </section>
+
+      <section class="group">
+        <p class="label">Controls</p>
+        <div class="row">
+          <div class="state">
+            <span class="kit-button kit-primary">Next step</span
+            ><span>Primary</span>
+          </div>
+          <div class="state">
+            <span class="kit-button kit-primary is-hover">Next step</span
+            ><span>Primary, hover</span>
+          </div>
+          <div class="state">
+            <span class="kit-button">Previous step</span><span>Ghost</span>
+          </div>
+          <div class="state">
+            <span class="kit-button is-hover">Previous step</span
+            ><span>Ghost, hover</span>
+          </div>
+          <div class="state">
+            <span class="kit-button kit-primary is-focus">Next step</span
+            ><span>Keyboard focus</span>
+          </div>
+        </div>
+        <p class="spec">
+          One filled primary per page, labeled with the step it goes to.
+          Secondary controls and the toggle are ghost, with a tint on hover. One
+          focus ring, 2 px in the stronger blue, draws on every control.
+        </p>
+      </section>
+
+      <section class="group grid">
+        <div>
+          <p class="label">Callout</p>
+          <div class="kit-note">
+            <strong>The hard part.</strong> One per lesson, naming what most
+            learners get wrong.
+          </div>
+          <p class="spec">The note fill, and the only yellow on the page.</p>
+        </div>
+        <div>
+          <p class="label">Figure</p>
+          <figure class="kit-figure specimen-figure">
+            <div class="figbox kit-wide">FPO · Figure, wide variant</div>
+            <div class="figbox kit-stacked">FPO · Figure, stacked variant</div>
+          </figure>
+          <p class="kit-caption" style="margin: 12px 0 0">
+            Caption, carrying its citation.<span class="kit-cite"
+              >[1, §4.2]</span
+            >
+          </p>
+          <p class="spec">
+            Shows a stacked variant under 640 px rather than shrinking past
+            reading.
+          </p>
+        </div>
+      </section>
+
+      <section class="group grid">
+        <div>
+          <p class="label">Citation and references</p>
+          <p class="t-body" style="margin: 0">
+            Body text with a citation mark.<span class="kit-cite"
+              >[1, §4.2]</span
+            >
+          </p>
+          <div class="kit-refs" style="margin-top: 16px">
+            <strong>References</strong>
+            <ol>
+              <li>
+                <span>[1]</span
+                ><span
+                  >Author, A. (ed.) (Year) <em>Title</em>. Series. Publisher.
+                  Available at: address (Accessed: date).</span
+                >
+              </li>
+            </ol>
+          </div>
+          <p class="spec">
+            Numbered marks with a section pin, in the stronger blue so small
+            text clears 4.5:1, and a Harvard reference list.
+          </p>
+        </div>
+        <div>
+          <p class="label">Code and tables</p>
+          <p class="t-body" style="margin: 0">
+            Inline code sits on the faint tint, and a table separates rows with
+            a hairline.
+          </p>
+          <p class="spec">
+            Both take their look inside
+            <code style="font-family: var(--font-code)">.kit-article</code> with
+            no class of their own.
+          </p>
+        </div>
+      </section>
+
+      <section class="group grid">
+        <div>
+          <p class="label">Quiz</p>
+          <label class="kit-option"
+            ><input type="radio" name="specimen" />Option</label
+          >
+          <label class="kit-option"
+            ><input type="radio" name="specimen" checked />Option, picked</label
+          >
+          <div class="kit-feedback">
+            <strong>Feedback.</strong> Names the right option and why each other
+            one fails.
+          </div>
+          <p class="spec">
+            Options sit on a tint with no outline, and the radio mark at 3:1
+            marks them as choices. Feedback after the attempt, one block per
+            question.
+          </p>
+        </div>
+        <div>
+          <p class="label">Teach-back reveal</p>
+          <details class="kit-reveal">
+            <summary>
+              <svg
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M6 3.5 10.5 8 6 12.5" /></svg
+              >What a complete answer covers
+            </summary>
+            <p class="kit-muted" style="margin: 12px 0 0 24px">
+              The points an answer covers, never the answer.
+            </p>
+          </details>
+          <p class="spec">Closed until the learner has written their answer.</p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

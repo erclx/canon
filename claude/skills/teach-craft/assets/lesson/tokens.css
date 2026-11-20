@@ -1,0 +1,39 @@
+/* Lesson tokens. The strong blue, its label color, and the control edge were measured against their contrast floors, so measure again before changing one. */
+
+:root {
+  /* nav.js reads this to tell a board that injected the sheets from a page that needs them loaded. */
+  --kit-lesson: 1;
+  color-scheme: light;
+  --accent: #2f7bf0;
+  --accent-strong: #1f5fcc;
+  --on-accent: #ffffff;
+  --surface: #ffffff;
+  --text: #111111;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --line: #d1d5db;
+  --note: #fef9c3;
+  --control-edge: #8b929c;
+  --tint: color-mix(in srgb, var(--text) 3%, var(--surface));
+  --tint-strong: color-mix(in srgb, var(--text) 7%, var(--surface));
+  --radius: 10px;
+  --stroke: 1px;
+  --font-text: Geist, sans-serif;
+  --font-code: 'Noto Sans Mono', ui-monospace, monospace;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --accent: #4e92f6;
+  --accent-strong: #6ea8ff;
+  --on-accent: #111111;
+  --surface: #111111;
+  --text: #ededed;
+  --muted: #9ca3af;
+  --border: #2e2e2e;
+  --line: #3f3f46;
+  --note: #3a3417;
+  --control-edge: #5f6670;
+  --tint: color-mix(in srgb, var(--text) 5%, var(--surface));
+  --tint-strong: color-mix(in srgb, var(--text) 10%, var(--surface));
+}

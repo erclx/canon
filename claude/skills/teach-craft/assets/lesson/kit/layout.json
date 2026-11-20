@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "frames": {
+    "lesson": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900,
+      "order": 0,
+      "scroll": true,
+      "widths": [{ "width": 390, "height": 844 }]
+    },
+    "components": {
+      "x": 0,
+      "y": 980,
+      "width": 1440,
+      "height": 900,
+      "order": 1,
+      "hugHeight": true
+    }
+  }
+}
