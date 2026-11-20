@@ -231,7 +231,7 @@ describe('referencesIn', () => {
     expect(
       referencesIn(
         'standards/publish.md',
-        `Write \`#123\` there. <!-- ${REFERENCE_MARKER} -->`,
+        `Write \`#1234\` there. <!-- ${REFERENCE_MARKER} -->`,
         noDocsRoot,
       ),
     ).toHaveLength(1)
@@ -250,11 +250,121 @@ describe('referencesIn', () => {
   it('should carry the one-based line a reader clicks', () => {
     const found = referencesIn(
       'docs/agents/alpha.md',
-      'first\nsecond\nsee `#516`',
+      'first\nsecond\nsee `#5160`',
       noDocsRoot,
     )
 
     expect(found[0]?.line).toBe(3)
+  })
+
+  describe('hex colors', () => {
+    const pullRequest = (file: string, line: number, text: string) => ({
+      file,
+      line,
+      kind: 'pull-request',
+      text,
+    })
+
+    it('should pass a digit-only hex color in a stylesheet declaration', () => {
+      expect(
+        referencesIn(
+          'claude/skills/alpha/assets/tokens.css',
+          '  --text: #111111;',
+          noDocsRoot,
+        ),
+      ).toEqual([])
+    })
+
+    it('should pass a digit-only hex color in a quoted markup attribute', () => {
+      expect(
+        referencesIn(
+          'claude/skills/alpha/assets/arrow.svg',
+          '<path fill="#111" d="M0 0"/>',
+          noDocsRoot,
+        ),
+      ).toEqual([])
+    })
+
+    it.each(['`#111`', '`#111111`', '`#11111111`'])(
+      'should pass %s alone in a code span',
+      (span) => {
+        expect(
+          referencesIn(
+            'claude/skills/alpha/SKILL.md',
+            `- The cursor is a ${span} arrow`,
+            noDocsRoot,
+          ),
+        ).toEqual([])
+      },
+    )
+
+    it('should report a pull request cited in a stylesheet comment', () => {
+      const file = 'claude/skills/alpha/assets/tokens.css'
+
+      expect(referencesIn(file, '/* see #3280 */', noDocsRoot)).toEqual([
+        pullRequest(file, 1, '#3280'),
+      ])
+    })
+
+    it('should report a comment citation while passing the color beside it', () => {
+      const file = 'claude/skills/alpha/assets/tokens.css'
+
+      expect(
+        referencesIn(file, '  --text: #111111; /* see #3280 */', noDocsRoot),
+      ).toEqual([pullRequest(file, 1, '#3280')])
+    })
+
+    it('should report a citation inside a stylesheet comment spanning lines', () => {
+      const file = 'claude/skills/alpha/assets/tokens.css'
+
+      expect(referencesIn(file, '/*\n  fixed in #111\n*/', noDocsRoot)).toEqual(
+        [pullRequest(file, 2, '#111')],
+      )
+    })
+
+    it.each(['--x: #11111;', '--x: #1111111;'])(
+      'should report %s, a digit run no CSS color takes',
+      (declaration) => {
+        const file = 'claude/skills/alpha/assets/tokens.css'
+
+        expect(referencesIn(file, declaration, noDocsRoot)).toHaveLength(1)
+      },
+    )
+
+    it('should report a four-digit number alone in a code span', () => {
+      const file = 'claude/skills/alpha/SKILL.md'
+
+      expect(referencesIn(file, 'Shipped in `#3280`.', noDocsRoot)).toEqual([
+        pullRequest(file, 1, '#3280'),
+      ])
+    })
+
+    it('should report a three-digit number in prose', () => {
+      const file = 'claude/skills/alpha/SKILL.md'
+
+      expect(referencesIn(file, 'Fixed in #111.', noDocsRoot)).toEqual([
+        pullRequest(file, 1, '#111'),
+      ])
+    })
+
+    it('should report a same-repository citation in a stylesheet', () => {
+      expect(
+        referencesIn(
+          'claude/skills/alpha/assets/tokens.css',
+          '/* erclx/canon#3280 */',
+          noDocsRoot,
+        ),
+      ).toEqual([
+        {
+          ...pullRequest(
+            'claude/skills/alpha/assets/tokens.css',
+            1,
+            'erclx/canon#3280',
+          ),
+          selfCitation: true,
+        },
+      ])
+    })
   })
 
   describe('DOCS_PATH', () => {
