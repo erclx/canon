@@ -5,7 +5,7 @@ description: Which learning-science sources this skill's rules rest on, the pass
 
 # Adopted and declined
 
-The field is learning science and cognitive psychology, with educational measurement for quiz construction. Every source below was opened, the papers through the PubMed API and the practice guide as a PDF. Each entry quotes the passage relied on, and a later session extends this file rather than re-arguing an item settled here.
+The field is learning science, with educational measurement for quizzes and instructional design for the goal. Every source below was opened, and each entry names the copy read. Only the retention entries quote their passage here. A later session extends this file rather than re-arguing an item settled here.
 
 A source a bullet rests on is linked once, in that bullet's row of the toolkit's per-bullet ledger at `governance/ledger/skills/teach-craft/`, which ships outside the plugin. This file names those sources without the link and keeps the catalog-level adopted and declined record, linking only a source no row cites.
 
@@ -83,6 +83,27 @@ Nestojko et al. 2014, Expecting to teach backs asking the learner to explain to 
 - Adopted as the teach-back block and its named audience
 - The participants expected to teach and never taught. The finding backs framing the ask as teaching, not a gain from the explanation itself.
 
+### Planning from the goal
+
+Wiggins and McTighe 2012, the Understanding by Design framework, backs stating the result first, then the evidence that shows it, then the lesson.
+
+- Adopted in `explanation.md` as the goal and the check written before the content, and in the body's before-teaching rules
+- Its passages are quoted in the `explanation.md` ledger row for each bullet
+
+### Words on figures, and the multimedia principles
+
+The IES guide's Recommendations 3 and 4, both rated moderate, back pairing a figure with words placed near its elements and tying the concrete case to the abstract one. Mayer 2023, Research-based principles for designing multimedia instruction, was read in a copy the University of New Hampshire hosts.
+
+- Mayer's coherence, signaling, spatial contiguity, pre-training, and segmenting principles back the matching sections of `explanation.md`
+- Coherence also backs the low density in `presentation.md`, and signaling backs marking the hard part
+
+### Refutation text
+
+Schroeder, Kucera and Adesope 2022, Refutation text facilitates learning, read through Europe PMC's full text, backs naming the misconception before correcting it.
+
+- Adopted as `explanation.md`'s refutation section and the order inside the callout
+- It reports a moderate pooled effect, so the rule rests on a meta-analysis rather than one study
+
 ## Declined
 
 ### A fixed schedule from the literature
@@ -96,6 +117,10 @@ Cepeda's synthesis and the IES guide each tie the best gap to how long the mater
 ### Leads not opened
 
 Bjork on desirable difficulties, Vygotsky on the zone of proximal development, and Haladyna, Downing and Rodriguez 2002 on item writing were each searched for and not opened. The item-writing review refused with a 403 at the publisher, and Crossref carries no abstract for it. Each rule it would back is labeled below.
+
+### Leads on explanation not opened
+
+Mayer 2024 on the cognitive theory of multimedia learning answered a bot check, Fyfe, McNeil, Son and Goldstone 2014 on concreteness fading was not found in full, and a 2025 refutation-text meta-analysis sits behind a paywall. Each stays a lead and is never cited, which is why `explanation.md` sets no order between the concrete case and the rule.
 
 ## House judgment
 
@@ -113,3 +138,10 @@ These rules stay with no opened source behind them, each for the reason given.
 - **Rotating the correct slot.** An author varying position by judgment settles on the first slot.
 - **Restraint and what makes a lesson worth returning to.** Both are editorial judgment about a page rather than claims about memory.
 - **The sourcing ladder.** It is this toolkit's rule for what a lesson cites, not a finding about learning.
+- **The project-owned rung.** A project is the only owner of its own conventions, and code read at no commit stops matching the lesson citing it.
+- **The misconception taken from the record.** One the session imagines may be one this learner never held.
+- **Citation marks and the Harvard list.** Picked by eye over sources run inline at the foot, since a bare number or an inline link reaches no passage.
+- **Tints over borders, the stacked figure, and type by weight and grey.** Each was picked against a drawn lesson where the alternative read flat or fell past reading size.
+- **One callout in a color of its own.** Feedback drawn in the callout's color made a second callout on every quiz.
+- **Measuring contrast in every theme and on the tint.** A measured pass found failures in dark and on the quiz tint that a glance in light had passed.
+- **Where the lesson lands.** The board when the project has one and a standalone page otherwise, with the record as a frame or a file, is a call about surfaces rather than about memory.
