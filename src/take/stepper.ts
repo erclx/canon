@@ -409,10 +409,9 @@ function liveStage(
 }
 
 /**
- * A pointer input as CDP takes it. `buttons` carries the held button through a
- * drag's moves, or the page reads them as a hover, and is the bit field the
- * page reads, 1 for the left button and 2 for the right. `modifiers` carries
- * the held keys as a bit field beside the key events that pressed them.
+ * A pointer input as CDP takes it. `buttons`, 1 left and 2 right, carries the
+ * held button through a drag's moves, or the page reads them as a hover, and
+ * `modifiers` carries the held keys beside the key events that pressed them.
  */
 function mouseEvent(input: PointerInput): Record<string, unknown> {
   const at = { x: input.x, y: input.y }

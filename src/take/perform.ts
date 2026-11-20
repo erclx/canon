@@ -621,11 +621,9 @@ export const FOCUS_MOVED = `(() => {
 })()`
 
 /**
- * A target resolves only to its one sized match, counted across the document
- * and each open shadow root, with `text=` counting innermost matches alone.
- * More than one refuses rather than taking the first, which filmed the wrong
- * row. A frame, a closed root, and a zero-size match stay uncounted, and
- * `within` reads through shadow hosts.
+ * Counts sized matches across the document and each open shadow root, `text=`
+ * counting innermost ones, since taking the first filmed the wrong row. A frame
+ * and a closed root stay uncounted, and `within` reads through shadow hosts.
  */
 const RESOLVER = `
   const within = (outer, inner) => {
