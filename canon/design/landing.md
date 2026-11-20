@@ -13,5 +13,4 @@ description: The public page at canon.erclx.com, one folder a section, a frame a
 ## States
 
 - Light and dark at 1440, 834, and 390
-- Each of the eight sections at rest
-- Try with the footer under it
+- Each of the nine sections at rest, as its arm was picked on the `landing-v6` board

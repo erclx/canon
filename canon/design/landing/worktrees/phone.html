@@ -1,160 +1,370 @@
 <!doctype html>
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>worktrees-built-390</title>
-    <link rel="stylesheet" href="../../assets/landing-v5/built/head.css" />
-    <link
-      rel="stylesheet"
-      href="../../assets/landing-v5/built/_astro/index.Cae65jSx.dark-surfaces.css"
-    />
+    <link rel="stylesheet" href="../../assets/landing-v6/lang/fonts.css" />
     <style>
-      body {
-        background: var(--ground);
+      * {
+        box-sizing: border-box;
       }
-      .site-nav {
-        display: none;
+      html,
+      body {
+        margin: 0;
+      }
+      body {
+        background: #fbfbfa;
+        color: #141413;
+        font-family: 'Geist Variable', Geist, sans-serif;
+        background-image:
+          linear-gradient(#ececea 1px, transparent 1px),
+          linear-gradient(90deg, #ececea 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+      .lab {
+        font:
+          500 12px/1.4 'Geist Variable',
+          Geist,
+          sans-serif;
+        padding: 8px 14px;
+        color: #55544f;
+        border-bottom: 1px solid #e0e0dd;
+        background: #fbfbfa;
+      }
+      .hero {
+        padding: 112px 64px 112px;
+      }
+      .w {
+        max-width: 1180px;
+        margin: 0 auto;
+      }
+      .kick {
+        font:
+          500 13px/1 'Geist Mono Variable',
+          monospace;
+        color: #c2380e;
+        margin-bottom: 24px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .kick:before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: #c2380e;
+        border-radius: 2px;
+      }
+      h1 {
+        margin: 0;
+        font-weight: 600;
+        letter-spacing: -0.045em;
+        line-height: 1;
+      }
+      .lede {
+        font-size: 20px;
+        line-height: 1.5;
+        color: #55544f;
+        margin: 24px 0 0;
+        max-width: 44ch;
+      }
+      .mono {
+        font-family: 'Geist Mono Variable', 'DejaVu Sans Mono', monospace;
+      }
+      .ink {
+        background: #fff;
+        border: 1.5px solid #141413;
+        border-radius: 10px;
+        box-shadow: 5px 5px 0 #141413;
+      }
+      .note {
+        font:
+          500 12px/1.35 'Geist Mono Variable',
+          monospace;
+        color: #55544f;
+      }
+      .acc {
+        color: #c2380e;
+      }
+      .wait {
+        color: #b07d1a;
+      }
+      .ic {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 0.9em;
+        height: 0.9em;
+        vertical-align: -0.08em;
+        border: 1.5px dashed #141413;
+        border-radius: 8px;
+        background: #fbfbfa;
+      }
+      .ic svg {
+        width: 0.55em;
+        height: 0.55em;
+      }
+      .ic.m {
+        border-style: solid;
+        background: #141413;
+        color: #fbfbfa;
+      }
+      @media (max-width: 900px) {
+        .hero {
+          padding: 80px 32px;
+        }
+      }
+      @media (max-width: 640px) {
+        .hero {
+          padding: 48px 20px;
+        }
+        .lede {
+          font-size: 17px;
+        }
+      }
+      h2 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 52px;
+        line-height: 1.04;
+        letter-spacing: -0.035em;
+        max-width: 16ch;
+      }
+      .sec {
+        padding: 112px 64px;
+      }
+      .floor {
+        margin-top: 0;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 14px 18px;
+        font:
+          500 13px/1 'Geist Mono Variable',
+          monospace;
+      }
+      .floor b {
+        font-size: 15px;
+      }
+      .floor .d {
+        color: #55544f;
+      }
+      .floor .d.on {
+        color: #c2380e;
+        font-weight: 600;
+      }
+      .floor .sh {
+        margin-left: auto;
+        font:
+          500 12px/1 'Geist Variable',
+          sans-serif;
+        color: #6b6a66;
+      }
+      @media (max-width: 900px) {
+        .sec {
+          padding: 80px 32px;
+        }
+        h2 {
+          font-size: 40px;
+        }
+      }
+      @media (max-width: 640px) {
+        .sec {
+          padding: 48px 20px;
+        }
+        h2 {
+          font-size: 30px;
+        }
+        .floor {
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+        .floor .sh {
+          margin-left: 0;
+          width: 100%;
+        }
+      }
+      .graph {
+        position: relative;
+        margin-top: 64px;
+        padding: 0 0 28px;
+      }
+      .main {
+        position: relative;
+        border-top: 2px solid #141413;
+        margin: 0 0 8px;
+        height: 28px;
+      }
+      .main span {
+        position: absolute;
+        left: 0;
+        top: -26px;
+        font:
+          500 12px/1 'Geist Mono Variable',
+          monospace;
+      }
+      .main:after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: -6px;
+        width: 10px;
+        height: 10px;
+        background: #141413;
+        border-radius: 50%;
+      }
+      .lane {
+        display: grid;
+        grid-template-columns: 120px 1fr 300px;
+        align-items: center;
+        gap: 0;
+        position: relative;
+        min-height: 96px;
+        margin-bottom: 12px;
+      }
+      .lane:nth-child(2) {
+        margin-left: 0;
+      }
+      .lane:nth-child(3) {
+        margin-left: 60px;
+      }
+      .lane:nth-child(4) {
+        margin-left: 120px;
+      }
+      .fork {
+        height: 100%;
+        border-left: 1.5px dashed #141413;
+        border-bottom: 1.5px dashed #141413;
+        border-bottom-left-radius: 14px;
+        align-self: start;
+        height: 50%;
+      }
+      .track {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 2px solid #141413;
+        margin-right: 24px;
+      }
+      .track i {
+        width: 12px;
+        height: 12px;
+        border: 2px solid #141413;
+        background: #fbfbfa;
+        border-radius: 50%;
+        margin-top: -7px;
+      }
+      .track i.head {
+        background: #c2380e;
+        border-color: #c2380e;
+      }
+      .meta {
+        padding: 10px 14px;
+        background: #fff;
+        border: 1.5px solid #141413;
+        border-radius: 8px;
+        box-shadow: 4px 4px 0 #141413;
+      }
+      .meta .p {
+        font:
+          400 11.5px/1.3 'Geist Mono Variable',
+          monospace;
+        color: #6b6a66;
+      }
+      .meta b {
+        display: block;
+        font:
+          600 14px/1.3 'Geist Variable',
+          sans-serif;
+        margin: 3px 0;
+      }
+      .meta .l {
+        font:
+          400 12.5px/1.4 'Geist Variable',
+          sans-serif;
+      }
+      .wr {
+        font:
+          500 11.5px/1 'Geist Mono Variable',
+          monospace;
+        color: #c2380e;
+        white-space: nowrap;
+      }
+      @media (max-width: 900px) {
+        .lane {
+          grid-template-columns: 48px 1fr;
+          height: auto;
+          margin: 0 0 18px !important;
+        }
+        .track {
+          display: none;
+        }
+        .fork {
+          height: 40px;
+        }
+        .meta {
+          grid-column: 2;
+        }
       }
     </style>
   </head>
   <body>
-    <script>
-      const mm = window.matchMedia.bind(window)
-      window.matchMedia = (q) =>
-        q.includes('prefers-reduced-motion')
-          ? {
-              matches: true,
-              media: q,
-              addEventListener() {},
-              removeEventListener() {},
-              addListener() {},
-              removeListener() {},
-            }
-          : mm(q)
-    </script>
-    <main>
-      <section class="sec split-left" id="worktrees">
-        <div class="sec-head">
-          <h2>One worktree for each change</h2>
-          <p>
-            Agents working in one checkout overwrite each other. Every change
-            builds on its own branch, and all of them share one record.
-          </p>
-        </div>
-        <div class="tray">
-          <button
-            type="button"
-            class="pz"
-            aria-label="Pause the animation"
-            data-pause="Pause the animation"
-            data-play="Play the animation"
-            data-paused="false"
-          >
-            <svg
-              viewBox="0 0 16 16"
-              width="14"
-              height="14"
-              class="pz-off"
-              aria-hidden="true"
-            >
-              <path
-                d="M5 3.5v9M11 3.5v9"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-              />
-            </svg>
-            <svg
-              viewBox="0 0 16 16"
-              width="14"
-              height="14"
-              class="pz-on"
-              aria-hidden="true"
-            >
-              <path d="M5.5 3.5l6.5 4.5-6.5 4.5z" fill="currentColor" />
-            </svg>
-          </button>
-          <div class="card">
-            <ul class="wts" role="list">
-              <li class="wt">
-                <p class="p">.claude/worktrees/take-timer/</p>
-                <p class="b">
-                  <span class="dot" aria-hidden="true"></span> feat/take-timer
-                </p>
-                <p class="l">
-                  <span>Slice 2 of 4 committed</span
-                  ><span class="on">Gate: 9 of 14 stages passed</span
-                  ><span>Pull request opened</span>
-                </p>
-                <span class="drop" aria-hidden="true"></span>
-              </li>
-              <li class="wt">
-                <p class="p">.claude/worktrees/sync-stamp/</p>
-                <p class="b">
-                  <span class="dot" aria-hidden="true"></span> feat/sync-stamp
-                </p>
-                <p class="l">
-                  <span>Reading the added commits</span
-                  ><span class="on">Second pass on the added commits</span
-                  ><span>Two findings posted</span>
-                </p>
-                <span class="drop" aria-hidden="true"></span>
-              </li>
-              <li class="wt">
-                <p class="p">.claude/worktrees/toolbar/</p>
-                <p class="b">
-                  <span class="dot" aria-hidden="true"></span> feat/toolbar
-                </p>
-                <p class="l">
-                  <span>Starting the app from the branch</span
-                  ><span class="on"
-                    >Driving the checklist in the running app</span
-                  ><span>Box 3 sent back to the worker</span>
-                </p>
-                <span class="drop" aria-hidden="true"></span>
-              </li>
-            </ul>
-            <div class="band">
-              <span class="ic"
-                ><svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.7"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M3 7.5A1.5 1.5 0 0 1 4.5 6H9l2 2h8.5A1.5 1.5 0 0 1 21 9.5v8A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5Z"
-                  /></svg
-              ></span>
-              <span class="nm">.canon/</span>
-              <span class="dirs">
-                <span data-dir="plans/">plans/</span> ·
-                <span data-dir="review/">review/</span> ·
-                <span data-dir="tasks/">tasks/</span>
-              </span>
-              <span class="sh">shared by every worktree</span>
+    <div class="lab">
+      arm-1 · Branch graph · cost: a drawn graph whose branch names and lines
+      track the shipped fiction · ref: linear-app s07, entries hung on one
+      horizontal rule
+    </div>
+    <section class="sec">
+      <div class="w">
+        <h2>One worktree for each change</h2>
+        <p class="lede">
+          Agents working in one checkout overwrite each other. Every change
+          builds on its own branch, and all of them share one record.
+        </p>
+        <div class="graph">
+          <div class="main"><span>main</span></div>
+          <div class="lane">
+            <div class="fork"></div>
+            <div class="track"><i></i><i></i><i class="head"></i></div>
+            <div class="meta">
+              <div class="p">.claude/worktrees/take-timer/</div>
+              <b>feat/take-timer</b>
+              <div class="l">
+                Gate: 9 of 14 stages passed
+                <span class="wr">→ writes plans/</span>
+              </div>
+            </div>
+          </div>
+          <div class="lane">
+            <div class="fork"></div>
+            <div class="track"><i></i><i></i><i class="head"></i></div>
+            <div class="meta">
+              <div class="p">.claude/worktrees/sync-stamp/</div>
+              <b>feat/sync-stamp</b>
+              <div class="l">
+                Second pass on the added commits
+                <span class="wr">→ writes review/</span>
+              </div>
+            </div>
+          </div>
+          <div class="lane">
+            <div class="fork"></div>
+            <div class="track"><i></i><i></i><i class="head"></i></div>
+            <div class="meta">
+              <div class="p">.claude/worktrees/toolbar/</div>
+              <b>feat/toolbar</b>
+              <div class="l">
+                Box 3 sent back to the worker
+                <span class="wr">→ writes review/</span>
+              </div>
             </div>
           </div>
         </div>
-        <script type="application/json" class="worktrees-data">
-          {
-            "rest": 1,
-            "cards": [
-              ["plans/", "plans/", "tasks/"],
-              ["review/", "review/", "review/"],
-              ["review/", "review/", "review/"]
-            ]
-          }
-        </script>
-      </section>
-      <script
-        type="module"
-        src="../../assets/landing-v5/built/_astro/index.astro_astro_type_script_index_0_lang.sTlfAzAI.js"
-      ></script>
-    </main>
+        <div class="floor ink">
+          <b>.canon/</b><span class="d on">plans/</span
+          ><span class="d on">review/</span><span class="d">tasks/</span
+          ><span class="sh">shared by every worktree</span>
+        </div>
+      </div>
+    </section>
   </body>
 </html>
