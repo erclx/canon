@@ -10,7 +10,7 @@
 
 - Give every author-defined drag a single-pointer alternative and a keyboard path, such as move buttons or arrow-key reordering (WCAG 2.5.7).
 - Show a dragged item as grabbed, by an outline, shadow, or offset, and preview where it lands by highlighting the drop target before the pointer reaches it.
-- Let a person grab a draggable item anywhere on it, and add a handle only when the item holds controls of its own.
+- Let a person grab a draggable item anywhere on it, unless it holds controls of its own, which take a grab handle instead.
 
 ## Pointer targets
 
