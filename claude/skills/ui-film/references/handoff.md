@@ -1,6 +1,6 @@
 ---
 title: UI film handoff
-description: What HyperFrames receives from a take, the shape of the click log and camera track, and how a composition applies the camera and draws the cursor
+description: What HyperFrames receives from a take, the footage page the operator reviews, the shape of the click log and camera track, and how a composition applies the camera and draws the cursor
 ---
 
 # UI film handoff
@@ -21,6 +21,31 @@ Read at Step 5 of `ui-film`. Canon stops at the clip, and a HyperFrames composit
 A press the plan aimed at a point logs `at` with no `box`, and a drag end aimed at a point logs no `box` or `drop`.
 
 The window is the log's `viewport`, 1920x1080 unless the plan set a smaller one. Every coordinate in the log and the track is in CSS pixels of that window, whatever size the clip is. Every time is in milliseconds on the clip's own clock, so frame `n` sits at `n * 1000 / 60`.
+
+## The footage page
+
+The operator approves the beats in words and sees no footage until a cut, so a bad take found then has compose work resting on it. Step 5 writes `.canon/video/<slug>/footage.html` from `take.json`, one page where every take plays before anything is composed.
+
+Write the page whole each time Step 5 runs, since `take.json` is its only source and a refilm changes it. One card per beat, in `take.json` order, carries what a reviewer needs to judge the take.
+
+| Card part | Read from                                                                           |
+| --------- | ----------------------------------------------------------------------------------- |
+| Title     | The beat's `name`, as the operator approved it                                      |
+| Player    | `<video muted controls preload="metadata">` on `takes/` joined to the beat's `clip` |
+| Length    | The beat's `seconds`                                                                |
+| Route     | The beat's `route`, with `fallback` named when the record carries it                |
+| File      | The clip's path relative to the workspace                                           |
+| Flaw      | What the still and the motion check found, or nothing when both passed              |
+
+### Building the page
+
+A stepped clip is 3840x2160 at 60 fps, and a dozen of them looping at once stutters the page.
+
+- Play a card on hover or click and pause it on leave, rather than looping every player at once
+- Read every clip by its path relative to the page, so the page plays from the workspace and copies no media
+- Copy neither `take.json`'s `url` nor the config's `access` into the page, since either can carry a token
+- Add a card per audio file already in the workspace, usually none at this step, and leave a refresh with the music to the composing session
+- Keep the page standalone, with no board route, since a board version belongs to the board's own plugin
 
 ## The camera track
 
