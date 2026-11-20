@@ -18,6 +18,7 @@ import { describeViewport } from '@/driver/probes/viewport'
 import type { Viewport } from '@/driver/probes/viewport'
 import { runStep, stepProbes } from '@/driver/steps'
 import type {
+  ColorScheme,
   DriverPlan,
   Finding,
   PlacedFinding,
@@ -71,6 +72,14 @@ export interface DriveOptions {
 /** One step measured at one viewport, so a sweep reads as passes rather than a total. */
 export interface PassReading {
   readonly viewport: string
+  /** Set only when the run sweeps color schemes, like `background`. */
+  readonly colorScheme?: ColorScheme
+  /**
+   * The first painted background up from the body, read after the step. Two
+   * schemes reading the same value mean the page never answered the media
+   * query, so the second pass rendered the first theme again.
+   */
+  readonly background?: string
   readonly step: string
   readonly probes: number
   readonly findings: number
@@ -130,10 +139,21 @@ export async function drive(options: DriveOptions): Promise<DriverResult> {
   const passes: PassReading[] = []
 
   try {
-    for (const viewport of options.plan.viewports) {
-      const pass = await driveViewport(browser, options, viewport)
-      findings.push(...pass.findings)
-      passes.push(...pass.passes)
+    // A run naming no scheme takes one unset pass per viewport, which leaves
+    // the context, the passes, and the findings exactly as they were before
+    // the sweep existed.
+    const schemes = options.plan.colorSchemes ?? [undefined]
+    for (const colorScheme of schemes) {
+      for (const viewport of options.plan.viewports) {
+        const pass = await driveViewport(
+          browser,
+          options,
+          viewport,
+          colorScheme,
+        )
+        findings.push(...pass.findings)
+        passes.push(...pass.passes)
+      }
     }
   } catch (error) {
     if (error instanceof AxeEngineMissing) return failed('axe-missing', error)
@@ -156,7 +176,8 @@ export async function drive(options: DriveOptions): Promise<DriverResult> {
 }
 
 /**
- * One full pass of the sequence at one viewport, in a context of its own.
+ * One full pass of the sequence at one viewport and scheme, in a context of its
+ * own.
  *
  * A fresh context per height rather than a resize of the last one, because a
  * step already run has left the page in a state the next height would inherit,
@@ -167,17 +188,20 @@ async function driveViewport(
   browser: Browser,
   options: DriveOptions,
   viewport: Viewport,
+  colorScheme: ColorScheme | undefined,
 ): Promise<{ findings: PlacedFinding[]; passes: PassReading[] }> {
   const context = await browser.newContext({
     viewport,
     // A measurement wants motion suppressed, since geometry read
     // mid-transition is a reading of neither state.
     reducedMotion: 'reduce',
+    ...(colorScheme ? { colorScheme } : {}),
   })
 
   const findings: PlacedFinding[] = []
   const passes: PassReading[] = []
   const where = describeViewport(viewport)
+  const scheme = colorScheme ? { colorScheme } : {}
 
   try {
     const page = await context.newPage()
@@ -191,13 +215,21 @@ async function driveViewport(
       for (const name of inRunOrder(names)) {
         const probe = PROBES[name]
         for (const finding of await probe(page)) {
-          findings.push({ ...finding, step: step.name, viewport: where })
+          findings.push({
+            ...finding,
+            step: step.name,
+            viewport: where,
+            ...scheme,
+          })
           count += 1
         }
       }
 
       passes.push({
         viewport: where,
+        ...(colorScheme
+          ? { colorScheme, background: await paintedBackground(page) }
+          : {}),
         step: step.name,
         probes: names.length,
         findings: count,
@@ -208,4 +240,20 @@ async function driveViewport(
   }
 
   return { findings, passes }
+}
+
+/**
+ * The background a reader sees, walking up from the body because a page often
+ * paints its theme on the root and leaves the body transparent.
+ */
+async function paintedBackground(page: Page): Promise<string> {
+  return page.evaluate(() => {
+    const transparent = 'rgba(0, 0, 0, 0)'
+    for (const element of [document.body, document.documentElement]) {
+      if (!element) continue
+      const color = getComputedStyle(element).backgroundColor
+      if (color !== transparent) return color
+    }
+    return transparent
+  })
 }

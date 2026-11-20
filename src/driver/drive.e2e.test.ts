@@ -25,6 +25,16 @@ const PAGE = readFileSync(
   'utf8',
 )
 
+/**
+ * Text that clears contrast on the light background and fails on the dark one,
+ * themed through `prefers-color-scheme`, so a run that renders one scheme
+ * reports either a pass or a failure with no theme to place it under.
+ */
+const DARK_CONTRAST = readFileSync(
+  new URL('./fixtures/dark-contrast.html', import.meta.url),
+  'utf8',
+)
+
 const RUN = JSON.stringify({
   viewport: { width: 390, heights: [900, 1200] },
   probes: ['details'],
@@ -50,8 +60,13 @@ describe.skipIf(!hasBrowser)('drive against a served application', () => {
   beforeAll(() => {
     const served = Bun.serve({
       port: 0,
-      fetch: () =>
-        new Response(PAGE, { headers: { 'content-type': 'text/html' } }),
+      fetch: (request) =>
+        new Response(
+          new URL(request.url).pathname === '/dark-contrast'
+            ? DARK_CONTRAST
+            : PAGE,
+          { headers: { 'content-type': 'text/html' } },
+        ),
     })
     server = { port: Number(served.port), stop: () => served.stop(true) }
   })
@@ -121,6 +136,65 @@ describe.skipIf(!hasBrowser)('drive against a served application', () => {
         expect.objectContaining({ rule: 'document-title', gate: true }),
       ]),
     )
+  }, 120_000)
+
+  it('should place a contrast failure under the one scheme that paints it', async () => {
+    const read = readDriverPlan(
+      JSON.stringify({
+        viewport: { width: 390, heights: [900] },
+        colorScheme: ['light', 'dark'],
+        probes: ['axe'],
+        steps: [{ name: 'arrive', kind: 'wait', ms: 0 }],
+      }),
+    )
+    expect(read.kind).toBe('read')
+    if (read.kind !== 'read') return
+
+    const result = await drive({
+      url: `http://127.0.0.1:${server.port}/dark-contrast`,
+      plan: read.plan,
+    })
+
+    expect(result.status).toBe('driven')
+    if (result.status !== 'driven') return
+
+    const contrast = result.findings.filter(
+      (finding) => finding.rule === 'color-contrast',
+    )
+    expect(contrast).toHaveLength(1)
+    expect(contrast[0]).toMatchObject({
+      viewport: '390x900',
+      colorScheme: 'dark',
+    })
+
+    // Each pass names its scheme and the background it painted, which is how a
+    // reader tells a page with no second theme from one that passed in both.
+    expect(result.passes).toEqual([
+      expect.objectContaining({
+        colorScheme: 'light',
+        background: 'rgb(255, 255, 255)',
+      }),
+      expect.objectContaining({
+        colorScheme: 'dark',
+        background: 'rgb(51, 51, 51)',
+      }),
+    ])
+  }, 120_000)
+
+  it('should add no scheme to a pass or a finding when the run names none', async () => {
+    const read = readDriverPlan(RUN)
+    if (read.kind !== 'read') return
+
+    const result = await drive({
+      url: `http://127.0.0.1:${server.port}/`,
+      plan: read.plan,
+    })
+
+    expect(result.status).toBe('driven')
+    if (result.status !== 'driven') return
+    expect(result.passes[0]).not.toHaveProperty('colorScheme')
+    expect(result.passes[0]).not.toHaveProperty('background')
+    expect(result.findings[0]).not.toHaveProperty('colorScheme')
   }, 120_000)
 
   it('should refuse by naming the server rather than reporting no findings', async () => {
