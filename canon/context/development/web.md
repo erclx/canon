@@ -7,7 +7,7 @@ description: The canon.erclx.com landing page, its composition and build-time re
 
 ## Overview
 
-Owns `web/`, the Astro app behind the `canon.erclx.com` landing page, and the images the page and the README carry. The page is one route of twelve sections, from Claude Code's agent view down to the install. It ships to no target, so the application-code non-goal in `canon/REQUIREMENTS.md` does not reach it.
+Owns `web/`, the Astro app behind the `canon.erclx.com` landing page, and the images the page and the README carry. The page is one route of nine sections in a drawn system on a grid ground, from the relay of sessions down to the install. It ships to no target, so the application-code non-goal in `canon/REQUIREMENTS.md` does not reach it.
 
 ## Layout
 
@@ -15,18 +15,18 @@ Owns `web/`, the Astro app behind the `canon.erclx.com` landing page, and the im
 
 Holds the page, built from components that read their figures through `lib/`. A section sheet sits under its id, since its script writes markup a scoped style never reaches, and the nav and footer sheets sit under their root class. `components/markup.test.ts` fails on a style block, a script body, or SVG written inline.
 
-- `components/` holds a folder per section, `site-nav/`, `site-footer/`, and `pause-button/`, each splitting `index.astro` from its style, script, and icons, which `pages/` assembles into one route
+- `components/` holds a folder per section, `site-nav/`, `site-footer/`, and `session-list/`, each splitting `index.astro` from its style, script, and icons, which `pages/` assembles into one route
 - `content/copy.ts` holds the copy and the product views' scenes, each string cited to `README.md` or marked as a paraphrase, gated by `readmeCitations`
 - `content/` also holds the sessions, craft's practices with each quote's ledger row, and the record sheets under `content/records/`, one formatted HTML file each
-- `lib/skills.ts` reads the skill catalog, `lib/health.ts` reads the code audits and `canon history` and refuses a shallow clone, and `lib/scene.ts` paces every scene window
-- `styles/global.css` imports Tailwind, then maps roles onto `tokens.css` in `@layer base` beside the shared tray, window, picker, split, and band classes, and `base.astro` embeds Geist and Geist Mono
+- `lib/` reads the catalog in `skills.ts`, the audits and history in `health.ts`, which refuses a shallow clone, and the reel's stamp in `film.ts`, and `scene.ts` paces each motion
+- `styles/global.css` maps roles onto `tokens.css` in `@layer base` beside the grid ground, the `.part` frame, and the drawn card, and `base.astro` embeds Geist and Geist Mono
 
 ### `web/`
 
 Beside `src/`, holds the tests, the social card route, and the files served as they are.
 
 - `e2e/` owns the Playwright suite, which runs on all three browsers
-- `card-src/` owns the social card route, served by `card.config.mjs` as `bun run web:card` on 4421 plus `WORKTREE_PORT_OFFSET`
+- `card-src/` owns the social card route and the session list route the README loop is filmed from, served by `card.config.mjs` as `bun run web:card` on 4421 plus `WORKTREE_PORT_OFFSET`
 - `web:card:check` runs the shipped exclusion check, which fails a build carrying `og-card-marker` or a built page under an `og-card` path and passes an image of that name
 - `public/og-image.png` is a symlink to the social card in `assets/frames/`, which the site serves at its root
 - `public/previews/` holds committed renders written only by `scripts/core/regen-web-previews.ts`, and `.oxfmtrc.jsonc` ignores the folder
@@ -36,8 +36,8 @@ Beside `src/`, holds the tests, the social card route, and the files served as t
 This repository's self-portrait for a visitor who never opens the source, where `examples/` is sample input for a reader about to copy and run it.
 
 - `evidence/home/` is the committed baseline of the page, one folder per section holding a frame per theme at 320 and 1280 pixels
-- `frames/` holds the social card and its stamp, the one image the site's link preview shows
-- `loops/` holds the README's `readme` pair, the launch film's files, and the film section's stamped reels, which `web:build` refuses once `web/film-plan.json` moves until `web:film -- --write` runs
+- `frames/` holds the social card and its stamp, and `drive/` the drive captures the evidence section labels as snapshots
+- `loops/` holds the README's `readme` pair, the launch film, and the records reel with its beat stills, which `web:build` refuses once `web/film-plan.json` moves until `web:film -- --write` runs
 - `merge/` and the whole-page frames come from a `workflow_dispatch` artifact on `main`, since a local capture falls back to another font
 - Every README image ships as a `<name>` and `<name>-light` pair behind a `<picture>`
 
