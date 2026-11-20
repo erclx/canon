@@ -774,6 +774,58 @@ describe('poll', () => {
         'UI-STALE  #7 closed at 2222222, behind 1111111',
       )
     })
+
+    describe('a push landing between the payload read and the verb read', () => {
+      const closes: Review[] = [
+        { heading: '## Review closed', submittedAt: CLOSE_OUT },
+        {
+          heading: '## UI review closed',
+          marker: READ_HEAD,
+          submittedAt: UI_AT,
+        },
+      ]
+      // The verb read the tip after the push, the payload before it.
+      const pushedScope = {
+        commit: READ_HEAD,
+        head: HEAD,
+        heading: '## Review closed',
+        source: 'fallback',
+        state: 'closed',
+        submittedAt: CLOSE_OUT,
+        ui: {
+          commit: READ_HEAD,
+          heading: '## UI review closed',
+          isCovered: false,
+          source: 'marker',
+          state: 'closed',
+        },
+      }
+
+      it('should print no UI line when the two reads name different heads', () => {
+        writeThread(closes, [], READ_HEAD)
+        expect(poll().stdout).toContain('SEEN')
+
+        writeThread(closes, [], READ_HEAD)
+        writeScope(pushedScope)
+
+        expect(poll().stdout).not.toContain('UI-')
+      })
+
+      it('should print UI-STALE on the next run once both reads agree', () => {
+        writeThread(closes, [], READ_HEAD)
+        expect(poll().stdout).toContain('SEEN')
+        writeThread(closes, [], READ_HEAD)
+        writeScope(pushedScope)
+        poll()
+
+        writeThread(closes, [], HEAD)
+        writeScope(pushedScope)
+
+        expect(poll().stdout).toContain(
+          'UI-STALE  #7 closed at 2222222, behind 1111111',
+        )
+      })
+    })
   })
 
   describe('evidence state', () => {
