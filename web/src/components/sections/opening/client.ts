@@ -1,10 +1,8 @@
 import { holdOn, reducedMotion } from '../../../lib/scene'
 
 /**
- * Passes the change card to card on Claude Code's 1.4s pulse. A pointer or
- * focus on the relay holds it, as does the pause button, whose visible word
- * and label both swap on a press. Under reduced motion nothing runs, so the
- * button stays hidden and every card rests unlit.
+ * Runs on Claude Code's 1.4s pulse, held by a pointer, focus, or the pause.
+ * Under reduced motion nothing runs, so the button stays hidden.
  */
 const relay = document.querySelector<HTMLElement>('#top .relay')
 const button = document.querySelector<HTMLButtonElement>('#top .pz-relay')

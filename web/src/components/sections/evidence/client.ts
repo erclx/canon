@@ -1,10 +1,8 @@
 import { playOnEntry } from '../../../lib/scene'
 
 /**
- * Steps the reel through its stills once the strip comes into view, the
- * still on screen outlined, and ticks each checklist line as its beat passes.
- * Replay runs it again. Every line stays ticked until the reel starts, so the
- * page reads finished before the script runs and under reduced motion.
+ * Every line stays ticked until the reel starts, so the page reads finished
+ * before the script runs and under reduced motion.
  */
 const STEP = 1600
 const section = document.getElementById('evidence')
