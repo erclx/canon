@@ -252,6 +252,13 @@ export function along(from: Point, to: Point, progress: number): Point {
 }
 
 /**
+ * How far past a clip time a stamp may sit and still count as sent by then,
+ * since a stage clock summing frame lengths and a reader multiplying a frame
+ * index reach the same frame a rounding error apart.
+ */
+const STAMP_SLACK_MS = 1e-6
+
+/**
  * The pointer at a clip time, held at the last point sent or read off the eased
  * curve when a move carries none, resting on `start` before the first move.
  */
@@ -263,7 +270,7 @@ export function cursorAt(
   let position = start
   for (const event of events) {
     if (event.kind !== 'move') continue
-    if (ms < event.t) break
+    if (ms + STAMP_SLACK_MS < event.t) break
     position = event.points?.length
       ? sentAt(event.from, event.points, ms)
       : along(event.from, event.to, (ms - event.t) / event.ms)
@@ -274,7 +281,7 @@ export function cursorAt(
 function sentAt(from: Point, points: readonly SentPoint[], ms: number): Point {
   let held: Point = from
   for (const point of points) {
-    if (point.t > ms) break
+    if (point.t > ms + STAMP_SLACK_MS) break
     held = { x: point.x, y: point.y }
   }
   return held
