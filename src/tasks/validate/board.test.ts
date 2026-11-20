@@ -252,7 +252,7 @@ describe('validateBoard', () => {
   it('should pass a rowed task whose Sessions line names full ids', async () => {
     await seedPlanLine(
       'v1.0-first',
-      'Plan: [feature-v1.0-first](../plans/feature-v1.0-first.md)\nSessions: worker-canon-a (0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0), cloud-a (session_01AbC)',
+      'Plan: [feature-v1.0-first](../plans/feature-v1.0-first.md)\nSessions: worker-canon-a (0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0), review-a (1a2b3c4d-5e6f-4a70-8b91-c2d3e4f5a6b7)',
     )
     await seedPlan('v1.0-first')
     await seedBoard(boardBody([readyTable([{ stem: 'v1.0-first' }])]))

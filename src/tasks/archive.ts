@@ -319,12 +319,11 @@ export function readPendingBranches(text: string): readonly string[] {
 }
 
 /**
- * A local session's full sessionId, or the `session_` id a cloud create reads
- * out. Only the full form reaches `canon sessions export`, so a short prefix is
- * refused rather than written.
+ * A local session's full sessionId. Only the full form reaches `canon sessions
+ * export`, so a short prefix is refused rather than written.
  */
 const SESSION_ID_SOURCE =
-  '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|session_[A-Za-z0-9]+'
+  '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
 
 export const SESSION_ID_PATTERN = new RegExp(`^(?:${SESSION_ID_SOURCE})$`)
 

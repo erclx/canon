@@ -1120,11 +1120,11 @@ describe('writeSessionsLine', () => {
 
 describe('readSessions', () => {
   it('should key each entry on its trailing id when a name carries a comma and parentheses', () => {
-    const text = `Sessions: fix (draft), take two (${WORKER_ID}), cloud-a (session_01AbC)\n`
+    const text = `Sessions: fix (draft), take two (${WORKER_ID}), review-a (1a2b3c4d-5e6f-4a70-8b91-c2d3e4f5a6b7)\n`
 
     expect(readSessions(text)).toEqual([
       { name: 'fix (draft), take two', sessionId: WORKER_ID },
-      { name: 'cloud-a', sessionId: 'session_01AbC' },
+      { name: 'review-a', sessionId: '1a2b3c4d-5e6f-4a70-8b91-c2d3e4f5a6b7' },
     ])
   })
 

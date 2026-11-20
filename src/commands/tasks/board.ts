@@ -240,7 +240,7 @@ export function registerBoard(tasks: Command): void {
     .option('--effort <effort>', `The effort: ${LAUNCH_EFFORTS.join(', ')}`)
     .option(
       '--route <route>',
-      `How it launches: ${LAUNCH_ROUTES.join(', ')}, being claude --bg, a pasted prompt, or a cloud worker`,
+      `How it launches: ${LAUNCH_ROUTES.join(', ')}, being claude --bg or a pasted prompt`,
     )
     .option('--override', "Mark the pick as the operator's, over the runbook's")
     .option('--clear', 'Empty the cell, taking no other pick flag')

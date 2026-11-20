@@ -43,8 +43,8 @@ export const RETIRED_COLUMNS: Readonly<Record<BoardGroup, readonly string[]>> =
 export const LAUNCH_ROLES = ['worker', 'planner'] as const
 export const LAUNCH_MODELS = ['opus', 'sonnet', 'fable'] as const
 export const LAUNCH_EFFORTS = ['low', 'medium', 'high', 'xhigh', 'max'] as const
-/** `background` is a `claude --bg` dispatch, `hand` a prompt the operator pastes, `cloud` a cloud worker. */
-export const LAUNCH_ROUTES = ['background', 'hand', 'cloud'] as const
+/** `background` is a `claude --bg` dispatch, and `hand` a prompt the operator pastes. */
+export const LAUNCH_ROUTES = ['background', 'hand'] as const
 
 export type LaunchRole = (typeof LAUNCH_ROLES)[number]
 export type LaunchModel = (typeof LAUNCH_MODELS)[number]

@@ -300,8 +300,7 @@ async function branchPullNumbers(
 }
 
 /**
- * The pull request numbers whose head is `branch`, read over REST because a
- * cloud session's GitHub proxy refuses the GraphQL `gh pr list` runs on.
+ * The pull request numbers whose head is `branch`, read over REST.
  * Unlike `branchPullNumbers`, a failed or unreadable answer is null rather
  * than an empty list, since the closing decision must not read a failure as
  * a branch with no pull request.
@@ -803,15 +802,12 @@ export function registerRecord(tasks: Command): void {
         'It writes Sessions: <name> (<sessionId>) below the origin, Pull',
         'request:, and Pending branch: lines, and appends to the line when one',
         'exists. The id is the key, so a session already listed is reported',
-        'unchanged under the name it was first recorded with. A cloud',
-        'session_ id is accepted, and takes --name since the roster never',
-        'lists it. Safe from a linked worktree, since it resolves the board',
-        'root in-process.',
+        'unchanged under the name it was first recorded with. Safe from a',
+        'linked worktree, since it resolves the board root in-process.',
         '',
         'Examples:',
         '  canon tasks session 0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0 v28.1-trigger-escalation',
         '  canon tasks session 0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0 --plan task-sessions-line --json',
-        '  canon tasks session session_01AbC v28.1-trigger-escalation --name cloud-canon-a',
         '',
       ].join('\n'),
     )
