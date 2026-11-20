@@ -1,6 +1,7 @@
 /**
  * The take plan, reusing `canon drive`'s step kinds plus `move`, which films the
- * pointer's travel. `tab` is left out, since keyboard focus leaves no cursor.
+ * pointer's travel, and `contextmenu`, a right press. `tab` is left out, since
+ * keyboard focus leaves no cursor.
  */
 
 import { MODIFIERS, type Modifier, isModifier, parseKeys } from '@/take/keys'
@@ -65,7 +66,11 @@ type Press = { readonly target: string } | PointAim
 export type TakeStep =
   | ({ readonly kind: 'move'; readonly target: string } & Aimed)
   | ({ readonly kind: 'move' } & PointAim & Aimed)
-  | ({ readonly kind: 'click' | 'dblclick' } & Press & Held & Through)
+  | ({
+      readonly kind: 'click' | 'dblclick' | 'contextmenu'
+    } & Press &
+      Held &
+      Through)
   | ({
       readonly kind: 'drag'
       readonly from: DragEnd
@@ -85,6 +90,7 @@ const KINDS = [
   'move',
   'click',
   'dblclick',
+  'contextmenu',
   'drag',
   'key',
   'fill',
@@ -297,7 +303,8 @@ function readStep(entry: unknown, at: string): TakeStep {
       )
     }
     case 'click':
-    case 'dblclick': {
+    case 'dblclick':
+    case 'contextmenu': {
       const held = {
         ...readModifiers(entry.modifiers, at),
         ...readThrough(entry, at),

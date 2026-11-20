@@ -346,6 +346,29 @@ describe('readTakePlan input steps', () => {
     })
   })
 
+  describe('contextmenu', () => {
+    it('should read a contextmenu on a target', () => {
+      expect(onlyStep({ kind: 'contextmenu', target: '#list' })).toEqual({
+        kind: 'contextmenu',
+        target: '#list',
+      })
+    })
+
+    it('should read a contextmenu at a point pressing through a layer', () => {
+      expect(
+        onlyStep({ kind: 'contextmenu', x: 300, y: 420, through: true }),
+      ).toEqual({ kind: 'contextmenu', x: 300, y: 420, through: true })
+    })
+
+    it('should refuse a contextmenu with neither a target nor a point', () => {
+      expect(onlyStep({ kind: 'contextmenu' })).toMatchObject({
+        kind: 'refused',
+        reason: 'bad-step',
+        detail: expect.stringContaining('contextmenu'),
+      })
+    })
+  })
+
   it('should keep the modifiers a click holds', () => {
     expect(
       onlyStep({ kind: 'click', target: '#layer', modifiers: ['Meta'] }),

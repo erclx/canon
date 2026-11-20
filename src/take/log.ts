@@ -64,6 +64,8 @@ export type LogEvent =
       readonly modifiers?: readonly Modifier[]
       /** 2 for a double click, absent for a single one. */
       readonly count?: number
+      /** The right button for a context menu, absent for the left one. */
+      readonly button?: 'right'
     }
   | {
       readonly t: number

@@ -1,0 +1,21 @@
+{
+  "beats": [
+    {
+      "name": "open the menu on the list's empty space",
+      "viewport": { "width": 1280, "height": 720 },
+      "steps": [
+        { "kind": "contextmenu", "target": "#files" },
+        { "kind": "wait", "ms": 800 }
+      ]
+    },
+    {
+      "name": "pick new file from the menu",
+      "viewport": { "width": 1280, "height": 720 },
+      "setup": [{ "kind": "contextmenu", "target": "#files" }],
+      "steps": [
+        { "kind": "click", "target": "text=New file" },
+        { "kind": "wait", "ms": 800 }
+      ]
+    }
+  ]
+}

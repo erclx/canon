@@ -34,6 +34,9 @@ const REST_MS = 300
 const RESULT_MS = 500
 const TYPE_MS = 400
 
+/** The press a context menu opens on, which a page reads as `button` 2. */
+const RIGHT = { button: 'right' } as const
+
 export type PointerInput =
   | {
       readonly type: 'move'
@@ -50,6 +53,8 @@ export type PointerInput =
       /** Which press of a run this is, 2 being a double click's second. */
       readonly clickCount: number
       readonly modifiers?: readonly Modifier[]
+      /** The right button for a context menu, absent for the left one. */
+      readonly button?: 'right'
     }
   | {
       readonly type: 'wheel'
@@ -185,6 +190,7 @@ export async function performSteps(
       }
       case 'click':
       case 'dblclick':
+      case 'contextmenu':
         await click(
           stage,
           state,
@@ -195,6 +201,7 @@ export async function performSteps(
           ),
           step.modifiers ?? [],
           step.kind === 'dblclick' ? 2 : 1,
+          step.kind === 'contextmenu' ? RIGHT : {},
         )
         await pause(stage, state, RESULT_MS)
         break
@@ -230,7 +237,14 @@ export async function performSteps(
       case 'fill': {
         const box = await boxOf(stage, step.target)
         const checks = step.through ? {} : { checks: step.target }
-        await click(stage, state, { at: center(box), box, ...checks }, [], 1)
+        await click(
+          stage,
+          state,
+          { at: center(box), box, ...checks },
+          [],
+          1,
+          {},
+        )
         await pause(stage, state, TYPE_MS)
         const start = stage.now()
         for (const character of step.text) {
@@ -393,6 +407,7 @@ async function click(
   pressed: Pressed,
   modifiers: readonly Modifier[],
   count: number,
+  button: { readonly button?: 'right' },
 ): Promise<void> {
   const { at, box } = pressed
   await moveTo(stage, state, at)
@@ -406,9 +421,15 @@ async function click(
       ...(box ? { box } : {}),
       ...withModifiers(modifiers),
       ...(count > 1 ? { count } : {}),
+      ...button,
     })
     for (let clickCount = 1; clickCount <= count; clickCount += 1) {
-      const press = { ...at, clickCount, ...withModifiers(modifiers) }
+      const press = {
+        ...at,
+        clickCount,
+        ...withModifiers(modifiers),
+        ...button,
+      }
       await stage.pointer({ type: 'down', ...press })
       await stage.pointer({ type: 'up', ...press })
     }
