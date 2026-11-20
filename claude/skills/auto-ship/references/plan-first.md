@@ -45,15 +45,15 @@ A question marked as needing the operator's call waits on a slot only the operat
 
 Each stop leaves the plan linked and nothing built, so a relaunch onto the same task resumes at step 1. Send the line to the controller as a block before the turn ends.
 
-| Reading                                                     | Stop line                                                                                       |
-| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `--stop-after-plan`                                         | `⏸️ <plan> is written and linked. The launch asked to stop after the plan.`                     |
-| More than 5 files, with no `--any-size`                     | `❌ <plan> touches <n> files, past the 5 built here. Relaunch with --any-size to build it.`     |
-| Graded heavy, with no `--any-size`                          | `❌ <plan> is graded heavy. Relaunch with --any-size to build it here.`                         |
-| `claimed: true`                                             | `❌ <branch> is held by <holder>. Relaunch once it clears.`                                     |
-| `claimed: false` unverified, a refusal, or no `claimed` key | `❌ The claim on <branch> could not be read (<missing reading>). Relaunch once it reads clean.` |
-| The wait reads `timeout`                                    | `❌ <plan> still waits on <open slots> after <seconds>s. Answer it and relaunch.`               |
-| `plan-answers` or the wait refuses                          | `❌ <plan> is not launchable (<reason>). Settle it and relaunch.`                               |
+| Reading                                                     | Stop line                                                                                                        |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `--stop-after-plan`                                         | `⏸️ <plan> is written and linked. The launch asked to stop after the plan.`                                      |
+| More than 5 files, with no `--any-size`                     | `❌ <plan> touches <n> files, past the 5 built here. To build it in this session, send /canon:auto-ship <plan>.` |
+| Graded heavy, with no `--any-size`                          | `❌ <plan> is graded heavy. To build it in this session, send /canon:auto-ship <plan>.`                          |
+| `claimed: true`                                             | `❌ <branch> is held by <holder>. Relaunch once it clears.`                                                      |
+| `claimed: false` unverified, a refusal, or no `claimed` key | `❌ The claim on <branch> could not be read (<missing reading>). Relaunch once it reads clean.`                  |
+| The wait reads `timeout`                                    | `❌ <plan> still waits on <open slots> after <seconds>s. Answer it and relaunch.`                                |
+| `plan-answers` or the wait refuses                          | `❌ <plan> is not launchable (<reason>). Settle it and relaunch.`                                                |
 
 An unverified `claimed: false` is one carrying `sessionsReadable` or `refsReadable` false, the reading `${CLAUDE_SKILL_DIR}/../role-orchestrator/references/orchestrator-dispatch.md` treats as unverified too.
 

@@ -113,6 +113,7 @@ No branch and no worktree exist here and none is created. A planner writes one g
 
 - That write meets the isolation guard as a linked worktree's main-root write does, with no worktree to redirect it to
 - `role-planner` therefore sends it as a `Bash` heredoc rather than through `Write`
+- A planner's plan announcement owes no `canon tasks promote`, since its `plan-link` already moved the row to `## Up next`. Promote at the build dispatch instead.
 
 ```bash
 claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion -n "planner-<project>-<slug>" "Run /canon:role-planner, then /canon:plan-feature <task>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the plan lands, carrying the path and what the task file got wrong, and message it again if you stop on a question."

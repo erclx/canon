@@ -19,7 +19,9 @@ Your controller is the session whose sessionId is <dispatcher-id>. Resolve its c
 Each argument goes after `<task>`, and the session reads them in the order below.
 
 - `--stop-after-plan` ends the run once the plan is announced, for an operator who reads the plan before a build
-- `--any-size` builds the plan whatever its file count and weight, only when the operator and this session chose to build a larger row this way
+- `--any-size` builds the plan whatever its file count and weight
+  - Pass it whenever the operator asked for the row planned and built in one session
+  - Leave it off a row this session routed here because it read small
 
 ## Reading a row as small
 
@@ -35,7 +37,8 @@ None of the three checks in `orchestrator-dispatch.md` can run at launch, since 
 - The plan-answer gate runs in the session on the plan it wrote
 - The branch check runs in the session on the same plan, which stops on a claim or an unverified reading
 - The conflict check runs on the announced plan, since its file list is the first this session can compare. Message the session to stop on a hold. It reads its messages before the worktree entry.
-- Promote the row with `canon tasks promote` when the plan announcement arrives, not at launch, since the session's link moves it to `## Up next` first
+- Promote the row with `canon tasks promote` when the plan announcement arrives from the session that builds it next, not at launch, since its link moves the row to `## Up next` first
+  - A `--stop-after-plan` launch, or a session that sent a stop line, builds nothing, so its row stays in `## Up next`
 
 ### An open call
 
