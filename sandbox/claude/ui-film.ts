@@ -75,8 +75,9 @@ export default scenario({
         '         approval a plan and takes under .canon/video/<slug>/, each beat',
       )
       ctx.log.info(
-        '         with clip.mp4, log.json, camera.json, and the still.jpg the verb wrote, read per beat, no tracked',
+        '         with clip.mp4, log.json, camera.json, and the still.jpg the verb wrote, read per beat,',
       )
+      ctx.log.info('         a footage.html playing each take, no tracked')
       ctx.log.info('         file changed, and the throwaway copy removed')
       ctx.log.info(
         '         Any dry run lands in scratch/ and nothing composed reads from it',
