@@ -449,12 +449,8 @@ export async function recordBaseline(
 }
 
 /**
- * Checks a finished drive against its intake folder's `drive.json`: every
- * goal mapped or skipped with a reason, every configured script run once per
- * persona or skipped with a reason, the main checkout unchanged since the
- * baseline, the evidence inside the folder's `evidence/`, every decision in
- * the drive log drawn, and the drive's worktree gone. A folder with no log
- * reads as nothing undrawn. It reports what failed and never reverts a changed path,
+ * Checks a finished drive against its `drive.json`, failing each axis
+ * `DriveFindings` names. It reports a changed path and never reverts it,
  * since only the operator knows which of them to keep.
  */
 export async function checkDrive(
