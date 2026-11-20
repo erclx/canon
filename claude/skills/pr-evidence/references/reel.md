@@ -89,6 +89,12 @@ Keep the whole reel at or under 15 seconds, which the take below enforces. Each 
 
 ## Film the reel
 
+Empty the takes folder before every film, refilms included. `canon take` never clears it, and the timing check below reads a beat folder a dropped or renamed beat left as a harness beat.
+
+```bash
+rm -rf .canon/tmp/pr/reel/<number>/takes
+```
+
 ```bash
 canon take <url> .canon/tmp/pr/reel/<number>/plan.json --out .canon/tmp/pr/reel/<number>/takes --reel .canon/tmp/pr/reel/<number>/reel.webp --max-seconds 15 --json
 ```
@@ -129,6 +135,16 @@ Open each beat's `still.jpg`, the closing frame the record names in its `still` 
 - A still showing the wrong state skips the reel as `wrong-state`, naming the beat and what the still shows
 - A record whose beats carry no `still` field comes from a `canon` predating the still, so skip as `no-still` rather than posting a reel nothing checked
 - Read `fallback` on each beat. A beat filmed by screencast still joins the reel, since the reel shrinks every beat to one width.
+
+Then check the takes' timing before pushing, since a still shows the closing frame and none of the motion before it.
+
+```bash
+canon take check .canon/tmp/pr/reel/<number>/takes --json
+```
+
+- No `reason` means every beat passed, so continue to the push
+- `reason: breach` means a beat broke a rule. Film the reel once more and check again, then skip as `timing` on a second breach, naming each beat's `dir` and `rule`.
+- Any other `reason` skips under that `reason`, naming its `beat` when the record carries one
 
 ## Push the reel
 

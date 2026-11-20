@@ -114,6 +114,16 @@ Open each beat's `takes/<dir>/still.jpg` before handing off, since a clip can fi
 - Say what each still shows beside the beat it belongs to
 - Report a beat the record marks with `fallback` as filmed in real time at its window, whose zoom stops near 1.35x rather than 1.8x, and offer to re-film it with the beat's input simplified
 
+### Check each take's timing
+
+A still says nothing about the motion before it, so check every take, harness beats included.
+
+```bash
+canon take check .canon/video/<slug>/takes --json
+```
+
+Branch on the record's `reason`, never on the exit code. With no `reason`, continue to the hand-off. Otherwise route each breach by its `rule` per `## The timing check` in `${CLAUDE_SKILL_DIR}/references/camera-and-cursor.md`, and refilm rather than editing a log or a track.
+
 ## Step 5: hand off
 
 Check that the `hyperframes` skill resolves before handing anything to it, as `hyperframes:hyperframes` from its plugin or `hyperframes` installed alone. Canon never installs or updates it, since the plugin manager owns both.
