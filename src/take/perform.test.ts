@@ -12,6 +12,7 @@ import {
   type PointerInput,
   FOCUS_MOVED,
   type Stage,
+  TargetAmbiguous,
   TargetCovered,
   TargetOffscreen,
   coverExpression,
@@ -194,6 +195,63 @@ describe('performSteps dblclick', () => {
 
     expect(log.find((event) => event.kind === 'click')).not.toHaveProperty(
       'count',
+    )
+  })
+})
+
+describe('performSteps contextmenu', () => {
+  it('should send one right-button press pair at the target', async () => {
+    const { sent } = await perform({ '#list': LANE }, [
+      { kind: 'contextmenu', target: '#list' },
+    ])
+
+    const presses = sent.filter(
+      (input) => input.type === 'down' || input.type === 'up',
+    )
+    expect(presses).toEqual([
+      expect.objectContaining({
+        type: 'down',
+        x: 700,
+        y: 450,
+        clickCount: 1,
+        button: 'right',
+      }),
+      expect.objectContaining({ type: 'up', button: 'right' }),
+    ])
+  })
+
+  it('should log one click naming the right button', async () => {
+    const { log } = await perform({ '#list': LANE }, [
+      { kind: 'contextmenu', target: '#list' },
+    ])
+
+    expect(log.filter((event) => event.kind === 'click')).toEqual([
+      expect.objectContaining({ kind: 'click', box: LANE, button: 'right' }),
+    ])
+  })
+
+  it('should right-press at a point with no box', async () => {
+    const { sent } = await perform({}, [
+      { kind: 'contextmenu', x: 300, y: 200 },
+    ])
+
+    expect(sent.find((input) => input.type === 'down')).toMatchObject({
+      x: 300,
+      y: 200,
+      button: 'right',
+    })
+  })
+
+  it('should send a left click with no button field', async () => {
+    const { sent, log } = await perform({ '#frame': CARD }, [
+      { kind: 'click', target: '#frame' },
+    ])
+
+    expect(sent.find((input) => input.type === 'down')).not.toHaveProperty(
+      'button',
+    )
+    expect(log.find((event) => event.kind === 'click')).not.toHaveProperty(
+      'button',
     )
   })
 })
@@ -920,6 +978,28 @@ describe('performSteps on a covered target', () => {
     expect(sent.some((input) => input.type === 'down')).toBe(true)
   })
 
+  it('should refuse a contextmenu whose point lands on a cover', async () => {
+    const { run } = await performCovered(
+      [{ kind: 'contextmenu', target: '#save' }],
+      { '#save': 'div.hit-layer' },
+    )
+
+    await expect(run).rejects.toThrow(TargetCovered)
+  })
+
+  it('should right-press through a cover with no read when the step says through', async () => {
+    const { run, sent, coverReads } = await performCovered(
+      [{ kind: 'contextmenu', target: '#save', through: true }],
+      { '#save': 'div.hit-layer' },
+    )
+
+    await run
+    expect(coverReads).toEqual([])
+    expect(sent.find((input) => input.type === 'down')).toMatchObject({
+      button: 'right',
+    })
+  })
+
   it('should refuse a fill whose field is covered, before typing', async () => {
     const { run, sent } = await performCovered(
       [{ kind: 'fill', target: '#save', text: 'a' }],
@@ -979,5 +1059,53 @@ describe('performSteps on a covered target', () => {
 
     await run
     expect(coverReads).toEqual([])
+  })
+})
+
+describe('performSteps on an ambiguous target', () => {
+  /** A stage whose page answers every lookup with two sized matches. */
+  function ambiguousStage() {
+    const { stage, sent } = recordingStage({})
+    const twoMatches: Stage = {
+      ...stage,
+      evaluate: async <T>() => ({ matches: 2 }) as T,
+    }
+    return { stage: twoMatches, sent }
+  }
+
+  it('should refuse a selector matching two sized elements, naming the count', async () => {
+    const { stage } = ambiguousStage()
+
+    const run = performSteps(stage, [{ kind: 'click', target: '.row' }], {
+      pointer: START,
+    })
+
+    await expect(run).rejects.toThrow(TargetAmbiguous)
+    await expect(run).rejects.toMatchObject({ target: '.row', matches: 2 })
+  })
+
+  it('should refuse a text target matching two sized rows', async () => {
+    const { stage } = ambiguousStage()
+
+    const run = performSteps(
+      stage,
+      [{ kind: 'contextmenu', target: 'text=New file' }],
+      { pointer: START },
+    )
+
+    await expect(run).rejects.toMatchObject({
+      target: 'text=New file',
+      matches: 2,
+    })
+  })
+
+  it('should send no input toward an ambiguous target', async () => {
+    const { stage, sent } = ambiguousStage()
+
+    await performSteps(stage, [{ kind: 'move', target: '.row' }], {
+      pointer: START,
+    }).catch(() => {})
+
+    expect(sent).toEqual([])
   })
 })

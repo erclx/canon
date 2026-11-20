@@ -34,6 +34,9 @@ const REST_MS = 300
 const RESULT_MS = 500
 const TYPE_MS = 400
 
+/** The press a context menu opens on, which a page reads as `button` 2. */
+const RIGHT = { button: 'right' } as const
+
 export type PointerInput =
   | {
       readonly type: 'move'
@@ -50,6 +53,8 @@ export type PointerInput =
       /** Which press of a run this is, 2 being a double click's second. */
       readonly clickCount: number
       readonly modifiers?: readonly Modifier[]
+      /** The right button for a context menu, absent for the left one. */
+      readonly button?: 'right'
     }
   | {
       readonly type: 'wheel'
@@ -106,6 +111,22 @@ export class TargetRefused extends Error {
 export class TargetMissing extends TargetRefused {
   constructor(target: string) {
     super(target, `nothing on the page matches ${target}`)
+  }
+}
+
+/**
+ * A target matching more than one sized element, so a press on the first
+ * could film the wrong one. A narrower selector names the one meant.
+ */
+export class TargetAmbiguous extends TargetRefused {
+  constructor(
+    target: string,
+    readonly matches: number,
+  ) {
+    super(
+      target,
+      `${target} matches ${matches} elements on the page, so the step could press the wrong one. Narrow it to one`,
+    )
   }
 }
 
@@ -185,6 +206,7 @@ export async function performSteps(
       }
       case 'click':
       case 'dblclick':
+      case 'contextmenu':
         await click(
           stage,
           state,
@@ -195,6 +217,7 @@ export async function performSteps(
           ),
           step.modifiers ?? [],
           step.kind === 'dblclick' ? 2 : 1,
+          step.kind === 'contextmenu' ? RIGHT : {},
         )
         await pause(stage, state, RESULT_MS)
         break
@@ -230,7 +253,14 @@ export async function performSteps(
       case 'fill': {
         const box = await boxOf(stage, step.target)
         const checks = step.through ? {} : { checks: step.target }
-        await click(stage, state, { at: center(box), box, ...checks }, [], 1)
+        await click(
+          stage,
+          state,
+          { at: center(box), box, ...checks },
+          [],
+          1,
+          {},
+        )
         await pause(stage, state, TYPE_MS)
         const start = stage.now()
         for (const character of step.text) {
@@ -393,6 +423,7 @@ async function click(
   pressed: Pressed,
   modifiers: readonly Modifier[],
   count: number,
+  button: { readonly button?: 'right' },
 ): Promise<void> {
   const { at, box } = pressed
   await moveTo(stage, state, at)
@@ -406,9 +437,15 @@ async function click(
       ...(box ? { box } : {}),
       ...withModifiers(modifiers),
       ...(count > 1 ? { count } : {}),
+      ...button,
     })
     for (let clickCount = 1; clickCount <= count; clickCount += 1) {
-      const press = { ...at, clickCount, ...withModifiers(modifiers) }
+      const press = {
+        ...at,
+        clickCount,
+        ...withModifiers(modifiers),
+        ...button,
+      }
       await stage.pointer({ type: 'down', ...press })
       await stage.pointer({ type: 'up', ...press })
     }
@@ -514,9 +551,10 @@ function inWindow(at: Point, viewport: Viewport): boolean {
 }
 
 async function foundBox(stage: Stage, target: string): Promise<Box> {
-  const box = await stage.evaluate<Box | null>(boxExpression(target))
-  if (!box) throw new TargetMissing(target)
-  return box
+  const found = await stage.evaluate<Lookup>(boxExpression(target))
+  if (!found) throw new TargetMissing(target)
+  if ('matches' in found) throw new TargetAmbiguous(target, found.matches)
+  return found
 }
 
 async function boxOf(stage: Stage, target: string): Promise<Box> {
@@ -583,9 +621,9 @@ export const FOCUS_MOVED = `(() => {
 })()`
 
 /**
- * `text=` takes the innermost sized match, and a selector searches the
- * document, then each open shadow root. A frame, a closed root, and a
- * zero-size match stay missing, and `within` reads through shadow hosts.
+ * Counts sized matches across the document and each open shadow root, `text=`
+ * counting innermost ones, since taking the first filmed the wrong row. A frame
+ * and a closed root stay uncounted, and `within` reads through shadow hosts.
  */
 const RESOLVER = `
   const within = (outer, inner) => {
@@ -607,7 +645,7 @@ const RESOLVER = `
       }
     }
     collect(document)
-    let element = null
+    let candidates
     if (target.startsWith('text=')) {
       const want = target.slice(5).trim()
       const matches = roots.flatMap((root) =>
@@ -615,22 +653,23 @@ const RESOLVER = `
           (node) => node.textContent.trim() === want,
         ),
       )
-      const innermost = matches.filter((node) => !matches.some((other) => other !== node && within(node, other)))
-      element = innermost.find(sized) ?? null
+      candidates = matches.filter((node) => !matches.some((other) => other !== node && within(node, other)))
     } else {
-      for (const root of roots) {
-        element = root.querySelector(target)
-        if (element) break
-      }
+      candidates = roots.flatMap((root) => [...root.querySelectorAll(target)])
     }
-    return element && sized(element) ? element : null
+    const found = candidates.filter(sized)
+    return { element: found.length === 1 ? found[0] : null, matches: found.length }
   }`
+
+/** What `boxExpression` reads back: the one match's box, a count past one, or nothing. */
+type Lookup = Box | { readonly matches: number } | null
 
 /** Finds a target's box in the page, so both routes resolve alike. */
 export function boxExpression(target: string): string {
   return `(() => {
     ${RESOLVER}
-    const element = find(${JSON.stringify(target)})
+    const { element, matches } = find(${JSON.stringify(target)})
+    if (matches > 1) return { matches }
     if (!element) return null
     const rect = element.getBoundingClientRect()
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
@@ -645,7 +684,7 @@ export function boxExpression(target: string): string {
 export function coverExpression(target: string, at: Point): string {
   return `(() => {
     ${RESOLVER}
-    const element = find(${JSON.stringify(target)})
+    const { element } = find(${JSON.stringify(target)})
     const x = ${at.x}
     const y = ${at.y}
     let hit = document.elementFromPoint(x, y)

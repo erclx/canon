@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <title>Project files</title>
+    <!--
+      The page a contextmenu step is filmed on. A right press on the file
+      list's empty space opens the page's own menu, with the browser's menu
+      prevented, since neither take route can film a native one. Two rows share
+      the prefix "New file", so a text= target that took the first partial
+      match would pick the wrong row.
+
+      - #files opens the menu on contextmenu, and on Shift+F10 or the menu key
+        while it holds focus, and the arrow keys, Enter, and Escape run the menu
+      - #add is the main interface's path to the same action
+      - Picking a row adds a file named for it and closes the menu
+      - Each contextmenu and each pick posts to /report, so a test reads which
+        button pressed and which row was picked after the take closes the page
+    -->
+    <link rel="stylesheet" href="/tokens.css" />
+    <style>
+      @font-face {
+        font-family: 'Geist Variable';
+        src: url('/fonts/Geist-Regular.woff2') format('woff2');
+        font-weight: 400;
+      }
+      @font-face {
+        font-family: 'Geist Variable';
+        src: url('/fonts/Geist-Medium.woff2') format('woff2');
+        font-weight: 500;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 720px;
+        overflow: hidden;
+        background: var(--color-background);
+        color: var(--color-text-body);
+        font-family: var(--type-body-family);
+        font-size: var(--type-body-size);
+        line-height: var(--type-body-lh);
+        cursor: none;
+      }
+      header {
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        background: var(--color-chrome);
+        border-bottom: 1px solid var(--color-border);
+      }
+      header h1 {
+        margin: 0;
+        font-size: var(--type-lede-size);
+        line-height: var(--type-lede-lh);
+        font-weight: 500;
+        color: var(--color-text);
+      }
+      #add {
+        font: inherit;
+        padding: 6px 16px;
+        color: var(--color-text);
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-action);
+      }
+      #add:focus-visible,
+      #files:focus-visible,
+      [role='menuitem']:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+      #files {
+        position: absolute;
+        left: 40px;
+        top: 96px;
+        width: 600px;
+        height: 584px;
+        margin: 0;
+        padding: var(--space-sm) 0;
+        list-style: none;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-panel);
+      }
+      #files li {
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--color-border);
+      }
+      #files li.fresh {
+        color: var(--color-text);
+        font-weight: 500;
+      }
+      #menu {
+        position: absolute;
+        min-width: 260px;
+        margin: 0;
+        padding: 6px;
+        list-style: none;
+        background: var(--color-background);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-panel);
+        box-shadow: var(--shadow-popover);
+      }
+      #menu[hidden] {
+        display: none;
+      }
+      [role='menuitem'] {
+        padding: 8px 14px;
+        border-radius: var(--radius-action);
+        color: var(--color-text);
+        user-select: none;
+      }
+      [role='menuitem']:hover,
+      [role='menuitem']:focus {
+        background: var(--color-surface);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Project files</h1>
+      <button id="add" type="button">Add file</button>
+    </header>
+    <ul id="files" tabindex="0" aria-label="Files">
+      <li>README.md</li>
+      <li>package.json</li>
+      <li>tsconfig.json</li>
+    </ul>
+    <ul id="menu" role="menu" aria-label="File actions" hidden>
+      <li role="menuitem" tabindex="-1" data-name="untitled.md">New file</li>
+      <li role="menuitem" tabindex="-1" data-name="from-template.md">
+        New file from template
+      </li>
+    </ul>
+    <script>
+      let seq = 0
+      const report = (entry) =>
+        fetch('/report', {
+          method: 'POST',
+          body: JSON.stringify({ seq: (seq += 1), ...entry }),
+          keepalive: true,
+        }).catch(() => {})
+
+      const files = document.getElementById('files')
+      const menu = document.getElementById('menu')
+      const items = [...menu.querySelectorAll('[role="menuitem"]')]
+
+      const open = (x, y) => {
+        menu.style.left = `${x}px`
+        menu.style.top = `${y}px`
+        menu.hidden = false
+        items[0].focus()
+      }
+      const close = () => {
+        menu.hidden = true
+        files.focus()
+      }
+      const add = (name) => {
+        const row = document.createElement('li')
+        row.textContent = name
+        row.className = 'fresh'
+        files.append(row)
+      }
+
+      files.addEventListener('contextmenu', (event) => {
+        event.preventDefault()
+        report({
+          type: 'contextmenu',
+          button: event.button,
+          empty: event.target === files,
+        })
+        open(event.clientX, event.clientY)
+      })
+      files.addEventListener('keydown', (event) => {
+        if (
+          (event.shiftKey && event.key === 'F10') ||
+          event.key === 'ContextMenu'
+        ) {
+          event.preventDefault()
+          const box = files.getBoundingClientRect()
+          open(box.left + 24, box.top + 24)
+        }
+      })
+      menu.addEventListener('keydown', (event) => {
+        const at = items.indexOf(document.activeElement)
+        if (event.key === 'ArrowDown') items[(at + 1) % items.length].focus()
+        else if (event.key === 'ArrowUp') {
+          items[(at - 1 + items.length) % items.length].focus()
+        } else if (event.key === 'Escape') close()
+        else if (event.key === 'Enter' && at >= 0) items[at].click()
+        else return
+        event.preventDefault()
+      })
+      for (const item of items) {
+        item.addEventListener('click', () => {
+          report({ type: 'pick', label: item.textContent.trim() })
+          add(item.dataset.name)
+          close()
+        })
+      }
+      document.addEventListener('pointerdown', (event) => {
+        if (!menu.hidden && !menu.contains(event.target)) menu.hidden = true
+      })
+      document
+        .getElementById('add')
+        .addEventListener('click', () => add('untitled.md'))
+    </script>
+  </body>
+</html>

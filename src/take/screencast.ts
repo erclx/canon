@@ -364,10 +364,18 @@ async function send(mouse: Mouse, input: PointerInput): Promise<void> {
     case 'move':
       return mouse.move(input.x, input.y)
     case 'down':
-      return mouse.down({ clickCount: input.clickCount })
+      return mouse.down(pressOf(input))
     case 'up':
-      return mouse.up({ clickCount: input.clickCount })
+      return mouse.up(pressOf(input))
     case 'wheel':
       return mouse.wheel(0, input.dy)
   }
+}
+
+function pressOf(
+  input: Extract<PointerInput, { readonly type: 'down' | 'up' }>,
+): { clickCount: number; button?: 'right' } {
+  return input.button
+    ? { clickCount: input.clickCount, button: input.button }
+    : { clickCount: input.clickCount }
 }

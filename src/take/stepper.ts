@@ -409,9 +409,9 @@ function liveStage(
 }
 
 /**
- * A pointer input as CDP takes it. `buttons` carries the held button through a
- * drag's moves, or the page reads them as a hover, and `modifiers` carries the
- * held keys as a bit field beside the key events that pressed them.
+ * A pointer input as CDP takes it. `buttons`, 1 left and 2 right, carries the
+ * held button through a drag's moves, or the page reads them as a hover, and
+ * `modifiers` carries the held keys beside the key events that pressed them.
  */
 function mouseEvent(input: PointerInput): Record<string, unknown> {
   const at = { x: input.x, y: input.y }
@@ -425,15 +425,17 @@ function mouseEvent(input: PointerInput): Record<string, unknown> {
         ? { type: 'mouseMoved', ...at, button: 'left', buttons: 1, modifiers }
         : { type: 'mouseMoved', ...at, button: 'none', buttons: 0, modifiers }
     case 'down':
-    case 'up':
+    case 'up': {
+      const right = input.button === 'right'
       return {
         type: input.type === 'down' ? 'mousePressed' : 'mouseReleased',
         ...at,
-        button: 'left',
-        buttons: input.type === 'down' ? 1 : 0,
+        button: right ? 'right' : 'left',
+        buttons: input.type === 'down' ? (right ? 2 : 1) : 0,
         clickCount: input.clickCount,
         modifiers,
       }
+    }
   }
 }
 
