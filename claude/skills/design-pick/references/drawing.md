@@ -61,8 +61,9 @@ Place every frame with `--width <px>`, `--x`, and `--y` on its add, the width be
 A group runs its widths as columns and its sections as rows, so one row reads as one section at every width.
 
 - Put desktop at the group's x, tablet 80px past the desktop's right edge, and phone 80px past the tablet's, so at the fallback widths at the group's x plus 0, 1520, and 2434
-- Stack the sections down in page order, one row per section, each row starting 80px below the tallest frame of the row above
-- Put a shot in its own section's row whatever its width, so a section split into more phone shots than desktop ones stacks the extra shots inside that row and never shifts the rows below
+- Stack the sections down in page order, one row per section, each row starting 80px below the lowest bottom edge in the row above
+- Put a shot in its own section's row whatever its width, so a section split into more phone shots than desktop ones holds the extra shots in that row
+- Stack a row's extra shots at one width 80px apart, so the row ends at the bottom of its last stacked shot
 - Start the next group 400px past the right edge of the group's last column
 
 A page set on `00-current` or `00-next` is one group at x 0.
@@ -80,7 +81,8 @@ A topic page opens with the section as shipped and puts each round of options to
 
 - Put the section's current set as the leftmost group
 - Put each arm of a round in a group of its own to the right of the current set, in arm order
-- Draw each later round below the tallest frame of the round before it, keeping the current group where it is
+- Start each later round 80px below the lowest bottom edge of the round before it, its first arm at the x the first round's first arm took
+- Keep the current group where it is while the rounds stack down beside it
 
 ## Names
 

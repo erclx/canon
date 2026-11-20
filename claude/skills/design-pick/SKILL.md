@@ -39,7 +39,7 @@ A round drafted with nothing real in front of it comes back generic, so gather r
 
 ## Step 2: draft the arms as frames on one page
 
-Every arm of a round sits as one frame on one board page, side by side. The operator judges that page, never a set of separate images compared from memory.
+Every arm of a round sits as one group of frames on one board page, the groups side by side. The operator judges that page, never a set of separate images compared from memory.
 
 1. Start the board the way `references/board.md` states, unless this run already has. Note whether this run started the server, read off `reused`, since Step 6 ends only a server this run started.
 2. Read `frameboard list --root <board> --json` with no `--project`, so it lists every project. Run `frameboard project add <project> --root <board> --json` when it lists no `<project>`.
