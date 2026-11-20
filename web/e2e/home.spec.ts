@@ -71,35 +71,6 @@ test('the toggle flips the theme and a reload keeps it', async ({ page }) => {
   await expect(root).toHaveAttribute('data-theme', after as string, SETTLE)
 })
 
-test('the opening prompt shows a focus ring when it takes focus', async ({
-  page,
-}) => {
-  await page.goto('/')
-
-  await page.locator('#av-ask').focus()
-
-  await expect(page.locator('#top .fld')).toHaveCSS('outline-style', 'solid')
-})
-
-test('a click into the opening prompt draws no ring, and Tab back draws it', async ({
-  page,
-}) => {
-  await page.goto('/')
-  const ask = page.locator('#av-ask')
-  const field = page.locator('#top .fld')
-
-  await ask.click()
-  await expect(ask).toBeFocused()
-  await expect(field).toHaveCSS('outline-style', 'none')
-
-  await page.keyboard.press('Shift+Tab')
-  await expect(ask).not.toBeFocused()
-  await page.keyboard.press('Tab')
-
-  await expect(ask).toBeFocused()
-  await expect(field).toHaveCSS('outline-style', 'solid')
-})
-
 test.describe('the fixed bar', () => {
   test('lands a section jump with its heading below the bar', async ({
     page,
@@ -185,60 +156,6 @@ test.describe('the fixed bar', () => {
     )
     await expect(page.locator('.nbtn')).toBeFocused()
   })
-})
-
-test('a click on the prompt mark focuses the input with no ring', async ({
-  page,
-}) => {
-  await page.goto('/')
-
-  await page.locator('#top .ask-line .p').click()
-
-  await expect(page.locator('#av-ask')).toBeFocused()
-  await expect(page.locator('#top .fld')).toHaveCSS('outline-style', 'none')
-})
-
-test('a press on the prompt dragged off before release leaves Tab its ring', async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto('/')
-  const ask = page.locator('#av-ask')
-  const mark = await page.locator('#top .ask-line .p').boundingBox()
-  expect(mark).not.toBeNull()
-
-  await page.mouse.move(mark!.x + mark!.width / 2, mark!.y + mark!.height / 2)
-  await page.mouse.down()
-  await page.mouse.move(5, 5)
-  await page.mouse.up()
-  await expect(ask).not.toBeFocused()
-  // Focus the control just ahead of the prompt in tab order, so Tab is what lands on it.
-  await page.evaluate(() => {
-    const target = document.getElementById('av-ask')
-    const focusable = [
-      ...document.querySelectorAll<HTMLElement>(
-        'a[href], button, input, [tabindex]:not([tabindex="-1"])',
-      ),
-    ].filter((node) => node.offsetParent !== null || node === target)
-    const index = target ? focusable.indexOf(target) : -1
-    if (index < 1) throw new Error('no control sits ahead of the prompt')
-    focusable[index - 1]?.focus()
-  })
-  await page.keyboard.press('Tab')
-
-  await expect(ask).toBeFocused()
-  await expect(page.locator('#top .fld')).toHaveCSS('outline-style', 'solid')
-})
-
-test('the opening status line fits on one row at 360', async ({ page }) => {
-  await page.setViewportSize({ width: 360, height: 800 })
-  await page.goto('/')
-  const line = page.locator('#av-counts')
-  await expect(line).toHaveText(/\S/)
-
-  const cut = await line.evaluate((node) => node.scrollWidth - node.clientWidth)
-
-  expect(cut).toBeLessThanOrEqual(0)
 })
 
 test('the footer mark takes the reader back to the top', async ({ page }) => {
@@ -659,27 +576,47 @@ test.describe('the looping windows and their pause button', () => {
   }
 })
 
-test.describe('the opening agent view', () => {
-  test('a finished worker puts both reviewers of its change into Working', async ({
+test.describe('the opening relay', () => {
+  test('passes the change card to card, and Pause holds it', async ({
     page,
   }) => {
+    await page.clock.install()
     await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto('/')
-    const working = () =>
-      page.locator('#av-list .r:not(.leave):has(.s.sp) .n').allTextContents()
-    expect(await working()).toContain('worker-canon-take-timer')
+    const cards = page.locator('#top .relay .st')
+    const pause = page.locator('#top .pz-relay')
+    await expect(cards).toHaveCount(5)
+    await expect(cards.nth(0)).toHaveClass(/(^| )act( |$)/, SETTLE)
 
-    await expect
-      .poll(working, { timeout: 15_000 })
-      .not.toContain('worker-canon-take-timer')
+    await page.clock.runFor(1_400)
+    await expect(cards.nth(1)).toHaveClass(/(^| )act( |$)/, SETTLE)
+    await pause.click()
+    await page.clock.runFor(5_000)
 
-    expect(await working()).toEqual(
-      expect.arrayContaining([
-        'reviewer-canon-take-timer',
-        'ui-reviewer-canon-take-timer',
-      ]),
-    )
+    await expect(cards.nth(1)).toHaveClass(/(^| )act( |$)/)
+    await expect(pause).toHaveText('Play')
+    await expect(pause).toHaveAccessibleName('Play the handoff')
+  })
+
+  test('rests with every card unlit and no pause under reduced motion', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    await expect(page.locator('#top .relay .st')).toHaveCount(5)
+
+    await expect(page.locator('#top .relay .st.act')).toHaveCount(0)
+    await expect(page.locator('#top .pz-relay')).toBeHidden()
+  })
+
+  test('stacks the orchestrator above the cards at 390', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 900 })
+    await page.goto('/')
+    const bar = await page.locator('#top .ob').boundingBox()
+    const first = await page.locator('#top .relay .st').first().boundingBox()
+    expect(bar).not.toBeNull()
+    expect(first).not.toBeNull()
+
+    expect(bar!.y + bar!.height).toBeLessThanOrEqual(first!.y)
   })
 })
 

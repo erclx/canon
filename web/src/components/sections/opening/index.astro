@@ -1,99 +1,106 @@
 ---
-import { fold } from '../../../content/copy'
+import { fold, relay } from '../../../content/copy'
 import {
-  changes,
   completed,
-  menuFlow,
   opening,
   pinned,
   roleLines,
 } from '../../../content/sessions'
-import { readSkills } from '../../../lib/skills'
 import DocIcon from './doc.svg'
 import MergeIcon from './merge.svg'
-import PauseButton from '../../pause-button/index.astro'
 import './style.css'
 
 /**
- * The claim, its lede, and Claude Code's agent view on the tray. The view runs
- * changes through their roles, a finished worker starting both reviewers of its
- * change, with a second event on every other tick, and its
- * prompt takes typing, opening the canon skill menu on `/` and shell mode on
- * `!`. The menu reads the catalog at build time.
+ * The claim, its lede, and the relay: the orchestrator over the four role
+ * cards it starts, each handing the change on, and the merge left to the
+ * reader. A loop lights the card holding the change, with a pause beside it,
+ * and reduced motion shows every card at rest. Each session's status line and
+ * the tally under the cards read the agent view's fiction in `sessions.ts`.
  */
-const data = {
-  changes,
-  lines: roleLines,
-  pinned,
-  completed,
-  opening,
-  flow: menuFlow,
-  skills: readSkills(),
-  noMatch: fold.view.noMatch,
-  shellHint: fold.view.shellHint,
-}
 const [before, middle, last] = fold.parts
+const session = (seat: string) => `${seat}-canon-${relay.slug}`.split('-')
+const line = (seat: keyof typeof roleLines) =>
+  seat === 'worker' ? (roleLines.worker.wk.at(-1) ?? '') : roleLines[seat].dn
+const tally = [
+  { count: opening.awaiting.length, label: relay.counts.awaiting, kind: 'wt' },
+  { count: opening.working.length, label: relay.counts.working, kind: 'ac' },
+  { count: completed, label: relay.counts.completed, kind: '' },
+]
 ---
 
-<section class="sec" id="top">
-  <div class="hero">
+<section class="part" id="top">
+  <div class="w">
+    <p class="kick">{fold.kick}</p>
     <h1>
       {before}
-      <span class="ico doc" aria-hidden="true"><DocIcon /></span>
+      <span class="ic" aria-hidden="true"><DocIcon /></span>
       {middle}
-      <span class="ico mg" aria-hidden="true"><MergeIcon /></span>
+      <span class="ic m" aria-hidden="true"><MergeIcon /></span>
       {last}
     </h1>
-    <p>{fold.lead}</p>
-  </div>
-  <div class="tray">
-    <PauseButton />
-    <div class="win term">
-      <div class="win-bar">
-        <i></i><i></i><i></i><span>{fold.view.title}</span>
+    <p class="lede">{fold.lead}</p>
+    <div class="orch">
+      <div class="ob ink">
+        <span class="note">{relay.orchestrator.label}</span>
+        <b>{relay.orchestrator.name}</b>
+        <span class="m2">{pinned.name} · {pinned.line}</span>
       </div>
-      <div class="av">
-        <div class="cnts" id="av-counts"></div>
-        <div class="lst" id="av-list"></div>
-        <div class="prompt">
-          <label class="ask-line">
-            <span class="p">❯</span>
-            <span class="fld">
-              <input
-                id="av-ask"
-                type="text"
-                placeholder=" "
-                aria-label={fold.view.askLabel}
-                autocomplete="off"
-                spellcheck="false"
-                maxlength="120"
-                role="combobox"
-                aria-autocomplete="list"
-                aria-controls="av-menu"
-                aria-expanded="false"
-              />
-              <span class="c"></span>
-              <span class="ph">{fold.view.hint}</span>
-              <span class="mz" aria-hidden="true">xxxxxxxxxxxxxxxxxxxx</span>
+      <p class="you">{relay.orchestrator.you}</p>
+    </div>
+    <ol class="relay" aria-label={relay.label}>
+      {
+        relay.steps.map((step) => (
+          <li class="st ink">
+            <span class="note">{step.step}</span>
+            <b class="role">{step.role}</b>
+            <span class="sess">
+              {session(step.seat).map((part, i) => (
+                <>
+                  {i > 0 && '-'}
+                  {i > 0 && <wbr />}
+                  {part}
+                </>
+              ))}
             </span>
-          </label>
-          <div
-            class="menu"
-            id="av-menu"
-            role="listbox"
-            aria-label={fold.view.menuLabel}
-            hidden
-          >
-          </div>
-        </div>
-      </div>
+            <span class="line">{line(step.seat)}</span>
+            <span class="hand">
+              {relay.handsOn} {step.hand}
+            </span>
+          </li>
+        ))
+      }
+      <li class="st ink done">
+        <span class="note">{relay.you.step}</span>
+        <b class="role">{relay.you.role}</b>
+        <span class="sess">{relay.you.session}</span>
+        <span class="line">{relay.you.line}</span>
+        <span class="hand">{relay.you.hand}</span>
+      </li>
+    </ol>
+    <div class="foot">
+      <p class="strip">
+        {
+          tally.map((part) => (
+            <span>
+              <b class={part.kind}>{part.count}</b> {part.label}
+            </span>
+          ))
+        }
+      </p>
+      <button
+        type="button"
+        class="drawn pz-relay"
+        aria-label={relay.pause.pauseLabel}
+        data-pause={relay.pause.pause}
+        data-play={relay.pause.play}
+        data-pause-label={relay.pause.pauseLabel}
+        data-play-label={relay.pause.playLabel}
+        hidden
+      >
+        {relay.pause.pause}
+      </button>
     </div>
   </div>
-  <script
-    type="application/json"
-    id="av-data"
-    set:html={JSON.stringify(data)}
-  />
 </section>
 
 <script src="./client.ts"></script>

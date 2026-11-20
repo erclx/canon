@@ -78,6 +78,8 @@ export const nav = {
 }
 
 export const fold = {
+  // README.md: "Claude Code plugin and CLI"
+  kick: 'Claude Code plugin and CLI',
   /** The claim in three runs, with the record icon set before `plan` and the merge icon before `merge`. */
   // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs agent work from" "plan to merge"
   parts: ['Canon runs agent work from', 'plan to', 'merge'] as const,
@@ -95,6 +97,68 @@ export const fold = {
     noMatch: 'No matching command',
   },
 }
+
+/**
+ * The opening's relay: the orchestrator over the four role cards it starts,
+ * then the merge left to the reader. Each card's session and status line come
+ * from `sessions.ts`, so the relay and the agent view tell one story.
+ */
+export const relay = {
+  // README.md: canon-allow-readme-paraphrase: the orchestrator's bar and the line beside it condense the README's roles sentence. "you talk to the orchestrator that starts them"
+  orchestrator: {
+    label: 'starts each session',
+    name: 'Orchestrator',
+    you: 'you talk to this one session',
+  },
+  // README.md: canon-allow-readme-paraphrase: the list's name and each card's step, role, and handoff, page fiction drawn from the README's roles list. "A planner reads the code and writes one plan you approve" "A worker builds the plan and opens the pull request"
+  label: 'One change handed from session to session',
+  slug: 'landing-page',
+  handsOn: 'hands on →',
+  steps: [
+    {
+      step: '1 · plan',
+      role: 'Planner',
+      seat: 'planner',
+      hand: 'feature-landing-page.md',
+    },
+    {
+      step: '2 · build',
+      role: 'Worker',
+      seat: 'worker',
+      hand: 'the pull request',
+    },
+    {
+      step: '3 · review',
+      role: 'Code reviewer',
+      seat: 'reviewer',
+      hand: '## Review closed',
+    },
+    {
+      step: '4 · drive',
+      role: 'UI reviewer',
+      seat: 'ui-reviewer',
+      hand: '## UI review closed',
+    },
+  ],
+  you: {
+    step: '5 · merge',
+    role: 'You',
+    session: 'the one call that stays yours',
+    line: 'Merge, or send it back',
+    hand: 'landing-page merged',
+  },
+  counts: {
+    awaiting: 'awaiting input',
+    working: 'working',
+    completed: 'completed',
+  },
+  pause: {
+    pause: 'Pause',
+    play: 'Play',
+    pauseLabel: 'Pause the handoff',
+    playLabel: 'Play the handoff',
+  },
+} as const
 
 export const roles = {
   // README.md: "Five roles, each in its own session"
