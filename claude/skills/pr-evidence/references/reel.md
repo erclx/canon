@@ -5,13 +5,14 @@ description: The reel pr-evidence films for an evidence comment with no operator
 
 # Reel
 
-Read by the reel step of `evidence.md`, passing the pull request number, the `url` its `canon pr local` read returned, and the checklist text.
+Read by the reel step of `evidence.md`, passing the pull request number, the `url` or reason its `canon pr local` read returned, the checklist text, and the `--check` record.
 
 This file films a short reel of what the checklist asks a reviewer to try, hosts it on `canon/frames`, and hands back the link or the reason it skipped. The filming rules are `ui-film`'s, in `${CLAUDE_SKILL_DIR}/../ui-film/references/take-craft.md`, and so is the config's `access` value, in `${CLAUDE_SKILL_DIR}/../ui-film/references/config.md`.
 
 ## Contents
 
 - [How the reel runs](#how-the-reel-runs)
+- [With no server to film](#with-no-server-to-film)
 - [Choose the beats](#choose-the-beats)
 - [Film the reel](#film-the-reel)
 - [Check each still](#check-each-still)
@@ -27,6 +28,15 @@ No operator is present, so the run is unattended end to end.
 - Compose nothing, since the reel is the product
 - Write inside `.canon/tmp/pr/reel/<number>/` at the current worktree's root, since a reel is thrown away once posted
 - Ask nothing at any step. Every stop below is a skip with a reason, since the ship chain runs this with nobody to answer.
+
+## With no server to film
+
+A reel the comment already carries goes forward under the older head it names. With no reason beside it, the lift's `reel-unsettled` reads as unexplained, so any local reading other than `ok` films nothing and ends here, a missing one included.
+
+- When the record carries a `reel` whose head the caller found trailing the tip, skip as `no-server: <local reason>`, naming the reason the local read returned
+- When the local step held no record at all, as an older binary answers, skip as `no-server: unread` on a trailing reel
+- When the record carries no reel, skip silently, since nothing trails
+- The lift reads `no-server` as a skip no waiver settles, since the builder clears it by starting the server and pushing again
 
 ## Choose the beats
 
