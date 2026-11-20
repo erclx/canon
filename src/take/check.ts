@@ -2,11 +2,9 @@ import type { CameraFrame, CameraTrack } from '@/take/camera'
 import type { LogEvent, TakeLog } from '@/take/log'
 
 /**
- * The timing rules a finished take is held to, read from its log and camera
- * track alone. Each limit sits a frame or more below the engine's own pacing,
- * since every logged time lands on a 60 fps clock and a 600 ms glide can log as
- * 583 ms. The limits are constants rather than options, so a session cannot
- * tune a take the operator would reject into a pass.
+ * Each limit sits a frame or more under the engine's pacing, since a 600 ms
+ * glide can log as 583 ms on the 60 fps clock. They are constants, so a
+ * session cannot tune a take the operator would reject into a pass.
  */
 
 export const RULES = [

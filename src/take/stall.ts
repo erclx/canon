@@ -22,10 +22,9 @@ export interface Window {
 }
 
 /**
- * The stretches of clip time the page should be moving, being each typing
- * burst and each drag. None on a stepped beat, whose virtual clock cannot
- * stall and whose held frames are on purpose. The time between two events is
- * left out, since the drawn cursor glides there over a page that holds.
+ * Each typing burst and drag, and none on a stepped beat, whose clock cannot
+ * stall. The time between events is left out, since the drawn cursor glides
+ * there over a page that holds.
  */
 export function stallWindows(log: TakeLog): Window[] {
   if (log.route === 'step') return []
