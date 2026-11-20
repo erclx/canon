@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson</title>
+    <script src="course.js"></script>
+    <script src="../nav.js"></script>
+    <style>
+      .fpo {
+        display: grid;
+        place-items: center;
+        margin: 0 0 14px;
+        border: 1px dashed var(--line);
+        border-radius: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .fpo-figure {
+        display: grid;
+        place-items: center;
+        height: 240px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="kit-lesson">
+      <article class="kit-article">
+        <p class="kit-kicker">Lesson 1</p>
+        <h1>Lesson title, stating what the learner will be able to do</h1>
+        <p class="kit-assumes">
+          FPO · Assumes line, naming what the learner already knows
+        </p>
+        <div class="fpo" style="height: 56px">FPO · Opening paragraph</div>
+
+        <h2 id="first">First section</h2>
+        <div class="fpo" style="height: 96px">
+          FPO · Body, two short paragraphs
+        </div>
+        <figure class="kit-figure">
+          <div class="fpo-figure kit-wide">FPO · Figure, wide variant</div>
+          <div class="fpo-figure kit-stacked">
+            FPO · Figure, stacked variant
+          </div>
+        </figure>
+        <p class="kit-caption">
+          FPO · Caption carrying its citation.<a class="kit-cite" href="#refs"
+            >[1, §4.2]</a
+          >
+        </p>
+
+        <h2 id="second">Second section</h2>
+        <div class="fpo" style="height: 96px">
+          FPO · Body, two short paragraphs
+        </div>
+        <table>
+          <tbody>
+            <tr>
+              <th>FPO · Term</th>
+              <th>FPO · What it changes</th>
+            </tr>
+            <tr>
+              <td>FPO · Row</td>
+              <td>FPO · Row</td>
+            </tr>
+            <tr>
+              <td>FPO · Row</td>
+              <td>FPO · Row</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 id="hard-part">The hard part</h2>
+        <div class="kit-note">
+          <strong>FPO · The misconception.</strong> FPO · Then its correction,
+          once per lesson.
+        </div>
+
+        <h2 id="check">Check yourself</h2>
+        <fieldset style="margin: 0 0 14px; padding: 0; border: 0">
+          <legend style="margin: 0 0 12px; font-weight: 600">
+            FPO · Question 1
+          </legend>
+          <label class="kit-option"
+            ><input type="radio" name="q1" />FPO · Option one</label
+          >
+          <label class="kit-option"
+            ><input type="radio" name="q1" checked />FPO · Option two</label
+          >
+          <label class="kit-option"
+            ><input type="radio" name="q1" />FPO · Option six</label
+          >
+        </fieldset>
+        <div class="kit-feedback">
+          <strong>FPO · Feedback.</strong> FPO · Names the right option and why
+          each other one fails.
+        </div>
+        <details class="kit-reveal">
+          <summary>
+            <svg
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M6 3.5 10.5 8 6 12.5" /></svg
+            >What a complete answer covers
+          </summary>
+          <p class="kit-muted" style="margin: 12px 0 0 24px">
+            FPO · The points an answer covers, never the answer.
+          </p>
+        </details>
+
+        <section class="kit-refs" id="refs" aria-label="References">
+          <strong>References</strong>
+          <ol>
+            <li>
+              <span>[1]</span
+              ><span
+                >FPO · Author, A. (Year) <em>Title</em>. Publisher. Available
+                at: address (Accessed: date).</span
+              >
+            </li>
+          </ol>
+        </section>
+      </article>
+    </main>
+  </body>
+</html>
