@@ -10,7 +10,7 @@
   --accent-strong-hover: #1b54b3;
   --on-accent: #ffffff;
   --surface: #ffffff;
-  --text: #111111; /* canon-allow-reference: a hex color, not a pull request */
+  --text: #111111;
   --muted: #6b7280;
   --border: #e5e7eb;
   --line: #d1d5db;
@@ -29,8 +29,8 @@
   --accent: #4e92f6;
   --accent-strong: #6ea8ff;
   --accent-strong-hover: #8ab9ff;
-  --on-accent: #111111; /* canon-allow-reference: a hex color, not a pull request */
-  --surface: #111111; /* canon-allow-reference: a hex color, not a pull request */
+  --on-accent: #111111;
+  --surface: #111111;
   --text: #ededed;
   --muted: #9ca3af;
   --border: #2e2e2e;

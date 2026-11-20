@@ -34,7 +34,7 @@ Holds the plugin's hooks at the default path, which Claude Code merges into ever
 
 ### `claude/skills/`
 
-Owns the plugin skills, one flat kebab-case folder each with a `SKILL.md`. Discovery is by folder presence with no registration, and a skill nested under a category folder is not discovered.
+Owns the plugin skills, one flat kebab-case folder each with a `SKILL.md`. Discovery is by folder presence with no registration, and a skill nested under a category folder is not discovered. A digit-only hex color passes Shipped references only as a CSS value, an attribute, or a lone code span.
 
 - `REQUIREMENT.md` beside `SKILL.md` holds the skill's gap statement. A body change tests against it, and a `## Must` line moves in the same change as the body line implementing it.
 - `references/` holds each artifact's shape reference, cited by a sibling as `${CLAUDE_SKILL_DIR}/../<owner>/references/<name>.md`, and a path resolving only here fails the Skill paths stage

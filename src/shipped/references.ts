@@ -3,15 +3,9 @@ import { join } from 'node:path'
 import { isMarked } from '@/sweep/exempt-marker'
 
 /**
- * The corpora a target reader reaches, which is the `files` field less `src`.
- *
- * `src/secrets/shipped.ts` reads that field directly. This list is narrower on
- * purpose: membership means something serves the file to a reader outside this
- * repository, as a skill, a docs page, a rule, or a seed is served. A `src/` doc
- * comment is read in this checkout, where every number resolves. That is also
- * what keeps the check a prose pattern, since `src/design/tokens.ts` carries
- * hex colors in a hash-and-digits shape no boundary rule separates from a pull
- * request number.
+ * The `files` field less `src`, narrower than `src/secrets/shipped.ts` reads:
+ * a corpus serves its files to a reader outside this repository, while a `src/`
+ * comment is read in this checkout, where every number resolves.
  */
 export const SHIPPED_CORPORA = [
   'claude',
@@ -39,16 +33,51 @@ export function isShippedCorpus(path: string): boolean {
 export const REFERENCE_MARKER = 'canon-allow-reference'
 
 /**
- * A pull request number a target reader resolves against their own repository.
- *
- * The leading boundary rejects a word character before the hash, so a
- * qualified `owner/repo` reference passes with no marker. The trailing boundary
- * rejects a word character after the digits, so a Tailwind arbitrary color
- * such as `bg-[` a hash and hex `]` is not read as a number, while a real
- * citation is always followed by a space, a backtick, or punctuation. Any digit
- * run counts, since a short number resolves wrongly in a target too.
+ * A pull request number, bounded so `owner/repo#1` and a Tailwind `bg-[#hex]`
+ * pass. `isHexColor` spares a digit-only color by its context, never its digits.
  */
 const PULL_REQUEST = /(?<![0-9A-Za-z_])#([0-9]+)(?![0-9A-Za-z_])/g
+
+const STYLESHEET = /\.(?:css|scss|sass|less)$/
+
+const CSS_HEX_DIGITS = new Set([3, 4, 6, 8])
+
+/** A code span drops `#RGBA`, since a current pull request number runs four digits. */
+const CODE_SPAN_HEX_DIGITS = new Set([3, 6, 8])
+
+/**
+ * Blanks a stylesheet's comments, keeping columns and line breaks. Plain CSS
+ * has no `//` comment, where it opens a protocol-relative `url()` instead.
+ */
+function blankComments(text: string, lineComments: boolean): string {
+  const comments = lineComments
+    ? /\/\*[\s\S]*?(?:\*\/|$)|\/\/[^\n]*/g
+    : /\/\*[\s\S]*?(?:\*\/|$)/g
+  return text.replace(comments, (comment) => comment.replace(/[^\n]/g, ' '))
+}
+
+/**
+ * Whether a `PULL_REQUEST` match is a color: alone in a code span, alone in a
+ * quoted attribute, or in a stylesheet's `code`, the line with comments blanked.
+ */
+function isHexColor(
+  line: string,
+  code: string | undefined,
+  match: RegExpExecArray,
+): boolean {
+  const digits = match[1]?.length ?? 0
+  const start = match.index
+  const end = start + match[0].length
+  const before = line.slice(0, start)
+
+  const inCodeSpan = before.endsWith('`') && line[end] === '`'
+  if (inCodeSpan && CODE_SPAN_HEX_DIGITS.has(digits)) return true
+  if (!CSS_HEX_DIGITS.has(digits)) return false
+  if (code?.[start] === '#') return true
+
+  const quote = /=\s*(["'])$/.exec(before)?.[1]
+  return quote !== undefined && line[end] === quote
+}
 
 /**
  * A commit sha, which is the worse half: it resolves to nothing anywhere rather
@@ -216,12 +245,16 @@ export function referencesIn(
   root: string,
 ): ShippedReference[] {
   const lines = text.split('\n')
+  const codeLines = STYLESHEET.test(file)
+    ? blankComments(text, !file.endsWith('.css')).split('\n')
+    : undefined
   const references: ShippedReference[] = []
 
   for (const [index, line] of lines.entries()) {
     if (isMarked(lines, index, REFERENCE_MARKER)) continue
 
     for (const match of line.matchAll(PULL_REQUEST)) {
+      if (isHexColor(line, codeLines?.[index], match)) continue
       references.push({
         file,
         line: index + 1,
