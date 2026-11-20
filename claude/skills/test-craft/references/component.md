@@ -41,5 +41,6 @@ A simulated DOM computes no layout, no scroll position, and no animation frame. 
 - Vitest browser mode runs tests "in the browser natively" through Playwright or WebdriverIO, for React, Vue, Svelte, Angular, Lit, Preact, and Qwik ([Vitest browser mode](https://vitest.dev/guide/browser/))
 - Astro is not on that list. For a static site, test the client module driving the behavior against a fixture DOM in Vitest browser mode.
 - Playwright component testing is stable in plain `@playwright/test` through a mount fixture ([Playwright component testing](https://playwright.dev/docs/test-components)). The experimental `-ct-*` packages were removed after 1.62.
+- Run a contrast, focus ring, or reduced motion check here, through the runner's media emulation such as Playwright's `emulateMedia`, and never stub a computed color in a simulated DOM.
 
 Playwright's own claim is that "if your dev server can render it, Playwright can test it". Either runs in a real browser without navigating the whole site, which keeps the test at the component's cost while observing what only a browser computes.

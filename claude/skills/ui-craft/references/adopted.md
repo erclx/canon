@@ -21,6 +21,8 @@ Each field below names the source its references cite, and a house choice covers
 - **Web architecture.** The W3C [Technical Architecture Group](https://www.w3.org/2001/tag/)'s Identifying Application State finding backs the state held in the address in `states.md`.
 - **Menus.** Apple's [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/) and the Nielsen Norman Group's research on contextual menus back `menus.md`, with the ARIA Authoring Practices Guide for its keys.
 - **Usability research.** The [Nielsen Norman Group](https://www.nngroup.com/articles/) backs most of `states.md`, part of `controls.md`, and the link sections of `copy.md`.
+- **Engine coverage.** [axe-core 4.14.0](https://github.com/dequelabs/axe-core/blob/v4.14.0/doc/rule-descriptions.md) gates text contrast (WCAG 1.4.3) in the one theme and state a page is read in.
+- **Engine gaps.** That engine has no rule for 1.4.11 non-text contrast or for `prefers-reduced-motion`, so a ring, a hover, a second theme, and motion rest on the component test in `a11y.md`.
 - **Capture.** `capture.md` is a house procedure, with its reflow width taken from the WCAG reflow criterion `a11y.md` cites. Its keyboard pass for a change that moves rests on WCAG 2.1.1 Keyboard.
 
 ## Where the rows sit
