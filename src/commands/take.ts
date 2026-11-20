@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
 import type { Command } from 'commander'
 import { INSTALL_BROWSER, isEngineMissing } from '@/browser/engine'
@@ -402,7 +402,9 @@ export function register(program: Command): void {
       [
         '',
         "Reads every beat take.json lists, in its order, from the beat's log.json",
-        'and camera track, and fails a beat breaking any rule below with the rule,',
+        'and camera track, then each folder beside them holding a clip.mp4 that',
+        'take.json does not list, by folder name, since a harness beat films',
+        'outside the verb. It fails a beat breaking any rule below with the rule,',
         'the time, and the measured value. The limits are fixed, each a frame or',
         "more under the engine's own pacing, so a take the engine filmed passes",
         'on a 60 fps clock and a harness log or a trimmed beat is held to the same.',
@@ -428,7 +430,7 @@ export function register(program: Command): void {
         'rebuilt with canon take camera --rate 2, checks the zooms a viewer sees.',
         '',
         'The record is { takes, ok, beats: [{ name, dir, breaches: [{ rule, t,',
-        'measured, limit }] }] }, beats in take.json order and breaches in time',
+        'measured, limit }] }] }, beats in the order above and breaches in time',
         'order, with reason breach and a message when any beat fails. A refusal',
         'carries ok false, reason, message, and beat when one beat refused.',
         '',
@@ -500,7 +502,10 @@ async function runCheck(
     logStep('Beats')
     for (const beat of beats) {
       if (beat.breaches.length === 0) logInfo(`${beat.dir}  pass`)
-      else logWarn(`${beat.dir}  ${beat.breaches.length === 1 ? '1 breach' : `${beat.breaches.length} breaches`}`)
+      else
+        logWarn(
+          `${beat.dir}  ${beat.breaches.length === 1 ? '1 breach' : `${beat.breaches.length} breaches`}`,
+        )
       for (const found of beat.breaches) {
         logWarn(
           `  ${found.rule}  ${(found.t / 1000).toFixed(2)} s  ${found.measured} ms against ${found.limit} ms`,
@@ -562,7 +567,20 @@ function readTakeBeats(
       `${path} lists no beat with a name and a dir, so it is not a take's take.json.`,
     )
   }
-  return beats as { name: string; dir: string }[]
+  const listed = beats as { name: string; dir: string }[]
+  // A harness beat films outside the verb, so take.json never lists it.
+  const known = new Set(listed.map((beat) => beat.dir))
+  const unlisted = readdirSync(takes, { withFileTypes: true })
+    .filter(
+      (entry) =>
+        entry.isDirectory() &&
+        !known.has(entry.name) &&
+        existsSync(join(takes, entry.name, 'clip.mp4')),
+    )
+    .map((entry) => entry.name)
+    .sort()
+    .map((dir) => ({ name: dir, dir }))
+  return [...listed, ...unlisted]
 }
 
 async function checkOne(
