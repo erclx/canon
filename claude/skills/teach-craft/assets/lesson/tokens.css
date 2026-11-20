@@ -6,6 +6,8 @@
   color-scheme: light;
   --accent: #2f7bf0;
   --accent-strong: #1f5fcc;
+  /* Darker in light and lighter in dark, so hover moves away from the surface. Its label clears 7:1 in both. */
+  --accent-strong-hover: #1b54b3;
   --on-accent: #ffffff;
   --surface: #ffffff;
   --text: #111111; /* canon-allow-reference: a hex color, not a pull request */
@@ -26,6 +28,7 @@
   color-scheme: dark;
   --accent: #4e92f6;
   --accent-strong: #6ea8ff;
+  --accent-strong-hover: #8ab9ff;
   --on-accent: #111111; /* canon-allow-reference: a hex color, not a pull request */
   --surface: #111111; /* canon-allow-reference: a hex color, not a pull request */
   --text: #ededed;

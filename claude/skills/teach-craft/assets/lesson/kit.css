@@ -417,7 +417,7 @@ body {
 }
 
 .kit-button.kit-primary:hover {
-  background: color-mix(in srgb, var(--accent-strong) 88%, black);
+  background: var(--accent-strong-hover);
 }
 
 .kit-button svg {
