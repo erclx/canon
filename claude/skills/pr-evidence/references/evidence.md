@@ -51,7 +51,7 @@ Pass `--local` to the evidence step only on an `ok`. The binary answering `ok` i
 
 ## Film the reel
 
-A screenshot cannot show an interaction move, so a pull request whose checklist asks a reviewer to click, fill, or scroll gets one short looping reel of it in the evidence comment. Run this step only on an `ok` from the local step, since the reel films the running server and this skill never starts one.
+A screenshot cannot show an interaction move, so a pull request whose checklist asks a reviewer to click, fill, or scroll gets one short looping reel of it in the evidence comment. This skill never starts a server, so on a local reason other than `ok`, `reel.md` turns a trailing reel into a skip.
 
 Read what the comment already carries first, since a later head reaches this step with the handoff file deleted:
 
@@ -63,7 +63,7 @@ canon pr evidence <number> --check --json
 - Skip filming when the record's `reel.head` is a prefix of the `tip` that `canon pr head <number> --json` reports, since the posted reel already shows this head
 - With no checklist from either source, skip silently, since nothing names an interaction to film
 
-Read `${CLAUDE_SKILL_DIR}/references/reel.md` and run it with the number, the local `url`, and the checklist. It films, checks each beat's closing still, pushes the reel to `canon/frames`, and hands back a `link` or a skip reason.
+Read `${CLAUDE_SKILL_DIR}/references/reel.md` and run it with the number, the local `url` or reason, the checklist, and the check record. It films, checks each beat's closing still, pushes the reel to `canon/frames`, and hands back a `link` or a skip reason.
 
 It reads the filming rules in `ui-film`. Report it rather than proceeding silently when the `ui-film` skill does not resolve, and post the evidence without a reel.
 
