@@ -51,7 +51,7 @@ Owns the `canon tasks` verbs that validate, archive, derive from, and write the 
 
 ### `src/intake/`
 
-Reads and answers the intake folders under `.canon/intake/`, behind `canon intake list`, `canon intake answer`, and `canon intake drive-check`.
+Reads and answers the intake folders under `.canon/intake/`, behind `canon intake list`, `canon intake answer`, and `canon intake drive-check`. The check reads `canon/config/app-drive.toml` by the target fallback `app-drive` states, so a change to that fallback lands in both.
 
 - `items.ts` parses an item's heading and its bolded field bullets, and skips `00-overview.md`, which points at items and carries no answer slot
 - `folder.ts` resolves a slug to a folder and refuses with a named reason, such as `ambiguous-slug` or `answered`, before it writes a selection into an answer slot
