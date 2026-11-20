@@ -1,6 +1,6 @@
 ---
 title: Compose craft
-description: The footage rules a session composing ui-film takes follows where the HyperFrames skills say nothing, being captions over app UI, other shapes, the README loop, pacing, sped-up clips, transitions, reviewing a cut, music, storyboard headings, and the workspace README
+description: The footage rules a session composing ui-film takes follows where the HyperFrames skills say nothing, being other shapes, the README loop, pacing, sped-up clips, transitions, reviewing a cut, music, storyboard headings, and the workspace README, with captions in captions.md
 ---
 
 # Compose craft
@@ -11,7 +11,7 @@ Each rule states the principle. Where a number appears, it is the case measured 
 
 ## Contents
 
-- [Captions over app footage](#captions-over-app-footage)
+- [Captions](#captions)
 - [Other shapes](#other-shapes)
 - [The README loop](#the-readme-loop)
 - [Pacing](#pacing)
@@ -23,14 +23,9 @@ Each rule states the principle. Where a number appears, it is the case measured 
 - [The workspace README](#the-workspace-readme)
 - [Sources](#sources)
 
-## Captions over app footage
+## Captions
 
-HyperFrames' caption guide places a landscape caption 80 to 120 px from the bottom and keeps it off a speaker's face. App footage has no speaker, and its bottom edge is often a toolbar where the beat's click lands.
-
-- Pick one caption position for the whole film, clear of the app's chrome where actions land, and keep every caption there, since a caption that moves between beats makes the viewer hunt for it
-- Back a caption over bright UI with the scrim HyperFrames' caption guide sizes to the text
-- Snapshot each caption's moment, and move a caption only when it covers its own beat's action
-- Write caption text by the interface copy rules in `ui-craft`'s `copy.md`, so a caption ends with no period
+Where each beat's caption sits, the scorer that picks the spot, caption text, and the approval every on-screen line gets before the first cut live in `captions.md`. Read it beside this file.
 
 ## Other shapes
 
@@ -128,12 +123,11 @@ The rules measured on Frameboard's launch film carry its case beside them rather
 
 The rest come from HyperFrames, the verb, or Frameboard's other deliverables.
 
-| Rule                        | Source                                                                                                    |
-| --------------------------- | --------------------------------------------------------------------------------------------------------- |
-| Caption placement and scrim | HyperFrames' `captions.md`, adjusted for footage with chrome along its bottom edge                        |
-| A new project per shape     | The `hyperframes` skill's `types/vertical.md`, which recomposes a vertical film rather than squeezing it  |
-| The 2 MB WebP loop          | Frameboard's README hero, an animated WebP cut from a raw take, which played inline at 1.72 MB            |
-| Reviewing motion            | HyperFrames' `review.md`, widened to every action after midpoint stills passed cuts the operator rejected |
-| Rebuilding a sped-up track  | `canon take camera --help`, whose `--rate` divides every time in the log                                  |
-| Storyboard heading form     | HyperFrames' `storyboard-format.md` and the markdown audit's character bans, with the colon read assumed  |
-| The README's two halves     | Frameboard's workspace, whose README recorded how to re-film and re-render after a session ended          |
+| Rule                       | Source                                                                                                    |
+| -------------------------- | --------------------------------------------------------------------------------------------------------- |
+| A new project per shape    | The `hyperframes` skill's `types/vertical.md`, which recomposes a vertical film rather than squeezing it  |
+| The 2 MB WebP loop         | Frameboard's README hero, an animated WebP cut from a raw take, which played inline at 1.72 MB            |
+| Reviewing motion           | HyperFrames' `review.md`, widened to every action after midpoint stills passed cuts the operator rejected |
+| Rebuilding a sped-up track | `canon take camera --help`, whose `--rate` divides every time in the log                                  |
+| Storyboard heading form    | HyperFrames' `storyboard-format.md` and the markdown audit's character bans, with the colon read assumed  |
+| The README's two halves    | Frameboard's workspace, whose README recorded how to re-film and re-render after a session ended          |
