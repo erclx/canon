@@ -69,7 +69,14 @@ export interface Finding {
 export interface PlacedFinding extends Finding {
   readonly step: string
   readonly viewport: string
+  /** Set only when the run sweeps color schemes, so a run naming none reads as before. */
+  readonly colorScheme?: ColorScheme
 }
+
+/** The schemes a run can emulate through `prefers-color-scheme`. */
+export const COLOR_SCHEMES = ['light', 'dark'] as const
+
+export type ColorScheme = (typeof COLOR_SCHEMES)[number]
 
 interface StepCommon {
   /** What the step did, carried onto every finding it produced. */
@@ -95,6 +102,11 @@ export interface DriverPlan {
     readonly height: number
   }[]
   readonly steps: readonly DriverStep[]
+  /**
+   * Absent when the run names no `colorScheme`, which renders the page's
+   * default theme alone, the way every run did before the field existed.
+   */
+  readonly colorSchemes?: readonly ColorScheme[]
 }
 
 export type PlanRefusal =
@@ -147,6 +159,11 @@ export function readDriverPlan(source: string): PlanRead {
     return refused(viewports.reason, viewports.detail)
   }
 
+  const colorSchemes = readColorSchemes(record.colorScheme)
+  if (typeof colorSchemes === 'string') {
+    return refused('unreadable-plan', colorSchemes)
+  }
+
   const probes = readProbeList(record.probes)
   if (typeof probes === 'string') return refused('unknown-probe', probes)
   if (probes.length === 0) {
@@ -181,8 +198,44 @@ export function readDriverPlan(source: string): PlanRead {
 
   return {
     kind: 'read',
-    plan: { probes, viewports: viewports.viewports, steps },
+    plan: {
+      probes,
+      viewports: viewports.viewports,
+      steps,
+      ...(colorSchemes ? { colorSchemes } : {}),
+    },
   }
+}
+
+/**
+ * Returns the schemes to sweep, undefined for a run naming none, or the
+ * message naming what failed. A repeated scheme is refused rather than
+ * collapsed, since it reads as a run that meant to name the other one.
+ */
+function readColorSchemes(value: unknown): ColorScheme[] | undefined | string {
+  if (value === undefined) return undefined
+  const entries = typeof value === 'string' ? [value] : value
+  if (!Array.isArray(entries) || entries.length === 0) {
+    return `colorScheme is ${JSON.stringify(value)}, and it takes light, dark, or a list of both`
+  }
+
+  const schemes: ColorScheme[] = []
+  for (const entry of entries) {
+    if (!isColorScheme(entry)) {
+      return `colorScheme names ${String(entry)}, which is not ${COLOR_SCHEMES.join(' or ')}`
+    }
+    if (schemes.includes(entry)) {
+      return `colorScheme names ${entry} twice`
+    }
+    schemes.push(entry)
+  }
+  return schemes
+}
+
+function isColorScheme(value: unknown): value is ColorScheme {
+  return (
+    typeof value === 'string' && COLOR_SCHEMES.includes(value as ColorScheme)
+  )
 }
 
 /** Returns the parsed list, or the message naming what failed. */
