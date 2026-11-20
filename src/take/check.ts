@@ -101,7 +101,7 @@ function cursorBreaches(source: readonly LogEvent[]): Breach[] {
       }
     }
     if (event.kind === 'type' && inside(event.at, event.box)) {
-      breaches.push({ rule: 'typed-under', t: event.t, measured: 0, limit: 0 })
+      breaches.push({ rule: 'typed-under', t: Math.round(event.t), measured: 0, limit: 0 })
     }
   })
   return breaches
@@ -195,5 +195,5 @@ function breach(
   t: number,
   measured: number,
 ): Breach {
-  return { rule, t, measured: Math.round(measured), limit: LIMITS[rule] }
+  return { rule, t: Math.round(t), measured: Math.round(measured), limit: LIMITS[rule] }
 }
