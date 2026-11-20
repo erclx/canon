@@ -83,7 +83,9 @@ The controlling session cannot watch this one build, so the messages below are o
 
 ### The pull request announcement
 
-Announce the pull request as the ship chain's pull request step returns, carrying the number, the branch, the head sha, the CI state, the task it closes, and each departure from the plan. That transition is the one moment only this session knows, and the controller's review poll no longer starts on a dispatch.
+Announce the pull request once `git-pr` returns, after its `pr-evidence` step and ahead of the CI watch, carrying the number, the branch, the head sha, the CI state, the task it closes, and each departure from the plan. That transition is the one moment only this session knows, and the controller's poll no longer starts on a dispatch.
+
+Carry one evidence line read from `canon pr evidence <number> --json`, since a message sent ahead of the comment named boxes nobody had posted. It holds the `boxes` count, `drivable`, the reel filmed or skipped, and the `uncaptured` paths. A diff with no rendered surface reads `Evidence: none`, never dropping the line or holding the message.
 
 - Carry the reach in that message, being the paths this branch wrote that another live plan or `In flight` row holds, and who holds each, which `canon tasks plan-reach` reports as `claimed`
 - Report each as a rebase the controller should order, never as a breach, since sharing a path is not a hold
