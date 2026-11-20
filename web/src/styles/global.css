@@ -161,6 +161,7 @@
    */
   .part {
     padding: 112px 64px;
+    overflow-x: clip;
   }
 
   main > section + section {
