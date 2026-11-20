@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.105.0](https://github.com/erclx/canon/compare/v5.104.0...v5.105.0) (2026-11-20)
+
+
+### Features
+
+* **driver:** sweep both color schemes and name what axe cannot gate ([#3279](https://github.com/erclx/canon/issues/3279)) ([d613f22](https://github.com/erclx/canon/commit/d613f223b156212fa5c08856f4401f2c7b305d48))
+* **lift:** name a trailing reel and check the server before a fix push ([#3275](https://github.com/erclx/canon/issues/3275)) ([df811fe](https://github.com/erclx/canon/commit/df811fe71771673bb837872a7edb981f04b342ed))
+* **skills:** add ui-film rules for captions, loops, licenses, and cuts ([#3277](https://github.com/erclx/canon/issues/3277)) ([54b72a1](https://github.com/erclx/canon/commit/54b72a1fe273b6c769f664126b9d2790d5fa5298))
+* **take:** add a contextmenu step and refuse an ambiguous target ([#3273](https://github.com/erclx/canon/issues/3273)) ([d924488](https://github.com/erclx/canon/commit/d92448845458a0fa26ccd03a13bb2d7c99cd1c36))
+* **ui-film:** teach harness traps, a footage page, and a refilm order ([#3278](https://github.com/erclx/canon/issues/3278)) ([f7c909f](https://github.com/erclx/canon/commit/f7c909ffaaf546dfa06a504583be7579304f0e5b))
+
 ## [5.104.0](https://github.com/erclx/canon/compare/v5.103.0...v5.104.0) (2026-11-20)
 
 
