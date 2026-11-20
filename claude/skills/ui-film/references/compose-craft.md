@@ -69,6 +69,14 @@ Every result and every line of text holds still long enough to land before the c
 
 Read each scene's window off the take's `log.json`, from its first event less a lead to its last result plus that result's hold, then set the rate from the scene's length. Reusing an old cut's offsets against a new take lands the camera on moments that moved.
 
+### Length and reshoots
+
+A length target pushes the beats a viewer has to follow past the rate they read at, and a reshoot that retunes every beat undoes the ones the operator already accepted.
+
+- The length is an outcome of the cut, so never speed a hand action or trim a hold to meet a target, and tell the operator the length the cut landed at
+- On a reshoot, carry over the rate, window, and camera of every beat the operator approved before, and tune only the new beats
+- Reread an approved beat's window from its new `log.json` when its take was refilmed, keeping its rate and camera
+
 ## Sped-up clips
 
 A clip the edit plays faster runs its zoom faster too, so a push that settled in real time pumps several times a beat.
@@ -121,13 +129,14 @@ The rules measured on Frameboard's launch film carry its case beside them rather
 | Settling wide             | Frameboard's launch film, whose dissolves ghosted two boards at different scales until each settled |
 | Where music faults hide   | Frameboard's launch film, which opened silent and ended over near silence                           |
 
-The rest come from HyperFrames, the verb, or Frameboard's other deliverables.
+The rest come from HyperFrames, the verb, Frameboard's other deliverables, or later films cut from app takes.
 
 | Rule                       | Source                                                                                                    |
 | -------------------------- | --------------------------------------------------------------------------------------------------------- |
 | A new project per shape    | The `hyperframes` skill's `types/vertical.md`, which recomposes a vertical film rather than squeezing it  |
 | The 2 MB WebP loop         | Frameboard's README hero, an animated WebP cut from a raw take, which played inline at 1.72 MB            |
 | Reviewing motion           | HyperFrames' `review.md`, widened to every action after midpoint stills passed cuts the operator rejected |
+| Length and reshoots        | A reshoot whose length target pushed hand actions to 1.5x to 1.8x and retuned beats already approved      |
 | Rebuilding a sped-up track | `canon take camera --help`, whose `--rate` divides every time in the log                                  |
 | Storyboard heading form    | HyperFrames' `storyboard-format.md` and the markdown audit's character bans, with the colon read assumed  |
 | The README's two halves    | Frameboard's workspace, whose README recorded how to re-film and re-render after a session ended          |
