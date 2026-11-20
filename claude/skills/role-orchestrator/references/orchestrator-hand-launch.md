@@ -32,6 +32,16 @@ Branch on the record's `ok` and `reason` rather than the exit. Treat a `dropped`
 
 The `Controller:` line the verb writes replaces the background template's message clauses, which `role-worker` and `session-relay` already own. `auto-ship` Step 0 loads `role-worker`, so the fence needs nothing more.
 
+### A task with no plan
+
+Queue a plan-and-build launch from `orchestrator-plan-build-launch.md` as a worker row carrying `--plan-first`, so the queue's claim check and launch record cover it too.
+
+- The row writes `/canon:auto-ship --plan-first .canon/tasks/<stem>.md` for a task linking no plan
+- The verb refuses `bad-input` for a task already linking one, which takes the plain worker form
+- Add `--any-size` only when `## The arguments after the task` in that runbook passes it
+- The row carries no branch until its session links a plan, so the record names it by label under `claimUnread`
+- The watch matches the row only once the plan lands, so record its launch the same way from then on
+
 ### The shape the verb writes
 
 An H1, then the optional merge-order line, then an H2 per task as `## <label>: <title>` and an H3 per role. Each H3 carries a `Model:` line, an `Effort:` line, and a `text` fence with the command at position zero, per `### Position zero` in `orchestrator-launch.md`. An empty queue reads `No prompts waiting.` and carries no lead line.
