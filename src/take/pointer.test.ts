@@ -9,7 +9,8 @@ import { type Frame, RING_RADIUS, drawPointer } from '@/take/pointer'
 
 const GREY = 128
 
-function blank(width = 120, height = 120): Frame {
+/** A reel-wide frame by default, the width the arrow is sized against. */
+function blank(width = 960, height = 120): Frame {
   const data = new Uint8Array(width * height * 4)
   for (let i = 0; i < data.length; i += 4) {
     data[i] = GREY
@@ -47,6 +48,31 @@ describe('drawPointer', () => {
       ...[38, 39, 40].map((x) => pixel(frame, x, 50)[0] ?? 0),
     )
     expect(brightest).toBeGreaterThan(200)
+  })
+
+  it('draws the arrow twice as large on a frame twice as wide', () => {
+    const reel = blank(960)
+    const film = blank(1920)
+    drawPointer(reel, { x: 40, y: 40 }, null)
+    drawPointer(film, { x: 40, y: 40 }, null)
+
+    // Low on the shaft at 1920, which a 960-wide arrow never reaches.
+    const [filmRed] = pixel(film, 43, 72)
+    const [reelRed] = pixel(reel, 43, 72)
+    expect(filmRed).toBeLessThan(40)
+    expect(reelRed).toBeGreaterThan(100)
+  })
+
+  it('casts a soft shadow just below the arrow', () => {
+    const frame = blank(1920)
+    drawPointer(frame, { x: 40, y: 40 }, null)
+
+    // Under the arrow's lowest edge, past its white outline.
+    const [r, g, b] = pixel(frame, 57, 88)
+    expect(r).toBeLessThan(GREY - 5)
+    expect(r).toBeGreaterThan(40)
+    expect(g).toBe(r)
+    expect(b).toBe(r)
   })
 
   it('leaves the frame untouched away from the pointer', () => {
