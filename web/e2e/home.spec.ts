@@ -11,13 +11,14 @@ const SETTLE = { timeout: 5_000 }
 const SECTIONS = [
   'top',
   'roles',
+  'worktrees',
   'records',
   'craft',
   'guardrails',
-  'worktrees',
+  'evidence',
   'film',
-  'board',
   'drive',
+  'board',
   'health',
   'setup',
   'try',
@@ -780,6 +781,67 @@ test.describe('the health ranking', () => {
   })
 })
 
+test.describe('the evidence section', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+
+  test('steps the reel through its stills and ticks each line', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.clock.install()
+    await page.goto('/')
+    const lines = page.locator('#evidence .ck li')
+    const replay = page.locator('#evidence .replay')
+    await expect(lines).toHaveCount(5)
+
+    await page.locator('#evidence .film').scrollIntoViewIfNeeded()
+    await expect(page.locator('#evidence')).toHaveClass(/(^| )in( |$)/, SETTLE)
+    await expect(page.locator('#evidence .strip li.now')).not.toHaveCount(0)
+    await expect(lines.nth(0)).toHaveClass(/(^| )done( |$)/)
+    await expect(lines.nth(4)).not.toHaveClass(/(^| )done( |$)/)
+    await page.clock.runFor(8_000)
+
+    await expect(page.locator('#evidence .ck li.done')).toHaveCount(5)
+    await expect(page.locator('#evidence .strip li.now')).toHaveCount(0)
+    await expect(replay).toBeVisible()
+  })
+
+  test('shows every line ticked and its stills under reduced motion', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    await expect(page.locator('#evidence .ck li')).toHaveCount(5)
+
+    await expect(page.locator('#evidence .ck li.done')).toHaveCount(5)
+    await expect(page.locator('#evidence .replay')).toBeHidden()
+    const stills = page.locator('#evidence .strip:visible img')
+    await expect(stills).toHaveCount(5)
+    await stills.first().scrollIntoViewIfNeeded()
+    await expect
+      .poll(
+        () =>
+          stills
+            .first()
+            .evaluate((node: HTMLImageElement) => node.naturalWidth),
+        SETTLE,
+      )
+      .toBeGreaterThan(0)
+  })
+
+  test('shows the stills filmed in the theme the page is in', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.goto('/')
+    const still = page.locator('#evidence .strip:visible img').first()
+    await expect(still).toHaveAttribute('src', '/film-beat-1.webp')
+
+    await page.locator('.theme-toggle').click()
+
+    await expect(still).toHaveAttribute('src', '/film-beat-1-light.webp')
+  })
+})
+
 test.describe('new sections', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
@@ -840,9 +902,9 @@ test.describe('new sections', () => {
         )
         .toBeGreaterThan(0)
 
-      await page.clock.runFor(7_700)
+      await page.clock.runFor(17_500)
 
-      await expect(page.locator('#film .checks li.done')).toHaveCount(3)
+      await expect(page.locator('#film .checks li.done')).toHaveCount(5)
     })
   })
 
@@ -852,7 +914,7 @@ test.describe('new sections', () => {
     await page.goto('/')
 
     await expect(page.locator('#drive .dr')).toHaveClass(/\bon\b/)
-    await expect(page.locator('#film .checks li.done')).toHaveCount(3)
+    await expect(page.locator('#film .checks li.done')).toHaveCount(5)
     await expect(page.locator('#film .pz')).toBeHidden()
     await expect(page.locator('#drive .pz')).toBeHidden()
   })

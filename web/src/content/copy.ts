@@ -268,14 +268,48 @@ export const film = {
   view: {
     title: 'Evidence',
     source: 'pull request, the records section',
-    alt: 'A reel of the records section: the Task sheet is picked, an outcome is ticked, and the rendered view keeps the tick',
+    alt: 'A reel of the records section: the Task, the Board, the pull request, the code review, and the handoff each come to the front of the fan',
     who: 'UI reviewer',
     checks: [
-      'The Task sheet comes up on its pick',
-      'A ticked outcome reads [x] in the source',
-      'The rendered view keeps the tick',
+      'The Task chip brings its sheet to the front',
+      'The board sheet heads its running rows In flight',
+      'The pull request comes up as a page in the browser',
+      'The code review keeps its findings on the page',
+      'The handoff fans the records either side of it',
     ],
   },
+}
+
+/**
+ * The film and the design board side by side: the reel's stills with the
+ * checklist they prove, beside the board the page's own footer was picked on.
+ */
+export const evidence = {
+  // README.md: "See the change before it merges"
+  head: 'See the change before it merges',
+  // README.md: "Watch the hover and focus ring a diff cannot show. Each pull request carries a film of the work, and you pick a design on a board by looking."
+  lede: 'Watch the hover and focus ring a diff cannot show. Each pull request carries a film of the work, and you pick a design on a board by looking.',
+  // README.md: canon-allow-readme-paraphrase: the labels around the reel's stills and the drive's board, which no README sentence carries.
+  reel: (seconds: number) => `the reel on pull request #412 · ${seconds} s`,
+  frame: (at: string) => `The reel at ${at}`,
+  replay: 'Replay the reel',
+  board: 'the board · footer-layout',
+  question: 'Which footer should the page take?',
+  arms: [
+    { name: 'arm-0', alt: 'Footer arm 0: the mark and a line of links' },
+    {
+      name: 'arm-1 · picked',
+      alt: 'Footer arm 1: the mark and tagline beside three link columns',
+    },
+    {
+      name: 'arm-2',
+      alt: 'Footer arm 2: a large wordmark over the link columns',
+    },
+  ],
+  picked: 1,
+  snapshot: "snapshots from the drive that picked this page's footer",
+  checks: film.view.checks,
+  who: film.view.who,
 }
 
 export const board = {

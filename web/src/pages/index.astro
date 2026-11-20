@@ -2,6 +2,7 @@
 import Board from '../components/sections/board/index.astro'
 import Craft from '../components/sections/craft/index.astro'
 import Drive from '../components/sections/drive/index.astro'
+import Evidence from '../components/sections/evidence/index.astro'
 import Film from '../components/sections/film/index.astro'
 import Guardrails from '../components/sections/guardrails/index.astro'
 import Health from '../components/sections/health/index.astro'
@@ -18,13 +19,14 @@ import Base from '../layouts/base.astro'
 <Base title={site.title} description={site.description}>
   <Opening />
   <Roles class="split-right" />
+  <Worktrees />
   <Records />
   <Craft />
   <Guardrails />
-  <Worktrees />
+  <Evidence />
   <Film class="banded split-right" />
-  <Board />
   <Drive class="banded split-right" />
+  <Board />
   <Health />
   <Setup class="banded" />
   <Try />

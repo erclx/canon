@@ -77,6 +77,10 @@ Write a rule down and an agent can still ignore it. These four parts fail the ru
 
 Run several changes at once without one agent overwriting another. Each worker builds in its own worktree on its own branch, and every session reads and writes the one `.canon/` record in the main checkout, so no worktree keeps a copy of its own.
 
+## See the change before it merges
+
+Watch the hover and focus ring a diff cannot show. Each pull request carries a film of the work, and you pick a design on a board by looking.
+
 ## A pull request arrives with a film of the change
 
 A diff cannot show a hover or a focus ring. Canon films the change in the running app and posts the reel beside the checklist a reviewer ticks.
