@@ -40,7 +40,7 @@ Review each pull request the launch named and no other. Report one met while rea
 A batch launch names several small pull requests, and each still takes a pass of its own. The batch shares this session and nothing the poll reads.
 
 - Run the pass once per number, in the launch's order, and post each verdict on its own pull request. A summary across the set is a second verdict the poll cannot route.
-- Run `canon pr lift <number>` on each close alone, so a closed pull request lifts while another in the batch stays open
+- Run `canon pr lift <number> --json` in the background on each close alone, as `### The close` states, so a closed pull request lifts while another in the batch stays open
 - Re-run the pass only for the number a re-review request names, since every other pull request in the batch keeps its own head
 - Skip a pull request whose evidence record carries no checklist as a UI reviewer, and drive the rest
 - Report a batched pull request found touching a contract another track consumes to the controller and leave it unreviewed, since the diff overturned the reading that admitted it
@@ -80,8 +80,9 @@ Send it to the worker holding the branch as `review-pr` Step 5 returns an open `
 
 ### The close
 
-Run `canon pr lift <number> --json` after posting `## Review closed` or `## UI review closed`. Message the controller with the heading, the count line, and the reason the verb returned.
+Run `canon pr lift <number> --json` in the background after posting `## Review closed` or `## UI review closed`. Message the controller with the heading, the count line, and the reason the verb returned.
 
+- Run the lift with `run_in_background` and send the message on its wake, since the verb waits up to 1200 seconds on a pending CI run and a foreground call outlasts the tool's limit
 - Skip that message when the reason names the other review as open or missing, since the other reviewer's close runs the verb again
 - On a ready pull request the verb waits on CI too. A standing or CI reason beside `isReady: true` holds the merge line rather than the ready mark, so relay it that way.
 
@@ -90,7 +91,7 @@ Run `canon pr lift <number> --json` after posting `## Review closed` or `## UI r
 A re-review request on a rebased head earns no pass when `canon pr review-state <number> --json` reads `carriedAcross: "rebase"` on this session's family. The rebase left the branch diff equal, so the close still holds at the new head.
 
 - Reply to the requester that the close carried, naming `carriedFrom` and the new head
-- Run `canon pr lift <number> --json` on a draft, since CI and the evidence still settle at the new head, and message the controller the reason as on a close
+- Run `canon pr lift <number> --json` with `run_in_background` on a draft, since CI and the evidence still settle at the new head, and message the controller the reason on its wake as on a close
 
 ### A re-drive owed
 
