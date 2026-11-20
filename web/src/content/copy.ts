@@ -193,38 +193,49 @@ export const craft = {
 export const guardrails = {
   // README.md: "Checks that catch a skipped step"
   head: 'Checks that catch a skipped step',
-  // README.md: "An instruction can be ignored. These four parts fail the run when a step is skipped."
-  lede: 'An instruction can be ignored. These four parts fail the run when a step is skipped.',
-  /** One part per README bullet in the order they fire, each with when it fires and the real name it runs under. */
-  // README.md: canon-allow-readme-paraphrase: each part restates its README bullet as one sentence beside the file or command it runs as.
+  // README.md: "Write a rule down and an agent can still ignore it. These four parts fail the run when that happens."
+  lede: 'Write a rule down and an agent can still ignore it. These four parts fail the run when that happens.',
+  /**
+   * One stamp per README bullet in the order they fire: when it fires, the
+   * real name it runs under, its verdict, and the action it caught.
+   */
+  // README.md: canon-allow-readme-paraphrase: each stamp restates its README bullet as one sentence beside page fiction drawn from the plan guard's real refusal and the seeded merge deny.
   parts: [
     {
       name: 'Rules by path',
       when: 'When a file opens',
-      play: 'Play rules by path in the window',
-      line: 'Opening a matching file loads the rule naming its skill.',
       real: '.claude/rules/canon/ui/craft.md',
+      verdict: 'Loaded',
+      act: 'Read src/components/SaveButton.tsx',
+      res: 'Loaded rule .claude/rules/canon/ui/craft.md',
+      line: 'Opening a matching file loads the rule naming its skill.',
     },
     {
       name: 'Hooks',
       when: 'As each action runs',
-      play: 'Play hooks in the window',
-      line: 'A hook checks each action as it runs, and refuses some.',
       real: 'plan-guard.sh, standards-audit.sh',
+      verdict: 'Blocked',
+      act: 'Write .canon/plans/feature-export-json.md',
+      res: 'PreToolUse:Write hook blocked the write',
+      line: 'A hook checks each action as it runs, and refuses some.',
     },
     {
       name: 'The gate',
       when: 'Before a pull request',
-      play: 'Play the gate in the window',
-      line: 'Every check runs before a pull request opens.',
       real: 'canon gate run',
+      verdict: 'Failed',
+      act: 'Bash canon gate run',
+      res: 'Tests failed: src/cart/total.test.ts, 1 of 212',
+      line: 'Every check runs before a pull request opens.',
     },
     {
       name: 'Deny rules',
       when: 'At the merge',
-      play: 'Play deny rules in the window',
-      line: 'A permission rule, not a hook, stops the agent merging.',
       real: 'Bash(gh pr merge:*)',
+      verdict: 'Denied',
+      act: 'Bash gh pr merge 412',
+      res: 'Denied by a permission rule: Bash(gh pr merge:*)',
+      line: 'A permission rule, not a hook, stops the agent merging.',
     },
   ],
 }
@@ -516,65 +527,6 @@ export const roleScenes = [
     say: [
       '6 of 7 boxes pass. One fails: the focus ring is clipped on mobile.',
       'Posted under UI review.',
-    ],
-  },
-]
-
-/**
- * One scene per part. A line is its kind, a lead, and its text, where `block`
- * is a refusal and `note` a line the harness reports back into the turn.
- */
-// README.md: canon-allow-readme-paraphrase: page fiction drawn from the plan guard's real refusal and the seeded merge deny, which the README describes but never quotes.
-export const guardrailScenes: {
-  ask: string
-  lines: [string, string, string][]
-}[] = [
-  {
-    ask: 'add a disabled state to the save button',
-    lines: [
-      ['tool', 'Read', 'src/components/SaveButton.tsx'],
-      ['res', '', 'Read 48 lines'],
-      ['note', '', 'Loaded rule .claude/rules/canon/ui/craft.md'],
-      ['tool', 'Skill', 'canon:ui-craft'],
-      ['res', '', 'Loaded'],
-    ],
-  },
-  {
-    ask: 'plan the --json flag for the export command',
-    lines: [
-      ['tool', 'Write', '.canon/plans/feature-export-json.md'],
-      [
-        'block',
-        'PreToolUse:Write hook blocked the write',
-        'This session has not invoked canon:plan-feature, so .canon/plans/feature-export-json.md would be written outside the skill that owns its shape. Invoke the canon:plan-feature skill for this plan, then resend the write.',
-      ],
-      ['tool', 'Skill', 'canon:plan-feature'],
-      ['res', '', 'Loaded'],
-      ['tool', 'Write', '.canon/plans/feature-export-json.md'],
-      ['res', '', 'Wrote 42 lines'],
-    ],
-  },
-  {
-    ask: 'open the pull request',
-    lines: [
-      ['tool', 'Bash', 'canon gate run'],
-      ['block', 'Tests failed', 'src/cart/total.test.ts, 1 of 212'],
-      ['tool', 'Update', 'src/cart/total.ts'],
-      ['res', '', '1 addition, 1 removal'],
-      ['tool', 'Bash', 'canon gate run'],
-      ['res', '', 'Every stage passed'],
-    ],
-  },
-  {
-    ask: 'merge it',
-    lines: [
-      ['tool', 'Bash', 'gh pr merge 412'],
-      ['block', 'Denied by a permission rule', 'Bash(gh pr merge:*)'],
-      [
-        'say',
-        '',
-        'The merge is yours. #412 is ready, and its review is closed.',
-      ],
     ],
   },
 ]

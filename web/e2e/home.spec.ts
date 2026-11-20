@@ -294,75 +294,6 @@ test.describe('section shapes', () => {
   }
 })
 
-test.describe('the band', () => {
-  for (const theme of ['light', 'dark'] as const) {
-    test(`a banded tray takes the ground and its band the tray grey in ${theme}`, async ({
-      page,
-    }) => {
-      await page.emulateMedia({ colorScheme: theme })
-      await page.goto('/')
-      await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
-
-      const colors = await page.evaluate(() => {
-        const probe = document.createElement('div')
-        document.body.append(probe)
-        const resolve = (role: string) => {
-          probe.style.backgroundColor = `var(${role})`
-          return getComputedStyle(probe).backgroundColor
-        }
-        const ground = resolve('--ground')
-        const grey = resolve('--tray')
-        probe.remove()
-        const banded = [
-          ...document.querySelectorAll<HTMLElement>('main > section.banded'),
-        ]
-        return {
-          ground,
-          grey,
-          bands: banded.map((node) => getComputedStyle(node).backgroundColor),
-          trays: banded.map((node) => {
-            const tray = node.querySelector('.tray')
-            return tray ? getComputedStyle(tray).backgroundColor : 'missing'
-          }),
-        }
-      })
-
-      expect(colors.ground).not.toBe(colors.grey)
-      expect(colors.bands).toEqual(Array(5).fill(colors.grey))
-      expect(colors.trays).toEqual(Array(5).fill(colors.ground))
-    })
-  }
-
-  test('the band fills the viewport edge to edge at 1440', async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto('/')
-    await page.locator('.site-nav').evaluate((node) => {
-      node.style.visibility = 'hidden'
-    })
-    const guardrails = page.locator('#guardrails')
-    await guardrails.evaluate((node) =>
-      window.scrollBy(0, node.getBoundingClientRect().top - 200),
-    )
-    const box = await guardrails.boundingBox()
-    expect(box).not.toBeNull()
-    // A row inside the section's top padding, above the heading.
-    const y = box!.y + 20
-    const pixel = (x: number) =>
-      page.screenshot({ clip: { x, y, width: 1, height: 1 } })
-
-    const left = await pixel(2)
-    const inside = await pixel(box!.x + 10)
-    const right = await pixel(1437)
-    const ground = await page.screenshot({
-      clip: { x: 2, y: box!.y - 20, width: 1, height: 1 },
-    })
-
-    expect(left.equals(inside)).toBe(true)
-    expect(right.equals(inside)).toBe(true)
-    expect(inside.equals(ground)).toBe(false)
-  })
-})
-
 test.describe('the craft section', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
@@ -408,21 +339,6 @@ test.describe('the looping windows and their pause button', () => {
   /** A loop that wraps has to outlast one scene and the rest after it. */
   const WRAP = { timeout: 20_000 }
 
-  test('guardrails plays on past its last scene', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await page.goto('/')
-    const parts = page.locator('#guardrails .four > div')
-    await expect(parts).toHaveCount(4)
-    // The scroll-in tour lights the first part, so the click lands after it.
-    await page.locator('#guardrails .tray').scrollIntoViewIfNeeded()
-    await expect(parts.first()).toHaveClass(/(^| )lit( |$)/, SETTLE)
-
-    await parts.last().locator('.go').click()
-
-    await expect(parts.last()).toHaveClass(/(^| )lit( |$)/, SETTLE)
-    await expect(parts.first()).toHaveClass(/(^| )lit( |$)/, WRAP)
-  })
-
   test('setup plays on past its last stage', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'no-preference' })
     await page.goto('/')
@@ -435,27 +351,6 @@ test.describe('the looping windows and their pause button', () => {
 
     await expect(stages.last()).toHaveClass(/(^| )on( |$)/, SETTLE)
     await expect(stages.first()).toHaveClass(/(^| )on( |$)/, WRAP)
-  })
-
-  test('a pressed pause button holds the window it sits on', async ({
-    page,
-  }) => {
-    await page.clock.install()
-    await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await page.goto('/')
-    const pause = page.locator('#guardrails .pz')
-    const log = page.locator('#guardrails .log')
-    await page.locator('#guardrails .four .go').nth(1).click()
-    await page.clock.runFor(600)
-    await expect(log.locator('.tool')).toHaveCount(1, SETTLE)
-
-    await pause.click()
-    const held = await log.textContent()
-    // Unpaused, the scene appends its next line within 400 ms and moves on to the next scene inside 10 s.
-    await page.clock.runFor(10_000)
-
-    await expect(pause).toHaveAttribute('data-paused', 'true')
-    expect(await log.textContent()).toBe(held)
   })
 
   test('the pause button toggles from the keyboard', async ({ page }) => {
@@ -593,31 +488,50 @@ test.describe('the worktree graph', () => {
   })
 })
 
-test.describe('the Guardrails section', () => {
-  test('sets the four checks on one line above the window at 1440', async ({
-    page,
-  }) => {
+test.describe('the guardrail stamps', () => {
+  test('land in firing order once the grid is in view', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto('/')
-    const parts = page.locator('#guardrails .four > div')
-    await expect(parts).toHaveCount(4)
-    const tops = await parts.evaluateAll((nodes) =>
-      nodes.map((node) => Math.round(node.getBoundingClientRect().top)),
-    )
-    const four = await page.locator('#guardrails .four').boundingBox()
-    const win = await page.locator('#guardrails .win').boundingBox()
+    const stamps = page.locator('#guardrails .stamp')
+    await expect(stamps).toHaveCount(4)
+    await expect(page.locator('#guardrails')).toHaveClass(/(^| )armed( |$)/)
+    await expect(stamps.first()).toHaveCSS('opacity', '0')
 
-    expect(new Set(tops).size).toBe(1)
-    expect(four && win && four.y + four.height).toBeLessThanOrEqual(win?.y ?? 0)
+    await page.locator('#guardrails .grid').scrollIntoViewIfNeeded()
+    await expect(page.locator('#guardrails')).toHaveClass(
+      /(^| )in( |$)/,
+      SETTLE,
+    )
+    const delays = await stamps.evaluateAll((nodes) =>
+      nodes.map((node) => parseFloat(getComputedStyle(node).transitionDelay)),
+    )
+
+    expect(delays).toEqual([...delays].sort((a, b) => a - b))
+    expect(new Set(delays).size).toBe(4)
+    await expect(stamps.last()).toHaveCSS('opacity', '1', SETTLE)
   })
 
-  test('keeps the window over the checks at 390', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 })
+  test('show all four landed under reduced motion', async ({ page }) => {
     await page.goto('/')
-    const four = await page.locator('#guardrails .four').boundingBox()
-    const win = await page.locator('#guardrails .win').boundingBox()
+    const stamps = page.locator('#guardrails .stamp')
+    await expect(stamps).toHaveCount(4)
 
-    expect(win && four && win.y + win.height).toBeLessThanOrEqual(four?.y ?? 0)
+    await expect(page.locator('#guardrails')).not.toHaveClass(/(^| )armed( |$)/)
+    await expect(stamps.last()).toHaveCSS('opacity', '1')
+  })
+
+  test('stack one stamp a row at 390', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 900 })
+    await page.goto('/')
+    const boxes = await page
+      .locator('#guardrails .stamp')
+      .evaluateAll((nodes) =>
+        nodes.map((node) => node.getBoundingClientRect().left),
+      )
+
+    expect(boxes).toHaveLength(4)
+    expect(new Set(boxes).size).toBe(1)
   })
 })
 

@@ -66,7 +66,7 @@ Each rule has its own source row in a ledger, and the skill audit fails when a s
 
 ## Checks that catch a skipped step
 
-An instruction can be ignored. These four parts fail the run when a step is skipped.
+Write a rule down and an agent can still ignore it. These four parts fail the run when that happens.
 
 - Rules by path load when the agent opens a matching file, and each names the skill that owns that kind of file
 - Hooks read each action before or after it runs, refusing some and reporting others back into the same turn
