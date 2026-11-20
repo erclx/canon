@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.107.0](https://github.com/erclx/canon/compare/v5.106.0...v5.107.0) (2026-11-20)
+
+
+### Features
+
+* **design:** draw each design as a group of width columns, side by side ([#3287](https://github.com/erclx/canon/issues/3287)) ([974357a](https://github.com/erclx/canon/commit/974357a2b4d879530c5994bca9c1af6accb60b53))
+* **docs-sync:** point README openings at the page-copy rule ([#3286](https://github.com/erclx/canon/issues/3286)) ([0208526](https://github.com/erclx/canon/commit/02085260f3e2c5fc62d8f5be3aa18979c19e6599))
+* **gate:** pass a digit-only hex color in a color context ([#3285](https://github.com/erclx/canon/issues/3285)) ([f2bb23a](https://github.com/erclx/canon/commit/f2bb23a4838e8675e59f46481ba4022cd8210820))
+
 ## [5.106.0](https://github.com/erclx/canon/compare/v5.105.0...v5.106.0) (2026-11-20)
 
 
