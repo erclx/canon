@@ -613,3 +613,182 @@ describe('checkDrive', () => {
     })
   })
 })
+
+describe('checkDrive scripts', () => {
+  const BASICS = 'canon/drive/basics.md'
+  const DESIGNER = 'a designer laying out a board'
+  const AGENT = 'an agent calling the CLI'
+
+  function writeConfig(text: string): void {
+    write('canon/config/app-drive.toml', text)
+    git('add', '.')
+    git('commit', '-q', '-m', 'config')
+  }
+
+  const FLAT_CONFIG = [
+    `scripts = ["${BASICS}"]`,
+    `personas = ["${DESIGNER}", "${AGENT}"]`,
+    '',
+  ].join('\n')
+
+  it('should pass a drive that ran every script once per persona', async () => {
+    writeConfig(FLAT_CONFIG)
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({
+      goals: BOTH_DRIVEN,
+      scripts: [
+        { script: BASICS, persona: DESIGNER, status: 'driven' },
+        { script: BASICS, persona: AGENT, status: 'driven' },
+      ],
+    })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      ok: true,
+      reason: 'clean',
+    })
+  })
+
+  it('should fail a script a persona never ran', async () => {
+    writeConfig(FLAT_CONFIG)
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({
+      goals: BOTH_DRIVEN,
+      scripts: [{ script: BASICS, persona: DESIGNER, status: 'driven' }],
+    })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      ok: true,
+      reason: 'failed',
+      findings: { unscripted: [`${BASICS} (${AGENT})`] },
+    })
+  })
+
+  it('should fail a script marked not driven with no reason', async () => {
+    writeConfig(FLAT_CONFIG)
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({
+      goals: BOTH_DRIVEN,
+      scripts: [
+        { script: BASICS, persona: DESIGNER, status: 'driven' },
+        { script: BASICS, persona: AGENT, status: 'not-driven' },
+      ],
+    })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'failed',
+      findings: { unscripted: [`${BASICS} (${AGENT})`] },
+    })
+  })
+
+  it('should pass a script skipped with a reason', async () => {
+    writeConfig(FLAT_CONFIG)
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({
+      goals: BOTH_DRIVEN,
+      scripts: [
+        { script: BASICS, persona: DESIGNER, status: 'driven' },
+        {
+          script: BASICS,
+          persona: AGENT,
+          status: 'not-driven',
+          reason: 'the script file is missing',
+        },
+      ],
+    })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'clean',
+    })
+  })
+
+  it('should check a config naming no scripts as before', async () => {
+    writeConfig(`personas = ["${DESIGNER}"]\n`)
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({ goals: BOTH_DRIVEN })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'clean',
+      findings: { unscripted: [] },
+    })
+  })
+
+  it('should hold a named target to the flat scripts with its own personas', async () => {
+    writeConfig(
+      [
+        FLAT_CONFIG,
+        '[targets.web]',
+        'root = "web"',
+        `personas = ["${AGENT}"]`,
+        '',
+      ].join('\n'),
+    )
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({ goals: BOTH_DRIVEN, target: 'web', scripts: [] })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'failed',
+      findings: { unscripted: [`${BASICS} (${AGENT})`] },
+    })
+  })
+
+  it("should not hold the default target to a named target's scripts", async () => {
+    writeConfig(
+      [
+        `personas = ["${DESIGNER}"]`,
+        '[targets.web]',
+        `scripts = ["${BASICS}"]`,
+        '',
+      ].join('\n'),
+    )
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({ goals: BOTH_DRIVEN, target: null })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'clean',
+    })
+  })
+
+  it('should require each script once when the config names no personas', async () => {
+    writeConfig(`scripts = ["${BASICS}"]\n`)
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({ goals: BOTH_DRIVEN, scripts: [] })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'failed',
+      findings: { unscripted: [BASICS] },
+    })
+  })
+
+  it('should refuse a record naming a target the config does not hold', async () => {
+    writeConfig(FLAT_CONFIG)
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({ goals: BOTH_DRIVEN, target: 'docs' })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      ok: false,
+      reason: 'bad-record',
+    })
+  })
+
+  it('should refuse a config that does not parse', async () => {
+    writeConfig('scripts = [\n')
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({ goals: BOTH_DRIVEN })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      ok: false,
+      reason: 'bad-config',
+    })
+  })
+
+  it('should refuse a scripts key that is not a list of paths', async () => {
+    writeConfig('scripts = "canon/drive/basics.md"\n')
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({ goals: BOTH_DRIVEN })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      ok: false,
+      reason: 'bad-config',
+    })
+  })
+})
