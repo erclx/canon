@@ -82,6 +82,8 @@ export interface GateResult {
   readonly reelWaiverRefused?: string
   /** The earlier commit a reel was filmed at, when it carried to the head across pushes no box can observe. */
   readonly reelCarriedFrom?: string
+  /** The commit the posted reel was filmed at, named on a `reel-unsettled` refusal when one trails the head. */
+  readonly reelHead?: string
 }
 
 /** How an earlier commit sits against the head, and what changed since. */
@@ -133,13 +135,15 @@ export const SETTLING_REEL_SKIPS: readonly string[] = [
 
 /**
  * Reel skips no waiver settles, since a builder clears each target refusal
- * with a selector, a setup step, `through`, or the seed.
+ * with a selector, a setup step, `through`, or the seed, and `no-server` by
+ * starting the worktree's server.
  */
 export const UNWAIVABLE_REEL_SKIPS: readonly string[] = [
   'target-missing',
   'target-offscreen',
   'target-covered',
   'target-ambiguous',
+  'no-server',
 ]
 
 /** The reason code a skip line opens with, the text before its first colon. */
@@ -419,8 +423,14 @@ export function evidenceGate(
     return { ...pass('evidence'), ...lists }
   }
 
-  const { reelSkip } = evidence
+  const { reelSkip, reelHead } = evidence
   const skipField = reelSkip !== undefined && { reelSkip }
+  const unsettled = {
+    ...fail('evidence', 'reel-unsettled'),
+    ...lists,
+    ...skipField,
+    ...(reelHead !== undefined && { reelHead }),
+  }
   if (
     reelSkip !== undefined &&
     SETTLING_REEL_SKIPS.includes(reelSkipCode(reelSkip))
@@ -428,19 +438,12 @@ export function evidenceGate(
     return { ...pass('evidence'), ...lists, ...skipField }
   }
   const reelWaived = readReelWaivers(standing).at(-1)
-  if (reelWaived === undefined) {
-    return { ...fail('evidence', 'reel-unsettled'), ...lists, ...skipField }
-  }
+  if (reelWaived === undefined) return unsettled
   if (
     reelSkip !== undefined &&
     UNWAIVABLE_REEL_SKIPS.includes(reelSkipCode(reelSkip))
   ) {
-    return {
-      ...fail('evidence', 'reel-unsettled'),
-      ...lists,
-      ...skipField,
-      reelWaiverRefused: reelWaived,
-    }
+    return { ...unsettled, reelWaiverRefused: reelWaived }
   }
   return { ...pass('evidence'), ...lists, ...skipField, reelWaived }
 }

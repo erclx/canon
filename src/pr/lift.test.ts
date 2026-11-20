@@ -1441,6 +1441,23 @@ describe('lift', () => {
         expect(record.reason).toBe('reel-unsettled')
       })
 
+      it('should name the head a trailing reel was filmed at on a reel-unsettled refusal', async () => {
+        const { api } = makeApi({
+          evidence: { ...drivable, reelHead: MOVED },
+          reviews: [CODE_CLOSED, UI_CLOSED],
+          changed: { isAncestor: true, paths: ['src/App.tsx'] },
+        })
+
+        const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+        expect(evidenceEntry(record)).toEqual({
+          gate: 'evidence',
+          isOk: false,
+          reason: 'reel-unsettled',
+          reelHead: MOVED,
+        })
+      })
+
       it('should settle on a reel waiver in the newest pass, naming its reason', async () => {
         const { api } = makeApi({
           evidence: { ...drivable, reelSkip: 'wrong-state: beat 1' },
@@ -1480,6 +1497,7 @@ describe('lift', () => {
         'target-covered: beat 1: div.hit-layer',
         'target-ambiguous: beat 2: text=New file',
         ' target-missing ',
+        'no-server: unreachable',
       ])(
         'should refuse a reel waiver over the skip %s, naming the waiver',
         async (reelSkip) => {
