@@ -9,7 +9,7 @@ description: The canon take verb that films a web app by frame stepping, its cli
 
 Owns `canon take`, which films each beat of a take plan into a 60 fps clip with a click log and a per-frame camera track, 4K unless a beat shrinks its window. Its boundary is the clip, and HyperFrames composes and renders everything past it. The one exception is the pull request reel, which `--reel` joins from the clips with the pointer drawn on.
 
-The `ui-film` plugin skill drafts the beats and calls the verb for a launch video. `pr-evidence` films the pull request reel with `--reel` and `--max-seconds 15`, which refuses as `over-cap` past 15 s of clips. `src/commands/take.ts` holds only the wiring, including `canon take camera`, which rebuilds a track at a playback rate.
+The `ui-film` plugin skill drafts the beats and calls the verb for a launch video. `pr-evidence` films the reel under `--max-seconds 15`, which refuses as `over-cap` past it. `src/commands/take.ts` holds only the wiring, including `canon take camera`, which rebuilds a track at a rate, and `canon take check`, which fails a beat on its timing.
 
 ## Layout
 
@@ -22,6 +22,10 @@ Films each beat of a take plan from a fresh load and writes its clip, a log with
 - One choreography runs each step on each route's stage and logs every glide point. A glide takes 600 ms to 1.2 s, and a fill rests, steps off its field, and settles before typing.
 - The camera zooms onto a press over the glide reaching it, and in the reel onto the box a key moved focus to, at a depth the clip's width over the output's caps, and pans only at a steady scale
 - Stepped frames stream into the system FFmpeg, screencast frames spool beside the clip until the stop, and FFmpeg's absence refuses before any browser launches
+
+### `src/take/check.ts` and `stall.ts`
+
+`check.ts` holds the timing rules over a beat's log and track, each limit a frame under the engine's pacing. `stall.ts` runs FFmpeg `freezedetect` over each typing burst and drag of a beat not filmed stepped. FFmpeg's default -60 dB read a whole 4K typing burst as frozen, so it reads at -100 dB.
 
 ### `src/take/fixtures/`
 
