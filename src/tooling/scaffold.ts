@@ -152,8 +152,7 @@ export async function scaffoldStack(
       }
     }
   }
-  // The overlay lands after the step, since on a case-insensitive filesystem a step removing `App.tsx` would
-  // otherwise delete an overlay's `app.tsx`.
+  // After the step, since on a case-insensitive filesystem removing `App.tsx` would delete the overlay's `app.tsx`.
   const overlay = join(manifest.dir, 'scaffold')
   if (existsSync(overlay)) {
     cpSync(overlay, produced, { recursive: true, force: true })

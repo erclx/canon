@@ -100,8 +100,7 @@ async function run({
   rmSync(state.dir, { recursive: true, force: true })
 
   logStep(`Scaffolding ${stack}`)
-  // The run scaffolds through the verb a real scaffold takes, so the starter, the post-scaffold step, and the
-  // overlay it proves are the ones a target receives.
+  // Through the verb a real scaffold takes, so the step and overlay proved here are the ones a target receives.
   const scaffold = await scaffoldStack({
     root,
     stack,
@@ -121,8 +120,7 @@ async function run({
   record(state, 'Scaffold', true)
   if (manifest.prepare !== undefined) record(state, 'Prepare', true)
 
-  // The verify folder sits inside the checkout's work tree, where the verb leaves git alone, so the run makes
-  // its own repository for the scaffold's git-reading scripts.
+  // The verb leaves git alone inside the checkout's work tree, so the scaffold's git-reading scripts need this repo.
   await shell('git init -q', state.dir)
   excludeChainIgnores(root, manifest, state.dir)
   await shell(
