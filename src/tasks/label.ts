@@ -17,9 +17,8 @@ const FIRST_LABEL: Label = { major: 1, minor: 0 }
 
 /**
  * Matches a task filename stem's leading label. Anchored, so a sibling such as
- * `TASK-ARCHIVE` fails it outright, and a reserved stem such as `index` or
- * `priority` never reaches it at all, since `listTaskStems` already filters
- * those out before this pattern sees a stem.
+ * `TASK-ARCHIVE` fails it, and `listTaskStems` already filters reserved stems
+ * such as `index` before this pattern sees a stem.
  */
 export const LABEL_PATTERN = /^v(\d+)\.(\d+)-/
 
@@ -132,15 +131,8 @@ async function readStems(root: string): Promise<string[]> {
 
 /**
  * Reports the next unused phase label, read off the true maximum across
- * `.canon/tasks/` and its `archive/` and `declined/` siblings together. A scan
- * confined to the live board is blind to every label a settled folder already
- * spent, which is what let two sessions hand out the same label within
- * minutes of each other.
- *
- * It reports and never writes. `claimLabel` is the variant that reserves. A
- * duplicate label already sitting in the tree, and a gap left by a
- * renumbering, both fold into the same max scan without needing a dedicated
- * check.
+ * `.canon/tasks/` and its `archive/` and `declined/`, since a scan of the live
+ * board alone misses labels already spent. It reports and never writes.
  */
 export async function nextLabel(root: string): Promise<LabelOutcome> {
   const dir = tasksDir(root)
@@ -177,13 +169,8 @@ async function reserveLabel(root: string, label: string): Promise<boolean> {
 
 /**
  * Reserves the next label through an exclusive `mkdir` under
- * `.canon/ordinal-locks/`, so a second claim lands on a different one.
- *
- * The scan counts every reservation beside the task stems. The skill writes
- * the task file after this returns, so a reservation with no file behind it is
- * the ordinary state for a few seconds, and a scan blind to it would offer the
- * same label to every retry. Reservations are never expired: a claim that died
- * leaves a gap, and `claude/skills/git-commit/references/versioning.md` permits gaps.
+ * `.canon/ordinal-locks/`. The scan counts every reservation beside the stems,
+ * and none expires, since a dead claim leaves a gap `versioning.md` permits.
  */
 export async function claimLabel(
   root: string,

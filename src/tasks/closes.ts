@@ -44,10 +44,9 @@ export type ClosureOutcome = TaskClosure | RecordRefused
 const ISSUE_LINE = /^Issue:[ \t]*(#\d+(?:[ \t]*,[ \t]*#\d+)*)[ \t]*$/
 
 /**
- * Reads every `Issue:` line outside a fence, each a bare `#NNN` or a comma
- * list of them. A line carrying anything else, such as the older bare-path
- * form, names no issue rather than the numbers that happened to parse, since a
- * wrong number would close an unrelated issue.
+ * Reads every `Issue:` line outside a fence, each a bare `#NNN` or a comma list
+ * of them. A line carrying anything else names no issue rather than the numbers
+ * that parsed, since a wrong number would close an unrelated issue.
  */
 export function readIssues(text: string): readonly number[] {
   const lines = text.split('\n')
@@ -71,8 +70,7 @@ export function readIssues(text: string): readonly number[] {
 /**
  * Decides whether the pull request for `branches` closes the task's issues.
  * `branches` is the working branch and every name it carried, since a rename
- * leaves the `Pending branch:` marker under the old one. Any other pending
- * branch is a slice still to ship, so the task stays open behind it.
+ * leaves the marker under the old one, and any other pending branch holds it open.
  */
 export function decideClosing(
   text: string,
@@ -87,8 +85,7 @@ export function decideClosing(
   const listed = readPullRequest(text)
   const last = listed.at(-1)
 
-  // A failed lookup cannot rule out an earlier slice, so it does not close. With
-  // nothing recorded there is no earlier slice, so that case still closes.
+  // A failed lookup cannot rule out an earlier slice, so it does not close, unless nothing is recorded.
   if (pulls === null && listed.length > 0) {
     return { issues, closing: false, reason: 'lookup-failed' }
   }

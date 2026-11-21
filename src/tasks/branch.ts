@@ -5,12 +5,9 @@ const PLAN_PREFIX = 'feature-'
 const MARKDOWN = '.md'
 
 /**
- * The type every plan-derived branch takes. It is a constant rather than a
- * reading, because determinism is the whole property that makes the dispatch
- * gate and the worker agree, and prose reading is the judgment that produced
- * three strings for one plan. A wrong type is cheap because a branch type is
- * cosmetic, since a commit's type and a pull request's title are both read off
- * the diff. Nothing renames it later, whatever three shipped bodies used to say.
+ * The type every plan-derived branch takes, a constant rather than a reading,
+ * since determinism is what makes the dispatch gate and the worker agree. A
+ * wrong type is cosmetic, since commit and pull request types come off the diff.
  */
 export const PLAN_BRANCH_TYPE = 'feat'
 
@@ -50,15 +47,8 @@ export function branchOfPlan(path: string): string {
 
 /**
  * Derives the branch a dispatch checks and a worker takes, from the plan both
- * of them name. It is the one derivation, so the collision check and the
- * worktree entry it gates cannot hold two answers for one plan.
- *
- * Conformance covers both caps `claude/skills/git-branch/references/branch.md` states, being the word
- * count of the description and the length of the whole branch. A slug is a
- * plan's own filename rather than a name anyone chose for a branch, so a plan
- * can name a branch this refuses to grade as conforming, and reporting that is
- * the point: the caller hands the row to a person rather than shipping a
- * rename that parts the branch slug from the plan slug.
+ * name. A slug is a plan's filename, so a plan can name a branch that breaks
+ * a cap in `git-branch`'s `branch.md`, and that is reported, not renamed.
  */
 export function planBranch(root: string, reference: string): BranchOutcome {
   const resolved = resolvePlanReference(root, reference)

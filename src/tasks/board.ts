@@ -160,9 +160,8 @@ export interface PlacedRow {
 
 /**
  * The board as a model. Rows are kept per group in order, and everything the
- * model does not own, being the frontmatter and title above the first group,
- * prose under a group heading, and any section that is not a group, is kept as
- * written.
+ * model does not own, being the frontmatter, title, prose under a group heading,
+ * and any non-group section, is kept as written.
  */
 export interface Board {
   readonly head: readonly string[]
@@ -221,11 +220,9 @@ function taskLink(
 }
 
 /**
- * Reads the `Waiting on` cell out of a row through the header above it, which
- * still applies to a row stranded behind a closed table. A row one cell short
- * of a header ending in `Waiting on` is read as missing its `Touches` cell, so
- * its last cell stands in. Any other shape answers `undefined`, since guessing
- * would write a path or a plan link into the blocker on the next render.
+ * Reads the `Waiting on` cell out of a row through the header above it. A row
+ * one cell short of a header ending in `Waiting on` is read as missing `Touches`,
+ * so its last cell stands in. Any other shape answers `undefined`, never a guess.
  */
 function waitingCell(
   cells: readonly string[],
@@ -250,12 +247,9 @@ function waitingCell(
 }
 
 /**
- * Parses `priority.md` into the model. The parse is lenient where `readBoard`
- * is strict: a row after a closed table, under a header short a column, or
- * past a blank line inside a table is still a row of the group it sits under,
- * since the render exists to repair exactly those boards. It refuses a pipe line
- * naming no task, which a render would drop, and a row whose blocker the header
- * cannot place, which a render would rewrite to the wrong cell.
+ * Parses `priority.md` into the model, leniently where `readBoard` is strict,
+ * since a render exists to repair a row after a closed table or under a short
+ * header. It refuses a pipe line naming no task and a blocker the header cannot place.
  */
 export function parseBoard(text: string): BoardParse {
   const lines = text.split('\n')
@@ -378,9 +372,8 @@ function folderOf(path: string): string | undefined {
 
 /**
  * A count of the declared paths and the folders holding most of them, at most
- * `TOUCHES_FOLDERS`, with ties going to the folder declared first. The file
- * list lives in the plan the row links, so the cell only says where a row
- * works. Root files count and name no folder.
+ * `TOUCHES_FOLDERS`, ties going to the folder declared first. The file list lives
+ * in the linked plan, so the cell says only where a row works.
  */
 export function touchesCell(paths: readonly string[]): string {
   if (paths.length === 0) return ''
@@ -421,9 +414,8 @@ async function livePlans(text: string, root: string): Promise<string[]> {
 
 /**
  * Derives the Task, Touches, and Plan cells from the task file and the plans
- * its `Plan:` line links. A task file that is gone keeps the label its row
- * carried and derives nothing else, since `validate` reports the dead row and a
- * render has no business dropping it.
+ * its `Plan:` line links. A gone task file keeps the label its row carried and
+ * derives nothing else, since `validate` reports the dead row.
  */
 export async function deriveCells(
   root: string,
@@ -694,9 +686,8 @@ export interface Edited {
 
 /**
  * Runs one verb as one read, one render, and one write of `priority.md`, so a
- * call never leaves a partial table behind. A row changing group is checked
- * against the target group's rule on the rendered board before anything is
- * written, which reads the board exactly as `validate` will.
+ * call never leaves a partial table. A group change is checked against the
+ * target group's rule on the rendered board, as `validate` will read it.
  */
 export async function writeBoard(
   root: string,
@@ -721,9 +712,8 @@ export async function writeBoard(
 
 /**
  * Holds an exclusive lock file beside the board for one read, render, and
- * write, so two verbs in two sessions cannot each replace the file with an
- * edit that drops the other's. The render reads every task and plan, which is
- * why the stale age sits well above any one call.
+ * write, so two sessions cannot each replace the file with an edit that drops
+ * the other's. The render reads every task and plan, so the stale age is long.
  */
 async function withBoardLock(
   path: string,
@@ -802,8 +792,7 @@ async function writeLocked(
     }
   }
 
-  // The lock holds off other verbs and nothing else, so a hand edit landing
-  // while the render awaited its reads is caught by comparing the file again.
+  // The lock holds off other verbs only, so a hand edit during the render is caught by recompare.
   if ((await readFile(path, 'utf8')) !== before) {
     return refuse(
       'board-changed',
@@ -833,9 +822,8 @@ export interface PlaceOptions {
 
 /**
  * Puts a task under a group from anywhere: another group, the backlog, or no
- * surface at all. A backlog line is removed in the same call, since a task on
- * both surfaces is the `row-duplicated` finding and a two-step move strands it
- * between them.
+ * surface. A backlog line is removed in the same call, since a task on both
+ * surfaces is the `row-duplicated` finding and a two-step move strands it.
  */
 export async function placeTask(
   root: string,

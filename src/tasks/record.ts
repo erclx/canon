@@ -35,13 +35,9 @@ import {
 const ORIGIN_PREFIXES = ['Plan:', 'Groundwork:', 'Intake:', 'Issue:'] as const
 
 /**
- * `bad-input` stands apart from the board-state reasons. `git-pr` swallows
- * `no-board`, `no-match`, and `ambiguous`, where a guessed write would archive
- * the wrong task, but a malformed argument is a defect nobody else would hear.
- *
- * `several-plans` answers a `Plan:` line already linking more than one plan,
- * since `plan-link` cannot know which link to drop. `no-name` answers a
- * session id the roster no longer lists, called with no name.
+ * `bad-input` stands apart from the board-state reasons, since `git-pr` swallows
+ * `no-board`, `no-match`, and `ambiguous`, but a malformed argument is a defect
+ * nobody else hears. `several-plans` answers a `Plan:` line already linking many.
  */
 export const RECORD_REFUSALS = [
   'no-board',
@@ -148,11 +144,9 @@ function planKey(reference: string): string {
 }
 
 /**
- * Places the `Pull request:` line under the origin lines the task already
- * carries. A task shipped in slices lists every pull request, so a new number
- * appends to an existing line rather than replacing it, and a line that does
- * not read as a list is replaced whole. A task with no origin line takes it
- * under the H1, which is the only other anchor the board format guarantees.
+ * Places the `Pull request:` line under the origin lines the task carries. A new
+ * number appends to an existing list line and a non-list line is replaced whole.
+ * A task with no origin line takes it under the H1, the only other anchor.
  */
 export function writePullRequestLine(
   text: string,
@@ -203,9 +197,8 @@ const PENDING_PREFIX = 'Pending branch:'
 
 /**
  * Names a branch on the `Pending branch:` line, which holds the task open
- * against a merge-time archive until that branch's own number is recorded. The
- * line sits under `Pull request:` when one exists, since a later slice ticks
- * after an earlier slice's number is already listed.
+ * against a merge-time archive until that branch's number is recorded. It sits
+ * under `Pull request:` when one exists, since a later slice ticks after it.
  */
 export function writePendingBranch(
   text: string,
@@ -258,10 +251,9 @@ export function clearPendingBranch(
 }
 
 /**
- * Names a session on the `Sessions:` line, keyed on the id, so a dispatcher
- * and `git-pr` recording the same worker write it once. The line sits below
- * every other line a task carries above its outcomes, so a pull request
- * recorded later lands above it.
+ * Names a session on the `Sessions:` line, keyed on the id, so a dispatcher and
+ * `git-pr` recording one worker write it once. The line sits below every other
+ * line above the outcomes, so a pull request recorded later lands above it.
  */
 export function writeSessionsLine(
   text: string,
@@ -309,12 +301,8 @@ export type PlanLineWrite =
 
 /**
  * Places the `Plan:` line right after the H1, and corrects the target in place
- * when the line exists, since a task runs under one plan.
- *
- * A line already linking several plans is refused whole, since overwriting it
- * drops links the caller never named. `add` is the sliced task's writer,
- * which keeps every link in order, appends the target, reports `unchanged`
- * when it is already listed, and so never refuses a line holding several.
+ * when it exists. A line linking several plans is refused whole, since
+ * overwriting drops links; `add` keeps every link in order and never refuses one.
  */
 export function writePlanLine(
   text: string,
@@ -372,14 +360,8 @@ export function writePlanLine(
 
 /**
  * Marks outcomes closed by their 1-based position in the task's outcome list,
- * which is the order the board format writes them. A caller reads the file
- * before deciding, so a position is what it already holds, while a text match
- * would need the wording handed back exactly.
- *
- * A cut strikes the body and keeps its `[ ]`, since `OUTCOME_PATTERN` counts
- * only checkbox lines and a dropped box would shift every later position. A
- * struck line is never ticked and a ticked one is never struck, since either
- * write would make one line claim both shipped and cut.
+ * since a caller reading the file already holds it. A cut strikes the body and
+ * keeps its `[ ]`, and no write may make one line claim both shipped and cut.
  */
 export function closeOutcomeLines(
   text: string,
@@ -557,16 +539,9 @@ export async function openTask(
 }
 
 /**
- * Records a pull request number on the task the branch closes. `git-pr` runs
- * this from a linked worktree, where an in-place edit through the file-editing
- * tools is refused and a shell stream editor is banned, so the write has to
- * resolve the board root in-process.
- *
- * `branches` names the recording branch and every name it carried before a
- * rename, since `git-ship` renames a branch after `task-complete` has already
- * written the marker under the old name. Each comes off the `Pending branch:`
- * line even when the number was already listed, so a rerun repairs a stale
- * marker.
+ * Records a pull request number on the task the branch closes, resolving the
+ * board root in-process, since a linked worktree refuses an in-place edit.
+ * `branches` carries every name before a rename, whose markers a rerun repairs.
  */
 export async function recordPullRequest(
   root: string,
@@ -602,13 +577,8 @@ export async function recordPullRequest(
 
 /**
  * Records a plan's path on the task it belongs to, as the task's `Plan:` line.
- * `plan-feature` runs this right after the plan file lands, resolving the
- * reference the same two ways `canon tasks plan-answers` does, through
- * `planCandidates`, so a bare slug and a board-relative path both resolve.
- *
- * The task is named directly rather than through `RecordSelector`'s `plan`
- * kind: every caller already holds the stem, since resolving the task is what
- * put it in a position to write the plan's path in the first place.
+ * `plan-feature` runs this once the plan lands, resolving the reference through
+ * `planCandidates`. The caller holds the task stem, so it is named directly.
  */
 export async function recordPlan(
   root: string,
@@ -664,9 +634,8 @@ export async function recordPlan(
 
 /**
  * Records a session that worked a task on its `Sessions:` line. The caller
- * resolves `name` from the roster or takes it from `--name`, and an undefined
- * name refuses rather than writing a bare id. The id is checked first, since a
- * malformed one is a caller defect and every later check would hide it.
+ * resolves `name`, and an undefined one refuses rather than writing a bare id.
+ * The id is checked first, since a malformed one would be hidden by later checks.
  */
 export async function recordSession(
   root: string,
@@ -725,13 +694,8 @@ export async function recordSession(
 
 /**
  * Marks the named outcomes `[x]`, and strikes the `cuts` with their reason, in
- * place. A cut alone writes no pending marker, since it ships nothing a merge
- * could archive early.
- *
- * A `branch` that ticks a new box goes on the `Pending branch:` line, so an
- * earlier slice's merge cannot archive the task before this branch records
- * its number. `branchPulls` holds the numbers the branch's head carries, and
- * one already on the `Pull request:` line means no marker is needed.
+ * place. A `branch` ticking a new box goes on the `Pending branch:` line so an
+ * earlier slice's merge cannot archive the task first, and a cut alone writes none.
  */
 export async function closeOutcomes(
   root: string,
