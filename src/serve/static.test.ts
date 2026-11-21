@@ -339,7 +339,8 @@ describe('startServer', () => {
     seed('index.html', '<h1>root</h1>')
     const server = start(ROOT, { port: 0 })
 
-    /* Assembled rather than written whole, so the spell check does not read the separator as a misspelling. */
+    /* Assembled rather than written whole, so the encoded separator does not
+       run into the next word and read as a misspelling to the spell check. */
     const climb = `/..${'%2f'}..${'%2f'}escape.txt`
 
     const status = await rawRequest(server.port, climb)
