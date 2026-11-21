@@ -1,21 +1,15 @@
 import { bodyLines } from '@/markdown/scan'
 
 /**
- * The index points at items and answers nothing itself, so it carries no
- * answer slot for this verb to reach. It also displays the item format inside a
- * fence, which the fence walk already masks, so skipping it by name is about
- * what the file is rather than about the block it holds.
+ * The index points at items and answers nothing itself, so it carries no answer slot.
+ * It also displays the item format inside a fence.
  */
 export const INDEX_FILE = '00-overview.md'
 
 /**
- * An item heading, labeled per cluster file rather than per folder.
- *
- * The label carries an optional letter suffix because a pass that splits one
- * finding after the fact numbers the halves `3a` and `3b` rather than
- * renumbering every item below them. A pattern accepting digits alone parses
- * such a file without complaint and drops those items, leaving them
- * unanswerable through this verb with nothing reporting the gap.
+ * An item heading, labeled per cluster file rather than per folder. The label takes
+ * an optional letter suffix, since a split finding numbers its halves `3a` and
+ * `3b`, and digits alone would drop them silently.
  */
 const HEADING = /^###\s+(\d+[a-z]*)\.\s*(.*)$/i
 
@@ -23,14 +17,9 @@ const HEADING = /^###\s+(\d+[a-z]*)\.\s*(.*)$/i
 const FIELD = /^-\s+\*\*([^*]+):\*\*\s*(.*)$/
 
 /**
- * Any heading, which ends the item above it.
- *
- * A numbered `###` is tested first and opens the next item, so what reaches
- * here is a heading that is not an item and therefore closes the one open. The
- * narrower test for `##` alone let a `### Notes` block stay inside the item
- * above it, and the stray slot such a block carries then displaced the real
- * one, leaving the item reading as answered while its own slot sat empty and
- * sending a write into the wrong section.
+ * Any heading, which ends the item above it. A numbered `###` is tested first, so a
+ * heading reaching here closes the open item, and a `### Notes` block must not stay
+ * inside it.
  */
 const SECTION = /^#{1,6}\s/
 
@@ -80,12 +69,9 @@ function seal(draft: Draft): IntakeItem {
 }
 
 /**
- * Reads every item a cluster file holds, in file order.
- *
- * The walk runs over `bodyLines` rather than a raw split so the item format
- * block a folder copies into its own files parses as the sample it is. A
- * heading counted out of a fence shifts nothing on its own, but it offers an
- * answer slot no reader owns and the write-back would land inside the sample.
+ * Reads every item a cluster file holds, in file order. The walk runs over
+ * `bodyLines`, so the item format block a folder copies into its own files parses
+ * as the sample it is.
  */
 export function readItems(text: string): IntakeItem[] {
   const items: IntakeItem[] = []
@@ -173,15 +159,9 @@ export function parseDecided(text: string): DecidedPointer | undefined {
 }
 
 /**
- * Puts a selection in one item's slot, leaving every other line as it was.
- *
- * It replaces the whole line, since a stream editor expands an unescaped
- * ampersand to the whole match and exits zero on a non-match, losing the
- * answer either way.
- *
- * The answer occupies one line, and the caller owes that guarantee. A line
- * break splices a continuation no pattern reads, so the slot reads back
- * truncated while the item counts as answered, behind the `answered` refusal.
+ * Puts a selection in one item's slot, leaving every other line as it was. It
+ * replaces the whole line, since a stream editor expands an unescaped ampersand.
+ * The answer occupies one line, and the caller owes that guarantee.
  */
 export function writeAnswerLine(
   text: string,
@@ -199,12 +179,8 @@ export function isUnread(item: IntakeItem): boolean {
 }
 
 /**
- * An item carrying no slot at all, which the format says ships on every one.
- *
- * Such an item is neither unread nor answered, and counting it as either hides
- * it: as answered it drops out of the work a reader is told remains, and as
- * unread it joins a list whose every entry the answer verb then refuses. It is
- * reported on its own so the file gets fixed.
+ * An item carrying no slot at all, which the format says ships on every one. It is
+ * neither unread nor answered, so it is reported on its own to get fixed.
  */
 export function isMalformed(item: IntakeItem): boolean {
   return item.answerLine === undefined

@@ -130,10 +130,9 @@ function readShape(file: WorkflowFile): WorkflowShape {
 }
 
 /**
- * Picks the workflow a preview dispatch runs: one that deploys to Pages and
- * can be dispatched. A workflow with any `pages deploy` line passing no
- * `--branch` is refused rather than dispatched, because Pages then publishes
- * whatever ref ran to production.
+ * Picks the workflow a preview dispatch runs: one that deploys to Pages and can
+ * be dispatched. A `pages deploy` line passing no `--branch` is refused, since
+ * Pages then publishes whatever ref ran to production.
  */
 export function findDeployWorkflow(
   files: readonly WorkflowFile[],
@@ -204,12 +203,9 @@ export type PreviewResult =
     }
 
 /**
- * Dispatches the deploy on the branch, waits for that run within the bound,
- * and reads the alias out of its log.
- *
- * `gh workflow run` reports no run id, so the run is found as the one id
- * absent from a listing taken before the dispatch. Comparing ids rather than
- * creation times keeps the match independent of this machine's clock.
+ * Dispatches the deploy on the branch, waits for that run within the bound, and
+ * reads the alias out of its log. `gh workflow run` reports no run id, so the
+ * run is the one id absent from an earlier listing, not matched by clock.
  */
 export async function mintPreview(
   runner: PreviewRunner,
@@ -267,13 +263,9 @@ export type PreviewHeadReading =
   | { readonly reason: 'gh-failed' }
 
 /**
- * Compares the head the newest successful dispatch built with the branch tip.
- *
- * The run listing is the only record of the built head, since the alias serves
- * the newest successful deployment per branch and names no sha. Runs are
- * ordered by creation rather than list position, so the verdict follows the
- * most recent deploy. A run still going at the tip reads `building` rather
- * than `stale`, so a mint already under way is not reported as a failure.
+ * Compares the head the newest successful dispatch built with the branch tip,
+ * read off the run listing since the alias names no sha, ordered by creation.
+ * A run still going at the tip reads `building` rather than `stale`.
  */
 export async function readPreviewHead(
   runner: PreviewRunner,

@@ -10,14 +10,8 @@ export interface BacktickSpan {
 
 /**
  * Every code span in the text, pairing a run of backticks only with the next
- * run of the same length.
- *
- * A single-backtick regex reads a doubled delimiter such as
- * ``` ``git status`` ``` as two singles and leaves a stray backtick that
- * absorbs the next span's opener, dropping the path inside it. Pairing by run
- * length keeps a doubled delimiter closed by a doubled one. An opening run with
- * no same-length run after it is literal text, per CommonMark, and the scan
- * resumes at the next run rather than backtracking.
+ * run of the same length, per CommonMark. A single-backtick regex leaves a
+ * stray backtick that absorbs the next span's opener, so an unmatched run is literal.
  */
 export function findBacktickSpans(text: string): BacktickSpan[] {
   const runs = [...text.matchAll(/`+/g)].map((match) => ({

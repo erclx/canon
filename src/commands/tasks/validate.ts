@@ -70,8 +70,7 @@ function reportValidation(
       for (const finding of outcome.findings) logWarn(describe(finding))
     }
 
-    // Untested rows warn and move no exit code, since a green tick on a row
-    // nothing re-took is the misread this section prevents.
+    // Untested rows warn and move no exit code, since a green tick on a row nothing re-took misleads.
     logStep('Parked rows')
     if (outcome.untested.length === 0) {
       logInfo('every parked row carried a citation or a file set to re-test')
@@ -82,8 +81,7 @@ function reportValidation(
       for (const row of outcome.untested) logWarn(describeUntested(row))
     }
 
-    // A folder claim is often correct for a row rewriting a directory, so it
-    // reports and moves no exit code.
+    // A folder claim is often correct for a row rewriting a directory, so it moves no exit code.
     logStep('Folder claims')
     if (outcome.claims.length === 0) {
       logInfo('every run now row names files rather than folders')
@@ -91,8 +89,7 @@ function reportValidation(
       for (const claim of outcome.claims) logWarn(describeClaim(claim))
     }
 
-    // A shared file holds nothing under the dispatch gate, so the pairs warn and
-    // move no exit code, listed for merge order and holds a cell cannot state.
+    // A shared file holds nothing under the dispatch gate, so the pairs warn and move no exit code.
     logStep('Shared files')
     if (outcome.shared.length === 0) {
       logInfo('no two run now rows name the same file')
@@ -100,8 +97,7 @@ function reportValidation(
       for (const pair of outcome.shared) logWarn(describeShared(pair))
     }
 
-    // The width limit is a heuristic over one preview pane, so a wide token
-    // reports and moves no exit code.
+    // The width limit is a heuristic over one preview pane, so it moves no exit code.
     logStep('Wide tokens')
     if (outcome.wide.length === 0) {
       logInfo('every code span fits the preview pane')
@@ -109,8 +105,7 @@ function reportValidation(
       for (const token of outcome.wide) logWarn(describeWide(token))
     }
 
-    // Unplaced is normal between filing a task and placing its row, so it moves no
-    // exit code, yet it is the only local detector for a dropped row.
+    // Unplaced moves no exit code, yet is the only local detector for a dropped row.
     logStep('Unplaced')
     if (outcome.unplaced.length === 0) {
       logInfo('every task file sits on the board or the backlog')

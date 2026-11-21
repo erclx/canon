@@ -67,8 +67,7 @@ export async function sizeSeries(
 
   const series = new Map<string, SizePoint>()
 
-  // One point at a time, since each read buffers a whole tree's blobs and a
-  // concurrent sample would hold every one of those trees together.
+  // One point at a time, since each read buffers a whole tree's blobs.
   for (const [from, rev] of sampled) {
     const result = await censusAt(root, rev)
     if (result.kind !== 'measured') continue

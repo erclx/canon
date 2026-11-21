@@ -15,11 +15,8 @@ const RECORDS_SETUP_NOTICE =
 
 /**
  * Orders the domains an init installs. Base tooling seeds the files the later
- * domains install alongside, so the sequence is part of the contract rather
- * than an arbitrary listing.
- *
- * The caller supplies the run factory so the list can be read for its labels
- * and kinds without spawning anything.
+ * domains install alongside, so the sequence is part of the contract. The caller
+ * supplies the run factory so the list reads without spawning anything.
  */
 export function buildSteps(
   target: string,
@@ -57,8 +54,7 @@ export function buildSteps(
     })
   }
 
-  // In-process, since the audit reads the working directory, and after every
-  // seeding domain so the roots it measures hold what they will ship with.
+  // In-process, since the audit reads the working directory, and after every seeding domain.
   steps.push({
     kind: 'run',
     label: 'Markdown gating',
@@ -66,8 +62,7 @@ export function buildSteps(
   })
 
   if (!flags.skip.skipped.has('records')) {
-    // `skip` here means there is nothing to run non-interactively, not that
-    // the caller opted out, unlike every other push of this kind above.
+    // `skip` here means there is nothing to run non-interactively, unlike every other push above.
     steps.push({
       kind: 'skip',
       label: 'Records backup',
@@ -91,8 +86,7 @@ async function gateMarkdown(root: string): Promise<boolean> {
     return true
   }
 
-  // A scaffold such as `npm create vite` makes no repository, and nothing else
-  // in init needs one, so this is a skip rather than a failed domain.
+  // A scaffold such as `npm create vite` makes no repository, so this is a skip rather than a failure.
   if (result.kind === 'unavailable') {
     logWarn(
       "Skipped: not a git repository, so no root was measured or gated. Run 'canon markdown gated add <prefix>' once it is one.",

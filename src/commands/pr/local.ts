@@ -142,8 +142,7 @@ export function registerLocal(pr: Command): void {
 function machineLocalRunner(): LocalRunner {
   return {
     ...machineListenerReader(),
-    // An HTML page rather than any answer, since a test runner's server or a
-    // reload socket in the tree answers too and would give a reviewer a bare 404.
+    // An HTML page rather than any answer, since a test runner's server would give a bare 404.
     async probe(port) {
       try {
         const response = await fetch(`http://localhost:${port}/`, {
@@ -157,8 +156,7 @@ function machineLocalRunner(): LocalRunner {
         return false
       }
     },
-    // The final status after redirects, so a login bounce ending on a 3xx or
-    // a 4xx fails rather than reading as the backend answering.
+    // The final status after redirects, so a login bounce ending on a 3xx or 4xx fails.
     async check(port, path) {
       try {
         const response = await fetch(`http://localhost:${port}${path}`, {
@@ -269,8 +267,7 @@ async function runLocalRemove(
     return refuseWith('gh-failed', LOCAL_REFUSALS['gh-failed'], emitJson, root)
   }
 
-  // A refused read on one side still lets the other side's edits land, and
-  // counts as a failure beside them, so one unread listing never strands both.
+  // A refused read on one side still lets the other side's edits land, counted as a failure.
   const [evidence, masked] = await Promise.all([
     comments === undefined
       ? Promise.resolve<EvidenceRemoval>({ kind: 'failed' })
@@ -352,10 +349,9 @@ async function removeEvidenceAddress(
 const UI_REVIEW_MARKER = '<!-- review-ui: head='
 
 /**
- * Masks the loopback address on each review `review-ui` posted, selected by
- * its marker so a code review quoting a local URL is never edited. Every
- * update is tried before a refusal is reported, so one refused review leaves
- * the rest masked.
+ * Masks the loopback address on each review `review-ui` posted, selected by its
+ * marker so a code review quoting a local URL is never edited. Every update is
+ * tried before a refusal is reported, so one refusal leaves the rest masked.
  */
 async function maskUiReviews(
   root: string,

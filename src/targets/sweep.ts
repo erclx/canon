@@ -12,15 +12,8 @@ import {
 import { isDirectory } from '@/targets/validate'
 
 /**
- * Folders a walk never descends into.
- *
- * Most hold vendored trees or the repository's own object store, where a target
- * cannot live and walking costs the sweep most of its time. `.claude` is here
- * for a different reason: a stamped folder is found by testing the folder
- * itself rather than by walking into its `.claude`, so descending finds nothing
- * new, and `.claude/worktrees/` holds a full checkout per linked worktree that
- * carries a copy of its own target's stamp. One target on this machine had five
- * of them, each of which would have reported as a target of its own.
+ * Folders a walk never descends into. Most hold vendored trees or the object store, and `.claude` is here
+ * because a stamped folder is tested directly and `.claude/worktrees/` holds a copy of each target's stamp.
  */
 const SKIP = new Set([
   'node_modules',
@@ -52,12 +45,8 @@ export interface SweptTarget {
 }
 
 /**
- * What the answer is bounded by, reported alongside it.
- *
- * A sweep cannot see another machine, a clone under a path nobody named, or a
- * tree it lacked permission to read. Stating the bound is what makes an
- * incomplete answer legible as incomplete, which the two undercounts this
- * exists to replace were not.
+ * What the answer is bounded by, reported alongside it. A sweep cannot see another machine, an unnamed
+ * clone path, or an unreadable tree, and stating the bound makes an incomplete answer legible.
  */
 export interface SweepBound {
   readonly roots: readonly string[]
@@ -67,12 +56,8 @@ export interface SweepBound {
   /** Roots that could not be listed at all, as opposed to holding nothing. */
   readonly unreadable: readonly string[]
   /**
-   * Symlinks to directories, which the walk does not follow.
-   *
-   * `readdirSync` with `withFileTypes` answers `isDirectory()` false for one, so
-   * without this field a target reached only through a symlink is dropped
-   * before the walk and named nowhere, which is a third silent undercount
-   * beside the two this module replaces.
+   * Symlinks to directories, which the walk does not follow. `readdirSync` with `withFileTypes` answers
+   * `isDirectory()` false for one, so without this field a target behind a symlink is named nowhere.
    */
   readonly symlinks: readonly string[]
 }
@@ -89,13 +74,8 @@ export interface SweepOptions {
 }
 
 /**
- * Whether a folder carries an install stamp at the current path or any
- * retired one. `aitk@3.57.0` still writes the folder form,
- * `retiredNameStampPath`, as its current path, so a target a pre-rename
- * binary syncs after this check drops the folder form would otherwise vanish
- * from the walk with nothing saying so. `claudeCanonStampPath` is the spelling
- * every target carried before the stamp moved to `canon/config/`, which a
- * target this batch has not reached still writes to.
+ * Whether a folder carries an install stamp at the current path or any retired one. A pre-rename binary
+ * still writes the folder form and `claudeCanonStampPath` is the spelling before the move to `canon/config/`.
  */
 function isStamped(path: string): boolean {
   return (
@@ -107,13 +87,8 @@ function isStamped(path: string): boolean {
 }
 
 /**
- * Reads the origin a checkout pushes to, trimmed to a form two clones of one
- * project agree on.
- *
- * The scheme and the `.git` suffix are dropped, since one project is commonly
- * cloned over ssh and https. Userinfo goes too, since a token in the URL would
- * reach the key that `canon targets list --json` prints, and a user name would
- * keep a clone from grouping with the same project's ssh clone.
+ * Reads the origin a checkout pushes to, trimmed to a form two clones of one project agree on. The scheme,
+ * the `.git` suffix, and userinfo are dropped, since a token would reach the key `canon targets list --json` prints.
  */
 export async function originOf(path: string): Promise<string | null> {
   const result = await $`git -C ${path} remote get-url origin`
@@ -136,13 +111,8 @@ export async function originOf(path: string): Promise<string | null> {
 }
 
 /**
- * Walks the given roots for installed targets and reports what bounds the walk.
- *
- * A stamped folder is descended into like any other, because a stamp is written
- * by an install someone ran in that folder and a target can hold others. The
- * machine this was measured on has exactly that shape: one stamped repository
- * holds the eight the hand census walked, so stopping at the outer one would
- * have hidden every target the sweep exists to find.
+ * Walks the given roots for installed targets and reports what bounds the walk. A stamped folder is
+ * descended into like any other, since a target can hold others and stopping would hide them.
  */
 export async function sweepTargets(
   roots: readonly string[],
@@ -174,8 +144,7 @@ export async function sweepTargets(
         (entry) => !SKIP.has(entry.name),
       )
 
-      // A directory symlink is named rather than followed, so the walk states what it
-      // did not reach. A link to a file or a broken link is excluded.
+      // A directory symlink is named rather than followed, and a link to a file or a broken link is excluded.
       for (const entry of listed) {
         if (!entry.isSymbolicLink()) continue
         const full = join(dir, entry.name)
@@ -210,11 +179,8 @@ export async function sweepTargets(
 }
 
 /**
- * Collapses the paths sharing one origin into a single target.
- *
- * A path whose origin does not resolve stays on its own, since two checkouts
- * with no remote cannot be shown to be the same project and merging them on
- * that absence would undercount in the other direction.
+ * Collapses the paths sharing one origin into a single target. A path whose origin does not resolve stays
+ * on its own, since merging checkouts with no remote would undercount.
  */
 async function group(
   paths: readonly string[],

@@ -9,24 +9,21 @@ function logCleanup(ctx: StageContext): void {
 }
 
 /**
- * Both submodule arms stage one tree and differ only in where the session is
- * told to run. The expectation format carries no prompt field, so each arm's
- * `expect.toml` names the prompt it was written against and the two would
- * silently swap verdicts if a caller crossed them.
+ * Both submodule arms stage one tree and differ only in where the session runs.
+ * The expectation format carries no prompt field, so each `expect.toml` names its
+ * prompt and the arms would swap verdicts if crossed.
  */
 function stageSubmodule(ctx: StageContext): void {
   ctx.fixtures('claude', 'session-worktree', 'shared', '01-plan')
 
-  // The submodule's origin stays on disk and is ignored, since an untracked
-  // nested repository would show in every status read and stage as a gitlink.
+  // The submodule's origin stays on disk and ignored, since an untracked nested repository shows in every status read.
   ctx.append('.gitignore', '.sandbox-submodule-origin/\n')
 
   ctx.git('add', '.')
   ctx.commit('feat(plans): seed grault plan')
   ctx.git('checkout', '-b', 'grault', '-q')
 
-  // An absorbed submodule returns one path from --git-dir and --git-common-dir,
-  // so only the superproject read separates the two states.
+  // An absorbed submodule returns one path from --git-dir and --git-common-dir, so only the superproject read separates states.
   ctx.git('init', '-q', '.sandbox-submodule-origin')
   ctx.git(
     '-C',
@@ -227,8 +224,7 @@ export default scenario({
       ctx.commit('feat(scripts): seed corge plan and the port helper')
       ctx.git('checkout', '-b', 'corge', '-q')
 
-      // A folder left behind by a removed worktree, the state the helper refuses,
-      // placed as a sibling since a fresh entry never lands on one.
+      // A folder left behind by a removed worktree, placed as a sibling since a fresh entry never lands on one.
       ctx.fixtures('claude', 'session-worktree', 'port-offset', '02-stale')
 
       ctx.log.step('Scenario ready: port report (Step 6)')

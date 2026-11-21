@@ -1,14 +1,7 @@
 /**
  * What a run reads from a `claude -p --output-format stream-json` session.
- *
- * `result` is the text of the final `result` message, the same object
- * `--output-format json` prints alone, and empty when no complete `result`
- * line arrived, which readers treat as an envelope that did not parse.
- *
- * `skills` names each `Skill` call's argument in order. A slash command the
- * prompt opened with expands before the session starts, so it never appears.
- * `writeTargets` and `commands` are what `attributeEscapes` ties a watched
- * write to this session by, and a subagent's calls are read here too.
+ * `result` is the final `result` message's text, empty when none arrived. `skills`
+ * names each `Skill` call's argument, and `writeTargets` and `commands` tie a watched write to this session.
  */
 export interface SessionStream {
   readonly result: string

@@ -3,12 +3,8 @@ import { join } from 'node:path'
 import { type StageContext, scenario } from '@/sandbox/scenario'
 
 // A record tree at whichever root the caller names, so one seeder serves both
-// sides of the fallback. The arms below differ only in that argument, which is
-// what keeps a difference in outcome attributable to the resolution rather than
-// to two fixtures that drifted apart. The records are stored once under a
-// neutral folder and moved to the named root, since a stored `.canon/` path
-// would be ignored and a stored `.claude/` path would pin the fallback's other
-// branch.
+// sides of the fallback and a difference in outcome is attributable to the
+// resolution. Records are stored under a neutral folder and moved to the named root.
 function seedRecords(ctx: StageContext, root: string, scratch: string): void {
   ctx.mkdir(`${root}/plans/archive`)
   ctx.mkdir(`${root}/tasks`)
@@ -19,8 +15,7 @@ function seedRecords(ctx: StageContext, root: string, scratch: string): void {
   ctx.run('cp', ['-R', 'seed-records/.', `${root}/`])
   ctx.run('rm', ['-rf', 'seed-records'])
 
-  // The task points at an archived plan, since a live one would move under
-  // `tasks archive`, and the live plan beside it gives validate a record.
+  // The task points at an archived plan, since a live one would move under `tasks archive`.
   ctx.run('cp', [
     `${root}/plans/feature-live-row.md`,
     `${root}/plans/archive/feature-shipped-row.md`,
@@ -106,8 +101,7 @@ export default scenario({
       seedRecords(ctx, '.claude', '.tmp')
       ctx.log.step('Running: canon records validate plans --root .')
       runCli(ctx, 'records', 'validate', 'plans', '--root', '.', '--json')
-      // This arm asserts the fallback, so the old root is the answer it checks, and a
-      // sweep rewriting it would check the migrated case twice.
+      // This arm asserts the fallback, so a sweep rewriting the old root would check the migrated case twice.
       ctx.log.info(
         'Expect: 1 record read, the live plan under .claude/plans', // canon-keep-record-root
       )
@@ -141,8 +135,7 @@ export default scenario({
       seedRecords(ctx, '.claude', '.tmp')
       ctx.write('.gitignore', '.canon/\n')
 
-      // A record carrying a citation, visible to the sweep as source under the new
-      // root's ignore file, so without the record-root skip it would be rewritten.
+      // A record carrying a citation, which the record-root skip must keep the sweep from rewriting.
       ctx.write(
         '.claude/memory/pen-entry.md', // canon-keep-record-root
         'The row is at .claude/plans/feature-live-row.md\n', // canon-keep-record-root
@@ -205,8 +198,7 @@ export default scenario({
       seedRecords(ctx, '.canon', 'tmp')
       ctx.mkdir('.canon/groundwork/01-closed-trail')
 
-      // One citation per class the scope separates, each seeding line protected so
-      // the sweep leaves this fixture building the state rather than the defect.
+      // One citation per class the scope separates, each seeding line protected from the sweep.
       ctx.append(
         '.canon/tasks/v1.1-staged-row.md',
         'Origin: .claude/groundwork/01-closed-trail/notes.md\n', // canon-keep-record-root
@@ -260,14 +252,12 @@ export default scenario({
       seedRecords(ctx, '.claude', '.tmp')
       ctx.write('.gitignore', '.canon/\n')
 
-      // A bare repository on disk stands in for the private records remote, passing
-      // the remote gate since a sandbox project has no remotes.
+      // A bare repository stands in for the private records remote, since a sandbox project has none.
       const origin = `${ctx.dir}/../records-origin.git`
       rmSync(origin, { recursive: true, force: true })
       ctx.git('init', '--quiet', '--bare', origin)
 
-      // A push lands on one branch per project, so the read follows whichever branch
-      // the push made rather than naming one.
+      // A push lands on one branch per project, so the read follows whichever the push made.
       const originTree = (): void => {
         const branch = ctx
           .read('git', [
@@ -290,8 +280,7 @@ export default scenario({
         ctx.print(ctx.capture('sort', [], { input: listing }).stdout)
       }
 
-      // The history opens at the old root to build an unmigrated tree for the
-      // split-root refusal below, so neither line may be swept.
+      // The history opens at the old root to build the unmigrated tree for the split-root refusal.
       ctx.git(
         '--git-dir=.claude/.records.git', // canon-keep-record-root
         'init',
@@ -316,8 +305,7 @@ export default scenario({
         'Expect: bare paths such as tasks/index.md, with no record root in any of them',
       )
 
-      // Half a move, the state the push guard exists for, with `.canon` answering for
-      // the tree while the index still names the folders left behind.
+      // Half a move, the state the push guard exists for, with `.canon` answering while the index names the old folders.
       ctx.log.step('Half-migrating the tree, one folder moved')
       ctx.mkdir('.canon')
       ctx.run('mv', [

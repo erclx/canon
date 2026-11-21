@@ -33,12 +33,8 @@ import {
 
 /**
  * Provisions one scenario into the sandbox tree, and resets or cleans that tree.
- * A scenario's arm runs in process through `scenario.ts`, and everything
- * around it runs here, in the order the retired bash dispatcher held.
- *
- * Narration is part of the contract. `canon sandbox equivalence` compares the
- * log line for line against the bash harness, so every message, its frame
- * glyph, and its position in the order stays as that harness wrote it.
+ * `canon sandbox equivalence` compares the log line for line against the retired
+ * bash harness, so every message, frame glyph, and position stays as that harness wrote it.
  */
 
 const ANCHOR_FIXTURE_PARTS = ['sandbox', FIXTURES_DIR, 'anchor', 'create']
@@ -107,8 +103,7 @@ function stageAnchorTree(
   sandbox: string,
   env: NodeJS.ProcessEnv,
 ): void {
-  // The anchor scenarios build their remote URL inside a command substitution,
-  // where a failure would leave an empty remote, so the guard fires here first.
+  // The anchor scenarios build their remote URL in a command substitution, where a failure leaves an empty remote.
   if ((env.GITHUB_ORG ?? '') === '')
     fail(
       'GITHUB_ORG is empty. Export GITHUB_ORG=<org>, or run from a clone whose remote.origin.url points at GitHub.',
@@ -259,12 +254,9 @@ function setupAssets(
 }
 
 /**
- * Copies every skill body this checkout changed against the merge base into the
- * tree, so a scenario exercises the branch's skill rather than the installed
- * plugin's. The merge base against `origin/main` comes first, so a local `main`
- * trailing the remote does not pull in skills other merged branches changed.
- * A headless run skips it, since a copied body alone shadows the plugin's whole
- * skill folder and its relative citations then resolve to nothing.
+ * Copies every skill body this checkout changed against the merge base with
+ * `origin/main` into the tree, so a scenario exercises the branch's skill. A
+ * headless run skips it, since a copied body shadows the plugin's whole skill folder.
  */
 export function injectChangedSkills(
   root: string,
@@ -452,8 +444,7 @@ async function provisionScenario(
   configureCredentials(sandbox, env)
   setupAssets(root, sandbox, env)
 
-  // A scenario that execs a verb last hands the run to that verb, whose frame
-  // is the last written. An in-process arm writes its exports into `env`.
+  // A scenario that execs a verb last hands the run to that verb, and an in-process arm writes its exports into `env`.
   const staged = await stageScenarioInProcess(declared.definition, {
     root,
     dir: sandbox,

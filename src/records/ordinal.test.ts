@@ -68,8 +68,7 @@ describe('claimOrdinal', () => {
   })
 
   it('should retry past a losing race rather than reporting one', async () => {
-    // Simulates a second session having already claimed 01 between this
-    // call's read and its own create.
+    // Simulates a second session having already claimed 01 between this call's read and its own create.
     seed('intake', '01-rival')
 
     const outcome = await claimOrdinal(ROOT, 'intake', 'my-topic')
@@ -78,8 +77,7 @@ describe('claimOrdinal', () => {
   })
 
   it('should let two concurrent claims for different kinds land on distinct ordinals', async () => {
-    // Two sessions taking one ordinal for two different record folders, both
-    // calls reading the same starting state and racing to claim it.
+    // Two sessions taking one ordinal for two different record folders, racing to claim it.
     const [first, second] = await Promise.all([
       claimOrdinal(ROOT, 'intake', 'one'),
       claimOrdinal(ROOT, 'groundwork', 'two'),
@@ -92,8 +90,7 @@ describe('claimOrdinal', () => {
   })
 
   it('should recover a stale reservation left by a process that died before its leaf create', async () => {
-    // A lock with no folder in either kind, old enough that no ordinary claim
-    // could still be creating its leaf: a process reserved 01 and stopped.
+    // A lock with no folder in either kind, old enough that no claim is still creating its leaf.
     mkdirSync(join(ROOT, '.canon', 'ordinal-locks', '01'), {
       recursive: true,
     })
@@ -105,8 +102,7 @@ describe('claimOrdinal', () => {
   })
 
   it('should not reclaim a lock too young to be abandoned', async () => {
-    // A fresh lock with no folder reads as a claim mid-flight, so every retry
-    // recomputes the same ordinal and the bounded spin ends in a refusal.
+    // A fresh lock with no folder reads as a claim mid-flight, so the bounded spin ends in a refusal.
     mkdirSync(join(ROOT, '.canon', 'ordinal-locks', '01'), {
       recursive: true,
     })
@@ -121,8 +117,7 @@ describe('claimOrdinal', () => {
   })
 
   it('should not read a lock backed by the other kind as stale', async () => {
-    // 01 is genuinely live: groundwork already claimed it, so highestOrdinal
-    // has already moved past it before this call even reads the lock.
+    // 01 is genuinely live: groundwork already claimed it, so highestOrdinal has moved past it.
     seed('groundwork', '01-already-claimed')
     mkdirSync(join(ROOT, '.canon', 'ordinal-locks', '01'), {
       recursive: true,

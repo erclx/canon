@@ -3,13 +3,9 @@ import { dirname, relative, resolve, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 /**
- * Turns the files `--frames` names into targets the walk opens, each with a
- * label the listing prints in place of a route.
- *
- * A label is the path relative to the directory every input shares, rather
- * than the basename, because a round's arms repeat names across pages. Two
- * frames both called `arm-1.html` would otherwise fold into one location and
- * the count of frames carrying a value would read low.
+ * Turns the files `--frames` names into targets the walk opens, each with a label
+ * the listing prints in place of a route. A label is the path relative to the
+ * shared directory, since a round's arms repeat basenames across pages.
  */
 
 export interface FrameTarget {

@@ -63,8 +63,7 @@ describe('resolveReference', () => {
   })
 
   it('should spell the package source so nothing joins it to a project root', () => {
-    // The field promises a repo-relative path everywhere else, and a package
-    // copy is the one source that promise cannot cover.
+    // The field promises a repo-relative path everywhere else, which a package copy cannot cover.
     expect(resolveReference(ROOT, 'base')?.source).toContain('<canon>')
   })
 

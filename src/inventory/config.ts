@@ -2,11 +2,9 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 /**
- * Where a project declares what an inventory walks, spelled once.
- *
- * It sits at the project root rather than under `.claude/`, because the routes
- * and the element queries describe the application rather than the agent
- * surface, and a target reads them the way it reads any other build input.
+ * Where a project declares what an inventory walks, at the project root rather
+ * than under `.claude/`, since routes and element queries describe the
+ * application, not the agent surface.
  */
 export const CONFIG_REL = 'inventory.toml'
 
@@ -23,12 +21,9 @@ export interface InventoryConfig {
 }
 
 /**
- * Why a config could not be used, which is never the same as a walk that read
- * nothing.
- *
- * Every value here is a refusal rather than an empty listing, because a listing
- * with no rows reads as a site giving one consistent answer, which is the
- * report an unconfigured project would get for free and the exact wrong reading.
+ * Why a config could not be used, never the same as a walk that read nothing.
+ * Each value is a refusal rather than an empty listing, since a listing with no
+ * rows reads as a site giving one consistent answer.
  */
 export type ConfigRefusal =
   | 'no-config'
@@ -58,12 +53,9 @@ function readSubjects(table: unknown): InventorySubject[] {
 }
 
 /**
- * Parses config text, so a caller holding the bytes skips the filesystem.
- *
- * A malformed route or subject is dropped rather than refused, matching the row
- * handling in `@/labels/map`: one bad entry should not blind the walk to the
- * other twenty. What that costs is a typo reading as an entry nobody wrote,
- * which the listing surfaces from the other side as a route with no elements.
+ * Parses config text, so a caller holding the bytes skips the filesystem. A
+ * malformed route or subject is dropped rather than refused, as `@/labels/map`
+ * does, so one bad entry does not blind the walk to the rest.
  */
 export function parseInventoryConfig(source: string): ConfigRead {
   let parsed: Record<string, unknown>
@@ -104,11 +96,9 @@ export function readInventoryConfig(root: string): ConfigRead {
 }
 
 /**
- * Joins a base and a route into the address a walk opens.
- *
- * Concatenation rather than `new URL(route, base)`, because the resolver reads
- * a leading slash as absolute and drops any path the base already carries, so a
- * project served under a subdirectory would have every route walk the origin.
+ * Joins a base and a route into the address a walk opens, by concatenation
+ * rather than `new URL(route, base)`, whose resolver drops any path the base
+ * carries, so a project under a subdirectory would walk the origin.
  */
 export function routeUrl(baseUrl: string, route: string): string {
   const base = baseUrl.replace(/\/+$/, '')

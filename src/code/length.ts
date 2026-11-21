@@ -9,9 +9,8 @@ import {
 
 /**
  * Lines a file may run before the report names it. One default Read returns
- * 25,000 tokens, not a line count, and 2,000 lines of this codebase's
- * TypeScript is about 18,500 tokens, so a file under the limit fits one read
- * with room to spare.
+ * 25,000 tokens, and 2,000 lines of this codebase's TypeScript is about 18,500,
+ * so a file under the limit fits one read.
  */
 export const FILE_LINE_LIMIT = 2000
 
@@ -107,10 +106,9 @@ const LITERAL = '\u0001'
 const MARKUP = '\u0002'
 
 /**
- * Blanks every literal, comment, regular expression, and stretch of JSX
- * markup, keeping newlines, so a brace or a keyword inside one reads as
- * nothing. A function written inside a template's `${}` is blanked with the
- * template and goes unmeasured, while one inside a JSX `{}` container is read.
+ * Blanks every literal, comment, regular expression, and stretch of JSX markup,
+ * keeping newlines. A function inside a template's `${}` goes unmeasured with
+ * the template, while one inside a JSX `{}` container is read.
  */
 function codeOnly(source: string, options: { jsx?: boolean }): string {
   const { literals, comments, regexes, jsx } = lex(source, options)
@@ -211,13 +209,9 @@ function wordAt(code: string, start: number): string {
 }
 
 /**
- * The `)` closing a parameter list that a return type annotation follows,
- * read backward from the annotation's last character, or -1.
- *
- * An annotation may span lines, so the read runs until `:` and stops at `;`,
- * `,`, `=`, `?`, or a declaration keyword outside brackets, which keeps a class
- * heritage clause, a ternary, or an assignment from reading as an annotation.
- * An annotation needs at least one character, so `case f(): {` opens no body.
+ * The `)` closing a parameter list that a return type annotation follows, read
+ * backward from the annotation's last character, or -1. It stops at `;`, `,`,
+ * `=`, `?`, or a declaration keyword so a ternary or heritage clause is no annotation.
  */
 function annotatedParams(code: string, from: number): number {
   let depth = 0
@@ -301,9 +295,8 @@ const TEST_RUNNERS = new Set(['describe', 'it', 'test'])
 
 /**
  * Whether the call whose arguments open at `paren` is a test runner's
- * `describe`, `it`, or `test`, read backward over any chained modifier such
- * as `.each(table)`, a tagged table, or `.skip`, to the name the chain starts
- * from. A method such as `pattern.test` starts from `pattern` and is no runner.
+ * `describe`, `it`, or `test`, read backward over chained modifiers to the
+ * name the chain starts from. `pattern.test` starts from `pattern`, no runner.
  */
 function callsTestRunner(code: string, paren: number): boolean {
   let i = previousToken(code, paren - 1)
@@ -331,10 +324,9 @@ function callsTestRunner(code: string, paren: number): boolean {
 }
 
 /**
- * Whether the function opening at `start` is an argument to a test runner's
- * `describe`, `it`, or `test`. Such a callback holds a suite or a case rather
- * than a function a review reads, so it is no function here and adds no depth
- * to the functions written inside it.
+ * Whether the function opening at `start` is an argument to a test runner. Such
+ * a callback holds a suite or a case rather than a function a review reads, so
+ * it adds no depth to the functions written inside it.
  */
 function isTestCallback(code: string, start: number): boolean {
   const before = previousToken(code, start - 1)
@@ -379,15 +371,9 @@ function headerAt(code: string, brace: number): Header | undefined {
 }
 
 /**
- * Every function with a block body in a TypeScript or JavaScript source, in
- * the order each closes. Pass `jsx` for a `.tsx` or `.jsx` source.
- *
- * `typescript` is a development dependency and this module ships inside the
- * published CLI, so braces are matched over the code `lex` leaves outside
- * literals, comments, and regular expressions, and each `{` is read as a body
- * when the tokens before it are a parameter list, a return type, or `=>`. An
- * arrow with an expression body has no braces and is skipped, and so is a
- * callback passed to `describe`, `it`, or `test`.
+ * Every function with a block body in a TypeScript or JavaScript source, in the
+ * order each closes. `typescript` is a development dependency, so braces are
+ * matched over the code `lex` leaves, and an expression-bodied arrow is skipped.
  */
 export function functionSpans(
   source: string,
@@ -416,10 +402,9 @@ export function functionSpans(
 }
 
 /**
- * Each function's block body as offsets from its `{` to just past its `}`,
- * in the order each closes, by the reading `functionSpans` takes. Unlike that
- * reading, a callback passed to `describe`, `it`, or `test` is a body here,
- * since a comment inside one sits inside a function all the same.
+ * Each function's block body as offsets from its `{` to just past its `}`, in
+ * the order each closes. Unlike `functionSpans`, a test runner's callback is a
+ * body here, since a comment inside one sits inside a function all the same.
  */
 export function functionBodies(
   source: string,
@@ -475,10 +460,8 @@ function bodies(code: string): Body[] {
 
 /**
  * The functions a file holds, or none for a language neither reading covers.
- * An `.astro` file is read by its frontmatter alone, whose lines keep their
- * numbers in the file. A Python file the indentation reading cannot follow
- * comes back unread with its reason, never as an empty list, and a `test_`
- * function in a pytest file is skipped as a test callback is.
+ * An `.astro` file is read by its frontmatter alone, and a Python file the
+ * reading cannot follow comes back unread with its reason, never as an empty list.
  */
 export function functionSpansInFile(
   file: string,
@@ -522,9 +505,8 @@ export interface LongFunction {
 
 /**
  * The files past the line limit, the top-level functions past the checkpoint,
- * and the files whose functions could not be read, each sorted by path then
- * line. A nested function is left out, since the function around it already
- * carries its lines.
+ * and the files whose functions could not be read, sorted by path then line. A
+ * nested function is left out, since its parent already carries its lines.
  */
 export function longCode(
   sources: readonly { readonly file: string; readonly source: string }[],

@@ -36,10 +36,9 @@ interface UpgradeRecord {
   readonly state: 'upgraded' | 'current' | 'pending' | 'cancelled' | 'refused'
   readonly reason?: string
   /**
-   * One rendered line for a caller that reports the outcome without parsing
-   * the rest of the record, such as the base stack's post-merge hook. `current` reuses
-   * `describeSkew` verbatim so its wording never drifts from the line `canon
-   * sync --check` and `canon claude skills drift` already report.
+   * One rendered line for a caller that reports the outcome without parsing the
+   * record, such as the base stack's post-merge hook. `current` reuses
+   * `describeSkew` verbatim so its wording never drifts from `canon sync --check`.
    */
   readonly message: string
 }
@@ -98,8 +97,7 @@ async function runUpgrade(opts: UpgradeOptions): Promise<number> {
     )
   }
 
-  // A manifest with no `name` would reach `installCommand` and install whatever
-  // the placeholder names, and the prompt defaults to yes headlessly.
+  // A manifest with no `name` would install whatever the placeholder names.
   if (installed.name === undefined) {
     return refuse(
       opts,
@@ -151,13 +149,8 @@ async function runUpgrade(opts: UpgradeOptions): Promise<number> {
 
 /**
  * Runs the reinstall and reads the version back off disk rather than trusting
- * the manager's own report, since each spells success differently and one of
- * them exits zero on a no-op. The read is the same `package.json` the CLI names
- * on `--version`, which the install has overwritten by this point.
- *
- * An `unknown` skew reaches here rather than stopping. The operator asked for
- * the reinstall, and the manager reports its own network failure in terms the
- * dist-tag endpoint cannot.
+ * the manager's report, since one exits zero on a no-op. An `unknown` skew
+ * reaches here, since the operator asked for the reinstall regardless.
  */
 async function applyUpgrade(
   opts: UpgradeOptions,
@@ -189,8 +182,7 @@ async function applyUpgrade(
 
   logStep('Upgrading')
   const [bin, ...args] = command
-  // The manager's progress goes to stderr, since inheriting stdout would put
-  // its output ahead of the JSON record and break every wrapper parsing it.
+  // The manager's progress goes to stderr, since stdout would precede and break the JSON record.
   const result = await execa(bin, args, {
     reject: false,
     stdin: 'inherit',
@@ -226,9 +218,8 @@ async function applyUpgrade(
 
 /**
  * The version of the checkout the caller stands in, read off cwd rather than
- * off `PROJECT_ROOT`, which is the installed package a bare `canon` resolves
- * to. A target project sits in no canon checkout, so this reads nothing there
- * and the verb behaves as it did.
+ * `PROJECT_ROOT`, the installed package a bare `canon` resolves to. A target
+ * sits in no canon checkout, so this reads nothing there.
  */
 function readCheckoutVersion(): string | undefined {
   const dir = findCheckoutMismatch(process.cwd())
@@ -237,11 +228,8 @@ function readCheckoutVersion(): string | undefined {
 
 /**
  * The clause a caller appends when the checkout carries a release npm does not
- * serve yet. A pull lands the release commit before the publish job finishes,
- * so for a few minutes the checkout leads the registry, and a release that
- * never publishes keeps it leading. The wording names the served version
- * rather than promising a publish for that reason. `undefined` covers every
- * case with nothing to say, including a version that does not parse.
+ * serve yet, since a pull lands the release commit before the publish finishes.
+ * The wording names the served version rather than promising a publish.
  */
 export function pendingNote(
   served: string | undefined,
@@ -307,15 +295,9 @@ function emit(opts: UpgradeOptions, record: UpgradeRecord): void {
 }
 
 /**
- * `message` is the one field carrying arbitrary text: `describeSkew`'s
- * `unknown` branch embeds a registry error verbatim, and a registry answering
- * with HTML produces one already carrying a double quote. The base stack's
- * post-merge hook, and any hook installed before `canon hooks post-merge`,
- * reads this field with a pattern rather than a parser, so a quote makes it
- * through `JSON.stringify` as an escaped `\"` that the pattern stops at,
- * truncating the line it prints. Collapsing whitespace and swapping the quote
- * for an apostrophe here, once, is what keeps every emitter of `message` from
- * having to reason about that reader.
+ * `message` is the one field carrying arbitrary text, and a hook reads it with
+ * a pattern rather than a parser, so an escaped `\"` truncates the line it
+ * prints. Swapping the quote for an apostrophe here spares every emitter.
  */
 export function singleLine(text: string): string {
   return text.replace(/\s+/g, ' ').replace(/"/g, "'")

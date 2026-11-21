@@ -1,11 +1,7 @@
 /**
- * How a folder under `.canon/evidence/` is numbered, shared by the two
- * migrations that land folders there.
- *
- * A folder takes `<nn>-<slug>` in the order folders first appeared, and a new
- * one continues past the highest ordinal already present. No record folder is
- * tracked in git, so file modification times are the only history a target
- * holds to order by.
+ * How a folder under `.canon/evidence/` is numbered, shared by the two migrations
+ * that land folders there. A new folder continues past the highest ordinal present,
+ * and file modification times are the only history to order by.
  */
 
 import { existsSync, readdirSync, statSync } from 'node:fs'

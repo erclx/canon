@@ -2,9 +2,8 @@ import { type StageContext, scenario } from '@/sandbox/scenario'
 
 /**
  * The exported function hands back the stored row, so its storage column names
- * are already part of what a caller sees. The command copies one of them,
- * `buyer`, straight into its JSON, and the nightly script parses it. A rename
- * in place breaks that script, which the prompt never mentions.
+ * are part of what a caller sees. The command copies `buyer` into its JSON, a
+ * nightly script parses it, and a rename in place breaks it unmentioned.
  */
 function stageRename(ctx: StageContext): void {
   ctx.fixtures('claude', 'api-design', 'rename', '01-initial')

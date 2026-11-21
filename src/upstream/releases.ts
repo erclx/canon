@@ -76,13 +76,8 @@ export function extractIdentifiers(text: string): string[] {
 }
 
 /**
- * Collects the releases newer than the cursor, newest first.
- *
- * The walk stops at the first release whose version is not newer than the
- * cursor, wherever it sits, so a range crossing a page boundary is read whole
- * and a cursor naming a version the feed never carried, as 2.1.256 is not,
- * still bounds the range. A feed that ends with every release newer than the
- * cursor reports `cursor-missing` instead of returning all of it.
+ * Collects the releases newer than the cursor, newest first. The walk stops at the first release
+ * not newer than the cursor, and a feed ending with every release newer reports `cursor-missing`.
  */
 export async function walkReleases(
   cursor: string,

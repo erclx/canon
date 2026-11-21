@@ -13,13 +13,9 @@ export type HistoryIndex = ReadonlyMap<string, PathHistory>
 const EMPTY_BLOB = '0000000000000000000000000000000000000000'
 
 /**
- * Git's own object name for a file's contents: sha1 over `blob <len>\0` and the
- * bytes. Computed here rather than shelled out to `git hash-object`, which would
- * cost a process per file inside the attribution pass.
- *
- * A repository normalizing line endings on checkout stores a blob the working
- * tree never holds, so this returns a name that matches no historical version.
- * The caller treats an unmatched file as unattributed, which is the safe label.
+ * Git's own object name for a file's contents: sha1 over `blob <len>\0` and the bytes, computed
+ * here to avoid a process per file. A repository normalizing line endings stores a blob the working
+ * tree never holds, so it matches nothing and the file is unattributed.
  */
 export function gitBlobHash(content: Buffer): string {
   const header = Buffer.from(`blob ${content.length}\0`, 'utf8')
@@ -27,12 +23,8 @@ export function gitBlobHash(content: Buffer): string {
 }
 
 /**
- * Reads `--raw` log output into blob-to-commit maps, one per path.
- *
- * Reverse-chronological input means the first commit naming a blob is the
- * newest that produced it, so an existing key is never overwritten. Content
- * reverted and restored therefore reports the recent commit rather than the
- * original, which is the one an operator can act on.
+ * Reads `--raw` log output into blob-to-commit maps, one per path. Input is newest first, so the
+ * first commit naming a blob is kept and an existing key is never overwritten.
  */
 export function parseRawLog(output: string): HistoryIndex {
   const index = new Map<string, Map<string, string>>()
@@ -61,13 +53,9 @@ export function parseRawLog(output: string): HistoryIndex {
 }
 
 /**
- * Every historical version of the given toolkit-relative paths, or `undefined`
- * when this toolkit has no history to read. A package installed from the
- * registry ships source without `.git`, so absence is an ordinary state rather
- * than a failure, and the caller degrades to the unattributed path.
- *
- * Renames are disabled so a raw line always carries exactly one path. Detection
- * would emit a two-path form that the parser would read as an unknown blob.
+ * Every historical version of the given toolkit-relative paths, or `undefined` when this toolkit has
+ * no history, as a registry install ships without `.git`. Renames are disabled so a raw line
+ * always carries exactly one path.
  */
 export function readHistoryIndex(
   toolkitRoot: string,
@@ -106,10 +94,8 @@ export function toRepoPath(path: string): string {
 }
 
 /**
- * The commit whose version of `sourceRel` matches what sits at `installedPath`.
- * A match proves the file is untouched since it was installed, so the toolkit is
- * what moved. No match means the content matches nothing this toolkit ever
- * published, which is a local edit and stays unattributed.
+ * The commit whose version of `sourceRel` matches what sits at `installedPath`. A match proves the
+ * file is untouched since install, and no match is a local edit that stays unattributed.
  */
 export function findInstalledOrigin(
   index: HistoryIndex,

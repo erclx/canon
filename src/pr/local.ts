@@ -51,15 +51,9 @@ function isUnder(cwd: string, folder: string): boolean {
 }
 
 /**
- * Finds the server this worktree is running: the lowest port whose listening
- * process runs inside the worktree, answers an HTTP probe, and passes every
- * declared health path. A port rather than a process is the unit, since one
- * dev server often holds a second socket for its reload channel, and the
- * lower one is the page by convention. Health is read on the page's own port,
- * since that is the address a reviewer drives, and a page whose backend fails
- * refuses as `unhealthy` naming the lowest page port's first failing path.
- * A port whose listener runs under a `pageOnly` folder, matched on whole
- * segments, is found on the page probe alone.
+ * Finds the server this worktree is running: the lowest port whose listener is
+ * in the worktree, answers an HTTP probe, and passes every declared health path
+ * on that page port. A port is the unit, since a reload socket holds a second.
  */
 export async function findLocalServer(
   worktreeRoot: string,
@@ -100,13 +94,9 @@ export async function findLocalServer(
 }
 
 /**
- * Drops the address line of a marked body, hosted and local segments alike,
- * since the close that runs this also deletes the branch's preview
- * deployments and a link left behind points at nothing. Every other byte stays
- * in place, so the trailing marker, the checklist delimiters, and any ticked
- * box survive, and the blank line the address sat on is dropped with it so no
- * gap doubles. Undefined when the body carries no address, which is also what
- * a second drop of the same body returns.
+ * Drops the address line of a marked body, hosted and local alike, since the
+ * close deletes the preview deployments and a left link points at nothing. Every
+ * other byte stays, the blank line goes, and undefined means no address.
  */
 export function dropAddressLine(body: string): string | undefined {
   const { lines: indexes } = readAddresses(body)
@@ -129,10 +119,8 @@ const LOOPBACK_URL =
 
 /**
  * Rewrites the loopback address on a UI review's `Driven at` line to "a local
- * preview", keeping the head and the renderer. Only that line is read, so a
- * loopback URL a box reason quotes from the page stays as content. Undefined
- * when no line changes, which is also what a second mask of the same body
- * returns.
+ * preview", keeping the head and renderer. Only that line is read, so a URL a box
+ * reason quotes stays. Undefined when no line changes, as on a second mask.
  */
 export function maskLocalAddress(body: string): string | undefined {
   let changed = false

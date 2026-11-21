@@ -419,11 +419,9 @@ function sizeRow(entry: FolderSize): string[] {
 }
 
 /**
- * Renders the present folders as a table, heaviest first.
- *
- * The order is what makes the reading worth taking. A folder listed
- * alphabetically hides behind its neighbors, and the one that grew is the row
- * a reader came for, so it leads.
+ * Renders the present folders as a table, heaviest first, since a folder
+ * listed alphabetically hides behind its neighbors and the one that grew is the
+ * row a reader came for.
  */
 function reportSize(outcome: Extract<SizeOutcome, { ok: true }>): void {
   const present = outcome.folders
@@ -455,8 +453,7 @@ function reportSize(outcome: Extract<SizeOutcome, { ok: true }>): void {
       ),
     )
 
-    // The name column reads as a list and the rest as numbers, so one is
-    // left-aligned and the others are not.
+    // The name column reads as a list and the rest as numbers, so only it is left-aligned.
     const render = (cells: readonly string[]): string =>
       cells
         .map((cell, column) =>
@@ -703,11 +700,9 @@ async function runPull(opts: BackupCommandOptions): Promise<number> {
 }
 
 /**
- * Reports a refusal from any of the three verbs that carry one.
- *
- * The parameter is structural rather than the union of their outcome types,
- * because the three refusal vocabularies are separate lists and naming them all
- * here would grow with every verb added.
+ * Reports a refusal from any of the three verbs that carry one. The parameter
+ * is structural rather than their outcome union, since the three refusal
+ * vocabularies are separate lists and naming them all would grow with each verb.
  */
 function reportRefusal(
   banner: string,
@@ -731,8 +726,7 @@ function reportRefusal(
     return 1
   }
 
-  // A setup refusal's later lines are commands to copy, so they go out with no
-  // marker, which would make them read as results.
+  // A setup refusal's later lines are commands to copy, so they carry no result marker.
   const [reason, ...rest] = outcome.message.split('\n')
 
   intro(banner)
@@ -764,8 +758,7 @@ async function runValidate(
 
   const root = opts.root ?? (await mainWorktreeRoot())
 
-  // A plan named with its extension and without it is one record, so the walk
-  // and the cross-plan filter below both read the bare stem.
+  // A plan named with or without its extension is one record, so both read the bare stem.
   const stem = record?.replace(/\.md$/, '')
 
   return report(await validateWithStacks(root, kind, stem), emitJson, root)
@@ -803,8 +796,7 @@ function report(
   root: string,
 ): number {
   if (!outcome.ok) {
-    // The framed branch reaches stderr through logError, and this bare write
-    // keeps JSON mode from reporting the reason on stdout alone.
+    // The bare write keeps JSON mode from reporting the reason on stdout alone.
     if (emitJson) {
       process.stderr.write(`${outcome.message}\n`)
       process.stdout.write(

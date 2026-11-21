@@ -5,12 +5,9 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { captureSources } from '@/capture/render'
 
 /**
- * Drives `captureSources` through the real engine for the two verdicts the font
- * probe gives without consulting an installed font: a generic keyword is
- * refused, and an element holding no text is never probed.
- *
- * The suite needs a browser binary and skips without one, so a green pipeline
- * is not evidence this passed.
+ * Drives `captureSources` through the real engine for the two font-probe verdicts
+ * needing no installed font: a generic keyword is refused and a textless element
+ * is never probed. It skips without a browser binary, so green is not evidence it passed.
  */
 
 async function browserAvailable(): Promise<boolean> {

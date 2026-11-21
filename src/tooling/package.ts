@@ -90,10 +90,8 @@ function firstInteger(value: string): string | undefined {
 }
 
 /**
- * Compares a manifest pin against what package.json records. A spec counts as
- * missing when absent or on an earlier major than the pin, and ahead when it
- * sits on a later one, which a write leaves alone. A spec with no integer to
- * compare, such as `latest` or `workspace:*`, counts as present.
+ * Compares a manifest pin against what package.json records. A spec is missing when absent or on an earlier
+ * major, ahead on a later one, and present when it has no integer to compare, such as `latest`.
  */
 function compareSpec(
   installed: string | undefined,
@@ -142,10 +140,8 @@ export function collectDeps(
 }
 
 /**
- * Compares manifest scripts and `[scripts.override]` keys against
- * package.json. The expected value of each key comes from `applyScripts`, so
- * the scan and the write path agree on which stack wins. Plain keys come
- * first, nearest stack first, then override-only keys.
+ * Compares manifest scripts and `[scripts.override]` keys against package.json, with each expected value from
+ * `applyScripts` so the scan and the write agree on which stack wins.
  */
 export function collectScripts(
   chain: readonly Manifest[],
@@ -204,11 +200,8 @@ export function resolveScript(
 }
 
 /**
- * Fills scripts the target does not define, nearest stack first, then replays
- * `[scripts.override]` from the furthest ancestor inward so the nearest stack
- * has the last word. This is the ordering `apply_stack_scripts` produced
- * through its recursion. A `held` key, one the project declined or
- * customized, is left as the target has it in both passes.
+ * Fills scripts the target does not define, nearest stack first, then replays `[scripts.override]` from the
+ * furthest ancestor inward so the nearest stack has the last word. A `held` key is left as the target has it.
  */
 export function applyScripts(
   pkg: PackageJson,

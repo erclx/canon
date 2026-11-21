@@ -7,11 +7,9 @@ export default scenario({
   },
   arms: {
     default: (ctx) => {
-      // One unresolved treatment, the callout shipping flat as arm 0, plus a seeded
-      // references page the reference step reuses rather than reaching the network.
+      // One unresolved treatment plus a seeded references page the reference step reuses.
       ctx.fixtures('claude', 'design-pick', 'shared', '01-initial')
-      // Frameboard names its marker board.json, which the folder-name gate reads as a
-      // repeat, so the scenario writes it rather than the fixture tree.
+      // Frameboard's marker board.json reads as a repeat to the gate, so the scenario writes it.
       ctx.write('.canon/board/board.json', '{"version": 1}\n')
 
       ctx.mkdir('.claude')

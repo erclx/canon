@@ -20,14 +20,8 @@ function logReady(ctx: StageContext): void {
 }
 
 // Two pick-only arms, one host signal each. Both host procedures call live
-// `wrangler`, `vercel`, and `gh` against real accounts, so neither arm drives
-// past the Pick step. Run each under a permission mode that denies every tool
-// outside the read set, which is what keeps the session off any account rather
-// than the prompt asking it to stop.
-//
-// No arm stages both hosts or neither. That branch ends in the structured
-// question, which `dontAsk` denies and a `claude -p` run has nobody to answer,
-// so an arm there would score a denial rather than the ask.
+// accounts, so each arm runs under a permission mode denying every tool outside
+// the read set. No arm stages both hosts or neither, since that ends in a question nobody answers.
 export default scenario({
   config: {
     SANDBOX_SKIP_AUTO_COMMIT: 'true',

@@ -10,9 +10,8 @@ const FANS_IN = /\bfans in\s+/gi
 
 /**
  * A backticked slug may drop the `feature-` prefix, and a bare one must carry
- * it. Without the prefix a bare word is indistinguishable from the prose that
- * follows the list, so `Fans in feature-a and the rest` would read `the` as a
- * member.
+ * it, since a bare word is otherwise indistinguishable from the prose after the
+ * list, so `Fans in feature-a and the rest` would read `the` as a member.
  */
 const TICKED_SLUG = /^`((?:feature-)?[a-z0-9][a-z0-9-]*)`/i
 const BARE_SLUG = /^(feature-[a-z0-9][a-z0-9-]*)/i
@@ -84,15 +83,9 @@ function unmatched(stem: string, subject: string, message: string): Finding {
 }
 
 /**
- * Every place a fan-in set's two sides disagree across the live plans.
- *
- * An absent plan is reported rather than skipped, unlike `stackFindings`. The
- * caller hands over the live folder only, so a member archived after it merged
- * reads as absent, and an integrator still listing it would otherwise take its
- * leftover branch on origin as a member that finished.
- *
- * A member two integrators list is reported on each of them rather than paired
- * with whichever sorts first, since either merge would carry it.
+ * Every place a fan-in set's two sides disagree across the live plans. An absent
+ * plan is reported rather than skipped, since an archived member's leftover
+ * branch would read as finished. A member two integrators list is reported on each.
  */
 export function fanInFindings(plans: readonly StackPlan[]): Finding[] {
   const integratorsOf = new Map(

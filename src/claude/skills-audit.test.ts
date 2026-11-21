@@ -690,8 +690,7 @@ function listedPracticeSkillsExcept(omitted: string): void {
 }
 
 describe('auditSkills ledger list', () => {
-  // A per-bullet scope with no body and no exemption owes no ledger a bare
-  // fixture lacks, so it varies as cleanly as an unlisted skill.
+  // A per-bullet scope with no body and no exemption owes no ledger a bare fixture lacks.
   const ledgerOnly =
     LEDGER_SKILLS.find((rel) => {
       if (PRACTICE_SKILLS.includes(rel)) return false
@@ -1463,8 +1462,7 @@ describe('auditExitCode', () => {
 
     const report = await auditSkills(root)
 
-    // Each closing section, the source ledger, and the body ledger the
-    // per-bullet list owes, since every practice skill sits on that list.
+    // Each closing section, the source ledger, and the body ledger the per-bullet list owes.
     expect(report.practiceShape).toHaveLength(PRACTICE_SECTIONS.length + 2)
     expect(auditExitCode(report)).toBe(0)
   })

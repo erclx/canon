@@ -60,15 +60,8 @@ function loadsE2eConfig(args: readonly string[]): boolean {
 
 /**
  * Whether a hand-run vitest invocation runs the whole suite and so queues on
- * the machine lock the gate's Tests stage holds.
- *
- * A run loading `E2E_CONFIG` queues too, since its suites film in a real
- * browser and two at once contend for CPU. Any other scoped run is seconds of
- * work, cheaper to collide than to queue. Vitest exposes no setup-time API
- * naming the CLI filters, so any bare argument other than the subcommand reads
- * as a file filter, including the value of a flag spelled `--flag value`. That
- * misread skips a lock rather than queueing a scoped run, which is the side to
- * err on.
+ * the machine lock the gate's Tests stage holds. An `E2E_CONFIG` run queues too,
+ * and any bare argument reads as a file filter, which skips a lock rather than queueing.
  */
 export function locksHandSuite(run: VitestRun): boolean {
   if (run.ci || run.watch || run.heldLock !== undefined) return false

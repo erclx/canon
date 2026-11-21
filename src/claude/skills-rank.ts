@@ -3,14 +3,8 @@ import { listSkillsAt, resolveSkillsCorpus } from '@/claude/skills-list'
 
 /**
  * Whether a prompt reaches the right skill, measured by TF-IDF cosine
- * similarity over the shipped catalog's own frontmatter descriptions. This is
- * a necessary condition rather than a report of real routing behavior: it
- * asks whether the descriptions are separable by the words they use, and
- * Claude Code does not route this way.
- *
- * Ported from `.canon/groundwork/42-ai-blueprint/evidence/rank.ts`, which
- * ran once against this catalog and named the collisions this measure now
- * tracks on a cadence.
+ * similarity over the catalog's frontmatter descriptions. A necessary condition
+ * rather than real routing behavior, which Claude Code does not do this way.
  */
 
 const STOP = new Set(
@@ -72,13 +66,8 @@ export type RankReport =
 
 /**
  * Reads a project's own case corpus, which is JSON in the shape `SKILL_CASES`
- * already holds. A target authors its own skills and its own vocabulary, so
- * the toolkit corpus answers a question no other project asked.
- *
- * No standard stands behind the shape until a third project needs one, so
- * every way the file fails is reported with what to change rather than
- * measured against a spec. An empty array refuses for the reason a missing
- * file does: a corpus of nothing scores 0 of 0 and reads as a clean pass.
+ * holds. Every failure is reported with what to change, and an empty array
+ * refuses, since a corpus of nothing scores 0 of 0 and reads as a clean pass.
  */
 export function loadCaseCorpus(path: string): CaseCorpusReport {
   if (!existsSync(path)) {
@@ -132,10 +121,9 @@ export function loadCaseCorpus(path: string): CaseCorpusReport {
 }
 
 /**
- * Every shipped skill's frontmatter description, read the way a prompt is
- * matched against it: whole, including the quoted trigger phrases it states.
- * A skill whose frontmatter carries no description contributes no vocabulary
- * and never wins a rank, so it is dropped rather than scored on nothing.
+ * Every shipped skill's frontmatter description, read whole as a prompt is
+ * matched against it. A skill with no description contributes no vocabulary
+ * and is dropped rather than scored on nothing.
  */
 export function loadCatalog(root: string): RankedSkill[] {
   const corpus = resolveSkillsCorpus(root)
@@ -208,10 +196,8 @@ export interface RankedResult {
 }
 
 /**
- * Every skill's TF-IDF vector over the catalog it was loaded with, and the
- * IDF weighting that both the catalog and a scored prompt read from. A model
- * is built once per catalog and reused across every case, since the IDF
- * weights are the same question asked of the same corpus each time.
+ * Every skill's TF-IDF vector over the catalog it was loaded with, and the IDF
+ * weighting a scored prompt shares. Built once per catalog and reused across cases.
  */
 export interface RankModel {
   readonly rank: (prompt: string) => readonly RankedResult[]
@@ -227,8 +213,7 @@ export function buildModel(catalog: readonly RankedSkill[]): RankModel {
   return {
     rank: (prompt: string): readonly RankedResult[] => {
       const promptVector = tfIdfVector(termCounts(tokenize(prompt)), idf)
-      // A prompt of only stopwords tokenizes to nothing, and an all-zero sort would
-      // hand the alphabetically first skill a win, so no ranking is reported.
+      // A prompt of only stopwords would hand the first skill a win, so no ranking is reported.
       if (promptVector.size === 0) return []
 
       return [...vectors]
@@ -289,10 +274,8 @@ export function measureCases(
 }
 
 /**
- * Reads whichever skill corpus the root carries and scores it against the
- * given cases. Measures the cwd's catalog rather than the toolkit root,
- * matching the reach and audit verbs, so a linked worktree reads its own
- * branch and a target reads the skills it wrote itself.
+ * Reads whichever skill corpus the root carries and scores it against the cases.
+ * Measures the cwd's catalog, so a linked worktree reads its own branch.
  */
 export function scanRank(
   root: string,

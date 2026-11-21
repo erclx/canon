@@ -1,12 +1,7 @@
 /**
- * The rule set the secret scan keys on.
- *
- * Every pattern matches an issued value and none matches a word, so the
- * exclusion set starts empty, since a scan keyed on `password` or `token`
- * fires on the environment reads, workflow inputs, and prose naming them. The
- * cost is a credential with no recognizable issuer prefix. Each literal prefix
- * is followed by a character class, so none of these sources matches itself,
- * and `src/secrets/scan.test.ts` holds the check.
+ * The rule set the secret scan keys on. Every pattern matches an issued value
+ * and none a word, since `password` or `token` would fire on environment reads
+ * and prose. Each literal prefix is followed by a class, so none matches itself.
  */
 export interface SecretPattern {
   readonly id: string
@@ -14,11 +9,9 @@ export interface SecretPattern {
   /** Carries the global flag, since a line may hold more than one value. */
   readonly match: RegExp
   /**
-   * Whether the matched text is the credential itself.
-   *
-   * A private key header names a block without carrying its bytes, so echoing
-   * it whole tells the reader what was found. Every other pattern matches the
-   * value, and reporting one in full would copy a live credential into a log.
+   * Whether the matched text is the credential itself. A private key header names
+   * a block without carrying its bytes, but reporting any other match in full
+   * would copy a live credential into a log.
    */
   readonly redact: boolean
 }
@@ -33,10 +26,7 @@ export const PATTERNS: readonly SecretPattern[] = [
   {
     id: 'github-token',
     label: 'GitHub token',
-    // Spelled as alternation rather than a character class, so the source
-    // carries the issued prefixes as themselves. A class reads as one
-    // pronounceable token to a spell checker and puts a nonsense word in a
-    // dictionary that is supposed to hold real terms.
+    // Spelled as alternation rather than a class, so a spell checker does not read it as a nonsense word.
     match: /\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{36,}\b/g,
     redact: true,
   },
@@ -106,11 +96,9 @@ export interface PatternHit {
 }
 
 /**
- * Shortens a matched value to its two ends.
- *
- * The ends are what a reader needs to find the credential in the file and to
- * tell one match from another, and the middle is the part no report should
- * carry. A value too short to have a middle is reported as its shape alone.
+ * Shortens a matched value to its two ends, which are what a reader needs to
+ * find the credential and tell matches apart. A value too short to have a
+ * middle is reported as its shape alone.
  */
 function redact(value: string): string {
   if (value.length <= 8) return '…'

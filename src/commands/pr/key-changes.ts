@@ -225,15 +225,9 @@ async function readFromApi(
 }
 
 /**
- * A rename's source path and a `.gitignore` addition, fetched only when a
- * first pass with neither already reports an unmet claim, since the fetch
- * repeats a listing and adds a full-row `gh api …/files` call.
- *
- * `unread` separates a read that failed from one that found neither, which an
- * empty `renames`/`ignoreAdditions` cannot. A set known to be short would let
- * a correct bullet accuse a file nobody changed. This carries that refusal as
- * a flag rather than a refused `Bijection`, since the base comparison can
- * still run and most claims never touch a rename or a `.gitignore` line.
+ * A rename's source path and a `.gitignore` addition, fetched only when a first
+ * pass already reports an unmet claim, since it adds a full-row `gh api` call.
+ * `unread` flags a failed read, since a short set would accuse a bullet.
  */
 async function resolveApiEvidence(
   cwd: string,
@@ -258,16 +252,13 @@ async function resolveApiEvidence(
     roots: treeRoots(tracked, changed),
     ...(head !== undefined && { head }),
   })
-  // A refusal has no claim to credit, and a clean pass resolved every claim
-  // without the extra evidence, so neither needs it.
+  // A refusal has no claim to credit, and a clean pass needs no extra evidence.
   if (probe.kind !== 'measured' || probe.unmet.length === 0) return clean
 
-  // Only here is a missing pull request number a real gap, since a claim is
-  // uncredited and there is no number to fetch its evidence.
+  // Only here is a missing pull request number a gap, since a claim is uncredited.
   if (number === undefined) return unread
 
-  // No `--jq` filter, since a filtered object per row makes `--paginate` emit one
-  // value per page. Parsing the raw paginated array is safe either way.
+  // No `--jq` filter, since a filtered object per row makes `--paginate` emit one value per page.
   const stdout = await gh(cwd, [
     'api',
     '--paginate',
@@ -303,10 +294,8 @@ async function resolveApiEvidence(
 
 /**
  * Every file a pull request changed, read through the paginated endpoint.
- *
  * Returns undefined when any page fails, which refuses rather than comparing
- * the pages that arrived: a comparison run against a set known to be short
- * would accuse a correct bullet of naming a file nobody changed.
+ * a set known to be short against a correct bullet.
  */
 async function listFilesByPage(
   cwd: string,
@@ -332,13 +321,9 @@ async function listFilesByPage(
 }
 
 /**
- * Reads the body off disk and the changed set from git, which is the shape a
- * fixture and a body still being drafted both need.
- *
- * `cwd` and `root` diverge when a caller passes `--root` to read a pull
- * request against a worktree other than the one they are standing in. The
- * body path is resolved against `cwd`, since it is correct from where the
- * caller stands regardless of which tree `--root` names.
+ * Reads the body off disk and the changed set from git, the shape a fixture and
+ * a body still being drafted both need. The body path resolves against `cwd`,
+ * since it is correct from where the caller stands, whatever `--root` names.
  */
 async function readFromFile(
   root: string,
@@ -443,8 +428,7 @@ async function runKeyChanges(
     }
   }
 
-  // Named rather than counted into the verdict, since generated assets,
-  // lockfiles, and indexes change without earning a bullet.
+  // Named rather than counted into the verdict, since generated files change unnamed.
   logStep('Unnamed')
   if (report.unnamed.length === 0) {
     logInfo('every changed file is reached by a bullet')
@@ -452,8 +436,7 @@ async function runKeyChanges(
     logInfo(
       `${plural(report.unnamed.length, 'changed file')} no bullet reached. Add one where the change is worth a reader knowing about.`,
     )
-    // Capped in the frame and whole in the record, since a rename branch can leave
-    // most files unnamed, correctly, and the list buries the graded direction.
+    // Capped in the frame and whole in the record, since a list can bury the graded direction.
     for (const path of report.unnamed.slice(0, UNNAMED_PRINT_LIMIT)) {
       logInfo(path)
     }
@@ -512,10 +495,8 @@ async function runKeyChanges(
 
 /**
  * Prints the body with each changed path in `## Key changes` linked to its
- * diff, and nothing else, so stdout pipes straight into a body file.
- *
- * Skips the frame `intro` opens, which would land in the piped body. Refusals
- * keep the framed shape on stdout like every other mode.
+ * diff, and nothing else, so stdout pipes into a body file. Skips the frame
+ * `intro`, which would land in the body, and keeps refusals framed on stdout.
  */
 async function runKeyChangesLink(
   number: string | undefined,

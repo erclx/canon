@@ -2,26 +2,17 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
 /**
- * The roots a tracked toolkit surface is read at, in precedence order.
- *
- * These are not `RECORD_ROOTS`. A record folder moves into `.canon/` because
- * it is gitignored, while a surface here is committed, so one shared list
- * would put a record folder under a root a tracked file resolves against.
- * `canon` wins because a tree carrying it has moved, and reading `.claude/`
- * there would answer from the copy the move left behind.
+ * The roots a tracked toolkit surface is read at, in precedence order, apart from
+ * `RECORD_ROOTS`, since a record folder is gitignored and a surface is committed.
+ * `canon` wins because `.claude/` in a moved tree is the copy the move left behind.
  */
 export const SURFACE_ROOTS = ['canon', '.claude'] as const
 
 export type SurfaceRoot = (typeof SURFACE_ROOTS)[number]
 
 /**
- * The root a surface is created at when neither root carries it yet.
- *
- * It agrees with the head of the read precedence. While the two disagreed,
- * creation stayed at `.claude/` so nothing wrote a fresh tracked file under a
- * root a target's installed binary could not resolve. A release carries the
- * read side now, so a fresh project scaffolds one root and an unmoved one keeps
- * resolving its own surfaces through the fallback above.
+ * The root a surface is created at when neither root carries it yet, which agrees with the head of
+ * the read precedence. An unmoved project keeps resolving its own through the fallback.
  */
 export const CREATION_ROOT: SurfaceRoot = 'canon'
 
@@ -50,13 +41,8 @@ export function spell(root: SurfaceRoot, entry: string): string {
 }
 
 /**
- * The root a surface resolves at: the first that carries it, and
- * `CREATION_ROOT` when neither does.
- *
- * The stamp folder used to take a carve-out here, staying at `.claude/` while
- * the install stamp and the audits baseline still wrote there by a fixed path
- * of their own. Both moved to `canon/config/` by a fixed path of their own, so
- * every entry now shares the one default.
+ * The root a surface resolves at: the first that carries it, and `CREATION_ROOT` when neither does.
+ * Every entry shares the one default, since the install stamp moved to `canon/config/`.
  */
 function rootOf(root: string, entry: string): SurfaceRoot {
   return (
@@ -82,13 +68,9 @@ export function surfaceDir(
 }
 
 /**
- * Where a path authored at the `canon/` spelling lands under `root`.
- *
- * A seed tree authors every surface once, at the new root, while a target may
- * still hold that surface under `.claude/`. Writing the literal path there
- * would open a `canon/` copy that wins read precedence and hides every entry
- * the target already wrote, so the entry resolves the way a read does. A path
- * naming no surface entry is joined as written.
+ * Where a path authored at the `canon/` spelling lands under `root`. A target may still hold the
+ * surface under `.claude/`, where a literal `canon/` copy would win read precedence and hide it,
+ * so the entry resolves the way a read does.
  */
 export function resolveSurfacePath(root: string, rel: string): string {
   const [head, entry, ...rest] = rel.split(/[\\/]/)
@@ -102,12 +84,9 @@ export function resolveSurfacePath(root: string, rel: string): string {
 }
 
 /**
- * Every root a surface would be read at, in precedence order, whether or not
- * it is on disk.
- *
- * Containment tests take this rather than `surfaceDir`, since a path written
- * against the root a tree no longer uses is still a path into that surface,
- * and reading it as outside would report a live reference as stale.
+ * Every root a surface would be read at, in precedence order, whether or not it is on disk.
+ * Containment tests take this rather than `surfaceDir`, since a path under a root the tree no
+ * longer uses is still a path into that surface.
  */
 export function surfaceDirs(
   root: string,

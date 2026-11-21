@@ -70,8 +70,7 @@ describe('resolveTargets', () => {
     ])
   })
 
-  // A machine no sync has run on answers "unknown" rather than "none", and the
-  // caller has to be able to tell those apart before reporting a population.
+  // A machine no sync has run on answers "unknown" rather than "none", and a caller must tell them apart.
   it('should carry an absent record through rather than reporting no targets', async () => {
     const report = await resolveTargets({
       registryFile: FILE,
@@ -123,8 +122,7 @@ describe('resolveTargets', () => {
     expect(report.targets[0]?.source).toBe('record')
   })
 
-  // The record knows the clone a sync ran in and only the sweep sees the second,
-  // so the rows fold rather than counting one project twice.
+  // The record knows the clone a sync ran in and only the sweep sees the second, so the rows fold.
   it('should fold a recorded clone into the sweep row that found its sibling', async () => {
     const first = stamp('public', 'birch')
     const second = stamp('extensions', 'birch')
@@ -145,8 +143,7 @@ describe('resolveTargets', () => {
     expect(report.targets[0]?.stampedAt).toBe('2026-08-30T00:00:00.000Z')
   })
 
-  // Every caller reading one path takes the first, and the record names a clone
-  // a sync actually ran in, where sort order names an arbitrary one.
+  // Every caller reading one path takes the first, and the record names a clone a sync actually ran in.
   it('should lead with the recorded clone rather than the one that sorts first', async () => {
     stamp('aaa-first-by-sort', 'birch')
 
@@ -163,8 +160,7 @@ describe('resolveTargets', () => {
     expect(report.targets[0]?.paths[0]).toBe(recorded)
   })
 
-  // The sweep sorts the second clone first, and the merge leads with the
-  // recorded one, so a carried `legacyPaths` would answer in the wrong order.
+  // The sweep sorts the second clone first and the merge leads with the recorded one, so a carried `legacyPaths` would mismatch.
   it('should re-derive legacy paths against the merged row rather than the sweep order', async () => {
     const recordedLegacy = stampLegacy('public', 'birch')
     const foundLegacy = stampLegacy('extensions', 'birch')

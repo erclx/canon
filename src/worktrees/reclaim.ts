@@ -50,9 +50,8 @@ export type Unreadable =
 
 /**
  * Which removal shape applies. `session` removes the background session and its
- * worktree together, and `worktree` removes a directory whose session has
- * ended. Picking the wrong one strands state, so this is reported rather than
- * assumed.
+ * worktree together, and `worktree` removes a directory whose session has ended.
+ * Picking the wrong one strands state, so it is reported rather than assumed.
  */
 export type Route = 'session' | 'worktree'
 
@@ -61,12 +60,8 @@ export type RemovalRoute = Route | null
 
 /**
  * One live session holding a worktree, enriched with the id `claude rm` takes.
- *
- * `id` is null on two occasions a caller cannot tell apart from the name
- * alone: an interactive holder, which carries no id at all since nothing but a
- * person closing its terminal removes it, and a background holder whose id
- * `claude agents --json` could not resolve, whether the binary is missing,
- * failing, or simply has not reported that pid.
+ * `id` is null for an interactive holder, which carries none, and for a
+ * background holder whose id `claude agents --json` could not resolve.
  */
 export interface HeldSession {
   readonly name: string
@@ -147,11 +142,9 @@ export interface ReclaimOptions {
 }
 
 /**
- * Reads the pull request state for the whole repository in one call.
- *
- * One call rather than one per worktree, since the per-worktree shape is a
- * network round trip inside a loop and the branches being matched are already
- * known before any of them runs.
+ * Reads the pull request state for the whole repository in one call, since the
+ * per-worktree shape is a network round trip inside a loop and the branches
+ * being matched are already known.
  */
 async function mergedPullRequests(cwd: string): Promise<MergedReport> {
   if (Bun.which('gh') === null) {
@@ -174,8 +167,7 @@ async function mergedPullRequests(cwd: string): Promise<MergedReport> {
   ]
 
   try {
-    // `gh` honors a hook's git variables over `cwd`, so they are cleared, or a
-    // same-named branch merged elsewhere would read a live worktree reclaimable.
+    // `gh` honors a hook's git variables over `cwd`, so they are cleared, or a same-named branch misleads.
     const result = await execa('gh', args, {
       cwd,
       timeout: GH_TIMEOUT_MS,
@@ -209,13 +201,8 @@ async function mergedPullRequests(cwd: string): Promise<MergedReport> {
 
 /**
  * Reads every live agent's session id, keyed by its process id, from `claude
- * agents --json`.
- *
- * Guarded like `mergedPullRequests`, reading the same way, but degrading
- * rather than refusing: the id enriches a caller's report and is never an
- * input the reclaim logic depends on, where the merge state decides whether a
- * removal is safe at all. A missing or failing binary leaves every entry
- * unresolved instead of refusing the whole reading.
+ * agents --json`. It degrades rather than refusing, since the id only enriches
+ * the report while merge state decides whether a removal is safe.
  */
 async function claudeAgentIds(
   cwd: string,
@@ -247,13 +234,9 @@ async function claudeAgentIds(
 }
 
 /**
- * Reports whether a worktree holds work no history is behind.
- *
- * Untracked files count, since a removed worktree takes them nowhere
- * recoverable. A missing directory reads clean, leaving the merged and session
- * checks to decide, and a failed read stays separate, since its empty output
- * looks clean. The directory test runs first, since `git status` exits 128
- * for a missing path and an unreadable one alike.
+ * Reports whether a worktree holds work no history is behind. Untracked files
+ * count, a missing directory reads clean, and a failed read stays separate. The
+ * directory test runs first, since `git status` exits 128 for missing and unreadable.
  */
 async function worktreeStatus(path: string): Promise<StatusReport> {
   if (!existsSync(path)) return { readable: true, dirty: false, missing: true }
@@ -273,12 +256,9 @@ async function worktreeStatus(path: string): Promise<StatusReport> {
 }
 
 /**
- * Names the live sessions holding one worktree.
- *
- * The path match is the direct reading and the branch match is what survives a
- * path spelled differently on either side, such as a symlinked temporary
- * directory. The branch half is scoped to the repository, since a branch name
- * identifies a branch inside one and nothing across a machine.
+ * Names the live sessions holding one worktree. The path match is direct, and the
+ * branch match survives a path spelled differently, such as a symlinked temporary
+ * directory, scoped to the repository, since a branch name is local to one.
  */
 function holders(
   entry: WorktreeEntry,
@@ -305,8 +285,7 @@ function verdict(
   agentIds: ReadonlyMap<number, string>,
 ): WorktreeVerdict {
   const held = holders(entry, sessions, repository)
-  // An interactive holder carries no id, so the branch is explicit rather than
-  // trusting `claude agents --json` never to report one.
+  // An interactive holder carries no id, so the branch is explicit.
   const heldSessions: HeldSession[] = held.map((session) => ({
     name: session.name,
     kind: session.kind,
@@ -320,8 +299,7 @@ function verdict(
   const refusals: Refusal[] = []
 
   if (isMain) refusals.push('main-worktree')
-  // Removing the caller's own directory breaks every later call scoped to it,
-  // so a linked worktree the caller stands in is refused.
+  // Removing the caller's own directory breaks every later call scoped to it.
   else if (isCurrent) refusals.push('current-worktree')
 
   if (entry.branch === null) refusals.push('detached-head')
@@ -339,22 +317,16 @@ function verdict(
     refusals,
     pullRequest,
     sessions: heldSessions,
-    // No removal shape reaches the main worktree. Deciding it here keeps the
-    // record and the framed output answering the same way.
+    // No removal shape reaches the main worktree, so the record and framed output agree here.
     route: isMain ? null : held.length > 0 ? 'session' : 'worktree',
     missing: status.missing,
   }
 }
 
 /**
- * Reports which worktrees are reclaimable and which are not, with the reason on
- * each.
- *
- * Reclaimable needs a merged pull request, a clean tree, and no live session,
- * since removal is unrecoverable. The pull request decides merged rather than
- * git ancestry, which a squash-merging repository gets wrong in the direction
- * that removes. An unreadable input refuses the whole reading, since an absent
- * merge state or roster gives the same empty answer as a clean one.
+ * Reports which worktrees are reclaimable, with the reason on each: a merged pull
+ * request, a clean tree, and no live session, since removal is unrecoverable. The
+ * pull request decides merged, not ancestry, and an unreadable input refuses.
  */
 export async function reclaimReport(
   opts: ReclaimOptions = {},
@@ -393,8 +365,7 @@ export async function reclaimReport(
     }
   }
 
-  // A foreign record whose socket is gone may still be a live holder this reader
-  // cannot see, so the whole reading refuses rather than risk a final removal.
+  // A foreign record whose socket is gone may be a live holder this reader cannot see, so refuse.
   if (sessions.foreignDead > 0) {
     return {
       kind: 'unreadable',
@@ -410,8 +381,7 @@ export async function reclaimReport(
     entries.map((entry) => readStatus(entry.path)),
   )
 
-  // `git worktree list` puts the main worktree first, which is the only signal
-  // separating it from a linked one in the porcelain output.
+  // `git worktree list` puts the main worktree first, the only signal separating it.
   const worktrees = entries.map((entry, index) =>
     verdict(
       entry,
@@ -425,8 +395,7 @@ export async function reclaimReport(
     ),
   )
 
-  // An empty listing is a failed read, since every repository lists its main
-  // worktree, and reading branches past it would offer every checked-out one.
+  // An empty listing is a failed read, since every repository lists its main worktree.
   const branches: BranchReport =
     entries.length === 0
       ? {

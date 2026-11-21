@@ -179,9 +179,7 @@ type DriveTarget =
 /**
  * The worker's worktree and its branch. A named pull request resolves through
  * its head ref, since a reviewer runs at the main root on the trunk. With no
- * number the checkout at `root` answers, and a number is looked up only when
- * the mode needs one, so a worker can build the copy before its pull request
- * exists.
+ * number the checkout at `root` answers, so the copy builds before a PR exists.
  */
 async function resolveDriveTarget(
   root: string,

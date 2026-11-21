@@ -37,14 +37,9 @@ Flags:
 `
 
 /**
- * Every domain canon init installs needs at least one path here. A domain with
- * no assertion can truncate silently: init still exits 0 because run_domain
- * catches a failed domain, and the gate stays green while the target is
- * missing everything that domain provides.
- *
- * Authoring references name no path because they ship inside the plugin's
- * skills rather than installing into a target. The two rule paths stand for
- * the `claude` and `canon` groups `base` takes whole.
+ * Every domain canon init installs needs at least one path here, since init
+ * exits 0 when run_domain catches a failed domain. Authoring references name
+ * none, as they ship inside the plugin's skills rather than installing into a target.
  */
 const SCAFFOLD_PATHS = [
   'CLAUDE.md',
@@ -90,8 +85,7 @@ function run(
 
 function check(): void {
   logStep('Assert excluded path exists in source')
-  // An absence check over a path the tree no longer holds passes on nothing, so
-  // the excluded tree has to exist here first.
+  // An absence check over a path the tree no longer holds passes on nothing, so it must exist first.
   if (!existsSync(join(root, 'sandbox/exempt.toml'))) {
     throw new Error(
       'sandbox/exempt.toml is missing from the source tree, so the absence check below would pass on nothing',

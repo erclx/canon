@@ -137,8 +137,7 @@ async function runAudit(
       `${total} ${total === 1 ? 'advisory' : 'advisories'} across ${plural(grouped.size, 'package')}: ${severityLine(counts)}`,
     )
 
-    // Piped rather than logged line by line, since every line is a finding and the
-    // timeline's tick would mark each as passed.
+    // Piped, since every line is a finding and the timeline tick would pass each.
     pipeOutput(
       [...grouped]
         .map(([name, held]) =>
@@ -154,8 +153,7 @@ async function runAudit(
     )
   }
 
-  // Stated whichever way the count went, since an advisory arrives with no edit
-  // here, and an undated report reads as a fact about the tree.
+  // Stated either way, since an undated report reads as a fact about the tree.
   logStep('Reading')
   logInfo(
     'Measured against the advisory index at run time, not at commit time.',

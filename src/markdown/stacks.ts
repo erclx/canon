@@ -30,13 +30,9 @@ interface Run {
 }
 
 /**
- * Every run of top-level bullets past `CAP`, in document order.
- *
- * A run is consecutive column-zero `-`, `*`, or `+` items. A blank line, an
- * indented continuation, a nested item, and a fenced line do not break it, and
- * any other column-zero line does. A run whose every item opens with a bold
- * label or a link is exempt, since it reads as a table of entries. Numbered
- * items do not count, since a numbered list states an order.
+ * Every run of top-level bullets past `CAP`, in document order. A run is
+ * consecutive column-zero items, which a blank line, a continuation, a nested
+ * item, and a fenced line do not break, and a run led by bold labels or links is exempt.
  */
 export function bulletStacks(lines: readonly BodyLine[]): StackFinding[] {
   const found: StackFinding[] = []

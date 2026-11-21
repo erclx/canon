@@ -337,8 +337,7 @@ async function runReach(
   opts: ReachCommandOptions,
 ): Promise<number> {
   const root = opts.root ?? (await mainWorktreeRoot())
-  // The range belongs to the caller's checkout, the linked worktree on a
-  // dispatched run, since the main worktree would measure trunk against itself.
+  // The range belongs to the caller's checkout, since the main worktree measures trunk against itself.
   const outcome = await planReach(root, plan, {
     repo: process.cwd(),
     ref: opts.base,
@@ -348,10 +347,9 @@ async function runReach(
 }
 
 /**
- * Names a holder, the declaration it matched on when that is wider than the
- * path, and whether a holding plan carries a dispatch row. A plan with no row
- * is the shape a plan nobody archived takes, which is what sends a reader to
- * check the holder rather than treating the claim as a live collision.
+ * Names a holder, the declaration it matched on when wider than the path, and
+ * whether a holding plan carries a dispatch row. A plan with no row is the shape
+ * a plan nobody archived takes, so the reader checks the holder first.
  */
 function describeHolder(claim: Claim, holder: Holder): string {
   const under =
@@ -370,10 +368,9 @@ function describeReachClaim(claim: Claim): string {
 }
 
 /**
- * Leads with the claimed list because it is the short one. Over the wave this
- * verb was filed against, undeclared paths ran 22 of 26 on one branch and 18 of
- * 25 on another, so a report opening on that list is noise a reader skips past
- * and the crossing underneath it goes with them.
+ * Leads with the claimed list because it is the short one. Undeclared paths ran
+ * 22 of 26 and 18 of 25 on two branches, so a report opening on that list is
+ * noise a reader skips past, and the crossing underneath goes with it.
  */
 function reportReach(
   outcome: ReachOutcome,
@@ -423,8 +420,7 @@ function reportReach(
     )
   }
 
-  // The counts bound the report, since a hand-launched track or one without a
-  // plan is unseen, and a clear reading over nothing would read as proof.
+  // The counts bound the report, since a clear reading over unseen tracks would read as proof.
   logStep('Compared against')
   logInfo(
     `${outcome.plans} other live plan(s) and ${outcome.rows} In flight row(s)${outcome.board ? '' : ', with no board on disk to read'}`,

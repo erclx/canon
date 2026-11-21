@@ -6,12 +6,9 @@
 export const SAMPLE_LIMIT = 3
 
 /**
- * Names a bounded head of a list and says how many it left out, so a treatment
- * carried by fifty locations reads as fifty rather than as the three named.
- *
- * `total` arrives separately because the two lists reach here differently. A
- * row's samples are already capped when they are collected, so their own length
- * cannot say how many elements the row covers, while its locations arrive whole.
+ * Names a bounded head of a list and says how many it left out. `total` arrives
+ * separately, since a row's samples are capped on collection and their length
+ * cannot say how many elements the row covers.
  */
 export function abbreviate(entries: readonly string[], total: number): string {
   const head = entries.slice(0, SAMPLE_LIMIT)
@@ -39,16 +36,9 @@ export interface TreatmentGroup {
 }
 
 /**
- * Turns a per-element walk into a per-answer listing, which is the whole point
- * of the command.
- *
- * Grouping by the component instead was the obvious shape and it reports what a
- * reader already knows, that a site has buttons and links. Grouping by the
- * computed answer reports the thing nobody can see while building, which is
- * that five components resolved to five different rings.
- *
- * Order is heaviest first, then by treatment, so the dominant answer leads and
- * two runs over one site report one order rather than whatever the walk hit.
+ * Turns a per-element walk into a per-answer listing, grouped by the computed
+ * answer rather than the component, since that reports what nobody sees while
+ * building. Order is heaviest first, then by treatment, so two runs report one order.
  */
 export function groupByTreatment(
   readings: readonly Reading[],

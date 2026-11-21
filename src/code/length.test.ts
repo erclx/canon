@@ -16,8 +16,7 @@ import {
 /**
  * The spans the compiler gives for every function with a block body, the
  * reference the brace reading is held to. Depth counts block-bodied ancestors
- * alone, since an arrow with an expression body is skipped by design. The
- * compiler parses JSX only in a file named `.tsx`.
+ * alone, and the compiler parses JSX only in a file named `.tsx`.
  */
 function compilerSpans(
   source: string,

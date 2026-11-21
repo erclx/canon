@@ -18,11 +18,6 @@ export function claudeChain(root: string): Manifest[] {
  * Previews the gitignore merge without writing. The answer comes from
  * `mergeSections`, the same function the apply step runs, so the preview can
  * never disagree with what lands.
- *
- * The bash matched the manifest's `[gitignore]` table with a line regex that
- * required the array to open and close on one line, and it re-parsed TOML that
- * `loadManifest` already reads. Routing through the manifest loader drops both
- * problems.
  */
 export function planGitignore(
   chain: readonly Manifest[],

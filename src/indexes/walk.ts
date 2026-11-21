@@ -13,12 +13,9 @@ function isPruned(relativePath: string): boolean {
 }
 
 /**
- * Lists every folder index under `root`.
- *
- * Vendored and git trees are pruned by path segment, since `Bun.Glob` has no
- * exclude. Everything else is dropped via `git check-ignore`, so a project's
- * own `.gitignore` governs what the walker sees. Outside a git repo the
- * segment prune is the only filter that applies.
+ * Lists every folder index under `root`. Vendored and git trees are pruned by
+ * path segment, since `Bun.Glob` has no exclude, and `git check-ignore` drops
+ * the rest so a project's `.gitignore` governs.
  */
 export async function listIndexes(root: string): Promise<string[]> {
   const glob = new Bun.Glob(`**/${INDEX_FILE}`)
@@ -43,12 +40,9 @@ export async function listIndexes(root: string): Promise<string[]> {
 }
 
 /**
- * Reports whether git ignores `path`.
- *
- * Positional regen reaches an ignored folder, because `findIndexedAncestor`
- * walks the filesystem and never consults git. Staging what it writes there
- * always fails, so the caller checks this first and skips the attempt rather
- * than warning on a no-op.
+ * Reports whether git ignores `path`. Positional regen reaches an ignored
+ * folder and staging there always fails, so the caller checks first and skips
+ * the attempt rather than warning on a no-op.
  */
 export async function isIgnored(root: string, path: string): Promise<boolean> {
   const ignored = await listIgnored(root, [resolve(path)])

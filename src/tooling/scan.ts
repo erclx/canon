@@ -62,10 +62,8 @@ export interface WithheldState {
 }
 
 /**
- * A golden file or script the project declined or customized, which every
- * write skips. A script's `rel` is its `package.json:<key>` address. `moved`
- * is set on a customized config or script alone, true once the golden copy no
- * longer hashes to the one the project took.
+ * A golden file or script the project declined or customized, which every write skips. `moved` is set on a customized
+ * config or script alone, true once the golden copy no longer hashes to the one the project took.
  */
 export interface DispositionState {
   readonly rel: string
@@ -92,10 +90,8 @@ export interface ScanResult {
 }
 
 /**
- * Why a drifted config differs, which decides whether a write may replace it.
- * A copy still at the hash the last write recorded is `stale`, since canon
- * moved and the project did not. A copy off it is `edited`, and a copy with no
- * recorded hash is `unattributed`, since nothing says who changed it.
+ * Why a drifted config differs, which decides whether a write may replace it. A copy at the recorded hash is `stale`,
+ * one off it is `edited`, and one with no recorded hash is `unattributed`.
  */
 function driftCause(recorded: string | undefined, dest: string): DriftCause {
   if (recorded === undefined) return 'unattributed'
@@ -108,15 +104,9 @@ function isIdentical(a: string, b: string): boolean {
 }
 
 /**
- * Compares every stack in the chain against the target and reports what would
- * change, writing nothing. Configs, seeds, and scripts resolve nearest stack
- * first, and dependencies and gitignore entries from the furthest ancestor in.
- *
- * A seed at a path the chain also ships as a config is left to the config. A
- * target below its git toplevel is scanned as a subfolder, so a file GitHub
- * reads only at the root moves to `withheld`. A path the project declined or
- * customized moves to `dispositions` ahead of that test. The scope and the
- * record are read here so every caller agrees without a flag.
+ * Compares every stack in the chain against the target and reports what would change, writing nothing. A seed at a
+ * path the chain ships as a config is left to the config, and a target below its git toplevel moves root-only
+ * files to `withheld`. Declined or customized paths move to `dispositions` ahead of that test.
  */
 export function scan(chain: readonly Manifest[], target: string): ScanResult {
   const isSubfolder = isSubfolderTarget(target)

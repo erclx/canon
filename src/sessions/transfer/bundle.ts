@@ -237,8 +237,7 @@ export async function exportSession(
 
   const transcript = readTranscript(location.transcript)
   const facts = transcriptFacts(transcript)
-  // The branch and HEAD come from the caller's checkout, the linked worktree,
-  // while the records and the handoff sit at the shared main root.
+  // The branch and HEAD come from the caller's linked worktree, the records from the main root.
   const cwd = options.cwd ?? process.cwd()
   const root = await repositoryRoot(cwd)
   const handoffPath = newestHandoff(root, facts.startedAt)
@@ -456,8 +455,7 @@ export async function importSession(
   const folder = join(projects, encodeProjectPath(options.root))
   const transcript = join(folder, `${id}.jsonl`)
   const sideDir = join(folder, id)
-  // A copy under any other project folder counts too, since `--resume <id>`
-  // walks every folder and would pick whichever copy it reached first.
+  // A copy under any other project folder counts too, since `--resume <id>` walks every folder.
   const elsewhere = locateTranscript(id, projects)?.transcript
   const taken = [
     ...new Set(
@@ -490,12 +488,10 @@ export async function importSession(
     }
   }
 
-  // The existence check is not atomic, so `wx` keeps an appeared copy intact,
-  // and a failure removes what this run placed so a reimport does not refuse.
+  // The existence check is not atomic, so `wx` keeps an appeared copy, and a failure removes this run's.
   const written: string[] = []
   const created: string[] = []
-  // `mkdir` over a file raises EEXIST too, so the code alone cannot say a copy
-  // appeared. Only a `wx` write refusing an existing path means that.
+  // `mkdir` over a file raises EEXIST too, so only a `wx` write refusing a path means a copy appeared.
   let isWriting = false
   const makeDir = (dir: string): void => {
     const first = mkdirSync(dir, { recursive: true })

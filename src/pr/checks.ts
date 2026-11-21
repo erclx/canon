@@ -46,11 +46,8 @@ export interface ChecksReading {
 
 /**
  * Reads the check names a base branch's rules require, from
- * `repos/{owner}/{repo}/rules/branches/<base>`.
- *
- * Undefined when the answer is not a rule list, which a repository without
- * rulesets or a refused read returns, so the caller falls back to every check.
- * Classic branch protection is not read, and falls back the same way.
+ * `repos/{owner}/{repo}/rules/branches/<base>`. Undefined when the answer is not
+ * a rule list, so the caller falls back to every check, as for classic protection.
  */
 export function requiredChecks(
   rules: unknown,
@@ -82,15 +79,9 @@ export interface ConflictedReading extends ChecksReading {
 }
 
 /**
- * Tells a conflicted pull request from a tip whose runs have not started.
- *
- * A branch that conflicts with its base gets no merge ref, so no
- * `pull_request` workflow runs and the listing stays empty, which
- * `collapseChecks` can only call pending. Only `DIRTY` separates the two, and
- * only while no run belongs to the tip: a conflict arising after runs
- * completed leaves those runs standing as a real answer. `UNKNOWN` is
- * transient while GitHub computes it, so it reads as not conflicted and costs
- * a caller one more poll.
+ * Tells a conflicted pull request from a tip whose runs have not started, since
+ * a conflict gets no merge ref and an empty listing reads pending. Only `DIRTY`
+ * separates them, and only while no run belongs to the tip; `UNKNOWN` is not one.
  */
 export function withMergeState(
   mergeState: string | undefined,
@@ -104,12 +95,9 @@ export function withMergeState(
 }
 
 /**
- * Puts a check-run row into the shape `rollup` reads.
- *
- * REST spells its statuses lowercase and `rollup` reads the GraphQL enum the
- * pull request listing returns, so the vocabulary is converted at this boundary
- * rather than teaching that function a second one. A null conclusion becomes an
- * absent one, since `rollup` reads absence as a run that has not concluded.
+ * Puts a check-run row into the shape `rollup` reads. REST spells statuses
+ * lowercase and `rollup` reads the GraphQL enum, so the vocabulary converts at
+ * this boundary, and a null conclusion becomes absent, meaning not concluded.
  */
 function adapt(run: RawCheckRun): RawCheck {
   return {
@@ -123,14 +111,9 @@ function adapt(run: RawCheckRun): RawCheck {
 }
 
 /**
- * Keeps the newest run per check name, so a re-triggered gate's stale run
- * does not outvote its own rerun.
- *
- * A run with no name keys on its own position rather than joining an
- * unnamed group, since nothing ties two nameless runs to the same check. A
- * run carrying an `id` always outranks one without, and a tie on `id`,
- * including a pair both missing one, keeps whichever run occurs later in
- * the array.
+ * Keeps the newest run per check name, so a re-triggered gate's stale run does
+ * not outvote its rerun. A nameless run keys on its own position, a run with an
+ * `id` outranks one without, and a tie keeps whichever occurs later.
  */
 function newestPerCheck(runs: readonly RawCheckRun[]): {
   readonly kept: readonly RawCheckRun[]
@@ -154,15 +137,9 @@ function newestPerCheck(runs: readonly RawCheckRun[]): {
 }
 
 /**
- * Collapses a check-run listing to one word about one commit.
- *
- * Keying on a sha is not sufficient, since the endpoint can report a count
- * with an empty row list, so no run for the tip and a run for another commit
- * both read `pending` rather than a false `passing`. The foreign test runs
- * ahead of the collapse, and the rollup reads `newestPerCheck`'s kept rows so a
- * stale failing run left by a rerun never outvotes the passing one. A required
- * set narrows only that rollup, and commit statuses join it by `context` only
- * once a non-empty required set was read.
+ * Collapses a check-run listing to one word about one commit. A sha is not
+ * enough, since a count with an empty row list, or a run for another commit,
+ * reads `pending` rather than a false `passing`, and the rollup reads kept rows.
  */
 export function collapseChecks(
   tip: string,
@@ -184,8 +161,7 @@ export function collapseChecks(
 
   if (reading.foreign > 0) return { ...reading, state: 'pending' }
 
-  // A count above the rows returned is a partial listing, and collapsing it
-  // could report `passing` while a failing run sits outside the part in hand.
+  // A count above the rows returned is a partial listing, which could hide a failing run.
   if (reading.reported > runs.length) return { ...reading, state: 'pending' }
 
   const statusRows: RawCheck[] =
@@ -222,15 +198,8 @@ export const STALL_SECONDS = 600
 
 /**
  * Whether a gating check has no row on the tip, the only pending reading a
- * stalled run can explain.
- *
- * A run that never got a job writes no check run, so it holds the reading
- * pending only by leaving a gating check unreported. A pending reading whose
- * gating checks all have rows is waiting on a run still going, and a stalled
- * workflow nothing requires beside it must not end that wait. A non-empty
- * required set gates by name, with a commit status counting as a row. An
- * unread or empty set gates by every check, so only a tip with no row at all
- * qualifies.
+ * stalled run can explain. A non-empty required set gates by name, and an unread
+ * or empty one by every check, so a stalled run nothing requires ends no wait.
  */
 export function missesGatingCheck(
   tip: string,
@@ -258,15 +227,9 @@ export interface StalledRun {
 }
 
 /**
- * The newest run per workflow and event on the tip that has sat queued past
- * the bound, which are the only runs whose jobs are worth reading.
- *
- * A close and reopen starts a fresh run and leaves the stuck one queued
- * forever, so a key on the workflow alone keeps the zombie out once its
- * replacement exists. The event joins the key because a `workflow_dispatch`
- * or `pull_request_review` run of the same workflow replaces nothing a stuck
- * `pull_request` run gates. A higher id is the newer run, as in
- * `newestPerCheck`.
+ * The newest run per workflow and event on the tip that has sat queued past the
+ * bound. The key excludes a stuck run once a close and reopen replaces it, and
+ * the event joins it since a `workflow_dispatch` run replaces nothing it gates.
  */
 export function stallCandidates(
   tip: string,

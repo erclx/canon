@@ -153,8 +153,7 @@ describe('checkExpectation', () => {
     })
   })
 
-  // A checker run only against a correct tree cannot tell asserting from
-  // asserting nothing, so each case violates one assertion kind and goes red.
+  // A checker run only against a correct tree cannot tell asserting from nothing, so each case violates one kind.
   describe('on a tree that violates one assertion', () => {
     it('should fail when the swept plan was deleted rather than archived', () => {
       seedCorrectTree()
@@ -481,10 +480,9 @@ describe('checkExpectation with no assertion able to run', () => {
 })
 
 /**
- * The case an arm alongside other assertions hits. `canon sandbox run` always passes
- * `--writes`, so a run whose only output escaped the snapshot supplies an empty
- * list rather than none, and the declaration has to reach the unchecked count
- * instead of vanishing behind the assertions that did run.
+ * The case an arm alongside other assertions hits: `canon sandbox run` always
+ * passes `--writes`, so an escaped-only run supplies an empty list, and the
+ * declaration must still reach the unchecked count.
  */
 describe('checkExpectation with a scope beside assertions that ran', () => {
   it('should count an unchecked scope when the run wrote nothing', () => {

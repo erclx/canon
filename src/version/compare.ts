@@ -1,8 +1,6 @@
 /**
- * A `major.minor.patch` core with an optional prerelease tail. The registry
- * publishes both shapes under the same dist tag, so a comparison that only
- * understood the core would read `1.0.0-rc.1` as unparseable and report the
- * whole lookup as unknown.
+ * A `major.minor.patch` core with an optional prerelease tail. The registry publishes both under
+ * the same dist tag, so a core-only comparison would read `1.0.0-rc.1` as unparseable.
  */
 const VERSION =
   /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/
@@ -28,13 +26,8 @@ export function parseVersion(raw: string): ParsedVersion | undefined {
 }
 
 /**
- * Negative when `left` is older, positive when it is newer, zero when the two
- * name the same version.
- *
- * Prerelease identifiers compare as whole strings rather than dot segment by
- * dot segment, which is narrower than semver states. Every version this repo
- * publishes is a plain core, so the ordering inside a prerelease series decides
- * nothing here, and the one comparison that matters is that any prerelease
+ * Negative when `left` is older, positive when it is newer, zero when the two name one version.
+ * Prerelease identifiers compare as whole strings, narrower than semver, and any prerelease
  * sorts below the release sharing its core.
  */
 export function compareVersions(

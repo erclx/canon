@@ -4,10 +4,8 @@ import { PROJECT_ROOT } from '@/roots/project'
 import { configFiles, type Manifest, seedFiles } from '@/tooling/manifest'
 
 /**
- * Spells the package root in a report where every other root spells a
- * project-relative path. The `source` field promises a path inside the project
- * and a package copy is the one source that promise cannot cover, so the
- * spelling has to be one nothing will join to a project root.
+ * Spells the package root in a report where every other root spells a project-relative path. The `source`
+ * field promises a path inside the project, so the spelling is one nothing will join to a project root.
  */
 const PACKAGE_LABEL = '<canon>'
 
@@ -33,11 +31,8 @@ function toolingSourceDir(root: string): string {
 }
 
 /**
- * The roots a stack reference resolves against. No stack reference installs
- * into a project any more, so the package corpus is the only root that answers there. The
- * authoring root stays ahead of it for the toolkit's own repository, which
- * authors the corpus this reads, and for a project authoring stacks of its
- * own under the same layout.
+ * The roots a stack reference resolves against. The package corpus is the only root that answers in a project,
+ * and the authoring root stays ahead of it for a repository authoring stacks under the same layout.
  */
 export function referenceRoots(root: string): ReferenceRoot[] {
   return [
@@ -74,10 +69,8 @@ function codeList(items: readonly string[]): string {
 }
 
 /**
- * The sections the verb prints after a stack's reference, read from its
- * manifest so no reference keeps a hand list that drifts from it. A stack lists
- * its own files and groups alone, since a parent's print under the parent's
- * reference, and a section with nothing to list prints no heading.
+ * The sections the verb prints after a stack's reference, read from its manifest so no reference keeps a hand
+ * list. A stack lists its own files and groups alone, and a section with nothing to list prints no heading.
  */
 export function renderStackSections(manifest: Manifest): string {
   const sections: string[] = []

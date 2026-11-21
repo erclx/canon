@@ -100,8 +100,7 @@ afterEach(() => {
 })
 
 describe('classifySpan', () => {
-  // Every span below is a real line from `governance/rules/` or
-  // `internal/rules/`, taken rather than invented, since the corpus writes it.
+  // Every span below is a real line from `governance/rules/` or `internal/rules/`, taken rather than invented.
 
   it('should read a backticked path carrying a directory segment as a citation', () => {
     expect(classifySpan('.github/workflows/verify.yml')).toBe('path')
@@ -211,8 +210,7 @@ describe('readCitations', () => {
   })
 
   it('should anchor on the whole span rather than a trailing standards pattern', async () => {
-    // Cutting the path out of this span and resolving it against another root
-    // would report a file that exists as missing.
+    // Cutting the path out of this span and resolving it against another root would miss a real file.
     write('internal/standards/tooling-reference.md', '# Tooling reference')
     writeRule(
       'claude/authoring-layout.md',
@@ -239,8 +237,7 @@ describe('readCitations', () => {
   })
 
   it('should exempt a path the rule spells in its own frontmatter', async () => {
-    // The retired artifact class. The rule tells its reader to convert a file an
-    // older install left, so it is correctly absent here and named there.
+    // The retired artifact class is correctly absent here and named in the rule.
     writeRule(
       'claude/560-diagrams.md',
       '- Convert a `.claude/DIAGRAMS.md` left by an older install before editing it',
@@ -255,8 +252,7 @@ describe('readCitations', () => {
   })
 
   it('should still name a dead path sitting inside a glob the rule governs', async () => {
-    // A glob declares a shape rather than an artifact, so a stale path under
-    // one is the defect this check exists for.
+    // A glob declares a shape rather than an artifact, so a stale path under one is the defect.
     writeRule(
       'core/cli-output.md',
       '- Follow `docs/agents/renamed.md` for the framed shapes.',
@@ -270,8 +266,7 @@ describe('readCitations', () => {
   })
 
   it('should exempt a cited path git ignores, which no clone is expected to hold', async () => {
-    // Session scratch is real in a live project and absent from a fresh clone, so
-    // the verdict cannot depend on the filesystem alone.
+    // Session scratch is real in a live project and absent from a fresh clone.
     write('.gitignore', '.claude/tasks/')
     writeRule(
       'claude/555-tasks.md',
@@ -352,8 +347,7 @@ describe('readCitations', () => {
   })
 
   it('should name an internal glob matching nothing in this tree', async () => {
-    // The defect the fourth outcome names: a rule scoped at a directory that
-    // moved stops firing and says nothing.
+    // A rule scoped at a directory that moved stops firing and says nothing.
     writeInternalRule('claude/597-wiki.md', '- Wiki pages live here.', [
       'wikis/**/*.md',
     ])
@@ -379,8 +373,7 @@ describe('readCitations', () => {
   })
 
   it('should anchor a glob past a description line that names the same path', async () => {
-    // `seed-mirror.md` names CLAUDE.md in its description and again as a
-    // glob, and a substring scan finds the description first.
+    // A substring scan finds the description's mention of CLAUDE.md before the glob.
     write(
       join('internal', 'rules', 'claude', 'seed-mirror.md'),
       [
@@ -414,8 +407,7 @@ describe('readCitations', () => {
   })
 
   it('should read no glob from the shipped corpus, whose globs name a target', async () => {
-    // `src/pages/**` in the Astro rule names a target's shape, so many shipped
-    // globs correctly match nothing in this tree.
+    // `src/pages/**` in the Astro rule names a target's shape, so shipped globs correctly match nothing here.
     writeRule('lang/200-astro.md', '- Astro pages live here.', 'src/pages/**')
     git('add', '--all')
 

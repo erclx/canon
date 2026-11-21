@@ -72,8 +72,7 @@ describe.each(workflowFiles.map((path) => relative(REPO_ROOT, path)).sort())(
 )
 
 describe('every workflow', () => {
-  // A direct call reaches apt with no retry, so one stalled mirror
-  // connection reddens the job
+  // A direct call reaches apt with no retry, so one stalled mirror reddens the job.
   it('should install playwright system packages only through the retry script', () => {
     const direct = allSteps()
       .filter(({ step }) => /install-deps|--with-deps/.test(step.run ?? ''))
@@ -94,8 +93,7 @@ describe('every workflow', () => {
     expect(unbounded).toEqual([])
   })
 
-  // Both hosted Ubuntu images ship Chrome and its libraries, so a seeded
-  // workflow that reaches apt fails on a mirror outage for nothing
+  // Hosted Ubuntu images ship Chrome and its libraries, so reaching apt fails on a mirror outage for nothing.
   it('should keep every shipped workflow off the retry script', () => {
     const calls = allSteps()
       .filter(({ file }) => file.startsWith('tooling/'))

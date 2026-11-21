@@ -4,13 +4,9 @@ import { STAGES } from '@/gate/stages'
 import { acquireSuiteLock, machineLockPath } from '@/gate/suite-lock'
 
 /**
- * Queues a full suite run by hand behind the machine lock the gate's Tests
- * stage holds, so a hand run and a gate's suite never starve each other.
- *
- * This runs in the main process before any worker exists, which is what keeps
- * the lock path on the real state folder. `vitest.setup.ts` redirects
- * `CANON_STATE_DIR` inside each worker, and a lock resolved there would sit in
- * a folder no other run reads.
+ * Queues a full suite run by hand behind the machine lock the gate's Tests stage
+ * holds. It runs in the main process before any worker, which keeps the lock on
+ * the real state folder, since `vitest.setup.ts` redirects `CANON_STATE_DIR` per worker.
  */
 export default async function setup(project: TestProject): Promise<() => void> {
   const queues = locksHandSuite({

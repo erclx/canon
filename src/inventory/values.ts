@@ -1,15 +1,9 @@
 import type { SubjectReading } from '@/inventory/subjects'
 
 /**
- * Reads one computed value family off every rendered element and its
- * `::before` and `::after` boxes, one row per element per distinct value.
- *
- * The five subjects share one body, since a reader is serialized into the page
- * and a helper outside it would throw there. Normalization matches `scale.ts`,
- * so a listing value and a record value meet as one string, and a change to
- * either side's form changes both. Computed style shows one state, so a
- * `:hover` value and another breakpoint's value are never read, and a frame
- * per width covers only the second.
+ * Reads one computed value family off every rendered element and its `::before`
+ * and `::after` boxes. Normalization matches `scale.ts`. Computed style shows one
+ * state, so a `:hover` value and another breakpoint's value are never read.
  */
 export function readValues(args: {
   readonly query: string
@@ -49,8 +43,7 @@ export function readValues(args: {
     return raw.endsWith('px') ? `${round(amount)}px` : raw
   }
 
-  // A form control paints its value with no text node, so it counts as carrying
-  // text unless its type draws no text at all.
+  // A form control paints its value with no text node, so it carries text unless its type draws none.
   const TEXTLESS_INPUTS = [
     'checkbox',
     'radio',

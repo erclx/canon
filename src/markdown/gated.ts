@@ -90,8 +90,7 @@ export function prefixShapeError(
   if (prefix === '' || prefix.startsWith('/') || prefix.includes('..')) {
     return `${prefix || '(empty)'} is not a repository-relative path`
   }
-  // A listed prefix is a `startsWith` match against repository paths, so either
-  // shape below matches no file and would gate nothing while reading as clean.
+  // A listed prefix is a `startsWith` match, so either shape below matches no file and gates nothing.
   if (prefix.includes('//')) {
     return `${prefix} carries a doubled slash, so it matches no file`
   }
@@ -181,9 +180,8 @@ export interface BlockingFinding {
 
 /**
  * Every density and reference shape finding that would gate once `prefix` is
- * listed, read from the files the audit reads. An absent folder carries none.
- * Undefined when the tree cannot be listed, since an empty answer there would
- * gate a corpus nobody measured.
+ * listed. An absent folder carries none, and an unlistable tree is undefined,
+ * since an empty answer would gate a corpus nobody measured.
  */
 export async function findingsUnder(
   root: string,
@@ -225,10 +223,9 @@ export type ScopeRootsResult =
     }
 
 /**
- * Gates each of `GATED_SCOPE_ROOTS` that carries no finding, for a new
- * project. A root with one is left out and named, since gating it would fail
- * the first push on prose a scaffolder wrote. An existing config is a list
- * someone chose, so it is never touched.
+ * Gates each of `GATED_SCOPE_ROOTS` that carries no finding, for a new project.
+ * A root with one is left out and named, since gating it would fail the first
+ * push, and an existing config is someone's choice and is never touched.
  */
 export async function gateScopeRoots(root: string): Promise<ScopeRootsResult> {
   if (existsSync(join(root, GATED_CONFIG_REL))) return { kind: 'exists' }

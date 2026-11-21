@@ -1,11 +1,7 @@
 /**
- * The old-root citations left inside the record tree itself.
- *
- * `migrate records` sweeps a git listing, so it reaches no record, since the
- * records are gitignored. What remains is the tree's own citations, a pointer
- * a session still follows and prose that must keep saying what it says, and
- * this module holds the scope separating the two. It stays apart from
- * `records.ts`, which answers about a repository listing rather than a walk.
+ * The old-root citations left inside the record tree itself, a pointer a session still
+ * follows and prose that must keep its words. It stays apart from `records.ts`, which
+ * answers about a repository listing rather than a walk.
  */
 
 import { readdir, readFile, writeFile } from 'node:fs/promises'
@@ -18,12 +14,8 @@ import {
 } from '@/migrate/records'
 
 /**
- * The folders inside the record root a session still follows a path into.
- *
- * Each holds a live pointer, such as a task naming its plan. The corpora left
- * out are closed trails and scratch, which the exclusion set in `records.ts`
- * already refuses to rewrite. `proposals` is listed though this tree does not
- * carry it, since the scope names live folders, not one machine's disk.
+ * The folders inside the record root a session still follows a path into, each holding
+ * a live pointer. `proposals` is listed though this tree does not carry it.
  */
 export const LIVE_FOLDERS: readonly string[] = [
   'diagrams',
@@ -36,21 +28,14 @@ export const LIVE_FOLDERS: readonly string[] = [
 ]
 
 /**
- * The backup history, skipped by name rather than by content.
- *
- * It is a git object store, so a walk that does not know it by name reads
- * binary object files whole and discards them. `runRecords` already names that
- * cost for this tree at 9,744 files and 83M.
+ * The backup history, skipped by name rather than by content. It is a git object store,
+ * so a walk that does not know it reads binary object files whole.
  */
 export const OBJECT_STORE = '.records.git'
 
 /**
- * Segments that end the walk wherever they appear inside a live folder.
- *
- * `archive` is the substantive one: an archived plan or a retired memory entry
- * describes work that closed, and a path inside that sentence is history rather
- * than a pointer. It is pruned at any depth because the archives do not all sit
- * at the same one, `memory/review/archive/` being two levels down.
+ * Segments that end the walk wherever they appear inside a live folder. `archive` is
+ * pruned at any depth, since archives do not all sit at the same one.
  */
 export const PRUNED_SEGMENTS: readonly string[] = [
   'archive',
@@ -95,11 +80,8 @@ export interface RecordTreePlan {
 }
 
 /**
- * Where a path sits relative to the project root, always forward-slashed.
- *
- * `Bun.Glob` reports a platform separator on Windows and every path here is
- * compared against a literal `/` or printed for a reader, so the separator is
- * spelled rather than joined.
+ * Where a path sits relative to the project root, always forward-slashed, since
+ * `Bun.Glob` reports a platform separator on Windows.
  */
 function under(...segments: readonly string[]): string {
   return segments.join('/')
@@ -122,11 +104,8 @@ async function countFiles(directory: string): Promise<number> {
 }
 
 /**
- * The files inside one live folder, with each pruned subtree counted rather
- * than swept.
- *
- * The prune is attributed to the shallowest pruned segment on the path, so an
- * archive reports as one corpus instead of one per folder inside it.
+ * The files inside one live folder, with each pruned subtree counted rather than swept.
+ * The prune is attributed to the shallowest pruned segment on the path.
  */
 async function scanLiveFolder(
   root: string,
@@ -159,12 +138,9 @@ async function scanLiveFolder(
 }
 
 /**
- * Every file in the live record surface, and a count for each corpus left out.
- *
- * The scope is root-directed rather than an inversion of `isRecordArtifact`.
- * That predicate is true for the new root whole and for each record entry under
- * the old one, since the sweep it serves skips both, so inverting it would
- * reach a project the move has not run in, where the old spelling is correct.
+ * Every file in the live record surface, and a count for each corpus left out. The scope
+ * is root-directed rather than an inversion of `isRecordArtifact`, which would reach a
+ * project the move has not run in.
  */
 export async function walkRecordTree(root: string): Promise<RecordTreeWalk> {
   const files: string[] = []
@@ -177,8 +153,7 @@ export async function walkRecordTree(root: string): Promise<RecordTreeWalk> {
     }).catch(() => undefined)
     if (entries === undefined) continue
 
-    // Each top-level entry is an independent subtree, so the scans run together,
-    // and both lists are sorted once the whole root is read.
+    // Each top-level entry is an independent subtree, so the scans run together and sort after.
     const scans = entries.map(async (entry) => {
       const relative = under(recordRoot, entry.name)
 
@@ -218,11 +193,8 @@ export async function walkRecordTree(root: string): Promise<RecordTreeWalk> {
 }
 
 /**
- * Reads what the walk found.
- *
- * A file whose bytes carry a NUL is skipped outright rather than carried as
- * empty text, which is what `readSources` does for the tracked sweep. There is
- * no path to move here, so a binary record has nothing left to contribute.
+ * Reads what the walk found. A file whose bytes carry a NUL is skipped outright, since
+ * there is no path to move and a binary record has nothing to contribute.
  */
 export async function readRecordTree(
   root: string,
@@ -241,13 +213,8 @@ export async function readRecordTree(
 }
 
 /**
- * Which lines the rewrite would change, read off the rewrite rather than off a
- * second expression.
- *
- * A marked line is unchanged by `rewriteText`, so it never lands here, which is
- * what keeps the report and the write agreeing about what is in scope. The
- * count of marked citations comes from `scanText` instead, since a protected
- * line is invisible in a diff and the reader needs to know the markers fired.
+ * Which lines the rewrite would change, read off the rewrite rather than a second
+ * expression. A marked line never lands here, and `scanText` counts the markers.
  */
 function citationLines(before: string, after: string): CitationLine[] {
   const original = before.split('\n')
@@ -259,11 +226,8 @@ function citationLines(before: string, after: string): CitationLine[] {
 }
 
 /**
- * What the sweep would rewrite, without writing it.
- *
- * Pure over the sources it is handed, the way `planRecordsMove` is, so a caller
- * reports and applies from one value. A file whose text does not change is
- * dropped rather than carried as a no-op.
+ * What the sweep would rewrite, without writing it. Pure over the sources it is
+ * handed, so a caller reports and applies from one value.
  */
 export function planRecordTree(
   sources: readonly RecordTreeSource[],
@@ -303,13 +267,8 @@ export interface RecordTreeResult {
 }
 
 /**
- * Writes the plan.
- *
- * The write lives here rather than beside the two in `apply.ts` because this
- * verb has no folder half: the citations are the whole of it, and the module
- * that decided which files are in scope is the one that should be trusted to
- * name them again. A rejected write is recorded rather than thrown, since this
- * runs inside a commander action that would unwind past the report.
+ * Writes the plan. The write lives here because this verb has no folder half, and a
+ * rejected write is recorded rather than thrown, since a commander action would unwind.
  */
 export async function applyRecordTree(
   root: string,

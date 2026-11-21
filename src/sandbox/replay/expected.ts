@@ -94,9 +94,8 @@ function driftOf(
 
 /**
  * Judges a snapshot's steps against its recorded answer. A step that already
- * failed keeps its verdict, since a crash names more than a changed exit. A
- * step either side lacks drifts, and with no expectation at all every step
- * does, since a missing input read as a pass is what the replay exists to stop.
+ * failed keeps its verdict, and a step either side lacks drifts, since a missing
+ * input read as a pass is what the replay exists to stop.
  */
 export function judgeDrift(
   steps: readonly StepResult[],

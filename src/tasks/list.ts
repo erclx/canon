@@ -49,11 +49,9 @@ export interface ListRefused {
 export type ListOutcome = TaskList | ListRefused
 
 /**
- * Reports each live task file's readiness from the board and the backlog. It
- * reads through the parsers `validate` exports rather than reading either file
- * a second time, so the two verbs cannot disagree on what a surface names. An
- * absent ordering file or backlog reads as empty, since a file in neither
- * surface is reported `unplaced` rather than refused.
+ * Reports each live task file's readiness from the board and the backlog,
+ * through the parsers `validate` exports so the two verbs cannot disagree. An
+ * absent ordering file or backlog reads as empty, and a file in neither is `unplaced`.
  */
 export async function listTasks(root: string): Promise<ListOutcome> {
   const dir = tasksDir(root)

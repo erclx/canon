@@ -65,12 +65,9 @@ export interface CloseRecord {
 }
 
 /**
- * Runs the checks `canon labels scan` runs on a pull request body, plus
- * density measured on the reason itself.
- *
- * The scan's own post density reads a body only when it opens on a known
- * post heading, and a closing comment carries none, so an overloaded reason
- * would pass it unmeasured.
+ * Runs the checks `canon labels scan` runs on a pull request body, plus density
+ * measured on the reason itself, since the scan's post density reads only a body
+ * opening on a known post heading and a closing comment carries none.
  */
 export function checkReason(reason: string): ReasonFindings {
   const lines = bodyLines(reason)
@@ -108,13 +105,9 @@ function refused(
 }
 
 /**
- * Closes one pull request unmerged with its reason posted first.
- *
- * The comment lands before the close, so a failure between the two leaves a
- * comment on an open pull request rather than a closed one carrying no
- * reason, which is the defect this verb exists to remove. The branch delete
- * runs last and never fails the close, since the pull request is already
- * closed with its reason by then.
+ * Closes one pull request unmerged with its reason posted first, so a failure
+ * between the two leaves a comment on an open pull request, not a closed one
+ * with no reason. The branch delete runs last and never fails the close.
  */
 export async function close(
   api: CloseApi,

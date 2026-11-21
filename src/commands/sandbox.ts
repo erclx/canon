@@ -61,16 +61,9 @@ import {
 const SANDBOX_DIR = join(PROJECT_ROOT, 'sandbox')
 
 /**
- * Reports that the scenario tree does not ship, and answers whether it reported,
- * so a caller that sees `true` returns without touching the tree.
- *
- * `sandbox` sits outside the published package, so an installed `canon`
- * resolves `SANDBOX_DIR` to a directory that is not there. Both entry points
- * that walk the tree ask here, since absence is a property of the install
- * rather than of a verb. `check` needs no guard, since its provisioned-tree
- * check stops an installed run first. An absent tree is not an empty one, and
- * a coverage percentage over an unread denominator reads as a clean suite.
- * The frame opens and closes here, so this runs before `intro`.
+ * Reports that the scenario tree does not ship, and answers whether it reported.
+ * An installed `canon` has no `SANDBOX_DIR`, and an absent tree reads as a clean
+ * suite. It opens and closes its own frame, so it runs before `intro`.
  */
 function reportAbsentScenarioTree(): boolean {
   if (existsSync(SANDBOX_DIR)) return false
@@ -166,15 +159,9 @@ async function interactivePicker(): Promise<string> {
 }
 
 /**
- * Reads the `claude -p --output-format json` envelope. Returns undefined when no
- * file was given, so the turn ceiling reports as skipped rather than passing on a
- * fabricated zero. A file that exists but does not parse falls back to clean,
- * since decision 8 lets the envelope fail a run but never pass one.
- *
- * `result` carries the reply text and is left undefined on both fallbacks, which
- * routes a reply assertion to skipped. Fabricating an empty string there would
- * fail every reply assertion on a run that supplied no envelope, turning a gap in
- * the input into a red arm.
+ * Reads the `claude -p --output-format json` envelope. Undefined when none was
+ * given, so the turn ceiling and reply assertions skip rather than run on a
+ * fabricated value. A file that does not parse falls back to clean.
  */
 function readEnvelope(path: string | undefined): RunEnvelope | undefined {
   if (path === undefined) return undefined
@@ -201,11 +188,9 @@ function readEnvelope(path: string | undefined): RunEnvelope | undefined {
 }
 
 /**
- * Shared by `--writes`, `--escapes`, and `--untied-escapes`, which are each a newline-delimited
- * path list written by `canon sandbox run`. Undefined when no file was given, which is
- * not the same as a run that produced no paths. Write scope and escape scope
- * both need that distinction: an empty list is a finding, an absent list is a
- * gap in what the caller supplied.
+ * Shared by `--writes`, `--escapes`, and `--untied-escapes`, each a path list.
+ * Undefined when no file was given, which differs from a run that produced no
+ * paths: an empty list is a finding and an absent list a gap in the input.
  */
 function readPathList(path: string | undefined): string[] | undefined {
   if (path === undefined) return undefined
@@ -312,8 +297,7 @@ function reportCensus(report: CensusReport): void {
     for (const entry of exempt) logInfo(`${entry.skill}: ${entry.reason}`)
   }
 
-  // A wrong exemption is the one way this report overstates itself, so both
-  // kinds print as errors, apart, since each sends the reader somewhere else.
+  // A wrong exemption is the one way this report overstates, so both kinds print as errors, apart.
   if (report.staleExemptions.length > 0) {
     logStep('Exemptions naming no shipped skill')
     for (const skill of report.staleExemptions) logError(skill)
@@ -344,8 +328,7 @@ function runCoverage(options: CoverageOptions): void {
 
   const report = collectCoverage(PROJECT_ROOT)
 
-  // A broken `exempt.toml` reads as a caller error rather than a stack trace,
-  // as `resolveVerdict` treats its own parse, since the parser throws on a loss.
+  // A broken `exempt.toml` reads as a caller error rather than a stack trace.
   let census: CensusReport | undefined
   if (options.skills === true) {
     try {
@@ -362,8 +345,7 @@ function runCoverage(options: CoverageOptions): void {
     }
   }
 
-  // The scenario view stays whichever way `--skills` is set, since the two count
-  // different denominators and the strict gate is written against this one.
+  // The scenario view stays whichever way `--skills` is set, since the strict gate is written against it.
   reportCoverage(report)
   if (census !== undefined) reportCensus(census)
 
@@ -374,8 +356,7 @@ function runCoverage(options: CoverageOptions): void {
 
   outro()
 
-  // A wrong exemption exits non-zero without `--strict`, since it is a wrong
-  // claim in committed data rather than a rollout still in progress.
+  // A wrong exemption exits non-zero without `--strict`, being a wrong claim in committed data.
   const wrongExemption =
     (census?.staleExemptions.length ?? 0) > 0 ||
     (census?.supersededExemptions.length ?? 0) > 0
@@ -397,8 +378,7 @@ interface EquivalenceOptions {
 /**
  * Provisions every arm on a base ref and on this checkout, then names what
  * differs. The record is the only thing on stdout, and a red arm that is red the
- * same way on both sides is reported without failing the run, since it proves
- * nothing either way.
+ * same way on both sides is reported without failing the run.
  */
 async function runEquivalence(
   targets: string[],
@@ -468,13 +448,9 @@ function refuseReplay(reason: string, message: string, json: boolean): void {
 }
 
 /**
- * Replays each consumer through a sync with this checkout's CLI and judges
- * the reads that follow. Bare, it replays the frozen snapshots, which is what
- * the gate runs. Given paths, it copies each real checkout, the operator's
- * step before a release. Every source is checked before any replay starts, so
- * a refusal never arrives after half the runs. A snapshot is judged against
- * the answer recorded beside it, since a frozen tree answers the same on every
- * push, and `--record` rewrites that answer from a run that broke nothing.
+ * Replays each consumer through a sync with this checkout's CLI and judges the
+ * reads against the answer recorded beside it, which `--record` rewrites. Bare,
+ * it replays the frozen snapshots the gate runs, and paths copy real checkouts.
  */
 function runReplay(paths: string[], options: ReplayOptions): void {
   if (reportAbsentScenarioTree()) return
@@ -525,8 +501,7 @@ function runReplay(paths: string[], options: ReplayOptions): void {
     }
   }
 
-  // Beside the provisioned tree rather than inside it, since `canon sandbox
-  // clean` wipes that one and a concurrent replay would lose its tree.
+  // Beside the provisioned tree, since `canon sandbox clean` wipes that one under a replay.
   const tempRoot = join(dirname(sandboxTree()), 'replay')
   const unsafe = assertSandboxDirSafe(
     join(tempRoot, 'tree'),
@@ -569,8 +544,7 @@ function runReplay(paths: string[], options: ReplayOptions): void {
       if (step.verdict === 'ok') logInfo(`${step.step}, exit ${step.exit}`)
       else
         logError(`${result.name}: ${step.step} ${step.verdict}: ${step.detail}`)
-      // A sync over an old layout prints a line per rule it moves, so the
-      // frame shows the first few and the record carries every one.
+      // A sync over an old layout prints a line per moved rule, so the frame shows a few.
       if (json) continue
       for (const finding of step.findings.slice(0, REPLAY_FINDINGS_SHOWN))
         logWarn(`${step.step}: ${finding}`)
@@ -660,8 +634,7 @@ function runCheck(
     return
   }
 
-  // A sandbox never provisioned fails every path assertion, which would read as
-  // a skill that did nothing rather than a check run too early.
+  // A sandbox never provisioned fails every path assertion, reading as a skill that did nothing.
   const sandboxDir = sandboxTree()
   if (!existsSync(sandboxDir)) {
     logError(`No sandbox at ${sandboxDir}. Provision one with canon sandbox.`)
@@ -686,8 +659,7 @@ function runCheck(
     },
   )
 
-  // `--json` adds the machine copy on stdout beside the stderr frame, per the
-  // stream contract in `docs/agents/output-shape.md`.
+  // `--json` adds the machine copy on stdout, per `docs/agents/output-shape.md`.
   reportVerdict(verdict)
   if (options.json === true)
     process.stdout.write(`${JSON.stringify(verdict)}\n`)
@@ -709,8 +681,7 @@ export function register(program: Command): void {
       const mismatch = checkoutMismatchWarning(process.cwd())
       if (mismatch !== undefined) logWarn(mismatch)
 
-      // `--no-header` is the frame opt-out for a caller that already opened
-      // one, which `canon sandbox run` and the picker below both do.
+      // `--no-header` is the frame opt-out for a caller that already opened one.
       const isHeader = cmd.args[0] !== '--no-header'
       const args = isHeader ? cmd.args : cmd.args.slice(1)
 

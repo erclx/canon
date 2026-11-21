@@ -34,12 +34,8 @@ export interface RenamePlan {
 }
 
 /**
- * Folders a target receives from the toolkit and does not author.
- *
- * The rename may rewrite these in a consuming project, because their content
- * came from here and a stale spelling in them is the toolkit's own defect.
- * Everything else in a target is prose that project wrote, where a citation is
- * reported for a person to decide rather than rewritten underneath them.
+ * Folders a target receives from the toolkit and does not author, which the rename may
+ * rewrite. Everything else is prose a project wrote, reported rather than rewritten.
  */
 const TOOLKIT_OWNED: readonly string[] = [
   '.claude/aitk/',
@@ -55,16 +51,9 @@ export function isToolkitOwned(path: string): boolean {
 }
 
 /**
- * What the sweep would do to a set of files.
- *
- * Pure, so the decision and the write are separable and the same plan can be
- * reported or applied. A file whose content and path both stay put is dropped
- * rather than carried as a no-op entry, which keeps the reported count equal
- * to the number of files the sweep actually changes.
- *
- * The rules arrive as an argument rather than being read from a module, since
- * this planner serves every rename the engine compiles and the four calls
- * below have no other way to say which one they mean.
+ * What the sweep would do to a set of files. Pure, so the same plan can be reported
+ * or applied, and a file whose content and path stay put is dropped. The rules
+ * arrive as an argument, since this planner serves every rename the engine compiles.
  */
 export function planRename(
   sources: readonly RenameSource[],

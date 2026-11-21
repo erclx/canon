@@ -4,14 +4,9 @@ import { execaSync } from 'execa'
 import { gitEnv } from '@/git/env'
 
 /**
- * The shipped corpus alone. A session loads a body from the plugin root, which
- * resolves to `claude/skills/`, so the internal tree carries no held copy that
- * could go stale in one.
- *
- * Held with posix separators because it is passed to git as a pathspec. Git
- * emits and accepts posix separators on every platform, so a `join()` form would
- * reach a Windows checkout as `claude\skills`, match no path, and return an
- * empty log that reads as a tree where nothing moved.
+ * The shipped corpus alone, since a session loads a body from the plugin root.
+ * Held with posix separators because git takes a pathspec in that form on every
+ * platform, and `claude\skills` would match nothing and read as a clean tree.
  */
 const SHIPPED_SKILLS = 'claude/skills'
 
@@ -42,11 +37,8 @@ export type DriftReport =
 
 /**
  * Reads `--name-only` log output into one entry per skill whose body moved.
- *
- * Reverse-chronological input means the first commit naming a body is the
- * newest that rewrote it, so an existing name is never overwritten. A body
- * rewritten twice therefore reports the recent commit, which is the one a
- * session can read to see what it is missing.
+ * Input is newest first, so the first commit naming a body is kept and an
+ * existing name is never overwritten.
  */
 export function parseMovedBodies(output: string): MovedBody[] {
   const moved = new Map<string, string>()
@@ -72,14 +64,9 @@ export function parseMovedBodies(output: string): MovedBody[] {
 }
 
 /**
- * Which shipped skill bodies were rewritten between `ref` and the current
- * `HEAD` of the tree at `root`.
- *
- * This measures a file moving, since a session cannot read its loaded body as
- * bytes, so a ref older than the oldest load over-reports, the safe direction.
- * Every path that cannot answer returns `unreadable` with its own reason,
- * since a target loads the plugin from a marketplace cache with no history,
- * where an empty result would read as a clean tree.
+ * Which shipped skill bodies were rewritten between `ref` and the current `HEAD`.
+ * Every path that cannot answer returns `unreadable` with its own reason, since
+ * a marketplace cache has no history and an empty result would read as clean.
  */
 export function readDrift(root: string, ref: string): DriftReport {
   if (!existsSync(join(root, SHIPPED_SKILLS))) {

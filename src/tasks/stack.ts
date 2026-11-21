@@ -8,11 +8,8 @@ import { readDeclarations } from '@/tasks/reach'
 
 /**
  * The fold thresholds, calibrated over 1,043 live and archived plans in which
- * 87 stack pairs name a parent. At these values 15 report: the inspector,
- * canvas, slides, and evidence chains, plus one sandbox contract split that
- * carries a `Judged apart from` line. The ceiling drops one pair of 24 files.
- * The per-PR cost was never measured as a number, so these are calibrated
- * against the corpus and not derived.
+ * 87 stack pairs name a parent, so that 15 report. The per-PR cost was never
+ * measured as a number, so these are calibrated against the corpus, not derived.
  */
 export const MIN_SHARED = 3
 export const MIN_OVERLAP = 0.6
@@ -56,11 +53,8 @@ export function constraintBullets(text: string): string[] {
 }
 
 /**
- * The plan stems a plan says it stacks on, in the order written.
- *
- * Only the slug standing directly after the phrase counts, with at most a
- * filler word between. A line like "`feature-x` stacks on this slice, not on
- * `feature-y`" names a parent for `feature-y`'s plan and none for this one, and
+ * The plan stems a plan says it stacks on, in the order written. Only the slug
+ * directly after the phrase counts, with at most a filler word between, since
  * reading every slug on a stack-worded line would hand it the wrong parent.
  */
 export function readStackParents(text: string): string[] {
@@ -94,12 +88,8 @@ function countShared(from: readonly string[], to: readonly string[]): number {
 
 /**
  * Every live plan that stacks on a live sibling it mostly shares files with and
- * has not written down why the two are judged apart.
- *
- * A parent absent from `plans` is never reported, so an archived parent stays
- * clear. A pair naming each other reports once, on the child sorting second.
- * A folder declaration counts as sharing the files under it, taking the larger
- * of the two directions and capping at the smaller set.
+ * has not written down why the two are judged apart. A parent absent from
+ * `plans` is never reported, and a pair naming each other reports once.
  */
 export function stackPairs(plans: readonly StackPlan[]): StackPair[] {
   const byStem = new Map(plans.map((plan) => [plan.stem, plan]))

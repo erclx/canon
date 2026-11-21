@@ -10,15 +10,8 @@ export const FAKE_GH = join(import.meta.dirname, '..', 'fixtures', 'gh.sh')
 
 /**
  * A `gh` stand-in that answers the reads `pr evidence` and `pr local` make and
- * records the body of any `gh api` write, so the command surface runs end to
- * end without a network. The program is `fixtures/gh.sh`, wrapped here.
- *
- * The files, head, and merge base come from the repository's own `main...HEAD`
- * unless a fixture beside `apiLog` names them: `files.tsv` holds
- * `status<TAB>path` rows, `head` and `merge-base` a sha each, `files-fail`
- * fails the files read, and `base-tree.json` answers the base tree read. The
- * rows pass through the caller's `--jq` filter, and every files read appends
- * its arguments to `files-calls.log`.
+ * records the body of any `gh api` write, so the surface runs without a network.
+ * Fixture files beside `apiLog` replace the repository's own `main...HEAD`.
  */
 export function writeFakeGh(
   bin: string,

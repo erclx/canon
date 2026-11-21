@@ -12,15 +12,9 @@ import context from './records/11-context.html?raw'
 import handoff from './records/12-handoff.html?raw'
 
 /**
- * The twelve record sheets the records stack pages through, in the order a
- * change writes them. Each sheet is page fiction in the exact shape canon
- * writes that record, a file in an editor for a record kept as markdown and a
- * browser page for one kept on the pull request, with no local path, version,
- * or account detail.
- *
- * Each sheet's body is its own file beside this module, as the drive settled
- * it on the `landing-v2` board. The formatter keeps the source view's `<pre>`
- * text and the whitespace between inline elements, so a reflow renders the same.
+ * The twelve record sheets the records stack pages through, in the order a change
+ * writes them. Each is page fiction in the exact shape canon writes that record,
+ * with no local path, version, or account detail, and its body is its own file beside this module.
  */
 export interface RecordSheet {
   readonly name: string

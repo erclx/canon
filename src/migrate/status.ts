@@ -7,10 +7,8 @@ interface Migration {
 }
 
 /**
- * Every `canon migrate` subcommand in the order a project runs them, records
- * first. This is the source for that order, and
- * `docs/migrations/by-verb.md` cites the verb rather than keeping a
- * second list. A new migration joins by one line here.
+ * Every `canon migrate` subcommand in the order a project runs them, records first. The
+ * source for that order, which `docs/migrations/by-verb.md` cites. A new one joins by a line.
  */
 export const MIGRATIONS: readonly Migration[] = [
   { name: 'records', flags: [] },
@@ -71,8 +69,7 @@ async function readOne(
   run: RunCommand,
   migration: Migration,
 ): Promise<MigrationStatus> {
-  // The flags ride in the verb, since a caller appending --write to a bare
-  // name would apply a different plan than the one this dry run read.
+  // The flags ride in the verb, since a bare name with `--write` appended would apply another plan.
   const verb = ['canon', 'migrate', migration.name, ...migration.flags].join(
     ' ',
   )
@@ -110,12 +107,9 @@ async function readOne(
 }
 
 /**
- * Runs each migration's own dry run and sorts it by the exit contract every
- * subcommand shares: 0 with nothing to move, 2 with a plan and no `--write`,
- * anything else a refusal. It never passes `--write`, and it reads no count,
- * since the records share no field to count from.
- * A retired caller is listed beside them and never changes the exit, since
- * exit 2 means the pending verbs can be run.
+ * Runs each migration's own dry run and sorts it by the exit contract every subcommand
+ * shares: 0 with nothing to move, 2 with a plan and no `--write`, anything else a refusal.
+ * A retired caller is listed beside them and never changes the exit.
  */
 export async function readMigrationStatus(
   run: RunCommand,

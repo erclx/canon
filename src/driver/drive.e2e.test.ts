@@ -4,21 +4,14 @@ import { drive } from '@/driver/drive'
 import { readDriverPlan } from '@/driver/steps'
 
 /**
- * Drives a served page through one interaction at two viewport heights, because
- * the property this command exists for cannot be shown at one height or in one
- * state. The fixture's defect is both: it needs the menu open, and it needs the
- * short viewport, so a run that skipped either reports the page clean.
- *
- * The suite needs a browser binary and skips without one. The E2E Suites job
- * in verify.yml installs it and fails before any suite starts when it is
- * missing, so read that job, not Static Checks, for whether this passed.
+ * Drives a served page through one interaction at two viewport heights, since the
+ * fixture's defect needs both the open menu and the short viewport. The suite
+ * skips without a browser binary, so read the verify.yml E2E job for whether it passed.
  */
 
 /**
- * A menu whose open panel is pushed off the right edge only where the viewport
- * is short. Contrived in its mechanism and not in its shape: a layout that
- * reflows below a height breakpoint is ordinary, and the defect it hides is the
- * scroll rail that passed at one height and failed at two others.
+ * A menu whose open panel is pushed off the right edge only where the viewport is
+ * short. Contrived in mechanism, not in shape: a reflow below a height breakpoint is ordinary.
  */
 const PAGE = readFileSync(
   new URL('./fixtures/reflow.html', import.meta.url),
@@ -200,8 +193,7 @@ describe.skipIf(!hasBrowser)('drive against a served application', () => {
     const read = readDriverPlan(RUN)
     if (read.kind !== 'read') return
 
-    // A port handed out and released refuses the connection. A low reserved port
-    // would not, since the engine blocks those before connecting.
+    // A port handed out and released refuses the connection, unlike a reserved port the engine blocks.
     const closed = Bun.serve({ port: 0, fetch: () => new Response('') })
     const port = Number(closed.port)
     closed.stop(true)
@@ -211,8 +203,7 @@ describe.skipIf(!hasBrowser)('drive against a served application', () => {
       plan: read.plan,
     })
 
-    // Nothing measured and nothing found read the same to a caller counting
-    // findings, so an unreachable page refuses rather than reporting empty.
+    // Nothing measured reads like nothing found, so an unreachable page refuses rather than reporting empty.
     expect(result).toMatchObject({
       status: 'failed',
       reason: 'server-unreachable',

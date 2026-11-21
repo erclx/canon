@@ -89,8 +89,7 @@ describe('checkClaim', () => {
     expect(report.foreignDead).toBe(3)
   })
 
-  // A merged pull request's branch has no worktree and no session, so only its
-  // local ref keeps a dispatch from opening a second pull request on it.
+  // A merged pull request's branch has no worktree or session, so only its local ref blocks a second.
   it('should report a branch claimed by a local ref that no worktree or session holds', async () => {
     git('branch', 'feat/parser')
 
@@ -111,8 +110,7 @@ describe('checkClaim', () => {
     expect(report.sessions).toHaveLength(0)
   })
 
-  // A sibling dispatcher that pushed seconds earlier leaves the remote-tracking
-  // ref behind and nothing else this machine can see.
+  // A sibling dispatcher that pushed seconds earlier leaves only the remote-tracking ref behind.
   it('should report a branch claimed by an origin remote-tracking ref alone', async () => {
     git('update-ref', 'refs/remotes/origin/feat/parser', 'HEAD')
 
@@ -204,8 +202,7 @@ describe('checkClaim', () => {
     expect(report.sessions).toHaveLength(0)
   })
 
-  // The roster is machine-wide and the filter scopes it, so pointing the read at
-  // another project is how a dispatcher learns a branch is held there.
+  // The roster is machine-wide and the filter scopes it, so another project's path asks about it.
   it('should answer for another repository when handed its path', async () => {
     const other = realpathSync(
       mkdtempSync(join(tmpdir(), 'canon-claim-target-')),
@@ -242,8 +239,7 @@ describe('checkClaim', () => {
     }
   })
 
-  // The same roster read from the caller's own repository has to keep answering
-  // the way it did, or widening the reach would change every existing dispatch.
+  // The same roster read from the caller's own repository must keep answering as before.
   it('should leave the default answer unchanged for a session in another repository', async () => {
     const other = realpathSync(
       mkdtempSync(join(tmpdir(), 'canon-claim-target-')),
@@ -309,8 +305,7 @@ describe('checkClaim', () => {
     expect(report.sessionsReadable).toBe(false)
   })
 
-  // A hook's `GIT_DIR` takes precedence over `-C`, so a claim read inside one
-  // would answer about the hook's repository rather than the directory given.
+  // A hook's `GIT_DIR` takes precedence over `-C`, so a claim read inside one would misanswer.
   it('should read the directory it was given when the environment names another repository', async () => {
     const other = realpathSync(
       mkdtempSync(join(tmpdir(), 'canon-claim-other-')),

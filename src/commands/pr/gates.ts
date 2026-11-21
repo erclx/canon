@@ -130,8 +130,7 @@ export async function readEvidenceGate(
     isSettled: record.reason === 'settled',
     owed: Array.isArray(record.owed) ? record.owed.map(String) : [],
     hasDrivableBox: readsDrivableBox(record),
-    // Absent stays absent, since it means the base keeps no captures and
-    // the gate passes as it did before the list existed.
+    // Absent stays absent, since the base keeps no captures and the gate passes as before.
     ...(Array.isArray(record.uncaptured) && {
       uncaptured: record.uncaptured.map(String),
     }),
@@ -154,8 +153,7 @@ export async function readChecksGate(
   number: string,
   tip: string,
 ): Promise<ChecksGate | undefined> {
-  // A status read that fails leaves a required status context unseen, which
-  // reads pending rather than passing, so it needs no refusal of its own.
+  // A failed status read leaves a required context unseen, which reads pending.
   const [listed, pulled, combined] = await Promise.all([
     gh(root, [
       'api',
@@ -181,8 +179,7 @@ export async function readChecksGate(
       mergeStateOf(row?.mergeable_state),
       collapseChecks(tip, listing, required, statuses),
     )
-    // Only a reading that would refuse `ci-pending` pays for the runs read. A
-    // gating check with a row is a run still going, which no stall cuts short.
+    // Only a reading that would refuse `ci-pending` pays for the runs read.
     const stalled =
       reading.state === 'pending' &&
       !reading.conflicted &&
@@ -202,9 +199,8 @@ export async function readChecksGate(
 
 /**
  * The tip's workflow runs GitHub queued past the bound and never gave a job.
- * Any read that fails or does not parse finds no stall, so the reading stays
- * `ci-pending`, which still refuses the merge, rather than a pass or a
- * refusal of its own.
+ * A read that fails or does not parse finds no stall, so the reading stays
+ * `ci-pending`, which still refuses the merge, rather than a pass or refusal.
  */
 async function readStalledRuns(
   root: string,

@@ -4,13 +4,9 @@ import { join, normalize, relative, resolve, sep } from 'node:path'
 import { listRuleFiles } from '@/gov/payload'
 
 /**
- * The six shape limits a rule body is held to.
- *
- * `create-rule`'s `references/rule.md` states the same six numbers to the
- * session writing a rule, and nothing compares the two, so a change to one is
- * a change to both in the same commit. The numbers come from groundwork 158's
- * decision rather than from the density limits, which bound prose sections a
- * rule never carries.
+ * The six shape limits a rule body is held to. `create-rule`'s `references/rule.md`
+ * states the same six numbers and nothing compares the two, so a change to one
+ * is a change to both in the same commit.
  */
 export const RULE_LIMITS = {
   words: 300,
@@ -60,8 +56,7 @@ export const PRACTICE_FOLDERS: readonly string[] = [
 /**
  * The folders whose rules record house decisions. Their ledger is checked
  * wherever one exists and owed only by a rule the branch touched, since the
- * reasoning behind an older bullet was never written down and no backfill
- * recovers it.
+ * reasoning behind an older bullet was never written down.
  */
 export const CORE_FOLDERS: readonly string[] = [
   'canon',
@@ -177,11 +172,9 @@ function stripCodeSpans(text: string): string {
 }
 
 /**
- * Sentence ends in one bullet, never fewer than one.
- *
- * Copied from groundwork 158's `audit.py`, which measured the baseline. A
- * period inside a code span or a short abbreviation ends nothing, and counting
- * either would put most of the corpus past two.
+ * Sentence ends in one bullet, never fewer than one, copied from the script
+ * that measured the baseline. A period inside a code span or a short
+ * abbreviation ends nothing, and counting either would put most of the corpus past two.
  */
 export function countSentences(bullet: string): number {
   const text = stripCodeSpans(bullet).replace(/\b(?:e\.g|i\.e|etc|vs)\./g, 'X')
@@ -194,12 +187,9 @@ interface Bullet {
 }
 
 /**
- * Measures one rule file against `RULE_LIMITS`.
- *
- * A bullet is a top-level `- ` line plus any indented line directly under it,
- * so a wrapped bullet is measured whole. A nested bullet is not counted, which
- * matches the groundwork script the baseline came from. Fenced blocks display
- * a list rather than state one.
+ * Measures one rule file against `RULE_LIMITS`. A bullet is a top-level `- `
+ * line plus any indented line directly under it, a nested bullet is not counted,
+ * and fenced blocks display a list rather than state one.
  */
 export function measureRule(text: string): RuleShape {
   const frontmatter = text.match(FRONTMATTER)
@@ -293,12 +283,9 @@ export function measureRule(text: string): RuleShape {
 }
 
 /**
- * Table rows per H2 in a ledger, `null` for a table above the first H2.
- *
- * A row is a table line after the header and its separator. Rows are matched
- * to bullets by count under a heading of the same name rather than by text,
- * since matching text breaks on every reword and whether a source says what
- * its bullet says is a review judgment either way.
+ * Table rows per H2 in a ledger, `null` for a table above the first H2. Rows
+ * match bullets by count under a heading of the same name rather than by text,
+ * since text breaks on every reword and fidelity is a review judgment.
  */
 export function countLedgerRows(text: string): HeadingCount[] {
   const counts = new Map<string | null, number>()
@@ -353,8 +340,7 @@ function ledgerFor(
   touched: ReadonlySet<string>,
   scope: 'canon' | 'target',
 ): { path: string; owed: boolean } | undefined {
-  // A project has no practice-folder list to owe a ledger against, so its
-  // ledger is checked where it exists and never owed.
+  // A project has no practice-folder list to owe a ledger against, so its ledger is never owed.
   if (scope === 'target') {
     const prefix = `${TARGET_RULES}${sep}`
     if (!file.startsWith(prefix)) return undefined
@@ -415,14 +401,9 @@ function findOrphanLedgers(root: string): string[] {
 }
 
 /**
- * Measures every rule this tree authors, or the files named.
- *
- * A tree holding `governance/rules/` is a canon checkout, read across both
- * authored corpora with a ledger asked of each outside-practice rule and of
- * each core rule in `touched`, and checked for any core rule carrying one.
- * Any other tree is a target, read at `.claude/rules/project/` alone, with
- * ledgers under `canon/ledger/rules/` checked where present and none owed.
- * `touched` holds root-relative paths, and leaving it out touches no rule.
+ * Measures every rule this tree authors, or the files named. A tree holding
+ * `governance/rules/` is a canon checkout read across both corpora, and any
+ * other is a target read at `.claude/rules/project/` with no ledger owed.
  */
 export async function readRuleAudit(
   root: string,
@@ -445,8 +426,7 @@ export async function readRuleAudit(
         message: `No rule at ${missing.join(', ')}.`,
       }
     }
-    // A path outside the root takes a `../` file name, which no gated prefix
-    // and no ledger path can match, so it would pass `--gate` unread.
+    // A path outside the root takes a `../` name no gated prefix matches, so it would pass `--gate` unread.
     const outside = paths.filter((path) =>
       relative(root, resolve(root, path)).startsWith('..'),
     )
@@ -515,11 +495,9 @@ export function hasFinding(reading: RuleReading): boolean {
 }
 
 /**
- * Exit code for a measured report.
- *
- * Without `gate`, any finding sets 2, which is what a session fixing its own
- * rule reads. With it, only a finding in a gated folder does, so the push
- * stage reports the whole corpus and fails on the folders already at zero.
+ * Exit code for a measured report. Without `gate`, any finding sets 2, and with
+ * it only a finding in a gated folder does, so the push stage fails on the
+ * folders already at zero.
  */
 export function auditExit(
   report: Extract<RuleAuditReport, { kind: 'measured' }>,

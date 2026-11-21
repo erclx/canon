@@ -27,11 +27,8 @@ const SKIPPED_DIRS = new Set([
 ])
 
 /**
- * Finds a Tailwind Vite plugin the chain registers with no stylesheet in the
- * target importing Tailwind, which compiles no utility while every check
- * passes. The plugin is read from a root config's effective copy, being the
- * target's when present and the golden otherwise, so a project that removed
- * it is not warned. Reads only, since `scan` runs under the report verbs.
+ * Finds a Tailwind Vite plugin the chain registers with no stylesheet in the target importing Tailwind, which compiles
+ * no utility while every check passes. The plugin is read from a root config's effective copy, and this reads only.
  */
 export function tailwindImportWarnings(
   chain: readonly Manifest[],

@@ -22,9 +22,8 @@ const REFUSALS: Record<ScanRefusal, string> = {
   'no-publish':
     'The manifest declares private, so this project publishes nothing.',
   // Stated as an unread corpus rather than an absent one. A publish with no
-  // files field packs the whole tree, so this is the package that ships the
-  // most, and calling it nothing to read is the denial the reasoning in
-  // src/secrets/shipped.ts warns against.
+  // files field packs the whole tree, so calling it nothing to read is the
+  // denial the reasoning in src/secrets/shipped.ts warns against.
   'no-files-field':
     'package.json declares no files field, so a publish would pack the whole tree. This check reads a declared corpus and left that one unread.',
   'no-git': 'git could not list this tree, so the corpus is unknown.',
@@ -109,8 +108,7 @@ async function runScan(
   logInfo(
     `${plural(scan.files, 'file')} read, ${scan.skipped} skipped as binary or unreadable`,
   )
-  // Stated on every run, since the corpus is what the package publishes and a
-  // passing count alone reads as covering the repository.
+  // Stated on every run, since a passing count alone reads as covering the repository.
   logInfo(
     `${scan.listed - scan.files - scan.skipped} of ${scan.listed} listed files sit outside the published corpus and were not read`,
   )

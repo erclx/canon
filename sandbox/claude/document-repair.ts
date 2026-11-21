@@ -7,8 +7,7 @@ export default scenario({
   },
   arms: {
     default: (ctx) => {
-      // docs/overview.md fails two density limits and states why the handler scan
-      // caches, while canon/context/ already passes and gates with no rewrite.
+      // docs/overview.md fails two density limits while canon/context/ already passes.
       ctx.fixtures('claude', 'document-repair', 'shared', '01-initial')
 
       ctx.git('add', '.')

@@ -24,10 +24,8 @@ export interface ResolvedSession {
   readonly status: string
   /**
    * What decided the row was live. `pid` is a start time matched or a pid that
-   * answered, `socket` means the record belongs to another pid namespace and
-   * only its messaging socket file existed, so the row can be a crashed
-   * session's leftover, and `listener` means the messaging socket accepted a
-   * connection, which confirms the row wherever the start time cannot be read.
+   * answered, `socket` means another pid namespace where only a socket file
+   * existed, possibly a crash's leftover, and `listener` means the socket accepted.
    */
   readonly via: 'pid' | 'socket' | 'listener'
   /**
@@ -44,15 +42,8 @@ export interface ResolvedSession {
   readonly statusUpdatedAt: string | null
   /**
    * Elapsed milliseconds since `statusUpdatedAt`, falling back to the coarser
-   * `updatedAt` when the record predates the narrower field, computed once at
-   * read time so three callers do not each convert the raw stamp and each get
-   * the clock-skew case wrong. The one record ever measured carrying
-   * `status: "waiting"` has exactly this shape: no `statusUpdatedAt`, an
-   * `updatedAt` beside it, so a caller reading this field alone would report
-   * the single real instance as unmeasured rather than as stalled.
-   * Clamped at zero rather than reported negative: a record stamped
-   * by a clock running ahead of this one is a skew to absorb, not a session
-   * that has not started waiting yet.
+   * `updatedAt` when the record predates it, computed once so no caller gets the
+   * clock skew wrong. Clamped at zero, since a record from a clock ahead is skew.
    */
   readonly statusDwellMs: number | null
   /**
@@ -78,10 +69,9 @@ export type SessionReport =
        */
       readonly confidence: Confidence
       /**
-       * Foreign-namespace records whose socket is gone. They read dead, but the
-       * reader could not check their pid, so an empty roster beside a count
-       * above zero is a roster that could not be checked rather than one that
-       * ended.
+       * Foreign-namespace records whose socket is gone. They read dead, but their
+       * pid could not be checked, so an empty roster beside a count above zero
+       * is a roster that could not be checked rather than one that ended.
        */
       readonly foreignDead: number
       readonly sessions: readonly ResolvedSession[]
@@ -119,11 +109,9 @@ export interface Located {
 }
 
 /**
- * Asks git what a directory is checked out to.
- *
- * A detached HEAD and a directory outside any repository are separated here
- * rather than collapsed into one empty answer, because the first is a session
- * that has a worktree and no branch and the second has neither.
+ * Asks git what a directory is checked out to. A detached HEAD and a directory
+ * outside any repository are separated rather than collapsed, since the first
+ * has a worktree and no branch and the second has neither.
  */
 async function locate(cwd: string): Promise<Located> {
   const top = await $`git -C ${cwd} rev-parse --show-toplevel`
@@ -132,8 +120,7 @@ async function locate(cwd: string): Promise<Located> {
     .nothrow()
 
   if (top.exitCode !== 0) {
-    // Git absent and git refusing the directory both exit non-zero, but only the
-    // first is the platform report, so the test is whether git ran at all.
+    // Git absent and git refusing the directory both exit non-zero, so test whether git ran at all.
     const version = await $`git --version`.quiet().nothrow()
     return {
       repository: null,
@@ -160,11 +147,9 @@ async function locate(cwd: string): Promise<Located> {
 }
 
 /**
- * Resolves the shared git directory a working directory belongs to.
- *
- * The common directory is what a linked worktree and its main checkout agree
- * on, so two rows in one repository match here while the toplevel would place
- * every worktree in a repository of its own.
+ * Resolves the shared git directory a working directory belongs to. The common
+ * directory is what a linked worktree and its main checkout agree on, while the
+ * toplevel would place every worktree in a repository of its own.
  */
 export async function repositoryOf(cwd: string): Promise<string | null> {
   const dir =
@@ -180,10 +165,9 @@ export async function repositoryOf(cwd: string): Promise<string | null> {
 }
 
 /**
- * Falls back to `updatedAt` when `statusUpdatedAt` is absent, since the
- * narrower field is the newer of the two and a record predating it still
- * carries the coarser one. The one record measured with `status: "waiting"`
- * takes exactly this path: no `statusUpdatedAt`, an `updatedAt` beside it.
+ * Falls back to `updatedAt` when `statusUpdatedAt` is absent, since the narrower
+ * field is the newer and a record predating it carries the coarser one, as the
+ * one record measured with `status: "waiting"` does.
  */
 function dwellMs(record: SessionRecord, now: number): number | null {
   const stamp = record.statusUpdatedAt ?? record.updatedAt
@@ -191,12 +175,9 @@ function dwellMs(record: SessionRecord, now: number): number | null {
 }
 
 /**
- * An absent field is rendered as an absence rather than as a value.
- *
- * A missing start time formatted from zero reads as a session launched in 1970
- * and a missing identifier as an empty one, both of which a caller would take
- * for data. Null says the record did not carry it, which is the same
- * distinction the registry draws between an absent folder and an empty one.
+ * An absent field is rendered as an absence rather than as a value, since a
+ * missing start time formatted from zero reads as launched in 1970. Null says
+ * the record did not carry it, as the registry's absent-versus-empty folder does.
  */
 function present(
   record: SessionRecord,
@@ -231,16 +212,9 @@ function present(
 }
 
 /**
- * Resolves every live session to the worktree and branch it holds.
- *
- * The registry is the whole source. Each session writes its own working
- * directory beside its own name, so a caller matching a listing row to a branch
- * reads both from one record instead of ordering the roster by start time and
- * hoping the order holds.
- *
- * A row whose branch cannot be read is kept and marked. Dropping it would leave
- * a caller unable to tell a session that holds no branch from one the resolver
- * never saw, and the second is the failure this replaces.
+ * Resolves every live session to the worktree and branch it holds. The registry
+ * is the whole source, each session writing its working directory beside its
+ * name. A row whose branch cannot be read is kept and marked, never dropped.
  */
 export async function resolveSessions(
   opts: ResolveOptions = {},
@@ -272,8 +246,7 @@ export async function resolveSessions(
     })
   }
 
-  // Only a row the start time left unverified is probed, since an accept proves
-  // the session runs where an answering pid or an existing socket does not.
+  // Only a row the start time left unverified is probed, since an accept proves the session runs.
   const upgraded = await Promise.all(
     live.map(async (row) => {
       const socket = row.record.messagingSocketPath
@@ -344,13 +317,8 @@ function pidOf(value: string | undefined): number | null {
 
 /**
  * Reads whatever the environment states about the calling session.
- *
- * `CLAUDE_CODE_SESSION_ID` is the roster's own `sessionId` and is read first,
- * since it survives a rename. `CLAUDE_CODE_HOST_SESSION_ID` is never read,
- * since it holds a harness-namespace value that matches no row, though a
- * reader searching the environment finds it first. The socket path is the last
- * rung, since its basename is the caller's pid by client convention rather
- * than a published interface.
+ * `CLAUDE_CODE_SESSION_ID` is the roster's own `sessionId` and survives a rename,
+ * so it comes first. `CLAUDE_CODE_HOST_SESSION_ID` matches no row and is never read.
  */
 export function callerIdentity(env: Env = process.env): SelfIdentity {
   const stated = env.CLAUDE_CODE_SESSION_ID?.trim()
@@ -369,15 +337,9 @@ export function callerIdentity(env: Env = process.env): SelfIdentity {
 }
 
 /**
- * Names which row of a roster belongs to the caller.
- *
- * The read that already returns every field marks none of them as the caller,
- * so this performs the join rather than adding a source. An identity the
- * environment does not carry and an identity no row matches are separated,
- * because the first is a client that states nothing and the second is a
- * session the roster cannot see. A session driving from Remote Control is the
- * measured instance of the second: it is addressable on the message channel
- * and holds no local process record for the roster to report.
+ * Names which row of a roster belongs to the caller, by a join rather than a new
+ * source. An identity the environment lacks and one no row matches are separate:
+ * a Remote Control session is addressable on the message channel with no local record.
  */
 export function selfOf(
   sessions: readonly ResolvedSession[],

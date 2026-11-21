@@ -81,11 +81,9 @@ function isCode(error: unknown, code: string): boolean {
 }
 
 /**
- * Publishes the holder's file whole or not at all.
- *
- * `link` refuses an existing name the way an exclusive open does, and the
- * linked file is already written, so no reader meets an empty lock and mistakes
- * a holder mid-write for a corrupt file it may take over.
+ * Publishes the holder's file whole or not at all. `link` refuses an existing
+ * name and the linked file is already written, so no reader mistakes a holder
+ * mid-write for a corrupt file it may take over.
  */
 function publish(path: string, text: string, pid: number): boolean {
   const staged = `${path}.${pid}.tmp`
@@ -102,16 +100,9 @@ function publish(path: string, text: string, pid: number): boolean {
 }
 
 /**
- * Moves a dead holder's file aside, or puts back one that changed under it.
- *
- * Unlink then create is two calls, so two acquirers judging one stale file
- * would both get through. A rename moves it to a name only this acquirer uses,
- * and comparing what moved against what was judged catches another acquirer
- * having already replaced it.
- *
- * A third acquirer publishing between the rename and the restore still lets
- * two suites run at once. That costs one oversubscribed run, never a hang, and
- * closing it needs a lock the kernel releases, which `node:fs` does not offer.
+ * Moves a dead holder's file aside, or puts back one that changed under it. A
+ * rename to a name only this acquirer uses beats unlink then create, and a third
+ * acquirer between rename and restore costs one oversubscribed run, never a hang.
  */
 function displace(path: string, judged: string, pid: number): void {
   const aside = `${path}.${pid}.stale`

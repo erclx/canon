@@ -1,11 +1,5 @@
 /**
- * The promotion of cited measurement folders out of `.canon/tmp/` into
- * `.canon/evidence/<nn>-<folder>/`, which `canon records push` backs.
- *
- * A disk loss takes the scratch root with it, so a durable record citing a
- * folder there cites something no backup covers. Unlike `record-tree.ts`, this
- * move reaches into archives on purpose, since most of the citing records sit
- * there and a promoted folder is gone either way. Honors the same
+ * The promotion of cited measurement folders out of `.canon/tmp/` into `.canon/evidence/<nn>-<folder>/`, which `canon records push` backs. This move reaches into archives on purpose. Honors the same
  * `canon-keep-record-root` marker `records.ts` reads.
  */
 
@@ -23,13 +17,9 @@ import { presentFolders } from '@/records/backup'
 import { LEGACY_SCRATCH_REL, recordDir, SCRATCH } from '@/roots/record'
 
 /**
- * Every folder this promotion moves, at the name it carries under scratch.
- *
- * Each passes the test `canon migrate scratch-evidence` applies: a durable
- * record cites it, and no file under `claude/`, `scripts/`, `src/`, or
- * `governance/` names its path. `verify-astro` and `verify-vite-react` pass
- * but are excluded, being generated scaffolds too large for the remote. A
- * folder a script or skill names needs a code change first, not a promotion.
+ * Every folder this promotion moves, at the name it carries under scratch. Each is cited by a
+ * durable record and named by no file under `claude/`, `scripts/`, `src/`, or `governance/`,
+ * and the generated scaffolds are excluded as too large for the remote.
  */
 export const PROMOTED_FOLDERS: readonly string[] = [
   'hero-probe',
@@ -44,10 +34,8 @@ export const PROMOTED_FOLDERS: readonly string[] = [
 ]
 
 /**
- * Where a promoted folder sits before the move: `.canon/tmp` when it holds the
- * folder, so a target part-way through a move promotes the newer copy, and the
- * retired scratch folder otherwise. The verb is a migration, so it reads an
- * unmigrated target where it is.
+ * Where a promoted folder sits before the move: `.canon/tmp` when it holds the folder, and
+ * the retired scratch folder otherwise, so a target part-way through promotes the newer copy.
  */
 export function sourcePath(root: string, folder: string): string {
   const current = recordDir(root, SCRATCH, folder)
@@ -66,10 +54,9 @@ function escape(value: string): string {
 }
 
 /**
- * The prefixes a citation of a promoted folder is spelled with, absolute at
- * either record root and relative from one directory below it. A tail
- * rejecting a following name character is what keeps `target-survey` from
- * swallowing a sibling folder whose name extends it.
+ * The prefixes a citation of a promoted folder is spelled with, absolute at either record
+ * root and relative from one directory below. A tail rejecting a name character keeps
+ * `target-survey` from swallowing a sibling.
  */
 const OLD_PREFIXES = [
   '.claude/.tmp/', // canon-keep-record-root
@@ -102,11 +89,9 @@ function buildRewrites(names: ReadonlyMap<string, string>): readonly Rewrite[] {
 }
 
 /**
- * Marks a line naming a promoted folder's old path on purpose, the same
- * marker `records.ts` reads: on the line itself or on the nearest non-blank
- * line above it. A sentence describing what no target holds, rather than
- * pointing a reader at this checkout's own evidence, needs the old spelling
- * kept, and a mechanical rewrite cannot tell that apart from a live citation.
+ * Marks a line naming a promoted folder's old path on purpose, the same marker `records.ts`
+ * reads, on the line itself or the nearest non-blank line above. A mechanical rewrite
+ * cannot tell a description of no target's state from a live citation.
  */
 const KEEP_MARKER = 'canon-keep-record-root'
 
@@ -133,11 +118,8 @@ interface RewriteOutcome {
 }
 
 /**
- * Rewrites every unmarked citation of a folder `rewrites` covers into its
- * destination under `.canon/evidence/`, absolute regardless of how the
- * source citation was spelled, counting each as it goes. A file naming no
- * such folder returns byte-identical with a count of zero, and a marked line
- * is returned unchanged and uncounted.
+ * Rewrites every unmarked citation of a folder `rewrites` covers into its destination
+ * under `.canon/evidence/`, counting each. A marked line is returned unchanged.
  */
 function applyRewrites(
   text: string,
@@ -222,14 +204,9 @@ export interface ScratchEvidencePlan {
 }
 
 /**
- * Every promoted folder found on disk, with its numbered destination, and the
- * name each promoted folder's citations rewrite to.
- *
- * Folders on disk take ordinals in order of first appearance, continuing past
- * the highest ordinal `evidence/` already holds. One whose slug `evidence/`
- * already carries refuses rather than taking a second number, and its
- * citations stay as they are. One already moved is not on disk under scratch,
- * so its citations rewrite to the numbered name it landed at.
+ * Every promoted folder found on disk, with its numbered destination and the name its
+ * citations rewrite to. Ordinals continue past the highest `evidence/` holds, and a slug
+ * already there refuses rather than taking a second number.
  */
 export function planFolderMoves(root: string): {
   moves: FolderMove[]

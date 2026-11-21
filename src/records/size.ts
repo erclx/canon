@@ -5,26 +5,17 @@ import { RECORD_ROOTS, recordDir, SCRATCH } from '@/roots/record'
 import { candidateFolders } from '@/records/backup'
 
 /**
- * The folders a size reading covers at `root`, resolved the way a push
- * resolves its scope rather than pinned to `BACKED_FOLDERS`, which is wrong at
- * a `.canon` root.
- *
- * It is the backed set plus scratch, which a backup skips as deletable but
- * which still accumulates handoffs and the memory archive. `.records.git` is
- * the backup history rather than a record, and `worktrees/` holds checkouts
- * with their own removal verb, so both stay out.
+ * The folders a size reading covers at `root`, resolved the way a push resolves its scope.
+ * It is the backed set plus scratch, and `.records.git` and `worktrees/` stay out, being the
+ * backup history and checkouts with their own removal verb.
  */
 export function sizedFolders(root: string): string[] {
   return [...candidateFolders(root), SCRATCH]
 }
 
 /**
- * The windows a reading reports, in days.
- *
- * There are two rather than one, because a single window cannot separate a
- * folder that grows steadily from one that took a single batch. A folder whose
- * 7-day count is most of its 30-day count moved in one pass, and one where the
- * two are proportional is growing at a rate.
+ * The windows a reading reports, in days. A single window cannot separate a folder that grows
+ * steadily from one that took a single batch, so there are two.
  */
 export const GROWTH_WINDOWS = [7, 30] as const
 
@@ -76,13 +67,9 @@ interface Walked {
 }
 
 /**
- * Renders the calendar date the writer saw, which is the local one.
- *
- * `toISOString` renders in UTC, so a file written after 17:00 at `-0700` dates
- * to the following day and a reader comparing the column against their own
- * memory of writing it finds the two disagree. The reading is per-machine
- * already, since these folders are gitignored and hold whatever that disk holds,
- * so a local date is the answer consistent with the rest of the report.
+ * Renders the calendar date the writer saw, which is the local one. `toISOString` renders in
+ * UTC and would date a late-evening file to the next day, and the reading is per-machine
+ * already.
  */
 export function day(ms: number): string {
   const at = new Date(ms)
@@ -92,13 +79,9 @@ export function day(ms: number): string {
 }
 
 /**
- * Adds one file to the running totals.
- *
- * The window counts read `mtime`, so a file edited long after it landed counts
- * as recent, which overstates growth and never understates it, and these
- * folders are append-mostly. A machine restored by `canon records pull` is
- * wrong rather than early, since the hard reset re-dates every file, and the
- * filesystem cannot tell the two apart, so the caveat is published.
+ * Adds one file to the running totals. The window counts read `mtime`, which overstates growth
+ * and never understates it, and a machine restored by `canon records pull` re-dates every
+ * file, so the caveat is published.
  */
 function absorb(into: Walked, bytes: number, mtime: number, now: number): void {
   into.files += 1
@@ -112,14 +95,9 @@ function absorb(into: Walked, bytes: number, mtime: number, now: number): void {
 }
 
 /**
- * Reads one entry, or undefined when it left between the listing and the read.
- *
- * These folders are written by whatever sessions are running, so a path listed
- * a moment ago can be gone by the time it is read. A vanished file is a file
- * the folder no longer holds, which is the answer the count wants, and letting
- * `ENOENT` out would fail the whole reading over one deleted scratch file.
- * Every other error propagates, since a permission or IO failure would
- * undercount with nothing said.
+ * Reads one entry, or undefined when it left between the listing and the read, which is the
+ * answer the count wants. Every other error propagates, since a permission or IO failure
+ * would undercount with nothing said.
  */
 async function readSize(path: string): Promise<Stats | undefined> {
   try {
@@ -131,12 +109,8 @@ async function readSize(path: string): Promise<Stats | undefined> {
 }
 
 /**
- * Walks one folder, counting files and never following a symlink.
- *
- * `isFile()` answers false for a link, so a folder holding one reports it
- * nowhere rather than counting whatever sits behind it. The corpus symlinks
- * point out of `.claude/` and into the authoring roots, where a second reading
- * of the same bytes would be the wrong answer twice over.
+ * Walks one folder, counting files and never following a symlink. `isFile()` answers false
+ * for a link, so the corpus symlinks into the authoring roots are not counted twice.
  */
 async function walk(dir: string, into: Walked, now: number): Promise<void> {
   const entries = await readdir(dir, { withFileTypes: true }).catch(
@@ -194,21 +168,15 @@ async function measure(
 }
 
 /**
- * Reports what each record folder holds and how much of it is recent.
- *
- * Every folder is reported whether or not it exists, since a caller reading the
- * record wants a stable set of keys, and a folder absent from the output is
- * indistinguishable from one the reading skipped.
- *
- * `now` is a parameter rather than a call inside the walk so a test can pin the
- * windows against fixture timestamps.
+ * Reports what each record folder holds and how much of it is recent. Every folder is
+ * reported whether or not it exists, so the keys are stable. `now` is a parameter so a test
+ * can pin the windows.
  */
 export async function sizeRecords(
   root: string,
   now: number = Date.now(),
 ): Promise<SizeOutcome> {
-  // Either root answers, so a migrated tree is read. The roots are tested, since
-  // a root with no records yet is empty, and `present` names the folders held.
+  // Either root answers, so a migrated tree is read, and `present` names the folders held.
   if (!RECORD_ROOTS.some((name) => existsSync(join(root, name)))) {
     return {
       ok: false,
@@ -217,8 +185,7 @@ export async function sizeRecords(
     }
   }
 
-  // Each folder is walked independently, and `Promise.all` keeps the caller's
-  // input order while the walks overlap.
+  // Each folder is walked independently, and `Promise.all` keeps the caller's input order.
   const folders = await Promise.all(
     sizedFolders(root).map((folder) => measure(root, folder, now)),
   )
@@ -233,12 +200,8 @@ export async function sizeRecords(
 }
 
 /**
- * The file count, byte total, and newest `mtime` under one path, for a caller
- * that wants a unit's freshness rather than the full per-window reading.
- *
- * It walks with the same `walk`/`absorb` pair `sizeRecords` uses, so the two
- * verbs agree on what counts as a file and which mtime a rewritten entry
- * carries, rather than each answering from a second walk of its own.
+ * The file count, byte total, and newest `mtime` under one path. It walks with the same
+ * `walk`/`absorb` pair `sizeRecords` uses, so the two verbs agree on what counts as a file.
  */
 export async function newestMtime(
   path: string,
@@ -258,11 +221,8 @@ export async function newestMtime(
 const UNITS = ['B', 'K', 'M', 'G'] as const
 
 /**
- * Renders a byte count at three significant figures or fewer.
- *
- * The reading is a prompt to go and look rather than an accounting figure, so
- * an exact byte count buys nothing and costs a reader the comparison between
- * two rows.
+ * Renders a byte count at three significant figures or fewer. The reading is a prompt to go
+ * and look rather than an accounting figure.
  */
 export function formatBytes(bytes: number): string {
   let value = bytes

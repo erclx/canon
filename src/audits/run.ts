@@ -15,9 +15,8 @@ export const CORPORA: readonly Corpus[] = ['tracked', 'per-machine', 'upstream']
 
 /**
  * The catalog scoped to the requested corpora, or the whole set when none
- * were named. `--corpus` on `audits run` reads this, and so does `auditSet`
- * in `src/gate/measures.ts`, which excludes the upstream corpus so the gate
- * reads only what describes this tree.
+ * were named. `auditSet` in `src/gate/measures.ts` also reads it, and
+ * excludes the upstream corpus so the gate reads only this tree.
  */
 export function auditsFor(
   specs: readonly AuditSpec[],
@@ -51,16 +50,9 @@ export interface SpawnResult {
 export type Spawn = (spec: AuditSpec) => Promise<SpawnResult>
 
 /**
- * Runs each verb out of the checkout this CLI is executing from.
- *
- * `process.execPath` and the resolved `cli.ts` rather than a bare `canon`, for
- * the reason `cliRunner` in `src/gate/sequencer.ts` already names: a globally
- * installed binary resolves to
- * the main checkout no matter which worktree is running, so the aggregate would
- * measure the wrong tree and report a pass over a branch it never read.
- *
- * `reject: false` because a findings exit is the ordinary outcome for half of
- * these verbs, and a throw there would be an error path for a working check.
+ * Runs each verb out of the checkout this CLI is executing from, through
+ * `process.execPath` and `cli.ts`, since a global `canon` resolves to the
+ * main checkout and the aggregate would measure the wrong tree.
  */
 export function spawnAudit(root: string): Spawn {
   const cli = join(PROJECT_ROOT, 'src', 'cli.ts')
@@ -69,8 +61,7 @@ export function spawnAudit(root: string): Spawn {
     const result = await execa(process.execPath, [cli, ...spec.argv], {
       cwd: root,
       reject: false,
-      // `gitEnv` is the whole environment minus git's resolution variables, so it
-      // replaces the environment, since spreading `process.env` would restore them.
+      // `gitEnv` replaces the environment, since spreading `process.env` restores git's vars.
       env: gitEnv(),
       extendEnv: false,
     })
@@ -80,15 +71,9 @@ export function spawnAudit(root: string): Spawn {
 }
 
 /**
- * Runs every audit and reads each one's own record shape.
- *
- * The verbs walk separate trees and share no state, so they run together
- * rather than in sequence. Serially, the aggregate would be the slowest thing
- * in the verify pipeline for no reason beyond the order they were written in.
- *
- * A spawn that throws becomes an `unmeasured` result rather than a rejection.
- * One absent binary would otherwise take the whole aggregate down and report
- * nothing about the audits that did run.
+ * Runs every audit and reads each one's own record shape, together since the
+ * verbs share no state. A throwing spawn becomes an `unmeasured` result, so
+ * one absent binary does not hide the audits that did run.
  */
 export async function runAudits(
   specs: readonly AuditSpec[],
@@ -117,16 +102,9 @@ export async function runAudits(
 }
 
 /**
- * The single verdict over the set.
- *
- * `incomplete` outranks a quiet set on purpose. An aggregate reporting a pass
- * over a tree it did not finish measuring is the failure this whole command
- * exists against, and an empty set takes it for the same reason: nothing ran,
- * so nothing passed.
- *
- * An `absent` per-machine corpus does not reach it. That folder is gitignored
- * and missing on every fresh clone, so folding it in would pin the verdict at
- * `incomplete` on every CI run and leave the word meaning nothing.
+ * The single verdict over the set. `incomplete` outranks a quiet set, since
+ * a pass over an unfinished or empty tree is what this command guards against.
+ * An `absent` per-machine corpus is skipped, or every fresh CI run is incomplete.
  */
 export function verdictOf(results: readonly AuditResult[]): Verdict {
   if (results.length === 0) return 'incomplete'
@@ -139,13 +117,9 @@ export function verdictOf(results: readonly AuditResult[]): Verdict {
 }
 
 /**
- * Exits non-zero only on a fact, which is the split this aggregate inherits
- * rather than moves. A growing judgment count reports as a delta and fails
- * nothing, because the standards behind those measures set no hard cap.
- *
- * An audit that did not report takes its own code rather than the findings one.
- * The two mean opposite things to whoever reads the exit: a fact is a defect in
- * the tree, and an unmeasured audit is a defect in the run.
+ * Exits non-zero only on a fact. A growing judgment count reports as a delta
+ * and fails nothing, and an unmeasured audit takes its own code, since that
+ * is a defect in the run rather than in the tree.
  */
 export function exitCodeFor(results: readonly AuditResult[]): number {
   const verdict = verdictOf(results)
@@ -179,12 +153,8 @@ export interface Summary {
 
 /**
  * The flat reading a shell stage takes without parsing the nested record.
- *
- * Published rather than left to a consumer to derive, for the reason the
- * context audit already gives about its own join: deriving it means restating
- * which question each number answers, and one wrong restatement is growth
- * reported against a measure that never moved. Every key here is unique across
- * the whole record, so a grep for one reaches the top level alone.
+ * Published so a consumer need not restate which question each number answers,
+ * and every key is unique across the record so a grep reaches the top level.
  */
 export function summarize(
   results: readonly AuditResult[],

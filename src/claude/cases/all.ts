@@ -7,13 +7,8 @@ import { WORKFLOW_CASES } from '@/claude/cases/workflow'
 
 /**
  * The full routing case corpus, one file per domain so a description change
- * in one family touches only the file beside it.
- *
- * Bootstrapped from each skill's own quoted trigger phrases and then
- * rephrased and supplemented rather than shipped verbatim, since a positive
- * lifted unchanged from a trigger passes by construction and never tests a
- * person's own words. See `.canon/groundwork/42-ai-blueprint/08-spikes.md`
- * for the extraction arm this corpus replaces as the shipped measure.
+ * in one family touches only the file beside it. Positives are rephrased,
+ * never lifted from a skill's own trigger, which would pass by construction.
  */
 export const SKILL_CASES: readonly SkillCase[] = [
   ...WORKFLOW_CASES,

@@ -1,16 +1,13 @@
 import { configDefaults, defineConfig } from 'vitest/config'
 import base from './vitest.config'
 
-// The suites `bun run test:e2e` runs. Each project below sets its own `include`
-// and takes nothing from the base by `extends`, since the merge concatenates
-// arrays and would let every unit test back in. Vitest ANDs a path argument
-// with `include`, so `bun run test:e2e src/take` runs only the end-to-end
-// suites under that path.
+// The suites `bun run test:e2e` runs. Each project sets its own `include` and
+// takes nothing from the base by `extends`, since the merge concatenates arrays
+// and would let every unit test back in.
 
-// Suites whose assertion reads real-time pacing, being the drag's pixel
-// bounds, the glide's two-slow-frame landing, and the step file's stall limit
-// on a refused beat, which a busy machine skews past their limits. They run
-// alone, after the parallel files.
+// Suites whose assertion reads real-time pacing, which a busy machine skews past
+// their limits: the drag's pixel bounds, the glide's landing, and the step file's
+// stall limit. They run alone, after the parallel files.
 const TIMED = [
   'src/take/film-drag.e2e.test.ts',
   'src/take/film-glide.e2e.test.ts',

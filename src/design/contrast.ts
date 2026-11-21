@@ -44,10 +44,8 @@ export interface Reading {
 }
 
 /**
- * Every reading the record declares, one per role and ground pair. A role
- * naming no ground contributes none, which is what keeps a ground itself and
- * the three ANSI roles out of the set rather than measured against something
- * they never sit on.
+ * Every reading the record declares, one per role and ground pair. A role naming
+ * no ground contributes none, which keeps a ground and the ANSI roles out of the set.
  */
 export function readings(
   tokens: readonly ColorToken[] = TOKENS.color,

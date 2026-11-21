@@ -34,12 +34,8 @@ export function loadRenames(root: string): Renames {
 
 /**
  * Follows a declared rename to the name the toolkit ships the rule under now,
- * through every later rename of that name. The ledger is pruned only once a
- * rule is retired, so a target several releases behind still reaches the
- * current name of every rule that still ships.
- *
- * Returns nothing when the chain ends on a name with no source, or loops,
- * since installing a guess is worse than the retire the caller falls back to.
+ * through every later rename, since the ledger is pruned only once a rule is
+ * retired. Returns nothing on a chain ending in no source or a loop.
  */
 export function resolveSuccessor(
   renames: Renames,

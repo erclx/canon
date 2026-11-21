@@ -88,8 +88,7 @@ describe('removeReclaimable', () => {
     expect(calls).toEqual([])
   })
 
-  // The sweep clears a registration a failed remove leaves, and git cannot delete
-  // a branch it reads as held, so the sweep runs before the deletes.
+  // The sweep clears a registration a failed remove leaves, and git cannot delete a held branch.
   it('should sweep once before the branch deletes when a directory is gone', async () => {
     const { calls, git: spy } = recorder()
 
@@ -119,8 +118,7 @@ describe('removeReclaimable', () => {
     expect(calls.some((call) => call[1] === 'prune')).toBe(false)
   })
 
-  // Git refuses to delete a branch a registered worktree holds, so forcing past
-  // a failed remove strands a registration pointing at a branch that is gone.
+  // Git refuses to delete a branch a registered worktree holds, so forcing strands a registration.
   it('should keep the branch when removing a directory that still stands failed', async () => {
     const { calls, git: spy } = recorder((args) =>
       args[1] === 'remove' ? 128 : 0,
@@ -148,8 +146,7 @@ describe('removeReclaimable', () => {
     expect(report.outcomes[0]?.failedAt).toBe('branch')
   })
 
-  // The hand cleanup this verb was filed against: eight directories deleted
-  // outside git, leaving a registration and a branch behind each one.
+  // The hand cleanup this verb was filed against: eight directories deleted outside git.
   it('should clear a worktree whose directory was deleted by hand, and its branch', async () => {
     git('worktree', 'add', '--quiet', '-b', 'feat/parser', 'wt-parser')
     const path = join(ROOT, 'wt-parser')
@@ -238,8 +235,7 @@ describe('removeBranches', () => {
     expect(git('branch', '--list', 'feat/parser')).not.toBe('')
   })
 
-  // A worktree that checked the branch out after the reading makes git refuse
-  // the delete, which reports rather than forcing past it.
+  // A worktree that checked the branch out since the reading makes git refuse, which reports.
   it('should report a delete git refused, with its reason', async () => {
     git('worktree', 'add', '--quiet', '-b', 'feat/parser', 'wt-parser')
 

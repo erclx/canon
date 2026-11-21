@@ -34,10 +34,8 @@ export const RECORD_KINDS = [
 export type RecordKind = (typeof RECORD_KINDS)[number]
 
 /**
- * `unknown-kind` is raised at the argument boundary rather than by the walk, and
- * it sits here because both reach a caller through the same `reason` field. A
- * union covering only what the walk returns would type a record the command can
- * emit as impossible.
+ * `unknown-kind` is raised at the argument boundary rather than by the walk, and sits here
+ * because both reach a caller through the same `reason` field.
  */
 export const VALIDATE_REFUSALS = [
   'no-folder',
@@ -148,18 +146,14 @@ const NONE_IDENTIFIED = 'None identified.'
 const NUMBERED_FILE = /^\d{2}-[a-z0-9]+(-[a-z0-9]+)*\.md$/
 
 /**
- * The suggestion the plan standard fixes for a question that turns on the
- * operator's preference rather than on a technical default. `src/tasks/answers.ts`
- * reads this alongside `normalizeOperatorCall` so the dispatch gate and this
- * write-time check cannot drift into recognizing different spellings.
+ * The suggestion the plan standard fixes for a question that turns on the operator's
+ * preference. `src/tasks/answers.ts` reads it so the two checks recognize the same spellings.
  */
 export const OPERATOR_CALL = 'needs your call'
 
 /**
- * The two demonstrated paraphrases of `OPERATOR_CALL`, longer variant first so
- * it is not read as a shorter match sitting inside it: `operator's call` is a
- * substring of `the operator's call`, and checking it first would rewrite the
- * `the` into place with the wrong phrase on either side.
+ * The two paraphrases of `OPERATOR_CALL`, longer variant first, since `operator's call` is a
+ * substring of `the operator's call`.
  */
 const OPERATOR_CALL_PHRASES = [
   "the operator's call",
@@ -167,14 +161,9 @@ const OPERATOR_CALL_PHRASES = [
 ] as const
 
 /**
- * Reads a recognized paraphrase as the canonical phrase, so a caller testing
- * `startsWith(OPERATOR_CALL)` sees one spelling. Case-insensitive, since the
- * corpus capitalizes a suggestion's first word, and it rewrites only the
- * matched span so the reason text either side survives.
- *
- * Short-circuits on an already-canonical opening, since a reason that goes on
- * to mention a paraphrase, as in `needs your call, since the operator's call
- * outranks a default`, would otherwise have that later occurrence garbled.
+ * Reads a recognized paraphrase as the canonical phrase, so `startsWith(OPERATOR_CALL)` sees one
+ * spelling. Case-insensitive, and it short-circuits on an already-canonical opening so a later
+ * paraphrase in the reason is not garbled.
  */
 export function normalizeOperatorCall(text: string): string {
   const lower = text.toLowerCase()
@@ -222,25 +211,17 @@ const PLAN_TITLE = /^#[ \t]+Feature:[ \t]+\S/
 const BATCH_LABEL = /^\*\*Batch\s+\d+\b.*\*\*/i
 
 /**
- * Reads the raw text rather than `splitPlanSections`'s output, since a
- * colon-bearing `**Batch 1: ...**` line is itself a `MARKER_LINE` and is
- * already dropped from the split `Files to touch` section before any check
- * sees it.
+ * Reads the raw text rather than `splitPlanSections`'s output, since a `**Batch 1: ...**` line
+ * is a `MARKER_LINE` and is already dropped from the split section.
  */
 export function hasStagedBatches(text: string): boolean {
   return linesOutsideFences(text).some((line) => BATCH_LABEL.test(line.trim()))
 }
 
 /**
- * An entry names a file and says something about it. Both halves are tested as
- * facts rather than as a syntax: a backticked span anywhere, and prose left over
- * once the spans are removed.
- *
- * Requiring the path to lead and the reason to follow a colon was the first
- * shape and it reported 80 of 178 archived plans. The corpus writes
- * `- Label: prose naming a path` as often as `- path: reason`, and both name the
- * file and say why, so the stricter rule measured a house style rather than a
- * defect.
+ * An entry names a file and says something about it, tested as facts rather than syntax: a
+ * backticked span anywhere, and prose left once the spans are removed. The corpus writes
+ * `- Label: prose naming a path` as often as `- path: reason`.
  */
 function statesReason(entry: string): boolean {
   if (!/`[^`]+`/.test(entry)) return false
@@ -277,10 +258,8 @@ const PLAN_REQUIRED: readonly PlanSection[] = [
 ]
 
 /**
- * The files whose edit changes what a person sees, the set the `ui/a11y` and
- * `ui/keyboard` rules glob plus the other markup and style extensions a plan
- * names. A plan touching one owes a `Design references` section, so a set too wide forces it on every
- * plan and one too narrow lets a UI plan skip it.
+ * The files whose edit changes what a person sees: the `ui/a11y` and `ui/keyboard` globs plus
+ * other markup and style extensions. A set too wide forces `Design references` on every plan.
  */
 const RENDERED_SURFACE = /\.(?:tsx|jsx|astro|vue|svelte|html|css|scss)$/
 
@@ -300,11 +279,8 @@ export function touchesRenderedSurface(entries: readonly string[]): boolean {
 const MARKER_LINE = /^(?:##[ \t]+(.+?)|\*\*(.+?):\*\*)[ \t]*$/
 
 /**
- * A section opens as a bold label or as an H2 and both count. The corpus writes
- * `Summary` as a heading and the others as bold labels, and roughly a fifth
- * of it swaps one for the other. Reporting the variant would fail nearly every
- * plan present on the rule a reader is least served by, which is what teaches
- * them to skip the output.
+ * A section opens as a bold label or as an H2 and both count, since the corpus swaps one for
+ * the other and reporting the variant would fail nearly every plan.
  */
 export function sectionMarker(line: string): PlanSection | undefined {
   const match = MARKER_LINE.exec(line.trim())
@@ -324,8 +300,7 @@ export function splitPlanSections(text: string): Map<string, string[]> {
   let current: string | undefined
 
   for (const line of linesOutsideFences(text)) {
-    // Any marker-shaped line closes the section above, so a plan's own label
-    // never collects its bullets into the section before it.
+    // Any marker-shaped line closes the section above, so a label never collects bullets into it.
     if (MARKER_LINE.test(line.trim())) {
       current = sectionMarker(line)
       if (current) sections.set(current, [])
@@ -484,10 +459,8 @@ const LOAD_PINNED = /\btaskset\b|\bmacos\b/i
 const LOAD_BOUNDED = /\bg?timeout\b/
 
 /**
- * Keys on a launched generator, being a digit count beside the word or
- * `stress-ng` with arguments, so a bullet that only mentions a hog passes.
- * Confined takes a `timeout` bound and a `taskset` pin on the line, where naming macOS waives the pin and `gtimeout` stands for the bound. A plan
- * saying "saturate the CPU" slips past.
+ * Keys on a launched generator, a digit count beside the word or `stress-ng` with arguments.
+ * Confined takes a `timeout` bound and a `taskset` pin, where naming macOS waives the pin.
  */
 function checkVerification(name: string, lines: readonly string[]): Finding[] {
   return readSourceEntries(lines)
@@ -653,10 +626,8 @@ export function checkPlan(
 const DATE_FIELD = /^date:[ \t]*'?"?(\d{4}-\d{2}-\d{2})'?"?[ \t]*$/m
 
 /**
- * Reads the opening date off the raw block rather than the parsed fields. A YAML
- * parser resolves an unquoted `YYYY-MM-DD` to a date value on the core schema
- * and to a string elsewhere, and a check keyed on the parsed type would report a
- * conforming file on one runtime and not the other.
+ * Reads the opening date off the raw block rather than the parsed fields, since a YAML parser
+ * resolves an unquoted date differently by schema and a check on the type would differ by runtime.
  */
 function hasOpeningDate(raw: string): boolean {
   return DATE_FIELD.test(raw)
@@ -751,8 +722,7 @@ async function checkTrack(dir: string, slug: string): Promise<Finding[]> {
     )
   }
 
-  // A track closes on its decision alone. A legacy handoff with no decision,
-  // or a pause note left beside one, reads as neither live nor closed.
+  // A track closes on its decision alone, so a legacy handoff or a pause note reads as neither.
   const decided = files.some((file) => file.startsWith(GROUNDWORK_DECISION))
   const handed = files.some((file) => file.startsWith(GROUNDWORK_HANDOFF))
 
@@ -864,8 +834,7 @@ async function checkDump(dir: string, slug: string): Promise<Finding[]> {
     ...(await checkFolderFrontmatter(dir, slug, files, INTAKE_INDEX)),
   )
 
-  // The two reserved files hold no items. Running the item check over the
-  // handoff would report every heading it carries as a malformed item.
+  // The two reserved files hold no items, so the item check would report each heading as malformed.
   const clusters = files.filter(
     (file) => file !== INTAKE_INDEX && file !== INTAKE_HANDOFF,
   )
@@ -895,10 +864,8 @@ const FOLDER_CHECK: Readonly<
 }
 
 /**
- * The files of a folder record the structure report reads. A groundwork
- * track's `evidence/`, `scripts/`, and `clones/` sit below the top level and
- * hold copies and raw output, so only its index and numbered files are read.
- * An intake folder's reserved files hold no items, so only clusters are.
+ * The files of a folder record the structure report reads. A groundwork track's `evidence/`,
+ * `scripts/`, and `clones/` hold raw output, and an intake folder's reserved files hold no items.
  */
 const STRUCTURE_FILES: Readonly<
   Partial<Record<RecordKind, (file: string) => boolean>>
@@ -908,11 +875,9 @@ const STRUCTURE_FILES: Readonly<
 }
 
 /**
- * An app drive's log, which sits under an intake folder's `evidence/` and
- * holds findings as headings and fields rather than items. It reads on the
- * plain criteria with a labeled field exempt from `S4`, since a finding
- * carries the measured number beside each claim, and without the cluster-only
- * spill and item-heading checks.
+ * An app drive's log, under an intake folder's `evidence/`, holding findings as headings and
+ * fields. It reads on the plain criteria with a labeled field exempt from `S4`, and without
+ * the cluster-only checks.
  */
 const DRIVE_LOG = 'evidence/drive-log.md'
 

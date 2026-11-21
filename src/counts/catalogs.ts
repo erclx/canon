@@ -10,10 +10,8 @@ export interface Catalog {
   readonly nouns: readonly [string, string]
   /**
    * `undefined` means this tree carries nothing this catalog reads, which is
-   * ordinary for every catalog but `commands`: a target installing this CLI
-   * has no `src/cli.ts` of its own, and reading that as zero would report a
-   * finding against every project stating its command count as anything but
-   * zero, forever.
+   * ordinary for every catalog but `commands`, since a target has no `src/cli.ts`
+   * and reading that as zero would report a finding against every project.
    */
   readonly count: (root: string) => number | undefined
 }
@@ -22,12 +20,9 @@ export interface Catalog {
 const REGISTER_IMPORT = /^import \{ register as /gm
 
 /**
- * Every top-level `canon` command, read off the CLI entry point rather than a
- * catalog verb, because a command carries no `--json` listing of its own
- * siblings. Callers import this reader rather than a second regex on
- * `src/cli.ts`, so this is the one place that pattern is written.
- *
- * This is the one catalog with no meaning outside this repository.
+ * Every top-level `canon` command, read off the CLI entry point since a command
+ * carries no `--json` listing of its siblings. Callers import this reader so the
+ * pattern on `src/cli.ts` is written once, and it means nothing outside this repository.
  */
 export function countCommands(root: string): number | undefined {
   const cli = join(root, 'src', 'cli.ts')
@@ -36,14 +31,9 @@ export function countCommands(root: string): number | undefined {
 }
 
 /**
- * The closed set of catalogs this sweep counts a document against.
- *
- * Closed rather than derived from every list command this CLI ships, on the
- * design the plan settled on: a wider set widens the false-positive class
- * before the first run has measured how large that class already is. Each
- * reader here walks the filesystem directly rather than shelling out to its
- * own `canon` verb, since this module already runs inside the process that
- * would spawn it.
+ * The closed set of catalogs this sweep counts a document against. A wider set
+ * widens the false-positive class before a run has measured it, and each reader
+ * walks the filesystem rather than spawning its own `canon` verb.
  */
 export const CATALOGS: readonly Catalog[] = [
   {

@@ -13,9 +13,8 @@ const CLAUDE_MD = 'CLAUDE.md'
 const HOOKS = 'hooks'
 /**
  * Seed subdirectories, authored under `.claude/` or, for a tracked surface,
- * under `canon/`. Exported because each one replaced a single file of the same
- * stem in an older layout, which is what `@/sync/layout` pairs a target against
- * to find a superseded artifact.
+ * under `canon/`. Each replaced a single file of the same stem, which
+ * `@/sync/layout` pairs a target against to find a superseded artifact.
  */
 export const SUBDIRS: readonly string[] = [HOOKS, 'context', 'tasks']
 
@@ -49,12 +48,9 @@ function isSurfaceEntry(name: string): boolean {
 }
 
 /**
- * Where a surface seed installs, relative to the target.
- *
- * Resolved the way a read resolves rather than fixed at `canon/`. A target that
- * still holds the surface under `.claude/` receives the seed beside the copy it
- * has, since a fresh `canon/` folder there would win read precedence and hide
- * every entry that target already wrote.
+ * Where a surface seed installs, relative to the target. Resolved the way a
+ * read resolves, so a target still holding the surface under `.claude/` gets
+ * the seed beside its copy rather than a `canon/` folder that hides it.
  */
 function surfaceRel(target: string, entry: string): string {
   return relative(target, surfaceDir(target, entry))
@@ -109,8 +105,7 @@ export function planSeeds(root: string, target: string): SeedEntry[] {
     const surface = isSurfaceEntry(subdir)
     const source = join(surface ? surfaceSource : claudeSource, subdir)
 
-    // Three `.claude/` subdirectories are record folders installing under the
-    // record root, which resolves back to `.claude/` for an unmigrated target.
+    // Three `.claude/` subdirectories are record folders, installing under the record root.
     const installRel = surface
       ? surfaceRel(target, subdir)
       : isRecordEntry(subdir)
@@ -156,12 +151,9 @@ export function countByScope(seeds: readonly Seed[]): SeedCounts {
 }
 
 /**
- * Copies each pending seed. Hooks get the executable bit the way `chmod +x`
- * granted it, added on top of whatever mode the destination already carried.
- *
- * A markdown seed is rewritten rather than copied, so the stub marker the seed
- * gate reads does not reach the target. Every other seed copies byte for byte,
- * which is what keeps the hook scripts and `settings.json` untouched.
+ * Copies each pending seed. Hooks gain the executable bit on top of the mode the
+ * destination carried, and a markdown seed is rewritten so the stub marker the
+ * seed gate reads never reaches the target.
  */
 export async function applySeeds(seeds: readonly Seed[]): Promise<string[]> {
   const applied: string[] = []

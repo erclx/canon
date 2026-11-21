@@ -19,11 +19,9 @@ export function frameStamp(reading: {
 }
 
 /**
- * Which frame fills each slot of a clip, as indexes into `stamps`, which holds
- * the frames in arrival order. A slot takes the newest frame stamped at or
- * before it, and slot 0 takes the first frame whenever it was presented. The
- * indexes never fall, so an early stamp cannot reorder the clip. Empty when no
- * frame arrived.
+ * Which frame fills each slot of a clip, as indexes into `stamps` in arrival
+ * order. A slot takes the newest frame stamped at or before it, and the indexes
+ * never fall, so an early stamp cannot reorder the clip.
  */
 export function slotFrames(
   stamps: readonly number[],

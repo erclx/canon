@@ -1,9 +1,7 @@
 /**
- * The keys a take plan may press, named as Playwright names them so the
- * screencast passes a combination straight to `page.keyboard`, and each one's
- * CDP descriptor so the stepper can send the same press as raw key events.
- * A key outside this vocabulary refuses at plan read, since the stepper has no
- * descriptor to send for it.
+ * The keys a take plan may press, named as Playwright names them, each with a CDP
+ * descriptor so the stepper can send the same press as raw key events. A key
+ * outside this vocabulary refuses at plan read.
  */
 
 export const MODIFIERS = ['Alt', 'Control', 'Meta', 'Shift'] as const

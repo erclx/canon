@@ -18,10 +18,8 @@ export interface SkillListing {
 
 export interface SkillsCorpus {
   /**
-   * The corpus spelling in POSIX form, so a report reads the same on Windows.
-   * `CorpusReport.rel` in `skills-audit.ts` is the same spelling left as `join`
-   * produced it, so the two verbs disagree there. Normalizing it is a contract
-   * change on an existing JSON field and belongs to a branch reading the audit.
+   * The corpus spelling in POSIX form. `CorpusReport.rel` in `skills-audit.ts`
+   * leaves it as `join` produced it, an existing JSON field left for the audit.
    */
   readonly rel: string
   /** The folder a listing reads, absolute against the root it was resolved at. */
@@ -29,15 +27,9 @@ export interface SkillsCorpus {
 }
 
 /**
- * The skill corpus a measure reads at a given root: the shipped tree in this
- * repository and a target's own `.claude/skills/` in a project that consumes
- * it. `CORPORA` order settles a tree carrying both, so every reading taken
- * here still comes from `claude/skills/`.
- *
- * Kept apart from `listSkills` deliberately. `src/counts/catalogs.ts` counts
- * the shipped catalog through that function, so teaching it to read both
- * corpora would move the reported total off the tree that installs and
- * falsify every sentence in the corpus stating it.
+ * The skill corpus a measure reads at a given root. `CORPORA` order settles a
+ * tree carrying both. Kept apart from `listSkills`, since `src/counts/catalogs.ts`
+ * counts the shipped catalog through it and a total must stay on that tree.
  */
 export function resolveSkillsCorpus(root: string): SkillsCorpus | undefined {
   for (const rel of CORPORA) {
@@ -49,16 +41,9 @@ export function resolveSkillsCorpus(root: string): SkillsCorpus | undefined {
 }
 
 /**
- * Enumerates the plugin skill catalog, which is the corpus under `claude/`
- * rather than the internal skills under `.claude/`. Only the former installs
- * into a target, so a count taken across both overstates what ships.
- *
- * The folder name wins over the frontmatter `name` when they disagree, because
- * Claude Code invokes a skill by its directory.
- *
- * `requirement` reports whether the folder carries `REQUIREMENT.md`. Every skill
- * is meant to carry one, so a false is a gap rather than a recorded exemption.
- * `canon claude skills audit` is what fails on it, across both corpora.
+ * Enumerates the plugin skill catalog under `claude/`, the only corpus that
+ * installs into a target. The folder name wins over the frontmatter `name`,
+ * because Claude Code invokes a skill by its directory.
  */
 export function listSkills(root: string): SkillListing[] {
   return listSkillsAt(join(root, 'claude', 'skills'))

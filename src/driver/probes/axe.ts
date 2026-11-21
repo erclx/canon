@@ -4,28 +4,18 @@ import type { Page } from 'playwright-core'
 import type { Finding } from '@/driver/steps'
 
 /**
- * Runs axe-core on the WCAG A and AA tags and reports what it found, marking
- * the findings a UI review holds open on. The engine is read from canon's own
- * install at run time, so nothing reaches a target's manifest or build.
- *
- * The bundle assigns `window.axe`, `doT`, and `_encodeHTML` as it loads, and
- * registers with any AMD loader the page carries. It is evaluated with
- * `define`, `module`, and `exports` shadowed, and every global it added or
- * replaced is put back once the run settles, so a page owning a global named
- * `axe` keeps it, a global set during the run survives, and a later probe reads
- * the page it found.
+ * Runs axe-core on the WCAG A and AA tags and marks the findings a UI review holds open on, reading the
+ * engine from canon's own install. Added globals are put back once the run settles, so a page owning `axe`
+ * keeps it, and `define`, `module`, and `exports` are shadowed since the bundle registers with any AMD loader.
  */
 
 /** The tags the groundwork measured on, which together are WCAG 2.2 A and AA. */
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 
 /**
- * The rules a violation of which keeps a UI review open. Each raised no false
- * finding across frameboard's real screens, and a rule moves to report-only on
- * its first false finding on a real pull request.
- *
- * `label-content-name-mismatch` stays off it as a text heuristic, and every
- * incomplete result stays off it as axe saying it could not decide.
+ * The rules whose violation keeps a UI review open, each having raised no false
+ * finding on real screens. A rule moves to report-only on its first false finding.
+ * `label-content-name-mismatch` and every incomplete result stay off it.
  */
 export const AXE_GATE_RULES: readonly string[] = [
   'color-contrast',
@@ -118,10 +108,9 @@ export async function probeAxe(
 }
 
 /**
- * Builds the expression the page evaluates. A string rather than a function,
- * so the bundle is evaluated by the debugging protocol, which a page's content
- * security policy does not govern, where a `new Function` inside the page would
- * be refused by any policy without `unsafe-eval`.
+ * Builds the expression the page evaluates, as a string rather than a function,
+ * so the debugging protocol evaluates it and a content security policy without
+ * `unsafe-eval` cannot refuse it.
  */
 function runner(source: string): string {
   const options = JSON.stringify({
@@ -138,8 +127,7 @@ function runner(source: string): string {
     }
     const prior = before.get('axe')
 
-    // The keys the bundle's load added or replaced, read once it has loaded and
-    // before the run awaits, so a global the page sets mid-run stays the page's.
+    // The keys the bundle's load added or replaced, read before the run awaits so a mid-run page global stays the page's.
     const loaded = () =>
       Object.getOwnPropertyNames(scope).filter((key) => {
         const was = before.get(key)
@@ -181,8 +169,7 @@ ${source}
       read('incomplete', result.incomplete)
       return rows
     } finally {
-      // A load that threw partway set nothing the page could have raced, so
-      // the keys that differ now are all the bundle's.
+      // A load that threw partway set nothing the page could have raced, so every differing key is the bundle's.
       for (const key of touched ?? loaded()) {
         const was = before.get(key)
         if (was) Object.defineProperty(scope, key, was)

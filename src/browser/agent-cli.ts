@@ -1,10 +1,7 @@
 /**
  * The pinned agent browser CLI every skill driving a page reaches through
- * `canon browser`, so every call in a run and every run on a machine reach one
- * version. `open` is forced onto the bundled Chromium, since the CLI's default
- * channel is a branded Chrome most machines lack, and it refuses rather than
- * downloading when that browser is absent, since a dispatched reviewer that
- * installs mid-pass spends its budget on the download.
+ * `canon browser`. `open` is forced onto the bundled Chromium and refuses rather
+ * than downloading when it is absent, since a reviewer installing mid-pass spends its budget.
  */
 
 import { planSwipe } from '@/browser/swipe'
@@ -25,10 +22,8 @@ export type AgentCall =
 
 /**
  * Rewrites the caller's words into the child's, reading the revision only for
- * `open`, the one verb that launches a browser, and expanding `swipe`, which
- * the pinned CLI lacks, into `run-code`. Global flags may lead the verb, as in
- * `-s=<name> --raw open <url>`. A later pin shipping its own `swipe` is shadowed
- * here, so moving the pin checks its command list for one.
+ * `open` and expanding `swipe`, which the pinned CLI lacks, into `run-code`. A
+ * later pin shipping its own `swipe` is shadowed here, so moving the pin checks for one.
  */
 export function planAgentCall(
   args: readonly string[],

@@ -386,8 +386,7 @@ describe('runEquivalence', () => {
   }, 240_000)
 
   it('should never find the toolkit different from itself on one real arm', async () => {
-    // The head side reads `root`, and the live checkout carries edits the base
-    // does not, so both sides build from one detached copy of the same commit.
+    // The live checkout carries edits the base does not, so both sides build from one detached copy.
     const snapshot = join(root, 'head')
     const removeSnapshot = addDetachedWorktree(process.cwd(), snapshot, 'HEAD')
 
@@ -400,8 +399,7 @@ describe('runEquivalence', () => {
         useMasks: true,
       })
 
-      // A machine without the tools the arm needs reads it red on both sides,
-      // which is still no difference, so the claim holds wherever the test runs.
+      // A machine without the arm's tools reads it red on both sides, which is still no difference.
       expect(record.arms.map((a) => [a.arm, a.differs])).toEqual([
         ['claude:plan-feature/full', []],
       ])

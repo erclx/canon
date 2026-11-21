@@ -138,8 +138,7 @@ describe('resolveReviewScope', () => {
   })
 
   it('should read the marker a PUT rewrite left on the standing close-out', () => {
-    // `PUT` replaces the body and leaves `commit.oid` at the first submission, so
-    // only the marker names the commit read.
+    // `PUT` leaves `commit.oid` at the first submission, so only the marker names the commit.
     const rewritten = review(`${CLOSED}\n${marker(READ)}`, STAMPED)
     const scope = resolveReviewScope({ reviews: [rewritten] })
 
@@ -172,8 +171,7 @@ describe('resolveReviewScope', () => {
     expect(scope.commit).toBe(READ)
   })
 
-  // The UI pass posts its own family as a pull request review too, after the
-  // code pass, and the code family's state must read through it unchanged.
+  // The UI pass posts its own family as a review too, and the code family must read through it.
   it('should ignore a review posted under a UI-family heading', () => {
     const scope = resolveReviewScope({
       reviews: [
@@ -210,8 +208,7 @@ describe('resolveReviewScope', () => {
   })
 
   it('should ignore a marker a body displays on its own line', () => {
-    // A fenced block trims to exactly the pattern, so a body showing the format
-    // must not hand the next reader a commit taken from an illustration.
+    // A fenced block trims to exactly the pattern, so a body showing the format must not scope a pass.
     const shown = `## Review
 
 - **should-fix**: end the body with the marker:
@@ -304,8 +301,7 @@ describe('resolveUiScope', () => {
   })
 
   it('should read the marker a PUT rewrite left on the standing UI close', () => {
-    // `PUT` keeps `commit.oid` at the first post and replaces the body, so only the
-    // marker names the head the clean re-pass drove.
+    // `PUT` keeps `commit.oid` at the first post, so only the marker names the head the re-pass drove.
     const rewritten = review(`${UI_CLOSED}\n${uiMarker(UI_HEAD)}`, STAMPED)
     const scope = resolveUiScope({ reviews: [rewritten] })
 

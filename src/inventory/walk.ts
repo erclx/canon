@@ -12,15 +12,9 @@ import type { Reading } from '@/inventory/group'
 import type { Subject } from '@/inventory/subjects'
 
 /**
- * Walks a running application, or a set of board frame files, and reads one
- * property off every element a subject names. Every browser reference the
- * inventory feature adds lives here, and `src/commands/inventory.ts` reaches
- * it through a dynamic import so no other command resolves the engine at
- * startup.
- *
- * Like `@/driver/drive` and `@/capture/render`, this module
- * ships, because a command whose whole purpose is running inside someone else's
- * project cannot stay toolkit-only.
+ * Walks a running application, or board frame files, and reads one property off
+ * every element a subject names. `src/commands/inventory.ts` reaches it through a
+ * dynamic import so no other command resolves the engine, and it ships to targets.
  */
 
 /**
@@ -33,14 +27,9 @@ export interface WalkTarget {
 }
 
 /**
- * The reader and the query arrive apart because they come from different
- * owners. The toolkit ships the reader and the project declares which elements
- * it runs over, which is what keeps the walk answering to the target rather
- * than to a fixed selector nobody there chose.
- *
- * `frames` reads each target twice, light and then dark, since a board frame
- * carries both themes in one file where a route serves whichever the project
- * chose.
+ * The reader and the query arrive apart, since the toolkit ships the reader and
+ * the project declares which elements it runs over. `frames` reads each target
+ * light then dark, since a board frame carries both themes in one file.
  */
 export interface WalkOptions {
   readonly targets: readonly WalkTarget[]
@@ -127,14 +116,12 @@ export async function walk(options: WalkOptions): Promise<WalkResult> {
         continue
       }
 
-      // A frame's stylesheets and fonts change what computes, so the read waits for
-      // load, and a stylesheet the frame cannot reach is simply absent from it.
+      // A frame's stylesheets and fonts change what computes, so the read waits for load.
       await page.emulateMedia({ colorScheme: 'light' })
       await page.goto(target.url, { waitUntil: 'load' })
       await readInto(page, target.label)
 
-      // The dark read sets both `data-theme` and the media query, and finishes each
-      // color transition the flip starts, so no value is read between themes.
+      // The dark read sets both `data-theme` and the media query and finishes each color transition.
       await page.emulateMedia({ colorScheme: 'dark' })
       await page.evaluate(() => {
         document.documentElement.setAttribute('data-theme', 'dark')
@@ -150,8 +137,7 @@ export async function walk(options: WalkOptions): Promise<WalkResult> {
       error,
     )
   } finally {
-    // Dropped, since a close failing beside a walk that already failed would
-    // replace the caller's refusal with a reason about teardown.
+    // Dropped, since a failing close would replace the caller's refusal with one about teardown.
     await browser.close().catch(() => undefined)
   }
 

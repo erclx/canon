@@ -8,12 +8,9 @@ import { documentHeight } from '@/markdown/structure'
 import { isStubSeed } from '@/tooling/seed-marker'
 
 /**
- * Every reason `canon context audit` refuses for.
- *
- * `no-folders` is the one ordinary absence: a project holding neither
- * `canon/context/` nor a `.canon/diagrams/` folder an older install left names
- * no corpus to measure, the state `no-skills` reads for the skill corpora. The
- * other four are a malformed invocation or a checkout git cannot read.
+ * Every reason `canon context audit` refuses for. `no-folders` is the one
+ * ordinary absence, a project holding neither `canon/context/` nor an older
+ * install's diagrams folder, and the other four are a bad call or an unreadable checkout.
  */
 export type ContextAuditRefusal =
   | 'conflicting-options'
@@ -23,20 +20,16 @@ export type ContextAuditRefusal =
   | 'no-git'
 
 /**
- * Checkpoint quoted from the standard stating it. It is not a cap.
- *
- * Entry length rests on one entry per domain, a domain fact, so
- * `claude/skills/context-fold/references/context.md` keeps it. Depth and bullet
- * weight read the same over any markdown file, so `canon markdown audit`
- * measures them rather than this.
+ * Checkpoint quoted from the standard stating it. It is not a cap. Entry length
+ * rests on one entry per domain, so `claude/skills/context-fold/references/context.md`
+ * keeps it, and depth and bullet weight are measured by `canon markdown audit`.
  */
 export const LENGTH_CHECKPOINT = 150
 
 /**
  * A table this size or larger whose first column mostly names artifacts reads
- * as a catalog that grows a row per shipped thing, which is the shape the
- * standard routes to a bullet list. Below it, a table is small enough that a
- * reflow rewrites little.
+ * as a catalog that grows a row per shipped thing, which the standard routes to
+ * a bullet list.
  */
 export const CATALOG_ROW_CHECKPOINT = 6
 
@@ -44,14 +37,9 @@ export const CATALOG_ROW_CHECKPOINT = 6
 const CATALOG_NAMED_RATIO = 0.6
 
 /**
- * Required sections per audited folder name, each in the order its standard
- * states them.
- *
- * Held here rather than parsed from the standards, as the checkpoints above
- * quote their numbers, since a parser would fail on a rewording rather than on
- * a defect. Keyed on the folder whose standard states each list: `context.md`
- * requires an overview and a layout, and a diagram entry declares a heading
- * per kind and requires none.
+ * Required sections per audited folder name, in the order its standard states
+ * them. Held here rather than parsed, since a parser would fail on a rewording
+ * rather than on a defect, and a diagram entry requires none.
  */
 export const REQUIRED_SECTIONS_BY_FOLDER: Readonly<
   Record<string, readonly string[]>
@@ -60,13 +48,9 @@ export const REQUIRED_SECTIONS_BY_FOLDER: Readonly<
 }
 
 /**
- * The closed set of H2 sections per audited folder name, which a required
- * section belongs to. An entry carrying another H2 is a finding under
- * `--gate`, since the set is what makes a context entry cheap to find a fact
- * in: a domain's folders go one level down as H3 items under `Layout`.
- *
- * Held beside the required lists for the same reason they are held here, and
- * keyed on the folder whose standard states it.
+ * The closed set of H2 sections per audited folder name. An entry carrying
+ * another H2 is a finding under `--gate`, since the set is what makes a fact
+ * cheap to find, and a domain's folders go down as H3 items under `Layout`.
  */
 export const ALLOWED_SECTIONS_BY_FOLDER: Readonly<
   Record<string, readonly string[]>
@@ -76,11 +60,8 @@ export const ALLOWED_SECTIONS_BY_FOLDER: Readonly<
 
 /**
  * H2 sections the standard once allowed and now forbids, per audited folder.
- *
- * Kept apart from the extra sections because every unrebuilt entry still
- * carries one, and an extra section gates under `--gate` everywhere. A retired
- * section is a shape finding instead, which gates only where the folder was
- * rebuilt, per `SHAPE_GATED_FOLDERS`.
+ * Kept apart from the extra sections, since a retired one is a shape finding
+ * that gates only where the folder was rebuilt, per `SHAPE_GATED_FOLDERS`.
  */
 export const RETIRED_SECTIONS_BY_FOLDER: Readonly<
   Record<string, readonly string[]>
@@ -104,11 +85,9 @@ export const OTHER_FOLDERS = 'Other folders'
 export const SCRIPTS_HEADING = 'Scripts'
 
 /**
- * Whether an entry path is the development entry, being the flat entry or any
- * entry directly under a `development/` folder, since a split folder names its
- * scripts entry by project, as `local-loop` here and `local` in another. The
- * standard exempts the `Scripts` H3 for that entry alone, so the path is what
- * tells.
+ * Whether an entry path is the development entry, the flat entry or any entry
+ * directly under `development/`, whose scripts entry the standard exempts from
+ * the `Scripts` H3 and which a split folder names by project.
  */
 function isDevelopmentEntry(rel: string): boolean {
   return /(?:^|\/)development(?:\/[^/]+)?\.md$/.test(rel)
@@ -129,15 +108,8 @@ const NAMED_CELL = /`[^`]+`|\[[^\]]+\]\([^)]+\)/
 
 /**
  * Spellings of how the domain reached its shape rather than what it is now.
- *
- * The standard admits a rejected alternative and refuses the provenance on it,
- * being when a change landed, which change carried it, and which release
- * labelled it. A marker is a judgment, so this reports and never gates. The
- * change pattern takes a hash sign and any digit count, and `provenance` masks
- * displayed spans first, so a heading's link anchor reads as no change. The
- * release pattern takes three segments without a `v` and two only with one,
- * since an unprefixed pair is more often a cost or a duration. Another tool's
- * version reports, since a name-keyed exclusion goes stale silently.
+ * A marker is a judgment, so this reports and never gates. The release pattern
+ * takes two segments only with a `v`, since an unprefixed pair is a cost.
  */
 const PROVENANCE: readonly { kind: ProvenanceKind; pattern: RegExp }[] = [
   { kind: 'date', pattern: /\b\d{4}-\d{2}-\d{2}\b/g },
@@ -146,24 +118,16 @@ const PROVENANCE: readonly { kind: ProvenanceKind; pattern: RegExp }[] = [
 ]
 
 /**
- * Verbs that read the date behind them as stamping a measurement.
- *
- * `claude/skills/context-fold/references/context.md` cuts a date attached to a
- * change and permits one stamping a measurement, so `measured on` and
- * `overturned on` before a date differ only in the verb. These five are never
- * a noun a change date attaches to, so they match at any distance. The set is
- * closed, and an unenumerated phrasing falls back to a change marker,
- * reporting one date too many rather than clearing one the standard cuts.
+ * Verbs that read the date behind them as stamping a measurement, which
+ * `claude/skills/context-fold/references/context.md` permits where a change date
+ * is cut. The set is closed, so an unenumerated phrasing falls back to a change marker.
  */
 const STAMPING = /\b(?:measured|verified|driven|passed|fired)\b/i
 
 /**
- * The noun form, which has to sit against the date to count.
- *
- * A run on a date stamps a measurement, while runs on two pull requests that
- * then landed on a date date a change, and the two differ only in what follows
- * the noun. Requiring the connector and then the date immediately separates
- * them, so this is anchored to the clause end where `STAMPING` is not.
+ * The noun form, which has to sit against the date to count. A run on a date
+ * stamps a measurement while runs on two pull requests that landed date a
+ * change, so this is anchored to the clause end where `STAMPING` is not.
  */
 const STAMPING_RUN = /\b(?:an?\s+)?runs?\s+(?:on|at|in)\s+$/i
 
@@ -171,15 +135,9 @@ const STAMPING_RUN = /\b(?:an?\s+)?runs?\s+(?:on|at|in)\s+$/i
 const SENTENCE_END = /[.!?:;]\s(?=[^.!?:;]*$)/
 
 /**
- * The folder whose standard carries the exclusion above, narrowing both
- * provenance and the required sections. It keeps the provenance name because
- * the JSON record publishes it as `checkpoints.provenanceFolder`.
- *
- * The context standard hands figures to `draw-figure`, so a marker in a
- * diagrams entry would cite a rule routed elsewhere. The length and table
- * checkpoints reach every folder, and bullet weight stays ungated here, owned
- * by `claude/skills/markdown-craft/references/markdown.md`. Restating the
- * exclusion in the sibling standards would duplicate one fact three times.
+ * The folder whose standard carries the exclusion above, narrowing provenance
+ * and the required sections. It keeps the provenance name because the JSON
+ * record publishes it as `checkpoints.provenanceFolder`.
  */
 export const PROVENANCE_FOLDER = 'context'
 
@@ -204,13 +162,9 @@ export interface BareReferenceFinding {
 }
 
 /**
- * Each way an entry breaks the section shape the context standard states.
- *
- * `retired-section` is a `Decisions` H2. The three `gotcha-*` kinds are a
- * `Gotchas` section past its bullet cap, holding a heading, or holding a
- * paragraph. The three `layout-*` kinds are a Layout H3 titled neither a path
- * nor `Other folders`, a folder H3 past its bullet or paragraph cap, and a
- * heading below H3 under `Layout`.
+ * Each way an entry breaks the section shape the context standard states: a
+ * retired `Decisions` H2, a `Gotchas` section past its cap or holding a heading
+ * or paragraph, and a Layout H3 or heading level the standard does not allow.
  */
 export type ShapeKind =
   | 'retired-section'
@@ -234,13 +188,9 @@ export interface ShapeIssue {
 export interface EntryReport {
   readonly rel: string
   /**
-   * Rendered lines across the whole file, counting frontmatter and fenced
-   * blocks, through `documentHeight` in `src/markdown/structure.ts`, which
-   * shares `renderedHeight` with the depth checkpoint and the document ceiling.
-   *
-   * Fences count here though the depth measure skips them, since a file measure
-   * has no run to protect, and excluding them would barely change which entries
-   * report.
+   * Rendered lines across the whole file, counting frontmatter and fenced blocks,
+   * through `documentHeight` in `src/markdown/structure.ts`. Fences count here
+   * though the depth measure skips them, since a file measure has no run to protect.
    */
   readonly lines: number
   readonly catalogTables: readonly TableFinding[]
@@ -277,10 +227,9 @@ export interface EntryReport {
    */
   readonly stub: boolean
   /**
-   * Whether a content rule reached this entry, which is what parts an empty
-   * `provenance` list that was measured from one that was never scanned. The
-   * length finding reads it, since reporting a clean history for an entry
-   * outside the governed folder answers a question nothing asked.
+   * Whether a content rule reached this entry, which parts an empty `provenance`
+   * list that was measured from one never scanned. The length finding reads it,
+   * since a clean history outside the governed folder answers nothing asked.
    */
   readonly governed: boolean
   /**
@@ -292,23 +241,16 @@ export interface EntryReport {
 }
 
 /**
- * The three questions `claude/skills/context-fold/references/context.md` asks of an entry past the
- * checkpoint, in the order it states them.
- *
- * The standard calls no entry over the checkpoint wrong. It asks whether the
- * entry still covers a single domain, whether it has filled with content `ls`
- * or `--help` reproduces, and whether it has accumulated the history of its own
- * changes, then directs a fix at whichever is true. A report naming the count
- * alone leaves all three unasked, which is why the finding carries them.
+ * The three questions the context standard asks of an entry past the checkpoint:
+ * whether it covers one domain, whether `ls` or `--help` reproduces it, and
+ * whether it holds the history of its own changes. A bare count leaves all three unasked.
  */
 export type LengthQuestion = 'domain' | 'reproduced' | 'history'
 
 /**
- * What the audit can say about one question for one entry.
- *
- * `unanswered` is a state rather than an omission. Two of the three questions
- * are judgments no measure settles, and dropping them would read as an entry
- * nothing found rather than one nothing checked.
+ * What the audit can say about one question for one entry. `unanswered` is a
+ * state rather than an omission, since dropping a judgment no measure settles
+ * would read as an entry nothing found rather than one nothing checked.
  */
 export type QuestionState = 'yes' | 'no' | 'unanswered'
 
@@ -316,11 +258,9 @@ export interface LengthCause {
   readonly question: LengthQuestion
   readonly state: QuestionState
   /**
-   * Change markers behind a `yes`, and absent wherever nothing was counted. It
-   * cites the provenance finding rather than restating it, so the two sections
-   * of the report describe the same measurement once. A date stamping a
-   * measurement never reaches that list, so an entry whose only dates are
-   * measurement anchors answers `no` here.
+   * Change markers behind a `yes`, absent wherever nothing was counted. It cites
+   * the provenance finding rather than restating it, and a date stamping a
+   * measurement never reaches that list.
    */
   readonly markers?: number
 }
@@ -360,12 +300,9 @@ function firstCell(row: string): string {
 }
 
 /**
- * Finds the tables whose rows name shipped artifacts.
- *
- * A bare table count reports mostly fixed comparison tables, where a reflow
- * costs nothing because no row is ever added. The reflow problem belongs to a
- * catalog that gains a row per artifact, and a first column carrying a path,
- * command, or link is what separates the two without reading the prose.
+ * Finds the tables whose rows name shipped artifacts. A bare table count reports
+ * mostly fixed comparison tables, and a first column carrying a path, command,
+ * or link separates a catalog that gains a row per artifact.
  */
 function catalogTables(entry: readonly BodyLine[]): TableFinding[] {
   const findings: TableFinding[] = []
@@ -409,15 +346,11 @@ function catalogTables(entry: readonly BodyLine[]): TableFinding[] {
 
 /**
  * Finds the markers narrating a change rather than describing the domain.
- *
  * Fenced blocks are skipped and displayed spans masked, since a pinned install
- * line, a hex color, or a heading anchor is text the entry shows rather than a
- * claim it makes. A date stamping a measurement is dropped rather than given a
- * kind of its own, so the report and the length finding read one list.
+ * line or a heading anchor is shown text, and a date stamping a measurement is dropped.
  */
 function provenance(lines: readonly BodyLine[]): ProvenanceFinding[] {
-  // Each pattern emits its markers grouped by kind, so the column is carried and
-  // sorted on, letting a reader find them left to right.
+  // Each pattern emits markers grouped by kind, so the column is carried to sort left to right.
   const found: { finding: ProvenanceFinding; column: number }[] = []
 
   for (const line of lines) {
@@ -446,12 +379,8 @@ function provenance(lines: readonly BodyLine[]): ProvenanceFinding[] {
 
 /**
  * Reads the clause in front of a date for a verb that stamps a measurement.
- *
- * The clause rather than the line, because a sentence recording a measurement
- * and a later one dating a change sit side by side often enough that a
- * line-wide read would clear the second from the first. A date opening its own
- * line has no clause in front of it and stays a change marker, which is the
- * fallback rather than a separate answer.
+ * The clause rather than the line, since a measurement and a later change date
+ * sit side by side often enough that a line-wide read would clear the second.
  */
 function stampsMeasurement(text: string, index: number): boolean {
   const before = text.slice(0, index)
@@ -462,13 +391,9 @@ function stampsMeasurement(text: string, index: number): boolean {
 }
 
 /**
- * Finds which required sections the entry declares.
- *
- * A heading at any level counts, since a split domain titles its overview file
- * for the section, where an `##` beneath would repeat the file's name. Nothing
- * is titled for a required section without being about it, so the looser
- * match costs no precision. Fenced blocks are skipped, since a standard quoted
- * in an example declares nothing about the entry.
+ * Finds which required sections the entry declares. A heading at any level
+ * counts, since a split domain titles its overview file for the section, and
+ * fenced blocks are skipped, since a quoted standard declares nothing.
  */
 function declaredSections(
   lines: readonly BodyLine[],
@@ -489,11 +414,9 @@ function declaredSections(
 const H2_TEXT = /^##\s+(.+?)\s*$/
 
 /**
- * Finds the H2 headings outside the allowed set.
- *
- * H2 only, since the set closes the sections of an entry and says nothing of
- * where its H3 items sit. Fenced blocks are skipped, so a template quoted
- * inside an example declares nothing about the entry quoting it.
+ * Finds the H2 headings outside the allowed set. H2 only, since the set closes
+ * the sections of an entry and says nothing of its H3 items, and fenced
+ * blocks are skipped so a quoted template declares nothing.
  */
 function otherSections(
   lines: readonly BodyLine[],
@@ -529,15 +452,9 @@ interface FolderHeading {
 }
 
 /**
- * Finds where the entry breaks the section shape.
- *
- * Bullets count at any indent and across any paragraph, so a list split by a
- * bold label or nested a level down still counts. A line continuing a list
- * item belongs to the item, so a wrapped bullet never reads as prose. A cap
- * reports once per heading however far past it the count runs. `Other
- * folders` is exempt from both folder caps, held by the bullet run limit, and
- * the development entry's `Scripts` H3 is exempt from the heading rule and
- * both caps, its table being a run-command surface rather than a folder.
+ * Finds where the entry breaks the section shape. Bullets count at any indent,
+ * a continuation line belongs to its item, and a cap reports once per heading.
+ * `Other folders` and the development entry's `Scripts` H3 are exempt from the caps.
  */
 function shapeIssues(
   rel: string,
@@ -689,14 +606,9 @@ function shapeIssues(
 }
 
 /**
- * Finds the references naming a sibling entry by bare filename.
- *
- * A bare name resolves against whichever folder the reader is in, so a folder
- * split strands it silently, while a path is checkable. Matching stops at the
- * sibling set, so a bare name for another folder's entry goes unseen, but a
- * match is a reference by construction. Fenced lines and lines carrying the
- * citation ignore marker display a name rather than point at one, so both are
- * skipped.
+ * Finds the references naming a sibling entry by bare filename. A bare name
+ * resolves against the reader's folder, so a split strands it silently, and a
+ * match is a reference by construction. Fenced and ignore-marked lines are skipped.
  */
 function bareReferences(
   lines: readonly BodyLine[],
@@ -722,13 +634,8 @@ function bareReferences(
 
 /**
  * Measures one entry, scanning for provenance only when a standard claims it.
- *
- * The caller passes jurisdiction rather than deriving it from `rel`, because a
- * path prefix hardcodes what `--folder` exists to override and misses a domain
- * split into `context/<sub-area>/`. Sibling names arrive the same way and for
- * the same reason, since the folder an entry sits in is what holds them. The
- * required sections arrive apart from jurisdiction, since a folder can owe
- * sections under a standard that states no provenance rule.
+ * The caller passes jurisdiction and sibling names rather than deriving them
+ * from `rel`, since a path prefix hardcodes what `--folder` exists to override.
  */
 export function measureEntry(
   rel: string,
@@ -760,13 +667,8 @@ export function measureEntry(
 
 /**
  * Names each entry past the checkpoint with the standard's three questions
- * answered as far as anything measures them.
- *
- * Only accumulated history is mechanical, so this joins the provenance count,
- * which already leaves out a date stamping a measurement. Whether an entry
- * covers one domain and whether `ls` or `--help` reproduces it need a reader.
- * An entry outside the governed folder answers nothing, since `no` there would
- * come from a scan that never ran. Sorted longest first.
+ * answered as far as anything measures them. Only accumulated history is
+ * mechanical, and an entry outside the governed folder answers nothing.
  */
 export function lengthFindings(
   entries: readonly EntryReport[],
@@ -795,12 +697,9 @@ function historyCause(entry: EntryReport): LengthCause {
 }
 
 /**
- * Measures every entry in the audited folders. A generated `index.md` is not
- * among them, since its body is rewritten on every regen and no checkpoint
- * describes a catalog.
- *
- * Jurisdiction is applied here rather than at the report, so the JSON record
- * and the printed run agree on which entries a content rule reached.
+ * Measures every entry in the audited folders, except a generated `index.md`
+ * whose body is rewritten on every regen. Jurisdiction is applied here, so the
+ * JSON record and the printed run agree on which entries a content rule reached.
  */
 export async function measureFolders(
   root: string,
@@ -861,26 +760,17 @@ export function retiredSections(folder: AuditedFolder): readonly string[] {
 
 /**
  * Reports whether a bare sibling name here is a reference by construction.
- *
- * A split folder's entries are named for sub-areas of one domain, so a bare
- * name matching one points at it alone. The folder under `.claude/` names its
- * entries for whole domains, common nouns a seed or script spells the same
- * way, so it is exempt, at the cost of references a future split would
- * strand, since a report firing on correct prose teaches readers to skip it.
+ * A split folder's entries are named for sub-areas, so a match points at it
+ * alone, while the `.claude/` folder's common nouns are exempt to avoid firing on correct prose.
  */
 export function matchesSiblings(folder: AuditedFolder): boolean {
   return governsContent(folder) && folder.nested
 }
 
 /**
- * Names what does not declare the sections the standard requires.
- *
- * A split folder's entries describe one domain between them, so any one
- * answers for the folder. The entries of the folder under `.claude/` are one
- * domain each, so each answers for itself. This needs the folder's other
- * entries, which `measureFolders` holds and `measureEntry` does not. A folder
- * with no entries of its own is a split parent holding an index. A domain
- * owning no paths may omit `## Layout`, so this prints and never gates.
+ * Names what does not declare the sections the standard requires. A split
+ * folder's entries answer for the folder between them and the `.claude/` folder's
+ * each answer for themselves. A domain owning no paths may omit Layout, so this never gates.
  */
 export function missingSections(
   root: string,
@@ -897,8 +787,7 @@ export function missingSections(
     const shortOf = (declared: readonly string[]): string[] =>
       required.filter((name) => !declared.includes(name))
 
-    // A stub owes no sections, so it is dropped before either branch, or it would
-    // answer for siblings that owe them in the split-folder aggregate.
+    // A stub owes no sections, so it is dropped before either branch or it would answer for siblings.
     const reports = folder.entries
       .map((path) => byRel.get(relative(root, path)))
       .filter((entry) => entry !== undefined)
@@ -922,13 +811,9 @@ export function missingSections(
 }
 
 /**
- * Names each entry carrying an H2 outside its folder's closed set.
- *
- * Per entry rather than per folder, unlike `missingSections`: a split folder's
- * entries each answer for their own headings, since an extra section is a fact
- * about the file it sits in. A stub seed is dropped for the reason
- * `missingSections` drops one, a skeleton being exempt from the shape rather
- * than from being well formed.
+ * Names each entry carrying an H2 outside its folder's closed set. Per entry
+ * rather than per folder, unlike `missingSections`, since an extra section is
+ * a fact about its own file, and a stub seed is dropped as there.
  */
 export function extraSections(
   entries: readonly EntryReport[],
@@ -948,12 +833,9 @@ export interface ShapeFinding {
 }
 
 /**
- * Names each entry breaking the section shape, and whether it gates.
- *
- * Where it gates is the caller's predicate rather than a list read here, since
- * the folders rebuilt to the shape are named by path from the repository root
- * and `measureFolders` holds only paths from the audit root. A stub seed is
- * dropped for the reason `extraSections` drops one.
+ * Names each entry breaking the section shape, and whether it gates. The caller's
+ * predicate decides where, since rebuilt folders are named from the repository
+ * root and `measureFolders` holds audit-root paths. A stub seed is dropped.
  */
 export function shapeFindings(
   entries: readonly EntryReport[],

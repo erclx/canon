@@ -61,11 +61,9 @@ export type BranchPull =
     }
 
 /**
- * Spells `mergeable_state` the way GraphQL's `mergeStateStatus` spells it.
- *
- * The two vocabularies hold the same values in different cases, so the
- * mapping is a case change. `unknown` stays `UNKNOWN`, which `withMergeState`
- * already reads as not conflicted while GitHub computes the state lazily.
+ * Spells `mergeable_state` the way GraphQL's `mergeStateStatus` spells it, a
+ * case change. `unknown` stays `UNKNOWN`, which `withMergeState` reads as not
+ * conflicted while GitHub computes the state lazily.
  */
 export function mergeStateOf(state: string | undefined): string | undefined {
   return state === undefined || state === '' ? undefined : state.toUpperCase()
@@ -84,11 +82,9 @@ export function identityOf(row: RestPull): PullIdentity {
 }
 
 /**
- * The one open pull request a branch carries.
- *
- * Two open pull requests on one head against different bases refuse rather
- * than resolving to the first, since the listing's order says nothing about
- * which one the caller meant.
+ * The one open pull request a branch carries. Two open pull requests on one head
+ * against different bases refuse rather than resolving to the first, since the
+ * listing's order says nothing about which one the caller meant.
  */
 export function selectBranchPull(rows: readonly RestPull[]): BranchPull {
   const numbers = rows
@@ -130,12 +126,8 @@ export function commentRowOf(comment: RestComment): {
 
 /**
  * Parses the output of `gh api --paginate --jq '.[] | @json'`, one compact
- * object per line across every page.
- *
- * A filter that reshapes each row makes `--paginate` emit one value per page
- * rather than one merged array, so a line per row is the form that survives
- * paging. A line that does not parse refuses the whole listing, since a list
- * short by one review reads as a thread missing its newest pass.
+ * object per line, since a reshaping filter makes `--paginate` emit one value per
+ * page. A line that does not parse refuses the listing, since a missing review misleads.
  */
 export function parseJsonLines<T>(stdout: string): T[] | undefined {
   const rows: T[] = []

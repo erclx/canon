@@ -7,8 +7,7 @@ export default scenario({
   },
   arms: {
     default: (ctx) => {
-      // A function and its test, paired at `foo.ts` and `foo.test.ts`, seeded rather
-      // than described so the run has a shape to copy.
+      // A function and its test, paired at `foo.ts` and `foo.test.ts`, seeded so the run has a shape to copy.
       ctx.fixtures('claude', 'test-first', 'shared', 'greeter')
 
       ctx.mkdir('src')

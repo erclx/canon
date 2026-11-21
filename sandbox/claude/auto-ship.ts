@@ -85,16 +85,14 @@ export default scenario({
       // Wipe anchor content to start clean
       wipeTree(ctx)
       ctx.write('.gitignore', 'node_modules\n.canon/plans/\n')
-      // A fresh worktree off the remote default carries none of the violating
-      // commits, so branching from local HEAD puts them in the range Step 4 reads.
+      // A fresh worktree off the remote default carries none of the violating commits.
       ctx.fixtures('claude', 'auto-ship', 'test-order-violation', '01-tree')
 
       ctx.git('add', '.')
       ctx.commit('feat(project): initial greeting library')
       ctx.git('push', '--force', 'origin', 'HEAD:main')
 
-      // Two commits, since a subject with no test reads as unclassified, and a
-      // finding needs the test arriving second in the range.
+      // Two commits, since a finding needs the test arriving second in the range.
       ctx.fixtures('claude', 'auto-ship', 'test-order-violation', '02-shout')
 
       ctx.git('add', 'src/shout.ts')
@@ -196,8 +194,7 @@ export default scenario({
       // Wipe anchor content to start clean
       wipeTree(ctx)
       ctx.write('.gitignore', 'node_modules\n.canon/plans/\n')
-      // ui-checklist writes its handoff under .canon/tmp/, which no other arm
-      // reaches, so only this arm ignores it.
+      // ui-checklist writes its handoff under .canon/tmp/, which no other arm reaches.
       ctx.append('.gitignore', '.canon/tmp/\n')
 
       ctx.fixtures('claude', 'auto-ship', 'ui-continue', '01-tree')

@@ -93,9 +93,8 @@ function keptSection(body: string, title: string): string | undefined {
 
 /**
  * The squash description: Summary, Key changes, and Technical context, in that
- * order, under their headings. Testing, the reviewer requests, and the UI pass
- * line describe the review rather than the change, so none reaches the trunk.
- * Technical context is optional, and an empty one leaves no bare heading.
+ * order. Testing, the reviewer requests, and the UI pass line describe the
+ * review, so none reaches the trunk. An empty Technical context leaves no heading.
  */
 export function composeDescription(body: string): Composed {
   const summary = keptSection(body, 'Summary')
@@ -120,10 +119,9 @@ const RELEASE_FOOTER = 'This PR was generated with'
 const DEPENDABOT_BRANCH = 'dependabot/'
 
 /**
- * The bot a pull request comes from, read off the pull request itself. The
- * release pull request's author is the operator's own account, so the head
- * branch carries it, and a second condition keeps a human pull request that
- * borrows the branch prefix on the human path.
+ * The bot a pull request comes from. The release pull request's author is the
+ * operator's own account, so the head branch carries it, and a second condition
+ * keeps a human pull request borrowing the branch prefix on the human path.
  */
 export function botKind(
   pull: Pick<MergePull, 'branch' | 'body' | 'isBotAuthor'>,
@@ -141,11 +139,9 @@ export function botKind(
 }
 
 /**
- * Where a Dependabot body stops. A group body runs a table and then one
- * `Updates ` line per package, and a single-package body has neither and goes
- * from its `Bumps` lead straight to a `<details>` block, so either line ends
- * the kept text. Neither match relies on the commands footer, which a truncated
- * body lacks.
+ * Where a Dependabot body stops: a group body runs a table and then one
+ * `Updates ` line per package, and a single-package body goes from `Bumps` to a
+ * `<details>` block, so either line ends the kept text, not the commands footer.
  */
 function dependabotCut(lines: readonly string[]): number {
   const cut = lines.findIndex(
@@ -157,9 +153,8 @@ function dependabotCut(lines: readonly string[]): number {
 
 /**
  * The squash description of a bot pull request, from the bot's own body. A
- * release keeps its changelog without the robot line, the dividers, and the
- * footer. Dependabot keeps its lead and package table. A body with nothing left
- * refuses `missing-summary`.
+ * release keeps its changelog without the robot line, dividers, and footer, and
+ * Dependabot its lead and package table. A body left empty refuses `missing-summary`.
  */
 export function composeBotDescription(kind: BotKind, body: string): Composed {
   const lines = body.replaceAll('\r\n', '\n').split('\n')
@@ -203,11 +198,9 @@ function refused(
 }
 
 /**
- * Squash-merges one ready pull request with a message carrying only the
- * change. Every refusal is read before the one write, and the write sends the
- * head it read as `sha`, so GitHub refuses rather than merging a commit pushed
- * after the checks were read. The verb reads the draft flag and not the review
- * comments, since a ready pull request already passed the lift's gates.
+ * Squash-merges one ready pull request with a message carrying only the change.
+ * Every refusal is read before the one write, which sends the head it read as `sha`, so GitHub
+ * refuses a later push. It reads the draft flag, not review comments, since a ready pull request passed the lift's gates.
  */
 export async function merge(
   api: MergeApi,

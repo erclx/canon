@@ -117,8 +117,7 @@ export default scenario({
     'dry-run': (ctx) => {
       seedFolder(ctx)
       ctx.log.step('Running: canon indexes regen --dry-run')
-      // Captured like infra:gov's test-order arm, since --dry-run exits 2 on drift by
-      // design and an abort would kill the scenario on the outcome observed.
+      // Captured like infra:gov's test-order arm, since --dry-run exits 2 on drift by design.
       const result = captureRegen(ctx, ['--dry-run'])
       ctx.write('dry-run-output.log', result.stdout)
       ctx.write('dry-run-frame.log', result.stderr)

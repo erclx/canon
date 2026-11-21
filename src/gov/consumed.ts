@@ -78,10 +78,8 @@ export function listInternalRules(root: string): RuleSource[] {
 
 /**
  * Rebuilds a repository's own `.claude/rules/` from its record. Unlike
- * `gov install` and `gov sync`, this runs against the toolkit root on purpose:
- * those two refuse it because a target's rules are the operator's to edit,
- * while this destination is produced output that happens to live beside its
- * source.
+ * `gov install` and `gov sync`, this runs against the toolkit root on purpose,
+ * since the destination is produced output beside its source.
  */
 export async function regenConsumedRules(
   root: string,
@@ -116,8 +114,7 @@ export async function regenConsumedRules(
     }
   }
 
-  // Cleared first so a rule the record stopped naming disappears. Each subtree
-  // clears on its own, so a `project/` folder beside them is never touched.
+  // Cleared first so a rule the record stopped naming disappears, and a `project/` folder is untouched.
   await rm(canonRulesDir(root), { recursive: true, force: true })
   await rm(installedInternalRulesDir(root), { recursive: true, force: true })
 

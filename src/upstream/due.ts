@@ -54,11 +54,8 @@ function ageInDays(date: string, now: Date): number {
 }
 
 /**
- * Decides whether a digest is due.
- *
- * The age boundary is inclusive: a cursor exactly seven days old is due, since
- * a week has passed. An installed version at or below the cursor is never due,
- * which covers a downgrade as well as a run straight after a digest.
+ * Decides whether a digest is due. The age boundary is inclusive, and an installed version at
+ * or below the cursor is never due, which covers a downgrade.
  */
 export function decideDue(input: DueInput): DueResult {
   const { installed, cursor, gap, now } = input

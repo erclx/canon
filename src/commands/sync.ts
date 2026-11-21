@@ -156,8 +156,7 @@ function renderCheck(report: CheckReport): void {
     if (stale + customized + drifted + stranded + retired + renamed === 0) {
       logInfo(orphaned === 0 ? 'up to date' : `up to date (${orphaned} local)`)
     }
-    // A missing rule is a deficiency and a local file is not, so it prints on its
-    // own line whether or not anything above needs a sync.
+    // A missing rule is a deficiency and a local file is not, so it prints on its own line.
     if (missing > 0) {
       logWarn(`${missing} listed by the stack, not installed`)
     }
@@ -203,13 +202,11 @@ function renderCheck(report: CheckReport): void {
     for (const name of report.newSkills) logInfo(name)
   }
 
-  // Warned, since a new skill loads live but a rule reaches the target only on
-  // install, which no sync does, so the remedy names the install command.
+  // Warned, since a rule reaches the target only on install, which no sync does.
   if (report.newRules.length > 0) {
     logStep('New rules, never installed')
     for (const name of report.newRules) logWarn(name)
-    // `install` re-resolves the whole stack rather than adding one rule, so
-    // the remedy names both routes rather than assuming the reader wants all.
+    // `install` re-resolves the whole stack, so the remedy names both routes.
     logInfo(
       'Run `canon gov install <stack>` to take the whole stack again, or `--add <rule>` to take one.',
     )
@@ -218,8 +215,7 @@ function renderCheck(report: CheckReport): void {
   renderUnclaimed(report)
 
   outro()
-  // Scanned domains only, since tooling renders a section on every managed
-  // target and a scanned domain nobody installed appears nowhere else.
+  // Scanned domains only, since tooling renders a section on every managed target.
   const uncovered = uncoveredDomains(report)
   if (uncovered.length === 0) return
 
@@ -230,10 +226,9 @@ function renderCheck(report: CheckReport): void {
 }
 
 /**
- * The binary reports before any domain does, since a stale binary is what makes
- * every section below it a reading from the wrong toolkit. It prints on all
- * three states rather than only when behind: a check that goes quiet when the
- * registry is unreachable is indistinguishable from one that found nothing.
+ * The binary reports before any domain does, since a stale binary makes every
+ * section below it a reading from the wrong toolkit. It prints on all three
+ * states, since a check quiet when the registry is unreachable reads as clean.
  */
 function renderSkew(report: CheckReport): void {
   const { skew } = report
@@ -341,13 +336,9 @@ function renderHooks(report: CheckReport): void {
 }
 
 /**
- * Names the attribution before the count, the way the tooling section does. A
- * dropped folder and a project-authored one are the same bytes at the same
- * path, so the count alone is the one thing an operator cannot act on.
- *
- * A folder history proved the project owns is dropped from the render and kept
- * in the JSON. Printing it costs a line on every run for a name collision no
- * remedy closes, which is the bar this section had to clear to exist at all.
+ * Names the attribution before the count, since a dropped folder and a
+ * project-authored one are the same bytes at the same path. A folder history
+ * proved the project owns is dropped from the render and kept in the JSON.
  */
 function renderUnclaimed(report: CheckReport): void {
   const { unclaimed, historyUnavailable } = report.reverse
@@ -374,9 +365,7 @@ function renderUnclaimed(report: CheckReport): void {
 /**
  * State first, then the count, then where the content came from. The revision
  * is the commit that published the content the target still holds, never the
- * one that dropped the folder, so it takes a clause of its own. Suffixed onto
- * `dropped upstream` it reads as the date of the drop, and an operator running
- * `git show` on it lands on the commit that added the folder.
+ * one that dropped it, so `git show` on it lands on the commit that added it.
  */
 function describeUnclaimed(entry: UnclaimedFolder): string {
   const state =
@@ -446,11 +435,9 @@ async function runSync(target: string): Promise<number> {
 }
 
 /**
- * Each domain sync runs as its own process. They open their own frames and
- * prompt for their own changes, so stdin stays inherited. Claude is the one
- * exception: its stdin is closed because the combined pull request preview is the
- * single confirmation gate for the whole sync, and `canon claude sync` writes
- * only `.gitignore`.
+ * Each domain sync runs as its own process, opening its own frames and
+ * prompting for its own changes, so stdin stays inherited. Claude's stdin is
+ * closed, since the combined pull request preview is the one confirmation gate.
  */
 async function runDomainSyncs(target: string): Promise<void> {
   const path = cliPath(PROJECT_ROOT)

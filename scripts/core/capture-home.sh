@@ -1,16 +1,7 @@
 #!/usr/bin/env bash
-# Builds the landing page, captures it, and stages the frames over
-# assets/evidence/home, the baseline `canon pr evidence` compares against.
-#
-# Two workflows call it. pr-visual-checks.yml stages the frames into the runner
-# tree to diff them against the baseline, and refresh-capture-frames.yml stages
-# them to commit as the new baseline. Both need the same frames, so one script
-# keeps the two from drifting apart.
-#
-# `tooling/web/configs/e2e/screenshot.ts` is reused as is. This checkout has no
-# web/package.json, so the preview server and the cases run against the
-# root-level scripts rather than through screenshot.sh, which assumes a
-# per-project `bun run build`/`bun run preview` pair.
+# Builds the landing page, captures it, and stages the frames over assets/evidence/home,
+# the baseline `canon pr evidence` compares against. Two workflows share it so they cannot drift.
+# `tooling/web/configs/e2e/screenshot.ts` is reused, run against the root-level scripts since this checkout has no web/package.json.
 set -e
 set -o pipefail
 
@@ -40,10 +31,8 @@ curl -sSf "$BASE_URL/" >/dev/null 2>&1 || {
 
 (cd web && SCREENSHOT_BASE_URL="$BASE_URL" bun ../tooling/web/configs/e2e/screenshot.ts)
 
-# The committed tree is cleared first rather than copied over. A copy only adds
-# and overwrites, so a section dropped from the case list would leave its
-# frames in place and a diff would see no change. Clearing first shows that
-# section as a deletion.
+# The committed tree is cleared first rather than copied over, so a section
+# dropped from the case list shows as a deletion instead of leaving stale frames.
 rm -rf "$BASELINE"
 mkdir -p "$BASELINE"
 cp -R web/screenshots/localhost/home/. "$BASELINE/"

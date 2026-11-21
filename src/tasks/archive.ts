@@ -19,8 +19,7 @@ const BACKLOG = 'backlog.md'
 
 /**
  * Siblings that sit on the board without being tasks: the generated index, the
- * hand-maintained ordering, the unordered backlog beside it, and a handoff a
- * session wrote before the file took one name per session. `validate` reads the
+ * ordering, the backlog, and an older per-session handoff. `validate` reads the
  * same list, so neither verb can count a sibling as a task the other does not.
  */
 export const RESERVED_STEMS = [
@@ -37,10 +36,9 @@ export function isReservedStem(stem: string): boolean {
 }
 
 /**
- * `bad-input` describes the command line rather than the board, which is the
- * split `record.ts` draws for the same reason. A caller naming two selectors
- * answered as `ambiguous` sends a session to repair a task citation that is
- * fine, so the three task verbs answer one mistake one way.
+ * `bad-input` describes the command line rather than the board, the split
+ * `record.ts` draws. Answering two selectors as `ambiguous` would send a session
+ * to repair a fine task citation, so the three task verbs answer one way.
  */
 export const ARCHIVE_REFUSALS = [
   'no-board',
@@ -56,10 +54,9 @@ export const ARCHIVE_REFUSALS = [
 export type ArchiveRefusal = (typeof ARCHIVE_REFUSALS)[number]
 
 /**
- * Kept apart from `ARCHIVE_REFUSALS` on purpose. `archive` and `decline`
- * answer different questions, shipped versus decided-against, and a shared
- * refusal set would let one archive a task that cannot yet ship or decline
- * one that already has.
+ * Kept apart from `ARCHIVE_REFUSALS`, since `archive` and `decline` answer
+ * different questions, and a shared set would let one archive a task that
+ * cannot yet ship or decline one that already has.
  */
 export const DECLINE_REFUSALS = [
   'no-board',
@@ -199,14 +196,9 @@ export function declinedDir(root: string): string {
 export const OUTCOME_PATTERN = /^- \[([ xX])\] ?(.*)$/
 
 /**
- * A bullet with an optional checkbox, wider than `OUTCOME_PATTERN` so a cut
- * line missing its checkbox still parses. `record.ts` positions outcomes off
- * the narrower pattern, so a cut line with no checkbox stays invisible to
- * `canon tasks outcome` by design.
- *
- * Unlike `OUTCOME_PATTERN`, this reaches a struck bullet under any heading,
- * since a cut line may carry no checkbox to confine it to `## Outcomes`. No
- * struck bullet sits outside that section today.
+ * A bullet with an optional checkbox, wider than `OUTCOME_PATTERN` so a cut line
+ * missing its checkbox still parses, though `canon tasks outcome` stays blind to
+ * it by design. This reaches a struck bullet under any heading.
  */
 const BULLET_PATTERN = /^- (?:\[([ xX])\] ?)?(.*)$/
 
@@ -221,10 +213,9 @@ export const STRUCK_BODY_PATTERN = /^~~.+~~/
 const OPERATOR_BODY_PATTERN = /^Operator check: ?\S/
 
 /**
- * Marks the lines sitting inside a fenced block, the fence delimiters included.
- * A checkbox in a sample a task displays is not an outcome the task claims, and
- * counting one shifts every position after it. Every reader of the outcome list
- * shares this so none of them can disagree about what the list holds.
+ * Marks the lines inside a fenced block, delimiters included, since a checkbox
+ * in a displayed sample is not an outcome and counting one shifts every position
+ * after it. Every reader of the outcome list shares this.
  */
 export function fenceMask(lines: readonly string[]): boolean[] {
   let inside = false
@@ -240,12 +231,8 @@ export function fenceMask(lines: readonly string[]): boolean[] {
 
 /**
  * Splits a task's outcome list by checkbox state, cut outcomes pulled out
- * ahead of it. Every outcome sits at the top level of `## Outcomes`, so an
- * anchored match needs no heading tracking.
- *
- * A struck body reads as cut whatever its checkbox holds, so `- ~~a thing~~`
- * does not vanish, `- [ ] ~~a thing~~` does not read as open, and
- * `- [x] ~~a thing~~` does not read as shipped.
+ * ahead. A struck body reads as cut whatever its checkbox holds, so `- ~~a~~`
+ * never vanishes, reads as open, or reads as shipped.
  */
 export function readOutcomes(text: string): TaskOutcomes {
   const open: string[] = []
@@ -286,12 +273,9 @@ export function readOutcomes(text: string): TaskOutcomes {
 }
 
 /**
- * Reads the `Pull request:` line `git-pr` writes when a pull request opens.
- * Each number is a bare `#NNN` the way `Issue:` is, since neither is a path and
- * a full URL would write the remote into a gitignored file. A task shipped in
- * slices lists one per slice, oldest first, so the line reads as a list. A line
- * carrying anything besides that list reads as naming none, rather than as the
- * numbers that happened to parse.
+ * Reads the `Pull request:` line `git-pr` writes when a pull request opens, a
+ * list of bare `#NNN` numbers oldest first, since a URL would write the remote
+ * into a gitignored file. A line carrying anything else reads as naming none.
  */
 export function readPullRequest(text: string): readonly number[] {
   const match = /^Pull request:[ \t]*(#\d+(?:[ \t]*,[ \t]*#\d+)*)[ \t]*$/m.exec(
@@ -304,9 +288,8 @@ export function readPullRequest(text: string): readonly number[] {
 
 /**
  * Reads the `Pending branch:` line `canon tasks outcome` writes when a branch
- * ticks an outcome ahead of its own pull request number reaching the task.
- * `canon tasks pull-request` clears each branch as it records, so a name left
- * here is a slice whose number the `Pull request:` line cannot list yet.
+ * ticks an outcome ahead of its pull request number. `canon tasks pull-request`
+ * clears each branch as it records, so a name left is a slice not yet listed.
  */
 export function readPendingBranches(text: string): readonly string[] {
   const match = /^Pending branch:(.*)$/m.exec(text)
@@ -391,11 +374,9 @@ interface PlanToken {
 }
 
 /**
- * The targets a located `Plan:` line carries, each with its span on the line.
- * Links win over the bare form. A bare remainder yields its leading run of
- * tokens reading as a path, one carrying `/` or ending in `.md`, and stops at
- * the first that does not, so a path inside trailing prose never reads as a
- * second plan. It falls back to the first token when that one is not a path.
+ * The targets a located `Plan:` line carries, each with its span. Links win over
+ * the bare form, whose leading run of path-like tokens is taken, so a path in
+ * trailing prose never reads as a second plan. It falls back to the first token.
  */
 function planTokens(line: string): readonly PlanToken[] {
   const links = [...line.matchAll(PLAN_LINK_PATTERN)].map((match) => ({
@@ -444,9 +425,8 @@ export function readPlanTarget(text: string): string | undefined {
 
 /**
  * Builds a `Plan:` line as a markdown link whose text and target stay in step,
- * the label taken from the target's filename with its extension dropped.
- * `record.ts` reuses this so a plan-link write and an archive retarget produce
- * one line shape rather than two.
+ * the label taken from the target's filename. `record.ts` reuses this so a
+ * plan-link write and an archive retarget produce one line shape.
  */
 export function planLine(target: string): string {
   return `Plan: ${planLink(target)}`
@@ -460,15 +440,9 @@ function planLink(target: string): string {
 }
 
 /**
- * Points each moved link on the task's `Plan:` line at the plan's new home,
- * keyed by the target as the line wrote it. A link the map does not name keeps
- * its path, since a plan another task still cites stays live. A moved bare
- * path is written back as a link, the shape `planLine` gives a single one.
- *
- * The line is rebuilt by concatenation rather than a replacement string,
- * because `$&` and its siblings are substitution sequences inside one. A plan
- * filename carrying one would write a path nobody typed, and `.canon/plans/` is
- * gitignored, so nothing recovers the pointer it replaced.
+ * Points each moved `Plan:` link at the plan's new home, keeping a link the map
+ * does not name, since another task may still cite it. The line is rebuilt by
+ * concatenation, since `$&` in a filename would write a path nobody typed.
  */
 export function retargetPlanLine(
   text: string,
@@ -494,9 +468,8 @@ export function retargetPlanLine(
 
 /**
  * Appends a link to a located `Plan:` line right after its last target, so
- * trailing prose and a line ending stay where they were. A bare target is
- * rewritten as a link on the way, since the reader takes bare paths only when
- * no link sits on the line and the appended one would otherwise hide them.
+ * trailing prose stays put. A bare target is rewritten as a link on the way,
+ * since the reader takes bare paths only when no link sits on the line.
  */
 export function appendPlanLink(line: string, target: string): string {
   const tokens = planTokens(line)
@@ -556,9 +529,8 @@ export function declineLine(reason: string, by: string, date: string): string {
 
 /**
  * Lines a `Declined:` line anchors after, mirroring `record.ts`'s
- * `ORIGIN_PREFIXES` with `Pull request:` folded in, since a decline can follow
- * a pull request that never merged. `Sessions:` joins them, since the sessions
- * that worked a task sit above whatever ended it.
+ * `ORIGIN_PREFIXES` plus `Pull request:`, since a decline can follow a pull
+ * request that never merged, and `Sessions:`, which sit above whatever ended it.
  */
 const DECLINE_ANCHOR_PREFIXES = [
   'Plan:',
@@ -584,8 +556,7 @@ function lastAnchorLine(lines: readonly string[]): number | undefined {
 /**
  * Places the `Declined:` line after the origin lines a task carries, the same
  * scan-and-anchor shape `writePullRequestLine` carries. A decline runs once
- * per task, so there is no existing line to correct, unlike the
- * add/correct/unchanged shape a write safe to run twice needs.
+ * per task, so there is no existing line to correct.
  */
 function insertDeclinedLine(text: string, line: string): string {
   const lines = text.split('\n')
@@ -663,21 +634,15 @@ function isBulletFor(line: string, target: string): boolean {
 
 /**
  * Resolves the `Plan:` target against the board and the project root both, as
- * `task-complete` reads the line, so `../plans/x.md` and `.canon/plans/x.md`
- * are one file.
- *
- * The resolved path is returned rather than a boolean, since the citation count
- * below compares tasks by where their targets land. A target outside the live
- * plans folder yields nothing. The archive sits inside the folder it archives,
- * so it is subtracted, or an archived plan would read as live.
+ * `task-complete` does, returning the path since the citation count compares
+ * where targets land. The archive is subtracted, or an archived plan reads live.
  */
 export function resolveLivePlan(
   target: string,
   dir: string,
   root: string,
 ): string | undefined {
-  // Both roots are tested, since a line spelling a root the tree has left still
-  // points into the plans folder, and reading it as outside keeps a plan live.
+  // Both roots are tested, since a line spelling a root the tree has left still points in.
   const plans = recordDirs(root, PLANS)
   const archives = recordDirs(root, PLANS, ARCHIVE)
   const live = (path: string): boolean =>
@@ -692,13 +657,9 @@ export function resolveLivePlan(
 }
 
 /**
- * Restates a live plan path at the root this tree actually resolves, so two
- * tasks naming one plan through different roots compare equal.
- *
- * Callers compare the return of `resolveLivePlan` by string. Both roots are
- * accepted above, so without this a task citing `.canon/plans/x.md` and one
- * citing `.canon/plans/x.md` name one file and read as two, which counts a
- * sibling's citation as absent and refuses the archive it should allow.
+ * Restates a live plan path at the root this tree resolves, so two tasks naming
+ * one plan through different roots compare equal. Without it a sibling's
+ * citation reads as absent and refuses an archive it should allow.
  */
 function atOneRoot(path: string, plans: string[], root: string): string {
   const at = plans.find((dir) => isUnder(path, dir))
@@ -709,16 +670,9 @@ function atOneRoot(path: string, plans: string[], root: string): string {
 }
 
 /**
- * Names the other live tasks whose `Plan:` line lands on the same file through
- * any of its links. This is
- * the rule the `post-merge` hook applies before it archives a plan, held here so one
- * question has one implementation: a plan another live task still cites is a
- * plan the sweep is correct to leave, and a guard that read the folder instead
- * refused every task sharing one plan and deadlocked the board against the
- * sweep that was behaving correctly.
- *
- * The closing task is excluded by name. It cites the plan itself, so counting
- * it would never reach zero and the count would answer nothing.
+ * Names the other live tasks whose `Plan:` line lands on the same file, the rule
+ * the `post-merge` hook applies, so a plan another task cites is left. The
+ * closing task is excluded, since it cites the plan and the count never hits zero.
  */
 export async function otherTasksCitingPlan(
   dir: string,
@@ -744,10 +698,9 @@ export async function otherTasksCitingPlan(
 }
 
 /**
- * Where a task's `Plan:` target resolves, which is what decides whether the
- * plan is the sweep's to move. `unstated` is a task carrying no line at all,
- * and it is distinct from a line resolving somewhere unexpected. `several` is a
- * line linking more than one plan, which answers no single location.
+ * Where a task's `Plan:` target resolves, which decides whether the plan is the
+ * sweep's to move. `unstated` is a task with no line, distinct from one
+ * resolving somewhere unexpected, and `several` links more than one plan.
  */
 export const CITATION_LOCATIONS = [
   'unstated',
@@ -774,14 +727,9 @@ export interface PlanCitations {
 export type CitationOutcome = PlanCitations | ArchiveRefused
 
 /**
- * Answers where one task's plan sits and who else holds it, which is the whole
- * of the last-live-citation rule. The archive reads this rather than scanning
- * the board itself, so the sweep that moves a plan and the gate that refuses a
- * task archive cannot drift into disagreeing about which plan is free.
- *
- * It reports and never writes. The move, the retarget, and the ordering the two
- * happen in belong to the caller, and a verb that performed them would be
- * deciding a question the sweep is there to decide.
+ * Answers where one task's plan sits and who else holds it, the whole of the
+ * last-live-citation rule. It reports and never writes, so the archive and the
+ * gate read one answer and the sweep keeps the move, retarget, and ordering.
  */
 export async function planCitations(
   root: string,
@@ -907,10 +855,9 @@ export interface UnmatchedStem {
 }
 
 /**
- * The three-way refusal a bare stem earns once it fails an exact match:
- * exactly one task starts with it, several do, or none does. `archive.ts`'s
- * own `resolveStem`, `planCitations`, and `record.ts`'s `resolveStem` all
- * refuse a stem this way, so the wording lives once rather than three times.
+ * The three-way refusal a bare stem earns once it fails an exact match: one
+ * task starts with it, several do, or none does. `resolveStem`, `planCitations`,
+ * and `record.ts`'s `resolveStem` refuse this way, so the wording lives once.
  */
 export function describeUnmatchedStem(
   stems: readonly string[],
@@ -975,9 +922,8 @@ async function resolveStem(
 
 /**
  * Archives one task as a single unit: the move, the ordering-row and backlog
- * bullet removal, and the index regen. The hook and `task-complete` both call this, so every gate
- * refuses rather than reports. A caller with nobody watching cannot act on a
- * warning, and two callers gating differently is the drift this exists to stop.
+ * bullet removal, and the index regen. The hook and `task-complete` both call
+ * this, so every gate refuses rather than reports, as nobody is watching.
  */
 export async function archiveTask(
   root: string,
@@ -997,8 +943,7 @@ export async function archiveTask(
   const from = join(dir, `${stem}.md`)
   const text = await readFile(from, 'utf8')
 
-  // `task-complete` ticks outcomes before the merge, so an earlier slice merging
-  // late would find every box ticked. Only the last number closes the task.
+  // An earlier slice merging late would find every box ticked, so only the last number closes.
   const last = readPullRequest(text).at(-1)
   if (selector.kind === 'pull-request' && last !== selector.number) {
     return withMergedSlice(
@@ -1011,8 +956,7 @@ export async function archiveTask(
     )
   }
 
-  // A branch ticks its outcome before `git-pr` records its number. The stem
-  // selector skips this check, since a hand archive clears an abandoned branch.
+  // A branch ticks its outcome before its number is recorded, and a hand archive skips this.
   const pending = readPendingBranches(text)
   if (selector.kind === 'pull-request' && pending.length > 0) {
     return refuse(
@@ -1053,8 +997,7 @@ export async function archiveTask(
   const destination = archiveDir(root)
   const to = join(destination, `${stem}.md`)
 
-  // Plans move first and the folder follows, all before the task, so a failed
-  // rename never leaves a pointer at an empty folder or the task archived alone.
+  // Plans move first and the folder follows, so a failed rename never strands a pointer.
   await movePlans(plans.moves)
 
   if (ready) {
@@ -1110,15 +1053,8 @@ interface MergedSlice {
 
 /**
  * Moves the slice plan a merged pull request built into the archive while its
- * task stays open, and retargets the task's `Plan:` line at it, so the board
- * row drops the slice through `livePlans`. The refusal still answers, since
- * the task did not close.
- *
- * Only a task citing more than one live plan has a slice to drop. The plan is
- * the one whose derived branch is the pull request's head, so a plan a worker
- * renamed off its branch matches nothing and moves nothing. A plan another
- * live task cites stays, for the reason `plansToArchive` gives, and an
- * unreadable head leaves everything as it was.
+ * task stays open, and retargets the `Plan:` line at it. Only a plan whose
+ * derived branch is the head moves, and one another live task cites stays.
  */
 async function withMergedSlice(
   refused: ArchiveRefused,
@@ -1160,7 +1096,6 @@ async function withMergedSlice(
     ),
   )
   // The row is rendered again to drop the slice from its Plan and Touches cells.
-  // A row the board cannot write stays for `validate` to report.
   await rerenderRow(root, stem)
 
   return { ...refused, slice: move }
@@ -1176,8 +1111,7 @@ export function ghHeadReader(root: string): HeadReader {
     if (Bun.which('gh') === null) return undefined
 
     try {
-      // `gh` resolves its repository through git, so the hook's resolution
-      // variables would point it elsewhere. `reclaim.ts` strips them the same way.
+      // `gh` resolves its repository through git, so the hook's variables would misdirect it.
       const result = await execa(
         'gh',
         [
@@ -1206,13 +1140,9 @@ interface PlansToArchive {
 }
 
 /**
- * The plans this task carries into the archive with it, one per live target on
- * its `Plan:` line. The hook reaches this unwatched, so the move sits inside
- * the archive rather than in a second call that could leave a plan live.
- *
- * A plan another live task still cites stays, since moving it strands every
- * other pointer. A target resolving to no file moves nothing, since refusing
- * the whole archive over a mistyped pointer would park the board.
+ * The plans this task carries into the archive, one per live `Plan:` target,
+ * inside the archive so an unwatched hook leaves none live. A plan another live
+ * task cites stays, and a mistyped target moves nothing, not parking the board.
  */
 async function plansToArchive(
   dir: string,
@@ -1256,15 +1186,9 @@ async function movePlans(moves: readonly PlanMove[]): Promise<void> {
 }
 
 /**
- * The ready folder that travels with the plan, or nothing. It is read from the
- * task's `Ready:` line, falling back to a folder path in the plan's own text for
- * a task written before the line was defined. It moves only with its plan,
- * since the folder is the plan's verbatim source and a plan another task still
- * cites still needs it, so the caller passes the plans `plansToArchive`
- * settled. Their texts are searched in line order and the first folder wins.
- *
- * A target naming no folder, one already archived, or a destination taken
- * yields nothing and refuses nothing, the way a mistyped `Plan:` does.
+ * The ready folder that travels with the plan, read from the task's `Ready:`
+ * line or a folder path in the plan's text. It moves only with a plan settled by
+ * `plansToArchive`, and a target naming no folder, or one taken, yields nothing.
  */
 async function readyToArchive(
   dir: string,
@@ -1372,9 +1296,8 @@ function rebaseTarget(target: string, fromDir: string, toDir: string): string {
 
 /**
  * Re-resolves every relative link in a task written for `fromDir` so it reads
- * the same target from `toDir`. Every link rather than the four origin lines,
- * since the body breaks one folder short the same way. Fenced samples stay
- * verbatim, and a URL, an anchor, or a rooted path names nothing depth changes.
+ * the same target from `toDir`. Fenced samples stay verbatim, and a URL, an
+ * anchor, or a rooted path names nothing depth changes.
  */
 export function rebaseRelativeLinks(
   text: string,
@@ -1473,16 +1396,9 @@ function repointLinks(
 }
 
 /**
- * Rewrites every link in the task folders that resolves to the moved task, so
- * a citation follows the file. The moved file and the reserved siblings are
- * skipped: the first was rebased on its own, and `citedStem` reads a blocker in
- * `priority.md` only while its target carries no `/`. Fenced samples and code
- * spans stay verbatim, the way `rebaseRelativeLinks` leaves them.
- *
- * It runs after the rename and ahead of the ordering-row removal and the index
- * regen, which the unattended post-merge hook cannot redo once the task has
- * moved. A read or write that fails is therefore reported in `failed` and never
- * thrown, so the steps after it always run.
+ * Rewrites every link in the task folders that resolves to the moved task, so a
+ * citation follows the file. A failed read or write lands in `failed` and is
+ * never thrown, since the unattended hook cannot redo the steps after it.
  */
 export async function repointInboundLinks(
   root: string,
@@ -1560,10 +1476,8 @@ async function clearBacklogRow(dir: string, stem: string): Promise<boolean> {
 
 /**
  * Declines one task as a single unit: the move, the ordering-or-backlog row
- * removal, and the index regen. Unlike `archiveTask`, it carries no
- * outcome-state gate, since a task decided against can sit at any outcome
- * state, and the two never share a refusal set for the reason
- * `DECLINE_REFUSALS` states.
+ * removal, and the index regen. It carries no outcome-state gate, since a task
+ * decided against can sit at any state, as `DECLINE_REFUSALS` states.
  */
 export async function declineTask(
   root: string,
@@ -1590,8 +1504,7 @@ export async function declineTask(
   const destination = declinedDir(root)
   const to = join(destination, `${stem}.md`)
 
-  // The plans move first, the same order archiveTask uses, so the retarget
-  // written below describes files already at their new paths.
+  // The plans move first, as in archiveTask, so the retarget describes files already moved.
   await movePlans(plans.moves)
 
   await mkdir(destination, { recursive: true })

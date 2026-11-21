@@ -16,14 +16,9 @@ import { type Beat, readTakePlan } from '@/take/plan'
 import { findShell } from '@/take/shell'
 
 /**
- * Films each beat of `fixtures/motion.json` by frame stepping and holds the
- * take to the motion the operator settled by eye: the drawn cursor on the card
- * it drags, a rest before each press, a pause before the first key, and a zoom
- * that keeps its target still. The page reports on its own clock, so each
- * check reads what the page saw rather than what the take meant to send.
- *
- * Needs chrome-headless-shell and FFmpeg and skips without either. The E2E
- * Suites job in verify.yml installs both.
+ * Films each beat of `fixtures/motion.json` by frame stepping and holds the take
+ * to the motion settled by eye, reading what the page saw on its own clock. It
+ * needs chrome-headless-shell and FFmpeg and skips without either.
  */
 
 const FRAME_MS = 1000 / FPS

@@ -24,11 +24,9 @@ function measured(
 }
 
 /**
- * `count` skill folders, so the true count `scanCounts` compares every
- * stated figure against is `count`. The plausibility filter reads the
- * distance between a stated figure and this true count, so a case exercising
- * it needs a true count in the same range a real catalog sits in rather than
- * the one or two a minimal fixture would otherwise carry.
+ * `count` skill folders, so the true count `scanCounts` compares against is
+ * `count`. The plausibility filter reads the distance to that count, so a case
+ * needs one in the range a real catalog sits in rather than a minimal fixture's.
  */
 function seedSkills(count: number): void {
   for (let index = 0; index < count; index += 1) {
@@ -38,8 +36,7 @@ function seedSkills(count: number): void {
 
 beforeEach(() => {
   ROOT = mkdtempSync(join(tmpdir(), 'canon-counts-scan-'))
-  // A hook's `GIT_DIR` takes precedence over `cwd`, so an inherited one would
-  // initialize the repository away from the fixture and every case reads empty.
+  // A hook's `GIT_DIR` takes precedence over `cwd`, so an inherited one reads every case empty.
   execSync('git init --quiet', { cwd: ROOT, env: gitEnv() })
 })
 
@@ -83,8 +80,7 @@ describe('scanCounts', () => {
   })
 
   it('should name a stale count reached through an article rather than a verb', async () => {
-    // The assertion verb sits after the noun rather than ahead of the number, a
-    // shape the verb-only gate could not reach.
+    // The assertion verb sits after the noun, a shape the verb-only gate could not reach.
     seedSkills(20)
     write(
       'docs/history.md',
@@ -123,8 +119,7 @@ describe('scanCounts', () => {
   })
 
   it('should name a stale count reached through a whole-catalog quantifier', async () => {
-    // A sentence reading `took all 69 rules` puts the trigger the verb gate
-    // wants five words ahead of the number, with `all` sitting against it.
+    // The trigger the verb gate wants sits five words ahead of the number, with `all` against it.
     seedSkills(63)
     write('docs/sandbox.md', 'The copy it replaced took all 59 skills.\n')
 
@@ -141,8 +136,7 @@ describe('scanCounts', () => {
   })
 
   it('should name a stale count reached through a production verb outside the original list', async () => {
-    // A context entry asserting `the toolkit authors 69 rules`, the assertion
-    // shape this gate was built for, with a verb the first list lacked.
+    // A context entry asserting a total, the shape this gate was built for, with a verb the first list lacked.
     seedSkills(63)
     write(
       'docs/regeneration.md',
@@ -162,8 +156,7 @@ describe('scanCounts', () => {
   })
 
   it('should read past a total reached through an indirect noun, which is the false positive the gap axis would have admitted', async () => {
-    // Widening the trigger-to-number gap to two words would read a domain's own
-    // membership here as the catalog's total, so the gap stays shut and this goes unread.
+    // Widening the trigger-to-number gap would read a domain's own membership as the catalog's total.
     seedSkills(63)
     write(
       'docs/overview.md',
@@ -176,8 +169,7 @@ describe('scanCounts', () => {
   })
 
   it('should read one figure per catalog per sentence, leaving a second figure in the same sentence unread', async () => {
-    // `regex.exec` reads one match, so of two stale figures in range, each with a
-    // trigger, the second drops by the single match rather than a filter.
+    // `regex.exec` reads one match, so the second stale figure drops by the single match.
     seedSkills(63)
     write(
       'docs/regeneration.md',
@@ -278,8 +270,7 @@ describe('scanCounts', () => {
   })
 
   it('should drop a verb-gated match whose figure sits nowhere near the true count', async () => {
-    // `rules` here means prescriptive statements in one document, not the rule
-    // catalog, and 2 beside a true count of 63 is what tells the two apart.
+    // `rules` here means statements in one document, and 2 beside a true 63 tells the two apart.
     seedSkills(63)
     write(
       'docs/standard.md',
@@ -292,8 +283,7 @@ describe('scanCounts', () => {
   })
 
   it('should match a subset qualified by an adjective when the sentence carries no date', async () => {
-    // `flat` fills the optional-word slot a restated whole needs, so a named subset
-    // reads as one. The fix is dating the clause, not narrowing the matcher.
+    // `flat` fills the optional-word slot a restated whole needs, so the fix is dating the clause.
     seedSkills(27)
     write(
       'docs/history.md',

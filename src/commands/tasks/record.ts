@@ -76,10 +76,9 @@ function collectPosition(value: string, previous: string[]): string[] {
 }
 
 /**
- * Both record verbs name a task the same two ways, and naming it neither way or
- * both ways is the same refusal in each. Both are `bad-input` rather than
- * `ambiguous` or `no-match`, since those two describe the board and these
- * describe the command line that reached it.
+ * Both record verbs name a task one of two ways, and naming it neither way or
+ * both is the same refusal in each. It is `bad-input` rather than `ambiguous` or
+ * `no-match`, since those describe the board and this the command line.
  */
 function selectorFor(
   task: string | undefined,
@@ -497,8 +496,7 @@ export function reportRecord(
   emitJson: boolean,
   root: string,
 ): number {
-  // The framed branch reaches stderr through logError, so this bare write keeps
-  // JSON mode from reporting the reason on stdout alone.
+  // The bare write keeps JSON mode from reporting the reason on stdout alone.
   if (emitJson) {
     process.stderr.write(`${refused.message}\n`)
     process.stdout.write(

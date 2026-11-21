@@ -139,8 +139,7 @@ export default scenario({
       )
     },
     layout: (ctx) => {
-      // Generic primitives and cart-only pieces share one flat folder, so the arm
-      // scores whether the plan places three more by role.
+      // Generic primitives and cart-only pieces share one flat folder, so the arm scores placement by role.
       ctx.fixtures('claude', 'plan-feature', 'layout', '01-initial')
 
       ctx.mkdir('src/components')
@@ -190,8 +189,7 @@ export default scenario({
       )
     },
     vague: (ctx) => {
-      // The ask names no number, so the only measurable criterion in reach is
-      // the budget this file states. The arm scores whether the plan carries it.
+      // The ask names no number, so the only measurable criterion is the budget this file states.
       ctx.fixtures('claude', 'plan-feature', 'vague', '01-initial')
 
       ctx.mkdir('canon')

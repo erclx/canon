@@ -26,24 +26,14 @@ esac
 
 [ -f "$file" ] || exit 0
 
-# The audit verb owns the ban set, so the hook an author meets at edit time and
-# the stage that fails the push read one set. The awk this replaces parsed its
-# bans out of a standards file and hardcoded the rest, so this hook and the push
-# could disagree with nothing in between explaining the difference.
-#
-# The verb resolves its own paths under the cwd, so the project root is named
-# rather than inherited. The payload carries an absolute file path, which is
-# what lets the runner move without taking the argument out of reach.
+# The audit verb owns the ban set, so this edit-time hook and the push stage read
+# one set. The verb resolves paths under the cwd, so the project root is named
+# rather than inherited, and the payload's absolute file path stays usable.
 root="${CLAUDE_PROJECT_DIR:-.}"
 
-# A checkout carrying the CLI source runs that source, so this hook and the
-# push stage read one build, as `cliRunner` in `src/gate/sequencer.ts` does,
-# since a global binary lags the branch. A tree without the source falls back
-# to the binary, and a machine with neither reports that nothing ran.
-#
-# A completed run always writes the record and a refusal writes nothing, so an
-# empty one means the verb declined to measure, as it does outside a git
-# repository, and reading the findings alone would call that clean.
+# A checkout carrying the CLI source runs that source, as `cliRunner` in
+# `src/gate/sequencer.ts` does, since a global binary lags the branch. A completed
+# run always writes the record, so an empty one means the verb declined to measure, not clean.
 unread=""
 record=""
 if [ -f "$root/src/cli.ts" ] && command -v bun >/dev/null 2>&1; then
@@ -62,14 +52,9 @@ fi
 hits=$(printf '%s' "$record" |
   jq -r '.entries[]?.bans[]? | ":\(.line):\(.column + 1)  \(.kind)  \(.term)"' 2>/dev/null)
 
-# Two advisory measures ride in the same record and never gate. A heading's
-# case is read for the whole file, since it is cheap to fix where it stands. A
-# colon is kept only where the word before it and the colon appear in the text
-# this write carried, since an edit often rewrites part of a line and a
-# whole-line match would drop exactly that case. The verb names that word as
-# `lead`, since slicing `text` at `column` miscounts after an emoji, and a
-# binary predating the field falls back to the slice. A file holds colons nobody is
-# asking this edit to answer for.
+# Two advisory measures ride in the record and never gate. A heading's case is
+# read for the whole file. A colon is kept only where its lead word and the colon
+# appear in the text this write carried, since an edit often rewrites part of a line.
 new=$(printf '%s' "$input" |
   jq -r '[.tool_input.new_string?, .tool_input.content?, (.tool_input.edits[]?.new_string?)] | map(select(. != null)) | join("\n")' 2>/dev/null)
 headings=$(printf '%s' "$record" |
@@ -95,9 +80,8 @@ shape=$(printf '%s' "$record" |
   jq -r '.entries[]?.referenceShape[]? | ":\(.line)  \(.kind)  \(.text)" + (if .gating then "  gating" else "" end)' 2>/dev/null)
 
 # A set the verb shipped empty measures nothing and would report a clean file.
-# Reading the findings alone turned that narrowed check into a pass once, back
-# when a standard could go missing, and the sets shipping with the package moves
-# the cause rather than removing it.
+# Reading the findings alone once turned that narrowed check into a pass, and
+# sets shipping with the package move the cause rather than remove it.
 empty=$(printf '%s' "$record" |
   jq -r '[.bans.emptySets[]?] | join(", ")' 2>/dev/null)
 

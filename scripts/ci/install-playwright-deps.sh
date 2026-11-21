@@ -1,13 +1,7 @@
 #!/usr/bin/env bash
 # Installs the Playwright system packages for the named browsers, killing an
-# attempt that outlives its bound and retrying it. A degraded apt mirror hangs
-# one connection rather than failing it, so a step timeout alone turns the
-# hang into a red check and never recovers it, while a fresh attempt usually
-# lands on a healthy backend.
-#
-# Usage: install-playwright-deps.sh [--package <spec>] <browser>...
-# Exits 0 on the first success, 2 when no browser is named, and the last
-# attempt's code when every attempt fails.
+# attempt past its bound and retrying, since a degraded apt mirror hangs rather than fails.
+# Usage: install-playwright-deps.sh [--package <spec>] <browser>... Exits 2 when no browser is named.
 set -e
 
 package=playwright
@@ -31,10 +25,8 @@ apt-config dump | grep -E '^Acquire::(Retries|http::Timeout) ' || true
 status=0
 for attempt in $(seq 1 "$attempts"); do
   if [ "$attempt" -gt 1 ]; then
-    # timeout runs as the runner user, and Linux drops its signal to the root
-    # apt-get playwright spawns through sudo. sudo relays it only to its own
-    # child shell, so a root apt-get or dpkg can outlive the kill and hold the
-    # lock the next attempt needs.
+    # timeout's signal is dropped before the root apt-get sudo spawns, so a root
+    # apt-get or dpkg can outlive the kill and hold the lock the next attempt needs.
     sudo pkill -KILL -x 'apt-get|dpkg' || true
     # A kill during unpack leaves dpkg interrupted, which refuses the next
     # install. Its own failure must not end the loop.

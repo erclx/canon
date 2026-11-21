@@ -1,10 +1,8 @@
 import { scenario } from '@/sandbox/scenario'
 
 /**
- * A plan that retries a CI install whose failures are upstream. The failure
- * log bunches by day, another repository fails on the same days, and an
- * earlier cache never saved, so every answer the critique needs sits in the
- * tree and the prompt names none of it.
+ * A plan that retries a CI install whose failures are upstream. Every answer
+ * the critique needs sits in the tree, and the prompt names none of it.
  */
 export default scenario({
   config: {

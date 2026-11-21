@@ -105,10 +105,9 @@ interface Candidates {
 }
 
 /**
- * The paths a file glob is matched against: every file to depth two, plus
- * every folder on the way to any listed file, so an evidence folder such as
- * `.github/workflows` matches without naming the file inside it. `folders`
- * holds the folders alone, which a pattern ending in `/` is matched against.
+ * The paths a file glob is matched against: every file to depth two plus every
+ * folder on the way to a listed file, so `.github/workflows` matches without
+ * naming the file inside. `folders` holds the folders alone, for a `/`-ending pattern.
  */
 async function candidatePaths(target: string): Promise<Candidates> {
   const listed = (await listRepositoryFiles(target)) ?? walkFiles(target)
@@ -210,9 +209,8 @@ const READERS: Readonly<Record<string, (text: string) => string[]>> = {
 
 /**
  * Every dependency name a manifest to depth two declares, mapped to the
- * manifests declaring it. A manifest that does not parse contributes nothing
- * rather than failing the run, since one broken fixture folder should not cost
- * a project every other proposal.
+ * manifests declaring it. A manifest that does not parse contributes nothing,
+ * since one broken fixture should not cost a project every other proposal.
  */
 function readDependencies(
   target: string,
@@ -288,9 +286,8 @@ function matchEntry(
 
 /**
  * Proposes each opt-in rule whose evidence the target holds. A rule `stack`
- * already resolves is left out, since proposing it would install nothing, and
- * a key naming no live rule is skipped rather than proposed, which the
- * `unreferenced-rules` gate stage reports on the toolkit side.
+ * already resolves is left out, and a key naming no live rule is skipped, which
+ * the `unreferenced-rules` gate stage reports on the toolkit side.
  */
 export async function detectRules(
   root: string,

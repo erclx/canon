@@ -19,8 +19,7 @@ export default scenario({
   },
   arms: {
     refusal: (ctx) => {
-      // A refusal writes nowhere, so the behavior lands in the sandbox, and the held
-      // status keeps its exit 1 from aborting the arm on the outcome it records.
+      // A refusal writes nowhere, and the held status keeps its exit 1 from aborting the arm.
       ctx.log.step(
         'Running: canon feedback (report missing its Proposed fix section)',
       )
@@ -45,8 +44,7 @@ export default scenario({
       ctx.write('install/refusal-stdout.log', result.stdout)
       ctx.write('install/refusal.log', result.stderr)
       ctx.write('install/refusal-status.txt', `${result.status}\n`)
-      // Byte count rather than the stream, since an assertion cannot match an empty
-      // file, and a refusal printing a path is the failure watched for.
+      // Byte count rather than the stream, since an assertion cannot match an empty file.
       ctx.write(
         'install/refusal-stdout-bytes.txt',
         `${Buffer.byteLength(result.stdout)}\n`,

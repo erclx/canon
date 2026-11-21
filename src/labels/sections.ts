@@ -26,11 +26,8 @@ export interface SectionsCheck {
 
 /**
  * Grades the level-two headings of a pull request body against the closed list.
- *
- * The comparison is exact, so `## Key Changes` fails. `canon pr key-changes`
- * reads its section case-insensitively, which keeps a body posted before the
- * rename parsing while the scan holds new text to one spelling. Subheadings and
- * fenced lines are not headings, so the list governs level two alone.
+ * The comparison is exact, while `canon pr key-changes` reads case-insensitively
+ * so an older body still parses. Subheadings and fenced lines are not headings.
  */
 export function checkSections(body: string): SectionsCheck {
   const headings = linesOutsideFences(body)

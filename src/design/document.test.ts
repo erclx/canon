@@ -114,13 +114,11 @@ describe('renderDesignDocument', () => {
     const document = renderDesignDocument()
 
     expect(document).toContain('| 1.45 ? verify |')
-    // The role column pads to the widest role in the table, so this width
-    // moves whenever a longer role name is declared.
+    // The role column pads to the widest role, so this width moves when a longer name is declared.
     expect(document).toContain('| background       | page canvas')
   })
 
-  // The preview parses the document back, so a render it cannot read would show
-  // an empty record for a file full of values.
+  // The preview parses the document back, so a render it cannot read shows an empty record.
   it('round-trips through the parser the preview reads it with', () => {
     const path = join(root, 'DESIGN.md')
     writeFileSync(path, renderDesignDocument())

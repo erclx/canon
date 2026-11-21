@@ -5,24 +5,16 @@ import { RECORD_ROOTS } from '@/roots/record'
 import { SURFACE_ROOTS } from '@/roots/surface'
 
 /**
- * Folder names under a record root audited by default.
- *
- * A named list rather than a contract read off disk, so a generated tree is
- * never measured against a rule written for per-domain narrative, and
- * `--folder` admits another. It doubles as the citation check's scope, since
- * `citationPattern` spells only these names, so a path into a folder left off
- * goes stale silently.
+ * Folder names under a record root audited by default, a named list so a
+ * generated tree is never measured against a narrative rule. It is also the
+ * citation check's scope, so a path into a folder left off goes stale silently.
  */
 export const DEFAULT_FOLDERS: readonly string[] = ['context', 'diagrams']
 
 /**
- * The bases every folder in the default list is looked for under.
- *
- * `diagrams` resolves under `RECORD_ROOTS` and `context` under `SURFACE_ROOTS`,
- * so the bases are their union rather than a per-name map, since a wrong root
- * costs one `existsSync`. `.claude` goes last, keeping each list's precedence.
- * A target holding its own root `canon/` folder resolves it as the toolkit's,
- * which costs only a wrong scope line, since the audit only reports.
+ * The bases every folder in the default list is looked for under, a union of
+ * `RECORD_ROOTS` and `SURFACE_ROOTS` since a wrong root costs one `existsSync`.
+ * `.claude` goes last, keeping each list's precedence.
  */
 const CLAUDE_BASES: readonly string[] = [
   ...new Set(
@@ -36,10 +28,8 @@ const ROOT_BASE = '.'
 
 export interface AuditedFolder {
   /**
-   * The requested folder name this was resolved under, which is what says
-   * which standard governs the entries. A nested split folder carries the name
-   * of the folder it sits beneath rather than its own, so
-   * `canon/context/<domain>` is governed as `context`.
+   * The requested folder name this was resolved under, which says which standard
+   * governs the entries. A nested split folder carries its parent's name.
    */
   readonly name: string
   /**
@@ -53,25 +43,17 @@ export interface AuditedFolder {
   /** Absolute paths of the folder's own entries, excluding its `index.md`. */
   readonly entries: readonly string[]
   /**
-   * Whether this is a sub-area a domain split into rather than the folder
-   * named under `.claude/`.
-   *
-   * The entries of a split folder describe one domain between them, so a rule
-   * about what a domain declares is answered by the folder. The entries of the
-   * named folder are one domain each, and a rule answered by a sibling there
-   * would let one entry stand in for domains it says nothing about.
+   * Whether this is a sub-area a domain split into. A split folder's entries
+   * describe one domain, while the named folder's entries are one domain each,
+   * so a sibling there must not stand in for domains it says nothing about.
    */
   readonly nested: boolean
 }
 
 /**
- * Names the requested record-root folders that actually exist, which is the
- * citation check's scope, since a pointer into an optional folder is no fault
- * in a project that lacks it.
- *
- * A folder resolved at the project root stays out, since the citation pattern
- * spells the `.claude/` prefix and widening it would match prose that
- * references nothing.
+ * Names the requested record-root folders that actually exist, the citation
+ * check's scope. A folder at the project root stays out, since the pattern
+ * spells the `.claude/` prefix and widening it would match prose.
  */
 export function presentNames(folders: readonly AuditedFolder[]): string[] {
   return [
@@ -103,9 +85,8 @@ export interface FolderResolution {
   readonly folders: readonly AuditedFolder[]
   /**
    * Requested names that resolved under no base, reported rather than dropped.
-   * Which absences are worth saying out loud is the caller's judgment: a
-   * default folder a project does not carry is ordinary, and a name passed by
-   * hand that resolves nowhere is a typo that would otherwise read as a pass.
+   * A default folder a project lacks is ordinary, but a hand-passed name that
+   * resolves nowhere is a typo that would otherwise read as a pass.
    */
   readonly missing: readonly string[]
 }
@@ -133,15 +114,9 @@ function locate(
 }
 
 /**
- * Resolves the folders to audit under `root`.
- *
- * A named folder contributes its entries plus every nested index folder, so a
- * split domain is audited at the same grain. Discovery runs through the shared
- * walker, so `.gitignore` and the vendored prune govern it too. The project
- * root is reached only on opt-in, so a target's own same-named folder is not
- * audited unasked, and `.claude/` wins a name both carry. The scope line
- * prints the resolved path, and `governsContent` gates root folders out of
- * single-standard rules.
+ * Resolves the folders to audit under `root`, each named folder plus its nested
+ * index folders so a split domain is audited at the same grain. The project root
+ * is reached only on opt-in, and `.claude/` wins a name both carry.
  */
 export async function resolveFolders(
   root: string,

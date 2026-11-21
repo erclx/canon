@@ -2,11 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { describeViewport, resolveViewports } from '@/driver/probes/viewport'
 
 /**
- * Pins the refusal rather than a reading, because refusing is the whole of this
- * module's contract. A scroll rail that skipped its middle sections passed at
- * 900 and failed at 1200 and 1500, so any default height this shipped would be
- * inherited unchosen by every later caller and would report clean over exactly
- * that defect.
+ * Pins the refusal rather than a reading, since refusing is this module's whole
+ * contract. A default height would be inherited unchosen by every later caller
+ * and report clean over a defect that passed at 900 and failed at 1200.
  */
 
 describe('resolveViewports', () => {

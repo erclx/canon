@@ -4,10 +4,8 @@ import { bodyLines, wordCount } from '@/markdown/scan'
 export const SESSION_MAP_PREFIX = 'session-'
 
 /**
- * The most words a session map holds, which `session.md` states as
- * `at most 350 words`. It lives here rather than being read off the standard
- * because a consumer project loads skills from the plugin cache and carries no
- * `session.md` to read, so a test pins the two to one number instead.
+ * The most words a session map holds, which `session.md` states as `at most 350 words`. It lives
+ * here because a consumer project carries no `session.md`, so a test pins the two.
  */
 export const SESSION_MAP_WORD_CAP = 350
 
@@ -33,10 +31,8 @@ export function isSessionMap(name: string): boolean {
 }
 
 /**
- * Counts what a resuming reader has to read: the body below the title, with
- * frontmatter and a `## Resume` section left out. A fenced block counts the way
- * it does in the requirements record, since a reader reads it too, and a
- * heading inside one neither opens nor closes a section.
+ * Counts what a resuming reader has to read: the body below the title, with frontmatter and
+ * a `## Resume` section left out. A fenced block counts, and a heading inside one opens no section.
  */
 export function sessionMapWords(source: string): number {
   const kept: string[] = []

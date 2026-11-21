@@ -2,11 +2,9 @@
 
 # canon-no-seed: reads src/cli.ts and the upstream cursor, which a target does not carry, since the digest is not shipped to targets.
 
-# Tells the operator when an upstream digest is due, as one line at the start
-# of an attended session. The line goes through `systemMessage` to the operator
-# and never into the model's context, which would spend a transcript line in
-# every session and invite the model to start a digest unasked. Every failure
-# exits 0 silently, since a broken reminder must not block a session start.
+# Tells the operator when an upstream digest is due, as one line at session start
+# through `systemMessage`, never into the model's context. Every failure exits 0
+# silently, since a broken reminder must not block a session start.
 
 IFS= read -r -d '' -t 2 input
 [ -n "$input" ] || {

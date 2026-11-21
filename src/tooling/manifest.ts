@@ -162,15 +162,9 @@ export function loadManifest(
 }
 
 /**
- * Walks the `extends` chain once, self first. Callers that apply parent
- * values before child values reverse the result. Replaces the seventeen
- * copies of `grep '^extends' | cut -d'"' -f2` the bash carried.
- *
- * A stack matching `skipStack` drops from the chain along with every
- * ancestor past it, except that one declaring `[sync] per_root` stays as a
- * restricted manifest shipping those configs alone. A `--skip base` subfolder
- * keeps its own verify entry point that way, while husky, prettier, and the
- * rest stay single at the repository root.
+ * Walks the `extends` chain once, self first, so callers applying parent values first reverse it. A stack
+ * matching `skipStack` drops with every ancestor past it, except one declaring `[sync] per_root`, which stays
+ * restricted to those configs.
  */
 export function resolveChain(
   root: string,

@@ -22,24 +22,15 @@ export const PROJECT_SKILLS_REL = join('.claude', 'skills')
 const SKILL_ROOTS: readonly string[] = [SHIPPED_SKILLS_REL, PROJECT_SKILLS_REL]
 
 /*
- * Path-scoped rules are read from every root in `RULE_DIRS`, the authoring
- * roots rather than the consumed copy under `.claude/rules/`. A stack takes a
- * whole rule folder, so a bullet landing anywhere under `governance/rules/`
- * ships to every target the stack reaches, the same way a bullet in the
- * always-loaded file or the seed does, and `internal/rules/` loads the same
- * way for every session in this repository. That is what makes a rule an
- * instruction surface rather than a place a rule is merely quoted, and it is
- * why a bullet moved into either root from the seed still belongs to the
- * corpus this sweep reads rather than leaving it.
+ * Path-scoped rules are read from every root in `RULE_DIRS`, the authoring roots
+ * rather than the consumed copy, since a bullet anywhere under `governance/rules/`
+ * or `internal/rules/` loads like one in the always-loaded file or the seed.
  */
 
 /**
- * Path pairs whose duplication is deliberate and already recorded.
- *
- * The seed is authored from the always-loaded file and a hand merge reconciles
- * the two, so a bullet in both is the design. Excluding by pair rather than by
- * content records that location fact once. The exclusion covers repetition
- * alone, so a polarity split on a declared pair stays a finding.
+ * Path pairs whose duplication is deliberate and already recorded. The seed is
+ * authored from the always-loaded file, so a bullet in both is the design. The
+ * exclusion covers repetition alone, so a polarity split on a pair stays a finding.
  */
 const MIRRORS: readonly (readonly [string, string])[] = [
   [INSTRUCTIONS_REL, SEED_REL],
@@ -47,11 +38,8 @@ const MIRRORS: readonly (readonly [string, string])[] = [
 
 /**
  * A token appearing in more than this many statements carries no signal.
- *
- * Under one percent of the 2750 statements this repository offers. Tuned
- * against that corpus rather than reasoned to, which is what the plan asked of
- * the first run: `.canon/plans/` sits at 14 and is the anchor the motivating
- * case turns on, while `file` sits at 371 and matches most of the tree.
+ * Tuned against this repository's corpus, where `.canon/plans/` sits at 14 and
+ * anchors the motivating case, while `file` sits at 371 and matches most of the tree.
  */
 export const COMMON_CEILING = 20
 
@@ -59,32 +47,23 @@ export const COMMON_CEILING = 20
 export const ANCHOR_FLOOR = 3
 
 /**
- * What a backticked token is worth against a plain word.
- *
- * An author marking a span as code named an identifier rather than describing
- * one, so `.canon/plans/archive/` says more about what a statement governs
- * than any two prose words do. Weighting it is what lets the floor rise high
- * enough to drop a coincidental word pair without losing a rule two surfaces
- * spelled entirely differently around one shared path.
+ * What a backticked token is worth against a plain word. An author marking a
+ * span as code named an identifier, so weighting it lets the floor rise enough
+ * to drop a coincidental word pair without losing a rule spelled differently.
  */
 const SPAN_WEIGHT = 2
 
 /**
- * Weight a match needs before a polarity split is called a contradiction.
- *
- * Above the match floor on purpose. A thin match says two statements touch the
- * same subject, which is not enough to claim one forbids what the other
- * prescribes, so a weak pair reports as a repetition and the loudest class is
- * reserved for a pair sharing real identity.
+ * Weight a match needs before a polarity split is called a contradiction. It is
+ * above the match floor, since a thin match shows only a shared subject and a
+ * weak pair reports as a repetition.
  */
 export const CONTRADICTION_FLOOR = 5
 
 /**
- * Words carrying no subject, dropped before anchors are counted.
- *
- * Short rather than exhaustive. The document-frequency ceiling above removes
- * the rest on its own, and a hand-written list long enough to do that job
- * would be a second corpus nobody maintains.
+ * Words carrying no subject, dropped before anchors are counted. Short rather
+ * than exhaustive, since the document-frequency ceiling removes the rest and a
+ * longer hand-written list would be a corpus nobody maintains.
  */
 const STOPWORDS = new Set([
   'about',
@@ -172,23 +151,16 @@ const STOPWORDS = new Set([
 ])
 
 /**
- * Markers reading as a prohibition, which is the one polarity signal available
- * without understanding the sentence.
- *
- * Deliberately narrow. `no` and `not` are excluded because both appear inside
- * ordinary qualifying clauses, and widening the set turns most of the corpus
- * into a suspected contradiction.
+ * Markers reading as a prohibition, the one polarity signal available without
+ * understanding the sentence. `no` and `not` are excluded, since both appear in
+ * ordinary qualifying clauses and widening turns the corpus into contradictions.
  */
 const PROHIBITIONS = ['never', 'do not', "don't", 'avoid', 'refuse']
 
 /**
- * A `no` opening a clause or a comma-set phrase directly on a code span, as in
- * `pinned to major tags, no `@latest``.
- *
- * Sitting on a backticked identifier, `no` names the thing ruled out, while
- * after a verb, as in `returns no `jq` output`, it describes. `not` and `never`
- * stay out, since each subject spells its own negation elsewhere and admitting
- * them flipped agreeing pairs into contradictions.
+ * A `no` opening a clause or a comma-set phrase directly on a code span, which
+ * names the thing ruled out, where `no` after a verb describes. `not` and
+ * `never` stay out, since admitting them flipped agreeing pairs into contradictions.
  */
 const NEGATED_SPAN = /(?:^|[,;:(])\s*no\s+`/
 
@@ -200,12 +172,9 @@ export type Restatement = 'mirror' | 'repetition' | 'contradiction'
 export type SurfaceKind = 'seed' | 'skill' | 'rule'
 
 /**
- * Which surface a later edit starts from.
- *
- * `unknown` is a first-class answer rather than a gap. The content-ownership
- * table assigns a cross-domain rule and a domain-triggered one, and reaches
- * nothing stated in a skill body the always-loaded file never names, so
- * guessing there would put a reader on a surface nobody decided.
+ * Which surface a later edit starts from. `unknown` is a first-class answer,
+ * since the content-ownership table reaches nothing stated in a skill body the
+ * always-loaded file never names, and guessing would put a reader on an undecided surface.
  */
 export type Authority = 'claude-md' | 'skill-body' | 'unknown'
 
@@ -283,11 +252,9 @@ interface Indexed<T extends Statement> {
 }
 
 /**
- * Splits text into the tokens an anchor can be drawn from.
- *
- * A code span keeps its inner text whole, since `.canon/plans/archive/` is the
- * strongest anchor this corpus offers and splitting it on the punctuation would
- * leave three words every second bullet also carries.
+ * Splits text into the tokens an anchor can be drawn from. A code span keeps its
+ * inner text whole, since a path is the strongest anchor this corpus offers and
+ * splitting it on punctuation would leave words every second bullet carries.
  */
 export function analyze(text: string): Analysis {
   const spans: string[] = []
@@ -312,13 +279,9 @@ export function analyze(text: string): Analysis {
 }
 
 /**
- * Whether a clause instructs against something, rather than merely describing
- * something that does not happen.
- *
- * The marker has to open the clause, since an instruction leads with its verb:
- * `Never delete a task file` prohibits where `a fallback never fires` reports.
- * A prohibition written mid-clause reads as description, which lands the pair
- * in the repetition class rather than dropping it.
+ * Whether a clause instructs against something rather than describing what does
+ * not happen. The marker has to open the clause, since an instruction leads with
+ * its verb, and a mid-clause prohibition lands in the repetition class.
  */
 function prohibits(text: string): boolean {
   const opening = text
@@ -333,13 +296,9 @@ function prohibits(text: string): boolean {
 }
 
 /**
- * The clauses a statement's polarity is read against.
- *
- * The trailing span is kept, where `splitSentences` in `src/markdown/structure.ts`
- * drops one no punctuation closes. A bullet routinely ends without a period and
- * its last clause is routinely the one carrying the prohibition, so dropping it
- * would lose exactly the half this reads. The two contracts differ, which is why
- * this is a second splitter rather than a shared one.
+ * The clauses a statement's polarity is read against. The trailing span is kept,
+ * unlike `splitSentences` in `src/markdown/structure.ts`, since a bullet often
+ * ends without a period and its last clause often carries the prohibition.
  */
 function clauses(text: string): string[] {
   return text
@@ -349,13 +308,9 @@ function clauses(text: string): string[] {
 }
 
 /**
- * The clause a match landed in, which is where a prohibition has to sit before
- * it says anything about the rule the two statements share.
- *
- * The densest clause rather than every clause carrying an anchor, since a
- * union answers true whenever any clause carries a marker. A rule split across
- * two bullets on one side and folded into one on the other otherwise reads as
- * a contradiction between statements that agree.
+ * The clause a match landed in, where a prohibition has to sit to say anything
+ * about the shared rule. The densest clause, not every one with an anchor, since
+ * a union reads a rule split across two bullets as a contradiction.
  */
 function anchoredClause(text: string, anchors: ReadonlySet<string>): string {
   const parts = clauses(text)
@@ -375,8 +330,7 @@ function anchoredClause(text: string, anchors: ReadonlySet<string>): string {
     }
   }
 
-  // No clause carries an anchor, as a boundary inside a code span can cause,
-  // so read the whole statement rather than report no polarity.
+  // No clause carries an anchor, as a boundary inside a code span can cause, so read the whole statement.
   return bestHits === 0 ? text : best
 }
 
@@ -405,16 +359,9 @@ function union(parent: Map<string, string>, a: string, b: string): void {
 }
 
 /**
- * How many duplicate clusters reach three member statements or more.
- *
- * A rule sitting on both sides lets a cluster of mutually restating
- * statements fragment across several `RestatedEntry` records, one per member
- * that happens to lead the subject loop, so counting an entry whose own
- * `surfaces.length >= 2` counts the same cluster more than once. Union over
- * every reported pair instead: two statements in one component are one
- * duplicated instruction wherever it was found from, and the entries a
- * reader sees are one view into that same union, never a second source for
- * its total.
+ * How many duplicate clusters reach three member statements or more. A rule on
+ * both sides fragments a cluster across several `RestatedEntry` records, so this
+ * unions every reported pair rather than counting entries more than once.
  */
 function countThreeSurfaceClusters(pairs: ReadonlySet<string>): number {
   const parent = new Map<string, string>()
@@ -466,11 +413,9 @@ function readBullets(root: string, relative: string): Statement[] {
 }
 
 /**
- * Every top-level bullet across every rule file, keyed to the file it came
- * from rather than folded into one corpus. A rule reads as bullets under the
- * same convention the always-loaded file and the seed use, so `readBullets`
- * is reused per file rather than rebuilt for prose, and frontmatter is read
- * past for the same reason it is: no line there starts with `- `.
+ * Every top-level bullet across every rule file, keyed to its file rather than
+ * folded into one corpus. A rule reads as bullets under the same convention the
+ * always-loaded file uses, so `readBullets` is reused per file.
  */
 function readRuleFiles(root: string, rulesRel: string): Statement[] {
   const rulesRoot = join(root, rulesRel)
@@ -489,13 +434,9 @@ function readRuleFiles(root: string, rulesRel: string): Statement[] {
 }
 
 /**
- * Every prose line and bullet in a skill body under one skills root.
- *
- * Wider than the bullet rule above because the motivating case was stated in a
- * body as a paragraph, so a bullet-only read would miss the one instance this
- * sweep exists for. Headings, tables, and fenced blocks are read past: a
- * heading names a section rather than stating a rule, and a fenced block is an
- * example whose words are the surrounding prose's by construction.
+ * Every prose line and bullet in a skill body under one skills root. It is wider
+ * than the bullet rule, since the motivating case was a paragraph, and headings,
+ * tables, and fenced blocks are read past as names or examples.
  */
 function readBodyLines(root: string, skillsRel: string): Candidate[] {
   const skillsRoot = join(root, skillsRel)
@@ -522,8 +463,7 @@ function readBodyLines(root: string, skillsRel: string): Candidate[] {
     for (const [index, line] of lines.entries()) {
       const trimmed = line.trim()
 
-      // Frontmatter is metadata, and each `description` restates its skill's
-      // purpose, so sweeping it would match any subject naming the domain.
+      // Frontmatter is metadata and each `description` restates its skill, so sweeping it would over-match.
       if (frontmatter) {
         if (index > 0 && trimmed === '---') frontmatter = false
         continue
@@ -572,12 +512,9 @@ function index<T extends Statement>(statement: T): Indexed<T> {
 }
 
 /**
- * Which surface a later edit starts from, and why.
- *
- * A skill body earns authority only where the subject names that skill, which
- * is the content-ownership table's rule that behavior triggered when editing
- * domain X belongs to X's skill. Everything else the table does not reach is
- * reported as unknown.
+ * Which surface a later edit starts from, and why. A skill body earns authority
+ * only where the subject names that skill, per the content-ownership table, and
+ * everything the table does not reach is reported as unknown.
  */
 function authorityFor(
   subject: Statement,
@@ -643,14 +580,8 @@ function classify(
 
 /**
  * Every instruction the always-loaded file or a path-scoped rule states that a
- * further surface also states.
- *
- * Matching is recall-first, keyed on distinctive shared tokens rather than a
- * shared phrase, since one rule is often written several ways and recall can be
- * narrowed from real output. Rules sit on both sides, since a stack ships a
- * whole rule folder and a bullet duplicated between two rules reaches a target
- * the same way. It reports and never gates, since a restatement is usually
- * legitimate.
+ * further surface also states. Matching is recall-first on distinctive shared
+ * tokens, rules sit on both sides, and it reports and never gates.
  */
 export function readRestated(root: string): RestatedReport {
   const instructions = readBullets(root, INSTRUCTIONS_REL)
@@ -682,8 +613,7 @@ export function readRestated(root: string): RestatedReport {
     return { kind: 'unreadable', reason: 'no-surfaces' }
   }
 
-  // Rules join the subjects, so an instruction moved out of the always-loaded
-  // file into two rules still has a subject carrying it.
+  // Rules join the subjects, so an instruction moved into two rules still has a subject.
   const subjects = [...instructions, ...rules].map(index)
   const candidates = [...seed, ...bodies, ...rules].map(index)
   const frequency = documentFrequency([subjects, candidates])
@@ -695,8 +625,7 @@ export function readRestated(root: string): RestatedReport {
       ),
     )
 
-  // A candidate's rare set is invariant across the subject loop, so build it
-  // once rather than inside hundreds of thousands of pairings.
+  // A candidate's rare set is invariant across the subject loop, so build it once.
   const rareCandidates = candidates.map((candidate) => ({
     ...candidate,
     rare: distinctive(candidate.analysis),
@@ -707,8 +636,7 @@ export function readRestated(root: string): RestatedReport {
   let repetitions = 0
   let mirrors = 0
 
-  // A rule pair would surface once per side, so the first find is recorded and
-  // the mirror skipped. `countThreeSurfaceClusters` reads this set for that.
+  // A rule pair would surface once per side, so the mirror is skipped, and `countThreeSurfaceClusters` reads this set.
   const reportedPairs = new Set<string>()
   const pairKey = (a: Statement, b: Statement): string => {
     const left = `${a.file}:${a.line}`
@@ -721,8 +649,7 @@ export function readRestated(root: string): RestatedReport {
     const surfaces: Surface[] = []
 
     for (const candidate of rareCandidates) {
-      // A second surface is a second file. Two bullets in one rule are adjacent
-      // instructions on one topic, not one rule shipped twice.
+      // A second surface is a second file, since two bullets in one rule are adjacent instructions.
       if (candidate.statement.file === subject.statement.file) continue
 
       const key = pairKey(subject.statement, candidate.statement)

@@ -275,9 +275,8 @@ function isTreeEntry(value: unknown): value is TreeEntry {
 
 /**
  * The git data API behind `canon pr frames`. A 422 on a ref write is GitHub
- * refusing a move that is not a fast-forward, or a create or update on a ref
- * that already exists or no longer does, which is another writer's doing and
- * worth a re-read rather than a failure.
+ * refusing a non-fast-forward move or a create or update on a ref that already
+ * exists or no longer does, which is another writer's doing and worth a re-read.
  */
 function ghFramesApi(call: ApiCaller, branch: string): FramesApi {
   const ref = `git/refs/heads/${branch}`

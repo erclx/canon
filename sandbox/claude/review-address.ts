@@ -55,8 +55,7 @@ function openPullRequest(
 ): void {
   ctx.git('push', '--force', 'origin', 'HEAD', '-q')
 
-  // The view stands in for a create that failed because the pull request
-  // already exists, so a missing one stops the arm as the bash form did.
+  // The view stands in for a create that failed because the pull request already exists.
   let prUrl = ctx
     .read(
       'gh',
@@ -305,8 +304,7 @@ export default scenario({
 
       const objectHead = ctx.read('git', ['rev-parse', 'HEAD']).trim()
 
-      // A second commit pushed after the pull request opened, so every head-sensitive
-      // read has to survive the object naming the older commit for a minute.
+      // A second commit pushed after the pull request opened, so head-sensitive reads must survive it.
       ctx.fixtures('claude', 'review-address', 'stale-head', '01-list-handler')
 
       ctx.git('add', '.')

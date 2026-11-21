@@ -5,11 +5,8 @@ import { resolveExisting } from '@/roots/legacy'
 
 /**
  * Where the retained counts live, relative to the project root.
- *
- * Committed rather than per-machine, so a fresh checkout inherits whether a
- * number grew since anyone last looked. Under the project root rather than in
- * `src/`, which ships to every target, since a target would otherwise measure
- * its tree against this repository's counts.
+ * Committed so a fresh checkout inherits whether a number grew, and outside
+ * `src/`, which ships to targets that would measure against these counts.
  */
 export const BASELINE_REL = join('canon', 'config', 'baseline.json')
 
@@ -56,8 +53,7 @@ export type Tolerances = Readonly<
 
 /**
  * Whether a growth from `from` to `to` sits inside `fraction` of the recorded
- * value. Inclusive, and floored to a whole count, since a fraction of a
- * recorded integer is rarely one and float error must not decide a boundary.
+ * value, floored to a whole count so float error cannot decide a boundary.
  * A shrink is never tolerated, since a fall is the ratchet the baseline locks.
  */
 function withinTolerance(
@@ -92,13 +88,9 @@ export type Delta =
   | { readonly id: string; readonly kind: 'unmeasured' }
 
 /**
- * Builds the record a run leaves behind.
- *
- * Only a tracked corpus is retained, since a gitignored folder's counts would
- * set a floor no other clone reproduces. An upstream count is left out too,
- * since it moves when an advisory is published. An audit that did not report
- * is left out rather than written as zero, or the next run would read its real
- * numbers as a regression against a floor never taken.
+ * Builds the record a run leaves behind, keeping only tracked corpora, since
+ * a gitignored folder or an upstream count sets a floor no other clone holds.
+ * An audit that did not report is left out, never written as zero.
  */
 export function baselineFrom(
   results: readonly AuditResult[],
@@ -116,11 +108,8 @@ export function baselineFrom(
 
 /**
  * Compares this run against the recorded floor, one audit at a time.
- *
- * A first run reports `unrecorded` rather than a delta of zero. A zero delta
- * against an absent baseline says the same thing as a corpus that did not move,
- * and those are the two states this repository has already had to separate
- * twice elsewhere.
+ * A first run reports `unrecorded`, since a zero delta against an absent
+ * baseline reads the same as a corpus that did not move.
  */
 export function compareBaseline(
   baseline: Baseline | undefined,
@@ -192,10 +181,8 @@ function isBaseline(value: unknown): value is Baseline {
 
 /**
  * Reads the recorded floor, or `undefined` when none has been taken.
- *
- * An absent file and a broken one are different answers. Absent is a first run.
- * Broken is a record someone hand-edited into a shape nothing can read, and
- * reading that as absent would silently reset the floor the file exists to hold.
+ * Absent is a first run. A broken file throws, since reading it as absent
+ * would silently reset the floor the file exists to hold.
  */
 export async function readBaseline(
   root: string,

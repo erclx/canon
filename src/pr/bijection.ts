@@ -3,13 +3,9 @@ import { findMislinked, type Mislinked } from '@/pr/links'
 import { extractKeyChangePaths, KEY_CHANGES, type PathClaim } from '@/pr/paths'
 
 /**
- * Why the comparison produced no reading.
- *
- * The three are apart because each names a different repair. `no-section` is a
- * body missing the heading, `no-claims` is the extractor failing over a section
- * full of prose, and `no-changes` is a pull request with no files. Folding any
- * of them into a clean pass is the failure this check exists to prevent, since
- * a reader cannot tell a check that found nothing from one that read nothing.
+ * Why the comparison produced no reading, the three apart since each names a
+ * different repair: no heading, an extractor failing over prose, or no files.
+ * Folding any into a clean pass hides a check that read nothing.
  */
 export type BijectionRefusal = 'no-section' | 'no-claims' | 'no-changes'
 
@@ -26,16 +22,9 @@ export interface BijectionReport {
    */
   readonly unmet: readonly PathClaim[]
   /**
-   * Claims no changed file answers that the comparison could not judge either
-   * way, reported so a run says what it declined rather than counting them met.
-   *
-   * Two causes land here. A claim whose first segment names no entry in the
-   * tree is a path written partially, and one past its bullet's first comma is
-   * a path the reader cannot separate from a file cited for context. Both are
-   * evidence strong enough to credit a changed file and too weak to accuse one,
-   * so neither reaches `unmet`, and the cause is on the claim rather than in a
-   * bucket of its own: a reader acts on both the same way, by opening the
-   * bullet on `preview`.
+   * Claims no changed file answers, which the comparison could not judge: a path
+   * written partially, or one past its bullet's first comma. Both are too weak
+   * to accuse, so neither reaches `unmet`; a reader opens the bullet on `preview`.
    */
   readonly unresolved: readonly PathClaim[]
   /**
@@ -45,20 +34,15 @@ export interface BijectionReport {
    */
   readonly unnamed: readonly string[]
   /**
-   * Changed files no claim reaches that owe no bullet in the first place.
-   *
-   * Held apart rather than dropped, so a run still says what it set aside. A
-   * count mixing files that owe a bullet with files that never could is
-   * unreadable, and the reviewing skill reads `unnamed` as a question to the
-   * branch author.
+   * Changed files no claim reaches that owe no bullet in the first place. Held
+   * apart rather than dropped, so a run says what it set aside, and `unnamed`
+   * stays a question to the branch author.
    */
   readonly incidental: readonly string[]
   /**
-   * True when the rename or `.gitignore`-addition evidence could not be read.
-   *
-   * A claim `unmet` would otherwise carry is downgraded to `unresolved`
-   * instead, since the unread evidence might have credited it and this
-   * comparison has no way to tell a stale claim from one it could not check.
+   * True when the rename or `.gitignore`-addition evidence could not be read, so
+   * a claim `unmet` would carry is downgraded to `unresolved`, since the unread
+   * evidence might have credited it.
    */
   readonly evidenceUnread: boolean
   /**
@@ -85,26 +69,17 @@ export interface BijectionInput {
   /** A pattern newly added to `.gitignore`, crediting a claim naming it as the `.gitignore` change it is. */
   readonly ignoreAdditions?: readonly string[]
   /**
-   * True when the caller could not read the rename or ignore-addition
-   * evidence, rather than reading it and finding neither.
-   *
-   * The two states produce the same empty `renames`/`ignoreAdditions`, so
-   * this is the only way `compareKeyChanges` can tell a claim that is
-   * genuinely stale from one the evidence might have credited had the read
-   * succeeded.
+   * True when the caller could not read the rename or ignore-addition evidence,
+   * rather than reading it and finding neither. The two states produce the same
+   * empty `renames`/`ignoreAdditions`, so this is the only way to tell them apart.
    */
   readonly evidenceUnread?: boolean
 }
 
 /**
- * A changed file that owes no bullet, so its absence from the section is not a
- * gap a reader would want reported.
- *
- * Three classes, each conventional rather than named for this repository: a
- * test beside the subject it covers, anything under a fixture or snapshot
- * folder, and a lockfile a package manager writes. A generated asset and a
- * regenerated index are deliberately absent, since neither has a spelling
- * that holds outside one project, and guessing would hide a real omission.
+ * A changed file that owes no bullet. Three conventional classes: a test beside
+ * its subject, anything under a fixture or snapshot folder, and a lockfile. A
+ * generated asset is absent, since no spelling holds outside one project.
  */
 const INCIDENTAL: readonly RegExp[] = [
   /(?:^|\/)[^/]+\.(?:test|spec)\.[A-Za-z0-9]+$/,
@@ -122,11 +97,9 @@ function withoutTrailingSlash(path: string): string {
 }
 
 /**
- * Whether a claim names a pattern newly added to `.gitignore`.
- *
- * Compared with the trailing slash both sides may or may not carry stripped,
- * since a bullet spells a folder pattern the way `.gitignore` itself does
- * (`web/screenshots/`) and the diff line carries the identical text.
+ * Whether a claim names a pattern newly added to `.gitignore`, compared with the
+ * trailing slash stripped on both sides, since a bullet spells a folder pattern
+ * the way `.gitignore` does (`web/screenshots/`).
  */
 function coversIgnoreAddition(
   claim: PathClaim,
@@ -140,13 +113,8 @@ function coversIgnoreAddition(
 
 /**
  * Whether one changed path is the file, or a file under the folder, a claim
- * names.
- *
- * An unanchored claim matches on a segment-anchored suffix, which is what lets
- * `role-worker/SKILL.md` credit `claude/skills/role-worker/SKILL.md`. That
- * asymmetry is deliberate: a partial spelling can confirm a changed file was
- * named and never accuse one of being absent, because nothing here separates a
- * path written short from a path written wrong.
+ * names. An unanchored claim matches on a segment-anchored suffix, so a partial
+ * spelling confirms a file was named and never accuses one of being absent.
  */
 function covers(claim: PathClaim, path: string): boolean {
   if (claim.bare) return path === claim.path
@@ -161,14 +129,8 @@ function covers(claim: PathClaim, path: string): boolean {
 
 /**
  * Compares what a pull request body claims to have changed against what it
- * actually changed, in both directions, reported apart. A claim nobody made
- * good on is a defect in the squash record, and a changed file nobody
- * recorded is often correct.
- *
- * A claim reaches `unmet` only when it is both whole and leading, and a
- * changed file reaches `unnamed` only when a bullet was owed for it. What each
- * split sets aside is still reported, under `unresolved` and `incidental`.
- * Pure, so the caller reads the body, the changed set, and the tree roots.
+ * changed, both directions apart. A claim reaches `unmet` only when whole and
+ * leading, and a file reaches `unnamed` only when a bullet was owed. Pure.
  */
 export function compareKeyChanges(input: BijectionInput): Bijection {
   if (input.changed.length === 0)
@@ -227,15 +189,8 @@ export function compareKeyChanges(input: BijectionInput): Bijection {
 
 /**
  * The top-level folders a claim may be anchored on: the first segment of every
- * path the tree holds, plus the first segment of every changed path.
- *
- * The changed half is what admits a folder this branch created. Reading the
- * tree alone would mark every claim under a new top-level directory unanchored,
- * and an unanchored claim never accuses, so the first branch to open one would
- * silently lose the graded direction.
- *
- * A path with no folder above it contributes nothing, since a bare claim is
- * never anchored and no root would ever be read against it.
+ * path the tree holds, plus every changed path's. The changed half admits a
+ * folder this branch created, or its claims would never accuse.
  */
 export function treeRoots(
   tracked: readonly string[],

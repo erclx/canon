@@ -24,8 +24,7 @@ describe('BAN_SETS', () => {
   })
 
   it('should report nothing for a word or spelling the audit used to ban', () => {
-    // The words moved to `write-human` as guidance and spelling to no check, so a
-    // line carrying both comes back clean rather than half-reported.
+    // The words moved to `write-human` as guidance, so a line carrying both reports clean.
     const lines = bodyLines('We leverage it and just check the behaviour.')
 
     expect(scanBans(lines, BAN_SETS)).toEqual([])
@@ -38,8 +37,7 @@ describe('emptyBanSets', () => {
   })
 
   it('should name the characters when they arrived empty', () => {
-    // Absent is not empty. A scan with no terms finds nothing, and reporting
-    // that as a clean file claims the prose passed when nothing was looked for.
+    // Absent is not empty, since a scan with no terms would report a clean file looking for nothing.
     expect(emptyBanSets({ characters: [] })).toEqual(['characters'])
   })
 })

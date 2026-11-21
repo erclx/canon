@@ -1,12 +1,7 @@
 /**
  * Writes web/public/favicon.svg and the README's `mark-color` pair from
- * assets/brand/mark.svg and the mark's own colors in src/design/favicon.ts.
- *
- * The favicon has a CSS context, so it carries a `prefers-color-scheme` branch.
- * The README pair loads as images behind a `<picture>`, so each copy bakes its
- * fills, its c taking GitHub's text color. A source filling `currentColor`
- * resolves to black with no CSS context, so the favicon is written rather than
- * linked, and the source keeps `currentColor` for the inline uses.
+ * assets/brand/mark.svg and src/design/favicon.ts. A source filling `currentColor`
+ * resolves to black with no CSS context, so each output bakes its fills.
  */
 import { writeFileSync } from 'node:fs'
 

@@ -17,12 +17,9 @@ export interface SeedListingWithContent {
 }
 
 /**
- * Reads the same plan `canon claude init` applies. The bash re-globbed the seeds
- * directory with its own hard-coded subdirectory list, which had drifted: it
- * never listed `canon/context/`, so a seed init installs went unreported.
- *
- * The target is irrelevant to a listing, so it resolves against the source
- * root and only the source-side fields are read.
+ * Reads the same plan `canon claude init` applies, so the listing cannot drift
+ * from what init installs. The target is irrelevant to a listing, so it
+ * resolves against the source root.
  */
 export function listSeeds(root: string): SeedListing[] {
   return planSeeds(root, root).map(({ seed }) => ({

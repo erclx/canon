@@ -63,10 +63,9 @@ export interface Mask {
 }
 
 /**
- * Every difference two provisions of one commit are known to produce and that
- * says nothing about the change under test. A mask outside this list does not
- * exist, and each entry carries the measurement that put it here, so one that
- * stops matching can be deleted rather than left to hide something later.
+ * Every difference two provisions of one commit are known to produce that says
+ * nothing about the change under test. Each entry carries the measurement that
+ * put it here, so one that stops matching can be deleted.
  */
 export const MASKS: readonly Mask[] = [
   {
@@ -198,8 +197,7 @@ function readArms(
 /**
  * Lists every provision a target names, from the scenario source. An armed arm
  * that `canon sandbox coverage` reports and this list lacks is returned as an
- * error, so a scenario whose call this reader cannot parse cannot shrink the
- * check unannounced.
+ * error, so an unparseable call cannot shrink the check.
  */
 export function enumerateArms(
   root: string,
@@ -273,10 +271,9 @@ function isRepository(dir: string): boolean {
 }
 
 /**
- * Walks a provisioned tree into flat `key -> value` entries. A file is its mode
- * and sha256, a symlink its target. The outer repository and every nested one
- * contribute commit subjects, the staged index, and the branch, and never their
- * object files, which differ between two runs of one commit.
+ * Walks a provisioned tree into flat `key -> value` entries: a file is its mode
+ * and sha256, a symlink its target, and a repository its commit subjects, index,
+ * and branch, never its object files, which differ between runs.
  */
 export function buildManifest(dir: string): Manifest {
   const manifest = new Map<string, string>()
@@ -284,8 +281,7 @@ export function buildManifest(dir: string): Manifest {
   function walk(relative: string): void {
     const absolute = join(dir, relative)
 
-    // A bare repository holds objects whose bytes differ between two runs of one
-    // commit, so it contributes its commit subjects and head and its files stay out.
+    // A bare repository's objects differ between two runs of one commit, so only its subjects and head count.
     if (isBare(absolute)) {
       manifest.set(
         `git:${relative}:log`,
@@ -335,10 +331,9 @@ export function buildManifest(dir: string): Manifest {
 }
 
 /**
- * Compares two manifests and names every key that differs, with a key present
- * on one side only counting as a difference. Keys matching a mask for this arm
- * drop out of both sides first and come back as `masked`, so the caller can
- * report each mask that fired.
+ * Compares two manifests and names every key that differs, a key on one side only
+ * counting. Keys matching a mask for this arm drop out first and come back as
+ * `masked`, so the caller can report each mask that fired.
  */
 export function diffManifests(
   arm: string,
@@ -359,8 +354,7 @@ export function diffManifests(
       masked.push({ key, reason })
   }
 
-  // A rewriting mask counts as fired only where the text it rewrites differs
-  // between the sides, so it never takes credit for another mask's difference.
+  // A rewriting mask counts as fired only where the text it rewrites differs, so it never takes another mask's credit.
   const rewrite = (
     key: string,
     value: string | undefined,
@@ -390,8 +384,7 @@ export function diffManifests(
       .map((k) => k.slice(5)),
   )
 
-  // A staged blob's hash is the masked file's content again, so its index line
-  // leaves the comparison with the file itself.
+  // A staged blob's hash is the masked file's content again, so its index line leaves with the file.
   const comparable = (
     key: string,
     value: string | undefined,
@@ -483,8 +476,7 @@ function runProcess(
     })
     if (child.pid !== undefined) running.add(child.pid)
     const finish = (status: number): void => {
-      // A scenario can leave a background process in the group, such as the fake
-      // occupant `git-worktree` starts, and nothing else ends it when the tree goes.
+      // A scenario can leave a background process in the group, such as git-worktree's fake occupant.
       if (child.pid !== undefined) killGroup(child.pid)
       if (child.pid !== undefined) running.delete(child.pid)
       closeSync(fd)
@@ -528,9 +520,8 @@ function provisionEnv(
 
 /**
  * Provisions through the public `canon sandbox` entry on one side, treating the
- * harness as a black box so the check survives the harness being replaced. The
- * log carries the checkout root as a placeholder, since the two sides differ in
- * exactly that.
+ * harness as a black box so the check survives its replacement. The log carries
+ * the checkout root as a placeholder, since the two sides differ in exactly that.
  */
 async function provision(
   root: string,
@@ -624,8 +615,7 @@ async function runArm(
   const head = await provision(headRoot, arm, dir, logPath, stubbed)
   const headManifest = withExit(buildManifest(dir), head, stubManifest())
 
-  // Kept beside the logs, so a reader of an `--out` folder can see what a
-  // difference was rather than only that one exists.
+  // Kept beside the logs, so a reader of an `--out` folder sees what a difference was.
   for (const [side, manifest] of [
     ['base', baseManifest],
     ['head', headManifest],
@@ -693,10 +683,9 @@ function canonVersion(): string {
 }
 
 /**
- * Adds a detached worktree of `ref` at `path`, so it carries full history for
- * the scenarios that read it, and returns a remover that is safe to call twice.
- * `node_modules` is linked from the working checkout, since the copy runs the
- * same CLI and carries no install of its own.
+ * Adds a detached worktree of `ref` at `path` with full history, and returns a
+ * remover safe to call twice. `node_modules` is linked from the working checkout,
+ * since the copy carries no install of its own.
  */
 export function addDetachedWorktree(
   root: string,
@@ -804,8 +793,7 @@ export async function runEquivalence(
         stubRemote && arm.anchor,
       )
 
-    // Anchor arms force-push `main` on one shared remote, so they run one at a
-    // time. A stub remote is private to its arm, so those arms join the pool.
+    // Anchor arms force-push `main` on one shared remote, so they run one at a time.
     const shared = (a: Arm): boolean => a.anchor && !stubRemote
     const offline = await pool(
       runnable.filter((a) => !shared(a)),

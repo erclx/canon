@@ -19,15 +19,9 @@ const ANCHOR = /README\.md:\s*(.*)$/
 const QUOTED_PHRASE = /"([^"]+)"/g
 
 /**
- * Every `README.md:` anchor comment in one file, classified by shape.
- *
- * `quoted` carries verbatim phrases a caller checks against the current
- * `README.md`. A quote is checked even on a line carrying
- * `README_PARAPHRASE_MARKER`, since the marker says part of a string is
- * synthesized and asserts nothing about a quoted phrase. `paraphrase` is a
- * marked line with no quote, muted the way `isMarked` mutes exemptions. `bare`
- * is the retired `README.md:<n>` form, reported so it cannot come back.
- * Modeled on `clientCommandCitationsIn` in `src/gate/client-commands.ts`.
+ * Every `README.md:` anchor comment in one file, classified by shape: `quoted`
+ * carries verbatim phrases checked even on a marked line, `paraphrase` is a marked
+ * line with no quote, and `bare` is the retired `README.md:<n>` form, reported so it cannot return.
  */
 export function readmeCitationsIn(
   file: string,

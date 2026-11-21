@@ -52,14 +52,8 @@ function cellsOf(row: string): string[] {
 
 /**
  * Every breach of the four table limits, in line order, split by whether it
- * gates.
- *
- * A table is a run of pipe rows whose second row is a delimiter, the shape a
- * renderer draws. Pipe lines with no delimiter render as paragraph text, and a
- * fenced line is an example, so neither is measured. The limits are a
- * 120-character cell, 8 body rows, a list as the next block, and a code span
- * holding a run past 30 characters. The cell and the trailing list are density
- * findings, and the row count and the wide token report and never gate.
+ * gates. A table is a run of pipe rows whose second row is a delimiter, and the
+ * cell and trailing list are density findings while row count and wide token never gate.
  */
 function measureTables(lines: readonly BodyLine[]): {
   reported: TableFinding[]

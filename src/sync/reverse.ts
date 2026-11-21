@@ -12,14 +12,9 @@ import {
 const CLAUDE_DIR = '.claude'
 
 /**
- * Who put an unclaimed folder in the target. A dropped folder and one the
- * project wrote are the same bytes at the same path, so this is traced from the
- * toolkit's own history and never guessed from the filesystem.
- *
- * `unattributed` is a verdict in its own right rather than a soft `dropped`.
- * The toolkit shipped a path of that name and the content matches no version it
- * ever published, which is exactly what history proving nothing looks like. An
- * operator can act on a labelled unknown and cannot act on a guess.
+ * Who put an unclaimed folder in the target, traced from the toolkit's own history and never guessed
+ * from the filesystem. `unattributed` is a verdict in its own right: the toolkit shipped that name
+ * and the content matches no published version.
  */
 export type Attribution = 'dropped' | 'project' | 'unattributed'
 
@@ -48,13 +43,9 @@ const EMPTY_REVERSE: ReverseReport = {
 }
 
 /**
- * Asks backwards what the target holds that no live catalog claims, since a
- * forward scan over toolkit-owned keys never sees a folder the toolkit deleted.
- *
- * Scoped to roots the toolkit has dropped rather than the whole tree, which
- * would report every project folder as unclaimed. Reports beside
- * `superseded`, `unmigrated`, and `newSkills` rather than absorbing them, since
- * each answers a narrower version of the question and none is wrong.
+ * Asks backwards what the target holds that no live catalog claims, since a forward scan never sees a
+ * folder the toolkit deleted. Scoped to roots the toolkit has dropped, since the whole tree would
+ * report every project folder as unclaimed.
  */
 export function buildReverseReport(
   toolkitRoot: string,
@@ -85,15 +76,9 @@ export function emptyReverseReport(): ReverseReport {
 }
 
 /**
- * Top-level toolkit paths that history records a deletion under and that no
- * longer exist in the working tree. Both halves are load-bearing: a path with
- * deletions that still exists is a live root the forward direction already
- * covers, and a path that never lost a file was never dropped.
- *
- * Read as one log over the whole repository rather than per candidate, since
- * the candidate set is what the call produces. A root-level file is skipped
- * because this walk matches target folders, and a deleted `README.md` names no
- * folder to look for.
+ * Top-level toolkit paths that history records a deletion under and that no longer exist in the
+ * working tree. Read as one log over the whole repository, and a root-level file is skipped, since
+ * this walk matches target folders.
  */
 function readDroppedRoots(toolkitRoot: string): readonly string[] | undefined {
   const result = execaSync(
@@ -128,16 +113,9 @@ function readDroppedRoots(toolkitRoot: string): readonly string[] | undefined {
 }
 
 /**
- * Splits a found folder three ways against the toolkit's history of the root it
- * sits at. Content matching a published version proves the toolkit put the file
- * there. Names the toolkit shipped with content it never published proves only
- * that the two collided, which is the unattributed case. No name overlap at all
- * is a folder the project owns that happens to share a retired name.
- *
- * Only files whose relative path the toolkit once held are hashed, so a project
- * folder colliding on name costs the walk no reads. The cost is that a file the
- * toolkit shipped and the target renamed goes unmatched, the same limit
- * `countToolkitOwned` carries for the forward direction.
+ * Splits a found folder three ways against the toolkit's history of the root it sits at: content
+ * matching a published version proves the toolkit put it there, a shipped name with unpublished
+ * content is `unattributed`, and no name overlap is the project's own. A renamed file goes unmatched.
  */
 function attributeFolder(
   toolkitRoot: string,

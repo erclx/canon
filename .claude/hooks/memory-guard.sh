@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
 # canon-no-seed: this repository turned the harness's auto memory off through
-# autoMemoryEnabled, and this hook is the check behind that switch. A target's
-# own memory folder is inert, and turning off a harness feature in someone
-# else's project is that operator's preference rather than a fact canon owns.
-# See the command scanners context entry.
+# autoMemoryEnabled and this hook backs that switch. A target's memory folder is
+# inert and that operator's preference, not a fact canon owns. See the command scanners context entry.
 
 IFS= read -r -d '' -t 2 input
 [ -n "$input" ] || {
@@ -12,11 +10,9 @@ IFS= read -r -d '' -t 2 input
   exit 1
 }
 
-# Bash is the highest-frequency tool, so the one field a write names is lifted
-# out of the raw payload and tested with a shell pattern before jq starts. The
-# whole payload cannot be tested, since every real one carries transcript_path
-# under ~/.claude/projects/ and so matches the pair on its own. A tool that
-# carries neither key reads no field and leaves quietly.
+# Bash is the highest-frequency tool, so the field a write names is lifted out of
+# the raw payload and pattern-tested before jq starts. The whole payload cannot be
+# tested, since every real one carries transcript_path under ~/.claude/projects/.
 field_re='"(command|file_path)":"(([^"\\]|\\.)*)"'
 [[ $input =~ $field_re ]] || exit 0
 case "${BASH_REMATCH[2]}" in
@@ -35,14 +31,9 @@ target=$(printf '%s' "$input" | jq -r '
 kind=${target:0:1}
 target=${target:1}
 
-# A command that only mentions the folder is not a write to it. A small awk
-# pass drops heredoc bodies, comments, and quoted spans holding whitespace,
-# and the shape is matched on the rest, since a write target carries no
-# whitespace. A span or heredoc handed to an interpreter is kept when the
-# command word, after any assignment or wrapper such as sudo, env, timeout, or
-# xargs, is a shell, python, node, perl, ruby, or eval. This is a scanner, not
-# a parser, so a substitution in double quotes reads as quoted text. The cut
-# is copied from review-post-scan.sh, since this unseeded hook cannot source it.
+# A command that only mentions the folder is not a write to it. An awk pass drops
+# heredoc bodies, comments, and quoted spans, keeping those handed to an interpreter.
+# It is a scanner, not a parser, copied from review-post-scan.sh since this unseeded hook cannot source it.
 if [ "$kind" = B ]; then
   IFS= read -r -d '' cutter <<'AWK'
 { s = s (NR > 1 ? "\n" : "") $0 }
@@ -137,9 +128,8 @@ fi
 [ -n "$target" ] || exit 0
 
 # The shape is <root>/projects/<one segment>/memory, so a bare memory segment
-# elsewhere, such as src/memory or .canon/memory, stays writable. The root is
-# .claude under a home directory, spelled ~, $HOME, or absolute, or the
-# directory CLAUDE_CONFIG_DIR names.
+# elsewhere stays writable. The root is .claude under a home directory, spelled
+# ~, $HOME, or absolute, or the directory CLAUDE_CONFIG_DIR names.
 tail='/projects/[^/[:space:]]+/memory([^A-Za-z0-9._-]|$)'
 hit=0
 if [[ $target =~ \.claude$tail ]]; then

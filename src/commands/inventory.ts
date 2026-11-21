@@ -237,8 +237,7 @@ async function runInventory(
     logInfo(`${target.location}  ${plural(target.elements, 'element')}`)
   }
 
-  // A walk matching nothing refuses rather than printing an empty listing, since
-  // no rows would read the same as a site giving one consistent answer.
+  // A walk matching nothing refuses, since no rows would read as a consistent site.
   if (groups.length === 0) {
     return refuse(
       emitJson,
@@ -272,10 +271,9 @@ async function runInventory(
 }
 
 /**
- * Reads board frame files rather than a served project's routes, which is
- * what lets a plan count a picked round's values before anything is built.
- * It reads no config, since a frame's every element is the subject and the
- * file list is the scope.
+ * Reads board frame files rather than a served project's routes, so a plan can
+ * count a picked round's values before anything is built. It reads no config,
+ * since a frame's every element is the subject and the file list is the scope.
  */
 async function runFrames(
   subject: Subject,

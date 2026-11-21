@@ -8,9 +8,8 @@ import type { DriverPlan, DriverStep } from '@/driver/steps'
 
 /**
  * Covers the two decisions the orchestrator makes before a browser is involved:
- * what the run document said, and which probes each step is owed. Both are pure
- * over their inputs, so they pin here rather than in the e2e suite, where a
- * launch failure would hide a parsing defect.
+ * what the run document said and which probes each step is owed. Both are pure,
+ * so a launch failure in the e2e suite cannot hide a parsing defect.
  */
 
 const VIEWPORT = { width: 1440, heights: [900] }
@@ -88,8 +87,7 @@ describe('readDriverPlan', () => {
   })
 
   it('should refuse an empty probe list a single step names', () => {
-    // A step-level empty list refuses like the run-level one, since running the
-    // step would measure nothing and read the same as a pass that looked.
+    // A step-level empty list refuses like the run-level one, since it would measure nothing.
     const read = readDriverPlan(
       planSource({ steps: [{ ...ONE_STEP[0], probes: [] }] }),
     )

@@ -143,11 +143,8 @@ function fixRatio(merges: readonly Merge[]): number | null {
 
 /**
  * Buckets delivery merges by the ISO week of their committer date and computes
- * each week's figures, the window's coverage, and the per-path change counts
- * the hotspots rank.
- *
- * Merges dated before the window feed only the rolling share of its first
- * weeks, so a caller reads `ROLLING_WEEKS - 1` weeks ahead of the window.
+ * each week's figures, coverage, and per-path change counts. A caller reads
+ * `ROLLING_WEEKS - 1` weeks ahead of the window.
  */
 export function summarize(input: SummaryInput): Summary {
   const { slots, excluded } = input
