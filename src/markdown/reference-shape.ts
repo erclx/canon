@@ -41,13 +41,8 @@ export function isReferencePage(source: string): boolean {
 
 /**
  * Every breach of the reference shape on a page marked `kind: reference`, in
- * line order, and nothing on an unmarked page.
- *
- * The shape is an opening holding the command, then `## Output`,
- * `## Refusals`, and `## See also`, each at most once and in that order, though
- * a page may leave one out, with no H3 and no table of flags, since
- * `--help` already prints them. The check reads headings and table headers
- * outside fences and leaves the opening to a reader.
+ * line order: `## Output`, `## Refusals`, and `## See also` each at most once and
+ * in order, with no H3 and no table of flags, since `--help` prints them.
  */
 export function referenceShapeFindings(
   source: string,

@@ -18,13 +18,9 @@ const CAPITALIZED = /^[A-Z][a-z]/
 const PHASE_LABEL = /^v\d+\.\d+:\s+/
 
 /**
- * The words of `text` that break sentence case.
- *
- * A code span stands for one lowercase word, so a heading opening on one
- * counts that span as its first word. The first word with a letter in it is
- * exempt, which keeps a leading numeral from promoting the next word. A
- * leading phase label is not a word of the heading, so the first word is the
- * one after it.
+ * The words of `text` that break sentence case. A code span counts as one
+ * lowercase word, the first word with a letter is exempt so a numeral does not
+ * promote the next, and a leading phase label is not a word of the heading.
  */
 function capitalizedAfterFirst(text: string): string[] {
   const masked = maskDisplayed(
@@ -51,10 +47,8 @@ function capitalizedAfterFirst(text: string): string[] {
 
 /**
  * Finds a heading or a frontmatter `title` carrying a capitalized word after
- * its first, outside code spans and all-caps tokens.
- *
- * A proper noun is the one case it cannot tell from title case, so the finding
- * is a warning and no names list backs it.
+ * its first, outside code spans and all-caps tokens. A proper noun reads as
+ * title case, so the finding is a warning and no names list backs it.
  */
 export function findHeadingCase(source: string): HeadingCaseFinding[] {
   const found: HeadingCaseFinding[] = []

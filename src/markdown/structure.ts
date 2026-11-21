@@ -4,14 +4,8 @@ export const HEADING = /^#{1,6}\s/
 
 /**
  * A section marker holding its line alone, the signpost a document uses where
- * its template asks for bold rather than a heading, as plans do.
- *
- * The marker starts at column zero and fills the line, since a bold opener is
- * emphasis and an indented one labels a list item. A false break is the
- * dearer error, since it shortens every run around it. A colon ends most
- * markers. Without one, a label that is a single code span always breaks, and
- * any other breaks at or under `MARKER_WIDTH`, past which bold lines turn into
- * sentences nobody can classify on sight. The colon form has no width cap.
+ * its template asks for bold rather than a heading. A colon form has no width
+ * cap, and a colonless label breaks as a code span or within `MARKER_WIDTH`.
  */
 const BOLD_LINE = /^\*\*([^*]+)\*\*\s*$/
 const SPAN_LABEL = /^`[^`]+`$/
@@ -24,24 +18,15 @@ export const BLOCKQUOTE = /^\s*>/
 
 /**
  * A sentence ends on terminal punctuation followed by the start of another
- * sentence or by the end of the paragraph.
- *
- * Requiring a capital after the space keeps a version pin or a decimal from
- * splitting a sentence. An abbreviation before a capital still over-reports by
- * one, which is why this reports rather than gates. A backtick also opens a
- * sentence, since a command name is lowercase, at the price of reading a span
- * opening a mid-paragraph fragment as a start.
+ * sentence or the paragraph end. A capital after the space keeps a version pin
+ * or decimal whole, and an abbreviation before a capital over-reports by one.
  */
 const SENTENCE_END = /[.!?]["'’”)\]]*(?=\s+(?:["'“([]*[A-Z]|`)|\s*$)/g
 
 /**
- * Checkpoints the structural measures run against.
- *
- * These are the definition rather than a fallback, since parsing them out of
- * the markdown standard would put a parser contract on prose written for
- * people. The standard still states every number, so moving one edits both.
- * `cadence`, `spread`, and `opener` come from the `## Rhythm` section of the
- * `write-human` skill.
+ * Checkpoints the structural measures run against. These are the definition
+ * rather than parsed from the markdown standard, which would put a parser
+ * contract on prose, so the standard states every number and moving one edits both.
  */
 export const CHECKPOINTS = {
   run: 40,
@@ -57,13 +42,9 @@ export const CHECKPOINTS = {
 } as const
 
 /**
- * The reading a cadence rate is compared against, rather than a checkpoint.
- *
- * A count with nothing beside it reads as a finding, so a healthy range
- * travels with the command. It is an observation rather than a rule: nothing
- * compares a run against it, no exit code reads it, and a corpus of terse
- * reference prose is expected to sit above the high end. A number here goes
- * stale against the corpus it describes, so re-measure before moving one.
+ * The reading a cadence rate is compared against, rather than a checkpoint. It
+ * is an observation, so nothing compares a run against it and no exit code reads
+ * it. A number here goes stale against its corpus, so re-measure before moving one.
  */
 export const BASELINE = {
   /** Share of every measured paragraph sitting at or under the spread checkpoint. */
@@ -116,11 +97,9 @@ export interface ParagraphFinding {
 }
 
 /**
- * One measured paragraph, carrying both cadence numbers rather than one.
- *
- * A paragraph reported for a narrow spread is usually worth reading for its
- * openers too, and splitting the two into separate finding types would name the
- * same line twice with half the picture on each.
+ * One measured paragraph, carrying both cadence numbers, since a paragraph
+ * reported for a narrow spread is usually worth reading for its openers too and
+ * two finding types would name the same line twice.
  */
 export interface CadenceFinding {
   readonly line: number
@@ -135,13 +114,8 @@ export interface CadenceFinding {
 
 /**
  * A file's cadence distribution, reported rather than listed finding by finding.
- *
- * Both numbers are advisory in a way even the weight checkpoints are not. A
- * healthy range differs by surface, so terse reference prose and a page written
- * for a reader sit at different spreads and one range applied across the corpus
- * would report the surfaces that are correct. The counts are what a reader
- * compares against the stated range, and the two worst paragraphs are where
- * they open the file.
+ * Both numbers are advisory, since a healthy range differs by surface, so the
+ * counts are compared against the stated range and the two worst paragraphs are named.
  */
 export interface CadenceReport {
   /** Paragraphs carrying at least the floor sentence count. */
@@ -168,14 +142,9 @@ export interface StructureReport {
 }
 
 /**
- * Height a source line occupies once wrapped.
- *
- * A blank line renders as the gap it is rather than as nothing, which keeps it
- * the distance the source measure already counted it as.
- *
- * The width is measured against what renders, since a rendered line shows a
- * link's anchor text rather than its destination and a source measure
- * over-counts exactly where this rule cares how far a reader travels.
+ * Height a source line occupies once wrapped. A blank line renders as the gap it
+ * is, and the width is measured against what renders, since a link shows its
+ * anchor text and a source measure over-counts where a reader's travel matters.
  */
 export function renderedHeight(text: string, width = RENDER_WIDTH): number {
   return Math.max(1, Math.ceil(visibleText(text).length / width))
@@ -183,12 +152,8 @@ export function renderedHeight(text: string, width = RENDER_WIDTH): number {
 
 /**
  * Height a whole source occupies once wrapped, frontmatter and fenced blocks
- * included.
- *
- * Nothing is excluded because a session pays for every line it loads, which is
- * what separates this from the depth measure. The context audit's length
- * reading and the document ceiling both count through here, so the two report
- * one unit.
+ * included, since a session pays for every line it loads. The context audit's
+ * length reading and the document ceiling both count through here.
  */
 export function documentHeight(source: string, width = RENDER_WIDTH): number {
   return source
@@ -198,13 +163,9 @@ export function documentHeight(source: string, width = RENDER_WIDTH): number {
 }
 
 /**
- * Reports whether a run is the peer list the standard exempts.
- *
- * Every non-blank line has to be a list item at one indent. Prose mixed into
- * the run or a nested level inside it ends the exemption, because either one
- * means the block is no longer a flat set a reader can skim. Bullet count says
- * nothing on its own, since a catalog of one-liners and a wall of paragraphs
- * reach the same count and read nothing alike, so the average bullet decides.
+ * Reports whether a run is the peer list the standard exempts. Every non-blank
+ * line has to be a list item at one indent, since prose or a nested level means
+ * the block is no longer a flat set, and the average bullet decides, not the count.
  */
 function isScannablePeerList(
   run: readonly BodyLine[],
@@ -231,16 +192,9 @@ function isScannablePeerList(
 }
 
 /**
- * Reports whether a run is a table, the second shape the checkpoint cannot fix.
- *
- * The peer list above is exempt because it is already navigable. A table is
- * exempt for the other reason: the remedy does not exist. A heading dropped
- * inside one splits the table into two tables rather than breaking the run.
- *
- * Every non-blank line has to be a row, and a delimiter is required rather than
- * assumed. A run holding a table between paragraphs is genuinely mixed and a
- * heading breaks it at a seam either side, and a stack of lines opening with a
- * pipe and no delimiter renders as paragraph text.
+ * Reports whether a run is a table, the second shape the checkpoint cannot fix,
+ * since a heading dropped inside splits it in two. Every non-blank line has to
+ * be a row and a delimiter is required, as pipe lines without one render as paragraph text.
  */
 function isTableRun(run: readonly BodyLine[]): boolean {
   let separators = 0
@@ -255,14 +209,9 @@ function isTableRun(run: readonly BodyLine[]): boolean {
 }
 
 /**
- * Reports whether a line is a section marker rather than emphasis.
- *
- * `BOLD_LINE` fixes the shape, and a colon-less label then answers to
- * `SPAN_LABEL` or to `MARKER_WIDTH`, per the record above. Both read visible
- * text, which reduces a link to its anchor text and leaves a backticked path
- * counted whole, the same reading `isScannablePeerList` takes. The reduction is
- * what lets a linked path reach the span test at all, since the markup around
- * it would fail the pattern the destination is still attached.
+ * Reports whether a line is a section marker rather than emphasis. `BOLD_LINE`
+ * fixes the shape and a colonless label answers to `SPAN_LABEL` or `MARKER_WIDTH`.
+ * Both read visible text, so a linked path reaches the span test at all.
  */
 export function isSectionMarker(text: string): boolean {
   const marker = text.match(BOLD_LINE)
@@ -277,13 +226,9 @@ export function isSectionMarker(text: string): boolean {
 }
 
 /**
- * Measures the longest run of lines no signpost breaks, in rendered lines.
- *
- * A heading or a section marker breaks a run. Fenced lines leave the count
- * without ending the run, so prose either side of an example measures as one
- * stretch, and blank lines count, since they are distance a reader travels.
- * Lines are wrapped at a stated width, since a file written one line per
- * bullet renders far taller than its source line count.
+ * Measures the longest run of lines no signpost breaks, in rendered lines. A
+ * heading or section marker breaks a run, fenced lines leave the count without
+ * ending it, and blank lines count, since they are distance a reader travels.
  */
 export function longestRun(
   lines: readonly BodyLine[],
@@ -294,8 +239,7 @@ export function longestRun(
   let run: BodyLine[] = []
 
   const close = (): void => {
-    // Report the run's first non-blank line, and never count a run of blank
-    // lines alone, since that is the gap between two headings.
+    // Report the run's first non-blank line, and never a run of blanks, which is the gap between headings.
     const first = run.find((line) => line.text.trim() !== '')
 
     if (
@@ -333,16 +277,9 @@ export function longestRun(
 }
 
 /**
- * Finds the bullets carrying more than a decision, nested ones included.
- *
- * A nested item is measured on its own and never folded into its parent, since
- * the checkpoint asks what one bullet carries and a child carries its own. Lines
- * continuing a bullet do fold in, so a heavy bullet cannot fall under the
- * checkpoint by being wrapped across two source lines. A fenced line closes the
- * open bullet, which keeps a bullet from absorbing the example below it.
- *
- * A bullet is measured without its list marker, the way the `bullet-length`
- * gate measures it, so the count and the gate agree at the checkpoint.
+ * Finds the bullets carrying more than a decision, nested ones included. A
+ * nested item is measured on its own, continuation lines fold in, and a fenced
+ * line closes the bullet. It is measured without its marker, as the gate does.
  */
 export function heavyBullets(
   lines: readonly BodyLine[],
@@ -384,8 +321,7 @@ function foldBullets(
     const text = line.text.trim()
     const lead = line.text.length - line.text.trimStart().length
 
-    // Structure is read off the raw line, since an autolink-only line masks to
-    // blank and would otherwise close the bullet it continues.
+    // Structure is read off the raw line, since an autolink-only line masks to blank and would close the bullet.
     if (item) {
       close()
       open = {
@@ -402,15 +338,13 @@ function foldBullets(
       continue
     }
 
-    // An indented line that does not pass the marker's indent belongs to a
-    // parent or to nothing, so it ends a nested item rather than extending it.
+    // An indented line not past the marker's indent belongs to a parent or nothing, so it ends a nested item.
     if (open && lead > 0 && lead <= open.indent) {
       close()
       continue
     }
 
-    // The joining space a wrapped line would have carried, so folding two
-    // source lines measures what one unwrapped line would have.
+    // The joining space a wrapped line would have carried, so folding two lines measures one unwrapped line.
     if (open)
       open = {
         ...open,
@@ -425,13 +359,9 @@ function foldBullets(
 }
 
 /**
- * Splits a paragraph into the sentences terminal punctuation closes.
- *
- * A trailing span no punctuation closes is dropped rather than returned, which
- * keeps this and the count below one definition. The pattern already matches a
- * paragraph's final period through its end-of-text alternative, so the only
- * span this drops is a paragraph genuinely ending without terminal punctuation,
- * which is a fragment rather than a sentence to either measure.
+ * Splits a paragraph into the sentences terminal punctuation closes. A trailing
+ * span no punctuation closes is dropped, which keeps this and the count below one
+ * definition, since such a span is a fragment rather than a sentence.
  */
 function splitSentences(text: string): string[] {
   const sentences: string[] = []
@@ -451,12 +381,9 @@ function countSentences(text: string): number {
 }
 
 /**
- * Splits the body into its prose paragraphs, each a run of consecutive lines.
- *
- * A heading, a list item, a table row, a blockquote, a blank line, and a fence
- * each end one, so a bullet is measured by `heavyBullets` alone and never
- * twice. Both paragraph measures walk this rather than one each, since two
- * walks deciding what a paragraph is would drift apart.
+ * Splits the body into its prose paragraphs, each a run of consecutive lines. A
+ * heading, list item, table row, blockquote, blank line, and fence end one, and
+ * both paragraph measures walk this, since two walks would drift apart.
  */
 function paragraphBlocks(lines: readonly BodyLine[]): BodyLine[][] {
   const blocks: BodyLine[][] = []
@@ -496,15 +423,9 @@ function paragraphText(block: readonly BodyLine[]): string {
 }
 
 /**
- * Finds the prose paragraphs past either half of the standard's checkpoint.
- *
- * Both halves are stated in the standard and both are read from it. The weight
- * half was added there rather than borrowed from the bullet checkpoint, which
- * governs a different construct: one number feeding both would move the
- * paragraph rule whenever the bullet rule was changed, and an author reading
- * the sentence cap would find no weight rule to read at all.
- *
- * They are separate checkpoints, so either moves without dragging the other.
+ * Finds the prose paragraphs past either half of the standard's checkpoint. The
+ * weight half is its own number rather than borrowed from the bullet checkpoint,
+ * so either moves without dragging the other.
  */
 export function heavyParagraphs(
   lines: readonly BodyLine[],
@@ -532,12 +453,9 @@ export function heavyParagraphs(
 const WORD_EDGE = /^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu
 
 /**
- * The word a sentence opens on, lowercased and stripped of punctuation.
- *
- * A sentence opening on a code span yields the command inside it rather than a
- * backtick, which is the word a reader hears. Casing is dropped because an
- * opener repeating is a repetition whether or not one of the two sits mid-list
- * and lost its capital.
+ * The word a sentence opens on, lowercased and stripped of punctuation. A code
+ * span yields the command inside it, which is the word a reader hears, and casing
+ * is dropped since a repeated opener is a repetition whatever its capital.
  */
 function openingWord(sentence: string): string {
   const [first = ''] = sentence.split(/\s+/)
@@ -545,12 +463,9 @@ function openingWord(sentence: string): string {
 }
 
 /**
- * Measures one paragraph's spread and its most repeated opener.
- *
- * Words are counted off the text a reader is shown, so a link contributes its
- * anchor text and a destination contributes nothing. The sentence boundaries do
- * not move with that masking, since the pattern requires whitespace after the
- * terminal punctuation and no destination or autolink carries any.
+ * Measures one paragraph's spread and its most repeated opener. Words are
+ * counted off the text a reader is shown, and sentence boundaries do not move
+ * with that masking, since the pattern requires whitespace after the punctuation.
  */
 function measureParagraph(block: readonly BodyLine[]): CadenceFinding {
   const sentences = splitSentences(visibleText(paragraphText(block)))
@@ -573,8 +488,7 @@ function measureParagraph(block: readonly BodyLine[]): CadenceFinding {
     }
   }
 
-  // A paragraph closing no sentence at all has no spread rather than a
-  // negative one, and the floor drops it before either number is read.
+  // A paragraph closing no sentence has no spread rather than a negative one, and the floor drops it.
   const spread =
     lengths.length === 0 ? 0 : Math.max(...lengths) - Math.min(...lengths)
 
@@ -589,14 +503,8 @@ function measureParagraph(block: readonly BodyLine[]): CadenceFinding {
 
 /**
  * Reports how a file's prose is distributed across sentence length and opening
- * word, the layer a ban list cannot reach, since each symptom is an absence.
- *
- * It stops at what is countable. Sentence shape and whether a sentence carries
- * a finite verb are not implemented, since part-of-speech taggers misread
- * fronted participles, imperatives, and noun-ambiguous predicates, and telling
- * them apart needs a syntax parser. Headings, list items, and table cells end
- * a paragraph in `paragraphBlocks`, and a paragraph under the floor is
- * skipped, since the opener rule needs a third sentence to see a pattern.
+ * word, the layer a ban list cannot reach. It stops at what is countable, since
+ * taggers misread fronted participles, and a paragraph under the floor is skipped.
  */
 export function measureCadence(
   lines: readonly BodyLine[],
@@ -623,11 +531,9 @@ export function measureCadence(
 }
 
 /**
- * The file's worst paragraph on one measure, earliest line breaking a tie.
- *
- * Only paragraphs already past their checkpoint are passed in, so a file
- * reading healthy names nothing rather than naming its least healthy paragraph,
- * which a reader would take for a finding.
+ * The file's worst paragraph on one measure, earliest line breaking a tie. Only
+ * paragraphs already past their checkpoint are passed in, so a healthy file names
+ * nothing rather than its least healthy paragraph.
  */
 function worst(
   findings: readonly CadenceFinding[],

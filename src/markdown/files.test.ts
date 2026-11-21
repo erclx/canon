@@ -11,8 +11,7 @@ describe('resolveMarkdown', () => {
 
   beforeEach(() => {
     root = mkdtempSync(join(tmpdir(), 'canon-markdown-'))
-    // A hook's `GIT_DIR` takes precedence over `cwd`, so an inherited one would
-    // initialize the repository away from the fixture and every case reads empty.
+    // A hook's `GIT_DIR` takes precedence over `cwd`, so an inherited one reads every case empty.
     execSync('git init --quiet', { cwd: root, env: gitEnv() })
     mkdirSync(join(root, 'docs'), { recursive: true })
     writeFileSync(join(root, 'README.md'), '# R\n')
@@ -35,8 +34,7 @@ describe('resolveMarkdown', () => {
   })
 
   it('should take every markdown file when the argument is the root itself', async () => {
-    // An empty relative path matches no prefix, so the root would otherwise
-    // report as an argument that resolved to nothing.
+    // An empty relative path matches no prefix, so the root would report as an unresolved argument.
     expect(await files(['.'])).toEqual([
       'README.md',
       'docs/one.md',

@@ -78,13 +78,9 @@ function maskTags(text: string): string {
 }
 
 /**
- * Whether the text before a line's first colon is a label rather than a
- * clause: the lead of a list item, or a prefix that is only emphasis and a
- * masked code span. A line, after any quote marker, also reads as a label when
- * its lead is at most three plain words, such as `Issue` or `Test strategy`.
- * A list item's lead also reads as a label at any length when only code spans,
- * links, commas, and `and`, `or`, or `to` stand in it, which is a file entry
- * naming several paths.
+ * Whether the text before a line's first colon is a label rather than a clause:
+ * a list item's lead, emphasis and a masked code span, or at most three plain
+ * words. A list item's lead of only code spans, links, commas, and `and` or `or` is one too.
  */
 function isLabel(prefix: string, listItem: boolean): boolean {
   if (BOLD_LABEL.test(prefix.trim())) return true
@@ -157,13 +153,9 @@ function uniform(entry: Entry): boolean {
 }
 
 /**
- * Finds a colon joining two clauses in the middle of a prose sentence.
- *
- * A heading, a table row, a fence, a code span, a link, and a line-final colon
- * are left alone, and so is the first colon of a list item or of a line opening
- * on a bold or code label, and of every item in a list where each one carries a
- * colon. The measure is advisory, because a colon is sometimes right and the
- * corpus count shows a gate would be a sweep nobody asked for.
+ * Finds a colon joining two clauses in the middle of a prose sentence. Headings,
+ * table rows, fences, code spans, links, line-final colons, and label leads are
+ * left alone. The measure is advisory, since a colon is sometimes right.
  */
 export function findColons(lines: readonly BodyLine[]): ColonFinding[] {
   const entries: Entry[] = lines.map((line) => {

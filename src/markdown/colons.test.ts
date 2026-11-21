@@ -49,8 +49,7 @@ describe('findColons', () => {
   })
 
   it('should name the word before the colon after an emoji', () => {
-    // The column is a UTF-16 offset, so the lead is carried rather than left
-    // for a reader counting code points to slice out of the text.
+    // The column is a UTF-16 offset, so the lead is carried rather than left to be counted.
     const found = colonsIn('Ship it 🚀 now: it works.')
 
     expect(found.map((hit) => hit.lead)).toEqual(['now'])

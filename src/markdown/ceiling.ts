@@ -3,21 +3,16 @@ import { bodyLines } from '@/markdown/scan'
 import { CHECKPOINTS, documentHeight } from '@/markdown/structure'
 
 /**
- * The marker exempting one document from the ceiling, written as a whole line
- * outside a fence and naming a reason.
- *
- * The whole line rather than anywhere on it, so a standard quoting the marker
- * inside a code span to document it does not exempt itself. A marker with no
- * reason does not count, for the reason `isMarked` in `src/sweep/exempt-marker.ts`
- * gives: a bare token reads as a line that meant to say something and did not.
+ * The marker exempting one document from the ceiling, a whole line outside a
+ * fence naming a reason, so a standard quoting it in a code span does not exempt
+ * itself. A bare marker does not count, as `isMarked` in `src/sweep/exempt-marker.ts` states.
  */
 const EXEMPT_MARKER = /^<!--\s*canon-length-exempt:[ \t]*(\S.*?)\s*-->$/
 
 /**
  * A changelog is exempt by name because the release tool rewrites it and would
- * not keep a marker in place. A committed list of exempt paths was the
- * alternative, and it turns every rename into a second edit with nothing to
- * check the list against the tree.
+ * not keep a marker in place. A committed list of paths would make every rename
+ * a second edit with nothing checking it against the tree.
  */
 const CHANGELOG = 'CHANGELOG.md'
 const CHANGELOG_REASON = 'CHANGELOG.md is written by the release tool'

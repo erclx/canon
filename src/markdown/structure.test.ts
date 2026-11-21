@@ -97,8 +97,7 @@ function sentences(count: number, width = 20): string {
 
 describe('CHECKPOINTS', () => {
   it('should ship the numbers the structural measures run against', () => {
-    // Asserted rather than read off the standard, which states each number for a
-    // reader, so a number moving in one place is caught by whoever edits it.
+    // Asserted rather than read off the standard, so a number moving in one place is caught.
     expect(CHECKPOINTS).toEqual({
       run: 40,
       peerBullet: 130,
@@ -124,8 +123,7 @@ describe('documentHeight', () => {
 
 describe('BASELINE', () => {
   it('should ship the reading a cadence rate is compared against', () => {
-    // No measure reads these, so this is the only check on one moving, and the
-    // report prints all five into the legend a reader acts on.
+    // No measure reads these, so this is the only check on one moving.
     expect(BASELINE).toEqual({
       flatShare: 8,
       floor: 10,
@@ -171,8 +169,7 @@ describe('longestRun', () => {
   it('should still report a long section two markers sit either side of', () => {
     const source = `${FRONTMATTER}# CI\n\n**Constraints:**\n\n${prose(60)}\n\n**Risks:**\n\n${prose(2)}\n`
 
-    // A deep run between two markers must still report, or a clean corpus says
-    // nothing about whether the checkpoint discriminates.
+    // A deep run between two markers must still report, or a clean corpus proves nothing.
     expect(measure(source).longestRun).toBeGreaterThan(RUN_CHECKPOINT)
   })
 
@@ -180,8 +177,7 @@ describe('longestRun', () => {
     const half = prose(30)
     const source = `${FRONTMATTER}# CI\n\n${half}\n\n  **Risks:**\n\n${half}\n`
 
-    // An indented marker is a label inside a list item rather than a seam, and a
-    // false break would shorten every run around it.
+    // An indented marker labels a list item rather than a seam, and a false break shortens every run.
     expect(measure(source).longestRun).toBeGreaterThan(RUN_CHECKPOINT)
   })
 
@@ -189,8 +185,7 @@ describe('longestRun', () => {
     const half = prose(30)
     const source = `${FRONTMATTER}# CI\n\n${half}\n\n**Testing**\n\n${half}\n`
 
-    // The other direction. `review-pr` writes this marker into every body it posts,
-    // so the break is a shipped seam.
+    // The other direction, since `review-pr` writes this marker into every body it posts.
     expect(measure(source).longestRun).toBeLessThan(RUN_CHECKPOINT)
   })
 
@@ -199,8 +194,7 @@ describe('longestRun', () => {
     const sentence = '**The pass found four things, and it took one read.**'
     const source = `${FRONTMATTER}# CI\n\n${half}\n\n${sentence}\n\n${half}\n`
 
-    // A colon-less bold line may be a sentence set in bold, and a false break
-    // shortens every run around it until the measure stops reporting.
+    // A colonless bold line may be a sentence set in bold, and a false break shortens every run.
     expect(measure(source).longestRun).toBeGreaterThan(RUN_CHECKPOINT)
   })
 
@@ -209,8 +203,7 @@ describe('longestRun', () => {
     const band = '**Two seeds and a behavior line**'
     const source = `${FRONTMATTER}# CI\n\n${half}\n\n${band}\n\n${half}\n`
 
-    // Inside the band the corpus cannot classify on sight, and the ceiling sits
-    // under it, since a false break is the dearer error.
+    // Inside the band the corpus cannot classify on sight, the ceiling sits under it.
     expect(measure(source).longestRun).toBeGreaterThan(RUN_CHECKPOINT)
   })
 
@@ -219,8 +212,7 @@ describe('longestRun', () => {
     const path = '**`src/markdown/structure.ts`**'
     const source = `${FRONTMATTER}# CI\n\n${half}\n\n${path}\n\n${half}\n`
 
-    // Width alone would hold it out, so the span test is what lets it break,
-    // since `review-pr` heads each reviewed file with a bold path past any ceiling.
+    // Width alone would hold it out, so the span test lets it break, as `review-pr` heads each file.
     expect(measure(source).longestRun).toBeLessThan(RUN_CHECKPOINT)
   })
 
@@ -228,8 +220,7 @@ describe('longestRun', () => {
     const half = prose(30)
     const source = `${FRONTMATTER}# CI\n\n${half}\n\n**Risks:**  \n\n${half}\n`
 
-    // Column zero is what the pattern anchors, so a trailing space cannot cost
-    // a break the author wrote.
+    // Column zero is what the pattern anchors, so a trailing space cannot cost a break.
     expect(measure(source).longestRun).toBeLessThan(RUN_CHECKPOINT)
   })
 
@@ -237,16 +228,14 @@ describe('longestRun', () => {
     const half = prose(30)
     const source = `${FRONTMATTER}# CI\n\n${half}\n\n**Emphasis:** and the sentence carries on.\n\n${half}\n`
 
-    // Emphasis opening a sentence is not a seam, and this measure ships as
-    // package data every project reads, so the pattern demands the whole line.
+    // Emphasis opening a sentence is not a seam, so the pattern demands the whole line.
     expect(measure(source).longestRun).toBeGreaterThan(RUN_CHECKPOINT)
   })
 
   it('should not count a heading that is markdown inside a fenced block', () => {
     const source = `${FRONTMATTER}# CI\n\n${prose(20)}\n\n\`\`\`markdown\n## Not a real heading\n\n### Nor this\n\`\`\`\n\n${prose(20)}\n`
 
-    // The fence neither breaks the run nor adds to it, so the two prose
-    // stretches measure as the single run a reader scrolls through.
+    // The fence neither breaks the run nor adds to it.
     expect(measure(source).longestRun).toBe(43)
   })
 
@@ -254,8 +243,7 @@ describe('longestRun', () => {
     const inner = `\`\`\`markdown\n## Not a real heading\n\`\`\``
     const source = `${FRONTMATTER}# CI\n\n${prose(20)}\n\n\`\`\`\`markdown\n${inner}\n\`\`\`\`\n\n${prose(20)}\n`
 
-    // A walker toggling on any backtick run reads the inner closing fence as an
-    // opening and inverts the rest of the file.
+    // A walker toggling on any backtick run reads the inner closing fence as an opening.
     expect(measure(source).longestRun).toBe(43)
   })
 
@@ -275,8 +263,7 @@ describe('longestRun', () => {
   it('should wrap a link-heavy line at the width its anchor text renders', () => {
     const source = `${FRONTMATTER}# CI\n\n${links(10)}\n`
 
-    // Raw the line wraps seven times. A rendered line shows anchor text rather
-    // than destinations, so the run is the blank line plus the one row it fills.
+    // A rendered line shows anchor text rather than destinations, so the run is one row plus the blank.
     expect(links(10).length).toBeGreaterThan(RENDER_WIDTH * 6)
     expect(measure(source).longestRun).toBe(2)
   })
@@ -296,8 +283,7 @@ describe('longestRun', () => {
   it('should report a bullet block whose source lines stay under the checkpoint', () => {
     const source = `${FRONTMATTER}# CI\n\n${weightedBullets(15, PARAGRAPH_BULLET)}\n`
 
-    // Fifteen bullets and a blank line are sixteen source lines, so only the
-    // rendered measure reaches the checkpoint.
+    // Fifteen bullets and a blank are sixteen source lines, so only the rendered measure reaches the checkpoint.
     expect(measure(source).longestRun).toBeGreaterThan(RUN_CHECKPOINT)
   })
 
@@ -398,8 +384,7 @@ describe('heavyBullets', () => {
     const half = Math.ceil((BULLET_CHECKPOINT + 1) / 2)
     const source = `${FRONTMATTER}# CI\n\n${bullet(half)}\n${'w'.repeat(half)}\n`
 
-    // Neither source line reaches the checkpoint on its own, so a wrapped
-    // bullet only reports once the two are measured as the one bullet they are.
+    // Neither source line reaches the checkpoint alone, so a wrapped bullet reports as one.
     expect(measure(source).heavyBullets).toEqual([
       { line: 8, characters: half * 2 + 1 },
     ])
@@ -424,8 +409,7 @@ describe('heavyParagraphs', () => {
   it('should report a short-sentence-count paragraph past the weight checkpoint', () => {
     const source = `${FRONTMATTER}# CI\n\n${sentences(2, PARAGRAPH_CHECKPOINT)}\n`
 
-    // A sentence cap alone is met by fewer, longer sentences, so the character
-    // weight catches a paragraph of two long ones.
+    // A sentence cap alone is met by fewer, longer sentences, so the character weight catches them.
     const [found] = measure(source).heavyParagraphs
     expect(found.sentences).toBe(2)
     expect(found.characters).toBeGreaterThan(PARAGRAPH_CHECKPOINT)
@@ -435,8 +419,7 @@ describe('heavyParagraphs', () => {
     const lowered: Checkpoints = { ...CHECKPOINTS, paragraph: 120 }
     const source = `${FRONTMATTER}# CI\n\n${sentences(2, 80)}\n`
 
-    // Lowering the paragraph number well under the bullet one is what shows
-    // which of the two the paragraph measure reads, whatever the standard says.
+    // Lowering the paragraph number under the bullet one shows which of the two the measure reads.
     expect(measure(source).heavyParagraphs).toEqual([])
     expect(
       measureStructure('ci.md', bodyLines(source), lowered).heavyParagraphs,
@@ -444,13 +427,11 @@ describe('heavyParagraphs', () => {
   })
 
   it('should measure a link-heavy paragraph against the text a reader sees', () => {
-    // Sized from the checkpoint rather than fixed, since a raw length that has
-    // to sit past it tests nothing on the run that moves the number.
+    // Sized from the checkpoint rather than fixed, so a raw length past it tests the run that moves it.
     const paragraph = links(Math.ceil(PARAGRAPH_CHECKPOINT / 40))
     const source = `${FRONTMATTER}# CI\n\n${paragraph}\n`
 
-    // Measured across the corpus this is the single largest correction: the
-    // heaviest paragraph ran 1159 raw characters against 319 a reader is shown.
+    // Measured across the corpus this is the single largest correction to the raw character count.
     expect(paragraph.length).toBeGreaterThan(PARAGRAPH_CHECKPOINT)
     expect(measure(source).heavyParagraphs).toEqual([])
   })
@@ -513,8 +494,7 @@ describe('heavyParagraphs', () => {
     ].join(' ')
     const source = `${FRONTMATTER}# CI\n\n${paragraph}\n`
 
-    // A command name is lowercase, so a boundary resting on a capital alone
-    // finds none of the four these spans open.
+    // A command name is lowercase, so a boundary resting on a capital alone finds none of the four.
     const [found] = measure(source).heavyParagraphs
     expect(found.sentences).toBe(5)
   })
@@ -543,8 +523,7 @@ describe('measureCadence', () => {
     const spread = CHECKPOINTS.spread
     const source = `${FRONTMATTER}# CI\n\n${passage([10, 10, 10 + spread])}\n`
 
-    // Sentences within roughly five words of each other are one cadence, so the
-    // checkpoint is the last flat value rather than the first varied one.
+    // Sentences within roughly five words of each other are one cadence, so the checkpoint is the last flat value.
     expect(measure(source).cadence.flat).toBe(1)
   })
 
@@ -577,16 +556,14 @@ describe('measureCadence', () => {
     const openers = ['`canon`', '`canon`', '`canon`']
     const source = `${FRONTMATTER}# CI\n\n${passage([4, 12, 22], openers)}\n`
 
-    // A sentence opening on a command name repeats as plainly as one opening on
-    // a word, and the backticks are punctuation a reader does not hear.
+    // A sentence opening on a command name repeats as plainly as one opening on a word.
     expect(measure(source).cadence.mostRepeated?.opener).toBe('canon')
   })
 
   it('should leave a paragraph under the sentence floor unmeasured', () => {
     const source = `${FRONTMATTER}# CI\n\n${passage([4, 22])}\n`
 
-    // A two-sentence configuration note carries a spread of 18 words and says
-    // nothing about cadence, which is the case the floor exists for.
+    // A two-sentence configuration note says nothing about cadence, which is the case the floor exists for.
     expect(measure(source).cadence).toEqual({
       measured: 0,
       flat: 0,
@@ -600,8 +577,7 @@ describe('measureCadence', () => {
     const linked = 'Alpha <https://x.test/one> <https://x.test/two> omega.'
     const source = `${FRONTMATTER}# CI\n\n${linked} ${passage([2, 2])}\n`
 
-    // Raw the linked sentence carries four tokens against two a reader reads,
-    // which would report a spread the page does not have.
+    // Raw the linked sentence carries four tokens against two a reader reads, which would report a false spread.
     expect(measure(source).cadence.flattest?.spread).toBe(0)
   })
 
@@ -631,8 +607,7 @@ describe('measureCadence', () => {
   it('should keep a heading fragment out of the paragraph below it', () => {
     const source = `${FRONTMATTER}# CI\n\n## Facts before opinion\n\n${passage([10, 10, 10])}\n`
 
-    // A heading is legitimately verbless and one length, so joining it to the
-    // paragraph under it would read a signpost as flat prose.
+    // A heading is legitimately verbless and one length, so joining it to its paragraph would read as flat prose.
     const { measured, flattest } = measure(source).cadence
     expect(measured).toBe(1)
     expect(flattest?.sentences).toBe(3)
@@ -642,8 +617,7 @@ describe('measureCadence', () => {
     const rows = table(['| `canon one` | Facts before opinion |'])
     const source = `${FRONTMATTER}# CI\n\n${passage([10, 10, 10])}\n\n${rows}\n\n${passage([9, 9, 9])}\n`
 
-    // A cell is written as a fragment by design. Both paragraphs measure, and
-    // neither absorbs the row between them.
+    // A cell is written as a fragment by design, so neither paragraph absorbs the row between them.
     const { measured, flat } = measure(source).cadence
     expect(measured).toBe(2)
     expect(flat).toBe(2)
@@ -653,8 +627,7 @@ describe('measureCadence', () => {
     const openers = ['Run', 'Check', 'Load']
     const source = `${FRONTMATTER}# CI\n\n${passage([10, 10, 10], openers)}\n`
 
-    // These shapes are excluded by position, needing no grammar, while the
-    // verbless share needs grammar and stays unimplemented. See `measureCadence`.
+    // These shapes are excluded by position, while the verbless share needs grammar. See `measureCadence`.
     const { measured, flat } = measure(source).cadence
     expect(measured).toBe(1)
     expect(flat).toBe(1)
