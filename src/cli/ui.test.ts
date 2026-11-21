@@ -215,8 +215,7 @@ describe('quiet mode', () => {
     expect(output).toBe('')
   })
 
-  // Diagnostics reach stderr in every mode, so a quiet run that hides a
-  // failure is the regression this guards.
+  // Diagnostics reach stderr in every mode, so a quiet run hiding one regresses.
   it('still writes warnings and errors', () => {
     setQuiet(true)
     const output = captureStderr(() => {
@@ -229,8 +228,7 @@ describe('quiet mode', () => {
 })
 
 describe('a --json run', () => {
-  // The switch is set from the parsed command, so only a real run reads the
-  // wiring rather than the helper.
+  // Set from the parsed command, so only a real run reads the wiring.
   it('writes its record and no progress, leaving warnings to stderr', () => {
     const result = spawnSync(
       'bun',
@@ -309,11 +307,9 @@ describe('outroSuccess', () => {
 })
 
 describe('the help text', () => {
-  // The one framed surface written to stdout, so it is the only end-to-end
-  // reading of the stream the other writers never touch.
+  // The one framed surface on stdout, so the only end-to-end reading of it.
   it('reaches a pipe with no escape in it', () => {
-    // The opt-out is unset deliberately, so the pipe is the only thing under
-    // test here and an assertion cannot pass on the environment instead.
+    // The opt-out is unset so an assertion cannot pass on the environment.
     const env = { ...process.env }
     delete env.NO_COLOR
     const result = spawnSync('bun', [join(ROOT, 'src/cli.ts')], {
@@ -469,8 +465,7 @@ describe('isNonInteractive', () => {
 })
 
 describe('the source tree', () => {
-  // Sixteen copies of one decision is what made color impossible to turn off.
-  // A rule nothing enforces rebuilds them the next time a command wants grey.
+  // Sixteen copies of one decision made color impossible to turn off.
   it('defines a color escape in the shared module alone', () => {
     const offenders = readdirSync(join(ROOT, 'src'), { recursive: true })
       .map(String)

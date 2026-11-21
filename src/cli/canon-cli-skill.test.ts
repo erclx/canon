@@ -10,9 +10,7 @@ const SKILL_PATH = join(
 
 // Verbs a target session has no job for, because their docs tie them to this
 // repository's own tree or to a hook it never calls by hand. `hooks` is the
-// edge: the base stack ships its post-merge call, which a target runs without
-// routing to it. Each name is confirmed against its docs/agents page, and the
-// second test fails when one stops being a verb.
+// edge: the base stack ships its post-merge call, which a target runs anyway.
 export const TOOLKIT_ONLY = new Set([
   'sandbox',
   'gate',

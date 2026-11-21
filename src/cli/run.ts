@@ -13,14 +13,9 @@ export function cliPath(root: string): string {
 }
 
 /**
- * Spawns a `canon` subcommand as its own process, by path rather than through
- * the global binary, so a linked worktree exercises its own code.
- *
- * Both callers want a separately failable child rather than an in-process call:
- * `canon init` reports each domain's outcome independently, and `canon sync`
- * relies on each domain opening its own frame. Returns whether the child
- * succeeded rather than throwing, because a failed domain is a reportable
- * outcome and not an abort.
+ * Spawns a `canon` subcommand as its own process, by path rather than the
+ * global binary, so a linked worktree runs its own code. Returns whether the
+ * child succeeded rather than throwing, since a failed domain is an outcome.
  */
 export function cliRun(
   path: string,
