@@ -117,7 +117,7 @@ export const REVIEWED = '2026-11-18'
 
 export const TOKENS: DesignTokens = {
   personality:
-    'A drawn system: a warm neutral ground ruled in a 32px grid, ink text in Geist, and Geist Mono for a path, a command, or shell output. Cards take an ink outline and a hard offset shadow. The vermilion pip of the mark is the one accent, marking a status.',
+    'A drawn system: a warm neutral ground ruled in a 48px grid, ink text in Geist, and Geist Mono for a path, a command, or shell output. Cards take an ink outline and a hard offset shadow. The vermilion pip of the mark is the one accent, marking a status.',
 
   colorRules: [
     "One accent, the mark's pip. Never promote a second color into a structural role.",
@@ -153,7 +153,7 @@ export const TOKENS: DesignTokens = {
     },
     {
       role: 'grid',
-      intent: 'the lines the page ground rules every 32px',
+      intent: 'the lines the page ground rules every 48px',
       value: '#242421',
     },
     {
@@ -240,7 +240,7 @@ export const TOKENS: DesignTokens = {
     },
     {
       role: 'light-grid',
-      intent: 'the lines the page ground rules every 32px, on light',
+      intent: 'the lines the page ground rules every 48px, on light',
       value: '#ececea',
     },
     {

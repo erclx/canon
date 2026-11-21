@@ -52,7 +52,7 @@
   }
 
   /*
-   * The ground: the canvas ruled in a 32px grid, fixed to the viewport so its
+   * The ground: the canvas ruled in a 48px grid, fixed to the viewport so its
    * lines run unbroken behind the nav and footer, which paint the same ground.
    * A color change goes through `background-color`, since the shorthand resets
    * the tile and the attachment.
@@ -64,7 +64,7 @@
     background-image:
       linear-gradient(var(--grid) 1px, transparent 1px),
       linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-    background-size: 32px 32px;
+    background-size: 48px 48px;
     background-attachment: fixed;
   }
 

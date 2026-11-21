@@ -8,7 +8,7 @@ Authoring guidance: `claude/skills/design-record/references/design.md`. Rendered
 
 ## Overview
 
-A drawn system: a warm neutral ground ruled in a 32px grid, ink text in Geist, and Geist Mono for a path, a command, or shell output. Cards take an ink outline and a hard offset shadow. The vermilion pip of the mark is the one accent, marking a status.
+A drawn system: a warm neutral ground ruled in a 48px grid, ink text in Geist, and Geist Mono for a path, a command, or shell output. Cards take an ink outline and a hard offset shadow. The vermilion pip of the mark is the one accent, marking a status.
 
 ## Colors
 
@@ -23,7 +23,7 @@ A drawn system: a warm neutral ground ruled in a 32px grid, ink text in Geist, a
 | window           | the body of a product window                                       | #31312e |
 | chrome           | the window titlebar                                                | #383835 |
 | band             | a quiet fill inside a window, such as a prompt                     | #3d3d39 |
-| grid             | the lines the page ground rules every 32px                         | #242421 |
+| grid             | the lines the page ground rules every 48px                         | #242421 |
 | rule             | the soft seam between sections, and under a scrolled nav           | #3d3d39 |
 | border           | every rule and divider inside a card                               | #474742 |
 | outline          | the drawn border around a card, a control, or a stamp              | #8d8c86 |
@@ -41,7 +41,7 @@ A drawn system: a warm neutral ground ruled in a 32px grid, ink text in Geist, a
 | light-window     | the body of a product window on light                              | #ffffff |
 | light-chrome     | the window titlebar on light                                       | #f7f7f5 |
 | light-band       | a quiet fill inside a window, on light                             | #f0f0ee |
-| light-grid       | the lines the page ground rules every 32px, on light               | #ececea |
+| light-grid       | the lines the page ground rules every 48px, on light               | #ececea |
 | light-rule       | the soft seam between sections, and under a scrolled nav, on light | #d6d6d2 |
 | light-border     | rules and dividers inside a card, on light                         | #ececea |
 | light-outline    | the drawn border around a card, a control, or a stamp, on light    | #121212 |
