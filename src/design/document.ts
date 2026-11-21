@@ -10,16 +10,9 @@ import type {
 import { REVIEWED, TOKENS } from '@/design/tokens'
 
 /**
- * Renders `canon/DESIGN.md` from the token source.
- *
- * The document is the view and `@/design/tokens` is the fact, which is the one
- * thing that changed when this record stopped being a transcript of two other
- * surfaces. A reader opening the document reads what the surfaces render,
- * because both come from the same module.
- *
- * Tables are emitted the way Prettier serializes them, padded to the widest
- * cell in each column, so the formatting stage and this writer agree and the
- * file has one shape rather than two writers fighting over it.
+ * Renders `canon/DESIGN.md` from the token source: the document is the view and
+ * `@/design/tokens` the fact. Tables are padded to the widest cell as Prettier
+ * serializes them, so the formatting stage and this writer agree on one shape.
  */
 
 /** The tag a cell carries when no rendering surface exercises its value yet. */

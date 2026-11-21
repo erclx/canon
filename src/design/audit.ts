@@ -42,12 +42,9 @@ export interface DesignAudit {
 }
 
 /**
- * Reads a project's design record against the prose budget and checks each
- * custom property its tables name against the stylesheet its lead names. It
- * writes nothing.
- *
- * A token check that cannot run says why under `unchecked` and leaves `clean`
- * false, since a check that did not look is no pass.
+ * Reads a design record against the prose budget and checks each custom property
+ * its tables name against the stylesheet its lead names. It writes nothing. A
+ * token check that cannot run says why under `unchecked` and leaves `clean` false.
  */
 export function auditDesign(root: string): DesignAudit {
   const path = join(root, DESIGN_DOCUMENT)
@@ -74,8 +71,7 @@ function checkTokens(root: string, path: string, source: string): TokenCheck {
   const doc = parseDesignDoc(path)
   const rows = [...doc.color, ...doc.borders]
 
-  // A values record renders from a token module and carries `Value` where an
-  // intent record carries `Property`, so it has no property to compare.
+  // A values record carries `Value` where an intent record carries `Property`, so it has nothing to compare.
   if (!rows.some((row) => 'Property' in row)) {
     return {
       status: 'not-applicable',

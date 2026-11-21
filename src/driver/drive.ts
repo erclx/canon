@@ -26,16 +26,9 @@ import type {
 } from '@/driver/steps'
 
 /**
- * Walks a page through a caller's interaction sequence and measures each state
- * it reaches. Every browser reference the driver adds lives here, and
- * `src/commands/driver.ts` reaches it through a dynamic import so no other
- * command resolves the engine at startup. Like `@/inventory/walk` and
- * `@/capture/render`, it ships, and it reaches nothing in `@/capture/`, so the
- * two surfaces move independently.
- *
- * A render answers about a page as it loads, so a defect that exists only after
- * a menu opens, an answer is chosen, or the page scrolls is invisible to one.
- * Probes run after a step, and a run reaches the load state with a `wait` step.
+ * Walks a page through a caller's interaction sequence and measures each state it
+ * reaches, since a render cannot see a defect that exists only after a menu opens.
+ * `src/commands/driver.ts` reaches it through a dynamic import so no other command resolves the engine at startup.
  */
 
 /** Each probe keyed by the name a caller writes in the run. */
@@ -160,8 +153,7 @@ export async function drive(options: DriveOptions): Promise<DriverResult> {
       error,
     )
   } finally {
-    // Dropped, since a close failing beside a drive that already failed would
-    // replace the caller's refusal with a reason about teardown.
+    // Dropped, since a failing close would replace the caller's refusal with one about teardown.
     await browser.close().catch(() => undefined)
   }
 
@@ -186,8 +178,7 @@ async function driveViewport(
 ): Promise<{ findings: PlacedFinding[]; passes: PassReading[] }> {
   const context = await browser.newContext({
     viewport,
-    // A measurement wants motion suppressed, since geometry read
-    // mid-transition is a reading of neither state.
+    // A measurement wants motion suppressed, since geometry read mid-transition is neither state.
     reducedMotion: 'reduce',
     ...(colorScheme ? { colorScheme } : {}),
   })

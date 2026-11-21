@@ -10,23 +10,17 @@ import {
 } from '@/browser/engine'
 
 /**
- * Launches chrome-headless-shell under begin-frame control and speaks raw CDP
- * to one page in it. Playwright cannot ask for begin-frame control on a page it
- * opens, and only the headless shell honors the flag, so this bypasses the
- * engine and finds the shell Playwright installed beside Chromium.
- *
- * `playwright-core` exposes no path for the shell, so the path is rebuilt from
- * its `browsers.json` revision and its cache layout. A Playwright upgrade that
- * moves that layout surfaces here as `browser-missing` rather than as a crash.
+ * Launches chrome-headless-shell under begin-frame control and speaks raw CDP to
+ * one page, since Playwright cannot ask for begin-frame control and only the shell
+ * honors the flag. The path is rebuilt from `browsers.json` and the cache layout, so a layout move surfaces as `browser-missing`.
  */
 
 export class ShellMissing extends Error {}
 
 /**
  * The shell aborted with no usable sandbox, printing the marker from
- * `zygote_host_impl_linux.cc` and dying on a signal. AppArmor's default from
- * Ubuntu 23.10 is one cause and a container's seccomp profile another, so
- * `fix` is set only when the AppArmor setting reads 1 and the sysctl applies.
+ * `zygote_host_impl_linux.cc`. AppArmor's default from Ubuntu 23.10 or a
+ * container's seccomp profile cause it, so `fix` is set only when the setting reads 1.
  */
 export class ShellSandboxBlocked extends Error {
   constructor(
@@ -162,8 +156,7 @@ export async function openShell(
     proc.kill('SIGKILL')
     rmSync(profile, { recursive: true, force: true })
   }
-  // A signal skips the exit event, so it closes the shell and then re-raises
-  // itself with the default handler restored, ending the process as it would have.
+  // A signal skips the exit event, so it closes the shell and re-raises itself with the default handler restored.
   const interrupt = (signal: NodeJS.Signals): void => {
     close()
     process.kill(process.pid, signal)
@@ -202,13 +195,11 @@ function devtoolsUrl(proc: ChildProcess, executable: string): Promise<string> {
       settled = true
       fail(error)
     })
-    // `close` waits for stderr to drain, where the marker can sit in the last
-    // chunk. A death after the address printed is past the launch.
+    // `close` waits for stderr to drain, where the marker can sit in the last chunk.
     proc.on('close', (code, signal) => {
       if (settled) return
       settled = true
-      // The setting is read only after the marker, since a profiled shell
-      // starts with it at 1.
+      // The setting is read only after the marker, since a profiled shell starts with it at 1.
       fail(
         output.includes(SANDBOX_MARKER)
           ? sandboxBlocked(executable, readUsernsSetting())

@@ -5,10 +5,8 @@ import { describe, expect, it } from 'vitest'
 
 /**
  * Each component keeps its markup in `index.astro` and its style, script, and
- * icons in files beside it, so a block written back into an Astro file fails
- * here by file and line. Generated CSS and the pre-paint script stay inline
- * under `is:inline`, a JSON data island under `type="application/json"`, and
- * a script loading its file through `src` carries no body.
+ * icons beside it, so a block written back into an Astro file fails here by
+ * file and line. Generated CSS, the pre-paint script, and JSON data islands stay inline.
  */
 interface Finding {
   line: number

@@ -49,8 +49,7 @@ describe.skipIf(!available())('a take of a page whose frames run slow', () => {
     )
     if (read.kind !== 'read') throw new Error(read.detail)
 
-    // The clock-timed page, which refused as a pending frame before the
-    // stepper waited on each one.
+    // The clock-timed page, which refused as a pending frame before the stepper waited on each one.
     const result = await take({
       url: `${server.url}?busy=400&timed=1`,
       plan: read.plan,
@@ -78,8 +77,7 @@ describe.skipIf(!available())('a take of a page whose frames run slow', () => {
     )
     if (read.kind !== 'read') throw new Error(read.detail)
 
-    // The clock-timed page settles in real time and never returns a frame
-    // once virtual time pauses, so it stalls in recording at both scales.
+    // The clock-timed page never returns a frame once virtual time pauses, so it stalls in recording at both scales.
     const result = await take({
       url: `${server.url}?busy=400&timed=1`,
       plan: read.plan,
@@ -124,8 +122,7 @@ describe.skipIf(!available())('a take of a page whose frames run slow', () => {
       deviceScale: 1,
     })
 
-    // Ahead of the route, so a refusal prints its message and a fall back
-    // prints the frame that stalled.
+    // Ahead of the route, so a refusal prints its message and a fall back prints the frame that stalled.
     expect(result).not.toHaveProperty('message')
     expect(result).not.toHaveProperty('beats.0.fallback')
     expect(result).toMatchObject({
@@ -158,8 +155,7 @@ describe.skipIf(!available())('a take of a page whose frames run slow', () => {
       out,
     })
 
-    // The plan is the two 600 ms holds, the paced glide to the card, and the
-    // 2500 ms wait, 4.43 s.
+    // The plan is the two 600 ms holds, the paced glide, and the 2500 ms wait, 4.43 s.
     expect(result).not.toHaveProperty('message')
     expect(result).toMatchObject({ status: 'filmed' })
     if (result.status !== 'filmed') return

@@ -5,11 +5,9 @@ function stageShopConfig(ctx: StageContext): void {
 }
 
 /**
- * One behavior per layer, so a correct run has exactly one right home for
- * each. The helper is pure, which makes it a unit test. The list's loading,
- * empty, and error states render without leaving the component, which makes
- * them a component test however much the diff looks like UI. The checkout
- * crosses three routes, which is the one journey here that earns a browser.
+ * One behavior per layer, so a correct run has exactly one right home for each:
+ * a pure helper is a unit test, the list's states are a component test however
+ * UI-like the diff, and the three-route checkout earns the browser.
  */
 function stageLayers(ctx: StageContext): void {
   ctx.mkdir('src/lib')
@@ -21,10 +19,9 @@ function stageLayers(ctx: StageContext): void {
 }
 
 /**
- * The page already carries an end to end spec, which is the pull. A session
- * adding to a page with a spec beside it is tempted to extend that spec. The
- * loading state renders without leaving the component, so the right home is a
- * component test, and the spec must stay free of it.
+ * The page already carries an end to end spec, which is the pull to extend it.
+ * The loading state renders without leaving the component, so the right home is
+ * a component test and the spec must stay free of it.
  */
 function stagePull(ctx: StageContext): void {
   ctx.mkdir('src/pages')

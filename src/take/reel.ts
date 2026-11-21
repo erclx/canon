@@ -9,11 +9,9 @@ import type { Viewport } from '@/take/plan'
 import { type Frame, drawPointer } from '@/take/pointer'
 
 /**
- * Joins a take's beats into one short reel for a pull request: each beat's
- * clip cropped to a camera built for the reel and shrunk to one width, every
- * third frame kept, the pointer drawn through the same view, encoded as an
- * animated WebP that GitHub plays inline. Captions and cuts stay the edit's
- * work for a launch video.
+ * Joins a take's beats into one short reel for a pull request: each clip cropped
+ * to a reel camera, shrunk to one width, every third frame kept, the pointer
+ * drawn through the same view, and encoded as an animated WebP GitHub plays inline.
  */
 
 export const REEL_WIDTH = 960
@@ -82,8 +80,7 @@ export async function* reelFrames(
   for (const [beat, filmed] of beats.entries()) {
     const camera = reelCamera(out, filmed)
     const { width, height } = reelSize(camera)
-    // Every route's clip decodes at the viewport's size, one pixel to a CSS
-    // pixel, so one crop places the view and the pointer on either.
+    // Every route's clip decodes at the viewport's size, so one crop places the view and pointer on either.
     const source = camera.viewport
     const factor = width / source.width
 
@@ -140,10 +137,9 @@ function beatLog(out: string, filmed: FilmedBeat): TakeLog {
 }
 
 /**
- * Names the first beat whose window differs in aspect ratio from the first
- * beat's, or nothing when every beat shares one. A reel shrinks each beat to
- * one width, so beats of one shape join at any size and beats of two would
- * make frames of two heights.
+ * Names the first beat whose window differs in aspect ratio from the first beat's,
+ * or nothing. A reel shrinks each beat to one width, so beats of two shapes
+ * would make frames of two heights.
  */
 export function reelShapeMismatch(
   beats: readonly { readonly name: string; readonly viewport: Viewport }[],
@@ -160,10 +156,9 @@ export function reelShapeMismatch(
 }
 
 /**
- * The view moved onto whole source pixels, so a held zoom at `REEL_DEPTH`
- * copies the clip pixel for pixel rather than blending each pixel with its
- * neighbor and softening a thin ring. It stays inside the source, since a
- * rounded origin past the far edge leaves the last pixels short of weight.
+ * The view moved onto whole source pixels, so a held zoom copies the clip pixel
+ * for pixel rather than softening a thin ring. It stays inside the source, since
+ * a rounded origin past the far edge leaves the last pixels short of weight.
  */
 function snapped(
   view: View,
@@ -183,9 +178,8 @@ function snapped(
 
 /**
  * The part of `source` the view shows, resampled to `width` by `height` by
- * averaging the source pixels each output pixel covers, the same area filter
- * the decoder shrinks with. It runs one axis at a time, since a per-pixel
- * two-dimensional sum costs a frame several times more.
+ * averaging the source pixels each output pixel covers. It runs one axis at a
+ * time, since a per-pixel two-dimensional sum costs a frame several times more.
  */
 function crop(source: Frame, view: View, width: number, height: number) {
   const columns = taps(view.x, source.width / view.scale, width, source.width)
@@ -271,9 +265,8 @@ function taps(
 
 /**
  * Renders the reel of a filmed take to `file`, an animated WebP. It encodes
- * lossless, since the lossy encoder skips a frame whose change is faint and
- * never repaints the last copy of an element that faded out. A reel past
- * `maxBytes` is encoded again lossy so a long reel still posts.
+ * lossless, since the lossy encoder never repaints the last copy of a faded-out
+ * element, and re-encodes lossy past `maxBytes` so a long reel still posts.
  */
 export async function renderReel(
   out: string,
@@ -333,16 +326,14 @@ async function encode(
     { stdio: ['pipe', 'ignore', 'pipe'] },
   )
   const done = finished(proc)
-  // Held so an encoder that dies mid-stream surfaces through `done` rather than
-  // as an unhandled rejection or a broken pipe thrown out of the stream.
+  // Held so an encoder that dies mid-stream surfaces through `done` rather than as a broken pipe.
   done.catch(() => {})
   proc.stdin?.on('error', () => {})
 
   let frames = 0
   try {
     for await (const frame of reelFrames(out, beats)) {
-      // Raced against the exit, since a write waiting on a drain from an
-      // encoder that already died would wait forever.
+      // Raced against the exit, since a write awaiting a drain from a dead encoder would wait forever.
       await Promise.race([write(proc.stdin, frame.data), done])
       frames += 1
     }

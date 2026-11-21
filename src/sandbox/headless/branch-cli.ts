@@ -4,14 +4,9 @@ import { join } from 'node:path'
 import { shellQuote } from '@/sandbox/headless/dispatch'
 
 /**
- * Writes a `canon` that runs this checkout's CLI, for the runner to place first
- * on every PATH a run spawns. Without it a bare `canon` in provisioning or in
- * the session resolves to the published release, which refuses a verb the
- * branch adds.
- *
- * Both paths are baked in quoted rather than looked up, so the run's own Bun
- * drives the child whatever `bun` the session's PATH would find, and a run from
- * a linked worktree reaches that worktree's source rather than the main one.
+ * Writes a `canon` that runs this checkout's CLI, placed first on every PATH a
+ * run spawns, since a bare `canon` would resolve to the release that refuses a
+ * verb the branch adds. Both paths are baked in quoted so a linked worktree reaches its own source.
  */
 export function installCanonShim(dir: string, bun: string, cli: string): void {
   const wrapper = [
@@ -25,12 +20,9 @@ export function installCanonShim(dir: string, bun: string, cli: string): void {
 }
 
 /**
- * Which CLI a run drove. The version string cannot answer this, since the
- * branch and the release print the same one until a release cuts, so the
- * record names the source path and the commit it sat at.
- *
- * `head` is null rather than a throw when git cannot read the checkout, since
- * a missing commit is a gap in the record, not a reason to refuse the run.
+ * Which CLI a run drove, named by source path and commit, since the branch and
+ * the release print one version until a release cuts. `head` is null rather
+ * than a throw when git cannot read the checkout.
  */
 export interface BranchCli {
   readonly cli: string

@@ -4,13 +4,9 @@ import { join } from 'node:path'
 import { afterAll } from 'vitest'
 
 /**
- * Redirects this machine's toolkit state for the whole run.
- *
- * `putDomain` records every stamped target into the machine-level registry, so
- * a stamp test would otherwise write fixture paths into the state folder of
- * whoever ran the suite and leave them there. Setting the override once here
- * covers every test that reaches a sync, including ones written later that do
- * not know the write happens.
+ * Redirects this machine's toolkit state for the whole run, since `putDomain`
+ * records every stamped target into the machine-level registry and a stamp test
+ * would leave fixture paths in the runner's state folder.
  */
 const STATE = mkdtempSync(join(tmpdir(), 'canon-test-state-'))
 

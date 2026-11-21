@@ -1,14 +1,7 @@
 /**
- * The readers an inventory can run, one per treatment.
- *
- * A reader runs inside the page rather than here, so each one is serialized to
- * source and evaluated by the browser. That is why every helper a reader needs
- * is declared inside its own body: a reference to anything at module scope
- * survives typechecking and throws once the page tries to call it.
- *
- * `focus` reads an element query the project declares. The five value
- * subjects read every rendered element, so they run over board frames as well
- * as routes, and their one reader lives in `values.ts`.
+ * The readers an inventory can run, one per treatment. Each is serialized to
+ * source and evaluated in the page, so every helper is declared inside its body.
+ * `focus` reads the project's element query, and the five value subjects share `values.ts`.
  */
 
 import { VALUE_SUBJECTS } from '@/inventory/scale'
@@ -37,13 +30,9 @@ export interface Subject {
 }
 
 /**
- * Reports what each element changes about itself when it takes focus, which is
- * the reading the `ui-craft` keyboard reference states three rules against.
- *
- * The treatment is the difference between rest and focus, since a card with a
- * resting shadow computes a shadow either way. An element the browser refuses
- * to focus is named as such rather than folded into the no-treatment row,
- * since a disabled control and a missing ring have different remedies.
+ * Reports what each element changes about itself when it takes focus, the reading
+ * the `ui-craft` keyboard reference states three rules against. An element the
+ * browser refuses to focus is named as such, since a disabled control and a missing ring differ.
  */
 function readFocusTreatments({ query }: ReaderArgs): SubjectReading[] {
   const PROPERTIES = [
@@ -73,8 +62,7 @@ function readFocusTreatments({ query }: ReaderArgs): SubjectReading[] {
 
   const rows: SubjectReading[] = []
 
-  // The walk's Tab press left one element focused, which would hide its ring, so
-  // the page starts from nothing focused and each element is blurred after.
+  // The walk's Tab press left one element focused, which would hide its ring, so the page starts blurred.
   const entryFocus = document.activeElement
   if (entryFocus instanceof HTMLElement) entryFocus.blur()
 

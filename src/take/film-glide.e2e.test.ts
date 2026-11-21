@@ -75,12 +75,10 @@ describe.skipIf(!available())('a screencast glide over 200 ms frames', () => {
     if (move?.kind !== 'move') throw new Error('the take logged no move')
     const glideMs =
       Math.round(travelMs(move.from, move.to) / FRAME_MS) * FRAME_MS
-    // The card turns from #ddd to #f60 once the pointer lands on it, which
-    // the clip shows at the frame its stored luma drops below 170.
+    // The card turns from #ddd to #f60 once the pointer lands, shown at the frame its luma drops below 170.
     const card = bandLuma(join(out, beat.clip), '200:100:100:100')
     const landedMs = card.findIndex((value) => value < 170) * FRAME_MS
-    // The hover fires on the first point sent inside the card, ahead of the
-    // move's end.
+    // The hover fires on the first point sent inside the card, ahead of the move's end.
     const entered = move.points?.find(
       (point) =>
         Math.abs(point.x - move.to.x) <= CARD_HALF.width &&
@@ -88,8 +86,7 @@ describe.skipIf(!available())('a screencast glide over 200 ms frames', () => {
     )
     if (!entered) throw new Error('no sent point landed inside the card')
 
-    // Within a second of its plan, where the unpaced glide ran about 15 times
-    // over, and landing in the clip within two slow frames of that point.
+    // Within a second of its plan, and landing in the clip within two slow frames of that point.
     expect(Math.abs(move.ms - glideMs)).toBeLessThan(1000)
     expect(landedMs).toBeGreaterThan(0)
     expect(landedMs).toBeGreaterThanOrEqual(entered.t)

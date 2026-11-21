@@ -1,15 +1,7 @@
 #!/usr/bin/env bash
-# Deletes the Cloudflare Pages preview deployments minted for one branch, called
-# by the cleanup-preview job in deploy-site.yml with the Pages project name and
-# the branch. CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID come from the step
-# env.
-#
-# Deployments are listed through the REST API rather than wrangler, whose
-# listing carries no branch filter. `force=true` is what lets a deployment
-# still holding its branch alias be deleted.
-#
-# tooling/cloudflare/configs/scripts/delete-previews.sh is the seeded copy,
-# which adds a skip for an absent secret. Keep the two otherwise the same.
+# Deletes the Cloudflare Pages preview deployments for one branch, called by
+# cleanup-preview in deploy-site.yml, through the REST API since wrangler's listing has no branch filter.
+# tooling/cloudflare/configs/scripts/delete-previews.sh is the seeded copy, which adds a skip for an absent secret.
 set -e
 
 PROJECT_NAME=$1

@@ -2,24 +2,15 @@ import type { Page } from 'playwright-core'
 import type { Finding } from '@/driver/steps'
 
 /**
- * Reads SVG label geometry off the rendered page, in two probes that differ by
- * what they compare a label against.
- *
- * Everything is measured in the browser after `document.fonts.ready`, never
- * computed from the markup, because a generated page is routinely authored
- * against one font and rendered in another, which moves every label.
- *
- * `clientWidth` is not the reading. Comparing it to `scrollWidth` flags every
- * label whose string is wider than its element box whether or not anything is
- * cut, which is why both probes compare geometry against other geometry.
+ * Reads SVG label geometry off the rendered page in two probes, measured in the
+ * browser after `document.fonts.ready` since a page is routinely authored against
+ * one font and rendered in another. Both compare geometry to geometry, never `clientWidth` to `scrollWidth`.
  */
 
 /**
- * Trims the slack a text rect carries above and below the glyphs. Vertical
- * only: a text rect is loose top and bottom and tight to the glyphs left and
- * right, and a one-pixel horizontal inset was enough to pass a label overrunning
- * a panel border by three tenths of a unit. Insetting the vertical band alone
- * stayed free of false positives across 41 strokes.
+ * Trims the slack a text rect carries above and below the glyphs, vertical only,
+ * since a one-pixel horizontal inset passed a label overrunning a panel border by
+ * three tenths of a unit.
  */
 const VERTICAL_INSET_PX = 2
 
@@ -146,15 +137,9 @@ export async function probeDiagramGeometry(page: Page): Promise<Finding[]> {
 }
 
 /**
- * Reports a stroke crossing a label, sampled along the stroke's own geometry.
- *
- * A bounding box cannot answer this. Filtering to filled shapes drops every
- * `line` and every `fill="none"` panel border, and a diagonal connector's box
- * covers most of the diagram while the stroke touches almost none of it.
- *
- * Both paint orders are findings. A stroke drawn after the label crosses the
- * glyphs out, and one drawn before it shows through them, since SVG text
- * carries no background plate of its own.
+ * Reports a stroke crossing a label, sampled along the stroke's own geometry,
+ * since a bounding box drops every `line` and `fill="none"` border. Both paint
+ * orders are findings, as SVG text carries no background plate.
  */
 export async function probeDiagramStrokes(page: Page): Promise<Finding[]> {
   const rows = await page.evaluate(
@@ -189,8 +174,7 @@ export async function probeDiagramStrokes(page: Page): Promise<Finding[]> {
           if (!(shape instanceof SVGGeometryElement)) continue
           if (getComputedStyle(shape).stroke === 'none') continue
 
-          // Read off the shape, since `getPointAtLength` answers in the shape's own user
-          // space and a generated diagram nests most shapes under a transformed `g`.
+          // Read off the shape, since a generated diagram nests most shapes under a transformed `g`.
           const matrix = shape.getScreenCTM()
           if (!matrix) continue
 

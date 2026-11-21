@@ -12,12 +12,9 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { captureSections } from '@/capture/render'
 
 /**
- * Drives `captureSections` through the real engine on fixture pages, since
- * the split reads layout and the preparation reads scroll, neither of which a
- * simulated DOM renders.
- *
- * The suite needs a browser binary and skips without one, so a green pipeline
- * is not evidence this passed.
+ * Drives `captureSections` through the real engine, since the split reads layout
+ * and the preparation reads scroll, which a simulated DOM does not render. It
+ * skips without a browser binary, so green is not evidence it passed.
  */
 
 async function browserAvailable(): Promise<boolean> {

@@ -4,15 +4,8 @@ import type { Finding } from '@/driver/steps'
 
 /**
  * Reports every element that takes focus and changes nothing a person can see.
- *
- * `:focus-visible` does not match a scripted `.focus()` while the browser is in
- * pointer modality, so reading each element's outline then reports every
- * correctly styled element as unstyled. The shared `enterKeyboardModality`
- * presses Tab ahead of the read, which holds keyboard modality for the pass.
- *
- * The reader below is serialized to source and evaluated by the browser, so
- * every helper it needs is declared inside its own body. A reference to
- * anything at module scope typechecks and throws once the page calls it.
+ * `enterKeyboardModality` presses Tab first, since `:focus-visible` does not match
+ * a scripted `.focus()` in pointer modality. The reader is serialized to source, so every helper is declared inside it.
  */
 
 /** The elements a keyboard reaches without the page authoring a tab order. */
@@ -51,8 +44,7 @@ export async function probeFocus(page: Page): Promise<Finding[]> {
         )
       }
 
-      // The modality press left one element focused, and its rest state read under
-      // focus would hide its ring. Every element starts and ends this pass blurred.
+      // The modality press left one element focused, so every element starts and ends this pass blurred.
       const entry = document.activeElement
       if (entry instanceof HTMLElement) entry.blur()
 
@@ -60,23 +52,20 @@ export async function probeFocus(page: Page): Promise<Finding[]> {
 
       for (const element of Array.from(document.querySelectorAll(query))) {
         if (!(element instanceof HTMLElement)) continue
-        // Tested by painted box rather than `offsetParent`, which is null for a
-        // `fixed` element and would skip a pinned control that is plainly on screen.
+        // Tested by painted box, since `offsetParent` is null for a `fixed` element on screen.
         if (element.getClientRects().length === 0) continue
         if (getComputedStyle(element).visibility === 'hidden') continue
 
         const rest = snapshot(element)
         element.focus()
-        // An element the browser refuses to focus is skipped, since a disabled control
-        // has no ring by design and shares no remedy with one missing its ring.
+        // An element the browser refuses to focus is skipped, since a disabled control has no ring by design.
         if (document.activeElement !== element) {
           element.blur()
           continue
         }
 
         const focused = snapshot(element)
-        // An outline resolving to `none` paints nothing, so a width, color, or offset
-        // moving under it is invisible and must not count as a ring.
+        // An outline resolving to `none` paints nothing, so a width, color, or offset moving under it is invisible.
         const blind =
           focused[properties.indexOf('outlineStyle')] === 'none'
             ? (property: string) => property.startsWith('outline')

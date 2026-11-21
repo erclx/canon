@@ -2,9 +2,7 @@ import type { Page } from 'playwright-core'
 
 /**
  * The split, the merge, and the page preparation behind `canon capture
- * --sections`. The thresholds are the ones track 218 measured on Notion,
- * Vercel, Linear, and ElevenLabs, and nothing beyond those four sites tuned
- * them.
+ * --sections`, with thresholds measured on four real sites and tuned on nothing else.
  */
 
 /** A block taller than this many viewports splits into its children. */
@@ -39,13 +37,9 @@ export interface Section {
 }
 
 /**
- * Loads what a reader would see by the time they reached each part of the
- * page, then hides every fixed and sticky layer so none paints into the middle
- * of a shot. Hiding is how a consent banner leaves, since a click on one
- * decides something on the operator's behalf.
- *
- * Wheeling rather than `scrollTo`, because a lazy loader listening for wheel
- * or for intersection sees each step, and a jump to the bottom skips them.
+ * Loads what a reader would see by each part of the page, then hides every fixed
+ * and sticky layer. Hiding is how a consent banner leaves, since a click would
+ * decide something for the operator. It wheels rather than `scrollTo` so lazy loaders see each step.
  */
 export async function preparePage(page: Page): Promise<void> {
   await page
@@ -64,12 +58,9 @@ export async function preparePage(page: Page): Promise<void> {
 }
 
 /**
- * Runs again before every shot as well as once in preparation, since a consent
- * banner commonly mounts on a timer after load and a single pass misses it.
- * Starts at the root element rather than the body, since a consent manager
- * can attach its host straight to `<html>`, and walks into open shadow roots,
- * where such widgets mount and a document-level query never reaches. A closed
- * root stays out of reach.
+ * Runs again before every shot, since a consent banner commonly mounts on a timer
+ * after load. It starts at the root element and walks open shadow roots, where
+ * such widgets mount. A closed root stays out of reach.
  */
 async function hideFixedLayers(page: Page): Promise<void> {
   await page.evaluate(() => {
@@ -87,12 +78,9 @@ async function hideFixedLayers(page: Page): Promise<void> {
 }
 
 /**
- * Walks down from the root, splitting any block taller than the split
- * threshold into its full-width children, and tags each block it keeps so a
- * later step can find it again. Null when the root selector matched nothing.
- *
- * With no root named, `main` is tried and then `body`, since track 218 found
- * `main` on every site it tried and a page without one still has a body.
+ * Walks down from the root, splitting any block taller than the split threshold
+ * into its full-width children and tagging each block it keeps. Null when the
+ * root selector matched nothing. With no root named, `main` is tried and then `body`.
  */
 export async function splitBlocks(
   page: Page,
@@ -149,12 +137,9 @@ export async function splitBlocks(
 }
 
 /**
- * Joins each block shorter than the merge threshold to the section above it,
- * so a page built of thin bands comes back as the sections a person would
- * name. A short first block has nothing above it and joins the one below.
- *
- * A merge that would carry a section past the shot cap starts a new section
- * instead, so a run of bands under a tall block is not cut off by the cap.
+ * Joins each block shorter than the merge threshold to the section above it, and
+ * a short first block to the one below. A merge that would pass the shot cap
+ * starts a new section instead.
  */
 export function mergeBlocks(
   blocks: readonly Block[],
@@ -211,9 +196,8 @@ export interface Clip {
 
 /**
  * Scrolls a section's first block into view so a reveal-on-view block paints,
- * waits for it to settle, then measures the union of its blocks in document
- * coordinates, cut at the shot cap. Measured after the scroll rather than
- * taken from the split, since content loading above can move it.
+ * then measures the union of its blocks in document coordinates, cut at the shot
+ * cap. It measures after the scroll, since content loading above can move it.
  */
 export async function revealSection(
   page: Page,

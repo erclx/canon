@@ -137,8 +137,7 @@ describe.skipIf(!available())(
       server.stop()
     })
 
-    // Both bounds sit above CI's timed-project readings, averages of 5.00 and
-    // 5.90 px with a 3.99 px spread, since local load skews a local reading.
+    // Both bounds sit above CI's timed-project readings, since local load skews a local reading.
     it('should keep the drawn cursor within 8 px of the box on average', () => {
       expect(offsets).toHaveLength(2)
       for (const offset of offsets) expect(offset).toBeLessThan(8)

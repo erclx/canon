@@ -21,11 +21,9 @@ export interface SkillCensusEntry {
    */
   readonly scenarios: readonly string[]
   /**
-   * Each armed arm as `<category>:<command>/<arm>`. Qualified rather than bare,
-   * because a skill two scenarios drive can hold two arms of the same name and
-   * a bare list renders them as one label twice. Deduplicating instead would
-   * read as one arm where two assert, which understates in the one direction
-   * this report exists to keep honest.
+   * Each armed arm as `<category>:<command>/<arm>`, qualified since a skill two
+   * scenarios drive can hold two arms of one name, and deduplicating would read
+   * two asserting arms as one.
    */
   readonly armed: readonly string[]
   /** Why no arm asserts this skill. Present only on `exempt`. */
@@ -67,16 +65,9 @@ export function listSkills(root: string): string[] {
 }
 
 /**
- * Maps a scenario to the skill it drives, trying two spellings in order.
- *
- * `<category>-<command>` is the rule `canon/context/development/sandbox.md`
- * states. The bare `<command>` fallback reaches the rest, since
- * `claude/target-setup.ts` drives the `target-setup` skill, not a
- * `claude-target-setup` that does not exist.
- *
- * Returns undefined for a scenario driving no skill at all, which is every
- * `infra/` and `tooling/` scenario. Those exercise a CLI domain rather than a
- * skill and belong to the scenario count, not to this one.
+ * Maps a scenario to the skill it drives, trying `<category>-<command>` as
+ * `canon/context/development/sandbox.md` states, then the bare `<command>`.
+ * Returns undefined for a scenario driving no skill, as every `infra/` and `tooling/` one.
  */
 export function skillForScenario(
   category: string,
@@ -91,16 +82,9 @@ export function skillForScenario(
 }
 
 /**
- * Reads the exemption declarations, keyed by skill with a `reason` each.
- *
- * The reason cannot live in the arm's `manual` array, since `resolveVerdict`
- * fails any declaration carrying zero mechanical assertions, and an exempt
- * skill has no assertion to pair the prose with.
- *
- * Throws on a malformed file and on a table carrying no usable `reason`, rather
- * than reporting a smaller set, since either loss silently reclassifies the
- * skill to should-be-asserted. This is the stray-key rule `contentArray`
- * applies in `expect.ts`. `runCoverage` catches both and frames them.
+ * Reads the exemption declarations, keyed by skill with a `reason` each. The
+ * reason cannot live in the arm's `manual` array, since `resolveVerdict` fails a
+ * declaration with no mechanical assertion. A malformed file or a table with no usable `reason` throws, since either would silently reclassify the skill.
  */
 export function parseExemptions(source: string): Map<string, string> {
   const parsed = Bun.TOML.parse(source) as Record<string, unknown>
@@ -135,15 +119,8 @@ function readExemptions(root: string): Map<string, string> {
 
 /**
  * Gives every shipped skill an asserted, should-be-asserted, or exempt verdict
- * against declared expectations rather than against a scenario existing.
- *
- * A paired scenario is not an asserted skill. A scenario with no `expect.toml`
- * provisions a state and prints a human-readable `Expect:` line, so a run over
- * it exits zero having proved nothing.
- *
- * An armed arm outranks an exemption. A skill listed exempt that acquired an arm
- * is asserted in fact, and reporting the stale claim instead would hide the one
- * direction the verdict decays in.
+ * against declared expectations. A scenario with no `expect.toml` proves nothing,
+ * and an armed arm outranks an exemption, so a stale claim cannot hide.
  */
 export function collectCensus(
   root: string,
@@ -158,8 +135,7 @@ export function collectCensus(
     const skill = skillForScenario(scenario.category, scenario.command, known)
     if (skill === undefined) continue
 
-    // Accumulate rather than assign. Dropping a second scenario would report a
-    // skill unarmed while an arm under the other spelling asserts it.
+    // Accumulate rather than assign, since dropping a second scenario would report the skill unarmed.
     const pair = `${scenario.category}:${scenario.command}`
     const existing = pairings.get(skill) ?? { scenarios: [], armed: [] }
     existing.scenarios.push(pair)
@@ -184,8 +160,7 @@ export function collectCensus(
     return { skill, verdict: 'should-be-asserted', scenarios, armed }
   })
 
-  // An exemption outranked by an arm is reported as wrong. Reading `entries`
-  // rather than recomputing keeps the report in step with the verdict.
+  // An exemption outranked by an arm is reported as wrong, read from `entries` to stay in step with the verdict.
   const assertedSkills = new Set(
     entries.filter((e) => e.verdict === 'asserted').map((e) => e.skill),
   )

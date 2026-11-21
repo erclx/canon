@@ -105,10 +105,9 @@ interface Confidence {
 }
 
 /**
- * The columns the confidence ratio reads, fixed by `claude/skills/design-record/references/design.md`. The
- * first column of each table names its row, and `Multiplier` and `When used`
- * restate what the row already carries, so none of them is something a source
- * could anchor and none belongs in the denominator.
+ * The columns the confidence ratio reads, fixed by `claude/skills/design-record/references/design.md`.
+ * `Multiplier` and `When used` restate what the row carries, so no source could
+ * anchor them and none belongs in the denominator.
  */
 const ANCHORABLE = {
   borders: ['Radius', 'Width'],
@@ -118,10 +117,9 @@ const ANCHORABLE = {
 } as const
 
 /**
- * A cell counts when it carries a tag, or when it holds a value in a column a
- * source could anchor. A blank the record left unfilled is neither, and so is a
- * row name. Counting a tagged cell whichever column it sits in is what keeps a
- * marker the preview draws from sitting outside the ratio printed beside it.
+ * A cell counts when it carries a tag, or holds a value in a column a source
+ * could anchor. A blank or a row name is neither. A tagged cell counts in any
+ * column, so a marker the preview draws never sits outside the printed ratio.
  */
 function confidence(doc: DesignDoc): Confidence {
   const tables: ReadonlyArray<readonly [Row[], readonly string[]]> = [
@@ -187,16 +185,9 @@ function escape(s: string): string {
 }
 
 /**
- * The preview page's own chrome, read off the toolkit's design source rather
- * than written as literals here.
- *
- * It takes a `--preview-` prefix rather than the `--color-` one the sheet beside
- * it emits, because that sheet is built from whichever document is being
- * previewed. A target's record is free to declare a role this page also uses,
- * and sharing one name would let the page being previewed repaint the page
- * doing the previewing.
- *
- * The light roles are the ones read, since the preview is a light document.
+ * The preview page's own chrome, read off the toolkit's design source and
+ * prefixed `--preview-` rather than `--color-`, since a previewed record may
+ * declare a role this page also uses and would repaint the page doing the previewing.
  */
 function previewChrome(): string {
   const roles: ReadonlyArray<readonly [string, string]> = [

@@ -93,16 +93,14 @@ export default scenario({
     for (const file of rules)
       copyRule(ctx, file, ruleDest(rulesDir, file, 'build/.claude/rules/canon'))
 
-    // `regen/` is shaped like the toolkit, since `gov regen` produces a consumed
-    // copy, and needs a catalog, a record, and an internal rule for every branch.
+    // `regen/` is shaped like the toolkit, since `gov regen` produces a consumed copy.
     ctx.mkdir('regen/internal/rules/claude')
     ctx.mkdir('regen/.claude/rules/canon/claude')
     ctx.run('cp', ['-R', join(ctx.root, 'governance'), 'regen/governance'])
 
     ctx.fixtures('infra', 'gov', 'shared', 'regen')
 
-    // A destination-only file the regen must delete, and a drifted copy it must
-    // overwrite. Together they are the before state the run is judged against.
+    // A destination-only file the regen must delete, and a drifted copy it must overwrite.
     ctx.write(
       'regen/.claude/rules/canon/claude/999-orphan.md',
       '# orphan, no source anywhere\n',
@@ -117,8 +115,7 @@ export default scenario({
     ctx.git('add', '.')
     ctx.commit('chore(sandbox): scaffold gov test directories')
 
-    // A repository of its own, built after the outer commit so it is no gitlink,
-    // since `test-order` reads history, and each of the three commits is a verdict.
+    // A repository of its own, built after the outer commit so it is no gitlink, since `test-order` reads history.
     seedTestOrderHistory(ctx)
 
     ctx.log.step('Governance sandbox')
@@ -161,8 +158,7 @@ export default scenario({
     },
     regen: (ctx) => {
       ctx.log.step('Running: canon gov regen --root regen/')
-      // The command prints nothing on success, so the tree after it is the whole
-      // result. Listed rather than exec'd for that reason.
+      // The command prints nothing on success, so the tree after it is the whole result.
       ctx.run('bun', [
         join(ctx.root, 'src', 'cli.ts'),
         'gov',
@@ -188,8 +184,7 @@ export default scenario({
       )
     },
     'test-order': (ctx) => {
-      // Streams and status land on disk for `canon sandbox check`, and the status is
-      // held, since a finding exits 2 by design and would otherwise abort the arm.
+      // The status is held, since a finding exits 2 by design and would abort the arm.
       ctx.log.step('Running: canon gov test-order --root test-order')
       const result = ctx.capture('bun', [
         join(ctx.root, 'src', 'cli.ts'),

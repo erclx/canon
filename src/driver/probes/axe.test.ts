@@ -4,12 +4,9 @@ import type { Browser } from 'playwright-core'
 import { AxeEngineMissing, probeAxe, readAxeEngine } from '@/driver/probes/axe'
 
 /**
- * Pins the split the review gate rests on: a gate-list violation is marked as
- * one, a heuristic rule and an undecided result are reported and never gate,
- * and a page the engine never reached refuses rather than reading as clean.
- *
- * The suite needs a browser binary. CI installs none, so it skips there rather
- * than failing, which means a green pipeline is not evidence this passed.
+ * Pins the split the review gate rests on: a gate-list violation is marked, a
+ * heuristic or undecided result is reported and never gates, and an unreached
+ * page refuses. It skips without a browser binary, so green is not evidence it passed.
  */
 
 /** Low-contrast text, a button with no name, and no `lang`, with a title so only three fire. */
@@ -139,8 +136,7 @@ describe.skipIf(!hasBrowser)('probeAxe against a rendered page', () => {
     const findings = await probeAxe(page)
     await page.close()
 
-    // `color-contrast` is on the gate list, so a probe keying the gate off the
-    // rule alone would hold the review open on a result axe says needs a person.
+    // `color-contrast` is on the gate list, so keying the gate off the rule alone would hold the review on an undecided result.
     expect(findings).toEqual([
       expect.objectContaining({
         rule: 'color-contrast',
@@ -166,8 +162,7 @@ describe.skipIf(!hasBrowser)('probeAxe against a rendered page', () => {
     })
     await page.close()
 
-    // The engine ran rather than calling the page's `run`, which would have
-    // returned a string and no results at all.
+    // The engine ran rather than the page's `run`, which would have returned a string and no results.
     expect(findings.map((finding) => finding.rule)).toEqual(['html-has-lang'])
     expect(after).toEqual({ axe: 'the page', doT: 'the page', encode: false })
   }, 120_000)

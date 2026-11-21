@@ -2,16 +2,9 @@ import type { Page } from 'playwright-core'
 import type { Finding } from '@/driver/steps'
 
 /**
- * Measures every `<details>` on the page twice, once shut and once open, and
- * judges only the open reading.
- *
- * A closed `<details>` still reports a layout box, and the box is nonsense, so
- * a shut menu's rows read as tiny tap targets hanging off the viewport.
- * Filtering closed ones out instead hides a dropdown that overflows only while
- * open, so both are taken and the closed one is context rather than judged.
- *
- * Discovery is automatic rather than selector-driven, since a probe taking a
- * selector misses every menu its author did not think to name.
+ * Measures every `<details>` twice, shut and open, and judges only the open
+ * reading, since a closed one reports a nonsense box but skipping it hides a
+ * dropdown that overflows only while open. Discovery is automatic, not selector-driven.
  */
 
 /** The smallest a control may be before a finger cannot reliably hit it. */
@@ -51,8 +44,7 @@ export async function probeDetails(page: Page): Promise<Finding[]> {
       for (const element of Array.from(document.querySelectorAll('details'))) {
         if (!(element instanceof HTMLDetailsElement)) continue
 
-        // Named for the state it was actually in, since a step may have clicked the
-        // menu open, and calling that reading shut would misreport the evidence.
+        // Named for the state it was in, since a step may have clicked the menu open.
         const wasOpen = element.open
         const entry = box(element)
         const entryState = wasOpen ? 'already open' : 'shut'
@@ -62,8 +54,7 @@ export async function probeDetails(page: Page): Promise<Finding[]> {
           element.querySelectorAll('a[href], button, [role="menuitem"], li'),
         )
 
-        // The panel is routinely out of flow, so the element's own box says nothing
-        // of where the menu landed. Every part is measured for the worst overhang.
+        // The panel is routinely out of flow, so every part is measured for the worst overhang.
         let worst: { part: Element; off: number; left: number } | undefined
         for (const part of [element, ...element.querySelectorAll('*')]) {
           const partBox = box(part)
@@ -93,8 +84,7 @@ export async function probeDetails(page: Page): Promise<Finding[]> {
           })
         }
 
-        // Restored because the probe runs between the caller's own steps, and a
-        // menu this left hanging open is a state no later step asked for.
+        // Restored because the probe runs between the caller's steps, and no later step asked for an open menu.
         element.open = wasOpen
       }
 

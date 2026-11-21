@@ -2,10 +2,9 @@
 
 # canon-no-seed: runs this checkout's src/cli.ts, which no target ships, so seeding this alone ships a permanent no-op. It already no-ops safely where src/cli.ts is absent.
 
-# Claude Code's worktree entry writes core.bare into the shared config and its
-# exit never restores it, so every later git command fails. `canon gate run`
-# runs the same repair, but a session that only reads git never runs the suite,
-# so the tool call is the trigger that fires while the session is still working.
+# Claude Code's worktree entry writes core.bare into the shared config and exit
+# never restores it, so every later git command fails. `canon gate run` repairs
+# it too, but a session that only reads git never runs it, so this tool call is the trigger.
 
 # Draining stdin with the builtin keeps the flag read the only process on the
 # path that every invocation but a handful takes.

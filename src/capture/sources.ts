@@ -21,13 +21,9 @@ export type CaptureSource =
   | { readonly kind: 'url'; readonly url: string; readonly pngPath: string }
 
 /**
- * Pairs each HTML source with the PNG it renders to. A directory expands to
- * every `.html` directly inside it, so adding a capture is a file drop rather
- * than a flag. Omitting `outDir` writes the PNG beside its source.
- *
- * A `http(s)://` source has no directory to walk and no basename on disk to
- * name the PNG from, so `outDir` there is read as the destination file
- * itself rather than a directory, and the caller is what requires it.
+ * Pairs each HTML source with the PNG it renders to. A directory expands to every
+ * `.html` directly inside it, and omitting `outDir` writes the PNG beside its
+ * source. A `http(s)://` source has no basename, so `outDir` there is the destination file.
  */
 export function resolveCaptureSources(
   sourcePath: string,
@@ -89,10 +85,9 @@ export const GENERIC_FAMILIES: ReadonlySet<string> = new Set([
 ])
 
 /**
- * Whether the first family of a computed `font-family` is a generic keyword.
- * Takes the raw declaration rather than `primaryFontFamily`'s result, since
- * quoting is what separates the keyword from a family that happens to share its
- * name, and the stripped form has lost it. Keywords match case-insensitively.
+ * Whether the first family of a computed `font-family` is a generic keyword. It
+ * takes the raw declaration, since quoting separates the keyword from a family
+ * sharing its name. Keywords match case-insensitively.
  */
 export function isGenericFamily(declaration: string): boolean {
   const first = declaration.split(',')[0]?.trim() ?? ''
@@ -100,10 +95,9 @@ export function isGenericFamily(declaration: string): boolean {
 }
 
 /**
- * Reduces the computed `font-family` of each rendered text element to the
- * distinct families a capture has to prove resolved, in document order, so a
- * frame that sets its font on any ancestor of its text is checked against the
- * face the text actually draws in.
+ * Reduces each rendered text element's computed `font-family` to the distinct
+ * families a capture has to prove resolved, in document order, so a font set on
+ * any ancestor is checked against the face the text draws in.
  */
 export function textFamilies(declarations: readonly string[]): string[] {
   const families = declarations.map(primaryFontFamily).filter(Boolean)

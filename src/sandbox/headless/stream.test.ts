@@ -129,8 +129,7 @@ describe('reduceStream on what the session wrote', () => {
     expect(stream.commands).toEqual(['echo b > /main/.canon/tasks/b.md'])
   })
 
-  // A subagent's tool call arrives as its own assistant line carrying the
-  // spawning call's id, and its write is the session's too.
+  // A subagent's tool call arrives as its own assistant line carrying the spawning call's id, and its write is the session's.
   it('should read a subagent call carrying a parent tool use id', () => {
     const out = [
       toolCall('Write', { file_path: '/main/.canon/plans/sub.md' }, 'toolu_1'),

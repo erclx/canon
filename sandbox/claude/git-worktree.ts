@@ -7,14 +7,8 @@ import { type StageContext, scenario } from '@/sandbox/scenario'
 
 /**
  * Fakes a live session occupying `path`, so the cleanup arm proves occupancy
- * holds a tree back independently of merge state.
- *
- * The registry is the real one at CLAUDE_CONFIG_DIR, since provisioning and
- * the later `claude -p` run share no environment. The process bounds itself at
- * six hours, so a record from an earlier drive dies on its own, and the pid in
- * the filename keeps a second drive from overwriting the first. The occupant
- * stays in the provisioning process group, unref'd rather than detached,
- * because equivalence reaps it by killing that group.
+ * holds a tree back independently of merge state. The occupant stays in the
+ * provisioning process group, unref'd, because equivalence reaps it by killing that group.
  */
 function registerOccupant(ctx: StageContext, path: string): void {
   const worktreePath = resolve(ctx.dir, path)

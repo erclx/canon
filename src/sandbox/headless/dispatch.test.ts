@@ -154,8 +154,7 @@ describe('reapProcessGroup', () => {
     expect(reapProcessGroup(child.pid ?? 0)).toBe('clear')
   })
 
-  // The safety property travels with the function, since a later caller passing
-  // the wrong group id would cost the operator's own shell.
+  // The safety property travels with the function, since a wrong group id would cost the operator's own shell.
   it('should refuse a group id matching the calling process', () => {
     const own = Number(processGroupOf(process.pid))
 
@@ -168,8 +167,7 @@ describe('reapProcessGroup', () => {
     expect(reapProcessGroup(child.pid ?? 0)).toBe('reaped-term')
   })
 
-  // A survivor can ignore SIGTERM, so a reap sending one signal and reporting
-  // success would leave it running.
+  // A survivor can ignore SIGTERM, so a reap sending one signal and reporting success would leave it running.
   it('should escalate to SIGKILL for a survivor that ignores SIGTERM', async () => {
     const ready = join(root, 'trap-installed')
     const stubborn = writeScript('stubborn', [
@@ -184,8 +182,7 @@ describe('reapProcessGroup', () => {
     expect(reapProcessGroup(child.pid ?? 0)).toBe('reaped-kill')
   }, 30_000)
 
-  // Every member, not the leader alone, since a surviving dispatch is a child of
-  // the session, and reaping only the held pid would miss it.
+  // Every member, not the leader alone, since a surviving dispatch is a child of the session.
   it('should reap a child the group leader left behind', async () => {
     const parent = writeScript('parent', ['sleep 30 &', 'exit 0'])
     const child = startGroup(parent)
@@ -293,8 +290,7 @@ describe('describeSession', () => {
     )
   })
 
-  // The name comes from whatever peer claimed the session, and a newline inside
-  // it would split one record into two entries.
+  // The name comes from whatever peer claimed the session, so a newline in it would split one record in two.
   it('should keep one record to one line when the name spans lines', () => {
     const dir = sessionsDir()
     writeRecord('multiline.json', { cwd: '/sandbox', name: 'rollout\nkestrel' })
@@ -304,8 +300,7 @@ describe('describeSession', () => {
     )
   })
 
-  // A session that started and exited inside the run takes its record with it,
-  // and the name is still the whole of what the report needs to be actionable.
+  // A session that started and exited inside the run takes its record with it, and the name still reports.
   it('should report the name alone when the record is already gone', () => {
     expect(describeSession(sessionsDir(), 'vanished.json')).toBe(
       'vanished.json: record already gone',

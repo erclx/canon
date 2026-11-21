@@ -15,27 +15,15 @@ const DISPATCH_SHIM = fileURLToPath(
 )
 
 /*
- * The bound on a nested background dispatch, and the recording behind it.
- *
- * A dispatched `claude --bg` session writes into neither the sandbox nor the
- * scratch directories the watches in `watch.ts` read, so the escape watch
- * cannot see one, and `SIGTERM` alone does not end it.
- *
- * The three mechanisms sit here rather than in `run.ts`, the only caller, so
- * `dispatch.test.ts` can drive the shim against a stub binary and the reap
- * against a `sleep` without spawning the thing the bound exists to prevent.
+ * The bound on a nested background dispatch and the recording behind it, since
+ * a dispatched `claude --bg` session writes where the `watch.ts` watches never
+ * read. The three mechanisms sit here so `dispatch.test.ts` can drive them without spawning the real thing.
  */
 
 /**
  * The prevention. Writes a `claude` that refuses a background dispatch by flag
  * name and delegates everything else, placed first on the session's PATH. The
- * refusal lives in `dispatch-shim.sh`, so the shell gate lints it, and the
- * wrapper written here runs it with the real binary as its first argument.
- *
- * The real binary is baked into the wrapper, since an env var carrying it would
- * hand any arm the exact string that walks around the shim. The refusal names
- * its layer, so an arm meeting it does not read it as the harness broken. A
- * dispatch by absolute path skips PATH, which `reapProcessGroup` backstops.
+ * real binary is baked in rather than passed by env var, which would hand an arm the string that walks around the shim.
  */
 export function installDispatchShim(dir: string, real: string): void {
   const wrapper = [
@@ -63,13 +51,9 @@ export function processGroupOf(pid: number): string | undefined {
 }
 
 /**
- * True while any live process still carries this group id. Reads the whole
- * table rather than `ps -g`, which selects by session on some builds.
- *
- * A zombie does not count. A leader this process spawned and has not yet
- * waited on stays in the table as one after the signal lands, and the wait
- * below blocks the event loop that would collect it, so signal 0 alone reports
- * a group that is already dead as a survivor.
+ * True while any live process still carries this group id, reading the whole
+ * table rather than `ps -g`. A zombie does not count, since the wait below blocks
+ * the loop that would collect it and signal 0 alone would call a dead group a survivor.
  */
 function processGroupAlive(pgid: number): boolean {
   const ps = spawnSync('ps', ['-eo', 'pgid=,stat='], { encoding: 'utf8' })
@@ -98,16 +82,9 @@ export type ReapState =
   | 'refused-own-group'
 
 /**
- * The backstop. Signals a process group the runner created, escalating rather
- * than sending one signal and reporting success. Returns its outcome and never
- * throws, since a survivor is reported rather than abandoning the verdict.
- *
- * It refuses this process's own group, so the property travels with the
- * function rather than living in one caller, since getting the argument wrong
- * costs the operator's own shell. Synchronous, so a signal handler can run it.
- *
- * It cannot reach a dispatch that called `setsid` on its way out, which leaves
- * the group before this reads it. That is the half the shim covers.
+ * The backstop. Signals a process group the runner created, escalating, and
+ * returns its outcome without throwing. It refuses this process's own group
+ * and cannot reach a dispatch that called `setsid` on its way out, which the shim covers.
  */
 export function reapProcessGroup(pgid: number): ReapState {
   if (String(pgid) === processGroupOf(process.pid)) return 'refused-own-group'
@@ -132,11 +109,9 @@ function signalGroup(pgid: number, signal: NodeJS.Signals): void {
 }
 
 /**
- * The client's own session registry, which is the only surface a nested
- * dispatch leaves a trace on that this harness can read. It is client-owned and
- * carries no contract, so a client that stops writing a record per session
- * breaks the detection silently. That is why what reads it reports rather than
- * asserts.
+ * The client's own session registry, the only surface a nested dispatch leaves a
+ * trace on that this harness can read. It carries no contract, so what reads it
+ * reports rather than asserts.
  */
 export function sessionsDir(env: NodeJS.ProcessEnv = process.env): string {
   const config = env.CLAUDE_CONFIG_DIR
@@ -160,11 +135,9 @@ export interface SessionSnapshot {
 }
 
 /**
- * Record names only, never hashes. A live session rewrites its own record on
- * every status change, so a content manifest would name every session running
- * beside this one, which is the noise the escape watch was already narrowed to
- * avoid. A record that appears between the two snapshots is a session that
- * started during the run, and that is the whole question.
+ * Record names only, never hashes, since a live session rewrites its record on
+ * every status change and a content manifest would name every session running
+ * beside this one. A record appearing between the snapshots started during the run.
  */
 export function snapshotSessions(dir: string): SessionSnapshot {
   if (!existsSync(dir)) return { names: [], isWatched: false }
@@ -192,10 +165,8 @@ export function sessionsBetween(
 }
 
 /**
- * The side `sessionsBetween` drops. A record present on both sides is a
- * session that was already running before this run started and still was
- * after, which rules it out as this run's own dispatch and rules it in as a
- * witness able to explain a write the escape watch attributes to nobody.
+ * The side `sessionsBetween` drops. A record present on both sides was already
+ * running, which rules it out as this run's dispatch and in as a witness to a write.
  */
 export function sessionsConcurrent(
   before: SessionSnapshot,
@@ -207,14 +178,9 @@ export function sessionsConcurrent(
 }
 
 /**
- * Turns a record name into a line a person can act on. The file can be gone by
- * the time this reads it, since a session that started and exited inside the
- * run takes its record with it, so an unreadable record still reports its name
- * rather than dropping out of the list.
- *
- * One record is one line. The name is written by whatever peer claimed the
- * session, so a newline inside it would split one record across two entries in
- * a list every reader takes as one line each.
+ * Turns a record name into a line a person can act on. An unreadable record still
+ * reports its name, since the file can be gone. One record is one line, since a
+ * newline in a peer-written name would split it across two entries.
  */
 export function describeSession(dir: string, name: string): string {
   let record: unknown

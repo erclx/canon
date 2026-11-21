@@ -6,14 +6,9 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { CHROMIUM_REVISION, browsersRoot } from '@/browser/agent-cli'
 
 /**
- * Drives `canon browser swipe` end to end against a served pinned section,
- * since only a real browser shows whether a protocol touch drag fires touch
- * listeners and moves the page. The pinned CLI refuses a `file:` address, so
- * the fixture is served over http.
- *
- * The suite needs Chromium revision 1247 and skips without it. The E2E Suites
- * job in verify.yml installs that revision through the agent CLI and fails
- * before any suite starts when it is missing.
+ * Drives `canon browser swipe` against a served pinned section, since only a real
+ * browser shows a protocol touch drag fires touch listeners. It needs Chromium
+ * revision 1247 and skips without it, which verify.yml fails on before any suite.
  */
 
 const PAGE = readFileSync(

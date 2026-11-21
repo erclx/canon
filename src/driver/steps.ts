@@ -7,21 +7,17 @@ import {
 
 /**
  * The interaction vocabulary a caller writes a run in, and the runner that
- * performs one step of it.
- *
- * It carries no pointer travel and no caption, since a measurement wants the
- * page in the next state as directly as the engine can put it there, and every
- * millisecond of travel is a millisecond a probe is not reading.
+ * performs one step of it. It carries no pointer travel or caption, since a
+ * measurement wants the page in the next state as directly as possible.
  */
 
 /** How long a transition is given to finish before anything measures the result. */
 const SETTLE_MS = 250
 
 /**
- * The probes a step can ask for. A fixed catalog rather than the pluggable
- * subject system `@/inventory/subjects` carries, because every lesson behind
- * these was a probe running at the wrong moment or trusting the wrong signal,
- * rather than a probe a project needed to author for itself.
+ * The probes a step can ask for, a fixed catalog rather than the pluggable
+ * subject system `@/inventory/subjects` carries, since each lesson behind them
+ * was a probe running at the wrong moment or trusting the wrong signal.
  */
 export const PROBE_NAMES = [
   'focus',
@@ -43,11 +39,9 @@ export const DEFAULT_PROBES: readonly ProbeName[] = PROBE_NAMES.filter(
 )
 
 /**
- * One thing a probe measured and judged wrong. The step and the viewport are
- * filled in by the orchestrator rather than by the probe, since a probe runs
- * with no knowledge of which pass it is on and a finding is unreadable without
- * both. A `measured` row carries what a reader needs to check the judgment
- * without rerunning the probe.
+ * One thing a probe measured and judged wrong. The orchestrator fills in the step
+ * and viewport, since a probe does not know which pass it is on. A `measured`
+ * row carries what a reader needs to check the judgment without rerunning.
  */
 export interface Finding {
   readonly probe: ProbeName
@@ -130,10 +124,9 @@ function refused(reason: PlanRefusal, detail: string): PlanRead {
 }
 
 /**
- * Reads a run out of a JSON document. A file rather than a config key at the
- * project root, and JSON rather than the TOML `canon inventory` declares its
- * routes in, because a route catalog is state a project holds and an
- * interaction sequence is a script written for one question.
+ * Reads a run out of a JSON document, a file rather than a project-root config
+ * key and JSON rather than TOML, since an interaction sequence is a script
+ * written for one question and not state a project holds.
  */
 export function readDriverPlan(source: string): PlanRead {
   let document: unknown
@@ -184,8 +177,7 @@ export function readDriverPlan(source: string): PlanRead {
     if (step.probes) {
       const named = readProbeList(step.probes)
       if (typeof named === 'string') return refused('unknown-probe', named)
-      // Refused like the run-level list, since an empty list runs the step and
-      // measures nothing, which reads the same as a pass that looked.
+      // Refused like the run-level list, since an empty list measures nothing and reads as a pass.
       if (named.length === 0) {
         return refused(
           'no-probes',

@@ -18,9 +18,8 @@ import { HOLD_MS, withinCap } from '@/take/stepper'
 
 /**
  * Films a beat in real time through Playwright's screencast, for a page frame
- * stepping cannot drive. It films the window one to one, so it goes
- * soft under a zoom where a stepped take stays sharp, and its frames land when
- * the page paints rather than one per step.
+ * stepping cannot drive. It films the window one to one, so it goes soft under a
+ * zoom, and its frames land when the page paints rather than one per step.
  */
 
 const FRAME_MS = 1000 / FPS
@@ -60,8 +59,7 @@ export async function filmScreencast(request: {
 }): Promise<ScreencastTake> {
   const { viewport } = request
   const start = startOf(viewport)
-  // Ahead of the launch, so a folder that refuses leaves no browser holding the
-  // process open past its refusal.
+  // Ahead of the launch, so a folder that refuses leaves no browser holding the process open.
   const scratch = openSpool(request.clip)
   const browser = await chromium
     .launch({
@@ -77,8 +75,7 @@ export async function filmScreencast(request: {
   let still: (() => Promise<Buffer | undefined>) | undefined
   try {
     const page = await browser.newPage({ viewport })
-    // Best effort, so a closed or crashed page leaves the refusal standing
-    // without a still rather than replacing it.
+    // Best effort, so a closed or crashed page leaves the refusal standing without a still.
     still = () =>
       page
         .screenshot({ type: 'jpeg', quality: 95, timeout: STILL_CAP_MS })
@@ -87,8 +84,7 @@ export async function filmScreencast(request: {
     const network = request.beat.network
       ? new NetworkTally(request.beat.network)
       : undefined
-    // Every request is routed, since `network` does the matching. A held route
-    // is never answered, so it stays pending until the browser closes.
+    // Every request is routed, since `network` does the matching, and a held route stays pending until close.
     if (network) {
       await page.route(
         () => true,
@@ -112,8 +108,7 @@ export async function filmScreencast(request: {
       hold: (ms) => page.waitForTimeout(ms),
       align: () => nextFrame(page, ALIGN_CAP_MS).then(() => undefined),
       pointer: async (input) => {
-        // A move waited on its frame already, so padding it would land the
-        // next one a frame late.
+        // A move waited on its frame already, so padding it would land the next one a frame late.
         if (input.type === 'move') return send(page.mouse, input)
         const sent = clock()
         await send(page.mouse, input)
@@ -124,8 +119,7 @@ export async function filmScreencast(request: {
         await page.keyboard.insertText(text)
         await page.waitForTimeout(FRAME_MS)
       },
-      // Playwright's mouse reads the modifiers its keyboard holds, so a press
-      // here is all a modified click or drag needs on this route.
+      // Playwright's mouse reads the modifiers its keyboard holds, so a press is all a modified click needs.
       press: async (input) => {
         if (input.type === 'down') await page.keyboard.down(input.key)
         else await page.keyboard.up(input.key)
@@ -144,11 +138,9 @@ export async function filmScreencast(request: {
     let spoolFailure: unknown
     await page.screencast.start({
       size: viewport,
-      // The docs tie this to `path`, but 1.64.1 still reads it here, where it
-      // doubles the frames Chromium may hold unacknowledged.
+      // The docs tie this to `path`, but 1.64.1 still reads it here, doubling the frames Chromium may hold unacknowledged.
       fps: FPS,
-      // Spooled, since a busy page sends many megabytes a second, and synchronous,
-      // so Chromium's frame pacing waits on no encoder. A throw here goes unawaited.
+      // Spooled and synchronous, so Chromium's frame pacing waits on no encoder. A throw here goes unawaited.
       onFrame: ({ data, timestamp }) => {
         const stamp = frameStamp({
           presentedWall: timestamp,
@@ -207,10 +199,9 @@ interface SpooledFrame {
 }
 
 /**
- * Opens the folder holding one take's frames, beside its clip rather than in a
- * temp folder nothing sweeps, since a 34 s beat on a busy page spools about
- * 650 MB. A take killed outright runs no handler, so it leaves the folder where
- * its owner looks, and the next take of that beat clears it.
+ * Opens the folder holding one take's frames beside its clip, not in a temp
+ * folder nothing sweeps, since a 34 s beat on a busy page spools about 650 MB. A
+ * take killed outright leaves it where its owner looks, and the next take clears it.
  */
 function openSpool(clip: string): { folder: string; remove: () => void } {
   const folder = join(dirname(clip), 'spool')
@@ -222,8 +213,7 @@ function openSpool(clip: string): { folder: string; remove: () => void } {
     process.off('SIGTERM', interrupt)
     rmSync(folder, { recursive: true, force: true })
   }
-  // A signal skips the exit event, so it removes the folder and then re-raises
-  // itself with this handler gone, ending the process as it would have.
+  // A signal skips the exit event, so it removes the folder and re-raises itself with this handler gone.
   const interrupt = (signal: NodeJS.Signals): void => {
     remove()
     process.kill(process.pid, signal)
@@ -292,15 +282,9 @@ function nextFrame(page: Page, capMs: number): Promise<number | undefined> {
 const PAINTED = '__canonTakePainted'
 
 /**
- * How long a move takes to show in the clip, measured by sending one aligned
- * move to the window's center and reading the animation frame after its handler against
- * the frame it was aligned to. Both readings are page time, so no clock mapping
- * is needed. The screencast captures a frame once it is presented, one page
- * frame after that frame begins, so the lag counts one page frame past the
- * readings, read off two consecutive animation frames rather than assumed from
- * the clip's rate. That held a dragged box within 7 px on every run where the
- * readings alone left 10 to 15. Undefined when the page gives no frame to read,
- * and the pointer rests on `start` either way.
+ * How long a move takes to show in the clip, measured by sending one aligned move
+ * to the window's center and reading the animation frame after its handler. The
+ * lag counts one page frame past the readings. Undefined when no frame is read.
  */
 async function calibrate(
   page: Page,

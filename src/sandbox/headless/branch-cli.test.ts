@@ -28,8 +28,7 @@ const shimDir = (): string => {
 }
 
 describe('installCanonShim', () => {
-  // The release refuses every `canon sandbox` verb, so a zero exit here is the
-  // checkout answering rather than whatever `canon` the PATH holds.
+  // The release refuses every `canon sandbox` verb, so a zero exit is the checkout answering.
   it('should reach a verb the release refuses', () => {
     const dir = shimDir()
     installCanonShim(dir, process.execPath, join(checkoutRoot, 'src/cli.ts'))

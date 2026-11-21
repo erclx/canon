@@ -33,9 +33,8 @@ function hashFiles(base: string, keep: (name: string) => boolean): Manifest {
 
 /**
  * Records a hash per file so the post-run comparison can name what the session
- * wrote. A diff against `refs/sandbox/baseline` cannot stand in for this: an arm
- * that sets SANDBOX_SKIP_AUTO_COMMIT leaves its last stage uncommitted, so the
- * fixtures the harness staged would read as session writes.
+ * wrote. A diff against `refs/sandbox/baseline` cannot stand in, since an arm
+ * setting SANDBOX_SKIP_AUTO_COMMIT leaves staged fixtures that would read as writes.
  */
 export function snapshotTree(dir: string): Manifest {
   return hashFiles(dir, (name) => name !== '.git')
@@ -44,9 +43,7 @@ export function snapshotTree(dir: string): Manifest {
 /**
  * Reports both sides of a change, so a deletion is a write. Reporting only the
  * after side would let a file removed outside the declared scope produce no
- * assertion at all, which is the one way this check stayed weaker than the
- * permission scoping it replaced. A modified file differs on both sides and
- * reports once.
+ * assertion. A modified file differs on both sides and reports once.
  */
 export function writesBetween(before: Manifest, after: Manifest): string[] {
   const paths = new Set([...before.keys(), ...after.keys()])
@@ -57,12 +54,9 @@ export function writesBetween(before: Manifest, after: Manifest): string[] {
 }
 
 /**
- * The roots a run must not write shared session scratch to, since
- * `snapshotTree` reads the sandbox alone and a write resolved against a
- * toolkit root would otherwise go unseen. It makes an escape visible, not
- * impossible: a write to a home directory or a sibling worktree is not watched.
- * The main root joins the list whenever it differs from the launch root, since
- * the scratch rule sends a session there from a linked worktree.
+ * The roots a run must not write shared session scratch to, since `snapshotTree`
+ * reads the sandbox alone. It makes an escape visible, not impossible. The main
+ * root joins whenever it differs from the launch root, as the scratch rule sends a session there.
  */
 export function escapeRoots(projectRoot: string): string[] {
   const listing = spawnSync('git', ['worktree', 'list', '--porcelain'], {
@@ -80,15 +74,9 @@ export function escapeRoots(projectRoot: string): string[] {
 }
 
 /**
- * The four directories the seed's shared-scratch rule names, and the whole of
- * where an escape lands, so watching only these costs no detection. A watch
- * over the whole root would report the operator's own editing as an escape.
- *
- * The watch reaches `escapeRoots` times these four and nothing past them, so a
- * nested run's escape is invisible here and a nested background dispatch
- * reports through `sessions` instead. An arm meant to write past the sandbox
- * declares `escape_scope` in its `expect.toml`. Read
- * `canon/context/development/sandbox.md` before claiming more.
+ * The four directories the seed's shared-scratch rule names, the whole of where
+ * an escape lands. A nested run's escape is invisible here and a nested background
+ * dispatch reports through `sessions`. Read `canon/context/development/sandbox.md` before claiming more.
  */
 export const ESCAPE_SCRATCH_DIRS = [
   '.canon/plans',
@@ -100,10 +88,9 @@ export const ESCAPE_SCRATCH_DIRS = [
 export interface RootSnapshot {
   readonly manifest: Manifest
   /**
-   * The root held at least one of the four directories. A root with none of
-   * them contributes no manifest and no diff, which reads identically to a watch
-   * that ran clean, so `checkEscapeScope` needs this to tell "watched and clean"
-   * from "nothing to watch" apart.
+   * The root held at least one of the four directories. A root with none reads
+   * like a clean watch, so `checkEscapeScope` needs this to tell "watched and
+   * clean" from "nothing to watch".
    */
   readonly isWatched: boolean
 }
@@ -129,13 +116,8 @@ export interface AttributedEscapes {
 
 /**
  * Splits the watched writes into those a tool call of this session names and
- * those none does, so a parallel session's write stops failing an arm.
- *
- * A path ties when a file-writing call targeted it or a `Bash` command spells
- * it or its scratch directory behind a prefix. A bare relative path ties only
- * once commands also spell the path's root and the `.canon` segment. A stream
- * with no call ties every path. A shell write that never spells the root nor
- * the prefixed directory ties nothing and reads as foreign.
+ * those none does, so a parallel session's write stops failing an arm. A bare
+ * relative path ties only once commands also spell its root, and a stream with no call ties every path.
  */
 export function attributeEscapes(
   escapes: readonly string[],
@@ -187,9 +169,7 @@ function entersRootOf(path: string, commands: readonly string[]): boolean {
 
 /**
  * True when `command` spells `/<dir>` behind a prefix that could resolve to a
- * watched root. A prefix of dots, slashes, or a tilde alone resolves against the
- * sandbox, the filesystem root, or the home directory, none of them a root the
- * watch reads.
+ * watched root. A prefix of dots, slashes, or a tilde alone resolves elsewhere.
  */
 function namesScratchDir(command: string, dir: string | undefined): boolean {
   if (dir === undefined) return false

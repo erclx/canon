@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # Writes the step summary saying whether the captured landing page frames match
-# the committed baseline, called by the capture job in pr-visual-checks.yml. A
-# moved capture is expected when a catalog the page counts has moved, so it
-# reports and never fails.
+# the committed baseline. A moved capture is expected when a counted catalog
+# moved, so it reports and never fails.
 set -e
 
 if git diff --quiet -- assets/evidence/home; then

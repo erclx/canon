@@ -17,15 +17,9 @@ import { RING_RADIUS } from '@/take/pointer'
 import { findShell } from '@/take/shell'
 
 /**
- * Films the fade fixture on both routes and joins the beats into a reel,
- * because the two properties a reviewer watches for, the pointer sitting on
- * what it pressed and both routes meeting at one size, show only in the
- * frames the reel draws.
- *
- * The suite needs chrome-headless-shell and FFmpeg with libwebp and skips
- * without them. The E2E Suites job in verify.yml installs both and fails
- * before any suite starts when the shell or the libwebp_anim encoder is
- * missing.
+ * Films the fade fixture on both routes and joins the beats into a reel, since the
+ * pointer sitting on what it pressed and both routes meeting at one size show only
+ * in the reel's frames. It needs chrome-headless-shell and FFmpeg with libwebp, and skips without them.
  */
 
 const PAGE = readFileSync(
@@ -46,10 +40,9 @@ function available(): boolean {
 }
 
 /**
- * The canvas width and the summed frame durations of an animated WebP, read
- * off its chunks, since the FFmpeg this runs against decodes no animation.
- * The encoder folds a frame identical to the last into its duration, so the
- * duration rather than the chunk count measures the frames written.
+ * The canvas width and summed frame durations of an animated WebP, read off its
+ * chunks, since the FFmpeg this runs against decodes no animation. A frame
+ * identical to the last folds into its duration, so duration measures frames written.
  */
 function readWebp(file: string): { width: number; height: number; ms: number } {
   const bytes = readFileSync(file)
@@ -150,8 +143,7 @@ describe.skipIf(!available())('a reel joined from a two-route take', () => {
       seen.push({
         beat: frame.beat,
         index: frame.index,
-        // Above the band, so a dark pixel there is the arrow rather than the
-        // black the band starts from.
+        // Above the band, so a dark pixel there is the arrow rather than the black the band starts from.
         overPage: camera.cursor.y + 30 < 300,
         dark: (r ?? 255) < 40 && (g ?? 255) < 40 && (b ?? 255) < 40,
       })
@@ -232,8 +224,7 @@ describe.skipIf(!available())('a reel of a drag', () => {
   })
 
   it('should draw the held ring around the pointer through the drag', async () => {
-    // The held ring is 0.7 of its full size, so its stroke centers about 12
-    // reel pixels from the tip. Left of the tip, the arrow never covers it.
+    // The held ring is 0.7 of its full size, so its stroke centers about 12 reel pixels from the tip.
     const radius = RING_RADIUS * 0.7 - 0.7
 
     const held: boolean[] = []
@@ -254,10 +245,9 @@ describe.skipIf(!available())('a reel of a drag', () => {
 })
 
 /**
- * The last frame of an animated WebP as RGBA, composited from its frames. The
- * FFmpeg this runs against decodes no animation, so each frame's bitstream is
- * wrapped as a still, decoded alone, and placed on the canvas the way a
- * player would: a transparent pixel under blending keeps what was there.
+ * The last frame of an animated WebP as RGBA, composited from its frames. Each
+ * bitstream is decoded as a still and placed as a player would, a transparent
+ * pixel under blending keeping what was there.
  */
 function lastFrame(file: string): {
   data: Uint8Array
@@ -529,8 +519,7 @@ describe.skipIf(!available())('a reel of a key that moves focus', () => {
     const reel = await renderReel(out, beats, file)
 
     expect(reel.lossless).toBe(true)
-    // Printed rather than asserted, since a moving crop changes every pixel
-    // through an ease and the plan watches the size it costs against the cap.
+    // Printed rather than asserted, since a moving crop changes every pixel through an ease.
     console.info(`focus reel of ${reel.frames} frames, ${reel.bytes} bytes`)
   }, 120_000)
 })

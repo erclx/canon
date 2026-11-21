@@ -83,9 +83,8 @@ function isCopied(rel: string): boolean {
 
 /**
  * Git's background maintenance creates and removes files such as
- * `.git/objects/maintenance.lock` while a copy walks the checkout, and a file
- * listed then gone throws ENOENT. A short bound covers every transient name
- * git uses, where a filter on `*.lock` would cover one.
+ * `.git/objects/maintenance.lock` while a copy walks the checkout, so a file
+ * listed then gone throws ENOENT. A short bound covers every transient name.
  */
 const COPY_ATTEMPTS = 3
 

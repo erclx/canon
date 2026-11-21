@@ -2,11 +2,8 @@ import { readFileSync } from 'node:fs'
 
 /**
  * A file under `templates/`, resolved from this module so the published CLI
- * finds it wherever the package is installed. Each file ends on one newline
- * that the emitted text does not carry, so that newline is dropped.
- *
- * The folder is outside the formatter, since a reflowed template changes the
- * bytes every generator emits.
+ * finds it wherever installed. The trailing newline is dropped, and the folder
+ * stays outside the formatter, since a reflow changes the bytes every generator emits.
  */
 export function readTemplate(file: string): string {
   return readFileSync(

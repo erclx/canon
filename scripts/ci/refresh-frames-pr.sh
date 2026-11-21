@@ -1,13 +1,7 @@
 #!/usr/bin/env bash
 # Commits the recaptured home baseline onto the refresh branch and opens or
-# updates its pull request, called by refresh-capture-frames.yml after the
-# capture step. The step running this sets GH_TOKEN and HUSKY.
-#
-# Hooks stay off, since pre-push needs shfmt, which the runner lacks, and
-# verify.yml checks the pull request. Only the files the baseline commit wrote
-# or dropped carry onto a freshly fetched main, so a mid-run merge loses
-# nothing. The pull request resolves by number, since every merged refresh
-# leaves a closed one on the same head.
+# updates its pull request. Hooks stay off since the runner lacks shfmt, and only
+# the files the baseline commit wrote carry onto a fresh main. The pull request resolves by number.
 set -e
 
 branch=chore/refresh-capture-frames

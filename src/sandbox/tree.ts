@@ -4,13 +4,9 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 
 /**
- * Mints a short per-run identifier the first time it is asked for and holds it
- * in `CANON_SANDBOX_RUN_ID` for the rest of this process, so a script that
- * spawns a child inheriting `process.env` — `canon sandbox run` calling
- * `canon sandbox` to provision and then `canon sandbox check` — resolves the same tree in every one
- * of them, as do the installer children provisioning spawns. A process
- * that already carries the variable, inherited from such a parent, reuses it
- * rather than minting a new one.
+ * Mints a short per-run identifier the first time it is asked for and holds it in
+ * `CANON_SANDBOX_RUN_ID` for this process, so every child inheriting `process.env`
+ * resolves the same tree. A process already carrying the variable reuses it.
  */
 export function mintSandboxRunId(): string {
   const existing = process.env.CANON_SANDBOX_RUN_ID
@@ -23,13 +19,8 @@ export function mintSandboxRunId(): string {
 
 /**
  * The provisioned tree's path, split out of `src/commands/sandbox.ts` so the
- * per-run default is unit-testable on its own rather than only through the
- * command's registration.
- *
- * The fall-through used to be one path per machine, so two
- * sessions each resolving the default at once provisioned over each other
- * with neither told; `mintSandboxRunId` gives the path a per-run component
- * instead, which is what makes two such sessions land on two different trees.
+ * per-run default is unit-testable. `mintSandboxRunId` gives the path a per-run
+ * component, so two sessions resolving the default at once land on different trees.
  */
 export function sandboxTree(): string {
   const override = process.env.CANON_SANDBOX_DIR
@@ -103,8 +94,7 @@ export function sandboxRoots(projectRoot: string): SandboxRoots {
 /**
  * Returns the reason a location cannot hold the tree, or undefined when it can.
  * Provisioning removes the tree before staging, so the test is an allowlist: a
- * strict descendant of the home folder or the temp root, outside the main
- * worktree in both directions.
+ * strict descendant of the home folder or temp root, outside the main worktree.
  */
 export function assertSandboxDirSafe(
   raw: string,

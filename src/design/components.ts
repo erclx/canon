@@ -1,12 +1,7 @@
 /**
- * The component layer, beside the token layer in `@/design/tokens`.
- *
- * A token says what a value is and a component what a repeated piece of
- * interface is made of, which catches a surface reading as unrelated to itself
- * while its tokens are right. `COMPONENTS` is the default every project
- * installing the `design` domain receives, and a caller passes its own list
- * through `buildDesignCss`'s `components` option. It stays out of
- * `canon/DESIGN.md`, since the design-record standard keeps class names in code.
+ * The component layer, beside the token layer in `@/design/tokens`. A token says
+ * what a value is and a component what a repeated piece of interface is made of.
+ * `COMPONENTS` is the default for the `design` domain, and a caller passes its own through `buildDesignCss`.
  */
 
 import { readTemplate } from '@/design/template'
@@ -21,10 +16,8 @@ export interface Component {
 }
 
 /**
- * A dot and a word, never a bordered chip. The jump menus already said written
- * and planned with a filled or hollow dot, so a status badge that spelled the
- * same fact in uppercase inside a border was a second vocabulary for something
- * the system already had one of.
+ * A dot and a word, never a bordered chip, since the jump menus already spell
+ * written and planned with a filled or hollow dot and a badge would be a second vocabulary.
  */
 const STATUS: Component = {
   name: 'status',
@@ -62,11 +55,8 @@ const SCROLLBAR: Component = {
 
 /**
  * The hand-drawn SVG diagram figure and its caption, sized wider than the
- * reading measure and cleared past an outline rail on a wide viewport.
- * Per `.canon/groundwork/86-portable-hand-drawn-figures/06-decision.md` item 4,
- * any project can draw one hand-drawn-styled figure. It declares its own
- * `--figure-hand` and `--figure-wide` defaults rather than reading custom
- * properties another component would have to declare.
+ * reading measure and cleared past an outline rail. It declares its own
+ * `--figure-hand` and `--figure-wide` defaults rather than reading another component's.
  */
 const HAND_DRAWN_FIGURE: Component = {
   name: 'hand-drawn-figure',

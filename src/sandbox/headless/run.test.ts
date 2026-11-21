@@ -90,8 +90,7 @@ describe('mergeEnvelope', () => {
     })
   })
 
-  // A dying session's stdout can be partial, and a silent stdout would read as a
-  // run that never happened, so the verdict prints marked as an error.
+  // A dying session's stdout can be partial, and silence would read as a run that never happened.
   it('should fall back to an error record when the envelope does not parse', () => {
     const { merged, isParsed } = mergeEnvelope(
       '{"is_error":false,"res',
@@ -130,8 +129,7 @@ describe('mergeEnvelope', () => {
 })
 
 describe('deadRunRecord', () => {
-  // The turn cap ends a session with exit 1 after it has already loaded its
-  // skills, which is the run a routing measurement most often takes.
+  // The turn cap ends a session with exit 1 after it loaded its skills, the run routing measurement most often takes.
   it('should carry the skills a capped session loaded beside its raw output', () => {
     const out = [
       '{"type":"system","subtype":"init"}',
@@ -180,8 +178,7 @@ describe('verdictFiles', () => {
 })
 
 describe('checkArgs', () => {
-  // A run that asserts nothing has earned no pass, and the check reads an
-  // unchecked arm as exit 0 unless it is told to be strict.
+  // A run asserting nothing has earned no pass, and the check reads an unchecked arm as exit 0 unless strict.
   it('should pass --strict so an arm declaring nothing fails the run', () => {
     const args = checkArgs(
       '/checkout/src/cli.ts',
