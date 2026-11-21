@@ -42,8 +42,7 @@ describe('running the audit set', () => {
     )
   })
 
-  // The verbs share no state, so running them in sequence would slow the
-  // aggregate for nothing. This pins the batching.
+  // The verbs share no state, so this pins the batching.
   it('should start every audit before any of them finishes', async () => {
     let running = 0
     let peak = 0
@@ -69,8 +68,7 @@ describe('running the audit set', () => {
     expect(results[0].counts).toEqual({ degradationHits: 2 })
   })
 
-  // A spawn that throws is a measure that did not run, and rejecting would take
-  // the aggregate down over one absent verb.
+  // Rejecting would take the aggregate down over one absent verb.
   it('should report an audit whose spawn threw as unmeasured', async () => {
     const results = await runAudits([specFor('markdown')], async () => {
       throw new Error('spawn ENOENT')
@@ -129,8 +127,7 @@ describe('the verdict over a set of results', () => {
     )
   })
 
-  // An audit that did not report outranks a quiet set, or the set would publish
-  // a pass over a tree never fully measured.
+  // A quiet set would otherwise publish a pass over a tree never fully measured.
   it('should read a set carrying an unmeasured audit as incomplete', () => {
     expect(verdictOf([result('a', 'clean'), result('b', 'unmeasured')])).toBe(
       'incomplete',
@@ -153,8 +150,7 @@ describe('the exit code the aggregate sets', () => {
     expect(exitCodeFor([result('a', 'clean'), result('b', 'reported')])).toBe(0)
   })
 
-  // A judgment moves no exit code, since failing a push on one teaches
-  // contributors to route around the stage.
+  // Failing a push on a judgment teaches contributors to route around the stage.
   it('should not fail on a judgment finding alone', () => {
     expect(exitCodeFor([result('a', 'reported')])).toBe(0)
   })
@@ -204,8 +200,7 @@ describe('the flat summary a shell stage reads', () => {
     expect(summary.shrunk).toBe(1)
   })
 
-  // A growth inside its tolerance stays in `moved` but not `grown`, so a gate
-  // reading `grown` sees only growth past the tolerance.
+  // A gate reading `grown` sees only growth past the tolerance.
   it('should leave a tolerated growth out of grown and count one past it', () => {
     const summary = summarize(
       [result('census', 'reported')],
@@ -242,8 +237,7 @@ describe('the flat summary a shell stage reads', () => {
     expect(summarize([result('skills', 'clean')], deltas).unrecorded).toBe(1)
   })
 
-  // A per-machine delta feeds no growth figure, since its counts are one
-  // machine's and no other clone could reproduce them.
+  // A per-machine count is one machine's, so no other clone could reproduce it.
   it('should leave a per-machine delta out of every count it publishes', () => {
     const summary = summarize(
       [result('records-plans', 'reported')],

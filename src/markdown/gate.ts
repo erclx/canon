@@ -21,13 +21,9 @@ export interface GateInput {
   /** Every dead relative link across every file measured, flattened. */
   readonly links: readonly LinkFinding[]
   /**
-   * Every structural measure the run made, read by nothing here.
-   *
-   * Naming it is what makes the split checkable: depth weight, cadence, and the
-   * sentence count are judgments a reader settles, and a push failing on one
-   * teaches a contributor to route around the stage. The bullet and paragraph
-   * weight a reader settles here are the advisory half, and the same numbers
-   * gate through `density` below, which knows the path each one sits on.
+   * Every structural measure the run made, read by nothing here. Depth weight,
+   * cadence, and sentence count are judgments a reader settles, and a push
+   * failing on one teaches a contributor to route around the stage.
    */
   readonly structure: readonly StructureReport[]
   /**
@@ -44,12 +40,9 @@ export interface GateInput {
    */
   readonly headingCase: readonly HeadingCaseFinding[]
   /**
-   * Every density finding, each marked with whether its path gates.
-   *
-   * The mark is decided by the caller from `src/markdown/scope.ts`, since only
-   * the caller knows the path and whether the tree is a canon checkout. A plan,
-   * a groundwork record, and a rule carry no density finding at all, and an
-   * in-scope path under no gated prefix carries one marked `gating: false`.
+   * Every density finding, each marked with whether its path gates. The caller
+   * decides the mark from `src/markdown/scope.ts`, since only it knows the path
+   * and whether the tree is a canon checkout.
    */
   readonly density: readonly GatedDensityFinding[]
   /**
@@ -60,14 +53,9 @@ export interface GateInput {
 }
 
 /**
- * Whether the audit found something that should fail the caller.
- *
- * A banned character and a relative link resolving to nothing on disk are both
- * facts rather than a threshold, so either gates unconditionally and there is
- * no widened mode to reach for. A density finding is a fact too, a count
- * against a fixed number, and it gates wherever the caller marked its path as
- * gated, and so does a reference shape finding. The standards decide what
- * counts as banned, which keeps this answering how many rather than which.
+ * Whether the audit found something that should fail the caller. A banned
+ * character, a dead relative link, a density finding on a gated path, and a
+ * reference shape finding are facts, and the standards decide what counts as banned.
  */
 export function isGating({
   bans,

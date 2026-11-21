@@ -1,11 +1,7 @@
 /**
- * Escapes every character a regular expression would read as syntax.
- *
- * The token became a parameter when this was extracted, and the two callers
- * pass letters and hyphens alone. That is what makes escaping cheap here rather
- * than a fix for a live defect: an unescaped token holding a dot matches the
- * wrong lines and one holding a parenthesis throws, and neither failure is the
- * caller's to anticipate.
+ * Escapes every character a regular expression would read as syntax. Callers pass
+ * letters and hyphens alone, so this is cheap protection rather than a fix, since
+ * a token holding a dot matches the wrong lines and a parenthesis throws.
  */
 export function escapeForPattern(token: string): string {
   return token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -13,13 +9,8 @@ export function escapeForPattern(token: string): string {
 
 /**
  * Whether the line at `index` carries `token` with a reason after it, reading
- * itself and the line above.
- *
- * Shared by the two sweeps that mute a line. The line above counts too, since
- * a value is as often introduced by a preceding comment as annotated inline,
- * and nothing further up counts, so a marker cannot silence a block it does
- * not sit on. Only a marker naming a reason counts, so a typo cannot mute a
- * finding.
+ * itself and the line above. Shared by the two sweeps that mute a line, nothing
+ * further up counts, and a marker naming no reason does not, so a typo mutes nothing.
  */
 export function isMarked(
   lines: readonly string[],

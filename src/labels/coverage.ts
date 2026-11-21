@@ -11,10 +11,8 @@ export interface Coverage {
   readonly labels: readonly string[]
   /**
    * Paths a `[declined]` row covers, which are a decision rather than a gap.
-   *
-   * Kept apart from `uncovered` because the response to the two differs. A
-   * surface nobody has gotten to wants a row, and one somebody decided against
-   * wants nothing, so a report folding them together is useful about neither.
+   * Kept apart from `uncovered`, since a surface nobody reached wants a row and
+   * one decided against wants nothing.
    */
   readonly declined: readonly DeclinedPath[]
   /** Paths no row of either table reaches, which is the finding. */
@@ -22,22 +20,18 @@ export interface Coverage {
 }
 
 /**
- * Prefix-anchored, matching what the map's own comment describes and what the
- * census behind its 41 prefixes was measured against.
- *
- * A glob would reach every existing prefix and invalidate that measurement, so
- * the rule stays a `startsWith` even where a glob would read more naturally.
+ * Prefix-anchored, matching what the map's own comment describes and what its
+ * prefix census was measured against. A glob would invalidate that measurement,
+ * so the rule stays a `startsWith`.
  */
 function matches(path: string, prefixes: readonly string[]): boolean {
   return prefixes.some((prefix) => path.startsWith(prefix))
 }
 
 /**
- * Resolves what a changed set earns from a map, and what it leaves behind.
- *
- * One pass answers both readers. `git-pr` wants the labels to apply, and the
- * audit wants the paths that earned none, and a function shaped for the first
- * alone returns nothing the second can count.
+ * Resolves what a changed set earns from a map, and what it leaves behind. One
+ * pass serves `git-pr`, which wants the labels, and the audit, which counts the
+ * paths that earned none.
  */
 export function resolveCoverage(
   map: Extract<LabelMap, { kind: 'map' }>,
@@ -50,8 +44,7 @@ export function resolveCoverage(
   for (const path of paths) {
     const labels = map.domains.filter((row) => matches(path, row.prefixes))
 
-    // A label wins over a decline, since a path both tables claim already carries
-    // a subject, and calling it unlabelled would contradict the label applied.
+    // A label wins over a decline, since calling a path both tables claim unlabelled would contradict it.
     if (labels.length > 0) {
       for (const row of labels) earned.add(row.label)
       continue
@@ -67,8 +60,7 @@ export function resolveCoverage(
   }
 
   return {
-    // Read back off the map rather than out of the set, so two runs over one
-    // branch produce one order and one string.
+    // Read back off the map rather than the set, so two runs over one branch produce one order.
     labels: map.domains
       .map((row) => row.label)
       .filter((label) => earned.has(label)),

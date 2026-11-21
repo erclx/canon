@@ -11,11 +11,8 @@ const REPO = process.cwd()
 
 /**
  * The commits `01-current-state.md` measured, with the figures it recorded.
- *
- * These are real commits in this repository, so the replay is skipped rather
- * than failed when they are unreachable. CI checks out at depth 1, and a fork
- * or a shallow clone has the same gap. Locally the assertion is the real check
- * the groundwork asked for.
+ * They are real commits, so the replay is skipped when unreachable, as in a
+ * depth-1 CI checkout, a fork, or a shallow clone.
  */
 const TYPESCRIPT_SERIES = [
   { rev: 'ef8c4b07', lines: 726, commentLines: 0, inlineComments: 0 },
@@ -93,8 +90,7 @@ describe('readRevision', () => {
     expect(await readRevision(REPO, 'not-a-real-ref')).toEqual([])
   })
 
-  // A hook's `GIT_DIR` overrides `-C`, so without the strip a subtree scan from a
-  // hook silently returns the whole repository.
+  // A hook's `GIT_DIR` overrides `-C`, so without the strip a subtree scan returns the whole repository.
   it.skipIf(SHALLOW)(
     'should stay scoped to the subtree when GIT_DIR is set in the environment',
     async () => {
@@ -149,8 +145,7 @@ describe('scanRevision replay against the comment-discipline groundwork', () => 
     30_000,
   )
 
-  // The folder's recorded bash count is the naive one its own snapshot calls an
-  // error. What is asserted is the correction, heredoc bodies leaving the count.
+  // The recorded bash count is the naive one, so this asserts heredoc bodies leave the count.
   it.skipIf(SHALLOW)(
     'should report far fewer bash comments than the naive count the folder recorded',
     async () => {

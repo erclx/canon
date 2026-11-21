@@ -46,15 +46,9 @@ type Block =
   | { readonly kind: 'other'; readonly line: number; readonly table: boolean }
 
 /**
- * Splits the body into the blocks the six limits read.
- *
- * Its own walk rather than `paragraphBlocks` in `src/markdown/structure.ts`,
- * since that walk reads an indented paragraph under a list item as a
- * paragraph, and here it belongs to the item, as a reader sees it.
- *
- * A nested item is a block of its own, taking the lines indented past its
- * marker, and its parent leaves it out. An indented fence inside an item joins
- * neither and ends the nested item, and a column-zero one ends both.
+ * Splits the body into the blocks the six limits read. It is its own walk rather
+ * than `paragraphBlocks` in `src/markdown/structure.ts`, since an indented
+ * paragraph under a list item belongs to the item here, and a nested item is its own block.
  */
 function blocksOf(lines: readonly BodyLine[]): Block[] {
   const blocks: Block[] = []
@@ -105,8 +99,7 @@ function blocksOf(lines: readonly BodyLine[]): Block[] {
     const indented = /^\s/.test(raw)
 
     if (line.fenced) {
-      // The opening delimiter decides who owns the block. `bodyLines` marks a
-      // delimiter and the body alike, so the opener is the first fenced line.
+      // The opening delimiter decides who owns the block, and the opener is the first fenced line.
       if (!inFence) {
         if (item && indented) closeChild()
         else {
@@ -196,15 +189,9 @@ function leadOf(raw: string): number {
 }
 
 /**
- * Every breach of the six density limits, in line order.
- *
- * Each limit is a count rather than a judgment, so a finding is a fact a scan
- * settles and the caller decides whether it gates. The limits are a 350-character
- * paragraph, 2 paragraphs in a row, a 200-character bullet, 5 plain bullets in
- * a row, no heading past H3, and a paragraph or a table as the first block
- * under every H3. The two length numbers are `CHECKPOINTS`, so the advisory
- * Bullets and Paragraphs sections and this measure read one number, and the
- * bullet run is `bulletStacks`, so a bold-labeled run stays exempt here too.
+ * Every breach of the six density limits, in line order. Each is a count a scan
+ * settles, so the caller decides whether it gates. The length numbers are
+ * `CHECKPOINTS` and the bullet run is `bulletStacks`, so each reads one number.
  */
 export function densityFindings(lines: readonly BodyLine[]): DensityFinding[] {
   const found: DensityFinding[] = []

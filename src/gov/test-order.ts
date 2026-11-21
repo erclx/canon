@@ -4,9 +4,8 @@ import { gitEnv } from '@/git/env'
 
 /**
  * The extensions this check can pair. A test sits beside its subject under one
- * name throughout this corpus, so the weakest assumption available is also the
- * one the corpus already honors. Every other extension is read past and named,
- * since a bash script and its test are related by nothing a filename carries.
+ * name throughout this corpus, and every other extension is read past and named,
+ * since a bash script and its test share nothing a filename carries.
  */
 export const SOURCE_EXTENSIONS = ['.ts', '.tsx'] as const
 
@@ -39,12 +38,9 @@ export interface Scope {
 }
 
 /**
- * Every reason `canon gov test-order` refuses for.
- *
- * None is an ordinary absence. A depth-1 checkout falls back to the root
- * commit and reports zero rather than reaching any of these, so what remains
- * is a repository with no commit at all or a git operation that failed
- * outright, both a broken checkout rather than a target's ordinary state.
+ * Every reason `canon gov test-order` refuses for. None is an ordinary absence,
+ * since a depth-1 checkout falls back to the root commit, so each is a repository
+ * with no commit or a failed git operation, a broken checkout.
  */
 export type TestOrderRefusal =
   | 'no-history'
@@ -86,11 +82,8 @@ interface Change {
 }
 
 /**
- * Reads `--name-status` log output, oldest commit first, into one entry per
- * path per commit.
- *
- * The order field rather than the commit is what a comparison reads, since two
- * commits carry no ordering a caller can derive from their hashes alone.
+ * Reads `--name-status` log output, oldest commit first, into one entry per path
+ * per commit. The order field is what a comparison reads, since hashes carry no ordering.
  */
 function parseChanges(output: string): Change[] {
   const changes: Change[] = []
@@ -169,8 +162,7 @@ function classify(
   const findings: PairRecord[] = []
   const unclassified: PairRecord[] = []
 
-  // Keyed by subject, so a module whose two sides both moved is one record and a
-  // lone test reports under the implementation path a reader would look for.
+  // Keyed by subject, so a lone test reports under the implementation path a reader would look for.
   const subjects = new Set<string>()
   for (const change of changes) {
     if (isImplementation(change.path)) subjects.add(change.path)
@@ -213,8 +205,7 @@ function classify(
       continue
     }
 
-    // A paired test the range never added is one that already sat at the base
-    // commit, since those are the only two ways `test` gets a value at all.
+    // A paired test the range never added already sat at the base commit.
     if (testChange === undefined) {
       satisfied.push({
         subject,
@@ -227,8 +218,7 @@ function classify(
       continue
     }
 
-    // One commit carrying both sides is satisfied, since the rule asks only that
-    // the test not come after, and small changes land in one commit.
+    // One commit carrying both sides is satisfied, since the rule asks only that the test not come after.
     const record: PairRecord = {
       subject,
       test,
@@ -252,14 +242,9 @@ function classify(
 }
 
 /**
- * Where an implementation reached a commit ahead of the test covering it,
- * between `base` and the current `HEAD` of the tree at `root`.
- *
- * This reports and never gates. Pairing a test to an implementation is a
- * judgment, so a change the pairing cannot read lands in `unclassified` with
- * its reason stated rather than being counted as a pass. Coverage is narrower
- * than the rule the check answers to, and `scope` and `ignored` are what say so
- * on every run.
+ * Where an implementation reached a commit ahead of the test covering it, between
+ * `base` and `HEAD`. This reports and never gates, since pairing is a judgment
+ * and `unclassified` and `ignored` state what coverage is narrower than the rule.
  */
 export function readTestOrder(
   root: string,
@@ -327,14 +312,9 @@ export function readTestOrder(
 }
 
 /**
- * The far side of the range. A ref the caller named resolves through the merge
- * base against `head`, matching the no-ref branch below rather than taking the
- * ref as the comparison point, so a trunk that has moved under the branch does
- * not pull other people's merged commits into the range. A ref producing no
- * merge base has to refuse, since falling back to the trunk there would measure
- * a range nobody asked for. With no ref named, the merge base against the trunk
- * scopes the run to the branch, and a repository carrying no trunk falls back
- * to the root commit rather than refusing.
+ * The far side of the range. A named ref resolves through the merge base against
+ * `head`, so a moved trunk pulls no one else's commits in, and a ref with no merge
+ * base refuses. With no ref, the trunk's merge base scopes the run, or the root commit.
  */
 function resolveBase(
   root: string,

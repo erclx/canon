@@ -48,10 +48,9 @@ function byName(a: DocEntry, b: DocEntry): number {
 }
 
 /**
- * A folder declares its category on its own index, since the allowlist is what
- * separates a target-facing doc from a workflow one and a split domain is not
- * exempt from it. A sub-area file declares its own, which keeps a page's
- * listing membership unchanged by the folder it moves into.
+ * A folder declares its category on its own index, since the allowlist
+ * separates a target-facing doc from a workflow one. A sub-area file declares
+ * its own, so a page's listing membership does not change when it moves.
  */
 function collectDocs(root: string): DocEntry[] {
   return walkEntries(root, DOCS_ROOT)
@@ -66,10 +65,8 @@ function collectDocs(root: string): DocEntry[] {
 
 /**
  * Stops at the folder where `listTopics` goes on to name each sub-area file.
- * This is the downstream catalog and that one answers what a caller could have
- * typed, so a reachable name absent here is the same divergence the internal
- * topics already carry. A name present at more than one surface root lists
- * once, at the first.
+ * This is the downstream catalog, so a reachable name absent here is the same
+ * divergence the internal topics carry, and a name at several roots lists once.
  */
 function collectContext(root: string): DocEntry[] {
   const seen = new Set<string>()

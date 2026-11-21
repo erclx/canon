@@ -104,9 +104,8 @@ function skipTrivia(source: string, from: number): number {
 
 /**
  * Merges each array of literals closed by a newline join into one block opening
- * on the array's bracket, since a script written line by line is one program and
- * each of its literals alone reads as nothing. An array holding anything but
- * literals stays as its separate literals.
+ * on the array's bracket, since a script written line by line is one program.
+ * An array holding anything but literals stays as separate literals.
  */
 function blocksOf(
   source: string,
@@ -161,12 +160,8 @@ function blocksOf(
 
 /**
  * The pages, stylesheets, and scripts a source embeds past the limit, or a
- * script that branches at any length.
- *
- * Only a template's static lines count, so a long page with one interpolation
- * still counts and a block built line by line from data does not. A literal whose
- * opening line, or the line above it, carries the marker with a reason is
- * exempt, and a bare marker exempts nothing.
+ * script that branches at any length. Only a template's static lines count, and
+ * a marker with a reason on the opening line or the line above exempts a literal.
  */
 export function embeddedBlocksIn(
   file: string,
@@ -203,11 +198,9 @@ function boundLiteral(
 }
 
 /**
- * The blocks an `.astro` file embeds past the limit: every frontmatter string
- * the TypeScript reading finds, a frontmatter string a `<script>` or `<style>`
- * takes through `set:html`, which names the language the text alone cannot,
- * and an `is:inline` script body. An inline block is exempt when its opening
- * tag, or the line above it, carries the marker with a reason.
+ * The blocks an `.astro` file embeds past the limit: frontmatter strings, a
+ * string a `<script>` or `<style>` takes through `set:html`, and an `is:inline`
+ * script body. A marker with a reason on its tag or the line above exempts one.
  */
 export function embeddedBlocksInAstro(
   file: string,

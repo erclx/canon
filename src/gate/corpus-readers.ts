@@ -26,11 +26,8 @@ const readTracked = (root: string, path: string): string | undefined => {
 
 /**
  * Every tracked test file under `root`, mapped to its source with any
- * `fixture*.ts` beside it appended, since a suite such as the hook guards takes
- * its corpus paths from a fixture module in its own folder. Production modules
- * beside a test stay out, since they name corpus folders as data and would
- * select every test in their folder. A file the index lists and the working
- * tree has deleted is left out.
+ * `fixture*.ts` beside it appended. Production modules beside a test stay out,
+ * since they name corpus folders as data and would select every test there.
  */
 export function readTestSources(root: string): ReadonlyMap<string, string> {
   const listing = execaSync(
@@ -64,9 +61,8 @@ export function readTestSources(root: string): ReadonlyMap<string, string> {
 
 /**
  * The tests that read `file` from disk, found by the folder its first two path
- * segments name, as `a/b` or as `'a', 'b'`. A root-level file is its own
- * needle. A reader that builds its path in a helper or a glob is missed here
- * and caught by CI's full run.
+ * segments name. A reader that builds its path in a helper or glob is missed
+ * here and caught by CI's full run.
  */
 export function readersOf(
   file: string,

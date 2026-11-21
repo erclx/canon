@@ -67,13 +67,9 @@ interface Tree {
 }
 
 /**
- * Finds every string and template literal in a TypeScript source.
- *
- * A pattern over backticks reads a doc comment saying `then` as a script, so
- * the stage needs literal bounds. A syntax tree would give them too, but
- * `typescript` is a development dependency and this module ships inside the
- * published CLI, so a lexer tracking comment, string, regex, and template
- * state stands in for it.
+ * Finds every string and template literal in a TypeScript source. A backtick
+ * pattern reads a doc comment as a script, and `typescript` is a development
+ * dependency, so a lexer tracking comment, string, regex, and template state stands in.
  */
 export function lex(
   source: string,
@@ -101,8 +97,7 @@ export function lex(
   const comments = new Map<number, number>()
   const regexes: Range[] = []
   const jsx: Range[] = []
-  // One entry per open template expression or JSX container, holding its
-  // brace depth and what resumes once its closing brace is read.
+  // One entry per open template expression or JSX container, with its brace depth and resume.
   const expressions: { depth: number; resume: () => void }[] = []
   // One entry per open template, holding its start line and static text.
   const templates: { line: number; start: number; text: string }[] = []
@@ -199,8 +194,7 @@ export function lex(
     i = end
   }
 
-  // Reads one element tree's markup from `start` until the tree closes or a
-  // `{` opens a container, whose closing brace resumes the read.
+  // Reads one element tree's markup from `start` until it closes or a `{` opens a container.
   const readMarkup = (tree: Tree, start: number): void => {
     while (i < source.length) {
       const char = source[i]
@@ -260,8 +254,7 @@ export function lex(
     lastSignificant = 'a'
   }
 
-  // Whether the code before `i` leaves an expression to start, where `/`
-  // opens a regular expression and, in JSX mode, `<` opens an element.
+  // Whether the code before `i` leaves an expression to start, where `/` opens a regex.
   const expressionStarts = (): boolean => {
     const before = source.slice(Math.max(0, i - 12), i).trimEnd()
     return (

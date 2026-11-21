@@ -64,9 +64,8 @@ export interface CensusFailure {
 
 /**
  * Open descriptors allowed at once while reading the tree, matching
- * `src/comments/scan.ts`. A single `Promise.all` over every path opens one
- * descriptor per file, which exhausts a default 1024 limit on a large
- * repository and fails the whole census with EMFILE.
+ * `src/comments/scan.ts`. One `Promise.all` over every path would exhaust a
+ * default 1024 limit on a large repository and fail the census with EMFILE.
  */
 const CONCURRENT_READS = 64
 
@@ -214,8 +213,7 @@ interface Counted {
 }
 
 function counted(path: string, text: string | undefined): Counted {
-  // A read that failed and a file that read as binary are counted the same
-  // way: toward `files`, excluded from every line count.
+  // A failed read and a binary file both count toward `files` and no line count.
   return { path, lines: text === undefined ? undefined : textLines(text) }
 }
 
@@ -260,13 +258,9 @@ function tally(files: readonly Counted[]): CensusResult {
 }
 
 /**
- * Censuses the tracked-plus-untracked tree under `root`: a file count, a
- * breakdown by extension, and a line total that skips whatever reads as
- * binary.
- *
- * Reads `listRepositoryFiles`, the same corpus the citation check, the
- * markdown corpus, and the secret scan already share, so this is not a
- * fourth definition of what counts.
+ * Censuses the tracked-plus-untracked tree under `root`: a file count, an
+ * extension breakdown, and a line total skipping binary. It reads
+ * `listRepositoryFiles`, the corpus the other checks share, not a fourth one.
  */
 export async function census(
   root: string,
@@ -274,8 +268,7 @@ export async function census(
   const listed = await listRepositoryFiles(root)
   if (listed === undefined) return { kind: 'refused', reason: 'no-git' }
 
-  // Each batch is reduced to line counts before the next is read, so the
-  // peak holds one batch of text rather than the whole tree.
+  // Each batch is reduced to line counts before the next is read, so peak memory is one batch.
   const files: Counted[] = []
 
   for (let start = 0; start < listed.length; start += CONCURRENT_READS) {
@@ -288,16 +281,9 @@ export async function census(
 }
 
 /**
- * Censuses the tree `rev` committed under `root`, through the same count
- * `census` runs over the working tree.
- *
- * A symlink and a submodule count toward `files` and as skipped, never as the
- * link text's lines. `census` reads a symlink through to its target, so the two
- * agree on a clean tree only while every symlink points at a binary or
- * unreadable file, as canon's one symlink does.
- *
- * Refuses with `no-git` when git cannot resolve `rev` to a tree, since an
- * empty count would read as an empty repository.
+ * Censuses the tree `rev` committed under `root`, through the count `census`
+ * runs. A symlink or submodule counts toward `files` and as skipped, and git
+ * failing to resolve `rev` refuses with `no-git` rather than read as empty.
  */
 export async function censusAt(
   root: string,

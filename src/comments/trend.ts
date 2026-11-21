@@ -37,15 +37,8 @@ function parseCommits(text: string): Commit[] {
 
 /**
  * Lists the commits from `since` to HEAD, oldest first and inclusive of
- * `since` itself.
- *
- * A `since..HEAD` range excludes its own boundary, which drops the reading the
- * caller is measuring against. The whole point of a trend is the before, so
- * the boundary commit is prepended rather than left to the range operator.
- *
- * `--first-parent` keeps a merged branch's own commits out of the sample, so
- * evenly spaced points land on the trunk rather than clustering inside
- * whichever feature happened to carry the most commits.
+ * `since`, which a `since..HEAD` range would drop. `--first-parent` keeps a
+ * merged branch's commits out, so the points land evenly on the trunk.
  */
 export async function listCommits(
   root: string,
@@ -114,8 +107,7 @@ export async function trend(
   const commits = await listCommits(root, opts.since)
   const sampled = spaceEvenly(commits, opts.points ?? DEFAULT_POINTS)
 
-  // Each point is an independent pair of git reads, and the sample is bounded
-  // by `points`, so the whole series costs one revision's wall clock.
+  // Each point is an independent pair of git reads bounded by `points`, so the series costs one revision.
   return Promise.all(
     sampled.map(async ({ rev, date }) => ({
       rev,

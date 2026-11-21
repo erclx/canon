@@ -7,22 +7,14 @@ import { listRepositoryFiles } from '@/git/files'
 /**
  * The inline token exempting one line from this sweep, shaped on the
  * `canon-allow-secret` precedent and read by the same two-line rule.
- *
- * A declaration disagreeing with a convention for a stated reason is the case
- * question 3 of the plan settled against gating on, and the marker is where
- * that reason goes. A bare token names nothing a later reader can weigh, so it
- * mutes nothing.
+ * A reason goes after it, and a bare token mutes nothing.
  */
 export const SUPERSEDED_MARKER = 'canon-allow-superseded'
 
 /**
- * What matched at one column.
- *
- * `literal` is the superseded value itself. The other three are the stem
- * followed by a glob, by an angle-bracket placeholder, or by nothing that
- * continues a name, which are the three forms this corpus writes a family in.
- * A literal comparison reaches none of them, which is why a rename running the
- * verb once per name reported clean over seven stale citations.
+ * What matched at one column. `literal` is the superseded value itself, and the
+ * other three are the stem followed by a glob, a placeholder, or nothing that
+ * continues a name, which a literal comparison reaches none of.
  */
 export type SupersededMatch = 'literal' | 'glob' | 'placeholder' | 'prefix'
 
@@ -33,23 +25,15 @@ export interface SupersededHit {
   readonly column: number
   readonly match: SupersededMatch
   /**
-   * The nearest heading above the hit in a markdown file, absent elsewhere and
-   * above the first heading.
-   *
-   * A line reads differently under the section holding it. `Use the canon-*
-   * prefix on an internal skill` is a prohibition under `## Must not` and an
-   * instruction anywhere else, and a reviewer reading the line alone made
-   * exactly that misreading against this tree.
+   * The nearest heading above the hit in a markdown file, absent elsewhere. A
+   * line reads differently under its section, since a prohibition under
+   * `## Must not` is an instruction anywhere else.
    */
   readonly heading: string | undefined
   /**
    * Whether the replacement sits on the same line, outside the superseded
-   * occurrences themselves, since the replacement is routinely a substring of
-   * the value it replaced and plain containment separates nothing.
-   *
-   * A reading aid rather than a filter, since a line stating the change and a
-   * fixture halfway through a repair both carry the two values, and
-   * suppressing on it would hide the second.
+   * occurrences. A reading aid rather than a filter, since a line stating the
+   * change and a fixture mid-repair both carry the two values.
    */
   readonly carriesReplacement: boolean
   readonly preview: string
@@ -106,13 +90,9 @@ const SEGMENT_SEPARATOR = '-'
 const NAME_CHARACTER = /[A-Za-z0-9]/
 
 /**
- * A character that puts the stem mid-name when it sits directly before it, so
- * a stem is only read where a name starts.
- *
- * The separator is here and not in `NAME_CHARACTER` because it decides one side
- * only. `canon-check-toolkit-` is a temp-directory prefix and matched the stem
- * `toolkit` on four fixtures before this, where `claude/skills/toolkit-*` is a
- * path and has to keep matching.
+ * A character that puts the stem mid-name when it sits directly before it, so a
+ * stem is only read where a name starts. It is separate from `NAME_CHARACTER`
+ * because it decides one side only, and a temp-directory prefix once matched a stem.
  */
 const SEGMENT_CONTINUATION = /[A-Za-z0-9_-]/
 
@@ -127,12 +107,8 @@ const FENCE = /^\s*(?:```|~~~)/
 
 /**
  * The segment the two values differ on, carried with everything they share
- * ahead of it.
- *
- * A shared prefix alone, such as `canon` in `canon-cli` and
- * `canon-feedback-file`, would match every sibling, so including the differing
- * segment bounds the net to what changed. An empty replacement yields nothing,
- * since a retirement has no second value to diverge from.
+ * ahead of it. A shared prefix alone would match every sibling, and an empty
+ * replacement yields nothing, since a retirement has no second value.
  */
 export function deriveStems(
   options: SupersededOptions,
@@ -172,11 +148,8 @@ function trimSeparators(value: string): string {
 
 /**
  * Which templated form sits at `column`, or nothing when the stem there
- * continues into an ordinary name.
- *
- * The character after `<stem>-` decides all three, so one scan reads every
- * form. A name character means a sibling spelled out, which the literal
- * comparison already answers for or correctly ignores.
+ * continues into an ordinary name. The character after `<stem>-` decides all
+ * three forms, and a name character is a sibling the literal comparison answers.
  */
 function classifyStem(
   line: string,
@@ -194,11 +167,9 @@ function classifyStem(
 }
 
 /**
- * Whether the replacement appears on the line outside the matched
- * occurrences, which makes the flag mean anything when one value contains the
- * other. An empty replacement answers false, since containment of the empty
- * string is always true. A templated hit reads the stem pair instead, since
- * the line repairing `toolkit-*` carries `canon-*` and neither full name.
+ * Whether the replacement appears on the line outside the matched occurrences,
+ * which means something only when one value contains the other. An empty
+ * replacement answers false, and a templated hit reads the stem pair instead.
  */
 function carriesReplacement(
   line: string,
@@ -221,11 +192,8 @@ function carriesReplacement(
 
 /**
  * Every column in one line carrying the superseded value or its family stem,
- * ordered left to right.
- *
- * A stem occurrence sharing a column with a literal one is dropped. The stem is
- * a prefix of the value it derives from whenever only the last segment moved,
- * so the same text would otherwise report twice under two kinds.
+ * ordered left to right. A stem sharing a column with a literal is dropped, since
+ * it is a prefix of the value and would report twice.
  */
 function matchLine(
   line: string,
@@ -306,14 +274,9 @@ export function sweepText(
 }
 
 /**
- * Where the tree still asserts a value the convention behind it no longer
- * produces, keyed on the value rather than on the file stating the rule, since
- * a fixture asserting an old output names neither the rule nor its standard.
- *
- * It also matches the family stem the values differ on, so a citation writing
- * the family as a pattern is reported. It reports and never gates, with counts
- * of what was listed, opened, and skipped, since a match can be unrelated. A
- * stale prose reference not carrying the value stays out of reach.
+ * Where the tree still asserts a value the convention no longer produces, keyed
+ * on the value rather than the rule file, and matching the family stem as well.
+ * It reports and never gates, with counts of listed, opened, and skipped paths.
  */
 export async function readSuperseded(
   root: string,
@@ -352,8 +315,7 @@ export async function readSuperseded(
     try {
       text = await readFile(join(root, path), 'utf8')
     } catch {
-      // A listed path that will not open is counted rather than reported, so
-      // the run states that it measured less than it listed.
+      // A listed path that will not open is counted, so the run states it measured less than it listed.
       skipped += 1
       continue
     }

@@ -6,11 +6,9 @@ import { SURFACE_ROOTS } from '@/roots/surface'
 const INDEX_TOPIC = 'index'
 
 /**
- * The roots a topic resolves against, in precedence order. `docs/` holds
- * consumer-facing reference and the context folder holds per-domain internal
- * narrative, so a name present in both resolves to the consumer-facing copy.
- * The context folder is read at every surface root, so a checkout the surface
- * move has not reached still resolves its own entries.
+ * The roots a topic resolves against, in precedence order, so a name present in
+ * both `docs/` and the context folder resolves to the consumer-facing copy. The
+ * context folder is read at every surface root, so an unmoved checkout still resolves.
  */
 export const DOCS_ROOT = 'docs'
 export const CONTEXT_ROOTS: readonly string[] = SURFACE_ROOTS.map((root) =>
@@ -25,13 +23,8 @@ export interface ResolvedTopic {
 
 /**
  * A domain too large for one file splits into `<domain>/` with a generated
- * `index.md`, so a topic names either a sibling file or such a folder. Both
- * spellings resolve to the same name a caller types.
- *
- * A sub-area file one level down resolves by its bare name too, but only after
- * every root has been tried for both spellings above. Reading the folder last
- * is what keeps the widening additive: no name that resolved before this
- * resolves anywhere else now.
+ * `index.md`, so a topic names either a sibling file or such a folder. A
+ * sub-area file resolves by bare name last, which keeps the widening additive.
  */
 export function resolveTopic(
   root: string,
@@ -58,10 +51,8 @@ export function resolveTopic(
 
 /**
  * Names every sub-area file called `<topic>.md` in the first root whose folders
- * carry one, so the root precedence above holds one folder down as well. A name
- * carried by more than one folder of that root resolves to none of them, since
- * answering a bare `overview` with whichever folder sorts first is a confident
- * wrong answer where the miss is a listing of what the caller could have typed.
+ * carry one. A name carried by more than one folder resolves to none, since
+ * picking whichever sorts first is a confident wrong answer.
  */
 function findLeaves(root: string, topic: string): string[] {
   for (const dir of ROOTS) {
@@ -91,10 +82,9 @@ function catalogedFolders(dir: string): string[] {
 }
 
 /**
- * Names every topic a `get` could resolve, listed per root in the order the
- * roots are searched. Shown when a topic misses, so it doubles as the answer to
- * what the caller should have typed, which is why it carries exactly what
- * `resolveTopic` answers for and nothing else.
+ * Names every topic a `get` could resolve, per root in search order. Shown when
+ * a topic misses, so it carries exactly what `resolveTopic` answers for and
+ * nothing else.
  */
 export function listTopics(root: string): string[] {
   const walked = ROOTS.map((dir) => walkEntries(root, dir))
@@ -140,10 +130,9 @@ export interface WalkedEntry {
 }
 
 /**
- * Every entry one root offers, in the three kinds above, with a leaf counted
- * once per occurrence so a name a folder pair both carry stays visible as a
- * collision. A root that is absent offers nothing. This is the one reading of
- * the tree, so `listTopics` and the docs catalog cannot disagree on membership.
+ * Every entry one root offers, with a leaf counted once per occurrence so a name
+ * a folder pair both carry stays visible as a collision. This is the one
+ * reading of the tree, so `listTopics` and the catalog cannot disagree.
  */
 export function walkEntries(root: string, dir: string): WalkedEntry[] {
   const cwd = join(root, dir)

@@ -182,8 +182,7 @@ describe('auditCitations against a real tree', () => {
 
   beforeEach(() => {
     root = mkdtempSync(join(tmpdir(), 'canon-citations-tree-'))
-    // A hook's `GIT_DIR` takes precedence over `cwd`, so an inherited one would
-    // initialize the repository away from the fixture and every case reads empty.
+    // A hook's `GIT_DIR` takes precedence over `cwd`, so an inherited one reads every case empty.
     execSync('git init --quiet', { cwd: root, env: gitEnv() })
     mkdirSync(join(root, 'canon', 'context'), { recursive: true })
     writeFileSync(join(root, 'canon', 'context', 'cli.md'), '# CLI\n')

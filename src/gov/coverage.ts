@@ -9,12 +9,9 @@ import type { RuleCoverage, SyncChange } from '@/sync/engine'
 const UI_FOLDER = 'ui'
 
 /**
- * One record per rule the sync copied, in apply order. A delete wrote nothing,
- * so it has no record, and a rename arrives as the copy to the new path.
- *
- * `files` is undefined when git cannot list the target, and `paths` is empty
- * for a rule that loads everywhere. Listing runs once for all rules, so a
- * large target costs one git call rather than one per rule.
+ * One record per rule the sync copied, in apply order, and none for a delete.
+ * `files` is undefined when git cannot list the target, and listing runs once
+ * for all rules, so a large target costs one git call.
  */
 export async function readCoverage(
   target: string,

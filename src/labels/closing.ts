@@ -1,10 +1,9 @@
 import { linesOutsideFences, maskCodeSpans } from '@/markdown/scan'
 
 /**
- * The keywords GitHub reads as closing an issue on merge, each with its
- * tenses. The keyword must start a word, so `disclosed` before a reference
- * closes nothing, and GitHub reads only the one number that follows it, so a
- * keyword before two comma-separated references closes the first alone.
+ * The keywords GitHub reads as closing an issue on merge, with their tenses. The
+ * keyword must start a word, and GitHub reads only the one number that follows
+ * it, so a keyword before two references closes the first alone.
  */
 const CLOSING =
   /(?<!\w)(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?):?[ \t]+#(\d+)/gi

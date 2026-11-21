@@ -37,12 +37,8 @@ const TENS: Record<string, number> = {
 
 /**
  * Every spelled-out cardinal from zero through ninety-nine, keyed lowercase.
- *
- * Every catalog this reads is under a hundred members, so the compound tens
- * form (`sixty-one`) is the only multi-word shape worth building: the corpus
- * this was written against spells a catalog size in words as often as in
- * digits, and a matcher reading digits alone would miss half its own
- * motivating cases.
+ * Every catalog read is under a hundred members, so the compound tens form is
+ * the only multi-word shape needed, and digits alone would miss half the cases.
  */
 export const WORD_NUMBERS: ReadonlyMap<string, number> = (() => {
   const words = new Map<string, number>()

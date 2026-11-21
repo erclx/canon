@@ -15,11 +15,8 @@ export function rulesSourceDir(root: string): string {
 }
 
 /**
- * Maps a rule name to its source file. The bash used
- * `find governance/rules -name "<rule>.md" | head -n 1` once per installed
- * rule, which walked the whole tree per file and returned whichever match
- * the filesystem happened to yield first. Indexing once makes the walk single
- * pass and the winner deterministic when a name appears in two subdirectories.
+ * Maps a rule name to its source file by indexing once, so the walk is a single
+ * pass and the winner is deterministic when a name appears in two subdirectories.
  */
 export function indexSourceRules(root: string): Map<string, string> {
   const dir = rulesSourceDir(root)
@@ -43,15 +40,9 @@ export function indexSourceRules(root: string): Map<string, string> {
 }
 
 /**
- * Matches installed rules to sources by rule name rather than by relative
- * path, so a rule that moved between subdirectories in the toolkit still
- * syncs into the subdirectory the target already uses.
- *
- * Declares `ownsInstalledRoot` and no `projectSubdir`. A project keeps its own
- * rules under `.claude/rules/project/`, outside the `.claude/rules/canon/`
- * walk, so a rule the walk reaches with no source is one the toolkit retired,
- * and the sync deletes it. A rename `governance/renames.toml` declares installs
- * under the new name. A `projectSubdir` would compute a stale destination.
+ * Matches installed rules to sources by rule name, so a moved rule still syncs
+ * in place. It declares `ownsInstalledRoot` and no `projectSubdir`, since a
+ * walked rule with no source was retired and a subdir would go stale.
  */
 export function createGovAdapter(root: string): SyncAdapter {
   const index = indexSourceRules(root)
@@ -97,13 +88,9 @@ export function createGovAdapter(root: string): SyncAdapter {
 }
 
 /**
- * Where the target already holds a rule, in whichever rule folder. A
- * successor held outside the source's folder stays where it is, the same way
- * `locateSource` syncs a moved rule in place, rather than gaining a second copy.
- *
- * Holding the predecessor is the whole entitlement test, so no stamped chain
- * is read here. That covers a rule `--add` layered on and a target installed
- * before chains were stamped alike.
+ * Where the target already holds a rule, in whichever rule folder. A successor
+ * held outside the source's folder stays put rather than gaining a second copy,
+ * and holding the predecessor is the whole entitlement test, with no chain read.
  */
 function heldRulePath(target: string, rule: string): string | undefined {
   const dir = canonRulesDir(target)
@@ -121,11 +108,9 @@ function heldRulePath(target: string, rule: string): string | undefined {
 }
 
 /**
- * Rules the target's recorded chain entitles it to and its tree does not
- * hold, then the partners of a held rule that split. Reports as `notice` text
- * through the same shape `collectRetired` already returns, since both are
- * surfaces the file walk cannot see: one an absence to remove, this one an
- * absence to add.
+ * Rules the target's recorded chain entitles it to and its tree does not hold,
+ * then the partners of a held rule that split. Reported as `notice` text like
+ * `collectRetired`, since both are surfaces the file walk cannot see.
  */
 function collectMissingGov(root: string, target: string): RetiredSurface[] {
   const chain = stampedChain(readStamp(target), 'governance')
@@ -150,10 +135,8 @@ function collectMissingGov(root: string, target: string): RetiredSurface[] {
 
 /**
  * Partners the split ledger names for a rule the target holds and whose own
- * file it lacks. The ui rules sit in no stack, so no chain entitles a target
- * to them and the chain-based read stays silent when one splits. Holding the
- * rule is the entitlement, found by basename the way `heldRulePath` finds a
- * predecessor, so a partner held under another folder reads as held.
+ * file it lacks. The ui rules sit in no stack, so holding the rule is the
+ * entitlement, found by basename the way `heldRulePath` finds a predecessor.
  */
 function collectSplitPartners(root: string, target: string): RetiredSurface[] {
   const splits = loadSplits(root)

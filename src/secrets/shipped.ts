@@ -2,13 +2,9 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 /**
- * The corpus is the package's own `files` field rather than a list kept here.
- *
- * That field is what npm packs, so a second list would drift, and its
- * negations keep the sandbox tree, the eval tree, and every test file out by
- * the rule that keeps them out of the tarball. The plugin, read live from
- * `claude/` by a marketplace install, is a `files` entry too, so both routes
- * land inside the same corpus.
+ * The corpus is the package's own `files` field rather than a list kept here,
+ * since that field is what npm packs and its negations keep tests and sandbox
+ * trees out. The plugin is a `files` entry too, so both routes share one corpus.
  */
 export type ShipEntries =
   /** The field declares a corpus, which is what this check reads. */
@@ -18,12 +14,9 @@ export type ShipEntries =
   /** The manifest declares it is never published, so there is no shipped tree. */
   | { readonly kind: 'no-publish' }
   /**
-   * A manifest that publishes and declares no corpus.
-   *
-   * npm packs the whole tree in that case, so this is the package that ships
-   * the most rather than one that ships nothing. This check reads a declared
-   * corpus and does not stand in an undeclared one, so the caller reports the
-   * shipped tree as unread rather than as empty.
+   * A manifest that publishes and declares no corpus. npm packs the whole tree
+   * then, so this ships the most, and the caller reports the shipped tree as
+   * unread rather than empty.
    */
   | { readonly kind: 'no-files-field' }
 
@@ -37,8 +30,7 @@ export async function readShipEntries(root: string): Promise<ShipEntries> {
 
   const record = manifest as { files?: unknown; private?: unknown } | null
 
-  // The one field that separates a project publishing nothing from one
-  // publishing everything, which the `files` field alone cannot tell apart.
+  // The one field separating a project publishing nothing from one publishing everything.
   if (record?.private === true) return { kind: 'no-publish' }
 
   const files = record?.files
@@ -54,11 +46,9 @@ export async function readShipEntries(root: string): Promise<ShipEntries> {
 }
 
 /**
- * Root files npm packs whether or not the `files` field names them.
- *
- * They leave the repository on every publish, so a corpus built from the field
- * alone would let a credential in any of them ship unreported. Matched by stem
- * against any extension, since each is packed under whichever one it carries.
+ * Root files npm packs whether or not the `files` field names them, so a corpus
+ * from the field alone would let a credential in one ship unreported. They are
+ * matched by stem against any extension.
  */
 const ALWAYS_PACKED = ['package.json', 'readme', 'license', 'licence', 'notice']
 
@@ -79,11 +69,9 @@ function covers(entry: string, path: string): boolean {
 }
 
 /**
- * Narrows a repository listing to what the package publishes.
- *
- * Negations are collected first and applied to every candidate, since npm
- * reads the field as one set rather than in order, and an entry's position in
- * the array says nothing about what it overrides.
+ * Narrows a repository listing to what the package publishes. Negations are
+ * collected first and applied to every candidate, since npm reads the field as
+ * one set and an entry's position overrides nothing.
  */
 export function selectShipped(
   paths: readonly string[],

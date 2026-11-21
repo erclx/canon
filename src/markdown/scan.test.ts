@@ -51,8 +51,7 @@ describe('bodyLines', () => {
   it('should leave an unterminated fence swallowing the rest of the file', () => {
     const source = '# Heading\n\n```ts\nconst x = 1\n\nMore prose.\n'
 
-    // Under-reporting a malformed file beats reporting its remainder as
-    // content, since the remainder is whatever the unclosed block holds.
+    // Under-reporting a malformed file beats reporting its unclosed remainder as content.
     expect(bodyLines(source).filter((line) => line.fenced)).toHaveLength(4)
   })
 })
@@ -73,8 +72,7 @@ describe('linesOutsideFences', () => {
   })
 
   it('should drop both of two adjacent blocks, which it cannot tell apart', () => {
-    // A caller reading this asks only whether a line is fenced, so the block
-    // index has to leave it returning exactly what it returned before.
+    // A caller asks only whether a line is fenced, so the block index must change nothing.
     const kept = linesOutsideFences(
       'Before.\n```ts\nconst x = 1\n```\n```sh\ncanon\n```\nAfter.\n',
     )
@@ -126,8 +124,7 @@ describe('visibleText', () => {
   })
 
   it('should keep a placeholder inside a code span, brackets and all', () => {
-    // The autolink pattern reaches into a backticked path and takes the angle
-    // brackets out of the middle of it, which counts less than the page shows.
+    // The autolink pattern reaches into a backticked path and takes the angle brackets out of it.
     const text = 'See `canon/context/<domain>.md` for it.'
 
     expect(visibleText(text)).toBe(text)
@@ -152,8 +149,7 @@ describe('visibleText', () => {
   })
 
   it('should keep an inline code span, which a reader reads', () => {
-    // A backticked path is still text on the page, so discounting it here would
-    // under-report a paragraph full of them, unlike the ban scan's blanking.
+    // A backticked path is still text on the page, so discounting it would under-report.
     expect(visibleText('Open `src/markdown/scan.ts` next.')).toBe(
       'Open `src/markdown/scan.ts` next.',
     )
@@ -174,8 +170,7 @@ describe('scanBans', () => {
   })
 
   it('should report nothing inside either of two adjacent blocks', () => {
-    // The ban half of `canon markdown audit` fails a push, so the exclusion this
-    // scan walks around has to hold for a block with no gap before the next.
+    // The ban half fails a push, so the exclusion must hold for a block with no gap before the next.
     expect(
       terms('# H\n\n```ts\nconst a = 1;\n```\n```sh\ncanon a; canon b\n```\n'),
     ).toEqual([])

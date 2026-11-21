@@ -1,14 +1,9 @@
 import type { FunctionSpan } from '@/code/length'
 
 /**
- * Reads the `def` and `async def` spans of a Python source by indentation.
- *
- * The published CLI spawns no interpreter, since an interpreter older than
- * the project's syntax refuses files that parse under the project's own, so a
- * line lexer tracks strings, comments, brackets, and continuations, and a
- * function's body runs until the first statement indented at or below its
- * header. A file the walk cannot read is returned as unread with the reason,
- * never as an empty list.
+ * Reads the `def` and `async def` spans of a Python source by indentation. The
+ * published CLI spawns no interpreter, since an older one refuses files that
+ * parse under the project's own, and a file the walk cannot read is returned as unread.
  */
 
 export type UnreadReason =

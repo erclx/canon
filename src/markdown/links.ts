@@ -20,14 +20,8 @@ function isSkipped(destination: string): boolean {
 
 /**
  * The path half of a destination, decoded, or undefined on a malformed
- * percent-encoding.
- *
- * `decodeURIComponent` throws on a stray `%` not followed by two hex digits,
- * and a destination is text an author typed rather than a value this command
- * controls, so a throw here is reachable from any markdown file in the
- * corpus. Exported so `src/commands/markdown.ts` decodes a destination for
- * display the same way this decodes one for resolution, rather than a second
- * definition of the same fallible call.
+ * percent-encoding, which `decodeURIComponent` throws on and any markdown file
+ * can reach. Exported so `src/commands/markdown.ts` decodes the same way.
  */
 export function decodePath(destination: string): string | undefined {
   try {

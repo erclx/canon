@@ -3,16 +3,9 @@ import { type Coverage, resolveCoverage } from '@/labels/coverage'
 import { type MapRefusal, readLabelMap } from '@/labels/map'
 
 /**
- * Why an audit produced no reading.
- *
- * `no-map` travels through from the map reader and stays an answer rather than
- * a fault. The git reasons are the opposite: a range this check asked for and
- * could not get, which is a broken invocation rather than a project that
- * declared nothing.
- *
- * A named ref producing no merge base is its own reason. Folding it into
- * `no-base` sends the caller who already passed `--base` a message telling
- * them to pass `--base`.
+ * Why an audit produced no reading. `no-map` is an answer rather than a fault,
+ * and the git reasons are a range this check could not get. A named ref with no
+ * merge base is its own reason, since `no-base` would tell the caller to pass `--base`.
  */
 export type LabelAuditRefusal =
   | MapRefusal
@@ -42,12 +35,9 @@ export interface LabelAuditOptions {
 }
 
 /**
- * Resolves a changed set against the map a project declares, and reports both
- * what it earns and what it leaves uncovered.
- *
- * One verb for two readers by design. `git-pr` reads the labels at open time
- * and the audit aggregate reads the uncovered count, and a verb shaped for the
- * first alone returns nothing the second can retain.
+ * Resolves a changed set against the map a project declares, reporting both what
+ * it earns and what it leaves uncovered. One verb serves `git-pr` at open time
+ * and the audit aggregate, which retains the uncovered count.
  */
 export async function auditLabels(
   root: string,

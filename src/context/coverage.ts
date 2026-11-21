@@ -9,13 +9,9 @@ export const CONTEXT_CONFIG_REL = join('canon', 'config', 'context.toml')
 export const DEFAULT_ROOT = 'src'
 
 /**
- * The roots a project asked the coverage check to measure.
- *
- * `none` says the project carries no declaration and no `src/`, which reports
- * and never gates so a seed tree audited at its own root keeps passing.
- * `opted-out` is an explicit `roots = []`. `invalid` is a declaration that
- * exists and cannot be used, which gates rather than falling back to `src`,
- * since a project that wrote one meant it.
+ * The roots a project asked the coverage check to measure. `none` reports and
+ * never gates, `opted-out` is an explicit empty list, and `invalid` is a
+ * declaration that cannot be used, which gates rather than falling back to `src`.
  */
 export type RootDeclaration =
   | { readonly kind: 'roots'; readonly patterns: readonly string[] }
@@ -101,13 +97,8 @@ export function readRoots(root: string): RootDeclaration {
 
 /**
  * The gate keys a project declares beside its roots in the context config.
- *
- * `gated` is null where the key is absent, so the toolkit's own prefixes
- * apply, and an empty list where the project gates no folder. `invalid` names
- * each key declared in a shape the audit cannot use, which gates under
- * `--gate` the way an invalid `roots` does, and the key then reads as absent.
- * A file that is not valid TOML reports through `readRoots` alone, so one
- * fault is not counted twice.
+ * `gated` is null where absent so the toolkit's prefixes apply, and `invalid`
+ * names each key in an unusable shape, which gates under `--gate`.
  */
 export interface GateKeys {
   readonly gated: readonly string[] | null
@@ -206,12 +197,9 @@ function backtickedPaths(text: string): string[] {
 }
 
 /**
- * Measures the folders under the declared roots against the Layout sections.
- *
- * A folder is named when any Layout text cites it in backticks, a bullet
- * included, and claimed when it is an H3 title. Only the H3 counts toward
- * uniqueness, since a bullet legitimately cites another domain's folder and a
- * grep cannot tell a citation from a claim.
+ * Measures the folders under the declared roots against the Layout sections. A
+ * folder is named when any Layout text cites it and claimed when it is an H3
+ * title, and only the H3 counts toward uniqueness, since a bullet may cite another domain.
  */
 export function measureCoverage(
   root: string,

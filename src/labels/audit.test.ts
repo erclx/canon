@@ -21,12 +21,9 @@ function write(root: string, path: string, text: string): void {
 }
 
 /**
- * Runs git against the fixture with the ambient environment dropped.
- *
- * Every read here goes through this rather than a bare `execaSync`. A git hook
- * exports `GIT_DIR` into the processes it runs and that variable takes
- * precedence over `-C`, so a bare call reads whichever repository invoked the
- * suite and the fixture's own history never comes back.
+ * Runs git against the fixture with the ambient environment dropped. A hook
+ * exports `GIT_DIR`, which takes precedence over `-C`, so a bare call would read
+ * whichever repository invoked the suite.
  */
 function git(root: string, args: string[]): string {
   return execaSync('git', ['-C', root, ...args], {

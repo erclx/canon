@@ -20,12 +20,9 @@ export type FileScope =
   | { readonly kind: 'unavailable' }
 
 /**
- * Every reason `canon markdown audit` refuses for.
- *
- * None is an ordinary absence. `no-git` is a broken checkout the way it is
- * for the secret scan, and a tree tracked by git carrying no markdown file at
- * all, or an argument matching none, is a corpus this run could not build
- * rather than a target that adopted none of the convention this check reads.
+ * Every reason `canon markdown audit` refuses for. None is an ordinary absence,
+ * since `no-git` is a broken checkout and a tree with no markdown, or an
+ * argument matching none, is a corpus this run could not build.
  */
 export type MarkdownAuditRefusal = 'no-git' | 'no-markdown' | 'no-match'
 
@@ -44,12 +41,9 @@ function matchGlob(files: readonly string[], pattern: string): string[] {
 }
 
 /**
- * Resolves the arguments to a markdown file list, repo-relative and sorted.
- *
- * The corpus is what git lists, which keeps `node_modules` and the gitignored
- * scratch out unnamed. A directory narrows it by prefix and a pattern by
- * match, so a file only the working tree has is in scope on its branch. An
- * explicit file path is taken as given, so a gitignored draft can be measured.
+ * Resolves the arguments to a markdown file list, repo-relative and sorted. The
+ * corpus is what git lists, a directory narrows it by prefix and a pattern by
+ * match, and an explicit file path is taken as given so a draft can be measured.
  */
 export async function resolveMarkdown(
   root: string,
@@ -77,8 +71,7 @@ export async function resolveMarkdown(
       continue
     }
 
-    // An empty `rel` is the root itself, where the prefix below matches nothing
-    // and would report the whole tree as an argument that resolved to no file.
+    // An empty `rel` is the root itself, where the prefix matches nothing and would report no file.
     const matched = isDirectory(absolute)
       ? rel === ''
         ? markdown

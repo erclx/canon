@@ -11,11 +11,7 @@ import { findBacktickSpans } from '@/markdown/backticks'
 /**
  * The inline token exempting one line from this sweep, shaped on the
  * `canon-allow-superseded` precedent and read by the same two-line rule.
- *
- * Everything the classifier below can separate mechanically is separated
- * there. This is for the residue: a line whose path is written as a reference
- * and is correct in naming something absent, for a reason a later reader has
- * to be able to weigh. A bare token names no reason, so it mutes nothing.
+ * It is for the residue, and a bare token names no reason, so it mutes nothing.
  */
 export const CITATION_MARKER = 'canon-allow-citation'
 
@@ -26,13 +22,9 @@ export const RULE_DIRS: readonly string[] = [
 ]
 
 /**
- * The corpus whose frontmatter globs resolve against this tree.
- *
- * Bodies are read across both corpora and globs across this one alone. A rule
- * under `governance/rules/` installs into a target, so its `paths:` entries
- * name that project's shape and many correctly match nothing here. The
- * internal corpus ships nowhere, so a glob matching nothing there is a rule
- * that stopped firing.
+ * The corpus whose frontmatter globs resolve against this tree. A shipped rule's
+ * `paths:` entries name a target's shape, so many correctly match nothing here,
+ * while a glob matching nothing in the internal corpus is a rule that stopped firing.
  */
 export const GLOB_CORPUS = join('internal', 'rules')
 
@@ -44,11 +36,9 @@ export const GLOB_CORPUS = join('internal', 'rules')
 export type CitationForm = 'path'
 
 /**
- * What the sweep decided about one citation.
- *
- * `governed` and `ignored` are the two classes where a path reaching nothing is
- * correct rather than stale, and they are named rather than dropped so the
- * report states what it declined to judge. `exempt` is the marker.
+ * What the sweep decided about one citation. `governed` and `ignored` are the
+ * classes where a path reaching nothing is correct, named rather than dropped
+ * so the report states what it declined to judge, and `exempt` is the marker.
  */
 export type CitationStatus =
   | 'resolved'
@@ -74,11 +64,9 @@ export interface RuleCitation {
 }
 
 /**
- * One `paths:` entry from a rule's frontmatter, resolved against the tree.
- *
- * Only the internal corpus is read. A rule shipping to a target declares the
- * shape that target holds, so its globs answer about a tree that is not this
- * one, which `GLOB_CORPUS` states and the report repeats on every run.
+ * One `paths:` entry from a rule's frontmatter, resolved against the tree. Only
+ * the internal corpus is read, since a shipped rule's globs answer about a
+ * tree that is not this one, as `GLOB_CORPUS` states.
  */
 export interface RuleGlob {
   readonly file: string
@@ -110,11 +98,8 @@ const FRONTMATTER_DELIMITER = /^---\s*$/
 
 /**
  * A character that puts the span outside this repository, or outside paths
- * altogether.
- *
- * `<` and `$` are the placeholder forms, `*` is a glob, and both describe a
- * shape rather than name a file. The rest are anchors nothing here resolves
- * against: an absolute path, a home path, a module alias, a URL scheme.
+ * altogether. `<` and `$` are placeholders, `*` is a glob, and the rest are
+ * anchors nothing here resolves against, such as an absolute path or a URL scheme.
  */
 function isNotRepositoryPath(span: string): boolean {
   if (/[\s<>$*|]/.test(span)) return true
@@ -123,13 +108,9 @@ function isNotRepositoryPath(span: string): boolean {
 }
 
 /**
- * Whether the span's last segment carries a file extension.
- *
- * This is what separates a citation from the folder and module conventions the
- * corpus is full of. `next/font`, `try/except`, `react-hooks/set-state-in-effect`,
- * and `oven-sh/setup-bun@v2` all carry a slash and name no file, and a trailing
- * slash is a folder rather than a document. The cost is that a real folder path
- * goes unchecked, which is the bound the report states.
+ * Whether the span's last segment carries a file extension, which separates a
+ * citation from folder and module conventions such as `next/font`. A real folder
+ * path goes unchecked, which is the bound the report states.
  */
 function namesAFile(span: string): boolean {
   if (span.endsWith('/')) return false
@@ -139,13 +120,8 @@ function namesAFile(span: string): boolean {
 
 /**
  * Which form the span is written in, or nothing when it names no file this
- * sweep can resolve.
- *
- * The whole span is classified rather than a trailing pattern inside it.
- * Extracting a trailing `<folder>/<name>.md` out of a longer path and resolving
- * that against another root manufactures a dead citation out of a file that
- * exists, which a session measuring this corpus did before the check was
- * written.
+ * sweep can resolve. The whole span is classified, since resolving a trailing
+ * `<folder>/<name>.md` of a longer path manufactures a dead citation.
  */
 export function classifySpan(span: string): CitationForm | undefined {
   if (isNotRepositoryPath(span)) return undefined
@@ -162,14 +138,9 @@ interface RawCitation {
 }
 
 /**
- * Every citation one rule body carries.
- *
- * The frontmatter block is skipped, since a `paths:` glob declares what the
- * rule governs rather than what it points a reader at, and the two questions
- * resolve against different trees. Fenced blocks are skipped for the reason the
- * marker exists: a fenced example displays a path rather than citing one. No
- * rule in either corpus opens a fence today, so this is a floor rather than a
- * filter over anything present.
+ * Every citation one rule body carries. The frontmatter block is skipped, since
+ * a `paths:` glob declares what the rule governs, and fenced blocks are skipped
+ * since a fenced example displays a path rather than citing one.
  */
 export function collectCitations(text: string): RawCitation[] {
   const lines = text.split('\n')
@@ -195,8 +166,7 @@ export function collectCitations(text: string): RawCitation[] {
         : trimmed
     const marked = isMarked(lines, index, CITATION_MARKER)
 
-    // A backticked span is the only carrier a rule writes a citation in, and
-    // matching running prose would report every sentence naming a file.
+    // A backticked span is the only carrier a rule writes a citation in, and prose would over-report.
     for (const { content: span } of findBacktickSpans(line)) {
       const form = classifySpan(span)
       if (form === undefined) continue
@@ -208,12 +178,9 @@ export function collectCitations(text: string): RawCitation[] {
 }
 
 /**
- * The paths one rule declares in its own frontmatter.
- *
- * A rule spelling a whole path there is declaring that exact artifact, and a
- * body line naming it again is naming what the rule governs rather than
- * pointing a reader somewhere. Such a path names a file a target holds, so it
- * is correctly absent from this tree and correctly named in the rule.
+ * The paths one rule declares in its own frontmatter. A body line naming one
+ * again names what the rule governs rather than pointing a reader somewhere, so
+ * it is correctly absent from this tree.
  */
 function governedPaths(text: string): string[] {
   const parsed = parseFrontmatter(text)
@@ -223,36 +190,25 @@ function governedPaths(text: string): string[] {
 }
 
 /**
- * Exact declarations only, never a glob match against one.
- *
- * A glob declares a shape rather than an artifact, so a body path sitting
- * inside one is still a citation and a stale one is still a defect. Matching
- * the glob would exempt a rule scoped at `docs/**` citing a
- * `docs/agents/renamed.md` that moved, which is the class this check exists
- * to catch.
+ * Exact declarations only, never a glob match against one. A glob declares a
+ * shape, so a body path inside it is still a citation, and matching it would
+ * exempt a stale path that moved.
  */
 function isGoverned(cited: string, declared: readonly string[]): boolean {
   return declared.includes(cited)
 }
 
 /**
- * A `paths:` list entry, with the glob captured and its quoting dropped.
- *
- * Anchored on the entry shape rather than searched for as a substring. A bare
- * scan for the glob text finds it in the `description:` line first wherever a
- * rule names what it governs in prose, which is how `seed-mirror.md` reported
- * its `CLAUDE.md` glob against line 2 instead of line 4.
+ * A `paths:` list entry, with the glob captured and its quoting dropped. It is
+ * anchored on the entry shape, since a bare scan finds the glob text in the
+ * `description:` line first wherever a rule names what it governs in prose.
  */
 const LIST_ENTRY = /^\s*-\s*(?:'([^']*)'|"([^"]*)"|(\S.*?))\s*$/
 
 /**
  * Where each declared glob sits, so a finding names a line a reader can click.
- *
- * The values come from the YAML parse and the line numbers from a scan of the
- * frontmatter block alone, rather than from a second parse of the list syntax.
- * A quoted entry, a bare one, and a flow sequence all reach the parse
- * identically, and only the first two are what this corpus writes, so a flow
- * sequence resolves its value and reports no line.
+ * Values come from the YAML parse and line numbers from a scan of the block, so
+ * a flow sequence resolves its value and reports no line.
  */
 function locateGlobs(text: string): { line: number; glob: string }[] {
   const declared = governedPaths(text)
@@ -277,13 +233,9 @@ function locateGlobs(text: string): { line: number; glob: string }[] {
 }
 
 /**
- * Whether the glob matches a file present in this tree.
- *
- * Read only for `internal/rules/`. A shipped rule's glob names the shape a
- * target holds, so `src/pages/**` in the Astro rule is indistinguishable by
- * pattern from a path here and resolving it would report 32 of 72 correct
- * globs as defects. The internal corpus ships nowhere, which makes the tree it
- * governs the tree present and the question answerable.
+ * Whether the glob matches a file present in this tree. Read only for
+ * `internal/rules/`, since a shipped rule's glob names a target's shape and
+ * resolving it here would report most correct globs as defects.
  */
 function globMatches(root: string, glob: string): boolean {
   const scan = new Bun.Glob(glob).scanSync({
@@ -296,15 +248,9 @@ function globMatches(root: string, glob: string): boolean {
 }
 
 /**
- * Which of `paths` git ignores, or nothing when git could not answer.
- *
- * Session scratch is the class this reaches. `.canon/tasks/index.md` is real
- * in a live project, absent from a fresh clone and from every linked worktree,
- * and a rule naming it is right either way. Resolving against the filesystem
- * alone would make the verdict depend on which tree the check ran in.
- *
- * `git check-ignore` exits 1 when nothing matches, which is a clean answer
- * rather than a failure, so only a higher code is read as one.
+ * Which of `paths` git ignores, or nothing when git could not answer. Session
+ * scratch is real in a live project and absent from a fresh clone, so the
+ * verdict must not depend on the tree. `git check-ignore` exits 1 on no match, a clean answer.
  */
 async function readIgnored(
   root: string,
@@ -323,15 +269,9 @@ async function readIgnored(
 }
 
 /**
- * Resolves every path the two rule corpora cite and names the ones reaching
- * nothing, plus every frontmatter glob under `GLOB_CORPUS`. Both fail the
- * same way, silently after a move, so one stage reads both.
- *
- * This gates rather than reports, since a path resolving to nothing carries no
- * judgment, and the classes where absence is correct are separated first. It
- * cannot see a citation that resolves somewhere wrong, a path without
- * backticks, a folder or specifier with no extension, which `namesAFile`
- * declines, or a glob matching real files but none of its intended work.
+ * Resolves every path the two rule corpora cite and names those reaching
+ * nothing, plus every frontmatter glob under `GLOB_CORPUS`. This gates, since an
+ * unresolved path carries no judgment, but it cannot see a citation that resolves wrongly.
  */
 export async function readCitations(root: string): Promise<CitationReport> {
   const dirs = RULE_DIRS.map((rel) => ({
@@ -358,8 +298,7 @@ export async function readCitations(root: string): Promise<CitationReport> {
       try {
         text = await readFile(abs, 'utf8')
       } catch {
-        // A rule removed since the glob answered is skipped, which under-reports
-        // rather than failing a push on a race.
+        // A rule removed since the glob answered is skipped, which under-reports rather than failing on a race.
         continue
       }
 
@@ -407,12 +346,9 @@ function classifyStatus(
 }
 
 /**
- * Moves the unresolved paths git ignores out of the dead set.
- *
- * Batched into one call over the whole sweep rather than one per citation, and
- * skipped outright when nothing is unresolved, so a clean corpus spawns no git
- * at all. A read git cannot answer refuses, since treating it as "nothing is
- * ignored" would fail a push over session scratch that was never in the tree.
+ * Moves the unresolved paths git ignores out of the dead set in one batched
+ * call, skipped when nothing is unresolved. A read git cannot answer refuses,
+ * since treating it as "nothing ignored" would fail a push over session scratch.
  */
 async function applyIgnored(
   root: string,
