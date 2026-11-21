@@ -6,15 +6,9 @@ export interface Frontmatter {
 }
 
 /**
- * Splits a leading `---` block off a markdown source.
- *
- * `raw` keeps the delimiters so an index can be rewritten with its own
- * frontmatter untouched, including comments and key order that a parse and
- * re-emit would lose.
- *
- * A block that will not parse reads as absent rather than throwing, so one
- * malformed file reports through the path a caller already takes for a
- * missing block instead of ending the caller's whole run.
+ * Splits a leading `---` block off a markdown source. `raw` keeps the delimiters
+ * so an index is rewritten with its frontmatter untouched, and a block that will
+ * not parse reads as absent rather than throwing and ending the caller's run.
  */
 export function parseFrontmatter(source: string): Frontmatter | undefined {
   const reading = readFrontmatterSource(source)

@@ -179,8 +179,7 @@ function renderIndex(
       }
     })
   } else {
-    // Flat mode sorts sub-catalogs among the files, since a trailing folder reads
-    // as absent from its alphabetical run. Grouped mode keeps its own heading.
+    // Flat mode sorts sub-catalogs among the files, since a trailing folder reads as absent.
     const lines = [
       ...entries.map((entry) => ({
         key: entry.name,
