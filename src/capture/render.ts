@@ -31,14 +31,9 @@ import {
 import { formatStamp, hashSource, stampPath } from '@/capture/stamp'
 
 /**
- * Every browser reference the capture command makes lives in this module, and
- * `src/commands/capture.ts` reaches it through a dynamic import so `src/cli.ts`
- * never resolves the engine at startup.
- *
- * It ships, like `@/inventory/walk` and `@/driver/drive`, since a target renders
- * its own generated pages and proves its own fonts resolved. It imports
- * `playwright-core` rather than `@playwright/test`, as the siblings do, since
- * the test runner is a development dependency the tarball never carries.
+ * Every browser reference the capture command makes lives here, reached through a
+ * dynamic import so `src/cli.ts` never resolves the engine at startup. It ships,
+ * so it imports `playwright-core`, since the test runner is a development dependency.
  */
 
 const DEVICE_SCALE_FACTOR = 2
@@ -125,14 +120,9 @@ interface PageEmulation {
 }
 
 /**
- * A viewport rather than a wrapper, since a media query answers to the
- * viewport. Absent leaves the option out so the browser default stands and
- * every committed capture renders as before. The height is Playwright's own
- * default, which keeps `vh` units where they were.
- *
- * Touch sets `hasTouch` alone, which turns `(hover: hover)` false and
- * `(pointer: coarse)` true. `isMobile` stays off, since it lays out a page with
- * no meta viewport at 980 wide and stops the wheel the section prep scrolls by.
+ * A viewport rather than a wrapper, since a media query answers to the viewport.
+ * Touch sets `hasTouch` alone, flipping `(hover: hover)` and `(pointer: coarse)`.
+ * `isMobile` stays off, since it lays out a page with no meta viewport at 980 wide.
  */
 function pageOptions({
   width,
@@ -244,12 +234,9 @@ export type SectionsResult =
   | { status: 'failed'; source: string; reason: string }
 
 /**
- * Shoots one page as one PNG per section, in page order, each with its stamp.
- * A section that fails to shoot is reported beside the rest rather than
- * dropping them, and a page that never loads or names no root fails whole.
- *
- * Each shot is a document-coordinate clip rather than an element shot, since a
- * merged section spans several elements and one element cannot frame them.
+ * Shoots one page as one PNG per section, in page order, each with its stamp. A
+ * failed section is reported beside the rest, and a page that never loads fails
+ * whole. Each shot is a document-coordinate clip, since a merged section spans several elements.
  */
 export async function captureSections(
   sourcePath: string,
@@ -337,12 +324,9 @@ interface Clip {
 }
 
 /**
- * Shoots a document-coordinate clip one viewport at a time, down and across,
- * and stitches the tiles, since Playwright's `fullPage` shot resets the device metrics while it
- * paints and drops touch emulation with them, so a `(hover: hover)` rule paints
- * its desktop form though `matchMedia` reads false before and after. A shot
- * inside the viewport keeps it. Neither `isMobile` nor an emulated `hover`
- * media feature survives the `fullPage` path either.
+ * Shoots a document-coordinate clip one viewport at a time and stitches the tiles,
+ * since Playwright's `fullPage` shot resets device metrics and drops touch
+ * emulation, so a `(hover: hover)` rule paints its desktop form.
  */
 async function shootByViewport(page: Page, clip: Clip): Promise<Buffer> {
   const viewport = page.viewportSize()
@@ -411,14 +395,9 @@ async function unresolvedFonts(page: Page): Promise<SectionFonts> {
 }
 
 /**
- * Runs inside the render rather than in a wrapper around it, so a capture
- * cannot succeed with its provenance unrecorded, and a throw here reports the
- * source as failed.
- *
- * A file source is stored as a bare filename, since an absolute path would
- * differ per checkout. A URL source is stored as the URL, and its digest hashes
- * the URL string's UTF-8 bytes. The image digest is taken over the buffer the
- * screenshot returned, so the stamp describes the bytes this run wrote.
+ * Runs inside the render, so a capture cannot succeed with its provenance
+ * unrecorded. A file source is stored as a bare filename since an absolute path
+ * differs per checkout, and the image digest covers the buffer the screenshot returned.
  */
 function writeStamp(source: CaptureSource, png: Uint8Array): void {
   writeFileSync(
@@ -444,14 +423,9 @@ function sourceIdentifier(source: CaptureSource): string {
 }
 
 /**
- * Writes the theme the three switches a stylesheet reads, being the media
- * query, a `data-theme` attribute, and a `light` or `dark` class on the root,
- * which is the set Frameboard's theme toggle writes on every frame. The media
- * query alone leaves a stylesheet keyed on the attribute in its default set,
- * which is dark for one `canon design css` emits.
- *
- * Written after the load event, so a page script restoring a stored theme on
- * load has already run and cannot overwrite it.
+ * Writes the theme the three switches a stylesheet reads: the media query, a
+ * `data-theme` attribute, and a `light` or `dark` class on the root. It runs after
+ * the load event so a script restoring a stored theme has already run.
  */
 async function applyColorScheme(
   page: Page,
@@ -474,16 +448,9 @@ function failed(
 }
 
 /**
- * The computed families of the captured element and of each element under it
- * holding a non-blank text node of its own that draws a box, which is the text
- * the screenshot shows. Testing the text node's box rather than the element's
- * keeps out `<style>`, `<script>`, `<title>`, and anything hidden, whose
- * computed family is the browser default and would refuse every source that
- * styles a descendant rather than the root, and keeps in text directly inside a
- * `display: contents` element, which draws no box of its own.
- *
- * Returns nothing when no element holds text, since a font cannot rewrap text
- * that is not there, so a container of iframes skips the probe.
+ * The computed families of the captured element and each descendant holding a
+ * non-blank text node that draws a box, so `<style>` and hidden nodes stay out
+ * and `display: contents` text stays in. Returns nothing when no element holds text.
  */
 async function renderedTextFamilies(element: Locator): Promise<string[]> {
   return element.evaluate((root) => {
@@ -502,9 +469,8 @@ async function renderedTextFamilies(element: Locator): Promise<string[]> {
 
 /**
  * Compares the family's text metrics against a family that cannot exist. Equal
- * widths mean the browser fell through to its default for both, which is the
- * only signal available: `document.fonts.check` reports every system family as
- * present, including invented ones.
+ * widths mean a fall through to the default, the only signal available since
+ * `document.fonts.check` reports every system family as present.
  */
 async function resolvesFont(page: Page, family: string): Promise<boolean> {
   return page.evaluate(

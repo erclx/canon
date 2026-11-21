@@ -1,12 +1,7 @@
 /**
- * The touch drag behind `canon browser swipe <x> <y> <dy>`, sent as a browser
- * protocol `Input.dispatchTouchEvent` sequence through the pinned CLI's
- * `run-code`. Groundwork 223 measured it as the one route that fires real touch
- * events and moves the page: a mouse wheel moves it with no touch event, and a
- * script-made `TouchEvent` reaches listeners but scrolls nothing.
- *
- * Measured only in a session opened with `open --mobile`, which gives the
- * engine context `hasTouch`.
+ * The touch drag behind `canon browser swipe <x> <y> <dy>`, sent as an
+ * `Input.dispatchTouchEvent` sequence through `run-code`, the one route measured
+ * to fire real touch events and move the page. It needs a session opened with `open --mobile`.
  */
 
 /** Pixels per move, the pace between moves, and the wait for the fling to stop. */
