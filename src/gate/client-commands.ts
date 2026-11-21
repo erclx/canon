@@ -2,11 +2,8 @@ import { escapeForPattern, isMarked } from '@/sweep/exempt-marker'
 
 /**
  * A client command this repository quotes, with the argument spelling every
- * quotation of it has to carry.
- *
- * `source` is the fact grounding `canonicalArgument`, so a reader correcting a
- * flagged line can see why the flagged form is wrong rather than taking the
- * table on faith.
+ * quotation of it has to carry. `source` grounds `canonicalArgument`, so a
+ * reader correcting a flagged line sees why the flagged form is wrong.
  */
 export interface ClientCommand {
   readonly command: string
@@ -27,13 +24,8 @@ export const CLIENT_COMMAND_MARKER = 'canon-allow-client-command'
 
 /**
  * A bracketed placeholder or a template interpolation, each optionally
- * single-quoted, which is the one call form this scanner reads. A sentence
- * naming the command with no bracketed argument never matches, by design,
- * since the defect is a wrong argument shown as an invocation.
- *
- * The interpolation half admits a dotted path, since a property access such as
- * `${session.id}` is the ordinary shape a real call site interpolates. A capture
- * stopping at the first `.` would miss it.
+ * single-quoted, the one call form this scanner reads. The interpolation half
+ * admits a dotted path, since a capture stopping at the first `.` would miss it.
  */
 const PLACEHOLDER = `'?(?:<([\\w-]+)>|\\$\\{(\\w+(?:\\.\\w+)*)\\})'?`
 
@@ -48,12 +40,9 @@ export interface ClientCommandCitation {
 }
 
 /**
- * Every quotation of a listed command in one file whose argument disagrees
- * with the table, and no marker mutes.
- *
- * `commands` defaults to the shipped table and takes a narrower one only for
- * the empty-table case a measure guards against, since production code never
- * has a reason to check against anything else.
+ * Every quotation of a listed command in one file whose argument disagrees with
+ * the table, and no marker mutes. `commands` takes a narrower table only for the
+ * empty-table case a measure guards against.
  */
 export function clientCommandCitationsIn(
   file: string,

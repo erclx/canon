@@ -5,13 +5,9 @@ import type { Measure, MeasureReport } from '@/gate/measures'
 import { seedRoots } from '@/tooling/seeds'
 
 /**
- * The checks guarding what crosses from this repository into a target: the
- * ignore set a manifest ships, the capabilities a seed carries, the plugin's
- * reach, the prose a seed installs, and the paths a shipped skill cites.
- *
- * Each reads the tree in-process and reports `unmeasured` wherever its walk
- * covered nothing, since a verdict over an empty walk reports the pass the
- * check exists to withhold.
+ * The checks guarding what crosses from this repository into a target: ignore
+ * set, seed capabilities, plugin reach, seed prose, and shipped skill paths.
+ * Each reports `unmeasured` where its walk covered nothing, never a pass.
  */
 
 const GITIGNORE = '.gitignore'
@@ -120,15 +116,8 @@ function manifestEntries(text: string): string[] | undefined {
 
 /**
  * The claude manifest is the only route a target's ignore set travels, and it
- * is hand-maintained beside this repository's own `.gitignore` with nothing
- * comparing the two. Parity is exact, with no exception list, since an empty
- * one could never be exercised.
- *
- * Both lists are compared with the trailing slash dropped. The `.gitignore` side
- * reads the whole file rather than one header, so a claude-scoped entry filed
- * under a header of its own still counts. It is scoped to `.claude/*` and to
- * `.canon` as a bare root and a prefix, since the manifest says nothing about
- * `node_modules/` or `.env`.
+ * is hand-maintained beside `.gitignore`, so parity is exact with no exception
+ * list. The `.gitignore` side reads the whole file and is scoped to `.claude/*` and `.canon`.
  */
 export const ignoreParity: Measure = async (ctx) => {
   const gitignorePath = join(ctx.root, GITIGNORE)
@@ -148,8 +137,7 @@ export const ignoreParity: Measure = async (ctx) => {
   const ignored = gitignorePatterns(readFileSync(gitignorePath, 'utf8'))
   const shipped = manifestEntries(readFileSync(manifestPath, 'utf8'))
 
-  // An empty read on either side is a failed parse rather than a repository
-  // ignoring nothing, and parity off it would compare no entries.
+  // An empty read on either side is a failed parse, and parity off it would compare no entries.
   if (ignored.length === 0) {
     return unmeasured(
       'No patterns read from .gitignore, ignore parity unverifiable.',
@@ -206,16 +194,9 @@ function collectCommands(value: unknown, into: string[] = []): string[] {
 }
 
 /**
- * A hook, a workflow, or a husky script reaching one side of the seed or config
- * boundary and not the other is a capability withheld with no recorded reason,
- * per the criterion in `canon/context/surfaces/tooling.md`.
- *
- * Presence on either side clears a name, and a `canon-no-seed:` comment in the
- * file is the recorded reason. The same marker on a destination clears a
- * target-only capability with no root counterpart by design. A seeded hook with
- * no wiring in the seeded `settings.json` is installed dead, which fails the
- * same way. Wiring compares whole path segments, so `log.sh` cannot pass on the
- * wiring of `pr-create-log.sh`.
+ * A hook, workflow, or husky script reaching one side of the seed or config
+ * boundary only is a capability withheld unless a `canon-no-seed:` comment
+ * records why. A seeded hook with no wiring in `settings.json` is installed dead.
  */
 export const capabilitySeeding: Measure = async (ctx) => {
   const { root } = ctx
@@ -275,8 +256,7 @@ export const capabilitySeeding: Measure = async (ctx) => {
     listFiles(join(root, 'tooling/base/configs/.husky')),
   )
 
-  // The reverse direction. A destination whose source here is gone reaches no
-  // forward pass, and ships a target a capability this repository deleted.
+  // The reverse direction, since a destination whose source is gone ships a deleted capability.
   checkOrphans('Hooks', '.claude/hooks', seedHooksDir)
   for (const dir of workflowDirs) {
     checkOrphans('Workflows', '.github/workflows', posixRel(root, dir))
@@ -331,13 +311,8 @@ export const capabilitySeeding: Measure = async (ctx) => {
 
 /**
  * Every file under `claude/` resolved through its symlinks and rejected when it
- * lands under `internal/`.
- *
- * An installer dereferences any symlink under the plugin root with no code in
- * the path to filter, so a link added there ships whatever it points at. Walking with symlinks
- * followed is what an install copies, so this is the only place the boundary
- * can be measured. The walk tracks the real directories on its current descent
- * and does not enter one a second time, the way `find -L` stops on a loop.
+ * lands under `internal/`, since an installer dereferences any link in the
+ * plugin root. The walk skips a real directory already on its descent, as `find -L` does.
  */
 export const pluginBoundary: Measure = async (ctx) => {
   const pluginRoot = join(ctx.root, 'claude')
@@ -421,14 +396,7 @@ function grepLines(
 /**
  * Seed prose is installed into every scaffolded project and read there as
  * instruction, so a line naming this repository's CLI hands a target a verb it
- * may not be able to run. Only the seed roots are walked, so a shipped rule
- * citing the CLI passes.
- *
- * Markdown alone, since the seed tree also ships hooks that call the CLI on
- * purpose. A token followed by `/` is the tracked surface root, so every other
- * spelling reports, and it matches as a substring, so `canonical` reports as
- * `canon` does. No seed root, or roots carrying no markdown, is unmeasured
- * rather than a pass, which agrees with `seedStandards`.
+ * may not run. Markdown alone is walked, and no seed root is unmeasured, not a pass.
  */
 export const seedIndependence: Measure = async (ctx) => {
   if (!isDirectory(join(ctx.root, 'tooling'))) {
@@ -476,8 +444,7 @@ export const seedIndependence: Measure = async (ctx) => {
 /**
  * A shipped skill runs from a target project, where the toolkit's own `wiki/`
  * does not exist. Anchoring on a non-path character keeps a target's
- * `.claude/wiki/` legal. A tree with no `claude/skills/`, or one holding no
- * file, is unmeasured rather than clean.
+ * `.claude/wiki/` legal, and a tree with no skills is unmeasured, not clean.
  */
 export const skillPaths: Measure = async (ctx) => {
   const skills = join(ctx.root, 'claude/skills')

@@ -66,8 +66,7 @@ describe('release-please exclude-paths', () => {
     expect(uncovered).toEqual([])
   })
 
-  // release-please skips a commit whose every file sits under an excluded
-  // prefix, so an exclusion reaching a shipped path drops a real change
+  // release-please skips a commit whose every file sits under an excluded prefix.
   it('should exclude no path npm or the marketplace ships', () => {
     const overlapping = excludePaths.filter((excluded) =>
       shipped.some(

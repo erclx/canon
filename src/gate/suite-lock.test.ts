@@ -177,8 +177,7 @@ describe('tryAcquire', () => {
     const racing: SuiteLockOptions = {
       ...loser,
       probes: {
-        // The loser has read the stale file and is judging it when the winner
-        // completes its own takeover underneath.
+        // The loser judges a stale file while the winner completes its takeover underneath.
         procStartOf: (pid) => {
           if (pid === 100) tryAcquire(winnerOptions)
           return pid === 200 ? '6000' : null
