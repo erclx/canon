@@ -31,19 +31,14 @@ export interface RunCliOptions {
 
 /**
  * Thrown when a case reaches past its declared temporary directory into this
- * machine's real toolkit state. `stateDir()` in `src/targets/registry.ts`
- * holds both the target registry `gov install` and `gov sync` record into and
- * the sandbox tree `canon sandbox` provisions into, so a case that inherits the
- * real `HOME` unmodified writes into whichever of the two a verb touches, and
- * nothing but this check would ever say so.
+ * machine's real toolkit state, which `stateDir()` in `src/targets/registry.ts` holds.
+ * A case inheriting the real `HOME` writes into it, and only this check says so.
  */
 export class ContainmentViolation extends Error {}
 
 /**
- * Compares two snapshots of this machine's real toolkit state directory and
- * reports whether a spawn changed it. A pure comparison over the two reads
- * rather than the read itself, so the detection logic is testable without
- * touching the filesystem or spawning anything.
+ * Compares two snapshots of this machine's real toolkit state directory and reports
+ * whether a spawn changed it. Pure over the two reads, so it tests without a disk.
  */
 export function detectStateLeak(
   before: string | undefined,
@@ -53,12 +48,9 @@ export function detectStateLeak(
 }
 
 /**
- * A sorted `path:size` listing of every file under this machine's real
- * `stateDir()`, walked recursively rather than read one level deep, so a
- * write nested inside an existing folder, such as a file the sandbox tree
- * already holds, shows up the same as a new top-level entry. Reading a single
- * known file, such as the target registry alone, would miss every sibling
- * `stateDir()` grows, which is what left the sandbox tree unwatched.
+ * A sorted `path:size` listing of every file under this machine's real `stateDir()`,
+ * walked recursively, so a write nested in an existing folder shows up as a new
+ * top-level entry would.
  */
 export function snapshotStateDir(): string {
   const root = stateDir()
@@ -90,16 +82,9 @@ export function snapshotStateDir(): string {
 }
 
 /**
- * Spawns the real entry point rather than calling an action in-process, so a
- * case proves the verb is registered, exits per its contract, and emits a
- * `--json` record that parses off stdout alone.
- *
- * Every spawn drops `GIT_` variables, since a hook's `GIT_DIR` would resolve
- * fixture reads against this checkout. `CANON_STATE_DIR` and
- * `CANON_SANDBOX_DIR` point under the case's `cwd`, since dropping them would
- * fall back to the real `HOME`, and `options.env` still wins. Stdin is a pipe,
- * so every case runs headless, and a `stateDir()` snapshot around the spawn
- * raises `ContainmentViolation` on any escape.
+ * Spawns the real entry point rather than calling an action in-process, so a case
+ * proves the verb is registered and emits a `--json` record that parses off stdout.
+ * Every spawn drops `GIT_` variables and points the state dirs under the case's `cwd`.
  */
 export function runCli(
   args: readonly string[],
@@ -141,11 +126,8 @@ export function runCli(
 }
 
 /**
- * Data goes to stdout and framing to stderr, so a harness reading `--json`
- * off the merged output would assert against a record no verb ever wrote. A
- * command that emits no JSON, or fails before it gets there, leaves the
- * field `undefined` rather than throwing, so a case asserting the exit code
- * of a refusal is not also forced to guard a parse.
+ * Data goes to stdout and framing to stderr. A command that emits no JSON, or fails
+ * first, leaves the field `undefined` rather than throwing.
  */
 function parseJson(stdout: string): unknown {
   const trimmed = stdout.trim()
