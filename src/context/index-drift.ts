@@ -26,20 +26,16 @@ export function listedTargets(source: string): string[] {
 }
 
 /**
- * Compares one folder's index against its siblings in both directions.
- *
- * Both halves are reported because they fail differently. An unlisted entry is
- * invisible to a session reading the catalog to choose what to open, while a
- * listed name with no file sends one to a path that opens nothing. Neither
- * surfaces from reading the index alone.
+ * Compares one folder's index against its siblings in both directions. An
+ * unlisted entry is invisible to a session choosing what to open, and a listed
+ * name with no file sends one to a path that opens nothing.
  */
 export async function auditFolder(folder: AuditedFolder): Promise<FolderDrift> {
   const dir = dirname(folder.indexPath)
   const source = await readFile(folder.indexPath, 'utf8')
   const targets = listedTargets(source)
 
-  // A sub-catalog is linked as `<name>/index.md` and its entries are audited
-  // as their own folder, so only the leading segment is compared here.
+  // A sub-catalog is linked as `<name>/index.md`, so only the leading segment is compared.
   const listed = new Set(targets.map((target) => target.split('/')[0]))
 
   const unlisted = folder.entries

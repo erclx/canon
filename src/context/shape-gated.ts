@@ -3,13 +3,8 @@ import { join } from 'node:path'
 
 /**
  * Path prefixes, from the repository root, whose context entries gate on the
- * section shape under `--gate` when a project declares no `gated` key.
- *
- * Every other entry reports its shape findings and never fails a push, since
- * the entries are rebuilt a batch at a time. A batch rebuilding a folder adds
- * its prefix here in the same change. Read against the repository root, so a
- * seed tree audited at its own root is listed by its toolkit path, such as
- * `tooling/base/seeds/`, and never collides with the entry a target installs.
+ * section shape under `--gate` when a project declares no `gated` key. A batch
+ * rebuilding a folder adds its prefix here in the same change.
  */
 export const SHAPE_GATED_FOLDERS: readonly string[] = [
   'canon/context/context-model.md',
@@ -32,12 +27,9 @@ export function resolveGatedPrefixes(
 }
 
 /**
- * Whether a relative entry path sits under a gated prefix.
- *
- * A prefix matches on a path segment boundary, so `canon/context/auth` and
- * `canon/context/auth/` gate the same folder and neither reaches a sibling
- * such as `canon/context/authz/`. A prefix naming a file matches that file,
- * and a leading `./` is dropped, since entry paths carry none.
+ * Whether a relative entry path sits under a gated prefix. A prefix matches on
+ * a segment boundary, so it reaches no sibling such as `canon/context/authz/`,
+ * and a prefix naming a file matches that file.
  */
 export function isShapeGated(
   rel: string,

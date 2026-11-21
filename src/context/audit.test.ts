@@ -56,8 +56,7 @@ describe('measureEntry', () => {
   it('should measure entry length in rendered lines rather than source lines', () => {
     const source = `${FRONTMATTER}# CI\n\n${weightedBullets(3, PARAGRAPH_BULLET)}\n`
 
-    // Ten short lines render as ten, and each 394-character bullet wraps to
-    // five, so three bullets stand in for fifteen of the checkpoint's budget.
+    // Ten short lines render as ten and each 394-character bullet wraps to five.
     expect(measureEntry('ci.md', source).lines).toBe(22)
   })
 
@@ -144,8 +143,7 @@ describe('measureEntry', () => {
   })
 
   it('should leave a date in frontmatter unreported', () => {
-    // A diagram entry stamps `verified` with a short sha and an ISO date, and the
-    // frontmatter strip keeps that field out of the report.
+    // A diagram entry stamps `verified`, and the frontmatter strip keeps that field out.
     const source = `---\ntitle: Components\nverified: 7b1107ac 2026-08-02\n---\n\n# Components\n\nThe boundary holds three layers.\n`
 
     expect(measureEntry('components.md', source).provenance).toEqual([])
@@ -192,8 +190,7 @@ describe('measureEntry', () => {
   })
 
   it('should report a date whose clause carries no stamping verb', () => {
-    // The set is closed, so an unenumerated phrasing falls back to a change marker,
-    // reporting one date too many rather than clearing one the standard cuts.
+    // The set is closed, so an unenumerated phrasing falls back to a change marker.
     const source = `${FRONTMATTER}# CI\n\nThe sweep returned five matches on 2026-08-04.\n`
 
     expect(measureEntry('ci.md', source).provenance).toEqual([
@@ -239,8 +236,7 @@ describe('measureEntry', () => {
   })
 
   it('should report a required section carried by the entry title', () => {
-    // A split domain titles its overview file for the section, so the heading is
-    // the `#` title rather than an `##` under it repeating the filename.
+    // A split domain titles its overview file for the section, so the heading is the `#` title.
     const source = `${FRONTMATTER}# Overview\n\n## Layout\n\n- \`scripts/\` owns them\n`
 
     expect(measureEntry('overview.md', source).sections).toEqual([
@@ -279,8 +275,7 @@ describe('measureEntry', () => {
   it('should keep measuring length outside the governed folder', () => {
     const source = `${FRONTMATTER}# Components\n\n${prose(60)}\n`
 
-    // Only the content rule narrows. A readability threshold generalizes
-    // across entry types, so it keeps reaching every audited folder.
+    // Only the content rule narrows, and a readability threshold reaches every audited folder.
     expect(measureEntry('components.md', source, false).lines).toBeGreaterThan(
       LENGTH_CHECKPOINT / 3,
     )
@@ -322,8 +317,7 @@ describe('lengthFindings', () => {
   })
 
   it('should leave every question open outside the governed folder', () => {
-    // Provenance is scoped to the standard stating it, so a clean list there
-    // is a scan that never ran rather than an entry that narrates nothing.
+    // Provenance is scoped to its standard, so a clean list here is a scan that never ran.
     const entry = measureEntry('components.md', long(), false)
 
     expect(lengthFindings([entry])[0].causes).toEqual([
@@ -415,8 +409,7 @@ describe('measureFolders', () => {
     })
     const [entry] = await measureFolders(root, folders)
 
-    // Provenance is the context standard's own rule and stops at its folder, while
-    // `canon markdown audit` reaches `docs/` with no folder to resolve.
+    // Provenance is the context standard's own rule and stops at its folder.
     expect(entry.rel).toBe('docs/agents.md')
     expect(entry.provenance).toEqual([])
   })
@@ -508,8 +501,7 @@ describe('bareReferences', () => {
   })
 
   it('should leave a name colliding with a seed at the flat root unreported', async () => {
-    // `canon/context/ci.md` is a domain entry and a seed of the same name is
-    // a file a scaffolded project owns. No signal in the name separates them.
+    // A domain entry and a scaffolded project's seed share a name with no signal to separate them.
     seedFolder('canon/context', {
       'tooling.md': '# Tooling\n\nA scaffold receives `ci.md` of its own.\n',
       'ci.md': '# CI\n\nOwns the workflow.\n',
@@ -635,8 +627,7 @@ describe('missingSections', () => {
   })
 
   it('should hold each entry of the named folder to the sections itself', async () => {
-    // The named folder's entries are one domain each, so a conforming sibling
-    // answers for nothing beside it.
+    // The named folder's entries are one domain each, so a conforming sibling answers for nothing.
     seedFolder('canon/context', {
       'ci.md': CONFORMING,
       'web.md': '# Web\n\n## Overview\n\nOwns the client.\n',
