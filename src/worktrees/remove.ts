@@ -28,11 +28,9 @@ export interface GitResult {
 
 export interface RemovalOptions {
   /**
-   * Where every git call runs. Required rather than defaulted, since the one
-   * value a default could carry is the process directory and that is the unsafe
-   * one: a caller standing in a worktree this run removes loses the ground the
-   * calls after it resolve against. A compiler error is what a caller gets
-   * instead of that failure.
+   * Where every git call runs. Required rather than defaulted, since the only
+   * default available is the process directory, and a caller standing in a
+   * worktree this run removes would lose the ground later calls resolve against.
    */
   readonly cwd: string
   readonly git?: (cwd: string, args: readonly string[]) => Promise<GitResult>
@@ -51,15 +49,9 @@ async function runGit(
 }
 
 /**
- * Removes every worktree a reading called reclaimable, and the branch behind it.
- *
- * The sequence is unlock, remove, then delete the branch, whether or not the
- * directory still exists, since `git worktree remove` takes a stale
- * registration too. Every command runs from `opts.cwd` at the main root, since
- * an earlier removal can delete the caller's own directory. The unlock result
- * is not read, since it fails on an unlocked tree, and a stuck lock surfaces
- * as the remove failing. One `prune` runs before the branch deletes, since a
- * branch git still reads as held cannot be deleted.
+ * Removes every worktree a reading called reclaimable, and its branch: unlock,
+ * remove, delete, from `opts.cwd` at the main root, since a removal can delete
+ * the caller's directory. One `prune` runs before the deletes, which a held branch blocks.
  */
 export async function removeReclaimable(
   verdicts: readonly WorktreeVerdict[],
@@ -78,8 +70,7 @@ export async function removeReclaimable(
     })
   }
 
-  // Reported from the sweep's own exit rather than from whether it was owed, so
-  // a run that tried and failed does not read as one that cleared the tree.
+  // Reported from the sweep's own exit, so a failed run does not read as one that cleared the tree.
   const sweep = targets.some((target) => target.missing)
     ? await git(cwd, ['worktree', 'prune'])
     : null
@@ -95,12 +86,8 @@ export async function removeReclaimable(
 
 /**
  * Closes one entry by deleting its branch, or reports why it was left standing.
- *
- * A remove that failed against a directory which still exists stops the entry
- * here. Git refuses to delete a branch a registered worktree holds, and forcing
- * past that strands a registration pointing at a branch that no longer exists.
- * A missing directory carries on, since the sweep above is what clears the
- * registration in that case and the delete reports for itself when it did not.
+ * A failed remove against a directory that still exists stops here, since git
+ * refuses a held branch and forcing would strand a registration; a missing one carries on.
  */
 async function deleteBranch(
   target: WorktreeVerdict,
@@ -120,8 +107,7 @@ async function deleteBranch(
     }
   }
 
-  // A reclaimable verdict always names a branch, so this answers a caller
-  // passing its own verdict rather than issuing a nameless delete.
+  // A reclaimable verdict always names a branch, so this answers a caller passing its own verdict.
   if (branch === null) {
     return { path, branch, removed: true, failedAt: null, detail: null }
   }
@@ -150,13 +136,9 @@ export interface BranchOutcome {
 }
 
 /**
- * Deletes every branch a reading called reclaimable, from `opts.cwd`.
- *
- * `-D` rather than `-d`, since a squash merge never makes the branch an
- * ancestor of the trunk and `-d` refuses every one of them. The containment
- * test the reading ran is what stands in for `-d`'s check. Git still refuses a
- * branch a worktree checked out since the reading, which reports as a failure
- * rather than a forced delete.
+ * Deletes every branch a reading called reclaimable, from `opts.cwd`. `-D` rather
+ * than `-d`, since a squash merge never makes the branch an ancestor and the
+ * reading's containment test stands in. Git still refuses a branch checked out since.
  */
 export async function removeBranches(
   verdicts: readonly BranchVerdict[],

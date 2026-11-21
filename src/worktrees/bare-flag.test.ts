@@ -9,10 +9,9 @@ const CLI = join(import.meta.dirname, '../cli.ts')
 
 let root: string
 
-// A git hook exports GIT_DIR, so a run under pre-push would otherwise resolve
-// `git -C real-bare.git` against the toolkit's own repository and the
-// genuinely-bare case would pass for the wrong reason. Isolating config also
-// drops the commit identity, hence the ident vars.
+// A git hook exports GIT_DIR, so a run under pre-push would resolve
+// `git -C real-bare.git` against the toolkit's own repository and the bare case
+// would pass for the wrong reason. Isolated config drops the commit identity too.
 const sh = (script: string): string =>
   execFileSync('bash', ['-c', script], {
     cwd: root,
