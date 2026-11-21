@@ -60,8 +60,7 @@ export function machineListenerReader(): ListenerReader {
   const hasLsof = Bun.which('lsof') !== null
   return {
     async listListeners() {
-      // Some lsof versions drop a process whose truncated name holds an unmatched
-      // `(`, as a Next server's title does, so `/proc` goes first despite its cost.
+      // Some lsof versions drop a process whose truncated name holds an unmatched `(`, so `/proc` goes first.
       if (existsSync('/proc/net/tcp')) {
         const listeners = await readProcListeners()
         if (listeners !== undefined) return listeners
@@ -70,8 +69,7 @@ export function machineListenerReader(): ListenerReader {
         const result = await $`lsof -nP -iTCP -sTCP:LISTEN -Fpn`
           .quiet()
           .nothrow()
-        // lsof exits 1 both when it matched nothing and when it could not
-        // read some process, and the rows it did print are real either way.
+        // lsof exits 1 both when it matched nothing and when it could not read some process.
         if (result.exitCode <= 1) return parseLsofListeners(result.text())
       }
       return undefined
