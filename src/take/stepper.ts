@@ -15,13 +15,8 @@ import { type ShellPage, openShell } from '@/take/shell'
 
 /**
  * Films a beat by frame stepping on a virtual 60 fps clock, so every transition
- * and timer moves exactly one frame between screenshots, each at the device
- * scale times the viewport. Each ordering below, broken, deadlocks or freezes
- * a take: send an input, step a frame, then await it. Continue Chromium's
- * monotonic clock, or CSS animations stay at frame one. Begin no frame before
- * the load event. Keep ticks at or ahead of the page clock once virtual time
- * pauses, or transitions start in the future. Begin a frame only once the last
- * settles, and fall the beat back on a stall rather than hang.
+ * and timer moves exactly one frame between screenshots. Each ordering below,
+ * broken, deadlocks or freezes a take, and a stall falls the beat back rather than hanging.
  */
 
 const FRAME_MS = 1000 / FPS
@@ -62,9 +57,8 @@ export class StepperStalled extends Error {
 
 /**
  * The device scale a stalled beat tries stepping again at, or nothing when it
- * should go to the screencast. Only a stall in recording retries, since a page
- * that will not settle or set up will not step at any size, and only from
- * scale 2, since a retry at the scale that stalled stalls again.
+ * should go to the screencast. Only a stall in recording retries, and only from
+ * scale 2, since a page that will not settle will not step at any size.
  */
 export function retryScale(
   phase: StallPhase,
@@ -153,8 +147,7 @@ export async function filmStepped(
 
     const frame = async (): Promise<void> => {
       const advanced = new Promise<void>((done) => expired.push(done))
-      // A plain advance, since pausing on pending fetches held the clock past
-      // the stall limit, and a refused advance never expires its budget.
+      // A plain advance, since pausing on pending fetches held the clock past the stall limit.
       page
         .send('Emulation.setVirtualTimePolicy', {
           policy: 'advance',
@@ -214,9 +207,8 @@ export async function filmStepped(
 
 /**
  * Begins one frame with a screenshot for a refusal to show, through the same
- * begin-frame call every kept frame uses, since a separate capture call can
- * wait on a frame that never begins. Best effort, so a page that answers with
- * nothing leaves the refusal standing without a still.
+ * begin-frame call every kept frame uses, since a separate capture can wait on a
+ * frame that never begins. Best effort, leaving the refusal without a still.
  */
 async function frameStill(
   beginFrame: (screenshot: boolean) => Promise<{ screenshotData?: string }>,
@@ -232,9 +224,8 @@ async function frameStill(
 
 /**
  * Pauses every request the page makes and answers each by the beat's list:
- * failed on `abort`, left paused for the shell's life on `hold`, and sent on
- * otherwise. Enabled before navigation, so a request made on load or in
- * setup is caught.
+ * failed on `abort`, held for the shell's life on `hold`, and sent otherwise.
+ * Enabled before navigation, so a request made on load is caught.
  */
 async function intercept(
   page: ShellPage,
@@ -261,9 +252,8 @@ async function intercept(
 
 /**
  * Navigates and resolves with Chromium's monotonic clock in milliseconds, read
- * off the load event's own timestamp. The runtime's clock cannot stand in for
- * it: Node's `hrtime` shares the base on Linux, Bun's counts from its own
- * start, and a frame stamped on the wrong base freezes every animation.
+ * off the load event's timestamp. The runtime's clock cannot stand in, since a
+ * frame stamped on the wrong base freezes every animation.
  */
 async function load(page: ShellPage, url: string): Promise<number> {
   await page.send('Page.addScriptToEvaluateOnNewDocument', {
@@ -300,10 +290,9 @@ export interface TickAlignment {
 }
 
 /**
- * The ticks the first recorded frame builds on, being the page clock carried
- * into the monotonic base plus one frame of margin, or the current ticks when
- * they already lead it or the page gave no usable timing. Never moves the
- * ticks backward.
+ * The ticks the first recorded frame builds on: the page clock carried into the
+ * monotonic base plus one frame of margin, or the current ticks when they already
+ * lead it. Never moves the ticks backward.
  */
 export function alignTicks(alignment: TickAlignment): number {
   const { ticks, loadTicks, pageNow, loadEventStart } = alignment
@@ -320,10 +309,9 @@ export function alignTicks(alignment: TickAlignment): number {
 }
 
 /**
- * Reads the page's clock beside the load event in the same base, since
- * `performance.now()` restarts at navigation and only `loadEventStart` pairs
- * it exactly with the load event's monotonic stamp. A read that fails or
- * returns no entry yields nothing, and the ticks stand.
+ * Reads the page's clock beside the load event in the same base, since only
+ * `loadEventStart` pairs `performance.now()` exactly with the load event's
+ * monotonic stamp. A failed read yields nothing, and the ticks stand.
  */
 async function readPageClock(
   page: ShellPage,

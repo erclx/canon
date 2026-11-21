@@ -62,8 +62,7 @@ export function openFrameEncoder(out: string, fps: number): FrameEncoder {
       'mjpeg',
       '-i',
       '-',
-      // A JPEG is full range and H.264 is read as TV range, so without this the
-      // levels pass through unscaled and a player crushes the blacks and whites.
+      // A JPEG is full range and H.264 is read as TV range, so without this a player crushes the blacks and whites.
       '-vf',
       'scale=in_range=full:out_range=tv',
       ...OUTPUT,
@@ -72,8 +71,7 @@ export function openFrameEncoder(out: string, fps: number): FrameEncoder {
     { stdio: ['pipe', 'ignore', 'pipe'] },
   )
   const done = finished(proc)
-  // Held so a failure while frames are still being written surfaces at close
-  // rather than as an unhandled rejection.
+  // Held so a failure while frames are still being written surfaces at close, not as an unhandled rejection.
   done.catch(() => {})
   // Rejects once FFmpeg is gone, since a full pipe with no reader never drains.
   const stopped = done.then(() => {

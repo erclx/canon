@@ -31,8 +31,7 @@ describe('drawPointer', () => {
     const frame = blank()
     drawPointer(frame, { x: 40, y: 40 }, null)
 
-    // The arrow's shaft runs down from the tip, so a few pixels below and
-    // right of it sit inside the fill.
+    // The arrow's shaft runs down from the tip, so a few pixels below and right of it sit inside the fill.
     const [r, g, b] = pixel(frame, 42, 48)
     expect(r).toBeLessThan(40)
     expect(g).toBeLessThan(40)
@@ -89,8 +88,7 @@ describe('drawPointer', () => {
     const frame = blank()
     drawPointer(frame, { x: 60, y: 60 }, 0.6)
 
-    // At 0.6 the ring is full size, its stroke just inside the outer radius, read
-    // straight up from the point where the arrow does not reach.
+    // At 0.6 the ring is full size, read straight up from the point where the arrow does not reach.
     const radius = Math.round(RING_RADIUS - 1)
     const [r, , b] = pixel(frame, 60, 60 - radius)
     expect(b).toBeGreaterThan(r)

@@ -2,9 +2,8 @@ import type { NetworkAction, NetworkRule } from '@/take/plan'
 
 /**
  * The request matching both routes share. The stepper intercepts over the raw
- * protocol and the screencast through Playwright's routing, and each has its
- * own pattern syntax, so neither is used: every request is intercepted and
- * matched here, and a plan means the same on either route and on a fallback.
+ * protocol and the screencast through Playwright's routing, with different
+ * pattern syntax, so every request is matched here and a plan means the same on either.
  */
 
 /** A pattern that matched, with how many requests it caught. */
