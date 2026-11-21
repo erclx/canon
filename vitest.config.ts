@@ -13,11 +13,8 @@ export default defineConfig({
     exclude: [...configDefaults.exclude, '**/*.e2e.test.ts'],
     globalSetup: ['./vitest.global-setup.ts'],
     setupFiles: ['./vitest.setup.ts'],
-    // One suite's spawn tests need headroom the machine lock cannot provide.
-    // The lock stops two suites running at once and cannot see ambient load,
-    // and vitest's default fills a 32-core box on its own once each worker
-    // spawns a child. CI runs one suite per runner, so it keeps the default.
-    // CI is read as the gate reads it, so the cap and the lock agree.
+    // One suite's spawn tests need headroom the machine lock cannot provide, since it cannot see
+    // ambient load and vitest's default fills a 32-core box. CI runs one suite per runner, so it keeps the default.
     maxWorkers: process.env.CI === 'true' ? undefined : '50%',
   },
 })
