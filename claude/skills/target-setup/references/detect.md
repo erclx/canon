@@ -146,8 +146,20 @@ The extras are the one part of the preview the operator confirms before the inst
 
 Pass what they kept to `--add`, and drop the flag when they kept nothing.
 
+### The second pass
+
+The `install` phase detects a second time after the tooling sync, since the sync lands the dependencies and configs that call for further rules. The second pass offers only the proposals the first pass lacked, through the same three options.
+
+- Ask nothing and install nothing when the second pass finds no new proposal
+- Install the union of what the operator kept from both passes, since `canon gov install` reinstalls a rule already present unchanged
+- A rule the operator deleted between the passes comes back with the union, so name every first-pass rule beside the new ones in the question
+
+The `gov` phase runs no tooling sync, so it takes one pass only.
+
 ### Answering ahead
 
 An `--extras` argument answers ahead of time and skips the question. `--extras <a>,<b>` takes the named rules, and `--extras none` takes none.
 
-With neither and no one to answer, take every proposal and list each in the report. A proposed rule costs one file to delete, and stopping would break every headless setup.
+- One argument answers both passes. The second pass takes each named rule among its new proposals, and the report names any listed rule neither pass proposed.
+- Under `--extras none` the second pass also takes nothing, and the report says it declined the new proposals
+- With neither and no one to answer, take every proposal from each pass and list each in the report. A proposed rule costs one file to delete, and stopping would break every headless setup.

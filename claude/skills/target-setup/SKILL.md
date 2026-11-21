@@ -127,9 +127,27 @@ canon tooling sync python ./backend --skip base --write
 - A subtree sync withholds `.github/`, since GitHub reads workflows only at the root, and names each withheld file with the `working-directory` a root CI job needs
 - A subtree with no `package.json` gets a minimal one from the sync, so its scripts and dependencies land in the same pass
 
+### Detect again after the sync
+
+Step 3: the sync lands dependencies and configs the first detection never saw, so detection runs again once every sync in Step 2 has finished.
+
+```bash
+canon gov detect <target> --stack <stack> --json
+```
+
+- Offer only the proposals the first pass lacked, through the same extras question, per the detect reference
+- Run no question and no install when the second pass proposes nothing new
+- Install what was kept as the union of both passes, since `canon gov install` reinstalls a rule already present unchanged
+
+```bash
+canon gov install <stack> --add <first-pass extras>,<second-pass extras> <target>
+```
+
+Skip this step when Step 2 was skipped, since nothing landed for a second pass to read.
+
 ### Post-sync fixups
 
-Step 3: post-sync fixups. Golden configs arrive from sync, so no config generation is required. But a few items may need a one-time touch:
+Step 4: post-sync fixups. Golden configs arrive from sync, so no config generation is required. But a few items may need a one-time touch:
 
 - **File naming.** `bun create vite`'s `App.tsx` violates the `KEBAB_CASE` rule. Rename to `app.tsx` and update the import in `main.tsx`.
 - **Docs.** Run `canon tooling reference <tooling-stack>` and `canon tooling reference web` for any stack-specific follow-ups (Chrome extension overrides, setup script details).
