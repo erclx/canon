@@ -53,10 +53,8 @@ const FIELD = '\x1f'
 export const LOG_FORMAT = `${RECORD}%H${FIELD}%cI${FIELD}%an${FIELD}%ae${FIELD}%s`
 
 /**
- * Parses `git log -z --name-only` under `LOG_FORMAT`. Each record is the
- * header, a NUL, then the file names, each NUL-terminated after a leading
- * newline. Names come NUL-separated because newline output C-quotes a path
- * holding a quote or a non-ASCII character.
+ * Parses `git log -z --name-only` under `LOG_FORMAT`. Names come NUL-separated
+ * because newline output C-quotes a path holding a quote or non-ASCII character.
  */
 export function parseLog(text: string): Merge[] {
   const merges: Merge[] = []
@@ -85,11 +83,8 @@ export function parseLog(text: string): Merge[] {
 }
 
 /**
- * Reads the first-parent log from `since` (a `YYYY-MM-DD` date) to HEAD,
- * newest first. A merge commit's files are its diff against the first parent,
- * so a merge-commit repository reads the same files a squash would carry.
- *
- * Returns undefined when git cannot read the log.
+ * Reads the first-parent log from `since` to HEAD, newest first. A merge commit's
+ * files are its diff against the first parent. Undefined when git cannot read it.
  */
 export async function readLog(
   root: string,
@@ -182,11 +177,8 @@ export function isLockOrRelease(path: string): boolean {
 }
 
 /**
- * The paths among `paths` that `.gitattributes` marks `linguist-generated`,
- * the one marker of a generated file that holds across stacks.
- *
- * Returns an empty set when git cannot answer, since a missed generated file
- * stays in the counts rather than failing the report.
+ * The paths among `paths` that `.gitattributes` marks `linguist-generated`.
+ * Returns an empty set when git cannot answer, so a missed file stays in the counts.
  */
 export async function readGenerated(
   root: string,
