@@ -3,13 +3,9 @@ import { createConnection } from 'node:net'
 import type { SessionRecord } from '@/sessions/registry'
 
 /**
- * How far the liveness answer can be trusted.
- *
- * `confirmed` means the running process was matched against the start time the
- * record stamped, so the pid belongs to the session that wrote the file.
- * `unverified` means the pid answers a signal probe and nothing more, which
- * cannot separate the original session from whatever inherited its pid, or,
- * for a `foreign` row, that its messaging socket still exists.
+ * How far the liveness answer can be trusted. `confirmed` means the process was
+ * matched against the start time the record stamped. `unverified` means the pid
+ * answers a probe only, or for a `foreign` row that its socket still exists.
  */
 export type Confidence = 'confirmed' | 'unverified'
 
@@ -45,11 +41,9 @@ export interface LivenessProbes {
 }
 
 /**
- * Reads a running process's start time from the process filesystem.
- *
- * The comm field is parenthesised and may itself contain spaces, so the split
- * runs from the last `)` rather than over the whole line. Fields resume at the
- * third, which puts the twenty-second at offset nineteen.
+ * Reads a running process's start time from the process filesystem. The comm
+ * field is parenthesised and may hold spaces, so the split runs from the last
+ * `)`, and fields resume at the third, putting the twenty-second at offset nineteen.
  */
 function procStartOf(pid: number): string | null {
   try {
@@ -108,15 +102,9 @@ export const SYSTEM_PROBES: LivenessProbes = {
 }
 
 /**
- * Decides whether a record describes a session that is still running, and
- * tells the caller which path ran.
- *
- * Where the process filesystem answers, a start-time mismatch is a reused pid
- * and the record is discarded. Where it does not, the probe alone stands and
- * every surviving row is marked unverified. A record from another pid
- * namespace is judged first on its messaging socket, always `unverified`,
- * since a crashed session leaves its socket behind. A record that is not a
- * session, such as the gate's machine lock, takes the pid path.
+ * Decides whether a record describes a session still running. Where the process
+ * filesystem answers, a start-time mismatch is a reused pid and is discarded;
+ * otherwise the probe stands, `unverified`. A foreign-namespace record is judged on its socket.
  */
 export function liveness(
   record: Pick<SessionRecord, 'pid' | 'procStart'> &

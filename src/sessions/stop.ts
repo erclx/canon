@@ -4,10 +4,9 @@ import { locateTranscript, projectsDir } from '@/sessions/transcript'
 
 export interface StopReading {
   /**
-   * `usage-limit` means the last assistant entry is a limit stop, passing over
-   * a `<synthetic>` entry with no error, such as the one a client restart
-   * writes. `unknown` means the read failed or found a limit-worded entry of
-   * another shape, so the row may be stopped and nothing here can say.
+   * `usage-limit` means the last assistant entry is a limit stop, passing over a
+   * `<synthetic>` entry with no error. `unknown` means the read failed or found a
+   * limit-worded entry of another shape, so the row may be stopped unsaid.
    */
   readonly stopped: 'usage-limit' | 'unknown' | null
   readonly stopResets: string | null
@@ -69,21 +68,13 @@ function entryText(message: Record<string, unknown>): string {
 }
 
 /**
- * Walks back to the entry that decides the row. No published contract describes
- * the stop entry, so this rests on a measured shape: `error: "rate_limit"`, a
- * `<synthetic>` model, `isApiErrorMessage`, and text naming the limit and its
- * reset.
- *
- * A generated entry with limit wording and any other shape reads `unknown`,
- * since a release renaming the field or the type still parses cleanly and would
- * otherwise read as a session that never stopped. A `<synthetic>` entry with no
- * error and no limit wording is passed over, since a client restart writes one
- * reading `No response requested.` with no model turn behind it.
+ * Walks back to the entry that decides the row. No contract describes the stop
+ * entry, so this rests on a measured shape: `error: "rate_limit"`, a `<synthetic>`
+ * model, `isApiErrorMessage`, and limit text. Other limit wording reads `unknown`.
  */
 function readEntries(text: string, cut: boolean): StopReading {
   const lines = text.split('\n')
-  // The first line of a cut window usually starts mid-entry, and one that
-  // happens to parse cannot be told apart from it.
+  // The first line of a cut window usually starts mid-entry, and one that parses cannot be told apart.
   const first = cut ? 1 : 0
 
   for (let index = lines.length - 1; index >= first; index -= 1) {

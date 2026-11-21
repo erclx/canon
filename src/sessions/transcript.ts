@@ -11,13 +11,9 @@ export function projectsDir(): string {
 }
 
 /**
- * The subfolder name the client files a project's transcripts under.
- *
- * Inferred from observed folders rather than read from a published rule:
- * every character outside `[A-Za-z0-9]` becomes a dash, so a dotted segment
- * doubles the dash before it. How a client shortens a path past its length
- * limit was never observed, so a very long path may land where `--continue`
- * does not look, while `--resume <id>` still finds it by walking every folder.
+ * The subfolder name the client files a project's transcripts under, inferred
+ * from observed folders: every character outside `[A-Za-z0-9]` becomes a dash.
+ * A very long path may land where `--continue` does not look, but `--resume <id>` walks all.
  */
 export function encodeProjectPath(path: string): string {
   return path.replace(/[^A-Za-z0-9]/g, '-')
@@ -42,11 +38,9 @@ export function isSessionId(id: string): boolean {
 }
 
 /**
- * Finds a session's transcript under any project subfolder.
- *
- * The walk crosses every folder rather than deriving one from the working
- * directory, since a transcript copied from another machine sits under that
- * machine's encoding and `--resume <id>` was measured to find it there.
+ * Finds a session's transcript under any project subfolder. The walk crosses
+ * every folder rather than deriving one from the working directory, since a
+ * copied transcript sits under another machine's encoding.
  */
 export function locateTranscript(
   id: string,
@@ -89,11 +83,9 @@ export function readSideFolder(side: string): string[] {
 const NEWLINE = 0x0a
 
 /**
- * Reads a transcript up to its last newline.
- *
- * The client appends a line per event, so a session exporting itself is
- * mid-write, and a copy taken at that moment can end on half a line. Cutting
- * at the last newline keeps every whole line and never rewrites one.
+ * Reads a transcript up to its last newline, since a session exporting itself is
+ * mid-write and a copy can end on half a line. Cutting there keeps every whole
+ * line and never rewrites one.
  */
 export function readTranscript(path: string): Uint8Array {
   const bytes = readFileSync(path)
