@@ -9,10 +9,9 @@ IFS= read -r -d '' -t 2 input
   exit 1
 }
 
-# A reply with no link is the ordinary turn, so it leaves before anything
-# spawns. The payload holds the reply JSON-escaped, and `](` survives the
-# escaping untouched, so a shell test on the raw payload is enough. This is the
-# one quiet exit: every later failure to measure reports instead.
+# A reply with no link is the ordinary turn, so it leaves before anything spawns.
+# `](` survives the payload's JSON escaping, so a shell test on the raw payload is
+# enough. This is the one quiet exit: every later failure to measure reports.
 case "$input" in
 *']('*) ;;
 *) exit 0 ;;
@@ -50,11 +49,9 @@ esac
 cwd=$(printf '%s' "$input" | jq -r '.cwd // empty')
 [ -n "$cwd" ] && [ -d "$cwd" ] || unread 'The payload carried no working directory that exists.'
 
-# A checkout carrying the CLI source runs that source, so this hook and the
-# build under test read one verb, and an installed binary lags a branch by
-# whatever has not been released. A tree without the source falls back to the
-# binary, and a machine with neither says so. The seeded copy keeps the binary
-# alone, since a target has no checkout.
+# A checkout carrying the CLI source runs that source, so the hook and the build
+# under test read one verb. A tree without it falls back to the binary, and a
+# machine with neither says so. The seeded copy keeps the binary alone.
 root="${CLAUDE_PROJECT_DIR:-.}"
 if [ -f "$root/src/cli.ts" ] && command -v bun >/dev/null 2>&1; then
   record=$(cd "$cwd" && printf '%s' "$reply" | bun "$root/src/cli.ts" hooks reply-links --json 2>/dev/null)

@@ -41,10 +41,9 @@ stop_hook_active=$(printf '%s' "$input" | jq -r '.stop_hook_active // false')
 reply=$(printf '%s' "$input" | jq -r '.last_assistant_message // empty')
 [[ $reply =~ $token ]] || exit 0
 
-# A checkout carrying the CLI source runs that source, so this hook and the
-# build under test read one verb. A tree without the source falls back to the
-# binary, and a machine with neither says so. The seeded copy keeps the binary
-# alone, since a target has no checkout.
+# A checkout carrying the CLI source runs that source, so the hook and the build
+# under test read one verb. A tree without it falls back to the binary, and a
+# machine with neither says so. The seeded copy keeps the binary alone.
 root="${CLAUDE_PROJECT_DIR:-.}"
 if [ -f "$root/src/cli.ts" ] && command -v bun >/dev/null 2>&1; then
   roster=$(bun "$root/src/cli.ts" sessions list --json 2>/dev/null)
@@ -55,10 +54,9 @@ else
 fi
 [ -n "$roster" ] || unread 'The roster read returned no record.'
 
-# The record decides rather than the exit code. A refusal carries `reason` and
-# no `sessions`, and a binary predating the verb writes no record at all.
-# A session counts as named when its roster name appears anywhere in the reply,
-# so a heading naming it and a command below quoting its id both pass.
+# The record decides rather than the exit code: a refusal carries `reason` and no
+# `sessions`, and a binary predating the verb writes nothing. A session counts as
+# named when its roster name appears anywhere in the reply.
 flagged=$(printf '%s' "$roster" | jq -r --arg reply "$reply" '
   if (.sessions | type) != "array" then "unread"
   else

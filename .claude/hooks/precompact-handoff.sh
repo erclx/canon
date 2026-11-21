@@ -14,13 +14,9 @@ IFS= read -r -d '' -t 2 input
 event=$(printf '%s' "$input" | jq -r '.hook_event_name // empty')
 [ "$event" = "PreCompact" ] || exit 0
 
-# Each trigger gets the one channel that reaches a session on it. Blocking is
-# manual-only: on `auto` the client suppresses the notification and discards the
-# blocking reason, so a block there stops the compaction and tells nobody. Exit-0
-# stdout is read on both, merged into the instructions the summarizer is given,
-# which is why `auto` writes to stdout and carries on. An absent `trigger` takes
-# the manual path, since a payload that names no trigger is the one this hook
-# cannot afford to answer with silence.
+# Blocking is manual-only: on `auto` the client suppresses the notification and
+# discards the blocking reason, so `auto` writes to stdout, which the summarizer reads.
+# An absent `trigger` takes the manual path, since silence is the wrong answer.
 trigger=$(printf '%s' "$input" | jq -r '.trigger // empty')
 if [ "$trigger" = "auto" ]; then
   cat <<'MSG'
@@ -39,17 +35,15 @@ marker_dir="$project/.canon/tmp/hooks/precompact-handoff"
 marker="$marker_dir/$key"
 [ -f "$marker" ] && exit 0
 
-# The marker is what ends the block, so a marker that cannot be written would
-# refuse every compaction this session ever takes rather than only the first.
-# Failing open costs one unasked handoff and failing closed strands the session,
-# so a scratch directory that refuses the write carries on instead.
+# The marker ends the block, so one that cannot be written would refuse every
+# compaction. Failing open costs one unasked handoff and failing closed strands
+# the session, so a scratch directory that refuses the write carries on.
 mkdir -p "$marker_dir" 2>/dev/null || exit 0
 : >"$marker" 2>/dev/null || exit 0
 
-# This event carries no `additionalContext`, and stdout reaches the summarizer
-# rather than the session, so blocking is the only channel that puts text in
-# front of the session itself. Exit 2 makes the stderr text the blocking reason,
-# which is why the message goes there rather than to stdout.
+# This event carries no `additionalContext` and stdout reaches the summarizer, so
+# blocking is the only channel that reaches the session. Exit 2 makes stderr the
+# blocking reason, which is why the message goes there.
 cat >&2 <<'MSG'
 Compaction blocked once so the handoff is written first. A compaction keeps conclusions and drops the reasoning that produced them, and this session is the only one still holding that reasoning.
 

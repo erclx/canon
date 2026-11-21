@@ -1,15 +1,7 @@
 #!/bin/sh
-# Points a session started in an empty folder at canon:target-scaffold.
-#
-# The skill listing drops the least-used skills' descriptions first once it
-# passes its character budget, and target-scaffold is rarely used, so a plain
-# "start a new project here" never saw it. This context reaches the session
-# whatever the listing keeps.
-#
-# Empty means what step 2 of target-scaffold tests: nothing but `.git`. A
-# folder holding only a dotfile such as `.gitignore` is a project, so the hook
-# stays silent there. It fires in every folder of every project with canon
-# installed, so it reads one listing, writes nothing, and exits 0 on every path.
+# Points a session started in an empty folder at canon:target-scaffold, since a
+# plain "start a new project here" never saw it in the listing. Empty means
+# nothing but `.git`. It fires everywhere canon is installed, so it writes nothing and exits 0.
 
 dir=${CLAUDE_PROJECT_DIR:-$PWD}
 [ -d "$dir" ] && [ -r "$dir" ] && [ -x "$dir" ] || exit 0
