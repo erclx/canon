@@ -18,9 +18,7 @@ export interface ScannedDeclaration {
 /**
  * Reads the `themes:` list off the raw frontmatter block, for the reason
  * `readReviewed` in `@/records/stale-canonical` gives. Each entry is the
- * stylesheet prelude that opens the theme, such as `:root` or
- * `@media (prefers-color-scheme: dark)`. A record declaring none reads as an
- * empty list.
+ * stylesheet prelude opening the theme, and a record declaring none reads as empty.
  */
 export function readThemes(source: string): string[] {
   const block = RAW_FRONTMATTER.exec(source.replaceAll('\r\n', '\n'))?.[1]
@@ -136,11 +134,9 @@ export interface ThemeResult {
 }
 
 /**
- * Checks each declared theme for the properties given. A declaration counts
- * for the outermost enclosing prelude that is a declared theme, so a `:root`
- * inside a declared media query belongs to the query and never to the light
- * `:root` as well, and `:root` never matches `:root[data-theme='dark']` by
- * containment.
+ * Checks each declared theme for the properties given. A declaration counts for
+ * the outermost enclosing prelude that is a declared theme, so a `:root` inside
+ * a declared media query belongs to the query alone.
  */
 export function checkThemes(
   themes: readonly string[],

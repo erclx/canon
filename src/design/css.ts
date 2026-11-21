@@ -6,13 +6,9 @@ import type { DesignTokens } from '@/design/tokens'
 import { TOKENS } from '@/design/tokens'
 
 /**
- * The form a CSS surface takes the source in. Custom properties carry the token
- * layer and plain rules carry the component layer, which is the whole of what a
- * stylesheet needs from `@/design/tokens` and `@/design/components`.
- *
- * The property names match the ones `@/design/render` already emits from a
- * parsed document, so the toolkit's own source and a target's hand-authored
- * `canon/DESIGN.md` produce one vocabulary rather than two.
+ * The form a CSS surface takes the source in: custom properties carry the token
+ * layer and plain rules the component layer. Property names match `@/design/render`,
+ * so the toolkit's source and a target's `canon/DESIGN.md` produce one vocabulary.
  */
 
 /** A role name as it appears in a custom property. */
@@ -71,9 +67,8 @@ function lightCounterparts(
 
 /**
  * Text roles with no light counterpart, named in the emitted stylesheet rather
- * than filled in. Inventing a value for one would put a color in the system
- * that no surface ever read off anything, which is the failure this whole
- * consolidation exists to end.
+ * than filled in, since an invented value would put a color in the system that
+ * no surface ever read off anything.
  */
 export function unmappedOnLight(tokens: DesignTokens = TOKENS): string[] {
   const pairs = lightCounterparts(tokens.color)
@@ -106,8 +101,7 @@ function tokenProperties(tokens: DesignTokens): string[] {
 
   for (const role of tokens.typography) {
     lines.push(`  --type-${slug(role.role)}-family: ${role.family};`)
-    // A role naming a step reads it, so the role shrinks under the queries
-    // the step's tablet and phone sizes are emitted in.
+    // A role naming a step reads it, so the role shrinks under the step's tablet and phone queries.
     const size = role.step ? `var(--size-${slug(role.step)})` : role.size
     lines.push(`  --type-${slug(role.role)}-size: ${size};`)
     lines.push(`  --type-${slug(role.role)}-lh: ${role.lineHeight};`)
@@ -209,10 +203,9 @@ ${component.rules}`,
 }
 
 /**
- * `@font-face` rules carrying a font list as base64, so a stylesheet renders
- * in the same typeface everywhere regardless of what the reader's machine has
- * installed. Defaults to the mono stack's primary family; a caller wanting
- * other faces passes its own list instead of widening this default.
+ * `@font-face` rules carrying a font list as base64, so a stylesheet renders in
+ * the same typeface everywhere. Defaults to the mono stack's primary family, and
+ * a caller wanting other faces passes its own list.
  */
 export function fontFaceBlock(
   faces: readonly FontFace[],

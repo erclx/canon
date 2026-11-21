@@ -2,11 +2,8 @@ import { readFileSync } from 'node:fs'
 
 /**
  * One table cell, split into the value a renderer emits and whether the record
- * marked it as unsourced.
- *
- * The marker sits inside the cell rather than in a trailing column, because a
- * trailing marker breaks the table parse. Splitting it out here is what keeps a
- * swatch or a font sample built from the value alone.
+ * marked it as unsourced. The marker sits inside the cell, since a trailing
+ * column breaks the table parse, and splitting it out keeps swatches built from the value.
  */
 export interface Cell {
   value: string
@@ -26,11 +23,9 @@ export interface DesignDoc {
 }
 
 /**
- * The three headings the standard renamed toward Google's DESIGN.md, each read
- * as the section it became. Records the seed and `canvas-board` wrote before
- * the rename sit in targets and will not rename themselves, and an unmatched
- * heading parses to nothing without saying so. The field names on `DesignDoc`
- * keep the old words, since the preview reading them is retired separately.
+ * The three headings the standard renamed, each read as the section it became.
+ * Records written before the rename sit in targets and will not rename
+ * themselves, and `DesignDoc` keeps the old field names.
  */
 export const LEGACY_HEADINGS: Readonly<Record<string, string>> = {
   Personality: 'Overview',
@@ -62,11 +57,9 @@ export function parseDesignDoc(path: string): DesignDoc {
 }
 
 /**
- * Every table under one section, in the order the record writes them. The
- * shadows under Shapes and the durations under Motion sit in tables
- * `parseDesignDoc` does not reach, the first by being second in its section
- * and the second by sitting under a section it reads as prose. A missing
- * section reads as no tables rather than as an error.
+ * Every table under one section, in the order the record writes them, including
+ * ones `parseDesignDoc` does not reach, such as the shadows under Shapes. A
+ * missing section reads as no tables rather than an error.
  */
 export function parseSectionTables(path: string, heading: string): Row[][] {
   const sections = splitSections(readFileSync(path, 'utf8'))
@@ -113,10 +106,9 @@ function prose(body: string | undefined): string {
 const DELIMITER = /^\s*\|\s*:?-{3,}/
 
 /**
- * The first table in a section. A section may carry a second, such as the
- * shadows under Shapes, with columns of its own, so the first ends on the row
- * heading the next delimiter. Rows are matched by their pipe rather than by
- * adjacency, since a hand-written record can leave blank lines between them.
+ * The first table in a section, ending on the row heading the next delimiter,
+ * since a section may carry a second with columns of its own. Rows are matched
+ * by their pipe, since a hand-written record can leave blank lines between them.
  */
 function table(body: string | undefined): Row[] {
   if (!body) return []
@@ -155,9 +147,8 @@ function splitRow(line: string): Cell[] {
 
 /**
  * The tag is tested against the cell with any surrounding code span removed,
- * since a value wrapping itself in backticks puts one after the tag and an
- * end-anchored test misses it there. The span is restored around the clean
- * value so an untagged cell and a tagged one carry the same formatting.
+ * since a value wrapped in backticks puts one after the tag. The span is
+ * restored so tagged and untagged cells carry the same formatting.
  */
 function parseCell(raw: string): Cell {
   const trimmed = raw.trim()

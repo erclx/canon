@@ -2,15 +2,9 @@ import { canonicalHeading } from '@/design/parse'
 import { stripFrontmatter } from '@/markdown/frontmatter'
 
 /**
- * The prose budget `claude/skills/design-record/references/design.md` sets for
- * a design record, and the counter the `design` gate stage reads it through.
- * The limits live here and in the standard, never in the stage.
- *
- * A row is excluded on the test `table()` in `@/design/parse` uses, a line
- * opening with a pipe. A line opening with `<` is dropped as `prose()` drops
- * it, as is a fenced block or a multi-line HTML comment. A `###` subsection
- * counts toward its `##` section. A legacy `## Personality` takes the Overview
- * cap through the parser's alias, and a finding names the heading as written.
+ * The prose budget `claude/skills/design-record/references/design.md` sets for a
+ * design record, and the counter the `design` gate stage reads it through. A row,
+ * a `<` line, a fenced block, and a multi-line HTML comment are excluded, as `table()` and `prose()` in `@/design/parse` do.
  */
 export const DESIGN_BUDGET = {
   /** Words before the first `##` section, the title excluded. */
