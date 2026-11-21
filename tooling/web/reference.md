@@ -93,6 +93,13 @@ The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project tha
 - `.github/workflows/verify.yml` runs `static-checks`, `unit-tests`, `build-verify`, and `e2e-tests`. `unit-tests` installs Chromium and runs `test:browser` only when the project defines that script.
 - Read `governance/rules/tooling/ci-workflow.md` for when a workflow's commit-back is right and when a report is
 
+## Screenshot on a taken port
+
+`screenshot` assigns `PREVIEW_PORT` from `scripts/worktree-port.sh`, so a value set by hand before the run is overwritten.
+
+- Set `WORKTREE_PORT_OFFSET` to move a run off a taken port, since it moves the preview and the screenshot port together
+- Expect a hand-set `PREVIEW_PORT` to wait on a port nothing serves, since the preview binds its own port under `strictPort`
+
 ## Playwright installs in CI
 
 - Expect the seeded workflows to install no system packages, since both hosted Ubuntu images ship Chrome and the libraries Chromium loads
