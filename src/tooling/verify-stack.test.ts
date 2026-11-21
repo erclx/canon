@@ -6,9 +6,11 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { gitEnv } from '@/git/env'
 import { verifyStack } from '@/tooling/verify-stack'
 
 let root: string
@@ -264,6 +266,23 @@ describe('verifyStack tmp dir', () => {
 })
 
 describe('verifyStack post-scaffold step', () => {
+  it('should leave a path the stack ignores out of the verify commit', async () => {
+    seedStack(
+      'php',
+      `${scaffoldWith([])}\n[scaffold]\nprepare = "mkdir vendor && touch vendor/lib.php"\n\n[gitignore]\n"# PHP" = ["vendor/"]\n`,
+    )
+
+    await verifyStack({ root, stack: 'php', keep: true })
+
+    const tracked = execFileSync('git', ['ls-files'], {
+      cwd: tmpDir('php'),
+      encoding: 'utf8',
+      env: gitEnv(),
+    })
+    expect(tracked.split('\n')).toContain('package.json')
+    expect(tracked).not.toContain('vendor/')
+  })
+
   it('should fail at Prepare and run no later phase when the step fails', async () => {
     seedStack('prep', `${scaffoldWith([])}\n[scaffold]\nprepare = "exit 2"\n`)
 

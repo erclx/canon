@@ -1,7 +1,18 @@
-import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs'
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+} from 'node:fs'
 import { join } from 'node:path'
 import { execa, type Options } from 'execa'
-import { isStackExcluded, loadManifest } from '@/tooling/manifest'
+import {
+  isStackExcluded,
+  loadManifest,
+  resolveChain,
+  type Manifest,
+} from '@/tooling/manifest'
 import { scaffoldStack } from '@/tooling/scaffold'
 import { isAddOn } from '@/tooling/stamp'
 import { intro, logError, logInfo, logStep, logWarn, outro } from '@/cli/ui'
@@ -112,8 +123,10 @@ async function run({
 
   // The verify folder sits inside the checkout's work tree, where the verb leaves git alone, so the run makes
   // its own repository for the scaffold's git-reading scripts.
+  await shell('git init -q', state.dir)
+  excludeChainIgnores(root, manifest, state.dir)
   await shell(
-    'git init -q && git add . && git commit -m "chore: verify scaffold" -q --no-verify --allow-empty',
+    'git add . && git commit -m "chore: verify scaffold" -q --no-verify --allow-empty',
     state.dir,
   )
 
@@ -175,6 +188,29 @@ async function runScripts(state: Run, scripts: Set<string>): Promise<void> {
   const shots = countScreenshots(join(state.dir, 'screenshots'))
   if (shots === 0) logWarn('screenshot produced no png files')
   record(state, 'screenshot-artifacts', shots > 0)
+}
+
+/**
+ * The commit lands after the post-scaffold step, ahead of the Sync that writes the chain's `.gitignore` groups, so
+ * a step's install output such as php's `vendor/` would otherwise become tracked and fail every check reading
+ * tracked files. `.git/info/exclude` keeps those paths out without touching the tree Sync reads.
+ */
+function excludeChainIgnores(
+  root: string,
+  manifest: Manifest,
+  dir: string,
+): void {
+  const chain = [
+    ...resolveChain(root, manifest.name),
+    ...(isAddOn(manifest) ? resolveChain(root, 'base') : []),
+  ]
+  const entries = chain.flatMap((layer) =>
+    layer.gitignore.flatMap((section) => section.entries),
+  )
+  if (entries.length === 0) return
+  const info = join(dir, '.git', 'info')
+  mkdirSync(info, { recursive: true })
+  appendFileSync(join(info, 'exclude'), `${entries.join('\n')}\n`)
 }
 
 type Spawned = Awaited<ReturnType<typeof execa>>
