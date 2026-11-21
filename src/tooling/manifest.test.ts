@@ -96,7 +96,25 @@ describe('loadManifest', () => {
     expect(loadManifest(root, 'vite')?.scaffold).toBe('bun create vite')
   })
 
-  it('should read the verify prepare command', () => {
+  it('should read the post-scaffold step from the scaffold table', () => {
+    seedStack(
+      'vite',
+      '[stack]\nname = "vite"\n\n[scaffold]\nprepare = "rm src/App.tsx"\n',
+    )
+
+    expect(loadManifest(root, 'vite')?.prepare).toBe('rm src/App.tsx')
+  })
+
+  it('should prefer the scaffold table over the verify alias', () => {
+    seedStack(
+      'vite',
+      '[stack]\nname = "vite"\n\n[scaffold]\nprepare = "new"\n\n[verify]\nprepare = "old"\n',
+    )
+
+    expect(loadManifest(root, 'vite')?.prepare).toBe('new')
+  })
+
+  it('should read the verify prepare command as an alias', () => {
     seedStack(
       'astro',
       '[stack]\nname = "astro"\n\n[verify]\nprepare = "bunx astro add react"\n',
