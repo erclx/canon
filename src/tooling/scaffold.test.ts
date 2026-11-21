@@ -140,6 +140,24 @@ describe('scaffoldStack git repository', () => {
     expect(git(target('svc'), 'symbolic-ref', '--short', 'HEAD')).toBe('main')
   })
 
+  it('should drop a repository the starter wrote and initialize its own', async () => {
+    seedStack(
+      'py',
+      'mkdir -p {{name}}/.git && touch {{name}}/.git/scaffold-head {{name}}/pyproject.toml',
+    )
+
+    const result = await scaffoldStack({
+      root,
+      stack: 'py',
+      target: target('lib'),
+      scratchBase,
+    })
+
+    expect(result.ok && result.files).toEqual(['pyproject.toml'])
+    expect(result.ok && result.git).toBe('initialized')
+    expect(existsSync(join(target('lib'), '.git', 'scaffold-head'))).toBe(false)
+  })
+
   it('should not nest a repository in a target inside a parent one', async () => {
     seedStack('go', 'mkdir {{name}} && cd {{name}} && touch go.mod')
     mkdirSync(join(root, 'projects'), { recursive: true })

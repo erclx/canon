@@ -159,10 +159,10 @@ export async function scaffoldStack(
   }
 
   mkdirSync(target, { recursive: true })
-  const keepTargetGit = existsSync(join(target, '.git'))
   const files: string[] = []
   for (const entry of readdirSync(produced).sort()) {
-    if (entry === '.git' && keepTargetGit) continue
+    // A starter's own repository would nest inside a parent one, so only `initGit` decides the target's git.
+    if (entry === '.git') continue
     move(join(produced, entry), join(target, entry))
     files.push(entry)
   }
