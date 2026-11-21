@@ -7,7 +7,7 @@ set -euo pipefail
 : "${PREVIEW_PORT:=4173}"
 
 if curl -sSf "http://localhost:$PREVIEW_PORT/" >/dev/null 2>&1; then
-  echo "Port $PREVIEW_PORT already in use. Stop the listening process, or rerun with an offset that moves the preview and this check together, such as: WORKTREE_PORT_OFFSET=100 bun run screenshot" >&2
+  echo "Port $PREVIEW_PORT already in use. Stop the listening process, or rerun with an offset that moves the preview and this check together, by prefixing the same command with WORKTREE_PORT_OFFSET=100" >&2
   exit 1
 fi
 

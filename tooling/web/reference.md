@@ -98,7 +98,7 @@ The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project tha
 `screenshot` assigns `PREVIEW_PORT` from `scripts/worktree-port.sh`, so a value set by hand before the run is overwritten.
 
 - Set `WORKTREE_PORT_OFFSET` to move a run off a taken port, since it moves the preview and the screenshot port together
-- Expect a hand-set `PREVIEW_PORT` to wait on a port nothing serves, since the preview binds its own port under `strictPort`
+- Expect a hand-set `PREVIEW_PORT` on a direct `bash scripts/screenshot.sh` call to wait on a port nothing serves, since the preview binds its own derived port
 
 ## Playwright installs in CI
 
