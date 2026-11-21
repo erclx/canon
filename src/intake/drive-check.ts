@@ -125,9 +125,8 @@ function refuse(
 
 /**
  * A goal as both sides compare it: a leading bold label and a trailing period
- * dropped, and whitespace collapsed. Requirements records carry no goal ids,
- * so the text is the identity, and stripping the label lets a drive record
- * paste the bullet whole or name the sentence alone.
+ * dropped, and whitespace collapsed. The text is the identity, since requirements
+ * records carry no goal ids.
  */
 function normalizeGoal(text: string): string {
   return text
@@ -424,10 +423,9 @@ function badSlug(slug: string): DriveRefused {
 }
 
 /**
- * Stores the main checkout's status before a drive, so the check can tell a
- * write the drive made from one already in the tree. Scratch rather than the
- * intake folder, since the baseline is safe to lose once the check passes and
- * the folder holds findings alone. A second call replaces the first.
+ * Stores the main checkout's status before a drive, so the check can tell a write
+ * the drive made from one already in the tree. Scratch rather than the intake
+ * folder, and a second call replaces the first.
  */
 export async function recordBaseline(
   root: string,

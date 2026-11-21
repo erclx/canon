@@ -127,13 +127,9 @@ type SlugMatch =
   | { readonly kind: 'none' }
 
 /**
- * A folder carries a `<nn>-<slug>` name, but a caller names the topic alone.
- * An exact match wins first, since it is what a name with no ordinal, or one
- * already copied in full from a listing, resolves against. Otherwise the one
- * entry whose name is an ordinal ahead of the given slug wins, which is what
- * lets a topic keep working as its folder's identity gains a prefix. Two or
- * more such entries is a collision the caller needs told apart from a typo,
- * not a folder silently picked or silently missing.
+ * A folder carries a `<nn>-<slug>` name but a caller names the topic alone. An exact
+ * match wins, then the one entry an ordinal ahead of the slug, and two or more is
+ * a collision reported apart from a typo.
  */
 function matchSlug(names: readonly string[], slug: string): SlugMatch {
   if (names.includes(slug)) return { kind: 'matched', name: slug }
@@ -265,15 +261,9 @@ export async function readFolder(
 }
 
 /**
- * Lands a batch of selections in one cluster file.
- *
- * The batch is scoped to a cluster and applied in one read-modify-write because
- * the alternative is a call per selection, and four of those against the same
- * file race on the read and drop every answer but the last.
- *
- * A `decided` label accepts the decision its item's `Decided:` pointer reaches
- * and writes that source into the slot. One that reaches no decision refuses
- * the whole call, so an accept never lands on a decision nobody recorded.
+ * Lands a batch of selections in one cluster file, in one read-modify-write, since a
+ * call per selection races on the read and drops every answer but the last. A
+ * `decided` label that reaches no decision refuses the whole call.
  */
 export async function answerItems(
   root: string,

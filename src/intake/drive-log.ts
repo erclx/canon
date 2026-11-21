@@ -21,12 +21,9 @@ const DRAWN_LABEL = 'Drawn'
 const SEE = /^see\s+(\d+)/i
 
 /**
- * Reads the drive log's numbered findings for a decision with nothing drawn.
- * A decision reading `see <nn>` was drawn under the finding it names, and a
- * `ref-<nn>` heading or a finding with no decision carries nothing to draw. A
- * `Drawn` field passes when it cites a path in a code span or reads
- * `skipped, <reason>`, so a bare `skipped` still lists the finding. A skip
- * cites no path, since its reason may code-span a flag or a format.
+ * Reads the drive log's numbered findings for a decision with nothing drawn. A
+ * `Drawn` field passes when it cites a path in a code span or reads `skipped,
+ * <reason>`, and `see <nn>` was drawn under the finding it names.
  */
 export function readDrawn(source: string): DrawnReading {
   const undrawn: string[] = []
@@ -67,10 +64,9 @@ export function readDrawn(source: string): DrawnReading {
 }
 
 /**
- * Maps each logged finding's number to the operator's decision, the reader
- * behind a `Decided:` item. A decision reading `see <nn>` takes the decision
- * of the finding it names, one hop only, and drops out when that finding is
- * missing or itself points on. A finding with no decision maps to nothing.
+ * Maps each logged finding's number to the operator's decision. A decision reading
+ * `see <nn>` takes that finding's decision, one hop only, and drops out when it
+ * is missing or itself points on.
  */
 export function readDecisions(source: string): Map<number, string> {
   const raw = new Map<number, string>()
