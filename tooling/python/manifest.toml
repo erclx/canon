@@ -20,5 +20,5 @@ scaffold = "uv init --package {{name}}"
   ".coverage_cache/",
 ]
 
-[verify]
+[scaffold]
 prepare = "bun init -y && uv add --dev ruff mypy pytest pytest-cov && uv sync"

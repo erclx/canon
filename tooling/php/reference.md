@@ -56,7 +56,7 @@ The php phase list probes its tools and holds one precondition.
 
 The manifest prepares a scaffold that lacks a `package.json`.
 
-- The manifest's `[verify] prepare` runs checklist steps 2 and 5 for `canon tooling verify php`, being `bun init -y` and the `composer require --dev` line.
+- The manifest's `[scaffold] prepare` runs checklist steps 2 and 5 on every `canon tooling scaffold php`, and so on `canon tooling verify php`, being `bun init -y` and the `composer require --dev` line.
 - The scaffold writes no `package.json`, and a verify that reaches its end with none fails.
 
 ## CI

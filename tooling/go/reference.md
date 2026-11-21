@@ -49,7 +49,7 @@ Two things stay out of the list, and one step runs before it.
 - Keep `build` out, though the stack declares the script. `go build ./...` exits 1 with `no packages to build` on a module holding only a test file.
 - A seeded `main.go` would assume every module is a binary rather than a library.
 - Keep `-race` out of `test:run`. The race detector needs cgo and a C toolchain, so it belongs in CI rather than a local `bun run check`.
-- The manifest's `[verify] prepare` runs checklist steps 3 and 6 for `canon tooling verify go`, being `bun init -y` and the `go install` when the binary is not on PATH.
+- The manifest's `[scaffold] prepare` runs checklist steps 3 and 6 on every `canon tooling scaffold go` and verify, being `bun init -y` and the `go install` when the binary is not on PATH.
 - The scaffold writes no `package.json`, and a verify that reaches its end with none fails.
 
 ## CI

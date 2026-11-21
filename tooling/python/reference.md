@@ -46,7 +46,7 @@ The manifest declares no `[dependencies.dev]`, because manifest injection calls 
 
 ## Verify command
 
-`canon tooling verify python` runs the manifest's `[verify] prepare` before Sync. That covers checklist steps 2, 5, and 6, being `bun init -y`, `uv add --dev ruff mypy pytest pytest-cov`, and `uv sync`.
+`canon tooling scaffold python` runs the manifest's `[scaffold] prepare` on the starter, and `canon tooling verify python` scaffolds through it before Sync. That covers checklist steps 2, 5, and 6, being `bun init -y`, `uv add --dev ruff mypy pytest pytest-cov`, and `uv sync`.
 
 - `uv init` writes no `package.json`, and a verify that reaches its end with none fails, so the prepare is what lets `bun run lint:fix`, `bun run format`, and `bun run check` run at all.
 - Python's `verify.json` requires the `lint`, `typecheck`, and `test:run` scripts that delegate to `uv run`, so the run needs `uv` on the machine and a network for the installs.
