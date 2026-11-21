@@ -27,15 +27,17 @@ interface LocalOptions extends ReadOptions {
   readonly remove?: boolean
 }
 
-/** How long the probe waits on a listener before reading it as not a server. */
-const LOCAL_PROBE_TIMEOUT_MS = 2_000
+/**
+ * How long the probe waits on a listener before reading it as not a server.
+ * A dev server such as astro's takes up to about 6 seconds on a cold render of /.
+ */
+const LOCAL_PROBE_TIMEOUT_MS = 10_000
 
 const LOCAL_REFUSALS: Record<
   LocalRefusal | 'invalid-config' | 'gh-failed',
   string
 > = {
-  'no-server':
-    'Nothing listening inside this worktree served an HTML page. Start the dev server here and re-run to get a link.',
+  'no-server': `Nothing listening inside this worktree served an HTML page within ${LOCAL_PROBE_TIMEOUT_MS / 1000} seconds. Start the dev server here and re-run to get a link.`,
   unhealthy:
     'A page answered inside this worktree, but a health path it declares failed. Start what the page reaches and re-run to get a link.',
   'invalid-config': `${LOCAL_CONFIG_REL} cannot be read, so no health path was checked and no link is given. Fix or delete it and re-run. health takes paths starting with /, and page-only takes folders relative to the repository.`,
@@ -65,7 +67,8 @@ export function registerLocal(pr: Command): void {
         'Reads every TCP socket in LISTEN, keeps those whose owning process runs',
         "inside this worktree's toplevel, and requests / on each. The lowest",
         'port serving an HTML page is reported, which skips a test runner or a',
-        'reload socket answering in the same tree.',
+        'reload socket answering in the same tree. Every port is requested at',
+        `once, and each request waits ${LOCAL_PROBE_TIMEOUT_MS / 1000} seconds for an answer.`,
         '',
         'A project can declare paths the page must also serve, in',
         'canon/config/local.toml as health = ["/api/health"]. Each is requested',
@@ -143,10 +146,13 @@ function machineLocalRunner(): LocalRunner {
   return {
     ...machineListenerReader(),
     // An HTML page rather than any answer, since a test runner's server would give a bare 404.
-    async probe(port) {
+    async probe(port, settled) {
       try {
         const response = await fetch(`http://localhost:${port}/`, {
-          signal: AbortSignal.timeout(LOCAL_PROBE_TIMEOUT_MS),
+          signal: AbortSignal.any([
+            AbortSignal.timeout(LOCAL_PROBE_TIMEOUT_MS),
+            settled,
+          ]),
         })
         await response.body?.cancel()
         return (response.headers.get('content-type') ?? '').includes(

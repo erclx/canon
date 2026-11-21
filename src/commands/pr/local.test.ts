@@ -168,6 +168,48 @@ describe('canon pr local', () => {
     })
   })
 
+  // Answers / after 3 seconds, as astro dev does on a warm render.
+  async function serveSlowPage(): Promise<number> {
+    const script = [
+      'const s = Bun.serve({ port: 0, fetch: async () => {',
+      '  await Bun.sleep(3000)',
+      "  return new Response('<p>', { headers: { 'content-type': 'text/html' } })",
+      '} })',
+      'process.stdout.write(`${s.port}\\n`)',
+    ].join('\n')
+    const child = execa(process.execPath, ['-e', script], {
+      cwd: repoRoot,
+      reject: false,
+      timeout: RUN_TIMEOUT_MS,
+    })
+    server = child
+    const [chunk] = await Promise.race([
+      once(child.stdout, 'data'),
+      child.then(() => {
+        throw new Error('the server exited before printing its port')
+      }),
+    ])
+    return Number(String(chunk).trim())
+  }
+
+  it(
+    'should report a page that takes 3 seconds to render',
+    async () => {
+      const port = await serveSlowPage()
+
+      const outcome = await runLocal([])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({
+          reason: 'ok',
+          url: `http://localhost:${port}`,
+        }),
+        exit: 0,
+      })
+    },
+    RUN_TIMEOUT_MS,
+  )
+
   it('should refuse as invalid-config when local.toml is not valid TOML', async () => {
     mkdirSync(join(repoRoot, 'canon', 'config'), { recursive: true })
     writeFileSync(join(repoRoot, 'canon', 'config', 'local.toml'), 'health = [')
