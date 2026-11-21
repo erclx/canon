@@ -1,13 +1,7 @@
 /**
- * Renders the launch film in assets/film/ once per theme, writing the launch
- * GIFs to assets/loops/ beside the landing page's web MP4 and poster per theme.
- *
- * Each theme renders an MP4 under the ignored assets/film/renders/, and the GIF
- * comes from it through the ffmpeg pass `assets/film/SPEC.md` gives. Outputs
- * reach assets/loops/ only once both themes exist, so a failure leaves the
- * committed set whole. The web MP4 drops audio with `-an`, since no track is
- * cleared for public use. Run by hand, since a render costs minutes, and only
- * from a clone, since a registry install carries no assets/film/.
+ * Renders the launch film in assets/film/ once per theme, writing the GIFs to
+ * assets/loops/ beside the web MP4 and poster. Outputs land only once both themes
+ * exist, and the MP4 drops audio. Run by hand from a clone, since a render costs minutes.
  */
 import { copyFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'

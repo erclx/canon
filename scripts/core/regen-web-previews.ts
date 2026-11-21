@@ -1,11 +1,7 @@
 /**
  * Writes `web/public/previews/design-tokens/index.html` and `design.css` by
- * calling `renderDesignDoc` directly, the in-process pattern
- * `regen-web-favicon.ts` already takes rather than spawning a subprocess.
- *
- * It is embedded live in a landing section as an `<iframe>` rather than a
- * screenshot, since `web/e2e/home.spec.ts` asserts no `<img>` renders inside
- * `<main>`.
+ * calling `renderDesignDoc` in process. The page embeds it live as an `<iframe>`,
+ * since `web/e2e/home.spec.ts` asserts no `<img>` renders inside `<main>`.
  */
 import { readFileSync } from 'node:fs'
 import { FAVICON_COLORS, renderFavicon } from '@/design/favicon'

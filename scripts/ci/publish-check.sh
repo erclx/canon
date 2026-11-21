@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-# Reports whether the newest GitHub release reached npm, called by the
-# publish-check job in release-please.yml. The step passes GH_TOKEN and GH_REPO
-# for gh. A release inside the publish job's 15-minute window passes, since its
-# publish may still be running.
+# Reports whether the newest GitHub release reached npm, called by publish-check
+# in release-please.yml with GH_TOKEN and GH_REPO. A release inside the 15-minute
+# publish window passes, since its publish may still be running.
 set -e
 
 package=@erclx/canon

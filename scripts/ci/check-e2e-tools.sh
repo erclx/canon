@@ -1,15 +1,7 @@
 #!/usr/bin/env bash
-# Fails when a tool the e2e suites gate on is missing, called after the cache
-# restore in verify.yml. Each suite skips rather than fails without its tool,
-# so this turns a missing one into a red step before any suite starts.
-#
-# Usage: check-e2e-tools.sh <agent-cli-chromium-revision>
-# The engine's browsers are checked by check-browsers.sh. This checks the
-# exact Chromium revision the pinned agent CLI launches, which a glob on
-# chromium-* would pass on the engine's revision alone, and FFmpeg's animated
-# WebP encoder, which the reel suite needs. It also launches the engine's
-# Chromium once, the probe the Playwright suites skip on, since a browser on
-# disk that cannot start would otherwise skip five suites green.
+# Fails when a tool the e2e suites gate on is missing, since each suite skips
+# rather than fails without it. Usage: check-e2e-tools.sh <agent-cli-chromium-revision>
+# It checks that exact revision, FFmpeg's animated WebP encoder, and one engine Chromium launch.
 set -eo pipefail
 
 if [ $# -ne 1 ]; then

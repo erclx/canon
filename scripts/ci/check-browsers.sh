@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # Fails when a Playwright browser named in the arguments is missing from the
-# cache, called after the cache restore in pr-visual-checks.yml. A cache hit
-# skips the install step, so a restore that came back empty would otherwise
-# surface later as a launch error.
+# cache, since a cache hit skips the install and an empty restore would surface
+# later as a launch error. Called after the restore in pr-visual-checks.yml.
 set -e
 
 for browser in "$@"; do
