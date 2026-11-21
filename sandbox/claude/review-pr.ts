@@ -239,14 +239,9 @@ function seedReviewFocusPr(ctx: StageContext): string {
 }
 
 /**
- * The trunk both evidence arms branch from: a header on a static page and the
- * project's evidence convention, one committed capture per width named for it.
- * `evidence/` is the segment `canon pr evidence` keys on, so a trunk holding one
- * is what makes a painting change without a new capture a finding rather than a
- * question. `CLAUDE.md` stays silent on the convention on purpose. A first draft
- * stated it there, and the review body from before `review-craft` caught the
- * missing capture off that sentence alone, so the arm proved nothing about
- * reading the convention from the tree.
+ * The trunk both evidence arms branch from: a static page header and a
+ * committed capture per width under `evidence/`, the segment `canon pr evidence`
+ * keys on. `CLAUDE.md` stays silent on the convention so the arm reads it from the tree.
  */
 function seedHeaderTrunk(ctx: StageContext): void {
   ctx.anchorRemote()
@@ -302,11 +297,9 @@ function seedMissingEvidencePr(ctx: StageContext): string {
 }
 
 /**
- * The same change with captures and a checklist box stating the narrow layout.
- * The narrow head capture shows the nav row running off the edge, while the
- * ticked box claims it collapses into the menu button. The comment is the one
- * the real verb renders from this checkout, which sits on the branch, so the
- * arm reads the body `git-pr` would have posted.
+ * The same change with captures and a ticked checklist box claiming the narrow
+ * layout collapses, while the narrow capture shows the nav overflowing. The
+ * comment is the one the real verb renders from this checkout.
  */
 function seedEvidenceMismatchPr(ctx: StageContext): string {
   seedHeaderTrunk(ctx)
@@ -351,8 +344,7 @@ function seedEvidenceMismatchPr(ctx: StageContext): string {
     ['pr', 'evidence', number, '--checklist', handoff, '--json'],
     { stderr: 'inherit' },
   )
-  // The refusal reads off the record on stdout whatever the verb's exit was,
-  // so a non-ok reason is named here rather than as a bare failure.
+  // The refusal reads off the stdout record whatever the exit was, so a non-ok reason is named.
   let record: unknown
   try {
     record = JSON.parse(evidence.stdout)
@@ -453,8 +445,7 @@ export default scenario({
       logConfiguring(ctx, 'unchanged-head ')
       const prUrl = seedReviewablePr(ctx)
 
-      // A pass with a finding at any severity takes the open heading, and both
-      // headings sit in the family the next pass matches.
+      // A pass with a finding at any severity takes the open heading.
       seedReview(ctx, prUrl, FIRST_PASS_MINOR, FAIL_FIRST_PASS)
 
       // The worker accepts the minor as recorded, so nothing is committed and the head stays put.
@@ -492,8 +483,7 @@ export default scenario({
 
       seedComment(ctx, prUrl, RESPONSE_ACCEPTED, FAIL_RESPONSE)
 
-      // The close-out the unchanged-head arm produces, so the newest pass post-dates
-      // every response and the thread has nothing left to answer.
+      // The close-out post-dates every response, so the thread has nothing left to answer.
       seedReview(
         ctx,
         prUrl,
@@ -556,8 +546,7 @@ export default scenario({
 
       seedReview(ctx, prUrl, FIRST_PASS_MINOR, FAIL_FIRST_PASS)
 
-      // A finding posted after the close-out with no commit behind it, which the
-      // widened reply-family query has to reach rather than refuse.
+      // A finding posted after the close-out with no commit behind it, which the reply-family query must reach.
       seedComment(
         ctx,
         prUrl,
@@ -598,8 +587,7 @@ export default scenario({
       commitAll(ctx, 'fix(api): reject an empty task title')
       ctx.git('push', 'origin', 'HEAD', '-q')
 
-      // Posted here so its commit.oid pins to this head, the field the guard reads
-      // back and a PUT rewrite cannot move.
+      // Posted here so its commit.oid pins to this head, which the guard reads back.
       const closedSha = ctx.read('git', ['rev-parse', '--short', 'HEAD']).trim()
       seedReview(
         ctx,
@@ -608,8 +596,7 @@ export default scenario({
         FAIL_CLOSE_OUT,
       )
 
-      // An author's own change after a close-out leaves the next pass nothing to say,
-      // so a conforming pass rewrites the close-out rather than posting another.
+      // An author's own change after a close-out leaves nothing to say, so a pass rewrites the close-out.
       ctx.fixtures('claude', 'review-pr', 'repeat-close-out', '01-trim-once')
 
       commitAll(ctx, 'refactor(api): read the trimmed title once')
@@ -643,20 +630,17 @@ export default scenario({
       logConfiguring(ctx, 'marker-race ')
       const prUrl = seedReviewablePr(ctx)
 
-      // What the seeded pass read, captured before the push below. Between these
-      // lines is the compose window, which GitHub's own stamps never record.
+      // What the seeded pass read, captured before the push, since GitHub's stamps never record the compose window.
       const readSha = ctx.read('git', ['rev-parse', 'HEAD']).trim()
       const readAt = `${new Date().toISOString().slice(0, 19)}Z`
 
-      // The push landing inside that window, the close-out arm's fix, so this arm
-      // asserts only that the pass reached the delta.
+      // The push landing inside that window, so this arm asserts only that the pass reached the delta.
       ctx.fixtures('claude', 'review-pr', 'shared', '04-empty-title-guard')
 
       commitAll(ctx, 'fix(api): reject an empty task title')
       ctx.git('push', 'origin', 'HEAD', '-q')
 
-      // Posted after that push, so commit.oid names the new head while the marker
-      // names the commit read, reproducing the race with no timing.
+      // Posted after that push, so commit.oid names the new head while the marker names the commit read.
       seedReview(
         ctx,
         prUrl,

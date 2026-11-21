@@ -17,8 +17,7 @@ function findMarkdown(ctx: StageContext, rulesDir: string): string[] {
 function makeStale(ctx: StageContext): string[] {
   const rulesDir = join(ctx.root, 'governance', 'rules')
 
-  // Governance is the one domain staged stale, since standards left the sync
-  // domains with the install channel.
+  // Governance is the one domain staged stale, since standards left the sync domains.
   const staleRules: string[] = []
   for (const file of findMarkdown(ctx, rulesDir)) {
     const subdir = dirname(relative(rulesDir, file))

@@ -11,11 +11,9 @@ import { join } from 'node:path'
 
 import { ScenarioStop, type StageContext, scenario } from '@/sandbox/scenario'
 
-// The header captures `review-pr`'s evidence arms already commit. Reusing them
-// keeps the binary images in one place, and this pass never opens them: they
-// are there so `canon pr evidence` renders a marked comment for the checklist
-// to ride on, since a checklist posted alone carries no marker and the pass
-// would stop on arrival.
+// The header captures `review-pr`'s evidence arms already commit, reused so
+// `canon pr evidence` renders a marked comment for the checklist to ride on. This
+// pass never opens them.
 const EVIDENCE_RENDER =
   'sandbox/fixtures/claude/review-pr/evidence-mismatch/render'
 const DRIVE_SITE = 'sandbox/fixtures/claude/review-ui/drive/site'
@@ -86,9 +84,7 @@ function seedTrunk(ctx: StageContext, site: string = DRIVE_SITE): void {
 
 /**
  * Opens a pull request on `branch` carrying new captures, then posts the
- * evidence comment `pr-evidence` would have posted, with the checklist and any
- * extra flags the arm passes, such as `--local <url>`. Returns the pull request
- * number.
+ * evidence comment with the checklist and any extra flags. Returns the number.
  */
 function seedPr(
   ctx: StageContext,
@@ -149,8 +145,7 @@ function seedPr(
     ['pr', 'evidence', prNumber, '--checklist', handoff, ...extra, '--json'],
     { stderr: 'inherit' },
   )
-  // The refusal reads off the record on stdout whatever the verb's exit was,
-  // so a non-ok reason is named here rather than as a bare failure.
+  // The refusal reads off the stdout record whatever the exit was, so a non-ok reason is named.
   let record: unknown
   try {
     record = JSON.parse(evidence.stdout)

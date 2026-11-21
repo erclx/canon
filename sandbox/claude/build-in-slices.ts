@@ -1,8 +1,7 @@
 import { type StageContext, scenario } from '@/sandbox/scenario'
 
 function stageStats(ctx: StageContext): void {
-  // Two behaviors, so one pass leaves one commit where two are owed. `legacyPad`
-  // is an out-of-scope export, so a run removing it widened the branch.
+  // Two behaviors, so one pass leaves one commit where two are owed.
   ctx.fixtures('claude', 'build-in-slices', 'stats', '01-initial')
 
   ctx.mkdir('src')

@@ -9,14 +9,9 @@ function stageBranch(ctx: StageContext): void {
 }
 
 /**
- * Four planted defects, three of them floors an earlier body already caught.
- *
- * The script runs an unpinned package at release time, so whoever publishes
- * its next version runs code on the release machine. The README's Safety
- * section, outside every changed hunk, still claims a refusal the diff deletes.
- * `scripts/check.sh` drops the changed script from its `shellcheck` run with no
- * reason, lowering the bar. One commit bumps a dependency across a major
- * version, and the lockfile adds a transitive package with an install script.
+ * Four planted defects: an unpinned package run at release time, a README claim
+ * the diff falsifies outside every hunk, a script dropped from `shellcheck`, and
+ * a major bump adding a transitive install script.
  */
 export default scenario({
   config: {

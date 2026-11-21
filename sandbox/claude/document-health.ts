@@ -1,14 +1,9 @@
 import { scenario } from '@/sandbox/scenario'
 
 /**
- * The seeds the `01-initial` fixture carries, one per finding shape:
- * staleness in `canon/context/api.md`, with dead paths and a Layout count, and
- * length in `docs/overview.md`, a long paragraph and bullet. Structure is in
- * `canon/context/pipeline.md`, one long entry holding three stage domains. A
- * doubled seed has `api.md` and `auth.md` both claim `src/auth`, with
- * `auth.md` as owner since it holds the trap. The design record seed in
- * `canon/DESIGN.md` has a lead past its cap, an undeclared `--color-muted`,
- * a dark block overriding `--color-ink` alone, and a reviewed date.
+ * The `01-initial` seeds, one per finding shape: staleness in `canon/context/api.md`,
+ * length in `docs/overview.md`, structure in `canon/context/pipeline.md`, a doubled
+ * `src/auth` claim, and a `canon/DESIGN.md` with a lead past its cap and an undeclared token.
  */
 export default scenario({
   config: {

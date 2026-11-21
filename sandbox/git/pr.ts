@@ -34,8 +34,7 @@ export default scenario({
     },
     'reused-name': (ctx) => {
       configure(ctx)
-      // `git init` runs without `-b`, so the baseline branch follows the
-      // machine's init.defaultBranch. This arm returns to it by name.
+      // `git init` runs without `-b`, so this arm returns to main by name.
       ctx.git('branch', '-M', 'main')
       ctx.git('push', '--force', 'origin', 'HEAD:main', '-q')
       ctx.run('git', ['push', 'origin', '--delete', 'feat/slugify', '-q'], {
@@ -73,8 +72,7 @@ export default scenario({
       ctx.commit('feat(utils): add slugify helper')
       ctx.git('push', '-u', 'origin', 'feat/slugify', '-q')
 
-      // The arm closes rather than merges, since `gh pr view` resolves by head and
-      // ignores state, so a closed pull request drives the same lookup.
+      // The arm closes rather than merges, since `gh pr view` resolves by head and ignores state.
       const created = ctx.read('gh', [
         'pr',
         'create',
@@ -91,8 +89,7 @@ export default scenario({
         /(\d+)\s*$/.exec(created)?.[1] ??
         ctx.fail(`gh pr create printed no number: ${created}`)
 
-      // `-d` deletes the branch and switches back to main itself, so the
-      // checkout and the delete below stay tolerant of whichever half gh did.
+      // `-d` switches back to main itself, so the checkout and delete below tolerate either half.
       ctx.run(
         'gh',
         ['pr', 'close', stale, '-d', '-c', 'closed to stage the reused name'],

@@ -115,11 +115,9 @@ function seedDrift(ctx: StageContext): void {
   ctx.run('rm', ['canon/context/development/web.md'])
 }
 
-// Three shapes the required-section rule reads differently. A short entry in the
-// named folder reports, a conforming sibling beside it answers for itself alone,
-// and a split folder is answered by the one sibling named for the sections. An
-// arm seeding only the first would pass while both halves of the unit rule went
-// unmeasured.
+// Three shapes the required-section rule reads differently: a short entry in the
+// named folder reports, a conforming sibling answers for itself alone, and a
+// split folder is answered by the one sibling named for the sections.
 function seedShortSections(ctx: StageContext): void {
   ctx.fixtures('infra', 'context', 'sections', '01-entries')
 }

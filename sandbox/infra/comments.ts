@@ -5,10 +5,9 @@ function seedSourceTree(ctx: StageContext): void {
   ctx.fixtures('infra', 'comments', 'shared', 'source-tree')
 }
 
-// The regression arm. Every `#` inside the heredoc stored in
-// `heredoc/01-scenario/create/scripts/scenario.sh.fixture` is a markdown heading
-// in fixture data, and counting it as a bash comment is what turned a measured
-// 112 comment lines into 427 during the comment-discipline track.
+// The regression arm. Every `#` inside the stored heredoc is a markdown heading
+// in fixture data, and counting it as a bash comment once turned 112 comment
+// lines into 427.
 function seedHeredocScenario(ctx: StageContext): void {
   ctx.fixtures('infra', 'comments', 'heredoc', '01-scenario')
 }

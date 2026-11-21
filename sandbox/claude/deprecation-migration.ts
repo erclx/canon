@@ -1,10 +1,9 @@
 import { type StageContext, scenario } from '@/sandbox/scenario'
 
 /**
- * The deprecated helper has two callers. One imports it by name, which a search
- * for the name finds. The other reaches it through a string in a config file,
- * looked up on the module at runtime, which a search for an import never
- * finds. The prompt names neither caller.
+ * The deprecated helper has two callers: one imported by name, one reached
+ * through a string in a config file that a search for an import never finds.
+ * The prompt names neither.
  */
 function stageCallers(ctx: StageContext): void {
   ctx.fixtures('claude', 'deprecation-migration', 'callers', '01-initial')

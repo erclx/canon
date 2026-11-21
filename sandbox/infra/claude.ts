@@ -40,8 +40,7 @@ export default scenario({
       ctx.exec('bun', [join(ctx.root, 'src', 'cli.ts'), 'claude', 'sync', '.'])
     },
     setup: (ctx) => {
-      // Aimed at a sandbox-local directory. The verb defaults to $HOME/.claude,
-      // and a scenario that took the default would edit the operator's own config.
+      // Aimed at a sandbox-local directory, since the default is the operator's own $HOME/.claude.
       ctx.log.step('Running: canon claude setup ./home/.claude')
       ctx.exec('bun', [
         join(ctx.root, 'src', 'cli.ts'),

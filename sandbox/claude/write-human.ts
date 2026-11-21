@@ -7,8 +7,7 @@ export default scenario({
   },
   arms: {
     default: (ctx) => {
-      // Every sentence clears the ban scan, and the defect is distribution, so a run
-      // reporting a clean audit has read the words rather than the passage.
+      // Every sentence clears the ban scan and the defect is distribution, so a clean audit read the words.
       ctx.fixtures('claude', 'write-human', 'shared', '01-initial')
 
       ctx.git('add', '.')

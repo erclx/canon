@@ -1,16 +1,9 @@
 import { scenario } from '@/sandbox/scenario'
 
 /**
- * Three arms of one skill. `open` is a research question in a field nothing in
- * the toolkit touches, so a run can only scope its search to authorities it
- * derives rather than ones it recalls from the toolkit's own stacks. The
- * project asks for notes at a fixed path and a link per source, and says
- * nothing about where to search, which is the judgment `search-craft` carries.
- *
- * `conflict` and `refused` are offline stand-ins for two cases the live web
- * cannot be made to produce on demand: a scoped and an open search that
- * disagree, and a site that refuses access. Both stage from fixtures, and both
- * prove the body's rules once it is loaded rather than that a session searches.
+ * Three arms of one skill. `open` is a research question in a field the toolkit
+ * never touches, so a run can only scope its search to authorities it derives.
+ * `conflict` and `refused` are offline stand-ins for cases the live web cannot be made to produce.
  */
 export default scenario({
   config: {

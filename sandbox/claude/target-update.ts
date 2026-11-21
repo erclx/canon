@@ -21,11 +21,9 @@ function previousRelease(ctx: StageContext): string {
 }
 
 /**
- * Stages a target one release behind the toolkit: a project bullet on a rule
- * the sync must keep, and a stale copy of another it must restore. The stale
- * copy loses its H1 and takes a stamp hash over the edited bytes, so it reads
- * as untouched and behind rather than customized. Both rules are pinned by
- * path because the arms' expectations name them.
+ * Stages a target one release behind: a project bullet on a rule the sync must
+ * keep, and a stale copy of another it must restore, reading as untouched and
+ * behind rather than customized. Both rules are pinned by path.
  */
 function stageBehind(ctx: StageContext): void {
   for (const rule of [CUSTOMIZED_RULE, STALE_RULE]) {

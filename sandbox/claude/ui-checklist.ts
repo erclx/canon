@@ -1,14 +1,9 @@
 import { scenario } from '@/sandbox/scenario'
 
 /**
- * No project copy of the corpus, as in `claude/review-craft.ts`, so
- * `ui-checklist` falls back to the plugin's slug standard, and the branch name
- * below turns that into a checklist path `expect.toml` asserts exactly. The
- * checklist is the skill's whole output, so a run producing none fails.
- *
- * The `02-task-filter` fixture keeps the filter input mounted beside the empty
- * state, since unmounting it would strand a filtered user, and the skill would
- * review that defect instead of the change under test.
+ * No project copy of the corpus, so `ui-checklist` falls back to the plugin's
+ * slug standard and the branch name fixes the checklist path `expect.toml` asserts.
+ * The `02-task-filter` fixture keeps the filter input mounted beside the empty state.
  */
 export default scenario({
   config: {
@@ -24,8 +19,7 @@ export default scenario({
 
       ctx.git('checkout', '-b', 'feat/task-filter', '-q')
 
-      // `TaskList` gains states for a component test, a route for an end to end spec,
-      // and a visual change, all three needed for the skill to write a checklist.
+      // `TaskList` gains states, a route, and a visual change, all three needed for a checklist.
       ctx.fixtures('claude', 'ui-checklist', 'shared', '02-task-filter')
 
       ctx.git('add', '.')
