@@ -110,8 +110,7 @@ async function run(
   args: readonly string[],
   timeout: number,
 ): Promise<CommandResult> {
-  // A hook exports git's resolution variables, which beat both `-C` and the
-  // working directory `gh` resolves its repository through.
+  // A hook exports git's resolution variables, which beat both `-C` and the working directory.
   const result = await execa(command, [...args], {
     cwd,
     timeout,
@@ -199,16 +198,9 @@ interface Plan {
 }
 
 /**
- * Retires the fan-in members an integrator's merged pull request names: each
- * one's origin branch, its worktree, and its local branch.
- *
- * Merged means reachable from the integrator's merged head, since a squash
- * merge leaves no member an ancestor of the trunk. A commit landing on a member
- * afterward leaves its tip unreachable from that head. Origin and local are
- * judged apart, and the worktree takes the reclaim's reading with the members
- * as its merged answer, refusing a held, dirty, or current one as elsewhere.
- * Every input is read before any delete, and an unreadable one refuses the
- * run, for the reason `reclaimReport` states.
+ * Retires the fan-in members an integrator's merged pull request names: origin
+ * branch, worktree, and local branch each. Merged means reachable from the merged
+ * head, since a squash leaves no ancestry, and every input is read before a delete.
  */
 export async function retireMembers(
   pullRequest: number,
@@ -324,8 +316,7 @@ export async function retireMembers(
     return refused(reason, reading.detail, members)
   }
 
-  // With head-branch deletion on, the integrator's branch is gone from origin
-  // by now, and GitHub keeps this ref for every pull request it has opened.
+  // With head-branch deletion on, the integrator's branch is gone, and GitHub keeps this ref.
   const fetched = await git(root, [
     'fetch',
     '--quiet',
@@ -397,8 +388,7 @@ async function judge(branch: string, context: JudgeContext): Promise<Plan> {
   const { git, root, merged, dryRun, verdict } = context
   const go: Half = plain(dryRun ? 'would-delete' : 'deleted')
 
-  // Read from origin itself rather than the tracking ref, which holds only
-  // what the last fetch saw and misses a commit pushed since.
+  // Read from origin itself, since the tracking ref misses a commit pushed since the last fetch.
   const remote = await git(root, [
     'ls-remote',
     '--heads',
@@ -471,8 +461,7 @@ async function act(
 
   let origin = plan.origin
   if (origin.state === 'deleted' && plan.originTip !== null) {
-    // The lease names the tip judged above, so a commit pushed between the
-    // judgment and the push keeps the branch rather than going with it.
+    // The lease names the tip judged above, so a commit pushed since keeps the branch.
     const pushed = await git(root, [
       'push',
       '--quiet',

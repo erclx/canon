@@ -108,8 +108,7 @@ describe('reclaimReport', () => {
     expect(verdict.route).toBe('worktree')
   })
 
-  // This repository squash merges, so a merged branch is never an ancestor of
-  // main, and the pull request state is the only surface that answers.
+  // This repository squash merges, so only the pull request state answers for a merged branch.
   it('should report a merged branch reclaimable even though it sits ahead of main', async () => {
     const path = linked('wt-parser', 'feat/parser')
     execaSync(
@@ -291,13 +290,11 @@ describe('reclaimReport', () => {
     const verdict = verdictFor(report, ROOT)
     expect(verdict.reclaimable).toBe(false)
     expect(verdict.refusals).toContain('main-worktree')
-    // No removal shape reaches it, so a reader acting on the record is offered
-    // neither rather than the one that would break the checkout.
+    // No removal shape reaches it, so a reader is offered neither.
     expect(verdict.route).toBeNull()
   })
 
-  // Git removes the caller's own directory without complaint, and every later
-  // call scoped to it then fails, leaving the branches after it undeleted.
+  // Git removes the caller's own directory without complaint, failing every later scoped call.
   it('should refuse the linked worktree the reading is being run from', async () => {
     const path = linked('wt-parser', 'feat/parser')
 
@@ -312,8 +309,7 @@ describe('reclaimReport', () => {
     expect(verdict.refusals).toEqual(['current-worktree'])
   })
 
-  // The main worktree already refuses on its own, so a reading run from there
-  // names one reason rather than stacking a second that says the same thing.
+  // The main worktree already refuses on its own, so a reading from there names one reason.
   it('should not stack the current-worktree refusal onto the main worktree', async () => {
     const report = await reclaimReport({
       cwd: ROOT,
@@ -357,8 +353,7 @@ describe('reclaimReport', () => {
     expect(verdict.refusals).toContain('unreadable-worktree')
   })
 
-  // A directory deleted by hand and a failed status read both exit 128, so the
-  // real status read runs here, since separating them is what is tested.
+  // A hand-deleted directory and a failed status read both exit 128, so the real read runs here.
   it('should reclaim a worktree whose directory was already deleted by hand', async () => {
     const path = linked('wt-parser', 'feat/parser')
     rmSync(path, { recursive: true, force: true })
@@ -375,8 +370,7 @@ describe('reclaimReport', () => {
     expect(verdict.missing).toBe(true)
   })
 
-  // Reading a missing directory as clean must not clear anything else with it,
-  // so the merged check still decides and names its own refusal.
+  // Reading a missing directory as clean must not clear anything else, so the merged check decides.
   it('should still refuse a deleted directory whose branch never merged', async () => {
     const path = linked('wt-verdicts', 'docs/verdicts')
     rmSync(path, { recursive: true, force: true })
@@ -409,8 +403,7 @@ describe('reclaimReport', () => {
     ])
   })
 
-  // An unreadable merge state and a branch with no merged pull request give the
-  // same empty answer, and reading the first as the second is a false clean.
+  // An unreadable merge state and a branch with no merged pull request look alike, a false clean.
   it('should refuse the whole reading when the pull request state is unreadable', async () => {
     linked('wt-parser', 'feat/parser')
 
@@ -457,8 +450,7 @@ describe('reclaimReport', () => {
     expect(report.reason).toBe('sessions-unchecked')
   })
 
-  // One call for the whole repository rather than one per worktree, which is
-  // nine network round trips at the board this was measured against.
+  // One call for the whole repository rather than one per worktree, nine round trips measured.
   it('should read the pull request state once for every worktree', async () => {
     linked('wt-parser', 'feat/parser')
     linked('wt-verdicts', 'docs/verdicts')

@@ -32,10 +32,8 @@ export interface ClaimReport {
 export interface ClaimOptions {
   /**
    * The repository the claim is answered about, not merely where the caller
-   * stands. Every reading below is taken against it, so handing another
-   * project's path asks about that project, which is what lets a dispatcher in
-   * one repository see a branch held in another. Defaults to the caller's own
-   * directory, so a call omitting it answers exactly as it always has.
+   * stands, so handing another project's path lets a dispatcher see a branch
+   * held there. Defaults to the caller's own directory.
    */
   readonly cwd?: string
   readonly resolve?: () => Promise<SessionReport>
@@ -44,14 +42,9 @@ export interface ClaimOptions {
 }
 
 /**
- * Answers whether a branch is already claimed, composing the three readings no
- * one surface can answer alone: a worktree can outlive the session that made
- * it, a session can hold a branch before a worktree exists for it, and a branch
- * behind a merged pull request has neither while still being taken.
- *
- * The two readable flags stay separate because a caller told the roster failed
- * looks at the roster. Folding either into `claimed` would report the failure
- * as a clean "unclaimed", which is the answer this exists to stop giving.
+ * Answers whether a branch is already claimed, composing three readings: a
+ * worktree can outlive its session, a session can hold a branch before a
+ * worktree exists, and a merged pull request's branch has neither.
  */
 export async function checkClaim(
   branch: string,

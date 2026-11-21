@@ -149,10 +149,8 @@ export function isFrameTheme(theme: string): theme is FrameTheme {
 
 /**
  * Where a frame lands. The pass segment keeps a second pass at the same head
- * and box from replacing the image an earlier review comment shows, since a
- * branch-path link reads whatever the path holds now. The theme segment keeps
- * two shots of one box in one pass apart, and a frame without one keeps the
- * plain `box-<n>.png` form.
+ * from replacing the image an earlier review comment shows, since a branch-path
+ * link reads whatever the path holds now. The theme segment keeps shots apart.
  */
 export function framePath(
   number: number,
@@ -166,24 +164,18 @@ export function framePath(
 }
 
 /**
- * The embed link, by branch path rather than by commit. Every drop rewrites
- * the branch, so a commit-pinned link to another pull request's frame would
- * stop resolving once GitHub collects the commit, while a path link lives
- * exactly as long as its file. The blob form is the one `canon pr evidence`
- * embeds, which a private repository's browser can open where the raw host
- * serves nothing.
+ * The embed link, by branch path rather than by commit, since a commit-pinned
+ * link would stop resolving once GitHub collects the commit. It is the blob
+ * form `canon pr evidence` embeds, which a private repository's browser can open.
  */
 export function frameLink(repo: string, path: string): string {
   return `https://github.com/${repo}/blob/${FRAMES_BRANCH}/${path}?raw=true`
 }
 
 /**
- * The file-name slug of a `<page>/<frame>` address or a tracked
- * `canon/design/<surface>/<name>` path, or undefined when the
- * address would not round-trip. Each half must open on a letter or digit and
- * hold only letters, digits, dots, underscores, and dashes, and neither may
- * carry `--`, so the joined slug reads back as the same two names and a path
- * never gains a directory or escapes the pass folder.
+ * The file-name slug of a `<page>/<frame>` address or a tracked design path, or
+ * undefined when it would not round-trip: each half opens on a letter or digit,
+ * holds only `[A-Za-z0-9._-]`, and carries no `--`, so no path escapes the folder.
  */
 export function referenceSlug(address: string): string | undefined {
   const tracked = DESIGN_REFERENCE.exec(address)
@@ -249,10 +241,9 @@ export async function readFrame(path: string): Promise<Uint8Array | undefined> {
 }
 
 /**
- * Commits one frame onto the branch, creating the branch with a root
- * commit when it is missing. The ref only fast-forwards here, so a drop or a
- * second add landing between the read and the move fails the move, and the
- * add rebuilds on the tip that writer left.
+ * Commits one frame onto the branch, creating it with a root commit when
+ * missing. The ref only fast-forwards, so a drop or add landing between the read
+ * and the move fails the move, and the add rebuilds on the tip that writer left.
  */
 export async function pushFrame(
   api: FramesApi,
@@ -330,11 +321,9 @@ async function readFolders(
 }
 
 /**
- * Rewrites the branch without the named pull requests' folders, as one
- * root commit the ref is force-moved to. A plain delete commit would
- * keep every dropped image reachable through history. The rewrite builds from
- * the tip it reads, and a branch left empty is deleted rather than holding an
- * empty tree.
+ * Rewrites the branch without the named pull requests' folders, as one root
+ * commit the ref is force-moved to, since a plain delete commit would keep every
+ * dropped image reachable. A branch left empty is deleted.
  */
 async function rewriteWithout(
   api: FramesApi,
@@ -452,9 +441,8 @@ function touchedLegacy(result: DropResult): boolean {
 
 /**
  * Drops on the current branch, then on the legacy one. The legacy pass only
- * removes, and a refusal there never fails a drop the current branch already
- * finished, since a target that never held the legacy ref reads it as missing
- * and a token may be unable to read it at all.
+ * removes, and a refusal there never fails a drop the current branch finished,
+ * since a token may be unable to read the legacy ref at all.
  */
 export async function dropFramesWithLegacy(
   api: FramesApi,

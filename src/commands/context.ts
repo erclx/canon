@@ -163,8 +163,7 @@ function parseFolders(list: string | undefined): string[] | string {
 
   if (names.length === 0) return 'Empty --folder list. Pass at least one name.'
 
-  // `..` would resolve the audited folder above the project root, taking the
-  // scan and the citation pattern outside the tree the audit describes.
+  // `..` would resolve the folder above the project root, outside the audited tree.
   const invalid = names.filter((name) => !FOLDER_NAME.test(name))
   if (invalid.length > 0) {
     return `--folder takes folder names, not paths: ${invalid.join(', ')}`
@@ -182,8 +181,7 @@ async function runAudit(
   const gateOnly = opts.citationsOnly ?? false
   const widened = opts.gate ?? false
 
-  // `--citations-only` never measures the two findings `--gate` adds, so honoring
-  // both would exit 0 on a seed short a required section.
+  // `--citations-only` measures no `--gate` finding, so both would exit 0 on a bad seed.
   if (gateOnly && widened) {
     return refuse(
       'conflicting-options',
@@ -198,8 +196,7 @@ async function runAudit(
     return refuse('bad-folder-list', names, gateOnly, root, opts.json ?? false)
   }
 
-  // The root base is opt-in, so a bare run never audits a target's own root
-  // folder against a standard it never adopted.
+  // The root base is opt-in, so a bare run never audits a target's root folder.
   const named = opts.folder !== undefined
   const { folders, missing } = await resolveFolders(root, names, {
     canResolveAtRoot: named,
@@ -214,12 +211,10 @@ async function runAudit(
     )
   }
 
-  // A default folder a project does not carry stays silent. A name passed by
-  // hand that resolves nowhere is a typo, and is reported rather than passed.
+  // A missing default folder stays silent, and a hand-named one is a typo, reported.
   const unresolved = named ? missing : []
 
-  // The gate refuses a scope it could not build rather than exiting 0 on
-  // nothing measured.
+  // The gate refuses a scope it could not build rather than exiting 0 on nothing.
   const cited = presentNames(folders)
   if (gateOnly && cited.length === 0) {
     return refuse(
@@ -246,14 +241,12 @@ async function runAudit(
   const drift = gateOnly ? [] : await auditIndexes(folders)
   const sections = gateOnly ? [] : missingSections(root, folders, entries)
   const extras = gateOnly ? [] : extraSections(entries)
-  // `--citations-only` reads neither gate key, so a fault in one never fails the
-  // merge gate's citation stage.
+  // `--citations-only` reads neither gate key, so a fault never fails its stage.
   const keys = gateOnly
     ? { gated: null, gateLength: false, invalid: [] }
     : readGateKeys(root)
   const gatedPrefixes = resolveGatedPrefixes(keys.gated)
-  // Default prefixes read from the repository root, keeping a seed tree under its
-  // toolkit path. A declared list reads from the audit root, where its config is.
+  // Default prefixes read from the repository root, a declared list from the audit root.
   const top =
     gateOnly || keys.gated !== null ? root : await currentWorktreeRoot(root)
   const shape = gateOnly
@@ -272,8 +265,7 @@ async function runAudit(
   const coverage: CoverageReport | undefined = gateOnly
     ? undefined
     : measureCoverage(root, readRoots(root), folders)
-  // Absent under `--citations-only` and null when the project carries no
-  // record, since a run that never looked differs from nothing to look at.
+  // Absent when `--citations-only` never looked, null when the project has no record.
   const requirements = gateOnly ? undefined : await measureRequirements(root)
 
   if (gateOnly) {
@@ -312,8 +304,7 @@ async function runAudit(
           unresolved: citations.unresolved,
         },
         entries,
-        // Published rather than left to a consumer to derive from `entries`. Absent
-        // rather than empty under `--citations-only`, which measures no entry.
+        // Published rather than derived by a consumer, absent under `--citations-only`.
         length,
         missingSections: sections,
         extraSections: extras,
@@ -321,8 +312,7 @@ async function runAudit(
         indexDrift: drift,
         // Absent under `--citations-only`, which never measures it.
         coverage,
-        // Null is a project carrying no record, and absent is a run that never
-        // looked, which is `--citations-only`.
+        // Null is a project with no record, absent a run that never looked.
         requirements: gateOnly ? undefined : (requirements ?? null),
         // Absent under `--citations-only`, which reads neither gate key.
         gateKeyFaults: gateOnly ? undefined : gateKeyFaults,
@@ -331,16 +321,14 @@ async function runAudit(
           renderWidth: RENDER_WIDTH,
           provenanceFolder: PROVENANCE_FOLDER,
           requiredSections: REQUIRED_SECTIONS,
-          // Keyed on the audited folder name. The flat key above stays for a caller
-          // that read it first, since removing it would break that caller silently.
+          // The flat key above stays, since removing it would break a caller silently.
           requiredSectionsByFolder: REQUIRED_SECTIONS_BY_FOLDER,
           allowedSectionsByFolder: ALLOWED_SECTIONS_BY_FOLDER,
           retiredSectionsByFolder: RETIRED_SECTIONS_BY_FOLDER,
           gotchaCap: GOTCHA_CAP,
           layoutBulletCap: LAYOUT_BULLET_CAP,
           layoutParagraphCap: LAYOUT_PARAGRAPH_CAP,
-          // The resolved list: the project's declared `gated` key, or the
-          // toolkit's own prefixes where it declares none.
+          // The resolved list: the declared `gated` key, or the toolkit's own prefixes.
           shapeGatedFolders: gatedPrefixes,
           lengthGate: keys.gateLength,
         },
@@ -390,11 +378,9 @@ function refuse(
 }
 
 /**
- * Prints nothing when every path resolves.
- *
- * `--citations-only` is what the merge gate runs on every push, and it pipes
- * a stage's whole output into its own frame. A passing gate that printed
- * its frame would nest one inside the other on every contributor's push.
+ * Prints nothing when every path resolves, since `--citations-only` pipes a
+ * stage's whole output into its own frame and a passing gate that printed its
+ * frame would nest one inside the other on every push.
  */
 function reportGate(report: ScannedCitations): void {
   const count = report.unresolved.length
@@ -416,11 +402,8 @@ function reportGate(report: ScannedCitations): void {
 
 /**
  * Names the resolved path of every audited folder, plus the requested names
- * that resolved nowhere.
- *
- * The path is what says which base a name was taken from, which matters once a
- * name can resolve under `.claude/` or at the project root and a project may
- * carry both.
+ * that resolved nowhere, since the path says which base a name was taken from
+ * once a name can resolve under `.claude/` or at the project root.
  */
 function reportScope(
   folders: readonly AuditedFolder[],
@@ -442,12 +425,9 @@ function reportScope(
 type ScannedCitations = Extract<CitationReport, { kind: 'scanned' }>
 
 /**
- * States the reach before the count, for the reason the provenance report
- * states its own.
- *
- * A run auditing a folder at the project root builds no pattern, and a count of
- * zero followed by a line saying every path resolves is indistinguishable from
- * a corpus that cites nothing.
+ * States the reach before the count, as the provenance report does, since a
+ * run auditing a folder at the project root builds no pattern and a zero count
+ * reads the same as a corpus that cites nothing.
  */
 function reportCitations(
   report: ScannedCitations,
@@ -480,14 +460,9 @@ function reportCitations(
 }
 
 /**
- * Reports the references naming a sibling entry by bare filename.
- *
- * This prints beside the citation check rather than among the readability
- * measures, since the two read the same thing: one resolves a path a reference
- * spells and this one finds the references that spell none. The reach line
- * names the split folders rather than the governed folder alone, because a run
- * whose only context folder is flat measures nothing here and would otherwise
- * print the same clean line as a run that measured every split.
+ * Reports the references naming a sibling entry by bare filename. It prints
+ * beside the citation check, which reads the same thing, and its reach line
+ * names the split folders so a flat corpus does not print a clean line.
  */
 function reportReferenceForm(
   entries: readonly EntryReport[],
@@ -539,13 +514,9 @@ function reportReferenceForm(
 }
 
 /**
- * Names the path each finding belongs to, which is an entry in the folder named
- * under `.claude/`, and the folder itself in a domain split across one. States
- * the reach on every run for the reason the provenance report does.
- *
- * This prints ahead of the four readability measures because a missing section
- * asks whether the entry is the right shape at all, which precedes asking
- * whether it has grown too long.
+ * Names the path each finding belongs to, and states the reach on every run as
+ * the provenance report does. It prints ahead of the four readability measures
+ * because a missing section asks whether the entry is the right shape at all.
  */
 function reportSections(
   missing: readonly SectionFinding[],
@@ -713,12 +684,8 @@ function readCause(cause: LengthCause): string {
 
 /**
  * Names each entry past the checkpoint with the three questions the standard
- * asks of it, rather than a count a reader has to cross-reference by eye.
- *
- * The checkpoint is not a cap, so the legend says what the list is for. An
- * entry that answers all three and is still long is a correct outcome under a
- * standard stating there is no hard cap, and a run reporting success as a
- * smaller count would have adopted the number the standard declines.
+ * asks of it. The checkpoint is not a cap, and reporting success as a smaller
+ * count would adopt the number the standard declines.
  */
 function reportLength(
   over: readonly LengthFinding[],
@@ -780,16 +747,9 @@ function reportTables(entries: readonly EntryReport[]): void {
 }
 
 /**
- * Groups by entry rather than listing every marker.
- *
- * The two entries carrying most of a corpus's markers carry them a dozen at a
- * time, and a flat list of those buries the entries holding one. What a reader
- * acts on is which file to open, so the count sits beside the name and the
- * lines follow it.
- *
- * The reach is stated on every run, including the run where nothing is in
- * scope. A check that covered three folders and now covers one reads as quietly
- * missing things unless the report says which folder it measured.
+ * Groups by entry rather than listing every marker, since a reader acts on
+ * which file to open. The reach is stated on every run, even with nothing in
+ * scope, so a check that lost a folder does not read as quietly missing things.
  */
 function reportProvenance(
   entries: readonly EntryReport[],

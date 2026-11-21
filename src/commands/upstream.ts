@@ -336,8 +336,7 @@ async function readGap(
   const cached = readDueCache(root, installed, cursor, now)
   if (cached) return cached.gap
 
-  // The hook that calls this has a 10 second timeout, and a network that drops
-  // packets would otherwise hold every session start to it with nothing cached.
+  // The calling hook has a 10 second timeout, and a dropping network would hold every start to it.
   const walk = await walkReleases(
     cursor,
     githubPageFetcher(process.env, AbortSignal.timeout(READ_BUDGET_MS)),

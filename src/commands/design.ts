@@ -31,12 +31,10 @@ export function register(program: Command): void {
       ].join('\n'),
     )
     .action(() => {
-      // The guard below catches an installed package, not a second checkout with
-      // its own record, so both paths emit this after their own opener.
+      // The guard below misses a second checkout with its own record, so both emit this.
       const mismatch = checkoutMismatchWarning(process.cwd())
 
-      // `PROJECT_ROOT` is the package directory under a target's `node_modules`, and
-      // the committed record ships with no package, so its absence tells them apart.
+      // `PROJECT_ROOT` is the package dir under `node_modules`, which ships no committed record.
       if (!existsSync(join(PROJECT_ROOT, DESIGN_DOCUMENT))) {
         intro('Regenerate design source')
         if (mismatch !== undefined) logWarn(mismatch)

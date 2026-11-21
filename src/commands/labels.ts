@@ -367,8 +367,7 @@ async function runAudit(paths: string[], opts: AuditOptions): Promise<number> {
 
   intro('canon labels audit')
 
-  // The refusal reaches stderr in both modes and the record goes to stdout
-  // alone, so the terminal shows the refusal rather than silence.
+  // The refusal reaches stderr in both modes and the record goes to stdout alone.
   if (report.kind === 'refused') {
     logStep('Refused')
     logWarn(REFUSALS[report.reason])
@@ -402,8 +401,7 @@ async function runAudit(paths: string[], opts: AuditOptions): Promise<number> {
       : coverage.labels.join(', '),
   )
 
-  // Named rather than counted into the uncovered line, since a path decided
-  // against wants nothing done.
+  // Named rather than counted into the uncovered line, since a declined path wants nothing.
   logStep('Declined')
   if (coverage.declined.length === 0) {
     logInfo('no changed path is deliberately unlabelled')
@@ -493,8 +491,7 @@ async function runApply(number: string, opts: ApplyOptions): Promise<number> {
   const head = branch.exitCode === 0 ? branch.text().trim() : ''
   if (head === '') return refuse('no-branch')
 
-  // Binding runs ahead of the audit, every read, and every write, under --check
-  // and with no map too, so a number this branch does not own costs only the run.
+  // Binding runs first, even under --check and with no map, so a foreign number costs one run.
   const target = await gh(root, [
     'api',
     `repos/{owner}/{repo}/pulls/${number}`,
@@ -504,8 +501,7 @@ async function runApply(number: string, opts: ApplyOptions): Promise<number> {
   if (target === null) return refuse('gh-failed')
   if (target.trim() !== `${head} open`) return refuse('head-mismatch')
 
-  // An explicit --base asks for the git route. Otherwise a failed listing read
-  // refuses rather than falling back, since binding needed gh too.
+  // An explicit --base asks for the git route, and a failed listing otherwise refuses.
   let paths: string[] | undefined
   if (opts.base === undefined) {
     const listing = await gh(root, [
@@ -524,8 +520,7 @@ async function runApply(number: string, opts: ApplyOptions): Promise<number> {
     ...(paths !== undefined && { paths }),
   })
 
-  // A project declaring no map earns nothing and is labelled silently, which
-  // is an answer and exits clean rather than reading as a break.
+  // A project declaring no map is labelled silently, which is an answer and exits clean.
   if (report.kind === 'refused' && report.reason === 'no-map') {
     logStep('Labels')
     logInfo(REFUSALS['no-map'])
@@ -729,10 +724,9 @@ async function runSync(opts: SyncOptions): Promise<number> {
 }
 
 /**
- * Reads `--closes` as the issues the body must close. Undefined when the flag
- * is absent, which skips the check, and a message when the value is neither
- * `none` nor a comma list of numbers, since a guessed list would grade the
- * body against the wrong issues.
+ * Reads `--closes` as the issues the body must close. Undefined skips the
+ * check, and a message answers a value that is neither `none` nor a comma list
+ * of numbers, since a guess would grade the body against the wrong issues.
  */
 function parseCloses(value: string | undefined): number[] | string | undefined {
   if (value === undefined) return undefined
@@ -780,8 +774,7 @@ async function runScan(opts: ScanOptions): Promise<number> {
   }
 
   const result = scanPhaseLabels(resolved)
-  // A scan given no title, whatever produced that absence, has nothing to
-  // grade and would otherwise fail as `structure` for the wrong reason.
+  // A scan with no title has nothing to grade and would fail as `structure` wrongly.
   const titleFormat =
     resolved.title !== '' ? checkTitleFormat(resolved.title) : undefined
 
@@ -828,8 +821,7 @@ async function runScan(opts: ScanOptions): Promise<number> {
 
   const titleFormatIssues = titleFormat?.issues ?? []
 
-  // A review, a release-please body, and a scan with no title each lack the
-  // closed section list, so none of the three is graded against it.
+  // A review, a release-please body, and a titleless scan lack the closed section list.
   const sectionsChecked =
     resolved.source === 'pull-request' &&
     resolved.title !== '' &&
@@ -868,8 +860,7 @@ async function runScan(opts: ScanOptions): Promise<number> {
     }
   }
 
-  // A post's density never fails the scan, since the review post hook denies on
-  // exit 2 and would block every dense review or reply.
+  // A post's density never fails the scan, since the review post hook denies on exit 2.
   const post = !sectionsChecked && isPost(resolved.body)
   const density = sectionsChecked
     ? bodyDensity(resolved.body)

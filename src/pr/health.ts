@@ -9,10 +9,8 @@ export const LOCAL_CONFIG_REL = join('canon', 'config', 'local.toml')
 
 /**
  * The health paths a project declared, with the folders whose listeners skip
- * them. `none` is an absent file or an empty `health = []`. `invalid` is a
- * declaration that exists and cannot be used, which refuses rather than
- * falling back to the page-only probe, since that fallback is the failure the
- * declaration exists to catch.
+ * them. `none` is an absent file or an empty `health = []`, and `invalid` exists
+ * but cannot be used, so it refuses rather than fall back to the page-only probe.
  */
 export type HealthDeclaration =
   | {
@@ -38,9 +36,8 @@ function isLocalPath(entry: unknown): entry is string {
 
 /**
  * A repository-relative folder as whole segments, or undefined when the entry
- * is not one. Absolute paths, drive letters, backslashes, and `..` refuse,
- * since each would name a place outside the repository. A leading `./` and
- * trailing slashes are dropped so the match compares segments alone.
+ * is not one. Absolute paths, drive letters, backslashes, and `..` refuse as
+ * outside the repository, and `./` and trailing slashes drop so segments compare.
  */
 function toFolder(entry: unknown): string | undefined {
   if (typeof entry !== 'string') return undefined

@@ -153,8 +153,7 @@ describe('tooling sync write authorization', () => {
 })
 
 describe('tooling sync and diff with no stack', () => {
-  // The picker stands in for a required argument, so a headless call has to
-  // refuse rather than lay the catalog's first stack over the target.
+  // The picker stands in for a required argument, so a headless call has to refuse.
   const bare = (verb: 'diff' | 'sync', args: readonly string[]): Run => {
     const run = spawnSync('bun', [CLI, 'tooling', verb, ...args], {
       cwd: target,
@@ -539,8 +538,7 @@ describe('tooling sync and inject over a registry that refuses the install', () 
 describe('tooling sync --write hold', () => {
   const OLDER_GOLDEN = '{ "older": "golden" }\n'
 
-  // A record with a chain and no hashes is what every target synced before
-  // hashes existed carries, so the local edit reads unattributed.
+  // A record with a chain and no hashes predates hashes, so the local edit reads unattributed.
   beforeEach(() => {
     mkdirSync(join(target, 'canon', 'config'), { recursive: true })
     writeFileSync(

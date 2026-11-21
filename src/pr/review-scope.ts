@@ -1,14 +1,7 @@
 /**
- * The last state a review pass covered, read off the pass's own marker rather
- * than off the fields GitHub stamps when a review is submitted.
- *
- * `commit.oid` names whatever the pull request head was at the instant the
- * review was submitted, not the commit the session read. A push landing between
- * the read and the post moves that stamp onto a commit nobody reviewed, and the
- * next pass then scopes its delta past work no reader has seen. `submittedAt`
- * carries the same defect on the time axis. `review-pr` therefore writes the
- * commit it read and the instant it read it into the body itself, and this
- * module is the one place that marker is parsed.
+ * The last state a review pass covered, read off the pass's own marker, since
+ * GitHub's `commit.oid` and `submittedAt` name the instant of the post and a
+ * push between read and post would hide work. This module parses that marker.
  */
 
 /** The two headings `review-pr` posts a pass under. */
@@ -62,12 +55,9 @@ export interface ReviewListing {
 }
 
 /**
- * The marker `review-pr` appends as the last line of every body it posts.
- *
- * The sha is bounded at git's own abbreviation range rather than pinned to 40,
- * since an abbreviated sha still names a commit. A whole-line anchor stops the
- * inline form, but a marker shown alone in a fenced block matches it too, so
- * position separates the two, which is why `markerOf` reads one line.
+ * The marker `review-pr` appends as the last line of every body it posts. The
+ * sha is bounded at git's abbreviation range, not pinned to 40, and a fenced
+ * marker matches too, so position separates them and `markerOf` reads one line.
  */
 const MARKER =
   /^<!--\s*review-pr:\s*commit=([0-9a-f]{7,40})\s+read-at=(\S+)\s*-->$/
@@ -82,11 +72,8 @@ const ISO_8601 =
 
 /**
  * The heading a body opens with, or undefined when it opens with anything else.
- *
- * Matched for equality on the first line alone. A prefix test also reaches
- * `## Review response`, which belongs to the reply family and would scope a
- * pass to whatever commit a worker's answer carried. The `\r` trim covers a
- * body composed in the GitHub web editor, which stores CRLF.
+ * Matched for equality on the first line, since a prefix test also reaches
+ * `## Review response`. The `\r` trim covers CRLF from the GitHub web editor.
  */
 function headingOf(body: string): ReviewHeading | undefined {
   const first = (body.split('\n')[0] ?? '').replace(/\r$/, '')
@@ -95,13 +82,8 @@ function headingOf(body: string): ReviewHeading | undefined {
 
 /**
  * The marker a body carries, or undefined when it carries none this reader
- * trusts.
- *
- * The last non-empty line and no other, since a search would read a marker the
- * body was displaying in a fenced block as one it claims, and hand the next
- * reader a covered commit taken from an illustration. Step 4 of `review-pr`
- * puts the marker on the last line of every body it writes, the `PUT` rewrite
- * included, and trailing blank lines are skipped.
+ * trusts. Only the last non-empty line counts, since a search would take a
+ * marker shown in a fenced block as claimed, and `review-pr` writes it last.
  */
 function markerOf(
   body: string,
@@ -190,11 +172,9 @@ function lastLine(body: string): string | undefined {
 }
 
 /**
- * Resolves the newest UI verdict and the head it covered.
- *
- * Read off `reviews` like the code review family, since `review-ui` posts each
- * verdict as a pull request review. The first line is matched for equality so
- * `## UI review closed` is never taken for the open heading by prefix.
+ * Resolves the newest UI verdict and the head it covered, read off `reviews`
+ * like the code family, since `review-ui` posts each verdict as a review. The
+ * first line is matched for equality so a closed heading never reads as open.
  */
 export function resolveUiScope(listing: ReviewListing): UiScope {
   let newest: { heading: UiHeading; row: ReviewRow } | undefined
@@ -232,8 +212,7 @@ export function resolveUiScope(listing: ReviewListing): UiScope {
 /**
  * The newest code pass and the newest UI pass, each only when its own marker
  * closes it, skipping any pass the operator dismissed. A body with no pass
- * heading never stands, and neither does an older pass a newer one replaced,
- * so a pass speaks only for the head it read.
+ * heading never stands, nor does an older pass a newer one replaced.
  */
 export function standingPasses(reviews: readonly ReviewRow[]): ReviewRow[] {
   let code: ReviewRow | undefined
@@ -264,11 +243,9 @@ export function coversHead(commit: string, head: string): boolean {
 }
 
 /**
- * Resolves what the newest review pass covered.
- *
- * The newest pass rather than the newest marker: a thread whose latest pass
- * predates this mechanism reads through the fallback, and reaching back to an
- * older marked pass would report a commit a later pass has already moved past.
+ * Resolves what the newest review pass covered, the newest pass rather than the
+ * newest marker: a thread whose latest pass predates the mechanism reads through
+ * the fallback, and an older marked pass would report a commit since passed.
  */
 export function resolveReviewScope(listing: ReviewListing): ReviewScope {
   let newest: { heading: ReviewHeading; row: ReviewRow } | undefined

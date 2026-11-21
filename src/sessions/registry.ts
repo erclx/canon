@@ -3,11 +3,9 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 
 /**
- * One session's own record of itself, as the client writes it.
- *
- * Only the fields this domain reads are declared. The client writes several
- * more, and naming them here would put a second copy of its schema in a
- * repository that does not own it.
+ * One session's own record of itself, as the client writes it. Only the fields
+ * this domain reads are declared, since naming the rest would put a second copy
+ * of the client's schema in a repository that does not own it.
  */
 export interface SessionRecord {
   readonly pid: number
@@ -22,20 +20,15 @@ export interface SessionRecord {
   readonly kind: string | undefined
   readonly status: string | undefined
   /**
-   * The epoch millisecond the client last changed `status`. Measured against
-   * the live registry, 23 of 341 usable records carry it, and the one record
-   * that has ever carried `status: "waiting"` is not among them, so its
-   * absence tracks a client version rather than a record's age alone.
-   * Declared here rather than read opportunistically off the parsed object,
-   * since this file is what states what the domain reads and an undeclared
-   * field read anyway is the drift this domain exists downstream of.
+   * The epoch millisecond the client last changed `status`, carried by 23 of 341
+   * usable records measured, so its absence tracks a client version. Declared
+   * here, since an undeclared field read anyway is the drift this domain follows.
    */
   readonly statusUpdatedAt: number | undefined
   /**
    * The epoch millisecond the client last wrote the record at all, a coarser
-   * stamp than `statusUpdatedAt` that a client writes whether or not it also
-   * stamps the status change itself. Declared as the fallback dwell source
-   * for a record predating the narrower field, per the same reasoning above.
+   * stamp than `statusUpdatedAt`, declared as the fallback dwell source for a
+   * record predating the narrower field.
    */
   readonly updatedAt: number | undefined
   readonly startedAt: number | undefined
@@ -60,11 +53,8 @@ export interface SessionRecord {
 
 /**
  * Resolves the client's configuration directory, which holds both the session
- * registry and the projects folder a transcript lives in.
- *
- * `CLAUDE_CONFIG_DIR` comes first because a client honouring it writes its
- * records nowhere near the home directory, and a read that ignored it would
- * report an empty roster on a machine running sessions.
+ * registry and the projects folder a transcript lives in. `CLAUDE_CONFIG_DIR`
+ * comes first, since a read ignoring it would report an empty roster.
  */
 export function claudeConfigDir(): string {
   const configured = process.env.CLAUDE_CONFIG_DIR
@@ -80,10 +70,8 @@ export function registryDir(): string {
 
 /**
  * Fields whose absence leaves a row unable to answer the question asked of it.
- *
- * The pid has to be positive rather than merely numeric. Signal zero addresses
- * the caller's own process group rather than a process, so a record carrying
- * zero would answer the liveness probe and enter the roster as a live session.
+ * The pid has to be positive, since signal zero addresses the caller's own
+ * process group and a zero record would enter the roster as a live session.
  */
 function isUsable(value: Partial<SessionRecord>): value is SessionRecord {
   return (
@@ -98,11 +86,9 @@ function isUsable(value: Partial<SessionRecord>): value is SessionRecord {
 }
 
 /**
- * An absent folder and an empty one are separate answers.
- *
- * The first means no client ever wrote a record here, so the read never ran and
- * a roster of none would report a machine with no sessions when the truth is a
- * lookup that failed. The second is a machine whose sessions have all ended.
+ * An absent folder and an empty one are separate answers. The first means no
+ * client ever wrote a record here, so a roster of none would report no sessions
+ * when a lookup failed, and the second is a machine whose sessions all ended.
  */
 export type Registry =
   | { readonly kind: 'absent'; readonly dir: string }
@@ -113,13 +99,9 @@ export type Registry =
     }
 
 /**
- * Reads every session record in the folder, newest first.
- *
- * A file that does not parse, or that parses without the fields a row is built
- * from, is dropped rather than reported. The folder accumulates a record per
- * session and is never pruned, so it holds thousands of entries from clients
- * spanning many versions, and a finding per stale shape would bury the live
- * sessions this exists to name.
+ * Reads every session record in the folder, newest first. A file that does not
+ * parse or lacks the fields a row is built from is dropped rather than reported,
+ * since the unpruned folder holds thousands of stale shapes that would bury live sessions.
  */
 export function readRegistry(dir: string = registryDir()): Registry {
   let names: string[]

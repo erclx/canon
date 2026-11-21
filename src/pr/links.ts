@@ -58,16 +58,9 @@ interface Edit {
 }
 
 /**
- * Writes each code span in `## Key changes` that names a changed file as a link
- * to that file's diff, keeping the span as the label.
- *
- * Only an exact changed path is linked, since a link to a guessed row is worse
- * than none. A span that is the whole label of an existing diff link has its
- * destination rewritten, which clears a wrong anchor. A span elsewhere inside a
- * link's brackets is left alone, so the rewrite stays idempotent.
- *
- * `filesUrl` is the pull request's `/files` address, absolute because the body
- * becomes the squash commit message, where a relative link resolves nowhere.
+ * Writes each code span in `## Key changes` naming a changed file as a link to
+ * its diff, only for an exact path, rewriting a stale destination and leaving a
+ * span inside other brackets, so it is idempotent. `filesUrl` is absolute.
  */
 export function linkKeyChanges(
   body: string,
@@ -131,11 +124,8 @@ const DIFF_LINK = /\[(`+)([^`]+)\1\]\([^)\s]*#(diff-[0-9a-f]{64})\)/g
 
 /**
  * Every Key changes link whose label is a changed path and whose anchor hashes
- * another path.
- *
- * A label that is no changed path, such as a bare file name or a function, is
- * left unjudged: it can open the right file under a spelling this cannot map
- * back to a row, and an accusation needs the row.
+ * another path. A label that is no changed path is left unjudged, since it can
+ * open the right file under a spelling this cannot map to a row.
  */
 export function findMislinked(
   body: string,

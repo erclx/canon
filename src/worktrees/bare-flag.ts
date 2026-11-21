@@ -37,13 +37,8 @@ const skipped = (reason: BareFlagSkip): BareFlagRecord => ({
 
 /**
  * Repairs `core.bare`, which Claude Code's worktree entry leaves set in the
- * shared config and nothing restores.
- *
- * The flag strands the main worktree and breaks the reads that scope a
- * verification run, so the gate runs this ahead of every stage, with the hook
- * variables dropped so the named root is the one read and written. A
- * genuinely bare repository has no `.git` directory, so its common dir fails
- * the basename test and keeps its flag.
+ * shared config, stranding the main worktree. The gate runs this ahead of every
+ * stage with hook variables dropped, and a truly bare repository keeps its flag.
  */
 export async function repairBareFlag(root: string): Promise<BareFlagRecord> {
   const git = (...args: string[]) =>

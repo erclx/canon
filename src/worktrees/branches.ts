@@ -43,11 +43,9 @@ const TRUNKS = new Set(['main', 'master'])
 type Containment = 'contained' | 'outside' | 'unreadable'
 
 /**
- * Lists every local branch with its tip, or says the listing failed.
- *
- * `lstrip=2` rather than `short`, since `short` abbreviates a name that is
- * ambiguous with a tag or a remote ref and the delete would then name a
- * different ref than the one judged.
+ * Lists every local branch with its tip, or says the listing failed. `lstrip=2`
+ * rather than `short`, since `short` abbreviates a name ambiguous with a tag or
+ * remote ref and the delete would name a different ref than the one judged.
  */
 async function localBranches(
   cwd: string,
@@ -86,11 +84,9 @@ async function remoteTrunk(cwd: string): Promise<string | null> {
 }
 
 /**
- * Whether `tip` is contained in `head`.
- *
- * `--is-ancestor` exits 1 for "no" and 128 when either object is absent, and
- * only the first is an answer. Reading 128 as "no" is safe but misnames the
- * reason, and reading it as "yes" deletes a branch on a head nobody could see.
+ * Whether `tip` is contained in `head`. `--is-ancestor` exits 1 for "no" and 128
+ * when either object is absent, and only the first is an answer, since reading
+ * 128 as "yes" deletes a branch on a head nobody could see.
  */
 async function containment(
   cwd: string,
@@ -123,8 +119,7 @@ async function verdict(
   if (merged.length === 0) {
     refusals.push('no-merged-pull-request')
   } else {
-    // Every merged head for the name, since a name merged twice can match the
-    // older pull request while its tip moved on past the newer one.
+    // Every merged head for the name, since a name merged twice can match the older pull request.
     const answers = await Promise.all(
       merged.map((request) => containment(cwd, tip, request.headOid)),
     )
@@ -144,16 +139,9 @@ async function verdict(
 }
 
 /**
- * Reports which local branches no worktree holds are safe to delete.
- *
- * Safe means the tip is contained in the head of a merged pull request for
- * that name, so every commit on the branch reached the remote under a merge.
- * Containment rather than a matching name or number, since a reused name
- * carrying a commit past its merged head would otherwise lose that commit, and
- * rather than ancestry to the trunk, which a squash merge never produces.
- *
- * A listing that fails refuses the whole reading, since it answers with the
- * same empty list as a repository with nothing to delete.
+ * Reports which local branches no worktree holds are safe to delete, meaning the
+ * tip is contained in a merged pull request's head, since a reused name would
+ * lose a commit and a squash merge makes no ancestry. A failed listing refuses.
  */
 export async function branchReport(input: BranchInput): Promise<BranchReport> {
   const [listing, remote] = await Promise.all([

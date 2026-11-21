@@ -12,9 +12,8 @@ const RUN_TIMEOUT_MS = 30_000
 
 /**
  * Spawns the CLI rather than importing the action, because the refusal reports
- * through `process.exitCode` and an in-process call would set it on the test
- * runner. The refusal runs ahead of every other check and returns before the
- * dynamic import, so no case here resolves a browser.
+ * through `process.exitCode`, which an in-process call would set on the runner.
+ * The refusal returns before the dynamic import, so no case resolves a browser.
  */
 async function runCapture(args: string[]): Promise<{
   readonly exitCode: number
@@ -34,11 +33,9 @@ async function runCapture(args: string[]): Promise<{
 }
 
 /**
- * The URL-source test below drives a real headless chromium through the
- * spawned CLI. `verify.yml` installs no browser, so this mirrors the
- * `hasBrowser` guard `src/driver/probes/focus.test.ts` and its siblings carry:
- * skip there rather than fail, since a green run on that job is not evidence
- * this passed.
+ * The URL-source test drives a real headless chromium, and `verify.yml`
+ * installs no browser, so this skips rather than fails when none resolves, as
+ * `src/driver/probes/focus.test.ts` does. A green run there proves nothing.
  */
 async function browserAvailable(): Promise<boolean> {
   const { chromium } = await import('playwright-core')
@@ -209,8 +206,7 @@ describe('canon capture', () => {
   )
 
   describe('with a color scheme', () => {
-    // Each theme sets a different width, so the PNG's width reads which theme
-    // rendered without decoding a pixel.
+    // Each theme sets a different width, so the PNG's width reads the theme.
     async function captureWidth(
       css: string,
       args: readonly string[],

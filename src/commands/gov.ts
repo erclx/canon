@@ -87,11 +87,8 @@ import {
 
 /**
  * Where the rules payload lands, resolved per target rather than once at import.
- *
- * The record root a project uses is a fact about that project, and this command
- * writes into a target the caller named, so a value computed here against this
- * process's own tree would point every target at whichever root the toolkit
- * happens to hold.
+ * The record root is a fact about the project, and a value computed against
+ * this process's own tree would point every target at the toolkit's root.
  */
 function payloadRel(root: string): string {
   return creationRel(root, SCRATCH, 'gov', 'rules.md')
@@ -692,8 +689,7 @@ async function runAudit(
   const changed = opts.touched
     ? await collectChangedFiles(commandRunner(root))
     : undefined
-  // An unscoped set lists nothing, and reading it as every file would owe a
-  // ledger of every core rule on a branch that touched none of them.
+  // An unscoped set lists nothing, and reading it as every file owes a ledger of every rule.
   const touched = changed?.scoped ? changed.files : []
   const report = await readRuleAudit(root, paths, { touched })
   const emitJson = opts.json ?? false
@@ -875,8 +871,7 @@ function reportRestated(
 ): void {
   intro('canon gov restated')
 
-  // A count of what matched reads as a verdict on the repository unless the run
-  // also says how wide the corpus behind it was.
+  // A count of what matched reads as a verdict unless the run says how wide the corpus was.
   logStep('Corpus')
   logInfo(
     `${report.corpus.instructions} always-loaded instruction(s) and ${report.corpus.rules} rule file(s) against ${report.corpus.candidates} statement(s) from the seed, ${report.corpus.bodies} skill body/bodies, and every rule again, in ${root}`,
@@ -885,8 +880,7 @@ function reportRestated(
     `matched on ${report.matcher.anchors} weighted anchor(s), dropping any token in more than ${report.matcher.common} statements`,
   )
 
-  // Named rather than counted. A polarity split is the only class claiming a
-  // defect, and a reader weighing one has to reach both surfaces.
+  // Named rather than counted, since a polarity split is the only class claiming a defect.
   logStep(
     report.counts.contradictions === 0 ? 'No contradiction' : 'Contradictions',
   )
@@ -914,10 +908,9 @@ function reportRestated(
 }
 
 /**
- * Reports and never gates, matching `test-order` above. The finding count moves
- * the exit code with nothing wiring it into a push, since a value sweep
- * over-reports by construction and gating a measure carrying a known
- * false-positive class is what teaches contributors to route around a stage.
+ * Reports and never gates, matching `test-order` above. A value sweep
+ * over-reports by construction, and gating a measure with a known false-positive
+ * class teaches contributors to route around a stage.
  */
 async function runSuperseded(
   superseded: string,
@@ -954,9 +947,8 @@ async function runSuperseded(
 
 /**
  * Gates, unlike `superseded` and `test-order` above. The classes where a path
- * reaching nothing is correct are separated inside the sweep, which is what
- * leaves the remainder a defect with no judgment in it, so a finding fails the
- * push rather than asking a reader to weigh it.
+ * reaching nothing is correct are separated inside the sweep, so a finding is a
+ * defect with no judgment in it and fails the push.
  */
 async function runCitations(opts: CitationsOptions): Promise<number> {
   const root = resolve(opts.root ?? process.cwd())
@@ -1019,11 +1011,9 @@ function reportExcused(
 }
 
 /**
- * Names the corpus on every run, clean or not.
- *
- * A section reporting that every glob resolves, over a corpus the reader
- * assumes is both of them, says the shipped rules were checked and they were
- * not. The scope is the finding here as much as the count is.
+ * Names the corpus on every run, clean or not, since a section reporting that
+ * every glob resolves over a corpus the reader assumes is both of them says the
+ * shipped rules were checked when they were not.
  */
 function reportGlobs(
   report: Extract<CitationReport, { kind: 'measured' }>,
@@ -1115,10 +1105,9 @@ function describeHit(hit: SupersededHit): string {
 }
 
 /**
- * Named separately from the literal hits rather than counted in with them. A
- * templated hit is a wider match on a shorter string, so a reader weighing one
- * is weighing a different question, and the section is where the forms it still
- * cannot read are stated.
+ * Named separately from the literal hits, since a templated hit is a wider
+ * match on a shorter string and a reader weighs a different question. The
+ * section states the forms it still cannot read.
  */
 function reportTemplated(
   report: Extract<SupersededReport, { kind: 'measured' }>,
@@ -1159,8 +1148,7 @@ function reportSuperseded(
 
   const literal = report.findings.filter((hit) => hit.match === 'literal')
 
-  // Named for the kind rather than a verdict, since `Clean` over the literal half
-  // would read as a clean tree when the templated half carries every finding.
+  // Named for the kind, since `Clean` over the literal half hides the templated findings.
   logStep('Literal')
   if (literal.length === 0) {
     logInfo('nothing in the corpus asserts the superseded value')
@@ -1170,8 +1158,7 @@ function reportSuperseded(
 
   reportTemplated(report)
 
-  // Named rather than counted. A muted line is a judgment someone recorded,
-  // and a reader weighing this report has to be able to reach the reason.
+  // Named rather than counted, since a reader weighing a muted line has to reach the reason.
   logStep('Exempt')
   if (report.exempt.length === 0) {
     logInfo('no line carries a marker')
@@ -1179,8 +1166,7 @@ function reportSuperseded(
     for (const hit of report.exempt) logInfo(describeHit(hit))
   }
 
-  // A count of what passed reads as a verdict on the repository unless the run
-  // also says how much of it the corpus left out.
+  // A pass count reads as a verdict unless the run says how much the corpus left out.
   logStep('Corpus')
   logInfo(
     `${report.files} file(s) opened of ${report.listed} listed, ${report.skipped} skipped as binary or unreadable`,
@@ -1190,18 +1176,16 @@ function reportSuperseded(
 }
 
 /**
- * Reports and never gates, so the finding count moves the exit code without
- * anything wiring it into a push. `canon tasks validate` set that shape: a
- * measure carrying a known false-positive class is what forces contributors to
- * route around a stage, and the unclassified bucket here is that class.
+ * Reports and never gates, as `canon tasks validate` does, so the finding count
+ * moves the exit code with nothing wiring it into a push. The unclassified
+ * bucket is a known false-positive class, which forces routing around a stage.
  */
 function runTestOrder(opts: TestOrderOptions): number {
   const root = resolve(opts.root ?? process.cwd())
   const report = readTestOrder(root, { base: opts.base })
   const emitJson = opts.json ?? false
 
-  // The refusal reaches stderr in both modes and the record goes to stdout
-  // alone, the split `docs/agents/output-shape.md` fixes.
+  // The refusal reaches stderr and the record stdout alone, per `docs/agents/output-shape.md`.
   if (report.kind === 'unreadable') {
     intro('canon gov test-order')
     logStep('Refused')
@@ -1250,8 +1234,7 @@ function reportTestOrder(
   logStep('Satisfied')
   logInfo(`${report.satisfied.length} pair(s) whose test came first`)
 
-  // The unclassified rows warn and move no exit code, and are named rather than
-  // counted into the clean line, so no pass is claimed over an unread change.
+  // Unclassified rows warn and are named, so no pass is claimed over an unread change.
   logStep('Unclassified')
   if (report.unclassified.length === 0) {
     logInfo('every changed module paired')
@@ -1262,8 +1245,7 @@ function reportTestOrder(
     for (const record of report.unclassified) logWarn(describePair(record))
   }
 
-  // Coverage is narrower than the rule, and a report that did not say so would
-  // read as a verdict over every behavior in the range.
+  // Coverage is narrower than the rule, so the report must not read as a verdict on the range.
   logStep('Read past')
   logInfo(
     `${report.ignored.length} path(s) outside ${report.scope.extensions.join(', ')}`,
@@ -1274,9 +1256,8 @@ function reportTestOrder(
 
 /**
  * Reports and never gates, matching the two sweeps above. The false-positive
- * rate here is unmeasured before a first run against a real corpus, and
- * gating a measure with an unknown false-positive rate is what teaches a
- * contributor to route around the stage.
+ * rate is unmeasured before a first run against a real corpus, and gating an
+ * unknown rate teaches a contributor to route around the stage.
  */
 async function runCounts(opts: CountsOptions): Promise<number> {
   const root = resolve(opts.root ?? process.cwd())
@@ -1355,19 +1336,12 @@ function selectedSections(opts: ListOptions): {
 }
 
 /**
- * `JSON.stringify` replaces a `printf` that interpolated a description into a
- * JSON string literal through a hand-rolled escaper, so a rule carrying a
- * character that escaper missed emitted output a consuming skill could not
- * parse.
- *
- * `unreferenced` rides the same payload rather than taking a flag of its own.
- * The verify stage and a skill asking what a stack leaves out read one call,
- * and the key is additive, so a consumer reading `stacks` or `rules` is
- * untouched by it.
+ * `JSON.stringify` replaces a hand-rolled escaper that missed a character and
+ * emitted output a consuming skill could not parse. `unreferenced` rides the
+ * same payload, as an additive key a reader of `stacks` or `rules` never sees.
  */
 function runList(opts: ListOptions): number {
-  // A frame-interior line, so it goes out after `intro` on the framed path and
-  // bare on the `--json` path, which returns first and opens no frame.
+  // A frame-interior line: after `intro` when framed, bare on the `--json` path.
   const mismatch = checkoutMismatchWarning(process.cwd())
   const catalog = buildGovCatalog(PROJECT_ROOT)
   const sections = selectedSections(opts)
@@ -1461,8 +1435,7 @@ async function runRegen(
   opts: RegenOptions,
   rootPassed: boolean,
 ): Promise<number> {
-  // Only the default root can silently regenerate a checkout nobody stands in,
-  // and the value alone cannot tell, since the flag carries a default.
+  // Only the default root can silently regenerate a checkout nobody stands in.
   if (!rootPassed) {
     const mismatch = checkoutMismatchWarning(process.cwd())
     if (mismatch !== undefined) logWarn(mismatch)
@@ -1491,9 +1464,8 @@ function displayPath(target: string, rel: string): string {
 
 /**
  * Refuses rather than picking. `select_option` returned `options[0]` with no
- * terminal to answer it, so a headless `canon gov install` with no stack
- * installed whichever stack sorted first, measured as 26 astro rules into an
- * empty directory. Every documented agent path already passes the argument.
+ * terminal to answer it, so a headless install with no stack installed
+ * whichever sorted first, measured as 26 astro rules into an empty directory.
  */
 async function chooseStack(root: string): Promise<string | number> {
   const stacks = listGovStacks(root)
@@ -1619,10 +1591,8 @@ async function confirmInstall(
 
 /**
  * Whether `--add` runs with no stack under it. Commander fills the first
- * positional before the second, so `--add a,b ../my-app` arrives with the
- * target in `stack` and the default `.` in `target`. A first positional that
- * names a stack keeps today's meaning, so a folder named `node` reads as the
- * stack, and `.` or a path carrying a slash is how a caller forces the target.
+ * positional first, so `--add a,b ../my-app` puts the target in `stack`. A name
+ * that is a stack stays one, and `.` or a slash forces the target.
  */
 function isAddWithoutStack(stack: string | undefined, target: string): boolean {
   if (stack === undefined) return true

@@ -17,8 +17,7 @@ describe('canon pr frames', () => {
   let bin: string
   let callLog: string
 
-  // A gh that answers the frames branch as missing and refuses every write with
-  // a read-only token's status, logging each call.
+  // A gh answering the frames branch as missing and refusing every write with a read-only status.
   function writeReadOnlyGh(): void {
     mkdirSync(bin, { recursive: true })
     writeFileSync(

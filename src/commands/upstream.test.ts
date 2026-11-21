@@ -138,8 +138,7 @@ describe('canon upstream', () => {
     })
 
     it('should report not due when the cursor is ahead of the install', async () => {
-      // A stub `claude`, so the case pins the version compare rather than
-      // whichever binary the machine carries, or none.
+      // A stub `claude`, so the case pins the version compare, not the machine's binary.
       const bin = join(root, 'bin')
       await mkdir(bin)
       const stub = join(bin, 'claude')

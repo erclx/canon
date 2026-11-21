@@ -40,8 +40,7 @@ function registeredFlags(command: Command): Set<string> {
 
 // Resolves the longest prefix of the cited words that names a command. A head
 // naming no command is skipped, since a migration page cites retired verbs on
-// purpose, and a flag cited on a group is skipped, since a group's flags are
-// its leaves'.
+// purpose, and a flag cited on a group is skipped too.
 function unregisteredFlags(text: string, program: Command): string[] {
   const findings: string[] = []
   for (const [, invocation] of text.matchAll(/`(canon [a-z][^`]*)`/g)) {

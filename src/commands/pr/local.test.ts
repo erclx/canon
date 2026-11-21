@@ -72,8 +72,7 @@ describe('canon pr local', () => {
     rmSync(tempDir, { recursive: true, force: true })
   })
 
-  // Serves an HTML page from the worktree under the name the kernel cuts a Next
-  // server's title down to, and resolves its port.
+  // Serves an HTML page under the name the kernel cuts a Next server's title down to.
   async function serveAsNext(): Promise<number> {
     const script = [
       "require('fs').writeFileSync('/proc/self/comm', 'next-server (v1')",
@@ -111,8 +110,7 @@ describe('canon pr local', () => {
     },
   )
 
-  // Serves an HTML page at / from the worktree and answers the given status at
-  // /api/health, declared in the worktree's local.toml.
+  // Serves an HTML page at / and answers the given status at the declared /api/health.
   async function serveWithHealth(status: number): Promise<number> {
     mkdirSync(join(repoRoot, 'canon', 'config'), { recursive: true })
     writeFileSync(

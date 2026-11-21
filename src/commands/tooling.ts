@@ -475,16 +475,11 @@ async function runScaffold(
 
 /**
  * `JSON.stringify` replaces a `printf` that interpolated manifest fields into a
- * JSON string literal unescaped, so a stack name or description carrying a
- * quote emitted output a consuming skill could not parse.
- *
- * The frame opens after the `--json` return. The bash emitted a closing `└`
- * from its EXIT trap with no `┌` above it, because the pass-through loop that
- * ran it opened no frame first.
+ * JSON string unescaped, so a quote in a name broke parsing. The frame opens
+ * after the `--json` return, which the bash did not, leaving a stray `└`.
  */
 function runList(opts: ListOptions): number {
-  // A frame-interior line, so it goes out after `intro` on the framed path and
-  // bare on the `--json` path, which returns first and opens no frame.
+  // A frame-interior line: after `intro` when framed, bare on the `--json` path.
   const mismatch = checkoutMismatchWarning(process.cwd())
   const stacks = buildStackSummaries(PROJECT_ROOT)
 
@@ -531,11 +526,8 @@ function printReference(stack: string): number {
 
 /**
  * Resolves the chain and rejects the same inputs the bash rejected, so a bad
- * stack name fails before anything touches the target.
- *
- * The excluded-stack guard is deliberately not here. It lived in the sync
- * entry point, so `canon claude` can still drive injection for the `claude`
- * stack the way it drove `merge_gitignore` before.
+ * stack name fails before anything touches the target. The excluded-stack guard
+ * lives in the sync entry point, so `canon claude` can still drive injection.
  */
 function prepare(stack: string, target: string, skip?: string): Prepared {
   const mismatch = checkoutMismatchWarning(process.cwd())
@@ -644,8 +636,7 @@ async function runSync(
   const mode = resolveWriteMode(opts)
 
   if (result.totalChanges === 0) {
-    // The stamp is a write, so a run with no authority to write leaves the
-    // target's record alone rather than claiming a sync it never performed.
+    // The stamp is a write, so a run with no authority leaves the record alone.
     if (mode === 'apply' || mode === 'prompt') {
       await stampChain(prepared.chain, prepared.target)
     }
@@ -694,14 +685,9 @@ async function runSync(
 }
 
 /**
- * A drifted config the project edited, or one no write recorded, is held
- * rather than replaced, since a write naming a stack is not consent to lose an
- * edit inside it. Only a path `--replace` names is taken over.
- *
- * A path no recorded stack ships is a first install of that stack, so it is
- * never held. `canon init` records `base` before a framework stack syncs over
- * a fresh scaffold, whose own copies of that stack's configs came from the
- * scaffold rather than from a project edit.
+ * A drifted config the project edited, or one no write recorded, is held rather
+ * than replaced, since naming a stack is not consent to lose an edit. A path no
+ * recorded stack ships is a first install and never held; `--replace` takes over.
  */
 function heldConfigs(
   result: ScanResult,
@@ -883,11 +869,9 @@ type WriteMode = 'apply' | 'prompt' | 'report' | 'unauthorized'
 type ApplyDecision = 'apply' | 'cancelled' | 'reported' | 'unauthorized'
 
 /**
- * Golden configs carry the CI workflow, the end-to-end harness, and the shell
- * scripts under `scripts/`, so an overwrite reaches work no one would consent
- * to losing. A headless caller therefore has no authority to write without
- * `--write`, since a confirm prompt carrying `nonInteractiveDefault` resolves
- * to its first option and would read silence as consent.
+ * Golden configs carry the CI workflow, the end-to-end harness, and shell
+ * scripts, so an overwrite reaches work no one would consent to losing. A
+ * headless caller needs `--write`, since a confirm default reads silence as consent.
  */
 function resolveWriteMode(opts: SyncOptions): WriteMode {
   if (opts.check === true) return 'report'
@@ -975,8 +959,7 @@ async function runInject(
     await injectGitignore(prepared.chain, prepared.target)
   }
 
-  // Only a whole-stack inject records the chain, and never for the claude
-  // stack, which `canon claude` still drives through injection.
+  // Only a whole-stack inject records the chain, and never for the claude stack.
   if (applyAll && !isStackExcluded(stack)) {
     await stampChain(prepared.chain, prepared.target)
   }

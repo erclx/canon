@@ -31,10 +31,9 @@ export interface LaunchRefused {
 }
 
 /**
- * One reading of a row. `reason` is `unlinked` while the task carries no
- * `Plan:` line, `open` while its plan holds a question for the operator, and
- * `launchable` once it holds none. `plan` and `open` keep the names
- * `plan-answers` gives them, so the dispatch reads one concept by one name.
+ * One reading of a row. `reason` is `unlinked` while the task carries no `Plan:`
+ * line, `open` while its plan holds a question for the operator, and
+ * `launchable` once it holds none. `plan` and `open` keep `plan-answers`' names.
  */
 export interface LaunchReading {
   readonly ok: true
@@ -49,9 +48,8 @@ export type LaunchOutcome = LaunchReading | LaunchRefused
 
 /**
  * The record a wait ends on. A reading ends `launchable` or, at the deadline,
- * `timeout` carrying the last reading, so the caller still sees which question
- * holds the row. A refusal ends the wait at once, since nothing a planner
- * writes next turns an archived plan or an unknown task launchable.
+ * `timeout` carrying the last reading. A refusal ends the wait at once, since
+ * nothing a planner writes next turns an archived plan or unknown task launchable.
  */
 export type LaunchWait =
   | (Omit<LaunchReading, 'reason'> & {
@@ -73,12 +71,8 @@ export interface LaunchWaitOptions {
 
 /**
  * Reads a row by its task stem: resolves the task's `Plan:` line, then runs the
- * `plan-answers` gate on the plan it names. Keying on the line rather than on
- * the plan file is what keeps a plan still being written from reading as
- * landed, since a planner links it only after it validates.
- *
- * It reports and never writes, and answers planning alone. The branch and
- * claim checks stay with the dispatch runbook, which owns them.
+ * `plan-answers` gate on the plan it names, since a planner links a plan only
+ * after it validates. It reports and never writes, and answers planning alone.
  */
 export async function readLaunchable(
   root: string,

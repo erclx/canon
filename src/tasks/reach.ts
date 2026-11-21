@@ -49,13 +49,8 @@ export interface Holder {
 
 /**
  * One changed path other tracks already hold, carrying every holder and the
- * declaration each matched on. A count alone leaves the reader diffing two file
- * lists by eye to find which pair collided.
- *
- * Grouped by path rather than by holder. The two sources are read separately
- * and stay separate inside `holders`, since a board cell and a plan's own list
- * answer different questions, but one track carrying both reported the same
- * path twice under two names before this, and the report leads on this list.
+ * declaration each matched on. It is grouped by path, since a track carrying
+ * both a board cell and a plan list reported the same path twice.
  */
 export interface Claim {
   readonly path: string
@@ -83,14 +78,9 @@ export type ReachOutcome = ReachReport | ReachRefused
 
 export interface ReachOptions {
   /**
-   * Where the git range is read, defaulting to the records root.
-   *
-   * The two part company on every ordinary run, since the plans and the board
-   * are shared scratch at the main worktree root while the branch's own commits
-   * are in a linked worktree. Reading the range at the records root there
-   * measures a checkout sitting on the trunk, so the range closes on itself and
-   * every branch reports a reach of nothing. `canon gov test-order` carries the
-   * same split as an instruction in a skill body; this one is a parameter.
+   * Where the range is read, defaulting to the records root. A linked worktree
+   * holds the branch's commits while the records root sits on the trunk, so
+   * reading there closes the range on itself and every reach reads nothing.
    */
   readonly repo?: string
   /** The far side of the range, defaulting to the trunk. */
@@ -98,13 +88,9 @@ export interface ReachOptions {
 }
 
 /**
- * Splits an entry at the colon that opens its reason, which is the first one
- * standing outside a backticked span.
- *
- * The span test is what keeps `canon:docs-sync` and a `<slug>: <title>` label
- * from ending the subject early, and it is the ordinary case rather than a
- * corner: a reason routinely names a skill, and a skill is spelled with a
- * colon inside backticks.
+ * Splits an entry at the colon that opens its reason, the first one outside a
+ * backticked span. The span test keeps `canon:docs-sync` and `<slug>: <title>`
+ * from ending the subject early, which is the ordinary case, not a corner.
  */
 function subjectOf(entry: string): string {
   let fenced = false
@@ -128,13 +114,9 @@ function namesFile(span: string): boolean {
 }
 
 /**
- * Reads the paths a plan declares out of its `**Files to touch:**` section.
- *
- * A declaration is a backticked span standing as an entry's subject, ahead of
- * the colon opening its reason, since a reason names other files the branch
- * never writes and reading every span reports collisions that never happen.
- * An entry with no colon is taken whole rather than read as declaring nothing.
- * A rename declares both sides, since both sit ahead of the colon.
+ * Reads the paths a plan declares out of its `**Files to touch:**` section. A
+ * declaration is a backticked span as an entry's subject, ahead of the colon,
+ * since a reason names files the branch never writes. A rename declares both sides.
  */
 export function readDeclarations(text: string): string[] {
   const section = splitPlanSections(text).get('Files to touch') ?? []
@@ -163,12 +145,8 @@ export function readDeclarations(text: string): string[] {
 
 /**
  * Whether a declaration covers a changed path: the same file, or a folder the
- * file sits under.
- *
- * Containment runs one way only. A changed path is always a file, so a
- * declaration of `src/tasks/reach.ts` covering a change to `src/tasks/other.ts`
- * would be the folder claim its author did not write, and the board's own
- * `sharesPath` reads both directions because two rows can each name a folder.
+ * file sits under. Containment runs one way, since a changed path is a file and
+ * the reverse would be a folder claim its author did not write.
  */
 function covers(declaration: string, path: string): boolean {
   return path === declaration || path.startsWith(`${declaration}/`)
@@ -281,14 +259,9 @@ function holdersOf(
 }
 
 /**
- * Reads a branch back against what was written down about it: the paths its own
- * plan declared, and the paths every other live plan or dispatch row holds.
- *
- * It reports and never gates, and writes nothing, since a `Touches` cell is the
- * controller's to correct and a plan's list is a prediction. A track with no
- * row or plan is invisible, so the report names how many it compared against.
- * The live folder is trusted, so a merged plan nobody archived still claims its
- * files, and the report names the holder for the reader to judge.
+ * Reads a branch back against what was written about it: the paths its own plan
+ * declared, and the paths every other live plan or dispatch row holds. It
+ * reports and never gates, trusts the live folder, and sees no track lacking a plan.
  */
 export async function planReach(
   root: string,

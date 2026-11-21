@@ -40,14 +40,9 @@ export function supportsColor(stream: { isTTY?: boolean }): boolean {
 }
 
 /**
- * The question is asked per stream rather than once for the process. The framed
- * output goes to stderr and a structured record to stdout, so a run piping only
- * its data keeps a terminal on stderr and keeps its color there. This is a
- * third question again from `isNonInteractive`, which answers whether a caller
- * can be prompted rather than whether a destination renders escapes.
- *
- * Read at write time rather than at import, so nothing freezes an answer taken
- * before the caller's environment was in place.
+ * Asked per stream rather than once, since a run piping only its data keeps a
+ * terminal and its color on stderr. Distinct from `isNonInteractive`, which
+ * answers whether a caller can be prompted. Read at write time, not import.
  */
 export function palette(stream: { isTTY?: boolean }): Palette {
   return supportsColor(stream) ? COLOR : PLAIN
@@ -191,12 +186,8 @@ export function frameSuccess(command: string, target: string): void {
 
 /**
  * A caller with no terminal on stdin is headless, since nobody can answer a
- * prompt there.
- *
- * Both variables are retired overrides that force headless on a terminal and
- * stay readable permanently. Skill bodies, CI jobs, and operator scripts in
- * other repositories and plugin caches this release cannot reach still set
- * them, and dropping the read turns their call into a prompt nobody watches.
+ * prompt. Both variables are retired overrides that stay readable, since
+ * scripts in repositories and caches this release cannot reach still set them.
  */
 export function isNonInteractive(): boolean {
   return (

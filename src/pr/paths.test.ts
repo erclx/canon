@@ -84,10 +84,8 @@ describe('readSection', () => {
 
 /**
  * Every case below is a bullet lifted verbatim from a merged pull request in
- * this repository, named by number, because a synthetic bullet proves the
- * extractor against prose nobody writes. The four classes the plan specified
- * are the first four, and the five after them are what a run over the whole
- * merged corpus turned up beside them.
+ * this repository, named by number, since a synthetic bullet proves the
+ * extractor against prose nobody writes. The first four are the planned classes.
  */
 describe('extractKeyChangePaths', () => {
   it('should drop a bare name a compound bullet leaves as a fragment (#1267)', () => {

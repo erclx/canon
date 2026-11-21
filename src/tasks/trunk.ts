@@ -8,17 +8,15 @@ const TRUNK_REFS = ['origin/main', 'main'] as const
 
 /**
  * Reports whether a pull request's work reached the trunk. `undefined` means
- * the trunk could not be read, which is a different answer from `false` and has
- * to stay one: a check that degraded to "not landed" on an unreachable trunk
- * would report a board silently rather than say what it failed to test.
+ * the trunk could not be read, which stays apart from `false`, since degrading
+ * to "not landed" would silently report a board without saying what it skipped.
  */
 export type TrunkReader = (pullRequest: number) => Promise<boolean | undefined>
 
 /**
  * Matches the two subjects a landed pull request leaves on the trunk: the
- * `(#NNN)` suffix a squash merge writes, and the subject GitHub writes for a
- * merge commit. Both carry the number in a form no other commit spells, so a
- * pull request numbered 12 cannot match one numbered 123.
+ * `(#NNN)` suffix a squash merge writes, and GitHub's merge-commit subject. Both
+ * carry the number in a form no other commit spells, so 12 cannot match 123.
  */
 function grepArgs(pullRequest: number): string[] {
   return [
@@ -31,10 +29,9 @@ function grepArgs(pullRequest: number): string[] {
 }
 
 /**
- * Reads the trunk as this clone already holds it and never fetches. A validate
- * run happens several times a sweep and a fetch per run is a cost the check
- * does not carry today, so a clone behind the remote reports the row untested
- * or leaves it parked rather than claiming work landed.
+ * Reads the trunk as this clone already holds it and never fetches, since a
+ * validate run happens several times a sweep. A clone behind the remote reports
+ * the row untested or parked rather than claiming work landed.
  */
 export function gitTrunkReader(root: string): TrunkReader {
   const answered = new Map<number, boolean | undefined>()
@@ -64,12 +61,10 @@ async function readTrunk(
         '1',
         '--format=%H',
         ...grepArgs(pullRequest),
-        // The ref is a revision, and a repository tracking a path under the
-        // same name would otherwise fail the whole read as ambiguous.
+        // The ref is a revision, and a same-named tracked path would make the read ambiguous.
         '--',
       ],
-      // A hook exports the repository variables git reads ahead of `-C`, so the
-      // ambient environment would answer for whichever repository fired the hook.
+      // A hook exports repository variables git reads ahead of `-C`, so the ambient environment would mislead.
       {
         reject: false,
         timeout: GIT_TIMEOUT_MS,
@@ -78,8 +73,7 @@ async function readTrunk(
       },
     )
 
-    // A missing ref exits non-zero, the next ref's turn. Zero with no commit says
-    // the work is not on that ref, which is an answer and stops the walk.
+    // A missing ref exits non-zero and moves on, while zero with no commit is an answer.
     if (result.exitCode === 0) return result.stdout.trim().length > 0
   }
 

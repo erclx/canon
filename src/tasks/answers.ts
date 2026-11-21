@@ -68,8 +68,7 @@ export type RemoteBranchReader = (
 /**
  * Reads the remote-tracking ref as the last fetch left it, so a member pushed
  * since then reads as absent and holds its integrator, which fails safe. The
- * local head is not read, since it exists mid-build and a pushed branch is the
- * only signal a member writes when it is done.
+ * local head is not read, since it exists mid-build.
  */
 export const originBranchPushed: RemoteBranchReader = async (root, branch) => {
   const report = await branchRefs(branch, root)
@@ -91,15 +90,9 @@ export interface PlanResolved {
 export type ResolveOutcome = PlanResolved | AnswersRefused
 
 /**
- * The spellings a caller reaches a plan by, in the order they are tried. A bare
- * slug names the live folder outright, and a path is resolved against the
- * project root first and then the board directory, since a board link reads
- * `../plans/feature-<slug>.md` relative to `.canon/tasks/`.
- *
- * `resolveLivePlan` shares the two bases but tries the board first and tests
- * containment under the live folder, so the two agree on what a board writes
- * and differ outside it. The archive exclusion in `planAnswers` is stated
- * separately for that reason.
+ * The spellings a caller reaches a plan by, in the order tried. A bare slug
+ * names the live folder, and a path resolves against the project root and then
+ * the board directory, since a board link is relative to `.canon/tasks/`.
  */
 export function planCandidates(root: string, reference: string): string[] {
   if (reference.includes('/') || reference.endsWith('.md')) {
@@ -125,10 +118,9 @@ function suggestionOf(body: readonly string[]): string | undefined {
 }
 
 /**
- * An absent `- Answer:` line reads the same as a blank one here. The slot being
- * missing is a conformance defect `canon tasks validate` already names, and a
- * gate that answered it differently would refuse a row for a reason the
- * validator has already reported.
+ * An absent `- Answer:` line reads the same as a blank one here, since a missing
+ * slot is a conformance defect `canon tasks validate` already names, and a gate
+ * answering it differently would refuse a row for a reason already reported.
  */
 function isAnswered(body: readonly string[]): boolean {
   const line = body.find((entry) => entry.startsWith(ANSWER_PREFIX))
@@ -138,16 +130,9 @@ function isAnswered(body: readonly string[]): boolean {
 }
 
 /**
- * The standard writes the reason behind a comma and the corpus also writes it
- * behind a full stop, so both separators come off. Reporting the phrase with
- * whatever punctuation followed it hands the operator a stray mark where the
- * reason should start.
- *
- * Takes the normalized suggestion rather than the raw one, so the length
- * stripped from the front is always `OPERATOR_CALL`'s own regardless of which
- * recognized wording the author wrote. The `operator's call` and
- * `the operator's call` variants read longer than `your call`, and slicing by
- * the canonical length against the raw text would cut into the reason itself.
+ * The reason follows a comma or a full stop, so both separators come off and
+ * the operator gets no stray mark. It takes the normalized suggestion, since
+ * slicing by the canonical length against the raw text would cut the reason.
  */
 function reasonOf(normalized: string): string {
   const rest = normalized.slice(OPERATOR_CALL.length).replace(/^[,.;:\s]+/, '')
@@ -156,10 +141,9 @@ function reasonOf(normalized: string): string {
 }
 
 /**
- * A question carrying no suggestion at all is also a stop at execution, and it
- * is not read here. `checkQuestionContract` reports it as `suggestion-missing`
- * and the runbook dispatches a row whose plan is already verified, so testing
- * it again would put one rule in two places that ship on different cadences.
+ * A question carrying no suggestion is also a stop at execution, and is not
+ * read here. `checkQuestionContract` reports it as `suggestion-missing`, and
+ * testing it again would put one rule in two places on different cadences.
  */
 function openQuestions(lines: readonly string[]): OpenQuestion[] {
   const open: OpenQuestion[] = []
@@ -180,12 +164,8 @@ function openQuestions(lines: readonly string[]): OpenQuestion[] {
 
 /**
  * Resolves a caller's reference to a live plan, refusing an empty reference, a
- * reference that names no file, and one that lands in the plans archive.
- *
- * Both `planAnswers` and `planBranch` answer the same reference, so the
- * resolution and the three refusals sit here rather than in each of them. Two
- * verbs reading one reference through two copies of this ladder is the defect
- * the branch derivation was filed against, one layer down.
+ * reference that names no file, and one in the plans archive. `planAnswers` and
+ * `planBranch` share it so the ladder lives once.
  */
 export function resolvePlanReference(
   root: string,
@@ -199,15 +179,13 @@ export function resolvePlanReference(
   const path = candidates.find((candidate) => existsSync(candidate))
 
   if (!path) {
-    // Naming every base keeps a task-relative link from reporting the one place
-    // it does not resolve, since `relative` hands that spelling straight back.
+    // Naming every base keeps a task-relative link from reporting only the one that fails.
     const looked = candidates.map((entry) => relative(root, entry)).join(' or ')
 
     return refuse('no-plan', `No plan at ${looked}.`, [reference])
   }
 
-  // An archived plan answers every question and would clear a dispatch that
-  // `auto-ship` then refuses, so it is refused here, under both record roots.
+  // An archived plan answers every question and would clear a dispatch `auto-ship` refuses.
   if (recordDirs(root, PLANS, ARCHIVE).some((dir) => isUnder(path, dir))) {
     return refuse(
       'archived',
@@ -220,14 +198,9 @@ export function resolvePlanReference(
 }
 
 /**
- * Answers whether a plan is launchable, which is whether it still waits on the
- * operator for a call only they can make. It reads the question block through
- * the same `readQuestions` the plan validator runs, so the gate and the
- * conformance check cannot drift into disagreeing about what a question is.
- *
- * It reports and never writes. Holding the row, naming the slot, and reaching
- * the operator belong to the dispatcher, which is where the decision already
- * sits.
+ * Answers whether a plan is launchable, being whether it still waits on the
+ * operator. It reads the questions through the validator's own `readQuestions`
+ * so the two cannot drift, and reports and never writes; the dispatcher holds.
  */
 export async function planAnswers(
   root: string,
@@ -272,10 +245,9 @@ export async function planAnswers(
 }
 
 /**
- * A plan whose fan-in set disagrees holds on `Fan-in set`, on either side,
- * since an integrator listing an archived member would otherwise read that
- * member's leftover branch as done. An integrator whose set agrees holds on
- * `Fan-in pending` until every member branch is on origin.
+ * A plan whose fan-in set disagrees holds on `Fan-in set`, on either side, since
+ * an archived member's leftover branch would read as done. An agreeing
+ * integrator holds on `Fan-in pending` until every member branch is on origin.
  */
 async function fanInEntries(
   root: string,

@@ -35,10 +35,9 @@ const BACKLOG_FILE = 'backlog.md'
 const DERIVED_COUNT = /^\d+ files?(?: under |$)/
 
 /**
- * The readiness headings `claude/skills/task-board/references/board.md` fixes. The names are the
- * contract rather than a suggestion, so a board grouping under names of its own
- * reads as carrying no group at all and the run refuses instead of reporting a
- * clean board it never parsed.
+ * The readiness headings `claude/skills/task-board/references/board.md` fixes.
+ * The names are the contract, so a board grouping under its own names reads as
+ * carrying no group, and the run refuses instead of reporting it clean.
  */
 export const BOARD_GROUPS = ['In flight', 'Up next', 'Needs a plan'] as const
 
@@ -134,9 +133,7 @@ export interface Untested {
 /**
  * A `Touches` cell naming a bare folder, which claims every file under it and
  * so collides with every row a later session writes there. The claim is often
- * correct, since a row rewriting a whole directory has no other way to say so,
- * which is why it reports beside the findings rather than inside them and moves
- * no exit code.
+ * correct, so it reports beside the findings and moves no exit code.
  */
 export interface FolderClaim {
   readonly group: BoardGroup
@@ -155,12 +152,9 @@ export interface SharedFiles {
 }
 
 /**
- * A code span in a board cell that the markdown preview cannot break, so it
- * pushes the table past the pane and makes it scroll sideways. Either the
- * longest whitespace-free run is wider than `WIDE_LIMIT`, or the span is a
- * brace-glob, which is written out as separate paths. The limit is a heuristic
- * over one pane, which is why it reports beside the findings and moves no exit
- * code.
+ * A code span in a board cell that the preview cannot break, pushing the table
+ * past the pane: a whitespace-free run wider than `WIDE_LIMIT`, or a brace-glob,
+ * which is written out as separate paths. It reports beside the findings only.
  */
 export interface WideToken {
   readonly group: BoardGroup
@@ -169,11 +163,9 @@ export interface WideToken {
 }
 
 /**
- * A task file neither surface names. That is the normal state between a
- * session filing it and a live orchestrator placing it, so it reports beside
- * the findings and moves no exit code. It is still the only local detector for
- * a row lost to a hand-edit, a handoff message that never arrived, or an
- * orchestrator that ended before placing it.
+ * A task file neither surface names, the normal state between a session filing
+ * it and an orchestrator placing it, so it moves no exit code. It is still the
+ * only local detector for a row lost to a hand-edit or an ended orchestrator.
  */
 export interface Unplaced {
   readonly subject: string
@@ -290,11 +282,9 @@ function stemOf(target: string): string | undefined {
 }
 
 /**
- * Reads the file set out of a `Touches` cell written as prose. Paths are the
- * backticked spans, and a span naming a skill or a command is dropped by the
- * same test. An extension opens with a letter, which separates `commands.md`
- * from a task version. A cell a board verb derived opens with its file count
- * and yields nothing, since its reader takes declared paths from the plans.
+ * Reads the file set out of a `Touches` cell written as prose: the backticked
+ * spans minus skills and commands, an extension opening with a letter to tell
+ * `commands.md` from a version. A cell a verb derived yields nothing.
  */
 export function readPaths(cell: string): string[] {
   if (DERIVED_COUNT.test(cell.trim())) return []
@@ -325,13 +315,8 @@ function sharesPath(left: string, right: string): boolean {
 
 /**
  * Whether a `Touches` path names a directory. The tree answers for a path that
- * resolves, which is the only reading that separates a folder from a file
- * carrying no extension, such as a hook script.
- *
- * A path the row has yet to create resolves to nothing, so the name decides
- * there. `readPaths` admits a span for one of two reasons, a slash or an
- * extension, so a span surviving without an extension is one a slash let
- * through and reads as a folder.
+ * resolves, and the name decides for one the row has yet to create, where a span
+ * surviving `readPaths` with no extension was let through by a slash.
  */
 function isFolder(path: string, root: string): boolean {
   const target = resolve(root, path)
@@ -406,10 +391,8 @@ const LAST_AT_END = /\blast\.?\s*$/i
 
 /**
  * Reads the ordinal phrase a `Waiting on` cell states about its own position.
- * `<ordinal> here` is found anywhere, since it needs a closed vocabulary word
- * beside `here`. A bare `last` counts only at the end of the cell, since the
- * word is common in prose and a row declaring itself last puts it there. A cell
- * carrying neither reads as unordered rather than as an error.
+ * `<ordinal> here` is found anywhere, but a bare `last` counts only at the end
+ * of the cell, since the word is common in prose. A cell with neither is unordered.
  */
 function readOrdinal(cell: string): OrdinalWord | 'last' | undefined {
   const here = ORDINAL_HERE.exec(cell)
@@ -425,23 +408,16 @@ const RANK_VERB =
 const RANK_OBJECT = /\bv\d+\.\d+\b|\bgroups?\b|\brows?\b/i
 
 /**
- * A clause boundary, which is any of the three punctuation marks that end one
- * plus the two conjunctions every live cell uses to hang its reason off its
- * position claim. All three marks are bounded away from digits on both sides,
- * which is what keeps a phase label one token, since `v80.4` is the commonest
- * positional object on the board and splitting it at its own period would
- * leave the verb holding nothing.
+ * A clause boundary: the three punctuation marks that end one plus the two
+ * conjunctions live cells use to hang a reason off a position claim. The marks
+ * are bounded away from digits so `v80.4` stays one token.
  */
 const CLAUSE_BREAK = /(?<!\d)[.;,](?!\d)|\band\b|\bbecause\b/i
 
 /**
  * Whether a `Waiting on` cell ranks its row against something rather than
- * arguing that the row matters, which reads defensible on every row at once.
- *
- * The test is a closed verb vocabulary in one clause with a positional object,
- * since `closes` alone matches prose claiming no position and the clause bound
- * keeps a verb from pairing with an object in another half. An unusual
- * comparative phrasing reads as unranked, the safe direction over prose.
+ * arguing it matters. The test is a closed verb vocabulary in one clause with a
+ * positional object, and unusual phrasing reads as unranked, the safe direction.
  */
 function readRank(cell: string): boolean {
   return cell
@@ -455,10 +431,8 @@ function isRowLine(line: string): boolean {
 
 /**
  * Whether a header candidate genuinely opens a table, meaning the line right
- * behind it is a separator carrying the same cell count. A row landing where a
- * blank line already closed the table above it looks identical to a fresh
- * header until this read, since both are the first pipe line the walk has
- * seen since the reset.
+ * behind it is a separator with the same cell count, since a row landing after
+ * a closed table looks identical to a fresh header until this read.
  */
 function opensTable(
   header: readonly string[],
@@ -470,16 +444,9 @@ function opensTable(
 }
 
 /**
- * Parses the ordering file into rows keyed by readiness group. Columns are read
- * from each table's own header rather than by position, so a group whose shape
- * differs from this repository's is reported for what it lacks instead of
- * having its second cell read as something it never was.
- *
- * The walk carries one more piece of state than a header: whether the table
- * that header opened is still open. A blank or prose line closes it, so a row
- * stranded behind that close is read as one candidate header among many rather
- * than as a continuation of the table above, and each surviving row's cell
- * count is checked against the header it actually followed.
+ * Parses the ordering file into rows keyed by readiness group, reading columns
+ * from each table's own header rather than by position. A blank or prose line
+ * closes a table, so a row stranded behind it is checked as a candidate header.
  */
 export function readBoard(text: string): {
   readonly rows: readonly BoardRow[]
@@ -598,11 +565,8 @@ export function readBoard(text: string): {
 
 /**
  * Reports the two ways a `## Needs a plan` row's stated position fails, in one
- * walk. A row carrying an ordinal is checked against where it actually sits,
- * since a hand-renumbered sequence is where prose and position part. A row with
- * no position claim is reported for that, since arguing the task matters ranks
- * it against nothing. An ordinal is already comparative, so it exempts the row
- * from the second half.
+ * walk: an ordinal checked against where the row sits, and a row with no
+ * position claim, since arguing the task matters ranks it against nothing.
  */
 function checkOrdering(rows: readonly BoardRow[]): Finding[] {
   const findings: Finding[] = []
@@ -644,14 +608,9 @@ function checkOrdering(rows: readonly BoardRow[]): Finding[] {
 }
 
 /**
- * Parses the backlog into one row per bullet carrying a link. The backlog is a
- * flat list rather than a table, so there is no header to resolve and no group
- * to sit under, and a bullet holding prose instead of a pointer is skipped.
- *
- * Skipping it rather than reporting it is what keeps the intro paragraph and
- * any explanatory bullet out of the findings. The task that bullet meant to
- * name is still accounted for, because a stem no line reaches is reported by
- * `checkMapping` as carrying no row on either surface.
+ * Parses the backlog into one row per bullet carrying a link. It is a flat list,
+ * so a bullet holding prose instead of a pointer is skipped, which keeps the
+ * intro out of the findings, and `checkMapping` reports a stem no line reaches.
  */
 export function readBacklog(text: string): readonly BacklogRow[] {
   const rows: BacklogRow[] = []
@@ -662,8 +621,7 @@ export function readBacklog(text: string): readonly BacklogRow[] {
     const target = linkTarget(line)
     if (!target) continue
 
-    // A pointer carrying a directory names something other than a sibling task,
-    // the way `citedStem` reads the same shape on the board.
+    // A pointer carrying a directory names something other than a sibling task, as `citedStem` reads it.
     const path = target.split('#')[0] ?? ''
     if (path.includes('/')) continue
 
@@ -700,10 +658,8 @@ function resolves(target: string, dir: string, root: string): boolean {
 
 /**
  * Reports a task cited from two places on the board, which claims two
- * contradictory things about itself: a task belongs to exactly one group,
- * board or backlog. A task file neither surface names is no longer reported
- * here, since that is the normal state between a session filing it and a live
- * orchestrator placing it.
+ * contradictory things about itself, since a task belongs to exactly one group.
+ * A file neither surface names is not reported here, being the normal state.
  */
 function checkMapping(
   rows: readonly BoardRow[],
@@ -959,15 +915,9 @@ async function checkFrontmatter(
 }
 
 /**
- * Tests the claim a group name makes about a plan. `## Needs a plan` says none
- * is live and `## Up next` says one is written, and neither group has a `Plan`
- * column, so the task file's own `Plan:` line is the only place either claim
- * can be read against.
- *
- * A live plan is one the archive's resolution accepts and the disk holds, so a
- * plan already archived reads as not live and a cited path with no file behind
- * it reads the same way. A row whose task file is gone is left to
- * `task-unresolved`, which owns that report.
+ * Tests the claim a group name makes about a plan: `## Needs a plan` says none
+ * is live and `## Up next` says one is written, read against the task's `Plan:`
+ * line. A live plan is one the archive accepts and the disk holds.
  */
 async function checkGroupClaims(
   rows: readonly BoardRow[],
@@ -1034,9 +984,8 @@ async function groupClaimFinding(
 
 /**
  * Reports a `Plan:` line linking one plan more than once. Links to distinct
- * plans are the shape a sliced task carries, so only a repeat is a finding.
- * Links compare by the file they resolve to, so `../plans/x.md` beside
- * `.canon/plans/x.md` is one plan listed twice.
+ * plans are the shape a sliced task carries, so only a repeat is a finding, and
+ * links compare by resolved file, so two spellings of one path repeat.
  */
 function duplicatePlans(
   targets: readonly string[],
@@ -1057,10 +1006,9 @@ function duplicatePlans(
 }
 
 /**
- * Where a plan pointer lands, resolved against the board and against the
- * project root the way the archive resolves the same line. Neither base
- * existing leaves the board-relative reading, so two pointers at one absent
- * file still compare equal and the mismatch check reports nothing.
+ * Where a plan pointer lands, resolved against the board and the project root
+ * the way the archive resolves the line. Neither base existing leaves the
+ * board-relative reading, so two pointers at one absent file compare equal.
  */
 function planPath(target: string, dir: string, root: string): string {
   const path = target.split('#')[0] || target
@@ -1082,8 +1030,7 @@ function checkTouches(rows: readonly BoardRow[]): Finding[] {
   for (const row of rows.filter(
     (candidate) => candidate.group === 'In flight',
   )) {
-    // An absent column and an unreadable one both leave the row out of every
-    // pair, so both are reported, or a board declaring no file set would pass.
+    // An absent column and an unreadable one both leave the row out of every pair, so both are reported.
     if (!row.touches || row.touches.length === 0) {
       findings.push({
         kind: 'touches-unstated',
@@ -1137,12 +1084,8 @@ function subjectOf(row: BoardRow): string {
 
 /**
  * Names one path two rows share, and the row that claimed it as a folder when
- * one side named a directory holding the other's file. Which side contributed
- * the containing path is the fact a reader acts on, and printing the shared
+ * one side named a directory holding the other's file, since printing the
  * strings alone leaves an over-broad cell and a genuine overlap identical.
- *
- * The shorter path is the container, because `sharesPath` holds for an unequal
- * pair only when one is a prefix of the other up to a separator.
  */
 function describeShared(
   path: string,
@@ -1196,21 +1139,14 @@ function checkFolderClaims(
 /**
  * The widest the longest unbroken run in a code span may be before a table
  * scrolls in the preview pane. A 57-character span fit and a 78-character one
- * did not, so the limit sits at the nearest round number above the first. It
- * is still too high: a 36-character path with no hyphen widened a board column
- * until the next one ran off the pane, which is why a table cell reads the same
- * measure at 30. The board keeps 60 until its own report is revisited.
+ * did not. Table cells read the same measure at 30, and the board keeps 60.
  */
 const WIDE_LIMIT = 60
 
 /**
  * Reports a code span a table cell cannot wrap, measured by `unbrokenRun`,
- * which `canon markdown audit` reads for a table too. A rendered preview breaks
- * a span at whitespace and after a hyphen or a slash, so a long run either
- * widens its column or splits mid-token. Every group is scanned, since the
- * overflow this exists for happened under `## Up next`, where the folder-claim
- * scan would not have looked. Prose breaks at spaces and bare words at hyphens,
- * so only a span is read.
+ * which `canon markdown audit` reads for a table too. Every group is scanned,
+ * since the overflow happened under `## Up next`, and only a span is read.
  */
 function checkWideTokens(rows: readonly BoardRow[]): WideToken[] {
   const wide: WideToken[] = []
@@ -1242,13 +1178,9 @@ function checkWideTokens(rows: readonly BoardRow[]): WideToken[] {
 }
 
 /**
- * Reports a task file neither the board nor the backlog names. Under the
- * roster-checked hand-off, filing a task and placing its row are two acts a
- * different session each may perform, so this state is ordinary rather than
- * an error, and it moves no exit code. It still surfaces here rather than
- * nowhere, since it is the only local detector for a row a hand-edit dropped,
- * a handoff message that never arrived, or an orchestrator that ended before
- * placing it.
+ * Reports a task file neither the board nor the backlog names. Filing a task
+ * and placing its row are two acts a different session may perform, so this
+ * moves no exit code, and it is the only local detector for a dropped row.
  */
 function checkUnplaced(
   rows: readonly BoardRow[],
@@ -1269,10 +1201,8 @@ function checkUnplaced(
 
 /**
  * Reads the task a blocker cell cites. A task pointer is a bare sibling
- * filename, so a target carrying a directory names something else, such as a
- * plan, and yields nothing. Every link in the cell is walked, since a cell can
- * name an answering record before the task, and the walk stops at the first
- * bare one.
+ * filename, so a target carrying a directory names something else and yields
+ * nothing. Every link is walked, and the walk stops at the first bare one.
  */
 function citedStem(cell: string): string | undefined {
   const target = linkTargets(cell)
@@ -1294,12 +1224,8 @@ type LabelCitation =
 
 /**
  * Reads every bare `vNNN.N` phase label a `Waiting on` cell names outside a
- * link, each resolved to the one task it labels. The live folder answers first,
- * since a live task and a declined one can share a label and the live one is
- * what the row waits on. Two matches in the folder that answers leave the row
- * untested rather than guessing between them, and a label no folder holds is
- * read as prose rather than as a broken pointer, since a version number in a
- * sentence is not always a citation.
+ * link, each resolved to one task, the live folder answering first. Two matches
+ * leave the row untested, and a label no folder holds reads as prose.
  */
 function bareLabels(cell: string, folders: LabelFolders): LabelCitation {
   const prose = cell.replace(/\[[^\]]*\]\([^)]*\)/g, ' ')
@@ -1370,12 +1296,8 @@ function nothing(): CitedResult {
 
 /**
  * Reports what a cited task does to the row waiting on it. An archived file
- * settles the row, and a live file settles it only once its pull request is on
- * the trunk, since outcomes are ticked before the pull request opens. A task
- * naming no pull request, or carrying a pending branch, leaves the row
- * untested. A file with no outcome box settles nothing, and a citation in
- * neither folder is a broken pointer rather than a closed task. Outcomes come
- * off `readOutcomes`, so this agrees with the archive and outcome verbs.
+ * settles the row, and a live one only once its pull request is on the trunk,
+ * since outcomes are ticked first. A citation in neither folder is a broken pointer.
  */
 async function checkCitedTask(
   group: BoardGroup,
@@ -1433,8 +1355,7 @@ async function checkCitedTask(
     )
   }
 
-  // The last number is the newest slice, and an earlier one closed without
-  // merging never lands, so only the last says whether the work reached trunk.
+  // Only the newest slice says whether the work reached trunk, since an earlier one closed unmerged.
   const pullRequest = readPullRequest(text).at(-1)
   if (pullRequest === undefined) {
     return untestedRow(
@@ -1575,11 +1496,9 @@ function checkCellWidth(rows: readonly BoardRow[]): Finding[] {
 }
 
 /**
- * Reports a `Touches` cell that differs from what the task's plans derive. A
- * verb writes the derivation on every call, so a difference is a hand edit or a
- * plan that changed since the last write. An empty derivation is left alone,
- * since a row with no live plan or no declared file is `plan-absent`,
- * `plan-unresolved`, or `touches-unstated` to report, not stale.
+ * Reports a `Touches` cell that differs from what the task's plans derive, a
+ * hand edit or a changed plan. An empty derivation is left alone, since a row
+ * with no live plan or declared file is `plan-absent` or the like, not stale.
  */
 async function checkStaleTouches(
   rows: readonly BoardRow[],
@@ -1609,9 +1528,8 @@ async function checkStaleTouches(
 
 /**
  * Gives each row the paths its task's live plans declare in place of the ones
- * read off its `Touches` cell, which states a count and folders rather than
- * files. A row whose task is gone, or whose plans declare nothing, keeps what
- * its cell named, so a hand-written cell still feeds the overlap checks.
+ * read off its `Touches` cell. A row whose task is gone, or whose plans declare
+ * nothing, keeps what its cell named, so a hand-written cell still feeds overlap.
  */
 export async function declaredRows(
   rows: readonly BoardRow[],
@@ -1777,8 +1695,7 @@ export async function validateBoard(
     )
   }
 
-  // An absent backlog reads as empty rather than refusing, since a project that
-  // never needed it keeps every task on the board.
+  // An absent backlog reads as empty rather than refusing, for a project that never needed it.
   const backlogFile = backlogPath(root)
   const backlog = existsSync(backlogFile)
     ? readBacklog(await readFile(backlogFile, 'utf8'))

@@ -18,9 +18,8 @@ const PULL_LIMIT = 1_000
 
 /**
  * Who holds each branch, named for a person reading the report. `undefined`
- * means the source could not be read, which has to stay apart from an empty map:
- * an unreachable source that degraded to "nobody holds it" would report a held
- * row as clean.
+ * means the source could not be read, which stays apart from an empty map, since
+ * degrading to "nobody holds it" would report a held row as clean.
  */
 export type HolderReader = () => Promise<
   ReadonlyMap<string, string> | undefined
@@ -42,10 +41,8 @@ export interface SessionHolderOptions {
 
 /**
  * Reads the roster scoped to `root`'s repository, since a branch name says
- * nothing across a machine and another project's worker on the same name holds
- * nothing here. Two rows leave the liveness undecided, a foreign record whose
- * socket is gone and a row resting only on a socket file a crash can leave, so
- * either reads the whole roster as unread rather than as a hold or as clear.
+ * nothing across a machine. A foreign record whose socket is gone, or a row
+ * resting on a socket file a crash can leave, reads the roster as unread.
  */
 export function sessionHolders(
   root: string,
@@ -88,8 +85,7 @@ const runGh: GhRunner = async (cwd, args) => {
   if (Bun.which('gh') === null) return undefined
 
   try {
-    // `gh` resolves its repository through git, so a hook's resolution
-    // variables would point it at another repository than `cwd`.
+    // `gh` resolves its repository through git, so a hook's variables would point elsewhere.
     const result = await execa('gh', [...args], {
       cwd,
       timeout: GH_TIMEOUT_MS,

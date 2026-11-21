@@ -16,8 +16,7 @@ let target: string
 
 // A git hook exports GIT_DIR, so a run under pre-push would resolve the fixture
 // against the toolkit's own repository rather than the temp directory. The
-// retired headless override is stripped too, so the piped stdin alone is what
-// makes each run headless.
+// retired headless override is stripped too, so piped stdin alone is headless.
 const buildEnv = (): NodeJS.ProcessEnv =>
   Object.fromEntries(
     Object.entries(process.env).filter(
