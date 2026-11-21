@@ -17,13 +17,9 @@ export interface SecretFinding {
 }
 
 /**
- * Why a scan produced no corpus, which is never the same as a clean one.
- *
- * Three of these mean this tree publishes nothing, and `no-files-field` means
- * the opposite: a publish would pack everything and this check read none of it.
- * They are separate reasons because the aggregate answers them differently,
- * and folding them together is what let one message deny the case another
- * comment named.
+ * Why a scan produced no corpus, which is never the same as a clean one. Three
+ * mean this tree publishes nothing and `no-files-field` means a publish would
+ * pack everything unread, so the aggregate answers them differently.
  */
 export type ScanRefusal =
   | 'no-manifest'
@@ -67,12 +63,9 @@ export function scanText(file: string, text: string): SecretFinding[] {
 }
 
 /**
- * Scans the tree this repository publishes, not the tree it holds.
- *
- * A refusal rather than an empty result wherever the corpus cannot be built.
- * Zero findings over zero files reads in the report exactly like zero findings
- * over the whole shipped tree, and the two mean opposite things, which is the
- * split every other audit here already draws.
+ * Scans the tree this repository publishes, not the tree it holds. It refuses
+ * wherever the corpus cannot be built, since zero findings over zero files reads
+ * like zero over the whole shipped tree and means the opposite.
  */
 export async function scanShippedTree(root: string): Promise<SecretScan> {
   const declared = await readShipEntries(root)
@@ -97,8 +90,7 @@ export async function scanShippedTree(root: string): Promise<SecretScan> {
     try {
       text = await readFile(join(root, path), 'utf8')
     } catch {
-      // A listed path that will not open is counted rather than reported, so the run
-      // still states that it measured less than it listed.
+      // A listed path that will not open is counted, so the run states it measured less than it listed.
       skipped += 1
       continue
     }
