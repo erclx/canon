@@ -24,7 +24,7 @@ a caller wanting one layer does not run the chain to get it.
 | `detect`  | Reads the project and resolves stack arguments              | `setup detect`        |
 | `install` | Runs `canon init` and the tooling sync                      | `setup install`       |
 | `gov`     | Installs governance rules and nothing else                  | `setup gov`           |
-| `verify`  | Runs the installed scripts at a stated depth                | `setup verify [deep]` |
+| `verify`  | Runs the installed scripts and audits context coverage      | `setup verify [deep]` |
 | `indexes` | Bootstraps the `index.md` system over documentation folders | `setup indexes`       |
 
 An argument naming a phase runs that phase and stops. A bare invocation runs
@@ -176,10 +176,11 @@ or fail per script. `deep` adds the dev and preview server smoke, the end-to-end
 suite, and the screenshot harness.
 
 The bare chain on a fresh scaffold runs `verify` at the default depth, then
-`verify deep`, so the report says whether the app was started. An unattended
-deep failure warns and names the script rather than failing the scaffold, and a
-stage the machine cannot run is named as skipped. The reference holds both
-verdicts and the skips.
+`verify deep`, so the report says whether the app was started.
+
+- An unattended deep failure warns and names the script rather than failing the scaffold
+- A stage the machine cannot run is named as skipped, never as passed
+- The phase closes on `canon context audit`, reporting each uncovered code folder as a finding rather than a failure
 
 ## Phase: indexes
 
@@ -199,6 +200,7 @@ After the chain, report:
 - Tooling stack synced, or skipped. Name the layers pulled via the extends chain.
 - Any post-sync fixups applied (filename renames)
 - `verify` outcome at each depth it ran, and whether the app was started
+- Each code folder the context audit found no entry naming, with `/canon:context-fold` as its fix
 
 ### Outcomes and gaps
 

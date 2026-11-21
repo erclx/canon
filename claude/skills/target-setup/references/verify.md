@@ -17,7 +17,8 @@ name and a stack exposing a different set is covered without an edit here.
 - [Guards](#guards)
 - [Step 1: read scripts](#step-1-read-scripts)
 - [Step 2: run the chain](#step-2-run-the-chain)
-- [Step 3: report](#step-3-report)
+- [Step 3: audit the context entries](#step-3-audit-the-context-entries)
+- [Step 4: report](#step-4-report)
 - [Out of scope](#out-of-scope)
 
 ## Guards
@@ -129,7 +130,23 @@ on either check failing.
 This is weaker than a real readiness probe. No manifest key exposes a generic
 port to poll across stacks, so port-probing is out of reach here.
 
-## Step 3: report
+## Step 3: audit the context entries
+
+Run the context audit once from the project root, after the script chain:
+
+```bash
+canon context audit --json
+```
+
+Read the record's `coverage` rather than the exit, which also carries findings
+this phase does not report on.
+
+- On `kind: 'measured'`, list each folder in `coverage.findings.unnamed` as a code folder no entry's Layout names
+- Report each as a finding, never a failure, and name `/canon:context-fold` as the step that writes the Layout line
+- Write no Layout line here, since what a folder does is the first build session's call and a line setup guesses is a stale claim
+- On any other `kind`, report it in one line, such as `no-root` for a project with no code root yet
+
+## Step 4: report
 
 Report per folder, under a heading naming its path relative to the root, and
 list each skipped folder with its sync fix. For each script run, report
