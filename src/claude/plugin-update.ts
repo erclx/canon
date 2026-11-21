@@ -24,10 +24,9 @@ export type MatchResult =
   | { readonly kind: 'many'; readonly installs: readonly PluginInstall[] }
 
 /**
- * `id` is `<name>@<marketplace>`, so a name alone can match more than one row
- * when the same plugin is installed from two marketplaces at once. Refusing
- * that case rather than picking a row is the same move `readPluginName`
- * makes: nothing here guesses at an ambiguity the caller can see plainly.
+ * `id` is `<name>@<marketplace>`, so a name alone can match more than one row.
+ * Refusing that case rather than picking a row matches `readPluginName`: nothing
+ * here guesses at an ambiguity the caller can see.
  */
 export function matchInstall(
   name: string,

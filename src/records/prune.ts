@@ -19,10 +19,8 @@ export const DEFAULT_OLDER_THAN_DAYS = 14
 const RESERVED = ['runs', 'hooks', 'handoff', 'pr', 'render'] as const
 
 /**
- * Pre-split names the scratch rename moved into a reserved subfolder, still
- * sitting at the scratch root on a tree the rename never touched. Reading them
- * as ordinary slugs would offer an unread handoff or the live poll baseline
- * for deletion, the one thing a wrong delete here loses for good.
+ * Pre-split names the scratch rename moved into a reserved subfolder, still at the scratch
+ * root on an untouched tree. Reading them as slugs would offer an unread handoff for deletion.
  */
 const LEGACY_MOVES: ReadonlyMap<string, string> = new Map([
   ['memory-routing', 'handoff/memory-routing'],
@@ -32,14 +30,9 @@ const LEGACY_MOVES: ReadonlyMap<string, string> = new Map([
 ])
 
 /**
- * Scratch-root names a different migration moves out of scratch for good,
- * derived from that migration's own table rather than duplicated in a second
- * hand-kept list. `RECORD_LAYOUT_MOVES` names `memory-archive`, the
- * retired-entry archive of the memory kind, which is never offered for deletion,
- * and `PROMOTED_FOLDERS`
- * names an evidence folder a durable record cites by name. A project that has
- * not run either migration still carries these at the scratch root, where an
- * ordinary slug's own age test would eventually offer them.
+ * Scratch-root names a different migration moves out of scratch for good, derived from that
+ * migration's own table: `RECORD_LAYOUT_MOVES` and `PROMOTED_FOLDERS`. A project that has not
+ * run either still carries these at the scratch root, where an age test would offer them.
  */
 function migratedScratchNames(): ReadonlyMap<string, string> {
   const names = new Map<string, string>()
@@ -203,11 +196,8 @@ async function groupedUnit(
 }
 
 /**
- * `pr/review/` groups by pull request rather than reporting as one folder
- * unit, per the prune-tmp plan's Question 3: a review pass leaves one body
- * file per pass, and a folder holding thousands of them would otherwise
- * report as a single row with no way to prune the finished pulls apart from
- * one still open.
+ * `pr/review/` groups by pull request rather than reporting as one folder unit, since a review
+ * pass leaves one body file per pass and a folder of thousands would hide the finished pulls.
  */
 async function reviewUnits(
   displayPath: string,
@@ -443,11 +433,8 @@ async function deleteUnits(
 }
 
 /**
- * Reports scratch nobody has touched inside the age window, and deletes it
- * only when asked.
- *
- * Reads mtime the way `sizeRecords` does, so a machine restored by `canon
- * records pull` reads every file as new and fails safe by offering nothing.
+ * Reports scratch nobody has touched inside the age window, and deletes it only when asked.
+ * Reads mtime as `sizeRecords` does, so a restored machine reads every file new and offers nothing.
  */
 export async function pruneScratch(
   root: string,

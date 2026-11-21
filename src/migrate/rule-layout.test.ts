@@ -44,10 +44,8 @@ const HASHES: DomainHashes = {
 }
 
 /**
- * One flat file of each class the verb has to separate: clean by stamp,
- * edited by stamp, clean by catalog fallback, the one renumbered rule, an
- * unclaimed name, a byte-identical duplicate, a real collision, and a
- * project-authored file the walk must never reach.
+ * One flat file of each class the verb has to separate, from clean by stamp to a real
+ * collision, plus a project-authored file the walk must never reach.
  */
 function seed(): void {
   write('.claude/rules/core/005-behavior.md', 'clean content\n')

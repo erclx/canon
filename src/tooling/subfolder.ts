@@ -5,12 +5,8 @@ import { gitEnv } from '@/git/env'
 const WITHHELD_PREFIX = '.github/'
 
 /**
- * Whether the target sits below the root of the git repository holding it. A
- * target outside any repository, or one git cannot read, counts as a root, so
- * a scratch folder with no repository keeps the behavior a root sync has.
- *
- * Synchronous because `scan` and `buildToolingReport` are, which is why this
- * does not reuse the async worktree reader.
+ * Whether the target sits below the root of the git repository holding it. A target outside any repository, or one
+ * git cannot read, counts as a root. Synchronous because `scan` and `buildToolingReport` are.
  */
 export function isSubfolderTarget(target: string): boolean {
   return subfolderPath(target) !== undefined
@@ -40,10 +36,8 @@ export function subfolderPath(target: string): string | undefined {
 }
 
 /**
- * GitHub reads workflows only at the repository root, so a `.github/` copied
- * into a subfolder is a file nothing runs. `scan`, `injectConfigs`, and
- * `injectSeeds` all read this, so the set the diff withholds and the set the
- * sync skips cannot disagree, whether the path ships as a config or a seed.
+ * GitHub reads workflows only at the repository root, so a `.github/` copied into a subfolder is a file nothing runs.
+ * `scan`, `injectConfigs`, and `injectSeeds` all read this, so the diff and the sync cannot disagree.
  */
 export function isWithheldInSubfolder(rel: string): boolean {
   return rel.startsWith(WITHHELD_PREFIX)

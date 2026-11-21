@@ -4,9 +4,8 @@ import { recordDir } from '@/roots/record'
 
 /**
  * The two record folders that share one ordinal sequence, per
- * `claude/skills/plan-intake/references/intake.md` and `claude/skills/plan-groundwork/references/groundwork.md`. A folder opened as
- * either kind blocks the same number for the other, so the two read together
- * rather than each keeping a count of its own.
+ * `claude/skills/plan-intake/references/intake.md` and `claude/skills/plan-groundwork/references/groundwork.md`.
+ * A folder opened as either kind blocks the number for the other.
  */
 export const ORDINAL_KINDS = ['intake', 'groundwork'] as const
 
@@ -22,15 +21,9 @@ const ORDINAL_WIDTH = 2
 const MAX_ATTEMPTS = 5
 
 /**
- * How long a reservation with no leaf folder behind it stays live before
- * `reserve` will clear it.
- *
- * An ordinary claim reserves the number and creates its leaf folder with
- * nothing awaited in between, so it finishes in milliseconds. The threshold
- * only has to clear that by a wide margin, not bound it tightly: reading a
- * genuinely abandoned lock as live costs one retry, while reading one still
- * in flight as abandoned reopens the exact duplicate this recovery exists to
- * close, so the cost of guessing too short is the one that matters here.
+ * How long a reservation with no leaf folder behind it stays live before `reserve` clears it.
+ * Guessing too short reopens the duplicate this recovery exists to close, and too long
+ * costs one retry, so it only has to clear an ordinary claim's milliseconds by a wide margin.
  */
 const STALE_LOCK_MS = 5 * 60 * 1000
 
@@ -73,14 +66,9 @@ function pad(ordinal: number): string {
 }
 
 /**
- * Where a number is reserved ahead of creating either kind's own folder.
- *
- * The two kinds share one sequence but not one directory, so a leaf `mkdir`
- * under `intake/` and one under `groundwork/` never collide with each other
- * even when both land on the same number in the same instant, which is the
- * race this verb exists to close. Reserving the number itself, at a path both
- * calls resolve to regardless of kind, is what makes the two contend on the
- * same `mkdir`.
+ * Where a number is reserved ahead of creating either kind's own folder. The two kinds share
+ * one sequence but not one directory, so reserving at a path both resolve to is what makes
+ * them contend on the same `mkdir`.
  */
 function lockPath(root: string, ordinal: string): string {
   return recordDir(root, 'ordinal-locks', ordinal)
@@ -112,13 +100,8 @@ async function lockAgeMs(dir: string): Promise<number | undefined> {
 }
 
 /**
- * `true` when a lock carries no leaf folder in either kind and is old enough
- * that an ordinary claim could not still be in flight.
- *
- * No backing folder alone is not enough, since `claimOrdinal` awaits the leaf
- * `mkdir` after `reserve` returns, and a second process seeing the lock in
- * that gap would land its own leaf at the same ordinal. Requiring the lock to
- * be older than `STALE_LOCK_MS` keeps that window from reading as abandoned.
+ * `true` when a lock carries no leaf folder in either kind and is older than `STALE_LOCK_MS`.
+ * A missing folder alone is not enough, since a claim awaits the leaf `mkdir` after `reserve`.
  */
 async function isStale(root: string, ordinal: string): Promise<boolean> {
   if (await isBacked(root, ordinal)) return false
@@ -128,16 +111,9 @@ async function isStale(root: string, ordinal: string): Promise<boolean> {
 }
 
 /**
- * `true` when this call won the reservation, `false` when another call holds
- * a live one.
- *
- * A lock already held is read against the kind folders before it is read as
- * contention. Reserving and creating the leaf folder are two acts rather than
- * one, so a process killed in between leaves a lock with nothing behind it,
- * and a caller walking that lock as ordinary contention would refuse every
- * later claim as `ordinal-contended` on a cause that was never contention.
- * Clearing a stale lock and retrying the same number is what keeps that dead
- * reservation from costing every claim that follows it.
+ * `true` when this call won the reservation, `false` when another holds a live one. A held
+ * lock is read against the kind folders first, since a process killed between reserving and
+ * creating the leaf leaves a dead lock that would refuse every later claim.
  */
 async function reserve(root: string, ordinal: string): Promise<boolean> {
   const locks = recordDir(root, 'ordinal-locks')
@@ -189,16 +165,9 @@ export interface ClaimRefused {
 export type ClaimOutcome = Claimed | ClaimRefused
 
 /**
- * Computes the next ordinal and creates `.canon/<kind>/<nn>-<slug>/` in one
- * act, so no second session lands between the read and the create, whichever
- * kind it claims.
- *
- * The reservation serializes, being the one `mkdir` an `intake` and a
- * `groundwork` claim share on the same number. A loser on a live reservation
- * re-reads the highest ordinal and retries, bounded so heavy contention
- * refuses, and `reserve` recovers a stale one. The leaf `mkdir` then runs with
- * `recursive: false`, since a recursive one succeeds silently on an existing
- * directory.
+ * Computes the next ordinal and creates `.canon/<kind>/<nn>-<slug>/` in one act. The one
+ * `mkdir` an `intake` and a `groundwork` claim share serializes them, and the leaf `mkdir`
+ * runs with `recursive: false`, since a recursive one succeeds silently on an existing directory.
  */
 export async function claimOrdinal(
   root: string,

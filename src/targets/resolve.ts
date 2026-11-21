@@ -12,11 +12,8 @@ import {
 } from '@/targets/sweep'
 
 /**
- * Where a target came from, carried on the row rather than inferred.
- *
- * A caller deciding whether an answer is trustworthy needs to know which rows
- * the machine recorded for itself and which a walk guessed at, and the two
- * carry different bounds.
+ * Where a target came from, carried on the row rather than inferred, since a caller needs to know which
+ * rows the machine recorded and which a walk guessed at, and the two carry different bounds.
  */
 export type TargetSource = 'given' | 'record' | 'sweep'
 
@@ -50,16 +47,9 @@ export interface ResolveTargetsOptions extends SweepOptions {
 }
 
 /**
- * Answers which projects the toolkit has installed into.
- *
- * The record written at install time is the primary source and a walk is the
- * fallback, which is the shape the population needs: a sweep alone cannot see
- * another machine or a clone under a path nobody named, and that is exactly how
- * the count moved from four to seven inside one pass and was then wrong in both
- * directions at once.
- *
- * A caller naming paths gets those and no lookup at all, since it has already
- * answered the question this resolves.
+ * Answers which projects the toolkit has installed into. The record written at install time is primary and
+ * a walk is the fallback, since a sweep alone cannot see another machine or a clone under an unnamed path.
+ * A caller naming paths gets those and no lookup.
  */
 export async function resolveTargets(
   opts: ResolveTargetsOptions = {},
@@ -93,8 +83,7 @@ export async function resolveTargets(
   const swept = await sweepTargets(opts.sweep, opts)
   const known = new Set(recorded.flatMap((target) => target.paths))
 
-  // A sweep row already held is the same project twice. One holding a known and
-  // an unknown path is a second clone, and replaces the record's row.
+  // A sweep row already held is the same project twice, and one with a known and unknown path is a second clone.
   const added: KnownTarget[] = []
   const superseded = new Set<string>()
 
@@ -105,15 +94,13 @@ export async function resolveTargets(
 
     for (const path of overlap) superseded.add(path)
 
-    // The recorded clone leads, since a sync actually ran there, and a caller
-    // reading one path takes the first.
+    // The recorded clone leads, since a sync actually ran there and a caller reading one path takes the first.
     const paths = [
       ...overlap,
       ...target.paths.filter((path) => !known.has(path)),
     ]
 
-    // Re-derived against this row's order, since `target.legacyPaths` follows the
-    // sweep's sort and mismatches `paths` once the recorded clone is not first.
+    // Re-derived against this row's order, since `target.legacyPaths` follows the sweep's sort.
     added.push({
       paths,
       origin: target.origin,

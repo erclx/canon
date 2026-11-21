@@ -5,13 +5,9 @@ import { payloadFor, ROOT, run, TREES, useFixture } from './fixture'
 
 const ctx = useFixture()
 
-// The guard decides on three readings at once: whether the command writes a
-// plan path, whether that path names a file yet, and whether the transcript
-// carries an invocation no earlier new plan spent. Each project below is its
-// own root holding one existing plan, so a marker one case writes never
-// licenses or blocks another.
-// Every synced project inherits the seed copy, so a fix landing in this tree
-// alone would leave each of them blocking on the bug it fixed.
+// The guard decides on whether the command writes a plan path, whether that path names a file yet, and whether
+// the transcript carries an unspent invocation. Every synced project inherits the seed copy, so a fix
+// landing in one tree alone would leave each of them blocking on the bug.
 it('should keep the two plan-guard.sh copies byte-identical', () => {
   const [local, seed] = TREES.map((tree) =>
     readFileSync(join(tree.dir, 'plan-guard.sh'), 'utf8'),
@@ -21,8 +17,7 @@ it('should keep the two plan-guard.sh copies byte-identical', () => {
 })
 
 describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
-  // The line shapes the guard reads an invocation from, pinned here because the
-  // transcript format is Claude Code's rather than canon's.
+  // The line shapes the guard reads an invocation from, pinned because the transcript format is Claude Code's.
   const SKILL_CALL = JSON.stringify({
     message: {
       content: [
@@ -39,8 +34,7 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
     message: { content: '<command-name>/canon:plan-feature</command-name>' },
     type: 'user',
   })
-  // A tool call naming no plan skill, so a transcript carrying it reads as
-  // today's format with no invocation rather than as an unread one.
+  // A tool call naming no plan skill reads as today's format with no invocation, not an unread one.
   const OTHER_CALL = JSON.stringify({
     message: {
       content: [{ input: { command: 'ls' }, name: 'Bash', type: 'tool_use' }],
@@ -169,8 +163,7 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
     expect(result.code).toBe(0)
   })
 
-  // A PreToolUse pass is not a landed write, so a retry or a main-root `cp`
-  // reaches the guard a second time for one plan.
+  // A PreToolUse pass is not a landed write, so a retry reaches the guard twice for one plan.
   it('should pass a second write onto the plan an invocation already licensed', async () => {
     const project = planProject(`${SKILL_CALL}\n`)
     await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
@@ -332,8 +325,7 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
   })
 
   describe('transcript format', () => {
-    // The Skill call the guard reads, moved under a key Claude Code might
-    // rename it to, so no line parses as a tool call in today's shape.
+    // The Skill call the guard reads, moved under a key Claude Code might rename it to.
     const RESHAPED_CALL = JSON.stringify({
       message: {
         content: [
@@ -518,13 +510,9 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
   })
 })
 
-// Each trigger reaches the session by a different channel, so the cases
-// deciding whether the hook is safe are the ones the acting case above cannot
-// reach: an automatic compaction has to instruct the summarizer without ever
-// blocking, and a manual one has to stop asking after the first refusal.
-// Blocking every `/compact` would trap the session that answered and the
-// session that declined alike, and blocking an automatic one stops a compaction
-// nobody is told about.
+// Each trigger reaches the session by a different channel. An automatic compaction must instruct the
+// summarizer without ever blocking, and a manual one must stop asking after the first refusal,
+// since blocking either would trap the session.
 describe('.claude/hooks/precompact-handoff.sh', () => {
   const hook = join(ROOT, '.claude/hooks/precompact-handoff.sh')
 
@@ -547,8 +535,7 @@ describe('.claude/hooks/precompact-handoff.sh', () => {
   it.concurrent('should instruct on every automatic compaction rather than once', async ({
     expect,
   }) => {
-    // A precompute pass fires with the real payload and re-arms when refused, so
-    // anything counted per session drains unseen, and the automatic path counts none.
+    // A precompute pass fires with the real payload and re-arms when refused, so the automatic path counts none.
     const once = payload({ session_id: 'precompact-arms', trigger: 'auto' })
 
     const first = await run(hook, once)
@@ -561,8 +548,7 @@ describe('.claude/hooks/precompact-handoff.sh', () => {
   it.concurrent('should block a compaction whose payload names no trigger', async ({
     expect,
   }) => {
-    // An absent trigger is the payload the hook cannot answer with silence,
-    // so it takes the manual path and asks.
+    // An absent trigger is the payload the hook cannot answer with silence, so it asks.
     const result = await run(hook, payload({ session_id: 'precompact-bare' }))
 
     expect(result.stderr).toContain('Run the canon:session-compact skill')
@@ -589,8 +575,7 @@ describe('.claude/hooks/precompact-handoff.sh', () => {
   it.concurrent('should keep the blocking reason off stdout', async ({
     expect,
   }) => {
-    // Exit 2 makes stderr the blocking reason, and stdout here joins the
-    // summarizer's instructions for a compaction that will not happen.
+    // Exit 2 makes stderr the blocking reason, and stdout would join the summarizer's instructions.
     const result = await run(
       hook,
       payload({ session_id: 'precompact-out', trigger: 'manual' }),
@@ -603,8 +588,7 @@ describe('.claude/hooks/precompact-handoff.sh', () => {
   it.concurrent('should carry on rather than block when the marker cannot be written', async ({
     expect,
   }) => {
-    // Blocking without the marker would refuse every compaction, so an unwritable
-    // root fails open, since one unasked handoff costs less.
+    // Blocking without the marker would refuse every compaction, so an unwritable root fails open.
     const result = await run(
       hook,
       payload({ session_id: 'precompact-readonly' }),

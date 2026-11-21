@@ -15,14 +15,9 @@ const FORMATTERS = [
 const FORMATTABLE = new Set(['.json', '.jsonc', '.md', '.yml', '.yaml'])
 
 /**
- * Runs the project's installed formatter over the files a sync wrote, so a
- * write the formatter would reshape does not leave a whitespace diff on a file
- * nobody edited. Only the named paths are passed, never the project, which
- * keeps a dirty tree unformatted. A path is absolute or relative to `target`.
- *
- * Best effort: no installed formatter, or one that fails, leaves the output as
- * written and the sync unaffected. Never pass a file the sync hashes against
- * its source, since the bytes on disk would stop matching the record.
+ * Runs the project's installed formatter over the files a sync wrote, passing only the named paths
+ * so a dirty tree stays unformatted. Best effort: no formatter, or one that fails, leaves the
+ * output as written. Never pass a file the sync hashes against its source.
  */
 export async function formatWritten(
   target: string,

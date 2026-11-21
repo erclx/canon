@@ -14,12 +14,8 @@ import { PNG } from 'pngjs'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 /**
- * Runs the web stack's capture script against a fixture page with a dialog
- * over masked elements, since whether a mask's element is covered is a hit
- * test only a real engine answers.
- *
- * The suite needs a browser binary and skips without one, so a green pipeline
- * is not evidence this passed.
+ * Runs the web stack's capture script against a fixture page with a dialog over masked elements, since a hit test
+ * only a real engine answers. The suite skips without a browser binary, so a green pipeline is not evidence.
  */
 
 const SCRIPT = join(

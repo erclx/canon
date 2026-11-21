@@ -14,11 +14,8 @@ const BAND = 50
 
 let root: string
 
-// Every inherited GIT_* var is dropped before the fixtures are built. A git hook
-// exports GIT_DIR, so a run under pre-push would resolve every fixture against
-// the toolkit's own repository and each case would answer for the wrong tree.
-// WORKTREE_PORT_OFFSET goes with them, since the helper reads it first and an
-// operator who set it by hand would short-circuit every case below.
+// Every inherited GIT_* var is dropped before the fixtures are built, since a hook's GIT_DIR would resolve them against
+// the toolkit's own repository. WORKTREE_PORT_OFFSET goes too, since the helper reads it first.
 const inheritedEnv = (): NodeJS.ProcessEnv =>
   Object.fromEntries(
     Object.entries(process.env).filter(
@@ -67,8 +64,7 @@ beforeEach(() => {
   sh('mkdir -p repo/src repo/.claude/worktrees plain')
   sh('git -C repo worktree add -q .claude/worktrees/live -b live')
 
-  // A removed worktree leaves two shapes, a deleted `.git` sending git upward and
-  // a pruned admin directory making git refuse, each reaching the base port.
+  // A removed worktree leaves two shapes, a deleted `.git` and a pruned admin directory, each reaching the base port.
   sh('mkdir -p repo/.claude/worktrees/unregistered/src')
   sh('git -C repo worktree add -q .claude/worktrees/pruned -b pruned')
   sh('rm -rf repo/.git/worktrees/pruned')

@@ -1,9 +1,7 @@
 /**
- * Plans the hook entries a target's settings lack against the seeded
- * `settings.json`, which is the list of what to wire. A seeded script counts
- * only where the target holds it under `.claude/hooks/`, since an entry with
- * no script fails every call it matches, and deleting the script is how a
- * project opts out of one.
+ * Plans the hook entries a target's settings lack against the seeded `settings.json`.
+ * A seeded script counts only where the target holds it under `.claude/hooks/`,
+ * since deleting the script is how a project opts out of one.
  */
 
 import { existsSync } from 'node:fs'
@@ -123,11 +121,9 @@ export function hooksShapeError(
 }
 
 /**
- * Adds only: an existing group, entry, or matcher is never removed or
- * reordered. A lacking entry joins the group whose matcher equals the one it
- * needs, after that group's own hooks, and otherwise lands in a new group
- * whose matcher names only the tools still lacking. Expects a shape
- * `hooksShapeError` passed.
+ * Adds only: an existing group, entry, or matcher is never removed or reordered.
+ * A lacking entry joins the group whose matcher equals its own, else a new group.
+ * Expects a shape `hooksShapeError` passed.
  */
 export function planHookWiring(
   hooks: unknown,

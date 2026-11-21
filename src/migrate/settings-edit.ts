@@ -1,11 +1,7 @@
 /**
- * Adds values to a JSON settings file as text insertions, so every byte the
- * edit does not insert stays as the project wrote it.
- *
- * `jsonc-parser`'s own `modify` was measured and rejected here: with
- * formatting on, it reformats the line the insertion lands on, which expanded
- * a one-line sibling entry into five lines. This file takes only offsets from
- * the parse tree and writes the inserted text itself.
+ * Adds values to a JSON settings file as text insertions, so every byte the edit does not
+ * insert stays as written. `jsonc-parser`'s `modify` reformats the line it lands on, so
+ * this takes only offsets from the parse tree.
  */
 
 import {
@@ -113,11 +109,8 @@ function render(
 }
 
 /**
- * Inserts after the container's last member. A member sharing the
- * container's opening line marks a one-line container, which keeps the new
- * member on that line in compact form. Otherwise the member takes its own
- * line at the last member's indent, or one unit past the container's for an
- * empty one.
+ * Inserts after the container's last member. A member sharing the container's opening
+ * line keeps the new one on that line, and otherwise it takes its own line at the indent.
  */
 function insertMember(
   text: string,

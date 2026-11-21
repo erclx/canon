@@ -2,13 +2,9 @@ import { $ } from 'bun'
 import { gitEnv } from '@/git/env'
 
 /**
- * Resolves the root of the checkout the caller is standing in, which is the
- * linked worktree rather than the main one when a session is inside one.
- *
- * A tracked tree differs per worktree, so a verb answers about the session's
- * edits only from this root, and the working directory is no substitute from a
- * subdirectory. The directory is an argument so a verb driven by an injected
- * root asks about that one rather than wherever the process stands.
+ * Resolves the root of the checkout the caller is standing in, the linked
+ * worktree when a session is inside one. The directory is an argument so an
+ * injected root asks about that one.
  */
 export async function currentWorktreeRoot(
   cwd: string = process.cwd(),
@@ -23,14 +19,9 @@ export async function currentWorktreeRoot(
 }
 
 /**
- * Resolves the root every shared-scratch folder lives under. `git worktree
- * list` puts the main worktree first, and trusting the working directory
- * instead would write a second board nothing else reads, or validate a linked
- * worktree's empty folder and report it clean.
- *
- * A caller reaching this from a linked worktree is the case it exists for: the
- * file-editing tools refuse a main-root path there, so a verb resolving the
- * root in-process is the route a skill body has.
+ * Resolves the root every shared-scratch folder lives under, the first entry of
+ * `git worktree list`. The file-editing tools refuse a main-root path from a
+ * linked worktree, so a verb resolves it in-process.
  */
 export async function mainWorktreeRoot(): Promise<string> {
   const result = await $`git worktree list --porcelain`
@@ -60,21 +51,14 @@ export interface RefReport {
 
 /**
  * Reports which of the local head and the `origin` remote-tracking ref already
- * name a branch, separating an absent branch from a read that failed.
- *
- * `git show-ref --verify` exits 128 both for a missing ref and for no
- * repository, while `for-each-ref` exits zero with empty output for absent. A
- * ref path is a pattern here, so `refs/heads/x` also matches `refs/heads/x/y`,
- * which git forbids beside it, so the over-match names the blocking branch.
- * The remote-tracking ref is read as the last fetch left it, so a branch pushed
- * elsewhere since is invisible, and `git ls-remote` costs a network read.
+ * name a branch, separating an absent branch from a failed read. A ref path is a
+ * pattern, so the over-match names a blocking branch.
  */
 export async function branchRefs(
   branch: string,
   cwd: string = process.cwd(),
 ): Promise<RefReport> {
-  // Every argument is interpolated rather than written inline, since Bun's
-  // shell parses the bare parentheses in `%(refname)` as syntax of its own.
+  // Every argument is interpolated, since Bun's shell parses the parentheses in `%(refname)`.
   const args = [
     '--format=%(refname)',
     `refs/heads/${branch}`,

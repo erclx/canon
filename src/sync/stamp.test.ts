@@ -457,18 +457,15 @@ describe('isLegacyStamped', () => {
   })
 })
 
-// The machine-level index lists the projects the toolkit installed into, and
-// every fixture here stamps a folder under the OS temp folder. A row for each
-// is how the index reached thousands of dead paths, so a stamp into scratch
-// must leave the index without it. `src/targets/registry.test.ts` proves a
-// real folder still records.
+// The machine-level index lists the projects the toolkit installed into, and every fixture stamps a
+// folder under the OS temp folder, so a stamp into scratch must leave the index without a row.
+// `src/targets/registry.test.ts` proves a real folder still records.
 describe('the machine-level target index', () => {
   const SETUP_TMPDIR = process.env.TMPDIR
   const SETUP_STATE_DIR = process.env.CANON_STATE_DIR
   let STATE: string
 
-  // A per-test state folder keeps the recorded row out of the operator's real
-  // index under a runner that skips `vitest.setup.ts`.
+  // A per-test state folder keeps the recorded row out of the operator's real index.
   beforeEach(() => {
     STATE = mkdtempSync(join(tmpdir(), 'canon-stamp-state-'))
     process.env.CANON_STATE_DIR = STATE
@@ -482,8 +479,7 @@ describe('the machine-level target index', () => {
     rmSync(STATE, { recursive: true, force: true })
   })
 
-  // The fixture is under the OS temp folder, so pointing that folder elsewhere
-  // lets the stamp reach a recordable target, or an absent row proves nothing.
+  // The fixture is under the OS temp folder, so pointing that elsewhere lets the stamp reach a recordable target.
   it('should gain a target outside every scratch root on a stamp write', async () => {
     process.env.TMPDIR = join(TARGET, 'elsewhere')
 

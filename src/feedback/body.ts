@@ -9,13 +9,8 @@ export const REQUIRED_FIELDS = ['Surface', 'Observed', 'Proposed fix'] as const
 
 /**
  * Fields are `###` headings under the report's own `## Toolkit feedback` title,
- * because that is the level a GitHub issue form emits for a field label. One
- * parser therefore reads a report the CLI wrote and one a person submitted
- * through the web form.
- *
- * The retired `**Surface:**` bold form is not accepted. Reading both would
- * leave a producer free to keep emitting the shape this parser exists to
- * retire, and the validator would then enforce nothing.
+ * the level a GitHub issue form emits, so one parser reads both producers. The
+ * retired `**Surface:**` bold form is not accepted.
  */
 const FIELD_HEADING = /^###\s+(.+?)\s*$/
 const FENCE = /^\s*(`{3,}|~{3,})(.*)$/
@@ -37,8 +32,7 @@ export function parseSections(body: string): Map<string, string> {
   }
 
   for (const line of body.split('\n')) {
-    // A fence closes only on the same marker at least as long, per CommonMark, so
-    // a `###` inside a Repro fence is shell rather than the next field.
+    // A fence closes only on the same marker at least as long, so a `###` inside a Repro fence is shell.
     const fenceMatch = line.match(FENCE)
     const run = fenceMatch?.[1]
     if (run !== undefined) {
@@ -92,10 +86,9 @@ export function missingFieldMessage(field: string): string {
 }
 
 /**
- * The fields a follow-up comment carries. A follow-up reports what happened
- * after filing, so it names no surface and proposes no fix of its own. It says
- * whether the body's fix still stands, since triage reads the body as the
- * request and a silent overturn leaves it acting on the old one.
+ * The fields a follow-up comment carries. A follow-up names no surface and
+ * proposes no fix, and says whether the body's fix still stands, since triage
+ * reads the body as the request.
  */
 export const FOLLOW_UP_FIELDS = [
   'Observed',

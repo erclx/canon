@@ -155,14 +155,9 @@ describe('a list --json verb', () => {
 })
 
 /**
- * The gate is the one verb here whose stages are not run from a case, since
- * its last stage runs `bun run test`, so a case spawning it spawns the suite
- * that spawns the case. Every stage also reads this checkout by design and the
- * first writes to it. What the tier answers instead is whether the entry point
- * the two package scripts name is registered in the binary at all.
- *
- * The stages are driven end to end twice on every branch, by the `pre-push`
- * hook and by `bun run check:ci` on the pull request.
+ * The gate's stages are not run from a case, since its last stage runs `bun run test`
+ * and a case spawning it spawns the suite that spawns the case. This tier answers
+ * whether the entry point the two package scripts name is registered.
  */
 describe('gate run', () => {
   it('should be registered under a group of its own', () => {

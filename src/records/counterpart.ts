@@ -182,10 +182,8 @@ function shorten(label: string): string {
 }
 
 /**
- * Reports each counterpart-class path no `## Counterparts` bullet covers, and
- * each bullet whose verdict is not `here`, `none` with a reason, or `filed`
- * with a backticked stem. A malformed bullet still covers its paths, so one
- * fault reports once.
+ * Reports each counterpart-class path no `## Counterparts` bullet covers, and each bullet
+ * whose verdict is not `here`, `none` with a reason, or `filed` with a backticked stem.
  */
 export function checkCounterparts(
   filesToTouch: readonly string[],

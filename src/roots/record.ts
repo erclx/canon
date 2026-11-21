@@ -2,15 +2,8 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
 /**
- * The roots a session record folder is read at, in precedence order.
- *
- * `.canon/` wins because a tree that carries it has been migrated, and reading
- * `.claude/` there would answer from the copy the move left behind. The second
- * spelling is what an unmigrated project still resolves through, so it stays
- * until no target reaches one, which nothing measures.
- *
- * The shape is `readStamp`'s: order the spellings, take the first that exists,
- * and stand the creation default in when none does.
+ * The roots a session record folder is read at, in precedence order. `.canon/` wins because a tree
+ * carrying it has been migrated, and `.claude/` is what an unmigrated project resolves through.
  */
 // canon-keep-record-root
 export const RECORD_ROOTS = ['.canon', '.claude'] as const
@@ -18,27 +11,14 @@ export const RECORD_ROOTS = ['.canon', '.claude'] as const
 export type RecordRoot = (typeof RECORD_ROOTS)[number]
 
 /**
- * The root a record folder is created at when no root carries it yet.
- *
- * It agrees with the head of the read precedence, which is what the move
- * changed. While the two disagreed, creation stayed at `.claude/` so a record
- * could not land under a root whose ignore line had yet to reach the project.
- * The ignore line ships now, so a fresh project scaffolds one root and an
- * unmigrated one keeps resolving its own through the fallback above.
+ * The root a record folder is created at when no root carries it yet, which agrees with the
+ * head of the read precedence. An unmigrated project keeps resolving its own through the fallback.
  */
 export const CREATION_ROOT: RecordRoot = '.canon'
 
 /**
- * The deletable scratch folder, named at the spelling `.claude/` gave it.
- *
- * Scratch resolves at `.canon/tmp` only. The `.claude/.tmp` spelling is a
- * migration source, named through `LEGACY_SCRATCH_REL` by the verbs that move
- * it, and no lookup falls back to it. Callers still name the folder at this
- * spelling because `spell` is the only place the variant is decided. Inside a
- * dotted root the leading dot hides nothing already hidden and costs a bare
- * `ls` that omits the folder, so the move dropped it. Every other record
- * folder keeps its name, `.records.git` included, where the dot marks the
- * mechanism apart from a payload rather than hiding it.
+ * The deletable scratch folder, named at the spelling `.claude/` gave it. Scratch resolves at
+ * `.canon/tmp` only, and `.claude/.tmp` is a migration source named through `LEGACY_SCRATCH_REL`.
  */
 export const SCRATCH = '.tmp'
 
@@ -49,16 +29,9 @@ export const LEGACY_SCRATCH_REL = '.claude/.tmp' // canon-keep-record-root
 const CANON_SCRATCH = 'tmp'
 
 /**
- * Every entry that lives under the record root, at the name `.claude/` gave it.
- *
- * These are the ignore patterns the move to `.canon/` collapsed into one, plus
- * every record folder since, so the list counts entries, with `.records.git`
- * the backup history and `README.md` a file a records pull writes back.
- * `worktrees` is absent, since the harness requires it under `.claude/`.
- * Everything absent is committed and never lands under the record root, so
- * `rules`, `skills`, and `hooks` stay where the vendor reads them, and
- * `context` and the loose documents resolve under `canon/` through
- * `surface.ts`.
+ * Every entry that lives under the record root, at the name `.claude/` gave it. `worktrees` is
+ * absent since the harness requires it under `.claude/`, and so is everything committed:
+ * `rules`, `skills`, `hooks`, and `context`, which resolves under `canon/` through `surface.ts`.
  */
 export const RECORD_ENTRIES: readonly string[] = [
   '.records.git',
@@ -90,23 +63,16 @@ export function isRecordEntry(name: string): boolean {
 }
 
 /**
- * How a root spells a folder name. Only the scratch folder differs.
- *
- * Exported because the migration verb has to name a folder's destination and
- * deriving it there would state the one naming variant in a second place, where
- * a tree half-moved by one rule and read by the other resolves nothing.
+ * How a root spells a folder name. Only the scratch folder differs, and exporting this keeps
+ * the migration verb from stating the one naming variant in a second place.
  */
 export function spell(root: RecordRoot, folder: string): string {
   return root === '.canon' && folder === SCRATCH ? CANON_SCRATCH : folder
 }
 
 /**
- * The root a folder resolves at: the first that carries it, and the creation
- * default when neither does.
- *
- * Presence is read on the record folder itself rather than on the full path, so
- * an archive or a payload that does not exist yet still resolves beside the
- * records it belongs to rather than at the creation default.
+ * The root a folder resolves at: the first that carries it, and the creation default when
+ * neither does. Presence is read on the record folder itself rather than the full path.
  */
 function rootOf(root: string, folder: string): RecordRoot {
   if (folder === SCRATCH) return CREATION_ROOT
@@ -119,12 +85,8 @@ function rootOf(root: string, folder: string): RecordRoot {
 }
 
 /**
- * Where a record folder is read.
- *
- * `folder` is the record folder itself and `rest` is whatever sits inside it,
- * so a caller spells no root and no folder-name variant of its own. A caller
- * that spells `.claude` by hand is the one thing the move has to find, and one
- * that calls this is one the move never has to open again.
+ * Where a record folder is read. `folder` is the record folder itself and `rest` is whatever
+ * sits inside it, so a caller spells no root and no folder-name variant of its own.
  */
 export function recordDir(
   root: string,
@@ -137,12 +99,9 @@ export function recordDir(
 }
 
 /**
- * Every root a record folder would be read at, in precedence order, whether or
- * not it is on disk.
- *
- * Containment tests take this rather than `recordDir`, since a path written
- * against the root a tree no longer uses is still a path into that folder and
- * reading it as outside would report a shipped plan as still live.
+ * Every root a record folder would be read at, in precedence order, whether or not it is on disk.
+ * Containment tests take this rather than `recordDir`, since a path under a root the tree no
+ * longer uses is still a path into that folder.
  */
 export function recordDirs(
   root: string,
@@ -157,13 +116,9 @@ export function recordDirs(
 }
 
 /**
- * The creation destination relative to the project root, which is the form a
- * message displays and an option default carries.
- *
- * It resolves the root the way a read does rather than pinning the creation
- * default, since pinning would write a new record to `.canon/` in a project
- * whose board is still `.claude/`, splitting its records across two roots. The
- * root is a parameter, since two callers join the result onto a target root.
+ * The creation destination relative to the project root, the form a message displays.
+ * It resolves the root the way a read does, since pinning the creation default would split a
+ * `.claude/` project's records across two roots.
  */
 export function creationRel(
   root: string,
@@ -186,14 +141,9 @@ function holdsRecords(root: string, candidate: RecordRoot): boolean {
 }
 
 /**
- * The record root itself, for a caller whose subject is the root rather than a
- * folder inside it.
- *
- * A half-migrated tree resolves on the root that exists, so a push never reads
- * history at one root and stages a work tree at the other. A root counts when
- * it holds a `.records.git` or a record folder, since `.claude/` exists in
- * every installed project. `README.md` and the scratch folder are left out,
- * since a records pull writes the first back and the second is deletable.
+ * The record root itself, for a caller whose subject is the root rather than a folder inside it.
+ * A root counts when it holds a `.records.git` or a record folder, since `.claude/` exists in
+ * every installed project, and `README.md` and the scratch folder are left out.
  */
 export function recordRoot(root: string): string {
   return join(

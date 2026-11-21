@@ -11,10 +11,8 @@ export type ChangelogRange =
   | { readonly kind: 'unknown-version'; readonly version: string }
 
 /**
- * `release-please` writes each release as `## [x.y.z](compare-url) (date)`, so
- * this is the one form the split reads. A heading in any other form is body
- * text of the entry above it, and a change to that form in the release tool
- * leaves the file reading as no entries at all.
+ * `release-please` writes each release as `## [x.y.z](compare-url) (date)`, the one form the split
+ * reads. A heading in any other form is body text of the entry above it.
  */
 const HEADING = /^## \[([^\]]+)\]/
 
@@ -46,14 +44,9 @@ export function parseChangelog(text: string): ChangelogEntry[] {
 }
 
 /**
- * The releases after `since` up to and including `running`, oldest first so a
- * reader meets them in the order they shipped.
- *
- * A version the file never listed, or one that does not parse, or a `since`
- * newer than `running`, names no range. Each reads as `unknown-version` rather
- * than an empty success, since an empty range reads as a target with nothing
- * to catch up on. `since` equal to `running` is the one empty range, because
- * that target is current.
+ * The releases after `since` up to and including `running`, oldest first. A version never listed,
+ * one that does not parse, or a `since` newer than `running` reads as `unknown-version`, and
+ * `since` equal to `running` is the one empty range.
  */
 export function entriesSince(
   entries: readonly ChangelogEntry[],

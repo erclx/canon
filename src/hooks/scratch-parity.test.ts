@@ -17,18 +17,12 @@ const TREES = [
   },
 ]
 
-// The harness assigns a background session a temp folder under the home
-// folder, which no repository ignores. The probe below is about project
-// scratch roots, so an arm naming that folder is covered by the spawned-hook
-// test instead.
+// The harness assigns a background session a temp folder under the home folder, which no
+// repository ignores, so the spawned-hook test covers an arm naming it.
 const HARNESS_FOLDER = '/.claude/jobs/'
 
-// The hook accepts a scratch write it recognizes through case arms under
-// `case "$file_path" in`, each exiting 0 on more than the bare wildcard.
-// Collecting every such arm rather than returning on the first is what keeps
-// a second arm added later from going untested. Parsing them here rather than
-// restating the two spellings is what makes this a parity test rather than a
-// second copy of the pair.
+// The hook accepts a scratch write through case arms under `case "$file_path" in`. Collecting every
+// arm, parsed here rather than restated, is what keeps a later arm from going untested.
 function deriveAcceptPatterns(source: string, hookPath: string): string[] {
   const patterns: string[] = []
 
@@ -52,10 +46,8 @@ function deriveAcceptPatterns(source: string, hookPath: string): string[] {
   return patterns
 }
 
-// `*/.canon/tmp/*` matches any path carrying that segment, the glob wrapper
-// included. check-ignore reasons about a path rather than a bash case
-// pattern, so the probe strips the wrapper down to the folder git has to
-// ignore.
+// `*/.canon/tmp/*` matches any path carrying that segment, wrapper included, so the probe
+// strips the wrapper down to the folder git has to ignore.
 function probePath(pattern: string): string {
   const folder = pattern.replace(/^\*\//, '').replace(/\/\*$/, '')
   return `${folder}/probe.md`

@@ -55,8 +55,7 @@ beforeEach(async () => {
   mkdirSync(bin, { recursive: true })
   readyMarker = join(fixture, 'ready')
 
-  // curl never touches a network. It reports the preview server reachable
-  // once the detached grandchild below has written its readiness marker.
+  // curl never touches a network, and reports the preview reachable once the detached grandchild writes its marker.
   stubBin('curl', `test -f "${readyMarker}" && exit 0\nexit 1`)
 })
 
@@ -64,10 +63,8 @@ afterEach(() => {
   rmSync(fixture, { force: true, recursive: true })
 })
 
-// Reproduces astro preview forking a detached grandchild and returning:
-// the stubbed `bun run preview` backgrounds a subshell that writes the
-// readiness marker, then exits itself immediately, so $! is already gone
-// by the time the EXIT trap runs.
+// Reproduces astro preview forking a detached grandchild and returning: the stubbed `bun run preview`
+// backgrounds a subshell that writes the readiness marker and exits, so $! is gone when the EXIT trap runs.
 const runScript = (captureExitCode: number): SpawnSyncReturns<string> => {
   copyStub('bun', 'bun-forking-preview.sh')
 
@@ -139,8 +136,7 @@ describe('screenshot.sh EXIT trap', () => {
       expect(result.status).toBe(0)
       expect(portPidList()).toEqual([])
     } finally {
-      // A regression in the trap would leave this bound, so a failed assertion above
-      // must not leak the listener into whatever runs on this port next.
+      // A regression in the trap would leave this bound, so a failed assertion must not leak the listener.
       for (const pid of portPidList()) {
         spawnSync('kill', [pid])
       }

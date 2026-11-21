@@ -48,10 +48,8 @@ export function applyInitOptions(command: Command): Command {
 }
 
 /**
- * Whether the operator passed any flag, which is what makes the command
- * scriptable by suppressing the confirmation prompt. `--stack` carries a
- * default, so presence has to be read from where the value came from rather
- * than from the value itself.
+ * Whether the operator passed any flag, which suppresses the confirmation prompt.
+ * `--stack` carries a default, so presence is read from where the value came from.
  */
 export function flagsProvided(cmd: Command): boolean {
   return INIT_OPTIONS.some(

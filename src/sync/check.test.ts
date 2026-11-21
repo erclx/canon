@@ -152,8 +152,7 @@ describe('buildToolingReport', () => {
     expect(buildToolingReport(TOOLKIT, TARGET, stamp).measured).toBe(false)
   })
 
-  // The render reads the chain to name one of the two unmeasured causes, so
-  // dropping it would report a recorded chain as none.
+  // The render reads the chain to name one of the two unmeasured causes, so dropping it would report none.
   it('should keep the recorded chain when the toolkit no longer ships it', () => {
     const stamp = stampChain(['retired-stack'])
 
@@ -192,8 +191,7 @@ describe('buildToolingReport', () => {
     expect(report.syncedAt).toBe('then')
   })
 
-  // The recorded chain is what was installed, and re-resolving from the leaf
-  // would report the skipped `base` layer's config as missing.
+  // The recorded chain is what was installed, and re-resolving would report the skipped `base` config as missing.
   it('should scan only the recorded stacks, not the leaf extends chain', () => {
     writeStack('base')
     writeStack('vite-react', 'base')
@@ -830,8 +828,7 @@ describe('readNewRules', () => {
     ).resolves.toEqual([])
   })
 
-  // The folder exists in no installed tree, so the base stack file is the only
-  // thing entitling it.
+  // The folder exists in no installed tree, so the base stack file is the only thing entitling it.
   it('should name a rule under a new folder the base stack takes whole', async () => {
     const anchor = authorRule(join('core', '000-constitution.md'), 'base rule')
     authorRule(join('security', '600-secrets.md'), 'add secrets')
@@ -854,8 +851,7 @@ describe('readNewRules', () => {
     ).resolves.toEqual([])
   })
 
-  // A rule that shipped and joined a stack before the recorded anchor, which the
-  // fallback above never sees, its window opening only after the anchor.
+  // A rule that shipped and joined a stack before the recorded anchor, which the fallback never sees.
   it('should name a rule the recorded chain lists that predates the anchor', async () => {
     writeStack('astro', 'extends = ""\nrules = ["copy", "440-capture"]\n')
     authorRule(join('ui', 'copy.md'), 'add ui')
@@ -866,8 +862,7 @@ describe('readNewRules', () => {
       readNewRules(TOOLKIT, TARGET, chainStamp(['astro'])),
     ).resolves.toEqual(['440-capture'])
 
-    // The same target read through the anchor-bound fallback misses it, which
-    // is the defect a recorded chain exists to close.
+    // The same target read through the anchor-bound fallback misses it, the defect a recorded chain closes.
     await expect(
       readNewRules(TOOLKIT, TARGET, commitStamp(anchor)),
     ).resolves.toEqual([])
@@ -891,8 +886,7 @@ describe('readNewRules', () => {
     ).resolves.toEqual([])
   })
 
-  // A stack retired or renamed since install must fall back to the anchor, since
-  // an empty list would read the same as a target holding everything.
+  // A stack retired or renamed since install must fall back to the anchor, since an empty list reads as holding everything.
   it('should fall through to the anchor-bound path when the recorded chain no longer resolves', async () => {
     const anchor = authorRule(join('core', '000-constitution.md'), 'base rule')
     authorRule(join('security', '600-secrets.md'), 'add secrets')

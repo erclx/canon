@@ -58,13 +58,9 @@ const MAX_NAME = 214
 const IGNORED_ENTRIES = new Set(['.git'])
 
 /**
- * Runs the stack's `manifest.scaffold` in a scratch folder with `{{name}}` set
- * to the target's basename, then moves what it produced into the target. The
- * scratch step is what lets a command that opens on `mkdir {{name}} && cd`
- * land in a folder that already exists.
- *
- * Nothing reaches the target unless the command exits 0 and produced its
- * folder. A failed run leaves the scratch folder in place and names it.
+ * Runs the stack's `manifest.scaffold` in a scratch folder with `{{name}}` set to the target's basename, then moves
+ * what it produced into the target. Nothing reaches the target unless the command exits 0, and a failed run names
+ * the scratch folder it leaves.
  */
 export async function scaffoldStack(
   opts: ScaffoldOptions,
@@ -111,8 +107,7 @@ export async function scaffoldStack(
   const scratch = mkdtempSync(
     join(opts.scratchBase ?? tmpdir(), 'canon-scaffold-'),
   )
-  // Manifests carry shell syntax (`&&`, `cd`, quoted globs), so the command
-  // runs under a shell rather than as a split argv, as `tooling verify` runs it.
+  // Manifests carry shell syntax (`&&`, `cd`, quoted globs), so the command runs under a shell, as `tooling verify` does.
   const command = manifest.scaffold.replaceAll('{{name}}', name)
   const run = await execa(command, {
     cwd: scratch,

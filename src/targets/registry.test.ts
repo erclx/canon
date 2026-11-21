@@ -23,12 +23,8 @@ let ROOT: string
 let FILE: string
 
 /**
- * `vitest.setup.ts` points this at a temp folder for the whole file, so a test
- * calling either read with no path stays out of the developer's real state
- * folder. Restoring it is what keeps that true: deleting the key instead would
- * leave the rest of the file resolving to the home directory. A runner that
- * skips the setup file leaves it unset, and assigning that back would store the
- * string `undefined`, which resolves as a relative folder under the cwd.
+ * `vitest.setup.ts` points this at a temp folder for the whole file. Restoring it rather than deleting
+ * the key keeps later tests off the home directory, and an unset value must not be stored as `undefined`.
  */
 const SETUP_STATE_DIR = process.env.CANON_STATE_DIR
 
@@ -139,8 +135,7 @@ describe('registryPath', () => {
 })
 
 describe('readTargetRegistry', () => {
-  // A machine no sync ran on and one whose targets were removed answer apart, or
-  // a lookup that never ran would report a confident zero.
+  // A machine no sync ran on and one whose targets were removed answer apart, or a lookup that never ran reports zero.
   it('should report an absent file as absent rather than as no targets', () => {
     const registry = readTargetRegistry(FILE, NO_ROOTS)
 
@@ -183,8 +178,7 @@ describe('readTargetRegistry', () => {
     expect(paths(readTargetRegistry(FILE, NO_ROOTS))).toEqual([alpha, zeta])
   })
 
-  // A file written before the prune existed holds thousands of dead rows, and
-  // the list has to be right on that machine before any sync rewrites it.
+  // A file written before the prune existed holds thousands of dead rows, so the list must be right before any sync.
   it('should leave out a row whose folder no longer exists', () => {
     const birch = project('birch')
     writeRows([
@@ -226,8 +220,7 @@ describe('isScratchPath', () => {
     ).toBe(true)
   })
 
-  // A worktree checkout is a real checkout of a real project, so only a root
-  // or a .canon/tmp segment may refuse it, never the .claude folder alone.
+  // A worktree checkout is a real checkout of a real project, so only a root or a .canon/tmp segment may refuse it.
   it('should keep a .claude/worktrees checkout', () => {
     expect(
       isScratchPath(
@@ -237,8 +230,7 @@ describe('isScratchPath', () => {
     ).toBe(false)
   })
 
-  // macOS hands out its temp folder as /var/folders while a resolved path reads
-  // /private/var/folders, so the refusal has to match through the symlink.
+  // macOS hands out its temp folder as /var/folders while a resolved path reads /private/var/folders.
   it('should refuse a real path whose root was named through a symlink', () => {
     const real = join(ROOT, 'real')
     mkdirSync(join(real, 'repo'), { recursive: true })
@@ -265,8 +257,7 @@ describe('scratchRoots', () => {
     )
   })
 
-  // Read at call time rather than at import, so a test that moves the state
-  // folder refuses the folder it moved to rather than the home directory.
+  // Read at call time rather than at import, so a test that moves the state folder refuses the folder it moved to.
   it('should follow a state folder override set after import', () => {
     process.env.CANON_STATE_DIR = '/moved/state'
 
@@ -289,8 +280,7 @@ describe('recordTarget', () => {
     })
   })
 
-  // Every sync of one target reaches this, so a rerun moves the stamp rather
-  // than adding a row that would count one project as many.
+  // Every sync of one target reaches this, so a rerun moves the stamp rather than adding a row.
   it('should replace the row for a target it already holds', () => {
     const birch = project('birch')
     recordTarget(birch, new Date('2026-08-01'), FILE, NO_ROOTS)
@@ -327,8 +317,7 @@ describe('recordTarget', () => {
     expect(paths(readTargetRegistry(FILE, NO_ROOTS))).toEqual([birch, delta])
   })
 
-  // The stamp inside the target is authoritative and this index a cache, so an
-  // unwritable state folder must not fail the sync recording into it.
+  // The stamp inside the target is authoritative and this index a cache, so an unwritable folder must not fail the sync.
   it('should report a location it cannot write rather than throwing', () => {
     const blocked = join(FILE, 'targets.json')
     writeFileSync(FILE, '{}\n')
@@ -344,8 +333,7 @@ describe('recordTarget', () => {
     expect(JSON.parse(readFileSync(FILE, 'utf8')).version).toBe(1)
   })
 
-  // Sandbox runs, job scratch, and test temp folders each pass through a
-  // stamping sync, and a row for each would fill the index with dead paths.
+  // Sandbox runs, job scratch, and test temp folders each pass through a stamping sync and would fill the index.
   it('should refuse a target under a scratch root and write nothing', () => {
     const { scratch, run } = scratchRun()
 
@@ -429,8 +417,7 @@ describe('backfillTarget', () => {
     })
   })
 
-  // A checkout with an unreadable stamp has no date, and dating it by the
-  // backfill would claim a sync that never happened.
+  // A checkout with an unreadable stamp has no date, and dating it by the backfill would claim a sync that never happened.
   it('should skip a checkout with no readable stamp rather than dating it by now', () => {
     const outcome = backfillTarget(
       { path: project('birch'), stampedAt: null },

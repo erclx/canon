@@ -71,14 +71,9 @@ export async function collectChanges(git: GitRunner): Promise<DomainChange[]> {
 }
 
 /**
- * Commits what the domain syncs wrote and optionally opens a pull request.
- *
- * This is the only toolkit code that writes to a git remote, which is why a
- * headless run refuses it outright. `select_option` resolved to its first
- * option with no terminal to answer it, and the first option here was
- * `Commit and open PR` whenever `gh` was installed, so an agent following the
- * documented non-interactive path pushed a branch and opened a pull request on
- * someone's repository without being asked.
+ * Commits what the domain syncs wrote and optionally opens a pull request. This is the only toolkit
+ * code that writes to a git remote, so a headless run refuses it outright rather than defaulting
+ * to a push.
  */
 export async function runGitWorkflow(
   target: string,

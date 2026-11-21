@@ -5,12 +5,8 @@ import { isDirectory } from '@/targets/validate'
 const GH_TIMEOUT_MS = 30_000
 
 /**
- * The two headings a review pass posts under.
- *
- * Owned by `review-pr`, which states the full set once, and pinned here
- * the way `role-orchestrator/scripts/poll.ts` pins them. All three surfaces
- * ship separately, so a heading added in that skill goes stale here with
- * nothing comparing the copies.
+ * The two headings a review pass posts under, owned by `review-pr` and pinned here as
+ * `role-orchestrator/scripts/poll.ts` pins them. All three ship separately, so nothing compares the copies.
  */
 const REVIEW_OPEN = '## Review'
 const REVIEW_CLOSED = '## Review closed'
@@ -116,11 +112,8 @@ const FAILED = new Set([
 ])
 
 /**
- * Collapses every check on a head into one word.
- *
- * A failure outranks a pending one, because a run still going cannot clear a
- * job that already failed and reporting the head as pending would invite a
- * wait for an answer that has arrived.
+ * Collapses every check on a head into one word. A failure outranks a pending one, since a run still
+ * going cannot clear a job that already failed.
  */
 export function rollup(checks: readonly RawCheck[]): ChecksState | null {
   if (checks.length === 0) return null
@@ -147,12 +140,8 @@ export interface RequiredRollup {
 }
 
 /**
- * Collapses a head's checks over the set the base branch's rules require.
- *
- * An unread or empty set gates by every check, which is `rollup` itself and
- * the safe default for a repository whose rules list nothing. A required name
- * with no run on the head reads pending rather than passing, since a run not
- * yet created has not cleared anything.
+ * Collapses a head's checks over the set the base branch's rules require. An unread or empty set gates by
+ * every check, and a required name with no run on the head reads pending rather than passing.
  */
 export function rollupRequired(
   checks: readonly RawCheck[],
@@ -180,12 +169,8 @@ export function rollupRequired(
 }
 
 /**
- * Reads the heading of the newest pass carrying one, matching on the first line
- * alone the way `poll.ts` does.
- *
- * The reviews arrive oldest first, so the last match is the current state of
- * the thread. A pass carrying neither heading is somebody reviewing by hand and
- * says nothing about whether the loop owes work.
+ * Reads the heading of the newest pass carrying one, matching on the first line alone as `poll.ts` does.
+ * A pass carrying neither heading is a hand review and says nothing about whether the loop owes work.
  */
 export function latestReview(
   reviews: readonly RawReview[],
@@ -211,13 +196,9 @@ function parse<T>(text: string | null): T | null {
 }
 
 /**
- * Reports the open pull requests in one target with their checks and the
- * heading their newest review pass carries.
- *
- * A list that failed and a target with no open pull request are separated
- * rather than collapsed, since reading the first as the second reports a target
- * as done when nothing was read at all. That is the failure mode the shell loop
- * this replaces had no way to surface.
+ * Reports the open pull requests in one target with their checks and the heading their newest review
+ * pass carries. A failed list and a target with no open pull request are separated, since reading the
+ * first as the second reports a target done having read nothing.
  */
 export async function readTargetPulls(
   path: string,
@@ -252,8 +233,7 @@ export async function readTargetPulls(
           typeof raw.number === 'number',
       )
       .map(async (raw) => {
-        // One query per pull request, so a review read that failed surfaces on
-        // the thread it failed for rather than emptying the whole target.
+        // One query per pull request, so a failed review read surfaces on its own thread.
         const reviews = parse<{ reviews?: readonly RawReview[] }>(
           await run(path, [
             'pr',
@@ -280,11 +260,8 @@ export async function readTargetPulls(
 }
 
 /**
- * Reads every target, one at a time.
- *
- * The reads are serial rather than batched because each one spends a GitHub API
- * quota shared across all of them, and a wave running over a dozen targets that
- * fired them together would meet the secondary rate limit rather than an answer.
+ * Reads every target, one at a time, because each read spends a GitHub API quota shared across all of
+ * them and firing them together would meet the secondary rate limit.
  */
 export async function readPullsAcross(
   paths: readonly string[],

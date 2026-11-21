@@ -28,8 +28,7 @@ function stubGh(pulls: unknown, reviews: unknown = { reviews: [] }): GhRunner {
 }
 
 describe('rollup', () => {
-  // No check and every check green are different answers, or a target whose
-  // workflow never fired would read as passing.
+  // No check and every check green are different answers, or a target whose workflow never fired reads as passing.
   it('should report no check at all as null rather than as passing', () => {
     expect(rollup([])).toBeNull()
   })
@@ -52,8 +51,7 @@ describe('rollup', () => {
     ).toBe('pending')
   })
 
-  // A failed job cannot be cleared by one still running, so pending would invite
-  // a wait for an answer that already arrived.
+  // A failed job cannot be cleared by one still running, so pending would invite a wait for an answer that arrived.
   it('should let a failure outrank a run still going', () => {
     expect(
       rollup([
@@ -119,8 +117,7 @@ describe('rollupRequired', () => {
     ).toEqual({ state: 'failing', advisory: [] })
   })
 
-  // A required check whose run has not been created yet is not a pass, or a
-  // head where only macOS reported would read green before Static Checks ran.
+  // A required check whose run has not been created yet is not a pass, or a head where only macOS reported reads green.
   it('should read pending when a required check has no run on the head yet', () => {
     expect(
       rollupRequired(
@@ -164,8 +161,7 @@ describe('latestReview', () => {
     expect(latestReview([{ body: '## Review\n\n- a finding\n' }])).toBe('open')
   })
 
-  // The pass that closed the thread is the last one, and a target leaves a wave
-  // on that heading rather than on the worker's reply.
+  // The pass that closed the thread is the last one, and a target leaves a wave on that heading.
   it('should take the newest pass when a close-out follows an open one', () => {
     expect(
       latestReview([
@@ -246,8 +242,7 @@ describe('readTargetPulls', () => {
     })
   })
 
-  // A failed list and a target with nothing open both arrive as no rows, and
-  // reading the first as the second reports a target done having read nothing.
+  // A failed list and a target with nothing open both arrive as no rows, and reading one as the other reports done.
   it('should refuse a list it could not read rather than reporting no pulls', async () => {
     const report = await readTargetPulls(ROOT, { run: async () => null })
 
@@ -331,8 +326,7 @@ describe('readPullsAcross', () => {
     expect(reports.map((report) => report.path)).toEqual([ROOT, missing])
   })
 
-  // One unreachable target must not empty the answer for the others, which is
-  // what a batch failing as a unit would do to a wave mid-flight.
+  // One unreachable target must not empty the answer for the others, as a batch failing as a unit would.
   it('should keep reading after a target it could not reach', async () => {
     const reports = await readPullsAcross([join(ROOT, 'nowhere'), ROOT], {
       run: stubGh([{ number: 1 }]),

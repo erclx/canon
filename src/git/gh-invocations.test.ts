@@ -5,11 +5,8 @@ import { describe, expect, it } from 'vitest'
 const ROOT = join(import.meta.dirname, '..', '..')
 
 /**
- * Slices the argument list of a call whose opening `execa(` ends at `open`,
- * by counting paren depth rather than matching a fixed closing shape. A
- * regex anchored to `})` misreads a call with no options object or one
- * reformatted across lines, and this walk exists to catch a call however
- * it is written.
+ * Slices the argument list of a call whose opening `execa(` ends at `open`, by
+ * counting paren depth, since a regex anchored to `})` misreads a reformatted call.
  */
 function callArgs(text: string, open: number): string | null {
   let depth = 1
@@ -23,12 +20,9 @@ function callArgs(text: string, open: number): string | null {
 }
 
 /**
- * Answers whether the given file text holds an `execa('gh', ...)` call whose
- * argument list does not carry `gitEnv()`, or one this walk could not read at
- * all. An unreadable call fails loudly here rather than passing silently,
- * since `gh` resolves its repository through the same environment variables
- * git does and they beat `cwd`, so a call missing the strip silently reads
- * whichever repository a hook's environment points at instead of this one.
+ * Answers whether the file text holds an `execa('gh', ...)` call whose arguments
+ * lack `gitEnv()`, or one this walk could not read. `gh` resolves its repository
+ * through the same variables git does, and they beat `cwd`.
  */
 function hasUnstrippedGhCall(text: string): boolean {
   const marker = /execa\(\s*'gh'/g

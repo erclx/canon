@@ -39,12 +39,8 @@ const MESSAGE: Record<StructureCriterion, string> = {
 }
 
 /**
- * Every place a record misses `S1` to `S5`, in line order.
- *
- * `S2` to `S5` are the markdown density limits read on the record's own
- * terms, so a labeled field run stays exempt from `S2` here as it does there.
- * `S1` is any line `isSectionMarker` reads as a bold section marker, which an
- * old plan carries on every section and still parses through.
+ * Every place a record misses `S1` to `S5`, in line order. `S2` to `S5` are the markdown
+ * density limits, and `S1` is any line `isSectionMarker` reads as a bold section marker.
  */
 export function structureFindings(text: string): StructureEntry[] {
   const lines = bodyLines(text)
@@ -76,13 +72,9 @@ const FIELD = /^-\s+\*\*([^*]+):\*\*/
 const SECTION = /^#{1,6}\s/
 
 /**
- * Every block of content sitting under an intake field rather than on its
- * line, one entry at the block's first line.
- *
- * `canon intake list` reads a field's own line and nothing under it, so a
- * nested list or a paragraph below a field never reaches the operator
- * answering in chat. A trailing paragraph after the last field is reported
- * too, since it is dropped the same way.
+ * Every block of content sitting under an intake field rather than on its line, one entry at
+ * the block's first line. `canon intake list` reads a field's own line and nothing under it,
+ * so a nested list or trailing paragraph never reaches the operator.
  */
 export function intakeSpill(text: string): StructureEntry[] {
   const found: StructureEntry[] = []
@@ -127,10 +119,8 @@ export function intakeSpill(text: string): StructureEntry[] {
 }
 
 /**
- * The structure report for an app drive's log. A finding carries the measured
- * number beside every claim, so a labeled field runs long and `S4` skips it.
- * Spill is a cluster check, since a log holds findings rather than items, so
- * it is not added here.
+ * The structure report for an app drive's log. A finding carries the measured number beside
+ * every claim, so `S4` skips a labeled field. Spill is a cluster check, so it is not added.
  */
 export function driveLogStructure(text: string): StructureEntry[] {
   const lines = text.split('\n')

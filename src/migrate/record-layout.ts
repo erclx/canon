@@ -1,14 +1,7 @@
 /**
- * The record folder layout moves. `.canon/review/` keeps only reviews, with
- * feedback, picks, evidence, renders, branch reports, and flat checklists each
- * moved to its own folder. `canon records push` backs every top-level `.canon/`
- * entry except `EXCLUDED_ENTRIES`, so new folders need no list edit, and
- * `tmp/render/` is deliberately unbacked.
- *
- * The move follows `scratch-evidence.ts`: a dry run by default, `--write` to
+ * The record folder layout moves each kind of record to its own folder, following `scratch-evidence.ts`: a dry run by default, `--write` to
  * apply, a collision refusal, the `canon-keep-record-root` marker, and archives
- * swept on purpose. A row whose destination depends on disk names the rule
- * that derives it, never a list of slugs, since every target differs.
+ * swept on purpose.
  */
 
 import { existsSync, readdirSync } from 'node:fs'
@@ -73,12 +66,8 @@ export type RecordLayoutMove =
 const RENDER = [SCRATCH, 'render'] as const
 
 /**
- * Every move this migration makes, as record-relative paths.
- *
- * The first two rows are batch 2's. The rest are batch 3's, in the order the
- * intake's review-folder pass listed them, then the design board, moved to
- * the `.canon/board` folder Frameboard names. A later batch appends here
- * rather than adding a second table.
+ * Every move this migration makes, as record-relative paths. A later batch appends
+ * here rather than adding a second table.
  */
 export const RECORD_LAYOUT_MOVES: readonly RecordLayoutMove[] = [
   { kind: 'folder', from: ['review', 'memory'], to: ['memory', 'review'] },
@@ -148,11 +137,8 @@ function escape(value: string): string {
 }
 
 /**
- * The prefixes a citation of a source is spelled with, each ending in a
- * slash: absolute at either record root, spelled the way each root spells the
- * leading segment, and relative one and two directories up, in both
- * spellings, since a relative citation carries no root of its own to read the
- * spelling from.
+ * The prefixes a citation of a source is spelled with, each ending in a slash: absolute
+ * at either record root, and relative one and two directories up in both spellings.
  */
 function oldPrefixes(from: readonly string[]): readonly string[] {
   const [head, ...rest] = from
@@ -215,10 +201,8 @@ interface RewriteOutcome {
 }
 
 /**
- * Rewrites every unmarked citation a move covers into its destination,
- * counting each as it goes. A file naming no such path returns
- * byte-identical with a count of zero, and a marked line is returned
- * unchanged and uncounted.
+ * Rewrites every unmarked citation a move covers into its destination, counting each.
+ * A file naming no such path returns byte-identical.
  */
 function applyRewrites(
   text: string,
@@ -308,11 +292,9 @@ export interface RecordLayoutPlan {
 const STRAY_RECEIPT_PATTERN = /^memory-review-.*\.md$/
 
 /**
- * A receipt sitting at the flat `review/` root, the shape `memory-review`
- * wrote before `.canon/review/memory/` existed. Neither mapped move covers
- * it, since it sits one level above the folder either move reads, so it is
- * reported rather than moved: widening the table for one stray file trades a
- * data-shaped mapping for a special case.
+ * A receipt at the flat `review/` root, which `memory-review` wrote before
+ * `.canon/review/memory/` existed. Neither mapped move covers it, so it is reported
+ * rather than moved.
  */
 export function strayReceipts(root: string): string[] {
   const dir = recordDir(root, 'review')
@@ -425,10 +407,8 @@ function planFilesRow(
 }
 
 /**
- * Sends each folder to its derived destination. Picks keep their slug.
- * Evidence folders take ordinals in order of first appearance, continuing past
- * the highest ordinal `evidence/` already holds, and a slug already numbered
- * there refuses rather than taking a second number.
+ * Sends each folder to its derived destination. Picks keep their slug, and evidence
+ * folders take ordinals in order of first appearance past the highest present.
  */
 function planSplitRow(
   root: string,
@@ -503,10 +483,8 @@ function planRow(
 }
 
 /**
- * What the migration would do, without doing it. Pure over the sources it is
- * handed apart from reading the tree it plans against, so a caller reports
- * and applies from the same value. A file whose text does not change is
- * dropped.
+ * What the migration would do, without doing it. Pure over the sources it is handed,
+ * so a caller reports and applies from one value.
  */
 export function planRecordLayout(
   root: string,
@@ -548,14 +526,9 @@ async function removeIfEmpty(dir: string): Promise<void> {
 }
 
 /**
- * Writes the plan: every citation rewrite first, then every move, then the
- * folders a files row emptied.
- *
- * A citation can sit inside a file the plan is about to move, since the walk
- * carries archives on purpose and a receipt can cite the row it retired.
- * Rewriting first is what keeps that write landing on a path that still
- * exists: moving first would send `writeFile` at the pre-move path into a
- * directory `rename` already cleared.
+ * Writes the plan: every citation rewrite first, then every move, then the folders a
+ * files row emptied. Rewriting first keeps a write landing on a path that still
+ * exists, since a receipt can cite the row it retired.
  */
 export async function applyRecordLayout(
   plan: RecordLayoutPlan,

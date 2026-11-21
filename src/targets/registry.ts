@@ -10,12 +10,8 @@ import { homedir, tmpdir } from 'node:os'
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 
 /**
- * One project the toolkit has installed into, as the install recorded it.
- *
- * The path is the target root rather than its git directory, because the
- * record is written by a sync that knows where it wrote and not by anything
- * that resolved a repository. Whether two entries are one project is a
- * question about their origins, which `src/targets/sweep.ts` answers.
+ * One project the toolkit has installed into, as the install recorded it. The path is the target root
+ * rather than its git directory, and whether two entries are one project is `src/targets/sweep.ts`'s.
  */
 export interface TargetRecord {
   readonly path: string
@@ -24,13 +20,8 @@ export interface TargetRecord {
 }
 
 /**
- * An absent file and an empty one are separate answers, the same split
- * `src/sessions/registry.ts` draws.
- *
- * The first means no sync has ever recorded a target on this machine, so the
- * population is unknown and the sweep is the only reading available. The
- * second means the file was read and holds no usable row, which a caller
- * should be able to tell apart from a lookup that never ran.
+ * An absent file and an empty one are separate answers, as in `src/sessions/registry.ts`. Absent means
+ * no sync has recorded a target here, so the sweep is the only reading, and empty means a read with no row.
  */
 export type TargetRegistry =
   | { readonly kind: 'absent'; readonly path: string }
@@ -48,11 +39,8 @@ interface StoredRegistry {
 const VERSION = 1
 
 /**
- * Resolves the folder holding this machine's toolkit state.
- *
- * Twin of `sandboxTree` in `src/commands/sandbox.ts`, which resolves the same
- * three sources in the same order. The override exists so a test never writes
- * into the home directory of whoever runs it.
+ * Resolves the folder holding this machine's toolkit state. Twin of `sandboxTree` in
+ * `src/commands/sandbox.ts`, and the override keeps a test out of the runner's home directory.
  */
 export function stateDir(): string {
   return stateDirNamed('canon')
@@ -86,13 +74,8 @@ function stateDirNamed(folder: string): string {
 }
 
 /**
- * The registry this machine uses, current path first and the retired one
- * behind it.
- *
- * Nothing migrates the folder, so without the fallback a machine with months
- * of targets would answer empty, which reads as never having installed
- * anything. One path serves read and write, so a machine holding the retired
- * file keeps using it, as `readStamp` treats a retired config.
+ * The registry this machine uses, current path first and the retired one behind it. Nothing migrates the
+ * folder, so without the fallback a machine with months of targets would answer empty.
  */
 export function registryPath(): string {
   const current = join(stateDir(), 'targets.json')
@@ -112,26 +95,17 @@ function isRecord(value: Partial<TargetRecord>): value is TargetRecord {
 }
 
 /**
- * The folders whose contents are never a project, resolved at call time so a
- * test's `CANON_STATE_DIR` override moves the state root with it.
- *
- * Sandbox runs and replays live under the state folder, background jobs keep
- * their scratch under `~/.claude/jobs/`, and unit tests stamp into the OS temp
- * folder. Each one passes through a stamping sync, so without this list every
- * run leaves a row behind for a folder that is gone a minute later.
+ * The folders whose contents are never a project, resolved at call time so a test's `CANON_STATE_DIR`
+ * override moves the state root. Each passes through a stamping sync and would leave a dead row behind.
  */
 export function scratchRoots(): readonly string[] {
   return [tmpdir(), stateDir(), join(homedir(), '.claude', 'jobs')]
 }
 
 /**
- * Whether a path sits under a scratch root or inside any `.canon/tmp/` folder.
- *
- * Both sides are compared in their given and their real form, since macOS
- * hands out its temp folder as `/var/folders/...` while a path that went
- * through a symlink resolution reads `/private/var/folders/...`. A
- * `.claude/worktrees/` checkout is not scratch: it is a real checkout of a real
- * project, and only a root on the list or a `.canon/tmp/` segment refuses it.
+ * Whether a path sits under a scratch root or inside any `.canon/tmp/` folder, compared in the given and
+ * the real form, since macOS temp folders resolve through a symlink. A `.claude/worktrees/` checkout
+ * is a real checkout and is not scratch.
  */
 export function isScratchPath(
   target: string,
@@ -181,13 +155,8 @@ function isLive(row: TargetRecord, roots: readonly string[]): boolean {
 }
 
 /**
- * Reads every recorded target that is still live, sorted by path.
- *
- * A row missing either field is dropped, since this module is the only
- * writer and a malformed row is a hand edit or a truncated write. A row whose
- * folder is gone or under a scratch root is left out too, so the list is right
- * before any sync rewrites it. A target on an unmounted drive reads as gone,
- * and its next sync records it again.
+ * Reads every recorded target that is still live, sorted by path. A malformed row, a row whose folder is
+ * gone, and a row under a scratch root are left out, so the list is right before any sync rewrites it.
  */
 export function readTargetRegistry(
   path: string = registryPath(),
@@ -231,14 +200,9 @@ export function readTargetRegistry(
 export type RecordOutcome = 'recorded' | 'unwritten' | 'scratch'
 
 /**
- * Records one target, keyed by its resolved path and replacing any row already
- * held for it, and refuses a path under a scratch root.
- *
- * A temp file plus a rename keeps a reader off a half-written file. Two syncs
- * finishing together resolve last-writer-wins, which can drop a row, left
- * unlocked since the stamp inside each target is authoritative and its next
- * sync restores the row. Every write also drops the rows
- * `readTargetRegistry` leaves out, so the file shrinks back to live projects.
+ * Records one target, keyed by its resolved path and replacing any row already held, and refuses a path
+ * under a scratch root. A temp file plus a rename keeps a reader off a half-written file, and concurrent
+ * syncs resolve last-writer-wins, which the stamp inside each target recovers.
  */
 export function recordTarget(
   target: string,
@@ -280,10 +244,8 @@ export interface BackfillTarget {
 export type BackfillOutcome = RecordOutcome | 'no-stamp'
 
 /**
- * Seeds one row from a checkout's own stamp rather than from a sync, for a
- * target a sweep found that the record never held. Loops `recordTarget`,
- * which already replaces a row by resolved path, so this is a caller of it
- * rather than a second file format.
+ * Seeds one row from a checkout's own stamp rather than a sync, for a target a sweep found that the
+ * record never held. A caller of `recordTarget`, not a second file format.
  */
 export function backfillTarget(
   target: BackfillTarget,

@@ -31,19 +31,13 @@ interface Run {
 }
 
 /**
- * Scaffolds a stack into `.canon/tmp/runs/verify-<stack>/`, syncs its chain
- * from the checkout at `root`, with `base` ahead of an add-on, and runs the
- * scaffold's own `format` and `check` scripts, plus `lint:fix`, `test:e2e`,
- * and `screenshot` where it declares them. Every line goes to stderr.
- *
- * A failed phase is recorded and the run carries on, so the Results block
- * reports every phase rather than the first failure. The tmp dir is removed
- * only on a clean run without `keep`.
+ * Scaffolds a stack into `.canon/tmp/runs/verify-<stack>/`, syncs its chain from the checkout at `root`, and runs the
+ * scaffold's own scripts. A failed phase is recorded and the run carries on, and the tmp dir is removed only on a
+ * clean run without `keep`.
  */
 export async function verifyStack(opts: VerifyOptions): Promise<VerifyOutcome> {
   intro(`canon tooling verify ${opts.stack}`)
-  // A signal skips the `finally` below, so the handler closes the frame on
-  // that path and leaves the tmp dir in place for inspection.
+  // A signal skips the `finally` below, so the handler closes the frame and leaves the tmp dir for inspection.
   let isOpen = true
   const close = (): void => {
     if (isOpen) outro()
@@ -94,8 +88,7 @@ async function run({
   rmSync(state.dir, { recursive: true, force: true })
 
   logStep(`Scaffolding ${stack}`)
-  // Manifests carry shell syntax (`&&`, `cd`, quoted globs), so the command
-  // runs under a shell rather than as a split argv.
+  // Manifests carry shell syntax (`&&`, `cd`, quoted globs), so the command runs under a shell.
   const scaffoldCommand = manifest.scaffold.replaceAll('{{name}}', name)
   const scaffold = await shell(scaffoldCommand, runsDir)
   if (scaffold.failed) {
@@ -121,8 +114,7 @@ async function run({
 
   const cli = join(root, 'src/cli.ts')
   logInfo(`Sync resolves via bun ${cli}, not PATH canon`)
-  // An add-on layers onto a core chain rather than heading one, so it lands
-  // on `base` first, the order `canon init` gives a real target.
+  // An add-on layers onto a core chain rather than heading one, so it lands on `base` first, as `canon init` does.
   if (isAddOn(manifest)) {
     await phase(state, 'Sync base', () => sync(cli, 'base', state.dir))
   }
@@ -154,13 +146,8 @@ async function run({
 }
 
 /**
- * `lint:fix` and `format` run first and rewrite the scaffold, so `check`
- * reads the tree a project would commit. `check` itself writes nothing, and a
- * fresh scaffold ships files its own generator formatted another way.
- *
- * `format` and `check` run unconditionally, since `base` declares both and
- * every verified chain reaches it. `lint:fix`, `test:e2e`, and `screenshot`
- * run only where the synced scaffold declares them.
+ * `lint:fix` and `format` run first and rewrite the scaffold, so `check` reads the tree a project would commit.
+ * `format` and `check` run unconditionally, and `lint:fix`, `test:e2e`, and `screenshot` only where declared.
  */
 async function runScripts(state: Run, scripts: Set<string>): Promise<void> {
   if (scripts.has('lint:fix')) {
@@ -177,8 +164,7 @@ async function runScripts(state: Run, scripts: Set<string>): Promise<void> {
   const isShot = await phase(state, 'screenshot', () =>
     bunRun('screenshot', state.dir, SCREENSHOT_TIMEOUT_MS),
   )
-  // A killed or failed screenshot run is already a failure, and its partial
-  // output says nothing about the artifacts.
+  // A killed or failed screenshot run is already a failure, and its partial output says nothing about artifacts.
   if (!isShot) return
 
   const shots = countScreenshots(join(state.dir, 'screenshots'))

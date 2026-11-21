@@ -21,14 +21,9 @@ import {
 let ROOT: string
 
 /**
- * Pinned so a window count is read against fixture timestamps rather than the
- * clock, and parsed without an offset so it lands at local noon.
- *
- * The dated assertions below name a calendar date, which the report renders in
- * local time. A UTC instant would shift that date on any machine far enough east
- * or west, so the fixture is what keeps those expectations machine-independent
- * rather than the renderer. Noon leaves an hour of DST movement in either
- * direction without reaching a day boundary.
+ * Pinned so a window count reads against fixture timestamps rather than the clock, parsed
+ * without an offset so it lands at local noon. A UTC instant would shift the dated assertions
+ * on a machine far enough east or west.
  */
 const NOW = Date.parse('2026-08-20T12:00:00')
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -229,8 +224,7 @@ describe('sizeRecords', () => {
     expect(entry.newest).toBe('2026-08-19')
   })
 
-  // The two cases cover the two signs of a UTC offset, each blind to the other,
-  // and a machine on UTC, where CI runs, catches neither.
+  // The two cases cover the two signs of a UTC offset, and a machine on UTC catches neither.
 
   it('should date a late-evening file by the local day its writer saw', async () => {
     writeRecordAt(

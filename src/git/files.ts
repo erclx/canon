@@ -12,15 +12,9 @@ async function git(
 }
 
 /**
- * The far side of a branch range: the merge base against the ref a caller
- * named, or against the first trunk this repository carries.
- *
- * A named ref resolves through the merge base as the trunk does, so a trunk
- * moving under an open branch never reports its merged paths as the branch's.
- * A caller naming an ancestor still gets that commit back. A named ref with no
- * merge base refuses rather than falling back, since the trunk range would
- * answer a question nobody asked, whether the ref resolves to nothing or
- * shares no history with `HEAD`.
+ * The far side of a branch range: the merge base against the ref a caller named,
+ * or against the first trunk this repository carries. A named ref with no merge
+ * base refuses rather than falling back to the trunk range.
  */
 export async function resolveBaseRef(
   root: string,
@@ -36,19 +30,14 @@ export async function resolveBaseRef(
 
 /**
  * Every path a branch has touched since `base`: the diff against the working
- * tree, plus untracked files git does not ignore.
- *
- * The working tree rather than `HEAD`, so a check before the commit sees the
- * surface a session just added, and the range still covers `base..HEAD` after
- * it. Returns undefined when git cannot answer, for the reason
- * `listRepositoryFiles` states: an empty list reads as a clean branch.
+ * tree, plus untracked files git does not ignore. Returns undefined when git
+ * cannot answer, since an empty list reads as a clean branch.
  */
 export async function listChangedFiles(
   root: string,
   base: string,
 ): Promise<string[] | undefined> {
-  // NUL-separated, since newline output C-quotes a path holding a quote or a
-  // non-ASCII character and the quoted spelling names no file.
+  // NUL-separated, since newline output C-quotes a path holding a quote or non-ASCII character.
   const changed = await git(root, ['diff', '--name-only', '-z', base])
   const untracked = await git(root, [
     'ls-files',
@@ -69,15 +58,9 @@ export interface RenamePair {
 }
 
 /**
- * Every rename `base..working tree` carries, read through the same similarity
- * detection `git diff -M` applies by default (50%).
- *
- * A move heavy enough on rewritten content to fall under that floor reports
- * as a plain delete and add rather than a rename, which is not a defect this
- * reads around: the diff genuinely does not carry the file a claim citing the
- * old path describes.
- *
- * Returns undefined when git cannot answer, matching `listChangedFiles`.
+ * Every rename `base..working tree` carries, read through the similarity
+ * detection `git diff -M` applies by default (50%). A move under that floor
+ * reports as a delete and add. Returns undefined when git cannot answer.
  */
 export async function listRenames(
   root: string,
@@ -98,11 +81,8 @@ export async function listRenames(
 }
 
 /**
- * Added, non-comment lines from a unified diff hunk touching `.gitignore`.
- *
- * Shared between a local `git diff` and a patch string GitHub returns inline
- * for the same file, so the two evidence sources read one pattern the same
- * way.
+ * Added, non-comment lines from a unified diff hunk touching `.gitignore`. Shared
+ * between a local `git diff` and a patch GitHub returns inline.
  */
 export function parseIgnoreAdditions(diffText: string): string[] {
   const patterns: string[] = []
@@ -132,16 +112,9 @@ export async function listIgnoreAdditions(
 }
 
 /**
- * Lists the files under `root`: tracked, plus untracked files git does not
- * ignore. The untracked half is what keeps a file added on this branch in scope
- * rather than one push later. A tracked path deleted in the working tree is
- * left out, since a caller reading the listing would otherwise open a file that
- * is gone.
- *
- * Returns undefined when git cannot answer, which every caller reports rather
- * than smoothing into an empty list. An empty list passes each of its zero
- * files, so a degraded git would otherwise be indistinguishable from a clean
- * tree in the output.
+ * Lists the files under `root`: tracked, plus untracked files git does not ignore.
+ * Returns undefined when git cannot answer, since an empty list passes each of
+ * its zero files and would read as a clean tree.
  */
 export async function listRepositoryFiles(
   root: string,

@@ -29,12 +29,8 @@ export function isWorkspaceRoot(target: string): boolean {
 }
 
 /**
- * Records the chain an install resolved, and returns the names it wrote, or
- * nothing when it wrote none. The names are the merged list, which can carry
- * stacks an earlier sync recorded. A
- * workspace root is the single refusal: one chain recorded there would be a
- * guess at what its packages hold, and the report reading tooling as unmeasured
- * is the true answer rather than a clean one.
+ * Records the chain an install resolved, and returns the names it wrote, or nothing when it wrote none. A workspace
+ * root is the single refusal, since one chain recorded there would be a guess at what its packages hold.
  */
 export async function recordToolingChain(
   toolkitRoot: string,
@@ -57,10 +53,8 @@ export async function recordToolingChain(
 }
 
 /**
- * The golden hash of every config the target now matches, over the hashes an
- * earlier run recorded. A config the target holds a different copy of keeps
- * its previous hash, so a held edit still reads as edited on the next run
- * rather than as a stale copy the write may replace.
+ * The golden hash of every config the target now matches, over the hashes an earlier run recorded. A config the
+ * target holds a different copy of keeps its previous hash, so a held edit still reads as edited.
  */
 function matchedHashes(
   chain: readonly Manifest[],

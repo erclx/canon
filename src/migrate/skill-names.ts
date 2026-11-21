@@ -1,15 +1,9 @@
 import { defineRenameRules, type RenameRules } from '@/migrate/rename'
 
 /**
- * Each retired skill name and the name it takes now. A retired key that went
- * through several names points straight at the current one, so a target on
- * the oldest spelling lands in one pass.
- *
- * Every destination takes two words, since a bare word such as `review` is a
- * substring of ordinary prose with no token left for a later sweep to find.
- * No bare single-word key may join this map: `wholeToken: true` below matches
- * a standalone word, so a one-word key also rewrites every variable, field,
- * and type spelling that word.
+ * Each retired skill name and the name it takes now, pointing straight at the current one.
+ * Every destination takes two words, and no bare single-word key may join, since
+ * `wholeToken: true` would rewrite every variable spelling that word.
  */
 export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
   'claude-address-review': 'review-address',
@@ -62,15 +56,9 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
 }
 
 /**
- * The skills that took a two-word name from a single word or from ordinary
- * prose, which the map above may not carry as a bare key.
- *
- * A bare `canvas` key would rewrite `canon canvas serve` and `src/canvas/`, and
- * a bare `draft-ready` would rewrite prose about a pull request leaving draft.
- * So each row keys on a form only the skill spells, a plugin invocation or a
- * skill folder path. The tail guard rejects a following `-`, so a rewritten
- * `canon:canvas-board` is not matched again. A prose mention by bare name has
- * no token for a sweep and is fixed by hand.
+ * The skills that took a two-word name from a single word or from ordinary prose. Each row
+ * keys on a form only the skill spells, and the tail guard rejects a following `-`. A prose
+ * mention by bare name has no token for a sweep and is fixed by hand.
  */
 export const SKILL_CITATION_MAP: Readonly<Record<string, string>> = {
   'canon:canvas': 'canon:canvas-board',
@@ -80,14 +68,9 @@ export const SKILL_CITATION_MAP: Readonly<Record<string, string>> = {
 }
 
 /**
- * The old `draft-` names that still answer as a pointer skill, each naming the
- * skill it became.
- *
- * Each pointer's own files spell the old name on purpose, so the sweep must
- * never reach them. A later run would otherwise move the stub onto the real
- * body at the new name. Their paths join the exclusions only once the sweep
- * that moved the real bodies has run, since excluding them first leaves each
- * body unmoved at its old path.
+ * The old `draft-` names that still answer as a pointer skill, each naming the skill it
+ * became. Their files spell the old name on purpose, and join the exclusions only once the
+ * sweep that moved the real bodies has run.
  */
 export const RENAMED_DRAFT_POINTERS: readonly string[] = [
   'draft-doc',
@@ -100,16 +83,9 @@ export const RENAMED_DRAFT_POINTERS: readonly string[] = [
 ]
 
 /**
- * The skill rename.
- *
- * It matches whole tokens, since a word can open with a skill name and mean
- * something else, such as `claude-worktrees.md` naming the harness feature.
- * Overlapping keys, such as `ui-test` inside `claude-ui-test`, are settled by
- * longest-first ordering, which the test asserts directly.
- *
- * The map's own module and test are excluded, or a sweep turns each key into
- * its replacement. The changelog, eval transcripts, and replay fixtures record
- * what ran under the name current then, so rewriting them falsifies the record.
+ * The skill rename. It matches whole tokens, since a word can open with a skill name,
+ * and overlapping keys settle by longest-first. The map's own module and test are excluded,
+ * and so are the records that name what ran under the name current then.
  */
 export const SKILL_NAME_RULES: RenameRules = defineRenameRules({
   replacements: { ...SKILL_NAME_MAP, ...SKILL_CITATION_MAP },

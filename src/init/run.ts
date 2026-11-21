@@ -10,15 +10,9 @@ export type DomainStep =
   | { readonly kind: 'skip'; readonly label: string; readonly notice: string }
 
 /**
- * Runs each step in order and returns the labels that failed.
- *
- * Partial failure is a first-class outcome rather than an error path. An init
- * that aborts on the first failing domain would look tidier and leave the
- * operator with no idea which of the remaining domains would have worked, so
- * the run continues and the caller reports the failures at the end.
- *
- * The sequence is deliberate. Base tooling seeds the files the later domains
- * install alongside, so these are not independent operations to batch.
+ * Runs each step in order and returns the labels that failed. Partial failure is a
+ * first-class outcome, and the sequence is deliberate: base tooling seeds the
+ * files the later domains install alongside.
  */
 export async function runDomains(
   steps: readonly DomainStep[],

@@ -1,11 +1,7 @@
 /**
- * The move of the tracked toolkit surfaces from `.claude/` to `canon/`.
- *
- * Unlike the records move, every entry here is tracked, so a folder relocating
- * is itself a citation-shaped event: the file's own path is a string every
- * other file may quote. One planner therefore judges both halves per source
- * file rather than moving folders and rewriting citations as two passes, so a
- * file that both moves and cites another moved entry is decided once.
+ * The move of the tracked toolkit surfaces from `.claude/` to `canon/`. Every entry is
+ * tracked, so a folder relocating is a citation-shaped event, and one planner judges both
+ * halves per source file.
  */
 
 import { join } from 'node:path'
@@ -18,12 +14,8 @@ export const FROM_ROOT: SurfaceRoot = '.claude'
 const TO_ROOT: SurfaceRoot = 'canon'
 
 /**
- * Every entry this move relocates, at the name `.claude/` gives it.
- *
- * Read from `SURFACE_ENTRIES` rather than restated. `canon` names the install
- * stamp folder and is the one entry whose name differs by root, which
- * `sourcePrefix` and `destinationPrefix` already resolve through `spell`
- * rather than restating the variant here.
+ * Every entry this move relocates, at the name `.claude/` gives it, read from
+ * `SURFACE_ENTRIES`. `canon` is the one entry whose name differs by root, resolved through `spell`.
  */
 export const MOVED_ENTRIES: readonly string[] = SURFACE_ENTRIES
 
@@ -36,11 +28,8 @@ function destinationPrefix(entry: string): string {
 }
 
 /**
- * Where a moved entry's own path lands, or `undefined` when `path` sits
- * outside every moved entry.
- *
- * Tested against the file's own path rather than its content, so a context
- * entry moves regardless of what it cites.
+ * Where a moved entry's own path lands, or `undefined` when `path` sits outside every one.
+ * Tested against the path rather than the content, so a context entry moves regardless.
  */
 export function movedPath(path: string): string | undefined {
   for (const entry of MOVED_ENTRIES) {
@@ -55,13 +44,9 @@ export function movedPath(path: string): string | undefined {
 }
 
 /**
- * A citation into a moved entry.
- *
- * The tail rejects a following name character rather than asking for a word
- * boundary, which is what keeps `.claude/context` bare and `.claude/context/`
- * both matching while `.claude/contexts/` does not. The alternation is ordered
- * longest first so `ARCHITECTURE.md` is decided before any shorter entry could
- * claim its prefix, and each entry is escaped because two of them carry a dot.
+ * A citation into a moved entry. The tail rejects a following name character rather than a
+ * word boundary, so `.claude/context` and `.claude/context/` match but `.claude/contexts/`
+ * does not. The alternation is ordered longest first, and each entry is escaped.
  */
 const CITATION = new RegExp(
   `${escape(FROM_ROOT)}/(${[...MOVED_ENTRIES]
@@ -76,14 +61,9 @@ function escape(value: string): string {
 }
 
 /**
- * Files whose content is left alone entirely.
- *
- * The changelog is release history and an eval result a transcript, and
- * rewriting either falsifies it. `src/roots/surface.ts`, `src/roots/record.ts`,
- * and the hooks with their seed copies spell the old root as data on purpose,
- * so sweeping them would rewrite the literals this verb reads. No suffix-wide
- * test exclusion, since most test files use these paths as fixture data. The
- * two that pin a fallback carry `KEEP_MARKER` on the line that needs it.
+ * Files whose content is left alone entirely. The changelog and eval results are history, and
+ * `src/roots/surface.ts`, `src/roots/record.ts`, and the hooks spell the old root as data.
+ * The two that pin a fallback carry `KEEP_MARKER` on the line that needs it.
  */
 const EXCLUDED_PREFIXES: readonly string[] = [
   'src/migrate/',
@@ -116,11 +96,8 @@ export function referencesExcluded(text: string): boolean {
 }
 
 /**
- * Marks a line naming the old root on purpose.
- *
- * The marker sits on the line itself or on the nearest non-blank line above
- * it, walking past a run of blank markdown lines to reach a marker written on
- * its own line above the paragraph it protects.
+ * Marks a line naming the old root on purpose, on the line itself or the nearest non-blank
+ * line above, walking past blank markdown lines to a marker above the paragraph.
  */
 const KEEP_MARKER = 'canon-keep-surface-root'
 
@@ -180,13 +157,9 @@ function isCrossRepoPrefix(lines: readonly string[], index: number): boolean {
 const ISO_DATE = /\b\d{4}-\d{2}-\d{2}\b/
 
 /**
- * Whether the line's citation sits inside a blank-line-delimited paragraph
- * that also carries an ISO date, read as dated prose rather than a live path.
- *
- * `.claude/ARCHITECTURE.md` is itself a moved entry and carries dozens of
- * `Measured at <sha> on <date>` paragraphs naming the old root as what was
- * true that day. Those stay as written rather than being rewritten into a
- * root that did not exist yet on the date being recorded.
+ * Whether the line's citation sits inside a blank-line-delimited paragraph that also
+ * carries an ISO date, read as dated prose. Those name the old root as what was true
+ * then, so they stay as written.
  */
 function isDatedParagraph(lines: readonly string[], index: number): boolean {
   let start = index
@@ -233,10 +206,8 @@ export function rewriteText(text: string): string {
 }
 
 /**
- * How many citations `rewriteText` would rewrite, how many marked lines it
- * left alone, how many sat inside a frontmatter `paths:` glob, how many sat
- * behind a cross-repository-shaped prefix, and how many sat inside a dated
- * paragraph.
+ * How many citations `rewriteText` would rewrite, and how many marked lines, frontmatter
+ * globs, cross-repository prefixes, and dated paragraphs it left alone.
  */
 export function scanText(text: string): {
   readonly rewritten: number
@@ -366,14 +337,9 @@ export interface SurfaceRootsPlan {
 }
 
 /**
- * What the move would do, without doing it.
- *
- * A file is judged once for both halves: whether its own path sits under a
- * moved entry, and whether its content cites one. Either alone is enough to
- * produce an entry, and a file excluded from the citation rewrite still moves
- * when its path itself is inside a moved entry, since the two entries excluded
- * today, `src/roots/surface.ts` and `src/roots/record.ts`, both sit outside
- * every moved entry and never take that branch in practice.
+ * What the move would do, without doing it. A file is judged once for both halves: whether
+ * its own path sits under a moved entry, and whether its content cites one. A file excluded
+ * from the rewrite still moves when its path is inside a moved entry.
  */
 export function planSurfaceRootsMove(
   sources: readonly SurfaceRootsSource[],

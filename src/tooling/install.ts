@@ -12,10 +12,8 @@ export type InstallResult =
     }
 
 /**
- * Runs `bun add -D` for the specs and bounds it, since a registry that accepts
- * a connection and never answers would otherwise hang the caller for good. A
- * stall or a failure comes back as a refusal naming the packages and the tail
- * of the output, never as a thrown error.
+ * Runs `bun add -D` for the specs and bounds it, since a registry that never answers would hang the caller.
+ * A stall or failure comes back as a refusal naming the packages and the output tail, never a throw.
  */
 export async function installDevDependencies(
   specs: readonly string[],

@@ -26,12 +26,8 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
 const RAW_FRONTMATTER = /^---\n([\s\S]*?)\n---/
 
 /**
- * Reads `reviewed` off the raw block rather than the parsed fields, for the
- * reason `hasOpeningDate` in the validator gives: a YAML parser resolves a
- * bare `YYYY-MM-DD` to a date on one schema and a string on another.
- *
- * A value that is not a calendar date reads as never reviewed and is carried
- * back so the review can see it, rather than throwing over one hand edit.
+ * Reads `reviewed` off the raw block rather than the parsed fields, for the reason
+ * `hasOpeningDate` gives. A value that is not a calendar date reads as never reviewed.
  */
 function readReviewed(
   text: string,
@@ -103,8 +99,7 @@ async function isUnborn(root: string): Promise<boolean> {
  * on a lightweight one, so a history mixing both counts by two clocks.
  */
 async function mergedReleases(root: string): Promise<Release[] | undefined> {
-  // Interpolated rather than inline, since Bun's shell parses the bare
-  // parentheses in `%(refname)` as syntax of its own.
+  // Interpolated rather than inline, since Bun's shell parses the parentheses in `%(refname)`.
   const args = [
     '--merged',
     'HEAD',
@@ -130,13 +125,9 @@ async function mergedReleases(root: string): Promise<Release[] | undefined> {
 }
 
 /**
- * Reports when each canonical doc was last reviewed and how many releases
- * have shipped since, read from an optional `reviewed:` frontmatter field.
- *
- * The review point is a date rather than a commit, since a commit written on a
- * feature branch never reaches a trunk that squash-merges. A release tagged on
- * the reviewed day itself is not counted, as the review is read as covering
- * that day. It reports and never writes.
+ * Reports when each canonical doc was last reviewed and how many releases have shipped since,
+ * from an optional `reviewed:` field. The review point is a date rather than a commit, since a
+ * squash-merging trunk never receives a feature-branch commit. It reports and never writes.
  */
 export async function staleCanonical(root: string): Promise<CanonicalOutcome> {
   const releases = await mergedReleases(root)

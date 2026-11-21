@@ -1,24 +1,12 @@
 /**
- * The frontmatter field exempting a seed from the section check the seed gate
- * runs.
- *
- * The check has a false-positive class its own comment records: a standard may
- * sanction omitting a section, and no measure separates that from a file that
- * forgot it. Reporting is the right response in a live project, where the
- * finding is advisory. The seed gate promotes the same finding to a failing
- * exit code, so the seed tree needs a way to say the omission is deliberate.
+ * The frontmatter field exempting a seed from the section check the seed gate runs. The check cannot separate a
+ * deliberately omitted section from a forgotten one, so the seed tree needs a way to say it is deliberate.
  */
 export const SEED_STUB_FIELD = 'stub'
 
 /**
- * Whether an install rewrites this seed rather than copying it byte for byte.
- *
- * This answers what the caller branches on and not whether the file holds a
- * marker, which is `isStubSeed` reading content. Only markdown carries
- * frontmatter, so only markdown can hold one, and the extension decides the
- * copy path without opening the file. Every install path and the drift report
- * ask this one question, or the report compares a marked source against a
- * stripped target and reads a seed nobody touched as drifted.
+ * Whether an install rewrites this seed rather than copying it byte for byte. Only markdown carries frontmatter,
+ * so the extension decides the copy path, and every install path and the drift report ask this one question.
  */
 export function rewritesOnInstall(src: string): boolean {
   return src.endsWith('.md')
@@ -28,11 +16,8 @@ const FRONTMATTER = /^---\n([\s\S]*?)\n---(\n|$)/
 const STUB_LINE = new RegExp(`^${SEED_STUB_FIELD}:[ \\t]*true[ \\t]*$`, 'm')
 
 /**
- * Whether the source declares itself a skeleton for the target to fill.
- *
- * Only `true` counts. A field set to anything else reads as a seed that meant
- * to turn the exemption off, and treating an unparsed value as exempt would
- * make a typo silence the gate.
+ * Whether the source declares itself a skeleton for the target to fill. Only `true` counts, since treating an
+ * unparsed value as exempt would let a typo silence the gate.
  */
 export function isStubSeed(source: string): boolean {
   const block = source.match(FRONTMATTER)
@@ -42,12 +27,8 @@ export function isStubSeed(source: string): boolean {
 }
 
 /**
- * Removes the marker so it reaches no target.
- *
- * The field is toolkit bookkeeping about the seed tree, and a project that
- * received it would carry a field its own tooling never reads. A file whose
- * frontmatter holds nothing else loses the block entirely rather than keeping
- * an empty one.
+ * Removes the marker so it reaches no target, since it is toolkit bookkeeping about the seed tree. A file whose
+ * frontmatter holds nothing else loses the block entirely.
  */
 export function stripSeedMarker(source: string): string {
   const block = source.match(FRONTMATTER)
@@ -58,14 +39,12 @@ export function stripSeedMarker(source: string): string {
     .filter((line) => !STUB_LINE.test(line))
     .join('\n')
 
-  // A function replacement, since a string one reads `$1` and `$&` in the kept
-  // fields, so a `description` naming a dollar amount would corrupt the file.
+  // A function replacement, since a string one reads `$1` and `$&` in the kept fields.
   if (kept.trim() !== '') {
     const replacement = `---\n${kept}\n---${block[2] ?? ''}`
     return source.replace(FRONTMATTER, () => replacement)
   }
 
-  // The blank line after the block goes with it, or the installed file would
-  // open on whitespace every target's formatter diffs against.
+  // The blank line after the block goes with it, or the installed file would open on whitespace.
   return source.slice(block[0].length).replace(/^\n+/, '')
 }

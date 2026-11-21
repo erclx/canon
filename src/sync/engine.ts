@@ -60,15 +60,9 @@ export type SyncChange =
   | { readonly kind: 'delete'; readonly dest: string; readonly rel: string }
 
 /**
- * How an installed file compares to its toolkit source, and when it differs,
- * who moved it. `stale` and `customized` need the stamp to tell apart, so
- * `drifted` is the verdict for a difference no stamp covers.
- *
- * With no source, a project-authored file is `orphaned` forever, one under a
- * root the toolkit owns is `retired` and deleted, and a stamped file the
- * toolkit no longer installs to is `stranded`. `renamed` is a retired file
- * whose rule still ships under a new name, so the sync moves it. `missing`
- * comes from `collectMissing`, since the walk only sees files that exist.
+ * How an installed file compares to its toolkit source, and when it differs, who moved it. `stale`
+ * and `customized` need the stamp, so `drifted` covers a difference no stamp does. With no source,
+ * a file is `orphaned`, `retired`, `stranded`, or `renamed`, and `missing` comes from `collectMissing`.
  */
 export type EntryState =
   | 'matching'
@@ -87,10 +81,8 @@ export interface ScanEntry {
   /** Toolkit revision this file's content came from, when history proved it. */
   readonly since?: string
   /**
-   * Overrides `report`'s generic text for this entry's state. Two producers
-   * write one: `collectMissing`, since a stack name is only known to the
-   * adapter that resolved it, and an orphan sitting outside the declared
-   * project subfolder, since the generic line names no destination.
+   * Overrides `report`'s generic text for this entry's state. Written by `collectMissing`, which
+   * knows the stack name, and by an orphan outside the declared project subfolder.
    */
   readonly notice?: string
 }
@@ -115,10 +107,8 @@ export interface RuleCoverage {
 }
 
 /**
- * What a headless run does once the plan has changes. Domains whose files the
- * toolkit owns apply them. Domains whose files a project is expected to edit
- * refuse, because an unattended overwrite of a customized file is data loss
- * with no prompt in front of it.
+ * What a headless run does once the plan has changes. Domains whose files the toolkit owns apply
+ * them, and the rest refuse, since an unattended overwrite of a customized file is data loss.
  */
 export type NonInteractivePolicy =
   | { readonly kind: 'apply' }
@@ -129,13 +119,9 @@ export type NonInteractivePolicy =
     }
 
 /**
- * The two holes every domain sync leaves open: where a destination file's
- * source lives, and what counts as a change beyond a plain content diff.
- * Everything else in a sync is identical across domains,
- * so it lives in the engine.
- *
- * The optional members exist because one adapter needed each of them. Leaving
- * all three unset reproduces the behavior gov already had.
+ * The two holes every domain sync leaves open: where a destination file's source lives, and what
+ * counts as a change beyond a plain content diff. Everything else lives in the engine, and each
+ * optional member exists because one adapter needed it.
  */
 export interface SyncAdapter {
   readonly banner: string
@@ -159,29 +145,20 @@ export interface SyncAdapter {
   /** Glob the walk lists. Defaults to `DEFAULT_INSTALL_PATTERN`. */
   readonly installPattern?: string
   /**
-   * Top-level folder under `installedRoot` that is project-authored by
-   * location rather than by the name inference `locateSource` runs.
-   * Checked before `locateSource`, so a file here is orphaned even when its
-   * name also matches a toolkit source, and never enters the stamp.
-   *
-   * Declaring it also gives the report a destination to name when the name
-   * inference orphans a file sitting anywhere else.
+   * Top-level folder under `installedRoot` that is project-authored by location, checked before
+   * `locateSource`, so a file here is orphaned and never enters the stamp. It also gives the report
+   * a destination to name for an orphan sitting elsewhere.
    */
   readonly projectSubdir?: string
   /**
-   * Every file under `installedRoot` is the toolkit's, so a walked file with
-   * no source is a leftover of a rule the toolkit retired or renamed rather
-   * than something a project wrote. Setting it turns that file into a
-   * `retired` entry and queues its delete, edited or not, whatever the stamp
-   * holds, or a `renamed` one when `locateSuccessor` names where it ships
-   * now. Unset, the file stays `orphaned` and untouched.
+   * Every file under `installedRoot` is the toolkit's, so a walked file with no source is a
+   * `retired` entry and its delete is queued, or `renamed` when `locateSuccessor` names it.
+   * Unset, the file stays `orphaned` and untouched.
    */
   readonly ownsInstalledRoot?: boolean
   /**
-   * Where a sourceless file's rule ships now, when the toolkit declares it
-   * renamed rather than retired. Reached only on a root the adapter owns and
-   * never past the newer-install guard. Unset, or returning nothing, leaves
-   * the file `retired`.
+   * Where a sourceless file's rule ships now, when the toolkit declares it renamed rather than
+   * retired. Reached only on a root the adapter owns, and unset leaves the file `retired`.
    */
   locateSuccessor?(
     file: InstalledFile,
@@ -210,10 +187,8 @@ export interface SyncAdapter {
 export const DEFAULT_INSTALL_PATTERN = '**/*.md'
 
 /**
- * Lists installed files matching the domain's pattern, dotfiles included.
- * `Bun.Glob` skips entries beginning with a dot unless `dot` is set, and every
- * domain installs under `.claude/`, so a nested dot-directory would silently
- * drop out of the walk.
+ * Lists installed files matching the domain's pattern, dotfiles included, since `Bun.Glob` skips
+ * a dot-directory unless `dot` is set and every domain installs under `.claude/`.
  */
 export function listInstalled(
   root: string,
@@ -237,10 +212,8 @@ export function listInstalled(
 }
 
 /**
- * Classifies every installed file against its source without writing anything.
- * A file with no source is deleted only when the adapter owns its installed
- * root outright, and left alone otherwise, which is what keeps a
- * project-authored file alive across a sync of a root the project shares.
+ * Classifies every installed file against its source without writing anything. A file with no
+ * source is deleted only when the adapter owns its installed root outright.
  */
 export function planSync(adapter: SyncAdapter, target: string): SyncPlan {
   const entries: ScanEntry[] = []
@@ -297,8 +270,7 @@ export function planSync(adapter: SyncAdapter, target: string): SyncPlan {
         notice: renamedNotice(file, destRel, attribute(hashes, file)),
       })
 
-      // A second predecessor of one successor, or a successor the target
-      // already holds, still loses its old file but must not overwrite.
+      // A second predecessor of one successor, or one the target already holds, loses its old file but must not overwrite.
       if (!existsSync(successor.dest) && !pendingCopies.has(successor.dest)) {
         pendingCopies.add(successor.dest)
         changes.push({
@@ -354,15 +326,9 @@ interface UnattributedFile {
 }
 
 /**
- * Second pass over the files the stamp could not attribute, which is every file
- * in a target installed before stamping shipped. Matching the installed content
- * against the toolkit's own history recovers the fact a stamp would have held,
- * and a file matching no published version stays unattributed.
- *
- * Runs as one git call for the whole domain rather than one per file, and only
- * when the first pass left something to attribute. Reports whether history was
- * readable at all, so a registry install can say why it fell short instead of
- * reporting every file as a local edit.
+ * Second pass over the files the stamp could not attribute, matching installed content against the
+ * toolkit's own history in one git call for the domain. Reports whether history was readable, so a
+ * registry install can say why it fell short.
  */
 function recoverAttribution(
   adapter: SyncAdapter,
@@ -625,12 +591,9 @@ function attribute(hashes: DomainHashes, file: InstalledFile): EntryState {
 }
 
 /**
- * Stamped paths the walk never reached, because the toolkit installs to a root
- * it no longer uses. Reporting them is what makes a relocation visible instead
- * of silent. They are left alone, and queue no change.
- *
- * A key escaping the target is dropped rather than reported, so a hand-edited
- * stamp cannot make the report name paths outside the project.
+ * Stamped paths the walk never reached, because the toolkit installs to a root it no longer uses.
+ * They are reported and left alone, and a key escaping the target is dropped, so a hand-edited
+ * stamp cannot name paths outside the project.
  */
 function strandedByRelocation(
   target: string,
@@ -662,13 +625,9 @@ function isProjectAuthored(adapter: SyncAdapter, file: InstalledFile): boolean {
 }
 
 /**
- * An orphan the name inference caught rather than the location test. No source
- * name matched, which fits a project-authored file and a renamed toolkit file
- * alike, and the stamp cannot tell them apart either, since a renamed entry
- * survives one sync. So the line offers the destination on a condition and the
- * sync never moves the file, since moving it rewrites paths the project cites
- * and marks a toolkit leftover as the project's. An adapter declaring
- * `ownsInstalledRoot` never reaches this, since its sourceless file is retired.
+ * An orphan the name inference caught rather than the location test. The stamp cannot tell a
+ * project-authored file from a renamed toolkit file, so the line offers the destination on a
+ * condition and the sync never moves the file.
  */
 function misplacedOrphan(
   adapter: SyncAdapter,
@@ -691,12 +650,9 @@ function misplacedOrphan(
 }
 
 /**
- * The release that last wrote this domain, when it is newer than the one
- * running. A binary older than that release cannot tell a rule it retired
- * from one added after it, so it holds every sourceless file rather than
- * deleting rules the newer release installed. An unparseable side holds too,
- * since deleting on a comparison that never ran is the failure this guards.
- * A stamp with no version predates the field and is never newer.
+ * The release that last wrote this domain, when it is newer than the one running. An older binary
+ * cannot tell a retired rule from one added after it, so it holds every sourceless file, and an
+ * unparseable side holds too.
  */
 function newerInstallingVersion(
   stamp: Stamp | undefined,
@@ -765,14 +721,9 @@ function hasUnattributedDrift(plan: SyncPlan): boolean {
 }
 
 /**
- * Records what the toolkit placed, after the copies land, so a partial apply
- * that throws leaves the previous stamp rather than a claim the target does not
- * meet. A file with no source stays out, whether it is project-authored or a
- * retired leftover a declined sync did not delete, and so does one orphaned by
- * location.
- *
- * Reads the installed tree rather than the caller's file list, so a partial
- * install still stamps the domain's whole installed set.
+ * Records what the toolkit placed, after the copies land, so a partial apply that throws leaves the
+ * previous stamp. A file with no source stays out, and the installed tree is read rather than the
+ * caller's list, so a partial install still stamps the whole set.
  */
 export async function recordStamp(
   adapter: SyncAdapter,

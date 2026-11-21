@@ -40,10 +40,7 @@ function resolved(base: string | undefined): string {
 
 /**
  * Leaves the session on a branch the trunk has moved past, and returns the
- * commit the branch left from. That gap is the whole subject here: the trunk
- * tip and the merge base are two different commits, so a resolver reading the
- * ref literally and one reading the range disagree about every path merged in
- * between.
+ * commit the branch left from, so the trunk tip and the merge base differ.
  */
 function branchBehindMovedTrunk(): string {
   const mergeBase = git('rev-parse', 'HEAD').trim()
