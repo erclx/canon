@@ -21,4 +21,7 @@ scaffold = "uv init --package {{name}}"
 ]
 
 [scaffold]
-prepare = "bun init -y && uv add --dev ruff mypy pytest pytest-cov && uv sync"
+# --no-sync locks without building .venv, whose scripts would carry the scratch
+# folder's absolute path after the scaffold moves them, so the first uv run
+# builds it at the target.
+prepare = "bun init -y && uv add --dev --no-sync ruff mypy pytest pytest-cov"

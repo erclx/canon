@@ -46,9 +46,10 @@ The manifest declares no `[dependencies.dev]`, because manifest injection calls 
 
 ## Verify command
 
-`canon tooling scaffold python` runs the manifest's `[scaffold] prepare` on the starter, and `canon tooling verify python` scaffolds through it before Sync. That covers checklist steps 2, 5, and 6, being `bun init -y`, `uv add --dev ruff mypy pytest pytest-cov`, and `uv sync`.
+`canon tooling scaffold python` runs the manifest's `[scaffold] prepare` on the starter, and `canon tooling verify python` scaffolds through it before Sync. That covers checklist steps 2 and 5, being `bun init -y` and `uv add --dev --no-sync`, and leaves step 6 to the first `uv run`.
 
 - `uv init` writes no `package.json`, and a verify that reaches its end with none fails, so the prepare is what lets `bun run lint:fix`, `bun run format`, and `bun run check` run at all.
+- The step skips the venv because the scaffold runs it in a scratch folder, and a `.venv` built there keeps that folder's absolute path in its scripts after the move
 - Python's `verify.json` requires the `lint`, `typecheck`, and `test:run` scripts that delegate to `uv run`, so the run needs `uv` on the machine and a network for the installs.
 - The end-to-end test and screenshot phases are gated on `package.json` script keys python does not declare, so they skip.
 
