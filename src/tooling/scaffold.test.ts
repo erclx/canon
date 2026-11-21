@@ -17,12 +17,18 @@ let scratchBase: string
 
 // A fixture root rather than the checkout, so each manifest's scaffold is a
 // local shell command and no test reaches a package registry.
-const seedStack = (stack: string, scaffold: string): void => {
+const seedStack = (stack: string, scaffold: string, rest = ''): void => {
   mkdirSync(join(root, 'tooling', stack), { recursive: true })
   writeFileSync(
     join(root, 'tooling', stack, 'manifest.toml'),
-    `[stack]\nname = "${stack}"\nscaffold = "${scaffold}"\n`,
+    `[stack]\nname = "${stack}"\nscaffold = "${scaffold}"\n${rest}`,
   )
+}
+
+const seedOverlay = (stack: string, path: string, body: string): void => {
+  const file = join(root, 'tooling', stack, 'scaffold', path)
+  mkdirSync(join(file, '..'), { recursive: true })
+  writeFileSync(file, body)
 }
 
 const target = (name: string): string => join(root, 'projects', name)
@@ -111,6 +117,73 @@ describe('scaffoldStack into an empty folder', () => {
   })
 })
 
+describe('scaffoldStack post-scaffold step and overlay', () => {
+  it('should run the step in the starter output before the move', async () => {
+    seedStack(
+      'vite',
+      'mkdir -p {{name}}/src && touch {{name}}/src/App.css {{name}}/package.json',
+      '\n[scaffold]\nprepare = "rm src/App.css && touch stepped"\n',
+    )
+
+    const result = await scaffoldStack({
+      root,
+      stack: 'vite',
+      target: target('app'),
+      scratchBase,
+    })
+
+    expect(result.ok && result.files).toEqual([
+      'package.json',
+      'src',
+      'stepped',
+    ])
+    expect(readdirSync(join(target('app'), 'src'))).toEqual([])
+  })
+
+  it('should copy the overlay over the starter output', async () => {
+    seedStack(
+      'vite',
+      'mkdir -p {{name}}/src && echo starter > {{name}}/src/main.tsx',
+    )
+    seedOverlay('vite', 'src/main.tsx', 'overlay\n')
+    seedOverlay('vite', 'src/app.tsx', 'export function App() {}\n')
+
+    await scaffoldStack({
+      root,
+      stack: 'vite',
+      target: target('app'),
+      scratchBase,
+    })
+
+    expect(readFileSync(join(target('app'), 'src', 'main.tsx'), 'utf8')).toBe(
+      'overlay\n',
+    )
+    expect(readFileSync(join(target('app'), 'src', 'app.tsx'), 'utf8')).toBe(
+      'export function App() {}\n',
+    )
+  })
+
+  it('should land the overlay after the step, so a removal cannot take an overlay file', async () => {
+    seedStack(
+      'vite',
+      'mkdir -p {{name}}/src && echo starter > {{name}}/src/main.tsx',
+      '\n[scaffold]\nprepare = "rm src/main.tsx"\n',
+    )
+    seedOverlay('vite', 'src/main.tsx', 'overlay\n')
+
+    await scaffoldStack({
+      root,
+      stack: 'vite',
+      target: target('app'),
+      scratchBase,
+    })
+
+    expect(readFileSync(join(target('app'), 'src', 'main.tsx'), 'utf8')).toBe(
+      'overlay\n',
+    )
+  })
+})
+
 describe('scaffoldStack refusals', () => {
   it('should refuse a folder holding a file and write nothing', async () => {
     seedStack('go', 'mkdir {{name}} && cd {{name}} && touch go.mod')
@@ -188,6 +261,30 @@ describe('scaffoldStack refusals', () => {
     const scratch = result.ok === false ? result.scratch : undefined
     expect(
       scratch !== undefined && existsSync(join(scratch, 'app', 'partial')),
+    ).toBe(true)
+  })
+
+  it('should move nothing when the step fails and keep the scratch folder', async () => {
+    seedStack(
+      'vite',
+      'mkdir {{name}} && touch {{name}}/package.json',
+      '\n[scaffold]\nprepare = "echo step broke && exit 4"\n',
+    )
+    mkdirSync(target('app'), { recursive: true })
+
+    const result = await scaffoldStack({
+      root,
+      stack: 'vite',
+      target: target('app'),
+      scratchBase,
+    })
+
+    expect(result.ok === false && result.reason).toBe('prepare-failed')
+    expect(result.ok === false && result.output).toContain('step broke')
+    expect(readdirSync(target('app'))).toEqual([])
+    const scratch = result.ok === false ? result.scratch : undefined
+    expect(
+      scratch !== undefined && existsSync(join(scratch, 'app', 'package.json')),
     ).toBe(true)
   })
 

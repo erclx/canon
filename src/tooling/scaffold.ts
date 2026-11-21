@@ -29,6 +29,7 @@ export type ScaffoldRefusal =
   | 'bad-name'
   | 'scaffold-failed'
   | 'no-output'
+  | 'prepare-failed'
 
 export type ScaffoldResult =
   | {
@@ -58,9 +59,10 @@ const MAX_NAME = 214
 const IGNORED_ENTRIES = new Set(['.git'])
 
 /**
- * Runs the stack's `manifest.scaffold` in a scratch folder with `{{name}}` set to the target's basename, then moves
- * what it produced into the target. Nothing reaches the target unless the command exits 0, and a failed run names
- * the scratch folder it leaves.
+ * Runs the stack's `manifest.scaffold` in a scratch folder with `{{name}}` set to the target's basename, applies the
+ * stack's post-scaffold step and then its `scaffold/` overlay to the output, and moves the result into the target.
+ * Nothing reaches the target unless the starter and the step both exit 0, and a failed run names the scratch folder
+ * it leaves.
  */
 export async function scaffoldStack(
   opts: ScaffoldOptions,
@@ -107,16 +109,8 @@ export async function scaffoldStack(
   const scratch = mkdtempSync(
     join(opts.scratchBase ?? tmpdir(), 'canon-scaffold-'),
   )
-  // Manifests carry shell syntax (`&&`, `cd`, quoted globs), so the command runs under a shell, as `tooling verify` does.
   const command = manifest.scaffold.replaceAll('{{name}}', name)
-  const run = await execa(command, {
-    cwd: scratch,
-    shell: 'bash',
-    all: true,
-    reject: false,
-    stdin: 'ignore',
-    env: { CI: '1' },
-  })
+  const run = await shell(command, scratch)
   const output = typeof run.all === 'string' ? run.all : ''
 
   if (run.failed) {
@@ -139,6 +133,25 @@ export async function scaffoldStack(
     }
   }
 
+  if (manifest.prepare !== undefined) {
+    const step = await shell(manifest.prepare, produced)
+    if (step.failed) {
+      return {
+        ok: false,
+        reason: 'prepare-failed',
+        message: `Post-scaffold step failed: ${manifest.prepare}`,
+        scratch,
+        output: typeof step.all === 'string' ? step.all : '',
+      }
+    }
+  }
+  // The overlay lands after the step, since on a case-insensitive filesystem a step removing `App.tsx` would
+  // otherwise delete an overlay's `app.tsx`.
+  const overlay = join(manifest.dir, 'scaffold')
+  if (existsSync(overlay)) {
+    cpSync(overlay, produced, { recursive: true, force: true })
+  }
+
   mkdirSync(target, { recursive: true })
   const keepTargetGit = existsSync(join(target, '.git'))
   const files: string[] = []
@@ -150,6 +163,18 @@ export async function scaffoldStack(
   rmSync(scratch, { recursive: true, force: true })
 
   return { ok: true, stack, target, name, files }
+}
+
+// Manifests carry shell syntax (`&&`, `cd`, quoted globs), so each command runs under a shell.
+function shell(command: string, cwd: string) {
+  return execa(command, {
+    cwd,
+    shell: 'bash',
+    all: true,
+    reject: false,
+    stdin: 'ignore',
+    env: { CI: '1' },
+  })
 }
 
 function refuse(reason: ScaffoldRefusal, message: string): ScaffoldResult {
