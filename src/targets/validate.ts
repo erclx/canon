@@ -12,13 +12,9 @@ export function isDirectory(path: string): boolean {
 }
 
 /**
- * Stands in for `validate_target` plus `guard_root`. The bash `guard_root` read
- * as a toolkit-root check, but its body was `cd "$target" && pwd`, so it also
- * rejected a target that does not exist. Porting the name alone would let a
- * typo'd path scaffold a whole new tree, since every apply step creates parents.
- *
- * Returns the resolved path, or the exit code the caller should hand back. The
- * frame is already open by the time this runs, so a rejection closes it.
+ * Stands in for `validate_target` plus `guard_root`. The bash `guard_root` also rejected a target that does
+ * not exist, so a typo'd path would otherwise scaffold a whole new tree. Returns the resolved path, or the
+ * exit code the caller should hand back.
  */
 export function resolveTarget(
   target: string,

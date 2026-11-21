@@ -69,8 +69,7 @@ describe('sweepTargets', () => {
     expect(report.targets[0]?.legacyPaths).toEqual([delta])
   })
 
-  // A pre-rename install still writes this form as its current path, so a sync
-  // from it would otherwise drop the target out of the walk silently.
+  // A pre-rename install still writes this form as its current path, so a sync from it would drop the target silently.
   it('should find a target stamped only at the retired folder path', async () => {
     const cedar = stampRetiredName('cedar')
 
@@ -80,8 +79,7 @@ describe('sweepTargets', () => {
     expect(report.targets[0]?.legacyPaths).toEqual([cedar])
   })
 
-  // The group boolean this replaced cleared for the whole group the moment one
-  // clone migrated, so a project half-migrated read as fully current.
+  // The group boolean this replaced cleared the whole group once one clone migrated.
   it('should name only the clone still at the retired path when its sibling migrated', async () => {
     const current = stamp('public', 'birch')
     const legacy = stampLegacy('extensions', 'birch')
@@ -103,8 +101,7 @@ describe('sweepTargets', () => {
     expect(report.targets).toEqual([])
   })
 
-  // A walk that counts only one clone misses a repair run in another, so two
-  // clones sharing an origin are one project.
+  // A walk that counts only one clone misses a repair run in another, so two clones sharing an origin are one project.
   it('should count two clones sharing an origin as one target', async () => {
     const first = stamp('public', 'birch')
     const second = stamp('extensions', 'chrome', 'birch')
@@ -141,8 +138,7 @@ describe('sweepTargets', () => {
     expect(report.targets).toHaveLength(2)
   })
 
-  // One stamped repository can hold others below it, and stopping at the outer
-  // one would hide every target the sweep exists to find.
+  // One stamped repository can hold others below it, and stopping at the outer one would hide them.
   it('should keep walking below a target it already found', async () => {
     const outer = stamp('atlas')
     const inner = stamp('atlas', 'public', 'delta')
@@ -154,8 +150,7 @@ describe('sweepTargets', () => {
     )
   })
 
-  // A linked worktree holds a full checkout carrying a copy of its own target's
-  // stamp. One target here had five, and each would have counted as a target.
+  // A linked worktree holds a full checkout carrying a copy of its own target's stamp, and each would count as a target.
   it('should not read a linked worktree as a target of its own', async () => {
     const atlas = stamp('atlas')
 
@@ -166,8 +161,7 @@ describe('sweepTargets', () => {
     expect(report.targets.flatMap((target) => target.paths)).toEqual([atlas])
   })
 
-  // An answer that ran out of depth and one that found everything would read the
-  // same, undercounting by a folder nobody looked in.
+  // An answer that ran out of depth and one that found everything would read the same.
   it('should name the folders it stopped at when the depth cap is reached', async () => {
     stamp('a', 'b', 'c', 'd', 'e', 'deep')
 
@@ -177,8 +171,7 @@ describe('sweepTargets', () => {
     expect(report.bound.truncated).toContain(join(ROOT, 'a', 'b'))
   })
 
-  // A non-numeric depth leaves every `level >= depth` test false, so the walk is
-  // uncapped while the bound claims one. The command refuses it, and this holds.
+  // A non-numeric depth leaves every `level >= depth` test false, so the walk is uncapped while the bound claims one.
   it('should walk without a cap when handed a depth that is not a number', async () => {
     stamp('a', 'b', 'c', 'd', 'e', 'f', 'deep')
 
@@ -225,8 +218,7 @@ describe('sweepTargets', () => {
     expect(report.targets).toHaveLength(1)
   })
 
-  // `readdirSync` with `withFileTypes` answers `isDirectory()` false for a
-  // symlink, so the walk reports one only if the bound names it.
+  // `readdirSync` with `withFileTypes` answers `isDirectory()` false for a symlink, so the bound must name it.
   it('should name a symlinked directory in the bound rather than walking it', async () => {
     const real = stamp('real', 'birch')
     symlinkSync(join(ROOT, 'real'), join(ROOT, 'link'))
@@ -237,8 +229,7 @@ describe('sweepTargets', () => {
     expect(report.targets.flatMap((target) => target.paths)).toEqual([real])
   })
 
-  // A symlink to a file is no directory the walk skipped, so naming it would
-  // report a candidate that never was one.
+  // A symlink to a file is no directory the walk skipped, so naming it would report a candidate that never was one.
   it('should not name a symlink to a file in the bound', async () => {
     writeFileSync(join(ROOT, 'note.txt'), 'hi')
     symlinkSync(join(ROOT, 'note.txt'), join(ROOT, 'note-link.txt'))
@@ -278,8 +269,7 @@ describe('originOf', () => {
     )
   })
 
-  // A checkout cloned with a token puts the token in the userinfo component,
-  // and the key this returns reaches stdout on `canon targets list --json`.
+  // A checkout cloned with a token puts it in the userinfo, and the key reaches stdout on `canon targets list --json`.
   it('should strip a token-bearing userinfo component', async () => {
     expect(
       await withRemote(
@@ -288,8 +278,7 @@ describe('originOf', () => {
     ).toBe('github.com/owner/repo')
   })
 
-  // A bare username in the userinfo would key the target on the username and
-  // fail to group with the same project's ssh clone.
+  // A bare username in the userinfo would key the target on the username and fail to group with its ssh clone.
   it('should strip a bare-username userinfo component', async () => {
     expect(await withRemote('https://someuser@github.com/owner/repo.git')).toBe(
       'github.com/owner/repo',
