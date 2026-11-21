@@ -61,14 +61,8 @@ interface Section {
 
 /**
  * Every density breach in a pull request body, graded per H2 section after
- * the shape `claude/skills/git-pr/references/pr.md` states.
- *
- * `densityFindings()` stays the docs measure, so the PR exemptions are splits
- * around it. Testing takes no counted limit. Key changes splits at each bold
- * label alone on its own block, and Technical context at each bold-led
- * paragraph, and also reports mixing bullets with paragraphs. A fenced line
- * past `FENCE_WIDTH` code points, and a fence's identifier and prompt rules,
- * report in every section, Testing included.
+ * `claude/skills/git-pr/references/pr.md`. `densityFindings()` stays the docs
+ * measure, and a fenced line past `FENCE_WIDTH` reports in every section.
  */
 export function bodyDensity(body: string): BodyDensityFinding[] {
   const found: BodyDensityFinding[] = []
@@ -137,15 +131,9 @@ const CHECKBOX = /^\s*[-*+]\s+\[[ xX]\]/
 const FOOTER = /^🤖/
 
 /**
- * Every density breach in a post a skill writes to a pull request, keyed on
- * its opening H2, or none when that heading is not in `POST_HEADINGS`.
- *
- * Only a heading past H3 reports, since the UI review groups verdicts under
- * H3s. The `🤖` footer, the marker, and a table never report. Inside
- * `<details>` a block takes the length limits alone. A bold-led paragraph
- * starts a new run, and a box under `What to look at` takes no length limit.
- * A nested item is measured as a bullet of its own by `densityFindings()`, so
- * a finding's subject and its evidence never sum.
+ * Every density breach in a post a skill writes to a pull request, keyed on its
+ * opening H2, or none when it is not in `POST_HEADINGS`. Only a heading past H3
+ * reports, and a nested item is its own bullet, so subject and evidence never sum.
  */
 export function postDensity(body: string): PostDensityFinding[] {
   const lines = bodyLines(body).map((line) =>
@@ -264,16 +252,9 @@ function subheadings(section: Section): BodyDensityFinding[] {
 const PROMPT = /^\$ /
 
 /**
- * Every fence finding in a section: a content line past `FENCE_WIDTH` code
- * points, so an emoji counts once, an opening delimiter with no identifier, a
- * prompt outside a `console` fence, and a `console` line opening on neither a
- * prompt nor the continuation of a line ending in `\`.
- *
- * `bodyLines()` marks a fence's delimiters as fenced too, so this walk re-reads
- * them with the same open and close test as `markFences()`. The identifier is
- * the first word of the outer delimiter's info string, and an inner fence's
- * delimiters are content, so a `markdown` fence quoting a body takes no prompt
- * rule from the fences it quotes.
+ * Every fence finding in a section: a line past `FENCE_WIDTH` code points, an
+ * opening delimiter with no identifier, a prompt outside a `console` fence, and a
+ * `console` line opening on neither a prompt nor a continuation.
  */
 function fenceFindings(section: Section): BodyDensityFinding[] {
   const found: BodyDensityFinding[] = []
@@ -372,11 +353,9 @@ function opensBlock(
 }
 
 /**
- * The line of the first block of whichever form appears second, when a
- * section carries both bullets and paragraphs, else undefined.
- *
- * A column-zero line directly under an item with no blank between is a lazy
- * continuation of that item, not a paragraph.
+ * The line of the first block of whichever form appears second, when a section
+ * carries both bullets and paragraphs. A column-zero line directly under an item
+ * is a lazy continuation of it, not a paragraph.
  */
 function mixedForm(lines: readonly BodyLine[]): number | undefined {
   let firstItem: number | undefined

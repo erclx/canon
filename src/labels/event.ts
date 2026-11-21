@@ -33,15 +33,9 @@ export interface ScanInputOptions {
 }
 
 /**
- * Reads a title, a body, and a head branch from explicit flags first and the
- * named event payload second, so a caller testing the wiring by hand never
- * needs a real GitHub event file on disk.
- *
- * A `pull_request_review` payload carries no title of its own, and the text a
- * reviewer wrote lives at `review.body` rather than at `pull_request.body`.
- * `payload.review` is read ahead of `payload.pull_request` so a payload
- * carrying both, which a real review event does, is never read off the
- * pull request's own title and body once a review resolved.
+ * Reads a title, body, and head branch from explicit flags first and the named
+ * event payload second. A review payload carries its text at `review.body`, so
+ * `payload.review` is read ahead of `payload.pull_request`.
  */
 export function resolveScanInput(opts: ScanInputOptions): ResolvedScanInput {
   let title = opts.title
@@ -122,8 +116,7 @@ export function resolveScanInput(opts: ScanInputOptions): ResolvedScanInput {
 
       title ??= ''
 
-      // Defense in depth for `isReleasePullRequest`. A review carries no head ref
-      // of its own, so this reaches for the pull request's.
+      // Defense in depth for `isReleasePullRequest`, since a review carries no head ref of its own.
       if (typeof pullRequest === 'object' && pullRequest !== null) {
         const head = (pullRequest as Record<string, unknown>).head
         headRefName ??=
@@ -153,8 +146,7 @@ export function resolveScanInput(opts: ScanInputOptions): ResolvedScanInput {
     }
   }
 
-  // Refused only with no title and no body, so `--body` alone exercises the
-  // review-style path a real review scans by hand.
+  // Refused only with no title and no body, so `--body` alone exercises the review-style path.
   if (title === undefined && body === undefined) {
     return {
       kind: 'refused',

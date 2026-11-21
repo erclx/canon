@@ -3,11 +3,8 @@ import { join } from 'node:path'
 import { resolveExisting } from '@/roots/legacy'
 
 /**
- * Where a project declares its pull request label map.
- *
- * The file has already moved once, and that relocation rewrote every mention
- * across four surfaces. `LEGACY_MAP_REL` below is the one other place code
- * spells it, kept only as a read fallback, so the next move is still one edit
+ * Where a project declares its pull request label map. `LEGACY_MAP_REL` is the
+ * one other place code spells it, a read fallback, so the next move is one edit
  * to the write path rather than a sweep.
  */
 export const MAP_REL = join('canon', 'config', 'pr-labels.toml')
@@ -33,11 +30,8 @@ export interface DeclinedRow {
 
 /**
  * Why a map could not be read, which is never the same as a map with no rows.
- *
- * `no-map` is an answer rather than a fault. A project declaring no map is
- * labelled silently by design, so a refusal read as a break would make the map
- * mandatory for every target, which that decision declined. The other two are
- * a file that exists and cannot be used, which is a defect in the map itself.
+ * `no-map` is an answer, since a project declaring none is labelled silently by
+ * design, and the other two are a file that exists and cannot be used.
  */
 export type MapRefusal = 'no-map' | 'unreadable-map' | 'no-domains'
 
@@ -50,13 +44,9 @@ export type LabelMap =
   | { readonly kind: 'refused'; readonly reason: MapRefusal }
 
 /**
- * Reads a TOML table of string arrays into rows, dropping any key whose value
- * carries no usable prefix.
- *
- * A malformed row is skipped rather than refused, because both tables are
- * authored by hand and one bad entry should not blind the check to the other
- * forty. What it costs is that a typo reads as a row nobody wrote, which the
- * uncovered report surfaces from the other side.
+ * Reads a TOML table of string arrays into rows, dropping any key with no usable
+ * prefix. A malformed row is skipped rather than refused, since one bad hand-written
+ * entry should not blind the check to the rest, and a typo surfaces as uncovered.
  */
 function readRows(table: unknown): { key: string; prefixes: string[] }[] {
   if (typeof table !== 'object' || table === null || Array.isArray(table)) {
