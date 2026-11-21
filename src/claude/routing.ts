@@ -58,11 +58,9 @@ export type RoutingReport =
   | { readonly kind: 'refused'; readonly reason: RoutingRefusal }
 
 /**
- * Every distinct path one bullet names, in reading order.
- *
- * Naming a path is what this measures, not firing only on it. A bullet can
- * name a folder and still apply every session, and one can fire on a path it
- * never spells, so the count is a reading a person still has to judge.
+ * Every distinct path one bullet names, in reading order. Naming a path is what
+ * this measures, not firing only on it, so the count is a reading a person
+ * still has to judge.
  */
 export function namedPaths(line: string): string[] {
   const paths: string[] = []
@@ -80,12 +78,8 @@ export function namedPaths(line: string): string[] {
 
 /**
  * The openable part of a token, which for a shape is the folder above the
- * placeholder.
- *
- * `canon/context/<domain>.md` names `canon/context/` and nothing narrower,
- * so dropping the whole token would report the section that carries it as
- * naming no path at all. A token whose placeholder sits in the first segment
- * has no openable prefix and is dropped.
+ * placeholder. A token whose placeholder sits in the first segment has no
+ * openable prefix and is dropped.
  */
 function concretePrefix(token: string): string | undefined {
   if (!SHAPE.test(token)) return token
@@ -96,11 +90,8 @@ function concretePrefix(token: string): string | undefined {
 
 /**
  * Splits the file into the sections a reader sees, counting top-level bullets.
- *
- * A nested bullet belongs to the one above it rather than to the section, and
- * a fenced block holds example text rather than instruction, so neither is
- * counted. A heading carrying no bullet is dropped, since the report answers
- * how many bullets are path-scoped and a section with none answers nothing.
+ * A nested bullet or a fenced example is not counted, and a section with no
+ * bullet is dropped.
  */
 export function splitSections(text: string): Section[] {
   const sections: Section[] = []
@@ -177,12 +168,8 @@ export function readRuleGlobs(root: string): RuleGlobs[] {
 
 /**
  * The block between the opening and closing `---`, or nothing for a rule
- * carrying no frontmatter.
- *
- * Bounding the read is what keeps a body bullet out of the glob list. A rule
- * quoting a path in prose would otherwise register it as a scope the rule
- * never declared, and the resulting coverage would be wrong with nothing
- * reporting it.
+ * carrying no frontmatter. Bounding the read keeps a body bullet quoting a
+ * path out of the glob list.
  */
 function frontmatter(text: string): string {
   if (!text.startsWith('---\n')) return ''
@@ -192,23 +179,18 @@ function frontmatter(text: string): string {
 }
 
 /**
- * Whether a glob scopes itself to a location rather than to a file type.
- *
- * A glob opening `**` reaches every folder in the tree, so it answers that a
- * file type is governed and never that a named path is. Counting one would
- * report every markdown path covered by the markdown rule and leave the column
- * saying nothing a reader could act on.
+ * Whether a glob scopes itself to a location rather than to a file type. A glob
+ * opening `**` reaches every folder, so counting it would report every
+ * markdown path covered by the markdown rule.
  */
 function isAnchored(glob: string): boolean {
   return !glob.startsWith('**/')
 }
 
 /**
- * The first rule scoping itself to a named path, or undefined for none.
- *
- * A folder is probed with a handful of extensions rather than matched as a
- * literal, because a glob narrowed by file type reaches under the folder
- * without ever matching the folder's own name.
+ * The first rule scoping itself to a named path, or undefined for none. A folder
+ * is probed with a few extensions, since a glob narrowed by file type reaches
+ * under it without matching its own name.
  */
 export function coveringRule(
   path: string,

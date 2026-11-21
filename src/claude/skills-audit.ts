@@ -52,10 +52,9 @@ export const CORPORA: readonly string[] = [
 ]
 
 /**
- * The practice skills `claude/skills/create-skill/references/skill-practice.md` describes, keyed by corpus-relative
- * folder rather than by name, so a target's own `.claude/skills/` folder that
- * shares a name is never swept in. The list lives here rather than in a skill's
- * frontmatter because a skill declaring its own kind could exempt itself.
+ * The practice skills `claude/skills/create-skill/references/skill-practice.md` describes, keyed by
+ * corpus-relative folder. The list lives here, since a skill declaring its own
+ * kind could exempt itself.
  */
 export const PRACTICE_SKILLS: readonly string[] = [
   join(SHIPPED_CORPUS, 'codebase-layout'),
@@ -72,9 +71,8 @@ export const PRACTICE_SKILLS: readonly string[] = [
 
 /**
  * Every skill carrying the source ledger, being the practice skills and the
- * skills that teach a craft without the practice closing sections. Kept apart
- * from `PRACTICE_SKILLS` so citing sources never forces those sections onto a
- * skill whose body is not shaped around a practice a session cuts short.
+ * skills that teach a craft. Kept apart from `PRACTICE_SKILLS` so citing
+ * sources never forces the closing sections onto a skill.
  */
 export const LEDGER_SKILLS: readonly string[] = [
   ...PRACTICE_SKILLS,
@@ -98,11 +96,8 @@ export interface BulletLedgerScope {
 
 /**
  * The ledger-listed skills whose every reference but the source record carries
- * a ledger of its own, one table row per bullet under each H2, the way a rule
- * in a practice folder does. A reference is ledgered unless exempted by name,
- * so one added later fails until its rows land rather than passing unread. The
- * ledgers sit outside the plugin as rule ledgers do, so a target pays nothing
- * for them.
+ * a ledger of its own, one row per bullet under each H2. A reference is
+ * ledgered unless exempted by name, so one added later fails until its rows land.
  */
 export const BULLET_LEDGER_SKILLS: Readonly<Record<string, BulletLedgerScope>> =
   {
@@ -211,10 +206,8 @@ const HEADING = /^#{1,6}\s+(.+?)\s*$/
 const SECTION = /^##\s+(.+?)\s*$/
 
 /**
- * An ISO date, read as provenance wherever a reader is told it. The context
- * audit's detector clears a date after "measured" or "verified", and a skill
- * body keeps no such carve-out, since the standard sends every incident and its
- * date to the requirement's Gap or to git.
+ * An ISO date, read as provenance wherever a reader is told it. A skill body
+ * keeps no carve-out, since the standard sends every date to git.
  */
 const ISO_DATE = /\b\d{4}-\d{2}-\d{2}\b/g
 
@@ -238,10 +231,8 @@ export interface SkillFinding {
 
 export interface CorpusReport {
   /**
-   * Left as `join` produced it, where `SkillsCorpus.rel` in `skills-list.ts`
-   * normalizes the same spelling to POSIX. This one is an existing JSON field
-   * a caller already reads, so the split holds until a branch reading this verb
-   * is the one to close it.
+   * Left as `join` produced it, where `SkillsCorpus.rel` normalizes to POSIX. An
+   * existing JSON field a caller reads, so the split holds.
    */
   readonly rel: string
   readonly skills: number
@@ -308,11 +299,8 @@ interface SkillText {
 
 /**
  * Measures both skill corpora against the rules `claude/skills/create-skill/references/skill.md` states
- * mechanically. A corpus the project does not carry is skipped rather than
- * reported, so a target holding only `.claude/skills/` reads as in scope.
- *
- * Reads raw frontmatter rather than `listSkills`, which prefers the folder name
- * over the declared one and so can never surface a disagreement between them.
+ * mechanically. Reads raw frontmatter rather than `listSkills`, which prefers
+ * the folder name and so never surfaces a disagreement.
  */
 export async function auditSkills(root: string): Promise<SkillsAudit> {
   const present = CORPORA.map((rel) => ({ rel, dir: join(root, rel) })).filter(
@@ -500,10 +488,8 @@ async function readReferenceLedgers(
 
 /**
  * Pairs each file a target wrote under `PROJECT_SKILL_LEDGERS` with the skill
- * file of that name, `SKILL.md` with the body and any other with the reference
- * at `references/<file>`. Nothing is owed, since a project has no list to owe a
- * ledger against, so only a ledger that exists is read, and one naming a skill
- * or a file that is gone is reported rather than skipped.
+ * file of that name. Only a ledger that exists is read, and one naming a skill
+ * or file that is gone is reported rather than skipped.
  */
 async function readProjectLedgers(
   root: string,
@@ -549,11 +535,8 @@ async function readProjectLedgers(
 }
 
 /**
- * Directives per H2, `null` for any above the first. A contents list repeats
- * the headings rather than stating a rule, so `## Contents` takes no rows. A
- * nested bullet elaborates its parent, so only a top-level line counts. A body
- * stops at its first closer, and a ledger table under one then reads as rows
- * with no bullets rather than passing unread.
+ * Directives per H2, `null` for any above the first. `## Contents` takes no rows,
+ * and only a top-level bullet counts. A body stops at its first closer.
  */
 function ledgerGroups(text: string, isBody: boolean): HeadingCount[] {
   const counts = new Map<string | null, number>()
@@ -785,10 +768,8 @@ function referenceLedgerFindings(entry: ReferenceLedger): SkillFinding[] {
 }
 
 /**
- * A ledger present but citing nothing passed for as long as the check read the
- * file's existence alone, so the contents are read too. A sample block shows a
- * reader the shape of a row and cites nothing, so fences and code spans are
- * left out.
+ * A ledger present but citing nothing must fail, so the contents are read too.
+ * Fences and code spans are left out, since a sample row cites nothing.
  */
 function ledgerFindings(source: SkillSource): SkillFinding[] {
   if (source.ledger === undefined) {

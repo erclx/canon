@@ -2,13 +2,8 @@ import type { SkillCase } from '@/claude/skills-rank'
 
 /**
  * The session workflow skills: feature planning, review, and the artifacts
- * that coordinate work across sessions.
- *
- * Every positive is phrased away from its skill's own quoted trigger, since a
- * verbatim trigger passes by construction and proves nothing about a prompt in
- * someone's own words. Negatives target the pairs whose bodies already state
- * an explicit `Do NOT` boundary against each other, since a boundary in a
- * body does not reach the field a router reads.
+ * that coordinate work across sessions. Every positive is phrased away from
+ * its skill's own trigger, and negatives target pairs with a `Do NOT` boundary.
  */
 export const WORKFLOW_CASES: readonly SkillCase[] = [
   {
@@ -105,10 +100,7 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     prompt: 'File the open issues on this repo into an intake folder.',
     expect: 'issue-triage',
   },
-  // Rot across documents nobody changed is what this reads, rather than a
-  // stated rule broken on a given line. It is also not `target-check`, which
-  // asks whether a document exists and holds its sections rather than whether
-  // it still describes the tree.
+  // Reads rot across documents nobody changed, not a rule broken on one line, so it is not `target-check`.
   {
     prompt:
       'Which of our docs have gone stale, grown too long, or ended up in the wrong file?',

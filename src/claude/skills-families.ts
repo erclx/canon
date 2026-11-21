@@ -7,12 +7,8 @@ export interface SkillFamily {
 
 /**
  * The one vocabulary a shipped skill's family is drawn from, in the order the
- * skill map reads across its two pages. A heading is the map's prose and a key
- * is what frontmatter carries, so renaming a heading touches this constant and
- * no skill.
- *
- * Import-free on purpose: `skills-list.ts` and `skills-audit.ts` both read it,
- * and the first already imports the second.
+ * skill map reads. Import-free on purpose: `skills-list.ts` and
+ * `skills-audit.ts` both read it, and the first already imports the second.
  */
 export const SKILL_FAMILIES: readonly SkillFamily[] = [
   { key: 'setup', group: 'Set up a project' },
