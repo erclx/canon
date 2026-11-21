@@ -13,10 +13,9 @@ import { buildRuleEntries } from '@/gov/list'
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..')
 
-// The first segments under `.claude/` the current layout keeps, being where
-// the vendor reads rules, skills, hooks, and settings, plus the worktree and
-// per-user project folders the harness owns. A root the next layout move
-// retires fails here without anyone naming it.
+// The first segments under `.claude/` the current layout keeps, where the vendor
+// reads rules, skills, hooks, and settings, plus harness-owned folders. A root
+// the next layout move retires fails here without anyone naming it.
 const CURRENT_CLAUDE_ROOTS = [
   'rules',
   'skills',

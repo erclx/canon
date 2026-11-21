@@ -40,13 +40,8 @@ export interface GovCatalog {
 
 /**
  * Reports each stack's own entries expanded, so a folder entry reaches a
- * consumer as the rules it stands for. the `setup` skill dedupes `--add` extras
- * against this list, and a stack answering `canon` there would re-add every
- * rule that folder already carries.
- *
- * The `extends` chain is deliberately not resolved, which is what the bash
- * did. The list shows what each stack contributes beside the parent it
- * inherits from, rather than repeating the ancestors under every descendant.
+ * consumer as the rules it stands for, which the `setup` skill dedupes `--add`
+ * against. The `extends` chain is not resolved, so ancestors are not repeated.
  */
 export function buildStackEntries(root: string): StackEntry[] {
   const entries: StackEntry[] = []
@@ -74,9 +69,8 @@ export function buildStackEntries(root: string): StackEntry[] {
 
 /**
  * Reads the catalog straight off the source tree. A rule's domain is the
- * subdirectory it sits in, which is the rule folder grouping install preserves, and
- * its `detect` entry is the evidence that proposes it, null for a rule
- * `detect.toml` does not name.
+ * subdirectory it sits in, and its `detect` entry is the evidence that proposes
+ * it, null for a rule `detect.toml` does not name.
  */
 export function buildRuleEntries(root: string): RuleEntry[] {
   const rulesRoot = rulesSourceDir(root)

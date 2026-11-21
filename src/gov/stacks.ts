@@ -73,14 +73,9 @@ export function loadGovStack(
 }
 
 /**
- * Expands one stack entry. An entry naming a directory under
- * `governance/rules/` resolves to every rule inside it, sorted, and any other
- * entry resolves to itself, so a folder and a slug reach the caller as one
- * shape rather than two the caller has to tell apart.
- *
- * The directory wins over a rule file of the same name, which would leave
- * that rule unreachable from a stack entry. `src/gov/rule-layout.test.ts`
- * fails on any rule basename equal to a folder name, so the two never meet.
+ * Expands one stack entry. A directory under `governance/rules/` resolves to
+ * every rule inside it, sorted, and any other entry resolves to itself. The
+ * directory wins over a same-named rule file, which `rule-layout.test.ts` forbids.
  */
 export function expandStackEntry(root: string, entry: string): string[] {
   const dir = join(rulesSourceDir(root), entry)
@@ -92,13 +87,9 @@ export function expandStackEntry(root: string, entry: string): string[] {
 }
 
 /**
- * Walks `extends` ancestors first, then the stack's own rules, deduped by
- * first appearance. Tooling's `resolveChain` returns full manifests nearest
- * first and carries `skipStack` restriction, so the two walks stay separate
- * rather than fitting one shape to both.
- *
- * Dedupe runs on expanded names rather than on the entries, so a stack naming
- * a folder and an ancestor naming a rule inside it yield that rule once.
+ * Walks `extends` ancestors first, then the stack's own rules, deduped by first
+ * appearance on expanded names. Tooling's `resolveChain` carries `skipStack`
+ * restriction, so the two walks stay separate rather than fitting one shape.
  */
 export function resolveRules(root: string, stack: string): RuleResolution {
   const rules: string[] = []
@@ -137,11 +128,7 @@ export function resolveRules(root: string, stack: string): RuleResolution {
 /**
  * Names every rule no stack reaches, sorted. A rule outside every stack still
  * installs through `--add`, so this reports an opt-in library and an oversight
- * alike and leaves telling them apart to the reader.
- *
- * A stack whose `extends` does not resolve contributes nothing rather than
- * aborting the sweep, or one broken stack would report the whole catalog as
- * unreferenced.
+ * alike. A stack whose `extends` does not resolve contributes nothing.
  */
 export function unreferencedRules(root: string): string[] {
   const reached = new Set<string>()
@@ -159,14 +146,9 @@ export function unreferencedRules(root: string): string[] {
 }
 
 /**
- * Rules the target's recorded chain entitles it to that its installed tree
- * does not hold. `resolveRules` already walks a stack's `extends` ancestors,
- * so reading its leaf entry is enough; no second walk resolves the chain
- * itself. A stack the toolkit no longer ships resolves to nothing rather than
- * throwing, the same way `readNewRules`'s folder fallback already treats it.
- *
- * A held rule's declared successor counts as held, since the sync that
- * renames the old file installs it.
+ * Rules the target's recorded chain entitles it to that its installed tree does
+ * not hold. `resolveRules` already walks `extends`, so reading the leaf entry is
+ * enough, and a held rule's declared successor counts as held.
  */
 export function resolveMissingRules(
   root: string,
