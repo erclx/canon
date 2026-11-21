@@ -17,3 +17,8 @@ packages = ["vite", "@vitejs/plugin-react"]
 "build" = "tsc --noEmit && vite build"
 "dev" = "WORKTREE_PORT_OFFSET=$(bash scripts/worktree-port.sh) && export WORKTREE_PORT_OFFSET && vite"
 "preview" = "WORKTREE_PORT_OFFSET=$(bash scripts/worktree-port.sh) && export WORKTREE_PORT_OFFSET && vite preview"
+
+[scaffold]
+# The overlay under scaffold/ writes the Tailwind stylesheet, app.tsx, and main.tsx after
+# this step, so the step only removes the demo the starter ships.
+prepare = "rm -r src/App.tsx src/App.css src/assets public/icons.svg"

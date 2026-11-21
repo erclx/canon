@@ -8,11 +8,18 @@ The vite-react stack covers Vite + React + TypeScript web apps and Chrome extens
 
 ## Scaffold checklist
 
-1. Scaffold with `bunx create-vite@latest <name> --template react-ts` (web apps) or `bunx create-crxjs@latest` (Chrome extensions).
+1. Scaffold with `canon tooling scaffold vite-react <name>` (web apps) or `bunx create-crxjs@latest` (Chrome extensions).
 2. Install base and web tooling with `canon tooling sync web . --write`.
 3. Install vite-react deps and configs with `canon tooling sync vite-react . --write`.
 4. Extend the `ci` and `development` context entries under `canon/context/` per the web reference's extend sections plus the vite-react rows below.
 5. Run `bun run lint:fix`, then `bun run format`, then `bun run check`.
+
+## What the scaffold step replaces
+
+`canon tooling scaffold vite-react` runs the manifest's `[scaffold] prepare` on the `create-vite` starter, then copies the stack's `scaffold/` overlay over it.
+
+- The step removes the demo, being `src/App.tsx`, `src/App.css`, `src/assets/`, and `public/icons.svg`, and fails the scaffold when a template change leaves one missing
+- The overlay writes `src/index.css` as the Tailwind import alone, a minimal `src/app.tsx` with a named `App` export, and a `src/main.tsx` mounting it on `#root`
 
 ## What ships as golden configs
 
