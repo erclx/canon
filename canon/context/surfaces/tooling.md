@@ -18,7 +18,7 @@ Holds one stack, always with a `manifest.toml` and a `reference.md`, plus `confi
 - Adding a stack means copying the closest one from `canon tooling list`, filling its manifest and reference, adding configs and seeds, and running `canon tooling verify <name>`
 - A manifest block injects one thing. `[dependencies.dev]` and `[scripts]` add only what is missing, `[gitignore]` adds a group, and `[scaffold] prepare` runs on the starter.
 - `runtime` is reserved and read by nothing. `scaffold` is read by `canon tooling verify`, `canon tooling scaffold`, `canon tooling list`, and `sandbox/tooling/upstream.ts`.
-- `python`, `go`, and `php` extend `base` directly and run on `uv`, `go`, and `composer`, so their scaffolds write no `package.json` and `[scaffold] prepare` runs `bun init -y`
+- `python`, `go`, and `php` extend `base` directly and run on `uv`, `go`, and `composer`, so their starters write no `package.json` and each stack's `scaffold/` overlay lands a minimal one
 - A script changes only through `[scripts.override]`, as `vite-react` forces `--max-warnings 0` onto the scaffold's oxlint, and the drift scan reads a stale override as `drifted`
 
 ### `tooling/astro/`
@@ -126,7 +126,7 @@ Runs `canon tooling verify <stack>` by scaffolding into `.canon/tmp/runs/verify-
 
 Runs `canon tooling scaffold <stack> [target]` for the `target-scaffold` skill. The starter runs in a temp folder with `{{name}}` set to the target's basename, the stack's `[scaffold] prepare` and its `tooling/<stack>/scaffold/` overlay apply there, and the result moves into the target.
 
-- A target holding anything but `.git` refuses, and a target's own `.git` wins over one the scaffolder wrote, as `uv init` does
+- A target holding anything but `.git` refuses, and a `.git` the starter wrote never moves, since it would nest inside a parent repository
 - A basename a package manager rejects refuses as `bad-name` with a `suggested` name, never a silent rename
 - A failed command or step moves nothing and keeps the scratch folder, named in the record, with `prepare-failed` for the step
 - The overlay lands after the step, since on a case-insensitive filesystem a step removing `App.tsx` would take an overlay's `app.tsx` with it
