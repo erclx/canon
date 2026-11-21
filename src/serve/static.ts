@@ -3,9 +3,8 @@ import { join, resolve, sep } from 'node:path'
 
 /**
  * The loopback interface, never a wildcard bind. A preview serves whatever
- * directory it is pointed at, and the folders this exists for are the
- * gitignored record trees, so reaching the network is the one thing it must
- * not do.
+ * directory it is pointed at, often gitignored record trees, so reaching the
+ * network is the one thing it must not do.
  */
 export const SERVE_HOST = '127.0.0.1'
 
@@ -100,10 +99,9 @@ interface ListingEntry {
 }
 
 /**
- * Reads the entries a listing may name. Each one takes the same containment
- * test a request for it would, since a listed name is itself a fact about a
- * place outside the root. Dotfiles are hidden because a listing is for
- * navigating pages, and a hidden file is still reachable by its URL.
+ * Reads the entries a listing may name. Each takes the containment test a request
+ * for it would, since a listed name is a fact about a place outside the root.
+ * Dotfiles are hidden but still reachable by URL.
  */
 function listEntries(root: string, directory: string): ListingEntry[] {
   return readdirSync(directory)
@@ -156,9 +154,8 @@ function contentType(path: string): string {
 
 /**
  * Resolves a request path inside the root, or returns undefined when it escapes.
- * The containment test compares resolved absolute paths rather than inspecting
- * the request for `..`, because an encoded traversal survives a textual scan and
- * does not survive resolution.
+ * Containment compares resolved absolute paths rather than scanning for `..`,
+ * since an encoded traversal survives a textual scan and not resolution.
  */
 export function resolveWithin(
   root: string,
@@ -170,8 +167,7 @@ export function resolveWithin(
   } catch {
     return undefined
   }
-  // A NUL truncates the path at the filesystem layer, so the file read would
-  // differ from the one the containment test checked.
+  // A NUL truncates the path at the filesystem layer, so the file read would differ from the one checked.
   if (decoded.includes('\0')) return undefined
 
   const relativePath = decoded.replace(/^\/+/, '')
@@ -181,13 +177,9 @@ export function resolveWithin(
 }
 
 /**
- * Re-tests containment after following symlinks. `resolveWithin` is lexical
- * and `resolve` does not follow a link, so a link inside the root clears that
- * test while the file it points at sits outside.
- *
- * Only a path that exists is checked, because a link can be followed only once
- * there is something on the other end, and a path that resolves to nothing is
- * a 404 rather than an escape.
+ * Re-tests containment after following symlinks, since `resolveWithin` is lexical
+ * and a link inside the root clears it. Only a path that exists is checked, as a
+ * path resolving to nothing is a 404 rather than an escape.
  */
 function escapesThroughLink(root: string, target: string): boolean {
   if (!existsSync(target)) return false
@@ -202,12 +194,9 @@ function escapesThroughLink(root: string, target: string): boolean {
 }
 
 /**
- * Whether a bind failure is contention worth trying the next port for.
- *
- * Lifted out of the loop so the decision is testable. Manufacturing a real
- * non-contention bind failure needs a privileged port or an unavailable
- * interface and neither travels between machines, where an error value does,
- * so this is unit-tested and the bind itself is not.
+ * Whether a bind failure is contention worth trying the next port for. It is
+ * lifted out of the loop so the decision is unit-testable, since the bind
+ * failures other than contention need a privileged port or unavailable interface.
  */
 export function shouldWalkPast(error: unknown): boolean {
   return (error as NodeJS.ErrnoException | null)?.code === 'EADDRINUSE'
@@ -216,12 +205,9 @@ export function shouldWalkPast(error: unknown): boolean {
 type BoundServer = ReturnType<typeof Bun.serve>
 
 /**
- * Picks a listening port, starting at the requested one and walking forward.
- * A busy port is the ordinary case rather than a failure, since a preview of
- * one workspace is routinely open while another is started.
- *
- * Takes the bind as a parameter so every surface that serves walks ports the
- * same way, whatever routes it binds.
+ * Picks a listening port, starting at the requested one and walking forward. A
+ * busy port is the ordinary case, since a preview of one workspace is routinely
+ * open while another starts. Takes the bind as a parameter so every surface walks ports alike.
  */
 export function bindFirstFree(
   first: number,
@@ -230,12 +216,10 @@ export function bindFirstFree(
   for (let port = first; port < first + PORT_ATTEMPTS; port++) {
     try {
       const server = bind(port)
-      // The bound port, since port 0 asks the OS to choose. The type admits
-      // undefined for a unix socket, which this bind never is.
+      // The bound port, since port 0 asks the OS to choose and the type admits undefined for a unix socket.
       return { server, port: server.port ?? port }
     } catch (error) {
-      // Only contention is walked past. Any other bind failure is rethrown for the
-      // caller to refuse on, rather than retried and reported as a full range.
+      // Only contention is walked past. Any other bind failure is rethrown for the caller to refuse on.
       if (!shouldWalkPast(error)) throw error
     }
   }
@@ -271,14 +255,12 @@ export async function respond(
   const target = resolveWithin(root, pathname)
   if (!target) return forbidden()
 
-  // Tested before the read as well, since the redirect below answers first and
-  // would otherwise reveal whether an out-of-root directory exists.
+  // Tested before the read as well, since the redirect below answers first and would reveal whether a directory exists.
   if (escapesThroughLink(root, target)) return forbidden()
 
   let path = target
   if (existsSync(path) && statSync(path).isDirectory()) {
-    // A browser resolves a relative asset against the URL's last slash, so a
-    // directory answered without one loads its assets from the parent.
+    // A browser resolves a relative asset against the URL's last slash, so a directory without one loads from the parent.
     if (!pathname.endsWith('/')) {
       return new Response(null, {
         status: 301,
@@ -300,8 +282,7 @@ export async function respond(
     path = indexPage
   }
 
-  // Sits immediately before the read, so every path reaching `Bun.file` is
-  // tested, the appended index included.
+  // Sits immediately before the read, so every path reaching `Bun.file` is tested, the appended index included.
   if (escapesThroughLink(root, path)) return forbidden()
 
   const file = Bun.file(path)
@@ -315,8 +296,7 @@ export async function respond(
   return new Response(file, {
     headers: {
       'content-type': contentType(path),
-      // A preview is edited and reloaded continuously, and a cached stylesheet
-      // reads as a fix that did not work.
+      // A preview is edited and reloaded continuously, and a cached stylesheet reads as a fix that did not work.
       'cache-control': 'no-store',
     },
   })
@@ -333,15 +313,13 @@ export function startServer(
 
   const entry = (options.entry ?? DEFAULT_ENTRY).replace(/^\/+/, '')
 
-  // Checked before a port is taken, since `url` is what a caller hands on. An
-  // entry that is merely absent does not refuse, and `entryExists` reports it.
+  // Checked before a port is taken, since `url` is what a caller hands on, and `entryExists` reports an absent entry.
   const entryPath = resolveWithin(root, entry)
   if (!entryPath) return refuse('no-entry', `${entry} escapes ${dir}`)
 
   const first = options.port ?? DEFAULT_PORT
 
-  // A bind failure other than contention throws here, and the help promises a
-  // reason on stderr or in the record, so it is caught and named.
+  // A bind failure other than contention throws here, and the help promises a reason on stderr or in the record.
   let bound: ReturnType<typeof listen>
   try {
     bound = listen(root, first, options.index ?? false)
@@ -360,8 +338,7 @@ export function startServer(
     )
   }
 
-  // A listing answers `/` where no index page exists, so under the flag the
-  // default entry is the root. An explicit `--entry` keeps its own link.
+  // A listing answers `/` where no index page exists, so under the flag the default entry is the root.
   const listsRoot =
     (options.index ?? false) &&
     options.entry === undefined &&

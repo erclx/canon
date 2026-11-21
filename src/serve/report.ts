@@ -7,10 +7,9 @@ import {
 import { intro, logError, logInfo, logStep, logWarn, outro } from '@/cli/ui'
 
 /**
- * The relative path where it stays inside the working directory, and the
- * absolute one where it climbs out. A run from a linked worktree serving the
- * main root reports `../../teach`, which names the directory without giving a
- * reader anything they can open.
+ * The relative path where it stays inside the working directory, and the absolute
+ * one where it climbs out, since `../../teach` from a linked worktree names a
+ * directory without giving a reader anything they can open.
  */
 export function displayPath(root: string): string {
   const near = relative(process.cwd(), root)
