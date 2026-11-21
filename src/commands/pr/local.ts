@@ -146,10 +146,13 @@ function machineLocalRunner(): LocalRunner {
   return {
     ...machineListenerReader(),
     // An HTML page rather than any answer, since a test runner's server would give a bare 404.
-    async probe(port) {
+    async probe(port, settled) {
       try {
         const response = await fetch(`http://localhost:${port}/`, {
-          signal: AbortSignal.timeout(LOCAL_PROBE_TIMEOUT_MS),
+          signal: AbortSignal.any([
+            AbortSignal.timeout(LOCAL_PROBE_TIMEOUT_MS),
+            settled,
+          ]),
         })
         await response.body?.cancel()
         return (response.headers.get('content-type') ?? '').includes(

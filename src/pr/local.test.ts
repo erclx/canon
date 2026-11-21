@@ -175,6 +175,26 @@ describe('findLocalServer', () => {
     expect(result).toMatchObject({ kind: 'found', port: 5173 })
   })
 
+  it('should abort the probes still pending once a page port is found', async () => {
+    const base = fakeRunner([
+      { port: 5173, pid: 10, cwd: LINKED },
+      { port: 24678, pid: 10, cwd: LINKED },
+    ])
+    const signals = new Map<number, AbortSignal>()
+    const runner: LocalRunner = {
+      ...base,
+      async probe(port, signal) {
+        signals.set(port, signal)
+        if (port === 5173) return true
+        return new Promise<boolean>(() => {})
+      },
+    }
+
+    await findLocalServer(LINKED, runner)
+
+    expect(signals.get(24678)?.aborted).toBe(true)
+  })
+
   it('should call no health check when no path is declared', async () => {
     const runner = fakeRunner([{ port: 5173, pid: 10, cwd: LINKED }])
 

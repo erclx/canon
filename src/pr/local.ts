@@ -6,8 +6,8 @@ export type LocalRefusal = 'no-server' | 'no-listener-reader' | 'unhealthy'
 
 /** The listener reads a detection makes plus two HTTP probes, injected so it can be driven without binding a socket. */
 export interface LocalRunner extends ListenerReader {
-  /** Whether the port serves an HTML page at its root inside the runner's timeout. */
-  probe(port: number): Promise<boolean>
+  /** Whether the port serves an HTML page at its root inside the runner's timeout, or before `signal` aborts. */
+  probe(port: number, signal: AbortSignal): Promise<boolean>
   /** The final status a path on the port answers after redirects, or null when nothing answers inside the timeout. */
   check(port: number, path: string): Promise<number | null>
 }
@@ -78,13 +78,33 @@ export async function findLocalServer(
   }
 
   // Probed at once, so silent listeners below a slow page cost one timeout.
+  const settled = new AbortController()
   const candidates = [...ports]
     .sort(([a], [b]) => a - b)
     .map(([port, skipsHealth]) => ({
       port,
       skipsHealth,
-      page: runner.probe(port),
+      page: runner.probe(port, settled.signal),
     }))
+  try {
+    return await firstHealthyPage(candidates, healthPaths, runner)
+  } finally {
+    // A pending fetch holds the process open until its own timeout.
+    settled.abort()
+  }
+}
+
+interface Candidate {
+  readonly port: number
+  readonly skipsHealth: boolean
+  readonly page: Promise<boolean>
+}
+
+async function firstHealthyPage(
+  candidates: readonly Candidate[],
+  healthPaths: readonly string[],
+  runner: LocalRunner,
+): Promise<LocalResult> {
   let unhealthy: (HealthFailure & { readonly port: number }) | undefined
   for (const { port, skipsHealth, page } of candidates) {
     if (!(await page)) continue
