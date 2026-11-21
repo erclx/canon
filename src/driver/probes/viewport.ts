@@ -1,13 +1,7 @@
 /**
- * Resolves the viewport sweep a run is driven at.
- *
- * A defect can be a function of how much scroll remains rather than of the
- * markup, so a single height can report clean over a live defect. Every other
- * probe measures a page, and this one decides how many pages there are.
- *
- * It refuses rather than defaulting, which is the whole of its contract. The
- * heights that separate a passing render from a failing one belong to the
- * layout being driven, and no sample is broad enough to ship as a default.
+ * Resolves the viewport sweep a run is driven at. A defect can be a function of
+ * how much scroll remains, so one height can report clean over a live defect.
+ * It refuses rather than defaulting, since no sample is broad enough to ship as one.
  */
 
 export interface Viewport {

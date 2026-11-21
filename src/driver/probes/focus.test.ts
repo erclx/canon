@@ -4,14 +4,9 @@ import type { Browser, Page } from 'playwright-core'
 import { probeFocus } from '@/driver/probes/focus'
 
 /**
- * Pins the two false-finding classes this probe was built against.
- *
- * The first is `.focus()` diverging from Tab once the page has taken a pointer
- * interaction, so the control clicks first, as every driver step does. The
- * second is an outline sub-property moving under an outline resolving to
- * `none`, which paints nothing, and `#quiet` clears `outline` while a broader
- * rule still sets `outline-offset`. The suite needs a browser binary and CI
- * installs none, so a green pipeline is no evidence this passed.
+ * Pins the two false-finding classes this probe was built against: `.focus()`
+ * diverging from Tab once a pointer interaction has happened, and an outline
+ * sub-property moving under an outline resolving to `none`. It skips without a browser binary.
  */
 
 /** One ring written the way a stylesheet writes one, and one control with none. */
@@ -71,8 +66,7 @@ describe.skipIf(!hasBrowser)('probeFocus against a rendered page', () => {
     const findings = await probeFocus(page)
     await page.close()
 
-    // `#pinned` is `fixed`, so its `offsetParent` is null while it is on screen,
-    // and a test keyed on that property would skip its missing ring.
+    // `#pinned` is `fixed`, so its `offsetParent` is null on screen and a test keyed on it would skip its missing ring.
     expect(findings.map((finding) => finding.selector)).toEqual([
       'button#quiet',
       'button#pinned',
@@ -83,14 +77,12 @@ describe.skipIf(!hasBrowser)('probeFocus against a rendered page', () => {
   it('should differ from a reader that focuses without entering keyboard modality', async () => {
     const page = await browser.newPage()
     await page.setContent(PAGE)
-    // The click is the point, since the cheap reader is only wrong once a pointer
-    // has set the modality, which every driver step does.
+    // The click is the point, since the cheap reader is only wrong once a pointer has set the modality.
     await page.locator('#ring').click()
 
     const naive = await readWithoutTab(page)
 
-    // A page of its own for the probe, since the modality one press installs
-    // belongs to the page and would carry back into the control above.
+    // A page of its own, since the modality one press installs would carry back into the control above.
     const fresh = await browser.newPage()
     await fresh.setContent(PAGE)
     await fresh.locator('#ring').click()
@@ -99,8 +91,7 @@ describe.skipIf(!hasBrowser)('probeFocus against a rendered page', () => {
     await page.close()
     await fresh.close()
 
-    // The ring is present and correctly written, and the cheaper reader calls
-    // it unstyled anyway. That is the whole of the 27-finding class.
+    // The ring is present and correctly written, and the cheaper reader calls it unstyled anyway.
     expect(naive).toContain('ring')
     expect(findings.map((finding) => finding.selector)).toEqual([
       'button#quiet',

@@ -7,14 +7,9 @@ import {
 } from '@/driver/probes/diagram'
 
 /**
- * One diagram per lesson, each in an `svg` of its own so a pairwise comparison
- * cannot reach across two cases and report a collision the fixture never posed.
- *
- * The stylesheet is the point of `#authored`. Its two labels sit apart in the
- * markup and the CSS renders them larger, the shape a page restyled after its
- * coordinates were picked takes, so every reading is taken in the browser after
- * `document.fonts.ready`. The suite needs a browser binary and CI installs
- * none, so a green pipeline is no evidence this passed.
+ * One diagram per lesson, each in its own `svg` so a pairwise comparison cannot
+ * collide across cases. Readings are taken in the browser after `document.fonts.ready`,
+ * since the CSS renders `#authored` labels larger. It skips without a browser binary.
  */
 
 const PAGE = readFileSync(
@@ -67,8 +62,7 @@ describe.skipIf(!hasBrowser)(
     })
 
     it('should be invisible to the probe that compares filled boxes', () => {
-      // A fill-only occlusion test filters out every line before the comparison, so
-      // sampling the stroke is the only reading that sees it.
+      // A fill-only occlusion test filters out every line, so sampling the stroke is the only reading that sees it.
       expect(
         geometry.filter((finding) =>
           finding.selector.startsWith('svg#connector'),
@@ -93,14 +87,12 @@ describe.skipIf(!hasBrowser)(
       )
 
       expect(found).toHaveLength(1)
-      // Authored 60 units apart and rendered overlapping, which is the whole
-      // reason the reading is taken here rather than off the coordinates.
+      // Authored 60 units apart and rendered overlapping, so the reading is taken in the browser.
       expect(found[0]?.measured).toMatch(/^2\dx\d+px of overlap/)
     })
 
     it('should leave two properly spaced lines alone where their boxes touch', () => {
-      // An SVG text rect is the font box rather than the ink, so adjacent lines touch,
-      // and the vertical inset with the threshold keeps that out.
+      // An SVG text rect is the font box rather than the ink, so the vertical inset keeps adjacent lines apart.
       expect(
         geometry.filter((finding) =>
           finding.selector.startsWith('svg#touching'),
@@ -109,8 +101,7 @@ describe.skipIf(!hasBrowser)(
     })
 
     it('should report a stroke crossing a label inside a transformed group', () => {
-      // `getPointAtLength` answers in the shape's user space, so sampling against the
-      // root's matrix drops a `g` translation and reads the page clean.
+      // `getPointAtLength` answers in the shape's user space, so sampling against the root's matrix drops a `g` translation.
       const found = strokes.filter((finding) =>
         finding.selector.startsWith('svg#grouped'),
       )
@@ -129,8 +120,7 @@ describe.skipIf(!hasBrowser)(
     })
 
     it('should name the vertical inset on every reading it was applied to', () => {
-      // Every compared rect is trimmed top and bottom only, and the record says so,
-      // so a reader can tell a real overrun from a trimmed one.
+      // Every compared rect is trimmed top and bottom only, and the record says so.
       const readings = [...geometry, ...strokes]
 
       expect(readings.length).toBeGreaterThan(0)

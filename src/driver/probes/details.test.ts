@@ -4,24 +4,17 @@ import type { Browser } from 'playwright-core'
 import { probeDetails } from '@/driver/probes/details'
 
 /**
- * Pins both halves of the closed-menu lesson against one fixture, since the two
- * pull opposite ways and a suite covering either alone would pass a probe that
- * fails the other.
- *
- * Shut, the element measures only its summary, so anything judged from that box
- * is judged from the trigger rather than the menu. Open, the panel hangs off the
- * right edge of a phone-width viewport, true only while open. The suite needs a
- * browser binary and CI installs none, so a green pipeline is no evidence.
+ * Pins both halves of the closed-menu lesson against one fixture: shut, the
+ * element measures only its summary, and open, the panel hangs off a phone-width
+ * edge. It skips without a browser binary, so green is no evidence it passed.
  */
 
 const PHONE = { width: 390, height: 800 }
 
 /**
- * A narrow trigger, and a panel that lands 35px past the right edge only once
- * the menu is open. The offset hangs off `details[open]` rather than off layout
- * flow, and that is deliberate: this Chromium hands a closed `<details>` a full
- * layout box for its contents, so a fixture that merely hid the panel would
- * still measure it shut and prove nothing about which state was read.
+ * A narrow trigger and a panel landing 35px past the right edge only once open.
+ * The offset hangs off `details[open]`, since this Chromium gives a closed
+ * `<details>` a full layout box and a merely hidden panel would still measure.
  */
 const PAGE = readFileSync(
   new URL('./fixtures/details.html', import.meta.url),
@@ -73,8 +66,7 @@ describe.skipIf(!hasBrowser)('probeDetails against a rendered menu', () => {
     const findings = await probeDetails(page)
     await page.close()
 
-    // The shut reading is in the record so a reader can see it was taken, and
-    // its own numbers are named as measuring nothing about the panel.
+    // The shut reading is in the record so a reader sees it was taken, named as measuring nothing.
     expect(findings[0]?.measured).toContain('shut')
     expect(findings[0]?.measured).toContain('measures nothing')
   }, 120_000)
@@ -92,8 +84,7 @@ describe.skipIf(!hasBrowser)('probeDetails against a rendered menu', () => {
     const findings = await probeDetails(page)
     await page.close()
 
-    // Shut, the panel sits inside the right edge and reads clean. The defect is
-    // over the edge only while open, the blind spot skipping a closed menu leaves.
+    // Shut, the panel reads clean, and the defect is over the edge only while open.
     expect(shut).toBeLessThan(0)
     expect(findings).toHaveLength(1)
   }, 120_000)
