@@ -12,11 +12,8 @@ import type { ValidateRefusal as BoardRefusal } from '@/tasks/validate'
 
 /**
  * The audits this repository already owns, and how to read each one's record.
- *
- * Every verb here ships its own `--json` shape with its own keys, and this
- * module reads each shape rather than forcing a common envelope on them. Each
- * record already has consumers, so an envelope would be a breaking change to
- * every one of them bought for tidiness.
+ * Each verb keeps its own `--json` shape, since an envelope would break every
+ * existing consumer of those records.
  */
 
 /** How far a finding from this audit reaches. */
@@ -27,13 +24,8 @@ export type Corpus =
   | 'per-machine'
   /**
    * Read from an index off this machine, so the count moves when someone
-   * publishes rather than when someone edits here.
-   *
-   * Its own member rather than either of the two above. A baseline would
-   * record growth nobody caused, which is what keeps it out of the retained
-   * set alongside per-machine scratch, and an index this run could not reach
-   * is an ordinary absence rather than the broken checkout a missing tracked
-   * tree would be.
+   * publishes. A baseline would record growth nobody caused, and an unreachable
+   * index is an ordinary absence rather than a broken checkout.
    */
   | 'upstream'
 
@@ -58,40 +50,28 @@ export interface AuditSpec {
   /** Arguments after `canon`, always ending in `--json`. */
   readonly argv: readonly string[]
   /**
-   * Exit codes this verb sets on a finding that is a fact.
-   *
-   * Empty for every verb whose findings are judgments. The catalog decides
-   * this rather than the exit code, because a reporting verb sets 2 on
-   * findings it deliberately does not gate on, so the code alone cannot say
-   * whether a finding is a fact.
+   * Exit codes this verb sets on a finding that is a fact, empty for a judgment.
+   * The catalog decides this, since a reporting verb sets 2 on findings it does
+   * not gate on and the code alone cannot say whether one is a fact.
    */
   readonly gatingExits: readonly number[]
   readonly corpus: Corpus
   /**
    * Refusal reasons that mean this audit has no corpus here rather than that
-   * it broke, overriding what the corpus alone would allow.
-   *
-   * Present only where the corpus answers wrongly. A tracked corpus normally
-   * allows nothing, since a tree that ships to targets and cannot be found is
-   * a broken checkout, and the secret scan is the exception: a project that
-   * publishes nothing has no shipped tree to read, which is an ordinary state
-   * rather than a defect.
+   * it broke. A tracked corpus normally allows none, and the secret scan is
+   * the exception, since a project that publishes nothing ships no tree.
    */
   readonly absentReasons?: readonly string[]
   /**
-   * Pulls the counts worth retaining out of this verb's record.
-   *
-   * Returns `undefined` when the record does not carry the keys it reads,
-   * which is a measure that did not run rather than a corpus with nothing in
-   * it. Zero there would read as clean, which is the two-states-look-alike
-   * defect this repository has already fixed elsewhere.
+   * Pulls the counts worth retaining out of this verb's record, or `undefined`
+   * when the record lacks the keys it reads. Zero there would read as clean
+   * for a measure that did not run.
    */
   readonly counts: (record: unknown) => Record<string, number> | undefined
   /**
    * Growth fractions by count key, of the recorded value, that move a key
-   * without counting it toward `summary.grown`. A fraction rather than an
-   * absolute count, so it scales to each project's own baseline with no
-   * change to its `baseline.json`. A key with none compares exactly.
+   * without counting toward `summary.grown`. A fraction scales to each
+   * project's baseline, and a key with none compares exactly.
    */
   readonly tolerance?: Readonly<Record<string, number>>
 }
@@ -130,10 +110,9 @@ function lengthOf(value: unknown): number | undefined {
 }
 
 /**
- * Folds a set of per-key readings into one record, or `undefined` when any of
- * them could not be read. One unreadable key means the record is not the shape
- * the extractor was written against, and reporting the rest would publish a
- * partial count under a name that claims to be whole.
+ * Folds per-key readings into one record, or `undefined` when any could not be
+ * read, since a partial count under a whole-sounding name would be published
+ * from a shape the extractor was not written against.
  */
 function allOf(
   readings: Record<string, number | undefined>,
@@ -148,10 +127,8 @@ function allOf(
 
 /**
  * Reads the requirements record's one cap, or nothing when the record is
- * absent, states no cap, or the run never opened it.
- *
- * The key is optional, so a record from a binary predating it still counts
- * its other findings.
+ * absent, states no cap, or the run never opened it. The key is optional, so a
+ * record from an older binary still counts its other findings.
  */
 function requirementsCounts(
   root: Record<string, unknown>,
@@ -203,8 +180,7 @@ function markdownCounts(record: unknown): Record<string, number> | undefined {
   if (!Array.isArray(entries)) return undefined
 
   const depth = asObject(root.checkpoints)?.run
-  // A depth reading needs its checkpoint, or zero would report an unmeasured
-  // corpus as one with no file past the line.
+  // A depth reading needs its checkpoint, or zero would report an unmeasured corpus as clean.
   if (entries.length > 0 && typeof depth !== 'number') return undefined
 
   let bans = 0
@@ -235,8 +211,7 @@ function markdownCounts(record: unknown): Record<string, number> | undefined {
     heavyParagraphs += paragraphs
     if (typeof depth === 'number' && run > depth) filesPastDepth += 1
 
-    // A file below the measuring floor carries no cadence key at all, which is
-    // a file that was not measured rather than one with no flat paragraph.
+    // A file below the measuring floor carries no cadence key, so it was not measured.
     const flat = asObject(entry.cadence)?.flat
     if (typeof flat === 'number') flatParagraphs += flat
   }
@@ -267,12 +242,9 @@ function skillCounts(record: unknown): Record<string, number> | undefined {
 }
 
 /**
- * Reads the unqualified citations alone, leaving the qualified ones out.
- *
- * A qualified citation is a repair that already landed, so folding the two
- * together would report a corpus getting worse every time one is fixed. The
- * key is still read rather than assumed present, since a record carrying
- * neither array is a shape that moved rather than a catalog with nothing in it.
+ * Reads the unqualified citations alone, since a qualified one is a repair
+ * that landed and folding it in would report a corpus worsening as it is fixed.
+ * A record carrying neither array is a shape that moved, not an empty catalog.
  */
 function reachCounts(record: unknown): Record<string, number> | undefined {
   const root = asObject(record)
@@ -283,11 +255,8 @@ function reachCounts(record: unknown): Record<string, number> | undefined {
 
 /**
  * Reads the routing measure's miss and unmeasurable counts, leaving `rank1`
- * and `top3` out. Both move in lockstep with `misses` over a fixed-size
- * corpus, so carrying them would report one movement three times, the same
- * reasoning `restatedCounts` already takes over its own pair of derived
- * totals. `unmeasurable` is retained separately, since it counts a defect in
- * the instrument rather than a collision the catalog itself carries.
+ * and `top3` out, since both move in lockstep with `misses`. `unmeasurable`
+ * stays, as it counts a defect in the instrument rather than a collision.
  */
 function rankCounts(record: unknown): Record<string, number> | undefined {
   const root = asObject(record)
@@ -303,8 +272,7 @@ function boardCounts(record: unknown): Record<string, number> | undefined {
   const root = asObject(record)
   if (root === undefined) return undefined
 
-  // The board keeps its untested rows apart from its findings on purpose, so
-  // they move no exit code. Folding them together here would undo that.
+  // The board keeps untested rows apart from findings so they move no exit code.
   return allOf({
     findings: lengthOf(root.findings),
     untested: lengthOf(root.untested),
@@ -312,11 +280,9 @@ function boardCounts(record: unknown): Record<string, number> | undefined {
 }
 
 /**
- * Reads the advisory verb's per-severity object rather than a total.
- *
- * A single count folds a critical advisory into a low one, and the response to
- * the two differs. The keys are read off the record rather than listed here,
- * so a severity the index adds is carried instead of silently dropped.
+ * Reads the advisory verb's per-severity object rather than a total, since a
+ * critical advisory folds into a low one and the responses differ. Keys come
+ * off the record, so a severity the index adds is carried rather than dropped.
  */
 function advisoryCounts(record: unknown): Record<string, number> | undefined {
   const severities = asObject(asObject(record)?.severities)
@@ -332,16 +298,9 @@ function advisoryCounts(record: unknown): Record<string, number> | undefined {
 }
 
 /**
- * Reads the uncovered paths alone, which is the half that is a finding.
- *
- * The declined paths are deliberately not counted. They are whichever declined
- * rows this branch happened to touch rather than a measure of the map, so a
- * clean trunk reads zero while the map declares eight, and the number would
- * describe the branch rather than the decision.
- *
- * Retaining it also broke the verdict. `classify` reads a clean run as quiet
- * only when every count is zero, so a branch touching one declined path exited
- * 0 and still reported as carrying findings.
+ * Reads the uncovered paths alone, which is the half that is a finding. The
+ * declined paths are whichever rows this branch touched, so a clean trunk reads
+ * zero and retaining them would make a quiet exit 0 report as carrying findings.
  */
 function labelCoverageCounts(
   record: unknown,
@@ -353,12 +312,9 @@ function labelCoverageCounts(
 }
 
 /**
- * Reads the two classes that are findings, leaving the declared mirrors out.
- *
- * A mirror is an authoring root and its consumed copy, left out since the two
- * duplicate on purpose, as the label audit drops its declined rows. The reach
- * count is left out too, since it counts surfaces reached rather than
- * defects and moves in lockstep with the two retained here.
+ * Reads the two classes that are findings, leaving the declared mirrors out,
+ * since an authoring root and its consumed copy duplicate on purpose. The reach
+ * count is left out too, as it moves in lockstep with the two retained here.
  */
 function restatedCounts(record: unknown): Record<string, number> | undefined {
   const counts = asObject(asObject(record)?.counts)
@@ -399,8 +355,7 @@ function ruleCounts(record: unknown): Record<string, number> | undefined {
     if ((lengthOf(ledger.mismatches) ?? 0) > 0) ledgerMismatches += 1
   }
 
-  // A target ledger with no rule sits beside `rules` rather than in it. A
-  // binary predating it carries no `orphans` key, which reads as none.
+  // A target ledger with no rule sits beside `rules`, and an older binary's missing `orphans` reads as none.
   const orphanLedgers = lengthOf(root?.orphans) ?? 0
 
   return { shapeRules, missingLedgers, ledgerMismatches, orphanLedgers }
@@ -425,8 +380,7 @@ function commentCounts(record: unknown): Record<string, number> | undefined {
     if (hits === undefined) return undefined
     degradationHits += hits
 
-    // A record from a binary older than the long-block measure carries no
-    // array. That leaves the key out rather than failing the hit count.
+    // A record from a binary older than the long-block measure carries no array, so the key is left out.
     const blocks = lengthOf(asObject(language)?.longBlocks)
     if (blocks === undefined) hasLongBlocks = false
     else longBlocks += blocks
@@ -437,10 +391,8 @@ function commentCounts(record: unknown): Record<string, number> | undefined {
 
 /**
  * Reads the census's three headline totals and the count of large folders,
- * leaving the extension breakdown and the folder list out. Both are what a
- * caller reads for its own sake, and folding every extension or folder into the
- * retained baseline would grow the recorded key set with every language and
- * path the tree ever picks up.
+ * leaving the extension breakdown and folder list out, since folding those in
+ * would grow the recorded key set with every language and path the tree adds.
  */
 function censusCounts(record: unknown): Record<string, number> | undefined {
   const root = asObject(record)
@@ -455,10 +407,9 @@ function censusCounts(record: unknown): Record<string, number> | undefined {
 }
 
 /**
- * Reads the long file and function counts, leaving embedded blocks out. Those
- * already fail a push through the `embedded-programs` stage, so this audit
- * retains length alone. The unread file count travels with them, since a
- * function count alone claims coverage of files the reading never followed.
+ * Reads the long file and function counts, leaving embedded blocks out, since
+ * the `embedded-programs` stage already fails a push on those. The unread file
+ * count travels along, since a function count alone claims files never followed.
  */
 function codeCounts(record: unknown): Record<string, number> | undefined {
   const root = asObject(record)
@@ -475,8 +426,7 @@ function testOrderCounts(record: unknown): Record<string, number> | undefined {
   const root = asObject(record)
   if (root === undefined) return undefined
 
-  // The unclassified count travels with the findings, since history cannot tell
-  // a refactor from new behavior and a findings count alone overclaims.
+  // The unclassified count travels with the findings, since a findings count alone overclaims.
   return allOf({
     findings: lengthOf(root.findings),
     unclassified: lengthOf(root.unclassified),
@@ -495,13 +445,9 @@ const RECORD_KINDS: readonly (readonly [string, Corpus])[] = [
 ]
 
 /**
- * Every audit the aggregate runs.
- *
- * `context`, `markdown`, and `skills` gate because the merge gate in
- * `src/gate/stages.ts` already fails a push on each. `secrets` gates with no
- * stage behind it, deliberately, since a credential in the published tree is a
- * fact, and this repository gates facts and reports judgments. Each verb runs
- * once in its fullest form rather than walking the tree twice.
+ * Every audit the aggregate runs. `context`, `markdown`, and `skills` gate
+ * because the merge gate already fails a push on each, and `secrets` gates with
+ * no stage behind it, since a credential in the published tree is a fact.
  */
 export const AUDITS: readonly AuditSpec[] = [
   {
@@ -510,11 +456,7 @@ export const AUDITS: readonly AuditSpec[] = [
     argv: ['context', 'audit', '--json'],
     gatingExits: [EXIT_FINDINGS],
     corpus: 'tracked',
-    // The one reason this verb refuses for that is an absence rather than a
-    // break, on the same test the reach check and the skill audit take: no
-    // target adopts `canon/context/` and an older install's `.canon/diagrams/`
-    // both, so without the allowance every such
-    // project reports the verb unmeasured on every run and never changes.
+    // The one refusal that is an absence, since no target adopts both context folders.
     absentReasons: ['no-folders'] satisfies ContextAuditRefusal[],
     counts: contextCounts,
   },
@@ -545,20 +487,10 @@ export const AUDITS: readonly AuditSpec[] = [
     id: 'skills-reach',
     label: 'Shipped citation reach',
     argv: ['claude', 'skills', 'reach', '--json'],
-    // Reports rather than gates, on the split this file already draws. A body
-    // naming a toolkit path is sometimes correct, since the instruction may be
-    // meant for a session in this repository, so the verdict is a judgment and
-    // a push failing on one teaches a contributor to route around the stage.
+    // Reports rather than gates, since a toolkit path in a body may be meant for this repository.
     gatingExits: [],
     corpus: 'tracked',
-    // The one reason this verb refuses for, and it is an absence rather than a
-    // break. A tracked corpus normally allows nothing, since a tree that ships
-    // to targets and cannot be found is a broken checkout, and this is the
-    // second exception on the same test the secret scan takes: a project
-    // carrying neither `claude/skills/` nor `.claude/skills/` has adopted no
-    // skill convention, so without the allowance it reports the verb
-    // unmeasured on every run and never changes, which is the permanent signal
-    // the per-machine allowance exists against.
+    // The one refusal that is an absence, since a project with no skill folder adopted no convention.
     absentReasons: ['no-skills'] satisfies ReachRefusal[],
     counts: reachCounts,
   },
@@ -566,17 +498,10 @@ export const AUDITS: readonly AuditSpec[] = [
     id: 'skills-rank',
     label: 'Skill routing measure',
     argv: ['claude', 'skills', 'rank', '--json'],
-    // Reports rather than gates. The corpus is a first run with no baseline to
-    // fail a push against, and a lexical ranker bounds a necessary condition
-    // rather than reporting real routing behavior, so a push failing on a
-    // moved rank would teach a contributor to route around the stage.
+    // Reports rather than gates, since a lexical ranker bounds a necessary condition only.
     gatingExits: [],
     corpus: 'tracked',
-    // The one reason this run refuses for, and it is an absence for the same
-    // reason the reach check's is: a project carrying neither `claude/skills/`
-    // nor `.claude/skills/` has adopted no skill convention this audit reads.
-    // The two case-corpus refusals never reach here, since they need `--cases`
-    // and this argv passes none.
+    // An absence for the same reason as the reach check, and the case-corpus refusals never arise here.
     absentReasons: ['no-skills'] satisfies RankRefusal[],
     counts: rankCounts,
   },
@@ -616,23 +541,10 @@ export const AUDITS: readonly AuditSpec[] = [
     id: 'secrets',
     label: 'Shipped tree secrets',
     argv: ['secrets', 'scan', '--json'],
-    // The fourth gate, and the first added since the note above was written.
-    // A credential-shaped value sitting in the tree this repository publishes
-    // is a fact rather than a judgment, which is the test that note asks any
-    // addition to pass. It is decided here and stated in the context entry
-    // rather than arriving as a side effect of registering a measure.
+    // The fourth gate, since a credential-shaped value in the published tree is a fact.
     gatingExits: [EXIT_FINDINGS],
     corpus: 'tracked',
-    // The three reasons that mean this tree publishes nothing, which is where
-    // most targets installing this CLI sit. Without the allowance the
-    // aggregate reports `incomplete` on every run in every such project and
-    // never changes, which is the permanent signal the per-machine allowance
-    // exists against.
-    //
-    // Two reasons are deliberately left out, and both are a corpus that exists
-    // and went unread. `no-git` is a broken checkout, and `no-files-field` is a
-    // publish that would pack the whole tree, so calling either an absence
-    // would report a pass over a shipped tree nobody measured.
+    // These reasons mean the tree publishes nothing, and `no-git` and `no-files-field` stay out, as the corpus went unread.
     absentReasons: [
       'no-manifest',
       'no-publish',
@@ -644,26 +556,13 @@ export const AUDITS: readonly AuditSpec[] = [
     id: 'labels',
     label: 'Pull request label coverage',
     argv: ['labels', 'audit', '--json'],
-    // Reports rather than gates, on the split this file already draws. Whether
-    // an uncovered surface deserves a label is a judgment, and a push failing
-    // on one would ask a contributor to answer a question only the person who
-    // owns the surface can.
+    // Reports rather than gates, since whether an uncovered surface deserves a label is a judgment.
     gatingExits: [],
     // The map is committed, so every clone reads the same rows and a delta is
     // shared. The changed set the rows are read against is the branch's, which
     // is what makes a clean trunk report zero rather than nothing.
     corpus: 'tracked',
-    // Only `uncovered` is retained, for the reason its extractor states.
-    //
-    // The one reason that means this project declares no surfaces to cover,
-    // which is the recorded decision that a project without a map is labelled
-    // silently. A tracked corpus normally allows nothing absent, and this is
-    // the second exception beside the secret scan rather than a default.
-    //
-    // The other three are deliberately left out. A map that will not parse, a
-    // map with no usable row, and a range git could not answer are each a
-    // corpus that exists and went unread, so calling any of them an absence
-    // would report a pass over a branch nobody measured.
+    // Only `uncovered` is retained, and `no-map` is the one absence, since an unparsed map or failed range went unread.
     absentReasons: ['no-map'] satisfies LabelAuditRefusal[],
     counts: labelCoverageCounts,
   },
@@ -671,17 +570,10 @@ export const AUDITS: readonly AuditSpec[] = [
     id: 'restated',
     label: 'Restated instructions',
     argv: ['gov', 'restated', '--json'],
-    // Reports rather than gates, on the split this file already draws. Whether
-    // a rule stated on two surfaces should be stated on one is a judgment the
-    // person owning the surface takes, and most restatements here are correct,
-    // so a push failing on one would fail on the ordinary case.
+    // Reports rather than gates, since most restatements are correct and a push failing on one would fail the ordinary case.
     gatingExits: [],
     corpus: 'tracked',
-    // Both reasons the sweep refuses for, and each is an absence rather than a
-    // break. A target holds neither the seed nor a shipped skills tree, so
-    // without the allowance every project installing this CLI reports the verb
-    // unmeasured on every run and never changes, which is the permanent signal
-    // the per-machine allowance exists against. Same shape as the reach verb.
+    // Both sweep refusals are absences, since a target holds neither the seed nor a shipped skills tree.
     absentReasons: [
       'no-instructions',
       'no-surfaces',
@@ -706,10 +598,7 @@ export const AUDITS: readonly AuditSpec[] = [
     id: 'counts',
     label: 'Self-stated catalog counts',
     argv: ['gov', 'counts', '--json'],
-    // Reports rather than gates, on the split this file already draws. The
-    // false-positive rate is read off the first real run rather than assumed
-    // ahead of it, and gating a measure with an unmeasured rate is what teaches
-    // a contributor to route around the stage.
+    // Reports rather than gates, since the false-positive rate is read off the first real run.
     gatingExits: [],
     corpus: 'tracked',
     counts: findingsOnly,
@@ -724,11 +613,7 @@ export const AUDITS: readonly AuditSpec[] = [
     gatingExits: [],
     corpus: 'tracked',
     counts: censusCounts,
-    // Every merge grows the tree, so an exact compare reports ordinary growth
-    // on each one. The fraction absorbs about a hundred merges at the rate
-    // measured when it was set. Headroom is cumulative from the record, so a
-    // one-off jump such as a vendored folder reports only past what earlier
-    // merges left unspent, and running out of it is the signal to re-record.
+    // Every merge grows the tree, so the fraction absorbs ordinary growth and re-recording follows when it runs out.
     tolerance: { files: 0.1, skipped: 0.1, lines: 0.1, largeFolders: 0.1 },
   },
   {
@@ -746,10 +631,7 @@ export const AUDITS: readonly AuditSpec[] = [
     id: 'deps',
     label: 'Dependency advisories',
     argv: ['deps', 'audit', '--json'],
-    // Reports rather than gates, on the same split. A published advisory is a
-    // fact about the index and a judgment about this tree, since the upgrade
-    // may not exist yet, and a push failing on one teaches a contributor to
-    // route around the stage while nothing about the dependency has changed.
+    // Reports rather than gates, since a published advisory is a fact about the index and a judgment about this tree.
     gatingExits: [],
     corpus: 'upstream',
     counts: advisoryCounts,
@@ -789,11 +671,8 @@ function refusalReason(record: unknown, exitCode: number): string {
 
 /**
  * The reasons a verb publishes when the folder it reads is simply not there.
- *
- * Typed against the unions those two verbs export rather than spelled as bare
- * strings, so renaming a reason at its source fails this build. A literal here
- * would go on matching nothing and quietly turn every expected absence back
- * into an unmeasured audit.
+ * Typed against the unions those verbs export, so a rename at the source fails
+ * this build rather than quietly turning every expected absence unmeasured.
  */
 const ABSENT_REASONS: readonly (RecordRefusal | BoardRefusal)[] = [
   'no-folder',
@@ -802,11 +681,8 @@ const ABSENT_REASONS: readonly (RecordRefusal | BoardRefusal)[] = [
 
 /**
  * Every reason the advisory verb refuses for, all of which are an absence.
- *
- * An unreachable index, a project that is not JavaScript, and unresolved
- * dependencies leave nothing to measure rather than something broken. This is
- * the verb's whole union, typed against its own module, so a later reason or a
- * rename fails the build rather than quietly matching nothing.
+ * Typed against its own module's union, so a later reason or rename fails the
+ * build rather than quietly matching nothing.
  */
 const ADVISORY_ABSENT_REASONS: readonly AuditRefusal[] = [
   'no-record',
@@ -816,12 +692,8 @@ const ADVISORY_ABSENT_REASONS: readonly AuditRefusal[] = [
 
 /**
  * Whether a refusal is a folder this machine never created rather than a break.
- *
- * Every gitignored record folder is absent on a fresh clone and in CI, so
- * counting those as unmeasured would pin the verdict at `incomplete` forever.
- * A tracked corpus gets no such allowance, since that tree ships and a
- * checkout missing it is broken. An upstream corpus takes the allowance, since
- * its index is off this machine and an offline run is no fault of the tree.
+ * A gitignored record folder is absent in CI, so counting it unmeasured would
+ * pin `incomplete`, and a tracked corpus gets no such allowance since it ships.
  */
 function absentReasonsFor(spec: AuditSpec): readonly string[] {
   if (spec.absentReasons !== undefined) return spec.absentReasons
@@ -840,11 +712,8 @@ function isExpectedAbsence(spec: AuditSpec, record: unknown): boolean {
 
 /**
  * Turns one verb's exit code and stdout into a result the aggregate can report.
- *
- * Unparseable output is `unmeasured` rather than clean, for the reason the
- * verify pipeline already states about its own skipped stages: a run that does
- * not report is a broken command, and skipping would report the pass the check
- * exists to withhold.
+ * Unparseable output is `unmeasured` rather than clean, since a run that does
+ * not report is a broken command and skipping would report the pass withheld.
  */
 export function classify(
   spec: AuditSpec,

@@ -65,8 +65,7 @@ describe('recording a baseline from a run', () => {
     expect(baseline.commit).toBe('abc1234')
   })
 
-  // Writing zeros for a check that did not report would record a clean corpus,
-  // and the next run would read its real numbers as a regression.
+  // Writing zeros for an unreported check would read its real numbers as a regression.
   it('should leave an unmeasured check out of the record entirely', () => {
     const baseline = baselineFrom(
       [result('markdown', { bans: 0 }), result('context', undefined)],
@@ -132,8 +131,7 @@ describe('comparing a run against the recorded baseline', () => {
     ])
   })
 
-  // A delta of zero against an absent baseline would read as a corpus that did
-  // not move, so the comparison says it had nothing to compare against.
+  // A zero delta against an absent baseline would read as a corpus that did not move.
   it('should report a check with no recorded baseline as unrecorded', () => {
     const deltas = compareBaseline(recorded, [result('skills', { readme: 3 })])
 
@@ -157,8 +155,7 @@ describe('comparing a run against the recorded baseline', () => {
     expect(deltas).toEqual([{ id: 'records-plans', kind: 'per-machine' }])
   })
 
-  // Named for its own corpus rather than per-machine, since this count moves
-  // when somebody publishes rather than describing one disk.
+  // An upstream count moves when somebody publishes, so it is not one disk's state.
   it('should leave an upstream check out under its own kind', () => {
     const deltas = compareBaseline(recorded, [
       result('deps', { 'advisories-high': 21 }, false, 'upstream'),
@@ -213,8 +210,7 @@ describe('comparing a count that carries a growth tolerance', () => {
     expect(compared(deltas[0]).moved[0]?.tolerated).toBe(true)
   })
 
-  // 100 times 0.29 is just under 29 in floating point, so a plain floor would
-  // report a growth of exactly 29 as past the tolerance.
+  // 100 times 0.29 is just under 29 in floating point, so a plain floor misses it.
   it('should tolerate a boundary growth whose product falls short in floating point', () => {
     const deltas = compareBaseline(
       {
@@ -320,8 +316,7 @@ describe('reading and writing the baseline file', () => {
     expect(await readBaseline(ROOT)).toBeUndefined()
   })
 
-  // Reading a broken hand-edited baseline as absent would silently reset the
-  // floor the record exists to hold.
+  // Reading a broken baseline as absent would silently reset the floor.
   it('should refuse a baseline that does not parse', async () => {
     const path = join(ROOT, BASELINE_REL)
     await mkdir(dirname(path), { recursive: true })

@@ -27,8 +27,7 @@ describe('the audit catalog', () => {
     }
   })
 
-  // Reads the catalog rather than naming an entry, so a later spec with an empty
-  // or blank `absentReasons` fails here.
+  // Reads the catalog rather than naming an entry, so a later blank reason fails here.
   it('should give every declared absence reason a non-empty string', () => {
     const declaring = AUDITS.filter((audit) => audit.absentReasons)
 
@@ -42,8 +41,7 @@ describe('the audit catalog', () => {
     ).toBe(true)
   })
 
-  // Asserted whole, so a fifth gating check cannot arrive as a side effect of
-  // registering a measure. `secrets` gates as a fact with no stage behind it.
+  // Asserted whole, so a fifth gating check cannot arrive as a side effect.
   it('should gate on exactly the checks whose findings are facts', () => {
     const gating = AUDITS.filter((audit) => audit.gatingExits.length > 0).map(
       (audit) => audit.id,
@@ -52,8 +50,7 @@ describe('the audit catalog', () => {
     expect(gating.sort()).toEqual(['context', 'markdown', 'secrets', 'skills'])
   })
 
-  // An advisory is published rather than committed, so it records no floor, and
-  // an unreachable index is an absence rather than a broken checkout.
+  // An advisory is published rather than committed, so it records no floor.
   it('should treat the advisory index as an upstream corpus', () => {
     expect(specFor('deps').corpus).toBe('upstream')
     expect(isTracked(specFor('deps'))).toBe(false)
@@ -148,8 +145,7 @@ describe('reading counts out of each record shape', () => {
     })
   })
 
-  // No `cadence` key is a file below the measuring floor, which reading the
-  // absent key as zero would fold into a file with no flat paragraph.
+  // No `cadence` key is a file below the measuring floor, not a zero reading.
   it('should skip a markdown entry carrying no cadence reading', () => {
     const record = {
       checkpoints: { run: 40 },
@@ -268,16 +264,14 @@ describe('reading counts out of each record shape', () => {
     })
   })
 
-  // A record the extractor could not read is a measure that did not run, and
-  // zero there would read as a clean corpus.
+  // Zero from an unreadable record would read as a clean corpus.
   it('should return no counts for a record missing the keys it reads', () => {
     expect(countsFor(specFor('markdown'), { unrelated: true })).toBeUndefined()
     expect(countsFor(specFor('context'), null)).toBeUndefined()
     expect(countsFor(specFor('tasks'), 'not an object')).toBeUndefined()
   })
 
-  // The declined paths describe the branch rather than the map, so retaining
-  // them would put a branch number into a baseline that compares trees.
+  // The declined paths describe the branch rather than the map, so no baseline keeps them.
   it('should count the uncovered paths and leave the declined ones out', () => {
     const record = {
       labels: ['cli'],
@@ -397,8 +391,7 @@ describe('classifying an audit run by its exit code', () => {
     })
   })
 
-  // A declined path moves no count, so a branch touching one and covering the
-  // rest is quiet, as the verb's own exit 0 says.
+  // A declined path moves no count, as the verb's own exit 0 says.
   it('should read a branch touching only declined paths as clean', () => {
     const record = JSON.stringify({
       labels: ['cli'],
@@ -434,8 +427,7 @@ describe('classifying an audit run by its exit code', () => {
     expect(result.status).toBe('finding')
   })
 
-  // A judgment verb sets 2 on findings it never gates on, so the catalog rather
-  // than the exit decides whether a finding is a fact.
+  // A judgment verb sets 2 on findings it never gates on, so the catalog decides.
   it('should read a findings exit from a reporting verb as reported', () => {
     const result = classify(comments, 2, '{"snapshot":[]}')
 
@@ -449,8 +441,7 @@ describe('classifying an audit run by its exit code', () => {
     expect(result.reason).toContain('no-folder')
   })
 
-  // Every gitignored record folder is absent on a fresh clone and in CI, so
-  // counting those as unmeasured would make the incomplete verdict permanent.
+  // A gitignored record folder is absent in CI, so counting it unmeasured would pin `incomplete`.
   it('should read an absent per-machine corpus as absent rather than unmeasured', () => {
     const result = classify(
       specFor('records-plans'),
@@ -471,8 +462,7 @@ describe('classifying an audit run by its exit code', () => {
     expect(result.status).toBe('absent')
   })
 
-  // An offline run is no fault of this tree, so an unreachable index is the
-  // same ordinary absence a gitignored folder is.
+  // An offline run is no fault of this tree, so it is an ordinary absence.
   it('should read an unreachable advisory index as absent', () => {
     const result = classify(
       specFor('deps'),
@@ -483,8 +473,7 @@ describe('classifying an audit run by its exit code', () => {
     expect(result.status).toBe('absent')
   })
 
-  // Every reason that verb refuses for is an absence, and a project that is none
-  // of those is ordinary in a target, so none reads as unmeasured.
+  // Every reason that verb refuses for is an absence in a project that is none of those.
   it.each(['no-record', 'no-lockfile', 'no-manifest'])(
     'should read the advisory refusal %s as absent',
     (reason) => {
@@ -508,8 +497,7 @@ describe('classifying an audit run by its exit code', () => {
     expect(result.status).toBe('unmeasured')
   })
 
-  // A tree git cannot list is a broken checkout, so the scan reporting nothing
-  // over it is a defect in the run.
+  // A tree git cannot list is a broken checkout, so a clean scan there is a defect.
   it('should read a secret scan over a tree git cannot list as unmeasured', () => {
     const result = classify(
       specFor('secrets'),
@@ -520,8 +508,7 @@ describe('classifying an audit run by its exit code', () => {
     expect(result.status).toBe('unmeasured')
   })
 
-  // Most projects installing this CLI publish nothing and carry no `files`
-  // field, so that reads as absent rather than a broken corpus.
+  // A project publishing nothing carries no `files` field, which is absent rather than broken.
   it('should read a project that publishes nothing as absent', () => {
     const result = classify(
       specFor('secrets'),
@@ -552,8 +539,7 @@ describe('classifying an audit run by its exit code', () => {
     expect(result.status).toBe('absent')
   })
 
-  // A publish with no files field packs the whole tree, so the corpus exists
-  // and went unread, which an absence would report as a pass.
+  // A publish with no files field packs the whole tree, so the corpus went unread.
   it('should read an undeclared corpus as unmeasured rather than absent', () => {
     const result = classify(
       specFor('secrets'),
@@ -564,8 +550,7 @@ describe('classifying an audit run by its exit code', () => {
     expect(result.status).toBe('unmeasured')
   })
 
-  // A project carrying neither skill corpus refuses on every run, so reading
-  // that as unmeasured would pin the aggregate at `incomplete` there.
+  // A project with neither skill corpus refuses on every run, so unmeasured would pin `incomplete`.
   it('should read a tree carrying no skill corpus as absent', () => {
     const result = classify(
       specFor('skills-reach'),
@@ -576,8 +561,7 @@ describe('classifying an audit run by its exit code', () => {
     expect(result.status).toBe('absent')
   })
 
-  // A project adopting neither `canon/context/` nor `.claude/diagrams/` is the
-  // ordinary state of a target, the test the skill corpora take below.
+  // Adopting neither folder is the ordinary state of a target.
   it('should read a project with no audited context folder as absent', () => {
     const result = classify(
       specFor('context'),
@@ -608,8 +592,7 @@ describe('classifying an audit run by its exit code', () => {
     expect(result.status).toBe('finding')
   })
 
-  // A tracked corpus with no stated exception stays the default, so a tree that
-  // cannot be found is a defect in the checkout.
+  // A tracked corpus with no stated exception is a defect in the checkout when missing.
   it('should read an absent tracked corpus with no exception as unmeasured', () => {
     const result = classify(
       specFor('context'),
