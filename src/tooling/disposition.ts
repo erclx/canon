@@ -67,10 +67,8 @@ export function normalizeGoldenPath(input: string): string | undefined {
 }
 
 /**
- * Resolves a path the way `scan` and the injectors do: nearest stack first,
- * and a config shadows a seed at the same path. The hash is of the copy
- * `injectConfigs` writes last, which is the nearest stack's. A script address
- * hashes the value `applyScripts` writes for its key.
+ * Resolves a path the way `scan` and the injectors do: nearest stack first, and a config shadows a seed
+ * at the same path. The hash is of the copy `injectConfigs` writes last, and a script's is its written value.
  */
 export function resolveGolden(
   chain: readonly Manifest[],
@@ -133,10 +131,8 @@ export function decline(
 }
 
 /**
- * A seed is copy-once, so the target already owns it and a customization
- * would record nothing a sync does not already respect. A plain script is
- * accepted although sync never overwrites one, since `diff` reports a drifted
- * plain key and the record is what quiets it.
+ * A seed is copy-once, so the target already owns it and a customization would record nothing. A plain
+ * script is accepted, since `diff` reports a drifted plain key and the record is what quiets it.
  */
 export function customize(
   dispositions: DomainDispositions,

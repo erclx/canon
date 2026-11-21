@@ -35,13 +35,8 @@ function hasEntry(lines: readonly string[], entry: string): boolean {
 }
 
 /**
- * Appends every manifest entry the file does not already carry.
- *
- * Two behaviors are load-bearing and preserved from `merge_gitignore`. The
- * section header is written only when the whole section is missing, so a
- * partially present section appends its entries bare at the end of the file.
- * Presence is re-checked against the growing file, so an entry added by an
- * earlier section or an earlier stack in the chain is not added twice.
+ * Appends every manifest entry the file does not already carry. The section header is written only when the
+ * whole section is missing, and presence is re-checked against the growing file, so an entry is not added twice.
  */
 export function mergeSections(
   content: string,

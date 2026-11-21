@@ -26,10 +26,8 @@ import { isSubfolderTarget, isWithheldInSubfolder } from '@/tooling/subfolder'
 import { logAdd, logRemove, logStep, logWarn } from '@/cli/ui'
 
 /**
- * Skips every path the project declined or customized, which is what makes
- * the record hold for `sync --write` and `inject` alike. `hold` names the
- * further paths a caller decided this write must leave, which `sync` derives
- * from the scan and `inject`, writing without one, never passes.
+ * Skips every path the project declined or customized, so the record holds for `sync --write` and `inject`.
+ * `hold` names further paths a caller decided this write must leave, which `inject` never passes.
  */
 export async function injectConfigs(
   chain: readonly Manifest[],
@@ -64,10 +62,8 @@ export async function injectConfigs(
 }
 
 /**
- * Writes a seed to a target that does not have it, dropping the stub marker on
- * the way. The marker is toolkit bookkeeping read by the seed gate, so a target
- * receiving it would carry a field its own tooling never reads. Only markdown
- * carries frontmatter, and every other seed copies byte for byte.
+ * Writes a seed to a target that does not have it, dropping the stub marker, which is toolkit bookkeeping
+ * read by the seed gate. Only markdown carries frontmatter, and every other seed copies byte for byte.
  */
 async function writeSeed(src: string, dest: string): Promise<void> {
   if (!rewritesOnInstall(src)) {
@@ -172,10 +168,8 @@ export async function pruneGitignore(
 }
 
 /**
- * Installs missing dev dependencies, fills package scripts the project has not
- * declined or customized, and merges gitignore entries. A target with no package.json gets a minimal one first
- * when the chain installs anything. A package.json that exists but cannot be
- * parsed is never rewritten, and the install is skipped with a warning.
+ * Installs missing dev dependencies, fills package scripts the project has not declined or customized, and
+ * merges gitignore entries. A `package.json` that cannot be parsed is never rewritten, and the install is skipped.
  */
 export async function injectManifest(
   chain: readonly Manifest[],
