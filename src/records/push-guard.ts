@@ -4,13 +4,8 @@ import { isBinary } from '@/sweep/binary'
 import { scanText } from '@/secrets/scan'
 
 /**
- * The largest single record a push carries, in bytes.
- *
- * A constant rather than a flag. The largest record measured in this
- * repository is a 6.7 MB git pack under a groundwork fixture and GitHub
- * rejects a blob at 100 MB, so this sits well clear of both, and an override
- * is one nobody remembers to pass the first time a backup tarball lands in a
- * record folder.
+ * The largest single record a push carries, in bytes. A constant rather than a flag, sitting
+ * well clear of GitHub's 100 MB blob limit, since an override is one nobody remembers to pass.
  */
 export const MAX_RECORD_BYTES = 25 * 1024 * 1024
 
@@ -26,11 +21,7 @@ function megabytes(bytes: number): string {
 }
 
 /**
- * Every pending path a push must not carry, in the order given.
- *
- * Reads the size off `lstat` first so an oversized file is never opened, and
- * skips anything that is not a regular file, since `add` stages a symlink as
- * its target path rather than the bytes it points at. The credential half is
+ * Every pending path a push must not carry, in the order given. An oversized file is never opened, and a non-regular file is skipped. The credential half is
  * `scanText` unchanged, so the patterns and the `canon-allow-secret` marker
  * answer here exactly as they do in `canon secrets scan`.
  */
