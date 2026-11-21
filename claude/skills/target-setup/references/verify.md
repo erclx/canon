@@ -85,9 +85,38 @@ server, and whether the screenshot harness produces output.
 depth already covers. The two sets are disjoint, so running both depths runs
 every declared script exactly once.
 
-Take `deep` on request rather than by default. A dev server that starts slowly
-reads as a failure here, which is too flaky to fail an unattended scaffold check
-on, and the end-to-end stage needs a browser install the chain does not make.
+### When deep runs
+
+The depth follows how the phase was reached.
+
+- The bare chain on a fresh scaffold runs the default depth, then `deep`, in each folder that passed the default depth
+- A folder that failed at the default depth skips `deep`, since a broken build fails every server stage for the same reason
+- `setup verify deep` runs `deep` alone
+- `setup verify` stays at the default depth, since a single-phase call states its own depth
+
+### The two verdicts
+
+A dev server that starts slowly reads as a failure, so the deep verdict depends
+on whether an operator is there to read it.
+
+- Attended, with a person in the session: a deep failure fails the report the way a default failure does, naming the script
+- Unattended, headless as the skill's non-interactive path reads it: a deep failure reports as a warning naming the failing script and its output, and the chain does not fail
+
+### Stages that cannot run
+
+A stage the machine cannot run is reported as skipped by name with its fix,
+never as passed and never as a scaffold failure. Carry on with the next stage.
+
+Before `test:e2e`, install the browsers the suite runs in.
+
+- Read the `projects` names from the folder's `playwright.config.ts` and run `bunx playwright install <engines>` with those names
+- Install every named engine, since a narrower install fails the suite on the first engine it leaves out
+- When the install fails, skip `test:e2e` and `screenshot`, naming the missing install and the command
+
+A port another process holds is not a fault in the scaffold.
+
+- When a server or the screenshot harness prints `already in use` or `EADDRINUSE`, skip that stage
+- Name the port and `WORKTREE_PORT_OFFSET`, the variable that shifts it, as the fix
 
 ### Server smoke
 
@@ -108,11 +137,18 @@ one of:
 
 - `✅ <script>`
 - `❌ <script>` followed by the failing output (last 40 lines) or, for a server script, the reason judged (process died, or a fatal string in its output)
+- `⚠️ <script>` for a deep failure on an unattended run, with the same output a failure carries
+- `⏭️ <script>` for a stage that could not run, followed by the reason and its fix
 
-End with a summary line naming the depth that ran:
+End with a summary line naming each depth that ran:
 
 - On pass: `✅ Scaffold verified at <depth> (<n> scripts passed across <m> folders).`
 - On fail: `❌ Scaffold failed at <script> in <folder>. Fix the error and re-run the verify phase.`
+- On an unattended deep failure: `⚠️ Scaffold verified at default, deep warned at <script> in <folder>.`
+
+A fresh scaffold's report states whether the app was started, so a run where
+every deep stage was skipped says the app was never started rather than reading
+as verified at `deep`.
 
 ## Out of scope
 
