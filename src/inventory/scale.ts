@@ -8,13 +8,8 @@ import {
 
 /**
  * Reads what a design record carries for each value subject, in the form the
- * page reader reports, so a listing's values and the record's meet as strings.
- *
- * A values record writes a token the way a person types it, such as `5.625rem`
- * or `0 0 0 1px rgba(0,0,0,.07)`, and the browser computes it as `90px` or
- * `rgba(0, 0, 0, 0.07) 0px 0px 0px 1px`. Each normalizer here turns the first
- * form into the second, and the page reader in `values.ts` does the same for
- * what the browser hands it, which is the one pair of rules the two must share.
+ * page reader reports. A record writes `5.625rem` where the browser computes
+ * `90px`, so each normalizer here and the reader in `values.ts` share one pair of rules.
  */
 
 export const VALUE_SUBJECTS = [

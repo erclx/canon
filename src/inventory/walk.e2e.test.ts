@@ -5,13 +5,9 @@ import { findSubject } from '@/inventory/subjects'
 import { walk } from '@/inventory/walk'
 
 /**
- * Drives a served application with two routes, because a walk that reads one
- * page proves nothing about the property this command exists to report, which
- * is how many different answers a site gives across all of them.
- *
- * The suite needs a browser binary and skips without one. The E2E Suites job
- * in verify.yml installs it and fails before any suite starts when it is
- * missing, so read that job, not Static Checks, for whether this passed.
+ * Drives a served application with two routes, since one page proves nothing
+ * about how many answers a site gives across all of them. It skips without a
+ * browser binary, so read the verify.yml E2E job for whether it passed.
  */
 
 const QUERY = 'button, a[href]'
@@ -84,8 +80,7 @@ describe.skipIf(!hasBrowser)('walk against a served application', () => {
 
     const groups = groupByTreatment(result.readings)
 
-    // Three elements share one ring across both routes and one has none, which
-    // is two rows rather than the four a per-element listing would print.
+    // Three elements share one ring across both routes and one has none, so two rows, not four.
     expect(groups).toHaveLength(2)
     expect(groups[0]?.count).toBe(3)
     expect(groups[0]?.locations).toEqual(['/', '/pricing'])
@@ -101,8 +96,7 @@ describe.skipIf(!hasBrowser)('walk against a served application', () => {
     const subject = findSubject('focus')
     if (!subject) return
 
-    // A port handed out and released refuses the connection. A low reserved port
-    // would not, since the engine blocks those before connecting.
+    // A port handed out and released refuses the connection, unlike a reserved port the engine blocks.
     const closed = Bun.serve({ port: 0, fetch: () => new Response('') })
     const port = Number(closed.port)
     closed.stop(true)

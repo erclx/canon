@@ -6,12 +6,9 @@ import { findSubject } from '@/inventory/subjects'
 import { walk } from '@/inventory/walk'
 
 /**
- * Reads two board frame fixtures through the real walk, since what a value
- * subject reports depends on what the browser computes: the dark theme, a
- * pseudo-element's box, and a transition's duration exist nowhere else.
- *
- * The suite needs a browser binary and skips without one, the same as the
- * route walk's suite. The E2E Suites job in verify.yml installs it.
+ * Reads two board frame fixtures through the real walk, since the dark theme, a
+ * pseudo-element's box, and a transition's duration exist nowhere else. It skips
+ * without a browser binary, as the route walk's suite does.
  */
 
 const FIXTURES = fileURLToPath(new URL('./fixtures/frames', import.meta.url))
