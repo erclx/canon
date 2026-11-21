@@ -20,6 +20,8 @@ Install [Bun](https://bun.sh) with `curl -fsSL https://bun.sh/install | bash` an
 | `bun run check`  | Gates locally and writes nothing. Fails on formatting drift until `bun run format` runs. |
 | `bun run format` | Auto-fix oxfmt formatting.                                                               |
 
+The synced stacks add more scripts, such as a test runner, a build, or a dev server. Read the `scripts` block in `package.json` for the full set rather than this table.
+
 ### `.husky/`
 
 Holds the git hooks that run the checks before a commit or a push leaves.
