@@ -64,15 +64,8 @@ export function parseSkip(csv: string | undefined): SkipPlan {
 
 /**
  * Builds the preview and the count from one pass, so the two cannot disagree.
- * Every `info` line is a domain that will run, which is what makes the count a
- * filter rather than a second tally kept in step by hand. A skipped domain
- * prints nothing at all and declined governance prints a warning, so neither
- * reaches the total.
- *
- * The skip drops `--add`, which names rules the caller asked for. Input
- * that goes nowhere is reported for the same reason `parseSkip` reports an
- * unrecognized value, so the warning names the flag rather than dropping it
- * without a word.
+ * Every `info` line is a domain that will run, so the count is a filter.
+ * The skip drops `--add`, and the warning names the flag rather than dropping it.
  */
 export function planInit(flags: InitFlags): InitPlan {
   const preview: PreviewLine[] = [
