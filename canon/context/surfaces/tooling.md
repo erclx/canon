@@ -124,17 +124,13 @@ Runs `canon tooling verify <stack>` by scaffolding into `.canon/tmp/runs/verify-
 
 ### `src/tooling/scaffold.ts`
 
-Runs `canon tooling scaffold <stack> [target]` for the `target-scaffold` skill. The command runs in a temp folder with `{{name}}` set to the target's basename, so `mkdir {{name}} && cd` still works, and the result moves into the target afterward.
+Runs `canon tooling scaffold <stack> [target]` for the `target-scaffold` skill. The starter runs in a temp folder with `{{name}}` set to the target's basename, the stack's `[scaffold] prepare` and its `tooling/<stack>/scaffold/` overlay apply there, and the result moves into the target.
 
 - A target holding anything but `.git` refuses, and a target's own `.git` wins over one the scaffolder wrote, as `uv init` does
 - A basename a package manager rejects refuses as `bad-name` with a `suggested` name, never a silent rename
 - A failed command or step moves nothing and keeps the scratch folder, named in the record, with `prepare-failed` for the step
-
-Before the move it runs the stack's `[scaffold] prepare` in the scratch output, then copies the `tooling/<stack>/scaffold/` overlay over it. After the move it runs `git init -b main` when the target sits in no work tree.
-
-- The overlay lands second, since on a case-insensitive filesystem a step removing `App.tsx` would take an overlay's `app.tsx` with it
-- The record's `git` field reads `initialized`, `existing`, or `failed`, and a failed init still returns the files
-- A target inside a parent repository reads `existing`, so a monorepo subfolder never gets a nested `.git`
+- The overlay lands after the step, since on a case-insensitive filesystem a step removing `App.tsx` would take an overlay's `app.tsx` with it
+- After the move, `git init -b main` runs only outside a work tree, so the record's `git` field reads `existing` in a monorepo subfolder, beside `initialized` and `failed`
 
 ### Other folders
 
