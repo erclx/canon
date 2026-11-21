@@ -67,10 +67,9 @@ const MAX_NAME = 214
 const IGNORED_ENTRIES = new Set(['.git'])
 
 /**
- * Runs the stack's `manifest.scaffold` in a scratch folder with `{{name}}` set to the target's basename, applies the
- * stack's post-scaffold step and then its `scaffold/` overlay to the output, and moves the result into the target.
- * Nothing reaches the target unless the starter and the step both exit 0, and a failed run names the scratch folder
- * it leaves.
+ * Runs the starter in a scratch folder with `{{name}}` set to the target's basename, applies the post-scaffold step
+ * and then the `scaffold/` overlay, and moves the result into the target. Nothing reaches the target unless the
+ * starter and the step both exit 0, and a failed run names the scratch folder it leaves.
  */
 export async function scaffoldStack(
   opts: ScaffoldOptions,
