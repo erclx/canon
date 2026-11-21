@@ -51,11 +51,12 @@ A fan-in builds batches in parallel and ships them as one pull request. Each mem
 
 ### When to fan in
 
-Fan in when the split was made for speed rather than meaning. Every one of these holds:
+Fan in when the split was made for speed rather than meaning. Both of these hold:
 
 - One task with one outcome, so no batch is a feature on its own
-- The batches share edge files, such as a gated-paths list or an index, so separate pull requests rebase each other on every merge
 - No batch needs to ship, be reviewed, or be reverted alone
+
+A shared edge file adds a reason to fan in, but the set passes without one. Batches sharing a gated-paths list or an index rebase each other on every merge as separate pull requests. Batches sharing no file still pay a review and a CI run each, and one comment sweep split 477 files four ways with no file in common and merged as one pull request.
 
 Keep separate pull requests when the pieces are independent features, when one needs its own review or revert, when one may stall and hold the rest, or when the combined diff is too large to review even one merge commit at a time. Batches that build on each other stack or fold, per `## Dependent batches`, since a member stacks on nothing.
 
@@ -72,7 +73,7 @@ Each side names the other in its `## Constraints`, and `canon records validate p
 
 ### Dispatching the set
 
-The members of one set dispatch together by design, since they share edge files and the integrator resolves those lines once. A shared file between members is never a hold.
+The members of one set dispatch together by design, since the integrator resolves once any line they share. A shared file between members is never a hold.
 
 - Hold the integrator on a dependency until `plan-answers` reads it launchable
 - Re-read it after a fetch on each member's done message, which carries the branch and head commit in place of a pull request
