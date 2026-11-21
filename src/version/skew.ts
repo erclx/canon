@@ -10,23 +10,15 @@ import { detectManager } from '@/version/manager'
 const REGISTRY = 'https://registry.npmjs.org'
 
 /**
- * Short enough that a check waiting on a dead network still returns inside the
- * time an operator would give the command anyway. The skew line is one section
- * of a report the rest of which needs no network at all, so the budget is set
- * against how long the report may be held up rather than against how long the
- * registry usually takes.
+ * Short enough that a check waiting on a dead network still returns inside the time an operator
+ * would give the command, since the rest of the report needs no network.
  */
 const LOOKUP_TIMEOUT_MS = 3_000
 
 /**
- * Three states and no fourth. `unknown` covers every way the question could not
- * be answered and carries the reason, which is what a caller reports instead of
- * a version.
- *
- * An installed version ahead of the published one reports `current`. That is a
- * source checkout between a release commit and the publish job, or a local
- * build, and neither is skew. Giving it a state of its own would fire a warning
- * on every maintainer run for a condition with no remedy.
+ * Three states and no fourth. `unknown` carries the reason a question could not be answered.
+ * An installed version ahead of the published one reports `current`, since a source checkout or
+ * local build is not skew.
  */
 export type SkewState = 'current' | 'behind' | 'unknown'
 
@@ -36,10 +28,8 @@ interface SkewBase {
 }
 
 /**
- * A union rather than one shape with two optional fields, so a `behind` report
- * cannot exist without the version it is behind and an `unknown` one cannot
- * exist without its reason. Both are what `describeSkew` renders into a line an
- * operator reads, and an optional field renders the word `undefined` there.
+ * A union rather than one shape with two optional fields, so a `behind` report cannot exist without
+ * its version and an `unknown` one without its reason.
  */
 export type SkewReport =
   | (SkewBase & {
@@ -57,12 +47,8 @@ export interface SkewOptions {
 }
 
 /**
- * The installed version against the newest published one.
- *
- * Never rejects and never reports through an exit code. `canon sync --check
- * --exit-code` gates CI on drift it measured locally, so a lookup that failed
- * the caller would turn an offline machine into a failing check and the check
- * would be routed around. Every failure lands in `unknown` with its reason.
+ * The installed version against the newest published one. Never rejects and never reports through
+ * an exit code, since a failed lookup would turn an offline machine into a failing CI check.
  */
 export async function readSkew(options: SkewOptions = {}): Promise<SkewReport> {
   const installed = options.installed ?? readInstalled()
@@ -161,15 +147,9 @@ async function fetchLatest(name: string): Promise<string> {
 }
 
 /**
- * One line naming the state, for a caller that renders the skew beside sections
- * it does not own. Held here so `canon sync --check` and `canon claude skills
- * drift` cannot word the same three states differently.
- *
- * The remedy is chosen by the same detection `canon upgrade` runs, because both
- * callers run from a source checkout routinely and that is where the verb
- * refuses. Naming it unconditionally sends a contributor whose clone sits a
- * release behind to a command that declines. The read is a match against the
- * root string rather than a filesystem call, so the line stays cheap.
+ * One line naming the state, held here so `canon sync --check` and `canon claude skills drift`
+ * cannot word it differently. The remedy comes from the detection `canon upgrade` runs, since
+ * a source checkout is where that verb refuses.
  */
 export function describeSkew(
   report: SkewReport,

@@ -20,13 +20,9 @@ const SIGNATURES: readonly (readonly [ManagerId, string])[] = [
 ]
 
 /**
- * Which package manager installed the package rooted at `root`, read off the
- * install path rather than guessed from what is on `PATH`.
- *
- * The evidence travels with the answer and the verb prints it before running
- * anything, so an operator can correct a wrong read. Returns `undefined` for a
- * path outside any install tree, which is a source checkout, since
- * reinstalling over a clone would replace what the operator works in.
+ * Which package manager installed the package rooted at `root`, read off the install path. The
+ * evidence travels with the answer, and a source checkout returns `undefined`, since reinstalling
+ * would replace what the operator works in.
  */
 export function detectManager(root: string): Manager | undefined {
   const segments = root.split(/[/\\]/).filter((segment) => segment !== '')
