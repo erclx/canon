@@ -21,10 +21,8 @@ function digestOf(path: string): string | null {
 }
 
 /**
- * Every entry `git status` reports, untracked files listed one by one so a
- * file a drive adds inside a tracked folder names itself, each with a content
- * digest so a file already dirty at the baseline still reads as changed when
- * a drive writes it again. Undefined when git cannot read the tree.
+ * Every entry `git status` reports, untracked files listed one by one, each with
+ * a content digest. Undefined when git cannot read the tree.
  */
 export async function readWorktreeStatus(
   worktree: string,

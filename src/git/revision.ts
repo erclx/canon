@@ -17,14 +17,8 @@ export interface RevisionEntry {
 export const SYMLINK_MODE = '120000'
 
 /**
- * Reads every entry at `rev` whose path `keep` accepts, without checking
- * anything out.
- *
- * `ls-tree` names the entries and `cat-file --batch` streams the blob
- * contents in one process, so a sampled series costs two subprocesses per
- * point rather than one per file. Contents arrive as bytes, so the batch
- * stream is walked by byte offset rather than split as text.
- *
+ * Reads every entry at `rev` whose path `keep` accepts, without checking anything
+ * out. Contents arrive as bytes, so the batch stream is walked by byte offset.
  * Returns an empty list when git cannot read the revision.
  */
 export async function readBlobsAt(
@@ -98,12 +92,8 @@ export function parseBatch(
 }
 
 /**
- * Picks evenly spaced items from `items`, always keeping the newest.
- *
- * Sample selection matters more than sample size here. The reading the
- * comment-discipline track needed came from four points spanning six months,
- * so spacing across the window is what a sampled series optimizes for rather
- * than density of coverage.
+ * Picks evenly spaced items from `items`, always keeping the newest. Spacing
+ * across the window matters more than density of coverage.
  */
 export function spaceEvenly<T>(items: readonly T[], points: number): T[] {
   if (items.length <= points) return [...items]

@@ -3,12 +3,8 @@ import { $ } from 'bun'
 import { gitEnv } from '@/git/env'
 
 /**
- * Reports which of `candidates` git ignores under `root`.
- *
- * Batched through one `check-ignore --stdin` rather than a call per path,
- * since a whole-repo walk hands this thousands of candidates. Outside a git
- * repo nothing is ignored, so a caller's segment prune becomes the only filter
- * that applies.
+ * Reports which of `candidates` git ignores under `root`, batched through one
+ * `check-ignore --stdin`. Outside a git repo nothing is ignored.
  */
 export async function listIgnored(
   root: string,
@@ -31,8 +27,7 @@ export async function listIgnored(
     .quiet()
     .nothrow()
 
-  // Exit 1 means nothing matched. Anything above is an error and degrades to
-  // ignoring nothing, so a broken git never shrinks the scanned set.
+  // Exit 1 means nothing matched, and anything above degrades to ignoring nothing.
   if (result.exitCode > 1) return new Set()
 
   return new Set(
