@@ -11,7 +11,7 @@ Configs ship as sidecar files (`ruff.toml`, `mypy.ini`, `pytest.ini`, `.coverage
 ## Scaffold checklist
 
 1. Scaffold with `uv init --package <name>`. This creates `pyproject.toml` with a `uv_build` backend and `src/<name with underscores>/__init__.py` holding an annotated `def main() -> None:`.
-2. Seed `package.json` with `bun init -y`, so the base layer's bun-side tools (husky, oxfmt, commitlint) have a target. Without it the sync skips the dep install.
+2. Seed a minimal `package.json`, so the base layer's bun-side tools (husky, oxfmt, commitlint) have a target and the sync installs them. The stack's `scaffold/` overlay lands it.
 3. Install base tooling with `canon tooling sync base . --write`.
 4. Install python tooling with `canon tooling sync python . --write`.
 5. Install the deps with `uv add --dev ruff mypy pytest pytest-cov`. This stays manual, since the manifest injector hardcodes `bun add -D`.
@@ -46,9 +46,10 @@ The manifest declares no `[dependencies.dev]`, because manifest injection calls 
 
 ## Verify command
 
-`canon tooling scaffold python` runs the manifest's `[scaffold] prepare` on the starter, and `canon tooling verify python` scaffolds through it before Sync. That covers checklist steps 2 and 5, being `bun init -y` and `uv add --dev --no-sync`, and leaves step 6 to the first `uv run`.
+`canon tooling verify python` scaffolds through `canon tooling scaffold python` before Sync. The overlay covers checklist step 2 and `[scaffold] prepare` covers step 5 with `uv add --dev --no-sync`, leaving step 6 to the first `uv run`.
 
-- `uv init` writes no `package.json`, and a verify that reaches its end with none fails, so the prepare is what lets `bun run lint:fix`, `bun run format`, and `bun run check` run at all.
+- The starter runs with `--vcs none`, so the scaffold verb's own git init decides the repository
+- `uv init` writes no `package.json`, and a verify that reaches its end with none fails, so the overlay is what lets `bun run lint:fix`, `bun run format`, and `bun run check` run at all.
 - The step skips the venv because the scaffold runs it in a scratch folder, and a `.venv` built there keeps that folder's absolute path in its scripts after the move
 - Python's `verify.json` requires the `lint`, `typecheck`, and `test:run` scripts that delegate to `uv run`, so the run needs `uv` on the machine and a network for the installs.
 - The end-to-end test and screenshot phases are gated on `package.json` script keys python does not declare, so they skip.

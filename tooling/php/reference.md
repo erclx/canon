@@ -9,7 +9,7 @@ The php stack covers Composer projects on PHP 8.3 or later, formatted by PHP CS 
 ## Scaffold checklist
 
 1. Scaffold with `composer init -n --name <vendor>/<name> --autoload src/`. The package name and namespace are the project's own identity, so this stack never ships a `composer.json`.
-2. Seed `package.json` with `bun init -y`, so the base layer's bun-side tools (husky, oxfmt, commitlint) have a target to install into.
+2. Seed a minimal `package.json`, so the base layer's bun-side tools (husky, oxfmt, commitlint) have a target to install into. `canon tooling scaffold php` lands it from the stack's `scaffold/` overlay.
 3. Install base tooling with `canon tooling sync base . --write`.
 4. Install php tooling with `canon tooling sync php . --write`.
 5. Install the dev tools with `composer require --dev friendsofphp/php-cs-fixer phpstan/phpstan phpunit/phpunit`. This stays manual, since manifest injection runs `bun add -D`.
@@ -56,7 +56,8 @@ The php phase list probes its tools and holds one precondition.
 
 The manifest prepares a scaffold that lacks a `package.json`.
 
-- The manifest's `[scaffold] prepare` runs checklist steps 2 and 5 on every `canon tooling scaffold php`, and so on `canon tooling verify php`, being `bun init -y` and the `composer require --dev` line.
+- The `scaffold/` overlay lands checklist step 2's `package.json`, and the manifest's `[scaffold] prepare` runs step 5's `composer require --dev` line, on every scaffold and verify.
+- The overlay replaces `bun init -y`, which writes Bun's own `CLAUDE.md` under Claude Code and so blocks canon's seed.
 - The scaffold writes no `package.json`, and a verify that reaches its end with none fails.
 
 ## CI
