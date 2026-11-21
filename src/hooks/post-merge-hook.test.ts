@@ -91,8 +91,7 @@ describe.each(HOOKS)('post-merge hook ($name copy)', ({ path }) => {
     expect(calls('canon')).toBe(`hooks post-merge --root ${root}\n`)
   })
 
-  // A binary older than the verb is left for its owner to upgrade by hand,
-  // so the hook calls nothing on it, names the upgrade, and still exits zero.
+  // A binary older than the verb is left for its owner to upgrade, so the hook names the upgrade and exits zero.
   it('should leave a binary lacking the verb alone and exit zero', () => {
     stub('canon', ROOT_USAGE)
 

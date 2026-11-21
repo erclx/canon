@@ -49,8 +49,7 @@ describe('.claude/hooks/standards-audit.sh runner', () => {
   it.concurrent('should report that nothing ran when the machine carries neither runner', async ({
     expect,
   }) => {
-    // The linked dependencies alone, so neither runner resolves from the machine,
-    // and a missing link would fail the run for an unrelated reason.
+    // The linked dependencies alone, so neither runner resolves from the machine.
     const path = join(ctx.fixture, 'bin-no-runner')
     expect(existsSync(join(path, 'bash')), 'no bash found to link').toBe(true)
     expect(existsSync(join(path, 'jq')), 'no jq found to link').toBe(true)
@@ -65,8 +64,7 @@ describe('.claude/hooks/standards-audit.sh runner', () => {
   it.concurrent('should name a ban set the verb shipped empty', async ({
     expect,
   }) => {
-    // `no-source` carries no `src/cli.ts`, which is what sends the hook past
-    // the checkout branch to the stubbed binary.
+    // `no-source` carries no `src/cli.ts`, which sends the hook to the stubbed binary.
     const path = [join(ctx.fixture, 'bin-empty-set'), ctx.hookPath].join(
       delimiter,
     )
@@ -125,10 +123,8 @@ describe('.claude/hooks/standards-audit.sh runner', () => {
   })
 })
 
-// The seed reaches one runner where the toolkit copy reaches two, so the branch
-// it takes and the two it degrades onto are what these cover. A scaffolded
-// project may carry no binary at all, and the pass a silent hook reports there
-// covers less than a reader would take it to cover.
+// The seed reaches one runner where the toolkit copy reaches two, so these cover the branch it takes
+// and the two it degrades onto. A scaffolded project may carry no binary at all.
 describe('seeds standards-audit.sh runner', () => {
   const hook = join(
     ROOT,
@@ -144,8 +140,7 @@ describe('seeds standards-audit.sh runner', () => {
   it.concurrent('should read its findings out of the installed binary', async ({
     expect,
   }) => {
-    // The seed resolves no checkout source, so the `canon` stub is its only branch
-    // and `via-canon` proves it took that one.
+    // The seed resolves no checkout source, so the `canon` stub is its only branch.
     const path = [join(ctx.fixture, 'bin'), ctx.hookPath].join(delimiter)
 
     const result = await run(hook, payload(), path)
@@ -157,8 +152,7 @@ describe('seeds standards-audit.sh runner', () => {
   it.concurrent('should report that nothing ran when the machine carries no binary', async ({
     expect,
   }) => {
-    // The linked dependencies alone, so no runner resolves from the machine, and a
-    // missing link would fail the run for an unrelated reason.
+    // The linked dependencies alone, so no runner resolves from the machine.
     const path = join(ctx.fixture, 'bin-no-runner')
     expect(existsSync(join(path, 'bash')), 'no bash found to link').toBe(true)
     expect(existsSync(join(path, 'jq')), 'no jq found to link').toBe(true)
@@ -225,8 +219,7 @@ describe('seeds standards-audit.sh runner', () => {
   it.concurrent('should warn on a colon an edit introduced inside a longer line', async ({
     expect,
   }) => {
-    // The record's text is the whole line, so a filter matching the line
-    // against the new text drops an edit that rewrote only a phrase of it.
+    // The record's text is the whole line, so a filter on the new text drops an edit that rewrote a phrase.
     const path = [join(ctx.fixture, 'bin-advisory'), ctx.hookPath].join(
       delimiter,
     )
@@ -248,8 +241,7 @@ describe('seeds standards-audit.sh runner', () => {
   it.concurrent('should warn on a colon an edit introduced after an emoji in its line', async ({
     expect,
   }) => {
-    // The record keys each colon on the word before it, so slicing an emoji line at
-    // a UTF-16 column would land one character off in jq and drop the match.
+    // The record keys each colon on the word before it, so a UTF-16 column slice would land one character off.
     const path = [join(ctx.fixture, 'bin-advisory'), ctx.hookPath].join(
       delimiter,
     )
@@ -450,8 +442,7 @@ describe('review-post-scan.sh verdicts', () => {
       expect(result.code).toBe(0)
     })
 
-    // A command that only mentions a post is not one. The scan stub fails, so
-    // a hook that read the whole string would deny each of these.
+    // A command that only mentions a post is not one, and the scan stub fails a hook reading the whole string.
     const mention = "gh api -X POST repos/o/r/issues/1/comments -f body='x'"
     const quoting: Record<string, string> = {
       'a heredoc quoting the command': `cat > .canon/tmp/notes.md <<'EOF'\n- ${mention}\nEOF`,
@@ -489,8 +480,7 @@ describe('review-post-scan.sh verdicts', () => {
       expect(result.code).toBe(2)
     })
 
-    // A here-string and an arithmetic shift both carry `<<` and neither opens
-    // a heredoc, so the post on the next line must still reach the scan.
+    // A here-string and an arithmetic shift carry `<<` without opening a heredoc, so the post must still reach the scan.
     const notHeredocs: Record<string, string> = {
       'a here-string with a space': 'cat <<< word',
       'a here-string with no space': 'cat <<<word',
@@ -584,13 +574,9 @@ describe('review-post-scan.sh verdicts', () => {
   }
 })
 
-// Held local rather than seeded, per the canon-no-seed marker on the file
-// itself, so it exists in .claude/hooks/ alone and the directory walk above
-// never reaches a seed copy to test.
-//
-// The acting case above proves the reminder fires on an attended startup. These
-// pin the two silences it promises, since a stub answering due on every call
-// would otherwise pass a hook that never filtered.
+// Held local rather than seeded, per the canon-no-seed marker, so it exists in `.claude/hooks/` alone.
+// These pin the two silences the acting case does not, since a stub answering due on every call
+// would pass a hook that never filtered.
 describe('upstream-due.sh silences', () => {
   const hook = join(ROOT, '.claude/hooks/upstream-due.sh')
   const dueBin = (): string =>
@@ -625,17 +611,14 @@ describe('upstream-due.sh silences', () => {
   })
 })
 
-// The acting case proves a write into the folder is denied. These are the
-// boundaries around it: the folder's shape is what separates a memory write
-// from any other path holding a `memory` segment, and the `Bash` arm reads a
-// command unexpanded where the file tools carry an absolute path. The hook
-// exists only in `.claude/hooks/`, so this runs against that path alone.
+// The boundaries around the acting case: the folder's shape separates a memory write from any other
+// path holding a `memory` segment, and the `Bash` arm reads a command unexpanded. The hook exists
+// only in `.claude/hooks/`.
 describe('memory-guard.sh boundaries', () => {
   const hook = join(ROOT, '.claude/hooks/memory-guard.sh')
   const home = '/home/x/.claude/projects/-home-x-repo'
 
-  // Every real payload carries the transcript, under the projects folder the
-  // guard watches, so a case without it skips the payload the hook receives.
+  // Every real payload carries the transcript, so a case without it skips the payload the hook receives.
   const transcript_path = `${home}/0f2c.jsonl`
 
   const fileTool = (tool: string, file: string): string =>

@@ -27,13 +27,9 @@ function isSkipped(destination: string): boolean {
 }
 
 /**
- * The path a destination names, or undefined when it is not one to check.
- *
- * A chat link is resolved from the editor root and not from a file's own
- * folder, which is why `findBrokenLinks` cannot serve here: it skips every
- * absolute destination and resolves the rest beside the file holding them.
- * A malformed percent escape is skipped, since the reply is text a model
- * typed and the hook has no business throwing on it.
+ * The path a destination names, or undefined when it is not one to check. A chat
+ * link resolves from the editor root, which is why `findBrokenLinks` cannot serve.
+ * A malformed percent escape is skipped rather than thrown on.
  */
 function linkedPath(destination: string): string | undefined {
   if (isSkipped(destination)) return undefined
@@ -44,12 +40,9 @@ function linkedPath(destination: string): string | undefined {
 }
 
 /**
- * Markdown link targets in a reply that name nothing on disk.
- *
- * A relative target resolves against `root`, the main worktree root, since the
- * editor is rooted there. A relative link to a file that exists only inside a
- * linked worktree therefore reads as missing, which is the report the output
- * rule asks for. `exists` stays injected so a test asserts against a fake disk.
+ * Markdown link targets in a reply that name nothing on disk. A relative target
+ * resolves against `root`, the main worktree root where the editor is rooted.
+ * `exists` stays injected so a test asserts against a fake disk.
  */
 export function findMissingReplyLinks(
   reply: string,
@@ -78,10 +71,8 @@ export function findMissingReplyLinks(
 }
 
 /**
- * The block reason the wrapper hands back to the session. The closing line
- * covers the one miss that is not a typo: a relative link to a file living only
- * inside a linked worktree, which the editor, rooted at the main checkout,
- * cannot open.
+ * The block reason the wrapper hands back to the session. The closing line covers
+ * a relative link to a file living only inside a linked worktree.
  */
 export function formatMissing(found: readonly MissingLink[]): string {
   return [
