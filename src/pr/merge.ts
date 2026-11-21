@@ -199,8 +199,8 @@ function refused(
 
 /**
  * Squash-merges one ready pull request with a message carrying only the change.
- * Every refusal is read before the one write, which sends the head it read as
- * `sha`, so GitHub refuses a commit pushed after the checks were read.
+ * Every refusal is read before the one write, which sends the head it read as `sha`, so GitHub
+ * refuses a later push. It reads the draft flag, not review comments, since a ready pull request passed the lift's gates.
  */
 export async function merge(
   api: MergeApi,

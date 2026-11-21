@@ -57,8 +57,8 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
 
 /**
  * The skills that took a two-word name from a single word or from ordinary prose. Each row
- * keys on a form only the skill spells, and the tail guard rejects a following `-`. A prose
- * mention by bare name has no token for a sweep and is fixed by hand.
+ * keys on a form only the skill spells, since a bare `canvas` would rewrite `canon canvas serve`.
+ * The tail guard rejects a following `-`, and a bare-name prose mention is fixed by hand.
  */
 export const SKILL_CITATION_MAP: Readonly<Record<string, string>> = {
   'canon:canvas': 'canon:canvas-board',

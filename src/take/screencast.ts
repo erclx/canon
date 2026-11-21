@@ -282,9 +282,9 @@ function nextFrame(page: Page, capMs: number): Promise<number | undefined> {
 const PAINTED = '__canonTakePainted'
 
 /**
- * How long a move takes to show in the clip, measured by sending one aligned move
- * to the window's center and reading the animation frame after its handler. The
- * lag counts one page frame past the readings. Undefined when no frame is read.
+ * How long a move takes to show in the clip, measured by an aligned move to the window's center and
+ * the animation frame after its handler. The lag counts one page frame past the readings, which held
+ * a dragged box within 7 px where a clip-rate assumption left 10 to 15. Undefined when no frame reads.
  */
 async function calibrate(
   page: Page,

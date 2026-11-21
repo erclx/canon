@@ -83,8 +83,8 @@ export type ReapState =
 
 /**
  * The backstop. Signals a process group the runner created, escalating, and
- * returns its outcome without throwing. It refuses this process's own group
- * and cannot reach a dispatch that called `setsid` on its way out, which the shim covers.
+ * returns its outcome without throwing. Synchronous, so a signal handler can
+ * run it. It refuses its own group and cannot reach a `setsid` dispatch, which the shim covers.
  */
 export function reapProcessGroup(pgid: number): ReapState {
   if (String(pgid) === processGroupOf(process.pid)) return 'refused-own-group'

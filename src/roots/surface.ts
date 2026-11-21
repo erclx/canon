@@ -2,9 +2,9 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
 /**
- * The roots a tracked toolkit surface is read at, in precedence order. These are not
- * `RECORD_ROOTS`: a record folder is gitignored and a surface is committed, so one shared list
- * would put a record folder under a root a tracked file resolves against.
+ * The roots a tracked toolkit surface is read at, in precedence order, apart from
+ * `RECORD_ROOTS`, since a record folder is gitignored and a surface is committed.
+ * `canon` wins because `.claude/` in a moved tree is the copy the move left behind.
  */
 export const SURFACE_ROOTS = ['canon', '.claude'] as const
 

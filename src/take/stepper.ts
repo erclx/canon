@@ -15,8 +15,8 @@ import { type ShellPage, openShell } from '@/take/shell'
 
 /**
  * Films a beat by frame stepping on a virtual 60 fps clock, so every transition
- * and timer moves exactly one frame between screenshots. Each ordering below,
- * broken, deadlocks or freezes a take, and a stall falls the beat back rather than hanging.
+ * and timer moves exactly one frame between screenshots. A misordered step
+ * deadlocks or freezes a take, and a stall falls the beat back, not hangs.
  */
 
 const FRAME_MS = 1000 / FPS
@@ -111,6 +111,7 @@ export async function filmStepped(
     })
     let ticks = loadTicks
     let outstanding: Promise<unknown> = Promise.resolve()
+    // Each frame begins only once the last settles, since overlapping frames deadlock the page.
     const beginFrame = (screenshot: boolean) => {
       const reply = outstanding.then(() =>
         page.send<{ screenshotData?: string }>(
@@ -128,6 +129,7 @@ export async function filmStepped(
       return reply
     }
     still = () => frameStill(beginFrame)
+    // No frame begins before the load event, which load() has already awaited.
     await pump(beginFrame, SETTLE_MS, stallMs, 'settle')
 
     const live = liveStage(page, viewport, beginFrame, stallMs)
@@ -136,6 +138,7 @@ export async function filmStepped(
     await live.pointer({ type: 'move', ...start })
 
     await page.send('Emulation.setVirtualTimePolicy', { policy: 'pause' })
+    // Ticks stay at or ahead of the page clock once virtual time pauses, or transitions start in the future.
     ticks = alignTicks({ ticks, loadTicks, ...(await readPageClock(page)) })
 
     const events: LogEvent[] = []
@@ -460,9 +463,9 @@ function keyEvent(input: KeyInput): Record<string, unknown> {
 }
 
 /**
- * Steps a frame, then awaits the input sent ahead of it. When the step fails,
- * the input is left settling against a shell about to close, so its rejection
- * is handled here rather than surfacing as an unhandled one.
+ * Steps a frame, then awaits the input sent ahead of it, since awaiting first
+ * deadlocks the page. When the step fails, the input is left settling against a
+ * closing shell, so its rejection is handled here rather than left unhandled.
  */
 async function stepThen(
   sent: Promise<unknown>,

@@ -70,7 +70,7 @@ function entryText(message: Record<string, unknown>): string {
 /**
  * Walks back to the entry that decides the row. No contract describes the stop
  * entry, so this rests on a measured shape: `error: "rate_limit"`, a `<synthetic>`
- * model, `isApiErrorMessage`, and limit text. Other limit wording reads `unknown`.
+ * model, `isApiErrorMessage`, and limit text. Other limit wording reads `unknown`, or a renamed field reads as never stopped.
  */
 function readEntries(text: string, cut: boolean): StopReading {
   const lines = text.split('\n')
@@ -102,6 +102,7 @@ function readEntries(text: string, cut: boolean): StopReading {
       }
     }
     if (worded) return UNREADABLE
+    // A client restart writes a <synthetic> entry with no error, which says nothing about a stop.
     if (synthetic && entry.error === undefined) continue
 
     return NOT_STOPPED

@@ -4,9 +4,9 @@ import type { Page } from 'playwright-core'
 import type { Finding } from '@/driver/steps'
 
 /**
- * Runs axe-core on the WCAG A and AA tags and marks the findings a UI review holds
- * open on, reading the engine from canon's own install. The bundle's added globals
- * are put back once the run settles, so a page owning a global named `axe` keeps it.
+ * Runs axe-core on the WCAG A and AA tags and marks the findings a UI review holds open on, reading the
+ * engine from canon's own install. Added globals are put back once the run settles, so a page owning `axe`
+ * keeps it, and `define`, `module`, and `exports` are shadowed since the bundle registers with any AMD loader.
  */
 
 /** The tags the groundwork measured on, which together are WCAG 2.2 A and AA. */
