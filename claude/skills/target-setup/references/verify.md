@@ -98,10 +98,12 @@ The depth follows how the phase was reached.
 ### The two verdicts
 
 A dev server that starts slowly reads as a failure, so the deep verdict depends
-on whether an operator is there to read it.
+on one test: whether a person can answer a question in this session. A probe of
+stdin does not decide it, since a Bash call reads no terminal even when a person
+is there.
 
-- Attended, with a person in the session: a deep failure fails the report the way a default failure does, naming the script
-- Unattended, headless as the skill's non-interactive path reads it: a deep failure reports as a warning naming the failing script and its output, and the chain does not fail
+- Attended, when a person can answer: a deep failure fails the report the way a default failure does, naming the script
+- Unattended, every other run: a deep failure reports as a warning naming the failing script and its output, and the chain does not fail
 
 ### Stages that cannot run
 
