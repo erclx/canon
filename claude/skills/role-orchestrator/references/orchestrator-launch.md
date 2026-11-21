@@ -133,6 +133,16 @@ claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion 
 - A failure that reproduces on demand, such as a deterministic timeout or perf bug, keeps `plan-feature`
 - The ellipsis stands for the message clauses above, unchanged
 
+### A row too big for one worker
+
+A row whose measured scope passes 150 files is too big for one worker, the bound being the largest member one measured sweep built in one session, at 151 files. Offer the operator a fan-in rather than waiting to be asked for one.
+
+- Read the size off the task's measurement, or off the planner's plan announcement when the task was not measured at filing
+- Put the offer under `Decisions:` in the report, naming the member count, each member's folders and file count, and the integrator
+- Split by folder so no two members share a file where the tree allows, and keep each member at or under the bound
+- On the operator's word, brief the planner to plan it as a fan-in set, one plan per member and one for the integrator, per `## Fan-in` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/batches.md`
+- Launch the members together and hold the integrator until `plan-answers` reads it launchable
+
 ### Which checks bind
 
 None of the three checks in `orchestrator-dispatch.md` binds this shape.
