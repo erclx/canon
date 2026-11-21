@@ -58,11 +58,9 @@ export type PreviewConfigRead =
     }
 
 /**
- * The branch-to-slug transform every branch-derived name shares: a leading
- * type segment comes off when a further segment follows it, and each
- * remaining `/` becomes `-`. The worker reads its branch off the worktree and
- * the reviewer off the pull request's head ref, so this one function is what
- * lands both on the same folder.
+ * The branch-to-slug transform every branch-derived name shares: a leading type
+ * segment comes off when a further one follows, and each `/` becomes `-`. The
+ * worker and the reviewer both land on the same folder through this one function.
  */
 export function branchSlug(branch: string): string {
   const segments = branch.split('/')
@@ -89,15 +87,9 @@ function isWithin(path: string, parent: string): boolean {
 }
 
 /**
- * Reads `canon/config/preview.json` as
- * `{ "writes": [...], "keep": [...], "env": "<NAME>", "seed": [...] }`.
- * A file that does not parse refuses rather than reading as absent, since a
- * typo there would otherwise drive the real folders while the pass reports a
- * copy. A `writes` or `keep` path that is absolute or climbs with `..`
- * refuses, so the copy never reads or writes outside its two roots, and a
- * `keep` path outside every `writes` path refuses, since the rebuild would
- * never reach it, and so does one equal to a `writes` path, which would be
- * declared both reset and kept.
+ * Reads `canon/config/preview.json` as `{ "writes", "keep", "env", "seed" }`. It
+ * refuses a file that does not parse, a path absolute or climbing with `..`, and
+ * a `keep` path outside, or equal to, a `writes` path, never reading as absent.
  */
 export function loadPreviewConfig(worktree: string): PreviewConfigRead {
   const path = join(worktree, PREVIEW_CONFIG_REL)
@@ -228,12 +220,9 @@ function clearAround(
 }
 
 /**
- * Resets each declared path in the copy from the worktree, so the last pass's
- * drives never reach the next one, and leaves everything else under the copy
- * root as it is. A `keep` path inside a declared path is neither cleared nor
- * copied, since the server running on the copy owns it. A path the worktree
- * does not hold has its stale copy removed and is named rather than failing
- * the copy.
+ * Resets each declared path in the copy from the worktree, so a pass's drives
+ * never reach the next, and leaves everything else as it is. A `keep` path inside
+ * a declared one is neither cleared nor copied, and a path the worktree lacks is named.
  */
 export function buildDriveCopy(
   worktree: string,
@@ -272,11 +261,9 @@ export type SeedRun =
     }
 
 /**
- * Runs a project's seed against a rebuilt copy, from the worktree with the
- * copy root in `env`. The child's stdout goes to this process's stderr, since
- * stdout carries the verb's JSON record and a printing seed would corrupt it.
- * The argv list is spawned with no shell, so a path holding a space or a
- * metacharacter runs as written.
+ * Runs a project's seed against a rebuilt copy, from the worktree with the copy
+ * root in `env`. The child's stdout goes to stderr, since stdout carries the
+ * JSON record, and argv is spawned with no shell so metacharacters run as written.
  */
 export async function runSeed(
   worktree: string,
@@ -286,8 +273,7 @@ export async function runSeed(
   timeoutMs: number = SEED_TIMEOUT_MS,
 ): Promise<SeedRun> {
   const [command = '', ...args] = seed
-  // The seed leads its own process group and the limit kills the group, since a
-  // grandchild under `sh -c` escapes execa's `timeout` and holds the pipe open.
+  // The seed leads its own process group, since a grandchild under `sh -c` escapes execa's `timeout`.
   const subprocess = execa(command, args, {
     cwd: worktree,
     env: { [env]: copyRoot },

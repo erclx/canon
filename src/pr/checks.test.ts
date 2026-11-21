@@ -428,8 +428,7 @@ describe('collapseChecks over a required commit status', () => {
     expect(reading.state).toBe('passing')
   })
 
-  // The fallback is the verbs' behavior before the rules were read, which
-  // never saw a commit status, so a status cannot start failing it.
+  // The fallback predates the rules and never saw a commit status, so one cannot fail it.
   it('should leave statuses out when no required set was read', () => {
     const reading = collapseChecks(TIP, listing, undefined, [
       { context: DEPLOY, state: 'failure' },
@@ -438,8 +437,7 @@ describe('collapseChecks over a required commit status', () => {
     expect(reading.state).toBe('passing')
   })
 
-  // A repository with no rulesets answers an empty rule list, which is the
-  // same fallback as an unread one, so an optional status still stays out.
+  // A repository with no rulesets answers an empty rule list, the same fallback as unread.
   it('should leave statuses out when the rules require nothing', () => {
     const reading = collapseChecks(TIP, listing, new Set(), [
       { context: 'codecov/patch', state: 'failure' },

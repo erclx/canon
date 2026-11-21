@@ -1,12 +1,9 @@
 import { findBacktickSpans } from '@/markdown/backticks'
 
 /**
- * The heading whose bullets state what a branch changed.
- *
- * Read alone, and never widened to a sibling section. `## Technical context`
- * legitimately names files a branch never touched, such as an install stamp
- * inside a target, so a reader that took the whole body would manufacture a
- * finding out of every argument the author made for the change.
+ * The heading whose bullets state what a branch changed, read alone and never
+ * widened to a sibling section, since `## Technical context` legitimately names
+ * files a branch never touched and would manufacture findings.
  */
 export const KEY_CHANGES = 'Key changes'
 
@@ -17,33 +14,21 @@ export interface PathClaim {
   /** True when the span named a folder, which covers every file beneath it. */
   readonly directory: boolean
   /**
-   * True when the first segment names an entry the tree actually holds.
-   *
-   * An unanchored claim is a path written partially, such as
-   * `role-worker/SKILL.md` for a file under `claude/skills/`. It can confirm
-   * that a changed file was named and can never accuse one of being absent,
-   * because the comparison has no way to tell a partial spelling from a
-   * genuinely wrong one.
+   * True when the first segment names an entry the tree actually holds. An
+   * unanchored claim is a path written partially, so it can confirm a changed
+   * file was named and never accuse one of being absent.
    */
   readonly anchored: boolean
   /**
-   * True when the span sits ahead of the bullet's first comma.
-   *
-   * A trailing span is a path the bullet names without the reader being able to
-   * tell a second claim from a file cited for context, so it credits a changed
-   * file and never accuses one. Same asymmetry as `anchored`, on a second
-   * question: both mark evidence strong enough to confirm and too weak to
-   * accuse with.
+   * True when the span sits ahead of the bullet's first comma. A trailing span
+   * cannot be told from a file cited for context, so it credits a changed file
+   * and never accuses one, the same asymmetry as `anchored`.
    */
   readonly leading: boolean
   /**
-   * True when the span carried no slash, such as `README.md` or `bun`.
-   *
-   * A bare claim credits a changed file whose whole path is exactly that name
-   * and nothing else, so `package.json` never reaches `web/package.json`. It
-   * never accuses: nothing separates a bare file name from a word of prose, so
-   * one matching no changed file is reported nowhere. Same asymmetry as
-   * `anchored` and `leading`.
+   * True when the span carried no slash, such as `README.md` or `bun`. A bare
+   * claim credits only a changed file whose whole path is that name, and never
+   * accuses, since nothing separates a file name from a word of prose.
    */
   readonly bare: boolean
   /** The span exactly as the body wrote it, before the line suffix came off. */
@@ -80,23 +65,16 @@ const HEADING = /^(#{1,6})\s+(.+?)\s*$/
 export const LINE_SUFFIX = /:\d+(?:-\d+)?$/
 
 /**
- * A span that carries a line suffix and nothing else, such as `:642` beside
- * an earlier `verify.sh:634`. Its presence is what tells the citation guard
- * below the bullet is describing lines inside one already-claimed file rather
- * than naming a second file, since a genuinely distinct file never gets cited
- * by a bare line number with nothing in front of the colon.
+ * A span that carries a line suffix and nothing else, such as `:642` beside an
+ * earlier `verify.sh:634`. It tells the citation guard the bullet describes
+ * lines inside one claimed file rather than naming a second file.
  */
 const BARE_LINE = /^:\d+(?:-\d+)?$/
 
 /**
- * A character that puts the span outside a path this comparison resolves.
- *
- * Whitespace marks a backticked command, angle brackets a shape such as
- * `feature-<slug>.md`, a glob or caret a pattern, and a leading anchor
- * something outside this repository. Deliberately not shared with
- * `classifySpan` in `@/gov/citations`, which resolves what a rule points at
- * against the filesystem, where this resolves what a bullet claims changed
- * against a changed-file list and admits a folder that sweep declines.
+ * A character that puts the span outside a path this comparison resolves:
+ * whitespace, angle brackets, a glob or caret, or a leading anchor. Not shared
+ * with `classifySpan` in `@/gov/citations`, which resolves a different question.
  */
 function isNotRepositoryPath(span: string): boolean {
   if (/[\s<>$*|?^]/.test(span)) return true
@@ -105,14 +83,9 @@ function isNotRepositoryPath(span: string): boolean {
 }
 
 /**
- * Whether the span's last segment is a bare dotted-decimal number, such as
- * an address (`127.0.0.1`) or an unprefixed version number (`1.2.3`).
- *
- * This is the one exclusion `resolveSpan` still applies to a non-directory
- * span. A bare dotted number reaching the comparison is the shape that put
- * `src/serve/127.0.0.1` in a report over a body that was correct, and every
- * other segment carrying no extension, such as `.husky/post-merge`, now
- * resolves.
+ * Whether the span's last segment is a bare dotted-decimal number, such as an
+ * address (`127.0.0.1`) or version (`1.2.3`). It is the one exclusion
+ * `resolveSpan` still applies, and every other extensionless segment resolves.
  */
 function isDottedNumber(span: string): boolean {
   const segment = span.slice(span.lastIndexOf('/') + 1)
@@ -132,14 +105,9 @@ function maskSpans(text: string): string {
 }
 
 /**
- * The part of a bullet that can accuse, which ends at its first comma.
- *
- * The comma separates a claim from a mention: a path ahead of it is a claim,
- * and one after it is context. The scan still reads the whole bullet, so a
- * trailing path can credit a changed file, but only this region decides
- * `leading`. Clause-opening words were weighed as a cut and added nothing the
- * comma did not. `disclaimsChange` reads this region too, since a disclaimer
- * opens its bullet.
+ * The part of a bullet that can accuse, which ends at its first comma: a path
+ * ahead of it is a claim and one after is context. The scan reads the whole
+ * bullet, so a trailing path can credit, but only this region decides `leading`.
  */
 function claimRegion(bullet: string): string {
   const at = maskSpans(bullet).indexOf(',')
@@ -147,13 +115,9 @@ function claimRegion(bullet: string): string {
 }
 
 /**
- * A claim region that asserts nothing changed.
- *
- * A body writes such a bullet to record a decision it declined, so the path it
- * names is the file it did not touch. The marker rather than the leading verb
- * decides it, since `keep` and `leave` open real claims too. `in place`, `no
- * other line`, and `alone` stay out, since each also appears in a bullet that
- * asserts an edit.
+ * A claim region that asserts nothing changed, as when a body records a decision
+ * it declined. The marker rather than the leading verb decides it, since `keep`
+ * and `leave` open real claims, and `in place` and `alone` also assert an edit.
  */
 const NO_CHANGE =
   /\b(?:untouched|unchanged)\b|\bas written\b|^\s*(?:do not|don't|never)\b/i
@@ -172,12 +136,9 @@ export function readSection(body: string, title: string): string | undefined {
 }
 
 /**
- * The section's text and the character offset it starts at, counted in the body
- * with its line endings normalized to `\n`.
- *
- * The offset is what lets a caller rewrite the section in place. Searching the
- * body for the text instead finds the first copy, so an identical block above
- * the heading would take the edit.
+ * The section's text and the character offset it starts at, counted with line
+ * endings normalized to `\n`. The offset lets a caller rewrite the section in
+ * place, since searching the body for the text finds the first identical copy.
  */
 export function readSectionAt(
   body: string,
@@ -223,10 +184,8 @@ export function readSectionAt(
 
 /**
  * Splits a section into bullets, folding a wrapped continuation line into the
- * bullet above it and starting a new one at every list marker.
- *
- * A nested bullet is its own bullet rather than part of its parent, which keeps
- * one claim region per claim a reader sees.
+ * bullet above it and starting a new one at every list marker. A nested bullet
+ * is its own, which keeps one claim region per claim a reader sees.
  */
 function splitBullets(section: string): string[] {
   const bullets: string[] = []
@@ -270,8 +229,7 @@ interface ResolvedSpan {
 function resolveSpan(span: string): ResolvedSpan | undefined {
   if (span === '' || isNotRepositoryPath(span)) return undefined
 
-  // A bare name resolves to itself as a root-level path and is marked bare so
-  // it never accuses, since guessing a sibling of an earlier path misfires.
+  // A bare name resolves to itself as a root-level path, marked bare so it never accuses.
   if (!span.includes('/')) {
     return isDottedNumber(span)
       ? undefined
@@ -279,8 +237,7 @@ function resolveSpan(span: string): ResolvedSpan | undefined {
   }
 
   if (span.endsWith('/')) {
-    // A single top-level folder is never a claim, since a body spelling one
-    // is naming where something lives.
+    // A single top-level folder is never a claim, since a body spelling one names where something lives.
     return span.indexOf('/') === span.length - 1
       ? undefined
       : { path: span, directory: true, bare: false }
@@ -292,13 +249,9 @@ function resolveSpan(span: string): ResolvedSpan | undefined {
 }
 
 /**
- * Every path the `## Key changes` section claims a change to.
- *
- * `roots` names the tree's top-level entries, which separates a whole path from
- * a partial one. It has no default, since an absent set would mark every claim
- * anchored, the direction that accuses. A missing heading reports
- * `no-section`, and a section yielding no claim reports an empty set with a
- * bullet count, so the caller never reads an extraction failure as a pass.
+ * Every path the `## Key changes` section claims a change to. `roots` names the
+ * tree's top-level entries and has no default, since an absent set would mark
+ * every claim anchored, the direction that accuses. A failure never reads as a pass.
  */
 export function extractKeyChangePaths(
   body: string,
@@ -322,8 +275,7 @@ export function extractKeyChangePaths(
 
     const accusesBefore = claimRegion(trimmed).length
     const spans = findBacktickSpans(trimmed)
-    // A bare `:642`-shaped span beside a `file:line` span means two lines in
-    // one file, so it decides whether a repeated file is a second claim.
+    // A bare `:642`-shaped span beside a `file:line` span means two lines in one file.
     const hasBareLineCompanion = spans.some((span) =>
       BARE_LINE.test(span.content),
     )
@@ -333,18 +285,15 @@ export function extractKeyChangePaths(
       const span = match.content
       const bare = span.replace(LINE_SUFFIX, '')
 
-      // A `file:line` span after another claim in the bullet cites a file being
-      // described. Leading its bullet, it is an ordinary claim.
+      // A `file:line` span after another claim cites a file being described, unlike one leading its bullet.
       const cited = bare !== span
       if (cited && claimed && hasBareLineCompanion) continue
 
       const resolved = resolveSpan(bare)
       if (resolved === undefined) continue
-      // A bare span is no evidence a path claim came first, so it leaves the
-      // citation guard above reading only the claims it was written for.
+      // A bare span is no evidence a path claim came first, for the citation guard above.
       if (!resolved.bare) claimed = true
-      // First occurrence wins across bullets, which can lose an accusation and
-      // never add one.
+      // First occurrence wins across bullets, which can lose an accusation and never add one.
       if (seen.has(resolved.path)) continue
       seen.add(resolved.path)
 

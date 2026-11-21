@@ -23,13 +23,9 @@ const REEL_WAIVER_LINE = /^- \*\*Waived reel:\*\*\s*(\S.*)$/
 const FENCE = /^\s*(```|~~~)/
 
 /**
- * Every line of the review bodies outside a fenced block, in order, with
- * trailing whitespace dropped. A line inside a fence is a quoted sample rather
- * than a waiver, so it never reaches a reader.
- *
- * Review bodies alone are read, never the pull request body or an issue
- * comment, since every session posts as one account and a review is the one
- * surface a worker never writes.
+ * Every line of the review bodies outside a fenced block, in order, trailing
+ * whitespace dropped, since a fenced line is a quoted sample, not a waiver. Only
+ * review bodies are read, since a review is the one surface a worker never writes.
  */
 function unfencedLines(reviews: readonly ReviewRow[]): string[] {
   const lines: string[] = []

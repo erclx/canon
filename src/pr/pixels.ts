@@ -20,10 +20,8 @@ function decode(bytes: Uint8Array): PNG | undefined {
 
 /**
  * Whether two PNG captures differ by no more than sub-visual noise. Anti-aliased
- * pixels are counted rather than skipped, since antialias detection reads a
- * changed 1px border as an edge artifact, and the windowed count separates
- * scattered edge noise from a compact change on its own. A pair that does not decode or differs in size reads as changed, so
- * nothing the comparison cannot read is ever folded.
+ * pixels are counted, since antialias detection reads a changed 1px border as an
+ * artifact. A pair that does not decode or differs in size reads as changed.
  */
 export function isWithinTolerance(base: Uint8Array, head: Uint8Array): boolean {
   const before = decode(base)

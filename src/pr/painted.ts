@@ -15,10 +15,9 @@ export interface PaintedPatterns {
    */
   readonly repainted?: readonly string[]
   /**
-   * Paths outside the painted set a reel reads, such as the engine that films
-   * it and the lockfile pinning its browser. Declared, a reel carries to a
-   * later head across any push changing neither a painted path nor one of
-   * these. Absent, it carries only across inert pushes.
+   * Paths outside the painted set a reel reads, such as the filming engine and
+   * the lockfile pinning its browser. Declared, a reel carries to a later head
+   * across a push changing none of them; absent, only across inert pushes.
    */
   readonly reelInputs?: readonly string[]
 }
@@ -47,11 +46,9 @@ const RENDERED_EXTENSIONS = [
 ]
 
 /**
- * What a browser renders, minus the tests, stories, and fixtures beside it. A
- * test-only push touches nothing a reviewer drove, which is the case the
- * carry-forward exists for. A fixture is test input no app renders, the same
- * judgment `INCIDENTAL` in `src/pr/bijection.ts` makes, so only a whole
- * `fixtures`, `__fixtures__`, or `testdata` segment exempts a path.
+ * What a browser renders, minus the tests, stories, and fixtures beside it, so a
+ * test-only push touches nothing a reviewer drove. A fixture is test input no app
+ * renders, as `INCIDENTAL` in `src/pr/bijection.ts` judges; whole segments only.
  */
 const FIXTURE_FOLDERS: readonly string[] = [
   '**/fixtures/**',
@@ -89,9 +86,8 @@ function strings(value: unknown): string[] {
 
 /**
  * The default list plus the project's own, read from `canon/config/painted.json`
- * as `{ "painted": [...], "unpainted": [...], "reelInputs": [...] }`. A file
- * that is absent or does not parse leaves the default, since a typo there must
- * not make every push read as unpainted.
+ * as `{ "painted", "unpainted", "reelInputs" }`. A file that is absent or does
+ * not parse leaves the default, since a typo must not make every push unpainted.
  */
 export function loadPaintedPatterns(root: string): PaintedPatterns {
   const path = join(root, PAINTED_CONFIG_REL)
