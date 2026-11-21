@@ -3,9 +3,8 @@ import { join } from 'node:path'
 
 /**
  * Three states rather than two. An arm with no declaration is `unchecked`: it
- * cannot pass, since nothing was asserted, and it does not fail, since failing
- * every undeclared arm would make the harness unusable while expectations roll
- * out. `canon sandbox coverage` is what keeps the count from hiding.
+ * cannot pass and does not fail, or every undeclared arm would break the harness
+ * while expectations roll out. `canon sandbox coverage` keeps the count honest.
  */
 export type VerdictState = 'pass' | 'fail' | 'unchecked'
 
@@ -20,10 +19,9 @@ export interface Expectation {
   readonly content: readonly ContentAssertion[]
   readonly writeScope: readonly string[]
   /**
-   * Undefined means the arm makes no claim about escapes, which is every arm
-   * today. Present, even as `[]`, means the arm asserts a bound: the empty
-   * form declares that a correct run produces none, so `stringArray`'s
-   * collapse of "absent" and "empty" into one `[]` would erase that claim.
+   * Undefined means the arm makes no claim about escapes. Present, even as `[]`,
+   * asserts a bound, which `stringArray`'s collapse of absent and empty into one
+   * `[]` would erase.
    */
   readonly escapeScope?: readonly string[]
   readonly reply: readonly string[]
@@ -37,10 +35,9 @@ export interface AssertionResult {
 }
 
 /**
- * `reply` is optional because an absent reply and an empty one mean different
- * things. A run whose envelope was never supplied has nothing to assert against
- * and skips. A run that genuinely returned no text carries the empty string and
- * fails every reply assertion, which is the finding.
+ * `reply` is optional because absent and empty differ: a run with no envelope
+ * has nothing to assert against and skips, while one returning no text carries
+ * the empty string and fails every reply assertion.
  */
 export interface RunEnvelope {
   readonly isError: boolean
@@ -69,11 +66,9 @@ export interface Verdict {
 }
 
 /**
- * `writes`, `escapes`, and `envelope` are absent when the caller supplied no
- * data for them, which is not the same as a run that wrote nothing, escaped
- * nowhere, or reported nothing. The assertion kinds that depend on them report
- * as skipped rather than silently dropping out of the count, so the cheap
- * standalone path cannot claim more coverage than it had.
+ * `writes`, `escapes`, and `envelope` are absent when the caller supplied no data,
+ * which differs from a run that wrote nothing. The assertion kinds that depend
+ * on them report as skipped, so the standalone path cannot claim more coverage than it had.
  */
 export interface CheckInput {
   readonly sandboxDir: string
@@ -81,17 +76,14 @@ export interface CheckInput {
   readonly escapes?: readonly string[]
   /**
    * Whether any watched escape root held one of the four directories this run.
-   * Undefined when the caller supplied no escapes at all, which already skips.
-   * False is what separates a watch that ran and found nothing from one with
-   * nothing to watch, both of which produce the same empty `escapes` list.
+   * False separates a watch that found nothing from one with nothing to watch,
+   * both of which produce an empty `escapes` list.
    */
   readonly escapesWatched?: boolean
   /**
-   * Names of sessions the client's own registry carried both before and after
-   * the run, so present rather than dispatched by it. Undefined when the
-   * caller supplied none, which is not the same as a run that had no witness:
-   * the registry carries no contract, so a client that stops writing a record
-   * per session makes this list empty regardless of who else was live.
+   * Names of sessions the client's registry carried before and after the run.
+   * Undefined when none was supplied. The registry carries no contract, so a
+   * client that stops writing per-session records makes this list empty.
    */
   readonly concurrentSessions?: readonly string[]
   /**
@@ -178,13 +170,11 @@ function contentArray(value: unknown): ContentAssertion[] {
 
     const record = entry as Record<string, unknown>
 
-    // A half-written entry is dropped, since it declares nothing to lose and
-    // `checkExpectation` fails an arm left asserting nothing.
+    // A half-written entry is dropped, since it declares nothing to lose.
     if (typeof record.path !== 'string' || record.path === '') continue
     if (typeof record.pattern !== 'string' || record.pattern === '') continue
 
-    // In TOML a bare key below a `[[content]]` header joins that table, so a
-    // misplaced `manual` or `max_turns` would silently assert nothing.
+    // In TOML a bare key below a `[[content]]` header joins that table, so a misplaced `manual` would assert nothing.
     const stray = Object.keys(record).filter(
       (key) => key !== 'path' && key !== 'pattern',
     )
@@ -259,16 +249,9 @@ function checkPaths(
 }
 
 /**
- * The first file an entry matches, or undefined when it matches none. An entry
- * carrying `*` is matched as a glob, which is what lets an arm name a file whose
- * name a run derives rather than fixes. Pinning one spelling of a derived name
- * passes vacuously against every other spelling, which reads as coverage the arm
- * does not have.
- *
- * Returning the match rather than a boolean is what lets a result name the file
- * the run wrote instead of the pattern that found it. A glob matching several
- * files answers with one of them in no fixed order, so an arm asserting content
- * through a glob seeds a folder holding one.
+ * The first file an entry matches, or undefined. An entry carrying `*` is a glob,
+ * so an arm can name a file whose name a run derives. A glob matching several
+ * files answers with one in no fixed order, so such an arm seeds a folder holding one.
  */
 function writtenUnder(pattern: string, sandboxDir: string): string | undefined {
   if (!pattern.includes('*')) {
@@ -300,12 +283,8 @@ function checkAbsent(
 
 /**
  * A pattern against a missing file reports as a content miss rather than
- * throwing, since an arm may assert content without also listing the path. A
- * pattern that does not compile is a defect in the declaration, so it fails the
- * assertion it belongs to rather than aborting the whole verdict.
- *
- * A path carrying `*` resolves to the file it matched, and falls back to itself
- * when it matched none so the miss is reported against the entry as written.
+ * throwing, and a pattern that does not compile fails its own assertion rather
+ * than aborting the verdict. A `*` path falls back to itself when it matched none.
  */
 function checkContent(
   expectation: Expectation,
@@ -353,8 +332,7 @@ function checkWriteScope(
     }
   }
 
-  // A run that wrote nothing yields no result here, so it is reported as
-  // skipped, or the declaration would vanish from the verdict as a vacuous pass.
+  // A run that wrote nothing is reported as skipped, or the declaration would vanish as a vacuous pass.
   if (writes.length === 0) {
     return {
       results: [],
@@ -375,16 +353,9 @@ function checkWriteScope(
 }
 
 /**
- * Asserts the writes `canon sandbox run` saw land in shared session scratch
- * at a toolkit root, split by `attributeEscapes`: `escapes` a tool call of the
- * session names, and `untiedEscapes` none does, which report as one skipped
- * line. An arm whose skill legitimately writes outside the sandbox declares
- * the destinations here.
- *
- * Zero escapes is a pass, unlike an empty write scope, but only when `watched`
- * says a root held something, since an empty manifest also means nothing was
- * watched. With no `untiedEscapes`, every path is asserted. A concurrent
- * session is appended to the message as evidence and never softens the verdict.
+ * Asserts the writes `canon sandbox run` saw land in shared session scratch at a
+ * toolkit root, split by `attributeEscapes` into `escapes` and `untiedEscapes`.
+ * Zero escapes passes only when `watched` says a root held something. A concurrent session is evidence, never softening the verdict.
  */
 function checkEscapeScope(
   expectation: Expectation,
@@ -464,14 +435,8 @@ function checkTiedEscapes(
 
 /**
  * Plain substrings, matched case-sensitively, against the text the run replied
- * with. A substring rather than a regex because the pattern a reply assertion
- * wants is a load-bearing token, a path or a command, and a regex invites the
- * anchored sentence that goes red on any rewording.
- *
- * Declare only positives. A negative substring passes on every reply that
- * phrases the thing differently, which is the vacuous pass
- * `countMechanicalAssertions` excludes `manual` to prevent. An entry asserting
- * what a run must not have said stays in `manual` with its reason.
+ * with, since a regex invites an anchored sentence that goes red on rewording.
+ * Declare only positives, since a negative passes on any rephrasing. A negative stays in `manual`.
  */
 function checkReply(
   expectation: Expectation,
@@ -597,8 +562,7 @@ export function checkExpectation(
 
   const failed = results.filter((result) => !result.ok).length
 
-  // A write scope yields one result per write, so a run that wrote nothing
-  // asserted nothing and fails rather than passing vacuously.
+  // A write scope yields one result per write, so a run that wrote nothing fails rather than passing vacuously.
   if (results.length === 0) {
     return {
       state: 'fail',

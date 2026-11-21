@@ -25,8 +25,7 @@ afterEach(() => {
 })
 
 describe('writesBetween', () => {
-  // A file removed outside the declared scope has to produce an assertion, so
-  // the before side of a change counts as a write as well as the after side.
+  // A file removed outside the declared scope has to produce an assertion, so the before side counts as a write.
   it('should report a deleted file as a write', () => {
     writeFile('keep.md', 'kept')
     writeFile('gone.md', 'doomed')
@@ -63,8 +62,7 @@ describe('snapshotTree', () => {
 })
 
 describe('snapshotRoot', () => {
-  // A root with none of the four folders reads identically to a watch that ran
-  // clean, so the flag is what lets the check tell the two apart.
+  // A root with none of the four folders reads like a clean watch, so the flag tells the two apart.
   it('should report unwatched when the root holds none of the scratch folders', () => {
     writeFile('.canon/tmp/scratch.md', 'not watched')
 
@@ -136,8 +134,7 @@ describe('attributeEscapes', () => {
     expect(attributeEscapes([plan], {})).toEqual({ tied: [plan], untied: [] })
   })
 
-  // Run from the sandbox cwd, a relative path lands in the sandbox, so naming
-  // the directory alone is no evidence the session wrote under a watched root.
+  // Run from the sandbox cwd, a relative path lands in the sandbox, so naming the directory alone is no evidence.
   it('should not tie on a relative scratch path alone', () => {
     const split = attributeEscapes([plan], {
       commands: [

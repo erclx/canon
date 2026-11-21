@@ -1,10 +1,7 @@
 /**
  * What one step of a replay concluded. A finding or a refusal is the verb
- * working, so it reads `ok`. Only a run that broke rather than answered fails:
- * a `crash` threw or died, an `unreadable` run answered in a shape a caller
- * cannot parse, and an `unformatted` tree holds a file sync wrote that the
- * formatter canon ships rejects. A `drifted` read answered a frozen snapshot
- * differently from the answer recorded beside it, which `judgeDrift` decides.
+ * working, so it reads `ok`. Only a run that broke fails: a `crash`, an
+ * `unreadable` shape, an `unformatted` tree, or a `drifted` read that `judgeDrift` decides.
  */
 export type ReplayVerdict =
   | 'ok'

@@ -25,19 +25,15 @@ const PINNED_DATE = '2026-01-01T00:00:00Z'
 
 /**
  * Answers the `gh` calls the git scenarios make and fails on any other, so a new
- * call reaches a reader as a red arm rather than a silent pass. Every call is
- * logged as one line, quoted so an argument holding a space stays one argument.
- * The pull request URL it prints reads `GITHUB_ORG` and `STUB_GH_REPO` from the
- * environment `createStubRemote` returns, so it follows `STUB_ORG` and
- * `ANCHOR_REPO`.
+ * call reaches a reader as a red arm. Every call is logged as one line, and the
+ * pull request URL follows `STUB_ORG` and `ANCHOR_REPO` through the returned environment.
  */
 const STUB_GH = fileURLToPath(new URL('stub-gh.sh', import.meta.url))
 
 /**
  * Builds a local bare repository and a stub `gh` under `stubDir` and returns the
- * environment that sends a provision's pushes and `gh` calls there. Nothing in
- * it reaches the shared anchor: the URL rewrite turns every push into a file
- * path, and the stub heads `PATH` ahead of any real `gh`.
+ * environment sending a provision's pushes and `gh` calls there. Nothing reaches
+ * the shared anchor, as the URL rewrite makes every push a file path.
  */
 export function createStubRemote(stubDir: string): Record<string, string> {
   rmSync(stubDir, { recursive: true, force: true })
@@ -86,9 +82,8 @@ function readLog(path: string): string {
 
 /**
  * Reads what a provision left in the stub: the `gh` calls, the calls it did not
- * recognize, and for each bare repository every ref with its tip tree and the
- * commit subjects beneath it. A tree id carries no timestamp, so it compares
- * across two runs where a commit id would not.
+ * recognize, and each bare repository's refs with tip tree and commit subjects.
+ * A tree id carries no timestamp, so it compares across two runs.
  */
 export function readStubManifest(stubDir: string): Map<string, string> {
   const manifest = new Map<string, string>()

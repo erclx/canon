@@ -88,10 +88,9 @@ function armsFor(
 }
 
 /**
- * Whether the runner reads a `default/` arm folder. It does only for a scenario
- * naming `default` beside another arm, since a sole-default scenario reads its
- * declaration at the command root. A file that fails to load counts as routing
- * it, so the report neither crashes on a scenario it cannot read nor flags it.
+ * Whether the runner reads a `default/` arm folder, which it does only for a
+ * scenario naming `default` beside another arm. A file that fails to load counts
+ * as routing it, so the report neither crashes nor flags it.
  */
 function routesDefault(file: string): boolean {
   try {

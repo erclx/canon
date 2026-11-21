@@ -24,15 +24,9 @@ import {
 } from '@/cli/ui'
 
 /**
- * The TypeScript form of a sandbox scenario: `sandbox/<category>/<command>.ts`,
- * whose default export declares what the bash form split across `use_config`,
- * `use_anchor`, and `stage_setup`. Provisioning, the catalog, coverage, census,
- * and equivalence all read a scenario through this module, so a stem holding
- * either extension reads the same everywhere.
- *
- * Arms run in the harness process rather than a bash child, so nothing here
- * spawns without the tree as its `cwd`. A scenario reaches the tree through the
- * context alone.
+ * The TypeScript form of a sandbox scenario, `sandbox/<category>/<command>.ts`,
+ * which provisioning, the catalog, coverage, census, and equivalence all read
+ * through this module. Arms run in the harness process, so nothing here spawns without the tree as its `cwd`.
  */
 
 /** Holds fixture content rather than scenarios, so no listing reads it as a category. */
@@ -190,9 +184,8 @@ function deriveGithubOrg(root: string, env: NodeJS.ProcessEnv): string {
 
 /**
  * What provisioning reads off a scenario: its config, the derived organization,
- * and the anchor's repository name. These land in the one
- * environment provisioning passes to every child, the seed and gov installs
- * included.
+ * and the anchor's repository name, landing in the one environment passed to
+ * every child.
  */
 export function scenarioExports(
   definition: ScenarioDefinition,
@@ -425,8 +418,7 @@ export function createStageContext(options: ContextOptions): StageContext {
     git('config', 'user.email', env.SANDBOX_GIT_EMAIL)
   }
 
-  // `gh` answers an absent repository and an unreachable host with one status,
-  // so the 404 alone separates them. Creating is the opt-in.
+  // `gh` answers an absent repository and an unreachable host with one status, so the 404 alone separates them.
   const ensureAnchorRepo = (org: string, repo: string): void => {
     const probe = spawn(
       'gh',
@@ -521,8 +513,7 @@ export function createStageContext(options: ContextOptions): StageContext {
       mkdirSync(dirname(path), { recursive: true })
       copyFileSync(file, path)
     }
-    // An append extends a file the anchor or the seeds provide, so a missing
-    // target means that upstream shape changed rather than a file to create.
+    // An append extends a file the anchor or seeds provide, so a missing target means that shape changed.
     for (const file of appendFiles) {
       const rel = target(join(stageDir, 'append'), file)
       if (!existsSync(inTree(rel))) fail(`Append fixture has no target: ${rel}`)
