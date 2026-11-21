@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { execa, type Options } from 'execa'
 import { isStackExcluded, loadManifest } from '@/tooling/manifest'
+import { scaffoldStack } from '@/tooling/scaffold'
 import { isAddOn } from '@/tooling/stamp'
 import { intro, logError, logInfo, logStep, logWarn, outro } from '@/cli/ui'
 
@@ -88,29 +89,33 @@ async function run({
   rmSync(state.dir, { recursive: true, force: true })
 
   logStep(`Scaffolding ${stack}`)
-  // Manifests carry shell syntax (`&&`, `cd`, quoted globs), so the command runs under a shell.
-  const scaffoldCommand = manifest.scaffold.replaceAll('{{name}}', name)
-  const scaffold = await shell(scaffoldCommand, runsDir)
-  if (scaffold.failed) {
-    logWarn('Scaffold failed')
-    process.stderr.write(`$ ${scaffoldCommand}\n`)
-    writeTail(scaffold.all)
+  // The run scaffolds through the verb a real scaffold takes, so the starter, the post-scaffold step, and the
+  // overlay it proves are the ones a target receives.
+  const scaffold = await scaffoldStack({
+    root,
+    stack,
+    target: state.dir,
+    scratchBase: runsDir,
+  })
+  if (!scaffold.ok) {
+    if (scaffold.scratch === undefined) return refuse(scaffold.message)
+    logWarn(scaffold.message)
+    writeTail(scaffold.output)
+    const isStepFailure = scaffold.reason === 'prepare-failed'
+    record(state, 'Scaffold', isStepFailure)
+    if (isStepFailure) record(state, 'Prepare', false)
+    logInfo(`Kept ${scaffold.scratch}`)
+    return { results: state.results, exitCode: 1 }
   }
+  record(state, 'Scaffold', true)
+  if (manifest.prepare !== undefined) record(state, 'Prepare', true)
 
-  if (!existsSync(state.dir)) {
-    return refuse(`Scaffold did not produce ${state.dir}`)
-  }
-  record(state, 'Scaffold', !scaffold.failed)
-
+  // The verify folder sits inside the checkout's work tree, where the verb leaves git alone, so the run makes
+  // its own repository for the scaffold's git-reading scripts.
   await shell(
     'git init -q && git add . && git commit -m "chore: verify scaffold" -q --no-verify --allow-empty',
     state.dir,
   )
-
-  const { prepare } = manifest
-  if (prepare !== undefined) {
-    await phase(state, 'Prepare', () => shell(prepare, state.dir))
-  }
 
   const cli = join(root, 'src/cli.ts')
   logInfo(`Sync resolves via bun ${cli}, not PATH canon`)

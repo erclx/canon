@@ -184,7 +184,7 @@ describe('verifyStack phases', () => {
   it('should run the manifest prepare before sync', async () => {
     seedStack(
       'prep',
-      `${scaffoldWith([])}\n[verify]\nprepare = "touch prepared"\n`,
+      `${scaffoldWith([])}\n[scaffold]\nprepare = "touch prepared"\n`,
     )
 
     const outcome = await verifyStack({ root, stack: 'prep', keep: true })
@@ -260,6 +260,21 @@ describe('verifyStack tmp dir', () => {
     expect(outcome.exitCode).toBe(1)
     expect(outcome.results[0]).toEqual({ name: 'Scaffold', passed: false })
     expect(stderr.mock.calls.join('')).toContain('mkdir -p verify-broken')
+  })
+})
+
+describe('verifyStack post-scaffold step', () => {
+  it('should fail at Prepare and run no later phase when the step fails', async () => {
+    seedStack('prep', `${scaffoldWith([])}\n[scaffold]\nprepare = "exit 2"\n`)
+
+    const outcome = await verifyStack({ root, stack: 'prep' })
+
+    expect(outcome.exitCode).toBe(1)
+    expect(outcome.results).toEqual([
+      { name: 'Scaffold', passed: true },
+      { name: 'Prepare', passed: false },
+    ])
+    expect(bunCalls()).toEqual([])
   })
 })
 
