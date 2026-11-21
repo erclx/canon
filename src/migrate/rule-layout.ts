@@ -1,11 +1,7 @@
 /**
- * The move of a target's installed rules from the flat `.claude/rules/<subdir>/`
- * layout onto `.claude/rules/canon/<subdir>/`.
- *
- * `canon gov sync` walks the wrapper alone, so a target still on the flat
- * layout reads back as unstamped rather than as needing this move, and
- * `canon gov install` writes a second copy beside the stale one. This module
- * is the mover neither of those verbs is.
+ * The move of a target's installed rules from the flat `.claude/rules/<subdir>/` layout
+ * onto `.claude/rules/canon/<subdir>/`. `canon gov sync` walks the wrapper alone, so a
+ * flat target reads as unstamped, and `canon gov install` would write a second copy.
  */
 
 import { existsSync, readFileSync } from 'node:fs'
@@ -21,20 +17,16 @@ import {
 } from '@/sync/stamp'
 
 /**
- * The one rule the wrapper move renumbered, keyed and valued as
- * `<subdir>/<name>` so a renumber that also changes subdirectory needs no
- * second field. A name match cannot find this rule under a name
- * `governance/rules/` no longer carries, so the table holds that one case.
+ * The one rule the wrapper move renumbered, keyed and valued as `<subdir>/<name>`. A name
+ * match cannot find it under a name `governance/rules/` no longer carries.
  */
 export const RENUMBERED_RULES: Readonly<Record<string, string>> = {
   'snippets/505-at-references': 'snippets/600-at-references',
 }
 
 /**
- * Rule folders the walk skips by name rather than by content, so the
- * exclusion holds even for a folder the toolkit has not shipped yet.
- * `canon/` and `internal/` are already-migrated destinations, and
- * `project/` is a target's own rules, which this verb never touches.
+ * Rule folders the walk skips by name, so the exclusion holds for a folder not yet shipped.
+ * `canon/` and `internal/` are migrated destinations, and `project/` is a target's own.
  */
 const EXCLUDED_FOLDERS: readonly string[] = ['project', 'canon', 'internal']
 
@@ -54,10 +46,8 @@ export function flatRulesRoot(target: string): string {
 }
 
 /**
- * Every rule file sitting directly under a flat rule folder. One level for
- * the folder and one glob below it for `*.md`, since `governance/rules/` never
- * nests a rule deeper than its folder, and the flat layout this verb migrates
- * off of mirrors that depth.
+ * Every rule file sitting directly under a flat rule folder, one level for the folder and
+ * one glob below it for `*.md`, since the flat layout mirrors the shipped depth.
  */
 export async function walkFlatRules(target: string): Promise<FlatRuleFile[]> {
   const root = flatRulesRoot(target)
@@ -92,13 +82,9 @@ export async function walkFlatRules(target: string): Promise<FlatRuleFile[]> {
 export type RuleStatus = 'clean' | 'edited'
 
 /**
- * Where a stamp entry exists, an exact hash match is `clean` and any other
- * value is `edited`. Where none exists, a name recognized by the current
- * catalog or the renumber table is read as `clean` too, since nothing on
- * this path suggests an edit, only that a hash cannot confirm one. A name
- * neither source recognizes is `unclaimed`, on the reasoning
- * `misplacedOrphan` in `src/sync/engine.ts` already states for why a mover
- * must not guess who authored a file.
+ * A matching stamp hash is `clean` and any other is `edited`. With no entry, a name the
+ * catalog or renumber table recognizes is `clean`, and any other is `unclaimed`, since a
+ * mover must not guess who authored a file.
  */
 export function classifyRule(
   root: string,
@@ -118,11 +104,8 @@ export function classifyRule(
 }
 
 /**
- * Where a classified file lands. The renumbered rule reads its destination
- * from the table instead of its own current name, and every other file keeps
- * its current subdirectory with `canon/` inserted ahead of it, rather than
- * recomputing one from the toolkit's current tree, since a subdirectory
- * reconciliation independent of this move is an ordinary sync concern.
+ * Where a classified file lands. The renumbered rule reads its destination from the table,
+ * and every other file keeps its subdirectory with `canon/` inserted ahead of it.
  */
 export function destinationRel(file: FlatRuleFile): string {
   const key = relPath(file.subdir, file.name)
@@ -160,11 +143,8 @@ export interface RuleLayoutPlan {
 }
 
 /**
- * What the move would do, without doing it.
- *
- * A collision is reported by name with neither file touched, and every other
- * planned move proceeds independently rather than the whole run refusing, per
- * the concurrency standard's rule for partial failure in a batched operation.
+ * What the move would do, without doing it. A collision is reported by name with neither
+ * file touched, and every other planned move proceeds independently.
  */
 export function planRuleLayout(
   root: string,
@@ -203,13 +183,9 @@ export function planRuleLayout(
 }
 
 /**
- * The stamp's hashes, re-keyed for every entry this run moved and otherwise
- * carried forward only where the file they name still exists.
- *
- * A file moved on the catalog or renumber fallback has no old key, since
- * `classifyRule` never required one to call it `clean`, so it lands under
- * `canon/` unhashed. Hashing it here would record what no sync confirmed, and
- * the file was unattributed before the move as well.
+ * The stamp's hashes, re-keyed for every entry this run moved and otherwise carried
+ * forward only where the file still exists. A catalog-fallback move has no old key and
+ * lands unhashed, since hashing it would record what no sync confirmed.
  */
 function nextHashes(
   root: string,
@@ -241,13 +217,8 @@ export interface RuleLayoutResult {
 }
 
 /**
- * Writes the plan: every move, then every byte-identical duplicate deleted,
- * then the stamp rewritten from whichever moves actually landed.
- *
- * The stamp keeps the hash the file was recorded with rather than re-hashing
- * current content, which is what keeps an `edited` file reporting `edited` on
- * the next `canon gov sync` instead of silently reading `stale` and losing
- * its own signal that it carries a local change.
+ * Writes the plan: every move, then every byte-identical duplicate deleted, then the stamp
+ * rewritten. The stamp keeps the recorded hash, so an `edited` file keeps reporting `edited`.
  */
 export async function applyRuleLayout(
   root: string,

@@ -1,22 +1,13 @@
 /**
- * The token rewrite behind a mechanical rename.
- *
- * The scanner is one pass with the protected forms tried first, since a chain
- * of replacements reprocesses its own output and rewrites a protected form a
- * later rule cannot see was already decided. The map, protected forms, and
- * exclusions are a parameter, so one engine serves several renames. A path
- * assembled as `join('.claude', ...)` is never seen, and a rewritten fixture
- * can collapse a fallback test into a copy of its neighbor, so read the
- * rewritten fixtures rather than trusting a clean run.
+ * The token rewrite behind a mechanical rename. The scanner is one pass with the protected
+ * forms tried first, since a chain of replacements reprocesses its own output. Read the
+ * rewritten fixtures rather than trusting a clean run, and a path built with `join` is never seen.
  */
 
 /**
- * An article whose agreement the rename breaks.
- *
- * Stated as a pattern and a replacement rather than a function so a preset is
- * data a test can read back. It runs against the already-rewritten line, which
- * is what keeps it clear of the protected forms: a form the scanner passed
- * through still spells the old token afterward, so it never matches here.
+ * An article whose agreement the rename breaks. Stated as a pattern and a replacement so a
+ * preset is data a test can read back, and run against the rewritten line, clear of the
+ * protected forms.
  */
 export interface ArticleFixup {
   readonly pattern: RegExp
@@ -37,27 +28,17 @@ export interface RenameRuleSpec {
   readonly excludedPrefixes?: readonly string[]
   readonly articleFixups?: readonly ArticleFixup[]
   /**
-   * Whether a token has to end where the word ends.
-   *
-   * A rename whose tokens are whole names wants this, and one whose tokens are
-   * word stems cannot have it. `aitk` is a stem that legitimately carries a
-   * suffix, as in `aitk-allow-superseded`, so requiring a boundary there would
-   * leave every hyphenated form behind. A skill name is not a stem, and the
+   * Whether a token has to end where the word ends, which whole names want and word stems cannot. A skill name is not a stem, and the
    * spelling below is the pre-rename one on purpose (canon-keep-retired):
-   * `claude-worktree` inside `claude-worktrees` is a different subject, the
-   * wiki page about the harness feature, which the rename must not move.
+   * `claude-worktree` inside `claude-worktrees` is a different subject the rename must not move.
    */
   readonly wholeToken?: boolean
 }
 
 /**
- * A spec with its scanner compiled and its alternatives ordered.
- *
- * `tokenOrder` is reported rather than kept private because the ordering is a
- * correctness property a caller has to be able to assert. A token containing a
- * shorter token has to be tried first, and reading that off the rewritten
- * string only works when the two happen to share a destination, which is
- * correctness by accident rather than by rule.
+ * A spec with its scanner compiled and its alternatives ordered. `tokenOrder` is reported
+ * because the ordering is a correctness property a caller has to assert, and the rewritten
+ * string shows it only when two tokens happen to share a destination.
  */
 export interface RenameRules {
   readonly replacements: Readonly<Record<string, string>>
@@ -71,25 +52,15 @@ export interface RenameRules {
 }
 
 /**
- * A branch that can never take, standing in for an empty protected list.
- *
- * The scanner reads a protected match off capture group 1, so a preset that
- * protects nothing still has to emit that group or every later group shifts by
- * one. An empty alternation would match the empty string at every position
- * instead, which reports a protected hit on every character.
+ * A branch that can never take, standing in for an empty protected list. The scanner reads a
+ * protected match off capture group 1, so an empty alternation would match everywhere.
  */
 const NEVER_MATCHES = '(?!)'
 
 /**
- * What may not follow a token when a preset asks for whole tokens.
- *
- * A plain word boundary rejects a following letter and accepts a following
- * hyphen, since `\b` reads a hyphen as the end of a word. That leaves
- * `plan-intake` matching inside `plan-intake-answer`, with the ordering of
- * the alternation the only thing standing between them. Naming the characters
- * that continue an identifier holds on both, so the ordering and the boundary
- * each cover what the other could miss, and a slash, a dot, or a backtick
- * still ends a token.
+ * What may not follow a token when a preset asks for whole tokens. A plain word boundary
+ * accepts a following hyphen, so `plan-intake` would match inside `plan-intake-answer`.
+ * Naming the characters that continue an identifier holds on both.
  */
 const TOKEN_TAIL = '(?![A-Za-z0-9_-])'
 
@@ -98,11 +69,8 @@ function escapeForPattern(value: string): string {
 }
 
 /**
- * Longest first, so a token is never consumed by a shorter token it contains.
- *
- * The sort is stable, so alternatives of equal length keep the order the
- * author wrote them in and a preset whose tokens are all one length compiles
- * to the alternation it already had.
+ * Longest first, so a token is never consumed by a shorter token it contains. The sort is
+ * stable, so alternatives of equal length keep the order the author wrote.
  */
 function longestFirst(values: readonly string[]): readonly string[] {
   return [...values].sort((left, right) => right.length - left.length)
@@ -148,29 +116,16 @@ export function defineRenameRules(spec: RenameRuleSpec): RenameRules {
 }
 
 /**
- * An indefinite article that agreed with the retired name and no longer
- * agrees with the replacement.
- *
- * The old name opens on a vowel sound and the new one does not, so every
- * `an aitk` in the corpus reads wrong the moment the token moves.
- *
- * The tail rejects a following letter rather than asking for a word boundary,
- * which is what separates `an canonical` from `an CANON_STATE_DIR`. A boundary
- * treats the underscore as part of the word and declines the environment
- * variable, where the whole identifier is the token continuing.
+ * An indefinite article that agreed with the retired name and no longer agrees with the
+ * replacement. The tail rejects a following letter rather than asking for a word boundary,
+ * which separates `an canonical` from `an CANON_STATE_DIR`.
  */
 const AITK_ARTICLE = /\b([Aa])n(\s+`?)(canon|CANON|Canon)(?![A-Za-z])/g
 
 /**
- * The `aitk` to `canon` rename.
- *
- * `aitk-sandbox`, bare or owner-scoped, is protected, since GitHub still
- * redirects that retired repository name. Case is carried in the map rather
- * than derived, because the uppercase form is an environment variable prefix
- * and the title-case form a heading word. The changelog and eval results
- * record what ran under the old name, this module states the map as literal
- * keys, and the four tests below prove the retired spellings still resolve, so
- * all are excluded.
+ * The `aitk` to `canon` rename. `aitk-sandbox`, bare or owner-scoped, is protected, since
+ * GitHub still redirects that repository name. Case is carried in the map rather than
+ * derived, and the files stating the old name on purpose are excluded.
  */
 export const AITK_RULES: RenameRules = defineRenameRules({
   replacements: {
@@ -213,12 +168,7 @@ export function renameText(text: string, rules: RenameRules): string {
 }
 
 /**
- * Whether a line names a retired spelling on purpose.
- *
- * A fallback path, a retired environment variable, and a dictionary entry
- * covering the record corpora all have to keep saying the old name, and a
- * second run over an already-renamed tree would otherwise strip exactly the
- * compatibility a rename shipped. The marker sits on the line itself or on the
+ * Whether a line names a retired spelling on purpose, such as a fallback path or a retired environment variable. The marker sits on the line itself or on the
  * one above it, which is the same placement `canon-allow-superseded` already
  * uses in this repository.
  */

@@ -149,10 +149,8 @@ function insideRoot(root: string, file: string): boolean {
 }
 
 /**
- * Finds the places a project calls a retired verb. It reads only the workflow
- * folder, the `package.json` scripts, `scripts/`, and the files those scripts
- * and workflow steps name, and it runs nothing. A markdown file is never read,
- * so prose naming a verb never reports.
+ * Finds the places a project calls a retired verb. It reads the workflow folder, the
+ * `package.json` scripts, `scripts/`, and the files they name, and runs nothing.
  */
 export async function scanRetiredCallers(
   root: string,

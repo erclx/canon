@@ -1,11 +1,7 @@
 /**
- * The move of the gitignored session records from `.claude/` to `.canon/`.
- *
- * Two halves that share one list. The folders themselves are untracked, so
- * relocating them is a filesystem act no commit records, while every tracked
- * file naming one of their paths is a citation that goes stale the moment they
- * land. Running one half without the other leaves a tree whose records are at a
- * root nothing points at, which is why the same verb performs both.
+ * The move of the gitignored session records from `.claude/` to `.canon/`. Two halves share
+ * one list: the untracked folders move on disk, and every tracked citation of their paths
+ * is rewritten, so one verb performs both.
  */
 
 import { existsSync } from 'node:fs'
@@ -24,11 +20,8 @@ export const FROM_ROOT: RecordRoot = '.claude'
 const TO_ROOT: RecordRoot = '.canon'
 
 /**
- * Every entry the move relocates, at the name `.claude/` gave it.
- *
- * The list is `RECORD_ENTRIES`, which `roots/record.ts` owns because a seed
- * destination and a superseded-layout report ask the same question. Restating
- * it here would let the sweep and the resolver disagree about what moved.
+ * Every entry the move relocates, at the name `.claude/` gave it. The list is
+ * `RECORD_ENTRIES`, which `roots/record.ts` owns, so the sweep and the resolver agree.
  */
 export const MOVED_ENTRIES = RECORD_ENTRIES
 
@@ -43,14 +36,9 @@ export function destinationPath(entry: string): string {
 }
 
 /**
- * A citation into a moved entry.
- *
- * The tail rejects a following name character rather than asking for a word
- * boundary, which protects the retired flat archives with no exception list:
- * `.claude/plans-archive` continues into a `-` and never matches, where a
- * boundary would treat the hyphen as a break and rewrite it. The alternation
- * runs longest first so `README.md` is decided before a shorter entry claims
- * its prefix, and each entry is escaped because two of them carry a dot.
+ * A citation into a moved entry. The tail rejects a following name character rather than
+ * a word boundary, which protects the retired flat archives with no exception list.
+ * The alternation runs longest first, and each entry is escaped, since two carry a dot.
  */
 const ENTRY_ALTERNATION = [...MOVED_ENTRIES]
   .sort((left, right) => right.length - left.length)
@@ -72,15 +60,9 @@ function escape(value: string): string {
 }
 
 /**
- * Files whose content is left alone entirely, because each states the old root
- * on purpose or records what happened under it.
- *
- * The changelog and eval results are history. This module and the root
- * resolvers build the rewriter from the old spelling. Test fixtures prove the
- * old root still resolves, hooks guard on a `case` arm per root, and replay
- * snapshots freeze a consumer, so a rewrite collapses each into the new-root
- * case and keeps passing. A file outside the list that quotes an excluded path
- * is reported by `referencesExcluded` rather than guessed at here.
+ * Files whose content is left alone entirely, because each states the old root on purpose
+ * or records what happened under it. A file outside the list that quotes an excluded
+ * path is reported by `referencesExcluded` rather than guessed at.
  */
 const EXCLUDED_PREFIXES: readonly string[] = [
   'src/migrate/',
@@ -105,11 +87,8 @@ export function isExcludedPath(path: string): boolean {
 }
 
 /**
- * Whether `text` names an `EXCLUDED_PREFIXES` or `EXCLUDED_PATHS` entry as
- * literal text, which is how a rewritten file couples to one this module leaves
- * alone. `EXCLUDED_SUFFIXES` plays no part, since a suffix names a file's own
- * shape. A file naming the excluded surface by description rather than by path
- * is the one case this cannot see.
+ * Whether `text` names an `EXCLUDED_PREFIXES` or `EXCLUDED_PATHS` entry as literal text,
+ * which is how a rewritten file couples to one this module leaves alone.
  */
 export function referencesExcluded(text: string): boolean {
   return (
@@ -119,25 +98,18 @@ export function referencesExcluded(text: string): boolean {
 }
 
 /**
- * The roots holding nothing but records, so a path under one is a record
- * whatever it is named.
- *
- * The old root is mixed and derived by exclusion, so a root added later reads
- * as records-only unless someone says otherwise. Exported because
- * `record-tree.ts` sweeps inside these roots, and inverting `isRecordArtifact`
- * would also sweep the old root's record entries in a project not yet moved.
+ * The roots holding nothing but records, so a path under one is a record whatever it is
+ * named. The old root is mixed and derived by exclusion. Exported because `record-tree.ts`
+ * sweeps inside these roots.
  */
 export const RECORD_ONLY_ROOTS: readonly RecordRoot[] = RECORD_ROOTS.filter(
   (root) => root !== FROM_ROOT,
 )
 
 /**
- * Every prefix under which a path is a record rather than a file to sweep.
- *
- * The old root is entry-scoped, since it also tracks files the sweep exists to
- * repoint, such as installed rules, and a bare `.claude/` prefix would strand
- * them. Joined with a literal `/` rather than `join`, since `git ls-files`
- * returns forward slashes on every platform.
+ * Every prefix under which a path is a record rather than a file to sweep. The old root is
+ * entry-scoped, since a bare `.claude/` prefix would strand installed rules. Joined with
+ * a literal `/`, since `git ls-files` returns forward slashes.
  */
 const RECORD_PREFIXES: readonly string[] = [
   ...RECORD_ONLY_ROOTS,
@@ -145,13 +117,9 @@ const RECORD_PREFIXES: readonly string[] = [
 ]
 
 /**
- * Whether a path is a record artifact, which the sweep passes over silently.
- *
- * Kept apart from `isExcludedPath`, which reports what it skips for a reader to
- * check, since a target's record tree would bury those few. Without it, a run
- * after `canon tooling sync claude` prunes the ignore entries reads the record
- * folders as source and rewrites them. The retired flat archives stay outside
- * it, the way `CITATION` leaves them alone.
+ * Whether a path is a record artifact, which the sweep passes over silently. Kept apart
+ * from `isExcludedPath`, which reports what it skips, since a record tree would bury
+ * those few. The retired flat archives stay outside it, as `CITATION` leaves them.
  */
 export function isRecordArtifact(path: string): boolean {
   return RECORD_PREFIXES.some(
@@ -160,16 +128,9 @@ export function isRecordArtifact(path: string): boolean {
 }
 
 /**
- * Marks a line naming the old root on purpose.
- *
- * Prose that dates a decision, records where a defect landed, or names the
- * fallback a target still resolves through all have to keep saying `.claude/`,
- * and a sweep cannot tell those from a live path. The marker sits on the line
- * itself or on the nearest non-blank line above it, walking past a run of
- * blank markdown lines to reach a marker written on its own line above the
+ * Marks a line naming the old root on purpose, on the line itself or the nearest non-blank line above, walking past blank markdown lines to reach a marker written on its own line above the
  * paragraph it protects. `canon-keep-retired` and `canon-allow-superseded`
- * mark code instead, where no blank line ever falls between the marker and
- * the line it protects, so neither needs the walk.
+ * mark code instead, so neither needs the walk.
  */
 const KEEP_MARKER = 'canon-keep-record-root'
 
@@ -193,14 +154,9 @@ function frontmatterEnd(lines: readonly string[]): number | undefined {
 }
 
 /**
- * Marks a line inside a rule's frontmatter `paths:` key: the key line itself,
- * or an indented `- 'glob'` list item under it. Structural rather than
- * marker-based, found by walking up to the nearest line starting at column 0
- * and testing whether that line is the bare `paths:` key.
- *
- * Independent of `KEEP_MARKER`. A rewritten glob stops matching silently,
- * where a rewritten sentence is at least visible to a reader, so this line is
- * held whether or not anyone remembered the marker.
+ * Marks a line inside a rule's frontmatter `paths:` key, found structurally by walking up
+ * to the nearest line at column 0. Independent of `KEEP_MARKER`, since a rewritten glob
+ * stops matching silently.
  */
 function isFrontmatterPathsLine(
   lines: readonly string[],
@@ -217,23 +173,15 @@ function isFrontmatterPathsLine(
 }
 
 /**
- * A path segment immediately before a citation match, shaped like another
- * repository's own name: it carries a dot (a domain-shaped token, matching
- * the measured `erclx.dev`) or it is itself preceded by a further `/` (two
- * path segments deep, also matching the measured `public/erclx.dev/...`).
- *
- * Bounded by `[\w.-]`, which is what keeps a shell-glob prefix such as
- * `*` before the slash and a variable-substitution prefix such as
- * `$project` out: neither `*` nor `$` is in the class, so a segment built
- * from either never reaches the dot or the second slash this looks for.
+ * A path segment immediately before a citation match, shaped like another repository's own
+ * name: it carries a dot, or it is preceded by a further `/`. Bounded by `[\w.-]`, which
+ * keeps a shell-glob `*` prefix and a `$project` prefix out.
  */
 const CROSS_REPO_PREFIX = /(?:[\w.-]+\.[\w.-]+|[\w.-]+\/[\w.-]+)\/$/
 
 /**
- * Whether the line's citation sits right after a prefix `CROSS_REPO_PREFIX`
- * reads as another repository's own path. Per-line rather than per-match,
- * matching `isKept`'s and `isFrontmatterPathsLine`'s granularity: a line
- * carrying more than one citation is judged by the first.
+ * Whether the line's citation sits right after a prefix `CROSS_REPO_PREFIX` reads as
+ * another repository's path. Per-line, so a line with several citations is judged by the first.
  */
 function isCrossRepoPrefix(lines: readonly string[], index: number): boolean {
   const line = lines[index] ?? ''
@@ -247,13 +195,9 @@ function isCrossRepoPrefix(lines: readonly string[], index: number): boolean {
 const ISO_DATE = /\b\d{4}-\d{2}-\d{2}\b/
 
 /**
- * Whether the line's citation sits inside a blank-line-delimited paragraph
- * that also carries an ISO date, read as dated prose rather than a live path.
- *
- * Walks both directions from `index` to the paragraph's edges, unlike
- * `isKept`'s upward-only walk to a marker: the date can close a paragraph the
- * citation opens, as `.claude/ARCHITECTURE.md`'s own `Measured at ... on
- * <date>` sentences do.
+ * Whether the line's citation sits inside a blank-line-delimited paragraph that also
+ * carries an ISO date, read as dated prose rather than a live path. Walks both directions,
+ * since the date can close a paragraph the citation opens.
  */
 function isDatedParagraph(lines: readonly string[], index: number): boolean {
   let start = index
@@ -300,12 +244,9 @@ export function rewriteText(text: string): string {
 }
 
 /**
- * How many citations `rewriteText` would rewrite, how many marked lines it
- * left alone, how many sat inside a frontmatter `paths:` glob, how many sat
- * behind a cross-repository-shaped prefix, and how many sat inside a dated
- * paragraph. Every number past the first is what says its boundary fired at
- * all, which a diff cannot show because a protected line does not appear in
- * one.
+ * How many citations `rewriteText` would rewrite, and how many marked lines, frontmatter
+ * globs, cross-repository prefixes, and dated paragraphs it left alone. A diff cannot show
+ * those, since a protected line does not appear in one.
  */
 export function scanText(text: string): {
   readonly rewritten: number
@@ -338,11 +279,9 @@ export function scanText(text: string): {
 }
 
 /**
- * Deletes each live line that is wholly an entry for a moved folder, counting
- * them. Only a root `.gitignore` that already ignores `.canon/` may be handed
- * here, since the dropped line is redundant only under that entry. Splitting on
- * `\n` and matching the trimmed line leaves CRLF endings and a missing final
- * newline on the lines that stay.
+ * Deletes each live line that is wholly an entry for a moved folder, counting them. Only a
+ * root `.gitignore` that already ignores `.canon/` may be handed here, since the dropped
+ * line is redundant only then.
  */
 export function dropCoveredIgnoreLines(text: string): {
   readonly text: string
@@ -384,11 +323,8 @@ function frontmatterGlobLines(text: string): CitationLine[] {
 }
 
 /**
- * Every line in `text` whose citation `classifyLine` reads as `crossRepo`.
- *
- * Reads through `classifyLine` rather than `isCrossRepoPrefix` alone, so a
- * line a glob or a keep marker already claims is not reported twice under a
- * second boundary.
+ * Every line in `text` whose citation `classifyLine` reads as `crossRepo`. Reads through
+ * `classifyLine`, so a line a glob or keep marker claims is not reported twice.
  */
 function crossRepoLines(text: string): CitationLine[] {
   const lines = text.split('\n')
@@ -428,11 +364,8 @@ export interface FolderMove {
 }
 
 /**
- * The entries actually on disk under the old root, with where each lands.
- *
- * An entry already present at the destination is reported as a collision by the
- * caller rather than filtered out here, since merging two record folders is a
- * judgment no verb should take on a memory pen.
+ * The entries actually on disk under the old root, with where each lands. A collision is
+ * reported by the caller, since merging two record folders is a judgment no verb takes.
  */
 export function planFolderMoves(root: string): FolderMove[] {
   return MOVED_ENTRIES.filter((entry) =>
@@ -451,13 +384,9 @@ export function collisions(
 }
 
 /**
- * Whether a project's ignore rules already cover the new root.
- *
- * The gate exists because every entry being moved is ignored where it stands.
- * Landing them under a root the project does not ignore publishes the memory
- * pen and the groundwork trails into the next commit, which is the same harm
- * the records remote gate refuses for the same payload. Reading the file rather
- * than asking git keeps the answer available in a project with no commits yet.
+ * Whether a project's ignore rules already cover the new root. Landing the entries under
+ * a root the project does not ignore would publish the memory pen into the next commit.
+ * Reads the file rather than asking git, so it works with no commits yet.
  */
 export function ignoresDestination(gitignore: string): boolean {
   return gitignore
@@ -517,12 +446,9 @@ export interface RecordsPlan {
 }
 
 /**
- * What the move would do, without doing it.
- *
- * The folder half reads disk and the citation half is pure over the sources it
- * is handed, so a caller can report the whole plan and apply it from the same
- * value. A file whose text does not change is dropped rather than carried as a
- * no-op, which keeps the reported file count equal to what the sweep writes.
+ * What the move would do, without doing it. The folder half reads disk and the citation
+ * half is pure, so a caller reports and applies from one value. A file whose text does
+ * not change is dropped.
  */
 export function planRecordsMove(
   root: string,
@@ -541,13 +467,11 @@ export function planRecordsMove(
   let dated = 0
 
   for (const source of sources) {
-    // Ahead of the exclusion test, so a direct call stays correct even though
-    // the command boundary already filters these out.
+    // Ahead of the exclusion test, so a direct call stays correct without the command boundary.
     if (isRecordArtifact(source.path)) continue
 
     if (isExcludedPath(source.path)) {
-      // Only an excluded file carrying a citation is reported, since the
-      // predicate covers every test file and would bury the few worth checking.
+      // Only an excluded file carrying a citation is reported, since the predicate covers every test file.
       if (scanText(source.text).rewritten > 0) excluded.push(source.path)
       continue
     }
@@ -562,8 +486,7 @@ export function planRecordsMove(
     crossRepo += counts.crossRepo
     dated += counts.dated
 
-    // Ahead of the rewritten === 0 continue below, since a file whose only
-    // citation is a glob, a cross-repo prefix, or a dated line is still reported.
+    // Ahead of the `rewritten === 0` continue below, since a glob-only file is still reported.
     const held = frontmatterGlobLines(source.text)
     if (held.length > 0)
       frontmatterGlobs.push({ path: source.path, lines: held })
