@@ -18,8 +18,7 @@ import {
 } from '@/shipped/references'
 
 describe('referencesIn', () => {
-  // No test in this block exercises a `docs/`-shaped token, so this root only
-  // fills the parameter. The `DOCS_PATH` describe below owns a real one.
+  // No test in this block exercises a `docs/`-shaped token, and the `DOCS_PATH` describe owns one.
   let noDocsRoot: string
 
   beforeAll(() => {

@@ -80,86 +80,52 @@ function isHexColor(
 }
 
 /**
- * A commit sha, which is the worse half: it resolves to nothing anywhere rather
- * than to the wrong pull request.
- *
- * Seven characters is git's short-sha floor and forty a full one, and no letter
- * is required, since an all-digit sha is real. The lookbehind rejects `@` and
- * `/` so the qualified repair form passes, and `#` so a long hex color is not
- * reported twice. An all-digit hex color, a word spelled only from `a` to `f`,
- * and a long decimal run survive by construction, and the marker answers each.
+ * A commit sha, which resolves to nothing anywhere. Seven to forty characters
+ * with no letter required, and the lookbehind rejects `@`, `/`, and `#` so the
+ * qualified form and a long hex color pass. The marker answers the other survivors.
  */
 const COMMIT_SHA = /(?<![0-9A-Za-z_@/#])([0-9a-f]{7,40})(?![0-9A-Za-z_])/g
 
 /**
- * A same-repository citation, qualified or not. Qualifying a number or a sha
- * against `erclx/canon` fixes nothing, since a reader holding only the plugin
- * cache or the package still cannot open this repository's history.
- *
- * The literal is hardcoded, as `src/feedback/github-format.ts` and
- * `src/commands/repo.ts` already do. Word boundaries on both ends keep a match
- * from being the suffix of another token or stopping short of the citation.
+ * A same-repository citation, qualified or not. Qualifying against
+ * `erclx/canon` fixes nothing, since a reader holding only the plugin cache or
+ * package cannot open this repository's history. The literal is hardcoded.
  */
 const SAME_REPOSITORY =
   /(?<![0-9A-Za-z_/])erclx\/canon(#[0-9]+|@[0-9a-f]{7,40})(?![0-9A-Za-z_])/g
 
 /**
  * A repository-relative path under `docs/`, reported only where `isResolvable`
- * confirms it resolves against this checkout.
- *
- * Shape alone cannot separate this repository's own docs from an illustration
- * of a target's tree, such as `docs/retry.md`, and most such tokens name a
- * target's tree, so resolving against `root` is what makes this a gate.
- * `canon/context/` carries no equivalent, since every scaffolded project holds
- * some of those paths too, and telling them apart is a semantic read left to
- * the rule and the review checklist.
+ * confirms it resolves here, since shape cannot separate this repository's docs
+ * from an illustration of a target's tree. `canon/context/` carries no equivalent.
  */
 const DOCS_PATH = /(?<![\w./-])docs\/[^\s`)\]]*\.md\b/g
 
 /**
- * A call to `canon standards`, a verb no installed CLI carries any more. A
- * shipped body naming it sends a target reader to an unknown-command error,
- * so every corpus reports it, `docs/` included. A page saying the verb is gone
- * carries the reference marker on that line.
- *
- * The trailing lookahead keeps a hyphenated token such as a `standards-audit`
- * page name from matching, since that names a file rather than a call.
+ * A call to `canon standards`, a verb no installed CLI carries any more, so a
+ * shipped body naming it sends a reader to an unknown-command error. A page
+ * saying the verb is gone carries the reference marker, and `standards-audit` is spared.
  */
 const STANDARDS_CALL = /\bcanon standards(?![\w-])/g
 
 /**
  * A phase-label-shaped token: exactly two numeric groups, with a negative
- * lookahead rejecting a third.
- *
- * `VERSION_TOKEN` in `src/labels/phase.ts` also matches a semver tag, since
- * `scanPhaseLabels` can ask whether a pull request is a release. A shipped
- * file has no pull request, so two groups against three is the only
- * discriminator. A bare label is muted the same way as a same-repository
- * citation when it names the format rather than a row.
+ * lookahead rejecting a third. A shipped file has no pull request to tell a
+ * release by, so two groups against three is the only discriminator.
  */
 const PHASE_LABEL = /\bv\d+\.\d+(?!\.\d)\b/g
 
 /**
  * A `.claude/rules/<segments>/<slug>.md` citation from a body under
- * `claude/skills/`, the installed-path spelling `authoring-layout.md` bans a
- * shipped skill body from citing as authority for its own behavior.
- *
- * Anchored on a trailing `.md` file, so a folder mention ending in `/` passes.
- * The segments admit a governance or a project namespace alike, since either
- * is the same broken citation, and the placeholder check spares the bracketed
- * illustration.
+ * `claude/skills/`, the installed-path spelling `authoring-layout.md` bans as
+ * authority. A folder mention passes, and the placeholder check spares an illustration.
  */
 const RULE_PATH = /(?<![\w./-])\.claude\/rules\/[^\s`)\]]*?[\w-]+\.md\b/g
 
 /**
  * A path into a stack's `configs/` or `seeds/` folder under `tooling/`, from a
- * body under `claude/skills/`, a source layout no target holds under any name.
- *
- * Unlike `RULE_PATH`, a bracketed placeholder is reported too, since no target
- * holds this path in any form, and a brace group matches when it lists either
- * folder. A bare `tooling/`, a `manifest.toml`, and a `canon tooling sync` call
- * pass. The leading boundary is `DOCS_PATH`'s, and no filesystem read backs
- * the match, since resolving here proves nothing about a target.
+ * body under `claude/skills/`, a layout no target holds. Unlike `RULE_PATH`, a
+ * placeholder is reported too, and no filesystem read backs the match.
  */
 const SOURCE_PATH =
   /(?<![\w./-])tooling\/[\w<>.*-]+\/(?:configs|seeds|\{[\w,]*\b(?:configs|seeds)\b[\w,]*\})(?![\w.-])[^\s`)\]]*/g
@@ -196,13 +162,9 @@ function isPlaceholderPath(path: string): boolean {
 }
 
 /**
- * Whether a `DOCS_PATH` match should be reported.
- *
- * `file` gates out the `docs/` corpus by the caller's location, since a
- * citation inside it resolves through `canon docs` with the rest. The
- * placeholder check runs ahead of `existsSync` rather than replacing it, since
- * existence still mutes an illustration of a target's tree and the check only
- * catches bracketed illustrations existence would report as broken.
+ * Whether a `DOCS_PATH` match should be reported. `file` gates out the `docs/`
+ * corpus, and the placeholder check runs ahead of `existsSync`, since existence
+ * mutes an illustration the check catches when bracketed.
  */
 function isDocsPathReportable(
   file: string,
@@ -215,29 +177,18 @@ function isDocsPathReportable(
 }
 
 /**
- * Whether `file` sits in the one corpus `RULE_PATH` and `SOURCE_PATH` gate:
- * a shipped skill body, minus its own `REQUIREMENT.md`.
- *
- * The ban lives in `authoring-layout.md`, stated for one reader: a
- * session loading the `SKILL.md` body a target actually receives.
- * `REQUIREMENT.md` is excluded for the reason that file states there, since a
- * maintainer or an audit command reads it rather than a session loading it,
- * so the resolver rule never applies to it.
+ * Whether `file` sits in the one corpus `RULE_PATH` and `SOURCE_PATH` gate: a
+ * shipped skill body, minus its `REQUIREMENT.md`, which a maintainer or audit
+ * reads rather than a session loading it, per `authoring-layout.md`.
  */
 function isSkillBodyScope(file: string): boolean {
   return file.startsWith('claude/skills/') && !file.endsWith('/REQUIREMENT.md')
 }
 
 /**
- * Every reference in one shipped file that no marker mutes.
- *
- * The corpus walk is absent, so most of the shape tests against a string, the
- * seam `headingCitationsIn` and `citationsIn` draw. `root` is the one exception,
- * since `DOCS_PATH` resolves against this checkout, and it has no default, since
- * a dropped root would report zero findings rather than raise. The unit is the
- * match rather than the line, since one line can carry several tokens.
- * `isMarked` reads a line and the one above it, so a real citation added
- * beside a marked illustration ships unreported.
+ * Every reference in one shipped file that no marker mutes. `root` has no
+ * default, since a dropped one would report zero findings rather than raise, and
+ * `isMarked` reads a line and the one above, so a real citation beside a marked one ships unreported.
  */
 export function referencesIn(
   file: string,
