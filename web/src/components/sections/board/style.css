@@ -52,6 +52,11 @@
   background: var(--band);
 }
 
+/* The columns sit quieter in dark, where the band read as solid slabs. The records fills keep the band, since they sit on a card. */
+:root:not([data-theme='light']) #board .ln {
+  background: color-mix(in srgb, var(--band) 45%, var(--ground));
+}
+
 #board .lh {
   margin: 0 0 10px;
 }
