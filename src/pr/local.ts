@@ -77,6 +77,7 @@ export async function findLocalServer(
     ports.set(port, (ports.get(port) ?? false) || skipsHealth)
   }
 
+  // Probed at once, so silent listeners below a slow page cost one timeout.
   const candidates = [...ports]
     .sort(([a], [b]) => a - b)
     .map(([port, skipsHealth]) => ({

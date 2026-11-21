@@ -168,8 +168,7 @@ describe('canon pr local', () => {
     })
   })
 
-  // A dev server like astro's renders / in 3 to 6 seconds, so the page here
-  // answers only after a 3 second render.
+  // Answers / after 3 seconds, as astro dev does on a warm render.
   async function serveSlowPage(): Promise<number> {
     const script = [
       'const s = Bun.serve({ port: 0, fetch: async () => {',

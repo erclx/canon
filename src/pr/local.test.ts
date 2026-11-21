@@ -158,8 +158,7 @@ describe('findLocalServer', () => {
     let releaseLower: (page: boolean) => void = () => {}
     const runner: LocalRunner = {
       ...base,
-      // The lower port answers only once the higher one was asked, which a
-      // sequential walk never reaches, so the case also pins the concurrency.
+      // Answers only once the higher port was asked, which a sequential walk never does.
       async probe(port) {
         if (port === 24678) {
           releaseLower(true)
