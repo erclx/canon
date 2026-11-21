@@ -17,10 +17,8 @@ const DOMAIN_MARKERS: Record<SyncDomain, string> = {
 }
 
 /**
- * Paths whose git status decides whether a domain contributed to the sync
- * commit. Governance carries the retired `.claude/GOV.md` because a sync that
- * removes it is still a governance change, and `claude` watches `.gitignore`
- * because that is the only file `canon claude sync` writes.
+ * Paths whose git status decides whether a domain contributed to the sync commit. Governance carries
+ * the retired `.claude/GOV.md`, and `claude` watches `.gitignore`, the only file it writes.
  */
 const DOMAIN_PATHS: Record<SyncDomain, readonly string[]> = {
   governance: ['.claude/rules/', '.claude/GOV.md'],
@@ -43,11 +41,8 @@ export function installedDomains(states: readonly DomainState[]): SyncDomain[] {
 }
 
 /**
- * Whether a domain's sync command should run, which is not the same question
- * `detectDomains` answers. Governance reports as absent without
- * `.claude/rules/`, yet still syncs when only the retired `.claude/GOV.md`
- * remains, so that the sync can delete it. The bash drew the same distinction
- * between `detect_domains` and `run_syncs`.
+ * Whether a domain's sync command should run, which differs from `detectDomains`. Governance reports
+ * absent without `.claude/rules/`, yet still syncs when only the retired `.claude/GOV.md` remains.
  */
 export function shouldSync(target: string, domain: SyncDomain): boolean {
   if (domain === 'governance') {

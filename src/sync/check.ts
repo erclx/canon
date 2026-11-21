@@ -43,12 +43,9 @@ import { isAddOn } from '@/tooling/stamp'
 import { readSkew, type SkewReport } from '@/version/skew'
 
 /**
- * Domains the sync engine walks file by file. Tooling is a stamp domain without
- * being one of these, because `src/tooling/` never calls `planSync`, so the
- * three lookups below have no entry to offer it. Standards and snippets left
- * the list with their install channels: nothing writes either corpus into a
- * target, so there is no installed copy to attribute. Design left with its
- * install verb for the same reason.
+ * Domains the sync engine walks file by file. Tooling is a stamp domain without being one, since
+ * `src/tooling/` never calls `planSync`. Standards, snippets, and design left with their install
+ * channels, so nothing writes them into a target.
  */
 export const SCANNED_DOMAINS = [
   'governance',
@@ -154,13 +151,9 @@ const UNMEASURED_TOOLING: ToolingReport = {
 }
 
 /**
- * Seeded hooks the target holds the script for and its `settings.json` never
- * runs. Read from `settings.json` alone, since Claude Code gitignores
- * `settings.local.json` and CI never sees it. `skipped` covers an unmanaged
- * target and the toolkit root, `absent` a target with no settings file, and
- * `unreadable` a settings file the migrate verb refuses, named in `reason`,
- * which counts as drift since a check that cannot see the hooks must not
- * pass. A deleted script never reaches `unwired`, which is the opt-out.
+ * Seeded hooks the target holds the script for and its `settings.json` never runs, read from
+ * `settings.json` alone since `settings.local.json` is gitignored. `unreadable` counts as drift,
+ * and a deleted script never reaches `unwired`, which is the opt-out.
  */
 export interface HooksReport {
   readonly state: 'read' | 'absent' | 'unreadable' | 'skipped'
@@ -187,9 +180,7 @@ export async function buildHooksReport(
 export interface CheckReport {
   readonly covers: readonly StampDomain[]
   /**
-   * True when the stamp `readStamp` found sits at one of the retired paths
-   * rather than the current one. Read only: nothing in the check migrates a
-   * target's config as a side effect of reporting it.
+   * True when the stamp `readStamp` found sits at a retired path rather than the current one, read only.
    *
    * canon-keep-retired
    * The two are `.claude/aitk/config.json` and `.claude/aitk.json`.
@@ -218,39 +209,26 @@ export interface CheckReport {
   readonly unmovedSurfaces: readonly UnmovedSurface[]
   readonly newSkills: readonly string[]
   /**
-   * Rules the toolkit authored after this target's governance anchor, filtered
-   * to what the target could receive. It rides beside `newSkills` rather than
-   * folding into it because the two answer the same question about different
-   * corpora and a reader acting on one runs a different command from the other.
+   * Rules the toolkit authored after this target's governance anchor, filtered to what the target
+   * could receive. It rides beside `newSkills`, since a reader acts on each with a different command.
    */
   readonly newRules: readonly string[]
   /**
-   * The one section built by walking the target rather than the catalog. It
-   * reports beside `superseded`, `unmigrated`, and `newSkills` rather than
-   * absorbing them, because each of those already answers a narrower version of
-   * the same question correctly. See `@/sync/reverse`.
+   * The one section built by walking the target rather than the catalog. It reports beside
+   * `superseded`, `unmigrated`, and `newSkills`, each of which answers a narrower question.
    */
   readonly reverse: ReverseReport
   readonly hooks: HooksReport
   /**
-   * The binary running the check, not the target. It reports on an unmanaged
-   * target too, since a reader told to run `canon init` is better off knowing
-   * first whether the binary about to install is the current one.
-   *
-   * `hasDrift` deliberately ignores it. A registry lookup inside a check that
-   * gates would fail CI on an offline machine for a condition the check never
-   * measured, and the state reaching the reader is the point rather than the
-   * exit code.
+   * The binary running the check, not the target, reported on an unmanaged target too. `hasDrift`
+   * ignores it, since a registry lookup in a gating check would fail CI offline.
    */
   readonly skew: SkewReport
 }
 
 /**
- * Scanned domains this target should have stamped and has not, which is the
- * one line a domain nobody installed ever appears on.
- *
- * An unmigrated domain is excluded because the relocation is its remedy rather
- * than a sync.
+ * Scanned domains this target should have stamped and has not. An unmigrated domain is excluded,
+ * since the relocation is its remedy rather than a sync.
  */
 export function uncoveredDomains(report: CheckReport): ScannedDomain[] {
   const unmigrated = new Set(report.unmigrated.map((entry) => entry.domain))
@@ -267,14 +245,9 @@ export function installedStampDomains(target: string): ScannedDomain[] {
 }
 
 /**
- * Reads the chain the install recorded and scans against those stacks rather
- * than re-resolving from the leaf. A run that passed `--skip` installed fewer
- * layers than the leaf's own chain reproduces, so re-resolving would report
- * drift against a layer the target deliberately does not carry.
- *
- * A recorded stack the toolkit no longer ships resolves to nothing, and a chain
- * where none resolve reads as unmeasured. Scanning the survivors would measure
- * against a chain neither side agrees on.
+ * Reads the chain the install recorded and scans against those stacks rather than re-resolving
+ * from the leaf, since a `--skip` run installed fewer layers. A chain where none resolve reads
+ * as unmeasured.
  */
 export function buildToolingReport(
   toolkitRoot: string,
@@ -311,11 +284,9 @@ export function buildToolingReport(
 }
 
 /**
- * Loads each recorded stack whole. When the recorded chain stops short of its
- * last stack's parent, the install skipped that parent, so the chain is
- * re-resolved with it as the skip to bring back any per-root configs the
- * skipped stack still shipped. The re-resolution is kept only when its whole
- * stacks are exactly the recorded ones.
+ * Loads each recorded stack whole. When the recorded chain stops short of its last stack's
+ * parent, the install skipped that parent, so it is re-resolved with it as the skip, and kept
+ * only when its whole stacks are exactly the recorded ones.
  */
 export function resolveRecorded(
   toolkitRoot: string,
@@ -356,12 +327,9 @@ function resolveCore(
 }
 
 /**
- * Whether the target is a toolkit-managed project at all. Seeds are enumerated
- * from the source, so without this gate an untouched directory reports every
- * seed as `missing`. An unmigrated domain counts as a marker, since
- * `detectUnmigrated` fires only on root files the toolkit ships, proving an
- * install before the layout moved under `.claude/`. Reading markers alone would
- * route the JSON and the rendered half of one report differently.
+ * Whether the target is a toolkit-managed project at all. Seeds are enumerated from the source,
+ * so without this gate an untouched directory reports every seed as `missing`. An unmigrated
+ * domain counts as a marker, since it proves an install before the layout moved.
  */
 export function isManagedTarget(
   target: string,
@@ -390,15 +358,9 @@ export function countStates(entries: readonly ScanEntry[]): StateCounts {
 }
 
 /**
- * Whether the target has diverged from the toolkit in a way a command could
- * close.
- *
- * An unmigrated domain, an unwired or unreadable `hooks` report, and `stale`,
- * `customized`, `drifted`, `stranded`, `retired`, and `renamed` entries count.
- * Orphaned files, superseded artifacts, seeds, tooling configs, and the
- * reverse report are excluded, since each is content the project may own and
- * a job counting it stays red with no remedy. `missing` is excluded too, since
- * gating CI on it would press a target into adopting a rule nobody picked.
+ * Whether the target has diverged from the toolkit in a way a command could close. Orphaned
+ * files, superseded artifacts, seeds, tooling configs, the reverse report, and `missing` are
+ * excluded, since each is content the project may own or would press it into adopting a rule.
  */
 export function hasDrift(report: CheckReport): boolean {
   if (report.unmigrated.length > 0) return true
@@ -429,8 +391,7 @@ export async function buildCheckReport(
 ): Promise<CheckReport> {
   const stamp = readStamp(target)
 
-  // Started before the local scan and awaited after it, so the network wait
-  // overlaps work the report needs anyway rather than adding to it.
+  // Started before the local scan and awaited after it, so the network wait overlaps needed work.
   const skewRead = readSkew()
 
   const domains = await Promise.all(
@@ -540,13 +501,9 @@ export function parseNewSkills(paths: string): string[] {
 }
 
 /**
- * What the target's `.claude/rules/` proves about its entitlement. `held` is
- * every rule name it carries and `folders` every rule folder those names sit in.
- *
- * Read off the installed tree, since `gov install` records file hashes and
- * never the stack it resolved, and `installRules` keeps each rule in its
- * authored subdirectory. `successorOf` adds a held rule's new name, which the
- * next sync installs, so the fallback does not report it as new.
+ * What the target's `.claude/rules/` proves about its entitlement: `held` is every rule name it
+ * carries and `folders` every rule folder they sit in. `successorOf` adds a held rule's new name,
+ * so the fallback does not report it as new.
  */
 export function readInstalledRules(
   target: string,
@@ -579,14 +536,9 @@ export function readInstalledRules(
 }
 
 /**
- * Narrows rules added upstream to the ones this target could receive and does
- * not already hold.
- *
- * The folder test is the entitlement filter, over the folders the target holds
- * and those base reaches, since a rule under `lang/` or `ui/` belongs only to
- * the stacks naming it. It over-reports inside a shared folder, which costs a
- * line where under-reporting would defeat the section. The `held` test keeps a
- * rule that moved folders out, since a rename reaches this diff as an addition.
+ * Narrows rules added upstream to the ones this target could receive and does not already hold.
+ * The folder test over-reports inside a shared folder, and the `held` test keeps a rule that
+ * moved folders out, since a rename reaches this diff as an addition.
  */
 export function selectNewRules(
   paths: string,
@@ -615,12 +567,8 @@ export function selectNewRules(
 }
 
 /**
- * Rule folders holding a rule the base stack resolves to. Every stack extends
- * base, so a new rule beside one of base's reaches every target the fallback
- * reads, including a folder no installed tree carries yet. Read through
- * `resolveRules`, since base names rules one by one by slug. A folder only a
- * leaf stack reaches stays absent, since the installed tree is the only
- * evidence of that entitlement.
+ * Rule folders holding a rule the base stack resolves to. Every stack extends base, so a new rule
+ * beside one of base's reaches every target, including a folder no installed tree carries yet.
  */
 export function baseFolders(root: string): Set<string> {
   const resolution = resolveRules(root, 'base')
@@ -634,15 +582,9 @@ export function baseFolders(root: string): Set<string> {
 }
 
 /**
- * Rules the target is entitled to and lacks. A recorded chain answers this
- * through `resolveMissingRules`, comparing the entitled set against what the
- * target holds, as `collectMissing` does per file.
- *
- * A target stamped before chains were recorded, or naming a retired stack,
- * falls back to a diff from governance's own anchor rather than a shared one,
- * so another domain's sync cannot move it. With no chain and no anchor it
- * reports nothing. An anchor this clone cannot resolve also reads empty and
- * says so nowhere, the gap `readNewSkills` shares.
+ * Rules the target is entitled to and lacks. A recorded chain answers through `resolveMissingRules`;
+ * a target stamped before chains, or naming a retired stack, falls back to a diff from its own
+ * governance anchor, and with neither it reports nothing.
  */
 export async function readNewRules(
   root: string,
@@ -744,13 +686,9 @@ async function isAncestor(
 }
 
 /**
- * A toolkit outside a git clone, or a stamped revision this clone has never
- * seen, yields no range. The per-file report still stands on its own.
- *
- * Scrubbed through `gitEnv` because a git hook exports `GIT_DIR` and its
- * siblings into every process it runs and they outrank `-C`. A check invoked
- * from a hook would otherwise diff the hook's repository and report a range for
- * a tree nobody asked about, which reads as an ordinary answer.
+ * A toolkit outside a git clone, or a stamped revision this clone has never seen, yields no
+ * range. Scrubbed through `gitEnv`, since a hook's `GIT_DIR` outranks `-C` and would report a
+ * range for a tree nobody asked about.
  */
 async function read(root: string, args: readonly string[]): Promise<string> {
   const result = await execa('git', ['-C', root, ...args], {

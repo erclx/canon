@@ -8,15 +8,9 @@ import type { StampDomain } from '@/sync/stamp'
 const CLAUDE_DIR = '.claude'
 
 /**
- * Domains an older toolkit installed at the project root, each with the source
- * folder naming what it owns.
- *
- * Governance is absent, since its move stayed inside `.claude/rules/` and
- * `canon migrate rule-layout` handles it. Standards and snippets are absent,
- * since no copy installs into a target now, so a root folder of that name is
- * the project's own. A tuple array keeps the domain key typed without an
- * assertion. It is empty now, and a future domain installing at a target's
- * root would be the next entry.
+ * Domains an older toolkit installed at the project root, each with the source folder naming what it
+ * owns. Governance, standards, and snippets are absent, since none installs there now. It is empty
+ * now, and a future root domain would be the next entry.
  */
 const ROOT_LAYOUTS: readonly (readonly [
   StampDomain,
@@ -48,14 +42,9 @@ export interface UnmigratedDomain {
 }
 
 /**
- * Pairs each seed subdirectory against an uppercase-stem sibling in the target,
- * so a project still holding `.claude/TASKS.md` is reported against the
- * `.canon/tasks/` folder that replaced it.
- *
- * Deriving from the seed tree rather than from a fixed list means a folder
- * added later is covered without editing this file. The cost is that only an
- * exact stem matches, so a suffixed variant such as `TASKS-ARCHIVE.md` is not
- * reported.
+ * Pairs each seed subdirectory against an uppercase-stem sibling in the target, so a project holding
+ * `.claude/TASKS.md` is reported against the `.canon/tasks/` folder that replaced it. Only an exact
+ * stem matches, so `TASKS-ARCHIVE.md` is not reported.
  */
 export function collectSuperseded(target: string): SupersededEntry[] {
   const entries: SupersededEntry[] = []
@@ -64,8 +53,7 @@ export function collectSuperseded(target: string): SupersededEntry[] {
     const rel = join(CLAUDE_DIR, `${subdir.toUpperCase()}.md`)
     if (!isFile(join(target, rel))) continue
 
-    // A record subdir resolves under the record root and a tracked surface under
-    // the surface root, so the replacement names a path the target actually reads.
+    // A record subdir resolves under the record root and a surface under the surface root.
     const replacedBy = isRecordEntry(subdir)
       ? creationRel(target, subdir)
       : SURFACE_ENTRIES.includes(subdir)
@@ -79,16 +67,9 @@ export function collectSuperseded(target: string): SupersededEntry[] {
 }
 
 /**
- * Domains the target holds at the root rather than under `.claude/`. Reported
- * separately from the per-domain scan because that scan lists only domains it
- * finds installed, so an unmigrated project would otherwise read as one that
- * never installed the domain at all.
- *
- * A root folder is claimed only when it holds a file the toolkit ships under
- * that domain. Presence of the folder alone is not evidence: a project can
- * carry its own `snippets/` of prompts it wrote and never have installed the
- * domain, and calling that unmigrated would fail `--exit-code` with no action
- * that clears it.
+ * Domains the target holds at the root rather than under `.claude/`, reported apart from the
+ * per-domain scan, which lists only installed domains. A root folder is claimed only when it holds
+ * a file the toolkit ships, since a project's own `snippets/` would fail `--exit-code` with no remedy.
  */
 export function detectUnmigrated(
   toolkitRoot: string,
@@ -122,11 +103,9 @@ export interface UnmovedSurface {
 }
 
 /**
- * Surfaces a target holds only at the root the surface move retired. Kept
- * apart from `detectUnmigrated`, which models a domain stranded at the project
- * root under a stamp domain, while a surface carries neither. A rule names the
- * current layout only, so a target here stops loading the rules scoped to these
- * files, and this report is what points it at the verb.
+ * Surfaces a target holds only at the root the surface move retired. Kept apart from
+ * `detectUnmigrated`, since a surface carries no stamp domain, and a target here stops loading
+ * the rules scoped to these files.
  */
 export function detectUnmovedSurfaces(target: string): UnmovedSurface[] {
   return SURFACE_ENTRIES.filter(
@@ -139,10 +118,8 @@ export function detectUnmovedSurfaces(target: string): UnmovedSurface[] {
 }
 
 /**
- * Root files whose basename matches something the toolkit ships for this domain.
- * Basenames rather than relative paths, because the root layout an older toolkit
- * wrote is flat while the source nests by category, and the question here is only
- * whether any file is toolkit-owned rather than which source each one came from.
+ * Root files whose basename matches something the toolkit ships for this domain. Basenames rather
+ * than relative paths, since an older toolkit wrote a flat root layout and the source nests.
  */
 function countToolkitOwned(dir: string, sourceDir: string): number {
   const owned = new Set(listMarkdown(sourceDir).map((rel) => basename(rel)))

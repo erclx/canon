@@ -10,14 +10,8 @@ import { compareVersions, parseVersion } from '@/version/compare'
 import { readInstalled } from '@/version/installed'
 
 /**
- * Domains the stamp can record. Governance attributes file by file through
- * the sync engine. Tooling records the stack chain it resolved and hashes only
- * the configs a target matched, so a later write tells a stale copy from an
- * edit.
- *
- * A stamp may still carry a retired `standards`, `snippets`, or `design`
- * record. `isStamp` ignores the key, `readStamp` drops it, and `sortDomains`
- * drops it from the file on the next write, so only that domain is lost.
+ * Domains the stamp can record. Governance attributes file by file through the sync engine, and tooling
+ * records the stack chain it resolved. A retired domain key is ignored on read and dropped on write.
  */
 export const STAMP_DOMAINS = ['governance', 'tooling'] as const
 
@@ -48,10 +42,8 @@ export interface DispositionEntry {
 }
 
 /**
- * Golden posix path, or `package.json:<key>` for a script, to the project's
- * decision about it, for one domain. Scripts share this map rather than a
- * sibling field, since an older binary rebuilds the record from the fields it
- * knows and would drop one.
+ * Golden posix path, or `package.json:<key>` for a script, to the project's decision about it. Scripts
+ * share this map, since an older binary rebuilds the record from the fields it knows.
  */
 export type DomainDispositions = Readonly<Record<string, DispositionEntry>>
 
@@ -64,22 +56,15 @@ export interface DomainStamp {
   /** Toolkit revision this domain last synced from. Absent outside a git clone. */
   readonly commit?: string
   /**
-   * Newest canon release that has written this domain. A sync deletes an
-   * installed file its toolkit does not ship, and a binary older than the one
-   * that installed the file cannot tell a retired file from one added after
-   * its own release, so this is what it reads before deleting anything.
-   * Absent on a stamp written before the field existed.
+   * Newest canon release that has written this domain, which an older binary reads before deleting an
+   * installed file its toolkit does not ship. Absent on a stamp written before the field existed.
    */
   readonly version?: string
   readonly syncedAt: string
   readonly files: DomainHashes
   /**
-   * Stack names the install resolved. Tooling records the full ancestor chain,
-   * nearest stack first, because a stack that extends another cannot be
-   * reinstalled from its leaf alone, and a `--skip` run installs fewer layers
-   * than the leaf's own chain would reproduce. Governance records the single
-   * stack `canon gov install` was given, since `resolveRules` walks its
-   * ancestors internally and a reader needs only the leaf to ask it again.
+   * Stack names the install resolved. Tooling records the full ancestor chain, nearest first, since a
+   * `--skip` run installs fewer layers. Governance records the single stack `canon gov install` was given.
    */
   readonly chain?: readonly string[]
   /**
@@ -115,12 +100,8 @@ export function claudeCanonStampPath(target: string): string {
 }
 
 /**
- * Where the stamp lived before it moved. No migration shipped with that move,
- * so a target stamped before it still carries its config here, and `readStamp`
- * falls back to this path when the current one is absent.
- *
- * The old tool name is deliberate and this path never renames, since it names
- * what a target already has on disk.
+ * Where the stamp lived before it moved. No migration shipped with that move, so `readStamp` falls back
+ * to this path when the current one is absent. The old tool name is deliberate and never renames.
  */
 export function legacyStampPath(target: string): string {
   // canon-keep-retired
@@ -138,13 +119,8 @@ export function retiredNameStampPath(target: string): string {
 }
 
 /**
- * Every spelling a stamp has been written under, current first. The order is
- * the read order, so a target carrying more than one resolves to the newest.
- *
- * The fallback carries no end date. It costs three path reads on a command
- * that already touches the filesystem, and dropping any of them later is a
- * second breaking change aimed at exactly the targets that were slowest to
- * migrate the first time.
+ * Every spelling a stamp has been written under, current first, which is the read order. The fallback
+ * carries no end date, since it costs three path reads and dropping one is a second breaking change.
  */
 export function stampPaths(target: string): readonly [string, ...string[]] {
   return [
@@ -190,16 +166,8 @@ export function toStampKey(rel: string): string {
 }
 
 /**
- * A missing or corrupt stamp reads as absent rather than failing, which is what
- * keeps every unstamped target on the existing unattributed path.
- *
- * Falls back to the retired path only when the current one does not exist,
- * read only: nothing here migrates a target's config as a side effect of a
- * report. The check is existence rather than a successful parse, so a
- * corrupt current stamp reads as absent rather than silently serving the
- * retired one beside it. `isLegacyStamped` tests the same existence check,
- * which is what keeps the two agreeing on which path a corrupt current file
- * was read from.
+ * A missing or corrupt stamp reads as absent rather than failing. Falls back to the retired path only
+ * when the current one does not exist, by existence rather than parse, matching `isLegacyStamped`.
  */
 export function readStamp(target: string): Stamp | undefined {
   return readStampFile(resolveExisting(stampPaths(target)))
@@ -280,10 +248,8 @@ export function stampedDispositions(
 }
 
 /**
- * Replaces one domain's file hashes and leaves the others, including that
- * domain's own chain, untouched. Domains install and sync independently but
- * share the one file, and a chain an install recorded is a separate fact a
- * later file-only sync must not erase.
+ * Replaces one domain's file hashes and leaves the others, including that domain's own chain, since a
+ * chain an install recorded is a separate fact a later file-only sync must not erase.
  */
 export async function writeStamp(
   target: string,
@@ -295,10 +261,8 @@ export async function writeStamp(
 }
 
 /**
- * Records the stack chain an install resolved, and leaves that domain's file
- * hashes untouched unless `files` is passed. Tooling passes the golden hash of
- * each config the target matches, since it never runs the sync engine.
- * Governance calls it alongside `writeStamp`, since that records its files.
+ * Records the stack chain an install resolved, leaving that domain's file hashes untouched unless
+ * `files` is passed. Tooling passes the golden hash of each matched config.
  */
 export async function writeChainStamp(
   target: string,
@@ -392,24 +356,18 @@ async function persist(
   await mkdir(dirname(path), { recursive: true })
   await writeFile(path, `${serializeStamp(stamp)}\n`)
 
-  // The stamp hashes every file but itself, so reshaping it is no drift. Seeds
-  // and goldens stay as copied, since their hashes are taken on source bytes.
+  // The stamp hashes every file but itself, so reshaping it is no drift.
   await formatWritten(target, [path])
 
-  // The one place every stamping install passes, so the machine index is kept
-  // here, and its outcome dropped, since the stamp just written is authoritative.
+  // The one place every stamping install passes, so the machine index is kept here and its outcome dropped.
   recordTarget(target, now)
 }
 
 const WIDTH = 80
 
 /**
- * `JSON.stringify` expands every array one element per line, a shape oxfmt and
- * prettier both reject, so a sync with no formatter to run would leave a
- * target's format gate red. This inlines a string array that fits the default
- * print width and expands one that does not, as both formatters would, and
- * leaves objects expanded, which both preserve. Content and key order are
- * `JSON.stringify`'s own.
+ * `JSON.stringify` expands every array one element per line, which oxfmt and prettier both reject. This
+ * inlines a string array that fits the print width and leaves objects expanded, as both formatters do.
  */
 function serializeStamp(value: unknown): string {
   return serialize(value, 0, 0, true)
@@ -423,8 +381,7 @@ function serialize(
 ): string {
   if (Array.isArray(value) && value.every((item) => typeof item === 'string')) {
     const inline = JSON.stringify(value).replace(/","/g, '", "')
-    // A comma follows every entry but the last of its object, and counts
-    // against the width as it does for a formatter.
+    // A comma follows every entry but the last of its object, and counts against the width.
     return taken + inline.length + (last ? 0 : 1) <= WIDTH
       ? inline
       : expand(value, depth)
@@ -480,10 +437,8 @@ async function readCommit(root: string): Promise<string | undefined> {
 }
 
 /**
- * Keeps the newer of the running release and the one already recorded, so an
- * older binary syncing after a newer one cannot lower the mark and let a later
- * run delete a rule the newer release installed. An unparseable side loses to
- * a parseable one, and a recorded value survives an unreadable manifest.
+ * Keeps the newer of the running release and the one already recorded, so an older binary cannot lower
+ * the mark. An unparseable side loses to a parseable one.
  */
 function newerVersion(
   running: string | undefined,
@@ -575,14 +530,9 @@ function sortDomains(
 }
 
 /**
- * Validates every recognized domain record rather than only the container. A
- * stamp whose domain value is the wrong shape would otherwise reach
- * `attribute`, where a bad hash lookup silently reads as a customization.
- *
- * A key naming no current domain is ignored rather than failing the parse. A
- * target stamped before the standards install channel closed carries one, and
- * rejecting the file would read as unstamped and then drop the three records it
- * does carry on the next write. `sortDomains` retires the key at that write.
+ * Validates every recognized domain record rather than only the container, since a wrong-shaped value
+ * would reach `attribute`. A key naming no current domain is ignored, and `sortDomains` retires it at
+ * the next write.
  */
 function isStamp(value: unknown): value is Stamp {
   if (!isRecord(value) || !isRecord(value.domains)) return false

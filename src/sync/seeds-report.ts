@@ -5,15 +5,9 @@ import { rewritesOnInstall, stripSeedMarker } from '@/tooling/seed-marker'
 import { findInstalledOrigin, readHistoryIndex } from '@/sync/history'
 
 /**
- * How an installed seed compares to the seed the toolkit currently ships.
- *
- * `missing` has no counterpart in the domain scan, which walks what a target
- * installed and so cannot see a file that never arrived. Seeds are enumerated
- * from the source instead, which is what makes the absence legible.
- *
- * There is no `customized` here. That verdict needs a stamp, and seeds carry
- * none, so a file history cannot attribute stays `drifted` and a consumer reads
- * it as the local edit it almost always is.
+ * How an installed seed compares to the seed the toolkit currently ships. `missing` has no counterpart in
+ * the domain scan, and there is no `customized`, since seeds carry no stamp, so an unattributed file
+ * stays `drifted`.
  */
 export type SeedState = 'matching' | 'stale' | 'drifted' | 'missing'
 
@@ -31,13 +25,9 @@ export interface SeedsReport {
 }
 
 /**
- * Classifies every seed the toolkit ships against the target's copy, and never
- * returns a change. Seeds are copy-once files a project is expected to edit, so
- * the engine's copy path would overwrite `CLAUDE.md` wholesale. Reporting alone
- * is what lets an operator merge one section at a time by hand instead.
- *
- * Attribution reuses the history reader rather than the engine's own recovery
- * pass, which is private and takes a `SyncAdapter` seeds have no way to supply.
+ * Classifies every seed the toolkit ships against the target's copy, and never returns a change. Seeds
+ * are copy-once files a project edits, so the engine's copy path would overwrite `CLAUDE.md` wholesale.
+ * Attribution reuses the history reader, since the engine's recovery pass needs a `SyncAdapter`.
  */
 export function buildSeedsReport(
   toolkitRoot: string,
@@ -74,10 +64,8 @@ interface DifferingSeed {
 }
 
 /**
- * Second pass over the seeds that differ, matching installed content against
- * every version the toolkit ever published. A match proves the file is
- * untouched since it landed, so the toolkit is what moved and the entry becomes
- * `stale`. Runs as one git call for the whole set rather than one per file.
+ * Second pass over the seeds that differ, matching installed content against every version the toolkit
+ * published. A match proves the toolkit moved and the entry becomes `stale`, in one git call for the set.
  */
 function attribute(
   toolkitRoot: string,
@@ -108,10 +96,8 @@ function attribute(
 }
 
 /**
- * Compares the target against what an install would write, not against the seed
- * source. The two differ for a markdown seed carrying the stub marker, which the
- * install strips, so comparing sources would report a file the target never
- * touched as drifted for as long as the marker stays set.
+ * Compares the target against what an install would write, not the seed source, which differs for a
+ * markdown seed carrying the stub marker the install strips.
  */
 function sameContent(source: string, dest: string): boolean {
   const installed = readFileSync(dest)

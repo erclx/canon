@@ -18,10 +18,8 @@ export interface DomainChange {
 export class GitCommandError extends Error {}
 
 /**
- * Pulls the path out of each porcelain line by taking the last whitespace
- * separated field, which is what the bash `awk '{print $NF}'` did. A rename
- * reports `old -> new` and so yields the destination, and a sync never
- * produces one because the workflow refuses a dirty tree before it starts.
+ * Pulls the path out of each porcelain line by taking the last whitespace-separated field. A
+ * rename yields its destination, and a sync never produces one.
  */
 export function changedPaths(status: string): string[] {
   const paths: string[] = []
@@ -110,10 +108,8 @@ export function pullRequestBody(changes: readonly DomainChange[]): string {
 }
 
 /**
- * The seam every git mutation goes through, so the workflow can be driven by a
- * fake in tests without a repository behind it. Reads swallow failure the way
- * the bash `2>/dev/null || true` did. Mutations throw, because a failed commit
- * or push must not be reported as a completed sync.
+ * The seam every git mutation goes through, so tests can drive the workflow with a fake. Reads
+ * swallow failure, and mutations throw, since a failed commit or push is not a completed sync.
  */
 export interface GitRunner {
   status(paths: readonly string[]): Promise<string>
@@ -194,10 +190,8 @@ export async function hasGh(): Promise<boolean> {
 }
 
 /**
- * Both seams strip git's repository-resolution variables, since a hook exports
- * `GIT_DIR` into every process it runs and it beats `-C`. A sync driven from
- * inside one would otherwise read the hook's repository and, through `mutate`,
- * commit and push into it.
+ * Both seams strip git's repository-resolution variables, since a hook's `GIT_DIR` beats `-C`
+ * and a sync driven from inside one would commit and push into the hook's repository.
  */
 async function read(target: string, args: readonly string[]): Promise<string> {
   const result = await execa('git', ['-C', target, ...args], {
