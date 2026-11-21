@@ -106,7 +106,7 @@ export default scenario({
       )
       ctx.log.info('Action:  /canon:target-setup')
       ctx.log.info(
-        "Expect:  governance stack 'node' with react proposed as an extra, tooling stack 'vite-react', canon init lands .claude/rules/ with react.md and no nextjs.md under .claude/rules/canon/framework/, tooling sync drops golden configs from tooling/web and tooling/vite-react, a second canon gov detect after the sync offers only the rules the first pass lacked (tailwind among them) and canon gov install --add takes the union, the verify phase runs lint/typecheck/check/test/build, the indexes phase then runs over the scaffold's own docs, and the report names git-commit as outside the chain",
+        "Expect:  governance stack 'node' with react proposed as an extra, tooling stack 'vite-react', canon init lands .claude/rules/ with react.md and no nextjs.md under .claude/rules/canon/framework/, tooling sync drops golden configs from tooling/web and tooling/vite-react, a second canon gov detect after the sync offers only the rules the first pass lacked (tailwind among them) and canon gov install --add with no stack installs only those, the verify phase runs lint/typecheck/check/test/build, the indexes phase then runs over the scaffold's own docs, and the report names git-commit as outside the chain",
       )
     },
     astro: (ctx) => {

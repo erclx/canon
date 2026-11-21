@@ -151,8 +151,7 @@ Pass what they kept to `--add`, and drop the flag when they kept nothing.
 The `install` phase detects a second time after the tooling sync, since the sync lands the dependencies and configs that call for further rules. The second pass offers only the proposals the first pass lacked, through the same three options.
 
 - Ask nothing and install nothing when the second pass finds no new proposal
-- Install the union of what the operator kept from both passes, since `canon gov install` reinstalls a rule already present unchanged
-- A rule the operator deleted between the passes comes back with the union, so name every first-pass rule beside the new ones in the question
+- Install only the second-pass rules the operator kept, through `canon gov install --add <rules> <target>` with no stack, so no first-pass rule is installed again
 
 The `gov` phase runs no tooling sync, so it takes one pass only.
 
