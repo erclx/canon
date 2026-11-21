@@ -1,11 +1,7 @@
 /**
  * Splits an `.astro` file into the parts that can carry another language
- * inline, each with the line it opens on in the file.
- *
- * Astro's compiler would give exact bounds, but it is not a dependency of the
- * published CLI, so the reader leans on the three shapes the format fixes: a
- * frontmatter fence that opens the file, a `set:html` binding on a tag, and an
- * `is:inline` script whose body Astro passes through untouched.
+ * inline, each with its opening line. The compiler is not a dependency of the
+ * published CLI, so the reader leans on the three shapes the format fixes.
  */
 
 export interface AstroFrontmatter {
@@ -102,9 +98,8 @@ function attributeNames(attributes: string): string[] {
 
 /**
  * Every script body Astro passes through unprocessed. Astro bundles a
- * `<script>` carrying no attribute or `src` alone, and inlines any other,
- * whether the attribute is `is:inline`, `type="module"`, or `define:vars`,
- * which implies `is:inline`.
+ * `<script>` with no attribute or `src` alone, and inlines any other, since
+ * `is:inline`, `type="module"`, and `define:vars` all inline.
  */
 export function astroInlineScripts(source: string): AstroInlineScript[] {
   const start = templateStart(source)
