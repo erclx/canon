@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.108.0](https://github.com/erclx/canon/compare/v5.107.0...v5.108.0) (2026-11-21)
+
+
+### Features
+
+* **design:** calm the dark landing theme and grow the grid tile to 48px ([#3305](https://github.com/erclx/canon/issues/3305)) ([85700cb](https://github.com/erclx/canon/commit/85700cb4128193f524bdbb92042e34a499c906ad))
+* **plan-feature:** let a speed-only split fan in, offered for big rows ([#3303](https://github.com/erclx/canon/issues/3303)) ([6d7d26f](https://github.com/erclx/canon/commit/6d7d26fcab49a2b2b11eda537733e149d507c68e))
+
+
+### Bug Fixes
+
+* **pr:** wait for a slow dev render on the local preview probe ([#3292](https://github.com/erclx/canon/issues/3292)) ([54f2450](https://github.com/erclx/canon/commit/54f2450ee50ba7057c093e435603bd411b4516f8))
+
 ## [5.107.0](https://github.com/erclx/canon/compare/v5.106.0...v5.107.0) (2026-11-20)
 
 
