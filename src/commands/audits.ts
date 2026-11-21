@@ -182,9 +182,8 @@ function today(): string {
 /**
  * The commit the counts were read at, or `unknown` outside a repository.
  *
- * A target project can install this CLI without a git history behind it, and
- * refusing there would withhold the whole report over a field that only makes
- * the record reproducible.
+ * A target can install this CLI with no history behind it, and refusing there
+ * would withhold the whole report over a field that only makes it reproducible.
  */
 async function headCommit(root: string): Promise<string> {
   const result = await execa('git', ['-C', root, 'rev-parse', 'HEAD'], {
@@ -261,8 +260,7 @@ async function runAll(opts: RunCommandOptions): Promise<number> {
       `${JSON.stringify({
         ok: true,
         root,
-        // Flat scalars, so a shell stage greps one out without a JSON parser.
-        // The nested arrays below carry the detail behind each number.
+        // Flat scalars, so a shell stage greps one out; the arrays carry the detail.
         summary,
         baseline: baseline
           ? { recordedAt: baseline.recordedAt, commit: baseline.commit }
@@ -398,8 +396,7 @@ function report(
     logInfo('Every audit reported and every count is zero.')
   }
 
-  // Stated on every run, including a clean one. A count of what passed reads as
-  // a verdict on the whole set unless the run also says what it never reached.
+  // Stated on every run, since a passed count reads as a verdict on the whole set.
   logInfo(
     `${summary.audited} of ${results.length} corpora measured, ${summary.absent} absent or unreachable from this machine`,
   )

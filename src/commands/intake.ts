@@ -33,9 +33,8 @@ import { mainWorktreeRoot } from '@/git/worktree'
 
 /**
  * A selection as the command line spells it, splitting on the first `=`. The
- * label accepts a letter suffix, matching the headings a cluster file carries,
- * and everything after the separator is the answer, so one carrying its own
- * `=` survives intact.
+ * label accepts a letter suffix, and everything after the separator is the
+ * answer, so one carrying its own `=` survives intact.
  */
 const SELECTION = /^(\d+[a-z]*)=([\s\S]*)$/i
 
@@ -397,8 +396,7 @@ function reportRefusal(
   emitJson: boolean,
   root: string,
 ): number {
-  // The framed branch reaches stderr through logError, so the bare write is
-  // what keeps the JSON mode from reporting the reason on stdout alone.
+  // The bare write keeps JSON mode from reporting the reason on stdout alone.
   if (emitJson) {
     process.stderr.write(`${refused.message}\n`)
     process.stdout.write(
@@ -432,8 +430,7 @@ function reportList(
     return reportRefusal('canon intake list', outcome, emitJson, root)
   }
 
-  // Malformed items count over every folder, since one whose only defect is an
-  // unanswerable item has no unread count to survive the filter.
+  // Malformed items count over every folder, since an unanswerable item has no unread count.
   const listed = unreadOnly
     ? outcome.folders.filter((folder) => folder.unread > 0)
     : outcome.folders

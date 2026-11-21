@@ -82,8 +82,7 @@ async function runBrowser(args: readonly string[]): Promise<number> {
     stdio: 'inherit',
     env: agentEnv(process.env),
   })
-  // A killed pass must not leave a browser running behind the parent, which a
-  // shell `exec` never had between the caller and the child.
+  // A killed pass must not leave a browser running behind the parent.
   const forward = (signal: NodeJS.Signals) => () => child.kill(signal)
   const handlers = FORWARDED_SIGNALS.map((signal) => {
     const handler = forward(signal)

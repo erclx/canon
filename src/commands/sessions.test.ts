@@ -126,8 +126,7 @@ describe('canon sessions import', () => {
 
 // Carries no `pidDomain` and no start time, so the row takes the pid probe on
 // any platform and only an accepting socket can confirm it. The namespace cases
-// below skip wherever `/proc` is absent, which would leave the verb's listener
-// row unproven off Linux.
+// below skip without `/proc`, leaving the listener row unproven off Linux.
 describe('canon sessions list on a machine without a pid namespace', () => {
   it('should confirm a row whose socket accepts and say the listener decided it', async () => {
     const socket = join(DIR, 'local.sock')

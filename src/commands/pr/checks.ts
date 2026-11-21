@@ -94,8 +94,7 @@ async function runChecks(
     )
   }
 
-  // Raised to the endpoint's maximum rather than paged, since `collapseChecks`
-  // reads a count above its rows as pending, so a commit past it reads unread.
+  // Raised to the endpoint's maximum rather than paged, since a count above the rows reads pending.
   const listed = await gh(root, [
     'api',
     `repos/{owner}/{repo}/commits/${resolved.tip}/check-runs?per_page=100`,
@@ -130,8 +129,7 @@ async function runChecks(
   logInfo(
     `${identity.branch} at ${reading.tip.slice(0, 8)}, ${plural(reading.matched, 'run')} belonging to it`,
   )
-  // Named rather than folded into the count above, since a listing carrying a
-  // run for another commit is what makes the verdict pending on its own.
+  // Named apart from the count above, since a foreign-commit run alone makes the verdict pending.
   if (reading.foreign > 0) {
     logWarn(
       `${plural(reading.foreign, 'further run')} belonging to another commit, so this listing does not describe the tip alone.`,

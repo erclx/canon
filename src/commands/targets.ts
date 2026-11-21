@@ -30,11 +30,8 @@ interface PullsOptions extends ListOptions {}
 
 /**
  * Reads the depth a sweep is bounded by, or null when the value is not one.
- *
  * `Number('abc')` is `NaN` and every `level >= NaN` test is false, so an
- * unchecked value walks to the bottom of whatever root it was given while
- * the bound reports a depth of `NaN`. Both halves of the guarantee go at once,
- * which is why this refuses rather than falling back to the default.
+ * unchecked value walks to the bottom and the bound reports a depth of `NaN`.
  */
 function readDepth(value: string | undefined): number | null {
   const depth = Number(value ?? DEFAULT_DEPTH)
@@ -232,8 +229,7 @@ async function runPulls(paths: string[], opts: PullsOptions): Promise<number> {
     return 1
   }
 
-  // One clone per project. Two checkouts sharing an origin answer the same
-  // query, so reading both spends the rate limit to print one answer twice.
+  // One clone per project, since two checkouts sharing an origin spend the rate limit twice.
   const reports = await readPullsAcross(
     resolved.targets.map((target) => target.paths[0] ?? ''),
   )
@@ -274,9 +270,8 @@ interface BackfillSummary {
 
 /**
  * Seeds the index from every checkout the sweep finds. `resolveTargets` walks
- * the same roots again right after this returns, which costs a second walk
- * rather than a restructure, since --record is a deliberate one-off rather
- * than a path any routine run takes.
+ * the same roots again after this returns, a second walk accepted over a
+ * restructure, since --record is a deliberate one-off.
  */
 async function runBackfill(
   roots: readonly string[],
@@ -389,9 +384,7 @@ function describe(target: KnownTarget): string {
 /**
  * "legacy stamp" plain when every checkout carries the retired stamp, the
  * count appended when only some do, and nothing when none do. The mixed case
- * is the one a bare flag could not say, and it is the common one: three of
- * the four affected groups measured on this machine were mixed rather than
- * uniform.
+ * is the one a bare flag could not say, and the common one on this machine.
  */
 function legacyFlag(target: KnownTarget): readonly string[] {
   const count = target.legacyPaths.length

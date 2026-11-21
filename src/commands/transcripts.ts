@@ -11,10 +11,9 @@ interface TranscriptOptions {
 }
 
 /**
- * A caller-supplied `--out` resolves against the CWD, since naming a path
- * explicitly opts out of the backed default. With none, the destination is
- * the backed `transcripts` record folder at the main worktree root, which
- * `canon records push` and `canon records pull` carry along with the rest.
+ * A caller-supplied `--out` resolves against the CWD, opting out of the backed
+ * default. With none, the destination is the backed `transcripts` record folder
+ * at the main worktree root, which `canon records push` and `pull` carry along.
  */
 export async function resolveOutDir(opts: TranscriptOptions): Promise<string> {
   return opts.out

@@ -39,9 +39,7 @@ const COLOR_SCHEMES: readonly ColorScheme[] = ['light', 'dark']
 /**
  * Holds wiring only. Every browser reference sits behind a dynamic import,
  * because `src/cli.ts` imports this module at startup and resolving the engine
- * there would put a browser launch in front of every other command. That is the
- * same reason `src/commands/demo.ts`, `src/commands/inventory.ts`, and
- * `src/commands/driver.ts` state for themselves.
+ * there would put a browser launch in front of every other command.
  */
 export function register(program: Command): void {
   program
@@ -140,8 +138,7 @@ export function register(program: Command): void {
           return
         }
 
-        // Refused rather than defaulted, ahead of every other check, since the
-        // element to crop to is a property of the page's own markup.
+        // Refused rather than defaulted, since the crop element is the page's markup.
         if (!opts.selector) {
           frameError(
             '--selector names the element to capture and has no default. See canon capture --help.',
@@ -352,12 +349,9 @@ function parseColorScheme(
 }
 
 /**
- * Closes an open frame around a failure that stopped the whole run rather than
- * one source. Two of them are setup states rather than defects and each names
- * the step that clears it: an engine package that never resolved, and a browser
- * binary that was never downloaded. Every other failure passes through intact,
- * since the engine's own message is readable and summarizing it loses what it
- * said.
+ * Closes an open frame around a failure that stopped the whole run. An engine
+ * package or browser binary never installed names its fix, and every other
+ * failure passes through intact, since the engine's message is readable.
  */
 function reportInFrame(error: unknown): void {
   if (isEngineMissing(error)) {
@@ -379,9 +373,8 @@ function reportInFrame(error: unknown): void {
 
 /**
  * Keeps a path clickable in the operator's terminal. A source outside the
- * project reports absolute, since a relative path to it is a run of `..`
- * segments no editor resolves. A URL is not a filesystem path at all, so it
- * reports as given.
+ * project reports absolute, since a relative one is a run of `..` no editor
+ * resolves, and a URL reports as given.
  */
 function displayPath(path: string): string {
   if (isUrlSource(path)) return path

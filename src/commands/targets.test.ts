@@ -51,8 +51,7 @@ describe('canon targets list --record', () => {
     await rm(sweepRoot, { recursive: true, force: true })
   })
 
-  // A write the registry cannot land reports apart and exits 1. The index refuses
-  // the OS temp folder, so the child gets another temp folder to attempt it in.
+  // A write the registry cannot land reports apart and exits 1, using another temp folder.
   it('should report a write failure distinctly and exit 1', async () => {
     await stamp(sweepRoot, 'birch')
 
@@ -72,8 +71,7 @@ describe('canon targets list --record', () => {
     expect(result.stderr).not.toContain('no readable stamp')
   })
 
-  // A checkout under a scratch root is refused by design, which is neither a
-  // missing stamp nor a failed write, so it must not turn the exit to 1.
+  // A checkout under a scratch root is refused by design, so it must not turn the exit to 1.
   it('should skip a checkout under a scratch root and exit 0', async () => {
     await stamp(sweepRoot, 'birch')
 

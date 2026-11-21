@@ -19,9 +19,8 @@ const RUN_TIMEOUT_MS = 30_000
 
 /**
  * Spawns the CLI rather than importing the action, because a refusal reports
- * through `process.exitCode` and an in-process call would set it on the test
- * runner. Every case refuses before a frame is filmed, so none of them pays for
- * a take.
+ * through `process.exitCode` and an in-process call would set it on the runner.
+ * Every case refuses before a frame is filmed, so none pays for a take.
  */
 async function runTake(
   args: string[],
@@ -201,8 +200,7 @@ describe('canon take', () => {
   it.skipIf(!hasFfmpeg)(
     'should refuse sandbox-blocked naming the shell when it finds no sandbox',
     async () => {
-      // A fake shell where Playwright would keep the real one, printing
-      // Chromium's fatal line and dying on the signal Chromium dies on.
+      // A fake shell where Playwright keeps the real one, dying on Chromium's signal.
       const browsers = join(dir, 'blocked-browsers')
       const shell = shellPath({ PLAYWRIGHT_BROWSERS_PATH: browsers })
       mkdirSync(dirname(shell), { recursive: true })
@@ -280,8 +278,7 @@ describe('canon take', () => {
         )
         const out = join(dir, 'capped-takes')
 
-        // The beat's two 0.6 s holds alone pass a 0.5 s cap, so load on the
-        // machine cannot move this case across it.
+        // The beat's two 0.6 s holds alone pass a 0.5 s cap, so machine load cannot move it.
         const result = await runTake([
           `http://127.0.0.1:${served.port}/`,
           twoBeats,
@@ -362,8 +359,7 @@ describe('canon take', () => {
           record: { reel: { file: reel, frames: expect.any(Number) } },
         })
 
-        // A folder that does not exist leaves the encoder nowhere to write,
-        // so the beats stand and the reel alone refuses.
+        // A missing folder leaves the encoder nowhere to write, so only the reel refuses.
         const missing = await runTake([
           `http://127.0.0.1:${served.port}/`,
           plan,

@@ -105,8 +105,7 @@ describe('checkout-mismatch warning at each directly wired verb', () => {
     expectWarns(['sandbox', 'check', 'claude:docs'])
   })
 
-  // A completed `canon gate run` would run the real tests stage and re-enter this
-  // file without bound, so the child is killed once the warning reaches stderr.
+  // A completed gate run would re-enter this file without bound, so the child is killed.
   it('should warn on canon gate run before the stage sequence starts', async () => {
     const child = spawn('bun', [CLI, 'gate', 'run'], {
       cwd: decoy,

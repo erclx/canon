@@ -71,9 +71,8 @@ interface RunOptions {
 
 /**
  * Spawns the CLI as a process rather than importing it, because the exit code
- * is the assertion and an in-process action would set it on the test runner.
- * `process.execPath` is the Bun binary under `bun --bun vitest`, and naming it
- * absolutely is what lets a case blank `PATH` to hide `gh` or `yt-dlp`.
+ * is the assertion. `process.execPath` is the Bun binary under `bun --bun
+ * vitest`, and naming it absolutely lets a case blank `PATH` to hide `gh`.
  */
 async function runCli(args: string[], opts: RunOptions): Promise<CliResult> {
   const result = await execa(process.execPath, [opts.cli ?? CLI, ...args], {
@@ -95,8 +94,7 @@ describe('command action exit codes', () => {
   let emptyPath: string
   let namelessCli: string
 
-  // A copy of the CLI outside the toolkit tree, which the nameless-manifest root
-  // below is built from.
+  // A copy of the CLI outside the toolkit tree, for the nameless-manifest root.
   beforeAll(async () => {
     workDir = await mkdtemp(join(tmpdir(), 'canon-exit-code-'))
     emptyPath = join(workDir, 'empty-path')
@@ -112,8 +110,7 @@ describe('command action exit codes', () => {
     )
     await symlink(findInstalledModules(), join(relocatedRoot, 'node_modules'))
 
-    // A root a package manager owns, with a nameless manifest, since the copy
-    // above sits under no install tree and refuses before the name check.
+    // A nameless manifest under `node_modules`, since the copy above refuses before the name check.
     const namelessRoot = join(workDir, 'node_modules', 'nameless')
     await cp(join(relocatedRoot, 'src'), join(namelessRoot, 'src'), {
       recursive: true,
@@ -142,8 +139,7 @@ describe('command action exit codes', () => {
     expect(result.stderr).toContain('Empty feedback body')
   })
 
-  // The validator runs before any `gh` call, so a report passing it would file
-  // a real issue on a machine holding an authenticated `gh`.
+  // The validator runs before any `gh` call, so passing it would file a real issue.
   it('should exit 1 when feedback is missing a required field', async () => {
     const result = await runCli(['feedback'], {
       cwd: workDir,
@@ -166,8 +162,7 @@ describe('command action exit codes', () => {
     expect(result.stdout).toContain('## Toolkit feedback')
   })
 
-  // `script` allocates the pty this check needs, and `-e` is a util-linux
-  // spelling, so the guard reads the binary as well as the platform.
+  // `script` allocates the pty this check needs, and `-e` is util-linux only.
   it.skipIf(process.platform !== 'linux' || Bun.which('script') === null)(
     'should exit 1 when feedback is run with a terminal on stdin',
     async () => {
@@ -182,8 +177,7 @@ describe('command action exit codes', () => {
     },
   )
 
-  // A checkout is where `upgrade` must not run, and the refusal lands before the
-  // registry lookup, so the case needs no network.
+  // The refusal lands before the registry lookup, so the case needs no network.
   it('should exit 1 when upgrade is run against a source checkout', async () => {
     const result = await runCli(['upgrade'], { cwd: workDir, emptyPath })
 
@@ -200,8 +194,7 @@ describe('command action exit codes', () => {
     expect(JSON.parse(result.stdout).state).toBe('refused')
   })
 
-  // A nameless manifest would install whatever sits under the placeholder, and
-  // the prompt defaults to yes headlessly, so this refusal is the only guard.
+  // A nameless manifest would install the placeholder, and a headless prompt defaults to yes.
   it('should exit 1 when upgrade finds a manifest carrying no package name', async () => {
     const result = await runCli(['upgrade'], {
       cwd: workDir,
@@ -235,8 +228,7 @@ describe('command action exit codes', () => {
     expect(result.stderr).toContain('yt-dlp not found on PATH')
   })
 
-  // `git-pr` swallows the board-state refusals, so these pin the reason rather
-  // than the exit code, which the two classes share.
+  // `git-pr` swallows these refusals, so they pin the reason, not the shared exit code.
   it('should refuse a non-numeric pull request number as bad-input', async () => {
     const result = await runCli(
       ['tasks', 'pull-request', 'not-a-number', '--plan', 'x', '--json'],
@@ -278,11 +270,9 @@ describe('command action exit codes', () => {
 })
 
 /**
- * Every audited verb refuses over a corpus this workDir does not carry.
- * `canon audits run` reads each `--json` record over its exit alone, so a
- * refusal that prints nothing there reaches the aggregate as unparseable
- * output rather than as a reading it can act on. These pin the parseable
- * shape rather than the wording, which is what the catalog matches on.
+ * Every audited verb refuses over a corpus this workDir does not carry, and
+ * `canon audits run` reads each `--json` record over its exit alone, so these
+ * pin the parseable shape the catalog matches on, not the wording.
  */
 describe('refusal records over an unmeasured corpus', () => {
   let workDir: string
@@ -353,8 +343,7 @@ describe('refusal records over an unmeasured corpus', () => {
     expect(record.reason).toBe('no-history')
   })
 
-  // Parameterized over the catalog, so a verb `AUDITS` adds later inherits the
-  // case. `deps` reaches a network index, so it is left to its own suite.
+  // Parameterized over the catalog, and `deps` reaches a network, so it has its own suite.
   it.each(
     AUDITS.filter((audit) => audit.id !== 'deps').map(
       (audit) => [audit.id, audit.argv] as const,
