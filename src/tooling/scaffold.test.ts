@@ -7,9 +7,11 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { gitEnv } from '@/git/env'
 import { scaffoldStack, suggestName } from '@/tooling/scaffold'
 
 let root: string
@@ -40,6 +42,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  vi.unstubAllEnvs()
   rmSync(root, { force: true, recursive: true })
 })
 
@@ -64,6 +67,7 @@ describe('scaffoldStack into an empty folder', () => {
       target: target('my-app'),
       name: 'my-app',
       files: ['package.json', 'src'],
+      git: 'initialized',
     })
     expect(
       JSON.parse(readFileSync(join(target('my-app'), 'package.json'), 'utf8')),
@@ -100,6 +104,7 @@ describe('scaffoldStack into an empty folder', () => {
     })
 
     expect(result.ok && result.files).toEqual(['pyproject.toml'])
+    expect(result.ok && result.git).toBe('existing')
     expect(readdirSync(join(target('lib'), '.git'))).toEqual(['HEAD'])
   })
 
@@ -114,6 +119,61 @@ describe('scaffoldStack into an empty folder', () => {
     })
 
     expect(readdirSync(scratchBase)).toEqual([])
+  })
+})
+
+describe('scaffoldStack git repository', () => {
+  const git = (cwd: string, ...args: string[]): string =>
+    execFileSync('git', args, { cwd, encoding: 'utf8', env: gitEnv() }).trim()
+
+  it('should initialize a repository on main in a fresh target', async () => {
+    seedStack('go', 'mkdir {{name}} && cd {{name}} && touch go.mod')
+
+    const result = await scaffoldStack({
+      root,
+      stack: 'go',
+      target: target('svc'),
+      scratchBase,
+    })
+
+    expect(result.ok && result.git).toBe('initialized')
+    expect(git(target('svc'), 'symbolic-ref', '--short', 'HEAD')).toBe('main')
+  })
+
+  it('should not nest a repository in a target inside a parent one', async () => {
+    seedStack('go', 'mkdir {{name}} && cd {{name}} && touch go.mod')
+    mkdirSync(join(root, 'projects'), { recursive: true })
+    git(join(root, 'projects'), 'init', '-q')
+
+    const result = await scaffoldStack({
+      root,
+      stack: 'go',
+      target: target('svc'),
+      scratchBase,
+    })
+
+    expect(result.ok && result.git).toBe('existing')
+    expect(existsSync(join(target('svc'), '.git'))).toBe(false)
+  })
+
+  it('should still return the files when git cannot initialize', async () => {
+    seedStack('go', 'mkdir {{name}} && cd {{name}} && touch go.mod')
+    const bin = join(root, 'bin')
+    mkdirSync(bin, { recursive: true })
+    writeFileSync(join(bin, 'git'), '#!/usr/bin/env bash\nexit 1\n', {
+      mode: 0o755,
+    })
+    vi.stubEnv('PATH', `${bin}:${process.env.PATH}`)
+
+    const result = await scaffoldStack({
+      root,
+      stack: 'go',
+      target: target('svc'),
+      scratchBase,
+    })
+
+    expect(result.ok && result.files).toEqual(['go.mod'])
+    expect(result.ok && result.git).toBe('failed')
   })
 })
 

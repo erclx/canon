@@ -417,7 +417,9 @@ export function register(program: Command): void {
         "[scaffold] prepare step on the output, copies the stack's scaffold/",
         'overlay over it, then moves the result into the target. A target',
         'holding anything but .git is refused, and a failed command or step',
-        'moves nothing and leaves the scratch folder named.',
+        'moves nothing and leaves the scratch folder named. A target in no git',
+        "work tree gets `git init -b main`, reported as the record's git field:",
+        'initialized, existing, or failed. A failed init still exits 0.',
         'Run `canon init` or the target-setup skill afterward to sync tooling.',
         '',
         'Exit codes:',
@@ -471,6 +473,10 @@ async function runScaffold(
   }
   logStep(`Scaffolded ${result.target}`)
   for (const file of result.files) logAdd(file)
+  if (result.git === 'initialized')
+    logInfo('Initialized a git repository on main')
+  else if (result.git === 'failed')
+    logWarn('git init failed, so run it by hand')
   outroSuccess('Scaffolded', `Next: canon init ${target}`)
   return 0
 }

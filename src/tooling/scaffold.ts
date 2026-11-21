@@ -10,6 +10,7 @@ import {
 import { tmpdir } from 'node:os'
 import { basename, join, resolve } from 'node:path'
 import { execa } from 'execa'
+import { gitEnv } from '@/git/env'
 import { isStackExcluded, loadManifest } from '@/tooling/manifest'
 
 export interface ScaffoldOptions {
@@ -31,6 +32,12 @@ export type ScaffoldRefusal =
   | 'no-output'
   | 'prepare-failed'
 
+/**
+ * `initialized` is a fresh `git init -b main`, `existing` a target already inside a work tree, which a scaffold
+ * into a monorepo subfolder must not nest a second repository in, and `failed` an init that exited non-zero.
+ */
+export type ScaffoldGit = 'initialized' | 'existing' | 'failed'
+
 export type ScaffoldResult =
   | {
       readonly ok: true
@@ -38,6 +45,7 @@ export type ScaffoldResult =
       readonly target: string
       readonly name: string
       readonly files: readonly string[]
+      readonly git: ScaffoldGit
     }
   | {
       readonly ok: false
@@ -162,7 +170,24 @@ export async function scaffoldStack(
   }
   rmSync(scratch, { recursive: true, force: true })
 
-  return { ok: true, stack, target, name, files }
+  return { ok: true, stack, target, name, files, git: await initGit(target) }
+}
+
+/** A failed init never fails the scaffold, since the files already reached the target. */
+async function initGit(target: string): Promise<ScaffoldGit> {
+  if (existsSync(join(target, '.git'))) return 'existing'
+  const git = (args: readonly string[]) =>
+    execa('git', args, {
+      cwd: target,
+      reject: false,
+      stdin: 'ignore',
+      env: gitEnv(),
+      extendEnv: false,
+    })
+  const probe = await git(['rev-parse', '--is-inside-work-tree'])
+  if (!probe.failed && probe.stdout.trim() === 'true') return 'existing'
+  const init = await git(['init', '-q', '-b', 'main'])
+  return init.failed ? 'failed' : 'initialized'
 }
 
 // Manifests carry shell syntax (`&&`, `cd`, quoted globs), so each command runs under a shell.
