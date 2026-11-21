@@ -23,7 +23,7 @@ A drawn system: a warm neutral ground ruled in a 32px grid, ink text in Geist, a
 | window           | the body of a product window                                       | #31312e |
 | chrome           | the window titlebar                                                | #383835 |
 | band             | a quiet fill inside a window, such as a prompt                     | #3d3d39 |
-| grid             | the lines the page ground rules every 32px                         | #31312e |
+| grid             | the lines the page ground rules every 32px                         | #242421 |
 | rule             | the soft seam between sections, and under a scrolled nav           | #3d3d39 |
 | border           | every rule and divider inside a card                               | #474742 |
 | outline          | the drawn border around a card, a control, or a stamp              | #8d8c86 |
@@ -110,9 +110,9 @@ A drawn system: a warm neutral ground ruled in a 32px grid, ink text in Geist, a
 
 | Token                          | Value                                                                     | When used                                          |
 | ------------------------------ | ------------------------------------------------------------------------- | -------------------------------------------------- |
-| `--shadow-offset`              | 5px 5px 0 #0b0b0a                                                         | a drawn card, dropped down and right               |
-| `--shadow-offset-small`        | 3px 3px 0 #0b0b0a                                                         | a drawn control or a small card                    |
-| `--shadow-offset-raised`       | 8px 8px 0 #0b0b0a                                                         | the card brought to the front of a stack           |
+| `--shadow-offset`              | 5px 5px 0 #5c5b56                                                         | a drawn card, dropped down and right               |
+| `--shadow-offset-small`        | 3px 3px 0 #5c5b56                                                         | a drawn control or a small card                    |
+| `--shadow-offset-raised`       | 8px 8px 0 #5c5b56                                                         | the card brought to the front of a stack           |
 | `--shadow-window`              | 0 0 0 1px rgba(255, 255, 255, 0.06), 0 24px 60px -28px rgba(0, 0, 0, 0.6) | a Claude Code window set on the page               |
 | `--shadow-popover`             | 0 0 0 1px rgba(255, 255, 255, 0.06), 0 16px 36px -16px rgba(0, 0, 0, 0.6) | a menu or popover over content                     |
 | `--shadow-ring`                | 0 0 0 1px rgba(255, 255, 255, 0.06)                                       | a hairline around a picked row                     |

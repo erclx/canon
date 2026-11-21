@@ -5,7 +5,7 @@
   --color-window: #31312e;
   --color-chrome: #383835;
   --color-band: #3d3d39;
-  --color-grid: #31312e;
+  --color-grid: #242421;
   --color-rule: #3d3d39;
   --color-border: #474742;
   --color-outline: #8d8c86;
@@ -83,9 +83,9 @@
   --radius-action: 8px;
   --radius-chip: 4px;
   --radius-marker: 2px;
-  --shadow-offset: 5px 5px 0 #0b0b0a;
-  --shadow-offset-small: 3px 3px 0 #0b0b0a;
-  --shadow-offset-raised: 8px 8px 0 #0b0b0a;
+  --shadow-offset: 5px 5px 0 #5c5b56;
+  --shadow-offset-small: 3px 3px 0 #5c5b56;
+  --shadow-offset-raised: 8px 8px 0 #5c5b56;
   --shadow-window:
     0 0 0 1px rgba(255, 255, 255, 0.06), 0 24px 60px -28px rgba(0, 0, 0, 0.6);
   --shadow-popover:

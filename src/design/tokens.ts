@@ -154,7 +154,7 @@ export const TOKENS: DesignTokens = {
     {
       role: 'grid',
       intent: 'the lines the page ground rules every 32px',
-      value: '#31312e',
+      value: '#242421',
     },
     {
       role: 'rule',
@@ -476,17 +476,17 @@ export const TOKENS: DesignTokens = {
   shadows: [
     {
       role: 'offset',
-      value: '5px 5px 0 #0b0b0a',
+      value: '5px 5px 0 #5c5b56',
       when: 'a drawn card, dropped down and right',
     },
     {
       role: 'offset-small',
-      value: '3px 3px 0 #0b0b0a',
+      value: '3px 3px 0 #5c5b56',
       when: 'a drawn control or a small card',
     },
     {
       role: 'offset-raised',
-      value: '8px 8px 0 #0b0b0a',
+      value: '8px 8px 0 #5c5b56',
       when: 'the card brought to the front of a stack',
     },
     {
