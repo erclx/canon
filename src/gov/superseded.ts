@@ -5,9 +5,9 @@ import { isMarked } from '@/sweep/exempt-marker'
 import { listRepositoryFiles } from '@/git/files'
 
 /**
- * The inline token exempting one line from this sweep, read by the same two-line
- * rule as `canon-allow-secret`. The marker is where the reason for a declaration
- * disagreeing with a convention goes, and a bare token mutes nothing.
+ * The inline token exempting one line from this sweep, shaped on the
+ * `canon-allow-secret` precedent and read by the same two-line rule.
+ * A reason goes after it, and a bare token mutes nothing.
  */
 export const SUPERSEDED_MARKER = 'canon-allow-superseded'
 

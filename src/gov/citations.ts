@@ -9,9 +9,9 @@ import { parseFrontmatter } from '@/indexes/frontmatter'
 import { findBacktickSpans } from '@/markdown/backticks'
 
 /**
- * The inline token exempting one line from this sweep, read by the same two-line
- * rule as `canon-allow-superseded`. It is for the residue the classifier cannot
- * separate, and a bare token names no reason, so it mutes nothing.
+ * The inline token exempting one line from this sweep, shaped on the
+ * `canon-allow-superseded` precedent and read by the same two-line rule.
+ * It is for the residue, and a bare token names no reason, so it mutes nothing.
  */
 export const CITATION_MARKER = 'canon-allow-citation'
 
