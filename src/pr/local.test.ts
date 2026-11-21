@@ -150,6 +150,32 @@ describe('findLocalServer', () => {
     expect(runner.probed).toEqual([5173])
   })
 
+  it('should report the lower page port when a higher port answers its probe first', async () => {
+    const base = fakeRunner([
+      { port: 5173, pid: 10, cwd: LINKED },
+      { port: 24678, pid: 10, cwd: LINKED },
+    ])
+    let releaseLower: (page: boolean) => void = () => {}
+    const runner: LocalRunner = {
+      ...base,
+      // The lower port answers only once the higher one was asked, which a
+      // sequential walk never reaches, so the case also pins the concurrency.
+      async probe(port) {
+        if (port === 24678) {
+          releaseLower(true)
+          return true
+        }
+        return new Promise<boolean>((resolve) => {
+          releaseLower = resolve
+        })
+      },
+    }
+
+    const result = await findLocalServer(LINKED, runner)
+
+    expect(result).toMatchObject({ kind: 'found', port: 5173 })
+  })
+
   it('should call no health check when no path is declared', async () => {
     const runner = fakeRunner([{ port: 5173, pid: 10, cwd: LINKED }])
 

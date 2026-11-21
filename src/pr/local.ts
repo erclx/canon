@@ -77,9 +77,16 @@ export async function findLocalServer(
     ports.set(port, (ports.get(port) ?? false) || skipsHealth)
   }
 
+  const candidates = [...ports]
+    .sort(([a], [b]) => a - b)
+    .map(([port, skipsHealth]) => ({
+      port,
+      skipsHealth,
+      page: runner.probe(port),
+    }))
   let unhealthy: (HealthFailure & { readonly port: number }) | undefined
-  for (const [port, skipsHealth] of [...ports].sort(([a], [b]) => a - b)) {
-    if (!(await runner.probe(port))) continue
+  for (const { port, skipsHealth, page } of candidates) {
+    if (!(await page)) continue
     const failure = skipsHealth
       ? undefined
       : await firstFailingPath(port, healthPaths, runner)
