@@ -27,16 +27,16 @@ Pick three that differ in kind and theme on a run with no ask, such as one light
 
 Read at Step 1 instead of the list above when the decision is an app surface, such as a dashboard, a planner, or a mobile flow. Each entry is a public page that shows real product screens, so a draft takes structure from an app rather than from marketing layout. An app shell behind a sign-in cannot be captured, so these pages stand in for one.
 
-| Site      | Address                  | Kind             | A reference for                                                     | Folder      |
-| --------- | ------------------------ | ---------------- | ------------------------------------------------------------------- | ----------- |
-| Todoist   | `https://todoist.com/`   | Planner, light   | A task list beside a sidebar, and the same list at phone width      | `todoist`   |
-| Wanderlog | `https://wanderlog.com/` | Travel, light    | An itinerary column beside a map, with booking cards in the list    | `wanderlog` |
-| Oura      | `https://ouraring.com/`  | Health, dark     | Phone screens of score rings, trend charts, and stacked detail      | `oura`      |
-| Brilliant | `https://brilliant.org/` | Education, light | A lesson canvas with a tutor panel, and answer tiles under a prompt | `brilliant` |
+| Site      | Address                  | Kind             | A reference for                                                     | Folder |
+| --------- | ------------------------ | ---------------- | ------------------------------------------------------------------- | ------ |
+| Todoist   | `https://todoist.com/`   | Planner, light   | A task list beside a sidebar, and the same list at phone width      | none   |
+| Wanderlog | `https://wanderlog.com/` | Travel, light    | An itinerary column beside a map, with booking cards in the list    | none   |
+| Oura      | `https://ouraring.com/`  | Health, dark     | Phone screens of score rings, trend charts, and stacked detail      | `oura` |
+| Brilliant | `https://brilliant.org/` | Education, light | A lesson canvas with a tutor panel, and answer tiles under a prompt | none   |
 
 Pick three that differ in kind and theme on a run with no ask. Each was captured at 1440 wide and read for real screens in its first sections.
 
-Wanderlog's later feature cards are illustrations, so take its first shot. A consent banner sits over some Oura and Brilliant shots, which a caption ignores.
+The collection holds no folder for a site whose Folder reads none, so Step 6 reads its file as absent. Wanderlog's later feature cards are illustrations, so take its first shot. A consent banner sits over some Oura and Brilliant shots, which a caption ignores.
 
 ## The DESIGN.md collection
 

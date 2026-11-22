@@ -11,7 +11,9 @@ Read before the first round at palette, imagery, or a whole visual direction. A 
 
 Ask once per run, ahead of the first look round, for a few taste words such as calm, dense, or playful, and for any screenshots or images the operator likes. Both are optional.
 
+- Put the question through the structured question surface
 - An answer of nothing proceeds on the existing source order, with no second ask
+- A run no one can answer, such as a background session or a denied surface, proceeds the same way and notes the skipped question in its output, since an optional question never blocks a round
 - Skip the question when the ask already gave direction
 - Skip it for a logo or a single control decision, since it gates look rounds alone
 
