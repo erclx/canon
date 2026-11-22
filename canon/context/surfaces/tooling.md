@@ -51,7 +51,7 @@ Holds the repository-root configs, including the verify runner, and every `--ski
 
 ### `tooling/base/configs/scripts/verify.ts`
 
-The seeded runner reads the phases the nearest `scripts/verify.json` requires. Its CI pin comes from the stamp, since the sync that wrote the runner stamped a release carrying every verb it calls.
+The seeded runner reads the phases the nearest `scripts/verify.json` requires. Its CI pin comes from the stamp, since the sync that wrote the runner stamped a release carrying every verb it calls. A root run also runs each nested root `git ls-files` finds, so a freshly synced subfolder stays out of `check` until it is staged.
 
 - `check:format` and the `shell` add-on's `check:shell` run only where `package.json` declares the script
 - A missing `package.json` in a subfolder verify tells the caller to sync the stack, and a missing `verify.json` names `canon tooling sync`

@@ -9,7 +9,7 @@ import {
   readFileSync,
   realpathSync,
 } from 'node:fs'
-import { delimiter, join } from 'node:path'
+import { delimiter, dirname, join } from 'node:path'
 
 interface Tool {
   readonly name: string
@@ -442,6 +442,44 @@ function checkCanonGate(): void {
   }
 }
 
+// Found from tracked files, since verify.json is golden and a list kept in it
+// is lost on sync. An untracked folder never runs, and a tracked one runs
+// whatever .gitignore says. Outside a git repository none are found.
+function findNestedRoots(): string[] {
+  const result = spawnSync(
+    'git',
+    ['ls-files', '-z', '--', ':(glob)**/scripts/verify.json'],
+    { encoding: 'utf8' },
+  )
+  if (result.status !== 0) return []
+  return (result.stdout ?? '')
+    .split('\0')
+    .filter((path) => path !== '' && path !== PHASE_LIST)
+    .map((path) => dirname(dirname(path)))
+}
+
+function runNestedRoot(root: string): void {
+  logStep(`Nested root ${root}`)
+  const runner = join(root, 'scripts/verify.ts')
+  if (!existsSync(runner)) {
+    fail(
+      `No ${runner} here, though git tracks ${root}/${PHASE_LIST}. Sync the stack into ${root} or stage its removal`,
+    )
+  }
+  const result = spawnSync(process.execPath, ['scripts/verify.ts'], {
+    cwd: root,
+    encoding: 'utf8',
+    env: { ...process.env, VERIFY_NESTED: 'true' },
+    maxBuffer: 256 * 1024 * 1024,
+  })
+  pipeOutput(`${result.stdout ?? ''}${result.stderr ?? ''}`)
+  if (result.error !== undefined) {
+    fail(`Nested root ${root} could not start: ${result.error.message}`)
+  }
+  if (result.status !== 0) fail(`Nested root ${root} failed`)
+  logInfo(`Nested root ${root} passed`)
+}
+
 function main(): void {
   const declared = readDeclaredScripts()
   const list = readPhaseList()
@@ -470,6 +508,11 @@ function main(): void {
     logStep('Head tags')
     runCheck(`bash ${HEAD_META}`, 'Head tag check failed')
     logInfo('Head tags passed')
+  }
+
+  // A nested run never discovers, so a subfolder's own subfolders run once.
+  if (!isNested) {
+    for (const root of findNestedRoots()) runNestedRoot(root)
   }
 
   if (!isNested) {

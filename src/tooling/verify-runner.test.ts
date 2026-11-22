@@ -637,3 +637,94 @@ describe('the head tag check', () => {
     expect(runVerify().stdout).not.toContain('Head tags')
   })
 })
+
+describe('nested roots', () => {
+  const NESTED = 'service'
+
+  // A --skip base subfolder: its own runner, phase list, and package.json.
+  const writeNestedRoot = (scripts: Readonly<Record<string, string>>): void => {
+    const dir = join(fixture, NESTED)
+    mkdirSync(join(dir, 'scripts'), { recursive: true })
+    copyFileSync(RUNNER, join(dir, 'scripts/verify.ts'))
+    writeFileSync(
+      join(dir, 'scripts/verify.json'),
+      JSON.stringify({ require: ['test:run'] }),
+    )
+    writeFileSync(join(dir, 'package.json'), JSON.stringify({ scripts }))
+  }
+
+  const track = (): void => {
+    spawnSync('git', ['add', '-A'], { cwd: fixture })
+  }
+
+  beforeEach(() => {
+    setUp('base', STACK_SCRIPTS.base)
+    spawnSync('git', ['init', '-q'], { cwd: fixture })
+    writeGate('canon', 0, PASSED)
+  })
+
+  it('should run a tracked nested root after its own phases', () => {
+    writeNestedRoot({ 'test:run': 'echo nested-ran' })
+    track()
+
+    const result = runVerify()
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toMatch(/Format check passed[\s\S]*nested-ran/)
+  })
+
+  it('should fail and name the folder when a nested root fails', () => {
+    writeNestedRoot({ 'test:run': 'exit 1' })
+    track()
+
+    const result = runVerify()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain(`${NESTED} failed`)
+    expect(result.stdout).not.toContain('Verification passed')
+  })
+
+  it('should fail naming the runner when a tracked root is gone on disk', () => {
+    writeNestedRoot({ 'test:run': 'true' })
+    track()
+    rmSync(join(fixture, NESTED), { force: true, recursive: true })
+
+    const result = runVerify()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain(`No ${NESTED}/scripts/verify.ts here`)
+  })
+
+  it('should skip a nested root git does not track', () => {
+    writeNestedRoot({ 'test:run': 'exit 1' })
+
+    expect(runVerify().status).toBe(0)
+  })
+
+  it('should discover no nested roots when itself nested', () => {
+    writeNestedRoot({ 'test:run': 'exit 1' })
+    track()
+
+    expect(runVerify({ VERIFY_NESTED: 'true' }).status).toBe(0)
+  })
+
+  it('should run the nested root from its own folder', () => {
+    writeNestedRoot({ 'test:run': 'pwd -P' })
+    track()
+
+    expect(runVerify().stdout).toContain(`/${NESTED}\n`)
+  })
+})
+
+describe('a folder with no git repository', () => {
+  it('should run as before when a nested root sits on disk', () => {
+    setUp('base', STACK_SCRIPTS.base)
+    mkdirSync(join(fixture, 'service/scripts'), { recursive: true })
+    writeFileSync(join(fixture, 'service/scripts/verify.json'), '{}')
+
+    const result = runVerify()
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('Verification passed')
+  })
+})
