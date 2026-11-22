@@ -29,6 +29,14 @@ When a decision rests on an outside practice or a third-party behavior, invoke `
 - Mark a source that could not be fetched as unverified rather than citing recall
 - Report it rather than proceeding silently when `canon:search-craft` does not resolve
 
+### Build or adopt
+
+Run this for each new server, runtime, harness, or agent loop the plan would create. A plan that edits existing code skips it.
+
+- Name the candidates that already do the job through `canon:search-craft`, including a tool the project or the platform already carries
+- Judge each candidate's fit against the requirement, and record the call with its reason on the component's `## Files to touch` entry
+- Read a build call with a written reason as a pass, since the check records fit and carries no bias toward adopting
+
 ## Step 3: build the plan
 
 What this skill adds on top of the standard:

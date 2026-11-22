@@ -24,6 +24,7 @@ Apply it in open mode alone, after Step 1 resolves the mode and before the folde
 
 - When one or fewer holds, stop: `❌ Already decided enough to plan. Run /plan-feature instead.`
 - Resume and close are exempt, since a measured track fails the test by definition and applying it would refuse the folder it admitted
+- A launch naming a finished `design-pick` run's picked page or archive path is exempt, per `${CLAUDE_SKILL_DIR}/references/design-run-record.md`
 - A refused topic that is a broad dump rather than one question routes to `plan-intake`, which dispositions many findings in breadth, not to the planning skill the stop names
 
 ## Write scope
@@ -110,7 +111,8 @@ Read these in parallel from the project root, skipping any that do not exist:
 
 Then read only what a live question needs, never whole directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at. For each domain the topic touches, read its context entry ahead of measuring, through the lookup in `${CLAUDE_SKILL_DIR}/../plan-feature/references/onboarding.md`.
 
-Do not dispatch subagents. A groundwork track is a conversation, and fanning out loses the reasoning that makes the folder worth keeping. A search too large to run inline is a finding that the question is too broad.
+- Run the build or adopt check from `${CLAUDE_SKILL_DIR}/../plan-feature/references/procedure.md`, recording each call in the topic file
+- Dispatch no subagents, since fanning out loses the reasoning, and a search too large to run inline means the question is too broad
 
 ## Open questions in chat
 

@@ -136,6 +136,8 @@ Give every `## Files to touch` entry a backticked path and something said about 
 - Read the list as what the branch sets out to write rather than a bound, since the doc syncs at ship write past it on nearly every branch
 - `canon tasks plan-reach <plan>` reads the branch back against this list and every other live plan
 
+Give an entry creating a new server, runtime, harness, or agent loop one more line, its build or adopt call with the reason, so a reviewer reads the call beside the file it governs.
+
 Group the entries by area under H3s once they pass 5, each H3 opening on the reason its files share. Every entry still names its full path, since the parsers read the bullet and never the heading above it.
 
 ### Measured claims

@@ -92,7 +92,8 @@ The round also asks for your taste at its start and archives its work at its clo
 
 - Before the first look round, `canon:design-pick` asks once for taste words and images. Pasted images join the references page.
 - The close archives the references page beside the picked round and leaves it on the board for the next round.
-- An app pick with several screens is offered a clickable prototype built to flows you confirm. It then owns behavior and copy, and each handover lists static frames it no longer matches.
+
+An app pick with several screens is offered a clickable prototype built to flows you confirm. It then owns behavior and copy, and each handover lists static frames it no longer matches.
 
 ### Where a round drafts
 
