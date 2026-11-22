@@ -6,8 +6,10 @@ import {
   isGenericFamily,
   primaryFontFamily,
   resolveCaptureSources,
+  textFaces,
   textFamilies,
 } from '@/capture/sources'
+import type { TextStyle } from '@/capture/sources'
 
 function fixture(names: string[]): string {
   const dir = mkdtempSync(join(tmpdir(), 'canon-capture-'))
@@ -173,5 +175,45 @@ describe('textFamilies', () => {
 
   it('should return an empty list for no declarations', () => {
     expect(textFamilies([])).toEqual([])
+  })
+})
+
+function textStyle(
+  fontFamily: string,
+  fontWeight = '400',
+  fontStyle = 'normal',
+): TextStyle {
+  return { fontFamily, fontWeight, fontStyle }
+}
+
+describe('textFaces', () => {
+  it('should keep one entry per distinct family, weight, and style', () => {
+    expect(
+      textFaces([
+        textStyle('"Geist", sans-serif', '800'),
+        textStyle('Geist, serif', '800'),
+      ]),
+    ).toEqual([{ family: 'Geist', weight: '800', style: 'normal' }])
+  })
+
+  it('should keep two weights of one family as two faces in document order', () => {
+    expect(
+      textFaces([textStyle('Geist', '800'), textStyle('Geist', '400')]),
+    ).toEqual([
+      { family: 'Geist', weight: '800', style: 'normal' },
+      { family: 'Geist', weight: '400', style: 'normal' },
+    ])
+  })
+
+  it('should read an oblique angle as plain oblique', () => {
+    expect(textFaces([textStyle('Geist', '400', 'oblique 10deg')])).toEqual([
+      { family: 'Geist', weight: '400', style: 'oblique' },
+    ])
+  })
+
+  it('should drop a declaration naming no family', () => {
+    expect(textFaces([textStyle(''), textStyle('Geist')])).toEqual([
+      { family: 'Geist', weight: '400', style: 'normal' },
+    ])
   })
 })

@@ -103,3 +103,38 @@ export function textFamilies(declarations: readonly string[]): string[] {
   const families = declarations.map(primaryFontFamily).filter(Boolean)
   return [...new Set(families)]
 }
+
+export interface TextStyle {
+  readonly fontFamily: string
+  readonly fontWeight: string
+  readonly fontStyle: string
+}
+
+export interface TextFace {
+  readonly family: string
+  readonly weight: string
+  readonly style: 'normal' | 'italic' | 'oblique'
+}
+
+/** Faces as drawn, since an unused declared face never loads, minus an oblique angle a canvas font may not parse. */
+export function textFaces(styles: readonly TextStyle[]): TextFace[] {
+  const faces = new Map<string, TextFace>()
+  for (const { fontFamily, fontWeight, fontStyle } of styles) {
+    const family = primaryFontFamily(fontFamily)
+    if (family === '') continue
+    const face: TextFace = {
+      family,
+      weight: fontWeight,
+      style: faceStyle(fontStyle),
+    }
+    const key = `${face.style} ${face.weight} ${face.family}`
+    if (!faces.has(key)) faces.set(key, face)
+  }
+  return [...faces.values()]
+}
+
+function faceStyle(computed: string): TextFace['style'] {
+  if (computed.startsWith('italic')) return 'italic'
+  if (computed.startsWith('oblique')) return 'oblique'
+  return 'normal'
+}

@@ -21,11 +21,12 @@ import {
   revealSection,
   splitBlocks,
 } from '@/capture/sections'
-import type { CaptureSource } from '@/capture/sources'
+import type { CaptureSource, TextFace, TextStyle } from '@/capture/sources'
 import {
   isGenericFamily,
   isUrlSource,
   resolveCaptureSources,
+  textFaces,
   textFamilies,
 } from '@/capture/sources'
 import { formatStamp, hashSource, stampPath } from '@/capture/stamp'
@@ -160,19 +161,21 @@ async function captureOne(
     }
 
     await page.evaluate(() => document.fonts.ready.then(() => undefined))
-    const declarations = await renderedTextFamilies(element)
-    const generic = declarations.find(isGenericFamily)
+    const styles = await renderedTextStyles(element)
+    const generic = styles
+      .map(({ fontFamily }) => fontFamily)
+      .find(isGenericFamily)
     if (generic !== undefined) {
       return failed(
         source,
         `${generic.split(',')[0]?.trim()} is a generic family that resolves differently per machine, so name a real font`,
       )
     }
-    for (const family of textFamilies(declarations)) {
-      if (!(await resolvesFont(page, family))) {
+    for (const face of textFaces(styles)) {
+      if (!(await resolvesFace(page, face))) {
         return failed(
           source,
-          `${family} is not installed, so the capture would rewrap against a fallback`,
+          `${face.family} is not installed, so the capture would rewrap against a fallback`,
         )
       }
     }
@@ -380,18 +383,20 @@ async function shootByViewport(page: Page, clip: Clip): Promise<Buffer> {
  * refuses on, turned into a record.
  */
 async function unresolvedFonts(page: Page): Promise<SectionFonts> {
-  const declarations = await renderedTextFamilies(page.locator('body'))
-  const generic = textFamilies(declarations.filter(isGenericFamily))
-  const named = textFamilies(
-    declarations.filter((declaration) => !isGenericFamily(declaration)),
+  const styles = await renderedTextStyles(page.locator('body'))
+  const generic = textFamilies(
+    styles.map(({ fontFamily }) => fontFamily).filter(isGenericFamily),
+  )
+  const named = textFaces(
+    styles.filter(({ fontFamily }) => !isGenericFamily(fontFamily)),
   )
   const resolved = await Promise.all(
-    named.map((family) => resolvesFont(page, family)),
+    named.map((face) => resolvesFace(page, face)),
   )
-  return {
-    generic,
-    missing: named.filter((_, index) => !resolved[index]),
-  }
+  const missing = named
+    .filter((_, index) => !resolved[index])
+    .map(({ family }) => family)
+  return { generic, missing: [...new Set(missing)] }
 }
 
 /**
@@ -448,11 +453,11 @@ function failed(
 }
 
 /**
- * The computed families of the captured element and each descendant holding a
+ * The computed font styles of the captured element and each descendant holding a
  * non-blank text node that draws a box, so `<style>` and hidden nodes stay out
  * and `display: contents` text stays in. Returns nothing when no element holds text.
  */
-async function renderedTextFamilies(element: Locator): Promise<string[]> {
+async function renderedTextStyles(element: Locator): Promise<TextStyle[]> {
   return element.evaluate((root) => {
     const range = document.createRange()
     const holdsText = (node: Element): boolean =>
@@ -463,28 +468,34 @@ async function renderedTextFamilies(element: Locator): Promise<string[]> {
         return range.getClientRects().length > 0
       })
     const texts = [root, ...root.querySelectorAll('*')].filter(holdsText)
-    return texts.map((node) => getComputedStyle(node).fontFamily)
+    return texts.map((node) => {
+      const { fontFamily, fontWeight, fontStyle } = getComputedStyle(node)
+      return { fontFamily, fontWeight, fontStyle }
+    })
   })
 }
 
 /**
- * Compares the family's text metrics against a family that cannot exist. Equal
- * widths mean a fall through to the default, the only signal available since
- * `document.fonts.check` reports every system family as present.
+ * Loads the face, letting the browser match the nearest declared weight, then
+ * compares widths against an absent family, since `document.fonts.check` reports
+ * every system family present. Equal widths mean a fall through to the default.
  */
-async function resolvesFont(page: Page, family: string): Promise<boolean> {
+async function resolvesFace(page: Page, face: TextFace): Promise<boolean> {
   return page.evaluate(
-    ({ family, absent, size, text }) => {
+    async ({ face, absent, size, text }) => {
       const context = document.createElement('canvas').getContext('2d')
       if (!context) return false
+      const fontOf = (name: string): string =>
+        `${face.style} ${face.weight} ${size}px "${name}"`
+      await document.fonts.load(fontOf(face.family), text).catch(() => [])
       const widthOf = (name: string): number => {
-        context.font = `${size}px "${name}"`
+        context.font = fontOf(name)
         return context.measureText(text).width
       }
-      return widthOf(family) !== widthOf(absent)
+      return widthOf(face.family) !== widthOf(absent)
     },
     {
-      family,
+      face,
       absent: ABSENT_FAMILY,
       size: FONT_PROBE_SIZE,
       text: FONT_PROBE_TEXT,
