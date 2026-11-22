@@ -1,5 +1,11 @@
 import { execaSync } from 'execa'
-import { mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdtempSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -527,6 +533,46 @@ describe('reclaimReport', () => {
       })
       git('worktree', 'remove', '--force', path)
       rmSync(outside, { recursive: true, force: true })
+
+      expect(report).toMatchObject({
+        kind: 'unreadable',
+        reason: 'sessions-unchecked',
+      })
+    })
+
+    it('should refuse when a foreign record reaches a worktree through a symlink', async () => {
+      const path = linked('wt-parser', 'feat/parser')
+      const elsewhere = realpathSync(
+        mkdtempSync(join(tmpdir(), 'canon-symlink-')),
+      )
+      const alias = join(elsewhere, 'alias')
+      symlinkSync(path, alias)
+
+      const report = await reclaimReport({
+        cwd: ROOT,
+        resolve: async () => stranded(alias),
+        mergedPullRequests: async () => merged(['feat/parser', 673]),
+      })
+      rmSync(elsewhere, { recursive: true, force: true })
+
+      expect(report).toMatchObject({
+        kind: 'unreadable',
+        reason: 'sessions-unchecked',
+      })
+    })
+
+    it('should refuse on every foreign record when the worktree listing is empty', async () => {
+      const elsewhere = realpathSync(
+        mkdtempSync(join(tmpdir(), 'canon-elsewhere-')),
+      )
+
+      const report = await reclaimReport({
+        cwd: ROOT,
+        listWorktrees: async () => [],
+        resolve: async () => stranded(elsewhere),
+        mergedPullRequests: async () => merged(['feat/parser', 673]),
+      })
+      rmSync(elsewhere, { recursive: true, force: true })
 
       expect(report).toMatchObject({
         kind: 'unreadable',
