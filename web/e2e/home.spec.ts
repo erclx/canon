@@ -661,12 +661,21 @@ test.describe('the board night', () => {
       await document.fonts.ready
     })
 
+  /**
+   * Brings the moving board into view, waits for the night to start, which the
+   * bar's run class marks, and pauses the page clock there, since an installed
+   * clock still flows on real time and a slower engine would otherwise land the
+   * next move while a step waits.
+   */
   const arrive = async (page: Page) => {
     await page.locator('#board .after .bd').scrollIntoViewIfNeeded()
-    await expect(page.locator('#board .after .stamp')).toHaveText(
-      /^23:00 /,
+    await expect(page.locator('#board .pg')).toHaveClass(
+      /(^| )run( |$)/,
       SETTLE,
     )
+    await expect(page.locator('#board .after .stamp')).toHaveText(/^23:00 /)
+    // A target read a moment ago can already be past on a slow engine, so it sits a margin ahead.
+    await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 100)
   }
 
   test('replays the night a move a beat, and Replay starts it again', async ({
@@ -700,7 +709,9 @@ test.describe('the board night', () => {
       await page.goto('/')
       await settleFonts(page)
       const section = page.locator('#board')
-      const height = async () => (await section.boundingBox())?.height ?? 0
+      // Firefox reports a still box with float noise in the sixth decimal, so a hundredth of a pixel is the grain.
+      const height = async () =>
+        Math.round(((await section.boundingBox())?.height ?? 0) * 100) / 100
       const before = await height()
       expect(before).toBeGreaterThan(0)
 
@@ -774,7 +785,16 @@ test.describe('the board night', () => {
     await expect(fly).toHaveCount(0)
     await expect(ghost).toHaveCount(0)
     await expect(moved).toHaveAttribute('data-name', 'take-timer')
-    expect(await offset(moved)).toEqual(slot)
+    // The landing pulse scales the row on real time, which the page clock does not hold, so settle on its end.
+    await expect
+      .poll(async () => {
+        const landed = await offset(moved)
+        return Math.max(
+          Math.abs(landed.x - slot.x),
+          Math.abs(landed.y - slot.y),
+        )
+      }, SETTLE)
+      .toBeLessThan(0.5)
   })
 
   test('marks a row that changes in place with no slot or travel', async ({
