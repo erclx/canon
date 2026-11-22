@@ -1,4 +1,4 @@
-import { basename } from 'node:path'
+import { basename, join } from 'node:path'
 import { $ } from 'bun'
 import { gitEnv } from '@/git/env'
 import {
@@ -58,6 +58,19 @@ export interface ResolvedSession {
   readonly unresolved: Unresolved | null
 }
 
+/**
+ * A foreign-namespace record whose socket is gone, named so a caller can scope
+ * its doubt to the records that could matter and tell an operator which file to
+ * look at. `path` assumes the client's `<pid>.json` naming, the one it writes.
+ */
+export interface ForeignRecord {
+  readonly sessionId: string | null
+  readonly pid: number
+  readonly cwd: string
+  readonly path: string
+  readonly startedAt: string | null
+}
+
 export type SessionReport =
   | { readonly kind: 'absent'; readonly dir: string }
   | {
@@ -74,6 +87,11 @@ export type SessionReport =
        * is a roster that could not be checked rather than one that ended.
        */
       readonly foreignDead: number
+      /**
+       * Each record `foreignDead` counts. Optional so a report built by hand
+       * still types, and a caller reads its absence as every record unplaced.
+       */
+      readonly foreign?: readonly ForeignRecord[]
       readonly sessions: readonly ResolvedSession[]
     }
 
@@ -231,12 +249,12 @@ export async function resolveSessions(
     via: ResolvedSession['via']
     confidence: Confidence
   }[] = []
-  let foreignDead = 0
+  const foreign: ForeignRecord[] = []
 
   for (const record of registry.records) {
     const state = liveness(record, probes)
     if (!state.alive) {
-      if (state.foreign) foreignDead += 1
+      if (state.foreign) foreign.push(foreignOf(record, registry.dir))
       continue
     }
     live.push({
@@ -274,8 +292,22 @@ export async function resolveSessions(
     kind: 'resolved',
     dir: registry.dir,
     confidence: confidenceOf(sessions),
-    foreignDead,
+    foreignDead: foreign.length,
+    foreign,
     sessions,
+  }
+}
+
+function foreignOf(record: SessionRecord, dir: string): ForeignRecord {
+  return {
+    sessionId: record.sessionId ?? null,
+    pid: record.pid,
+    cwd: record.cwd,
+    path: join(dir, `${record.pid}.json`),
+    startedAt:
+      record.startedAt === undefined
+        ? null
+        : new Date(record.startedAt).toISOString(),
   }
 }
 

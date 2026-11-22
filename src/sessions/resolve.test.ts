@@ -355,6 +355,38 @@ describe('resolveSessions from another pid namespace', () => {
     })
   })
 
+  it('should list each foreign row whose socket is gone beside the count', async () => {
+    seed(100, { ...FOREIGN, cwd: '/home/someone' })
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: reader(false),
+      locate: locating('feat/parser'),
+    })
+
+    expect(report.kind === 'resolved' && report.foreign).toEqual([
+      {
+        sessionId: 'id-100',
+        pid: 100,
+        cwd: '/home/someone',
+        path: join(DIR, '100.json'),
+        startedAt: new Date(100).toISOString(),
+      },
+    ])
+  })
+
+  it('should leave a same-namespace dead row out of the foreign list', async () => {
+    seed(100, { ...FOREIGN, pidDomain: 'linux:abc:pid:[4026532221]' })
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: { ...reader(true), procStartOf: () => 'other' },
+      locate: locating('feat/parser'),
+    })
+
+    expect(report.kind === 'resolved' && report.foreign).toEqual([])
+  })
+
   it('should leave a same-namespace dead row out of the foreign count', async () => {
     seed(100, { ...FOREIGN, pidDomain: 'linux:abc:pid:[4026532221]' })
 
