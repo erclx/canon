@@ -60,13 +60,13 @@ Place every frame with `--width <px>`, `--x`, `--y`, and `--device on` on its ad
 
 A group runs its widths as columns and its sections as rows, so one row reads as one section at every width.
 
-- Put desktop at the group's x, tablet 80px past the desktop's right edge, and phone 80px past the tablet's, so at the fallback widths at the group's x plus 0, 1520, and 2434
+- Put desktop at the group's x, tablet 160px past the desktop's right edge, and phone 80px past the tablet's, so at the fallback widths at the group's x plus 0, 1600, and 2514
 - Stack the sections down in page order, one row per section, each row starting 80px below the lowest bottom edge in the row above
 - Put a shot in its own section's row whatever its width, so a section split into more phone shots than desktop ones holds the extra shots in that row
 - Stack a row's extra shots at one width 80px apart, so the row ends at the bottom of its last stacked shot
 - Start the next group 400px past the right edge of the group's last column
 
-Check the 80px column gap against the laptop body. The bodies draw outside the frame's own width, so widen the gap, and every offset above that carries it, if a body overlaps the next column.
+The desktop to tablet gap is 160px because the laptop body runs about 109px past its frame at 1440 and the tablet body starts 44px before its own. The phone gap stays 80px, since tablet to phone needs 64px.
 
 A page set on `00-current` or `00-next` is one group at x 0.
 
