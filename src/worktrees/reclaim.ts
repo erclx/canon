@@ -1,6 +1,7 @@
 import { $ } from 'bun'
 import { execa } from 'execa'
-import { existsSync } from 'node:fs'
+import { existsSync, realpathSync } from 'node:fs'
+import { resolve as resolvePath, sep } from 'node:path'
 import { gitEnv } from '@/git/env'
 import {
   type BranchInput,
@@ -8,6 +9,7 @@ import {
   type BranchReport,
 } from '@/worktrees/branches'
 import {
+  type ForeignRecord,
   repositoryOf,
   type ResolvedSession,
   resolveSessions,
@@ -323,6 +325,55 @@ function verdict(
   }
 }
 
+/** Both spellings of a path, since a record and git can disagree over a symlink. */
+function spellings(path: string): readonly string[] {
+  const plain = resolvePath(path)
+  try {
+    const real = realpathSync(plain)
+    return real === plain ? [plain] : [plain, real]
+  } catch {
+    return [plain]
+  }
+}
+
+function within(path: string, roots: readonly string[]): boolean {
+  return spellings(path).some((candidate) =>
+    roots.some(
+      (root) => candidate === root || candidate.startsWith(root + sep),
+    ),
+  )
+}
+
+/**
+ * Foreign records whose folder sits at or under a worktree, null when none does.
+ * An ancestor folder passes, since a session holding a worktree runs inside it.
+ * An unread list or listing blocks every record, unnamed, as an empty array.
+ */
+function blockingForeign(
+  sessions: Extract<SessionReport, { kind: 'resolved' }>,
+  entries: readonly WorktreeEntry[],
+): readonly ForeignRecord[] | null {
+  if (sessions.foreignDead === 0) return null
+  if (sessions.foreign === undefined || entries.length === 0) return []
+
+  const roots = entries.flatMap((entry) => spellings(entry.path))
+  const inside = sessions.foreign.filter((record) => within(record.cwd, roots))
+  return inside.length > 0 ? inside : null
+}
+
+function uncheckedDetail(
+  count: number,
+  blocking: readonly ForeignRecord[],
+): string {
+  if (blocking.length === 0) {
+    return `${count} session records come from another pid namespace and no socket answers for them, so nothing was read about whether they still hold a worktree.`
+  }
+  const named = blocking
+    .map((record) => `${record.path} (working folder ${record.cwd})`)
+    .join('; ')
+  return `${blocking.length} session records from another pid namespace have no answering socket and a working folder inside this repository, so nothing was read about whether they still hold a worktree: ${named}.`
+}
+
 /**
  * Reports which worktrees are reclaimable, with the reason on each: a merged pull
  * request, a clean tree, and no live session, since removal is unrecoverable. The
@@ -366,11 +417,12 @@ export async function reclaimReport(
   }
 
   // A foreign record whose socket is gone may be a live holder this reader cannot see, so refuse.
-  if (sessions.foreignDead > 0) {
+  const blocking = blockingForeign(sessions, entries)
+  if (blocking !== null) {
     return {
       kind: 'unreadable',
       reason: 'sessions-unchecked',
-      detail: `${sessions.foreignDead} session records come from another pid namespace and no socket answers for them, so nothing was read about whether they still hold a worktree.`,
+      detail: uncheckedDetail(sessions.foreignDead, blocking),
     }
   }
 

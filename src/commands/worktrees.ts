@@ -164,7 +164,7 @@ const UNREADABLE: Record<Unreadable, string> = {
   'sessions-unreadable':
     'The session roster could not be read, so nothing was read about which worktrees are still held.',
   'sessions-unchecked':
-    'Some session records come from another pid namespace and no socket answers for them, so a live holder may be missing from the roster. Run this from the namespace the sessions run in.',
+    'A session record from another pid namespace has no answering socket and a working folder inside this repository, so a live holder may be missing from the roster. Run this from the namespace that session runs in, or delete each record named below once its session is known to have ended.',
 }
 
 const CONDITIONS = [
@@ -204,7 +204,7 @@ const MEMBERS_REFUSALS: Record<MembersRefusal, string> = {
   'gh-failed': 'the pull request read failed',
   'sessions-unreadable': 'the session roster could not be read',
   'sessions-unchecked':
-    'some session records come from another pid namespace and no socket answers for them',
+    'a session record from another pid namespace with a working folder inside this repository has no answering socket',
   'not-merged': 'the pull request has not merged',
   'no-members': 'the body carries no "Fan-in members:" line',
   'trunk-named': 'the line names the branch the pull request merged into',

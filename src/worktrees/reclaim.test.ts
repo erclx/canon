@@ -1,5 +1,11 @@
 import { execaSync } from 'execa'
-import { mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdtempSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -448,6 +454,148 @@ describe('reclaimReport', () => {
     expect(report.kind).toBe('unreadable')
     if (report.kind !== 'unreadable') return
     expect(report.reason).toBe('sessions-unchecked')
+  })
+
+  describe('when foreign records are listed', () => {
+    function stranded(cwd: string): SessionReport {
+      return {
+        kind: 'resolved',
+        dir: '/registry',
+        confidence: 'confirmed',
+        sessions: [],
+        foreignDead: 1,
+        foreign: [
+          {
+            sessionId: 'id-9',
+            pid: 9,
+            cwd,
+            path: '/registry/9.json',
+            startedAt: null,
+          },
+        ],
+      }
+    }
+
+    it('should read the worktrees when every foreign record sits outside the repository', async () => {
+      const path = linked('wt-parser', 'feat/parser')
+      const elsewhere = realpathSync(
+        mkdtempSync(join(tmpdir(), 'canon-elsewhere-')),
+      )
+
+      const report = await reclaimReport({
+        cwd: ROOT,
+        resolve: async () => stranded(elsewhere),
+        mergedPullRequests: async () => merged(['feat/parser', 673]),
+      })
+      rmSync(elsewhere, { recursive: true, force: true })
+
+      expect(verdictFor(report, path).reclaimable).toBe(true)
+    })
+
+    it('should read the worktrees when a foreign record sits at an ancestor of the repository', async () => {
+      const path = linked('wt-parser', 'feat/parser')
+
+      const report = await reclaimReport({
+        cwd: ROOT,
+        resolve: async () => stranded(tmpdir()),
+        mergedPullRequests: async () => merged(['feat/parser', 673]),
+      })
+
+      expect(verdictFor(report, path).reclaimable).toBe(true)
+    })
+
+    it('should refuse when a foreign record sits inside the main worktree', async () => {
+      linked('wt-parser', 'feat/parser')
+
+      const report = await reclaimReport({
+        cwd: ROOT,
+        resolve: async () => stranded(join(ROOT, 'src')),
+        mergedPullRequests: async () => merged(['feat/parser', 673]),
+      })
+
+      expect(report).toMatchObject({
+        kind: 'unreadable',
+        reason: 'sessions-unchecked',
+      })
+    })
+
+    it('should refuse when a foreign record sits inside a worktree outside the main root', async () => {
+      const outside = realpathSync(
+        mkdtempSync(join(tmpdir(), 'canon-outside-')),
+      )
+      const path = join(outside, 'wt-parser')
+      git('worktree', 'add', '--quiet', '-b', 'feat/parser', path)
+
+      const report = await reclaimReport({
+        cwd: ROOT,
+        resolve: async () => stranded(path),
+        mergedPullRequests: async () => merged(['feat/parser', 673]),
+      })
+      git('worktree', 'remove', '--force', path)
+      rmSync(outside, { recursive: true, force: true })
+
+      expect(report).toMatchObject({
+        kind: 'unreadable',
+        reason: 'sessions-unchecked',
+      })
+    })
+
+    it('should refuse when a foreign record reaches a worktree through a symlink', async () => {
+      const path = linked('wt-parser', 'feat/parser')
+      const elsewhere = realpathSync(
+        mkdtempSync(join(tmpdir(), 'canon-symlink-')),
+      )
+      const alias = join(elsewhere, 'alias')
+      symlinkSync(path, alias)
+
+      const report = await reclaimReport({
+        cwd: ROOT,
+        resolve: async () => stranded(alias),
+        mergedPullRequests: async () => merged(['feat/parser', 673]),
+      })
+      rmSync(elsewhere, { recursive: true, force: true })
+
+      expect(report).toMatchObject({
+        kind: 'unreadable',
+        reason: 'sessions-unchecked',
+      })
+    })
+
+    it('should refuse on every foreign record when the worktree listing is empty', async () => {
+      const elsewhere = realpathSync(
+        mkdtempSync(join(tmpdir(), 'canon-elsewhere-')),
+      )
+
+      const report = await reclaimReport({
+        cwd: ROOT,
+        listWorktrees: async () => [],
+        resolve: async () => stranded(elsewhere),
+        mergedPullRequests: async () => merged(['feat/parser', 673]),
+      })
+      rmSync(elsewhere, { recursive: true, force: true })
+
+      expect(report).toMatchObject({
+        kind: 'unreadable',
+        reason: 'sessions-unchecked',
+      })
+    })
+
+    it('should name each blocking record and its file in the refusal', async () => {
+      linked('wt-parser', 'feat/parser')
+
+      const report = await reclaimReport({
+        cwd: ROOT,
+        resolve: async () => stranded(join(ROOT, 'wt-parser')),
+        mergedPullRequests: async () => merged(['feat/parser', 673]),
+      })
+
+      expect(report.kind === 'unreadable' && report.detail).toContain(
+        '/registry/9.json',
+      )
+      expect(report.kind === 'unreadable' && report.detail).toContain(
+        join(ROOT, 'wt-parser'),
+      )
+    })
   })
 
   // One call for the whole repository rather than one per worktree, nine round trips measured.
