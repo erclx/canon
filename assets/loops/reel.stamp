@@ -1,9 +1,9 @@
-source: canon/frames:pr-3379/da06531/20261122T092450Z/reel.webp
+source: canon/frames:pr-3379/c3832d3/20261122T094042Z/reel.webp
 pull-request: 3379
-filmed-at: da06531
+filmed-at: c3832d3
 address: https://github.com/erclx/canon/pull/3379
-image-sha256: daca0001a5f9304c2ca01e7dde6e12eceb1d8da2eadcf0723bca276ee2c0d432
-still-sha256: 3187d9826bb24c78102208cc48ef56c3e7bb8031d20af3b1913b36429e8391c1
+image-sha256: 85b17ffe25b1e03340fc7ddafa8ca7f3691e2857f5cd1ed6827ba274e3c7879f
+still-sha256: 25ff67bdaef2ce4085b14741351b6b7de0b1f78f88ea6113344870740ddef855
 width: 960
 height: 600
-reel-seconds: 12.5
+reel-seconds: 12.55
