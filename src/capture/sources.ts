@@ -104,7 +104,6 @@ export function textFamilies(declarations: readonly string[]): string[] {
   return [...new Set(families)]
 }
 
-/** The computed font properties of one rendered text element. */
 export interface TextStyle {
   readonly fontFamily: string
   readonly fontWeight: string
@@ -117,13 +116,7 @@ export interface TextFace {
   readonly style: 'normal' | 'italic' | 'oblique'
 }
 
-/**
- * Reduces each rendered text element's computed style to the distinct faces a
- * capture has to prove resolved, in document order. A family is probed at the
- * weight and style its text draws in, since a declared face no text uses never
- * loads. An oblique angle is dropped because a canvas font string that fails to
- * parse keeps the previous font, which the probe would read as a fallback.
- */
+/** Faces as drawn, since an unused declared face never loads, minus an oblique angle a canvas font may not parse. */
 export function textFaces(styles: readonly TextStyle[]): TextFace[] {
   const faces = new Map<string, TextFace>()
   for (const { fontFamily, fontWeight, fontStyle } of styles) {

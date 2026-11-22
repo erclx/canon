@@ -476,11 +476,9 @@ async function renderedTextStyles(element: Locator): Promise<TextStyle[]> {
 }
 
 /**
- * Loads the face the text draws in, then compares its metrics against a family
- * that cannot exist at the same weight and style. Equal widths mean a fall through
- * to the default, the only signal available since `document.fonts.check` reports
- * every system family as present. Loading by face rather than family lets the
- * browser match the nearest declared weight, as it does when drawing.
+ * Loads the face, letting the browser match the nearest declared weight, then
+ * compares widths against an absent family, since `document.fonts.check` reports
+ * every system family present. Equal widths mean a fall through to the default.
  */
 async function resolvesFace(page: Page, face: TextFace): Promise<boolean> {
   return page.evaluate(
