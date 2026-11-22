@@ -43,6 +43,7 @@ argument that answers its prompt ahead of time:
 | `install` and `gov` | Confirm the proposed extras                | `--extras <a>,<b>` for a set, `--extras none` for none     | Takes every proposal and lists each in the report     |
 | `install`           | Ask whether the repository is public       | `--visibility public` or `--visibility private`            | Takes private and says so in the report               |
 | `install`           | Ask which services the project will carry  | `--services <folder>:<kind>,...`, or `--services none`     | Plans none and says so in the report                  |
+| `install`           | Ask whether to initialize shadcn           | `--shadcn yes` or `--shadcn no`                            | Takes yes on an app root and says so in the report    |
 | `gov`               | Stop on a detected technology with no rule | `--skip-gaps`, which proceeds and lists the gap            | Stops on the gap                                      |
 
 Claude Code's tool permission dialog is the confirmation gate for everything
@@ -111,9 +112,11 @@ canon tooling sync python ./backend --skip base --write
 
 Sync each planned service the preview resolved to a stack into its folder before the first commit, per `${CLAUDE_SKILL_DIR}/references/services.md`, and skip one marked `gap`.
 
-### Public layer
+### Public layer and shadcn
 
 On a public answer, run `canon tooling sync public <target> --write` at the root after every stack sync, then apply `${CLAUDE_SKILL_DIR}/references/public.md`. Skip both otherwise.
+
+On a shadcn yes, initialize each app root after every sync and ahead of Step 3, per `${CLAUDE_SKILL_DIR}/references/shadcn.md`.
 
 ### Detect again after the sync
 

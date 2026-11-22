@@ -24,7 +24,9 @@ bun create vite my-app && cd my-app
 claude
 ```
 
-Invoke `canon:target-setup`. It reads `package.json` and the Vite config, resolves tooling to `vite-react` and governance to `node`, proposes the rules the manifest matches, and runs `canon init`. After the tooling sync lands Tailwind, Vitest, Playwright, and CI, it detects again and offers the rules those call for.
+Invoke `canon:target-setup`. It reads `package.json` and the Vite config, resolves tooling to `vite-react` and governance to `node`, proposes the rules the manifest matches, and runs `canon init`.
+
+After the tooling sync lands Tailwind, Vitest, Playwright, and CI, it initializes shadcn unless you decline. It then detects again and offers the rules those call for.
 
 - Check drift with `canon sync --check .` and sync everything with `canon sync .`
 - Refresh governance alone with `canon gov sync .`

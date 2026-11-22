@@ -124,6 +124,7 @@ Before executing, output:
 - **Skip:** any `--skip` entries with reason
 - **Visibility:** public or private, and whether an argument, the operator, or the private default answered it. Omit this row on the `gov` phase.
 - **Planned services:** one row per planned service, with its folder, its stack or a `gap` mark, and its sync command, or `none` with what answered it. Omit this row on the `gov` phase.
+- **shadcn:** yes or no, and what answered it. Omit it on the `gov` phase and with no app root.
 - **Target:** resolved target path
 - **Commands:** the full chain that will run
 
@@ -147,6 +148,7 @@ Every question the preview puts to the operator goes out in one structured call,
 - The extras, below
 - The visibility, under [Visibility](#visibility)
 - The planned services, under [Planned services](#planned-services)
+- The shadcn init on a `vite-react` or `nextjs` root, per `${CLAUDE_SKILL_DIR}/references/shadcn.md`
 
 A further preview question takes its own bullet here and its own question in the same call, never a second prompt.
 
