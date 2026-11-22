@@ -1,9 +1,25 @@
-import { mkdirSync, mkdtempSync, rmSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  utimesSync,
+  writeFileSync,
+} from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { type LabelOutcome, claimLabel, nextLabel } from '@/tasks/label'
+import type {
+  ForeignRecord,
+  ResolvedSession,
+  SessionReport,
+} from '@/sessions/resolve'
+
+const NOW = Date.parse('2026-11-22T10:00:00.000Z')
+const HOUR_MS = 60 * 60 * 1000
 
 let ROOT: string
 
@@ -18,6 +34,47 @@ async function seed(dir: string, ...stems: string[]): Promise<void> {
   await Promise.all(
     stems.map((stem) => writeFile(join(dir, `${stem}.md`), '', 'utf8')),
   )
+}
+
+function lockDir(label: string): string {
+  return join(ROOT, '.canon', 'ordinal-locks', label)
+}
+
+function ownedLock(label: string, sessionId: string): void {
+  mkdirSync(lockDir(label), { recursive: true })
+  writeFileSync(
+    join(lockDir(label), 'claim.json'),
+    JSON.stringify({ sessionId, claimedAt: '2026-11-22T09:59:00.000Z' }),
+  )
+}
+
+function ownerlessLock(label: string, ageMs: number): void {
+  mkdirSync(lockDir(label), { recursive: true })
+  const at = new Date(NOW - ageMs)
+  utimesSync(lockDir(label), at, at)
+}
+
+function roster(
+  liveIds: string[],
+  foreign: Partial<ForeignRecord>[] = [],
+): () => Promise<SessionReport> {
+  return async () => ({
+    kind: 'resolved',
+    dir: '/sessions',
+    confidence: 'confirmed',
+    foreignDead: foreign.length,
+    foreign: foreign.map((record) => ({
+      sessionId: null,
+      pid: 1,
+      cwd: '/',
+      path: '/sessions/1.json',
+      startedAt: null,
+      ...record,
+    })),
+    sessions: liveIds.map(
+      (sessionId) => ({ sessionId }) as unknown as ResolvedSession,
+    ),
+  })
 }
 
 beforeEach(() => {
@@ -150,6 +207,21 @@ describe('nextLabel', () => {
     expect(outcome.label).toBe('v07.4')
   })
 
+  it('should report a reservation above the highest stem without claiming', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+    mkdirSync(join(ROOT, '.canon', 'ordinal-locks', 'v01.4'), {
+      recursive: true,
+    })
+
+    const outcome = await nextLabel(ROOT)
+
+    assertOk(outcome)
+    expect(outcome.reservations).toEqual([
+      { label: 'v01.4', sessionId: null, claimedAt: null },
+    ])
+    expect(outcome.released).toEqual([])
+  })
+
   it('should tolerate an absent declined folder', async () => {
     await seed(join(ROOT, '.canon', 'tasks'), 'v05.0-solo-target')
 
@@ -211,6 +283,47 @@ describe('claimLabel', () => {
     expect(peeked.label).toBe('v01.1')
   })
 
+  it('should stamp the claiming session and time into its lock', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+
+    await claimLabel(ROOT, {
+      sessionId: 'session-a',
+      now: () => Date.parse('2026-11-22T10:00:00.000Z'),
+    })
+
+    const owner = JSON.parse(
+      readFileSync(
+        join(ROOT, '.canon', 'ordinal-locks', 'v01.1', 'claim.json'),
+        'utf8',
+      ),
+    )
+    expect(owner).toEqual({
+      sessionId: 'session-a',
+      claimedAt: '2026-11-22T10:00:00.000Z',
+    })
+  })
+
+  it('should report each reservation above the highest stem with its owner', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+    mkdirSync(join(ROOT, '.canon', 'ordinal-locks', 'v00.9'), {
+      recursive: true,
+    })
+
+    const outcome = await claimLabel(ROOT, {
+      sessionId: 'session-a',
+      now: () => Date.parse('2026-11-22T10:00:00.000Z'),
+    })
+
+    assertOk(outcome)
+    expect(outcome.reservations).toEqual([
+      {
+        label: 'v01.1',
+        sessionId: 'session-a',
+        claimedAt: '2026-11-22T10:00:00.000Z',
+      },
+    ])
+  })
+
   it('should refuse a board that does not exist', async () => {
     const outcome = await claimLabel(ROOT)
 
@@ -223,5 +336,169 @@ describe('claimLabel', () => {
     const outcome = await claimLabel(ROOT, { reserve: async () => false })
 
     expect(outcome.ok === false && outcome.reason).toBe('label-contended')
+  })
+})
+
+describe('claimLabel releasing dead claims', () => {
+  it('should release a dead claim above the highest stem and reissue its label', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+    ownedLock('v01.1', 'gone-session')
+    ownedLock('v01.2', 'gone-session')
+
+    const outcome = await claimLabel(ROOT, {
+      sessionId: 'session-a',
+      now: () => NOW,
+      sessions: roster(['session-a']),
+    })
+
+    assertOk(outcome)
+    expect(outcome.label).toBe('v01.1')
+    expect(outcome.released).toEqual(['v01.1', 'v01.2'])
+    expect(existsSync(lockDir('v01.2'))).toBe(false)
+  })
+
+  it('should keep a claim whose session is live', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+    ownedLock('v01.1', 'planner-session')
+
+    const outcome = await claimLabel(ROOT, {
+      sessionId: 'session-a',
+      now: () => NOW,
+      sessions: roster(['planner-session']),
+    })
+
+    assertOk(outcome)
+    expect(outcome.label).toBe('v01.2')
+    expect(outcome.released).toEqual([])
+  })
+
+  it('should keep a dead claim whose label names a task file', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+    ownedLock('v01.0', 'gone-session')
+
+    const outcome = await claimLabel(ROOT, {
+      now: () => NOW,
+      sessions: roster([]),
+    })
+
+    assertOk(outcome)
+    expect(outcome.released).toEqual([])
+    expect(existsSync(lockDir('v01.0'))).toBe(true)
+  })
+
+  it('should leave a dead claim below the highest stem', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+    ownedLock('v00.5', 'gone-session')
+
+    const outcome = await claimLabel(ROOT, {
+      now: () => NOW,
+      sessions: roster([]),
+    })
+
+    assertOk(outcome)
+    expect(outcome.released).toEqual([])
+    expect(existsSync(lockDir('v00.5'))).toBe(true)
+  })
+
+  it('should release an ownerless lock past an hour', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+    ownerlessLock('v01.1', HOUR_MS + 1)
+
+    const outcome = await claimLabel(ROOT, {
+      now: () => NOW,
+      sessions: roster([]),
+    })
+
+    assertOk(outcome)
+    expect(outcome.released).toEqual(['v01.1'])
+    expect(outcome.label).toBe('v01.1')
+  })
+
+  it('should keep an ownerless lock inside an hour', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+    ownerlessLock('v01.1', HOUR_MS - 60_000)
+
+    const outcome = await claimLabel(ROOT, {
+      now: () => NOW,
+      sessions: roster([]),
+    })
+
+    assertOk(outcome)
+    expect(outcome.released).toEqual([])
+    expect(outcome.label).toBe('v01.2')
+  })
+
+  it('should keep an owned claim when the roster cannot be read', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+    ownedLock('v01.1', 'unknown-session')
+
+    const outcome = await claimLabel(ROOT, {
+      now: () => NOW,
+      sessions: async () => ({ kind: 'absent', dir: '/sessions' }),
+    })
+
+    assertOk(outcome)
+    expect(outcome.released).toEqual([])
+  })
+
+  it('should keep an owned claim the roster holds as an unchecked foreign record', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+    ownedLock('v01.1', 'foreign-session')
+
+    const outcome = await claimLabel(ROOT, {
+      now: () => NOW,
+      sessions: roster([], [{ sessionId: 'foreign-session' }]),
+    })
+
+    assertOk(outcome)
+    expect(outcome.released).toEqual([])
+  })
+
+  it('should never read or remove a numeric record lock', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+    ownerlessLock('0042', HOUR_MS * 48)
+
+    await claimLabel(ROOT, { now: () => NOW, sessions: roster([]) })
+
+    expect(existsSync(lockDir('0042'))).toBe(true)
+  })
+
+  it('should return distinct labels when several claims race one dead lock', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+    ownedLock('v01.1', 'gone-session')
+    const live = roster(['racer-a', 'racer-b', 'racer-c'])
+
+    const outcomes = await Promise.all(
+      ['racer-a', 'racer-b', 'racer-c'].map((sessionId) =>
+        claimLabel(ROOT, { sessionId, now: () => NOW, sessions: live }),
+      ),
+    )
+
+    const labels = outcomes.map((outcome) => outcome.ok && outcome.label)
+    expect(new Set(labels).size).toBe(3)
+  })
+
+  it('should keep a lock a second claim took while the first was releasing it', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+    ownedLock('v01.1', 'gone-session')
+    const live = roster(['racer-a', 'racer-b'])
+    let second: LabelOutcome | undefined
+
+    const first = await claimLabel(ROOT, {
+      sessionId: 'racer-a',
+      now: () => NOW,
+      sessions: live,
+      beforeRelease: async () => {
+        second ??= await claimLabel(ROOT, {
+          sessionId: 'racer-b',
+          now: () => NOW,
+          sessions: live,
+        })
+      },
+    })
+
+    assertOk(first)
+    expect(second?.ok && second.label).toBe('v01.2')
+    expect(first.label).toBe('v01.3')
   })
 })
