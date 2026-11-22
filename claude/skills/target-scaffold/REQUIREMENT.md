@@ -7,23 +7,25 @@ description: Why an empty folder gets its own skill rather than a branch inside 
 
 ## Gap
 
-A developer in an empty folder has no skill to run. `target-setup` detects a stack from files that are not there yet, so it falls back to `base` and installs tooling onto nothing.
+A developer in an empty folder has no skill to run. `target-setup` detects a stack from files that are not there yet, so it falls back to `base` and installs tooling onto nothing. The tested starters sit in the stack manifests. A session left to improvise picks a scaffolder from memory, answers its prompts wrong, or writes into the wrong folder.
 
-The tested non-interactive starters sit in the stack manifests. A session left to improvise picks a scaffolder from memory, answers its prompts wrong, or writes into the wrong folder.
+A scaffold run from a planning session in another repository ends with that session holding everything the new project's first session needs. Every handoff skill matches a note within one repository, so nothing carries the plan, the setup state, or the next step across.
 
 ## Must
 
-- Offer only the stacks the catalog reports as carrying a starter, read at runtime rather than hardcoded
-- Start the project through the CLI verb alone, so the starter that runs is the one `canon tooling verify` tests
+- Offer only the stacks the catalog reports as carrying a starter, read at runtime, and start the project through the CLI verb alone, so the starter that runs is the one `canon tooling verify` tests
 - Write nothing into a folder that already holds files, and route that folder to `target-setup`
 - Leave the project name to the person, refusing rather than renaming when a package manager would reject it
 - Hand the started project to `target-setup` with nothing resolved ahead of its own detection
+- Leave the new project's first session what a planning session knew, in a gitignored note the printed opening prompt names, whenever the scaffold ran from one
 
 ## Must not
 
 - Run a scaffolder command directly, which drifts from the manifest the verb reads
 - Pick a stack for a caller who named none
 - Depend on the author typing its name, since `target-setup` routes an empty folder here
+- Write the kickoff note into a tracked file or a task on the new project's board, since it may cite a private path and a row needs an origin the new board cannot supply
+- Restate the plan's decisions in the note, which then drifts from the plan it points at
 
 ## Out of scope
 
