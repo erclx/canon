@@ -1,0 +1,9 @@
+source: canon/frames:pr-3289/0ce632a/20261120T191226Z/reel.webp
+pull-request: 3289
+filmed-at: 0ce632a
+address: https://github.com/erclx/canon/pull/3289
+image-sha256: 6d105086838fe8498ff4e7b9903fd7c89f6d760de8e6ca8dfaeb77fb5f99a3a7
+still-sha256: da0fe36b2709f52c897a51f46cad09e8d64b34926ce26e567de7eadd9636a8e8
+width: 960
+height: 600
+reel-seconds: 12.4

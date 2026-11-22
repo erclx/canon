@@ -1,87 +1,50 @@
 /**
- * Checks, or with `--write` films per theme, the reel of the records section `web/film-plan.json` names the beats of, with one still per beat for the evidence section's filmstrip.
- * The check `web:build` runs refuses a reel whose stamp no longer matches the plan, the image, or a still, so an edited plan cannot ship an old reel.
+ * Checks, or with `--write --pr <number>` copies, the reel the evidence section
+ * plays: the newest reel a pull request's evidence posted to the `canon/frames`
+ * branch, its opening frame as the still it rests on, and a stamp naming the
+ * pull request it came from.
+ * The check `web:build` runs refuses a reel or still whose stamp no longer
+ * matches it, so a hand-swapped reel cannot ship under another number.
  */
 import { createHash } from 'node:crypto'
-import { spawn, spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { spawnSync } from 'node:child_process'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-import type { FilmedBeat } from '../../src/take/film'
-import { renderReel } from '../../src/take/reel'
-
 const root = new URL('../..', import.meta.url).pathname
-const PLAN = 'web/film-plan.json'
-/** Far under the take's own cap, so a lossless reel of megabytes always takes the lossy pass. */
-const REEL_BYTES = 1_000_000
-const VIEWPORT = '1280x800'
-const PORT = Number(process.env.FILM_PORT ?? 4537)
-
-interface Theme {
-  readonly name: 'dark' | 'light'
-  readonly reel: string
-  readonly still: string
-  readonly stamp: string
-  /** Where the still closing beat `n`, counted from 1, lands. */
-  readonly beat: (n: number) => string
-}
-
-const THEMES: readonly Theme[] = [
-  {
-    name: 'dark',
-    reel: 'assets/loops/film.webp',
-    still: 'assets/loops/film-still.webp',
-    stamp: 'assets/loops/film.stamp',
-    beat: (n) => `assets/loops/film-beat-${n}.webp`,
-  },
-  {
-    name: 'light',
-    reel: 'assets/loops/film-light.webp',
-    still: 'assets/loops/film-still-light.webp',
-    stamp: 'assets/loops/film-light.stamp',
-    beat: (n) => `assets/loops/film-beat-${n}-light.webp`,
-  },
+const FRAMES = 'canon/frames'
+const REEL = 'assets/loops/reel.webp'
+const STILL = 'assets/loops/reel-still.webp'
+const STAMP = 'assets/loops/reel.stamp'
+const FIELDS = [
+  'source',
+  'pull-request',
+  'filmed-at',
+  'address',
+  'image-sha256',
+  'still-sha256',
+  'width',
+  'height',
+  'reel-seconds',
 ]
 
-const sha = (path: string) =>
-  createHash('sha256')
-    .update(readFileSync(join(root, path)))
-    .digest('hex')
+const sha = (bytes: Buffer) => createHash('sha256').update(bytes).digest('hex')
 
 function fail(message: string): never {
   console.error(`regen-web-film: ${message}`)
   process.exit(1)
 }
 
-/** The reasons a theme's committed reel no longer matches the plan, empty when it does. */
-function staleness(theme: Theme, plan: string): string[] {
-  const missing = [theme.reel, theme.still, theme.stamp].filter(
-    (path) => !existsSync(join(root, path)),
-  )
-  if (missing.length) return missing.map((path) => `${path} is missing`)
-  const stamp = readStamp(theme.stamp)
-  const reasons: string[] = []
-  if (stamp['plan-sha256'] !== plan)
-    reasons.push(`${theme.stamp} was filmed from another ${PLAN}`)
-  if (stamp['image-sha256'] !== sha(theme.reel))
-    reasons.push(`${theme.reel} differs from the image its stamp names`)
-  if (stamp['still-sha256'] !== sha(theme.still))
-    reasons.push(`${theme.still} differs from the still its stamp names`)
-  const beats = (stamp['beat-stills-sha256'] ?? '').split(' ').filter(Boolean)
-  if (beats.length === 0) reasons.push(`${theme.stamp} names no beat still`)
-  beats.forEach((digest, index) => {
-    const path = theme.beat(index + 1)
-    if (!existsSync(join(root, path))) reasons.push(`${path} is missing`)
-    else if (digest !== sha(path))
-      reasons.push(`${path} differs from the still its stamp names`)
-  })
-  return reasons
+function git(args: string[]): Buffer {
+  const run = spawnSync('git', args, { cwd: root, maxBuffer: 64 << 20 })
+  if (run.status !== 0)
+    fail(`git ${args.join(' ')} exited ${run.status}: ${run.stderr}`)
+  return run.stdout
 }
 
-function readStamp(path: string): Record<string, string> {
+function readStamp(): Record<string, string> {
   return Object.fromEntries(
-    readFileSync(join(root, path), 'utf8')
+    readFileSync(join(root, STAMP), 'utf8')
       .split('\n')
       .filter(Boolean)
       .map((line) => {
@@ -91,139 +54,172 @@ function readStamp(path: string): Record<string, string> {
   )
 }
 
-/** The plan with the theme toggle pressed ahead of every beat, which a fresh load opens in light. */
-function planFor(theme: Theme, dir: string): string {
-  const plan = JSON.parse(readFileSync(join(root, PLAN), 'utf8')) as {
-    beats: { setup?: unknown[] }[]
-  }
-  if (theme.name === 'dark')
-    for (const beat of plan.beats)
-      beat.setup = [
-        { kind: 'click', target: '.theme-toggle' },
-        ...(beat.setup ?? []),
-      ]
-  const path = join(dir, 'plan.json')
-  writeFileSync(path, JSON.stringify(plan))
-  return path
+/** The reasons the committed reel no longer matches its stamp, empty when it does. */
+function staleness(): string[] {
+  const missing = [REEL, STILL, STAMP].filter(
+    (path) => !existsSync(join(root, path)),
+  )
+  if (missing.length) return missing.map((path) => `${path} is missing`)
+  const stamp = readStamp()
+  const reasons = FIELDS.filter((key) => !stamp[key]).map(
+    (key) => `${STAMP} names no ${key}`,
+  )
+  if (stamp['image-sha256'] !== sha(readFileSync(join(root, REEL))))
+    reasons.push(`${REEL} differs from the reel its stamp names`)
+  if (stamp['still-sha256'] !== sha(readFileSync(join(root, STILL))))
+    reasons.push(`${STILL} differs from the still its stamp names`)
+  return reasons
 }
 
-async function waitFor(url: string) {
-  for (let tries = 0; tries < 60; tries += 1) {
-    const ok = await fetch(url).then(
-      (response) => response.ok,
-      () => false,
+interface Chunk {
+  readonly type: string
+  readonly body: Buffer
+}
+
+function chunks(bytes: Buffer, from: number, to: number): Chunk[] {
+  const found: Chunk[] = []
+  for (let at = from; at + 8 <= to;) {
+    const size = bytes.readUInt32LE(at + 4)
+    found.push({
+      type: bytes.toString('latin1', at, at + 4),
+      body: bytes.subarray(at + 8, at + 8 + size),
+    })
+    at += 8 + size + (size & 1)
+  }
+  return found
+}
+
+const riff = (parts: Buffer[]) => {
+  const body = Buffer.concat([Buffer.from('WEBP'), ...parts])
+  const head = Buffer.alloc(8)
+  head.write('RIFF', 0, 'latin1')
+  head.writeUInt32LE(body.length, 4)
+  return Buffer.concat([head, body])
+}
+
+const chunk = ({ type, body }: Chunk) => {
+  const head = Buffer.alloc(8)
+  head.write(type, 0, 'latin1')
+  head.writeUInt32LE(body.length, 4)
+  return Buffer.concat([head, body, Buffer.alloc(body.length & 1)])
+}
+
+/**
+ * The reel's canvas size, its length, and its opening frame as a still WebP.
+ * The opening frame is the one a reel always encodes whole, where a later
+ * frame may hold only the region that changed, so its image chunk is lifted
+ * out as it is rather than decoded, which ffmpeg cannot do for an animated WebP.
+ */
+function openReel(bytes: Buffer) {
+  if (
+    bytes.toString('latin1', 0, 4) !== 'RIFF' ||
+    bytes.toString('latin1', 8, 12) !== 'WEBP'
+  )
+    fail('the reel is not a WebP file')
+  const top = chunks(bytes, 12, bytes.length)
+  const header = top.find((part) => part.type === 'VP8X')?.body
+  const frames = top.filter((part) => part.type === 'ANMF')
+  if (!header || frames.length === 0) fail('the reel is not an animated WebP')
+  const width = header.readUIntLE(4, 3) + 1
+  const height = header.readUIntLE(7, 3) + 1
+  const ms = frames.reduce(
+    (sum, frame) => sum + frame.body.readUIntLE(12, 3),
+    0,
+  )
+  const first = frames[0]!.body
+  if (
+    first.readUIntLE(0, 3) !== 0 ||
+    first.readUIntLE(3, 3) !== 0 ||
+    first.readUIntLE(6, 3) + 1 !== width ||
+    first.readUIntLE(9, 3) + 1 !== height
+  )
+    fail('the reel opens on a frame smaller than its canvas')
+  const image = chunks(first, 16, first.length)
+  const still = image.some((part) => part.type === 'ALPH')
+    ? riff([
+        chunk({ type: 'VP8X', body: stillHeader(width, height) }),
+        ...image.map(chunk),
+      ])
+    : riff(image.map(chunk))
+  return { width, height, seconds: ms / 1000, still }
+}
+
+/** A still's extended header, flagging the alpha its opening frame carries. */
+function stillHeader(width: number, height: number) {
+  const body = Buffer.alloc(10)
+  body[0] = 0x10
+  body.writeUIntLE(width - 1, 4, 3)
+  body.writeUIntLE(height - 1, 7, 3)
+  return body
+}
+
+/** The newest reel the pull request's evidence posted, by the capture time in its path. */
+function newestReel(pullRequest: number) {
+  git(['fetch', '--quiet', 'origin', FRAMES])
+  const paths = git([
+    'ls-tree',
+    '-r',
+    '--name-only',
+    `origin/${FRAMES}`,
+    `pr-${pullRequest}/`,
+  ])
+    .toString('utf8')
+    .split('\n')
+    .filter((path) =>
+      /^pr-\d+\/[0-9a-f]+\/\d{8}T\d{6}Z\/reel\.webp$/.test(path),
     )
-    if (ok) return
-    await new Promise((resolve) => setTimeout(resolve, 500))
-  }
-  throw new Error(`the preview at ${url} never answered`)
+    .sort((a, b) => a.split('/')[2]!.localeCompare(b.split('/')[2]!))
+  const path = paths.at(-1)
+  if (!path) fail(`${FRAMES} holds no reel for pull request #${pullRequest}`)
+  return { path, sha: path.split('/')[1]! }
 }
 
-/** Scales a filmed frame down to `width` and writes it as WebP at `path` under the root. */
-function writeStill(frame: string, path: string, width: number) {
-  const still = spawnSync(
-    'ffmpeg',
-    [
-      '-y',
-      '-loglevel',
-      'error',
-      '-i',
-      frame,
-      '-vf',
-      `scale=${width}:-2`,
-      '-quality',
-      '80',
-      join(root, path),
-    ],
-    { stdio: 'inherit' },
-  )
-  if (still.status !== 0) throw new Error(`ffmpeg could not write ${path}`)
+/** The pull request's page, read from the origin remote rather than typed. */
+function address(pullRequest: number) {
+  const remote = git(['remote', 'get-url', 'origin']).toString('utf8').trim()
+  const repo = /github\.com[:/]([^/]+\/[^/]+?)(\.git)?$/.exec(remote)?.[1]
+  if (!repo) fail(`the origin remote ${remote} is not a GitHub repository`)
+  return `https://github.com/${repo}/pull/${pullRequest}`
 }
 
-async function film(theme: Theme, url: string, plan: string) {
-  const dir = mkdtempSync(join(tmpdir(), `canon-film-${theme.name}-`))
-  const take = spawnSync(
-    'bun',
-    [
-      join(root, 'src/cli.ts'),
-      'take',
-      url,
-      planFor(theme, dir),
-      '--out',
-      dir,
-      '--viewport',
-      VIEWPORT,
-      '--json',
-    ],
-    { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] },
-  )
-  if (take.status !== 0) throw new Error(`canon take exited ${take.status}`)
-  const record = JSON.parse(take.stdout) as { beats: FilmedBeat[] }
-  const reel = await renderReel(
-    dir,
-    record.beats,
-    join(root, theme.reel),
-    REEL_BYTES,
-  )
-
-  const last = record.beats.at(-1)
-  if (!last) throw new Error('the take filmed no beat')
-  writeStill(join(dir, last.still), theme.still, 960)
-  const beats = record.beats.map((beat, index) => {
-    const path = theme.beat(index + 1)
-    writeStill(join(dir, beat.still), path, 640)
-    return path
-  })
-
+function write(pullRequest: number) {
+  const reel = newestReel(pullRequest)
+  const bytes = git(['show', `origin/${FRAMES}:${reel.path}`])
+  const opened = openReel(bytes)
+  writeFileSync(join(root, REEL), bytes)
+  writeFileSync(join(root, STILL), opened.still)
   writeFileSync(
-    join(root, theme.stamp),
+    join(root, STAMP),
     [
-      `source: ${url}`,
-      `plan-sha256: ${plan}`,
-      `image-sha256: ${sha(theme.reel)}`,
-      `still-sha256: ${sha(theme.still)}`,
-      `beat-stills-sha256: ${beats.map(sha).join(' ')}`,
-      `reel-seconds: ${reel.seconds}`,
-      `beats: ${record.beats.map((beat) => beat.seconds).join(' ')}`,
+      `source: ${FRAMES}:${reel.path}`,
+      `pull-request: ${pullRequest}`,
+      `filmed-at: ${reel.sha}`,
+      `address: ${address(pullRequest)}`,
+      `image-sha256: ${sha(bytes)}`,
+      `still-sha256: ${sha(opened.still)}`,
+      `width: ${opened.width}`,
+      `height: ${opened.height}`,
+      `reel-seconds: ${opened.seconds}`,
       '',
     ].join('\n'),
   )
   console.log(
-    `regen-web-film: wrote ${theme.reel}, ${theme.still}, and ${beats.length} beat stills`,
+    `regen-web-film: copied the reel of pull request #${pullRequest} filmed at ${reel.sha} to ${REEL}, with its still`,
   )
 }
 
-const plan = sha(PLAN)
-
-if (!process.argv.includes('--write')) {
-  const reasons = THEMES.flatMap((theme) => staleness(theme, plan))
+const args = process.argv.slice(2)
+if (!args.includes('--write')) {
+  const reasons = staleness()
   if (reasons.length)
     fail(
-      `${reasons.join(', ')}. Run bun run web:film -- --write, which builds the page and films it again.`,
+      `${reasons.join(', ')}. Run bun run web:film -- --write --pr <number>, which copies that pull request's newest reel from ${FRAMES}.`,
     )
-  console.log(`regen-web-film: both reels match ${PLAN}`)
+  console.log(`regen-web-film: the reel matches ${STAMP}`)
 } else {
-  // `web:build` runs the check above first, so it cannot build the page this films.
-  const build = spawnSync('bunx', ['astro', 'build'], {
-    cwd: join(root, 'web'),
-    stdio: 'inherit',
-  })
-  if (build.status !== 0) fail(`astro build exited ${build.status}`)
-  const server = spawn(
-    'bunx',
-    ['astro', 'preview', '--host', '127.0.0.1', '--port', String(PORT)],
-    { cwd: join(root, 'web'), stdio: 'ignore' },
-  )
-  try {
-    const base = `http://127.0.0.1:${PORT}/`
-    await waitFor(base)
-    for (const theme of THEMES) await film(theme, `${base}#records`, plan)
-  } catch (error) {
-    console.error(
-      `regen-web-film: ${error instanceof Error ? error.message : String(error)}`,
-    )
-    process.exitCode = 1
-  } finally {
-    server.kill()
-  }
+  const flag = args.indexOf('--pr')
+  const pullRequest = Number(flag === -1 ? Number.NaN : args[flag + 1])
+  if (!Number.isInteger(pullRequest) || pullRequest <= 0)
+    fail('--write takes --pr <number>, the pull request whose reel to copy')
+  write(pullRequest)
 }
