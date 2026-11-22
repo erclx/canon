@@ -36,6 +36,8 @@ export type PullRefusal =
   | 'no-branch'
   | 'runs-unreadable'
   | 'reviews-unreadable'
+  | 'bad-input'
+  | 'no-pull'
 
 /** What a reader does about each way the two sha-keyed verbs produced nothing. */
 export const PULL_REFUSALS: Record<PullRefusal | HeadRefusal, string> = {
@@ -56,6 +58,50 @@ export const PULL_REFUSALS: Record<PullRefusal | HeadRefusal, string> = {
     'The check runs for this commit could not be read. An empty answer here would report a commit as having no check rather than as unread, so nothing is reported.',
   'reviews-unreadable':
     'The reviews on this pull request could not be read. An empty answer here would report a reviewed pull request as never reviewed, which routes the next pass to the whole change, so nothing is reported.',
+  'bad-input':
+    'A pull request number is a positive whole number, such as 3348, with no # or other characters.',
+  'no-pull': 'No pull request carries that number on this repository.',
+}
+
+/** A refusal, carrying the number the caller named when the reason is about it. */
+export interface NumberedRefusal {
+  readonly reason: PullRefusal | HeadRefusal
+  readonly number?: string
+}
+
+/** The refusal's message, naming the number where the shared text cannot. */
+export function pullRefusalMessage(refusal: NumberedRefusal): string {
+  const { reason, number } = refusal
+  if (number !== undefined && reason === 'bad-input') {
+    return `${JSON.stringify(number)} is not a pull request number. ${PULL_REFUSALS['bad-input']}`
+  }
+  if (number !== undefined && reason === 'no-pull') {
+    return `No pull request #${number} exists on this repository, so nothing was read.`
+  }
+  return PULL_REFUSALS[reason]
+}
+
+/** Refuses on a resolver reason, with the named number in the record where it decided the refusal. */
+export function refusePull(
+  refusal: NumberedRefusal,
+  emitJson: boolean,
+  root: string,
+): number {
+  const extra =
+    refusal.number === undefined
+      ? {}
+      : refusal.reason === 'no-pull'
+        ? { number: Number(refusal.number) }
+        : refusal.reason === 'bad-input'
+          ? { input: refusal.number }
+          : {}
+  return refuseWith(
+    refusal.reason,
+    pullRefusalMessage(refusal),
+    emitJson,
+    root,
+    extra,
+  )
 }
 
 type IdentityRead =
@@ -70,6 +116,16 @@ export async function gh(
   cwd: string,
   args: readonly string[],
 ): Promise<string | null> {
+  const result = await ghRead(cwd, args)
+  return result.kind === 'read' ? result.stdout : null
+}
+
+type GhRead =
+  | { readonly kind: 'read'; readonly stdout: string }
+  | { readonly kind: 'failed'; readonly stderr: string }
+
+/** One `gh` call, keeping stderr on failure so a caller can tell a 404 from a failed read. */
+async function ghRead(cwd: string, args: readonly string[]): Promise<GhRead> {
   try {
     const result = await execa('gh', [...args], {
       cwd,
@@ -77,13 +133,11 @@ export async function gh(
       env: gitEnv(),
       extendEnv: false,
     })
-    return result.stdout
+    return { kind: 'read', stdout: result.stdout }
   } catch (error) {
-    await noteRateLimit(
-      cwd,
-      String((error as { stderr?: unknown }).stderr ?? ''),
-    )
-    return null
+    const stderr = String((error as { stderr?: unknown }).stderr ?? '')
+    await noteRateLimit(cwd, stderr)
+    return { kind: 'failed', stderr }
   }
 }
 
@@ -144,11 +198,33 @@ function rateLimitFor(reason: string): RateLimit | undefined {
   return GH_READ_REFUSALS.has(reason) ? rateLimit : undefined
 }
 
+/** Whether gh's stderr reports GitHub's 404, the one status meaning the object is absent. */
+export function isNotFound(stderr: string): boolean {
+  return /\(HTTP 404\)/.test(stderr)
+}
+
+/**
+ * The named number when it is a positive whole number, checked before any call
+ * since GitHub reads `33x8` as pull request 33 rather than refusing it.
+ */
+export function parsePullNumber(number: string):
+  | { readonly kind: 'found'; readonly number: string }
+  | {
+      readonly kind: 'refused'
+      readonly reason: 'bad-input'
+      readonly number: string
+    } {
+  return POSITIVE_WHOLE.test(number)
+    ? { kind: 'found', number }
+    : { kind: 'refused', reason: 'bad-input', number }
+}
+
 type PullNumber =
   | { readonly kind: 'found'; readonly number: string }
   | {
       readonly kind: 'refused'
-      readonly reason: 'gh-failed' | 'ambiguous-pull'
+      readonly reason: 'gh-failed' | 'ambiguous-pull' | 'bad-input'
+      readonly number?: string
     }
 
 /**
@@ -159,7 +235,7 @@ export async function resolvePullNumber(
   cwd: string,
   number: string | undefined,
 ): Promise<PullNumber> {
-  if (number !== undefined) return { kind: 'found', number }
+  if (number !== undefined) return parsePullNumber(number)
 
   const branch = await $`git -C ${cwd} symbolic-ref --short -q HEAD`
     .env(gitEnv())
@@ -190,7 +266,8 @@ type PullRead =
   | { readonly kind: 'read'; readonly row: RestPull }
   | {
       readonly kind: 'refused'
-      readonly reason: 'gh-failed' | 'ambiguous-pull'
+      readonly reason: 'gh-failed' | 'ambiguous-pull' | 'bad-input' | 'no-pull'
+      readonly number?: string
     }
 
 /** The pull request object off the REST pull endpoint. */
@@ -201,13 +278,17 @@ export async function readPull(
   const resolved = await resolvePullNumber(cwd, number)
   if (resolved.kind === 'refused') return resolved
 
-  const stdout = await gh(cwd, [
+  const read = await ghRead(cwd, [
     'api',
     `repos/{owner}/{repo}/pulls/${resolved.number}`,
   ])
-  if (stdout === null) return { kind: 'refused', reason: 'gh-failed' }
+  if (read.kind === 'failed') {
+    return isNotFound(read.stderr)
+      ? { kind: 'refused', reason: 'no-pull', number: resolved.number }
+      : { kind: 'refused', reason: 'gh-failed' }
+  }
   try {
-    return { kind: 'read', row: JSON.parse(stdout) as RestPull }
+    return { kind: 'read', row: JSON.parse(read.stdout) as RestPull }
   } catch {
     return { kind: 'refused', reason: 'gh-failed' }
   }

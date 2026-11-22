@@ -19,6 +19,7 @@ import {
   listComments,
   listReviews,
   refuseWith,
+  refusePull,
   resolvePullNumber,
   resolveWorktreeRoot,
 } from '@/commands/pr/pull'
@@ -255,15 +256,9 @@ async function runLocalRemove(
 
   const resolved = await resolvePullNumber(root, number)
   if (resolved.kind === 'refused') {
-    const reason = resolved.reason
-    return refuseWith(
-      reason,
-      reason === 'ambiguous-pull'
-        ? PULL_REFUSALS[reason]
-        : LOCAL_REFUSALS[reason],
-      emitJson,
-      root,
-    )
+    return resolved.reason === 'gh-failed'
+      ? refuseWith('gh-failed', LOCAL_REFUSALS['gh-failed'], emitJson, root)
+      : refusePull(resolved, emitJson, root)
   }
   const [comments, reviews] = await Promise.all([
     listComments(root, resolved.number),

@@ -24,6 +24,8 @@ import { KEY_CHANGES } from '@/pr/paths'
 import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
 import {
   AMBIGUOUS_PULL,
+  PULL_REFUSALS,
+  refusePull,
   GH_TIMEOUT_MS,
   gh,
   readPull,
@@ -46,6 +48,8 @@ type SourceRefusal =
   | 'gh-missing'
   | 'gh-failed'
   | 'ambiguous-pull'
+  | 'bad-input'
+  | 'no-pull'
   | 'unreadable-body'
   | 'unreadable-tree'
   | 'no-base'
@@ -61,6 +65,8 @@ const REFUSALS: Record<Refusal, string> = {
   'gh-failed':
     'gh could not answer for this branch. Name the pull request number, or pass --body <path>.',
   'ambiguous-pull': AMBIGUOUS_PULL,
+  'bad-input': PULL_REFUSALS['bad-input'],
+  'no-pull': PULL_REFUSALS['no-pull'],
   'unreadable-body': 'The file named by --body could not be read.',
   'unreadable-tree':
     'git could not list this repository, so no path could be judged whole rather than partial.',
@@ -183,7 +189,11 @@ interface PullRequestRead {
 
 type SourceRead =
   | { readonly kind: 'read'; readonly source: PullRequestRead }
-  | { readonly kind: 'refused'; readonly reason: SourceRefusal }
+  | {
+      readonly kind: 'refused'
+      readonly reason: SourceRefusal
+      readonly number?: string
+    }
 
 /**
  * Reads the body off the pull read and the changed set off the paginated files
@@ -520,7 +530,15 @@ async function runKeyChangesLink(
     opts.body === undefined
       ? await readFromApi(root, number)
       : await readFromFile(root, process.cwd(), opts.body, opts.base)
-  if (source.kind === 'refused') return refuse(source.reason, emitJson, root)
+  if (source.kind === 'refused') {
+    return source.reason === 'bad-input' || source.reason === 'no-pull'
+      ? refusePull(
+          { reason: source.reason, number: source.number },
+          emitJson,
+          root,
+        )
+      : refuse(source.reason, emitJson, root)
+  }
 
   const pull = number ?? source.source.number?.toString()
   if (pull === undefined) {
