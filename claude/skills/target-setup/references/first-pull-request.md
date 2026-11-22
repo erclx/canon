@@ -9,11 +9,18 @@ The setup report closes on this checklist. Each step writes to the remote, so th
 
 Fill each line for the project that just landed, and drop a line whose condition does not hold.
 
+## Amend the root commit
+
+A service or fix decided after the root commit goes to a scratch branch first. Push it there, let CI run on it, and force `main` only once that run passes, since an amend forced straight to `main` ships a commit no CI has seen.
+
+- The route covers the root commit alone, before a ruleset protects `main`
+- A history already pushed under a ruleset takes a pull request instead, never a force push
+
 ## Protect the trunk
 
 - Add a branch ruleset on `main` under the repository's Settings, Rules, Rulesets, or through `gh api repos/<owner>/<repo>/rulesets`. Require a pull request before merging and block force pushes.
 - Name the required status checks from the jobs the root `.github/workflows/` carries, plus each job a planned service's subtree sync named for the root CI
-- Add the ruleset after the root commit is final, since a ruleset blocking force pushes closes the amend route the report names
+- Add the ruleset after the root commit is final, since a ruleset blocking force pushes closes the amend route above
 
 ## Release token
 

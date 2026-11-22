@@ -201,28 +201,4 @@ A `--visibility public` or `--visibility private` argument answers ahead of time
 
 ## Planned services
 
-Detection reads folders that exist, so a service the project will carry but has no files for yet is never seen. The `install` phase asks for those ahead of the first commit, since a service added after it lands configs and CI changes the root commit never ran. The `gov` phase installs rules alone and asks nothing.
-
-### Ask
-
-Ask it as its own question in the [one structured ask](#one-structured-ask), with two options.
-
-- None planned, the recommended first option
-- Name them, which the operator types as a comma-separated list of `<folder>:<kind>`, such as `api:python` or `worker:cloudflare`
-
-Offer a subfolder in another language, a Cloudflare Worker, and a database as the examples in the question text, so the operator reads what counts as a service.
-
-### Resolve each service
-
-Match each kind against the stacks `canon tooling list --json` returned, the way a detected language root resolves, and give the service a preview row.
-
-- A kind matching a stack takes `canon tooling sync <stack> ./<folder> --skip base --write`, the subtree command the monorepo route runs
-- A kind matching no stack, such as a database, takes no command. Mark its row `gap` and carry it into the report's detection gaps, the way [a language with no stack](#gap-handling) is surfaced rather than guessed.
-- A folder that already holds a marker is a detected root, so drop the planned row and say detection already covers it
-
-### Answering ahead
-
-A `--services <folder>:<kind>,<folder>:<kind>` argument answers ahead of time and skips the question. `--services none` declares none.
-
-- With neither and no one to answer, plan no service and say so in the preview and the report
-- Planning none is the default because a guessed service lands a folder nobody asked for, while a missed one costs the amend route the report names
+Detection never sees a service with no files yet, so the `install` phase asks for planned services as its own question in the [one structured ask](#one-structured-ask). Read `${CLAUDE_SKILL_DIR}/references/services.md` for the options, how each service resolves, and the `--services` answer ahead.

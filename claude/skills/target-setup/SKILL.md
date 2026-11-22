@@ -57,29 +57,7 @@ else. Ask only the questions this body and its references name.
 
 ## Declined states
 
-Four states reach this skill that the chain does not serve. Name the destination for each, so the refusal routes rather than ends.
-
-### An empty folder
-
-Stop before `detect` when the target holds nothing but `.git`, and hand off to `target-scaffold`. Detection reads a stack from files a project carries, so an empty folder resolves to `base` and installs tooling onto no project. That skill starts the project and hands it back here.
-
-### An existing project
-
-Stop and hand off to `target-check`, which reports what the target already carries before anything is repaired. This chain never reads that, so a per-domain install picked here is a guess against configs nobody read. Name `target-update` when the operator wants the catch-up applied.
-
-### The `.claude/` folder alone
-
-Stop. Run `canon claude init` for the seed docs, then the `indexes` phase over the project's own documentation folders. Neither needs the tooling sync the `install` phase runs.
-
-### A language with no stack
-
-The chain still runs, on `base`, with the fallback marked in the preview. A project wanting none of `base` declines there and takes the `gov` phase, which is language-neutral and drops no `base` development dependencies.
-
-Say so at the preview rather than resolving it here, since the fallback is a working default and only the person can say whether it fits.
-
-### Route rather than build
-
-Do not add a stack, a mode switch, or an existing-project branch to satisfy one of these. Each destination already exists and routing to it costs a line.
+An empty folder, an existing project, the `.claude/` folder alone, and a language with no stack each reach this skill without the chain serving them. Read `${CLAUDE_SKILL_DIR}/references/declined.md` on meeting one, for the destination each routes to rather than a refusal that ends.
 
 ## Phase: detect
 
@@ -131,10 +109,7 @@ canon tooling sync python ./backend --skip base --write
 
 ### Planned services
 
-Sync each planned service the preview resolved to a stack into its folder with the subtree command from its row, per the monorepo route above, so it lands before the first commit rather than being amended into it. Create the folder first when it does not exist.
-
-- Skip a planned service the preview marked `gap`, which the report lists
-- Skip this step when the preview planned none
+Sync each planned service the preview resolved to a stack into its folder before the first commit, per `${CLAUDE_SKILL_DIR}/references/services.md`, and skip one marked `gap`.
 
 ### Public layer
 
@@ -232,9 +207,6 @@ Report each planned service with the sync it took or its `gap` mark, or that non
 
 ### After the root commit
 
-A service or fix decided after the root commit goes to a scratch branch first. Push it there, let CI run on it, and force `main` only once that run passes, since an amend forced straight to `main` ships a commit no CI has seen.
-
-- The route covers the root commit alone, before a ruleset protects `main`
-- A history already pushed under a ruleset takes a pull request instead, never a force push
+A late amend to the root commit goes to a scratch branch for CI before `main` is forced, per the checklist below.
 
 Close the report on the checklist in `${CLAUDE_SKILL_DIR}/references/first-pull-request.md`, filled for this project. Name each step and the verb or setting that does it, and run none, since each one writes to the remote and is the operator's call.
