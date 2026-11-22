@@ -7,7 +7,7 @@ set -euo pipefail
 : "${PREVIEW_PORT:=4173}"
 
 if curl -sSf "http://localhost:$PREVIEW_PORT/" >/dev/null 2>&1; then
-  echo "Port $PREVIEW_PORT already in use. Stop the listening process or set PREVIEW_PORT." >&2
+  echo "Port $PREVIEW_PORT already in use. Stop the listening process, or rerun with an offset that moves the preview and this check together, by prefixing the same command with WORKTREE_PORT_OFFSET=100" >&2
   exit 1
 fi
 
@@ -25,6 +25,6 @@ for _ in $(seq 1 40); do
 done
 
 if ! curl -sSf "http://localhost:$PREVIEW_PORT/" >/dev/null 2>&1; then
-  echo "Preview server not responding on port $PREVIEW_PORT after 10s." >&2
+  echo "Preview server not responding on port $PREVIEW_PORT after 10s. If PREVIEW_PORT was set by hand, the preview bound its own port instead, so set WORKTREE_PORT_OFFSET rather than PREVIEW_PORT." >&2
   exit 1
 fi
