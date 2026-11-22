@@ -8,6 +8,15 @@ The public stack is an add-on that ships the open-source files a public reposito
 
 A seed is copied only when its path is absent, so a project's filled `LICENSE`, `SECURITY.md`, or `CONTRIBUTING.md` is never overwritten. Fill each `<placeholder>` after the first sync.
 
+### Placeholders
+
+`target-setup` fills the five identity tokens on a public answer and leaves the rest to the operator.
+
+- It fills `<owner>` and `<repo>` from the GitHub remote, `<project>` from the repository name, `<year>` from the date, and `<holder>` from the git user name.
+- It asks for the owner and repository when no remote exists yet, or lists them when no one can answer.
+- Fill the install and check commands, the folder map in `CONTRIBUTING.md`, and the version command in the bug form by hand.
+- Leave `<type>(<scope>): <subject>` in `CONTRIBUTING.md` as it is, since it is the commit header format rather than a placeholder.
+
 ### Policy files
 
 These three name the project's owner and terms.
