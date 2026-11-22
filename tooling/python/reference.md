@@ -10,7 +10,7 @@ Configs ship as sidecar files (`ruff.toml`, `mypy.ini`, `pytest.ini`, `.coverage
 
 ## Scaffold checklist
 
-1. Scaffold with `uv init --package --author-from none <name>`. This creates `pyproject.toml` with a `uv_build` backend and `src/<name with underscores>/__init__.py` holding an annotated `def main() -> None:`. The flag keeps the git user's name and email out of the `authors` field, which a public repository would otherwise publish.
+1. Scaffold with `uv init --package --author-from none <name>`, which writes `pyproject.toml` on a `uv_build` backend and `src/<name with underscores>/__init__.py` holding `def main() -> None:`.
 2. Seed a minimal `package.json`, so the base layer's bun-side tools (husky, oxfmt, commitlint) have a target and the sync installs them. The stack's `scaffold/` overlay lands it.
 3. Install base tooling with `canon tooling sync base . --write`.
 4. Install python tooling with `canon tooling sync python . --write`.
@@ -22,7 +22,7 @@ A later `uv add` rewrites `pyproject.toml` in its own layout, so run `bun run fo
 
 ### What the scaffold gives
 
-Step 1 puts source under `src/`, where `mypy.ini`, `pytest.ini`, and `.coveragerc` look for it. `uv init` also pins `.python-version` to 3.14 and defaults `requires-python` to `>=3.14`, which matches the pin this stack ships.
+Step 1 puts source under `src/`, where `mypy.ini`, `pytest.ini`, and `.coveragerc` look for it. Its `--author-from none` keeps the git user's name and email out of a public `authors` field. `uv init` also pins `.python-version` to 3.14 and defaults `requires-python` to `>=3.14`, which matches the pin this stack ships.
 
 The stack ships `tests/test_smoke.py` as a copy-once seed. `pytest` then collects at least one test on first run, so `bun run test:run` exits 0 instead of the empty-collection exit code 5. Delete or replace it with real tests.
 

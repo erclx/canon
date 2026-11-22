@@ -442,10 +442,9 @@ function checkCanonGate(): void {
   }
 }
 
-// A --skip base subfolder carries its own runner, which nothing else calls.
-// verify.json is a golden config sync overwrites, so the roots are found from
-// tracked files rather than read from a list, and tracked alone so a vendored
-// or ignored folder never runs. Outside a git repository none are found.
+// Found from tracked files, since verify.json is golden and a list kept in it
+// is lost on sync, and tracked alone so a vendored or ignored folder never
+// runs. Outside a git repository none are found.
 function findNestedRoots(): string[] {
   const result = spawnSync(
     'git',

@@ -43,7 +43,7 @@ The root run calls each nested runner after its own stages, so one `bun run chec
 Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and never overwrites it, so a project extends them freely.
 
 - `.lintstagedrc` holds the glob map below.
-- `.github/workflows/verify.yml` runs on pull requests targeting `main` and on `workflow_dispatch`. The web stack ships its own golden copy at that path, which sync rewrites, so put a project's own jobs, such as a nested root's toolchain setup, in a separate workflow file no stack ships.
+- `.github/workflows/verify.yml` runs on pull requests targeting `main` and on `workflow_dispatch`.
 - `.github/pull_request_template.md` has `## Summary`, `## Key changes`, `## Technical context`, `## Outcome`, and `## Testing`, the optional two commented. A project adds its own checklist lines.
 - `canon/context/development/` holds the `setup` and `ci` entries under a folder index. Extend them with project-specific commands and workflows, and keep canonical rationale here.
 - `canon/config/pr-labels.toml` is the starter pull request label map, covering what the toolkit installs. A project adds a row per surface of its own.
@@ -89,6 +89,7 @@ The seeded baseline globs.
 
 - Steps are checkout, setup Bun at latest, `bun install --frozen-lockfile`, then `check:format`.
 - CI asserts and never writes, so format must be clean before push.
+- The web stack ships a golden `verify.yml`, which sync rewrites. Put a project's own jobs, such as a nested root's toolchain setup, in a separate workflow file no stack ships.
 
 ## Anti-patterns
 

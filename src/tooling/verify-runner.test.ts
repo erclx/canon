@@ -641,8 +641,7 @@ describe('the head tag check', () => {
 describe('nested roots', () => {
   const NESTED = 'service'
 
-  // A nested root is a --skip base subfolder: its own runner and phase list,
-  // with a package.json the case fills.
+  // A --skip base subfolder: its own runner, phase list, and package.json.
   const writeNestedRoot = (scripts: Readonly<Record<string, string>>): void => {
     const dir = join(fixture, NESTED)
     mkdirSync(join(dir, 'scripts'), { recursive: true })

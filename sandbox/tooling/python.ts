@@ -137,8 +137,7 @@ export default scenario({
         QUIET,
       )
       ctx.run('bun', ['run', '--cwd', SUBFOLDER, 'lint:fix'], QUIET)
-      // uv add rewrites pyproject.toml in its own layout, which the root
-      // format check then reads.
+      // uv add rewrites pyproject.toml, which the root format check reads.
       ctx.run('bun', ['run', 'format'], QUIET)
       ctx.git('add', '-A')
 
