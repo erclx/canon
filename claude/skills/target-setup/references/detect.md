@@ -15,6 +15,7 @@ What the `install` and `gov` phases both do before they write anything. Stated o
 - [Gap handling](#gap-handling)
 - [Preview](#preview)
 - [Visibility](#visibility)
+- [Planned services](#planned-services)
 
 ## Read the catalogs
 
@@ -122,6 +123,7 @@ Before executing, output:
 - **Extras:** each proposal with the evidence the verb returned, plus each subfolder language rule, listed in full as the list the operator confirms
 - **Skip:** any `--skip` entries with reason
 - **Visibility:** public or private, and whether an argument, the operator, or the private default answered it. Omit this row on the `gov` phase.
+- **Planned services:** one row per planned service, with its folder, its stack or a `gap` mark, and its sync command, or `none` with what answered it. Omit this row on the `gov` phase.
 - **Target:** resolved target path
 - **Commands:** the full chain that will run
 
@@ -137,6 +139,16 @@ On the repository root's row, name what `base` lands. Configs, seeds, and gitign
 A resolved name and a fallback read alike once written, so mark the fallback in the preview rather than the report. The preview is the last point before the first write.
 
 The extras list stays whole for a similar reason. `canon init --stack` takes one stack, so a second matched stack reaches the install only through this list, and a shortened list reads as that stack dropped.
+
+### One structured ask
+
+Every question the preview puts to the operator goes out in one structured call, each as its own question beside the others, so the operator answers the preview once.
+
+- The extras, below
+- The visibility, under [Visibility](#visibility)
+- The planned services, under [Planned services](#planned-services)
+
+A further preview question takes its own bullet here and its own question in the same call, never a second prompt.
 
 ### Confirm the extras
 
@@ -173,7 +185,7 @@ Confirm the add-on exists before asking. Look for `public` among the stacks `can
 
 ### Ask
 
-Ask it as its own question in the same structured call as the extras, with two options. A later preview question joins that call rather than opening a second one.
+Ask it as its own question in the [one structured ask](#one-structured-ask), with two options.
 
 - Private, the recommended first option
 - Public, which adds the public sync to the chain the preview lists
@@ -186,3 +198,7 @@ A `--visibility public` or `--visibility private` argument answers ahead of time
 
 - With neither and no one to answer, take private and say so in the preview and the report
 - Private is the default because syncing public files into a private repository adds a license and a security policy nobody chose, while the reverse costs one later sync
+
+## Planned services
+
+Detection never sees a service with no files yet, so the `install` phase asks for planned services as its own question in the [one structured ask](#one-structured-ask). Read `${CLAUDE_SKILL_DIR}/references/services.md` for the options, how each service resolves, and the `--services` answer ahead.

@@ -42,6 +42,7 @@ argument that answers its prompt ahead of time:
 | `indexes`           | Confirm its folder list                    | `--all` for every candidate, `--folders <a>,<b>` for a set | Reports its candidates and stops rather than choosing |
 | `install` and `gov` | Confirm the proposed extras                | `--extras <a>,<b>` for a set, `--extras none` for none     | Takes every proposal and lists each in the report     |
 | `install`           | Ask whether the repository is public       | `--visibility public` or `--visibility private`            | Takes private and says so in the report               |
+| `install`           | Ask which services the project will carry  | `--services <folder>:<kind>,...`, or `--services none`     | Plans none and says so in the report                  |
 | `gov`               | Stop on a detected technology with no rule | `--skip-gaps`, which proceeds and lists the gap            | Stops on the gap                                      |
 
 Claude Code's tool permission dialog is the confirmation gate for everything
@@ -56,29 +57,7 @@ else. Ask only the questions this body and its references name.
 
 ## Declined states
 
-Four states reach this skill that the chain does not serve. Name the destination for each, so the refusal routes rather than ends.
-
-### An empty folder
-
-Stop before `detect` when the target holds nothing but `.git`, and hand off to `target-scaffold`. Detection reads a stack from files a project carries, so an empty folder resolves to `base` and installs tooling onto no project. That skill starts the project and hands it back here.
-
-### An existing project
-
-Stop and hand off to `target-check`, which reports what the target already carries before anything is repaired. This chain never reads that, so a per-domain install picked here is a guess against configs nobody read. Name `target-update` when the operator wants the catch-up applied.
-
-### The `.claude/` folder alone
-
-Stop. Run `canon claude init` for the seed docs, then the `indexes` phase over the project's own documentation folders. Neither needs the tooling sync the `install` phase runs.
-
-### A language with no stack
-
-The chain still runs, on `base`, with the fallback marked in the preview. A project wanting none of `base` declines there and takes the `gov` phase, which is language-neutral and drops no `base` development dependencies.
-
-Say so at the preview rather than resolving it here, since the fallback is a working default and only the person can say whether it fits.
-
-### Route rather than build
-
-Do not add a stack, a mode switch, or an existing-project branch to satisfy one of these. Each destination already exists and routing to it costs a line.
+An empty folder, an existing project, the `.claude/` folder alone, and a language with no stack each reach this skill without the chain serving them. Read `${CLAUDE_SKILL_DIR}/references/declined.md` on meeting one, for the destination each routes to rather than a refusal that ends.
 
 ## Phase: detect
 
@@ -127,6 +106,10 @@ canon tooling sync python ./backend --skip base --write
 - Each subtree keeps its own framework configs, and its stack reference reads through `canon tooling reference <stack>`
 - A subtree sync withholds `.github/`, since GitHub reads workflows only at the root, and names each withheld file with the `working-directory` a root CI job needs
 - A subtree with no `package.json` gets a minimal one from the sync, so its scripts and dependencies land in the same pass
+
+### Planned services
+
+Sync each planned service the preview resolved to a stack into its folder before the first commit, per `${CLAUDE_SKILL_DIR}/references/services.md`, and skip one marked `gap`.
 
 ### Public layer
 
@@ -220,3 +203,10 @@ fallback rather than this report. The preview is the last point before the first
 write, and the report runs after the files have landed.
 
 Report the visibility taken and what answered it, plus what the public reference says a public run owes.
+Report each planned service with the sync it took or its `gap` mark, or that none was planned and what answered it.
+
+### After the root commit
+
+A late amend to the root commit goes to a scratch branch for CI before `main` is forced, per the checklist below.
+
+Close the report on the checklist in `${CLAUDE_SKILL_DIR}/references/first-pull-request.md`, filled for this project. Name each step and the verb or setting that does it, and run none, since each one writes to the remote and is the operator's call.

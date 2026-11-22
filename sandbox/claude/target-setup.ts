@@ -34,7 +34,7 @@ export default scenario({
       ctx.log.info('Context: package.json only, no framework evidence')
       ctx.log.info('Action:  /canon:target-setup')
       ctx.log.info(
-        "Expect:  stack resolves to 'base' and the preview marks it a fallback, canon init lands .claude/rules/ and stamps canon/config/config.json, tooling sync is skipped (tooling stack also 'base' = already synced), the verify phase finds no stack scripts and reports base scripts only, the visibility question takes the private default with no answer and no public files land, the indexes phase then runs and finds no candidate folder on the empty tree, and the report names private as assumed and git-commit as outside the chain",
+        "Expect:  stack resolves to 'base' and the preview marks it a fallback, canon init lands .claude/rules/ and stamps canon/config/config.json, tooling sync is skipped (tooling stack also 'base' = already synced), the verify phase finds no stack scripts and reports base scripts only, the visibility question takes the private default with no answer and no public files land, the planned-services question plans none with no answer and the report says so, the indexes phase then runs and finds no candidate folder on the empty tree, and the report names private as assumed, git-commit as outside the chain, and closes on the first pull request checklist with no release token line",
       )
     },
     // Provisioning commits a .gitignore, which the empty-folder rule counts as
