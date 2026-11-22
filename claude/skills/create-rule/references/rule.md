@@ -42,7 +42,7 @@ Does not govern:
 
 - Authoring conventions for a document type, which are standards rather than rules. A rule points at the standard that owns one and never restates it.
 - Skill folders and skill frontmatter: `skill.md`
-- Cross-domain behavior rules, which live in `CLAUDE.md` at the project root
+- What `CLAUDE.md` at the project root holds, which stays at the sections its seed carries while a project convention becomes a rule under this reference
 - Judging each bullet after writing, which is `checklist.md`
 
 ## Shape
