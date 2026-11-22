@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.111.0](https://github.com/erclx/canon/compare/v5.110.0...v5.111.0) (2026-11-22)
+
+
+### Features
+
+* **cloudflare:** deploy the Worker the stack scaffolds ([#3361](https://github.com/erclx/canon/issues/3361)) ([5718d09](https://github.com/erclx/canon/commit/5718d091400e425495f62b215cc61248c597106c))
+* **pr:** pull the main worktree after a merge ([#3363](https://github.com/erclx/canon/issues/3363)) ([7812c3c](https://github.com/erclx/canon/commit/7812c3cd29ab939dcac9dc4756c75ea7e25aac78))
+* **tasks:** record a whole-plan approval the plan-answers gate reads ([#3359](https://github.com/erclx/canon/issues/3359)) ([1e3b9cb](https://github.com/erclx/canon/commit/1e3b9cb1d4da5eb80a53e9f73be2ceb50e78ca55))
+* **tasks:** release dead label claims and stamp each claim's owner ([#3358](https://github.com/erclx/canon/issues/3358)) ([1ac90bc](https://github.com/erclx/canon/commit/1ac90bc51063877d6655845224279138912e69a6))
+* **tasks:** warn when plan-link meets a task with no board row ([#3356](https://github.com/erclx/canon/issues/3356)) ([9c82b90](https://github.com/erclx/canon/commit/9c82b9059a6947b005830536fcd003d8c203a3c4))
+* **tooling:** run python subfolders from the root check ([#3362](https://github.com/erclx/canon/issues/3362)) ([37a9bee](https://github.com/erclx/canon/commit/37a9bee8be3cb0fc556825c43fea24e00934ec62))
+
+
+### Bug Fixes
+
+* **skills:** measure the served frame and draw each in a device body ([#3357](https://github.com/erclx/canon/issues/3357)) ([6e43e30](https://github.com/erclx/canon/commit/6e43e30f02008e3d451d47e2b4de3f9240be86bd))
+
 ## [5.110.0](https://github.com/erclx/canon/compare/v5.109.0...v5.110.0) (2026-11-22)
 
 
