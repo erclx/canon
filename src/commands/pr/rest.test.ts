@@ -112,6 +112,47 @@ describe('canon pr reads through REST alone', () => {
     rmSync(tempDir, { recursive: true, force: true })
   })
 
+  describe('a named number', () => {
+    const VERBS: readonly (readonly string[])[] = [
+      ['head'],
+      ['checks'],
+      ['review-state'],
+      ['lift', '--check'],
+      ['merge', '--dry-run'],
+      ['evidence'],
+      ['key-changes'],
+    ]
+
+    function pullCalls(): string[] {
+      return readFileSync(join(tempDir, 'gh.log'), 'utf8')
+        .split('\n')
+        .filter((line) => line.includes('/pulls/'))
+    }
+
+    it.each(VERBS)(
+      'should refuse a malformed number on %s before any pull read',
+      async (verb, ...flags) => {
+        writeFixture('gh.log', '')
+
+        const record = await runVerb(verb, ['33x8', ...flags])
+
+        expect(record).toMatchObject({ reason: 'bad-input', input: '33x8' })
+        expect(String(record.message)).toContain('"33x8"')
+        expect(pullCalls()).toEqual([])
+      },
+    )
+
+    it.each(VERBS)(
+      'should refuse a number naming no pull request on %s as no-pull',
+      async (verb, ...flags) => {
+        const record = await runVerb(verb, ['404', ...flags])
+
+        expect(record).toMatchObject({ reason: 'no-pull', number: 404 })
+        expect(String(record.message)).toContain('#404')
+      },
+    )
+  })
+
   it('should read the head of a named pull request', async () => {
     const record = await runVerb('head', ['7'])
 

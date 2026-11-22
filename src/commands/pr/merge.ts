@@ -10,16 +10,16 @@ import {
   type MergeRefusal,
   type MergeRequest,
 } from '@/pr/merge'
-import type { RestPull } from '@/pr/rest'
 import { intro, logInfo, logStep, outro } from '@/cli/ui'
 import {
   GH_TIMEOUT_MS,
   PULL_REFUSALS,
   ReadOptions,
-  gh,
   noteRateLimit,
   rateLimitMessage,
   refuseWith,
+  readPull,
+  refusePull,
   resolvePullNumber,
   withRateLimit,
 } from '@/commands/pr/pull'
@@ -92,7 +92,8 @@ export function registerMerge(pr: Command): void {
         '  merged, dry-run (--dry-run)',
         '  pull-closed, pull-draft, missing-summary, missing-key-changes,',
         '  ci-failing, ci-conflicted, ci-stalled, ci-pending, head-moved,',
-        '  not-mergeable, gh-failed, rate-limited',
+        '  not-mergeable, gh-failed, rate-limited, bad-input (a number that is not',
+        '  a positive whole number), no-pull (a number naming no pull request)',
         '',
         'A read or the merge GitHub refused for a spent quota reports',
         '`rate-limited` with `bucket` and `resetAt` rather than `gh-failed`.',
@@ -136,6 +137,7 @@ const MERGE_REFUSALS: Record<MergeRefusal | 'gh-missing', string> = {
   'not-mergeable': 'GitHub answered that the pull request is not mergeable.',
   'gh-failed':
     'A read or the merge was refused, so nothing is reported as merged.',
+  'no-pull': PULL_REFUSALS['no-pull'],
 }
 
 /**
@@ -194,27 +196,27 @@ async function putSquashMerge(
 function mergeApi(root: string, number: string): MergeApi {
   return {
     readPull: async () => {
-      const stdout = await gh(root, [
-        'api',
-        `repos/{owner}/{repo}/pulls/${number}`,
-      ])
-      if (stdout === null) return undefined
-      try {
-        const row = JSON.parse(stdout) as RestPull
-        if (row.head?.sha === undefined || typeof row.title !== 'string') {
-          return undefined
-        }
-        return {
-          isOpen: row.state === 'open',
-          isDraft: row.draft === true,
-          title: row.title,
-          body: row.body ?? '',
-          head: row.head.sha,
-          branch: row.head.ref ?? '',
-          isBotAuthor: row.user?.type === 'Bot',
-        }
-      } catch {
+      const read = await readPull(root, number)
+      if (read.kind === 'refused') {
+        return read.reason === 'no-pull' ? 'absent' : undefined
+      }
+      const { row } = read
+      if (
+        row.head?.sha === undefined ||
+        typeof row.title !== 'string' ||
+        typeof row.number !== 'number'
+      ) {
         return undefined
+      }
+      return {
+        isOpen: row.state === 'open',
+        isDraft: row.draft === true,
+        title: row.title,
+        body: row.body ?? '',
+        head: row.head.sha,
+        branch: row.head.ref ?? '',
+        isBotAuthor: row.user?.type === 'Bot',
+        number: row.number,
       }
     },
     readChecks: (head) => readChecksGate(root, number, head),
@@ -242,14 +244,7 @@ async function runMerge(
   }
 
   const resolved = await resolvePullNumber(root, number)
-  if (resolved.kind === 'refused') {
-    return refuseWith(
-      resolved.reason,
-      PULL_REFUSALS[resolved.reason],
-      emitJson,
-      root,
-    )
-  }
+  if (resolved.kind === 'refused') return refusePull(resolved, emitJson, root)
 
   const merged = await merge(mergeApi(root, resolved.number), {
     number: Number(resolved.number),
@@ -257,6 +252,13 @@ async function runMerge(
     isPull: opts.pull ?? true,
   })
   const record = withRateLimit(merged)
+  if (record.reason === 'no-pull') {
+    return refusePull(
+      { reason: 'no-pull', number: resolved.number },
+      emitJson,
+      root,
+    )
+  }
 
   logStep(record.reason)
   logInfo(

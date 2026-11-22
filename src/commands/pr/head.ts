@@ -7,6 +7,7 @@ import {
   ReadOptions,
   readIdentity,
   refReader,
+  refusePull,
   refuseWith,
 } from '@/commands/pr/pull'
 
@@ -40,6 +41,9 @@ export function registerHead(pr: Command): void {
         '  gh-failed         `gh` could not answer for this branch, so name a number',
         '  rate-limited      GitHub refused a read for a spent quota, named with',
         '                    `bucket` and `resetAt`, so wait for the reset',
+        '  bad-input         the number named is not a positive whole number,',
+        '                    refused before any call to GitHub',
+        '  no-pull           no pull request carries the number named',
         '  no-object-head    the pull request object reported no head commit',
         '',
         'Read the verdict off the record rather than off the exit. A stale head',
@@ -72,7 +76,7 @@ async function runHead(
 
   const read = await readIdentity(root, number)
   if (read.kind === 'refused') {
-    return refuseWith(read.reason, PULL_REFUSALS[read.reason], emitJson, root)
+    return refusePull(read, emitJson, root)
   }
 
   const { identity } = read

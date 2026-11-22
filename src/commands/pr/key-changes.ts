@@ -24,6 +24,9 @@ import { KEY_CHANGES } from '@/pr/paths'
 import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
 import {
   AMBIGUOUS_PULL,
+  PULL_REFUSALS,
+  parsePullNumber,
+  refusePull,
   GH_TIMEOUT_MS,
   gh,
   readPull,
@@ -46,6 +49,8 @@ type SourceRefusal =
   | 'gh-missing'
   | 'gh-failed'
   | 'ambiguous-pull'
+  | 'bad-input'
+  | 'no-pull'
   | 'unreadable-body'
   | 'unreadable-tree'
   | 'no-base'
@@ -61,6 +66,8 @@ const REFUSALS: Record<Refusal, string> = {
   'gh-failed':
     'gh could not answer for this branch. Name the pull request number, or pass --body <path>.',
   'ambiguous-pull': AMBIGUOUS_PULL,
+  'bad-input': PULL_REFUSALS['bad-input'],
+  'no-pull': PULL_REFUSALS['no-pull'],
   'unreadable-body': 'The file named by --body could not be read.',
   'unreadable-tree':
     'git could not list this repository, so no path could be judged whole rather than partial.',
@@ -149,6 +156,9 @@ export function registerKeyChanges(pr: Command): void {
         '  gh-failed           `gh` could not answer for this repository or branch',
         '  rate-limited        GitHub refused a read for a spent quota, named with',
         '                      `bucket` and `resetAt`, so wait for the reset',
+        '  bad-input           the number named is not a positive whole number,',
+        '                      refused before any call to GitHub',
+        '  no-pull             no pull request carries the number named',
         '  no-number           --link was given with no pull request number',
         '  no-repo-url         --link could not read the repository address',
         '  link-json           --link was given with --json, though it prints the body',
@@ -183,7 +193,11 @@ interface PullRequestRead {
 
 type SourceRead =
   | { readonly kind: 'read'; readonly source: PullRequestRead }
-  | { readonly kind: 'refused'; readonly reason: SourceRefusal }
+  | {
+      readonly kind: 'refused'
+      readonly reason: SourceRefusal
+      readonly number?: string
+    }
 
 /**
  * Reads the body off the pull read and the changed set off the paginated files
@@ -380,6 +394,12 @@ async function runKeyChanges(
   const root = resolve(opts.root ?? process.cwd())
   const emitJson = opts.json ?? false
 
+  // Checked ahead of both modes, since --body skips the resolver and --link prints the number.
+  if (number !== undefined) {
+    const parsed = parsePullNumber(number)
+    if (parsed.kind === 'refused') return refusePull(parsed, emitJson, root)
+  }
+
   if (opts.link === true) return runKeyChangesLink(number, opts, root)
 
   intro('canon pr key-changes')
@@ -389,7 +409,7 @@ async function runKeyChanges(
       ? await readFromApi(root, number)
       : await readFromFile(root, process.cwd(), opts.body, opts.base)
 
-  if (source.kind === 'refused') return refuse(source.reason, emitJson, root)
+  if (source.kind === 'refused') return refuseSource(source, emitJson, root)
 
   const tracked = await listRepositoryFiles(root)
   if (tracked === undefined) return refuse('unreadable-tree', emitJson, root)
@@ -520,7 +540,7 @@ async function runKeyChangesLink(
     opts.body === undefined
       ? await readFromApi(root, number)
       : await readFromFile(root, process.cwd(), opts.body, opts.base)
-  if (source.kind === 'refused') return refuse(source.reason, emitJson, root)
+  if (source.kind === 'refused') return refuseSource(source, emitJson, root)
 
   const pull = number ?? source.source.number?.toString()
   if (pull === undefined) {
@@ -571,4 +591,16 @@ async function readRepoUrl(root: string): Promise<string | undefined> {
  */
 function refuse(reason: Refusal, emitJson: boolean, root: string): number {
   return refuseWith(reason, REFUSALS[reason], emitJson, root)
+}
+
+/** Refuses on a source read, naming the number where the refusal is about it. */
+function refuseSource(
+  source: { readonly reason: SourceRefusal; readonly number?: string },
+  emitJson: boolean,
+  root: string,
+): number {
+  const { reason, number } = source
+  return reason === 'bad-input' || reason === 'no-pull'
+    ? refusePull({ reason, number }, emitJson, root)
+    : refuse(reason, emitJson, root)
 }

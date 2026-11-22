@@ -15,6 +15,9 @@ describe('canon pr close', () => {
       readonly reason?: string
       readonly branch?: string
       readonly commentUrl?: string
+      readonly message?: string
+      readonly input?: string
+      readonly number?: number
     }
     readonly exit: number
     readonly calls: string[]
@@ -25,7 +28,7 @@ describe('canon pr close', () => {
 
   async function runClose(
     args: string[],
-    fake: { readonly head?: string } = {},
+    fake: { readonly head?: string; readonly number?: string } = {},
   ): Promise<CloseRun> {
     const bin = join(root, 'bin')
     mkdirSync(bin, { recursive: true })
@@ -36,7 +39,16 @@ describe('canon pr close', () => {
     )
     const result = await execa(
       process.execPath,
-      [CLI, 'pr', 'close', '7', '--json', '--root', root, ...args],
+      [
+        CLI,
+        'pr',
+        'close',
+        fake.number ?? '7',
+        '--json',
+        '--root',
+        root,
+        ...args,
+      ],
       {
         cwd: root,
         reject: false,
@@ -80,6 +92,26 @@ describe('canon pr close', () => {
       'PATCH',
       'DELETE',
     ])
+  })
+
+  it('should refuse a malformed number before any call', async () => {
+    const run = await runClose(['--reason-file', 'reason.md'], {
+      number: '33x8',
+    })
+
+    expect(run.record).toMatchObject({ reason: 'bad-input', input: '33x8' })
+    expect(run.exit).toBe(1)
+    expect(run.calls).toEqual([])
+  })
+
+  it('should refuse a number naming no pull request and write nothing', async () => {
+    const run = await runClose(['--reason-file', 'reason.md'], {
+      number: '404',
+    })
+
+    expect(run.record).toMatchObject({ reason: 'no-pull', number: 404 })
+    expect(run.record.message).toContain('#404')
+    expect(run.calls.filter((call) => call.includes('-X'))).toEqual([])
   })
 
   it('should refuse without a reason file and call nothing', async () => {

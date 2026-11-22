@@ -5,6 +5,10 @@ case "$*" in
 *"-X POST"*) printf 'https://example.test/c/1' ;;
 *"-X PATCH"*) exit 0 ;;
 *"-X DELETE"*) exit 0 ;;
+*pulls/404*)
+  echo "gh: Not Found (HTTP 404)" >&2
+  exit 1
+  ;;
 *pulls/7*) printf '{"number":7,"state":"open","head":{"ref":"%s","repo":{"full_name":"o/r"}},"base":{"repo":{"full_name":"o/r"}}}' "$FAKE_HEAD" ;;
 *) exit 1 ;;
 esac

@@ -16,6 +16,7 @@ export type MergeRefusal =
   | 'head-moved'
   | 'not-mergeable'
   | 'gh-failed'
+  | 'no-pull'
 
 export interface MergePull {
   readonly isOpen: boolean
@@ -28,6 +29,8 @@ export interface MergePull {
   readonly branch: string
   /** Whether the author is a bot account, which a release pull request's is not. */
   readonly isBotAuthor: boolean
+  /** The number GitHub answered for, which the squash subject carries. */
+  readonly number: number
 }
 
 export type BotKind = 'release-please' | 'dependabot'
@@ -51,7 +54,8 @@ export type MergeOutcome =
  * `gh-failed` rather than reading absence as a pass.
  */
 export interface MergeApi {
-  readPull(): Promise<MergePull | undefined>
+  /** `absent` when GitHub answered 404, which no retry changes. */
+  readPull(): Promise<MergePull | 'absent' | undefined>
   readChecks(head: string): Promise<ChecksGate | undefined>
   putMerge(request: MergeRequest): Promise<MergeOutcome>
   /** Runs only after a merge landed, so its outcome never decides the merge's. */
@@ -221,11 +225,15 @@ export async function merge(
   const { number } = opts
 
   const pull = await api.readPull()
-  if (pull === undefined) return refused('gh-failed', number)
+  // A read answering for another number would put that number in the subject.
+  if (pull === 'absent') return refused('no-pull', number)
+  if (pull === undefined || pull.number !== number) {
+    return refused('gh-failed', number)
+  }
   if (!pull.isOpen) return refused('pull-closed', number)
   if (pull.isDraft) return refused('pull-draft', number)
 
-  const title = mergeTitle(pull.title, number)
+  const title = mergeTitle(pull.title, pull.number)
   const bot = botKind(pull)
   const composed =
     bot === undefined

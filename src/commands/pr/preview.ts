@@ -13,13 +13,13 @@ import {
 } from '@/pr/preview'
 import { intro, logInfo, logStep, logWarn, outro } from '@/cli/ui'
 import {
-  PULL_REFUSALS,
   ReadOptions,
   everyChangedPath,
   gh,
   listPullFiles,
   readIdentity,
   refReader,
+  refusePull,
   refuseWith,
 } from '@/commands/pr/pull'
 import { readWorkflows } from '@/commands/pr/workflows'
@@ -259,7 +259,7 @@ async function runPreview(
 
   const read = await readIdentity(root, number)
   if (read.kind === 'refused') {
-    return refuseWith(read.reason, PULL_REFUSALS[read.reason], emitJson, root)
+    return refusePull(read, emitJson, root)
   }
   const { identity } = read
 
@@ -346,12 +346,7 @@ async function runPreviewCheck(
 ): Promise<number> {
   const resolved = await resolveTip(identity.branch, refReader(root))
   if (resolved.kind === 'refused') {
-    return refuseWith(
-      resolved.reason,
-      PULL_REFUSALS[resolved.reason],
-      emitJson,
-      root,
-    )
+    return refusePull(resolved, emitJson, root)
   }
 
   const reading = await readPreviewHead(ghPreviewRunner(root), {

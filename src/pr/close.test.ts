@@ -13,7 +13,7 @@ const REASON =
 const OPEN: ClosePull = { isOpen: true, branch: 'feat/x', isFork: false }
 
 interface Fake {
-  readonly pull?: ClosePull | undefined
+  readonly pull?: ClosePull | 'absent' | undefined
   readonly commentFails?: boolean
   readonly closeFails?: boolean
   readonly deleteFails?: boolean
@@ -51,6 +51,17 @@ const OPTS: CloseOptions = {
   head: 'feat/x',
   isKeepBranch: false,
 }
+
+describe('close on a pull request GitHub does not hold', () => {
+  it('should refuse no-pull and post nothing', async () => {
+    const { api, calls } = fakeApi({ pull: 'absent' })
+
+    const record = await close(api, OPTS)
+
+    expect(record).toMatchObject({ reason: 'no-pull', isOk: false })
+    expect(calls).toEqual(['read'])
+  })
+})
 
 describe('checkReason', () => {
   it('should find nothing in a short plain reason', () => {
