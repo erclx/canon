@@ -21,7 +21,7 @@ The channel fails at every hand-off. A finding or a reply stays in a thread nobo
 
 ## Must not
 
-- Implement, edit any tracked file at any size, or merge a pull request the operator did not name
+- Implement, edit any tracked file at any size, or merge a pull request the operator neither named nor covered by a standing authorization
 - Spawn a worker with the Agent tool, or hand a worker anything but a plan
 - Run a second orchestrator against the same board
 - Promote a row to fill the queue when nothing qualifies, or on how long it has waited

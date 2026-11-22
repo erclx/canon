@@ -93,7 +93,25 @@ Read the slot off `canon pr evidence <number> --json` at the moment the line is 
 
 ### Running the line
 
-The operator runs the line, or names the pull request for this session to run it. The client puts each `canon pr merge` call to the operator, and that prompt is their approval, so run the line only for the one pull request they named and never for a second they did not.
+The operator runs the line, or names the pull request for this session to run it. The client puts each `canon pr merge` call to the operator, and that prompt is their approval, so run the line only for the one pull request they named and never for a second they did not, unless a standing authorization below covers it.
+
+### Under a standing authorization
+
+A standing authorization is the operator's word to merge each pull request in a scope as its gates pass, so this session runs the line for each one without a fresh word.
+
+- Its scope is the one the operator states, or the current wave when they name none, since a wave is the unit the merge order reasons over
+- It ends on the event the operator states, once every pull request in its scope has merged, or at a compaction handoff
+- The handoff's map records it for the next session to re-test, per `orchestrator-handoff.md`
+- A pull request outside the scope takes a recommendation and nothing runs, and a merge past the end waits on the operator's word again
+
+Run the line under it only when every gate passes at the moment of the merge, and report each merge after it lands with its merge line and proof slot.
+
+- Both reviews closed at the head, read through `canon pr review-state <number> --json`
+- `canon pr lift <number> --check --json` reading `already-ready` or `clear`, which carries CI passed at the tip, per the gate below
+- GitHub reading the pull request clean, as `mergeStateStatus: CLEAN` from `gh pr view <number> --json mergeStateStatus`
+- The pull request first among those still open in the scope, in the order `orchestrator-merge-order.md` sets
+
+A failing gate takes the report it would take outside the authorization, and the merge waits for the next read. The shipped `ask` rule on `canon pr merge` still prompts the operator on each call, since the authorization changes when this session runs the line and never the client's prompt.
 
 ### Gate the line on CI at the tip
 
