@@ -1,6 +1,6 @@
 ---
 name: create-rule
-description: Scaffolds a project-specific governance rule into `.claude/rules/project/<subdir>/<slug>.md` with correct frontmatter and a slug no other rule in that subdir takes. Use when asked to "add a rule", "create a governance rule", "write a project rule", "add a project convention", "add this to CLAUDE.md", or when a project needs a coding rule the toolkit does not ship. Do NOT use to edit toolkit source rules under `governance/rules/`.
+description: Scaffolds a project-specific governance rule into `.claude/rules/project/<subdir>/<slug>.md` with correct frontmatter and a slug no other rule in that subdir takes. Use when asked to "add a rule", "create a governance rule", "write a project rule", "add a project convention", "add this convention to CLAUDE.md", or when a project needs a coding rule the toolkit does not ship. Do NOT use to edit toolkit source rules under `governance/rules/`.
 metadata:
   family: generate
 ---

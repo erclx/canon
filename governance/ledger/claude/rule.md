@@ -9,9 +9,9 @@ The rule is a core rule, so every row is a house choice rather than a citation. 
 
 ## Project conventions
 
-| Bullet                              | Source                                                                                                                                                                                                                                                  | Read       |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Keep CLAUDE.md to its seed sections | House choice: in a first scaffold a session wrote a Language section and then a Privacy section into the target's `CLAUDE.md`, and the operator moved both into project rules by hand. It beat a pointer line in the seed, which loads in every session | 2026-11-22 |
+| Bullet                             | Source                                                                                                                                                                                                                                                                                                                                               | Read       |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Add a convention as a project rule | House choice: in a first scaffold a session wrote a Language section and then a Privacy section into the target's `CLAUDE.md`, and the operator moved both into project rules by hand. It beat a pointer line in the seed, which loads in every session, and a cap on the whole file, which would tell a project to shrink sections it already holds | 2026-11-22 |
 
 ## Rule files
 

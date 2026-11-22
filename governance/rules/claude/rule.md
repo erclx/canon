@@ -9,7 +9,7 @@ paths:
 
 ## Project conventions
 
-- Keep `CLAUDE.md` to the sections its seed carries, and add a project convention as a project rule through `canon:create-rule` instead of a new section.
+- Add a new project convention as a project rule through `canon:create-rule` rather than a new `CLAUDE.md` section, unless `CLAUDE.md` names another owner for it.
 
 ## Rule files
 
