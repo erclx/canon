@@ -107,7 +107,9 @@ A Pages project fills three values in `deploy.yml`.
 
 ### Worker
 
-A Worker project fills two values in `deploy-worker.yml`.
+A Worker project fills two values in `deploy-worker.yml` and sets its token's scope.
+
+- Grant `CLOUDFLARE_API_TOKEN` Workers Scripts edit and D1 edit, since a Pages-edit token runs neither `wrangler deploy` nor `d1 migrations apply`.
 
 - Set `HEALTH_URL` to the full URL of a route answering 2xx only when the Worker is healthy.
 - Widen the `paths:` filter the same way as the Pages one, keeping `migrations/**` and `wrangler.*`.

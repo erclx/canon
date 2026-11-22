@@ -64,7 +64,7 @@ jobs:
           elif [ "$REF" != "$DEFAULT_REF" ]; then
             reason="A Worker deploys to production from the default branch alone, and this run is on $REF, skipping deploy."
           elif [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-            reason="CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is not set, skipping deploy. Run the deploy-app skill to finish setup."
+            reason="CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is not set, skipping deploy. Add both as repository secrets, with a token granting Workers Scripts edit and D1 edit."
           fi
           if [ -n "$reason" ]; then
             echo "::notice::$reason"
