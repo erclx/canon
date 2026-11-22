@@ -1,7 +1,8 @@
 import { existsSync } from 'node:fs'
-import { mkdir, readdir } from 'node:fs/promises'
-import { relative } from 'node:path'
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { join, relative } from 'node:path'
 import { recordDir } from '@/roots/record'
+import { callerIdentity } from '@/sessions/resolve'
 import {
   archiveDir,
   declinedDir,
@@ -28,6 +29,9 @@ const RESERVATION_PATTERN = /^v(\d+)\.(\d+)$/
 /** Bounds the claim loop. A fifth loss in a row is not a race. */
 const MAX_ATTEMPTS = 5
 
+/** The owner file each claim writes inside its lock directory. */
+const OWNER_FILE = 'claim.json'
+
 interface Label {
   readonly major: number
   readonly minor: number
@@ -40,6 +44,20 @@ export interface NextLabel {
   readonly highest: string | undefined
   /** Whether this label was reserved on disk rather than only read. */
   readonly claimed: boolean
+  /**
+   * Each label lock above the highest task label, the only ones that move the
+   * next label, read after this run's own claim and release.
+   */
+  readonly reservations: readonly Reservation[]
+  /** The labels this run freed as dead claims. A bare read frees none. */
+  readonly released: readonly string[]
+}
+
+export interface Reservation {
+  readonly label: string
+  /** The session that claimed it, null for a lock that predates the owner file or a claim from outside a session. */
+  readonly sessionId: string | null
+  readonly claimedAt: string | null
 }
 
 export interface LabelRefused {
@@ -107,6 +125,52 @@ async function listReservations(root: string): Promise<string[]> {
   }
 }
 
+async function readOwner(
+  root: string,
+  label: string,
+): Promise<Omit<Reservation, 'label'>> {
+  try {
+    const raw: unknown = JSON.parse(
+      await readFile(
+        join(recordDir(root, 'ordinal-locks', label), OWNER_FILE),
+        'utf8',
+      ),
+    )
+    const owner = typeof raw === 'object' && raw !== null ? raw : {}
+    const sessionId = 'sessionId' in owner ? owner.sessionId : undefined
+    const claimedAt = 'claimedAt' in owner ? owner.claimedAt : undefined
+    return {
+      sessionId: typeof sessionId === 'string' ? sessionId : null,
+      claimedAt: typeof claimedAt === 'string' ? claimedAt : null,
+    }
+  } catch {
+    // An absent or torn owner file reads as no owner, the legacy shape.
+    return { sessionId: null, claimedAt: null }
+  }
+}
+
+/** The label locks above `floor`, each with whatever owner it recorded. */
+async function reservationsAbove(
+  root: string,
+  floor: Label | undefined,
+): Promise<Reservation[]> {
+  const above = (await listReservations(root))
+    .map((name) => ({ name, label: parseLabel(name, RESERVATION_PATTERN) }))
+    .filter(
+      (entry): entry is { name: string; label: Label } =>
+        entry.label !== undefined &&
+        (floor === undefined || isHigher(entry.label, floor)),
+    )
+    .sort((a, b) => (isHigher(a.label, b.label) ? 1 : -1))
+
+  return Promise.all(
+    above.map(async ({ name }) => ({
+      label: name,
+      ...(await readOwner(root, name)),
+    })),
+  )
+}
+
 function highestOf(
   names: readonly string[],
   pattern: RegExp,
@@ -145,32 +209,59 @@ export async function nextLabel(root: string): Promise<LabelOutcome> {
     label: formatLabel(highest === undefined ? FIRST_LABEL : next(highest)),
     highest: highest === undefined ? undefined : formatLabel(highest),
     claimed: false,
+    reservations: await reservationsAbove(root, highest),
+    released: [],
   }
+}
+
+interface Owner {
+  readonly sessionId: string | null
+  readonly claimedAt: string
 }
 
 interface ClaimOptions {
   /** Takes the reservation, resolving false when another claim holds it. */
-  readonly reserve?: (root: string, label: string) => Promise<boolean>
+  readonly reserve?: (
+    root: string,
+    label: string,
+    owner: Owner,
+  ) => Promise<boolean>
+  /** The claiming session, defaulting to `CLAUDE_CODE_SESSION_ID`. */
+  readonly sessionId?: string | null
+  /** The instant the claim is stamped with. Defaults to `Date.now`. */
+  readonly now?: () => number
 }
 
-async function reserveLabel(root: string, label: string): Promise<boolean> {
+/**
+ * Takes the lock through an exclusive `mkdir`, which alone decides a race, then
+ * stamps the owner inside it. A reader meeting the lock before the stamp sees a
+ * fresh directory with no owner, which no release takes inside its age bound.
+ */
+async function reserveLabel(
+  root: string,
+  label: string,
+  owner: Owner,
+): Promise<boolean> {
   await mkdir(reservationsDir(root), { recursive: true })
+  const dir = recordDir(root, 'ordinal-locks', label)
 
   try {
-    await mkdir(recordDir(root, 'ordinal-locks', label), { recursive: false })
-    return true
+    await mkdir(dir, { recursive: false })
   } catch (error) {
     if (error instanceof Error && 'code' in error && error.code === 'EEXIST') {
       return false
     }
     throw error
   }
+
+  await writeFile(join(dir, OWNER_FILE), `${JSON.stringify(owner)}\n`, 'utf8')
+  return true
 }
 
 /**
  * Reserves the next label through an exclusive `mkdir` under
- * `.canon/ordinal-locks/`. The scan counts every reservation beside the stems,
- * and none expires, since a dead claim leaves a gap `versioning.md` permits.
+ * `.canon/ordinal-locks/`, stamping the claiming session and time inside it.
+ * The scan counts every reservation beside the stems.
  */
 export async function claimLabel(
   root: string,
@@ -180,6 +271,13 @@ export async function claimLabel(
   if (!existsSync(dir)) return noBoard(root, dir)
 
   const reserve = options.reserve ?? reserveLabel
+  const owner: Owner = {
+    sessionId:
+      options.sessionId === undefined
+        ? callerIdentity().sessionId
+        : options.sessionId,
+    claimedAt: new Date(options.now?.() ?? Date.now()).toISOString(),
+  }
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
     const stems = highestOf(await readStems(root), LABEL_PATTERN)
@@ -192,12 +290,14 @@ export async function claimLabel(
       highest === undefined ? FIRST_LABEL : next(highest),
     )
 
-    if (await reserve(root, label)) {
+    if (await reserve(root, label, owner)) {
       return {
         ok: true,
         label,
         highest: highest === undefined ? undefined : formatLabel(highest),
         claimed: true,
+        reservations: await reservationsAbove(root, stems),
+        released: [],
       }
     }
   }

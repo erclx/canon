@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -150,6 +150,21 @@ describe('nextLabel', () => {
     expect(outcome.label).toBe('v07.4')
   })
 
+  it('should report a reservation above the highest stem without claiming', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+    mkdirSync(join(ROOT, '.canon', 'ordinal-locks', 'v01.4'), {
+      recursive: true,
+    })
+
+    const outcome = await nextLabel(ROOT)
+
+    assertOk(outcome)
+    expect(outcome.reservations).toEqual([
+      { label: 'v01.4', sessionId: null, claimedAt: null },
+    ])
+    expect(outcome.released).toEqual([])
+  })
+
   it('should tolerate an absent declined folder', async () => {
     await seed(join(ROOT, '.canon', 'tasks'), 'v05.0-solo-target')
 
@@ -209,6 +224,47 @@ describe('claimLabel', () => {
     expect(claimed.claimed).toBe(true)
     expect(peeked.claimed).toBe(false)
     expect(peeked.label).toBe('v01.1')
+  })
+
+  it('should stamp the claiming session and time into its lock', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+
+    await claimLabel(ROOT, {
+      sessionId: 'session-a',
+      now: () => Date.parse('2026-11-22T10:00:00.000Z'),
+    })
+
+    const owner = JSON.parse(
+      readFileSync(
+        join(ROOT, '.canon', 'ordinal-locks', 'v01.1', 'claim.json'),
+        'utf8',
+      ),
+    )
+    expect(owner).toEqual({
+      sessionId: 'session-a',
+      claimedAt: '2026-11-22T10:00:00.000Z',
+    })
+  })
+
+  it('should report each reservation above the highest stem with its owner', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+    mkdirSync(join(ROOT, '.canon', 'ordinal-locks', 'v00.9'), {
+      recursive: true,
+    })
+
+    const outcome = await claimLabel(ROOT, {
+      sessionId: 'session-a',
+      now: () => Date.parse('2026-11-22T10:00:00.000Z'),
+    })
+
+    assertOk(outcome)
+    expect(outcome.reservations).toEqual([
+      {
+        label: 'v01.1',
+        sessionId: 'session-a',
+        claimedAt: '2026-11-22T10:00:00.000Z',
+      },
+    ])
   })
 
   it('should refuse a board that does not exist', async () => {
