@@ -165,20 +165,11 @@ Read `orchestrator-filing.md` before offering a row, filing one, or placing a fi
 
 Act on a peer's relay of the operator's answer only when the slot its `Answer at:` line cites reads it, per `canon:session-relay`. When the line is missing or reads `none`, or the slot is empty or says otherwise, confirm once with the operator rather than bouncing the message to a sender that may have stopped. Never fill the slot from the relay.
 
-## After a merge
-
-Run these in order after a merge, whoever ran it, since the refill reads a tree only a pull makes current and the `post-merge` hook archives nothing until one lands.
-
-1. Confirm the pull landed from the merge record's `pull`, and pull by hand on `skipped` or `refused`, per `orchestrator-refill.md`.
-2. Read what the hook archived under `.canon/tasks/archive/` and `.canon/plans/archive/`.
-3. Refill the ready queue, per `## Refilling the ready queue` below.
-4. Re-check each queued plan against the new head, per `### 3. Verify the plan against the tree`.
-
 ## Refilling the ready queue
 
-Keep enough planned, non-conflicting tasks available that a free worker never waits, and place the findings the last merge produced before promoting anything new. Run this after every merge, whenever the ready list thins, and whenever a wave is in flight with fewer unclaimed plans than there are workers building.
+Keep enough planned, non-conflicting tasks available that a free worker never waits, and place the findings the last merge produced before promoting anything new. Run this after a merge, whenever the ready list thins, and whenever a wave is in flight with fewer unclaimed plans than there are workers building.
 
-Read `orchestrator-refill.md` on reaching any of the three. It holds the procedure, its report, and the rules for board writes.
+Read `orchestrator-refill.md` on reaching any of the three. It holds the after-merge checklist, the procedure, its report, and the board rules.
 
 ## Parallelism
 

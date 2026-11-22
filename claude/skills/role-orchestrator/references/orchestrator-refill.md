@@ -14,6 +14,15 @@ The third trigger reaches a window the first two cannot. A session with three wo
 - A plan a worker already took serves nobody who finishes next, so counting it lets the queue read full while it is about to empty
 - How many to write past that floor is the parallelism call rather than a count of free slots, and `## Parallelism` in the skill body states what binds it
 
+## The after-merge checklist
+
+A merge trigger runs four things in order, whoever ran the merge, since the refill reads a tree only a pull makes current and the `post-merge` hook archives nothing until one lands.
+
+1. Confirm the pull landed, per step 1 below, and pull by hand on `skipped` or `refused`.
+2. Read what the hook archived under `.canon/tasks/archive/` and `.canon/plans/archive/`.
+3. Run the rest of the refill below.
+4. Re-check each queued plan against the new head, per `### 3. Verify the plan against the tree` in the skill body.
+
 ## Running the refill
 
 1. Read the `pull` field of each merge record since the last sweep before reading any history, since a main behind its remote reads every later step off a stale tree.
