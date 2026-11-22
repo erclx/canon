@@ -31,9 +31,9 @@ export interface LaunchRefused {
 }
 
 /**
- * One reading of a row. `reason` is `unlinked` while the task carries no `Plan:`
- * line, `open` while its plan holds a question for the operator, and
- * `launchable` once it holds none. `plan` and `open` keep `plan-answers`' names.
+ * One reading of a row: `unlinked` with no `Plan:` line, `open` while its plan
+ * holds an operator call, `launchable` once it holds none. The plan fields keep
+ * `plan-answers`' names, and `approved` is absent whenever `plan` is.
  */
 export interface LaunchReading {
   readonly ok: true
@@ -42,14 +42,16 @@ export interface LaunchReading {
   readonly reason: 'unlinked' | 'open' | 'launchable'
   readonly launchable: boolean
   readonly open: readonly OpenQuestion[]
+  readonly approved?: string | null
+  readonly deferred: readonly OpenQuestion[]
 }
 
 export type LaunchOutcome = LaunchReading | LaunchRefused
 
 /**
- * The record a wait ends on. A reading ends `launchable` or, at the deadline,
- * `timeout` carrying the last reading. A refusal ends the wait at once, since
- * nothing a planner writes next turns an archived plan or unknown task launchable.
+ * A reading ends `launchable` or `timeout`, carrying the last one. A refusal ends
+ * the wait at once. A planner writes the approval line before linking, so a linked
+ * plan its board refuses as `unapproved` has nobody writing the line to wait on.
  */
 export type LaunchWait =
   | (Omit<LaunchReading, 'reason'> & {
@@ -94,7 +96,14 @@ export async function readLaunchable(
   )
   const [target] = targets
   if (target === undefined) {
-    return { ok: true, task, reason: 'unlinked', launchable: false, open: [] }
+    return {
+      ok: true,
+      task,
+      reason: 'unlinked',
+      launchable: false,
+      open: [],
+      deferred: [],
+    }
   }
   if (targets.length > 1) {
     return refuse(
@@ -114,6 +123,8 @@ export async function readLaunchable(
     reason: answers.launchable ? 'launchable' : 'open',
     launchable: answers.launchable,
     open: answers.open,
+    approved: answers.approved,
+    deferred: answers.deferred,
   }
 }
 

@@ -85,6 +85,7 @@ The slot is one of these:
 
 - A plan question's `- Answer:` line
 - A plan question's `- Suggested:` line, for a pick settled in conversation, which names who settled it there
+- A plan's `Approved:` line, for a plan the operator approved whole in the planner's session, cited as `<path>, Approved:`
 - An intake item's `You:` line
 - A task's outcome box
 

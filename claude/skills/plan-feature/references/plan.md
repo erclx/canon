@@ -354,6 +354,20 @@ The plan is archived at ship, so the same deviation takes one line in the open t
 
 This contract inverts the one an intake folder keeps, where an empty slot means unread and acceptance is typed out. A plan is written and read in one sitting with every question already surfaced, so silence is a usable default here and is not one there.
 
+### Approval
+
+An operator who approves a plan whole in the planner's session leaves no slot behind, and a `needs your call` question whose value stays out of the plan never gets a typed answer. The planner records that approval as one line under the H1 paragraph, ahead of `## Summary`:
+
+```markdown
+Approved: operator, <YYYY-MM-DD>, in <session name>
+```
+
+- Write it only on the operator's word in that session, never on a controller's message or on silence. The line records the planner's claim, so the controller confirms it as it would any relayed answer.
+- Take the session name from `canon sessions list --self --json`, since the controller looks the claim up by it.
+- Keep the line outside `## Questions`, since the planner fills no `- Answer:` slot. A line placed after the first section reads as prose and approves nothing.
+- Under the line, `canon tasks plan-answers` launches a blank `needs your call` question and lists it under `deferred`, for the building session to ask at build. A typed answer still wins.
+- A board refuses a plan without the line as `unapproved` only where `canon/config/tasks.toml` sets `require_approval = true`. Elsewhere a blank slot keeps accepting its suggestion.
+
 ## Template
 
 Each H3 below shows where a section groups once it passes 5 bullets. A section of 5 or fewer drops its H3s and keeps its bullets flat, except `## Risks` and `## Verbatim`, which take an H3 per risk or block at any count.

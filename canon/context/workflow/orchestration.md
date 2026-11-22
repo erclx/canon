@@ -45,7 +45,7 @@ Owns the plan shape that a planner writes and a worker or controller reads.
 Owns the `canon tasks` verbs that validate, archive, derive from, and write the board. `board.ts` refuses a row naming no task or one whose blocker its header cannot place, since a render would drop or rewrite it in a gitignored file, and checks a group move against the predicates `validate.ts` exports.
 
 - `plan-branch` is the one branch derivation, called by the dispatcher and by `auto-ship` Step 0, and its type is a constant because the type is cosmetic
-- `plan-answers` reports `launchable` from a `needs your call` suggestion over an empty slot, and holds a fan-in integrator until each member branch is on origin, since a local head exists mid-build
+- `plan-answers` holds an empty `needs your call` slot unless an `Approved:` line heads the plan, which moves it to `deferred`, and holds a fan-in integrator until each member branch is on origin
 - `resolvePlanReference` tries the project root and then the board directory, and an archived plan refuses as `archived`
 - The overlap checks read a row's paths from its plans, since a `Touches` cell only counts them. `sharesPath` collides a folder a plan declares with every file under it on purpose.
 - `plan-reach` reports the paths a branch wrote beyond its plan and gates nothing
