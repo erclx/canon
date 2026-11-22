@@ -11,7 +11,7 @@ paths:
 
 - Edit an installed component in place when the design needs it, since the code is the project's own.
 - Read `shadcn add --diff` before running `--overwrite` on a component, since overwriting discards local edits.
-- Import components and `cn` through the aliases in `components.json`, which the CLI uses to place files and rewrite imports.
+- Import components through the aliases in `components.json`, which the CLI uses to place files and rewrite imports.
 
 ## Component authoring
 
@@ -21,7 +21,8 @@ paths:
 ## Tokens and styling
 
 - Use semantic tokens such as `bg-background`, `text-foreground`, and `border-border` over hardcoded colors.
-- Merge classes with `cn()` from `@/lib/utils`, so a caller's `className` overrides the component's defaults.
+- Merge classes with `cn()`, so a caller's `className` overrides the component's defaults.
+- Import `cn` from `@/lib/utils` in the project's own code, and leave a generated component's direct import from the `cn` package as the CLI wrote it.
 
 ## Composition
 

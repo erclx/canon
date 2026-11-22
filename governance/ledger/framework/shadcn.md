@@ -9,11 +9,11 @@ The field is front-end engineering, and the authority is the shadcn/ui documenta
 
 ## Source files
 
-| Bullet                       | Source                                                                                                                                                                                                            | Read       |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Edit installed code in place | [Introduction](https://ui.shadcn.com/docs): "This is not a component library. It is how you build your component library", and "Modify any part of a component to fit your design and functionality requirements" | 2026-10-18 |
-| Diff before overwrite        | [CLI](https://ui.shadcn.com/docs/cli): `add --overwrite` will "overwrite existing files", and `--diff` will "show diff for a file"                                                                                | 2026-10-18 |
-| Import through the aliases   | [components.json](https://ui.shadcn.com/docs/components-json): "The CLI uses these values to place generated components in the correct location and rewrite imports"                                              | 2026-10-18 |
+| Bullet                       | Source                                                                                                                                                                                                                                                                                                                                                                                                                           | Read       |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Edit installed code in place | [Introduction](https://ui.shadcn.com/docs): "This is not a component library. It is how you build your component library", and "Modify any part of a component to fit your design and functionality requirements"                                                                                                                                                                                                                | 2026-10-18 |
+| Diff before overwrite        | [CLI](https://ui.shadcn.com/docs/cli): `add --overwrite` will "overwrite existing files", and `--diff` will "show diff for a file"                                                                                                                                                                                                                                                                                               | 2026-10-18 |
+| Import through the aliases   | [components.json](https://ui.shadcn.com/docs/components-json): "The CLI uses these values to place generated components in the correct location and rewrite imports". [Manual installation](https://ui.shadcn.com/docs/installation/manual) keeps `cn` out of the aliases: "Components import `cn` directly from the `cn` package. Re-export it from `lib/utils.ts` so your own code has a single place to import helpers from." | 2026-11-22 |
 
 ## Component authoring
 
@@ -24,10 +24,11 @@ The field is front-end engineering, and the authority is the shadcn/ui documenta
 
 ## Tokens and styling
 
-| Bullet          | Source                                                                                                                                                                                      | Read       |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Semantic tokens | [Theming](https://ui.shadcn.com/docs/theming): "We use semantic background and foreground pairs", mapped "into utilities like bg-background, text-foreground, border-border, and ring-ring" | 2026-10-18 |
-| `cn()` merging  | [Manual installation](https://ui.shadcn.com/docs/installation/manual): re-export `cn` "from lib/utils.ts so your own code has a single place to import helpers from"                        | 2026-10-18 |
+| Bullet          | Source                                                                                                                                                                                                                       | Read       |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Semantic tokens | [Theming](https://ui.shadcn.com/docs/theming): "We use semantic background and foreground pairs", mapped "into utilities like bg-background, text-foreground, border-border, and ring-ring"                                  | 2026-10-18 |
+| `cn()` merging  | [cn README](https://github.com/shadcn-ui/cn): "`cn` is a new engine for Tailwind class merging and conflict resolution. It replaces `tailwind-merge` and `clsx`."                                                            | 2026-11-22 |
+| `cn` import     | [Manual installation](https://ui.shadcn.com/docs/installation/manual): "Components import `cn` directly from the `cn` package. Re-export it from `lib/utils.ts` so your own code has a single place to import helpers from." | 2026-11-22 |
 
 ## Composition
 
