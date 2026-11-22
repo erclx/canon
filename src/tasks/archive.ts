@@ -518,11 +518,6 @@ export function retargetReadyLine(text: string, target: string): string {
   return text.replace(READY_PATTERN, () => readyLine(target))
 }
 
-/**
- * Builds the `Declined:` line recording why a task was decided against and by
- * whom. Free prose after the colon, since the line names no file to link,
- * unlike `planLine`.
- */
 export const DEFAULT_DECIDER = 'operator'
 
 /**
@@ -535,6 +530,11 @@ export function deciderFor(by: string | undefined): string | undefined {
   return name.length > 0 ? name : undefined
 }
 
+/**
+ * Builds the `Declined:` line recording why a task was decided against and by
+ * whom. Free prose after the colon, since the line names no file to link,
+ * unlike `planLine`.
+ */
 export function declineLine(reason: string, by: string, date: string): string {
   return `Declined: ${reason}, ${by} on ${date}`
 }
