@@ -88,6 +88,7 @@ A round draws every arm at a phone, a tablet, and a desktop width, read from the
 - Before drafting, a round reuses the board's `references` page or runs `canon:design-references` to fill one, with the sites you name or bare.
 - That page holds section shots at each width, a filmed scroll, and a few hovers, each frame naming its source. Each arm names the frame it draws on and takes structure alone.
 - The close archives the references page beside the picked round and leaves it on the board for the next round.
+- An app pick with several screens is offered a clickable prototype built to flows you confirm. It then owns behavior and copy, and each handover lists static frames it no longer matches.
 
 ### Where a round drafts
 
