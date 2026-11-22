@@ -146,7 +146,7 @@ Offer one prototype once the pick settles on an app or product surface with more
 5. Resolve `<canon-dir>` as `.canon/` against the main worktree root, where shared session scratch resolves. Frameboard appends the project and page, so the archive lands at `.canon/<project>/<page>/`.
 6. Delete every page on the run's list with `frameboard page delete <page>`, except the pages kept below. Touch no page the run did not add, and never remove a page folder by hand.
 7. End the serve command if this run started it, since Frameboard carries no stop verb. Leave a server the operator started running.
-8. Leave the renders in a live track's `evidence/<slug>/renders/`, since `plan-groundwork` treats evidence as durable.
+8. Leave renders in a live track's `evidence/<slug>/renders/`, which `plan-groundwork` keeps. Under `role-planner`, offer a record per `references/record.md`.
 9. Report each page or frame whose delete is refused, naming its `ref` and the `error.code`. The pick is applied either way.
 10. Report every surface that changed, each on its own line, name the winning arm by its id and its cost, and report the archive path.
 
