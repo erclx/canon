@@ -1,5 +1,25 @@
 # Changelog
 
+## [5.110.0](https://github.com/erclx/canon/compare/v5.109.0...v5.110.0) (2026-11-22)
+
+
+### Features
+
+* **cli:** default the decline decider to operator (#NaN) ([20ef056](https://github.com/erclx/canon/commit/20ef0565fca42e4f4533511245441f7f013552d8))
+* **records:** exempt bold lean labels from the groundwork S4 check ([#3349](https://github.com/erclx/canon/issues/3349)) ([9de2326](https://github.com/erclx/canon/commit/9de2326372afea8ece4808716b496b53828f5e43))
+* **skills:** add an amend path with a lease push to git-commit ([#3354](https://github.com/erclx/canon/issues/3354)) ([3236c5d](https://github.com/erclx/canon/commit/3236c5d171fded4ef0e1de79e6b9470e3d9aaba9))
+* **skills:** ask for planned services and close setup on a PR checklist ([#3344](https://github.com/erclx/canon/issues/3344)) ([cb93a36](https://github.com/erclx/canon/commit/cb93a36acbedf19a1376b94cc482d45d63538be6))
+* **skills:** initialize shadcn on an app root in target-setup ([#3345](https://github.com/erclx/canon/issues/3345)) ([39617dc](https://github.com/erclx/canon/commit/39617dcbd78d96387e2665baa4595f890835a60a))
+* **skills:** name typed glyphs for icons as a tell ([#3350](https://github.com/erclx/canon/issues/3350)) ([7d26444](https://github.com/erclx/canon/commit/7d26444c4cf191717e62add13c459752d2593c26))
+* **skills:** render the retro shortlist as markdown ([#3347](https://github.com/erclx/canon/issues/3347)) ([06e32d2](https://github.com/erclx/canon/commit/06e32d2d30e9835b88fda039029d766f74d8f584))
+* **worktrees:** scope the foreign-record refusal to the repository ([#3352](https://github.com/erclx/canon/issues/3352)) ([2e26092](https://github.com/erclx/canon/commit/2e26092d357e28c2d4400ffd922bb1b57fbc0b1c))
+
+
+### Bug Fixes
+
+* **capture:** probe each font face at the weight and style it draws in ([#3353](https://github.com/erclx/canon/issues/3353)) ([c8bcf2d](https://github.com/erclx/canon/commit/c8bcf2d19f016838060cd56f2eb7360c7bb6c780))
+* **hooks:** skip a session id inside a path in session-name ([#3351](https://github.com/erclx/canon/issues/3351)) ([f8edfd6](https://github.com/erclx/canon/commit/f8edfd6243f63e23bdf2b15b4d1fe88d50a07b4e))
+
 ## [5.109.0](https://github.com/erclx/canon/compare/v5.108.0...v5.109.0) (2026-11-22)
 
 
