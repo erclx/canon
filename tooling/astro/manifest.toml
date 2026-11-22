@@ -46,7 +46,7 @@ packages = [
 "# Astro" = [".astro/"]
 "# Social card" = ["card-dist/"]
 
-[verify]
+[scaffold]
 # The scaffold's page writes its own head, so it is pointed at the synced
 # site-head component, and the two greps stop the run here if a template change
 # left either rewrite unmatched rather than at the head tag check later.

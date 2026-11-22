@@ -16,9 +16,9 @@ Owns the golden configs a project inherits, layered across a `base` to `web` to 
 Holds one stack, always with a `manifest.toml` and a `reference.md`, plus `configs/` and `seeds/`. A stack that stands alone, such as `cloudflare` or `shell`, sets `extends = ""` and layers onto a root already carrying another. `shippedCommentCaps` fails a file in either past a comment cap, touched or not, since every synced target fails on it.
 
 - Adding a stack means copying the closest one from `canon tooling list`, filling its manifest and reference, adding configs and seeds, and running `canon tooling verify <name>`
-- A manifest block injects one thing. `[dependencies.dev]` and `[scripts]` add only what is missing, `[gitignore]` adds a group, and `[verify] prepare` runs between scaffold and sync.
+- A manifest block injects one thing. `[dependencies.dev]` and `[scripts]` add only what is missing, `[gitignore]` adds a group, and `[scaffold] prepare` runs on the starter.
 - `runtime` is reserved and read by nothing. `scaffold` is read by `canon tooling verify`, `canon tooling scaffold`, `canon tooling list`, and `sandbox/tooling/upstream.ts`.
-- `python`, `go`, and `php` extend `base` directly and run on `uv`, `go`, and `composer`, so their scaffolds write no `package.json` and `[verify] prepare` runs `bun init -y`
+- `python`, `go`, and `php` extend `base` directly and run on `uv`, `go`, and `composer`, so their starters write no `package.json` and each stack's `scaffold/` overlay lands a minimal one
 - A script changes only through `[scripts.override]`, as `vite-react` forces `--max-warnings 0` onto the scaffold's oxlint, and the drift scan reads a stale override as `drifted`
 
 ### `tooling/astro/`
@@ -28,7 +28,7 @@ Holds the one stack that lints with ESLint and formats `.astro` files with Prett
 - `lint` and `lint:fix` are overridden back to `eslint`, and every other file takes oxfmt
 - Its `.oxfmtrc.json` repeats base's options because scan takes a child config over the parent's whole file
 - `configs/src/components/dev/` holds a query-parameter switcher between candidate treatments as an `.astro` shell, a `.ts` script, and a `.css` file, shipped under the application-code proof
-- `configs/src/components/site-head.astro` writes the head tags from `src/site.ts`, a `web` seed, and its `[verify] prepare` wires the scaffold's page to it
+- `configs/src/components/site-head.astro` writes the head tags from `src/site.ts`, a `web` seed, and its `[scaffold] prepare` wires the scaffold's page to it
 - `configs/scripts/check-head-meta.sh` fails a built page missing a head tag. It sits here rather than in `web` because `vite-react` and `nextjs` write no head yet.
 
 ### `tooling/web/`
@@ -114,9 +114,9 @@ Holds the decline, customize, and lift transitions over `domains.tooling.disposi
 
 ### `src/tooling/verify-stack.ts`
 
-Runs `canon tooling verify <stack>` by scaffolding into `.canon/tmp/runs/verify-<stack>/`, running `[verify] prepare`, syncing, then running `format` and `check` with `CI` set, plus `lint:fix`, `test:e2e`, and `screenshot` where the synced `package.json` declares them.
+Runs `canon tooling verify <stack>` by scaffolding into `.canon/tmp/runs/verify-<stack>/` through `scaffoldStack`, committing into its own repository, syncing, then running `format` and `check` with `CI` set, plus `lint:fix`, `test:e2e`, and `screenshot` where the synced `package.json` declares them.
 
-- A failed phase is recorded and the run continues, a scaffold with no `package.json` after sync fails it, and `--keep` preserves a green run
+- A failed phase is recorded and the run continues, but a failed starter or step stops it, since the verb moved nothing. `--keep` preserves a green run.
 - The sync phase runs `bun <root>/src/cli.ts` from the checkout, never `canon` on PATH, and an add-on such as `cloudflare` syncs `base` first, as `canon init` would
 - `web` has no scaffold command, so a change to `tooling/web/configs/` is verified through `vite-react` and `astro`
 - Run it after any change to `tooling/<stack>/configs/`, a manifest, or `src/tooling/`
@@ -124,12 +124,13 @@ Runs `canon tooling verify <stack>` by scaffolding into `.canon/tmp/runs/verify-
 
 ### `src/tooling/scaffold.ts`
 
-Runs `canon tooling scaffold <stack> [target]` for the `target-scaffold` skill. The command runs in a temp folder with `{{name}}` set to the target's basename, so `mkdir {{name}} && cd` still works, and the result moves into the target afterward.
+Runs `canon tooling scaffold <stack> [target]` for the `target-scaffold` skill. The starter runs in a temp folder with `{{name}}` set to the target's basename, the stack's `[scaffold] prepare` and its `tooling/<stack>/scaffold/` overlay apply there, and the result moves into the target.
 
-- A target holding anything but `.git` refuses, and a target's own `.git` wins over one the scaffolder wrote, as `uv init` does
+- A target holding anything but `.git` refuses, and a `.git` the starter wrote never moves, since it would nest inside a parent repository
 - A basename a package manager rejects refuses as `bad-name` with a `suggested` name, never a silent rename
-- A failed command moves nothing and keeps the scratch folder, named in the record
-- It runs no `[verify] prepare`, so a `python`, `go`, or `php` starter reaches `target-setup` with no `package.json`
+- A failed command or step moves nothing and keeps the scratch folder, named in the record, with `prepare-failed` for the step
+- The overlay lands after the step, since on a case-insensitive filesystem a step removing `App.tsx` would take an overlay's `app.tsx` with it
+- After the move, `git init -b main` runs only outside a work tree, so the record's `git` field reads `existing` in a monorepo subfolder, beside `initialized` and `failed`
 
 ### Other folders
 

@@ -10,6 +10,7 @@ import {
 import { tmpdir } from 'node:os'
 import { basename, join, resolve } from 'node:path'
 import { execa } from 'execa'
+import { gitEnv } from '@/git/env'
 import { isStackExcluded, loadManifest } from '@/tooling/manifest'
 
 export interface ScaffoldOptions {
@@ -29,6 +30,13 @@ export type ScaffoldRefusal =
   | 'bad-name'
   | 'scaffold-failed'
   | 'no-output'
+  | 'prepare-failed'
+
+/**
+ * `initialized` is a fresh `git init -b main`, `existing` a target already inside a work tree, which a scaffold
+ * into a monorepo subfolder must not nest a second repository in, and `failed` an init that exited non-zero.
+ */
+export type ScaffoldGit = 'initialized' | 'existing' | 'failed'
 
 export type ScaffoldResult =
   | {
@@ -37,6 +45,7 @@ export type ScaffoldResult =
       readonly target: string
       readonly name: string
       readonly files: readonly string[]
+      readonly git: ScaffoldGit
     }
   | {
       readonly ok: false
@@ -58,9 +67,9 @@ const MAX_NAME = 214
 const IGNORED_ENTRIES = new Set(['.git'])
 
 /**
- * Runs the stack's `manifest.scaffold` in a scratch folder with `{{name}}` set to the target's basename, then moves
- * what it produced into the target. Nothing reaches the target unless the command exits 0, and a failed run names
- * the scratch folder it leaves.
+ * Runs the starter in a scratch folder with `{{name}}` set to the target's basename, applies the post-scaffold step
+ * and then the `scaffold/` overlay, and moves the result into the target. Nothing reaches the target unless the
+ * starter and the step both exit 0, and a failed run names the scratch folder it leaves.
  */
 export async function scaffoldStack(
   opts: ScaffoldOptions,
@@ -107,16 +116,8 @@ export async function scaffoldStack(
   const scratch = mkdtempSync(
     join(opts.scratchBase ?? tmpdir(), 'canon-scaffold-'),
   )
-  // Manifests carry shell syntax (`&&`, `cd`, quoted globs), so the command runs under a shell, as `tooling verify` does.
   const command = manifest.scaffold.replaceAll('{{name}}', name)
-  const run = await execa(command, {
-    cwd: scratch,
-    shell: 'bash',
-    all: true,
-    reject: false,
-    stdin: 'ignore',
-    env: { CI: '1' },
-  })
+  const run = await shell(command, scratch)
   const output = typeof run.all === 'string' ? run.all : ''
 
   if (run.failed) {
@@ -139,17 +140,64 @@ export async function scaffoldStack(
     }
   }
 
+  if (manifest.prepare !== undefined) {
+    const step = await shell(manifest.prepare, produced)
+    if (step.failed) {
+      return {
+        ok: false,
+        reason: 'prepare-failed',
+        message: `Post-scaffold step failed: ${manifest.prepare}`,
+        scratch,
+        output: typeof step.all === 'string' ? step.all : '',
+      }
+    }
+  }
+  // After the step, since on a case-insensitive filesystem removing `App.tsx` would delete the overlay's `app.tsx`.
+  const overlay = join(manifest.dir, 'scaffold')
+  if (existsSync(overlay)) {
+    cpSync(overlay, produced, { recursive: true, force: true })
+  }
+
   mkdirSync(target, { recursive: true })
-  const keepTargetGit = existsSync(join(target, '.git'))
   const files: string[] = []
   for (const entry of readdirSync(produced).sort()) {
-    if (entry === '.git' && keepTargetGit) continue
+    // A starter's own repository would nest inside a parent one, so only `initGit` decides the target's git.
+    if (entry === '.git') continue
     move(join(produced, entry), join(target, entry))
     files.push(entry)
   }
   rmSync(scratch, { recursive: true, force: true })
 
-  return { ok: true, stack, target, name, files }
+  return { ok: true, stack, target, name, files, git: await initGit(target) }
+}
+
+/** A failed init never fails the scaffold, since the files already reached the target. */
+async function initGit(target: string): Promise<ScaffoldGit> {
+  if (existsSync(join(target, '.git'))) return 'existing'
+  const git = (args: readonly string[]) =>
+    execa('git', args, {
+      cwd: target,
+      reject: false,
+      stdin: 'ignore',
+      env: gitEnv(),
+      extendEnv: false,
+    })
+  const probe = await git(['rev-parse', '--is-inside-work-tree'])
+  if (!probe.failed && probe.stdout.trim() === 'true') return 'existing'
+  const init = await git(['init', '-q', '-b', 'main'])
+  return init.failed ? 'failed' : 'initialized'
+}
+
+// Manifests carry shell syntax (`&&`, `cd`, quoted globs), so each command runs under a shell.
+function shell(command: string, cwd: string) {
+  return execa(command, {
+    cwd,
+    shell: 'bash',
+    all: true,
+    reject: false,
+    stdin: 'ignore',
+    env: { CI: '1' },
+  })
 }
 
 function refuse(reason: ScaffoldRefusal, message: string): ScaffoldResult {

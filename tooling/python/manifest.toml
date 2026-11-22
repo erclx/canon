@@ -2,7 +2,7 @@
 name = "python"
 extends = "base"
 runtime = "uv"
-scaffold = "uv init --package {{name}}"
+scaffold = "uv init --package --vcs none {{name}}"
 
 [scripts]
 "lint" = "uv run ruff check . && uv run ruff format --check ."
@@ -20,5 +20,8 @@ scaffold = "uv init --package {{name}}"
   ".coverage_cache/",
 ]
 
-[verify]
-prepare = "bun init -y && uv add --dev ruff mypy pytest pytest-cov && uv sync"
+[scaffold]
+# --no-sync locks without building .venv, whose scripts would carry the scratch
+# folder's absolute path after the scaffold moves them, so the first uv run
+# builds it at the target.
+prepare = "uv add --dev --no-sync ruff mypy pytest pytest-cov"

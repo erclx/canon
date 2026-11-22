@@ -36,7 +36,11 @@ export interface Manifest {
    * layer stack, which scaffolds nothing of its own.
    */
   readonly scaffold?: string
-  /** Post-scaffold setup `canon tooling verify` runs ahead of Sync. */
+  /**
+   * The post-scaffold step `canon tooling scaffold` runs on the starter's
+   * output, from `[scaffold] prepare`. `[verify] prepare` is read as an alias
+   * for one release so a manifest not yet moved keeps working.
+   */
   readonly prepare?: string
 }
 
@@ -142,7 +146,9 @@ export function loadManifest(
   const scriptsTable = asTable(parsed.scripts)
   const perRoot = readStrings(asTable(parsed.sync).per_root)
   const scaffold = readString(stackTable.scaffold)
-  const prepare = readString(asTable(parsed.verify).prepare)
+  const prepare =
+    readString(asTable(parsed.scaffold).prepare) ??
+    readString(asTable(parsed.verify).prepare)
   const dir = join(toolingDir(root), stack)
 
   return {

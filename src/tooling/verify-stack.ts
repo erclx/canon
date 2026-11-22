@@ -1,7 +1,19 @@
-import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs'
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+} from 'node:fs'
 import { join } from 'node:path'
 import { execa, type Options } from 'execa'
-import { isStackExcluded, loadManifest } from '@/tooling/manifest'
+import {
+  isStackExcluded,
+  loadManifest,
+  resolveChain,
+  type Manifest,
+} from '@/tooling/manifest'
+import { scaffoldStack } from '@/tooling/scaffold'
 import { isAddOn } from '@/tooling/stamp'
 import { intro, logError, logInfo, logStep, logWarn, outro } from '@/cli/ui'
 
@@ -88,29 +100,33 @@ async function run({
   rmSync(state.dir, { recursive: true, force: true })
 
   logStep(`Scaffolding ${stack}`)
-  // Manifests carry shell syntax (`&&`, `cd`, quoted globs), so the command runs under a shell.
-  const scaffoldCommand = manifest.scaffold.replaceAll('{{name}}', name)
-  const scaffold = await shell(scaffoldCommand, runsDir)
-  if (scaffold.failed) {
-    logWarn('Scaffold failed')
-    process.stderr.write(`$ ${scaffoldCommand}\n`)
-    writeTail(scaffold.all)
+  // Through the verb a real scaffold takes, so the step and overlay proved here are the ones a target receives.
+  const scaffold = await scaffoldStack({
+    root,
+    stack,
+    target: state.dir,
+    scratchBase: runsDir,
+  })
+  if (!scaffold.ok) {
+    if (scaffold.scratch === undefined) return refuse(scaffold.message)
+    logWarn(scaffold.message)
+    writeTail(scaffold.output)
+    const isStepFailure = scaffold.reason === 'prepare-failed'
+    record(state, 'Scaffold', isStepFailure)
+    if (isStepFailure) record(state, 'Prepare', false)
+    logInfo(`Kept ${scaffold.scratch}`)
+    return { results: state.results, exitCode: 1 }
   }
+  record(state, 'Scaffold', true)
+  if (manifest.prepare !== undefined) record(state, 'Prepare', true)
 
-  if (!existsSync(state.dir)) {
-    return refuse(`Scaffold did not produce ${state.dir}`)
-  }
-  record(state, 'Scaffold', !scaffold.failed)
-
+  // The verb leaves git alone inside the checkout's work tree, so the scaffold's git-reading scripts need this repo.
+  await shell('git init -q', state.dir)
+  excludeChainIgnores(root, manifest, state.dir)
   await shell(
-    'git init -q && git add . && git commit -m "chore: verify scaffold" -q --no-verify --allow-empty',
+    'git add . && git commit -m "chore: verify scaffold" -q --no-verify --allow-empty',
     state.dir,
   )
-
-  const { prepare } = manifest
-  if (prepare !== undefined) {
-    await phase(state, 'Prepare', () => shell(prepare, state.dir))
-  }
 
   const cli = join(root, 'src/cli.ts')
   logInfo(`Sync resolves via bun ${cli}, not PATH canon`)
@@ -170,6 +186,29 @@ async function runScripts(state: Run, scripts: Set<string>): Promise<void> {
   const shots = countScreenshots(join(state.dir, 'screenshots'))
   if (shots === 0) logWarn('screenshot produced no png files')
   record(state, 'screenshot-artifacts', shots > 0)
+}
+
+/**
+ * The commit lands after the post-scaffold step, ahead of the Sync that writes the chain's `.gitignore` groups, so
+ * a step's install output such as php's `vendor/` would otherwise become tracked and fail every check reading
+ * tracked files. `.git/info/exclude` keeps those paths out without touching the tree Sync reads.
+ */
+function excludeChainIgnores(
+  root: string,
+  manifest: Manifest,
+  dir: string,
+): void {
+  const chain = [
+    ...resolveChain(root, manifest.name),
+    ...(isAddOn(manifest) ? resolveChain(root, 'base') : []),
+  ]
+  const entries = chain.flatMap((layer) =>
+    layer.gitignore.flatMap((section) => section.entries),
+  )
+  if (entries.length === 0) return
+  const info = join(dir, '.git', 'info')
+  mkdirSync(info, { recursive: true })
+  appendFileSync(join(info, 'exclude'), `${entries.join('\n')}\n`)
 }
 
 type Spawned = Awaited<ReturnType<typeof execa>>

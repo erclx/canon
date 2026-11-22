@@ -150,7 +150,6 @@ Skip this step when Step 2 was skipped, since nothing landed for a second pass t
 
 Step 4: post-sync fixups. Golden configs arrive from sync, so no config generation is required. But a few items may need a one-time touch:
 
-- **File naming.** `bun create vite`'s `App.tsx` violates the `KEBAB_CASE` rule. Rename to `app.tsx` and update the import in `main.tsx`.
 - **Docs.** Run `canon tooling reference <tooling-stack>` and `canon tooling reference web` for any stack-specific follow-ups (Chrome extension overrides, setup script details).
 
 Do not generate oxlint, ESLint, Vitest, or Playwright configs. They ship as golden files. Generating from prose duplicates what sync already installed.

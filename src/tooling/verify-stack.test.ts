@@ -6,9 +6,11 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { gitEnv } from '@/git/env'
 import { verifyStack } from '@/tooling/verify-stack'
 
 let root: string
@@ -184,7 +186,7 @@ describe('verifyStack phases', () => {
   it('should run the manifest prepare before sync', async () => {
     seedStack(
       'prep',
-      `${scaffoldWith([])}\n[verify]\nprepare = "touch prepared"\n`,
+      `${scaffoldWith([])}\n[scaffold]\nprepare = "touch prepared"\n`,
     )
 
     const outcome = await verifyStack({ root, stack: 'prep', keep: true })
@@ -260,6 +262,38 @@ describe('verifyStack tmp dir', () => {
     expect(outcome.exitCode).toBe(1)
     expect(outcome.results[0]).toEqual({ name: 'Scaffold', passed: false })
     expect(stderr.mock.calls.join('')).toContain('mkdir -p verify-broken')
+  })
+})
+
+describe('verifyStack post-scaffold step', () => {
+  it('should leave a path the stack ignores out of the verify commit', async () => {
+    seedStack(
+      'php',
+      `${scaffoldWith([])}\n[scaffold]\nprepare = "mkdir vendor && touch vendor/lib.php"\n\n[gitignore]\n"# PHP" = ["vendor/"]\n`,
+    )
+
+    await verifyStack({ root, stack: 'php', keep: true })
+
+    const tracked = execFileSync('git', ['ls-files'], {
+      cwd: tmpDir('php'),
+      encoding: 'utf8',
+      env: gitEnv(),
+    })
+    expect(tracked.split('\n')).toContain('package.json')
+    expect(tracked).not.toContain('vendor/')
+  })
+
+  it('should fail at Prepare and run no later phase when the step fails', async () => {
+    seedStack('prep', `${scaffoldWith([])}\n[scaffold]\nprepare = "exit 2"\n`)
+
+    const outcome = await verifyStack({ root, stack: 'prep' })
+
+    expect(outcome.exitCode).toBe(1)
+    expect(outcome.results).toEqual([
+      { name: 'Scaffold', passed: true },
+      { name: 'Prepare', passed: false },
+    ])
+    expect(bunCalls()).toEqual([])
   })
 })
 

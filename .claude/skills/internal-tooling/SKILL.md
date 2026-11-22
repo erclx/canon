@@ -84,7 +84,9 @@ The check runs only where a stack keeps a `tooling/<stack>/manifest.toml`, so a 
 
 `canon tooling verify <stack>` is the end-to-end validator, run after any change to `tooling/<stack>/` or `src/tooling/`. It scaffolds fresh into `.canon/tmp/runs/verify-<stack>/`, syncs, runs `lint:fix`, `format`, `check`, `test:e2e`, and `screenshot`, asserts the screenshot artifacts, and reports a results matrix.
 
-- The `[verify] prepare` manifest field declares post-scaffold setup that runs before sync. Use for integrations that can not ship as golden configs (astro's `bunx astro add react`).
+- The `[scaffold] prepare` manifest field declares the post-scaffold step `canon tooling scaffold` runs on the starter, and verify scaffolds through that verb, so both run it
+- Use the step for integrations that can not ship as golden configs (astro's `bunx astro add react`) and for removals. `[verify] prepare` still reads as an alias.
+- Put a file the scaffold writes under `tooling/<stack>/scaffold/`, which lands after the step, rather than writing it through a shell string
 - Tmp dir auto-removes on success. Keeps on failure. Use `--keep` to inspect after a green run.
 
 ## Seed naming

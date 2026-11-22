@@ -10,7 +10,7 @@ The go stack covers Go modules linted and formatted by `golangci-lint` v2, type-
 
 1. Scaffold with `go mod init <module-path>`. The module path is the project's own identity, so this stack never ships a `go.mod`.
 2. Keep `./...` out of `node_modules` with `go mod edit -ignore=./node_modules` (Go 1.25 or later). A root sync installs `node_modules/` in the module, and a package there can ship `.go` files.
-3. Seed `package.json` with `bun init -y`, so the base layer's bun-side tools (husky, oxfmt, commitlint) have a target to install into.
+3. Seed a minimal `package.json`, so the base layer's bun-side tools (husky, oxfmt, commitlint) have a target to install into. `canon tooling scaffold go` lands it from the stack's `scaffold/` overlay.
 4. Install base tooling with `canon tooling sync base . --write`.
 5. Install go tooling with `canon tooling sync go . --write`.
 6. Install the linter with `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest`. This stays manual, since manifest injection runs `bun add -D`, which cannot install a Go tool.
@@ -49,7 +49,7 @@ Two things stay out of the list, and one step runs before it.
 - Keep `build` out, though the stack declares the script. `go build ./...` exits 1 with `no packages to build` on a module holding only a test file.
 - A seeded `main.go` would assume every module is a binary rather than a library.
 - Keep `-race` out of `test:run`. The race detector needs cgo and a C toolchain, so it belongs in CI rather than a local `bun run check`.
-- The manifest's `[verify] prepare` runs checklist steps 3 and 6 for `canon tooling verify go`, being `bun init -y` and the `go install` when the binary is not on PATH.
+- The `scaffold/` overlay lands checklist step 3's `package.json`, and step 6's `go install` stays manual, so an offline scaffold never fails on the linter.
 - The scaffold writes no `package.json`, and a verify that reaches its end with none fails.
 
 ## CI

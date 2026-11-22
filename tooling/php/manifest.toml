@@ -19,5 +19,5 @@ scaffold = "mkdir {{name}} && cd {{name}} && composer init -n --name example/{{n
   ".phpunit.result.cache",
 ]
 
-[verify]
-prepare = "bun init -y && composer require --dev friendsofphp/php-cs-fixer phpstan/phpstan phpunit/phpunit"
+[scaffold]
+prepare = "composer require --dev friendsofphp/php-cs-fixer phpstan/phpstan phpunit/phpunit"
