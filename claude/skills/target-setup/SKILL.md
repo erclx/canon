@@ -112,18 +112,11 @@ canon tooling sync python ./backend --skip base --write
 
 Sync each planned service the preview resolved to a stack into its folder before the first commit, per `${CLAUDE_SKILL_DIR}/references/services.md`, and skip one marked `gap`.
 
-### Public layer
+### Public layer and shadcn
 
 On a public answer, run `canon tooling sync public <target> --write` at the root after every stack sync, then apply `${CLAUDE_SKILL_DIR}/references/public.md`. Skip both otherwise.
 
-### shadcn on an app root
-
-On a yes to the shadcn question, initialize shadcn in each app root once every sync in Step 2 has finished and ahead of Step 3. Read the sequence from `canon tooling reference web` under `## Adding shadcn`, which names the stylesheet, template, and flags per stack, rather than composing the command here.
-
-- Run it from the app root, which is the target itself on a single-root project
-- Skip it on an `astro` root and on any root whose tooling stack is not an app stack, per the detect reference
-- Run it before the second detection, since that pass proposes the shadcn rule only once `components.json` exists
-- Treat a failed or timed-out init as a gap the report names, and carry on with Step 3
+On a shadcn yes, initialize each app root after every sync and ahead of Step 3, per `${CLAUDE_SKILL_DIR}/references/shadcn.md`.
 
 ### Detect again after the sync
 

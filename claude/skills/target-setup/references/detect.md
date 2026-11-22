@@ -16,7 +16,6 @@ What the `install` and `gov` phases both do before they write anything. Stated o
 - [Preview](#preview)
 - [Visibility](#visibility)
 - [Planned services](#planned-services)
-- [Component library](#component-library)
 
 ## Read the catalogs
 
@@ -125,7 +124,7 @@ Before executing, output:
 - **Skip:** any `--skip` entries with reason
 - **Visibility:** public or private, and whether an argument, the operator, or the private default answered it. Omit this row on the `gov` phase.
 - **Planned services:** one row per planned service, with its folder, its stack or a `gap` mark, and its sync command, or `none` with what answered it. Omit this row on the `gov` phase.
-- **shadcn:** yes or no per app root, and whether an argument, the operator, or the yes default answered it. Omit this row on the `gov` phase and when no root resolved to an app stack.
+- **shadcn:** yes or no, and what answered it. Omit it on the `gov` phase and with no app root.
 - **Target:** resolved target path
 - **Commands:** the full chain that will run
 
@@ -149,7 +148,7 @@ Every question the preview puts to the operator goes out in one structured call,
 - The extras, below
 - The visibility, under [Visibility](#visibility)
 - The planned services, under [Planned services](#planned-services)
-- The shadcn init on an app root, under [Component library](#component-library)
+- The shadcn init on a `vite-react` or `nextjs` root, per `${CLAUDE_SKILL_DIR}/references/shadcn.md`
 
 A further preview question takes its own bullet here and its own question in the same call, never a second prompt.
 
@@ -205,25 +204,3 @@ A `--visibility public` or `--visibility private` argument answers ahead of time
 ## Planned services
 
 Detection never sees a service with no files yet, so the `install` phase asks for planned services as its own question in the [one structured ask](#one-structured-ask). Read `${CLAUDE_SKILL_DIR}/references/services.md` for the options, how each service resolves, and the `--services` answer ahead.
-
-## Component library
-
-The `install` phase asks whether to initialize shadcn on an app root, being a language root whose tooling stack resolved to `vite-react` or `nextjs`. An app builds dialogs, menus, and selects, and shadcn hands it accessible primitives the project owns as source. The `gov` phase installs rules alone and asks nothing.
-
-Skip the question on every other root. An `astro` site keeps its own components, and a root with no app stack has nothing to initialize.
-
-### Ask
-
-Ask it in the same structured call as the extras and the visibility question, with two options. One answer covers every app root in the repository.
-
-- Yes, the recommended first option, which adds the init sequence to the chain the preview lists
-- No, which leaves the app to build its components by hand
-
-A yes adds the init to the **Commands** row, once per app root, after every stack sync and ahead of the second detection.
-
-### Answering ahead
-
-A `--shadcn yes` or `--shadcn no` argument answers ahead of time and skips the question.
-
-- With neither and no one to answer, take yes on an app root and say so in the preview and the report, so an install nobody asked for stays visible
-- Yes is the default because a declined init leaves each later session hand-building primitives, while an unwanted one costs a removal of `components.json`, `src/components/ui/`, and `src/lib/utils.ts`

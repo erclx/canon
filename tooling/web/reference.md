@@ -43,14 +43,9 @@ Checked against shadcn `4.23.0` on 2026-11-22.
 2. Confirm the stylesheet imports `tailwindcss` and the `@/*` alias sits in every file the table names. Without the import, init stops on `No Tailwind CSS configuration found`.
 3. Run `timeout 300 bunx shadcn@latest init -t <template> -b base -p nova --no-monorepo -y </dev/null` from the app root. The closed stdin and `--no-monorepo` keep a non-TTY session off a prompt.
 4. Expect `components.json` reading `"style": "base-nova"`, `src/lib/utils.ts`, and `src/components/ui/button.tsx`, with the theme merged into the stylesheet below the Tailwind import.
-5. Diff the stylesheet against the copy and reapply any line init removed.
-6. Run `bun run format`, since init writes in its own style and the format check fails on it.
+5. Reapply any stylesheet line init removed, then run `bun run format`, since init writes in its own style.
 
-`-b base` picks Base UI, the shadcn rule's default for new projects, and `-p nova` with it yields the `base-nova` style.
-
-- Name both, since a release changing a default would otherwise move every new project
-- Pass the bare preset name to `-p`, which refuses `base-nova`
-- Expect init to add `@base-ui/react`, `class-variance-authority`, `lucide-react`, `tw-animate-css`, and the Geist font
+`-b base` picks Base UI, the shadcn rule's default for new projects, and `-p nova` with it yields `base-nova`, since `-p` refuses that name. Naming both keeps a release changing a default from moving every new project.
 
 ## TypeScript and layout
 
