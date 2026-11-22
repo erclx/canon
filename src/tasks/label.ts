@@ -250,6 +250,8 @@ interface ClaimOptions {
   readonly now?: () => number
   /** The session roster liveness is read from. Defaults to `resolveSessions`. */
   readonly sessions?: () => Promise<SessionReport>
+  /** Runs between a release's owner re-read and its removal, so a test can force a race there. */
+  readonly beforeRelease?: (label: string) => Promise<void>
 }
 
 type Liveness = 'live' | 'dead' | 'unknown'
@@ -298,6 +300,7 @@ interface ReleaseContext {
   readonly now: number
   readonly self: string | null
   readonly roster: () => Promise<SessionReport | undefined>
+  readonly beforeRelease?: (label: string) => Promise<void>
 }
 
 async function isDead(
@@ -314,11 +317,33 @@ async function isDead(
 }
 
 /**
- * Removes a lock judged dead, re-reading it first so a claim that took the
- * label since the judgment keeps it. The owner file goes before the directory,
- * and a non-recursive `rmdir` refuses anything a later claim wrote beside it.
+ * Removes a lock judged dead under a sibling `<label>.release` guard, so two
+ * releasers never interleave a re-read with a removal and free a lock just retaken.
  */
 async function release(
+  context: ReleaseContext,
+  judged: Reservation,
+): Promise<boolean> {
+  const guard = recordDir(
+    context.root,
+    'ordinal-locks',
+    `${judged.label}.release`,
+  )
+  try {
+    await mkdir(guard, { recursive: false })
+  } catch {
+    // A held guard is a sibling mid-release, and a crashed one keeps the lock, the safe side.
+    return false
+  }
+
+  try {
+    return await removeIfUnchanged(context, judged)
+  } finally {
+    await rmdir(guard).catch(() => undefined)
+  }
+}
+
+async function removeIfUnchanged(
   context: ReleaseContext,
   judged: Reservation,
 ): Promise<boolean> {
@@ -333,6 +358,7 @@ async function release(
     return false
   }
 
+  await context.beforeRelease?.(judged.label)
   const dir = recordDir(context.root, 'ordinal-locks', judged.label)
   try {
     await rm(join(dir, OWNER_FILE), { force: true })
@@ -394,7 +420,15 @@ async function reserveLabel(
     throw error
   }
 
-  await writeFile(join(dir, OWNER_FILE), `${JSON.stringify(owner)}\n`, 'utf8')
+  try {
+    await writeFile(join(dir, OWNER_FILE), `${JSON.stringify(owner)}\n`, 'utf8')
+  } catch (error) {
+    // A release took the lock before the stamp landed, so this claim lost the race.
+    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+      return false
+    }
+    throw error
+  }
   return true
 }
 
@@ -423,6 +457,7 @@ export async function claimLabel(
       now: Date.parse(owner.claimedAt),
       self: owner.sessionId,
       roster: rosterOnce(options.sessions ?? (() => resolveSessions())),
+      beforeRelease: options.beforeRelease,
     },
     highestOf(await readStems(root), LABEL_PATTERN),
   )

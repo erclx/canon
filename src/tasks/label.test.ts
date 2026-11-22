@@ -463,23 +463,42 @@ describe('claimLabel releasing dead claims', () => {
     expect(existsSync(lockDir('0042'))).toBe(true)
   })
 
-  it('should hand a freed label to one of several racing claims', async () => {
+  it('should return distinct labels when several claims race one dead lock', async () => {
     await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
     ownedLock('v01.1', 'gone-session')
-    const options = {
-      sessionId: 'racer',
-      now: () => NOW,
-      sessions: roster(['racer']),
-    }
+    const live = roster(['racer-a', 'racer-b', 'racer-c'])
 
-    const outcomes = await Promise.all([
-      claimLabel(ROOT, options),
-      claimLabel(ROOT, options),
-      claimLabel(ROOT, options),
-    ])
+    const outcomes = await Promise.all(
+      ['racer-a', 'racer-b', 'racer-c'].map((sessionId) =>
+        claimLabel(ROOT, { sessionId, now: () => NOW, sessions: live }),
+      ),
+    )
 
     const labels = outcomes.map((outcome) => outcome.ok && outcome.label)
     expect(new Set(labels).size).toBe(3)
-    expect(labels).toContain('v01.1')
+  })
+
+  it('should keep a lock a second claim took while the first was releasing it', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+    ownedLock('v01.1', 'gone-session')
+    const live = roster(['racer-a', 'racer-b'])
+    let second: LabelOutcome | undefined
+
+    const first = await claimLabel(ROOT, {
+      sessionId: 'racer-a',
+      now: () => NOW,
+      sessions: live,
+      beforeRelease: async () => {
+        second ??= await claimLabel(ROOT, {
+          sessionId: 'racer-b',
+          now: () => NOW,
+          sessions: live,
+        })
+      },
+    })
+
+    assertOk(first)
+    expect(second?.ok && second.label).toBe('v01.2')
+    expect(first.label).toBe('v01.3')
   })
 })
