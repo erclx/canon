@@ -38,6 +38,8 @@ export function registerHead(pr: Command): void {
         '                    is no tip to compare against',
         '  gh-missing        `gh` is not on the path, so no pull request resolved',
         '  gh-failed         `gh` could not answer for this branch, so name a number',
+        '  rate-limited      GitHub refused a read for a spent quota, named with',
+        '                    `bucket` and `resetAt`, so wait for the reset',
         '  no-object-head    the pull request object reported no head commit',
         '',
         'Read the verdict off the record rather than off the exit. A stale head',

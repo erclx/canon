@@ -373,9 +373,26 @@ describe('waitForReviews', () => {
     expect(result).toMatchObject({
       kind: 'read',
       reason: 'covered',
-      waitedSeconds: 2,
+      waitedSeconds: 3,
     })
-    expect(calls.sleeps).toEqual([1000, 1000])
+    expect(calls.sleeps).toEqual([1000, 1500])
+  })
+
+  it('should read at most 14 times across a 1200s wait at the default gap', async () => {
+    const { api, calls } = makeApi({ reviews: [[codePass('## Review', HEAD)]] })
+
+    await waitForReviews(api, { waitSeconds: 1200, pollMs: 30_000 })
+
+    expect(calls.sleeps.length + 1).toBeLessThanOrEqual(14)
+  })
+
+  it('should cut the last gap to the deadline rather than sleeping past it', async () => {
+    const { api, calls } = makeApi({ reviews: [[codePass('## Review', HEAD)]] })
+
+    const result = await waitForReviews(api, { waitSeconds: 3, pollMs: 1000 })
+
+    expect(result).toMatchObject({ reason: 'timeout', waitedSeconds: 3 })
+    expect(calls.sleeps).toEqual([1000, 1500, 500])
   })
 
   it('should return timeout past the deadline with the last record', async () => {
@@ -441,7 +458,7 @@ describe('waitForReviews', () => {
 
     expect(result).toMatchObject({
       reason: 'covered',
-      waitedSeconds: 2,
+      waitedSeconds: 3,
       record: { head: PUSHED },
     })
   })

@@ -21,8 +21,20 @@ import { DEFAULT_PAINTED, isPainted, type PaintedPatterns } from '@/pr/painted'
 /** How long `--wait` holds for a pending CI run, in seconds, when none is named. */
 export const DEFAULT_WAIT_SECONDS = 1200
 
-/** The gap between two reads of the check runs while the verb waits on them. */
+/** The first gap between two reads while a verb waits, which grows from here. */
 export const CHECKS_POLL_MS = 30_000
+
+/** The widest gap a wait grows to, so a pass is reported at most this late. */
+export const CHECKS_POLL_CAP_MS = 120_000
+
+/**
+ * The gap after `gap`, half again up to the cap, so a wave of concurrent waits
+ * on one token spends a fraction of the calls a fixed gap does. A first gap
+ * already past the cap is kept rather than shrunk.
+ */
+export function nextPollMs(gap: number): number {
+  return Math.min(gap * 1.5, Math.max(gap, CHECKS_POLL_CAP_MS))
+}
 
 /** Why the verb did not lift, in the order the gates are read. */
 export type LiftRefusal =
@@ -507,6 +519,7 @@ async function waitForChecks(
 ): Promise<CiOutcome> {
   const started = api.now()
   const deadline = started + waitSeconds * 1000
+  let gap = pollMs
 
   for (;;) {
     const reading = await api.readChecks(tip)
@@ -531,10 +544,10 @@ async function waitForChecks(
         stalled: reading.stalled,
       }
     }
-    if (api.now() + pollMs > deadline) {
-      return { kind: 'refused', reason: 'ci-timeout', waited }
-    }
-    await api.sleep(pollMs)
+    const left = deadline - api.now()
+    if (left <= 0) return { kind: 'refused', reason: 'ci-timeout', waited }
+    await api.sleep(Math.min(gap, left))
+    gap = nextPollMs(gap)
   }
 }
 

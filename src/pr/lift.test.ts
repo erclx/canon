@@ -1640,7 +1640,7 @@ describe('lift', () => {
       })
 
       expect(record.reason).toBe('lifted')
-      expect(calls.sleeps).toEqual([30_000, 30_000])
+      expect(calls.sleeps).toEqual([30_000, 45_000])
     })
 
     it('should refuse ci-timeout when the run is still pending at the deadline', async () => {
