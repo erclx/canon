@@ -1640,6 +1640,37 @@ describe('lift', () => {
       })
 
       expect(record.reason).toBe('lifted')
+      expect(calls.sleeps).toEqual([30_000, 45_000])
+    })
+
+    it('should grow the gap by half each poll up to two minutes', async () => {
+      const { api, calls } = makeApi({ checks: [PENDING] })
+
+      await lift(api, { isCheck: false, waitSeconds: 1200, pollMs: 30_000 })
+
+      expect(calls.sleeps.slice(0, 6)).toEqual([
+        30_000, 45_000, 67_500, 101_250, 120_000, 120_000,
+      ])
+    })
+
+    it('should read the checks at most 14 times across a 1200s wait', async () => {
+      const { api, calls } = makeApi({ checks: [PENDING] })
+
+      await lift(api, { isCheck: false, waitSeconds: 1200, pollMs: 30_000 })
+
+      expect(calls.checks).toBeLessThanOrEqual(14)
+    })
+
+    it('should cut the last gap to the deadline and read once more there', async () => {
+      const { api, calls } = makeApi({ checks: [PENDING] })
+
+      const record = await lift(api, {
+        isCheck: false,
+        waitSeconds: 60,
+        pollMs: 30_000,
+      })
+
+      expect(record).toMatchObject({ reason: 'ci-timeout', waitedSeconds: 60 })
       expect(calls.sleeps).toEqual([30_000, 30_000])
     })
 

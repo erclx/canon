@@ -3,6 +3,7 @@ import {
   type GateResult,
   type LiftApi,
   type LiftRefusal,
+  nextPollMs,
   reviewGate,
   uiGate,
 } from '@/pr/lift'
@@ -162,6 +163,7 @@ export async function waitForReviews(
   const started = api.now()
   const deadline = started + opts.waitSeconds * 1000
   const waited = () => Math.round((api.now() - started) / 1000)
+  let gap = pollMs
 
   const evidence = await api.readEvidence()
   if (evidence === undefined) {
@@ -182,7 +184,8 @@ export async function waitForReviews(
         waitedSeconds: waited(),
       }
     }
-    if (api.now() + pollMs > deadline) {
+    const left = deadline - api.now()
+    if (left <= 0) {
       return {
         kind: 'read',
         reason: 'timeout',
@@ -190,6 +193,7 @@ export async function waitForReviews(
         waitedSeconds: waited(),
       }
     }
-    await api.sleep(pollMs)
+    await api.sleep(Math.min(gap, left))
+    gap = nextPollMs(gap)
   }
 }
