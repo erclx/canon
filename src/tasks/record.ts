@@ -49,6 +49,8 @@ export const RECORD_REFUSALS = [
   'several-plans',
   'bad-input',
   'no-name',
+  'unregistered',
+  'ambiguous-id',
 ] as const
 
 export type RecordRefusal = (typeof RECORD_REFUSALS)[number]
@@ -630,6 +632,99 @@ export async function recordPlan(
     replaced,
     board,
   }
+}
+
+/** The 8-character id `claude --bg` prints, which the roster carries as a prefix. */
+const SHORT_SESSION_ID_PATTERN = /^[0-9a-f]{8}$/
+
+/**
+ * A launch records its worker before the new session registers, which ran three
+ * to eight seconds, so the wait covers that and stops a failed launch soon after.
+ */
+const REGISTRATION_ATTEMPTS = 15
+const REGISTRATION_INTERVAL_MS = 1000
+
+export interface RosterRow {
+  readonly sessionId: string | null
+  readonly name: string
+}
+
+export interface RegistrationWait {
+  readonly sleep: (ms: number) => Promise<void>
+  readonly attempts?: number
+  readonly intervalMs?: number
+}
+
+export type SessionIdResolution =
+  | {
+      readonly ok: true
+      readonly sessionId: string
+      readonly name: string | undefined
+    }
+  | RecordRefused
+
+/**
+ * Resolves the id a caller passed to a full sessionId and its roster name. A full
+ * id reads the roster once, and a short one waits for its session to register,
+ * refusing `unregistered` when none does and `ambiguous-id` when two share it,
+ * since recording the wrong worker misroutes every later message.
+ */
+export async function resolveSessionId(
+  argument: string,
+  readRoster: () => Promise<readonly RosterRow[]>,
+  wait: RegistrationWait,
+): Promise<SessionIdResolution> {
+  if (argument.length === 0) {
+    return refuse(
+      'bad-input',
+      'Empty sessionId. A lookup by name returns nothing until the session has registered, so pass the 8-character id the launch printed.',
+      [argument],
+    )
+  }
+
+  if (SESSION_ID_PATTERN.test(argument)) {
+    const row = (await readRoster()).find((r) => r.sessionId === argument)
+    return { ok: true, sessionId: argument, name: row?.name }
+  }
+
+  if (!SHORT_SESSION_ID_PATTERN.test(argument)) {
+    return refuse(
+      'bad-input',
+      `Not a sessionId: ${argument}. Pass the 8-character id the launch printed, or the full id canon sessions list --json carries.`,
+      [argument],
+    )
+  }
+
+  const attempts = wait.attempts ?? REGISTRATION_ATTEMPTS
+  const intervalMs = wait.intervalMs ?? REGISTRATION_INTERVAL_MS
+  for (let attempt = 0; ; attempt += 1) {
+    const matches = new Map<string, string>()
+    for (const row of await readRoster()) {
+      if (row.sessionId?.startsWith(`${argument}-`)) {
+        matches.set(row.sessionId, row.name)
+      }
+    }
+
+    if (matches.size > 1) {
+      return refuse(
+        'ambiguous-id',
+        `${matches.size} live sessions start with ${argument}. Pass the full sessionId.`,
+        [...matches.keys()],
+      )
+    }
+
+    const [match] = matches
+    if (match) return { ok: true, sessionId: match[0], name: match[1] }
+
+    if (attempt >= attempts) break
+    await wait.sleep(intervalMs)
+  }
+
+  return refuse(
+    'unregistered',
+    `No live session starts with ${argument} after ${(attempts * intervalMs) / 1000}s. The launch may have failed, or the session already exited.`,
+    [argument],
+  )
 }
 
 /**
