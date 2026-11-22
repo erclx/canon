@@ -664,10 +664,8 @@ export type SessionIdResolution =
   | RecordRefused
 
 /**
- * Resolves the id a caller passed to a full sessionId and its roster name. A full
- * id reads the roster once, and a short one waits for its session to register,
- * refusing `unregistered` when none does and `ambiguous-id` when two share it,
- * since recording the wrong worker misroutes every later message.
+ * Resolves a full or short id to a full sessionId and its roster name. A short id
+ * waits for registration, and refuses `ambiguous-id` rather than misroute a worker.
  */
 export async function resolveSessionId(
   argument: string,
