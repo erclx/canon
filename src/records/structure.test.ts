@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   driveLogStructure,
+  groundworkStructure,
   intakeSpill,
   intakeStructure,
   structureFindings,
@@ -298,6 +299,32 @@ describe('intakeStructure', () => {
 
     expect(intakeStructure(text).map((entry) => entry.criterion)).toEqual([
       'S3',
+    ])
+  })
+})
+
+describe('groundworkStructure', () => {
+  const lead = ['## Open questions', '', '1. A question']
+
+  it('should exempt a long nested bold lean from S4', () => {
+    const text = [...lead, `   - **Leaning:** ${'a'.repeat(300)}`].join('\n')
+
+    expect(groundworkStructure(text)).toEqual([])
+  })
+
+  it('should still report S4 on a long nested lean with no bold label', () => {
+    const text = [...lead, `   - Leaning: ${'a'.repeat(300)}`].join('\n')
+
+    expect(groundworkStructure(text).map((entry) => entry.criterion)).toEqual([
+      'S4',
+    ])
+  })
+
+  it('should still report S4 on a long plain bullet', () => {
+    const text = [...lead, `- ${'a'.repeat(300)}`].join('\n')
+
+    expect(groundworkStructure(text).map((entry) => entry.criterion)).toEqual([
+      'S4',
     ])
   })
 })

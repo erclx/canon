@@ -15,6 +15,7 @@ import {
 } from '@/records/session-map'
 import {
   driveLogStructure,
+  groundworkStructure,
   intakeStructure,
   type StructureEntry,
   structureFindings,
@@ -889,7 +890,12 @@ async function folderStructure(
   const reads = STRUCTURE_FILES[kind]
   if (!reads) return []
 
-  const report = kind === 'intake' ? intakeStructure : structureFindings
+  const report =
+    kind === 'intake'
+      ? intakeStructure
+      : kind === 'groundwork'
+        ? groundworkStructure
+        : structureFindings
   const files = (await listMarkdown(dir)).filter(reads)
   const reports = files.map((file) => ({ file, read: report }))
   if (kind === 'intake' && existsSync(join(dir, DRIVE_LOG))) {
