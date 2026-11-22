@@ -10,9 +10,9 @@ IFS= read -r -d '' -t 2 input
 }
 
 # A session id reaches a reply as its first 8 hex characters, standing alone
-# between characters that are not letters or digits. A 40-character commit hash
-# never matches, and a short hash matches only until the roster read below.
-token='(^|[^0-9A-Za-z])[0-9a-f]{8}([^0-9A-Za-z]|$)'
+# between characters that are not letters, digits, or a slash, so an id inside a
+# path passes. A 40-character hash never matches, and a short one only until the roster read.
+token='(^|[^0-9A-Za-z/])[0-9a-f]{8}([^0-9A-Za-z/]|$)'
 
 # A payload holding no such token anywhere leaves before anything spawns. A real
 # Stop payload carries its own session id, so the reply is tested again below.
@@ -56,7 +56,7 @@ fi
 flagged=$(printf '%s' "$roster" | jq -r --arg reply "$reply" '
   if (.sessions | type) != "array" then "unread"
   else
-    ([$reply | scan("(?<![0-9A-Za-z])[0-9a-f]{8}(?![0-9A-Za-z])")] | unique) as $ids
+    ([$reply | scan("(?<![0-9A-Za-z/])[0-9a-f]{8}(?![0-9A-Za-z/])")] | unique) as $ids
     | ($reply | ascii_downcase) as $text
     | [.sessions[]
         | select((.name // "") != "" and (.sessionId | type) == "string")
