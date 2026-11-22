@@ -27,7 +27,10 @@ import {
   listReviews,
   readPull,
   refReader,
+  noteRateLimit,
+  rateLimitMessage,
   refuseWith,
+  withRateLimit,
   resolvePullNumber,
 } from '@/commands/pr/pull'
 import {
@@ -153,7 +156,10 @@ export function registerLift(pr: Command): void {
         '  ui-undriven, evidence-owed, painted-uncaptured, reel-unsettled,',
         '  standing-stale, standing-conflict, standing-unknown,',
         '  ci-pending (--check), ci-failing, ci-conflicted, ci-stalled,',
-        '  ci-timeout, head-moved, ready-withdrawn, gh-failed',
+        '  ci-timeout, head-moved, ready-withdrawn, gh-failed, rate-limited',
+        '',
+        'A read GitHub refused for a spent quota reports `rate-limited` with',
+        '`bucket` and `resetAt` rather than `gh-failed`. Wait for the reset.',
         '',
         'Every read is REST. The mutation is the one GraphQL call.',
         '',
@@ -203,7 +209,10 @@ async function flipDraft(
       extendEnv: false,
     },
   )
-  if (result.exitCode !== 0) return false
+  if (result.exitCode !== 0) {
+    await noteRateLimit(root, String(result.stderr))
+    return false
+  }
   try {
     const body = JSON.parse(String(result.stdout)) as {
       data?: Record<string, { pullRequest?: { isDraft?: boolean } } | undefined>
@@ -342,11 +351,12 @@ async function runLift(
     return refuseWith('gh-failed', LIFT_REFUSALS['gh-failed'], emitJson, root)
   }
 
-  const record = await lift(liftApi(root, resolved.number, `origin/${base}`), {
+  const lifted = await lift(liftApi(root, resolved.number, `origin/${base}`), {
     isCheck: opts.check ?? false,
     waitSeconds,
     painted: loadPaintedPatterns(root),
   })
+  const record = withRateLimit(lifted)
 
   logStep(record.reason)
   logInfo(
@@ -358,7 +368,9 @@ async function runLift(
           ? `#${resolved.number} is back to draft, since ${record.failed === undefined ? 'a gate' : LIFT_REFUSALS[record.failed]}`
           : record.reason === 'clear'
             ? `every gate reads clear for #${resolved.number}`
-            : LIFT_REFUSALS[record.reason],
+            : record.reason === 'rate-limited'
+              ? rateLimitMessage(record)
+              : LIFT_REFUSALS[record.reason],
   )
   for (const gate of record.gates) {
     if (!gate.isOk) logWarn(`${gate.gate}: ${gate.reason ?? 'not clear'}`)

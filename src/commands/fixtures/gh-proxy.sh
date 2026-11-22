@@ -3,6 +3,15 @@
 set -o pipefail
 fx="$FAKE_DIR"
 echo "$*" >>"$fx/gh.log"
+# rate-limited holds the rate_limit body, and rate-limited-on a substring that narrows which calls hit it.
+if [ -f "$fx/rate-limited" ] && [ "$*" != "api rate_limit" ]; then
+  on=$(cat "$fx/rate-limited-on" 2>/dev/null)
+  case "$*" in *"$on"*)
+    echo "gh: API rate limit exceeded for user ID 1. (HTTP 403)" >&2
+    exit 1
+    ;;
+  esac
+fi
 f=.
 p=
 for a in "$@"; do
@@ -43,6 +52,7 @@ case "$*" in
 *"/actions/runs/"*"/jobs"*) [ -f "$fx/jobs.json" ] && cat "$fx/jobs.json" || exit 1 ;;
 *"/actions/runs?"*) [ -f "$fx/runs.json" ] && cat "$fx/runs.json" || exit 1 ;;
 *"/pulls/7") jq -r "$f" "$fx/pull.json" ;;
+"api rate_limit") [ -f "$fx/rate-limited" ] && cat "$fx/rate-limited" || exit 1 ;;
 "api repos/{owner}/{repo}") echo '{"full_name":"acme/widgets","html_url":"https://github.com/acme/widgets"}' ;;
 *) exit 1 ;;
 esac

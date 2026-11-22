@@ -14,6 +14,7 @@ import {
   type RestReview,
   selectBranchPull,
 } from '@/pr/rest'
+import { type RateLimit, rateLimitOf } from '@/pr/rate-limit'
 import { logStep, logWarn, outro } from '@/cli/ui'
 
 export const GH_TIMEOUT_MS = 30_000
@@ -77,9 +78,70 @@ export async function gh(
       extendEnv: false,
     })
     return result.stdout
-  } catch {
+  } catch (error) {
+    await noteRateLimit(
+      cwd,
+      String((error as { stderr?: unknown }).stderr ?? ''),
+    )
     return null
   }
+}
+
+/** Process-wide, since one spent quota refuses every later call until its reset. */
+let rateLimit: RateLimit | undefined
+
+/**
+ * Latches the rate limit a refused gh call's stderr names, reading the bucket
+ * off `rate_limit`, which GitHub does not count against the quota. A caller
+ * running gh outside `gh()` passes its own stderr here.
+ */
+export async function noteRateLimit(
+  cwd: string,
+  stderr: string,
+): Promise<void> {
+  if (rateLimit !== undefined || rateLimitOf(stderr, undefined) === undefined) {
+    return
+  }
+  const buckets = await execa('gh', ['api', 'rate_limit'], {
+    cwd,
+    timeout: GH_TIMEOUT_MS,
+    env: gitEnv(),
+    extendEnv: false,
+  }).then(
+    (result) => result.stdout,
+    () => undefined,
+  )
+  rateLimit = rateLimitOf(stderr, buckets)
+}
+
+/** The refusals a failed gh read produces, which a spent quota explains. */
+const GH_READ_REFUSALS: ReadonlySet<string> = new Set([
+  'gh-failed',
+  'runs-unreadable',
+  'reviews-unreadable',
+])
+
+export function rateLimitMessage(limit: RateLimit): string {
+  const bucket = limit.bucket === undefined ? 'A' : `The ${limit.bucket}`
+  const until = limit.resetAt === undefined ? '' : ` until ${limit.resetAt}`
+  return `${bucket} GitHub rate limit is spent${until}, so nothing was read. Wait for the reset rather than retrying, since a retry spends what is left.`
+}
+
+/**
+ * The record a refused gh read leaves, renamed `rate-limited` with the bucket
+ * and reset once a call in this process hit the limit, and unchanged otherwise.
+ */
+export function withRateLimit<T extends { readonly reason: string }>(
+  record: T,
+): T | (Omit<T, 'reason'> & RateLimit & { readonly reason: 'rate-limited' }) {
+  const limit = rateLimitFor(record.reason)
+  return limit === undefined
+    ? record
+    : { ...record, reason: 'rate-limited', ...limit }
+}
+
+function rateLimitFor(reason: string): RateLimit | undefined {
+  return GH_READ_REFUSALS.has(reason) ? rateLimit : undefined
 }
 
 type PullNumber =
@@ -375,13 +437,22 @@ export function refuseWith(
   root: string,
   extra: Record<string, unknown> = {},
 ): number {
+  const limit = rateLimitFor(reason)
+  const shown =
+    limit === undefined
+      ? { reason, message, extra }
+      : {
+          reason: 'rate-limited',
+          message: rateLimitMessage(limit),
+          extra: { ...extra, ...limit },
+        }
   logStep('Refused')
-  logWarn(message)
+  logWarn(shown.message)
   outro()
 
   if (emitJson) {
     process.stdout.write(
-      `${JSON.stringify({ root, reason, message, ...extra })}\n`,
+      `${JSON.stringify({ root, reason: shown.reason, message: shown.message, ...shown.extra })}\n`,
     )
   }
   return 1

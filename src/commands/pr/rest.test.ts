@@ -78,6 +78,16 @@ describe('canon pr reads through REST alone', () => {
     return JSON.parse(result.stdout)
   }
 
+  function spendCore(on = ''): void {
+    writeFixture('rate-limited', {
+      resources: {
+        core: { limit: 5000, remaining: 0, reset: 1795321310, used: 5000 },
+        graphql: { limit: 5000, remaining: 4978, reset: 1795321445 },
+      },
+    })
+    if (on !== '') writeFixture('rate-limited-on', on)
+  }
+
   beforeEach(() => {
     tempDir = mkdtempSync(join(tmpdir(), 'canon-pr-rest-'))
     repoRoot = join(tempDir, 'repo')
@@ -197,6 +207,28 @@ describe('canon pr reads through REST alone', () => {
     const record = await runVerb('review-state', ['7'])
 
     expect(record.reason).toBe('gh-failed')
+  })
+
+  describe('a spent quota', () => {
+    it('should refuse rate-limited with the bucket and reset rather than gh-failed', async () => {
+      spendCore()
+
+      const record = await runVerb('head', ['7'])
+
+      expect(record).toMatchObject({
+        reason: 'rate-limited',
+        bucket: 'core',
+        resetAt: '2026-11-22T04:21:50.000Z',
+      })
+    })
+
+    it('should refuse rate-limited on a review-state read the quota refused', async () => {
+      spendCore('/reviews')
+
+      const record = await runVerb('review-state', ['7'])
+
+      expect(record).toMatchObject({ reason: 'rate-limited', bucket: 'core' })
+    })
   })
 
   it('should compare a live pull request body against its files', async () => {
@@ -374,6 +406,20 @@ describe('canon pr reads through REST alone', () => {
       expect(exit).toBe(1)
     })
 
+    it('should refuse rate-limited when the quota refuses the check runs read', async () => {
+      stageClearPull()
+      spendCore('/check-runs')
+
+      const { record, exit } = await runLift(['7', '--check'])
+
+      expect(record).toMatchObject({
+        reason: 'rate-limited',
+        bucket: 'core',
+        isLifted: false,
+      })
+      expect(exit).toBe(1)
+    })
+
     it('should refuse an open review and call no mutation', async () => {
       stageClearPull()
       writeFixture('reviews.json', [
@@ -478,6 +524,25 @@ describe('canon pr reads through REST alone', () => {
       const at = log.indexOf('-X PUT repos/{owner}/{repo}/pulls/7/merge')
       return at === -1 ? undefined : log.slice(at)
     }
+
+    it('should refuse rate-limited when the quota refuses the check runs read', async () => {
+      stageReadyPull()
+      spendCore('/check-runs')
+
+      const { record, exit } = await runMerge(['7'])
+
+      expect(record).toMatchObject({ reason: 'rate-limited', bucket: 'core' })
+      expect(exit).toBe(1)
+    })
+
+    it('should refuse rate-limited when the quota refuses the merge call itself', async () => {
+      stageReadyPull()
+      spendCore('/pulls/7/merge')
+
+      const { record } = await runMerge(['7'])
+
+      expect(record).toMatchObject({ reason: 'rate-limited', bucket: 'core' })
+    })
 
     it('should squash-merge over REST pinned to the head it read', async () => {
       stageReadyPull()

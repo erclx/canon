@@ -17,8 +17,11 @@ import {
   PULL_REFUSALS,
   ReadOptions,
   gh,
+  noteRateLimit,
+  rateLimitMessage,
   refuseWith,
   resolvePullNumber,
+  withRateLimit,
 } from '@/commands/pr/pull'
 import { readChecksGate, warnAdvisory } from '@/commands/pr/gates'
 
@@ -89,7 +92,10 @@ export function registerMerge(pr: Command): void {
         '  merged, dry-run (--dry-run)',
         '  pull-closed, pull-draft, missing-summary, missing-key-changes,',
         '  ci-failing, ci-conflicted, ci-stalled, ci-pending, head-moved,',
-        '  not-mergeable, gh-failed',
+        '  not-mergeable, gh-failed, rate-limited',
+        '',
+        'A read or the merge GitHub refused for a spent quota reports',
+        '`rate-limited` with `bucket` and `resetAt` rather than `gh-failed`.',
         '',
         'The merge is the REST `PUT pulls/<number>/merge` with',
         '`merge_method=squash`, never `gh pr merge`, which runs on GraphQL.',
@@ -166,6 +172,7 @@ async function putSquashMerge(
     },
   )
   if (result.exitCode !== 0) {
+    await noteRateLimit(root, String(result.stderr))
     const status = /\(HTTP (\d{3})\)/.exec(String(result.stderr))?.[1]
     if (status === '409') return { kind: 'head-moved' }
     if (status === '405') return { kind: 'not-mergeable' }
@@ -244,11 +251,12 @@ async function runMerge(
     )
   }
 
-  const record = await merge(mergeApi(root, resolved.number), {
+  const merged = await merge(mergeApi(root, resolved.number), {
     number: Number(resolved.number),
     isDryRun: opts.dryRun ?? false,
     isPull: opts.pull ?? true,
   })
+  const record = withRateLimit(merged)
 
   logStep(record.reason)
   logInfo(
@@ -256,7 +264,9 @@ async function runMerge(
       ? `#${record.number} squash-merged as ${record.sha?.slice(0, 8)}`
       : record.reason === 'dry-run'
         ? `#${record.number} would merge with the message below`
-        : MERGE_REFUSALS[record.reason],
+        : record.reason === 'rate-limited'
+          ? rateLimitMessage(record)
+          : MERGE_REFUSALS[record.reason],
   )
   warnAdvisory(record.advisory)
   if (record.pull !== undefined) {
