@@ -938,6 +938,8 @@ export interface LinkPromotion {
   /** The group the row sat in before, undefined when it has no row. */
   readonly from: BoardGroup | undefined
   readonly note: string
+  /** The command that places a task with no row, absent for any other case. */
+  readonly next?: string
 }
 
 /**
@@ -957,7 +959,12 @@ export async function promoteOnLink(
   const parse = parseBoard(await readFile(path, 'utf8'))
   const found = parse.ok ? findRow(parse.board, stem) : undefined
   if (!found) {
-    return { moved: false, from: undefined, note: 'no row on the board' }
+    return {
+      moved: false,
+      from: undefined,
+      note: 'no row on the board',
+      next: `canon tasks place ${stem} --group up-next`,
+    }
   }
 
   if (found.group !== 'Needs a plan') {

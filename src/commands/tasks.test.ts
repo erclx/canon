@@ -167,4 +167,27 @@ describe('canon tasks plan-link --json', () => {
     }
     expect(record.board).toMatchObject({ moved: false, from: 'Run now' })
   })
+
+  it('should warn on stderr and keep stdout pure JSON for a task with no row', async () => {
+    writeFileSync(
+      join(root, '.canon', 'tasks', 'priority.md'),
+      '## Needs a plan\n\n| Task | Waiting on |\n| ---- | ---------- |\n',
+    )
+
+    const result = await execa(
+      process.execPath,
+      [CLI, 'tasks', 'plan-link', 'v1.0-one', 'one', '--json', '--root', root],
+      { cwd: root, reject: false, timeout: RUN_TIMEOUT_MS },
+    )
+
+    const record = JSON.parse(result.stdout) as {
+      ok: boolean
+      board: { next?: string }
+    }
+    expect(record).toMatchObject({
+      ok: true,
+      board: { next: 'canon tasks place v1.0-one --group up-next' },
+    })
+    expect(result.stderr).toContain('canon tasks place v1.0-one')
+  })
 })

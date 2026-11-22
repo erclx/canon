@@ -82,7 +82,7 @@ Every verb reads the older heading `Run now` as `In flight` and writes the new o
 
 ### Writing the board
 
-Every write goes through `canon tasks place`, `promote`, `move`, `block`, or `launch`, each reading the file once, rendering the columns the template fixes, and writing it once. `plan-link` promotes a parked row the same way. `Waiting on` and `Launch` are typed, and every other cell derives from the task and its live plans.
+Every write goes through `canon tasks place`, `promote`, `move`, `block`, or `launch`, each reading the file once, rendering the template's columns, and writing once. `plan-link` promotes a parked row and warns, with `board.next`, on a task with no row. `Waiting on` and `Launch` are typed, and every other cell derives from the task and its plans.
 
 `canon tasks flight` reads each in-flight row's stage live and stores none.
 
