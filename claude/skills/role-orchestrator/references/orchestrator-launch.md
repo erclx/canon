@@ -82,7 +82,7 @@ Report the dispatch as loudly as the human-launch line it replaces, naming the b
 
 ### Record the worker on its task
 
-After a build or review-address launch, run `canon tasks session <worker-id> <task> --json` with the 8-character id the launch printed. The verb waits up to 15 seconds for the session to register and records the full id. An `unregistered` refusal means the launch likely failed, and `no-name` reruns with `--name` and the `-n` name.
+After a build or review-address launch, run `canon tasks session <worker-id> <task> --json` with the 8-character id the launch printed. The verb waits 15 seconds for it to register and records the full id. On `unregistered`, the launch failed or the worker exited, and only its full id with `--name` records it.
 
 ## Dispatch to address a review
 
