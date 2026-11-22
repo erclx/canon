@@ -11,7 +11,7 @@
   align-items: start;
   max-width: calc(var(--page-w) + 128px);
   margin: 0 auto;
-  padding: 64px 64px 32px;
+  padding: 96px 64px;
 }
 
 .site-footer .brand {
@@ -44,7 +44,7 @@
 }
 
 .site-footer h2 {
-  margin: 2px 0 16px;
+  margin: 2px 0 24px;
   font-family: var(--mono);
   font-size: var(--size-view-small);
   font-weight: 500;
@@ -54,7 +54,7 @@
 
 .site-footer ul {
   display: grid;
-  gap: 11px;
+  gap: 18px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -64,17 +64,6 @@
 .site-footer .col.page ul {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   column-gap: 24px;
-}
-
-.site-footer .base {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 8px 24px;
-  margin-top: 16px;
-  font-family: var(--mono);
-  font-size: var(--size-small);
 }
 
 .site-footer a {
@@ -89,11 +78,12 @@
   text-underline-offset: 3px;
 }
 
+/* The mark takes its own row, and the three link columns share the one under it. */
 @media (max-width: 900px) {
   .site-footer .in {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
     gap: 32px;
-    padding: 48px 32px 32px;
+    padding: 80px 32px;
   }
 
   .site-footer .lead {
@@ -103,10 +93,7 @@
 
 @media (max-width: 640px) {
   .site-footer .in {
-    padding: 40px 20px 32px;
-  }
-
-  .site-footer .base {
-    flex-direction: column;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 64px 20px;
   }
 }

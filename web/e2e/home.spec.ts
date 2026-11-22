@@ -232,6 +232,38 @@ test.describe('the footer columns', () => {
     expect(new URL(page.url()).hash).toBe('#worktrees')
   })
 
+  for (const width of [900, 840, 641]) {
+    test(`sets three link columns in one row under the mark at ${width}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 })
+      await page.goto('/')
+
+      const boxes = await page
+        .locator('.site-footer .col')
+        .evaluateAll((columns) =>
+          columns.map((column) => {
+            const box = column.getBoundingClientRect()
+            return { top: Math.round(box.top), left: Math.round(box.left) }
+          }),
+        )
+      const lead = await page.locator('.site-footer .lead').boundingBox()
+
+      expect(boxes).toHaveLength(3)
+      expect(new Set(boxes.map((box) => box.top)).size).toBe(1)
+      expect(new Set(boxes.map((box) => box.left)).size).toBe(3)
+      expect(lead).not.toBeNull()
+      expect(lead!.y + lead!.height).toBeLessThanOrEqual(boxes[0]!.top)
+    })
+  }
+
+  test('carries no base line under the columns', async ({ page }) => {
+    await page.goto('/')
+
+    await expect(page.locator('.site-footer .col')).toHaveCount(3)
+    await expect(page.locator('.site-footer .base')).toHaveCount(0)
+  })
+
   test('pairs the columns two by two at 390', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 900 })
     await page.goto('/')

@@ -5,8 +5,7 @@ import './style.css'
 
 /**
  * The mark and tagline beside three link columns on the page's grid ground,
- * parted from the page by one soft rule, over a base row set apart by spacing
- * alone. The first column repeats the nav's section links in two columns, so
+ * parted from the page by one soft rule. The first column repeats the nav's section links in two columns, so
  * they carry no `.sl` class and the nav's in-view marker never reads them.
  */
 const glyph = mark.replace(/<!--[\s\S]*?-->/, '').trim()
@@ -47,8 +46,5 @@ const columns = [
         </div>
       ))
     }
-    <div class="base">
-      {footer.base.map((part) => <span>{part}</span>)}
-    </div>
   </div>
 </footer>

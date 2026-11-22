@@ -355,7 +355,7 @@ export const boardScene = {
 
 /**
  * The footer's three link columns in order, the first listing `sections`
- * under its heading, then the base line under them.
+ * under its heading.
  */
 export const footer = {
   // README.md: canon-allow-readme-paraphrase: column headings for the footer's links, which no README sentence carries.
@@ -366,8 +366,6 @@ export const footer = {
       label: 'Skill map',
       href: `${REPO}/blob/main/docs/workflow/skill-map.md`,
     },
-    // README.md: canon-allow-readme-paraphrase: the jump to the install section, which the README opens on.
-    { label: 'Install', href: '#install' },
   ],
   project: [
     { label: 'GitHub', href: REPO },
@@ -375,9 +373,6 @@ export const footer = {
     // README.md: "MIT license"
     { label: 'MIT licensed', href: `${REPO}/blob/main/LICENSE` },
   ],
-  /** The base line's two ends: the license plainly, then the author and the host. */
-  // README.md: "MIT license"
-  base: ['MIT licensed', `${site.author} · ${site.label}`],
 }
 
 /**
