@@ -135,16 +135,26 @@ describe('sessionDefaultsWarnings', () => {
     ])
   })
 
-  it('should name the merge ask on a file lacking only it', () => {
+  it('should name the hand removal on a file still asking before a merge', () => {
     const plan = planSessionDefaults({
       ...seed,
       hooks: undefined,
-      permissions: { ...seed.permissions, ask: [] },
+      permissions: { ...seed.permissions, ask: ['Bash(canon pr merge:*)'] },
     })
 
     expect(sessionDefaultsWarnings(plan)).toEqual([
-      'settings.json lacks the merge ask. Run `canon migrate session-defaults --write`',
+      'settings.json still asks before `canon pr merge`, which the seed no longer carries, so every merge waits on a prompt in every permission mode. Remove that ask entry by hand to let a merge the operator named run',
     ])
+  })
+
+  it('should warn on nothing for an unrelated ask entry', () => {
+    const plan = planSessionDefaults({
+      ...seed,
+      hooks: undefined,
+      permissions: { ...seed.permissions, ask: ['Bash(rm:*)'] },
+    })
+
+    expect(sessionDefaultsWarnings(plan)).toEqual([])
   })
 
   it('should say why the orchestrator cannot merge under the old deny', () => {
@@ -158,7 +168,7 @@ describe('sessionDefaultsWarnings', () => {
     })
 
     expect(sessionDefaultsWarnings(plan)).toEqual([
-      "settings.json still denies `canon pr merge`, which wins over the ask, so the orchestrator cannot merge here even on the operator's word. Remove that deny entry by hand to have each merge ask",
+      "settings.json still denies `canon pr merge`, so the orchestrator cannot merge here even on the operator's word. Remove that deny entry by hand to let a merge the operator named run",
     ])
   })
 

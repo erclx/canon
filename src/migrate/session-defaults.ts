@@ -35,10 +35,12 @@ export const MERGE_DENIED: readonly string[] = [
 ]
 
 /**
- * The merge verb the seeded ask list carries, so the client puts each merge to
- * the operator. A target denying it keeps the deny, which wins over the ask.
+ * The merge verb's rule, which the seed no longer carries in any list. An ask
+ * on it prompts in every permission mode, auto mode included, so a merge the
+ * operator named waited on the client. A target holding it keeps it, since
+ * this verb only adds, and sync names the hand removal.
  */
-export const MERGE_ASKED: readonly string[] = ['Bash(canon pr merge:*)']
+export const MERGE_VERB = 'Bash(canon pr merge:*)'
 
 /**
  * The lease pushes a worker runs after a rebase. An allow resolves before auto
@@ -100,11 +102,11 @@ export interface SessionDefaultsPlan {
   readonly predates: boolean
   /** True when the deny list lacks any merge entry, whatever else it holds. */
   readonly lacksMergeDeny: boolean
-  /** True when the ask list lacks the merge verb. */
-  readonly lacksMergeAsk: boolean
+  /** True when the ask list still holds the merge verb the seed retired. */
+  readonly holdsMergeAsk: boolean
   /**
-   * True when the deny list still holds the merge verb the ask now carries,
-   * which this verb reports and never removes.
+   * True when the deny list holds the merge verb, which keeps an orchestrator
+   * from merging on the operator's word and which this verb never removes.
    */
   readonly holdsMergeDeny: boolean
   /** True when the allow list lacks any lease push entry. */
@@ -168,14 +170,12 @@ export function planSessionDefaults(
     (entry) => !allow.includes(entry),
   )
   const allowMissing = [...pushMissing, ...uiPassMissing]
-  const askMissing = MERGE_ASKED.filter((entry) => !ask.includes(entry))
   const memoryAbsent = !('autoMemoryEnabled' in current)
   const wiring = planHookWiring(current.hooks, seeded, holds)
 
   const edits: SettingsEdit[] = [
     ...appendTo(['permissions', 'deny'], missing),
     ...appendTo(['permissions', 'allow'], allowMissing),
-    ...appendTo(['permissions', 'ask'], askMissing),
     ...(memoryAbsent
       ? [
           {
@@ -191,7 +191,6 @@ export function planSessionDefaults(
   const keys: SettingsKey[] = [
     { label: 'permissions.deny', changed: missing.length > 0 },
     { label: 'permissions.allow', changed: allowMissing.length > 0 },
-    { label: 'permissions.ask', changed: askMissing.length > 0 },
     { label: 'autoMemoryEnabled', changed: memoryAbsent },
     ...wiring.events.map((event) => ({
       label: `hooks.${event.event}`,
@@ -212,8 +211,8 @@ export function planSessionDefaults(
       subagentsMissing.length === DENIED_TOOLS.length &&
       mergeMissing.length === MERGE_DENIED.length,
     lacksMergeDeny: mergeMissing.length > 0,
-    lacksMergeAsk: askMissing.length > 0,
-    holdsMergeDeny: MERGE_ASKED.some((entry) => deny.includes(entry)),
+    holdsMergeAsk: ask.includes(MERGE_VERB),
+    holdsMergeDeny: deny.includes(MERGE_VERB),
     lacksPushAllow: pushMissing.length > 0,
     lacksUiPassAllow: uiPassMissing.length > 0,
     unwired: wiring.unwired,
