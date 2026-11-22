@@ -1,0 +1,187 @@
+name: Deploy Worker
+# canon-no-seed: a stack-specific deploy workflow with no root counterpart by design, parameterized per project on sync rather than mirrored from one.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      # Fill in this project's own deploy inputs. Keep the migrations folder
+      # and the Wrangler config, so a schema or binding change deploys too.
+      - 'src/**'
+      - 'migrations/**'
+      - 'wrangler.*'
+  workflow_dispatch:
+    inputs:
+      drill_rollback:
+        description: Fail the smoke check once after deploying, to exercise the rollback
+        type: boolean
+        default: false
+
+# A Worker deploys from the default branch alone, so one group serializes every
+# run. The running job is left to finish, since a cancel between the migration
+# and the deploy leaves a migrated database under the old code.
+concurrency:
+  group: deploy-worker
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: 🚀 Deploy Worker
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Fill in the full URL of a route the deployed Worker answers with a 2xx
+      # only when it is healthy, such as https://example.com/health.
+      HEALTH_URL: REPLACE_WITH_HEALTH_URL
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # The Pages workflow reads the same script, so exactly one of the two
+      # deploys a given config, and a config declaring both deploys nowhere.
+      - name: Read the Wrangler config
+        id: shape
+        run: bash scripts/wrangler-shape.sh >> "$GITHUB_OUTPUT"
+
+      - name: Decide whether to deploy
+        id: gate
+        env:
+          SHAPE: ${{ steps.shape.outputs.shape }}
+          REF: ${{ github.ref }}
+          DEFAULT_REF: refs/heads/${{ github.event.repository.default_branch }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          reason=""
+          if [ "$SHAPE" = both ]; then
+            reason="The Wrangler config declares both main and pages_build_output_dir, so neither deploy workflow runs. Keep the one this project deploys as."
+          elif [ "$SHAPE" != worker ]; then
+            reason="The Wrangler config declares no Worker entry, so the Pages workflow deploys this project and this one skips."
+          elif [ "$REF" != "$DEFAULT_REF" ]; then
+            reason="A Worker deploys to production from the default branch alone, and this run is on $REF, skipping deploy."
+          elif [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            reason="CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is not set, skipping deploy. Add both as repository secrets, with a token granting Workers Scripts edit and D1 edit."
+          fi
+          if [ -n "$reason" ]; then
+            echo "::notice::$reason"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Refused here rather than at the smoke check, since a placeholder failing
+      # after the deploy would roll back a healthy version.
+      - name: Check the health route
+        if: steps.gate.outputs.skip == 'false'
+        run: |
+          case "$HEALTH_URL" in
+          http://* | https://*) ;;
+          *)
+            echo "::error::Fill in HEALTH_URL in .github/workflows/deploy-worker.yml before the first deploy."
+            exit 1
+            ;;
+          esac
+
+      - name: Setup Bun
+        if: steps.gate.outputs.skip == 'false'
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        if: steps.gate.outputs.skip == 'false'
+        run: bun install --frozen-lockfile
+
+      - name: Test
+        if: steps.gate.outputs.skip == 'false'
+        run: |
+          if jq -e '.scripts.test' package.json > /dev/null; then
+            bun run test
+          else
+            echo "package.json declares no test script, skipping tests."
+          fi
+
+      - name: Build
+        if: steps.gate.outputs.skip == 'false'
+        run: |
+          if jq -e '.scripts.build' package.json > /dev/null; then
+            bun run build
+          else
+            echo "package.json declares no build script, so wrangler deploy bundles the Worker."
+          fi
+
+      # The version serving before this run is the rollback target, read now
+      # because once the deploy lands the newest version is the one just shipped.
+      # A Worker never deployed answers API code 10007, since its script does
+      # not exist yet, and one with an empty history answers `has no deployments`.
+      - name: Record the serving version
+        id: serving
+        if: steps.gate.outputs.skip == 'false'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if status=$(bunx wrangler deployments status --json 2> "$RUNNER_TEMP/wrangler-error.log"); then
+            version=$(jq -r '.versions | max_by(.percentage) | .version_id' <<< "$status")
+            echo "Serving version $version, the rollback target."
+          elif printf '%s\n' "$status" | cat - "$RUNNER_TEMP/wrangler-error.log" | grep -qE 'has no deployments|code: 10007'; then
+            version=""
+            echo "::notice::No version serves yet, so a failed smoke check has nothing to roll back to."
+          else
+            cat "$RUNNER_TEMP/wrangler-error.log"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # Migrations run before the deploy, so a failed one stops the run with the
+      # old code still serving. They must stay readable by that old code, since
+      # a rollback restores the Worker and never the database.
+      - name: Migrate D1
+        if: steps.gate.outputs.skip == 'false' && steps.shape.outputs.d1 != ''
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DATABASES: ${{ steps.shape.outputs.d1 }}
+        run: |
+          for database in $DATABASES; do
+            bunx wrangler d1 migrations apply "$database" --remote
+          done
+
+      - name: Deploy
+        if: steps.gate.outputs.skip == 'false'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          SHA: ${{ github.sha }}
+        run: bunx wrangler deploy --message "Deploy $SHA"
+
+      - name: Smoke check
+        id: smoke
+        if: steps.gate.outputs.skip == 'false'
+        env:
+          DRILL: ${{ inputs.drill_rollback }}
+        run: |
+          if [ "$DRILL" = true ]; then
+            echo "::warning::Rollback drill, failing the smoke check on purpose."
+            exit 1
+          fi
+          bash scripts/smoke-check.sh "$HEALTH_URL"
+
+      - name: Roll back
+        if: failure() && steps.smoke.outcome == 'failure'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VERSION: ${{ steps.serving.outputs.version }}
+          SHA: ${{ github.sha }}
+        run: |
+          if [ -z "$VERSION" ]; then
+            echo "::error::The smoke check failed and no earlier version was recorded, so the new version still serves."
+            exit 1
+          fi
+          bunx wrangler rollback "$VERSION" --message "Smoke check failed on $SHA"
+          echo "::error::The smoke check failed, so version $VERSION serves again. Any migration this run applied stays in the database."

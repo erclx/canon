@@ -30,9 +30,40 @@ permissions:
   contents: read
 
 jobs:
+  # The Worker workflow reads the same script, so exactly one of the two
+  # deploys a given config, and a config declaring both deploys nowhere.
+  gate:
+    name: 🔎 Read the Wrangler config
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      pages: ${{ steps.shape.outputs.pages }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.repository.default_branch || github.sha }}
+
+      - name: Read the Wrangler config
+        id: shape
+        run: |
+          shape=$(bash scripts/wrangler-shape.sh | sed -n 's/^shape=//p')
+          case "$shape" in
+          worker)
+            echo "::notice::The Wrangler config declares a Worker entry, so the Worker workflow deploys this project and this one skips."
+            echo "pages=false" >> "$GITHUB_OUTPUT"
+            ;;
+          both)
+            echo "::notice::The Wrangler config declares both main and pages_build_output_dir, so neither deploy workflow runs. Keep the one this project deploys as."
+            echo "pages=false" >> "$GITHUB_OUTPUT"
+            ;;
+          *) echo "pages=true" >> "$GITHUB_OUTPUT" ;;
+          esac
+
   build:
     name: 📦 Build
-    if: github.event_name != 'pull_request'
+    needs: gate
+    if: github.event_name != 'pull_request' && needs.gate.outputs.pages == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -129,7 +160,8 @@ jobs:
 
   cleanup-preview:
     name: 🧹 Delete Branch Previews
-    if: github.event_name == 'pull_request'
+    needs: gate
+    if: github.event_name == 'pull_request' && needs.gate.outputs.pages == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
