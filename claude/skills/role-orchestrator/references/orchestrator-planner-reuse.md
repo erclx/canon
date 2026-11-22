@@ -56,8 +56,9 @@ The session that closed a groundwork track or an app drive is the default planne
 
 ## Reviving a stopped planner
 
-A stopped session comes back only through the operator attaching it, since `claude --resume` on an id that is already running starts a copy under a new id sharing the original's transcript and write scope.
+A planner the roster no longer lists comes back only through the operator attaching it, since `claude --resume` on an id that is already running starts a copy under a new id sharing the original's transcript and write scope.
 
-- Read `canon sessions list --json` for the planner's name and status before anything else
-- When it is absent or stopped, ask the operator to attach it by name, then send the brief by message once the roster lists it live
+- Read `canon sessions list --json` for the planner's name before anything else
+- When it is absent, ask the operator to attach it by name, then send the brief by message once the roster lists it live
+- When its row carries `stopped`, a usage limit stopped it, so route it to `orchestrator-limit-stops.md` and revive nothing
 - Never resume a session from the orchestrator, and never pass `-n` on a resume, which names the copy and leaves two names on one transcript
