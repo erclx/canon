@@ -45,10 +45,17 @@ None of these is a pass, and none emits `✅ Shipped`. A `reason` and no `state`
 The set lives in the watch command rather than in the verb, so a refusal `canon pr checks` adds later defaults to transient and waits, which is the safe side.
 
 - A permanent refusal ends the sequence. Stop and report that `reason`, such as `no-remote-branch` for a branch deleted on the remote.
-- A `rate-limited` refusal ends the sequence the same way, naming the record's `bucket` and its `resetAt`. A secondary limit carries no `resetAt`, so say the reset is unnamed.
-- Start the watch again only after `resetAt` has passed. The read after the loop spent the same quota, so a `rate-limited` final record stops the sequence without a second read.
 - A transient refusal in the final record with no limit line came from the read after the loop, which never exits on one. Read `canon pr checks <number> --json` once more and route on that.
 - A second refusal on that read stops the sequence with its `reason`
+
+### A spent quota
+
+A `rate-limited` refusal ends the sequence the same way a permanent one does, since each further read spends calls the quota lacks.
+
+- Report the record's `bucket` and its `resetAt`
+- A secondary limit carries no `resetAt`, and a record whose bucket read failed carries neither `bucket` nor `resetAt`. Say the reset is unnamed in both.
+- Start the watch again only after `resetAt` has passed
+- A `rate-limited` final record stops the sequence without a second read, since the read after the loop spent the same quota
 
 ### The unsettled read
 

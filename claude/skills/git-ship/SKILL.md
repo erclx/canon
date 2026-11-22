@@ -102,7 +102,7 @@ Branch on the final record's fields rather than on the exit. The first matching 
 | `state: passing`                                        | Settle the evidence thread below, then continue to After completion on `settled`                      |
 | `state: failing`                                        | Read the cancelled-run section of `${CLAUDE_SKILL_DIR}/references/ci-watch.md`, which reruns or stops |
 | `conflicted: true`                                      | Stop and report the branch conflicts with its base, since no run will start. Rebase.                  |
-| `reason: rate-limited`                                  | Stop and report the spent `bucket` and its `resetAt`, since polling on spends calls the quota lacks   |
+| `reason: rate-limited`                                  | Stop, then read the refused reads in `${CLAUDE_SKILL_DIR}/references/ci-watch.md` for the reset       |
 | The limit line, a `state: pending`, or no final record  | Stop on the unsettled read `ci-watch.md` states, reporting CI unsettled                               |
 | A `reason` and no `state`, with no limit line before it | Read `${CLAUDE_SKILL_DIR}/references/ci-watch.md` for the refused reads                               |
 
