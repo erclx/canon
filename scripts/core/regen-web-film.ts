@@ -7,6 +7,8 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
+import { REEL_MAX_BYTES } from '../../src/take/reel'
+
 const root = new URL('../..', import.meta.url).pathname
 const FRAMES = 'canon/frames'
 const REEL = 'assets/loops/reel.webp'
@@ -179,6 +181,10 @@ function address(pullRequest: number) {
 function write(pullRequest: number) {
   const reel = newestReel(pullRequest)
   const bytes = git(['show', `origin/${FRAMES}:${reel.path}`])
+  if (bytes.length > REEL_MAX_BYTES)
+    fail(
+      `${reel.path} is ${bytes.length} bytes, past the ${REEL_MAX_BYTES} a reel may carry`,
+    )
   const opened = openReel(bytes)
   writeFileSync(join(root, REEL), bytes)
   writeFileSync(join(root, STILL), opened.still)
