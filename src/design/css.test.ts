@@ -218,6 +218,46 @@ describe('buildDesignCss', () => {
     )
   })
 
+  describe('theme-fixed dark family', () => {
+    const paired = () =>
+      minimal({
+        color: [
+          { role: 'band', intent: 'a band', value: '#3d3d39' },
+          { role: 'light-band', intent: 'a band on light', value: '#f0f0ee' },
+          { role: 'pip', intent: 'no light pair', value: '#ff0000' },
+        ],
+      })
+
+    it('emits a dark role with a light counterpart again under a dark- name', () => {
+      const css = buildDesignCss(paired())
+
+      expect(declarationsOf(css, ':root')).toContain(
+        '--color-dark-band: #3d3d39;',
+      )
+    })
+
+    it('leaves the family out of the light remap, so it stays dark under either theme', () => {
+      const css = buildDesignCss(paired())
+
+      expect(declarationsOf(css, "[data-theme='light']")).not.toContain(
+        '--color-dark-',
+      )
+    })
+
+    it('gives a dark role with no light counterpart no family member', () => {
+      expect(buildDesignCss(paired())).not.toContain('--color-dark-pip')
+    })
+
+    it('emits a member for every value the shipped dark surfaces read', () => {
+      const root = declarationsOf(buildDesignCss(), ':root')
+
+      expect(root).toContain('--color-dark-text-body: #cfcdc8;')
+      expect(root).toContain('--color-dark-chrome: #383835;')
+      expect(root).toContain('--color-dark-window: #31312e;')
+      expect(root).toContain('--color-dark-accent: #ff6b42;')
+    })
+  })
+
   it('breaks a declaration past 80 columns after its colon, as oxfmt prints it', () => {
     const value =
       '0 0 0 1px rgba(0, 0, 0, 0.07), 0 24px 60px -28px rgba(0, 0, 0, 0.3)'

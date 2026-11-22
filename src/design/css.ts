@@ -91,6 +91,14 @@ function tokenProperties(tokens: DesignTokens): string[] {
     lines.push(`  --color-${slug(token.role)}: ${token.value};`)
   }
 
+  // The light block remaps only the bare roles, so a surface dark in both
+  // themes reads these, as one light in both reads the `light-` family.
+  const paired = lightCounterparts(tokens.color)
+  for (const token of tokens.color) {
+    if (!paired.has(token.role) || !hasHexValue(token.value)) continue
+    lines.push(`  --color-dark-${slug(token.role)}: ${token.value};`)
+  }
+
   for (const step of tokens.spacing) {
     lines.push(`  --space-${slug(step.step)}: ${step.value};`)
   }

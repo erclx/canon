@@ -123,6 +123,7 @@ export const TOKENS: DesignTokens = {
     "One accent, the mark's pip. Never promote a second color into a structural role.",
     'Every text role clears WCAG AA at 4.5:1 against each ground it is drawn on.',
     '`waiting` colors product-view glyphs, never text. `warning` and `error` exist only in the terminal, as ANSI codes.',
+    'A surface fixed to one theme, such as a terminal dark in both, reads the `--color-dark-*` or `--color-light-*` family, which the theme switch never remaps. Every other surface reads the bare role.',
   ],
 
   color: [
