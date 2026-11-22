@@ -22,8 +22,8 @@ Use `📂 Resumed` in place of `📂 Opened` on a resume pass.
 **Open questions:**
 
 1. <question>
-   - Leaning: <where the evidence currently points>
-   - Overturned by: <the finding that would change it>
+   - **Leaning:** <where the evidence currently points>
+   - **Overturned by:** <the finding that would change it>
 ```
 
 ## Retell

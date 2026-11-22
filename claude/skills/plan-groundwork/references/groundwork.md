@@ -130,12 +130,12 @@ Every open question carries a lean, wherever it appears. A bare numbered list ha
 
 ```markdown
 1. <question>
-   - Leaning: <where the evidence currently points>
-   - Overturned by: <the finding that would change it>
+   - **Leaning:** <where the evidence currently points>
+   - **Overturned by:** <the finding that would change it>
 ```
 
 - Pair every lean with what would overturn it. A lean with no falsifier is opinion.
-- On a measurement rather than a judgment, write `- Leaning: none, needs measuring` and drop the overturn line. A guess at a number is worse.
+- On a measurement rather than a judgment, write `- **Leaning:** none, needs measuring` and drop the overturn line. A guess at a number is worse.
 - Mark each question open or answered, and repeat the open ones at the end of the file they belong to. That gives the decision file its agenda for free.
 
 A lean is weaker than a plan's suggestion: it records the current read on an open question, not a decision to accept at execution time.
@@ -228,5 +228,5 @@ description: <one line naming what the track decided>
 
 ## Revisit when
 
-- <an "Overturned by" line, as written>
+- **Overturned by:** <line, as written>
 ```
