@@ -35,10 +35,8 @@ function stampFields(stamp: string): Record<string, string> {
 }
 
 /**
- * Reads the pull request, its address, the length, and the size from a reel's
- * stamp, which `scripts/core/regen-web-film.ts` writes beside it. A field it
- * lacks or cannot read as a number fails the build, since the caption would
- * otherwise print a number nothing read.
+ * Reads a reel's stamp, which `scripts/core/regen-web-film.ts` writes beside it. A missing or unreadable field
+ * fails the build, since the caption would otherwise print a number nothing read.
  */
 export function reelFrom(stamp: string): Reel {
   const fields = stampFields(stamp)

@@ -11,12 +11,8 @@ interface Data {
 }
 
 /**
- * Replays the night on the second board once that board is in view: the board
- * as you left it, then one move a beat with the clock reading its time, until
- * it rests where the page rendered it. A move into another lane opens a dashed
- * slot where the row lands, carries the row there, and pulses it, and a move in
- * place pulses the row alone. Replay starts the night again, under reduced
- * motion too, where each move lands with no travel.
+ * Replays the night on the second board once that board is in view, one move a beat: a slot, a travel, and a pulse
+ * for a move into another lane, a pulse alone for one in place. Replay starts it again, under reduced motion with no travel.
  */
 const section = document.getElementById('board')
 const source = document.getElementById('board-data')
@@ -72,10 +68,8 @@ if (section && source && after && board && stamp && bar && replay) {
   }
 
   /**
-   * Holds every lane, on both boards, at the tallest it stands at any point in
-   * the night, and the clock line at its longest, so the section keeps one
-   * height while rows come and go. Heights are read to the subpixel, since a
-   * rounded one still lets the page move by a fraction.
+   * Holds every lane on both boards at its tallest across the night, and the clock line at its longest, so the
+   * section keeps one height. Heights are read to the subpixel, since a rounded one still moves the page by a fraction.
    */
   const lock = () => {
     const current = shown

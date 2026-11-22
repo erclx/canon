@@ -1,10 +1,6 @@
 /**
- * Checks, or with `--write --pr <number>` copies, the reel the evidence section
- * plays: the newest reel a pull request's evidence posted to the `canon/frames`
- * branch, its opening frame as the still it rests on, and a stamp naming the
- * pull request it came from.
- * The check `web:build` runs refuses a reel or still whose stamp no longer
- * matches it, so a hand-swapped reel cannot ship under another number.
+ * Checks, or with `--write --pr <number>` copies from `canon/frames`, the reel the evidence section plays, its opening still, and a stamp naming its pull request.
+ * The check `web:build` runs refuses a reel or still its stamp no longer matches, so a swapped reel cannot ship under another number.
  */
 import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
@@ -105,10 +101,8 @@ const chunk = ({ type, body }: Chunk) => {
 }
 
 /**
- * The reel's canvas size, its length, and its opening frame as a still WebP.
- * The opening frame is the one a reel always encodes whole, where a later
- * frame may hold only the region that changed, so its image chunk is lifted
- * out as it is rather than decoded, which ffmpeg cannot do for an animated WebP.
+ * The reel's size, its length, and its opening frame as a still WebP. Only the opening frame is always encoded whole,
+ * so its image chunk is lifted out as it is rather than decoded, which ffmpeg cannot do for an animated WebP.
  */
 function openReel(bytes: Buffer) {
   if (
