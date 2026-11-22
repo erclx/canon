@@ -36,7 +36,7 @@ Each role keeps to its own writes, and five rules cover how the roles meet.
 7. The worker addresses the findings, rebases onto `origin/main` if a sibling landed on its files, pushes, and asks every reviewer on the PR for a re-review of the added commits without waiting on CI.
 8. A pass posts `## Review` while anything is open and `## Review closed` when nothing is. The reviewer then runs `canon pr lift`.
 9. The operator runs `canon pr merge <number>` or names the PR for the orchestrator to merge, which then tells each trailing worker the merge touched to run `review-address` and rebase.
-   - A standing authorization, scoped to a wave by default, lets the orchestrator merge each PR as its gates pass and report after
+   - A standing authorization, scoped by default to the PRs in flight when the operator gives it, lets the orchestrator merge each as its gates pass and report after
 
 Each worker halts at the PR, and the merge stays a human gate, since the seeded ask rule puts every `canon pr merge` an agent runs to the operator. The verb squashes with the body's Summary, Key changes, and Technical context as the message. A release-please or Dependabot pull request merges the same way, from the bot's own body.
 
