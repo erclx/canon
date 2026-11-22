@@ -1,4 +1,7 @@
-import { expect, test } from '@playwright/test'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+
+import { type Page, expect, test } from '@playwright/test'
 
 /** Every settle on an observer or a transition is bounded explicitly. */
 const SETTLE = { timeout: 5_000 }
@@ -169,6 +172,22 @@ test.describe('the fixed bar', () => {
     await expect(page.locator('.nbtn')).toBeFocused()
   })
 
+  for (const width of [834, 700]) {
+    test(`keeps the open menu inside the viewport at ${width}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 800 })
+      await page.goto('/')
+
+      await page.locator('.nbtn').click()
+      const panel = await page.locator('#nav-panel').boundingBox()
+
+      expect(panel).not.toBeNull()
+      expect(panel!.x).toBeGreaterThanOrEqual(0)
+      expect(panel!.x + panel!.width).toBeLessThanOrEqual(width)
+    })
+  }
+
   test('shows its rule only once the page scrolls', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto('/')
@@ -232,6 +251,38 @@ test.describe('the footer columns', () => {
     expect(new URL(page.url()).hash).toBe('#worktrees')
   })
 
+  for (const width of [900, 840, 641]) {
+    test(`sets three link columns in one row under the mark at ${width}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 })
+      await page.goto('/')
+
+      const boxes = await page
+        .locator('.site-footer .col')
+        .evaluateAll((columns) =>
+          columns.map((column) => {
+            const box = column.getBoundingClientRect()
+            return { top: Math.round(box.top), left: Math.round(box.left) }
+          }),
+        )
+      const lead = await page.locator('.site-footer .lead').boundingBox()
+
+      expect(boxes).toHaveLength(3)
+      expect(new Set(boxes.map((box) => box.top)).size).toBe(1)
+      expect(new Set(boxes.map((box) => box.left)).size).toBe(3)
+      expect(lead).not.toBeNull()
+      expect(lead!.y + lead!.height).toBeLessThanOrEqual(boxes[0]!.top)
+    })
+  }
+
+  test('carries no base line under the columns', async ({ page }) => {
+    await page.goto('/')
+
+    await expect(page.locator('.site-footer .col')).toHaveCount(3)
+    await expect(page.locator('.site-footer .base')).toHaveCount(0)
+  })
+
   test('pairs the columns two by two at 390', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 900 })
     await page.goto('/')
@@ -292,6 +343,38 @@ test.describe('the craft section', () => {
       /obra\/superpowers/,
     )
     await expect(chips.last()).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  test('sets every quote beside its rule at 1440', async ({ page }) => {
+    await page.goto('/')
+    const chips = page.locator('#craft .chip')
+    const count = await chips.count()
+    expect(count).toBe(8)
+
+    for (let index = 0; index < count; index += 1) {
+      await chips.nth(index).click()
+      const shown = page.locator('#craft .pair:visible')
+      await expect(shown).toHaveCount(1)
+      const quote = await shown.locator('blockquote').boundingBox()
+      const rule = await shown.locator('.rule').boundingBox()
+      expect(quote).not.toBeNull()
+      expect(rule).not.toBeNull()
+
+      expect(rule!.x).toBeGreaterThan(quote!.x + quote!.width)
+      expect(rule!.y).toBeLessThan(quote!.y + quote!.height)
+    }
+  })
+
+  test('stacks the rule under its quote at 834', async ({ page }) => {
+    await page.setViewportSize({ width: 834, height: 900 })
+    await page.goto('/')
+    const shown = page.locator('#craft .pair:visible')
+    const quote = await shown.locator('blockquote').boundingBox()
+    const rule = await shown.locator('.rule').boundingBox()
+    expect(quote).not.toBeNull()
+    expect(rule).not.toBeNull()
+
+    expect(rule!.y).toBeGreaterThan(quote!.y + quote!.height)
   })
 
   test('sets the quote larger than the rule it became', async ({ page }) => {
@@ -568,6 +651,28 @@ test.describe('the page name', () => {
 test.describe('the board night', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
+  /** The first move lands this long after the board arrives, and each next one a beat later. */
+  const FIRST = 600
+  const BEAT = 1200
+  const MOVES = 6
+
+  const settleFonts = (page: Page) =>
+    page.evaluate(async () => {
+      await document.fonts.ready
+    })
+
+  // An installed clock still flows on real time, so it pauses once the bar marks the night started.
+  const arrive = async (page: Page) => {
+    await page.locator('#board .after .bd').scrollIntoViewIfNeeded()
+    await expect(page.locator('#board .pg')).toHaveClass(
+      /(^| )run( |$)/,
+      SETTLE,
+    )
+    await expect(page.locator('#board .after .stamp')).toHaveText(/^23:00 /)
+    // A target read a moment ago can already be past on a slow engine, so it sits a margin ahead.
+    await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 100)
+  }
+
   test('replays the night a move a beat, and Replay starts it again', async ({
     page,
   }) => {
@@ -575,28 +680,157 @@ test.describe('the board night', () => {
     await page.clock.install()
     await page.goto('/')
     const stamp = page.locator('#board .after .stamp')
-    const replay = page.locator('#board .replay')
 
-    await page.locator('#board .ba').scrollIntoViewIfNeeded()
-    await expect(stamp).toHaveText(/^23:00 /, SETTLE)
-    await page.clock.runFor(700)
-    await expect(stamp).toHaveText(/^23:40 /)
-    await page.clock.runFor(5_000)
+    await arrive(page)
+    await page.clock.runFor(FIRST)
+    await expect(stamp).toHaveText(
+      /^23:40 · the orchestrator moves take-timer$/,
+    )
+    await page.clock.runFor(MOVES * BEAT)
     await expect(stamp).toHaveText(/what you come back to$/)
     await expect(page.locator('#board .after .cd.wt')).toHaveCount(1)
-    await replay.click()
+    await page.locator('#board .replay').click()
 
     await expect(stamp).toHaveText(/^23:00 /)
   })
 
-  test('rests where the night ends under reduced motion', async ({ page }) => {
+  for (const width of [1440, 390]) {
+    test(`holds the section at one height through the night at ${width}`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: 'no-preference' })
+      await page.setViewportSize({ width, height: 900 })
+      await page.clock.install()
+      await page.goto('/')
+      await settleFonts(page)
+      const section = page.locator('#board')
+      // Firefox reports a still box with float noise in the sixth decimal, so a hundredth of a pixel is the grain.
+      const height = async () =>
+        Math.round(((await section.boundingBox())?.height ?? 0) * 100) / 100
+      const before = await height()
+      expect(before).toBeGreaterThan(0)
+
+      await arrive(page)
+      const during: number[] = []
+      for (let step = 0; step < MOVES * 4 + 2; step += 1) {
+        await page.clock.runFor(BEAT / 4)
+        during.push(await height())
+      }
+
+      await expect(page.locator('#board .after .stamp')).toHaveText(
+        /what you come back to$/,
+      )
+      expect(new Set([...during, await height()])).toEqual(new Set([before]))
+    })
+  }
+
+  test('starts the night only once the moving board is in view', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.clock.install()
+    await page.goto('/')
+    const stamp = page.locator('#board .after .stamp')
+    await expect(page.locator('#board')).toHaveClass(/(^| )armed( |$)/)
+
+    await page.evaluate(() => {
+      const board = document.getElementById('board')
+      if (!board) throw new Error('the page carries no #board section')
+      window.scrollBy(0, board.getBoundingClientRect().top - innerHeight + 300)
+    })
+    await page.clock.runFor(FIRST + 2 * BEAT)
+    await expect(stamp).toHaveText(/^23:00 /)
+    await page.locator('#board .after .bd').scrollIntoViewIfNeeded()
+    await page.clock.runFor(FIRST)
+
+    await expect(stamp).toHaveText(/^23:40 /, SETTLE)
+  })
+
+  test('opens a slot, carries the row, and keeps it in place through a scroll', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.clock.install()
+    await page.goto('/')
+    const after = page.locator('#board .after')
+    const ghost = page.locator('#board .ghost')
+    const fly = page.locator('#board .fly')
+    const moved = page.locator('#board .after .cd.mv')
+    /** A box in the second board's frame, where the slot and the landed row are drawn. */
+    const offset = async (node: typeof ghost) => {
+      const frame = await after.boundingBox()
+      const box = await node.boundingBox()
+      if (!frame || !box) throw new Error('the board or the row is not drawn')
+      return { x: box.x - frame.x, y: box.y - frame.y }
+    }
+
+    await arrive(page)
+    await page.clock.runFor(FIRST)
+    await expect(ghost).toHaveCount(1)
+    const slot = await offset(ghost)
+    await page.clock.runFor(300)
+    await expect(fly).toHaveCount(1)
+    const scrolled = await page.evaluate(() => scrollY)
+    await page.mouse.wheel(0, 120)
+    await expect
+      .poll(() => page.evaluate(() => scrollY), SETTLE)
+      .toBeGreaterThan(scrolled)
+    await page.clock.runFor(500)
+
+    await expect(fly).toHaveCount(0)
+    await expect(ghost).toHaveCount(0)
+    await expect(moved).toHaveAttribute('data-name', 'take-timer')
+    // The landing pulse scales the row on real time, which the page clock does not hold, so settle on its end.
+    await expect
+      .poll(async () => {
+        const landed = await offset(moved)
+        return Math.max(
+          Math.abs(landed.x - slot.x),
+          Math.abs(landed.y - slot.y),
+        )
+      }, SETTLE)
+      .toBeLessThan(0.5)
+  })
+
+  test('marks a row that changes in place with no slot or travel', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.clock.install()
     await page.goto('/')
 
-    await expect(page.locator('#board .after .stamp')).toHaveText(
-      /what you come back to\s*$/,
+    await arrive(page)
+    await page.clock.runFor(FIRST + 2 * BEAT)
+
+    await expect(page.locator('#board .after .stamp')).toHaveText(/sync-stamp$/)
+    await expect(page.locator('#board .after .cd.mv')).toHaveAttribute(
+      'data-name',
+      'sync-stamp',
     )
+    await expect(page.locator('#board .ghost, #board .fly')).toHaveCount(0)
+  })
+
+  test('rests where the night ends under reduced motion until Replay is pressed', async ({
+    page,
+  }) => {
+    await page.clock.install()
+    await page.goto('/')
+    const stamp = page.locator('#board .after .stamp')
+    const replay = page.locator('#board .replay')
+
+    await expect(stamp).toHaveText(/what you come back to\s*$/)
     await expect(page.locator('#board .after .cd.wt')).toHaveCount(1)
-    await expect(page.locator('#board .replay')).toBeHidden()
+    await expect(replay).toBeVisible()
+    await page.clock.runFor(FIRST + MOVES * BEAT)
+    await expect(stamp).toHaveText(/what you come back to\s*$/)
+    await replay.click()
+
+    await expect(stamp).toHaveText(/^23:00 /)
+    await page.clock.runFor(FIRST)
+    await expect(stamp).toHaveText(/^23:40 /)
+    await expect(page.locator('#board .ghost, #board .fly')).toHaveCount(0)
+    await page.clock.runFor(MOVES * BEAT)
+    await expect(stamp).toHaveText(/what you come back to\s*$/)
   })
 })
 
@@ -638,61 +872,115 @@ test.describe('the health ranking', () => {
 test.describe('the evidence section', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
-  test('steps the reel through its stills and ticks each line', async ({
-    page,
-  }) => {
-    await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await page.clock.install()
-    await page.goto('/')
-    const lines = page.locator('#evidence .ck li')
-    const replay = page.locator('#evidence .replay')
-    await expect(lines).toHaveCount(5)
+  /** The stamp `scripts/core/regen-web-film.ts` writes beside the reel the page plays. */
+  const stamp = Object.fromEntries(
+    readFileSync(
+      fileURLToPath(new URL('../../assets/loops/reel.stamp', import.meta.url)),
+      'utf8',
+    )
+      .split('\n')
+      .filter(Boolean)
+      .map((line) => [
+        line.slice(0, line.indexOf(': ')),
+        line.slice(line.indexOf(': ') + 2),
+      ]),
+  )
 
-    await page.locator('#evidence .film').scrollIntoViewIfNeeded()
-    await expect(page.locator('#evidence')).toHaveClass(/(^| )in( |$)/, SETTLE)
-    await expect(page.locator('#evidence .strip li.now')).not.toHaveCount(0)
-    await expect(lines.nth(0)).toHaveClass(/(^| )done( |$)/)
-    await expect(lines.nth(4)).not.toHaveClass(/(^| )done( |$)/)
-    await page.clock.runFor(8_000)
-
-    await expect(page.locator('#evidence .ck li.done')).toHaveCount(5)
-    await expect(page.locator('#evidence .strip li.now')).toHaveCount(0)
-    await expect(replay).toBeVisible()
-  })
-
-  test('shows every line ticked and its stills under reduced motion', async ({
+  test('rests on its still, plays on its control, and stops on it again', async ({
     page,
   }) => {
     await page.goto('/')
-    await expect(page.locator('#evidence .ck li')).toHaveCount(5)
-
-    await expect(page.locator('#evidence .ck li.done')).toHaveCount(5)
-    await expect(page.locator('#evidence .replay')).toBeHidden()
-    const stills = page.locator('#evidence .strip:visible img')
-    await expect(stills).toHaveCount(5)
-    await stills.first().scrollIntoViewIfNeeded()
+    const frame = page.locator('#evidence .frame')
+    const play = page.locator('#evidence .play')
+    await expect(frame).toHaveAttribute('src', '/reel-still.webp')
+    await frame.scrollIntoViewIfNeeded()
     await expect
       .poll(
-        () =>
-          stills
-            .first()
-            .evaluate((node: HTMLImageElement) => node.naturalWidth),
+        () => frame.evaluate((node: HTMLImageElement) => node.naturalWidth),
         SETTLE,
       )
       .toBeGreaterThan(0)
+
+    await play.click()
+    await expect(frame).toHaveAttribute('src', '/reel.webp')
+    await expect(play).toHaveAccessibleName('Stop the reel')
+    await play.click()
+
+    await expect(frame).toHaveAttribute('src', '/reel-still.webp')
+    await expect(play).toHaveAccessibleName('Play the reel')
   })
 
-  test('shows the stills filmed in the theme the page is in', async ({
+  test('returns to its still once the reel has played through', async ({
     page,
   }) => {
-    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.clock.install()
     await page.goto('/')
-    const still = page.locator('#evidence .strip:visible img').first()
-    await expect(still).toHaveAttribute('src', '/film-beat-1.webp')
+    const frame = page.locator('#evidence .frame')
 
-    await page.locator('.theme-toggle').click()
+    await page.locator('#evidence .play').click()
+    await expect(page.locator('#evidence .play')).toHaveAccessibleName(
+      'Stop the reel',
+      SETTLE,
+    )
+    await page.clock.runFor(Math.ceil(Number(stamp['reel-seconds']) * 1000))
 
-    await expect(still).toHaveAttribute('src', '/film-beat-1-light.webp')
+    await expect(frame).toHaveAttribute('src', '/reel-still.webp')
+  })
+
+  test('counts the reel from when it arrives, not from the press', async ({
+    page,
+  }) => {
+    let release = () => {}
+    const held = new Promise<void>((resolve) => (release = resolve))
+    await page.route('**/reel.webp', async (route) => {
+      await held
+      await route.continue()
+    })
+    await page.clock.install()
+    await page.goto('/')
+    const frame = page.locator('#evidence .frame')
+    const play = page.locator('#evidence .play')
+
+    await play.click()
+    await expect(play).toHaveAccessibleName('Loading the reel')
+    await page.clock.runFor(Math.ceil(Number(stamp['reel-seconds']) * 1000))
+    await expect(frame).toHaveAttribute('src', '/reel.webp')
+    release()
+    await expect(play).toHaveAccessibleName('Stop the reel', SETTLE)
+    await page.clock.runFor(Math.ceil(Number(stamp['reel-seconds']) * 1000))
+
+    await expect(frame).toHaveAttribute('src', '/reel-still.webp')
+  })
+
+  test('plays nothing on its own once in view', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.clock.install()
+    await page.goto('/')
+    const frame = page.locator('#evidence .frame')
+
+    await frame.scrollIntoViewIfNeeded()
+    await page.clock.runFor(Math.ceil(Number(stamp['reel-seconds']) * 1000))
+
+    await expect(frame).toHaveAttribute('src', '/reel-still.webp')
+  })
+
+  test('links the pull request its stamp names', async ({ page }) => {
+    await page.goto('/')
+    const link = page.locator('#evidence figcaption a')
+    expect(stamp['pull-request']).toMatch(/^\d+$/)
+
+    await expect(link).toHaveAttribute('href', stamp.address ?? '')
+    await expect(link).toHaveText(`pull request #${stamp['pull-request']}`)
+    await expect(page.locator('#evidence')).not.toContainText('#412')
+  })
+
+  test('draws the reel no wider than it was recorded', async ({ page }) => {
+    await page.goto('/')
+    const frame = await page.locator('#evidence .frame').boundingBox()
+
+    expect(frame).not.toBeNull()
+    expect(frame!.width).toBeLessThanOrEqual(Number(stamp.width))
+    expect(frame!.width).toBeGreaterThan(Number(stamp.width) / 2)
   })
 })
 
@@ -712,11 +1000,51 @@ test.describe('the install section', () => {
 
     await copy.click()
 
-    await expect(copy).toHaveText('Copied')
+    await expect(copy.locator('.now')).toHaveText('Copied')
+    await expect(copy).toHaveAccessibleName('Copied')
     await expect(page.locator('#install [role="status"]')).toHaveText(
       'Copied the three commands',
     )
     const copied = await page.evaluate(() => navigator.clipboard.readText())
     expect(copied.split('\n')).toHaveLength(3)
+  })
+
+  test('holds the command card at one size through a copy at 840', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 840, height: 900 })
+    await page.goto('/')
+    const card = page.locator('#install .cmd')
+    const copy = page.locator('#install .copy')
+    await card.scrollIntoViewIfNeeded()
+    const before = await card.boundingBox()
+    const width = (await copy.boundingBox())?.width
+
+    await copy.click()
+    await expect(copy.locator('.now')).toHaveText('Copied')
+
+    expect(before).not.toBeNull()
+    expect((await card.boundingBox())?.height).toBe(before!.height)
+    expect((await copy.boundingBox())?.width).toBe(width)
+  })
+
+  test('sets the heading beside the command card at 1440 and above it at 834', async ({
+    page,
+  }) => {
+    const place = async (width: number) => {
+      await page.setViewportSize({ width, height: 900 })
+      await page.goto('/')
+      const head = await page.locator('#install h2').boundingBox()
+      const card = await page.locator('#install .cmd').boundingBox()
+      expect(head).not.toBeNull()
+      expect(card).not.toBeNull()
+      return { head: head!, card: card! }
+    }
+
+    const wide = await place(1440)
+    expect(wide.card.x).toBeGreaterThan(wide.head.x + wide.head.width)
+    const narrow = await place(834)
+    expect(narrow.card.y).toBeGreaterThan(narrow.head.y + narrow.head.height)
+    await expect(page.locator('#install .term, #install .stg')).toHaveCount(0)
   })
 })

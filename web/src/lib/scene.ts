@@ -92,21 +92,45 @@ export function armEntry<T extends Stage>(
   return true
 }
 
-function watchOnce(node: Element, enter: () => void) {
+function watchOnce(node: Element, enter: () => void, threshold = 0.25) {
   const observer = new IntersectionObserver(
     (entries) => {
       if (!entries.some((entry) => entry.isIntersecting)) return
       observer.disconnect()
       enter()
     },
-    { threshold: 0.25 },
+    { threshold },
   )
   observer.observe(node)
 }
 
-/** Plays a section's motion once, the first time a quarter of it is in view. */
-export const playOnEntry = (node: Element | null, play?: () => void) =>
-  node ? armEntry(node, reducedMotion(), watchOnce, play) : false
+/** The part of a section whose arrival starts its motion, when that is not the section's top quarter. */
+export interface EntryWatch {
+  readonly node: Element
+  /** How much of `node` shows before the motion starts, 0 to 1. */
+  readonly threshold: number
+}
+
+/**
+ * Plays a section's motion once, the first time a quarter of it is in view, or
+ * once `watch` names the part whose arrival should start it.
+ */
+export const playOnEntry = (
+  node: Element | null,
+  play?: () => void,
+  watch?: EntryWatch,
+) =>
+  node
+    ? armEntry(
+        node,
+        reducedMotion(),
+        (section, enter) =>
+          watch
+            ? watchOnce(watch.node, enter, watch.threshold)
+            : watchOnce(section, enter),
+        play,
+      )
+    : false
 
 export const escapeHtml = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;')

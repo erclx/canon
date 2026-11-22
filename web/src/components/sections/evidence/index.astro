@@ -1,23 +1,15 @@
 ---
 import { evidence } from '../../../content/copy'
-import { readFilm } from '../../../lib/film'
+import { readReel } from '../../../lib/film'
 import './style.css'
 
 /**
- * The film and the board side by side. The film is the reel's beat stills as
- * a filmstrip, each timed from the reel's stamp, over the checklist the reel
- * proves, one line a beat. The board is the drive that picked this page's
- * footer, its three arms with the picked one marked, labeled as snapshots.
- * Each theme shows the stills filmed in it. Once the strip comes into view the
- * reel steps through its stills and ticks each line, with a replay after, and
- * reduced motion shows every line ticked.
+ * One reel a real pull request carried, read with its number and address from
+ * the stamp beside it. It rests on its opening frame and plays only on its
+ * control, on a surface that stays dark in both themes since one recording
+ * carries one theme.
  */
-const dark = readFilm('dark')
-const light = readFilm('light')
-const themes = [
-  { film: dark, kind: 'dk', suffix: '' },
-  { film: light, kind: 'lt', suffix: '-light' },
-]
+const reel = readReel()
 ---
 
 <section class="part" id="evidence">
@@ -26,67 +18,38 @@ const themes = [
       <h2>{evidence.head}</h2>
       <p class="lede">{evidence.lede}</p>
     </div>
-    <div class="bento">
-      <div class="film ink">
-        <p class="note">{evidence.reel(dark.seconds)}</p>
-        {
-          themes.map((theme) => (
-            <ol class:list={['strip', theme.kind]} role="list">
-              {theme.film.beats.map((beat) => (
-                <li>
-                  <img
-                    src={beat.still}
-                    alt={evidence.frame(beat.at)}
-                    width="640"
-                    height="400"
-                    decoding="async"
-                  />
-                  <span class="tc" aria-hidden="true">
-                    {beat.at}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          ))
-        }
-        <ul class="ck" role="list">
-          {
-            evidence.checks.map((check) => (
-              <li class="done">
-                <span class="b" role="img" aria-label="checked" />
-                <span>{check}</span>
-                <span class="who">{evidence.who}</span>
-              </li>
-            ))
-          }
-        </ul>
-        <button type="button" class="drawn replay" hidden>
-          {evidence.replay}
-        </button>
+    <figure class="reel">
+      <div class="screen">
+        <img
+          class="frame"
+          src="/reel-still.webp"
+          alt={evidence.still(reel.pullRequest)}
+          width={reel.width}
+          height={reel.height}
+          decoding="async"
+          data-still="/reel-still.webp"
+          data-reel="/reel.webp"
+        />
+        <div class="bar">
+          <button
+            type="button"
+            class="play"
+            data-play={evidence.play}
+            data-loading={evidence.loading}
+            data-stop={evidence.stop}
+            data-ms={Math.round(reel.seconds * 1000)}
+          >
+            <span class="glyph" aria-hidden="true"></span>
+            <span class="label">{evidence.play}</span>
+          </button>
+          <span class="len">{evidence.length(reel.seconds)}</span>
+        </div>
       </div>
-      <div class="board ink">
-        <p class="note">{evidence.board}</p>
-        <p class="q">{evidence.question}</p>
-        <ol class="arms" role="list">
-          {
-            evidence.arms.map((arm, index) => (
-              <li class:list={['arm', { pk: index === evidence.picked }]}>
-                {themes.map((theme) => (
-                  <img
-                    class={theme.kind}
-                    src={`/drive/footer-layout/arm-${index}${theme.suffix}.png`}
-                    alt={arm.alt}
-                    decoding="async"
-                  />
-                ))}
-                <span class="n">{arm.name}</span>
-              </li>
-            ))
-          }
-        </ol>
-        <p class="note snap">{evidence.snapshot}</p>
-      </div>
-    </div>
+      <figcaption>
+        {evidence.posted}{' '}
+        <a href={reel.address}>{evidence.link(reel.pullRequest)}</a>
+      </figcaption>
+    </figure>
   </div>
 </section>
 

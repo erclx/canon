@@ -36,3 +36,20 @@ export function boardAfter(
   }
   return board
 }
+
+/**
+ * Whether move `index` carries its row into another lane, which draws a slot
+ * and a travel, rather than changing the row's line where it sits.
+ */
+export function travels(
+  rows: readonly BoardRow[],
+  moves: readonly BoardMove[],
+  index: number,
+): boolean {
+  const move = moves[index]
+  if (!move) return false
+  const row = boardAfter(rows, moves, index).find(
+    (other) => other.name === move.name,
+  )
+  return row?.lane !== move.lane
+}

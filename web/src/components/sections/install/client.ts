@@ -9,6 +9,7 @@ export {}
  */
 const card = document.querySelector<HTMLElement>('#install .cmd')
 const button = card?.querySelector<HTMLButtonElement>('.copy')
+const label = button?.querySelector<HTMLElement>('.now')
 const status = card?.querySelector<HTMLElement>('[role="status"]')
 let reset: ReturnType<typeof setTimeout> | undefined
 
@@ -16,11 +17,11 @@ button?.addEventListener('click', () => {
   void navigator.clipboard
     ?.writeText(card?.dataset.commands ?? '')
     .catch(() => {})
-  button.textContent = button.dataset.done ?? ''
+  if (label) label.textContent = button.dataset.done ?? ''
   if (status) status.textContent = button.dataset.status ?? ''
   clearTimeout(reset)
   reset = setTimeout(() => {
-    button.textContent = button.dataset.label ?? ''
+    if (label) label.textContent = button.dataset.label ?? ''
     if (status) status.textContent = ''
   }, 1600)
 })

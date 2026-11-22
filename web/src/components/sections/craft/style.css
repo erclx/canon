@@ -121,6 +121,50 @@
   margin-top: 8px;
 }
 
+#craft .arw {
+  display: inline-block;
+}
+
+/* The quote and the rule it became share a row, so the arrow turns to point across. */
+@media (min-width: 901px) {
+  #craft .pair:not([hidden]) {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    column-gap: 56px;
+    align-items: start;
+  }
+
+  #craft .pair > .note:first-child,
+  #craft .pair > blockquote,
+  #craft .pair > .src {
+    grid-column: 1;
+  }
+
+  #craft .pair > .src {
+    justify-self: start;
+  }
+
+  #craft .pair > .becomes {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0 0 14px;
+  }
+
+  #craft .pair > .rule {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+    max-width: none;
+  }
+
+  #craft blockquote {
+    max-width: none;
+  }
+
+  #craft .arw {
+    transform: rotate(-90deg);
+  }
+}
+
 @media (max-width: 900px) {
   #craft .top {
     grid-template-columns: minmax(0, 1fr);

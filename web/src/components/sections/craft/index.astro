@@ -5,8 +5,8 @@ import './style.css'
 
 /**
  * One practice at a time: the source's own words set large, the link to the
- * address its ledger row cites, and under them the rule those words became,
- * with the skill file it sits in. A chip per practice skill swaps the pair.
+ * address its ledger row cites, and beside them above 900 or under them below
+ * it the rule those words became, with the skill file it sits in. A chip per practice skill swaps the pair.
  * Every pair is rendered and the unpicked ones hidden, so the page reads whole
  * before the script runs.
  */
@@ -42,7 +42,7 @@ import './style.css'
               {practice.source} ↗
             </a>
             <p class="becomes note" aria-hidden="true">
-              ↓ {craft.becomes}
+              <span class="arw">↓</span> {craft.becomes}
             </p>
             <div class="rule ink">
               <p class="note">

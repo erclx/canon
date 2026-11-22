@@ -1,6 +1,3 @@
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
-
 import { describe, expect, it } from 'vitest'
 
 import * as copy from './copy'
@@ -28,7 +25,7 @@ describe('copy', () => {
 
   it('should read every exported string, including those built from counts', () => {
     expect(strings).toContain(copy.guardrails.parts[1]?.verdict)
-    expect(strings).toContain(copy.install.stages[0]?.line)
+    expect(strings).toContain(copy.install.copy.done)
     expect(strings).toContain(copy.footer.read[0]?.label)
   })
 
@@ -53,15 +50,5 @@ describe('worktreeCards', () => {
 
     expect(copy.worktreeCards.length).toBeGreaterThan(0)
     expect(strays).toEqual([])
-  })
-})
-
-describe('evidence', () => {
-  it('should carry one checklist line per beat the film plan films', () => {
-    const plan = JSON.parse(
-      readFileSync(join(import.meta.dirname, '../../film-plan.json'), 'utf8'),
-    ) as { beats: unknown[] }
-
-    expect(copy.evidence.checks).toHaveLength(plan.beats.length)
   })
 })

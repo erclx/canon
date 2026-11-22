@@ -1,46 +1,41 @@
-import { playOnEntry } from '../../../lib/scene'
+// Astro bundles this file as a module, and the empty export tells TypeScript so,
+// keeping its names off the globals the other section scripts declare.
+export {}
 
 /**
- * Every line stays ticked until the reel starts, so the page reads finished
- * before the script runs and under reduced motion.
+ * Plays the reel once on a press and returns it to its still at the end or on
+ * a second press. The length counts from the reel's arrival, since on a slow
+ * link the bytes take longer than the reel runs. Nothing plays on its own.
  */
-const STEP = 1600
-const section = document.getElementById('evidence')
-const film = section?.querySelector<HTMLElement>('.film')
-const replay = film?.querySelector<HTMLButtonElement>('.replay')
-const lines = [...(film?.querySelectorAll<HTMLElement>('.ck li') ?? [])]
-const strips = [...(film?.querySelectorAll<HTMLElement>('.strip') ?? [])]
+const reel = document.querySelector<HTMLElement>('#evidence .reel')
+const frame = reel?.querySelector<HTMLImageElement>('.frame')
+const button = reel?.querySelector<HTMLButtonElement>('.play')
+const label = button?.querySelector<HTMLElement>('.label')
 
-if (section && replay && lines.length) {
-  const timers: number[] = []
-  const frames = (index: number) =>
-    strips.flatMap((strip) => {
-      const frame = strip.children[index]
-      return frame instanceof HTMLElement ? [frame] : []
-    })
-  const count = Math.min(lines.length, strips[0]?.children.length ?? 0)
+if (reel && frame && button && label) {
+  let end: ReturnType<typeof setTimeout> | undefined
 
-  const reel = () => {
-    timers.splice(0).forEach(clearTimeout)
-    lines.forEach((line) => line.classList.remove('done'))
-    for (let index = 0; index <= count; index += 1) {
-      timers.push(
-        window.setTimeout(() => {
-          strips.forEach((strip) =>
-            [...strip.children].forEach((frame) =>
-              frame.classList.remove('now'),
-            ),
-          )
-          if (index === count) return
-          frames(index).forEach((frame) => frame.classList.add('now'))
-          lines[index]?.classList.add('done')
-        }, index * STEP),
-      )
-    }
+  const started = () => {
+    label.textContent = button.dataset.stop ?? ''
+    end = setTimeout(rest, Number(button.dataset.ms))
   }
 
-  if (playOnEntry(section, reel)) {
-    replay.hidden = false
-    replay.addEventListener('click', reel)
+  const rest = () => {
+    clearTimeout(end)
+    frame.removeEventListener('load', started)
+    frame.src = frame.dataset.still ?? ''
+    reel.classList.remove('on')
+    label.textContent = button.dataset.play ?? ''
   }
+
+  const play = () => {
+    reel.classList.add('on')
+    label.textContent = button.dataset.loading ?? ''
+    frame.addEventListener('load', started, { once: true })
+    frame.src = frame.dataset.reel ?? ''
+  }
+
+  button.addEventListener('click', () =>
+    reel.classList.contains('on') ? rest() : play(),
+  )
 }
