@@ -1,5 +1,25 @@
 # Changelog
 
+## [5.112.0](https://github.com/erclx/canon/compare/v5.111.0...v5.112.0) (2026-11-22)
+
+
+### Features
+
+* **claude:** add an orchestrator kickoff runbook for an empty board ([#3365](https://github.com/erclx/canon/issues/3365)) ([b0a4912](https://github.com/erclx/canon/commit/b0a4912691a05156e37c33662da0880fa7eeeefd))
+* **design:** ask for operator taste before a look round ([#3366](https://github.com/erclx/canon/issues/3366)) ([e3733eb](https://github.com/erclx/canon/commit/e3733eba47c666a5f400704b9c9b89a443e18d21))
+* **design:** turn an app pick into one checked clickable prototype ([#3367](https://github.com/erclx/canon/issues/3367)) ([6b0a136](https://github.com/erclx/canon/commit/6b0a136539e30e7f3578813ffa7f9c170317c24e))
+* **governance:** route project conventions to project rules ([#3376](https://github.com/erclx/canon/issues/3376)) ([d814d6f](https://github.com/erclx/canon/commit/d814d6fbec2fa0ea446fbac0c2948adc5797d147))
+* **plan:** ask for build or adopt and record a settled design run ([#3372](https://github.com/erclx/canon/issues/3372)) ([2ad830e](https://github.com/erclx/canon/commit/2ad830ea289b7bb0e85b8676b156bc209e2463ad))
+* **pr:** report a spent GitHub quota as rate-limited ([#3369](https://github.com/erclx/canon/issues/3369)) ([eda3870](https://github.com/erclx/canon/commit/eda38700a47a35f981134723ae278ce32aade885))
+* **ship:** back off the CI watch and stop on a spent quota ([#3375](https://github.com/erclx/canon/issues/3375)) ([8c460b2](https://github.com/erclx/canon/commit/8c460b2eb87f3ee0ba54fccef838022653f6a32c))
+* **tasks:** take the launch's short id in canon tasks session ([#3368](https://github.com/erclx/canon/issues/3368)) ([8dbf8d3](https://github.com/erclx/canon/commit/8dbf8d3618b0a44cbdcf7f46909cad0a618354be))
+
+
+### Bug Fixes
+
+* **docs:** split the round bullets under the density cap ([#3373](https://github.com/erclx/canon/issues/3373)) ([2456fc5](https://github.com/erclx/canon/commit/2456fc522cbe4e2569627af84685d0e1c8158f7c))
+* **pr:** refuse a malformed or absent pull request number ([#3370](https://github.com/erclx/canon/issues/3370)) ([15bbff8](https://github.com/erclx/canon/commit/15bbff841b1741c36c5413b3ab247be86a1b7e1b))
+
 ## [5.111.0](https://github.com/erclx/canon/compare/v5.110.0...v5.111.0) (2026-11-22)
 
 
