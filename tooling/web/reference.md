@@ -26,15 +26,31 @@ The web layer covers the tooling shared across Vite + React, Astro, and Next.js.
 ## Tailwind
 
 - Use v4 through `@tailwindcss/vite`, never the v3 integration
-- Add shadcn through the sequence under `## Adding shadcn`, since a bare `init` overwrites `src/styles/global.css` and waits on prompts
+- Add shadcn to a Vite + React or Next.js app through the sequence under `## Adding shadcn`, since a bare `init` reads the wrong template and waits on prompts
 
 ## Adding shadcn
 
-1. Copy `src/styles/global.css` aside, since init overwrites it.
-2. Confirm `global.css` starts with `@import 'tailwindcss';`, which init reads to find Tailwind v4, and that the `@/*` alias sits in both `tsconfig.json` and `vite.config.ts`.
-3. Take a preset name from `bunx shadcn@latest init --help`, since `-p` names a preset and not a primary color, and the default drifts between releases.
-4. Run `bunx shadcn@latest init -t vite -b radix -p <preset> -y </dev/null` with a timeout. The stdin redirect stops a non-TTY session from hanging on a prompt.
-5. Expect `components.json`, `src/lib/utils.ts`, and `src/components/ui/button.tsx`. Init installs the `cn` package for the helper and merges its theme into `global.css`, so reapply any copied styles.
+Each app stack names its own stylesheet and template. An Astro site keeps its own components and takes no init.
+
+| Stack        | Stylesheet            | Template | Alias in                          |
+| ------------ | --------------------- | -------- | --------------------------------- |
+| `vite-react` | `src/index.css`       | `vite`   | `tsconfig.json`, `vite.config.ts` |
+| `nextjs`     | `src/app/globals.css` | `next`   | `tsconfig.json`                   |
+
+Checked against shadcn `4.23.0` on 2026-11-22.
+
+1. Copy the stylesheet aside, so anything init drops can be reapplied.
+2. Confirm the stylesheet imports `tailwindcss` and the `@/*` alias sits in every file the table names. Without the import, init stops on `No Tailwind CSS configuration found`.
+3. Run `timeout 300 bunx shadcn@latest init -t <template> -b base -p nova --no-monorepo -y </dev/null` from the app root. The closed stdin and `--no-monorepo` keep a non-TTY session off a prompt.
+4. Expect `components.json` reading `"style": "base-nova"`, `src/lib/utils.ts`, and `src/components/ui/button.tsx`, with the theme merged into the stylesheet below the Tailwind import.
+5. Diff the stylesheet against the copy and reapply any line init removed.
+6. Run `bun run format`, since init writes in its own style and the format check fails on it.
+
+`-b base` picks Base UI, the shadcn rule's default for new projects, and `-p nova` with it yields the `base-nova` style.
+
+- Name both, since a release changing a default would otherwise move every new project
+- Pass the bare preset name to `-p`, which refuses `base-nova`
+- Expect init to add `@base-ui/react`, `class-variance-authority`, `lucide-react`, `tw-animate-css`, and the Geist font
 
 ## TypeScript and layout
 
