@@ -68,6 +68,9 @@ const ITEM_HEADING = /^###\s+\d+[a-z]*\.\s/i
 /** A bolded field bullet, the one line `readItems` takes from a field. */
 const FIELD = /^-\s+\*\*([^*]+):\*\*/
 
+/** A groundwork lean or its falsifier, a bold-labeled bullet at any indent. */
+const LEAN_FIELD = /^\s*-\s+\*\*(Leaning|Overturned by):\*\*/
+
 /** Any heading, which closes the item above it. */
 const SECTION = /^#{1,6}\s/
 
@@ -128,6 +131,22 @@ export function driveLogStructure(text: string): StructureEntry[] {
   return structureFindings(text).filter(
     (entry) =>
       !(entry.criterion === 'S4' && FIELD.test(lines[entry.line - 1] ?? '')),
+  )
+}
+
+/**
+ * The structure report for a groundwork track's file. A lean and its falsifier run past `S4`'s
+ * bound on one line, and the close copies each into `## Revisit when`, so a bullet labeled
+ * `Leaning` or `Overturned by` in bold, at any indent, skips `S4`.
+ */
+export function groundworkStructure(text: string): StructureEntry[] {
+  const lines = text.split('\n')
+
+  return structureFindings(text).filter(
+    (entry) =>
+      !(
+        entry.criterion === 'S4' && LEAN_FIELD.test(lines[entry.line - 1] ?? '')
+      ),
   )
 }
 
