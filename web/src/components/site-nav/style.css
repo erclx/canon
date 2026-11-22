@@ -182,6 +182,14 @@
   display: block;
 }
 
+/* From the tablet up the button sits near the right edge, so the panel opens leftward from it. */
+@media (min-width: 641px) {
+  .site-nav .npanel {
+    left: auto;
+    right: 0;
+  }
+}
+
 .site-nav .npanel a {
   position: relative;
   display: block;

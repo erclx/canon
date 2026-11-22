@@ -169,6 +169,22 @@ test.describe('the fixed bar', () => {
     await expect(page.locator('.nbtn')).toBeFocused()
   })
 
+  for (const width of [834, 700]) {
+    test(`keeps the open menu inside the viewport at ${width}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 800 })
+      await page.goto('/')
+
+      await page.locator('.nbtn').click()
+      const panel = await page.locator('#nav-panel').boundingBox()
+
+      expect(panel).not.toBeNull()
+      expect(panel!.x).toBeGreaterThanOrEqual(0)
+      expect(panel!.x + panel!.width).toBeLessThanOrEqual(width)
+    })
+  }
+
   test('shows its rule only once the page scrolls', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto('/')
