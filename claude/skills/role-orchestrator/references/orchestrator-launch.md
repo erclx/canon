@@ -145,7 +145,9 @@ What a planning dispatch owes instead is the reverse reading, since a row planne
 
 ### Reusing a planner
 
-Read `${CLAUDE_SKILL_DIR}/references/orchestrator-planner-reuse.md` before handing a planner more than one row or one row too big for one worker. Several rows in one launch take its batch brief, which asks for one plan file per task, and a row named back to a live planner takes its reuse rules. A planner the roster lists stopped or absent takes its `## Reviving a stopped planner` section first.
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-planner-reuse.md` before handing a planner more than one row or one row too big for one worker. Several rows in one launch take its batch brief, which asks for one plan file per task, and a row named back to a live planner takes its reuse rules.
+
+Read its `## Reviving a stopped planner` section first when the roster lists the planner stopped or absent.
 
 ## Dispatch to plan and build a small row
 
