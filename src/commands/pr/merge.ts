@@ -20,6 +20,7 @@ import {
   noteRateLimit,
   rateLimitMessage,
   refuseWith,
+  refusePull,
   resolvePullNumber,
   withRateLimit,
 } from '@/commands/pr/pull'
@@ -201,7 +202,11 @@ function mergeApi(root: string, number: string): MergeApi {
       if (stdout === null) return undefined
       try {
         const row = JSON.parse(stdout) as RestPull
-        if (row.head?.sha === undefined || typeof row.title !== 'string') {
+        if (
+          row.head?.sha === undefined ||
+          typeof row.title !== 'string' ||
+          typeof row.number !== 'number'
+        ) {
           return undefined
         }
         return {
@@ -212,6 +217,7 @@ function mergeApi(root: string, number: string): MergeApi {
           head: row.head.sha,
           branch: row.head.ref ?? '',
           isBotAuthor: row.user?.type === 'Bot',
+          number: row.number,
         }
       } catch {
         return undefined
@@ -242,14 +248,7 @@ async function runMerge(
   }
 
   const resolved = await resolvePullNumber(root, number)
-  if (resolved.kind === 'refused') {
-    return refuseWith(
-      resolved.reason,
-      PULL_REFUSALS[resolved.reason],
-      emitJson,
-      root,
-    )
-  }
+  if (resolved.kind === 'refused') return refusePull(resolved, emitJson, root)
 
   const merged = await merge(mergeApi(root, resolved.number), {
     number: Number(resolved.number),

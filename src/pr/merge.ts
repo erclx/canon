@@ -28,6 +28,8 @@ export interface MergePull {
   readonly branch: string
   /** Whether the author is a bot account, which a release pull request's is not. */
   readonly isBotAuthor: boolean
+  /** The number GitHub answered for, which the squash subject carries. */
+  readonly number: number
 }
 
 export type BotKind = 'release-please' | 'dependabot'
@@ -221,11 +223,14 @@ export async function merge(
   const { number } = opts
 
   const pull = await api.readPull()
-  if (pull === undefined) return refused('gh-failed', number)
+  // A read answering for another number would put that number in the subject.
+  if (pull === undefined || pull.number !== number) {
+    return refused('gh-failed', number)
+  }
   if (!pull.isOpen) return refused('pull-closed', number)
   if (pull.isDraft) return refused('pull-draft', number)
 
-  const title = mergeTitle(pull.title, number)
+  const title = mergeTitle(pull.title, pull.number)
   const bot = botKind(pull)
   const composed =
     bot === undefined

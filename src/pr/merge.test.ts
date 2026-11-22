@@ -375,6 +375,7 @@ function harness(fixture: Fixture = {}): Harness {
     head: HEAD,
     branch: 'feat/add-merge-verb',
     isBotAuthor: false,
+    number: 2544,
     ...fixture.pull,
   }
   const api: MergeApi = {
@@ -475,6 +476,24 @@ describe('merge pulling the main worktree', () => {
 })
 
 describe('merge', () => {
+  it('should refuse gh-failed and write nothing when the read answers for another pull request', async () => {
+    const { api, puts } = harness({ pull: { number: 33 } })
+
+    const record = await merge(api, { number: 2544, isDryRun: false })
+
+    expect(record).toMatchObject({ reason: 'gh-failed', isOk: false })
+    expect(record.title).toBeUndefined()
+    expect(puts).toEqual([])
+  })
+
+  it('should end the squash subject on the number the pull object carries', async () => {
+    const { api, puts } = harness()
+
+    await merge(api, { number: 2544, isDryRun: false })
+
+    expect(puts[0]?.title).toBe('feat(pr): add a merge verb (#2544)')
+  })
+
   it('should squash-merge a ready pull request with the composed message pinned to the head', async () => {
     const { api, puts } = harness()
 
@@ -621,11 +640,13 @@ describe('merge on a bot pull request', () => {
     title: 'chore(main): release 5.58.0',
     body: RELEASE_BODY,
     branch: 'release-please--branches--main--components--canon',
+    number: 2649,
   }
   const DEPENDABOT = {
     title: 'chore(deps): bump the bun group with 3 updates',
     body: DEPENDABOT_BODY,
     branch: 'dependabot/bun/bun-0523db4276',
+    number: 2483,
     isBotAuthor: true,
   }
 
