@@ -164,10 +164,8 @@ function gitWrite(cwd: string, args: readonly string[]): Promise<boolean> {
 }
 
 /**
- * Fast-forwards the main worktree at `cwd` to its remote trunk, which fires the
- * `post-merge` hook as a hand pull does. It skips a linked worktree and a main
- * on another branch, and refuses a tree with tracked changes or a branch that
- * diverged, leaving the checkout where it was in every case but `pulled`.
+ * Fast-forwards the main worktree at `cwd` to its remote trunk, firing `post-merge`
+ * as a hand pull does. Every outcome but `pulled` leaves the checkout as it was.
  */
 export async function fastForwardMain(cwd: string): Promise<MainPull> {
   const dirs = (
