@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+
 import { expect, test } from '@playwright/test'
 
 /** Every settle on an observer or a transition is bounded explicitly. */
@@ -718,61 +721,86 @@ test.describe('the health ranking', () => {
 test.describe('the evidence section', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
-  test('steps the reel through its stills and ticks each line', async ({
-    page,
-  }) => {
-    await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await page.clock.install()
-    await page.goto('/')
-    const lines = page.locator('#evidence .ck li')
-    const replay = page.locator('#evidence .replay')
-    await expect(lines).toHaveCount(5)
+  /** The stamp `scripts/core/regen-web-film.ts` writes beside the reel the page plays. */
+  const stamp = Object.fromEntries(
+    readFileSync(
+      fileURLToPath(new URL('../../assets/loops/reel.stamp', import.meta.url)),
+      'utf8',
+    )
+      .split('\n')
+      .filter(Boolean)
+      .map((line) => [
+        line.slice(0, line.indexOf(': ')),
+        line.slice(line.indexOf(': ') + 2),
+      ]),
+  )
 
-    await page.locator('#evidence .film').scrollIntoViewIfNeeded()
-    await expect(page.locator('#evidence')).toHaveClass(/(^| )in( |$)/, SETTLE)
-    await expect(page.locator('#evidence .strip li.now')).not.toHaveCount(0)
-    await expect(lines.nth(0)).toHaveClass(/(^| )done( |$)/)
-    await expect(lines.nth(4)).not.toHaveClass(/(^| )done( |$)/)
-    await page.clock.runFor(8_000)
-
-    await expect(page.locator('#evidence .ck li.done')).toHaveCount(5)
-    await expect(page.locator('#evidence .strip li.now')).toHaveCount(0)
-    await expect(replay).toBeVisible()
-  })
-
-  test('shows every line ticked and its stills under reduced motion', async ({
+  test('rests on its still, plays on its control, and stops on it again', async ({
     page,
   }) => {
     await page.goto('/')
-    await expect(page.locator('#evidence .ck li')).toHaveCount(5)
-
-    await expect(page.locator('#evidence .ck li.done')).toHaveCount(5)
-    await expect(page.locator('#evidence .replay')).toBeHidden()
-    const stills = page.locator('#evidence .strip:visible img')
-    await expect(stills).toHaveCount(5)
-    await stills.first().scrollIntoViewIfNeeded()
+    const frame = page.locator('#evidence .frame')
+    const play = page.locator('#evidence .play')
+    await expect(frame).toHaveAttribute('src', '/reel-still.webp')
+    await frame.scrollIntoViewIfNeeded()
     await expect
       .poll(
-        () =>
-          stills
-            .first()
-            .evaluate((node: HTMLImageElement) => node.naturalWidth),
+        () => frame.evaluate((node: HTMLImageElement) => node.naturalWidth),
         SETTLE,
       )
       .toBeGreaterThan(0)
+
+    await play.click()
+    await expect(frame).toHaveAttribute('src', '/reel.webp')
+    await expect(play).toHaveAccessibleName('Stop the reel')
+    await play.click()
+
+    await expect(frame).toHaveAttribute('src', '/reel-still.webp')
+    await expect(play).toHaveAccessibleName('Play the reel')
   })
 
-  test('shows the stills filmed in the theme the page is in', async ({
+  test('returns to its still once the reel has played through', async ({
     page,
   }) => {
-    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.clock.install()
     await page.goto('/')
-    const still = page.locator('#evidence .strip:visible img').first()
-    await expect(still).toHaveAttribute('src', '/film-beat-1.webp')
+    const frame = page.locator('#evidence .frame')
 
-    await page.locator('.theme-toggle').click()
+    await page.locator('#evidence .play').click()
+    await expect(frame).toHaveAttribute('src', '/reel.webp')
+    await page.clock.runFor(Math.ceil(Number(stamp['reel-seconds']) * 1000))
 
-    await expect(still).toHaveAttribute('src', '/film-beat-1-light.webp')
+    await expect(frame).toHaveAttribute('src', '/reel-still.webp')
+  })
+
+  test('plays nothing on its own once in view', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.goto('/')
+    const frame = page.locator('#evidence .frame')
+
+    await frame.scrollIntoViewIfNeeded()
+    await page.waitForTimeout(500)
+
+    await expect(frame).toHaveAttribute('src', '/reel-still.webp')
+  })
+
+  test('links the pull request its stamp names', async ({ page }) => {
+    await page.goto('/')
+    const link = page.locator('#evidence figcaption a')
+    expect(stamp['pull-request']).toMatch(/^\d+$/)
+
+    await expect(link).toHaveAttribute('href', stamp.address ?? '')
+    await expect(link).toHaveText(`pull request #${stamp['pull-request']}`)
+    await expect(page.locator('#evidence')).not.toContainText('#412')
+  })
+
+  test('draws the reel no wider than it was recorded', async ({ page }) => {
+    await page.goto('/')
+    const frame = await page.locator('#evidence .frame').boundingBox()
+
+    expect(frame).not.toBeNull()
+    expect(frame!.width).toBeLessThanOrEqual(Number(stamp.width))
+    expect(frame!.width).toBeGreaterThan(Number(stamp.width) / 2)
   })
 })
 

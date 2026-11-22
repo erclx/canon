@@ -9,226 +9,109 @@
   margin: 0;
 }
 
-#evidence p {
-  margin: 0;
+/* The figure takes the reel's recorded width, never wider than the column. */
+#evidence .reel {
+  width: fit-content;
+  max-width: 100%;
+  margin: 64px 0 0;
 }
 
-/* The film beside the board, two unequal tiles each holding a different record. */
-#evidence .bento {
-  display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  gap: 24px;
-  align-items: start;
-  margin-top: 64px;
+/* One recording carries one theme, so its surface reads the theme-fixed dark family. */
+#evidence .screen {
+  padding: 10px 10px 0;
+  border-radius: var(--radius-card);
+  background: var(--color-dark-background);
+  box-shadow: 5px 5px 0 var(--rule);
 }
 
-#evidence .film,
-#evidence .board {
-  padding: 22px 24px;
-}
-
-#evidence .film > .note,
-#evidence .board > .note:first-child {
-  margin-bottom: 14px;
-}
-
-/* The filmstrip: the reel's beat stills on a dark strip, each under its time. */
-#evidence .strip {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 6px;
-  margin: 0 0 16px;
-  padding: 10px 8px;
-  border-radius: var(--radius-action);
-  background: var(--color-light-text);
-  list-style: none;
-}
-
-#evidence .strip li {
-  border-radius: var(--radius-chip);
-  outline: 2px solid transparent;
-  outline-offset: 2px;
-  transition: outline-color var(--duration-fade) var(--ease-standard);
-}
-
-#evidence .strip li.now {
-  outline-color: var(--accent);
-}
-
-#evidence .strip img {
+#evidence .frame {
   display: block;
-  width: 100%;
+  max-width: 100%;
   height: auto;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
-  object-position: top;
-  border-radius: var(--radius-chip);
+  border-radius: var(--radius-action);
 }
 
-#evidence .tc {
-  display: block;
-  margin-top: 6px;
-  text-align: center;
+#evidence .bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 4px;
   font-family: var(--mono);
   font-size: var(--size-view-small);
-  color: var(--color-light-border);
+  color: var(--color-dark-muted);
 }
 
-/* Each theme shows the stills and arms captured in it. */
-[data-theme='light'] #evidence .dk,
-[data-theme='dark'] #evidence .lt {
-  display: none;
-}
-
-#evidence .ck {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-#evidence .ck li {
-  display: grid;
-  grid-template-columns: 20px minmax(0, 1fr) auto;
+#evidence .play {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
-  align-items: start;
-  padding: 6px 0;
-  border-top: 1px solid var(--line);
+  padding: 8px 12px;
+  border: 1.5px solid var(--color-dark-text);
+  border-radius: var(--radius-action);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--color-dark-text);
+}
+
+#evidence .play:focus-visible {
+  outline: 2px solid var(--color-dark-text);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  #evidence .play:hover {
+    background: var(--color-dark-band);
+  }
+}
+
+/* A drawn triangle at rest, two bars while the reel plays. */
+#evidence .glyph {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 8px solid currentColor;
+}
+
+#evidence .reel.on .glyph {
+  width: 8px;
+  height: 10px;
+  border: 0;
+  border-left: 3px solid currentColor;
+  border-right: 3px solid currentColor;
+}
+
+#evidence figcaption {
+  margin-top: 14px;
   font-size: var(--size-small);
   line-height: 1.5;
   color: var(--body);
 }
 
-#evidence .ck li:first-child {
-  border-top: 0;
-}
-
-#evidence .ck .b {
-  position: relative;
-  width: 13px;
-  height: 13px;
-  margin-top: 3px;
-  border: 1.5px solid var(--outline);
-  border-radius: var(--radius-chip);
-}
-
-#evidence .ck li.done .b {
-  border-color: var(--accent);
-  background: var(--accent);
-}
-
-#evidence .ck li.done .b::after {
-  content: '';
-  position: absolute;
-  left: 3px;
-  top: 0;
-  width: 3px;
-  height: 7px;
-  border: solid var(--card);
-  border-width: 0 1.5px 1.5px 0;
-  transform: rotate(45deg);
-}
-
-#evidence .ck .who {
-  font-family: var(--mono);
-  font-size: var(--size-view-small);
-  color: var(--muted);
-}
-
-#evidence .replay {
-  margin-top: 14px;
-}
-
-#evidence .q {
-  margin-bottom: 12px;
-  font-size: var(--type-label-size);
-  font-weight: 600;
-  line-height: 1.3;
+#evidence figcaption a {
   color: var(--ink);
-}
-
-#evidence .arms {
-  display: grid;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-#evidence .arm {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  overflow: hidden;
-  border: 1.5px solid var(--rule);
-  border-radius: var(--radius-action);
-  background: var(--card);
-}
-
-#evidence .arm img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-#evidence .arm .n {
-  align-self: stretch;
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  border-left: 1px solid var(--line);
-  font-family: var(--mono);
-  font-size: var(--size-view-small);
-  font-weight: 500;
-  color: var(--muted);
-  white-space: nowrap;
-}
-
-/* The pick, the live state the board records, in the accent. */
-#evidence .arm.pk {
-  border: 2px solid var(--accent);
-  box-shadow: 3px 3px 0 var(--accent);
-}
-
-#evidence .arm.pk .n {
-  font-weight: 600;
-  color: var(--ink);
-}
-
-#evidence .snap {
-  margin-top: 12px;
+  text-decoration: underline;
+  text-decoration-color: var(--outline);
+  text-underline-offset: 3px;
 }
 
 @media (max-width: 900px) {
-  #evidence .top,
-  #evidence .bento {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   #evidence .top {
+    grid-template-columns: minmax(0, 1fr);
     gap: 20px;
   }
 
-  #evidence .bento {
-    margin-top: 48px;
+  #evidence .reel {
+    margin-top: 40px;
   }
 }
 
 @media (max-width: 640px) {
-  #evidence .strip {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  #evidence .strip li:nth-child(n + 4) {
-    display: none;
-  }
-
-  #evidence .arm {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  #evidence .arm .n {
-    padding: 7px 8px;
-    border-left: 0;
-    border-top: 1px solid var(--line);
+  #evidence .screen {
+    padding: 6px 6px 0;
   }
 }

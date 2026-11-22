@@ -58,7 +58,7 @@ export interface Reel {
   readonly pullRequest: number
   /** The pull request's page, which the caption links. */
   readonly address: string
-  /** The whole reel, rounded to the second. */
+  /** The whole reel, to the frame. */
   readonly seconds: number
   readonly width: number
   readonly height: number
@@ -104,7 +104,7 @@ export function reelFrom(stamp: string): Reel {
   return {
     pullRequest: number('pull-request'),
     address: fields.address ?? '',
-    seconds: Math.round(number('reel-seconds')),
+    seconds: number('reel-seconds'),
     width: number('width'),
     height: number('height'),
   }

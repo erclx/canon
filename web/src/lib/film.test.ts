@@ -44,7 +44,7 @@ describe('reelFrom', () => {
     expect(reelFrom(reelStamp)).toEqual({
       pullRequest: 3289,
       address: 'https://github.com/erclx/canon/pull/3289',
-      seconds: 12,
+      seconds: 12.4,
       width: 960,
       height: 600,
     })

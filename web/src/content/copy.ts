@@ -239,42 +239,22 @@ export const worktrees = {
 }
 
 /**
- * The film and the design board side by side: the reel's stills with the
- * checklist they prove, beside the board the page's own footer was picked on.
+ * One reel a real pull request carried, resting on its opening frame until its
+ * control plays it, over a caption linking that pull request.
  */
 export const evidence = {
   // README.md: "See the interface evidence before you merge"
   head: 'See the interface evidence before you merge',
   // README.md: "Every pull request comes with a short film of the new screen working in the app."
   lede: 'Every pull request comes with a short film of the new screen working in the app.',
-  // README.md: canon-allow-readme-paraphrase: the labels around the reel's stills and the drive's board, which no README sentence carries.
-  reel: (seconds: number) => `the reel on pull request #412 · ${seconds} s`,
-  frame: (at: string) => `The reel at ${at}`,
-  replay: 'Replay the reel',
-  board: 'the board · footer-layout',
-  question: 'Which footer should the page take?',
-  arms: [
-    { name: 'arm-0', alt: 'Footer arm 0: the mark and a line of links' },
-    {
-      name: 'arm-1 · picked',
-      alt: 'Footer arm 1: the mark and tagline beside three link columns',
-    },
-    {
-      name: 'arm-2',
-      alt: 'Footer arm 2: a large wordmark over the link columns',
-    },
-  ],
-  picked: 1,
-  snapshot: "snapshots from the drive that picked this page's footer",
-  /** One checklist line per beat `web/film-plan.json` films, in its order. */
-  checks: [
-    'The Task chip brings its sheet to the front',
-    'The board sheet heads its running rows In flight',
-    'The pull request comes up as a page in the browser',
-    'The code review keeps its findings on the page',
-    'The handoff fans the records either side of it',
-  ],
-  who: 'UI reviewer',
+  // README.md: canon-allow-readme-paraphrase: the reel's control and caption, which no README sentence carries. "posts the reel"
+  still: (pullRequest: number) =>
+    `The opening frame of the reel on pull request #${pullRequest}`,
+  play: 'Play the reel',
+  stop: 'Stop the reel',
+  posted: 'The reel canon posted on',
+  link: (pullRequest: number) => `pull request #${pullRequest}`,
+  length: (seconds: number) => `${Math.round(seconds)} s`,
 }
 
 export const board = {
