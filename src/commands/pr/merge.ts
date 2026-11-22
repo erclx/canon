@@ -24,6 +24,8 @@ import { readChecksGate, warnAdvisory } from '@/commands/pr/gates'
 
 interface MergeCommandOptions extends ReadOptions {
   readonly dryRun?: boolean
+  /** Commander sets this false on `--no-pull` and true otherwise. */
+  readonly pull?: boolean
 }
 
 export function registerMerge(pr: Command): void {
@@ -36,6 +38,10 @@ export function registerMerge(pr: Command): void {
     .option('--root <path>', 'Repository to read, defaulting to the cwd')
     .option('--json', 'Add a machine-readable record on stdout')
     .option('--dry-run', 'Print the title and description and merge nothing')
+    .option(
+      '--no-pull',
+      'Leave the main worktree where it is after the merge, rather than fast-forwarding it',
+    )
     .addHelpText(
       'after',
       [
@@ -65,6 +71,16 @@ export function registerMerge(pr: Command): void {
         'request already passed `canon pr lift`. It does not wait on checks or',
         'delete the branch.',
         '',
+        'After a merge lands, the verb fast-forwards the checkout at --root when',
+        'it is the main worktree on the trunk, which fires the `post-merge` hook',
+        'as a hand pull does, with git and hook output on stderr. The record',
+        'carries `pull` as `{ outcome, reason }`, and no pull outcome changes the',
+        "merge's reason or exit code. --dry-run and a refusal pull nothing.",
+        '  pulled:  fast-forwarded, up-to-date',
+        '  skipped: no-pull (--no-pull), linked-worktree, off-trunk, not-a-repo',
+        '  refused: dirty-tree, diverged, pull-failed, with the checkout left as',
+        '           it was, so pull by hand once the cause is cleared',
+        '',
         "The checks gate by the ones the base branch's rules require, the way",
         '`canon pr lift` reads them. A failing check outside that set is named',
         'in the record as `advisory` and does not refuse the merge.',
@@ -85,6 +101,7 @@ export function registerMerge(pr: Command): void {
         'Examples:',
         '  canon pr merge 1341 --dry-run',
         '  canon pr merge 1341 --json',
+        '  canon pr merge 1341 --no-pull --json',
         '',
       ].join('\n'),
     )
@@ -230,6 +247,7 @@ async function runMerge(
   const record = await merge(mergeApi(root, resolved.number), {
     number: Number(resolved.number),
     isDryRun: opts.dryRun ?? false,
+    isPull: opts.pull ?? true,
   })
 
   logStep(record.reason)
@@ -241,6 +259,9 @@ async function runMerge(
         : MERGE_REFUSALS[record.reason],
   )
   warnAdvisory(record.advisory)
+  if (record.pull !== undefined) {
+    logInfo(`main worktree ${record.pull.outcome}: ${record.pull.reason}`)
+  }
   outro()
 
   if (emitJson) {
