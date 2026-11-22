@@ -29,6 +29,7 @@ Holds one plan per task, archived beside the task on ship.
 - A plan several live tasks hold stays live, decided by `otherTasksCitingPlan` in `src/tasks/archive.ts` and reported by `plan-citations`
 - `planLineIndex` finds the first `Plan:` line outside a fenced sample, and a line linking several plans is a sliced task
 - `next-label --claim` reserves a label under `.canon/ordinal-locks/`, since a bare read lets two callers land on one answer
+- The next `--claim` releases a lock above the highest task label once the roster shows its `claim.json` session gone, so a planner whose session ends before writing the task loses its label
 
 ### `claude/skills/plan-feature/`
 
