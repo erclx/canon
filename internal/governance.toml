@@ -17,7 +17,7 @@
 # spikes and occasional skill scripts, and the `node` stack alone never loads it.
 
 # `skill` and the `tooling` rules are added because base names its rules one
-# by one and none of them is among the ten, while this repository edits
+# by one and none of them is among the eleven, while this repository edits
 # skills, workflows, configs, and code.
 
 # `test-scope` is left out because it names `bun run test:e2e:changed`,

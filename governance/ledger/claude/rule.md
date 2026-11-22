@@ -7,6 +7,12 @@ description: Decisions behind governance/rules/claude/rule.md, one row per bulle
 
 The rule is a core rule, so every row is a house choice rather than a citation. Each names what goes wrong without its bullet and the option the bullet beat, with the date it was decided.
 
+## Project conventions
+
+| Bullet                             | Source                                                                                                                                                                                                                                                                                                                                               | Read       |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Add a convention as a project rule | House choice: in a first scaffold a session wrote a Language section and then a Privacy section into the target's `CLAUDE.md`, and the operator moved both into project rules by hand. It beat a pointer line in the seed, which loads in every session, and a cap on the whole file, which would tell a project to shrink sections it already holds | 2026-11-22 |
+
 ## Rule files
 
 | Bullet                          | Source                                                                                                                                                                                          | Read       |

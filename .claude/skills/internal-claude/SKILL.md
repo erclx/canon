@@ -47,7 +47,7 @@ A plugin skill test handed off from a linked worktree prints two lines, a `cd` t
 - Propose a husky hook rather than a `CLAUDE.md` or skill bullet for unconditional pre-push or per-edit automation, since `CLAUDE.md` fires only while Claude acts and a hook fires for everyone
 - A PostToolUse hook such as `standards-audit` ships punctuation bans and closed-set wordlists, read from the standard at runtime rather than copied
 - Keep structural checks such as negative parallelism, hollow openers, and paragraph length out of a hook, since regex detection on those fires against legitimate prose
-- Default cross-project behavior rules, such as output formatting and path printing, to the seeded `CLAUDE.md` plus the toolkit's own. Reserve `~/.claude/` for terminal capability and machine specifics.
+- Ship a cross-project behavior, such as path printing, as a `base` governance rule and keep the seeded `CLAUDE.md` at its seed sections. Reserve `~/.claude/` for terminal and machine specifics.
 
 ### Hook limits
 
