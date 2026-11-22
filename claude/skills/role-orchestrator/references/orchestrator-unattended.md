@@ -46,6 +46,8 @@ A plan that lands mid-run builds the same night when nobody has to answer it. Ru
 - `launchable: true`: the row takes the dispatch checks on the next pass, like any `## Up next` row
 - `launchable: false`: park every entry in `open`, per the next section, and leave the row unbuilt
 
+A `deferred` entry is a value the worker asks the operator for at build, and nobody is there to answer it. Park every `deferred` entry the way an `open` one is parked, on a mid-run plan and an `## Up next` row alike, and leave the row unbuilt.
+
 ### Reading a stalled session
 
 Read a session's state off `canon sessions list --json` and the watch, never off `claude agents`. A background session that asked in a message and ended its turn reads `blocked` there while it waits correctly on a reply, so a stall check reading it raises a false alarm all night.
