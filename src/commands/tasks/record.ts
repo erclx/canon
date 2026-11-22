@@ -566,7 +566,12 @@ function reportPlanLink(
     return reportRecord('canon tasks plan-link', outcome, emitJson, root)
   }
 
+  const unplaced = outcome.board.next
+    ? `${outcome.stem} has no row on the board, so place it with: ${outcome.board.next}`
+    : undefined
+
   if (emitJson) {
+    if (unplaced) logWarn(unplaced)
     process.stdout.write(
       `${JSON.stringify({
         ok: true,
@@ -596,11 +601,7 @@ function reportPlanLink(
   logInfo(
     `board row ${outcome.board.moved ? '' : 'not moved, '}${outcome.board.note}`,
   )
-  if (outcome.board.next) {
-    logWarn(
-      `${outcome.stem} has no row on the board, so place it with: ${outcome.board.next}`,
-    )
-  }
+  if (unplaced) logWarn(unplaced)
   outro()
 
   return 0
