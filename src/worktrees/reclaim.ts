@@ -345,11 +345,9 @@ function within(path: string, roots: readonly string[]): boolean {
 }
 
 /**
- * The foreign records that could be holding a worktree here, keyed on the folder
- * each recorded: at or under the main root or a worktree. A record at an ancestor,
- * such as the home folder, cannot be told from one that later moved in, and is
- * passed, since a session holding a worktree runs inside it. Null clears the read.
- * Every record blocks, unnamed, when the list or the worktrees could not be read.
+ * Foreign records whose folder sits at or under a worktree, null when none does.
+ * An ancestor folder passes, since a session holding a worktree runs inside it.
+ * An unread list or listing blocks every record, unnamed, as an empty array.
  */
 function blockingForeign(
   sessions: Extract<SessionReport, { kind: 'resolved' }>,
