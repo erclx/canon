@@ -320,6 +320,22 @@ describe('groundworkStructure', () => {
     ])
   })
 
+  it('should still report S4 on a long bold bullet that is not a lean', () => {
+    const text = [...lead, `   - **Evidence:** ${'a'.repeat(300)}`].join('\n')
+
+    expect(groundworkStructure(text).map((entry) => entry.criterion)).toEqual([
+      'S4',
+    ])
+  })
+
+  it('should exempt a long bold falsifier from S4', () => {
+    const text = [...lead, `   - **Overturned by:** ${'a'.repeat(300)}`].join(
+      '\n',
+    )
+
+    expect(groundworkStructure(text)).toEqual([])
+  })
+
   it('should still report S4 on a long plain bullet', () => {
     const text = [...lead, `- ${'a'.repeat(300)}`].join('\n')
 
