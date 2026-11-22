@@ -53,6 +53,12 @@ Keep the `## Scripts` table in `canon/context/development/local-loop.md` current
 
 ### From scaffold to first feature
 
+After setup, a scaffold run from a planning session writes a kickoff note and prints an opening prompt. Open the project's first session on that prompt, which tells it to read the note first.
+
+- The note lands at `.canon/tmp/kickoff/next-session.md`, gitignored scratch that can cite a path outside the repository
+- It names where the plan lives, the state of the requirements record, what setup did, the next sessions in order, and the first rows to file
+- It carries one opening prompt per session. A bare scaffold with no planning behind it writes no note.
+
 Before the first feature session:
 
 1. Fill `canon/REQUIREMENTS.md` with the problem, goals, and non-goals. The seed's 600-word cap gates under `canon context audit`.
