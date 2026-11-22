@@ -147,6 +147,8 @@ export function registerKeyChanges(pr: Command): void {
         '  gh-missing          `gh` is not on the path, so no pull request could be',
         '                      resolved',
         '  gh-failed           `gh` could not answer for this repository or branch',
+        '  rate-limited        GitHub refused a read for a spent quota, named with',
+        '                      `bucket` and `resetAt`, so wait for the reset',
         '  no-number           --link was given with no pull request number',
         '  no-repo-url         --link could not read the repository address',
         '  link-json           --link was given with --json, though it prints the body',
