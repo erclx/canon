@@ -1,5 +1,11 @@
 import { execaSync } from 'execa'
-import { mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -197,6 +203,22 @@ describe('fastForwardMain', () => {
 
   it('should fast-forward a clean main to the commit its remote gained', async () => {
     const landed = landOnOrigin('feat: merged elsewhere')
+
+    expect(await fastForwardMain(MAIN)).toEqual({
+      outcome: 'pulled',
+      reason: 'fast-forwarded',
+    })
+    expect(head(MAIN)).toBe(landed)
+  })
+
+  it('should report a fast-forward whose hook killed git after HEAD moved as fast-forwarded', async () => {
+    const landed = landOnOrigin('feat: merged elsewhere')
+    const hooks = join(BASE, 'killing-hooks')
+    mkdirSync(hooks)
+    writeFileSync(join(hooks, 'post-merge'), '#!/bin/sh\nkill -9 $PPID\n', {
+      mode: 0o755,
+    })
+    run(MAIN, 'config', 'core.hooksPath', hooks)
 
     expect(await fastForwardMain(MAIN)).toEqual({
       outcome: 'pulled',

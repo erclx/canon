@@ -221,7 +221,11 @@ export async function fastForwardMain(cwd: string): Promise<MainPull> {
       .nothrow()
   if (isBehind.exitCode !== 0) return { outcome: 'refused', reason: 'diverged' }
 
-  return (await gitWrite(cwd, ['merge', '--ff-only', '--quiet', remote]))
+  if (await gitWrite(cwd, ['merge', '--ff-only', '--quiet', remote])) {
+    return { outcome: 'pulled', reason: 'fast-forwarded' }
+  }
+  // The `post-merge` hook runs inside the timed merge, so a kill can land after HEAD moved.
+  return (await gitRead(cwd, ['rev-parse', 'HEAD'])) === upstream
     ? { outcome: 'pulled', reason: 'fast-forwarded' }
     : { outcome: 'refused', reason: 'pull-failed' }
 }
