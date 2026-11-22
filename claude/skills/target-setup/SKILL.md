@@ -43,6 +43,7 @@ argument that answers its prompt ahead of time:
 | `install` and `gov` | Confirm the proposed extras                | `--extras <a>,<b>` for a set, `--extras none` for none     | Takes every proposal and lists each in the report     |
 | `install`           | Ask whether the repository is public       | `--visibility public` or `--visibility private`            | Takes private and says so in the report               |
 | `install`           | Ask which services the project will carry  | `--services <folder>:<kind>,...`, or `--services none`     | Plans none and says so in the report                  |
+| `install`           | Ask whether to initialize shadcn           | `--shadcn yes` or `--shadcn no`                            | Takes yes on an app root and says so in the report    |
 | `gov`               | Stop on a detected technology with no rule | `--skip-gaps`, which proceeds and lists the gap            | Stops on the gap                                      |
 
 Claude Code's tool permission dialog is the confirmation gate for everything
@@ -114,6 +115,15 @@ Sync each planned service the preview resolved to a stack into its folder before
 ### Public layer
 
 On a public answer, run `canon tooling sync public <target> --write` at the root after every stack sync, then apply `${CLAUDE_SKILL_DIR}/references/public.md`. Skip both otherwise.
+
+### shadcn on an app root
+
+On a yes to the shadcn question, initialize shadcn in each app root once every sync in Step 2 has finished and ahead of Step 3. Read the sequence from `canon tooling reference web` under `## Adding shadcn`, which names the stylesheet, template, and flags per stack, rather than composing the command here.
+
+- Run it from the app root, which is the target itself on a single-root project
+- Skip it on an `astro` root and on any root whose tooling stack is not an app stack, per the detect reference
+- Run it before the second detection, since that pass proposes the shadcn rule only once `components.json` exists
+- Treat a failed or timed-out init as a gap the report names, and carry on with Step 3
 
 ### Detect again after the sync
 
