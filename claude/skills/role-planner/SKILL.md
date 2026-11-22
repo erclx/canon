@@ -124,6 +124,10 @@ Offer the operator a new row only when it passes Step 5 of `${CLAUDE_SKILL_DIR}/
 
 The operator being present is an assumption the launch carries. A talk planner whose operator has walked away waits silently on its first question, so say what the session is waiting on in the turn it stops.
 
+### A whole-plan approval
+
+When the operator approves the plan whole here, write its `Approved:` line per `### Approval` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`. Cite that line in the landing announcement's `Answer at:` line, since no `- Answer:` slot holds the approval.
+
 ## Refusing is part of the job
 
 - Refuse an instruction the tree contradicts, and carry the evidence with it. Name the commands read and what complying would produce, rather than reporting reluctance.
