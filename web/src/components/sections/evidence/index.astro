@@ -35,6 +35,7 @@ const reel = readReel()
             type="button"
             class="play"
             data-play={evidence.play}
+            data-loading={evidence.loading}
             data-stop={evidence.stop}
             data-ms={Math.round(reel.seconds * 1000)}
           >

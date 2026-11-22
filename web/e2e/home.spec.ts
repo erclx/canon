@@ -918,7 +918,35 @@ test.describe('the evidence section', () => {
     const frame = page.locator('#evidence .frame')
 
     await page.locator('#evidence .play').click()
+    await expect(page.locator('#evidence .play')).toHaveAccessibleName(
+      'Stop the reel',
+      SETTLE,
+    )
+    await page.clock.runFor(Math.ceil(Number(stamp['reel-seconds']) * 1000))
+
+    await expect(frame).toHaveAttribute('src', '/reel-still.webp')
+  })
+
+  test('counts the reel from when it arrives, not from the press', async ({
+    page,
+  }) => {
+    let release = () => {}
+    const held = new Promise<void>((resolve) => (release = resolve))
+    await page.route('**/reel.webp', async (route) => {
+      await held
+      await route.continue()
+    })
+    await page.clock.install()
+    await page.goto('/')
+    const frame = page.locator('#evidence .frame')
+    const play = page.locator('#evidence .play')
+
+    await play.click()
+    await expect(play).toHaveAccessibleName('Loading the reel')
+    await page.clock.runFor(Math.ceil(Number(stamp['reel-seconds']) * 1000))
     await expect(frame).toHaveAttribute('src', '/reel.webp')
+    release()
+    await expect(play).toHaveAccessibleName('Stop the reel', SETTLE)
     await page.clock.runFor(Math.ceil(Number(stamp['reel-seconds']) * 1000))
 
     await expect(frame).toHaveAttribute('src', '/reel-still.webp')
@@ -926,11 +954,12 @@ test.describe('the evidence section', () => {
 
   test('plays nothing on its own once in view', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.clock.install()
     await page.goto('/')
     const frame = page.locator('#evidence .frame')
 
     await frame.scrollIntoViewIfNeeded()
-    await page.waitForTimeout(500)
+    await page.clock.runFor(Math.ceil(Number(stamp['reel-seconds']) * 1000))
 
     await expect(frame).toHaveAttribute('src', '/reel-still.webp')
   })

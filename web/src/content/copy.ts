@@ -251,6 +251,7 @@ export const evidence = {
   still: (pullRequest: number) =>
     `The opening frame of the reel on pull request #${pullRequest}`,
   play: 'Play the reel',
+  loading: 'Loading the reel',
   stop: 'Stop the reel',
   posted: 'The reel canon posted on',
   link: (pullRequest: number) => `pull request #${pullRequest}`,
