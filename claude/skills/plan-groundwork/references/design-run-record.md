@@ -22,7 +22,7 @@ Neither proves anything for a topic that was never drawn, so an ordinary settled
 
 ## One pass
 
-Open mode writes `README.md`, `01-current-state.md`, and `06-decision.md` in one pass, with no resume between them. The track closes in the session that opens it.
+Open mode writes `README.md`, `01-current-state.md`, and `06-decision.md` in one pass, with no resume between them. It then runs close Steps 2 to 7 in the same session, so the file map, the route that records or hands off the conclusion, and the plan or its named handoff all follow.
 
 - `01-current-state.md` measures the archive: the frames kept, the widths drawn, and the arms each pick beat
 - `06-decision.md` states each pick with the arms it beat, the measurements behind the pick, and the operator's reason when they gave one
@@ -30,4 +30,4 @@ Open mode writes `README.md`, `01-current-state.md`, and `06-decision.md` in one
 
 ## Under `role-planner`
 
-A pick never lands through `design-record` under `role-planner`, so this record is the only trace of the run. The track writes nothing under `canon/design/`.
+A pick never lands through `design-record` under `role-planner`. The archive keeps the frames, and the track keeps what the archive cannot, which arm beat which and why. The track writes nothing under `canon/design/`.

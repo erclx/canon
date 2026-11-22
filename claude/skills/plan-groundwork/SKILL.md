@@ -111,7 +111,7 @@ Read these in parallel from the project root, skipping any that do not exist:
 
 Then read only what a live question needs, never whole directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at. For each domain the topic touches, read its context entry ahead of measuring, through the lookup in `${CLAUDE_SKILL_DIR}/../plan-feature/references/onboarding.md`.
 
-- Run the build or adopt check from `${CLAUDE_SKILL_DIR}/../plan-feature/references/procedure.md` for each new server, runtime, or agent loop
+- Run the build or adopt check from `${CLAUDE_SKILL_DIR}/../plan-feature/references/procedure.md`, recording each call in the topic file
 - Dispatch no subagents, since fanning out loses the reasoning, and a search too large to run inline means the question is too broad
 
 ## Open questions in chat

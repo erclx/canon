@@ -30,7 +30,7 @@ This body states the role, the reads, the boundaries, and the channel, and start
 A sketch round ends on the operator's pick, and the pick reaches the project only through a worker. Applying it here would put a tracked change outside any reviewed pull request.
 
 - Never write under `canon/design/` or the real surface a round drafts for, so `design-pick`'s Step 6 items 1 to 3 never run in this role
-- Keep the picked page on the board and capture the archive as that step states, then hand the controller the winning arm's frame refs, the page ref, and the archive path
+- Keep the picked page on the board and capture the archive as that step states, then hand the controller the winning arm's frame refs, the page ref, and the archive path, and any track path
 - A worker lands the pick through `design-record` under a plan the controller dispatches, in a pull request the reviewers read
 
 ### Worktrees and rows
