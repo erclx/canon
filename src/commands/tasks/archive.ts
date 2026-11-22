@@ -1,12 +1,11 @@
 import { relative } from 'node:path'
 import { type Command } from 'commander'
-import { execa } from 'execa'
-import { gitEnv } from '@/git/env'
 import {
   type ArchiveOutcome,
   archiveTask,
   type DeclineOutcome,
   declineTask,
+  deciderFor,
   type InboundRelink,
   type PlanMove,
   type RelinkFailure,
@@ -23,9 +22,6 @@ import {
   pipeOutput,
 } from '@/cli/ui'
 import { mainWorktreeRoot } from '@/git/worktree'
-
-/** Matches `trunk.ts`'s bound on a git subprocess this verb also shells out to. */
-const GIT_TIMEOUT_MS = 10_000
 
 interface ArchiveCommandOptions {
   readonly json?: boolean
@@ -236,28 +232,6 @@ function recordFor(
   }
 }
 
-/**
- * Reads the local `git config user.name` when `--by` names nobody. `--root`
- * scopes the read so it answers for the board's own repository rather than
- * whatever the ambient environment points at, mirroring `trunk.ts`'s guard.
- */
-async function resolveBy(
-  root: string,
-  by: string | undefined,
-): Promise<string | undefined> {
-  if (by) return by
-
-  const result = await execa('git', ['-C', root, 'config', 'user.name'], {
-    reject: false,
-    timeout: GIT_TIMEOUT_MS,
-    env: gitEnv(),
-    extendEnv: false,
-  })
-
-  const name = result.exitCode === 0 ? result.stdout.trim() : ''
-  return name.length > 0 ? name : undefined
-}
-
 async function runDecline(
   task: string,
   opts: DeclineCommandOptions,
@@ -278,7 +252,7 @@ async function runDecline(
   }
 
   const root = opts.root ?? (await mainWorktreeRoot())
-  const by = await resolveBy(root, opts.by)
+  const by = deciderFor(opts.by)
 
   if (!by) {
     return reportDecline(
@@ -286,7 +260,7 @@ async function runDecline(
         ok: false,
         reason: 'bad-input',
         message:
-          'No decider named. Pass --by <name> or set git config user.name.',
+          'Empty decider. Pass --by <name> or omit it to record operator.',
         detail: [],
       },
       emitJson,
@@ -429,7 +403,7 @@ export function registerArchive(tasks: Command): void {
     .argument('<task>', 'Task filename stem, as in v28.1-trigger-escalation')
     .helpOption('-h, --help', 'Show this help message')
     .option('--reason <text>', 'Why the task was decided against')
-    .option('--by <name>', 'Who decided, defaulting to git config user.name')
+    .option('--by <name>', 'Who decided, defaulting to operator')
     .option('--json', 'Emit a machine-readable record on stdout')
     .option('--root <path>', 'Board root, defaulting to the main worktree')
     .addHelpText(
@@ -444,7 +418,7 @@ export function registerArchive(tasks: Command): void {
         '  no-board   the repository holds no `.canon/tasks/` board',
         '  no-match   no task matches the selector',
         '  ambiguous  more than one task matches the selector',
-        '  bad-input  a missing `--reason`, or a `--by` that resolves to nobody',
+        '  bad-input  a missing `--reason`, or a blank `--by`',
         '',
         'Exit codes:',
         '  0  the task was declined',

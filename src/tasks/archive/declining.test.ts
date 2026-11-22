@@ -4,6 +4,8 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
   archiveDir,
+  DEFAULT_DECIDER,
+  deciderFor,
   declinedDir,
   declineLine,
   declineTask,
@@ -311,5 +313,21 @@ describe('declineTask', () => {
     ).toContain(
       'Plan: [feature-trigger](../../plans/archive/feature-trigger.md)',
     )
+  })
+})
+
+describe('deciderFor', () => {
+  it('should default a caller naming nobody to operator', () => {
+    expect(deciderFor(undefined)).toBe('operator')
+    expect(DEFAULT_DECIDER).toBe('operator')
+  })
+
+  it('should keep an explicit name unchanged', () => {
+    expect(deciderFor('Alex')).toBe('Alex')
+  })
+
+  it('should refuse a blank name rather than write an empty decider', () => {
+    expect(deciderFor('')).toBeUndefined()
+    expect(deciderFor('   ')).toBeUndefined()
   })
 })

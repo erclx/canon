@@ -523,6 +523,18 @@ export function retargetReadyLine(text: string, target: string): string {
  * whom. Free prose after the colon, since the line names no file to link,
  * unlike `planLine`.
  */
+export const DEFAULT_DECIDER = 'operator'
+
+/**
+ * The decider a decline records: a role when nobody is named, since a git name
+ * would be copied into plans. A blank name is refused, never defaulted.
+ */
+export function deciderFor(by: string | undefined): string | undefined {
+  if (by === undefined) return DEFAULT_DECIDER
+  const name = by.trim()
+  return name.length > 0 ? name : undefined
+}
+
 export function declineLine(reason: string, by: string, date: string): string {
   return `Declined: ${reason}, ${by} on ${date}`
 }
