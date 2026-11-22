@@ -7,7 +7,7 @@
 
 # canon
 
-A Claude Code plugin and CLI that runs agent work from plan to merge. Runs your agent's work and keeps its code good, on one setup for every repo.
+A Claude Code plugin and CLI that runs agent work from plan to merge. And holds it to good engineering practice the whole way. Runs your agent's work and keeps its code good, on one setup for every repo.
 
 [![npm version](https://img.shields.io/npm/v/@erclx/canon)](https://www.npmjs.com/package/@erclx/canon)
 [![CI status](https://img.shields.io/github/actions/workflow/status/erclx/canon/verify.yml?branch=main)](https://github.com/erclx/canon/actions/workflows/verify.yml)
@@ -22,7 +22,7 @@ A Claude Code plugin and CLI that runs agent work from plan to merge. Runs your 
 
 ## Install, then set up a project
 
-Start in three commands once you know Claude Code well. It runs on Linux and macOS, and the CLI needs Bun.
+Three commands get you the plugin and the CLI. You need Bun, and Linux or macOS.
 
 ```bash
 claude plugin marketplace add https://github.com/erclx/canon
@@ -52,17 +52,17 @@ Give each step of a change its own session and a written record the next one rea
 - A code reviewer reads the diff from a fresh session
 - A UI reviewer drives the visual checklist in the running app
 
-## The record each step writes
+## Every session leaves a structured record
 
-Pick up a change where the last session stopped. Each record has a fixed shape, so the next session knows where to read. Records live under `.canon/` in the main checkout.
+Each plan, review, and handoff is a markdown file written to the same standard every time. Records live under `.canon/` in the main checkout.
 
 - Before a build: intake, groundwork, the plan, its task, and the board
 - Around a pull request: the code review, the UI review, and the screenshot evidence
 - Across sessions: the drive log, the context entries, and the handoff a compaction would lose
 
-## Practice skills with cited sources
+## Skills that cite their sources
 
-Keep your agent from copying whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from.
+Each one teaches your agent an engineering practice, and every rule in it links to the guide it came from. Each skill loads when its kind of work starts.
 
 | Skill                  | Loads                           | Cites                                     |
 | ---------------------- | ------------------------------- | ----------------------------------------- |
@@ -74,33 +74,33 @@ Keep your agent from copying whatever code sits nearest. Each skill loads when i
 
 Each rule has its own source row in a ledger, and the skill audit fails when a skill's rules and its rows disagree in count.
 
-## Checks that catch a skipped step
+## Rules your agent cannot ignore
 
-Write a rule down and an agent can still ignore it. These four parts fail the run when that happens.
+Each one is backed by a check that stops the work when it's broken.
 
 - Rules by path load when the agent opens a matching file, and each names the skill that owns that kind of file
 - Hooks read each action before or after it runs, refusing some and reporting others back into the same turn
 - The gate runs every stage before a pull request opens, and a stage that cannot read its input fails rather than passing
 - A deny rule keeps the agent from merging, since a hook fails open on a timeout and a permission rule does not
 
-## One worktree for each change
+## Every feature gets its own worktree
 
-Run several changes at once without one agent overwriting another. Each worker builds in its own worktree on its own branch, and every session reads and writes the one `.canon/` record in the main checkout, so no worktree keeps a copy of its own.
+So several agents can build at once without touching each other's files. Each worker builds in its own worktree on its own branch, and every session reads and writes the one `.canon/` record in the main checkout, so no worktree keeps a copy of its own.
 
-## See the change before it merges
+## See the interface evidence before you merge
 
-Watch the hover and focus ring a diff cannot show. Each pull request carries a film of the work, and you pick a design on a board by looking.
+Every pull request comes with a short film of the new screen working in the app.
 
 - canon films the change in the running app and posts the reel beside the checklist a reviewer ticks
 - canon drives the running app beside you and puts the options on a board for you to pick
 
-## The board runs while you are away
+## Come back to finished pull requests
 
-Step out and the work keeps going. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide.
+Queue features on the task board before you leave. Canon builds and reviews them, and holds each merge for you. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide.
 
-## Audits that report where the code is rotting
+## Audits for code an agent wrote
 
-Find the long files and functions generated code piles up. canon measures file, function, and comment length, and charts what shipped each week.
+They list the files and functions past a line limit, so you know what to split before it gets worse. canon measures file, function, and comment length, and charts what shipped each week.
 
 ## For your agent
 

@@ -48,10 +48,7 @@ describe('public positioning', () => {
     expect(readmeOpening()).toContain(fold.headline.replace(/^Canon /, ''))
   })
 
-  it('should name the README opening sentence subject in the hero lead', () => {
-    const subject = 'Claude Code plugin and CLI that'
-
-    expect(readmeOpening().startsWith(`A ${subject}`)).toBe(true)
-    expect(fold.lead).toContain(subject)
+  it('should take the hero lead from the README opening line', () => {
+    expect(readmeOpening()).toContain(fold.lead)
   })
 })

@@ -75,8 +75,8 @@ export const fold = {
   parts: ['Canon runs agent work from', 'plan to', 'merge'] as const,
   // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs agent work from plan to merge"
   headline: 'Canon runs agent work from plan to merge',
-  // README.md: canon-allow-readme-paraphrase: the opening sentence's subject joined to the roles section's first sentence, led by the reader's verb. "Claude Code plugin and CLI that" "its own session and a written record the next one reads"
-  lead: "Hand your agent's work to a Claude Code plugin and CLI that gives each step of a change its own session and a written record the next one reads, so nothing rides on what it remembers.",
+  // README.md: "And holds it to good engineering practice the whole way."
+  lead: 'And holds it to good engineering practice the whole way.',
   view: {
     title: 'claude',
     // README.md: canon-allow-readme-paraphrase: the agent view's own prompt hint, which no README sentence carries.
@@ -151,19 +151,19 @@ export const relay = {
 } as const
 
 export const records = {
-  // README.md: "The record each step writes"
-  head: 'The record each step writes',
-  // README.md: "Pick up a change where the last session stopped. Each record has a fixed shape, so the next session knows where to read."
-  lede: 'Pick up a change where the last session stopped. Each record has a fixed shape, so the next session knows where to read.',
+  // README.md: "Every session leaves a structured record"
+  head: 'Every session leaves a structured record',
+  // README.md: "Each plan, review, and handoff is a markdown file written to the same standard every time."
+  lede: 'Each plan, review, and handoff is a markdown file written to the same standard every time.',
   // README.md: canon-allow-readme-paraphrase: the name of the chips that bring a record to the front, which no README sentence carries.
   pick: 'Bring a record to the front',
 }
 
 export const craft = {
-  // README.md: "Practice skills with cited sources"
-  head: 'Practice skills with cited sources',
-  // README.md: "Keep your agent from copying whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from."
-  lede: 'Keep your agent from copying whatever code sits nearest. Each skill loads when its kind of work starts, and every rule names where it came from.',
+  // README.md: "Skills that cite their sources"
+  head: 'Skills that cite their sources',
+  // README.md: "Each one teaches your agent an engineering practice, and every rule in it links to the guide it came from."
+  lede: 'Each one teaches your agent an engineering practice, and every rule in it links to the guide it came from.',
   // README.md: canon-allow-readme-paraphrase: the labels around one skill's source and the rule it became, which the README's table folds into its columns.
   ruleIn: 'the rule, in',
   source: 'the source',
@@ -174,10 +174,10 @@ export const craft = {
 }
 
 export const guardrails = {
-  // README.md: "Checks that catch a skipped step"
-  head: 'Checks that catch a skipped step',
-  // README.md: "Write a rule down and an agent can still ignore it. These four parts fail the run when that happens."
-  lede: 'Write a rule down and an agent can still ignore it. These four parts fail the run when that happens.',
+  // README.md: "Rules your agent cannot ignore"
+  head: 'Rules your agent cannot ignore',
+  // README.md: "Each one is backed by a check that stops the work when it's broken."
+  lede: "Each one is backed by a check that stops the work when it's broken.",
   /**
    * One stamp per README bullet in the order they fire: when it fires, the
    * real name it runs under, its verdict, and the action it caught.
@@ -224,10 +224,10 @@ export const guardrails = {
 }
 
 export const worktrees = {
-  // README.md: "One worktree for each change"
-  head: 'One worktree for each change',
-  // README.md: canon-allow-readme-paraphrase: the README's reason, then its sentence cut to the branch each change builds on and the one record they share. "Run several changes at once without one agent overwriting another." "on its own branch"
-  lede: 'Run several changes at once without one agent overwriting another. Every change builds on its own branch, and all of them share one record.',
+  // README.md: "Every feature gets its own worktree"
+  head: 'Every feature gets its own worktree',
+  // README.md: "So several agents can build at once without touching each other's files."
+  lede: "So several agents can build at once without touching each other's files.",
   // README.md: canon-allow-readme-paraphrase: the band naming the shared folder, which the README states as the record in the main checkout. "the one `.canon/` record in the main checkout"
   band: {
     name: '.canon/',
@@ -243,10 +243,10 @@ export const worktrees = {
  * checklist they prove, beside the board the page's own footer was picked on.
  */
 export const evidence = {
-  // README.md: "See the change before it merges"
-  head: 'See the change before it merges',
-  // README.md: "Watch the hover and focus ring a diff cannot show. Each pull request carries a film of the work, and you pick a design on a board by looking."
-  lede: 'Watch the hover and focus ring a diff cannot show. Each pull request carries a film of the work, and you pick a design on a board by looking.',
+  // README.md: "See the interface evidence before you merge"
+  head: 'See the interface evidence before you merge',
+  // README.md: "Every pull request comes with a short film of the new screen working in the app."
+  lede: 'Every pull request comes with a short film of the new screen working in the app.',
   // README.md: canon-allow-readme-paraphrase: the labels around the reel's stills and the drive's board, which no README sentence carries.
   reel: (seconds: number) => `the reel on pull request #412 · ${seconds} s`,
   frame: (at: string) => `The reel at ${at}`,
@@ -278,17 +278,17 @@ export const evidence = {
 }
 
 export const board = {
-  // README.md: "The board runs while you are away"
-  head: 'The board runs while you are away',
-  // README.md: "Step out and the work keeps going. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide."
-  lede: 'Step out and the work keeps going. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide.',
+  // README.md: "Come back to finished pull requests"
+  head: 'Come back to finished pull requests',
+  // README.md: "Queue features on the task board before you leave. Canon builds and reviews them, and holds each merge for you."
+  lede: 'Queue features on the task board before you leave. Canon builds and reviews them, and holds each merge for you.',
 }
 
 export const health = {
-  // README.md: "Audits that report where the code is rotting"
-  head: 'Audits that report where the code is rotting',
-  // README.md: canon-allow-readme-paraphrase: the README's opening sentence, then its second with the audits as the subject in place of the lowercase name. "Find the long files and functions generated code piles up." "measures file, function, and comment length, and charts what shipped each week"
-  lede: 'Find the long files and functions generated code piles up. The audits measure file, function, and comment length, and chart what shipped each week.',
+  // README.md: "Audits for code an agent wrote"
+  head: 'Audits for code an agent wrote',
+  // README.md: "They list the files and functions past a line limit, so you know what to split before it gets worse."
+  lede: 'They list the files and functions past a line limit, so you know what to split before it gets worse.',
   /** The labels around the figures `web/src/lib/health.ts` reads at build time. */
   // README.md: canon-allow-readme-paraphrase: column heads and captions for the two reports, which no README sentence carries.
   view: {
@@ -413,8 +413,8 @@ export const worktreeCards = [
 export const install = {
   // README.md: "Install, then set up a project"
   head: 'Install, then set up a project',
-  // README.md: "Start in three commands once you know Claude Code well. It runs on Linux and macOS, and the CLI needs Bun."
-  lede: 'Start in three commands once you know Claude Code well. It runs on Linux and macOS, and the CLI needs Bun.',
+  // README.md: "Three commands get you the plugin and the CLI. You need Bun, and Linux or macOS."
+  lede: 'Three commands get you the plugin and the CLI. You need Bun, and Linux or macOS.',
   // README.md: "claude plugin marketplace add https://github.com/erclx/canon" "claude plugin install canon@canon" "bun install --global @erclx/canon"
   commands: [
     'claude plugin marketplace add https://github.com/erclx/canon',
