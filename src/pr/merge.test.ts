@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import type { MainPull } from '@/git/worktree'
 import type { ChecksGate } from '@/pr/lift'
 import {
   botKind,
@@ -354,15 +355,18 @@ interface Fixture {
   pull?: Partial<MergePull> | null
   checks?: ChecksGate | null
   outcome?: MergeOutcome
+  mainPull?: MainPull
 }
 
 interface Harness {
   readonly api: MergeApi
   readonly puts: { title: string; description: string; sha: string }[]
+  readonly pulls: { count: number }
 }
 
 function harness(fixture: Fixture = {}): Harness {
   const puts: Harness['puts'] = []
+  const pulls = { count: 0 }
   const pull: MergePull = {
     isOpen: true,
     isDraft: false,
@@ -383,9 +387,92 @@ function harness(fixture: Fixture = {}): Harness {
       puts.push(request)
       return fixture.outcome ?? { kind: 'merged', sha: MERGED_SHA }
     },
+    pullMain: async () => {
+      pulls.count += 1
+      return fixture.mainPull ?? { outcome: 'pulled', reason: 'fast-forwarded' }
+    },
   }
-  return { api, puts }
+  return { api, puts, pulls }
 }
+
+describe('merge pulling the main worktree', () => {
+  it('should record the fast-forward after a merge', async () => {
+    const { api, pulls } = harness()
+
+    const record = await merge(api, { number: 2544, isDryRun: false })
+
+    expect(record).toMatchObject({
+      reason: 'merged',
+      isOk: true,
+      pull: { outcome: 'pulled', reason: 'fast-forwarded' },
+    })
+    expect(pulls.count).toBe(1)
+  })
+
+  it.each<[string, MainPull]>([
+    ['a dirty main', { outcome: 'refused', reason: 'dirty-tree' }],
+    ['a diverged main', { outcome: 'refused', reason: 'diverged' }],
+    ['a failed fetch', { outcome: 'refused', reason: 'pull-failed' }],
+    ['a linked worktree', { outcome: 'skipped', reason: 'linked-worktree' }],
+    ['a main off the trunk', { outcome: 'skipped', reason: 'off-trunk' }],
+  ])(
+    'should keep the merge a success and record the pull on %s',
+    async (_name, mainPull) => {
+      const { api } = harness({ mainPull })
+
+      const record = await merge(api, { number: 2544, isDryRun: false })
+
+      expect(record).toMatchObject({
+        reason: 'merged',
+        isOk: true,
+        sha: MERGED_SHA,
+        pull: mainPull,
+      })
+    },
+  )
+
+  it('should skip the pull under no-pull and record why', async () => {
+    const { api, pulls } = harness()
+
+    const record = await merge(api, {
+      number: 2544,
+      isDryRun: false,
+      isPull: false,
+    })
+
+    expect(record).toMatchObject({
+      reason: 'merged',
+      pull: { outcome: 'skipped', reason: 'no-pull' },
+    })
+    expect(pulls.count).toBe(0)
+  })
+
+  it('should pull nothing on a dry run', async () => {
+    const { api, pulls } = harness()
+
+    const record = await merge(api, { number: 2544, isDryRun: true })
+
+    expect(record.reason).toBe('dry-run')
+    expect(record.pull).toBeUndefined()
+    expect(pulls.count).toBe(0)
+  })
+
+  it.each<[string, Fixture]>([
+    ['a draft', { pull: { isDraft: true } }],
+    ['a head that moved', { outcome: { kind: 'head-moved' } }],
+  ])(
+    'should pull nothing when the merge refuses %s',
+    async (_name, fixture) => {
+      const { api, pulls } = harness(fixture)
+
+      const record = await merge(api, { number: 2544, isDryRun: false })
+
+      expect(record.isOk).toBe(false)
+      expect(record.pull).toBeUndefined()
+      expect(pulls.count).toBe(0)
+    },
+  )
+})
 
 describe('merge', () => {
   it('should squash-merge a ready pull request with the composed message pinned to the head', async () => {

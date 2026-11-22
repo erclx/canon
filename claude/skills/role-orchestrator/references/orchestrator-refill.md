@@ -10,17 +10,30 @@ Run this when `## Refilling the ready queue` in the skill body names one of its 
 The third trigger reaches a window the first two cannot. A session with three workers mid-build has merged nothing and watched its ready list sit still, so both reactive triggers stay silent across the one stretch where planning costs nothing, and the wave finishes into an empty `## In flight`.
 
 - Nothing starts this pass, as nothing starts the review poll, so it holds only while the session applies it
-- It counts unclaimed plans against workers rather than reading step 4's reserve, which is sized for one worker finishing and falls short of a wave landing together
+- It counts unclaimed plans against workers rather than reading step 5's reserve, which is sized for one worker finishing and falls short of a wave landing together
 - A plan a worker already took serves nobody who finishes next, so counting it lets the queue read full while it is about to empty
 - How many to write past that floor is the parallelism call rather than a count of free slots, and `## Parallelism` in the skill body states what binds it
 
+## The after-merge checklist
+
+A merge trigger runs four things in order, whoever ran the merge, since the refill reads a tree only a pull makes current and the `post-merge` hook archives nothing until one lands.
+
+1. Confirm the pull landed, per step 1 below, and pull by hand on `skipped` or `refused`.
+2. Read what the hook archived under `.canon/tasks/archive/` and `.canon/plans/archive/`.
+3. Run the rest of the refill below.
+4. Re-check each queued plan against the new head, per `### 3. Verify the plan against the tree` in the skill body.
+
 ## Running the refill
 
-1. Run `gh pr list --state open` and `git log --oneline -8`. Report any pull request whose review has not been posted and stop for that one first.
-2. For each pull request merged since the last sweep, place every finding it produced, and never leave one in a pull request thread alone.
+1. Read the `pull` field of each merge record since the last sweep before reading any history, since a main behind its remote reads every later step off a stale tree.
+   - `pulled` means the main worktree is current and the `post-merge` hook ran
+   - `skipped` or `refused` means neither happened, so run `git pull --ff-only` in the main worktree once its `reason` is cleared, such as a dirty tree committed or a branch checked back to the trunk
+   - A merge whose record nobody read, such as one the operator ran by hand, takes the same hand pull
+2. Run `gh pr list --state open` and `git log --oneline -8`. Report any pull request whose review has not been posted and stop for that one first.
+3. For each pull request merged since the last sweep, place every finding it produced, and never leave one in a pull request thread alone.
    - A finding that changes a rule goes to the standard or rule that states it
    - One that changes another task goes to that task's Findings, and one that overturns a groundwork lean to that folder marked answered
-3. Archive what closed.
+4. Archive what closed.
    - A task whose outcomes are all `[x]`, or all `[x]` beside `Operator check:` lines, and whose pull request merged is archived by the `post-merge` hook through `canon tasks archive`, plans included
    - Run `task-complete` to archive one the hook left in place
    - A task whose outcomes are standing policy never closes, so hand it to a worker to encode the policy where it is enforced, then cut the outcomes with the reason and archive once that branch merges
@@ -37,17 +50,17 @@ The third trigger reaches a window the first two cannot. A session with three wo
    - Then run `canon sessions reap <stem> --json` for each merged task, archived or not, so its worker and reviewers stop and the agent view keeps to live work
    - The verb skips a busy, interactive, talk, or controller session, the caller, and one a live task still records, so read each `skipped` row's `reason` rather than stopping it by hand
    - List what it stopped in the report's `Reaped:` line, any `failed` row with its `detail`, and each listener the record's `listeners` ended, by port and path
-4. Read `.canon/tasks/priority.md` and count the `## Up next` rows whose `Waiting on` has cleared, since a blocked row is no reserve. `## In flight` is what is running, so keep one in reserve beyond it.
-5. Promote from the top of `## Needs a plan`, where the last sweep recorded what to plan next.
+5. Read `.canon/tasks/priority.md` and count the `## Up next` rows whose `Waiting on` has cleared, since a blocked row is no reserve. `## In flight` is what is running, so keep one in reserve beyond it.
+6. Promote from the top of `## Needs a plan`, where the last sweep recorded what to plan next.
    - Depart from that order when something changed under it and say what, since a position nobody honors is the ordering going stale
    - The order is set by whether a task establishes functionality, so prefer one that adds or proves a mechanism over one that trims, tidies, or audits
    - Re-take the demotion half of the board-or-backlog call while the file is open, moving a row no longer near-term to `backlog.md` per the standard's test
    - The promotion half is `orchestrator-parked.md`'s full walk over every backlog row, and a row it clears already sits at the bottom of `## Needs a plan`
-6. Before promoting a candidate, test it against every running task under the conflict check in `orchestrator-dispatch.md`.
+7. Before promoting a candidate, test it against every running task under the conflict check in `orchestrator-dispatch.md`.
    - Serialize it behind a task only on one of that check's holds, and name the hold
    - A path the two merely share is promoted beside it, named so the merge order plans the rebase
    - A candidate held by something outside the tree stays put whatever the check shows, since clearing a conflict leaves an external condition standing
-7. Write a plan for each newly promoted task with `plan-feature`, carrying the in-flight constraint that `## The loop` in the skill body states, then report:
+8. Write a plan for each newly promoted task with `plan-feature`, carrying the in-flight constraint that `## The loop` in the skill body states, then report:
 
 ```plaintext
 Findings placed: <finding> → <destination>
@@ -89,7 +102,7 @@ The points below govern writing the board through those verbs.
 The verbs derive the Task, Touches, and Plan cells from the task file and its live plans, so a later reader checks them rather than reasoning again.
 
 - `place` and `promote` refuse a row the target group's test fails, so a Plan cell never leads `auto-ship` to no plan and spends a dispatch
-- A Touches cell differing from its plan's list is `touches-stale`. Change the plan's list rather than the cell, and step 6's hold call reads the result.
+- A Touches cell differing from its plan's list is `touches-stale`. Change the plan's list rather than the cell, and step 7's hold call reads the result.
 - Read the board back after a write, since the row that lands is the row a worker acts on
 
 ### Stale plan pointers

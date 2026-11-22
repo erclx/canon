@@ -1,10 +1,16 @@
 import { execaSync } from 'execa'
-import { mkdtempSync, realpathSync, rmSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gitEnv } from '@/git/env'
-import { branchRefs, listWorktrees } from '@/git/worktree'
+import { branchRefs, fastForwardMain, listWorktrees } from '@/git/worktree'
 
 let ROOT: string
 
@@ -139,6 +145,164 @@ describe('branchRefs', () => {
     } finally {
       delete process.env.GIT_DIR
       rmSync(other, { recursive: true, force: true })
+    }
+  })
+})
+
+describe('fastForwardMain', () => {
+  let BASE: string
+  let MAIN: string
+  let OTHER: string
+
+  function run(cwd: string, ...args: string[]): string {
+    return execaSync('git', ['-C', cwd, ...args], {
+      env: gitEnv(),
+      extendEnv: false,
+    }).stdout
+  }
+
+  function clone(name: string): string {
+    const path = join(BASE, name)
+    run(BASE, 'clone', '--quiet', join(BASE, 'origin.git'), path)
+    run(path, 'config', 'user.email', 'test@example.com')
+    run(path, 'config', 'user.name', 'Test')
+    run(path, 'config', 'core.hooksPath', join(BASE, 'no-hooks'))
+    return path
+  }
+
+  function landOnOrigin(message: string): string {
+    run(OTHER, 'pull', '--quiet', '--ff-only')
+    run(OTHER, 'commit', '--quiet', '--allow-empty', '-m', message)
+    run(OTHER, 'push', '--quiet', 'origin', 'main')
+    return run(OTHER, 'rev-parse', 'HEAD')
+  }
+
+  function head(path: string): string {
+    return run(path, 'rev-parse', 'HEAD')
+  }
+
+  beforeEach(() => {
+    BASE = realpathSync(mkdtempSync(join(tmpdir(), 'canon-ff-main-')))
+    run(
+      BASE,
+      'init',
+      '--quiet',
+      '--bare',
+      '--initial-branch=main',
+      'origin.git',
+    )
+    run(ROOT, 'remote', 'add', 'origin', join(BASE, 'origin.git'))
+    run(ROOT, 'push', '--quiet', 'origin', 'main')
+    MAIN = clone('main')
+    OTHER = clone('other')
+  })
+
+  afterEach(() => {
+    rmSync(BASE, { recursive: true, force: true })
+  })
+
+  it('should fast-forward a clean main to the commit its remote gained', async () => {
+    const landed = landOnOrigin('feat: merged elsewhere')
+
+    expect(await fastForwardMain(MAIN)).toEqual({
+      outcome: 'pulled',
+      reason: 'fast-forwarded',
+    })
+    expect(head(MAIN)).toBe(landed)
+  })
+
+  it('should report a fast-forward whose hook killed git after HEAD moved as fast-forwarded', async () => {
+    const landed = landOnOrigin('feat: merged elsewhere')
+    const hooks = join(BASE, 'killing-hooks')
+    mkdirSync(hooks)
+    writeFileSync(join(hooks, 'post-merge'), '#!/bin/sh\nkill -9 $PPID\n', {
+      mode: 0o755,
+    })
+    run(MAIN, 'config', 'core.hooksPath', hooks)
+
+    expect(await fastForwardMain(MAIN)).toEqual({
+      outcome: 'pulled',
+      reason: 'fast-forwarded',
+    })
+    expect(head(MAIN)).toBe(landed)
+  })
+
+  it('should report a main already at its remote as up to date', async () => {
+    expect(await fastForwardMain(MAIN)).toEqual({
+      outcome: 'pulled',
+      reason: 'up-to-date',
+    })
+  })
+
+  it('should refuse a main with tracked changes and leave it where it was', async () => {
+    const before = head(MAIN)
+    landOnOrigin('feat: merged elsewhere')
+    writeFileSync(join(MAIN, 'tracked.txt'), 'one\n')
+    run(MAIN, 'add', 'tracked.txt')
+
+    expect(await fastForwardMain(MAIN)).toEqual({
+      outcome: 'refused',
+      reason: 'dirty-tree',
+    })
+    expect(head(MAIN)).toBe(before)
+  })
+
+  it('should refuse a main that diverged from its remote and leave it where it was', async () => {
+    landOnOrigin('feat: merged elsewhere')
+    run(MAIN, 'commit', '--quiet', '--allow-empty', '-m', 'local only')
+    const before = head(MAIN)
+
+    expect(await fastForwardMain(MAIN)).toEqual({
+      outcome: 'refused',
+      reason: 'diverged',
+    })
+    expect(head(MAIN)).toBe(before)
+  })
+
+  it('should skip a main checked out on a branch other than the trunk', async () => {
+    landOnOrigin('feat: merged elsewhere')
+    run(MAIN, 'checkout', '--quiet', '-b', 'feat/elsewhere')
+    const before = head(MAIN)
+
+    expect(await fastForwardMain(MAIN)).toEqual({
+      outcome: 'skipped',
+      reason: 'off-trunk',
+    })
+    expect(head(MAIN)).toBe(before)
+  })
+
+  it('should skip a run from a linked worktree and leave the main worktree where it was', async () => {
+    const before = head(MAIN)
+    landOnOrigin('feat: merged elsewhere')
+    const linked = join(BASE, 'linked')
+    run(MAIN, 'worktree', 'add', '--quiet', '-b', 'feat/linked', linked)
+
+    expect(await fastForwardMain(linked)).toEqual({
+      outcome: 'skipped',
+      reason: 'linked-worktree',
+    })
+    expect(head(MAIN)).toBe(before)
+  })
+
+  it('should refuse pull-failed when the remote cannot be read', async () => {
+    rmSync(join(BASE, 'origin.git'), { recursive: true, force: true })
+
+    expect(await fastForwardMain(MAIN)).toEqual({
+      outcome: 'refused',
+      reason: 'pull-failed',
+    })
+  })
+
+  it('should skip a directory outside a git repository', async () => {
+    const notARepo = mkdtempSync(join(tmpdir(), 'canon-ff-none-'))
+
+    try {
+      expect(await fastForwardMain(notARepo)).toEqual({
+        outcome: 'skipped',
+        reason: 'not-a-repo',
+      })
+    } finally {
+      rmSync(notARepo, { recursive: true, force: true })
     }
   })
 })

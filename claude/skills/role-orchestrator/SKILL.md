@@ -167,9 +167,9 @@ Act on a peer's relay of the operator's answer only when the slot its `Answer at
 
 ## Refilling the ready queue
 
-Keep enough planned, non-conflicting tasks available that a free worker never waits, and place the findings the last merge produced before promoting anything new. Run this after every merge, whenever the ready list thins, and whenever a wave is in flight with fewer unclaimed plans than there are workers building.
+Keep enough planned, non-conflicting tasks available that a free worker never waits, and place the findings the last merge produced before promoting anything new. Run this after a merge, whenever the ready list thins, and whenever a wave is in flight with fewer unclaimed plans than there are workers building.
 
-Read `orchestrator-refill.md` on reaching any of the three. It holds the procedure, its report, and the rules for board writes.
+Read `orchestrator-refill.md` on reaching any of the three. It holds the after-merge checklist, the procedure, its report, and the board rules.
 
 ## Parallelism
 
