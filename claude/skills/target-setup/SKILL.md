@@ -228,3 +228,13 @@ fallback rather than this report. The preview is the last point before the first
 write, and the report runs after the files have landed.
 
 Report the visibility taken and what answered it, plus what the public reference says a public run owes.
+Report each planned service with the sync it took or its `gap` mark, or that none was planned and what answered it.
+
+### After the root commit
+
+A service or fix decided after the root commit goes to a scratch branch first. Push it there, let CI run on it, and force `main` only once that run passes, since an amend forced straight to `main` ships a commit no CI has seen.
+
+- The route covers the root commit alone, before a ruleset protects `main`
+- A history already pushed under a ruleset takes a pull request instead, never a force push
+
+Close the report on the checklist in `${CLAUDE_SKILL_DIR}/references/first-pull-request.md`, filled for this project. Name each step and the verb or setting that does it, and run none, since each one writes to the remote and is the operator's call.
