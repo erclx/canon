@@ -1,3 +1,4 @@
+import type { MainPull } from '@/git/worktree'
 import { advisoryOf, type ChecksGate } from '@/pr/lift'
 import { readSection } from '@/pr/paths'
 import { UI_PASS_MARKER } from '@/pr/tick'
@@ -53,12 +54,20 @@ export interface MergeApi {
   readPull(): Promise<MergePull | undefined>
   readChecks(head: string): Promise<ChecksGate | undefined>
   putMerge(request: MergeRequest): Promise<MergeOutcome>
+  /** Runs only after a merge landed, so its outcome never decides the merge's. */
+  pullMain(): Promise<MainPull>
 }
 
 export interface MergeOptions {
   readonly number: number
   readonly isDryRun: boolean
+  /** Defaults to true, so a merge leaves the main worktree current. */
+  readonly isPull?: boolean
 }
+
+/** What happened to the local main worktree after a merge. */
+export type MergePullRecord =
+  MainPull | { readonly outcome: 'skipped'; readonly reason: 'no-pull' }
 
 export interface MergeRecord {
   readonly reason: 'merged' | 'dry-run' | MergeRefusal
@@ -70,6 +79,8 @@ export interface MergeRecord {
   readonly sha?: string
   /** Failing checks the base does not require, which the merge went past. */
   readonly advisory?: readonly string[]
+  /** The fast-forward of the main worktree, present only on a merge. */
+  readonly pull?: MergePullRecord
 }
 
 export type Composed =
@@ -243,6 +254,10 @@ export async function merge(
 
   const outcome = await api.putMerge({ ...message, sha: pull.head })
   if (outcome.kind === 'merged') {
+    const pull: MergePullRecord =
+      opts.isPull === false
+        ? { outcome: 'skipped', reason: 'no-pull' }
+        : await api.pullMain()
     return {
       reason: 'merged',
       isOk: true,
@@ -250,6 +265,7 @@ export async function merge(
       ...message,
       sha: outcome.sha,
       ...advisoryOf(checks),
+      pull,
     }
   }
   return refused(

@@ -2,6 +2,7 @@ import type { Command } from 'commander'
 import { resolve } from 'node:path'
 import { execa } from 'execa'
 import { gitEnv } from '@/git/env'
+import { fastForwardMain } from '@/git/worktree'
 import {
   merge,
   type MergeApi,
@@ -194,6 +195,7 @@ function mergeApi(root: string, number: string): MergeApi {
     },
     readChecks: (head) => readChecksGate(root, number, head),
     putMerge: (request) => putSquashMerge(root, number, request),
+    pullMain: () => fastForwardMain(root),
   }
 }
 
