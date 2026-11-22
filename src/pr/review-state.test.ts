@@ -378,6 +378,14 @@ describe('waitForReviews', () => {
     expect(calls.sleeps).toEqual([1000, 1500])
   })
 
+  it('should read at most 14 times across a 1200s wait at the default gap', async () => {
+    const { api, calls } = makeApi({ reviews: [[codePass('## Review', HEAD)]] })
+
+    await waitForReviews(api, { waitSeconds: 1200, pollMs: 30_000 })
+
+    expect(calls.sleeps.length + 1).toBeLessThanOrEqual(14)
+  })
+
   it('should cut the last gap to the deadline rather than sleeping past it', async () => {
     const { api, calls } = makeApi({ reviews: [[codePass('## Review', HEAD)]] })
 
