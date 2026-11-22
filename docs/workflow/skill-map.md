@@ -72,7 +72,7 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | `canon:task-complete` | After the fold, to mark shipped outcomes      |
 | `canon:docs-sync`     | A change left `README.md` or `docs/` stale    |
 | `canon:git-stage`     | Staged changes span several concerns          |
-| `canon:git-commit`    | Staged changes are one concern                |
+| `canon:git-commit`    | Staged changes are one concern, or amend HEAD |
 | `canon:git-branch`    | A branch needs creating, naming, or renaming  |
 | `canon:git-pr`        | A pull request needs a title and body         |
 
