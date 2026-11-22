@@ -684,6 +684,17 @@ describe('nested roots', () => {
     expect(result.stdout).not.toContain('Verification passed')
   })
 
+  it('should fail naming the runner when a tracked root is gone on disk', () => {
+    writeNestedRoot({ 'test:run': 'true' })
+    track()
+    rmSync(join(fixture, NESTED), { force: true, recursive: true })
+
+    const result = runVerify()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain(`No ${NESTED}/scripts/verify.ts here`)
+  })
+
   it('should skip a nested root git does not track', () => {
     writeNestedRoot({ 'test:run': 'exit 1' })
 

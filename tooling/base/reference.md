@@ -33,7 +33,7 @@ These two files are base's `[sync] per_root` set, which a `--skip base` subfolde
 
 The root run calls each nested runner after its own stages, so one `bun run check` at the root covers every subfolder.
 
-- It finds a nested root from a tracked `scripts/verify.json` below the root, read through `git ls-files`, so a vendored or ignored folder never runs.
+- It finds a nested root from a tracked `scripts/verify.json` below the root, read through `git ls-files`. An untracked folder never runs, and a tracked one runs whatever `.gitignore` says.
 - It runs that folder's `scripts/verify.ts` from inside it with `VERIFY_NESTED=true`, and a nested failure fails the root run and names the folder.
 - A nested run discovers nothing, and a folder outside a git repository finds no nested root.
 - Discovery reads files rather than a list, since `verify.json` is golden and a list kept in it is lost on sync.

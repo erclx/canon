@@ -443,8 +443,8 @@ function checkCanonGate(): void {
 }
 
 // Found from tracked files, since verify.json is golden and a list kept in it
-// is lost on sync, and tracked alone so a vendored or ignored folder never
-// runs. Outside a git repository none are found.
+// is lost on sync. An untracked folder never runs, and a tracked one runs
+// whatever .gitignore says. Outside a git repository none are found.
 function findNestedRoots(): string[] {
   const result = spawnSync(
     'git',
@@ -460,6 +460,12 @@ function findNestedRoots(): string[] {
 
 function runNestedRoot(root: string): void {
   logStep(`Nested root ${root}`)
+  const runner = join(root, 'scripts/verify.ts')
+  if (!existsSync(runner)) {
+    fail(
+      `No ${runner} here, though git tracks ${root}/${PHASE_LIST}. Sync the stack into ${root} or stage its removal`,
+    )
+  }
   const result = spawnSync(process.execPath, ['scripts/verify.ts'], {
     cwd: root,
     encoding: 'utf8',
@@ -467,6 +473,9 @@ function runNestedRoot(root: string): void {
     maxBuffer: 256 * 1024 * 1024,
   })
   pipeOutput(`${result.stdout ?? ''}${result.stderr ?? ''}`)
+  if (result.error !== undefined) {
+    fail(`Nested root ${root} could not start: ${result.error.message}`)
+  }
   if (result.status !== 0) fail(`Nested root ${root} failed`)
   logInfo(`Nested root ${root} passed`)
 }
