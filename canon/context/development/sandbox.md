@@ -19,7 +19,7 @@ Every `canon sandbox` verb is toolkit-only, so run `bun src/cli.ts sandbox <verb
 
 ### `sandbox/`
 
-Owns the scenario scripts, one folder per category and one `.ts` file per command, each holding one or more named arms.
+Owns the scenario scripts, one folder per category and one `.ts` file per command, each holding one or more named arms. `claude:target-scaffold chain` checks the whole scaffold chain, and being billed, runs by hand before a scaffold-chain release.
 
 - Add a scenario as `sandbox/<category>/<command>.ts` default-exporting `scenario()` from `src/sandbox/scenario.ts`, named for the skill it drives. `sandbox/git/pr.ts` shows the shape.
 - `config` holds presence flags such as `SANDBOX_SKIP_AUTO_COMMIT`, `SANDBOX_INJECT_SEEDS`, `SANDBOX_INJECT_GOV`, and `SANDBOX_GOV_STACK`. `anchor: true` names the push target.
