@@ -52,6 +52,18 @@ describe('the capture cases seed', () => {
     expect(seeded.EVIDENCE_ROOT).toBe('e2e/evidence')
   })
 
+  it('seeds cases that name no section and no mask', async () => {
+    await sync()
+
+    const seeded = (await import(join(target, 'e2e/capture/cases.ts'))) as {
+      CASES: Record<string, unknown>[]
+    }
+
+    expect(seeded.CASES.filter((c) => 'sections' in c || 'mask' in c)).toEqual(
+      [],
+    )
+  })
+
   it('exits 1 naming the missing cases file instead of capturing nothing', () => {
     const result = spawnSync('bun', [join(PROJECT_ROOT, HARNESS_REL)], {
       cwd: target,

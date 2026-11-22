@@ -23,4 +23,7 @@ frame_prefix="$(basename "$README_FILTER")"
 
 mkdir -p "$README_EVIDENCE_DIR"
 cp "$frame_dir/$frame_prefix--default.png" "$README_EVIDENCE_DIR/light.png"
-cp "$frame_dir/$frame_prefix--dark.png" "$README_EVIDENCE_DIR/dark.png"
+# A project with no dark case captures no dark frame.
+if [[ -f "$frame_dir/$frame_prefix--dark.png" ]]; then
+  cp "$frame_dir/$frame_prefix--dark.png" "$README_EVIDENCE_DIR/dark.png"
+fi
