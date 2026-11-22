@@ -7,10 +7,10 @@ import './style.css'
 /**
  * The board twice: as you leave it at the night's start, and as you find it
  * when you come back, with the moves between them counted. The second board
- * replays the night once it comes into view, a row a beat as the clock runs
- * on, with a replay beside it. The page renders where the night rests, which
- * reduced motion keeps, and the one row that waits on you takes the waiting
- * glyph and edge.
+ * replays the night once it comes into view, a row a beat under a bar that
+ * fills across the night, with a replay beside it. The page renders where the
+ * night rests, which reduced motion keeps until Replay is pressed, and the one
+ * row that waits on you takes the waiting glyph and edge.
  */
 const { rows, moves, lanes, start } = boardScene
 const rest = boardAfter(rows, moves, moves.length)
@@ -67,6 +67,11 @@ const data = {
               >
                 {side.stamp}
               </p>
+              {index === 1 && (
+                <div class="pg" aria-hidden="true">
+                  <i />
+                </div>
+              )}
               <div class="bd">
                 {lanes.map((lane, l) => (
                   <div class="ln">

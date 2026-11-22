@@ -325,7 +325,7 @@ export const boardScene = {
   waitingLabel: 'waits for you',
   stepOut: (at: string) => `${at} · you step out`,
   nightStarts: (at: string) => `${at} · the night starts`,
-  moved: (at: string, name: string) => `${at} · ${name} moved`,
+  moved: (at: string, name: string) => `${at} · the orchestrator moves ${name}`,
   comeBack: (at: string) => `${at} · what you come back to`,
   movesLabel: (count: number) => `${count} moves →`,
   before: 'The board when you step out',

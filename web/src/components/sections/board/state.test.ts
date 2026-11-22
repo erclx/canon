@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { boardAfter } from './state'
+import { boardAfter, travels } from './state'
 
 const rows = [
   { name: 'a', lane: 0, line: 'plan linked' },
@@ -51,5 +51,24 @@ describe('boardAfter', () => {
 
   it('should return the rows as they start at no moves', () => {
     expect(boardAfter(rows, [], 0)).toEqual(rows)
+  })
+})
+
+describe('travels', () => {
+  const moves = [
+    { at: '00:10', name: 'a', lane: 1, line: 'worker' },
+    { at: '00:20', name: 'a', lane: 1, line: 'review' },
+  ]
+
+  it('should read a move into another lane as a travel', () => {
+    expect(travels(rows, moves, 0)).toBe(true)
+  })
+
+  it('should read a move that keeps its lane as no travel', () => {
+    expect(travels(rows, moves, 1)).toBe(false)
+  })
+
+  it('should read an index past the last move as no travel', () => {
+    expect(travels(rows, moves, 2)).toBe(false)
   })
 })

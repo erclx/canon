@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
-import { expect, test } from '@playwright/test'
+import { type Page, expect, test } from '@playwright/test'
 
 /** Every settle on an observer or a transition is bounded explicitly. */
 const SETTLE = { timeout: 5_000 }
@@ -651,6 +651,24 @@ test.describe('the page name', () => {
 test.describe('the board night', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
+  /** The first move lands this long after the board arrives, and each next one a beat later. */
+  const FIRST = 600
+  const BEAT = 1200
+  const MOVES = 6
+
+  const settleFonts = (page: Page) =>
+    page.evaluate(async () => {
+      await document.fonts.ready
+    })
+
+  const arrive = async (page: Page) => {
+    await page.locator('#board .after .bd').scrollIntoViewIfNeeded()
+    await expect(page.locator('#board .after .stamp')).toHaveText(
+      /^23:00 /,
+      SETTLE,
+    )
+  }
+
   test('replays the night a move a beat, and Replay starts it again', async ({
     page,
   }) => {
@@ -658,28 +676,146 @@ test.describe('the board night', () => {
     await page.clock.install()
     await page.goto('/')
     const stamp = page.locator('#board .after .stamp')
-    const replay = page.locator('#board .replay')
 
-    await page.locator('#board .ba').scrollIntoViewIfNeeded()
-    await expect(stamp).toHaveText(/^23:00 /, SETTLE)
-    await page.clock.runFor(700)
-    await expect(stamp).toHaveText(/^23:40 /)
-    await page.clock.runFor(5_000)
+    await arrive(page)
+    await page.clock.runFor(FIRST)
+    await expect(stamp).toHaveText(
+      /^23:40 · the orchestrator moves take-timer$/,
+    )
+    await page.clock.runFor(MOVES * BEAT)
     await expect(stamp).toHaveText(/what you come back to$/)
     await expect(page.locator('#board .after .cd.wt')).toHaveCount(1)
-    await replay.click()
+    await page.locator('#board .replay').click()
 
     await expect(stamp).toHaveText(/^23:00 /)
   })
 
-  test('rests where the night ends under reduced motion', async ({ page }) => {
+  for (const width of [1440, 390]) {
+    test(`holds the section at one height through the night at ${width}`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: 'no-preference' })
+      await page.setViewportSize({ width, height: 900 })
+      await page.clock.install()
+      await page.goto('/')
+      await settleFonts(page)
+      const section = page.locator('#board')
+      const height = async () => (await section.boundingBox())?.height ?? 0
+      const before = await height()
+      expect(before).toBeGreaterThan(0)
+
+      await arrive(page)
+      const during: number[] = []
+      for (let step = 0; step < MOVES * 4 + 2; step += 1) {
+        await page.clock.runFor(BEAT / 4)
+        during.push(await height())
+      }
+
+      await expect(page.locator('#board .after .stamp')).toHaveText(
+        /what you come back to$/,
+      )
+      expect(new Set([...during, await height()])).toEqual(new Set([before]))
+    })
+  }
+
+  test('starts the night only once the moving board is in view', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.clock.install()
+    await page.goto('/')
+    const stamp = page.locator('#board .after .stamp')
+    await expect(page.locator('#board')).toHaveClass(/(^| )armed( |$)/)
+
+    await page.evaluate(() => {
+      const board = document.getElementById('board')
+      if (!board) throw new Error('the page carries no #board section')
+      window.scrollBy(0, board.getBoundingClientRect().top - innerHeight + 300)
+    })
+    await page.clock.runFor(FIRST + 2 * BEAT)
+    await expect(stamp).toHaveText(/^23:00 /)
+    await page.locator('#board .after .bd').scrollIntoViewIfNeeded()
+    await page.clock.runFor(FIRST)
+
+    await expect(stamp).toHaveText(/^23:40 /, SETTLE)
+  })
+
+  test('opens a slot, carries the row, and keeps it in place through a scroll', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.clock.install()
+    await page.goto('/')
+    const after = page.locator('#board .after')
+    const ghost = page.locator('#board .ghost')
+    const fly = page.locator('#board .fly')
+    const moved = page.locator('#board .after .cd.mv')
+    /** A box in the second board's frame, where the slot and the landed row are drawn. */
+    const offset = async (node: typeof ghost) => {
+      const frame = await after.boundingBox()
+      const box = await node.boundingBox()
+      if (!frame || !box) throw new Error('the board or the row is not drawn')
+      return { x: box.x - frame.x, y: box.y - frame.y }
+    }
+
+    await arrive(page)
+    await page.clock.runFor(FIRST)
+    await expect(ghost).toHaveCount(1)
+    const slot = await offset(ghost)
+    await page.clock.runFor(300)
+    await expect(fly).toHaveCount(1)
+    const scrolled = await page.evaluate(() => scrollY)
+    await page.mouse.wheel(0, 120)
+    await expect
+      .poll(() => page.evaluate(() => scrollY), SETTLE)
+      .toBeGreaterThan(scrolled)
+    await page.clock.runFor(500)
+
+    await expect(fly).toHaveCount(0)
+    await expect(ghost).toHaveCount(0)
+    await expect(moved).toHaveAttribute('data-name', 'take-timer')
+    expect(await offset(moved)).toEqual(slot)
+  })
+
+  test('marks a row that changes in place with no slot or travel', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.clock.install()
     await page.goto('/')
 
-    await expect(page.locator('#board .after .stamp')).toHaveText(
-      /what you come back to\s*$/,
+    await arrive(page)
+    await page.clock.runFor(FIRST + 2 * BEAT)
+
+    await expect(page.locator('#board .after .stamp')).toHaveText(/sync-stamp$/)
+    await expect(page.locator('#board .after .cd.mv')).toHaveAttribute(
+      'data-name',
+      'sync-stamp',
     )
+    await expect(page.locator('#board .ghost, #board .fly')).toHaveCount(0)
+  })
+
+  test('rests where the night ends under reduced motion until Replay is pressed', async ({
+    page,
+  }) => {
+    await page.clock.install()
+    await page.goto('/')
+    const stamp = page.locator('#board .after .stamp')
+    const replay = page.locator('#board .replay')
+
+    await expect(stamp).toHaveText(/what you come back to\s*$/)
     await expect(page.locator('#board .after .cd.wt')).toHaveCount(1)
-    await expect(page.locator('#board .replay')).toBeHidden()
+    await expect(replay).toBeVisible()
+    await page.clock.runFor(FIRST + MOVES * BEAT)
+    await expect(stamp).toHaveText(/what you come back to\s*$/)
+    await replay.click()
+
+    await expect(stamp).toHaveText(/^23:00 /)
+    await page.clock.runFor(FIRST)
+    await expect(stamp).toHaveText(/^23:40 /)
+    await expect(page.locator('#board .ghost, #board .fly')).toHaveCount(0)
+    await page.clock.runFor(MOVES * BEAT)
+    await expect(stamp).toHaveText(/what you come back to\s*$/)
   })
 })
 
