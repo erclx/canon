@@ -38,7 +38,7 @@ Each role keeps to its own writes, and five rules cover how the roles meet.
 9. The operator runs `canon pr merge <number>` or names the PR for the orchestrator to merge, which then tells each trailing worker the merge touched to run `review-address` and rebase.
    - A standing authorization, scoped by default to the PRs in flight when the operator gives it, lets the orchestrator merge each as its gates pass and report after
 
-Each worker halts at the PR, and the merge stays a human gate. An agent merges only on the operator's word for one named PR. The verb squashes with the body's Summary, Key changes, and Technical context as the message. A release-please or Dependabot pull request merges the same way, from the bot's own body.
+Each worker halts at the PR, and the merge stays a human gate. An agent merges only on the operator's word, for a named PR or under a standing authorization. The verb squashes with the body's Summary, Key changes, and Technical context as the message. A release-please or Dependabot pull request merges the same way, from the bot's own body.
 
 An orchestrator can run this loop unattended, from now or from a set time. Every local `claude --bg` launch but a talk one denies the question tool, so a session with a question messages its controller and waits for the reply. The run answers technical questions, parks the operator's, and ends on a report of merge-ready pull requests.
 
