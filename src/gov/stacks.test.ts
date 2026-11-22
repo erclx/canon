@@ -127,9 +127,10 @@ describe('resolveRules on the shipped stacks', () => {
     'plan',
     'markdown',
     'background',
+    'rule',
   ]
 
-  it('should give base its ten rules and no folder whole', () => {
+  it('should give base its eleven rules and no folder whole', () => {
     expect(resolveRules(PROJECT_ROOT, 'base')).toEqual({
       ok: true,
       rules: BASE,
