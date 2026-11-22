@@ -661,12 +661,7 @@ test.describe('the board night', () => {
       await document.fonts.ready
     })
 
-  /**
-   * Brings the moving board into view, waits for the night to start, which the
-   * bar's run class marks, and pauses the page clock there, since an installed
-   * clock still flows on real time and a slower engine would otherwise land the
-   * next move while a step waits.
-   */
+  // An installed clock still flows on real time, so it pauses once the bar marks the night started.
   const arrive = async (page: Page) => {
     await page.locator('#board .after .bd').scrollIntoViewIfNeeded()
     await expect(page.locator('#board .pg')).toHaveClass(
