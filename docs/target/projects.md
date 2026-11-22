@@ -42,7 +42,7 @@ To develop against a checkout, run `claude --plugin-dir <toolkit>/claude`.
 The chain runs these phases:
 
 - `canon init` installs base tooling, Claude seeds, and governance rules into `.claude/rules/`
-- `canon tooling sync <stack> --write` adds stack dependencies, scripts, and gitignore entries, then a second `canon gov detect` offers the rules they call for
+- `canon tooling sync <stack> --write` adds stack dependencies, scripts, and gitignore entries, and the public layer on a public answer. A second `canon gov detect` offers the rules they call for
 - The agent follows `canon tooling reference <stack>` and extends `canon/context/development/ci.md` and `canon/context/development/local-loop.md` <!-- audit-ignore-citations -->
 - The `verify` phase runs the installed scripts, starts the app for the end-to-end and screenshot stages, and lists each code folder no context entry names
 - The `indexes` phase bootstraps `index.md` over the project's documentation folders, confirming candidates with you
