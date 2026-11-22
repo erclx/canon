@@ -31,10 +31,9 @@ export interface LaunchRefused {
 }
 
 /**
- * One reading of a row. `reason` is `unlinked` while the task carries no `Plan:`
- * line, `open` while its plan holds a question for the operator, and
- * `launchable` once it holds none. `plan`, `open`, `approved`, and `deferred`
- * keep `plan-answers`' names, and `approved` is absent with `plan`.
+ * One reading of a row: `unlinked` with no `Plan:` line, `open` while its plan
+ * holds an operator call, `launchable` once it holds none. The plan fields keep
+ * `plan-answers`' names, and `approved` is absent whenever `plan` is.
  */
 export interface LaunchReading {
   readonly ok: true
@@ -50,10 +49,9 @@ export interface LaunchReading {
 export type LaunchOutcome = LaunchReading | LaunchRefused
 
 /**
- * The record a wait ends on. A reading ends `launchable` or, at the deadline,
- * `timeout` carrying the last reading. A refusal ends the wait at once, since
- * nothing a planner writes next turns an archived plan or unknown task launchable,
- * and a linked plan missing the approval its board requires is a defect to see now.
+ * A reading ends `launchable` or `timeout`, carrying the last one. A refusal ends
+ * the wait at once, since an archived plan, an unknown task, or a linked plan its
+ * board refuses as `unapproved` is a defect no later poll repairs.
  */
 export type LaunchWait =
   | (Omit<LaunchReading, 'reason'> & {
