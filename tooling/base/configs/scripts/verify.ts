@@ -9,7 +9,7 @@ import {
   readFileSync,
   realpathSync,
 } from 'node:fs'
-import { delimiter, join } from 'node:path'
+import { delimiter, dirname, join } from 'node:path'
 
 interface Tool {
   readonly name: string
@@ -442,6 +442,36 @@ function checkCanonGate(): void {
   }
 }
 
+// A --skip base subfolder carries its own runner, which nothing else calls.
+// verify.json is a golden config sync overwrites, so the roots are found from
+// tracked files rather than read from a list, and tracked alone so a vendored
+// or ignored folder never runs. Outside a git repository none are found.
+function findNestedRoots(): string[] {
+  const result = spawnSync(
+    'git',
+    ['ls-files', '-z', '--', ':(glob)**/scripts/verify.json'],
+    { encoding: 'utf8' },
+  )
+  if (result.status !== 0) return []
+  return (result.stdout ?? '')
+    .split('\0')
+    .filter((path) => path !== '' && path !== PHASE_LIST)
+    .map((path) => dirname(dirname(path)))
+}
+
+function runNestedRoot(root: string): void {
+  logStep(`Nested root ${root}`)
+  const result = spawnSync(process.execPath, ['scripts/verify.ts'], {
+    cwd: root,
+    encoding: 'utf8',
+    env: { ...process.env, VERIFY_NESTED: 'true' },
+    maxBuffer: 256 * 1024 * 1024,
+  })
+  pipeOutput(`${result.stdout ?? ''}${result.stderr ?? ''}`)
+  if (result.status !== 0) fail(`Nested root ${root} failed`)
+  logInfo(`Nested root ${root} passed`)
+}
+
 function main(): void {
   const declared = readDeclaredScripts()
   const list = readPhaseList()
@@ -470,6 +500,11 @@ function main(): void {
     logStep('Head tags')
     runCheck(`bash ${HEAD_META}`, 'Head tag check failed')
     logInfo('Head tags passed')
+  }
+
+  // A nested run never discovers, so a subfolder's own subfolders run once.
+  if (!isNested) {
+    for (const root of findNestedRoots()) runNestedRoot(root)
   }
 
   if (!isNested) {
