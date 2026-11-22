@@ -52,7 +52,7 @@ export default scenario({
         'Action:  /canon:git-commit amend this into the last commit and push',
       )
       ctx.log.info(
-        'Expect:  amends with --no-edit, then runs git push --force-with-lease',
+        'Expect:  amends with --no-edit, then lease-pushes naming the old sha',
       )
     },
     'amend-merged': (ctx) => {

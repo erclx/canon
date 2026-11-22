@@ -16,7 +16,7 @@ A plain request to commit also reaches the grouping sibling, which restages whol
 - The message follows the commit format and versioning references, and describes the staged diff with lockfiles excluded
 - The user sees the message, its length, and any commit it amends before the commit runs
 - The committed set is exactly the staged set, whether it lands as a new commit or an amend
-- An explicit ask to amend folds the staged set into `HEAD`, and pushes with `--force-with-lease` only when the same ask says to push
+- An explicit ask to amend folds the staged set into `HEAD`, and pushes with a lease naming the replaced commit only when the same ask says to push
 - The description claims single-concern and hunk-level staged sets, and names `git-stage` for a mixed one
 
 ## Must not
@@ -24,7 +24,7 @@ A plain request to commit also reaches the grouping sibling, which restages whol
 - Stage or unstage anything
 - Commit when nothing is staged, unless an amend names a new message
 - Amend on an ask that never said to, or amend a commit another author wrote
-- Amend a commit the remote trunk holds once the repository has a merged pull request
+- Amend a commit the remote trunk holds once the repository has a merged pull request, or one an open pull request carries
 - Emit anything after the result line
 
 ## Out of scope

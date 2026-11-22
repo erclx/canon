@@ -62,12 +62,16 @@ The amend folds the staged set into `HEAD`. It keeps the existing message unless
 
 Run these in parallel, beside the two reads under `## Context`:
 
-- `git log -1 --format='%h%n%an <%ae>%n%s%n%p' HEAD 2>/dev/null || echo "NO_HEAD"`
+- `git log -1 --format='%H%n%h%n%an <%ae>%n%s%n%p' HEAD 2>/dev/null || echo "NO_HEAD"`
 - `git config user.email`
+- `git branch --show-current`
+
+Read `canon pr head --json` beside them, for any open pull request on the branch.
+
 - `git branch -r --contains HEAD 2>/dev/null`
 - `git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || echo "origin/main"`
 
-The last read names the remote trunk, written `<trunk>` below. A non-empty `--contains` read means the commit being replaced is already on the remote.
+The full sha on the first line is `<old-sha>`, the commit the amend replaces, and the branch read is `<branch>`. The trunk read names `<trunk>`, and a non-empty `--contains` read means `<old-sha>` is already on the remote.
 
 ### Amend guards
 
@@ -77,6 +81,8 @@ Run them in this order, stopping at the first that fires.
 - Nothing staged and no new message in the ask: stop with `❌ Nothing to amend. Stage changes or name a new message.` A new message with nothing staged is a reword, which the amend allows.
 - More than one parent on the `%p` line: stop with `❌ HEAD is a merge commit. Amend a merge by hand.`
 - The author email differs from `git config user.email`: stop with `❌ HEAD was written by <author>. Amend only your own commit, or make a new one.`, naming the author line
+- A `canon pr head` record carrying `number`: stop with `❌ <branch> has open pull request #<number>. Make a new commit, since an amend rewrites what its review read.`
+  - A refusal, such as no open pull request, lets the amend continue
 
 ### Refuse merged history
 
@@ -105,12 +111,12 @@ Keep the message with `git commit --amend --no-edit`, or replace it with `git co
 
 A commit whose old version is on the remote now differs from it, so a plain push is rejected.
 
-- Run `git push --force-with-lease` only when the same ask said to push
-- Type it bare, with no remote or branch, the form the seeded allow rule matches
-- Never name a plain `--force`, since the lease refuses to overwrite a remote commit this session never read
+- Run `git push --force-with-lease=refs/heads/<branch>:<old-sha> origin HEAD` only when the same ask said to push, and stop before it when `<branch>` is empty
+- Name `<old-sha>` in the lease rather than typing it bare, since a bare lease trusts whatever the last fetch wrote and a fetch can move it onto a collaborator's commit
+- Never name a plain `--force`. The named lease refuses unless the remote branch still sits on the commit this amend replaced.
 
 Respond with exactly one line:
 
 - Pushed: `✅ Amended and pushed with lease: <subject>`
-- On the remote, not pushed: `✅ Amended: <subject>. The old commit is on the remote, so the next push needs git push --force-with-lease.`
+- On the remote, not pushed: `✅ Amended: <subject>. The old commit is on the remote, so push with --force-with-lease=refs/heads/<branch>:<old-sha>.`
 - Not on the remote: `✅ Amended: <subject>`, since a plain push carries it
