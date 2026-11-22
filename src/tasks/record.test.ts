@@ -12,6 +12,8 @@ import {
   clearPendingBranch,
   recordPullRequest,
   recordSession,
+  resolveSessionId,
+  type RosterRow,
   writePendingBranch,
   writePlanLine,
   writePullRequestLine,
@@ -1259,5 +1261,137 @@ describe('recordSession', () => {
     )
 
     expect(outcome).toMatchObject({ ok: false, reason: 'no-board' })
+  })
+})
+
+describe('resolveSessionId', () => {
+  const SHORT = WORKER_ID.slice(0, 8)
+  const TWIN = `${SHORT}-ffff-4fff-8fff-ffffffffffff`
+
+  function rosterOf(...reads: RosterRow[][]): () => Promise<RosterRow[]> {
+    let call = 0
+    return async () => reads[Math.min(call++, reads.length - 1)] ?? []
+  }
+
+  function sleeper() {
+    const waits: number[] = []
+    return {
+      waits,
+      sleep: async (ms: number) => {
+        waits.push(ms)
+      },
+    }
+  }
+
+  it('should take a full id with no wait and read its name off the roster', async () => {
+    const { waits, sleep } = sleeper()
+
+    const resolved = await resolveSessionId(
+      WORKER_ID,
+      rosterOf([{ sessionId: WORKER_ID, name: 'worker-a' }]),
+      { sleep },
+    )
+
+    expect(resolved).toEqual({
+      ok: true,
+      sessionId: WORKER_ID,
+      name: 'worker-a',
+    })
+    expect(waits).toEqual([])
+  })
+
+  it('should resolve a registered short id to its full id on the first read', async () => {
+    const { waits, sleep } = sleeper()
+
+    const resolved = await resolveSessionId(
+      SHORT,
+      rosterOf([
+        { sessionId: null, name: 'unplaced' },
+        { sessionId: WORKER_ID, name: 'worker-a' },
+      ]),
+      { sleep },
+    )
+
+    expect(resolved).toEqual({
+      ok: true,
+      sessionId: WORKER_ID,
+      name: 'worker-a',
+    })
+    expect(waits).toEqual([])
+  })
+
+  it('should wait for a short id that registers after the launch', async () => {
+    const { waits, sleep } = sleeper()
+
+    const resolved = await resolveSessionId(
+      SHORT,
+      rosterOf([], [], [{ sessionId: WORKER_ID, name: 'worker-a' }]),
+      { sleep, attempts: 15, intervalMs: 1000 },
+    )
+
+    expect(resolved).toMatchObject({ ok: true, sessionId: WORKER_ID })
+    expect(waits).toEqual([1000, 1000])
+  })
+
+  it('should refuse a short id that never registers as unregistered after the wait', async () => {
+    const { waits, sleep } = sleeper()
+
+    const resolved = await resolveSessionId(SHORT, rosterOf([]), {
+      sleep,
+      attempts: 3,
+      intervalMs: 1000,
+    })
+
+    expect(resolved).toMatchObject({
+      ok: false,
+      reason: 'unregistered',
+      detail: [SHORT],
+    })
+    expect(waits).toEqual([1000, 1000, 1000])
+  })
+
+  it('should refuse a short id two live sessions share as ambiguous-id, naming both', async () => {
+    const { sleep } = sleeper()
+
+    const resolved = await resolveSessionId(
+      SHORT,
+      rosterOf([
+        { sessionId: WORKER_ID, name: 'worker-a' },
+        { sessionId: TWIN, name: 'worker-b' },
+      ]),
+      { sleep },
+    )
+
+    expect(resolved).toMatchObject({
+      ok: false,
+      reason: 'ambiguous-id',
+      detail: [WORKER_ID, TWIN],
+    })
+  })
+
+  it('should refuse an empty id as bad input naming registration lag', async () => {
+    const { sleep } = sleeper()
+
+    const resolved = await resolveSessionId('', rosterOf([]), { sleep })
+
+    expect(resolved).toMatchObject({ ok: false, reason: 'bad-input' })
+    expect(resolved.ok ? '' : resolved.message).toMatch(/registered/)
+  })
+
+  it('should refuse an id in neither form as bad input with no roster read', async () => {
+    const { sleep } = sleeper()
+    let reads = 0
+
+    const resolved = await resolveSessionId(
+      'v28.1-trigger-escalation',
+      async () => {
+        reads += 1
+        return []
+      },
+      { sleep },
+    )
+
+    expect(resolved).toMatchObject({ ok: false, reason: 'bad-input' })
+    expect(reads).toBe(0)
   })
 })

@@ -39,7 +39,7 @@ A reviewer writes no task file, so this session names it on the task the pull re
 canon tasks session <reviewer-id> <task> --json
 ```
 
-Record the UI reviewer below the same way after its launch, and a batch reviewer on every task its batch closes, one call per task. A `no-name` refusal means the reviewer exited before the read, so rerun with `--name` and the name the launch passed to `-n`.
+Record the UI reviewer below the same way after its launch, and a batch reviewer on every task its batch closes, one call per task. An `unregistered` refusal on the launch's short id, or `no-name` on a full id, means the reviewer exited before the read. Rerun with its full id, `--name`, and the name the launch passed to `-n`.
 
 ### The channel clauses
 

@@ -14,6 +14,8 @@ import {
   type RecordSelector,
   recordPullRequest,
   recordSession,
+  resolveSessionId,
+  type RosterRow,
   type SessionOutcome,
 } from '@/tasks/record'
 import { resolveSessions } from '@/sessions/resolve'
@@ -166,19 +168,27 @@ async function runSession(
   }
 
   const root = opts.root ?? (await mainWorktreeRoot())
-  const name = opts.name ?? (await rosterName(sessionId))
-  const outcome = await recordSession(root, selector, sessionId, name)
+  const resolved = await resolveSessionId(sessionId, liveRoster, {
+    sleep: (ms) => new Promise((done) => setTimeout(done, ms)),
+  })
+  if (!resolved.ok) {
+    return reportRecord('canon tasks session', resolved, emitJson, root)
+  }
+
+  const outcome = await recordSession(
+    root,
+    selector,
+    resolved.sessionId,
+    opts.name ?? resolved.name,
+  )
 
   return reportSession(outcome, emitJson, root)
 }
 
-/** The live roster's name for an id, or undefined once the session has exited. */
-async function rosterName(sessionId: string): Promise<string | undefined> {
+/** The live roster, empty when no session has registered yet. */
+async function liveRoster(): Promise<readonly RosterRow[]> {
   const report = await resolveSessions()
-  if (report.kind === 'absent') return undefined
-
-  return report.sessions.find((session) => session.sessionId === sessionId)
-    ?.name
+  return report.kind === 'absent' ? [] : report.sessions
 }
 
 function reportSession(
@@ -776,7 +786,7 @@ export function registerRecord(tasks: Command): void {
     .description('Record a session that worked a task on its Sessions: line')
     .argument(
       '<sessionId>',
-      'Full sessionId, as canon sessions list --json carries it',
+      'The 8-character id the launch printed, or the full sessionId canon sessions list --json carries',
     )
     .argument('[task]', 'Task filename stem, as in v28.1-trigger-escalation')
     .helpOption('-h, --help', 'Show this help message')
@@ -795,9 +805,12 @@ export function registerRecord(tasks: Command): void {
         '  no-board   the repository holds no `.canon/tasks/` board',
         '  no-match   no task matches the selector',
         '  ambiguous  more than one task matches the selector',
-        '  bad-input  an id that is not a full sessionId, or an empty name',
-        '  no-name    the roster lists no live session with the id, and no',
-        '             --name was passed',
+        '  bad-input     an empty id, an id in neither form, or an empty name',
+        '  no-name       the roster lists no live session with the full id,',
+        '                and no --name was passed',
+        '  unregistered  no live session starts with the 8-character id',
+        '                after 15 seconds of waiting for it to register',
+        '  ambiguous-id  two live sessions start with the 8-character id',
         '',
         'Exit codes:',
         '  0  the session was added, appended, or already listed',
@@ -809,7 +822,12 @@ export function registerRecord(tasks: Command): void {
         'unchanged under the name it was first recorded with. Safe from a',
         'linked worktree, since it resolves the board root in-process.',
         '',
+        'An 8-character id resolves to the full id it prefixes on the live',
+        'roster, polling each second for up to 15 seconds while a session',
+        'just launched registers. The line always records the full id.',
+        '',
         'Examples:',
+        '  canon tasks session 0b1c2d3e v28.1-trigger-escalation',
         '  canon tasks session 0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0 v28.1-trigger-escalation',
         '  canon tasks session 0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0 --plan task-sessions-line --json',
         '',
