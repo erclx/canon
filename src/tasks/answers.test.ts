@@ -17,7 +17,10 @@ interface QuestionFixture {
   readonly answer?: string
 }
 
-function planBody(questions: readonly QuestionFixture[]): string {
+function planBody(
+  questions: readonly QuestionFixture[],
+  approved?: string,
+): string {
   const block = questions.flatMap(({ suggested, answer = '' }, index) => [
     `${index + 1}. Question ${index + 1}?`,
     `   - Suggested: ${suggested}`,
@@ -27,6 +30,7 @@ function planBody(questions: readonly QuestionFixture[]): string {
   return [
     '# Feature: A plan under test',
     '',
+    ...(approved === undefined ? [] : [approved, '']),
     '## Summary',
     '',
     '- It ships something.',
@@ -45,10 +49,11 @@ function planBody(questions: readonly QuestionFixture[]): string {
 async function writePlan(
   slug: string,
   questions: readonly QuestionFixture[],
+  approved?: string,
 ): Promise<void> {
   await writeFile(
     join(ROOT, '.canon', 'plans', `feature-${slug}.md`),
-    planBody(questions),
+    planBody(questions, approved),
     'utf8',
   )
 }
@@ -233,6 +238,176 @@ describe('planAnswers', () => {
     assertOk(outcome)
     expect(outcome.launchable).toBe(false)
     expect(outcome.open.map(({ label }) => label)).toContain('Batch staging')
+  })
+
+  describe('a plan carrying an approval line', () => {
+    const APPROVED = 'Approved: operator, 2026-11-22, in planner-deploy'
+
+    it('should launch an approved plan and list its untyped operator call as deferred', async () => {
+      await writePlan(
+        'gate',
+        [
+          {
+            suggested: 'needs your call, the real host stays out of the plan.',
+          },
+        ],
+        APPROVED,
+      )
+
+      const outcome = await planAnswers(ROOT, 'gate')
+
+      assertOk(outcome)
+      expect(outcome.launchable).toBe(true)
+      expect(outcome.open).toEqual([])
+      expect(outcome.deferred).toEqual([
+        {
+          label: '1. Question 1?',
+          why: 'the real host stays out of the plan.',
+        },
+      ])
+    })
+
+    it('should report the approval line the planner wrote', async () => {
+      await writePlan('gate', [], APPROVED)
+
+      const outcome = await planAnswers(ROOT, 'gate')
+
+      assertOk(outcome)
+      expect(outcome.approved).toBe('operator, 2026-11-22, in planner-deploy')
+    })
+
+    it('should defer nothing when the approved plan carries no operator call', async () => {
+      await writePlan(
+        'gate',
+        [{ suggested: 'the first, since the group already carries a verb.' }],
+        APPROVED,
+      )
+
+      const outcome = await planAnswers(ROOT, 'gate')
+
+      assertOk(outcome)
+      expect(outcome.launchable).toBe(true)
+      expect(outcome.deferred).toEqual([])
+    })
+
+    it('should let a typed answer win over the approval rather than defer it', async () => {
+      await writePlan(
+        'gate',
+        [
+          {
+            suggested: 'needs your call, the two shapes cost the same.',
+            answer: 'Take the second.',
+          },
+        ],
+        APPROVED,
+      )
+
+      const outcome = await planAnswers(ROOT, 'gate')
+
+      assertOk(outcome)
+      expect(outcome.deferred).toEqual([])
+    })
+
+    it('should read a blank approval line as no approval', async () => {
+      await writePlan(
+        'gate',
+        [{ suggested: 'needs your call, the two shapes cost the same.' }],
+        'Approved:',
+      )
+
+      const outcome = await planAnswers(ROOT, 'gate')
+
+      assertOk(outcome)
+      expect(outcome.approved).toBeNull()
+      expect(outcome.launchable).toBe(false)
+    })
+
+    it('should ignore an approval line written below the first section', async () => {
+      await writeFile(
+        join(ROOT, '.canon', 'plans', 'feature-gate.md'),
+        `${planBody([{ suggested: 'needs your call, the two shapes cost the same.' }])}\n${APPROVED}\n`,
+        'utf8',
+      )
+
+      const outcome = await planAnswers(ROOT, 'gate')
+
+      assertOk(outcome)
+      expect(outcome.approved).toBeNull()
+      expect(outcome.launchable).toBe(false)
+    })
+  })
+
+  describe('a board requiring approval', () => {
+    async function requireApproval(value: string): Promise<void> {
+      mkdirSync(join(ROOT, 'canon', 'config'), { recursive: true })
+      await writeFile(
+        join(ROOT, 'canon', 'config', 'tasks.toml'),
+        `require_approval = ${value}\n`,
+        'utf8',
+      )
+    }
+
+    it('should launch an unapproved plan on a board that has not opted in', async () => {
+      await writePlan('gate', [
+        { suggested: 'the first, since the group already carries a verb.' },
+      ])
+
+      const outcome = await planAnswers(ROOT, 'gate')
+
+      assertOk(outcome)
+      expect(outcome.launchable).toBe(true)
+      expect(outcome.approved).toBeNull()
+    })
+
+    it('should refuse an unapproved plan as unapproved once the board opts in', async () => {
+      await requireApproval('true')
+      await writePlan('gate', [
+        { suggested: 'the first, since the group already carries a verb.' },
+      ])
+
+      const outcome = await planAnswers(ROOT, 'gate')
+
+      expect(outcome.ok).toBe(false)
+      expect(outcome.ok ? undefined : outcome.reason).toBe('unapproved')
+    })
+
+    it('should name the missing Approved: line in the refusal', async () => {
+      await requireApproval('true')
+      await writePlan('gate', [])
+
+      const outcome = await planAnswers(ROOT, 'gate')
+
+      expect(outcome.ok ? '' : outcome.message).toContain('Approved:')
+    })
+
+    it('should launch an approved plan on an opted-in board', async () => {
+      await requireApproval('true')
+      await writePlan('gate', [], 'Approved: operator, 2026-11-22, in planner')
+
+      const outcome = await planAnswers(ROOT, 'gate')
+
+      assertOk(outcome)
+      expect(outcome.launchable).toBe(true)
+    })
+
+    it('should launch an unapproved plan when the board sets the key false', async () => {
+      await requireApproval('false')
+      await writePlan('gate', [])
+
+      const outcome = await planAnswers(ROOT, 'gate')
+
+      assertOk(outcome)
+      expect(outcome.launchable).toBe(true)
+    })
+
+    it('should refuse as bad-config when the key is not a boolean', async () => {
+      await requireApproval('"yes"')
+      await writePlan('gate', [], 'Approved: operator, 2026-11-22, in planner')
+
+      const outcome = await planAnswers(ROOT, 'gate')
+
+      expect(outcome.ok ? undefined : outcome.reason).toBe('bad-config')
+    })
   })
 
   describe('a plan stacked on a live sibling', () => {

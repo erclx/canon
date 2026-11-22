@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
-import { basename, isAbsolute, relative, resolve } from 'node:path'
+import { basename, isAbsolute, join, relative, resolve } from 'node:path'
 import { branchRefs } from '@/git/worktree'
 import { fanInBranch, fanInFindings, readFanInMembers } from '@/tasks/fan-in'
 import { isUnder } from '@/tasks/paths'
@@ -10,6 +10,7 @@ import {
   type StackPlan,
   stackPairs,
 } from '@/tasks/stack'
+import { linesOutsideFences } from '@/markdown/scan'
 import { recordDir, recordDirs } from '@/roots/record'
 import {
   hasStagedBatches,
@@ -25,14 +26,28 @@ const ARCHIVE = 'archive'
 
 const SUGGESTED_PREFIX = '- Suggested:'
 const ANSWER_PREFIX = '- Answer:'
+const APPROVED_PREFIX = 'Approved:'
 
-export const ANSWER_REFUSALS = ['no-plan', 'archived', 'bad-input'] as const
+/** Where a board opts into refusing a plan that carries no approval line. */
+export const TASKS_CONFIG_REL = join('canon', 'config', 'tasks.toml')
+
+/** The refusals resolving a reference can return, which every plan verb shares. */
+export const RESOLVE_REFUSALS = ['no-plan', 'archived', 'bad-input'] as const
+
+export type ResolveRefusal = (typeof RESOLVE_REFUSALS)[number]
+
+/** The gate adds its own two, which a verb only resolving a plan never returns. */
+export const ANSWER_REFUSALS = [
+  ...RESOLVE_REFUSALS,
+  'unapproved',
+  'bad-config',
+] as const
 
 export type AnswerRefusal = (typeof ANSWER_REFUSALS)[number]
 
-export interface AnswersRefused {
+export interface AnswersRefused<R extends AnswerRefusal = ResolveRefusal> {
   readonly ok: false
-  readonly reason: AnswerRefusal
+  readonly reason: R
   readonly message: string
   readonly detail: readonly string[]
 }
@@ -47,14 +62,21 @@ export interface OpenQuestion {
   readonly why: string
 }
 
+/**
+ * `approved` is the text after the plan's `Approved:` line, or null without
+ * one. `deferred` lists each untyped operator call that line closed, being the
+ * values the build still has to ask for, so it is empty without an approval.
+ */
 export interface PlanAnswers {
   readonly ok: true
   readonly plan: string
   readonly launchable: boolean
   readonly open: readonly OpenQuestion[]
+  readonly approved: string | null
+  readonly deferred: readonly OpenQuestion[]
 }
 
-export type AnswersOutcome = PlanAnswers | AnswersRefused
+export type AnswersOutcome = PlanAnswers | AnswersRefused<AnswerRefusal>
 
 /**
  * Whether `refs/remotes/origin/<branch>` exists, or `null` when the read
@@ -145,7 +167,7 @@ function reasonOf(normalized: string): string {
  * read here. `checkQuestionContract` reports it as `suggestion-missing`, and
  * testing it again would put one rule in two places on different cadences.
  */
-function openQuestions(lines: readonly string[]): OpenQuestion[] {
+function operatorCalls(lines: readonly string[]): OpenQuestion[] {
   const open: OpenQuestion[] = []
 
   for (const question of readQuestions(lines)) {
@@ -160,6 +182,61 @@ function openQuestions(lines: readonly string[]): OpenQuestion[] {
   }
 
   return open
+}
+
+/**
+ * The approval sits under the H1 paragraph, ahead of the first section, since
+ * the answer contract keeps a planner out of `## Questions`. A line anywhere
+ * later reads as prose quoting the form rather than as an approval.
+ */
+export function readApproval(text: string): string | null {
+  for (const line of linesOutsideFences(text)) {
+    const trimmed = line.trim()
+    if (/^(?:#{2,}\s|\*\*)/.test(trimmed)) return null
+    if (!trimmed.startsWith(APPROVED_PREFIX)) continue
+
+    const value = trimmed.slice(APPROVED_PREFIX.length).trim()
+    return value.length > 0 ? value : null
+  }
+
+  return null
+}
+
+type ApprovalRequirement =
+  | { readonly ok: true; readonly required: boolean }
+  | AnswersRefused<'bad-config'>
+
+/**
+ * An absent file or key keeps blank-means-accept dispatch. A key in any other
+ * shape refuses rather than falling back, since a board that meant to opt in
+ * would otherwise launch every unapproved plan without a word.
+ */
+async function readApprovalRequirement(
+  root: string,
+): Promise<ApprovalRequirement> {
+  const path = join(root, TASKS_CONFIG_REL)
+  if (!existsSync(path)) return { ok: true, required: false }
+
+  let table: Record<string, unknown>
+  try {
+    table = Bun.TOML.parse(await readFile(path, 'utf8')) as Record<
+      string,
+      unknown
+    >
+  } catch {
+    return refuse('bad-config', `${TASKS_CONFIG_REL} is not valid TOML.`)
+  }
+
+  const value = table.require_approval
+  if (value === undefined) return { ok: true, required: false }
+  if (typeof value !== 'boolean') {
+    return refuse(
+      'bad-config',
+      `${TASKS_CONFIG_REL} needs require_approval as true or false.`,
+    )
+  }
+
+  return { ok: true, required: value }
 }
 
 /**
@@ -210,9 +287,25 @@ export async function planAnswers(
   const resolved = resolvePlanReference(root, reference)
   if (!resolved.ok) return resolved
 
-  const text = await readFile(resolved.path, 'utf8')
+  const [text, requirement] = await Promise.all([
+    readFile(resolved.path, 'utf8'),
+    readApprovalRequirement(root),
+  ])
+  if (!requirement.ok) return requirement
+
+  const approved = readApproval(text)
+  if (requirement.required && approved === null) {
+    return refuse(
+      'unapproved',
+      `${resolved.plan} carries no Approved: line, and ${TASKS_CONFIG_REL} sets require_approval, so the operator has not approved it.`,
+      [reference],
+    )
+  }
+
   const sections = splitPlanSections(text)
-  const open = openQuestions(sections.get('Questions') ?? [])
+  const calls = operatorCalls(sections.get('Questions') ?? [])
+  const deferred = approved === null ? [] : calls
+  const open = approved === null ? calls : []
 
   if (hasStagedBatches(text)) {
     open.push({
@@ -241,6 +334,8 @@ export async function planAnswers(
     plan: resolved.plan,
     launchable: open.length === 0,
     open,
+    approved,
+    deferred,
   }
 }
 
@@ -287,10 +382,10 @@ async function fanInEntries(
   ]
 }
 
-function refuse(
-  reason: AnswerRefusal,
+function refuse<R extends AnswerRefusal>(
+  reason: R,
   message: string,
   detail: readonly string[] = [],
-): AnswersRefused {
+): AnswersRefused<R> {
   return { ok: false, reason, message, detail }
 }
