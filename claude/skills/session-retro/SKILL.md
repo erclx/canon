@@ -52,7 +52,9 @@ Read an empty `issues` array as a queue with nothing open, which is a match that
 
 ## Step 4: present the shortlist
 
-Run tests 5 and 6 on each survivor, then rank and cap per `filter.md`. Show the shortlist and the dropped list in the shape it fixes, and stop for the operator's pick. Label the pick question's options with the shortlist's short titles, so the operator picks by the names the list shows. File nothing the operator did not pick.
+Run tests 5 and 6 on each survivor, then rank and cap per `filter.md`. Show the shortlist and the dropped list in the shape it fixes, and stop for the operator's pick. File nothing the operator did not pick.
+
+Label the pick question's options with the shortlist's short titles, so the operator picks by the names the list shows. The question tool takes at most four options, so a shortlist of five offers its first four and leaves the fifth to the free-text answer.
 
 ## Step 5: file each pick
 
