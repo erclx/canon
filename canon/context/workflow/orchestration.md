@@ -82,7 +82,7 @@ Holds the runbooks for moments the model cannot detect, shipped inside the skill
 
 ### `claude/skills/session-map/`
 
-Owns the handoff the orchestrator adds three sections to.
+Owns the handoff the orchestrator adds sections to, `## Operator preferences` being the one `orchestrator-kickoff.md` fills.
 
 - `orchestrator-handoff.md` writes the map and `orchestrator-resume.md` reads it, adding delegated decisions, the review-poll restart, and `## Talk sessions held open`
 - One file per session keeps two writers off one path, and `isReservedStem` in `src/tasks/archive.ts` stops the task verbs counting it, reading the `session-` prefix from `src/records/session-map.ts`
