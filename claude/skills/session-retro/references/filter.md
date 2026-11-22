@@ -27,14 +27,19 @@ Rank survivors by observed cost, highest first. Cap the shortlist at five, and m
 
 ## Shape
 
-Show both lists in this form, one line per candidate.
+Render both lists as markdown, so a terminal shows each title in bold and each candidate on three short lines.
 
-```plaintext
-Worth filing
-1. <surface>: <observed cost>. Fix: <direction>. <new | follow-up on #<n>>
+```markdown
+## Worth filing
 
-Considered and dropped
-- <candidate>: <test that dropped it>
+**1. <short title>** (<new | follow-up on #n>, <repo>)
+
+- **Cost:** <what it cost this session, with the number>
+- **Fix:** <direction, one sentence>
+
+## Dropped
+
+- <candidate>: <the test that dropped it, in plain words>
 ```
 
-Omit the dropped list when nothing was dropped. When the match did not run, put its line above `Worth filing`.
+Omit the `## Dropped` heading and its list when nothing was dropped. When the match did not run, put its line above the first heading.
