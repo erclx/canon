@@ -14,6 +14,7 @@ What the `install` and `gov` phases both do before they write anything. Stated o
 - [Resolve arguments](#resolve-arguments)
 - [Gap handling](#gap-handling)
 - [Preview](#preview)
+- [Visibility](#visibility)
 
 ## Read the catalogs
 
@@ -120,6 +121,7 @@ Before executing, output:
 - **Tooling stack:** one row per language root, each with its path, picked stack, a `fallback` mark on the same test, and its own command. Omit these rows on the `gov` phase.
 - **Extras:** each proposal with the evidence the verb returned, plus each subfolder language rule, listed in full as the list the operator confirms
 - **Skip:** any `--skip` entries with reason
+- **Visibility:** public or private, and whether an argument, the operator, or the private default answered it. Omit this row on the `gov` phase.
 - **Target:** resolved target path
 - **Commands:** the full chain that will run
 
@@ -138,7 +140,7 @@ The extras list stays whole for a similar reason. `canon init --stack` takes one
 
 ### Confirm the extras
 
-The extras are the one part of the preview the operator confirms before the install runs, since a proposal is evidence that a project might want a rule rather than proof that it does. Put the list through the structured question surface with three options.
+The operator confirms the extras before the install runs, since a proposal is evidence that a project might want a rule rather than proof that it does. Put the list through the structured question surface with three options.
 
 - Take every proposal, the recommended first option
 - Take none
@@ -162,3 +164,25 @@ An `--extras` argument answers ahead of time and skips the question. `--extras <
 - One argument answers both passes. The second pass takes each named rule among its new proposals, and the report names any listed rule neither pass proposed.
 - Under `--extras none` the second pass also takes nothing, and the report says it declined the new proposals
 - With neither and no one to answer, take every proposal from each pass and list each in the report. A proposed rule costs one file to delete, and stopping would break every headless setup.
+
+## Visibility
+
+The `install` phase asks whether the repository is public, since a public one carries open-source files no language stack ships. The `gov` phase installs rules alone and asks nothing.
+
+Confirm the add-on exists before asking. Look for `public` among the stacks `canon tooling list --json` returned, and skip the question when the installed catalog carries none, naming the missing layer as a gap.
+
+### Ask
+
+Ask it as its own question in the same structured call as the extras, with two options. A later preview question joins that call rather than opening a second one.
+
+- Private, the recommended first option
+- Public, which adds the public sync to the chain the preview lists
+
+A public answer adds `canon tooling sync public <target> --write` to the **Commands** row, after every stack sync.
+
+### Answering ahead
+
+A `--visibility public` or `--visibility private` argument answers ahead of time and skips the question.
+
+- With neither and no one to answer, take private and say so in the preview and the report
+- Private is the default because syncing public files into a private repository adds a license and a security policy nobody chose, while the reverse costs one later sync
