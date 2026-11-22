@@ -1,6 +1,6 @@
 ---
 title: Orchestrator kickoff
-description: The order an orchestrator follows on a board holding no rows, the four standing preferences it asks the operator once, and where the answers land
+description: The order an orchestrator follows on an empty board, the four standing preferences it asks the operator once, and where the answers land
 ---
 
 Run this on an empty board, one with no `priority.md` rows, task files, plans, or open pull requests, being a new project's first orchestrator turn. Any other board never reads it. The order is a default the operator can reorder, since it came from one project's two-day kickoff.
@@ -29,4 +29,4 @@ Two further preferences need no question. The pull after a merge follows `orches
 
 ## Where the answers land
 
-Write the answers into the `## Operator preferences` section of the session map, one line each, with no reasoning, per `${CLAUDE_SKILL_DIR}/../session-map/references/session.md`. A resumed orchestrator reads that section and asks none of them again.
+Write the answers into the `## Operator preferences` section of the session map, one line each, with no reasoning, per `orchestrator-handoff.md`. A resumed orchestrator reads that section and asks none of them again.

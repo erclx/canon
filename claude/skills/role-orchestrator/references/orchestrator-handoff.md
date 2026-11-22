@@ -1,6 +1,6 @@
 ---
 title: Orchestrator handoff runbook
-description: Retirement act the wind-down owes the fleet it dispatched, the talk sessions it exempts, the three sections an orchestrating session adds over the shared session map, where a lesson goes from a session that never commits, and the resume invocation the file carries out
+description: Retirement act the wind-down owes the fleet it dispatched, the talk sessions it exempts, the four sections an orchestrating session adds over the shared session map, where a lesson goes from a session that never commits, and the resume invocation the file carries out
 ---
 
 ## Retire what the wave delivered

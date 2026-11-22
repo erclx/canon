@@ -84,7 +84,7 @@ Holds the runbooks for moments the model cannot detect, shipped inside the skill
 
 Owns the handoff the orchestrator adds sections to, `## Operator preferences` being the one `orchestrator-kickoff.md` fills.
 
-- `orchestrator-handoff.md` writes the map and `orchestrator-resume.md` reads it, adding delegated decisions, the review-poll restart, and `## Talk sessions held open`
+- `orchestrator-handoff.md` writes the map and `orchestrator-resume.md` reads it, adding delegated decisions, the poll restart, `## Talk sessions held open`, and `## Operator preferences`
 - One file per session keeps two writers off one path, and `isReservedStem` in `src/tasks/archive.ts` stops the task verbs counting it, reading the `session-` prefix from `src/records/session-map.ts`
 - `canon records validate sessions` counts a map against the cap in `src/records/session-map.ts`, which a test pins to `session.md`
 - The count drops the closing block by its exact `## Resume` heading, so renaming it in `orchestrator-handoff.md` puts the block back in the count
