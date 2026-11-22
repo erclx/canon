@@ -1,5 +1,27 @@
 # Changelog
 
+## [5.109.0](https://github.com/erclx/canon/compare/v5.108.0...v5.109.0) (2026-11-22)
+
+
+### Features
+
+* **design:** draw the landing frames in the shipped dark theme ([#3341](https://github.com/erclx/canon/issues/3341)) ([52b0a77](https://github.com/erclx/canon/commit/52b0a77b496602476cc58248c4b39663d8cc51bc))
+* **governance:** match the shadcn rule to where components import cn ([#3335](https://github.com/erclx/canon/issues/3335)) ([c616ece](https://github.com/erclx/canon/commit/c616ecec3088948b209330f006596821e4218a2a))
+* **permissions:** drop the canon pr merge ask from the seeded settings ([#3342](https://github.com/erclx/canon/issues/3342)) ([1ddcc22](https://github.com/erclx/canon/commit/1ddcc22b2b7bc0fa077c455d632d213c0188410f))
+* **skills:** ask whether the project is public in target-setup ([#3340](https://github.com/erclx/canon/issues/3340)) ([da6f9e2](https://github.com/erclx/canon/commit/da6f9e21a327747311b9649ad786e7155eca6551))
+* **skills:** drop the indexes convention seed step from target-setup ([#3338](https://github.com/erclx/canon/issues/3338)) ([6ce20b2](https://github.com/erclx/canon/commit/6ce20b268e453cb57fb0c96cf282b58f0b45d893))
+* **skills:** leave a kickoff note after a planning scaffold ([#3339](https://github.com/erclx/canon/issues/3339)) ([c5df830](https://github.com/erclx/canon/commit/c5df830832fe5b2c30b663aaba47f8e219f0adc2))
+* **skills:** let the orchestrator merge under a standing authorization ([#3337](https://github.com/erclx/canon/issues/3337)) ([5d6f4ac](https://github.com/erclx/canon/commit/5d6f4ac6e8066c52eb1bc0038677e28b95cd3676))
+* **skills:** run the deep verify on a fresh scaffold ([#3328](https://github.com/erclx/canon/issues/3328)) ([82c479d](https://github.com/erclx/canon/commit/82c479d644d076ac2fb1a2b46b33e887ec0a03cd))
+* **target-setup:** detect rules again after the tooling sync ([#3327](https://github.com/erclx/canon/issues/3327)) ([d1662f5](https://github.com/erclx/canon/commit/d1662f5eb88477420a3710a72de10507866fb152))
+* **tooling:** run the post-scaffold step and git init when scaffolding ([#3331](https://github.com/erclx/canon/issues/3331)) ([76cadca](https://github.com/erclx/canon/commit/76cadcae4ee0f315b6e71730d11b854c3710720c))
+* **tooling:** seed one neutral home capture case for the web stack ([#3334](https://github.com/erclx/canon/issues/3334)) ([4e7c58a](https://github.com/erclx/canon/commit/4e7c58aa1a0e6d9d4e230ad5a38bb375caffd660))
+
+
+### Bug Fixes
+
+* **web:** name the port offset in the preview server messages ([#3333](https://github.com/erclx/canon/issues/3333)) ([608af7b](https://github.com/erclx/canon/commit/608af7bb4c2aaa0aaf55348c71079be1c827d6e3))
+
 ## [5.108.0](https://github.com/erclx/canon/compare/v5.107.0...v5.108.0) (2026-11-21)
 
 
