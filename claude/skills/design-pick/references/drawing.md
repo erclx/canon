@@ -54,7 +54,7 @@ Copy both pages' captures into the drive's `evidence/baseline/` as its whole-pag
 
 Down is page order and across is what is compared. Each design on a page is one group, being a pick round's arm, a drive's current set or option, or a reference site, and the groups sit side by side, left to right.
 
-Place every frame with `--width <px>`, `--x`, and `--y` on its add, the width being its column's. A frame added without them hugs its content and lands past every other one.
+Place every frame with `--width <px>`, `--x`, `--y`, and `--device on` on its add, the width being its column's and the device being the phone, tablet, or laptop that width names. A frame added without them hugs its content and lands past every other one.
 
 ### Inside a group
 
@@ -65,6 +65,8 @@ A group runs its widths as columns and its sections as rows, so one row reads as
 - Put a shot in its own section's row whatever its width, so a section split into more phone shots than desktop ones holds the extra shots in that row
 - Stack a row's extra shots at one width 80px apart, so the row ends at the bottom of its last stacked shot
 - Start the next group 400px past the right edge of the group's last column
+
+Check the 80px column gap against the laptop body. The bodies draw outside the frame's own width, so widen the gap, and every offset above that carries it, if a body overlaps the next column.
 
 A page set on `00-current` or `00-next` is one group at x 0.
 
