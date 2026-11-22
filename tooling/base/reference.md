@@ -31,12 +31,19 @@ Two configs fix how output looks and how commits read.
 
 These two files are base's `[sync] per_root` set, which a `--skip base` subfolder still receives.
 
+The root run calls each nested runner after its own stages, so one `bun run check` at the root covers every subfolder.
+
+- It finds a nested root from a tracked `scripts/verify.json` below the root, read through `git ls-files`, so a vendored or ignored folder never runs.
+- It runs that folder's `scripts/verify.ts` from inside it with `VERIFY_NESTED=true`, and a nested failure fails the root run and names the folder.
+- A nested run discovers nothing, and a folder outside a git repository finds no nested root.
+- Discovery reads files rather than a list, since `verify.json` is golden and a list kept in it is lost on sync.
+
 ## What ships as user-owned seeds
 
 Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and never overwrites it, so a project extends them freely.
 
 - `.lintstagedrc` holds the glob map below.
-- `.github/workflows/verify.yml` runs on pull requests targeting `main` and on `workflow_dispatch`. A multi-root project adds its own jobs here.
+- `.github/workflows/verify.yml` runs on pull requests targeting `main` and on `workflow_dispatch`. The web stack ships its own golden copy at that path, which sync rewrites, so put a project's own jobs, such as a nested root's toolchain setup, in a separate workflow file no stack ships.
 - `.github/pull_request_template.md` has `## Summary`, `## Key changes`, `## Technical context`, `## Outcome`, and `## Testing`, the optional two commented. A project adds its own checklist lines.
 - `canon/context/development/` holds the `setup` and `ci` entries under a folder index. Extend them with project-specific commands and workflows, and keep canonical rationale here.
 - `canon/config/pr-labels.toml` is the starter pull request label map, covering what the toolkit installs. A project adds a row per surface of its own.
@@ -101,7 +108,7 @@ Negative knowledge that costs a failed run to relearn.
 
 ### The check script
 
-Base writes `check` as a `[scripts.override]`, so a sync replaces whatever `check` a target declared, including one that chained further checks after the runner. Re-add a chained check as its own script after a sync.
+Base writes `check` as a `[scripts.override]`, so a sync replaces whatever `check` a target declared, including one that chained further checks after the runner. A nested root needs no chained call, since the runner runs it. Re-add any other chained check as its own script after a sync.
 
 - `bun run check` writes nothing. Formatting drift fails it at `check:format`, and the failure line names `bun run format`, the one command that writes.
 - `VERIFY_NESTED=true` suppresses timeline boundaries when `check` runs inside another call
