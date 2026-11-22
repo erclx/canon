@@ -75,6 +75,7 @@ The main catalog is Taste-Skill's v2 experimental skill, which its author moved 
 | One family doing every job   | Catalog observation, [Redesign skill](https://github.com/nxpatterns/claude-taste-skill/blob/main/skills/redesign-skill/SKILL.md): "Browser default fonts or Inter everywhere", reached past by pairing "a serif header with a sans-serif body" | 2026-10-24 |
 | Unbounded measure            | [Practical Typography, Line length](https://practicaltypography.com/line-length.html): "Aim for an average line length of 45–90 characters, including spaces."                                                                                 | 2026-10-24 |
 | Caps and tracking as texture | Catalog observation, [Taste-Skill tells](https://github.com/leonxlnx/taste-skill/blob/main/skills/taste-skill/references/tells.md): "Tiny uppercase letter-spaced captions scattered around the viewport"                                      | 2026-10-24 |
+| Typed glyph for an icon      | House choice, from two field reports: typed `‹ › ✕ ☰ ⇆` called sloppy by a reporter's operator, and a 10 px text caret on the toolkit's own landing                                                                                           | 2026-11-22 |
 
 ## Motion
 
