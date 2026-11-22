@@ -89,7 +89,7 @@ Fetch the site's community DESIGN.md at the commit `${CLAUDE_SKILL_DIR}/referenc
 
 ## Step 7: write the frames
 
-Write each frame's whole document to `<page-dir>/<frame>.html`, then place it with `frameboard frame add references/<frame> --width <px> --x <px> --y <px>`, letting the height hug. From a linked worktree, take the heredoc route `${CLAUDE_SKILL_DIR}/../session-worktree/references/main-root-writes.md` gives for a main-root write.
+Write each frame's whole document to `<page-dir>/<frame>.html`, then place it with `frameboard frame add references/<frame> --width <px> --x <px> --y <px> --device on`, letting the height hug. From a linked worktree, take the heredoc route `${CLAUDE_SKILL_DIR}/../session-worktree/references/main-root-writes.md` gives for a main-root write.
 
 | Frame                | Holds                                                                      |
 | -------------------- | -------------------------------------------------------------------------- |

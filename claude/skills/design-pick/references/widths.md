@@ -23,6 +23,8 @@ The draw widths are not the capture widths. The capture list beside them is the 
 - Take all three fallbacks when the document is absent, carries no `## Layout`, or its layout carries no `Draw widths:` line
 - Say in the run's output which widths the round draws and which source gave each
 
+A `--widths` linked width draws no device, so each class takes its own frame, added with its own `--device on`. See `${CLAUDE_SKILL_DIR}/references/drawing.md` for the add.
+
 One width per class keeps the round's frame count at three times its arms. A width between two classes rarely changes a pick, and drawing it grows the board and the composite for no new answer.
 
 ### The 320 check
@@ -35,17 +37,21 @@ Draw a tablet frame in the desktop form first. Fall back to the phone form at th
 
 ## Holding a pick that scrolls sideways
 
-No pick folds into the surface until every one of its frames renders with no sideways scroll, per [WCAG 2.2 Reflow](https://www.w3.org/TR/WCAG22/#reflow). Measure each of the picked arm's frames at the width it was drawn at, and the phone frame again at 320:
+No pick folds into the surface until every one of its frames renders with no sideways scroll, per [WCAG 2.2 Reflow](https://www.w3.org/TR/WCAG22/#reflow). Measure each of the picked arm's frames at the width it was drawn at, and the phone frame again at 320.
+
+Open each frame at the address the board serves, never at its file. `canon browser` refuses a local file path, and the eval then reads `about:blank`, which has no overflow and passes every width. Take the address from the `url` that `frameboard serve --json` returned, including a board another session serves (`reused: true`).
 
 ```bash
-canon browser -s=<run> open file://<frame-path>
+canon browser -s=<run> open <url>/frames/<project>/<page>/<frame>.html
 canon browser -s=<run> resize <px> 900
-canon browser -s=<run> --raw eval "document.documentElement.scrollWidth - document.documentElement.clientWidth"
+canon browser -s=<run> --raw eval "location.href + ' ' + document.contentType + ' ' + (document.documentElement.scrollWidth - document.documentElement.clientWidth)"
 ```
 
-Read the result per frame, and close the session with `canon browser -s=<run> close` after the last one.
+The board redirects a frame to a second origin, so the printed address carries a different host and port than `<url>`. Compare the path alone. Read the result per frame, and close the session with `canon browser -s=<run> close` after the last one.
 
-- Read any value above 1 as a frame that scrolls sideways, and hold the pick, naming each width that failed, 320 included
+- Hold the pick unless the address ends in the frame's own `/frames/<project>/<page>/<frame>.html` and the type reads `text/html`, since a missing frame answers 404 as `text/plain` and reads 0
+- Check the address again after the resize to 320, since the phone frame is measured twice and the second read must name the same frame
+- Read the overflow after the address matches, and read any value above 1 as a frame that scrolls sideways. Hold the pick, naming each width that failed, 320 included.
 - Carry a held pick into the loop as a correction to the failing frames, and measure again before the close
 - Report a browser refusal by its stderr and hold the pick, since an unmeasured width is not a clean one
 

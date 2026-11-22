@@ -44,7 +44,7 @@ Every arm of a round sits as one group of frames on one board page, the groups s
 1. Start the board the way `references/board.md` states, unless this run already has. Note whether this run started the server, read off `reused`, since Step 6 ends only a server this run started.
 2. Read `frameboard list --root <board> --json` with no `--project`, so it lists every project. Run `frameboard project add <project> --root <board> --json` when it lists no `<project>`.
 3. Add the round's page with `frameboard page add <page>` and record its `ref` on the run's list of pages. A `name-taken` refusal means the name is somebody else's, so take the next free suffix.
-4. Add each arm at each round width as `frameboard frame add <page>/arm-<id>-<px>`, laid out as `${CLAUDE_SKILL_DIR}/references/drawing.md` states. Step 6's archive keys on those names.
+4. Add each arm at each round width as `frameboard frame add <page>/arm-<id>-<px> --device on`, laid out as `${CLAUDE_SKILL_DIR}/references/drawing.md` states. Step 6's archive keys on those names.
 5. Write each frame's whole document to the `path` the add verb reported. From a linked worktree, take the heredoc route `session-worktree` gives for a main-root write.
 
 A frame renders at its own layout width on the board and in a capture alike, so a layout decision needs no device toolbar. Read `${CLAUDE_SKILL_DIR}/references/widths.md` before the first add, for the phone, tablet, and desktop widths the round draws, the 320 check, and the form a tablet frame takes.

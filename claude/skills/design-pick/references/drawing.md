@@ -54,17 +54,19 @@ Copy both pages' captures into the drive's `evidence/baseline/` as its whole-pag
 
 Down is page order and across is what is compared. Each design on a page is one group, being a pick round's arm, a drive's current set or option, or a reference site, and the groups sit side by side, left to right.
 
-Place every frame with `--width <px>`, `--x`, and `--y` on its add, the width being its column's. A frame added without them hugs its content and lands past every other one.
+Place every frame with `--width <px>`, `--x`, `--y`, and `--device on` on its add, the width being its column's and the device being the phone, tablet, or laptop that width names. A frame added without them hugs its content and lands past every other one.
 
 ### Inside a group
 
 A group runs its widths as columns and its sections as rows, so one row reads as one section at every width.
 
-- Put desktop at the group's x, tablet 80px past the desktop's right edge, and phone 80px past the tablet's, so at the fallback widths at the group's x plus 0, 1520, and 2434
+- Put desktop at the group's x, tablet one desktop to tablet gap past the desktop's right edge, and phone 80px past the tablet's, so at the fallback widths at the group's x plus 0, 1600, and 2514
 - Stack the sections down in page order, one row per section, each row starting 80px below the lowest bottom edge in the row above
 - Put a shot in its own section's row whatever its width, so a section split into more phone shots than desktop ones holds the extra shots in that row
 - Stack a row's extra shots at one width 80px apart, so the row ends at the bottom of its last stacked shot
 - Start the next group 400px past the right edge of the group's last column
+
+The desktop to tablet gap is the laptop body's reach, `20 + round((width + 40) * 0.06)` past the desktop frame, plus 44px for the tablet body, and never under 160px. That is 153px at 1440 and 182px at 1920. The phone gap stays 80px, since tablet to phone needs 64px.
 
 A page set on `00-current` or `00-next` is one group at x 0.
 
