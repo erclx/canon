@@ -17,7 +17,12 @@ max_turns = 30
 # Guards the second detect pass. The first pass reads a bare Vite starter,
 # which carries no Tailwind or shadcn evidence, so only a pass after the
 # tooling sync installs these two. `react.md` proves the first pass ran.
+#
+# `src/app.tsx` guards the scaffold overlay, which alone writes it once the
+# prepare step removes the starter's `src/App.tsx`. The stylesheet pattern
+# below cannot, since a session can hand-add the import a skipped overlay left.
 paths = [
+  "src/app.tsx",
   ".claude/rules/canon/framework/react.md",
   ".claude/rules/canon/framework/tailwind.md",
   ".claude/rules/canon/framework/shadcn.md",
@@ -37,14 +42,14 @@ absent = ["src/App.css", "src/assets", "public/icons.svg"]
 reply = ["test:e2e", "screenshot"]
 
 manual = [
-  "The report carries no indexes outcome, since target-setup dropped that phase. Semantic: `reply` takes positive fragments only, and a negative passes on any rephrasing",
+  "CLAUDE.md carries no `## Indexes` section, since target-setup dropped the convention seed step that pasted it. Semantic: `content` takes positive patterns only, and an absence has no pattern",
   "A deep failure warns and names the script rather than failing the scaffold. Semantic: a warning and a failure both name the script, and no fragment separates them",
   "A red run from a network failure in `bun create`, `bun install`, or the Playwright install is not a regression. Semantic: read the envelope's `result` before treating a failure as the chain's",
 ]
 
-# Guards the scaffold overlay. It writes the Tailwind stylesheet after the
-# prepare step, so a scaffold that skipped it keeps the starter's own
-# `index.css`, which carries no import.
+# Guards the end state the Tailwind plugin needs, since `src/index.css` with no
+# import compiles no utility class. Whether the overlay wrote it is the
+# `src/app.tsx` path above.
 [[content]]
 path = "src/index.css"
 pattern = '''^@import\s+['"]tailwindcss['"]'''
