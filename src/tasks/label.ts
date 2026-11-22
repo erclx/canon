@@ -1,8 +1,20 @@
 import { existsSync } from 'node:fs'
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import {
+  mkdir,
+  readdir,
+  readFile,
+  rm,
+  rmdir,
+  stat,
+  writeFile,
+} from 'node:fs/promises'
 import { join, relative } from 'node:path'
 import { recordDir } from '@/roots/record'
-import { callerIdentity } from '@/sessions/resolve'
+import {
+  callerIdentity,
+  resolveSessions,
+  type SessionReport,
+} from '@/sessions/resolve'
 import {
   archiveDir,
   declinedDir,
@@ -31,6 +43,12 @@ const MAX_ATTEMPTS = 5
 
 /** The owner file each claim writes inside its lock directory. */
 const OWNER_FILE = 'claim.json'
+
+/**
+ * How old a lock naming no session must be before a claim releases it. A claim
+ * lands its task within minutes, so an hour clears any slow planner.
+ */
+const OWNERLESS_RELEASE_MS = 60 * 60 * 1000
 
 interface Label {
   readonly major: number
@@ -230,6 +248,128 @@ interface ClaimOptions {
   readonly sessionId?: string | null
   /** The instant the claim is stamped with. Defaults to `Date.now`. */
   readonly now?: () => number
+  /** The session roster liveness is read from. Defaults to `resolveSessions`. */
+  readonly sessions?: () => Promise<SessionReport>
+}
+
+type Liveness = 'live' | 'dead' | 'unknown'
+
+/**
+ * Whether the roster shows a session gone. An unreadable roster, and a foreign
+ * record it could not check that might be this session, read unknown, so only a
+ * roster that could see the session and did not frees its claim.
+ */
+function livenessOf(
+  report: SessionReport | undefined,
+  sessionId: string,
+): Liveness {
+  if (report === undefined || report.kind === 'absent') return 'unknown'
+  if (report.sessions.some((session) => session.sessionId === sessionId)) {
+    return 'live'
+  }
+  if (report.foreign === undefined) {
+    return report.foreignDead > 0 ? 'unknown' : 'dead'
+  }
+  const unchecked = report.foreign.some(
+    (record) => record.sessionId === null || record.sessionId === sessionId,
+  )
+  return unchecked ? 'unknown' : 'dead'
+}
+
+async function lockAgeMs(
+  root: string,
+  reservation: Reservation,
+  now: number,
+): Promise<number | undefined> {
+  if (reservation.claimedAt !== null) {
+    const at = Date.parse(reservation.claimedAt)
+    if (!Number.isNaN(at)) return now - at
+  }
+  try {
+    const info = await stat(recordDir(root, 'ordinal-locks', reservation.label))
+    return now - info.mtimeMs
+  } catch {
+    return undefined
+  }
+}
+
+interface ReleaseContext {
+  readonly root: string
+  readonly now: number
+  readonly self: string | null
+  readonly roster: () => Promise<SessionReport | undefined>
+}
+
+async function isDead(
+  context: ReleaseContext,
+  reservation: Reservation,
+): Promise<boolean> {
+  if (reservation.sessionId === null) {
+    const age = await lockAgeMs(context.root, reservation, context.now)
+    return age !== undefined && age >= OWNERLESS_RELEASE_MS
+  }
+  if (reservation.sessionId === context.self) return false
+
+  return livenessOf(await context.roster(), reservation.sessionId) === 'dead'
+}
+
+/**
+ * Removes a lock judged dead, re-reading it first so a claim that took the
+ * label since the judgment keeps it. The owner file goes before the directory,
+ * and a non-recursive `rmdir` refuses anything a later claim wrote beside it.
+ */
+async function release(
+  context: ReleaseContext,
+  judged: Reservation,
+): Promise<boolean> {
+  const current = await readOwner(context.root, judged.label)
+  if (
+    current.sessionId !== judged.sessionId ||
+    current.claimedAt !== judged.claimedAt
+  ) {
+    return false
+  }
+  if (judged.sessionId === null && !(await isDead(context, judged))) {
+    return false
+  }
+
+  const dir = recordDir(context.root, 'ordinal-locks', judged.label)
+  try {
+    await rm(join(dir, OWNER_FILE), { force: true })
+    await rmdir(dir)
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Frees each dead label lock above the highest stem, the only locks that move
+ * the next label. A lock at or below it changes nothing, so it is never read.
+ */
+async function releaseDead(
+  context: ReleaseContext,
+  floor: Label | undefined,
+): Promise<string[]> {
+  const released: string[] = []
+
+  for (const reservation of await reservationsAbove(context.root, floor)) {
+    if (!(await isDead(context, reservation))) continue
+    if (await release(context, reservation)) released.push(reservation.label)
+  }
+
+  return released
+}
+
+/** Reads the roster once, on first need, and reads a failed read as unknown. */
+function rosterOnce(
+  read: () => Promise<SessionReport>,
+): () => Promise<SessionReport | undefined> {
+  let pending: Promise<SessionReport | undefined> | undefined
+  return () => {
+    pending ??= read().catch(() => undefined)
+    return pending
+  }
 }
 
 /**
@@ -261,7 +401,9 @@ async function reserveLabel(
 /**
  * Reserves the next label through an exclusive `mkdir` under
  * `.canon/ordinal-locks/`, stamping the claiming session and time inside it.
- * The scan counts every reservation beside the stems.
+ * It first releases each dead lock above the highest stem, one whose session
+ * the roster shows gone or, naming none, one past an hour old. The scan then
+ * counts every reservation left beside the stems.
  */
 export async function claimLabel(
   root: string,
@@ -278,6 +420,15 @@ export async function claimLabel(
         : options.sessionId,
     claimedAt: new Date(options.now?.() ?? Date.now()).toISOString(),
   }
+  const released = await releaseDead(
+    {
+      root,
+      now: Date.parse(owner.claimedAt),
+      self: owner.sessionId,
+      roster: rosterOnce(options.sessions ?? (() => resolveSessions())),
+    },
+    highestOf(await readStems(root), LABEL_PATTERN),
+  )
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
     const stems = highestOf(await readStems(root), LABEL_PATTERN)
@@ -297,7 +448,7 @@ export async function claimLabel(
         highest: highest === undefined ? undefined : formatLabel(highest),
         claimed: true,
         reservations: await reservationsAbove(root, stems),
-        released: [],
+        released,
       }
     }
   }
