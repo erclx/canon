@@ -53,6 +53,11 @@ case "$*" in
 *"/actions/runs?"*) [ -f "$fx/runs.json" ] && cat "$fx/runs.json" || exit 1 ;;
 *"/pulls/7") jq -r "$f" "$fx/pull.json" ;;
 "api rate_limit") [ -f "$fx/rate-limited" ] && cat "$fx/rate-limited" || exit 1 ;;
+*"/pulls/404")
+  echo '{"message":"Not Found","status":"404"}'
+  echo "gh: Not Found (HTTP 404)" >&2
+  exit 1
+  ;;
 "api repos/{owner}/{repo}") echo '{"full_name":"acme/widgets","html_url":"https://github.com/acme/widgets"}' ;;
 *) exit 1 ;;
 esac

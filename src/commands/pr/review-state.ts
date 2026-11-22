@@ -24,6 +24,7 @@ import {
   readIdentity,
   refReader,
   refuseWith,
+  refusePull,
   resolvePullNumber,
 } from '@/commands/pr/pull'
 import { LIFT_REFUSALS, readEvidenceGate } from '@/commands/pr/gates'
@@ -167,17 +168,12 @@ async function runReviewState(
   // Resolved up front, so a record answering a bare call still names its pull request.
   const resolved = await resolvePullNumber(root, number)
   if (resolved.kind === 'refused') {
-    return refuseWith(
-      resolved.reason,
-      PULL_REFUSALS[resolved.reason],
-      emitJson,
-      root,
-    )
+    return refusePull(resolved, emitJson, root)
   }
 
   const read = await readIdentity(root, resolved.number)
   if (read.kind === 'refused') {
-    return refuseWith(read.reason, PULL_REFUSALS[read.reason], emitJson, root)
+    return refusePull(read, emitJson, root)
   }
 
   // The api keeps each read's own reason, so a caller tells a thread from a remote.

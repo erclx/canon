@@ -16,10 +16,10 @@ import {
 } from '@/git/status'
 import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
 import {
-  PULL_REFUSALS,
   PullRefusal,
   ReadOptions,
   readPull,
+  refusePull,
   refuseWith,
   resolvePullNumber,
   resolveWorktreeRoot,
@@ -142,7 +142,8 @@ export function registerDriveCopy(pr: Command): void {
         '                   paths in `paths`',
         '  unreadable-tree  git could not read the worktree status',
         '  bad-flags        --baseline and --check were combined',
-        '  gh-failed, ambiguous-pull, gh-missing',
+        '  gh-failed, ambiguous-pull, gh-missing, bad-input (a number that is',
+        '  not a positive whole number), no-pull (a number naming no pull request)',
         '',
         'Exit codes:',
         '  0  copied, no-config, or clean',
@@ -174,6 +175,7 @@ type DriveTarget =
   | {
       readonly kind: 'refused'
       readonly reason: DriveCopyRefusal | PullRefusal
+      readonly number?: string
     }
 
 /**
@@ -257,12 +259,13 @@ async function runDriveCopy(
   const target = await resolveDriveTarget(root, number, baseline || check)
   if (target.kind === 'refused') {
     const reason = target.reason
-    return refuse(
-      reason,
-      reason in DRIVE_COPY_REFUSALS
-        ? DRIVE_COPY_REFUSALS[reason as DriveCopyRefusal]
-        : PULL_REFUSALS[reason as PullRefusal],
-    )
+    return reason in DRIVE_COPY_REFUSALS
+      ? refuse(reason, DRIVE_COPY_REFUSALS[reason as DriveCopyRefusal])
+      : refusePull(
+          { reason: reason as PullRefusal, number: target.number },
+          emitJson,
+          root,
+        )
   }
 
   const scratch = join(target.main, REVIEW_UI_SCRATCH)

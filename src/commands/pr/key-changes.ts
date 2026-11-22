@@ -155,6 +155,9 @@ export function registerKeyChanges(pr: Command): void {
         '  gh-failed           `gh` could not answer for this repository or branch',
         '  rate-limited        GitHub refused a read for a spent quota, named with',
         '                      `bucket` and `resetAt`, so wait for the reset',
+        '  bad-input           the number named is not a positive whole number,',
+        '                      refused before any call to GitHub',
+        '  no-pull             no pull request carries the number named',
         '  no-number           --link was given with no pull request number',
         '  no-repo-url         --link could not read the repository address',
         '  link-json           --link was given with --json, though it prints the body',
@@ -399,7 +402,7 @@ async function runKeyChanges(
       ? await readFromApi(root, number)
       : await readFromFile(root, process.cwd(), opts.body, opts.base)
 
-  if (source.kind === 'refused') return refuse(source.reason, emitJson, root)
+  if (source.kind === 'refused') return refuseSource(source, emitJson, root)
 
   const tracked = await listRepositoryFiles(root)
   if (tracked === undefined) return refuse('unreadable-tree', emitJson, root)
@@ -530,15 +533,7 @@ async function runKeyChangesLink(
     opts.body === undefined
       ? await readFromApi(root, number)
       : await readFromFile(root, process.cwd(), opts.body, opts.base)
-  if (source.kind === 'refused') {
-    return source.reason === 'bad-input' || source.reason === 'no-pull'
-      ? refusePull(
-          { reason: source.reason, number: source.number },
-          emitJson,
-          root,
-        )
-      : refuse(source.reason, emitJson, root)
-  }
+  if (source.kind === 'refused') return refuseSource(source, emitJson, root)
 
   const pull = number ?? source.source.number?.toString()
   if (pull === undefined) {
@@ -589,4 +584,16 @@ async function readRepoUrl(root: string): Promise<string | undefined> {
  */
 function refuse(reason: Refusal, emitJson: boolean, root: string): number {
   return refuseWith(reason, REFUSALS[reason], emitJson, root)
+}
+
+/** Refuses on a source read, naming the number where the refusal is about it. */
+function refuseSource(
+  source: { readonly reason: SourceRefusal; readonly number?: string },
+  emitJson: boolean,
+  root: string,
+): number {
+  const { reason, number } = source
+  return reason === 'bad-input' || reason === 'no-pull'
+    ? refusePull({ reason, number }, emitJson, root)
+    : refuse(reason, emitJson, root)
 }

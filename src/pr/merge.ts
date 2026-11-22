@@ -16,6 +16,7 @@ export type MergeRefusal =
   | 'head-moved'
   | 'not-mergeable'
   | 'gh-failed'
+  | 'no-pull'
 
 export interface MergePull {
   readonly isOpen: boolean
@@ -53,7 +54,8 @@ export type MergeOutcome =
  * `gh-failed` rather than reading absence as a pass.
  */
 export interface MergeApi {
-  readPull(): Promise<MergePull | undefined>
+  /** `absent` when GitHub answered 404, which no retry changes. */
+  readPull(): Promise<MergePull | 'absent' | undefined>
   readChecks(head: string): Promise<ChecksGate | undefined>
   putMerge(request: MergeRequest): Promise<MergeOutcome>
   /** Runs only after a merge landed, so its outcome never decides the merge's. */
@@ -224,6 +226,7 @@ export async function merge(
 
   const pull = await api.readPull()
   // A read answering for another number would put that number in the subject.
+  if (pull === 'absent') return refused('no-pull', number)
   if (pull === undefined || pull.number !== number) {
     return refused('gh-failed', number)
   }

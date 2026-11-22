@@ -20,7 +20,6 @@ import { type RestPull, reviewRowOf } from '@/pr/rest'
 import { intro, logInfo, logStep, logWarn, outro } from '@/cli/ui'
 import {
   GH_TIMEOUT_MS,
-  PULL_REFUSALS,
   ReadOptions,
   gh,
   gitRunner,
@@ -31,6 +30,7 @@ import {
   rateLimitMessage,
   refuseWith,
   withRateLimit,
+  refusePull,
   resolvePullNumber,
 } from '@/commands/pr/pull'
 import {
@@ -328,23 +328,13 @@ async function runLift(
 
   const resolved = await resolvePullNumber(root, number)
   if (resolved.kind === 'refused') {
-    return refuseWith(
-      resolved.reason,
-      PULL_REFUSALS[resolved.reason],
-      emitJson,
-      root,
-    )
+    return refusePull(resolved, emitJson, root)
   }
 
   // Read once for the base, while the injected `readPull` rereads it per gate.
   const initial = await readPull(root, resolved.number)
   if (initial.kind === 'refused') {
-    return refuseWith(
-      initial.reason,
-      PULL_REFUSALS[initial.reason],
-      emitJson,
-      root,
-    )
+    return refusePull(initial, emitJson, root)
   }
   const base = initial.row.base?.ref
   if (base === undefined || base === '') {

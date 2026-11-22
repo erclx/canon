@@ -13,6 +13,7 @@ import {
   gh,
   readIdentity,
   refReader,
+  refusePull,
   refuseWith,
 } from '@/commands/pr/pull'
 
@@ -50,6 +51,9 @@ export function registerChecks(pr: Command): void {
         '  rate-limited      GitHub refused a read for a spent quota, named with',
         '                    `bucket` and `resetAt`, so wait for the reset',
         '  no-object-head    the pull request object reported no head commit',
+        '  bad-input         the number named is not a positive whole number,',
+        '                    refused before any call to GitHub',
+        '  no-pull           no pull request carries the number named',
         '',
         'A branch conflicting with its base gets no merge ref, so no run ever',
         'starts for it and the state stays pending. The record carries',
@@ -82,18 +86,13 @@ async function runChecks(
 
   const read = await readIdentity(root, number)
   if (read.kind === 'refused') {
-    return refuseWith(read.reason, PULL_REFUSALS[read.reason], emitJson, root)
+    return refusePull(read, emitJson, root)
   }
 
   const { identity } = read
   const resolved = await resolveTip(identity.branch, refReader(root))
   if (resolved.kind === 'refused') {
-    return refuseWith(
-      resolved.reason,
-      PULL_REFUSALS[resolved.reason],
-      emitJson,
-      root,
-    )
+    return refusePull(resolved, emitJson, root)
   }
 
   // Raised to the endpoint's maximum rather than paged, since a count above the rows reads pending.

@@ -106,7 +106,11 @@ export function refusePull(
 
 type IdentityRead =
   | { readonly kind: 'read'; readonly identity: PullIdentity }
-  | { readonly kind: 'refused'; readonly reason: PullRefusal }
+  | {
+      readonly kind: 'refused'
+      readonly reason: PullRefusal
+      readonly number?: string
+    }
 
 /**
  * One `gh` call's stdout, or null on failure. The environment is stripped since

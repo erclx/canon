@@ -7,6 +7,7 @@ import {
   ReadOptions,
   readIdentity,
   refReader,
+  refusePull,
   refuseWith,
 } from '@/commands/pr/pull'
 
@@ -72,7 +73,7 @@ async function runHead(
 
   const read = await readIdentity(root, number)
   if (read.kind === 'refused') {
-    return refuseWith(read.reason, PULL_REFUSALS[read.reason], emitJson, root)
+    return refusePull(read, emitJson, root)
   }
 
   const { identity } = read
