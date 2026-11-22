@@ -294,6 +294,38 @@ test.describe('the craft section', () => {
     await expect(chips.last()).toHaveAttribute('aria-pressed', 'true')
   })
 
+  test('sets every quote beside its rule at 1440', async ({ page }) => {
+    await page.goto('/')
+    const chips = page.locator('#craft .chip')
+    const count = await chips.count()
+    expect(count).toBe(8)
+
+    for (let index = 0; index < count; index += 1) {
+      await chips.nth(index).click()
+      const shown = page.locator('#craft .pair:visible')
+      await expect(shown).toHaveCount(1)
+      const quote = await shown.locator('blockquote').boundingBox()
+      const rule = await shown.locator('.rule').boundingBox()
+      expect(quote).not.toBeNull()
+      expect(rule).not.toBeNull()
+
+      expect(rule!.x).toBeGreaterThan(quote!.x + quote!.width)
+      expect(rule!.y).toBeLessThan(quote!.y + quote!.height)
+    }
+  })
+
+  test('stacks the rule under its quote at 834', async ({ page }) => {
+    await page.setViewportSize({ width: 834, height: 900 })
+    await page.goto('/')
+    const shown = page.locator('#craft .pair:visible')
+    const quote = await shown.locator('blockquote').boundingBox()
+    const rule = await shown.locator('.rule').boundingBox()
+    expect(quote).not.toBeNull()
+    expect(rule).not.toBeNull()
+
+    expect(rule!.y).toBeGreaterThan(quote!.y + quote!.height)
+  })
+
   test('sets the quote larger than the rule it became', async ({ page }) => {
     await page.goto('/')
     const size = (selector: string) =>
