@@ -12,6 +12,7 @@ export type CloseRefusal =
   | 'head-mismatch'
   | 'comment-failed'
   | 'close-failed'
+  | 'no-pull'
 
 export interface ClosePull {
   readonly isOpen: boolean
@@ -27,7 +28,8 @@ export interface ClosePull {
  * guess.
  */
 export interface CloseApi {
-  readPull(): Promise<ClosePull | undefined>
+  /** `absent` when GitHub answered 404, which no retry changes. */
+  readPull(): Promise<ClosePull | 'absent' | undefined>
   /** Posts the reason and answers the comment's URL. */
   postComment(body: string): Promise<string | undefined>
   patchClosed(): Promise<boolean>
@@ -123,6 +125,7 @@ export async function close(
   }
 
   const pull = await api.readPull()
+  if (pull === 'absent') return refused('no-pull', number)
   if (pull === undefined) return refused('gh-failed', number)
   if (!pull.isOpen) return refused('pull-closed', number)
   if (pull.branch !== opts.head) return refused('head-mismatch', number)

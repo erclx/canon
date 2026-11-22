@@ -4,9 +4,16 @@ import { $ } from 'bun'
 import type { Command } from 'commander'
 import { gitEnv } from '@/git/env'
 import { close, type CloseApi, type CloseRefusal } from '@/pr/close'
-import { type RestPull } from '@/pr/rest'
 import { intro, logInfo, logStep, logWarn, outro } from '@/cli/ui'
-import { ReadOptions, gh, refuseWith } from '@/commands/pr/pull'
+import {
+  PULL_REFUSALS,
+  ReadOptions,
+  gh,
+  parsePullNumber,
+  readPull,
+  refusePull,
+  refuseWith,
+} from '@/commands/pr/pull'
 
 interface CloseCommandOptions extends ReadOptions {
   readonly reasonFile?: string
@@ -51,7 +58,9 @@ export function registerClose(pr: Command): void {
         'Reasons:',
         '  closed',
         '  no-reason, reason-unreadable, reason-unpublishable, no-head,',
-        '  gh-failed, pull-closed, head-mismatch, comment-failed, close-failed',
+        '  gh-failed, pull-closed, head-mismatch, comment-failed, close-failed,',
+        '  bad-input (a number that is not a positive whole number, refused before',
+        '  any call), no-pull (a number naming no pull request)',
         '',
         'Every call is REST, never `gh pr close`, which runs on GraphQL.',
         '',
@@ -88,28 +97,24 @@ const CLOSE_REFUSALS: Record<CloseRefusal | CloseCommandRefusal, string> = {
     'The closing comment did not post, so the pull request was left open.',
   'close-failed':
     'The comment posted but the close was refused, so the pull request is still open. Close it by hand or re-run.',
+  'no-pull': PULL_REFUSALS['no-pull'],
 }
 
 function closeApi(root: string, number: string): CloseApi {
   return {
     readPull: async () => {
-      const stdout = await gh(root, [
-        'api',
-        `repos/{owner}/{repo}/pulls/${number}`,
-      ])
-      if (stdout === null) return undefined
-      try {
-        const row = JSON.parse(stdout) as RestPull
-        if (typeof row.head?.ref !== 'string') return undefined
-        const headRepo = row.head.repo?.full_name
-        return {
-          isOpen: row.state === 'open',
-          branch: row.head.ref,
-          isFork:
-            headRepo === undefined || headRepo !== row.base?.repo?.full_name,
-        }
-      } catch {
-        return undefined
+      const read = await readPull(root, number)
+      if (read.kind === 'refused') {
+        return read.reason === 'no-pull' ? 'absent' : undefined
+      }
+      const { row } = read
+      if (typeof row.head?.ref !== 'string') return undefined
+      const headRepo = row.head.repo?.full_name
+      return {
+        isOpen: row.state === 'open',
+        branch: row.head.ref,
+        isFork:
+          headRepo === undefined || headRepo !== row.base?.repo?.full_name,
       }
     },
     postComment: async (body) => {
@@ -155,6 +160,10 @@ async function runClose(
 
   intro('canon pr close')
 
+  // Checked first, since GitHub reads `33x8` as 33 and would close that one.
+  const parsed = parsePullNumber(number)
+  if (parsed.kind === 'refused') return refusePull(parsed, emitJson, root)
+
   const refuseClose = (
     reason: CloseRefusal | CloseCommandRefusal,
     extra: Record<string, unknown> = {},
@@ -190,6 +199,9 @@ async function runClose(
     isKeepBranch: opts.keepBranch ?? false,
   })
 
+  if (record.reason === 'no-pull') {
+    return refusePull({ reason: 'no-pull', number }, emitJson, root)
+  }
   if (!record.isOk) {
     return refuseClose(record.reason as CloseRefusal, {
       ...(record.commentUrl !== undefined && { commentUrl: record.commentUrl }),
