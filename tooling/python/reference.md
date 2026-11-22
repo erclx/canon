@@ -10,13 +10,15 @@ Configs ship as sidecar files (`ruff.toml`, `mypy.ini`, `pytest.ini`, `.coverage
 
 ## Scaffold checklist
 
-1. Scaffold with `uv init --package <name>`. This creates `pyproject.toml` with a `uv_build` backend and `src/<name with underscores>/__init__.py` holding an annotated `def main() -> None:`.
+1. Scaffold with `uv init --package --author-from none <name>`. This creates `pyproject.toml` with a `uv_build` backend and `src/<name with underscores>/__init__.py` holding an annotated `def main() -> None:`. The flag keeps the git user's name and email out of the `authors` field, which a public repository would otherwise publish.
 2. Seed a minimal `package.json`, so the base layer's bun-side tools (husky, oxfmt, commitlint) have a target and the sync installs them. The stack's `scaffold/` overlay lands it.
 3. Install base tooling with `canon tooling sync base . --write`.
 4. Install python tooling with `canon tooling sync python . --write`.
 5. Install the deps with `uv add --dev ruff mypy pytest pytest-cov`. This stays manual, since the manifest injector hardcodes `bun add -D`.
 6. Sync the lockfile and create the venv with `uv sync`.
 7. Run `bun run lint:fix`, then `bun run format`, then `bun run check`.
+
+A later `uv add` rewrites `pyproject.toml` in its own layout, so run `bun run format` after it, or the format check fails on the file it reformatted.
 
 ### What the scaffold gives
 
