@@ -1,10 +1,15 @@
 ---
-description: Route edits to a rule file to the create-rule skill for its shape and checklist
+description: Route a project convention to a project rule rather than CLAUDE.md, and edits to a rule file to the create-rule skill
 paths:
+  - 'CLAUDE.md'
   - '.claude/rules/project/**/*.md'
 ---
 
 # Rule standards
+
+## Project conventions
+
+- Keep `CLAUDE.md` to the sections its seed carries, and add a project convention as a project rule through `canon:create-rule` instead of a new section.
 
 ## Rule files
 
