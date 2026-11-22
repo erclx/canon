@@ -32,9 +32,10 @@ A reference lends structure and nothing else. The frames this run writes are the
 
 Take the sites in this order, stopping at the first that answers.
 
-1. Every address the ask names.
-2. The `references` key of `canon/config/design.toml` at the main worktree root, read per `${CLAUDE_SKILL_DIR}/../design-pick/references/design-config.md`.
-3. The default list in `${CLAUDE_SKILL_DIR}/references/sites.md`. Take three sites from it that differ in kind and theme unless the ask wants more, and say which ones.
+1. Images the operator supplied. Copy each to `<asset-dir>/operator/` and give it a captioned frame `operator-<nn>` at the page head. They sit beside the sites below.
+2. Every address the ask names.
+3. The `references` key of `canon/config/design.toml` at the main worktree root, read per `${CLAUDE_SKILL_DIR}/../design-pick/references/design-config.md`.
+4. The default list in `${CLAUDE_SKILL_DIR}/references/sites.md`. Take three sites that differ in kind and theme unless the ask wants more, and say which. An app surface takes them from the app UI list.
 
 Derive a kebab `<site>` from each address's host without its `www.`, such as `linear-app` for `https://linear.app/`.
 
@@ -55,7 +56,12 @@ Resolve `<board>` and `<project>` and start the board as `${CLAUDE_SKILL_DIR}/..
 
 Frameboard serves a file sitting directly in a page folder or anywhere under its project's `assets/` folder, but nothing in a page folder's subfolders, so shots kept in `<site>/<px>/` folders live under `assets/`.
 
-Clearing a site's folder makes a rerun replace that site rather than stack a second copy beside the first, and leaves every other site's shots standing.
+Clearing a site's folder makes a rerun replace that site rather than stack a second copy, and leaves every other site's shots standing.
+
+- Keep `<asset-dir>/operator/` on a rerun, since only a captured site's folder is cleared
+- Lend mood, palette direction, and shape language from an operator image, as `design-pick` settles, and caption what it was pasted for, never a product's artwork, logo, or text
+
+An operator image lends mood, palette direction, and shape language, as the taste question in `design-pick` settles. Its caption says what the operator pasted it for, never a product's artwork, logo, or text.
 
 ## Step 4: shoot the sections
 
