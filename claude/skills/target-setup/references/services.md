@@ -26,6 +26,8 @@ Match each kind against the stacks `canon tooling list --json` returned, the way
 - Carry each `gap` row into the report's detection gaps, surfaced rather than guessed as the detect reference's gap handling states
 - A folder that already holds a marker is a detected root, so drop the planned row and say detection already covers it
 
+A stack-matched kind in a language the governance stack does not carry adds its language rule to the extras by name, read from `canon gov list --json`, as a detected subfolder root does. `canon gov detect` proposes no language rule, so without this the service lands its tooling and none of its rules.
+
 ## Answering ahead
 
 A `--services <folder>:<kind>,<folder>:<kind>` argument answers ahead of time and skips the question. `--services none` declares none.

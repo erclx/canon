@@ -185,7 +185,7 @@ Confirm the add-on exists before asking. Look for `public` among the stacks `can
 
 ### Ask
 
-Ask it as its own question in the same structured call as the extras, with two options. A later preview question joins that call rather than opening a second one.
+Ask it as its own question in the [one structured ask](#one-structured-ask), with two options.
 
 - Private, the recommended first option
 - Public, which adds the public sync to the chain the preview lists
