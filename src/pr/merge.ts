@@ -67,7 +67,8 @@ export interface MergeOptions {
 
 /** What happened to the local main worktree after a merge. */
 export type MergePullRecord =
-  MainPull | { readonly outcome: 'skipped'; readonly reason: 'no-pull' }
+  | MainPull
+  | { readonly outcome: 'skipped'; readonly reason: 'no-pull' }
 
 export interface MergeRecord {
   readonly reason: 'merged' | 'dry-run' | MergeRefusal
