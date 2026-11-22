@@ -1,4 +1,6 @@
 import { $ } from 'bun'
+import { spawn } from 'node:child_process'
+import { resolve } from 'node:path'
 import { gitEnv } from '@/git/env'
 
 /**
@@ -118,4 +120,110 @@ export async function listWorktrees(
   if (path !== undefined) entries.push({ path, branch })
 
   return entries
+}
+
+/** What a fast-forward of the main worktree did, with a stable code per outcome. */
+export type MainPull =
+  | {
+      readonly outcome: 'pulled'
+      readonly reason: 'fast-forwarded' | 'up-to-date'
+    }
+  | {
+      readonly outcome: 'skipped'
+      readonly reason: 'not-a-repo' | 'linked-worktree' | 'off-trunk'
+    }
+  | {
+      readonly outcome: 'refused'
+      readonly reason: 'dirty-tree' | 'diverged' | 'pull-failed'
+    }
+
+const PULL_TIMEOUT_MS = 120_000
+
+async function gitRead(
+  cwd: string,
+  args: readonly string[],
+): Promise<string | undefined> {
+  const result = await $`git -C ${cwd} ${args}`.env(gitEnv()).quiet().nothrow()
+  return result.exitCode === 0 ? result.stdout.toString().trim() : undefined
+}
+
+/**
+ * Runs a git write with its output and any hook's on stderr, so a caller's
+ * stdout stays a clean record.
+ */
+function gitWrite(cwd: string, args: readonly string[]): Promise<boolean> {
+  return new Promise((done) => {
+    const child = spawn('git', ['-C', cwd, ...args], {
+      env: gitEnv(),
+      stdio: ['ignore', 2, 2],
+      timeout: PULL_TIMEOUT_MS,
+    })
+    child.on('error', () => done(false))
+    child.on('close', (code) => done(code === 0))
+  })
+}
+
+/**
+ * Fast-forwards the main worktree at `cwd` to its remote trunk, which fires the
+ * `post-merge` hook as a hand pull does. It skips a linked worktree and a main
+ * on another branch, and refuses a tree with tracked changes or a branch that
+ * diverged, leaving the checkout where it was in every case but `pulled`.
+ */
+export async function fastForwardMain(cwd: string): Promise<MainPull> {
+  const dirs = (
+    await gitRead(cwd, [
+      'rev-parse',
+      '--path-format=absolute',
+      '--git-dir',
+      '--git-common-dir',
+    ])
+  )?.split('\n')
+  const [gitDir, commonDir] = dirs ?? []
+  if (gitDir === undefined || commonDir === undefined) {
+    return { outcome: 'skipped', reason: 'not-a-repo' }
+  }
+  if (resolve(gitDir) !== resolve(commonDir)) {
+    return { outcome: 'skipped', reason: 'linked-worktree' }
+  }
+
+  const remoteHead = await gitRead(cwd, [
+    'symbolic-ref',
+    '--short',
+    'refs/remotes/origin/HEAD',
+  ])
+  const trunk = remoteHead?.replace(/^origin\//, '') || 'main'
+  const branch = await gitRead(cwd, ['branch', '--show-current'])
+  if (branch !== trunk) return { outcome: 'skipped', reason: 'off-trunk' }
+
+  const status = await gitRead(cwd, [
+    'status',
+    '--porcelain',
+    '--untracked-files=no',
+  ])
+  if (status === undefined) return { outcome: 'refused', reason: 'pull-failed' }
+  if (status !== '') return { outcome: 'refused', reason: 'dirty-tree' }
+
+  if (!(await gitWrite(cwd, ['fetch', '--quiet', 'origin', trunk]))) {
+    return { outcome: 'refused', reason: 'pull-failed' }
+  }
+  const remote = `refs/remotes/origin/${trunk}`
+  const [local, upstream] = await Promise.all([
+    gitRead(cwd, ['rev-parse', 'HEAD']),
+    gitRead(cwd, ['rev-parse', remote]),
+  ])
+  if (local === undefined || upstream === undefined) {
+    return { outcome: 'refused', reason: 'pull-failed' }
+  }
+  if (local === upstream) return { outcome: 'pulled', reason: 'up-to-date' }
+
+  const isBehind =
+    await $`git -C ${cwd} merge-base --is-ancestor HEAD ${remote}`
+      .env(gitEnv())
+      .quiet()
+      .nothrow()
+  if (isBehind.exitCode !== 0) return { outcome: 'refused', reason: 'diverged' }
+
+  return (await gitWrite(cwd, ['merge', '--ff-only', '--quiet', remote]))
+    ? { outcome: 'pulled', reason: 'fast-forwarded' }
+    : { outcome: 'refused', reason: 'pull-failed' }
 }
