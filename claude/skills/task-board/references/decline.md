@@ -23,6 +23,8 @@ Pass the task's filename stem:
 canon tasks decline <stem> --reason "<text>" [--by <name>] --json
 ```
 
+The decider defaults to `operator` when `--by` is absent, so pass `--by` only to record a name. A blank `--by` is refused as `bad-input`.
+
 Branch on the record's `ok`, then on `reason`, never on the exit. A shell wrapper can flatten the exit, the same hazard `canon tasks archive` carries.
 
 ### Success record

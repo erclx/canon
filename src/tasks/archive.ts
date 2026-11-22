@@ -518,6 +518,18 @@ export function retargetReadyLine(text: string, target: string): string {
   return text.replace(READY_PATTERN, () => readyLine(target))
 }
 
+export const DEFAULT_DECIDER = 'operator'
+
+/**
+ * The decider a decline records: a role when nobody is named, since a git name
+ * would be copied into plans. A blank name is refused, never defaulted.
+ */
+export function deciderFor(by: string | undefined): string | undefined {
+  if (by === undefined) return DEFAULT_DECIDER
+  const name = by.trim()
+  return name.length > 0 ? name : undefined
+}
+
 /**
  * Builds the `Declined:` line recording why a task was decided against and by
  * whom. Free prose after the colon, since the line names no file to link,
