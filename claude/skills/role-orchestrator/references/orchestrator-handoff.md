@@ -60,6 +60,8 @@ Settle all three steps below before the door writes, so one write carries the co
 
 1. Add `## Decisions taken under delegated authority` directly after `## State`, holding only the rules and holds this session set that die with the wave.
    - End each with `(until <event>)`, naming what retires it, so the next session re-tests it rather than obeying it
+   - Record a standing merge authorization here, listing the pull requests its scope fixed at the grant and its `(until <event>)` end
+   - The next session re-tests that end and re-reads the scope before its first merge under it, and asks the operator again when either no longer holds
    - Write `None.` when nothing is still in force
    - It sits there because a decision is read against the state it was taken in
 2. Add `## Talk sessions held open` directly after that, one line per open talk session giving its name, its `sessionId`, and its row, or `None.`.

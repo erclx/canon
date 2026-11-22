@@ -10,12 +10,12 @@ One warm session holds the cross-feature call and reviews. Cold worker sessions 
 
 ## Four roles
 
-| Role         | Session                                    | Owns                                                                                     | Does not                                              |
-| ------------ | ------------------------------------------ | ---------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Orchestrator | One warm, long-lived session               | The cross-feature call, review dispatch, merge order                                     | Review in place, edit, merge an unnamed PR            |
-| Reviewer     | One cold session per PR or small batch     | Each PR's read through `review-pr`, the lift on close                                    | Fix findings, ready by hand, merge                    |
-| Planner      | One session per row or batch, warm or cold | Measure each row against the tree, write one plan per row, run a drive or a sketch round | Enter a worktree, write the board, land a design pick |
-| Worker       | One cold worktree session per feature      | Implement, self-check, open PR, answer the reviewer                                      | Write the shared board, merge                         |
+| Role         | Session                                    | Owns                                                                                     | Does not                                                 |
+| ------------ | ------------------------------------------ | ---------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Orchestrator | One warm, long-lived session               | The cross-feature call, review dispatch, merge order                                     | Review in place, edit, merge without the operator's word |
+| Reviewer     | One cold session per PR or small batch     | Each PR's read through `review-pr`, the lift on close                                    | Fix findings, ready by hand, merge                       |
+| Planner      | One session per row or batch, warm or cold | Measure each row against the tree, write one plan per row, run a drive or a sketch round | Enter a worktree, write the board, land a design pick    |
+| Worker       | One cold worktree session per feature      | Implement, self-check, open PR, answer the reviewer                                      | Write the shared board, merge                            |
 
 Each role keeps to its own writes, and five rules cover how the roles meet.
 
@@ -36,6 +36,7 @@ Each role keeps to its own writes, and five rules cover how the roles meet.
 7. The worker addresses the findings, rebases onto `origin/main` if a sibling landed on its files, pushes, and asks every reviewer on the PR for a re-review of the added commits without waiting on CI.
 8. A pass posts `## Review` while anything is open and `## Review closed` when nothing is. The reviewer then runs `canon pr lift`.
 9. The operator runs `canon pr merge <number>` or names the PR for the orchestrator to merge, which then tells each trailing worker the merge touched to run `review-address` and rebase.
+   - A standing authorization, scoped by default to the PRs in flight when the operator gives it, lets the orchestrator merge each as its gates pass and report after
 
 Each worker halts at the PR, and the merge stays a human gate, since the seeded ask rule puts every `canon pr merge` an agent runs to the operator. The verb squashes with the body's Summary, Key changes, and Technical context as the message. A release-please or Dependabot pull request merges the same way, from the bot's own body.
 
