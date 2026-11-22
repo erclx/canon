@@ -25,6 +25,7 @@ import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
 import {
   AMBIGUOUS_PULL,
   PULL_REFUSALS,
+  parsePullNumber,
   refusePull,
   GH_TIMEOUT_MS,
   gh,
@@ -392,6 +393,12 @@ async function runKeyChanges(
 ): Promise<number> {
   const root = resolve(opts.root ?? process.cwd())
   const emitJson = opts.json ?? false
+
+  // Checked ahead of both modes, since --body skips the resolver and --link prints the number.
+  if (number !== undefined) {
+    const parsed = parsePullNumber(number)
+    if (parsed.kind === 'refused') return refusePull(parsed, emitJson, root)
+  }
 
   if (opts.link === true) return runKeyChangesLink(number, opts, root)
 

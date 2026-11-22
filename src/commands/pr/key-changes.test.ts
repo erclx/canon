@@ -53,6 +53,34 @@ describe('canon pr key-changes --body resolution', () => {
     expect(reason).not.toBe('unreadable-body')
   })
 
+  it('should refuse a malformed number before reading --body', async () => {
+    await writeFile(join(cwdDir, 'body.md'), '## Key changes\n')
+
+    const { reason } = await runKeyChanges(cwdDir, [
+      '33x8',
+      '--body',
+      'body.md',
+      '--root',
+      rootDir,
+    ])
+
+    expect(reason).toBe('bad-input')
+  })
+
+  it('should print no linked body for a malformed number under --link', async () => {
+    await writeFile(join(cwdDir, 'body.md'), '## Key changes\n')
+
+    const result = await execa(
+      process.execPath,
+      [CLI, 'pr', 'key-changes', '33x8', '--body', 'body.md', '--link'],
+      { cwd: cwdDir, reject: false, timeout: RUN_TIMEOUT_MS },
+    )
+
+    expect(result.exitCode).toBe(1)
+    expect(result.stdout).toBe('')
+    expect(result.stderr).toContain('"33x8"')
+  })
+
   it('should not resolve --body against --root', async () => {
     await writeFile(join(rootDir, 'body.md'), '## Key changes\n')
 
