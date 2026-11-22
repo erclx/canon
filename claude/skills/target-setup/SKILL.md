@@ -41,6 +41,7 @@ argument that answers its prompt ahead of time:
 | ------------------- | ------------------------------------------ | ---------------------------------------------------------- | ----------------------------------------------------- |
 | `indexes`           | Confirm its folder list                    | `--all` for every candidate, `--folders <a>,<b>` for a set | Reports its candidates and stops rather than choosing |
 | `install` and `gov` | Confirm the proposed extras                | `--extras <a>,<b>` for a set, `--extras none` for none     | Takes every proposal and lists each in the report     |
+| `install`           | Ask whether the repository is public       | `--visibility public` or `--visibility private`            | Takes private and says so in the report               |
 | `gov`               | Stop on a detected technology with no rule | `--skip-gaps`, which proceeds and lists the gap            | Stops on the gap                                      |
 
 Claude Code's tool permission dialog is the confirmation gate for everything
@@ -126,6 +127,10 @@ canon tooling sync python ./backend --skip base --write
 - Each subtree keeps its own framework configs, and its stack reference reads through `canon tooling reference <stack>`
 - A subtree sync withholds `.github/`, since GitHub reads workflows only at the root, and names each withheld file with the `working-directory` a root CI job needs
 - A subtree with no `package.json` gets a minimal one from the sync, so its scripts and dependencies land in the same pass
+
+### Public layer
+
+On a public answer, run `canon tooling sync public <target> --write` at the root after every stack sync, then apply `${CLAUDE_SKILL_DIR}/references/public.md`. Skip both otherwise.
 
 ### Detect again after the sync
 
@@ -213,3 +218,5 @@ After the chain, report as well:
 A resolved name and a fallback read alike once written, so the preview marks the
 fallback rather than this report. The preview is the last point before the first
 write, and the report runs after the files have landed.
+
+Report the visibility taken and what answered it, plus what the public reference says a public run owes.
