@@ -140,7 +140,7 @@ The extras list stays whole for a similar reason. `canon init --stack` takes one
 
 ### Confirm the extras
 
-The extras are the one part of the preview the operator confirms before the install runs, since a proposal is evidence that a project might want a rule rather than proof that it does. Put the list through the structured question surface with three options.
+The operator confirms the extras before the install runs, since a proposal is evidence that a project might want a rule rather than proof that it does. Put the list through the structured question surface with three options.
 
 - Take every proposal, the recommended first option
 - Take none
@@ -173,7 +173,7 @@ Confirm the add-on exists before asking. Look for `public` among the stacks `can
 
 ### Ask
 
-Put the question through the structured question surface beside the extras, with two options.
+Ask it as its own question in the same structured call as the extras, with two options. A later preview question joins that call rather than opening a second one.
 
 - Private, the recommended first option
 - Public, which adds the public sync to the chain the preview lists

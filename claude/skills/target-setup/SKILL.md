@@ -45,7 +45,7 @@ argument that answers its prompt ahead of time:
 | `gov`               | Stop on a detected technology with no rule | `--skip-gaps`, which proceeds and lists the gap            | Stops on the gap                                      |
 
 Claude Code's tool permission dialog is the confirmation gate for everything
-else. Do not pause for a separate confirmation beyond the extras question.
+else. Do not pause beyond the preview's one structured call.
 
 ## Scope
 
