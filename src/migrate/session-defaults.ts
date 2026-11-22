@@ -35,10 +35,8 @@ export const MERGE_DENIED: readonly string[] = [
 ]
 
 /**
- * The merge verb's rule, which the seed no longer carries in any list. An ask
- * on it prompts in every permission mode, auto mode included, so a merge the
- * operator named waited on the client. A target holding it keeps it, since
- * this verb only adds, and sync names the hand removal.
+ * The merge verb's rule, which the seed carries in no list, since an ask on it
+ * prompts in every mode. A held one stays, as this verb only adds.
  */
 export const MERGE_VERB = 'Bash(canon pr merge:*)'
 
