@@ -407,8 +407,7 @@ export const worktreeCards = [
 ]
 
 /**
- * The three install commands with one copy control, beside the setup run in a
- * fresh project and the four stages a project goes through.
+ * The three install commands with one copy control and the first run under them.
  */
 export const install = {
   // README.md: "Install, then set up a project"
@@ -421,52 +420,12 @@ export const install = {
     'claude plugin install canon@canon',
     'bun install --global @erclx/canon',
   ],
-  // README.md: canon-allow-readme-paraphrase: the copy control's labels and the terminal's title, which no README sentence carries.
+  // README.md: canon-allow-readme-paraphrase: the copy control's labels, which no README sentence carries.
   copy: {
     label: 'Copy the three commands',
     done: 'Copied',
     status: 'Copied the three commands',
   },
-  session: 'a fresh project',
   // README.md: canon-allow-readme-paraphrase: the README's first-run sentence, cut to the command and where it runs. "run `/canon:target-setup`"
   first: 'then run /canon:target-setup in a project',
-  /** The setup the terminal runs: a line is its kind, a key, and its value, where `q` is a question it puts to you. */
-  // README.md: canon-allow-readme-paraphrase: page fiction of a setup run, condensing what the README's first step says the skill does.
-  run: {
-    ask: '/canon:target-setup',
-    rows: [
-      ['k', 'Stack', 'bun, react'],
-      [
-        'k',
-        'Lays down',
-        'base tooling, the react stack, governance rules, the Claude seeds',
-      ],
-      ['q', 'Run it?', 'yes'],
-      ['k', 'Verified', 'format, lint, types, tests'],
-    ] as [string, string, string][],
-  },
-  /** The four stages, each saying when it runs, the skills set apart as code. */
-  // README.md: canon-allow-readme-paraphrase: each stage condenses its README step to one line. "such as `bun init` or `npm create vite`" "writes nothing until you say yes" "catches the project up on your go-ahead"
-  stages: [
-    {
-      name: 'Start',
-      when: 'First',
-      line: '`bun init`, `npm create vite`, or `target-scaffold` starts the project.',
-    },
-    {
-      name: 'target-setup',
-      when: 'Once per project',
-      line: 'Shows what it will lay down, and writes nothing until you say yes.',
-    },
-    {
-      name: 'target-check',
-      when: 'Any time',
-      line: 'Reports what the project lacks against the current release.',
-    },
-    {
-      name: 'target-update',
-      when: 'After each release',
-      line: 'After a release, catches the project up on your go-ahead.',
-    },
-  ],
 }

@@ -5,15 +5,11 @@
   align-items: start;
 }
 
-#install .term p {
-  margin: 0;
+#install .say .lede {
+  margin-bottom: 0;
 }
 
 /* The three commands in a drawn card, one copy control under them. */
-#install .cmd {
-  margin-top: 36px;
-}
-
 #install .cbody {
   display: flex;
   flex-direction: column;
@@ -42,109 +38,23 @@
   border-top: 1.5px solid var(--outline);
 }
 
-/* The terminal, dark in both themes, reads the theme-fixed dark family. */
-#install .term {
-  overflow: hidden;
-  border-radius: var(--radius-card);
-  background: var(--color-light-text);
-  box-shadow: 5px 5px 0 var(--rule);
-  color: var(--color-dark-text-body);
+/* Every label sits in one cell, so the widest sets the width whichever shows. */
+#install .copy {
+  display: inline-grid;
+  justify-items: center;
 }
 
-#install .tb {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 11px 14px;
-  border-bottom: 1px solid var(--color-dark-chrome);
-  font-size: var(--size-view-small);
-  font-weight: 500;
-  line-height: 1;
-  color: var(--color-dark-muted);
+#install .copy > span {
+  grid-area: 1 / 1;
 }
 
-#install .tb i {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--color-dark-band);
-}
-
-#install .tb span {
-  flex: 1;
-  margin-right: 48px;
-  text-align: center;
-}
-
-#install .tbody {
-  padding: 20px 22px;
-  font-family: var(--mono);
-  font-size: var(--size-small);
-  line-height: 1.75;
-  overflow-wrap: anywhere;
-}
-
-#install .k {
-  display: inline-block;
-  min-width: 96px;
-  padding-left: 2ch;
-  color: var(--color-dark-muted);
-}
-
-#install .q {
-  padding-left: 2ch;
-  color: var(--color-dark-waiting);
-}
-
-#install .acc {
-  color: var(--color-dark-accent);
-}
-
-#install .stg {
-  margin: 28px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-#install .stg li {
-  display: grid;
-  grid-template-columns: 140px 130px minmax(0, 1fr);
-  gap: 12px;
-  padding: 10px 0;
-  border-top: 1px solid var(--line);
-  font-size: var(--size-small);
-  line-height: 1.45;
-  color: var(--body);
-}
-
-#install .stg b {
-  font-family: var(--mono);
-  font-weight: 600;
-  color: var(--ink);
-}
-
-#install .stg code {
-  font-family: var(--mono);
-  font-size: 0.9em;
-  color: var(--ink);
-}
-
-@media (max-width: 1100px) {
-  #install .stg li {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 2px;
-  }
+#install .copy .hold {
+  visibility: hidden;
 }
 
 @media (max-width: 900px) {
   #install .split {
     grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-@media (max-width: 640px) {
-  #install .tbody {
-    padding: 16px;
-    font-size: var(--size-view-small);
+    gap: 24px;
   }
 }

@@ -712,11 +712,51 @@ test.describe('the install section', () => {
 
     await copy.click()
 
-    await expect(copy).toHaveText('Copied')
+    await expect(copy.locator('.now')).toHaveText('Copied')
+    await expect(copy).toHaveAccessibleName('Copied')
     await expect(page.locator('#install [role="status"]')).toHaveText(
       'Copied the three commands',
     )
     const copied = await page.evaluate(() => navigator.clipboard.readText())
     expect(copied.split('\n')).toHaveLength(3)
+  })
+
+  test('holds the command card at one size through a copy at 840', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 840, height: 900 })
+    await page.goto('/')
+    const card = page.locator('#install .cmd')
+    const copy = page.locator('#install .copy')
+    await card.scrollIntoViewIfNeeded()
+    const before = await card.boundingBox()
+    const width = (await copy.boundingBox())?.width
+
+    await copy.click()
+    await expect(copy.locator('.now')).toHaveText('Copied')
+
+    expect(before).not.toBeNull()
+    expect((await card.boundingBox())?.height).toBe(before!.height)
+    expect((await copy.boundingBox())?.width).toBe(width)
+  })
+
+  test('sets the heading beside the command card at 1440 and above it at 834', async ({
+    page,
+  }) => {
+    const place = async (width: number) => {
+      await page.setViewportSize({ width, height: 900 })
+      await page.goto('/')
+      const head = await page.locator('#install h2').boundingBox()
+      const card = await page.locator('#install .cmd').boundingBox()
+      expect(head).not.toBeNull()
+      expect(card).not.toBeNull()
+      return { head: head!, card: card! }
+    }
+
+    const wide = await place(1440)
+    expect(wide.card.x).toBeGreaterThan(wide.head.x + wide.head.width)
+    const narrow = await place(834)
+    expect(narrow.card.y).toBeGreaterThan(narrow.head.y + narrow.head.height)
+    await expect(page.locator('#install .term, #install .stg')).toHaveCount(0)
   })
 })
