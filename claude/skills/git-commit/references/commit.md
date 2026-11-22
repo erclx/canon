@@ -21,6 +21,11 @@ Does not govern:
 - Casing: lowercase for `<type>`, `<scope>`, and first word of `<subject>`
 - Subject: 72 characters maximum, no trailing period
 
+## Amend
+
+- An amend keeps the existing message unless the ask names a new one, since the subject already describes the commit the staged set folds into
+- A new message on an amend follows this format in full, and describes the amended commit as a whole rather than the staged change alone
+
 ## Types
 
 | Type       | Use                                         |
