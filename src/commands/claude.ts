@@ -207,16 +207,19 @@ export function sessionDefaultsWarnings(plan: SessionDefaultsPlan): string[] {
         ? 'the lease push allow'
         : plan.lacksUiPassAllow
           ? 'the UI pass allow'
-          : plan.lacksMergeAsk
-            ? 'the merge ask'
-            : undefined
+          : undefined
   if (lacking !== undefined) {
     warnings.push(`settings.json lacks ${lacking}. ${MIGRATE_DEFAULTS}`)
   }
-  // The migration never removes a deny entry, so the operator removes this one.
+  // The migration never removes an entry, so the operator removes these two.
+  if (plan.holdsMergeAsk) {
+    warnings.push(
+      'settings.json still asks before `canon pr merge`, which the seed no longer carries, so every merge prompts in every permission mode but dontAsk, which denies it. Remove that ask entry by hand to let a merge the operator named run',
+    )
+  }
   if (plan.holdsMergeDeny) {
     warnings.push(
-      "settings.json still denies `canon pr merge`, which wins over the ask, so the orchestrator cannot merge here even on the operator's word. Remove that deny entry by hand to have each merge ask",
+      "settings.json still denies `canon pr merge`, so the orchestrator cannot merge here even on the operator's word. Remove that deny entry by hand to let a merge the operator named run",
     )
   }
   const count = plan.unwired.length

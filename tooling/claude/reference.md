@@ -73,9 +73,9 @@ A project installed before the board became a folder still holds `.claude/TASKS.
 - Expect `autoMemoryEnabled` to be `false`. A person turns it back on for themselves in `settings.local.json`.
 - Run `canon migrate session-defaults` on a target seeded before those defaults, the merge entries, or a seeded hook, since sync never rewrites an existing settings file
 
-The seed asks on `Bash(canon pr merge:*)`, so the client puts each merge an agent runs to the operator, and denies `Bash(gh pr merge:*)` and the REST form `Bash(gh api *pulls/*/merge*)`. An existing target gets all three from `canon migrate session-defaults --write`, and `canon claude sync` warns while any is absent.
+The seed denies `Bash(gh pr merge:*)` and the REST form `Bash(gh api *pulls/*/merge*)`, so an agent merges only through `canon pr merge`. It carries no rule on that verb, since an ask prompts even in auto mode. A target gets both denies from `canon migrate session-defaults --write`, and sync warns while either is absent.
 
-None covers more than the form an agent writes by default. A target seeded before the ask still denies `canon pr merge`, and a deny wins over an ask. The migration never removes that entry, so `canon claude sync` names it as the reason an orchestrator cannot merge there until the operator deletes it.
+Neither covers more than the form an agent writes by default. A target migrated earlier can still ask before `canon pr merge`, and one seeded before the ask can still deny it. The migration never removes an entry, so `canon claude sync` names each with the hand removal until the operator deletes it.
 
 ### Seeded hooks
 
