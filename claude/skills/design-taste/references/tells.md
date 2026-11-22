@@ -71,6 +71,7 @@ The browser and the operating system draw some parts of every page, and a themed
 - **One family doing every job.** Pairing is not decoration. A second family, or a real weight range, separates roles that scale alone cannot.
 - **Unbounded measure.** Body text running the full width of a wide container. Cap the line length.
 - **Caps and letter-spacing as a texture.** Small caps with wide tracking on every label reads as a template. Use it where the label is genuinely a different kind of thing.
+- **A typed glyph for an icon.** `‹ ›`, `✕`, `☰` in the active font drift in weight and baseline from the icons beside them. Draw icons as SVG in one stroke and cap style, and label back controls.
 
 ## Motion
 
