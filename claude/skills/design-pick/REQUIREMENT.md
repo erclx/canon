@@ -32,6 +32,14 @@ The pick lands only once it holds at every width, and the run leaves a record of
 - Rounds sit on the board the design config names, each openable until the pick
 - The picked arms and the references page are archived at the main root before the run's pages go
 
+### The prototype
+
+An app pick is judged by clicking it, and a hand-built prototype grows by request while the static frames keep a flow it dropped.
+
+- A picked app surface with more than one screen is offered one prototype, built to a flow list the operator confirmed and kept past the close
+- The prototype passes a scripted click-through of every confirmed flow before any handover
+- Static frames carrying copy or controls the prototype no longer renders are listed before every handover, since the prototype owns behavior and copy
+
 ## Must not
 
 - Take the pick where two arms are defensible and the difference is taste

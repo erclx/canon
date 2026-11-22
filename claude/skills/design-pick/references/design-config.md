@@ -34,3 +34,11 @@ Each key falls back on its own, so a file naming `board` alone moves the board a
 The run drafts on `.canon/board/` in `picks`, the folder Frameboard keeps its design board in, and asks nothing.
 
 Set the file when the project's design sync reads a board other than `.canon/board/`. A round drafted there lands through `design-record` without a redraw, and Step 6 of the skill body keeps the winning page for the sync's mapping.
+
+## Closing on a named board
+
+A named board is the one the project's design sync reads, and once `design-record` lands the pick, the sync's mapping points at the winning arm's frames. Deleting that page at the close leaves a later redraw nothing to read.
+
+- Keep the picked round's page and the winning arm's frames
+- Delete each losing arm's frames with `frameboard frame delete <page>/arm-<id>-<px>`, after the close's capture has archived them
+- Delete every other page on the run's list as the close states, keeping the prototype page under its own name so it never stands in for the picked page the sync reads

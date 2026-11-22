@@ -127,6 +127,8 @@ Ask one finding or one round per question, never several picks batched into one 
 
 A board frame is one section fitted to its content, so it cannot show how an element behaves across the page. Decide a finding about behavior across sections on a served prototype of the whole page instead.
 
+A picked app or product surface takes the board prototype `prototype.md` beside this file states, being one page of device frames with a checked flow list. The bullets below cover a drive's served copy alone.
+
 - Behavior across sections covers scroll, a sticky or pinned element, a fixed header, and a theme switch
 - Serve the prototype from the drive's copy, apply each decision to it as it lands, and hand the operator its address beside the board's
 - Copy its source into `evidence/mocks/<section>/` like any mock, since the copy is gone once the drive closes
