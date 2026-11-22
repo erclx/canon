@@ -1,6 +1,10 @@
 import { EXIT_FINDINGS } from '@/commands/tasks/validate'
 import { type Command } from 'commander'
-import { type AnswersOutcome, planAnswers } from '@/tasks/answers'
+import {
+  type AnswersOutcome,
+  type OpenQuestion,
+  planAnswers,
+} from '@/tasks/answers'
 import {
   DEFAULT_LAUNCH_WAIT_SECONDS,
   type LaunchOutcome,
@@ -155,6 +159,7 @@ function reportAnswers(
 
   if (outcome.launchable) {
     logInfo('waits on nobody, so the dispatch may launch it.')
+    logDeferred(outcome.deferred)
     outro()
     return 0
   }
@@ -171,6 +176,13 @@ function reportAnswers(
   outro()
 
   return EXIT_FINDINGS
+}
+
+/** An approved plan's deferred calls are values the build asks for, not a hold. */
+function logDeferred(deferred: readonly OpenQuestion[]): void {
+  for (const question of deferred) {
+    logInfo(`deferred to build: ${question.label} ${question.why}`)
+  }
 }
 
 const BAD_WAIT = '--wait takes a whole number of seconds above zero.'
@@ -258,6 +270,7 @@ function reportLaunchable(
     logWarn('carries no Plan: line yet, so no plan has landed.')
   } else if (outcome.launchable) {
     logInfo(`${outcome.plan} waits on nobody, so the dispatch may launch it.`)
+    logDeferred(outcome.deferred)
   } else {
     for (const question of outcome.open) {
       logWarn(`${question.label} ${question.why}`)
@@ -481,7 +494,7 @@ export function registerPlans(tasks: Command): void {
         '',
         'Exit codes:',
         '  0  the plan is launchable',
-        '  1  refused as no-plan, archived, or bad-input',
+        '  1  refused as no-plan, archived, bad-input, unapproved, or bad-config',
         '  2  the plan waits on the operator, and open names every slot',
         '',
         'A blank Answer accepts the Suggested line above it, so only',
@@ -490,6 +503,15 @@ export function registerPlans(tasks: Command): void {
         'over an empty slot are a stop. It reports and never writes.',
         'Branch on launchable rather than on the exit code, which a shell',
         'function wrapping canon can flatten to zero.',
+        '',
+        'An `Approved: operator, <YYYY-MM-DD>, in <session>` line under the',
+        'H1 paragraph records an approval given in the planner session.',
+        '`approved` carries its text, or null without one. Under it, an',
+        'operator call with a blank slot closes as deferred rather than open:',
+        '`deferred` names each value the build still has to ask for, and a',
+        'typed answer still wins. `unapproved` refuses a plan with no such',
+        'line only where canon/config/tasks.toml sets require_approval =',
+        'true, and `bad-config` refuses that key in any shape but a boolean.',
         '',
         'A relative path resolves against the project root first and against',
         '.canon/tasks/ second, so the ../plans/ link a board row writes works.',
@@ -529,8 +551,9 @@ export function registerPlans(tasks: Command): void {
         'plan still being written never reads as landed. It answers planning',
         'alone: the branch and claim checks stay in the dispatch runbook.',
         '',
-        'The record carries task, plan, launchable, and open, the last three',
-        'named as plan-answers names them. Read `reason`:',
+        'The record carries task, plan, launchable, open, approved, and',
+        'deferred, all but task named as plan-answers names them, with',
+        'approved absent while plan is. Read `reason`:',
         '  unlinked    the task carries no Plan: line yet',
         '  open        the plan still holds a question for the operator',
         '  launchable  the plan waits on nobody',
@@ -550,6 +573,10 @@ export function registerPlans(tasks: Command): void {
         '  no-plan        the Plan: line names no file',
         '  archived       the Plan: line points into the plans archive',
         '  bad-input      the Plan: line carries an empty target',
+        '  unapproved     the board requires approval and the plan has no',
+        '                 Approved: line, which ends a wait at once',
+        '  bad-config     canon/config/tasks.toml sets require_approval to',
+        '                 something other than true or false',
         '  bad-wait       --wait takes a whole number of seconds above zero',
         '',
         'Exit codes:',
