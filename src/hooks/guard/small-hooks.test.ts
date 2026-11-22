@@ -303,6 +303,44 @@ describe('session-name.sh firing conditions', () => {
       expect(callCount(key('notoken'))).toBe(0)
     })
 
+    it.concurrent(`should pass an id sitting inside a scratch path on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const result = await runWith(
+        stopPayload('Wrote ~/.claude/jobs/631880bb/tmp/out.md for review.'),
+        key('path'),
+      )
+
+      expect(result.code).toBe(0)
+      expect(result.stderr).toBe('')
+    })
+
+    it.concurrent(`should pass a path starting on the id on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const result = await runWith(
+        stopPayload('631880bb/notes.md'),
+        key('pathstart'),
+      )
+
+      expect(result.code).toBe(0)
+      expect(result.stderr).toBe('')
+    })
+
+    it.concurrent(`should still flag a bare id beside a path on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const result = await runWith(
+        stopPayload(
+          'Wrote ~/.claude/jobs/631880bb/tmp/out.md. Launched 631880bb.',
+        ),
+        key('pathbare'),
+      )
+
+      expect(result.code).toBe(2)
+      expect(result.stderr).toContain('- 631880bb is Review of PR 42')
+    })
+
     it.concurrent(`should pass the continuation on ${tree.label}`, async ({
       expect,
     }) => {
