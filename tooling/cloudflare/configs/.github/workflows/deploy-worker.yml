@@ -116,6 +116,8 @@ jobs:
 
       # The version serving before this run is the rollback target, read now
       # because once the deploy lands the newest version is the one just shipped.
+      # A Worker never deployed answers API code 10007, since its script does
+      # not exist yet, and one with an empty history answers `has no deployments`.
       - name: Record the serving version
         id: serving
         if: steps.gate.outputs.skip == 'false'
@@ -126,7 +128,7 @@ jobs:
           if status=$(bunx wrangler deployments status --json 2> "$RUNNER_TEMP/wrangler-error.log"); then
             version=$(jq -r '.versions | max_by(.percentage) | .version_id' <<< "$status")
             echo "Serving version $version, the rollback target."
-          elif grep -q "has no deployments" "$RUNNER_TEMP/wrangler-error.log"; then
+          elif printf '%s\n' "$status" | cat - "$RUNNER_TEMP/wrangler-error.log" | grep -qE 'has no deployments|code: 10007'; then
             version=""
             echo "::notice::No version serves yet, so a failed smoke check has nothing to roll back to."
           else

@@ -86,6 +86,7 @@ A rollback creates a new deployment of the recorded version and touches no datab
 - Keep every migration readable by the version before it, such as adding a column rather than renaming one, so the rolled-back code still runs.
 - Migrate before deploying, so a failed migration stops the run with the old code still serving.
 - A first deploy records no version, so a failed smoke check on it fails the run with the new version still serving.
+- The record step reads API code 10007 as a Worker never deployed and `has no deployments` as one with an empty history, and fails on any other error.
 
 ### Rollback drill
 
