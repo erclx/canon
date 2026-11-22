@@ -15,6 +15,10 @@ export const GIT_CASES: readonly SkillCase[] = [
     expect: 'git-commit',
   },
   {
+    prompt: 'Fold what I just staged into the last commit and push it.',
+    expect: 'git-commit',
+  },
+  {
     prompt: "Push a quick follow-up fix onto the PR that's already open.",
     expect: 'git-followup',
   },
