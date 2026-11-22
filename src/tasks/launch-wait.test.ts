@@ -13,10 +13,11 @@ let ROOT: string
 
 const OPEN_CALL = 'needs your call, the two shapes cost the same.'
 
-function planBody(answer: string): string {
+function planBody(answer: string, approved?: string): string {
   return [
     '# Feature: A plan under test',
     '',
+    ...(approved === undefined ? [] : [approved, '']),
     '## Summary',
     '',
     '- It ships something.',
@@ -34,10 +35,14 @@ function planBody(answer: string): string {
   ].join('\n')
 }
 
-async function writePlan(slug: string, answer = 'Take the second.') {
+async function writePlan(
+  slug: string,
+  answer = 'Take the second.',
+  approved?: string,
+) {
   await writeFile(
     join(ROOT, '.canon', 'plans', `feature-${slug}.md`),
-    planBody(answer),
+    planBody(answer, approved),
     'utf8',
   )
 }
@@ -95,6 +100,7 @@ describe('readLaunchable', () => {
       reason: 'unlinked',
       launchable: false,
       open: [],
+      deferred: [],
     })
   })
 
@@ -126,6 +132,22 @@ describe('readLaunchable', () => {
       reason: 'launchable',
       launchable: true,
       open: [],
+      approved: null,
+      deferred: [],
+    })
+  })
+
+  it('should carry the calls an approval deferred to the build', async () => {
+    await writePlan('row', '', 'Approved: operator, 2026-11-22, in planner')
+    await writeTask('v1.1-row', 'Plan: [feature-row](../plans/feature-row.md)')
+
+    const outcome = await readLaunchable(ROOT, 'v1.1-row')
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      reason: 'launchable',
+      approved: 'operator, 2026-11-22, in planner',
+      deferred: [{ label: '1. Which shape?' }],
     })
   })
 
@@ -252,6 +274,31 @@ describe('waitForLaunchable', () => {
     expect(outcome).toMatchObject({
       ok: false,
       reason: 'no-plan',
+      waitedSeconds: 0,
+    })
+    expect(sleeps()).toBe(0)
+  })
+
+  it('should end on unapproved at once on a board requiring approval', async () => {
+    mkdirSync(join(ROOT, 'canon', 'config'), { recursive: true })
+    await writeFile(
+      join(ROOT, 'canon', 'config', 'tasks.toml'),
+      'require_approval = true\n',
+      'utf8',
+    )
+    await writePlan('row')
+    await writeTask('v1.1-row', 'Plan: [feature-row](../plans/feature-row.md)')
+    const { clock, sleeps } = fakeClock()
+
+    const outcome = await waitForLaunchable(ROOT, 'v1.1-row', {
+      waitSeconds: 1800,
+      clock,
+      pollMs: 30_000,
+    })
+
+    expect(outcome).toMatchObject({
+      ok: false,
+      reason: 'unapproved',
       waitedSeconds: 0,
     })
     expect(sleeps()).toBe(0)
