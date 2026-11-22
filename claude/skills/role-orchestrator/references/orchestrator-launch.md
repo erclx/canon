@@ -147,6 +147,8 @@ What a planning dispatch owes instead is the reverse reading, since a row planne
 
 Read `${CLAUDE_SKILL_DIR}/references/orchestrator-planner-reuse.md` before handing a planner more than one row or one row too big for one worker. Several rows in one launch take its batch brief, which asks for one plan file per task, and a row named back to a live planner takes its reuse rules.
 
+Read its `## Reviving a stopped planner` section first when the roster no longer lists the planner.
+
 ## Dispatch to plan and build a small row
 
 Read `${CLAUDE_SKILL_DIR}/references/orchestrator-plan-build-launch.md` before launching a row that reads small, for the full brief, the bound its plan must meet, and which dispatch checks bind. Its prompt opens on `/canon:auto-ship --plan-first <task>` at position zero.
