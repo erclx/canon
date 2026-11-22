@@ -42,6 +42,7 @@ argument that answers its prompt ahead of time:
 | `indexes`           | Confirm its folder list                    | `--all` for every candidate, `--folders <a>,<b>` for a set | Reports its candidates and stops rather than choosing |
 | `install` and `gov` | Confirm the proposed extras                | `--extras <a>,<b>` for a set, `--extras none` for none     | Takes every proposal and lists each in the report     |
 | `install`           | Ask whether the repository is public       | `--visibility public` or `--visibility private`            | Takes private and says so in the report               |
+| `install`           | Ask which services the project will carry  | `--services <folder>:<kind>,...`, or `--services none`     | Plans none and says so in the report                  |
 | `gov`               | Stop on a detected technology with no rule | `--skip-gaps`, which proceeds and lists the gap            | Stops on the gap                                      |
 
 Claude Code's tool permission dialog is the confirmation gate for everything
@@ -127,6 +128,13 @@ canon tooling sync python ./backend --skip base --write
 - Each subtree keeps its own framework configs, and its stack reference reads through `canon tooling reference <stack>`
 - A subtree sync withholds `.github/`, since GitHub reads workflows only at the root, and names each withheld file with the `working-directory` a root CI job needs
 - A subtree with no `package.json` gets a minimal one from the sync, so its scripts and dependencies land in the same pass
+
+### Planned services
+
+Sync each planned service the preview resolved to a stack into its folder with the subtree command from its row, per the monorepo route above, so it lands before the first commit rather than being amended into it. Create the folder first when it does not exist.
+
+- Skip a planned service the preview marked `gap`, which the report lists
+- Skip this step when the preview planned none
 
 ### Public layer
 

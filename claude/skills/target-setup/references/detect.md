@@ -15,6 +15,7 @@ What the `install` and `gov` phases both do before they write anything. Stated o
 - [Gap handling](#gap-handling)
 - [Preview](#preview)
 - [Visibility](#visibility)
+- [Planned services](#planned-services)
 
 ## Read the catalogs
 
@@ -122,6 +123,7 @@ Before executing, output:
 - **Extras:** each proposal with the evidence the verb returned, plus each subfolder language rule, listed in full as the list the operator confirms
 - **Skip:** any `--skip` entries with reason
 - **Visibility:** public or private, and whether an argument, the operator, or the private default answered it. Omit this row on the `gov` phase.
+- **Planned services:** one row per planned service, with its folder, its stack or a `gap` mark, and its sync command, or `none` with what answered it. Omit this row on the `gov` phase.
 - **Target:** resolved target path
 - **Commands:** the full chain that will run
 
@@ -137,6 +139,16 @@ On the repository root's row, name what `base` lands. Configs, seeds, and gitign
 A resolved name and a fallback read alike once written, so mark the fallback in the preview rather than the report. The preview is the last point before the first write.
 
 The extras list stays whole for a similar reason. `canon init --stack` takes one stack, so a second matched stack reaches the install only through this list, and a shortened list reads as that stack dropped.
+
+### One structured ask
+
+Every question the preview puts to the operator goes out in one structured call, each as its own question beside the others, so the operator answers the preview once.
+
+- The extras, below
+- The visibility, under [Visibility](#visibility)
+- The planned services, under [Planned services](#planned-services)
+
+A further preview question takes its own bullet here and its own question in the same call, never a second prompt.
 
 ### Confirm the extras
 
@@ -186,3 +198,31 @@ A `--visibility public` or `--visibility private` argument answers ahead of time
 
 - With neither and no one to answer, take private and say so in the preview and the report
 - Private is the default because syncing public files into a private repository adds a license and a security policy nobody chose, while the reverse costs one later sync
+
+## Planned services
+
+Detection reads folders that exist, so a service the project will carry but has no files for yet is never seen. The `install` phase asks for those ahead of the first commit, since a service added after it lands configs and CI changes the root commit never ran. The `gov` phase installs rules alone and asks nothing.
+
+### Ask
+
+Ask it as its own question in the [one structured ask](#one-structured-ask), with two options.
+
+- None planned, the recommended first option
+- Name them, which the operator types as a comma-separated list of `<folder>:<kind>`, such as `api:python` or `worker:cloudflare`
+
+Offer a subfolder in another language, a Cloudflare Worker, and a database as the examples in the question text, so the operator reads what counts as a service.
+
+### Resolve each service
+
+Match each kind against the stacks `canon tooling list --json` returned, the way a detected language root resolves, and give the service a preview row.
+
+- A kind matching a stack takes `canon tooling sync <stack> ./<folder> --skip base --write`, the subtree command the monorepo route runs
+- A kind matching no stack, such as a database, takes no command. Mark its row `gap` and carry it into the report's detection gaps, the way [a language with no stack](#gap-handling) is surfaced rather than guessed.
+- A folder that already holds a marker is a detected root, so drop the planned row and say detection already covers it
+
+### Answering ahead
+
+A `--services <folder>:<kind>,<folder>:<kind>` argument answers ahead of time and skips the question. `--services none` declares none.
+
+- With neither and no one to answer, plan no service and say so in the preview and the report
+- Planning none is the default because a guessed service lands a folder nobody asked for, while a missed one costs the amend route the report names
