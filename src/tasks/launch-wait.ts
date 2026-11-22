@@ -50,8 +50,8 @@ export type LaunchOutcome = LaunchReading | LaunchRefused
 
 /**
  * A reading ends `launchable` or `timeout`, carrying the last one. A refusal ends
- * the wait at once, since an archived plan, an unknown task, or a linked plan its
- * board refuses as `unapproved` is a defect no later poll repairs.
+ * the wait at once. A planner writes the approval line before linking, so a linked
+ * plan its board refuses as `unapproved` has nobody writing the line to wait on.
  */
 export type LaunchWait =
   | (Omit<LaunchReading, 'reason'> & {
