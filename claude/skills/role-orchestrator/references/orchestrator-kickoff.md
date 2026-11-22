@@ -3,7 +3,7 @@ title: Orchestrator kickoff
 description: The order an orchestrator follows on a board holding no rows, the four standing preferences it asks the operator once, and where the answers land
 ---
 
-Run this when `priority.md` holds no rows, being a new project's first orchestrator turn. A board with rows never reads it. The order is a default the operator can reorder, since it came from one project's two-day kickoff.
+Run this on an empty board, one with no `priority.md` rows, task files, plans, or open pull requests, being a new project's first orchestrator turn. Any other board never reads it. The order is a default the operator can reorder, since it came from one project's two-day kickoff.
 
 # Orchestrator kickoff
 

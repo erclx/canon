@@ -22,7 +22,7 @@ Read the board in parallel, resolving the paths at the main worktree root the wa
 - `.canon/plans/*.md`: features already planned and ready to hand off
 - open PRs via `gh pr list --json number,title,headRefName,isDraft`
 
-Every runbook named here resolves under `${CLAUDE_SKILL_DIR}/references/`. An empty board reads `orchestrator-kickoff.md` only. Otherwise read the table, `orchestrator-filing.md` in full, and `orchestrator-output.md`, then report.
+Every runbook named here resolves under `${CLAUDE_SKILL_DIR}/references/`. On an empty board, which `orchestrator-kickoff.md` defines, read only it. Else read the table, `orchestrator-filing.md` in full, and `orchestrator-output.md`.
 
 ### Acts and their runbooks
 

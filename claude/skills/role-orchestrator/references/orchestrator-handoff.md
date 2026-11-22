@@ -56,7 +56,7 @@ Then close the act out.
 
 Write the pre-compaction handoff as orchestrator. Invoke `canon:session-map` for the generic half, being the filename, the three core sections, the write procedure, the drift step and the ref it reads, and the citation rule. Everything in this section is the extension this role adds.
 
-Settle all three steps below before the door writes, so one write carries the core and the extension together. The door's success line ends the generic half rather than this runbook, so a session stopping there ships a map missing everything this section adds.
+Settle all four steps below before the door writes, so one write carries the core and the extension together. The door's success line ends the generic half rather than this runbook, so a session stopping there ships a map missing everything this section adds.
 
 1. Add `## Decisions taken under delegated authority` directly after `## State`, holding only the rules and holds this session set that die with the wave.
    - End each with `(until <event>)`, naming what retires it, so the next session re-tests it rather than obeying it
@@ -66,7 +66,10 @@ Settle all three steps below before the door writes, so one write carries the co
    - It sits there because a decision is read against the state it was taken in
 2. Add `## Talk sessions held open` directly after that, one line per open talk session giving its name, its `sessionId`, and its row, or `None.`.
    - The next session reads it to know which sessions it must not retire on a delivery
-3. Close the file with the block below under a `## Resume` heading, resolving each runbook path to an absolute one as you write it.
+3. Add `## Operator preferences` directly after that, carried over unchanged from the prior map or the kickoff, one line per answer with no reasoning.
+   - Core sections cannot hold them, and the next session would otherwise ask the operator again
+   - Omit the section when the operator never answered the kickoff
+4. Close the file with the block below under a `## Resume` heading, resolving each runbook path to an absolute one as you write it.
    - The heading is what keeps the block out of the map's word count
    - Paste `${CLAUDE_SKILL_DIR}/references/orchestrator-resume.md` resolved in place of `<RESUME_RUNBOOK>`
    - Paste `${CLAUDE_SKILL_DIR}/references/orchestrator-poll.md` resolved in place of `<POLL_RUNBOOK>`
