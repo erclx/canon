@@ -23,6 +23,7 @@ import {
   logError,
   logInfo,
   logStep,
+  logWarn,
   outro,
   pipeOutput,
 } from '@/cli/ui'
@@ -595,6 +596,11 @@ function reportPlanLink(
   logInfo(
     `board row ${outcome.board.moved ? '' : 'not moved, '}${outcome.board.note}`,
   )
+  if (outcome.board.next) {
+    logWarn(
+      `${outcome.stem} has no row on the board, so place it with: ${outcome.board.next}`,
+    )
+  }
   outro()
 
   return 0
@@ -862,7 +868,9 @@ export function registerRecord(tasks: Command): void {
         '',
         'A row under Needs a plan moves to the bottom of Up next through the',
         'board verbs, and `board` in the record says whether it moved and why',
-        'not. A row elsewhere, or a task with no row, stays where it is.',
+        'not. A row elsewhere stays where it is. A task with no row stays',
+        'unplaced and ok stays true, but a warning on stderr and board.next',
+        'in the record name the `canon tasks place` command that places it.',
         '',
         'Examples:',
         '  canon tasks plan-link v28.1-trigger-escalation dispatch-answer-gate',

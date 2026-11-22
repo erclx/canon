@@ -791,6 +791,7 @@ describe('recordPlan', () => {
         ok: true,
         board: { moved: false, from: 'In flight' },
       })
+      expect(outcome).not.toHaveProperty('board.next')
       await expect(
         readFile(join(tasksDir(ROOT), 'priority.md'), 'utf8'),
       ).resolves.toBe(before)
@@ -808,7 +809,12 @@ describe('recordPlan', () => {
 
       expect(outcome).toMatchObject({
         ok: true,
-        board: { moved: false, from: undefined, note: 'no row on the board' },
+        board: {
+          moved: false,
+          from: undefined,
+          note: 'no row on the board',
+          next: `canon tasks place ${stem} --group up-next`,
+        },
       })
     })
 
