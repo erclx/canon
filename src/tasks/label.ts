@@ -399,11 +399,8 @@ async function reserveLabel(
 }
 
 /**
- * Reserves the next label through an exclusive `mkdir` under
- * `.canon/ordinal-locks/`, stamping the claiming session and time inside it.
- * It first releases each dead lock above the highest stem, one whose session
- * the roster shows gone or, naming none, one past an hour old. The scan then
- * counts every reservation left beside the stems.
+ * Reserves the next label through an exclusive `mkdir` under `.canon/ordinal-locks/`,
+ * after releasing the dead locks above the highest stem. Every lock left counts in the scan.
  */
 export async function claimLabel(
   root: string,
