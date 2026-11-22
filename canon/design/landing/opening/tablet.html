@@ -280,6 +280,83 @@
           grid-template-columns: 1fr;
           margin-top: 40px;
         }
+      } /* dark theme: derived from the light rules above */
+      html[data-theme='dark'] body {
+        background-color: #1e1e1c;
+        color: #f2f2f0;
+        background-image:
+          linear-gradient(#242421 1px, transparent 1px),
+          linear-gradient(90deg, #242421 1px, transparent 1px);
+      }
+      html[data-theme='dark'] .lab {
+        color: #a9a7a0;
+        border-bottom-color: #3d3d39;
+        background-color: #1e1e1c;
+      }
+      html[data-theme='dark'] .kick {
+        color: #ff6b42;
+      }
+      html[data-theme='dark'] .kick:before {
+        background-color: #ff6b42;
+      }
+      html[data-theme='dark'] .lede {
+        color: #a9a7a0;
+      }
+      html[data-theme='dark'] .ink {
+        background-color: #292927;
+        border-color: #8d8c86;
+        box-shadow: 5px 5px 0 #5c5b56;
+      }
+      html[data-theme='dark'] .note {
+        color: #a9a7a0;
+      }
+      html[data-theme='dark'] .acc {
+        color: #ff6b42;
+      }
+      html[data-theme='dark'] .wait {
+        color: #e5b567;
+      }
+      html[data-theme='dark'] .ic {
+        border-color: #8d8c86;
+        background-color: #1e1e1c;
+      }
+      html[data-theme='dark'] .ic.m {
+        background-color: #f2f2f0;
+        color: #1e1e1c;
+      }
+      html[data-theme='dark'] .ob .m2 {
+        color: #a9a7a0;
+      }
+      html[data-theme='dark'] .you {
+        color: #ff6b42;
+      }
+      html[data-theme='dark'] .relay .st:not(.done):after {
+        border-left-color: #8d8c86;
+      }
+      html[data-theme='dark'] .sess {
+        color: #a9a7a0;
+      }
+      html[data-theme='dark'] .hand {
+        border-top-color: #8d8c86;
+        color: #ff6b42;
+      }
+      html[data-theme='dark'] .st.done {
+        background-color: #f2f2f0;
+        color: #1e1e1c;
+      }
+      html[data-theme='dark'] .st.done .sess,
+      html[data-theme='dark'] .st.done .line {
+        color: #3d3d39;
+      }
+      html[data-theme='dark'] .st.done .hand {
+        color: #1e1e1c;
+        border-color: #1e1e1c;
+      }
+      html[data-theme='dark'] .strip {
+        color: #a9a7a0;
+      }
+      html[data-theme='dark'] .st.done .note {
+        color: #55544f !important;
       }
     </style>
   </head>

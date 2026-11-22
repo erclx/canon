@@ -91,6 +91,13 @@ function tokenProperties(tokens: DesignTokens): string[] {
     lines.push(`  --color-${slug(token.role)}: ${token.value};`)
   }
 
+  // The light block never remaps these, so a surface dark in both themes reads them.
+  const paired = lightCounterparts(tokens.color)
+  for (const token of tokens.color) {
+    if (!paired.has(token.role) || !hasHexValue(token.value)) continue
+    lines.push(`  --color-dark-${slug(token.role)}: ${token.value};`)
+  }
+
   for (const step of tokens.spacing) {
     lines.push(`  --space-${slug(step.step)}: ${step.value};`)
   }

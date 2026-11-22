@@ -120,7 +120,7 @@ export const TOKENS: DesignTokens = {
     'A drawn system: a warm neutral ground ruled in a 48px grid, ink text in Geist, and Geist Mono for a path, a command, or shell output. Cards take an ink outline and a hard offset shadow. The vermilion pip of the mark is the one accent, marking a status.',
 
   colorRules: [
-    "One accent, the mark's pip. Never promote a second color into a structural role.",
+    "One accent, the mark's pip, and no second color in a structural role. A theme-fixed surface reads the `--color-dark-*` or `--color-light-*` family.",
     'Every text role clears WCAG AA at 4.5:1 against each ground it is drawn on.',
     '`waiting` colors product-view glyphs, never text. `warning` and `error` exist only in the terminal, as ANSI codes.',
   ],

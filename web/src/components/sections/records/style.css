@@ -326,14 +326,14 @@
   background: var(--t-ground);
 }
 
-/* The dark tokens turn light under the light theme and no theme-fixed set exists, so a dark shot carries their dark values. */
+/* A dark shot stays dark under the light theme, so it reads the theme-fixed dark family. */
 #records .md .thumb.dk {
-  --t-ground: #3d3d39;
-  --t-bar: #31312e;
-  --t-line: #474742;
-  --t-key: #383835;
-  --t-text: #cfcdc8;
-  --t-ring: #ff6b42;
+  --t-ground: var(--color-dark-band);
+  --t-bar: var(--color-dark-window);
+  --t-line: var(--color-dark-border);
+  --t-key: var(--color-dark-chrome);
+  --t-text: var(--color-dark-text-body);
+  --t-ring: var(--color-dark-accent);
 }
 
 #records .md .tt .bar {

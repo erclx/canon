@@ -247,6 +247,92 @@
           flex-direction: column;
           gap: 4px;
         }
+      } /* dark theme: derived from the light rules above */
+      html[data-theme='dark'] body {
+        background-color: #1e1e1c;
+        color: #f2f2f0;
+        background-image:
+          linear-gradient(#242421 1px, transparent 1px),
+          linear-gradient(90deg, #242421 1px, transparent 1px);
+      }
+      html[data-theme='dark'] .lab {
+        color: #a9a7a0;
+        border-bottom-color: #3d3d39;
+        background-color: #1e1e1c;
+      }
+      html[data-theme='dark'] .kick {
+        color: #ff6b42;
+      }
+      html[data-theme='dark'] .kick:before {
+        background-color: #ff6b42;
+      }
+      html[data-theme='dark'] .lede {
+        color: #a9a7a0;
+      }
+      html[data-theme='dark'] .ink {
+        background-color: #292927;
+        border-color: #8d8c86;
+        box-shadow: 5px 5px 0 #5c5b56;
+      }
+      html[data-theme='dark'] .note {
+        color: #a9a7a0;
+      }
+      html[data-theme='dark'] .acc {
+        color: #ff6b42;
+      }
+      html[data-theme='dark'] .wait {
+        color: #e5b567;
+      }
+      html[data-theme='dark'] .ic {
+        border-color: #8d8c86;
+        background-color: #1e1e1c;
+      }
+      html[data-theme='dark'] .ic.m {
+        background-color: #f2f2f0;
+        color: #1e1e1c;
+      }
+      html[data-theme='dark'] .stamp {
+        border-color: #8d8c86;
+        background-color: #292927;
+        box-shadow: 5px 5px 0 #5c5b56;
+      }
+      html[data-theme='dark'] .sm {
+        color: #a9a7a0;
+      }
+      html[data-theme='dark'] .big {
+        color: #f2f2f0;
+      }
+      html[data-theme='dark'] .act {
+        color: #cfcdc8;
+      }
+      html[data-theme='dark'] .res {
+        color: #a9a7a0;
+      }
+      html[data-theme='dark'] .nm {
+        border-top-color: #3d3d39;
+        color: #cfcdc8;
+      }
+      html[data-theme='dark'] .hot {
+        background-color: #ff6b42;
+        border-color: #8d8c86;
+        color: #fff8f2;
+      }
+      html[data-theme='dark'] .hot .big {
+        color: #fff8f2;
+      }
+      html[data-theme='dark'] .hot .note,
+      html[data-theme='dark'] .hot .sm,
+      html[data-theme='dark'] .hot .act,
+      html[data-theme='dark'] .hot .res,
+      html[data-theme='dark'] .hot .nm {
+        color: #ffe3d8;
+      }
+      html[data-theme='dark'] .hot .nm {
+        border-color: rgba(255, 255, 255, 0.4);
+      }
+      html[data-theme='dark'] .hot {
+        background-color: #c2380e;
+        border-color: #f2f2f0;
       }
     </style>
   </head>
