@@ -103,3 +103,45 @@ export function textFamilies(declarations: readonly string[]): string[] {
   const families = declarations.map(primaryFontFamily).filter(Boolean)
   return [...new Set(families)]
 }
+
+/** The computed font properties of one rendered text element. */
+export interface TextStyle {
+  readonly fontFamily: string
+  readonly fontWeight: string
+  readonly fontStyle: string
+}
+
+export interface TextFace {
+  readonly family: string
+  readonly weight: string
+  readonly style: 'normal' | 'italic' | 'oblique'
+}
+
+/**
+ * Reduces each rendered text element's computed style to the distinct faces a
+ * capture has to prove resolved, in document order. A family is probed at the
+ * weight and style its text draws in, since a declared face no text uses never
+ * loads. An oblique angle is dropped because a canvas font string that fails to
+ * parse keeps the previous font, which the probe would read as a fallback.
+ */
+export function textFaces(styles: readonly TextStyle[]): TextFace[] {
+  const faces = new Map<string, TextFace>()
+  for (const { fontFamily, fontWeight, fontStyle } of styles) {
+    const family = primaryFontFamily(fontFamily)
+    if (family === '') continue
+    const face: TextFace = {
+      family,
+      weight: fontWeight,
+      style: faceStyle(fontStyle),
+    }
+    const key = `${face.style} ${face.weight} ${face.family}`
+    if (!faces.has(key)) faces.set(key, face)
+  }
+  return [...faces.values()]
+}
+
+function faceStyle(computed: string): TextFace['style'] {
+  if (computed.startsWith('italic')) return 'italic'
+  if (computed.startsWith('oblique')) return 'oblique'
+  return 'normal'
+}
