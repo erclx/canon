@@ -59,7 +59,9 @@ Write the note only when this session holds context the new project lacks, such 
 
 1. Read `${CLAUDE_SKILL_DIR}/references/kickoff.md` for the six parts, what stays out, and the template.
 2. Write the note to `.canon/tmp/kickoff/next-session.md` at the target root, a scratch slug that never takes the reserved `handoff`.
-3. Run `git check-ignore -q .canon/tmp/kickoff/next-session.md` in the target. When it exits non-zero, delete the note and print its content in the report instead, since the note may cite a private path.
-4. Name the note's path in the report, then print the first opening prompt as the last output, in a fenced `plaintext` block.
+3. Run `git check-ignore -q .canon/tmp/kickoff/next-session.md` in the target. Delete the note on any non-zero exit, a target with no repository included, since it may cite a private path.
+4. Close the report on whichever branch step 3 took, printing the first opening prompt as the last output in a fenced `plaintext` block.
+   - Kept: name the note's path, then print the prompt as the template writes it
+   - Deleted: print the note's content in place of the path, and open the prompt by telling the operator to paste that content into the session rather than read a file
 
 Seed no task on the new board and write nothing under `.canon/tasks/`. The first rows stay candidates in the note until the new project's orchestrator files them on the operator's word.
