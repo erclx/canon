@@ -2,27 +2,25 @@
 # CLAUDE.md with no markdown-heavy folder anywhere. Read by `canon sandbox
 # check`, which only asserts against what a run left behind and drives
 # nothing itself. The scan finds no candidate, so the skill skips straight
-# to the convention seed offer, which is a question rather than a write. A
-# single headless turn has nobody to answer it, so a correct run stops
-# there with `CLAUDE.md` untouched instead of reaching the closeout.
-# Driven twice on 2026-09-07: both ran 4 turns at $0.12 and left `CLAUDE.md`
-# unchanged, and each phrased the offer differently ("Want me to append the
-# canonical convention block to it?" against "I'd add this block... Should
-# I install it?"), so no reply substring survives both and none is pinned.
+# to the closeout and writes nothing. The phase no longer offers to append an
+# `## Indexes` section to `CLAUDE.md`, since the `indexes` governance rule
+# carries that convention, so a correct run leaves `CLAUDE.md` untouched.
+# The closeout's wording beyond its first line is the model's, so only that
+# line's presence is a manual judgment rather than a pinned substring.
 
 max_turns = 8
 
 absent = ["docs/index.md"]
 
 manual = [
-  "The reply identifies the missing `## Indexes` section and offers the correct convention block rather than a different one. Semantic: the offer's exact wording varies run to run, so a substring pin would be fragile and the correctness of the paraphrase is a judgment no pattern can carry",
+  "The reply reports the empty scan and ends on exactly one `Bootstrap complete.` closeout, with no `Convention seed:` line and no offer to add an `## Indexes` section to `CLAUDE.md`. Semantic: the absence of an offer is read from the whole reply, which no single substring pin can carry",
 ]
 
-# Proves nothing was written, not that the offer happened. This pin, and
-# `absent` above, hold identically whether the run stops correctly at the
-# convention seed offer or crashes before ever reaching it. Telling the two
-# apart is the `manual` entry's job, which `countMechanicalAssertions`
-# excludes from the arm's asserted count.
+# Proves nothing was written, not that the closeout happened. This pin, and
+# `absent` above, hold identically whether the run closes correctly or
+# crashes before the closeout. Telling the two apart is the `manual` entry's
+# job, which `countMechanicalAssertions` excludes from the arm's asserted
+# count.
 [[content]]
 path = "CLAUDE.md"
 pattern = '^# Project\n\nSample project for testing the indexes phase of the setup skill on an empty scan\.\n$'

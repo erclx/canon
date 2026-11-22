@@ -1,6 +1,6 @@
 ---
 title: Indexes bootstrap
-description: The scan, frontmatter drafting, scaffold, validate, and convention seed phases that add the index.md system to a project
+description: The scan, frontmatter drafting, scaffold, and validate phases that add the index.md system to a project
 ---
 
 # Indexes bootstrap
@@ -21,7 +21,6 @@ before scanning.
 - [Scaffold the folder index](#scaffold-the-folder-index)
 - [Inject](#inject)
 - [Validate](#validate)
-- [Offer the convention seed](#offer-the-convention-seed)
 - [Closeout](#closeout)
 - [Reference](#reference)
 
@@ -52,9 +51,9 @@ If the scan found no candidate, report the flat result and skip ahead:
 No folder has three or more markdown siblings without an index.md already. Nothing to bootstrap.
 ```
 
-Skip past the ask below and every step between it and the seed offer, straight
-to `## Offer the convention seed`. There is no candidate to ask about, so this
-stops rather than opening a prompt with nothing in it.
+Skip past the ask below and every step between it and the closeout, going
+straight to `## Closeout`. There is no candidate to ask about, so this stops
+rather than opening a prompt with nothing in it.
 
 Output one line per candidate:
 
@@ -138,46 +137,12 @@ run the way the dry run is read, since the exit carries nothing reliable back.
 - An operator's shell profile may wrap `canon` in a function that takes a second command's status
 - A regen that errored on a sibling missing `title` then arrives here as a clean pass
 
-## Offer the convention seed
-
-First check whether `CLAUDE.md` exists in the project root. If absent, do not
-scaffold one. Skip the seed install with this exact message:
-
-```plaintext
-No CLAUDE.md in the project. Skipping convention seed.
-To add the convention later, run `canon tooling sync` or `canon init`,
-then re-invoke this phase.
-```
-
-If `CLAUDE.md` exists, check it for an existing `## Indexes` section:
-
-```bash
-grep -l '^## Indexes' CLAUDE.md 2>/dev/null
-```
-
-If the section is present, skip the seed silently.
-
-If `CLAUDE.md` exists but has no `## Indexes` section, offer to install the
-canonical convention block. The text below is the source of truth and is
-mirrored in the toolkit's seed `CLAUDE.md`. Paste it verbatim. Do not rewrite,
-paraphrase, condense, or add punctuation.
-
-```markdown
-- When a folder has an `index.md`, check it before reading individual files in that folder.
-- For folders where an agent browses to pick a document, `index.md` is regenerated from each file's frontmatter. Do not hand-edit `index.md`. Code folders and scratch folders do not need one.
-- Every `index.md` carries its own frontmatter (`title`, `subtitle`) that the walker preserves. To keep a folder's `index.md` hand-edited, add `auto: false` to its frontmatter.
-```
-
-Append a new `## Indexes` section at the end of the file containing the three
-lines. Do not touch any other section.
-
 ## Closeout
 
-Always emit this block as the final message of the phase. Do not skip it
-regardless of how the seed step concluded (installed, already present, declined,
-or skipped because no `CLAUDE.md` exists). Output exactly one closeout, even if
-the seed step paused for user input. Resume the flow after the user responds and
-emit the closeout next.
+Always emit this block as the final message of the phase, including on a scan
+that found no candidate. Output exactly one closeout, even if an earlier step
+paused for user input. Resume the flow after the user responds and emit the
+closeout next.
 
 Format:
 
@@ -188,7 +153,6 @@ Folders bootstrapped:
 - <path> (<n> files)
 
 Drafts: <n> accepted, <n> edited, <n> rejected
-Convention seed: <installed | already present | declined | skipped (no CLAUDE.md)>
 
 Optional maintenance (opt in, the phase does not configure these):
 - lint-staged entry in .lintstagedrc.json:

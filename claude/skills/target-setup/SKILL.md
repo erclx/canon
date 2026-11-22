@@ -184,8 +184,7 @@ The bare chain on a fresh scaffold runs `verify` at the default depth, then
 ## Phase: indexes
 
 Read `${CLAUDE_SKILL_DIR}/references/indexes.md`. It holds the scan, the
-frontmatter drafting, the scaffold, the validate step, and the convention seed
-offer.
+frontmatter drafting, the scaffold, and the validate step.
 
 This is the one phase that pauses to confirm candidate folders with the
 operator, unless `--all` or `--folders` answered it ahead of time. A fresh scaffold usually has no markdown-heavy folder yet, so this phase often

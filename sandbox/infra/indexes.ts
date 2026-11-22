@@ -199,7 +199,7 @@ export default scenario({
         'Open Claude in this sandbox and invoke /canon:target-setup indexes',
       )
       ctx.log.info(
-        'The skill should report an empty scan and skip straight to the convention seed offer',
+        'The skill should report an empty scan and skip straight to the closeout, leaving CLAUDE.md untouched',
       )
     },
   },
