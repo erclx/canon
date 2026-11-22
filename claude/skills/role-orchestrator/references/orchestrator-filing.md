@@ -39,6 +39,6 @@ A ready list can name a bundle row, items whose fixes share a file. File an agre
 
 What the measurement decides is the test. One deciding whether a row can start stays in this seat, and one deciding how big the row is goes to the planner, since only a sizing count commits a plan to a scope this seat cannot see whole.
 
-- This seat keeps the blocker re-test in `${CLAUDE_SKILL_DIR}/references/orchestrator-parked.md`, the branch and conflict checks before a dispatch, and the hold refill step 6 tests
+- This seat keeps the blocker re-test in `${CLAUDE_SKILL_DIR}/references/orchestrator-parked.md`, the branch and conflict checks before a dispatch, and the hold refill step 7 tests
 - A row under `## Needs a plan` carries no `Touches` column, so filing it unmeasured owes no file set and leaves the conflict check untouched
 - A position claim in that cell names the row it outranks or the class it belongs to. Never justify a rank with a count of the defect's extent.

@@ -75,7 +75,7 @@ A cleared row moves out of `backlog.md` onto the bottom of `## Needs a plan` in 
 
 - `canon tasks validate`'s ordering check reads `last` as the ordinal the bottom placement claims
 - A cell stating only what changed matches neither the ordinal nor the rank reading, raising a finding against the pass's own row
-- The next refill sweep's promotion step still orders the row against the rest of that heading, per step 5 under `## Refilling the ready queue` in `role-orchestrator`
+- The next refill sweep's promotion step still orders the row against the rest of that heading, per step 6 under `## Refilling the ready queue` in `role-orchestrator`
 
 ## Two ways a re-test goes wrong
 
