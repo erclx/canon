@@ -14,7 +14,6 @@
       "Bash(canon pr tick:*)",
       "Bash(canon pr lift:*)"
     ],
-    "ask": ["Bash(canon pr merge:*)"],
     "deny": [
       "Agent",
       "Task",
