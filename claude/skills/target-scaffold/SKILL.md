@@ -48,5 +48,18 @@ The verb runs `git init -b main` when the target sits in no work tree, so a `tar
 
 Invoke `canon:target-setup` with the target as the working folder. Its detect phase now finds the starter's files and resolves the stack from them, so pass it nothing this skill resolved.
 
-- The hand-off is the last step. Install, governance, verify, and indexes all belong to `target-setup`.
+- The hand-off is the last install step. Install, governance, verify, and indexes all belong to `target-setup`.
 - Report the stack, the target, the files the verb moved, the `git` field, and that setup ran, in that order.
+
+## Kickoff note
+
+Run this after `target-setup` returns, whatever its report. It resolves nothing setup detects, and only leaves the project's first session what this session knew.
+
+Write the note only when this session holds context the new project lacks, such as a plan, a groundwork or design record, or a planning conversation behind the request. A bare request like "start a vite app here" carries none, so write nothing and add one line to the report saying no kickoff note was written, since there was no planning context.
+
+1. Read `${CLAUDE_SKILL_DIR}/references/kickoff.md` for the six parts, what stays out, and the template.
+2. Write the note to `.canon/tmp/kickoff/next-session.md` at the target root, a scratch slug that never takes the reserved `handoff`.
+3. Run `git check-ignore -q .canon/tmp/kickoff/next-session.md` in the target. When it exits non-zero, delete the note and print its content in the report instead, since the note may cite a private path.
+4. Name the note's path in the report, then print the first opening prompt as the last output, in a fenced `plaintext` block.
+
+Seed no task on the new board and write nothing under `.canon/tasks/`. The first rows stay candidates in the note until the new project's orchestrator files them on the operator's word.

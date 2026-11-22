@@ -15,7 +15,7 @@ export default scenario({
       ctx.log.info('Context: a git repository holding nothing but .git')
       ctx.log.info('Action:  "start a new astro project here"')
       ctx.log.info(
-        "Expect:  the envelope's `skills` lists canon:target-scaffold before any scaffolder runs, astro is taken from the request without a question, `canon tooling scaffold astro . --json` returns ok with package.json and astro.config.mjs among its files, and no scaffolder command runs outside the verb. Read `skills` rather than `result`, since a plain prompt that never loads the skill can still land an Astro starter by hand.",
+        "Expect:  the envelope's `skills` lists canon:target-scaffold before any scaffolder runs, astro is taken from the request without a question, `canon tooling scaffold astro . --json` returns ok with package.json and astro.config.mjs among its files, and no scaffolder command runs outside the verb. The bare request carries no planning context, so no .canon/tmp/kickoff/next-session.md lands and the report says no kickoff note was written. Read `skills` rather than `result`, since a plain prompt that never loads the skill can still land an Astro starter by hand.",
       )
     },
     occupied: (ctx) => {
