@@ -12,10 +12,14 @@ Applies to step 9 of `git-ship` once the watch wakes on anything but a `state` o
 When `canon pr checks <number> --json` returns no record at all, the target's CLI predates the verb. The polling loop would never exit on such a target, since an empty read never satisfies its test. Start this loop instead, with `run_in_background` and the same 65-minute timeout:
 
 ```bash
-SECONDS=0; until gh pr checks <number> >/dev/null 2>&1; [ $? -ne 8 ]; do if [ "$SECONDS" -ge 3600 ]; then echo "CI watch limit reached after 60 minutes"; break; fi; sleep 30; done; gh pr checks <number>
+SECONDS=0; gap=30000; until gh pr checks <number> >/dev/null 2>&1; [ $? -ne 8 ]; do if [ "$SECONDS" -ge 3600 ]; then echo "CI watch limit reached after 60 minutes"; break; fi; sleep "$(printf '%d.%03d' $((gap/1000)) $((gap%1000)))"; gap=$((gap*3/2)); [ "$gap" -gt 120000 ] && gap=120000; done; gh pr checks <number>
 ```
 
-It polls while `gh pr checks` exits 8, which gh documents as checks pending, and ends on any other exit or at the 60-minute limit. `gh pr checks --watch` never ends on its own either, so the fallback carries the main loop's limit for the reason the body's `### Why the loop carries its own limit` states.
+It polls while `gh pr checks` exits 8, which gh documents as checks pending, and ends on any other exit or at the 60-minute limit.
+
+- The gap starts at 30 seconds and grows by half each read up to 120, the schedule the main loop waits on
+- It reads no `rate-limited` reason, so a spent quota ends it as an errored read
+- `gh pr checks --watch` never ends on its own either, so the fallback carries the main loop's limit for the reason the body's `### Why the loop carries its own limit` states
 
 The fallback prints a check table rather than a record, and has no `conflicted` field to separate a conflict from lag. The first matching row routes.
 
@@ -30,16 +34,19 @@ Empty output stops rather than waits, since `no checks reported on the '<branch>
 
 ## Refused and unsettled reads
 
-None of these is a pass, and none emits `✅ Shipped`. A `reason` and no `state` means the read was refused, and the watch sorts refusals into two kinds.
+None of these is a pass, and none emits `✅ Shipped`. A `reason` and no `state` means the read was refused, and the watch sorts refusals into three kinds.
 
-| Kind      | Reasons                                                      | What the watch did                                               |
-| --------- | ------------------------------------------------------------ | ---------------------------------------------------------------- |
-| Permanent | `no-remote-branch`, `ambiguous-pull`, `no-branch`            | Exited on the first one, since no amount of waiting changes them |
-| Transient | Every other reason, such as `gh-failed` or `runs-unreadable` | Kept polling, since the next read can clear                      |
+| Kind      | Reasons                                                      | What the watch did                                                 |
+| --------- | ------------------------------------------------------------ | ------------------------------------------------------------------ |
+| Permanent | `no-remote-branch`, `ambiguous-pull`, `no-branch`            | Exited on the first one, since no amount of waiting changes them   |
+| Quota     | `rate-limited`                                               | Exited on the first one, since every further read spends the quota |
+| Transient | Every other reason, such as `gh-failed` or `runs-unreadable` | Kept polling, since the next read can clear                        |
 
 The set lives in the watch command rather than in the verb, so a refusal `canon pr checks` adds later defaults to transient and waits, which is the safe side.
 
 - A permanent refusal ends the sequence. Stop and report that `reason`, such as `no-remote-branch` for a branch deleted on the remote.
+- A `rate-limited` refusal ends the sequence the same way, naming the record's `bucket` and its `resetAt`. A secondary limit carries no `resetAt`, so say the reset is unnamed.
+- Start the watch again only after `resetAt` has passed. The read after the loop spent the same quota, so a `rate-limited` final record stops the sequence without a second read.
 - A transient refusal in the final record with no limit line came from the read after the loop, which never exits on one. Read `canon pr checks <number> --json` once more and route on that.
 - A second refusal on that read stops the sequence with its `reason`
 

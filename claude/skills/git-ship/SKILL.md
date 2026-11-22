@@ -73,10 +73,12 @@ The verb ships with the CLI and this body with the plugin, so an older binary me
 Run `canon pr checks <number> --json` once in the foreground. When no record comes back at all, the CLI predates the verb, so read `${CLAUDE_SKILL_DIR}/references/ci-watch.md` for the fallback watch. Otherwise start this loop through the Bash tool with `run_in_background` and a 65-minute timeout:
 
 ```bash
-SECONDS=0; until canon pr checks <number> --json | jq -e '.conflicted == true or (.state | IN("passing", "failing")) or (.reason | IN("no-remote-branch", "ambiguous-pull", "no-branch"))' >/dev/null; do if [ "$SECONDS" -ge 3600 ]; then echo "CI watch limit reached after 60 minutes"; break; fi; sleep 30; done; canon pr checks <number> --json
+SECONDS=0; gap=30000; until canon pr checks <number> --json | jq -e '.conflicted == true or (.state | IN("passing", "failing")) or (.reason | IN("no-remote-branch", "ambiguous-pull", "no-branch", "rate-limited"))' >/dev/null; do if [ "$SECONDS" -ge 3600 ]; then echo "CI watch limit reached after 60 minutes"; break; fi; sleep "$(printf '%d.%03d' $((gap/1000)) $((gap%1000)))"; gap=$((gap*3/2)); [ "$gap" -gt 120000 ] && gap=120000; done; canon pr checks <number> --json
 ```
 
-The loop exits on a terminal state, a conflict, or one of the three permanent refusals, and polls through anything else. One failed GitHub call such as `gh-failed` never ends the watch while CI runs.
+The loop exits on a terminal state, a conflict, a spent quota, or one of the three permanent refusals, and polls through anything else. One failed GitHub call such as `gh-failed` never ends the watch while CI runs.
+
+The gap between reads starts at 30 seconds and grows by half each read up to 120, the schedule `canon pr lift` and `canon pr review-state` wait on. A green run is noticed at most about two minutes late, and a wave of watchers on one token spends a fraction of the calls a fixed gap does.
 
 - A record carrying neither field, or an empty line from a crashed binary, waits for the next read too
 - A refusal that never clears polls until the 60-minute limit, then prints the limit line rather than stopping at once
@@ -100,6 +102,7 @@ Branch on the final record's fields rather than on the exit. The first matching 
 | `state: passing`                                        | Settle the evidence thread below, then continue to After completion on `settled`                      |
 | `state: failing`                                        | Read the cancelled-run section of `${CLAUDE_SKILL_DIR}/references/ci-watch.md`, which reruns or stops |
 | `conflicted: true`                                      | Stop and report the branch conflicts with its base, since no run will start. Rebase.                  |
+| `reason: rate-limited`                                  | Stop and report the spent `bucket` and its `resetAt`, since polling on spends calls the quota lacks   |
 | The limit line, a `state: pending`, or no final record  | Stop on the unsettled read `ci-watch.md` states, reporting CI unsettled                               |
 | A `reason` and no `state`, with no limit line before it | Read `${CLAUDE_SKILL_DIR}/references/ci-watch.md` for the refused reads                               |
 
