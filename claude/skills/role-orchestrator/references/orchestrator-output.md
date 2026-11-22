@@ -93,7 +93,7 @@ Read the slot off `canon pr evidence <number> --json` at the moment the line is 
 
 ### Running the line
 
-The operator runs the line, or names the pull request for this session to run it. The client puts each `canon pr merge` call to the operator, and that prompt is their approval, so run the line only for the one pull request they named and never for a second they did not, unless a standing authorization below covers it.
+The operator runs the line, or names the pull request for this session to run it. The operator's word naming the pull request is their approval, so run the line only for the one pull request they named and never for a second they did not, unless a standing authorization below covers it.
 
 ### Under a standing authorization
 
@@ -116,7 +116,7 @@ Run the line under it only when every gate below passes at the moment of the mer
 | `gh pr view <number> --json mergeStateStatus` reads `CLEAN`                                   | The state read, such as `UNKNOWN`, `BLOCKED`, or `UNSTABLE`, and that it waits |
 | The pull request comes first among those open in the scope, per `orchestrator-merge-order.md` | The pull request it waits behind                                               |
 
-A failing gate leaves the merge for the next read. The shipped `ask` rule on `canon pr merge` still prompts the operator on each call, since the authorization changes when this session runs the line and never the client's prompt.
+A failing gate leaves the merge for the next read. No shipped rule makes the client prompt on `canon pr merge`, so the gates above are the whole check before the line runs.
 
 ### Gate the line on CI at the tip
 

@@ -214,7 +214,7 @@ export function sessionDefaultsWarnings(plan: SessionDefaultsPlan): string[] {
   // The migration never removes an entry, so the operator removes these two.
   if (plan.holdsMergeAsk) {
     warnings.push(
-      'settings.json still asks before `canon pr merge`, which the seed no longer carries, so every merge waits on a prompt in every permission mode. Remove that ask entry by hand to let a merge the operator named run',
+      'settings.json still asks before `canon pr merge`, which the seed no longer carries, so every merge prompts in every permission mode but dontAsk, which denies it. Remove that ask entry by hand to let a merge the operator named run',
     )
   }
   if (plan.holdsMergeDeny) {
