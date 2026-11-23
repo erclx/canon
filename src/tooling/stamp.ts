@@ -8,6 +8,7 @@ import {
   stampedHashes,
   writeChainStamp,
 } from '@/sync/stamp'
+import { appRootPath, hashGolden, stampedAppRoot } from '@/tooling/app-root'
 import {
   configFiles,
   isWholeStack,
@@ -47,7 +48,12 @@ export async function recordToolingChain(
     { domain: 'tooling', toolkitRoot },
     merged,
     now,
-    matchedHashes(chain, target, stampedHashes(stamp, 'tooling')),
+    matchedHashes(
+      chain,
+      target,
+      stampedHashes(stamp, 'tooling'),
+      stampedAppRoot(stamp),
+    ),
   )
   return merged
 }
@@ -60,6 +66,7 @@ function matchedHashes(
   chain: readonly Manifest[],
   target: string,
   previous: DomainHashes,
+  appRoot: string,
 ): DomainHashes {
   const hashes: Record<string, string> = { ...previous }
   const seen = new Set<string>()
@@ -69,9 +76,9 @@ function matchedHashes(
       if (seen.has(rel)) continue
       seen.add(rel)
 
-      const dest = join(target, rel)
+      const dest = join(target, appRootPath(rel, appRoot))
       if (!existsSync(dest)) continue
-      const golden = hashFile(join(manifest.configsDir, rel))
+      const golden = hashGolden(join(manifest.configsDir, rel), appRoot)
       if (hashFile(dest) === golden) hashes[rel] = golden
     }
   }

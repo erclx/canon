@@ -37,6 +37,7 @@ import {
   resolveGolden,
   scriptAddress,
 } from '@/tooling/disposition'
+import { appRootPath, readAppRoot } from '@/tooling/app-root'
 import { readPackage, resolveScript } from '@/tooling/package'
 import { scan, type ScanResult } from '@/tooling/scan'
 import { recordToolingChain } from '@/tooling/stamp'
@@ -810,12 +811,13 @@ async function runDisposition(
   }
 
   const current = readDispositions(resolved)
-  const golden = resolveGolden(chain, rel)
+  const appRoot = readAppRoot(resolved)
+  const golden = resolveGolden(chain, rel, appRoot)
   const transition =
     action === 'decline'
       ? decline(current, golden, opts.reason)
       : action === 'customize'
-        ? customize(current, golden, isPresent(resolved, golden))
+        ? customize(current, golden, isPresent(resolved, golden, appRoot))
         : lift(current, rel)
 
   if (!transition.ok) {
@@ -851,10 +853,16 @@ async function runDisposition(
 }
 
 /** A script is present when the target's scripts define its key. */
-function isPresent(target: string, golden: GoldenPath | undefined): boolean {
+function isPresent(
+  target: string,
+  golden: GoldenPath | undefined,
+  appRoot: string,
+): boolean {
   if (golden === undefined) return false
   const key = parseScriptAddress(golden.rel)
-  if (key === undefined) return existsSync(join(target, golden.rel))
+  if (key === undefined) {
+    return existsSync(join(target, appRootPath(golden.rel, appRoot)))
+  }
   return readPackage(join(target, 'package.json'))?.scripts?.[key] !== undefined
 }
 

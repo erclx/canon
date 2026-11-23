@@ -6,6 +6,7 @@ import {
   readStamp,
   stampedDispositions,
 } from '@/sync/stamp'
+import { DEFAULT_APP_ROOT, hashGolden } from '@/tooling/app-root'
 import { configFiles, type Manifest, seedFiles } from '@/tooling/manifest'
 import { resolveScript } from '@/tooling/package'
 
@@ -68,11 +69,13 @@ export function normalizeGoldenPath(input: string): string | undefined {
 
 /**
  * Resolves a path the way `scan` and the injectors do: nearest stack first, and a config shadows a seed
- * at the same path. The hash is of the copy `injectConfigs` writes last, and a script's is its written value.
+ * at the same path. The hash is of the copy `injectConfigs` writes last, rendered for the target's app root,
+ * and a script's is its written value.
  */
 export function resolveGolden(
   chain: readonly Manifest[],
   rel: string,
+  appRoot: string = DEFAULT_APP_ROOT,
 ): GoldenPath | undefined {
   const key = parseScriptAddress(rel)
   if (key !== undefined) {
@@ -88,24 +91,25 @@ export function resolveGolden(
 
   for (const manifest of chain) {
     if (configFiles(manifest).includes(rel)) {
-      return golden(manifest, rel, 'config', manifest.configsDir)
+      return {
+        rel,
+        stack: manifest.name,
+        kind: 'config',
+        hash: hashGolden(join(manifest.configsDir, rel), appRoot),
+      }
     }
   }
   for (const manifest of chain) {
     if (seedFiles(manifest).includes(rel)) {
-      return golden(manifest, rel, 'seed', manifest.seedsDir)
+      return {
+        rel,
+        stack: manifest.name,
+        kind: 'seed',
+        hash: hashFile(join(manifest.seedsDir, rel)),
+      }
     }
   }
   return undefined
-}
-
-function golden(
-  manifest: Manifest,
-  rel: string,
-  kind: GoldenPath['kind'],
-  dir: string,
-): GoldenPath {
-  return { rel, stack: manifest.name, kind, hash: hashFile(join(dir, rel)) }
 }
 
 export function decline(
