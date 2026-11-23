@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.115.0](https://github.com/erclx/canon/compare/v5.114.0...v5.115.0) (2026-11-23)
+
+
+### Features
+
+* **labels:** color new labels and check measured results ([#3455](https://github.com/erclx/canon/issues/3455)) ([38ea000](https://github.com/erclx/canon/commit/38ea00012fd8a2e71c1b5810b459830fb4de5103))
+* **sessions:** reap finished sessions, scope an empty branch read ([#3449](https://github.com/erclx/canon/issues/3449)) ([b442653](https://github.com/erclx/canon/commit/b442653f5101844b47385da92db6132f701af1de))
+* **skills:** add code blocks and a reading mode to the lesson kit ([#3452](https://github.com/erclx/canon/issues/3452)) ([e5eaaaf](https://github.com/erclx/canon/commit/e5eaaaf27dd85860d3c21f3e493565d203897fdd))
+
+
+### Bug Fixes
+
+* **context:** report what two audit verbs read ([#3448](https://github.com/erclx/canon/issues/3448)) ([e4ff80d](https://github.com/erclx/canon/commit/e4ff80d21995fc674d4723c2b5c244d0b228bac8))
+* **tasks:** report and keep what the board verbs touch ([#3450](https://github.com/erclx/canon/issues/3450)) ([259c547](https://github.com/erclx/canon/commit/259c547f2555b998e8a06452c28dc99ac8966b3d))
+
 ## [5.114.0](https://github.com/erclx/canon/compare/v5.113.0...v5.114.0) (2026-11-23)
 
 
