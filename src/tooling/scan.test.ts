@@ -130,6 +130,47 @@ describe('scan', () => {
     expect(result.gitignore).toEqual([{ entry: 'dist/', state: 'present' }])
   })
 
+  it('should count a missing gitattributes line as a change to sync', () => {
+    const manifest = makeManifest('web', {
+      gitattributes: [
+        {
+          header: '# Design record',
+          entries: ['canon/design/** linguist-documentation'],
+        },
+      ],
+    })
+
+    const result = scan([manifest], target())
+
+    expect(result.gitattributes).toEqual([
+      { entry: 'canon/design/** linguist-documentation', state: 'missing' },
+    ])
+    expect(result.totalChanges).toBe(1)
+  })
+
+  it('should report a gitattributes line already in the file as present', () => {
+    const dir = target()
+    writeFileSync(
+      join(dir, '.gitattributes'),
+      '# Design record\ncanon/design/** linguist-documentation\n',
+    )
+    const manifest = makeManifest('web', {
+      gitattributes: [
+        {
+          header: '# Design record',
+          entries: ['canon/design/** linguist-documentation'],
+        },
+      ],
+    })
+
+    const result = scan([manifest], dir)
+
+    expect(result.gitattributes).toEqual([
+      { entry: 'canon/design/** linguist-documentation', state: 'present' },
+    ])
+    expect(result.totalChanges).toBe(0)
+  })
+
   it('should scan scripts and deps against an empty manifest when the target has no package.json', () => {
     const manifest = makeManifest('base', {
       scripts: { check: './verify.sh' },

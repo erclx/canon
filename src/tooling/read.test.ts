@@ -127,6 +127,23 @@ describe('renderStackSections', () => {
     )
   })
 
+  it('should print each gitattributes group under its own heading', () => {
+    writeStack(
+      '[stack]\nname = "demo"\n\n[gitattributes]\n"# Design record" = ["canon/design/** linguist-documentation"]\n',
+    )
+    const manifest = loadManifest(ROOT, 'demo')
+
+    expect(manifest && renderStackSections(manifest)).toBe(
+      [
+        '',
+        '## Gitattributes',
+        '',
+        '- `# Design record`: `canon/design/** linguist-documentation`',
+        '',
+      ].join('\n'),
+    )
+  })
+
   it('should print no empty heading for a stack with no seeds or groups', () => {
     writeStack('[stack]\nname = "demo"\n')
     writeReference('tooling/demo/configs/tsconfig.json', '{}\n')
