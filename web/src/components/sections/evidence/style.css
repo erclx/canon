@@ -9,18 +9,19 @@
   margin: 0;
 }
 
-/* The figure takes the reel's recorded width, never wider than the column. */
+/* The figure takes the reel's recorded width, centered in the column and never wider than it. */
 #evidence .reel {
   width: fit-content;
   max-width: 100%;
-  margin: 64px 0 0;
+  margin: 64px auto 0;
 }
 
-/* One recording carries one theme, so its surface reads the theme-fixed dark family. */
+/* The recording is light in both themes, so the surround follows the page's theme and frames it. */
 #evidence .screen {
   padding: 10px 10px 0;
+  border: 1px solid var(--line);
   border-radius: var(--radius-card);
-  background: var(--color-dark-background);
+  background: var(--card);
   box-shadow: 5px 5px 0 var(--rule);
 }
 
@@ -29,6 +30,8 @@
   max-width: 100%;
   height: auto;
   border-radius: var(--radius-action);
+  outline: 1px solid var(--edge);
+  outline-offset: -1px;
 }
 
 #evidence .bar {
@@ -39,7 +42,7 @@
   padding: 10px 4px;
   font-family: var(--mono);
   font-size: var(--size-view-small);
-  color: var(--color-dark-muted);
+  color: var(--muted);
 }
 
 #evidence .play {
@@ -50,21 +53,21 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border: 1.5px solid var(--color-dark-text);
+  border: 1.5px solid var(--ink);
   border-radius: var(--radius-action);
   font-weight: 500;
   line-height: 1;
-  color: var(--color-dark-text);
+  color: var(--ink);
 }
 
 #evidence .play:focus-visible {
-  outline: 2px solid var(--color-dark-text);
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
 
 @media (hover: hover) {
   #evidence .play:hover {
-    background: var(--color-dark-band);
+    background: var(--hover);
   }
 }
 

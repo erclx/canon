@@ -37,7 +37,7 @@ This repository's self-portrait for a visitor who never opens the source, where 
 
 - `evidence/home/` is the committed baseline of the page, one folder per section holding a frame per theme at 320 and 1280 pixels
 - `frames/` holds the social card and its stamp
-- `loops/` holds the `readme` pair, the launch film, and the reel `web:film -- --write --pr <n>` copies from `canon/frames`, which `web:build` refuses once it differs from `reel.stamp`
+- `loops/` holds the `readme` pair, the launch film, and the reel, which `web:film -- --write --pr <n> [--repo <owner/name>]` copies from `canon/frames` and `web:build` checks against `reel.stamp`
 - `merge/` and the whole-page frames come from a `workflow_dispatch` artifact on `main`, since a local capture falls back to another font
 - Every README image ships as a `<name>` and `<name>-light` pair behind a `<picture>`
 

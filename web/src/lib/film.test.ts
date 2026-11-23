@@ -4,6 +4,7 @@ import { readReel, reelFrom } from './film'
 
 const reelStamp = [
   'source: canon/frames:pr-3289/0ce632a/20261120T191226Z/reel.webp',
+  'repository: erclx/canon',
   'pull-request: 3289',
   'filmed-at: 0ce632a',
   'address: https://github.com/erclx/canon/pull/3289',
@@ -16,8 +17,9 @@ const reelStamp = [
 ].join('\n')
 
 describe('reelFrom', () => {
-  it('should read the pull request, its address, the length, and the size', () => {
+  it('should read the repository, pull request, its address, the length, and the size', () => {
     expect(reelFrom(reelStamp)).toEqual({
+      repository: 'erclx/canon',
       pullRequest: 3289,
       address: 'https://github.com/erclx/canon/pull/3289',
       seconds: 12.4,
@@ -30,6 +32,12 @@ describe('reelFrom', () => {
     const stamp = reelStamp.replace('pull-request: 3289\n', '')
 
     expect(() => reelFrom(stamp)).toThrow(/names no pull-request/)
+  })
+
+  it('should refuse a stamp that names no repository', () => {
+    const stamp = reelStamp.replace('repository: erclx/canon\n', '')
+
+    expect(() => reelFrom(stamp)).toThrow(/names no repository/)
   })
 
   it('should refuse a pull request it cannot read as a number', () => {

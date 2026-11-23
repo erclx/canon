@@ -1,6 +1,6 @@
 /**
- * Checks, or with `--write --pr <number>` copies from `canon/frames`, the reel the evidence section plays, its opening still, and a stamp naming its pull request.
- * The check `web:build` runs refuses a reel or still its stamp no longer matches, so a swapped reel cannot ship under another number.
+ * Checks, or with `--write --pr <number> [--repo <owner/name>]` copies from that repository's `canon/frames` branch, the reel the evidence section plays, its still, and its stamp.
+ * The check `web:build` runs reads the committed files alone and never the network, so a swapped reel cannot ship under another number.
  */
 import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
@@ -16,6 +16,7 @@ const STILL = 'assets/loops/reel-still.webp'
 const STAMP = 'assets/loops/reel.stamp'
 const FIELDS = [
   'source',
+  'repository',
   'pull-request',
   'filmed-at',
   'address',
@@ -150,13 +151,13 @@ function stillHeader(width: number, height: number) {
 }
 
 /** The newest reel the pull request's evidence posted, by the capture time in its path. */
-function newestReel(pullRequest: number) {
-  git(['fetch', '--quiet', 'origin', FRAMES])
+function newestReel(repo: string, pullRequest: number) {
+  git(['fetch', '--quiet', `https://github.com/${repo}.git`, FRAMES])
   const paths = git([
     'ls-tree',
     '-r',
     '--name-only',
-    `origin/${FRAMES}`,
+    'FETCH_HEAD',
     `pr-${pullRequest}/`,
   ])
     .toString('utf8')
@@ -166,21 +167,22 @@ function newestReel(pullRequest: number) {
     )
     .sort((a, b) => a.split('/')[2]!.localeCompare(b.split('/')[2]!))
   const path = paths.at(-1)
-  if (!path) fail(`${FRAMES} holds no reel for pull request #${pullRequest}`)
+  if (!path)
+    fail(`${repo} ${FRAMES} holds no reel for pull request #${pullRequest}`)
   return { path, sha: path.split('/')[1]! }
 }
 
-/** The pull request's page, read from the origin remote rather than typed. */
-function address(pullRequest: number) {
+/** The origin remote's repository, which `--repo` overrides. */
+function originRepo() {
   const remote = git(['remote', 'get-url', 'origin']).toString('utf8').trim()
   const repo = /github\.com[:/]([^/]+\/[^/]+?)(\.git)?$/.exec(remote)?.[1]
   if (!repo) fail(`the origin remote ${remote} is not a GitHub repository`)
-  return `https://github.com/${repo}/pull/${pullRequest}`
+  return repo
 }
 
-function write(pullRequest: number) {
-  const reel = newestReel(pullRequest)
-  const bytes = git(['show', `origin/${FRAMES}:${reel.path}`])
+function write(repo: string, pullRequest: number) {
+  const reel = newestReel(repo, pullRequest)
+  const bytes = git(['show', `FETCH_HEAD:${reel.path}`])
   if (bytes.length > REEL_MAX_BYTES)
     fail(
       `${reel.path} is ${bytes.length} bytes, past the ${REEL_MAX_BYTES} a reel may carry`,
@@ -192,9 +194,10 @@ function write(pullRequest: number) {
     join(root, STAMP),
     [
       `source: ${FRAMES}:${reel.path}`,
+      `repository: ${repo}`,
       `pull-request: ${pullRequest}`,
       `filmed-at: ${reel.sha}`,
-      `address: ${address(pullRequest)}`,
+      `address: https://github.com/${repo}/pull/${pullRequest}`,
       `image-sha256: ${sha(bytes)}`,
       `still-sha256: ${sha(opened.still)}`,
       `width: ${opened.width}`,
@@ -204,7 +207,7 @@ function write(pullRequest: number) {
     ].join('\n'),
   )
   console.log(
-    `regen-web-film: copied the reel of pull request #${pullRequest} filmed at ${reel.sha} to ${REEL}, with its still`,
+    `regen-web-film: copied the reel of ${repo} pull request #${pullRequest} filmed at ${reel.sha} to ${REEL}, with its still`,
   )
 }
 
@@ -213,7 +216,7 @@ if (!args.includes('--write')) {
   const reasons = staleness()
   if (reasons.length)
     fail(
-      `${reasons.join(', ')}. Run bun run web:film -- --write --pr <number>, which copies that pull request's newest reel from ${FRAMES}.`,
+      `${reasons.join(', ')}. Run bun run web:film -- --write --pr <number> [--repo <owner/name>], which copies that pull request's newest reel from the repository's ${FRAMES}.`,
     )
   console.log(`regen-web-film: the reel matches ${STAMP}`)
 } else {
@@ -221,5 +224,9 @@ if (!args.includes('--write')) {
   const pullRequest = Number(flag === -1 ? Number.NaN : args[flag + 1])
   if (!Number.isInteger(pullRequest) || pullRequest <= 0)
     fail('--write takes --pr <number>, the pull request whose reel to copy')
-  write(pullRequest)
+  const named = args.indexOf('--repo')
+  const repo = named === -1 ? originRepo() : (args[named + 1] ?? '')
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo))
+    fail(`--repo takes <owner/name>, not ${JSON.stringify(repo)}`)
+  write(repo, pullRequest)
 }

@@ -66,7 +66,13 @@ test('every nav link and menu entry resolves to a section or an absolute address
 
   expect(anchors.length).toBeGreaterThan(6)
   expect(missing).toEqual([])
-  expect(outward.filter((href) => !href.startsWith('https://'))).toEqual([])
+  expect(
+    outward.filter((href) => href !== '/' && !href.startsWith('https://')),
+  ).toEqual([])
+  await expect(page.locator('nav[aria-label="Site"] a.brand')).toHaveAttribute(
+    'href',
+    '/',
+  )
 })
 
 test('the toggle flips the theme and a reload keeps it', async ({ page }) => {
@@ -299,6 +305,20 @@ test.describe('the footer columns', () => {
     expect(lefts[0]).toBe(lefts[2])
     expect(lefts[1]).toBeGreaterThan(lefts[0]!)
   })
+})
+
+test('both logos link to the home page and the skip link still reaches the opening section', async ({
+  page,
+}) => {
+  await page.goto('/')
+
+  await expect(page.locator('.site-nav a.brand')).toHaveAttribute('href', '/')
+  await expect(page.locator('.site-footer a.brand')).toHaveAttribute(
+    'href',
+    '/',
+  )
+  await expect(page.locator('a[href="#top"]')).toHaveCount(1)
+  await expect(page.locator('#top')).toHaveCount(1)
 })
 
 test('the footer mark carries no underline under hover', async ({ page }) => {
@@ -970,7 +990,9 @@ test.describe('the evidence section', () => {
     expect(stamp['pull-request']).toMatch(/^\d+$/)
 
     await expect(link).toHaveAttribute('href', stamp.address ?? '')
-    await expect(link).toHaveText(`pull request #${stamp['pull-request']}`)
+    await expect(link).toHaveText(
+      `pull request #${stamp['pull-request']} on ${stamp.repository}`,
+    )
     await expect(page.locator('#evidence')).not.toContainText('#412')
   })
 
@@ -981,6 +1003,19 @@ test.describe('the evidence section', () => {
     expect(frame).not.toBeNull()
     expect(frame!.width).toBeLessThanOrEqual(Number(stamp.width))
     expect(frame!.width).toBeGreaterThan(Number(stamp.width) / 2)
+  })
+
+  test('centers the reel in its column', async ({ page }) => {
+    await page.goto('/')
+    const column = await page.locator('#evidence .w').boundingBox()
+    const screen = await page.locator('#evidence .screen').boundingBox()
+
+    expect(column).not.toBeNull()
+    expect(screen).not.toBeNull()
+    const left = screen!.x - column!.x
+    const right = column!.x + column!.width - (screen!.x + screen!.width)
+    expect(left).toBeGreaterThan(40)
+    expect(Math.abs(left - right)).toBeLessThanOrEqual(1)
   })
 })
 
