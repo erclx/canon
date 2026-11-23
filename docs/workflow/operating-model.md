@@ -45,6 +45,8 @@ Each worker halts at the PR, and the merge stays a human gate. An agent merges o
 
 An orchestrator can run this loop unattended, from now or from a set time. Every local `claude --bg` launch but a talk one denies the question tool, so a session with a question messages its controller and waits for the reply. The run answers technical questions, parks the operator's, and ends on a report of merge-ready pull requests.
 
+An attended run keeps the queue moving while the operator stays and merges. It starts and stops on the operator's word, launches each row once the rows it depends on have merged, and plans one cap's worth of rows ahead, holding on a billed run, a refused command, or a question meant for the operator.
+
 ## The review layer
 
 The first review a change gets is a dispatched reviewer's. The worker's gate inside `auto-ship` decides whether the PR opens, and the draft mark holds the merge. The reviewer pass is the merge gate.
