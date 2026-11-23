@@ -1,5 +1,12 @@
 import { spawnSync } from 'node:child_process'
-import { appendFileSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import {
+  appendFileSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -19,6 +26,24 @@ beforeEach(() => {
 afterEach(() => {
   rmSync(target, { recursive: true, force: true })
 })
+
+/** Writes a case file under the target's `e2e/capture/`, one default-theme case per section named. */
+const writeCases = (relative: string, sections: string[]): void => {
+  const file = join(target, 'e2e/capture', relative)
+  mkdirSync(join(file, '..'), { recursive: true })
+  const cases = sections
+    .map((section) => `{ section: '${section}', theme: 'default', route: '/' }`)
+    .join(', ')
+  writeFileSync(file, `export const CASES = [${cases}]\n`)
+}
+
+/** Runs the harness with a filter nothing matches, which lists every label and exits before a browser starts. */
+const listLabels = () =>
+  spawnSync('bun', [join(PROJECT_ROOT, HARNESS_REL)], {
+    cwd: target,
+    encoding: 'utf8',
+    env: { ...process.env, SCREENSHOT_FILTER: 'no-such-label' },
+  })
 
 const sync = async (): Promise<void> => {
   const chain = resolveChain(PROJECT_ROOT, 'web')
@@ -71,6 +96,83 @@ describe('the capture cases seed', () => {
     })
 
     expect(result.status).toBe(1)
-    expect(result.stderr).toContain('e2e/capture/cases.ts is missing')
+    expect(result.stderr).toContain('e2e/capture/cases.ts')
+  })
+})
+
+describe('the capture cases folder', () => {
+  it('captures a project holding the folder alone', () => {
+    writeCases('cases/menu.ts', ['menu'])
+
+    const result = listLabels()
+
+    expect(result.stderr).toContain('menu/1280--default')
+  })
+
+  it('reads the single file ahead of the folder, and the folder in file-name order', () => {
+    writeCases('cases.ts', ['home'])
+    writeCases('cases/b-search.ts', ['search'])
+    writeCases('cases/a-menu.ts', ['menu'])
+
+    const result = listLabels()
+    const order = ['home', 'menu', 'search'].map((section) =>
+      result.stderr.indexOf(`${section}/1280--default`),
+    )
+
+    expect(order.every((at) => at >= 0)).toBe(true)
+    expect([...order].sort((a, b) => a - b)).toEqual(order)
+  })
+
+  it('exits 1 naming both files when two cases write one output file', () => {
+    writeCases('cases.ts', ['home'])
+    writeCases('cases/home.ts', ['home'])
+
+    const result = listLabels()
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toMatch(
+      /home\/1280--default.*cases\.ts.*cases\/home\.ts/s,
+    )
+  })
+
+  it('prints the evidence root the single file names', () => {
+    mkdirSync(join(target, 'e2e/capture'), { recursive: true })
+    writeFileSync(
+      join(target, 'e2e/capture/cases.ts'),
+      "export const EVIDENCE_ROOT = 'assets/evidence'\nexport const CASES = []\n",
+    )
+
+    const result = spawnSync(
+      'bun',
+      [join(PROJECT_ROOT, HARNESS_REL), '--print-evidence-root'],
+      { cwd: target, encoding: 'utf8' },
+    )
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toBe('assets/evidence\n')
+  })
+
+  it('prints e2e/evidence as the evidence root of a folder-only project', () => {
+    writeCases('cases/menu.ts', ['menu'])
+
+    const result = spawnSync(
+      'bun',
+      [join(PROJECT_ROOT, HARNESS_REL), '--print-evidence-root'],
+      { cwd: target, encoding: 'utf8' },
+    )
+
+    expect(result.stdout).toBe('e2e/evidence\n')
+  })
+
+  it('warns on an excluded viewport name no viewport carries', () => {
+    mkdirSync(join(target, 'e2e/capture'), { recursive: true })
+    writeFileSync(
+      join(target, 'e2e/capture/cases.ts'),
+      "export const CASES = [{ section: 'home', theme: 'default', route: '/', excludeViewports: ['1600'] }]\n",
+    )
+
+    const result = listLabels()
+
+    expect(result.stderr).toMatch(/home.*'1600'/)
   })
 })

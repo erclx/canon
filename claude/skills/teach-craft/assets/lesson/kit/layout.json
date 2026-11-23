@@ -4,7 +4,7 @@
     "lesson": {
       "x": 0,
       "y": 0,
-      "width": 1440,
+      "width": 1280,
       "height": 900,
       "order": 0,
       "scroll": true,
@@ -13,7 +13,7 @@
     "components": {
       "x": 0,
       "y": 980,
-      "width": 1440,
+      "width": 1280,
       "height": 900,
       "order": 1,
       "hugHeight": true

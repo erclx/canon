@@ -466,7 +466,7 @@ const uncoveredRanges = (cuts: number[], widths: number[]): string[] => {
 
 describe('capture widths', () => {
   it('reads a width from every viewport the capture config declares', () => {
-    expect(readCaptureWidths()).toEqual([320, 768, 1280, 1536])
+    expect(readCaptureWidths()).toEqual([390, 768, 1280, 1536])
   })
 
   it('reach every range the base width queries lay out', () => {

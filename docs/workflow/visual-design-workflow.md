@@ -26,7 +26,7 @@ When its change makes a reference untrue, the worker redraws the board frame its
 
 - The `craft` rule fires on the files the worker edits and loads `ui-craft` for behavior and `design-taste` for look.
 - The `ui-craft` capture reference has the worker capture the full page in every theme the surface ships, against a preview server and never a dev server.
-- It sets the widths too, being 320 plus each breakpoint in `canon/DESIGN.md` for a layout case, and one width for a state case.
+- It sets the widths too, being each breakpoint in `canon/DESIGN.md` or 390, 768, and 1280 for a layout case, checked for sideways scroll at 320, and one width for a state case.
 
 ## Self-check
 
@@ -82,7 +82,7 @@ Most projects author design in the loop above and need nothing more. Start with 
 
 ### What a round draws
 
-A round draws every arm at a phone, a tablet, and a desktop width, read from the `Draw widths:` line in the `## Layout` section of `canon/DESIGN.md` and falling back to 390, 834, and 1440. A drive with `canon:app-drive` draws on the board by the same convention.
+A round draws every arm at a phone, a tablet, and a desktop width, read from the `Draw widths:` line in the `## Layout` section of `canon/DESIGN.md` and falling back to 390, 768, and 1280, the widths the screenshot harness commits. A drive with `canon:app-drive` draws on the board by the same convention.
 
 - A pick that scrolls sideways at any of those widths, or at 320, is held until it reflows.
 - Before drafting, a round reuses the board's `references` page or runs `canon:design-references` to fill one, with the sites you name or bare.

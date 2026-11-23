@@ -18,7 +18,11 @@ export interface CaptureCase {
   section: string
   theme: string
   route: string
-  /** Names of viewports this case skips, for a route that reflows rather than breaks at that width. */
+  /**
+   * Names of viewports this case skips, for a route that reflows rather than breaks at that width.
+   * `320` defers the reflow check, which fails the run on a sideways scroll or a clipped control.
+   * A name no viewport carries is warned on and ignored.
+   */
   excludeViewports?: readonly string[]
   evidence?: boolean
   /** Selectors painted over in every frame the case writes, for a value that moves between runs with no code change. */
@@ -27,9 +31,17 @@ export interface CaptureCase {
   setup?: (page: Page) => Promise<void>
 }
 
-/** What the harness loads from the project's `e2e/capture/cases.ts`. */
+/**
+ * What the harness loads from the project's `e2e/capture/cases.ts` and from
+ * each `e2e/capture/cases/*.ts`, concatenating their `CASES` with the single
+ * file first and the folder in file-name order. Either form alone is enough.
+ */
 export interface CaptureModule {
   CASES: CaptureCase[]
-  /** Where a case flagged `evidence: true` writes its frames, relative to the working directory. */
+  /**
+   * Where a case flagged `evidence: true` writes its frames, relative to the
+   * working directory. Read from `cases.ts` alone, and `e2e/evidence` when the
+   * project holds the folder alone.
+   */
   EVIDENCE_ROOT: string
 }

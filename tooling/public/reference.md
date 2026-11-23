@@ -58,6 +58,8 @@ The config's `exclude-paths` keeps a commit out of the version and changelog whe
 - Set the secret to a personal token so CI runs on the release pull request, since the default token's author does not start it.
 - Keep the token read-only at the top, with `contents: write` and `pull-requests: write` on the one job.
 
+The web stack's `readme-screenshot.yml` checks out with the same secret to push a refreshed README frame, so grant it Contents write and one token serves both workflows.
+
 ## Dependabot
 
 `dependabot.yml` is how an existing repository keeps its seeded workflows' action majors current, since a seed never updates after install.

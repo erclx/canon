@@ -71,12 +71,20 @@ A group is the bold feature-area label above at most five boxes, as `ui-checklis
 
 A checklist with one group gives up to three beats from it. A checklist with four groups gives three beats, one from each of the first three.
 
+### Pick the reel's width
+
+A beat films at the width its box names, even one outside the set such as 834, and at 1280 when it names none. One reel holds one width, since `canon take` refuses two shapes as `reel-shape`.
+
+- Film the width holding the most beats, ties going to the first beat's, and drop the rest from the plan
+- Pass `--viewport` at 390x844, 768x1024, 1280x800, or 900 tall otherwise, and `--reel-width <width>` under 960
+- Set `"push": false` on a 390 reel, since a push crops the column, and expect a 390 or 768 reel to render upscaled
+
 ### Hold the coverage
 
 A reviewer watching three beats cannot tell whether the reel skipped a group or the group had nothing to film. Once the beats are ordered, hold two lists of group labels, in checklist order:
 
 - Filmed: each group with at least one beat
-- Left out: each other group, whether the filter emptied it or the cap of three ran out first
+- Left out: each other group, whether the filter emptied it, the cap of three ran out first, or its beats sat at a skipped width, written as `Board at 768`
 
 Write the two as one line, `filmed: <labels> · left out: <labels>`, joining labels with a comma and writing `none` for an empty list. A checklist with one group and three beats reads `filmed: Board · left out: none`, and one with four groups names the fourth as left out.
 
@@ -105,7 +113,7 @@ rm -rf .canon/tmp/pr/reel/<number>/takes
 ```
 
 ```bash
-canon take <url> .canon/tmp/pr/reel/<number>/plan.json --out .canon/tmp/pr/reel/<number>/takes --reel .canon/tmp/pr/reel/<number>/reel.webp --max-seconds 15 --json
+canon take <url> .canon/tmp/pr/reel/<number>/plan.json --out .canon/tmp/pr/reel/<number>/takes --reel .canon/tmp/pr/reel/<number>/reel.webp --viewport <width>x<height> --max-seconds 15 --json
 ```
 
 Branch on the record's `reason`, never on the exit code.
@@ -143,7 +151,7 @@ Open each beat's `still.jpg`, the closing frame the record names in its `still` 
 
 - A still showing the wrong state skips the reel as `wrong-state`, naming the beat and what the still shows
 - A record whose beats carry no `still` field comes from a `canon` predating the still, so skip as `no-still` rather than posting a reel nothing checked
-- Read `fallback` on each beat. A beat filmed by screencast still joins the reel, since the reel shrinks every beat to one width. Pass no `--reel-width`, since the comment draws it at 960.
+- Read `fallback` on each beat. A beat filmed by screencast still joins the reel, since the reel shrinks every beat to one width.
 
 A beat's still shows only its closing frame. To judge the reel's motion before pushing, write evenly spaced frames of the reel itself and open them, since no other verb reads a frame back out of the animation:
 

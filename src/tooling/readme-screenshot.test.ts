@@ -41,23 +41,32 @@ afterEach(() => {
   rmSync(project, { force: true, recursive: true })
 })
 
-/** Stands in for `bun e2e/screenshot.ts`, writing one frame per named theme. */
+/**
+ * Stands in for `bun e2e/screenshot.ts` on both calls the script makes,
+ * printing the evidence root the harness resolves and writing one frame per
+ * named theme each time, so it needs no branch on its arguments.
+ */
 const stubCapture = (themes: string[]): void => {
   const writes = themes
     .map((theme) => `touch "$dir/1280--${theme}.png"`)
     .join('\n')
   writeFileSync(
     join(bin, 'bun'),
-    `#!/usr/bin/env bash\ndir=screenshots/localhost/home\nmkdir -p "$dir"\n${writes}\n`,
+    `#!/usr/bin/env bash\necho e2e/evidence\ndir=screenshots/localhost/home\nmkdir -p "$dir"\n${writes}\n`,
     { mode: 0o755 },
   )
 }
 
-const run = () =>
+const run = (env: Record<string, string> = {}) =>
   spawnSync('bash', ['scripts/readme-screenshot.sh'], {
     cwd: project,
     encoding: 'utf8',
-    env: { ...process.env, PATH: `${bin}:${process.env.PATH}` },
+    env: {
+      ...process.env,
+      GITHUB_OUTPUT: '',
+      ...env,
+      PATH: `${bin}:${process.env.PATH}`,
+    },
     timeout: 10_000,
   })
 
@@ -68,10 +77,10 @@ describe('readme-screenshot.sh', () => {
     const result = run()
 
     expect(result.status).toBe(0)
-    expect(existsSync(join(project, 'assets/evidence/readme/light.png'))).toBe(
+    expect(existsSync(join(project, 'e2e/evidence/readme/light.png'))).toBe(
       true,
     )
-    expect(existsSync(join(project, 'assets/evidence/readme/dark.png'))).toBe(
+    expect(existsSync(join(project, 'e2e/evidence/readme/dark.png'))).toBe(
       false,
     )
   })
@@ -82,8 +91,33 @@ describe('readme-screenshot.sh', () => {
     const result = run()
 
     expect(result.status).toBe(0)
-    expect(existsSync(join(project, 'assets/evidence/readme/dark.png'))).toBe(
-      true,
+    expect(existsSync(join(project, 'e2e/evidence/readme/dark.png'))).toBe(true)
+  })
+
+  it('lands the frames in the folder the project names over the evidence root', () => {
+    stubCapture(['default'])
+    writeFileSync(
+      join(project, 'scripts/readme-screenshot.sh'),
+      readFileSync(
+        join(project, 'scripts/readme-screenshot.sh'),
+        'utf8',
+      ).replace("README_EVIDENCE_DIR=''", "README_EVIDENCE_DIR='docs/readme'"),
     )
+
+    const result = run()
+
+    expect(result.status).toBe(0)
+    expect(existsSync(join(project, 'docs/readme/light.png'))).toBe(true)
+  })
+
+  it('hands the frame folder to a workflow step as its dir output', () => {
+    stubCapture(['default'])
+    const output = join(project, 'github-output')
+    writeFileSync(output, '')
+
+    const result = run({ GITHUB_OUTPUT: output })
+
+    expect(result.status).toBe(0)
+    expect(readFileSync(output, 'utf8')).toBe('dir=e2e/evidence/readme\n')
   })
 })

@@ -28,7 +28,7 @@ jobs:
     name: 🖼️ Refresh README Screenshot
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # The default GITHUB_TOKEN cannot push to a fork's branch, so a PR from
+    # No token this job holds can push to a fork's branch, so a PR from
     # outside this repository is skipped rather than left to fail on the push
     # step below.
     if: github.event.pull_request.head.repo.full_name == github.repository
@@ -39,6 +39,11 @@ jobs:
         uses: actions/checkout@v7
         with:
           ref: ${{ github.head_ref }}
+          # A push made with GITHUB_TOKEN starts no workflow, so the required
+          # checks never report on the refreshed commit and the pull request
+          # stays blocked. The release token's push starts them. The fallback
+          # keeps a project without the secret capturing, at that cost.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
 
       - name: Refuse An Unfilled Template
         # A path list left at its placeholder never fires on the pages it was
@@ -77,12 +82,23 @@ jobs:
         run: bunx playwright install chromium
 
       - name: Capture README Screenshot
+        # The script resolves the frame folder from the capture config and
+        # hands it on as `dir`, so no step below names a path of its own.
+        id: capture
         run: bun run readme-screenshot
 
       - name: Check For Changes
         id: diff
+        env:
+          FRAME_DIR: ${{ steps.capture.outputs.dir }}
+        # An empty folder is a script that predates its `dir` output, and git
+        # reads "" as no path, so the step would pass and refresh nothing.
         run: |
-          if git status --porcelain assets/evidence/readme | grep -q .; then
+          if [ -z "$FRAME_DIR" ]; then
+            echo "::error file=scripts/readme-screenshot.sh::The script wrote no dir output. Merge the GITHUB_OUTPUT lines from the synced script into yours."
+            exit 1
+          fi
+          if git status --porcelain "$FRAME_DIR" | grep -q .; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -99,9 +115,10 @@ jobs:
         # pushes is PNG bytes a capture produced.
         env:
           HUSKY: 0
+          FRAME_DIR: ${{ steps.capture.outputs.dir }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add assets/evidence/readme
+          git add "$FRAME_DIR"
           git commit -m "chore(readme): refresh README screenshot"
           git push origin "HEAD:${{ github.head_ref }}"

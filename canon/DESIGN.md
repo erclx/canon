@@ -88,9 +88,9 @@ A drawn system: a warm neutral ground ruled in a 48px grid, ink text in Geist, a
 
 ## Layout
 
-- Capture widths: 320, 768, 1280, 1536. 320 is the reflow floor.
+- Capture widths: 390, 768, 1280 as evidence, and 1536 swept alone. 320 is the reflow floor, checked for sideways scroll and never captured.
 - Every width query in the generated stylesheets opens a range one of these widths reaches.
-- Draw widths: 390, 834, 1440. Every pick is also checked for sideways scroll at 320.
+- Draw widths: 390, 768, 1280, the capture set. Every pick is also checked for sideways scroll at 320.
 
 ## Shapes
 
