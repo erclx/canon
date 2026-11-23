@@ -5,10 +5,16 @@ import { listWorktrees } from '@/git/worktree'
 import {
   branchSlug,
   buildDriveCopy,
+  checkPassPage,
   loadPreviewConfig,
+  type PreviewConfig,
+  readWorktreeOffset,
   runSeed,
   SEED_TIMEOUT_MS,
+  startPassPreview,
+  stopPassPreview,
 } from '@/pr/drive-copy'
+import { readHealthPaths } from '@/pr/health'
 import {
   changedSince,
   readWorktreeStatus,
@@ -28,6 +34,8 @@ import {
 interface DriveCopyOptions extends ReadOptions {
   readonly baseline?: boolean
   readonly check?: boolean
+  readonly serve?: boolean
+  readonly stop?: boolean
 }
 
 type DriveCopyRefusal =
@@ -38,6 +46,9 @@ type DriveCopyRefusal =
   | 'bad-flags'
   | 'seed-failed'
   | 'seed-wrote-worktree'
+  | 'serve-failed'
+  | 'preview-stale'
+  | 'stop-failed'
 
 const DRIVE_COPY_REFUSALS: Record<DriveCopyRefusal, string> = {
   'no-worktree':
@@ -47,7 +58,14 @@ const DRIVE_COPY_REFUSALS: Record<DriveCopyRefusal, string> = {
   'no-baseline':
     'No baseline was recorded for this pull request. Run --baseline before --check.',
   'unreadable-tree': 'git could not read the worktree status.',
-  'bad-flags': '--baseline and --check cannot be combined.',
+  'bad-flags':
+    '--check combines with no other mode, and --stop combines with nothing.',
+  'serve-failed':
+    "The pass's server did not come up on the copy, so the pass has no fresh preview to drive.",
+  'preview-stale':
+    "The pass's server answered, but its page failed, so it serves a stale copy. It was stopped, so re-run --serve to restart it.",
+  'stop-failed':
+    "The pass's server survived the stop, so it may still answer on its port.",
   'seed-failed':
     'The seed exited non-zero, so the copy holds no seeded state to drive against.',
   'seed-wrote-worktree':
@@ -74,13 +92,19 @@ export function registerDriveCopy(pr: Command): void {
       '--check',
       'Report each path changed since the baseline, copying nothing',
     )
+    .option(
+      '--serve',
+      "After the rebuild, start the project's serve command on the copy for this pass",
+    )
+    .option('--stop', "End the pass's server that --serve started")
     .addHelpText(
       'after',
       [
         '',
         'A project names what its preview writes in',
         '`canon/config/preview.json` as',
-        '`{ "writes": [path], "keep": [path], "env": "<NAME>", "seed": [argv] }`.',
+        '`{ "writes": [path], "keep": [path], "env": "<NAME>", "seed": [argv],',
+        '"serve": [argv], "port": <number> }`.',
         'Each `writes` path is relative to the worktree, and `env`, defaulting',
         'to `CANON_PREVIEW_ROOT`, is the variable the server reads for the copy',
         'root. The server resolves each declared path under that root.',
@@ -98,6 +122,24 @@ export function registerDriveCopy(pr: Command): void {
         "and its stdout and stderr go to this verb's stderr. A seed that exits",
         'non-zero or runs past the limit refuses, and so does one that changes',
         "the worktree's git status, since it wrote outside the copy.",
+        '',
+        '`serve` and `port` are optional. `port` is the port the project serves',
+        'on before the worktree offset, and `canon pr local` reads it plus the',
+        'offset scripts/worktree-port.sh prints, or 0 with no helper. `serve`',
+        'is an argv list spawned with no shell, detached, from the worktree,',
+        'and it needs `port`. With --serve, after the rebuild, the seed, and',
+        'any baseline, it runs with `env` set to the copy root and',
+        '`WORKTREE_PORT_OFFSET` set to the worktree offset plus 25, so it binds',
+        "the declared port plus that offset, never the worker's own. The verb",
+        'waits 60 seconds for HTTP there, then requests / and each health path',
+        'canon/config/local.toml declares: / must answer inside 10 seconds with',
+        'no 5xx and each health path with a 2xx. The server writes its output',
+        'to `server.log` and its pid to `server.json` beside the copy root, and',
+        'a later --serve ends a server still recorded there before the rebuild.',
+        "--stop ends the recorded server's whole process group, and needs no",
+        'worktree, so a server outlives no removed worktree. A project with',
+        'no `serve` key drives as before under --serve, with no `url` on the',
+        "record. The worker's own server is never started, stopped, or read.",
         '',
         'The copy lives at `.canon/tmp/pr/review-ui/<slug>/board/` at the main',
         'worktree root, where `<slug>` is the branch with a leading type',
@@ -120,10 +162,15 @@ export function registerDriveCopy(pr: Command): void {
         'Read `reason` on the JSON record:',
         '  copied     the copy was rebuilt, with `copyRoot`, `env`, `copied`, and',
         '             `missing` for a declared path the worktree does not hold,',
-        '             and `seed` as `{ ran, exit }` when the project declares one',
+        '             and `seed` as `{ ran, exit }` when the project declares one.',
+        '             Under --serve with a `serve` key, it adds `url`, `port`,',
+        '             `pid`, and `log` for the started server',
         '  no-config  the project declares no preview, so nothing was copied',
         '  clean      --check found no change since the baseline',
         '  changed    --check found changes, listed in `paths`, exit 1',
+        '  stopped    --stop ended the server, with its `pid` and `port`',
+        '  not-running',
+        '             --stop found no live server recorded for this copy',
         '',
         'Refusals, read off `reason`:',
         '  no-worktree      no local worktree holds the branch, so there is no',
@@ -131,7 +178,9 @@ export function registerDriveCopy(pr: Command): void {
         '  no-branch        the checkout holds no branch',
         '  no-baseline      --check ran before any --baseline for this number',
         '  bad-config       preview.json does not parse, lacks a writes list, or',
-        '                   names a seed that is not a list opening on a command',
+        '                   names a seed or serve that is not a list opening on a',
+        '                   command, a port outside 1 to 65535, or a serve with',
+        '                   no port',
         '  unsafe-path      a writes path is absolute or climbs with `..`',
         '  seed-failed      the seed exited non-zero, ran past its limit, or never',
         '                   started, with `seed` carrying `ran`, `exit`,',
@@ -140,19 +189,32 @@ export function registerDriveCopy(pr: Command): void {
         '  seed-wrote-worktree',
         "                   the seed changed the worktree's git status, with the",
         '                   paths in `paths`',
+        '  serve-failed     the pass port already answered, the helper refused',
+        '                   the offset, or the server never started, exited',
+        '                   early, or gave no answer in 60 seconds, with `serve`',
+        '                   carrying `cause`, `exit`, and the last 20 lines of',
+        '                   `output`. Nothing it started is left running',
+        '  preview-stale    the server answered, but / or a health path failed,',
+        '                   with `path`, `status` (null on no answer), and',
+        '                   `stopped` reading whether the server was ended',
+        '  stop-failed      --stop signalled the group and it survived, with',
+        '                   `pid` and `port`',
         '  unreadable-tree  git could not read the worktree status',
-        '  bad-flags        --baseline and --check were combined',
+        '  bad-flags        --check was combined with another mode, or --stop',
+        '                   with any',
         '  gh-failed, ambiguous-pull, gh-missing, bad-input (a number that is',
         '  not a positive whole number), no-pull (a number naming no pull request)',
         '',
         'Exit codes:',
-        '  0  copied, no-config, or clean',
+        '  0  copied, no-config, clean, stopped, or not-running',
         '  1  changed, or refused, with the reason in the JSON record',
         '',
         'Examples:',
         '  canon pr drive-copy --json',
         '  canon pr drive-copy 1341 --baseline --json',
         '  canon pr drive-copy 1341 --check --json',
+        '  canon pr drive-copy 1341 --baseline --serve --json',
+        '  canon pr drive-copy 1341 --stop --json',
         '',
       ].join('\n'),
     )
@@ -168,7 +230,8 @@ type DriveTarget =
   | {
       readonly kind: 'found'
       readonly main: string
-      readonly worktree: string
+      /** Absent only when the caller needs no worktree and none holds the branch. */
+      readonly worktree: string | undefined
       readonly branch: string
       readonly number: string | undefined
     }
@@ -187,6 +250,7 @@ async function resolveDriveTarget(
   root: string,
   number: string | undefined,
   needsNumber: boolean,
+  needsWorktree: boolean,
 ): Promise<DriveTarget> {
   const worktrees = await listWorktrees(root)
   const main = worktrees[0]?.path ?? root
@@ -226,11 +290,13 @@ async function resolveDriveTarget(
     return { kind: 'refused', reason: 'no-worktree' }
   }
   const entry = worktrees.find((candidate) => candidate.branch === headRef)
-  if (entry === undefined) return { kind: 'refused', reason: 'no-worktree' }
+  if (entry === undefined && needsWorktree) {
+    return { kind: 'refused', reason: 'no-worktree' }
+  }
   return {
     kind: 'found',
     main,
-    worktree: entry.path,
+    worktree: entry?.path,
     branch: headRef,
     number,
   }
@@ -244,6 +310,8 @@ async function runDriveCopy(
   const emitJson = opts.json ?? false
   const baseline = opts.baseline ?? false
   const check = opts.check ?? false
+  const serve = opts.serve ?? false
+  const stop = opts.stop ?? false
 
   intro('canon pr drive-copy')
 
@@ -252,11 +320,20 @@ async function runDriveCopy(
     message: string,
   ) => refuseWith(reason, message, emitJson, root)
 
-  if (baseline && check) {
+  if (
+    (check && (baseline || serve)) ||
+    (stop && (baseline || check || serve))
+  ) {
     return refuse('bad-flags', DRIVE_COPY_REFUSALS['bad-flags'])
   }
 
-  const target = await resolveDriveTarget(root, number, baseline || check)
+  // A stop reads only the record beside the copy root, so a removed worktree never strands a server.
+  const target = await resolveDriveTarget(
+    root,
+    number,
+    baseline || check,
+    !stop,
+  )
   if (target.kind === 'refused') {
     const reason = target.reason
     return reason in DRIVE_COPY_REFUSALS
@@ -269,6 +346,7 @@ async function runDriveCopy(
   }
 
   const scratch = join(target.main, REVIEW_UI_SCRATCH)
+  const copyRoot = join(scratch, branchSlug(target.branch), 'board')
   const baselinePath =
     target.number === undefined
       ? undefined
@@ -281,6 +359,36 @@ async function runDriveCopy(
     }
   }
 
+  // A server left by an earlier pass would keep serving files the rebuild replaces.
+  if (stop || serve) {
+    const ended = await stopPassPreview(copyRoot)
+    if (ended.kind === 'failed') {
+      logWarn(ended.detail)
+      return refuseWith(
+        'stop-failed',
+        DRIVE_COPY_REFUSALS['stop-failed'],
+        emitJson,
+        root,
+        { pid: ended.pid, port: ended.port },
+      )
+    }
+    if (stop) {
+      logStep(ended.kind === 'stopped' ? 'Stopped' : 'Not running')
+      outro()
+      emit(
+        ended.kind === 'stopped'
+          ? { reason: 'stopped', pid: ended.pid, port: ended.port }
+          : { reason: 'not-running' },
+      )
+      return 0
+    }
+  }
+
+  const worktree = target.worktree
+  if (worktree === undefined) {
+    return refuse('no-worktree', DRIVE_COPY_REFUSALS['no-worktree'])
+  }
+
   if (check && baselinePath !== undefined) {
     let prior: readonly StatusEntry[]
     try {
@@ -288,14 +396,14 @@ async function runDriveCopy(
     } catch {
       return refuse('no-baseline', DRIVE_COPY_REFUSALS['no-baseline'])
     }
-    const current = await readWorktreeStatus(target.worktree)
+    const current = await readWorktreeStatus(worktree)
     if (current === undefined) {
       return refuse('unreadable-tree', DRIVE_COPY_REFUSALS['unreadable-tree'])
     }
     const paths = changedSince(prior, current)
     if (paths.length === 0) {
       logStep('Clean')
-      logInfo(`No change in ${target.worktree} since the baseline.`)
+      logInfo(`No change in ${worktree} since the baseline.`)
       outro()
       emit({ reason: 'clean', paths })
       return 0
@@ -307,7 +415,7 @@ async function runDriveCopy(
     return 1
   }
 
-  const config = loadPreviewConfig(target.worktree)
+  const config = loadPreviewConfig(worktree)
   if (config.kind === 'refused') return refuse(config.reason, config.detail)
 
   let copy: Record<string, unknown>
@@ -316,9 +424,8 @@ async function runDriveCopy(
     logInfo('The project declares no preview writes, so nothing was copied.')
     copy = { reason: 'no-config' }
   } else {
-    const copyRoot = join(scratch, branchSlug(target.branch), 'board')
     const { copied, missing } = buildDriveCopy(
-      target.worktree,
+      worktree,
       copyRoot,
       config.config.writes,
       config.config.keep,
@@ -336,18 +443,13 @@ async function runDriveCopy(
 
     const seed = config.config.seed
     if (seed !== undefined) {
-      const before = await readWorktreeStatus(target.worktree)
+      const before = await readWorktreeStatus(worktree)
       if (before === undefined) {
         return refuse('unreadable-tree', DRIVE_COPY_REFUSALS['unreadable-tree'])
       }
       logStep('Seed')
-      const run = await runSeed(
-        target.worktree,
-        copyRoot,
-        seed,
-        config.config.env,
-      )
-      const after = await readWorktreeStatus(target.worktree)
+      const run = await runSeed(worktree, copyRoot, seed, config.config.env)
+      const after = await readWorktreeStatus(worktree)
       if (after === undefined) {
         return refuse('unreadable-tree', DRIVE_COPY_REFUSALS['unreadable-tree'])
       }
@@ -386,7 +488,7 @@ async function runDriveCopy(
   }
 
   if (baseline && baselinePath !== undefined) {
-    const status = await readWorktreeStatus(target.worktree)
+    const status = await readWorktreeStatus(worktree)
     if (status === undefined) {
       return refuse('unreadable-tree', DRIVE_COPY_REFUSALS['unreadable-tree'])
     }
@@ -397,7 +499,96 @@ async function runDriveCopy(
     copy = { ...copy, baseline: baselinePath }
   }
 
+  if (serve && config.kind === 'read' && config.config.serve !== undefined) {
+    const served = await servePass(
+      worktree,
+      copyRoot,
+      config.config,
+      emitJson,
+      root,
+    )
+    if (served.kind === 'refused') return served.exit
+    copy = { ...copy, ...served.server }
+  }
+
   outro()
   emit(copy)
   return 0
+}
+
+type ServeOutcome =
+  | {
+      readonly kind: 'served'
+      readonly server: Record<string, unknown>
+    }
+  | { readonly kind: 'refused'; readonly exit: number }
+
+/**
+ * Starts the pass's server on the rebuilt copy and checks one page loads,
+ * refusing as `serve-failed` or `preview-stale`. A stale page's server is
+ * stopped before the refusal, so no refusal leaves a server running.
+ */
+async function servePass(
+  worktree: string,
+  copyRoot: string,
+  config: PreviewConfig,
+  emitJson: boolean,
+  root: string,
+): Promise<ServeOutcome> {
+  const refused = (
+    reason: DriveCopyRefusal,
+    message: string,
+    extra: Record<string, unknown>,
+  ): ServeOutcome => ({
+    kind: 'refused',
+    exit: refuseWith(reason, message, emitJson, root, extra),
+  })
+
+  const offset = await readWorktreeOffset(worktree)
+  if (offset.kind === 'refused') {
+    logWarn(offset.detail)
+    return refused('serve-failed', DRIVE_COPY_REFUSALS['serve-failed'], {
+      serve: { cause: 'offset', exit: null, output: [offset.detail] },
+    })
+  }
+  logStep('Serve')
+  const started = await startPassPreview({
+    worktree,
+    copyRoot,
+    serve: config.serve ?? [],
+    env: config.env,
+    basePort: config.port ?? 0,
+    worktreeOffset: offset.value,
+  })
+  if (started.kind === 'failed') {
+    logWarn(started.detail)
+    for (const line of started.output) logWarn(line)
+    return refused('serve-failed', DRIVE_COPY_REFUSALS['serve-failed'], {
+      serve: {
+        cause: started.cause,
+        exit: started.exit,
+        output: started.output,
+      },
+    })
+  }
+
+  const { url, port, pid, log } = started.server
+  const health = readHealthPaths(worktree)
+  const stale = await checkPassPage(
+    url,
+    health.kind === 'paths' ? health.paths : [],
+  )
+  if (stale !== undefined) {
+    const ended = await stopPassPreview(copyRoot)
+    logWarn(
+      `${stale.path} on ${url} ${stale.status === null ? 'gave no answer' : `answered ${stale.status}`}.`,
+    )
+    return refused('preview-stale', DRIVE_COPY_REFUSALS['preview-stale'], {
+      ...stale,
+      url,
+      stopped: ended.kind !== 'failed',
+    })
+  }
+  logInfo(`Serving the copy on ${url}, pid ${pid}.`)
+  return { kind: 'served', server: { url, port, pid, log } }
 }

@@ -11,7 +11,8 @@ import {
   type LocalRunner,
 } from '@/pr/local'
 import { type RestReview } from '@/pr/rest'
-import { intro, logInfo, logStep, outro } from '@/cli/ui'
+import { intro, logInfo, logStep, logWarn, outro } from '@/cli/ui'
+import { loadPreviewConfig, readWorktreeOffset } from '@/pr/drive-copy'
 import {
   PULL_REFUSALS,
   ReadOptions,
@@ -71,6 +72,15 @@ export function registerLocal(pr: Command): void {
         'reload socket answering in the same tree. Every port is requested at',
         `once, and each request waits ${LOCAL_PROBE_TIMEOUT_MS / 1000} seconds for an answer.`,
         '',
+        'A project that declares `port` in canon/config/preview.json is read',
+        'there first: the declared port plus the offset scripts/worktree-port.sh',
+        'prints for this worktree, or 0 with no helper. When a listener inside',
+        'this worktree holds that port, it alone is requested, and it answers',
+        'for the worktree, health paths included. The scan runs only when the',
+        'port serves no page or nothing here listens on it, and `source` on the',
+        'record reads `declared` or `scan`. A preview.json or helper that',
+        'refuses warns on stderr and leaves the scan to answer.',
+        '',
         'A project can declare paths the page must also serve, in',
         'canon/config/local.toml as health = ["/api/health"]. Each is requested',
         "on the page's own port, redirects followed, and only a final 2xx",
@@ -106,7 +116,8 @@ export function registerLocal(pr: Command): void {
         'left alone, and `reviews` on the JSON record counts the rewrites.',
         '',
         'Read `reason` on the JSON record:',
-        '  ok                  a page answered, with its address in `url`',
+        '  ok                  a page answered, with its address in `url` and',
+        '                      `source` naming how its port was found',
         '  no-server           nothing inside this worktree served a page',
         '  no-listener-reader  neither lsof nor /proc is available',
         '  unhealthy           a page answered but a declared health path did',
@@ -200,6 +211,7 @@ async function runLocal(opts: LocalOptions): Promise<number> {
     machineLocalRunner(),
     declaration.kind === 'paths' ? declaration.paths : [],
     declaration.pageOnly,
+    await readDeclaredPort(worktree),
   )
   if (result.kind === 'refused' && result.reason === 'unhealthy') {
     const { port, path, status } = result
@@ -230,10 +242,32 @@ async function runLocal(opts: LocalOptions): Promise<number> {
 
   if (emitJson) {
     process.stdout.write(
-      `${JSON.stringify({ root, reason: 'ok', url: result.url, port: result.port })}\n`,
+      `${JSON.stringify({ root, reason: 'ok', url: result.url, port: result.port, source: result.declared === true ? 'declared' : 'scan' })}\n`,
     )
   }
   return 0
+}
+
+/**
+ * The port `canon/config/preview.json` declares plus this worktree's offset, or
+ * undefined when none is declared. A config or helper that refuses warns and
+ * leaves the scan to answer, since the port only narrows where the scan looks.
+ */
+async function readDeclaredPort(worktree: string): Promise<number | undefined> {
+  const config = loadPreviewConfig(worktree)
+  if (config.kind === 'refused') {
+    logWarn(`${config.detail} Scanning every listener instead.`)
+    return undefined
+  }
+  if (config.kind === 'absent' || config.config.port === undefined) {
+    return undefined
+  }
+  const offset = await readWorktreeOffset(worktree)
+  if (offset.kind === 'refused') {
+    logWarn(`${offset.detail} Scanning every listener instead.`)
+    return undefined
+  }
+  return config.config.port + offset.value
 }
 
 /**

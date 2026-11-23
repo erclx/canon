@@ -376,6 +376,102 @@ describe('findLocalServer', () => {
       })
     })
   })
+
+  describe('a declared port', () => {
+    it('should use a declared port that answers without probing any other listener', async () => {
+      const runner = fakeRunner([
+        { port: 5173, pid: 10, cwd: LINKED },
+        { port: 5180, pid: 11, cwd: LINKED },
+      ])
+
+      const result = await findLocalServer(LINKED, runner, [], [], 5180)
+
+      expect(result).toEqual({
+        kind: 'found',
+        port: 5180,
+        url: 'http://localhost:5180',
+        declared: true,
+      })
+      expect(runner.probed).toEqual([5180])
+    })
+
+    it('should fall back to the scan when the declared port answers nothing', async () => {
+      const runner = fakeRunner([
+        { port: 5173, pid: 10, cwd: LINKED },
+        { port: 5180, pid: 11, cwd: LINKED, answers: false },
+      ])
+
+      const result = await findLocalServer(LINKED, runner, [], [], 5180)
+
+      expect(result).toEqual({
+        kind: 'found',
+        port: 5173,
+        url: 'http://localhost:5173',
+      })
+    })
+
+    it('should fall back to the scan when nothing listens on the declared port', async () => {
+      const runner = fakeRunner([{ port: 5173, pid: 10, cwd: LINKED }])
+
+      const result = await findLocalServer(LINKED, runner, [], [], 5180)
+
+      expect(result).toMatchObject({ kind: 'found', port: 5173 })
+      expect(runner.probed).toEqual([5173])
+    })
+
+    it('should never probe a declared port a sibling worktree holds', async () => {
+      const runner = fakeRunner([
+        { port: 5173, pid: 10, cwd: LINKED },
+        { port: 5180, pid: 11, cwd: SIBLING },
+      ])
+
+      const result = await findLocalServer(LINKED, runner, [], [], 5180)
+
+      expect(result).toMatchObject({ kind: 'found', port: 5173 })
+      expect(runner.probed).toEqual([5173])
+    })
+
+    it('should refuse unhealthy on the declared port rather than scan past it', async () => {
+      const runner = fakeRunner([
+        { port: 5173, pid: 10, cwd: LINKED },
+        {
+          port: 5180,
+          pid: 11,
+          cwd: LINKED,
+          health: { '/api/health': 500 },
+        },
+      ])
+
+      const result = await findLocalServer(
+        LINKED,
+        runner,
+        ['/api/health'],
+        [],
+        5180,
+      )
+
+      expect(result).toEqual({
+        kind: 'refused',
+        reason: 'unhealthy',
+        port: 5180,
+        path: '/api/health',
+        status: 500,
+      })
+      expect(runner.probed).toEqual([5180])
+    })
+
+    it('should probe the declared port when no listener reader is available', async () => {
+      const runner = fakeRunner(undefined)
+
+      const result = await findLocalServer(LINKED, runner, [], [], 5180)
+
+      expect(result).toMatchObject({
+        kind: 'found',
+        port: 5180,
+        declared: true,
+      })
+    })
+  })
 })
 
 describe('dropAddressLine', () => {
