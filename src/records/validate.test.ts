@@ -500,6 +500,64 @@ describe('checkPlan', () => {
     expect(checkPlan('feature-a-b.md', body)).toEqual([])
   })
 
+  describe('Callers', () => {
+    const CALLERS = {
+      root: '/nowhere',
+      index: {
+        lines: [
+          {
+            skill: 'review-ui',
+            file: 'claude/skills/review-ui/SKILL.md',
+            line: 3,
+            text: 'canon pr drive-copy --stop',
+          },
+        ],
+      },
+    }
+
+    function commandPlan(callers: string[]): string {
+      return conformingPlan()
+        .replace(
+          '- `standards/plan.md`: the sections and the answer contract',
+          '- `src/commands/pr/drive-copy.ts`: add the stop flag',
+        )
+        .replace(
+          '**Verification:**',
+          [...callers, '**Verification:**'].join('\n'),
+        )
+    }
+
+    it('should report a calling skill the plan leaves unstated', () => {
+      const findings = checkPlan(
+        'feature-a-b.md',
+        commandPlan([]),
+        undefined,
+        undefined,
+        CALLERS,
+      )
+
+      expect(kinds(findings)).toEqual(['callers-unstated'])
+      expect(findings[0].subject).toBe('claude/skills/review-ui')
+    })
+
+    it('should pass once a Callers bullet states the skill', () => {
+      const body = commandPlan([
+        '## Callers',
+        '',
+        '- `claude/skills/review-ui/SKILL.md`: here, close-out runs it',
+        '',
+      ])
+
+      expect(
+        checkPlan('feature-a-b.md', body, undefined, undefined, CALLERS),
+      ).toEqual([])
+    })
+
+    it('should owe nothing where no callers root was read', () => {
+      expect(checkPlan('feature-a-b.md', commandPlan([]))).toEqual([])
+    })
+  })
+
   describe('Counterparts', () => {
     const CONTEXT = { rootFiles: new Set(['package.json']) }
 

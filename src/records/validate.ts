@@ -10,6 +10,11 @@ import {
   type ReadDocument,
 } from '@/records/ceiling'
 import {
+  type CallersRoot,
+  checkCallers,
+  readCallersRoot,
+} from '@/records/callers'
+import {
   checkCounterparts,
   type CounterpartRoot,
   readCounterpartRoot,
@@ -75,6 +80,8 @@ export const FINDING_KINDS = [
   'fan-in-unmatched',
   'counterpart-unstated',
   'counterpart-malformed',
+  'callers-unstated',
+  'callers-malformed',
   'ceiling-unstated',
   'bundle-unshared',
 ] as const
@@ -247,6 +254,7 @@ const PLAN_SECTIONS = [
   'Constraints',
   'Files to touch',
   'Counterparts',
+  'Callers',
   'Design references',
   'Reference images',
   'Verification',
@@ -522,15 +530,16 @@ function checkDesignReferences(
 }
 
 /**
- * `counterpart` is the root the plan sits under, read by `readCounterpartRoot`.
- * Left out, as in a project keeping no stack under `tooling/`, the plan owes no
- * `Counterparts` section.
+ * `counterpart` and `callers` are the roots each section's check reads. Left
+ * out, as in a project with no stack or no shipped skills, the plan owes that
+ * section nothing.
  */
 export function checkPlan(
   name: string,
   text: string,
   counterpart?: CounterpartRoot,
   readDocument?: ReadDocument,
+  callers?: CallersRoot,
 ): Finding[] {
   const findings: Finding[] = []
 
@@ -605,6 +614,16 @@ export function checkPlan(
         sections.get('Files to touch') ?? [],
         sections.get('Counterparts'),
         counterpart,
+      ).map((found) => finding(found.kind, name, found.subject, found.message)),
+    )
+  }
+
+  if (callers) {
+    findings.push(
+      ...checkCallers(
+        sections.get('Files to touch') ?? [],
+        sections.get('Callers'),
+        callers,
       ).map((found) => finding(found.kind, name, found.subject, found.message)),
     )
   }
@@ -1082,11 +1101,13 @@ export async function validateRecords(
 
   if (kind === 'plans') {
     const counterpart = await readCounterpartRoot(root)
+    const callers = readCallersRoot(root)
     return validateFiles(
       dir,
       kind,
       names,
-      (name, text) => checkPlan(name, text, counterpart, documentReader(root)),
+      (name, text) =>
+        checkPlan(name, text, counterpart, documentReader(root), callers),
       planStructure,
     )
   }

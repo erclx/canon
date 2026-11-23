@@ -65,7 +65,7 @@ Owns the logic behind `canon claude`, with its verbs registered in `src/commands
 
 - `seeds.ts` plans and applies the `init` copy, `seeds-list.ts` reads the same plan, and `settings.ts` merges the user-level config `setup` writes
 - `gitignore.ts` reconciles a target's `.gitignore` against `tooling/claude/manifest.toml`, the only file `sync` writes
-- The `skills-*.ts` modules read the shipped catalog for the `skills` verbs, being list, audit, families, headings, drift, reach, and rank
+- The `skills-*.ts` modules read the shipped catalog for the `skills` verbs, being list, audit, families, headings, drift, reach, callers, and rank
 - `routing.ts` counts the bullets per `CLAUDE.md` section that name a path, and `plugin-update.ts` backs `plugin-update`
 - `cases/` holds the routing corpus `skills rank` scores against, and `all.test.ts` fails until every shipped skill has a case
 
