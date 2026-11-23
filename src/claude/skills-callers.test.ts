@@ -94,6 +94,26 @@ describe('callersOf', () => {
     expect(callersOf(readCallerIndex(root), 'pr lift')).toEqual([])
   })
 
+  it('keeps a fence open past a shorter fence nested inside it', () => {
+    write(
+      'claude/skills/a/SKILL.md',
+      [
+        '````markdown',
+        '```text',
+        'canon pr lift 1',
+        '```',
+        'canon pr lift 2',
+        '````',
+        'canon pr lift 3',
+        '',
+      ].join('\n'),
+    )
+
+    expect(
+      callersOf(readCallerIndex(root), 'pr lift').map((caller) => caller.line),
+    ).toEqual([7])
+  })
+
   it('reads a reference file and does not match a longer verb name', () => {
     write(
       'claude/skills/a/references/r.md',

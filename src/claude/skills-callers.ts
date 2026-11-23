@@ -41,15 +41,20 @@ export function readCallerIndex(root: string): CallerIndex {
     for (const file of files) {
       const skill = file.split('/')[0]
       let shown = false
-      let fenced = false
+      let open = 0
 
       for (const [index, text] of readFileSync(join(dir, file), 'utf8')
         .split('\n')
         .entries()) {
-        const fence = /^\s*```(\S*)/.exec(text)
-        if (fence) {
-          fenced = !fenced
-          shown = fenced && !SHELL_FENCE.test(fence[1])
+        const fence = /^\s*(`{3,})(\S*)/.exec(text)
+        if (fence && open === 0) {
+          open = fence[1].length
+          shown = !SHELL_FENCE.test(fence[2])
+          continue
+        }
+        if (fence && open > 0 && fence[1].length >= open && fence[2] === '') {
+          open = 0
+          shown = false
           continue
         }
         if (shown) continue
