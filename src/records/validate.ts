@@ -7,6 +7,7 @@ import { linesOutsideFences } from '@/markdown/scan'
 import {
   checkCeiling,
   documentReader,
+  splitAtColon,
   type ReadDocument,
 } from '@/records/ceiling'
 import {
@@ -283,8 +284,8 @@ export const RENDERED_SURFACE = /\.(?:tsx|jsx|astro|vue|svelte|html|css|scss)$/
 
 export function touchesRenderedSurface(entries: readonly string[]): boolean {
   return entries.some((entry) =>
-    [...entry.matchAll(/`([^`]+)`/g)].some((span) =>
-      RENDERED_SURFACE.test(span[1]),
+    [...splitAtColon(entry)[0].matchAll(/`([^`]+)`/g)].some(
+      (span) => !span[1].includes('*') && RENDERED_SURFACE.test(span[1]),
     ),
   )
 }

@@ -9,6 +9,9 @@ import { documentHeight } from '@/markdown/structure'
  */
 export const NEAR_CEILING = 280
 
+/** The fixed phrase an entry uses to state an edit replaces lines in place. */
+const IN_PLACE_PHRASE = 'adds no line'
+
 export interface CeilingFinding {
   readonly kind: 'ceiling-unstated'
   readonly subject: string
@@ -32,7 +35,7 @@ function spans(text: string): string[] {
 }
 
 /** Splits an entry at its first colon outside a code span. */
-function splitAtColon(entry: string): [string, string] {
+export function splitAtColon(entry: string): [string, string] {
   let inSpan = false
   for (let at = 0; at < entry.length; at++) {
     if (entry[at] === '`') inSpan = !inSpan
@@ -83,13 +86,15 @@ export function checkCeiling(
     if (lines < NEAR_CEILING) continue
 
     seen.add(target)
-    const stated = rest.some((path) => isMarkdown(path) && path !== target)
+    const stated =
+      tail.includes(IN_PLACE_PHRASE) ||
+      rest.some((path) => isMarkdown(path) && path !== target)
     if (stated) continue
 
     findings.push({
       kind: 'ceiling-unstated',
       subject: target,
-      message: `renders at ${lines} lines, ${NEAR_CEILING} or more of the 300 ceiling, and its entry names no second markdown path for the new content. Say in the entry which reference the content goes to or which split comes first.`,
+      message: `renders at ${lines} lines, ${NEAR_CEILING} or more of the 300 ceiling, and its entry names no second markdown path for the new content and does not say "${IN_PLACE_PHRASE}". Say in the entry which reference the content goes to or which split comes first.`,
     })
   }
 
