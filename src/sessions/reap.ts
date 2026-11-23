@@ -580,7 +580,7 @@ const DIRS: readonly [TaskState, (root: string) => string][] = [
  */
 export async function readTaskSessions(
   root: string,
-  trunk?: TrunkReader,
+  landed?: LandedRead,
 ): Promise<readonly TaskSessions[]> {
   const read = await Promise.all(
     DIRS.map(async ([state, dirOf]) => {
@@ -599,7 +599,8 @@ export async function readTaskSessions(
               stem,
               state,
               entries: readSessions(text),
-              landed: await landedOn(text, trunk),
+              landed:
+                landed?.stem === stem && (await landedOn(text, landed.trunk)),
               planned: readPlanTargets(text).length > 0,
             }
           }),
@@ -612,15 +613,21 @@ export async function readTaskSessions(
 }
 
 /**
+ * The one task whose pull requests the trunk is asked about. Only a named task
+ * reads its own `landed`, and a board holds a thousand archived ones, so
+ * reading the trunk for each would cost minutes of git on every call.
+ */
+export interface LandedRead {
+  readonly stem: string
+  readonly trunk: TrunkReader
+}
+
+/**
  * The post-merge hook archives a merged task, so an archived one is read too.
  * An unreadable trunk reads as not landed, which keeps the skip a reap made
  * before this test.
  */
-async function landedOn(
-  text: string,
-  trunk: TrunkReader | undefined,
-): Promise<boolean> {
-  if (trunk === undefined) return false
+async function landedOn(text: string, trunk: TrunkReader): Promise<boolean> {
   const numbers = readPullRequest(text)
   if (numbers.length === 0) return false
   const read = await Promise.all(numbers.map((number) => trunk(number)))

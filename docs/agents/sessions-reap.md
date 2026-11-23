@@ -68,7 +68,7 @@ A session reading `shell` holds a background command, such as a preview server o
 
 **Stops the task shows**
 
-The task form stops two more sessions whatever the status says, and the row's `reason` names why.
+The task form stops two more sessions a status alone would have blocked, and the row's `reason` names why. A landed reviewer reading `idle` or `waiting` stops on its status and carries no reason.
 
 | Reason    | Session                                                                                               |
 | --------- | ----------------------------------------------------------------------------------------------------- |

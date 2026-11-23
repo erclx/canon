@@ -218,6 +218,29 @@ describe('canon sessions list from another pid namespace', () => {
   )
 
   it.skipIf(!readable)(
+    'should read an empty branch as unverified beside a dead record in a worktree outside the root',
+    async () => {
+      const outside = join(DIR, 'outside-tree')
+      await $`git -C ${REPO} worktree add -q ${outside} -b side`
+        .env(gitEnv())
+        .quiet()
+      seed(join(DIR, 'gone.sock'), false, outside)
+
+      const result = await runSessions([
+        'list',
+        '--branch',
+        'feat/none-such',
+        '--json',
+      ])
+
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        confidence: 'unverified',
+        sessions: [],
+      })
+    },
+  )
+
+  it.skipIf(!readable)(
     'should read an empty branch as confirmed beside a dead record in another repository',
     async () => {
       seed(join(DIR, 'gone.sock'), false, join(DIR, 'elsewhere'))

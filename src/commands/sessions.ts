@@ -38,7 +38,7 @@ import {
   pipeOutput,
   plural,
 } from '@/cli/ui'
-import { mainWorktreeRoot } from '@/git/worktree'
+import { listWorktrees, mainWorktreeRoot } from '@/git/worktree'
 import { gitTrunkReader } from '@/tasks/trunk'
 
 interface ListCommandOptions {
@@ -473,7 +473,11 @@ async function runReap(
   }
 
   const root = await mainWorktreeRoot()
-  const tasks = await readTaskSessions(root, gitTrunkReader(root))
+  const named = task === undefined ? null : basename(task).replace(/\.md$/, '')
+  const tasks = await readTaskSessions(
+    root,
+    named === null ? undefined : { stem: named, trunk: gitTrunkReader(root) },
+  )
   const own = selfOf(report.sessions, callerIdentity())
   const guards = {
     self:
@@ -792,7 +796,10 @@ async function runList(opts: ListCommandOptions): Promise<number> {
 
   const doubt =
     opts.branch && repository !== null
-      ? doubtIn(report, repository)
+      ? doubtIn(report, [
+          dirname(repository),
+          ...(await listWorktrees(at)).map((entry) => entry.path),
+        ])
       : report.foreignDead
   const claimed =
     opts.branch && repository !== null
@@ -926,17 +933,18 @@ function reportConfidence(
 
 /**
  * A dead foreign record could have held the branch only where its cwd sits
- * under the repository's root, since a branch is unique per repository. A
- * report built without the records leaves every one in doubt.
+ * under the repository's root or one of its worktrees, which may live outside
+ * that root. A report built without the records leaves every one in doubt.
  */
 function doubtIn(
   report: Extract<SessionReport, { kind: 'resolved' }>,
-  repository: string,
+  roots: readonly string[],
 ): number {
   if (report.foreign === undefined) return report.foreignDead
-  const root = dirname(repository)
-  return report.foreign.filter(
-    (record) => record.cwd === root || record.cwd.startsWith(`${root}/`),
+  return report.foreign.filter((record) =>
+    roots.some(
+      (root) => record.cwd === root || record.cwd.startsWith(`${root}/`),
+    ),
   ).length
 }
 

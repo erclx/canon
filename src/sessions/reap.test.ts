@@ -432,6 +432,25 @@ describe('executeReap', () => {
     expect(rows[0]).toMatchObject({ outcome: 'stopped', clientId: '11111111' })
   })
 
+  it.each([
+    ['a stop', false, false, 'stopped'],
+    ['a dry run', false, true, 'would-stop'],
+  ])(
+    'should carry the target reason onto %s',
+    async (_name, remove, dry, outcome) => {
+      const fake = effects([WORKER], true)
+
+      const rows = await executeReap(
+        [{ ...target, reason: 'merged' }],
+        remove,
+        dry,
+        fake,
+      )
+
+      expect(rows[0]).toMatchObject({ outcome, reason: 'merged' })
+    },
+  )
+
   it('should run the client remove in place of its stop under remove', async () => {
     const fake = effects([WORKER], true)
 
@@ -739,7 +758,10 @@ describe('readTaskSessions', () => {
       `# Lexer\n\nPull request: #42\nPlan: .canon/plans/feature-lexer.md\nSessions: worker-a (${WORKER})\n`,
     )
 
-    const read = await readTaskSessions(root, async (number) => number === 42)
+    const read = await readTaskSessions(root, {
+      stem: 'v1.1-lexer',
+      trunk: async (number) => number === 42,
+    })
 
     expect(read[0]).toMatchObject({ landed: true, planned: true })
   })
@@ -753,7 +775,10 @@ describe('readTaskSessions', () => {
       `# Lexer\n\nPull request: #42\nSessions: worker-a (${WORKER})\n`,
     )
 
-    const read = await readTaskSessions(root, async () => undefined)
+    const read = await readTaskSessions(root, {
+      stem: 'v1.1-lexer',
+      trunk: async () => undefined,
+    })
 
     expect(read[0]).toMatchObject({ landed: false })
   })
