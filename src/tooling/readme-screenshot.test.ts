@@ -42,8 +42,9 @@ afterEach(() => {
 })
 
 /**
- * Stands in for `bun e2e/screenshot.ts`, answering the evidence root the
- * harness resolves and writing one frame per named theme.
+ * Stands in for `bun e2e/screenshot.ts` on both calls the script makes,
+ * printing the evidence root the harness resolves and writing one frame per
+ * named theme each time, so it needs no branch on its arguments.
  */
 const stubCapture = (themes: string[]): void => {
   const writes = themes
@@ -51,7 +52,7 @@ const stubCapture = (themes: string[]): void => {
     .join('\n')
   writeFileSync(
     join(bin, 'bun'),
-    `#!/usr/bin/env bash\nif [[ "$*" == *--print-evidence-root* ]]; then echo e2e/evidence; exit 0; fi\ndir=screenshots/localhost/home\nmkdir -p "$dir"\n${writes}\n`,
+    `#!/usr/bin/env bash\necho e2e/evidence\ndir=screenshots/localhost/home\nmkdir -p "$dir"\n${writes}\n`,
     { mode: 0o755 },
   )
 }
