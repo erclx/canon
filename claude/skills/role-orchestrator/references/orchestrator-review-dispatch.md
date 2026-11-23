@@ -56,7 +56,7 @@ Dispatch every pull request's review to a reviewer under `role-reviewer`, first 
 
 ## The UI reviewer
 
-A pull request whose evidence record counts a drivable box takes a second reviewer, a UI reviewer under `review-ui`, dispatched beside the code reviewer so the two passes run at once. Read the record with `canon pr evidence <number> --json` and branch on `drivable` above zero rather than on the exit code.
+A pull request whose evidence record counts a drivable box takes a second reviewer, a UI reviewer under `review-ui`, dispatched beside the code reviewer so the two passes run at once, bar the `OVERLAP` deferral below. Read the record with `canon pr evidence <number> --json` and branch on `drivable` above zero rather than on the exit code.
 
 The record decides this dispatch rather than the worker's announcement, since it reads the checklist `pr-evidence` posted and a message carries only what its sender read.
 
@@ -67,6 +67,16 @@ The record decides this dispatch rather than the worker's announcement, since it
 - Each posts its own family and runs `canon pr lift` on its close, and the verb lifts the draft mark only once both read closed at the head
   - Send the worker each reviewer's sessionId as that reviewer launches, one launched later on `MOVED` included, since a clean UI close dispatches nothing
   - The UI reviewer re-drives on the worker's re-review request at a new head, so message it only to state a hold, as when the merge order owes a rebase first
+
+### Deferred behind an OVERLAP
+
+A pull request an `OVERLAP` line names rebases once per sibling merging ahead of it, and each rebase re-drove its UI pass and re-filmed its reel. Its code reviewer launches at open as usual, and its UI reviewer and reel wait until it is next, so both run once at the head that merges.
+
+- Next is the first in the merge order `orchestrator-merge-order.md` settles whose code review is closed and whose CI is green, so the UI pass is the last gate before the merge
+- Record the deferral as a line on its task under `## Findings`, naming the pull request it waits behind, so the operator sees the wait
+- Tell its worker the reel is deferred, so a rebase skips the reel under the `deferred` code in `${CLAUDE_SKILL_DIR}/../pr-evidence/references/reel.md` rather than filming it
+- Check whether a deferred pull request is next on each merge and on each code close of one, and the merge-order step says what follows
+- A UI reviewer already live when the `OVERLAP` line first names its pull request runs on, and a pull request with no drivable box defers nothing
 
 ### A UI-STALE on the second wake
 

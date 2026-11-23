@@ -12,6 +12,7 @@ This file films a short reel of what the checklist asks a reviewer to try, hosts
 ## Contents
 
 - [How the reel runs](#how-the-reel-runs)
+- [A reel the merge order deferred](#a-reel-the-merge-order-deferred)
 - [With no server to film](#with-no-server-to-film)
 - [Choose the beats](#choose-the-beats)
 - [Film the reel](#film-the-reel)
@@ -28,6 +29,14 @@ No operator is present, so the run is unattended end to end.
 - Compose nothing, since the reel is the product
 - Write inside `.canon/tmp/pr/reel/<number>/` at the current worktree's root, since a reel is thrown away once posted
 - Ask nothing at any step. Every stop below is a skip with a reason, since the ship chain runs this with nobody to answer.
+
+## A reel the merge order deferred
+
+A pull request that overlaps another open one films its reel once, at the head it merges from, rather than once per rebase. The controller defers the reel when the poll reports the overlap, and asks for it once the pull request is next in merge order and rebased.
+
+- While the controller's deferral stands, skip as `deferred: behind #<number>`, naming the pull request it waits behind, and film nothing
+- The lift reads `deferred` as unsettled, so the mark holds until the reel at the head lands
+- On the controller's ask, film as this file states at the rebased head
 
 ## With no server to film
 
