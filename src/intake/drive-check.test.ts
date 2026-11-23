@@ -143,7 +143,7 @@ describe('readGoals', () => {
 
 describe('readDrawn', () => {
   it('should read the reference example as drawn, citing its paths', () => {
-    expect(readDrawn(REFERENCE_LOG)).toEqual({
+    expect(readDrawn(REFERENCE_LOG)).toMatchObject({
       undrawn: [],
       paths: ['evidence/layers/02-options.png', 'evidence/mocks/layers/'],
     })
@@ -165,7 +165,7 @@ describe('readDrawn', () => {
       '- **Decision (operator):** print the record on stdout',
     ].join('\n')
 
-    expect(readDrawn(log)).toEqual({ undrawn: [], paths: [] })
+    expect(readDrawn(log)).toMatchObject({ undrawn: [], paths: [] })
   })
 
   it('should pass a skipped drawing that gives its reason', () => {
@@ -176,7 +176,7 @@ describe('readDrawn', () => {
       '- **Decision (operator):** keep alpha in PNG export',
     ].join('\n')
 
-    expect(readDrawn(log)).toEqual({ undrawn: [], paths: [] })
+    expect(readDrawn(log)).toMatchObject({ undrawn: [], paths: [] })
   })
 
   it('should list a bare skipped drawing as undrawn', () => {
@@ -216,6 +216,54 @@ describe('readDrawn', () => {
     ].join('\n')
 
     expect(readDrawn(log).undrawn).toEqual([])
+  })
+})
+
+describe('readDrawn board and skips', () => {
+  it('should read a drive as drawing when the Board row holds a value', () => {
+    expect(readDrawn(REFERENCE_LOG).board).toBe(true)
+  })
+
+  it('should read a drive as drawing when the Board row holds only a url', () => {
+    const log =
+      '| Setup | Value |\n| --- | --- |\n| Board | `http://127.0.0.1:4173` |'
+
+    expect(readDrawn(log).board).toBe(true)
+  })
+
+  it('should read a drive as drawing no board when the Board row is empty', () => {
+    const log =
+      '| Setup | Value |\n| --- | --- |\n| Board |  |\n| In flight | none |'
+
+    expect(readDrawn(log).board).toBe(false)
+  })
+
+  it('should read a drive with no Board row as drawing no board', () => {
+    expect(readDrawn('# Drive log\n\n| Setup | Value |').board).toBe(false)
+  })
+
+  it('should list a finding whose drawing was skipped with a reason', () => {
+    const log = [
+      '## 03. Export drops the alpha channel',
+      '',
+      '- **Drawn:** skipped, the fix changes no pixel the persona sees',
+      '- **Decision (operator):** keep alpha in PNG export',
+    ].join('\n')
+
+    expect(readDrawn(log).skipped).toEqual([
+      { finding: 3, heading: '03. Export drops the alpha channel' },
+    ])
+  })
+
+  it('should not list a finding that drew or one pointing at another', () => {
+    const log = [
+      REFERENCE_LOG,
+      '## 04. Layers click on a nested frame',
+      '',
+      '- **Decision (operator):** see 02',
+    ].join('\n')
+
+    expect(readDrawn(log).skipped).toEqual([])
   })
 })
 

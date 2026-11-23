@@ -12,12 +12,23 @@ export interface DrawnReading {
   readonly undrawn: readonly string[]
   /** Every path a `Drawn` field cites, for the evidence tests. */
   readonly paths: readonly string[]
+  /** Each decided finding whose `Drawn` field skips with a reason. */
+  readonly skipped: readonly SkippedFinding[]
+  /** Whether the `Board` setup row holds a value, which a drive that drew a board always writes. */
+  readonly board: boolean
+}
+
+export interface SkippedFinding {
+  readonly finding: number
+  /** The finding's heading, as `<nn>. <title>`. */
+  readonly heading: string
 }
 
 const FINDING_HEADING = /^##\s+(\d+\.\s.*?)\s*$/
 const LOG_FIELD = /^[-*]\s+\*\*([^*]+):\*\*\s*(.*)$/
 const DECISION_LABEL = 'Decision (operator)'
 const DRAWN_LABEL = 'Drawn'
+const BOARD_ROW = /^\|\s*Board\s*\|(.*?)\|?\s*$/
 const SEE = /^see\s+(\d+)/i
 
 /**
@@ -28,6 +39,8 @@ const SEE = /^see\s+(\d+)/i
 export function readDrawn(source: string): DrawnReading {
   const undrawn: string[] = []
   const paths: string[] = []
+  const skipped: SkippedFinding[] = []
+  let board = false
   let finding: string | undefined
   let decision: string | undefined
   let drawn: string | undefined
@@ -36,7 +49,14 @@ export function readDrawn(source: string): DrawnReading {
     if (finding !== undefined && decision && !SEE.test(decision)) {
       const field = drawn ?? ''
       if (/^skipped\b/i.test(field)) {
-        if (!/^skipped\s*,\s*\S/i.test(field)) undrawn.push(finding)
+        if (/^skipped\s*,\s*\S/i.test(field)) {
+          skipped.push({
+            finding: Number.parseInt(finding, 10),
+            heading: finding,
+          })
+        } else {
+          undrawn.push(finding)
+        }
       } else {
         const cited = [...field.matchAll(/`([^`]+)`/g)].map((match) => match[1])
         paths.push(...cited)
@@ -53,6 +73,8 @@ export function readDrawn(source: string): DrawnReading {
       finding = FINDING_HEADING.exec(line.text)?.[1]
       continue
     }
+    const row = BOARD_ROW.exec(line.text)
+    if (row && row[1].trim() !== '') board = true
     const field = LOG_FIELD.exec(line.text)
     if (finding === undefined || !field) continue
     if (field[1] === DECISION_LABEL) decision = field[2].trim()
@@ -60,7 +82,7 @@ export function readDrawn(source: string): DrawnReading {
   }
   close()
 
-  return { undrawn, paths }
+  return { undrawn, paths, skipped, board }
 }
 
 /**
