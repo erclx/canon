@@ -49,8 +49,8 @@ Run the sequence from the app root, checked against shadcn `4.23.0` on 2026-11-2
 
 ## TypeScript and layout
 
-- Keep app code in `src/`, Playwright in `e2e/`, shell in `scripts/`, and the Vitest globals in `src/test/setup.ts`
-- Map the `@` alias to `./src` in both tsconfig and the framework's build config
+- Keep app code in the app root, `src/` by default, Playwright in `e2e/`, shell in `scripts/`, and Vitest globals in the root's `test/setup.ts`
+- Map the `@` alias to the app root in tsconfig and the framework's build config
 - Keep the tsconfig at the root with `noEmit: true` in a Vite stack. Astro keeps the scaffold default from `@astrojs/check`.
 - Typecheck with `tsc --noEmit`, never `tsc -b`, since composite mode emits `.js` next to `.ts` and the linter lints it
 

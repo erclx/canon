@@ -16,10 +16,13 @@ Starts a project in an empty folder and hands it to `target-setup`. The CLI owns
 3. Run `canon tooling list --json` and offer only the stacks whose `scaffold` is `true`. A stack without a starter is a layer synced onto a project.
 4. Resolve the stack. Take one the request named, or ask through the structured question surface with one option per offered stack.
    - With no person present and no stack named, stop and list the offered names rather than picking one
-5. Preview the stack, the target, the project name, and the command, then run it:
+   - Once `vite-react` is the stack, ask whether the project is a site or full stack, meaning a browser app that will sit beside a Worker, shared schemas, or a CLI
+   - Pass `--app-root web` for full stack, so every top-level folder is named for a role. A site keeps `src/` and passes no root.
+   - With no person present, pass a root only when the request says full stack, and take `src/` otherwise
+5. Preview the stack, the target, the project name, the root, and the command, then run it:
 
 ```bash
-canon tooling scaffold <stack> <target> --json
+canon tooling scaffold <stack> <target> [--app-root web] --json
 ```
 
 ## Route on the record
@@ -28,10 +31,12 @@ Branch on the record's `ok` and `reason` rather than on the exit, which a shell 
 
 | Record                                              | Route                                                                                                        |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `ok: true`                                          | Report the `files` it moved and the `git` field, then hand off below                                         |
+| `ok: true`                                          | Report the `files` it moved, the `appRoot` when set, and the `git` field, then hand off below                |
 | `bad-name`                                          | Offer the record's `suggested` name as a subfolder target, and rerun only once the person accepts or renames |
 | `not-empty`                                         | Route to `/canon:target-setup`, since something landed in the folder after step 2                            |
 | `scaffold-failed`, `no-output`, or `prepare-failed` | Report the `message` and the `scratch` folder the verb kept, and stop. Nothing reached the target.           |
+| `app-root-taken`                                    | Report the `message` and the `scratch` folder, and ask for another root before a rerun                       |
+| `app-root-unsupported` or `bad-app-root`            | Report the `message` and stop, since step 4 passed a root this stack or the verb does not take               |
 | `no-scaffold`, `no-manifest`, or other              | Report the `message` and stop, since the catalog read in step 3 and the verb disagree                        |
 
 Never rename the folder or retry with a name the person did not choose, since the folder name becomes the package name.
@@ -49,7 +54,7 @@ The verb runs `git init -b main` when the target sits in no work tree, so a `tar
 Invoke `canon:target-setup` with the target as the working folder. Its detect phase now finds the starter's files and resolves the stack from them, so pass it nothing this skill resolved.
 
 - The hand-off is the last install step. Install, governance, verify, and indexes all belong to `target-setup`.
-- Report the stack, the target, the files the verb moved, the `git` field, and that setup ran, in that order.
+- Report the stack, the target, the app root, the files the verb moved, the `git` field, and that setup ran, in that order.
 
 ## Kickoff note
 
