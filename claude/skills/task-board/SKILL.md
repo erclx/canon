@@ -71,6 +71,8 @@ Write `.canon/tasks/vXX.Y-<slug>.md` under the claimed label, reading the file f
 - Leave `Issue:` a bare `#NNN`. The older bare-path form still parses, but it leaves the board in two shapes for every later reader.
 - Never write a `Pull request:` line here. `git-pr` adds it when a pull request opens, and a number guessed now points at someone else's work.
 
+Write the outcome of a row citing an intake item from that item's `Fix:` line, read through `canon intake list <slug> --json` and never from a relayed summary. Drop the class prefix such as "plan-worthy", and carry a narrowing from the `You:` line beside the fix. A bundled row takes one outcome per item.
+
 ### Step 4: place it on a surface
 
 A task file with no row is a dropped task, so name its surface in the same pass that creates it. The test is in `${CLAUDE_SKILL_DIR}/references/backlog.md`, and the board shape in `${CLAUDE_SKILL_DIR}/references/board.md` beside it.
