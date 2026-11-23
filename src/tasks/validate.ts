@@ -413,9 +413,10 @@ const RANK_OBJECT = /\bv\d+\.\d+\b|\bgroups?\b|\brows?\b/i
 /**
  * A clause boundary: the three punctuation marks that end one plus the two
  * conjunctions live cells use to hang a reason off a position claim. The marks
- * are bounded away from digits so `v80.4` stays one token.
+ * are bounded away from digits so `v80.4` stays one token, and a comma or semicolon
+ * after a label still ends its clause.
  */
-const CLAUSE_BREAK = /(?<!\d)[.;,](?!\d)|\band\b|\bbecause\b/i
+const CLAUSE_BREAK = /(?<!\d)\.(?!\d)|[;,]|\band\b|\bbecause\b/i
 
 /**
  * Whether a `Waiting on` cell ranks its row against something rather than
@@ -1316,6 +1317,30 @@ export async function readCitedStems(
 
   const bare = bareLabels(cell, await readLabelFolders(root))
   return bare.kind === 'stems' ? [...bare.stems] : []
+}
+
+/**
+ * The tasks a `Waiting on` cell cites as blockers, leaving out any clause that
+ * ranks the row, since "follows v212.6" places a row and never gates it. The
+ * cell splits where `row-unranked` splits it, with each link held aside so the
+ * dot in a filename is no clause break.
+ */
+export async function readBlockerStems(
+  cell: string,
+  root: string,
+): Promise<string[]> {
+  const links: string[] = []
+  const masked = cell.replace(/\[[^\]]*\]\([^)]*\)/g, (link) => {
+    links.push(link)
+    return `\u0000${links.length - 1}\u0000`
+  })
+  const blockers = masked
+    .split(CLAUSE_BREAK)
+    .filter((clause) => !RANK_VERB.test(clause))
+    .join(', ')
+    .replace(/\u0000(\d+)\u0000/g, (_, index) => links[Number(index)])
+
+  return readCitedStems(blockers, root)
 }
 
 /** What one blocker citation produced, since a row can be neither settled nor open. */

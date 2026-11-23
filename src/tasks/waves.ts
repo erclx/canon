@@ -8,7 +8,7 @@ import {
   type BoardRow,
   orderingPath,
   readBoard,
-  readCitedStems,
+  readBlockerStems,
 } from '@/tasks/validate'
 
 const UP_NEXT = 'Up next'
@@ -202,7 +202,7 @@ export async function planWaves(root: string): Promise<WavesOutcome> {
 
   const after = new Map<string, string[]>()
   for (const holder of planned) {
-    const cited = await readCitedStems(holder.waiting, root)
+    const cited = await readBlockerStems(holder.waiting, root)
     after.set(
       holder.stem,
       cited.filter(
