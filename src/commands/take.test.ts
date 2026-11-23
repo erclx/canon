@@ -138,6 +138,76 @@ describe('canon take', () => {
     },
   )
 
+  it.each(['961', '318', '1922', 'abc'])(
+    'should refuse bad-reel-width for --reel-width %s before filming',
+    async (value) => {
+      const result = await runTake([
+        'http://127.0.0.1:9/',
+        plan,
+        '--out',
+        dir,
+        '--reel',
+        join(dir, 'reel.webp'),
+        '--reel-width',
+        value,
+      ])
+
+      expect(result).toMatchObject({
+        exitCode: 1,
+        record: { reason: 'bad-reel-width' },
+      })
+    },
+  )
+
+  it('should refuse bad-reel-width past the narrowest window, not the first', async () => {
+    const sizes = join(dir, 'sizes.json')
+    const steps = [{ kind: 'wait', ms: 100 }]
+    writeFileSync(
+      sizes,
+      JSON.stringify({
+        beats: [
+          { name: 'wide', steps },
+          { name: 'small', viewport: { width: 800, height: 450 }, steps },
+        ],
+      }),
+    )
+
+    const result = await runTake([
+      'http://127.0.0.1:9/',
+      sizes,
+      '--out',
+      dir,
+      '--reel',
+      join(dir, 'reel.webp'),
+      '--reel-width',
+      '1000',
+    ])
+
+    expect(result).toMatchObject({
+      exitCode: 1,
+      record: {
+        reason: 'bad-reel-width',
+        message: expect.stringContaining('800'),
+      },
+    })
+  })
+
+  it('should refuse bad-reel-width with no --reel rather than ignore it', async () => {
+    const result = await runTake([
+      'http://127.0.0.1:9/',
+      plan,
+      '--out',
+      dir,
+      '--reel-width',
+      '640',
+    ])
+
+    expect(result).toMatchObject({
+      exitCode: 1,
+      record: { reason: 'bad-reel-width' },
+    })
+  })
+
   it('should refuse reel-shape before filming beats of two aspect ratios', async () => {
     const shapes = join(dir, 'shapes.json')
     const steps = [{ kind: 'wait', ms: 100 }]
