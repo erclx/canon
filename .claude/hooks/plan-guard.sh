@@ -130,55 +130,9 @@ session=${meta%%$'\t'*}
 transcript=${meta#*$'\t'}
 [ -n "$session" ] && [ -n "$transcript" ] && [ -r "$transcript" ] || exit 0
 
-# A Skill call or a typed slash command prints as `P <line>`, ordered against
-# the spent marker, and `auto-ship` as `A <args>`, since a worker writes the
-# plan its launch names verbatim without planning it.
-invocations=$(grep -n -e 'plan-feature' -e 'auto-ship' "$transcript" 2>/dev/null | jq -Rr '
-  def text: if type == "string" then . else (map(select(.type == "text") | .text) | join("\n")) end;
-  def skill($name): .type == "tool_use" and .name == "Skill"
-    and ((.input.skill // "") | test("^(canon:)?" + $name + "$"));
-  def typed($name): test("<command-name>/?(canon:)?" + $name + "</command-name>");
-  capture("^(?<n>[0-9]+):(?<j>.*)$") as $l
-  | ($l.j | fromjson? // empty) as $o
-  | if $o.type == "assistant" then
-      ($o.message.content[]? | select(type == "object")
-        | if skill("plan-feature") then "P \($l.n)"
-          elif skill("auto-ship") then "A \(.input.args // "" | tostring)"
-          else empty end)
-    elif $o.type == "user" then
-      (($o.message.content // "") | text)
-      | if typed("plan-feature") then "P \($l.n)"
-        elif typed("auto-ship") then "A \(gsub("\n"; " "))"
-        else empty end
-    else empty end' 2>/dev/null)
-
 rest=${new#.canon/plans/}
 key=$(printf '%s' "$session" | tr -c 'A-Za-z0-9' '_')
 marker_dir="$root/.canon/tmp/hooks/plan-guard"
-
-# One line per new plan judged, so a wrong block in any project shows up beside
-# the passes and the unread ones. A failed write never changes the decision.
-log_decision() {
-  # The group takes the redirect's own error, which a `2>/dev/null` after the
-  # `>>` would miss because the shell opens the file first.
-  mkdir -p "$marker_dir" 2>/dev/null && {
-    printf '%s %s %s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$1" "$key" "$rest" \
-      >>"$marker_dir/decisions.log"
-  } 2>/dev/null
-  return 0
-}
-
-while IFS= read -r line; do
-  case "$line" in
-  "A "*".canon/plans/$rest"*)
-    log_decision pass
-    exit 0
-    ;;
-  esac
-done <<EOF
-$invocations
-EOF
-latest=$(printf '%s\n' "$invocations" | awk '/^P /{n = $2} END {if (n != "") print n}')
 
 # The marker holds the spent invocation's line and the plan it licensed, so a
 # retry or the `cp` after a worktree `Write` passes on the same plan, since a
@@ -191,12 +145,68 @@ if [ -f "$marker" ]; then
 fi
 case "$spent" in '' | *[!0-9]*) spent=0 ;; esac
 
-if [ "$spent" -gt 0 ] && [ "$spent_plan" = "$rest" ]; then
-  log_decision pass
-  exit 0
-fi
-if [ -n "$latest" ] && [ "$latest" -gt "$spent" ]; then
-  mkdir -p "$marker_dir" 2>/dev/null && printf '%s %s\n' "$latest" "$rest" >"$marker" 2>/dev/null
+# A Skill call or a typed slash command prints as `P <line>`, ordered against
+# the spent marker, and `auto-ship` as `A <args>`, since a worker writes the
+# plan its launch names verbatim without planning it.
+read_transcript() {
+  lines=$(wc -l <"$transcript" 2>/dev/null | tr -d ' ')
+  lines=${lines:-0}
+  invocations=$(grep -n -e 'plan-feature' -e 'auto-ship' "$transcript" 2>/dev/null | jq -Rr '
+    def text: if type == "string" then . else (map(select(.type == "text") | .text) | join("\n")) end;
+    def skill($name): .type == "tool_use" and .name == "Skill"
+      and ((.input.skill // "") | test("^(canon:)?" + $name + "$"));
+    def typed($name): test("<command-name>/?(canon:)?" + $name + "</command-name>");
+    capture("^(?<n>[0-9]+):(?<j>.*)$") as $l
+    | ($l.j | fromjson? // empty) as $o
+    | if $o.type == "assistant" then
+        ($o.message.content[]? | select(type == "object")
+          | if skill("plan-feature") then "P \($l.n)"
+            elif skill("auto-ship") then "A \(.input.args // "" | tostring)"
+            else empty end)
+      elif $o.type == "user" then
+        (($o.message.content // "") | text)
+        | if typed("plan-feature") then "P \($l.n)"
+          elif typed("auto-ship") then "A \(gsub("\n"; " "))"
+          else empty end
+      else empty end' 2>/dev/null)
+  latest=$(printf '%s\n' "$invocations" | awk '/^P /{n = $2} END {if (n != "") print n}')
+}
+
+# Spends an invocation after the marker on this plan when it is the license.
+licensed() {
+  while IFS= read -r line; do
+    case "$line" in
+    "A "*".canon/plans/$rest"*) return 0 ;;
+    esac
+  done <<EOF
+$invocations
+EOF
+  if [ "$spent" -gt 0 ] && [ "$spent_plan" = "$rest" ]; then
+    return 0
+  fi
+  if [ -n "$latest" ] && [ "$latest" -gt "$spent" ]; then
+    mkdir -p "$marker_dir" 2>/dev/null && printf '%s %s\n' "$latest" "$rest" >"$marker" 2>/dev/null
+    return 0
+  fi
+  return 1
+}
+
+# One line per new plan judged, carrying the numbers it was judged on, so a
+# wrong block in any project can be explained after the fact. A failed write
+# never changes the decision.
+log_decision() {
+  # The group takes the redirect's own error, which a `2>/dev/null` after the
+  # `>>` would miss because the shell opens the file first.
+  mkdir -p "$marker_dir" 2>/dev/null && {
+    printf '%s %s %s %s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$1" "$key" "$rest" "$judged" \
+      >>"$marker_dir/decisions.log"
+  } 2>/dev/null
+  return 0
+}
+
+read_transcript
+judged="latest=${latest:--} spent=$spent spent_plan=${spent_plan:--} lines=$lines"
+if licensed; then
   log_decision pass
   exit 0
 fi
@@ -213,11 +223,24 @@ if [ -z "$calls" ]; then
   exit 0
 fi
 
-if [ "$spent" -gt 0 ]; then
-  why='The last canon:plan-feature invocation in this session was spent on an earlier new plan'
-else
+# Refusals have come on a write sent right after an invocation a later replay
+# found, which fits a transcript not yet holding it, so a refusal reads once
+# more after a wait well inside the hook timeout.
+sleep 1
+read_transcript
+judged="$judged retry_latest=${latest:--} retry_lines=$lines"
+if licensed; then
+  log_decision pass
+  exit 0
+fi
+
+if [ -z "$latest" ]; then
   why='This session has not invoked canon:plan-feature'
+elif [ "$latest" -eq "$spent" ]; then
+  why="The latest canon:plan-feature invocation in this session, at transcript line $latest, was spent on .canon/plans/${spent_plan:-another plan}"
+else
+  why="The latest canon:plan-feature invocation in this session, at transcript line $latest, is not after line $spent, which was spent on .canon/plans/${spent_plan:-another plan}"
 fi
 log_decision block
-printf '%s, so %s would be written outside the skill that owns its shape. Invoke the canon:plan-feature skill for this plan, then resend the write.\n' "$why" "$new" >&2
+printf '%s, so %s would be written outside the skill that owns its shape. Invoke the canon:plan-feature skill for this plan, then resend the write. A session writing several plans invokes it once per new plan.\n' "$why" "$new" >&2
 exit 2
