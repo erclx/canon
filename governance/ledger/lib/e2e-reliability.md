@@ -53,10 +53,13 @@ Every bullet the rewrite removed or reshaped, grouped by why.
 
 ### Owned by the test-craft skill
 
-Cut in groundwork 266, since `test-craft/references/e2e.md` carries each.
+Cut in groundwork 266, since `test-craft/references/e2e.md` carries each of the four below.
 
 - Cut "settle on the condition with a web-first assertion or `expect.poll`, never `page.waitForTimeout`".
 - Cut "reserve a fixed duration for an assertion that nothing happened across a window".
 - Cut "settle a smooth scroll on the `scrollend` event".
 - Cut "run with `reducedMotion: 'reduce'` unless the test asserts motion".
-- Cut "read the failure's trace for the state the assertion does not read".
+
+### Cut as a restated source line
+
+- Cut "read the failure's trace for the state the assertion does not read". The skill only says to capture a trace on the first retry, so no skill line carries the reading. The [best practices](https://playwright.dev/docs/best-practices) page states it, and groundwork 266 judged it a restatement of that page.
