@@ -50,7 +50,7 @@ export interface Row {
   ui: string
   /** The tip the verb read `ui` against, empty when its record names none. */
   uiHead: string
-  /** The code close carried to the head across a rebase, with the UI family owing nothing. */
+  /** The code close carried to the head across a rebase or a merge of the base, with the UI family owing nothing. */
   isRebased: boolean
   unmatchedCount: number
   unmatchedHeading: string
