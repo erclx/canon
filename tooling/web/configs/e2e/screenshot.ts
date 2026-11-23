@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 import { chromium } from '@playwright/test'
-import { existsSync } from 'fs'
+import { existsSync, readdirSync } from 'fs'
 import { mkdir } from 'fs/promises'
 import path from 'path'
 import { pathToFileURL } from 'url'
@@ -23,35 +23,112 @@ const VIEWPORTS: readonly Viewport[] = [
   { name: '1536', width: 1536, height: 800, evidence: false },
 ]
 
-const CASES_FILE = path.resolve('e2e/capture/cases.ts')
+const CASES_FILE = 'e2e/capture/cases.ts'
+const CASES_DIR = 'e2e/capture/cases'
 
-if (!existsSync(CASES_FILE)) {
+/** The evidence root a project holding the folder alone writes under, the seed's own value. */
+const DEFAULT_EVIDENCE_ROOT = 'e2e/evidence'
+
+/**
+ * The single file first, then each per-feature file in name order, so parallel
+ * branches each add a file rather than all appending to one.
+ */
+const caseFiles: string[] = [
+  ...(existsSync(CASES_FILE) ? [CASES_FILE] : []),
+  ...(existsSync(CASES_DIR)
+    ? readdirSync(CASES_DIR)
+        .filter((name) => name.endsWith('.ts'))
+        .sort()
+        .map((name) => `${CASES_DIR}/${name}`)
+    : []),
+]
+
+if (caseFiles.length === 0) {
   console.error(
-    'e2e/capture/cases.ts is missing. Run canon tooling sync to seed it.',
+    `Neither ${CASES_FILE} nor a ${CASES_DIR}/*.ts file exists. Run canon tooling sync to seed one.`,
   )
   process.exit(1)
 }
 
-const { CASES, EVIDENCE_ROOT } = (await import(
-  pathToFileURL(CASES_FILE).href
-)) as CaptureModule
+/** A case beside the file that declared it, so a collision can name both. */
+interface SourcedCase {
+  readonly captureCase: CaptureCase
+  readonly file: string
+}
+
+const modules = await Promise.all(
+  caseFiles.map(
+    async (file) =>
+      [
+        file,
+        (await import(
+          pathToFileURL(path.resolve(file)).href
+        )) as Partial<CaptureModule>,
+      ] as const,
+  ),
+)
+
+const SOURCED: SourcedCase[] = []
+for (const [file, module] of modules) {
+  if (!Array.isArray(module.CASES)) {
+    console.error(`${file} exports no CASES array.`)
+    process.exit(1)
+  }
+  for (const captureCase of module.CASES) SOURCED.push({ captureCase, file })
+}
+
+const EVIDENCE_ROOT =
+  modules.find(([file]) => file === CASES_FILE)?.[1].EVIDENCE_ROOT ??
+  DEFAULT_EVIDENCE_ROOT
 
 /** One case at one viewport, which is the unit a filter selects and a context is built for. */
 interface CaptureRun {
   readonly captureCase: CaptureCase
   readonly viewport: Viewport
   readonly label: string
+  readonly file: string
 }
 
-const ALL_RUNS: readonly CaptureRun[] = CASES.flatMap((captureCase) =>
-  VIEWPORTS.filter(
-    (viewport) => !captureCase.excludeViewports?.includes(viewport.name),
-  ).map((viewport) => ({
-    captureCase,
-    viewport,
-    label: `${captureCase.section}/${viewport.name}--${captureCase.theme}`,
-  })),
+const VIEWPORT_NAMES = new Set(VIEWPORTS.map((viewport) => viewport.name))
+
+for (const { captureCase, file } of SOURCED) {
+  for (const name of captureCase.excludeViewports ?? []) {
+    if (!VIEWPORT_NAMES.has(name)) {
+      console.warn(
+        `${file}: case ${captureCase.section}/${captureCase.theme} excludes '${name}', which no viewport carries. Ignored.`,
+      )
+    }
+  }
+}
+
+const ALL_RUNS: readonly CaptureRun[] = SOURCED.flatMap(
+  ({ captureCase, file }) =>
+    VIEWPORTS.filter(
+      (viewport) => !captureCase.excludeViewports?.includes(viewport.name),
+    ).map((viewport) => ({
+      captureCase,
+      viewport,
+      file,
+      label: `${captureCase.section}/${viewport.name}--${captureCase.theme}`,
+    })),
 )
+
+// Two runs sharing a label write one output file, and the later would
+// overwrite the earlier with no sign.
+const firstFileByLabel = new Map<string, string>()
+const collisions: string[] = []
+for (const { label, file } of ALL_RUNS) {
+  const first = firstFileByLabel.get(label)
+  if (first === undefined) firstFileByLabel.set(label, file)
+  else collisions.push(`  ${label}: ${first} and ${file}`)
+}
+
+if (collisions.length > 0) {
+  console.error(
+    `Two cases write the same output file. Give one a distinct section or theme:\n${collisions.join('\n')}`,
+  )
+  process.exit(1)
+}
 
 const args = process.argv.slice(2)
 const checkConsoleClean = args.includes('--check-console-clean')
