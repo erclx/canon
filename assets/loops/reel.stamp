@@ -1,9 +1,10 @@
-source: canon/frames:pr-3379/c3832d3/20261122T094042Z/reel.webp
-pull-request: 3379
-filmed-at: c3832d3
-address: https://github.com/erclx/canon/pull/3379
-image-sha256: 85b17ffe25b1e03340fc7ddafa8ca7f3691e2857f5cd1ed6827ba274e3c7879f
-still-sha256: 25ff67bdaef2ce4085b14741351b6b7de0b1f78f88ea6113344870740ddef855
+source: canon/frames:pr-385/446f36b/20261118T181748Z/reel.webp
+repository: erclx/frameboard
+pull-request: 385
+filmed-at: 446f36b
+address: https://github.com/erclx/frameboard/pull/385
+image-sha256: 46c1254319ad35addd2c541f7bd7e5bfb4e3b70f8bed94da2cd5b8fbb3c032fe
+still-sha256: 382a78ad5ae6073e027e3a2dd1a2f85fab1a2355a29ba7c6d7de31ba7cd2c535
 width: 960
 height: 600
-reel-seconds: 12.55
+reel-seconds: 4.55

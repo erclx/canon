@@ -5,6 +5,8 @@ import { repoRoot } from './canon-cli'
 
 /** A reel a pull request carried, as its stamp names it. */
 export interface Reel {
+  /** The repository whose pull request carried the reel, as `owner/name`. */
+  readonly repository: string
   readonly pullRequest: number
   /** The pull request's page, which the caption links. */
   readonly address: string
@@ -15,6 +17,7 @@ export interface Reel {
 }
 
 const REEL_FIELDS = [
+  'repository',
   'pull-request',
   'address',
   'reel-seconds',
@@ -50,6 +53,7 @@ export function reelFrom(stamp: string): Reel {
     return value
   }
   return {
+    repository: fields.repository ?? '',
     pullRequest: number('pull-request'),
     address: fields.address ?? '',
     seconds: number('reel-seconds'),
