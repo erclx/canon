@@ -28,7 +28,7 @@ export type ReelRead =
   | { readonly kind: 'read'; readonly reel: ReelInfo }
   | { readonly kind: 'refused'; readonly detail: string }
 
-const NOT_ANIMATED = 'is not an animated WebP, as `canon take --reel` writes'
+const NOT_ANIMATED = 'it is not an animated WebP'
 
 /**
  * Reads the canvas size and each frame's start from the container's chunks.
@@ -41,14 +41,14 @@ export function readReel(bytes: Buffer): ReelRead {
     bytes.toString('ascii', 0, 4) !== 'RIFF' ||
     bytes.toString('ascii', 8, 12) !== 'WEBP'
   ) {
-    return { kind: 'refused', detail: `the file ${NOT_ANIMATED}` }
+    return { kind: 'refused', detail: NOT_ANIMATED }
   }
   let width = 0
   let height = 0
   let animated = false
   let ms = 0
   const frames: ReelFrame[] = []
-  for (let at = 12; at + 8 <= bytes.length; ) {
+  for (let at = 12; at + 8 <= bytes.length;) {
     const kind = bytes.toString('ascii', at, at + 4)
     const size = bytes.readUInt32LE(at + 4)
     const body = at + 8
@@ -67,7 +67,7 @@ export function readReel(bytes: Buffer): ReelRead {
     at = body + size + (size % 2)
   }
   if (!animated || frames.length === 0) {
-    return { kind: 'refused', detail: `the file ${NOT_ANIMATED}` }
+    return { kind: 'refused', detail: NOT_ANIMATED }
   }
   return { kind: 'read', reel: { width, height, frames } }
 }
