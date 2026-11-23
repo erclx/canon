@@ -102,6 +102,7 @@ export const FINDING_KINDS = [
   'columns-mismatched',
   'group-doubled',
   'launch-misshapen',
+  'launch-unstated',
   'cell-long',
   'blocker-settled',
   'blocker-unresolved',
@@ -203,6 +204,8 @@ export interface BoardRow {
   readonly ordinal: OrdinalWord | 'last' | undefined
   /** Whether a `Waiting on` cell ranks its row against a sibling row or a class of rows, false when the group fixes no such column. */
   readonly ranked: boolean
+  /** The `Launch` cell as written, absent when the group fixes no such column. */
+  readonly launch: string | undefined
   /** Every cell of the row as `splitCells` read it, which the wide-token scan walks. */
   readonly cells: readonly string[]
 }
@@ -556,6 +559,7 @@ export function readBoard(text: string): {
       waiting,
       ordinal: waiting ? readOrdinal(waiting) : undefined,
       ranked: waiting ? readRank(waiting) : false,
+      launch,
       cells,
     })
   }
@@ -962,6 +966,20 @@ async function groupClaimFinding(
       group: row.group,
       subject: row.stem,
       message: `sits under ${row.group} and its task cites ${target}, a live plan. A row with a plan belongs under Up next or In flight. When the plan no longer describes the work, keep the row under Up next, amend the plan in place, hold the row with canon tasks block until the amended plan lands, and record why under the task's Findings.`,
+    }
+  }
+
+  if (
+    row.group === 'Up next' &&
+    hasLivePlan &&
+    row.launch !== undefined &&
+    row.launch.trim() === ''
+  ) {
+    return {
+      kind: 'launch-unstated',
+      group: row.group,
+      subject: row.stem,
+      message: `sits under ${row.group} with a live plan and no Launch cell. Pick one through canon tasks launch.`,
     }
   }
 
