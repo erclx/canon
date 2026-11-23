@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { MainPull } from '@/git/worktree'
-import type { ChecksGate } from '@/pr/lift'
+import type { BaseReading, ChecksGate } from '@/pr/lift'
 import {
   botKind,
   composeBotDescription,
@@ -356,17 +356,20 @@ interface Fixture {
   checks?: ChecksGate | null
   outcome?: MergeOutcome
   mainPull?: MainPull
+  standing?: BaseReading
 }
 
 interface Harness {
   readonly api: MergeApi
   readonly puts: { title: string; description: string; sha: string }[]
   readonly pulls: { count: number }
+  readonly standings: { head: string; base: string }[]
 }
 
 function harness(fixture: Fixture = {}): Harness {
   const puts: Harness['puts'] = []
   const pulls = { count: 0 }
+  const standings: Harness['standings'] = []
   const pull: MergePull = {
     isOpen: true,
     isDraft: false,
@@ -374,6 +377,7 @@ function harness(fixture: Fixture = {}): Harness {
     body: BODY,
     head: HEAD,
     branch: 'feat/add-merge-verb',
+    base: 'main',
     isBotAuthor: false,
     number: 2544,
     ...fixture.pull,
@@ -384,6 +388,10 @@ function harness(fixture: Fixture = {}): Harness {
       fixture.checks === null
         ? undefined
         : (fixture.checks ?? { state: 'passing', isConflicted: false }),
+    readStanding: async (head, base) => {
+      standings.push({ head, base })
+      return fixture.standing ?? { standing: 'fresh' }
+    },
     putMerge: async (request) => {
       puts.push(request)
       return fixture.outcome ?? { kind: 'merged', sha: MERGED_SHA }
@@ -393,8 +401,91 @@ function harness(fixture: Fixture = {}): Harness {
       return fixture.mainPull ?? { outcome: 'pulled', reason: 'fast-forwarded' }
     },
   }
-  return { api, puts, pulls }
+  return { api, puts, pulls, standings }
 }
+
+describe('merge reading the base standing', () => {
+  it('should merge a fresh head after reading its standing against the base', async () => {
+    const { api, puts, standings } = harness()
+
+    const record = await merge(api, { number: 2544, isDryRun: false })
+
+    expect(record).toMatchObject({ reason: 'merged', isOk: true })
+    expect(record.moved).toBeUndefined()
+    expect(standings).toEqual([{ head: HEAD, base: 'main' }])
+    expect(puts).toHaveLength(1)
+  })
+
+  it('should refuse standing-stale and name the files the base changed', async () => {
+    const { api, puts } = harness({
+      standing: { standing: 'stale', moved: ['src/pr/merge.ts'] },
+    })
+
+    const record = await merge(api, { number: 2544, isDryRun: false })
+
+    expect(record).toMatchObject({
+      reason: 'standing-stale',
+      isOk: false,
+      moved: ['src/pr/merge.ts'],
+    })
+    expect(puts).toEqual([])
+  })
+
+  it.each<[string, BaseReading, string]>([
+    ['a conflicted base', { standing: 'conflict' }, 'standing-conflict'],
+    ['a base nobody could read', { standing: 'unknown' }, 'standing-unknown'],
+  ])('should refuse %s and call no merge', async (_name, standing, reason) => {
+    const { api, puts } = harness({ standing })
+
+    const record = await merge(api, { number: 2544, isDryRun: false })
+
+    expect(record).toMatchObject({ reason, isOk: false })
+    expect(record.moved).toBeUndefined()
+    expect(puts).toEqual([])
+  })
+
+  it('should refuse a stale head on a dry-run the way it refuses a merge', async () => {
+    const { api, puts } = harness({
+      standing: { standing: 'stale', moved: ['src/a.ts'] },
+    })
+
+    const record = await merge(api, { number: 2544, isDryRun: true })
+
+    expect(record).toMatchObject({
+      reason: 'standing-stale',
+      isOk: false,
+      moved: ['src/a.ts'],
+    })
+    expect(puts).toEqual([])
+  })
+
+  it('should report failing checks without reading the standing', async () => {
+    const { api, standings } = harness({
+      checks: { state: 'failing', isConflicted: false },
+    })
+
+    const record = await merge(api, { number: 2544, isDryRun: false })
+
+    expect(record.reason).toBe('ci-failing')
+    expect(standings).toEqual([])
+  })
+
+  it('should read a release pull request fresh against its base and merge it', async () => {
+    const { api, standings } = harness({
+      pull: {
+        title: 'chore(main): release 5.58.0',
+        body: RELEASE_BODY,
+        branch: 'release-please--branches--main--components--canon',
+        number: 2649,
+      },
+    })
+
+    const record = await merge(api, { number: 2649, isDryRun: false })
+
+    expect(record.reason).toBe('merged')
+    expect(standings).toEqual([{ head: HEAD, base: 'main' }])
+  })
+})
 
 describe('merge pulling the main worktree', () => {
   it('should record the fast-forward after a merge', async () => {

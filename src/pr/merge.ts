@@ -1,5 +1,5 @@
 import type { MainPull } from '@/git/worktree'
-import { advisoryOf, type ChecksGate } from '@/pr/lift'
+import { advisoryOf, type BaseReading, type ChecksGate } from '@/pr/lift'
 import { readSection } from '@/pr/paths'
 import { UI_PASS_MARKER } from '@/pr/tick'
 
@@ -13,6 +13,9 @@ export type MergeRefusal =
   | 'ci-conflicted'
   | 'ci-stalled'
   | 'ci-pending'
+  | 'standing-stale'
+  | 'standing-conflict'
+  | 'standing-unknown'
   | 'head-moved'
   | 'not-mergeable'
   | 'gh-failed'
@@ -27,6 +30,8 @@ export interface MergePull {
   readonly head: string
   /** The head branch name, which a bot pull request is recognized by. */
   readonly branch: string
+  /** The base branch name, which the standing is read against. */
+  readonly base: string
   /** Whether the author is a bot account, which a release pull request's is not. */
   readonly isBotAuthor: boolean
   /** The number GitHub answered for, which the squash subject carries. */
@@ -57,6 +62,8 @@ export interface MergeApi {
   /** `absent` when GitHub answered 404, which no retry changes. */
   readPull(): Promise<MergePull | 'absent' | undefined>
   readChecks(head: string): Promise<ChecksGate | undefined>
+  /** The lift's own standing read, so the two verbs never disagree about one head. */
+  readStanding(head: string, base: string): Promise<BaseReading>
   putMerge(request: MergeRequest): Promise<MergeOutcome>
   /** Runs only after a merge landed, so its outcome never decides the merge's. */
   pullMain(): Promise<MainPull>
@@ -71,8 +78,7 @@ export interface MergeOptions {
 
 /** What happened to the local main worktree after a merge. */
 export type MergePullRecord =
-  | MainPull
-  | { readonly outcome: 'skipped'; readonly reason: 'no-pull' }
+  MainPull | { readonly outcome: 'skipped'; readonly reason: 'no-pull' }
 
 export interface MergeRecord {
   readonly reason: 'merged' | 'dry-run' | MergeRefusal
@@ -84,6 +90,8 @@ export interface MergeRecord {
   readonly sha?: string
   /** Failing checks the base does not require, which the merge went past. */
   readonly advisory?: readonly string[]
+  /** The branch paths the base changed since the fork point, present only on `standing-stale`. */
+  readonly moved?: readonly string[]
   /** The fast-forward of the main worktree, present only on a merge. */
   readonly pull?: MergePullRecord
 }
@@ -208,7 +216,11 @@ function pendingReason(checks: ChecksGate): MergeRefusal {
 function refused(
   reason: MergeRefusal,
   number: number,
-  message: { title?: string; description?: string } = {},
+  message: {
+    title?: string
+    description?: string
+    moved?: readonly string[]
+  } = {},
 ): MergeRecord {
   return { reason, isOk: false, number, ...message }
 }
@@ -216,7 +228,8 @@ function refused(
 /**
  * Squash-merges one ready pull request with a message carrying only the change.
  * Every refusal is read before the one write, which sends the head it read as `sha`, so GitHub
- * refuses a later push. It reads the draft flag, not review comments, since a ready pull request passed the lift's gates.
+ * refuses a later push. It reads the draft flag, not review comments, and reads the lift's standing again, since a
+ * sibling merged after the lift can leave the head stale. Standing runs after the checks, so failing CI makes no fetch.
  */
 export async function merge(
   api: MergeApi,
@@ -249,6 +262,14 @@ export async function merge(
   if (checks.state === 'failing') return refused('ci-failing', number, message)
   if (checks.state !== 'passing') {
     return refused(pendingReason(checks), number, message)
+  }
+
+  const base = await api.readStanding(pull.head, pull.base)
+  if (base.standing !== 'fresh') {
+    return refused(`standing-${base.standing}`, number, {
+      ...message,
+      ...(base.moved === undefined ? {} : { moved: base.moved }),
+    })
   }
 
   if (opts.isDryRun) {

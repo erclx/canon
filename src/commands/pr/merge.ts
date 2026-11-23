@@ -3,6 +3,7 @@ import { resolve } from 'node:path'
 import { execa } from 'execa'
 import { gitEnv } from '@/git/env'
 import { fastForwardMain } from '@/git/worktree'
+import { readBaseReading } from '@/pr/lift'
 import {
   merge,
   type MergeApi,
@@ -15,6 +16,7 @@ import {
   GH_TIMEOUT_MS,
   PULL_REFUSALS,
   ReadOptions,
+  gitRunner,
   noteRateLimit,
   rateLimitMessage,
   refuseWith,
@@ -70,9 +72,13 @@ export function registerMerge(pr: Command): void {
         '',
         'Refusals are read before the one write, which sends the head it read',
         'as `sha`, so a push after the read refuses rather than merging. The',
-        'verb reads the draft flag and not the reviews, since a ready pull',
-        'request already passed `canon pr lift`. It does not wait on checks or',
-        'delete the branch.',
+        'verb reads the draft flag and not the reviews. It reads the standing',
+        '`canon pr lift` gates on again once the checks pass, since a sibling',
+        'merged after the lift can leave the head stale. Stale means the base',
+        'changed a file the branch writes since the two forked, and the record',
+        'names those files as `moved`. A stale, conflicted, or unread base',
+        'refuses, and the branch updates and reruns CI before it lands. No',
+        'flag merges past it. It does not wait on checks or delete the branch.',
         '',
         'After a merge lands, the verb fast-forwards the checkout at --root when',
         'it is the main worktree on the trunk, which fires the `post-merge` hook',
@@ -91,7 +97,8 @@ export function registerMerge(pr: Command): void {
         'Reasons:',
         '  merged, dry-run (--dry-run)',
         '  pull-closed, pull-draft, missing-summary, missing-key-changes,',
-        '  ci-failing, ci-conflicted, ci-stalled, ci-pending, head-moved,',
+        '  ci-failing, ci-conflicted, ci-stalled, ci-pending, standing-stale',
+        '  (with `moved`), standing-conflict, standing-unknown, head-moved,',
         '  not-mergeable, gh-failed, rate-limited, bad-input (a number that is not',
         '  a positive whole number), no-pull (a number naming no pull request)',
         '',
@@ -132,6 +139,12 @@ const MERGE_REFUSALS: Record<MergeRefusal | 'gh-missing', string> = {
     'A workflow run on the head has sat queued with no job past 10 minutes. Close and reopen the pull request to start a fresh run.',
   'ci-pending':
     'A check run on the head has yet to conclude. Run the verb again once it does.',
+  'standing-stale':
+    'The base changed a file this branch writes since the two forked. Update the branch and wait for CI, rather than retrying the merge.',
+  'standing-conflict':
+    'The head no longer merges cleanly into the base. Rebase the branch and wait for CI.',
+  'standing-unknown':
+    'The standing against the base could not be read, so nothing is merged. Check the remote and run the verb again.',
   'head-moved':
     'The head moved after the read, so GitHub refused rather than merging unread commits.',
   'not-mergeable': 'GitHub answered that the pull request is not mergeable.',
@@ -215,11 +228,22 @@ function mergeApi(root: string, number: string): MergeApi {
         body: row.body ?? '',
         head: row.head.sha,
         branch: row.head.ref ?? '',
+        base: row.base?.ref ?? '',
         isBotAuthor: row.user?.type === 'Bot',
         number: row.number,
       }
     },
     readChecks: (head) => readChecksGate(root, number, head),
+    // A pull read with no base names nothing to measure against, so it refuses.
+    readStanding: async (head, base) =>
+      base === ''
+        ? { standing: 'unknown' }
+        : readBaseReading(
+            gitRunner(root),
+            Number(number),
+            head,
+            `origin/${base}`,
+          ),
     putMerge: (request) => putSquashMerge(root, number, request),
     pullMain: () => fastForwardMain(root),
   }
@@ -271,6 +295,9 @@ async function runMerge(
           : MERGE_REFUSALS[record.reason],
   )
   warnAdvisory(record.advisory)
+  for (const path of record.moved ?? []) {
+    logInfo(`base changed ${path}`)
+  }
   if (record.pull !== undefined) {
     logInfo(`main worktree ${record.pull.outcome}: ${record.pull.reason}`)
   }
