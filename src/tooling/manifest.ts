@@ -46,6 +46,11 @@ export interface Manifest {
    * for one release so a manifest not yet moved keeps working.
    */
   readonly prepare?: string
+  /**
+   * The folder the starter writes its app into, from `[scaffold] app-root`. Declaring it is what lets
+   * `canon tooling scaffold --app-root` move that folder, so a stack whose framework fixes `src/` leaves it unset.
+   */
+  readonly appRoot?: string
 }
 
 export interface ChainOptions {
@@ -153,6 +158,7 @@ export function loadManifest(
   const prepare =
     readString(asTable(parsed.scaffold).prepare) ??
     readString(asTable(parsed.verify).prepare)
+  const appRoot = readString(asTable(parsed.scaffold)['app-root'])
   const gitattributes = readGitignoreSections(asTable(parsed.gitattributes))
   const dir = join(toolingDir(root), stack)
 
@@ -170,6 +176,7 @@ export function loadManifest(
     ...(perRoot.length > 0 ? { perRoot } : {}),
     ...(scaffold !== undefined ? { scaffold } : {}),
     ...(prepare !== undefined ? { prepare } : {}),
+    ...(appRoot !== undefined ? { appRoot } : {}),
   }
 }
 

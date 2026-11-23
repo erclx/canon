@@ -8,7 +8,7 @@ The vite-react stack covers Vite + React + TypeScript web apps and Chrome extens
 
 ## Scaffold checklist
 
-1. Scaffold with `canon tooling scaffold vite-react <name>` (web apps) or `bunx create-crxjs@latest` (Chrome extensions).
+1. Scaffold with `canon tooling scaffold vite-react <name>` for a site, adding `--app-root web` for a full stack project, or with `bunx create-crxjs@latest` for a Chrome extension.
 2. Install base and web tooling with `canon tooling sync web . --write`.
 3. Install vite-react deps and configs with `canon tooling sync vite-react . --write`.
 4. Extend the `ci` and `development` context entries under `canon/context/` per the web reference's extend sections plus the vite-react rows below.
@@ -21,9 +21,19 @@ The vite-react stack covers Vite + React + TypeScript web apps and Chrome extens
 - The step removes the demo, being `src/App.tsx`, `src/App.css`, `src/assets/`, and `public/icons.svg`, and fails the scaffold when a template change leaves one missing
 - The overlay writes `src/index.css` as the Tailwind import alone, a minimal `src/app.tsx` with a named `App` export, and a `src/main.tsx` mounting it on `#root`
 
+### App root
+
+`[scaffold] app-root` declares `src` as the folder the starter writes, which opts the stack into `--app-root`.
+
+- Pass `--app-root web` when the project will hold a Worker, shared schemas, or a CLI beside the browser app, so every top-level folder is named for a role
+- The scaffold moves `src/` there after the overlay lands and points `index.html`'s module script into it
+- It records the root as `appRoot` in `canon/config/config.json`, and sync renders that root wherever a golden config names the app folder
+- Sync also lands each golden file shipped under `src/`, such as the test setup file and `site.ts`, under the recorded root
+- A project with no recorded root renders `src`, so passing `--app-root src` matches passing nothing
+
 ## What ships as golden configs
 
-- `vite.config.ts` adds `@vitejs/plugin-react`, `@tailwindcss/vite`, the `@` alias to `./src`, and `VITE_BASE_URL` for the base path.
+- `vite.config.ts` adds `@vitejs/plugin-react`, `@tailwindcss/vite`, the `@` alias to the app root, and `VITE_BASE_URL` for the base path.
 - It serves dev on port `5173` and preview on `4173`, each plus `WORKTREE_PORT_OFFSET`, both with `strictPort`.
 - `vitest.config.ts` merges from `vite.config.ts`, imported with its `.ts` extension, which Vite 8 requires. It sets jsdom, globals, the setup file, `passWithNoTests: true`, and v8 coverage.
   - It sets `cacheDir` to `node_modules/.vite-vitest`, since the runner writes its results cache to Vite's `cacheDir`, which the dev server also uses.
@@ -32,7 +42,7 @@ The vite-react stack covers Vite + React + TypeScript web apps and Chrome extens
 
 ## Chrome extension variant
 
-When scaffolding a Chrome extension, override the installed golden configs.
+When scaffolding a Chrome extension, override the installed golden configs. Keep the extension on `src/`, since its manifest entry points name that folder.
 
 ### Build config
 

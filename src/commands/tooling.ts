@@ -409,6 +409,10 @@ export function register(program: Command): void {
     .argument('[target]', 'Target directory, created when missing', '.')
     .helpOption('-h, --help', 'Show this help message')
     .option('--json', 'Add a machine-readable record on stdout')
+    .option(
+      '--app-root <dir>',
+      'Folder the app lands in instead of src/, for a stack declaring [scaffold] app-root',
+    )
     .addHelpText(
       'after',
       [
@@ -423,20 +427,32 @@ export function register(program: Command): void {
         'initialized, existing, or failed. A failed init still exits 0.',
         'Run `canon init` or the target-setup skill afterward to sync tooling.',
         '',
+        '--app-root moves the folder the manifest declares, overlay included,',
+        "retargets index.html's paths into it, and records the root in",
+        'canon/config/config.json, which sync renders into the golden configs.',
+        "The record's appRoot field is set only when the folder moved. Passing",
+        'src is the same as passing nothing.',
+        '',
         'Exit codes:',
         '  0  scaffolded',
         '  1  refused: excluded, no-manifest, no-scaffold, not-empty, bad-name,',
-        '     scaffold-failed, no-output, or prepare-failed',
+        '     bad-app-root, app-root-unsupported, scaffold-failed, no-output,',
+        '     prepare-failed, or app-root-taken',
         '',
         'Examples:',
         '  canon tooling scaffold vite-react',
+        '  canon tooling scaffold vite-react my-app --app-root web --json',
         '  canon tooling scaffold astro my-site --json',
         '',
       ].join('\n'),
     )
-    .action(async (stack: string, target: string, opts: ListOptions) => {
+    .action(async (stack: string, target: string, opts: ScaffoldFlags) => {
       process.exitCode = await runScaffold(stack, target, opts)
     })
+}
+
+interface ScaffoldFlags extends ListOptions {
+  readonly appRoot?: string
 }
 
 /**
@@ -446,12 +462,17 @@ export function register(program: Command): void {
 async function runScaffold(
   stack: string,
   target: string,
-  opts: ListOptions,
+  opts: ScaffoldFlags,
 ): Promise<number> {
   const json = opts.json === true
   if (!json) intro(`canon tooling scaffold ${stack}`)
 
-  const result = await scaffoldStack({ root: PROJECT_ROOT, stack, target })
+  const result = await scaffoldStack({
+    root: PROJECT_ROOT,
+    stack,
+    target,
+    ...(opts.appRoot === undefined ? {} : { appRoot: opts.appRoot }),
+  })
 
   if (!result.ok) {
     logError(result.message)
@@ -474,6 +495,9 @@ async function runScaffold(
   }
   logStep(`Scaffolded ${result.target}`)
   for (const file of result.files) logAdd(file)
+  if (result.appRoot !== undefined) {
+    logInfo(`Moved the app to ${result.appRoot}/ and recorded it for sync`)
+  }
   if (result.git === 'initialized')
     logInfo('Initialized a git repository on main')
   else if (result.git === 'failed')
