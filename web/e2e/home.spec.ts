@@ -66,7 +66,13 @@ test('every nav link and menu entry resolves to a section or an absolute address
 
   expect(anchors.length).toBeGreaterThan(6)
   expect(missing).toEqual([])
-  expect(outward.filter((href) => !href.startsWith('https://'))).toEqual([])
+  expect(
+    outward.filter((href) => href !== '/' && !href.startsWith('https://')),
+  ).toEqual([])
+  await expect(page.locator('nav[aria-label="Site"] a.brand')).toHaveAttribute(
+    'href',
+    '/',
+  )
 })
 
 test('the toggle flips the theme and a reload keeps it', async ({ page }) => {
