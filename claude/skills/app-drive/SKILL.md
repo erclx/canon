@@ -150,7 +150,7 @@ Close only on the operator's word, and keep the app up while they keep talking.
 Run this tail by default after the close, since the intake records the session's measurements only as outcomes. A drive left with `You:` slots unread ends at the close and hands its rows off, a reason `role-planner` names under `### Planning what this session measured`.
 
 1. Answer the intake's `You:` slots with `plan-intake-answer` before any row is promoted from it.
-2. Send the controller the ready list, naming no item whose `You:` slot is still open, and say this session is planning those rows, so it holds a cold planner for each.
+2. Send the controller the ready items by intake folder, cluster file, and number, none with an open `You:` slot, and say this session is planning those rows, so it holds a cold planner for each.
 3. Wait for the controller to file the rows and name each back. Plan only a row named to this session, and write no task file.
 4. Invoke `canon:plan-feature` for each named row, since its Step 1 loads the UI skills for a rendered surface. Link it with `canon tasks plan-link` and announce it per `role-planner` before the next.
 
