@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      '@': path.resolve(import.meta.dirname, './src'),
+      '@': path.resolve(import.meta.dirname, './{{appRoot}}'),
     },
   },
   base: process.env.VITE_BASE_URL ?? '/',

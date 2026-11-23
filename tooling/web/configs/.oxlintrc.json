@@ -143,7 +143,7 @@
         "check-file/folder-naming-convention": [
           "error",
           {
-            "src/**/!(__tests__)/": "KEBAB_CASE"
+            "{{appRoot}}/**/!(__tests__)/": "KEBAB_CASE"
           }
         ],
         "no-unused-vars": [
