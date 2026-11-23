@@ -51,6 +51,9 @@ A merge trigger runs four things in order, whoever ran the merge, since the refi
    - The verb skips a busy, interactive, talk, or controller session, the caller, and one a live task still records, so read each `skipped` row's `reason` rather than stopping it by hand
    - List what it stopped in the report's `Reaped:` line, any `failed` row with its `detail`, and each listener the record's `listeners` ended, by port and path
 5. Read `.canon/tasks/priority.md` and count the `## Up next` rows whose `Waiting on` has cleared, since a blocked row is no reserve. `## In flight` is what is running, so keep one in reserve beyond it.
+   - Run `canon tasks validate --json` beside the count, and fill every row it names as `launch-unstated`, a linked plan a planner just moved here with no Launch cell
+   - Pick per `## Pick the model` in `orchestrator-dispatch.md`, then record it through `canon tasks launch`, with `--override` only for an operator's
+   - The finding reports and refuses nothing, so a row left unfilled still dispatches only after its pick
 6. Promote from the top of `## Needs a plan`, where the last sweep recorded what to plan next.
    - Depart from that order when something changed under it and say what, since a position nobody honors is the ordering going stale
    - The order is set by whether a task establishes functionality, so prefer one that adds or proves a mechanism over one that trims, tidies, or audits
