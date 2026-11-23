@@ -21,12 +21,18 @@ A server keeps the files it already opened, so a database or a dependency cache 
 
 - The verb starts it on the rebuilt copy at the worktree's port band plus 25, so it never meets the worker's port
 - The worker's server is never stopped or restarted, since it belongs to another session
-- The pass drives this server's `url` in place of the Step 3 address, and stops it before the post, whatever the verdict
+- It stands in for the local rung alone, and stops before the post, whatever the verdict
 - A project with no `serve` key drives the worker's server exactly as before
+
+### Which rung it serves
+
+Pass `--serve` only when Step 3 took the local rung. A hosted rung passed its head check, and a launch-named address is the dispatcher's choice, so the pass drives either as Step 3 picked and runs the command below without `--serve`.
+
+A pass reaching no rung goes to Step 7 as Step 3 states, since the worker's server answering is what shows the head is served at all. The post names the started `url` as the local rung, so it reads as a local preview, unverified, per `post.md`.
 
 ## Before the browser opens
 
-Rebuild the copy, record the worktree's state, and start the pass's server:
+Rebuild the copy, record the worktree's state, and start the pass's server on the local rung:
 
 ```bash
 canon pr drive-copy <number> --baseline --serve --json
@@ -35,7 +41,7 @@ canon pr drive-copy <number> --baseline --serve --json
 Branch on `reason` rather than on the exit code.
 
 - `copied` means the address serves a throwaway copy rebuilt from the worker's worktree. Keep `copied` for the comment.
-- `copied` carrying `url` means the pass's own server answers on the copy. Drive that `url` for every box, in place of the Step 3 address.
+- `copied` carrying `url` means the pass's own server answers on the copy. Drive that `url` for every box, in place of the local rung's address.
 - `no-config` means the project declares no preview writes, so drive as usual. The check below still runs.
 - `no-worktree` means no local worktree holds the branch. Drive, and say in the comment that the worktree check did not run.
 
@@ -66,6 +72,7 @@ canon pr drive-copy <number> --stop --json
 
 - `stopped` and `not-running` continue
 - `stop-failed` means the group survived, so name its `pid` and `port` in the comment, or in the stop message when nothing is posted, and leave it for the dispatcher
+- Any other refusal, such as `gh-failed`, left the server up. Name the `reason` with the `pid` and `port` the `--serve` record carried, the same way.
 
 ## Before the post
 
