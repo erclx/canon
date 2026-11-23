@@ -1,16 +1,17 @@
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { PNG } from 'pngjs'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { chromium } from 'playwright-core'
-import {
-  composeSheet,
-  decodeFrames,
-  pickFrames,
-  readReel,
-} from '@/take/stills'
+import { composeSheet, decodeFrames, pickFrames, readReel } from '@/take/stills'
 
 /**
  * Writes a reel of solid frames, one colour each, through the same FFmpeg
