@@ -28,6 +28,7 @@
 ## Pickers
 
 - Cover a picker's open state beside its closed field, such as a `select` list or a date popup. Draw it or replace the native control, since styling reaches only the closed field.
+- Show a picker in place, beside or below the field it fills, rather than navigating to another view for it, and order its values predictably, such as alphabetical for names and chronological for dates.
 
 ## Derived display state
 
