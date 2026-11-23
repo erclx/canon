@@ -17,4 +17,4 @@ Two tracks sharing a file both build, and the one merging second rebases and res
 
 A standing authorization merges in this same order, one pull request at a time. The next waits until each sibling the last merge touched has rebased and its gates read clean again. A merge never waits on `🎬 E2E Suites`, which is informational.
 
-Once a merge or a code close makes a deferred pull request next, have it rebase first. Then launch its UI reviewer and ask its worker to film the reel at the rebased head, per the deferral in `orchestrator-review-dispatch.md`.
+Once a merge, a code close, or the CI wake after one makes a deferred pull request next, have it rebase first. Then launch its UI reviewer and ask its worker to film the reel at the rebased head, per the deferral in `orchestrator-review-dispatch.md`.
