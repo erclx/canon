@@ -11,423 +11,351 @@
       body {
         margin: 0;
       }
+      :root {
+        --ground: #fdfdfc;
+        --card: #fff;
+        --band: #f0f0ee;
+        --grid: #ececea;
+        --rule: #d6d6d2;
+        --line: #ececea;
+        --edge: #e4e4e1;
+        --outline: #121212;
+        --ink: #121212;
+        --body: #3b3b38;
+        --muted: #6b6a66;
+        --accent: #c2380e;
+        --waiting: #b07d1a;
+        --shadow: 5px 5px 0 #121212;
+        --shadow-s: 3px 3px 0 #121212;
+        --size-display: 50px;
+        --size-lede: 21px;
+        --size-small: 13px;
+        --size-vs: 12px;
+        --pad: 112px 64px;
+        --mono: 'Geist Mono Variable', 'DejaVu Sans Mono', monospace;
+        --sans: 'Geist Variable', 'DejaVu Sans', sans-serif;
+      }
+      html[data-theme='dark'] {
+        --ground: #1e1e1c;
+        --card: #292927;
+        --band: #3d3d39;
+        --grid: #242421;
+        --rule: #3d3d39;
+        --line: #474742;
+        --edge: #4d4d48;
+        --outline: #8d8c86;
+        --ink: #f2f2f0;
+        --body: #cfcdc8;
+        --muted: #a9a7a0;
+        --accent: #ff6b42;
+        --waiting: #e5b567;
+        --shadow: 5px 5px 0 #5c5b56;
+        --shadow-s: 3px 3px 0 #5c5b56;
+      }
+      @media (max-width: 900px) {
+        :root {
+          --size-display: 40px;
+          --size-lede: 18px;
+          --size-vs: 11px;
+          --pad: 80px 32px;
+        }
+      }
+      @media (max-width: 640px) {
+        :root {
+          --size-display: 32px;
+          --size-lede: 17px;
+          --size-small: 12.5px;
+          --pad: 48px 20px;
+        }
+      }
       body {
-        background: #fbfbfa;
-        color: #141413;
-        font-family: 'Geist Variable', Geist, sans-serif;
+        background-color: var(--ground);
+        color: var(--ink);
+        font-family: var(--sans);
         background-image:
-          linear-gradient(#ececea 1px, transparent 1px),
-          linear-gradient(90deg, #ececea 1px, transparent 1px);
+          linear-gradient(var(--grid) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid) 1px, transparent 1px);
         background-size: 48px 48px;
       }
       .lab {
-        font:
-          500 12px/1.4 'Geist Variable',
-          Geist,
-          sans-serif;
+        font: 500 12px/1.4 var(--sans);
         padding: 8px 14px;
-        color: #55544f;
-        border-bottom: 1px solid #e0e0dd;
-        background: #fbfbfa;
+        color: var(--muted);
+        border-bottom: 1px solid var(--rule);
+        background: var(--ground);
       }
-      .hero {
-        padding: 112px 64px 112px;
+      .part {
+        padding: var(--pad);
+        overflow-x: clip;
       }
       .w {
         max-width: 1180px;
         margin: 0 auto;
       }
-      .kick {
-        font:
-          500 13px/1 'Geist Mono Variable',
-          monospace;
-        color: #c2380e;
-        margin-bottom: 24px;
-        display: flex;
-        gap: 10px;
-        align-items: center;
-      }
-      .kick:before {
-        content: '';
-        width: 8px;
-        height: 8px;
-        background: #c2380e;
-        border-radius: 2px;
-      }
-      h1 {
+      h2 {
         margin: 0;
+        max-width: 16ch;
+        font-size: var(--size-display);
+        line-height: 1.06;
+        letter-spacing: -0.03em;
         font-weight: 600;
-        letter-spacing: -0.045em;
-        line-height: 1;
+        color: var(--ink);
+        text-wrap: balance;
       }
       .lede {
-        font-size: 20px;
-        line-height: 1.5;
-        color: #55544f;
-        margin: 24px 0 0;
-        max-width: 44ch;
-      }
-      .mono {
-        font-family: 'Geist Mono Variable', 'DejaVu Sans Mono', monospace;
-      }
-      .ink {
-        background: #fff;
-        border: 1.5px solid #141413;
-        border-radius: 10px;
-        box-shadow: 5px 5px 0 #141413;
-      }
-      .note {
-        font:
-          500 12px/1.35 'Geist Mono Variable',
-          monospace;
-        color: #55544f;
-      }
-      .acc {
-        color: #c2380e;
-      }
-      .wait {
-        color: #b07d1a;
-      }
-      .ic {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 0.9em;
-        height: 0.9em;
-        vertical-align: -0.08em;
-        border: 1.5px dashed #141413;
-        border-radius: 8px;
-        background: #fbfbfa;
-      }
-      .ic svg {
-        width: 0.55em;
-        height: 0.55em;
-      }
-      .ic.m {
-        border-style: solid;
-        background: #141413;
-        color: #fbfbfa;
-      }
-      @media (max-width: 900px) {
-        .hero {
-          padding: 80px 32px;
-        }
-      }
-      @media (max-width: 640px) {
-        .hero {
-          padding: 48px 20px;
-        }
-        .lede {
-          font-size: 17px;
-        }
-      }
-      h2.s {
         margin: 0;
-        font-weight: 600;
-        font-size: 52px;
-        line-height: 1.04;
-        letter-spacing: -0.035em;
-        max-width: 16ch;
-      }
-      .sec {
-        padding: 112px 64px;
-      }
-      .m {
-        font-family: 'Geist Mono Variable', 'DejaVu Sans Mono', monospace;
+        max-width: 44ch;
+        font-size: var(--size-lede);
+        line-height: 1.48;
+        color: var(--muted);
+        text-wrap: pretty;
       }
       .top {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         gap: 64px;
         align-items: end;
       }
-      .top .lede {
-        margin: 0;
-      }
-      .bd {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 14px;
-      }
-      .ln {
-        background: #f0f0ee;
-        border-radius: 8px;
-        padding: 12px;
-        min-height: 120px;
-      }
-      .lh {
-        font-size: 12px;
-        color: #55544f;
-        margin-bottom: 10px;
-      }
-      .cd {
-        background: #fff;
-        border: 1.5px solid #141413;
-        border-radius: 6px;
-        padding: 9px 11px;
-        margin-bottom: 8px;
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-      }
-      .cd b {
-        font-size: 13px;
-        font-weight: 500;
-      }
-      .cd span {
-        font-size: 11.5px;
-        color: #6b6a66;
-      }
-      .cd.wt {
-        border-color: #b07d1a;
-        box-shadow: 3px 3px 0 #b07d1a;
-      }
-      .cd.wt span {
-        color: #b07d1a;
-      }
       @media (max-width: 900px) {
-        .sec {
-          padding: 80px 32px;
-        }
-        h2.s {
-          font-size: 40px;
-        }
         .top {
-          grid-template-columns: 1fr;
+          grid-template-columns: minmax(0, 1fr);
           gap: 20px;
         }
       }
-      @media (max-width: 640px) {
-        .sec {
-          padding: 48px 20px;
-        }
-        h2.s {
-          font-size: 30px;
-        }
-        .bd {
-          grid-template-columns: 1fr;
-        }
+      .note {
+        font-family: var(--mono);
+        font-size: var(--size-vs);
+        font-weight: 500;
+        line-height: 1.35;
+        color: var(--muted);
+      }
+      .ink {
+        background: var(--card);
+        border: 1.5px solid var(--outline);
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+      }
+      .drawn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border: 1.5px solid var(--outline);
+        border-radius: 8px;
+        background: var(--card);
+        box-shadow: var(--shadow-s);
+        font-family: var(--mono);
+        font-size: var(--size-vs);
+        font-weight: 500;
+        line-height: 1;
+        color: var(--ink);
+      }
+      figure {
+        margin: 0;
       }
       .ba {
-        margin-top: 64px;
         display: grid;
-        grid-template-columns: 1fr 80px 1fr;
+        grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr);
         gap: 16px;
         align-items: start;
+        margin-top: 64px;
       }
       .stamp {
-        font-size: 13px;
-        color: #6b6a66;
-        margin-bottom: 12px;
+        margin: 0 0 12px;
+        font-size: var(--size-small);
       }
-      .stamp.on {
-        color: #141413;
+      .after .stamp {
         font-weight: 600;
+        color: var(--ink);
       }
       .mid {
         align-self: center;
+        margin: 0;
         text-align: center;
-        font-size: 12px;
-        color: #c2380e;
+        color: var(--ink);
       }
-      .dim {
-        opacity: 0.55;
-      }
-      .ba .bd {
+      .bd {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 8px;
       }
-      .ba .ln {
-        padding: 9px;
+      .ln {
         min-height: 200px;
+        padding: 9px;
+        border-radius: 8px;
+        background: var(--band);
       }
-      .ba .cd {
+      html[data-theme='dark'] .ln {
+        background: color-mix(in srgb, var(--band) 45%, var(--ground));
+      }
+      .lh {
+        margin: 0 0 10px;
+      }
+      .cards {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .cd {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        margin-bottom: 8px;
         padding: 7px 9px;
+        border: 1.5px solid var(--outline);
+        border-radius: 4px;
+        background: var(--card);
+        font-family: var(--mono);
       }
-      .ba .cd b {
-        font-size: 12px;
+      .cd b {
+        font-size: var(--size-vs);
+        font-weight: 500;
+        color: var(--ink);
+        overflow-wrap: anywhere;
       }
-      .ba .cd span {
-        font-size: 11px;
+      .cd span {
+        font-size: var(--size-vs);
+        line-height: 1.35;
+        color: var(--muted);
+      }
+      .before .cd {
+        border-style: dashed;
+      }
+      .cd.wt {
+        border-color: var(--waiting);
+        box-shadow: 3px 3px 0 var(--waiting);
+      }
+      .cd.wt span {
+        color: var(--ink);
+      }
+      .gl {
+        margin-right: 6px;
+        font-style: normal;
+        color: var(--waiting);
+      }
+      .replay {
+        margin-top: 14px;
+      }
+      .pg {
+        height: 4px;
+        margin: -4px 0 12px;
+        overflow: hidden;
+        border-radius: 2px;
+        background: var(--line);
+      }
+      .pg i {
+        display: block;
+        height: 100%;
+        background: var(--ink);
       }
       @media (max-width: 1100px) {
         .ba {
-          grid-template-columns: 1fr;
+          grid-template-columns: minmax(0, 1fr);
         }
         .mid {
           text-align: left;
         }
-      } /* dark theme: derived from the light rules above */
-      html[data-theme='dark'] body {
-        background-color: #1e1e1c;
-        color: #f2f2f0;
-        background-image:
-          linear-gradient(#242421 1px, transparent 1px),
-          linear-gradient(90deg, #242421 1px, transparent 1px);
       }
-      html[data-theme='dark'] .lab {
-        color: #a9a7a0;
-        border-bottom-color: #3d3d39;
-        background-color: #1e1e1c;
-      }
-      html[data-theme='dark'] .kick {
-        color: #ff6b42;
-      }
-      html[data-theme='dark'] .kick:before {
-        background-color: #ff6b42;
-      }
-      html[data-theme='dark'] .lede {
-        color: #a9a7a0;
-      }
-      html[data-theme='dark'] .ink {
-        background-color: #292927;
-        border-color: #8d8c86;
-        box-shadow: 5px 5px 0 #5c5b56;
-      }
-      html[data-theme='dark'] .note {
-        color: #a9a7a0;
-      }
-      html[data-theme='dark'] .acc {
-        color: #ff6b42;
-      }
-      html[data-theme='dark'] .wait {
-        color: #e5b567;
-      }
-      html[data-theme='dark'] .ic {
-        border-color: #8d8c86;
-        background-color: #1e1e1c;
-      }
-      html[data-theme='dark'] .ic.m {
-        background-color: #f2f2f0;
-        color: #1e1e1c;
-      }
-      html[data-theme='dark'] .ln {
-        background-color: #3d3d39;
-      }
-      html[data-theme='dark'] .lh {
-        color: #a9a7a0;
-      }
-      html[data-theme='dark'] .cd {
-        background-color: #292927;
-        border-color: #8d8c86;
-      }
-      html[data-theme='dark'] .cd span {
-        color: #a9a7a0;
-      }
-      html[data-theme='dark'] .cd.wt {
-        border-color: #e5b567;
-        box-shadow: 3px 3px 0 #e5b567;
-      }
-      html[data-theme='dark'] .cd.wt span {
-        color: #e5b567;
-      }
-      html[data-theme='dark'] .stamp {
-        color: #a9a7a0;
-      }
-      html[data-theme='dark'] .stamp.on {
-        color: #f2f2f0;
-      }
-      html[data-theme='dark'] .mid {
-        color: #ff6b42;
-      }
-      html[data-theme='dark'] .ln {
-        background-color: #2c2c29;
+      @media (max-width: 640px) {
+        .bd {
+          grid-template-columns: minmax(0, 1fr);
+        }
       }
     </style>
   </head>
   <body>
     <div class="lab">
-      arm-3 · Before and after · cost: two boards side by side, so each card is
-      small, and the move between them is told rather than shown · ref:
-      resend-com s07, two states side by side
+      board · two boards with the moves between, as the page ships it after
+      #3379
     </div>
-    <section class="sec">
+    <section class="part" id="board">
       <div class="w">
         <div class="top">
-          <h2 class="s">Come back to finished pull requests</h2>
+          <h2>Come back to finished pull requests</h2>
           <p class="lede">
             Queue features on the task board before you leave. Canon builds and
             reviews them, and holds each merge for you.
           </p>
         </div>
         <div class="ba">
-          <div>
-            <div class="stamp m">23:00 · you step out</div>
-            <div class="bd dim">
-              <div class="ln">
-                <div class="lh m">Up next</div>
-                <div class="cd">
-                  <b class="m">gate-stages</b><span class="m">plan linked</span>
-                </div>
-                <div class="cd">
-                  <b class="m">film-beats</b><span class="m">needs a plan</span>
-                </div>
-                <div class="cd">
-                  <b class="m">take-timer</b><span class="m">plan linked</span>
-                </div>
-              </div>
-              <div class="ln">
-                <div class="lh m">In flight</div>
-                <div class="cd">
-                  <b class="m">sync-stamp</b
-                  ><span class="m">worker, slice 3 of 3</span>
-                </div>
-                <div class="cd">
-                  <b class="m">review-lift</b
-                  ><span class="m">worker, slice 2 of 2</span>
-                </div>
-                <div class="cd">
-                  <b class="m">sync-coverage</b
-                  ><span class="m">review, first pass</span>
-                </div>
-                <div class="cd">
-                  <b class="m">drive-check</b
-                  ><span class="m">review, second pass</span>
-                </div>
-              </div>
-              <div class="ln"><div class="lh m">Ready to merge</div></div>
-            </div>
-          </div>
-          <div class="mid m">six moves →</div>
-          <div>
-            <div class="stamp m on">02:14 · what you come back to</div>
+          <figure class="side before">
+            <p class="stamp note">23:00 · you step out</p>
             <div class="bd">
               <div class="ln">
-                <div class="lh m">Up next</div>
-                <div class="cd">
-                  <b class="m">gate-stages</b><span class="m">plan linked</span>
-                </div>
-                <div class="cd">
-                  <b class="m">film-beats</b><span class="m">needs a plan</span>
-                </div>
+                <p class="lh note">Up next</p>
+                <ul class="cards">
+                  <li class="cd"><b>gate-stages</b><span>plan linked</span></li>
+                  <li class="cd"><b>film-beats</b><span>needs a plan</span></li>
+                  <li class="cd"><b>take-timer</b><span>plan linked</span></li>
+                </ul>
               </div>
               <div class="ln">
-                <div class="lh m">In flight</div>
-                <div class="cd">
-                  <b class="m">take-timer</b
-                  ><span class="m">worker, slice 2 of 3</span>
-                </div>
-                <div class="cd">
-                  <b class="m">sync-stamp</b
-                  ><span class="m">review, second pass</span>
-                </div>
-                <div class="cd wt">
-                  <b class="m">review-lift</b
-                  ><span class="m">one question for you</span>
-                </div>
+                <p class="lh note">In flight</p>
+                <ul class="cards">
+                  <li class="cd">
+                    <b>sync-stamp</b><span>worker, slice 3 of 3</span>
+                  </li>
+                  <li class="cd">
+                    <b>review-lift</b><span>worker, slice 2 of 2</span>
+                  </li>
+                  <li class="cd">
+                    <b>sync-coverage</b><span>review, first pass</span>
+                  </li>
+                  <li class="cd">
+                    <b>drive-check</b><span>review, second pass</span>
+                  </li>
+                </ul>
               </div>
               <div class="ln">
-                <div class="lh m">Ready to merge</div>
-                <div class="cd">
-                  <b class="m">sync-coverage</b
-                  ><span class="m">review closed</span>
-                </div>
-                <div class="cd">
-                  <b class="m">drive-check</b
-                  ><span class="m">review closed</span>
-                </div>
+                <p class="lh note">Ready to merge</p>
+                <ul class="cards"></ul>
               </div>
             </div>
-          </div>
+          </figure>
+          <p class="mid note">6 moves →</p>
+          <figure class="side after">
+            <p class="stamp note">02:14 · what you come back to</p>
+            <div class="pg"><i></i></div>
+            <div class="bd">
+              <div class="ln">
+                <p class="lh note">Up next</p>
+                <ul class="cards">
+                  <li class="cd"><b>gate-stages</b><span>plan linked</span></li>
+                  <li class="cd"><b>film-beats</b><span>needs a plan</span></li>
+                </ul>
+              </div>
+              <div class="ln">
+                <p class="lh note">In flight</p>
+                <ul class="cards">
+                  <li class="cd">
+                    <b>sync-stamp</b><span>review, second pass</span>
+                  </li>
+                  <li class="cd wt">
+                    <b>review-lift</b
+                    ><span
+                      ><i class="gl" role="img" aria-label="waits for you">◆</i
+                      >one question for you</span
+                    >
+                  </li>
+                  <li class="cd">
+                    <b>take-timer</b><span>worker, slice 2 of 3</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="ln">
+                <p class="lh note">Ready to merge</p>
+                <ul class="cards">
+                  <li class="cd">
+                    <b>drive-check</b><span>review closed</span>
+                  </li>
+                  <li class="cd">
+                    <b>sync-coverage</b><span>review closed</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <span class="drawn replay">Replay the night</span>
+          </figure>
         </div>
       </div>
     </section>

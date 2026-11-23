@@ -11,326 +11,307 @@
       body {
         margin: 0;
       }
+      :root {
+        --ground: #fdfdfc;
+        --card: #fff;
+        --band: #f0f0ee;
+        --grid: #ececea;
+        --rule: #d6d6d2;
+        --line: #ececea;
+        --edge: #e4e4e1;
+        --outline: #121212;
+        --ink: #121212;
+        --body: #3b3b38;
+        --muted: #6b6a66;
+        --accent: #c2380e;
+        --waiting: #b07d1a;
+        --shadow: 5px 5px 0 #121212;
+        --shadow-s: 3px 3px 0 #121212;
+        --size-display: 50px;
+        --size-lede: 21px;
+        --size-small: 13px;
+        --size-vs: 12px;
+        --pad: 112px 64px;
+        --mono: 'Geist Mono Variable', 'DejaVu Sans Mono', monospace;
+        --sans: 'Geist Variable', 'DejaVu Sans', sans-serif;
+      }
+      html[data-theme='dark'] {
+        --ground: #1e1e1c;
+        --card: #292927;
+        --band: #3d3d39;
+        --grid: #242421;
+        --rule: #3d3d39;
+        --line: #474742;
+        --edge: #4d4d48;
+        --outline: #8d8c86;
+        --ink: #f2f2f0;
+        --body: #cfcdc8;
+        --muted: #a9a7a0;
+        --accent: #ff6b42;
+        --waiting: #e5b567;
+        --shadow: 5px 5px 0 #5c5b56;
+        --shadow-s: 3px 3px 0 #5c5b56;
+      }
+      @media (max-width: 900px) {
+        :root {
+          --size-display: 40px;
+          --size-lede: 18px;
+          --size-vs: 11px;
+          --pad: 80px 32px;
+        }
+      }
+      @media (max-width: 640px) {
+        :root {
+          --size-display: 32px;
+          --size-lede: 17px;
+          --size-small: 12.5px;
+          --pad: 48px 20px;
+        }
+      }
       body {
-        background: #fbfbfa;
-        color: #141413;
-        font-family: 'Geist Variable', Geist, sans-serif;
+        background-color: var(--ground);
+        color: var(--ink);
+        font-family: var(--sans);
         background-image:
-          linear-gradient(#ececea 1px, transparent 1px),
-          linear-gradient(90deg, #ececea 1px, transparent 1px);
+          linear-gradient(var(--grid) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid) 1px, transparent 1px);
         background-size: 48px 48px;
       }
       .lab {
-        font:
-          500 12px/1.4 'Geist Variable',
-          Geist,
-          sans-serif;
+        font: 500 12px/1.4 var(--sans);
         padding: 8px 14px;
-        color: #55544f;
-        border-bottom: 1px solid #e0e0dd;
-        background: #fbfbfa;
+        color: var(--muted);
+        border-bottom: 1px solid var(--rule);
+        background: var(--ground);
       }
-      .hero {
-        padding: 112px 64px 112px;
+      .part {
+        padding: var(--pad);
+        overflow-x: clip;
       }
       .w {
         max-width: 1180px;
         margin: 0 auto;
       }
-      .kick {
-        font:
-          500 13px/1 'Geist Mono Variable',
-          monospace;
-        color: #c2380e;
-        margin-bottom: 24px;
-        display: flex;
-        gap: 10px;
-        align-items: center;
-      }
-      .kick:before {
-        content: '';
-        width: 8px;
-        height: 8px;
-        background: #c2380e;
-        border-radius: 2px;
-      }
-      h1 {
+      h2 {
         margin: 0;
+        max-width: 16ch;
+        font-size: var(--size-display);
+        line-height: 1.06;
+        letter-spacing: -0.03em;
         font-weight: 600;
-        letter-spacing: -0.045em;
-        line-height: 1;
+        color: var(--ink);
+        text-wrap: balance;
       }
       .lede {
-        font-size: 20px;
-        line-height: 1.5;
-        color: #55544f;
-        margin: 24px 0 0;
+        margin: 0;
         max-width: 44ch;
+        font-size: var(--size-lede);
+        line-height: 1.48;
+        color: var(--muted);
+        text-wrap: pretty;
       }
-      .mono {
-        font-family: 'Geist Mono Variable', 'DejaVu Sans Mono', monospace;
-      }
-      .ink {
-        background: #fff;
-        border: 1.5px solid #141413;
-        border-radius: 10px;
-        box-shadow: 5px 5px 0 #141413;
-      }
-      .note {
-        font:
-          500 12px/1.35 'Geist Mono Variable',
-          monospace;
-        color: #55544f;
-      }
-      .acc {
-        color: #c2380e;
-      }
-      .wait {
-        color: #b07d1a;
-      }
-      .ic {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 0.9em;
-        height: 0.9em;
-        vertical-align: -0.08em;
-        border: 1.5px dashed #141413;
-        border-radius: 8px;
-        background: #fbfbfa;
-      }
-      .ic svg {
-        width: 0.55em;
-        height: 0.55em;
-      }
-      .ic.m {
-        border-style: solid;
-        background: #141413;
-        color: #fbfbfa;
+      .top {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 64px;
+        align-items: end;
       }
       @media (max-width: 900px) {
-        .hero {
-          padding: 80px 32px;
+        .top {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 20px;
         }
       }
-      @media (max-width: 640px) {
-        .hero {
-          padding: 48px 20px;
-        }
-        .lede {
-          font-size: 17px;
-        }
+      .note {
+        font-family: var(--mono);
+        font-size: var(--size-vs);
+        font-weight: 500;
+        line-height: 1.35;
+        color: var(--muted);
       }
-      h2.s {
-        margin: 0;
-        font-weight: 600;
-        font-size: 52px;
-        line-height: 1.04;
-        letter-spacing: -0.035em;
+      .ink {
+        background: var(--card);
+        border: 1.5px solid var(--outline);
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+      }
+      .drawn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border: 1.5px solid var(--outline);
+        border-radius: 8px;
+        background: var(--card);
+        box-shadow: var(--shadow-s);
+        font-family: var(--mono);
+        font-size: var(--size-vs);
+        font-weight: 500;
+        line-height: 1;
+        color: var(--ink);
+      }
+      #craft h2 {
         max-width: 18ch;
-      }
-      .sec {
-        padding: 112px 64px;
       }
       .chips {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
+        margin: 56px 0 64px;
       }
-      .chips span {
-        font:
-          500 12.5px/1 'Geist Mono Variable',
-          monospace;
+      .chip {
         padding: 8px 11px;
-        border: 1.5px solid #141413;
-        border-radius: 6px;
-        background: #fbfbfa;
+        border: 1.5px solid var(--outline);
+        border-radius: 8px;
+        background: var(--ground);
+        font-family: var(--mono);
+        font-size: var(--size-vs);
+        font-weight: 500;
+        line-height: 1;
+        color: var(--ink);
       }
-      .chips span.on {
-        background: #141413;
-        color: #fbfbfa;
-      }
-      .src {
-        font:
-          500 13px/1.4 'Geist Variable',
-          sans-serif;
-        color: #141413;
-        text-decoration: underline;
-        text-underline-offset: 3px;
-      }
-      .path {
-        font:
-          400 12px/1.4 'Geist Mono Variable',
-          monospace;
-        color: #6b6a66;
+      .chip.on {
+        border-color: var(--ink);
+        background: var(--ink);
+        color: var(--ground);
       }
       @media (max-width: 900px) {
-        .sec {
-          padding: 80px 32px;
-        }
-        h2.s {
-          font-size: 40px;
+        .chips {
+          margin: 40px 0 48px;
         }
       }
-      @media (max-width: 640px) {
-        .sec {
-          padding: 48px 20px;
-        }
-        h2.s {
-          font-size: 30px;
-        }
-      }
-      .top {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 64px;
-        align-items: end;
-      }
-      .lbl {
-        margin-bottom: 14px;
+      .pair > .note:first-child {
+        margin: 0 0 14px;
       }
       blockquote {
-        margin: 0 0 20px;
-        font:
-          500 48px/1.12 'Geist Variable',
-          sans-serif;
-        letter-spacing: -0.025em;
         max-width: 24ch;
+        margin: 0 0 20px;
+        font-size: var(--size-display);
+        font-weight: 500;
+        line-height: 1.12;
+        letter-spacing: -0.025em;
+        color: var(--ink);
+        text-wrap: pretty;
       }
-      .arrow {
+      .src,
+      .path {
+        color: var(--ink);
+        text-decoration: underline;
+        text-decoration-color: var(--outline);
+        text-underline-offset: 3px;
+      }
+      .src {
+        font-size: var(--size-small);
+        font-weight: 500;
+      }
+      .becomes {
         margin: 40px 0 16px;
-        color: #c2380e;
+        color: var(--ink);
       }
       .rule {
-        padding: 20px 24px;
         max-width: 760px;
+        padding: 20px 24px;
       }
       .rule p {
         margin: 0;
-        font:
-          500 19px/1.45 'Geist Variable',
-          sans-serif;
       }
-      @media (max-width: 900px) {
-        .top {
-          grid-template-columns: 1fr;
-          gap: 20px;
+      .rule .note:first-child {
+        margin-bottom: 14px;
+      }
+      .rule .text {
+        font-size: var(--size-lede);
+        font-weight: 500;
+        line-height: 1.45;
+        color: var(--ink);
+      }
+      .rule .text + .note {
+        margin-top: 8px;
+      }
+      .arw {
+        display: inline-block;
+      }
+      @media (min-width: 901px) {
+        .pair {
+          display: grid;
+          grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+          column-gap: 56px;
+          align-items: start;
+        }
+        .pair > .note:first-child,
+        .pair > blockquote,
+        .pair > .src {
+          grid-column: 1;
+        }
+        .pair > .src {
+          justify-self: start;
+        }
+        .pair > .becomes {
+          grid-column: 2;
+          grid-row: 1;
+          margin: 0 0 14px;
+        }
+        .pair > .rule {
+          grid-column: 2;
+          grid-row: 2/span 2;
+          max-width: none;
         }
         blockquote {
-          font-size: 34px;
+          max-width: none;
+        }
+        .arw {
+          transform: rotate(-90deg);
         }
       }
       @media (max-width: 640px) {
-        blockquote {
-          font-size: 25px;
+        .rule {
+          padding: 16px 18px;
         }
-        .rule p {
-          font-size: 16px;
-        }
-      } /* dark theme: derived from the light rules above */
-      html[data-theme='dark'] body {
-        background-color: #1e1e1c;
-        color: #f2f2f0;
-        background-image:
-          linear-gradient(#242421 1px, transparent 1px),
-          linear-gradient(90deg, #242421 1px, transparent 1px);
-      }
-      html[data-theme='dark'] .lab {
-        color: #a9a7a0;
-        border-bottom-color: #3d3d39;
-        background-color: #1e1e1c;
-      }
-      html[data-theme='dark'] .kick {
-        color: #ff6b42;
-      }
-      html[data-theme='dark'] .kick:before {
-        background-color: #ff6b42;
-      }
-      html[data-theme='dark'] .lede {
-        color: #a9a7a0;
-      }
-      html[data-theme='dark'] .ink {
-        background-color: #292927;
-        border-color: #8d8c86;
-        box-shadow: 5px 5px 0 #5c5b56;
-      }
-      html[data-theme='dark'] .note {
-        color: #a9a7a0;
-      }
-      html[data-theme='dark'] .acc {
-        color: #ff6b42;
-      }
-      html[data-theme='dark'] .wait {
-        color: #e5b567;
-      }
-      html[data-theme='dark'] .ic {
-        border-color: #8d8c86;
-        background-color: #1e1e1c;
-      }
-      html[data-theme='dark'] .ic.m {
-        background-color: #f2f2f0;
-        color: #1e1e1c;
-      }
-      html[data-theme='dark'] .chips span {
-        border-color: #8d8c86;
-        background-color: #1e1e1c;
-      }
-      html[data-theme='dark'] .chips span.on {
-        background-color: #f2f2f0;
-        color: #1e1e1c;
-      }
-      html[data-theme='dark'] .src {
-        color: #f2f2f0;
-      }
-      html[data-theme='dark'] .path {
-        color: #a9a7a0;
-      }
-      html[data-theme='dark'] .arrow {
-        color: #ff6b42;
       }
     </style>
   </head>
   <body>
-    <div class="lab">
-      arm-1 · One quote, large · cost: one practice shown at a time, picked by
-      the chips · ref: resend-com s09, one quote alone in open space
-    </div>
-    <section class="sec">
+    <div class="lab">craft · the section as the page ships it after #3379</div>
+    <section class="part" id="craft">
       <div class="w">
         <div class="top">
-          <h2 class="s">Skills that cite their sources</h2>
-          <p class="lede" style="margin: 0">
+          <h2>Skills that cite their sources</h2>
+          <p class="lede">
             Each one teaches your agent an engineering practice, and every rule
             in it links to the guide it came from.
           </p>
         </div>
-        <div class="chips" style="margin: 56px 0 64px">
-          <span class="on">code-craft</span><span class="">test-craft</span
-          ><span class="">api-design</span><span class="">ui-craft</span
-          ><span class="">design-taste</span><span class="">review-craft</span
-          ><span class="">write-human</span
-          ><span class="">systematic-debugging</span>
+        <div class="chips">
+          <span class="chip on">code-craft</span
+          ><span class="chip">test-craft</span
+          ><span class="chip">api-design</span><span class="chip">ui-craft</span
+          ><span class="chip">design-taste</span
+          ><span class="chip">review-craft</span
+          ><span class="chip">write-human</span
+          ><span class="chip">systematic-debugging</span>
         </div>
-        <div class="big">
-          <div class="lbl note">the source</div>
-          <blockquote>
-            “solve the problem they know needs to be solved now, not the problem
-            that the developer speculates might need to be solved in the future”
-          </blockquote>
-          <a class="src">Google, What to look for in a code review ↗</a>
-        </div>
-        <div class="arrow note">↓ becomes the rule</div>
-        <div class="rule ink">
-          <div class="lbl note">
-            the rule, in
-            <span class="path">claude/skills/code-craft/SKILL.md</span>
-          </div>
-          <p>
-            When no next change can be named, write the plainest code that
-            passes, since a shape built for an unnamed change is a guess.
-          </p>
-          <div class="note" style="margin-top: 8px">
-            loads before a new function or module
+        <div class="pairs">
+          <div class="pair">
+            <p class="note">the source</p>
+            <blockquote>
+              “solve the problem they know needs to be solved now, not the
+              problem that the developer speculates might need to be solved in
+              the future”
+            </blockquote>
+            <a class="src">Google, What to look for in a code review ↗</a>
+            <p class="becomes note">
+              <span class="arw">↓</span> becomes the rule
+            </p>
+            <div class="rule ink">
+              <p class="note">
+                the rule, in
+                <span class="path">claude/skills/code-craft/SKILL.md</span>
+              </p>
+              <p class="text">
+                When no next change can be named, write the plainest code that
+                passes, since a shape built for an unnamed change is a guess.
+              </p>
+              <p class="note">loads before a new function or module</p>
+            </div>
           </div>
         </div>
       </div>
