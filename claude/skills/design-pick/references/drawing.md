@@ -9,7 +9,7 @@ Read before the first frame a `design-pick` round or an `app-drive` drive adds. 
 
 ## Widths
 
-Draw every frame at the three widths `widths.md` beside this file resolves, being the record's `Draw widths:` line or 390, 834, and 1440. A now frame, an arm, and a page set all take the three, and only the operator's word drops one.
+Draw every frame at the three widths `widths.md` beside this file resolves, being the record's `Draw widths:` line or 390, 768, and 1280. A now frame, an arm, and a page set all take the three, and only the operator's word drops one.
 
 - Measure every pick for sideways scroll at 320 as `widths.md` states, and draw no 320 frame
 - Say in the run's output which widths the frames take and which source gave them
@@ -46,7 +46,7 @@ A drive draws the shipped surface whole on `00-current` before its first finding
 - Give each section one row in page order, desktop first, then tablet, then phone
 - Put the site header in the first section's frames and the footer in the last's
 - Leave `00-current` as the shipped page for the whole drive, and apply each pick to `00-next` alone
-- Log the page's measured height at 1440 on both pages under the finding that asked for a shorter page, when one did
+- Log the page's measured height at 1280 on both pages under the finding that asked for a shorter page, when one did
 
 Copy both pages' captures into the drive's `evidence/baseline/` as its whole-page comparison.
 
@@ -60,13 +60,13 @@ Place every frame with `--width <px>`, `--x`, `--y`, and `--device on` on its ad
 
 A group runs its widths as columns and its sections as rows, so one row reads as one section at every width.
 
-- Put desktop at the group's x, tablet one desktop to tablet gap past the desktop's right edge, and phone 80px past the tablet's, so at the fallback widths at the group's x plus 0, 1600, and 2514
+- Put desktop at the group's x, tablet one desktop to tablet gap past the desktop's right edge, and phone 80px past the tablet's, so at the fallback widths at the group's x plus 0, 1440, and 2288
 - Stack the sections down in page order, one row per section, each row starting 80px below the lowest bottom edge in the row above
 - Put a shot in its own section's row whatever its width, so a section split into more phone shots than desktop ones holds the extra shots in that row
 - Stack a row's extra shots at one width 80px apart, so the row ends at the bottom of its last stacked shot
 - Start the next group 400px past the right edge of the group's last column
 
-The desktop to tablet gap is the laptop body's reach, `20 + round((width + 40) * 0.06)` past the desktop frame, plus 44px for the tablet body, and never under 160px. That is 153px at 1440 and 182px at 1920. The phone gap stays 80px, since tablet to phone needs 64px.
+The desktop to tablet gap is the laptop body's reach, `20 + round((width + 40) * 0.06)` past the desktop frame, plus 44px for the tablet body, and never under 160px. That is 143px at 1280, which the floor raises to 160, and 182px at 1920. The phone gap stays 80px, since tablet to phone needs 64px.
 
 A page set on `00-current` or `00-next` is one group at x 0.
 
@@ -122,7 +122,7 @@ Ask one finding or one round per question, never several picks batched into one 
 
 1. Run `frameboard show <page>/<frame>...` on the frames under decision, every width of each, so the open board marks them.
 2. Put the page address `show` returned in the turn's text and again in the question, with the frames it marks.
-3. Name in each option the frame it stands for, such as `craft-pill-row-1440`.
+3. Name in each option the frame it stands for, such as `craft-pill-row-1280`.
 
 `show` returns the page's address, and no Frameboard verb returns one opening on the marked frames alone. Name the page and the frames until Frameboard ships that address, then put it in the question instead.
 

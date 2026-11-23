@@ -34,14 +34,14 @@ A box written to the drivable format reads:
 ```
 
 - **Route.** A path goes through `pw goto <rung><path>`, the rung before the access join. A control name, or "from the page the app opens on", is reached by clicking from the opened address.
-- **Width.** `pw resize <width> 900` before acting. A box naming no width is driven at 1440.
+- **Width.** `pw resize <width> 900` before acting. A box naming no width is driven at 1280, the desktop width of the set the board draws and the harness commits.
 - **Verb.** The action the driver performs: `click`, `fill`, `press`, `hover`, a resize, or the real input `## A box that moves` sets for a wheel, a key, a tap, or a hover at a phone width.
   - An `eval` of `scrollIntoView` brings a target into view before another verb acts, and never stands as the scroll a box checks.
 - **`(taste)`.** The result is a judgment of look or feel. Capture, never judge.
 - **`(local only)`.** The state needs something a hosted preview cannot reach. On a hosted address the box is not driven, naming the marker as the reason.
 - **`(needs fixture)`.** The drive fixture lacks the state. Drive the box if the state now answers, and otherwise it is not driven for a cause on the branch, as the verdicts below state.
 
-A box written before that format may carry no route, no width, and a verb such as "read" or "look at". Drive it anyway: take the opened address as the route and 1440 as the width, turn the verb into the nearest action, and name each guess in the verdict's evidence.
+A box written before that format may carry no route, no width, and a verb such as "read" or "look at". Drive it anyway: take the opened address as the route and 1280 as the width, turn the verb into the nearest action, and name each guess in the verdict's evidence.
 
 ## A box that moves
 

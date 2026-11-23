@@ -14,10 +14,10 @@ Draw every arm at one width per device class. Take the widths from the `Draw wid
 | Class   | Fallback |
 | ------- | -------- |
 | Phone   | 390      |
-| Tablet  | 834      |
-| Desktop | 1440     |
+| Tablet  | 768      |
+| Desktop | 1280     |
 
-The draw widths are not the capture widths. The capture list beside them is the screenshot harness every target syncs, and it carries more widths than a round draws.
+The fallback is the set the screenshot harness every target syncs commits as evidence, so a drawn frame lines up with a committed still. The harness also sweeps 1536 into a folder nobody commits, and a round draws no frame there.
 
 - Fill a class the line names no width for from the fallback column
 - Take all three fallbacks when the document is absent, carries no `## Layout`, or its layout carries no `Draw widths:` line
@@ -26,6 +26,14 @@ The draw widths are not the capture widths. The capture list beside them is the 
 A `--widths` linked width draws no device, so each class takes its own frame, added with its own `--device on`. See `${CLAUDE_SKILL_DIR}/references/drawing.md` for the add.
 
 One width per class keeps the round's frame count at three times its arms. A width between two classes rarely changes a pick, and drawing it grows the board and the composite for no new answer.
+
+### Where the fallback comes from
+
+Each width is the narrow end of its class in a ranked usage table, since a frame drawn at the narrow end shows the cramped case a wider frame hides.
+
+- Phone 390 sits inside the band of 360 to 414 that [StatCounter's mobile ranking](https://gs.statcounter.com/screen-resolution-stats/mobile/worldwide) leads with
+- Tablet 768 ranks in [StatCounter's tablet table](https://gs.statcounter.com/screen-resolution-stats/tablet/worldwide), and [Material 3](https://m3.material.io/foundations/layout/applying-layout) puts it in the medium class, from 600 to 839
+- Desktop 1280 ranks in [StatCounter's desktop table](https://gs.statcounter.com/screen-resolution-stats/desktop/worldwide), and [WCAG 2.2 Understanding Reflow](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html) names it as the window that reaches 320 at 400% zoom
 
 ### The 320 check
 
