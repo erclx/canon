@@ -77,7 +77,9 @@ Use H2 only, one-line bold-label bullets, and numbers only where they settle som
 Omit the uncited-claims block when the count is zero. The `Conclusion:` line names the close route that ran, so a later reader knows whether a row exists.
 
 - A named task reads `recorded into <task path>`
-- A controller handoff reads `handed to <controller sessionId>, no task file written`
+- A controller handoff reads `handed to <name> (<sessionId>), no task file written`
+  - Read `<name>` from `canon sessions list --json` at the close, by the controller's `sessionId`
+  - Write `a controller no longer on the roster` for `<name>` when no row carries that id
 - A close with neither reads `wrote <task path>`, followed by `row placed` or `row unplaced` as `task-board` Step 4 reports
 
 The `Next:` line names who plans the conclusion, per close Step 7, so the controller never reads a bare pointer and launches a second planner.
