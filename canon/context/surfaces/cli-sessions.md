@@ -18,7 +18,7 @@ Holds the readers and writers behind `canon pr`, all over REST rather than Graph
 - `rest.ts` is the one boundary where REST payloads take the field names the rest of the folder reads, and list endpoints go through `gh api --paginate`
 - `head.ts` and `checks.ts` key on the remote tip, not the local branch, and `checks.ts` tells a conflicted branch from runs that have not started
 - `evidence.ts`, `tick.ts`, `bijection.ts`, and `links.ts` own the marked comment, ticks, key-changes check, and its links. `frames.ts` files frames, captures, and reels on `canon/frames` until a prune
-- `preview.ts` and `local.ts` write and remove the address line. The first reads what a branch serves from the deploy workflow's push trigger, the second finds a server by its cwd
+- `preview.ts` and `local.ts` write and remove the address line, read off the deploy trigger and off a declared port then the cwd. `drive-copy.ts` rebuilds a UI pass's copy and its own server
 - `lift.ts` readies a pull request only when every gate passes, or returns a ready one to draft. `carry.ts` holds the push and rebase carries the tick shares, and the code review's merge carry
 
 ### `src/listeners/`
@@ -40,4 +40,5 @@ Holds the live-session roster and the branch claim, split by what a stub has to 
 
 ## Gotchas
 
+- The pass's server writes to `server.log` rather than a pipe, since a pipe closes when `pr drive-copy` exits and takes the detached server down on its next write
 - `pr merge` reads stale from the fork point through the lift's `readBaseReading`, never from the last CI run, so a branch sharing a file with a merged sibling updates first even when both edits pass
