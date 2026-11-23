@@ -123,8 +123,7 @@ A `perf` pull request states what it measured. The title type is the trigger, an
 - Put a table under `## Outcome` with a header row, a separator, and a data row per measurement, never in a fence, since a fence reads as an example
 - List each run as its own row, or give the run count beside an average
 - Name what the speedup trades in `## Technical context`
-- Write a count in place of a time where nothing can be timed, such as a dropped allocation
-- Write one row reading `not measured` with the reason in the change column when no number exists, since a visible gap beats an invented figure
+- Write a count where nothing can be timed, or one row reading `not measured` with the reason in the change column, since a visible gap beats an invented figure
 
 ```plaintext
 | <what was measured> | main | this branch | change |
