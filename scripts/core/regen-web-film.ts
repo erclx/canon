@@ -1,8 +1,6 @@
 /**
- * Checks, or with `--write --pr <number> [--repo <owner/name>]` copies from a repository's `canon/frames` branch, the reel the evidence section plays,
- * its opening still, and a stamp naming the repository and pull request. The repository defaults to the origin remote's.
- * The check `web:build` runs reads the committed files alone, never the network, and refuses a reel or still its stamp no longer matches,
- * so a swapped reel cannot ship under another number.
+ * Checks, or with `--write --pr <number> [--repo <owner/name>]` copies from that repository's `canon/frames` branch, the reel the evidence section plays, its still, and its stamp.
+ * The check `web:build` runs reads the committed files alone and never the network, so a swapped reel cannot ship under another number.
  */
 import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
