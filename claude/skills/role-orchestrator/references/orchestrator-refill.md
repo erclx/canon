@@ -64,7 +64,7 @@ A merge trigger runs four things in order, whoever ran the merge, since the refi
    - Run `canon tasks validate --json` and record a pick through `canon tasks launch` for each `launch-unstated` row, per `## Pick the model` in `orchestrator-dispatch.md`
    - Run it after the links, since a promoted row gets its plan only at this step
    - The finding refuses nothing, so a row left unfilled still waits on its pick before it dispatches
-   - Run `canon tasks waves --json` once the plans are linked, since a row with no plan reads as unplanned. It writes nothing, so a row's place and its `Waiting on` cell stay here.
+   - Run `canon tasks waves --json` once the plans are linked, since a row with no plan reads as unplanned. It writes nothing, so a row's place and its `Waiting on` cell stay here. A row it lists under `cyclic` carries its edges under `cycles`, each a stem and its source, `waiting` for a cell and `shared` for a path, so read which edge to cut there.
    - The block below carries each pick on its `Launch filled:` line
 
 ```plaintext

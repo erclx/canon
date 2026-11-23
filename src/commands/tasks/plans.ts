@@ -504,7 +504,17 @@ function reportWaves(outcome: WavesOutcome, emitJson: boolean): number {
 
   if (outcome.cyclic.length > 0) {
     logStep('Cyclic')
-    for (const stem of outcome.cyclic) logWarn(`${stem} waits in a cycle`)
+    for (const stem of outcome.cyclic) {
+      logWarn(`${stem} waits in a cycle`)
+      const edges = outcome.cycles.find((cycle) => cycle.stem === stem)?.edges
+      for (const edge of edges ?? []) {
+        logInfo(
+          edge.source === 'shared'
+            ? `  on ${edge.to}, shared path ${edge.path}`
+            : `  on ${edge.to}, Waiting on cell`,
+        )
+      }
+    }
   }
 
   outro()
@@ -758,6 +768,8 @@ export function registerPlans(tasks: Command): void {
         '             the Up next stem that rebases',
         '  unplanned  Up next rows linking no live plan',
         '  cyclic     rows in a wait cycle, or waiting on one',
+        '  cycles     each cyclic row with its edges, a stem it waits on and the',
+        '             source, waiting for its cell or shared with the path',
         '',
         'Exit codes:',
         '  0  the board was read, with an empty Up next included',
