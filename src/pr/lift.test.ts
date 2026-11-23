@@ -4,11 +4,9 @@ import {
   type ChecksGate,
   type EvidenceGate,
   type GateResult,
-  type GitRunner,
   lift,
   type LiftApi,
   type PullState,
-  readChangedPaths,
   readsDrivableBox,
   type Standing,
 } from '@/pr/lift'
@@ -77,6 +75,8 @@ interface Fixture {
   changed?: ChangedRead | null
   /** What the rebase comparison answers, a failed read when absent. */
   rebased?: RebaseRead
+  /** The commits the head adds that are neither merges nor on the base, a failed read when absent. */
+  unmerged?: readonly string[]
 }
 
 interface Harness {
@@ -86,6 +86,7 @@ interface Harness {
     drafts: string[]
     reads: (readonly [string, string])[]
     rebases: (readonly [string, string])[]
+    unmerged: (readonly [string, string])[]
     checks: number
     sleeps: number[]
   }
@@ -98,6 +99,7 @@ function makeApi(fixture: Fixture = {}): Harness {
     drafts: [] as string[],
     reads: [] as (readonly [string, string])[],
     rebases: [] as (readonly [string, string])[],
+    unmerged: [] as (readonly [string, string])[],
     checks: 0,
     sleeps: [] as number[],
   }
@@ -141,6 +143,10 @@ function makeApi(fixture: Fixture = {}): Harness {
     readRebased: async (from, to) => {
       calls.rebases.push([from, to])
       return fixture.rebased
+    },
+    readUnmerged: async (from, to) => {
+      calls.unmerged.push([from, to])
+      return fixture.unmerged
     },
     markDraft: async (nodeId) => {
       calls.drafts.push(nodeId)
@@ -630,12 +636,31 @@ describe('lift', () => {
         reviews: [CODE_CLOSED_AT_MOVED],
         changed: { isAncestor: true, paths: ['README.md'] },
         rebased: { differingPaths: [] },
+        unmerged: [HEAD],
       })
 
       const record = await lift(api, { isCheck: false, waitSeconds: 60 })
 
       expect(record.reason).toBe('review-behind')
       expect(calls.rebases).toEqual([])
+    })
+
+    it('should never list merged commits across a rebase', async () => {
+      const { api, calls } = makeApi({
+        ...rebasedFrom,
+        rebased: { differingPaths: [] },
+        unmerged: [],
+      })
+
+      const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+      expect(record.gates).toContainEqual({
+        gate: 'review',
+        isOk: true,
+        carriedFrom: MOVED,
+        carriedAcross: 'rebase',
+      })
+      expect(calls.unmerged).toEqual([])
     })
 
     it.each([
@@ -650,6 +675,120 @@ describe('lift', () => {
       async (reason, fixture) => {
         const { api } = makeApi({
           ...rebasedFrom,
+          rebased: { differingPaths: [] },
+          ...fixture,
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe(reason)
+      },
+    )
+  })
+
+  describe('a code close across a merge of the base', () => {
+    const mergedFrom = {
+      reviews: [CODE_CLOSED_AT_MOVED],
+      changed: { isAncestor: true, paths: ['src/main-only.ts'] },
+    }
+
+    it('should lift with the close carried across the merge', async () => {
+      const { api, calls } = makeApi({
+        ...mergedFrom,
+        unmerged: [],
+        rebased: { differingPaths: [] },
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record).toMatchObject({
+        reason: 'lifted',
+        reviewCarriedFrom: MOVED,
+      })
+      expect(record.gates).toContainEqual({
+        gate: 'review',
+        isOk: true,
+        carriedFrom: MOVED,
+        carriedAcross: 'merge',
+      })
+      expect(calls.unmerged[0]).toEqual([MOVED, HEAD])
+      expect(calls.rebases[0]).toEqual([MOVED, HEAD])
+    })
+
+    it('should refuse a merge beside a commit of the branch without reading the diff', async () => {
+      const { api, calls } = makeApi({
+        ...mergedFrom,
+        unmerged: [HEAD],
+        rebased: { differingPaths: [] },
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.gates).toContainEqual({
+        gate: 'review',
+        isOk: false,
+        reason: 'review-behind',
+      })
+      expect(calls.rebases).toEqual([])
+      expect(calls.marks).toEqual([])
+    })
+
+    it('should refuse when the comparison could not be read', async () => {
+      const { api, calls } = makeApi({ ...mergedFrom, unmerged: [] })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.gates).toContainEqual({
+        gate: 'review',
+        isOk: false,
+        reason: 'review-behind',
+      })
+      expect(calls.marks).toEqual([])
+    })
+
+    it('should refuse when the head could not be read against the close', async () => {
+      const { api, calls } = makeApi({
+        ...mergedFrom,
+        changed: null,
+        unmerged: [],
+        rebased: { differingPaths: [] },
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('review-behind')
+      expect(calls.unmerged).toEqual([])
+    })
+
+    it('should keep a UI close behind the merge while the code close carries', async () => {
+      const { api } = makeApi({
+        ...mergedFrom,
+        reviews: [CODE_CLOSED_AT_MOVED, UI_CLOSED_AT_MOVED],
+        evidence: { hasDrivableBox: true, reelHead: HEAD },
+        unmerged: [],
+        rebased: { differingPaths: [] },
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('ui-behind')
+      expect(record.gates).toContainEqual({
+        gate: 'review',
+        isOk: true,
+        carriedFrom: MOVED,
+        carriedAcross: 'merge',
+      })
+    })
+
+    it.each([
+      ['ci-failing', { checks: [{ state: 'failing', isConflicted: false }] }],
+      ['standing-stale', { standing: 'stale' }],
+    ] as const)(
+      'should still refuse %s on a carried merge',
+      async (reason, fixture) => {
+        const { api } = makeApi({
+          ...mergedFrom,
+          unmerged: [],
           rebased: { differingPaths: [] },
           ...fixture,
         })
@@ -1843,83 +1982,5 @@ describe('lift', () => {
         record.gates.filter((gate) => !gate.isOk).map((gate) => gate.reason),
       ).toEqual(['review-open', 'evidence-owed', 'standing-stale'])
     })
-  })
-})
-
-describe('readChangedPaths', () => {
-  const FULL = MOVED
-
-  function gitOf(answers: Record<string, string | undefined>): GitRunner {
-    return async (args) => {
-      const verb = args.find((arg) => !arg.startsWith('-')) ?? ''
-      return answers[verb]
-    }
-  }
-
-  it('should list the paths changed since an ancestor close', async () => {
-    const git = gitOf({
-      'cat-file': '',
-      'rev-parse': `${FULL}\n`,
-      'merge-base': `${FULL}\n`,
-      diff: 'src/a.ts\nsrc/App.tsx\n',
-    })
-
-    expect(await readChangedPaths(git, '1111111', HEAD)).toEqual({
-      isAncestor: true,
-      paths: ['src/a.ts', 'src/App.tsx'],
-    })
-  })
-
-  it('should read not an ancestor when the close was rewritten away', async () => {
-    const git = gitOf({
-      'cat-file': '',
-      'rev-parse': `${FULL}\n`,
-      'merge-base': 'ffffffffffffffffffffffffffffffffffffffff\n',
-    })
-
-    expect(await readChangedPaths(git, FULL, HEAD)).toEqual({
-      isAncestor: false,
-      paths: [],
-    })
-  })
-
-  it('should read not an ancestor when the close does not resolve', async () => {
-    const git = gitOf({ 'cat-file': '', 'rev-parse': undefined })
-
-    expect(await readChangedPaths(git, FULL, HEAD)).toEqual({
-      isAncestor: false,
-      paths: [],
-    })
-  })
-
-  it('should read a failed read when the head does not resolve', async () => {
-    const git = gitOf({ 'cat-file': undefined })
-
-    expect(await readChangedPaths(git, FULL, HEAD)).toBeUndefined()
-  })
-
-  it('should read a failed read when the diff fails', async () => {
-    const git = gitOf({
-      'cat-file': '',
-      'rev-parse': `${FULL}\n`,
-      'merge-base': `${FULL}\n`,
-      diff: undefined,
-    })
-
-    expect(await readChangedPaths(git, FULL, HEAD)).toBeUndefined()
-  })
-})
-
-describe('readsDrivableBox', () => {
-  it.each([
-    [{}, false],
-    [{ checklist: '' }, false],
-    [{ checklist: '- [ ] calm (taste)', drivable: 0 }, false],
-    [{ checklist: '- [ ] opens', drivable: 1 }, true],
-    [{ checklist: '- [ ] opens' }, true],
-    [{ checklist: '- [ ] opens', drivable: '0' }, true],
-    [{ checklist: '- [ ] opens', drivable: -1 }, true],
-  ])('should read %j as binding %s', (record, expected) => {
-    expect(readsDrivableBox(record)).toBe(expected)
   })
 })

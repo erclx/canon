@@ -5,6 +5,7 @@ import {
   DEFAULT_WAIT_SECONDS,
   readChangedPaths,
   readRebasedPaths,
+  readUnmergedCommits,
 } from '@/pr/lift'
 import { loadPaintedPatterns } from '@/pr/painted'
 import { reviewRowOf } from '@/pr/rest'
@@ -80,15 +81,21 @@ export function registerReviewState(pr: Command): void {
         '                 rebase  a close across a rebase that left the',
         '                         branch diff equal per path, each side read',
         '                         against its own merge base with the base',
-        '  differingPaths  the paths whose branch diff differs across a rebase,',
-        '                  which kept a code review close from carrying',
+        '                 merge   a code review close across merges of the',
+        '                         base that left the branch diff equal per',
+        '                         path, read the same way',
+        '  differingPaths  the paths whose branch diff differs across a rebase',
+        '                  or a merge, which kept a code review close from',
+        '                  carrying',
         '',
         'A code review close carries across a rebase only when every path is',
-        'equal, and never across a push on top of it. A carried close vouches',
-        'for the branch diff and not for what the base moved under it, so CI at',
-        'the new head is still required. Hunk positions are not compared, so an',
-        'edit moved into an identical block of the same file by a hand-resolved',
-        'conflict reads equal too.',
+        'equal, and across commits on top of it only when each is a merge or',
+        'already on the base and every path is equal, so a commit of the',
+        "branch's own pushed beside a merge still needs a pass. A carried close",
+        'vouches for the branch diff and not for what the base moved under it,',
+        'so CI at the new head is still required. Hunk positions are not',
+        'compared, so an edit moved into an identical block of the same file',
+        'by a hand-resolved conflict reads equal too.',
         '',
         '`ui` also carries the newest `## UI review` pass (`heading`, `state`,',
         '`commit`, `source`), `isBound`, which is whether the evidence comment',
@@ -203,6 +210,10 @@ async function runReviewState(
       base === undefined
         ? undefined
         : readRebasedPaths(git, `origin/${base}`, from, to),
+    readUnmerged: async (from, to) =>
+      base === undefined
+        ? undefined
+        : readUnmergedCommits(git, `origin/${base}`, from, to),
     sleep: (ms) => new Promise((done) => setTimeout(done, ms)),
     now: () => Date.now(),
   }

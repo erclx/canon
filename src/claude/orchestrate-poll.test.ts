@@ -725,6 +725,44 @@ describe('poll', () => {
         expect(rebased).not.toContain('UI-STALE')
       })
 
+      it('should print one quiet line when the code close carried across a merge', () => {
+        writeThread(closes, [], READ_HEAD)
+        expect(poll().stdout).toContain('SEEN')
+
+        writeThread(closes, [], HEAD)
+        writeScope({
+          ...rebasedScope({ isBound: false, isCovered: true }),
+          review: {
+            carriedAcross: 'merge',
+            carriedFrom: READ_HEAD,
+            isCovered: true,
+          },
+        })
+        const merged = poll().stdout
+
+        expect(merged).toContain('REBASED   #7 -> 1111111, verdicts carried')
+        expect(merged).not.toContain('MOVED')
+      })
+
+      it('should keep MOVED when the code close carried across a merge and the UI close did not', () => {
+        writeThread(closes, [], READ_HEAD)
+        expect(poll().stdout).toContain('SEEN')
+
+        writeThread(closes, [], HEAD)
+        writeScope({
+          ...rebasedScope({ isCovered: false, reason: 'ui-behind' }),
+          review: {
+            carriedAcross: 'merge',
+            carriedFrom: READ_HEAD,
+            isCovered: true,
+          },
+        })
+        const merged = poll().stdout
+
+        expect(merged).toContain('MOVED     #7 -> 1111111')
+        expect(merged).not.toContain('REBASED')
+      })
+
       it('should keep MOVED and UI-STALE when the rebase changed a driven path', () => {
         writeThread(closes, [], READ_HEAD)
         expect(poll().stdout).toContain('SEEN')

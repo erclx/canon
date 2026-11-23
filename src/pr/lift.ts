@@ -9,8 +9,10 @@ import {
   type UiCounts,
 } from '@/pr/review-scope'
 import {
+  type CarriedAcross,
   type RebaseRead,
   readCarry,
+  readMergeCarry,
   readRebaseCarry,
   readUiCarry,
   reelMoves,
@@ -73,8 +75,8 @@ export interface GateResult {
   readonly reason?: LiftRefusal
   /** The commit a close was carried forward from, when it covered an earlier head. */
   readonly carriedFrom?: string
-  readonly carriedAcross?: 'push' | 'rebase'
-  /** The paths whose branch diff differs across a rebase, which kept a code review close from carrying. */
+  readonly carriedAcross?: CarriedAcross
+  /** The paths whose branch diff differs across a rebase or a base merge, which kept a code review close from carrying. */
   readonly differingPaths?: readonly string[]
   /** The painted paths that kept a UI close from carrying forward. */
   readonly paintedPaths?: readonly string[]
@@ -229,6 +231,8 @@ export interface LiftApi {
   readChanged(from: string, to: string): Promise<ChangedRead | undefined>
   /** The branch diff compared at an earlier commit and the head, undefined when the read failed. */
   readRebased(from: string, to: string): Promise<RebaseRead | undefined>
+  /** The commits from an earlier commit to the head that are neither merges nor on the base, undefined when the read failed. */
+  readUnmerged(from: string, to: string): Promise<readonly string[] | undefined>
   /** The one GraphQL call that returns a ready pull request to draft. */
   markDraft(nodeId: string): Promise<boolean>
   sleep(ms: number): Promise<void>
@@ -283,11 +287,11 @@ function fail(gate: GateName, reason: LiftRefusal): GateResult {
 
 /**
  * The code review gate. An unmarked pass is refused, since its commit is a
- * submission stamp. A close behind the head carries only across a rebase
- * leaving every branch path equal, never across commits pushed on top of it.
+ * submission stamp. A close carries across a rebase or base merges leaving
+ * every branch path equal, never across a commit of the branch's own.
  */
 export async function reviewGate(
-  api: Pick<LiftApi, 'readChanged' | 'readRebased'>,
+  api: Pick<LiftApi, 'readChanged' | 'readRebased' | 'readUnmerged'>,
   reviews: readonly ReviewRow[],
   head: string,
 ): Promise<GateResult> {
@@ -299,19 +303,23 @@ export async function reviewGate(
   if (coversHead(scope.commit, head)) return pass('review')
 
   const changed = await api.readChanged(scope.commit, head)
-  if (changed === undefined || changed.isAncestor) {
-    return fail('review', 'review-behind')
-  }
-  const carry = await readRebaseCarry(
-    (from, to) => api.readRebased(from, to),
-    scope.commit,
-    head,
-  )
-  if (carry.kind === 'rebased') {
+  if (changed === undefined) return fail('review', 'review-behind')
+  const readRebased = (from: string, to: string) => api.readRebased(from, to)
+  const carry = changed.isAncestor
+    ? await readMergeCarry(
+        {
+          readUnmerged: (from, to) => api.readUnmerged(from, to),
+          readRebased,
+        },
+        scope.commit,
+        head,
+      )
+    : await readRebaseCarry(readRebased, scope.commit, head)
+  if (carry.kind === 'rebased' || carry.kind === 'merged') {
     return {
       ...pass('review'),
       carriedFrom: carry.carriedFrom,
-      carriedAcross: 'rebase',
+      carriedAcross: carry.kind === 'rebased' ? 'rebase' : 'merge',
     }
   }
   return {
@@ -944,6 +952,39 @@ export async function readChangedPaths(
   if (diff === undefined) return undefined
 
   return { isAncestor: true, paths: nonEmptyLines(diff) }
+}
+
+/**
+ * The commits from `from` to `to` that are neither merges nor on `ref`. A range
+ * holding no merge lists every commit without fetching the base, since it can
+ * carry nothing. Any read that fails answers undefined.
+ */
+export async function readUnmergedCommits(
+  git: GitRunner,
+  ref: string,
+  from: string,
+  to: string,
+): Promise<readonly string[] | undefined> {
+  const full = (
+    await git(['rev-parse', '--verify', '-q', `${from}^{commit}`])
+  )?.trim()
+  if (full === undefined || full === '') return undefined
+  const range = [to, `^${full}`]
+
+  const merges = (
+    await git(['rev-list', '--min-parents=2', '--count', ...range])
+  )?.trim()
+  if (merges === undefined || !/^\d+$/.test(merges)) return undefined
+  if (merges === '0') {
+    const commits = await git(['rev-list', ...range])
+    return commits === undefined ? undefined : nonEmptyLines(commits)
+  }
+
+  if (ref.startsWith('origin/')) {
+    await git(['fetch', '-q', 'origin', ref.slice('origin/'.length)])
+  }
+  const commits = await git(['rev-list', '--no-merges', ...range, `^${ref}`])
+  return commits === undefined ? undefined : nonEmptyLines(commits)
 }
 
 const FILE_HEADER = 'diff --git '

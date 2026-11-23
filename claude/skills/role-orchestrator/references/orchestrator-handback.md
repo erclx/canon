@@ -28,7 +28,7 @@ A `STALE` or `CONFLICT` from the poll goes to the branch's own session the same 
 - Say that a check failing after a clean rebase is a semantic conflict to fix on the branch
 - Say that a hunk needing a decision the tree does not carry comes back as a message rather than as a guess
 - A pull request carrying review findings as well earns one message naming both, since one `review-address` run answers them together
-- Say that the rebase pushes as `git push --force-with-lease` through `review-address`, never as a merge of `main` into the branch, since the code review carries a close only across a rebase
+- Say that the rebase pushes as `git push --force-with-lease` through `review-address`, never as a merge of `main`, since a merge commit reads as noise on a squash-merged pull request
 
 The worker that built the branch rebases it, not this session. It holds the plan behind each hunk, and a rebase made here would also write a branch this session does not own.
 

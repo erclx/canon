@@ -12,6 +12,7 @@ import {
   readBaseStanding,
   readChangedPaths,
   readRebasedPaths,
+  readUnmergedCommits,
   SETTLING_REEL_SKIPS,
   UNWAIVABLE_REEL_SKIPS,
 } from '@/pr/lift'
@@ -279,6 +280,7 @@ function liftApi(root: string, number: string, baseRef: string): LiftApi {
       ),
     readChanged: (from, to) => readChangedPaths(git, from, to),
     readRebased: (from, to) => readRebasedPaths(git, baseRef, from, to),
+    readUnmerged: (from, to) => readUnmergedCommits(git, baseRef, from, to),
     sleep: (ms) => new Promise((done) => setTimeout(done, ms)),
     now: () => Date.now(),
   }

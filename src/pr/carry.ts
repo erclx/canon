@@ -95,6 +95,46 @@ export async function readRebaseCarry(
     : { kind: 'rebased', carriedFrom: from }
 }
 
+/** How a close reached a head it was not read at. */
+export type CarriedAcross = 'push' | 'rebase' | 'merge'
+
+/** Whether a verdict holds across merges of the base into the branch. */
+export type MergeCarry =
+  | { readonly kind: 'merged'; readonly carriedFrom: string }
+  | { readonly kind: 'changed'; readonly differingPaths: readonly string[] }
+  | { readonly kind: 'unmerged' }
+  | { readonly kind: 'unread' }
+
+/**
+ * Carries a code review close across commits on top of it only when each is a
+ * merge or already on the base, and the branch's own diff is equal at both
+ * ends. Any commit of the branch's own refuses before the diff is read.
+ */
+export async function readMergeCarry(
+  reads: {
+    readonly readUnmerged: (
+      from: string,
+      to: string,
+    ) => Promise<readonly string[] | undefined>
+    readonly readRebased: (
+      from: string,
+      to: string,
+    ) => Promise<RebaseRead | undefined>
+  },
+  from: string,
+  to: string,
+): Promise<MergeCarry> {
+  const unmerged = await reads.readUnmerged(from, to)
+  if (unmerged === undefined) return { kind: 'unread' }
+  if (unmerged.length > 0) return { kind: 'unmerged' }
+
+  const rebase = await readRebaseCarry(reads.readRebased, from, to)
+  if (rebase.kind === 'rebased') {
+    return { kind: 'merged', carriedFrom: rebase.carriedFrom }
+  }
+  return rebase
+}
+
 /** Whether a UI verdict at one commit holds at the head, across a push or a rebase. */
 export type UiCarry =
   | { readonly kind: 'covered' }
