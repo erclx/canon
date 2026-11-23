@@ -964,7 +964,7 @@ async function runScan(opts: ScanOptions): Promise<number> {
   } else {
     if (measurement.missing.includes('table')) {
       logWarn(
-        'A perf pull request needs a table with a header row and a data row under ## Outcome: | <what was measured> | main | this branch | change |. Write not measured with the reason in the change column when nothing can be timed.',
+        'A perf pull request needs a table with a header row and a data row under ## Outcome: | <what was measured> | result | baseline | conditions |. Write not measured with the reason when nothing can be timed.',
       )
     }
     if (measurement.missing.includes('results-table')) {

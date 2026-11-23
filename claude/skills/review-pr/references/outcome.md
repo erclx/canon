@@ -30,7 +30,7 @@ A `perf` pull request carries a table of measurements under Outcome in place of 
 Read the table against the claim in the Summary instead.
 
 - A headline number the table does not support, or a table with no run behind its figures, is a `should-fix` under the `**PR body**` block
-- A row reading `not measured` with its reason in the change column takes no finding
+- A row reading `not measured` with its reason beside it takes no finding
 
 ## What takes no finding
 

@@ -654,7 +654,9 @@ describe('canon labels sync', { timeout: RUN_TIMEOUT_MS }, () => {
     readonly reason?: string
     readonly labels?: string[]
     readonly created?: string[]
+    readonly colored?: { label: string; color: string }[]
     readonly missing?: string[]
+    readonly drift?: { label: string; declared: string; remote: string }[]
     readonly failed?: string[]
     readonly exitCode: number
     readonly calls: string[]
@@ -669,11 +671,13 @@ describe('canon labels sync', { timeout: RUN_TIMEOUT_MS }, () => {
   let root: string
   let logFile: string
 
-  async function writeMap(): Promise<void> {
+  async function writeMap(
+    domains = 'cli = ["src/"]\ndocs = ["docs/"]\n',
+  ): Promise<void> {
     await mkdir(join(root, 'canon', 'config'), { recursive: true })
     await writeFile(
       join(root, 'canon', 'config', 'pr-labels.toml'),
-      '[domains]\ncli = ["src/"]\ndocs = ["docs/"]\n',
+      `[domains]\n${domains}`,
     )
   }
 
@@ -786,5 +790,45 @@ describe('canon labels sync', { timeout: RUN_TIMEOUT_MS }, () => {
     expect(record.labels).toEqual([])
     expect(record.exitCode).toBe(0)
     expect(record.calls).toEqual([])
+  })
+
+  it('should create a missing label with the palette color at its map position', async () => {
+    await writeMap('cli = ["src/"]\ndocs = ["docs/"]\n')
+
+    const record = await runSync([], { remote: ['cli\tededed'] })
+
+    expect(record.colored).toEqual([{ label: 'docs', color: '2da44e' }])
+    expect(posts(record)[0]).toContain('color=2da44e')
+  })
+
+  it('should create a missing label with the color its row declares', async () => {
+    await writeMap(
+      'cli = ["src/"]\ndocs = { paths = ["docs/"], color = "ABCDEF" }\n',
+    )
+
+    const record = await runSync([], { remote: ['cli\tededed'] })
+
+    expect(posts(record)[0]).toContain('color=abcdef')
+  })
+
+  it('should exit 2 under --check when a declared color differs and write nothing', async () => {
+    await writeMap('cli = { paths = ["src/"], color = "1f6feb" }\n')
+
+    const record = await runSync(['--check'], { remote: ['cli\tededed'] })
+
+    expect(record.drift).toEqual([
+      { label: 'cli', declared: '1f6feb', remote: 'ededed' },
+    ])
+    expect(record.exitCode).toBe(2)
+    expect(posts(record)).toEqual([])
+  })
+
+  it('should exit 0 under --check when a label with no declared color was recolored by hand', async () => {
+    await writeMap('cli = ["src/"]\n')
+
+    const record = await runSync(['--check'], { remote: ['cli\tff0000'] })
+
+    expect(record.drift).toEqual([])
+    expect(record.exitCode).toBe(0)
   })
 })

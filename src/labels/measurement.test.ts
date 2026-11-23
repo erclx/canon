@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { checkMeasuredResults, checkMeasurement } from '@/labels/measurement'
 
 const TABLE = [
-  '| <what was measured> | main | this branch | change |',
+  '| <what was measured> | result | baseline | conditions |',
   '| --- | --- | --- | --- |',
-  '| scan of 200 files | 41 ms | 12 ms | -71% |',
+  '| scan of 200 files | 12 ms | 41 ms | warm cache |',
 ].join('\n')
 
 function body(outcome: string, context = 'It trades memory for speed.') {
