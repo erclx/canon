@@ -19,10 +19,6 @@ paths:
 - Widen a fixture's `scope=` past the `function` default only for state no test mutates.
 - Use `tmp_path` and `monkeypatch` over hand-rolled temp directories or environment stashes, since both undo themselves.
 
-## Parametrize
-
-- Use `@pytest.mark.parametrize` for table-driven cases over per-case test functions.
-
 ## Async
 
 - Mark each async test `@pytest.mark.asyncio`, or set `asyncio_mode = "auto"`, since strict mode runs only marked tests.
@@ -33,4 +29,3 @@ paths:
 - Use plain `assert`, which pytest rewrites to report the values, over `self.assertEqual`.
 - Use `pytest.raises(...)` over `try` and `except` for an expected exception.
 - Patch with `monkeypatch.setattr` or `unittest.mock.patch`, never by assigning a module attribute by hand.
-- Do not make real network calls. Use `responses`, `pytest-httpx`, or a fake.

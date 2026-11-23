@@ -22,12 +22,6 @@ The field is Python testing, and the authorities are the pytest documentation at
 | Widen scope only for unmutated state | [Fixtures](https://docs.pytest.org/en/stable/how-to/fixtures.html): "`function`: the default scope, the fixture is destroyed at the end of the test", so a wider scope hands one object to every test in it                                                                                                 | 2026-10-18 |
 | `tmp_path` and `monkeypatch`         | [tmp_path](https://docs.pytest.org/en/stable/how-to/tmp_path.html) is "a temporary directory unique to each test function", and with [monkeypatch](https://docs.pytest.org/en/stable/how-to/monkeypatch.html) "All modifications will be undone after the requesting test function or fixture has finished" | 2026-10-18 |
 
-## Parametrize
-
-| Bullet                   | Source                                                                                                                                          | Read       |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| `parametrize` for tables | [Parametrizing tests](https://docs.pytest.org/en/stable/how-to/parametrize.html): it "enables parametrization of arguments for a test function" | 2026-10-18 |
-
 ## Async
 
 | Bullet                      | Source                                                                                                                                                                                                         | Read       |
@@ -42,7 +36,6 @@ The field is Python testing, and the authorities are the pytest documentation at
 | Plain `assert`          | [Assertions](https://docs.pytest.org/en/stable/how-to/assert.html): failure details come from "rewriting assert statements before they are run"                                                   | 2026-10-18 |
 | `pytest.raises`         | [Assertions](https://docs.pytest.org/en/stable/how-to/assert.html): you "can use pytest.raises() as a context manager" for an expected exception                                                  | 2026-10-18 |
 | Patch through a fixture | [monkeypatch](https://docs.pytest.org/en/stable/how-to/monkeypatch.html): it "helps you to safely set/delete an attribute", undone after the test, where a hand assignment leaks into later tests | 2026-10-18 |
-| No real network calls   | House choice: a test reaching the network fails on an outage or a rate limit with no defect in the code under test                                                                                | 2026-10-18 |
 
 ## Declined
 
@@ -65,3 +58,8 @@ Every bullet the rewrite removed or reshaped, grouped by why.
 - Merged "use `pytest` for all tests, never `unittest.TestCase`" with the reason the unittest page gives.
 - Reworded "do not start a fresh event loop inside tests" to name the loop the plugin provides and the calls that bypass it.
 - Replaced `httpx_mock`, a fixture name, with `pytest-httpx`, the package that provides it.
+
+### Owned by the test-craft skill
+
+- Cut "use `@pytest.mark.parametrize` for table-driven cases". `test-craft` carries the table-driven case, per groundwork 266.
+- Cut "do not make real network calls". `test-craft` carries the no-real-network floor, per groundwork 266.
