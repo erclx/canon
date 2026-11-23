@@ -40,10 +40,9 @@ A drive numbers and orders its pages by the findings they serve.
 
 ## A drive's whole page
 
-A drive draws the shipped surface whole on `00-current` before its first finding, so every fix is judged against the page it changes. It draws `00-next` beside it once the operator's picks settle, with every pick applied.
+A drive draws the shipped surface whole on `00-current` before its first finding, so every fix is judged against the page it changes. It draws `00-next` beside it once the operator's picks settle, with every pick applied. Both pages' frames take no device and are fitted, so each section shows at its full length.
 
 - Draw one frame per section at each width, never the whole page in one frame. A page frame 12,000px tall is one nobody reads.
-- Place each frame of `00-current` and `00-next` with no device and fit it, so the page shows whole and its measured height is its content's
 - Give each section one row in page order, desktop first, then tablet, then phone
 - Put the site header in the first section's frames and the footer in the last's
 - Leave `00-current` as the shipped page for the whole drive, and apply each pick to `00-next` alone
@@ -55,9 +54,7 @@ Copy both pages' captures into the drive's `evidence/baseline/` as its whole-pag
 
 Down is page order and across is what is compared. Each design on a page is one group, being a pick round's arm, a drive's current set or option, or a reference site, and the groups sit side by side, left to right.
 
-Place every frame with `--width <px>`, `--x`, `--y`, and `--device on` on its add, the width being its column's and the device being the phone, tablet, or laptop that width names. A frame added without them hugs its content and lands past every other one.
-
-Add `--scroll` beside `--device on`, so the frame holds the device's screen height and scrolls past it. A frame with no device skips both flags and is fitted, as `## Heights` states.
+Place every frame with `--width <px>`, `--x`, `--y`, and `--device on` on its add, the width being its column's and the device being the phone, tablet, or laptop that width names. A frame added without them hugs its content and lands past the rest. Add `--scroll` beside `--device on`, and skip both without a device, per `## Heights`.
 
 ### Inside a group
 
@@ -112,8 +109,8 @@ The parts of a drive's names come from the drive itself.
 
 A frame's height follows whether the board draws a device around it.
 
-- A frame drawn in a device holds that device's screen height and scrolls, taking `--scroll` on its add. Never run `frameboard frame fit` on it, since a fit stretches the device body to the content's full length, and a long page then reads as a phone many screens tall.
-- A frame with no device, such as a component or a drive's whole page on `00-current`, is fitted with `frameboard frame fit <frame>` after it is written, since its height is its content's at its own width
+- A frame drawn in a device holds that device's screen height and scrolls, taking `--scroll` on its add. Never fit it, since a fit stretches the device body to the content's full length.
+- A frame with no device, such as a component or a drive's whole page, is fitted with `frameboard frame fit <frame>` after it is written
 - Look at the capture for a frame cut at the bottom before handing anything over, since a cut frame reads as a broken design
 
 A composite capture draws a scrolling frame at its first screen. An arm whose difference sits below the fold reads identical in the stills, so capture it at a scrolled position or judge it on the live board.

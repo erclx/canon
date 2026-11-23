@@ -4,7 +4,7 @@ Read before the first `frameboard` verb a `design-pick` run sends. It carries wh
 
 ## Reaching the board
 
-Resolve `<board>` and `<project>` from the `board` and `project` keys of `canon/config/design.toml`, read at the main worktree root per `${CLAUDE_SKILL_DIR}/references/design-config.md`. A missing file or key falls back to `.canon/board/` and `picks`.
+Resolve `<board>` and `<project>` from the `board` and `project` keys of `canon/config/design.toml`, read at the main worktree root per `${CLAUDE_SKILL_DIR}/references/design-config.md`. A missing file or key falls back to `.canon/board/` and a project named for the surface, as `design-config.md` states.
 
 - Stop before starting a board when `<board>` came from that fallback, `.canon/board/` is absent, and `.canon/canvas/` exists
 - Report `❌ The board is still at .canon/canvas/. Run canon migrate record-layout --write, then re-run.` on that stop
@@ -13,6 +13,7 @@ Resolve `<board>` and `<project>` from the `board` and `project` keys of `canon/
 Resolve `<board>` against the main worktree root, the way `session-worktree` resolves it, since a linked worktree holds no copy of the gitignored folder.
 
 - Pass `--root <board> --project <project> --json` to every verb unless the step says otherwise, so no verb relies on the only-project default
+- Hand frame refs over with the project in them, since a ref follows the project name and a derived name is not the one an earlier round used
 - Where `frameboard` is not on PATH, run every verb as `bunx -y frameboard <verb>`. Say so once and keep that form for the run.
 - The fallback takes the latest release unpinned, since the verbs and record shapes come from `frameboard docs --json` each run and a renamed verb surfaces as a refusal
 
@@ -40,7 +41,7 @@ The board's home lists every project, and a home folder gathers the projects of 
 | ------------------ | ----------------------------------------------------------------------------- |
 | `app-drive`        | The `board-folder` key of `canon/config/app-drive.toml`, `Drives` when absent |
 | A groundwork track | `Groundwork`, holding each drawing track's `groundwork-<nn>` project          |
-| A pick round       | None, since a round draws in the `project` key's one project, opened by name  |
+| A pick round       | None, since a round draws in its one project, opened by name                  |
 
 A run that takes a folder files its project there once the project exists, whether this run added it or found it on the board.
 
