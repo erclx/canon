@@ -25,6 +25,10 @@
 - Trim leading and trailing whitespace from a text input on submit, never on every keystroke.
 - Say near a case-sensitive field that it is case-sensitive, rather than silently treating `Foo` and `foo` as different values.
 
+## Pickers
+
+- Cover a picker's open state beside its closed field, such as a `select` list or a date popup. Draw it or replace the native control, since styling reaches only the closed field.
+
 ## Derived display state
 
 - Reset a status indicator, count, or derived value to neutral when its source input changes.

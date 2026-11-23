@@ -100,7 +100,7 @@ An app pick with several screens is offered a clickable prototype built to flows
 A pick round drafts on `.canon/board/` unless the project names another board in `canon/config/design.toml`.
 
 - Set `board` when your design sync reads another Frameboard board, so the picked frame lands without a redraw.
-- Leave `project` unset to keep rounds in their own `picks` project on that board.
+- Leave `project` unset to keep each surface's rounds in a project named for it, such as `landing`, on that board.
 - Set `references` to an array of site addresses to replace the default list `canon:design-references` captures when you name no site.
 
 ### When a graphical tool fits

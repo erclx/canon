@@ -9,7 +9,7 @@ Read before the first `frameboard` verb a `design-pick` run sends. A project nam
 
 ```toml
 board = ".canon/board"
-project = "picks"
+project = "landing"
 references = ["https://linear.app/", "https://docs.stripe.com/"]
 ```
 
@@ -18,20 +18,33 @@ references = ["https://linear.app/", "https://docs.stripe.com/"]
 | Key          | Holds                                                                                                  | Default                   |
 | ------------ | ------------------------------------------------------------------------------------------------------ | ------------------------- |
 | `board`      | The board folder a round drafts on, under the main root                                                | `.canon/board/`           |
-| `project`    | The Frameboard project a round's pages go in                                                           | `picks`                   |
+| `project`    | The Frameboard project a round's pages go in                                                           | The surface's slug        |
 | `references` | Site addresses a `design-references` run captures when the ask names none, never read by `design-pick` | That skill's default list |
 
-Each key falls back on its own, so a file naming `board` alone moves the board and keeps the project at `picks`.
+Each key falls back on its own, so a file naming `board` alone moves the board and keeps the derived project name.
 
 - Resolve `board` against the main worktree root even when the run sits in a linked worktree, since the board folder is gitignored and a linked worktree holds no copy of it
-- Leave `project` at `picks` on a named board unless the operator wants otherwise, so rounds sit on the board the sync reads and stay apart from the accepted frames
+- Leave `project` unset on a named board unless the operator wants otherwise, so each surface's rounds sit on the board the sync reads and stay apart from the accepted frames
 - Stop on a file that does not parse or a `board` or `project` that is not a string, naming the file's path. Falling back there would draft the round where the sync never looks.
 - Stop a `design-references` run alone on a `references` that is not an array of strings, naming the file's path, since a pick round never reads the key
-- The archive lands at `.canon/<project>/<page>/`, so it follows `project`. Stop on a `project` naming a `.canon/` folder another record owns, such as `plans` or `tasks`.
+- The archive lands at `.canon/<project>/<page>/`, so it follows `project`. Stop on a `project`, configured or derived, naming a folder another `.canon/` record owns.
+
+## The derived project name
+
+A round with no `project` key names its project for the surface it draws, so a second surface never lands among the first one's pages.
+
+- Take the kebab-case slug of the surface the round edits, such as `landing` or `settings`, from the route or file Step 1's decision names, since the declared read names a kind and not a surface
+- Reuse the project when it already exists, and add the round's page to it under the next free page name, since a second round on one surface belongs beside its first
+- Leave a drive's `drive-<nn>` project alone, since `app-drive` names it
+- Leave a round already open in `picks` where it is, since no verb moves a page between projects and its refs are handed out
+
+A standalone `design-references` run names its project the same way, from the surface the operator's ask, and asks when the ask names none.
+
+Stop and ask the operator for a name when the slug is `board`, `canvas`, `compact`, `tmp`, or a `.canon/` kind that `${CLAUDE_SKILL_DIR}/../create-skill/references/skill.md` lists under `### Where output lands`, since the archive would write into that record's folder.
 
 ## When the file is absent
 
-The run drafts on `.canon/board/` in `picks`, the folder Frameboard keeps its design board in, and asks nothing.
+The run drafts on `.canon/board/` in the derived project, the folder Frameboard keeps its design board in, and asks nothing.
 
 Set the file when the project's design sync reads a board other than `.canon/board/`. A round drafted there lands through `design-record` without a redraw, and Step 6 of the skill body keeps the winning page for the sync's mapping.
 

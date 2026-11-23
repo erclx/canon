@@ -14,11 +14,11 @@ The prototype answers behavior and copy, and the static frames answer the states
 The prototype is one board page named `prototype` in the run's project, recorded on the run's list. A `name-taken` refusal takes the next free suffix, as Step 2 of `SKILL.md` states for a round page.
 
 - Write one responsive HTML document, never one per width, so a fix lands once and every class shows it
-- Add one frame per device class as `frameboard frame add <page>/prototype-<px> --width <px> --device on`, at the widths `widths.md` beside this file resolves, laid out as `drawing.md` lays a group
+- Add one frame per device class as `frameboard frame add <page>/prototype-<px> --width <px> --device on --scroll`, at the widths `widths.md` resolves, laid out as `drawing.md` lays a group
 - Write the same document to each frame's `path`. Never use a `--widths` linked width, which draws no device body.
 - Inline every style, script, and asset, as the default path in `SKILL.md` states for any frame
 
-A frame is the size its device is, so set each frame's height to that device's viewport with `frameboard frame resize` rather than fitting it. The prototype scrolls inside its frame the way the app scrolls inside a screen.
+A frame holds its device's screen height under the one rule in `drawing.md` beside this file, so the prototype scrolls inside its frame the way the app scrolls inside a screen. Fit nothing.
 
 ## Scope
 
@@ -56,6 +56,12 @@ Script a click-through of every confirmed flow in each device frame before handi
 - Read `canon browser -s=<run> console` after the last flow in each frame, and count any error as a failed check
 - Run `canon browser -s=<run> reload` and assert the starting rows are back, which proves the reset `## Data` requires
 - Measure sideways scroll in each frame as `widths.md` states, the phone frame again at 320
+
+Then list every native `select` and picker `input` in each frame, such as a date, time, or color field. The browser draws its open state, so the prototype's styling stops at the closed field.
+
+- Hold the handover until each listed control has a frame drawing its open state or a styled replacement
+- Accept a native control the design keeps on purpose with its open-state frame, and never demand a replacement
+- Say `no native pickers` when the list is empty, which passes the step
 
 Report each flow, each frame, and pass or fail in the run's output. A failed flow is fixed and the whole check runs again, since a fix to one flow can break another sharing its state.
 
