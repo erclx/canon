@@ -193,6 +193,8 @@ body {
 /* The content: a centered reading column, with the rail beside it from 1280 px. */
 
 .kit-lesson {
+  container-type: inline-size;
+  --kit-cols: 944px;
   display: grid;
   grid-template-columns: minmax(0, 680px) 200px;
   justify-content: center;
@@ -202,6 +204,7 @@ body {
 }
 
 .kit-lesson:not(:has(.kit-rail)) {
+  --kit-cols: 680px;
   grid-template-columns: minmax(0, 680px);
 }
 
@@ -300,7 +303,10 @@ body {
 /* Parts a lesson is written from. */
 
 .kit-figure {
-  margin: 18px 0 8px -180px;
+  /* The room left of the column: the lesson's 40 px padding plus half of what the columns leave over, less a 16 px gutter to the sidebar. */
+  --kit-room: calc(40px + max(0px, (100cqw - var(--kit-cols)) / 2) - 16px);
+  --kit-reach: 180px;
+  margin: 18px 0 8px calc(-1 * clamp(0px, var(--kit-room), var(--kit-reach)));
   padding: 18px;
   border-radius: var(--radius);
   background: var(--tint);
@@ -518,9 +524,13 @@ body {
     margin: 0 auto;
   }
 
+  .kit-lesson {
+    --kit-cols: 680px;
+  }
+
   .kit-figure {
-    margin-right: -100px;
-    margin-left: -100px;
+    --kit-reach: 100px;
+    margin-right: calc(-1 * clamp(0px, var(--kit-room), var(--kit-reach)));
   }
 
   .kit-rail {
