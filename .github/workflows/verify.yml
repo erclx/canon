@@ -66,6 +66,9 @@ jobs:
     timeout-minutes: 5
     outputs:
       code: ${{ steps.detect.outputs.code }}
+      e2e: ${{ steps.scope.outputs.e2e }}
+      full: ${{ steps.scope.outputs.full }}
+      files: ${{ steps.scope.outputs.files }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -78,6 +81,25 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: bash scripts/ci/docs-only.sh "$BASE_SHA"
+
+      - name: Setup Bun
+        if: steps.detect.outputs.code == 'true'
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        if: steps.detect.outputs.code == 'true'
+        run: bun install --frozen-lockfile
+
+      # Which E2E suites the change reaches through imports. A failed read
+      # reports the full suite, never a skip.
+      - name: Scope E2E Suites
+        id: scope
+        if: steps.detect.outputs.code == 'true'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: bun scripts/ci/e2e-scope.ts "$BASE_SHA"
 
   # The unit suite alone, since lint, types, format, shell, build, and browser
   # results do not differ by platform. Reason in canon/context/development/ci.md
@@ -135,12 +157,15 @@ jobs:
     timeout-minutes: 25
     needs: changes
     # The macOS job's condition, so a Markdown-only pull request skips it and
-    # a push to main, where changes never runs, does not
+    # a push to main, where changes never runs, does not. A pull request also
+    # skips when its imports reach no suite, and runs only the reached suites
+    # unless a trigger forced the full one.
     if: >-
       !cancelled() && github.event_name != 'schedule' &&
       !(github.event_name == 'pull_request' &&
       needs.changes.result == 'success' &&
-      needs.changes.outputs.code == 'false')
+      (needs.changes.outputs.code == 'false' ||
+      needs.changes.outputs.e2e == 'false'))
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -193,9 +218,13 @@ jobs:
         timeout-minutes: 1
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
+      # Files is empty on a push, on a trigger, and on a failed scope read,
+      # which all run the full suite
       - name: Run E2E Suites
         timeout-minutes: 15
-        run: bun run test:e2e
+        env:
+          FILES: ${{ needs.changes.outputs.full != 'true' && needs.changes.outputs.files || '' }}
+        run: bun run test:e2e $FILES
 
   dependency-advisories:
     name: 📦 Dependency Advisories
