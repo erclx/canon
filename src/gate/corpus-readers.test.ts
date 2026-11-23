@@ -4,11 +4,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import {
-  e2eReadersOf,
-  readersOf,
-  readTestSources,
-} from '@/gate/corpus-readers'
+import { e2eReadersOf, readersOf, readTestSources } from '@/gate/corpus-readers'
 import { gitEnv } from '@/git/env'
 
 describe('readersOf', () => {
