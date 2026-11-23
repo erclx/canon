@@ -8,7 +8,7 @@
 ## Modals
 
 - Open a modal only for a task that needs the person's full attention or an answer before they continue, and use inline content for anything they can ignore.
-- Never open a modal from inside a modal. Close the first before showing the second, and reopen it after if the person needs it back.
+- Never open a modal from inside a modal, and close the first before showing the second. A confirm or alert may sit over one, one at a time.
 
 ## Navigation
 
@@ -18,7 +18,7 @@
 
 ## Permissions
 
-- Ask for a browser permission, such as location, notifications, or the camera, when the person first uses the feature that needs it. Ask at load only when the feature cannot work without the grant.
+- Ask for a browser permission, such as location, notifications, or the camera, when the person first uses the feature that needs it. Ask at load only when the page cannot work at all without the grant.
 
 ## Element states
 
