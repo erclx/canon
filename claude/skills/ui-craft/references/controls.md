@@ -5,6 +5,21 @@
 - Confirm a destructive action, such as a delete, disconnect, or discard, before it runs, unless it can be undone afterward.
 - Restore the value from before an edit when the edit is cancelled. Never discard typed work on Escape or an outside click unasked, but confirm first when the person has typed something.
 
+## Modals
+
+- Open a modal only for a task that needs the person's full attention or an answer before they continue, and use inline content for anything they can ignore.
+- Never open a modal from inside a modal. Close the first before showing the second, and reopen it after if the person needs it back.
+
+## Navigation
+
+- Use a tab bar to move among a page's sections, and never to run an action, since an action takes a button. Tabs that switch a view inside one section are not covered.
+- Label every tab with text, beside or beneath its icon.
+- Keep every tab shown and enabled when its section is empty, and say why the section has nothing.
+
+## Permissions
+
+- Ask for a browser permission, such as location, notifications, or the camera, when the person first uses the feature that needs it. Ask at load only when the feature cannot work without the grant.
+
 ## Element states
 
 - Give every interactive element distinct hover, active, focus, and disabled styles.

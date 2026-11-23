@@ -26,8 +26,14 @@
 - Keep an unsent draft and panel sizes in browser storage, and restore them on reload. Leave a password or payment field out of the kept draft.
 - Reset an open confirm or destructive dialog, a one-time message, hover and focus, an in-flight drag, and a selection whose item is gone, since restoring one repeats an act or points at nothing.
 
+## Search
+
+- Show what a search covers, in a placeholder, a scope control, or a title, such as the mailbox or section being searched.
+- Offer suggestions, such as recent searches before typing starts or matches while typing, and keep the field usable without them.
+
 ## Overflow
 
 - Truncate long text in a constrained container with an ellipsis rather than letting it overflow.
 - Expose truncated text through an expand control or full text on focus, never through a `title` tooltip alone.
 - Keep interactive borders clear of a parent's `overflow` clipping, padding the edge items of a scrollable list.
+- Keep content and controls clear of a notch or home indicator, padding with `env(safe-area-inset-*)` on a page set to `viewport-fit=cover`. The inset is zero on a desktop, so it costs nothing there.

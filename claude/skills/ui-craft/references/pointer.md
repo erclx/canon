@@ -5,6 +5,7 @@
 - Dismiss a popover or menu on a press outside it and when focus leaves it, as well as on Escape.
 - Run a pointer action on release rather than press, so a person can slide off the target to abort it (WCAG 2.5.2).
 - Give a path-based or multipoint gesture, such as a swipe or pinch, a single-pointer alternative with no path (WCAG 2.5.1).
+- Leave the browser's and system's edge gestures alone, such as the swipe that goes back. Put no swipe handler on the edge strip, and keep any Back control the page offers.
 
 ## Drags
 
