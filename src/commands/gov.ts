@@ -874,7 +874,7 @@ function reportRestated(
   // A count of what matched reads as a verdict unless the run says how wide the corpus was.
   logStep('Corpus')
   logInfo(
-    `${report.corpus.instructions} always-loaded instruction(s) and ${report.corpus.rules} rule file(s) against ${report.corpus.candidates} statement(s) from the seed, ${report.corpus.bodies} skill body/bodies, and every rule again, in ${root}`,
+    `${report.corpus.instructions} always-loaded instruction(s) and ${report.corpus.rules} rule file(s) against ${report.corpus.candidates} statement(s) from the seed, ${report.corpus.bodies} skill body/bodies, ${report.corpus.references} skill reference file(s), and every rule again, in ${root}`,
   )
   logInfo(
     `matched on ${report.matcher.anchors} weighted anchor(s), dropping any token in more than ${report.matcher.common} statements`,
