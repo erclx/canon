@@ -28,6 +28,10 @@ const PAGES: Record<string, string> = {
   '/clipped':
     '<body style="margin:0"><button style="width:60px;overflow:hidden;white-space:nowrap">A label far too long for its box</button></body>',
   '/fits': '<body style="margin:0"><p>Fits at any width.</p></body>',
+  '/past-edge':
+    '<body style="margin:0"><div style="overflow:hidden"><button style="margin-left:280px;width:100px">Past</button></div></body>',
+  '/skip-link':
+    '<body style="margin:0"><a href="#main" style="position:absolute;left:-9999px">Skip to content</a><p id="main">Fits.</p></body>',
 }
 
 /** Each case at the floor and at 390 alone, so a run writes one frame per case beside its check. */
@@ -37,6 +41,8 @@ export const CASES = [
   { section: 'wide', theme: 'light', route: '/wide', excludeViewports: floorAnd390 },
   { section: 'clipped', theme: 'light', route: '/clipped', excludeViewports: floorAnd390 },
   { section: 'fits', theme: 'light', route: '/fits', excludeViewports: floorAnd390 },
+  { section: 'past-edge', theme: 'light', route: '/past-edge', excludeViewports: floorAnd390 },
+  { section: 'skip-link', theme: 'light', route: '/skip-link', excludeViewports: floorAnd390 },
 ]
 `
 
@@ -109,6 +115,14 @@ describe.skipIf(!hasBrowser)('screenshot.ts reflow floor', () => {
 
   it('should report nothing for a page that fits at 320', () => {
     expect(run.output).not.toContain('fits/320--light:')
+  })
+
+  it('should name a control running past the edge of a clipping parent at 320', () => {
+    expect(run.output).toMatch(/past-edge\/320--light: button .*past the edge/)
+  })
+
+  it('should report nothing for a skip link held wholly off the page', () => {
+    expect(run.output).not.toContain('skip-link/320--light:')
   })
 
   it('should write no frame at the floor', () => {
