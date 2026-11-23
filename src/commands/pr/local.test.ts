@@ -168,6 +168,40 @@ describe('canon pr local', () => {
     })
   })
 
+  it('should report the declared port plus the worktree offset as the declared source', async () => {
+    const port = await serveWithHealth(200)
+    writeFileSync(
+      join(repoRoot, 'canon', 'config', 'preview.json'),
+      JSON.stringify({ writes: ['board'], port: port - 5 }),
+    )
+    mkdirSync(join(repoRoot, 'scripts'))
+    writeFileSync(
+      join(repoRoot, 'scripts', 'worktree-port.sh'),
+      'echo $(( ${1:-0} + 5 ))\n',
+    )
+
+    const outcome = await runLocal([])
+
+    expect(outcome).toEqual({
+      record: expect.objectContaining({
+        reason: 'ok',
+        port,
+        source: 'declared',
+      }),
+      exit: 0,
+    })
+  })
+
+  it('should report a scanned server as the scan source when the project declares no port', async () => {
+    const port = await serveWithHealth(200)
+
+    const outcome = await runLocal([])
+
+    expect(outcome.record).toEqual(
+      expect.objectContaining({ port, source: 'scan' }),
+    )
+  })
+
   // Answers / after 3 seconds, as astro dev does on a warm render.
   async function serveSlowPage(): Promise<number> {
     const script = [

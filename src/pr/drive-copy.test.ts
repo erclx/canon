@@ -15,6 +15,7 @@ import {
   branchSlug,
   buildDriveCopy,
   loadPreviewConfig,
+  readWorktreeOffset,
   runSeed,
 } from '@/pr/drive-copy'
 
@@ -507,5 +508,47 @@ describe('branchSlug', () => {
 
   it('should keep a type that no further segment follows', () => {
     expect(branchSlug('feat')).toBe('feat')
+  })
+})
+
+describe('readWorktreeOffset', () => {
+  it('should read offset zero when the project installs no port helper', async () => {
+    expect(await readWorktreeOffset(worktree)).toEqual({
+      kind: 'offset',
+      value: 0,
+    })
+  })
+
+  it('should read the offset the port helper prints from the worktree', async () => {
+    write(
+      'scripts/worktree-port.sh',
+      '[ "$(pwd -P)" = "$EXPECTED" ] || exit 9\necho $(( ${1:-0} + 17 ))\n',
+    )
+
+    const read = await readWorktreeOffset(worktree, {
+      EXPECTED: realpathSync(worktree),
+    })
+
+    expect(read).toEqual({ kind: 'offset', value: 17 })
+  })
+
+  it('should refuse with the helper stderr when the helper refuses the folder', async () => {
+    write(
+      'scripts/worktree-port.sh',
+      'echo "worktree-port: leftover folder" >&2\nexit 1\n',
+    )
+
+    expect(await readWorktreeOffset(worktree)).toEqual({
+      kind: 'refused',
+      detail: 'worktree-port: leftover folder',
+    })
+  })
+
+  it('should refuse when the helper prints something other than a number', async () => {
+    write('scripts/worktree-port.sh', 'echo offset\n')
+
+    expect(await readWorktreeOffset(worktree)).toMatchObject({
+      kind: 'refused',
+    })
   })
 })

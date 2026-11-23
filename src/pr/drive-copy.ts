@@ -358,3 +358,42 @@ export async function runSeed(
       : {}),
   }
 }
+
+/** The helper a project installs to derive each worktree's port offset. */
+export const WORKTREE_PORT_SCRIPT = join('scripts', 'worktree-port.sh')
+
+export type WorktreeOffset =
+  | { readonly kind: 'offset'; readonly value: number }
+  | { readonly kind: 'refused'; readonly detail: string }
+
+/**
+ * The offset the project's port helper derives for `worktree`, run from that
+ * tree with a base of 0 so the helper stays the one owner of the rule and its
+ * `WORKTREE_PORT_OFFSET` override. A project with no helper serves at offset 0.
+ */
+export async function readWorktreeOffset(
+  worktree: string,
+  env: Readonly<Record<string, string>> = {},
+): Promise<WorktreeOffset> {
+  if (!existsSync(join(worktree, WORKTREE_PORT_SCRIPT))) {
+    return { kind: 'offset', value: 0 }
+  }
+  const result = await execa('bash', [WORKTREE_PORT_SCRIPT, '0'], {
+    cwd: worktree,
+    env,
+    stdin: 'ignore',
+    reject: false,
+  })
+  const printed = result.stdout.trim()
+  if (result.exitCode === 0 && /^\d+$/.test(printed)) {
+    return { kind: 'offset', value: Number(printed) }
+  }
+  const detail = result.stderr.trim()
+  return {
+    kind: 'refused',
+    detail:
+      detail === ''
+        ? `${WORKTREE_PORT_SCRIPT} printed "${printed}" and exited ${result.exitCode ?? 'on a signal'}.`
+        : detail,
+  }
+}
