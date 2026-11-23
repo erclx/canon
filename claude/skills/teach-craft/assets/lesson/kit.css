@@ -235,6 +235,51 @@ body {
   background: var(--tint);
   font-family: var(--font-code);
   font-size: 0.86em;
+  overflow-wrap: anywhere;
+}
+
+/* A block takes the tint once, and the code inside it drops the inline look so a line is not boxed again. */
+.kit-article pre {
+  margin: 0 0 14px;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  background: var(--tint);
+  font-family: var(--font-code);
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.kit-article pre code {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  font-size: inherit;
+}
+
+.kit-syn-keyword {
+  color: var(--syn-keyword);
+}
+
+.kit-syn-string {
+  color: var(--syn-string);
+}
+
+.kit-syn-comment {
+  color: var(--syn-comment);
+}
+
+.kit-syn-number {
+  color: var(--syn-number);
+}
+
+.kit-syn-function {
+  color: var(--syn-function);
+}
+
+.kit-syn-type {
+  color: var(--syn-type);
 }
 
 .kit-article table {
@@ -270,6 +315,7 @@ body {
 }
 
 .kit-rail {
+  align-self: start;
   position: sticky;
   top: 80px;
   font-size: 14px;
@@ -294,7 +340,8 @@ body {
   color: var(--text);
 }
 
-.kit-rail a.kit-here {
+.kit-rail a.kit-here,
+.kit-rail a[aria-current='location'] {
   border-left-color: var(--accent-strong);
   color: var(--text);
   font-weight: 600;
@@ -303,13 +350,21 @@ body {
 /* Parts a lesson is written from. */
 
 .kit-figure {
-  /* The room left of the column: the lesson's 40 px padding plus half of what the columns leave over, less a 16 px gutter to the sidebar. */
+  /* The room beside the column: the lesson's 40 px padding plus half of what the columns leave over, less a 16 px gutter. The breakout takes it on both sides, so the figure stays centered on the column. */
   --kit-room: calc(40px + max(0px, (100cqw - var(--kit-cols)) / 2) - 16px);
   --kit-reach: 180px;
-  margin: 18px 0 8px calc(-1 * clamp(0px, var(--kit-room), var(--kit-reach)));
+  --kit-out: clamp(0px, var(--kit-room), var(--kit-reach));
+  margin: 18px calc(-1 * var(--kit-out)) 8px;
   padding: 18px;
   border-radius: var(--radius);
   background: var(--tint);
+}
+
+/* Beside the rail the figure reaches only the 64 px gap, less a 16 px gutter, so it never goes under the pinned rail. */
+@media (min-width: 1280px) {
+  .kit-lesson:has(.kit-rail) .kit-figure {
+    --kit-reach: 48px;
+  }
 }
 
 .kit-figure svg {
@@ -387,8 +442,9 @@ body {
 
 .kit-refs li {
   display: grid;
-  grid-template-columns: 34px 1fr;
+  grid-template-columns: 34px minmax(0, 1fr);
   margin-bottom: 8px;
+  overflow-wrap: anywhere;
 }
 
 .kit-refs a {
@@ -530,7 +586,6 @@ body {
 
   .kit-figure {
     --kit-reach: 100px;
-    margin-right: calc(-1 * clamp(0px, var(--kit-room), var(--kit-reach)));
   }
 
   .kit-rail {
@@ -540,8 +595,7 @@ body {
 
 @media (max-width: 1100px) {
   .kit-figure {
-    margin-right: 0;
-    margin-left: 0;
+    --kit-out: 0px;
   }
 }
 

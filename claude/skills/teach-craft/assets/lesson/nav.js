@@ -35,6 +35,15 @@
       root.dataset.theme = 'dark'
   }
 
+  // A browser fetches a face only once visible text uses it, so code that first shows in hidden feedback would capture before the face arrived.
+  const loadCodeFace = () => {
+    try {
+      document.fonts?.load("1em 'Noto Sans Mono'")?.catch(() => {})
+    } catch {
+      // A browser without the font loading API leaves the face to load on first use.
+    }
+  }
+
   // A board injects the kit's sheets into a frame naming the kit. A standalone page loads them from beside this script.
   const injected =
     getComputedStyle(root).getPropertyValue('--kit-lesson').trim() !== ''
@@ -44,7 +53,117 @@
       link.rel = 'stylesheet'
       link.href = new URL(name, script.src).href
       link.setAttribute('blocking', 'render')
+      if (name === 'tokens.css') link.addEventListener('load', loadCodeFace)
       document.head.append(link)
+    }
+  }
+
+  // The tokenizer reads a block's text and builds its own spans, so a lesson's code never reaches innerHTML.
+  const quoted = (q) => `${q}(?:\\\\.|[^${q}\\\\\\n])*${q}`
+  const slashComments = '\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/'
+  const jsWords =
+    'const let var function return if else for while do switch case break continue new class extends import export from default async await try catch finally throw typeof instanceof in of void interface type enum implements readonly public private protected static as true false null undefined this super yield'
+  const languages = {
+    js: {
+      comment: slashComments,
+      string: `${quoted("'")}|${quoted('"')}|\`(?:\\\\.|[^\`\\\\])*\``,
+      words: jsWords,
+      types: true,
+    },
+    json: {
+      comment: '(?!)',
+      string: quoted('"'),
+      words: 'true false null',
+    },
+    sql: {
+      comment: '--[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/',
+      string: quoted("'"),
+      words:
+        'select from where and or not insert into values update set delete create alter drop table index view join left right inner outer full cross on as group by order having limit offset union all distinct null is in like between exists case when then else end primary key foreign references default unique count sum avg min max with returning',
+      fold: true,
+    },
+    sh: {
+      comment: '#[^\\n]*',
+      string: `${quoted("'")}|${quoted('"')}`,
+      words:
+        'if then elif else fi for while until do done case esac in function return exit export local readonly set unset source echo cd',
+    },
+  }
+  const aliases = {
+    ts: 'js',
+    tsx: 'js',
+    typescript: 'js',
+    javascript: 'js',
+    jsx: 'js',
+    mjs: 'js',
+    bash: 'sh',
+    shell: 'sh',
+    zsh: 'sh',
+    console: 'sh',
+  }
+
+  const compile = (lang) => {
+    const set = new Set(
+      (lang.fold ? lang.words.toLowerCase() : lang.words).split(' '),
+    )
+    return {
+      lang,
+      set,
+      pattern: new RegExp(
+        `(?<comment>${lang.comment})|(?<string>${lang.string})|(?<number>\\b\\d[\\d_]*(?:\\.\\d+)?\\b)|(?<word>[A-Za-z_$][\\w$]*)`,
+        'g',
+      ),
+    }
+  }
+  const compiled = new Map()
+
+  const languageOf = (code) => {
+    const named = `${code.className} ${code.parentElement?.className ?? ''}`
+    const found =
+      code.dataset.lang ?? named.match(/\b(?:language|lang)-([\w-]+)/)?.[1]
+    const key = (found ?? '').toLowerCase()
+    return languages[key] ? key : aliases[key]
+  }
+
+  const tokenize = (text, key) => {
+    if (!compiled.has(key)) compiled.set(key, compile(languages[key]))
+    const { lang, set, pattern } = compiled.get(key)
+    const parts = []
+    let last = 0
+    for (const match of text.matchAll(pattern)) {
+      const [raw] = match
+      const { comment, string, number, word } = match.groups
+      let kind = null
+      if (comment !== undefined) kind = 'comment'
+      else if (string !== undefined) kind = 'string'
+      else if (number !== undefined) kind = 'number'
+      else if (set.has(lang.fold ? word.toLowerCase() : word)) kind = 'keyword'
+      else if (text[match.index + raw.length] === '(') kind = 'function'
+      else if (lang.types && /^[A-Z]/.test(word)) kind = 'type'
+      if (!kind) continue
+      if (match.index > last) parts.push([null, text.slice(last, match.index)])
+      parts.push([kind, raw])
+      last = match.index + raw.length
+    }
+    if (last < text.length) parts.push([null, text.slice(last)])
+    return parts
+  }
+
+  // A block in a language the tokenizer does not know stays plain text, since a wrong guess would color it wrongly.
+  const highlight = () => {
+    for (const code of document.querySelectorAll('pre code')) {
+      const key = languageOf(code)
+      if (!key || code.dataset.kitSyntax) continue
+      const text = code.textContent
+      const nodes = tokenize(text, key).map(([kind, part]) => {
+        if (!kind) return document.createTextNode(part)
+        const span = document.createElement('span')
+        span.className = `kit-syn-${kind}`
+        span.textContent = part
+        return span
+      })
+      code.replaceChildren(...nodes)
+      code.dataset.kitSyntax = 'done'
     }
   }
 
@@ -153,7 +272,12 @@
       ),
     )
     const mark = (id) =>
-      links.forEach((a) => a.classList.toggle('kit-here', a.hash === `#${id}`))
+      links.forEach((a) => {
+        const here = a.hash === `#${id}`
+        a.classList.toggle('kit-here', here)
+        if (here) a.setAttribute('aria-current', 'location')
+        else a.removeAttribute('aria-current')
+      })
     mark(headings[0].id)
     const watch = new IntersectionObserver(
       (entries) => {
@@ -166,6 +290,8 @@
   }
 
   const build = () => {
+    loadCodeFace()
+    highlight()
     const main = document.querySelector('main.kit-lesson')
     if (!main) return
     const article = main.querySelector('.kit-article')
