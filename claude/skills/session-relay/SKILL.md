@@ -84,10 +84,10 @@ Answer at: <path>, <slot>
 The slot is one of these:
 
 - A plan question's `- Answer:` line
-- A plan question's `- Suggested:` line, for a pick settled in conversation, which names who settled it there
+- A plan question's `- Suggested:` line, for a pick settled in conversation, which names who settled it there, or for a decision no question covers, written as a new question already settled
 - A plan's `Approved:` line, for a plan the operator approved whole in the planner's session, cited as `<path>, Approved:`
 - An intake item's `You:` line
-- A task's outcome box
+- A task's outcome box, or a line under its `## Findings` for a decision no question covers when no plan exists yet
 
 The calling role decides whether a message relays an answer, and one relaying none, such as a landing announcement, carries no such line.
 

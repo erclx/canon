@@ -348,6 +348,8 @@ Before Step 3, `plan-feature` predicts the operator's answer to the next three q
 
 A deviation from an unanswered question rewrites the `- Suggested:` line to the pick execution made and leaves the slot blank, since the prohibition above reaches the answer line alone.
 
+A decision settled in conversation that no question covers takes a new question written already settled. Its `- Suggested:` line carries the pick and names who settled it, with the slot blank. With no plan yet, it takes a line in the task's `## Findings` under the label `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
+
 - Open the rewritten text with `overridden at execution to <pick>,` and follow it with the measurement that moved the pick
 - The fixed phrase tells an override from an authored suggestion, which routinely carries a number too
 - Take a deviation from an answered question back to whoever answered it rather than rewriting either line
