@@ -59,14 +59,19 @@ Run the sequence from the app root, checked against shadcn `4.23.0` on 2026-11-2
 The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project that has none and leaves it alone after, so grow it freely.
 
 - Edit the `CASES` in the seeded `e2e/capture/cases.ts`, one entry per output file naming a section, a theme, and a route, since sync overwrites the `e2e/screenshot.ts` harness
+- Add a per-feature file exporting `CASES` under `e2e/capture/cases/`, read after `cases.ts` in file-name order, so parallel branches stop conflicting on one file
 - Move cases from `e2e/screenshot.ts` to `e2e/capture/cases.ts` before a sync, and set `EVIDENCE_ROOT = 'evidence'` to keep an existing baseline
+
+Each case is crossed with every width the harness holds, and checked once at the reflow floor.
+
 - Expect each case crossed with `VIEWPORTS`, written to `screenshots/<hostname>/<section>/<width>--<theme>.png`, so local and deployed runs stay apart
-- `VIEWPORTS` holds 320, 768, 1280, and 1536. Width 320 is the base a page has to hold without wrapping or clipping.
-- Set `excludeViewports` to skip a width, for a route whose long-form prose reflows at 320 instead of breaking
+- `VIEWPORTS` holds 390, 768, and 1280, the widths a design round draws, plus 1536 swept alone
+- Expect every case to load at 320, the WCAG Reflow floor, and fail the run on a sideways scroll or a clipped control, writing no image
+- Set `excludeViewports` to skip a width, and name `320` in it to defer the reflow check on a route not yet fixed. A name no viewport carries is warned on and ignored.
 
 ## Screenshot sections
 
-- Set `evidence: true` to also write `<EVIDENCE_ROOT>/<section>/<width>--<theme>.png` at 320 and 1280 alone. `EVIDENCE_ROOT` defaults to `e2e/evidence`.
+- Set `evidence: true` to also write `<EVIDENCE_ROOT>/<section>/<width>--<theme>.png` at 390, 768, and 1280. `EVIDENCE_ROOT` comes from `cases.ts`, else `e2e/evidence`.
 - Name `sections` on a case, one `{ name, selector }` per addressable part of the route, each written as its own frame beside the whole-page one
 - Expect a section frame at `screenshots/<hostname>/<section>/<name>/<width>--<theme>.png`, plus the same path under `EVIDENCE_ROOT` where flagged
 - Expect a selector matching nothing to be reported and skipped, since a seeded list may name sections the page lacks, and test that they resolve in the project owning the selectors
@@ -99,8 +104,8 @@ The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project tha
 ## Screenshot scripts and workflows
 
 - `scripts/screenshot.sh` sources `scripts/lib/preview-server.sh`, builds, serves on `PREVIEW_PORT`, waits for the port, and traps the whole process group on exit
-- `scripts/readme-screenshot.sh` captures one case under `SCREENSHOT_FILTER` into `assets/evidence/readme/`, and exits 1 until a project fills `README_FILTER`
-- `.github/workflows/readme-screenshot.yml` ships its path list as `REPLACE_WITH_PROJECT_PATHS`, and its first step exits 1 while that stays
+- `scripts/readme-screenshot.sh` captures one case under `SCREENSHOT_FILTER` into `<EVIDENCE_ROOT>/readme/` unless `README_EVIDENCE_DIR` names a folder, and exits 1 until a project fills `README_FILTER`
+- `.github/workflows/readme-screenshot.yml` checks out with `RELEASE_PLEASE_TOKEN` so its push starts the required checks, and exits 1 while its path list holds `REPLACE_WITH_PROJECT_PATHS`
 - `.github/workflows/verify.yml` runs `static-checks`, `unit-tests`, `build-verify`, and `e2e-tests`. `unit-tests` installs Chromium and runs `test:browser` only when the project defines that script.
 - Read `governance/rules/tooling/ci-workflow.md` for when a workflow's commit-back is right and when a report is
 

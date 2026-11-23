@@ -97,7 +97,16 @@ A web project's `e2e/screenshot.ts` is a config. It now loads `CASES` from a see
 
 - Copy your cases from the old `e2e/screenshot.ts` into `e2e/capture/cases.ts`, then sync with `--replace e2e/screenshot.ts`.
 - Evidence now defaults to `e2e/evidence/`. Set `export const EVIDENCE_ROOT = 'evidence'` in `e2e/capture/cases.ts` to keep a committed baseline at the old path.
-- A run from a folder with no `e2e/capture/cases.ts` exits 1 and names the file.
+- A run from a folder holding neither `e2e/capture/cases.ts` nor a file under `e2e/capture/cases/` exits 1 and names both.
+
+## Drop the 320 stills and move the README frame, once
+
+A web project's capture harness now commits evidence at 390, 768, and 1280. It writes nothing at 320, and checks every case there for sideways scroll and clipped controls instead. The README script writes its frame under `<EVIDENCE_ROOT>/readme/` in place of `assets/evidence/readme/`. Both files are configs, so the change lands on your next sync.
+
+- Delete each committed `320--<theme>.png` under your `EVIDENCE_ROOT`, since no run rewrites or removes it, and commit the 390 and 768 frames the next capture writes.
+- Fix a page the run now fails at 320, or name `'320'` in that case's `excludeViewports` to defer the check. An `excludeViewports` name no width carries is warned on and ignored.
+- Point the README's `srcset` at `<EVIDENCE_ROOT>/readme/`, then delete `assets/evidence/readme/`. The README shows a broken image until you do.
+- Give `RELEASE_PLEASE_TOKEN` Contents write, so the README refresh's push starts the required checks. Without the secret the workflow falls back to the default token, whose push starts none.
 
 ## Fold the ui rules onto one pointer, once
 

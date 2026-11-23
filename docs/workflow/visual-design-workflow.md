@@ -82,7 +82,7 @@ Most projects author design in the loop above and need nothing more. Start with 
 
 ### What a round draws
 
-A round draws every arm at a phone, a tablet, and a desktop width, read from the `Draw widths:` line in the `## Layout` section of `canon/DESIGN.md` and falling back to 390, 834, and 1440. A drive with `canon:app-drive` draws on the board by the same convention.
+A round draws every arm at a phone, a tablet, and a desktop width, read from the `Draw widths:` line in the `## Layout` section of `canon/DESIGN.md` and falling back to 390, 768, and 1280, the widths the screenshot harness commits. A drive with `canon:app-drive` draws on the board by the same convention.
 
 - A pick that scrolls sideways at any of those widths, or at 320, is held until it reflows.
 - Before drafting, a round reuses the board's `references` page or runs `canon:design-references` to fill one, with the sites you name or bare.
