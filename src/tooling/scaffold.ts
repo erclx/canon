@@ -15,7 +15,13 @@ import { execa } from 'execa'
 import { gitEnv } from '@/git/env'
 import { writeAppRoot } from '@/sync/stamp'
 import { DEFAULT_APP_ROOT, parseAppRoot } from '@/tooling/app-root'
-import { isStackExcluded, loadManifest } from '@/tooling/manifest'
+import {
+  configFiles,
+  isStackExcluded,
+  loadManifest,
+  resolveChain,
+  seedFiles,
+} from '@/tooling/manifest'
 
 export interface ScaffoldOptions {
   /** Root holding `tooling/<stack>/manifest.toml`. */
@@ -126,6 +132,16 @@ export async function scaffoldStack(
       `Stack '${stack}' declares no [scaffold] app-root, so its app folder cannot move.`,
     )
   }
+  const clash =
+    moveTo === undefined || manifest.appRoot === undefined
+      ? undefined
+      : rootClash(root, stack, manifest.appRoot, moveTo)
+  if (clash !== undefined) {
+    return refuse(
+      'bad-app-root',
+      `App root '${moveTo}' sits inside ${clash}/, which the scaffold or sync writes. Pick a folder of its own, such as 'web'.`,
+    )
+  }
 
   const held = existsSync(target) ? occupiedEntries(target) : []
   if (held.length > 0) {
@@ -233,6 +249,29 @@ export async function scaffoldStack(
     git: await initGit(target),
     appRoot: moveTo,
   }
+}
+
+/**
+ * The folder a root would sit inside and collide with: the starter's app folder, which cannot move into itself,
+ * `canon/`, which holds the tooling record, or a top-level folder the chain ships golden files into.
+ */
+function rootClash(
+  root: string,
+  stack: string,
+  from: string,
+  to: string,
+): string | undefined {
+  if (to === from || to.startsWith(`${from}/`)) return from
+
+  const top = to.split('/')[0]
+  const written = new Set(['canon'])
+  for (const manifest of resolveChain(root, stack)) {
+    for (const rel of [...configFiles(manifest), ...seedFiles(manifest)]) {
+      const segments = rel.split('/')
+      if (segments.length > 1 && segments[0] !== from) written.add(segments[0])
+    }
+  }
+  return top !== undefined && written.has(top) ? top : undefined
 }
 
 /**

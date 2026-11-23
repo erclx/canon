@@ -377,6 +377,55 @@ describe('scaffoldStack app root', () => {
     },
   )
 
+  it.each(['src/app', 'src/nested/deep'])(
+    'should refuse %j as a root inside the folder that moves',
+    async (appRoot) => {
+      seedVite()
+
+      const result = await scaffoldStack({
+        root,
+        stack: 'vite',
+        target: target('app'),
+        scratchBase,
+        appRoot,
+      })
+
+      expect(result.ok || result.reason).toBe('bad-app-root')
+      expect(existsSync(target('app'))).toBe(false)
+    },
+  )
+
+  it('should refuse the folder the tooling record lives in as a root', async () => {
+    seedVite()
+
+    const result = await scaffoldStack({
+      root,
+      stack: 'vite',
+      target: target('app'),
+      scratchBase,
+      appRoot: 'canon',
+    })
+
+    expect(result.ok || result.reason).toBe('bad-app-root')
+  })
+
+  it('should refuse a root the stack ships golden files into', async () => {
+    seedVite()
+    const golden = join(root, 'tooling', 'vite', 'configs', 'e2e', 'shot.ts')
+    mkdirSync(join(golden, '..'), { recursive: true })
+    writeFileSync(golden, 'export {}\n')
+
+    const result = await scaffoldStack({
+      root,
+      stack: 'vite',
+      target: target('app'),
+      scratchBase,
+      appRoot: 'e2e/app',
+    })
+
+    expect(result.ok || result.reason).toBe('bad-app-root')
+  })
+
   it('should refuse a root naming a folder the starter already holds', async () => {
     seedVite()
 
