@@ -38,6 +38,8 @@ interface Fixture {
   changed?: ChangedRead | null
   /** What the rebase comparison answers, a failed read when absent. */
   rebased?: RebaseRead
+  /** The commits the head adds that are neither merges nor on the base, a failed read when absent. */
+  unmerged?: readonly string[]
 }
 
 interface Harness {
@@ -80,6 +82,7 @@ function makeApi(fixture: Fixture = {}): Harness {
       return fixture.changed ?? { isAncestor: true, paths: [] }
     },
     readRebased: async () => fixture.rebased,
+    readUnmerged: async () => fixture.unmerged,
     sleep: async (ms) => {
       calls.sleeps.push(ms)
       clock += ms
@@ -255,6 +258,31 @@ describe('readReviewState', () => {
         head: PUSHED,
         review: { isCovered: true, carriedFrom: HEAD, carriedAcross: 'rebase' },
         ui: { isCovered: true, carriedFrom: HEAD, carriedAcross: 'rebase' },
+      },
+    })
+  })
+
+  it('should carry the code close across a base merge and hold the UI close behind it', async () => {
+    const { api } = makeApi({
+      tips: [PUSHED],
+      reviews: [
+        [
+          codePass('## Review closed', HEAD),
+          uiPass('## UI review closed', HEAD),
+        ],
+      ],
+      changed: { isAncestor: true, paths: ['src/cli.ts'] },
+      rebased: { differingPaths: [] },
+      unmerged: [],
+    })
+
+    const result = await readReviewState(api)
+
+    expect(result).toMatchObject({
+      kind: 'read',
+      record: {
+        review: { isCovered: true, carriedFrom: HEAD, carriedAcross: 'merge' },
+        ui: { reason: 'ui-behind', isCovered: false },
       },
     })
   })
@@ -524,6 +552,21 @@ describe('agrees with lift', () => {
         ],
         changed: { isAncestor: false, paths: [] },
         rebased: { differingPaths: [] },
+      },
+    ],
+    [
+      'a code close across a base merge',
+      {
+        tips: [PUSHED],
+        reviews: [
+          [
+            codePass('## Review closed', HEAD),
+            uiPass('## UI review closed', HEAD),
+          ],
+        ],
+        changed: { isAncestor: true, paths: ['src/cli.ts'] },
+        rebased: { differingPaths: [] },
+        unmerged: [],
       },
     ],
     [

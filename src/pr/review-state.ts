@@ -7,6 +7,7 @@ import {
   reviewGate,
   uiGate,
 } from '@/pr/lift'
+import type { CarriedAcross } from '@/pr/carry'
 import { DEFAULT_PAINTED, type PaintedPatterns } from '@/pr/painted'
 import {
   coversHead,
@@ -28,6 +29,7 @@ export type ReviewStateApi = Pick<
   | 'readEvidence'
   | 'readChanged'
   | 'readRebased'
+  | 'readUnmerged'
   | 'sleep'
   | 'now'
 > & {
@@ -46,7 +48,7 @@ export interface FamilyState {
   readonly isCovered: boolean
   /** The commit the close covering the tip was read at, beside the record's `head`. */
   readonly carriedFrom?: string
-  readonly carriedAcross?: 'push' | 'rebase'
+  readonly carriedAcross?: CarriedAcross
   readonly differingPaths?: readonly string[]
 }
 

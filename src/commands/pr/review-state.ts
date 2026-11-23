@@ -5,6 +5,7 @@ import {
   DEFAULT_WAIT_SECONDS,
   readChangedPaths,
   readRebasedPaths,
+  readUnmergedCommits,
 } from '@/pr/lift'
 import { loadPaintedPatterns } from '@/pr/painted'
 import { reviewRowOf } from '@/pr/rest'
@@ -203,6 +204,10 @@ async function runReviewState(
       base === undefined
         ? undefined
         : readRebasedPaths(git, `origin/${base}`, from, to),
+    readUnmerged: async (from, to) =>
+      base === undefined
+        ? undefined
+        : readUnmergedCommits(git, `origin/${base}`, from, to),
     sleep: (ms) => new Promise((done) => setTimeout(done, ms)),
     now: () => Date.now(),
   }

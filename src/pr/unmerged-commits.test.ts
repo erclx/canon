@@ -85,9 +85,9 @@ describe('readUnmergedCommits', () => {
     await mergeMain()
     const extra = await commit({ 'feat.ts': 'more\n' }, 'extra')
 
-    expect(await readUnmergedCommits(runner, 'main', reviewed, extra)).toEqual(
-      [extra],
-    )
+    expect(await readUnmergedCommits(runner, 'main', reviewed, extra)).toEqual([
+      extra,
+    ])
   })
 
   it('should list every commit of a push with no merge in it', async () => {
