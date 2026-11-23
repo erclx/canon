@@ -32,12 +32,18 @@ The wrong surface fails either way. Intake on a question that needs measuring yi
 ## Write scope
 
 - Write only inside `.canon/intake/<nn>-<slug>/`. Plans, tasks, source, standards, and rules all live outside it, so this one rule forbids every one of them.
-- There is no exception. Promoting an item onto the board runs through `task-board` after the operator has answered, as a separate invocation.
+- The one exception is a board project for a pass that draws, below. Promoting an item onto the task board runs through `task-board` after the operator has answered, as a separate invocation.
 - Reading is unrestricted inside the project. Measuring is the work.
 - Treat the folder as gitignored. `canon records push` and `pull` back it up only where a records remote exists, and refuse with `no-remote` otherwise.
 - A push protects against losing the machine, never against a compaction dropping reasoning before anyone pushed. No check reaches the folder, so these rules hold only while a session reads them.
 
 Nothing outside this body carries the write-scope floor, and no path-scoped rule can, since a misrouted write lands on a path the folder's glob never matches. The rule shipping beside the intake standard carries the item format and answer contract instead.
+
+### Drawing an item
+
+When an item's fix is a choice the operator settles by looking, the pass draws its options on its own board project, `drive-<nn>` with the intake's ordinal. That project is the exception to the write scope, and the pass reaches no other project and no accepted frame.
+
+Read `${CLAUDE_SKILL_DIR}/references/intake-board.md` before the first frame, for when a pass draws, how it reaches the board, and the copy it keeps under `evidence/`.
 
 ## Step 1: detect open or resume
 
