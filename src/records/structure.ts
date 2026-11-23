@@ -143,10 +143,8 @@ export function driveLogStructure(text: string): StructureEntry[] {
 }
 
 /**
- * The structure report for a groundwork track's file. A lean and its falsifier run past `S4`'s
- * bound on one line, and the close copies each into `## Revisit when`, so a bullet labeled
- * `Leaning` or `Overturned by` in bold, at any indent, skips `S4`. A method bullet carries its
- * command in a code span, so `S4` also counts outside code spans, as a plan's does.
+ * The structure report for a groundwork track's file. A bold `Leaning` or `Overturned by` bullet
+ * at any indent skips `S4`, since the close copies it whole, and `S4` counts outside code spans.
  */
 export function groundworkStructure(text: string): StructureEntry[] {
   const lines = text.split('\n')
