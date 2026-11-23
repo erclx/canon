@@ -32,6 +32,13 @@
   --tint-strong: color-mix(in srgb, var(--text) 7%, var(--surface));
   --radius: 10px;
   --stroke: 1px;
+  /* The syntax palette, the one place the kit allows more than its accent. Each is 4.5:1 or better on the code block's tint, measured against --tint. */
+  --syn-keyword: #6d28d9;
+  --syn-string: #0f7b3a;
+  --syn-comment: #5b6472;
+  --syn-number: #9a4a06;
+  --syn-function: #1f5fcc;
+  --syn-type: #0c6a82;
   --font-text: Geist, sans-serif;
   --font-code: 'Noto Sans Mono', ui-monospace, monospace;
 }
@@ -49,6 +56,12 @@
   --line: #3f3f46;
   --note: #3a3417;
   --control-edge: #5f6670;
+  --syn-keyword: #c4a1ff;
+  --syn-string: #7ee0a0;
+  --syn-comment: #9ca3af;
+  --syn-number: #f2b36b;
+  --syn-function: #8ab9ff;
+  --syn-type: #5fd3e8;
   --tint: color-mix(in srgb, var(--text) 5%, var(--surface));
   --tint-strong: color-mix(in srgb, var(--text) 10%, var(--surface));
 }

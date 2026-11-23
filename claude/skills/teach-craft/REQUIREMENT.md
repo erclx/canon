@@ -16,7 +16,7 @@ Its quizzes leak the answer through option length or position, and nothing tests
 - Carry retrieval, spacing, interleaving, and placement as rules a session applies before picking what to teach next
 - Carry planning, explaining, and presenting as rules for any surface, pick the board or a standalone page by whether a board exists, and ship one look for both as a kit folder holding no lesson
 - Ask the learner's starting point and read the subject from sources, saying which claims rest on recall
-- State quiz design that leaks no answer, pair a quiz with a teach-back, and hold that the wrong answer itself is what the next session places from
+- State quiz design that leaks no answer, pair a quiz with a teach-back that stays on the page for a learner who declines chat retrieval, and place the next session from the wrong answer
 - Cite an opened source in the ledger for every kept rule, or label it house judgment with the reason it stays, then close on excuses, red flags, and a checklist
 
 ## Must not

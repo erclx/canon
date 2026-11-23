@@ -66,6 +66,16 @@ The ladder is 1, 3, 7, 16, and 35 days. A topic retrieved unaided moves up a run
 
 The ladder is house judgment. No opened source names a sequence of days or tests a gap that widens after each correct retrieval.
 
+### A learner who declines retrieval
+
+A learner who opts out of in-chat retrieval gets reading lessons, so no topic has a retrieval to move it up a rung. The record carries that, and the next session starts from it.
+
+- Write the opt-out in the learning record, with what the learner said, so a later session reads it rather than asking again
+- Put every lesson on the first rung, since none has been retrieved and the ladder has nothing to widen
+- Open the next session on the first lesson's check, offered rather than required, since the decline held for the chat gate and the page still carries the check
+
+This is house judgment. It applies the ladder's rule that a miss drops a topic to the first rung to a topic never retrieved.
+
 ## Interleaving
 
 Mixing related topics within a session beats finishing one before starting the next. Blocked practice inflates in-session performance and hurts what survives it, because the learner stops having to work out which approach a problem calls for.

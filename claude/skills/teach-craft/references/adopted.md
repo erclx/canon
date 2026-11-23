@@ -145,3 +145,5 @@ These rules stay with no opened source behind them, each for the reason given.
 - **One callout in a color of its own.** Feedback drawn in the callout's color made a second callout on every quiz.
 - **Measuring contrast in every theme and on the tint.** A measured pass found failures in dark and on the quiz tint that a glance in light had passed.
 - **Where the lesson lands.** The board when the project has one and a standalone page otherwise, with the record as a frame or a file, is a call about surfaces rather than about memory.
+- **Reading mode.** Dropping the chat gate for a learner who declines it, and keeping the page's quiz and teach-back, is a call about what a session may ask rather than a finding about memory.
+- **Every lesson on the first rung after an opt-out.** It applies the ladder's drop on a miss to a topic never retrieved, and no opened source tests a schedule for one.

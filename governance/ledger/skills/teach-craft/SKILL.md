@@ -44,6 +44,15 @@ The closing sections and `## What this delegates` restate these rules or route, 
 | The record as a board frame                | House choice: a board frame runs a quiz and cannot save the learner's pick, so a record left to the frame is lost when the page reloads                                | 2026-11-20 |
 | The record as a file with no board         | House choice: a record kept only in the conversation is gone when it ends, so the next session places the learner from nothing                                         | 2026-11-20 |
 
+## Reading mode
+
+| Bullet                                   | Source                                                                                                                                            | Read       |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Drop the chat gate                       | House choice: a learner told to answer questions they declined stops the lessons, and a session cannot tell reluctance from a fault in the lesson | 2026-11-23 |
+| Keep the quiz and teach-back on the page | House choice: the page runs both without the chat, so cutting them removes the only retrieval a learner who changes their mind can reach          | 2026-11-23 |
+| Draw the remaining lessons together      | House choice: with no retrieval to pace them, one lesson per session spreads a course over sessions the learner declined                          | 2026-11-23 |
+| Record the opt-out and end it on request | House choice: an opt-out with no end holds after the learner wants retrieval again, so the session keeps withholding it                           | 2026-11-23 |
+
 ## The lesson kit
 
 | Bullet                                | Source                                                                                                                                             | Read       |

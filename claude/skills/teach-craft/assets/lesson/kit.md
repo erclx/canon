@@ -30,6 +30,7 @@ The two script paths are the same on a board and off one, since a standalone cou
 - Keep every lesson page one folder deep, as `<page>/<lesson>.html` beside `assets/`, so `../` reaches the course map and the kit from each
 - Load `course.js` before `nav.js`, since `nav.js` reads the map once the page is parsed
 - Give the rail two or more `h2` headings, since a lesson with one gets no rail. An `h2` without an `id` gets one made from its text.
+- Expect the rail to stay pinned beside the column while it scrolls, and to mark the heading in view with `aria-current`
 - Leave the kit's sheets out of the page. A board injects them into a frame naming the kit, and `nav.js` loads them from beside itself where nothing did.
 
 ## The course map
@@ -63,7 +64,7 @@ The shape changes only by adding a field, so a map written for this version keep
 
 ## Reach for
 
-- `.kit-figure` for a figure, breaking out of the column beside the rail. Put a `.kit-wide` and a `.kit-stacked` variant inside it when the figure would shrink past reading under 640 px.
+- `.kit-figure` for a figure, breaking out of the column by the same amount on both sides, so it stays centered. It reaches the room beside the column, and only the gap to the rail where a rail sits. Put a `.kit-wide` and a `.kit-stacked` variant inside it when the figure would shrink past reading under 640 px.
 - `.kit-caption` under a figure, and `.kit-cite` on a citation mark such as `[1, §4.2]`
 - `.kit-note` for the one callout holding the hard part
 - `.kit-option` on a `<label>` wrapping a radio input for each quiz option, and `.kit-feedback` for the one block after the attempt
@@ -71,14 +72,16 @@ The shape changes only by adding a field, so a map written for this version keep
 - `.kit-refs` for the reference list closing the lesson
 - `.kit-button`, plus `.kit-primary` on the one filled control a page carries
 - `.kit-card` for a box on the tint, `.kit-muted` for secondary text, and `.kit-line` on an SVG `path`
+- `<pre><code class="language-ts">` for a code block, which reads as one tinted block that wraps at any width. The class `language-` plus `ts`, `js`, `json`, `sql`, or `sh` colors it, and a block with another language or no class stays plain.
 
-Tables and inline code inside `.kit-article` take their look with no class.
+Tables, inline code, and code blocks inside `.kit-article` take their look with no class beyond the language. A long path or URL in inline code or the reference list wraps instead of widening the page.
 
 ## Keep to
 
 - Color through the tokens in `tokens.css` alone, so both themes follow
 - `--accent-strong` for small text and filled controls in the accent, since `--accent` falls under 4.5:1 there
 - One filled primary and one callout per page
+- The syntax palette in `tokens.css` as the one allowed second accent, for code alone, with each color at 4.5:1 or better on the block's tint
 - A part of its own is allowed inside the reading column, with a class that takes no `kit-` prefix and a color from the tokens, leaving the header, sidebar, rail, and pager alone
 - Geist for text, which the kit leaves to the board to serve, and Noto Sans Mono for code, which `tokens.css` carries as a subset of its own
 - A system font as the fallback for either, since a font neither served nor installed fails a board capture
