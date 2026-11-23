@@ -946,6 +946,40 @@ export async function readChangedPaths(
   return { isAncestor: true, paths: nonEmptyLines(diff) }
 }
 
+/**
+ * The commits from `from` to `to` that are neither merges nor on `ref`, which
+ * keep a close from carrying across a merge of the base. With no merge in the
+ * range the base is never fetched, and every commit is listed, since such a
+ * head carries nothing. Any read that fails answers undefined.
+ */
+export async function readUnmergedCommits(
+  git: GitRunner,
+  ref: string,
+  from: string,
+  to: string,
+): Promise<readonly string[] | undefined> {
+  const full = (
+    await git(['rev-parse', '--verify', '-q', `${from}^{commit}`])
+  )?.trim()
+  if (full === undefined || full === '') return undefined
+  const range = [to, `^${full}`]
+
+  const merges = (
+    await git(['rev-list', '--min-parents=2', '--count', ...range])
+  )?.trim()
+  if (merges === undefined || !/^\d+$/.test(merges)) return undefined
+  if (merges === '0') {
+    const commits = await git(['rev-list', ...range])
+    return commits === undefined ? undefined : nonEmptyLines(commits)
+  }
+
+  if (ref.startsWith('origin/')) {
+    await git(['fetch', '-q', 'origin', ref.slice('origin/'.length)])
+  }
+  const commits = await git(['rev-list', '--no-merges', ...range, `^${ref}`])
+  return commits === undefined ? undefined : nonEmptyLines(commits)
+}
+
 const FILE_HEADER = 'diff --git '
 
 /**
