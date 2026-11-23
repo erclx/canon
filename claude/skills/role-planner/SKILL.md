@@ -152,7 +152,8 @@ Validate, link, and announce each plan before starting the next row a launch han
 
 A session that closed a groundwork track or an app drive holds the evidence a plan needs, and a cold planner launched after it re-reads the same code. That session plans the rows its record produced by default, under or without a talk launch, and a cold planner is the exception.
 
-- Hand off instead when the work needs more than one plan file, when a compaction nears before the first plan lands, or when a drive's operator left its `You:` slots unread
-- Judge the first from the session's own decision or intake record at close, since no plan exists yet to count. A wrong call costs one handoff message.
+- Hand off instead when a compaction nears before the first plan lands, or when a drive's operator left its `You:` slots unread, under every launch
+- Hand off too when the work needs more than one plan file and the launch carries no talk sentence, since nobody answers each plan's questions. A talk launch plans every row the controller names back.
+- Judge the count from the session's own decision or intake record at close, since no plan exists yet to count. A wrong call costs one handoff message.
 - Say in the close message that this session is planning, or that it hands off and which reason held, since the controller launches a cold planner only on a handoff
 - Plan only a row the controller named back, and run the in-flight read above for it rather than reusing the one the track or drive took
