@@ -530,10 +530,9 @@ function checkDesignReferences(
 }
 
 /**
- * `counterpart` is the root the plan sits under, read by `readCounterpartRoot`.
- * Left out, as in a project keeping no stack under `tooling/`, the plan owes no
- * `Counterparts` section. `callers` is the same for a project shipping no
- * `claude/skills/`, which owes no `Callers` section.
+ * `counterpart` and `callers` are the roots each section's check reads. Left
+ * out, as in a project with no stack or no shipped skills, the plan owes that
+ * section nothing.
  */
 export function checkPlan(
   name: string,
