@@ -16,6 +16,9 @@ import { type Frame, drawPointer } from '@/take/pointer'
 
 export const REEL_WIDTH = 960
 
+/** The narrowest reel `--reel-width` allows, the floor `--viewport` holds a window to. */
+export const MIN_REEL_WIDTH = 320
+
 /**
  * How deep the reel's camera zooms, the deepest a 1920-wide decode reaches at
  * `REEL_WIDTH` with no upscale, so a CSS pixel takes a whole reel pixel at the
@@ -64,6 +67,9 @@ export interface Reel {
   readonly frames: number
   readonly seconds: number
   readonly bytes: number
+  /** The size the reel was written at, in pixels. */
+  readonly width: number
+  readonly height: number
   /** False when the reel passed the cap lossless and was encoded again lossy. */
   readonly lossless?: boolean
 }
@@ -76,10 +82,11 @@ export interface Reel {
 export async function* reelFrames(
   out: string,
   beats: readonly FilmedBeat[],
+  reelWidth: number = REEL_WIDTH,
 ): AsyncGenerator<ReelFrame> {
   for (const [beat, filmed] of beats.entries()) {
-    const camera = reelCamera(out, filmed)
-    const { width, height } = reelSize(camera)
+    const camera = reelCamera(out, filmed, reelWidth)
+    const { width, height } = reelSize(camera, reelWidth)
     // Every route's clip decodes at the viewport's size, so one crop places the view and pointer on either.
     const source = camera.viewport
     const factor = width / source.width
@@ -120,10 +127,14 @@ export async function* reelFrames(
  * The beat's camera rebuilt from its log at the reel's depth, rather than read
  * from `camera.json`, which keeps the launch depth an edit at 1920 reads.
  */
-function reelCamera(out: string, filmed: FilmedBeat): CameraTrack {
+function reelCamera(
+  out: string,
+  filmed: FilmedBeat,
+  width: number,
+): CameraTrack {
   return cameraTrack(beatLog(out, filmed), {
     depth: REEL_DEPTH,
-    outputWidth: REEL_WIDTH,
+    outputWidth: width,
     focus: true,
   })
 }
@@ -153,6 +164,43 @@ export function reelShapeMismatch(
   if (!differing) return undefined
   const size = (viewport: Viewport) => `${viewport.width}x${viewport.height}`
   return `${differing.name} films a ${size(differing.viewport)} window, not the shape of ${first.name}'s ${size(first.viewport)}, so a reel cannot join them`
+}
+
+/**
+ * Reads `--reel-width`, capped at the narrowest window since a clip decodes at
+ * its window and a wider reel would upscale it. Even, since the encoder refuses odd.
+ */
+export function readReelWidth(
+  text: string,
+  windows: readonly Viewport[],
+): { kind: 'read'; width: number } | { kind: 'refused'; detail: string } {
+  if (!/^\d+$/.test(text.trim())) {
+    return {
+      kind: 'refused',
+      detail: `${text} is not a whole number of pixels, such as 1180`,
+    }
+  }
+  const width = Number(text)
+  if (width % 2 !== 0) {
+    return {
+      kind: 'refused',
+      detail: `${width} is odd, and a reel width is even`,
+    }
+  }
+  if (width < MIN_REEL_WIDTH) {
+    return {
+      kind: 'refused',
+      detail: `${width} is under the ${MIN_REEL_WIDTH} px floor`,
+    }
+  }
+  const narrowest = Math.min(...windows.map((window) => window.width))
+  if (width > narrowest) {
+    return {
+      kind: 'refused',
+      detail: `${width} is wider than the narrowest window filmed, ${narrowest} px, so the reel would upscale it`,
+    }
+  }
+  return { kind: 'read', width }
 }
 
 /**
@@ -273,6 +321,7 @@ export async function renderReel(
   beats: readonly FilmedBeat[],
   file: string,
   maxBytes: number = REEL_MAX_BYTES,
+  width: number = REEL_WIDTH,
 ): Promise<Reel> {
   const mismatch = reelShapeMismatch(
     beats.map((filmed) => ({
@@ -281,9 +330,9 @@ export async function renderReel(
     })),
   )
   if (mismatch) throw new Error(mismatch)
-  const lossless = await encode(out, beats, file, true)
+  const lossless = await encode(out, beats, file, true, width)
   if (lossless.bytes <= maxBytes) return { ...lossless, lossless: true }
-  return { ...(await encode(out, beats, file, false)), lossless: false }
+  return { ...(await encode(out, beats, file, false, width)), lossless: false }
 }
 
 async function encode(
@@ -291,11 +340,13 @@ async function encode(
   beats: readonly FilmedBeat[],
   file: string,
   lossless: boolean,
+  reelWidth: number,
 ): Promise<Reel> {
   const first = beats[0]
   if (!first) throw new Error('a reel needs at least one filmed beat')
   const { width, height } = reelSize(
     JSON.parse(readFileSync(join(out, first.camera), 'utf8')) as CameraTrack,
+    reelWidth,
   )
 
   const proc = spawn(
@@ -332,7 +383,7 @@ async function encode(
 
   let frames = 0
   try {
-    for await (const frame of reelFrames(out, beats)) {
+    for await (const frame of reelFrames(out, beats, reelWidth)) {
       // Raced against the exit, since a write awaiting a drain from a dead encoder would wait forever.
       await Promise.race([write(proc.stdin, frame.data), done])
       frames += 1
@@ -349,15 +400,18 @@ async function encode(
     frames,
     seconds: Number((frames / REEL_FPS).toFixed(2)),
     bytes: statSync(file).size,
+    width,
+    height,
   }
 }
 
-function reelSize(camera: CameraTrack): { width: number; height: number } {
+function reelSize(
+  camera: CameraTrack,
+  width: number,
+): { width: number; height: number } {
   const height =
-    Math.round(
-      (REEL_WIDTH * camera.viewport.height) / camera.viewport.width / 2,
-    ) * 2
-  return { width: REEL_WIDTH, height }
+    Math.round((width * camera.viewport.height) / camera.viewport.width / 2) * 2
+  return { width, height }
 }
 
 /** Decodes every `REEL_EVERY`th frame of a clip as RGBA at the given size. */

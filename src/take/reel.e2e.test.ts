@@ -173,6 +173,7 @@ describe.skipIf(!available())('a reel joined from a two-route take', () => {
     const read = readWebp(file)
     expect(read.width).toBe(REEL_WIDTH)
     expect(read.height).toBe(540)
+    expect(reel).toMatchObject({ width: 960, height: 540 })
     expect(read.ms).toBe((expected * 1000) / REEL_FPS)
     expect(reel.bytes).toBeGreaterThan(0)
     // Printed rather than asserted, since it is the figure the plan estimated.
@@ -570,6 +571,15 @@ describe.skipIf(!available())(
       await renderReel(out, beats, file)
 
       expect(readWebp(file)).toMatchObject({ width: REEL_WIDTH, height: 540 })
+    }, 120_000)
+
+    it('should write the reel at a named width and carry it on the record', async () => {
+      const file = join(out, 'named-width.webp')
+
+      const reel = await renderReel(out, beats, file, undefined, 640)
+
+      expect(readWebp(file)).toMatchObject({ width: 640, height: 360 })
+      expect(reel).toMatchObject({ width: 640, height: 360 })
     }, 120_000)
   },
 )
