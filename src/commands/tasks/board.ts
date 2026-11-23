@@ -23,7 +23,15 @@ import { checkLift } from '@/commands/pr/lift'
 import { type FlightReaders, readFlight } from '@/tasks/flight'
 import { resolveSessions } from '@/sessions/resolve'
 import { type BoardGroup, groupToken } from '@/tasks/validate'
-import { intro, logAdd, logInfo, logRemove, logStep, outro } from '@/cli/ui'
+import {
+  intro,
+  logAdd,
+  logInfo,
+  logRemove,
+  logStep,
+  logWarn,
+  outro,
+} from '@/cli/ui'
 import { mainWorktreeRoot } from '@/git/worktree'
 
 interface BoardCommandOptions {
@@ -98,7 +106,7 @@ const GROUP_FLAGS: Readonly<Record<string, BoardGroup>> = {
 function withPosition(command: Command): Command {
   return command
     .option('--top', 'Put the row first in its group')
-    .option('--bottom', 'Put the row last in its group, the default')
+    .option('--bottom', 'Put the row last in its group, the default for a move between groups')
     .option('--before <task>', 'Put the row right above this sibling')
     .option('--after <task>', 'Put the row right below this sibling')
 }
@@ -543,6 +551,10 @@ async function runBlock(
   )
 }
 
+function launchWarning(stem: string): string {
+  return `${stem} entered Up next with no Launch cell. Write one with: canon tasks launch ${stem} --role <role> --model <model> --effort <effort> --route <route>`
+}
+
 function reportBoardWrite(
   title: string,
   outcome: BoardOutcome,
@@ -565,16 +577,22 @@ function reportBoardWrite(
             : groupToken(outcome.from),
         position: outcome.position,
         backlog: outcome.backlog,
+        ...(outcome.kept ? { kept: true } : {}),
+        ...(outcome.launch ? { launch: outcome.launch } : {}),
       })}\n`,
     )
+    if (outcome.launch === 'none') {
+      process.stderr.write(`${launchWarning(outcome.stem)}\n`)
+    }
     return 0
   }
 
   intro(title)
   logStep('Written')
   logInfo(
-    `${outcome.stem} sits at ${outcome.position} under ${outcome.group}${outcome.from && outcome.from !== outcome.group ? `, from ${outcome.from}` : ''}`,
+    `${outcome.stem} ${outcome.kept ? 'kept at' : 'sits at'} ${outcome.position} under ${outcome.group}${outcome.from && outcome.from !== outcome.group ? `, from ${outcome.from}` : ''}`,
   )
+  if (outcome.launch === 'none') logWarn(launchWarning(outcome.stem))
   if (outcome.backlog) logRemove('its backlog line')
   logAdd(relative(root, outcome.path))
   outro()

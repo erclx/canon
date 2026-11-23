@@ -499,6 +499,92 @@ describe('placeTask', () => {
     expect(await stemsUnder('Needs a plan')).toEqual(['v1.0-one', 'v1.1-two'])
   })
 
+  it('should keep a row at its position when a same-group edit names none', async () => {
+    await seedTask('v1.0-one')
+    await seedTask('v1.1-two')
+    await seedBoard(
+      ...NEEDS_A_PLAN,
+      '| [v1.0: One](v1.0-one.md) | old blocker |',
+      '| [v1.1: Two](v1.1-two.md) | other |',
+    )
+
+    const outcome = await placeTask(ROOT, 'v1.0-one', 'Needs a plan', {
+      waiting: 'new blocker',
+    })
+
+    expect(outcome).toMatchObject({ ok: true, position: 1, kept: true })
+    expect(await stemsUnder('Needs a plan')).toEqual(['v1.0-one', 'v1.1-two'])
+    expect(await readFile(orderingPath(ROOT), 'utf8')).toContain('new blocker')
+  })
+
+  it('should still move a same-group row when a position is named', async () => {
+    await seedTask('v1.0-one')
+    await seedTask('v1.1-two')
+    await seedBoard(
+      ...NEEDS_A_PLAN,
+      '| [v1.0: One](v1.0-one.md) | old blocker |',
+      '| [v1.1: Two](v1.1-two.md) | other |',
+    )
+
+    const outcome = await placeTask(ROOT, 'v1.0-one', 'Needs a plan', {
+      position: { at: 'bottom' },
+    })
+
+    expect(outcome).toMatchObject({ ok: true, position: 2 })
+    expect(outcome.ok && outcome.kept).toBeUndefined()
+    expect(await stemsUnder('Needs a plan')).toEqual(['v1.1-two', 'v1.0-one'])
+  })
+
+  it('should give a row leaving In flight its Launch cell from its pick and a worker session', async () => {
+    await seedPlan('one', ['a.ts'])
+    mkdirSync(tasksDir(ROOT), { recursive: true })
+    await writeFile(
+      join(tasksDir(ROOT), 'v1.0-one.md'),
+      [
+        '# v1.0: One',
+        '',
+        'Plan: [feature-one](../plans/feature-one.md)',
+        'Sessions: worker-one (22222222-2222-4222-8222-222222222222)',
+        '',
+        '## Outcomes',
+        '',
+        '- [ ] it ships',
+        '',
+      ].join('\n'),
+    )
+    await seedBoard(
+      ...IN_FLIGHT,
+      '| [v1.0: One](v1.0-one.md) | 1 file | worker-one (sonnet, medium) |',
+    )
+
+    const outcome = await placeTask(ROOT, 'v1.0-one', 'Up next', {
+      waiting: 'Planned, not dispatched yet',
+    })
+
+    expect(outcome).toMatchObject({ ok: true, launch: 'derived' })
+    expect(await readFile(orderingPath(ROOT), 'utf8')).toContain(
+      'worker, sonnet, medium, background',
+    )
+  })
+
+  it('should build no Launch cell for a row with no pick and report none', async () => {
+    await seedPlan('one', ['a.ts'])
+    await seedTask('v1.0-one', { title: 'v1.0: One', plans: ['one'] })
+    await seedBoard(
+      ...NEEDS_A_PLAN,
+      '| [v1.0: One](v1.0-one.md) | Not planned yet |',
+    )
+
+    const outcome = await placeTask(ROOT, 'v1.0-one', 'Up next', {
+      waiting: 'Planned, not dispatched yet',
+    })
+
+    expect(outcome).toMatchObject({ ok: true, launch: 'none' })
+    expect(await readFile(orderingPath(ROOT), 'utf8')).not.toContain(
+      'background',
+    )
+  })
+
   it('should ask for a blocker when the group carries one and the row has none', async () => {
     await seedTask('v1.0-one')
     await seedBoard(...NEEDS_A_PLAN)

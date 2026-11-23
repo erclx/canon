@@ -547,6 +547,10 @@ export interface BoardWritten {
   readonly path: string
   /** Whether the call also removed the task's backlog line. */
   readonly backlog: boolean
+  /** Set when a same-group call left the row at its position. */
+  readonly kept?: boolean
+  /** Set when a row entered Up next, `derived` for a built Launch cell and `none` for no cell. */
+  readonly launch?: 'derived' | 'none'
 }
 
 export type BoardOutcome = BoardWritten | BoardRefused
@@ -576,15 +580,35 @@ const PROMOTES_TO: Readonly<Record<BoardGroup, BoardGroup | undefined>> = {
  * and effort its Launch cell picked, and the Launch cell itself stays behind,
  * since the pick it records is spent once the row launched.
  */
-function entering(row: PlacedRow, group: BoardGroup): PlacedRow {
+function entering(
+  row: PlacedRow,
+  group: BoardGroup,
+  session?: string,
+): PlacedRow {
   const { launch, pick, ...rest } = row
-  if (group === 'Up next') return launch ? { ...rest, launch } : rest
+  if (group === 'Up next') {
+    const built = launch ?? derivedLaunch(pick, session)
+    return built ? { ...rest, launch: built } : rest
+  }
   if (group !== 'In flight') return rest
 
   const carried =
     pick ??
     (launch ? { model: launch.model, effort: launch.effort } : undefined)
   return carried ? { ...rest, pick: carried } : rest
+}
+
+/**
+ * The Launch cell a row leaving In flight gets back. The `Sessions:` line holds
+ * a name and an id and no route, so only a `worker-` name is read as a
+ * dispatched worker, which `claude --bg` launches. Any other name builds none.
+ */
+function derivedLaunch(
+  pick: FlightPick | undefined,
+  session: string | undefined,
+): LaunchPick | undefined {
+  if (!pick || !session?.startsWith('worker-')) return undefined
+  return { role: 'worker', ...pick, route: 'background', override: false }
 }
 
 function refuse(
@@ -682,6 +706,8 @@ export interface Edited {
   readonly from: BoardGroup | undefined
   /** The group whose rule the write must pass, undefined when the row kept its group. */
   readonly ruled: BoardGroup | undefined
+  readonly kept?: boolean
+  readonly launch?: 'derived' | 'none'
 }
 
 /**
@@ -812,6 +838,8 @@ async function writeLocked(
       1,
     path,
     backlog: false,
+    ...(edited.kept ? { kept: true } : {}),
+    ...(edited.launch ? { launch: edited.launch } : {}),
   }
 }
 
@@ -836,6 +864,8 @@ export async function placeTask(
     if (bad) return bad
   }
 
+  const session = await latestSessionName(root, stem)
+
   const written = await writeBoard(root, stem, (board) => {
     const found = findRow(board, stem)
     const owns = GROUP_COLUMNS[group].includes('Waiting on')
@@ -850,22 +880,36 @@ export async function placeTask(
       )
     }
 
-    const next = placed(
-      board,
+    const row = entering(
+      { ...found?.row, stem, label: found?.row.label ?? stem, waiting },
       group,
-      entering(
-        { ...found?.row, stem, label: found?.row.label ?? stem, waiting },
-        group,
-      ),
-      options.position ?? { at: 'bottom' },
+      session,
     )
+    const sameGroup = found?.group === group
+    const kept = sameGroup && options.position === undefined
+
+    const next = kept
+      ? {
+          ...board,
+          groups: {
+            ...board.groups,
+            [group]: board.groups[group].map((entry) =>
+              entry.stem === stem ? row : entry,
+            ),
+          },
+        }
+      : placed(board, group, row, options.position ?? { at: 'bottom' })
     if ('ok' in next) return next
 
     return {
       board: next,
       group,
       from: found?.group,
-      ruled: found?.group === group ? undefined : group,
+      ruled: sameGroup ? undefined : group,
+      ...(kept ? { kept: true } : {}),
+      ...(group === 'Up next' && !sameGroup
+        ? { launch: row.launch ? ('derived' as const) : ('none' as const) }
+        : {}),
     }
   })
   if (!written.ok) return written
@@ -876,6 +920,15 @@ export async function placeTask(
     from: written.from ?? (removed ? 'backlog' : undefined),
     backlog: removed,
   }
+}
+
+async function latestSessionName(
+  root: string,
+  stem: string,
+): Promise<string | undefined> {
+  const file = join(tasksDir(root), `${stem}.md`)
+  if (!existsSync(file)) return undefined
+  return readSessions(await readFile(file, 'utf8')).at(-1)?.name
 }
 
 async function removeFromBacklog(root: string, stem: string): Promise<boolean> {
