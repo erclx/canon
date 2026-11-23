@@ -213,6 +213,29 @@ describe('validateBoard', () => {
         'launch-unstated',
       )
     })
+
+    it('should report nothing for an Up next table with no Launch column', async () => {
+      await seedTask('v1.0-first')
+      await seedPlan('v1.0-first')
+      await seedBoard(
+        boardBody([
+          [
+            '## Up next',
+            '',
+            '| Task | Touches | Waiting on |',
+            '| ---- | ------- | ---------- |',
+            '| [v1.0-first](v1.0-first.md) | `src/a.ts` | Planned, not dispatched yet |',
+            '',
+          ].join('\n'),
+        ]),
+      )
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && kinds(outcome.findings)).not.toContain(
+        'launch-unstated',
+      )
+    })
   })
 
   it('should report a run now row whose plan pointer resolves nowhere', async () => {
