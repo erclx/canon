@@ -80,6 +80,15 @@ canon pr review-state <number> --json
 - `ui.isCovered` true, or a `review` family still owed, needs nothing from this session, since the re-drive started or the code pass holds the worker
 - A refusal is unread, so report its `reason` and read again on the wake after
 
+### The READY stop
+
+The poll prints `READY` once per head for a pull request out of draft whose every gate, CI included, reads clear at that head, read through `canon pr lift <number> --check --json`. Nothing is owed on it but the operator's merge, so a poll re-armed on it spends a wake on nothing.
+
+- Hold each READY number until a later line names it, being `MOVED`, `REBASED`, `CONFLICT`, `STALE`, or `GONE`, which drops it
+- Stop re-arming once every open pull request but a release one is held, and name the numbers waiting on the merge in that turn
+- Restart the poll on the operator's next message, since the merge is the operator's act and that message is where this session hears of it
+- A push landing after the stop reads as `MOVED` on that restarted run, which drops the number and re-arms the poll
+
 ## A batch of small pull requests
 
 Small pull requests landing together can share one reviewer pair rather than taking a pair each. Rows stay one per fix, so only the review is batched, and this session decides the batch without asking the operator.

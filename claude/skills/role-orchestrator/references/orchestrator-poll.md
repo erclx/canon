@@ -9,7 +9,7 @@ Run the orchestrator's review trigger. The poll reports pull request movement an
 
 ## When to run it
 
-Start the poll on an open pull request and stop it when the last one merges with nothing else out. That is the whole condition, and it resolves from the open list without asking the operator. A release pull request alone does not qualify, since its sweep carries no findings.
+Start the poll on an open pull request and stop it when the last one merges with nothing else out, or when every open one waits on the merge alone under the `READY` rule below. Both conditions resolve from the open list without asking the operator. A release pull request alone does not qualify, since its sweep carries no findings.
 
 ### A dispatch no longer starts it
 
@@ -58,6 +58,7 @@ Act on what the poll printed when it exited, then start it again.
 - UI-OPEN: a zero-driven pass goes to the live UI reviewer to drive again, or a new one. Any other: report and stop if that reviewer holds it, since it dispatches canon:review-address, else use the fallback rule below.
 - UI-CLOSED: report it. When the pull request is still a draft and its code review is closed too, run `canon pr lift <number> --json` with `run_in_background` and report the reason on its wake, never starting a second while one is pending for that number. Each reviewer runs the verb on its own close, so this run is the fallback for a lift neither reviewer's run made, and the verb reads every gate itself.
 - UI-STALE: lift no mark. Report and stop on the first wake when a worker holds the branch, since its hand-back starts the re-drive, and re-read it on the next wake under the second-wake rule in the review dispatch runbook of the canon:role-orchestrator skill. With no worker, message the UI reviewer or launch one.
+- READY: report it. The pull request waits on the operator's merge alone, so start no next poll once every open pull request but a release one reads READY, per the READY stop in the review dispatch runbook of the canon:role-orchestrator skill.
 - GONE: report it, then sweep the board by invoking the canon:role-orchestrator skill and following its queue-refill sweep.
 - A line starting `poll:`: report it verbatim and treat that pull request as unread this run. It is a failed query, not a state.
 - Nothing changed: say exactly "No movement." and nothing else.
