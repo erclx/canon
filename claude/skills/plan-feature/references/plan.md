@@ -221,7 +221,7 @@ A `## Verbatim` section carries wording someone settled, landing in a file exact
 - Give each block an H3 naming it, then a lead sentence with the action, the full path, and the anchor, then a fenced `text` block holding the wording
 - Name the action as Add, Insert, Replace, or Create. A Replace quotes the old line in the lead's code span.
 - Write the block as the project's formatter leaves it, since a formatter that re-pads a table row or rewraps a line makes the grep fail on correct text
-- Name the outcome in a grep bullet and put a command past 200 characters in a fenced `bash` block under it, since `S4` reports a longer bullet
+- Name the outcome in a grep bullet with its command in a code span, or a fenced `bash` block under it when the command spans lines, since `S4` counts only the prose outside code spans
 - Give each block one `## Verification` bullet running `grep -cF -e` on its whole first line against its file, so a reworded line fails a check the reviewer already runs.
 
 A Create block makes a new file, so its lead names a path that does not exist yet and no anchor. Its grep bullet takes the first distinctive line, such as the `title:` line or the H1, since a markdown file opens on `---` and that line matches any file with frontmatter.
