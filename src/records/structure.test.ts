@@ -337,6 +337,12 @@ describe('groundworkStructure', () => {
     expect(groundworkStructure(text)).toEqual([])
   })
 
+  it('should exempt a method bullet whose command sits in a code span', () => {
+    const text = `- **Method:** \`${'x'.repeat(250)}\`, 3 runs`
+
+    expect(groundworkStructure(text)).toEqual([])
+  })
+
   it('should still report S4 on a long plain bullet', () => {
     const text = [...lead, `- ${'a'.repeat(300)}`].join('\n')
 

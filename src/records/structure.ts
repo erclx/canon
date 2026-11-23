@@ -145,7 +145,8 @@ export function driveLogStructure(text: string): StructureEntry[] {
 /**
  * The structure report for a groundwork track's file. A lean and its falsifier run past `S4`'s
  * bound on one line, and the close copies each into `## Revisit when`, so a bullet labeled
- * `Leaning` or `Overturned by` in bold, at any indent, skips `S4`.
+ * `Leaning` or `Overturned by` in bold, at any indent, skips `S4`. A method bullet carries its
+ * command in a code span, so `S4` also counts outside code spans, as a plan's does.
  */
 export function groundworkStructure(text: string): StructureEntry[] {
   const lines = text.split('\n')
@@ -153,7 +154,9 @@ export function groundworkStructure(text: string): StructureEntry[] {
   return structureFindings(text).filter(
     (entry) =>
       !(
-        entry.criterion === 'S4' && LEAN_FIELD.test(lines[entry.line - 1] ?? '')
+        entry.criterion === 'S4' &&
+        (LEAN_FIELD.test(lines[entry.line - 1] ?? '') ||
+          withinProse(lines, entry))
       ),
   )
 }
@@ -207,6 +210,11 @@ function proseLength(bullet: string): number {
   return kept.length
 }
 
+/** Whether an `S4` entry's bullet holds within the limit once its code spans are left out. */
+function withinProse(lines: readonly string[], entry: StructureEntry): boolean {
+  return proseLength(bulletAt(lines, entry.line - 1)) <= CHECKPOINTS.bullet
+}
+
 /**
  * The structure report for a plan. A path with its reason, or a command with what it showed, is
  * what the plan standard asks a bullet to carry, and a writer cannot shorten the path or the
@@ -216,10 +224,6 @@ export function planStructure(text: string): StructureEntry[] {
   const lines = text.split('\n')
 
   return structureFindings(text).filter(
-    (entry) =>
-      !(
-        entry.criterion === 'S4' &&
-        proseLength(bulletAt(lines, entry.line - 1)) <= CHECKPOINTS.bullet
-      ),
+    (entry) => !(entry.criterion === 'S4' && withinProse(lines, entry)),
   )
 }
