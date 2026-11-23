@@ -110,11 +110,11 @@ Cache the directory walk to cut a repeat scan. A 200-file scan drops from 41 ms 
 
 ## Outcome
 
-| Scan of 200 files | main  | this branch | change |
-| ----------------- | ----- | ----------- | ------ |
-| run 1             | 43 ms | 12 ms       | -72%   |
-| run 2             | 40 ms | 12 ms       | -70%   |
-| run 3             | 40 ms | 11 ms       | -73%   |
+| What was measured        | Result | Baseline | Conditions         |
+| ------------------------ | ------ | -------- | ------------------ |
+| Scan of 200 files, run 1 | 12 ms  | 43 ms    | warm cache, 3 runs |
+| Scan of 200 files, run 2 | 12 ms  | 40 ms    | warm cache, 3 runs |
+| Scan of 200 files, run 3 | 11 ms  | 40 ms    | warm cache, 3 runs |
 ```
 
 ## Incorrect

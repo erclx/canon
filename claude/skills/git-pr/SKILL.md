@@ -102,7 +102,7 @@ Then run:
 canon labels scan --title "<title>" --body-file .canon/tmp/pr/body.md --closes <numbers|none> --json
 ```
 
-Drop `--closes` when the closes step skipped a refusal, since no list was decided to grade against.
+Drop `--closes` when the closes step skipped a refusal, since no list was decided to grade against. Add `--plan <path>` when the branch has a plan, so a plan whose Verification ran a measurement fails a body with no results table.
 
 ### Reading the scan
 

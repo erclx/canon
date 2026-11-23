@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { $ } from 'bun'
 import type { Command } from 'commander'
@@ -16,10 +17,10 @@ import {
 import { resolveScanInput } from '@/labels/event'
 import { checkTitleFormat, type TitleFormatIssue } from '@/labels/format'
 import { MAP_REL, readLabelMap } from '@/labels/map'
-import { checkMeasurement } from '@/labels/measurement'
+import { checkMeasuredResults, checkMeasurement } from '@/labels/measurement'
 import { isReleasePullRequest, scanPhaseLabels } from '@/labels/phase'
 import { checkSections } from '@/labels/sections'
-import { missingLabels } from '@/labels/sync'
+import { colorFor, driftedLabels, missingLabels } from '@/labels/sync'
 import { BAN_SETS } from '@/markdown/bans'
 import { bodyLines, scanBans } from '@/markdown/scan'
 import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
@@ -51,6 +52,7 @@ interface ScanOptions {
   readonly bodyFile?: string
   readonly head?: string
   readonly closes?: string
+  readonly plan?: string
   readonly json?: boolean
 }
 
@@ -214,16 +216,21 @@ export function register(program: Command): void {
         'on the remote is left as it is, and one the map does not name is never',
         'touched. A project declaring no map creates nothing and exits 0.',
         '',
+        'A new label takes the color its row declares, as `cli = { paths = [..],',
+        'color = "1f6feb" }`, or the palette color at its row position. --check',
+        'reports a declared color the remote holds differently as drift and never',
+        'edits it.',
+        '',
         'Run it once after installing a map and again after adding a row, so',
         '`canon labels apply` finds every label it earns.',
         '',
-        'Record: labels, present, created, missing, failed',
+        'Record: labels, present, created, colored, missing, drift, failed',
         '',
         'Exit codes:',
         '  0  the remote carries every label the map names after the run',
         '  1  refused, with the reason on stderr or in the JSON record',
         '  2  labels are still missing, being any under --check, or a failed',
-        '     create otherwise',
+        '     create otherwise, or under --check a declared color has drifted',
         '',
         'Reasons:',
         '  gh-failed  the remote labels could not be read, so nothing was written',
@@ -258,6 +265,10 @@ export function register(program: Command): void {
     .option(
       '--closes <numbers>',
       'Issues the body must close, a comma list or `none`, graded when given',
+    )
+    .option(
+      '--plan <path>',
+      'Plan to read, failing a body that lacks the results table its Verification owes',
     )
     .option('--json', 'Add a machine-readable record on stdout')
     .addHelpText(
@@ -306,6 +317,12 @@ export function register(program: Command): void {
         'its numbers are true. Reported under `measurement` as `checked` and',
         '`missing`.',
         '',
+        'Given --plan, it also fails any ordinary body with no Outcome table',
+        "when the plan's ## Verification names an eval, a benchmark, latency,",
+        'p50, p95, a median, or a timed run in prose, outside code spans and',
+        'fences, reported as `results-table` under `measurement`. A plan',
+        'that cannot be read is refused. Without the flag the check does not run.',
+        '',
         'It fails the density of that same body, reported per section under',
         '`density`: a bullet past 200 characters, more than 5 plain',
         'bullets or 2 paragraphs in a row, a paragraph past 350 characters, any',
@@ -347,7 +364,7 @@ export function register(program: Command): void {
         '  2  the title or body carries a phase label, a board identifier, a',
         '     session link, a banned character, a heading outside the closed',
         '     list or a required one missing, a perf body with no measurement',
-        '     table, a density finding in the body, a',
+        '     table, a body with no results table under --plan, a density finding in the body, a',
         '     missing or stray closing line',
         '     under --closes, or a title',
         "     breaking claude/skills/git-pr/references/pr.md's format, casing, or length",
@@ -679,19 +696,27 @@ async function runSync(opts: SyncOptions): Promise<number> {
     '--paginate',
     'repos/{owner}/{repo}/labels',
     '--jq',
-    '.[].name',
+    '.[] | [.name, .color] | @tsv',
   ])
   if (remoteRaw === null) return refuse('gh-failed')
 
   const labels = map.domains.map((row) => row.label)
-  const present = nonEmptyLines(remoteRaw)
+  const remote = nonEmptyLines(remoteRaw).map((line) => {
+    const [name, color = ''] = line.split('\t')
+    return { name, color }
+  })
+  const present = remote.map((entry) => entry.name)
   const toCreate = missingLabels(labels, present)
+  const drift = driftedLabels(map.domains, remote)
 
   const created: string[] = []
+  const colored: { label: string; color: string }[] = []
   const failed: string[] = []
 
   if (!isCheck) {
     for (const label of toCreate) {
+      const index = labels.indexOf(label)
+      const color = colorFor(map.domains[index], index)
       const wrote = await gh(root, [
         'api',
         '-X',
@@ -699,10 +724,16 @@ async function runSync(opts: SyncOptions): Promise<number> {
         'repos/{owner}/{repo}/labels',
         '-f',
         `name=${label}`,
+        '-f',
+        `color=${color}`,
         '--silent',
       ])
-      if (wrote === null) failed.push(label)
-      else created.push(label)
+      if (wrote === null) {
+        failed.push(label)
+      } else {
+        created.push(label)
+        colored.push({ label, color })
+      }
     }
   }
 
@@ -716,19 +747,29 @@ async function runSync(opts: SyncOptions): Promise<number> {
     for (const label of missing) logWarn(label)
   } else {
     logStep('Created')
-    logInfo(created.length === 0 ? 'no label was created' : created.join(', '))
+    logInfo(
+      colored.length === 0
+        ? 'no label was created'
+        : colored.map(({ label, color }) => `${label} (#${color})`).join(', '),
+    )
   }
   for (const label of failed) logWarn(`Label create failed: ${label}`)
+  for (const { label, declared, remote: held } of drift) {
+    logWarn(
+      `Color drift on ${label}: map declares #${declared}, remote #${held}`,
+    )
+  }
 
   outro()
 
   if (emitJson) {
     process.stdout.write(
-      `${JSON.stringify({ labels, present, created, missing, failed })}\n`,
+      `${JSON.stringify({ labels, present, created, colored, missing, drift, failed })}\n`,
     )
   }
 
-  return missing.length === 0 ? 0 : 2
+  const driftOwed = isCheck && drift.length > 0
+  return missing.length === 0 && !driftOwed ? 0 : 2
 }
 
 /**
@@ -764,6 +805,25 @@ async function runScan(opts: ScanOptions): Promise<number> {
       )
     }
     return 1
+  }
+
+  let plan: string | undefined
+  if (opts.plan !== undefined) {
+    try {
+      plan = readFileSync(resolve(opts.plan), 'utf8')
+    } catch {
+      const message = `--plan could not read ${opts.plan}, so the results table was not graded`
+      logStep('Refused')
+      logWarn(message)
+      outro()
+
+      if (emitJson) {
+        process.stdout.write(
+          `${JSON.stringify({ reason: 'bad-input', message })}\n`,
+        )
+      }
+      return 1
+    }
   }
 
   const resolved = resolveScanInput(opts)
@@ -868,9 +928,21 @@ async function runScan(opts: ScanOptions): Promise<number> {
     }
   }
 
-  const measurement = sectionsChecked
+  const perf = sectionsChecked
     ? checkMeasurement(resolved.title, resolved.body)
     : { checked: false, missing: [] }
+  const results =
+    sectionsChecked && plan !== undefined
+      ? checkMeasuredResults(resolved.body, plan)
+      : { checked: false, missing: [] }
+  // A perf body already missing its table reports that once, not twice.
+  const measurement = {
+    checked: perf.checked || results.checked,
+    missing: [
+      ...perf.missing,
+      ...results.missing.filter(() => !perf.missing.includes('table')),
+    ],
+  }
 
   logStep(
     !measurement.checked
@@ -880,13 +952,24 @@ async function runScan(opts: ScanOptions): Promise<number> {
         : 'Measurement missing',
   )
   if (!measurement.checked) {
-    logInfo('only a perf pull request body is graded for its measurement')
+    logInfo(
+      'only a perf pull request body, or one whose plan ran a measurement, is graded for its results',
+    )
   } else if (measurement.missing.length === 0) {
-    logInfo('the Outcome table and the Technical context are there')
+    logInfo(
+      perf.checked
+        ? 'the Outcome table and the Technical context are there'
+        : 'the Outcome table is there',
+    )
   } else {
     if (measurement.missing.includes('table')) {
       logWarn(
-        'A perf pull request needs a table with a header row and a data row under ## Outcome: | <what was measured> | main | this branch | change |. Write not measured with the reason in the change column when nothing can be timed.',
+        'A perf pull request needs a table with a header row and a data row under ## Outcome: | <what was measured> | result | baseline | conditions |. Write not measured with the reason when nothing can be timed.',
+      )
+    }
+    if (measurement.missing.includes('results-table')) {
+      logWarn(
+        'The plan ran a measurement, so the body needs a table with a header row and a data row under ## Outcome: | <what was measured> | result | baseline | conditions |. Write not measured with the reason when nothing can be run.',
       )
     }
     if (measurement.missing.includes('technical-context')) {
