@@ -13,7 +13,13 @@ export interface LocalRunner extends ListenerReader {
 }
 
 export type LocalResult =
-  | { readonly kind: 'found'; readonly port: number; readonly url: string }
+  | {
+      readonly kind: 'found'
+      readonly port: number
+      readonly url: string
+      /** Present when the port came from the project's declaration rather than the scan. */
+      readonly declared?: true
+    }
   | {
       readonly kind: 'refused'
       readonly reason: Exclude<LocalRefusal, 'unhealthy'>
@@ -51,19 +57,26 @@ function isUnder(cwd: string, folder: string): boolean {
 }
 
 /**
- * Finds the server this worktree is running: the lowest port whose listener is
- * in the worktree, answers an HTTP probe, and passes every declared health path
- * on that page port. A port is the unit, since a reload socket holds a second.
+ * Finds the server this worktree is running. A declared port held by a listener
+ * in the worktree is probed alone first, and answers for the worktree unless it
+ * serves no page. Otherwise the lowest port whose listener is in the worktree,
+ * answers an HTTP probe, and passes every declared health path on that page port
+ * wins. A port is the unit, since a reload socket holds a second.
  */
 export async function findLocalServer(
   worktreeRoot: string,
   runner: LocalRunner,
   healthPaths: readonly string[] = [],
   pageOnly: readonly string[] = [],
+  declaredPort?: number,
 ): Promise<LocalResult> {
   const listeners = await runner.listListeners()
   if (listeners === undefined) {
-    return { kind: 'refused', reason: 'no-listener-reader' }
+    const declared =
+      declaredPort === undefined
+        ? undefined
+        : await probeDeclared(declaredPort, false, healthPaths, runner)
+    return declared ?? { kind: 'refused', reason: 'no-listener-reader' }
   }
 
   const cwdByPid = new Map<number, string | undefined>()
@@ -75,6 +88,19 @@ export async function findLocalServer(
     if (cwd === undefined || !belongsTo(cwd, worktreeRoot)) continue
     const skipsHealth = folders.some((folder) => isUnder(cwd, folder))
     ports.set(port, (ports.get(port) ?? false) || skipsHealth)
+  }
+
+  const declaredSkips =
+    declaredPort === undefined ? undefined : ports.get(declaredPort)
+  if (declaredPort !== undefined && declaredSkips !== undefined) {
+    const declared = await probeDeclared(
+      declaredPort,
+      declaredSkips,
+      healthPaths,
+      runner,
+    )
+    if (declared !== undefined) return declared
+    ports.delete(declaredPort)
   }
 
   // Probed at once, so silent listeners below a slow page cost one timeout.
@@ -92,6 +118,27 @@ export async function findLocalServer(
     // A pending fetch holds the process open until its own timeout.
     settled.abort()
   }
+}
+
+/** The declared port's verdict, or undefined when it serves no page and the scan runs. */
+async function probeDeclared(
+  port: number,
+  skipsHealth: boolean,
+  healthPaths: readonly string[],
+  runner: LocalRunner,
+): Promise<LocalResult | undefined> {
+  const settled = new AbortController()
+  try {
+    if (!(await runner.probe(port, settled.signal))) return undefined
+  } finally {
+    settled.abort()
+  }
+  const failure = skipsHealth
+    ? undefined
+    : await firstFailingPath(port, healthPaths, runner)
+  return failure === undefined
+    ? { kind: 'found', port, url: `http://localhost:${port}`, declared: true }
+    : { kind: 'refused', reason: 'unhealthy', port, ...failure }
 }
 
 interface Candidate {
