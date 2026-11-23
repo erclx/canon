@@ -73,8 +73,7 @@ A checklist with one group gives up to three beats from it. A checklist with fou
 
 ### Pick the reel's width
 
-Each beat films at the width its box names after the route, and a box naming none films at 390, the phone width of the set the board draws. A box naming a width outside the set, such as 834 from an older plan, films at the width it names.
-
+Each beat films at the width its box names after the route, and a box naming none films at 1280, the set's desktop width. A box naming a width outside the set, such as 834 from an older plan, films at that width.
 One reel holds one width, since `canon take` refuses beats of two shapes as `reel-shape` and the evidence comment embeds one reel.
 
 - Group the ordered beats by width, and film the group holding the most beats
@@ -82,6 +81,8 @@ One reel holds one width, since `canon take` refuses beats of two shapes as `ree
 - Drop the beats at every other width from the plan, and name their groups under the coverage below
 
 The take films that width through `--viewport`, at 390x844, 768x1024, or 1280x800, and 900 tall for any other width. A reel filmed at 390 sets `"push": false` on every beat, since the phone window already fills the reel and a push crops the column it films.
+
+The evidence comment draws every reel 960 wide, so a reel filmed at 390 or 768 renders upscaled until the comment draws a reel at its own width.
 
 ### Hold the coverage
 
