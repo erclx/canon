@@ -106,7 +106,14 @@ Write one item per issue in the intake item format, one cluster file per domain 
 - `Suggested:` opens with exactly one of those tokens, then the reason
 - `You:` ships empty
 
-Write `00-overview.md` last, per the intake standard. It carries the counts by token, an open-questions list linking each item, the commit measured against, every issue skipped in Step 2 with its carrier, and the left-over count from Step 3. Where the pass runs out of context before the index, write `99-next-session.md` naming the last issue filed.
+Write `00-overview.md` last, per the intake standard. It carries the counts by token, the ready list, an open-questions list linking each item, the commit measured against, every issue skipped in Step 2 with its carrier, and the left-over count from Step 3.
+
+Build the ready list the way the intake standard's `## 00-overview.md` section states it.
+
+- Name a bundle row for items whose `Fix:` lines name a shared file, and leave two fixes in one skill folder with no common file as separate rows
+- Treat a bundle as a proposal the operator answers, and fill no `You:` slot from it
+
+Where the pass runs out of context before the index, write `99-next-session.md` naming the last issue filed.
 
 ## Output
 
@@ -117,11 +124,12 @@ Write `00-overview.md` last, per the intake standard. It carries the counts by t
 **Skipped:** <n> already carried
 **Left over:** <n> past the cap of <cap>, from #<lowest>
 **Suggested:** <n> plan, <n> ask, <n> decline
+**Bundles:** <n> named, covering <n> items
 
 Next: /canon:plan-intake-answer to answer the `You:` slots
 ```
 
-Drop the `Left over:` line when nothing was past the cap.
+Drop the `Left over:` line when nothing was past the cap, and the `Bundles:` line when no bundle was named.
 
 An answered plan item promotes through `task-board` with an `Issue: #NNN` line, and the shipping pull request's `Closes #NNN` drains the queue. This skill still closes nothing. `plan-intake-answer` offers the close of a declined issue when the decline is answered, and the operator's yes posts it.
 
