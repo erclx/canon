@@ -86,9 +86,11 @@ Run `canon pr lift <number> --json` in the background after posting `## Review c
 - Skip that message when the reason names the other review as open or missing, since the other reviewer's close runs the verb again
 - On a ready pull request the verb waits on CI too. A standing or CI reason beside `isReady: true` holds the merge line rather than the ready mark, so relay it that way.
 
-### A carried rebase
+### A carried rebase or merge
 
 A re-review request on a rebased head earns no pass when `canon pr review-state <number> --json` reads `carriedAcross: "rebase"` on this session's family. The rebase left the branch diff equal, so the close still holds at the new head.
+
+A request on a head that merged the base earns none either when the code family reads `carriedAcross: "merge"`. Every commit since the close is a merge or already on the base, and the branch diff is equal. The UI family never reads `merge`, so a UI close behind a merged head still owes its pass.
 
 - Reply to the requester that the close carried, naming `carriedFrom` and the new head
 - Run `canon pr lift <number> --json` with `run_in_background` on a draft, since CI and the evidence still settle at the new head, and message the controller the reason on its wake as on a close
