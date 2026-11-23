@@ -91,7 +91,13 @@ jobs:
         id: diff
         env:
           FRAME_DIR: ${{ steps.capture.outputs.dir }}
+        # An empty folder is a script that predates its `dir` output, and git
+        # reads "" as no path, so the step would pass and refresh nothing.
         run: |
+          if [ -z "$FRAME_DIR" ]; then
+            echo "::error file=scripts/readme-screenshot.sh::The script wrote no dir output. Merge the GITHUB_OUTPUT lines from the synced script into yours."
+            exit 1
+          fi
           if git status --porcelain "$FRAME_DIR" | grep -q .; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
