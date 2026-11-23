@@ -1,6 +1,6 @@
 ---
 title: CLI
-description: TypeScript entry point and the layer boundary to bash, command registration and migration, the sync engine and its install stamp, the audit commands, and packaging
+description: TypeScript entry point and the layer boundary to bash, command registration, the root and git resolvers, packaging, and the pointers to the sync, audit, and session entries
 ---
 
 # CLI
@@ -9,7 +9,7 @@ description: TypeScript entry point and the layer boundary to bash, command regi
 
 `src/cli.ts` is the entry point of `canon`, the one `bin` the package ships. It builds a commander program, calls the `register` of each file in `src/commands/`, and routes help ahead of parsing. The source runs as it stands under Bun, so nothing compiles and no `dist/` exists to drift. Use `@/` imports, mapped to `src/` in `tsconfig.json`.
 
-This entry owns the layers every command stands on, from the process layer and root resolvers to the sync engine, the audit set, `canon pr`, and the package. The engine behind a feature verb sits in its own `src/<domain>/` folder and belongs to that domain's entry. Flags and exit codes are in `docs/agents/`.
+This entry owns the layers every command stands on, from the process layer to the package. The sync engine, the audit set, and `canon pr` sit in the `cli-*` entries. The engine behind a feature verb sits in its own `src/<domain>/` folder and belongs to that domain's entry. Flags and exit codes are in `docs/agents/`.
 
 ## Layout
 
@@ -51,92 +51,6 @@ Holds every module that reads repository state, named for what it reads.
 - `base.ts` holds `baseCandidates()`, the trunk order the base-ref resolver and `src/gov/test-order.ts` each run their own call over
 - `files.ts` holds `listRepositoryFiles()`, the corpus three audits read, and `listChangedFiles()`, which diffs the working tree rather than `HEAD`, so an uncommitted surface is in scope
 - `revision.ts` holds `readBlobsAt()` and `spaceEvenly()` for every trend
-
-### `src/sync/`
-
-Holds the one engine `gov` installs and syncs through, the workflow `canon sync` runs afterward, and the install stamp. `format.ts` formats the stamp alone with the target's `oxfmt` or `prettier`, since a formatted seed would read as `customized`. `stamp.ts` already writes the shape both accept.
-
-- An adapter supplies `installedRoot`, `locateSource`, and optional hooks. Widen `SyncAdapter` rather than branching on a domain name in `engine.ts`
-- `planSync` marks each walked file with a state such as `stale`, `orphaned`, `retired`, or `renamed`. Location decides ownership before a name lookup, through `projectSubdir` and `ownsInstalledRoot`
-- Declare a rename in `governance/renames.toml`, or the old rule lands as `retired` and is deleted. `src/gov/renames.test.ts` fails on a live key, a dead chain, or a cycle
-- `stamp.ts` writes `canon/config/config.json` after the copies land and reads three older spellings. Adding a domain means choosing `STAMP_DOMAINS` or `SCANNED_DOMAINS`, and retiring one edits both
-- `check.ts` builds `canon sync --check`, `history.ts` recovers `stale` when unstamped, and `reverse.ts` finds dropped files. `hasDrift` skips `orphaned`, tooling, and the new and reverse sections
-
-### `src/targets/`
-
-Owns the machine-level index of target projects, kept under `stateDir()`.
-
-- `registry.ts` records a target as `putDomain` stamps it, refuses a scratch path, and drops gone or scratch rows. A failed write is dropped
-- `sweep.ts` finds installs that predate the index. It descends into a stamped folder, which can hold others, and skips `.claude` so a worktree's stamp copy counts nothing
-- `resolve.ts` groups by origin so a target in two clones counts once, and `pulls.ts` reads each target's open pull requests
-- `validate.ts` holds `resolveTarget`, the install-directory check under every verb that takes a target
-
-### `src/audits/`
-
-Holds the aggregate behind `canon audits run`, the only audit anything schedules.
-
-- `catalog.ts` holds `AUDITS`, one `AuditSpec` per verb. Its `gatingExits` say which exits are facts, since a reporting verb sets 2 on findings it does not gate
-- Add an audit by adding its spec, with a `counts` extractor that returns `undefined` when the record lacks its keys, since zero would read as clean
-- `run.ts` runs the specs together and reports one verdict. `--corpus` scopes a run, and an exit 3 from a verb is a defect in the run
-- `baseline.ts` diffs each count against the record. Growth never gates, is attributed rather than re-recorded, and skips `grown` inside a spec's `tolerance`
-- `deps` runs weekly in `verify.yml` and times out at 120 seconds as `no-record`. A missing per-machine folder reports absent, but a missing tracked tree still warns
-
-### `src/context/`
-
-Holds the context-folder audit behind `canon context audit`.
-
-- `audit.ts` reports section, shape, length, provenance, and reference-form findings per entry, and `gate.ts` decides which fail under `--gate`
-- `shape-gated.ts` holds the default gated paths, which a project's `gated` key replaces rather than extends. `canon/context/index.md` is regenerated by `canon indexes regen`, never edited
-- `citations.ts` gates on a cited path that does not resolve. It lifts a `canon/context/<name>.md` suffix out of a longer path, so a seed path fails when its entry moves. It skips a stamp at any depth
-- `requirements.ts` reads the word cap from `canon/REQUIREMENTS.md`, and `index-drift.ts` compares an index to its siblings
-- `coverage.ts` reads `roots`, `gated`, and `gate-length` from `canon/config/context.toml`, and flags a code folder no Layout names or two entries claim. A project with no root passes
-
-### `src/markdown/`
-
-Holds the attribute-standard audit behind `canon markdown audit` and the fence walker every markdown reader shares.
-
-- `bans.ts` and `links.ts` gate. The ban set ships as data, an empty set reports rather than passes, and exit 3 stays apart from the refusal at 1
-- `density.ts` measures bullet runs and sentence weight. `scope.ts` names what is measured and what gates, read by the audit, `canon init`, and `canon claude sync` through `scopedDensityFindings`
-- `claude/skills/` gates as one prefix in `GATED_PATHS`, so a new body or reference gates on arrival, and a `REQUIREMENT.md` still gates only on its exact path
-- `gated.ts` reads a target's list from `canon/config/markdown.toml`, where a bullet run gates only under a listed prefix, and `gated add` and `canon init` append a prefix only once it is clean
-- `colons.ts` and `heading-case.ts` only report. `tables.ts` gates `table-cell` and `table-then-list` as density kinds and reports `table-rows` and `table-token`.
-
-### `src/migrate/`
-
-Holds the one-shot moves behind `canon migrate`, being `records`, `surface-roots`, `record-tree`, `scratch-evidence`, `record-layout`, `rename`, `skill-names`, `rule-layout`, and `session-defaults`. Each plans first and applies only under `--write`. `session-defaults` plans hooks in `src/migrate/hook-wiring.ts`.
-
-- `status.ts` orders every move in `MIGRATIONS` and reads each by its exit through `cliRunner`, and a test fails when a registered subcommand is missing from it, so a new move joins by one line there
-- `rename.ts` holds the token sweep and `skill-names.ts` the map it reads, so a renamed or merged skill is a map row plus a pointer left at the old name
-- A merged skill's pointer sets `disable-model-invocation: true`, counts as a shipped skill, and needs a routing case, `metadata.family`, and a skill-map row
-- Each old spelling in the pointer takes a `canon-keep-retired` marker so a later sweep does not move it onto the survivor
-- The pointer's paths join the map's `excludedPaths` only after the sweep runs, since excluding first leaves the real body unmoved while every citation names the new one
-
-### `src/pr/`
-
-Holds the readers and writers behind `canon pr`, all over REST rather than GraphQL. The squash in `merge.ts` is a REST `PUT` pinned to the head it read, and a bot pull request composes from its own body.
-
-- `rest.ts` is the one boundary where REST payloads take the field names the rest of the folder reads, and list endpoints go through `gh api --paginate`
-- `head.ts` and `checks.ts` key on the remote tip, not the local branch, and `checks.ts` tells a conflicted branch from runs that have not started
-- `evidence.ts`, `tick.ts`, `bijection.ts`, and `links.ts` own the marked comment, ticks, key-changes check, and its links. `frames.ts` files frames, captures, and reels on `canon/frames` until a prune
-- `preview.ts` and `local.ts` write and remove the address line. The first reads what a branch serves from the deploy workflow's push trigger, the second finds a server by its cwd
-- `lift.ts` readies a pull request only when every gate passes, or returns a ready one to draft. `carry.ts` holds its push and rebase carry rules, shared with the tick
-
-### `src/listeners/`
-
-Holds the port listener reads and their `stop.ts`, shared by `pr local`, `worktrees reclaim`, and `sessions reap`.
-
-- `machine.ts` reads through `/proc` first and lsof second, and reports no reader at all rather than an empty list on a machine with neither
-- `parse.ts` turns each tool's output into pid and port pairs. `belongs.ts` is the nesting test that keeps a listener in the main checkout or a sibling worktree out of a worktree's set
-
-### `src/sessions/`
-
-Holds the live-session roster and the branch claim, split by what a stub has to replace. `transfer/` moves a session between machines and treats a transcript as opaque bytes. `reap.ts` judges each stop by a fresh roster read.
-
-- `registry.ts` reads one JSON file per session under `claudeConfigDir()`. No published contract describes it, so an absent registry refuses rather than reporting an empty roster
-- `live.ts` matches a record to its stamped start time, and marks it unverified where it can only probe a signal or, across pid namespaces, a socket file. `liveness()` stays synchronous for the gate
-- `resolve.ts` joins a session to its branch, scoping `--branch` to the shared directory, and confirms a row `via: 'listener'` when its socket accepts, since macOS has no process filesystem
-- `claim.ts` composes `claimed` from the roster, worktrees, and `branchRefs()`, which misses a branch pushed since the last fetch. Two readable flags stay apart so a failed read never reads unclaimed
-- `stop.ts` reads a usage-limit stop off a transcript's last 1 MiB. No contract describes the entry, so a limit-worded one of another shape reads `unknown`
 
 ### `package.json`
 
