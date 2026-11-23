@@ -13,10 +13,8 @@ import { join } from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 /**
- * Runs the web stack's capture script at the 320 reflow floor against pages
- * that scroll sideways, clip a control, or fit, since layout is something only
- * a real engine answers. The suite skips without a browser binary, so a green
- * pipeline is not evidence.
+ * Runs the capture script at the 320 reflow floor against pages that scroll sideways, clip a control,
+ * or fit, since only a real engine answers layout. It skips without a browser, so green is not evidence.
  */
 
 const SCRIPT = join(

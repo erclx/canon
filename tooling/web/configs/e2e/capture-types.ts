@@ -19,11 +19,9 @@ export interface CaptureCase {
   theme: string
   route: string
   /**
-   * Names of viewports this case skips, for a route that reflows rather than
-   * breaks at that width. `320` names the reflow floor, where every case fails
-   * the run on a sideways scroll or a clipped control and writes no frame, so
-   * naming it defers that check. A name no viewport carries is warned on and
-   * ignored.
+   * Names of viewports this case skips, for a route that reflows rather than breaks at that width.
+   * `320` defers the reflow check, which fails the run on a sideways scroll or a clipped control.
+   * A name no viewport carries is warned on and ignored.
    */
   excludeViewports?: readonly string[]
   evidence?: boolean

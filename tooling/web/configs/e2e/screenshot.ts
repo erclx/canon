@@ -12,10 +12,8 @@ import type {
 } from './capture-types'
 
 /**
- * The widths every case is crossed with. The three carrying `evidence` are the
- * narrow end of the phone, tablet, and desktop classes, which the board draws
- * and the reel films at too. 1536 sweeps into `screenshots/` alone, so a layout
- * range wider than 1280 is still looked at without a committed frame.
+ * The three `evidence` widths are the narrow end of the phone, tablet, and
+ * desktop classes the board draws at. 1536 sweeps alone, so a range past 1280 is still looked at.
  */
 const VIEWPORTS: readonly Viewport[] = [
   { name: '390', width: 390, height: 800, evidence: true },
@@ -357,10 +355,8 @@ async function resolveMask(
 const CLIPPED_LISTED = 5
 
 /**
- * What fails the reflow floor on the loaded page: content wider than the
- * viewport, and each visible control partly past its edge or clipping its own
- * label. A control wholly off the page is hidden on purpose, such as a skip
- * link or a closed drawer, and a 1px box is a screen-reader-only label.
+ * Content wider than the viewport, and each visible control partly past its edge or clipping its label.
+ * A control wholly off the page is hidden on purpose, such as a skip link, and a 1px box is a screen-reader label.
  */
 async function readReflow(page: Page): Promise<string[]> {
   return page.evaluate((listed) => {
