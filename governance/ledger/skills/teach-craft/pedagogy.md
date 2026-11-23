@@ -37,6 +37,9 @@ The reference labels the rest as house judgment, being the ladder, production ov
 | Widen the gap on a hit, shorten on a miss | House choice: a fixed gap keeps reviewing what the learner holds and leaves what they keep missing to fade between sessions                                                                          | 2026-10-24 |
 | Name the revisit in the record            | House choice: a next session with no schedule in the record picks its revisit by guess, and the spacing the ladder sets is lost                                                                      | 2026-10-24 |
 | Apply the ladder as written               | House choice: an author told to widen a gap by judgment settles on whatever feels right, so two sessions space one topic differently                                                                 | 2026-10-24 |
+| Write the opt-out in the record           | House choice: an opt-out left in the conversation is gone when it ends, so the next session asks again or quizzes a learner who declined                                                             | 2026-11-23 |
+| Put every lesson on the first rung        | House choice: no lesson has a retrieval to move it up, so any wider gap is a guess and the ladder's drop on a miss is the nearest rule                                                               | 2026-11-23 |
+| Open the next session on the first check  | House choice: a learner who declined in chat may still take the check on the page, and offering it costs one line while skipping it leaves every lesson unmeasured                                   | 2026-11-23 |
 
 ## Interleaving
 
