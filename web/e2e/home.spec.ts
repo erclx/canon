@@ -984,7 +984,9 @@ test.describe('the evidence section', () => {
     expect(stamp['pull-request']).toMatch(/^\d+$/)
 
     await expect(link).toHaveAttribute('href', stamp.address ?? '')
-    await expect(link).toHaveText(`pull request #${stamp['pull-request']}`)
+    await expect(link).toHaveText(
+      `pull request #${stamp['pull-request']} on ${stamp.repository}`,
+    )
     await expect(page.locator('#evidence')).not.toContainText('#412')
   })
 
@@ -995,6 +997,19 @@ test.describe('the evidence section', () => {
     expect(frame).not.toBeNull()
     expect(frame!.width).toBeLessThanOrEqual(Number(stamp.width))
     expect(frame!.width).toBeGreaterThan(Number(stamp.width) / 2)
+  })
+
+  test('centers the reel in its column', async ({ page }) => {
+    await page.goto('/')
+    const column = await page.locator('#evidence .w').boundingBox()
+    const screen = await page.locator('#evidence .screen').boundingBox()
+
+    expect(column).not.toBeNull()
+    expect(screen).not.toBeNull()
+    const left = screen!.x - column!.x
+    const right = column!.x + column!.width - (screen!.x + screen!.width)
+    expect(left).toBeGreaterThan(40)
+    expect(Math.abs(left - right)).toBeLessThanOrEqual(1)
   })
 })
 

@@ -239,7 +239,7 @@ export const worktrees = {
 }
 
 /**
- * One reel a real pull request carried, resting on its opening frame until its
+ * One reel a real pull request carried, from the repository its stamp names, resting on its opening frame until its
  * control plays it, over a caption linking that pull request.
  */
 export const evidence = {
@@ -248,13 +248,14 @@ export const evidence = {
   // README.md: "Every pull request comes with a short film of the new screen working in the app."
   lede: 'Every pull request comes with a short film of the new screen working in the app.',
   // README.md: canon-allow-readme-paraphrase: the reel's control and caption, which no README sentence carries. "posts the reel"
-  still: (pullRequest: number) =>
-    `The opening frame of the reel on pull request #${pullRequest}`,
+  still: (pullRequest: number, repository: string) =>
+    `The opening frame of the reel on pull request #${pullRequest} on ${repository}`,
   play: 'Play the reel',
   loading: 'Loading the reel',
   stop: 'Stop the reel',
   posted: 'The reel canon posted on',
-  link: (pullRequest: number) => `pull request #${pullRequest}`,
+  link: (pullRequest: number, repository: string) =>
+    `pull request #${pullRequest} on ${repository}`,
   length: (seconds: number) => `${Math.round(seconds)} s`,
 }
 
