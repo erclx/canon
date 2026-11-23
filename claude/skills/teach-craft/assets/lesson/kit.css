@@ -229,6 +229,10 @@ body {
   margin: 0 0 14px;
 }
 
+.kit-article a {
+  overflow-wrap: anywhere;
+}
+
 .kit-article code {
   padding: 1px 6px;
   border-radius: 5px;
