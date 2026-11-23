@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs'
 import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join, relative } from 'node:path'
 import { copyPreservingMode } from '@/sync/copy'
+import { appRootPath, readAppRoot, renderGolden } from '@/tooling/app-root'
 import { heldScriptKeys, readDispositions } from '@/tooling/disposition'
 import { type InstallResult, installDevDependencies } from '@/tooling/install'
 import { rewritesOnInstall, stripSeedMarker } from '@/tooling/seed-marker'
@@ -37,6 +38,7 @@ export async function injectConfigs(
   const applied: string[] = []
   const isSubfolder = isSubfolderTarget(target)
   const held = readDispositions(target)
+  const appRoot = readAppRoot(target)
 
   for (const manifest of ancestorsFirst(chain)) {
     const files = configFiles(manifest).filter(
@@ -49,11 +51,12 @@ export async function injectConfigs(
 
     logStep(`Applying ${manifest.name} configs`)
     for (const rel of files) {
-      await copyPreservingMode(
-        join(manifest.configsDir, rel),
-        join(target, rel),
-      )
-      logAdd(rel)
+      const source = join(manifest.configsDir, rel)
+      const dest = appRootPath(rel, appRoot)
+      // The copy settles the mode, and writing the rendered text over it in place keeps that mode.
+      await copyPreservingMode(source, join(target, dest))
+      await writeFile(join(target, dest), renderGolden(source, appRoot))
+      logAdd(dest)
       applied.push(rel)
     }
   }
@@ -92,6 +95,7 @@ export async function injectSeeds(
   const isSubfolder = isSubfolderTarget(target)
   const shadowed = configPaths(chain)
   const held = readDispositions(target)
+  const appRoot = readAppRoot(target)
 
   for (const manifest of ancestorsFirst(chain)) {
     const files = seedFiles(manifest).filter(
@@ -104,7 +108,7 @@ export async function injectSeeds(
 
     logStep(`Applying ${manifest.name} seeds`)
     for (const rel of files) {
-      const dest = resolveSurfacePath(target, rel)
+      const dest = resolveSurfacePath(target, appRootPath(rel, appRoot))
       await copySeedIfMissing(join(manifest.seedsDir, rel), dest)
       logAdd(relative(target, dest))
       applied.push(rel)

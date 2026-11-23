@@ -10,6 +10,12 @@ import {
   stampedDispositions,
   stampedHashes,
 } from '@/sync/stamp'
+import {
+  appRootPath,
+  hashGolden,
+  renderGolden,
+  stampedAppRoot,
+} from '@/tooling/app-root'
 import { heldScriptKeys, scriptAddress } from '@/tooling/disposition'
 import { mergeSections } from '@/tooling/gitignore'
 import {
@@ -100,9 +106,9 @@ function driftCause(recorded: string | undefined, dest: string): DriftCause {
   return hashFile(dest) === recorded ? 'stale' : 'edited'
 }
 
-function isIdentical(a: string, b: string): boolean {
-  if (!existsSync(b)) return false
-  return readFileSync(a).equals(readFileSync(b))
+function isIdentical(golden: Buffer, dest: string): boolean {
+  if (!existsSync(dest)) return false
+  return golden.equals(readFileSync(dest))
 }
 
 /**
@@ -115,6 +121,7 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
   const stamp = readStamp(target)
   const held = stampedDispositions(stamp, 'tooling')
   const recorded = stampedHashes(stamp, 'tooling')
+  const appRoot = stampedAppRoot(stamp)
   const configs: ConfigState[] = []
   const withheld: WithheldState[] = []
   const dispositions: DispositionState[] = []
@@ -126,7 +133,7 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
       seenConfigs.add(rel)
 
       const source = join(manifest.configsDir, rel)
-      const dest = join(target, rel)
+      const dest = join(target, appRootPath(rel, appRoot))
 
       const entry = held[rel]
       if (entry !== undefined) {
@@ -137,7 +144,7 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
           disposition: entry.disposition,
           present: existsSync(dest),
           ...(entry.disposition === 'customized'
-            ? { moved: hashFile(source) !== entry.base }
+            ? { moved: hashGolden(source, appRoot) !== entry.base }
             : {}),
         })
         continue
@@ -150,7 +157,7 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
 
       if (!existsSync(dest)) {
         configs.push({ rel, stack: manifest.name, state: 'new' })
-      } else if (isIdentical(source, dest)) {
+      } else if (isIdentical(renderGolden(source, appRoot), dest)) {
         configs.push({ rel, stack: manifest.name, state: 'matching' })
       } else {
         configs.push({
@@ -170,6 +177,7 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
     for (const rel of seedFiles(manifest)) {
       if (seenSeeds.has(rel)) continue
       seenSeeds.add(rel)
+      const dest = appRootPath(rel, appRoot)
 
       const entry = held[rel]
       if (entry !== undefined) {
@@ -178,7 +186,7 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
           stack: manifest.name,
           kind: 'seed',
           disposition: entry.disposition,
-          present: existsSync(resolveSurfacePath(target, rel)),
+          present: existsSync(resolveSurfacePath(target, dest)),
         })
         continue
       }
@@ -187,14 +195,14 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
         withheld.push({
           rel,
           stack: manifest.name,
-          present: existsSync(join(target, rel)),
+          present: existsSync(join(target, dest)),
         })
         continue
       }
 
       seeds.push({
         rel,
-        state: existsSync(resolveSurfacePath(target, rel))
+        state: existsSync(resolveSurfacePath(target, dest))
           ? 'present'
           : 'missing',
       })

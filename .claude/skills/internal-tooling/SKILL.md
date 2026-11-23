@@ -89,6 +89,15 @@ The check runs only where a stack keeps a `tooling/<stack>/manifest.toml`, so a 
 - Put a file the scaffold writes under `tooling/<stack>/scaffold/`, which lands after the step, rather than writing it through a shell string
 - Tmp dir auto-removes on success. Keeps on failure. Use `--keep` to inspect after a green run.
 
+### App root
+
+Sync renders and relocates golden files from the root a target recorded at `canon tooling scaffold --app-root`.
+
+- Declare `[scaffold] app-root` only on a stack whose framework lets the app folder move, since the field opts it into the flag
+- Write `{{appRoot}}` where a golden config names the app folder, never a literal `src`
+- Ship a golden file under `src/` only when it belongs in the app folder, since sync lands it under the recorded root
+- Verify scaffolds with no root, so the scaffold and inject tests alone prove a moved one
+
 ## Seed naming
 
 Agent-facing prose seeds under `tooling/*/seeds/` use lowercase filenames, such as `development.md` and `ci.md`. CAPS, such as `CLAUDE.md` and `REQUIREMENTS.md`, is reserved for state and planning files agents read as known paths.

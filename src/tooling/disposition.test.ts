@@ -91,6 +91,18 @@ describe('resolveGolden', () => {
   it('should return undefined for a path no stack ships', () => {
     expect(resolveGolden([makeManifest('base')], 'nope.txt')).toBeUndefined()
   })
+
+  it('should hash a config as rendered for the app root, the copy sync writes', () => {
+    const web = makeManifest('web')
+    writeAt(join(web.configsDir, 'tsconfig.json'), '["./{{appRoot}}/*"]\n')
+
+    expect(resolveGolden([web], 'tsconfig.json', 'app')?.hash).toBe(
+      hashContent('["./app/*"]\n'),
+    )
+    expect(resolveGolden([web], 'tsconfig.json')?.hash).toBe(
+      hashContent('["./src/*"]\n'),
+    )
+  })
 })
 
 const CONFIG = {

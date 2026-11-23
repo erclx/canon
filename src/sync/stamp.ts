@@ -73,6 +73,11 @@ export interface DomainStamp {
    * and costing every other domain its record.
    */
   readonly dispositions?: DomainDispositions
+  /**
+   * The folder tooling renders as the app root, recorded by a scaffold given one. Absent means `src`, so
+   * every target scaffolded before the option renders as it always did.
+   */
+  readonly appRoot?: string
 }
 
 export interface Stamp {
@@ -193,7 +198,9 @@ function withoutRetired(stamp: Stamp): Stamp {
   const domains: Partial<Record<StampDomain, DomainStamp>> = {}
   for (const domain of STAMP_DOMAINS) {
     const record = stamp.domains[domain]
-    if (record !== undefined) domains[domain] = withValidDispositions(record)
+    if (record !== undefined) {
+      domains[domain] = withValidAppRoot(withValidDispositions(record))
+    }
   }
 
   const covers = Array.isArray(stamp.covers)
@@ -310,10 +317,22 @@ export async function writeDispositions(
   )
 }
 
+/** Records the app root a scaffold moved the starter's app folder to, leaving the rest of the record. */
+export async function writeAppRoot(
+  target: string,
+  source: StampSource,
+  appRoot: string,
+  now: Date,
+): Promise<void> {
+  await putDomain(target, source, { appRoot }, now)
+}
+
 async function putDomain(
   target: string,
   source: StampSource,
-  payload: Partial<Pick<DomainStamp, 'files' | 'chain' | 'dispositions'>>,
+  payload: Partial<
+    Pick<DomainStamp, 'files' | 'chain' | 'dispositions' | 'appRoot'>
+  >,
   now: Date,
 ): Promise<void> {
   const previous = readStamp(target)
@@ -330,6 +349,7 @@ async function putDomain(
     ...dispositionsField(
       payload.dispositions ?? previousRecord?.dispositions ?? {},
     ),
+    ...appRootField(payload.appRoot ?? previousRecord?.appRoot),
   }
 
   await persist(target, previous, source.domain, record, now)
@@ -475,6 +495,20 @@ function dispositionsField(
   return Object.keys(dispositions).length === 0
     ? {}
     : { dispositions: sortKeys(dispositions) }
+}
+
+function appRootField(
+  appRoot: string | undefined,
+): Pick<DomainStamp, 'appRoot'> {
+  return appRoot === undefined ? {} : { appRoot }
+}
+
+/** A root that is not a string costs only itself, as a malformed dispositions map does. */
+function withValidAppRoot(record: DomainStamp): DomainStamp {
+  const raw: unknown = record.appRoot
+  if (raw === undefined || typeof raw === 'string') return record
+  const { appRoot: _dropped, ...rest } = record
+  return rest
 }
 
 /**

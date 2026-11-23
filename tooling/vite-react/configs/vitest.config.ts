@@ -9,7 +9,7 @@ export default mergeConfig(
     test: {
       environment: 'jsdom',
       globals: true,
-      setupFiles: ['src/test/setup.ts'],
+      setupFiles: ['{{appRoot}}/test/setup.ts'],
       passWithNoTests: true,
       exclude: [
         '**/node_modules/**',
@@ -20,7 +20,7 @@ export default mergeConfig(
       coverage: {
         provider: 'v8',
         reporter: ['text', 'json', 'html'],
-        exclude: ['node_modules/', 'src/test/setup.ts', 'e2e/'],
+        exclude: ['node_modules/', '{{appRoot}}/test/setup.ts', 'e2e/'],
       },
     },
   }),

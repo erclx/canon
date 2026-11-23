@@ -4,14 +4,24 @@ import {
   mkdirSync,
   mkdtempSync,
   readdirSync,
+  readFileSync,
   renameSync,
   rmSync,
+  writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { basename, join, resolve } from 'node:path'
+import { basename, dirname, join, resolve } from 'node:path'
 import { execa } from 'execa'
 import { gitEnv } from '@/git/env'
-import { isStackExcluded, loadManifest } from '@/tooling/manifest'
+import { writeAppRoot } from '@/sync/stamp'
+import { DEFAULT_APP_ROOT, parseAppRoot } from '@/tooling/app-root'
+import {
+  configFiles,
+  isStackExcluded,
+  loadManifest,
+  resolveChain,
+  seedFiles,
+} from '@/tooling/manifest'
 
 export interface ScaffoldOptions {
   /** Root holding `tooling/<stack>/manifest.toml`. */
@@ -20,6 +30,13 @@ export interface ScaffoldOptions {
   readonly target: string
   /** Parent of the scratch folder the command runs in. Defaults to the OS temp dir. */
   readonly scratchBase?: string
+  /**
+   * The folder the app lands in, for a stack whose manifest declares `[scaffold] app-root`. Unset, or `src`,
+   * scaffolds as the starter writes it.
+   */
+  readonly appRoot?: string
+  /** The time the recorded root is stamped with. Defaults to now. */
+  readonly now?: Date
 }
 
 export type ScaffoldRefusal =
@@ -28,9 +45,12 @@ export type ScaffoldRefusal =
   | 'no-scaffold'
   | 'not-empty'
   | 'bad-name'
+  | 'bad-app-root'
+  | 'app-root-unsupported'
   | 'scaffold-failed'
   | 'no-output'
   | 'prepare-failed'
+  | 'app-root-taken'
 
 /**
  * `initialized` is a fresh `git init -b main`, `existing` a target already inside a work tree, which a scaffold
@@ -46,6 +66,8 @@ export type ScaffoldResult =
       readonly name: string
       readonly files: readonly string[]
       readonly git: ScaffoldGit
+      /** Set only when the app folder moved, to the root the target's tooling record now names. */
+      readonly appRoot?: string
     }
   | {
       readonly ok: false
@@ -91,6 +113,33 @@ export async function scaffoldStack(
     return refuse(
       'no-scaffold',
       `Stack '${stack}' has no scaffold command in its manifest.`,
+    )
+  }
+
+  const appRoot =
+    opts.appRoot === undefined ? undefined : parseAppRoot(opts.appRoot)
+  if (opts.appRoot !== undefined && appRoot === undefined) {
+    return refuse(
+      'bad-app-root',
+      `App root '${opts.appRoot}' is not a folder inside the project. Use lowercase segments such as 'web' or 'apps/web'.`,
+    )
+  }
+  // Naming the default is the same as naming nothing, whichever stack it is.
+  const moveTo = appRoot === DEFAULT_APP_ROOT ? undefined : appRoot
+  if (moveTo !== undefined && manifest.appRoot === undefined) {
+    return refuse(
+      'app-root-unsupported',
+      `Stack '${stack}' declares no [scaffold] app-root, so its app folder cannot move.`,
+    )
+  }
+  const clash =
+    moveTo === undefined || manifest.appRoot === undefined
+      ? undefined
+      : rootClash(root, stack, manifest.appRoot, moveTo)
+  if (clash !== undefined) {
+    return refuse(
+      'bad-app-root',
+      `App root '${moveTo}' sits inside ${clash}/, which the scaffold or sync writes. Pick a folder of its own, such as 'web'.`,
     )
   }
 
@@ -158,6 +207,19 @@ export async function scaffoldStack(
     cpSync(overlay, produced, { recursive: true, force: true })
   }
 
+  // After the overlay, so an overlay written for the starter's folder moves with it.
+  if (moveTo !== undefined && manifest.appRoot !== undefined) {
+    if (existsSync(join(produced, moveTo))) {
+      return {
+        ok: false,
+        reason: 'app-root-taken',
+        message: `The starter already holds ${moveTo}/, so the app cannot move there. Pick another root.`,
+        scratch,
+      }
+    }
+    moveAppFolder(produced, manifest.appRoot, moveTo)
+  }
+
   mkdirSync(target, { recursive: true })
   const files: string[] = []
   for (const entry of readdirSync(produced).sort()) {
@@ -168,7 +230,64 @@ export async function scaffoldStack(
   }
   rmSync(scratch, { recursive: true, force: true })
 
-  return { ok: true, stack, target, name, files, git: await initGit(target) }
+  if (moveTo === undefined) {
+    return { ok: true, stack, target, name, files, git: await initGit(target) }
+  }
+  await writeAppRoot(
+    target,
+    { domain: 'tooling', toolkitRoot: root },
+    moveTo,
+    opts.now ?? new Date(),
+  )
+  const recorded = [...new Set([...files, 'canon'])].sort()
+  return {
+    ok: true,
+    stack,
+    target,
+    name,
+    files: recorded,
+    git: await initGit(target),
+    appRoot: moveTo,
+  }
+}
+
+/**
+ * The folder a root would sit inside and collide with: the starter's app folder, which cannot move into itself,
+ * `canon/`, which holds the tooling record, or a top-level folder the chain ships golden files into.
+ */
+function rootClash(
+  root: string,
+  stack: string,
+  from: string,
+  to: string,
+): string | undefined {
+  if (to === from || to.startsWith(`${from}/`)) return from
+
+  const top = to.split('/')[0]
+  const written = new Set(['canon'])
+  for (const manifest of resolveChain(root, stack)) {
+    for (const rel of [...configFiles(manifest), ...seedFiles(manifest)]) {
+      const segments = rel.split('/')
+      if (segments.length > 1 && segments[0] !== from) written.add(segments[0])
+    }
+  }
+  return top !== undefined && written.has(top) ? top : undefined
+}
+
+/**
+ * Moves the starter's app folder to the root and retargets the absolute `/<folder>/` paths in `index.html`,
+ * which is where a Vite starter loads its entry module from.
+ */
+function moveAppFolder(produced: string, from: string, to: string): void {
+  mkdirSync(dirname(join(produced, to)), { recursive: true })
+  renameSync(join(produced, from), join(produced, to))
+
+  const html = join(produced, 'index.html')
+  if (!existsSync(html)) return
+  writeFileSync(
+    html,
+    readFileSync(html, 'utf8').replaceAll(`"/${from}/`, `"/${to}/`),
+  )
 }
 
 /** A failed init never fails the scaffold, since the files already reached the target. */

@@ -22,11 +22,11 @@
       "node"
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./{{appRoot}}/*"]
     }
   },
   "include": [
-    "src",
+    "{{appRoot}}",
     "vite.config.ts",
     "vitest.config.ts",
     "e2e",

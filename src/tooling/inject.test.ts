@@ -20,7 +20,10 @@ import {
   injectManifest,
   injectSeeds,
 } from '@/tooling/inject'
+import { readAppRoot } from '@/tooling/app-root'
 import { type Manifest, resolveChain } from '@/tooling/manifest'
+import { scan } from '@/tooling/scan'
+import { recordToolingChain } from '@/tooling/stamp'
 
 let target: string
 
@@ -433,5 +436,120 @@ describe('injectGitattributes', () => {
     const added = await injectGitattributes([designRecord], target)
 
     expect(added).toEqual([])
+  })
+})
+
+describe('sync under a recorded app root', () => {
+  let toolkit: string
+
+  beforeEach(() => {
+    toolkit = mkdtempSync(join(tmpdir(), 'canon-inject-stack-'))
+  })
+
+  afterEach(() => {
+    rmSync(toolkit, { recursive: true, force: true })
+  })
+
+  const rootedStack = (): Manifest => {
+    const dir = join(toolkit, 'tooling', 'rooted')
+    const write = (rel: string, body: string): void => {
+      mkdirSync(join(dir, rel, '..'), { recursive: true })
+      writeFileSync(join(dir, rel), body)
+    }
+    write('configs/tsconfig.json', '{ "paths": ["./{{appRoot}}/*"] }\n')
+    write('configs/src/test/setup.ts', 'export {}\n')
+    write('seeds/src/site.ts', 'export const site = {}\n')
+    return {
+      name: 'rooted',
+      dir,
+      configsDir: join(dir, 'configs'),
+      seedsDir: join(dir, 'seeds'),
+      scripts: {},
+      scriptOverrides: {},
+      gitignore: [],
+      devPackages: [],
+    }
+  }
+
+  const recordRoot = (appRoot: string): void => {
+    mkdirSync(join(target, 'canon', 'config'), { recursive: true })
+    writeFileSync(
+      stampPath(target),
+      JSON.stringify({
+        covers: ['tooling'],
+        domains: { tooling: { syncedAt: 'then', files: {}, appRoot } },
+      }),
+    )
+  }
+
+  it('should render the recorded root into a golden config', async () => {
+    captureStderr()
+    recordRoot('web')
+
+    await injectConfigs([rootedStack()], target)
+
+    expect(readFileSync(join(target, 'tsconfig.json'), 'utf8')).toBe(
+      '{ "paths": ["./web/*"] }\n',
+    )
+  })
+
+  it('should land a golden config under src/ in the recorded root', async () => {
+    captureStderr()
+    recordRoot('web')
+
+    await injectConfigs([rootedStack()], target)
+
+    expect(existsSync(join(target, 'web', 'test', 'setup.ts'))).toBe(true)
+    expect(existsSync(join(target, 'src'))).toBe(false)
+  })
+
+  it('should land a seed under src/ in the recorded root', async () => {
+    captureStderr()
+    recordRoot('web')
+
+    await injectSeeds([rootedStack()], target)
+
+    expect(existsSync(join(target, 'web', 'site.ts'))).toBe(true)
+    expect(existsSync(join(target, 'src'))).toBe(false)
+  })
+
+  it('should read every rendered config as matching after the write', async () => {
+    captureStderr()
+    recordRoot('web')
+    const chain = [rootedStack()]
+    await injectConfigs(chain, target)
+
+    const result = scan(chain, target)
+
+    expect(result.configs.map((entry) => entry.state)).toEqual([
+      'matching',
+      'matching',
+    ])
+  })
+
+  it('should render src for a target that recorded no root', async () => {
+    captureStderr()
+
+    await injectConfigs([rootedStack()], target)
+
+    expect(readFileSync(join(target, 'tsconfig.json'), 'utf8')).toBe(
+      '{ "paths": ["./src/*"] }\n',
+    )
+    expect(existsSync(join(target, 'src', 'test', 'setup.ts'))).toBe(true)
+  })
+
+  it('should keep the recorded root through a later sync stamp', async () => {
+    captureStderr()
+    recordRoot('web')
+    const chain = [rootedStack()]
+    await injectConfigs(chain, target)
+
+    await recordToolingChain(toolkit, target, chain, new Date())
+
+    expect(readAppRoot(target)).toBe('web')
+    expect(scan(chain, target).configs.map((entry) => entry.state)).toEqual([
+      'matching',
+      'matching',
+    ])
   })
 })

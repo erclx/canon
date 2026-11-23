@@ -12,6 +12,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { gitEnv } from '@/git/env'
+import { readAppRoot } from '@/tooling/app-root'
 import { scaffoldStack, suggestName } from '@/tooling/scaffold'
 
 let root: string
@@ -259,6 +260,185 @@ describe('scaffoldStack post-scaffold step and overlay', () => {
     expect(readFileSync(join(target('app'), 'src', 'main.tsx'), 'utf8')).toBe(
       'overlay\n',
     )
+  })
+})
+
+describe('scaffoldStack app root', () => {
+  const VITE_STARTER =
+    'mkdir -p {{name}}/src {{name}}/public && echo starter > {{name}}/src/main.tsx && echo \'<script type=\\"module\\" src=\\"/src/main.tsx\\"></script>\' > {{name}}/index.html'
+
+  const seedVite = (): void => {
+    seedStack('vite', VITE_STARTER, '\n[scaffold]\napp-root = "src"\n')
+    seedOverlay('vite', 'src/app.tsx', 'export function App() {}\n')
+  }
+
+  it('should land the app folder, the overlay included, under the root', async () => {
+    seedVite()
+
+    const result = await scaffoldStack({
+      root,
+      stack: 'vite',
+      target: target('app'),
+      scratchBase,
+      appRoot: 'web',
+    })
+
+    expect(result.ok && result.appRoot).toBe('web')
+    expect(readdirSync(join(target('app'), 'web')).sort()).toEqual([
+      'app.tsx',
+      'main.tsx',
+    ])
+    expect(existsSync(join(target('app'), 'src'))).toBe(false)
+  })
+
+  it('should point the module script in index.html at the root', async () => {
+    seedVite()
+
+    await scaffoldStack({
+      root,
+      stack: 'vite',
+      target: target('app'),
+      scratchBase,
+      appRoot: 'web',
+    })
+
+    expect(readFileSync(join(target('app'), 'index.html'), 'utf8')).toBe(
+      '<script type="module" src="/web/main.tsx"></script>\n',
+    )
+  })
+
+  it('should record the root in the target for sync to render', async () => {
+    seedVite()
+
+    const result = await scaffoldStack({
+      root,
+      stack: 'vite',
+      target: target('app'),
+      scratchBase,
+      appRoot: 'web/',
+    })
+
+    expect(readAppRoot(target('app'))).toBe('web')
+    expect(result.ok && result.files).toContain('canon')
+  })
+
+  it('should scaffold src exactly as passing no root does', async () => {
+    seedVite()
+    const plain = await scaffoldStack({
+      root,
+      stack: 'vite',
+      target: target('plain'),
+      scratchBase,
+    })
+
+    const named = await scaffoldStack({
+      root,
+      stack: 'vite',
+      target: target('named'),
+      scratchBase,
+      appRoot: 'src',
+    })
+
+    expect(named.ok && named.files).toEqual(plain.ok && plain.files)
+    expect(named.ok && named.appRoot).toBeUndefined()
+    expect(existsSync(join(target('named'), 'canon'))).toBe(false)
+  })
+
+  it('should refuse a root on a stack that declares no app folder', async () => {
+    seedStack('go', 'mkdir {{name}} && cd {{name}} && touch go.mod')
+
+    const result = await scaffoldStack({
+      root,
+      stack: 'go',
+      target: target('svc'),
+      scratchBase,
+      appRoot: 'web',
+    })
+
+    expect(result.ok || result.reason).toBe('app-root-unsupported')
+    expect(existsSync(target('svc'))).toBe(false)
+  })
+
+  it.each(['../web', '/web', 'Web'])(
+    'should refuse %j as a root outside the project or no folder name',
+    async (appRoot) => {
+      seedVite()
+
+      const result = await scaffoldStack({
+        root,
+        stack: 'vite',
+        target: target('app'),
+        scratchBase,
+        appRoot,
+      })
+
+      expect(result.ok || result.reason).toBe('bad-app-root')
+      expect(existsSync(target('app'))).toBe(false)
+    },
+  )
+
+  it.each(['src/app', 'src/nested/deep'])(
+    'should refuse %j as a root inside the folder that moves',
+    async (appRoot) => {
+      seedVite()
+
+      const result = await scaffoldStack({
+        root,
+        stack: 'vite',
+        target: target('app'),
+        scratchBase,
+        appRoot,
+      })
+
+      expect(result.ok || result.reason).toBe('bad-app-root')
+      expect(existsSync(target('app'))).toBe(false)
+    },
+  )
+
+  it('should refuse the folder the tooling record lives in as a root', async () => {
+    seedVite()
+
+    const result = await scaffoldStack({
+      root,
+      stack: 'vite',
+      target: target('app'),
+      scratchBase,
+      appRoot: 'canon',
+    })
+
+    expect(result.ok || result.reason).toBe('bad-app-root')
+  })
+
+  it('should refuse a root the stack ships golden files into', async () => {
+    seedVite()
+    const golden = join(root, 'tooling', 'vite', 'configs', 'e2e', 'shot.ts')
+    mkdirSync(join(golden, '..'), { recursive: true })
+    writeFileSync(golden, 'export {}\n')
+
+    const result = await scaffoldStack({
+      root,
+      stack: 'vite',
+      target: target('app'),
+      scratchBase,
+      appRoot: 'e2e/app',
+    })
+
+    expect(result.ok || result.reason).toBe('bad-app-root')
+  })
+
+  it('should refuse a root naming a folder the starter already holds', async () => {
+    seedVite()
+
+    const result = await scaffoldStack({
+      root,
+      stack: 'vite',
+      target: target('app'),
+      scratchBase,
+      appRoot: 'public',
+    })
+
+    expect(result.ok || result.reason).toBe('app-root-taken')
+    expect(existsSync(target('app'))).toBe(false)
   })
 })
 

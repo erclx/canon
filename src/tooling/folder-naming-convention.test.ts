@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import micromatch from 'micromatch'
 import { describe, expect, it } from 'vitest'
 import { PROJECT_ROOT } from '@/roots/project'
+import { DEFAULT_APP_ROOT, renderGolden } from '@/tooling/app-root'
 
 const RULE = 'check-file/folder-naming-convention'
 
@@ -32,7 +33,9 @@ const PATTERN_RE =
 function readOverrides(
   stack: keyof typeof OXLINT_CONFIGS,
 ): readonly OxlintOverride[] {
-  const config = JSON.parse(readFileSync(OXLINT_CONFIGS[stack], 'utf8')) as {
+  // The copy sync writes into a target that recorded no app root.
+  const rendered = renderGolden(OXLINT_CONFIGS[stack], DEFAULT_APP_ROOT)
+  const config = JSON.parse(rendered.toString('utf8')) as {
     overrides: readonly OxlintOverride[]
   }
   return config.overrides

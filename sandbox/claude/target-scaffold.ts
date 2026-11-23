@@ -37,6 +37,20 @@ export default scenario({
         "Expect:  target-scaffold runs `canon tooling scaffold vite-react` and hands off to target-setup. src/index.css imports tailwindcss, the Vite demo (src/App.css, src/assets/, public/icons.svg) is gone, the second detect pass installs .claude/rules/canon/framework/tailwind.md and shadcn.md beside react.md, and the report names the deep verify's test:e2e and screenshot stages, run or skipped. Raise CANON_SKILL_TEST_MAX_TURNS above the default for the first run.",
       )
     },
+    // Headless, so the request has to say full stack for the skill to pass a root.
+    fullstack: (ctx) => {
+      ctx.git('rm', '-q', '.gitignore')
+      ctx.commit('chore(sandbox): leave nothing but .git')
+
+      ctx.log.step('Scenario ready: full stack vite-react scaffold')
+      ctx.log.info('Context: a git repository holding nothing but .git')
+      ctx.log.info(
+        'Action:  "start a full stack vite-react project here, with a Worker beside the app"',
+      )
+      ctx.log.info(
+        'Expect:  the skill runs `canon tooling scaffold vite-react . --app-root web --json`, whose record reads ok with appRoot web. web/main.tsx and web/app.tsx land, no src/ folder does, index.html loads /web/main.tsx, and canon/config/config.json records appRoot as web. Read `skills` for canon:target-scaffold before trusting `result`.',
+      )
+    },
     occupied: (ctx) => {
       ctx.write('notes.md', '# Notes\n')
       ctx.git('add', '.')
