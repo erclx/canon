@@ -10,7 +10,7 @@ import { readTakeLog } from '@/take/log'
 import { beatViewport, parseViewport, readTakePlan } from '@/take/plan'
 import type { TakePlanRefusal } from '@/take/plan'
 import type { TakeRefusal } from '@/take/film'
-import { reelShapeMismatch, renderReel } from '@/take/reel'
+import { readReelWidth, reelShapeMismatch, renderReel } from '@/take/reel'
 import {
   intro,
   logError,
@@ -31,6 +31,7 @@ type Take = typeof import('@/take/film')
 interface RunOptions {
   readonly out?: string
   readonly reel?: string
+  readonly reelWidth?: string
   readonly maxSeconds?: string
   readonly viewport?: string
   readonly json?: boolean
@@ -105,6 +106,10 @@ export function register(program: Command): void {
       'Also join the beats into one animated WebP with the pointer drawn',
     )
     .option(
+      '--reel-width <px>',
+      'Write the reel this many pixels wide, 960 by default',
+    )
+    .option(
       '--max-seconds <n>',
       'Refuse once the filmed beats run past n seconds in total',
     )
@@ -139,7 +144,14 @@ export function register(program: Command): void {
         "reviewer sees the whole page. clip.mp4 stays each beat's raw take.",
         'The reel is lossless, so a fade-out leaves no ghost, and it falls back',
         'to lossy past 10 MB so a long reel still posts. The record says which',
-        'in `lossless`.',
+        'in `lossless`, and gives the written size as `width` and `height`.',
+        '',
+        '--reel-width <px> writes the reel at that width instead of 960, for a',
+        'page showing it wider. The width is even, at least 320, and no wider',
+        'than the narrowest window the take films, since a clip is decoded at its',
+        'window and a wider reel would stretch it. A wider lossless reel reaches',
+        'the 10 MB cap sooner. The option refuses as bad-reel-width without',
+        '--reel, before any beat films.',
         '',
         '  {',
         '    "beats": [',
@@ -268,6 +280,8 @@ export function register(program: Command): void {
         '  bad-max-seconds     --max-seconds is not a positive number',
         '  bad-viewport        --viewport or a beat viewport is malformed, odd, or',
         '                      outside 320x240 to 1920x1080',
+        '  bad-reel-width      --reel-width is odd, under 320, past the narrowest',
+        '                      window, not a whole number, or given without --reel',
         '  reel-shape          --reel over beats whose windows differ in aspect',
         '                      ratio, naming the first that differs',
         '  no-plan-file        nothing readable at the plan path',
@@ -756,6 +770,15 @@ async function runTake(
     )
   }
 
+  if (opts.reelWidth !== undefined && !opts.reel) {
+    return refuse(
+      emitJson,
+      url,
+      'bad-reel-width',
+      `--reel-width ${opts.reelWidth} needs --reel, since it sizes the reel and nothing else.`,
+    )
+  }
+
   let source: string
   try {
     source = readFileSync(path, 'utf8')
@@ -780,20 +803,32 @@ async function runTake(
 
   const { plan } = read
   // Checked before filming, since the reel would refuse only after every beat.
-  const mismatch = opts.reel
-    ? reelShapeMismatch(
-        plan.beats.map((beat) => ({
-          name: beat.name,
-          viewport: beatViewport(beat, viewport?.viewport),
-        })),
-      )
-    : undefined
+  const windows = plan.beats.map((beat) => ({
+    name: beat.name,
+    viewport: beatViewport(beat, viewport?.viewport),
+  }))
+  const mismatch = opts.reel ? reelShapeMismatch(windows) : undefined
   if (mismatch) {
     return refuse(
       emitJson,
       url,
       'reel-shape',
       `${mismatch}. Give every beat one aspect ratio, or film without --reel.`,
+    )
+  }
+  const reelWidth =
+    opts.reelWidth === undefined
+      ? undefined
+      : readReelWidth(
+          opts.reelWidth,
+          windows.map((window) => window.viewport),
+        )
+  if (reelWidth?.kind === 'refused') {
+    return refuse(
+      emitJson,
+      url,
+      'bad-reel-width',
+      `--reel-width ${reelWidth.detail}.`,
     )
   }
 
@@ -899,7 +934,13 @@ async function runTake(
 
   logStep('Reel')
   try {
-    const reel = await renderReel(result.out, result.beats, resolve(opts.reel))
+    const reel = await renderReel(
+      result.out,
+      result.beats,
+      resolve(opts.reel),
+      undefined,
+      reelWidth?.width,
+    )
     logInfo(
       `${reel.file}  ${plural(reel.frames, 'frame')}  ${reel.seconds} s  ${(reel.bytes / 1e6).toFixed(1)} MB`,
     )
