@@ -93,13 +93,13 @@ jobs:
         run: bun install --frozen-lockfile
 
       # Which E2E suites the change reaches through imports. A failed read
-      # reports the full suite, never a skip.
+      # reports the full suite, never a skip. The base is the merge commit's
+      # first parent, since base.sha is absent from a depth-2 fetch once main
+      # has moved past it.
       - name: Scope E2E Suites
         id: scope
         if: steps.detect.outputs.code == 'true'
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: bun scripts/ci/e2e-scope.ts "$BASE_SHA"
+        run: bun scripts/ci/e2e-scope.ts HEAD^1
 
   # The unit suite alone, since lint, types, format, shell, build, and browser
   # results do not differ by platform. Reason in canon/context/development/ci.md
