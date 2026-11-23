@@ -277,7 +277,7 @@ async function runAudit(
     reportReferenceForm(entries, folders)
     reportSections(sections, extras, folders)
     reportGateKeys(gateKeyFaults)
-    reportShape(shape, gatedPrefixes)
+    reportShape(shape, gatedPrefixes, widened)
     reportLength(length ?? [], keys.gateLength)
     reportTables(entries)
     reportProvenance(entries, folders)
@@ -631,8 +631,11 @@ function reportGateKeys(faults: readonly string[]): void {
 function reportShape(
   shape: readonly ShapeFinding[],
   gatedPrefixes: readonly string[],
+  widened: boolean,
 ): void {
   logStep('Shape')
+  // An unwidened run cannot fail on a gated break, so the log must not say it did.
+  const mark = widened ? 'gated' : 'would gate under --gate'
 
   logInfo(
     gatedPrefixes.length === 0
@@ -648,7 +651,9 @@ function reportShape(
   const gated = shape.filter((finding) => finding.gated)
   if (gated.length > 0) {
     logWarn(
-      `${gated.length} gated ${gated.length === 1 ? 'entry' : 'entries'} breaking the shape`,
+      widened
+        ? `${gated.length} gated ${gated.length === 1 ? 'entry' : 'entries'} breaking the shape`
+        : `${gated.length} ${gated.length === 1 ? 'entry' : 'entries'} breaking the shape that would gate under --gate`,
     )
   }
   logInfo(
@@ -658,7 +663,7 @@ function reportShape(
     [...gated, ...shape.filter((finding) => !finding.gated)]
       .map(
         (finding) =>
-          `${finding.rel}${finding.gated ? '  gated' : ''}\n${finding.issues
+          `${finding.rel}${finding.gated ? `  ${mark}` : ''}\n${finding.issues
             .map((issue) => `  :${issue.line}  ${readIssue(issue)}`)
             .join('\n')}`,
       )
