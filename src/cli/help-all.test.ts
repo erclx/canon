@@ -36,9 +36,10 @@ describe('renderAll', () => {
   it('should render a group and each of its leaves', () => {
     const program = buildProgram()
 
-    const text = renderAll(find(program, ['tasks']))
+    const tasks = find(program, ['tasks'])
+    const text = renderAll(tasks)
 
-    expect(usageLines(text)).toHaveLength(22)
+    expect(usageLines(text)).toHaveLength(tasks.commands.length + 1)
   })
 
   it('should carry the help text a leaf adds after its usage', () => {
