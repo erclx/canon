@@ -56,7 +56,7 @@ Dispatch every pull request's review to a reviewer under `role-reviewer`, first 
 
 ## The UI reviewer
 
-A pull request whose evidence record counts a drivable box takes a second reviewer, a UI reviewer under `review-ui`, dispatched beside the code reviewer so the two passes run at once. Read the record with `canon pr evidence <number> --json` and branch on `drivable` above zero rather than on the exit code.
+A pull request whose evidence record counts a drivable box takes a second reviewer, a UI reviewer under `review-ui`, dispatched beside the code reviewer so the two passes run at once, bar the `OVERLAP` deferral below. Read the record with `canon pr evidence <number> --json` and branch on `drivable` above zero rather than on the exit code.
 
 The record decides this dispatch rather than the worker's announcement, since it reads the checklist `pr-evidence` posted and a message carries only what its sender read.
 
@@ -67,6 +67,38 @@ The record decides this dispatch rather than the worker's announcement, since it
 - Each posts its own family and runs `canon pr lift` on its close, and the verb lifts the draft mark only once both read closed at the head
   - Send the worker each reviewer's sessionId as that reviewer launches, one launched later on `MOVED` included, since a clean UI close dispatches nothing
   - The UI reviewer re-drives on the worker's re-review request at a new head, so message it only to state a hold, as when the merge order owes a rebase first
+
+### Deferred behind an OVERLAP
+
+A pull request an `OVERLAP` line names rebases once per sibling merging ahead of it, and each rebase re-drove its UI pass and re-filmed its reel. Its code reviewer launches at open as usual, and its UI reviewer and reel wait until it is next, so both run once at the head that merges.
+
+- Next is the first in the merge order `orchestrator-merge-order.md` settles whose code review is closed and whose CI is green, so the UI pass is the last gate before the merge
+- Record the deferral as a line on its task under `## Findings`, naming the pull request it waits behind, so the operator sees the wait
+- Tell its worker the reel is deferred, so a rebase skips the reel under the `deferred` code in `${CLAUDE_SKILL_DIR}/../pr-evidence/references/reel.md` rather than filming it
+- Check whether a deferred pull request is next on each merge and on each code close of one, and the merge-order step says what follows
+  - A code close landing while CI still runs meets no later trigger, so run the loop under `### Watching CI` in `${CLAUDE_SKILL_DIR}/../git-ship/SKILL.md` in the background and check again on its wake
+- A UI reviewer already live when the `OVERLAP` line first names its pull request runs on, and a pull request with no drivable box defers nothing
+
+### A UI-STALE on the second wake
+
+The poll prints `UI-STALE` once, on the push that left the UI pass behind, and the worker's hand-back owes the UI reviewer that re-drive. A worker skipping the UI reviewer leaves nothing else to start it, so re-read the pull request on the next wake whatever that wake printed:
+
+```bash
+canon pr review-state <number> --json
+```
+
+- `ui.isCovered` false with `review.isCovered` true is the skipped hand-back. Message the UI reviewer the head, resolved from its sessionId, or launch one when none is live.
+- `ui.isCovered` true, or a `review` family still owed, needs nothing from this session, since the re-drive started or the code pass holds the worker
+- A refusal is unread, so report its `reason` and read again on the wake after
+
+### The READY stop
+
+The poll prints `READY` once per head for a pull request out of draft whose every gate, CI included, reads clear at that head, read through `canon pr lift <number> --check --json`. Nothing is owed on it but the operator's merge, so a poll re-armed on it spends a wake on nothing.
+
+- Hold each READY number until a later line names it, being `MOVED`, `REBASED`, `CONFLICT`, `STALE`, or `GONE`, which drops it
+- Stop re-arming once every open pull request but a release one is held, and name the numbers waiting on the merge in that turn
+- Restart the poll on the operator's next message, since the merge is the operator's act and that message is where this session hears of it
+- A push landing after the stop reads as `MOVED` on that restarted run, which drops the number and re-arms the poll
 
 ## A batch of small pull requests
 

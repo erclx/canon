@@ -987,6 +987,107 @@ describe('poll', () => {
     })
   })
 
+  // The lift verb's check answers readiness, so the poll and the lift agree on it.
+  describe('merge readiness', () => {
+    const UI_AT = '2026-08-20T02:05:00Z'
+    const closedAtHead: Review[] = [
+      { heading: '## Review closed', submittedAt: CLOSE_OUT },
+      { heading: '## UI review closed', marker: HEAD, submittedAt: UI_AT },
+    ]
+
+    const writeLift = (record: Record<string, unknown>): void => {
+      writeFileSync(
+        join(root, 'fixtures', 'lift-7.json'),
+        JSON.stringify({ gates: [], head: HEAD, waitedSeconds: 0, ...record }),
+      )
+    }
+
+    it('should report a ready pull request green with both closes at its head', () => {
+      writeThread(closedAtHead, [])
+      expect(poll().stdout).toContain('SEEN')
+
+      writeLift({
+        isLifted: false,
+        isOk: true,
+        isReady: true,
+        reason: 'already-ready',
+      })
+
+      expect(poll().stdout).toBe(
+        'READY     #7 at 1111111, waiting only on the merge',
+      )
+    })
+
+    it('should report a ready pull request once at the same head', () => {
+      writeThread(closedAtHead, [])
+      writeLift({
+        isLifted: false,
+        isOk: true,
+        isReady: true,
+        reason: 'already-ready',
+      })
+      expect(poll().stdout).toContain('READY     #7')
+
+      expect(poll().stdout).toBe('No movement.')
+    })
+
+    it('should not report a ready pull request whose check is pending', () => {
+      writeThread(closedAtHead, [])
+      expect(poll().stdout).toContain('SEEN')
+
+      writeLift({
+        isLifted: false,
+        isOk: false,
+        isReady: true,
+        reason: 'ci-pending',
+      })
+
+      expect(poll().stdout).not.toContain('READY')
+    })
+
+    it('should not report a draft every gate clears', () => {
+      writeThread(closedAtHead, [])
+      expect(poll().stdout).toContain('SEEN')
+
+      writeLift({ isLifted: false, isOk: true, reason: 'clear' })
+
+      expect(poll().stdout).not.toContain('READY')
+    })
+
+    it('should report a ready pull request again once a push readies a new head', () => {
+      writeThread(closedAtHead, [])
+      writeLift({
+        isLifted: false,
+        isOk: true,
+        isReady: true,
+        reason: 'already-ready',
+      })
+      expect(poll().stdout).toContain('READY     #7 at 1111111')
+
+      writeThread(
+        [
+          { heading: '## Review closed', submittedAt: CLOSE_OUT },
+          {
+            heading: '## UI review closed',
+            marker: READ_HEAD,
+            submittedAt: UI_AT,
+          },
+        ],
+        [],
+        READ_HEAD,
+      )
+      writeLift({
+        head: READ_HEAD,
+        isLifted: false,
+        isOk: true,
+        isReady: true,
+        reason: 'already-ready',
+      })
+
+      expect(poll().stdout).toContain('READY     #7 at 2222222')
+    })
+  })
+
   // Real commits on a bare origin, with a five-line file two sides can share.
   describe('base movement', () => {
     const LINES = ['one', 'two', 'three', 'four', 'five']

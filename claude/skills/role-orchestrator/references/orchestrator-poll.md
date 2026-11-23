@@ -9,7 +9,7 @@ Run the orchestrator's review trigger. The poll reports pull request movement an
 
 ## When to run it
 
-Start the poll on an open pull request and stop it when the last one merges with nothing else out. That is the whole condition, and it resolves from the open list without asking the operator. A release pull request alone does not qualify, since its sweep carries no findings.
+Start the poll on an open pull request and stop it when the last one merges with nothing else out, or when every open one reads `READY`. Both resolve from the open list without asking the operator. A release pull request alone does not qualify, since its sweep carries no findings.
 
 ### A dispatch no longer starts it
 
@@ -53,11 +53,12 @@ Act on what the poll printed when it exited, then start it again.
 - REBASED: both closes carried, so report it and stop, first running `canon pr lift <number> --json` with `run_in_background` on a draft and reporting its reason on the wake.
 - STALLED: read the last pass and report what it carried. The pass has sat open for hours with nothing following it, so a worker mid-task is already ruled out and the dispatch either never went out or the session holding it is gone. Confirm and re-send it under the dispatch rule below, whatever grades the pass carried. Do not re-run a review to correct the heading, since a pass on an unchanged head with no response behind it stops by design.
 - CONFLICT or STALE: send the session holding that branch the rebase handback in the canon:role-orchestrator skill's handback runbook, resolving it the way the handback rule below does. The branch owner rebases, not this session. The poll prints one of the two for a pull request, never both, so it earns one message. The canon pr lift verb refuses on either standing itself, since the green run tested a main that no longer exists, so nothing here lifts the mark.
-- OVERLAP: report the pair and the files, and settle their merge order now under the Parallelism rule of the canon:role-orchestrator skill. Dispatch nobody. The second to merge reads STALE or CONFLICT once the first lands, and the handback goes out then.
+- OVERLAP: report the pair and the files, and settle their merge order now under the Parallelism rule of the canon:role-orchestrator skill. Defer each one's UI reviewer and reel per the OVERLAP deferral in its review dispatch runbook, and dispatch nobody else. The second to merge reads STALE or CONFLICT once the first lands, and the handback goes out then.
 - UNMATCHED: report it and stop. A comment posted under a heading outside the known set reaches nobody automatically, so a person decides whether to answer it by hand or the set needs a ninth heading.
 - UI-OPEN: a zero-driven pass goes to the live UI reviewer to drive again, or a new one. Any other: report and stop if that reviewer holds it, since it dispatches canon:review-address, else use the fallback rule below.
 - UI-CLOSED: report it. When the pull request is still a draft and its code review is closed too, run `canon pr lift <number> --json` with `run_in_background` and report the reason on its wake, never starting a second while one is pending for that number. Each reviewer runs the verb on its own close, so this run is the fallback for a lift neither reviewer's run made, and the verb reads every gate itself.
-- UI-STALE: lift no mark. Report and stop when a worker holds the branch, since its request starts the re-drive, else message the UI reviewer or launch one.
+- UI-STALE: lift no mark. Report and stop on the first wake when a worker holds the branch, since its hand-back starts the re-drive, and re-read it on the next wake under the second-wake rule in the review dispatch runbook of the canon:role-orchestrator skill. With no worker, message the UI reviewer or launch one.
+- READY: report it. Once every open pull request but a release one reads READY, start no next poll, per the READY stop in the review dispatch runbook of the canon:role-orchestrator skill.
 - GONE: report it, then sweep the board by invoking the canon:role-orchestrator skill and following its queue-refill sweep.
 - A line starting `poll:`: report it verbatim and treat that pull request as unread this run. It is a failed query, not a state.
 - Nothing changed: say exactly "No movement." and nothing else.

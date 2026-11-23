@@ -137,7 +137,7 @@ gh api -X POST 'repos/{owner}/{repo}/issues/<number>/comments' -F body=@.canon/t
 
 ### Hand back for re-review
 
-Hand back to every reviewer for re-review once the reply posts, or to the orchestrator where no live reviewer answers, with CI marked running. Neither side waits on Step 7's watch. A check failing later takes its own fix, push, and hand-back naming only what changed, and that push starts a fresh Step 7 watch that edits the same reply id.
+Hand back for re-review once the reply posts, to the addressees `${CLAUDE_SKILL_DIR}/references/handback.md` derives, with CI marked running. Neither side waits on Step 7's watch. A check failing later takes its own fix, push, and hand-back naming only what changed, and that push starts a fresh Step 7 watch on the same reply id.
 
 ## Step 7: confirm resolution
 
