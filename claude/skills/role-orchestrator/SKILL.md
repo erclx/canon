@@ -44,7 +44,7 @@ Every runbook named here resolves under `${CLAUDE_SKILL_DIR}/references/`. On an
 | Resume after a compaction                | `orchestrator-resume.md`          |
 | Resume sessions a usage limit stopped    | `orchestrator-limit-stops.md`     |
 | Re-test the parked rows                  | `orchestrator-parked.md`          |
-| Run unattended                           | `orchestrator-unattended.md`      |
+| Run unattended or attended               | `orchestrator-unattended.md`      |
 
 ### Reading the order
 

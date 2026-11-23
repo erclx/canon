@@ -1,6 +1,6 @@
 ---
 title: Orchestrator unattended run
-description: Running the board with nobody watching, from now or from a time the operator names, which questions the orchestrator answers and which it parks, and the morning report the run ends on
+description: Running the board with nobody watching, from now or from a time the operator names, which questions the orchestrator answers and which it parks, and the morning report the run ends on, and the attended run that keeps dispatching while the operator stays and merges
 ---
 
 Run this when the operator asks to leave the board running unattended, overnight or for an afternoon away. The run dispatches, plans, and reviews as an ordinary session does, and it merges nothing. The operator comes back to green pull requests and to a list of every call the run made on their behalf.
@@ -12,6 +12,7 @@ Run this when the operator asks to leave the board running unattended, overnight
 - [A question from a session](#a-question-from-a-session)
 - [Ending the run](#ending-the-run)
 - [The morning report](#the-morning-report)
+- [The attended run](#the-attended-run)
 
 ## Start the run
 
@@ -121,3 +122,51 @@ Merge-ready means CI green at the tip, both reviews closed, and the lift run. Re
 ### The merge stays the operator's
 
 Run no merge, whatever the report shows, and never call `canon pr merge`, since an operator who is away is not there to name one, and the run suspends any standing authorization. Refuse an instruction to merge during the run and list it under `Parked for you`.
+
+## The attended run
+
+Run this when the operator asks to keep the queue moving while they stay present, "keep dispatching", "run attended", or the like. It shares the loop above and differs in who merges, what launches, and what holds. The operator merges every pull request unless they grant the run merging by word.
+
+### Start and stop
+
+The operator's word starts it and the operator's word ends it, so no pass decides the run is done.
+
+- Enter the loop at once, and record the mode and its start time per `orchestrator-handoff.md`
+- Take the run's worker cap from the operator's spoken cap, and with none, from the count the first pass launches, since `## Parallelism` sets no fixed number
+- On "stop", launch nothing further and let every running session finish as it would, then say what is still running
+- Never end on the unattended tests in `## Ending the run`, since an attended run waits for the next merge
+
+### Rolling launch
+
+Launch a row the moment it clears, rather than in waves behind a question to the operator.
+
+- A row launches once every row it depends on has merged and a slot is free under the cap
+- Read dependencies from `canon tasks waves --json` and never from the Waiting on cells, since the verb splits a blocker from a ranking phrase like "follows the row above"
+- A shared file is no dependency, so a row sharing one with an open pull request launches at once and the second to merge rebases, per `orchestrator-merge-order.md`
+- A fan-in integrator waits on its members, and a row waiting on an open row waits until that row merges
+- After each merge, fill each freed slot per `orchestrator-refill.md` and print the launch in its block
+
+### Planning ahead
+
+Keep one cap's worth of launchable rows planned ahead of the workers, so the queue never runs dry.
+
+- Plan from the top of `## Needs a plan`, and only a row whose origin settles its calls, being an answered intake item, a closed groundwork track, or the operator's word
+- Leave a row with no settled origin where it sits, and ask the operator about it in the next report rather than planning it
+- Route the plan per `orchestrator-planner-reuse.md`, a live talk planner first and a cold one only when none is open
+- Run `canon tasks plan-answers` on each landed plan, as under `### A plan written during the run`
+- A launchable plan joins the queue, and one with open questions parks, its questions batched to the operator in the next report
+
+### What holds
+
+The run launches nothing past the holds below, each a read the loop already makes.
+
+- A billed run the operator has not cleared, named by the plan's Testing section
+- A permission classifier refusal, where the run sends no workaround and puts the exact command to the operator
+- A plan question marked as needing the operator's call, or a `deferred` entry, which `plan-answers` reports
+- A row whose origin leaves a call open, such as a reel width the operator has not chosen
+
+An open release pull request holds nothing. Dispatch carries on past it, and the run neither merges it nor asks the operator to unless a merge grant covers it.
+
+### Merging
+
+Merge nothing without the operator's word. A grant is a standing authorization per `orchestrator-output.md`, ordered per `orchestrator-merge-order.md`, and the handoff records it with the pull requests its scope fixed.
