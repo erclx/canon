@@ -136,6 +136,14 @@ Open each beat's `still.jpg`, the closing frame the record names in its `still` 
 - A record whose beats carry no `still` field comes from a `canon` predating the still, so skip as `no-still` rather than posting a reel nothing checked
 - Read `fallback` on each beat. A beat filmed by screencast still joins the reel, since the reel shrinks every beat to one width. Pass no `--reel-width`, since the comment draws it at 960.
 
+A beat's still shows only its closing frame. To judge the reel's motion before pushing, write evenly spaced frames of the reel itself and open them, since no other verb reads a frame back out of the animation:
+
+```bash
+canon take stills .canon/tmp/pr/reel/<number>/reel.webp --out .canon/tmp/pr/reel/<number>/stills --sheet .canon/tmp/pr/reel/<number>/sheet.png
+```
+
+Open `sheet.png` for the four frames at once. Add `--overwrite` on a refilm, since a still already there is never replaced without it.
+
 Then check the takes' timing before pushing, since a still shows the closing frame and none of the motion before it.
 
 ```bash

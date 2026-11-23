@@ -9,7 +9,7 @@ description: The canon take verb that films a web app by frame stepping, its cli
 
 Owns `canon take`, which films each beat of a take plan into a 60 fps clip with a click log and a per-frame camera track, 4K unless a beat shrinks its window. Its boundary is the clip, and HyperFrames composes and renders everything past it. The one exception is the pull request reel, which `--reel` joins from the clips with the pointer drawn on.
 
-The `ui-film` plugin skill drafts the beats and calls the verb for a launch video. `pr-evidence` films the reel under `--max-seconds 15`, which refuses as `over-cap` past it. `src/commands/take.ts` holds only the wiring, including `canon take camera`, which rebuilds a track at a rate, and `canon take check`, which fails a beat on its timing.
+The `ui-film` plugin skill drafts the beats and calls the verb for a launch video. `pr-evidence` films the reel under `--max-seconds 15`, which refuses as `over-cap` past it. `src/commands/take.ts` holds only the wiring, including `canon take camera`, which rebuilds a track at a rate, `canon take check`, which fails a beat on its timing, and `canon take stills`, which reads a reel's frames.
 
 ## Layout
 
@@ -26,6 +26,16 @@ Films each beat of a take plan from a fresh load, writing its clip, log, camera 
 ### `src/take/check.ts`
 
 `check.ts` holds the timing rules over a beat's log and track, each limit a frame under the engine's pacing. `stall.ts` runs FFmpeg `freezedetect` over each typing burst and drag of a beat not filmed stepped. FFmpeg's default -60 dB read a whole 4K typing burst as frozen, so it reads at -100 dB.
+
+### `src/take/stills.ts`
+
+`stills.ts` is the reel's reading half. It reads the frame count and each frame's start off the WebP chunks, since FFmpeg decodes no animated WebP, and refuses a file that is not one before any browser starts.
+
+- Pixels come from Chromium's `ImageDecoder` by frame index, since a timed capture lands frames off. The page is a routed https address, since a blank page refuses a `file://` image.
+- Playwright imports inside the decode, so a target without the engine still loads `take.ts`
+- A reel filmed with identical neighbors folds them into one frame at encode, so the count is the frames written and not the reel's duration at its frame rate
+- The pick spaces frames evenly with the first and last included, and each once when the count passes the reel's frames
+- A still or sheet already on disk refuses as `would-overwrite` unless `--overwrite` is passed, and a refusal writes nothing
 
 ### `src/take/fixtures/`
 
