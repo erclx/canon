@@ -136,7 +136,8 @@ export function registerDriveCopy(pr: Command): void {
         'no 5xx and each health path with a 2xx. The server writes its output',
         'to `server.log` and its pid to `server.json` beside the copy root, and',
         'a later --serve ends a server still recorded there before the rebuild.',
-        "--stop ends the recorded server's whole process group. A project with",
+        "--stop ends the recorded server's whole process group, and needs no",
+        'worktree, so a server outlives no removed worktree. A project with',
         'no `serve` key drives as before under --serve, with no `url` on the',
         "record. The worker's own server is never started, stopped, or read.",
         '',
@@ -229,7 +230,8 @@ type DriveTarget =
   | {
       readonly kind: 'found'
       readonly main: string
-      readonly worktree: string
+      /** Absent only when the caller needs no worktree and none holds the branch. */
+      readonly worktree: string | undefined
       readonly branch: string
       readonly number: string | undefined
     }
@@ -248,6 +250,7 @@ async function resolveDriveTarget(
   root: string,
   number: string | undefined,
   needsNumber: boolean,
+  needsWorktree: boolean,
 ): Promise<DriveTarget> {
   const worktrees = await listWorktrees(root)
   const main = worktrees[0]?.path ?? root
@@ -287,11 +290,13 @@ async function resolveDriveTarget(
     return { kind: 'refused', reason: 'no-worktree' }
   }
   const entry = worktrees.find((candidate) => candidate.branch === headRef)
-  if (entry === undefined) return { kind: 'refused', reason: 'no-worktree' }
+  if (entry === undefined && needsWorktree) {
+    return { kind: 'refused', reason: 'no-worktree' }
+  }
   return {
     kind: 'found',
     main,
-    worktree: entry.path,
+    worktree: entry?.path,
     branch: headRef,
     number,
   }
@@ -322,7 +327,13 @@ async function runDriveCopy(
     return refuse('bad-flags', DRIVE_COPY_REFUSALS['bad-flags'])
   }
 
-  const target = await resolveDriveTarget(root, number, baseline || check)
+  // A stop reads only the record beside the copy root, so a removed worktree never strands a server.
+  const target = await resolveDriveTarget(
+    root,
+    number,
+    baseline || check,
+    !stop,
+  )
   if (target.kind === 'refused') {
     const reason = target.reason
     return reason in DRIVE_COPY_REFUSALS
@@ -346,32 +357,6 @@ async function runDriveCopy(
         `${JSON.stringify({ root, worktree: target.worktree, branch: target.branch, ...record })}\n`,
       )
     }
-  }
-
-  if (check && baselinePath !== undefined) {
-    let prior: readonly StatusEntry[]
-    try {
-      prior = JSON.parse(await readFile(baselinePath, 'utf8'))
-    } catch {
-      return refuse('no-baseline', DRIVE_COPY_REFUSALS['no-baseline'])
-    }
-    const current = await readWorktreeStatus(target.worktree)
-    if (current === undefined) {
-      return refuse('unreadable-tree', DRIVE_COPY_REFUSALS['unreadable-tree'])
-    }
-    const paths = changedSince(prior, current)
-    if (paths.length === 0) {
-      logStep('Clean')
-      logInfo(`No change in ${target.worktree} since the baseline.`)
-      outro()
-      emit({ reason: 'clean', paths })
-      return 0
-    }
-    logStep('Changed')
-    for (const path of paths) logWarn(path)
-    outro()
-    emit({ reason: 'changed', paths })
-    return 1
   }
 
   // A server left by an earlier pass would keep serving files the rebuild replaces.
@@ -399,7 +384,38 @@ async function runDriveCopy(
     }
   }
 
-  const config = loadPreviewConfig(target.worktree)
+  const worktree = target.worktree
+  if (worktree === undefined) {
+    return refuse('no-worktree', DRIVE_COPY_REFUSALS['no-worktree'])
+  }
+
+  if (check && baselinePath !== undefined) {
+    let prior: readonly StatusEntry[]
+    try {
+      prior = JSON.parse(await readFile(baselinePath, 'utf8'))
+    } catch {
+      return refuse('no-baseline', DRIVE_COPY_REFUSALS['no-baseline'])
+    }
+    const current = await readWorktreeStatus(worktree)
+    if (current === undefined) {
+      return refuse('unreadable-tree', DRIVE_COPY_REFUSALS['unreadable-tree'])
+    }
+    const paths = changedSince(prior, current)
+    if (paths.length === 0) {
+      logStep('Clean')
+      logInfo(`No change in ${worktree} since the baseline.`)
+      outro()
+      emit({ reason: 'clean', paths })
+      return 0
+    }
+    logStep('Changed')
+    for (const path of paths) logWarn(path)
+    outro()
+    emit({ reason: 'changed', paths })
+    return 1
+  }
+
+  const config = loadPreviewConfig(worktree)
   if (config.kind === 'refused') return refuse(config.reason, config.detail)
 
   let copy: Record<string, unknown>
@@ -409,7 +425,7 @@ async function runDriveCopy(
     copy = { reason: 'no-config' }
   } else {
     const { copied, missing } = buildDriveCopy(
-      target.worktree,
+      worktree,
       copyRoot,
       config.config.writes,
       config.config.keep,
@@ -427,18 +443,13 @@ async function runDriveCopy(
 
     const seed = config.config.seed
     if (seed !== undefined) {
-      const before = await readWorktreeStatus(target.worktree)
+      const before = await readWorktreeStatus(worktree)
       if (before === undefined) {
         return refuse('unreadable-tree', DRIVE_COPY_REFUSALS['unreadable-tree'])
       }
       logStep('Seed')
-      const run = await runSeed(
-        target.worktree,
-        copyRoot,
-        seed,
-        config.config.env,
-      )
-      const after = await readWorktreeStatus(target.worktree)
+      const run = await runSeed(worktree, copyRoot, seed, config.config.env)
+      const after = await readWorktreeStatus(worktree)
       if (after === undefined) {
         return refuse('unreadable-tree', DRIVE_COPY_REFUSALS['unreadable-tree'])
       }
@@ -477,7 +488,7 @@ async function runDriveCopy(
   }
 
   if (baseline && baselinePath !== undefined) {
-    const status = await readWorktreeStatus(target.worktree)
+    const status = await readWorktreeStatus(worktree)
     if (status === undefined) {
       return refuse('unreadable-tree', DRIVE_COPY_REFUSALS['unreadable-tree'])
     }
@@ -490,7 +501,7 @@ async function runDriveCopy(
 
   if (serve && config.kind === 'read' && config.config.serve !== undefined) {
     const served = await servePass(
-      target.worktree,
+      worktree,
       copyRoot,
       config.config,
       emitJson,

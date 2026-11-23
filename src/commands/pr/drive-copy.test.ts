@@ -416,6 +416,23 @@ describe('canon pr drive-copy', () => {
       expect(await answers(passPort)).toBe(false)
     })
 
+    it('should stop the server once no worktree holds the branch any more', async () => {
+      writeServe()
+      const served = await runDriveCopy(['7', '--serve'])
+      git('checkout', '-q', '-b', 'chore/elsewhere')
+
+      const stopped = await runDriveCopy(['7', '--stop'])
+
+      expect(stopped).toEqual({
+        record: expect.objectContaining({
+          reason: 'stopped',
+          pid: served.record.pid,
+        }),
+        exit: 0,
+      })
+      expect(await answers(passPort)).toBe(false)
+    })
+
     it('should read as not-running on a --stop with no server started', async () => {
       const outcome = await runDriveCopy(['7', '--stop'])
 
