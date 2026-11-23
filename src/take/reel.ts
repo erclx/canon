@@ -22,9 +22,18 @@ export const MIN_REEL_WIDTH = 320
 /**
  * How deep the reel's camera zooms, the deepest a 1920-wide decode reaches at
  * `REEL_WIDTH` with no upscale, so a CSS pixel takes a whole reel pixel at the
- * hold and a 2 px focus ring draws at 2.
+ * hold and a 2 px focus ring draws at 2. A wider reel zooms less, per `reelDepth`.
  */
 export const REEL_DEPTH = 2
+
+/**
+ * The depth a reel `width` wide zooms to over a decode `source` wide. Past the
+ * default width it is lowered until the hold copies whole source pixels, and
+ * at or under it stays `REEL_DEPTH`, so an existing reel is written as before.
+ */
+export function reelDepth(source: number, width: number): number {
+  return width > REEL_WIDTH ? Math.min(REEL_DEPTH, source / width) : REEL_DEPTH
+}
 
 /** How many take frames each reel frame stands for, 60 fps down to 20. */
 export const REEL_EVERY = 3
@@ -85,7 +94,7 @@ export async function* reelFrames(
   reelWidth: number = REEL_WIDTH,
 ): AsyncGenerator<ReelFrame> {
   for (const [beat, filmed] of beats.entries()) {
-    const camera = reelCamera(out, filmed, reelWidth)
+    const camera = reelCamera(beatLog(out, filmed), reelWidth)
     const { width, height } = reelSize(camera, reelWidth)
     // Every route's clip decodes at the viewport's size, so one crop places the view and pointer on either.
     const source = camera.viewport
@@ -127,13 +136,9 @@ export async function* reelFrames(
  * The beat's camera rebuilt from its log at the reel's depth, rather than read
  * from `camera.json`, which keeps the launch depth an edit at 1920 reads.
  */
-function reelCamera(
-  out: string,
-  filmed: FilmedBeat,
-  width: number,
-): CameraTrack {
-  return cameraTrack(beatLog(out, filmed), {
-    depth: REEL_DEPTH,
+export function reelCamera(log: TakeLog, width: number): CameraTrack {
+  return cameraTrack(log, {
+    depth: reelDepth(log.viewport.width, width),
     outputWidth: width,
     focus: true,
   })
