@@ -109,7 +109,7 @@ The index. It points at items and answers nothing itself.
 
 The index carries no answer slot. One question in two answerable places has no rule for which wins, and retrieval walks item headings, so an answer typed into the index is found by nothing and lost silently.
 
-Only a shared file bundles, since separate branches on one file rebase on each other anyway. A small fix with nothing in common stays its own row, and a bundle has no cap on items. Where an item touches a task already on the board, say so in the index rather than only inside the item. A reader deciding what to promote reads the index first.
+Only a shared file bundles, since separate branches on one file rebase on each other anyway. `canon records validate intake` reads each bundle row in the form the template fixes: cluster files in code spans, each followed by its item numbers, then `sharing` and the shared paths in code spans. Any bundle whose items do not all cite one shared file reports `bundle-unshared` and fails the exit. Two things never count as sharing: a folder, and a path cited as a bare filename in one item and in full in another. When the reader cannot resolve a row to items, it reports `bundle-unresolved` under `structure` and never sets the exit. A small fix with nothing in common stays its own row, and a bundle has no cap on items. Where an item touches a task already on the board, say so in the index rather than only inside the item. A reader deciding what to promote reads the index first.
 
 ## Repro versus groundwork
 
@@ -248,7 +248,7 @@ date: <YYYY-MM-DD>
 ## Ready
 
 - <item, grouped by what shipping it costs>
-- Bundle <name>: <item>, <item>, sharing <file>, standing in for those items' own rows
+- Bundle <name>: `NN-<domain>.md` items <n>, <n>, and <n>, sharing `<path/to/file>`, standing in for those items' own rows
 
 ## Open questions
 

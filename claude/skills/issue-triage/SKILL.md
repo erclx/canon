@@ -110,7 +110,7 @@ Write `00-overview.md` last, per the intake standard. It carries the counts by t
 
 Build the ready list the way the intake standard's `## 00-overview.md` section states it.
 
-- Name a bundle row for items whose `Fix:` lines name a shared file, and leave two fixes in one skill folder with no common file as separate rows
+- Name a bundle row for items whose `Fix:` lines name a shared file, in the form the intake standard's template fixes, and leave two fixes in one skill folder with no common file as separate rows
 - Treat a bundle as a proposal the operator answers, and fill no `You:` slot from it
 
 Where the pass runs out of context before the index, write `99-next-session.md` naming the last issue filed.
