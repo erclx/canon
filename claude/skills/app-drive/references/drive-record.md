@@ -87,8 +87,9 @@ The check reads `Drawn` and `Decision (operator)` off the log by those exact lab
 - Copy the mock source into `evidence/mocks/<surface>/`, where `<surface>` names the screen or panel drawn on
 - Write `Drawn` above the decision, citing paths under `evidence/` the way `Evidence` does, or `skipped, <reason>` when the change has nothing visible
 - A bare `skipped` with no reason counts as undrawn, since the next reader cannot tell a choice from an omission
-- A skip also fails when the intake item deciding the finding names a rendered-surface file in its `Fix:` or `Worth it:` line, since a change a person sees is drawn. Move a path that only explains the defect out of those two lines.
 - A decision reading `see <nn>` was drawn under the finding it names and carries no `Drawn` of its own
+
+A skip also fails when the intake item deciding the finding names a rendered-surface file in its `Fix:` or `Worth it:` line, since a person sees that change. Move a path that only explains the defect out of those two lines.
 
 Leave a board page out of `Drawn`, since the check reads every code span there as an evidence path and fails a ref outside `evidence/`. The `Board` setup row already names the project.
 
