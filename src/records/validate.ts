@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { checkBundles, type BundleReport } from '@/intake/bundles'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { linesOutsideFences } from '@/markdown/scan'
 import {
@@ -75,6 +76,7 @@ export const FINDING_KINDS = [
   'counterpart-unstated',
   'counterpart-malformed',
   'ceiling-unstated',
+  'bundle-unshared',
 ] as const
 
 export type FindingKind = (typeof FINDING_KINDS)[number]
@@ -832,6 +834,27 @@ export function checkItems(
   return findings
 }
 
+/** The bundle rows of an intake folder read against its cluster files, or nothing when it has no overview. */
+async function readBundles(
+  dir: string,
+  files: readonly string[],
+): Promise<BundleReport> {
+  if (!files.includes(INTAKE_INDEX)) return { unshared: [], unresolved: [] }
+
+  const clusters = new Map(
+    await Promise.all(
+      files
+        .filter((file) => file !== INTAKE_INDEX && file !== INTAKE_HANDOFF)
+        .map(
+          async (file) =>
+            [file, await readFile(join(dir, file), 'utf8')] as const,
+        ),
+    ),
+  )
+
+  return checkBundles(await readFile(join(dir, INTAKE_INDEX), 'utf8'), clusters)
+}
+
 async function checkDump(dir: string, slug: string): Promise<Finding[]> {
   const files = await listMarkdown(dir)
   const findings: Finding[] = []
@@ -862,7 +885,17 @@ async function checkDump(dir: string, slug: string): Promise<Finding[]> {
     ),
   )
 
-  return [...findings, ...perCluster.flat()]
+  const bundles = await readBundles(dir, files)
+  const unshared = bundles.unshared.map((row) =>
+    finding(
+      'bundle-unshared',
+      slug,
+      `${INTAKE_INDEX}: ${row.name}`,
+      row.message,
+    ),
+  )
+
+  return [...findings, ...perCluster.flat(), ...unshared]
 }
 
 /**
@@ -928,7 +961,20 @@ async function folderStructure(
     ),
   )
 
-  return perFile.flat()
+  const unresolved =
+    kind === 'intake'
+      ? (await readBundles(dir, await listMarkdown(dir))).unresolved.map(
+          (row) => ({
+            criterion: 'bundle-unresolved' as const,
+            line: row.line,
+            message: row.message,
+            record: slug,
+            subject: INTAKE_INDEX,
+          }),
+        )
+      : []
+
+  return [...perFile.flat(), ...unresolved]
 }
 
 function refuse(reason: ValidateRefusal, message: string): ValidateRefused {

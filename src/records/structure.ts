@@ -19,9 +19,9 @@ export const STRUCTURE_CRITERIA = ['S1', 'S2', 'S3', 'S4', 'S5'] as const
 
 export type StructureCriterion = (typeof STRUCTURE_CRITERIA)[number]
 
-/** One place a record misses a criterion, or an intake field spilling past its line. */
+/** One place a record misses a criterion, an intake field spilling past its line, or a bundle row no reader resolves. */
 export interface StructureEntry {
-  readonly criterion: StructureCriterion | 'intake-spill'
+  readonly criterion: StructureCriterion | 'intake-spill' | 'bundle-unresolved'
   /** The line as an editor numbers it, frontmatter included. */
   readonly line: number
   readonly message: string
