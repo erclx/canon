@@ -269,7 +269,7 @@ const PLAN_REQUIRED: readonly PlanSection[] = [
  * The files whose edit changes what a person sees: the `ui/a11y` and `ui/keyboard` globs plus
  * other markup and style extensions. A set too wide forces `Design references` on every plan.
  */
-const RENDERED_SURFACE = /\.(?:tsx|jsx|astro|vue|svelte|html|css|scss)$/
+export const RENDERED_SURFACE = /\.(?:tsx|jsx|astro|vue|svelte|html|css|scss)$/
 
 export function touchesRenderedSurface(entries: readonly string[]): boolean {
   return entries.some((entry) =>

@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { basename, isAbsolute, join, normalize } from 'node:path'
 import {
   changedSince,
@@ -12,7 +12,14 @@ import {
   EVIDENCE_DIR,
   readDrawn,
 } from '@/intake/drive-log'
-import { extractOrdinal, type IntakeRefused, openFolder } from '@/intake/folder'
+import {
+  extractOrdinal,
+  type IntakeRefused,
+  listClusters,
+  openFolder,
+} from '@/intake/folder'
+import { parseDecided, readItems } from '@/intake/items'
+import { RENDERED_SURFACE } from '@/records/validate'
 import { requirementsRel } from '@/context/requirements'
 import { bodyLines } from '@/markdown/scan'
 
@@ -21,6 +28,10 @@ export const DRIVE_RECORD = 'drive.json'
 
 /** The project's drive config, which the drive reads at Step 1 and this check reads for scripts. */
 export const DRIVE_CONFIG = join('canon', 'config', 'app-drive.toml')
+
+const BASELINE_DIR = join(EVIDENCE_DIR, 'baseline')
+const CURRENT_PAGE = '00-current'
+const IMAGE_EXTENSION = /\.(?:png|jpe?g|webp|gif|avif)$/i
 
 const SCRATCH = join('.canon', 'tmp', 'app-drive')
 
@@ -77,6 +88,10 @@ export interface DriveFindings {
   readonly worktreeLeft: readonly string[]
   /** Logged findings the operator decided with no drawn outcome. */
   readonly undrawn: readonly string[]
+  /** `evidence/baseline/00-current` when a drive that drew a board holds no capture of the current page. */
+  readonly uncaptured: readonly string[]
+  /** Findings whose drawing was skipped while the item deciding them fixes a rendered surface. */
+  readonly skippedVisible: readonly string[]
 }
 
 export interface DriveChecked {
@@ -446,6 +461,51 @@ export async function recordBaseline(
   return { ok: true, slug: bare, path, entries: status.length }
 }
 
+async function holdsCurrentPage(folder: string): Promise<boolean> {
+  const dir = join(folder, BASELINE_DIR)
+  if (!existsSync(dir)) return false
+  const names = await readdir(dir)
+  return names.some(
+    (name) =>
+      IMAGE_EXTENSION.test(name) &&
+      name.startsWith(CURRENT_PAGE) &&
+      /^[-.]|^$/.test(
+        name.slice(CURRENT_PAGE.length).replace(IMAGE_EXTENSION, ''),
+      ),
+  )
+}
+
+/**
+ * The skipped findings whose deciding item names a rendered-surface file in
+ * its `Fix:` or `Worth it:` line, joined through the item's `Decided:` pointer.
+ */
+async function skippedOnVisible(
+  folder: string,
+  skipped: DrawnReading['skipped'],
+): Promise<string[]> {
+  if (skipped.length === 0) return []
+
+  const visible = new Set<number>()
+  for (const cluster of await listClusters(folder)) {
+    for (const item of readItems(
+      await readFile(join(folder, cluster), 'utf8'),
+    )) {
+      const pointer =
+        item.decided === undefined ? undefined : parseDecided(item.decided)
+      if (pointer === undefined || normalize(pointer.path) !== DRIVE_LOG)
+        continue
+      const text = `${item.fix ?? ''} ${item.worth ?? ''}`
+      const names = [...text.matchAll(/`([^`]+)`/g)].some((span) =>
+        RENDERED_SURFACE.test(span[1]),
+      )
+      if (names) visible.add(pointer.finding)
+    }
+  }
+  return skipped
+    .filter((entry) => visible.has(entry.finding))
+    .map((entry) => entry.heading)
+}
+
 /**
  * Checks a finished drive against its `drive.json`, failing each axis
  * `DriveFindings` names. It reports a changed path and never reverts it,
@@ -504,7 +564,7 @@ export async function checkDrive(
   const logPath = join(folder, DRIVE_LOG)
   const drawn: DrawnReading = existsSync(logPath)
     ? readDrawn(await readFile(logPath, 'utf8'))
-    : { undrawn: [], paths: [] }
+    : { undrawn: [], paths: [], skipped: [], board: false }
   const evidence = [...new Set([...record.evidence, ...drawn.paths])]
 
   const entries = new Map(
@@ -533,6 +593,11 @@ export async function checkDrive(
         ? [record.worktree]
         : [],
     undrawn: drawn.undrawn,
+    uncaptured:
+      drawn.board && !(await holdsCurrentPage(folder))
+        ? [join(BASELINE_DIR, CURRENT_PAGE)]
+        : [],
+    skippedVisible: await skippedOnVisible(folder, drawn.skipped),
   }
   const failed = Object.values(findings).some((list) => list.length > 0)
 
