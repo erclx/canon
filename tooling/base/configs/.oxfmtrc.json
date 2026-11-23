@@ -3,5 +3,6 @@
   "semi": false,
   "singleQuote": true,
   "printWidth": 80,
-  "sortPackageJson": false
+  "sortPackageJson": false,
+  "ignorePatterns": ["/CHANGELOG.md"]
 }
