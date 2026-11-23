@@ -72,10 +72,8 @@ export function checkMeasurement(
 }
 
 /**
- * Reads that a body carries an Outcome table when its plan's Verification ran a
- * measurement, whatever the title says. The trigger is a measurement word in
- * prose, so a fence or a code span naming a command never fires it, and it reads
- * that the table exists, never that its numbers are true.
+ * Grades the Outcome table a plan's Verification owes, whatever the title. Only
+ * a measurement word in prose triggers it, never a fence or a code span.
  */
 export function checkMeasuredResults(
   body: string,

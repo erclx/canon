@@ -74,11 +74,8 @@ type DomainRead =
   | { readonly ok: false }
 
 /**
- * Reads the domains table, where a row is a bare prefix list or an inline table
- * of `paths` and an optional `color`. A bare row of the wrong type is skipped like
- * any malformed row, but a table row with no usable paths or a color that is not
- * hex is refused, since it was written to carry a color and silently dropping it
- * would color nothing.
+ * A table row with no usable paths or a non-hex color is refused, since dropping
+ * it silently would color nothing. A malformed bare row is skipped as before.
  */
 function readDomains(table: unknown): DomainRead {
   if (typeof table !== 'object' || table === null || Array.isArray(table)) {
