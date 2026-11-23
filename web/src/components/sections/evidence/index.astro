@@ -47,7 +47,9 @@ const reel = readReel()
       </div>
       <figcaption>
         {evidence.posted}{' '}
-        <a href={reel.address}>{evidence.link(reel.pullRequest, reel.repository)}</a>
+        <a href={reel.address}
+          >{evidence.link(reel.pullRequest, reel.repository)}</a
+        >
       </figcaption>
     </figure>
   </div>
