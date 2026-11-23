@@ -15,8 +15,7 @@ The drive's project holds `00-current`, a page per topic, and `00-next`, as `dra
 - Lift the copy's rendered markup per `${CLAUDE_SKILL_DIR}/../design-pick/references/live-arms.md`, since the board cannot reach a stylesheet inside the copy
 - Capture with `frameboard capture --page <page> --composite --theme <theme> --out <scratch>`, in the theme the board is judged in, and copy that image to `evidence/<surface>/<nn>-options.png`
 - Hide an earlier finding's frames with `frameboard frame hide` for that capture, and clear them with `--off`
-- Draw `00-next` once the operator's picks settle, and copy both whole-page captures into `evidence/baseline/` as `00-current.png` and `00-next.png`
-- Expect the check to fail a drive with a `Board` row and no `00-current` image, and to ask nothing of `00-next`
+- Draw `00-next` once the operator's picks settle, and copy both whole-page captures into `evidence/baseline/` as `00-current.png` and `00-next.png`, which the check reads for `00-current` alone
 
 Give the operator each page's address in the turn the page is added, read off `frameboard show` as `drawing.md` states. The operator then opens a page while it holds only what was just drawn, rather than asking for the link.
 
