@@ -11,6 +11,7 @@ import { dirname, join } from 'node:path'
 import { execa, execaSync } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { CLI, PROXY_GH, RUN_TIMEOUT_MS } from '@/commands/pr/fixture'
+import { PASS_OFFSET_SHIFT, stopPassPreview } from '@/pr/drive-copy'
 
 describe('canon pr drive-copy', () => {
   let tempDir: string
@@ -289,6 +290,154 @@ describe('canon pr drive-copy', () => {
     expect(outcome).toEqual({
       record: expect.objectContaining({ reason: 'no-worktree' }),
       exit: 1,
+    })
+  })
+
+  describe('with a pass server', () => {
+    const base = 20_000 + Math.floor(Math.random() * 20_000)
+    const passPort = base + PASS_OFFSET_SHIFT
+
+    function writeServe(status = 200, extra: Record<string, unknown> = {}) {
+      writeRepoFile(
+        'canon/config/preview.json',
+        JSON.stringify({
+          writes: ['board'],
+          port: base,
+          serve: [
+            process.execPath,
+            '-e',
+            `Bun.serve({ port: ${base} + Number(process.env.WORKTREE_PORT_OFFSET), fetch: () => new Response('<p>', { status: ${status}, headers: { 'content-type': 'text/html' } }) })`,
+          ],
+          ...extra,
+        }),
+      )
+    }
+
+    async function answers(port: number): Promise<boolean> {
+      try {
+        const response = await fetch(`http://localhost:${port}/`)
+        await response.body?.cancel()
+        return true
+      } catch {
+        return false
+      }
+    }
+
+    afterEach(async () => {
+      await stopPassPreview(join(repoRoot, '.canon/tmp/pr/review-ui/x/board'))
+    })
+
+    it('should start a server on the rebuilt copy under --serve and end it under --stop', async () => {
+      writeServe()
+
+      const served = await runDriveCopy(['7', '--baseline', '--serve'])
+      const stopped = await runDriveCopy(['7', '--stop'])
+
+      expect(served).toEqual({
+        record: expect.objectContaining({
+          reason: 'copied',
+          url: `http://localhost:${passPort}`,
+          port: passPort,
+          pid: expect.any(Number),
+        }),
+        exit: 0,
+      })
+      expect(stopped).toEqual({
+        record: expect.objectContaining({
+          reason: 'stopped',
+          pid: served.record.pid,
+        }),
+        exit: 0,
+      })
+      expect(await answers(passPort)).toBe(false)
+    })
+
+    it('should drive as before with no url when the project declares no serve', async () => {
+      writeRepoFile('canon/config/preview.json', '{"writes":["board"]}')
+
+      const outcome = await runDriveCopy(['7', '--baseline', '--serve'])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({ reason: 'copied' }),
+        exit: 0,
+      })
+      expect(outcome.record).not.toHaveProperty('url')
+    })
+
+    it('should stop the last pass server before starting the next one', async () => {
+      writeServe()
+      const first = await runDriveCopy(['7', '--serve'])
+
+      const second = await runDriveCopy(['7', '--serve'])
+
+      expect(second.record).toMatchObject({ reason: 'copied', port: passPort })
+      expect(second.record.pid).not.toBe(first.record.pid)
+      expect(() => process.kill(-Number(first.record.pid), 0)).toThrow()
+    })
+
+    it('should refuse as serve-failed with the output tail when the serve command exits early', async () => {
+      writeServe(200, {
+        serve: [
+          process.execPath,
+          '-e',
+          "console.error('missing dev dependency'); process.exit(4)",
+        ],
+      })
+
+      const outcome = await runDriveCopy(['7', '--serve'])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({
+          reason: 'serve-failed',
+          serve: expect.objectContaining({
+            cause: 'exited',
+            exit: 4,
+            output: ['missing dev dependency'],
+          }),
+        }),
+        exit: 1,
+      })
+    })
+
+    it('should refuse as preview-stale and stop the server when the page answers 500', async () => {
+      writeServe(500)
+
+      const outcome = await runDriveCopy(['7', '--serve'])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({
+          reason: 'preview-stale',
+          path: '/',
+          status: 500,
+          stopped: true,
+        }),
+        exit: 1,
+      })
+      expect(await answers(passPort)).toBe(false)
+    })
+
+    it('should read as not-running on a --stop with no server started', async () => {
+      const outcome = await runDriveCopy(['7', '--stop'])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({ reason: 'not-running' }),
+        exit: 0,
+      })
+    })
+
+    it.each([['--check'], ['--baseline']])(
+      'should refuse --stop combined with %s',
+      async (flag) => {
+        const outcome = await runDriveCopy(['7', '--stop', flag])
+
+        expect(outcome.record).toMatchObject({ reason: 'bad-flags' })
+      },
+    )
+
+    it('should refuse --serve combined with --check', async () => {
+      const outcome = await runDriveCopy(['7', '--serve', '--check'])
+
+      expect(outcome.record).toMatchObject({ reason: 'bad-flags' })
     })
   })
 })
