@@ -899,6 +899,26 @@ describe('checkDrive current page and visible skips', () => {
     })
   })
 
+  it('should count a current-page capture carrying a width and theme suffix', async () => {
+    write(`${FOLDER}/evidence/drive-log.md`, BOARD_LOG)
+    write(`${FOLDER}/evidence/baseline/00-current-1440.light.png`, 'img')
+    write(`${FOLDER}/evidence/baseline/00-current-1440.dark.png`, 'img')
+
+    expect(await check()).toMatchObject({
+      reason: 'clean',
+      findings: { uncaptured: [] },
+    })
+  })
+
+  it('should not count a name that only begins with the stem', async () => {
+    write(`${FOLDER}/evidence/drive-log.md`, BOARD_LOG)
+    write(`${FOLDER}/evidence/baseline/00-currently.png`, 'img')
+
+    expect(await check()).toMatchObject({
+      findings: { uncaptured: ['evidence/baseline/00-current'] },
+    })
+  })
+
   it('should pass a drive that names no board and holds no capture', async () => {
     write(`${FOLDER}/evidence/drive-log.md`, '| Board |  |')
 

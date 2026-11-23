@@ -468,7 +468,10 @@ async function holdsCurrentPage(folder: string): Promise<boolean> {
   return names.some(
     (name) =>
       IMAGE_EXTENSION.test(name) &&
-      name.replace(IMAGE_EXTENSION, '') === CURRENT_PAGE,
+      name.startsWith(CURRENT_PAGE) &&
+      /^[-.]|^$/.test(
+        name.slice(CURRENT_PAGE.length).replace(IMAGE_EXTENSION, ''),
+      ),
   )
 }
 
