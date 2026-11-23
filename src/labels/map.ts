@@ -16,10 +16,14 @@ export const MAP_REL = join('canon', 'config', 'pr-labels.toml')
  */
 const LEGACY_MAP_REL = join('.claude', 'canon', 'pr-labels.toml')
 
-/** A label name and the path prefixes that earn it, in the map's own order. */
+/**
+ * A label name and the path prefixes that earn it, in the map's own order. The
+ * `color` is a lowercase hex without `#`, present only when the row declares one.
+ */
 export interface DomainRow {
   readonly label: string
   readonly prefixes: readonly string[]
+  readonly color?: string
 }
 
 /** A reason a path is deliberately unlabelled, and the prefixes it covers. */
@@ -56,13 +60,60 @@ function readRows(table: unknown): { key: string; prefixes: string[] }[] {
   const rows: { key: string; prefixes: string[] }[] = []
   for (const [key, value] of Object.entries(table)) {
     if (!Array.isArray(value)) continue
-    const prefixes = value.filter(
-      (entry): entry is string => typeof entry === 'string' && entry !== '',
-    )
+    const prefixes = readPrefixes(value)
     if (prefixes.length > 0) rows.push({ key, prefixes })
   }
 
   return rows
+}
+
+const HEX_COLOR = /^#?[0-9a-fA-F]{6}$/
+
+type DomainRead =
+  | { readonly ok: true; readonly rows: DomainRow[] }
+  | { readonly ok: false }
+
+/**
+ * Reads the domains table, where a row is a bare prefix list or an inline table
+ * of `paths` and an optional `color`. A bare row of the wrong type is skipped like
+ * any malformed row, but a table row with no usable paths or a color that is not
+ * hex is refused, since it was written to carry a color and silently dropping it
+ * would color nothing.
+ */
+function readDomains(table: unknown): DomainRead {
+  if (typeof table !== 'object' || table === null || Array.isArray(table)) {
+    return { ok: true, rows: [] }
+  }
+
+  const rows: DomainRow[] = []
+  for (const [label, value] of Object.entries(table)) {
+    if (Array.isArray(value)) {
+      const prefixes = readPrefixes(value)
+      if (prefixes.length > 0) rows.push({ label, prefixes })
+      continue
+    }
+    if (typeof value !== 'object' || value === null) continue
+
+    const { paths, color } = value as { paths?: unknown; color?: unknown }
+    const prefixes = Array.isArray(paths) ? readPrefixes(paths) : []
+    if (prefixes.length === 0) return { ok: false }
+    if (color === undefined) {
+      rows.push({ label, prefixes })
+      continue
+    }
+    if (typeof color !== 'string' || !HEX_COLOR.test(color)) {
+      return { ok: false }
+    }
+    rows.push({ label, prefixes, color: color.replace('#', '').toLowerCase() })
+  }
+
+  return { ok: true, rows }
+}
+
+function readPrefixes(value: readonly unknown[]): string[] {
+  return value.filter(
+    (entry): entry is string => typeof entry === 'string' && entry !== '',
+  )
 }
 
 /** Parses map text, so a caller holding the bytes skips the filesystem. */
@@ -74,12 +125,13 @@ export function parseLabelMap(source: string): LabelMap {
     return { kind: 'refused', reason: 'unreadable-map' }
   }
 
-  const domains = readRows(parsed.domains)
-  if (domains.length === 0) return { kind: 'refused', reason: 'no-domains' }
+  const read = readDomains(parsed.domains)
+  if (!read.ok) return { kind: 'refused', reason: 'unreadable-map' }
+  if (read.rows.length === 0) return { kind: 'refused', reason: 'no-domains' }
 
   return {
     kind: 'map',
-    domains: domains.map(({ key, prefixes }) => ({ label: key, prefixes })),
+    domains: read.rows,
     declined: readRows(parsed.declined).map(({ key, prefixes }) => ({
       reason: key,
       prefixes,

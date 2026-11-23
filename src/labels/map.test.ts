@@ -68,6 +68,44 @@ broken = "docs/"
       { label: 'cli', prefixes: ['src/'] },
     ])
   })
+
+  it('should read a row in table form with the color it declares', () => {
+    const map = parseLabelMap(`
+[domains]
+cli = { paths = ["src/"], color = "1F6FEB" }
+docs = ["docs/"]
+`)
+
+    expect(map.kind === 'map' && map.domains).toEqual([
+      { label: 'cli', prefixes: ['src/'], color: '1f6feb' },
+      { label: 'docs', prefixes: ['docs/'] },
+    ])
+  })
+
+  it('should read a table row with no color as a row with no declared color', () => {
+    const map = parseLabelMap('[domains]\ncli = { paths = ["src/"] }\n')
+
+    expect(map.kind === 'map' && map.domains[0]).toEqual({
+      label: 'cli',
+      prefixes: ['src/'],
+    })
+  })
+
+  it('should refuse a table row carrying no paths rather than read it as no prefixes', () => {
+    const map = parseLabelMap(
+      '[domains]\ncli = ["src/"]\nbad = { color = "1f6feb" }\n',
+    )
+
+    expect(map).toEqual({ kind: 'refused', reason: 'unreadable-map' })
+  })
+
+  it('should refuse a table row whose color is not six hex digits', () => {
+    const map = parseLabelMap(
+      '[domains]\ncli = { paths = ["src/"], color = "blue" }\n',
+    )
+
+    expect(map).toEqual({ kind: 'refused', reason: 'unreadable-map' })
+  })
 })
 
 describe('readLabelMap', () => {
