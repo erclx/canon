@@ -28,6 +28,18 @@ describe('checkCeiling', () => {
     expect(checkCeiling(entries, read(files))).toEqual([])
   })
 
+  it('accepts an entry saying it adds no line', () => {
+    const entries = ['- `docs/near.md`: replaces a clause, adds no line']
+
+    expect(checkCeiling(entries, read(files))).toEqual([])
+  })
+
+  it('accepts a second path and the phrase together once', () => {
+    const entries = ['- `docs/near.md`: adds no line, mirrors `docs/other.md`']
+
+    expect(checkCeiling(entries, read(files))).toEqual([])
+  })
+
   it('falls on the near side at exactly the margin and off it one under', () => {
     expect(checkCeiling(['- `docs/near.md`: x'], read(files))).toHaveLength(1)
     expect(checkCeiling(['- `docs/under.md`: x'], read(files))).toEqual([])
