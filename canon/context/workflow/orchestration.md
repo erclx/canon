@@ -48,7 +48,7 @@ Owns the `canon tasks` verbs that validate, archive, derive from, and write the 
 - `plan-answers` holds an empty `needs your call` slot unless an `Approved:` line heads the plan, which moves it to `deferred`, and holds a fan-in integrator until each member branch is on origin
 - `resolvePlanReference` tries the project root and then the board directory, and an archived plan refuses as `archived`
 - The overlap checks read a row's paths from its plans, since a `Touches` cell only counts them. `sharesPath` collides a folder a plan declares with every file under it on purpose.
-- `plan-reach` reports the paths a branch wrote beyond its plan and gates nothing, and `waves` groups the Up next rows from their plans' declared paths and writes nothing. A declared set predicts and does not bound, so `plan-reach` at ship stays the read of what was written.
+- `plan-reach` reports the paths a branch wrote beyond its plan, and `waves` groups Up next rows by declared paths. Neither gates or writes.
 
 ### `src/intake/`
 

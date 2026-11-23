@@ -57,7 +57,7 @@ A merge trigger runs four things in order, whoever ran the merge, since the refi
    - Re-take the demotion half of the board-or-backlog call while the file is open, moving a row no longer near-term to `backlog.md` per the standard's test
    - The promotion half is `orchestrator-parked.md`'s full walk over every backlog row, and a row it clears already sits at the bottom of `## Needs a plan`
 7. Before promoting a candidate, test it against every running task under the conflict check in `orchestrator-dispatch.md`.
-   - Run `canon tasks waves --json` when `## Up next` gains rows, for the grouping of the planned rows into waves, each shared path with the row that rebases, and the rows linking no plan. It writes nothing, so placing a row and writing its `Waiting on` cell stay with this step.
+   - Run `canon tasks waves --json` when `## Up next` gains rows, for its waves and shared paths. It writes nothing, so placing a row and its `Waiting on` cell stay here.
    - Serialize it behind a task only on one of that check's holds, and name the hold
    - A path the two merely share is promoted beside it, named so the merge order plans the rebase
    - A candidate held by something outside the tree stays put whatever the check shows, since clearing a conflict leaves an external condition standing
