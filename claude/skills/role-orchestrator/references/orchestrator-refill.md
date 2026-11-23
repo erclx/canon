@@ -51,9 +51,6 @@ A merge trigger runs four things in order, whoever ran the merge, since the refi
    - The verb skips a busy, interactive, talk, or controller session, the caller, and one a live task still records, so read each `skipped` row's `reason` rather than stopping it by hand
    - List what it stopped in the report's `Reaped:` line, any `failed` row with its `detail`, and each listener the record's `listeners` ended, by port and path
 5. Read `.canon/tasks/priority.md` and count the `## Up next` rows whose `Waiting on` has cleared, since a blocked row is no reserve. `## In flight` is what is running, so keep one in reserve beyond it.
-   - Run `canon tasks validate --json` beside the count, and fill every row it names as `launch-unstated`, a linked plan a planner just moved here with no Launch cell
-   - Pick per `## Pick the model` in `orchestrator-dispatch.md`, then record it through `canon tasks launch`, with `--override` only for an operator's
-   - The finding reports and refuses nothing, so a row left unfilled still dispatches only after its pick
 6. Promote from the top of `## Needs a plan`, where the last sweep recorded what to plan next.
    - Depart from that order when something changed under it and say what, since a position nobody honors is the ordering going stale
    - The order is set by whether a task establishes functionality, so prefer one that adds or proves a mechanism over one that trims, tidies, or audits
@@ -63,7 +60,11 @@ A merge trigger runs four things in order, whoever ran the merge, since the refi
    - Serialize it behind a task only on one of that check's holds, and name the hold
    - A path the two merely share is promoted beside it, named so the merge order plans the rebase
    - A candidate held by something outside the tree stays put whatever the check shows, since clearing a conflict leaves an external condition standing
-8. Write a plan for each newly promoted task with `plan-feature`, carrying the in-flight constraint that `## The loop` in the skill body states, then report:
+8. Write a plan for each newly promoted task with `plan-feature`, carrying the in-flight constraint that `## The loop` in the skill body states, then fill the picks the link left blank and report:
+   - Run `canon tasks validate --json` and record a pick through `canon tasks launch` for each `launch-unstated` row, per `## Pick the model` in `orchestrator-dispatch.md`
+   - Run it after the links, since a promoted row gets its plan only at this step
+   - The finding refuses nothing, so a row left unfilled still waits on its pick before it dispatches
+   - The block below carries each pick on its `Launch filled:` line
 
 ```plaintext
 Findings placed: <finding> → <destination>
@@ -71,6 +72,7 @@ Archived: <task>
 Reaped: <session names stopped>, failed <session: detail> or none, listeners ended <port in path>, unread, or none
 Struck: <outcome>, owed by <operator or repository>, <reason>
 Operator checks: <outcome>, left unticked on <task>
+Launch filled: <task>, <role, model, effort, route> or none
 Promoted: <task>, touches <surfaces>, parallel with <task>, sharing <paths or none>
 Serialized: <task> behind <task>, held on <dependency, contract, relocation, sweep, or reason>
 Backlogged: <task>, because <what stopped being near-term>
