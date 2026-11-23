@@ -68,6 +68,18 @@ The record decides this dispatch rather than the worker's announcement, since it
   - Send the worker each reviewer's sessionId as that reviewer launches, one launched later on `MOVED` included, since a clean UI close dispatches nothing
   - The UI reviewer re-drives on the worker's re-review request at a new head, so message it only to state a hold, as when the merge order owes a rebase first
 
+### A UI-STALE on the second wake
+
+The poll prints `UI-STALE` once, on the push that left the UI pass behind, and the worker's hand-back owes the UI reviewer that re-drive. A worker skipping the UI reviewer leaves nothing else to start it, so re-read the pull request on the next wake whatever that wake printed:
+
+```bash
+canon pr review-state <number> --json
+```
+
+- `ui.isCovered` false with `review.isCovered` true is the skipped hand-back. Message the UI reviewer the head, resolved from its sessionId, or launch one when none is live.
+- `ui.isCovered` true, or a `review` family still owed, needs nothing from this session, since the re-drive started or the code pass holds the worker
+- A refusal is unread, so report its `reason` and read again on the wake after
+
 ## A batch of small pull requests
 
 Small pull requests landing together can share one reviewer pair rather than taking a pair each. Rows stay one per fix, so only the review is batched, and this session decides the batch without asking the operator.

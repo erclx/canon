@@ -57,7 +57,7 @@ Act on what the poll printed when it exited, then start it again.
 - UNMATCHED: report it and stop. A comment posted under a heading outside the known set reaches nobody automatically, so a person decides whether to answer it by hand or the set needs a ninth heading.
 - UI-OPEN: a zero-driven pass goes to the live UI reviewer to drive again, or a new one. Any other: report and stop if that reviewer holds it, since it dispatches canon:review-address, else use the fallback rule below.
 - UI-CLOSED: report it. When the pull request is still a draft and its code review is closed too, run `canon pr lift <number> --json` with `run_in_background` and report the reason on its wake, never starting a second while one is pending for that number. Each reviewer runs the verb on its own close, so this run is the fallback for a lift neither reviewer's run made, and the verb reads every gate itself.
-- UI-STALE: lift no mark. Report and stop when a worker holds the branch, since its request starts the re-drive, else message the UI reviewer or launch one.
+- UI-STALE: lift no mark. Report and stop on the first wake when a worker holds the branch, since its hand-back starts the re-drive, and re-read it on the next wake under the second-wake rule in the review dispatch runbook of the canon:role-orchestrator skill. With no worker, message the UI reviewer or launch one.
 - GONE: report it, then sweep the board by invoking the canon:role-orchestrator skill and following its queue-refill sweep.
 - A line starting `poll:`: report it verbatim and treat that pull request as unread this run. It is a failed query, not a state.
 - Nothing changed: say exactly "No movement." and nothing else.

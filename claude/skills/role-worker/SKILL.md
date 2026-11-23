@@ -100,7 +100,7 @@ A member of a fan-in set opens no pull request, so its done message stands in fo
 
 Ask for the re-review once the `review-address` reply posts after its push, carrying what was addressed, the new head, and CI marked running, since the CI watch runs beside the review. A check failing later takes a fix and a second request.
 
-- Send it to every reviewer the controller named at launch or whose dispatch reached this session, UI reviewer included, each resolved from its sessionId at sending
+- Send it to each reviewer `${CLAUDE_SKILL_DIR}/../review-address/references/handback.md` derives from `canon pr review-state` at the new head, each resolved from its sessionId at sending
 - Send it to the controller instead when the dispatch named no reviewer or the id resolves to no live session
 - In a non-talk background launch, message the controller on a block and end the turn, skill steps included. A hand launch messages, then asks.
 - Cite the slot an operator's answer was written in when relaying it to the controller, in the `Answer at:` line whose form `canon:session-relay` states
