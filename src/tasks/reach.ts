@@ -148,7 +148,7 @@ export function readDeclarations(text: string): string[] {
  * file sits under. Containment runs one way, since a changed path is a file and
  * the reverse would be a folder claim its author did not write.
  */
-function covers(declaration: string, path: string): boolean {
+export function covers(declaration: string, path: string): boolean {
   return path === declaration || path.startsWith(`${declaration}/`)
 }
 
