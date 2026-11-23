@@ -4,7 +4,7 @@
 
 ## Overview
 
-The web layer covers the tooling shared across Vite + React, Astro, and Next.js. It sets lint, unit and end-to-end tests, Tailwind, screenshots, ports, and CI, and each framework stack adds its own wiring on top.
+The web layer covers the tooling shared across Vite + React, Astro, and Next.js. It sets lint, unit and end-to-end tests, Tailwind, screenshots, ports, and CI, and each framework stack adds its own wiring on top. A `src/` path below means the app folder a scaffold recorded, `web/` on a full stack project.
 
 ## oxlint
 
@@ -37,7 +37,7 @@ Each app stack names its own stylesheet and template. An Astro site keeps its ow
 | `vite-react` | `src/index.css`       | `vite`   | `tsconfig.json`, `vite.config.ts` |
 | `nextjs`     | `src/app/globals.css` | `next`   | `tsconfig.json`                   |
 
-Run the sequence from the app root, checked against shadcn `4.23.0` on 2026-11-22.
+Run it from the project root, checked against shadcn `4.23.0` on 2026-11-22.
 
 1. Copy the stylesheet aside, so anything init drops can be reapplied.
 2. Confirm the stylesheet imports `tailwindcss` and the `@/*` alias sits in every file the table names. Without the import, init stops on `No Tailwind CSS configuration found`.
