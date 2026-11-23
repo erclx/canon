@@ -10,6 +10,7 @@ Resume as orchestrator after a compaction. Read the board and the groundwork beh
    - Read the newest `.canon/tasks/session-*.md` when one exists, per `${CLAUDE_SKILL_DIR}/../session-map/references/session.md`
    - Treat it as the previous session's scratch rather than a source
    - Read its `## Operator preferences` as standing answers and ask none of them again
+   - Read the running mode from its `## Decisions taken under delegated authority`, and re-enter an attended or unattended run per `orchestrator-unattended.md`, telling the operator once that it is running
 3. Read the task file for every entry under `## In flight`, plus any entry a live pull request names.
    - Run `canon tasks flight --json` for where each of those rows stands, and branch on each row's `stage`
    - Re-read a row whose `stage` is `unread` rather than taking it as stopped, since the verb guesses no stage it could not read

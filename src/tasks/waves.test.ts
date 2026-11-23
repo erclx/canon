@@ -121,6 +121,95 @@ describe('planWaves', () => {
     expect(report.waves[1].rows[0].after).toEqual(['b'])
   })
 
+  it('places a row beside the task its Waiting on cell only ranks it against', async () => {
+    await board([
+      { stem: 'v1.2-second', paths: ['src/a.ts'], waiting: 'Follows v1.1' },
+      { stem: 'v1.1-first', paths: ['src/b.ts'] },
+    ])
+
+    const report = await read()
+    expect(stems(report)).toEqual([['v1.2-second', 'v1.1-first']])
+    expect(report.waves[0].rows[0].after).toEqual([])
+  })
+
+  it('keeps a row waiting on a task its cell cites as a blocker', async () => {
+    await board([
+      { stem: 'v1.2-second', paths: ['src/a.ts'], waiting: 'Waits on v1.1' },
+      { stem: 'v1.1-first', paths: ['src/b.ts'] },
+    ])
+
+    const report = await read()
+    expect(stems(report)).toEqual([['v1.1-first'], ['v1.2-second']])
+    expect(report.waves[1].rows[0].after).toEqual(['v1.1-first'])
+  })
+
+  it('waits on the blocker alone when a cell carries a ranking clause and a blocker', async () => {
+    await board([
+      {
+        stem: 'v1.3-third',
+        paths: ['src/a.ts'],
+        waiting: 'Follows v1.1, waits on [v1.2](v1.2-second.md)',
+      },
+      { stem: 'v1.2-second', paths: ['src/b.ts'] },
+      { stem: 'v1.1-first', paths: ['src/c.ts'] },
+    ])
+
+    const report = await read()
+    const third = report.waves
+      .flatMap((wave) => wave.rows)
+      .find((row) => row.stem === 'v1.3-third')
+    expect(third?.after).toEqual(['v1.2-second'])
+  })
+
+  it('leaves a task its cell only shares a file with out of after', async () => {
+    await board([
+      {
+        stem: 'v1.3-third',
+        paths: ['src/a.ts'],
+        waiting:
+          'Follows v1.1; shares evidence.md with v1.2, second to merge rebases',
+      },
+      { stem: 'v1.2-second', paths: ['src/b.ts'] },
+      { stem: 'v1.1-first', paths: ['src/c.ts'] },
+    ])
+
+    const report = await read()
+    expect(stems(report)).toEqual([['v1.3-third', 'v1.2-second', 'v1.1-first']])
+  })
+
+  it('leaves the members a fan-in row launches with out of after', async () => {
+    await board([
+      {
+        stem: 'v1.3-third',
+        paths: ['src/a.ts'],
+        waiting: 'Fan-in member 3, launches with v1.1 and v1.2',
+      },
+      { stem: 'v1.2-second', paths: ['src/b.ts'] },
+      { stem: 'v1.1-first', paths: ['src/c.ts'] },
+    ])
+
+    const report = await read()
+    expect(stems(report)).toEqual([['v1.3-third', 'v1.2-second', 'v1.1-first']])
+  })
+
+  it('keeps every task a blocker clause joins with and', async () => {
+    await board([
+      {
+        stem: 'v1.3-third',
+        paths: ['src/a.ts'],
+        waiting: 'Waits on v1.1 and v1.2 merging',
+      },
+      { stem: 'v1.2-second', paths: ['src/b.ts'] },
+      { stem: 'v1.1-first', paths: ['src/c.ts'] },
+    ])
+
+    const report = await read()
+    const third = report.waves
+      .flatMap((wave) => wave.rows)
+      .find((row) => row.stem === 'v1.3-third')
+    expect(third?.after).toEqual(['v1.1-first', 'v1.2-second'])
+  })
+
   it('reads a folder declaration as covering a file under it', async () => {
     await board([
       { stem: 'a', paths: ['src/tasks/'] },

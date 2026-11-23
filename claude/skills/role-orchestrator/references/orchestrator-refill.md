@@ -68,6 +68,9 @@ A merge trigger runs four things in order, whoever ran the merge, since the refi
    - Run `canon tasks waves --json` once the plans are linked, since a row with no plan reads as unplanned. It writes nothing, so a row's place and its `Waiting on` cell stay here.
      - A row under `cyclic` carries its edges under `cycles`, each a stem and a source, `waiting` or `shared`
    - The block below carries each pick on its `Launch filled:` line
+9. Under the attended run of `orchestrator-unattended.md`, fill each freed slot with the top row whose dependencies have merged, without asking, and print it on the `Launched:` line below.
+   - Read the dependencies from `canon tasks waves --json`
+   - A hold in that section stops the launch, and the row stays in the report
 
 ```plaintext
 Findings placed: <finding> → <destination>
@@ -76,6 +79,7 @@ Reaped: <session names stopped>, failed <session: detail> or none, listeners end
 Struck: <outcome>, owed by <operator or repository>, <reason>
 Operator checks: <outcome>, left unticked on <task>
 Launch filled: <task>, <role, model, effort, route> or none
+Launched: <task> into the freed slot, or none (attended run only)
 Promoted: <task>, touches <surfaces>, parallel with <task>, sharing <paths or none>
 Serialized: <task> behind <task>, held on <dependency, contract, relocation, sweep, or reason>
 Backlogged: <task>, because <what stopped being near-term>

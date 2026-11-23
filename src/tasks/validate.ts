@@ -1318,6 +1318,41 @@ export async function readCitedStems(
   return bare.kind === 'stems' ? [...bare.stems] : []
 }
 
+/** Where a blocker clause ends. A comma after a label ends it, a dot inside a filename does not, and `and` does not. */
+const BLOCKER_BREAK = /\.(?=\s|$)|[;,]|\bbecause\b/i
+
+/** A verb saying the row sits beside a task, never behind it. */
+const BESIDE_VERB = new RegExp(
+  `${RANK_VERB.source}|\\bshares\\b|\\blaunches\\s+with\\b`,
+  'i',
+)
+
+/**
+ * The tasks a `Waiting on` cell cites as blockers. Each clause is read up to
+ * a ranking, sharing, or launches-with verb, since those place a row and never
+ * gate it. Links are held aside so a filename's dot is no clause break.
+ */
+export async function readBlockerStems(
+  cell: string,
+  root: string,
+): Promise<string[]> {
+  const links: string[] = []
+  const masked = cell.replace(/\[[^\]]*\]\([^)]*\)/g, (link) => {
+    links.push(link)
+    return `\uE000${links.length - 1}\uE001`
+  })
+  const blockers = masked
+    .split(BLOCKER_BREAK)
+    .map((clause) => {
+      const at = clause.search(BESIDE_VERB)
+      return at < 0 ? clause : clause.slice(0, at)
+    })
+    .join(', ')
+    .replace(/\uE000(\d+)\uE001/g, (_, index) => links[Number(index)])
+
+  return readCitedStems(blockers, root)
+}
+
 /** What one blocker citation produced, since a row can be neither settled nor open. */
 interface CitedResult {
   readonly findings: readonly Finding[]

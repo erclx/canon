@@ -38,6 +38,14 @@ A filed row carries no extent, so the count first exists in the plan its planner
 - On the operator's word, brief the planner to plan it as a fan-in set, one plan per member and one for the integrator, per `## Fan-in` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/batches.md`
 - Launch the members together and hold the integrator until `plan-answers` reads it launchable
 
+## An attended row
+
+Under the attended run of `orchestrator-unattended.md`, a row to plan goes to a live talk planner first, naming the row back to it, and to a cold planner only when no talk planner is open.
+
+- Read `canon sessions list --json` for a live talk planner before launching a cold one
+- Gate each landed plan through `canon tasks plan-answers <plan> --json`
+- A `launchable` plan joins the queue, and one with an `open` or `deferred` entry parks, its questions batched to the operator
+
 ## Bounds
 
 Set no cap on how many rows a batch holds. The bound is finishing before a compaction, where `role-planner` stops and names the rows left unplanned. The talk launch takes no batch variant, since a talk planner already takes a further row when one is named back to it.
