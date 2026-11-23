@@ -137,10 +137,10 @@ export interface Stage {
  * them to the tests that reach them. A corpus a test reads from disk is not
  * among them, so its readers are selected by `readersOf` and passed by name.
  */
-const RELATED_SOURCES = /\.tsx?$|^commitlint\.config\.js$/
+export const RELATED_SOURCES = /\.tsx?$|^commitlint\.config\.js$/
 
 /** Files every test depends on without importing, so no related run sees them. */
-const FULL_SUITE_TRIGGERS =
+export const FULL_SUITE_TRIGGERS =
   /^vitest\.(e2e\.)?(config|setup|global-setup)\.ts$|^tsconfig\.json$|^package\.json$/
 
 const testSources = new Map<string, ReadonlyMap<string, string>>()

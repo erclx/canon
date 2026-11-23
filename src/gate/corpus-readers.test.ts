@@ -4,7 +4,12 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { readersOf, readTestSources } from '@/gate/corpus-readers'
+import {
+  e2eCliSpawners,
+  e2eReadersOf,
+  readersOf,
+  readTestSources,
+} from '@/gate/corpus-readers'
 import { gitEnv } from '@/git/env'
 
 describe('readersOf', () => {
@@ -64,6 +69,39 @@ describe('readersOf', () => {
     ])
 
     expect(readersOf('claude/skills/ui-film/SKILL.md', sources)).toEqual([])
+  })
+})
+
+describe('e2eReadersOf', () => {
+  it('should select only the end-to-end suites reading the folder', () => {
+    const sources = new Map([
+      ['src/take/film.e2e.test.ts', "join(PROJECT_ROOT, 'claude/skills')"],
+      ['src/skills.test.ts', "join(PROJECT_ROOT, 'claude/skills')"],
+    ])
+
+    expect(e2eReadersOf('claude/skills/ui-film/SKILL.md', sources)).toEqual([
+      'src/take/film.e2e.test.ts',
+    ])
+  })
+
+  it('should skip an end-to-end suite resolving no root', () => {
+    const sources = new Map([
+      ['src/take/film.e2e.test.ts', "expect(name).toBe('claude/skills/x')"],
+    ])
+
+    expect(e2eReadersOf('claude/skills/ui-film/SKILL.md', sources)).toEqual([])
+  })
+})
+
+describe('e2eCliSpawners', () => {
+  it('should select the end-to-end suites that spawn the cli entry', () => {
+    const sources = new Map([
+      ['src/a.e2e.test.ts', "new URL('../cli.ts', import.meta.url)"],
+      ['src/b.e2e.test.ts', "import { run } from '@/cli/run'"],
+      ['src/c.test.ts', "new URL('../cli.ts', import.meta.url)"],
+    ])
+
+    expect(e2eCliSpawners(sources)).toEqual(['src/a.e2e.test.ts'])
   })
 })
 
