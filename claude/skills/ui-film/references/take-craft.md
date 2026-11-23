@@ -88,6 +88,8 @@ Every beat films in a 1920x1080 window unless the take or the beat names another
 - Expect the pointer to start at the beat's own center, and a target outside the smaller window to refuse as `target-offscreen` even where it sat inside the default
 - Give every beat of a `--reel` take one aspect ratio. Sizes may differ, since the reel shrinks each beat to one width, and two shapes refuse as `reel-shape` before anything films.
 
+A reel is 960 wide unless `--reel-width <px>` names another, for a page column that shows it wider. The width is even, at least 320, and no wider than the narrowest beat window, else it refuses as `bad-reel-width` before filming. A wider lossless reel reaches the 10 MB cap sooner, so shorten the take rather than letting it fall back to lossy.
+
 ### Reading a take back
 
 Two rules hold once a beat is filmed.

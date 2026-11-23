@@ -134,7 +134,7 @@ Open each beat's `still.jpg`, the closing frame the record names in its `still` 
 
 - A still showing the wrong state skips the reel as `wrong-state`, naming the beat and what the still shows
 - A record whose beats carry no `still` field comes from a `canon` predating the still, so skip as `no-still` rather than posting a reel nothing checked
-- Read `fallback` on each beat. A beat filmed by screencast still joins the reel, since the reel shrinks every beat to one width.
+- Read `fallback` on each beat. A beat filmed by screencast still joins the reel, since the reel shrinks every beat to one width. Pass no `--reel-width`, since the comment draws it at 960.
 
 Then check the takes' timing before pushing, since a still shows the closing frame and none of the motion before it.
 
