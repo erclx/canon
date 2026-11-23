@@ -111,6 +111,15 @@ The index carries no answer slot. One question in two answerable places has no r
 
 Only a shared file bundles, since separate branches on one file rebase on each other anyway. A small fix with nothing in common stays its own row, and a bundle has no cap on items. Where an item touches a task already on the board, say so in the index rather than only inside the item. A reader deciding what to promote reads the index first.
 
+### The bundle row
+
+`canon records validate intake` reads each bundle row in the form the template fixes, with each cluster file in a code span, its item numbers after it, and the shared paths in code spans after `sharing`, and it reports three ways:
+
+- A bundle whose items do not all cite one shared file reports `bundle-unshared` and fails the exit
+- An item cites the shared file when its fields carry the full path in a code span, a link, or bare prose, with or without a `:12` suffix
+- A folder never counts as the shared file, and a bare filename in one item does not match the full path in another
+- A row the reader cannot resolve to items reports `bundle-unresolved` under `structure` and never sets the exit
+
 ## Repro versus groundwork
 
 An item whose claim is a defect may carry one run of its repro, and the run is where intake's measuring stops. A repro that needs more is groundwork's.
@@ -248,7 +257,7 @@ date: <YYYY-MM-DD>
 ## Ready
 
 - <item, grouped by what shipping it costs>
-- Bundle <name>: <item>, <item>, sharing <file>, standing in for those items' own rows
+- Bundle <name>: `NN-<domain>.md` items <n>, <n>, and <n>, sharing `<path/to/file>`, standing in for those items' own rows
 
 ## Open questions
 

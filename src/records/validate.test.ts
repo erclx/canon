@@ -1132,6 +1132,88 @@ describe('validateRecords', () => {
     ])
   })
 
+  describe('intake bundles', () => {
+    const overview = (row: string): string =>
+      [
+        '---',
+        'title: Dump',
+        'description: One line',
+        'date: 2026-08-04',
+        '---',
+        '',
+        '# Dump',
+        '',
+        '## Ready',
+        '',
+        row,
+        '',
+      ].join('\n')
+
+    const cluster = (fixes: readonly string[]): string =>
+      [
+        '---',
+        'title: Cluster',
+        'description: One line',
+        '---',
+        '',
+        ...fixes.flatMap((fix, index) => [
+          `### ${index + 1}. Item`,
+          '',
+          '- **Problem:** a defect',
+          `- **Fix:** ${fix}`,
+          '- **Worth it:** Yes.',
+          '- **You:**',
+          '',
+        ]),
+      ].join('\n')
+
+    it('should report a bundle sharing a folder and no file', async () => {
+      await seedFolder('intake', 'dump', {
+        '00-overview.md': overview(
+          '- Bundle web: `01-web.md` items 1 and 2, sharing `web/`',
+        ),
+        '01-web.md': cluster(['edit `web/a.ts`', 'edit `web/b.ts`']),
+      })
+      const outcome = await validateRecords(ROOT, 'intake', 'dump')
+
+      expect(outcome.ok).toBe(true)
+      if (!outcome.ok) return
+      expect(outcome.findings).toMatchObject([
+        { kind: 'bundle-unshared', record: 'dump' },
+      ])
+      expect(outcome.structure).toEqual([])
+    })
+
+    it('should report nothing for a bundle whose items cite the file', async () => {
+      await seedFolder('intake', 'dump', {
+        '00-overview.md': overview(
+          '- Bundle web: `01-web.md` items 1 and 2, sharing `web/a.ts`',
+        ),
+        '01-web.md': cluster(['edit `web/a.ts`', 'edit `web/a.ts`']),
+      })
+      const outcome = await validateRecords(ROOT, 'intake', 'dump')
+
+      expect(outcome).toMatchObject({ findings: [], structure: [] })
+    })
+
+    it('should report an unresolvable row under structure and leave findings empty', async () => {
+      await seedFolder('intake', 'dump', {
+        '00-overview.md': overview(
+          '- Bundle web: every item in the cluster, sharing `web/a.ts`',
+        ),
+        '01-web.md': cluster(['edit `web/a.ts`', 'edit `web/a.ts`']),
+      })
+      const outcome = await validateRecords(ROOT, 'intake', 'dump')
+
+      expect(outcome.ok).toBe(true)
+      if (!outcome.ok) return
+      expect(outcome.findings).toEqual([])
+      expect(outcome.structure).toMatchObject([
+        { criterion: 'bundle-unresolved', subject: '00-overview.md', line: 11 },
+      ])
+    })
+  })
+
   it('should carry the record name on every plan finding', async () => {
     await seedPlan('feature-broken.md', '# Broken\n')
     const outcome = await validateRecords(ROOT, 'plans')
