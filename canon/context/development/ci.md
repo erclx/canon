@@ -60,6 +60,8 @@ Runs weekly and on dispatch, one matrix job per scaffoldable stack through `cano
 
 `phase-label-gate.yml` runs `canon labels scan` on the event payload, since no gate stage sees a pull request body or a posted review. It needs `edited` on its trigger, so it sits outside `verify.yml`. It never passes `--closes`, which needs a task board. Body density fails the exit, and post density does not.
 
+`src/labels/measurement.ts` fails a `perf` title whose body has no table under Outcome, so every `perf` pull request meets it from the merge on.
+
 - It also triggers on `pull_request_review` and reads `review.body`, and its `if:` checks the base ref because that event carries no `branches` filter
 - A release-please pull request is told apart by both the `release-please--branches--main` head prefix and the `chore(main): release ` title prefix
 - The scan drops fenced blocks and blanks inline spans, but leaves link destinations, since a release body keeps its semver in a compare link
