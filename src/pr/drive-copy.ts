@@ -46,6 +46,13 @@ export interface PreviewConfig {
    * each rebuild. Absent when the project declares none.
    */
   readonly seed?: readonly string[]
+  /**
+   * An argv list, spawned with no shell and detached, that starts a fresh
+   * server on the copy for one UI pass. Absent when the project declares none.
+   */
+  readonly serve?: readonly string[]
+  /** The port the project's server takes before the worktree offset is added. */
+  readonly port?: number
 }
 
 export type PreviewConfigRead =
@@ -86,8 +93,19 @@ function isWithin(path: string, parent: string): boolean {
   )
 }
 
+/** An argv list opening on a non-empty command. */
+function isArgv(value: unknown): value is readonly string[] {
+  return (
+    Array.isArray(value) &&
+    value.every((item): item is string => typeof item === 'string') &&
+    (value[0] ?? '') !== ''
+  )
+}
+
 /**
- * Reads `canon/config/preview.json` as `{ "writes", "keep", "env", "seed" }`. It
+ * Reads `canon/config/preview.json` as `{ "writes", "keep", "env", "seed",
+ * "serve", "port" }`. A `serve` needs a `port`, since that is the address a
+ * started server is waited on at. It
  * refuses a file that does not parse, a path absolute or climbing with `..`, and
  * a `keep` path outside, or equal to, a `writes` path, never reading as absent.
  */
@@ -113,7 +131,14 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
     }
   }
 
-  const { writes, env, keep = [], seed } = parsed as Record<string, unknown>
+  const {
+    writes,
+    env,
+    keep = [],
+    seed,
+    serve,
+    port,
+  } = parsed as Record<string, unknown>
   if (
     !Array.isArray(writes) ||
     !writes.every((item): item is string => typeof item === 'string')
@@ -142,16 +167,39 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
     }
   }
 
-  if (
-    seed !== undefined &&
-    (!Array.isArray(seed) ||
-      !seed.every((item): item is string => typeof item === 'string') ||
-      (seed[0] ?? '') === '')
-  ) {
+  if (seed !== undefined && !isArgv(seed)) {
     return {
       kind: 'refused',
       reason: 'bad-config',
       detail: `${PREVIEW_CONFIG_REL} names a "seed" that is not a list opening on a command.`,
+    }
+  }
+
+  if (serve !== undefined && !isArgv(serve)) {
+    return {
+      kind: 'refused',
+      reason: 'bad-config',
+      detail: `${PREVIEW_CONFIG_REL} names a "serve" that is not a list opening on a command.`,
+    }
+  }
+  if (
+    port !== undefined &&
+    (typeof port !== 'number' ||
+      !Number.isInteger(port) ||
+      port < 1 ||
+      port > 65_535)
+  ) {
+    return {
+      kind: 'refused',
+      reason: 'bad-config',
+      detail: `${PREVIEW_CONFIG_REL} names a "port" that is not a whole number from 1 to 65535.`,
+    }
+  }
+  if (serve !== undefined && port === undefined) {
+    return {
+      kind: 'refused',
+      reason: 'bad-config',
+      detail: `${PREVIEW_CONFIG_REL} names a "serve" with no "port", so a started server has no address to wait on.`,
     }
   }
 
@@ -193,6 +241,8 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
       env: env ?? DEFAULT_PREVIEW_ENV,
       keep,
       ...(seed === undefined ? {} : { seed }),
+      ...(serve === undefined ? {} : { serve }),
+      ...(port === undefined ? {} : { port }),
     },
   }
 }

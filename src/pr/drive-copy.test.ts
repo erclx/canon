@@ -211,6 +211,83 @@ describe('loadPreviewConfig', () => {
       })
     })
   })
+
+  describe('with a serve command and a port', () => {
+    it('should read the serve argv and the port the project declares', () => {
+      write(
+        'canon/config/preview.json',
+        '{"writes":["board"],"serve":["bun","run","dev"],"port":5173}',
+      )
+
+      expect(loadPreviewConfig(worktree)).toMatchObject({
+        kind: 'read',
+        config: { serve: ['bun', 'run', 'dev'], port: 5173 },
+      })
+    })
+
+    it('should read a port declared without a serve command', () => {
+      write('canon/config/preview.json', '{"writes":["board"],"port":4321}')
+
+      const read = loadPreviewConfig(worktree)
+
+      expect(read).toMatchObject({ kind: 'read', config: { port: 4321 } })
+      expect(read.kind === 'read' && 'serve' in read.config).toBe(false)
+    })
+
+    it('should carry neither key when the project declares neither', () => {
+      write('canon/config/preview.json', '{"writes":["board"]}')
+
+      const read = loadPreviewConfig(worktree)
+
+      expect(
+        read.kind === 'read' &&
+          ('serve' in read.config || 'port' in read.config),
+      ).toBe(false)
+    })
+
+    it.each([
+      ['a string', '"bun run dev"'],
+      ['an empty list', '[]'],
+      ['a list opening on an empty command', '["", "dev"]'],
+    ])('should refuse a serve that is %s', (_label, serve) => {
+      write(
+        'canon/config/preview.json',
+        `{"writes":["board"],"serve":${serve},"port":5173}`,
+      )
+
+      expect(loadPreviewConfig(worktree)).toMatchObject({
+        kind: 'refused',
+        reason: 'bad-config',
+      })
+    })
+
+    it.each([
+      ['a string', '"5173"'],
+      ['zero', '0'],
+      ['a fraction', '5173.5'],
+      ['above the last port', '65536'],
+    ])('should refuse a port that is %s', (_label, port) => {
+      write('canon/config/preview.json', `{"writes":["board"],"port":${port}}`)
+
+      expect(loadPreviewConfig(worktree)).toMatchObject({
+        kind: 'refused',
+        reason: 'bad-config',
+      })
+    })
+
+    it('should refuse a serve command with no port to wait on', () => {
+      write(
+        'canon/config/preview.json',
+        '{"writes":["board"],"serve":["bun","run","dev"]}',
+      )
+
+      expect(loadPreviewConfig(worktree)).toMatchObject({
+        kind: 'refused',
+        reason: 'bad-config',
+        detail: expect.stringContaining('"port"'),
+      })
+    })
+  })
 })
 
 describe('buildDriveCopy', () => {
