@@ -76,7 +76,7 @@ A pull request an `OVERLAP` line names rebases once per sibling merging ahead of
 - Record the deferral as a line on its task under `## Findings`, naming the pull request it waits behind, so the operator sees the wait
 - Tell its worker the reel is deferred, so a rebase skips the reel under the `deferred` code in `${CLAUDE_SKILL_DIR}/../pr-evidence/references/reel.md` rather than filming it
 - Check whether a deferred pull request is next on each merge and on each code close of one, and the merge-order step says what follows
-  - A code close landing while CI still runs meets no later trigger, so watch `canon pr checks <number> --json` in the background and check again on its wake
+  - A code close landing while CI still runs meets no later trigger, so run the loop under `### Watching CI` in `${CLAUDE_SKILL_DIR}/../git-ship/SKILL.md` in the background and check again on its wake
 - A UI reviewer already live when the `OVERLAP` line first names its pull request runs on, and a pull request with no drivable box defers nothing
 
 ### A UI-STALE on the second wake
