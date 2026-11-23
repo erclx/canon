@@ -35,10 +35,8 @@ function holdsTable(lines: readonly string[]): boolean {
 }
 
 /**
- * Grades a `perf` pull request for the measurement it claims: a table under
- * `## Outcome` and a `## Technical context` for what it trades. It reads that
- * the table exists and never that its numbers are true, which stays with the
- * reviewer. A fence is an example rather than a result, so it never counts.
+ * Reads that a `perf` body has an Outcome table and a Technical context, never
+ * that its numbers are true. A fenced table is an example, so it never counts.
  */
 export function checkMeasurement(
   title: string,
