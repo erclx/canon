@@ -40,7 +40,10 @@ function holdsTable(lines: readonly string[]): boolean {
  * the table exists and never that its numbers are true, which stays with the
  * reviewer. A fence is an example rather than a result, so it never counts.
  */
-export function checkMeasurement(title: string, body: string): MeasurementCheck {
+export function checkMeasurement(
+  title: string,
+  body: string,
+): MeasurementCheck {
   if (!PERF_TITLE.test(title)) return { checked: false, missing: [] }
 
   const lines = linesOutsideFences(body).map((line) => line.trim())
