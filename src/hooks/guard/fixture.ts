@@ -190,6 +190,31 @@ function linkNoRunnerPath(dir: string): void {
   }
 }
 
+let lagCount = 0
+
+/**
+ * A PATH whose `sleep` appends `line` to `transcript`, so the line lands after
+ * the plan guard's first read and before its retry. The stub records each wait
+ * it was asked for in `waits`, which stays absent when the guard never waits.
+ */
+export const lagTranscript = (
+  transcript: string,
+  line: string,
+): { path: string; waits: string } => {
+  lagCount++
+  const dir = join(ctx.fixture, `bin-lag-${lagCount}`)
+  mkdirSync(dir)
+  const waits = join(dir, 'waits')
+  const landing = join(dir, 'line')
+  writeFileSync(landing, `${line}\n`)
+  writeFileSync(
+    join(dir, 'sleep'),
+    `#!/usr/bin/env bash\nprintf '%s\\n' "$*" >>'${waits}'\ncat '${landing}' >>'${transcript}'\n`,
+  )
+  chmodSync(join(dir, 'sleep'), 0o755)
+  return { path: [dir, ctx.hookPath].join(delimiter), waits }
+}
+
 /**
  * Registers the fixture setup and teardown on the calling test file, so each
  * file builds its own temp tree and none reads a path another file made.
@@ -197,7 +222,12 @@ function linkNoRunnerPath(dir: string): void {
 export function useFixture(): Context {
   beforeAll(() => {
     ctx.fixture = mkdtempSync(join(tmpdir(), 'hooks-guard-'))
-    ctx.hookPath = pathWithoutCanon()
+    // The plan guard waits a second before each refusal, which a real `sleep` adds to every blocking case.
+    const instant = join(ctx.fixture, 'bin-instant-sleep')
+    mkdirSync(instant)
+    writeFileSync(join(instant, 'sleep'), '#!/usr/bin/env bash\nexit 0\n')
+    chmodSync(join(instant, 'sleep'), 0o755)
+    ctx.hookPath = [instant, pathWithoutCanon()].join(delimiter)
 
     const project = join(ctx.fixture, 'project')
     for (const dir of [

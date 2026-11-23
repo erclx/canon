@@ -1,7 +1,14 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { payloadFor, ROOT, run, TREES, useFixture } from './fixture'
+import {
+  lagTranscript,
+  payloadFor,
+  ROOT,
+  run,
+  TREES,
+  useFixture,
+} from './fixture'
 
 const ctx = useFixture()
 
@@ -143,8 +150,106 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
       shellIn(project, heredoc('.canon/plans/feature-b.md')),
     )
 
-    expect(result.stderr).toContain('spent on an earlier new plan')
+    expect(result.stderr).toContain('at transcript line 2')
+    expect(result.stderr).toContain('spent on .canon/plans/feature-a.md')
     expect(result.code).toBe(2)
+  })
+
+  describe('refusal message', () => {
+    it('should name no invocation line for a write sent before any invocation', async () => {
+      const project = planProject()
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-new.md')),
+      )
+
+      expect(result.stderr).toContain('has not invoked canon:plan-feature')
+      expect(result.stderr).not.toContain('transcript line')
+      expect(result.code).toBe(2)
+    })
+
+    it('should say a session writing several plans invokes the skill once per plan', async () => {
+      const project = planProject(`${SKILL_CALL}\n`)
+      await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-b.md')),
+      )
+
+      expect(result.stderr).toContain('once per new plan')
+    })
+  })
+
+  // The suspected cause of a wrong refusal is a transcript not yet holding a fresh invocation.
+  describe('retry before a refusal', () => {
+    it('should pass a write whose invocation lands during the retry', async () => {
+      const project = planProject()
+      const lag = lagTranscript(project.transcript, SKILL_CALL)
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-a.md')),
+        lag.path,
+      )
+
+      expect(result.stderr).toBe('')
+      expect(result.code).toBe(0)
+      expect(readFileSync(lag.waits, 'utf8')).toBe('1\n')
+    })
+
+    it('should spend an invocation the retry found on this plan', async () => {
+      const project = planProject()
+      const lag = lagTranscript(project.transcript, SKILL_CALL)
+      await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-a.md')),
+        lag.path,
+      )
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-b.md')),
+      )
+
+      expect(result.stderr).toContain('spent on .canon/plans/feature-a.md')
+      expect(result.code).toBe(2)
+    })
+
+    it('should still refuse when the retry finds no invocation', async () => {
+      const project = planProject()
+      const lag = lagTranscript(project.transcript, OTHER_CALL)
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-a.md')),
+        lag.path,
+      )
+
+      expect(result.stderr).toContain('has not invoked canon:plan-feature')
+      expect(result.code).toBe(2)
+      expect(readFileSync(lag.waits, 'utf8')).toBe('1\n')
+    })
+
+    it.each([
+      ['a first read that passes', `${SKILL_CALL}\n`, {}],
+      ['an unreadable transcript', '', { transcript_path: '/nowhere/t.jsonl' }],
+    ])('should not wait on %s', async (_, transcript, override) => {
+      const project = planProject(transcript)
+      const lag = lagTranscript(project.transcript, SKILL_CALL)
+      const fields = {
+        ...(JSON.parse(
+          shellIn(project, heredoc('.canon/plans/feature-a.md')),
+        ) as Record<string, unknown>),
+        ...override,
+      }
+
+      const result = await run(hook, payloadFor(fields), lag.path)
+
+      expect(result.code).toBe(0)
+      expect(existsSync(lag.waits)).toBe(false)
+    })
   })
 
   it('should pass the second new plan once a second invocation follows', async () => {
@@ -404,6 +509,42 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
 
       const verdicts = logLines(project.root).map((l) => l.split(' ')[1])
       expect(verdicts).toEqual(['block', 'pass'])
+    })
+
+    it('should log the invocation, spent marker, and line count a pass was judged on', async () => {
+      const project = planProject(`${SKILL_CALL}\n`)
+
+      await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
+
+      expect(logLines(project.root)[0]).toMatch(
+        / feature-a\.md latest=2 spent=0 spent_plan=- lines=2$/,
+      )
+    })
+
+    it('should log both reads of a refusal that retried', async () => {
+      const project = planProject(`${SKILL_CALL}\n`)
+      await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
+
+      await run(hook, shellIn(project, heredoc('.canon/plans/feature-b.md')))
+
+      expect(logLines(project.root)[1]).toMatch(
+        / block \S+ feature-b\.md latest=2 spent=2 spent_plan=feature-a\.md lines=2 retry_latest=2 retry_lines=2$/,
+      )
+    })
+
+    it('should log the retry read that found a late invocation', async () => {
+      const project = planProject()
+      const lag = lagTranscript(project.transcript, SKILL_CALL)
+
+      await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-a.md')),
+        lag.path,
+      )
+
+      expect(logLines(project.root)[0]).toMatch(
+        / pass \S+ feature-a\.md latest=- spent=0 spent_plan=- lines=1 retry_latest=2 retry_lines=2$/,
+      )
     })
 
     it('should log a block for a second new plan on a spent invocation', async () => {
