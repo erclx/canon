@@ -9,14 +9,10 @@ The field is browser test automation. The authorities are the Playwright documen
 
 ## Waiting
 
-| Bullet                         | Source                                                                                                                                                                                                                                                                                                         | Read       |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Settle, never `waitForTimeout` | [Page API](https://playwright.dev/docs/api/class-page): `waitForTimeout` is "Discouraged", since "Tests that wait for time are inherently flaky", and [assertions](https://playwright.dev/docs/test-assertions): "You can convert any synchronous `expect` to an asynchronous polling one using `expect.poll`" | 2026-10-18 |
-| Fixed window for absence       | House choice: an absence has no signal to settle on, so a web-first assertion of it passes before the thing it rules out has had time to happen                                                                                                                                                                | 2026-10-18 |
-| Bound every settle             | [Assertions](https://playwright.dev/docs/test-assertions): "by default `toPass` has timeout 0 and does not respect custom" expect timeouts                                                                                                                                                                     | 2026-10-18 |
-| No raised timeout under load   | House choice: a longer timeout hides a race that the load exposed, and it returns on a slower runner                                                                                                                                                                                                           | 2026-10-18 |
-| `scrollend`, then stillness    | [MDN scrollend](https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollend_event): "If the scroll position did not change, then no scrollend event fires"                                                                                                                                              | 2026-10-18 |
-| Reduced motion by default      | [Test options](https://playwright.dev/docs/api/class-testoptions): `reducedMotion` "Emulates `'prefers-reduced-motion'` media feature"                                                                                                                                                                         | 2026-10-18 |
+| Bullet                       | Source                                                                                                                                     | Read       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| Bound every settle           | [Assertions](https://playwright.dev/docs/test-assertions): "by default `toPass` has timeout 0 and does not respect custom" expect timeouts | 2026-10-18 |
+| No raised timeout under load | House choice: a longer timeout hides a race that the load exposed, and it returns on a slower runner                                       | 2026-10-18 |
 
 ## Falsifiable guards
 
@@ -32,7 +28,6 @@ The field is browser test automation. The authorities are the Playwright documen
 | Bullet                      | Source                                                                                                                                                                                          | Read       |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | CPU throttling to reproduce | [DevTools Protocol, Emulation](https://chromedevtools.github.io/devtools-protocol/tot/Emulation/): `setCPUThrottlingRate` "Enables CPU throttling to emulate slow CPUs", as a "slowdown factor" | 2026-10-18 |
-| Read the trace              | [Best practices](https://playwright.dev/docs/best-practices): "For CI failures, use the Playwright trace viewer instead of videos and screenshots"                                              | 2026-10-18 |
 | Vary one condition          | House choice: two runs that differ in an uncontrolled condition cannot attribute a change in count to the one under suspicion                                                                   | 2026-10-18 |
 
 ## Authority
@@ -55,3 +50,13 @@ Every bullet the rewrite removed or reshaped, grouped by why.
 - Reworded "bound every settle with an explicit timeout" to name `toPass`, the one settle the docs leave unbounded.
 - Reworded "run with motion reduced" to name the `reducedMotion` option.
 - Reworded "read the state the assertion does not" to read it from the trace, which the best practices page names for a CI failure.
+
+### Owned by the test-craft skill
+
+Cut in groundwork 266, since `test-craft/references/e2e.md` carries each.
+
+- Cut "settle on the condition with a web-first assertion or `expect.poll`, never `page.waitForTimeout`".
+- Cut "reserve a fixed duration for an assertion that nothing happened across a window".
+- Cut "settle a smooth scroll on the `scrollend` event".
+- Cut "run with `reducedMotion: 'reduce'` unless the test asserts motion".
+- Cut "read the failure's trace for the state the assertion does not read".

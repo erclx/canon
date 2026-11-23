@@ -9,16 +9,8 @@ paths:
 
 # TypeScript/JavaScript testing tooling
 
-## Unit and integration
-
-- Use Vitest for unit and integration tests.
-- Simulate interaction with `userEvent` over `fireEvent`, since it refuses what a browser would, such as a click on a hidden element.
-- Mock the network with MSW. Never mock `fetch` or axios by hand, and never let a unit test make a real call.
-- Query by role or label first, such as `getByRole` and `getByLabelText`, and by test ID only when neither matches.
-
 ## End-to-end
 
-- Use Playwright for end-to-end tests.
 - Place every test the Playwright runner executes under `e2e/`, never `src/`. A Vitest test that drives a browser stays beside its module.
 
 ## Timers and async

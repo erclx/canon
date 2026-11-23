@@ -15,7 +15,6 @@ The field is software engineering practice for source comments, which has no spe
 | Do not restate the line                  | [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html): "never describe the code. Assume the person reading the code knows Python (though not what you're trying to do) better than you do."                                | 2026-10-18 |
 | No comment on a self-describing function | [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html): "Method, parameter, and return descriptions may be omitted if they are obvious from the rest of the method's JSDoc or from the method name and type signature." | 2026-10-18 |
 | A file at 15% comment text               | House choice: run caps alone left about ten comments per file and the share at 19.1%, and counting run lines failed a cleaned file on its delimiters. Text lines with a 50-line floor beat both, since a smaller file tips on one note.            | 2026-11-17 |
-| A reason, not a description              | House choice: a fifth of sampled head comments restated the name they sat on. A description the name and type carry goes stale with no check to catch it, and it beat a ban on internal comments, which drops the reasons too.                     | 2026-11-17 |
 
 ## What a comment may claim
 
@@ -54,3 +53,7 @@ Every bullet the rewrite removed or reshaped, grouped by why.
 
 - Merged "Let comment density follow how much of a file's behavior is decided outside that file" into the density bullet as its reason. On its own it named no line a reviewer could check.
 - Merged "State only what is true of the code as written" into the update bullet, which states the same requirement and adds when to meet it
+
+### Owned by the code-craft skill
+
+- Cut "give a comment on an internal declaration or a member a reason or a constraint, never a description its name and type already carry". `code-craft/references/comments.md` states it word for word, per groundwork 266.
