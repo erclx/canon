@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.117.0](https://github.com/erclx/canon/compare/v5.116.0...v5.117.0) (2026-11-23)
+
+
+### Features
+
+* **capture:** draw, commit, and film at 390, 768, and 1280 ([#3459](https://github.com/erclx/canon/issues/3459)) ([d2ebc07](https://github.com/erclx/canon/commit/d2ebc077b22a596476c307d5da090ab7d6169d51))
+* **orchestrator:** add an attended run with rolling dispatch ([#3464](https://github.com/erclx/canon/issues/3464)) ([06683b4](https://github.com/erclx/canon/commit/06683b4a77d1e02de4b894ded42d860a1ce9bf4e))
+* **tooling:** offer an opt-in app root for the vite-react scaffold ([#3468](https://github.com/erclx/canon/issues/3468)) ([f051706](https://github.com/erclx/canon/commit/f051706fa3c8f0af0b39ca38b3b8a81153f28efd))
+
+
+### Bug Fixes
+
+* **records:** stop two false positives in plan validation ([#3463](https://github.com/erclx/canon/issues/3463)) ([ac839e5](https://github.com/erclx/canon/commit/ac839e50e2a0b9db7f54aa9dc6ce32015fcd6e3d))
+
 ## [5.116.0](https://github.com/erclx/canon/compare/v5.115.0...v5.116.0) (2026-11-23)
 
 
