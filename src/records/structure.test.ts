@@ -4,6 +4,7 @@ import {
   groundworkStructure,
   intakeSpill,
   intakeStructure,
+  planStructure,
   structureFindings,
 } from '@/records/structure'
 
@@ -336,11 +337,55 @@ describe('groundworkStructure', () => {
     expect(groundworkStructure(text)).toEqual([])
   })
 
+  it('should exempt a method bullet whose command sits in a code span', () => {
+    const text = `- **Method:** \`${'x'.repeat(250)}\`, 3 runs`
+
+    expect(groundworkStructure(text)).toEqual([])
+  })
+
   it('should still report S4 on a long plain bullet', () => {
     const text = [...lead, `- ${'a'.repeat(300)}`].join('\n')
 
     expect(groundworkStructure(text).map((entry) => entry.criterion)).toEqual([
       'S4',
     ])
+  })
+})
+
+describe('planStructure', () => {
+  const path = `src/${'deep/'.repeat(30)}file.ts`
+
+  it('should pass a long path with a short reason', () => {
+    expect(planStructure(`- \`${path}\`: add the filter`)).toEqual([])
+  })
+
+  it('should still report S4 on a long prose bullet', () => {
+    expect(
+      planStructure(`- ${'word '.repeat(50)}`).map((e) => e.criterion),
+    ).toEqual(['S4'])
+  })
+
+  it('should pass a bullet that is all code span', () => {
+    expect(planStructure(`- \`${'x'.repeat(250)}\``)).toEqual([])
+  })
+
+  it('should measure a bullet with an unclosed span whole', () => {
+    expect(
+      planStructure(`- \`${'x'.repeat(250)}`).map((e) => e.criterion),
+    ).toEqual(['S4'])
+  })
+
+  it('should pair a double-backtick span by run length', () => {
+    expect(planStructure(`- \`\`a \` ${'b'.repeat(250)}\`\`: short`)).toEqual(
+      [],
+    )
+  })
+
+  it('should hold a Suggested line to the limit on its prose', () => {
+    expect(
+      planStructure(`1. Q\n   - Suggested: ${'word '.repeat(50)}`).map(
+        (e) => e.criterion,
+      ),
+    ).toEqual(['S4'])
   })
 })

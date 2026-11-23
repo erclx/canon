@@ -121,6 +121,8 @@ Every hand-written record under `.canon/` holds to six criteria, being a plan, a
 
 A run of labeled field bullets, each opening on a bold label, is exempt from `S2`, as `markdown.md` exempts it. An intake item's fields are also exempt from `S4`, and its numbered H3 from `S3`, since the item template fixes both.
 
+A plan's and a groundwork track's `S4` counts a bullet's characters outside its code spans, since a path or a command is most of the length and a writer cannot shorten it. An unclosed backtick counts as text, and a question's `- Suggested:` line is held to the limit on its prose.
+
 - `canon records validate <kind> <record>` reports `S1` to `S5` under `structure`, and never in the exit, since every record written before the criteria misses `S1`
 - `canon tasks plan-reach` reports an `S6` miss as an unclaimed bare filename
 - A writing skill reads the report for the one record it wrote and fixes each entry before it stops
@@ -219,7 +221,7 @@ A `## Verbatim` section carries wording someone settled, landing in a file exact
 - Give each block an H3 naming it, then a lead sentence with the action, the full path, and the anchor, then a fenced `text` block holding the wording
 - Name the action as Add, Insert, Replace, or Create. A Replace quotes the old line in the lead's code span.
 - Write the block as the project's formatter leaves it, since a formatter that re-pads a table row or rewraps a line makes the grep fail on correct text
-- Name the outcome in a grep bullet and put a command past 200 characters in a fenced `bash` block under it, since `S4` reports a longer bullet
+- Name the outcome in a grep bullet with its command in a code span, or a fenced `bash` block under it when the command spans lines, since `S4` counts only the prose outside code spans
 - Give each block one `## Verification` bullet running `grep -cF -e` on its whole first line against its file, so a reworded line fails a check the reviewer already runs.
 
 A Create block makes a new file, so its lead names a path that does not exist yet and no anchor. Its grep bullet takes the first distinctive line, such as the `title:` line or the H1, since a markdown file opens on `---` and that line matches any file with frontmatter.

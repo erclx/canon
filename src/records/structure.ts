@@ -1,6 +1,14 @@
+import { findBacktickSpans } from '@/markdown/backticks'
 import { type DensityKind, densityFindings } from '@/markdown/density'
-import { bodyLines } from '@/markdown/scan'
-import { isSectionMarker } from '@/markdown/structure'
+import { bodyLines, visibleText } from '@/markdown/scan'
+import {
+  BLOCKQUOTE,
+  CHECKPOINTS,
+  HEADING,
+  isSectionMarker,
+  LIST_ITEM,
+  TABLE_ROW,
+} from '@/markdown/structure'
 
 /**
  * The criteria `plan.md`'s `### Structure` states for every hand-written
@@ -135,9 +143,8 @@ export function driveLogStructure(text: string): StructureEntry[] {
 }
 
 /**
- * The structure report for a groundwork track's file. A lean and its falsifier run past `S4`'s
- * bound on one line, and the close copies each into `## Revisit when`, so a bullet labeled
- * `Leaning` or `Overturned by` in bold, at any indent, skips `S4`.
+ * The structure report for a groundwork track's file. A bold `Leaning` or `Overturned by` bullet
+ * at any indent skips `S4`, since the close copies it whole, and `S4` counts outside code spans.
  */
 export function groundworkStructure(text: string): StructureEntry[] {
   const lines = text.split('\n')
@@ -145,7 +152,9 @@ export function groundworkStructure(text: string): StructureEntry[] {
   return structureFindings(text).filter(
     (entry) =>
       !(
-        entry.criterion === 'S4' && LEAN_FIELD.test(lines[entry.line - 1] ?? '')
+        entry.criterion === 'S4' &&
+        (LEAN_FIELD.test(lines[entry.line - 1] ?? '') ||
+          withinProse(lines, entry))
       ),
   )
 }
@@ -168,4 +177,51 @@ export function intakeStructure(text: string): StructureEntry[] {
     ...structureFindings(text).filter((entry) => !exempt(entry)),
     ...intakeSpill(text),
   ].sort((a, b) => a.line - b.line)
+}
+
+/** The bullet at a line as the density scan reads it, with its lazy continuation lines joined. */
+function bulletAt(lines: readonly string[], index: number): string {
+  const parts = [(lines[index] ?? '').replace(LIST_ITEM, '').trim()]
+  for (let next = index + 1; next < lines.length; next++) {
+    const raw = lines[next]
+    if (
+      raw.trim() === '' ||
+      LIST_ITEM.test(raw) ||
+      HEADING.test(raw) ||
+      TABLE_ROW.test(raw) ||
+      BLOCKQUOTE.test(raw)
+    ) {
+      break
+    }
+    parts.push(raw.trim())
+  }
+  return parts.join(' ')
+}
+
+/** The characters of a bullet outside its code spans, an unclosed backtick run counting as text. */
+function proseLength(bullet: string): number {
+  const text = visibleText(bullet)
+  let kept = text
+  for (const span of findBacktickSpans(text).reverse()) {
+    kept = kept.slice(0, span.start) + kept.slice(span.end)
+  }
+  return kept.length
+}
+
+/** Whether an `S4` entry's bullet holds within the limit once its code spans are left out. */
+function withinProse(lines: readonly string[], entry: StructureEntry): boolean {
+  return proseLength(bulletAt(lines, entry.line - 1)) <= CHECKPOINTS.bullet
+}
+
+/**
+ * The structure report for a plan. A path with its reason, or a command with what it showed, is
+ * what the plan standard asks a bullet to carry, and a writer cannot shorten the path or the
+ * command, so `S4` counts a bullet outside its code spans.
+ */
+export function planStructure(text: string): StructureEntry[] {
+  const lines = text.split('\n')
+
+  return structureFindings(text).filter(
+    (entry) => !(entry.criterion === 'S4' && withinProse(lines, entry)),
+  )
 }
