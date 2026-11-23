@@ -18,6 +18,7 @@ Measure against the tree rather than recall, since a count carried from an earli
 - Open each file before describing what is in it
 - Grep for each construct the plan will name and count the sites
 - Confirm any work the plan sequences behind is still open
+- Read `renderedLines` from `canon markdown audit <file> --json` for each markdown file the plan touches, since a raw line count reads far under the gate's measure
 - Read a flat folder as a reading to place against rather than a pattern to copy, since the tree shows what exists beside a new path, not where it belongs
 
 ### Outside sources
@@ -46,6 +47,8 @@ What this skill adds on top of the standard:
 - Confirm a concrete project or use case drives the feature, and lift patterns from it where precedent exists. A feature with no named user is a guess.
 - Prefer one layout that serves both a new and a grown project over a dual-mode toggle or a migration shim. Two modes double what every later change holds.
 - Name `proposal-critique` for a one-way change or an unverified cause
+
+A file at 280 rendered lines or more gets its new content placed in its entry, as a second markdown path for the reference it lands in or the split that comes first. Weigh what the plan adds too, since a file at 250 can take a 60-line section.
 
 ### Suggestions and sections
 

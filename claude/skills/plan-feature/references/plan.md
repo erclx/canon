@@ -131,10 +131,10 @@ A run of labeled field bullets, each opening on a bold label, is exempt from `S2
 Give every `## Files to touch` entry a backticked path and something said about it. A bare path states scope and not intent, and the reason is what an executing session checks its edit against.
 
 - Lead with the path or with a label carrying the path, whichever reads better for the entry
-- Separate the two halves with a colon, and keep every path the entry declares ahead of it, since what sits before the colon reads as a target
-- Both sides of a rename belong before the colon, and a file merely cited by the reason does not
+- Separate the two halves with a colon, and keep every path the entry declares ahead of it, both sides of a rename included, since what sits before it reads as a target
 - Read the list as what the branch sets out to write rather than a bound, since the doc syncs at ship write past it on nearly every branch
 - `canon tasks plan-reach <plan>` reads the branch back against this list and every other live plan
+- Name a second markdown path after the colon when the target renders at 280 lines or more, or `canon records validate plans` reports `ceiling-unstated`
 
 Give an entry creating a new server, runtime, harness, or agent loop one more line, its build or adopt call with the reason, so a reviewer reads the call beside the file it governs.
 
