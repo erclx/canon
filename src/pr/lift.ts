@@ -108,6 +108,12 @@ export interface ChangedRead {
 /** How the head sits against the base the pull request targets. */
 export type Standing = 'fresh' | 'stale' | 'conflict' | 'unknown'
 
+/** A standing with the branch paths the base changed, present only on `stale`. */
+export interface BaseReading {
+  readonly standing: Standing
+  readonly moved?: readonly string[]
+}
+
 export interface PullState {
   readonly isDraft: boolean
   readonly isOpen: boolean
@@ -238,11 +244,7 @@ export interface LiftOptions {
 
 export interface LiftRecord {
   readonly reason:
-    | 'lifted'
-    | 'already-ready'
-    | 'redrafted'
-    | 'clear'
-    | LiftRefusal
+    'lifted' | 'already-ready' | 'redrafted' | 'clear' | LiftRefusal
   /** The gate that read not clear when a ready pull request went back to draft. */
   readonly failed?: LiftRefusal
   readonly carriedFrom?: string
@@ -849,6 +851,19 @@ export async function readBaseStanding(
   head: string,
   ref: string,
 ): Promise<Standing> {
+  return (await readBaseReading(git, number, head, ref)).standing
+}
+
+/**
+ * The standing `readBaseStanding` answers, read from the fork point, with the
+ * paths that made it stale so a refusal can name the collision.
+ */
+export async function readBaseReading(
+  git: GitRunner,
+  number: number,
+  head: string,
+  ref: string,
+): Promise<BaseReading> {
   // Fetch the base too, or a sibling merged since the last fetch reads as fresh.
   const baseBranch = ref.startsWith('origin/')
     ? ref.slice('origin/'.length)
@@ -859,13 +874,14 @@ export async function readBaseStanding(
   const hasHead =
     (await git(['cat-file', '-e', `${head}^{commit}`])) !== undefined
   const hasRef = (await git(['rev-parse', '--verify', '-q', ref])) !== undefined
-  if (!hasHead || !hasRef) return 'unknown'
+  if (!hasHead || !hasRef) return { standing: 'unknown' }
 
   const merged = await git(['merge-tree', '--write-tree', ref, head])
-  if (merged === undefined) return 'conflict'
+  if (merged === undefined) return { standing: 'conflict' }
 
   const forkPoint = (await git(['merge-base', ref, head]))?.trim()
-  if (forkPoint === undefined || forkPoint === '') return 'unknown'
+  if (forkPoint === undefined || forkPoint === '')
+    return { standing: 'unknown' }
 
   const written = await git([
     'diff',
@@ -874,10 +890,10 @@ export async function readBaseStanding(
     forkPoint,
     head,
   ])
-  if (written === undefined) return 'unknown'
+  if (written === undefined) return { standing: 'unknown' }
 
   const paths = nonEmptyLines(written)
-  if (paths.length === 0) return 'fresh'
+  if (paths.length === 0) return { standing: 'fresh' }
 
   const moved = await git([
     '--literal-pathspecs',
@@ -889,9 +905,12 @@ export async function readBaseStanding(
     '--',
     ...paths,
   ])
-  if (moved === undefined) return 'unknown'
+  if (moved === undefined) return { standing: 'unknown' }
 
-  return nonEmptyLines(moved).length > 0 ? 'stale' : 'fresh'
+  const changed = nonEmptyLines(moved)
+  return changed.length > 0
+    ? { standing: 'stale', moved: changed }
+    : { standing: 'fresh' }
 }
 
 /**

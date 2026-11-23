@@ -8,6 +8,7 @@ import {
   lift,
   type LiftApi,
   type PullState,
+  readBaseReading,
   readBaseStanding,
   readChangedPaths,
   readsDrivableBox,
@@ -1979,6 +1980,42 @@ describe('readBaseStanding', () => {
     }
 
     expect(await readBaseStanding(git, 1, HEAD, 'origin/main')).toBe('stale')
+  })
+})
+
+describe('readBaseReading', () => {
+  it('should name the branch paths the base changed on a stale base', async () => {
+    const git: GitRunner = async (args) => {
+      const verb = args.find((arg) => !arg.startsWith('-')) ?? ''
+      if (verb === 'diff') {
+        return args.includes('--') ? 'src/a.ts\n' : 'src/a.ts\nsrc/b.ts\n'
+      }
+      if (verb === 'merge-base') return 'fork\n'
+      return ''
+    }
+
+    expect(await readBaseReading(git, 1, HEAD, 'origin/main')).toEqual({
+      standing: 'stale',
+      moved: ['src/a.ts'],
+    })
+  })
+
+  it('should carry no path list on a fresh base', async () => {
+    const git: GitRunner = async (args) =>
+      args.includes('merge-base') ? 'fork\n' : ''
+
+    expect(await readBaseReading(git, 1, HEAD, 'origin/main')).toEqual({
+      standing: 'fresh',
+    })
+  })
+
+  it('should read unknown and name nothing when the fetch leaves no head', async () => {
+    const git: GitRunner = async (args) =>
+      args[0] === 'cat-file' ? undefined : ''
+
+    expect(await readBaseReading(git, 1, HEAD, 'origin/main')).toEqual({
+      standing: 'unknown',
+    })
   })
 })
 
