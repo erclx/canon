@@ -118,6 +118,14 @@ Run the line under it only when every gate below passes at the moment of the mer
 
 A failing gate leaves the merge for the next read. No shipped rule makes the client prompt on `canon pr merge`, so the gates above are the whole check before the line runs.
 
+### A stale refusal
+
+`canon pr merge` reads the lift's standing again before it writes, so a sibling that merged after the lift check can still refuse the line. Branch on the record's `reason`, never treating a `standing-` reason as a retry, since the same head refuses the same way every time.
+
+- `standing-stale` carries `moved`, the branch's files the base also changed. Send the branch's session to update it, then wait for CI and re-read the gates before writing the line again.
+- `standing-conflict` takes the same route through a rebase
+- `standing-unknown` means the base could not be read, so report it and run the line again only once the remote answers
+
 ### Gate the line on CI at the tip
 
 Write the line only off `already-ready` or `clear` from `canon pr lift <number> --check --json`, read at the moment the line is written. A ready mark is not a merge-ready one, and `canon pr merge` refuses `ci-pending` on a pull request the mark alone vouched for.

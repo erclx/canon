@@ -517,6 +517,8 @@ describe('canon pr reads through REST alone', () => {
 
   describe('merge', () => {
     function stageReadyPull(): void {
+      git('push', '-q', 'origin', 'feat/x:main')
+      git('fetch', '-q', 'origin')
       writeFixture(
         'pull.json',
         pullRow({
@@ -627,6 +629,51 @@ describe('canon pr reads through REST alone', () => {
       expect(record).toMatchObject({ reason: 'head-moved' })
       expect(record.sha).toBeUndefined()
       expect(exit).toBe(1)
+    })
+
+    it('should refuse standing-stale naming the file a sibling merged into, and call no merge', async () => {
+      writeFileSync(join(repoRoot, 'c.txt'), '1\n2\n3\n4\n5\n')
+      git('add', 'c.txt')
+      git('commit', '-q', '-m', 'fork')
+      git('push', '-q', 'origin', 'feat/x:main')
+      git('checkout', '-q', '-b', 'sibling')
+      writeFileSync(join(repoRoot, 'c.txt'), '1\n2\n3\n4\nfive\n')
+      git('commit', '-q', '-am', 'sibling')
+      git('push', '-q', 'origin', 'sibling:main')
+      git('checkout', '-q', 'feat/x')
+      writeFileSync(join(repoRoot, 'c.txt'), 'one\n2\n3\n4\n5\n')
+      git('commit', '-q', '-am', 'branch')
+      tip = git('rev-parse', 'HEAD').trim()
+      writeFixture(
+        'pull.json',
+        pullRow({
+          draft: false,
+          state: 'open',
+          title: 'feat(pr): add a merge verb',
+          body: '## Summary\n\n- Merge one pull request\n\n## Key changes\n\n- Add `src/a.ts`\n',
+        }),
+      )
+      writeFixture('checks.json', {
+        total_count: 1,
+        check_runs: [
+          {
+            head_sha: tip,
+            status: 'completed',
+            conclusion: 'success',
+            name: 'check',
+            id: 1,
+          },
+        ],
+      })
+
+      const { record, exit } = await runMerge(['7'])
+
+      expect(record).toMatchObject({
+        reason: 'standing-stale',
+        moved: ['c.txt'],
+      })
+      expect(exit).toBe(1)
+      expect(mergeCall()).toBeUndefined()
     })
   })
 })

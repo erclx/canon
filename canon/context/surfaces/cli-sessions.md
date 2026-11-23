@@ -37,3 +37,7 @@ Holds the live-session roster and the branch claim, split by what a stub has to 
 - `resolve.ts` joins a session to its branch, scoping `--branch` to the shared directory, and confirms a row `via: 'listener'` when its socket accepts, since macOS has no process filesystem
 - `claim.ts` composes `claimed` from the roster, worktrees, and `branchRefs()`, which misses a branch pushed since the last fetch. Two readable flags stay apart so a failed read never reads unclaimed
 - `stop.ts` reads a usage-limit stop off a transcript's last 1 MiB. No contract describes the entry, so a limit-worded one of another shape reads `unknown`
+
+## Gotchas
+
+- `pr merge` reads stale from the fork point through the lift's `readBaseReading`, never from the last CI run, so a branch sharing a file with a merged sibling updates first even when both edits pass
