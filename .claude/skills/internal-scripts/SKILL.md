@@ -68,6 +68,29 @@ After editing install or sync code (`manage-*.sh`, `src/tooling/`):
 
 Read `canon/context/development/local-loop.md` before touching `.claude/hooks/` or `.husky/`. It covers the hook stdin guard, the husky POSIX `sh` constraint, and the `canon-no-seed:` marker rule from `canon/context/surfaces/tooling.md`.
 
+## Plan callers
+
+A plan here that changes a verb's command file carries a `## Callers` section saying what happens to each skill that runs the verb, since a change to the verb often owes the same change there.
+
+`canon records validate plans` reports `callers-unstated` for a calling skill no bullet covers and `callers-malformed` for a bullet it cannot read.
+
+- List the callers with `canon claude skills callers <verb>`, which prints each skill and line across `claude/skills/` and `.claude/skills/`
+- A backticked `.ts` path under `src/commands/` in `## Files to touch` fires the check, a test file excepted, and a file in a family folder or a top-level file owns every verb it registers
+- Each bullet names a skill path or a verb in backticks before a colon and one verdict after it, and a skill folder covers every file in it
+
+Add under `## Plan callers`, after its lead sentence, the three forms below.
+
+```text
+- `<skill path>`: here, <what changes in it>
+- `<skill path>`: none, <why it needs no change>
+- `canon <verb>`: none, <why no caller of the verb needs a change>
+```
+
+- A verb bullet covers every caller of that verb and of each verb under it, so `canon pr` covers the whole family
+- A verb named only in prose, such as "the lift verb", escapes the listing, so read the skill bodies for one
+
+The check runs only where `claude/skills/` exists, so a target project never sees it.
+
 ## Reference
 
 A new domain script is written in TypeScript on Bun, on the `src/cli/ui.ts` frame. A shell file over 100 lines is edited in place without growing and flagged for a rewrite.
