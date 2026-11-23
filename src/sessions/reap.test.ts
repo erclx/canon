@@ -51,11 +51,15 @@ function task(
   stem: string,
   state: TaskSessions['state'],
   ids: readonly string[],
+  extra: Partial<Pick<TaskSessions, 'landed' | 'planned'>> = {},
 ): TaskSessions {
   return {
     stem,
     state,
     entries: ids.map((sessionId) => ({ name: `name-${sessionId}`, sessionId })),
+    landed: false,
+    planned: false,
+    ...extra,
   }
 }
 
@@ -199,12 +203,101 @@ describe('planTaskReap', () => {
       stem: 'v1.0-parser',
       state: 'archived',
       entries: [{ name: 'worker-canon-parser', sessionId: REVIEWER }],
+      landed: false,
+      planned: false,
     }
 
     const plan = planTaskReap(merged, [row({})], [merged], GUARDS)
 
     expect(plan.targets).toEqual([])
     expect(plan.settled[0]).toMatchObject({ outcome: 'gone' })
+  })
+})
+
+describe('planTaskReap on finished work the task shows', () => {
+  it('should target a busy reviewer on a task whose pull request landed', () => {
+    const landed = task('v1.0-parser', 'live', [REVIEWER], { landed: true })
+    const reviewer = row({
+      sessionId: REVIEWER,
+      name: 'reviewer-canon-parser',
+      status: 'busy',
+    })
+
+    const plan = planTaskReap(landed, [reviewer], [landed], GUARDS)
+
+    expect(plan.targets).toEqual([
+      { sessionId: REVIEWER, name: 'reviewer-canon-parser', reason: 'merged' },
+    ])
+  })
+
+  it('should keep skipping a busy session on a task whose pull request has not landed', () => {
+    const open = task('v1.0-parser', 'live', [REVIEWER])
+    const reviewer = row({ sessionId: REVIEWER, status: 'busy' })
+
+    const plan = planTaskReap(open, [reviewer], [open], GUARDS)
+
+    expect(plan.targets).toEqual([])
+    expect(plan.settled[0]).toMatchObject({ reason: 'busy', detail: 'busy' })
+  })
+
+  it('should target a branchless planner on shell when the task links a plan', () => {
+    const planned = task('v1.0-parser', 'live', [PLANNER], { planned: true })
+    const planner = row({
+      sessionId: PLANNER,
+      name: 'planner-canon-parser',
+      status: 'shell',
+      branch: null,
+    })
+
+    const plan = planTaskReap(planned, [planner], [planned], GUARDS)
+
+    expect(plan.targets).toEqual([
+      { sessionId: PLANNER, name: 'planner-canon-parser', reason: 'planned' },
+    ])
+  })
+
+  it('should skip a planner on shell when the task links no plan', () => {
+    const bare = task('v1.0-parser', 'live', [PLANNER])
+    const planner = row({
+      sessionId: PLANNER,
+      name: 'planner-canon-parser',
+      status: 'shell',
+      branch: null,
+    })
+
+    const plan = planTaskReap(bare, [planner], [bare], GUARDS)
+
+    expect(plan.settled[0]).toMatchObject({ reason: 'busy', detail: 'shell' })
+  })
+
+  it('should skip a planner holding a feature branch on a planned task', () => {
+    const planned = task('v1.0-parser', 'live', [PLANNER], { planned: true })
+    const planner = row({
+      sessionId: PLANNER,
+      name: 'planner-canon-parser',
+      status: 'shell',
+      branch: 'feat/parser',
+    })
+
+    const plan = planTaskReap(planned, [planner], [planned], GUARDS)
+
+    expect(plan.settled[0]).toMatchObject({ reason: 'busy' })
+  })
+
+  it.each([
+    ['talk', 'planner-canon-parser-talk'],
+    ['controller', 'orchestrator-canon'],
+  ])('should still skip a %s session on a landed task', (reason, name) => {
+    const landed = task('v1.0-parser', 'live', [REVIEWER], {
+      landed: true,
+      planned: true,
+    })
+    const session = row({ sessionId: REVIEWER, name, status: 'busy' })
+
+    const plan = planTaskReap(landed, [session], [landed], GUARDS)
+
+    expect(plan.targets).toEqual([])
+    expect(plan.settled[0]).toMatchObject({ reason })
   })
 })
 
@@ -338,6 +431,25 @@ describe('executeReap', () => {
     expect(fake.calls).toEqual(['stop 11111111'])
     expect(rows[0]).toMatchObject({ outcome: 'stopped', clientId: '11111111' })
   })
+
+  it.each([
+    ['a stop', false, false, 'stopped'],
+    ['a dry run', false, true, 'would-stop'],
+  ])(
+    'should carry the target reason onto %s',
+    async (_name, remove, dry, outcome) => {
+      const fake = effects([WORKER], true)
+
+      const rows = await executeReap(
+        [{ ...target, reason: 'merged' }],
+        remove,
+        dry,
+        fake,
+      )
+
+      expect(rows[0]).toMatchObject({ outcome, reason: 'merged' })
+    },
+  )
 
   it('should run the client remove in place of its stop under remove', async () => {
     const fake = effects([WORKER], true)
@@ -624,12 +736,50 @@ describe('readTaskSessions', () => {
         stem: 'v1.1-lexer',
         state: 'live',
         entries: [{ name: 'worker-a', sessionId: WORKER }],
+        landed: false,
+        planned: false,
       },
       {
         stem: 'v1.0-parser',
         state: 'archived',
         entries: [{ name: 'reviewer-b', sessionId: REVIEWER }],
+        landed: false,
+        planned: false,
       },
     ])
+  })
+
+  it('should read a landed pull request and a linked plan off a task', async () => {
+    root = mkdtempSync(join(tmpdir(), 'reap-'))
+    const tasks = join(root, '.canon', 'tasks')
+    mkdirSync(tasks, { recursive: true })
+    writeFileSync(
+      join(tasks, 'v1.1-lexer.md'),
+      `# Lexer\n\nPull request: #42\nPlan: .canon/plans/feature-lexer.md\nSessions: worker-a (${WORKER})\n`,
+    )
+
+    const read = await readTaskSessions(root, {
+      stem: 'v1.1-lexer',
+      trunk: async (number) => number === 42,
+    })
+
+    expect(read[0]).toMatchObject({ landed: true, planned: true })
+  })
+
+  it('should read an unreadable trunk as not landed', async () => {
+    root = mkdtempSync(join(tmpdir(), 'reap-'))
+    const tasks = join(root, '.canon', 'tasks')
+    mkdirSync(tasks, { recursive: true })
+    writeFileSync(
+      join(tasks, 'v1.1-lexer.md'),
+      `# Lexer\n\nPull request: #42\nSessions: worker-a (${WORKER})\n`,
+    )
+
+    const read = await readTaskSessions(root, {
+      stem: 'v1.1-lexer',
+      trunk: async () => undefined,
+    })
+
+    expect(read[0]).toMatchObject({ landed: false })
   })
 })

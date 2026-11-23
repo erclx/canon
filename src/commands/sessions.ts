@@ -1,4 +1,4 @@
-import { basename, resolve } from 'node:path'
+import { basename, dirname, resolve } from 'node:path'
 import type { Command } from 'commander'
 import { checkClaim, type ClaimReport } from '@/sessions/claim'
 import {
@@ -38,7 +38,8 @@ import {
   pipeOutput,
   plural,
 } from '@/cli/ui'
-import { mainWorktreeRoot } from '@/git/worktree'
+import { listWorktrees, mainWorktreeRoot } from '@/git/worktree'
+import { gitTrunkReader } from '@/tasks/trunk'
 
 interface ListCommandOptions {
   readonly json?: boolean
@@ -350,11 +351,18 @@ export function register(program: Command): void {
         '  talk         a name carrying -talk, which waits on the operator',
         '  busy         a status other than idle or waiting, named in "detail".',
         '               A held background shell counts as finished only on',
-        '               archived or declined work',
+        "               archived or declined work, or a planned task's planner",
         '  usage-limit  stopped at a usage limit, which the operator resumes',
         '  open-task    a live task also records it, named in "detail"',
         '  recent       --finished only: no task records it and it has not sat',
         '               idle past the threshold, or its dwell is unmeasured',
+        '',
+        'Stops the task alone showed finished, read off the same "reason":',
+        "  merged       the task's recorded pull request landed on the trunk this",
+        '               clone holds, so any status is taken, a busy reviewer',
+        '               included',
+        '  planned      a planner- session holding no branch, on a task whose',
+        '               Plan: line links a plan, taken on a held shell',
         '',
         'Outcomes, read off each row\'s "outcome":',
         '  stopped, removed            the client ran and the roster dropped it',
@@ -465,7 +473,11 @@ async function runReap(
   }
 
   const root = await mainWorktreeRoot()
-  const tasks = await readTaskSessions(root)
+  const named = task === undefined ? null : basename(task).replace(/\.md$/, '')
+  const tasks = await readTaskSessions(
+    root,
+    named === null ? undefined : { stem: named, trunk: gitTrunkReader(root) },
+  )
   const own = selfOf(report.sessions, callerIdentity())
   const guards = {
     self:
@@ -782,8 +794,20 @@ async function runList(opts: ListCommandOptions): Promise<number> {
       )
     : pool
 
+  const doubt =
+    opts.branch && repository !== null
+      ? doubtIn(report, [
+          dirname(repository),
+          ...(await listWorktrees(at)).map((entry) => entry.path),
+        ])
+      : report.foreignDead
+  const claimed =
+    opts.branch && repository !== null
+      ? { ...report, foreignDead: doubt }
+      : report
+
   const claim = opts.branch
-    ? await checkClaim(opts.branch, { cwd: at, resolve: async () => report })
+    ? await checkClaim(opts.branch, { cwd: at, resolve: async () => claimed })
     : null
 
   const read: readonly ListedSession[] = shown.map((session) => ({
@@ -804,7 +828,7 @@ async function runList(opts: ListCommandOptions): Promise<number> {
     opts.branch,
     repository,
     own !== null,
-    report.foreignDead,
+    opts.branch ? doubt : report.foreignDead,
     opts.stopped ? stopsUnread : null,
   )
   if (opts.stopped && stopsUnread > 0) {
@@ -825,7 +849,10 @@ async function runList(opts: ListCommandOptions): Promise<number> {
       `${JSON.stringify({
         dir: report.dir,
         // Over the rows shown, so an unrelated row --branch dropped cannot weaken it.
-        confidence: confidenceOf(listed),
+        confidence:
+          opts.branch && listed.length === 0 && doubt > 0
+            ? 'unverified'
+            : confidenceOf(listed),
         foreignDead: report.foreignDead,
         stopsUnread,
         branch: opts.branch ?? null,
@@ -904,6 +931,23 @@ function reportConfidence(
   )
 }
 
+/**
+ * A dead foreign record could have held the branch only where its cwd sits
+ * under the repository's root or one of its worktrees, which may live outside
+ * that root. A report built without the records leaves every one in doubt.
+ */
+function doubtIn(
+  report: Extract<SessionReport, { kind: 'resolved' }>,
+  roots: readonly string[],
+): number {
+  if (report.foreign === undefined) return report.foreignDead
+  return report.foreign.filter((record) =>
+    roots.some(
+      (root) => record.cwd === root || record.cwd.startsWith(`${root}/`),
+    ),
+  ).length
+}
+
 function reportSessions(
   sessions: readonly ListedSession[],
   branch: string | undefined,
@@ -933,6 +977,11 @@ function reportSessions(
           ? `This session does not hold ${branch}.`
           : `No live session in this repository holds ${branch}.`,
       )
+      if (!scoped && foreignDead > 0) {
+        logWarn(
+          `${foreignDead} records from another pid namespace sit in this repository and no socket answers for them, so a session holding ${branch} may be missing. Treat it as unverified rather than clear.`,
+        )
+      }
       return
     }
 
