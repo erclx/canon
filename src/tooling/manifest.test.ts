@@ -72,6 +72,26 @@ describe('loadManifest', () => {
     ])
   })
 
+  it('should read gitattributes sections the way it reads gitignore ones', () => {
+    seedStack(
+      'web',
+      '[stack]\nname = "web"\n\n[gitattributes]\n"# Design record" = ["canon/design/** linguist-documentation"]\n',
+    )
+
+    expect(loadManifest(root, 'web')?.gitattributes).toEqual([
+      {
+        header: '# Design record',
+        entries: ['canon/design/** linguist-documentation'],
+      },
+    ])
+  })
+
+  it('should leave gitattributes unset on a manifest with no such table', () => {
+    seedStack('base', '[stack]\nname = "base"\n')
+
+    expect(loadManifest(root, 'base')?.gitattributes).toBeUndefined()
+  })
+
   it('should read a script whose key is bare', () => {
     seedStack('web', '[stack]\nname = "web"\n\n[scripts]\nlint = "oxlint"\n')
 

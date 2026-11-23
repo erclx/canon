@@ -55,3 +55,6 @@ packages = [
   "playwright/.cache/",
 ]
 "# Screenshots" = ["screenshots/"]
+
+[gitattributes]
+"# Design record" = ["canon/design/** linguist-documentation"]

@@ -17,6 +17,10 @@ export interface Manifest {
   readonly scripts: Readonly<Record<string, string>>
   readonly scriptOverrides: Readonly<Record<string, string>>
   readonly gitignore: readonly GitignoreSection[]
+  /**
+   * Line-merged `.gitattributes` sections from `[gitattributes]`, shaped like the gitignore ones.
+   */
+  readonly gitattributes?: readonly GitignoreSection[]
   readonly devPackages: readonly string[]
   /**
    * Config paths this stack still ships into a folder that skips it, read
@@ -149,6 +153,7 @@ export function loadManifest(
   const prepare =
     readString(asTable(parsed.scaffold).prepare) ??
     readString(asTable(parsed.verify).prepare)
+  const gitattributes = readGitignoreSections(asTable(parsed.gitattributes))
   const dir = join(toolingDir(root), stack)
 
   return {
@@ -160,6 +165,7 @@ export function loadManifest(
     scripts: pickStrings(scriptsTable),
     scriptOverrides: pickStrings(asTable(scriptsTable.override)),
     gitignore: readGitignoreSections(asTable(parsed.gitignore)),
+    ...(gitattributes.length > 0 ? { gitattributes } : {}),
     devPackages: readDevPackages(parsed.dependencies),
     ...(perRoot.length > 0 ? { perRoot } : {}),
     ...(scaffold !== undefined ? { scaffold } : {}),
@@ -205,6 +211,7 @@ function restrict(manifest: Manifest): Manifest {
     scripts: {},
     scriptOverrides: {},
     gitignore: [],
+    gitattributes: undefined,
     devPackages: [],
   }
 }

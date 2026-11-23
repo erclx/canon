@@ -120,9 +120,10 @@ The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project tha
 
 ## Design references
 
-- Expect a seeded `canon/design/index.md` in the generated shape, a heading and a lead with no groups yet, copied only when missing so a project's own index is never replaced
+- Expect a seeded `canon/design/index.md`, a heading and a lead with no groups yet, copied only when missing so a project's own index is never replaced
 - Expect `canon indexes regen canon/design` to list each `<group>.md` written beside a group folder, so no branch hand-edits a shared line of the index
 - Expect `governance/rules/ui/design-reference.md` to install once a group folder sits under `canon/design/`, since the stub alone is no reference
+- Expect `.gitattributes` to mark `canon/design/**` as linguist-documentation
 
 ## Site settings
 
