@@ -218,6 +218,8 @@ export type RestatedReport =
         readonly instructions: number
         readonly seed: number
         readonly bodies: number
+        /** Distinct `references/*.md` files read beside the bodies. */
+        readonly references: number
         /** Distinct rule files a bullet was read from, counted like `bodies`. */
         readonly rules: number
         /** Statements the three further surfaces offered, which bounds recall. */
@@ -444,12 +446,12 @@ function readBodyLines(root: string, skillsRel: string): Candidate[] {
 
   const candidates: Candidate[] = []
 
-  const files = [
-    ...new Bun.Glob('*/SKILL.md').scanSync({
-      cwd: skillsRoot,
-      onlyFiles: true,
-    }),
-  ].sort()
+  // Practice lives in `references/`, so a restatement there counts beside one in a body.
+  const files = ['*/SKILL.md', '*/references/*.md']
+    .flatMap((pattern) => [
+      ...new Bun.Glob(pattern).scanSync({ cwd: skillsRoot, onlyFiles: true }),
+    ])
+    .sort()
 
   for (const file of files) {
     const posix = file.replaceAll('\\', '/')
@@ -597,7 +599,11 @@ export function readRestated(root: string): RestatedReport {
   const bodies = SKILL_ROOTS.flatMap((skillsRel) =>
     readBodyLines(root, skillsRel),
   )
-  const bodyFiles = new Set(bodies.map((candidate) => candidate.file)).size
+  const bodyPaths = new Set(bodies.map((candidate) => candidate.file))
+  const referenceFiles = [...bodyPaths].filter((file) =>
+    file.includes('/references/'),
+  ).length
+  const bodyFiles = bodyPaths.size - referenceFiles
 
   const ruleStatements = RULE_DIRS.flatMap((rulesRel) =>
     readRuleFiles(root, rulesRel),
@@ -715,6 +721,7 @@ export function readRestated(root: string): RestatedReport {
       instructions: instructions.length,
       seed: seed.length,
       bodies: bodyFiles,
+      references: referenceFiles,
       rules: ruleFiles,
       candidates: candidates.length,
     },
