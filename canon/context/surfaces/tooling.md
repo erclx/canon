@@ -79,7 +79,7 @@ Is storage for `canon claude` and no stack, so `EXCLUDED_STACKS` in `src/tooling
 
 ### `src/tooling/`
 
-Owns the manifest walk, scan, injection engine, stamp, reference resolver, and verify. The stamp keeps a standalone add-on such as `shell` or `public` beside the core chain, so syncing one never displaces the stack it layers onto.
+Owns the manifest walk, scan, injection engine, stamp, reference resolver, and verify. The stamp keeps a standalone add-on such as `shell` or `public` beside the core chain, so syncing one never displaces the stack it layers onto. Read a golden config through `renderGolden` in `app-root.ts`, since it can carry `{{appRoot}}`.
 
 - `scan` walks the current stack first and a file seen there blocks the same path from every parent, so dependencies and gitignore entries alone resolve from the furthest ancestor inward
 - `mergeSections` writes a group header only when the whole group is missing, treats `.canon/tmp` and `.canon/tmp/` as one entry, and never rewrites a line
@@ -102,7 +102,7 @@ Holds the decline, customize, and lift transitions over `domains.tooling.disposi
 - `recordToolingChain` hashes each config the target matches, and `scan` reads a drifted config against that hash as `stale`, `edited`, or `unattributed`
 - `sync --write` replaces only a stale config and holds the rest until `--replace` names them, while `canon tooling inject` holds nothing
 - A config no recorded stack ships is never held, since a fresh scaffold ships its own copies and `canon init` records `base` before `target-setup` syncs the framework stack
-- `putDomain` rebuilds a record from the fields it knows, so a release older than the dispositions field drops it on its next tooling write and restores a declined file
+- `putDomain` rebuilds a record from the fields it knows, so an older release drops `dispositions` or `appRoot` on its next tooling write, restoring a declined file or rendering `src`
 - Scripts share the map as `package.json:<key>`, since that rebuild would drop a sibling field. The address skips `normalizeGoldenPath`, which would rewrite a key holding `/` or `..`.
 
 ### `src/tooling/install.ts`
