@@ -45,6 +45,7 @@ export const RECORD_REFUSALS = [
   'ambiguous',
   'no-outcomes',
   'out-of-range',
+  'already-closed',
   'no-plan',
   'several-plans',
   'bad-input',
@@ -374,6 +375,8 @@ export function closeOutcomeLines(
   readonly text: string
   readonly closed: readonly string[]
   readonly alreadyClosed: readonly string[]
+  /** Ticked outcomes a cut named, which no write may strike. */
+  readonly cutClosed: readonly string[]
   readonly cut: readonly string[]
   readonly alreadyCut: readonly string[]
   readonly total: number
@@ -382,6 +385,7 @@ export function closeOutcomeLines(
   const cutting = new Set(cutPositions)
   const closed: string[] = []
   const alreadyClosed: string[] = []
+  const cutClosed: string[] = []
   const cut: string[] = []
   const alreadyCut: string[] = []
   const lines = text.split('\n')
@@ -406,7 +410,8 @@ export function closeOutcomeLines(
     }
 
     if (box !== ' ') {
-      alreadyClosed.push(trimmed)
+      if (cutting.has(seen)) cutClosed.push(trimmed)
+      else alreadyClosed.push(trimmed)
       return line
     }
 
@@ -423,6 +428,7 @@ export function closeOutcomeLines(
     text: rewritten.join('\n'),
     closed,
     alreadyClosed,
+    cutClosed,
     cut,
     alreadyCut,
     total: seen,
@@ -822,6 +828,14 @@ export async function closeOutcomes(
       'out-of-range',
       `${stem} carries ${result.total} outcome(s), so ${beyond.join(', ')} names nothing.`,
       beyond.map(String),
+    )
+  }
+
+  if (result.cutClosed.length > 0) {
+    return refuse(
+      'already-closed',
+      `${stem} ticked ${result.cutClosed.length} outcome(s) a cut names, and a shipped outcome is not cut. Nothing was written.`,
+      result.cutClosed,
     )
   }
 

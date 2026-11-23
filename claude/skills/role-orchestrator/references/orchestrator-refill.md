@@ -65,6 +65,7 @@ A merge trigger runs four things in order, whoever ran the merge, since the refi
    - Run it after the links, since a promoted row gets its plan only at this step
    - The finding refuses nothing, so a row left unfilled still waits on its pick before it dispatches
    - Run `canon tasks waves --json` once the plans are linked, since a row with no plan reads as unplanned. It writes nothing, so a row's place and its `Waiting on` cell stay here.
+     - A row under `cyclic` carries its edges under `cycles`, each a stem and a source, `waiting` or `shared`
    - The block below carries each pick on its `Launch filled:` line
 
 ```plaintext

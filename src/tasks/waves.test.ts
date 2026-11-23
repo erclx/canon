@@ -184,6 +184,35 @@ describe('planWaves', () => {
     const report = await read()
     expect(report.cyclic).toEqual(['a', 'b'])
     expect(stems(report)).toEqual([['c']])
+    expect(report.cycles).toEqual([
+      { stem: 'a', edges: [{ to: 'b', source: 'waiting' }] },
+      { stem: 'b', edges: [{ to: 'a', source: 'waiting' }] },
+    ])
+  })
+
+  it('places an earlier row waiting on a later row it shares a path with, rather than in a cycle', async () => {
+    await board([
+      { stem: 'a', paths: ['src/x.ts'], waiting: '[b](b.md)' },
+      { stem: 'b', paths: ['src/x.ts'] },
+    ])
+
+    const report = await read()
+    expect(report.cyclic).toEqual([])
+    expect(stems(report)).toEqual([['b'], ['a']])
+  })
+
+  it('keeps a waiting edge to a later row sharing no path, and a shared edge named for its path', async () => {
+    await board([
+      { stem: 'a', paths: ['src/x.ts'], waiting: '[c](c.md)' },
+      { stem: 'b', paths: ['src/x.ts'], waiting: '[a](a.md)' },
+      { stem: 'c', paths: ['src/c.ts'], waiting: '[b](b.md)' },
+    ])
+
+    const report = await read()
+    expect(report.cycles.find((cycle) => cycle.stem === 'b')?.edges).toEqual([
+      { to: 'a', source: 'waiting' },
+      { to: 'a', source: 'shared', path: 'src/x.ts' },
+    ])
   })
 
   it('reports an empty Up next as ok with no waves', async () => {

@@ -48,6 +48,16 @@ export interface SharedPath {
   readonly rebases: string
 }
 
+/** One wait a row holds, from its `Waiting on` cell or from a path it shares with an earlier row. */
+export type WaveEdge =
+  | { readonly to: string; readonly source: 'waiting' }
+  | { readonly to: string; readonly source: 'shared'; readonly path: string }
+
+export interface WaveCycle {
+  readonly stem: string
+  readonly edges: readonly WaveEdge[]
+}
+
 export interface WavesReport {
   readonly ok: true
   readonly waves: readonly Wave[]
@@ -56,6 +66,8 @@ export interface WavesReport {
   readonly unplanned: readonly string[]
   /** Up next rows in a wait cycle, or waiting on one, which no wave can hold. */
   readonly cyclic: readonly string[]
+  /** Each cyclic row with the edges it waits on and where each came from, beside `cyclic`. */
+  readonly cycles: readonly WaveCycle[]
 }
 
 export type WavesOutcome = WavesReport | WavesRefused
@@ -203,11 +215,25 @@ export async function planWaves(root: string): Promise<WavesOutcome> {
     )
   }
 
-  const earlier = (holder: Holder): string[] =>
-    planned
+  const edgesOf = (holder: Holder): WaveEdge[] => {
+    const waiting = (after.get(holder.stem) ?? []).map((to): WaveEdge => ({
+      to,
+      source: 'waiting',
+    }))
+
+    // An earlier row whose own cell cites this row already waits on it, so the shared path must not wait back.
+    const shared = planned
       .slice(0, planned.indexOf(holder))
-      .filter((other) => overlap(holder, other) !== undefined)
-      .map((other) => other.stem)
+      .filter((other) => !after.get(other.stem)?.includes(holder.stem))
+      .flatMap((other): WaveEdge[] => {
+        const path = overlap(holder, other)
+        return path === undefined
+          ? []
+          : [{ to: other.stem, source: 'shared', path }]
+      })
+
+    return [...waiting, ...shared]
+  }
 
   const placed = new Map<string, number | null>()
   const visiting = new Set<string>()
@@ -221,8 +247,7 @@ export async function planWaves(root: string): Promise<WavesOutcome> {
     if (visiting.has(stem)) return null
 
     visiting.add(stem)
-    const waits = [...(after.get(stem) ?? []), ...earlier(holder)]
-    const waves = waits.map(place)
+    const waves = edgesOf(holder).map((edge) => place(edge.to))
     visiting.delete(stem)
 
     const result = waves.includes(null)
@@ -234,11 +259,13 @@ export async function planWaves(root: string): Promise<WavesOutcome> {
 
   const grouped = new Map<number, WaveRow[]>()
   const cyclic: string[] = []
+  const cycles: WaveCycle[] = []
 
   for (const holder of planned) {
     const wave = place(holder.stem)
     if (wave === null || wave === undefined) {
       cyclic.push(holder.stem)
+      cycles.push({ stem: holder.stem, edges: edgesOf(holder) })
       continue
     }
 
@@ -258,5 +285,6 @@ export async function planWaves(root: string): Promise<WavesOutcome> {
     shared: sharedPaths([...planned, ...running]),
     unplanned,
     cyclic,
+    cycles,
   }
 }
