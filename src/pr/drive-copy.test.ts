@@ -14,9 +14,13 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   branchSlug,
   buildDriveCopy,
+  checkPassPage,
   loadPreviewConfig,
+  PASS_OFFSET_SHIFT,
   readWorktreeOffset,
   runSeed,
+  startPassPreview,
+  stopPassPreview,
 } from '@/pr/drive-copy'
 
 let tempDir: string
@@ -550,5 +554,136 @@ describe('readWorktreeOffset', () => {
     expect(await readWorktreeOffset(worktree)).toMatchObject({
       kind: 'refused',
     })
+  })
+})
+
+/** Whether any process in the group `pid` leads is still alive. */
+function isGroupAlive(pid: number): boolean {
+  try {
+    process.kill(-pid, 0)
+    return true
+  } catch {
+    return false
+  }
+}
+
+describe('the pass preview', () => {
+  const base = 20_000 + Math.floor(Math.random() * 20_000)
+  const passPort = base + PASS_OFFSET_SHIFT
+
+  /** A server on the base plus the offset it is handed, answering `/` with `status`. */
+  function stubServe(status = 200): readonly string[] {
+    return [
+      process.execPath,
+      '-e',
+      [
+        `const port = ${base} + Number(process.env.WORKTREE_PORT_OFFSET)`,
+        "require('fs').writeFileSync(process.env.CANON_PREVIEW_ROOT + '/served-from', process.cwd())",
+        `Bun.serve({ port, fetch: () => new Response('<p>', { status: ${status}, headers: { 'content-type': 'text/html' } }) })`,
+      ].join('\n'),
+    ]
+  }
+
+  function start(serve: readonly string[], timeoutMs?: number) {
+    mkdirSync(copyRoot, { recursive: true })
+    return startPassPreview({
+      worktree,
+      copyRoot,
+      serve,
+      env: 'CANON_PREVIEW_ROOT',
+      basePort: base,
+      worktreeOffset: 0,
+      ...(timeoutMs === undefined ? {} : { timeoutMs }),
+    })
+  }
+
+  afterEach(async () => {
+    await stopPassPreview(copyRoot)
+  })
+
+  it('should start the server on the copy at the pass offset and record it beside the copy root', async () => {
+    const started = await start(stubServe())
+
+    expect(started).toMatchObject({
+      kind: 'started',
+      server: { port: passPort, url: `http://localhost:${passPort}` },
+    })
+    expect(readFileSync(join(copyRoot, 'served-from'), 'utf8')).toBe(
+      realpathSync(worktree),
+    )
+    expect(
+      JSON.parse(readFileSync(join(dirname(copyRoot), 'server.json'), 'utf8')),
+    ).toMatchObject({ port: passPort })
+  })
+
+  it('should end the whole server group on stop and forget it', async () => {
+    const started = await start(stubServe())
+    const pid = started.kind === 'started' ? started.server.pid : -1
+
+    const stopped = await stopPassPreview(copyRoot)
+
+    expect(stopped).toEqual({ kind: 'stopped', pid, port: passPort })
+    expect(isGroupAlive(pid)).toBe(false)
+    expect(existsSync(join(dirname(copyRoot), 'server.json'))).toBe(false)
+  })
+
+  it('should read as not running on a stop with no server started', async () => {
+    expect(await stopPassPreview(copyRoot)).toEqual({ kind: 'not-running' })
+  })
+
+  it('should fail as exited with the stderr tail when the serve command exits before answering', async () => {
+    const outcome = await start(
+      [process.execPath, '-e', "console.error('no vite'); process.exit(3)"],
+      30_000,
+    )
+
+    expect(outcome).toEqual({
+      kind: 'failed',
+      cause: 'exited',
+      exit: 3,
+      output: ['no vite'],
+      detail: expect.any(String),
+    })
+    expect(existsSync(join(dirname(copyRoot), 'server.json'))).toBe(false)
+  })
+
+  it('should fail as spawn when the serve command does not exist', async () => {
+    const outcome = await start(['canon-no-such-serve-command'])
+
+    expect(outcome).toMatchObject({ kind: 'failed', cause: 'spawn' })
+  })
+
+  it('should fail as port-taken and start nothing when the pass port already answers', async () => {
+    const holder = Bun.serve({ port: passPort, fetch: () => new Response() })
+
+    const outcome = await start(stubServe())
+    await holder.stop(true)
+
+    expect(outcome).toMatchObject({ kind: 'failed', cause: 'port-taken' })
+    expect(existsSync(join(copyRoot, 'served-from'))).toBe(false)
+  })
+
+  it('should fail as timeout and end the group when the port never answers', async () => {
+    const outcome = await start(
+      [process.execPath, '-e', 'setInterval(() => {}, 1000)'],
+      1_500,
+    )
+
+    expect(outcome).toMatchObject({ kind: 'failed', cause: 'timeout' })
+    expect(existsSync(join(dirname(copyRoot), 'server.json'))).toBe(false)
+  })
+
+  it('should read a page answering 500 at the root as stale', async () => {
+    const started = await start(stubServe(500))
+    const url = started.kind === 'started' ? started.server.url : ''
+
+    expect(await checkPassPage(url, [])).toEqual({ path: '/', status: 500 })
+  })
+
+  it('should read a page answering 200 with no failing health path as fresh', async () => {
+    const started = await start(stubServe())
+    const url = started.kind === 'started' ? started.server.url : ''
+
+    expect(await checkPassPage(url, [])).toBeUndefined()
   })
 })

@@ -1,12 +1,18 @@
+import { spawn } from 'node:child_process'
 import {
+  closeSync,
   cpSync,
   existsSync,
   lstatSync,
+  openSync,
   readdirSync,
   readFileSync,
   rmSync,
+  writeFileSync,
 } from 'node:fs'
-import { isAbsolute, join, relative, sep } from 'node:path'
+import { createConnection } from 'node:net'
+import { dirname, isAbsolute, join, relative, sep } from 'node:path'
+import { setTimeout as sleep } from 'node:timers/promises'
 import { execa } from 'execa'
 
 /** Where a project names the folders its running preview saves into. */
@@ -396,4 +402,311 @@ export async function readWorktreeOffset(
         ? `${WORKTREE_PORT_SCRIPT} printed "${printed}" and exited ${result.exitCode ?? 'on a signal'}.`
         : detail,
   }
+}
+
+/** How long a pass's server may take to answer HTTP, since a first dependency optimize runs long. */
+export const SERVE_TIMEOUT_MS = 60_000
+
+/** Added to the worktree's own offset: half the 50-port band the helper gives each worktree. */
+export const PASS_OFFSET_SHIFT = 25
+
+const STOP_GRACE_MS = 5_000
+const PAGE_TIMEOUT_MS = 10_000
+const SERVER_RECORD = 'server.json'
+const SERVER_LOG = 'server.log'
+
+export interface PassServer {
+  readonly pid: number
+  readonly port: number
+  readonly url: string
+  /** Where the server's stdout and stderr go, since a pipe would close when this process exits. */
+  readonly log: string
+}
+
+interface ServerRecord extends PassServer {
+  /** The leader's start time as `ps` prints it, so a recycled pid is never signalled. */
+  readonly started?: string
+}
+
+export type PassStart =
+  | { readonly kind: 'started'; readonly server: PassServer }
+  | {
+      readonly kind: 'failed'
+      readonly cause: 'port-taken' | 'spawn' | 'exited' | 'timeout'
+      readonly exit: number | null
+      readonly output: readonly string[]
+      readonly detail: string
+    }
+
+export type PassStop =
+  | { readonly kind: 'stopped'; readonly pid: number; readonly port: number }
+  | { readonly kind: 'not-running' }
+  | {
+      readonly kind: 'failed'
+      readonly pid: number
+      readonly port: number
+      readonly detail: string
+    }
+
+export interface PassStartInput {
+  readonly worktree: string
+  readonly copyRoot: string
+  readonly serve: readonly string[]
+  /** The variable the server reads for the copy root. */
+  readonly env: string
+  readonly basePort: number
+  readonly worktreeOffset: number
+  readonly timeoutMs?: number
+}
+
+function recordPath(copyRoot: string): string {
+  return join(dirname(copyRoot), SERVER_RECORD)
+}
+
+function isGroupAlive(pid: number): boolean {
+  try {
+    process.kill(-pid, 0)
+    return true
+  } catch {
+    return false
+  }
+}
+
+function signalGroup(pid: number, signal: NodeJS.Signals): void {
+  try {
+    process.kill(-pid, signal)
+  } catch {
+    // The group exited between the read and the signal.
+  }
+}
+
+async function leaderStart(pid: number): Promise<string | undefined> {
+  const result = await execa('ps', ['-o', 'lstart=', '-p', String(pid)], {
+    stdin: 'ignore',
+    reject: false,
+  })
+  const text = result.stdout.trim()
+  return result.exitCode === 0 && text !== '' ? text : undefined
+}
+
+/** Ends every process in the group, TERM first and KILL after the grace, and reports whether none is left. */
+async function endGroup(pid: number): Promise<boolean> {
+  for (const signal of ['SIGTERM', 'SIGKILL'] as const) {
+    signalGroup(pid, signal)
+    const deadline = Date.now() + STOP_GRACE_MS
+    while (isGroupAlive(pid) && Date.now() < deadline) await sleep(100)
+    if (!isGroupAlive(pid)) return true
+  }
+  return false
+}
+
+async function isPortOpen(port: number): Promise<boolean> {
+  const reads = ['127.0.0.1', '::1'].map(
+    (host) =>
+      new Promise<boolean>((resolve) => {
+        const socket = createConnection({ host, port })
+        socket.setTimeout(1_000)
+        socket.once('connect', () => {
+          socket.destroy()
+          resolve(true)
+        })
+        socket.once('timeout', () => {
+          socket.destroy()
+          resolve(false)
+        })
+        socket.once('error', () => resolve(false))
+      }),
+  )
+  return (await Promise.all(reads)).some(Boolean)
+}
+
+/** The final status `path` answers after redirects, or null when nothing answers inside the timeout. */
+async function statusOf(
+  url: string,
+  path: string,
+  timeoutMs: number,
+): Promise<number | null> {
+  try {
+    const response = await fetch(`${url}${path}`, {
+      signal: AbortSignal.timeout(timeoutMs),
+    })
+    await response.body?.cancel()
+    return response.status
+  } catch {
+    return null
+  }
+}
+
+function logTail(log: string): readonly string[] {
+  const lines = existsSync(log) ? readFileSync(log, 'utf8').split('\n') : []
+  while (lines.length > 0 && lines.at(-1)?.trim() === '') lines.pop()
+  return lines.slice(-SEED_STDERR_LINES)
+}
+
+function readServerRecord(path: string): ServerRecord | undefined {
+  try {
+    const parsed: unknown = JSON.parse(readFileSync(path, 'utf8'))
+    if (typeof parsed !== 'object' || parsed === null) return undefined
+    const { pid, port } = parsed as Record<string, unknown>
+    return Number.isInteger(pid) && Number(pid) > 0 && Number.isInteger(port)
+      ? (parsed as ServerRecord)
+      : undefined
+  } catch {
+    return undefined
+  }
+}
+
+interface ServeExit {
+  readonly code: number | null
+  readonly error?: string
+}
+
+/**
+ * Starts the project's `serve` detached from the worktree on the copy, with
+ * `WORKTREE_PORT_OFFSET` at the worktree's offset plus the shift, and waits for
+ * any HTTP answer on the port that derives. It never binds beside a port that
+ * already answers, and on every failure it ends what it started and forgets it.
+ */
+export async function startPassPreview(
+  input: PassStartInput,
+): Promise<PassStart> {
+  const offset = input.worktreeOffset + PASS_OFFSET_SHIFT
+  const port = input.basePort + offset
+  const url = `http://localhost:${port}`
+  if (await isPortOpen(port)) {
+    return {
+      kind: 'failed',
+      cause: 'port-taken',
+      exit: null,
+      output: [],
+      detail: `Port ${port} already answers, so the pass's server would bind beside another server.`,
+    }
+  }
+
+  const record = recordPath(input.copyRoot)
+  const log = join(dirname(record), SERVER_LOG)
+  const fd = openSync(log, 'w')
+  const [command = '', ...args] = input.serve
+  const child = spawn(command, args, {
+    cwd: input.worktree,
+    env: {
+      ...process.env,
+      [input.env]: input.copyRoot,
+      WORKTREE_PORT_OFFSET: String(offset),
+    },
+    detached: true,
+    stdio: ['ignore', fd, fd],
+  })
+  closeSync(fd)
+  let ended: ServeExit | undefined
+  const exited = new Promise<ServeExit>((resolve) => {
+    child.once('error', (error) =>
+      resolve({ code: null, error: error.message }),
+    )
+    child.once('exit', (code) => resolve({ code }))
+  }).then((exit) => (ended = exit))
+
+  const pid = child.pid
+  if (pid === undefined) {
+    const exit = await exited
+    return {
+      kind: 'failed',
+      cause: 'spawn',
+      exit: null,
+      output: logTail(log),
+      detail: `The serve command could not start: ${exit.error ?? command}`,
+    }
+  }
+  const server: PassServer = { pid, port, url, log }
+  const started = await leaderStart(pid)
+  writeFileSync(
+    record,
+    `${JSON.stringify({ ...server, ...(started === undefined ? {} : { started }) })}\n`,
+  )
+
+  const deadline = Date.now() + (input.timeoutMs ?? SERVE_TIMEOUT_MS)
+  while (ended === undefined && Date.now() < deadline) {
+    if ((await statusOf(url, '/', 2_000)) !== null) {
+      child.unref()
+      return { kind: 'started', server }
+    }
+    await sleep(250)
+  }
+
+  // Read before the kill, whose own exit event would otherwise read as an early exit.
+  const exit = ended
+  await endGroup(pid)
+  rmSync(record, { force: true })
+  const output = logTail(log)
+  return exit === undefined
+    ? {
+        kind: 'failed',
+        cause: 'timeout',
+        exit: null,
+        output,
+        detail: `Nothing answered on ${url} within ${(input.timeoutMs ?? SERVE_TIMEOUT_MS) / 1000} seconds, so the server was stopped.`,
+      }
+    : {
+        kind: 'failed',
+        cause: 'exited',
+        exit: exit.code,
+        output,
+        detail: `The serve command exited before ${url} answered.`,
+      }
+}
+
+/**
+ * Ends the server the last start recorded beside the copy root, its whole
+ * process group, and forgets it. A record whose group is gone, or whose pid now
+ * leads another process, reads as not running and is never signalled.
+ */
+export async function stopPassPreview(copyRoot: string): Promise<PassStop> {
+  const path = recordPath(copyRoot)
+  if (!existsSync(path)) return { kind: 'not-running' }
+  const record = readServerRecord(path)
+  const leader =
+    record === undefined ? undefined : await leaderStart(record.pid)
+  const ours =
+    record !== undefined &&
+    isGroupAlive(record.pid) &&
+    (record.started === undefined ||
+      leader === undefined ||
+      leader === record.started)
+  if (!ours) {
+    rmSync(path, { force: true })
+    return { kind: 'not-running' }
+  }
+  const { pid, port } = record
+  if (!(await endGroup(pid))) {
+    return {
+      kind: 'failed',
+      pid,
+      port,
+      detail: `Process group ${pid} survived TERM and KILL, so the server on port ${port} may still answer.`,
+    }
+  }
+  rmSync(path, { force: true })
+  return { kind: 'stopped', pid, port }
+}
+
+/**
+ * Whether the pass's page is fresh: `/` answering inside the timeout with no
+ * 5xx, and each declared health path answering 2xx. Returns the first failing
+ * path, with a null status for no answer, or undefined when every one passes.
+ */
+export async function checkPassPage(
+  url: string,
+  healthPaths: readonly string[],
+): Promise<
+  { readonly path: string; readonly status: number | null } | undefined
+> {
+  const root = await statusOf(url, '/', PAGE_TIMEOUT_MS)
+  if (root === null || root >= 500) return { path: '/', status: root }
+  for (const path of healthPaths) {
+    const status = await statusOf(url, path, PAGE_TIMEOUT_MS)
+    if (status === null || status < 200 || status >= 300) {
+      return { path, status }
+    }
+  }
+  return undefined
 }
