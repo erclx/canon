@@ -79,6 +79,16 @@ function readReferences(left: string): Reference[] | string {
   return out
 }
 
+/**
+ * Whether a text cites a path as a whole path, in a code span, a link target, or bare
+ * prose. A path flanked by more path characters is a longer path, so `a.ts` does not
+ * match `src/a.ts`, while a `:12` or `#parse` suffix still does.
+ */
+function cites(text: string, path: string): boolean {
+  const escaped = path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return new RegExp(`(?<![\\w./-])${escaped}(?![\\w/-]|\\.\\w)`).test(text)
+}
+
 /** Every field an item carries, where a shared path would be cited. */
 function fieldText(item: IntakeItem): string {
   return [
@@ -94,14 +104,14 @@ function fieldText(item: IntakeItem): string {
 }
 
 type Resolved =
-  | { readonly kind: 'ok'; readonly cited: ReadonlySet<string>[] }
+  | { readonly kind: 'ok'; readonly cited: string[] }
   | { readonly kind: 'unresolved'; readonly message: string }
 
 function resolveItems(
   refs: readonly Reference[],
   clusters: ReadonlyMap<string, string>,
 ): Resolved {
-  const cited: ReadonlySet<string>[] = []
+  const cited: string[] = []
 
   for (const ref of refs) {
     const text = clusters.get(ref.file)
@@ -121,7 +131,7 @@ function resolveItems(
           message: `names item ${label}, which \`${ref.file}\` does not hold`,
         }
       }
-      cited.push(new Set(codeSpans(fieldText(item))))
+      cited.push(fieldText(item))
     }
   }
 
@@ -138,7 +148,7 @@ function resolveItems(
 /**
  * Reads each `Bundle` row of an overview against the cluster files it names. A path
  * counts as shared only when it is a file, never a folder, and every named item
- * cites it in a code span on one of its fields.
+ * cites it on one of its fields, in a code span, a link, or bare prose.
  */
 export function checkBundles(
   overview: string,
@@ -183,7 +193,7 @@ export function checkBundles(
 
     const paths = codeSpans(sharing[1]).filter((path) => !path.endsWith('/'))
     const common = paths.some((path) =>
-      resolved.cited.every((spans) => spans.has(path)),
+      resolved.cited.every((text) => cites(text, path)),
     )
 
     if (!common) {

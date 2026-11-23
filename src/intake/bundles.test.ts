@@ -64,6 +64,38 @@ describe('checkBundles', () => {
     expect(checkBundles(text, clusters).unshared).toHaveLength(1)
   })
 
+  it('should count a plain-label link, a bare path, and a suffixed span as citing', () => {
+    const clusters = new Map([
+      [
+        '01-a.md',
+        cluster({
+          '1': 'edit [a.ts](src/a.ts) in place',
+          '2': 'edit src/a.ts, then the tests',
+          '3': 'edit `src/a.ts:12` and `src/a.ts#parse`',
+        }),
+      ],
+    ])
+    const text = overview(
+      '- Bundle a: `01-a.md` items 1 to 3, sharing `src/a.ts`',
+    )
+
+    expect(checkBundles(text, clusters)).toEqual(CLEAN)
+  })
+
+  it('should not count a longer path that merely contains the shared one', () => {
+    const clusters = new Map([
+      [
+        '01-a.md',
+        cluster({ '1': 'edit `src/a.ts`', '2': 'edit `lib/src/a.ts.bak`' }),
+      ],
+    ])
+    const text = overview(
+      '- Bundle a: `01-a.md` items 1 and 2, sharing `src/a.ts`',
+    )
+
+    expect(checkBundles(text, clusters).unshared).toHaveLength(1)
+  })
+
   it('should accept any one shared path every item cites', () => {
     const clusters = new Map([
       [

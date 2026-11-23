@@ -116,6 +116,7 @@ Only a shared file bundles, since separate branches on one file rebase on each o
 `canon records validate intake` reads each bundle row in the form the template fixes, with each cluster file in a code span, its item numbers after it, and the shared paths in code spans after `sharing`, and it reports three ways:
 
 - A bundle whose items do not all cite one shared file reports `bundle-unshared` and fails the exit
+- An item cites the shared file when its fields carry the full path in a code span, a link, or bare prose, with or without a `:12` suffix
 - A folder never counts as the shared file, and a bare filename in one item does not match the full path in another
 - A row the reader cannot resolve to items reports `bundle-unresolved` under `structure` and never sets the exit
 
