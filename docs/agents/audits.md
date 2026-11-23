@@ -80,7 +80,7 @@ A key may carry a growth tolerance, a fraction of its recorded value. A growth i
 | `test-order`         | `canon gov test-order`              | Implementations that reached branch history before their test                                                          | Reports        |
 | `secrets`            | `canon secrets scan`                | Credential-shaped values in the shipped tree                                                                           | Gates          |
 | `labels`             | `canon labels audit`                | Changed paths no row of the label map reaches                                                                          | Reports        |
-| `restated`           | `canon gov restated`                | Instructions `CLAUDE.md` states that a second surface states too                                                       | Reports        |
+| `restated`           | `canon gov restated`                | Instructions `CLAUDE.md` states that a second surface states too, skill references included                            | Reports        |
 | `rules`              | `canon gov audit`                   | Rules past a shape limit or out of step with a ledger, and here rules short of one                                     | Reports        |
 | `counts`             | `canon gov counts`                  | Sentences stating a closed catalog's size that disagree with the tree                                                  | Reports        |
 | `census`             | `canon census`                      | File count, extension breakdown, files per folder, sibling prefix groups, and line total                               | Reports        |

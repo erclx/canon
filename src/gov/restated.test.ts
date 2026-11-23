@@ -137,6 +137,29 @@ describe('readRestated', () => {
     expect(report.counts.contradictions).toBe(0)
   })
 
+  it('reads a skill reference beside the bodies', () => {
+    write(
+      'CLAUDE.md',
+      '- Write temporary files to `.canon/tmp/<slug>/<file>.md` in the project root.',
+    )
+    write('tooling/claude/seeds/CLAUDE.md', '- Unrelated seed guidance.')
+    write('claude/skills/alpha/SKILL.md', '# Alpha\n\nSome prose.')
+    write(
+      'claude/skills/alpha/references/scratch.md',
+      '# Scratch\n\n- Write scratch output to `.canon/tmp/<slug>/<file>.md` under the project root.',
+    )
+
+    const report = measured(readRestated(ROOT))
+    const entry = entryFor(report, 'Write temporary files')
+
+    expect(entry.surfaces[0].restatement).toBe('repetition')
+    expect(entry.surfaces[0].file).toBe(
+      'claude/skills/alpha/references/scratch.md',
+    )
+    expect(report.corpus.references).toBe(1)
+    expect(report.corpus.bodies).toBe(1)
+  })
+
   it('separates a restatement whose prohibition flips from one that repeats', () => {
     write(
       'CLAUDE.md',
