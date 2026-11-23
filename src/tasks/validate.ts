@@ -411,10 +411,11 @@ const RANK_VERB =
 const RANK_OBJECT = /\bv\d+\.\d+\b|\bgroups?\b|\brows?\b/i
 
 /**
- * A clause boundary: punctuation or one of two conjunctions that hang a reason
- * off a position claim. A dot beside a digit stays inside a `v80.4` label.
+ * A clause boundary: the three punctuation marks that end one plus the two
+ * conjunctions live cells use to hang a reason off a position claim. The marks
+ * are bounded away from digits so `v80.4` stays one token.
  */
-const CLAUSE_BREAK = /(?<!\d)\.(?!\d)|[;,]|\band\b|\bbecause\b/i
+const CLAUSE_BREAK = /(?<!\d)[.;,](?!\d)|\band\b|\bbecause\b/i
 
 /**
  * Whether a `Waiting on` cell ranks its row against something rather than
@@ -1317,10 +1318,19 @@ export async function readCitedStems(
   return bare.kind === 'stems' ? [...bare.stems] : []
 }
 
+/** Where a blocker clause ends. A comma after a label ends it, a dot inside a filename does not, and `and` does not. */
+const BLOCKER_BREAK = /\.(?=\s|$)|[;,]|\bbecause\b/i
+
+/** A verb saying the row sits beside a task, never behind it. */
+const BESIDE_VERB = new RegExp(
+  `${RANK_VERB.source}|\\bshares\\b|\\blaunches\\s+with\\b`,
+  'i',
+)
+
 /**
- * The tasks a `Waiting on` cell cites as blockers, leaving out a clause that
- * ranks the row, since a ranking places a row and never gates it. Links are
- * held aside so the dot in a filename is no clause break.
+ * The tasks a `Waiting on` cell cites as blockers. Each clause is read up to
+ * a ranking, sharing, or launches-with verb, since those place a row and never
+ * gate it. Links are held aside so a filename's dot is no clause break.
  */
 export async function readBlockerStems(
   cell: string,
@@ -1332,8 +1342,11 @@ export async function readBlockerStems(
     return `\uE000${links.length - 1}\uE001`
   })
   const blockers = masked
-    .split(CLAUSE_BREAK)
-    .filter((clause) => !RANK_VERB.test(clause))
+    .split(BLOCKER_BREAK)
+    .map((clause) => {
+      const at = clause.search(BESIDE_VERB)
+      return at < 0 ? clause : clause.slice(0, at)
+    })
     .join(', ')
     .replace(/\uE000(\d+)\uE001/g, (_, index) => links[Number(index)])
 
