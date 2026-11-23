@@ -44,6 +44,15 @@ A board frame runs a quiz and cannot save what the learner picked, so the surfac
 - Keep the learning record on the board as a frame the session writes from what the learner reports, beside the lesson it records
 - Keep the record as a file beside the standalone lessons when the project has no board
 
+## Reading mode
+
+A learner who says they do not want to be quizzed in chat gets the remaining lessons in reading mode. Switch on that statement alone, never on short replies or a guess about what they would prefer.
+
+- Drop the chat gate, being the retrieval asked before each advance and the one a returning session opens on, so the learner moves at their own pace
+- Keep the quiz and the teach-back on the page. The page runs them, and a learner who declined in chat may still try them, so a later ask for a quiz is answered as usual.
+- Draw the remaining lessons together rather than one per session, since nothing paces them
+- Record the opt-out in the learning record per `${CLAUDE_SKILL_DIR}/references/pedagogy.md`, and end it when the learner asks for retrieval again
+
 ## The lesson kit
 
 Every lesson takes one look, shipped as the Frameboard kit folder `${CLAUDE_SKILL_DIR}/assets/lesson/`. Read its `kit.md` before writing a lesson page, for the page a lesson writes, the course map, and the classes to reach for.
@@ -55,11 +64,12 @@ Every lesson takes one look, shipped as the Frameboard kit folder `${CLAUDE_SKIL
 
 ## Excuses and rebuttals
 
-| Excuse                                    | Rebuttal                                                                                     |
-| ----------------------------------------- | -------------------------------------------------------------------------------------------- |
-| They followed the explanation, so move on | Following is fluency. Advance on a retrieval the learner passed unaided.                     |
-| Review the last lesson before testing it  | Review rebuilds the fluency the test would have measured. Test first, then fill what missed. |
-| The answer is obvious from the options    | Then the distractors are not misconceptions anyone holds. Rewrite them.                      |
+| Excuse                                    | Rebuttal                                                                                      |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------- |
+| They followed the explanation, so move on | Following is fluency. Advance on a retrieval the learner passed unaided.                      |
+| Review the last lesson before testing it  | Review rebuilds the fluency the test would have measured. Test first, then fill what missed.  |
+| The answer is obvious from the options    | Then the distractors are not misconceptions anyone holds. Rewrite them.                       |
+| They declined quizzing, so cut the quiz   | Only the chat gate goes. The page keeps its quiz and teach-back for a learner who wants them. |
 
 ## Red flags
 
