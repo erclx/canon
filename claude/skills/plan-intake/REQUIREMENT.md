@@ -17,7 +17,7 @@ An empty operator slot reads as consent under a blank-means-accept contract, whi
 - Measure every problem line against the tree, running a defect's one-command repro read-only or marking it not reproduced here
 - Close every item with a verdict and a suggested pick on each question, and treat an empty operator slot as unread
 - Reserve the index number, carry the domain in every other filename, and number a new folder past the highest ordinal across intake and groundwork
-- Confine writes to the intake folder and name the heading and the act beside every path written
+- Confine writes to the intake folder and its own board project, and name the heading and the act beside every path written
 
 ## Must not
 
@@ -25,6 +25,7 @@ An empty operator slot reads as consent under a blank-means-accept contract, whi
 - Fill an operator's slot, or replace a verdict with an overlap line
 - Reserve mid-range numbers or date every file
 - Open a folder for a single question or for no dump
+- Draw to settle a measurement, write into a pick round's project or an accepted frame, or cite a frame from the board alone
 
 ## Out of scope
 

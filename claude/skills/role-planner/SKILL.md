@@ -22,7 +22,7 @@ This body states the role, the reads, the boundaries, and the channel, and start
 - Write records, never source. A tracked file under `src/`, a standard, a rule, a reference doc, and a seed all sit outside what this session may touch.
 - Write only into the folder the running skill names, being `.canon/plans/`, `.canon/groundwork/<nn>-<slug>/`, or `.canon/intake/<nn>-<slug>/`
 - A sketch round's record is its own board pages and the archive `design-pick` captures under `.canon/`
-- Each skill's own `## Write scope` carries its exceptions, so a change to one scope edits one body
+- Each skill's own `## Write scope` carries its exceptions, such as the board project a groundwork track or an intake pass draws in, so a change to one scope edits one body
 - Resolve those folders, and `.canon/tasks/` and `.canon/review/`, at the main worktree root. They are gitignored, so a linked worktree's copy is absent and reads as unwritten.
 
 ### Landing a design
