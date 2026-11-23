@@ -22,6 +22,7 @@ import {
   driveLogStructure,
   groundworkStructure,
   intakeStructure,
+  planStructure,
   type StructureEntry,
   structureFindings,
 } from '@/records/structure'
@@ -940,13 +941,14 @@ async function validateFiles(
   kind: RecordKind,
   files: readonly string[],
   check: (name: string, text: string) => Finding[],
+  report: (text: string) => StructureEntry[],
 ): Promise<ValidateReport> {
   const perFile = await Promise.all(
     files.map(async (file) => {
       const text = await readFile(join(dir, file), 'utf8')
       return {
         findings: check(file, text),
-        structure: structureFindings(text).map((entry) => ({
+        structure: report(text).map((entry) => ({
           ...entry,
           record: file,
           subject: file,
@@ -1034,8 +1036,12 @@ export async function validateRecords(
 
   if (kind === 'plans') {
     const counterpart = await readCounterpartRoot(root)
-    return validateFiles(dir, kind, names, (name, text) =>
-      checkPlan(name, text, counterpart, documentReader(root)),
+    return validateFiles(
+      dir,
+      kind,
+      names,
+      (name, text) => checkPlan(name, text, counterpart, documentReader(root)),
+      planStructure,
     )
   }
   if (kind === 'sessions') return validateSessionMaps(dir, names)

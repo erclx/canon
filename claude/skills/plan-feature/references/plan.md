@@ -121,6 +121,8 @@ Every hand-written record under `.canon/` holds to six criteria, being a plan, a
 
 A run of labeled field bullets, each opening on a bold label, is exempt from `S2`, as `markdown.md` exempts it. An intake item's fields are also exempt from `S4`, and its numbered H3 from `S3`, since the item template fixes both.
 
+A plan's `S4` counts a bullet's characters outside its code spans, since a path or a command is most of the length and a writer cannot shorten it. An unclosed backtick counts as text, and a question's `- Suggested:` line is held to the limit on its prose.
+
 - `canon records validate <kind> <record>` reports `S1` to `S5` under `structure`, and never in the exit, since every record written before the criteria misses `S1`
 - `canon tasks plan-reach` reports an `S6` miss as an unclaimed bare filename
 - A writing skill reads the report for the one record it wrote and fixes each entry before it stops
