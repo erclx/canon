@@ -54,6 +54,7 @@ import {
   type FamilyGrouping,
   groupByFamily,
   listSkills,
+  resolveSkillsCorpus,
 } from '@/claude/skills-list'
 import {
   type ReachRefusal,
@@ -61,6 +62,7 @@ import {
   scanReach,
 } from '@/claude/skills-reach'
 import { SKILL_CASES } from '@/claude/cases/all'
+import { callersOf, readCallerIndex } from '@/claude/skills-callers'
 import {
   loadCaseCorpus,
   type RankRefusal,
@@ -447,18 +449,20 @@ export function register(program: Command): void {
 
   const skills = claude
     .command('skills')
-    .description('Plugin skill catalog (list, audit, drift, reach, rank)')
+    .description(
+      'Plugin skill catalog (list, audit, drift, reach, callers, rank)',
+    )
     .argument(
       '[subcommand]',
-      "One of 'list', 'audit', 'drift', 'reach', or 'rank'",
+      "One of 'list', 'audit', 'drift', 'reach', 'callers', or 'rank'",
     )
     .helpOption('-h, --help', 'Show this help message')
     .action((subcommand: string | undefined) => {
       intro('canon claude')
       logError(
         subcommand === undefined
-          ? "Missing subcommand. Use 'list', 'audit', 'drift', 'reach', or 'rank'."
-          : `Unknown subcommand: ${subcommand}. Use 'list', 'audit', 'drift', 'reach', or 'rank'.`,
+          ? "Missing subcommand. Use 'list', 'audit', 'drift', 'reach', 'callers', or 'rank'."
+          : `Unknown subcommand: ${subcommand}. Use 'list', 'audit', 'drift', 'reach', 'callers', or 'rank'.`,
       )
       outro()
       process.exitCode = 1
@@ -602,6 +606,39 @@ export function register(program: Command): void {
     )
     .action((path: string | undefined, opts: SkillsReachOptions) => {
       process.exitCode = runSkillsReach(path, opts)
+    })
+
+  skills
+    .command('callers')
+    .description('List the skill lines that run a canon verb')
+    .argument('<verb...>', "The verb, such as 'tooling scaffold'")
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Scope:',
+        '  Every SKILL.md and references/*.md under claude/skills/ and',
+        '  .claude/skills/ of the current directory. A line counts when it',
+        '  spells `canon <verb>` outside a fenced sample that is not a shell',
+        '  block, and a family verb such as `claude skills` matches every verb',
+        '  under it.',
+        '',
+        'Exit codes:',
+        '  0  the listing completed, with or without a caller',
+        '  1  refused, with the reason on stderr',
+        '',
+        'A verb named only in prose, such as "the lift verb", is not matched.',
+        '',
+        'Examples:',
+        '  canon claude skills callers tooling scaffold',
+        '  canon claude skills callers "pr drive-copy" --json',
+        '',
+      ].join('\n'),
+    )
+    .action((verb: string[], opts: SkillsCallersOptions) => {
+      process.exitCode = runSkillsCallers(verb.join(' '), opts)
     })
 
   skills
@@ -1267,6 +1304,46 @@ function emitPluginUpdate(
   process.stdout.write(
     `${JSON.stringify({ ...record, message: singleLine(record.message) })}\n`,
   )
+}
+
+interface SkillsCallersOptions {
+  json?: boolean
+}
+
+function runSkillsCallers(verb: string, opts: SkillsCallersOptions): number {
+  const root = process.cwd()
+  if (resolveSkillsCorpus(root) === undefined) {
+    const message =
+      'Neither claude/skills/ nor .claude/skills/ here, so this project carries no skill body to read.'
+    frameError(message)
+    if (opts.json) {
+      process.stdout.write(
+        `${JSON.stringify({ root, reason: 'no-skills', message })}\n`,
+      )
+    }
+    return 1
+  }
+
+  const callers = callersOf(readCallerIndex(root), verb)
+
+  intro('canon claude skills callers')
+  logStep(`canon ${verb}`)
+  if (callers.length === 0) {
+    logInfo('No skill line spells this verb.')
+  } else {
+    pipeOutput(
+      callers
+        .map((caller) => `${caller.skill}  ${caller.file}:${caller.line}`)
+        .join('\n'),
+    )
+  }
+  outro()
+
+  if (opts.json) {
+    process.stdout.write(`${JSON.stringify({ root, verb, callers })}\n`)
+  }
+
+  return 0
 }
 
 /** What a reader does about the one way the corpus fails to build. */
