@@ -4,6 +4,11 @@ import { join } from 'node:path'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { linesOutsideFences } from '@/markdown/scan'
 import {
+  checkCeiling,
+  documentReader,
+  type ReadDocument,
+} from '@/records/ceiling'
+import {
   checkCounterparts,
   type CounterpartRoot,
   readCounterpartRoot,
@@ -68,6 +73,7 @@ export const FINDING_KINDS = [
   'fan-in-unmatched',
   'counterpart-unstated',
   'counterpart-malformed',
+  'ceiling-unstated',
 ] as const
 
 export type FindingKind = (typeof FINDING_KINDS)[number]
@@ -521,6 +527,7 @@ export function checkPlan(
   name: string,
   text: string,
   counterpart?: CounterpartRoot,
+  readDocument?: ReadDocument,
 ): Finding[] {
   const findings: Finding[] = []
 
@@ -596,6 +603,14 @@ export function checkPlan(
         sections.get('Counterparts'),
         counterpart,
       ).map((found) => finding(found.kind, name, found.subject, found.message)),
+    )
+  }
+
+  if (readDocument) {
+    findings.push(
+      ...checkCeiling(sections.get('Files to touch') ?? [], readDocument).map(
+        (found) => finding(found.kind, name, found.subject, found.message),
+      ),
     )
   }
 
@@ -1020,7 +1035,7 @@ export async function validateRecords(
   if (kind === 'plans') {
     const counterpart = await readCounterpartRoot(root)
     return validateFiles(dir, kind, names, (name, text) =>
-      checkPlan(name, text, counterpart),
+      checkPlan(name, text, counterpart, documentReader(root)),
     )
   }
   if (kind === 'sessions') return validateSessionMaps(dir, names)
