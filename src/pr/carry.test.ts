@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   isInert,
   readCarry,
+  readMergeCarry,
   readRebaseCarry,
   readUiCarry,
   type RebaseRead,
@@ -266,6 +267,64 @@ describe('readRebaseCarry', () => {
 
   it('should carry nothing when the comparison could not be read', async () => {
     const carry = await readRebaseCarry(rebaseRead(undefined), DRIVEN, TIP)
+
+    expect(carry).toEqual({ kind: 'unread' })
+  })
+})
+
+describe('readMergeCarry', () => {
+  function reads(
+    unmerged: readonly string[] | undefined,
+    rebased?: RebaseRead,
+  ): Parameters<typeof readMergeCarry>[0] {
+    return {
+      readUnmerged: async () => unmerged,
+      readRebased: rebaseRead(rebased),
+    }
+  }
+
+  it('should carry across merges of the base with the branch diff equal', async () => {
+    const carry = await readMergeCarry(
+      reads([], { differingPaths: [] }),
+      DRIVEN,
+      TIP,
+    )
+
+    expect(carry).toEqual({ kind: 'merged', carriedFrom: DRIVEN })
+  })
+
+  it('should name the differing paths when a merge changed the branch diff', async () => {
+    const carry = await readMergeCarry(
+      reads([], { differingPaths: ['README.md'] }),
+      DRIVEN,
+      TIP,
+    )
+
+    expect(carry).toEqual({ kind: 'changed', differingPaths: ['README.md'] })
+  })
+
+  it('should refuse a commit of the branch even with the diff equal', async () => {
+    const carry = await readMergeCarry(
+      reads([TIP], { differingPaths: [] }),
+      DRIVEN,
+      TIP,
+    )
+
+    expect(carry).toEqual({ kind: 'unmerged' })
+  })
+
+  it('should carry nothing when the commits could not be listed', async () => {
+    const carry = await readMergeCarry(
+      reads(undefined, { differingPaths: [] }),
+      DRIVEN,
+      TIP,
+    )
+
+    expect(carry).toEqual({ kind: 'unread' })
+  })
+
+  it('should carry nothing when the comparison could not be read', async () => {
+    const carry = await readMergeCarry(reads([]), DRIVEN, TIP)
 
     expect(carry).toEqual({ kind: 'unread' })
   })
