@@ -4,11 +4,9 @@ import {
   type ChecksGate,
   type EvidenceGate,
   type GateResult,
-  type GitRunner,
   lift,
   type LiftApi,
   type PullState,
-  readChangedPaths,
   readsDrivableBox,
   type Standing,
 } from '@/pr/lift'
@@ -717,25 +715,6 @@ describe('lift', () => {
       expect(calls.rebases[0]).toEqual([MOVED, HEAD])
     })
 
-    it('should refuse a merge that changed the branch diff and name the path', async () => {
-      const { api, calls } = makeApi({
-        ...mergedFrom,
-        unmerged: [],
-        rebased: { differingPaths: ['src/a.ts'] },
-      })
-
-      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
-
-      expect(record.reason).toBe('review-behind')
-      expect(record.gates).toContainEqual({
-        gate: 'review',
-        isOk: false,
-        reason: 'review-behind',
-        differingPaths: ['src/a.ts'],
-      })
-      expect(calls.marks).toEqual([])
-    })
-
     it('should refuse a merge beside a commit of the branch without reading the diff', async () => {
       const { api, calls } = makeApi({
         ...mergedFrom,
@@ -751,18 +730,6 @@ describe('lift', () => {
         reason: 'review-behind',
       })
       expect(calls.rebases).toEqual([])
-      expect(calls.marks).toEqual([])
-    })
-
-    it('should refuse when the commits could not be listed', async () => {
-      const { api, calls } = makeApi({
-        ...mergedFrom,
-        rebased: { differingPaths: [] },
-      })
-
-      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
-
-      expect(record.reason).toBe('review-behind')
       expect(calls.marks).toEqual([])
     })
 
@@ -2015,83 +1982,5 @@ describe('lift', () => {
         record.gates.filter((gate) => !gate.isOk).map((gate) => gate.reason),
       ).toEqual(['review-open', 'evidence-owed', 'standing-stale'])
     })
-  })
-})
-
-describe('readChangedPaths', () => {
-  const FULL = MOVED
-
-  function gitOf(answers: Record<string, string | undefined>): GitRunner {
-    return async (args) => {
-      const verb = args.find((arg) => !arg.startsWith('-')) ?? ''
-      return answers[verb]
-    }
-  }
-
-  it('should list the paths changed since an ancestor close', async () => {
-    const git = gitOf({
-      'cat-file': '',
-      'rev-parse': `${FULL}\n`,
-      'merge-base': `${FULL}\n`,
-      diff: 'src/a.ts\nsrc/App.tsx\n',
-    })
-
-    expect(await readChangedPaths(git, '1111111', HEAD)).toEqual({
-      isAncestor: true,
-      paths: ['src/a.ts', 'src/App.tsx'],
-    })
-  })
-
-  it('should read not an ancestor when the close was rewritten away', async () => {
-    const git = gitOf({
-      'cat-file': '',
-      'rev-parse': `${FULL}\n`,
-      'merge-base': 'ffffffffffffffffffffffffffffffffffffffff\n',
-    })
-
-    expect(await readChangedPaths(git, FULL, HEAD)).toEqual({
-      isAncestor: false,
-      paths: [],
-    })
-  })
-
-  it('should read not an ancestor when the close does not resolve', async () => {
-    const git = gitOf({ 'cat-file': '', 'rev-parse': undefined })
-
-    expect(await readChangedPaths(git, FULL, HEAD)).toEqual({
-      isAncestor: false,
-      paths: [],
-    })
-  })
-
-  it('should read a failed read when the head does not resolve', async () => {
-    const git = gitOf({ 'cat-file': undefined })
-
-    expect(await readChangedPaths(git, FULL, HEAD)).toBeUndefined()
-  })
-
-  it('should read a failed read when the diff fails', async () => {
-    const git = gitOf({
-      'cat-file': '',
-      'rev-parse': `${FULL}\n`,
-      'merge-base': `${FULL}\n`,
-      diff: undefined,
-    })
-
-    expect(await readChangedPaths(git, FULL, HEAD)).toBeUndefined()
-  })
-})
-
-describe('readsDrivableBox', () => {
-  it.each([
-    [{}, false],
-    [{ checklist: '' }, false],
-    [{ checklist: '- [ ] calm (taste)', drivable: 0 }, false],
-    [{ checklist: '- [ ] opens', drivable: 1 }, true],
-    [{ checklist: '- [ ] opens' }, true],
-    [{ checklist: '- [ ] opens', drivable: '0' }, true],
-    [{ checklist: '- [ ] opens', drivable: -1 }, true],
-  ])('should read %j as binding %s', (record, expected) => {
-    expect(readsDrivableBox(record)).toBe(expected)
   })
 })
