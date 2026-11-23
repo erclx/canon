@@ -216,9 +216,10 @@ export async function planWaves(root: string): Promise<WavesOutcome> {
   }
 
   const edgesOf = (holder: Holder): WaveEdge[] => {
-    const waiting = (after.get(holder.stem) ?? []).map(
-      (to): WaveEdge => ({ to, source: 'waiting' }),
-    )
+    const waiting = (after.get(holder.stem) ?? []).map((to): WaveEdge => ({
+      to,
+      source: 'waiting',
+    }))
 
     // An earlier row whose own cell cites this row already waits on it, so the shared path must not wait back.
     const shared = planned

@@ -106,7 +106,10 @@ const GROUP_FLAGS: Readonly<Record<string, BoardGroup>> = {
 function withPosition(command: Command): Command {
   return command
     .option('--top', 'Put the row first in its group')
-    .option('--bottom', 'Put the row last in its group, the default for a move between groups')
+    .option(
+      '--bottom',
+      'Put the row last in its group, the default for a move between groups',
+    )
     .option('--before <task>', 'Put the row right above this sibling')
     .option('--after <task>', 'Put the row right below this sibling')
 }
