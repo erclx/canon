@@ -57,10 +57,31 @@ describe('scopeFor', () => {
     ).toEqual(['src/a.e2e.test.ts'])
   })
 
-  it('should not look for readers of a typescript source', () => {
-    const readers = (): readonly string[] => ['src/a.e2e.test.ts']
+  it('should add the suite spawning a changed typescript file by path', () => {
+    const readers = (file: string): readonly string[] =>
+      file === 'tooling/web/configs/e2e/screenshot.ts'
+        ? ['src/tooling/screenshot-mask.e2e.test.ts']
+        : []
 
-    expect(scopeFor(['src/b.ts'], [], readers).e2e).toBe(false)
+    expect(
+      scopeFor(['tooling/web/configs/e2e/screenshot.ts'], [], readers).files,
+    ).toEqual(['src/tooling/screenshot-mask.e2e.test.ts'])
+  })
+
+  it('should add the suites spawning the cli when a source under src changes', () => {
+    const spawners = ['src/browser/swipe.e2e.test.ts']
+
+    expect(scopeFor(['src/commands/browser.ts'], [], none, spawners)).toEqual({
+      e2e: true,
+      full: false,
+      files: spawners,
+    })
+  })
+
+  it('should leave the cli spawners out when no source under src changes', () => {
+    const spawners = ['src/browser/swipe.e2e.test.ts']
+
+    expect(scopeFor(['docs/a.md'], [], none, spawners).e2e).toBe(false)
   })
 
   it('should run the full suite when the changed set is empty', () => {

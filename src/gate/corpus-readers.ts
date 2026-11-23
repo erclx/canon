@@ -81,6 +81,21 @@ export function e2eReadersOf(
   return readersWhere(file, sources, (path) => path.endsWith(E2E_SUFFIX))
 }
 
+/**
+ * The end-to-end suites that run the CLI entry as a child process, which reach
+ * every command through no import, so a change under `src/` selects them.
+ */
+export function e2eCliSpawners(
+  sources: ReadonlyMap<string, string>,
+): readonly string[] {
+  return [...sources]
+    .filter(
+      ([path, source]) =>
+        path.endsWith(E2E_SUFFIX) && /cli\.ts['"]/.test(source),
+    )
+    .map(([path]) => path)
+}
+
 function readersWhere(
   file: string,
   sources: ReadonlyMap<string, string>,

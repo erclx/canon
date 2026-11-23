@@ -6,14 +6,21 @@ import { execaSync } from 'execa'
 import { appendFileSync } from 'node:fs'
 import { relative } from 'node:path'
 
-import { e2eReadersOf, readTestSources } from '@/gate/corpus-readers'
-import { FULL_SUITE_TRIGGERS, RELATED_SOURCES } from '@/gate/stages'
+import {
+  e2eCliSpawners,
+  e2eReadersOf,
+  readTestSources,
+} from '@/gate/corpus-readers'
+import { FULL_SUITE_TRIGGERS } from '@/gate/stages'
 
 export interface E2eScope {
   readonly e2e: boolean
   readonly full: boolean
   readonly files: readonly string[]
 }
+
+/** A source here changes what the CLI a suite spawns does, through no import. */
+const CLI_SOURCE = /^src\/.*\.tsx?$/
 
 const FULL: E2eScope = { e2e: true, full: true, files: [] }
 
@@ -25,13 +32,15 @@ export function scopeFor(
   changed: readonly string[],
   affected: readonly string[],
   readersOf: (file: string) => readonly string[],
+  cliSpawners: readonly string[] = [],
 ): E2eScope {
   if (changed.length === 0) return FULL
   if (changed.some((file) => FULL_SUITE_TRIGGERS.test(file))) return FULL
-  const readers = changed
-    .filter((file) => !RELATED_SOURCES.test(file))
-    .flatMap(readersOf)
-  const files = [...new Set([...affected, ...readers])].sort()
+  const spawners = changed.some((file) => CLI_SOURCE.test(file))
+    ? cliSpawners
+    : []
+  const readers = changed.flatMap(readersOf)
+  const files = [...new Set([...affected, ...readers, ...spawners])].sort()
   return { e2e: files.length > 0, full: false, files }
 }
 
@@ -60,7 +69,12 @@ function measure(base: string): E2eScope {
     relative(root, entry.file),
   )
   const sources = readTestSources(root)
-  return scopeFor(changed, affected, (file) => e2eReadersOf(file, sources))
+  return scopeFor(
+    changed,
+    affected,
+    (file) => e2eReadersOf(file, sources),
+    e2eCliSpawners(sources),
+  )
 }
 
 function main(base: string | undefined): void {
