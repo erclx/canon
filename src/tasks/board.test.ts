@@ -567,6 +567,38 @@ describe('placeTask', () => {
     )
   })
 
+  it('should build no Launch cell when the latest session is not a worker, though the row has a pick', async () => {
+    await seedPlan('one', ['a.ts'])
+    mkdirSync(tasksDir(ROOT), { recursive: true })
+    await writeFile(
+      join(tasksDir(ROOT), 'v1.0-one.md'),
+      [
+        '# v1.0: One',
+        '',
+        'Plan: [feature-one](../plans/feature-one.md)',
+        'Sessions: planner-one (11111111-1111-4111-8111-111111111111)',
+        '',
+        '## Outcomes',
+        '',
+        '- [ ] it ships',
+        '',
+      ].join('\n'),
+    )
+    await seedBoard(
+      ...IN_FLIGHT,
+      '| [v1.0: One](v1.0-one.md) | 1 file | planner-one (sonnet, medium) |',
+    )
+
+    const outcome = await placeTask(ROOT, 'v1.0-one', 'Up next', {
+      waiting: 'Planned, not dispatched yet',
+    })
+
+    expect(outcome).toMatchObject({ ok: true, launch: 'none' })
+    expect(await readFile(orderingPath(ROOT), 'utf8')).not.toContain(
+      'background',
+    )
+  })
+
   it('should build no Launch cell for a row with no pick and report none', async () => {
     await seedPlan('one', ['a.ts'])
     await seedTask('v1.0-one', { title: 'v1.0: One', plans: ['one'] })
