@@ -1,5 +1,24 @@
 # Changelog
 
+## [5.114.0](https://github.com/erclx/canon/compare/v5.113.0...v5.114.0) (2026-11-23)
+
+
+### Features
+
+* **git-pr:** require a measurement table in perf pull requests ([#3411](https://github.com/erclx/canon/issues/3411)) ([f449b03](https://github.com/erclx/canon/commit/f449b03a09bb2ad9262cfb4db52e74c2f0a7f11f))
+* **intake:** fail a missing current page and a visible skip ([#3409](https://github.com/erclx/canon/issues/3409)) ([52b85e5](https://github.com/erclx/canon/commit/52b85e5d6562411173f021baa4594b47641f7830))
+* **records:** fail a bundle whose items share no file ([#3417](https://github.com/erclx/canon/issues/3417)) ([cc19797](https://github.com/erclx/canon/commit/cc19797b597bdb5a64742918ec0dbbd5fddafa22))
+* **review:** carry a code close across a clean merge of the base ([#3413](https://github.com/erclx/canon/issues/3413)) ([6e2333c](https://github.com/erclx/canon/commit/6e2333c85a35332d5cadb32f64350d5313b701b1))
+* **skills:** let a lesson add a part of its own to the kit ([#3415](https://github.com/erclx/canon/issues/3415)) ([35af8aa](https://github.com/erclx/canon/commit/35af8aaa6364cbc66e4dd35c2124a66bdf1ad52b))
+* **skills:** let a talk planner plan every row its track produced ([#3414](https://github.com/erclx/canon/issues/3414)) ([58b1e22](https://github.com/erclx/canon/commit/58b1e227a6540495ac6fe094e624245dbc61f6d8))
+* **skills:** take a row's outcome from its intake item's Fix line ([#3407](https://github.com/erclx/canon/issues/3407)) ([433b69d](https://github.com/erclx/canon/commit/433b69df2868502e0ec40935504788628fe0a672))
+* **tasks:** add a read-only waves verb for queued rows ([#3410](https://github.com/erclx/canon/issues/3410)) ([a571aaa](https://github.com/erclx/canon/commit/a571aaa8450b1e1074dc96271bc2bcbe59cd099e))
+
+
+### Bug Fixes
+
+* **skills:** serve the lesson kit's code face and bound its figure ([#3408](https://github.com/erclx/canon/issues/3408)) ([0351cf0](https://github.com/erclx/canon/commit/0351cf0b9bb0cd00c9cf01ec1be14e02c19aa910))
+
 ## [5.113.0](https://github.com/erclx/canon/compare/v5.112.0...v5.113.0) (2026-11-23)
 
 
