@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.116.0](https://github.com/erclx/canon/compare/v5.115.0...v5.116.0) (2026-11-23)
+
+
+### Features
+
+* **hooks:** log the numbers a plan refusal judged and retry once ([#3462](https://github.com/erclx/canon/issues/3462)) ([0b031ff](https://github.com/erclx/canon/commit/0b031ffcc8290066d7da8c7b003d523d9d22d01e))
+* **pr:** start a fresh preview per UI pass and read the declared port ([#3457](https://github.com/erclx/canon/issues/3457)) ([614062a](https://github.com/erclx/canon/commit/614062a5e5b5e8f59a50e761ee9830ce74861751))
+* **records:** check that a verb change names the skills that call it ([#3456](https://github.com/erclx/canon/issues/3456)) ([4d72ffc](https://github.com/erclx/canon/commit/4d72ffcc05f6702225ad6ef768c0b984f6385755))
+* **review:** derive hand-backs, add READY, defer overlap UI passes ([#3461](https://github.com/erclx/canon/issues/3461)) ([e1e5b0c](https://github.com/erclx/canon/commit/e1e5b0c871096f66bf5c2cbd882222a8b7ee4efe))
+
+
+### Bug Fixes
+
+* **tooling:** repair four seeds for release, language stats, cache ([#3460](https://github.com/erclx/canon/issues/3460)) ([57b7662](https://github.com/erclx/canon/commit/57b7662eb52fb06009a49961b4913425b9590b4c))
+
 ## [5.115.0](https://github.com/erclx/canon/compare/v5.114.0...v5.115.0) (2026-11-23)
 
 
