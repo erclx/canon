@@ -104,7 +104,7 @@ export function counterpartPaths(
  * Joins a wrapped line or a nested bullet onto the bullet above it, so a
  * reason may wrap and still read as one entry.
  */
-function readBullets(lines: readonly string[]): string[] {
+export function readBullets(lines: readonly string[]): string[] {
   const bullets: string[] = []
   let depth: number | undefined
 
@@ -125,7 +125,7 @@ function readBullets(lines: readonly string[]): string[] {
   return bullets
 }
 
-interface Bullet {
+export interface Bullet {
   readonly text: string
   readonly paths: readonly string[]
   readonly verdict: string | undefined
@@ -135,7 +135,7 @@ interface Bullet {
  * Splits a bullet at the first colon outside a code span. The paths are the
  * spans before it, and the verdict is the prose after it.
  */
-function parseBullet(text: string): Bullet {
+export function parseBullet(text: string): Bullet {
   const body = text.replace(/^-[ \t]*/, '')
   let inSpan = false
 
@@ -165,7 +165,7 @@ function wellFormed(bullet: Bullet): boolean {
   return VERDICTS.some((pattern) => pattern.test(verdict))
 }
 
-function covers(stated: string, path: string): boolean {
+export function covers(stated: string, path: string): boolean {
   const base = stated.replace(/\/+$/, '')
   return path === base || path.startsWith(`${base}/`)
 }
@@ -177,7 +177,7 @@ function covers(stated: string, path: string): boolean {
 const BULLET_FORM =
   'Write it as "- `<path>`: here", "- `<path>`: none, <reason>", or "- `<path>`: filed `<row stem>`" under ## Counterparts, where a directory path covers every file under it.'
 
-function shorten(label: string): string {
+export function shorten(label: string): string {
   return label.length > 60 ? `${label.slice(0, 57)}...` : label
 }
 
