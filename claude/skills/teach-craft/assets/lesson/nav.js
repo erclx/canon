@@ -278,15 +278,19 @@
         if (here) a.setAttribute('aria-current', 'location')
         else a.removeAttribute('aria-current')
       })
-    mark(headings[0].id)
-    const watch = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries)
-          if (entry.isIntersecting) mark(entry.target.id)
-      },
-      { rootMargin: '-80px 0px -70% 0px' },
-    )
-    headings.forEach((heading) => watch.observe(heading))
+    // The reading line sits 100 px down at the top and drops to the window's foot at the page end, so a heading that can never scroll up to the top still gets marked.
+    const update = () => {
+      const room = document.documentElement.scrollHeight - innerHeight
+      const progress = room > 0 ? Math.min(1, Math.max(0, scrollY / room)) : 0
+      const line = 100 + (innerHeight - 100) * progress
+      let current = headings[0]
+      for (const heading of headings)
+        if (heading.getBoundingClientRect().top <= line) current = heading
+      mark(current.id)
+    }
+    addEventListener('scroll', update, { passive: true })
+    addEventListener('resize', update)
+    update()
   }
 
   const build = () => {
