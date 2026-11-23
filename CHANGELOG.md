@@ -1,5 +1,26 @@
 # Changelog
 
+## [5.113.0](https://github.com/erclx/canon/compare/v5.112.0...v5.113.0) (2026-11-23)
+
+
+### Features
+
+* **intake:** let an intake that draws keep a board project ([#3402](https://github.com/erclx/canon/issues/3402)) ([984198f](https://github.com/erclx/canon/commit/984198f4c1e9407a27d4e93732eaed9a0db993e8))
+* **issue-triage:** name a bundle in the overview ready list ([#3398](https://github.com/erclx/canon/issues/3398)) ([c517fc2](https://github.com/erclx/canon/commit/c517fc2d725ed55f1dbcf039a146864b8126e155))
+* **pr:** refuse a merge on a stale, conflicted, or unread base ([#3400](https://github.com/erclx/canon/issues/3400)) ([5c16696](https://github.com/erclx/canon/commit/5c166966c88f6ad1d338eef33e991855c3196a07))
+* **records:** count a plan bullet outside its code spans ([#3401](https://github.com/erclx/canon/issues/3401)) ([da5442b](https://github.com/erclx/canon/commit/da5442b42e64b1b506addbcb98022c41a843bf54))
+* **records:** report a near-ceiling plan entry that states no room ([#3399](https://github.com/erclx/canon/issues/3399)) ([eb7a84e](https://github.com/erclx/canon/commit/eb7a84ed87affee0abec05ddf16b5c566e4dfb0f))
+* **skills:** add seven Apple interface practices to ui-craft ([#3403](https://github.com/erclx/canon/issues/3403)) ([a263159](https://github.com/erclx/canon/commit/a263159cb53b1fb4e8c4d3c3f6e8846277f754a5))
+* **take:** add a --reel-width option ([#3397](https://github.com/erclx/canon/issues/3397)) ([669820c](https://github.com/erclx/canon/commit/669820c86f2fd4d368bf0872f88d587584ef1401))
+* **take:** add a stills verb that writes frames of a reel ([#3405](https://github.com/erclx/canon/issues/3405)) ([0322c22](https://github.com/erclx/canon/commit/0322c2246494c4d51b75b3f4dd54b34db1b31b8a))
+* **tasks:** report an Up next row with a plan and no launch pick ([#3406](https://github.com/erclx/canon/issues/3406)) ([af6a547](https://github.com/erclx/canon/commit/af6a547a9d5a67576ad1c37282be1ef23fced309))
+
+
+### Bug Fixes
+
+* **plan:** name the controller by roster name in the groundwork close ([#3392](https://github.com/erclx/canon/issues/3392)) ([aad6e47](https://github.com/erclx/canon/commit/aad6e47f5a1f470c4320870319145c82ecbccd04))
+* **skills:** fix three design-pick gaps from feedback ([#3394](https://github.com/erclx/canon/issues/3394)) ([450f941](https://github.com/erclx/canon/commit/450f941e78442147599633fb8caa9dd53f10d6c2))
+
 ## [5.112.0](https://github.com/erclx/canon/compare/v5.111.0...v5.112.0) (2026-11-22)
 
 
