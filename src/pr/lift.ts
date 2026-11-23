@@ -287,9 +287,8 @@ function fail(gate: GateName, reason: LiftRefusal): GateResult {
 
 /**
  * The code review gate. An unmarked pass is refused, since its commit is a
- * submission stamp. A close behind the head carries across a rebase, or across
- * merges of the base, only when every branch path is equal, and never across
- * a commit of the branch's own pushed on top of it.
+ * submission stamp. A close carries across a rebase or base merges leaving
+ * every branch path equal, never across a commit of the branch's own.
  */
 export async function reviewGate(
   api: Pick<LiftApi, 'readChanged' | 'readRebased' | 'readUnmerged'>,
@@ -956,10 +955,9 @@ export async function readChangedPaths(
 }
 
 /**
- * The commits from `from` to `to` that are neither merges nor on `ref`, which
- * keep a close from carrying across a merge of the base. With no merge in the
- * range the base is never fetched, and every commit is listed, since such a
- * head carries nothing. Any read that fails answers undefined.
+ * The commits from `from` to `to` that are neither merges nor on `ref`. A range
+ * holding no merge lists every commit without fetching the base, since it can
+ * carry nothing. Any read that fails answers undefined.
  */
 export async function readUnmergedCommits(
   git: GitRunner,
