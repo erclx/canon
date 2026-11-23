@@ -16,6 +16,8 @@ const ROOT_MARKERS = [
   'process.cwd()',
 ]
 
+const E2E_SUFFIX = '.e2e.test.ts'
+
 const readTracked = (root: string, path: string): string | undefined => {
   try {
     return readFileSync(join(root, path), 'utf8')
@@ -68,6 +70,22 @@ export function readersOf(
   file: string,
   sources: ReadonlyMap<string, string>,
 ): readonly string[] {
+  return readersWhere(file, sources, (path) => !path.endsWith(E2E_SUFFIX))
+}
+
+/** The end-to-end suites `readersOf` leaves out, for the scope CI gives them. */
+export function e2eReadersOf(
+  file: string,
+  sources: ReadonlyMap<string, string>,
+): readonly string[] {
+  return readersWhere(file, sources, (path) => path.endsWith(E2E_SUFFIX))
+}
+
+function readersWhere(
+  file: string,
+  sources: ReadonlyMap<string, string>,
+  wanted: (path: string) => boolean,
+): readonly string[] {
   const segments = file.split('/')
   const needles =
     segments.length === 1
@@ -75,7 +93,7 @@ export function readersOf(
       : [`${segments[0]}/${segments[1]}`, `'${segments[0]}', '${segments[1]}'`]
   const readers: string[] = []
   for (const [path, source] of sources) {
-    if (path.endsWith('.e2e.test.ts')) continue
+    if (!wanted(path)) continue
     if (!ROOT_MARKERS.some((marker) => source.includes(marker))) continue
     if (needles.some((needle) => source.includes(needle))) readers.push(path)
   }
