@@ -73,23 +73,18 @@ A checklist with one group gives up to three beats from it. A checklist with fou
 
 ### Pick the reel's width
 
-Each beat films at the width its box names after the route, and a box naming none films at 1280, the set's desktop width. A box naming a width outside the set, such as 834 from an older plan, films at that width.
-One reel holds one width, since `canon take` refuses beats of two shapes as `reel-shape` and the evidence comment embeds one reel.
+A beat films at the width its box names, even one outside the set such as 834, and at 1280 when it names none. One reel holds one width, since `canon take` refuses two shapes as `reel-shape`.
 
-- Group the ordered beats by width, and film the group holding the most beats
-- Break a tie toward the width of the first beat in checklist order
-- Drop the beats at every other width from the plan, and name their groups under the coverage below
-
-The take films that width through `--viewport`, at 390x844, 768x1024, or 1280x800, and 900 tall for any other width. A reel filmed at 390 sets `"push": false` on every beat, since the phone window already fills the reel and a push crops the column it films.
-
-The evidence comment draws every reel 960 wide, so a reel filmed at 390 or 768 renders upscaled until the comment draws a reel at its own width.
+- Film the width holding the most beats, ties going to the first beat's, and drop the rest from the plan
+- Pass `--viewport` at 390x844, 768x1024, 1280x800, or 900 tall otherwise, and `--reel-width <width>` under 960
+- Set `"push": false` on a 390 reel, since a push crops the column, and expect a 390 or 768 reel to render upscaled
 
 ### Hold the coverage
 
 A reviewer watching three beats cannot tell whether the reel skipped a group or the group had nothing to film. Once the beats are ordered, hold two lists of group labels, in checklist order:
 
 - Filmed: each group with at least one beat
-- Left out: each other group, whether the filter emptied it, the cap of three ran out first, or its beats sat at a width the reel skipped, written with that width, as in `Board at 768`
+- Left out: each other group, whether the filter emptied it, the cap of three ran out first, or its beats sat at a skipped width, written as `Board at 768`
 
 Write the two as one line, `filmed: <labels> · left out: <labels>`, joining labels with a comma and writing `none` for an empty list. A checklist with one group and three beats reads `filmed: Board · left out: none`, and one with four groups names the fourth as left out.
 
@@ -120,8 +115,6 @@ rm -rf .canon/tmp/pr/reel/<number>/takes
 ```bash
 canon take <url> .canon/tmp/pr/reel/<number>/plan.json --out .canon/tmp/pr/reel/<number>/takes --reel .canon/tmp/pr/reel/<number>/reel.webp --viewport <width>x<height> --max-seconds 15 --json
 ```
-
-Add `--reel-width <width>` when the reel's width is under 960, since the take refuses a reel wider than its window as `bad-reel-width`.
 
 Branch on the record's `reason`, never on the exit code.
 
