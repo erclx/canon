@@ -938,6 +938,8 @@ export function registerRecord(tasks: Command): void {
         '  ambiguous     more than one task matches the selector',
         '  no-outcomes   the task carries no outcomes',
         '  out-of-range  a `--close` or `--cut` position past the end of the list',
+        '  already-closed  a `--cut` position whose outcome is already ticked, which',
+        '                  refuses the whole call and writes nothing',
         '  bad-input     a malformed position, a position named twice, or a',
         '                `--cut` without `--reason`',
         '',

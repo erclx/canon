@@ -492,7 +492,7 @@ describe('closeOutcomeLines', () => {
 
     expect(result.text).toBe(text)
     expect(result.cut).toEqual([])
-    expect(result.alreadyClosed).toEqual(['Outcome: one'])
+    expect(result.cutClosed).toEqual(['Outcome: one'])
   })
 
   it('should close and cut different positions in one call', () => {
@@ -953,6 +953,48 @@ describe('closeOutcomes', () => {
     )
 
     expect(outcome).toMatchObject({ ok: false, reason: 'out-of-range' })
+  })
+
+  it('should refuse a cut on a ticked outcome and write nothing', async () => {
+    const stem = await seedTask({
+      outcomes: ['- [x] Outcome: one', '- [ ] Outcome: two'],
+    })
+    const before = await readTask(stem)
+
+    const outcome = await closeOutcomes(
+      ROOT,
+      { kind: 'stem', stem },
+      [],
+      undefined,
+      [],
+      { positions: [1], reason: 'dropped' },
+    )
+
+    expect(outcome).toMatchObject({
+      ok: false,
+      reason: 'already-closed',
+      detail: ['Outcome: one'],
+    })
+    await expect(readTask(stem)).resolves.toBe(before)
+  })
+
+  it('should refuse a mixed cut whole, striking neither outcome', async () => {
+    const stem = await seedTask({
+      outcomes: ['- [x] Outcome: one', '- [ ] Outcome: two'],
+    })
+    const before = await readTask(stem)
+
+    const outcome = await closeOutcomes(
+      ROOT,
+      { kind: 'stem', stem },
+      [],
+      undefined,
+      [],
+      { positions: [1, 2], reason: 'dropped' },
+    )
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'already-closed' })
+    await expect(readTask(stem)).resolves.toBe(before)
   })
 
   it('should refuse a task carrying no outcomes', async () => {

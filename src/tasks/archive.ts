@@ -230,6 +230,34 @@ export function fenceMask(lines: readonly string[]): boolean[] {
 }
 
 /**
+ * The 1-based positions `canon tasks outcome` addresses for each open outcome,
+ * counted over checkbox lines the way `closeOutcomeLines` counts them.
+ */
+function openPositions(text: string): number[] {
+  const lines = text.split('\n')
+  const fenced = fenceMask(lines)
+  const positions: number[] = []
+  let seen = 0
+
+  for (const [index, line] of lines.entries()) {
+    if (fenced[index]) continue
+
+    const match = OUTCOME_PATTERN.exec(line)
+    if (!match) continue
+
+    seen += 1
+    const body = match[2].trim()
+    const open =
+      match[1] === ' ' &&
+      !STRUCK_BODY_PATTERN.test(body) &&
+      !OPERATOR_BODY_PATTERN.test(body)
+    if (open) positions.push(seen)
+  }
+
+  return positions
+}
+
+/**
  * Splits a task's outcome list by checkbox state, cut outcomes pulled out
  * ahead. A struck body reads as cut whatever its checkbox holds, so `- ~~a~~`
  * never vanishes, reads as open, or reads as shipped.
@@ -981,9 +1009,10 @@ export async function archiveTask(
   const { open, closed, cut, operator } = readOutcomes(text)
 
   if (open.length > 0) {
+    const openPositionsList = openPositions(text)
     const refused = refuse(
       'open-outcomes',
-      `${stem} has ${open.length} open outcome(s). Close them, or cut one with \`canon tasks outcome ${stem} --cut N --reason <why>\`, then archive.`,
+      `${stem} has ${open.length} open outcome(s), at position(s) ${openPositionsList.join(', ')}. Close them, or cut one with \`canon tasks outcome ${stem} --cut ${openPositionsList[0]} --reason <why>\`, then archive.`,
       open,
     )
     return selector.kind === 'pull-request'

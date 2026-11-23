@@ -94,6 +94,18 @@ describe('archiveTask', () => {
     expect(existsSync(join(tasksDir(ROOT), `${stem}.md`))).toBe(true)
   })
 
+  it('should name the position of the open outcome in the cut hint', async () => {
+    const stem = await seedTask({
+      outcomes:
+        '- [x] Outcome: shipped\n- [x] Outcome: also shipped\n- [ ] Outcome: pending',
+    })
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(result).toMatchObject({ ok: false, reason: 'open-outcomes' })
+    expect(result.ok ? '' : result.message).toContain('--cut 3 --reason')
+  })
+
   it('should refuse a task carrying no outcomes at all', async () => {
     const stem = await seedTask({ outcomes: '- A note, not an outcome' })
 
