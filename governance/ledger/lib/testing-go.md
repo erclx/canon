@@ -7,12 +7,6 @@ description: Sources for governance/rules/lib/testing-go.md, one row per bullet
 
 The field is Go testing, and the authorities are the `testing` and `net/http/httptest` package documentation at pkg.go.dev, the Go wiki at go.dev, and the race detector article. None of the pages read names a Go release beyond a 1.22 loop-variable note, so the rows record the read date alone.
 
-## Layer
-
-| Bullet                  | Source                                                                                              | Read       |
-| ----------------------- | --------------------------------------------------------------------------------------------------- | ---------- |
-| Load `test-craft` first | House choice: a pointer to the skill that owns the choice of layer, claiming no practice of its own | 2026-10-18 |
-
 ## Framework
 
 | Bullet                                | Source                                                                                                                                                                     | Read       |
@@ -51,6 +45,10 @@ Every bullet the rewrite removed or reshaped, grouped by why.
 ### A default the toolchain already applies
 
 - Cut "place a test beside the code it tests, in a `_test.go` file of the same package". The `go` tool finds tests only in `_test.go` files, and Claude writes them that way unprompted.
+
+### Carried by another surface
+
+- Cut the `## Layer` pointer at `test-craft`. `code/testing` states it for every language stack, so a Go target already loads it.
 
 ### Merged or reworded
 

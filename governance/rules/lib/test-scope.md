@@ -2,6 +2,7 @@
 description: Enforce which specs and which engines an end-to-end run covers at each point in the loop
 paths:
   - '**/e2e/**/*.ts'
+  - '**/playwright.config.*'
 ---
 
 # Test scope standards
@@ -21,4 +22,3 @@ paths:
 - Answer a question about the running page with a script against the dev server rather than with the suite.
 - Do not enable `fullyParallel` in the Playwright config.
 - Follow the `canon:ui-craft` skill's capture reference for capture scope, reporting it when the skill does not resolve.
-- Follow `.claude/rules/canon/lib/e2e-reliability.md` for waits and guards.

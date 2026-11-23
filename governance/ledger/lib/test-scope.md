@@ -21,12 +21,11 @@ The field is browser test automation, and the authority is the Playwright docume
 
 ## Instruments
 
-| Bullet                       | Source                                                                                                                                                                                                      | Read       |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| A script, not the suite      | House choice: a suite run answers a question about the page only through assertions written for another question, and costs the whole run                                                                   | 2026-10-18 |
-| No `fullyParallel`           | [Parallelism](https://playwright.dev/docs/test-parallel): by default "Tests in a single file are run in order, in the same worker process", and parallel tests "cannot share any state or global variables" | 2026-10-18 |
-| Pointer to `ui-craft`        | House choice: a pointer to the skill that owns capture scope, claiming no practice of its own                                                                                                               | 2026-10-18 |
-| Pointer to `e2e-reliability` | House choice: a pointer to the rule that owns waits and guards, claiming no practice of its own                                                                                                             | 2026-10-18 |
+| Bullet                  | Source                                                                                                                                                                                                      | Read       |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| A script, not the suite | House choice: a suite run answers a question about the page only through assertions written for another question, and costs the whole run                                                                   | 2026-10-18 |
+| No `fullyParallel`      | [Parallelism](https://playwright.dev/docs/test-parallel): by default "Tests in a single file are run in order, in the same worker process", and parallel tests "cannot share any state or global variables" | 2026-10-18 |
+| Pointer to `ui-craft`   | House choice: a pointer to the skill that owns capture scope, claiming no practice of its own                                                                                                               | 2026-10-18 |
 
 ## Declined
 
@@ -37,6 +36,10 @@ Every bullet the rewrite removed or reshaped, grouped by why.
 - Replaced `bun run test:e2e -- -g '<name>'` with `playwright test -g '<name>'`. The `test:e2e` scripts are this toolkit's alone, and the rule ships to every Playwright target.
 - Replaced `bun run test:e2e -- e2e/<area>.spec.ts` with the CLI's path argument.
 - Replaced `bun run test:e2e:changed`, which selected specs from the import graph, with `--only-changed`, the CLI's own selection by git diff.
+
+### Carried by another surface
+
+- Cut the pointer at `e2e-reliability`. Its globs match this rule's, so both always load together and the pointer repeats a load that already happens.
 
 ### Merged or reworded
 

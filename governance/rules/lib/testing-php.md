@@ -7,10 +7,6 @@ paths:
 
 # PHP testing tooling
 
-## Layer
-
-- Load the `canon:test-craft` skill to pick the layer a test belongs at before choosing the tooling below, and report it rather than proceeding silently when the skill does not resolve.
-
 ## Framework
 
 - Use PHPUnit for all tests.
@@ -26,4 +22,3 @@ paths:
 - Use `assertSame` over `assertEquals`, which compares with `==`.
 - Call `expectException` before the throwing call, over `try` and `catch`, for an expected exception.
 - Use `createStub` where no interaction is asserted. Reserve `createMock` for asserting a call.
-- Do not make real network calls. Use a fake or a stubbed client.

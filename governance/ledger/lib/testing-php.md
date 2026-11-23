@@ -7,12 +7,6 @@ description: Sources for governance/rules/lib/testing-php.md, one row per bullet
 
 The field is PHP testing, and the authority is the PHPUnit documentation at docs.phpunit.de with its release announcements at phpunit.de. The manual pages read are the PHPUnit 12.4 edition. Attributes arrived in PHPUnit 10, so the attribute bullet names that floor and a PHPUnit 9 target is never told to use them.
 
-## Layer
-
-| Bullet                  | Source                                                                                              | Read       |
-| ----------------------- | --------------------------------------------------------------------------------------------------- | ---------- |
-| Load `test-craft` first | House choice: a pointer to the skill that owns the choice of layer, claiming no practice of its own | 2026-10-18 |
-
 ## Framework
 
 | Bullet                        | Source                                                                                                                                                                                   | Read                     |
@@ -34,7 +28,6 @@ The field is PHP testing, and the authority is the PHPUnit documentation at docs
 | `assertSame` over `assertEquals` | [Assertions](https://docs.phpunit.de/en/12.4/assertions.html): `assertSame()` fails when the values "do not have the same type and value", while `assertEquals()` compares with `==`                                | 2026-10-18, PHPUnit 12.4 |
 | `expectException` first          | [Writing tests](https://docs.phpunit.de/en/12.4/writing-tests-for-phpunit.html): "The `expectException()` method has to be used **before** the exception you expect to be thrown is thrown"                         | 2026-10-18, PHPUnit 12.4 |
 | Stub unless asserting a call     | [Test doubles](https://docs.phpunit.de/en/12.4/test-doubles.html): a stub "(optionally) returns configured return values", and a mock "verifies expectations, for instance asserting that a method has been called" | 2026-10-18, PHPUnit 12.4 |
-| No real network calls            | House choice: a test reaching the network fails on an outage or a rate limit with no defect in the code under test                                                                                                  | 2026-10-18               |
 
 ## Declined
 
@@ -43,6 +36,11 @@ Every bullet the rewrite removed or reshaped, grouped by why.
 ### Cut without a source or a bug class
 
 - Cut "place tests under `tests/`, mirroring the `src/` namespace layout, in files named `*Test.php`" as a layout call, which the `codebase-layout` skill owns. The PHPUnit manual shows the layout in examples and states no rule.
+
+### Carried by another surface
+
+- Cut the `## Layer` pointer at `test-craft`. `code/testing` states it for every language stack, so a PHP target already loads it.
+- Cut "do not make real network calls". `test-craft`'s unit reference states it, as the Python twin's ledger records.
 
 ### Merged or reworded
 
