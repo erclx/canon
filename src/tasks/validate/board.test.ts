@@ -169,6 +169,52 @@ describe('validateBoard', () => {
     })
   })
 
+  describe('launch-unstated', () => {
+    it('should report an Up next row linking a plan with an empty Launch cell', async () => {
+      await seedTask('v1.0-first')
+      await seedPlan('v1.0-first')
+      await seedBoard(boardBody([upNextLaunchTable('')]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && kinds(outcome.findings)).toEqual(['launch-unstated'])
+    })
+
+    it('should read a cell of spaces as empty, never as misshapen', async () => {
+      await seedTask('v1.0-first')
+      await seedPlan('v1.0-first')
+      await seedBoard(boardBody([upNextLaunchTable('   ')]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && kinds(outcome.findings)).toEqual(['launch-unstated'])
+    })
+
+    it('should report nothing for a row carrying a pick', async () => {
+      await seedTask('v1.0-first')
+      await seedPlan('v1.0-first')
+      await seedBoard(
+        boardBody([upNextLaunchTable('worker, opus, high, background')]),
+      )
+
+      expect(await validateBoard(ROOT)).toMatchObject({
+        ok: true,
+        findings: [],
+      })
+    })
+
+    it('should report nothing for an Up next row linking no plan', async () => {
+      await seedTask('v1.0-first', '', undefined, NO_PLAN)
+      await seedBoard(boardBody([upNextLaunchTable('')]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && kinds(outcome.findings)).not.toContain(
+        'launch-unstated',
+      )
+    })
+  })
+
   it('should report a run now row whose plan pointer resolves nowhere', async () => {
     await seedTask('v1.0-first')
     await seedBoard(boardBody([readyTable([{ stem: 'v1.0-first' }])]))
