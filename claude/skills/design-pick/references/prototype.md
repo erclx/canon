@@ -14,11 +14,11 @@ The prototype answers behavior and copy, and the static frames answer the states
 The prototype is one board page named `prototype` in the run's project, recorded on the run's list. A `name-taken` refusal takes the next free suffix, as Step 2 of `SKILL.md` states for a round page.
 
 - Write one responsive HTML document, never one per width, so a fix lands once and every class shows it
-- Add one frame per device class as `frameboard frame add <page>/prototype-<px> --width <px> --device on`, at the widths `widths.md` beside this file resolves, laid out as `drawing.md` lays a group
+- Add one frame per device class as `frameboard frame add <page>/prototype-<px> --width <px> --device on --scroll`, at the widths `widths.md` beside this file resolves, laid out as `drawing.md` lays a group
 - Write the same document to each frame's `path`. Never use a `--widths` linked width, which draws no device body.
 - Inline every style, script, and asset, as the default path in `SKILL.md` states for any frame
 
-A frame is the size its device is, so set each frame's height to that device's viewport with `frameboard frame resize` rather than fitting it. The prototype scrolls inside its frame the way the app scrolls inside a screen.
+A frame holds its device's screen height under the one rule in `drawing.md` beside this file, so the prototype scrolls inside its frame the way the app scrolls inside a screen. Fit nothing.
 
 ## Scope
 
