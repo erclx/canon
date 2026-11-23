@@ -229,8 +229,9 @@ const headFromVerb = (record: unknown): string => {
 }
 
 /**
- * Whether the verb carried the code close across a rebase while the UI family
- * reads covered, so a moved head owes neither reviewer a pass.
+ * Whether the verb carried the code close across a rebase or a merge of the
+ * base while the UI family reads covered, so a moved head owes neither
+ * reviewer a pass.
  */
 export const rebasedFromVerb = (record: unknown): boolean => {
   if (typeof record !== 'object' || record === null) return false
@@ -239,9 +240,11 @@ export const rebasedFromVerb = (record: unknown): boolean => {
     typeof value === 'object' && value !== null
       ? (value as Record<string, unknown>)
       : {}
+  const { carriedAcross } = family(review)
 
   return (
-    family(review).carriedAcross === 'rebase' && family(ui).isCovered === true
+    (carriedAcross === 'rebase' || carriedAcross === 'merge') &&
+    family(ui).isCovered === true
   )
 }
 
