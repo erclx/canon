@@ -16,6 +16,7 @@ import {
   ancestorsFirst,
   configFiles,
   configPaths,
+  type GitignoreSection,
   type Manifest,
   seedFiles,
 } from '@/tooling/manifest'
@@ -82,6 +83,7 @@ export interface ScanResult {
   readonly scripts: readonly ScriptState[]
   readonly deps: readonly DepState[]
   readonly gitignore: readonly EntryState[]
+  readonly gitattributes: readonly EntryState[]
   readonly hasPackageJson: boolean
   readonly newManifest: boolean
   readonly totalChanges: number
@@ -212,7 +214,18 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
   const gitignoreContent = existsSync(gitignorePath)
     ? readFileSync(gitignorePath, 'utf8')
     : ''
-  const gitignore = scanGitignore(chain, gitignoreContent)
+  const gitignore = scanSections(
+    ancestorsFirst(chain).flatMap((manifest) => manifest.gitignore),
+    gitignoreContent,
+  )
+
+  const gitattributesPath = join(target, '.gitattributes')
+  const gitattributes = scanSections(
+    ancestorsFirst(chain).flatMap((manifest) => manifest.gitattributes ?? []),
+    existsSync(gitattributesPath)
+      ? readFileSync(gitattributesPath, 'utf8')
+      : '',
+  )
 
   const totalChanges =
     (newManifest ? 1 : 0) +
@@ -221,7 +234,8 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
     seeds.filter((entry) => entry.state === 'missing').length +
     scripts.filter((entry) => entry.state !== 'matching').length +
     deps.filter((entry) => entry.state === 'missing').length +
-    gitignore.filter((entry) => entry.state === 'missing').length
+    gitignore.filter((entry) => entry.state === 'missing').length +
+    gitattributes.filter((entry) => entry.state === 'missing').length
 
   return {
     configs,
@@ -231,6 +245,7 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
     scripts,
     deps,
     gitignore,
+    gitattributes,
     hasPackageJson: pkg !== undefined,
     newManifest,
     totalChanges,
@@ -274,29 +289,27 @@ function scriptDispositions(
  * Replays the merge against a copy of the file so an entry that an earlier
  * section or stack would add is not also reported as missing.
  */
-function scanGitignore(
-  chain: readonly Manifest[],
+function scanSections(
+  sections: readonly GitignoreSection[],
   content: string,
 ): EntryState[] {
   const states: EntryState[] = []
   const seen = new Set<string>()
   let projected = content
 
-  for (const manifest of ancestorsFirst(chain)) {
-    for (const section of manifest.gitignore) {
-      for (const entry of section.entries) {
-        if (seen.has(entry)) continue
-        seen.add(entry)
+  for (const section of sections) {
+    for (const entry of section.entries) {
+      if (seen.has(entry)) continue
+      seen.add(entry)
 
-        const result = mergeSections(projected, [
-          { header: section.header, entries: [entry] },
-        ])
-        states.push({
-          entry,
-          state: result.added.length > 0 ? 'missing' : 'present',
-        })
-        projected = result.content
-      }
+      const result = mergeSections(projected, [
+        { header: section.header, entries: [entry] },
+      ])
+      states.push({
+        entry,
+        state: result.added.length > 0 ? 'missing' : 'present',
+      })
+      projected = result.content
     }
   }
 

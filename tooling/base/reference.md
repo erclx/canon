@@ -60,6 +60,14 @@ Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and n
 - Add a project's own ignores to `.prettierignore`, which oxfmt reads beside `.gitignore` by default. Sync overwrites `.oxfmtrc.json`, so an entry in its `ignorePatterns` is lost on the next sync.
 - After the first sync onto oxfmt, delete a leftover `.prettierrc` and run `bun remove prettier`. Sync deletes nothing a stack stopped shipping.
 
+## Gitattributes
+
+A stack manifest may carry a `[gitattributes]` section, shaped like `[gitignore]`, with a comment header keying an array of lines.
+
+- Sync appends each missing line to `.gitattributes` under its header, creating the file when absent
+- Sync never removes or reorders a line a project wrote
+- Sync prunes nothing, so a line a stack stops shipping stays until the project deletes it
+
 ## File layout
 
 Hooks live in `.husky/` and seeded context docs in `canon/context/`. That location matches the three-tier context model.

@@ -37,8 +37,10 @@ These three name the project's owner and terms.
 These two start release-please at version zero.
 
 - Start `release-please-config.json` on the `simple` release type, with `initial-version` `0.0.1` and `bump-minor-pre-major` on.
+- Add `bump-patch-for-minor-pre-major` beside it, so before 1.0 a breaking change bumps the minor and a feature bumps the patch.
 - Switch the type and add `extra-files` for a package that carries its version in a manifest.
 - Start `.release-please-manifest.json` at `0.0.0`.
+- Leave `/CHANGELOG.md` to release-please, since the synced format config ignores it and the generated file would otherwise fail the first release pull request.
 
 The config's `exclude-paths` keeps a commit out of the version and changelog when every file it touches sits under an excluded folder.
 

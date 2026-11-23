@@ -141,6 +141,32 @@ export async function injectGitignore(
   return added
 }
 
+export async function injectGitattributes(
+  chain: readonly Manifest[],
+  target: string,
+): Promise<string[]> {
+  const path = join(target, '.gitattributes')
+  const added: string[] = []
+
+  for (const manifest of ancestorsFirst(chain)) {
+    const sections = manifest.gitattributes ?? []
+    if (sections.length === 0) continue
+
+    const content = existsSync(path) ? await readFile(path, 'utf8') : ''
+    const result = mergeSections(content, sections)
+    if (result.added.length === 0) continue
+
+    logStep(`Applying ${manifest.name} gitattributes`)
+    await writeFile(path, result.content)
+    for (const entry of result.added) {
+      logAdd(entry)
+      added.push(entry)
+    }
+  }
+
+  return added
+}
+
 export async function pruneGitignore(
   chain: readonly Manifest[],
   target: string,
@@ -211,6 +237,7 @@ export async function injectManifest(
   }
 
   await injectGitignore(chain, target)
+  await injectGitattributes(chain, target)
 
   if (!pkg) warnUnreadablePackage(chain, target, heldScripts)
 

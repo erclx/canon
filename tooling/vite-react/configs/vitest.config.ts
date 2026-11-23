@@ -5,6 +5,7 @@ import viteConfig from './vite.config.ts'
 export default mergeConfig(
   viteConfig,
   defineConfig({
+    cacheDir: 'node_modules/.vite-vitest',
     test: {
       environment: 'jsdom',
       globals: true,

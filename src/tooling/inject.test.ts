@@ -15,6 +15,7 @@ import { PROJECT_ROOT } from '@/roots/project'
 import { stampPath } from '@/sync/stamp'
 import {
   injectConfigs,
+  injectGitattributes,
   injectGitignore,
   injectManifest,
   injectSeeds,
@@ -381,5 +382,56 @@ describe('injectGitignore', () => {
     expect(readFileSync(join(target, '.gitignore'), 'utf8')).toContain(
       'screenshots/',
     )
+  })
+})
+
+describe('injectGitattributes', () => {
+  const designRecord: Manifest = {
+    ...scriptsOnly({}),
+    name: 'design-record',
+    gitattributes: [
+      {
+        header: '# Design record',
+        entries: ['canon/design/** linguist-documentation'],
+      },
+    ],
+  }
+
+  it('should create .gitattributes with the section when the file is absent', async () => {
+    captureStderr()
+
+    const added = await injectGitattributes([designRecord], target)
+
+    expect(added).toEqual(['canon/design/** linguist-documentation'])
+    expect(readFileSync(join(target, '.gitattributes'), 'utf8')).toBe(
+      '\n# Design record\ncanon/design/** linguist-documentation\n',
+    )
+  })
+
+  it('should keep a project line and its order when it appends the entry', async () => {
+    captureStderr()
+    writeFileSync(join(target, '.gitattributes'), '* text=auto\n*.png binary\n')
+
+    await injectGitattributes([designRecord], target)
+
+    expect(readFileSync(join(target, '.gitattributes'), 'utf8')).toBe(
+      '* text=auto\n*.png binary\n\n# Design record\ncanon/design/** linguist-documentation\n',
+    )
+  })
+
+  it('should add nothing and write no file when no manifest carries the section', async () => {
+    const added = await injectGitattributes([scriptsOnly({})], target)
+
+    expect(added).toEqual([])
+    expect(existsSync(join(target, '.gitattributes'))).toBe(false)
+  })
+
+  it('should not add the entry twice on a second run', async () => {
+    captureStderr()
+    await injectGitattributes([designRecord], target)
+
+    const added = await injectGitattributes([designRecord], target)
+
+    expect(added).toEqual([])
   })
 })

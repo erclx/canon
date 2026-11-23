@@ -1061,6 +1061,16 @@ function report(result: ScanResult, target: string): void {
     if (entry.state === 'missing') logAdd(entry.entry)
   }
 
+  if (result.gitattributes.length > 0) {
+    logStep('Scanning gitattributes')
+    for (const entry of result.gitattributes) {
+      if (entry.state === 'present') logInfo(entry.entry)
+    }
+    for (const entry of result.gitattributes) {
+      if (entry.state === 'missing') logAdd(entry.entry)
+    }
+  }
+
   reportWarnings(result)
 }
 
@@ -1165,6 +1175,10 @@ function summarize(result: ScanResult): string {
   add(
     result.gitignore.filter((entry) => entry.state === 'missing').length,
     'gitignore',
+  )
+  add(
+    result.gitattributes.filter((entry) => entry.state === 'missing').length,
+    'gitattributes',
   )
 
   return parts.join(', ')

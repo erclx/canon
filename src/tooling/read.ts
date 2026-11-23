@@ -88,12 +88,17 @@ export function renderStackSections(manifest: Manifest): string {
     sections.push(sync.join('\n\n'))
   }
 
-  if (manifest.gitignore.length > 0) {
-    const groups = manifest.gitignore.map(
+  const groupSections = [
+    ['Gitignore', manifest.gitignore],
+    ['Gitattributes', manifest.gitattributes ?? []],
+  ] as const
+  for (const [title, groups] of groupSections) {
+    if (groups.length === 0) continue
+    const lines = groups.map(
       ({ header, entries }) =>
         `- \`${header}\`: ${entries.map((entry) => `\`${entry}\``).join(', ')}`,
     )
-    sections.push(`## Gitignore\n\n${groups.join('\n')}`)
+    sections.push(`## ${title}\n\n${lines.join('\n')}`)
   }
 
   return sections.map((section) => `\n${section}\n`).join('')
