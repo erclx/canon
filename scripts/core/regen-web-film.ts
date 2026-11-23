@@ -169,7 +169,8 @@ function newestReel(repo: string, pullRequest: number) {
     )
     .sort((a, b) => a.split('/')[2]!.localeCompare(b.split('/')[2]!))
   const path = paths.at(-1)
-  if (!path) fail(`${repo} ${FRAMES} holds no reel for pull request #${pullRequest}`)
+  if (!path)
+    fail(`${repo} ${FRAMES} holds no reel for pull request #${pullRequest}`)
   return { path, sha: path.split('/')[1]! }
 }
 
