@@ -1,7 +1,19 @@
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { basename, join, resolve } from 'node:path'
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs'
+import { basename, dirname, join, resolve } from 'node:path'
 import type { Command } from 'commander'
-import { INSTALL_BROWSER, isEngineMissing } from '@/browser/engine'
+import {
+  INSTALL_BROWSER,
+  isBrowserMissing,
+  isEngineMissing,
+  isSandboxBlocked,
+  launchSandboxFix,
+} from '@/browser/engine'
 import { type CameraTrack, cameraTrack, readRate } from '@/take/camera'
 import { type Breach, checkBeat, sortBreaches } from '@/take/check'
 import { requireFfmpeg } from '@/take/encode'
@@ -11,6 +23,13 @@ import { beatViewport, parseViewport, readTakePlan } from '@/take/plan'
 import type { TakePlanRefusal } from '@/take/plan'
 import type { TakeRefusal } from '@/take/film'
 import { readReelWidth, reelShapeMismatch, renderReel } from '@/take/reel'
+import {
+  DEFAULT_STILLS,
+  composeSheet,
+  decodeFrames,
+  pickFrames,
+  readReel,
+} from '@/take/stills'
 import {
   intro,
   logError,
@@ -40,6 +59,14 @@ interface RunOptions {
 interface CameraOptions {
   readonly out?: string
   readonly rate?: string
+  readonly json?: boolean
+}
+
+interface StillsOptions {
+  readonly out?: string
+  readonly count?: string
+  readonly sheet?: string
+  readonly overwrite?: boolean
   readonly json?: boolean
 }
 
@@ -403,6 +430,62 @@ export function register(program: Command): void {
     })
 
   take
+    .command('stills')
+    .description('Write a few evenly spaced frames of a reel as PNG images')
+    .argument('<reel>', 'An animated WebP, as `canon take --reel` wrote')
+    .helpOption('-h, --help', 'Show this help message')
+    .requiredOption('--out <dir>', 'Folder the stills land in')
+    .option(
+      '--count <n>',
+      `How many stills, ${DEFAULT_STILLS} by default, the first and last frame included`,
+    )
+    .option(
+      '--sheet <file>',
+      'Also lay the stills in one PNG, two to a row, at this path',
+    )
+    .option('--overwrite', 'Replace a still or sheet that already exists')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Decodes the reel in the headless Chromium canon take drives, one frame at',
+        'a time by index, and writes <reel name>-<frame>.png into --out at the',
+        "reel's own size. The reel is only read. A --count over the reel's frames",
+        'writes each frame once, and a one-frame reel writes one still.',
+        '',
+        'Nothing is replaced unless --overwrite is passed. A refusal writes nothing.',
+        '',
+        'The record is { reel, width, height, frames, stills: [{ file, index, ms }],',
+        'sheet }, with ms the frame start in the reel and sheet set only with --sheet.',
+        'A refusal carries reel, reason, and message.',
+        '',
+        'Reasons:',
+        '  bad-count         --count is not a whole number from 1',
+        '  no-reel-file      nothing readable at the reel path',
+        '  not-animated-webp the file is not an animated WebP, checked before any',
+        '                    browser starts',
+        '  would-overwrite   a still or the sheet exists and --overwrite is absent',
+        '  engine-missing    the browser engine is not installed in this project',
+        `  browser-missing   the browser is not installed, so run ${INSTALL_BROWSER}`,
+        '  sandbox-blocked   the browser could not start its sandbox',
+        '  decode-failed     the browser could not decode the reel',
+        '',
+        'Exit codes:',
+        '  0  the stills were written',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '',
+        'Examples:',
+        '  canon take stills reel.webp --out .canon/tmp/stills',
+        '  canon take stills reel.webp --out stills --count 6 --sheet stills/sheet.png',
+        '',
+      ].join('\n'),
+    )
+    .action(async (reel: string, opts: StillsOptions) => {
+      process.exitCode = await runStills(reel, opts)
+    })
+
+  take
     .command('check')
     .description("Check a take's beats against the timing rules")
     .argument('<takes>', 'The folder a take wrote, holding take.json')
@@ -476,6 +559,137 @@ export function register(program: Command): void {
     .action(async (takes: string, opts: CheckOptions) => {
       process.exitCode = await runCheck(takes, opts)
     })
+}
+
+interface Still {
+  readonly file: string
+  readonly index: number
+  readonly ms: number
+}
+
+async function runStills(
+  reelPath: string,
+  opts: StillsOptions,
+): Promise<number> {
+  const emitJson = opts.json ?? false
+  const path = resolve(reelPath)
+  const refuseStills = (
+    reason: string,
+    message: string,
+    extra: Record<string, unknown> = {},
+  ): number => {
+    logWarn(message)
+    emit(emitJson, { reel: path, reason, message, ...extra })
+    return 1
+  }
+
+  const count = opts.count === undefined ? DEFAULT_STILLS : Number(opts.count)
+  if (
+    (opts.count !== undefined && !/^\d+$/.test(opts.count.trim())) ||
+    count < 1
+  ) {
+    return refuseStills(
+      'bad-count',
+      `--count ${opts.count} is not a whole number of stills from 1, such as 4.`,
+    )
+  }
+
+  let bytes: Buffer
+  try {
+    bytes = readFileSync(path)
+  } catch (error) {
+    return refuseStills(
+      'no-reel-file',
+      `No reel file at ${path}. ${error instanceof Error ? error.message : String(error)}`,
+    )
+  }
+  const read = readReel(bytes)
+  if (read.kind === 'refused') {
+    return refuseStills(
+      'not-animated-webp',
+      `${path} is not a reel \`canon take --reel\` wrote: ${read.detail}.`,
+    )
+  }
+
+  const { reel } = read
+  const out = resolve(opts.out ?? '')
+  const stem = basename(path).replace(/\.webp$/i, '')
+  const pad = String(reel.frames.length - 1).length
+  const picked = pickFrames(reel.frames.length, count)
+  const stills: Still[] = picked.map((index) => ({
+    file: join(
+      out,
+      `${stem}-${String(index).padStart(Math.max(pad, 2), '0')}.png`,
+    ),
+    index,
+    ms: reel.frames[index]?.ms ?? 0,
+  }))
+  const sheet = opts.sheet === undefined ? undefined : resolve(opts.sheet)
+
+  const held = [
+    ...stills.map((still) => still.file),
+    ...(sheet ? [sheet] : []),
+  ].filter((file) => existsSync(file))
+  if (held.length > 0 && !opts.overwrite) {
+    return refuseStills(
+      'would-overwrite',
+      `${held.join(', ')} already exist. Pass --overwrite to replace ${held.length === 1 ? 'it' : 'them'}, or name another --out.`,
+      { files: held },
+    )
+  }
+
+  let images: Buffer[]
+  try {
+    images = await decodeFrames(bytes, picked)
+  } catch (error) {
+    if (isEngineMissing(error)) {
+      return refuseStills(
+        'engine-missing',
+        `The browser engine is not installed in this project. Install it with: ${INSTALL_BROWSER}`,
+        { install: INSTALL_BROWSER },
+      )
+    }
+    if (isBrowserMissing(error)) {
+      return refuseStills(
+        'browser-missing',
+        `The browser is not installed. Install it with: ${INSTALL_BROWSER}`,
+        { install: INSTALL_BROWSER },
+      )
+    }
+    if (isSandboxBlocked(error)) {
+      const fix = launchSandboxFix()
+      return refuseStills(
+        'sandbox-blocked',
+        `The browser could not start its sandbox.${fix ? ` Allow unprivileged user namespaces for this boot with ${fix}.` : ''}`,
+        fix ? { fix } : {},
+      )
+    }
+    return refuseStills(
+      'decode-failed',
+      `The browser could not decode ${path}. ${error instanceof Error ? error.message : String(error)}`,
+    )
+  }
+
+  mkdirSync(out, { recursive: true })
+  stills.forEach((still, i) => {
+    writeFileSync(still.file, images[i] ?? Buffer.alloc(0))
+  })
+  if (sheet) {
+    mkdirSync(dirname(sheet), { recursive: true })
+    writeFileSync(sheet, composeSheet(images))
+  }
+  logInfo(
+    `${plural(stills.length, 'still')} of ${plural(reel.frames.length, 'frame')} into ${out}${sheet ? `, sheet ${sheet}` : ''}`,
+  )
+  emit(emitJson, {
+    reel: path,
+    width: reel.width,
+    height: reel.height,
+    frames: reel.frames.length,
+    stills,
+    ...(sheet ? { sheet } : {}),
+  })
+  return 0
 }
 
 interface CheckedBeat {

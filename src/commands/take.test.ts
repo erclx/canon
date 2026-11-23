@@ -4,6 +4,7 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs'
@@ -496,6 +497,94 @@ function writeBeat(
   if (files.track) writeFileSync(join(takes, dir, 'camera.json'), files.track)
   if (files.clip) writeFileSync(join(takes, dir, 'clip.mp4'), '')
 }
+
+/** A reel's container with one frame and no pixels, enough to pass the reader and stop before the browser. */
+function reelShell(): Buffer {
+  const chunk = (kind: string, body: Buffer) => {
+    const head = Buffer.alloc(8)
+    head.write(kind, 0, 'ascii')
+    head.writeUInt32LE(body.length, 4)
+    return Buffer.concat([head, body])
+  }
+  const vp8x = Buffer.alloc(10)
+  vp8x[0] = 0x02
+  const body = Buffer.concat([
+    Buffer.from('WEBP', 'ascii'),
+    chunk('VP8X', vp8x),
+    chunk('ANMF', Buffer.alloc(16)),
+  ])
+  const head = Buffer.alloc(8)
+  head.write('RIFF', 0, 'ascii')
+  head.writeUInt32LE(body.length, 4)
+  return Buffer.concat([head, body])
+}
+
+describe('canon take stills', () => {
+  let dir: string
+
+  beforeAll(() => {
+    dir = mkdtempSync(join(tmpdir(), 'canon-take-stills-'))
+  })
+
+  afterAll(() => {
+    rmSync(dir, { recursive: true, force: true })
+  })
+
+  it('should refuse a file that is not an animated WebP before any browser starts', async () => {
+    const file = join(dir, 'plain.webp')
+    writeFileSync(file, 'not a reel')
+
+    const result = await runTake(['stills', file, '--out', join(dir, 'a')])
+
+    expect(result).toMatchObject({
+      exitCode: 1,
+      record: { reason: 'not-animated-webp' },
+    })
+    expect(existsSync(join(dir, 'a'))).toBe(false)
+  })
+
+  it('should refuse a count that is not a whole number from 1', async () => {
+    const file = join(dir, 'reel.webp')
+    writeFileSync(file, reelShell())
+
+    const result = await runTake(['stills', file, '--out', dir, '--count', '0'])
+
+    expect(result).toMatchObject({
+      exitCode: 1,
+      record: { reason: 'bad-count' },
+    })
+  })
+
+  it('should refuse to replace a still without --overwrite and leave it as it was', async () => {
+    const file = join(dir, 'held.webp')
+    writeFileSync(file, reelShell())
+    const out = join(dir, 'held')
+    mkdirSync(out)
+    writeFileSync(join(out, 'held-00.png'), 'mine')
+
+    const result = await runTake(['stills', file, '--out', out])
+
+    expect(result).toMatchObject({
+      exitCode: 1,
+      record: { reason: 'would-overwrite', files: [join(out, 'held-00.png')] },
+    })
+    expect(readFileSync(join(out, 'held-00.png'), 'utf8')).toBe('mine')
+  })
+
+  it('should refuse a missing reel as no-reel-file', async () => {
+    const result = await runTake([
+      'stills',
+      join(dir, 'absent.webp'),
+      '--out',
+      dir,
+    ])
+
+    expect(result).toMatchObject({
+      exitCode: 1,
+      record: { reason: 'no-reel-file' },
+    })
+  })
+})
 
 describe('canon take check', () => {
   let dir: string
