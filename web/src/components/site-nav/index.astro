@@ -7,7 +7,7 @@ import SunIcon from './sun.svg'
 import './style.css'
 
 /**
- * The fixed bar on the page's own grid ground: the mark back to the top, a
+ * The fixed bar on the page's own grid ground: the mark linking the home page, a
  * jump to each section, then Docs and GitHub after a thin rule, and the theme
  * toggle. Below 1100 it drops the jumps `sections` marks to fold, and below
  * 900 every jump, Docs, and GitHub fold into Menu, so focus order matches what
@@ -22,7 +22,7 @@ const glyph = mark.replace(/<!--[\s\S]*?-->/, '').trim()
 
 <header class="site-nav">
   <nav aria-label="Site">
-    <a class="brand" href="#top" aria-label={nav.back}>
+    <a class="brand" href="/" aria-label={nav.back}>
       <span class="glyph" aria-hidden="true" set:html={glyph} />
       <span>{nav.mark}</span>
     </a>

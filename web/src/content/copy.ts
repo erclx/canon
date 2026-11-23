@@ -55,7 +55,7 @@ export const sections = [
 
 export const nav = {
   mark: 'Canon',
-  back: 'Canon, back to top',
+  back: 'Canon, home',
   // README.md: "Docs"
   docs: { href: DOCS, label: 'Docs' },
   github: { href: REPO, label: 'GitHub' },

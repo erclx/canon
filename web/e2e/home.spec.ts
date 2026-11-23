@@ -301,6 +301,20 @@ test.describe('the footer columns', () => {
   })
 })
 
+test('both logos link to the home page and the skip link still reaches the opening section', async ({
+  page,
+}) => {
+  await page.goto('/')
+
+  await expect(page.locator('.site-nav a.brand')).toHaveAttribute('href', '/')
+  await expect(page.locator('.site-footer a.brand')).toHaveAttribute(
+    'href',
+    '/',
+  )
+  await expect(page.locator('a[href="#top"]')).toHaveCount(1)
+  await expect(page.locator('#top')).toHaveCount(1)
+})
+
 test('the footer mark carries no underline under hover', async ({ page }) => {
   await page.goto('/')
   const brand = page.locator('.site-footer a.brand')
