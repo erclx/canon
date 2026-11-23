@@ -80,7 +80,7 @@ The closing lines end `## Summary`, one `Closes #NNN` per issue and no trailing 
 
 ### Outcome section
 
-`## Outcome` is optional and shows the shape the change produces, for a reader who would otherwise rebuild it from the raw diff. It sits between Technical context and Testing.
+`## Outcome` is optional and shows the shape the change produces, for a reader who would otherwise rebuild it from the raw diff. It sits between Technical context and Testing. A `perf` pull request is the second use and always carries it, holding the measurement table under `### Performance claims` in place of a produced shape.
 
 - Write Outcome when the change alters a shape someone reads or writes: a record or template, a verb's output or flags, a config or settings format, or a report a skill produces
 - Omit Outcome for an internal refactor, a fix that changes no output, and a prose edit whose diff is its result

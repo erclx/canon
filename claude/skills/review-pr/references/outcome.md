@@ -23,6 +23,15 @@ The fence form takes a finding the scan cannot reach, since it sees a command on
 - A fence mixing kinds under one identifier, such as a command with no prompt beside its output, is a `minor` under the same block
 - A JSON record laid out other than as `jq .` prints it is a `minor` under the same block, since a placeholder value leaves nothing a parser could check
 
+## A measurement table
+
+A `perf` pull request carries a table of measurements under Outcome in place of a produced shape, per `${CLAUDE_SKILL_DIR}/../git-pr/references/pr.md`. Skip the shape comparison above for it. The diff produces no such table, so comparing would draw a `should-fix` on every compliant body.
+
+Read the table against the claim in the Summary instead.
+
+- A headline number the table does not support, or a table with no run behind its figures, is a `should-fix` under the `**PR body**` block
+- A row reading `not measured` with its reason in the change column takes no finding
+
 ## What takes no finding
 
 - A body carrying no Outcome, since the section is optional
