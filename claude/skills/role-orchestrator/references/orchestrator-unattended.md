@@ -132,7 +132,7 @@ Run this when the operator asks to keep the queue moving while they stay present
 The operator's word starts it and the operator's word ends it, so no pass decides the run is done.
 
 - Enter the loop at once, and record the mode and its start time per `orchestrator-handoff.md`
-- Take the run's worker cap from the operator's spoken cap, and with none, from the count the first pass launches, since `## Parallelism` sets no fixed number
+- Take the run's worker cap from the operator's spoken cap, and with none, 5, since a wave of about 15 polling sessions once spent the hourly GitHub quota
 - On "stop", launch nothing further and let every running session finish as it would, then say what is still running
 - Never end on the unattended tests in `## Ending the run`, since an attended run waits for the next merge
 
