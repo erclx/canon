@@ -159,11 +159,9 @@ function sharedPaths(holders: readonly Holder[]): SharedPath[] {
 }
 
 /**
- * Groups the Up next rows into waves from what their plans declare and what
- * their `Waiting on` cells cite, and writes nothing. A row lands one wave after
- * the rows it waits on and the earlier rows it shares a path with, so rows in
- * one wave declare no common path. A declared set predicts what a branch
- * writes and does not bound it.
+ * Groups the Up next rows into waves and writes nothing. A row lands one wave
+ * after the rows it waits on and the earlier rows it shares a path with. A
+ * declared set predicts what a branch writes and does not bound it.
  */
 export async function planWaves(root: string): Promise<WavesOutcome> {
   const ordering = orderingPath(root)
