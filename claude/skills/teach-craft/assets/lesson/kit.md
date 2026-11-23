@@ -79,7 +79,9 @@ Tables and inline code inside `.kit-article` take their look with no class.
 - Color through the tokens in `tokens.css` alone, so both themes follow
 - `--accent-strong` for small text and filled controls in the accent, since `--accent` falls under 4.5:1 there
 - One filled primary and one callout per page
-- Geist for text, which the kit leaves to the board to serve, and Noto Sans Mono for code, which `tokens.css` carries as a subset of its own, falling back to the system's own, since a font neither served nor installed fails a board capture
+- A part of its own is allowed inside the reading column, with a class that takes no `kit-` prefix and a color from the tokens, leaving the header, sidebar, rail, and pager alone
+- Geist for text, which the kit leaves to the board to serve, and Noto Sans Mono for code, which `tokens.css` carries as a subset of its own
+- A system font as the fallback for either, since a font neither served nor installed fails a board capture
 
 ## On the canvas
 
