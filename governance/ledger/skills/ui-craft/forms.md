@@ -42,6 +42,12 @@ The field is form design inside interaction design, and the authority for resear
 | Trim on submit                | [Recover from validation errors](https://design-system.service.gov.uk/patterns/validation/): "Use validation to ignore unwanted characters", such as spaces entered "before or after" an answer, since an error over one "would be difficult for the user to see and fix" | 2026-10-18 |
 | Say a field is case-sensitive | House choice: a value rejected or duplicated on case alone fails with no visible reason, since `Foo` and `foo` read as the same answer                                                                                                                                    | 2026-10-18 |
 
+## Pickers
+
+| Bullet                      | Source                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Read       |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Cover a picker's open state | [Advanced form styling](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Advanced_form_styling): "you don't have control over the box that appears containing the options when you click on the `<select>` box to open it", and of a date picker, "the internal parts of the control (e.g., the popup calendar that you use to pick a date, the spinner that you can use to increment/decrement values) are not stylable at all" | 2026-11-23 |
+
 ## Derived display state
 
 | Bullet                        | Source                                                                                                                                                       | Read       |
