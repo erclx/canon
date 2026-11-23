@@ -2,11 +2,8 @@ import { PNG } from 'pngjs'
 import { SANDBOXED } from '@/browser/engine'
 
 /**
- * Reads frames back out of a reel `canon take --reel` wrote, the reading half of
- * `src/take/reel.ts`. The container is read here off its chunks, since FFmpeg
- * decodes no animated WebP, and the pixels are decoded by the headless Chromium
- * the filming path already installs, one frame by index through the browser's
- * `ImageDecoder` rather than a timed capture of a playing animation.
+ * The reading half of `src/take/reel.ts`. FFmpeg decodes no animated WebP, so
+ * the chunks are read here and Chromium decodes each frame by index.
  */
 
 export const DEFAULT_STILLS = 4

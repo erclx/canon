@@ -14,10 +14,9 @@ import { chromium } from 'playwright-core'
 import { composeSheet, decodeFrames, pickFrames, readReel } from '@/take/stills'
 
 /**
- * Writes a reel of solid frames, one colour each, through the same FFmpeg
- * encoder `canon take --reel` uses and reads it back through Chromium, since
- * which frame came back shows only in its pixels. It needs Chromium and FFmpeg
- * with libwebp, and skips without them as `reel.e2e.test.ts` does.
+ * Writes a reel of one-colour frames through FFmpeg and reads it back through
+ * Chromium, since which frame came back shows only in its pixels. Skips without
+ * Chromium or FFmpeg with libwebp, as `reel.e2e.test.ts` does.
  */
 
 const WIDTH = 96
