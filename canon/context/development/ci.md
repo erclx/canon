@@ -35,6 +35,7 @@ Runs `🛡️ Static Checks` on Linux and `🍎 macOS Unit Tests` beside it, nei
 
 A third job runs `bun run test:e2e` with the tools the `*.e2e.test.ts` suites gate on. It copies the macOS job's `if:`, so a Markdown-only pull request skips it. The operator makes it required after 20 consecutive green runs.
 
+- A pull request runs only the E2E files its imports reach, listed by `scripts/ci/e2e-scope.ts` in `🔍 Changes` through `vitest list --changed`, and a trigger file or a failed read runs the full suite. A push to main runs the full suite.
 - FFmpeg comes from apt with `Acquire::Retries=3` and a 5-minute step bound, since the runner image lists none
 - `bunx playwright install chromium` lands the engine's browsers, and `canon browser install-browser chromium` the agent CLI's own revision, which the swipe suite launches
 - The browser cache keys on `bun.lock` and `src/browser/agent-cli.ts` under its own prefix, since a hit on the capture job's cache would skip the agent CLI install
