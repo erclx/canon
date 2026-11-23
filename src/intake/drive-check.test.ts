@@ -559,6 +559,7 @@ describe('checkDrive', () => {
     await recordBaseline(ROOT, 'app-drive-1-0')
     write(`${FOLDER}/evidence/layers/02-options.png`, 'png')
     write(`${FOLDER}/evidence/mocks/layers/02-fix.html`, '<div></div>')
+    write(`${FOLDER}/evidence/baseline/00-current.png`, 'png')
     writeLog(REFERENCE_LOG.replace(/^# Drive log\n/, ''))
     writeRecord({ goals: BOTH_DRIVEN })
 
@@ -837,6 +838,125 @@ describe('checkDrive scripts', () => {
     expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
       ok: false,
       reason: 'bad-config',
+    })
+  })
+})
+
+describe('checkDrive current page and visible skips', () => {
+  const BOARD_LOG = [
+    '| Setup | Value |',
+    '| --- | --- |',
+    '| Board | `http://127.0.0.1:4173`, project `drive-13` |',
+  ].join('\n')
+
+  const SKIPPED = [
+    '## 03. Export drops the alpha channel',
+    '- **Drawn:** skipped, nothing visible changes',
+    '- **Decision (operator):** keep alpha in PNG export',
+  ]
+
+  function writeItem(
+    fix: string,
+    decided = 'evidence/drive-log.md, finding 03',
+  ) {
+    write(
+      `${FOLDER}/01-export.md`,
+      [
+        '### 1. Export drops alpha',
+        '',
+        '- **Problem:** alpha is lost',
+        `- **Fix:** ${fix}`,
+        '- **Worth it:** yes',
+        `- **Decided:** ${decided}`,
+        '- **You:**',
+      ].join('\n'),
+    )
+  }
+
+  async function check() {
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({ goals: BOTH_DRIVEN })
+    return checkDrive(ROOT, 'app-drive-1-0')
+  }
+
+  it('should fail a board drive with no current-page capture', async () => {
+    write(`${FOLDER}/evidence/drive-log.md`, BOARD_LOG)
+    write(`${FOLDER}/evidence/baseline/00-next.png`, 'png')
+
+    expect(await check()).toMatchObject({
+      reason: 'failed',
+      findings: { uncaptured: ['evidence/baseline/00-current'] },
+    })
+  })
+
+  it('should pass a board drive holding the capture in any image format', async () => {
+    write(`${FOLDER}/evidence/drive-log.md`, BOARD_LOG)
+    write(`${FOLDER}/evidence/baseline/00-current.webp`, 'img')
+
+    expect(await check()).toMatchObject({
+      reason: 'clean',
+      findings: { uncaptured: [] },
+    })
+  })
+
+  it('should pass a drive that names no board and holds no capture', async () => {
+    write(`${FOLDER}/evidence/drive-log.md`, '| Board |  |')
+
+    expect(await check()).toMatchObject({
+      reason: 'clean',
+      findings: { uncaptured: [] },
+    })
+  })
+
+  it('should fail a skip on a finding whose item fixes a rendered surface', async () => {
+    write(`${FOLDER}/evidence/drive-log.md`, SKIPPED.join('\n\n'))
+    writeItem('set the alpha in `web/src/export.css`')
+
+    expect(await check()).toMatchObject({
+      reason: 'failed',
+      findings: { skippedVisible: ['03. Export drops the alpha channel'] },
+    })
+  })
+
+  it('should pass a skip on an item that names no rendered surface', async () => {
+    write(`${FOLDER}/evidence/drive-log.md`, SKIPPED.join('\n\n'))
+    writeItem('keep alpha in `src/export.ts`')
+
+    expect(await check()).toMatchObject({
+      reason: 'clean',
+      findings: { skippedVisible: [] },
+    })
+  })
+
+  it('should pass a skip that no intake item points at', async () => {
+    write(`${FOLDER}/evidence/drive-log.md`, SKIPPED.join('\n\n'))
+    writeItem(
+      'set the alpha in `web/src/export.css`',
+      'evidence/drive-log.md, finding 09',
+    )
+
+    expect(await check()).toMatchObject({
+      findings: { skippedVisible: [] },
+    })
+  })
+
+  it('should read the Fix and Worth it lines alone', async () => {
+    write(`${FOLDER}/evidence/drive-log.md`, SKIPPED.join('\n\n'))
+    write(
+      `${FOLDER}/01-export.md`,
+      [
+        '### 1. Export drops alpha',
+        '',
+        '- **Problem:** `web/src/export.css` clips it',
+        '- **Fix:** keep alpha in `src/export.ts`',
+        '- **Worth it:** yes',
+        '- **Decided:** evidence/drive-log.md, finding 03',
+        '- **You:**',
+      ].join('\n'),
+    )
+
+    expect(await check()).toMatchObject({
+      findings: { skippedVisible: [] },
     })
   })
 })

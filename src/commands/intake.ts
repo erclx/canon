@@ -208,6 +208,10 @@ export function register(program: Command): void {
         '                   where null records a drive of the live app',
         '  undrawn          a decision in evidence/drive-log.md with no Drawn',
         '                   path and no skipped reason',
+        '  uncaptured       a drive whose log names a Board with no',
+        '                   evidence/baseline/00-current image',
+        '  skippedVisible   a Drawn skip on a finding whose intake item names a',
+        '                   rendered-surface file in its Fix or Worth it line',
         '',
         'A goal matches by its text with any bold label and trailing period',
         'dropped. A changed path is named and never reverted.',
@@ -590,6 +594,8 @@ const FINDING_LABELS: Record<keyof DriveFindings, string> = {
   missingEvidence: 'Evidence holding no file',
   worktreeLeft: 'Drive worktree still on disk',
   undrawn: 'Decisions with nothing drawn',
+  uncaptured: 'Board drive with no current-page capture',
+  skippedVisible: 'Drawing skipped on a visible change',
 }
 
 function reportDriveCheck(
