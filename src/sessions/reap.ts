@@ -8,10 +8,13 @@ import {
   archiveDir,
   declinedDir,
   isReservedStem,
+  readPlanTargets,
+  readPullRequest,
   readSessions,
   type SessionEntry,
   tasksDir,
 } from '@/tasks/archive'
+import type { TrunkReader } from '@/tasks/trunk'
 
 /**
  * Where a task file sits. `live` is still on the board, and `archived` and
@@ -24,6 +27,10 @@ export interface TaskSessions {
   readonly stem: string
   readonly state: TaskState
   readonly entries: readonly SessionEntry[]
+  /** A recorded pull request reached the trunk, so nothing a session writes can reach the change. */
+  readonly landed: boolean
+  /** The task's `Plan:` line links a plan, so a planner's work is on the record. */
+  readonly planned: boolean
 }
 
 export type SkipReason =
@@ -36,6 +43,9 @@ export type SkipReason =
   | 'usage-limit'
   | 'open-task'
   | 'recent'
+
+/** Why a session was stopped, where the task alone showed it finished. */
+export type StopReason = 'merged' | 'planned'
 
 export type ReapOutcome =
   | 'stopped'
@@ -50,7 +60,7 @@ export interface ReapRow {
   readonly sessionId: string
   readonly name: string
   readonly outcome: ReapOutcome
-  readonly reason: SkipReason | null
+  readonly reason: SkipReason | StopReason | null
   /** The status, the open task, the dwell, or the client's output on a failure. */
   readonly detail: string | null
   /**
@@ -77,6 +87,8 @@ const IDLE_STATUSES: readonly string[] = ['idle', 'waiting']
  */
 const SETTLED_STATUSES: readonly string[] = [...IDLE_STATUSES, 'shell']
 
+const PLANNER_PREFIX = 'planner-'
+
 const TALK_MARKER = '-talk'
 
 /** The roster name every orchestrator launch carries, the controller of its wave. */
@@ -92,6 +104,8 @@ export interface ReapGuards {
 interface Candidate {
   readonly sessionId: string
   readonly name: string
+  /** Set where the task, not the status, showed the session finished. */
+  readonly reason?: StopReason
 }
 
 /**
@@ -104,7 +118,7 @@ function sharedSkip(
   guards: ReapGuards,
   tasks: readonly TaskSessions[],
   exclude: string | null,
-  finished: readonly string[],
+  finished: (status: string) => boolean,
 ): Pick<ReapRow, 'reason' | 'detail'> | null {
   const id = row.sessionId ?? ''
   if (id === guards.self) return { reason: 'caller', detail: null }
@@ -114,7 +128,7 @@ function sharedSkip(
     return { reason: 'controller', detail: row.name }
   }
   if (row.name.includes(TALK_MARKER)) return { reason: 'talk', detail: null }
-  if (!finished.includes(row.status)) {
+  if (!finished(row.status)) {
     return { reason: 'busy', detail: row.status }
   }
   if (row.stopped === 'usage-limit') {
@@ -165,12 +179,17 @@ export function planTaskReap(
       continue
     }
 
+    const statuses = task.state === 'live' ? IDLE_STATUSES : SETTLED_STATUSES
+    const planner = planned(row, task)
     const skip = sharedSkip(
       row,
       guards,
       tasks,
       task.stem,
-      task.state === 'live' ? IDLE_STATUSES : SETTLED_STATUSES,
+      (status) =>
+        task.landed ||
+        statuses.includes(status) ||
+        (planner && status === 'shell'),
     )
     if (skip) {
       settled.push({
@@ -182,10 +201,29 @@ export function planTaskReap(
       continue
     }
 
-    targets.push({ sessionId: entry.sessionId, name: row.name })
+    const reason = task.landed
+      ? 'merged'
+      : planner && row.status === 'shell'
+        ? 'planned'
+        : undefined
+    targets.push({
+      sessionId: entry.sessionId,
+      name: row.name,
+      ...(reason && !statuses.includes(row.status) ? { reason } : {}),
+    })
   }
 
   return { settled, targets }
+}
+
+/**
+ * A planner holding a feature branch may still be writing, so only a branchless
+ * one on a task linking a plan counts as done.
+ */
+function planned(row: RosterRow, task: TaskSessions): boolean {
+  return (
+    task.planned && row.name.startsWith(PLANNER_PREFIX) && row.branch === null
+  )
 }
 
 /**
@@ -211,12 +249,8 @@ export function planFinishedReap(
     const recorded = tasks.some((task) =>
       task.entries.some((entry) => entry.sessionId === id),
     )
-    const skip = sharedSkip(
-      row,
-      guards,
-      tasks,
-      null,
-      recorded ? SETTLED_STATUSES : IDLE_STATUSES,
+    const skip = sharedSkip(row, guards, tasks, null, (status) =>
+      (recorded ? SETTLED_STATUSES : IDLE_STATUSES).includes(status),
     )
     if (skip) {
       settled.push({
@@ -363,7 +397,8 @@ export async function executeReap(
     if (clientId === undefined) {
       const gone = !(await effects.live()).has(target.sessionId)
       rows.push({
-        ...target,
+        sessionId: target.sessionId,
+        name: target.name,
         outcome: gone ? 'gone' : 'failed',
         reason: null,
         detail: gone ? null : ids === undefined ? UNREAD : UNLISTED,
@@ -372,11 +407,13 @@ export async function executeReap(
       continue
     }
 
+    const reason = target.reason ?? null
     if (dryRun) {
       rows.push({
-        ...target,
+        sessionId: target.sessionId,
+        name: target.name,
         outcome: remove ? 'would-remove' : 'would-stop',
-        reason: null,
+        reason,
         detail: null,
         clientId,
       })
@@ -395,16 +432,18 @@ export async function executeReap(
     rows.push(
       still
         ? {
-            ...target,
+            sessionId: target.sessionId,
+            name: target.name,
             outcome: 'failed',
-            reason: null,
+            reason,
             detail: result.output.trim() || `exit ${result.exitCode}`,
             clientId,
           }
         : {
-            ...target,
+            sessionId: target.sessionId,
+            name: target.name,
             outcome: remove ? 'removed' : 'stopped',
-            reason: null,
+            reason,
             detail: null,
             clientId,
           },
@@ -541,6 +580,7 @@ const DIRS: readonly [TaskState, (root: string) => string][] = [
  */
 export async function readTaskSessions(
   root: string,
+  trunk?: TrunkReader,
 ): Promise<readonly TaskSessions[]> {
   const read = await Promise.all(
     DIRS.map(async ([state, dirOf]) => {
@@ -553,17 +593,36 @@ export async function readTaskSessions(
         names
           .map((name) => name.slice(0, -'.md'.length))
           .filter((stem) => !isReservedStem(stem))
-          .map(async (stem) => ({
-            stem,
-            state,
-            entries: readSessions(
-              await readFile(join(dir, `${stem}.md`), 'utf8'),
-            ),
-          })),
+          .map(async (stem) => {
+            const text = await readFile(join(dir, `${stem}.md`), 'utf8')
+            return {
+              stem,
+              state,
+              entries: readSessions(text),
+              landed: await landedOn(text, trunk),
+              planned: readPlanTargets(text).length > 0,
+            }
+          }),
       )
       return tasks
     }),
   )
 
   return read.flat()
+}
+
+/**
+ * The post-merge hook archives a merged task, so an archived one is read too.
+ * An unreadable trunk reads as not landed, which keeps the skip a reap made
+ * before this test.
+ */
+async function landedOn(
+  text: string,
+  trunk: TrunkReader | undefined,
+): Promise<boolean> {
+  if (trunk === undefined) return false
+  const numbers = readPullRequest(text)
+  if (numbers.length === 0) return false
+  const read = await Promise.all(numbers.map((number) => trunk(number)))
+  return read.every((landed) => landed === true)
 }

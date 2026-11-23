@@ -66,6 +66,17 @@ Every form leaves the sessions below alone, and the row's `reason` says which sk
 
 A session reading `shell` holds a background command, such as a preview server or a review wait. It counts as finished only when every task recording it is archived or declined, and the stop ends the command. On a live task, or on no task, it reads `busy`, since the command is usually a check the session still waits on.
 
+**Stops the task shows**
+
+The task form stops two more sessions whatever the status says, and the row's `reason` names why.
+
+| Reason    | Session                                                                                               |
+| --------- | ----------------------------------------------------------------------------------------------------- |
+| `merged`  | Any status, once a pull request the task records is on the trunk this clone holds                     |
+| `planned` | A `planner-` session holding no branch and reading `shell`, on a task whose `Plan:` line links a plan |
+
+The caller, kept, controller, and talk skips still run first. A clone behind the remote reads a merged pull request as not landed, so the reap keeps skipping it.
+
 ## Refusals
 
 Branch on `reason` in the record, not the exit code.

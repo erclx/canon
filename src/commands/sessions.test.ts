@@ -162,7 +162,7 @@ describe('canon sessions list from another pid namespace', () => {
   const FOREIGN_DOMAIN = 'linux:test:pid:[1]'
   const readable = existsSync('/proc/self/ns/pid')
 
-  function seed(socket: string, socketPresent: boolean): void {
+  function seed(socket: string, socketPresent: boolean, cwd = REPO): void {
     const registry = join(CONFIG, 'sessions')
     mkdirSync(registry, { recursive: true })
     if (socketPresent) writeFileSync(socket, '')
@@ -171,7 +171,7 @@ describe('canon sessions list from another pid namespace', () => {
       JSON.stringify({
         pid: 4242,
         sessionId: 'id-4242',
-        cwd: REPO,
+        cwd,
         name: 'canon-4242',
         kind: 'interactive',
         status: 'idle',
@@ -194,6 +194,46 @@ describe('canon sessions list from another pid namespace', () => {
         foreignDead: 1,
         sessions: [],
       })
+    },
+  )
+
+  it.skipIf(!readable)(
+    'should read an empty branch as unverified beside a dead record in the repository',
+    async () => {
+      seed(join(DIR, 'gone.sock'), false)
+
+      const result = await runSessions([
+        'list',
+        '--branch',
+        'feat/none-such',
+        '--json',
+      ])
+
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        confidence: 'unverified',
+        sessions: [],
+      })
+      expect(result.stderr).toContain('may be missing')
+    },
+  )
+
+  it.skipIf(!readable)(
+    'should read an empty branch as confirmed beside a dead record in another repository',
+    async () => {
+      seed(join(DIR, 'gone.sock'), false, join(DIR, 'elsewhere'))
+
+      const result = await runSessions([
+        'list',
+        '--branch',
+        'feat/none-such',
+        '--json',
+      ])
+
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        confidence: 'confirmed',
+        sessions: [],
+      })
+      expect(result.stderr).not.toContain('may be missing')
     },
   )
 

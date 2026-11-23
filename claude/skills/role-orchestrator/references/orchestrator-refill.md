@@ -47,8 +47,9 @@ A merge trigger runs four things in order, whoever ran the merge, since the refi
    - Let the receiver file it with `task-board` on its own board, since `task-board` here would file it on this board
    - Name it in the report for the operator when no such session is live
    - List every struck outcome in the report's `Struck:` line, so the work is carried by a named owner rather than lost to the strike
-   - Then run `canon sessions reap <stem> --json` for each merged task, archived or not, so its worker and reviewers stop and the agent view keeps to live work
-   - The verb skips a busy, interactive, talk, or controller session, the caller, and one a live task still records, so read each `skipped` row's `reason` rather than stopping it by hand
+   - Then run `canon sessions reap <stem> --remove --json` for each merged task, archived or not, so its worker and reviewers stop, leave the agent view, and the view keeps to live work
+   - The verb skips an interactive, talk, or controller session, the caller, one a live task still records, and a busy one on a task whose pull request has not landed
+   - Read each row's `sessions[].outcome` and `reason` rather than stopping a session by hand, since a stop reads `merged` or `planned` where the task alone showed it finished
    - List what it stopped in the report's `Reaped:` line, any `failed` row with its `detail`, and each listener the record's `listeners` ended, by port and path
 5. Read `.canon/tasks/priority.md` and count the `## Up next` rows whose `Waiting on` has cleared, since a blocked row is no reserve. `## In flight` is what is running, so keep one in reserve beyond it.
 6. Promote from the top of `## Needs a plan`, where the last sweep recorded what to plan next.
