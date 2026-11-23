@@ -89,6 +89,13 @@ const EVIDENCE_ROOT =
   modules.find(([file]) => file === CASES_FILE)?.[1].EVIDENCE_ROOT ??
   DEFAULT_EVIDENCE_ROOT
 
+// A caller such as the README script reads the resolved root here rather
+// than parsing the case files itself, and nothing is captured.
+if (process.argv.includes('--print-evidence-root')) {
+  console.log(EVIDENCE_ROOT)
+  process.exit(0)
+}
+
 /**
  * One case at one width, which is the unit a filter selects and a context is
  * built for. A `frame` run writes images and a `reflow` run only checks.

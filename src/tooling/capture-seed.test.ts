@@ -135,6 +135,35 @@ describe('the capture cases folder', () => {
     )
   })
 
+  it('prints the evidence root the single file names', () => {
+    mkdirSync(join(target, 'e2e/capture'), { recursive: true })
+    writeFileSync(
+      join(target, 'e2e/capture/cases.ts'),
+      "export const EVIDENCE_ROOT = 'assets/evidence'\nexport const CASES = []\n",
+    )
+
+    const result = spawnSync(
+      'bun',
+      [join(PROJECT_ROOT, HARNESS_REL), '--print-evidence-root'],
+      { cwd: target, encoding: 'utf8' },
+    )
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toBe('assets/evidence\n')
+  })
+
+  it('prints e2e/evidence as the evidence root of a folder-only project', () => {
+    writeCases('cases/menu.ts', ['menu'])
+
+    const result = spawnSync(
+      'bun',
+      [join(PROJECT_ROOT, HARNESS_REL), '--print-evidence-root'],
+      { cwd: target, encoding: 'utf8' },
+    )
+
+    expect(result.stdout).toBe('e2e/evidence\n')
+  })
+
   it('warns on an excluded viewport name no viewport carries', () => {
     mkdirSync(join(target, 'e2e/capture'), { recursive: true })
     writeFileSync(
