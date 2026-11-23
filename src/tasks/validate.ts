@@ -1302,6 +1302,22 @@ async function readLabelFolders(root: string): Promise<LabelFolders> {
   return { live, archived, declined }
 }
 
+/**
+ * The tasks a `Waiting on` cell cites, by a bare sibling pointer or a bare
+ * phase label, the way the parked-row check reads them. A label naming more
+ * than one task yields nothing, since a guess would order a row on the wrong one.
+ */
+export async function readCitedStems(
+  cell: string,
+  root: string,
+): Promise<string[]> {
+  const linked = citedStem(cell)
+  if (linked) return [linked]
+
+  const bare = bareLabels(cell, await readLabelFolders(root))
+  return bare.kind === 'stems' ? [...bare.stems] : []
+}
+
 /** What one blocker citation produced, since a row can be neither settled nor open. */
 interface CitedResult {
   readonly findings: readonly Finding[]
