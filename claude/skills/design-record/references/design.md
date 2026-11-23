@@ -89,7 +89,7 @@ In an intent record, `## Colors` carries a `Role | Property | Intent` table and 
 
 Add either optional section, and the one line Layout may carry, when the project has content for it:
 
-- `## Layout`: page width, breakpoints, and grid rules as current constraints. `ui-craft` captures at these breakpoints, so a project declaring none is captured at the 320 reflow floor alone.
+- `## Layout`: page width, breakpoints, and grid rules as current constraints. `ui-craft` captures at these, and at 390, 768, and 1280 for a project declaring none.
 - `Draw widths:`, a line inside `## Layout` naming the phone, tablet, and desktop widths a board draws at, which `design-pick` reads
 - `## Mark`: the logo's construction rules and the files that carry it
 

@@ -36,7 +36,7 @@ Only a change with no visible result in any reachable state is exempt, such as a
 ## What a capture covers
 
 - Capture the full page, never a component in isolation.
-- Capture a layout case at 320, the reflow floor in `a11y`, plus each breakpoint in the `## Layout` section of `DESIGN.md`, or at 320 alone when there is none.
+- Capture a layout case at each `## Layout` breakpoint in `DESIGN.md`, or at 390, 768, and 1280 when there is none, and check it for sideways scroll at 320, capturing nothing there.
 - Capture resizable chrome at its narrowest and widest clamp, at the narrowest width keeping it persistent. Judge the content width beside it.
 - Capture a state case at one width, driving states a first render cannot reach, such as an open menu.
 - Add a surface's case with the surface, and remove it with the surface.
