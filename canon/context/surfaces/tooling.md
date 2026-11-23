@@ -16,7 +16,7 @@ Owns the golden configs a project inherits, layered across a `base` to `web` to 
 Holds one stack, always with a `manifest.toml` and a `reference.md`, plus `configs/` and `seeds/`. A stack that stands alone, such as `cloudflare` or `shell`, sets `extends = ""` and layers onto a root already carrying another. `shippedCommentCaps` fails a file in either past a comment cap, touched or not, since every synced target fails on it.
 
 - Adding a stack means copying the closest one from `canon tooling list`, filling its manifest and reference, adding configs and seeds, and running `canon tooling verify <name>`
-- A manifest block injects one thing. `[dependencies.dev]` and `[scripts]` add only what is missing, `[gitignore]` adds a group, and `[scaffold] prepare` runs on the starter.
+- A manifest block injects one thing. `[dependencies.dev]` and `[scripts]` add only what is missing, `[gitignore]` and `[gitattributes]` add a group, and `[scaffold] prepare` runs on the starter.
 - `runtime` is reserved and read by nothing. `scaffold` is read by `canon tooling verify`, `canon tooling scaffold`, `canon tooling list`, and `sandbox/tooling/upstream.ts`.
 - `python`, `go`, and `php` extend `base` directly and run on `uv`, `go`, and `composer`, so their starters write no `package.json` and each stack's `scaffold/` overlay lands a minimal one
 - A script changes only through `[scripts.override]`, as `vite-react` forces `--max-warnings 0` onto the scaffold's oxlint, and the drift scan reads a stale override as `drifted`
