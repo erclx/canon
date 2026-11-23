@@ -45,7 +45,7 @@ Does not govern:
 
 A body describes the new behavior and nothing the diff or the commits already say.
 
-- Do not describe historical behavior or unchanged code. Describe new behavior only.
+- Do not describe historical behavior or unchanged code. Describe new behavior only. A measured baseline in a performance table is a result and not historical behavior.
 - Do not include future promises or speculative documentation
 - Do not explain obvious changes (formatting, renaming variables)
 - Do not duplicate commit messages verbatim
@@ -114,6 +114,23 @@ The squash commit carries Summary, Key changes, and Technical context alone, so 
 - Omit Testing for docs, config, or trivial sync changes
 - Use checkboxes, never prose. See Testing discipline for which box gets ticked.
 - Write one box per command, pointing at a test file rather than listing its cases
+
+### Performance claims
+
+A `perf` pull request states what it measured. The title type is the trigger, and a body that mentions speed under another type owes nothing.
+
+- State the headline number in the second sentence of `## Summary`, so the squash commit keeps the claim
+- Put a table under `## Outcome` with a header row, a separator, and a data row per measurement, never in a fence, since a fence reads as an example
+- List each run as its own row, or give the run count beside an average
+- Name what the speedup trades in `## Technical context`
+- Write a count in place of a time where nothing can be timed, such as a dropped allocation
+- Write one row reading `not measured` with the reason in the change column when no number exists, since a visible gap beats an invented figure
+
+```plaintext
+| <what was measured> | main | this branch | change |
+```
+
+`canon labels scan` fails a `perf` title whose `## Outcome` holds no such table or whose body has no `## Technical context`. It reads that the table exists and never that its numbers are true, which the reviewer judges.
 
 ### Reviewer section and visuals
 
