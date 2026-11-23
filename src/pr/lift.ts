@@ -868,11 +868,13 @@ export async function readBaseReading(
   head: string,
   ref: string,
 ): Promise<BaseReading> {
-  // Fetch the base too, or a sibling merged since the last fetch reads as fresh.
+  // A failed base fetch leaves the last fetched ref, where a sibling merged since reads as fresh.
   const baseBranch = ref.startsWith('origin/')
     ? ref.slice('origin/'.length)
     : ref
-  await git(['fetch', '-q', 'origin', baseBranch])
+  if ((await git(['fetch', '-q', 'origin', baseBranch])) === undefined) {
+    return { standing: 'unknown' }
+  }
   await git(['fetch', '-q', 'origin', `pull/${number}/head`])
 
   const hasHead =

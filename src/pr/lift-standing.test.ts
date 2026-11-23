@@ -108,4 +108,30 @@ describe('readBaseReading', () => {
       standing: 'unknown',
     })
   })
+
+  it('should read unknown when the base fetch fails and a ref from an earlier fetch remains', async () => {
+    const git: GitRunner = async (args) => {
+      if (args[0] === 'fetch') {
+        return args.includes('main') ? undefined : ''
+      }
+      return args.includes('merge-base') ? 'fork\n' : ''
+    }
+
+    expect(await readBaseReading(git, 1, HEAD, 'origin/main')).toEqual({
+      standing: 'unknown',
+    })
+  })
+
+  it('should keep measuring when only the head fetch fails, since the head commit settles it', async () => {
+    const git: GitRunner = async (args) => {
+      if (args[0] === 'fetch') {
+        return args.includes('main') ? '' : undefined
+      }
+      return args.includes('merge-base') ? 'fork\n' : ''
+    }
+
+    expect(await readBaseReading(git, 1, HEAD, 'origin/main')).toEqual({
+      standing: 'fresh',
+    })
+  })
 })
