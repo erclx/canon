@@ -1,6 +1,7 @@
 /* Lesson tokens. The strong blue, its label color, and the control edge were measured against their contrast floors, so measure again before changing one. */
 
-/* The code face, carried inside this sheet so a board capture finds it on any machine and a board that injects the sheet loses no path. A subset of Noto Sans Mono Regular under the SIL Open Font License 1.1: Basic Latin, Latin-1, and common punctuation. */
+/* The code face, carried inside this sheet so a board capture finds it on any machine and a board that injects the sheet loses no path. A Latin subset of Noto Sans Mono Regular, Copyright 2015-2020 Google LLC and 2010, 2012-2020 Google Inc.
+   Licensed under the SIL Open Font License 1.1, https://openfontlicense.org/open-font-license-official-text/, which permits bundling and requires this notice to travel with the font. */
 
 @font-face {
   font-family: 'Noto Sans Mono';
