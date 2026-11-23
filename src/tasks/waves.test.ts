@@ -153,6 +153,27 @@ describe('planWaves', () => {
     ])
   })
 
+  it('keeps a row waiting on an In flight task in wave 1 and names the blocker', async () => {
+    await board(
+      [{ stem: 'a', paths: ['src/a.ts'], waiting: '[r](r.md)' }],
+      [{ stem: 'r', paths: ['src/r.ts'] }],
+    )
+
+    const report = await read()
+    expect(stems(report)).toEqual([['a']])
+    expect(report.waves[0].rows[0].after).toEqual(['r'])
+  })
+
+  it('drops a blocker whose task is no longer live from after', async () => {
+    await board([
+      { stem: 'a', paths: ['src/a.ts'], waiting: '[gone](gone.md)' },
+    ])
+
+    const report = await read()
+    expect(stems(report)).toEqual([['a']])
+    expect(report.waves[0].rows[0].after).toEqual([])
+  })
+
   it('reports two rows waiting on each other instead of looping', async () => {
     await board([
       { stem: 'a', paths: ['src/a.ts'], waiting: '[b](b.md)' },
