@@ -41,7 +41,7 @@ export function readCallersRoot(root: string): CallersRoot | undefined {
 const COMMAND_FILE = /^src\/commands\/.+\.ts$/
 
 function isVerbChange(path: string): boolean {
-  return COMMAND_FILE.test(path) && !/\.test\.ts$/.test(path)
+  return COMMAND_FILE.test(path) && !path.endsWith('.test.ts')
 }
 
 function commandFiles(entries: readonly string[]): string[] {
@@ -115,7 +115,7 @@ export function checkCallers(
   const stated = bullets.flatMap((bullet) => bullet.paths)
   const reported = new Set<string>()
 
-  for (const verb of [...new Set(verbs)]) {
+  for (const verb of new Set(verbs)) {
     if (stated.some((path) => isVerbBullet(path) && coversVerb(path, verb))) {
       continue
     }
