@@ -24,10 +24,29 @@ Reach and start the board per `board.md`, and pass `--root <board>` on every `fr
 - `<project>` is `drive-<nn>`, the default `${CLAUDE_SKILL_DIR}/../app-drive/references/config.md` gives with the intake's ordinal
 - Never take the `project` key of `design.toml`, so a pass's pages stay apart from pick rounds and accepted frames
 - Read `frameboard list --root <board> --json` with no `--project`, run `project add` when the list lacks the project, and name it in the overview before the first frame
-- File it under the `Drives` home folder once it exists, per `## Home folders` in `board.md`
-- Note `reused` off the serve record, since the pass ends only a server it started
+- File it under the `board-folder` key of `canon/config/app-drive.toml`, `Drives` when absent, per `## Home folders` in `board.md`, so a drive and a pass land in one place
+- Note `reused` off the serve record
+
+### A project another intake left
+
+A deleted folder frees its ordinal while its kept project stays on the board, so a later intake can claim the same `<nn>` and find `drive-<nn>` already there. The overview names the project the pass drew in, and that line decides whose it is.
+
+- Treat a found `drive-<nn>` the overview does not name as foreign, and never write into it
+- Take `drive-<nn>-<slug>` instead, run `project add` for it, and name it in the overview before the first frame
 
 A refusal that ends the board ends the drawing on it rather than the pass. Report it on the item.
+
+## Pages
+
+Read `drawing.md` beside `board.md` before the first frame, for the widths, layout, frame names, and heights. It states pages for a pick round and a drive only, so this file fixes the intake's.
+
+- Draw one page per item, named `<n>-<topic>` after the item's number and a short topic, and delete the empty page `project add` leaves once the first page holds a frame
+- Name an option frame as a drive's option, `<topic>-<arm>-<px>`
+- Never use `00-current` or `00-next`, which belong to a drive alone
+
+## The server after the pass
+
+Leave a server this pass started running, since the operator settles an item by looking after the pass has ended and `plan-intake-answer` reads no board. Put the board's `url` in the pass output beside each item drawn for, so the operator reaches the live frames. An ended server is the operator's to restart.
 
 ## The write scope on the board
 

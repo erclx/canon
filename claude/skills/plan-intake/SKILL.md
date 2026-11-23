@@ -125,13 +125,15 @@ This overrides the paths-only reporting the project states generally, which stay
 
 **Routing:** <N> ready to plan, <N> groundwork candidates, <N> already settled
 
+**Board:** <url>, drew for items <n>, <n>
+
 **Open questions:** <N> awaiting your call
 
 Next: /plan-intake-answer to answer the `You:` slots from here, or type them
 into the files, then /task-board to promote what is ready
 ```
 
-Use `📂 Resumed` in place of `📂 Opened` on a resume pass.
+Use `📂 Resumed` in place of `📂 Opened` on a resume pass, and omit the `**Board:**` line when the pass drew nothing.
 
 Close on a retell of the items this pass filed, after the report above, since the operator reads the chat more than the files. Read `${CLAUDE_SKILL_DIR}/references/retell.md` for its shape and wording, and mark every item `unread`, since none carries an answer yet.
 
