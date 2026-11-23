@@ -109,11 +109,9 @@ function isArgv(value: unknown): value is readonly string[] {
 }
 
 /**
- * Reads `canon/config/preview.json` as `{ "writes", "keep", "env", "seed",
- * "serve", "port" }`. A `serve` needs a `port`, since that is the address a
- * started server is waited on at. It
- * refuses a file that does not parse, a path absolute or climbing with `..`, and
- * a `keep` path outside, or equal to, a `writes` path, never reading as absent.
+ * Reads `canon/config/preview.json`, refusing rather than reading as absent on a
+ * bad parse, a path leaving the worktree, a `keep` outside or equal to a `writes`
+ * path, or a `serve` with no `port` to wait on.
  */
 export function loadPreviewConfig(worktree: string): PreviewConfigRead {
   const path = join(worktree, PREVIEW_CONFIG_REL)
@@ -562,10 +560,9 @@ interface ServeExit {
 }
 
 /**
- * Starts the project's `serve` detached from the worktree on the copy, with
- * `WORKTREE_PORT_OFFSET` at the worktree's offset plus the shift, and waits for
- * any HTTP answer on the port that derives. It never binds beside a port that
- * already answers, and on every failure it ends what it started and forgets it.
+ * Starts `serve` detached on the copy at the worktree's offset plus the shift and
+ * waits for HTTP there. It never binds beside a port that already answers, and
+ * on every failure it ends what it started and forgets it.
  */
 export async function startPassPreview(
   input: PassStartInput,

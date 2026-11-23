@@ -57,11 +57,9 @@ function isUnder(cwd: string, folder: string): boolean {
 }
 
 /**
- * Finds the server this worktree is running. A declared port held by a listener
- * in the worktree is probed alone first, and answers for the worktree unless it
- * serves no page. Otherwise the lowest port whose listener is in the worktree,
- * answers an HTTP probe, and passes every declared health path on that page port
- * wins. A port is the unit, since a reload socket holds a second.
+ * Finds this worktree's server. A declared port its listener holds is probed
+ * alone first, and otherwise the lowest worktree port serving a page that passes
+ * every health path wins. A port is the unit, since a reload socket holds a second.
  */
 export async function findLocalServer(
   worktreeRoot: string,
