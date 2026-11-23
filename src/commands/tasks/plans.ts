@@ -24,6 +24,7 @@ import {
   planReach,
   type ReachOutcome,
 } from '@/tasks/reach'
+import { planWaves, type WavesOutcome } from '@/tasks/waves'
 import { intro, logError, logInfo, logStep, logWarn, outro } from '@/cli/ui'
 import { mainWorktreeRoot } from '@/git/worktree'
 
@@ -41,6 +42,11 @@ interface LaunchableCommandOptions {
   readonly json?: boolean
   readonly root?: string
   readonly wait?: string | true
+}
+
+interface WavesCommandOptions {
+  readonly json?: boolean
+  readonly root?: string
 }
 
 interface BranchCommandOptions {
@@ -444,6 +450,67 @@ function reportReach(
   return outcome.claimed.length === 0 ? 0 : EXIT_FINDINGS
 }
 
+async function runWaves(opts: WavesCommandOptions): Promise<number> {
+  const root = opts.root ?? (await mainWorktreeRoot())
+  return reportWaves(await planWaves(root), opts.json ?? false)
+}
+
+function reportWaves(outcome: WavesOutcome, emitJson: boolean): number {
+  if (!outcome.ok) {
+    if (emitJson) {
+      process.stdout.write(
+        `${JSON.stringify({ ok: false, reason: outcome.reason, message: outcome.message })}\n`,
+      )
+      return 1
+    }
+
+    intro('canon tasks waves')
+    logStep('Refused')
+    logError(outcome.message)
+    outro()
+    return 1
+  }
+
+  if (emitJson) {
+    process.stdout.write(`${JSON.stringify(outcome)}\n`)
+    return 0
+  }
+
+  intro('canon tasks waves')
+
+  if (outcome.waves.length === 0) logInfo('no planned row in Up next')
+  for (const wave of outcome.waves) {
+    logStep(`Wave ${wave.wave}`)
+    for (const row of wave.rows) {
+      const after =
+        row.after.length > 0 ? `, after ${row.after.join(', ')}` : ''
+      logInfo(`${row.stem} (${row.plan}${after})`)
+    }
+  }
+
+  if (outcome.shared.length > 0) {
+    logStep('Shared')
+    for (const entry of outcome.shared) {
+      logWarn(
+        `${entry.path} is declared by ${entry.stems.join(' and ')}, and ${entry.rebases} rebases`,
+      )
+    }
+  }
+
+  if (outcome.unplanned.length > 0) {
+    logStep('Unplanned')
+    for (const stem of outcome.unplanned) logInfo(stem)
+  }
+
+  if (outcome.cyclic.length > 0) {
+    logStep('Cyclic')
+    for (const stem of outcome.cyclic) logWarn(`${stem} waits in a cycle`)
+  }
+
+  outro()
+  return 0
+}
+
 export function registerPlans(tasks: Command): void {
   tasks
     .command('plan-citations')
@@ -672,5 +739,45 @@ export function registerPlans(tasks: Command): void {
     )
     .action(async (plan: string, opts: ReachCommandOptions) => {
       process.exitCode = await runReach(plan, opts)
+    })
+
+  tasks
+    .command('waves')
+    .description('Group the Up next rows into waves that can build together')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Emit a machine-readable record on stdout')
+    .option('--root <path>', 'Board root, defaulting to the main worktree')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Record fields:',
+        '  waves      each a number and its rows, a row carrying its task stem,',
+        '             its plan, and the live tasks its Waiting on cell cites',
+        '  shared     each a path two plans declare, the stems holding it, and',
+        '             the Up next stem that rebases',
+        '  unplanned  Up next rows linking no live plan',
+        '  cyclic     rows in a wait cycle, or waiting on one',
+        '',
+        'Exit codes:',
+        '  0  the board was read, with an empty Up next included',
+        '  1  refused as no-board, with the reason on stderr or in the JSON record',
+        '',
+        'Rows in one wave declare no common path. A row waiting on another, or',
+        'sharing a path with an earlier row, lands in a later wave. A shared path',
+        'is a rebase and never a hold, so the orchestrator still decides what',
+        'dispatches. A declared set predicts what a branch writes and does not',
+        'bound it, so plan-reach at ship stays the read of what was written. A',
+        'cell naming its blocker in a sentence reads as an empty after. It',
+        'reports and never writes.',
+        '',
+        'Examples:',
+        '  canon tasks waves',
+        '  canon tasks waves --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (opts: WavesCommandOptions) => {
+      process.exitCode = await runWaves(opts)
     })
 }
