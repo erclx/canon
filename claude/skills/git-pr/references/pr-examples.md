@@ -91,6 +91,32 @@ Update auth middleware to enforce jwt expiration checks. # imperative + direct o
 - Confirm the 401 and 403 split reads correctly for the public API. # a request, not a test result
 ```
 
+## Performance
+
+A `perf` body carries the headline number, a table under Outcome, and what it trades.
+
+```markdown
+## Summary
+
+Cache the directory walk to cut a repeat scan. A 200-file scan drops from 41 ms to 12 ms.
+
+## Key changes
+
+- Add a walk cache to `src/scan/walk.ts`.
+
+## Technical context
+
+**Stale entries.** The cache holds a walk until the process exits, so a file added mid-run is missed.
+
+## Outcome
+
+| Scan of 200 files | main  | this branch | change |
+| ----------------- | ----- | ----------- | ------ |
+| run 1             | 43 ms | 12 ms       | -72%   |
+| run 2             | 40 ms | 12 ms       | -70%   |
+| run 3             | 40 ms | 11 ms       | -73%   |
+```
+
 ## Incorrect
 
 Each line's comment names the rule it breaks.

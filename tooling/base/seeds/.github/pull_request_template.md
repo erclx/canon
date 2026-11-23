@@ -14,6 +14,7 @@
 <!-- <The new shape with placeholders, about 20 lines at most, never a whole file> -->
 <!-- One fence per kind, each tagged: console with every command on "$ ", json as jq . prints it, markdown, yaml, plaintext -->
 <!-- Keep fenced lines to 90 characters, and quote a single message line in a blockquote instead -->
+<!-- A perf title needs a table under Outcome with a header row and a data row, and a Technical context -->
 <!-- Full rules: the pr.md reference in the git-pr skill -->
 
 ## Testing

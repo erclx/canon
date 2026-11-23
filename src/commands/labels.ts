@@ -16,6 +16,7 @@ import {
 import { resolveScanInput } from '@/labels/event'
 import { checkTitleFormat, type TitleFormatIssue } from '@/labels/format'
 import { MAP_REL, readLabelMap } from '@/labels/map'
+import { checkMeasurement } from '@/labels/measurement'
 import { isReleasePullRequest, scanPhaseLabels } from '@/labels/phase'
 import { checkSections } from '@/labels/sections'
 import { missingLabels } from '@/labels/sync'
@@ -299,6 +300,12 @@ export function register(program: Command): void {
         '## Summary or ## Key changes, fails. A review, a release-please body,',
         'and a scan carrying no title skip this check.',
         '',
+        'It fails a `perf` title whose body carries no table under ## Outcome,',
+        'being a header row, a separator, and a data row outside a fence, or',
+        'no ## Technical context. It reads that the table exists and never that',
+        'its numbers are true. Reported under `measurement` as `checked` and',
+        '`missing`.',
+        '',
         'It fails the density of that same body, reported per section under',
         '`density`: a bullet past 200 characters, more than 5 plain',
         'bullets or 2 paragraphs in a row, a paragraph past 350 characters, any',
@@ -335,11 +342,12 @@ export function register(program: Command): void {
         'not read, as GitHub does not read it.',
         '',
         'Exit codes:',
-        '  0  none of the nine found',
+        '  0  none of the ten found',
         '  1  refused, with the reason on stderr or in the JSON record',
         '  2  the title or body carries a phase label, a board identifier, a',
         '     session link, a banned character, a heading outside the closed',
-        '     list or a required one missing, a density finding in the body, a',
+        '     list or a required one missing, a perf body with no measurement',
+        '     table, a density finding in the body, a',
         '     missing or stray closing line',
         '     under --closes, or a title',
         "     breaking claude/skills/git-pr/references/pr.md's format, casing, or length",
@@ -860,6 +868,34 @@ async function runScan(opts: ScanOptions): Promise<number> {
     }
   }
 
+  const measurement = sectionsChecked
+    ? checkMeasurement(resolved.title, resolved.body)
+    : { checked: false, missing: [] }
+
+  logStep(
+    !measurement.checked
+      ? 'Measurement not checked'
+      : measurement.missing.length === 0
+        ? 'Clean'
+        : 'Measurement missing',
+  )
+  if (!measurement.checked) {
+    logInfo('only a perf pull request body is graded for its measurement')
+  } else if (measurement.missing.length === 0) {
+    logInfo('the Outcome table and the Technical context are there')
+  } else {
+    if (measurement.missing.includes('table')) {
+      logWarn(
+        'A perf pull request needs a table with a header row and a data row under ## Outcome: | <what was measured> | main | this branch | change |. Write not measured with the reason in the change column when nothing can be timed.',
+      )
+    }
+    if (measurement.missing.includes('technical-context')) {
+      logWarn(
+        'A perf pull request needs ## Technical context, naming what the speedup trades.',
+      )
+    }
+  }
+
   // A post's density never fails the scan, since the review post hook denies on exit 2.
   const post = !sectionsChecked && isPost(resolved.body)
   const density = sectionsChecked
@@ -1001,6 +1037,7 @@ async function runScan(opts: ScanOptions): Promise<number> {
         sessionLinks: result.sessionLinks,
         titleFormatIssues,
         sections: { checked: sectionsChecked, ...sections },
+        measurement,
         density,
         bannedCharacters,
         missingClosures: closing.missing,
@@ -1015,6 +1052,7 @@ async function runScan(opts: ScanOptions): Promise<number> {
     titleFormatIssues.length === 0 &&
     sections.outside.length === 0 &&
     sections.missing.length === 0 &&
+    measurement.missing.length === 0 &&
     !(sectionsChecked && density.length > 0) &&
     banFindings.length === 0 &&
     closing.missing.length === 0 &&
