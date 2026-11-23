@@ -111,6 +111,7 @@ A frame's height follows whether the board draws a device around it.
 
 - A frame drawn in a device holds that device's screen height and scrolls, taking `--scroll` on its add. Never fit it, since a fit stretches the device body to the content's full length.
 - A frame with no device, such as a component or a drive's whole page, is fitted with `frameboard frame fit <frame>` after it is written
+- Where a scroll-driven or pinned section defeats the fit, measure its `scrollHeight` at that width and set it with `frameboard frame resize`
 - Look at the capture for a frame cut at the bottom before handing anything over, since a cut frame reads as a broken design
 
 A composite capture draws a scrolling frame at its first screen. An arm whose difference sits below the fold reads identical in the stills, so capture it at a scrolled position or judge it on the live board.
