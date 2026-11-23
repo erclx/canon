@@ -11,8 +11,6 @@ export default scenario({
       ctx.fixtures('claude', 'design-pick', 'shared', '01-initial')
       // Frameboard's marker board.json reads as a repeat to the gate, so the scenario writes it.
       ctx.write('.canon/board/board.json', '{"version": 1}\n')
-      // A configured project wins over the derived name, so the seeded references page and the archive globs stay under picks.
-      ctx.write('canon/config/design.toml', 'project = "picks"\n')
 
       ctx.mkdir('.claude')
       ctx.git('add', '.')
