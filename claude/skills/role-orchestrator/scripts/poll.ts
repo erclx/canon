@@ -52,6 +52,8 @@ export interface Row {
   uiHead: string
   /** The code close carried to the head across a rebase or a merge of the base, with the UI family owing nothing. */
   isRebased: boolean
+  /** The lift verb's readiness at the head, empty when this run took no reading or it was refused. */
+  ready: '' | Readiness
   unmatchedCount: number
   unmatchedHeading: string
 }
@@ -69,6 +71,9 @@ export type Staleness = 'fresh' | 'stale' | 'unknown'
  */
 export type EvidenceState = 'owed' | 'settled' | 'uncaptured' | 'unread'
 
+/** Out of draft with every gate clear at the head, so only the merge is owed. */
+export type Readiness = 'not' | 'ready'
+
 /** One baseline line, kept as the strings it was written with. */
 export interface Baseline {
   /** An `EvidenceState`, or empty on a line written before the field existed. */
@@ -79,6 +84,8 @@ export interface Baseline {
   /** Open pull requests this one conflicts with, comma-separated, or `none`. */
   overlaps: string
   prior: string
+  /** The head READY reported at, or `none`, so a standing reading reports once. */
+  ready: string
   resp: string
   stale: string
   state: string
@@ -248,7 +255,7 @@ export const rebasedFromVerb = (record: unknown): boolean => {
   )
 }
 
-/** Takes the first eleven fields and ignores the rest, so a short or padded line still reads. */
+/** Takes the first twelve fields and ignores the rest, so a short or padded line still reads. */
 export const parseBaseline = (line: string): Baseline => {
   const fields = line.split(' ')
 
@@ -259,6 +266,7 @@ export const parseBaseline = (line: string): Baseline => {
     number: fields[0] ?? '',
     overlaps: fields[9] ?? '',
     prior: fields[2] ?? '',
+    ready: fields[11] ?? '',
     resp: fields[3] ?? '',
     stale: fields[8] ?? '',
     state: fields[5] ?? '',
@@ -285,6 +293,7 @@ export const formatBaseline = (entry: Baseline): string =>
     entry.stale,
     entry.overlaps,
     entry.evidence,
+    entry.ready,
   ]
     .join(' ')
     .trimEnd()
@@ -335,6 +344,7 @@ const classifyFirstSighting = (
     number: row.number,
     overlaps: 'none',
     prior: row.prior,
+    ready: row.ready === 'ready' ? row.head : 'none',
     resp: String(row.resp),
     stale: row.stale,
     state: row.heading,
@@ -352,8 +362,26 @@ const classifyFirstSighting = (
   return {
     baseline,
     isChanged: true,
-    lines: [line, ...staleLine(row, context.base)],
+    lines: [line, ...staleLine(row, context.base), ...readyLine(row, 'none')],
   }
+}
+
+/**
+ * Reported once per head, so a pull request waiting on the merge alone stops
+ * ending every wait, and a push that readies a new head reports again.
+ */
+const readyLine = (row: Row, reportedAt: string): string[] =>
+  row.ready === 'ready' && reportedAt !== row.head
+    ? [
+        `READY     #${row.number} at ${short(row.head)}, waiting only on the merge`,
+      ]
+    : []
+
+const carriedReady = (row: Row, old: Baseline): string => {
+  if (row.ready === 'ready') return row.head
+  if (row.ready === 'not') return 'none'
+
+  return old.ready || 'none'
 }
 
 /** A `settled` reading never carries onto a moved head, where it would stop every later read. */
@@ -432,6 +460,7 @@ export const classify = (
   // A post or a push moves the UI state, and either is when an action is owed.
   lines.push(...classifyUi(row, old))
   lines.push(...classifyEvidence(row, old))
+  lines.push(...readyLine(row, old.ready))
 
   const oldResp = Number.parseInt(old.resp, 10)
   if (row.head !== old.head) {
@@ -485,6 +514,7 @@ export const classify = (
     number: row.number,
     overlaps: old.overlaps,
     prior: row.prior,
+    ready: carriedReady(row, old),
     resp: String(row.resp),
     stale: row.stale,
     state,
@@ -851,6 +881,45 @@ const readEvidence = async (
       )
     : ''
 
+/**
+ * Branches on `reason`, since the verb exits 1 on a refusal it still prints.
+ * `already-ready` alone is a ready pull request every gate clears at the head,
+ * CI included. A failed read is unread rather than not ready, so it reprints nothing.
+ */
+export const readinessFromLift = (
+  record: unknown,
+  head: string,
+): '' | Readiness => {
+  if (typeof record !== 'object' || record === null) return ''
+  const fields = record as Record<string, unknown>
+  if (typeof fields.reason !== 'string' || fields.reason === 'gh-failed') {
+    return ''
+  }
+
+  return fields.reason === 'already-ready' &&
+    fields.isReady === true &&
+    fields.head === head
+    ? 'ready'
+    : 'not'
+}
+
+/** Only a code close can be ready, and one reported at this head costs no second read. */
+const readReadiness = async (
+  number: string,
+  head: string,
+  heading: string,
+  old: Baseline | undefined,
+): Promise<'' | Readiness> =>
+  heading === 'closed' && old?.ready !== head
+    ? readinessFromLift(
+        parseJson(
+          (await runAsync('canon', ['pr', 'lift', number, '--check', '--json']))
+            .stdout,
+        ),
+        head,
+      )
+    : ''
+
 const buildRow = async (
   number: string,
   payload: Payload,
@@ -869,7 +938,10 @@ const buildRow = async (
   const record = parseJson(state.stdout)
   const scope = scopeFromVerb(record, now) ?? scopeFallback(payload, now)
   const written = merges === 'unknown' ? null : await readWritten(head, ref)
-  const stale = await readStale(written, ref)
+  const [stale, ready] = await Promise.all([
+    readStale(written, ref),
+    readReadiness(number, head, scope.state, old),
+  ])
 
   return {
     age: scope.age,
@@ -881,6 +953,7 @@ const buildRow = async (
     passAt: scope.readAt,
     paths: written?.paths ?? null,
     prior: scope.commit,
+    ready,
     replyAt: replies.newestAt,
     resp: replies.count,
     stale: stale.stale,
