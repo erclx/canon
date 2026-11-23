@@ -9,6 +9,12 @@
 # Run `canon labels sync` once to create the ones the remote lacks, and again
 # after adding a row.
 #
+# `canon labels sync` colors each label it creates from a fixed palette in row
+# order. A row may take the table form to choose its own color, such as
+# `app = { paths = ["src/"], color = "1f6feb" }`, and `canon labels sync
+# --check` reports a declared color the remote holds differently without
+# editing it.
+#
 # The matching rule and the `[declined]` table are described in the `git-pr`
 # skill's labels reference.
 

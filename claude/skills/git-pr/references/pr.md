@@ -117,19 +117,19 @@ The squash commit carries Summary, Key changes, and Technical context alone, so 
 
 ### Performance claims
 
-A `perf` pull request states what it measured. The title type is the trigger, and a body that mentions speed under another type owes nothing.
+A pull request states what it measured when its plan's Verification ran an eval, a benchmark, or a timed run, and every `perf` pull request does whatever its plan says. A body that mentions speed with neither owes nothing.
 
 - State the headline number in the second sentence of `## Summary`, so the squash commit keeps the claim
 - Put a table under `## Outcome` with a header row, a separator, and a data row per measurement, never in a fence, since a fence reads as an example
-- List each run as its own row, or give the run count beside an average
-- Name what the speedup trades in `## Technical context`
-- Write a count where nothing can be timed, or one row reading `not measured` with the reason in the change column, since a visible gap beats an invented figure
+- Give each row what was measured, the result, the baseline, and the conditions, with each run as its own row or its count beside an average
+- Name what a `perf` change trades in `## Technical context`
+- Write one row reading `not measured` with the reason where nothing can be timed, and keep the numbers out of the announcement to the controller, which points here
 
 ```plaintext
-| <what was measured> | main | this branch | change |
+| <what was measured> | result | baseline | conditions |
 ```
 
-`canon labels scan` fails a `perf` title whose `## Outcome` holds no such table or whose body has no `## Technical context`. It reads that the table exists and never that its numbers are true, which the reviewer judges.
+`canon labels scan` fails a `perf` title whose `## Outcome` holds no such table or whose body has no `## Technical context`. Given `--plan`, it fails any body with no table when the plan's Verification names a measurement in prose. It reads that the table exists and never that its numbers are true, which the reviewer judges.
 
 ### Reviewer section and visuals
 

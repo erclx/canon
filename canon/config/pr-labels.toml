@@ -5,7 +5,12 @@
 # file gets no labels and no warning.
 #
 # Each label named here has to exist on the remote before the first run that
-# matches it. `canon labels sync` creates every one the remote lacks.
+# matches it. `canon labels sync` creates every one the remote lacks, coloring
+# each from a fixed palette in the order the rows appear below.
+#
+# A row may take the table form to choose its own color, such as
+# `cli = { paths = ["src/"], color = "1f6feb" }`. `canon labels sync --check`
+# reports a declared color the remote holds differently and never edits it.
 #
 # Label count is worth watching rather than capping. A pull request needing
 # three domain labels is one `git-split` should have split. Two is normal for a
