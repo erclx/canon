@@ -464,6 +464,35 @@ describe('checkPlan', () => {
       expect(checkPlan('feature-a-b.md', conformingPlan())).toEqual([])
     })
 
+    it('should not require the section for a rendered path named only in the reason', () => {
+      const body = uiPlan([]).replace(
+        '- `src/app/button.tsx`: the pressed state',
+        '- `src/app/button.ts`: mirrors `src/app/button.tsx`',
+      )
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
+    it('should not require the section for a glob span ahead of the colon', () => {
+      const body = uiPlan([]).replace(
+        '- `src/app/button.tsx`: the pressed state',
+        '- `**/*.astro`: the glob the check scans',
+      )
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
+    it('should still require the section for a rendered html path ahead of the colon', () => {
+      const body = uiPlan([]).replace(
+        '`src/app/button.tsx`',
+        '`canon/design/foo.html`',
+      )
+
+      expect(kinds(checkPlan('feature-a-b.md', body))).toEqual([
+        'section-missing',
+      ])
+    })
+
     it('should require the section for a scss entry', () => {
       const body = uiPlan([]).replace('button.tsx', 'theme.scss')
 
