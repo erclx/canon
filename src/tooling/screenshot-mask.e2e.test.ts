@@ -41,8 +41,8 @@ async function browserAvailable(): Promise<boolean> {
 
 const hasBrowser = await browserAvailable()
 
-/** One case at 1280 alone, so a run writes one whole-page frame per case. */
-const CASES_SOURCE = `const only1280 = ['320', '768', '1536']
+/** One case at 1280 alone, the reflow floor skipped, so a run writes one whole-page frame per case. */
+const CASES_SOURCE = `const only1280 = ['320', '390', '768', '1536']
 export const EVIDENCE_ROOT = 'evidence'
 export const CASES = [
   { section: 'open', theme: 'light', route: '/', excludeViewports: only1280, mask: ['.edited', '.below', '.badge', '.missing'] },

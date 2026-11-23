@@ -37,8 +37,8 @@ rm -rf "$BASELINE"
 mkdir -p "$BASELINE"
 cp -R web/screenshots/localhost/home/. "$BASELINE/"
 
-# The sweep holds all four widths and this repository commits two, 320 and
-# 1280. The case list is the place to change if that set moves.
+# The sweep holds four widths and this repository commits two, 390 and 1280.
+# The harness's VIEWPORTS is the place to change if that set moves.
 find "$BASELINE" \( -name '768--*.png' -o -name '1536--*.png' \) -delete
 
 # The shared golden config names the case that emulates nothing `default`, and

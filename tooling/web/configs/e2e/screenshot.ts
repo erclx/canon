@@ -12,16 +12,24 @@ import type {
 } from './capture-types'
 
 /**
- * The widths every case is crossed with, 320 being the base a page holds
- * without clipping. Only the base and desktop carry `evidence`, since each
- * committed width multiplies the tracked frames.
+ * The widths every case is crossed with. The three carrying `evidence` are the
+ * narrow end of the phone, tablet, and desktop classes, which the board draws
+ * and the reel films at too. 1536 sweeps into `screenshots/` alone, so a layout
+ * range wider than 1280 is still looked at without a committed frame.
  */
 const VIEWPORTS: readonly Viewport[] = [
-  { name: '320', width: 320, height: 800, evidence: true },
-  { name: '768', width: 768, height: 800, evidence: false },
+  { name: '390', width: 390, height: 800, evidence: true },
+  { name: '768', width: 768, height: 800, evidence: true },
   { name: '1280', width: 1280, height: 800, evidence: true },
   { name: '1536', width: 1536, height: 800, evidence: false },
 ]
+
+/**
+ * The WCAG Reflow floor. Every case is loaded here and fails the run on a
+ * sideways scroll or a clipped control, and no frame is written, since nothing
+ * fails on a picture. A case defers it by naming `320` in `excludeViewports`.
+ */
+const REFLOW_FLOOR = { name: '320', width: 320, height: 800 } as const
 
 const CASES_FILE = 'e2e/capture/cases.ts'
 const CASES_DIR = 'e2e/capture/cases'
@@ -81,15 +89,23 @@ const EVIDENCE_ROOT =
   modules.find(([file]) => file === CASES_FILE)?.[1].EVIDENCE_ROOT ??
   DEFAULT_EVIDENCE_ROOT
 
-/** One case at one viewport, which is the unit a filter selects and a context is built for. */
+/**
+ * One case at one width, which is the unit a filter selects and a context is
+ * built for. A `frame` run writes images and a `reflow` run only checks.
+ */
 interface CaptureRun {
   readonly captureCase: CaptureCase
-  readonly viewport: Viewport
+  readonly kind: 'frame' | 'reflow'
+  readonly viewport: Pick<Viewport, 'name' | 'width' | 'height'> &
+    Partial<Pick<Viewport, 'evidence'>>
   readonly label: string
   readonly file: string
 }
 
-const VIEWPORT_NAMES = new Set(VIEWPORTS.map((viewport) => viewport.name))
+const VIEWPORT_NAMES = new Set([
+  ...VIEWPORTS.map((viewport) => viewport.name),
+  REFLOW_FLOOR.name,
+])
 
 for (const { captureCase, file } of SOURCED) {
   for (const name of captureCase.excludeViewports ?? []) {
@@ -103,14 +119,21 @@ for (const { captureCase, file } of SOURCED) {
 
 const ALL_RUNS: readonly CaptureRun[] = SOURCED.flatMap(
   ({ captureCase, file }) =>
-    VIEWPORTS.filter(
-      (viewport) => !captureCase.excludeViewports?.includes(viewport.name),
-    ).map((viewport) => ({
-      captureCase,
-      viewport,
-      file,
-      label: `${captureCase.section}/${viewport.name}--${captureCase.theme}`,
-    })),
+    [
+      { kind: 'reflow' as const, viewport: REFLOW_FLOOR },
+      ...VIEWPORTS.map((viewport) => ({ kind: 'frame' as const, viewport })),
+    ]
+      .filter(
+        ({ viewport }) =>
+          !captureCase.excludeViewports?.includes(viewport.name),
+      )
+      .map(({ kind, viewport }) => ({
+        captureCase,
+        kind,
+        viewport,
+        file,
+        label: `${captureCase.section}/${viewport.name}--${captureCase.theme}`,
+      })),
 )
 
 // Two runs sharing a label write one output file, and the later would
@@ -323,6 +346,64 @@ async function resolveMask(
   return mask
 }
 
+/** How many clipped controls one run names before it stops listing them. */
+const CLIPPED_LISTED = 5
+
+/**
+ * What fails the reflow floor on the loaded page: content wider than the
+ * viewport, and each visible control partly past its edge or clipping its own
+ * label. A control wholly off the page is hidden on purpose, such as a skip
+ * link or a closed drawer, and a 1px box is a screen-reader-only label.
+ */
+async function readReflow(page: Page): Promise<string[]> {
+  return page.evaluate((listed) => {
+    const root = document.documentElement
+    const problems: string[] = []
+    if (root.scrollWidth > root.clientWidth) {
+      problems.push(
+        `the page scrolls sideways, ${root.scrollWidth}px of content in a ${root.clientWidth}px viewport`,
+      )
+    }
+    const scrollsSideways = (node: Element): boolean => {
+      for (let at = node.parentElement; at !== null; at = at.parentElement) {
+        if (at === document.body) return false
+        const { overflowX } = getComputedStyle(at)
+        if (overflowX === 'auto' || overflowX === 'scroll') return true
+      }
+      return false
+    }
+    const describe = (node: Element): string => {
+      const text = (node.textContent ?? '').trim().slice(0, 40)
+      const id = node.id === '' ? '' : `#${node.id}`
+      return `${node.tagName.toLowerCase()}${id}${text === '' ? '' : ` "${text}"`}`
+    }
+    const clipped: string[] = []
+    const controls = document.querySelectorAll(
+      'a[href], button, input, select, textarea, summary, [role="button"], [role="link"]',
+    )
+    for (const control of controls) {
+      const box = control.getBoundingClientRect()
+      const style = getComputedStyle(control)
+      if (box.width <= 1 || box.height <= 1) continue
+      if (style.visibility === 'hidden') continue
+      if (box.right <= 0 || box.left >= root.clientWidth) continue
+      const pastEdge =
+        (box.left < 0 || box.right > root.clientWidth) &&
+        !scrollsSideways(control)
+      const clipsLabel =
+        style.overflowX !== 'visible' &&
+        control.scrollWidth > control.clientWidth + 1
+      if (pastEdge) clipped.push(`${describe(control)} runs past the edge`)
+      else if (clipsLabel) clipped.push(`${describe(control)} clips its label`)
+    }
+    problems.push(...clipped.slice(0, listed))
+    if (clipped.length > listed) {
+      problems.push(`${clipped.length - listed} more clipped controls`)
+    }
+    return problems
+  }, CLIPPED_LISTED)
+}
+
 async function shoot(
   page: Page,
   dir: string,
@@ -347,9 +428,10 @@ async function shoot(
 
 const browser = await chromium.launch()
 const consoleErrors: string[] = []
+const reflowFailures: string[] = []
 let ranCases = 0
 
-for (const { captureCase, viewport, label } of RUNS) {
+for (const { captureCase, kind, viewport, label } of RUNS) {
   if (captureCase.evidence && requireBaseUrl) continue
 
   ranCases++
@@ -376,6 +458,16 @@ for (const { captureCase, viewport, label } of RUNS) {
   await page.waitForLoadState('networkidle')
 
   const sections = await settle(page, label, captureCase.sections ?? [])
+
+  if (kind === 'reflow') {
+    for (const problem of await readReflow(page)) {
+      reflowFailures.push(`${label}: ${problem}`)
+    }
+    console.log(`checked ${label}`)
+    await context.close()
+    continue
+  }
+
   const mask = await resolveMask(page, label, captureCase.mask ?? [])
 
   const sweepDir = path.join(OUT_DIR, captureCase.section)
@@ -405,6 +497,14 @@ if (requireBaseUrl && ranCases === 0) {
     'every CASES entry is flagged evidence: true, so --require-base-url skipped all of them and checked nothing',
   )
   process.exit(1)
+}
+
+if (reflowFailures.length > 0) {
+  console.error(
+    `${reflowFailures.length} reflow failures at ${REFLOW_FLOOR.width}px, the WCAG Reflow floor. Fix the layout, or name '${REFLOW_FLOOR.name}' in the case's excludeViewports to defer it:`,
+  )
+  for (const failure of reflowFailures) console.error(`  ${failure}`)
+  process.exitCode = 1
 }
 
 if (checkConsoleClean && consoleErrors.length > 0) {
