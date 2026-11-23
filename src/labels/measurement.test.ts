@@ -123,7 +123,10 @@ describe('checkMeasuredResults', () => {
   it.each(['eval', 'latency', 'p50', 'p95', 'median', 'timed run'])(
     'should read %s in Verification as a measurement',
     (word) => {
-      const result = checkMeasuredResults(body('none'), plan(`- Take the ${word}`))
+      const result = checkMeasuredResults(
+        body('none'),
+        plan(`- Take the ${word}`),
+      )
 
       expect(result.checked).toBe(true)
     },

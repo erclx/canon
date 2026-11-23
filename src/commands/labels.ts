@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { $ } from 'bun'
 import type { Command } from 'commander'
@@ -16,7 +17,7 @@ import {
 import { resolveScanInput } from '@/labels/event'
 import { checkTitleFormat, type TitleFormatIssue } from '@/labels/format'
 import { MAP_REL, readLabelMap } from '@/labels/map'
-import { checkMeasurement } from '@/labels/measurement'
+import { checkMeasuredResults, checkMeasurement } from '@/labels/measurement'
 import { isReleasePullRequest, scanPhaseLabels } from '@/labels/phase'
 import { checkSections } from '@/labels/sections'
 import { colorFor, driftedLabels, missingLabels } from '@/labels/sync'
@@ -51,6 +52,7 @@ interface ScanOptions {
   readonly bodyFile?: string
   readonly head?: string
   readonly closes?: string
+  readonly plan?: string
   readonly json?: boolean
 }
 
@@ -264,6 +266,10 @@ export function register(program: Command): void {
       '--closes <numbers>',
       'Issues the body must close, a comma list or `none`, graded when given',
     )
+    .option(
+      '--plan <path>',
+      'Plan to read, failing a body that lacks the results table its Verification owes',
+    )
     .option('--json', 'Add a machine-readable record on stdout')
     .addHelpText(
       'after',
@@ -311,6 +317,12 @@ export function register(program: Command): void {
         'its numbers are true. Reported under `measurement` as `checked` and',
         '`missing`.',
         '',
+        'Given --plan, it also fails any ordinary body with no Outcome table',
+        "when the plan's ## Verification names an eval, a benchmark, latency,",
+        'p50, p95, a median, or a timed run in prose, outside code spans and',
+        'fences, reported as `results-table` under `measurement`. A plan',
+        'that cannot be read is refused. Without the flag the check does not run.',
+        '',
         'It fails the density of that same body, reported per section under',
         '`density`: a bullet past 200 characters, more than 5 plain',
         'bullets or 2 paragraphs in a row, a paragraph past 350 characters, any',
@@ -352,7 +364,7 @@ export function register(program: Command): void {
         '  2  the title or body carries a phase label, a board identifier, a',
         '     session link, a banned character, a heading outside the closed',
         '     list or a required one missing, a perf body with no measurement',
-        '     table, a density finding in the body, a',
+        '     table, a body with no results table under --plan, a density finding in the body, a',
         '     missing or stray closing line',
         '     under --closes, or a title',
         "     breaking claude/skills/git-pr/references/pr.md's format, casing, or length",
@@ -795,6 +807,25 @@ async function runScan(opts: ScanOptions): Promise<number> {
     return 1
   }
 
+  let plan: string | undefined
+  if (opts.plan !== undefined) {
+    try {
+      plan = readFileSync(resolve(opts.plan), 'utf8')
+    } catch {
+      const message = `--plan could not read ${opts.plan}, so the results table was not graded`
+      logStep('Refused')
+      logWarn(message)
+      outro()
+
+      if (emitJson) {
+        process.stdout.write(
+          `${JSON.stringify({ reason: 'bad-input', message })}\n`,
+        )
+      }
+      return 1
+    }
+  }
+
   const resolved = resolveScanInput(opts)
 
   if (resolved.kind === 'refused') {
@@ -897,9 +928,21 @@ async function runScan(opts: ScanOptions): Promise<number> {
     }
   }
 
-  const measurement = sectionsChecked
+  const perf = sectionsChecked
     ? checkMeasurement(resolved.title, resolved.body)
     : { checked: false, missing: [] }
+  const results =
+    sectionsChecked && plan !== undefined
+      ? checkMeasuredResults(resolved.body, plan)
+      : { checked: false, missing: [] }
+  // A perf body already missing its table reports that once, not twice.
+  const measurement = {
+    checked: perf.checked || results.checked,
+    missing: [
+      ...perf.missing,
+      ...results.missing.filter(() => !perf.missing.includes('table')),
+    ],
+  }
 
   logStep(
     !measurement.checked
@@ -909,13 +952,24 @@ async function runScan(opts: ScanOptions): Promise<number> {
         : 'Measurement missing',
   )
   if (!measurement.checked) {
-    logInfo('only a perf pull request body is graded for its measurement')
+    logInfo(
+      'only a perf pull request body, or one whose plan ran a measurement, is graded for its results',
+    )
   } else if (measurement.missing.length === 0) {
-    logInfo('the Outcome table and the Technical context are there')
+    logInfo(
+      perf.checked
+        ? 'the Outcome table and the Technical context are there'
+        : 'the Outcome table is there',
+    )
   } else {
     if (measurement.missing.includes('table')) {
       logWarn(
         'A perf pull request needs a table with a header row and a data row under ## Outcome: | <what was measured> | main | this branch | change |. Write not measured with the reason in the change column when nothing can be timed.',
+      )
+    }
+    if (measurement.missing.includes('results-table')) {
+      logWarn(
+        'The plan ran a measurement, so the body needs a table with a header row and a data row under ## Outcome: | <what was measured> | result | baseline | conditions |. Write not measured with the reason when nothing can be run.',
       )
     }
     if (measurement.missing.includes('technical-context')) {

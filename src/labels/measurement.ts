@@ -95,5 +95,8 @@ export function checkMeasuredResults(
     OUTCOME,
   )
 
-  return { checked: true, missing: holdsTable(outcome) ? [] : ['results-table'] }
+  return {
+    checked: true,
+    missing: holdsTable(outcome) ? [] : ['results-table'],
+  }
 }
