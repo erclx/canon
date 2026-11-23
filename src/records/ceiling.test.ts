@@ -51,6 +51,12 @@ describe('checkCeiling', () => {
     expect(checkCeiling(entries, read(files))).toEqual([])
   })
 
+  it('does not count a rename side before the colon as stated room', () => {
+    const entries = ['- `docs/near.md` to `docs/other.md`: rename']
+
+    expect(checkCeiling(entries, read(files))).toHaveLength(1)
+  })
+
   it('joins a wrapped entry before reading its second path', () => {
     const entries = [
       '- `docs/near.md`: new content',

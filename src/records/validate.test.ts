@@ -332,6 +332,22 @@ describe('checkPlan', () => {
     expect(findings[0].subject).toBe('## Risks')
   })
 
+  it('should report a near-ceiling target through the document reader', () => {
+    const long = Array.from({ length: 290 }, (_, i) => `line ${i}`).join('\n')
+    const read = (rel: string) =>
+      rel === 'standards/plan.md' ? long : undefined
+
+    const findings = checkPlan(
+      'feature-a-b.md',
+      conformingPlan(),
+      undefined,
+      read,
+    )
+
+    expect(kinds(findings)).toEqual(['ceiling-unstated'])
+    expect(findings[0].subject).toBe('standards/plan.md')
+  })
+
   it('should report a missing Verification section', () => {
     const body = conformingPlan().replace(
       '**Verification:**\n\n- The validator reports both sections: `bun test src/records`\n\n',

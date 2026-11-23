@@ -31,6 +31,18 @@ function spans(text: string): string[] {
   )
 }
 
+/** Splits an entry at its first colon outside a code span. */
+function splitAtColon(entry: string): [string, string] {
+  let inSpan = false
+  for (let at = 0; at < entry.length; at++) {
+    if (entry[at] === '`') inSpan = !inSpan
+    if (entry[at] === ':' && !inSpan) {
+      return [entry.slice(0, at), entry.slice(at + 1)]
+    }
+  }
+  return [entry, '']
+}
+
 const isMarkdown = (path: string) => /\.md$/i.test(path)
 
 /** Joins a wrapped line or nested bullet onto the entry above it. */
@@ -57,7 +69,9 @@ export function checkCeiling(
   const seen = new Set<string>()
 
   for (const entry of readEntries(filesToTouch)) {
-    const [target, ...rest] = spans(entry)
+    const [head, tail] = splitAtColon(entry)
+    const [target] = spans(head)
+    const rest = spans(tail)
     if (target === undefined || !isMarkdown(target) || seen.has(target))
       continue
 
