@@ -65,12 +65,8 @@ export const LEGACY_APP_FILES: Readonly<Record<AppTable, LegacyAppFile>> = {
 }
 
 /**
- * A table read from `app.toml` or, when that file holds none, from the file it
- * lived in before, with the old keys renamed to the table's. `value` is unknown
- * because a file can hold the name as something other than a table, which each
- * reader refuses in its own words. `spell` turns a key path in the table's
- * spelling into the one the source file uses, so a refusal names what the
- * project wrote.
+ * `value` is unknown, since a file can hold the name as something other than a table, which each reader refuses in its
+ * own words. `spell` maps a key path in the table's spelling to the source file's, so a refusal names what was written.
  */
 export type AppTableRead =
   | { readonly kind: 'absent' }
@@ -140,10 +136,8 @@ function respell(
 }
 
 /**
- * Reads one table, `app.toml` first. A table there wins over its old file, and
- * an `app.toml` that does not parse stops every table rather than falling back,
- * since the project has moved and the old file is stale. The old file is read
- * only when `app.toml` is absent or holds no such table.
+ * A table in `app.toml` wins over its old file, and an `app.toml` that does not parse stops every table rather than
+ * falling back, since the project has moved and the old file is stale.
  */
 export function readAppTable(root: string, table: AppTable): AppTableRead {
   const appPath = join(root, APP_CONFIG_REL)

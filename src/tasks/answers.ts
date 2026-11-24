@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
-import { basename, isAbsolute, join, relative, resolve } from 'node:path'
+import { basename, isAbsolute, relative, resolve } from 'node:path'
 import { branchRefs } from '@/git/worktree'
 import { fanInBranch, fanInFindings, readFanInMembers } from '@/tasks/fan-in'
 import { isUnder } from '@/tasks/paths'

@@ -1,8 +1,6 @@
 /**
- * Moves a project's app config files into the tables of `canon/config/app.toml`.
- * A TOML file moves as text, so its comments stay beside their keys, and a JSON
- * file is written out as TOML. Every moved table is read back and compared with
- * what the old file reads as before anything is written.
+ * A TOML file moves as text, so its comments stay beside their keys, and a JSON file is written out as TOML. Every
+ * moved table is read back and compared with what the old file reads as before anything is written.
  */
 
 import {
@@ -193,10 +191,8 @@ function parseToml(text: string): unknown {
 }
 
 /**
- * Plans the move of every old file the project holds. It refuses rather than
- * writing part of a move: an `app.toml` or old file that does not parse, a table
- * `app.toml` already holds beside its old file, a JSON value TOML cannot hold,
- * or a moved table that would read back different from the old file.
+ * Refuses rather than writing part of a move, on a file that does not parse, a table `app.toml` already holds beside
+ * its old file, a JSON value TOML cannot hold, or a table that would read back different.
  */
 export function planAppConfig(root: string): AppConfigPlan {
   const appPath = join(root, APP_CONFIG_REL)

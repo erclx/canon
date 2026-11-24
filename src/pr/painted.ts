@@ -81,10 +81,8 @@ function strings(value: unknown): string[] {
 }
 
 /**
- * The default list plus the project's own, read from the `[painted]` table of
- * `canon/config/app.toml` as `paths`, `exclude`, and `reel-inputs`, or from
- * `painted.json` before it. A table that is absent or does not parse leaves the
- * default, since a typo must not make every push unpainted.
+ * The default list plus the project's own `paths`, `exclude`, and `reel-inputs`. A table that is absent or does not
+ * parse leaves the default, since a typo must not make every push unpainted.
  */
 export function loadPaintedPatterns(root: string): PaintedPatterns {
   const read = readAppTable(root, 'painted')

@@ -107,10 +107,8 @@ function isArgv(value: unknown): value is readonly string[] {
 }
 
 /**
- * Reads the `[preview]` table of `canon/config/app.toml`, or `preview.json`
- * before it, refusing rather than reading as absent on a bad parse, a path
- * leaving the worktree, a `keep` outside or equal to a `writes` path, or a
- * `serve` with no `port` to wait on.
+ * Refuses rather than reading as absent on a bad parse, a path leaving the worktree, a `keep` outside or equal to a
+ * `writes` path, or a `serve` with no `port` to wait on.
  */
 export function loadPreviewConfig(worktree: string): PreviewConfigRead {
   const read = readAppTable(worktree, 'preview')

@@ -6,10 +6,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { DEVICE_CONFIG_CASES } from '@/design/fixtures/device-classes'
 
 /**
- * Runs the shipped capture harness's inline reader of `[device-classes]`, in
- * `canon/config/app.toml` and in the `device-classes.toml` before it, against the
- * cases `@/design/device-classes` is tested on, so the two readers cannot drift.
- * The print flag exits before a browser launches.
+ * Runs the shipped harness's inline reader, on both config files, against the cases `@/design/device-classes` is
+ * tested on, so the two readers cannot drift. The print flag exits before a browser launches.
  */
 
 const FILES = ['app.toml', 'device-classes.toml'] as const

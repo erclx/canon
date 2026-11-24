@@ -317,10 +317,8 @@ function isStringList(value: unknown): value is string[] {
 }
 
 /**
- * The scripts and personas the drive's target owes, read from the `[drive]`
- * table of `canon/config/app.toml` or `app-drive.toml` before it, a named
- * target's table falling back to the flat key the way `app-drive` reads it. A
- * project with no config owes no scripts.
+ * The scripts and personas the drive's target owes, a named target's table falling back to the flat key the way
+ * `app-drive` reads it. A project with no `[drive]` table owes no scripts.
  */
 function readScriptPlan(
   read: AppTableRead,
