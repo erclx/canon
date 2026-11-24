@@ -136,24 +136,6 @@ jobs:
           path: assets/evidence/home/
           retention-days: 7
 
-      # This job used to commit the frames back onto the pull request branch
-      # and push. It stopped because the drift it was correcting is not the
-      # branch's. The render is byte-deterministic: on 2026-09-19 two capture
-      # runs on two unrelated branches, four minutes apart on separate runners,
-      # both rewrote light.png from blob 77a35b66 to 08936e29 and dark.png from
-      # fa0121af to 1f91bc04. Those two bot commits were squash-merged and their
-      # branches deleted, so read the same pair off main at fa07374d and
-      # 71a5e183, which bracket the move. No noise means no tolerance to absorb.
-      # What moves the bytes is the page reading catalog counts at build time,
-      # which a merge touching no web/ file still changes, leaving the committed
-      # baseline stale until some unrelated pull request re-renders it and
-      # commits the correction onto a branch that never asked for it.
-      #
-      # Reporting rather than committing keeps that signal without the commit.
-      # Refreshing the baseline on main is the other half of the fix, and
-      # refresh-capture-frames.yml owns it: a post-merge job that opens a pull
-      # request, since a commit reaching the trunk with no pull request was
-      # ruled out. This step keeps reporting whether the captured
-      # frames match the baseline, which stays true on a pull request.
+      # Reports drift and never commits it. Why: canon/context/development/web.md.
       - name: Report whether the baseline moved
         run: scripts/ci/report-baseline.sh

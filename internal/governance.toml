@@ -1,17 +1,8 @@
 # The governance subset this repository consumes into `.claude/rules/`.
 #
-# The toolkit authors every stack and installs one of them into its own
-# sessions. Without this record the producer would read `.claude/rules/` to
-# decide what `.claude/rules/` should hold, deriving intent from its own
-# output. Naming the stack here makes the regen deterministic and makes a
-# deliberate addition show up in a diff.
-#
 # Rules under `internal/rules/` install alongside these and need no entry.
 
-# The `craft` pointer is added because this repository renders surfaces of
-# its own, being design token previews, slide decks, capture sources, and teach
-# lessons, none of which is a framework route. `e2e-reliability` governs the
-# driven capture those surfaces are verified with.
+# `craft` and `e2e-reliability` cover the surfaces this repository renders.
 
 # `python` is added because sessions here write Python for groundwork
 # spikes and occasional skill scripts, and the `node` stack alone never loads it.

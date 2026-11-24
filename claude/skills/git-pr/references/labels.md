@@ -69,6 +69,7 @@ canon labels audit --base <base> --json
 The record carries `labels`, `declined`, and `uncovered`. It exits 2 when `uncovered` has anything in it and 1 when it refuses, with `reason` naming the cause, `no-map` for a project that declared none and a parse or range failure otherwise.
 
 - It reports and never gates, since whether a surface deserves a label is a call only its owner makes
+- It is a verb rather than a step of this skill, since a check this skill ran would give the ship chain a new failure mode, and a verb makes the match testable
 - A push failing on one teaches a contributor to route around the check while the surface stays unchanged
 - A prefix reaching no path stays unmeasured, so a row left by a deleted folder stays in the map. That staleness needs a second measure.
 
@@ -79,6 +80,8 @@ The record carries `labels`, `declined`, and `uncovered`. It exits 2 when `uncov
 - A path earns a label when the path starts with one of that label's prefixes
 - Collect the distinct labels across the whole set, ordered as the map declares them, so two runs over one branch produce one string
 - Pass the result as a single comma-separated value. An empty result runs no labelling step.
+
+Watch the label count rather than cap it. Three domain labels is a pull request `git-split` should have split, and two is normal for a surface and its docs.
 
 ## Applying
 

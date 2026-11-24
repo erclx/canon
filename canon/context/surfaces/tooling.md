@@ -76,6 +76,7 @@ Is storage for `canon claude` and no stack, so `EXCLUDED_STACKS` in `src/tooling
 - A seed exempts itself from the section check with `stub: true`, which `src/tooling/seed-marker.ts` strips on both install paths
 - `planSeeds` in `src/claude/seeds.ts` iterates a literal `SUBDIRS` array, so a new claude seed folder needs its entry, an `install-check.ts` assertion, and a `canon claude init` run
 - `.gitignore` writes `.canon/` bare, since `.canon/*` would let a `!` line track a folder, and a nested `.gitignore` inside that folder is the other way to carve one out
+- The claude manifest ships one `.canon/` ignore entry, so a new record folder needs no sync. A target that never runs `canon migrate records` gets no ignore for its old `.claude/` records.
 
 ### `src/tooling/`
 

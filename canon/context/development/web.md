@@ -45,7 +45,7 @@ This repository's self-portrait for a visitor who never opens the source, where 
 
 Holds the two workflows that build and check the page.
 
-- `deploy-site.yml` publishes the page, and `pr-visual-checks.yml` runs the e2e job and a capture job that reports into the job summary and commits nothing
+- `deploy-site.yml` publishes the page. `pr-visual-checks.yml` runs the e2e job and a capture job that only reports drift, since any merge can move the render
 - The two files carry literal copies of the same path globs, which the `visual-path-globs` stage compares
 - The visual copy adds `tooling/web/configs/e2e/**` through `VISUAL_ONLY_GLOBS`
 - Both lists hold `web/**`, `assets/**` minus `assets/evidence/**`, `src/design/**`, and the deploy workflow file
