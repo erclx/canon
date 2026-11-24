@@ -926,15 +926,64 @@ describe('config comments', () => {
     expect(count.degradationHits.map((hit) => hit.term)).toEqual(['date'])
   })
 
-  it('should report no share or block finding for a heavily commented TOML file', () => {
-    const lines = Array.from({ length: 60 }, (_, i) => `# note ${i}`)
+  const note = (count: number): string[] =>
+    Array.from({ length: count }, (_, i) => `# note ${i}`)
+
+  it('should pass a config block of 3 text lines', () => {
     const count = countFile(
-      file('a.toml', [...lines, 'key = 1'].join('\n')),
+      file('a.toml', [...note(3), 'key = 1'].join('\n')),
+      'config',
+    )
+
+    expect(count.headBlocks).toEqual([])
+  })
+
+  it('should report a config block of 4 text lines as a head run', () => {
+    const count = countFile(
+      file('a.yml', ['jobs:', ...note(4), 'key: 1'].join('\n')),
+      'config',
+    )
+
+    expect(count.headBlocks).toEqual([
+      { file: 'a.yml', line: 2, lines: 4, textLines: 4 },
+    ])
+  })
+
+  it('should split a block at a blank line and judge each run alone', () => {
+    const text = [...note(3), '', ...note(3), 'key = 1'].join('\n')
+    const count = countFile(file('a.toml', text), 'config')
+
+    expect(count.headBlocks).toEqual([])
+  })
+
+  it('should keep a bare # inside one block without counting it as text', () => {
+    const text = ['# one', '#', '# two', '# three', 'key = 1'].join('\n')
+    const count = countFile(file('a.toml', text), 'config')
+
+    expect(count.headBlocks).toEqual([])
+  })
+
+  it('should not read a # line inside a TOML multi-line string as a comment', () => {
+    const text = ['body = """', ...note(5), '"""', 'key = 1'].join('\n')
+    const count = countFile(file('a.toml', text), 'config')
+
+    expect(count.headBlocks).toEqual([])
+    expect(count.commentLines).toBe(0)
+  })
+
+  it('should read a comment after a multi-line string closes', () => {
+    const text = ['body = """', 'x', '"""', ...note(4), 'key = 1'].join('\n')
+    const count = countFile(file('a.toml', text), 'config')
+
+    expect(count.headBlocks.map((run) => run.textLines)).toEqual([4])
+  })
+
+  it('should never report a share for a heavily commented config file', () => {
+    const count = countFile(
+      file('a.toml', [...note(60), 'key = 1'].join('\n')),
       'config',
     )
 
     expect(count.fileShares).toEqual([])
-    expect(count.headBlocks).toEqual([])
-    expect(count.blocks).toEqual([])
   })
 })
