@@ -18,7 +18,7 @@ canon pr evidence <number> --check --json
 canon pr local --json
 ```
 
-- Skip the server read when the check record carries no `reel`, since the lift owes no re-film there
+- Skip the server read when the check record carries no `reels`, since the lift owes no re-film there
 - On `ok`, push as Step 6 states
 - On any other reason, follow `### The preview server` in `role-worker`, which names the reasons that start one and the wait, then push whatever the verb reads after it
 
