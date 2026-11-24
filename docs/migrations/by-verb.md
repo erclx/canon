@@ -40,7 +40,7 @@ canon migrate record-layout --json
 canon migrate record-layout --write --json
 ```
 
-A project holding both folders gets a collision, and neither moves. A `board` key in `design.toml` naming `.canon/canvas` stays as written, so update it by hand.
+A project holding both folders gets a collision, and neither moves.
 
 ## Move rules off the flat layout, once
 
@@ -119,6 +119,7 @@ The verb keeps each TOML comment beside its key and writes a JSON file out as TO
 - It lists each tracked line still naming an old file and rewrites none, since the wording usually names a key the move changed
 - The readers still fall back to an old file until a later release retires it, and `canon migrate status` lists a project that has not moved
 - `design.toml` and `tasks.toml` under `canon/config/` are no longer read. A round draws on `.canon/board/`, and a board can no longer require an `Approved:` line on every plan.
+- `canon tasks plan-answers` and `canon tasks launchable` no longer refuse as `unapproved` or `bad-config`, so a caller matching either reason never sees it
 
 ## Deny subagents and merges, and turn auto memory off, once
 
