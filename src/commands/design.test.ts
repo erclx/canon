@@ -67,11 +67,10 @@ describe('canon design classes', { timeout: RUN_TIMEOUT_MS }, () => {
     })
   })
 
-  it('reads its own file beside a design.toml holding the board keys', async () => {
-    await writeConfig(root, SCOPED)
-    await writeFile(
-      join(root, 'canon', 'config', 'design.toml'),
-      'board = ".canon/board"\nproject = "landing"\nreferences = ["https://linear.app/"]\n',
+  it('reads its table beside the other tables of app.toml', async () => {
+    await writeConfig(
+      root,
+      `[drive]\nlaunch = "bun run dev"\n\n[painted]\npaths = ["web/**"]\n\n${SCOPED}`,
     )
 
     const run = await runClasses(root, ['web/index.html', '--json'])
