@@ -1,25 +1,18 @@
-# What a correct `/canon:test-craft` run leaves behind on the orders page.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-#
-# Every top-level key sits above the first `[[content]]` block, since a bare key
-# below one binds to that table and asserts nothing.
-#
-# The staged page already has an end to end spec, which pulls a session toward
-# extending it. The claim under test is that the loading state lands in a
-# component test instead. This asserts the with arm only. The without arm is
-# scored by reading the files it wrote, since it fails this check by design.
+purpose = "/canon:test-craft on a page that already has an end to end spec puts the loading state in a component test instead of extending the spec. This asserts the with arm only, since the without arm fails this check by design and is scored by reading its files."
 
-paths = ["src/pages/Orders.*.tsx", "e2e/orders.spec.ts"]
+paths = [
+  { path = "src/pages/Orders.*.tsx", why = "The component test for the page." },
+  { path = "e2e/orders.spec.ts", why = "The existing spec, which pulls a session toward extending it." },
+]
 
 write_scope = [
-  "src/**",
-  "e2e/**",
-  "node_modules/**",
-  "bun.lock",
-  "package.json",
-  "vitest.config.ts",
-  "test-results/**",
+  { path = "src/**", why = "The change edits source here." },
+  { path = "e2e/**", why = "Browser specs sit here." },
+  { path = "node_modules/**", why = "A dependency install writes here." },
+  { path = "bun.lock", why = "An install rewrites the lockfile." },
+  { path = "package.json", why = "A dependency change edits the manifest." },
+  { path = "vitest.config.ts", why = "A component test may need the runner configured." },
+  { path = "test-results/**", why = "Playwright writes its run output here." },
 ]
 
 manual = [
@@ -30,9 +23,9 @@ manual = [
 [[content]]
 path = "src/pages/Orders.*.tsx"
 pattern = '(?:loading|Loading)'
+why = "The loading state lands in the component test."
 
-# The anchor pins the lookahead to the start of the file rather than to any
-# line, which is what makes it an absence over the whole spec.
 [[content]]
 path = "e2e/*.spec.ts"
 pattern = '(?<![\s\S])(?![\s\S]*(?:loading|Loading))'
+why = "The spec gains no loading assertion. The anchor pins the lookahead to the start of the file, which makes it an absence over the whole spec."

@@ -1,71 +1,35 @@
-# What a correct `/canon:review-pr` run leaves behind on the marker-race arm.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-#
-# The seeded pass carries `commit.oid` at the head and a marker one commit
-# behind it, which is what a push landing inside a pass's compose window
-# produces. A pass reading the marker sees a covered commit behind the head and
-# reviews the delta. A pass reading `commit.oid` sees the head already covered,
-# takes the unchanged-head stop, and writes nothing at all, so the presence of a
-# body file is the whole verdict here.
-#
-# The read half of this arm depends on `canon pr review-state`, which ships with
-# the CLI while this skill ships with the plugin. An arm resolves `canon` off the
-# machine's PATH, so a run against a global install predating that verb takes the
-# skill's own fallback, reads `commit.oid`, and fails every assertion below for a
-# release reason rather than a skill one. Run it against a released binary.
-#
-# Nothing surfaces that the first such run is owed. Coverage counts an arm by
-# whether it carries an `expect.toml`, so this one reads as armed from the day it
-# lands and no verb separates an arm that cannot pass yet from one nobody has
-# driven. The operator authorizes the spend and a session performs it, per the
-# eval rule, so the trigger is a person deciding to and the durable record is a
-# task row rather than anything in this file. Confirm the verb is on PATH before
-# reading a failure here as the skill's:
-#
-#   canon pr review-state --help
+purpose = "/canon:review-pr on a pass whose marker sits one commit behind the head reviews the delta rather than stopping as unchanged. A pass reading the commit oid instead sees the head covered and writes nothing, so a body file is the whole verdict. The arm needs a released canon binary carrying `canon pr review-state` on PATH, since an older one takes the skill's fallback and fails every assertion for a release reason."
 
-# The same absence every arm asserts: no target here installed the corpus, so
-# the skill's own `references` route is the only one left and a local copy
-# would swap the standard the pass read its Testing discipline from.
-absent = [".claude/standards/pr.md", "standards/pr.md"]
+absent = [
+  { path = ".claude/standards/pr.md", why = "No target here installed the corpus, so the skill's own references route is the only one left, and a local copy would swap the standard the pass read its Testing discipline from." },
+  { path = "standards/pr.md", why = "The same path without the .claude prefix." },
+]
 
-# The head moved, so the name carries the two segments rather than the
-# repeated-head third one. A pass that took the unchanged-head stop reaches
-# Step 4 at all, so this path is what separates the two outcomes.
-paths = [".canon/tmp/pr/review/body-*.md"]
+paths = [
+  { path = ".canon/tmp/pr/review/body-*.md", why = "The head moved, so the name carries two segments rather than the repeated-head third one. A pass that took the unchanged-head stop never reaches the body write, so this path separates the two outcomes." },
+]
 
-# The only file this arm's diff has any business touching.
-write_scope = [".canon/tmp/pr/review/**"]
+write_scope = [
+  { path = ".canon/tmp/pr/review/**", why = "The only file this arm diff has any business touching." },
+]
 
-# The thread half is a GitHub state rather than a local file, so it is asserted
-# by hand. No assertion kind reads a remote thread, and the poll's own half runs
-# a different script against the same seeded state.
 manual = [
   "The posted comment's marker names the head this pass read, not the commit the seeded pass named. Both are on the thread, and only the newest one scopes the pass after this",
   "`claude/skills/role-orchestrator/scripts/poll.ts` reports this pull request as MOVED rather than SEEN on a first run against it. The seeded stamp equals the head, which is what SEEN fires on, and the marker is what keeps it from firing",
   "The pass did not stop with 'The head is unchanged since the prior pass'. That stop is the failure this arm exists against, and it leaves no local file to assert on",
 ]
 
-# Every key above this line is top level. A bare key written below a
-# `[[content]]` header belongs to that table in TOML, so anything moved down
-# here would parse clean and assert nothing.
-
-# The pass reviewed something rather than stopping, under either heading. Which
-# one it picked is the threshold's business and not this arm's.
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
 pattern = '^## Review'
+why = "The pass reviewed something rather than stopping, under either heading. Which one it picked is the threshold's business and not this arm's."
 
-# The marker this pass writes for whoever reads the thread next. Its shape is
-# fixed by `canon pr review-state`, which is the only parser of it, so a body
-# missing it reads as a pre-marker pass and drops the next reader back onto the
-# stamps this arm exists to stop trusting.
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
 pattern = '<!-- review-pr: commit=[0-9a-f]{7,40} read-at=[0-9]{4}-[0-9]{2}-[0-9]{2}T'
+why = "The marker the next reader parses. Its shape is fixed by `canon pr review-state`, so a body missing it reads as a pre-marker pass and drops the next reader back onto the stamps this arm exists to stop trusting."
 
-# The footer every pass owes, which the marker sits below rather than replaces.
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
 pattern = 'Reviewed by Claude Code'
+why = "The footer every pass owes, which the marker sits below rather than replaces."

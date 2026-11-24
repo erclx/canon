@@ -1,19 +1,9 @@
-# What `tooling inject base` leaves behind once the phase-label-gate workflow
-# ships through the `base` config rather than staying checkout-root only. Read
-# by `canon sandbox check`. Patterns use TOML literal strings so a regex needs
-# no backslash escaping.
-#
-# No `max_turns`. The arm runs `bun src/cli.ts tooling inject base` with no
-# agent driving it, so no envelope is produced and a ceiling here would sit
-# permanently skipped.
+purpose = "tooling inject base ships the phase-label-gate workflow through the base config rather than leaving it checkout-root only."
 
-# Each seeded workflow landed at the same relative path a target's own
-# `.github/workflows/` resolves, alongside the `verify.yml` every base inject
-# already carried.
 paths = [
-  ".github/workflows/phase-label-gate.yml",
-  ".github/workflows/pr-local-preview.yml",
-  ".github/workflows/verify.yml",
+  { path = ".github/workflows/phase-label-gate.yml", why = "Lands at the same relative path a target's own .github/workflows/ resolves." },
+  { path = ".github/workflows/pr-local-preview.yml", why = "Ships beside the gate in the same inject." },
+  { path = ".github/workflows/verify.yml", why = "Every base inject already carried it, so a missing one means the inject regressed." },
 ]
 
 manual = [
@@ -21,10 +11,7 @@ manual = [
   "The checkout-only `src/cli.ts` path never leaked into the seeded copy. Semantic: `test()` runs per line under the `m` flag, so a negative pattern matches on any line that lacks the substring rather than asserting no line carries it, which the single scan-step pin below already covers by naming the one invocation the step takes",
 ]
 
-# The scan step names the published CLI rather than this checkout's own source
-# tree, which is the whole point of seeding a portable copy. A run that copied
-# the checkout-root file verbatim, `bun src/cli.ts labels scan` included, fails
-# here, since a target has no `src/cli.ts` to resolve.
 [[content]]
 path = ".github/workflows/phase-label-gate.yml"
 pattern = 'bunx -y @erclx/canon labels scan'
+why = "The scan step names the published CLI rather than this checkout's source tree. A verbatim copy of the checkout-root file would fail here, since a target has no src/cli.ts to resolve."

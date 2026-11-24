@@ -1,67 +1,60 @@
-# What a correct `/backlog-triage` run leaves behind on the apply arm.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-
-# Every top-level key sits above the first `[[content]]` block, since a bare key
-# below one belongs to that table in TOML.
+purpose = "A run of /backlog-triage applies each verdict to its task, leaving kept and promoted tasks live and an unreadable answer untouched."
 
 max_turns = 40
 
-# Each verdict's destination. The kept and promoted tasks stay live, and the
-# free-text row stays exactly where it was.
 paths = [
-  ".canon/tasks/declined/v01.0-request-logs-write-to-stdout.md",
-  ".canon/tasks/archive/v02.0-csv-export.md",
-  ".canon/tasks/v03.0-rate-limit.md",
-  ".canon/tasks/v04.0-search.md",
-  ".canon/tasks/v05.0-dark-theme.md",
-  ".canon/tasks/v06.0-retry-webhooks.md",
+  { path = ".canon/tasks/declined/v01.0-request-logs-write-to-stdout.md", why = "The declined task moves to declined/." },
+  { path = ".canon/tasks/archive/v02.0-csv-export.md", why = "The shipped task moves to archive/." },
+  { path = ".canon/tasks/v03.0-rate-limit.md", why = "A kept task stays live." },
+  { path = ".canon/tasks/v04.0-search.md", why = "A promoted task stays live." },
+  { path = ".canon/tasks/v05.0-dark-theme.md", why = "The override kept it live rather than declined." },
+  { path = ".canon/tasks/v06.0-retry-webhooks.md", why = "The free-text row stays exactly where it was." },
 ]
 
-# The override kept v05.0 off the declined folder, and the free-text answer
-# kept v06.0 off it too.
 absent = [
-  ".canon/tasks/v01.0-request-logs-write-to-stdout.md",
-  ".canon/tasks/v02.0-csv-export.md",
-  ".canon/tasks/declined/v05.0-dark-theme.md",
-  ".canon/tasks/declined/v06.0-retry-webhooks.md",
+  { path = ".canon/tasks/v01.0-request-logs-write-to-stdout.md", why = "The declined task left the live folder." },
+  { path = ".canon/tasks/v02.0-csv-export.md", why = "The archived task left the live folder." },
+  { path = ".canon/tasks/declined/v05.0-dark-theme.md", why = "The override kept v05.0 off the declined folder." },
+  { path = ".canon/tasks/declined/v06.0-retry-webhooks.md", why = "The free-text answer kept v06.0 off it too." },
 ]
 
-write_scope = [".canon/tasks/**"]
+write_scope = [
+  { path = ".canon/tasks/**", why = "The task board and its index." },
+]
 
-reply = ["v06.0"]
+reply = [{ text = "v06.0", why = "The reply names the row it skipped." }]
 
 manual = [
   "The run reached declined/ and archive/ through `canon tasks decline` and `canon tasks archive` rather than by moving files. Semantic: both leave the same tree.",
   "The reply names v06.0 as skipped for an unreadable answer. Semantic: the stem alone appears whether it was skipped or reported for another reason.",
 ]
 
-# The decline reason names the triage folder, so the declined task cites it.
 [[content]]
 path = ".canon/tasks/declined/v01.0-request-logs-write-to-stdout.md"
 pattern = '^Declined: .*backlog triage 01-backlog-triage'
+why = "The decline reason names the triage folder, so the declined task cites it."
 
-# Archive closed both named positions before moving the task.
 [[content]]
 path = ".canon/tasks/archive/v02.0-csv-export.md"
 pattern = '^- \[x\] Outcome: the download is served at'
+why = "Archive closed both named positions before moving the task."
 
-# Keep and the override both leave the folder slug on their task.
 [[content]]
 path = ".canon/tasks/v03.0-rate-limit.md"
 pattern = 'backlog triage 01-backlog-triage:\*\* keep'
+why = "Keep leaves the folder slug on its task."
 
 [[content]]
 path = ".canon/tasks/v05.0-dark-theme.md"
 pattern = 'backlog triage 01-backlog-triage:\*\* keep'
+why = "The override leaves the folder slug on its task the same way."
 
-# The promoted row lands under the control row with a cell ending in `last`.
 [[content]]
 path = ".canon/tasks/priority.md"
 pattern = '^\| \[v07\.0 auth tokens\]\(v07\.0-auth-tokens\.md\) +\|.*\|\n\| \[v04\.0[^\]]*\]\(v04\.0-search\.md\) +\|.*last +\|'
+why = "The promoted row lands under the control row with a cell ending in last."
 
-# The free-text row keeps its backlog line and ends the list, since the three
-# rows that left it sat between it and the kept ones.
 [[content]]
 path = ".canon/tasks/backlog.md"
 pattern = '^- \[v03\.0[^\n]*\n- \[v05\.0[^\n]*\n- \[v06\.0 retry failed webhooks\]\(v06\.0-retry-webhooks\.md\)\n*$'
+why = "The free-text row keeps its backlog line and ends the list, since the three rows that left it sat between it and the kept ones."

@@ -1,32 +1,23 @@
-# What a correct `/canon:review-pr` run leaves behind on the missing-evidence
-# arm. Read by `canon sandbox check`. Patterns use TOML literal strings so a
-# regex needs no backslash escaping.
-#
-# The branch changes the header's markup and style and posts no evidence
-# comment, on a trunk that already keeps captures under `evidence/header/`.
-# The project holds the convention, so the absent capture is a finding the
-# pass grades rather than a question it asks.
+purpose = "/canon:review-pr on a branch that changes the header's markup and style and posts no evidence comment, on a trunk that keeps captures under evidence/header/, grades the absent capture as a finding rather than asking a question."
 
-# The short-sha segment is derived from the PR's head commit, so only the
-# prefix is fixed.
-paths = [".canon/tmp/pr/review/body-*.md"]
+paths = [
+  { path = ".canon/tmp/pr/review/body-*.md", why = "The review body. The short-sha segment comes from the head commit, so only the prefix is fixed." },
+]
 
-# The only file this arm's diff has any business touching.
-write_scope = [".canon/tmp/pr/review/**"]
+write_scope = [
+  { path = ".canon/tmp/pr/review/**", why = "The only file this arm's diff has any business touching." },
+]
 
 manual = [
   "The finding is graded rather than asked as a question with no severity. Semantic: the grade sits on a line a pattern can find, and whether it attaches to the missing-capture finding rather than a neighbor is a reading.",
 ]
 
-# Every key above this line is top level. A bare key written below a
-# `[[content]]` header belongs to that table in TOML, so anything moved down
-# here would parse clean and assert nothing.
-
-# A graded finding is open, so the pass cannot close.
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
 pattern = '^## Review[ \t]*$'
+why = "A graded finding is open, so the pass cannot close."
 
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
 pattern = '(no|No|missing|Missing|absent|Absent|stale|Stale|outdated|Outdated|without|Without)( an?)? ([a-z]+ )?(screenshots?|captures?|evidence)|re-capture|Re-capture|recapture|Recapture|(no|No) [^\n]{0,4}## Evidence'
+why = "The finding names the missing capture. The project holds the convention, so the absence is a finding the pass grades."

@@ -1,65 +1,28 @@
-# What a correct `/canon:session-map` run leaves behind.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
+purpose = "/canon:session-map writes a conforming map that reports what each step returned rather than what the session predicted it would. The content blocks read what the map says each step answered, since a map written from a prediction reads as conforming and passes an assertion over the artifact alone."
 
-# The arm exists for a failure a review pass cannot reach. Both defects ever
-# found in this skill came out of driving it against a cold project, and the
-# first was a session that skipped a step, predicted what the step would have
-# answered, and wrote the prediction into the map. That map read as conforming,
-# so an assertion over the artifact passes it. The content blocks below read
-# what the map says each step returned instead.
-#
-# Only the first defect is asserted. The second reproduces on every run, since
-# the fixture is always younger than any session window, and what a conforming
-# map says about it is a wording the run chooses rather than a token the fixture
-# fixes, so it sits in `manual` under `Judgment:` and a reader carries it.
-
-# The prompt carries reasoning because the skill declines a session that holds
-# nothing git does not, and a cold sandbox holds none. The arm states one mistake
-# and one caution, as the `session-compact` arm does, so the run takes the write
-# branch. Neither is a tree fact, so the untracked-file block below still proves
-# a read of the tree.
-
-# Every top-level key sits above the first `[[content]]` block. A bare key below
-# one belongs to that table in TOML, so a `manual` array written at the bottom
-# parses clean and asserts nothing.
-
-# The runner cap, taken as the default. This arm resolves several reads against
-# a standard it fetches at run time and its turn count moves with how a run
-# orders them, so one sample does not license a lower number. Two passing runs on
-# 2026-08-25 cost 22 turns and 0.48 dollars, then 15 and 0.29, against a fixture
-# that changed only by gaining two plan files between them. Read the pair as a
-# floor on what a correct run costs rather than a bound on it.
+# This arm resolves several reads against a standard it fetches at run time and its turn count moves with how a run orders them, so the runner default stands. Two passing runs cost 22 turns and 15, a floor on what a correct run costs rather than a bound.
 max_turns = 30
 
-# The filename is the first assertion. The branch is `feat/csv-export`, so the
-# slug transform drops the type segment and a run that kept it lands beside this
-# name rather than on it. The board is the control: a handoff writes one file and
-# has no reason to touch a task.
 paths = [
-  ".canon/tasks/session-csv-export.md",
-  ".canon/tasks/v01.0-rate-limit.md",
-  ".canon/tasks/v02.0-pagination.md",
-  ".canon/tasks/v03.0-csv-export.md",
-  ".canon/plans/feature-csv-export.md",
+  { path = ".canon/tasks/session-csv-export.md", why = "The filename is the first assertion. The branch is feat/csv-export, so the slug transform drops the type segment, and a run that kept it lands beside this name rather than on it." },
+  { path = ".canon/tasks/v01.0-rate-limit.md", why = "The board is the control. A handoff writes one file and has no reason to touch a task." },
+  { path = ".canon/tasks/v02.0-pagination.md", why = "Control: the task is left as staged." },
+  { path = ".canon/tasks/v03.0-csv-export.md", why = "Control: the task is left as staged." },
+  { path = ".canon/plans/feature-csv-export.md", why = "Control: the plan is left as staged." },
 ]
 
-# The type-carrying spelling, which is what a broken transform writes. This is a
-# path negative rather than a reply one, so it fails on the file existing rather
-# than on how a sentence was worded.
-absent = [".canon/tasks/session-feat-csv-export.md"]
+absent = [
+  { path = ".canon/tasks/session-feat-csv-export.md", why = "The type-carrying spelling, which is what a broken transform writes. A path negative fails on the file existing rather than on how a sentence was worded." },
+]
 
-# The map, plus the index a `Write` fires the board hook on.
-write_scope = [".canon/tasks/**"]
+write_scope = [
+  { path = ".canon/tasks/**", why = "The map, plus the index a Write fires the board hook on." },
+]
 
-# The path comes off the skill's own Output block. The fixture fixes the branch,
-# so this reads back off provisioning rather than off how one run worded a line.
-# The cap closes that block, and a run reaches it only by running the length
-# check, since the count beside it moves with what the run wrote. The closing
-# line reads `of 350 words` only on a CLI carrying the `sessions` kind, which
-# 5.67.0 ships. An older one refuses the kind, so the entry fails there for the
-# CLI and not for the map.
-reply = [".canon/tasks/session-csv-export.md", "of 350 words"]
+reply = [
+  { text = ".canon/tasks/session-csv-export.md", why = "The path comes off the skill's own Output block. The fixture fixes the branch, so this reads back off provisioning rather than off how one run worded a line." },
+  { text = "of 350 words", why = "The cap closes the Output block, and a run reaches it only by running the length check, since the count beside it moves with what the run wrote. It reads this only on a CLI carrying the sessions kind, and an older one refuses the kind, so the entry fails there for the CLI and not for the map." },
+]
 
 manual = [
   "The map reports what each step actually returned rather than what the session expected it to. Semantic: a prediction and a result read alike in the written text, so the blocks below catch a map silent about a step and not a map that guessed.",
@@ -68,50 +31,42 @@ manual = [
   "The map says which of the two commits the ref came from, the window having found none before it. Judgment: item 3 requires the writer to say which, never to echo the wording item 3 states it in, so a map reading that the ref is the only commit the repository holds satisfies the rule and fails any pin over the phrase. The fixture fixes no token here, since its one commit carries a hash that moves per run.",
 ]
 
-# The frontmatter the standard fixes. `title` is the same string on every map, so
-# a generated catalog reads them alike, and `description` is what the board
-# cannot show plus the date.
 [[content]]
 path = ".canon/tasks/session-csv-export.md"
 pattern = '^title: Session map$'
+why = "The title is the same string on every map, so a generated catalog reads them alike."
 
 [[content]]
 path = ".canon/tasks/session-csv-export.md"
 pattern = '^description: \S'
+why = "The description is what the board cannot show plus the date."
 
-# The three core sections. A map missing one is non-conforming whatever else it
-# carries, and every session fills all three.
 [[content]]
 path = ".canon/tasks/session-csv-export.md"
 pattern = '^## State$'
+why = "A map missing any of the three core sections is non-conforming whatever else it carries, and every session fills all three."
 
 [[content]]
 path = ".canon/tasks/session-csv-export.md"
 pattern = '^## Mistakes worth not repeating$'
+why = "The second core section."
 
 [[content]]
 path = ".canon/tasks/session-csv-export.md"
 pattern = '^## Standing cautions$'
+why = "The third core section."
 
-# The first defect. The fixture carries no `claude/skills/` corpus, so the drift
-# verb refuses with a sentence it owns, and a map recording the refusal quotes
-# it. A session predicting a refusal reaches for the marketplace-cache wording or
-# for no history, since those are what a reader of the body would expect, and the
-# corpus sentence is the one only a run produces.
 [[content]]
 path = ".canon/tasks/session-csv-export.md"
 pattern = 'shipped skill corpus'
+why = "The fixture carries no claude/skills/ corpus, so the drift verb refuses with a sentence it owns, and a map recording the refusal quotes it. A session predicting a refusal reaches for other wording, so only a run produces this one."
 
-# `## State` owes the reader any untracked file that needs committing, and the
-# fixture leaves exactly one. A map filled from what a session already knew
-# rather than from a read of the tree misses it.
 [[content]]
 path = ".canon/tasks/session-csv-export.md"
 pattern = 'export\.ts'
+why = "State owes the reader any untracked file that needs committing, and the fixture leaves exactly one. A map filled from what the session already knew rather than from a read of the tree misses it."
 
-# The mistake the prompt states. The port appears nowhere in the fixture tree, so
-# a map filled from git alone cannot carry it, and one that recorded the prompt's
-# reasoning does.
 [[content]]
 path = ".canon/tasks/session-csv-export.md"
 pattern = '3000'
+why = "The mistake the prompt states. The port appears nowhere in the fixture tree, so a map filled from git alone cannot carry it, and one that recorded the prompt's reasoning does."

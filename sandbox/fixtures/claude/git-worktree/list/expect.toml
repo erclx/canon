@@ -1,24 +1,17 @@
-# What a correct `/canon:git-worktree` run reports on the list arm, over three
-# linked worktrees in three different states. Read by `canon sandbox check`.
-# Patterns use TOML literal strings so a regex needs no backslash escaping.
-
-# `list` only reports, so the strongest tree assertion available is that
-# nothing it staged was touched. The verdict itself lives almost entirely in
-# the reply, the same shape `claude/orchestrate`'s declaration documents for a
-# proposal-only skill.
+purpose = "/canon:git-worktree list reports three linked worktrees in three states and touches none of them."
 
 max_turns = 30
 
 paths = [
-  ".claude/worktrees/merged",
-  ".claude/worktrees/dirty",
-  ".claude/worktrees/clean",
+  { path = ".claude/worktrees/merged", why = "List only reports, so the strongest tree assertion is that nothing it staged was touched. The verdict itself lives in the reply." },
+  { path = ".claude/worktrees/dirty", why = "Left in place." },
+  { path = ".claude/worktrees/clean", why = "Left in place." },
 ]
 
-# Neither phrase is a substring of any branch name the scenario stages
-# (feat/merged, feat/dirty, feat/clean), so each one can only come from the
-# State column reading the row correctly.
-reply = ["merged (local)", "unmerged"]
+reply = [
+  { text = "merged (local)", why = "Neither phrase is a substring of any branch name the scenario stages, so each can only come from the State column reading the row correctly." },
+  { text = "unmerged", why = "Same reason." },
+]
 
 manual = [
   "The dirty-titled worktree's Notes column reads 'dirty'. Judgment: the branch name feat/dirty already carries that substring in the Branch column, so a plain-text pin cannot tell whether it matched the Notes flag or the branch name.",

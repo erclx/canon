@@ -1,22 +1,23 @@
-# What a correct `/backlog-triage` run leaves behind on the file arm.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-
-# Every top-level key sits above the first `[[content]]` block, since a bare key
-# below one belongs to that table in TOML.
+purpose = "The file phase of /backlog-triage writes an overview and numbered cluster files under a fresh intake folder and moves no task."
 
 max_turns = 40
 
-# The seeded tree opens with neither `.canon/intake/` nor `.canon/groundwork/`,
-# so the claimed ordinal can only be `01` and the slug is fixed by the skill.
-paths = [".canon/intake/01-backlog-triage/00-overview.md"]
+paths = [
+  { path = ".canon/intake/01-backlog-triage/00-overview.md", why = "The seeded tree opens with neither an intake nor a groundwork folder, so the claimed ordinal can only be 01 and the skill fixes the slug." },
+]
 
-# The file phase writes nothing outside the folder, so no task moves.
-absent = [".canon/tasks/declined", ".canon/tasks/archive"]
+absent = [
+  { path = ".canon/tasks/declined", why = "The file phase writes nothing outside its folder, so no task is declined." },
+  { path = ".canon/tasks/archive", why = "Nor is any task archived." },
+]
 
-write_scope = [".canon/intake/**"]
+write_scope = [
+  { path = ".canon/intake/**", why = "Intake files land in the folder the pass opens." },
+]
 
-reply = [".canon/intake/01-backlog-triage/"]
+reply = [
+  { text = ".canon/intake/01-backlog-triage/", why = "The reply names the folder it wrote." },
+]
 
 manual = [
   "v03.0 is suggested keep and v05.0 is suggested decline. Semantic: which cluster file holds each item is the run's call, so a pattern cannot anchor the verdict to its row.",
@@ -29,14 +30,14 @@ manual = [
 [[content]]
 path = ".canon/intake/01-backlog-triage/00-overview.md"
 pattern = '^date: \d{4}-\d{2}-\d{2}$'
+why = "The overview carries its date in frontmatter."
 
-# The index links a numbered cluster file, which proves the numbering and the
-# domain half of each filename together.
 [[content]]
 path = ".canon/intake/01-backlog-triage/00-overview.md"
 pattern = '\]\((?!00-)\d\d-[a-z][a-z0-9-]*\.md'
+why = "The index links a numbered cluster file, which proves the numbering and the domain half of each filename together."
 
-# The control row sits on the board, so the pass leaves it where it was.
 [[content]]
 path = ".canon/tasks/priority.md"
 pattern = '^\| \[v07\.0 auth tokens\]\(v07\.0-auth-tokens\.md\)'
+why = "The control row sits on the board, so the pass leaves it where it was."

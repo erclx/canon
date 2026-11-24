@@ -1,24 +1,16 @@
-# What a correct pick-only `/canon:deploy-app` run leaves behind on the
-# cloudflare arm. Read by `canon sandbox check`. The arm runs with no shell, so
-# the run reads the tree, picks a host, and stops at the first CLI call it is
-# denied.
-#
-# Every top-level key sits above the first `[[content]]` block. A bare key below
-# one belongs to that table in TOML, so an array written at the bottom parses
-# clean and asserts nothing.
+purpose = "A pick-only run of /canon:deploy-app with no shell picks Cloudflare from the tree and stops at the first CLI call it is denied."
 
 max_turns = 30
 
-paths = ["wrangler.toml"]
+paths = [{ path = "wrangler.toml", why = "The signal file the pick reads." }]
 
-# The Pick step's own output line, which the body fixes, so a run that picked the
-# other host or skipped the line goes red here.
-reply = ["Host: cloudflare"]
+reply = [
+  { text = "Host: cloudflare", why = "The Pick step's own output line, which the body fixes, so a run that picked the other host or skipped the line goes red." },
+]
 
-# A pick-only run writes nothing. The signal file is admitted so the scope has a
-# member, since an empty scope asserts nothing, and any write past the pick, such
-# as a project config, lands outside it.
-write_scope = ["wrangler.toml"]
+write_scope = [
+  { path = "wrangler.toml", why = "A pick-only run writes nothing. The signal file is admitted so the scope has a member, since an empty scope asserts nothing, and any write past the pick, such as a project config, lands outside it." },
+]
 
 manual = [
   "Semantic: whether the run stopped because the shell was denied or because it chose to stop is not readable from the tree or the reply.",

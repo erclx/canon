@@ -1,49 +1,25 @@
-# What a correct `/canon:app-drive` run leaves behind on the seeded board app.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-#
-# Every top-level key sits above the first `[[content]]` block. A bare key below
-# one belongs to that table in TOML, so an array written at the bottom parses
-# clean and silently asserts nothing.
-#
-# The skill closes on `canon intake drive-check`, and the checker cannot run a
-# command, so this arm asserts the axes that verb reads rather than its verdict.
-# The checkout is untouched, the worktree registration is gone, and the record
-# maps every goal. The verdict itself sits under `manual`, as does the
-# `unreasoned` axis, since both live where no pattern reaches.
-#
-# Every pattern below matches a pretty-printed `drive.json` and a compact one
-# alike. The first billed run wrote the record indented and a hand-staged tree
-# wrote it on one line, so the formatting varies by writer and a pattern
-# anchored on whitespace fails a correct run.
+purpose = "A run of /canon:app-drive on the seeded board app maps every goal, leaves the checkout untouched, and removes its worktree registration."
+
+# A single run at 22 turns sets the cap; a truncated run fails by its subtype.
+max_turns = 30
 
 paths = [
-  ".canon/intake/*/drive.json",
-  ".canon/intake/*/evidence/*.png",
-  ".canon/intake/*/evidence/drive-log.md",
+  { path = ".canon/intake/*/drive.json", why = "The record mapping every goal." },
+  { path = ".canon/intake/*/evidence/*.png", why = "The evidence screenshots." },
+  { path = ".canon/intake/*/evidence/drive-log.md", why = "The drive log." },
 ]
 
-# The registration `git worktree list` reads. The skill closes only on the
-# operator's word, and a headless run has no operator, so the Action carries
-# that word up front. Without it a correct run parks before the close and fails
-# here with the worktree still registered. The worktree itself sits under
-# /tmp, outside the tree the checker reads. A bare `.git/worktrees/*` matches
-# nothing even while a worktree is live, since the scan returns files only, so
-# name a file under it.
-absent = [".git/worktrees/*/HEAD"]
+absent = [
+  { path = ".git/worktrees/*/HEAD", why = "The worktree registration `git worktree list` reads. A headless run has no operator, so the Action carries the word to close up front, and a run that parks before the close fails here. A bare `.git/worktrees/*` matches nothing, since the scan returns files only." },
+]
 
-# Any write to `boards/`, `dist/`, or another tracked path fails, the stand-in
-# for the check's `changed` axis. `.canon/picks` is the config's proposals
-# folder, where Step 4 sends a taste item's frames. The first run found no taste
-# item, so a scope without it passes that run and fails a correct one that does.
-write_scope = [".canon/intake/**", ".canon/tmp/app-drive/**", ".canon/picks/**"]
+write_scope = [
+  { path = ".canon/intake/**", why = "Any write to boards/, dist/, or another tracked path fails, which stands in for the check's changed axis." },
+  { path = ".canon/tmp/app-drive/**", why = "The drive keeps its scratch here." },
+  { path = ".canon/picks/**", why = "The config's proposals folder, where a taste item's frames go. A scope without it passes a run with no taste item and fails a correct one that has one." },
+]
 
 escape_scope = []
-
-# Observed at 22 turns and 0.31 dollars on 2026-10-26, from one run. Declared at
-# the cap rather than tightened from a single observation, so the cap holds it
-# and a truncated run fails by its subtype rather than by this count.
-max_turns = 30
 
 manual = [
   "The run's own `canon intake drive-check <slug> --json` returned clean. Unwired: a command's exit is not in the envelope, and the reply renders the word inside a code span, so a reply substring is brittle.",
@@ -53,30 +29,27 @@ manual = [
   "The close removed the /tmp folder as well as the registration. Unwired: the checker reads the sandbox alone.",
 ]
 
-# The seed is untouched, which a drive served from the checkout would break.
-# Byte-exact against the seed in `sandbox/claude/app-drive.ts`, so a scenario
-# edit reformatting that seed moves this pattern in the same commit.
 [[content]]
 path = "boards/board.json"
 pattern = '^\{"frames":\["frame 1"\]\}$'
+why = "The seed is untouched, which a drive served from the checkout would break. It is byte-exact against the scenario's seed, so a reformat there moves this pattern too."
 
-# Both goals are mapped. Matched on the goal text, so a kept bold label or a
-# dropped period still matches.
 [[content]]
 path = ".canon/intake/*/drive.json"
 pattern = 'adds a frame to the board and sees it saved'
+why = "The first goal is mapped. It matches on the goal text, so a kept bold label or a dropped period still passes."
 
 [[content]]
 path = ".canon/intake/*/drive.json"
 pattern = 'exports the board to PNG'
+why = "The second goal is mapped."
 
-# The field that arms the check's worktreeLeft axis is present.
 [[content]]
 path = ".canon/intake/*/drive.json"
 pattern = '"worktree":\s*"/'
+why = "The field that arms the check's worktree-left axis is present. The pattern matches an indented record and a one-line one."
 
-# The drive log opens on its setup table, which every run writes. A run can
-# find no finding at all, so a finding heading is never asserted.
 [[content]]
 path = ".canon/intake/*/evidence/drive-log.md"
 pattern = '^\| Commit\s'
+why = "The log opens on its setup table, which every run writes. A run can find no finding at all, so a finding heading is never asserted."

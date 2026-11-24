@@ -1,25 +1,8 @@
-# What a correct `/canon:auto-ship` run leaves behind on the happy-path
-# arm, once Step 6 has run. Read by `canon sandbox check`.
-# Patterns use TOML literal strings so a regex needs no backslash escaping.
+purpose = "A run of /canon:auto-ship that reaches the ship step ends on the chain's completion line."
 
-# `#1242` routed a step through a body carrying `disable-model-invocation`,
-# which halted every chained run before it committed while a green board and a
-# green gate both read the run as clean. This declares what a run reaching the
-# ship step leaves that one halting before it would not: the completion line
-# `auto-ship`'s own Output contract mandates.
-
-# No max_turns yet. A real pass on 2026-08-30 came in at 74 turns, well past
-# the 30 this row dropped for want of a number, which is what the drop was
-# for. One sample of a chain whose cost follows however much both
-# doc syncs and ship find to do is not enough to set a ceiling from.
-
-# `git-ship`'s sequence reaches this exact line only after the verify gate, both
-# doc syncs, staging, the commit, the branch rename, and the pull request have
-# all run, with the draft marking landing before the CI watch. A chain halted
-# at or before the ship step, silently or on a refused invocation, ends its reply
-# somewhere else, which is what makes this the one assertion that would have
-# failed `#1242` and every other stop point in the chain's own recovery table.
-reply = ["Autoshipped (draft)"]
+reply = [
+  { text = "Autoshipped (draft)", why = "git-ship reaches this line only after the verify gate, both doc syncs, staging, the commit, the branch rename, and the pull request, with the draft mark before the CI watch. A chain halted at or before the ship step ends its reply elsewhere, so this is the one assertion every stop point in the chain would fail." },
+]
 
 manual = [
   "The pull request itself opened, and opened as a draft. Unwired: the sandbox tree and the reply text are what expect.toml can read, and confirming the PR object needs a gh call this declaration has no channel for.",

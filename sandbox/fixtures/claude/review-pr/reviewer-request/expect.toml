@@ -1,56 +1,39 @@
-# What a correct `/canon:review-pr` run leaves behind on the
-# reviewer-request arm. Read by `canon sandbox check`. Patterns use TOML
-# literal strings so a regex needs no backslash escaping.
-#
-# The diff is clean (the handler already validates the title), so the only
-# thing this pass owes is the `## For the reviewer` bullet, and answering it
-# from the diff owes nothing further. The heading this proves is the fix
-# `59fd6f1` made: an answered bullet takes `## Review closed` with the folded
-# block standing in for the canned line, rather than forcing the review open.
+purpose = "/canon:review-pr on a clean diff answers the For the reviewer bullet from the diff and closes, with the folded block standing in for the canned line rather than forcing the review open."
 
-# Same absence the `review` arm asserts, for the same reason: no target here
-# installed the corpus, so `${CLAUDE_SKILL_DIR}/../git-pr/references/pr.md` is the
-# only route left, and a local copy would silently swap the standard the pass
-# read the Testing discipline from.
-absent = [".claude/standards/pr.md", "standards/pr.md"]
+# A single clean pass at 25 turns against the default cap of 30 is too few samples to set a ceiling from.
 
-# The short-sha segment is derived from the PR's head commit, so only the
-# prefix is fixed.
-paths = [".canon/tmp/pr/review/body-*.md"]
+absent = [
+  { path = ".claude/standards/pr.md", why = "No target here installed the corpus, so the skill's own references route is the only one left, and a local copy would swap the standard the pass read its Testing discipline from." },
+  { path = "standards/pr.md", why = "The same path without the .claude prefix." },
+]
 
-# The only file this arm's diff has any business touching.
-write_scope = [".canon/tmp/pr/review/**"]
+paths = [
+  { path = ".canon/tmp/pr/review/body-*.md", why = "The review body. The short-sha segment comes from the head commit, so only the prefix is fixed." },
+]
 
-# Fixed by Step 5's own output template, not chosen by the run.
-reply = ["reviewer request"]
+write_scope = [
+  { path = ".canon/tmp/pr/review/**", why = "The only file this arm's diff has any business touching." },
+]
 
-# No max_turns yet. A clean pass on 2026-08-26 came in at 25 against the
-# default cap of 30, one run short of the several the standard wants before
-# a ceiling is set from a cost that holds rather than from one sample.
+reply = [
+  { text = "reviewer request", why = "Fixed by Step 5's own output template, not chosen by the run." },
+]
 
 manual = [
   "The block's answer correctly reports that `handleCreate` validates the title before calling `createTask`. Semantic: whether the stated answer is correct is a judgment no substring can carry, though its presence is asserted below",
 ]
 
-# Every key above this line is top level. A bare key written below a
-# `[[content]]` header belongs to that table in TOML, so anything moved down
-# here would parse clean and assert nothing.
-
-# The heading this arm exists to prove: an all-answered `## For the reviewer`
-# block takes the closed heading rather than forcing the review open.
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
 pattern = '^## Review closed'
+why = "The heading this arm exists to prove: an all-answered For the reviewer block takes the closed heading rather than forcing the review open."
 
-# An answered bullet folds under a counted summary rather than an open bold
-# block, which would mark it owed.
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
 pattern = '^<summary>For the reviewer, 1 confirmed</summary>'
+why = "An answered bullet folds under a counted summary rather than an open bold block, which would mark it owed."
 
-# The request shortened inside the fold, proving the pass read the section
-# itself. The skill writes the request shortened, so only its subject and
-# object are fixed rather than the author's words.
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
 pattern = '<summary>For the reviewer[^<]*</summary>[\s\S]*handleCreate[^\n]*title'
+why = "The request shortened inside the fold proves the pass read the section itself. The skill writes it shortened, so only its subject and object are fixed rather than the author's words."

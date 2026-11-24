@@ -1,20 +1,16 @@
-# What a correct `/canon:document-health` run leaves behind on the health fixture.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-#
-# Every top-level key sits above the first `[[content]]` block. A bare key below
-# one belongs to that table in TOML and silently asserts nothing.
-#
-# The skill reports and repairs nothing, so the assertions pin what stays put
-# and what the reply names. The seeded overview sentence and the seeded stale
-# path surviving means neither seeded document was rewritten.
-#
-# No `write_scope` is declared. The checker skips an empty scope, so an empty
-# list would assert nothing, and a run writing a new file is not caught here.
+purpose = "A run of /canon:document-health reports and repairs nothing, naming the doubled folder, the owner, and the design record."
 
-paths = ["docs/overview.md", "canon/context/api.md", "canon/DESIGN.md"]
+paths = [
+  { path = "docs/overview.md", why = "A seeded document that must survive unrewritten." },
+  { path = "canon/context/api.md", why = "A seeded document carrying the stale path, which must survive unrewritten." },
+  { path = "canon/DESIGN.md", why = "The design record the run reviews." },
+]
 
-reply = ["src/auth", "auth.md", "design-record"]
+reply = [
+  { text = "src/auth", why = "The folder two entries both cover is named." },
+  { text = "auth.md", why = "The entry proposed as owner is named." },
+  { text = "design-record", why = "The skill the design record's findings route to." },
+]
 
 manual = [
   "The doubled finding proposes auth.md as the owner. Semantic: the reply naming both strings does not say which one owns the folder, and the owner follows from which entry holds the area's trap.",
@@ -28,7 +24,9 @@ manual = [
 [[content]]
 path = "docs/overview.md"
 pattern = 'The caching is deliberate and it is the reason the development server watches'
+why = "The seeded overview sentence survives, so the document was not rewritten. No write_scope is declared, since the checker skips an empty scope and a new file is not caught here."
 
 [[content]]
 path = "canon/context/api.md"
 pattern = '`src/api/serialize\.ts` converts a domain record into a wire payload'
+why = "The seeded stale path survives, so the document was not rewritten."

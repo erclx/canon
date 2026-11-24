@@ -1,24 +1,19 @@
-# What a correct `/canon:git-worktree` run leaves behind on the cleanup arm,
-# after `list` then `cleanup` both run in one turn. Read by `canon sandbox
-# check`. Patterns use TOML literal strings so a regex needs no backslash
-# escaping.
+purpose = "After list then cleanup in one turn, /canon:git-worktree removes the merged clean worktree and keeps the unmerged one and the occupied one."
 
 max_turns = 30
 
-# feat/beta is unmerged, so cleanup must leave its worktree in place. feat/gamma
-# is merged and clean, matching alpha's shape, but a fake live session occupies
-# it, so cleanup must leave it in place too rather than removing it as merged.
-paths = [".claude/worktrees/beta", ".claude/worktrees/gamma"]
+paths = [
+  { path = ".claude/worktrees/beta", why = "feat/beta is unmerged, so cleanup must leave its worktree in place." },
+  { path = ".claude/worktrees/gamma", why = "feat/gamma is merged and clean like alpha, but a fake live session occupies it, so cleanup must leave it in place rather than removing it as merged." },
+]
 
-# feat/alpha is merged and clean, so cleanup must remove its worktree.
-absent = [".claude/worktrees/alpha"]
+absent = [
+  { path = ".claude/worktrees/alpha", why = "feat/alpha is merged and clean, so cleanup must remove its worktree." },
+]
 
-# The skill's own `cleanup` Output contract states this exact line, with one
-# worktree and one branch removed. It is the literal completion signal for the
-# mode, not wording the run chooses, so pinning it is what separates a run
-# that classified all three rows correctly and acted on them from one that
-# read gamma as merely merged and removed it alongside alpha.
-reply = ["Removed: 1 worktrees, 1 branches pruned"]
+reply = [
+  { text = "Removed: 1 worktrees, 1 branches pruned", why = "The skill's cleanup output contract states this line as the literal completion signal. Pinning it separates a run that classified all three rows and acted on them from one that read gamma as merely merged and removed it beside alpha." },
+]
 
 manual = [
   "The list step reports feat/alpha as 'merged (local)', feat/beta as 'unmerged', and feat/gamma as 'occupied'. Unwired: the run drives both list and cleanup in one turn, and the reply the harness captures is the session's final text, which the cleanup line may supersede.",

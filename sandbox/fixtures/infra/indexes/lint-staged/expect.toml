@@ -1,13 +1,10 @@
-# What `canon indexes regen docs/alpha.md` leaves behind in the git index.
-# Read by `canon sandbox check`. `stage()` auto-adds a rewritten index.md when
-# a positional path was given and neither --dry-run nor --json was passed, so
-# the cached diff is where the auto-stage is checkable.
+purpose = "canon indexes regen docs/alpha.md stages the index it rewrote."
 
-paths = ["lint-staged-diff.txt"]
-absent = []
-
-manual = []
+paths = [
+  { path = "lint-staged-diff.txt", why = "The cached diff, where the auto-stage is checkable. It adds a rewritten index.md only when a positional path is given and neither --dry-run nor --json is passed." },
+]
 
 [[content]]
 path = "lint-staged-diff.txt"
 pattern = '^docs/index\.md$'
+why = "The rewritten index is in the git index with no explicit git add behind it."

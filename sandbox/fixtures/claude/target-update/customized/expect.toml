@@ -1,17 +1,13 @@
-# What a correct `/canon:target-update` run leaves behind on a target one release
-# behind the toolkit, with the worktree taken. Read by `canon sandbox check`.
-# Patterns use TOML literal strings so a regex needs no backslash escaping.
-#
-# Every top-level key sits above the first `[[content]]` block, since a bare key
-# below one binds to that table and asserts nothing.
-#
-# The claim under test is where the sync lands: the shared checkout stays on
-# main while a commit lands in a linked worktree, which restores the stale rule
-# and keeps the one the project edited.
+purpose = "/canon:target-update on a target one release behind, with the worktree taken, commits the sync in a linked worktree while the shared checkout stays on main. It restores the stale rule and keeps the one the project edited."
 
-paths = [".git/HEAD", ".claude/rules/canon/canon/git.md"]
+paths = [
+  { path = ".git/HEAD", why = "The shared checkout's head, which must not move." },
+  { path = ".claude/rules/canon/canon/git.md", why = "The stale rule in the shared checkout." },
+]
 
-reply = ["context.md"]
+reply = [
+  { text = "context.md", why = "The report names the customized rule it kept." },
+]
 
 manual = [
   "No commit subject names a canon version.",
@@ -19,22 +15,22 @@ manual = [
   "The reply reports the governance state of the kept rule as behind. Semantic: any non-zero count but matching reads as behind, so the word current is wrong here.",
 ]
 
-# The shared checkout stayed on main.
 [[content]]
 path = ".git/HEAD"
 pattern = '^ref: refs/heads/main$'
+why = "The shared checkout stayed on main."
 
-# A commit landed in the linked worktree.
 [[content]]
 path = ".git/worktrees/*/logs/HEAD"
 pattern = 'commit'
+why = "A commit landed in the linked worktree."
 
-# The stale rule came back, H1 included.
 [[content]]
 path = ".claude/worktrees/*/.claude/rules/canon/canon/git.md"
 pattern = '^# \S'
+why = "The stale rule came back, H1 included."
 
-# The customized rule kept the project's bullet.
 [[content]]
 path = ".claude/worktrees/*/.claude/rules/canon/canon/context.md"
 pattern = 'project-written bullet'
+why = "The customized rule kept the project's bullet."

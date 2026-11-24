@@ -1,47 +1,20 @@
-# What a correct `/canon:ui-checklist` run leaves behind on the default arm.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-#
-# The checklist is the arm's whole output now. It used to be the conditional
-# remainder beside the tests the skill wrote, which is why it sat in `manual`
-# rather than in `paths`: a run could judge every change behavioral, write the
-# tests, and correctly write no checklist at all. That escape is closed. The
-# skill writes no test, so a run with nothing to say leaves the branch with no
-# output at all, and the seeded change carries both halves the file holds, a
-# restyle for the visual list and four untested behaviors for the other.
+purpose = "/canon:ui-checklist writes one checklist file for the seeded change, splitting a restyle for the visual list from four untested behaviors, and writes no test. A run with nothing to say would leave the branch with no output at all."
 
-# The precondition, asserted rather than described. No corpus installs into a
-# target, so the project copy is absent and the plugin fallback is the only route
-# to the slug transform. An arm that staged a copy of its own would resolve the
-# project path and void the premise here, so the absence is asserted where that
-# edit lands.
-absent = [".claude/skills/git-branch/references/slug.md"]
-
-# The filename is the slug transform in the slug reference applied to branch
-# `feat/task-filter`, with the leading type segment dropped. The transform
-# appears in no skill body, so asserting this exact path asserts the citation
-# resolved through the plugin fallback rather than through a project copy.
-paths = [".canon/tmp/handoff/ui-checklist/task-filter.md"]
-
-# The skill writes one file. Everything the old shape produced, the component
-# test, the spec, the Playwright install, the lockfile, and the run output, is
-# outside the scope on purpose: a run that writes any of them has written a test
-# the skill no longer owns, and the violation is the assertion.
-#
-# `.claude/**` stays because the seeds and settings the harness injects land
-# there, and `.canon/tmp/**` is where the checklist itself goes.
-write_scope = [".claude/**", ".canon/tmp/**"]
-
-# Measured at 6 turns on 2026-09-20, costing $0.12 on sonnet, against the 21-turn
-# and 31-turn samples the old shape took. Installing a runner and running a suite
-# was most of what those paid for, and the skill does neither now.
-#
-# The ceiling sits at twice the measured run rather than at it, because one sample
-# cannot separate the skill's cost from this prompt's. It is also well under the
-# harness budget in `canon sandbox run`, which is the real cap: a declaration
-# here is asserted after the run and cannot raise what the run executes under, so
-# a ceiling at that budget asserts nothing a truncated run would fail.
+# The ceiling sits at twice the measured run rather than at it, since one sample cannot separate the skill's cost from this prompt's. It is well under the harness budget in `canon sandbox run`, which is the real cap, since a declaration here is asserted after the run and cannot raise what the run executes under.
 max_turns = 12
+
+paths = [
+  { path = ".canon/tmp/handoff/ui-checklist/task-filter.md", why = "The slug transform applied to feat/task-filter, with the leading type segment dropped. The transform appears in no skill body, so asserting this exact path asserts the citation resolved through the plugin fallback rather than a project copy." },
+]
+
+absent = [
+  { path = ".claude/skills/git-branch/references/slug.md", why = "The precondition, asserted rather than described. No corpus installs into a target, so the project copy is absent and the plugin fallback is the only route to the slug transform. An arm that staged its own copy would void the premise." },
+]
+
+write_scope = [
+  { path = ".claude/**", why = "The seeds and settings the harness injects land here." },
+  { path = ".canon/tmp/**", why = "Where the checklist goes. The skill writes one file, so a run that writes a component test, a spec, a Playwright install, a lockfile, or run output has written a test the skill no longer owns, and the violation is the assertion." },
+]
 
 manual = [
   "The spacing, padding, and color changes land on the visual list and the filter input does not. Semantic: the split between visual-only and automatable is the skill's judgment, and a pattern matching one item cannot tell a correct classification from a lucky one",
@@ -51,44 +24,32 @@ manual = [
   "No test is proposed as a diff in chat either. Unwired: the write scope catches a test written to disk, and a body pasted into the reply reaches no file for the scope to see",
 ]
 
-# Every key above this line is top level. `max_turns` and all five `manual`
-# entries sat below the content blocks until 2026-08-02, which in TOML bound them
-# to the last block: the ceiling never asserted, the entries never reached the
-# unchecked count, and coverage read the arm as armed the whole time.
-# `contentArray` rejects that now.
-
-# The checklist's visual half, in the checkbox syntax the skill's format fixes.
 [[content]]
 path = ".canon/tmp/handoff/ui-checklist/task-filter.md"
 pattern = '- \[ \]'
+why = "The checklist's visual half, in the checkbox syntax the skill's format fixes."
 
-# The missing-test half, which is what the shrink added. A run that writes the
-# visual list alone has dropped the behaviors shipping untested, which is the
-# whole of what the skill now hands to `test-craft`.
 [[content]]
 path = ".canon/tmp/handoff/ui-checklist/task-filter.md"
 pattern = 'Shipping without a test'
+why = "The missing-test half. A run that writes the visual list alone has dropped the behaviors shipping untested, which is what the skill hands to test-craft."
 
-# The route change is the one item with a single correct layer: only a real
-# browser navigates it, so it reads as end to end wherever the line is phrased.
 [[content]]
 path = ".canon/tmp/handoff/ui-checklist/task-filter.md"
 pattern = 'archive'
+why = "The route change is the one item with a single correct layer, since only a real browser navigates it, so it reads as end to end wherever the line is phrased."
 
-# A written box names its route and opens on a verb a driver performs. The
-# first pattern reads a box line carrying a route, and the second reads one whose
-# action follows the route and opens on neither "read" nor "look at".
 [[content]]
 path = ".canon/tmp/handoff/ui-checklist/task-filter.md"
 pattern = '^- \[ \] (`?/[^\s:,`]*`?|from the page the app opens on)[,:]'
+why = "A written box names its route."
 
 [[content]]
 path = ".canon/tmp/handoff/ui-checklist/task-filter.md"
 pattern = '^- \[ \] [^:\n]+: (?!(?:[Rr]ead|[Ll]ook)\b)[A-Za-z]+'
+why = "A written box opens its action on a verb a driver performs, rather than on read or look at."
 
-# The seeded spec survives untouched. It is outside the write scope, so a run
-# that edits it fails there too, and this reads the file itself rather than the
-# scope report so a deletion is caught as well as a rewrite.
 [[content]]
 path = "e2e/task-list.spec.ts"
 pattern = 'task list renders the seeded tasks'
+why = "The seeded spec survives untouched. It is outside the write scope, and this reads the file itself rather than the scope report, so a deletion is caught as well as a rewrite."

@@ -1,54 +1,35 @@
-# What `canon feedback` leaves behind when the report it is handed carries no
-# `### Proposed fix` section. Read by `canon sandbox check`. Patterns use TOML
-# literal strings so a regex needs no backslash escaping.
-#
-# `src/commands/feedback.test.ts` covers the parser and `src/commands/exit-code.test.ts`
-# covers the exit status. What only this arm reaches is the command run from a
-# working directory outside the toolkit checkout with a real report on stdin,
-# which is the shape every producer actually uses.
+purpose = "canon feedback refuses a report with no Proposed fix section, run outside the checkout with the report on stdin."
 
 paths = [
-  "install/refusal.log",
-  "install/refusal-status.txt",
-  "install/refusal-stdout-bytes.txt",
+  { path = "install/refusal.log", why = "The refusal message, which the content entries read." },
+  { path = "install/refusal-status.txt", why = "The exit status the run captured." },
+  { path = "install/refusal-stdout-bytes.txt", why = "The stdout byte count the run captured." },
 ]
 
-# No record root opened under the working directory. A report that passes
-# validation files a real issue, which sits outside the tree, so this is what
-# the sandbox can see of the refusal: the verb wrote nothing here.
-absent = ["install/.canon"]
+absent = [
+  { path = "install/.canon", why = "No record root opened under the working directory. A report that passes validation files a real issue outside the tree, so this is all the sandbox can see of the refusal." },
+]
 
-# Declared above the content blocks deliberately. A bare key below a
-# `[[content]]` header binds to that table rather than to the document.
-#
-# No `max_turns`. The arm runs the CLI directly with no agent driving it, so no
-# envelope is produced and a ceiling here would sit permanently skipped.
 manual = [
   "The refusal reaches a producer as a repair it can act on. Semantic: a pattern can pin the field name but cannot tell a sentence that reads as an instruction from one that reads as a crash",
 ]
 
-# The field the report omitted, named rather than reported as a generic shape
-# failure. Every other required field appears in the same message as part of the
-# full list, so the pattern pins the missing-field clause rather than a bare
-# mention of the name.
 [[content]]
 path = "install/refusal.log"
 pattern = 'missing its "### Proposed fix" section'
+why = "Names the omitted field rather than a generic shape failure. Every required field appears in the full list, so the pattern pins the missing-field clause."
 
-# The repair, which is the list of what a conforming report carries.
 [[content]]
 path = "install/refusal.log"
 pattern = '### Surface, ### Observed, ### Proposed fix'
+why = "The repair, being the list of what a conforming report carries."
 
-# Refused rather than written. A zero here is the command reporting success on a
-# report it should not have accepted.
 [[content]]
 path = "install/refusal-status.txt"
 pattern = '^1$'
+why = "Refused rather than written. A zero would be the command reporting success on a report it should not accept."
 
-# Nothing on stdout. The success path prints the written path there, so any byte
-# count above zero means a consumer piping this command read a path for a report
-# that was never filed.
 [[content]]
 path = "install/refusal-stdout-bytes.txt"
 pattern = '^0$'
+why = "The success path prints the written path on stdout, so any byte means a piping consumer read a path for a report never filed."

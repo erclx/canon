@@ -1,35 +1,16 @@
-# What a correct `/session-worktree` run leaves behind on the dual-root arm.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-
-# Step 6 used to emit the first of four ordered lines that matched, so a
-# project carrying both a node and a python manifest saw only whichever bullet
-# the ordering favored. This arm asserts the fix: both ecosystems are read
-# independently and each contributes its own line.
-
-# Every top-level key sits above the first `[[content]]` block. A bare key below
-# one belongs to that table in TOML, so an array written at the bottom parses
-# clean and asserts nothing.
+purpose = "/session-worktree on a project carrying both a node and a python manifest reads both ecosystems independently and reports each on its own line, rather than the first of four ordered lines that matched."
 
 max_turns = 30
 
 paths = [
-  ".claude/worktrees/quux/package.json",
-  ".claude/worktrees/quux/pyproject.toml",
+  { path = ".claude/worktrees/quux/package.json", why = "Both manifests travel into the worktree because the seed commit landed before the arm branched. A run that dropped either during entry loses the precondition this arm tests." },
+  { path = ".claude/worktrees/quux/pyproject.toml", why = "The python manifest travels into the worktree beside the node one." },
 ]
 
-# Both manifests travel into the worktree because the seed commit landed before
-# the arm branched, so the tree the entry forks from already carries both. A
-# run that dropped either during entry loses the precondition this arm tests.
-
-reply = ["bun install", "virtual environment"]
-
-# Neither manifest's folder exists, so neither ecosystem reads as installed.
-# Pinning `bun install` rather than the full sentence is what separates a run
-# that named the node case from one that only reported the python line, and the
-# same holds for `virtual environment` against a run reporting only node. Both
-# present is what a fallthrough regression cannot produce, since a first-match
-# read stops at whichever bullet comes first and never emits the second.
+reply = [
+  { text = "bun install", why = "Neither manifest's installed folder exists, so neither ecosystem reads as installed. Pinning this token separates a run that named the node case from one that only reported the python line." },
+  { text = "virtual environment", why = "The same holds against a run reporting only node. Both present is what a first-match regression cannot produce." },
+]
 
 manual = [
   "Only the not-installed branch of each check is exercised here. Semantic: neither manifest's installed folder is staged, so a regression collapsing the two 'Dependencies are installed.' branches back into one first-match check, reached only once both ecosystems already have their folders present, would still pass this arm blind to it.",

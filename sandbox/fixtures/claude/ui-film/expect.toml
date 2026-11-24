@@ -1,49 +1,32 @@
-# What a correct `/canon:ui-film` run leaves behind on the seeded inbox app.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-#
-# Every top-level key sits above the first `[[content]]` block. A bare key below
-# one belongs to that table in TOML, so an array written at the bottom parses
-# clean and silently asserts nothing.
-#
-# The storyboard names two beats, so every per-beat path below is named once for
-# `01-` and once for `02-`, since a glob alone passes on one beat. The slug and
-# the beat names are the session's own, so no path spells either. The route a
-# beat took is not asserted, since a stepped beat falling back to the screencast
-# is a correct run.
+purpose = "/canon:ui-film on the seeded inbox app films a two-beat storyboard, writing a plan, a footage page, and per-beat clips, logs, and camera tracks under the video scratch folder. The route a beat took is not asserted, since a stepped beat falling back to the screencast is a correct run."
+
+# One run at 15 turns sets this with headroom, since a selector miss costs a refusal and a second take.
+max_turns = 25
 
 paths = [
-  ".canon/video/*/plan.json",
-  ".canon/video/*/README.md",
-  ".canon/video/*/footage.html",
-  ".canon/video/*/takes/take.json",
-  ".canon/video/*/takes/01-*/clip.mp4",
-  ".canon/video/*/takes/01-*/log.json",
-  ".canon/video/*/takes/01-*/camera.json",
-  ".canon/video/*/takes/02-*/clip.mp4",
-  ".canon/video/*/takes/02-*/log.json",
-  ".canon/video/*/takes/02-*/camera.json",
-  ".canon/video/*/takes/01-*/still.jpg",
-  ".canon/video/*/takes/02-*/still.jpg",
+  { path = ".canon/video/*/plan.json", why = "The slug and the beat names are the session's own, so no path spells either." },
+  { path = ".canon/video/*/README.md", why = "The workspace README the verb writes." },
+  { path = ".canon/video/*/footage.html", why = "The page that plays the takes." },
+  { path = ".canon/video/*/takes/take.json", why = "The record of both takes." },
+  { path = ".canon/video/*/takes/01-*/clip.mp4", why = "The storyboard names two beats, so every per-beat path is named once for 01- and once for 02-, since a glob alone passes on one beat." },
+  { path = ".canon/video/*/takes/01-*/log.json", why = "The first beat action log." },
+  { path = ".canon/video/*/takes/01-*/camera.json", why = "The first beat camera track." },
+  { path = ".canon/video/*/takes/02-*/clip.mp4", why = "The second beat clip." },
+  { path = ".canon/video/*/takes/02-*/log.json", why = "The second beat action log." },
+  { path = ".canon/video/*/takes/02-*/camera.json", why = "The second beat camera track." },
+  { path = ".canon/video/*/takes/01-*/still.jpg", why = "The first beat still." },
+  { path = ".canon/video/*/takes/02-*/still.jpg", why = "The second beat still." },
 ]
 
-# The throwaway copy Step 1 adds is gone. The copy itself sits under /tmp,
-# outside the tree the checker reads, so this names the registration file under
-# the shared git dir. A bare `.git/worktrees/*` matches nothing even while one
-# is live, since the scan returns files only.
-absent = [".git/worktrees/*/HEAD"]
+absent = [
+  { path = ".git/worktrees/*/HEAD", why = "The throwaway copy Step 1 adds is gone. The copy sits under /tmp, outside the tree the checker reads, so this names the registration file under the shared git dir. A bare .git/worktrees/* matches nothing even while one is live, since the scan returns files only." },
+]
 
-# Any write outside the skill's scratch fails, the stand-in for "no tracked file
-# changed". The seed's `src/index.html` and `canon/config/app.toml` are
-# the files a run serving from the checkout or writing the config would touch.
-write_scope = [".canon/video/**"]
+write_scope = [
+  { path = ".canon/video/**", why = "Any write outside the skill's scratch fails, the stand-in for no tracked file changed. A run serving from the checkout or writing the config would touch the seed's src/index.html or canon/config/app.toml." },
+]
 
 escape_scope = []
-
-# Observed at 15 turns and 0.19 dollars on 2026-10-26, from one run. Declared
-# with headroom rather than tightened from a single observation, since a
-# selector miss costs a refusal and a second take.
-max_turns = 25
 
 manual = [
   "The beats were shown in plain words before any take ran. Unwired: the Action narration approves them up front for a headless run, and the order lives in the transcript.",
@@ -52,45 +35,47 @@ manual = [
   "A beat that fell back to the screencast was named to the operator. Unwired: a reply substring is brittle, and a run with no fallback has nothing to name.",
 ]
 
-# The plan holds both storyboard beats as steps the verb reads.
 [[content]]
 path = ".canon/video/*/plan.json"
 pattern = '"kind":\s*"click"'
+why = "The plan holds the archive beat as a click step the verb reads."
 
 [[content]]
 path = ".canon/video/*/plan.json"
 pattern = '"kind":\s*"fill"'
+why = "The plan holds the search beat as a fill step the verb reads."
 
-# The workspace README carries the command that re-films the takes.
 [[content]]
 path = ".canon/video/*/README.md"
 pattern = 'canon take '
+why = "The workspace README carries the command that re-films the takes."
 
-# The footage page carries a player per take, read by its relative path.
 [[content]]
 path = ".canon/video/*/footage.html"
 pattern = 'takes/02-[^/]*/clip\.mp4'
+why = "The footage page carries a player per take, read by its relative path."
 
-# The record lists both beats and the route that filmed each.
 [[content]]
 path = ".canon/video/*/takes/take.json"
 pattern = '"dir":\s*"02-'
+why = "The record lists both beats."
 
 [[content]]
 path = ".canon/video/*/takes/take.json"
 pattern = '"route":\s*"(step|screencast)"'
+why = "The record names the route that filmed each beat."
 
-# The archive beat's log carries its click with the target's box.
 [[content]]
 path = ".canon/video/*/takes/01-*/log.json"
 pattern = '"kind":\s*"click"'
+why = "The archive beat's log carries its click with the target's box."
 
-# The search beat's log carries the typing burst.
 [[content]]
 path = ".canon/video/*/takes/02-*/log.json"
 pattern = '"kind":\s*"type"'
+why = "The search beat's log carries the typing burst."
 
-# Each camera track carries its frames.
 [[content]]
 path = ".canon/video/*/takes/01-*/camera.json"
 pattern = '"frames":\s*\[\{'
+why = "Each camera track carries its frames."

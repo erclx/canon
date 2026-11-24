@@ -1,22 +1,16 @@
-# What a correct `/canon:search-craft` run leaves behind when the scoped and the
-# open result sets disagree. Read by `canon sandbox check`. Patterns use TOML
-# literal strings so a regex needs no backslash escaping.
-#
-# The arm replays two recorded result sets and never searches, so it proves the
-# body's reconciliation rules once the skill is loaded and nothing about whether
-# a session scopes a search. A fetch attempt is a failure of the arm's own
-# setup, since the recorded sets are the whole evidence, and the run's denial
-# count catches it because the tool list allows no fetch. Which side was kept
-# and why is semantic, so it sits under `manual`.
-#
-# Every top-level key sits above the first `[[content]]` header, since a bare
-# key below one binds to that table and asserts nothing.
-
-paths = ["notes/research.md"]
-
-write_scope = ["notes/**", ".claude/**", ".canon/**"]
+purpose = "/canon:search-craft given two recorded result sets that disagree keeps the side the field's own record supports and notes the disagreement. The arm replays the sets and never searches, so it proves the reconciliation rules once the skill is loaded and nothing about whether a session scopes a search."
 
 max_turns = 30
+
+paths = [
+  { path = "notes/research.md", why = "The notes the run wrote from the recorded sets." },
+]
+
+write_scope = [
+  { path = "notes/**", why = "A fetch attempt is a failure of the arm's own setup, since the recorded sets are the whole evidence. The tool list allows no fetch, so the run's denial count catches it." },
+  { path = ".claude/**", why = "Seeds and settings the harness injects land here." },
+  { path = ".canon/**", why = "The record root the harness writes under." },
+]
 
 manual = [
   "The notes say the scoped and open results disagreed and name the side kept. Semantic: a disagreement is worded many ways, and a substring cannot tell stating it from restating one answer.",
@@ -24,12 +18,12 @@ manual = [
   "The result outside the scoped domain list is discarded or flagged as unverified, not cited as support. Semantic: whether a source supports a claim is a judgment the file's links do not carry.",
 ]
 
-# The kept version is the one the field's own record states.
 [[content]]
 path = "notes/research.md"
 pattern = '4\.2\.0'
+why = "The kept version is the one the field's own record states."
 
-# At least one claim carries a link to its source.
 [[content]]
 path = "notes/research.md"
 pattern = 'https?://[^\s)]+'
+why = "At least one claim carries a link to its source."

@@ -1,41 +1,21 @@
-# What a correct `/canon:target-setup` run leaves behind on the `monorepo` arm.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-#
-# The tree holds three language roots below a root `package.json` carrying no
-# dependencies: `web/` with React and Vite, `api/` with a Python project, and
-# `svc/` with a Go module. Detection has to find all three to pass, since a run
-# reading markers at the root alone resolves everything to `base`.
+purpose = "/canon:target-setup on a tree with a React web root, a Python api root, and a Go svc root below an empty root package.json finds all three and syncs each. A run reading markers at the root alone resolves everything to base."
 
-# The `fresh` arm cost 20 turns against the default cap of 30, and this arm adds
-# two subfolder syncs on top of the same chain. The ceiling holds at the default
-# until a first run gives a measurement to set it from.
+# The fresh arm cost 20 turns and this arm adds two subfolder syncs on top of the same chain, so the ceiling holds at the default until a first run gives a measurement.
 max_turns = 30
 
-# Governance installs once at the root, so each subfolder's language reaches the
-# rule set through `--add` rather than through a stack of its own. One rule per
-# root proves the walk reached it. The two tooling configs prove each subfolder
-# took its own sync.
-#
-# `svc/` carries no tooling assertion. A driven session calls the published
-# `canon`, and a Go tooling config asserted here fails against any release
-# predating that stack while the detection under test ran correctly.
 paths = [
-  ".claude/rules/canon/lang/python.md",
-  ".claude/rules/canon/lang/go.md",
-  ".claude/rules/canon/framework/react.md",
-  "web/.oxlintrc.json",
-  "api/ruff.toml",
+  { path = ".claude/rules/canon/lang/python.md", why = "Governance installs once at the root, so each subfolder's language reaches the rule set through --add. One rule per root proves the walk reached it." },
+  { path = ".claude/rules/canon/lang/go.md", why = "The Go root language rule arrived through --add." },
+  { path = ".claude/rules/canon/framework/react.md", why = "The web root framework rule arrived through --add." },
+  { path = "web/.oxlintrc.json", why = "Proves the web subfolder took its own tooling sync. The svc root carries no tooling assertion, since a driven session calls the published canon and a Go tooling config fails against any release predating that stack while the detection under test ran correctly." },
+  { path = "api/ruff.toml", why = "Proves the api subfolder took its own tooling sync." },
 ]
 
-# A subfolder sync that ran without `--skip base` re-drops husky, and git honors
-# one `core.hooksPath`, so the extra hook folder breaks silently. A subtree sync
-# also withholds `.github/`, which GitHub reads only at the repository root.
 absent = [
-  "web/.github/workflows/verify.yml",
-  "api/.github",
-  "web/.husky",
-  "api/.husky",
+  { path = "web/.github/workflows/verify.yml", why = "A subtree sync also withholds .github/, which GitHub reads only at the repository root." },
+  { path = "api/.github", why = "A subtree sync withholds .github for the python root too." },
+  { path = "web/.husky", why = "A subfolder sync that ran without --skip base re-drops husky, and git honors one core.hooksPath, so the extra hook folder breaks silently." },
+  { path = "api/.husky", why = "The python root sync skipped base, so no second hook folder." },
 ]
 
 manual = [

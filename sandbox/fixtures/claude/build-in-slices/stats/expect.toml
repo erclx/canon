@@ -1,33 +1,27 @@
-# What a correct `/canon:build-in-slices` run leaves behind on the seeded repo.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-#
-# Every top-level key sits above the first `[[content]]` block, since a bare key
-# below one binds to that table and asserts nothing.
-#
-# The claim under test is two halves of one discipline: the plan's two
-# behaviors land as separate commits, and the unused export the plan never
-# names is reported rather than removed. The prompt mentions neither.
+purpose = "A run of /canon:build-in-slices lands the plan's two behaviors as separate commits and reports the unused export the plan never names rather than removing it."
 
-paths = ["src/stats.ts", "src/stats.test.ts"]
-
-write_scope = [
-  "src/stats.ts",
-  "src/stats.test.ts",
-  "node_modules/**",
-  "bun.lock",
+paths = [
+  { path = "src/stats.ts", why = "The module the plan's behaviors land in." },
+  { path = "src/stats.test.ts", why = "Each behavior carries its test." },
 ]
 
-# The defect named in the reply, since a run that left the file alone without
-# noticing it passes the content pin below on its own.
-reply = ["legacyPad"]
+write_scope = [
+  { path = "src/stats.ts", why = "The module the plan behaviors land in." },
+  { path = "src/stats.test.ts", why = "The tests for those behaviors." },
+  { path = "node_modules/**", why = "A dependency install writes here." },
+  { path = "bun.lock", why = "An install rewrites the lockfile." },
+]
+
+reply = [
+  { text = "legacyPad", why = "The defect is named in the reply, since a run that left the file alone without noticing it passes the content pin below on its own." },
+]
 
 manual = [
   "At least two commits landed on top of the seeded one, one per behavior, each carrying its test with or ahead of its code. Unwired: the checker reads the tree and the reply, not git history, so confirm with `git log --oneline`.",
   "The reply names `legacyPad` as noticed and left, not as removed or proposed for this branch. Semantic: the identifier appears in either framing.",
 ]
 
-# The out-of-scope defect is still in place.
 [[content]]
 path = "src/format.ts"
 pattern = 'export function legacyPad'
+why = "The out-of-scope defect is still in place."

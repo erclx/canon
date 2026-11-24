@@ -1,27 +1,16 @@
-# What a correct `/plan-intake` run leaves behind on the route arm.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-
-# The routing test is the one thing in this skill that decides whether the
-# session spends a folder or a billed measurement, and it is stated as prose with
-# nothing under it. This arm hands it the case it must refuse: one question,
-# unanswerable from the tree, phrased the way a dump would be.
-
-# Every top-level key sits above the first `[[content]]` block. A bare key below
-# one belongs to that table in TOML, so a `manual` array written at the bottom
-# parses clean and asserts nothing.
+purpose = "/plan-intake refuses a single question unanswerable from the tree and routes it to plan-groundwork rather than filing it. The routing test decides whether the session spends a folder or a billed measurement."
 
 max_turns = 20
 
-# Nothing was written. The first entry is the refusal, and the other two catch a
-# run that took the question somewhere rather than declining it. All three are
-# absent from the seeded tree, so each one failing names a different wrong turn.
-absent = [".canon/intake", ".canon/plans", ".canon/groundwork"]
+absent = [
+  { path = ".canon/intake", why = "Nothing was written. This is the refusal itself." },
+  { path = ".canon/plans", why = "Catches a run that took the question into a plan rather than declining it." },
+  { path = ".canon/groundwork", why = "Catches a run that opened a track itself. All three are absent from the seeded tree, so each failing names a different wrong turn." },
+]
 
-# The guard names its destination. A refusal that stops without routing leaves
-# the operator where the groundwork guard already leaves them, which is the loop
-# this skill closes.
-reply = ["plan-groundwork"]
+reply = [
+  { text = "plan-groundwork", why = "The guard names its destination. A refusal that stops without routing leaves the operator where the groundwork guard already leaves them." },
+]
 
 manual = [
   "The refusal turns on the question needing a measurement rather than on its length. Semantic: a run that declined because the prompt was short passes every assertion here.",

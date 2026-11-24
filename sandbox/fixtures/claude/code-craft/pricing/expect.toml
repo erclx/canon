@@ -1,34 +1,27 @@
-# What a correct `/canon:code-craft` run leaves behind on the seeded shop.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-#
-# Every top-level key sits above the first `[[content]]` block, since a bare key
-# below one binds to that table and asserts nothing.
-#
-# The claim under test is one rule in one place: asked to add a third discount
-# to a rule written twice, the run merges the two copies rather than pasting a
-# third branch into each, and adds no pattern scaffolding for what is still a
-# few conditionals. The prompt never says the rule is duplicated.
+purpose = "Asked to add a third discount to a rule written twice, the run merges the two copies rather than pasting a third branch into each, and adds no pattern scaffolding."
 
-paths = ["src/cart.ts", "src/invoice.ts"]
+paths = [
+  { path = "src/cart.ts", why = "One of the two copies of the rule." },
+  { path = "src/invoice.ts", why = "The other copy. The prompt never says the rule is duplicated." },
+]
 
 absent = [
-  "src/**/*strategy*",
-  "src/**/*Strategy*",
-  "src/**/*factory*",
-  "src/**/*Factory*",
-  "src/**/*registry*",
-  "src/**/*Registry*",
+  { path = "src/**/*strategy*", why = "A few conditionals do not earn a strategy type." },
+  { path = "src/**/*Strategy*", why = "The same check, capitalized." },
+  { path = "src/**/*factory*", why = "Nor a factory." },
+  { path = "src/**/*Factory*", why = "The same check, capitalized." },
+  { path = "src/**/*registry*", why = "Nor a registry." },
+  { path = "src/**/*Registry*", why = "The same check, capitalized." },
 ]
 
 write_scope = [
-  "src/**",
-  "test/**",
-  "README.md",
-  "CHANGELOG.md",
-  "node_modules/**",
-  "bun.lock",
-  "package.json",
+  { path = "src/**", why = "The change edits source here." },
+  { path = "test/**", why = "Tests sit beside the change." },
+  { path = "README.md", why = "A change may update the docs beside it." },
+  { path = "CHANGELOG.md", why = "A change may note itself here." },
+  { path = "node_modules/**", why = "A dependency install writes here." },
+  { path = "bun.lock", why = "An install rewrites the lockfile." },
+  { path = "package.json", why = "A dependency change edits the manifest." },
 ]
 
 manual = [
@@ -37,13 +30,12 @@ manual = [
   "The run named the duplicated member rule as the reason to merge before adding the variant. Unwired: the claim is about the session's turns, which the checker does not read.",
 ]
 
-# The invoice no longer carries its own discount arithmetic, so it reads the
-# rule from wherever the merge put it.
 [[content]]
 path = "src/invoice.ts"
 pattern = '(?<![\s\S])(?![\s\S]*0\.[89]\b)'
+why = "The invoice no longer carries its own discount arithmetic, so it reads the rule from wherever the merge put it."
 
-# No strategy or factory type for the variant inside the cart either.
 [[content]]
 path = "src/cart.ts"
 pattern = '(?<![\s\S])(?![\s\S]*(?:Strategy|Factory))'
+why = "No strategy or factory type for the variant inside the cart either."

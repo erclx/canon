@@ -1,17 +1,15 @@
-# What `canon indexes regen docs/alpha.md` leaves behind. Read by
-# `canon sandbox check`. The positional file resolves up to its nearest
-# indexed ancestor, `docs/`, so the effect is the same rewrite the `regen`
-# arm asserts, triggered from a file rather than a bare walk.
+purpose = "canon indexes regen docs/alpha.md resolves the file up to its nearest indexed ancestor and rewrites that index."
 
-paths = ["docs/index.md"]
-absent = []
-
-manual = []
+paths = [
+  { path = "docs/index.md", why = "The ancestor index the positional file resolves to. The rewrite is the same one the regen arm asserts, triggered from a file rather than a bare walk." },
+]
 
 [[content]]
 path = "docs/index.md"
 pattern = '\[Alpha\]\(alpha\.md\): First sample entry'
+why = "The first sibling is listed with its description."
 
 [[content]]
 path = "docs/index.md"
 pattern = '\[Beta\]\(beta\.md\): Second sample entry'
+why = "The second sibling is listed, though only the first was named on the command line."

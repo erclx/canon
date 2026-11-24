@@ -1,16 +1,16 @@
-# What a correct `/canon:target-setup verify deep` run leaves behind on the `smoke-fail` arm. Read
-# by `canon sandbox check`. `test:e2e` exits non-zero, so a correct run stops
-# before `screenshot` ever starts.
+purpose = "/canon:target-setup verify deep stops at the first failing stage. test:e2e exits non-zero, so a correct run never starts screenshot."
 
 max_turns = 20
 
-# dev, preview, and test:e2e each touch their marker before failing or
-# finishing. A stop-on-first-failure run reaches all three.
-paths = [".smoke/dev-started", ".smoke/preview-started", ".smoke/e2e-ran"]
+paths = [
+  { path = ".smoke/dev-started", why = "dev, preview, and test:e2e each touch their marker before failing or finishing, so a stop-on-first-failure run reaches all three." },
+  { path = ".smoke/preview-started", why = "The preview stage started before the failure." },
+  { path = ".smoke/e2e-ran", why = "The failing stage ran, and stopped the run." },
+]
 
-# screenshot's marker is the proof the run actually stopped rather than
-# collecting every failure and continuing past the first one.
-absent = [".smoke/screenshot-ran"]
+absent = [
+  { path = ".smoke/screenshot-ran", why = "The proof the run stopped rather than collecting every failure and continuing past the first one." },
+]
 
 manual = [
   "The dev and preview stages report pass ahead of the test:e2e failure. Semantic: pass/fail for a long-running server has no manifest-exposed port to probe, so the judgment reads backgrounded output for a fatal string rather than a fixed exit code",

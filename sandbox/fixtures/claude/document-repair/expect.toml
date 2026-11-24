@@ -1,13 +1,14 @@
-# What a correct `/canon:document-repair` run leaves behind on the repair fixture.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-#
-# Every top-level key sits above the first `[[content]]` block. A bare key below
-# one belongs to that table in TOML and silently asserts nothing.
+purpose = "A run of /canon:document-repair rewrites the failing document and lists both folders as gated through the verb."
 
-paths = ["docs/overview.md", "canon/config/markdown.toml"]
+paths = [
+  { path = "docs/overview.md", why = "The document the run rewrites." },
+  { path = "canon/config/markdown.toml", why = "The gated list the run adds both folders to." },
+]
 
-write_scope = ["docs/**", "canon/config/markdown.toml"]
+write_scope = [
+  { path = "docs/**", why = "The documents the run edits or updates." },
+  { path = "canon/config/markdown.toml", why = "The gated list the run extends." },
+]
 
 manual = [
   "docs/overview.md passes `canon markdown audit docs/` after the rewrite. Semantic: the exit status of a command the run made is not in the envelope.",
@@ -15,17 +16,17 @@ manual = [
   "The skill states no limit number. Unwired: an absence in the reply, and `reply` asserts positives only.",
 ]
 
-# The gated list names both folders, the failing one after its rewrite and the
-# passing one with no rewrite.
 [[content]]
 path = "canon/config/markdown.toml"
 pattern = '^  "docs/",$'
+why = "The failing folder is gated after its rewrite."
 
 [[content]]
 path = "canon/config/markdown.toml"
 pattern = '^  "canon/context/",$'
+why = "The passing folder is gated with no rewrite."
 
-# The rewrite keeps the reason the scan caches, which is the seeded reason.
 [[content]]
 path = "docs/overview.md"
 pattern = 'cach'
+why = "The rewrite keeps the reason the scan caches, which is the seeded reason."
