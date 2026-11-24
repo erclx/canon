@@ -1,4 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   FOLLOW_UP_FIELDS,
   REQUIRED_FIELDS,
@@ -11,6 +14,8 @@ import {
   parseSections,
   readField,
 } from '@/feedback/body'
+import { feedbackRoute } from '@/feedback/list'
+import { PROJECT_ROOT } from '@/roots/project'
 
 function report(overrides: Record<string, string> = {}): string {
   const fields: Record<string, string> = {
@@ -315,5 +320,32 @@ describe('followUpProblem', () => {
     const body = followUp({ Links: 'frameboard#next' })
 
     expect(followUpProblem(body)).toContain('### Links')
+  })
+})
+
+describe('feedbackRoute', () => {
+  let project: string
+
+  beforeEach(() => {
+    project = mkdtempSync(join(tmpdir(), 'feedback-route-'))
+    writeFileSync(join(project, 'package.json'), '{"name":"some-app"}')
+  })
+
+  afterEach(() => {
+    rmSync(project, { recursive: true, force: true })
+  })
+
+  it('should read board for a checkout of the toolkit', () => {
+    expect(feedbackRoute(PROJECT_ROOT)).toBe('board')
+  })
+
+  it('should read issues for a target project', () => {
+    expect(feedbackRoute(project)).toBe('issues')
+  })
+
+  it('should read issues where no package.json exists', () => {
+    rmSync(join(project, 'package.json'))
+
+    expect(feedbackRoute(project)).toBe('issues')
   })
 })

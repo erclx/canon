@@ -17,7 +17,7 @@ import {
   issueFailureMessage,
   issueReadFailureMessage,
 } from '@/feedback/github-format'
-import { listFlagProblem, listRecord } from '@/feedback/list'
+import { feedbackRoute, listFlagProblem, listRecord } from '@/feedback/list'
 import { frameError, frameSuccess } from '@/cli/ui'
 
 function readStdin(): Promise<string> {
@@ -84,7 +84,10 @@ async function postFollowUp(issue: number, body: string): Promise<void> {
 }
 
 async function listOpen(json: boolean): Promise<void> {
-  const record = listRecord(await listFeedbackIssues())
+  const record = listRecord(
+    await listFeedbackIssues(),
+    feedbackRoute(process.cwd()),
+  )
   if (!record.ok) {
     frameError(record.message)
     if (json) process.stdout.write(`${JSON.stringify(record)}\n`)
