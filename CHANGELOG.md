@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.120.0](https://github.com/erclx/canon/compare/v5.119.0...v5.120.0) (2026-11-24)
+
+
+### Features
+
+* **governance:** report directives past the cap beside a pointer ([#3485](https://github.com/erclx/canon/issues/3485)) ([c6ff94d](https://github.com/erclx/canon/commit/c6ff94d91bc1045b832ede605e9dc0c33bc81ccb))
+* **pr:** post one evidence reel per capture width ([#3483](https://github.com/erclx/canon/issues/3483)) ([4c7008a](https://github.com/erclx/canon/commit/4c7008a46d6badd96989ac6add78e7e82e384880))
+* **sandbox:** give expect.toml assertions a checked purpose and why ([#3484](https://github.com/erclx/canon/issues/3484)) ([6ebedba](https://github.com/erclx/canon/commit/6ebedba87e78f2dc18a1adc64b1074a7c6b19b48))
+
+
+### Bug Fixes
+
+* **hooks:** parse the plan guard under bash 3.2 ([#3490](https://github.com/erclx/canon/issues/3490)) ([24851d7](https://github.com/erclx/canon/commit/24851d78cb888e7e60d7938e5919573314bd856c))
+
 ## [5.119.0](https://github.com/erclx/canon/compare/v5.118.0...v5.119.0) (2026-11-24)
 
 
