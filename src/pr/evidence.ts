@@ -884,13 +884,6 @@ export function findEvidenceReels(
   return reels
 }
 
-/** The first reel the marked comment embeds, with the head it was filmed at. */
-export function findEvidenceReel(
-  comments: readonly EvidenceComment[],
-): EvidenceReel | undefined {
-  return findEvidenceReels(comments)[0]
-}
-
 /** The coverage line directly under a reel line, past blank lines only, so a coverage line never attaches to a reel it does not follow. */
 function readReelCovers(after: readonly string[]): string | undefined {
   const next = after.find((line) => line !== '')
@@ -960,21 +953,6 @@ export function nextEvidenceReels(
     (reel) => !widths.has(reel.width),
   )
   return [...filmed, ...kept]
-}
-
-/**
- * The reel a render embeds. A passed link, filmed at this head, replaces the
- * posted one and its coverage, which otherwise carry forward under their head.
- */
-export function nextEvidenceReel(
-  link: string | undefined,
-  head: string,
-  comments: readonly EvidenceComment[],
-  covers?: string,
-): EvidenceReel | undefined {
-  if (link === undefined) return findEvidenceReel(comments)
-  const reel = { link, head, width: readReelWidth(link) }
-  return covers === undefined ? reel : { ...reel, covers }
 }
 
 /**

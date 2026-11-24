@@ -7,10 +7,10 @@ import {
   findEvidenceChecklist,
   findEvidenceLocal,
   findEvidencePreview,
-  findEvidenceReel,
+  findEvidenceReels,
   findEvidenceSkips,
   hasMarkedEvidenceComment,
-  nextEvidenceReel,
+  nextEvidenceReels,
   readOwed,
   renderEvidenceBody,
 } from '@/pr/evidence'
@@ -1056,11 +1056,9 @@ describe('the reel line', () => {
     const comments = [
       { url: 'https://github.com/o/r/pull/1#issuecomment-9', body },
     ]
-    expect(findEvidenceReel(comments)).toEqual({
-      link: LINK,
-      head: 'bbbb111',
-      width: 1280,
-    })
+    expect(findEvidenceReels(comments)).toEqual([
+      { link: LINK, head: 'bbbb111', width: 1280 },
+    ])
     expect(findEvidencePreview(comments)).toBe('https://x.dev')
     expect(findEvidenceLocal(comments)).toBe('http://localhost:5173')
     expect(findEvidenceChecklist(comments)).toBe('- [ ] look')
@@ -1069,18 +1067,18 @@ describe('the reel line', () => {
 
   it('should read no reel off an unmarked comment or one without the line', () => {
     expect(
-      findEvidenceReel([
+      findEvidenceReels([
         { body: `**Reel** filmed at \`bbbb111\`:<br><img src="${LINK}">` },
       ]),
-    ).toBeUndefined()
+    ).toEqual([])
     expect(
-      findEvidenceReel([
+      findEvidenceReels([
         { body: '## Evidence\n\n<!-- pr-evidence: head=bbbb111 -->' },
       ]),
-    ).toBeUndefined()
+    ).toEqual([])
   })
 
-  describe('nextEvidenceReel', () => {
+  describe('nextEvidenceReels', () => {
     const carried = [
       {
         body: renderEvidenceBody(
@@ -1097,23 +1095,19 @@ describe('the reel line', () => {
     ]
 
     it('should carry the posted reel forward under its old head when none is passed', () => {
-      expect(nextEvidenceReel(undefined, 'cccc222', carried)).toEqual({
-        link: LINK,
-        head: 'bbbb111',
-        width: 1280,
-      })
+      expect(nextEvidenceReels([], 'cccc222', carried)).toEqual([
+        { link: LINK, head: 'bbbb111', width: 1280 },
+      ])
     })
 
     it('should replace a carried reel with a passed one filmed at this head', () => {
-      expect(nextEvidenceReel('https://new.link', 'cccc222', carried)).toEqual({
-        link: 'https://new.link',
-        head: 'cccc222',
-        width: 1280,
-      })
+      expect(
+        nextEvidenceReels([{ link: 'https://new.link' }], 'cccc222', carried),
+      ).toEqual([{ link: 'https://new.link', head: 'cccc222', width: 1280 }])
     })
 
     it('should give no reel when none is passed or posted', () => {
-      expect(nextEvidenceReel(undefined, 'cccc222', [])).toBeUndefined()
+      expect(nextEvidenceReels([], 'cccc222', [])).toEqual([])
     })
   })
 })
@@ -1281,7 +1275,7 @@ describe('the skip lines', () => {
     })
     expect(findEvidencePreview(comments)).toBe('https://x.dev')
     expect(findEvidenceLocal(comments)).toBeUndefined()
-    expect(findEvidenceReel(comments)).toBeUndefined()
+    expect(findEvidenceReels(comments)).toEqual([])
     expect(findEvidenceChecklist(comments)).toBe('- [ ] look')
     expect(countEvidenceCases(comments[0]?.body ?? '')).toBe(1)
   })
