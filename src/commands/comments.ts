@@ -30,6 +30,7 @@ const LABELS: Record<Language, string> = {
   ts: 'TypeScript',
   sh: 'Bash',
   py: 'Python',
+  config: 'Config',
 }
 
 export function register(program: Command): void {

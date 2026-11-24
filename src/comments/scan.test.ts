@@ -79,6 +79,12 @@ describe('languageFor', () => {
     expect(languageFor('pkg/main.py')).toBe('py')
   })
 
+  it('should map workflow and TOML extensions to the config language', () => {
+    expect(languageFor('.github/workflows/ci.yml')).toBe('config')
+    expect(languageFor('compose.yaml')).toBe('config')
+    expect(languageFor('canon/config/pr-labels.toml')).toBe('config')
+  })
+
   it('should return undefined for an extension the scan does not cover', () => {
     expect(languageFor('README.md')).toBeUndefined()
     expect(languageFor('main.rb')).toBeUndefined()
@@ -407,7 +413,7 @@ describe('scanPaths', () => {
       ROOT,
     )
 
-    expect(counts.map((count) => count.files)).toEqual([1, 0, 0])
+    expect(counts.map((count) => count.files)).toEqual([1, 0, 0, 0])
   })
 
   it('should skip a file target in a language left out of the scan', async () => {
@@ -883,5 +889,52 @@ describe('comment share of a file', () => {
       ...code.slice(8),
     ].join('\n')
     expect(countFile(file('a.ts', text), 'ts').fileShares).toEqual([])
+  })
+})
+
+describe('config comments', () => {
+  it('should report a TODO and an issue number in a workflow comment', () => {
+    const text = [
+      'jobs:',
+      '  test:',
+      '    # TODO drop this step',
+      '    # works around #123',
+      '    runs-on: ubuntu-latest',
+      '',
+    ].join('\n')
+    const count = countFile(file('ci.yml', text), 'config', ['TODO'])
+
+    expect(count.degradationHits).toEqual([
+      { file: 'ci.yml', line: 3, term: 'TODO' },
+      { file: 'ci.yml', line: 4, term: 'issue reference' },
+    ])
+  })
+
+  it('should not report a comment describing what a key does', () => {
+    const text = '# Seconds before the job is cancelled\ntimeout: 30\n'
+    const count = countFile(file('ci.yml', text), 'config', ['TODO'])
+
+    expect(count.degradationHits).toEqual([])
+  })
+
+  it('should report a date in a TOML comment', () => {
+    const count = countFile(
+      file('a.toml', '# added 2026-11-01\nkey = 1\n'),
+      'config',
+    )
+
+    expect(count.degradationHits.map((hit) => hit.term)).toEqual(['date'])
+  })
+
+  it('should report no share or block finding for a heavily commented TOML file', () => {
+    const lines = Array.from({ length: 60 }, (_, i) => `# note ${i}`)
+    const count = countFile(
+      file('a.toml', [...lines, 'key = 1'].join('\n')),
+      'config',
+    )
+
+    expect(count.fileShares).toEqual([])
+    expect(count.headBlocks).toEqual([])
+    expect(count.blocks).toEqual([])
   })
 })
