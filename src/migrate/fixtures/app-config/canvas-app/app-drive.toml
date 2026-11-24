@@ -1,0 +1,4 @@
+launch = "bun install --frozen-lockfile && bun run build && PREVIEW_PORT=4530 bun run preview"
+data = "fixtures/demo"
+personas = ["a person using the app in the browser"]
+access = "/open"

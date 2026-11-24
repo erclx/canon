@@ -51,8 +51,8 @@ function valueOf(read: ReturnType<typeof readAppTable>): unknown {
   return read.kind === 'table' ? read.value : undefined
 }
 
-describe('planAppConfig on real configs', () => {
-  it.each(['frameboard', 'lichtrinh'])(
+describe('planAppConfig on whole project configs', () => {
+  it.each(['canvas-app', 'web-app'])(
     'should move every %s table with each key reading back equal',
     (project) => {
       cpSync(join(FIXTURES, project), join(root, 'canon', 'config'), {
@@ -80,8 +80,8 @@ describe('planAppConfig on real configs', () => {
     },
   )
 
-  it('should move frameboard in table order, keeping the comments beside their keys', () => {
-    cpSync(join(FIXTURES, 'frameboard'), join(root, 'canon', 'config'), {
+  it('should move canvas-app in table order, keeping the comments beside their keys', () => {
+    cpSync(join(FIXTURES, 'canvas-app'), join(root, 'canon', 'config'), {
       recursive: true,
     })
 
@@ -102,7 +102,7 @@ describe('planAppConfig on real configs', () => {
   })
 
   it('should remove each moved file and leave nothing to move on a second run', () => {
-    cpSync(join(FIXTURES, 'frameboard'), join(root, 'canon', 'config'), {
+    cpSync(join(FIXTURES, 'canvas-app'), join(root, 'canon', 'config'), {
       recursive: true,
     })
 

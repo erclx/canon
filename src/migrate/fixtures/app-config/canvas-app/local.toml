@@ -1,5 +1,5 @@
 # canon pr local probes this path before it posts a preview link.
 health = ["/api/health"]
 
-# The landing under web/ serves no API, so its server is found on the page alone.
+# The static site under web/ serves no API, so its server is found on the page alone.
 page-only = ["web"]
