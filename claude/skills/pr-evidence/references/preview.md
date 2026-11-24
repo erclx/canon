@@ -5,13 +5,13 @@ description: The preview step of pr-evidence, covering when it runs, the Pages d
 
 # Preview address
 
-Read by the preview step of `evidence.md`, passing the pull request number.
+Read by the preview step of `evidence.md`, passing the pull request number. It runs `canon pr preview` for the pull request, re-renders the evidence body with the hosted address, and hands back the address or the reason the step skipped.
 
-This file runs `canon pr preview` for the pull request, re-renders the evidence body with the hosted address, and hands back the address or the reason the step skipped.
+The step runs when the evidence step returned `ok`, when the fallback posted a checklist, or when `canon pr evidence <number> --check --json` lists `preview` in `owed`.
 
-- The first two mean the pull request changes a rendered surface, and a reviewer holding a checklist with no screenshots needs the live page most
-- The third is how `git-ship` reaches this step alone when an earlier run's deploy timed out
-- An evidence record carrying a `commentId` takes the third alone, owed again once a served path changes past the build its `previewHead` names
+- An `ok` or a fallback checklist means the pull request changes a rendered surface, and a reviewer holding a checklist with no screenshots needs the live page most
+- A `preview` in `owed` is how `git-ship` reaches this step alone when an earlier run's deploy timed out
+- An evidence record carrying a `commentId` takes the `owed` case alone, owed again once a served path changes past the build its `previewHead` names
 - The evidence comment is already posted, so the reviewer has the screenshots while the deploy runs
 
 ```bash
