@@ -69,7 +69,7 @@ A stepped clip is 3840x2160 at 60 fps, and a dozen of them looping at once stutt
 
 Each frame carries `scale`, the view's top-left `x` and `y`, the `cursor`, and `ring`.
 
-- `scale` is 1 for the whole page and 1.8 at the deepest zoom, or about 1.35 on a screencast beat, and holds at 1 on a beat whose plan set `push: false`
+- `scale` is 1 for the whole page and 1.8 at the deepest zoom, or about 1.35 on a screencast beat, and holds at 1 on a beat whose plan set `push: false` or filmed under 768 wide with no key
 - `x` and `y` place the view's corner on the page, so the view spans `viewport.width / scale` by `viewport.height / scale` from there
 - `cursor` is the pointer's position on the page
 - `ring` runs from 0 to 1 across the 450 ms after a click and is `null` otherwise. On a drag it grows to 0.3, holds there from press to release, and runs on to 1 from the release.

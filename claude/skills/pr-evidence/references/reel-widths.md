@@ -13,7 +13,6 @@ A box films at the width its `<route>, <width>:` opening names, even one outside
 
 - Film the widths narrowest first, so the comment reads them in that order
 - Pass `--viewport` at 390x844, 768x1024, 1280x800, or 900 tall otherwise, and `--reel-width <width>` under 960
-- Set `"push": false` on a 390 reel, since a push crops the column
 
 ## Beats per width
 
