@@ -7,6 +7,9 @@ paths:
   - '**/*.jsx'
   - '**/*.sh'
   - '**/*.py'
+  - '.github/workflows/**'
+  - '**/action.yml'
+  - '**/action.yaml'
 ---
 
 # Code comment standards
