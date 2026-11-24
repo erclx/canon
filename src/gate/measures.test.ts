@@ -896,10 +896,10 @@ describe('deviceClasses', () => {
     expect(report.unmeasured).toBeUndefined()
   })
 
-  it('passes a config the reader accepts', async () => {
+  it('passes a table the reader accepts beside other tables in app.toml', async () => {
     write(
-      'canon/config/device-classes.toml',
-      '[device-classes]\ndefault = ["desktop"]\nwhy = "A canvas"\n',
+      'canon/config/app.toml',
+      '[drive]\nlaunch = "bun run dev"\n\n[device-classes]\ndefault = ["desktop"]\nwhy = "A canvas"\n',
     )
 
     const report = await deviceClasses(context())
@@ -907,7 +907,20 @@ describe('deviceClasses', () => {
     expect(report.failure).toBeUndefined()
   })
 
-  it('fails a bad class name and names the field', async () => {
+  it('fails a bad class name and names the field and app.toml', async () => {
+    write(
+      'canon/config/app.toml',
+      '[device-classes]\ndefault = ["watch"]\nwhy = "A canvas"\n',
+    )
+
+    const report = await deviceClasses(context())
+
+    expect(report.failure).toContain(
+      'device-classes.default in canon/config/app.toml',
+    )
+  })
+
+  it('fails a bad class name in device-classes.toml, naming that file', async () => {
     write(
       'canon/config/device-classes.toml',
       '[device-classes]\ndefault = ["watch"]\nwhy = "A canvas"\n',
@@ -915,7 +928,9 @@ describe('deviceClasses', () => {
 
     const report = await deviceClasses(context())
 
-    expect(report.failure).toContain('device-classes.default')
+    expect(report.failure).toContain(
+      'device-classes.default in canon/config/device-classes.toml',
+    )
   })
 
   it('fails a Device classes: line left in the record, naming the config', async () => {
@@ -926,7 +941,7 @@ describe('deviceClasses', () => {
 
     const report = await deviceClasses(context())
 
-    expect(report.failure).toContain('canon/config/device-classes.toml')
+    expect(report.failure).toContain('canon/config/app.toml')
   })
 
   it('passes a record carrying no Device classes: line', async () => {

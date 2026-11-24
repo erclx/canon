@@ -18,7 +18,8 @@ import {
 import { familyKeys } from '@/claude/skills-families'
 import { listSkills } from '@/claude/skills-list'
 import { measureDesignProse } from '@/design/budget'
-import { DEVICE_CONFIG_REL, readDeviceConfig } from '@/design/device-classes'
+import { APP_CONFIG_REL, readAppTable } from '@/config/app'
+import { readDeviceConfig } from '@/design/device-classes'
 import { DESIGN_DOCUMENT } from '@/design/regen'
 import { listRepositoryFiles } from '@/git/files'
 import { ceilingFindings, isChangelog } from '@/markdown/ceiling'
@@ -325,19 +326,20 @@ export const deviceClasses: Measure = async (ctx) => {
     PROSE_DEVICE_LINE.test(readFileSync(record, 'utf8'))
   ) {
     failures.push(
-      `${DESIGN_DOCUMENT} still carries a Device classes: line, which no reader reads. Move its classes to default under [device-classes] in ${DEVICE_CONFIG_REL}, with a why, and delete the line.`,
+      `${DESIGN_DOCUMENT} still carries a Device classes: line, which no reader reads. Move its classes to default under [device-classes] in ${APP_CONFIG_REL}, with a why, and delete the line.`,
     )
   }
 
   if (failures.length > 0) {
     return { emissions: [], failure: failures.join(' ') }
   }
+  const table = readAppTable(ctx.root, 'device-classes')
   return {
     emissions: [
       info(
-        existsSync(join(ctx.root, DEVICE_CONFIG_REL))
-          ? `${DEVICE_CONFIG_REL} reads clean`
-          : `No ${DEVICE_CONFIG_REL}, so every device class is supported`,
+        table.kind === 'table'
+          ? `[device-classes] in ${table.source} reads clean`
+          : `No [device-classes] in ${APP_CONFIG_REL}, so every device class is supported`,
       ),
     ],
   }

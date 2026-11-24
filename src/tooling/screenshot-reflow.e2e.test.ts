@@ -153,7 +153,7 @@ describe.skipIf(!hasBrowser)('screenshot.ts on a desktop-only scope', () => {
     mkdirSync(join(desktop, 'e2e', 'capture'), { recursive: true })
     mkdirSync(join(desktop, 'canon', 'config'), { recursive: true })
     writeFileSync(
-      join(desktop, 'canon', 'config', 'device-classes.toml'),
+      join(desktop, 'canon', 'config', 'app.toml'),
       [
         '[device-classes.scopes.canvas]',
         'paths = ["src/canvas/"]',

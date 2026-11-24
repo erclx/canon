@@ -6,55 +6,28 @@ import {
   classesFor,
   type DeviceConfig,
   deviceClassOf,
-  parseDeviceConfig,
   readDeviceConfig,
 } from '@/design/device-classes'
 import { DEVICE_CONFIG_CASES } from '@/design/fixtures/device-classes'
 
-const CONFIG_READ_CASES = DEVICE_CONFIG_CASES.flatMap(
-  ({ name, config, expected }) =>
-    'default' in expected ? [{ name, config, expected }] : [],
+const FILES = ['app.toml', 'device-classes.toml'] as const
+
+const CONFIG_READ_CASES = FILES.flatMap((file) =>
+  DEVICE_CONFIG_CASES.flatMap(({ name, config, expected }) =>
+    'default' in expected ? [{ file, name, config, expected }] : [],
+  ),
 )
 
-const CONFIG_REFUSED_CASES = DEVICE_CONFIG_CASES.flatMap(
-  ({ name, config, expected }) =>
-    'reason' in expected ? [{ name, config, expected }] : [],
+const CONFIG_REFUSED_CASES = FILES.flatMap((file) =>
+  DEVICE_CONFIG_CASES.flatMap(({ name, config, expected }) =>
+    'reason' in expected ? [{ file, name, config, expected }] : [],
+  ),
 )
 
 const scopeClasses = (
   config: DeviceConfig,
 ): Record<string, readonly string[]> =>
   Object.fromEntries(config.scopes.map((scope) => [scope.name, scope.classes]))
-
-describe('parseDeviceConfig', () => {
-  it.each(CONFIG_READ_CASES)('reads $name', ({ config, expected }) => {
-    const read = parseDeviceConfig(config)
-
-    expect(
-      read.ok && {
-        default: read.config.default,
-        scopes: scopeClasses(read.config),
-      },
-    ).toEqual(expected)
-  })
-
-  it.each(CONFIG_REFUSED_CASES)('refuses $name', ({ config, expected }) => {
-    expect(parseDeviceConfig(config)).toMatchObject({ ok: false, ...expected })
-  })
-
-  it('names the field and the file in the refusal message', () => {
-    const read = parseDeviceConfig(
-      '[device-classes]\ndefault = ["watch"]\nwhy = "x"\n',
-    )
-
-    expect(read).toMatchObject({
-      ok: false,
-      message: expect.stringContaining(
-        'device-classes.default in canon/config/device-classes.toml',
-      ),
-    })
-  })
-})
 
 describe('readDeviceConfig', () => {
   let root: string
@@ -67,23 +40,71 @@ describe('readDeviceConfig', () => {
     rmSync(root, { force: true, recursive: true })
   })
 
-  it('reads canon/config/device-classes.toml under the project root', () => {
+  const write = (file: string, config: string | undefined): void => {
+    if (config === undefined) return
     mkdirSync(join(root, 'canon', 'config'), { recursive: true })
-    writeFileSync(
-      join(root, 'canon', 'config', 'device-classes.toml'),
-      '[device-classes]\ndefault = ["desktop"]\nwhy = "A canvas"\n',
+    writeFileSync(join(root, 'canon', 'config', file), config)
+  }
+
+  it.each(CONFIG_READ_CASES)(
+    'reads $name from $file',
+    ({ file, config, expected }) => {
+      write(file, config)
+
+      const read = readDeviceConfig(root)
+
+      expect(
+        read.ok && {
+          default: read.config.default,
+          scopes: scopeClasses(read.config),
+        },
+      ).toEqual(expected)
+    },
+  )
+
+  it.each(CONFIG_REFUSED_CASES)(
+    'refuses $name from $file',
+    ({ file, config, expected }) => {
+      write(file, config)
+
+      expect(readDeviceConfig(root)).toMatchObject({ ok: false, ...expected })
+    },
+  )
+
+  it.each(FILES)('names the field and %s in the refusal message', (file) => {
+    write(file, '[device-classes]\ndefault = ["watch"]\nwhy = "x"\n')
+
+    expect(readDeviceConfig(root)).toMatchObject({
+      ok: false,
+      message: expect.stringContaining(
+        `device-classes.default in canon/config/${file}`,
+      ),
+    })
+  })
+
+  it('takes the app.toml table over device-classes.toml', () => {
+    write('app.toml', '[device-classes]\ndefault = ["phone"]\nwhy = "x"\n')
+    write(
+      'device-classes.toml',
+      '[device-classes]\ndefault = ["desktop"]\nwhy = "x"\n',
+    )
+
+    expect(readDeviceConfig(root)).toEqual({
+      ok: true,
+      config: { default: ['phone'], scopes: [] },
+    })
+  })
+
+  it('reads device-classes.toml beside an app.toml holding no such table', () => {
+    write('app.toml', '[drive]\nlaunch = "bun run dev"\n')
+    write(
+      'device-classes.toml',
+      '[device-classes]\ndefault = ["desktop"]\nwhy = "x"\n',
     )
 
     expect(readDeviceConfig(root)).toEqual({
       ok: true,
       config: { default: ['desktop'], scopes: [] },
-    })
-  })
-
-  it('supports all three classes for a root holding no config', () => {
-    expect(readDeviceConfig(root)).toEqual({
-      ok: true,
-      config: { default: ['phone', 'tablet', 'desktop'], scopes: [] },
     })
   })
 })

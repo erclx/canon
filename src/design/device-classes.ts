@@ -1,5 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { readAppTable } from '@/config/app'
 
 /**
  * The device classes a project can declare, in reader order. The design-record standard states the config grammar,
@@ -20,9 +19,6 @@ function isDeviceClass(name: string): name is DeviceClass {
   return (DEVICE_CLASSES as readonly string[]).includes(name)
 }
 
-/** Where a project declares its device classes, beside the label map. */
-export const DEVICE_CONFIG_REL = join('canon', 'config', 'device-classes.toml')
-
 /** One named surface and the classes it supports, matched by design group or path prefix. */
 export interface DeviceScope {
   readonly name: string
@@ -36,7 +32,7 @@ export interface DeviceConfig {
   readonly scopes: readonly DeviceScope[]
 }
 
-/** Why a config could not be used. A missing file or table is no refusal, and supports all three classes. */
+/** Why a config could not be used. A missing table is no refusal, and supports all three classes. */
 export type DeviceConfigRefusal =
   | 'unreadable-config'
   | 'unknown-key'
@@ -71,32 +67,22 @@ class ConfigRefusal extends Error {
 }
 
 /**
- * The `[device-classes]` table of `canon/config/device-classes.toml`. Every key is checked, since a typo that dropped a
- * scope would capture the wrong widths with no sign. The shipped harness carries its own copy of this grammar.
+ * The `[device-classes]` table of `canon/config/app.toml`, or of `device-classes.toml` before it. Every key in the
+ * table is checked, since a typo that dropped a scope would capture the wrong widths with no sign, and tables beside
+ * it belong to other readers. The shipped harness carries its own copy of this grammar.
  */
-export function parseDeviceConfig(
-  source: string | undefined,
-): DeviceConfigRead {
-  if (source === undefined) return { ok: true, config: NO_CONFIG }
-  let parsed: unknown
-  try {
-    parsed = Bun.TOML.parse(source)
-  } catch {
-    return refuse('unreadable-config', '', 'is not valid TOML')
+export function readDeviceConfig(root: string): DeviceConfigRead {
+  const read = readAppTable(root, 'device-classes')
+  if (read.kind === 'absent') return { ok: true, config: NO_CONFIG }
+  if (read.kind === 'unparsable') {
+    return refuse(read.source, 'unreadable-config', '', read.detail)
   }
   try {
-    return { ok: true, config: readConfig(parsed) }
+    return { ok: true, config: readTable(read.value) }
   } catch (error) {
     if (!(error instanceof ConfigRefusal)) throw error
-    return refuse(error.reason, error.field, error.message)
+    return refuse(read.source, error.reason, error.field, error.message)
   }
-}
-
-export function readDeviceConfig(root: string): DeviceConfigRead {
-  const path = join(root, DEVICE_CONFIG_REL)
-  return parseDeviceConfig(
-    existsSync(path) ? readFileSync(path, 'utf8') : undefined,
-  )
 }
 
 export interface DeviceClassesMatch {
@@ -150,20 +136,17 @@ function scopeHoldsPath(scope: DeviceScope, path: string): boolean {
 }
 
 function refuse(
+  source: string,
   reason: DeviceConfigRefusal,
   field: string,
   detail: string,
 ): DeviceConfigRead {
-  const at =
-    field === '' ? DEVICE_CONFIG_REL : `${field} in ${DEVICE_CONFIG_REL}`
+  const at = field === '' ? source : `${field} in ${source}`
   return { ok: false, reason, field, message: `${at} ${detail}.` }
 }
 
-function readConfig(parsed: unknown): DeviceConfig {
-  const file = asTable(parsed, '')
-  checkKeys(file, [TABLE], '')
-  if (file[TABLE] === undefined) return NO_CONFIG
-  const table = asTable(file[TABLE], TABLE)
+function readTable(value: unknown): DeviceConfig {
+  const table = asTable(value, TABLE)
   checkKeys(table, TABLE_KEYS, TABLE)
 
   let fallback: readonly DeviceClass[] = DEVICE_CLASSES

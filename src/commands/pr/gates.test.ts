@@ -130,7 +130,7 @@ describe('readSupportedClasses', () => {
   })
 
   const writeConfig = (text: string): void => {
-    writeFileSync(join(root, 'canon', 'config', 'device-classes.toml'), text)
+    writeFileSync(join(root, 'canon', 'config', 'app.toml'), text)
   }
 
   it('should read the scope a changed painted path reaches', () => {

@@ -37,7 +37,7 @@ async function runClasses(root: string, args: string[]) {
 
 async function writeConfig(root: string, text: string): Promise<void> {
   await mkdir(join(root, 'canon', 'config'), { recursive: true })
-  await writeFile(join(root, 'canon', 'config', 'device-classes.toml'), text)
+  await writeFile(join(root, 'canon', 'config', 'app.toml'), text)
 }
 
 async function git(root: string, args: string[]): Promise<void> {
@@ -131,7 +131,7 @@ describe('canon design classes', { timeout: RUN_TIMEOUT_MS }, () => {
       reason: 'unknown-class',
       field: 'device-classes.default',
     })
-    expect(run.stderr).toContain('canon/config/device-classes.toml')
+    expect(run.stderr).toContain('canon/config/app.toml')
   })
 
   it('reads the painted paths a branch changed with --changed', async () => {
