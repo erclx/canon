@@ -349,7 +349,7 @@ export function registerEvidence(pr: Command): void {
         'only when that line is posted, and `reelSkips`, each **No reel at',
         '<width>:** line as `width` and `skip`, narrowest first, present only',
         'when one is posted. `deviceClasses` holds the classes the changed',
-        'painted paths reach in canon/config/design.toml, per `canon design',
+        'painted paths reach in canon/config/device-classes.toml, per `canon design',
         'classes`. `canon pr lift` reads each reason code, the text',
         'before the first colon, to decide whether a drivable checklist with',
         'no reel at the head is settled at each width. --check refuses',

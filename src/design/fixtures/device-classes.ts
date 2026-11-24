@@ -1,5 +1,5 @@
 /**
- * The `canon/config/design.toml` texts both config readers are tested against, `parseDeviceConfig` in the CLI and
+ * The `canon/config/device-classes.toml` texts both config readers are tested against, `parseDeviceConfig` in the CLI and
  * the inline reader in the shipped harness, each with the default and per-scope classes read or the refusal.
  */
 export interface DeviceConfigCase {

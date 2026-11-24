@@ -95,7 +95,9 @@ Add either optional section, and the one line Layout may carry, when the project
 
 ## Device classes
 
-The classes a project supports live in `canon/config/design.toml`, not in the record. A `[device-classes]` table holds a `default` list and a `why`, and each `[device-classes.scopes.<name>]` table holds `groups`, `paths`, `classes`, and a `why`. A project with no file supports all three of phone, tablet, and desktop.
+The classes a project supports live in `canon/config/device-classes.toml`, not in the record. A project with no file supports all three of phone, tablet, and desktop. The file stands apart from `canon/config/design.toml`, whose presence opts a project into a board.
+
+A `[device-classes]` table holds a `default` list and a `why`, and each `[device-classes.scopes.<name>]` table holds `groups`, `paths`, `classes`, and a `why`.
 
 ```toml
 [device-classes]

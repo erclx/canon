@@ -137,7 +137,7 @@ export async function readEvidenceGate(
 }
 
 /**
- * The classes `canon/config/design.toml` gives the painted paths a change touched, the default for none, read by
+ * The classes `canon/config/device-classes.toml` gives the painted paths a change touched, the default for none, read by
  * the lift and the evidence comment alike. A config the reader refuses warns and reads as all three, so a reel is
  * owed at every width rather than fewer.
  */
@@ -173,10 +173,8 @@ export interface EvidenceCheckRecord {
 }
 
 /**
- * The gate a check record reads as, undefined for a record that is not a
- * check. The owed widths come off the checklist text, so a box naming no
- * width or a malformed one owes the default. A record carrying its own
- * `deviceClasses` governs over `fallback`, since the check read the changed set.
+ * The gate a check record reads as, undefined for one that is not a check. A box naming no width owes the
+ * default, and a record's own `deviceClasses` governs over `fallback`, since the check read the changed set.
  */
 export function toEvidenceGate(
   record: EvidenceCheckRecord,

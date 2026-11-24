@@ -26,7 +26,7 @@ export interface CaptureCase {
   excludeViewports?: readonly string[]
   evidence?: boolean
   /**
-   * The scope under `[device-classes.scopes]` in `canon/config/design.toml` whose classes this case captures at,
+   * The scope under `[device-classes.scopes]` in `canon/config/device-classes.toml` whose classes this case captures at,
    * the config's default when absent. A name the config does not declare exits the run 1.
    */
   deviceScope?: string

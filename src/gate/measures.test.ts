@@ -898,7 +898,7 @@ describe('deviceClasses', () => {
 
   it('passes a config the reader accepts', async () => {
     write(
-      'canon/config/design.toml',
+      'canon/config/device-classes.toml',
       '[device-classes]\ndefault = ["desktop"]\nwhy = "A canvas"\n',
     )
 
@@ -909,7 +909,7 @@ describe('deviceClasses', () => {
 
   it('fails a bad class name and names the field', async () => {
     write(
-      'canon/config/design.toml',
+      'canon/config/device-classes.toml',
       '[device-classes]\ndefault = ["watch"]\nwhy = "A canvas"\n',
     )
 
@@ -926,7 +926,7 @@ describe('deviceClasses', () => {
 
     const report = await deviceClasses(context())
 
-    expect(report.failure).toContain('canon/config/design.toml')
+    expect(report.failure).toContain('canon/config/device-classes.toml')
   })
 
   it('passes a record carrying no Device classes: line', async () => {

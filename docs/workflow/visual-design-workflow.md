@@ -85,7 +85,7 @@ Most projects author design in the loop above and need nothing more. Start with 
 
 A round draws every arm at a phone, a tablet, and a desktop width, read from the `Draw widths:` line in the `## Layout` section of `canon/DESIGN.md` and falling back to 390, 768, and 1280, the widths the screenshot harness commits. A drive with `canon:app-drive` draws on the board by the same convention.
 
-A project declaring fewer classes in `canon/config/design.toml`, such as desktop alone for a canvas tool, draws only those. Named scopes, matched by design group or changed path, let a desktop canvas and a responsive landing page share one record.
+A project declaring fewer classes in `canon/config/device-classes.toml`, such as desktop alone for a canvas tool, draws only those. Named scopes, matched by design group or changed path, let a desktop canvas and a responsive landing page share one record.
 
 - A record still carrying the earlier `Device classes:` line fails the gate's Device classes stage until those classes move into `default` with a `why` and the line goes.
 - A pick that scrolls sideways at any of those widths, or at 320, is held until it reflows.

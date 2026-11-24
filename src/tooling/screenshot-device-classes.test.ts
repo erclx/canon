@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { DEVICE_CONFIG_CASES } from '@/design/fixtures/device-classes'
 
 /**
- * Runs the shipped capture harness's inline reader of `canon/config/design.toml`
+ * Runs the shipped capture harness's inline reader of `canon/config/device-classes.toml`
  * against the cases `@/design/device-classes` is tested on, so the two readers
  * cannot drift. The print flag exits before a browser launches.
  */
@@ -29,7 +29,10 @@ afterEach(() => {
 const runWith = (config: string | undefined, flag: string) => {
   if (config !== undefined) {
     mkdirSync(join(project, 'canon', 'config'), { recursive: true })
-    writeFileSync(join(project, 'canon', 'config', 'design.toml'), config)
+    writeFileSync(
+      join(project, 'canon', 'config', 'device-classes.toml'),
+      config,
+    )
   }
   return spawnSync('bun', [SCRIPT, flag], { cwd: project, encoding: 'utf8' })
 }
@@ -79,8 +82,26 @@ describe('screenshot.ts device classes', () => {
 
     expect(run.status).toBe(1)
     expect(run.stderr).toContain(
-      field === '' ? 'canon/config/design.toml' : `${field} in`,
+      field === '' ? 'canon/config/device-classes.toml' : `${field} in`,
     )
+  })
+
+  it('reads its own file beside a design.toml holding the board keys', () => {
+    mkdirSync(join(project, 'canon', 'config'), { recursive: true })
+    writeFileSync(
+      join(project, 'canon', 'config', 'design.toml'),
+      'board = ".canon/board"\nproject = "landing"\n',
+    )
+
+    const run = runWith(
+      '[device-classes]\ndefault = ["desktop"]\nwhy = "A canvas"\n',
+      '--print-device-classes',
+    )
+
+    expect({ status: run.status, stdout: run.stdout.trim() }).toEqual({
+      status: 0,
+      stdout: 'desktop',
+    })
   })
 
   it('exits 1 on a scope the config does not declare', () => {

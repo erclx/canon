@@ -21,7 +21,7 @@ function isDeviceClass(name: string): name is DeviceClass {
 }
 
 /** Where a project declares its device classes, beside the label map. */
-export const DEVICE_CONFIG_REL = join('canon', 'config', 'design.toml')
+export const DEVICE_CONFIG_REL = join('canon', 'config', 'device-classes.toml')
 
 /** One named surface and the classes it supports, matched by design group or path prefix. */
 export interface DeviceScope {
@@ -71,7 +71,7 @@ class ConfigRefusal extends Error {
 }
 
 /**
- * The `[device-classes]` table of `canon/config/design.toml`. Every key is checked, since a typo that dropped a
+ * The `[device-classes]` table of `canon/config/device-classes.toml`. Every key is checked, since a typo that dropped a
  * scope would capture the wrong widths with no sign. The shipped harness carries its own copy of this grammar.
  */
 export function parseDeviceConfig(

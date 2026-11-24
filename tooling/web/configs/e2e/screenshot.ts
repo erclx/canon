@@ -33,7 +33,7 @@ const DEVICE_CLASSES = ['phone', 'tablet', 'desktop'] as const
 
 type DeviceClass = (typeof DEVICE_CLASSES)[number]
 
-const DEVICE_CONFIG = 'canon/config/design.toml'
+const DEVICE_CONFIG = 'canon/config/device-classes.toml'
 
 interface DeviceConfig {
   readonly default: readonly DeviceClass[]
@@ -41,7 +41,7 @@ interface DeviceConfig {
 }
 
 /**
- * The `[device-classes]` table of `canon/config/design.toml`, all three classes when the file or table is absent.
+ * The `[device-classes]` table of `canon/config/device-classes.toml`, all three classes when the file or table is absent.
  * The grammar is the design record standard's, and anything it refuses exits 1 rather than dropping a class.
  */
 function readDeviceConfig(): DeviceConfig {

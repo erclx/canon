@@ -50,7 +50,7 @@ describe('parseDeviceConfig', () => {
     expect(read).toMatchObject({
       ok: false,
       message: expect.stringContaining(
-        'device-classes.default in canon/config/design.toml',
+        'device-classes.default in canon/config/device-classes.toml',
       ),
     })
   })
@@ -67,10 +67,10 @@ describe('readDeviceConfig', () => {
     rmSync(root, { force: true, recursive: true })
   })
 
-  it('reads canon/config/design.toml under the project root', () => {
+  it('reads canon/config/device-classes.toml under the project root', () => {
     mkdirSync(join(root, 'canon', 'config'), { recursive: true })
     writeFileSync(
-      join(root, 'canon', 'config', 'design.toml'),
+      join(root, 'canon', 'config', 'device-classes.toml'),
       '[device-classes]\ndefault = ["desktop"]\nwhy = "A canvas"\n',
     )
 
