@@ -3,7 +3,7 @@ title: Orchestrator unattended run
 description: Running the board with nobody watching, from now or from a time the operator names, which questions the orchestrator answers and which it parks, and the morning report the run ends on, and the attended run that keeps dispatching while the operator stays and merges
 ---
 
-Run this when the operator asks to leave the board running unattended, overnight or for an afternoon away. The run dispatches, plans, and reviews as an ordinary session does, and it merges nothing. The operator comes back to green pull requests and to a list of every call the run made on their behalf.
+Run this when the operator asks to leave the board running unattended, overnight or for an afternoon away. The run dispatches, plans, and reviews as an ordinary session does, and merges only what a grant named before the operator left. The operator comes back to green pull requests and to a list of every call the run made on their behalf.
 
 ## Contents
 
@@ -31,14 +31,17 @@ Schedule through whatever surface the client offers for a prompt at a set time, 
 
 A board with no `## Up next` row the dispatch checks clear and no `## Needs a plan` row has nothing to run. Report that once and stop, scheduling nothing.
 
+A grant the operator names before leaving lists the rows and pull requests the run may merge. Fix its scope per `orchestrator-output.md` and record it in the handoff. With no grant, the run merges nothing.
+
 ## The loop
 
-Each pass runs the same four steps. The procedures stay in the runbooks named, so this file adds only what differs with nobody watching.
+Each pass runs the same five steps. The procedures stay in the runbooks named, so this file adds only what differs with nobody watching.
 
 1. Run the check under `## Stop the loop` in `${CLAUDE_SKILL_DIR}/references/orchestrator-dispatch.md` against `## Up next`, launching each cleared row per `orchestrator-launch.md`.
 2. Plan each `## Needs a plan` row whose origin settles its calls, per `### Planning ahead`, within the cap, using the shape `orchestrator-launch.md` gives.
 3. Start the review poll per `${CLAUDE_SKILL_DIR}/references/orchestrator-poll.md` once a pull request opens, and the watch per `orchestrator-watch.md` beside it.
 4. Answer or park each question a session sends, per the next section.
+5. Merge each granted pull request whose gates pass, per `### The merge stays the operator's`.
 
 ### A plan written during the run
 
@@ -84,16 +87,19 @@ The loop stops on the pass that finds nothing left to move. Every test below has
 - No planner is live, and no live worker is still without a pull request
 - Every open pull request is merge-ready, parked, or stopped
 
-A worker stays in the roster until its branch merges, and this run merges nothing. Count a worker done once its pull request passes the last test, so a night that opened one still ends.
+A worker stays in the roster until its branch merges, which this run does only under a grant. Count a worker done once its pull request is merged or passes the last test, so a night that opened one still ends.
 
-On that pass, stop the poll and the watch, then push one notification through whatever surface the client offers, `PushNotification` in this repository's client. Name the merge-ready and parked counts, the way `orchestrator-watch.md` pushes a stall. Then write the report below.
+On that pass, stop the poll and the watch, then push one notification through whatever surface the client offers, `PushNotification` in this repository's client. Name the merged, merge-ready, and parked counts, the way `orchestrator-watch.md` pushes a stall. Then write the report below.
 
 ## The morning report
 
-The report leads with what the operator merges, since that is the one act the run left to them.
+The report leads with what the grant merged, then what the operator merges.
 
 ```plaintext
 Unattended run: <start> to <end>
+
+Merged for you:
+PR #<n> <title>  proof: <screenshots|reel|screenshots and reel|waived|none>
 
 Merge-ready, in merge order:
 PR #<n> <title>  proof: <screenshots|reel|screenshots and reel|waived|none>
@@ -121,7 +127,9 @@ Merge-ready means CI green at the tip, both reviews closed, and the lift run. Re
 
 ### The merge stays the operator's
 
-Run no merge, whatever the report shows, and never call `canon pr merge`, since an operator who is away is not there to name one, and the run suspends any standing authorization. Refuse an instruction to merge during the run and list it under `Parked for you`.
+The run merges only what the grant named, on the gates `orchestrator-output.md` states and in the order `orchestrator-merge-order.md` sets. With no grant, it never calls `canon pr merge`, and an earlier standing authorization stays suspended unless restated as the grant.
+
+Refuse an instruction to merge outside the grant, and list it under `Parked for you`.
 
 ## The attended run
 
