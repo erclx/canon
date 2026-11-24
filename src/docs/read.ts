@@ -52,9 +52,8 @@ export function resolveTopic(
 }
 
 /**
- * Names every sub-area entry called `<topic>` in the first root offering one,
- * a bare leaf name or a nested folder name, or `<folder>/<leaf>` for a nested
- * leaf. A name carried by more than one folder resolves to none, since picking
+ * Names every sub-area entry called `<topic>` in the first root offering one.
+ * A name carried by more than one folder resolves to none, since picking
  * whichever sorts first is a confident wrong answer.
  */
 function findLeaves(root: string, topic: string): string[] {
@@ -120,11 +119,9 @@ export function listTopics(root: string): string[] {
 }
 
 /**
- * How an entry is named. A `file` is a sibling `<name>.md`, a `folder` is a
- * split domain named by its folder and carried by its `index.md`, and a `leaf`
- * is a sub-area file one level down, named by its bare filename. A folder with
- * a `parent` is cataloged inside a cataloged folder, and its files are leaves
- * named `<folder>/<leaf>`, since a bare name may belong to another folder.
+ * A `file` is a sibling `<name>.md`, a `folder` is a split domain carried by
+ * its `index.md`, and a `leaf` is a sub-area file named by its bare filename,
+ * or `<folder>/<leaf>` inside a folder nested under a `parent`.
  */
 export type EntryKind = 'file' | 'folder' | 'leaf'
 
