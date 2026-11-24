@@ -11,33 +11,46 @@ function issue(number: number) {
 
 describe('listRecord', () => {
   it('should carry ok and the issues on a read', () => {
-    const record = listRecord({ ok: true, issues: [issue(3210)] })
+    const record = listRecord({ ok: true, issues: [issue(3210)] }, 'board')
 
-    expect(record).toEqual({ ok: true, issues: [issue(3210)] })
+    expect(record).toEqual({
+      ok: true,
+      route: 'board',
+      issues: [issue(3210)],
+    })
   })
 
   it('should carry an empty issues array on an empty queue', () => {
-    expect(listRecord({ ok: true, issues: [] })).toEqual({
+    expect(listRecord({ ok: true, issues: [] }, 'issues')).toEqual({
       ok: true,
+      route: 'issues',
       issues: [],
     })
   })
 
   it('should carry ok false, the reason, and a message on a refused read', () => {
-    const record = listRecord({
-      ok: false,
-      reason: 'command-failed',
-      detail: 'HTTP 401',
-    })
+    const record = listRecord(
+      { ok: false, reason: 'command-failed', detail: 'HTTP 401' },
+      'board',
+    )
 
-    expect(record).toMatchObject({ ok: false, reason: 'command-failed' })
+    expect(record).toMatchObject({
+      ok: false,
+      route: 'board',
+      reason: 'command-failed',
+    })
     expect(record.ok === false && record.message).toContain('HTTP 401')
   })
 
   it('should keep the gh detail out of the record as its own field', () => {
-    const record = listRecord({ ok: false, reason: 'missing-binary' })
+    const record = listRecord({ ok: false, reason: 'missing-binary' }, 'issues')
 
-    expect(Object.keys(record).sort()).toEqual(['message', 'ok', 'reason'])
+    expect(Object.keys(record).sort()).toEqual([
+      'message',
+      'ok',
+      'reason',
+      'route',
+    ])
   })
 })
 

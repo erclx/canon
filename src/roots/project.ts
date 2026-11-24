@@ -32,6 +32,25 @@ export function isOwnCheckout(root: string): boolean {
 }
 
 /**
+ * Whether `startDir` sits in a checkout of this package, judged by the nearest ancestor
+ * `package.json` carrying a name, so a subdirectory reads as the project it belongs to.
+ */
+export function isWithinOwnCheckout(startDir: string): boolean {
+  const ownName = readPackageName(PROJECT_ROOT)
+  if (ownName === undefined) return false
+
+  let dir = resolve(startDir)
+  while (true) {
+    const name = readPackageName(dir)
+    if (name !== undefined) return name === ownName
+
+    const parent = dirname(dir)
+    if (parent === dir) return false
+    dir = parent
+  }
+}
+
+/**
  * Walks upward from `startDir` for the nearest ancestor `package.json` sharing this package's
  * `name`, and reports its path when that ancestor is not `PROJECT_ROOT`, as when a bare `canon`
  * on PATH resolves to the installed package while the caller stands in a checkout.

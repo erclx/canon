@@ -4,23 +4,46 @@ import {
   type IssueFailureReason,
   type IssueList,
 } from '@/feedback/github-format'
+import { isWithinOwnCheckout } from '@/roots/project'
+
+/**
+ * Where a caller's feedback goes. A session in the toolkit's own checkout files
+ * on its board, and any other project files on the public queue.
+ */
+export type FeedbackRoute = 'board' | 'issues'
+
+export function feedbackRoute(
+  root: string,
+  own: boolean = isWithinOwnCheckout(root),
+): FeedbackRoute {
+  return own ? 'board' : 'issues'
+}
 
 export interface ListRefusal {
   readonly ok: false
+  readonly route: FeedbackRoute
   readonly reason: IssueFailureReason
   readonly message: string
 }
 
-export type ListRecord = IssueList | ListRefusal
+export interface ListRead extends IssueList {
+  readonly route: FeedbackRoute
+}
+
+export type ListRecord = ListRead | ListRefusal
 
 /**
  * The record `session-retro` branches on. A refusal carries its reason, so the
  * caller says the match did not run rather than reading an empty queue.
  */
-export function listRecord(result: IssueList | IssueFailure): ListRecord {
-  if (result.ok) return { ok: true, issues: result.issues }
+export function listRecord(
+  result: IssueList | IssueFailure,
+  route: FeedbackRoute,
+): ListRecord {
+  if (result.ok) return { ok: true, route, issues: result.issues }
   return {
     ok: false,
+    route,
     reason: result.reason,
     message: issueListFailureMessage(result),
   }
