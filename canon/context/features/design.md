@@ -9,7 +9,7 @@ description: DESIGN.md as a generated record, the token module and component lay
 
 `canon/DESIGN.md` holds visual intent, being a short Overview, one-line rules, and a table naming what each role is for. This repository's record is generated from `src/design/tokens.ts` by `canon design regen`, and the `design` gate stage checks it for drift. A target writes its record by hand with no values.
 
-The same stage drift-checks the landing page's token preview, and that drift is what paints a `src/design/` change, since `canon/config/painted.json` leaves those sources unpainted.
+The same stage drift-checks the landing page's token preview, and that drift is what paints a `src/design/` change, since the `[painted]` table of `canon/config/app.toml` leaves those sources unpainted.
 
 ## Layout
 
@@ -25,7 +25,7 @@ Owns the token module, the component layer, the renderers, the markdown parser, 
 
 ### `src/design/fixtures/`
 
-Holds the `canon/config/device-classes.toml` texts both config readers are tested on. `device-classes.ts` reads the file for `canon design classes`, the lift, and the gate, and the shipped harness `tooling/web/configs/e2e/screenshot.ts` carries its own copy, since a target cannot import the CLI. A grammar change lands in both readers and here.
+Holds the config texts both device class readers are tested on, each read as `canon/config/app.toml` and as the `device-classes.toml` before it. `device-classes.ts` reads the table through `src/config/app.ts` for `canon design classes`, the lift, and the gate, and the shipped harness `tooling/web/configs/e2e/screenshot.ts` carries its own copy, since a target cannot import the CLI. A grammar change lands in both readers and here.
 
 ### `canon/design/`
 

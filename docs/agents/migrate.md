@@ -20,6 +20,7 @@ kind: reference
 | `scratch-evidence` | A folder a durable record cites out of `.tmp/`, with its citations                                                    |
 | `record-layout`    | Review receipts, memory archives, feedback, renders, picks, evidence, and the design board into their current folders |
 | `session-defaults` | The seeded session defaults into an existing `.claude/settings.json`, listed below the table                          |
+| `app-config`       | The app config files under `canon/config/` into the tables of `app.toml`, listed below the table                      |
 
 `record-tree` follows citations in `diagrams`, `memory`, `plans`, `proposals`, `review`, `tasks`, and `teach`.
 
@@ -30,6 +31,8 @@ kind: reference
 - `rule-layout` classifies each flat file against the stamp as clean, edited, or unclaimed. Clean and edited files move untouched, and an unclaimed name stays.
 - `record-layout` labels each evidence folder `(pick)` or `(evidence)` in the dry run
 - `session-defaults` adds a key only when absent, and each older project runs it once. `--write` restores a removed `Agent` or `Task`, never removes a deny entry, and edits the file in place.
+
+`app-config` moves `app-drive.toml`, `preview.json`, `local.toml`, `painted.json`, and `device-classes.toml` into `[drive]`, `[preview]`, `[health]`, `[painted]`, and `[device-classes]`. It keeps TOML comments, reads each table back before writing, and lists each tracked citation of an old file for a person to reword.
 
 ## Output
 
@@ -67,6 +70,7 @@ Three markers keep an old spelling on a line. Each also covers the nearest non-b
 | `record-layout`    | A destination already exists, each move refused on its own                                                           |
 | `rule-layout`      | A destination holds different bytes. Neither file is touched and other moves apply.                                  |
 | `session-defaults` | The settings file is not valid JSON, or `permissions`, `deny`, `allow`, `hooks`, or a seeded event has another shape |
+| `app-config`       | A file does not parse, `app.toml` already holds a table whose old file exists, or a table would read back different  |
 
 A `rule-layout` destination holding the same bytes marks a duplicate, which `--write` deletes.
 

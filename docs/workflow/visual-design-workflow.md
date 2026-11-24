@@ -27,7 +27,7 @@ When its change makes a reference untrue, the worker redraws the board frame its
 - The `craft` rule fires on the files the worker edits and loads `ui-craft` for behavior and `design-taste` for look.
 - The `ui-craft` capture reference has the worker capture the full page in every theme the surface ships, against a preview server and never a dev server.
 - It sets the widths too, being each breakpoint in `canon/DESIGN.md` or 390, 768, and 1280 for a layout case, checked for sideways scroll at 320, and one width for a state case.
-- The device classes in `canon/config/device-classes.toml` drop the widths of every class the changed surface leaves out, and the 320 check with phone. `canon design classes --changed` prints them.
+- The device classes under `[device-classes]` in `canon/config/app.toml` drop the widths of every class the changed surface leaves out, and the 320 check with phone. `canon design classes --changed` prints them.
 
 ## Self-check
 
@@ -51,7 +51,7 @@ Two reviews run beside each other and finish on their own clocks.
 - `canon:review-pr` reads the code and the stills in the evidence comment, and posts under `## Review`.
 - `canon:review-ui` never reads the diff. It drives each checklist box in the running app through `canon browser`, which runs the pinned `@playwright/cli`, and posts under `## UI review`.
 - Every box gets one verdict, being pass, fail, needs eyes, or not driven.
-- A page that shows its start state only behind a token or a signed-in route names that path as `access` in `canon/config/app-drive.toml`, and the pass opens its address behind it.
+- A page that shows its start state only behind a token or a signed-in route names that path as `access` in the `[drive]` table of `canon/config/app.toml`, and the pass opens its address behind it.
 - The pass refuses rather than download a browser. Install it once per machine with `canon browser install-browser chromium` yourself, since the seeded settings deny that command to a session.
 
 After the boxes, `review-ui` sweeps every route they reached:
@@ -85,7 +85,7 @@ Most projects author design in the loop above and need nothing more. Start with 
 
 A round draws every arm at a phone, a tablet, and a desktop width, read from the `Draw widths:` line in the `## Layout` section of `canon/DESIGN.md` and falling back to 390, 768, and 1280, the widths the screenshot harness commits. A drive with `canon:app-drive` draws on the board by the same convention.
 
-A project declaring fewer classes in `canon/config/device-classes.toml`, such as desktop alone for a canvas tool, draws only those. Named scopes, matched by design group or changed path, let a desktop canvas and a responsive landing page share one record.
+A project declaring fewer classes under `[device-classes]` in `canon/config/app.toml`, such as desktop alone for a canvas tool, draws only those. Named scopes, matched by design group or changed path, let a desktop canvas and a responsive landing page share one record.
 
 - A record still carrying the earlier `Device classes:` line fails the gate's Device classes stage until those classes move into `default` with a `why` and the line goes.
 - A pick that scrolls sideways at any of those widths, or at 320, is held until it reflows.
@@ -101,11 +101,7 @@ An app pick with several screens is offered a clickable prototype built to flows
 
 ### Where a round drafts
 
-A pick round drafts on `.canon/board/` unless the project names another board in `canon/config/design.toml`.
-
-- Set `board` when your design sync reads another Frameboard board, so the picked frame lands without a redraw.
-- Leave `project` unset to keep each surface's rounds in a project named for it, such as `landing`, on that board.
-- Set `references` to an array of site addresses to replace the default list `canon:design-references` captures when you name no site.
+A pick round drafts on `.canon/board/` at the main root, in a project named for the surface it draws, such as `landing`. Name a project in the ask to place a round elsewhere, and name sites in a `canon:design-references` ask to replace the default list it captures.
 
 ### When a graphical tool fits
 

@@ -42,6 +42,10 @@ Groups the resolvers that answer where something lives.
 - `legacy.ts` holds `resolveExisting`, the first-existing-path read the stamp, baseline, and label map share
 - A verb whose answer depends on the caller's root takes it as a parameter, which keeps root resolution in the command layer
 
+### `src/config/`
+
+Holds `app.ts`, the one reader of `canon/config/app.toml` that `src/pr/`, `src/intake/`, and `src/design/` share. `readAppTable` returns a table from it, or from the file the table lived in before with its keys renamed, and each caller keeps its own validation and refusals. `src/migrate/app-config.ts` moves a project through the same map of old files, and the shipped screenshot harness cannot import this folder, so it carries its own `[device-classes]` reader.
+
 ### `src/git/`
 
 Holds every module that reads repository state, named for what it reads.

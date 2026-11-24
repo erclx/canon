@@ -14,7 +14,7 @@ The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project tha
 
 ## Device classes
 
-The harness reads the `[device-classes]` table in `canon/config/device-classes.toml`, and a project with no file captures every width as before. It needs Bun to parse the file, which `bun e2e/screenshot.ts` already runs it under.
+The harness reads the `[device-classes]` table in `canon/config/app.toml`, or in `canon/config/device-classes.toml` for a project that has not run `canon migrate app-config`, and a project with no table captures every width as before. It needs Bun to parse the file, which `bun e2e/screenshot.ts` already runs it under.
 
 - A case captures at its `deviceScope`, naming a table under `[device-classes.scopes]`, or at the `default` when it names none, and a scope the config lacks exits 1
 - A width outside the case's classes takes no frame, with phone under 600, tablet from 600 to 839, and desktop from 840, 1536 included
