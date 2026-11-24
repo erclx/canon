@@ -70,6 +70,20 @@ describe('measureCoverage', () => {
     expect(measured(SRC, folderOf(a)).unnamed).toEqual(['src/beta'])
   })
 
+  it('counts a Layout in a nested folder entry toward coverage', () => {
+    mkdirs('src/alpha', 'src/beta')
+    const a = entry(
+      'canon/context/surfaces/cli/sync.md',
+      '### `src/alpha/`\n\n- one',
+    )
+    const b = entry(
+      'canon/context/surfaces/cli/audits.md',
+      '### `src/beta/`\n\n- two',
+    )
+
+    expect(measured(SRC, folderOf(a, b)).unnamed).toEqual([])
+  })
+
   it('reports an H3 in two entries and ignores a bullet citation', () => {
     mkdirs('src/alpha', 'src/beta')
     const a = entry(
