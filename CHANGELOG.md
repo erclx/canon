@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.118.0](https://github.com/erclx/canon/compare/v5.117.0...v5.118.0) (2026-11-24)
+
+
+### Features
+
+* **gate:** report every failing stage in one run ([#3472](https://github.com/erclx/canon/issues/3472)) ([031876b](https://github.com/erclx/canon/commit/031876b4872763be53dc802719608107dfe0d259))
+* **pr:** let a worker rebase its own branch when the base moves ([#3474](https://github.com/erclx/canon/issues/3474)) ([9cdd4fd](https://github.com/erclx/canon/commit/9cdd4fda15929411eff972fbd29991ec5471b392))
+* **tasks:** hold an operator-word row out of the waves ([#3470](https://github.com/erclx/canon/issues/3470)) ([38e04cd](https://github.com/erclx/canon/commit/38e04cdd2246c2c938376891efc48707f8a451f7))
+
+
+### Bug Fixes
+
+* **pr:** refuse a review waiver over a deferred reel skip ([#3475](https://github.com/erclx/canon/issues/3475)) ([7a609f6](https://github.com/erclx/canon/commit/7a609f646efdf280b77e4bac0996715ae03b50f8))
+* **pr:** retry a merge pull on a ref-lock race ([#3471](https://github.com/erclx/canon/issues/3471)) ([ac38edc](https://github.com/erclx/canon/commit/ac38edc9595075b725e559dea1c8b83f8d863c12))
+
 ## [5.117.0](https://github.com/erclx/canon/compare/v5.116.0...v5.117.0) (2026-11-23)
 
 
