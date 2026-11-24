@@ -16,12 +16,9 @@ on:
   pull_request:
     types: [closed]
 
-# Fill in a concurrency group name unique to this project. A second push
-# while a deploy is in flight publishes the newer commit rather than racing
-# it, and the running job is left to finish so a half-uploaded site is never
-# what a reader lands on. The group is keyed on the ref, since GitHub cancels
-# a pending run when a newer one queues in the same group, and a branch
-# preview must never displace a production deploy waiting behind another.
+# Fill in a concurrency group name unique to this project.
+# A running deploy finishes so a half-uploaded site is never live.
+# The group is keyed on the ref, so a branch preview never displaces a production deploy.
 concurrency:
   group: deploy-${{ github.ref_name }}
   cancel-in-progress: false
@@ -110,11 +107,8 @@ jobs:
         if: steps.secrets-check.outputs.skip == 'true'
         run: echo "::notice::CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is not set, skipping deploy. Run the deploy-app skill to finish setup."
 
-      # This job builds nothing and still needs a toolchain. The checkout
-      # below brings bun.lock, wrangler-action reads it, picks bun on the
-      # strength of it, and installs wrangler with that, so a deploy with no
-      # bun on PATH fails before it reaches Cloudflare. Dropping these steps
-      # as dead weight breaks the deploy on every push.
+      # This job builds nothing and still needs bun, which wrangler-action
+      # picks from bun.lock. Dropping these steps fails every deploy.
       - name: Checkout
         if: steps.secrets-check.outputs.skip == 'false'
         uses: actions/checkout@v7
@@ -146,10 +140,8 @@ jobs:
           # deploy-app skill runs wrangler pages project create.
           command: pages deploy dist --project-name=REPLACE_WITH_PROJECT_NAME --branch=${{ github.ref_name }}
 
-      # `canon pr preview` reads this line out of the run log, so the marker is
-      # a contract rather than decoration. The alias is read off the deploy
-      # rather than computed from the branch name, since Cloudflare flattens
-      # and may truncate a branch into its alias.
+      # `canon pr preview` reads this marker out of the run log. The alias comes
+      # off the deploy, since Cloudflare may truncate a branch name.
       - name: Report preview alias
         if: steps.publish.outputs.pages-deployment-alias-url != ''
         env:

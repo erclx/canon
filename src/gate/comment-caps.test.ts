@@ -417,6 +417,24 @@ describe('comment caps', () => {
         })
       })
 
+      it('should fail a shipped workflow block past 3 text lines', async () => {
+        commit(
+          'tooling/web/configs/.github/workflows/a.yml',
+          [
+            'jobs:',
+            ...Array.from({ length: 4 }, (_, n) => `  # n${n}`),
+            '',
+          ].join('\n'),
+        )
+
+        const report = await shippedCommentCaps(context())
+
+        expect(report.failure).toBeDefined()
+        expect(report.emissions.map((emission) => emission.text)).toContain(
+          'tooling/web/configs/.github/workflows/a.yml:2 runs 4 comment text lines, past 3',
+        )
+      })
+
       it('should pass shipped files under every cap', async () => {
         commit('tooling/web/configs/a.ts', headRuns(1, 3))
 

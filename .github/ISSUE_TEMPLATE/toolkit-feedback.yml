@@ -2,11 +2,8 @@ name: Toolkit feedback
 description: Report something broken, missing, or off in the toolkit
 title: 'feedback: '
 labels: ['feedback']
-# The web mirror of the report `canon feedback` validates. A submission renders
-# each label as a `### <label>` section, which is the shape the CLI parses, so
-# both routes reach triage as one document. `required` here mirrors
-# REQUIRED_FIELDS in src/feedback/body.ts, which is where the list is
-# spelled and where every report filed through the CLI is checked against it.
+# The web mirror of `canon feedback`: each label renders as a `### <label>` section.
+# `required` mirrors REQUIRED_FIELDS in src/feedback/body.ts.
 body:
   - type: input
     id: project

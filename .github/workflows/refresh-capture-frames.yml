@@ -7,10 +7,8 @@ on:
     branches:
       - main
     paths:
-      # The inputs to the home render. The page is built from web/ and shows the
-      # film's poster from assets/loops/, which `bun run film:render` writes. The
-      # rest of assets/** stays off the list, since it holds the output this job
-      # writes and would start a run from its own merge.
+      # The inputs to the home render, web/ and the poster in assets/loops/.
+      # The rest of assets/** holds this job's output and would loop it.
       - 'web/**'
       - 'assets/loops/**'
       - 'scripts/core/capture-home.sh'
@@ -56,10 +54,7 @@ jobs:
         run: bunx playwright install chromium
 
       # The home baseline `canon pr evidence` compares a page change against.
-      # pr-visual-checks.yml runs the same script and reports whether its frames
-      # match, so a merge that moves the render leaves a reviewed pull request
-      # behind it instead of a stale baseline. It writes under assets/evidence,
-      # which the status check and the add in the script below cover.
+      # pr-visual-checks.yml runs the same script and reports whether it matches.
       - name: Capture Home Baseline
         run: bash scripts/core/capture-home.sh
 

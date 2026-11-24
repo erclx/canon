@@ -9,11 +9,12 @@ The field is comment style in configuration files. Neither the YAML spec nor the
 
 ## Comments
 
-| Bullet                                   | Source                                                                                                                                                                                                                                      | Read       |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| What a key does or accepts, not its name | House choice: the allowed values are set by the tool reading the file, a fact the key name does not carry, while a comment restating the name adds a line that tells the reader nothing and can drift from the key                          | 2026-10-18 |
-| True of the key, updated in the change   | House choice: a comment describing a value the key no longer holds reads as authoritative and misleads the next reader, and a config file has no test to catch it. Updating it in the same change puts both sides in front of one reviewer. | 2026-11-24 |
-| No date, hash, issue, or `TODO`          | House choice: each is history or deferred work true only of the moment it was written, the same bug class the code rule bans. The scan matches each in `.yml`, `.yaml`, and `.toml` as it does in source.                                   | 2026-11-24 |
+| Bullet                                   | Source                                                                                                                                                                                                                                                                    | Read       |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| What a key does or accepts, not its name | House choice: the allowed values are set by the tool reading the file, a fact the key name does not carry, while a comment restating the name adds a line that tells the reader nothing and can drift from the key                                                        | 2026-10-18 |
+| A block of at most 3 text lines          | House choice: a config header that explains rationale grows into an essay no reviewer reads and drifts from the keys below it, and the code rule already holds a head block to 3 lines. No share cap, since a file explaining each key runs near half comments by design. | 2026-11-24 |
+| True of the key, updated in the change   | House choice: a comment describing a value the key no longer holds reads as authoritative and misleads the next reader, and a config file has no test to catch it. Updating it in the same change puts both sides in front of one reviewer.                               | 2026-11-24 |
+| No date, hash, issue, or `TODO`          | House choice: each is history or deferred work true only of the moment it was written, the same bug class the code rule bans. The scan matches each in `.yml`, `.yaml`, and `.toml` as it does in source.                                                                 | 2026-11-24 |
 
 ## Declined
 

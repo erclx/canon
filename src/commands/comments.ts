@@ -73,7 +73,7 @@ export function register(program: Command): void {
         '',
         'Caps, which canon gate run fails on and this report only lists, a run cap',
         'when the branch changed the run and history anywhere in a touched file:',
-        `  a head run past ${HEAD_TEXT_CAP} text lines`,
+        `  a head run past ${HEAD_TEXT_CAP} text lines, a config # block included`,
         `  an in-body run past ${BODY_BLOCK_CAP} text line`,
         '  a comment carrying a date, a commit hash, or an issue reference',
         '',

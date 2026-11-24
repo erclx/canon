@@ -189,7 +189,9 @@ function capMeasure<T>(
 const HEAD_READING: CapReading<CappedRun> = {
   clean: `No head comment run past ${HEAD_TEXT_CAP} text lines`,
   line: (block) =>
-    `${block.file}:${block.line} runs ${block.textLines} comment text lines outside a function body, past ${HEAD_TEXT_CAP}`,
+    languageFor(block.file) === 'config'
+      ? `${block.file}:${block.line} runs ${block.textLines} comment text lines, past ${HEAD_TEXT_CAP}`
+      : `${block.file}:${block.line} runs ${block.textLines} comment text lines outside a function body, past ${HEAD_TEXT_CAP}`,
   failure: (count) =>
     `${plural(count, 'head comment run')} past ${HEAD_TEXT_CAP} text lines. Cut each to the contract or the constraint the code cannot carry.`,
 }

@@ -6,15 +6,9 @@ name: PR Visual Checks
 on:
   pull_request:
     paths:
-      # Mirrors deploy-site.yml's own list. The page builds from web/, assets/,
-      # and src/design/ and reads no catalog. Its audits section reads code
-      # outside these globs and refreshes only on a page deploy, and the list
-      # stays as it is for the preview contract that file states. Question 2
-      # in .canon/plans/archive/feature-render-visibility.md names
-      # the two literal copies rather than a single shared source.
-      # The e2e harness entry has no deploy counterpart: a harness edit changes
-      # no byte of the built site, so it reports the capture and never deploys.
-      # VISUAL_ONLY_GLOBS in src/gate/measures.ts declares it to the gate.
+      # Mirrors deploy-site.yml's list, which states the preview contract.
+      # The e2e harness entry has no deploy counterpart, and VISUAL_ONLY_GLOBS
+      # in src/gate/measures.ts declares it to the gate.
       - 'web/**'
       - 'assets/**'
       # Pull request screenshots, which the page never reads.
@@ -114,21 +108,15 @@ jobs:
       - name: Verify Playwright Browsers Restored
         run: scripts/ci/check-browsers.sh chromium
 
-      # Builds, serves, and captures the page, then clears and refills
-      # assets/evidence/home so the report below diffs the frames against the
-      # baseline this repository ships. refresh-capture-frames.yml calls the
-      # same script to write that baseline, so the two cannot capture
-      # differently.
+      # Captures the page into assets/evidence/home for the report below to diff.
+      # refresh-capture-frames.yml runs the same script to write the baseline.
       - name: Build, capture, and stage the frames
         run: bash scripts/core/capture-home.sh
 
       - name: Verify social card excluded from build
         run: bun run web:card:check
 
-      # Uploaded on success rather than on failure alone, against the artifact
-      # rule in governance/rules/tooling/ci-workflow.md. The frames are this
-      # job's product now that it no longer commits them, so a failure-only
-      # upload would leave a passing run with nothing to review.
+      # Uploaded on success too, since the frames are this job's product.
       - name: Upload the captured frames
         uses: actions/upload-artifact@v7
         with:

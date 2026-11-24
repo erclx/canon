@@ -1,13 +1,4 @@
-# Rule splits a sync tells a target about. Each key under [split] is the
-# basename of a rule that shed bullets into others, and its value lists the
-# basenames those bullets moved to. `canon gov sync` adds no rule, so a target
-# holding the key and not a partner reads a notice naming the partner and the
-# `canon gov install --add` command that installs it.
-#
-# This ledger is not the rename ledger. A rename entry resolves to a successor
-# the sync installs, and a split key is a live rule the target keeps. Add the
-# entry in the same change as the split. The notice is stateless, so a target
-# installed after the split reads it too until it adds the partner. Prune an
-# entry only once its key or partner is retired, which the live-rule check in
-# `src/gov/splits.test.ts` forces.
+# Each key under [split] is a live rule that shed bullets, and its value lists the rules they moved to.
+# A target holding the key and no partner reads a notice naming the partner to add.
+# A key or partner must name a live rule.
 [split]

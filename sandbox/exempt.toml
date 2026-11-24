@@ -1,31 +1,7 @@
 # Skills a sandbox run cannot assert, each with the reason it cannot.
 #
-# `canon sandbox coverage --skills` reads this. An entry here is a claim that no
-# arm should be written, so it needs a reason a later reader can check and
-# overturn. A skill left out of this file reports `should-be-asserted`, which is
-# the honest default.
-#
-# A table carrying no reason is an error rather than a skipped entry, and so is
-# a file that does not parse. A dropped exemption is invisible in the counts:
-# the skill rejoins the work queue someone already ruled it out of, with nothing
-# naming the entry that stopped counting.
-#
-# The reason cannot live in the arm's `manual` array. `resolveVerdict` fails any
-# `expect.toml` declaring zero mechanical assertions, so a declaration holding
-# only an exempt reason goes red the moment it is written.
-#
-# Two kinds of reason belong here and nothing else does:
-#
-#   - A harness capability limit, where the checker cannot reach the effect.
-#   - A skill that produces no artifact, so there is nothing to assert over.
-#
-# "Nobody has written one yet" is not a reason. That is `should-be-asserted`,
-# which is a default rather than a queue. Which of those skills earns an arm is
-# decided by blast radius: arm a skill when a wrong run is silent and the damage
-# lands in a target project rather than in the sandbox. A coverage percentage
-# names no skill and rewards whichever arm is cheapest to write next. This file
-# is the other half of that split: the rule says what to write, an entry here
-# says what never will be.
+# `canon sandbox coverage --skills` reads each table, keyed by skill, and fails one with no `reason`.
+# A reason is a harness capability limit, or a skill that produces no artifact to assert over.
 
 [canon-cli]
 reason = "Reference only. Its body forbids running the commands it describes, so a correct run produces no artifact to assert over."

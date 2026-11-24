@@ -114,10 +114,8 @@ jobs:
             echo "package.json declares no build script, so wrangler deploy bundles the Worker."
           fi
 
-      # The version serving before this run is the rollback target, read now
-      # because once the deploy lands the newest version is the one just shipped.
-      # A Worker never deployed answers API code 10007, since its script does
-      # not exist yet, and one with an empty history answers `has no deployments`.
+      # The serving version is the rollback target, read before the deploy lands.
+      # A Worker never deployed answers code 10007, and an empty history `has no deployments`.
       - name: Record the serving version
         id: serving
         if: steps.gate.outputs.skip == 'false'

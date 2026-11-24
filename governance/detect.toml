@@ -1,20 +1,6 @@
-# Evidence that marks a project as wanting an opt-in rule. Each table is keyed by
-# a rule basename, the same key `renames.toml` and the stacks use, so a rename
-# sweep reaches this file too. `canon gov detect` reads it and proposes every
-# rule whose evidence a target holds, and `target-setup` puts those proposals to
-# the operator before anything installs.
-#
-# `deps` are package names read from `package.json` (`dependencies` and
-# `devDependencies`), `pyproject.toml`, `go.mod`, and `composer.json`, at the
-# root and in every folder to depth two. `files` are globs matched against the
-# target's git-listed paths to depth two, and against each folder on those
-# paths, so `.github/workflows` matches a folder holding a workflow. A glob with
-# no wildcard is also tested on disk, which reaches a gitignored path.
-#
-# Every rule no stack reaches needs a table here, which the `unreferenced-rules`
-# gate stage checks, along with every key naming a live rule. A table for a rule
-# a stack already reaches is harmless, since the verb leaves out every rule the
-# caller's stack resolves.
+# Evidence that proposes an opt-in rule, one table per rule basename.
+# `deps`: package names read from manifests at the root and to depth two.
+# `files`: globs over git-listed paths and folders to depth two, plus disk for a glob with no wildcard.
 
 ["skill"]
 deps = []

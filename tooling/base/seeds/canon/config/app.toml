@@ -52,6 +52,7 @@
 
 # Files that count as a visible change, and files that do not.
 # [painted]
+
 # paths = ["src/client/**/*.ts"]
 # exclude = ["src/client/**/fixtures.ts"]
 

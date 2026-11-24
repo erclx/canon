@@ -25,7 +25,7 @@ Owns the scenario scripts, one folder per category and one `.ts` file per comman
 - `config` holds presence flags such as `SANDBOX_SKIP_AUTO_COMMIT`, `SANDBOX_INJECT_SEEDS`, `SANDBOX_INJECT_GOV`, and `SANDBOX_GOV_STACK`. `anchor: true` names the push target.
 - `arms` maps an arm name to a function staging the tree through `ctx`, the only way in. Arm order is routing order, and a headless call naming no arm is refused with the arm names, so name the arm.
 - An arm ends its narration with an `Action:` line spelling the full command, arguments included, since a skill guarding on a missing argument refuses a bare prompt
-- `exempt.toml` names skills no arm should cover, each with a `reason`, and a stale or now-asserted one exits 1. Run `canon sandbox` bare for the live catalog.
+- `exempt.toml` lists skills no arm covers, each with a `reason`, and a stale or now-asserted one exits 1. Arm a skill when a wrong run is silent and hits a target. `canon sandbox` bare lists them
 
 ### `sandbox/fixtures/`
 

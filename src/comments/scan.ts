@@ -470,10 +470,13 @@ function countPython(
   }
 }
 
+/** A TOML multi-line string delimiter, whose body is data rather than comments. */
+const TOML_MULTILINE = /"""|'''/g
+
 /**
- * Reads `#` comments for the vocabulary and history matchers only. Runs stay
- * empty and no text counts, since the block and share caps govern code and a
- * config file's comments are read key by key.
+ * Reads `#` runs for the head cap alone, leaving the share count at zero since
+ * a config file explaining each key runs near half comments by design. A `#`
+ * line inside a TOML multi-line string is data.
  */
 function countConfig(
   file: SourceFile,
@@ -481,13 +484,30 @@ function countConfig(
   hits: DegradationHit[],
 ): FileCount {
   const lines = splitLines(file.text)
+  const toml = file.path.endsWith('.toml')
   let commentLines = 0
+  let delimiter: string | undefined
+  const runs = runTracker()
 
   for (const [index, line] of lines.entries()) {
     const trimmed = line.trim()
-    if (!trimmed.startsWith('#')) continue
-    commentLines++
-    sweep(trimmed, file.path, index + 1, matchers, hits)
+
+    if (delimiter !== undefined) {
+      if (line.includes(delimiter)) delimiter = undefined
+      continue
+    }
+
+    if (trimmed.startsWith('#')) {
+      commentLines++
+      runs.extend(index + 1, trimmed)
+      sweep(trimmed, file.path, index + 1, matchers, hits)
+      continue
+    }
+
+    runs.end()
+    if (!toml) continue
+    const quotes = line.match(TOML_MULTILINE) ?? []
+    if (quotes.length % 2 === 1) delimiter = quotes[quotes.length - 1]
   }
 
   return {
@@ -497,7 +517,7 @@ function countConfig(
     commentLines,
     docBlocks: 0,
     inlineComments: commentLines,
-    runs: [],
+    runs: runs.runs().map((run) => ({ ...run, placement: null })),
   }
 }
 
