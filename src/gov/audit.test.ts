@@ -141,6 +141,41 @@ describe('measureRule', () => {
   })
 })
 
+describe('measureRule directive cap', () => {
+  const pointer = '- Load the `canon:code-craft` skill before writing.'
+
+  function cap(body: string) {
+    return measureRule(rule(body)).directivesOverCap
+  }
+
+  it('should report a pointer with six other bullets', () => {
+    expect(cap(['## A', pointer, bullets(6)].join('\n'))).toEqual({
+      count: 6,
+      max: 5,
+    })
+  })
+
+  it('should pass a pointer with five other bullets', () => {
+    expect(cap(['## A', pointer, bullets(5)].join('\n'))).toBeUndefined()
+  })
+
+  it('should never report a rule with no pointer', () => {
+    expect(cap(['## A', bullets(9)].join('\n'))).toBeUndefined()
+  })
+
+  it('should exclude every pointer bullet from the count', () => {
+    const second = '- Load `canon:api-design` before shaping.'
+    expect(
+      cap(['## A', pointer, second, bullets(5)].join('\n')),
+    ).toBeUndefined()
+  })
+
+  it('should keep the cap out of the gating findings', () => {
+    const shape = measureRule(rule(['## A', pointer, bullets(6)].join('\n')))
+    expect(shape.findings).toEqual([])
+  })
+})
+
 describe('readRuleAudit in a canon checkout', () => {
   const practice = join('governance', 'rules', 'lang', 'go.md')
   const ledger = join('governance', 'ledger', 'lang', 'go.md')

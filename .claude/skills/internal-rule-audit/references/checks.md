@@ -43,7 +43,7 @@ Two surfaces a target receives stating one instruction means one goes. A surface
 
 A directive beside the pointer states what must not go wrong rather than restating the standard's structure. `canon/context/surfaces/governance.md` caps directives beside a pointer at five.
 
-- **Source:** the standard the rule points at, read with `bun src/cli.ts standards <name>`.
+- **Source:** the standard the rule points at, read from the owning skill's `references/`, the files `gov restated` reads.
 - **Fails toward:** keep with the restated directives to cut. A rule whose every directive restates its standard retires to the pointer alone, which reads as keep when the pointer still earns the load.
 
 ## 5. Pointer at a self-triggering skill

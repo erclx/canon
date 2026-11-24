@@ -17,6 +17,13 @@ export const RULE_LIMITS = {
   sentences: 2,
 } as const
 
+/**
+ * `create-rule`'s `references/rule.md` caps the directives beside a skill
+ * pointer at five. It is a judgment about a rule's shape, so it reports and
+ * never joins `findings`, which `--gate` reads.
+ */
+export const DIRECTIVE_CAP = 5
+
 export type RuleLimit = keyof typeof RULE_LIMITS | 'emphasis'
 
 /**
@@ -102,6 +109,8 @@ export interface RuleShape {
   /** The most bullets under one H2, with the text above the first H2 a group. */
   readonly perH2: number
   readonly findings: readonly ShapeFinding[]
+  /** Set when a rule carrying a skill pointer holds more directives than the cap, never gating. */
+  readonly directivesOverCap?: { readonly count: number; readonly max: number }
   /** Bullets per H2 heading, `null` for the group above the first one. */
   readonly groups: readonly HeadingCount[]
 }
@@ -159,6 +168,7 @@ export type RuleAuditReport =
 const FRONTMATTER = /^---\n[\s\S]*?\n---\n/
 const FENCE = /^\s*(?:```|~~~)/
 const H2 = /^## /
+const POINTER = /\b(?:[Ll]oad|[Ff]ollow)\b.*`canon:[\w-]+`/
 
 /**
  * Case-sensitive on the capitals, since "Never" opening a directive is plain
@@ -272,12 +282,20 @@ export function measureRule(text: string): RuleShape {
     }
   }
 
+  const pointers = bullets.filter((bullet) => POINTER.test(bullet.text))
+  const directives = bullets.length - pointers.length
+  const directivesOverCap =
+    pointers.length > 0 && directives > DIRECTIVE_CAP
+      ? { count: directives, max: DIRECTIVE_CAP }
+      : undefined
+
   return {
     words,
     bullets: bullets.length,
     h2,
     perH2,
     findings,
+    ...(directivesOverCap === undefined ? {} : { directivesOverCap }),
     groups: groups.filter((group) => group.count > 0),
   }
 }

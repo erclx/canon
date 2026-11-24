@@ -632,6 +632,8 @@ export function register(program: Command): void {
         `  perH2      ${RULE_LIMITS.perH2} bullets under one H2, the text above the first H2 a group`,
         `  chars      ${RULE_LIMITS.chars} characters in one bullet, continuation lines folded in`,
         `  sentences  ${RULE_LIMITS.sentences} sentences in one bullet`,
+        '  directives-over-cap  more than five bullets beside a `canon:` skill pointer,',
+        '             reported and never gating',
         '  emphasis   any CRITICAL, IMPORTANT, MUST, ALWAYS, NEVER, or "you must"',
         '             outside a code span',
         '',
@@ -784,6 +786,21 @@ function reportAudit(
         )
       }
     }
+  }
+
+  const capped = report.rules.filter(
+    (reading) => reading.directivesOverCap !== undefined,
+  )
+  logStep('Directives beside a pointer')
+  if (capped.length === 0) {
+    logInfo('no rule carrying a skill pointer holds more than the cap')
+  }
+  for (const reading of capped) {
+    const over = reading.directivesOverCap
+    if (over === undefined) continue
+    logWarn(
+      `${reading.file}: directives-over-cap ${over.count} past ${over.max}, reported and never gating`,
+    )
   }
 
   logStep('Ledgers')
