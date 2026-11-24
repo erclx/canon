@@ -87,9 +87,20 @@ The state and the remote a run touches sit outside the repository.
 - Issues on that remote survive the reset, so a scenario filing them closes only a label it owns
 - `canon sandbox check --help` owns the verb flags and the verdict states, and the `expect.toml` files under `sandbox/` show every key
 
+## The `expect.toml` format
+
+An optional top-level `purpose` states what the arm proves, and an optional `why` states what one assertion guards. `canon sandbox check` prints `purpose` above the results and a `why` beneath its failure only.
+
+- A `[[content]]` table takes `why` as a key
+- Every other array takes an inline table beside a bare string, `{ path = "...", why = "..." }` or `{ text = "...", why = "..." }` in `reply`
+- An inline table missing `path` or `text` throws, where a bare non-string is dropped
+- A `why` or `purpose` carrying a date, hash, or issue number is refused through `HISTORY_PATTERNS`
+- The summary counts assertions with no `why` beside the unchecked count and never gates on it
+
+A bare key written below a `[[content]]` header joins that table and asserts nothing, so the parser throws on one. A green `bun run check` does not prove a file parses.
+
 ## Gotchas
 
-- A green `bun run check` does not prove an `expect.toml` parses, and a bare key under a `[[content]]` header joins that table and never asserts
 - `canon sandbox check` mints a fresh run id and asserts nothing on a multi-arm scenario without an arm, so name the arm and pin `CANON_SANDBOX_DIR` outside `~/.claude/`, where every `Write` is refused
 - A run serves toolkit-only verbs to the driven session, which a consumer's install refuses, so an arm calling one passes on behavior no consumer gets
 - A skill with a decline guard declines in a cold sandbox, which holds nothing git does not, so the arm's prompt states the reasoning to record as `claude:session-compact` does
