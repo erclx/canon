@@ -40,14 +40,14 @@ describe('readAppTable', () => {
     it('should read each table from app.toml', () => {
       expect(valueOf(readAppTable(root, 'drive'))).toEqual({
         launch: 'bun run build && bun run preview',
-        data: 'test/fixtures/boards/basic',
+        data: 'test/fixtures/boards/sample',
         personas: ['a developer in the browser'],
-        access: '/api/access/open',
+        access: '/api/open',
       })
       expect(valueOf(readAppTable(root, 'preview'))).toEqual({
-        writes: ['test/fixtures/boards/basic'],
-        keep: ['test/fixtures/boards/basic/.run'],
-        seed: ['bun', 'scripts/drive-seed.ts'],
+        writes: ['test/fixtures/boards/sample'],
+        keep: ['test/fixtures/boards/sample/.run'],
+        seed: ['bun', 'scripts/seed.ts'],
       })
       expect(valueOf(readAppTable(root, 'health'))).toEqual({
         paths: ['/api/health'],

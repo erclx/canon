@@ -1,13 +1,13 @@
 [drive]
 launch = "bun run build && bun run preview"
-data = "test/fixtures/boards/basic"
+data = "test/fixtures/boards/sample"
 personas = ["a developer in the browser"]
-access = "/api/access/open"
+access = "/api/open"
 
 [preview]
-writes = ["test/fixtures/boards/basic"]
-keep = ["test/fixtures/boards/basic/.run"]
-seed = ["bun", "scripts/drive-seed.ts"]
+writes = ["test/fixtures/boards/sample"]
+keep = ["test/fixtures/boards/sample/.run"]
+seed = ["bun", "scripts/seed.ts"]
 
 [health]
 paths = ["/api/health"]
