@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.119.0](https://github.com/erclx/canon/compare/v5.118.0...v5.119.0) (2026-11-24)
+
+
+### Features
+
+* **comments:** widen comment rules and scan to config files ([#3482](https://github.com/erclx/canon/issues/3482)) ([09bf0dd](https://github.com/erclx/canon/commit/09bf0dd74f9c76236ad8495ec3c3ddfcb8b16011))
+* **governance:** load the dependencies rule on Go and PHP files ([#3479](https://github.com/erclx/canon/issues/3479)) ([e154822](https://github.com/erclx/canon/commit/e154822ca86b5f1b65b46a1f708beda256a539b7))
+* **hooks:** refuse an unread write onto another session's plan ([#3478](https://github.com/erclx/canon/issues/3478)) ([936efec](https://github.com/erclx/canon/commit/936efec2e0d813d827c8207dc4fe65c48532a15a))
+* **tasks:** refuse low effort on opus and sonnet at launch ([#3476](https://github.com/erclx/canon/issues/3476)) ([b78f1c1](https://github.com/erclx/canon/commit/b78f1c189012032fc68d37395a0fc1750602e62b))
+
+
+### Bug Fixes
+
+* **tooling:** select TID so the python stack bans relative imports ([#3477](https://github.com/erclx/canon/issues/3477)) ([90a6a37](https://github.com/erclx/canon/commit/90a6a37b92328cb42b09ca00135980a6bb9eff38))
+
 ## [5.118.0](https://github.com/erclx/canon/compare/v5.117.0...v5.118.0) (2026-11-24)
 
 
