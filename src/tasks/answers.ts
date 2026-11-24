@@ -28,20 +28,13 @@ const SUGGESTED_PREFIX = '- Suggested:'
 const ANSWER_PREFIX = '- Answer:'
 const APPROVED_PREFIX = 'Approved:'
 
-/** Where a board opts into refusing a plan that carries no approval line. */
-export const TASKS_CONFIG_REL = join('canon', 'config', 'tasks.toml')
-
 /** The refusals resolving a reference can return, which every plan verb shares. */
 export const RESOLVE_REFUSALS = ['no-plan', 'archived', 'bad-input'] as const
 
 export type ResolveRefusal = (typeof RESOLVE_REFUSALS)[number]
 
-/** The gate adds its own two, which a verb only resolving a plan never returns. */
-export const ANSWER_REFUSALS = [
-  ...RESOLVE_REFUSALS,
-  'unapproved',
-  'bad-config',
-] as const
+/** The refusals the gate returns, which are a resolve's alone. */
+export const ANSWER_REFUSALS = RESOLVE_REFUSALS
 
 export type AnswerRefusal = (typeof ANSWER_REFUSALS)[number]
 
@@ -202,43 +195,6 @@ export function readApproval(text: string): string | null {
   return null
 }
 
-type ApprovalRequirement =
-  | { readonly ok: true; readonly required: boolean }
-  | AnswersRefused<'bad-config'>
-
-/**
- * An absent file or key keeps blank-means-accept dispatch. A key in any other
- * shape refuses rather than falling back, since a board that meant to opt in
- * would otherwise launch every unapproved plan without a word.
- */
-async function readApprovalRequirement(
-  root: string,
-): Promise<ApprovalRequirement> {
-  const path = join(root, TASKS_CONFIG_REL)
-  if (!existsSync(path)) return { ok: true, required: false }
-
-  let table: Record<string, unknown>
-  try {
-    table = Bun.TOML.parse(await readFile(path, 'utf8')) as Record<
-      string,
-      unknown
-    >
-  } catch {
-    return refuse('bad-config', `${TASKS_CONFIG_REL} is not valid TOML.`)
-  }
-
-  const value = table.require_approval
-  if (value === undefined) return { ok: true, required: false }
-  if (typeof value !== 'boolean') {
-    return refuse(
-      'bad-config',
-      `${TASKS_CONFIG_REL} needs require_approval as true or false.`,
-    )
-  }
-
-  return { ok: true, required: value }
-}
-
 /**
  * Resolves a caller's reference to a live plan, refusing an empty reference, a
  * reference that names no file, and one in the plans archive. `planAnswers` and
@@ -287,20 +243,8 @@ export async function planAnswers(
   const resolved = resolvePlanReference(root, reference)
   if (!resolved.ok) return resolved
 
-  const [text, requirement] = await Promise.all([
-    readFile(resolved.path, 'utf8'),
-    readApprovalRequirement(root),
-  ])
-  if (!requirement.ok) return requirement
-
+  const text = await readFile(resolved.path, 'utf8')
   const approved = readApproval(text)
-  if (requirement.required && approved === null) {
-    return refuse(
-      'unapproved',
-      `${resolved.plan} carries no Approved: line, and ${TASKS_CONFIG_REL} sets require_approval, so the operator has not approved it.`,
-      [reference],
-    )
-  }
 
   const sections = splitPlanSections(text)
   const calls = operatorCalls(sections.get('Questions') ?? [])
