@@ -69,6 +69,18 @@ function everyKeyPath(spec: TableSpec, prefix = ''): string[] {
   })
 }
 
+/** The text under `heading`, up to the next heading of the same or a higher level. */
+function sectionOf(text: string, heading: string): string {
+  const start = text.indexOf(`${heading}\n`)
+  if (start === -1) return ''
+  const level = heading.split(' ')[0] ?? ''
+  const rest = text.slice(start)
+  const next = rest
+    .slice(heading.length)
+    .search(new RegExp(`\\n#{1,${level.length}} `))
+  return next === -1 ? rest : rest.slice(0, heading.length + next)
+}
+
 let root: string
 
 beforeEach(() => {
@@ -127,10 +139,14 @@ describe('the commented starters', () => {
         join(REPO, 'docs', 'agents', 'config.md'),
         'utf8',
       )
-      const section = page.slice(page.indexOf(`## ${spec.name}`))
+      const file = sectionOf(page, `## ${spec.name}`)
       const missing = everyKeyPath(spec.root).filter((path) => {
         const key = path.split('.').at(-1) ?? ''
-        return !(section.includes(`\`${key}\``) || section.includes(`[${path}`))
+        const table = path.split('.')[0] ?? ''
+        const own = file.includes(`### [${table}]`)
+          ? sectionOf(file, `### [${table}]`)
+          : file
+        return !(own.includes(`\`${key}\``) || own.includes(`[${path}`))
       })
 
       expect(page).toContain(`## ${spec.name}`)
