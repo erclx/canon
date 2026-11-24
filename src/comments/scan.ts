@@ -5,14 +5,15 @@ import { pythonComments } from '@/code/python'
 import { type Placement, placementReader } from '@/comments/placement'
 import { listIgnored } from '@/git/ignore'
 
-export type Language = 'ts' | 'sh' | 'py'
+export type Language = 'ts' | 'sh' | 'py' | 'config'
 
-export const LANGUAGES: readonly Language[] = ['ts', 'sh', 'py']
+export const LANGUAGES: readonly Language[] = ['ts', 'sh', 'py', 'config']
 
 const EXTENSIONS: Record<Language, readonly string[]> = {
   ts: ['.ts', '.tsx'],
   sh: ['.sh'],
   py: ['.py'],
+  config: ['.yml', '.yaml', '.toml'],
 }
 
 /**
@@ -469,6 +470,37 @@ function countPython(
   }
 }
 
+/**
+ * Reads `#` comments for the vocabulary and history matchers only. Runs stay
+ * empty and no text counts, since the block and share caps govern code and a
+ * config file's comments are read key by key.
+ */
+function countConfig(
+  file: SourceFile,
+  matchers: readonly { term: string; pattern: RegExp }[],
+  hits: DegradationHit[],
+): FileCount {
+  const lines = splitLines(file.text)
+  let commentLines = 0
+
+  for (const [index, line] of lines.entries()) {
+    const trimmed = line.trim()
+    if (!trimmed.startsWith('#')) continue
+    commentLines++
+    sweep(trimmed, file.path, index + 1, matchers, hits)
+  }
+
+  return {
+    lines: lines.length,
+    nonBlankLines: nonBlank(lines),
+    textLines: 0,
+    commentLines,
+    docBlocks: 0,
+    inlineComments: commentLines,
+    runs: [],
+  }
+}
+
 function capped(run: Run & { readonly file: string }): CappedRun {
   return {
     file: run.file,
@@ -485,7 +517,12 @@ const COUNTERS: Record<
     matchers: readonly { term: string; pattern: RegExp }[],
     hits: DegradationHit[],
   ) => FileCount
-> = { ts: countTypeScript, sh: countBash, py: countPython }
+> = {
+  ts: countTypeScript,
+  sh: countBash,
+  py: countPython,
+  config: countConfig,
+}
 
 export function countFile(
   file: SourceFile,

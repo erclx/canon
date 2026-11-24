@@ -267,7 +267,7 @@ describe('canon comments scan python', () => {
   )
 
   it(
-    'should read py in the default language set',
+    'should read py and config in the default language set',
     async () => {
       const record = (await scan(TREE)) as unknown as {
         snapshot: { language: string }[]
@@ -277,6 +277,7 @@ describe('canon comments scan python', () => {
         'ts',
         'sh',
         'py',
+        'config',
       ])
     },
     RUN_TIMEOUT_MS,

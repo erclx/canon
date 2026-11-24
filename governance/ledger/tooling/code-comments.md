@@ -5,7 +5,7 @@ description: Sources for governance/rules/tooling/code-comments.md, one row per 
 
 # Code comments rule ledger
 
-The field is software engineering practice for source comments, which has no spec. The authorities are the published style guides of large codebases, here Google's guides for Python, C++, TypeScript, JavaScript, and shell, read as practice from one large codebase rather than as a settlement of the field.
+CI workflows and action files load this rule beside `config-comments`, since their `if:` conditions and steps are logic a comment explains. The field is software engineering practice for source comments, which has no spec. The authorities are the published style guides of large codebases, here Google's guides for Python, C++, TypeScript, JavaScript, and shell, read as practice from one large codebase rather than as a settlement of the field.
 
 ## When a comment should exist
 
