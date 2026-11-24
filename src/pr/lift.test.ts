@@ -278,7 +278,10 @@ describe('lift', () => {
     it('should stay ready on a test-only push after a UI close', async () => {
       const { api, calls } = makeApi({
         ...ready,
-        evidence: { hasDrivableBox: true, reelHead: MOVED },
+        evidence: {
+          hasDrivableBox: true,
+          reels: [{ width: 1280, head: MOVED }],
+        },
         reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
         changed: { isAncestor: true, paths: ['src/App.test.tsx'] },
       })
@@ -551,7 +554,7 @@ describe('lift', () => {
 
   describe('both closes across a rebase', () => {
     const rebasedFrom = {
-      evidence: { hasDrivableBox: true, reelHead: HEAD },
+      evidence: { hasDrivableBox: true, reels: [{ width: 1280, head: HEAD }] },
       reviews: [CODE_CLOSED_AT_MOVED, UI_CLOSED_AT_MOVED],
       changed: { isAncestor: false, paths: [] },
     }
@@ -668,7 +671,12 @@ describe('lift', () => {
       ['standing-stale', { standing: 'stale' }],
       [
         'reel-unsettled',
-        { evidence: { hasDrivableBox: true, reelHead: MOVED } },
+        {
+          evidence: {
+            hasDrivableBox: true,
+            reels: [{ width: 1280, head: MOVED }],
+          },
+        },
       ],
     ] as const)(
       'should still refuse %s on a carried rebase',
@@ -764,7 +772,10 @@ describe('lift', () => {
       const { api } = makeApi({
         ...mergedFrom,
         reviews: [CODE_CLOSED_AT_MOVED, UI_CLOSED_AT_MOVED],
-        evidence: { hasDrivableBox: true, reelHead: HEAD },
+        evidence: {
+          hasDrivableBox: true,
+          reels: [{ width: 1280, head: HEAD }],
+        },
         unmerged: [],
         rebased: { differingPaths: [] },
       })
@@ -813,7 +824,10 @@ describe('lift', () => {
 
   describe('UI gate', () => {
     // A reel at the head settles the evidence reel half, isolating the UI gate.
-    const withDrivable = { hasDrivableBox: true, reelHead: HEAD }
+    const withDrivable = {
+      hasDrivableBox: true,
+      reels: [{ width: 1280, head: HEAD }],
+    }
 
     it('should still refuse ui-open when the checklist holds no drivable box', async () => {
       const { api } = makeApi({
@@ -1289,7 +1303,10 @@ describe('lift', () => {
 
       it('should clear the list with a reel filmed at the head', async () => {
         const { api } = makeApi({
-          evidence: { uncaptured: ['src/b.tsx'], reelHead: HEAD.slice(0, 7) },
+          evidence: {
+            uncaptured: ['src/b.tsx'],
+            reels: [{ width: 1280, head: HEAD.slice(0, 7) }],
+          },
         })
 
         const record = await lift(api, { isCheck: false, waitSeconds: 60 })
@@ -1299,7 +1316,10 @@ describe('lift', () => {
 
       it('should not clear the list with a reel filmed before a push to a painted path', async () => {
         const { api } = makeApi({
-          evidence: { uncaptured: ['src/b.tsx'], reelHead: MOVED },
+          evidence: {
+            uncaptured: ['src/b.tsx'],
+            reels: [{ width: 1280, head: MOVED }],
+          },
           changed: { isAncestor: true, paths: ['src/b.tsx'] },
         })
 
@@ -1317,7 +1337,7 @@ describe('lift', () => {
         }
         const filmedEarlier = {
           uncaptured: ['src/take/film.ts'],
-          reelHead: MOVED,
+          reels: [{ width: 1280, head: MOVED }],
         }
 
         it('should clear the list across a push to a source path the reel does not read, naming where it was filmed', async () => {
@@ -1458,6 +1478,7 @@ describe('lift', () => {
           gate: 'evidence',
           isOk: false,
           reason: 'reel-unsettled',
+          reelWidths: [1280],
         })
         expect(calls.marks).toEqual([])
       })
@@ -1503,7 +1524,7 @@ describe('lift', () => {
         const { api } = makeApi({
           evidence: {
             ...drivable,
-            reelHead: HEAD.slice(0, 7),
+            reels: [{ width: 1280, head: HEAD.slice(0, 7) }],
             reelSkip: 'not-filmed',
           },
           reviews: [CODE_CLOSED, UI_CLOSED],
@@ -1519,14 +1540,18 @@ describe('lift', () => {
         const settling = makeApi({
           evidence: {
             ...drivable,
-            reelHead: MOVED,
+            reels: [{ width: 1280, head: MOVED }],
             reelSkip: 'no-visible-change',
           },
           reviews: [CODE_CLOSED, UI_CLOSED],
           changed: { isAncestor: true, paths: ['src/App.tsx'] },
         })
         const unsettled = makeApi({
-          evidence: { ...drivable, reelHead: MOVED, reelSkip: 'wrong-state' },
+          evidence: {
+            ...drivable,
+            reels: [{ width: 1280, head: MOVED }],
+            reelSkip: 'wrong-state',
+          },
           reviews: [CODE_CLOSED, UI_CLOSED],
           changed: { isAncestor: true, paths: ['src/App.tsx'] },
         })
@@ -1546,7 +1571,7 @@ describe('lift', () => {
 
       it('should carry a reel across a push no box can observe, naming where it was filmed', async () => {
         const { api } = makeApi({
-          evidence: { ...drivable, reelHead: MOVED },
+          evidence: { ...drivable, reels: [{ width: 1280, head: MOVED }] },
           reviews: [CODE_CLOSED, UI_CLOSED],
           changed: { isAncestor: true, paths: ['src/App.test.tsx'] },
         })
@@ -1570,7 +1595,7 @@ describe('lift', () => {
         ['a failed read', null],
       ] as const)('should not carry a reel across %s', async (_, changed) => {
         const { api } = makeApi({
-          evidence: { ...drivable, reelHead: MOVED },
+          evidence: { ...drivable, reels: [{ width: 1280, head: MOVED }] },
           reviews: [CODE_CLOSED, UI_CLOSED],
           changed,
         })
@@ -1582,7 +1607,7 @@ describe('lift', () => {
 
       it('should name the head a trailing reel was filmed at on a reel-unsettled refusal', async () => {
         const { api } = makeApi({
-          evidence: { ...drivable, reelHead: MOVED },
+          evidence: { ...drivable, reels: [{ width: 1280, head: MOVED }] },
           reviews: [CODE_CLOSED, UI_CLOSED],
           changed: { isAncestor: true, paths: ['src/App.tsx'] },
         })
@@ -1594,6 +1619,161 @@ describe('lift', () => {
           isOk: false,
           reason: 'reel-unsettled',
           reelHead: MOVED,
+          reelWidths: [1280],
+        })
+      })
+
+      describe('at several widths', () => {
+        const twoWidths = { ...drivable, owedWidths: [390, 1280] }
+
+        it('should refuse reel-unsettled naming the width no reel covers', async () => {
+          const { api } = makeApi({
+            evidence: {
+              ...twoWidths,
+              reels: [{ width: 1280, head: HEAD.slice(0, 7) }],
+            },
+            reviews: [CODE_CLOSED, UI_CLOSED],
+          })
+
+          const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+          expect(evidenceEntry(record)).toEqual({
+            gate: 'evidence',
+            isOk: false,
+            reason: 'reel-unsettled',
+            reelWidths: [390],
+          })
+        })
+
+        it('should settle once the uncovered width carries a skip no builder can change', async () => {
+          const { api } = makeApi({
+            evidence: {
+              ...twoWidths,
+              reels: [{ width: 1280, head: HEAD.slice(0, 7) }],
+              reelSkips: new Map([[390, 'no-visible-change']]),
+            },
+            reviews: [CODE_CLOSED, UI_CLOSED],
+          })
+
+          const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+          expect(record.reason).toBe('lifted')
+          expect(evidenceEntry(record)).toEqual({
+            gate: 'evidence',
+            isOk: true,
+            reelSkip: 'no-visible-change',
+          })
+        })
+
+        it('should refuse both widths on a bare deferred skip, beside a waiver it ignores', async () => {
+          const { api } = makeApi({
+            evidence: { ...twoWidths, reelSkip: 'deferred: behind #1' },
+            reviews: [CODE_CLOSED, reelWaiver('hover-only tooltip')],
+          })
+
+          const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+          expect(evidenceEntry(record)).toEqual({
+            gate: 'evidence',
+            isOk: false,
+            reason: 'reel-unsettled',
+            reelSkip: 'deferred: behind #1',
+            reelWidths: [390, 1280],
+            reelWaiverRefused: 'hover-only tooltip',
+          })
+        })
+
+        it('should let a width skip govern its width over the bare skip', async () => {
+          const { api } = makeApi({
+            evidence: {
+              ...twoWidths,
+              reelSkip: 'deferred: behind #1',
+              reelSkips: new Map([[390, 'no-visible-change']]),
+            },
+            reviews: [CODE_CLOSED, UI_CLOSED],
+          })
+
+          const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+          expect(evidenceEntry(record)).toMatchObject({
+            reason: 'reel-unsettled',
+            reelWidths: [1280],
+          })
+        })
+
+        it('should judge each width on its own carry', async () => {
+          const { api } = makeApi({
+            evidence: {
+              ...twoWidths,
+              reels: [
+                { width: 390, head: MOVED },
+                { width: 1280, head: HEAD.slice(0, 7) },
+              ],
+            },
+            reviews: [CODE_CLOSED, UI_CLOSED],
+            changed: { isAncestor: true, paths: ['src/App.test.tsx'] },
+          })
+
+          const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+          expect(record.reason).toBe('lifted')
+          expect(evidenceEntry(record)).toEqual({
+            gate: 'evidence',
+            isOk: true,
+            reelCarriedFrom: MOVED,
+          })
+        })
+
+        it('should owe a width an earlier reel at another width does not settle', async () => {
+          const { api } = makeApi({
+            evidence: {
+              ...twoWidths,
+              reels: [
+                { width: 390, head: MOVED },
+                { width: 1280, head: HEAD.slice(0, 7) },
+              ],
+            },
+            reviews: [CODE_CLOSED, UI_CLOSED],
+            changed: { isAncestor: true, paths: ['src/App.tsx'] },
+          })
+
+          const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+          expect(evidenceEntry(record)).toEqual({
+            gate: 'evidence',
+            isOk: false,
+            reason: 'reel-unsettled',
+            reelHead: MOVED,
+            reelWidths: [390],
+          })
+        })
+
+        it('should read a reel posted before reels carried a width as settling 1280 alone', async () => {
+          const { api } = makeApi({
+            evidence: {
+              ...twoWidths,
+              reels: [{ width: 1280, head: HEAD.slice(0, 7) }],
+            },
+            reviews: [CODE_CLOSED, UI_CLOSED],
+          })
+          const legacy = makeApi({
+            evidence: {
+              ...drivable,
+              reels: [{ width: 1280, head: HEAD.slice(0, 7) }],
+            },
+            reviews: [CODE_CLOSED, UI_CLOSED],
+          })
+
+          const twoOwed = await lift(api, { isCheck: true, waitSeconds: 60 })
+          const oneOwed = await lift(legacy.api, {
+            isCheck: true,
+            waitSeconds: 60,
+          })
+
+          expect([twoOwed.reason, oneOwed.reason]).toEqual([
+            'reel-unsettled',
+            'clear',
+          ])
         })
       })
 
@@ -1654,6 +1834,7 @@ describe('lift', () => {
             isOk: false,
             reason: 'reel-unsettled',
             reelSkip,
+            reelWidths: [1280],
             reelWaiverRefused: 'hover-only tooltip',
           })
           expect(calls.marks).toEqual([])
@@ -1680,7 +1861,7 @@ describe('lift', () => {
         const { api } = makeApi({
           evidence: {
             ...drivable,
-            reelHead: HEAD.slice(0, 7),
+            reels: [{ width: 1280, head: HEAD.slice(0, 7) }],
             reelSkip: 'target-missing: beat 1',
           },
           reviews: [CODE_CLOSED, reelWaiver('hover-only tooltip')],
