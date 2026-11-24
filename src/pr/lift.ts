@@ -154,9 +154,8 @@ export const SETTLING_REEL_SKIPS: readonly string[] = [
 ]
 
 /**
- * Reel skips no waiver settles, since a builder clears each target refusal
- * with a selector, a setup step, `through`, or the seed, and `no-server` by
- * starting the worktree's server.
+ * Reel skips no waiver settles, since a builder clears each, bar `deferred`,
+ * which ends on the controller's ask once the merge order reaches it.
  */
 export const UNWAIVABLE_REEL_SKIPS: readonly string[] = [
   'target-missing',
@@ -164,6 +163,7 @@ export const UNWAIVABLE_REEL_SKIPS: readonly string[] = [
   'target-covered',
   'target-ambiguous',
   'no-server',
+  'deferred',
 ]
 
 /** The reason code a skip line opens with, the text before its first colon. */

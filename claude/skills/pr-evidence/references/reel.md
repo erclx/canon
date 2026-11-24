@@ -35,7 +35,7 @@ No operator is present, so the run is unattended end to end.
 A pull request that overlaps another open one films its reel once, at the head it merges from, rather than once per rebase. The controller defers the reel when the poll reports the overlap, and asks for it once the pull request is next in merge order and rebased.
 
 - While the controller's deferral stands, skip as `deferred: behind #<number>`, naming the pull request it waits behind, and film nothing
-- The lift reads `deferred` as unsettled, so the mark holds until the reel at the head lands
+- The lift reads `deferred` as a skip no waiver settles, so the mark holds until the reel at the head lands
 - On the controller's ask, film as this file states at the rebased head
 
 ## With no server to film
