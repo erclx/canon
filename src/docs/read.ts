@@ -28,8 +28,10 @@ export interface ResolvedTopic {
  */
 export function resolveTopic(
   root: string,
-  topic: string,
+  rawTopic: string,
 ): ResolvedTopic | undefined {
+  const topic = rawTopic.replace(/\/+$/, '')
+
   for (const dir of ROOTS) {
     const candidates = [
       join(dir, `${topic}.md`),
@@ -50,15 +52,16 @@ export function resolveTopic(
 }
 
 /**
- * Names every sub-area file called `<topic>.md` in the first root whose folders
- * carry one. A name carried by more than one folder resolves to none, since
- * picking whichever sorts first is a confident wrong answer.
+ * Names every sub-area entry called `<topic>` in the first root offering one.
+ * A name carried by more than one folder resolves to none, since picking
+ * whichever sorts first is a confident wrong answer.
  */
 function findLeaves(root: string, topic: string): string[] {
   for (const dir of ROOTS) {
-    const matches = catalogedFolders(join(root, dir))
-      .map((folder) => join(dir, folder, `${topic}.md`))
-      .filter((rel) => existsSync(join(root, rel)))
+    const matches = walkEntries(root, dir)
+      .filter((entry) => entry.name === topic)
+      .filter((entry) => entry.kind === 'leaf' || entry.parent !== undefined)
+      .map((entry) => entry.rel)
 
     if (matches.length > 0) return matches
   }
@@ -116,9 +119,9 @@ export function listTopics(root: string): string[] {
 }
 
 /**
- * How an entry is named. A `file` is a sibling `<name>.md`, a `folder` is a
- * split domain named by its folder and carried by its `index.md`, and a `leaf`
- * is a sub-area file one level down, named by its bare filename.
+ * A `file` is a sibling `<name>.md`, a `folder` is a split domain carried by
+ * its `index.md`, and a `leaf` is a sub-area file named by its bare filename,
+ * or `<folder>/<leaf>` inside a folder nested under a `parent`.
  */
 export type EntryKind = 'file' | 'folder' | 'leaf'
 
@@ -127,6 +130,8 @@ export interface WalkedEntry {
   readonly kind: EntryKind
   /** The path under the project root, which is the catalog's `target`. */
   readonly rel: string
+  /** The cataloged folder holding a nested folder, absent at the top level. */
+  readonly parent?: string
 }
 
 /**
@@ -156,8 +161,25 @@ export function walkEntries(root: string, dir: string): WalkedEntry[] {
       rel: join(dir, folder, `${name}.md`),
     })),
   )
+  const nested = folders.flatMap((folder) => walkNested(dir, cwd, folder))
 
-  return [...files, ...split, ...leaves]
+  return [...files, ...split, ...leaves, ...nested]
+}
+
+function walkNested(dir: string, cwd: string, parent: string): WalkedEntry[] {
+  return catalogedFolders(join(cwd, parent)).flatMap((folder) => [
+    {
+      name: folder,
+      kind: 'folder' as const,
+      rel: join(dir, parent, folder, `${INDEX_TOPIC}.md`),
+      parent,
+    },
+    ...markdownNames(join(cwd, parent, folder)).map((name): WalkedEntry => ({
+      name: `${folder}/${name}`,
+      kind: 'leaf',
+      rel: join(dir, parent, folder, `${name}.md`),
+    })),
+  ])
 }
 
 function markdownNames(dir: string): string[] {

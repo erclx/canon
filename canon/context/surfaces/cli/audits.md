@@ -7,7 +7,7 @@ description: '`src/audits/`, `src/context/`, and `src/markdown/`, being the aggr
 
 ## Overview
 
-Owns the audit aggregate behind `canon audits run`, the context-folder audit, and the markdown audit. The layers they stand on are in `cli.md`.
+Owns the audit aggregate behind `canon audits run`, the context-folder audit, and the markdown audit. The layers they stand on are in `canon/context/surfaces/cli/overview.md`.
 
 ## Layout
 

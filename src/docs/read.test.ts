@@ -140,6 +140,65 @@ describe('resolveTopic', () => {
     expect(resolveTopic(ROOT, 'overview')).toBeUndefined()
   })
 
+  it('should resolve a nested entry by its folder and leaf name', () => {
+    writeDoc('canon/context/surfaces/index.md', '# Surfaces\n')
+    writeDoc('canon/context/surfaces/cli/index.md', '# CLI\n')
+    writeDoc('canon/context/surfaces/cli/sync.md', '# Sync\n')
+
+    expect(resolveTopic(ROOT, 'cli/sync')?.rel).toBe(
+      join('canon', 'context', 'surfaces', 'cli', 'sync.md'),
+    )
+  })
+
+  it('should resolve a nested folder to its index, with or without a trailing slash', () => {
+    writeDoc('canon/context/surfaces/index.md', '# Surfaces\n')
+    writeDoc('canon/context/surfaces/cli/index.md', '# CLI\n')
+    const rel = join('canon', 'context', 'surfaces', 'cli', 'index.md')
+
+    expect(resolveTopic(ROOT, 'cli')?.rel).toBe(rel)
+    expect(resolveTopic(ROOT, 'cli/')?.rel).toBe(rel)
+  })
+
+  it('should not resolve a nested leaf by its bare name', () => {
+    writeDoc('canon/context/surfaces/index.md', '# Surfaces\n')
+    writeDoc('canon/context/surfaces/cli/index.md', '# CLI\n')
+    writeDoc('canon/context/surfaces/cli/sync.md', '# Sync\n')
+
+    expect(resolveTopic(ROOT, 'sync')).toBeUndefined()
+  })
+
+  it('should leave a bare name carried by a docs leaf and a nested leaf on the docs leaf', () => {
+    writeDoc('docs/agents/index.md', '# Agents\n')
+    writeDoc('docs/agents/audits.md', '# From docs\n')
+    writeDoc('canon/context/surfaces/index.md', '# Surfaces\n')
+    writeDoc('canon/context/surfaces/cli/index.md', '# CLI\n')
+    writeDoc('canon/context/surfaces/cli/audits.md', '# Nested\n')
+
+    expect(resolveTopic(ROOT, 'audits')?.rel).toBe(
+      join('docs', 'agents', 'audits.md'),
+    )
+    expect(resolveTopic(ROOT, 'cli/audits')?.rel).toBe(
+      join('canon', 'context', 'surfaces', 'cli', 'audits.md'),
+    )
+  })
+
+  it('should not read a third level of nesting', () => {
+    writeDoc('canon/context/surfaces/index.md', '# Surfaces\n')
+    writeDoc('canon/context/surfaces/cli/index.md', '# CLI\n')
+    writeDoc('canon/context/surfaces/cli/deep/index.md', '# Deep\n')
+    writeDoc('canon/context/surfaces/cli/deep/leaf.md', '# Leaf\n')
+
+    expect(resolveTopic(ROOT, 'deep/leaf')).toBeUndefined()
+    expect(resolveTopic(ROOT, 'cli/deep/leaf')).toBeUndefined()
+  })
+
+  it('should leave a nested folder carrying no index out of reach', () => {
+    writeDoc('canon/context/surfaces/index.md', '# Surfaces\n')
+    writeDoc('canon/context/surfaces/headless/sync.md', '# Sync\n')
+
+    expect(resolveTopic(ROOT, 'headless/sync')).toBeUndefined()
+  })
+
   it('should not resolve a leaf inside a folder carrying no index', () => {
     writeDoc('canon/context/headless/skills.md', '# Skills\n')
 
@@ -238,6 +297,14 @@ describe('listTopics', () => {
     writeDoc('canon/context/features/indexes.md', 'd')
 
     expect(listTopics(ROOT)).toEqual(['agents', 'indexes', 'features'])
+  })
+
+  it('should list a nested folder and its entries by slash name', () => {
+    writeDoc('canon/context/surfaces/index.md', 'a')
+    writeDoc('canon/context/surfaces/cli/index.md', 'b')
+    writeDoc('canon/context/surfaces/cli/sync.md', 'c')
+
+    expect(listTopics(ROOT)).toEqual(['cli', 'cli/sync', 'surfaces'])
   })
 
   it('should omit a leaf name carried by two folders', () => {

@@ -95,6 +95,35 @@ describe('listDocs', () => {
     ])
   })
 
+  it('should list a nested context folder by its subtitle and leave its leaves out', () => {
+    writeDoc('canon/context/surfaces/index.md', 'subtitle: Surfaces')
+    writeDoc('canon/context/surfaces/cli/index.md', 'subtitle: CLI entries')
+    writeDoc('canon/context/surfaces/cli/sync.md', 'description: Sync')
+
+    expect(listDocs(ROOT).context).toEqual([
+      {
+        name: 'cli',
+        description: 'CLI entries',
+        category: '',
+        target: join('canon', 'context', 'surfaces', 'cli', 'index.md'),
+      },
+      {
+        name: 'surfaces',
+        description: 'Surfaces',
+        category: '',
+        target: join('canon', 'context', 'surfaces', 'index.md'),
+      },
+    ])
+  })
+
+  it('should leave out a nested folder under an internal context topic', () => {
+    writeDoc('canon/context/development/index.md', 'subtitle: Development')
+    writeDoc('canon/context/development/scripts/index.md', 'subtitle: Scripts')
+    writeDoc('canon/context/web.md', 'description: Landing page')
+
+    expect(listDocs(ROOT).context.map((entry) => entry.name)).toEqual(['web'])
+  })
+
   it('should return the value of a quoted description without the quotes', () => {
     writeDoc(
       'docs/quoted.md',

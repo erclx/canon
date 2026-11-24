@@ -17,13 +17,14 @@ Reference for an agent driving the `canon` CLI, in this repository or in any pro
 
 `canon docs list [--json]` lists the consumer docs, plus the per-domain context entries when the install carries `canon/context/`. A registry install carries `docs/` alone. A clone or a linked worktree carries both.
 
-`canon docs <topic>` prints one doc to stdout, and an unknown topic names the available ones on stderr and exits 1. Three spellings are tried in order, each across both roots before the next, with `docs/` ahead of `canon/context/`.
+`canon docs <topic>` prints one doc to stdout, and an unknown topic names the available ones on stderr and exits 1. Four spellings are tried in order, each across both roots before the next, with `docs/` ahead of `canon/context/`.
 
 - A sibling file, such as `docs/agents/indexes.md` for `indexes`
 - A folder of that name, which prints its generated `index.md`
 - A sub-area file one level down, such as `operating-model` reaching `docs/workflow/operating-model.md`
+- A folder inside a folder, or a file in one, written `<folder>/<leaf>`, such as `cli/sync`
 
-A bare name carried by two folders of one root resolves to neither and exits 1. Toolkit-internal topics resolve by name and stay off the list.
+A bare name carried by two folders of one root resolves to neither and exits 1, and the slash form is how to name a nested entry whose bare name another folder holds. Toolkit-internal topics resolve by name and stay off the list.
 
 ## Commands with no page
 

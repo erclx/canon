@@ -7,7 +7,7 @@ description: '`src/pr/`, `src/listeners/`, and `src/sessions/`, being the `canon
 
 ## Overview
 
-Owns `canon pr`, the port listener reads, and the live-session roster with the branch claim. The layers they stand on are in `cli.md`.
+Owns `canon pr`, the port listener reads, and the live-session roster with the branch claim. The layers they stand on are in `canon/context/surfaces/cli/overview.md`.
 
 ## Layout
 
