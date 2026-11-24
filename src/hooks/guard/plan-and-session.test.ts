@@ -1,4 +1,11 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
@@ -429,6 +436,293 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
     expect(result.code).toBe(0)
   })
 
+  // The owner is read off the decision log, so a test seeds the log line a planner's licensed write leaves.
+  const OWNER_AT = '2026-11-23T10:00:20Z'
+  const ownedBy = (
+    project: { root: string },
+    owner = 'planner_a',
+    plan = 'feature-old.md',
+  ): void => {
+    const dir = join(project.root, '.canon/tmp/hooks/plan-guard')
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(
+      join(dir, 'decisions.log'),
+      `${OWNER_AT} pass ${owner} ${plan} latest=2 spent=0 spent_plan=- lines=2\n`,
+    )
+  }
+  const readCall = (path: string, timestamp?: string): string =>
+    JSON.stringify({
+      message: {
+        content: [
+          { input: { file_path: path }, name: 'Read', type: 'tool_use' },
+        ],
+      },
+      ...(timestamp === undefined ? {} : { timestamp }),
+      type: 'assistant',
+    })
+  const oldPlan = (project: { root: string }): string =>
+    join(project.root, '.canon/plans/feature-old.md')
+
+  describe("another session's plan", () => {
+    it('should refuse an unread heredoc onto a plan another session licensed', async () => {
+      const project = planProject()
+      ownedBy(project)
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-old.md')),
+      )
+
+      expect(result.stderr).toContain('planner_a')
+      expect(result.stderr).toContain(OWNER_AT)
+      expect(result.stderr).toContain('Read the plan')
+      expect(result.code).toBe(2)
+    })
+
+    it.each([
+      ['at the owner time', '2026-11-23T10:00:20.000Z'],
+      ['after the owner time', '2026-11-23T10:05:00.512Z'],
+    ])('should pass once this session read the plan %s', async (_, stamp) => {
+      const project = planProject()
+      writeFileSync(
+        project.transcript,
+        `${OTHER_CALL}\n${readCall(oldPlan(project), stamp)}\n`,
+      )
+      ownedBy(project)
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-old.md')),
+      )
+
+      expect(result.stderr).toBe('')
+      expect(result.code).toBe(0)
+    })
+
+    it.each([
+      ['before the owner time', '2026-11-23T10:00:00.000Z'],
+      ['with no timestamp', undefined],
+    ])('should refuse a read stamped %s', async (_, stamp) => {
+      const project = planProject()
+      writeFileSync(
+        project.transcript,
+        `${OTHER_CALL}\n${readCall(oldPlan(project), stamp)}\n`,
+      )
+      ownedBy(project)
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-old.md')),
+      )
+
+      expect(result.code).toBe(2)
+    })
+
+    it('should refuse when the read names a different plan', async () => {
+      const project = planProject()
+      writeFileSync(
+        project.transcript,
+        `${OTHER_CALL}\n${readCall(join(project.root, '.canon/plans/feature-x.md'), '2026-11-23T11:00:00.000Z')}\n`,
+      )
+      ownedBy(project)
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-old.md')),
+      )
+
+      expect(result.code).toBe(2)
+    })
+
+    it('should pass the owner rewriting its own plan with no read', async () => {
+      const project = planProject()
+      ownedBy(project, 'plan_guard_session')
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-old.md')),
+      )
+
+      expect(result.code).toBe(0)
+    })
+
+    it('should judge ownership by the last pass line naming the plan', async () => {
+      const project = planProject()
+      ownedBy(project)
+      const log = join(
+        project.root,
+        '.canon/tmp/hooks/plan-guard/decisions.log',
+      )
+      writeFileSync(
+        log,
+        `${readFileSync(log, 'utf8')}2026-11-23T10:01:00Z pass plan_guard_session feature-old.md latest=4 spent=2 spent_plan=- lines=4\n2026-11-23T10:02:00Z amend planner_a feature-old.md owner=plan_guard_session owned_at=2026-11-23T10:01:00Z\n`,
+      )
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-old.md')),
+      )
+
+      expect(result.code).toBe(0)
+    })
+
+    it('should pass an existing plan no pass line names', async () => {
+      const project = planProject()
+      ownedBy(project, 'planner_a', 'feature-other.md')
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-old.md')),
+      )
+
+      expect(result.code).toBe(0)
+    })
+
+    it('should pass the main-root cp onto a plan this session licensed', async () => {
+      const project = planProject()
+      ownedBy(project, 'plan_guard_session')
+
+      const result = await run(
+        hook,
+        shellIn(
+          project,
+          'cp /wt/.canon/plans/feature-old.md .canon/plans/feature-old.md',
+        ),
+      )
+
+      expect(result.code).toBe(0)
+    })
+
+    it.each([
+      [
+        'an absolute main-root path',
+        (root: string) => heredoc(join(root, '.canon/plans/feature-old.md')),
+      ],
+      [
+        'a main-root variable',
+        () => heredoc('"$root/.canon/plans/feature-old.md"'),
+      ],
+    ])('should refuse an unread write naming %s', async (_, command) => {
+      const project = planProject()
+      ownedBy(project)
+
+      const result = await run(hook, shellIn(project, command(project.root)))
+
+      expect(result.code).toBe(2)
+    })
+
+    it('should pass a cp reading the owned plan as its source', async () => {
+      const project = planProject()
+      ownedBy(project)
+
+      const result = await run(
+        hook,
+        shellIn(project, 'cp .canon/plans/feature-old.md notes.md'),
+      )
+
+      expect(result.code).toBe(0)
+    })
+
+    it('should pass a write onto the same plan name in another plans folder', async () => {
+      const project = planProject()
+      ownedBy(project)
+      const other = join(
+        ctx.fixture,
+        `plan-guard-other-${tree.label.replace(/\W/g, '-')}`,
+      )
+      mkdirSync(join(other, '.canon/plans'), { recursive: true })
+      writeFileSync(join(other, '.canon/plans/feature-old.md'), '# Other\n')
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc(join(other, '.canon/plans/feature-old.md'))),
+      )
+
+      expect(result.code).toBe(0)
+    })
+
+    it('should refuse after a read of a same-named plan outside the main root', async () => {
+      const project = planProject()
+      const copy = join(project.root, '.claude/worktrees/wt/.canon/plans')
+      mkdirSync(copy, { recursive: true })
+      writeFileSync(join(copy, 'feature-old.md'), '# Copy\n')
+      writeFileSync(
+        project.transcript,
+        `${OTHER_CALL}\n${readCall(join(copy, 'feature-old.md'), '2026-11-23T11:00:00.000Z')}\n`,
+      )
+      ownedBy(project)
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-old.md')),
+      )
+
+      expect(result.code).toBe(2)
+    })
+
+    it('should pass after a read through a symlinked main root', async () => {
+      const project = planProject()
+      const link = join(
+        ctx.fixture,
+        `plan-guard-link-${tree.label.replace(/\W/g, '-')}`,
+      )
+      symlinkSync(project.root, link)
+      writeFileSync(
+        project.transcript,
+        `${OTHER_CALL}\n${readCall(join(link, '.canon/plans/feature-old.md'), '2026-11-23T11:00:00.000Z')}\n`,
+      )
+      ownedBy(project)
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-old.md')),
+      )
+
+      expect(result.code).toBe(0)
+    })
+
+    it('should pass an owned plan when no line parses as a tool call', async () => {
+      const project = planProject()
+      writeFileSync(project.transcript, '')
+      ownedBy(project)
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-old.md')),
+      )
+
+      expect(result.code).toBe(0)
+    })
+
+    it.each([
+      ['no session id', { session_id: undefined }],
+      ['no transcript path', { transcript_path: undefined }],
+      ['an unreadable transcript', { transcript_path: '/nowhere/t.jsonl' }],
+      ['an unreadable decision log', {}],
+    ])('should fail open on %s', async (label, override) => {
+      const project = planProject()
+      ownedBy(project)
+      if (label === 'an unreadable decision log') {
+        const log = join(
+          project.root,
+          '.canon/tmp/hooks/plan-guard/decisions.log',
+        )
+        rmSync(log)
+        mkdirSync(log)
+      }
+      const fields = {
+        ...(JSON.parse(
+          shellIn(project, heredoc('.canon/plans/feature-old.md')),
+        ) as Record<string, unknown>),
+        ...override,
+      }
+
+      const result = await run(hook, payloadFor(fields))
+
+      expect(result.code).toBe(0)
+    })
+  })
+
   describe('transcript format', () => {
     // The Skill call the guard reads, moved under a key Claude Code might rename it to.
     const RESHAPED_CALL = JSON.stringify({
@@ -579,6 +873,36 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
       expect(lines).toHaveLength(1)
       expect(lines[0]).toMatch(LINE)
       expect(lines[0]).toContain(' unread plan_guard_session feature-a.md')
+    })
+
+    it('should log block-owned with the owner and its time', async () => {
+      const project = planProject()
+      ownedBy(project)
+
+      await run(hook, shellIn(project, heredoc('.canon/plans/feature-old.md')))
+
+      expect(logLines(project.root)[1]).toMatch(
+        new RegExp(
+          ` block-owned plan_guard_session feature-old\\.md owner=planner_a owned_at=${OWNER_AT} read_at=-$`,
+        ),
+      )
+    })
+
+    it('should log amend with the owner for a read plan', async () => {
+      const project = planProject()
+      writeFileSync(
+        project.transcript,
+        `${OTHER_CALL}\n${readCall(oldPlan(project), '2026-11-23T10:01:00.000Z')}\n`,
+      )
+      ownedBy(project)
+
+      await run(hook, shellIn(project, heredoc('.canon/plans/feature-old.md')))
+
+      expect(logLines(project.root)[1]).toMatch(
+        new RegExp(
+          ` amend plan_guard_session feature-old\\.md owner=planner_a owned_at=${OWNER_AT} read_at=2026-11-23T10:01:00$`,
+        ),
+      )
     })
 
     it.each([

@@ -26,12 +26,16 @@ target=$(printf '%s' "$input" | jq -r '
 kind=${target:0:1}
 target=${target:1}
 
-# Prints only the words a write lands on, after `>` or `>>` or as a `tee` or
-# `cp` argument, so a command merely naming a plan passes. A scanner, not a
+# Prints only the words a write lands on, after `>` or `>>`, as a `tee`
+# argument, or as a `cp` target, so a command merely naming a plan passes. A scanner, not a
 # parser: a path built in a variable or by `printf` passes unseen.
 if [ "$kind" = B ]; then
   IFS= read -r -d '' scanner <<'AWK'
 { s = s (NR > 1 ? "\n" : "") $0 }
+function endcmd() {
+  if (last != "") print last
+  last = ""; cmd = ""
+}
 function flush() {
   if (!inword) return
   if (redirect) print word
@@ -40,7 +44,8 @@ function flush() {
     w = word; sub(/.*\//, "", w)
     if (w !~ /^[A-Za-z_][A-Za-z0-9_]*=/ && w !~ /^(sudo|env|command|exec|time|nice|xargs)$/) cmd = w
   }
-  else if ((cmd == "tee" || cmd == "cp") && word !~ /^-/) print word
+  else if (cmd == "tee" && word !~ /^-/) print word
+  else if (cmd == "cp" && word !~ /^-/) last = word
   word = ""; inword = 0; redirect = 0; tag = 0
 }
 END {
@@ -67,9 +72,9 @@ END {
       if (substr(s, i, 1) == "-") { dash = 1; i++ }
       tag = 1; continue
     }
-    if (c ~ /[;|&()<`]/) { flush(); if (c != "<") cmd = ""; i++; continue }
+    if (c ~ /[;|&()<`]/) { flush(); if (c != "<") endcmd(); i++; continue }
     if (c == "\n") {
-      flush(); cmd = ""; i++
+      flush(); endcmd(); i++
       for (t = 1; t <= nt; t++) {
         while (i <= n) {
           e = index(substr(s, i), "\n")
@@ -82,7 +87,7 @@ END {
     }
     word = word c; inword = 1; i++
   }
-  flush()
+  flush(); endcmd()
 }
 AWK
   targets=$(printf '%s' "$target" | awk "$scanner")
@@ -96,11 +101,24 @@ cwd=${payload_cwd:-${CLAUDE_PROJECT_DIR:-.}}
 # Plans live at the main worktree root, which a linked worktree's cwd is not.
 root=$(git -C "$cwd" worktree list --porcelain 2>/dev/null | awk '/^worktree /{sub(/^worktree /, ""); print; exit}')
 root=${root:-$cwd}
+plans_dir=$(cd "$root/.canon/plans" 2>/dev/null && pwd -P)
 
-# A write onto an existing plan is an amendment, such as a worker rewriting a
-# `- Suggested:` line, and an archive path holds a shipped plan rather than a
-# new one, so only a path naming no file yet asks for the skill.
+# Whether a path lands on the main-root plan named by `$rest`, read through
+# symlinks. A path built on a variable cannot be resolved, so it counts.
+at_root() {
+  case "$1" in
+  *'$'*) return 0 ;;
+  /*) dir=${1%/*} ;;
+  *) dir=$cwd/${1%/*} ;;
+  esac
+  [ -n "$plans_dir" ] && [ "$(cd "$dir" 2>/dev/null && pwd -P)/${1##*/}" = "$plans_dir/$rest" ]
+}
+
+# A write onto an existing plan is an amendment its owner judges below, and an
+# archive path holds a shipped plan, so only a path naming no file yet asks for
+# the skill.
 new=""
+existing=""
 while IFS= read -r path; do
   case "$path" in
   *.canon/plans/*) ;;
@@ -112,7 +130,10 @@ while IFS= read -r path; do
   *.md) ;;
   *) continue ;;
   esac
-  [ -e "$root/.canon/plans/$rest" ] && continue
+  if [ -e "$root/.canon/plans/$rest" ]; then
+    [ -z "$existing" ] && at_root "$path" && existing=".canon/plans/$rest"
+    continue
+  fi
   case "$path" in
   /*) [ -e "$path" ] && continue ;;
   esac
@@ -121,7 +142,7 @@ while IFS= read -r path; do
 done <<EOF
 $targets
 EOF
-[ -n "$new" ] || exit 0
+[ -n "$new" ] || [ -n "$existing" ] || exit 0
 
 # Without a session id or a readable transcript there is nothing to read the
 # invocation from, and blocking on that would stop every plan, so pass.
@@ -130,7 +151,8 @@ session=${meta%%$'\t'*}
 transcript=${meta#*$'\t'}
 [ -n "$session" ] && [ -n "$transcript" ] && [ -r "$transcript" ] || exit 0
 
-rest=${new#.canon/plans/}
+rest=${new:-$existing}
+rest=${rest#.canon/plans/}
 key=$(printf '%s' "$session" | tr -c 'A-Za-z0-9' '_')
 marker_dir="$root/.canon/tmp/hooks/plan-guard"
 
@@ -204,6 +226,56 @@ log_decision() {
   return 0
 }
 
+# No assistant `tool_use` line means the transcript format changed, so a
+# caller passes and logs it apart rather than block on a read it cannot see.
+parses() {
+  calls=$(grep -F '"tool_use"' "$transcript" 2>/dev/null | jq -Rrn '
+    first(inputs | fromjson? | select(type == "object" and .type == "assistant")
+      | .message.content[]? | select(type == "object" and .type == "tool_use"
+        and (.name | type) == "string") | "read") // empty' 2>/dev/null)
+  [ -n "$calls" ]
+}
+
+# The owner is the session on the last `pass` line naming this plan. Another
+# session must read it at or after that time, since a read taken before the
+# owner's write is the race. No readable `pass` line means no owner, so pass.
+if [ -z "$new" ]; then
+  owned=$(awk -v plan="$rest" '$2 == "pass" && $4 == plan { at = $1; who = $3 }
+    END { if (who != "") print at, who }' "$marker_dir/decisions.log" 2>/dev/null)
+  [ -n "$owned" ] || exit 0
+  owned_at=${owned%% *}
+  owner=${owned#* }
+  # A malformed owner time reads as an unreadable log line.
+  owned_n=${owned_at:0:19}
+  owned_n=${owned_n//[!0-9]/}
+  [ "${#owned_n}" -eq 14 ] || exit 0
+  read_at=-
+  if [ "$owner" != "$key" ]; then
+    read_at=$(grep -F '"Read"' "$transcript" 2>/dev/null | jq -Rr --arg plan "/.canon/plans/$rest" '
+      fromjson? // empty | select(type == "object" and .type == "assistant")
+      | .timestamp as $t | select(($t | type) == "string" and ($t | length) >= 19)
+      | .message.content[]? | select(type == "object" and .type == "tool_use" and .name == "Read")
+      | (.input.file_path // "" | tostring) | select(endswith($plan)) | "\($t[0:19]) \(.)"' 2>/dev/null |
+      while IFS=' ' read -r stamp file; do
+        case "$file" in /*) at_root "$file" && printf '%s\n' "$stamp" ;; esac
+      done | sort | tail -n 1)
+    read_at=${read_at:--}
+  fi
+  judged="owner=$owner owned_at=$owned_at read_at=$read_at"
+  read_n=${read_at//[!0-9]/}
+  if [ "$owner" = "$key" ] || { [ "${#read_n}" -eq 14 ] && [ "$read_n" -ge "$owned_n" ]; }; then
+    log_decision amend
+    exit 0
+  fi
+  if ! parses; then
+    log_decision unread
+    exit 0
+  fi
+  log_decision block-owned
+  printf 'Session %s licensed %s at %s, and this session has not read it since, so this write would replace text it never saw. Read the plan with the Read tool, then resend the write.\n' "$owner" "$existing" "$owned_at" >&2
+  exit 2
+fi
+
 read_transcript
 judged="latest=${latest:--} spent=$spent spent_plan=${spent_plan:--} lines=$lines"
 if licensed; then
@@ -211,14 +283,9 @@ if licensed; then
   exit 0
 fi
 
-# No assistant `tool_use` line means the transcript format changed, so pass
-# and log it apart rather than block every plan. A change confined to the Skill
-# input or the command tag is not caught here, and the guard still blocks.
-calls=$(grep -F '"tool_use"' "$transcript" 2>/dev/null | jq -Rrn '
-  first(inputs | fromjson? | select(type == "object" and .type == "assistant")
-    | .message.content[]? | select(type == "object" and .type == "tool_use"
-      and (.name | type) == "string") | "read") // empty' 2>/dev/null)
-if [ -z "$calls" ]; then
+# A change confined to the Skill input or the command tag is not caught by
+# `parses`, and the guard still blocks.
+if ! parses; then
   log_decision unread
   exit 0
 fi
