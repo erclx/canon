@@ -2,10 +2,8 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 /**
- * The device classes a design record can declare, in the order a reader
- * returns them. `claude/skills/design-record/references/design.md` states the
- * line's grammar, and the shipped screenshot harness reads it inline with the
- * same cases from `@/design/fixtures/device-classes`.
+ * The device classes a design record can declare, in reader order. The design-record standard states the grammar,
+ * and the shipped screenshot harness reads it inline, tested on `@/design/fixtures/device-classes`.
  */
 export const DEVICE_CLASSES = ['phone', 'tablet', 'desktop'] as const
 
@@ -27,10 +25,8 @@ export type DeviceClassesRead =
 const LINE = /^\s*(?:[-*+]\s+)?Device classes:(.*)$/i
 
 /**
- * The classes a record's `## Layout` declares through its `Device classes:`
- * line, the list ending at the first period. A record that is absent, holds
- * no Layout, or holds no line there supports all three. A name outside the
- * three, or a line naming none, refuses rather than dropping a class.
+ * The classes the `Device classes:` line in `## Layout` declares, its list ending at the first period. No record,
+ * Layout, or line supports all three, and a name outside them or a line naming none refuses rather than dropping one.
  */
 export function parseDeviceClasses(
   record: string | undefined,

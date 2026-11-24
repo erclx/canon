@@ -36,11 +36,8 @@ type DeviceClass = (typeof DEVICE_CLASSES)[number]
 const DESIGN_RECORD = 'canon/DESIGN.md'
 
 /**
- * The classes the `Device classes:` line under `## Layout` in the design record
- * declares, all three when the record, the section, or the line is absent. The
- * grammar is the design record standard's, and canon tests this reader against
- * the same cases as its own CLI reader. A name outside the three exits 1 rather
- * than dropping a class.
+ * The classes the `Device classes:` line under `## Layout` declares, all three when the record, section, or line is
+ * absent. The grammar is the design record standard's, and a name outside the three exits 1 rather than dropping one.
  */
 function readDeviceClasses(): readonly DeviceClass[] {
   if (!existsSync(DESIGN_RECORD)) return DEVICE_CLASSES

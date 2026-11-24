@@ -1049,10 +1049,8 @@ function readBoxWidth(text: string): { width?: number } {
 }
 
 /**
- * The widths a reel is owed at, one per width a drivable box names and the
- * default for a box naming none, narrowest first. A box with a malformed
- * width reads as naming none, and a width outside the device classes the
- * project supports is owed nothing.
+ * The widths a reel is owed at, one per width a drivable box names and the default for a box naming none or a
+ * malformed one, narrowest first. A width outside the device classes the project supports is owed nothing.
  */
 export function owedReelWidths(
   boxes: readonly ChecklistBox[],
