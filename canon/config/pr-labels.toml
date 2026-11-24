@@ -12,10 +12,6 @@
 # `cli = { paths = ["src/"], color = "1f6feb" }`. `canon labels sync --check`
 # reports a declared color the remote holds differently and never edits it.
 #
-# Label count is worth watching rather than capping. A pull request needing
-# three domain labels is one `git-split` should have split. Two is normal for a
-# change that touches a surface and its docs.
-#
 # `canon labels audit` detects a surface neither table below reaches, so a
 # directory added after this census is named rather than merging bare. It runs
 # inside `canon audits` as well, and it reports without gating, since whether an
@@ -24,16 +20,6 @@
 # or add it to `[declined]` with the reason it earns no label.
 # `claude/skills/git-pr/references/labels.md` carries the matching rule and the
 # declined-path rule, and it ships wherever this map does.
-#
-# Building the report into `git-pr` was declined. That skill already reads the map
-# and the changed set, so the check would cost it nothing to run, which is exactly
-# what makes it the wrong home: it hands the ship chain a new failure mode from a
-# check nobody has designed. A verb is also where the match becomes testable,
-# which a skill body only states.
-#
-# What the check does not measure is a prefix reaching no path, so a row left
-# behind by a deleted folder stays in the map. That is the map going stale from
-# the other side and a second measure rather than this one.
 #
 # Matching is prefix-anchored, so a `.claude/` path earns no row written for an
 # authoring root: `internal/rules/` never matches `.claude/rules/internal/`.
@@ -110,17 +96,7 @@ repo = [
   "commitlint.config.test.ts",
 ]
 
-# Deliberately unlabelled, measured across the 138 commits between `3a0fd695`,
-# which shipped the map, and `190af80b`. Against the rows as they stood before
-# this census, 54 of those commits carried no label: 53 releases and one commit
-# that edited this file, which the `repo` row above reached at the time.
-#
-# Replaying the range through `canon labels audit` reports 54 rather than 53, and
-# the extra is that same commit. The map has since moved to `.claude/canon/`, so
-# the `repo` row moved with it and no longer reaches the path the file used to
-# sit at. Reaching a path nothing carries any more is not worth a row, so the
-# number is recorded here instead: 53 are releases and every one is declined
-# below, and the 54th is an artifact of the relocation.
+# Deliberately unlabelled: every release commit.
 #
 # These are data rather than prose because the check reads them. A path here is
 # a decision already taken and a path under neither table is a gap nobody has

@@ -15,10 +15,6 @@ scaffold = ""
 # folder later receives no manifest edit and no sync. `.claude/worktrees/` is
 # the carve-out, since the harness requires a worktree to sit there.
 #
-# The cost is recorded rather than mitigated, and the operator took it on
-# 2026-09-01 against the two alternatives. A target that syncs and never runs
-# `canon migrate records` still holds its records under `.claude/`, and this
-# array no longer tells it to ignore them, so the first sign is a memory file or
-# a task board appearing in someone's commit.
+# The cost taken is in canon/context/surfaces/tooling.md.
 [gitignore]
 "# Claude" = [".canon/", ".claude/worktrees/"]
