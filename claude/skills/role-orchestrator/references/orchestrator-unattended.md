@@ -31,7 +31,7 @@ Schedule through whatever surface the client offers for a prompt at a set time, 
 
 A board with no `## Up next` row the dispatch checks clear and no `## Needs a plan` row has nothing to run. Report that once and stop, scheduling nothing.
 
-A grant the operator names before leaving lists the rows and pull requests the run may merge. Fix its scope per `orchestrator-output.md` and record it in the handoff. With no grant, the run merges nothing.
+Before leaving, the operator may grant the rows and pull requests the run may merge, scoped per `orchestrator-output.md`. With no grant, the run merges nothing.
 
 ## The loop
 
@@ -85,9 +85,9 @@ The loop stops on the pass that finds nothing left to move. Every test below has
 
 - No `## Up next` row clears the dispatch checks
 - No planner is live, and no live worker is still without a pull request
-- Every open pull request is merge-ready, parked, or stopped
+- Every open pull request is merge-ready, parked, or stopped, a granted one only on a merge refusal no re-read clears
 
-A worker stays in the roster until its branch merges, which this run does only under a grant. Count a worker done once its pull request is merged or passes the last test, so a night that opened one still ends.
+A worker stays in the roster until its branch merges. Count it done once its pull request is merged or passes the last test, so a night that opened one still ends.
 
 On that pass, stop the poll and the watch, then push one notification through whatever surface the client offers, `PushNotification` in this repository's client. Name the merged, merge-ready, and parked counts, the way `orchestrator-watch.md` pushes a stall. Then write the report below.
 
