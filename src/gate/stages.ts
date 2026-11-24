@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
+
 import {
   capabilitySeeding,
   ignoreParity,
@@ -13,6 +16,7 @@ import {
   commentHistory,
   shippedCommentCaps,
 } from '@/gate/comment-caps'
+import { EXAMPLES_DIR, recordExamples } from '@/gate/examples'
 import { fileLength } from '@/gate/file-length'
 import {
   canonicalRecords,
@@ -360,6 +364,20 @@ export const STAGES: readonly Stage[] = [
     shared: true,
     label: 'Design prose',
     checks: [{ kind: 'measure', measure: designProse }],
+  },
+  {
+    // A worked record under `examples/` drifts from its standard silently, so
+    // an edit to either reruns the validator and the stamp check. A standard is
+    // a skill body or reference, and `examples/` stays in this checkout alone.
+    id: 'record-examples',
+    label: 'Record examples',
+    scope: /^examples\/|^claude\/skills\/[^/]+\/(?:SKILL\.md$|references\/)/,
+    skipped: 'No example or skill standard changed, so no example was reread',
+    absent: (root) =>
+      existsSync(join(root, EXAMPLES_DIR, 'index.md'))
+        ? undefined
+        : `Skipped, no ${EXAMPLES_DIR}/index.md here, so there is no example to check`,
+    checks: [{ kind: 'measure', measure: recordExamples }],
   },
   {
     // Every config file's key names and value types, since a reader takes a

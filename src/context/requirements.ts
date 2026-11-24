@@ -40,16 +40,14 @@ function isMissing(error: unknown): boolean {
 }
 
 /**
- * Measures the record, or reports nothing when the project carries none.
- *
- * Absent rather than zeroed, so a project with no record is never told it holds an
- * empty one, and a record present and unreadable propagates.
+ * Measures the record at `rel`, the project's own by default, or reports
+ * nothing when it is absent rather than a zeroed count. A record present and
+ * unreadable propagates.
  */
 export async function measureRequirements(
   root: string,
+  rel: string = requirementsRel(root),
 ): Promise<RequirementsReport | undefined> {
-  const rel = requirementsRel(root)
-
   let source: string
   try {
     source = await readFile(join(root, rel), 'utf8')

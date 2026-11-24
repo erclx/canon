@@ -3,6 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { recordExamples } from '@/gate/examples'
 import { fileLength } from '@/gate/file-length'
 import {
   commentBodyBlocks,
@@ -421,6 +422,35 @@ describe('the design prose stage', () => {
 
     expect(ids.indexOf('design-prose')).toBe(ids.indexOf('design') + 1)
     expect(stage?.checks).toEqual([{ kind: 'measure', measure: designProse }])
+  })
+})
+
+describe('the record examples stage', () => {
+  const stage = STAGES.find((candidate) => candidate.id === 'record-examples')
+
+  it('should run the examples measure', () => {
+    expect(stage?.checks).toEqual([
+      { kind: 'measure', measure: recordExamples },
+    ])
+  })
+
+  it('should run on a changed example or a changed skill standard', () => {
+    expect(stage?.scope?.test('examples/planning/priority.md')).toBe(true)
+    expect(
+      stage?.scope?.test('claude/skills/plan-feature/references/plan.md'),
+    ).toBe(true)
+    expect(stage?.scope?.test('claude/skills/review-address/SKILL.md')).toBe(
+      true,
+    )
+  })
+
+  it('should skip a branch touching neither', () => {
+    expect(stage?.scope?.test('src/tasks/board.ts')).toBe(false)
+    expect(stage?.scope?.test('docs/workflow/index.md')).toBe(false)
+  })
+
+  it('should stay out of target projects, which hold no examples', () => {
+    expect(stage?.shared).toBeUndefined()
   })
 })
 

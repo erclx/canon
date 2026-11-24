@@ -265,13 +265,10 @@ export const canonicalRecords: Measure = async (ctx) => {
 
 /**
  * The design records this repository holds, each read against the prose
- * budget in `@/design/budget`. The worked example is read beside the record,
- * since it is the one a target copies its shape from.
+ * budget in `@/design/budget`. The worked example under `examples/` is read by
+ * the record-examples stage alone, so a budget breach there reports once.
  */
-const DESIGN_RECORDS = [
-  DESIGN_DOCUMENT,
-  join('examples', 'design', 'DESIGN.md'),
-] as const
+const DESIGN_RECORDS = [DESIGN_DOCUMENT] as const
 
 export const designProse: Measure = async (ctx) => {
   const failures: string[] = []

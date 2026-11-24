@@ -1,0 +1,30 @@
+{
+  "goals": [
+    {
+      "goal": "A beachgoer finds the next high tide for a station",
+      "status": "driven"
+    },
+    { "goal": "A harbor pilot compares two stations", "status": "driven" },
+    {
+      "goal": "A saved station alerts on a surge",
+      "status": "not-driven",
+      "reason": "no advisory was live on the feed during the drive"
+    }
+  ],
+  "target": null,
+  "scripts": [
+    {
+      "script": "canon/drive/week.md",
+      "persona": "harbor pilot on a phone",
+      "status": "driven"
+    }
+  ],
+  "evidence": [
+    "evidence/week/01-cascais-next-high.png",
+    "evidence/week/02-marker-hidden.png",
+    "evidence/week/02-options.png",
+    "evidence/week/03-chart-scroll.png",
+    "evidence/week/04-two-stations.png"
+  ],
+  "worktree": "/tmp/tmp.Rw83/tidewell"
+}
