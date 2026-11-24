@@ -97,7 +97,7 @@ The CI programs, the install check, and a version pin sit beside the workflows.
 ## Gotchas
 
 - `no checks reported on the '<branch>' branch` usually means a merge conflict, since such a branch has no merge ref to run on. Read `gh pr view --json mergeable,mergeStateStatus` and rebase.
-- A green `🛡️ Static Checks` tested `refs/pull/<n>/merge` as of the last push. No merge queue exists, so a sibling merge leaves it stale until the poll reads `STALE`.
+- A green `🛡️ Static Checks` tested `refs/pull/<n>/merge` as of the last push. With no merge queue, a sibling merge leaves it stale until a worker's standing wait or the poll reads it.
 - The ruleset requires `🛡️ Static Checks` and `🍎 macOS Unit Tests` by name, so renaming either strands branch protection and leaves lift and merge waiting on a check no run reports
 - `vitest.config.ts` keeps every `*.e2e.test.ts` out of `🛡️ Static Checks`. Only `🎬 E2E Suites` runs them, minus the probe tests under `src/driver/probes/` and `src/take/target.test.ts`.
 - The `merge_group` trigger is inert, since a `merge_queue` rule returns `422` on a user-owned repository until a move to an organization
