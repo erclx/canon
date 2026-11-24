@@ -5,7 +5,7 @@ description: Decisions behind governance/rules/canon/tasks.md, one row per bulle
 
 # Tasks rule ledger
 
-The rule is a core rule, so every row is a house choice rather than a citation. Only the trim was decided in the change that wrote this ledger, so the older bullets carry the reason their own text gives, and none carries a date nobody recorded. The trim cut the bullet forbidding a hand edit of the board index, since the records index hook regenerates the file and `task-board` and `task-complete` state it.
+The rule is a core rule, so every row is a house choice rather than a citation. Only the trim was decided in the change that wrote this ledger, so the older bullets carry the reason their own text gives, and none carries a date nobody recorded.
 
 ## Task files
 
@@ -21,3 +21,7 @@ The rule is a core rule, so every row is a house choice rather than a citation. 
 | Bullet                            | Source                                                                                                                                                               | Read    |
 | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | Treat a session file as a handoff | House choice: a session file carries neither outcomes nor findings, so reading it as a task invents rows that were never planned. It beat letting it pass for a task | Unknown |
+
+## Declined
+
+- Never hand-edit the board index, cut because the records index hook regenerates the file and `task-board` and `task-complete` state it.
