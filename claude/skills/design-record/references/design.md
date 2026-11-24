@@ -113,7 +113,7 @@ why = "The landing page is responsive and meets phones first"
 
 - A changed path matches a scope by a prefix, or by sitting under `canon/design/<group>/` for one of its groups. A path matching no scope takes the default.
 - A change touching several surfaces takes the union of their classes
-- `canon design classes` prints the classes for a group, a path, or the branch's changed paths, and every width reader goes through it or its record
+- `canon design classes` prints the classes for a group, a path, or the changed paths. A screenshot case has none, so it names its scope as `deviceScope` or captures at the default.
 - A reader places a width under 600 in phone, 600 to 839 in tablet, and 840 and up in desktop
 - The gate's Device classes stage fails a bad class name, an unknown key, or a missing `why`, rather than letting a reader drop a class
 
