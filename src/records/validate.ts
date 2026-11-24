@@ -735,7 +735,10 @@ const GROUNDWORK_DECISION = '06-'
 const GROUNDWORK_HANDOFF = '07-'
 const GROUNDWORK_PAUSE = '99-next-session.md'
 
-async function checkTrack(dir: string, slug: string): Promise<Finding[]> {
+export async function checkTrack(
+  dir: string,
+  slug: string,
+): Promise<Finding[]> {
   const files = await listMarkdown(dir)
   const findings: Finding[] = []
 
@@ -875,7 +878,7 @@ async function readBundles(
   return checkBundles(await readFile(join(dir, INTAKE_INDEX), 'utf8'), clusters)
 }
 
-async function checkDump(dir: string, slug: string): Promise<Finding[]> {
+export async function checkDump(dir: string, slug: string): Promise<Finding[]> {
   const files = await listMarkdown(dir)
   const findings: Finding[] = []
 

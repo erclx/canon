@@ -83,4 +83,20 @@ describe('measuring the requirements record', () => {
   it('should report nothing for a project carrying no record', async () => {
     expect(await measureRequirements(root)).toBeUndefined()
   })
+
+  it('should measure a record at the path a caller names', async () => {
+    mkdirSync(join(root, 'examples', 'project'), { recursive: true })
+    writeFileSync(
+      join(root, 'examples', 'project', 'REQUIREMENTS.md'),
+      '# Requirements\n\nThis record holds at most 400 words.\n',
+    )
+
+    const report = await measureRequirements(
+      root,
+      join('examples', 'project', 'REQUIREMENTS.md'),
+    )
+
+    expect(report?.rel).toBe('examples/project/REQUIREMENTS.md')
+    expect(report?.wordCap).toBe(400)
+  })
 })
