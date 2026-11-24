@@ -1,4 +1,5 @@
 import {
+  type BaseReading,
   CHECKS_POLL_MS,
   type GateResult,
   type LiftApi,
@@ -195,6 +196,112 @@ export async function waitForReviews(
         waitedSeconds: waited(),
       }
     }
+    await api.sleep(Math.min(gap, left))
+    gap = nextPollMs(gap)
+  }
+}
+
+/**
+ * The reads a standing wait makes. The tip and the standing are local git, so
+ * a poll spends no GitHub quota, and the pull request state is read only where
+ * the answer would change the ending.
+ */
+export interface StandingApi {
+  /** The branch tip from the remote, undefined once the branch is gone or the read failed. */
+  readTip(): Promise<string | undefined>
+  readStanding(head: string): Promise<BaseReading>
+  /** Whether the pull request is still open, undefined when the read failed. */
+  readOpen(): Promise<boolean | undefined>
+  sleep(ms: number): Promise<void>
+  now(): number
+}
+
+export type StandingWait =
+  | {
+      readonly kind: 'read'
+      readonly reason: 'stale'
+      readonly head: string
+      readonly moved: readonly string[]
+      readonly waitedSeconds: number
+    }
+  | {
+      readonly kind: 'read'
+      readonly reason: 'conflict'
+      readonly head: string
+      readonly waitedSeconds: number
+    }
+  | {
+      readonly kind: 'read'
+      readonly reason: 'closed'
+      /** Absent when the branch left the remote with the close. */
+      readonly head?: string
+      readonly waitedSeconds: number
+    }
+  | {
+      readonly kind: 'read'
+      readonly reason: 'timeout'
+      readonly head: string
+      readonly standing: 'fresh' | 'unknown'
+      readonly waitedSeconds: number
+    }
+  | {
+      readonly kind: 'refused'
+      readonly reason: 'gh-failed'
+      readonly waitedSeconds: number
+    }
+
+export interface StandingWaitOptions {
+  readonly waitSeconds: number
+  readonly pollMs?: number
+}
+
+/**
+ * Holds until the base moves a path the branch writes, the two stop merging,
+ * the pull request closes, or the deadline. Every ending reads the open state
+ * first, since a squash merge reads as stale against the base it landed on.
+ */
+export async function waitForStanding(
+  api: StandingApi,
+  opts: StandingWaitOptions,
+): Promise<StandingWait> {
+  const started = api.now()
+  const deadline = started + opts.waitSeconds * 1000
+  const waited = () => Math.round((api.now() - started) / 1000)
+  let gap = opts.pollMs ?? CHECKS_POLL_MS
+
+  for (;;) {
+    const head = await api.readTip()
+    const reading =
+      head === undefined ? undefined : await api.readStanding(head)
+    const left = deadline - api.now()
+    const hasMoved =
+      reading?.standing === 'stale' || reading?.standing === 'conflict'
+
+    if (reading === undefined || hasMoved || left <= 0) {
+      const isOpen = await api.readOpen()
+      const waitedSeconds = waited()
+      if (isOpen === false) {
+        return {
+          kind: 'read',
+          reason: 'closed',
+          ...(head !== undefined && { head }),
+          waitedSeconds,
+        }
+      }
+      if (isOpen === undefined || head === undefined || reading === undefined) {
+        return { kind: 'refused', reason: 'gh-failed', waitedSeconds }
+      }
+      if (reading.standing === 'stale') {
+        const moved = reading.moved ?? []
+        return { kind: 'read', reason: 'stale', head, moved, waitedSeconds }
+      }
+      if (reading.standing === 'conflict') {
+        return { kind: 'read', reason: 'conflict', head, waitedSeconds }
+      }
+      const { standing } = reading
+      return { kind: 'read', reason: 'timeout', head, standing, waitedSeconds }
+    }
+
     await api.sleep(Math.min(gap, left))
     gap = nextPollMs(gap)
   }
