@@ -62,7 +62,7 @@ Settle all four steps below before the door writes, so one write carries the cor
    - End each with `(until <event>)`, naming what retires it, so the next session re-tests it rather than obeying it
    - Record a standing merge authorization here, listing the pull requests its scope fixed at the grant and its `(until <event>)` end
    - The next session re-tests that end and re-reads the scope before its first merge under it, and asks the operator again when either no longer holds
-   - Record the running mode here too, attended or unattended, with its start time, the worker cap, and each hold in force, so a resume re-enters it
+   - Record the running mode here too, attended or unattended, with its start time, the worker cap, each hold in force, and an unattended run's merge grant with its scope, so a resume re-enters it
    - Write `None.` when nothing is still in force
    - It sits there because a decision is read against the state it was taken in
 2. Add `## Talk sessions held open` directly after that, one line per open talk session giving its name, its `sessionId`, and its row, or `None.`.
