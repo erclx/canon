@@ -65,10 +65,11 @@ let run: { code: number | null; output: string }
 
 function runCapture(
   baseUrl: string,
+  cwd: string = fixture,
 ): Promise<{ code: number | null; output: string }> {
   return new Promise((resolve, reject) => {
     const child = spawn('bun', [SCRIPT], {
-      cwd: fixture,
+      cwd,
       env: { ...process.env, SCREENSHOT_BASE_URL: baseUrl },
     })
     let output = ''
@@ -79,8 +80,12 @@ function runCapture(
   })
 }
 
-const frame = (section: string, width: string): string =>
-  join(fixture, 'screenshots', '127.0.0.1', section, `${width}--light.png`)
+const frame = (
+  section: string,
+  width: string,
+  root: string = fixture,
+): string =>
+  join(root, 'screenshots', '127.0.0.1', section, `${width}--light.png`)
 
 describe.skipIf(!hasBrowser)('screenshot.ts reflow floor', () => {
   beforeAll(async () => {
@@ -131,5 +136,56 @@ describe.skipIf(!hasBrowser)('screenshot.ts reflow floor', () => {
 
   it('should still write the frame at 390 for a page failing the floor', () => {
     expect(existsSync(frame('wide', '390'))).toBe(true)
+  })
+})
+
+/** A record declaring desktop alone, against a page that fails the floor, so a run checking 320 would exit 1. */
+describe.skipIf(!hasBrowser)('screenshot.ts on a desktop-only record', () => {
+  let desktop: string
+  let desktopServer: Server
+  let desktopRun: { code: number | null; output: string }
+
+  beforeAll(async () => {
+    desktop = mkdtempSync(join(tmpdir(), 'screenshot-desktop-'))
+    mkdirSync(join(desktop, 'e2e', 'capture'), { recursive: true })
+    mkdirSync(join(desktop, 'canon'))
+    writeFileSync(
+      join(desktop, 'canon', 'DESIGN.md'),
+      '# Design\n\n## Layout\n\n- Device classes: desktop\n',
+    )
+    writeFileSync(
+      join(desktop, 'e2e', 'capture', 'cases.ts'),
+      `export const CASES = [{ section: 'wide', theme: 'light', route: '/wide', excludeViewports: ['390', '1536'] }]\n`,
+    )
+    desktopServer = createServer((_request, response) => {
+      response.writeHead(200, { 'content-type': 'text/html' })
+      response.end(PAGES['/wide'])
+    })
+    await new Promise<void>((resolve) =>
+      desktopServer.listen(0, '127.0.0.1', resolve),
+    )
+    const { port } = desktopServer.address() as AddressInfo
+    desktopRun = await runCapture(`http://127.0.0.1:${port}`, desktop)
+  }, TIMEOUT_MS)
+
+  afterAll(async () => {
+    await new Promise((resolve) => desktopServer?.close(resolve))
+    rmSync(desktop, { force: true, recursive: true })
+  })
+
+  it('should exit 0 with no 320 check on a page failing the floor', () => {
+    expect(desktopRun.code).toBe(0)
+    expect(desktopRun.output).not.toContain('wide/320--light')
+  })
+
+  it('should write the desktop frame alone', () => {
+    expect([
+      existsSync(frame('wide', '768', desktop)),
+      existsSync(frame('wide', '1280', desktop)),
+    ]).toEqual([false, true])
+  })
+
+  it('should raise no warning for a case excluding a phone width', () => {
+    expect(desktopRun.output).not.toContain('which no viewport carries')
   })
 })

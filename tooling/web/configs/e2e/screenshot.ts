@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 import { chromium } from '@playwright/test'
-import { existsSync, readdirSync } from 'fs'
+import { existsSync, readdirSync, readFileSync } from 'fs'
 import { mkdir } from 'fs/promises'
 import path from 'path'
 import { pathToFileURL } from 'url'
@@ -28,6 +28,77 @@ const VIEWPORTS: readonly Viewport[] = [
  * fails on a picture. A case defers it by naming `320` in `excludeViewports`.
  */
 const REFLOW_FLOOR = { name: '320', width: 320, height: 800 } as const
+
+const DEVICE_CLASSES = ['phone', 'tablet', 'desktop'] as const
+
+type DeviceClass = (typeof DEVICE_CLASSES)[number]
+
+const DESIGN_RECORD = 'canon/DESIGN.md'
+
+/**
+ * The classes the `Device classes:` line under `## Layout` in the design record
+ * declares, all three when the record, the section, or the line is absent. The
+ * grammar is the design record standard's, and canon tests this reader against
+ * the same cases as its own CLI reader. A name outside the three exits 1 rather
+ * than dropping a class.
+ */
+function readDeviceClasses(): readonly DeviceClass[] {
+  if (!existsSync(DESIGN_RECORD)) return DEVICE_CLASSES
+  let isLayout = false
+  for (const line of readFileSync(DESIGN_RECORD, 'utf8').split('\n')) {
+    const heading = /^##\s+(.+?)\s*$/.exec(line)
+    if (heading) {
+      isLayout = heading[1] === 'Layout'
+      continue
+    }
+    const value = isLayout
+      ? /^\s*(?:[-*+]\s+)?Device classes:(.*)$/i.exec(line)?.[1]
+      : undefined
+    if (value === undefined) continue
+    const names = value
+      .split('.')[0]
+      .split(/,|\band\b/)
+      .map((token) => token.trim().toLowerCase())
+      .filter((token) => token !== '')
+    const unknown = names.find(
+      (name) => !(DEVICE_CLASSES as readonly string[]).includes(name),
+    )
+    if (names.length === 0 || unknown !== undefined) {
+      const named =
+        unknown === undefined ? 'names no device class' : `names '${unknown}'`
+      console.error(
+        `The Device classes: line under ## Layout in ${DESIGN_RECORD} ${named}. It takes phone, tablet, or desktop.`,
+      )
+      process.exit(1)
+    }
+    return DEVICE_CLASSES.filter((deviceClass) => names.includes(deviceClass))
+  }
+  return DEVICE_CLASSES
+}
+
+/** The class a width falls in, at the Material 3 window boundaries of 600 and 840. */
+function deviceClassOf(width: number): DeviceClass {
+  if (width < 600) return 'phone'
+  if (width < 840) return 'tablet'
+  return 'desktop'
+}
+
+const SUPPORTED_CLASSES = readDeviceClasses()
+
+if (process.argv.includes('--print-device-classes')) {
+  console.log(SUPPORTED_CLASSES.join(','))
+  process.exit(0)
+}
+
+/** The widths this project captures, and the 320 check only while it supports phones. */
+const SUPPORTED_RUNS = [
+  ...(SUPPORTED_CLASSES.includes('phone')
+    ? [{ kind: 'reflow' as const, viewport: REFLOW_FLOOR }]
+    : []),
+  ...VIEWPORTS.filter((viewport) =>
+    SUPPORTED_CLASSES.includes(deviceClassOf(viewport.width)),
+  ).map((viewport) => ({ kind: 'frame' as const, viewport })),
+]
 
 const CASES_FILE = 'e2e/capture/cases.ts'
 const CASES_DIR = 'e2e/capture/cases'
@@ -124,21 +195,15 @@ for (const { captureCase, file } of SOURCED) {
 
 const ALL_RUNS: readonly CaptureRun[] = SOURCED.flatMap(
   ({ captureCase, file }) =>
-    [
-      { kind: 'reflow' as const, viewport: REFLOW_FLOOR },
-      ...VIEWPORTS.map((viewport) => ({ kind: 'frame' as const, viewport })),
-    ]
-      .filter(
-        ({ viewport }) =>
-          !captureCase.excludeViewports?.includes(viewport.name),
-      )
-      .map(({ kind, viewport }) => ({
-        captureCase,
-        kind,
-        viewport,
-        file,
-        label: `${captureCase.section}/${viewport.name}--${captureCase.theme}`,
-      })),
+    SUPPORTED_RUNS.filter(
+      ({ viewport }) => !captureCase.excludeViewports?.includes(viewport.name),
+    ).map(({ kind, viewport }) => ({
+      captureCase,
+      kind,
+      viewport,
+      file,
+      label: `${captureCase.section}/${viewport.name}--${captureCase.theme}`,
+    })),
 )
 
 // Two runs sharing a label write one output file, and the later would
