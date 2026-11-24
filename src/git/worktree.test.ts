@@ -227,6 +227,23 @@ describe('fastForwardMain', () => {
     expect(head(MAIN)).toBe(landed)
   })
 
+  it('should not wait on a hook child that keeps stderr open after git exits', async () => {
+    const landed = landOnOrigin('feat: merged elsewhere')
+    const hooks = join(BASE, 'lingering-hooks')
+    mkdirSync(hooks)
+    writeFileSync(join(hooks, 'post-merge'), '#!/bin/sh\nsleep 3 >&2 &\n', {
+      mode: 0o755,
+    })
+    run(MAIN, 'config', 'core.hooksPath', hooks)
+    const started = Date.now()
+
+    const result = await fastForwardMain(MAIN)
+
+    expect(result).toEqual({ outcome: 'pulled', reason: 'fast-forwarded' })
+    expect(head(MAIN)).toBe(landed)
+    expect(Date.now() - started).toBeLessThan(2000)
+  })
+
   it('should report a main already at its remote as up to date', async () => {
     expect(await fastForwardMain(MAIN)).toEqual({
       outcome: 'pulled',

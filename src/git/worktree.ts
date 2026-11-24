@@ -159,10 +159,25 @@ interface GitWriteResult {
   readonly stderr: string
 }
 
+const STDERR_DRAIN_MS = 200
+
+/**
+ * The environment a retried write runs under. Only the message language is
+ * pinned, so a hook the write fires keeps the caller's character set and
+ * collation. `LC_ALL` and `LANGUAGE` are dropped because either one overrides
+ * `LC_MESSAGES`.
+ */
+function englishMessagesEnv(): Record<string, string> {
+  const { LC_ALL: _all, LANGUAGE: _language, ...rest } = gitEnv()
+  return { ...rest, LC_MESSAGES: 'C' }
+}
+
 /**
  * Runs a git write with its output and any hook's on stderr, so a caller's
  * stdout stays a clean record. The stderr is also returned, in git's English
- * text, since a retry keys on its wording.
+ * text, since a retry keys on its wording. The write ends when git exits, with
+ * a short drain for what it already wrote, since a hook's background child can
+ * hold the pipe open long after git is gone.
  */
 function gitWrite(
   cwd: string,
@@ -170,19 +185,27 @@ function gitWrite(
 ): Promise<GitWriteResult> {
   return new Promise((done) => {
     const child = spawn('git', ['-C', cwd, ...args], {
-      env: { ...gitEnv(), LC_ALL: 'C' },
+      env: englishMessagesEnv(),
       stdio: ['ignore', 2, 'pipe'],
       timeout: PULL_TIMEOUT_MS,
     })
     const chunks: Buffer[] = []
+    let settled = false
+    const finish = (ok: boolean): void => {
+      if (settled) return
+      settled = true
+      child.stderr?.destroy()
+      done({ ok, stderr: Buffer.concat(chunks).toString() })
+    }
     child.stderr?.on('data', (chunk: Buffer) => {
       chunks.push(chunk)
       process.stderr.write(chunk)
     })
-    child.on('error', () => done({ ok: false, stderr: '' }))
-    child.on('close', (code) =>
-      done({ ok: code === 0, stderr: Buffer.concat(chunks).toString() }),
-    )
+    child.on('error', () => finish(false))
+    child.on('exit', (code) => {
+      setTimeout(() => finish(code === 0), STDERR_DRAIN_MS)
+    })
+    child.on('close', (code) => finish(code === 0))
   })
 }
 
