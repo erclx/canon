@@ -1,6 +1,7 @@
 import { scenario } from '@/sandbox/scenario'
 
-const CONFIG = `launch = "PREVIEW_PORT=4531 bun run preview"
+const CONFIG = `[drive]
+launch = "PREVIEW_PORT=4531 bun run preview"
 access = "/?demo=1"
 `
 
@@ -38,7 +39,7 @@ export default scenario({
   },
   arms: {
     default: (ctx) => {
-      ctx.write('canon/config/app-drive.toml', CONFIG)
+      ctx.write('canon/config/app.toml', CONFIG)
       ctx.write('package.json', PACKAGE)
       ctx.write('server.ts', SERVER)
       ctx.fixtures('claude', 'ui-film', 'default', '01-initial')
@@ -57,7 +58,7 @@ export default scenario({
         '  video/STORYBOARD.md names two beats, one click and one typed search',
       )
       ctx.log.info(
-        '  canon/config/app-drive.toml names launch and an access path, and no data',
+        '  the [drive] table of canon/config/app.toml names launch and an access path, and no data',
       )
       ctx.log.info(
         'Before:  install the headless shell once with bunx playwright install chromium,',

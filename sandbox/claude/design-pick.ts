@@ -11,8 +11,6 @@ export default scenario({
       ctx.fixtures('claude', 'design-pick', 'shared', '01-initial')
       // Frameboard's marker board.json reads as a repeat to the gate, so the scenario writes it.
       ctx.write('.canon/board/board.json', '{"version": 1}\n')
-      // A configured project wins over the derived name, so the seeded references page and the archive globs stay under picks.
-      ctx.write('canon/config/design.toml', 'project = "picks"\n')
 
       ctx.mkdir('.claude')
       ctx.git('add', '.')
@@ -57,7 +55,7 @@ export default scenario({
         '         browser-not-found everywhere else, which the run reports before drafting further.',
       )
       ctx.log.info(
-        'Action:  /canon:design-pick draft candidates for the callout treatment on index.html, and take arm 2 when you put the pick to me',
+        'Action:  /canon:design-pick draft candidates for the callout treatment on index.html in the picks project, and take arm 2 when you put the pick to me',
       )
       ctx.log.info(
         'Expect:  the closed state. A headless run has no operator to say the pick is right, so it',

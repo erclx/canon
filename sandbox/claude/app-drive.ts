@@ -14,7 +14,8 @@ A board app for laying out frames.
 - Host boards for anyone.
 `
 
-const CONFIG = `launch = "bun run build && PREVIEW_PORT=4530 bun run preview"
+const CONFIG = `[drive]
+launch = "bun run build && PREVIEW_PORT=4530 bun run preview"
 data = "boards/board.json"
 personas = ["a designer laying out a board"]
 proposals = ".canon/picks"
@@ -56,7 +57,7 @@ console.log(\`http://localhost:\${port}\`)
 
 function seedApp(ctx: StageContext) {
   ctx.write('canon/REQUIREMENTS.md', REQUIREMENTS)
-  ctx.write('canon/config/app-drive.toml', CONFIG)
+  ctx.write('canon/config/app.toml', CONFIG)
   ctx.write('package.json', PACKAGE)
   ctx.write('server.ts', SERVER)
   ctx.fixtures('claude', 'app-drive', 'default', '01-initial')
@@ -92,7 +93,7 @@ export default scenario({
         '  the Export goal has no control, so it is a finding or not-driven with a reason',
       )
       ctx.log.info(
-        '  canon/config/app-drive.toml names launch, data, and one persona',
+        '  the [drive] table of canon/config/app.toml names launch, data, and one persona',
       )
       ctx.log.info(
         'Before:  install the bundled Chromium once with canon browser install-browser chromium,',
@@ -142,7 +143,7 @@ export default scenario({
     },
     board: (ctx) => {
       seedApp(ctx)
-      ctx.write('canon/config/design.toml', 'board = ".canon/board"\n')
+      ctx.write('.canon/board/board.json', '{"version": 1}\n')
       commitApp(ctx)
 
       ctx.log.step('Scenario ready: app drive of a project with a board')
