@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.122.0](https://github.com/erclx/canon/compare/v5.121.0...v5.122.0) (2026-11-24)
+
+
+### Features
+
+* **comments:** cap config comment blocks at 3 text lines ([#3504](https://github.com/erclx/canon/issues/3504)) ([00b4922](https://github.com/erclx/canon/commit/00b4922ba6310977756f73eef8ca0b67fab9dfee))
+* **config:** merge the app config files into canon/config/app.toml ([#3502](https://github.com/erclx/canon/issues/3502)) ([1f5e4ea](https://github.com/erclx/canon/commit/1f5e4ead1bf4ce20da63ad53653178e85c035425))
+* **config:** seed commented config starters and gate on unknown keys ([#3503](https://github.com/erclx/canon/issues/3503)) ([7654e3a](https://github.com/erclx/canon/commit/7654e3a24fecd16a930f8c792089abf10c8cd91b))
+* **design:** declare device classes per surface in their own config ([#3498](https://github.com/erclx/canon/issues/3498)) ([ea3b379](https://github.com/erclx/canon/commit/ea3b37938fd153d9023b65adc6858764ee968d4b))
+* **orchestrator:** let an unattended run merge what a grant named ([#3501](https://github.com/erclx/canon/issues/3501)) ([c57e8c4](https://github.com/erclx/canon/commit/c57e8c445211ae159dab8860a57cd0d7db5c5441))
+
 ## [5.121.0](https://github.com/erclx/canon/compare/v5.120.0...v5.121.0) (2026-11-24)
 
 
