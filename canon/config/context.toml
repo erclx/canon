@@ -1,14 +1,4 @@
-# Code roots the context audit measures.
-#
-# `canon context audit` reports any folder directly under a root that no
-# context entry names in its Layout, and any folder given a Layout H3 in two
-# entries. A glob such as "packages/*/src" expands to every match, and an
-# empty list opts the project out. Without this file the root defaults to
-# "src" when that folder exists.
-#
-# Two optional gate keys sit beside it, and this repository sets neither, so
-# its gated folders stay the toolkit default. `gated` lists path prefixes whose
-# entries gate on a shape break under `--gate`, replacing that default.
-# `gate-length = true` gates an entry past the line checkpoint that carries no
-# canon-length-exempt marker. docs/agents/context-audit.md covers both.
+# What canon context audit covers and gates. Every key: canon docs config
+
+# Code folders the context entries must cover. Without it, src.
 roots = ["src"]
