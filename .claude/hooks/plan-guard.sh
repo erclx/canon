@@ -98,9 +98,11 @@ root=$(git -C "$cwd" worktree list --porcelain 2>/dev/null | awk '/^worktree /{s
 root=${root:-$cwd}
 
 # A write onto an existing plan is an amendment, such as a worker rewriting a
-# `- Suggested:` line, and an archive path holds a shipped plan rather than a
-# new one, so only a path naming no file yet asks for the skill.
+# `- Suggested:` line, judged by its owner below, and an archive path holds a
+# shipped plan rather than a new one, so only a path naming no file yet asks
+# for the skill.
 new=""
+existing=""
 while IFS= read -r path; do
   case "$path" in
   *.canon/plans/*) ;;
@@ -112,7 +114,10 @@ while IFS= read -r path; do
   *.md) ;;
   *) continue ;;
   esac
-  [ -e "$root/.canon/plans/$rest" ] && continue
+  if [ -e "$root/.canon/plans/$rest" ]; then
+    existing=${existing:-.canon/plans/$rest}
+    continue
+  fi
   case "$path" in
   /*) [ -e "$path" ] && continue ;;
   esac
@@ -121,7 +126,7 @@ while IFS= read -r path; do
 done <<EOF
 $targets
 EOF
-[ -n "$new" ] || exit 0
+[ -n "$new" ] || [ -n "$existing" ] || exit 0
 
 # Without a session id or a readable transcript there is nothing to read the
 # invocation from, and blocking on that would stop every plan, so pass.
@@ -130,7 +135,8 @@ session=${meta%%$'\t'*}
 transcript=${meta#*$'\t'}
 [ -n "$session" ] && [ -n "$transcript" ] && [ -r "$transcript" ] || exit 0
 
-rest=${new#.canon/plans/}
+rest=${new:-$existing}
+rest=${rest#.canon/plans/}
 key=$(printf '%s' "$session" | tr -c 'A-Za-z0-9' '_')
 marker_dir="$root/.canon/tmp/hooks/plan-guard"
 
@@ -204,6 +210,56 @@ log_decision() {
   return 0
 }
 
+# No assistant `tool_use` line means the transcript format changed, so a
+# caller passes and logs it apart rather than block on a read it cannot see.
+parses() {
+  calls=$(grep -F '"tool_use"' "$transcript" 2>/dev/null | jq -Rrn '
+    first(inputs | fromjson? | select(type == "object" and .type == "assistant")
+      | .message.content[]? | select(type == "object" and .type == "tool_use"
+        and (.name | type) == "string") | "read") // empty' 2>/dev/null)
+  [ -n "$calls" ]
+}
+
+# The owner is the session on the last `pass` line naming this plan, and an
+# `amend` never moves it. Another session must have read the plan at or after
+# that time, since the race this closes is a read taken before the owner's
+# write. An unreadable log or a plan no `pass` names has no owner, so passes.
+if [ -z "$new" ]; then
+  owned=$(awk -v plan="$rest" '$2 == "pass" && $4 == plan { at = $1; who = $3 }
+    END { if (who != "") print at, who }' "$marker_dir/decisions.log" 2>/dev/null)
+  [ -n "$owned" ] || exit 0
+  owned_at=${owned%% *}
+  owner=${owned#* }
+  # Both times compare as their 14 digits, and a malformed one reads as an
+  # unreadable log line.
+  owned_n=${owned_at:0:19}
+  owned_n=${owned_n//[!0-9]/}
+  [ "${#owned_n}" -eq 14 ] || exit 0
+  read_at=-
+  if [ "$owner" != "$key" ]; then
+    read_at=$(grep -F '"Read"' "$transcript" 2>/dev/null | jq -Rr --arg plan "/.canon/plans/$rest" '
+      fromjson? // empty | select(type == "object" and .type == "assistant")
+      | select(any(.message.content[]?; type == "object" and .type == "tool_use"
+          and .name == "Read" and ((.input.file_path // "") | tostring | endswith($plan))))
+      | .timestamp | select(type == "string" and length >= 19) | .[0:19]' 2>/dev/null |
+      sort | tail -n 1)
+    read_at=${read_at:--}
+  fi
+  judged="owner=$owner owned_at=$owned_at read_at=$read_at"
+  read_n=${read_at//[!0-9]/}
+  if [ "$owner" = "$key" ] || { [ "${#read_n}" -eq 14 ] && [ "$read_n" -ge "$owned_n" ]; }; then
+    log_decision amend
+    exit 0
+  fi
+  if ! parses; then
+    log_decision unread
+    exit 0
+  fi
+  log_decision block-owned
+  printf 'Session %s licensed %s at %s, and this session has not read it since, so this write would replace text it never saw. Read the plan with the Read tool, then resend the write.\n' "$owner" "$existing" "$owned_at" >&2
+  exit 2
+fi
+
 read_transcript
 judged="latest=${latest:--} spent=$spent spent_plan=${spent_plan:--} lines=$lines"
 if licensed; then
@@ -211,14 +267,9 @@ if licensed; then
   exit 0
 fi
 
-# No assistant `tool_use` line means the transcript format changed, so pass
-# and log it apart rather than block every plan. A change confined to the Skill
-# input or the command tag is not caught here, and the guard still blocks.
-calls=$(grep -F '"tool_use"' "$transcript" 2>/dev/null | jq -Rrn '
-  first(inputs | fromjson? | select(type == "object" and .type == "assistant")
-    | .message.content[]? | select(type == "object" and .type == "tool_use"
-      and (.name | type) == "string") | "read") // empty' 2>/dev/null)
-if [ -z "$calls" ]; then
+# A change confined to the Skill input or the command tag is not caught by
+# `parses`, and the guard still blocks.
+if ! parses; then
   log_decision unread
   exit 0
 fi
