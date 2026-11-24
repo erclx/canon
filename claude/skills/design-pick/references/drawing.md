@@ -9,9 +9,9 @@ Read before the first frame a `design-pick` round or an `app-drive` drive adds. 
 
 ## Widths
 
-Draw every frame at the widths `widths.md` beside this file resolves, one per device class the record's `Device classes:` line supports, from its `Draw widths:` line or 390, 768, and 1280. A now frame, an arm, and a page set all take the same widths, and only the operator's word drops one.
+Draw every frame at the widths `widths.md` beside this file resolves, one per device class the surface supports, from the record's `Draw widths:` line or 390, 768, and 1280. A now frame, an arm, and a page set all take the same widths, and only the operator's word drops one.
 
-- Measure every pick for sideways scroll at 320 as `widths.md` states, unless the record leaves phone out, and draw no 320 frame
+- Measure every pick for sideways scroll at 320 as `widths.md` states, unless the surface leaves phone out, and draw no 320 frame
 - Say in the run's output which widths the frames take and which source gave them
 
 ## Pages

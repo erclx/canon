@@ -19,7 +19,7 @@ Every round puts real candidates in front of the operator at every width the sur
 
 - Three to five arms, the shipping state among them, each carry an id, a label, and a cost, and vary only at a layer named from the `design-taste` catalog
 - Each round is one Frameboard page, themed by the board toggle and captured once as a composite, with the link ahead of the first pick question
-- Every arm is drawn at the widths of the design record's `Draw widths:` line, falling back to 390, 768, and 1280, for each device class its `Device classes:` line supports, all three when it has none
+- Every arm is drawn at the record's `Draw widths:` line, falling back to 390, 768, and 1280, for each device class `canon design classes` reports for the surface
 - References are gathered before drafting, and each arm names the kept reference it draws on and what it takes, or says none backs it
 - Every arm is rendered and judged against a stated bar before handover, and a missing browser or a board that will not start is reported as a refusal
 

@@ -91,12 +91,33 @@ Add either optional section, and the one line Layout may carry, when the project
 
 - `## Layout`: page width, breakpoints, and grid rules as current constraints. `ui-craft` captures at these, and at 390, 768, and 1280 for a project declaring none.
 - `Draw widths:`, a line inside `## Layout` naming the phone, tablet, and desktop widths a board draws at, which `design-pick` reads
-- `Device classes:`, a line inside `## Layout` naming the classes the project supports, such as `Device classes: desktop` or `Device classes: tablet, desktop`. A record without it supports all three.
 - `## Mark`: the logo's construction rules and the files that carry it
 
-Every surface that picks a width reads `Device classes:`, being the board, the checklist, the reels, and the screenshot harness. A reader places a width under 600 in phone, 600 to 839 in tablet, and 840 and up in desktop, and refuses a name outside the three rather than dropping a class.
+## Device classes
+
+The classes a project supports live in `canon/config/design.toml`, not in the record. A `[device-classes]` table holds a `default` list and a `why`, and each `[device-classes.scopes.<name>]` table holds `groups`, `paths`, `classes`, and a `why`. A project with no file supports all three of phone, tablet, and desktop.
+
+```toml
+[device-classes]
+default = ["desktop"]
+why = "The board is a two-dimensional canvas, exempt from Reflow"
+
+[device-classes.scopes.landing]
+groups = ["landing"]
+paths = ["web/"]
+classes = ["phone", "tablet", "desktop"]
+why = "The landing page is responsive and meets phones first"
+```
+
+- A changed path matches a scope by a prefix, or by sitting under `canon/design/<group>/` for one of its groups. A path matching no scope takes the default.
+- A change touching several surfaces takes the union of their classes
+- `canon design classes` prints the classes for a group, a path, or the branch's changed paths, and every width reader goes through it or its record
+- A reader places a width under 600 in phone, 600 to 839 in tablet, and 840 and up in desktop
+- The gate's Device classes stage fails a bad class name, an unknown key, or a missing `why`, rather than letting a reader drop a class
 
 Declare fewer only for content that needs a two-dimensional layout, such as a canvas or a drawing tool. Leaving phone out also drops the 320 reflow check, since WCAG Reflow exempts that content.
+
+A record still carrying a `Device classes:` line under `## Layout` fails the same stage. Move its classes into `default` with a `why`, and delete the line.
 
 ## The uncertainty tag
 
