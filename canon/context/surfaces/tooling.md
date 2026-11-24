@@ -13,7 +13,7 @@ Owns the golden configs a project inherits, layered across a `base` to `web` to 
 
 ### `tooling/<stack>/`
 
-Holds one stack, always with a `manifest.toml` and a `reference.md`, plus `configs/` and `seeds/`. A stack that stands alone, such as `cloudflare` or `shell`, sets `extends = ""` and layers onto a root already carrying another. `shippedCommentCaps` fails a file in either past a comment cap, touched or not, since every synced target fails on it.
+Holds one stack: a `manifest.toml`, a `reference.md` with any `reference-<topic>.md` beside it, `configs/`, and `seeds/`. A stack that stands alone sets `extends = ""` and layers onto a root already carrying another. `shippedCommentCaps` fails a file in either past a comment cap, touched or not, since every synced target fails on it.
 
 - Adding a stack means copying the closest one from `canon tooling list`, filling its manifest and reference, adding configs and seeds, and running `canon tooling verify <name>`
 - A manifest block injects one thing. `[dependencies.dev]` and `[scripts]` add only what is missing, `[gitignore]` and `[gitattributes]` add a group, and `[scaffold] prepare` runs on the starter.
