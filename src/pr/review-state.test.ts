@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { RebaseRead } from '@/pr/carry'
 import {
+  type BaseReading,
   type ChangedRead,
   type ChecksGate,
   type EvidenceGate,
@@ -12,7 +13,9 @@ import type { ReviewRow } from '@/pr/review-scope'
 import {
   readReviewState,
   type ReviewStateApi,
+  type StandingApi,
   waitForReviews,
+  waitForStanding,
 } from '@/pr/review-state'
 
 const HEAD = '9b1f2c3d4e5f60718293a4b5c6d7e8f901234567'
@@ -621,4 +624,221 @@ describe('agrees with lift', () => {
       ])
     },
   )
+})
+
+interface StandingFixture {
+  /** One tip per read, the last repeating, null for a read that failed. */
+  tips?: readonly (string | null)[]
+  /** One base reading per read, the last repeating. */
+  readings?: readonly BaseReading[]
+  /** One open read per call, the last repeating, null for a read that failed. */
+  opens?: readonly (boolean | null)[]
+}
+
+interface StandingHarness {
+  readonly api: StandingApi
+  readonly calls: { opens: number; standings: string[]; sleeps: number[] }
+}
+
+/** The standing api over a fake clock that only `sleep` advances. */
+function makeStandingApi(fixture: StandingFixture = {}): StandingHarness {
+  const calls = { opens: 0, standings: [] as string[], sleeps: [] as number[] }
+  const tips = fixture.tips ?? [HEAD]
+  const readings = fixture.readings ?? [{ standing: 'fresh' }]
+  const opens = fixture.opens ?? [true]
+  let tipReads = 0
+  let clock = 0
+
+  const api: StandingApi = {
+    readTip: async () => {
+      const tip = tips[Math.min(tipReads, tips.length - 1)]
+      tipReads += 1
+      return tip ?? undefined
+    },
+    readStanding: async (head) => {
+      const reading =
+        readings[Math.min(calls.standings.length, readings.length - 1)]
+      calls.standings.push(head)
+      return reading ?? { standing: 'unknown' }
+    },
+    readOpen: async () => {
+      const open = opens[Math.min(calls.opens, opens.length - 1)]
+      calls.opens += 1
+      return open ?? undefined
+    },
+    sleep: async (ms) => {
+      calls.sleeps.push(ms)
+      clock += ms
+    },
+    now: () => clock,
+  }
+  return { api, calls }
+}
+
+describe('waitForStanding', () => {
+  it('should end as stale naming the moved paths once the base moves a branch path', async () => {
+    const { api } = makeStandingApi({
+      readings: [
+        { standing: 'fresh' },
+        { standing: 'stale', moved: ['src/a.ts'] },
+      ],
+    })
+
+    const result = await waitForStanding(api, {
+      waitSeconds: 600,
+      pollMs: 1000,
+    })
+
+    expect(result).toEqual({
+      kind: 'read',
+      reason: 'stale',
+      head: HEAD,
+      moved: ['src/a.ts'],
+      waitedSeconds: 1,
+    })
+  })
+
+  it('should end as conflict when the base no longer merges cleanly', async () => {
+    const { api } = makeStandingApi({ readings: [{ standing: 'conflict' }] })
+
+    const result = await waitForStanding(api, {
+      waitSeconds: 600,
+      pollMs: 1000,
+    })
+
+    expect(result).toEqual({
+      kind: 'read',
+      reason: 'conflict',
+      head: HEAD,
+      waitedSeconds: 0,
+    })
+  })
+
+  it('should end as closed rather than stale once the pull request merged', async () => {
+    const { api } = makeStandingApi({
+      readings: [{ standing: 'stale', moved: ['src/a.ts'] }],
+      opens: [false],
+    })
+
+    const result = await waitForStanding(api, {
+      waitSeconds: 600,
+      pollMs: 1000,
+    })
+
+    expect(result).toEqual({
+      kind: 'read',
+      reason: 'closed',
+      head: HEAD,
+      waitedSeconds: 0,
+    })
+  })
+
+  it('should end as closed when the branch left the remote and the pull request closed', async () => {
+    const { api } = makeStandingApi({ tips: [null], opens: [false] })
+
+    const result = await waitForStanding(api, {
+      waitSeconds: 600,
+      pollMs: 1000,
+    })
+
+    expect(result).toEqual({ kind: 'read', reason: 'closed', waitedSeconds: 0 })
+  })
+
+  it('should refuse when the tip read fails on an open pull request', async () => {
+    const { api } = makeStandingApi({ tips: [null], opens: [true] })
+
+    const result = await waitForStanding(api, {
+      waitSeconds: 600,
+      pollMs: 1000,
+    })
+
+    expect(result).toEqual({
+      kind: 'refused',
+      reason: 'gh-failed',
+      waitedSeconds: 0,
+    })
+  })
+
+  it('should refuse when the open read fails rather than act on a stale reading', async () => {
+    const { api } = makeStandingApi({
+      readings: [{ standing: 'stale', moved: ['src/a.ts'] }],
+      opens: [null],
+    })
+
+    const result = await waitForStanding(api, {
+      waitSeconds: 600,
+      pollMs: 1000,
+    })
+
+    expect(result).toEqual({
+      kind: 'refused',
+      reason: 'gh-failed',
+      waitedSeconds: 0,
+    })
+  })
+
+  it('should hold on a fresh base until the deadline and end as timeout', async () => {
+    const { api, calls } = makeStandingApi()
+
+    const result = await waitForStanding(api, { waitSeconds: 3, pollMs: 1000 })
+
+    expect(result).toEqual({
+      kind: 'read',
+      reason: 'timeout',
+      head: HEAD,
+      standing: 'fresh',
+      waitedSeconds: 3,
+    })
+    expect(calls.sleeps).toEqual([1000, 1500, 500])
+  })
+
+  it('should end as closed at the deadline for a pull request closed on a fresh base', async () => {
+    const { api } = makeStandingApi({ opens: [false] })
+
+    const result = await waitForStanding(api, { waitSeconds: 3, pollMs: 1000 })
+
+    expect(result).toEqual({
+      kind: 'read',
+      reason: 'closed',
+      head: HEAD,
+      waitedSeconds: 3,
+    })
+  })
+
+  it('should keep waiting through an unknown reading', async () => {
+    const { api } = makeStandingApi({
+      readings: [{ standing: 'unknown' }, { standing: 'conflict' }],
+    })
+
+    const result = await waitForStanding(api, {
+      waitSeconds: 600,
+      pollMs: 1000,
+    })
+
+    expect(result).toEqual({
+      kind: 'read',
+      reason: 'conflict',
+      head: HEAD,
+      waitedSeconds: 1,
+    })
+  })
+
+  it('should read the pull request state only on a non-fresh reading or at the deadline', async () => {
+    const { api, calls } = makeStandingApi()
+
+    await waitForStanding(api, { waitSeconds: 3, pollMs: 1000 })
+
+    expect(calls.opens).toBe(1)
+  })
+
+  it('should read the standing at a tip the worker pushed during the wait', async () => {
+    const { api, calls } = makeStandingApi({
+      tips: [HEAD, PUSHED],
+      readings: [{ standing: 'fresh' }, { standing: 'conflict' }],
+    })
+
+    await waitForStanding(api, { waitSeconds: 600, pollMs: 1000 })
+
+    expect(calls.standings).toEqual([HEAD, PUSHED])
+  })
 })

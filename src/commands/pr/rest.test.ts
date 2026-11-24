@@ -242,6 +242,50 @@ describe('canon pr reads through REST alone', () => {
     expect(record.reason).toBe('bad-wait')
   })
 
+  it('should refuse --wait beside --wait-standing, since one wait has one ending', async () => {
+    const record = await runVerb('review-state', [
+      '7',
+      '--wait',
+      '60',
+      '--wait-standing',
+      '60',
+    ])
+
+    expect(record.reason).toBe('bad-wait')
+  })
+
+  it('should refuse a --wait-standing that is not a whole number', async () => {
+    const record = await runVerb('review-state', [
+      '7',
+      '--wait-standing',
+      'soon',
+    ])
+
+    expect(record.reason).toBe('bad-wait')
+  })
+
+  it('should end a standing wait as timeout on an open pull request whose base never read', async () => {
+    writeFixture('pull.json', pullRow({ state: 'open' }))
+
+    const record = await runVerb('review-state', ['7', '--wait-standing', '0'])
+
+    expect(record).toMatchObject({
+      number: 7,
+      reason: 'timeout',
+      head: tip,
+      standing: 'unknown',
+      waitedSeconds: expect.any(Number),
+    })
+  })
+
+  it('should end a standing wait as closed on a closed pull request', async () => {
+    writeFixture('pull.json', pullRow({ state: 'closed' }))
+
+    const record = await runVerb('review-state', ['7', '--wait-standing', '0'])
+
+    expect(record).toMatchObject({ number: 7, reason: 'closed' })
+  })
+
   it('should refuse rather than report a first pass when the reviews read is refused', async () => {
     writeFixture('reviews-fail', '')
 

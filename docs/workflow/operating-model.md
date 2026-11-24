@@ -36,7 +36,8 @@ Each role keeps to its own writes, and five rules cover how the roles meet.
 6. The reviewer tells the session holding the branch to run `review-address`, found with `canon sessions list --branch`, once a pass posts a finding at any severity.
 7. The worker addresses the findings, rebases onto `origin/main` if a sibling touched its files, and pushes. It asks each reviewer `canon pr review-state` reads behind the head to re-review, ahead of CI.
 8. A pass posts `## Review` while anything is open and `## Review closed` when nothing is. The reviewer then runs `canon pr lift`.
-9. The operator runs `canon pr merge <number>` or names the PR for the orchestrator to merge, which then tells each trailing worker the merge touched to run `review-address` and rebase.
+9. The operator runs `canon pr merge <number>` or names the PR for the orchestrator to merge.
+   - Each trailing worker the merge touched rebases on the wake of its `canon pr review-state --wait-standing`, and the orchestrator hands the rebase only to a branch whose worker is gone
    - A standing authorization, scoped by default to the PRs in flight when the operator gives it, lets the orchestrator merge each as its gates pass and report after
    - The verb refuses `standing-stale`, naming the files, when a sibling merged since the fork point changed one the PR writes. The branch updates and reruns CI, since the same head refuses again.
    - The verb then fast-forwards the main worktree it ran from, so the `post-merge` hook runs, unless `--no-pull` is passed
