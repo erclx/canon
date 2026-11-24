@@ -32,9 +32,11 @@ A task's `Plan:` pointer can also fail after it is read:
 
 These stops come after the plan reads:
 
-- Verify fails. Read logs, fix manually, run `/git-ship --draft`, then run `${CLAUDE_SKILL_DIR}/references/draft-mark.md` as its pull request step returns.
+- Verify fails. A stage failed again after its own fix, so read logs, fix manually, run `/git-ship --draft`, then run `${CLAUDE_SKILL_DIR}/references/draft-mark.md` as its pull request step returns.
 - Verify hung. Narrow the parallel work on the machine, or raise the limit `CLAUDE.md` states beside its verify commands, then run `/git-ship --draft` and the same mark.
 - git-ship fails. Inspect the hook or remote error, then run `/git-ship --draft` and the same mark.
+
+The gate holds `tests` behind any failed stage, so a `tests` failure surfaces only after the rest clear, and its fix counts as that stage's own attempt.
 
 A resume typed bare opens the pull request ready, and only this chain runs the mark, so a resume carries both.
 
