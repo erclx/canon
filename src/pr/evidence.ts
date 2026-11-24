@@ -558,11 +558,8 @@ export function evidenceMarker(head: string): string {
 }
 
 /**
- * Every state opens within `EVIDENCE_OPEN_LIMIT` head images, so a comment is
- * never half open. `coveredWidths` names the widths whose reel covers the head,
- * as `canon pr lift` reads the carry. A width's skip line drops while its reel
- * covers the head, the line naming every width drops once each width the
- * checklist owes is covered, and the uncaptured line drops beside any covering reel.
+ * Every state opens within `EVIDENCE_OPEN_LIMIT` head images. `coveredWidths` names the widths whose reel covers the head, as `canon pr lift` reads the carry.
+ * A covered width drops its skip line, every owed width covered drops the line naming them all, and any covered reel drops the uncaptured line.
  */
 export function renderEvidenceBody(
   states: readonly EvidenceState[],
