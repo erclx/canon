@@ -22,7 +22,9 @@ A chain's create drafts at once, so its pull request reads draft from the first 
 
 ## The rebase handback
 
-A `STALE` or `CONFLICT` from the poll goes to the branch's own session the same way, with `review-address` as the skill to run, since its staleness test rebases a branch `main` moved under even when the merge is clean.
+A `STALE` or `CONFLICT` from the poll earns this handback only when the worker that built the branch is gone. A live worker holds a standing wait on `canon pr review-state --wait-standing` once its reviews close and rebases on its own wake, per `role-worker`, so a message to it would start the same rebase twice.
+
+The handback goes to a session launched for the branch the same way, with `review-address` as the skill to run, since its staleness test rebases a branch `main` moved under even when the merge is clean.
 
 - Name what merged under the branch, being the pull request that landed and the files the poll listed, so the worker reads those hunks first
 - Say that a check failing after a clean rebase is a semantic conflict to fix on the branch
