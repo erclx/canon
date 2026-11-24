@@ -18,6 +18,7 @@ import {
   type FindingKind,
   groupOfHeading,
   groupRuleFindings,
+  isOperatorHeld,
   orderingPath,
   readBoard,
 } from '@/tasks/validate'
@@ -971,8 +972,12 @@ export async function promoteTask(
       )
     }
 
+    const kept =
+      found.row.waiting && isOperatorHeld(found.row.waiting)
+        ? found.row.waiting
+        : undefined
     const waiting = GROUP_COLUMNS[target].includes('Waiting on')
-      ? (options.waiting?.trim() ?? PLANNED_WAITING)
+      ? (options.waiting?.trim() ?? kept ?? PLANNED_WAITING)
       : undefined
     const next = placed(
       board,
