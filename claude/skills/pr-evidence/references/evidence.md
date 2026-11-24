@@ -83,7 +83,7 @@ canon pr evidence <number> --checklist <main-root>/.canon/tmp/handoff/ui-checkli
 Pass `--local-skip '<reason>: <message>'` in place of `--local` when the local step held a refusal, and `--reel-skip '<reason>: <message>'` per reel skip, prefixed `<width>=` for one width. Each puts the line the closing report prints onto the comment, so a reader of the pull request sees why the link or the reel is missing.
 
 - Pass the same text the closing report carries, so the comment and the report agree
-- Pass `--reel-covers '<coverage>'` directly after each `--reel` with that reel's coverage, since the verb pairs them by position
+- Pass one `--reel-covers '<coverage>'` per `--reel`, since the verb reads the Nth covers as describing the Nth reel
 - A later run that posts the link or films the reel drops the line, and one passing neither flag carries it forward
 
 One call answers both questions because a checklist decides `no-evidence`. A diff carrying a checklist and no evidence image renders `ok` with the checklist in a marked body, so the checklist lands in the one comment a later call finds and edits.

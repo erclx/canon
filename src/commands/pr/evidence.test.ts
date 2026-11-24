@@ -219,6 +219,20 @@ describe('canon pr evidence --local', () => {
       expect(record).not.toHaveProperty('body')
     })
 
+    it('should refuse as reel-covers-unpaired when reels outnumber covers', async () => {
+      const record = await runEvidenceCommand([
+        '--reel',
+        NARROW,
+        '--reel',
+        WIDE,
+        '--reel-covers',
+        'filmed: Sheet',
+      ])
+
+      expect(record).toMatchObject({ reason: 'reel-covers-unpaired' })
+      expect(record).not.toHaveProperty('body')
+    })
+
     it('should refuse as reel-covers-unpaired for a coverage line with no reel', async () => {
       const record = await runEvidenceCommand([
         '--reel-covers',

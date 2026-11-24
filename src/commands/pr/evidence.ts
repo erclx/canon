@@ -105,7 +105,7 @@ const EVIDENCE_REFUSALS: Record<EvidenceRefusal, string> = {
   'no-base':
     'GitHub reported no merge base for this pull request, so no path could be judged added or changed.',
   'reel-covers-unpaired':
-    'More --reel-covers were passed than --reel, so a coverage line would describe no reel. Pass one --reel-covers after each --reel it describes, in the same order.',
+    'The --reel-covers count differs from the --reel count, so a coverage line would land under the wrong reel or none. The Nth --reel-covers describes the Nth --reel, so pass one per reel or none at all.',
   'reel-width-repeated':
     'Two --reel links name one width, so the comment would embed two reels for one width. Pass one --reel per width, each the link canon pr frames --reel returned.',
   'unreadable-changes':
@@ -254,9 +254,10 @@ export function registerEvidence(pr: Command): void {
         '',
         '--reel-covers puts one **Reel covers:** line under a passed reel,',
         'naming the checklist groups it films and the ones it leaves out, the',
-        'first --reel-covers under the first --reel and so on. More covers than',
-        'reels refuse as reel-covers-unpaired, so a line never describes a reel',
-        'that is not there. The line belongs to its reel: it is carried forward',
+        'Nth --reel-covers under the Nth --reel, whatever order the two flags',
+        'arrive in. Passing any covers takes one per reel, and a count that',
+        'differs refuses as reel-covers-unpaired, so a line never lands under',
+        'the wrong reel. The line belongs to its reel: it is carried forward',
         'with a carried reel and dropped when a passed reel replaces it.',
         '',
         '--local-skip and --reel-skip each put a line under the addresses,',
@@ -355,7 +356,7 @@ export function registerEvidence(pr: Command): void {
         'Refusals, read off `reason`:',
         '  unreadable-checklist  --checklist named a path that could not be read,',
         '                        or one holding nothing',
-        '  reel-covers-unpaired  more --reel-covers were passed than --reel',
+        '  reel-covers-unpaired  --reel-covers were passed in a count other than --reel',
         '  reel-width-repeated   two --reel links name one width',
         '  no-branch             the pull request carries no head branch name',
         '  no-base               GitHub reported no merge base for the pull request',
@@ -654,7 +655,7 @@ async function runEvidence(
 
   const passedLinks = opts.reel ?? []
   const passedCovers = opts.reelCovers ?? []
-  if (passedCovers.length > passedLinks.length) {
+  if (passedCovers.length > 0 && passedCovers.length !== passedLinks.length) {
     return refuseWith(
       'reel-covers-unpaired',
       EVIDENCE_REFUSALS['reel-covers-unpaired'],

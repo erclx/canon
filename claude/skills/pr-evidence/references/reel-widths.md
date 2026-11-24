@@ -27,7 +27,7 @@ Run `### Order the beats` in `reel.md` over each width's boxes on their own. Eac
 
 Hold the filmed and left-out lists of `### Hold the coverage` once per reel, over the groups holding a box at that width. A group whose boxes all sit at another width belongs to that width's reel and is never left out of this one.
 
-Pass each reel's line as a `--reel-covers` directly after its `--reel`, since `canon pr evidence` pairs the two by position and refuses `reel-covers-unpaired` when covers outnumber reels.
+Pass one `--reel-covers` per `--reel`, since `canon pr evidence` reads the Nth covers as describing the Nth reel and refuses `reel-covers-unpaired` when the counts differ.
 
 ## Skips per width
 
