@@ -53,23 +53,20 @@ describe('measureDesignProse', () => {
     ])
   })
 
-  it('counts neither labeled Layout line as a rule', () => {
+  it('counts no Draw widths line in Layout as a rule', () => {
     const source = record({
       Layout: [
         rules(DESIGN_BUDGET.rules),
         '- Draw widths: 1280, the desktop frame',
-        '- Device classes: desktop',
       ].join('\n'),
     })
 
     expect(measureDesignProse(source)).toEqual([])
   })
 
-  it('still counts a Device classes line outside Layout as a rule', () => {
+  it('still counts a Draw widths line outside Layout as a rule', () => {
     const source = record({
-      Shapes: [rules(DESIGN_BUDGET.rules), '- Device classes: desktop'].join(
-        '\n',
-      ),
+      Shapes: [rules(DESIGN_BUDGET.rules), '- Draw widths: 1280'].join('\n'),
     })
 
     expect(measureDesignProse(source)).toEqual([
