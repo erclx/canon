@@ -28,7 +28,7 @@ The stack ships `tests/test_smoke.py` as a copy-once seed. `pytest` then collect
 
 ## What ships as golden configs
 
-- `ruff.toml` sets line length 88, target `py314`, strict lint rules (`E`, `W`, `F`, `I`, `B`, `C4`, `UP`, `N`), single-quote format, and banned relative imports.
+- `ruff.toml` sets line length 88, target `py314`, strict lint rules (`E`, `W`, `F`, `I`, `B`, `C4`, `UP`, `N`, `TID`), single-quote format, and banned relative imports.
 - `mypy.ini` sets strict mode, `python_version = 3.14`, and `mypy_path = src`, and excludes `tests/` and `docs/`.
 - `pytest.ini` puts tests under `tests/` and source under `src/`.
 - `.coveragerc` measures branch coverage on `src/` with the html report under `.coverage_cache/html`.
