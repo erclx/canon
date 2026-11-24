@@ -14,6 +14,11 @@ import {
   stalledRuns,
   withMergeState,
 } from '@/pr/checks'
+import {
+  DEVICE_CLASSES,
+  type DeviceClass,
+  readDeviceClasses,
+} from '@/design/device-classes'
 import { owedReelWidths, readChecklistBoxes } from '@/pr/evidence'
 import {
   type ChecksGate,
@@ -117,7 +122,18 @@ export async function readEvidenceGate(
   } catch {
     return undefined
   }
-  return toEvidenceGate(record)
+  return toEvidenceGate(record, readSupportedClasses(root))
+}
+
+/**
+ * The classes the project's design record declares. A line the reader refuses
+ * warns and reads as all three, so the lift owes every width rather than fewer.
+ */
+function readSupportedClasses(root: string): readonly DeviceClass[] {
+  const read = readDeviceClasses(root)
+  if (read.ok) return read.classes
+  logWarn(`${read.message} The lift owes a reel at every class's width.`)
+  return DEVICE_CLASSES
 }
 
 /** The `canon pr evidence --check --json` fields the lift reads, each unchecked until `toEvidenceGate` narrows it. */
@@ -139,6 +155,7 @@ export interface EvidenceCheckRecord {
  */
 export function toEvidenceGate(
   record: EvidenceCheckRecord,
+  classes: readonly DeviceClass[] = DEVICE_CLASSES,
 ): EvidenceGate | undefined {
   if (record.reason !== 'settled' && record.reason !== 'owed') return undefined
 
@@ -156,7 +173,7 @@ export function toEvidenceGate(
     ...(typeof record.reelSkip === 'string' && { reelSkip: record.reelSkip }),
     ...(reelSkips.size > 0 && { reelSkips }),
     ...(typeof record.checklist === 'string' && {
-      owedWidths: owedReelWidths(readChecklistBoxes(record.checklist)),
+      owedWidths: owedReelWidths(readChecklistBoxes(record.checklist), classes),
     }),
   }
 }

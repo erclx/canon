@@ -1,3 +1,8 @@
+import {
+  DEVICE_CLASSES,
+  type DeviceClass,
+  deviceClassOf,
+} from '@/design/device-classes'
 import { isPainted, type PaintedPatterns } from '@/pr/painted'
 import type { PreviewHeadReason } from '@/pr/preview'
 
@@ -1046,13 +1051,18 @@ function readBoxWidth(text: string): { width?: number } {
 /**
  * The widths a reel is owed at, one per width a drivable box names and the
  * default for a box naming none, narrowest first. A box with a malformed
- * width reads as naming none.
+ * width reads as naming none, and a width outside the device classes the
+ * project supports is owed nothing.
  */
-export function owedReelWidths(boxes: readonly ChecklistBox[]): number[] {
+export function owedReelWidths(
+  boxes: readonly ChecklistBox[],
+  classes: readonly DeviceClass[] = DEVICE_CLASSES,
+): number[] {
   const widths = new Set(
     boxes
       .filter((box) => !box.isTaste)
-      .map((box) => box.width ?? DEFAULT_REEL_WIDTH),
+      .map((box) => box.width ?? DEFAULT_REEL_WIDTH)
+      .filter((width) => classes.includes(deviceClassOf(width))),
   )
   return [...widths].sort((a, b) => a - b)
 }

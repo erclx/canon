@@ -49,6 +49,15 @@ describe('toEvidenceGate', () => {
     expect(gate).not.toHaveProperty('reels')
   })
 
+  it('should owe no width of a device class the project leaves out', () => {
+    const gate = toEvidenceGate(
+      { reason: 'settled', checklist: CHECKLIST, drivable: 2 },
+      ['desktop'],
+    )
+
+    expect(gate?.owedWidths).toEqual([1280])
+  })
+
   it('should owe no width when the record carries no checklist', () => {
     const gate = toEvidenceGate({ reason: 'owed', owed: ['evidence'] })
 

@@ -841,6 +841,18 @@ describe('owedReelWidths', () => {
   it('should owe nothing for a checklist of taste boxes alone', () => {
     expect(owedReelWidths(readChecklistBoxes('- [ ] calm (taste)'))).toEqual([])
   })
+
+  it('should owe no width whose device class the record leaves out', () => {
+    const boxes = readChecklistBoxes(
+      [
+        '- [ ] /board, 390: tap → opens',
+        '- [ ] /board, 834: click → opens',
+        '- [ ] /board: click → opens',
+      ].join('\n'),
+    )
+
+    expect(owedReelWidths(boxes, ['desktop'])).toEqual([1280])
+  })
 })
 
 describe('reels per width', () => {
