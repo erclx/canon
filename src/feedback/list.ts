@@ -4,7 +4,7 @@ import {
   type IssueFailureReason,
   type IssueList,
 } from '@/feedback/github-format'
-import { isOwnCheckout } from '@/roots/project'
+import { isWithinOwnCheckout } from '@/roots/project'
 
 /**
  * Where a caller's feedback goes. A session in the toolkit's own checkout files
@@ -14,7 +14,7 @@ export type FeedbackRoute = 'board' | 'issues'
 
 export function feedbackRoute(
   root: string,
-  own: boolean = isOwnCheckout(root),
+  own: boolean = isWithinOwnCheckout(root),
 ): FeedbackRoute {
   return own ? 'board' : 'issues'
 }

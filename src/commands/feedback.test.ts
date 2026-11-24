@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -341,6 +341,17 @@ describe('feedbackRoute', () => {
 
   it('should read issues for a target project', () => {
     expect(feedbackRoute(project)).toBe('issues')
+  })
+
+  it('should read board from a subdirectory of the toolkit checkout', () => {
+    expect(feedbackRoute(join(PROJECT_ROOT, 'src', 'feedback'))).toBe('board')
+  })
+
+  it('should read issues from a subdirectory of a target project', () => {
+    const nested = join(project, 'src', 'deep')
+    mkdirSync(nested, { recursive: true })
+
+    expect(feedbackRoute(nested)).toBe('issues')
   })
 
   it('should read issues where no package.json exists', () => {
