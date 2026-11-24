@@ -37,8 +37,10 @@ import { surfaceDir } from '@/roots/surface'
 import { seedRoots } from '@/tooling/seeds'
 import { plural } from '@/cli/ui'
 import {
+  README_ONLY_MARKER,
   README_PARAPHRASE_MARKER,
   readmeCitationsIn,
+  uncitedReadmeSections,
 } from '@/web/readme-citations'
 
 export interface CommandResult {
@@ -1047,6 +1049,22 @@ export const readmeCitations: Measure = async (ctx) => {
   )
 
   if (bad.length === 0) {
+    const uncited = uncitedReadmeSections(
+      readmeText,
+      citations.flatMap((citation) => citation.phrases),
+    )
+
+    if (uncited.length > 0) {
+      return {
+        emissions: uncited.map((section) =>
+          warn(
+            `${readmePath}:${section.line} opens ## ${section.heading}, which no quoted phrase in ${copyPath} cites`,
+          ),
+        ),
+        failure: `README.md carries ${plural(uncited.length, 'section')} no landing phrase quotes. Quote one from each in ${copyPath}, or mark each README-only with <!-- ${README_ONLY_MARKER}: <reason> --> on the first line under its heading.`,
+      }
+    }
+
     return {
       emissions: [
         info(

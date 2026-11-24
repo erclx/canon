@@ -2,6 +2,7 @@ import { execaSync } from 'execa'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { BASELINE_REL } from '@/audits/baseline'
 import {
@@ -43,7 +44,10 @@ import {
 import { cliRunner } from '@/gate/sequencer'
 import { buildGovCatalog } from '@/gov/list'
 import { REFERENCE_MARKER } from '@/shipped/references'
-import { README_PARAPHRASE_MARKER } from '@/web/readme-citations'
+import {
+  README_ONLY_MARKER,
+  README_PARAPHRASE_MARKER,
+} from '@/web/readme-citations'
 
 describe('auditsBaselineRel', () => {
   it('should agree with the path audits/baseline.ts writes when the project has not moved', () => {
@@ -579,6 +583,33 @@ describe('readmeCitations', () => {
     const report = await readmeCitations(context())
 
     expect(report.failure).toBeUndefined()
+  })
+
+  it('fails on a README section no quoted phrase cites and no marker covers', async () => {
+    write(
+      'README.md',
+      '## Install it\n\nRun one command.\n\n## Contributing\n\nIssues are welcome.\n',
+    )
+    write(
+      'web/src/content/copy.ts',
+      '// README.md: "Install it"\nexport const install = {}\n',
+    )
+
+    const report = await readmeCitations(context())
+
+    expect(report.failure).toContain(README_ONLY_MARKER)
+    expect(report.emissions[0]?.text).toContain('README.md:5')
+    expect(report.emissions[0]?.text).toContain('Contributing')
+  })
+
+  it('passes on the shipped README and landing copy', async () => {
+    const report = await readmeCitations({
+      ...context(),
+      root: fileURLToPath(new URL('../../', import.meta.url)),
+    })
+
+    expect(report.failure).toBeUndefined()
+    expect(report.unmeasured).toBeUndefined()
   })
 })
 
