@@ -103,7 +103,7 @@ A standing authorization is the operator's word to merge each pull request in a 
 - Fix its scope at the grant, as the pull requests the operator lists, or the ones in flight then when they name none. A row promoted later stays outside it.
 - It ends on the event the operator states, or once every pull request in its fixed scope has merged
 - It survives a compaction handoff, whose map records the scope as a list and the end, for the next session to re-test per `orchestrator-handoff.md`
-- An unattended run suspends it, since that run merges nothing per `orchestrator-unattended.md`, and it resumes only on the operator's word once they return
+- An unattended run suspends it unless the operator restates it as the run's merge grant at the start, and it resumes only on the operator's word once they return
 
 A pull request outside the scope takes a recommendation and nothing runs, and a merge past the end waits on the operator's word again.
 
@@ -117,6 +117,15 @@ Run the line under it only when every gate below passes at the moment of the mer
 | The pull request comes first among those open in the scope, per `orchestrator-merge-order.md` | The pull request it waits behind                                               |
 
 A failing gate leaves the merge for the next read. No shipped rule makes the client prompt on `canon pr merge`, so the gates above are the whole check before the line runs.
+
+### A grant named at the start of an unattended run
+
+A merge grant named at the start of an unattended run is a standing authorization the operator gave knowing they would be away, so it holds through the run.
+
+- Fix its scope as the rows and pull requests the operator named. A named row covers the pull request it opens after the grant.
+- A row the operator did not name stays outside, even one promoted mid-run
+- Merge under it on the gates above, one pull request at a time, and list each merge in the morning report per `orchestrator-unattended.md`
+- It ends with the run, and the next run takes a fresh grant
 
 ### A stale refusal
 
