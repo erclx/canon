@@ -33,7 +33,7 @@ Beside `src/`, holds the tests, the social card route, and the files served as t
 
 ### `assets/`
 
-This repository's self-portrait for a visitor who never opens the source, where `examples/` is sample input for a reader about to copy and run it.
+This repository's self-portrait for a visitor who never opens the source, where `examples/` holds filled-in records for a reader learning each record's shape.
 
 - `evidence/home/` is the committed baseline of the page, one folder per section holding a frame per theme at the two widths `capture-home.sh` keeps, rewritten on `main` by `refresh-capture-frames.yml`
 - `frames/` holds the social card and its stamp
