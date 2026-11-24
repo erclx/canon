@@ -120,7 +120,7 @@ A failing gate leaves the merge for the next read. No shipped rule makes the cli
 
 ### A grant named at the start of an unattended run
 
-A merge grant named at the start of an unattended run is a standing authorization the operator gave knowing they would be away, so it holds through the run.
+This grant is a standing authorization the operator gave knowing they would be away, so it holds through the run.
 
 - Fix its scope as the rows and pull requests the operator named. A named row covers the pull request it opens after the grant.
 - A row the operator did not name stays outside, even one promoted mid-run
