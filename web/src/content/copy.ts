@@ -23,13 +23,13 @@ export const site = {
   origin: ORIGIN,
   /** The browser tab and the share title, which read the project name alone with no tagline after it. */
   title: 'Canon',
-  // README.md: "A Claude Code plugin and CLI that runs agent work from plan to merge."
+  // README.md: "A Claude Code plugin and CLI that runs your agent's work from plan to merge, holds it to cited engineering practice, and sets up every repo the same way."
   description:
-    'A Claude Code plugin and CLI that runs agent work from plan to merge.',
-  /** The README's payoff line, also the `description` in `package.json` and both manifests, kept equal by `positioning.test.ts`. */
-  // README.md: "Runs your agent's work and keeps its code good, on one setup for every repo."
+    "A Claude Code plugin and CLI that runs your agent's work from plan to merge, holds it to cited engineering practice, and sets up every repo the same way.",
+  /** The README's opening sentence, also the `description` in `package.json` and both manifests, kept equal by `positioning.test.ts`. */
+  // README.md: "A Claude Code plugin and CLI that runs your agent's work from plan to merge, holds it to cited engineering practice, and sets up every repo the same way."
   tagline:
-    "Runs your agent's work and keeps its code good, on one setup for every repo.",
+    "A Claude Code plugin and CLI that runs your agent's work from plan to merge, holds it to cited engineering practice, and sets up every repo the same way.",
   /** The handle the social card signs with, rather than the copyright holder `LICENSE` names. */
   author: 'erclx',
 }
@@ -71,12 +71,12 @@ export const fold = {
   // README.md: "Claude Code plugin and CLI"
   kick: 'Claude Code plugin and CLI',
   /** The claim in three runs, with the record icon set before `plan` and the merge icon before `merge`. */
-  // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs agent work from" "plan to merge"
-  parts: ['Canon runs agent work from', 'plan to', 'merge'] as const,
-  // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs agent work from plan to merge"
-  headline: 'Canon runs agent work from plan to merge',
-  // README.md: "And holds it to good engineering practice the whole way."
-  lead: 'And holds it to good engineering practice the whole way.',
+  // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs your agent's work from" "plan to merge"
+  parts: ["Canon runs your agent's work from", 'plan to', 'merge'] as const,
+  // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs your agent's work from" "plan to merge"
+  headline: "Canon runs your agent's work from plan to merge",
+  // README.md: canon-allow-readme-paraphrase: the opening sentence's second clause, capitalized to stand as its own line. "holds it to cited engineering practice"
+  lead: 'Holds it to cited engineering practice, and sets up every repo the same way.',
   view: {
     title: 'claude',
     // README.md: canon-allow-readme-paraphrase: the agent view's own prompt hint, which no README sentence carries.

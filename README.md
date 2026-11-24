@@ -7,7 +7,7 @@
 
 # canon
 
-A Claude Code plugin and CLI that runs agent work from plan to merge. And holds it to good engineering practice the whole way. Runs your agent's work and keeps its code good, on one setup for every repo.
+A Claude Code plugin and CLI that runs your agent's work from plan to merge, holds it to cited engineering practice, and sets up every repo the same way.
 
 [![npm version](https://img.shields.io/npm/v/@erclx/canon)](https://www.npmjs.com/package/@erclx/canon)
 [![CI status](https://img.shields.io/github/actions/workflow/status/erclx/canon/verify.yml?branch=main)](https://github.com/erclx/canon/actions/workflows/verify.yml)
