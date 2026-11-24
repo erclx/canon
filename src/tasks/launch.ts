@@ -6,6 +6,24 @@ import {
   writeBoard,
 } from '@/tasks/board'
 
+/** The models whose lowest launchable effort is above `low`, by the runbook's mapping. */
+const FLOORED_MODELS: readonly LaunchPick['model'][] = ['opus', 'sonnet']
+
+/**
+ * Whether a pick sits below its model's floor, being `low` on `opus` or
+ * `sonnet` that the operator did not choose. Only a write is held to it, so a
+ * cell already on the board still reads.
+ */
+export function belowEffortFloor(
+  pick: Pick<LaunchPick, 'model' | 'effort' | 'override'>,
+): boolean {
+  return (
+    !pick.override &&
+    pick.effort === 'low' &&
+    FLOORED_MODELS.includes(pick.model)
+  )
+}
+
 /** The one group carrying a Launch cell, since only a queued row has a launch still to make. */
 const LAUNCH_GROUP = 'Up next'
 

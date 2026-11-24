@@ -518,6 +518,7 @@ export const BOARD_REFUSALS = [
   'top-group',
   'cell-long',
   'bad-input',
+  'effort-floor',
 ] as const
 
 export type BoardRefusal = (typeof BOARD_REFUSALS)[number]

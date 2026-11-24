@@ -18,7 +18,7 @@ import {
   promoteTask,
   WAITING_LIMIT,
 } from '@/tasks/board'
-import { writeLaunch } from '@/tasks/launch'
+import { belowEffortFloor, writeLaunch } from '@/tasks/launch'
 import { checkLift } from '@/commands/pr/lift'
 import { type FlightReaders, readFlight } from '@/tasks/flight'
 import { resolveSessions } from '@/sessions/resolve'
@@ -83,6 +83,7 @@ const BOARD_WRITE_REFUSALS = [
   '  group-doubled   the board opens one group twice, as Run now beside In flight',
   `  cell-long       the Waiting on cell renders past ${WAITING_LIMIT} characters`,
   '  bad-input       a malformed group, position, or Waiting on text',
+  '  effort-floor    canon tasks launch picked low on opus or sonnet with no --override',
   '',
   'Exit codes:',
   '  0  the board was written',
@@ -264,8 +265,10 @@ export function registerBoard(tasks: Command): void {
         ...BOARD_WRITE_REFUSALS,
         '',
         'The cell stores a pick the dispatcher made from its runbook, and the',
-        'verb computes none. A row promoted to In flight carries the model and',
-        'effort into its Session cell and leaves the Launch cell behind.',
+        'verb computes none, though it refuses low on opus or sonnet unless',
+        "--override marks the pick as the operator's. A row promoted to In",
+        'flight carries the model and effort into its Session cell and leaves',
+        'the Launch cell behind.',
         'no-column here means the row sits outside Up next.',
         '',
         'Examples:',
@@ -412,7 +415,17 @@ function launchFrom(
     )
   }
 
-  return { role, model, effort, route, override: opts.override ?? false }
+  const pick = { role, model, effort, route, override: opts.override ?? false }
+  if (belowEffortFloor(pick)) {
+    return {
+      ok: false,
+      reason: 'effort-floor',
+      message: `${model} launches at medium or above, so pass --override when the operator chose ${effort}.`,
+      detail: [],
+    }
+  }
+
+  return pick
 }
 
 function badInput(message: string): BoardRefused {

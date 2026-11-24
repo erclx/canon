@@ -112,6 +112,7 @@ A `claude --bg` session inherits the launching session's model, so an orchestrat
 
 - Read the role's worst failure and whether a test, gate, or review stops it, beside the plan's `## Weight`, never the folder, the plan's length, or its `Touches` count
 - Planner: `opus` for a row that changes a contract others consume, spans modules, or needs slicing. `sonnet` for a narrow row, even one inside a hook or governance folder.
+  - Planner taking several rows: `opus` at `medium`, and at `high` when any row is heavy or leaves open calls.
 - Worker, and the review-address pass against the findings in hand: `opus` where the plan is heavy or leaves a cross-module call tests will not settle. `sonnet` where it is light or pins the fix.
 - Code reviewer: `opus` on a heavy plan or where a miss would ship unseen, a change to behavior no test or gate exercises that other surfaces read. `sonnet` otherwise, a one-line hook edit included.
 - UI reviewer: `sonnet` by default, `opus` only on the operator's word. `sonnet` is the measured floor, since a cheaper tier passed real defects on that checklist, and no tier above it is measured.
@@ -122,7 +123,15 @@ A plan stating no `## Weight`, or stating medium, dispatches on the role's test 
 
 ### Effort
 
-Name `<effort>` beside `<model>` on every launch, by the same test. No level is measured per role, so the two below are starting points rather than defaults.
+Name `<effort>` beside `<model>` on every launch, by the same test. Each model launches at one level and steps up on one condition.
+
+| Model    | Launch at | Step up to | When                                  |
+| -------- | --------- | ---------- | ------------------------------------- |
+| `opus`   | `medium`  | `high`     | The work is heavy or risky            |
+| `sonnet` | `medium`  | `high`     | The plan does not pin the work        |
+| `fable`  | `low`     | `high`     | The work is long, hard, or unattended |
+
+`canon tasks launch` refuses `low` on `opus` and `sonnet` unless the pick carries `--override`. The bullets below are how a step-up is judged.
 
 - `high` where the plan leaves a call that no test, gate, or review settles
 - `medium` where the plan pins the work or the pass follows a checklist, the UI reviewer's included
@@ -136,7 +145,7 @@ A launch naming no effort takes the saved setting or the model's default, never 
 
 ### The top tier
 
-`fable`, the tier above `opus`, runs only on the operator's word, for one dispatch or as a standing pick for the session. `haiku` stays never.
+`fable`, the tier above `opus`, runs only on the operator's word, for one dispatch or as a standing pick for the session. `haiku` stays never. `fable` launches at `low` and steps up to `high` on the table's condition.
 
 ## Dispatch
 
