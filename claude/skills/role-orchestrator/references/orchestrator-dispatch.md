@@ -39,7 +39,7 @@ Never shorten a non-conforming slug here, since a rename parts the branch from t
 
 Run `canon tasks plan-answers <plan> --json` and read `launchable` off the record. Branch on `launchable` rather than on the exit code, which a wrapping shell function can flatten to zero and so read a held row as clear.
 
-- Hold a row whose `Waiting on` has not cleared, which no other check reads
+- Read `canon tasks waves --json` and hold a row listed in `held`, or whose `after` names an unmerged row, since the verb splits a blocker from a ranking phrase
 - `launchable: true`: proceed to the branch check, and name each `deferred` label in the launch brief as a value the worker asks the operator for at build
 - `launchable: false`: report every entry in `open`, each with its question label and stated reason, and hand the row to the human-launch line below
 - Never fill the slot on the operator's behalf, the one move the plan standard forbids outright
