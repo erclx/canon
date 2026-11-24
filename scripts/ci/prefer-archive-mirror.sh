@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
-# Takes the AWS ec2 mirror out of the runner's apt mirror list, since an AWS-hosted
-# runner lists it first and it can degrade to a trickle that times an install out.
-# Usage: prefer-archive-mirror.sh [--drop-first]
-# --drop-first removes every line above archive.ubuntu.com, for a retry that must
-# leave whichever mirror came first. Always exits 0, since apt may pass without it.
+# Drops the AWS ec2 mirror from the runner's apt list, since it can degrade to a trickle.
+# Usage: prefer-archive-mirror.sh [--drop-first], which drops every line above archive.ubuntu.com.
+# Always exits 0, since apt may pass without the change.
 set -u
 
 list=${APT_MIRRORS_FILE:-/etc/apt/apt-mirrors.txt}
