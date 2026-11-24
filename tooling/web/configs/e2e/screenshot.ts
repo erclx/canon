@@ -33,44 +33,110 @@ const DEVICE_CLASSES = ['phone', 'tablet', 'desktop'] as const
 
 type DeviceClass = (typeof DEVICE_CLASSES)[number]
 
-const DESIGN_RECORD = 'canon/DESIGN.md'
+const DEVICE_CONFIG = 'canon/config/design.toml'
+
+interface DeviceConfig {
+  readonly default: readonly DeviceClass[]
+  readonly scopes: ReadonlyMap<string, readonly DeviceClass[]>
+}
 
 /**
- * The classes the `Device classes:` line under `## Layout` declares, all three when the record, section, or line is
- * absent. The grammar is the design record standard's, and a name outside the three exits 1 rather than dropping one.
+ * The `[device-classes]` table of `canon/config/design.toml`, all three classes when the file or table is absent.
+ * The grammar is the design record standard's, and anything it refuses exits 1 rather than dropping a class.
  */
-function readDeviceClasses(): readonly DeviceClass[] {
-  if (!existsSync(DESIGN_RECORD)) return DEVICE_CLASSES
-  let isLayout = false
-  for (const line of readFileSync(DESIGN_RECORD, 'utf8').split('\n')) {
-    const heading = /^##\s+(.+?)\s*$/.exec(line)
-    if (heading) {
-      isLayout = heading[1] === 'Layout'
-      continue
+function readDeviceConfig(): DeviceConfig {
+  const none: DeviceConfig = { default: DEVICE_CLASSES, scopes: new Map() }
+  if (!existsSync(DEVICE_CONFIG)) return none
+  const refuse = (field: string, detail: string): never => {
+    console.error(
+      `${field === '' ? DEVICE_CONFIG : `${field} in ${DEVICE_CONFIG}`} ${detail}.`,
+    )
+    process.exit(1)
+  }
+  // Read off the global rather than imported, so a target without Bun's types still typechecks the harness.
+  const toml = (
+    globalThis as unknown as {
+      Bun?: { TOML: { parse: (text: string) => unknown } }
     }
-    const value = isLayout
-      ? /^\s*(?:[-*+]\s+)?Device classes:(.*)$/i.exec(line)?.[1]
-      : undefined
-    if (value === undefined) continue
-    const names = value
-      .split('.')[0]
-      .split(/,|\band\b/)
-      .map((token) => token.trim().toLowerCase())
-      .filter((token) => token !== '')
-    const unknown = names.find(
+  ).Bun?.TOML
+  if (toml === undefined) return refuse('', 'is read under Bun alone')
+  let parsed: unknown
+  try {
+    parsed = toml.parse(readFileSync(DEVICE_CONFIG, 'utf8'))
+  } catch {
+    return refuse('', 'is not valid TOML')
+  }
+
+  const table = (value: unknown, field: string): Record<string, unknown> =>
+    typeof value === 'object' && value !== null && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : refuse(field, 'is not a table')
+  const keys = (
+    value: Record<string, unknown>,
+    known: readonly string[],
+    field: string,
+  ): void => {
+    const unknown = Object.keys(value).find((key) => !known.includes(key))
+    if (unknown !== undefined) {
+      refuse(
+        field === '' ? unknown : `${field}.${unknown}`,
+        `is no key. It takes ${known.join(', ')}`,
+      )
+    }
+  }
+  const names = (value: unknown, field: string): string[] =>
+    value === undefined
+      ? []
+      : Array.isArray(value) &&
+          value.every((entry) => typeof entry === 'string' && entry !== '')
+        ? value
+        : refuse(field, 'is not a list of names')
+  const classes = (value: unknown, field: string): DeviceClass[] => {
+    if (value === undefined) refuse(field, 'is missing')
+    const read = names(value, field).map((name) => name.toLowerCase())
+    if (read.length === 0) refuse(field, 'names no device class')
+    const unknown = read.find(
       (name) => !(DEVICE_CLASSES as readonly string[]).includes(name),
     )
-    if (names.length === 0 || unknown !== undefined) {
-      const named =
-        unknown === undefined ? 'names no device class' : `names '${unknown}'`
-      console.error(
-        `The Device classes: line under ## Layout in ${DESIGN_RECORD} ${named}. It takes phone, tablet, or desktop.`,
-      )
-      process.exit(1)
+    if (unknown !== undefined) {
+      refuse(field, `names '${unknown}'. It takes phone, tablet, or desktop`)
     }
-    return DEVICE_CLASSES.filter((deviceClass) => names.includes(deviceClass))
+    return DEVICE_CLASSES.filter((deviceClass) => read.includes(deviceClass))
   }
-  return DEVICE_CLASSES
+  const why = (value: unknown, field: string): void => {
+    if (typeof value !== 'string' || value.trim() === '') {
+      refuse(field, 'is missing, and every declared set of classes says why')
+    }
+  }
+
+  const file = table(parsed, '')
+  keys(file, ['device-classes'], '')
+  if (file['device-classes'] === undefined) return none
+  const root = table(file['device-classes'], 'device-classes')
+  keys(root, ['default', 'why', 'scopes'], 'device-classes')
+  let fallback: readonly DeviceClass[] = DEVICE_CLASSES
+  if (root.default !== undefined) {
+    fallback = classes(root.default, 'device-classes.default')
+    why(root.why, 'device-classes.why')
+  }
+  const scopes = new Map<string, readonly DeviceClass[]>()
+  const declared =
+    root.scopes === undefined ? {} : table(root.scopes, 'device-classes.scopes')
+  for (const [name, value] of Object.entries(declared)) {
+    const field = `device-classes.scopes.${name}`
+    const scope = table(value, field)
+    keys(scope, ['groups', 'paths', 'classes', 'why'], field)
+    const reach = [
+      ...names(scope.groups, `${field}.groups`),
+      ...names(scope.paths, `${field}.paths`),
+    ]
+    if (reach.length === 0) {
+      refuse(field, 'names no groups or paths, so no change can reach it')
+    }
+    scopes.set(name, classes(scope.classes, `${field}.classes`))
+    why(scope.why, `${field}.why`)
+  }
+  return { default: fallback, scopes }
 }
 
 /** The class a width falls in, at the Material 3 window boundaries of 600 and 840. */
@@ -80,22 +146,40 @@ function deviceClassOf(width: number): DeviceClass {
   return 'desktop'
 }
 
-const SUPPORTED_CLASSES = readDeviceClasses()
+const DEVICE_CONFIG_READ = readDeviceConfig()
 
-if (process.argv.includes('--print-device-classes')) {
-  console.log(SUPPORTED_CLASSES.join(','))
+const printFlag = process.argv.find(
+  (arg) =>
+    arg === '--print-device-classes' ||
+    arg.startsWith('--print-device-classes='),
+)
+if (printFlag !== undefined) {
+  const scope = printFlag.split('=')[1]
+  const classes =
+    scope === undefined
+      ? DEVICE_CONFIG_READ.default
+      : DEVICE_CONFIG_READ.scopes.get(scope)
+  if (classes === undefined) {
+    console.error(
+      `No scope '${scope}' under device-classes in ${DEVICE_CONFIG}.`,
+    )
+    process.exit(1)
+  }
+  console.log(classes.join(','))
   process.exit(0)
 }
 
-/** The widths this project captures, and the 320 check only while it supports phones. */
-const SUPPORTED_RUNS = [
-  ...(SUPPORTED_CLASSES.includes('phone')
-    ? [{ kind: 'reflow' as const, viewport: REFLOW_FLOOR }]
-    : []),
-  ...VIEWPORTS.filter((viewport) =>
-    SUPPORTED_CLASSES.includes(deviceClassOf(viewport.width)),
-  ).map((viewport) => ({ kind: 'frame' as const, viewport })),
-]
+/** The widths a case captures for its classes, and the 320 check only while they hold phone. */
+function supportedRuns(classes: readonly DeviceClass[]) {
+  return [
+    ...(classes.includes('phone')
+      ? [{ kind: 'reflow' as const, viewport: REFLOW_FLOOR }]
+      : []),
+    ...VIEWPORTS.filter((viewport) =>
+      classes.includes(deviceClassOf(viewport.width)),
+    ).map((viewport) => ({ kind: 'frame' as const, viewport })),
+  ]
+}
 
 const CASES_FILE = 'e2e/capture/cases.ts'
 const CASES_DIR = 'e2e/capture/cases'
@@ -190,17 +274,41 @@ for (const { captureCase, file } of SOURCED) {
   }
 }
 
+const unscoped = SOURCED.filter(
+  ({ captureCase }) =>
+    captureCase.deviceScope !== undefined &&
+    !DEVICE_CONFIG_READ.scopes.has(captureCase.deviceScope),
+)
+if (unscoped.length > 0) {
+  console.error(`Cases name a deviceScope ${DEVICE_CONFIG} does not declare:`)
+  for (const { captureCase, file } of unscoped) {
+    console.error(
+      `  ${file}: ${captureCase.section}/${captureCase.theme} names '${captureCase.deviceScope}'`,
+    )
+  }
+  process.exit(1)
+}
+
+const classesOf = (captureCase: CaptureCase): readonly DeviceClass[] =>
+  (captureCase.deviceScope === undefined
+    ? undefined
+    : DEVICE_CONFIG_READ.scopes.get(captureCase.deviceScope)) ??
+  DEVICE_CONFIG_READ.default
+
 const ALL_RUNS: readonly CaptureRun[] = SOURCED.flatMap(
   ({ captureCase, file }) =>
-    SUPPORTED_RUNS.filter(
-      ({ viewport }) => !captureCase.excludeViewports?.includes(viewport.name),
-    ).map(({ kind, viewport }) => ({
-      captureCase,
-      kind,
-      viewport,
-      file,
-      label: `${captureCase.section}/${viewport.name}--${captureCase.theme}`,
-    })),
+    supportedRuns(classesOf(captureCase))
+      .filter(
+        ({ viewport }) =>
+          !captureCase.excludeViewports?.includes(viewport.name),
+      )
+      .map(({ kind, viewport }) => ({
+        captureCase,
+        kind,
+        viewport,
+        file,
+        label: `${captureCase.section}/${viewport.name}--${captureCase.theme}`,
+      })),
 )
 
 // Two runs sharing a label write one output file, and the later would

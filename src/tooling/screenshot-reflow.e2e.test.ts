@@ -139,8 +139,11 @@ describe.skipIf(!hasBrowser)('screenshot.ts reflow floor', () => {
   })
 })
 
-/** A record declaring desktop alone, against a page that fails the floor, so a run checking 320 would exit 1. */
-describe.skipIf(!hasBrowser)('screenshot.ts on a desktop-only record', () => {
+/**
+ * A case whose device scope declares desktop alone, under a default of all three, against a page that fails the
+ * floor, so a run checking 320 for it would exit 1.
+ */
+describe.skipIf(!hasBrowser)('screenshot.ts on a desktop-only scope', () => {
   let desktop: string
   let desktopServer: Server
   let desktopRun: { code: number | null; output: string }
@@ -148,14 +151,20 @@ describe.skipIf(!hasBrowser)('screenshot.ts on a desktop-only record', () => {
   beforeAll(async () => {
     desktop = mkdtempSync(join(tmpdir(), 'screenshot-desktop-'))
     mkdirSync(join(desktop, 'e2e', 'capture'), { recursive: true })
-    mkdirSync(join(desktop, 'canon'))
+    mkdirSync(join(desktop, 'canon', 'config'), { recursive: true })
     writeFileSync(
-      join(desktop, 'canon', 'DESIGN.md'),
-      '# Design\n\n## Layout\n\n- Device classes: desktop\n',
+      join(desktop, 'canon', 'config', 'design.toml'),
+      [
+        '[device-classes.scopes.canvas]',
+        'paths = ["src/canvas/"]',
+        'classes = ["desktop"]',
+        'why = "A canvas needs a pointer"',
+        '',
+      ].join('\n'),
     )
     writeFileSync(
       join(desktop, 'e2e', 'capture', 'cases.ts'),
-      `export const CASES = [{ section: 'wide', theme: 'light', route: '/wide', excludeViewports: ['390', '1536'] }]\n`,
+      `export const CASES = [{ section: 'wide', theme: 'light', route: '/wide', deviceScope: 'canvas', excludeViewports: ['390', '1536'] }]\n`,
     )
     desktopServer = createServer((_request, response) => {
       response.writeHead(200, { 'content-type': 'text/html' })
