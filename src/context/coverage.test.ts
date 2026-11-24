@@ -174,12 +174,27 @@ describe('readRoots', () => {
   it.each([
     ['a string', 'roots = "src"\n'],
     ['a non-string entry', 'roots = ["src", 3]\n'],
-    ['a missing key', 'root = ["src"]\n'],
   ])('reports a declaration with %s as invalid', (_label, toml) => {
     mkdirs('src')
     write('canon/config/context.toml', toml)
 
     expect(readRoots(ROOT).kind).toBe('invalid')
+  })
+
+  it('reads a file with no roots key as undeclared, keeping the src default', () => {
+    mkdirs('src')
+    write(
+      'canon/config/context.toml',
+      '# roots = ["lib"]\ngate-length = true\n',
+    )
+
+    expect(readRoots(ROOT)).toEqual({ kind: 'roots', patterns: ['src'] })
+  })
+
+  it('reads a file with no roots key and no src folder as no root', () => {
+    write('canon/config/context.toml', '# roots = ["lib"]\n')
+
+    expect(readRoots(ROOT)).toEqual({ kind: 'none' })
   })
 })
 
