@@ -97,10 +97,9 @@ cwd=${payload_cwd:-${CLAUDE_PROJECT_DIR:-.}}
 root=$(git -C "$cwd" worktree list --porcelain 2>/dev/null | awk '/^worktree /{sub(/^worktree /, ""); print; exit}')
 root=${root:-$cwd}
 
-# A write onto an existing plan is an amendment, such as a worker rewriting a
-# `- Suggested:` line, judged by its owner below, and an archive path holds a
-# shipped plan rather than a new one, so only a path naming no file yet asks
-# for the skill.
+# A write onto an existing plan is an amendment its owner judges below, and an
+# archive path holds a shipped plan, so only a path naming no file yet asks for
+# the skill.
 new=""
 existing=""
 while IFS= read -r path; do
@@ -220,18 +219,16 @@ parses() {
   [ -n "$calls" ]
 }
 
-# The owner is the session on the last `pass` line naming this plan, and an
-# `amend` never moves it. Another session must have read the plan at or after
-# that time, since the race this closes is a read taken before the owner's
-# write. An unreadable log or a plan no `pass` names has no owner, so passes.
+# The owner is the session on the last `pass` line naming this plan. Another
+# session must read it at or after that time, since a read taken before the
+# owner's write is the race. No readable `pass` line means no owner, so pass.
 if [ -z "$new" ]; then
   owned=$(awk -v plan="$rest" '$2 == "pass" && $4 == plan { at = $1; who = $3 }
     END { if (who != "") print at, who }' "$marker_dir/decisions.log" 2>/dev/null)
   [ -n "$owned" ] || exit 0
   owned_at=${owned%% *}
   owner=${owned#* }
-  # Both times compare as their 14 digits, and a malformed one reads as an
-  # unreadable log line.
+  # A malformed owner time reads as an unreadable log line.
   owned_n=${owned_at:0:19}
   owned_n=${owned_n//[!0-9]/}
   [ "${#owned_n}" -eq 14 ] || exit 0
