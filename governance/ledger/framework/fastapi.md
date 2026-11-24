@@ -47,9 +47,9 @@ The field is back-end Python web engineering, and the authority is the FastAPI d
 
 ## Middleware
 
-| Bullet                | Source                                                                                                                                                                | Read       |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Explicit CORS origins | [CORS](https://fastapi.tiangolo.com/tutorial/cors/): "None of allow_origins, allow_methods and allow_headers can be set to ['*'] if allow_credentials is set to True" | 2026-10-18 |
+| Bullet           | Source                                                                                                                           | Read       |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `CORSMiddleware` | [CORS](https://fastapi.tiangolo.com/tutorial/cors/): "You can configure it in your FastAPI application using the CORSMiddleware" | 2026-10-18 |
 
 ## Declined
 
@@ -74,3 +74,7 @@ Every bullet the rewrite removed or reshaped, grouped by why.
 - Merged "do not perform blocking I/O inside `async def`" into the `async def` bullet.
 - Narrowed "configure CORS through middleware, not per-route checks" to the credentials footgun the CORS page states.
 - Moved "apply `dependencies=[Depends(auth)]` at the router or app level" to the routers section.
+
+### Carried by another rule
+
+- Cut the credentials half of the CORS bullet, "list origins explicitly when `allow_credentials=True`", which `lib/security-server` states under Transport.

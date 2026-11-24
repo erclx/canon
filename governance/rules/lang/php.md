@@ -8,9 +8,7 @@ paths:
 
 ## Strictness
 
-- Open every file with `declare(strict_types=1);`.
 - Declare native parameter, return, and property types. Do not rely on a docblock type where a native one exists.
-- Compare with `===` and `!==`. Never use loose `==` or `!=`.
 
 ## Layout
 

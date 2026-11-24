@@ -17,7 +17,6 @@ paths:
 
 - Pass `context.Context` as the first parameter, named `ctx`.
 - Never store a `context.Context` in a struct field. Pass it to each function that needs it.
-- Do not pass a `nil` context. Use `context.TODO()` where none is available yet.
 
 ## Interfaces
 
