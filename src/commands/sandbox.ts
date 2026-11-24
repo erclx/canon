@@ -203,10 +203,9 @@ function readPathList(path: string | undefined): string[] | undefined {
 }
 
 /**
- * The unchecked count rides the summary line in every verdict, including a pass.
- * It is the number the rollout is measured by, and a count that surfaces only on
- * arms that happen to carry prose is a count nobody drains. The whyless count
- * rides beside it for the same reason and never gates.
+ * The unchecked and whyless counts ride the summary line in every verdict,
+ * including a pass, since they measure the rollout and a count shown only on
+ * some arms is one nobody drains. Neither gates.
  */
 function reportVerdict(verdict: Verdict): void {
   if (verdict.purpose !== undefined) logInfo(`Purpose: ${verdict.purpose}`)
