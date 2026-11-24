@@ -91,8 +91,8 @@ export interface FrameInput {
   readonly box?: number
   readonly reference?: string
   readonly theme?: FrameTheme
-  /** The pass's reel, in place of a box or a reference. */
-  readonly reel?: boolean
+  /** The width the pass's reel was filmed at, in place of a box or a reference. */
+  readonly reelWidth?: number
   readonly bytes: Uint8Array
 }
 
@@ -210,9 +210,30 @@ export function referencePath(
   return `pr-${number}/${head.slice(0, SHORT_HEAD_LENGTH)}/${pass}/ref-${slug}.png`
 }
 
-/** Where a pass's reel lands, one per pass beside its box frames. */
-export function reelPath(number: number, head: string, pass: string): string {
-  return `pr-${number}/${head.slice(0, SHORT_HEAD_LENGTH)}/${pass}/reel.webp`
+/** Where a pass's reel lands, one per width beside its box frames, so two widths in one pass never collide. */
+export function reelPath(
+  number: number,
+  head: string,
+  pass: string,
+  width: number,
+): string {
+  return `pr-${number}/${head.slice(0, SHORT_HEAD_LENGTH)}/${pass}/reel-${width}.webp`
+}
+
+/** A reel path `reelPath` writes, or the bare `reel.webp` one written before reels carried a width. */
+const REEL_PATH =
+  /^pr-\d+\/[0-9a-f]+\/(\d{8}T\d{6}Z)\/reel(?:-([1-9]\d*))?\.webp$/
+
+/** The widest reel of the newest pass among the paths, a bare `reel.webp` reading as 1280, or undefined when none is a reel. */
+export function newestReelPath(paths: readonly string[]): string | undefined {
+  const reels = paths.flatMap((path) => {
+    const match = REEL_PATH.exec(path)
+    return match?.[1] === undefined
+      ? []
+      : [{ path, pass: match[1], width: Number(match[2] ?? 1280) }]
+  })
+  reels.sort((a, b) => a.pass.localeCompare(b.pass) || a.width - b.width)
+  return reels.at(-1)?.path
 }
 
 /** The reel's bytes, refusing a file that is absent, not a WebP, or past the cap. */
@@ -249,26 +270,28 @@ export async function pushFrame(
   api: FramesApi,
   input: FrameInput,
 ): Promise<PushResult> {
-  const path = input.reel
-    ? reelPath(input.number, input.head, input.pass)
-    : input.reference === undefined
-      ? framePath(
-          input.number,
-          input.head,
-          input.pass,
-          input.box ?? 0,
-          input.theme,
-        )
-      : referencePath(input.number, input.head, input.pass, input.reference)
+  const path =
+    input.reelWidth !== undefined
+      ? reelPath(input.number, input.head, input.pass, input.reelWidth)
+      : input.reference === undefined
+        ? framePath(
+            input.number,
+            input.head,
+            input.pass,
+            input.box ?? 0,
+            input.theme,
+          )
+        : referencePath(input.number, input.head, input.pass, input.reference)
   if (path === undefined) return { kind: 'refused', reason: 'push-failed' }
   const blob = await api.createBlob(Buffer.from(input.bytes).toString('base64'))
   if (blob === undefined) return { kind: 'refused', reason: 'push-failed' }
   const entry: TreeEntry = { path, mode: '100644', type: 'blob', sha: blob }
-  const message = input.reel
-    ? `chore(frames): add reel of #${input.number}`
-    : input.reference === undefined
-      ? `chore(frames): add box ${input.box} of #${input.number}`
-      : `chore(frames): add reference ${input.reference} of #${input.number}`
+  const message =
+    input.reelWidth !== undefined
+      ? `chore(frames): add ${input.reelWidth} reel of #${input.number}`
+      : input.reference === undefined
+        ? `chore(frames): add box ${input.box} of #${input.number}`
+        : `chore(frames): add reference ${input.reference} of #${input.number}`
 
   for (let attempt = 0; attempt < ADD_ATTEMPTS; attempt += 1) {
     const tip = await api.readTip()

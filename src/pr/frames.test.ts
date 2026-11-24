@@ -13,6 +13,7 @@ import {
   isFrameHead,
   isFramePass,
   isFrameTheme,
+  newestReelPath,
   type PullClosure,
   pruneFrames,
   pruneFramesWithLegacy,
@@ -731,15 +732,15 @@ describe('pruneFramesWithLegacy', () => {
 })
 
 describe('pushFrame with a reel', () => {
-  const reel = (number = 12): FrameInput => ({
+  const reel = (number = 12, reelWidth = 1280): FrameInput => ({
     number,
     head: HEAD,
     pass: PASS,
-    reel: true,
+    reelWidth,
     bytes: WEBP,
   })
 
-  it('should land the reel at reel.webp beside the box frames of one pass', async () => {
+  it('should land the reel at reel-<width>.webp beside the box frames of one pass', async () => {
     const fake = fakeApi()
 
     await pushFrame(fake.api, frame(12, 1))
@@ -748,17 +749,51 @@ describe('pushFrame with a reel', () => {
     expect({ result, files: fake.filesAtTip() }).toEqual({
       result: expect.objectContaining({
         kind: 'pushed',
-        path: `pr-12/abcdef0/${PASS}/reel.webp`,
+        path: `pr-12/abcdef0/${PASS}/reel-1280.webp`,
       }),
       files: [
         `pr-12/abcdef0/${PASS}/box-1.png`,
-        `pr-12/abcdef0/${PASS}/reel.webp`,
+        `pr-12/abcdef0/${PASS}/reel-1280.webp`,
       ],
     })
   })
 
+  it('should keep two reels of one pass at different widths apart', async () => {
+    const fake = fakeApi()
+
+    await pushFrame(fake.api, reel(12, 390))
+    await pushFrame(fake.api, reel(12, 1280))
+
+    expect(fake.filesAtTip()).toEqual([
+      `pr-12/abcdef0/${PASS}/reel-1280.webp`,
+      `pr-12/abcdef0/${PASS}/reel-390.webp`,
+    ])
+  })
+
+  it('should pick the widest reel of the newest pass, reading a bare reel.webp as 1280', () => {
+    const paths = [
+      'pr-12/abcdef0/20261001T100000Z/reel-1536.webp',
+      'pr-12/abcdef0/20261002T100000Z/reel.webp',
+      'pr-12/abcdef0/20261002T100000Z/reel-390.webp',
+      'pr-12/abcdef0/20261002T100000Z/box-1.png',
+    ]
+
+    expect(newestReelPath(paths)).toBe(
+      'pr-12/abcdef0/20261002T100000Z/reel.webp',
+    )
+    expect(
+      newestReelPath([
+        ...paths,
+        'pr-12/abcdef0/20261002T100000Z/reel-1536.webp',
+      ]),
+    ).toBe('pr-12/abcdef0/20261002T100000Z/reel-1536.webp')
+    expect(newestReelPath(['pr-12/abcdef0/x/box-1.png'])).toBeUndefined()
+  })
+
   it('should match the path reelPath names', () => {
-    expect(reelPath(12, HEAD, PASS)).toBe(`pr-12/abcdef0/${PASS}/reel.webp`)
+    expect(reelPath(12, HEAD, PASS, 390)).toBe(
+      `pr-12/abcdef0/${PASS}/reel-390.webp`,
+    )
   })
 
   it('should clear the reel when its pull request is dropped', async () => {

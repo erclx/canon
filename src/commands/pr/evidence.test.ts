@@ -177,6 +177,98 @@ describe('canon pr evidence --local', () => {
     expect(record.body).toContain('**Reel** filmed at')
     expect(record.body).not.toContain('**Reel covers:**')
   })
+
+  describe('a reel per width', () => {
+    const NARROW = REEL_LINK.replace('reel.webp', 'reel-390.webp')
+    const WIDE = REEL_LINK.replace('reel.webp', 'reel-1280.webp')
+
+    it('should post one reel line per --reel in the order passed, pairing each --reel-covers by position', async () => {
+      const record = await runEvidenceCommand([
+        '--reel',
+        NARROW,
+        '--reel-covers',
+        'filmed: Board · left out: none',
+        '--reel',
+        WIDE,
+        '--reel-covers',
+        'filmed: Sheet · left out: none',
+      ])
+
+      const lines = (record.body?.split('\n') ?? []).filter(
+        (line) => line.startsWith('**Reel') && line !== '',
+      )
+      expect(lines).toEqual([
+        expect.stringContaining(`<img src="${NARROW}" width="390"`),
+        '**Reel covers:** filmed: Board · left out: none',
+        expect.stringContaining(`<img src="${WIDE}" width="960"`),
+        '**Reel covers:** filmed: Sheet · left out: none',
+      ])
+    })
+
+    it('should refuse as reel-covers-unpaired when covers outnumber reels', async () => {
+      const record = await runEvidenceCommand([
+        '--reel',
+        NARROW,
+        '--reel-covers',
+        'filmed: Board',
+        '--reel-covers',
+        'filmed: Sheet',
+      ])
+
+      expect(record).toMatchObject({ reason: 'reel-covers-unpaired' })
+      expect(record).not.toHaveProperty('body')
+    })
+
+    it('should refuse as reel-covers-unpaired when reels outnumber covers', async () => {
+      const record = await runEvidenceCommand([
+        '--reel',
+        NARROW,
+        '--reel',
+        WIDE,
+        '--reel-covers',
+        'filmed: Sheet',
+      ])
+
+      expect(record).toMatchObject({ reason: 'reel-covers-unpaired' })
+      expect(record).not.toHaveProperty('body')
+    })
+
+    it('should refuse as reel-covers-unpaired for a coverage line with no reel', async () => {
+      const record = await runEvidenceCommand([
+        '--reel-covers',
+        'filmed: Board',
+      ])
+
+      expect(record).toMatchObject({ reason: 'reel-covers-unpaired' })
+    })
+
+    it('should refuse as reel-width-repeated for two reels at one width', async () => {
+      const record = await runEvidenceCommand([
+        '--reel',
+        NARROW,
+        '--reel',
+        NARROW,
+      ])
+
+      expect(record).toMatchObject({ reason: 'reel-width-repeated' })
+    })
+
+    it('should write a skip naming a width on its own line beside one naming every width', async () => {
+      const record = await runEvidenceCommand([
+        '--checklist',
+        join(tempDir, 'checklist.md'),
+        '--reel-skip',
+        '390=no-visible-change: desktop only',
+        '--reel-skip',
+        'wrong-state: beat 1',
+      ])
+
+      expect(record.body).toContain('**No reel:** wrong-state: beat 1')
+      expect(record.body).toContain(
+        '**No reel at 390:** no-visible-change: desktop only',
+      )
+    })
+  })
 })
 
 describe('canon pr evidence reports the marked comment', () => {
@@ -256,6 +348,32 @@ describe('canon pr evidence reports the marked comment', () => {
       reel: { link: REEL_LINK, head: 'abc1234' },
     })
     expect(record.body).toContain('**Reel** filmed at `abc1234`')
+  })
+
+  it('should report every posted reel as reels, keeping the first as reel', async () => {
+    const narrow = REEL_LINK.replace('reel.webp', 'reel-390.webp')
+    writeComments([
+      markedCommentBody().replace(
+        '## What to look at',
+        [
+          `**Reel** filmed at \`abc1234\`:<br><img src="${narrow}" width="390" alt="reel filmed at abc1234">`,
+          '',
+          `**Reel** filmed at \`abc1234\`:<br><img src="${REEL_LINK}" width="960" alt="reel filmed at abc1234">`,
+          '',
+          '## What to look at',
+        ].join('\n'),
+      ),
+    ])
+
+    const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' })
+
+    expect(record).toMatchObject({
+      reel: { link: narrow, head: 'abc1234', width: 390 },
+      reels: [
+        { link: narrow, head: 'abc1234', width: 390 },
+        { link: REEL_LINK, head: 'abc1234', width: 1280 },
+      ],
+    })
   })
 
   it('should carry the posted coverage line forward with its reel', async () => {
@@ -1373,6 +1491,22 @@ describe('canon pr evidence --check', () => {
     const record = await runCheck()
 
     expect(record).toMatchObject({ reelSkip: 'wrong-state: beat 1' })
+  })
+
+  it('should carry the per-width reel skip lines the marked comment holds as reelSkips', async () => {
+    writeComment(
+      '**No reel:** deferred: behind #1\n\n**No reel at 390:** no-visible-change\n\n**No reel at 1280:** wrong-state: beat 1\n\n## What to look at\n\n<!-- pr-evidence: head=abc -->',
+    )
+
+    const record = await runCheck()
+
+    expect(record).toMatchObject({
+      reelSkip: 'deferred: behind #1',
+      reelSkips: [
+        { width: 390, skip: 'no-visible-change' },
+        { width: 1280, skip: 'wrong-state: beat 1' },
+      ],
+    })
   })
 
   it('should omit reelSkip when the marked comment holds no reel skip line', async () => {

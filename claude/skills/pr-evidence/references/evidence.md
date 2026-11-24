@@ -60,30 +60,30 @@ canon pr evidence <number> --check --json
 ```
 
 - Take the checklist from the handoff file when one exists, and from the record's `checklist` field otherwise
-- Skip filming when the record's `reel.head` is a prefix of the `tip` that `canon pr head <number> --json` reports, since the posted reel already shows this head
+- Skip filming a width whose entry in the record's `reels` has a `head` that is a prefix of the `tip` that `canon pr head <number> --json` reports, since that reel already shows this head
 - With no checklist from either source, skip silently, since nothing names an interaction to film
 
-Read `${CLAUDE_SKILL_DIR}/references/reel.md` and run it with the number, the local `url` or reason, the checklist, and the check record. It films, checks each beat's closing still, pushes the reel to `canon/frames`, and hands back a `link` or a skip reason.
+Read `${CLAUDE_SKILL_DIR}/references/reel.md` and run it with the number, the local `url` or reason, the checklist, and the check record. It films one reel per width, checks each beat's closing still, pushes each reel to `canon/frames`, and hands back a `link` or a skip reason per width.
 
 It reads the filming rules in `ui-film`. Report it rather than proceeding silently when the `ui-film` skill does not resolve, and post the evidence without a reel.
 
-- Hold a `link` for the evidence step, which embeds it under the addresses
+- Hold each width's `link` for the evidence step, which embeds each under the addresses at its own width
 - Hold a skip's reason and message for the closing report and for the evidence step's `--reel-skip`, which a silent skip never passes
 - A skip never stops the chain, and a reel already on the comment carries forward under the older head it names
 - On a drivable checklist, a missing reel or a skip the lift does not settle holds the merge until a reel lands at the head or a review waives it
 
 ## Post the evidence comparison
 
-Run the verb once against the pull request number. Pass `--checklist` when the checklist step found a file, `--local` when the local step returned `ok`, and `--reel` when the reel step returned a link, and leave each flag off otherwise:
+Run the verb once against the pull request number. Pass `--checklist` when the checklist step found a file, `--local` when the local step returned `ok`, and `--reel` once per link the reel step returned, and leave each flag off otherwise:
 
 ```bash
 canon pr evidence <number> --checklist <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md --local <url> --reel <link> --json
 ```
 
-Pass `--local-skip '<reason>: <message>'` in place of `--local` when the local step held a refusal, and `--reel-skip '<reason>: <message>'` in place of `--reel` when the reel step held a skip. Each puts the line the closing report prints onto the comment as well, so a reader of the pull request sees why the link or the reel is missing.
+Pass `--local-skip '<reason>: <message>'` in place of `--local` when the local step held a refusal, and `--reel-skip '<reason>: <message>'` per reel skip, prefixed `<width>=` for one width. Each puts the line the closing report prints onto the comment, so a reader of the pull request sees why the link or the reel is missing.
 
 - Pass the same text the closing report carries, so the comment and the report agree
-- Pass `--reel-covers '<coverage>'` beside `--reel` with the reel's coverage
+- Pass one `--reel-covers '<coverage>'` per `--reel`, since the verb reads the Nth covers as describing the Nth reel
 - A later run that posts the link or films the reel drops the line, and one passing neither flag carries it forward
 
 One call answers both questions because a checklist decides `no-evidence`. A diff carrying a checklist and no evidence image renders `ok` with the checklist in a marked body, so the checklist lands in the one comment a later call finds and edits.

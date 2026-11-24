@@ -35,14 +35,27 @@ const REEL_COVERS_PREFIX = '**Reel covers:**'
 /** How the line naming why no local address was posted opens. */
 const LOCAL_SKIP_PREFIX = '**No local preview:**'
 
-/** How the line naming why no reel was filmed opens. */
+/** How the line naming why no reel was filmed at any width opens. */
 const REEL_SKIP_PREFIX = '**No reel:**'
+
+/** The line naming why no reel was filmed at one width, read back for the width and the reason. */
+const REEL_WIDTH_SKIP_LINE = /^\*\*No reel at ([1-9]\d*):\*\*\s*(.*)$/
 
 /** How the line naming the painted paths changed with no capture opens. */
 const UNCAPTURED_PREFIX = '**Uncaptured:**'
 
-/** The width a reel is filmed at, which it asks for in the comment. */
-const REEL_WIDTH = 960
+/** The most pixels a reel asks for in the comment, since one filmed wider is shrunk to fit the column. */
+const REEL_MAX_EMBED = 960
+
+/**
+ * The width a reel or a box is taken at when it names none, as the reel step
+ * films a box without one. A comment posted before reels carried a width reads
+ * as one reel at this width.
+ */
+export const DEFAULT_REEL_WIDTH = 1280
+
+/** The width `canon pr frames` writes into a reel's file name. */
+const REEL_LINK_WIDTH = /\/reel-([1-9]\d*)\.webp(?:[?#]|$)/
 
 /** What joins the hosted and local segments on the one address line. */
 const ADDRESS_SEPARATOR = ' · '
@@ -473,27 +486,51 @@ function renderFolded(
   return block('<details>', `${FOLDED_SUMMARY} (${cases.length})`, cases)
 }
 
-/** A reel embedded in the comment, the head it was filmed at, and what it covers when the filming session said. */
+/** A reel embedded in the comment, the width and head it was filmed at, and what it covers when the filming session said. */
 export interface EvidenceReel {
   readonly link: string
   readonly head: string
+  readonly width: number
   readonly covers?: string
+}
+
+/** The width a reel link names, or the default for a bare `reel.webp` posted before reels carried one. */
+export function readReelWidth(link: string): number {
+  const width = REEL_LINK_WIDTH.exec(link)?.[1]
+  return width === undefined ? DEFAULT_REEL_WIDTH : Number(width)
 }
 
 /** The reel line, then its coverage line when it carries one, which lives and dies with the reel. */
 function reelLines(reel: EvidenceReel): string[] {
   const head = reel.head.slice(0, SHORT_SHA_LENGTH)
+  const shown = Math.min(reel.width, REEL_MAX_EMBED)
   return [
-    `${REEL_PREFIX} \`${head}\`:<br><img src="${escapeCell(reel.link)}" width="${REEL_WIDTH}" alt="reel filmed at ${head}">`,
+    `${REEL_PREFIX} \`${head}\`:<br><img src="${escapeCell(reel.link)}" width="${shown}" alt="reel filmed at ${head}">`,
     '',
     ...skipLines(REEL_COVERS_PREFIX, reel.covers),
   ]
 }
 
-/** Why a render carries no local address or no reel, each a reason code and any one-line message the caller joined to it. */
+/**
+ * Why a render carries no local address or no reel, each a reason code and any
+ * one-line message the caller joined to it. `reel` names every width, and
+ * `reelByWidth` one width each, which governs that width over `reel`.
+ */
 export interface EvidenceSkips {
   readonly local?: string
   readonly reel?: string
+  readonly reelByWidth?: ReadonlyMap<number, string>
+}
+
+/** One `**No reel at <width>:**` line per width, narrowest first, leaving out a width whose reel covers the head. */
+function widthSkipLines(
+  byWidth: ReadonlyMap<number, string> | undefined,
+  covered: ReadonlySet<number>,
+): string[] {
+  return [...(byWidth ?? new Map<number, string>()).entries()]
+    .filter(([width]) => !covered.has(width))
+    .sort(([a], [b]) => a - b)
+    .flatMap(([width, reason]) => skipLines(`**No reel at ${width}:**`, reason))
 }
 
 /** A skip line, or nothing for an empty reason. A reason is folded onto one line, since a line break would end the address region early. */
@@ -521,9 +558,8 @@ export function evidenceMarker(head: string): string {
 }
 
 /**
- * Every state opens within `EVIDENCE_OPEN_LIMIT` head images, so a comment is
- * never half open. The reel skip and uncaptured lines drop only while the reel
- * covers the head, as `canon pr lift` reads the carry passed in `reelCovers`.
+ * Every state opens within `EVIDENCE_OPEN_LIMIT` head images. `coveredWidths` names the widths whose reel covers the head, as `canon pr lift` reads the carry.
+ * A covered width drops its skip line, every owed width covered drops the line naming them all, and any covered reel drops the uncaptured line.
  */
 export function renderEvidenceBody(
   states: readonly EvidenceState[],
@@ -533,13 +569,21 @@ export function renderEvidenceBody(
   preview?: string,
   checklist?: string,
   local?: string,
-  reel?: EvidenceReel,
+  reels: readonly EvidenceReel[] = [],
   skips: EvidenceSkips = {},
   uncaptured: readonly string[] = [],
-  reelCovers: boolean = reel !== undefined && head.startsWith(reel.head),
+  coveredWidths: ReadonlySet<number> = new Set(
+    reels.filter((reel) => head.startsWith(reel.head)).map((r) => r.width),
+  ),
   previewBuilt?: string,
 ): string {
-  const covered = reel !== undefined && reelCovers
+  const covering = new Set(
+    reels.map((reel) => reel.width).filter((width) => coveredWidths.has(width)),
+  )
+  const owed =
+    checklist === undefined ? [] : owedReelWidths(readChecklistBoxes(checklist))
+  const covered =
+    covering.size > 0 && owed.every((width) => covering.has(width))
   const segments = [
     ...(preview === undefined ? [] : [`${PREVIEW_PREFIX} ${preview}`]),
     ...(preview === undefined || previewBuilt === undefined
@@ -554,9 +598,10 @@ export function renderEvidenceBody(
     '',
     ...(segments.length === 0 ? [] : [segments.join(ADDRESS_SEPARATOR), '']),
     ...(local === undefined ? skipLines(LOCAL_SKIP_PREFIX, skips.local) : []),
-    ...(reel === undefined ? [] : reelLines(reel)),
+    ...reels.flatMap(reelLines),
     ...(covered ? [] : skipLines(REEL_SKIP_PREFIX, skips.reel)),
-    ...uncapturedLines(uncaptured, covered),
+    ...widthSkipLines(skips.reelByWidth, covering),
+    ...uncapturedLines(uncaptured, covering.size > 0),
   ]
   const closing =
     checklist === undefined
@@ -817,22 +862,23 @@ export function findEvidenceLocal(
   return marked === undefined ? undefined : readAddresses(marked.body).local
 }
 
-/** The reel the marked comment already embeds, with the head it was filmed at. */
-export function findEvidenceReel(
+/** Every reel the marked comment embeds, in the order it posts them, each with the width and head it was filmed at. */
+export function findEvidenceReels(
   comments: readonly EvidenceComment[],
-): EvidenceReel | undefined {
+): EvidenceReel[] {
   const marked = findMarked(comments)
-  if (marked === undefined) return undefined
+  if (marked === undefined) return []
   const lines = marked.body.split('\n').map((line) => line.trim())
+  const reels: EvidenceReel[] = []
   for (const [index, line] of lines.entries()) {
     const match = REEL_LINE.exec(line)
-    if (match?.[1] !== undefined && match[2] !== undefined) {
-      const reel = { link: match[2].replaceAll('&amp;', '&'), head: match[1] }
-      const covers = readReelCovers(lines.slice(index + 1))
-      return covers === undefined ? reel : { ...reel, covers }
-    }
+    if (match?.[1] === undefined || match[2] === undefined) continue
+    const link = match[2].replaceAll('&amp;', '&')
+    const reel = { link, head: match[1], width: readReelWidth(link) }
+    const covers = readReelCovers(lines.slice(index + 1))
+    reels.push(covers === undefined ? reel : { ...reel, covers })
   }
-  return undefined
+  return reels
 }
 
 /** The coverage line directly under a reel line, past blank lines only, so a coverage line never attaches to a reel it does not follow. */
@@ -855,32 +901,55 @@ export function findEvidenceSkips(
   if (marked === undefined) return {}
   let local: string | undefined
   let reel: string | undefined
+  const reelByWidth = new Map<number, string>()
   for (const raw of marked.body.split('\n')) {
     const line = raw.trim()
     if (REGION_ENDS.some((end) => line.startsWith(end))) break
     const ownSkip = readSegment(line, LOCAL_SKIP_PREFIX)
     const reelSkip = readSegment(line, REEL_SKIP_PREFIX)
+    const widthSkip = REEL_WIDTH_SKIP_LINE.exec(line)
     if (ownSkip !== undefined) local ??= unescapeCell(ownSkip)
     if (reelSkip !== undefined) reel ??= unescapeCell(reelSkip)
+    const width = Number(widthSkip?.[1])
+    const reason = widthSkip?.[2]?.trim() ?? ''
+    if (reason !== '' && !reelByWidth.has(width)) {
+      reelByWidth.set(width, unescapeCell(reason))
+    }
   }
   return {
     ...(local !== undefined && { local }),
     ...(reel !== undefined && { reel }),
+    ...(reelByWidth.size > 0 && { reelByWidth }),
   }
 }
 
+/** A reel the caller passed to a render, filmed at the head it describes. */
+export interface PassedReel {
+  readonly link: string
+  readonly covers?: string
+}
+
 /**
- * The reel a render embeds. A passed link, filmed at this head, replaces the
- * posted one and its coverage, which otherwise carry forward under their head.
+ * The reels a render embeds, the passed ones first in the order given. A
+ * passed reel replaces the posted one at its width and that one's coverage,
+ * and a posted reel at any other width carries forward under its own head.
  */
-export function nextEvidenceReel(
-  link: string | undefined,
+export function nextEvidenceReels(
+  passed: readonly PassedReel[],
   head: string,
   comments: readonly EvidenceComment[],
-  covers?: string,
-): EvidenceReel | undefined {
-  if (link === undefined) return findEvidenceReel(comments)
-  return covers === undefined ? { link, head } : { link, head, covers }
+): EvidenceReel[] {
+  const filmed = passed.map(({ link, covers }) => ({
+    link,
+    head,
+    width: readReelWidth(link),
+    ...(covers !== undefined && { covers }),
+  }))
+  const widths = new Set(filmed.map((reel) => reel.width))
+  const kept = findEvidenceReels(comments).filter(
+    (reel) => !widths.has(reel.width),
+  )
+  return [...filmed, ...kept]
 }
 
 /**
@@ -912,6 +981,8 @@ export interface ChecklistBox {
   readonly stamp?: string
   /** Whether the box's trailing marker run holds `(taste)`, which no driver ticks. */
   readonly isTaste: boolean
+  /** The width the box names in its `<route>, <width>:` opening, absent when it names none. */
+  readonly width?: number
 }
 
 export interface BoxLine {
@@ -958,9 +1029,32 @@ export function readChecklistBoxes(checklist: string): ChecklistBox[] {
       isTicked: parsed.isTicked,
       ...(parsed.stamp !== undefined && { stamp: parsed.stamp }),
       isTaste: hasTasteMarker(parsed.text),
+      ...readBoxWidth(parsed.text),
     })
   })
   return boxes
+}
+
+/** The width a box opening on `<route>, <width>: ` names, read from the text before its first `: ` alone. */
+function readBoxWidth(text: string): { width?: number } {
+  const opening = text.split(': ')[0] ?? ''
+  if (opening === text) return {}
+  const width = /, ([1-9]\d*)$/.exec(opening)?.[1]
+  return width === undefined ? {} : { width: Number(width) }
+}
+
+/**
+ * The widths a reel is owed at, one per width a drivable box names and the
+ * default for a box naming none, narrowest first. A box with a malformed
+ * width reads as naming none.
+ */
+export function owedReelWidths(boxes: readonly ChecklistBox[]): number[] {
+  const widths = new Set(
+    boxes
+      .filter((box) => !box.isTaste)
+      .map((box) => box.width ?? DEFAULT_REEL_WIDTH),
+  )
+  return [...widths].sort((a, b) => a - b)
 }
 
 function hasTasteMarker(text: string): boolean {

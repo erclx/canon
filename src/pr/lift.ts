@@ -17,6 +17,7 @@ import {
   readUiCarry,
   reelMoves,
 } from '@/pr/carry'
+import { DEFAULT_REEL_WIDTH } from '@/pr/evidence'
 import { readReelWaivers, readWaivers } from '@/pr/waiver'
 import { DEFAULT_PAINTED, isPainted, type PaintedPatterns } from '@/pr/painted'
 
@@ -96,8 +97,10 @@ export interface GateResult {
   readonly reelWaiverRefused?: string
   /** The earlier commit a reel was filmed at, when it carried to the head across pushes no box can observe. */
   readonly reelCarriedFrom?: string
-  /** The commit the posted reel was filmed at, named on a `reel-unsettled` refusal when one trails the head. */
+  /** The commit the posted reel at the first unsettled width was filmed at, named on a `reel-unsettled` refusal when one trails the head. */
   readonly reelHead?: string
+  /** The widths no reel, skip, or waiver settled, narrowest first, named on a `reel-unsettled` refusal. */
+  readonly reelWidths?: readonly number[]
 }
 
 /** How an earlier commit sits against the head, and what changed since. */
@@ -137,10 +140,19 @@ export interface EvidenceGate {
    * base keeps no captures, which reads as unchecked and passes.
    */
   readonly uncaptured?: readonly string[]
-  /** The head the marked comment's reel was filmed at, when it embeds one. */
-  readonly reelHead?: string
-  /** The text after the marked comment's `**No reel:**` label, when it carries one. */
+  /** Each reel the marked comment embeds, with the width and head it was filmed at. */
+  readonly reels?: readonly EvidenceGateReel[]
+  /** The text after the marked comment's `**No reel:**` label, which names every width, when it carries one. */
   readonly reelSkip?: string
+  /** The text after each `**No reel at <width>:**` label, which governs its width over `reelSkip`. */
+  readonly reelSkips?: ReadonlyMap<number, string>
+  /** The widths a drivable box owes a reel at. Absent reads as the default width alone. */
+  readonly owedWidths?: readonly number[]
+}
+
+export interface EvidenceGateReel {
+  readonly width: number
+  readonly head: string
 }
 
 /**
@@ -415,23 +427,67 @@ export async function uiGate(
   }
 }
 
+/** How one owed width settled, or that it did not. */
+type WidthSettle =
+  | { readonly kind: 'filmed' }
+  | { readonly kind: 'carried'; readonly from: string }
+  | { readonly kind: 'skipped'; readonly skip: string }
+  | { readonly kind: 'waived'; readonly skip?: string; readonly reason: string }
+  | {
+      readonly kind: 'unsettled'
+      readonly skip?: string
+      readonly refusedWaiver?: string
+    }
+
+/**
+ * One width, settled in the gate's order: a reel at the head, one carried to
+ * it, a skip no builder can change, then a standing waiver over any skip but
+ * an unwaivable one. The width's own skip line governs it over the bare one.
+ */
+function settleWidth(
+  width: number,
+  evidence: EvidenceGate,
+  head: string,
+  carriedFrom: ReadonlyMap<number, string>,
+  waiver: string | undefined,
+): WidthSettle {
+  const reel = evidence.reels?.find((entry) => entry.width === width)
+  if (reel !== undefined && coversHead(reel.head, head)) {
+    return { kind: 'filmed' }
+  }
+  const from = carriedFrom.get(width)
+  if (from !== undefined) return { kind: 'carried', from }
+  const skip = evidence.reelSkips?.get(width) ?? evidence.reelSkip
+  const code = skip === undefined ? undefined : reelSkipCode(skip)
+  if (skip !== undefined && SETTLING_REEL_SKIPS.includes(code ?? '')) {
+    return { kind: 'skipped', skip }
+  }
+  const skipField = skip !== undefined && { skip }
+  if (waiver === undefined) return { kind: 'unsettled', ...skipField }
+  if (code !== undefined && UNWAIVABLE_REEL_SKIPS.includes(code)) {
+    return { kind: 'unsettled', ...skipField, refusedWaiver: waiver }
+  }
+  return { kind: 'waived', ...skipField, reason: waiver }
+}
+
 /**
  * Refuses an owed step, an uncaptured painted path no head reel or restated
- * waiver covers, then a drivable checklist no reel, skip, or waiver settles.
+ * waiver covers, then a drivable checklist leaving a width it owes that no
+ * reel, skip, or waiver settles, naming those widths as `reelWidths`.
  */
 export function evidenceGate(
   evidence: EvidenceGate,
   reviews: readonly ReviewRow[],
   head: string,
-  reelCarriedFrom?: string,
+  carriedFrom: ReadonlyMap<number, string> = new Map(),
 ): GateResult {
   if (!evidence.isSettled) return fail('evidence', 'evidence-owed')
 
   const standing = standingPasses(reviews)
-  const isAtHead =
-    evidence.reelHead !== undefined && coversHead(evidence.reelHead, head)
-  const isFilmed = isAtHead || reelCarriedFrom !== undefined
-  const carried = !isAtHead && reelCarriedFrom !== undefined
+  const isAtHead = (evidence.reels ?? []).some((reel) =>
+    coversHead(reel.head, head),
+  )
+  const isFilmed = isAtHead || carriedFrom.size > 0
   const listed = isFilmed ? [] : (evidence.uncaptured ?? [])
   const named = new Set(readWaivers(standing).map((waiver) => waiver.path))
   const waived = listed.filter((path) => named.has(path)).toSorted()
@@ -444,55 +500,97 @@ export function evidenceGate(
   if (uncaptured.length > 0) {
     return { ...fail('evidence', 'painted-uncaptured'), ...lists }
   }
-  if (carried) return { ...pass('evidence'), ...lists, reelCarriedFrom }
-  if (!evidence.hasDrivableBox || isFilmed) {
-    return { ...pass('evidence'), ...lists }
+  const firstCarried = isAtHead ? undefined : [...carriedFrom.values()][0]
+  const carriedField = firstCarried !== undefined && {
+    reelCarriedFrom: firstCarried,
+  }
+  if (!evidence.hasDrivableBox) {
+    return { ...pass('evidence'), ...lists, ...carriedField }
   }
 
-  const { reelSkip, reelHead } = evidence
-  const skipField = reelSkip !== undefined && { reelSkip }
-  const unsettled = {
-    ...fail('evidence', 'reel-unsettled'),
+  // A drivable box with no width read owes the default, so an unread checklist fails closed.
+  const owed =
+    evidence.owedWidths !== undefined && evidence.owedWidths.length > 0
+      ? evidence.owedWidths
+      : [DEFAULT_REEL_WIDTH]
+  const waiver = readReelWaivers(standing).at(-1)
+  const settles = owed.map((width) => ({
+    width,
+    settle: settleWidth(width, evidence, head, carriedFrom, waiver),
+  }))
+  const left = settles.filter(({ settle }) => settle.kind === 'unsettled')
+
+  if (left.length > 0) {
+    const first = left[0]?.settle
+    const trailing = evidence.reels?.find(
+      (reel) => reel.width === left[0]?.width,
+    )?.head
+    const refused = left
+      .map(({ settle }) =>
+        settle.kind === 'unsettled' ? settle.refusedWaiver : undefined,
+      )
+      .find((reason) => reason !== undefined)
+    return {
+      ...fail('evidence', 'reel-unsettled'),
+      ...lists,
+      ...(first?.kind === 'unsettled' &&
+        first.skip !== undefined && { reelSkip: first.skip }),
+      ...(trailing !== undefined && { reelHead: trailing }),
+      reelWidths: left.map(({ width }) => width),
+      ...(refused !== undefined && { reelWaiverRefused: refused }),
+    }
+  }
+
+  const carriedFromWidth = settles
+    .map(({ settle }) => (settle.kind === 'carried' ? settle.from : undefined))
+    .find((from) => from !== undefined)
+  const reelSkip = settles
+    .map(({ settle }) =>
+      settle.kind === 'skipped' || settle.kind === 'waived'
+        ? settle.skip
+        : undefined,
+    )
+    .find((skip) => skip !== undefined)
+  const reelWaived = settles.some(({ settle }) => settle.kind === 'waived')
+  return {
+    ...pass('evidence'),
     ...lists,
-    ...skipField,
-    ...(reelHead !== undefined && { reelHead }),
+    ...(carriedFromWidth !== undefined && {
+      reelCarriedFrom: carriedFromWidth,
+    }),
+    ...(reelSkip !== undefined && { reelSkip }),
+    ...(reelWaived && waiver !== undefined && { reelWaived: waiver }),
   }
-  if (
-    reelSkip !== undefined &&
-    SETTLING_REEL_SKIPS.includes(reelSkipCode(reelSkip))
-  ) {
-    return { ...pass('evidence'), ...lists, ...skipField }
-  }
-  const reelWaived = readReelWaivers(standing).at(-1)
-  if (reelWaived === undefined) return unsettled
-  if (
-    reelSkip !== undefined &&
-    UNWAIVABLE_REEL_SKIPS.includes(reelSkipCode(reelSkip))
-  ) {
-    return { ...unsettled, reelWaiverRefused: reelWaived }
-  }
-  return { ...pass('evidence'), ...lists, ...skipField, reelWaived }
 }
 
 /**
- * The commit a reel filmed before the head carries from, when no later push
- * moved a `reelMoves` path. A rewritten commit or failed read carries nothing.
+ * The commit each reel filmed before the head carries from, by width, when no
+ * later push moved a `reelMoves` path. A rewritten commit or failed read
+ * carries nothing, and a reel at the head needs no carry.
  */
 async function readReelCarry(
   api: Pick<LiftApi, 'readChanged'>,
   painted: PaintedPatterns,
   evidence: EvidenceGate,
   head: string,
-): Promise<string | undefined> {
-  const { reelHead } = evidence
-  if (reelHead === undefined) return undefined
-  const carry = await readCarry(
-    (from, to) => api.readChanged(from, to),
-    reelHead,
-    head,
-    reelMoves(painted),
+): Promise<ReadonlyMap<number, string>> {
+  const trailing = (evidence.reels ?? []).filter(
+    (reel) => !coversHead(reel.head, head),
   )
-  return carry.kind === 'carried' ? carry.carriedFrom : undefined
+  const carries = await Promise.all(
+    trailing.map(async (reel) => {
+      const carry = await readCarry(
+        (from, to) => api.readChanged(from, to),
+        reel.head,
+        head,
+        reelMoves(painted),
+      )
+      return carry.kind === 'carried'
+        ? ([[reel.width, carry.carriedFrom]] as const)
+        : []
+    }),
+  )
+  return new Map(carries.flat())
 }
 
 function standingGate(standing: Standing): GateResult {

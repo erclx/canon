@@ -10,7 +10,7 @@ import {
   findEvidenceHead,
   findEvidenceLocal,
   findEvidencePreview,
-  findEvidenceReel,
+  findEvidenceReels,
   findEvidenceSkips,
   type EvidenceItem,
   type EvidenceReading,
@@ -24,7 +24,8 @@ import {
   readOwed,
   readPngWidth,
   readUncaptured,
-  nextEvidenceReel,
+  nextEvidenceReels,
+  readReelWidth,
   renderEvidenceBody,
   settleChecklist,
   SHORT_SHA_LENGTH,
@@ -68,10 +69,10 @@ interface EvidenceOptions extends ReadOptions {
   /** A path to fold in, or false from `--no-checklist` to drop the carried one. */
   readonly checklist?: string | false
   readonly local?: string
-  readonly reel?: string
-  readonly reelCovers?: string
+  readonly reel?: readonly string[]
+  readonly reelCovers?: readonly string[]
   readonly localSkip?: string
-  readonly reelSkip?: string
+  readonly reelSkip?: readonly string[]
   readonly check?: boolean
 }
 
@@ -84,6 +85,8 @@ type EvidenceRefusal =
   | 'check-writes'
   | 'gh-failed'
   | 'no-base'
+  | 'reel-covers-unpaired'
+  | 'reel-width-repeated'
   | 'unreadable-changes'
   | 'unreadable-checklist'
   | 'would-empty'
@@ -101,6 +104,10 @@ const EVIDENCE_REFUSALS: Record<EvidenceRefusal, string> = {
     'The file named by --checklist could not be read, or holds nothing. Rendering without it would drop the only copy, since the caller deletes the handoff once a post reports success.',
   'no-base':
     'GitHub reported no merge base for this pull request, so no path could be judged added or changed.',
+  'reel-covers-unpaired':
+    'The --reel-covers count differs from the --reel count, so a coverage line would land under the wrong reel or none. The Nth --reel-covers describes the Nth --reel, so pass one per reel or none at all.',
+  'reel-width-repeated':
+    'Two --reel links name one width, so the comment would embed two reels for one width. Pass one --reel per width, each the link canon pr frames --reel returned.',
   'unreadable-changes':
     'GitHub could not list what this pull request changed, so the set is unknown.',
   'would-empty':
@@ -134,11 +141,13 @@ export function registerEvidence(pr: Command): void {
     )
     .option(
       '--reel <link>',
-      'Embed this reel under the address line, filmed at the head, from canon pr frames --reel',
+      'Embed this reel under the address line, filmed at the head, from canon pr frames --reel, once per width',
+      collect,
     )
     .option(
       '--reel-covers <text>',
-      'Name the checklist groups the passed --reel films and leaves out, on a line under it',
+      'Name the checklist groups a passed --reel films and leaves out, on a line under it, paired by position',
+      collect,
     )
     .option(
       '--local-skip <reason>',
@@ -146,7 +155,8 @@ export function registerEvidence(pr: Command): void {
     )
     .option(
       '--reel-skip <reason>',
-      'Name why no reel is embedded, from the reason pr-evidence holds for canon pr frames --reel',
+      'Name why no reel is embedded, from the reason pr-evidence holds for canon pr frames --reel, as <width>=<reason> for one width',
+      collect,
     )
     .option(
       '--check',
@@ -231,30 +241,41 @@ export function registerEvidence(pr: Command): void {
         '',
         '--reel embeds an animated reel on its own line under the addresses,',
         'labeled with the head this render describes as the one it was filmed',
-        'at. Without --reel, a reel the marked comment already embeds is carried',
-        'forward under the head it names, so a stale reel never reads as',
-        'current, and a passed one replaces it. Unlike --local, a passed reel',
-        'opens a render alone, so a branch whose evidence is a filmed reel',
-        'posts it with no checklist or comparison. A carried reel opens none.',
+        'at, and repeats once per width. The width is read off the',
+        'reel-<width>.webp name canon pr frames --reel writes, a bare reel.webp',
+        'reading as 1280, and each reel embeds at that width up to 960. Two',
+        '--reel links naming one width refuse as reel-width-repeated. Passed',
+        'reels post in the order given. A reel the marked comment already',
+        'embeds is carried forward under the head it names unless a passed one',
+        'shares its width, so a stale reel never reads as current. Unlike',
+        '--local, a passed reel opens a render alone, so a branch whose',
+        'evidence is a filmed reel posts it with no checklist or comparison. A',
+        'carried reel opens none.',
         '',
-        '--reel-covers puts one **Reel covers:** line under the passed reel,',
-        'naming the checklist groups it films and the ones it leaves out. The',
-        'line belongs to its reel: it is carried forward with a carried reel',
-        'and dropped when a passed reel replaces it, so it never describes a',
-        'reel that is gone. Without --reel it is ignored with a warning, since',
-        'nothing filmed at this head is there for it to describe.',
+        '--reel-covers puts one **Reel covers:** line under a passed reel,',
+        'naming the checklist groups it films and the ones it leaves out, the',
+        'Nth --reel-covers under the Nth --reel, whatever order the two flags',
+        'arrive in. Passing any covers takes one per reel, and a count that',
+        'differs refuses as reel-covers-unpaired, so a line never lands under',
+        'the wrong reel. The line belongs to its reel: it is carried forward',
+        'with a carried reel and dropped when a passed reel replaces it.',
         '',
-        '--local-skip and --reel-skip each put one line under the addresses,',
+        '--local-skip and --reel-skip each put a line under the addresses,',
         '**No local preview:** or **No reel:** followed by the text passed, a',
         'reason code and any one-line message joined to it, folded onto one',
-        'line. Without the flag, a skip line the marked comment already carries',
-        'is carried forward. The local skip line is dropped whenever its',
-        'address renders, passed or carried. The reel skip line is dropped only',
-        'by a reel that covers this head, so it stays beside an earlier reel',
-        'the lift would not carry. A passed --local-skip drops a carried',
-        'local address, since that line names no head and would read as live,',
-        'while a carried reel names its head and stays beside --reel-skip. Like',
-        '--local, neither opens a comment alone.',
+        'line. A --reel-skip written <width>=<reason>, such as',
+        "'390=no-visible-change', writes **No reel at 390:** instead, which",
+        'governs that width over the line naming every width, and the flag',
+        'repeats once per width. Without the flag, a skip line the marked',
+        'comment already carries is carried forward, and a passed one replaces',
+        'only the line for its own width. The local skip line is dropped',
+        'whenever its address renders, passed or carried. A width skip line is',
+        'dropped by a reel at that width that covers this head, and the line',
+        'naming every width only once each width the checklist owes has one,',
+        'so it stays beside an earlier reel the lift would not carry. A passed',
+        '--local-skip drops a carried local address, since that line names no',
+        'head and would read as live, while a carried reel names its head and',
+        'stays beside --reel-skip. Like --local, neither opens a comment alone.',
         '',
         "A render at a new head also resets the pull request body's UI pass",
         'line, the one `canon pr tick` writes under ## Testing, to unchecked',
@@ -265,8 +286,11 @@ export function registerEvidence(pr: Command): void {
         'present only when that comment holds it:',
         '  preview    the hosted **Preview:** address the comment carries',
         '  local      the **Local preview:** address beside it',
-        '  reel       the embedded reel, as `link`, the `head` it was filmed at,',
-        '             and `covers` when its coverage line is posted',
+        '  reels      each embedded reel in posted order, as `link`, the `width`',
+        '             and `head` it was filmed at, and `covers` when its coverage',
+        '             line is posted',
+        '  reel       the first entry of `reels`, kept for one release for a',
+        '             reader of `reel.head`. Read `reels` instead',
         '  checklist  the checklist between its delimiters, ticks included',
         '  boxes      each checklist box with its number, tick, stamp, and taste',
         '             mark, the numbering `canon pr tick` takes',
@@ -321,15 +345,19 @@ export function registerEvidence(pr: Command): void {
         'compare that fails refuses as gh-failed rather than reading settled.',
         'The record carries `owed` and the same marked fields, plus',
         '`reelSkip`, the text after **No reel:** on the marked comment, present',
-        'only when that line is posted. `canon pr lift` reads its reason code,',
-        'the text before the first colon, to decide whether a drivable',
-        'checklist with no reel at the head is settled. --check refuses',
+        'only when that line is posted, and `reelSkips`, each **No reel at',
+        '<width>:** line as `width` and `skip`, narrowest first, present only',
+        'when one is posted. `canon pr lift` reads each reason code, the text',
+        'before the first colon, to decide whether a drivable checklist with',
+        'no reel at the head is settled at each width. --check refuses',
         'with --preview, --local, --checklist, --no-checklist, --reel,',
         '--reel-covers, --local-skip, or --reel-skip as check-writes.',
         '',
         'Refusals, read off `reason`:',
         '  unreadable-checklist  --checklist named a path that could not be read,',
         '                        or one holding nothing',
+        '  reel-covers-unpaired  --reel-covers were passed in a count other than --reel',
+        '  reel-width-repeated   two --reel links name one width',
         '  no-branch             the pull request carries no head branch name',
         '  no-base               GitHub reported no merge base for the pull request',
         '  unreadable-changes    GitHub could not list what the pull request changed',
@@ -351,7 +379,8 @@ export function registerEvidence(pr: Command): void {
         '  canon pr evidence 1341 --preview https://feat-x.site.pages.dev --json',
         '  canon pr evidence 1341 --checklist .canon/tmp/handoff/ui-checklist/x.md --json',
         '  canon pr evidence 1341 --local http://localhost:5173 --json',
-        '  canon pr evidence 1341 --reel <link from canon pr frames --reel> --json',
+        '  canon pr evidence 1341 --reel <390 link> --reel-covers <text> --reel <1280 link> --json',
+        "  canon pr evidence 1341 --reel-skip '390=no-visible-change' --json",
         "  canon pr evidence 1341 --reel-skip 'no-server: <message>' --json",
         '  canon pr evidence 1341 --check --json',
         '',
@@ -624,6 +653,27 @@ async function runEvidence(
     )
   }
 
+  const passedLinks = opts.reel ?? []
+  const passedCovers = opts.reelCovers ?? []
+  if (passedCovers.length > 0 && passedCovers.length !== passedLinks.length) {
+    return refuseWith(
+      'reel-covers-unpaired',
+      EVIDENCE_REFUSALS['reel-covers-unpaired'],
+      emitJson,
+      root,
+    )
+  }
+  const passedWidths = passedLinks.map(readReelWidth)
+  if (new Set(passedWidths).size < passedWidths.length) {
+    return refuseWith(
+      'reel-width-repeated',
+      EVIDENCE_REFUSALS['reel-width-repeated'],
+      emitJson,
+      root,
+    )
+  }
+  const passedSkips = readPassedReelSkips(opts.reelSkip ?? [])
+
   // Read first, so a bad path refuses before any `gh` round trip.
   let suppliedChecklist: string | undefined
   if (typeof opts.checklist === 'string') {
@@ -713,13 +763,16 @@ async function runEvidence(
   const postedChecklist = findEvidenceChecklist(comments)
   carriedChecklist = opts.checklist === false ? undefined : postedChecklist
   carriedLocal = findEvidenceLocal(comments)
-  const carriedReel = findEvidenceReel(comments)
+  const carriedReels = findEvidenceReels(comments)
 
   // What the comment already shows, kept apart from this call's flags.
   const carried = {
     ...(carriedPreview !== undefined && { preview: carriedPreview }),
     ...(carriedLocal !== undefined && { local: carriedLocal }),
-    ...(carriedReel !== undefined && { reel: carriedReel }),
+    ...(carriedReels.length > 0 && {
+      reel: carriedReels[0],
+      reels: carriedReels,
+    }),
     ...(carriedChecklist !== undefined && checklistFields(carriedChecklist)),
   }
 
@@ -788,7 +841,10 @@ async function runEvidence(
     outro()
     if (emitJson) {
       // Carried verbatim, since the lift settles a reel-less checklist on it.
-      const reelSkip = findEvidenceSkips(comments).reel
+      const { reel: reelSkip, reelByWidth } = findEvidenceSkips(comments)
+      const reelSkips = [...(reelByWidth ?? new Map<number, string>())]
+        .sort(([a], [b]) => a - b)
+        .map(([width, skip]) => ({ width, skip }))
       process.stdout.write(
         `${JSON.stringify({
           root,
@@ -797,6 +853,7 @@ async function runEvidence(
           owed,
           ...uncapturedField,
           ...(reelSkip !== undefined && { reelSkip }),
+          ...(reelSkips.length > 0 && { reelSkips }),
           ...(commentId !== undefined && { commentId }),
           ...(carriedHead !== undefined && {
             previewHead: {
@@ -824,7 +881,7 @@ async function runEvidence(
   if (
     grouped.kind === 'refused' &&
     opts.preview === undefined &&
-    opts.reel === undefined &&
+    passedLinks.length === 0 &&
     !hasChecklist &&
     !hasUncaptured
   ) {
@@ -880,34 +937,42 @@ async function runEvidence(
   // A carried local line names no head, so a passed skip drops it.
   const local =
     opts.local ?? (opts.localSkip === undefined ? carriedLocal : undefined)
-  if (opts.reelCovers !== undefined && opts.reel === undefined) {
-    logWarn(
-      '--reel-covers ignored, since no --reel was passed for it to describe',
-    )
-  }
-  const reel = nextEvidenceReel(
-    opts.reel,
+  const reels = nextEvidenceReels(
+    passedLinks.map((link, index) => {
+      const covers = passedCovers[index]
+      return covers === undefined ? { link } : { link, covers }
+    }),
     identity.head,
     comments,
-    opts.reelCovers,
   )
   // Covered exactly when `canon pr lift` would carry the reel to the head.
-  const reelCovers =
-    reel !== undefined &&
-    ['covered', 'carried'].includes(
-      (
-        await readCarry(
-          (from, to) => readChangedPaths(gitRunner(root), from, to),
-          reel.head,
-          identity.head,
-          reelMoves(painted),
-        )
-      ).kind,
-    )
+  const renderHead = identity.head
+  const carries = await Promise.all(
+    reels.map((reel) =>
+      readCarry(
+        (from, to) => readChangedPaths(gitRunner(root), from, to),
+        reel.head,
+        renderHead,
+        reelMoves(painted),
+      ),
+    ),
+  )
+  const coveredWidths = new Set(
+    reels
+      .filter((_, index) =>
+        ['covered', 'carried'].includes(carries[index]?.kind ?? ''),
+      )
+      .map((reel) => reel.width),
+  )
+  const reelCovers = coveredWidths.size > 0
   const carriedSkips = findEvidenceSkips(comments)
   const skips = {
     local: opts.localSkip ?? carriedSkips.local,
-    reel: opts.reelSkip ?? carriedSkips.reel,
+    reel: passedSkips.every ?? carriedSkips.reel,
+    reelByWidth: new Map([
+      ...(carriedSkips.reelByWidth ?? []),
+      ...passedSkips.byWidth,
+    ]),
   }
   const unsettled = suppliedChecklist ?? carriedChecklist
   const checklist =
@@ -924,10 +989,10 @@ async function runEvidence(
     preview,
     checklist,
     local,
-    reel,
+    reels,
     skips,
     uncaptured,
-    reelCovers,
+    coveredWidths,
     previewBuilt,
   )
 
@@ -982,11 +1047,11 @@ async function runEvidence(
   }
   if (preview !== undefined) logInfo(`preview ${preview}`)
   if (local !== undefined) logInfo(`local preview ${local}`)
-  if (reel !== undefined) {
+  for (const reel of reels) {
     logInfo(
-      opts.reel === undefined
-        ? `reel carried forward, filmed at ${reel.head.slice(0, 7)}`
-        : 'reel embedded under the addresses',
+      reel.head === identity.head
+        ? `${reel.width} reel embedded under the addresses`
+        : `${reel.width} reel carried forward, filmed at ${reel.head.slice(0, 7)}`,
     )
   }
   if (checklist !== undefined) {
@@ -1020,6 +1085,29 @@ async function runEvidence(
   }
 
   return 0
+}
+
+/** Commander's collector for a flag that repeats, keeping every value in the order passed. */
+function collect(value: string, previous: readonly string[] = []): string[] {
+  return [...previous, value]
+}
+
+/** A `--reel-skip` written `<width>=<reason>` names one width, and any other names every width. */
+const WIDTH_SKIP = /^([1-9]\d*)=(.*)$/s
+
+/** The passed reel skips split by width, the last one passed winning for each width and for the line naming every width. */
+function readPassedReelSkips(values: readonly string[]): {
+  every?: string
+  byWidth: Map<number, string>
+} {
+  let every: string | undefined
+  const byWidth = new Map<number, string>()
+  for (const value of values) {
+    const match = WIDTH_SKIP.exec(value)
+    if (match?.[1] === undefined || match[2] === undefined) every = value
+    else byWidth.set(Number(match[1]), match[2])
+  }
+  return every === undefined ? { byWidth } : { every, byWidth }
 }
 
 /** The record fields a checklist carries, with `drivable` counting the boxes a driver can run. */

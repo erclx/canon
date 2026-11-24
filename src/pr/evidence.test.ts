@@ -7,12 +7,17 @@ import {
   findEvidenceHead,
   findEvidenceLocal,
   findEvidencePreview,
+  findEvidenceReels,
+  findEvidenceSkips,
   groupEvidence,
   hasMarkedEvidenceComment,
   type OwedInput,
+  nextEvidenceReels,
+  owedReelWidths,
   readChecklistBoxes,
   readOwed,
   readPngWidth,
+  readReelWidth,
   readUncaptured,
   renderEvidenceBody,
   settleChecklist,
@@ -796,6 +801,180 @@ describe('checklist boxes', () => {
 
     expect(box?.stamp).toBeUndefined()
     expect(box?.text).toBe('the footer says passed at `abc1234` in its copy')
+  })
+
+  it('should read the width a box names in its route opening, and none otherwise', () => {
+    const boxes = readChecklistBoxes(
+      [
+        '- [ ] /board, 390: tap the card → the sheet opens',
+        '- [ ] /board, 834: drag the card → the column scrolls',
+        '- [ ] /board: click the card → the sheet opens',
+        '- [ ] /board, wide: click the card → the sheet opens',
+        '- [ ] click the card, then 390: nothing',
+      ].join('\n'),
+    )
+
+    expect(boxes.map((box) => box.width)).toEqual([
+      390,
+      834,
+      undefined,
+      undefined,
+      undefined,
+    ])
+  })
+})
+
+describe('owedReelWidths', () => {
+  it('should owe each width a drivable box names, narrowest first, and 1280 for a box naming none', () => {
+    const boxes = readChecklistBoxes(
+      [
+        '- [ ] /board: click → opens',
+        '- [ ] /board, 390: tap → opens',
+        '- [ ] /board, 390: swipe → closes',
+        '- [ ] /board, 768: look → calm (taste)',
+      ].join('\n'),
+    )
+
+    expect(owedReelWidths(boxes)).toEqual([390, 1280])
+  })
+
+  it('should owe nothing for a checklist of taste boxes alone', () => {
+    expect(owedReelWidths(readChecklistBoxes('- [ ] calm (taste)'))).toEqual([])
+  })
+})
+
+describe('reels per width', () => {
+  const frames =
+    'https://github.com/o/r/blob/canon/frames/pr-1/bbbb111/20261026T120000Z'
+  const NARROW = `${frames}/reel-390.webp?raw=true`
+  const WIDE = `${frames}/reel-1280.webp?raw=true`
+  const LEGACY = `${frames}/reel.webp?raw=true`
+
+  function marked(body: string): { url: string; body: string }[] {
+    return [{ url: 'https://github.com/o/r/pull/1#issuecomment-9', body }]
+  }
+
+  it('should read the width off the file name, and 1280 off a bare reel.webp', () => {
+    expect([NARROW, WIDE, LEGACY].map(readReelWidth)).toEqual([390, 1280, 1280])
+  })
+
+  it('should embed a reel at its filmed width up to the 960 column', () => {
+    const body = renderEvidenceBody(
+      [],
+      'o/r',
+      'aaaa000',
+      'bbbb111',
+      undefined,
+      undefined,
+      undefined,
+      [
+        { link: NARROW, head: 'bbbb111', width: 390 },
+        { link: WIDE, head: 'bbbb111', width: 1280 },
+      ],
+    )
+
+    expect(body.match(/<img [^>]*width="(\d+)"/g)).toEqual([
+      `<img src="${NARROW}" width="390"`,
+      `<img src="${WIDE}" width="960"`,
+    ])
+  })
+
+  it('should read every reel back in the order it was posted', () => {
+    const comments = marked(
+      renderEvidenceBody(
+        [],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+        undefined,
+        undefined,
+        undefined,
+        [
+          {
+            link: NARROW,
+            head: 'bbbb111',
+            width: 390,
+            covers: 'filmed: Board',
+          },
+          { link: WIDE, head: 'bbbb111', width: 1280 },
+        ],
+      ),
+    )
+
+    expect(findEvidenceReels(comments)).toEqual([
+      { link: NARROW, head: 'bbbb111', width: 390, covers: 'filmed: Board' },
+      { link: WIDE, head: 'bbbb111', width: 1280 },
+    ])
+  })
+
+  it('should read a reel posted before reels carried a width as one reel at 1280', () => {
+    const comments = marked(
+      [
+        '## Evidence',
+        '',
+        `**Reel** filmed at \`bbbb111\`:<br><img src="${LEGACY}" width="960" alt="reel filmed at bbbb111">`,
+        '',
+        '<!-- pr-evidence: head=bbbb111 -->',
+      ].join('\n'),
+    )
+
+    expect(findEvidenceReels(comments)).toEqual([
+      { link: LEGACY, head: 'bbbb111', width: 1280 },
+    ])
+  })
+
+  it('should replace a posted reel at the passed width and carry the other forward', () => {
+    const comments = marked(
+      renderEvidenceBody(
+        [],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+        undefined,
+        undefined,
+        undefined,
+        [
+          { link: NARROW, head: 'bbbb111', width: 390, covers: 'old' },
+          { link: WIDE, head: 'bbbb111', width: 1280 },
+        ],
+      ),
+    )
+    const fresh = 'https://x/pr-1/cccc222/20261027T120000Z/reel-390.webp'
+
+    expect(nextEvidenceReels([{ link: fresh }], 'cccc222', comments)).toEqual([
+      { link: fresh, head: 'cccc222', width: 390 },
+      { link: WIDE, head: 'bbbb111', width: 1280 },
+    ])
+  })
+
+  it('should read each per-width skip line back beside the line naming every width', () => {
+    const comments = marked(
+      renderEvidenceBody(
+        [],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+        undefined,
+        '- [ ] look',
+        undefined,
+        [],
+        {
+          reel: 'deferred: behind #1',
+          reelByWidth: new Map([
+            [1280, 'wrong-state: beat 1'],
+            [390, 'no-visible-change'],
+          ]),
+        },
+      ),
+    )
+
+    expect(findEvidenceSkips(comments)).toEqual({
+      reel: 'deferred: behind #1',
+      reelByWidth: new Map([
+        [390, 'no-visible-change'],
+        [1280, 'wrong-state: beat 1'],
+      ]),
+    })
   })
 })
 

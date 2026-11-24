@@ -14,9 +14,11 @@ import {
   stalledRuns,
   withMergeState,
 } from '@/pr/checks'
+import { owedReelWidths, readChecklistBoxes } from '@/pr/evidence'
 import {
   type ChecksGate,
   type EvidenceGate,
+  type EvidenceGateReel,
   type LiftRefusal,
   readsDrivableBox,
   UNWAIVABLE_REEL_SKIPS,
@@ -53,7 +55,7 @@ export const LIFT_REFUSALS: Record<
     'The evidence check reads owed, so the ship chain left a step undone.',
   'painted-uncaptured':
     'A painted path changed with no capture, no reel at the head, and no waiver in a review. Capture it, or have a review waive it.',
-  'reel-unsettled': `The checklist holds a box a driver can run, and no reel is filmed at the head. The posted skip, if any, is one a builder can fix. Film the reel, or have a review waive it. A waiver over a ${UNWAIVABLE_REEL_SKIPS.join(' or ')} skip settles nothing, and the gate entry names one it ignored as \`reelWaiverRefused\`.`,
+  'reel-unsettled': `The checklist holds a box a driver can run, and a width it owes has no reel filmed at the head, which the gate entry names as \`reelWidths\`. The skip posted for that width, if any, is one a builder can fix. Film the reel, or have a review waive it. A waiver over a ${UNWAIVABLE_REEL_SKIPS.join(' or ')} skip settles nothing, and the gate entry names one it ignored as \`reelWaiverRefused\`.`,
   'standing-stale':
     'The base moved under a path this branch writes since it branched, so CI measured a tree that is gone.',
   'standing-conflict': 'The head does not merge cleanly into the base.',
@@ -109,23 +111,39 @@ export async function readEvidenceGate(
     .at(-1)
   if (last === undefined) return undefined
 
-  let record: {
-    reason?: unknown
-    owed?: unknown
-    checklist?: unknown
-    drivable?: unknown
-    uncaptured?: unknown
-    reel?: unknown
-    reelSkip?: unknown
-  }
+  let record: EvidenceCheckRecord
   try {
     record = JSON.parse(last)
   } catch {
     return undefined
   }
+  return toEvidenceGate(record)
+}
+
+/** The `canon pr evidence --check --json` fields the lift reads, each unchecked until `toEvidenceGate` narrows it. */
+export interface EvidenceCheckRecord {
+  readonly reason?: unknown
+  readonly owed?: unknown
+  readonly checklist?: unknown
+  readonly drivable?: unknown
+  readonly uncaptured?: unknown
+  readonly reels?: unknown
+  readonly reelSkip?: unknown
+  readonly reelSkips?: unknown
+}
+
+/**
+ * The gate a check record reads as, undefined for a record that is not a
+ * check. The owed widths come off the checklist text, so a box naming no
+ * width or a malformed one owes the default.
+ */
+export function toEvidenceGate(
+  record: EvidenceCheckRecord,
+): EvidenceGate | undefined {
   if (record.reason !== 'settled' && record.reason !== 'owed') return undefined
 
-  const reelHead = readReelHead(record.reel)
+  const reels = readReels(record.reels)
+  const reelSkips = readReelSkips(record.reelSkips)
   return {
     isSettled: record.reason === 'settled',
     owed: Array.isArray(record.owed) ? record.owed.map(String) : [],
@@ -134,18 +152,39 @@ export async function readEvidenceGate(
     ...(Array.isArray(record.uncaptured) && {
       uncaptured: record.uncaptured.map(String),
     }),
-    ...(reelHead !== undefined && { reelHead }),
+    ...(reels.length > 0 && { reels }),
     ...(typeof record.reelSkip === 'string' && { reelSkip: record.reelSkip }),
+    ...(reelSkips.size > 0 && { reelSkips }),
+    ...(typeof record.checklist === 'string' && {
+      owedWidths: owedReelWidths(readChecklistBoxes(record.checklist)),
+    }),
   }
 }
 
-function readReelHead(reel: unknown): string | undefined {
-  if (typeof reel !== 'object' || reel === null || !('head' in reel)) {
-    return undefined
-  }
-  return typeof reel.head === 'string' && reel.head !== ''
-    ? reel.head
-    : undefined
+/** Each well-formed reel on the record, dropping an entry with no width or head rather than guessing one. */
+function readReels(reels: unknown): EvidenceGateReel[] {
+  if (!Array.isArray(reels)) return []
+  return reels.flatMap((reel: unknown) => {
+    if (typeof reel !== 'object' || reel === null) return []
+    const { width, head } = reel as { width?: unknown; head?: unknown }
+    return typeof width === 'number' && typeof head === 'string' && head !== ''
+      ? [{ width, head }]
+      : []
+  })
+}
+
+/** The per-width skips on the record, keyed by width. */
+function readReelSkips(skips: unknown): Map<number, string> {
+  if (!Array.isArray(skips)) return new Map()
+  return new Map(
+    skips.flatMap((entry: unknown) => {
+      if (typeof entry !== 'object' || entry === null) return []
+      const { width, skip } = entry as { width?: unknown; skip?: unknown }
+      return typeof width === 'number' && typeof skip === 'string'
+        ? [[width, skip] as const]
+        : []
+    }),
+  )
 }
 
 export async function readChecksGate(

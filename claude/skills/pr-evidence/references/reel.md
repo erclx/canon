@@ -42,14 +42,14 @@ A pull request that overlaps another open one films its reel once, at the head i
 
 A reel the comment already carries goes forward under the older head it names. With no reason beside it, the lift's `reel-unsettled` reads as unexplained, so any local reading other than `ok` films nothing and ends here, a missing one included.
 
-- When the record carries a `reel` whose head the caller found trailing the tip, skip as `no-server: <local reason>`, naming the reason the local read returned
+- When the record's `reels` holds one whose head the caller found trailing the tip, skip as `no-server: <local reason>`, naming the reason the local read returned
 - When the local step held no record at all, as an older binary answers, skip as `no-server: unread` on a trailing reel
-- When the record carries no reel, skip silently, since nothing trails
+- When `reels` is absent, skip silently, since nothing trails
 - The lift reads `no-server` as a skip no waiver settles, since the builder clears it by starting the server and pushing again
 
 ## Choose the beats
 
-Film where motion is the claim. Filter the boxes first, then spend the three beats so each feature area shows its change once before any area shows two.
+Film where motion is the claim. Filter the boxes first, then spend each reel's three beats so each feature area shows its change once before any area shows two.
 
 ### Filter the boxes
 
@@ -71,20 +71,16 @@ A group is the bold feature-area label above at most five boxes, as `ui-checklis
 
 A checklist with one group gives up to three beats from it. A checklist with four groups gives three beats, one from each of the first three.
 
-### Pick the reel's width
+### Pick the widths
 
-A beat films at the width its box names, even one outside the set such as 834, and at 1280 when it names none. One reel holds one width, since `canon take` refuses two shapes as `reel-shape`.
-
-- Film the width holding the most beats, ties going to the first beat's, and drop the rest from the plan
-- Pass `--viewport` at 390x844, 768x1024, 1280x800, or 900 tall otherwise, and `--reel-width <width>` under 960
-- Set `"push": false` on a 390 reel, since a push crops the column, and expect a 390 or 768 reel to render upscaled
+Read `${CLAUDE_SKILL_DIR}/references/reel-widths.md` before ordering the beats, since each width its boxes name films a reel of its own, and run everything below once per width.
 
 ### Hold the coverage
 
 A reviewer watching three beats cannot tell whether the reel skipped a group or the group had nothing to film. Once the beats are ordered, hold two lists of group labels, in checklist order:
 
 - Filmed: each group with at least one beat
-- Left out: each other group, whether the filter emptied it, the cap of three ran out first, or its beats sat at a skipped width, written as `Board at 768`
+- Left out: each other group, whether the filter emptied it or the cap of three ran out first
 
 Write the two as one line, `filmed: <labels> · left out: <labels>`, joining labels with a comma and writing `none` for an empty list. A checklist with one group and three beats reads `filmed: Board · left out: none`, and one with four groups names the fourth as left out.
 
@@ -109,11 +105,11 @@ Keep the whole reel at or under 15 seconds, which the take below enforces. Each 
 Empty the takes folder before every film, refilms included. `canon take` never clears it, and the timing check below reads a beat folder a dropped or renamed beat left as a harness beat.
 
 ```bash
-rm -rf .canon/tmp/pr/reel/<number>/takes
+rm -rf .canon/tmp/pr/reel/<number>/<width>/takes
 ```
 
 ```bash
-canon take <url> .canon/tmp/pr/reel/<number>/plan.json --out .canon/tmp/pr/reel/<number>/takes --reel .canon/tmp/pr/reel/<number>/reel.webp --viewport <width>x<height> --max-seconds 15 --json
+canon take <url> .canon/tmp/pr/reel/<number>/<width>/plan.json --out .canon/tmp/pr/reel/<number>/<width>/takes --reel .canon/tmp/pr/reel/<number>/<width>/reel.webp --viewport <width>x<height> --max-seconds 15 --json
 ```
 
 Branch on the record's `reason`, never on the exit code.
@@ -156,7 +152,7 @@ Open each beat's `still.jpg`, the closing frame the record names in its `still` 
 A beat's still shows only its closing frame. To judge the reel's motion before pushing, write evenly spaced frames of the reel itself and open them, since no other verb reads a frame back out of the animation:
 
 ```bash
-canon take stills .canon/tmp/pr/reel/<number>/reel.webp --out .canon/tmp/pr/reel/<number>/stills --sheet .canon/tmp/pr/reel/<number>/sheet.png
+canon take stills .canon/tmp/pr/reel/<number>/<width>/reel.webp --out .canon/tmp/pr/reel/<number>/<width>/stills --sheet .canon/tmp/pr/reel/<number>/<width>/sheet.png
 ```
 
 Open `sheet.png` for the four frames at once. Add `--overwrite` on a refilm, since a still already there is never replaced without it.
@@ -164,7 +160,7 @@ Open `sheet.png` for the four frames at once. Add `--overwrite` on a refilm, sin
 Then check the takes' timing before pushing, since a still shows the closing frame and none of the motion before it.
 
 ```bash
-canon take check .canon/tmp/pr/reel/<number>/takes --json
+canon take check .canon/tmp/pr/reel/<number>/<width>/takes --json
 ```
 
 - No `reason` means every beat passed, so continue to the push
@@ -173,21 +169,21 @@ canon take check .canon/tmp/pr/reel/<number>/takes --json
 
 ## Push the reel
 
-Stamp the pass in compact UTC and push the file:
+Stamp the pass once with `date -u +%Y%m%dT%H%M%SZ`, and push each width's reel under that one stamp:
 
 ```bash
-canon pr frames <number> --reel .canon/tmp/pr/reel/<number>/reel.webp --pass "$(date -u +%Y%m%dT%H%M%SZ)" --json
+canon pr frames <number> --reel .canon/tmp/pr/reel/<number>/<width>/reel.webp --width <width> --pass <stamp> --json
 ```
 
-- `ok`: hold the record's `link`
+- `ok`: hold the record's `link`, whose `reel-<width>.webp` name carries the width to the comment
 - `reel-too-large`: skip as `reel-too-large`, since GitHub would not render it
 - Any other `reason`: skip under it with the record's `message`
 
 ## What goes back to the reel step
 
-Hand the reel step one of two things and print nothing of your own:
+Hand the reel step one of two things per width and print nothing of your own:
 
 - The `link` from the push, which the evidence step passes to `canon pr evidence --reel`, with the coverage line held above, which it passes to `--reel-covers`
-- A skip, as the reason and a one-line message, which the closing report names. A skip carries no coverage, since nothing was filmed.
+- A skip, as the reason and a one-line message, which the closing report names. A skip carries no coverage, since nothing was filmed, and names its width unless it stopped every width.
 
 Put only a reason this procedure emits on `--reel-skip`, never one written by hand. `canon pr lift` reads the reason code and settles a drivable checklist only on the few codes no builder can change, which `canon pr lift --help` lists. Any other code holds the lift until a reel lands or a review waives it.

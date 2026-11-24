@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
+import { newestReelPath } from '../../src/pr/frames'
 import { REEL_MAX_BYTES } from '../../src/take/reel'
 
 const root = new URL('../..', import.meta.url).pathname
@@ -150,7 +151,7 @@ function stillHeader(width: number, height: number) {
   return body
 }
 
-/** The newest reel the pull request's evidence posted, by the capture time in its path. */
+/** The newest reel the pull request's evidence posted, by the capture time in its path, the widest when a pass holds several. */
 function newestReel(repo: string, pullRequest: number) {
   git(['fetch', '--quiet', `https://github.com/${repo}.git`, FRAMES])
   const paths = git([
@@ -162,11 +163,7 @@ function newestReel(repo: string, pullRequest: number) {
   ])
     .toString('utf8')
     .split('\n')
-    .filter((path) =>
-      /^pr-\d+\/[0-9a-f]+\/\d{8}T\d{6}Z\/reel\.webp$/.test(path),
-    )
-    .sort((a, b) => a.split('/')[2]!.localeCompare(b.split('/')[2]!))
-  const path = paths.at(-1)
+  const path = newestReelPath(paths)
   if (!path)
     fail(`${repo} ${FRAMES} holds no reel for pull request #${pullRequest}`)
   return { path, sha: path.split('/')[1]! }

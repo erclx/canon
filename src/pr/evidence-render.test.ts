@@ -2,14 +2,15 @@ import { describe, expect, it } from 'vitest'
 import {
   countEvidenceCases,
   type EvidenceItem,
+  type EvidenceReel,
   type EvidenceState,
   findEvidenceChecklist,
   findEvidenceLocal,
   findEvidencePreview,
-  findEvidenceReel,
+  findEvidenceReels,
   findEvidenceSkips,
   hasMarkedEvidenceComment,
-  nextEvidenceReel,
+  nextEvidenceReels,
   readOwed,
   renderEvidenceBody,
 } from '@/pr/evidence'
@@ -987,7 +988,7 @@ describe('the reel line', () => {
       undefined,
       '- [ ] the menu opens',
       'http://localhost:5173',
-      { link: LINK, head: 'bbbb1112222' },
+      [{ link: LINK, head: 'bbbb1112222', width: 1280 }],
     )
 
     expect(body.split('\n').slice(0, 7)).toEqual([
@@ -1010,7 +1011,7 @@ describe('the reel line', () => {
       undefined,
       undefined,
       undefined,
-      { link: LINK, head: 'bbbb111' },
+      [{ link: LINK, head: 'bbbb111', width: 1280 }],
     )
     const lines = body.split('\n')
     const reel = lines.findIndex((line) => line.startsWith('**Reel**'))
@@ -1049,13 +1050,15 @@ describe('the reel line', () => {
       'https://x.dev',
       '- [ ] look',
       'http://localhost:5173',
-      { link: LINK, head: 'bbbb111' },
+      [{ link: LINK, head: 'bbbb111', width: 1280 }],
     )
 
     const comments = [
       { url: 'https://github.com/o/r/pull/1#issuecomment-9', body },
     ]
-    expect(findEvidenceReel(comments)).toEqual({ link: LINK, head: 'bbbb111' })
+    expect(findEvidenceReels(comments)).toEqual([
+      { link: LINK, head: 'bbbb111', width: 1280 },
+    ])
     expect(findEvidencePreview(comments)).toBe('https://x.dev')
     expect(findEvidenceLocal(comments)).toBe('http://localhost:5173')
     expect(findEvidenceChecklist(comments)).toBe('- [ ] look')
@@ -1064,18 +1067,18 @@ describe('the reel line', () => {
 
   it('should read no reel off an unmarked comment or one without the line', () => {
     expect(
-      findEvidenceReel([
+      findEvidenceReels([
         { body: `**Reel** filmed at \`bbbb111\`:<br><img src="${LINK}">` },
       ]),
-    ).toBeUndefined()
+    ).toEqual([])
     expect(
-      findEvidenceReel([
+      findEvidenceReels([
         { body: '## Evidence\n\n<!-- pr-evidence: head=bbbb111 -->' },
       ]),
-    ).toBeUndefined()
+    ).toEqual([])
   })
 
-  describe('nextEvidenceReel', () => {
+  describe('nextEvidenceReels', () => {
     const carried = [
       {
         body: renderEvidenceBody(
@@ -1086,27 +1089,25 @@ describe('the reel line', () => {
           undefined,
           '- [ ] look',
           undefined,
-          { link: LINK, head: 'bbbb111' },
+          [{ link: LINK, head: 'bbbb111', width: 1280 }],
         ),
       },
     ]
 
     it('should carry the posted reel forward under its old head when none is passed', () => {
-      expect(nextEvidenceReel(undefined, 'cccc222', carried)).toEqual({
-        link: LINK,
-        head: 'bbbb111',
-      })
+      expect(nextEvidenceReels([], 'cccc222', carried)).toEqual([
+        { link: LINK, head: 'bbbb111', width: 1280 },
+      ])
     })
 
     it('should replace a carried reel with a passed one filmed at this head', () => {
-      expect(nextEvidenceReel('https://new.link', 'cccc222', carried)).toEqual({
-        link: 'https://new.link',
-        head: 'cccc222',
-      })
+      expect(
+        nextEvidenceReels([{ link: 'https://new.link' }], 'cccc222', carried),
+      ).toEqual([{ link: 'https://new.link', head: 'cccc222', width: 1280 }])
     })
 
     it('should give no reel when none is passed or posted', () => {
-      expect(nextEvidenceReel(undefined, 'cccc222', [])).toBeUndefined()
+      expect(nextEvidenceReels([], 'cccc222', [])).toEqual([])
     })
   })
 })
@@ -1176,7 +1177,7 @@ describe('the skip lines', () => {
       undefined,
       '- [ ] look',
       undefined,
-      { link: LINK, head: 'bbbb111' },
+      [{ link: LINK, head: 'bbbb111', width: 1280 }],
       { reel: 'no-checklist' },
     )
 
@@ -1193,7 +1194,7 @@ describe('the skip lines', () => {
       undefined,
       '- [ ] look',
       undefined,
-      { link: LINK, head: 'bbbb111' },
+      [{ link: LINK, head: 'bbbb111', width: 1280 }],
       { reel: 'reel-too-large' },
     )
 
@@ -1210,10 +1211,10 @@ describe('the skip lines', () => {
       undefined,
       '- [ ] look',
       undefined,
-      { link: LINK, head: 'bbbb111' },
+      [{ link: LINK, head: 'bbbb111', width: 1280 }],
       { reel: 'reel-too-large' },
       [],
-      true,
+      new Set([1280]),
     )
 
     expect(body).toContain('**Reel** filmed at `bbbb111`')
@@ -1247,7 +1248,7 @@ describe('the skip lines', () => {
       'https://x.dev',
       '- [ ] look',
       'http://localhost:5173',
-      { link: LINK, head: 'bbbb111' },
+      [{ link: LINK, head: 'bbbb111', width: 1280 }],
     ] as const
 
     expect(renderEvidenceBody(...args, {})).toBe(renderEvidenceBody(...args))
@@ -1274,7 +1275,7 @@ describe('the skip lines', () => {
     })
     expect(findEvidencePreview(comments)).toBe('https://x.dev')
     expect(findEvidenceLocal(comments)).toBeUndefined()
-    expect(findEvidenceReel(comments)).toBeUndefined()
+    expect(findEvidenceReels(comments)).toEqual([])
     expect(findEvidenceChecklist(comments)).toBe('- [ ] look')
     expect(countEvidenceCases(comments[0]?.body ?? '')).toBe(1)
   })
@@ -1317,6 +1318,112 @@ describe('the skip lines', () => {
   })
 })
 
+describe('reels at several widths', () => {
+  const frames =
+    'https://github.com/o/r/blob/canon/frames/pr-1/bbbb111/20261026T120000Z'
+  const NARROW = {
+    link: `${frames}/reel-390.webp?raw=true`,
+    head: 'bbbb111',
+    width: 390,
+  }
+  const WIDE = {
+    link: `${frames}/reel-1280.webp?raw=true`,
+    head: 'bbbb111',
+    width: 1280,
+  }
+  const CHECKLIST =
+    '- [ ] /board, 390: tap → opens\n- [ ] /board: click → opens'
+
+  function render(
+    head: string,
+    reels: readonly EvidenceReel[],
+    skips = {},
+    covered?: ReadonlySet<number>,
+  ): string {
+    return renderEvidenceBody(
+      [],
+      'o/r',
+      'aaaa000',
+      head,
+      undefined,
+      CHECKLIST,
+      undefined,
+      reels,
+      skips,
+      [],
+      covered,
+    )
+  }
+
+  it('should post a 390 and a 1280 reel, each embedded at its size under its own covers line', () => {
+    const body = render('bbbb111', [
+      { ...NARROW, covers: 'filmed: Board · left out: none' },
+      { ...WIDE, covers: 'filmed: Sheet · left out: Board at 768' },
+    ])
+
+    expect(body.split('\n').slice(0, 10)).toEqual([
+      '## Evidence',
+      '',
+      `**Reel** filmed at \`bbbb111\`:<br><img src="${NARROW.link}" width="390" alt="reel filmed at bbbb111">`,
+      '',
+      '**Reel covers:** filmed: Board · left out: none',
+      '',
+      `**Reel** filmed at \`bbbb111\`:<br><img src="${WIDE.link}" width="960" alt="reel filmed at bbbb111">`,
+      '',
+      '**Reel covers:** filmed: Sheet · left out: Board at 768',
+      '',
+    ])
+  })
+
+  it('should write a skip line per width, narrowest first, under the line naming every width', () => {
+    const body = render('bbbb111', [], {
+      reel: 'deferred: behind #1',
+      reelByWidth: new Map([
+        [1280, 'wrong-state'],
+        [390, 'no-visible-change'],
+      ]),
+    })
+
+    expect(body.split('\n').slice(2, 8)).toEqual([
+      '**No reel:** deferred: behind #1',
+      '',
+      '**No reel at 390:** no-visible-change',
+      '',
+      '**No reel at 1280:** wrong-state',
+      '',
+    ])
+  })
+
+  it('should drop a width skip once that width has a reel at the head and keep the other', () => {
+    const body = render('bbbb111', [WIDE], {
+      reelByWidth: new Map([
+        [390, 'no-visible-change'],
+        [1280, 'wrong-state'],
+      ]),
+    })
+
+    expect(body).toContain('**No reel at 390:** no-visible-change')
+    expect(body).not.toContain('No reel at 1280')
+  })
+
+  it('should keep the line naming every width while an owed width has no covering reel', () => {
+    const body = render('bbbb111', [WIDE], { reel: 'deferred: behind #1' })
+
+    expect(body).toContain('**No reel:** deferred: behind #1')
+  })
+
+  it('should drop the line naming every width once each owed width has a covering reel', () => {
+    const body = render(
+      'cccc222',
+      [NARROW, WIDE],
+      { reel: 'deferred: behind #1' },
+      new Set([390, 1280]),
+    )
+
+    expect(body).not.toContain('No reel')
+  })
+})
+
 describe('the uncaptured line', () => {
   const LINK = 'https://github.com/o/r/blob/canon/frames/reel.webp?raw=true'
   const HEAD = 'bbbb111bbbb111bbbb111bbbb111bbbb111bbbb1'
@@ -1336,10 +1443,10 @@ describe('the uncaptured line', () => {
       'https://x.dev',
       undefined,
       undefined,
-      reel,
+      reel === undefined ? [] : [{ ...reel, width: 1280 }],
       {},
       uncaptured,
-      reelCovers,
+      reelCovers === undefined ? undefined : new Set(reelCovers ? [1280] : []),
     )
   }
 
