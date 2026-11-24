@@ -104,6 +104,8 @@ They list the files and functions past a line limit, so you know what to split b
 
 ## For your agent
 
+<!-- canon-readme-only: the landing page addresses the person, and the agent's surface lives in the docs it links -->
+
 - Every command runs without a prompt, and data on stdout pipes clean
 - `canon <command> --help` prints each command's flags, exit codes, and examples
 - Rules load by path, so the agent gets the rule for the file it is editing
