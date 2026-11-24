@@ -87,14 +87,63 @@ describe('stage ordering', () => {
     expect(seen).toEqual(['true first', 'true second'])
   })
 
-  it('should stop at the stage that found a fact', async () => {
+  it('should run the stage after one that found a fact', async () => {
+    const seen: string[] = []
     const ctx = contextWith({
-      run: runnerFor({ 'true first': result({ exitCode: 1 }) }),
+      run: runnerFor({ 'true first': result({ exitCode: 1 }) }, seen),
     })
 
     const results = await runStages([stage('first'), stage('second')], ctx)
 
-    expect(results.map((entry) => entry.id)).toEqual(['first'])
+    expect(results.map((entry) => [entry.id, entry.status])).toEqual([
+      ['first', 'failed'],
+      ['second', 'passed'],
+    ])
+    expect(seen).toEqual(['true first', 'true second'])
+  })
+
+  it('should record every failing stage when two fail', async () => {
+    const ctx = contextWith({
+      run: runnerFor({
+        'true first': result({ exitCode: 1 }),
+        'true third': result({ exitCode: 1 }),
+      }),
+    })
+
+    const results = await runStages(
+      [stage('first'), stage('second'), stage('third')],
+      ctx,
+    )
+
+    expect(
+      results.filter((entry) => entry.status === 'failed').map((e) => e.id),
+    ).toEqual(['first', 'third'])
+    expect(exitCodeFor(results)).toBe(1)
+  })
+
+  it('should hold the tests stage behind a failure and name why', async () => {
+    const seen: string[] = []
+    const ctx = contextWith({
+      run: runnerFor({ 'true first': result({ exitCode: 1 }) }, seen),
+    })
+
+    const results = await runStages([stage('first'), stage('tests')], ctx)
+
+    const held = results[1]
+    expect(held.status).toBe('skipped')
+    expect(held.emissions).toEqual([
+      { kind: 'info', text: 'Held, the first stage failed' },
+    ])
+    expect(seen).toEqual(['true first'])
+  })
+
+  it('should run the tests stage when every earlier stage passes', async () => {
+    const results = await runStages(
+      [stage('first'), stage('tests')],
+      contextWith(),
+    )
+
+    expect(results.map((entry) => entry.status)).toEqual(['passed', 'passed'])
   })
 
   it('should report the failing stage remedy rather than a bare exit code', async () => {

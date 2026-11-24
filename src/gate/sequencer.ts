@@ -25,7 +25,7 @@ export type StageStatus =
   | 'skipped'
   /** The stage could not read its input, so it has no verdict to give. */
   | 'unmeasured'
-  /** A check found a fact, which stops the run here. */
+  /** A check found a fact. */
   | 'failed'
 
 export interface StageResult {
@@ -533,9 +533,11 @@ async function runDrift(
   return { emissions, failure: drifted ? failure : undefined }
 }
 
+/** The one stage a failure holds, being the slow suite behind a lock. */
+const HELD_STAGE_ID = 'tests'
+
 /**
- * Runs the stages in table order and stops at the first failure, so clearing
- * a regenerate-then-assert stage reveals the next one behind it.
+ * Runs every stage in table order past a failure, holding `tests` behind one.
  */
 export async function runStages(
   stages: readonly Stage[],
@@ -545,13 +547,28 @@ export async function runStages(
   const results: StageResult[] = []
 
   for (const stage of stages) {
-    const result = await runStage(stage, ctx)
+    const failed = results.find((entry) => entry.status === 'failed')
+    const result =
+      stage.id === HELD_STAGE_ID && failed !== undefined
+        ? heldResult(stage, failed)
+        : await runStage(stage, ctx)
     results.push(result)
     onResult?.(result)
-    if (result.status === 'failed') break
   }
 
   return results
+}
+
+function heldResult(stage: Stage, failed: StageResult): StageResult {
+  return {
+    id: stage.id,
+    label: stage.label,
+    status: 'skipped',
+    emissions: [
+      { kind: 'info', text: `Held, the ${failed.label} stage failed` },
+    ],
+    ms: 0,
+  }
 }
 
 export interface Summary {

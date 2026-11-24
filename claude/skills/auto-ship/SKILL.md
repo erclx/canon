@@ -84,11 +84,11 @@ When the plan's `**Constraints:**` carry a `Fans in` bullet, this run is a fan-i
 
 Run the verify commands defined in `CLAUDE.md` (lint, typecheck, tests), each under the time limit `canon:git-ship` states in `### Bound each run`, so this step and the Step 6 gate share one bound. On failure:
 
-- Make **one** fix attempt targeting the reported errors
-- Re-run only the failing command
-- If it still fails, stop: `❌ Verify failed after one fix attempt. Review logs and retry manually.`
+- Make **one** fix attempt per distinct failing stage, targeting its reported errors
+- Re-run the gate after each fix, so a stage the fix broke surfaces
+- If a stage fails again after its own fix, stop: `❌ Verify failed after one fix attempt. Review logs and retry manually.`
 
-Do not loop. Do not bypass hooks.
+The stage count bounds the attempts. Do not loop. Do not bypass hooks.
 
 ### A hung run
 
