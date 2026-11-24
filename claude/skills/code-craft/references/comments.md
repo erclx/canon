@@ -22,7 +22,7 @@ Read this before writing or keeping a comment. The figures live in `canon commen
 
 - Leave history to the pull request or a groundwork folder, being the date a figure was measured, the commit or issue it came from, and the alternative tried first.
 - Write `<YYYY-MM-DD>` for an example date and a token name for a color written in digits alone, since the scan reads a real date and an issue number.
-- Cut a head block to three lines of text, since the gate fails a fourth. Keep what the code cannot carry and drop the rest.
+- Cut a head block to three lines of text, since the gate fails a fourth. Keep what the code cannot carry and drop the rest. The limit reaches a `#` block in a config file too.
 
 ## The limits
 
