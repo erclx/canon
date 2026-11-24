@@ -410,6 +410,8 @@ describe('canon pr frames', () => {
         'abc1234',
         '--pass',
         '20261002T154450Z',
+        '--width',
+        '390',
       ]
     }
 
@@ -483,9 +485,48 @@ describe('canon pr frames', () => {
         '7',
         '--reel',
         join(tempDir, 'reel.webp'),
+        '--width',
+        '390',
       ])
 
       expect(outcome.record.reason).toBe('bad-pass')
+    })
+
+    it.each([
+      ['no --width', []],
+      ['a zero width', ['--width', '0']],
+      ['a width that is not a whole number', ['--width', '39o']],
+    ])(
+      'should refuse as bad-width without calling gh for %s',
+      async (_, width) => {
+        writeFileSync(join(tempDir, 'reel.webp'), WEBP)
+
+        const outcome = await runFrames([
+          '7',
+          '--reel',
+          join(tempDir, 'reel.webp'),
+          '--head',
+          'abc1234',
+          '--pass',
+          '20261002T154450Z',
+          ...width,
+        ])
+
+        expect({ reason: outcome.record.reason, calls: calls() }).toEqual({
+          reason: 'bad-width',
+          calls: [],
+        })
+      },
+    )
+
+    it('should refuse as bad-width when --width rides an --add', async () => {
+      const outcome = await runFrames([
+        ...addArgs('box-1.png'),
+        '--width',
+        '390',
+      ])
+
+      expect(outcome.record.reason).toBe('bad-width')
     })
   })
 
@@ -512,6 +553,7 @@ describe('canon pr frames', () => {
         'ref-conflict',
         'bad-head',
         'bad-pass',
+        'bad-width',
       ].filter((reason) => !result.stdout.includes(reason)),
     ).toEqual([])
   })

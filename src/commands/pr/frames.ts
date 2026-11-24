@@ -41,6 +41,7 @@ interface FramesOptions extends ReadOptions {
   readonly pass?: string
   readonly theme?: string
   readonly reel?: string
+  readonly width?: string
   readonly drop?: boolean
   readonly prune?: string
 }
@@ -54,6 +55,7 @@ type FramesCommandRefusal =
   | 'bad-head'
   | 'bad-pass'
   | 'bad-theme'
+  | 'bad-width'
   | 'bad-days'
   | 'unreadable-frame'
   | 'unreadable-reel'
@@ -69,13 +71,15 @@ const FRAMES_REFUSALS: Record<FramesCommandRefusal, string> = {
   'no-number':
     '--add, --reel, and --drop write for one pull request, so name its number.',
   'bad-box':
-    '--add takes --box <n>, a positive whole number naming the checklist box, or --reference, as <page>/<frame> or a tracked canon/design/<surface>/<name> path, never both. --reel takes neither, since a pass has one reel.',
+    '--add takes --box <n>, a positive whole number naming the checklist box, or --reference, as <page>/<frame> or a tracked canon/design/<surface>/<name> path, never both. --reel takes neither, since a reel films every box at its width.',
   'bad-reference':
     '--reference takes <page>/<frame> or a tracked canon/design/<surface>/<name> path, each half opening on a letter or digit and holding only letters, digits, dots, underscores, and dashes, with no `--` in either, so the capture files under a name that reads back as the frame.',
   'bad-head':
     '--head takes a commit sha, 7 to 40 lowercase hex characters. A branch name or a path would file the frame under a folder that names no commit.',
   'bad-pass':
     '--add and --reel take --pass <stamp>, the instant the pass started in compact UTC such as 20261002T154450Z, so a second pass never replaces an earlier one.',
+  'bad-width':
+    '--reel takes --width <n>, the positive whole number of pixels the reel was filmed at, such as 390 or 1280, so two reels of one pass land apart and the comment embeds each at its own size. --width goes with --reel alone.',
   'bad-theme':
     '--theme takes dark or light and goes with --add --box, so a second shot of one box never replaces the first.',
   'bad-days': '--prune takes a positive whole number of days.',
@@ -128,7 +132,11 @@ export function registerFrames(pr: Command): void {
     )
     .option(
       '--reel <file>',
-      "Push this animated WebP as the pass's reel, in place of --add",
+      "Push this animated WebP as one of the pass's reels, in place of --add",
+    )
+    .option(
+      '--width <n>',
+      'The viewport width the reel was filmed at, required with --reel',
     )
     .option('--drop', "Rewrite the branch without this pull request's frames")
     .option(
@@ -152,9 +160,12 @@ export function registerFrames(pr: Command): void {
         'an earlier comment shows. The first --add creates the branch.',
         '',
         `--reel <file> pushes one animated WebP of at most ${REEL_MAX_BYTES / 1_000_000} MB to`,
-        'pr-<number>/<short-head>/<pass>/reel.webp beside the box frames, taking',
-        '--pass and --head the way --add does, and carries `reel: true` in place of',
-        'a box. A drop or a prune clears it with the rest of the folder.',
+        'pr-<number>/<short-head>/<pass>/reel-<width>.webp beside the box frames,',
+        'taking --pass and --head the way --add does and --width <n>, the viewport',
+        'width it was filmed at, so a pass holds one reel per width. The record',
+        'carries `reel: true` and `width` in place of a box, and `canon pr',
+        'evidence` reads the width back off the link. A drop or a prune clears',
+        'it with the rest of the folder.',
         '',
         '--drop and --prune write one root commit and force-move the ref,',
         'since a delete commit would keep every image reachable through history.',
@@ -176,6 +187,7 @@ export function registerFrames(pr: Command): void {
         '  bad-head          --head is not 7 to 40 lowercase hex characters',
         '  bad-pass          --add or --reel without a compact UTC --pass stamp',
         '  bad-theme         --theme is not dark or light, or no --add, or rides a --reference',
+        '  bad-width         --reel without a positive whole --width, or --width without --reel',
         '  bad-days          --prune without a positive number of days',
         '  unreadable-frame  the --add file is missing, empty, or not a PNG',
         '  unreadable-reel   the --reel file is missing, empty, or not a WebP',
@@ -194,7 +206,7 @@ export function registerFrames(pr: Command): void {
         '',
         'Examples:',
         '  canon pr frames 1341 --add frames/3.png --box 3 --pass 20261002T154450Z --json',
-        '  canon pr frames 1341 --reel reel.webp --pass 20261002T154450Z --json',
+        '  canon pr frames 1341 --reel reel.webp --width 390 --pass 20261002T154450Z --json',
         '  canon pr frames 1341 --drop --json',
         '  canon pr frames --prune 30 --json',
         '',
@@ -401,6 +413,12 @@ function framesArgumentRefusal(
       return 'bad-reference'
     }
   }
+  if (
+    (opts.reel === undefined) !== (opts.width === undefined) ||
+    (opts.width !== undefined && !POSITIVE_WHOLE.test(opts.width))
+  ) {
+    return 'bad-width'
+  }
   if (opts.head !== undefined && !isFrameHead(opts.head)) return 'bad-head'
   if (
     (opts.add !== undefined || opts.reel !== undefined) &&
@@ -538,7 +556,7 @@ async function runFrames(
     box,
     reference,
     theme,
-    reel: reel !== undefined,
+    ...(reel !== undefined && { reelWidth: Number(opts.width) }),
     bytes: reel?.bytes ?? bytes ?? new Uint8Array(),
   })
   if (result.kind === 'refused') return refuseWrite(result.reason)
@@ -547,7 +565,7 @@ async function runFrames(
     {
       number: pull,
       ...(reel !== undefined
-        ? { reel: true }
+        ? { reel: true, width: Number(opts.width) }
         : box === undefined
           ? { reference }
           : { box }),

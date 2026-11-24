@@ -91,8 +91,8 @@ export interface FrameInput {
   readonly box?: number
   readonly reference?: string
   readonly theme?: FrameTheme
-  /** The pass's reel, in place of a box or a reference. */
-  readonly reel?: boolean
+  /** The width the pass's reel was filmed at, in place of a box or a reference. */
+  readonly reelWidth?: number
   readonly bytes: Uint8Array
 }
 
@@ -210,9 +210,14 @@ export function referencePath(
   return `pr-${number}/${head.slice(0, SHORT_HEAD_LENGTH)}/${pass}/ref-${slug}.png`
 }
 
-/** Where a pass's reel lands, one per pass beside its box frames. */
-export function reelPath(number: number, head: string, pass: string): string {
-  return `pr-${number}/${head.slice(0, SHORT_HEAD_LENGTH)}/${pass}/reel.webp`
+/** Where a pass's reel lands, one per width beside its box frames, so two widths in one pass never collide. */
+export function reelPath(
+  number: number,
+  head: string,
+  pass: string,
+  width: number,
+): string {
+  return `pr-${number}/${head.slice(0, SHORT_HEAD_LENGTH)}/${pass}/reel-${width}.webp`
 }
 
 /** The reel's bytes, refusing a file that is absent, not a WebP, or past the cap. */
@@ -249,26 +254,28 @@ export async function pushFrame(
   api: FramesApi,
   input: FrameInput,
 ): Promise<PushResult> {
-  const path = input.reel
-    ? reelPath(input.number, input.head, input.pass)
-    : input.reference === undefined
-      ? framePath(
-          input.number,
-          input.head,
-          input.pass,
-          input.box ?? 0,
-          input.theme,
-        )
-      : referencePath(input.number, input.head, input.pass, input.reference)
+  const path =
+    input.reelWidth !== undefined
+      ? reelPath(input.number, input.head, input.pass, input.reelWidth)
+      : input.reference === undefined
+        ? framePath(
+            input.number,
+            input.head,
+            input.pass,
+            input.box ?? 0,
+            input.theme,
+          )
+        : referencePath(input.number, input.head, input.pass, input.reference)
   if (path === undefined) return { kind: 'refused', reason: 'push-failed' }
   const blob = await api.createBlob(Buffer.from(input.bytes).toString('base64'))
   if (blob === undefined) return { kind: 'refused', reason: 'push-failed' }
   const entry: TreeEntry = { path, mode: '100644', type: 'blob', sha: blob }
-  const message = input.reel
-    ? `chore(frames): add reel of #${input.number}`
-    : input.reference === undefined
-      ? `chore(frames): add box ${input.box} of #${input.number}`
-      : `chore(frames): add reference ${input.reference} of #${input.number}`
+  const message =
+    input.reelWidth !== undefined
+      ? `chore(frames): add ${input.reelWidth} reel of #${input.number}`
+      : input.reference === undefined
+        ? `chore(frames): add box ${input.box} of #${input.number}`
+        : `chore(frames): add reference ${input.reference} of #${input.number}`
 
   for (let attempt = 0; attempt < ADD_ATTEMPTS; attempt += 1) {
     const tip = await api.readTip()
