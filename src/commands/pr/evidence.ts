@@ -924,10 +924,10 @@ async function runEvidence(
     preview,
     checklist,
     local,
-    reel,
+    reel === undefined ? [] : [reel],
     skips,
     uncaptured,
-    reelCovers,
+    new Set(reel !== undefined && reelCovers ? [reel.width] : []),
     previewBuilt,
   )
 
