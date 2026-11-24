@@ -7,7 +7,7 @@ description: '`src/sync/`, `src/targets/`, and `src/migrate/`, being the sync en
 
 ## Overview
 
-Owns the sync engine `gov` installs and syncs through, the index of target projects, and the migrations behind `canon migrate`. The layers they stand on are in `cli.md`.
+Owns the sync engine `gov` installs and syncs through, the index of target projects, and the migrations behind `canon migrate`. The layers they stand on are in `overview.md`.
 
 ## Layout
 
