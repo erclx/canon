@@ -502,6 +502,11 @@ function reportWaves(outcome: WavesOutcome, emitJson: boolean): number {
     for (const stem of outcome.unplanned) logInfo(stem)
   }
 
+  if (outcome.held.length > 0) {
+    logStep('Held')
+    for (const stem of outcome.held) logInfo(stem)
+  }
+
   if (outcome.cyclic.length > 0) {
     logStep('Cyclic')
     for (const stem of outcome.cyclic) {
@@ -767,6 +772,8 @@ export function registerPlans(tasks: Command): void {
         '  shared     each a path two plans declare, the stems holding it, and',
         '             the Up next stem that rebases',
         '  unplanned  Up next rows linking no live plan',
+        '  held       rows whose Waiting on cell says to launch on the',
+        "             operator's word, in no wave and no other list",
         '  cyclic     rows in a wait cycle, or waiting on one',
         '  cycles     each cyclic row with its edges, a stem it waits on and the',
         '             source, waiting for its cell or shared with the path',

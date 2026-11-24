@@ -6,6 +6,7 @@ import { readPlanTargets, tasksDir } from '@/tasks/archive'
 import { covers, readDeclarations } from '@/tasks/reach'
 import {
   type BoardRow,
+  isOperatorHeld,
   orderingPath,
   readBoard,
   readBlockerStems,
@@ -68,6 +69,8 @@ export interface WavesReport {
   readonly cyclic: readonly string[]
   /** Each cyclic row with the edges it waits on and where each came from, beside `cyclic`. */
   readonly cycles: readonly WaveCycle[]
+  /** Up next rows whose `Waiting on` cell holds them for the operator's word, in no wave and in no other list. */
+  readonly held: readonly string[]
 }
 
 export type WavesOutcome = WavesReport | WavesRefused
@@ -194,8 +197,12 @@ export async function planWaves(root: string): Promise<WavesOutcome> {
     Promise.all(runningRows.map((row) => readHolder(row, root, false))),
   ])
 
-  const planned = queued.filter((holder) => holder.plan !== undefined)
-  const unplanned = queued
+  const held = queued
+    .filter((holder) => isOperatorHeld(holder.waiting))
+    .map((holder) => holder.stem)
+  const open = queued.filter((holder) => !held.includes(holder.stem))
+  const planned = open.filter((holder) => holder.plan !== undefined)
+  const unplanned = open
     .filter((holder) => holder.plan === undefined)
     .map((holder) => holder.stem)
   const queuedStems = new Set(queued.map((holder) => holder.stem))
@@ -286,5 +293,6 @@ export async function planWaves(root: string): Promise<WavesOutcome> {
     unplanned,
     cyclic,
     cycles,
+    held,
   }
 }
