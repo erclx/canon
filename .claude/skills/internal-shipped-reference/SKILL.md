@@ -57,7 +57,7 @@ An `In the toolkit:` branch is Fine in `create-skill`, which exists to write int
 
 ### Toolkit-facing skills
 
-These skills exist to reach the toolkit checkout or to report against it, so a toolkit-only line in them speaks to their own audience. They are `canon-feedback`, `create-rule`, `create-skill`, `target-check`, `target-scaffold`, `target-setup`, and `target-update`.
+These skills exist to reach the toolkit checkout or to report against it, so a toolkit-only line in them speaks to their own audience. They are `canon-feedback`, `create-rule`, `create-skill`, `session-retro`, `target-check`, `target-scaffold`, `target-setup`, and `target-update`.
 
 This list is the one place the exemption lives, and `authoring-layout.md` points here rather than copying it. A new skill whose job reaches the checkout reports findings until it joins, so a stale list surfaces as a finding rather than a silent pass. `document-repair` joins only if its checkout refusal keeps a toolkit branch.
 

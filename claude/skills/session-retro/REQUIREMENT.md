@@ -15,14 +15,15 @@ A session asked for candidates lists volume over value, files a repeat of an ope
 
 - Propose only a candidate passing the six fixed tests, showing every dropped one with the test that dropped it
 - Match each candidate against the open feedback issues through the CLI, so a repeat becomes a follow-up, and say so when the match did not run
+- Match against the open rows `canon tasks list --json` lists too when the CLI's `route` reads `board`
 - Cap the shortlist at five, ranked by observed cost, and propose nothing when the session holds no toolkit friction
-- File only the operator's picks, each through `canon-feedback`
+- File only the operator's picks, one record each, through `canon-feedback`, or through `task-board` when the CLI's `route` reads `board`
 
 ## Must not
 
 - Run on its own, at a handoff, or at a compaction. Only the operator invokes it, so nothing else ever does, and a review weighs whether that still earns a catalog entry.
-- Probe the project or toolkit surfaces to find or enrich a candidate
-- Post an issue or a comment itself
+- Probe the project or toolkit surfaces to find or enrich a candidate, or read the board past the open rows the verb lists
+- Post an issue or a comment itself, or write a row itself
 
 ## Out of scope
 
