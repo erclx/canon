@@ -840,6 +840,72 @@ describe('checkDrive scripts', () => {
       reason: 'bad-config',
     })
   })
+
+  describe('from the [drive] table of app.toml', () => {
+    function writeApp(text: string): void {
+      write('canon/config/app.toml', text)
+      git('add', '.')
+      git('commit', '-q', '-m', 'app config')
+    }
+
+    it('should hold a [drive.targets.web] table to its own personas over the flat scripts', async () => {
+      writeApp(
+        [
+          '[drive]',
+          `scripts = ["${BASICS}"]`,
+          `personas = ["${DESIGNER}"]`,
+          '',
+          '[drive.targets.web]',
+          `personas = ["${AGENT}"]`,
+          '',
+        ].join('\n'),
+      )
+      await recordBaseline(ROOT, 'app-drive-1-0')
+      writeRecord({ goals: BOTH_DRIVEN, target: 'web', scripts: [] })
+
+      expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+        reason: 'failed',
+        findings: { unscripted: [`${BASICS} (${AGENT})`] },
+      })
+    })
+
+    it('should take the table over an app-drive.toml beside it', async () => {
+      writeConfig(`scripts = ["${BASICS}"]\n`)
+      writeApp('[drive]\nscripts = []\n')
+      await recordBaseline(ROOT, 'app-drive-1-0')
+      writeRecord({ goals: BOTH_DRIVEN, scripts: [] })
+
+      expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+        reason: 'clean',
+      })
+    })
+
+    it('should name the table key on a target the table does not hold', async () => {
+      writeApp(`[drive]\nscripts = ["${BASICS}"]\n`)
+      await recordBaseline(ROOT, 'app-drive-1-0')
+      writeRecord({ goals: BOTH_DRIVEN, target: 'docs' })
+
+      expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+        ok: false,
+        reason: 'bad-record',
+        message: expect.stringContaining(
+          'canon/config/app.toml does not hold under [drive.targets]',
+        ),
+      })
+    })
+
+    it('should name the dotted key on a target list that is not strings', async () => {
+      writeApp('[drive]\n\n[drive.targets.web]\nscripts = "basics.md"\n')
+      await recordBaseline(ROOT, 'app-drive-1-0')
+      writeRecord({ goals: BOTH_DRIVEN, target: 'web' })
+
+      expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+        ok: false,
+        reason: 'bad-config',
+        message: expect.stringContaining('"drive.targets.web.scripts"'),
+      })
+    })
+  })
 })
 
 describe('checkDrive current page and visible skips', () => {

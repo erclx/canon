@@ -20,14 +20,17 @@ import {
 } from '@/intake/folder'
 import { parseDecided, readItems } from '@/intake/items'
 import { RENDERED_SURFACE } from '@/records/validate'
+import {
+  APP_CONFIG_REL,
+  type AppTableRead,
+  LEGACY_APP_FILES,
+  readAppTable,
+} from '@/config/app'
 import { requirementsRel } from '@/context/requirements'
 import { bodyLines } from '@/markdown/scan'
 
 /** The record a drive leaves in its intake folder, which this check reads. */
 export const DRIVE_RECORD = 'drive.json'
-
-/** The project's drive config, which the drive reads at Step 1 and this check reads for scripts. */
-export const DRIVE_CONFIG = join('canon', 'config', 'app-drive.toml')
 
 const BASELINE_DIR = join(EVIDENCE_DIR, 'baseline')
 const CURRENT_PAGE = '00-current'
@@ -314,30 +317,35 @@ function isStringList(value: unknown): value is string[] {
 }
 
 /**
- * The scripts and personas the drive's target owes, a named target's table
- * falling back to the flat key the way `app-drive` reads it. A project with no
- * config owes no scripts.
+ * The scripts and personas the drive's target owes, read from the `[drive]`
+ * table of `canon/config/app.toml` or `app-drive.toml` before it, a named
+ * target's table falling back to the flat key the way `app-drive` reads it. A
+ * project with no config owes no scripts.
  */
 function readScriptPlan(
-  source: string | undefined,
+  read: AppTableRead,
   target: string | undefined,
 ): ScriptPlan | DriveRefused {
   const none: ScriptPlan = { scripts: [], personas: [] }
-  if (source === undefined) {
+  if (read.kind === 'absent') {
     return target === undefined
       ? none
       : refuse(
           'bad-record',
-          `${DRIVE_RECORD} names target "${target}", but ${DRIVE_CONFIG} does not exist.`,
+          `${DRIVE_RECORD} names target "${target}", but neither ${APP_CONFIG_REL} nor ${LEGACY_APP_FILES.drive.rel} holds a [drive] config.`,
         )
   }
-
-  let parsed: Record<string, unknown>
-  try {
-    parsed = Bun.TOML.parse(source) as Record<string, unknown>
-  } catch {
-    return refuse('bad-config', `${DRIVE_CONFIG} is not valid TOML.`)
+  if (read.kind === 'unparsable') {
+    return refuse('bad-config', `${read.source} ${read.detail}.`)
   }
+
+  const { source, spell } = read
+  const parsed: Record<string, unknown> =
+    typeof read.value === 'object' &&
+    read.value !== null &&
+    !Array.isArray(read.value)
+      ? (read.value as Record<string, unknown>)
+      : {}
 
   let table: Record<string, unknown> = {}
   if (target !== undefined) {
@@ -346,28 +354,28 @@ function readScriptPlan(
     if (typeof named !== 'object' || named === null) {
       return refuse(
         'bad-record',
-        `${DRIVE_RECORD} names target "${target}", which ${DRIVE_CONFIG} does not hold under [targets].`,
+        `${DRIVE_RECORD} names target "${target}", which ${source} does not hold under [${spell('targets')}].`,
       )
     }
     table = named as Record<string, unknown>
   }
 
-  const read = (key: 'scripts' | 'personas'): string[] | DriveRefused => {
+  const readList = (key: 'scripts' | 'personas'): string[] | DriveRefused => {
     const value = key in table ? table[key] : parsed[key]
     if (value === undefined) return []
     if (!isStringList(value)) {
-      const where = key in table ? `targets.${target}.${key}` : key
+      const where = spell(key in table ? `targets.${target}.${key}` : key)
       return refuse(
         'bad-config',
-        `${DRIVE_CONFIG} carries a "${where}" that is not a list of strings.`,
+        `${source} carries a "${where}" that is not a list of strings.`,
       )
     }
     return value
   }
 
-  const scripts = read('scripts')
+  const scripts = readList('scripts')
   if (!Array.isArray(scripts)) return scripts
-  const personas = read('personas')
+  const personas = readList('personas')
   if (!Array.isArray(personas)) return personas
   return { scripts, personas }
 }
@@ -540,11 +548,7 @@ export async function checkDrive(
   }
   const goals = readGoals(await readFile(requirements, 'utf8'))
 
-  const configPath = join(root, DRIVE_CONFIG)
-  const plan = readScriptPlan(
-    existsSync(configPath) ? await readFile(configPath, 'utf8') : undefined,
-    record.target,
-  )
+  const plan = readScriptPlan(readAppTable(root, 'drive'), record.target)
   if ('ok' in plan) return plan
 
   let baseline: readonly StatusEntry[]
