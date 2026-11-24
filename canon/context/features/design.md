@@ -25,7 +25,7 @@ Owns the token module, the component layer, the renderers, the markdown parser, 
 
 ### `src/design/fixtures/`
 
-Holds the records both readers of the `Device classes:` line are tested on. `device-classes.ts` reads it for the lift, and the shipped harness `tooling/web/configs/e2e/screenshot.ts` carries its own copy, since a target cannot import the CLI. A grammar change lands in both readers and here.
+Holds the `canon/config/device-classes.toml` texts both config readers are tested on. `device-classes.ts` reads the file for `canon design classes`, the lift, and the gate, and the shipped harness `tooling/web/configs/e2e/screenshot.ts` carries its own copy, since a target cannot import the CLI. A grammar change lands in both readers and here.
 
 ### `canon/design/`
 
