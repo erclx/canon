@@ -180,6 +180,17 @@ describe('planAppConfig text moves', () => {
     expect(planned().text).toBe(text)
   })
 
+  it('should move a device-classes.toml holding no table, which still reads as absent', () => {
+    write('device-classes.toml', '# nothing yet\n')
+    write('preview.json', '{"writes":["data"]}')
+
+    applyAppConfig(root, planned())
+
+    expect(readAppTable(root, 'device-classes')).toEqual({ kind: 'absent' })
+    expect(existsSync(config('device-classes.toml'))).toBe(false)
+    expect(valueOf(readAppTable(root, 'preview'))).toEqual({ writes: ['data'] })
+  })
+
   it('should append to an existing app.toml, keeping its text', () => {
     write('app.toml', '# Ours.\n[drive]\nlaunch = "bun run dev"\n')
     write('preview.json', '{"writes":["data"],"port":4321}')

@@ -277,7 +277,7 @@ export function planAppConfig(root: string): AppConfigPlan {
   return { kind: 'planned', moves, text }
 }
 
-/** The first moved table whose value in the planned text differs from what its old file reads as today. */
+/** The first moved table whose value in the planned text differs from what its old file reads as today, absent matching absent. */
 function readsDifferent(
   root: string,
   text: string,
@@ -287,7 +287,7 @@ function readsDifferent(
   for (const { table } of moves) {
     const before = readLegacy(root, table)
     const after = isRecord(planned) ? planned[table] : undefined
-    if (after === undefined || !Bun.deepEquals(before, after)) return table
+    if (!Bun.deepEquals(before, after)) return table
   }
   return undefined
 }
