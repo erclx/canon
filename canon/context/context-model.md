@@ -41,7 +41,7 @@ Holds one folder per kind of domain, such as `development/`, `surfaces/`, `featu
 
 Holds what the toolkit authors and commits, while `.claude/` holds what Claude Code reads by path and `.canon/` every gitignored session record. A committed file leaves `.canon/` first, and a path Claude Code reads then separates `.claude/` from `canon/`.
 
-- `canon/` holds `context/`, `config/` with `baseline.json`, `pr-labels.toml` and the install stamp, `REQUIREMENTS.md`, and `DESIGN.md`
+- `canon/` holds `context/`, `config/` with the project's settings and the install stamp, `REQUIREMENTS.md`, and `DESIGN.md`
 - `.claude/` holds `settings.json` with its per-machine `settings.local.json`, `hooks/`, `skills/` for the internal skills, `rules/`, and `worktrees/`
 - `.canon/` takes one bare ignore line that covers a record folder added later
 - `canon migrate records` moves untracked record folders under `.canon/`, with `RECORD_ROOTS` resolving the old root behind the new one and `CREATION_ROOT` naming where new ones land

@@ -44,11 +44,12 @@ Groups the resolvers that answer where something lives.
 
 ### `src/config/`
 
-Holds `app.ts`, the one reader of `canon/config/app.toml` that `src/pr/`, `src/intake/`, and `src/design/` share.
+Holds the reading and judging of `canon/config/`, with `app.ts` the one reader of `canon/config/app.toml` that `src/pr/`, `src/intake/`, and `src/design/` share.
 
 - `readAppTable` returns a table from it, or from the file the table lived in before with its keys renamed, and each caller keeps its own validation and refusals
 - `src/migrate/app-config.ts` moves a project through the same map of old files
 - The shipped screenshot harness cannot import this folder, so it carries its own `[device-classes]` reader
+- `keys.ts` holds every config file's keys and value types, which `check.ts` judges for the `Config` gate stage, so a key a reader gains goes in both
 
 ### `src/git/`
 
