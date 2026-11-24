@@ -304,6 +304,77 @@ describe('planWaves', () => {
     ])
   })
 
+  it('lists a row whose cell holds it for the operator apart from every wave', async () => {
+    await board([
+      {
+        stem: 'a',
+        paths: ['src/a.ts'],
+        waiting: "Never auto-dispatched, launch on the operator's word",
+      },
+      { stem: 'b', paths: ['src/b.ts'] },
+    ])
+
+    const report = await read()
+    expect(report.held).toEqual(['a'])
+    expect(stems(report)).toEqual([['b']])
+  })
+
+  it('still places a row waiting on a held row and names the held row in after', async () => {
+    await board([
+      {
+        stem: 'a',
+        paths: ['src/a.ts'],
+        waiting: "Launch on the operator's word",
+      },
+      { stem: 'b', paths: ['src/b.ts'], waiting: 'Waits on [a](a.md)' },
+    ])
+
+    const report = await read()
+    expect(stems(report)).toEqual([['b']])
+    expect(report.waves[0].rows[0].after).toEqual(['a'])
+  })
+
+  it('lists a held row that waits in a cycle as held alone', async () => {
+    await board([
+      {
+        stem: 'a',
+        paths: ['src/a.ts'],
+        waiting: "[b](b.md), launch on the operator's word",
+      },
+      { stem: 'b', paths: ['src/b.ts'], waiting: '[a](a.md)' },
+    ])
+
+    const report = await read()
+    expect(report.held).toEqual(['a'])
+    expect(report.cyclic).not.toContain('a')
+  })
+
+  it('reads a held row linking no plan as held and not unplanned', async () => {
+    await board([{ stem: 'a', waiting: "Launch on the operator's word" }])
+
+    const report = await read()
+    expect(report.held).toEqual(['a'])
+    expect(report.unplanned).toEqual([])
+  })
+
+  it('places a row beside the task its cell only rebases over', async () => {
+    await board([
+      {
+        stem: 'v1.3-third',
+        paths: ['src/a.ts'],
+        waiting: 'Follows v1.1, rebases over v1.2',
+      },
+      { stem: 'v1.2-second', paths: ['src/b.ts'] },
+      { stem: 'v1.1-first', paths: ['src/c.ts'] },
+    ])
+
+    const report = await read()
+    const third = report.waves
+      .flatMap((wave) => wave.rows)
+      .find((row) => row.stem === 'v1.3-third')
+    expect(third?.after).toEqual([])
+  })
+
   it('reports an empty Up next as ok with no waves', async () => {
     await board([])
 

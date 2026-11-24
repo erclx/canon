@@ -1321,9 +1321,17 @@ export async function readCitedStems(
 /** Where a blocker clause ends. A comma after a label ends it, a dot inside a filename does not, and `and` does not. */
 const BLOCKER_BREAK = /\.(?=\s|$)|[;,]|\bbecause\b/i
 
+/** The phrase a `Waiting on` cell carries to keep a row out of every automatic launch. */
+const OPERATOR_HELD = /launch\s+on\s+the\s+operator['’]s\s+word/i
+
+/** Whether a cell holds its row for the operator's word, so no wave launches it. */
+export function isOperatorHeld(cell: string): boolean {
+  return OPERATOR_HELD.test(cell)
+}
+
 /** A verb saying the row sits beside a task, never behind it. */
 const BESIDE_VERB = new RegExp(
-  `${RANK_VERB.source}|\\bshares\\b|\\blaunches\\s+with\\b`,
+  `${RANK_VERB.source}|\\bshares\\b|\\brebases\\b|\\blaunches\\s+with\\b`,
   'i',
 )
 

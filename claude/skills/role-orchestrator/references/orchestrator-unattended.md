@@ -36,7 +36,7 @@ A board with no `## Up next` row the dispatch checks clear and no `## Needs a pl
 Each pass runs the same four steps. The procedures stay in the runbooks named, so this file adds only what differs with nobody watching.
 
 1. Run the check under `## Stop the loop` in `${CLAUDE_SKILL_DIR}/references/orchestrator-dispatch.md` against `## Up next`, launching each cleared row per `orchestrator-launch.md`.
-2. Launch a planner on each `## Needs a plan` row the parallelism cap leaves room for, in the planning shape of `orchestrator-launch.md`, or the plan-and-build shape for a row that reads small.
+2. Plan each `## Needs a plan` row whose origin settles its calls, per `### Planning ahead`, within the cap, using the shape `orchestrator-launch.md` gives.
 3. Start the review poll per `${CLAUDE_SKILL_DIR}/references/orchestrator-poll.md` once a pull request opens, and the watch per `orchestrator-watch.md` beside it.
 4. Answer or park each question a session sends, per the next section.
 
@@ -160,12 +160,17 @@ Keep one cap's worth of launchable rows planned ahead of the workers, so the que
 
 The run launches nothing past the holds below, each a read the loop already makes.
 
+- A row listed in `held` on `canon tasks waves --json`, whose cell says to launch on the operator's word
 - A billed run the operator has not cleared, named by the plan's Testing section
 - A permission classifier refusal, where the run sends no workaround and puts the exact command to the operator
 - A plan question marked as needing the operator's call, or a `deferred` entry, which `plan-answers` reports
 - A row whose origin leaves a call open, such as a reel width the operator has not chosen
 
 An open release pull request holds nothing. Dispatch carries on past it, and the run neither merges it nor asks the operator to unless a merge grant covers it.
+
+### A question from a session
+
+Answer a technical question the way `## A question from a session` states, and batch every parked kind to the operator in the next report rather than to the morning one.
 
 ### Merging
 
