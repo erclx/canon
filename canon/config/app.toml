@@ -1,0 +1,4 @@
+[painted]
+paths = ["src/take/**"]
+exclude = ["tooling/**"]
+reel-inputs = ["src/browser/engine.ts", "web/src/styles/tokens.css", "assets/film/fonts/**", "package.json", "bun.lock"]
