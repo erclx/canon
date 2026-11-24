@@ -65,8 +65,10 @@ export function register(program: Command): void {
         'every stage, and any other project runs the stages that fit any',
         'project, so run it from the project root.',
         '',
-        'A stage halts the run, so clearing a regenerate-then-assert stage',
-        'reveals the next one behind it rather than the whole set at once.',
+        'A failing stage does not halt the run, so one run reports every failing',
+        'stage it can reach. A failure holds the Tests stage alone, recorded as',
+        'skipped, since the suite is the slow stage and a broken tree proves',
+        'nothing through it.',
         '',
         'A stage that cannot read its input reports rather than passing. On a',
         "contributor's machine that is a warning and the run still exits 0,",
@@ -131,10 +133,11 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
   const code = exitCodeFor(results)
 
   if (emitJson) {
-    const failed = results.find((result) => result.status === 'failed')
     // Diagnostics reach stderr in every mode, beside the record.
-    if (failed?.failure !== undefined) {
-      process.stderr.write(`${failed.label}: ${failed.failure}\n`)
+    for (const failed of results) {
+      if (failed.status === 'failed' && failed.failure !== undefined) {
+        process.stderr.write(`${failed.label}: ${failed.failure}\n`)
+      }
     }
     process.stdout.write(
       `${JSON.stringify(

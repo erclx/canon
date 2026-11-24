@@ -211,7 +211,8 @@ export function contextAuditArgv(root: string): readonly string[] {
 
 /**
  * Bound to the project `stagesFor` checks. It holds a lock, since concurrent
- * suites starve each other's spawn tests and a related run can reach one.
+ * suites starve each other's spawn tests and a related run can reach one. The
+ * sequencer holds it behind any failed stage, matched on this id.
  */
 function testsStage(root: string): Stage {
   return {
@@ -237,8 +238,8 @@ function testsStage(root: string): Stage {
 
 /**
  * Every stage in run order, which is the product: the regenerating stages run
- * before anything reads what they wrote, the CLI stages sit together, and the
- * scoped stages sit last where a skip costs nothing already paid for.
+ * before anything reads what they wrote, and `tests` sits last so a failure
+ * anywhere in the run holds it.
  */
 export const STAGES: readonly Stage[] = [
   {
