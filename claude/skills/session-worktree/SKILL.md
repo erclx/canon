@@ -27,7 +27,7 @@ The superproject read is empty in a linked worktree of a submodule and of the su
 
 Run in parallel:
 
-- `git worktree list --porcelain | awk '/^worktree /{print $2; exit}' 2>/dev/null || pwd`
+- The main worktree root, the way `${CLAUDE_SKILL_DIR}/references/main-root-writes.md` states, falling back to `pwd` outside a git repository
 - `git branch --show-current 2>/dev/null || echo ""`
 - `git config --get core.bare 2>/dev/null || echo false`
 

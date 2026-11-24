@@ -11,7 +11,7 @@ Owns the two operations that settle a task once its work exists: marking the out
 
 ## Guards
 
-- Resolve the board at the main worktree root with `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd` outside a git repo
+- Resolve the board at the main worktree root the way `${CLAUDE_SKILL_DIR}/../session-worktree/references/main-root-writes.md` states, falling back to `pwd` outside a git repo
   - The board is gitignored scratch shared across worktrees, so a linked worktree reading its own `pwd` finds no board
 - With no `.canon/tasks/` at that root, Mark reports `⏭️ No .canon/tasks/ board, so no outcomes to mark.` and returns, still running Step 4's sweep
   - `git-ship` invokes Mark on every ship, and a project with no board is not a failed one

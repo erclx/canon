@@ -20,7 +20,7 @@ The procedure of `pr-evidence`, run in order against one pull request number. It
 
 `ui-checklist` writes a visual checklist to `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root when a change needs visual verification, with `<slug>` derived per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`. This skill is the file's sole consumer.
 
-- Resolve the main root the way `session-worktree` does, `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-` falling back to `pwd`
+- Resolve the main root the way `session-worktree` does, per `${CLAUDE_SKILL_DIR}/../session-worktree/references/main-root-writes.md`, falling back to `pwd`
 - A missing file means no checklist was produced, and the two steps below each skip their checklist half
 - Scan an existing file against `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md` before either step posts it, the same as the body
 - The evidence step decides where it lands, since a checklist reads next to its screenshots and posting it alone is the fallback for a refused render

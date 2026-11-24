@@ -24,7 +24,7 @@ Both are optional and come in either order.
 
 ## Guards
 
-- Resolve `.canon/tasks/` and `.canon/intake/` at the main worktree root, from `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd` outside git
+- Resolve `.canon/tasks/` and `.canon/intake/` at the main worktree root, the way `${CLAUDE_SKILL_DIR}/../session-worktree/references/main-root-writes.md` states, falling back to `pwd` outside git
 - If `gh` is not on PATH, stop: `❌ gh CLI not found. Install it to read the issue queue.`
 - If `gh auth status` fails, stop: `❌ gh is not authenticated. Run gh auth login.`
 - If `gh repo view --json nameWithOwner` fails, stop: `❌ No GitHub repository here. Run from a checkout with a GitHub remote.`

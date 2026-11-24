@@ -36,7 +36,7 @@ A `## State` filled from the tree is non-conforming per the standard, and a map 
 
 - If `git rev-parse --git-dir` does not resolve, stop: `❌ Not a git repository. A session map takes its filename from the branch.`
 - Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`. An empty result falls back to `latest`, since a stop loses the reasoning the file exists to save.
-- Resolve the containing folder at the main worktree root with `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`
+- Resolve the containing folder at the main worktree root the way `${CLAUDE_SKILL_DIR}/../session-worktree/references/main-root-writes.md` states
   - It takes no fallback, since the guard above already stopped where no repository answers
 
 ## Step 1: recover the commit the drift step reads

@@ -3,7 +3,7 @@ title: Main-root write routing
 description: Which tools the isolation refusal covers, the route each kind of main-root write takes, the fallback when a heredoc is refused, and the index cost a shell write carries
 ---
 
-Shared session scratch, being `.canon/plans/`, `.canon/review/`, and `.canon/tasks/`, lives at the main worktree root. Resolve that root with the first `worktree` entry of `git worktree list --porcelain`, falling back to `pwd` outside a git repository.
+Shared session scratch, being `.canon/plans/`, `.canon/review/`, and `.canon/tasks/`, lives at the main worktree root. Resolve that root with `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, the first `worktree` entry, falling back to `pwd` outside a git repository.
 
 ## The refusal
 

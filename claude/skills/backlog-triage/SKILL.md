@@ -17,7 +17,7 @@ The record is an ordinary intake folder at `.canon/intake/<nn>-backlog-triage/`,
 
 ## Guards
 
-- Resolve `.canon/tasks/` and `.canon/intake/` at the main worktree root, from `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd` outside git
+- Resolve `.canon/tasks/` and `.canon/intake/` at the main worktree root, the way `${CLAUDE_SKILL_DIR}/../session-worktree/references/main-root-writes.md` states, falling back to `pwd` outside git
 - If `.canon/tasks/backlog.md` does not exist at that root, stop: `❌ No backlog at .canon/tasks/backlog.md. Nothing to triage.`
 - Never fill a `You:` slot, and never read an empty one as agreement, so silence never decides a row. Answering runs through `plan-intake-answer` or the operator's own edit.
 - Branch on each `canon` record's `ok` and `reason` rather than on the exit code, which a shell function wrapping `canon` can flatten to zero.
