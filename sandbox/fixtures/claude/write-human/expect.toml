@@ -1,41 +1,13 @@
-# What a correct `/canon:write-human` run leaves behind on the seeded passage.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-#
-# Every top-level key sits above the first `[[content]]` block. A bare key below
-# one belongs to that table in TOML, so a `manual` array written at the bottom
-# parses clean and silently asserts nothing. The first run of this arm declared
-# it that way and the checker refused the file rather than scoring it, which is
-# what caught the mistake this comment already warned about.
-#
-# This arm asserts less than most and says so rather than padding the count.
-# The defect seeded here is a distribution over a passage, and the checker reads
-# one pattern at a time, so every rhythm claim sits under `manual` by
-# construction. The vocabulary claims sit there too, because each one is an
-# absence inside a file and `absent` takes paths rather than content: a run that
-# leaves `The buffer` standing passes every mechanical assertion below.
+purpose = "/canon:write-human revises the seeded passage in place and keeps its frontmatter and setting names. The defect seeded is a distribution over a passage and the checker reads one pattern at a time, so every rhythm and vocabulary claim sits in manual, and a run that leaves a flagged term standing passes every mechanical assertion."
 
-paths = ["docs/cache.md"]
-
-write_scope = ["docs/**"]
-
-# Observed at 8 turns and 0.47 dollars on 2026-08-20, from one run.
-#
-# This is a judgment rather than a bound, and the distinction is worth stating
-# because the number looks like a measurement. The cost has a moving part: a run
-# may or may not dereference the tells catalog, and the rule calls a cost with
-# something that moves variable, which is why a proposal-only arm, since
-# retired, sat at the default after a single 17-turn pass. One observation does not
-# bound a variable cost.
-#
-# Twenty against eight is deliberately generous for that reason. It stays under
-# the cap so nothing is masked, and the only exposure it carries is a correct
-# run failing on a count. Correct it downward from the widest of several runs
-# rather than from this one.
-#
-# Raised to the runner's cap of 30 or above, it would compare nothing, since
-# the cap then holds it and fails a truncated run by its subtype.
+# Twenty against an observed eight is deliberately generous, since the cost has a moving part: a run may or may not dereference the tells catalog, and one observation does not bound a variable cost. Correct it downward from the widest of several runs. Raised to the runner's cap or above it would compare nothing, since the cap then holds it.
 max_turns = 20
+
+paths = [{ path = "docs/cache.md", why = "The passage the run revises." }]
+
+write_scope = [
+  { path = "docs/**", why = "The documents the run edits or updates." },
+]
 
 manual = [
   "The revision varies sentence length rather than trading one uniform cadence for another. Semantic: length spread is a property of the passage, and a pattern over the file counts no words per sentence. This is the reported failure the skill exists against, so read it first.",
@@ -49,13 +21,12 @@ manual = [
   "No marketing word or vague qualifier entered the file during the rewrite. Unwired: an absence inside a file, and the skill carries these words as guidance that no command gates.",
 ]
 
-# The frontmatter and the setting names survive the revision. A rewrite dropping
-# either has reformatted the file rather than revised the prose, and those two
-# outcomes are indistinguishable in a report that only counts what left.
 [[content]]
 path = "docs/cache.md"
 pattern = 'title: Cache'
+why = "The frontmatter survives the revision. A rewrite dropping it reformatted the file rather than revising the prose, and a report that only counts what left cannot tell the two apart."
 
 [[content]]
 path = "docs/cache.md"
 pattern = 'maxEntries'
+why = "The setting names survive the revision, for the same reason."

@@ -1,21 +1,19 @@
-# What `canon indexes regen --dry-run` leaves behind against a folder that
-# would change. Read by `canon sandbox check`. Stdout, stderr, and the exit
-# status are captured to disk, the same idiom `infra:gov`'s test-order arm
-# runs, since a --dry-run in human mode writes nothing else a checker can read.
+purpose = "canon indexes regen --dry-run against a folder that would change reports drift and writes nothing."
 
-paths = ["dry-run-status.txt"]
-absent = []
+paths = [
+  { path = "dry-run-status.txt", why = "The captured exit status, since a dry run in human mode writes nothing else a checker can read." },
+]
 
 manual = [
   "dry-run-output.log stays empty. Semantic: the human-mode run writes its report through the UI frame on stderr alone, so the captured stdout file carries nothing to assert",
 ]
 
-# --dry-run never writes, so the seeded placeholder survives untouched.
 [[content]]
 path = "docs/index.md"
 pattern = 'Stale content that should be overwritten'
+why = "A dry run never writes, so the seeded placeholder survives untouched."
 
-# The documented exit for a --dry-run that found drift.
 [[content]]
 path = "dry-run-status.txt"
 pattern = '^2$'
+why = "The documented exit for a dry run that found drift."

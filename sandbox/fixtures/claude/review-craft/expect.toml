@@ -1,70 +1,35 @@
-# What a correct request to load `review-craft` and review the branch leaves
-# behind once it carries the axes, with the findings file the request names. Read by `canon sandbox check`. Patterns use TOML literal
-# strings so a regex needs no backslash escaping.
-#
-# The declaration sits at the command root, which is the unnamed arm. The
-# scenario offers no arm list, so a named folder here would declare an arm
-# nothing can select.
-#
-# Two runs against the body before `review-craft` existed, on 2026-09-25, both
-# failed on the Safety entry: each found the removed guard in the script and
-# left the README clean. Both also caught the security defect, the first an
-# `eval` over the arguments and the second the unpinned package below, so the
-# security entry is a floor the craft skill must not lose rather than the part
-# of the arm that discriminates. The stale claim outside the hunk is that part.
-#
-# The weakened check in `scripts/check.sh` was added on 2026-10-01 and run once
-# against the body before the guard-the-bar axis. That run filed it as
-# should-fix, reading the exclusion against the `CLAUDE.md` line promising every
-# script is linted, so it is a floor like the security entry rather than a
-# discriminating case.
+purpose = "A request to load review-craft and review the branch writes a findings file that grades the unpinned package, the stale README claim outside the hunk, the weakened shellcheck run, and the risky dependency upgrade."
 
-# The upgrade in `package.json` and `package-lock.json` was added on 2026-10-02
-# and run twice against the body with no dependency reference. The first run
-# matched a loose pattern and could not say what it matched, since the report is
-# torn down with the sandbox. The second, with the pattern tightened to a graded
-# finding line, passed all six assertions, so the upgrade is a floor like the
-# security entry and no dependency reference was built for it.
+paths = [
+  { path = ".canon/review/branch-*release-tag.md", why = "The glob covers both slugs a run derives from feat/release-tag, with and without the type segment." },
+]
 
-# The glob covers both slugs a run derives from `feat/release-tag`, with and
-# without the type segment, since the first red run wrote
-# `branch-feat-release-tag.md` and the second `branch-release-tag.md`.
-paths = [".canon/review/branch-*release-tag.md"]
-
-write_scope = [".claude/**", ".canon/review/**"]
+write_scope = [
+  { path = ".claude/**", why = "Seeds and settings the harness injects land here." },
+  { path = ".canon/review/**", why = "The findings file the request names." },
+]
 
 manual = [
   "The report names the unused `dry_run` as something built that nobody calls, and states the cost rather than a taste. Semantic: a design finding can be worded many ways.",
   "The unpinned package is graded critical or should-fix rather than minor. Semantic: severity belongs to the procedure body's ladder and a substring cannot tell a correct grade from a word that happens to appear.",
 ]
 
-# Every key above this line is top level. A bare key written below a
-# `[[content]]` header belongs to that table in TOML, so anything moved down
-# here would parse clean and assert nothing.
-
-# The package fetched at `@latest` and run on every release.
 [[content]]
 path = ".canon/review/branch-*release-tag.md"
 pattern = 'unpinned|Unpinned|supply chain|Supply chain|supply-chain|Supply-chain|@latest[^\n]*(pin|Pin|version|Version)'
+why = "The package fetched at @latest and run on every release. A floor the craft skill must not lose, since runs caught it before review-craft existed."
 
-# The Safety claim the diff made false sits outside every hunk. Either a graded
-# finding names the section, or the README block opens with a graded finding
-# rather than the clean note the red run left there.
 [[content]]
 path = ".canon/review/branch-*release-tag.md"
 pattern = '^- \*\*[a-z-]+\*\*:[^\n]*Safety|README\.md\n+- \*\*(critical|should-fix|minor)\*\*'
+why = "The Safety claim the diff made false sits outside every hunk. Either a graded finding names the section, or the README block opens with a graded finding rather than a clean note. This is the part of the arm that discriminates."
 
-# The branch leaves the changed script out of the `shellcheck` run in
-# `scripts/check.sh` and says why nowhere. Either a graded finding names the
-# weakened check, or the block for that file opens with a graded finding.
 [[content]]
 path = ".canon/review/branch-*release-tag.md"
 pattern = '^- \*\*[a-z-]+\*\*:[^\n]*(check\.sh|shellcheck|ShellCheck)|check\.sh\n+- \*\*(critical|should-fix|minor)\*\*'
+why = "The branch leaves the changed script out of the shellcheck run in scripts/check.sh and says why nowhere. Either a graded finding names the weakened check, or the block for that file opens with one."
 
-# The upgrade bumps two dependencies in one commit, one across a major version,
-# and the lockfile adds a package the manifest never names, carrying an install
-# script. Either a graded finding names the unread range or the split, or one
-# names the lockfile addition.
 [[content]]
 path = ".canon/review/branch-*release-tag.md"
 pattern = '^- \*\*[a-z-]+\*\*:[^\n]*(color-shim|install script|changelog|Changelog|breaking change|major (version|bump))'
+why = "The upgrade bumps two dependencies in one commit, one across a major version, and the lockfile adds a package the manifest never names, carrying an install script. A graded finding names the unread range, the split, or the lockfile addition."

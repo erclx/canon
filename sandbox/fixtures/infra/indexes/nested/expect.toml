@@ -1,25 +1,21 @@
-# What `canon indexes regen` leaves behind against a parent folder holding one
-# nested folder with its own index.md. Read by `canon sandbox check`.
-#
-# Neither sibling here carries a `category` field, so `renderIndex` takes its
-# flat branch: a sub-catalog link sorts among the entries by name rather than
-# under a `## Sub-catalogs` heading, which only the grouped branch emits. The
-# child folder name "guides" sorts after both "alpha.md" and "beta.md", which
-# is the "after the sibling files" order the scenario's own log_info states.
+purpose = "canon indexes regen against a parent folder holding one nested folder links the sub-catalog among the entries by name."
 
-paths = ["docs/index.md", "docs/guides/index.md"]
-absent = []
-
-manual = []
+paths = [
+  { path = "docs/index.md", why = "The parent index the walk rewrote." },
+  { path = "docs/guides/index.md", why = "The nested folder's own index, rewritten by the same walk." },
+]
 
 [[content]]
 path = "docs/index.md"
 pattern = '\[Alpha\]\(alpha\.md\)[\s\S]*\[Beta\]\(beta\.md\)[\s\S]*\[Guides\]\(guides/index\.md\): Step-by-step how-tos'
+why = "Neither sibling carries a category, so the flat branch renders and the sub-catalog link sorts among the entries by name rather than under a Sub-catalogs heading. Guides sorts after both files."
 
 [[content]]
 path = "docs/guides/index.md"
 pattern = '\[Setup\]\(setup\.md\): Local environment bootstrap'
+why = "The nested index lists its first entry with its description."
 
 [[content]]
 path = "docs/guides/index.md"
 pattern = '\[Deploy\]\(deploy\.md\): Release and rollback steps'
+why = "The nested index lists its second entry with its description."

@@ -1,22 +1,22 @@
-# What a correct `/issue-triage triage-fixture` run leaves behind on the file
-# arm. Read by `canon sandbox check`. Patterns use TOML literal strings so a
-# regex needs no backslash escaping.
-
-# Every top-level key sits above the first `[[content]]` block, since a bare key
-# below one belongs to that table in TOML.
+purpose = "The file phase of /issue-triage writes an overview and numbered cluster files under a fresh intake folder, names the skipped issue with its carrier, and plans nothing."
 
 max_turns = 40
 
-# The seeded tree opens with no `.canon/intake/`, so the claimed ordinal can
-# only be `01`, and the label the arm passes fixes the slug.
-paths = [".canon/intake/01-triage-fixture-triage/00-overview.md"]
+paths = [
+  { path = ".canon/intake/01-triage-fixture-triage/00-overview.md", why = "The seeded tree opens with no intake folder, so the claimed ordinal can only be 01, and the label the arm passes fixes the slug." },
+]
 
-# The skill plans and files nothing else, so a plan means it started building.
-absent = [".canon/plans"]
+absent = [
+  { path = ".canon/plans", why = "The skill plans and files nothing else, so a plan means it started building." },
+]
 
-write_scope = [".canon/intake/**"]
+write_scope = [
+  { path = ".canon/intake/**", why = "Intake files land in the folder the pass opens." },
+]
 
-reply = [".canon/intake/01-triage-fixture-triage/"]
+reply = [
+  { text = ".canon/intake/01-triage-fixture-triage/", why = "The reply names the folder it wrote." },
+]
 
 manual = [
   "Issue A is suggested plan and never fix, since a stale reference is a size. Semantic: which cluster file holds the item is the run's call, so a negative pattern cannot anchor it to its row.",
@@ -25,20 +25,17 @@ manual = [
   "No `You:` slot is filled. Unwired: `canon intake list 01-triage-fixture-triage --unread --json` reports one unread item when it holds.",
 ]
 
-# The skipped issue is named with its carrier, the task the arm wrote.
 [[content]]
 path = ".canon/intake/01-triage-fixture-triage/00-overview.md"
 pattern = 'v01\.0'
+why = "The skipped issue is named with its carrier, the task the arm wrote."
 
-# The overview counts by token, and Issue A is the one item filed, so a nonzero
-# plan count shows its suggestion opened with `plan`. The reply cannot show it,
-# since the skill's own output prints the token.
 [[content]]
 path = ".canon/intake/01-triage-fixture-triage/00-overview.md"
 pattern = '[1-9]\d* plan'
+why = "The overview counts by token and Issue A is the one item filed, so a nonzero plan count shows its suggestion opened with plan. The reply cannot show it, since the skill's own output prints the token."
 
-# The index links a numbered cluster file, which proves the numbering and the
-# domain half of each filename together.
 [[content]]
 path = ".canon/intake/01-triage-fixture-triage/00-overview.md"
 pattern = '\]\((?!00-)\d\d-[a-z][a-z0-9-]*\.md'
+why = "The index links a numbered cluster file, which proves the numbering and the domain half of each filename together."

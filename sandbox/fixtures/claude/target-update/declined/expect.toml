@@ -1,16 +1,13 @@
-# What a correct `/canon:target-update` run leaves behind on a target one release
-# behind the toolkit, with the worktree declined. Read by `canon sandbox check`.
-# Patterns use TOML literal strings so a regex needs no backslash escaping.
-#
-# Every top-level key sits above the first `[[content]]` block, since a bare key
-# below one binds to that table and asserts nothing.
-#
-# The claim under test is the in-place branch: with the worktree declined, the
-# skill creates `chore/update-canon` in the checkout and commits the sync there.
+purpose = "/canon:target-update on a target one release behind, with the worktree declined, creates chore/update-canon in the checkout and commits the sync there."
 
-paths = [".git/HEAD", ".claude/rules/canon/canon/git.md"]
+paths = [
+  { path = ".git/HEAD", why = "The checkout's head, which moved onto the new branch." },
+  { path = ".claude/rules/canon/canon/git.md", why = "The stale rule the sync restores." },
+]
 
-reply = ["context.md"]
+reply = [
+  { text = "context.md", why = "The report names the customized rule it kept." },
+]
 
 manual = [
   "No commit subject names a canon version.",
@@ -18,22 +15,22 @@ manual = [
   "The reply reports the governance state of the kept rule as behind. Semantic: any non-zero count but matching reads as behind, so the word current is wrong here.",
 ]
 
-# The checkout moved onto the branch the skill created.
 [[content]]
 path = ".git/HEAD"
 pattern = '^ref: refs/heads/chore/update-canon$'
+why = "The checkout moved onto the branch the skill created."
 
-# A commit landed on that branch.
 [[content]]
 path = ".git/logs/refs/heads/chore/update-canon"
 pattern = 'commit'
+why = "A commit landed on that branch."
 
-# The stale rule came back, H1 included.
 [[content]]
 path = ".claude/rules/canon/canon/git.md"
 pattern = '^# \S'
+why = "The stale rule came back, H1 included."
 
-# The customized rule kept the project's bullet.
 [[content]]
 path = ".claude/rules/canon/canon/context.md"
 pattern = 'project-written bullet'
+why = "The customized rule kept the project's bullet."

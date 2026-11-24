@@ -1,22 +1,19 @@
-# What `canon indexes regen --no-stage docs/alpha.md` leaves behind on disk
-# and in the git index. Read by `canon sandbox check`. `--no-stage` makes
-# `shouldStage` false regardless of the positional path, so the rewrite lands
-# on disk with no `git add` behind it.
+purpose = "canon indexes regen --no-stage docs/alpha.md rewrites the index on disk with no git add behind it."
 
-paths = ["no-stage-diff.txt"]
-absent = []
+paths = [
+  { path = "no-stage-diff.txt", why = "The cached diff the run captured." },
+]
 
 manual = [
   "no-stage-diff.txt excludes docs/index.md. Semantic: checkContent tests a pattern against the whole file rather than anchoring to it, so there is no primitive here for content absence. The lint-staged arm's positive pin, that the identical rewrite IS staged when --no-stage is not passed, covers the same ground from the other direction",
 ]
 
-# docs/alpha.md was staged by seed_git_repo before this arm ran, and stays the
-# only cached path --no-stage leaves behind.
 [[content]]
 path = "no-stage-diff.txt"
 pattern = '^docs/alpha\.md$'
+why = "docs/alpha.md was staged by the seed before the run, and stays the only cached path --no-stage leaves behind."
 
-# The rewrite reached disk despite landing unstaged.
 [[content]]
 path = "docs/index.md"
 pattern = '\[Alpha\]\(alpha\.md\): Updated first entry'
+why = "The rewrite reached disk despite landing unstaged."

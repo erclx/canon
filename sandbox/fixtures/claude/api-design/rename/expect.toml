@@ -1,26 +1,19 @@
-# What a correct `/canon:api-design` run leaves behind on the seeded command.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-#
-# Every top-level key sits above the first `[[content]]` block, since a bare key
-# below one binds to that table and asserts nothing.
-#
-# The claim under test is additive change: asked to rename a field a script
-# outside the command parses, the run adds the new name beside the old one
-# rather than renaming in place. The prompt never names the script, so a run
-# that only reads the file it was pointed at renames and breaks it.
+purpose = "Asked to rename a field a script outside the command parses, the run adds the new name beside the old one rather than renaming in place."
 
-paths = ["src/cli.ts", "scripts/nightly-report.sh"]
+paths = [
+  { path = "src/cli.ts", why = "The seeded command the run edits." },
+  { path = "scripts/nightly-report.sh", why = "The caller outside the command. The prompt never names it, so a run that only reads the file it was pointed at renames and breaks it." },
+]
 
 write_scope = [
-  "src/**",
-  "scripts/**",
-  "README.md",
-  "CHANGELOG.md",
-  "docs/**",
-  "node_modules/**",
-  "bun.lock",
-  "package.json",
+  { path = "src/**", why = "The change edits source here." },
+  { path = "scripts/**", why = "A caller in scripts may need migrating beside the command." },
+  { path = "README.md", why = "A change may update the docs beside it." },
+  { path = "CHANGELOG.md", why = "A change may note itself here." },
+  { path = "docs/**", why = "The documents the run edits or updates." },
+  { path = "node_modules/**", why = "A dependency install writes here." },
+  { path = "bun.lock", why = "An install rewrites the lockfile." },
+  { path = "package.json", why = "A dependency change edits the manifest." },
 ]
 
 manual = [
@@ -32,13 +25,14 @@ manual = [
 [[content]]
 path = "src/cli.ts"
 pattern = 'customerId'
+why = "The new field name is in the command."
 
-# The old field is still printed beside the new one.
 [[content]]
 path = "src/cli.ts"
 pattern = '''\bbuyer['"]?\s*:'''
+why = "The old field is still printed beside the new one."
 
-# The script outside the command still reads the field it always read.
 [[content]]
 path = "scripts/nightly-report.sh"
 pattern = '\.buyer\b'
+why = "The script outside the command still reads the field it always read."

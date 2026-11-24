@@ -1,30 +1,16 @@
-# What a correct `/session-worktree` run leaves behind on the submodule control
-# arm. Read by `canon sandbox check`. Patterns use TOML literal strings so a
-# regex needs no backslash escaping.
-
-# This arm stages the same tree as `submodule` next door and runs from the
-# superproject root instead. It is written against the bare prompt
-# `/canon:session-worktree`, since the expectation format carries no prompt field.
-# The guard is asserted by the sibling arm and this one asserts that it stays
-# silent where it should, which is the half a regression would break first.
-
-# Every top-level key sits above the first `[[content]]` block. A bare key below
-# one belongs to that table in TOML, so an array written at the bottom parses
-# clean and asserts nothing.
+purpose = "/session-worktree run from the superproject root of a tree holding a submodule enters its worktree and leaves the submodule guard silent. This is the control for the submodule arm, which asserts the guard fires."
 
 max_turns = 30
 
 paths = [
-  ".claude/worktrees/grault/.canon/plans/feature-grault.md",
-  "vendor/lib.js",
+  { path = ".claude/worktrees/grault/.canon/plans/feature-grault.md", why = "The plan reaching the worktree proves entry read the superproject's own tree rather than a root it derived from somewhere else." },
+  { path = "vendor/lib.js", why = "The precondition. A tree with no populated vendor cannot show the guard stayed silent for the right reason." },
 ]
 
-# The plan reaching the worktree is what proves entry read the superproject's
-# own tree rather than a root it derived from somewhere else. The submodule file
-# is the precondition: a tree with no populated `vendor` cannot show that the
-# guard stayed silent for the right reason.
-
-reply = ["feat/grault", "No package manifest"]
+reply = [
+  { text = "feat/grault", why = "The branch the entry created." },
+  { text = "No package manifest", why = "The dependency line for a tree with no manifest." },
+]
 
 manual = [
   "That the guard stayed silent rather than never running is not separable here. Unwired: a skipped read and a read returning empty produce the same output, and only the sibling arm shows the command is wired at all.",

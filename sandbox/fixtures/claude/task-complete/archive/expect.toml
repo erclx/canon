@@ -1,98 +1,56 @@
-# What a correct `/task-complete` run leaves behind on the archive arm.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-
-# The arm asserts the successful move and nothing about the refusals.
-# `src/tasks/archive/` covers those, and a model session at a
-# dollar a run is the wrong instrument for a typed guard. What no unit test
-# reaches is whether the skill gets to the command at all with the board in the
-# state the command needs.
-
-# Every top-level key sits above the first `[[content]]` block. A bare key below
-# one belongs to that table in TOML, so a `manual` array written at the bottom
-# parses clean and asserts nothing.
+purpose = "/task-complete archives the named task and carries its plan across, retargeting the plan link and leaving the control task and its plan alone. The arm asserts the successful move, not the refusals, which `src/tasks/archive/` covers at the unit level."
 
 max_turns = 30
 
-# The destination, not the source. A board staged with an open outcome exercises
-# a refusal rather than the archive, and a run that declined leaves the source
-# file exactly where a `paths` entry over it would find it. Asserting the
-# destination is what separates the two.
-#
-# The plan is the second half of the same move. `v01.0-rate-limit` cites a live
-# plan no other task holds, so the archive carries it across, and asserting only
-# the task would pass a run that archived the task and stranded the plan.
-#
-# The control's plan is what keeps that honest. `feature-pagination.md` belongs
-# to a task whose outcomes stay open, so a run that swept the plans folder rather
-# than following the one task it was given moves it too.
-#
-# `priority.md` is listed because the content pin below reads it. A run that
-# deleted the file rather than dropping one row would otherwise report a content
-# miss with nothing naming the cause.
 paths = [
-  ".canon/tasks/archive/v01.0-rate-limit.md",
-  ".canon/tasks/v02.0-pagination.md",
-  ".canon/tasks/priority.md",
-  ".canon/plans/archive/feature-rate-limit.md",
-  ".canon/plans/feature-pagination.md",
+  { path = ".canon/tasks/archive/v01.0-rate-limit.md", why = "The destination, not the source. A board staged with an open outcome exercises a refusal rather than the archive, and a run that declined leaves the source where a paths entry over it would find it." },
+  { path = ".canon/tasks/v02.0-pagination.md", why = "The control task, which must not move." },
+  { path = ".canon/tasks/priority.md", why = "Read by the content pin below, so a deleted file reports its own cause rather than a content miss." },
+  { path = ".canon/plans/archive/feature-rate-limit.md", why = "The second half of the same move. The task cites a live plan no other task holds, so the archive carries it across, and asserting only the task would pass a run that stranded the plan." },
+  { path = ".canon/plans/feature-pagination.md", why = "The control's plan. Its task's outcomes stay open, so a run that swept the plans folder rather than following the one task it was given moves it too." },
 ]
 
-# Both sources are gone and the control never moved. The second entry catches a
-# run that archived the board rather than the task it was given, and the third
-# separates a moved plan from a copied one.
 absent = [
-  ".canon/tasks/v01.0-rate-limit.md",
-  ".canon/tasks/archive/v02.0-pagination.md",
-  ".canon/plans/feature-rate-limit.md",
+  { path = ".canon/tasks/v01.0-rate-limit.md", why = "The source is gone." },
+  { path = ".canon/tasks/archive/v02.0-pagination.md", why = "Catches a run that archived the board rather than the task it was given." },
+  { path = ".canon/plans/feature-rate-limit.md", why = "Separates a moved plan from a copied one." },
 ]
 
-# Two entries now. The task archive sits inside the board, so the board's own
-# glob already reaches it, and the plans glob is what the archive verb writes
-# through when it carries the plan across.
-write_scope = [".canon/tasks/**", ".canon/plans/**"]
+write_scope = [
+  { path = ".canon/tasks/**", why = "The task board and its index." },
+  { path = ".canon/plans/**", why = "The task archive sits inside the board, so the board's glob reaches it, and the plans glob is what the archive verb writes through when it carries the plan across." },
+]
 
-# The skill reports the paths the command returned, in full from the project
-# root. The archive destination is the token worth pinning, since a reply naming
-# only the stem reads the same whether the file moved or not.
-reply = [".canon/tasks/archive/v01.0-rate-limit.md"]
+reply = [
+  { text = ".canon/tasks/archive/v01.0-rate-limit.md", why = "The skill reports the paths the command returned, in full from the project root. The archive destination is the token worth pinning, since a reply naming only the stem reads the same whether the file moved or not." },
+]
 
 manual = [
   "The run reached the archive through `canon tasks archive` rather than moving the file by hand. Semantic: both leave the same tree, so no assertion over the tree separates them.",
   "The board resolves at the main worktree root rather than at pwd. Unwired: a standalone sandbox repository has no linked worktree, so the two roots are the same path and no run can tell them apart.",
 ]
 
-# The cleared ordering row, asserted by what survives it. An `absent` entry
-# cannot express a removed table row, and a negative pattern would pass on every
-# rewording, so the pin runs from the separator line into the row that follows
-# it. The fixture puts the archived task's row first, so a run that left it in
-# place pushes the control's row down and the match fails.
 [[content]]
 path = ".canon/tasks/priority.md"
 pattern = '^\| ---- \| ------- \| ---- \|\n\| \[v02\.0 pagination\]\(v02\.0-pagination\.md\)'
+why = "The cleared ordering row, asserted by what survives it, since an absent entry cannot express a removed table row and a negative pattern passes on every rewording. The fixture puts the archived row first, so a run that left it pushes the control's row down and the match fails."
 
-# The move carried the file rather than creating an empty one at the
-# destination. `paths` alone passes on a touched file.
 [[content]]
 path = ".canon/tasks/archive/v01.0-rate-limit.md"
 pattern = '^- \[x\] Outcome: a client over the request budget is rejected'
+why = "The move carried the file rather than creating an empty one at the destination. The path alone passes on a touched file."
 
-# The retarget. The archived task sits a folder deeper than the live one, so the
-# pointer it carried is wrong by one level the moment the task moves, and
-# `.canon/plans/` is gitignored so nothing recovers the target it named.
 [[content]]
 path = ".canon/tasks/archive/v01.0-rate-limit.md"
 pattern = '^Plan: \[feature-rate-limit\]\(\.\./\.\./plans/archive/feature-rate-limit\.md\)'
+why = "The retarget. The archived task sits a folder deeper than the live one, so the pointer it carried is wrong by one level the moment it moves, and the plans folder is gitignored so nothing recovers the target it named."
 
-# The control's pointer stays put, at the live path it was staged with. Asserting
-# the plan's location alone would pass a run that retargeted every line it found.
 [[content]]
 path = ".canon/tasks/v02.0-pagination.md"
 pattern = '^Plan: \[feature-pagination\]\(\.\./plans/feature-pagination\.md\)'
+why = "The control's pointer stays at the live path it was staged with. Asserting the plan's location alone would pass a run that retargeted every line it found."
 
-# The control's outcomes stay open. A run that marked them to get the control
-# past the open-outcome gate would leave both tasks archivable, and every other
-# assertion here would still hold.
 [[content]]
 path = ".canon/tasks/v02.0-pagination.md"
 pattern = '^- \[ \] Outcome: a list request accepts a page size and an offset'
+why = "The control's outcomes stay open. A run that marked them to get the control past the open-outcome gate would leave both tasks archivable, and every other assertion would still hold."

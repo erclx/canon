@@ -1,73 +1,52 @@
-# What `canon gov test-order` leaves behind when it reads a history carrying one
-# module per verdict. Read by `canon sandbox check`. Patterns use TOML literal
-# strings so a regex needs no backslash escaping.
-#
-# `src/gov/test-order.test.ts` already covers the classification against fixture
-# histories built in a temp directory. What only this arm reaches is the command
-# around it: the exit a finding produces, the record shape a consuming skill
-# parses, and the frame rendering on stderr while stdout stays pure data.
+purpose = "canon gov test-order on a history with one module per verdict exits 2 with a pure-data record on stdout."
 
 paths = [
-  "test-order-record.json",
-  "test-order-frame.log",
-  "test-order-status.txt",
+  { path = "test-order-record.json", why = "The record the verb printed on stdout." },
+  { path = "test-order-frame.log", why = "The frame rendering on stderr." },
+  { path = "test-order-status.txt", why = "The exit status the run captured." },
 ]
 
-# Declared above the content blocks deliberately. A bare key below a
-# `[[content]]` header binds to that table rather than to the document.
-#
-# No `max_turns`. The arm runs the CLI directly with no agent driving it, so no
-# envelope is produced and a ceiling here would sit permanently skipped.
 manual = [
   "The commit hashes the record names are the commits the fixture wrote, in the order it wrote them. Semantic: a pattern can pin a subject to an array but cannot tell a correct hash from a well-formed wrong one",
   "The frame's Read past line reports 0 because the fixture stages only .ts files. Semantic: an arm that stages no unreadable path cannot demonstrate that one would be named rather than dropped",
 ]
 
-# The three verdicts pin by position rather than by presence. Each array holds
-# exactly one member here, so anchoring the subject to the array's opening brace
-# is what separates a module classified correctly from one merely mentioned
-# somewhere in the record.
 [[content]]
 path = "test-order-record.json"
 pattern = '"findings":\[\{"subject":"src/parser\.ts"'
+why = "Each verdict array holds one member here, so anchoring the subject to the array's opening brace separates a module classified correctly from one merely mentioned in the record."
 
 [[content]]
 path = "test-order-record.json"
 pattern = '"satisfied":\[\{"subject":"src/reader\.ts"'
+why = "Pinned by position for the same reason as the findings entry."
 
 [[content]]
 path = "test-order-record.json"
 pattern = '"unclassified":\[\{"subject":"src/seed\.ts"'
+why = "Pinned by position for the same reason as the findings entry."
 
-# The reason the operator's rejection of the blocking shape rests on. A module
-# the range modified rather than added has to say why it could not be read, and
-# a verdict of `unclassified` carrying no reason would satisfy the pin above
-# while telling a reader nothing.
 [[content]]
 path = "test-order-record.json"
 pattern = 'the implementation predates the range'
+why = "A module the range modified rather than added has to say why it could not be read. An unclassified verdict with no reason would satisfy the pin above and tell a reader nothing."
 
-# Coverage is stated on every run rather than implied. A record dropping `scope`
-# reports verdicts over a corpus it never names.
 [[content]]
 path = "test-order-record.json"
 pattern = '"scope":\{"extensions":\[""?\.ts'
+why = "Coverage is stated on every run rather than implied. A record without scope reports verdicts over a corpus it never names."
 
-# The exit a finding produces. Nothing else here reads it, since the verb reports
-# rather than gates and no stage consumes the code, so an arm that let it drift
-# to 0 would report a clean tree to any caller branching on the exit.
 [[content]]
 path = "test-order-status.txt"
 pattern = '^2$'
+why = "The exit a finding produces. The verb reports rather than gates and no stage consumes the code, so a drift to 0 would tell any caller branching on it that the tree is clean."
 
-# A `--json` run keeps stderr to warnings while the record holds stdout alone,
-# which is the split `docs/agents/output-shape.md` fixes. Each finding leaves a
-# `subject → test` warning there, so asserting it catches a regression that
-# sends the warning to stdout or quiets it with the progress.
 [[content]]
 path = "test-order-frame.log"
 pattern = '→'
+why = "A --json run keeps stderr to warnings while stdout holds the record alone. Each finding leaves a `subject → test` warning there, so this catches one sent to stdout or quieted."
 
 [[content]]
 path = "test-order-record.json"
 pattern = '^\{"ok":true'
+why = "The record opens as data with nothing printed ahead of it."

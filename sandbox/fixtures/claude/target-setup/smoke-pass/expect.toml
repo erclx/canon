@@ -1,17 +1,12 @@
-# What a correct `/canon:target-setup verify deep` run leaves behind on the `smoke-pass` arm. Read
-# by `canon sandbox check`. Each staged script touches a marker file as its
-# first action, so a marker's presence proves the skill invoked that script
-# regardless of what the script's own stdout says.
+purpose = "/canon:target-setup verify deep runs all four stages in order. Each staged script touches a marker as its first action, so a marker's presence proves the skill invoked that script regardless of what the script prints."
 
 max_turns = 20
 
-# One marker per stage in the fixed order the skill runs: dev, preview,
-# test:e2e, screenshot. All four exist only when every stage ran.
 paths = [
-  ".smoke/dev-started",
-  ".smoke/preview-started",
-  ".smoke/e2e-ran",
-  ".smoke/screenshot-ran",
+  { path = ".smoke/dev-started", why = "One marker per stage in the fixed order the skill runs: dev, preview, test:e2e, screenshot. All four exist only when every stage ran." },
+  { path = ".smoke/preview-started", why = "The second stage ran." },
+  { path = ".smoke/e2e-ran", why = "The third stage ran." },
+  { path = ".smoke/screenshot-ran", why = "The last stage ran, so the chain reached its end." },
 ]
 
 manual = [

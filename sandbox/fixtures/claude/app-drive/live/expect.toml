@@ -1,28 +1,19 @@
-# What a correct `/canon:app-drive` run leaves behind when the operator names
-# the live app. Read by `canon sandbox check`. Patterns use TOML literal strings
-# so a regex needs no backslash escaping.
-#
-# Every top-level key sits above the first `[[content]]` block, as in the
-# default arm.
-#
-# The arm drives the default app where it runs. The Action names the launch, so
-# the build output under `dist/` is the one checkout write a correct run makes.
-# Saving a frame writes the operator's own board, which a live drive never
-# edits, so the seed stays byte-exact and the Frames goal is driven as a read
-# or marked not-driven with its reason.
-#
-# No `max_turns` is declared until a billed run records a count.
+purpose = "A run of /canon:app-drive on the live app the operator names leaves the operator's board untouched and registers no worktree."
 
-paths = [".canon/intake/*/drive.json", ".canon/intake/*/evidence/drive-log.md"]
+paths = [
+  { path = ".canon/intake/*/drive.json", why = "The record mapping every goal." },
+  { path = ".canon/intake/*/evidence/drive-log.md", why = "The drive log." },
+]
 
-# No copy is made, so no registration appears at any point.
-absent = [".git/worktrees/*/HEAD"]
+absent = [
+  { path = ".git/worktrees/*/HEAD", why = "No copy is made, so no registration appears at any point." },
+]
 
 write_scope = [
-  ".canon/intake/**",
-  ".canon/tmp/app-drive/**",
-  ".canon/picks/**",
-  "dist/**",
+  { path = ".canon/intake/**", why = "Intake files land in the folder the pass opens." },
+  { path = ".canon/tmp/app-drive/**", why = "The drive keeps its scratch here." },
+  { path = ".canon/picks/**", why = "The proposals folder, where a taste item frames go." },
+  { path = "dist/**", why = "The Action names the launch, so the build output is the one checkout write a correct run makes." },
 ]
 
 escape_scope = []
@@ -33,24 +24,27 @@ manual = [
   "No undo, redo, select-all, or bulk action ran in the page. Unwired: browser input is not in the tree.",
 ]
 
-# The operator's board is untouched.
 [[content]]
 path = "boards/board.json"
 pattern = '^\{"frames":\["frame 1"\]\}$'
+why = "The operator's board is untouched. Saving a frame would write it, which a live drive never does, so the Frames goal is driven as a read or marked not-driven with its reason."
 
 [[content]]
 path = ".canon/intake/*/drive.json"
 pattern = 'adds a frame to the board and sees it saved'
+why = "The first goal is mapped."
 
 [[content]]
 path = ".canon/intake/*/drive.json"
 pattern = 'exports the board to PNG'
+why = "The second goal is mapped."
 
-# The live value, in a pretty-printed record and a compact one.
 [[content]]
 path = ".canon/intake/*/drive.json"
 pattern = '"worktree":\s*null'
+why = "The live value, in an indented record and a one-line one."
 
 [[content]]
 path = ".canon/intake/*/evidence/drive-log.md"
 pattern = '^\| Copy\s.*live app'
+why = "The log names the live app as the copy driven."

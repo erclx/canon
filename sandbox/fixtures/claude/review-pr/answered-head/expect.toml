@@ -1,25 +1,15 @@
-# What a correct `/canon:review-pr` run leaves behind on the
-# answered-head arm. Read by `canon sandbox check`. Patterns use TOML literal
-# strings so a regex needs no backslash escaping.
-#
-# The seed already carries a close-out with no response since, so the prior
-# commit equals headRefOid and the response query newer than that close-out
-# comes back empty. The fix this arm proves moved that check to Step 2, ahead
-# of both the review and the body write, so a pass that would otherwise go
-# straight to composing a close-out never reaches the point where it posts.
+purpose = "/canon:review-pr on a head whose standing close-out has no response since refuses at Step 2 and posts nothing. The seeded prior commit equals the head, so the refusal sits ahead of both the review and the body write."
 
-# Two clean runs on 2026-08-26 came in at 8 and 7. The refusal resolves off
-# one read with nothing to execute behind it, a fixed-cost shape, so two
-# samples are enough to set a ceiling.
+# The refusal resolves off one read with nothing to execute behind it, a fixed-cost shape, so a few samples are enough to set a ceiling.
 max_turns = 12
 
-# The whole assertion for the negative half. A second close-out would still
-# write a body file, so the folder staying empty is what proves no post
-# happened.
-absent = [".canon/tmp/pr/review/*.md"]
+absent = [
+  { path = ".canon/tmp/pr/review/*.md", why = "The whole negative half. A second close-out would still write a body file, so the folder staying empty proves no post happened." },
+]
 
-# Fixed by the refusal Step 2 states, not chosen by the run.
-reply = ["head is unchanged"]
+reply = [
+  { text = "head is unchanged", why = "Fixed by the refusal Step 2 states, not chosen by the run." },
+]
 
 manual = [
   "The refusal names the prior pass's short commit rather than a placeholder. Semantic: whether the named sha matches the seeded close-out's commit is a judgment no substring can carry",

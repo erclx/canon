@@ -1,26 +1,16 @@
-# What a correct `/canon:target-setup indexes` run leaves behind against a bare
-# CLAUDE.md with no markdown-heavy folder anywhere. Read by `canon sandbox
-# check`, which only asserts against what a run left behind and drives
-# nothing itself. The scan finds no candidate, so the skill skips straight
-# to the closeout and writes nothing. The phase no longer offers to append an
-# `## Indexes` section to `CLAUDE.md`, since the `indexes` governance rule
-# carries that convention, so a correct run leaves `CLAUDE.md` untouched.
-# The closeout's wording beyond its first line is the model's, so only that
-# line's presence is a manual judgment rather than a pinned substring.
+purpose = "A /canon:target-setup indexes run against a bare CLAUDE.md with no markdown-heavy folder skips to the closeout and writes nothing."
 
 max_turns = 8
 
-absent = ["docs/index.md"]
+absent = [
+  { path = "docs/index.md", why = "The scan finds no candidate, so no index is bootstrapped. This holds whether the run closes correctly or crashes before the closeout, which the manual entry tells apart." },
+]
 
 manual = [
   "The reply reports the empty scan and ends on exactly one `Bootstrap complete.` closeout, with no `Convention seed:` line and no offer to add an `## Indexes` section to `CLAUDE.md`. Semantic: the absence of an offer is read from the whole reply, which no single substring pin can carry",
 ]
 
-# Proves nothing was written, not that the closeout happened. This pin, and
-# `absent` above, hold identically whether the run closes correctly or
-# crashes before the closeout. Telling the two apart is the `manual` entry's
-# job, which `countMechanicalAssertions` excludes from the arm's asserted
-# count.
 [[content]]
 path = "CLAUDE.md"
 pattern = '^# Project\n\nSample project for testing the indexes phase of the setup skill on an empty scan\.\n$'
+why = "CLAUDE.md is untouched, since the governance rule carries the Indexes convention and the phase no longer offers to append it. This proves nothing was written, not that the closeout happened."

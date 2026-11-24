@@ -1,53 +1,26 @@
-# What a correct `/canon:target-setup` run leaves behind on the `fresh` arm. Read by
-# `canon sandbox check`. Patterns use TOML literal strings so a regex needs no
-# backslash escaping.
-#
-# This arm runs the real installer against a tree carrying no framework
-# evidence. Every path below was read off the tree a run produced on 2026-08-03
-# rather than projected from what `buildSteps` orders.
+purpose = "/canon:target-setup run against a tree with no framework evidence installs governance and tooling for the base stack and skips the framework steps. The arm runs the real installer."
 
-# A clean run cost 20 turns on 2026-08-03 against the default cap of 30. One
-# sample, and the arm drives the real installer across six domains, so how a run
-# orders those installs moves the count and 20 is one path through them. The
-# ceiling holds at the default until a second pass shows the cost is stable, and
-# comes down to sit above the widest observation once one does.
+# A clean run cost 20 turns against the default cap of 30. The arm drives the real installer across six domains, so how a run orders those installs moves the count, and the ceiling holds at the default until a second pass shows the cost is stable.
 max_turns = 30
 
-# One path per domain the chain installs. A run that reported success while
-# skipping one leaves the others in place, so a single path proves nothing about
-# the chain.
-#
-# `.claude/GOV.md` is not among them. The `fresh` arm's own stage prose claimed
-# `canon init` builds it until 2026-08-03, and `src/gov/adapter.ts` names it
-# `RETIRED_GOV_FILE`. The first run of this arm failed on it, which is the stale
-# expectation the declaration exists to catch.
 paths = [
-  "CLAUDE.md",
-  ".claude/rules/canon/claude/output.md",
-  ".claude/rules/canon/canon/scratch.md",
-  "commitlint.config.js",
+  { path = "CLAUDE.md", why = "One path per domain the chain installs. A run that reported success while skipping one leaves the others in place, so a single path proves nothing about the chain." },
+  { path = ".claude/rules/canon/claude/output.md", why = "The claude rule folder landed." },
+  { path = ".claude/rules/canon/canon/scratch.md", why = "The canon rule folder landed." },
+  { path = "commitlint.config.js", why = "The tooling domain landed its base config." },
 ]
 
-# The two fallbacks, asserted rather than described. `base` carries no framework
-# rule and no framework config, so a run that read an empty project and picked
-# `react` anyway lands the first, and one that ran step 2 instead of skipping it
-# lands the other two. These are claims about what the resolve step decided, not
-# assertions inverted over output the snapshot cannot reach.
 absent = [
-  ".claude/rules/canon/framework/react.md",
-  "vite.config.ts",
-  ".oxlintrc.json",
-  ".claude/standards",
-  ".claude/wiki",
+  { path = ".claude/rules/canon/framework/react.md", why = "The base fallback, asserted rather than described. Base carries no framework rule, so a run that read an empty project and picked react anyway lands this." },
+  { path = "vite.config.ts", why = "A run that ran step 2 instead of skipping it lands this." },
+  { path = ".oxlintrc.json", why = "A run that ran step 2 instead of skipping it lands this." },
+  { path = ".claude/standards", why = "No install channel writes it." },
+  { path = ".claude/wiki", why = "A run that ran step 2 instead of skipping it lands this." },
 ]
 
-# No `write_scope`. `canon init` writes a whole project scaffold and the verify
-# phase runs `bun install` behind it, so the narrowest glob admitting a correct run is
-# `**`. A first pass declared exactly that and asserted 7772 node_modules paths,
-# none of which can fail. A scope that cannot go red is the silent-green shape
-# the checker exists to prevent, so this arm makes no scope claim at all.
+# No write_scope is declared. The install writes a whole project scaffold and the verify phase runs bun install behind it, so the narrowest glob admitting a correct run is `**`, and a scope that cannot go red is the silent-green shape the checker exists to prevent.
 
-reply = ["base"]
+reply = [{ text = "base", why = "The stack the resolve step fell back to." }]
 
 manual = [
   "The verify phase runs and reports the base scripts alone. Unwired: the claim is about which commands were invoked, which the envelope does not carry",
@@ -55,10 +28,7 @@ manual = [
   "The run reaches nothing outside the sandbox tree. Semantic: the install legitimately writes the whole tree, so no `write_scope` glob distinguishes a correct run from a wrong one and the claim has no mechanical form here",
 ]
 
-# Both stamped domains wrote their manifest. A run that installed governance and
-# stopped leaves a well-formed `config.json` carrying one entry, which every path
-# above still passes. `.claude/standards` is asserted absent above, since no
-# install channel writes it.
 [[content]]
 path = "canon/config/config.json"
 pattern = '"covers": \[\s*"governance",\s*"tooling"\s*\]'
+why = "Both stamped domains wrote their manifest. A run that installed governance and stopped leaves a well-formed config.json carrying one entry, which every path above still passes."

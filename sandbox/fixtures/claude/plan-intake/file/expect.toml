@@ -1,43 +1,25 @@
-# What a correct `/plan-intake` run leaves behind on the file arm.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
+purpose = "The file phase of /plan-intake writes a numbered intake folder with an index and cluster files, and opens no plan or groundwork track. The folder is gitignored in every target, so this arm is the only check of its shape."
 
-# The folder is gitignored in every target, so nothing in the repository checks
-# its shape. This arm is the only thing that ever will, which is why it asserts
-# the numbering and the index rather than only that a folder appeared.
-
-# Every top-level key sits above the first `[[content]]` block. A bare key below
-# one belongs to that table in TOML, so a `manual` array written at the bottom
-# parses clean and asserts nothing.
-
-# The default cap, declared rather than observed. No recorded run for this arm
-# survives, so the ceiling sits where the running narrative puts an uncalibrated
-# one and comes down whenever a pass is measured. It stood at 45 against a cap of
-# 30, where a truncated run reports 31, passes the turn assertion, and fails only
-# what was going to fail anyway.
+# The cap is the default rather than observed, since a truncated run reports one past it and passes the turn assertion.
 max_turns = 30
 
-# The slug is pinned by the invocation rather than left to the run. `paths`
-# matches an exact path, and a slug the model derives from the dump's wording
-# would leave every assertion here naming a folder that may not exist. What the
-# arm gives up is the slug derivation, which is one line of the body against the
-# whole of the folder shape. The ordinal stays derivable: the seeded tree opens
-# with neither `.canon/intake/` nor `.canon/groundwork/`, so the standard's
-# highest-plus-one rule can only land on `01`.
-paths = [".canon/intake/01-cli-cleanup/00-overview.md"]
+paths = [
+  { path = ".canon/intake/01-cli-cleanup/00-overview.md", why = "The invocation pins the slug, since one the model derives from the dump's wording would leave every assertion naming a folder that may not exist. The ordinal stays derivable: the seeded tree has no intake or groundwork folder, so the highest-plus-one rule lands on 01." },
+]
 
-# Two folders the pass must not open. Neither exists in the seeded tree, so each
-# catches a run that answered the dump by planning it or by opening a track
-# instead of filing it.
-absent = [".canon/plans", ".canon/groundwork"]
+absent = [
+  { path = ".canon/plans", why = "Answering the dump by planning it is the wrong turn. Neither folder exists in the seeded tree." },
+  { path = ".canon/groundwork", why = "Opening a track instead of filing the dump is the other wrong turn." },
+]
 
-write_scope = [".canon/intake/**"]
+write_scope = [
+  { path = ".canon/intake/**", why = "Intake files land in the folder the pass opens." },
+]
 
-# The output names the folder and reports the routing split. `groundwork` is the
-# load-bearing token, since the dump carries one item nobody can answer by
-# reading the tree and a run that filed it as an ordinary finding reports no
-# candidates at all.
-reply = [".canon/intake/01-cli-cleanup/", "groundwork"]
+reply = [
+  { text = ".canon/intake/01-cli-cleanup/", why = "The output names the folder." },
+  { text = "groundwork", why = "The dump carries one item nobody can answer by reading the tree, and a run that filed it as an ordinary finding reports no groundwork candidates at all." },
+]
 
 manual = [
   "Every problem line carries a number or a file path measured this pass. Semantic: a count sits in prose and any pattern over it either pins one phrasing or matches any digit in the file.",
@@ -48,25 +30,22 @@ manual = [
   "No `You:` slot is filled. Unwired: the run writes every slot empty on an open pass, so a filled one and a missing item are indistinguishable to a pattern that does not know how many items were filed.",
 ]
 
-# The index frontmatter. `date` is the day the folder opened and it is the only
-# date in the folder, so a run that dated each cluster file instead leaves this
-# field missing.
 [[content]]
 path = ".canon/intake/01-cli-cleanup/00-overview.md"
 pattern = '^title: \S'
+why = "The index frontmatter carries a title."
 
 [[content]]
 path = ".canon/intake/01-cli-cleanup/00-overview.md"
 pattern = '^description: \S'
+why = "The index frontmatter carries a description."
 
 [[content]]
 path = ".canon/intake/01-cli-cleanup/00-overview.md"
 pattern = '^date: \d{4}-\d{2}-\d{2}$'
+why = "The date is the day the folder opened and the only one in it, so a run that dated each cluster file instead leaves this field missing."
 
-# The numbering, read through the index rather than through a directory listing.
-# A cluster file carries a two-digit number and its domain, so the link the
-# index writes proves both halves at once. `00` is excluded because the index
-# linking itself would satisfy a looser pattern.
 [[content]]
 path = ".canon/intake/01-cli-cleanup/00-overview.md"
 pattern = '\]\((?!00-)\d\d-[a-z][a-z0-9-]*\.md'
+why = "The numbering, read through the index. A cluster link carries a two-digit number and its domain, so it proves both halves. 00 is excluded because the index linking itself would satisfy a looser pattern."

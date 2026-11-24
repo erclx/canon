@@ -1,49 +1,35 @@
-# What `canon sync --check --json` reports on a target holding a folder at a root
-# the toolkit has stopped shipping. Read by `canon sandbox check`. Patterns use
-# TOML literal strings so a regex needs no backslash escaping.
-#
-# This is the arm that would have reported nothing before the change rather than
-# erroring. Every other section enumerates toolkit-owned keys and asks whether
-# the target matches, so a folder the toolkit deleted appeared in none of them.
+purpose = "canon sync --check --json reports a folder at a root the toolkit stopped shipping, attributed as dropped."
 
-paths = ["drift-report.json"]
+paths = [
+  { path = "drift-report.json", why = "The report the command wrote, which every content entry reads." },
+]
 
-# Declared above the content blocks deliberately. A bare key below a `[[content]]`
-# header binds to that table rather than to the document, which is how an arm
-# ships manual entries that never reach the unchecked count.
 manual = [
   "The rendered run names the folder under `No longer shipped by the toolkit` and proposes nothing. Semantic: the assertion is that the section offers no command, and the JSON report carries no rendered text",
   "`--exit-code` still exits 0 on this target once its other sections are clean. Semantic: the JSON carries the finding either way, so the gate has to be observed from the exit status rather than read out of the report",
 ]
 
-# The folder is reported at all, which is the whole point of the section.
 [[content]]
 path = "drift-report.json"
 pattern = '"unclaimed"'
+why = "The folder is reported at all. Every other section enumerates toolkit-owned keys, so a folder the toolkit deleted appeared in none of them."
 
-# Attributed as dropped rather than left as a bare path. A project-authored
-# folder and a dropped one are identical on disk, so the verdict is what makes
-# the entry safe to act on.
 [[content]]
 path = "drift-report.json"
 pattern = '"attribution": "dropped"'
+why = "A project-authored folder and a dropped one look identical on disk, so the verdict is what makes the entry safe to act on."
 
-# Named with the revision the content was last published at. A verdict with no
-# commit behind it is a guess wearing an attribution.
 [[content]]
 path = "drift-report.json"
 pattern = '"since": "[0-9a-f]{7}'
+why = "A verdict with no revision behind it is a guess wearing an attribution."
 
-# A file count above zero. An entry with no files would mean the walk fired on
-# an empty directory, which is the false positive the file list exists to
-# prevent.
 [[content]]
 path = "drift-report.json"
 pattern = '"files": [1-9]'
+why = "An entry with no files would mean the walk fired on an empty directory."
 
-# The sibling the toolkit never shipped is counted in the same folder rather
-# than reported as its own entry. The walk reports folders, and one unmatched
-# file inside a dropped folder does not split it in two.
 [[content]]
 path = "drift-report.json"
 pattern = '"files": 2'
+why = "The sibling file the toolkit never shipped is counted in the same folder rather than reported as its own entry."

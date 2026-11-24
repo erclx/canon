@@ -1,33 +1,24 @@
-# What `canon sync --check --json` reports for tooling on a target that never
-# recorded a stack chain. Read by `canon sandbox check`. Patterns use TOML literal
-# strings so a regex needs no backslash escaping.
-#
-# This is the arm that would have reported nothing before the change. Tooling sat
-# outside the stamp entirely, so no section named it and no count measured it.
+purpose = "canon sync --check --json reports tooling as unmeasured on a target that never recorded a stack chain."
 
-paths = ["drift-report.json"]
+paths = [
+  { path = "drift-report.json", why = "The report the command wrote, which every content entry reads." },
+]
 
-# The target never installed tooling, so no stack reference landed either.
-absent = [".claude/tooling"]
+absent = [
+  { path = ".claude/tooling", why = "The target never installed tooling, so no stack reference landed either." },
+]
 
-# Declared above the content blocks deliberately. A bare key below a `[[content]]`
-# header binds to that table rather than to the document, which is how an arm
-# ships manual entries that never reach the unchecked count.
 manual = [
   "`covers` does not list tooling, since it names only the domains a target actually stamped. Semantic: the assertion is that a key is missing from a JSON array, and a content pattern asserts presence rather than absence",
   "The rendered run prints a `tooling` section naming the state and the command that records one, rather than omitting the domain. Semantic: the assertion is about the stderr render, and the JSON report carries no rendered line",
 ]
 
-# The unmeasured state, which is the whole reason tooling carries this field
-# rather than a count alone. A target that never installed tooling and one whose
-# tooling is current both produce zero changes, so the count is a claim without
-# it.
 [[content]]
 path = "drift-report.json"
 pattern = '"measured": false'
+why = "The unmeasured state is why tooling carries this field. A target that never installed tooling and one whose tooling is current both produce zero changes, so the count alone is a claim without it."
 
-# An empty chain. Entries here would mean the report read a record this arm never
-# wrote, which is the backfill-by-inference the record exists to replace.
 [[content]]
 path = "drift-report.json"
 pattern = '"chain": \[\]'
+why = "An empty chain. Entries would mean the report read a record this arm never wrote, which is the backfill-by-inference the record replaces."

@@ -1,29 +1,20 @@
-# What a correct `/canon:review-pr` run leaves behind on the
-# repeat-close-out arm. Read by `canon sandbox check`. Patterns use TOML
-# literal strings so a regex needs no backslash escaping.
-#
-# The head moved, so the unchanged-head stop cannot fire, and the delta is one
-# refactor commit that raises nothing. The standing verdict is already
-# `## Review closed`, so a conforming pass rewrites that comment through
-# `gh api -X PUT` rather than posting a second close-out beside it. Two of
-# those landed on `#1201` on 2026-08-28 and nothing reported the pair.
+purpose = "/canon:review-pr on a moved head whose delta raises nothing, under a standing Review closed, rewrites that comment rather than posting a second close-out beside it. The head moved, so the unchanged-head stop cannot fire."
 
-# The same absence every arm asserts: no target here installed the corpus, so
-# the skill's own `references` route is the only one left and a local copy
-# would swap the standard the pass read its Testing discipline from.
-absent = [".claude/standards/pr.md", "standards/pr.md"]
+# The spread is the open question: the pass decides whether the delta raises a finding, and the two branches cost different turns, so a ceiling drawn from the cheaper one would fail the other.
 
-# The short-sha segment is derived from the PR's head commit, so only the
-# prefix is fixed. The head moved on this arm, so the name carries the two
-# segments rather than the repeated-head third one.
-paths = [".canon/tmp/pr/review/body-*.md"]
+absent = [
+  { path = ".claude/standards/pr.md", why = "No target here installed the corpus, so the skill's own references route is the only one left, and a local copy would swap the standard the pass read its Testing discipline from." },
+  { path = "standards/pr.md", why = "The same path without the .claude prefix." },
+]
 
-# The only file this arm's diff has any business touching.
-write_scope = [".canon/tmp/pr/review/**"]
+paths = [
+  { path = ".canon/tmp/pr/review/body-*.md", why = "The head moved, so the name carries two segments rather than the repeated-head third one." },
+]
 
-# The thread half of this arm is a GitHub state rather than a local file, so
-# it is asserted by hand. A substring cannot count comments on a remote, and
-# an assertion kind that reads the thread does not exist yet.
+write_scope = [
+  { path = ".canon/tmp/pr/review/**", why = "The only file this arm's diff has any business touching." },
+]
+
 manual = [
   "The thread carries exactly one `## Review closed`. A second one posted beside the first is the whole defect this arm exists against, and no local file records whether the pass posted or rewrote",
   "The standing close-out's body now names the refactor commit rather than the commit it was first submitted against, which is what proves the rewrite landed rather than being skipped",
@@ -31,30 +22,17 @@ manual = [
   "No comment sits under a heading outside the five the review and reply families fix. `poll.ts` reports anything else as UNMATCHED",
 ]
 
-# No max_turns yet. One clean run came in at 13 turns, and this arm's spread is
-# the open question rather than its floor: the pass decides for itself whether
-# the refactor commit raises a finding, and the two branches cost different
-# numbers of turns. A ceiling drawn from the cheaper branch would red the other
-# one, so this waits for a run that takes it.
-
-# Every key above this line is top level. A bare key written below a
-# `[[content]]` header belongs to that table in TOML, so anything moved down
-# here would parse clean and assert nothing.
-
-# The heading the rewrite keeps. A pass that reopened the review under
-# `## Review` on a delta raising nothing has failed the threshold rather than
-# the guard, and this pins the half a local file can carry.
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
 pattern = '^## Review closed'
+why = "The heading the rewrite keeps. A pass that reopened the review under Review on a delta raising nothing failed the threshold rather than the guard, and this pins the half a local file can carry."
 
-# The scope line names what this pass covered rather than what the standing
-# comment covered, which is the body half of the rewrite.
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
 pattern = 'Re-reviewed'
+why = "The scope line names what this pass covered rather than what the standing comment covered, which is the body half of the rewrite."
 
-# The footer every pass owes, kept through a rewrite the same as through a post.
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
 pattern = 'Reviewed by Claude Code'
+why = "The footer every pass owes, kept through a rewrite the same as through a post."

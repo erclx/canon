@@ -1,22 +1,16 @@
-# What a correct `/canon:plan-feature` run leaves behind on the seeded shop.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-#
-# Every top-level key sits above the first `[[content]]` block, since a bare key
-# below one binds to that table and asserts nothing.
-#
-# The claim under test is placement: the plan names its new paths by role
-# rather than beside the flat neighbors the tree holds. A run picks its own
-# subfolder names, so each pattern accepts any subfolder and refuses only the
-# flat sibling. Plans are gitignored, and the checker scans the tree rather
-# than what git lists, so the glob reaches the plan the run wrote.
+purpose = "/canon:plan-feature names its new paths by role rather than beside the flat neighbors the seeded shop holds."
 
-# Declared at the cap, with no observed run yet to correct it from.
 max_turns = 30
 
-paths = [".canon/plans/feature-*.md"]
+paths = [
+  { path = ".canon/plans/feature-*.md", why = "Plans are gitignored and the checker scans the tree rather than what git lists, so the glob reaches the plan the run wrote." },
+]
 
-write_scope = [".canon/plans/**", ".canon/tasks/**", ".canon/tmp/**"]
+write_scope = [
+  { path = ".canon/plans/**", why = "The plan the run writes." },
+  { path = ".canon/tasks/**", why = "The task board and its index." },
+  { path = ".canon/tmp/**", why = "Skill scratch." },
+]
 
 manual = [
   "Each new path in `**Files to touch:**` carries a one-clause placement reason. Semantic: a reason can be worded many ways and sits in the prose after the path.",
@@ -24,26 +18,22 @@ manual = [
   "No wishlist component is named flat in `src/components/`. Semantic: a negative over the plan passes on every spelling of a flat path the pattern did not anticipate, so the positive below carries the assertion.",
 ]
 
-# A component path at least two folders under `src/`, such as
-# `src/components/wishlist/WishlistLine.tsx` or `src/features/wishlist/...`.
-# A flat `src/components/WishlistLine.tsx` has one folder and does not match.
 [[content]]
 path = ".canon/plans/feature-*.md"
 pattern = 'src/[\w-]+/[\w-]+/[\w.-]+\.tsx'
+why = "A component path at least two folders under src/. A run picks its own subfolder names, so the pattern accepts any subfolder and refuses only the flat sibling, which has one folder."
 
-# An end to end support file inside a subfolder of `e2e/`. The filename class
-# carries no dot, so a spec such as `wishlist.spec.ts` in a journey folder does
-# not satisfy it, and a helper named flat beside the specs has no subfolder.
 [[content]]
 path = ".canon/plans/feature-*.md"
 pattern = 'e2e/[\w-]+/[\w-]+\.ts\b'
+why = "An end to end support file inside a subfolder of e2e/. The filename class carries no dot, so a spec in a journey folder does not satisfy it, and a helper named flat beside the specs has no subfolder."
 
-# The plan carries the two sections the plan standard requires below the file
-# list and the risks. Either spelling the validator accepts satisfies each.
 [[content]]
 path = ".canon/plans/feature-*.md"
 pattern = '^(\*\*Verification:\*\*|## Verification)[ \t]*$'
+why = "The plan carries the section the plan standard requires below the file list and risks, in either accepted spelling."
 
 [[content]]
 path = ".canon/plans/feature-*.md"
 pattern = '^(\*\*Review focus:\*\*|## Review focus)[ \t]*$'
+why = "The plan carries its review focus section, in either accepted spelling."

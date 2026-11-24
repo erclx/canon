@@ -1,16 +1,15 @@
-# What `canon indexes regen` leaves behind against a folder opted out with
-# `auto: false`. Read by `canon sandbox check`. `regenOne` reads the field
-# ahead of any render and returns `skipped` rather than touching the file.
+purpose = "canon indexes regen skips a folder opted out with auto: false and leaves its index untouched."
 
-paths = ["docs/index.md"]
-absent = []
-
-manual = []
+paths = [
+  { path = "docs/index.md", why = "The opted-out index still exists after the walk." },
+]
 
 [[content]]
 path = "docs/index.md"
 pattern = '^auto: false$'
+why = "The opt-out field survives. The walk reads it ahead of any render and returns skipped rather than touching the file."
 
 [[content]]
 path = "docs/index.md"
 pattern = 'Stale content that should be overwritten'
+why = "The seeded body survives, which is what separates a skip from a rewrite that happened to keep the frontmatter."

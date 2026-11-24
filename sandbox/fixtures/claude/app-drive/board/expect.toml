@@ -1,54 +1,29 @@
-# What a correct `/canon:app-drive` run leaves behind on the seeded board app
-# when the project carries a board. Read by `canon sandbox check`. Patterns use
-# TOML literal strings so a regex needs no backslash escaping.
-#
-# Every top-level key sits above the first `[[content]]` block. A bare key below
-# one belongs to that table in TOML, so an array written at the bottom parses
-# clean and silently asserts nothing.
-#
-# The arm drives the same app as `default/`, so the seed, the goals, and the
-# removed worktree are asserted the same way. It adds what the board drawing
-# convention leaves on disk, being the `00-current` page first, a frame at each
-# of 390, 834, and 1440, evidence grouped by surface, and no empty start project
-# or page. The pick question and the ended server sit under `manual`, since the
-# checker reads the sandbox tree alone.
-#
-# No `max_turns` is declared until a billed run records a count. A guessed cap
-# fails a correct run, and a truncated run fails by its subtype regardless.
-#
-# Every pattern below matches a pretty-printed JSON file and a compact one
-# alike, since the formatting varies by writer.
+purpose = "A run of /canon:app-drive on a project carrying a board leaves the drive record, the board pages in the drawing convention, and no checkout writes."
 
 paths = [
-  ".canon/intake/*/drive.json",
-  ".canon/intake/*/evidence/drive-log.md",
-  ".canon/intake/*/evidence/*/*.png",
-  ".canon/intake/*/evidence/*/*-options.png",
-  ".canon/intake/*/evidence/mocks/*/*",
-  ".canon/board/drive-*/project.json",
-  ".canon/board/drive-*/00-current/layout.json",
-  ".canon/board/drive-*/00-current/*-390.html",
-  ".canon/board/drive-*/00-current/*-834.html",
-  ".canon/board/drive-*/00-current/*-1440.html",
+  { path = ".canon/intake/*/drive.json", why = "The record mapping every goal." },
+  { path = ".canon/intake/*/evidence/drive-log.md", why = "The drive log, opening on its setup table." },
+  { path = ".canon/intake/*/evidence/*/*.png", why = "Evidence grouped by surface." },
+  { path = ".canon/intake/*/evidence/*/*-options.png", why = "The option frames the pick question names." },
+  { path = ".canon/intake/*/evidence/mocks/*/*", why = "The mocks the options were drawn from." },
+  { path = ".canon/board/drive-*/project.json", why = "The drive's board project." },
+  { path = ".canon/board/drive-*/00-current/layout.json", why = "The current-state page leads the board." },
+  { path = ".canon/board/drive-*/00-current/*-390.html", why = "A frame at the narrow width." },
+  { path = ".canon/board/drive-*/00-current/*-834.html", why = "A frame at the middle width." },
+  { path = ".canon/board/drive-*/00-current/*-1440.html", why = "A frame at the wide width." },
 ]
 
-# The worktree registration, as in the default arm, plus the two things an empty
-# board leaves. `serve` starts a project named `untitled` and `project add` makes
-# a project holding an empty `page-1`, and the drive deletes each while it holds
-# nothing. Each entry names a file, since the scan returns files only and a bare
-# folder matches nothing.
 absent = [
-  ".git/worktrees/*/HEAD",
-  ".canon/board/untitled/project.json",
-  ".canon/board/drive-*/page-1/layout.json",
+  { path = ".git/worktrees/*/HEAD", why = "The worktree registration is gone after the close. Each entry names a file, since the scan returns files only and a bare folder matches nothing." },
+  { path = ".canon/board/untitled/project.json", why = "`serve` starts a project named untitled, which the drive deletes while it holds nothing." },
+  { path = ".canon/board/drive-*/page-1/layout.json", why = "`project add` makes an empty page-1, which the drive deletes while it holds nothing." },
 ]
 
-# The default scope plus the board root, where a board run writes its pages.
 write_scope = [
-  ".canon/intake/**",
-  ".canon/tmp/app-drive/**",
-  ".canon/picks/**",
-  ".canon/board/**",
+  { path = ".canon/intake/**", why = "Intake files land in the folder the pass opens." },
+  { path = ".canon/tmp/app-drive/**", why = "The drive keeps its scratch here." },
+  { path = ".canon/picks/**", why = "The proposals folder, where a taste item frames go." },
+  { path = ".canon/board/**", why = "The default scope plus the board root, where a board run writes its pages." },
 ]
 
 escape_scope = []
@@ -60,33 +35,37 @@ manual = [
   "The run's own `canon intake drive-check <slug> --json` returned clean. Unwired: a command's exit is not in the envelope.",
 ]
 
-# The seed is untouched, which a drive served from the checkout would break.
 [[content]]
 path = "boards/board.json"
 pattern = '^\{"frames":\["frame 1"\]\}$'
+why = "The seed is untouched, which a drive served from the checkout would break."
 
 [[content]]
 path = ".canon/intake/*/drive.json"
 pattern = 'adds a frame to the board and sees it saved'
+why = "The first goal is mapped."
 
 [[content]]
 path = ".canon/intake/*/drive.json"
 pattern = 'exports the board to PNG'
+why = "The second goal is mapped."
 
 [[content]]
 path = ".canon/intake/*/drive.json"
 pattern = '"worktree":\s*"/'
+why = "The field that arms the check's worktree-left axis is present."
 
-# The log opens on its setup table, and the Board row names the drive's project.
 [[content]]
 path = ".canon/intake/*/evidence/drive-log.md"
 pattern = '^\| Commit\s'
+why = "The log opens on its setup table, which every run writes."
 
 [[content]]
 path = ".canon/intake/*/evidence/drive-log.md"
 pattern = '^\| Board\s.*drive-\d+'
+why = "The Board row names the drive's project."
 
-# `00-current` leads the page order, in a pretty-printed file and a compact one.
 [[content]]
 path = ".canon/board/drive-*/project.json"
 pattern = '"pages":\s*\[\s*"00-current"'
+why = "00-current leads the page order. The pattern matches a pretty-printed file and a compact one."

@@ -1,32 +1,22 @@
-# What a correct `/canon:test-craft` run leaves behind on the seeded shop.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-#
-# Every top-level key sits above the first `[[content]]` block, since a bare key
-# below one binds to that table and asserts nothing.
-#
-# The claim under test is placement: each behavior's test lands at the smallest
-# layer that can catch its break. The glob on the component test accepts either
-# suffix a run may pick, and excludes `OrderList.tsx` itself because it demands
-# a second dot segment.
+purpose = "/canon:test-craft places each behavior's test at the smallest layer that can catch its break: the price formatter at unit, the loading and empty states at component, and the order journey at end to end."
 
 paths = [
-  "src/lib/price.test.ts",
-  "src/components/OrderList.*.tsx",
-  "e2e/*.spec.ts",
+  { path = "src/lib/price.test.ts", why = "The formatter's unit test." },
+  { path = "src/components/OrderList.*.tsx", why = "The component test. The glob accepts either suffix a run may pick and excludes OrderList.tsx itself, since it demands a second dot segment." },
+  { path = "e2e/*.spec.ts", why = "The browser spec for the journey." },
 ]
 
-# The suffix rule reserves `.test.ts` for unit tests. A browser spec named that
-# way is the defect the layer routing this skill replaces used to write.
-absent = ["e2e/*.test.ts"]
+absent = [
+  { path = "e2e/*.test.ts", why = "The suffix rule reserves .test.ts for unit tests. A browser spec named that way is the defect the layer routing this skill replaces used to write." },
+]
 
 write_scope = [
-  "src/**",
-  "e2e/**",
-  "node_modules/**",
-  "bun.lock",
-  "package.json",
-  "test-results/**",
+  { path = "src/**", why = "The change edits source here." },
+  { path = "e2e/**", why = "Browser specs sit here." },
+  { path = "node_modules/**", why = "A dependency install writes here." },
+  { path = "bun.lock", why = "An install rewrites the lockfile." },
+  { path = "package.json", why = "A dependency change edits the manifest." },
+  { path = "test-results/**", why = "Playwright writes its run output here." },
 ]
 
 manual = [
@@ -39,22 +29,24 @@ manual = [
 [[content]]
 path = "src/lib/price.test.ts"
 pattern = 'formatPrice'
+why = "The unit test exercises the formatter."
 
 [[content]]
 path = "src/components/OrderList.*.tsx"
 pattern = 'Loading orders'
+why = "The loading state is tested at the component layer."
 
 [[content]]
 path = "src/components/OrderList.*.tsx"
 pattern = 'No orders yet'
+why = "The empty state is tested at the component layer."
 
 [[content]]
 path = "e2e/*.spec.ts"
 pattern = '/confirmation|Order placed'
+why = "The journey spec reaches the confirmation."
 
-# The loading state is reachable in a component test, so no browser spec asserts
-# it. The anchor pins the lookahead to the start of the file rather than to any
-# line, which is what makes it an absence over the whole spec.
 [[content]]
 path = "e2e/*.spec.ts"
 pattern = '(?<![\s\S])(?![\s\S]*Loading orders)'
+why = "The loading state is reachable in a component test, so no browser spec asserts it. The anchor pins the lookahead to the start of the file, which makes it an absence over the whole spec."

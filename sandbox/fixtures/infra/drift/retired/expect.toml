@@ -1,40 +1,27 @@
-# What `canon sync --check --json` reports on a target still holding the files the
-# seed folders replaced. Read by `canon sandbox check`. Patterns use TOML literal
-# strings so a regex needs no backslash escaping.
-#
-# The retired files appear in `paths` because a superseded entry queues no change.
-# Asserting they survive is the point: an absence check alone cannot tell a move
-# from a delete, and this class exists precisely so nothing deletes them.
+purpose = "canon sync --check --json names the files a seed folder replaced and leaves them on disk."
 
 paths = [
-  "drift-report.json",
-  ".claude/TASKS.md",
-  ".claude/CONTEXT.md",
-  ".claude/TASKS-ARCHIVE.md",
+  { path = "drift-report.json", why = "The report the command wrote, which every content entry reads." },
+  { path = ".claude/TASKS.md", why = "A superseded entry queues no change, so the file survives. An absence check alone cannot tell a move from a delete." },
+  { path = ".claude/CONTEXT.md", why = "Survives for the same reason as TASKS.md." },
+  { path = ".claude/TASKS-ARCHIVE.md", why = "Survives for the same reason as TASKS.md." },
 ]
 
-# The suffixed variant stays unmatched, which is the accepted limit of a stem
-# rule rather than a defect. Kept as a reader's check because a pattern matching
-# the filename would also match the TASKS.md entry beside it.
-#
-# Declared above the content blocks deliberately. A bare key below a `[[content]]`
-# header binds to that table rather than to the document, which is how an arm
-# ships manual entries that never reach the unchecked count.
 manual = [
   "`.claude/TASKS-ARCHIVE.md` appears in the report only as a file on disk, never in the superseded list. Semantic: the distinction is which array the name sits in, and a bare filename pattern passes from either",
 ]
 
-# The two retired artifacts are named, each against the folder that replaced it.
-# This pair is the arm's reason to exist: nothing detected either before, because
-# the relocation walk reads a stamp and no real target carries one.
 [[content]]
 path = "drift-report.json"
 pattern = '"rel": "\.claude/TASKS\.md"'
+why = "Names the retired task file. Nothing detected it before, since the relocation walk reads a stamp and no real target carries one."
 
 [[content]]
 path = "drift-report.json"
 pattern = '"replacedBy": "\.canon/tasks"'
+why = "Names the folder that replaced it."
 
 [[content]]
 path = "drift-report.json"
 pattern = '"rel": "\.claude/CONTEXT\.md"'
+why = "Names the second retired artifact against its replacement."

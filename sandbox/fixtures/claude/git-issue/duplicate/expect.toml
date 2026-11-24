@@ -1,19 +1,19 @@
-# What a correct headless `/git-issue` run leaves behind on the duplicate arm.
-# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
-# needs no backslash escaping.
-
-# Every top-level key sits above the first `[[content]]` block, since a bare key
-# below one belongs to that table in TOML.
+purpose = "A headless /git-issue run that finds a possible duplicate files nothing and reports it."
 
 max_turns = 20
 
-# The body and comment files go through `.canon/tmp/issue/`, which the skill
-# removes, and a headless match files nothing, so the folder never stays.
-absent = [".canon/tmp/issue"]
+absent = [
+  { path = ".canon/tmp/issue", why = "The body and comment files go through this folder, which the skill removes, and a headless match files nothing, so the folder never stays." },
+]
 
-write_scope = [".canon/tmp/issue/**"]
+write_scope = [
+  { path = ".canon/tmp/issue/**", why = "The skill body and comment files." },
+]
 
-reply = ["Not filed", "Possible duplicate"]
+reply = [
+  { text = "Not filed", why = "The run states it filed nothing." },
+  { text = "Possible duplicate", why = "The run names the match as the reason." },
+]
 
 manual = [
   "No second issue is open on the anchor for the seeded defect. Unwired: `gh issue list --search 'fmt:write in:title,body' --state open` lists the seeded issue alone when it holds, and `--label dedupe-fixture` scopes it to this arm.",

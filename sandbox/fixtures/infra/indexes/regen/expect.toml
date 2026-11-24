@@ -1,25 +1,23 @@
-# What `canon indexes regen` leaves behind against a flat folder of two
-# frontmatter-bearing siblings. Read by `canon sandbox check`.
+purpose = "canon indexes regen against a flat folder of two frontmatter-bearing siblings rewrites the stale index."
 
-paths = ["docs/index.md"]
-absent = []
+paths = [{ path = "docs/index.md", why = "The index the walk rewrote." }]
 
-manual = []
-
-# The seeded placeholder heading is gone, proving the walker rewrote the file
-# rather than leaving the stale content the sandbox seeds it with.
 [[content]]
 path = "docs/index.md"
 pattern = '^# Docs$'
+why = "The seeded placeholder heading is gone, which proves the walker rewrote the file rather than leaving the stale content the sandbox seeds."
 
 [[content]]
 path = "docs/index.md"
 pattern = 'Sample folder index for sandbox'
+why = "The folder's description is carried into the rewritten index."
 
 [[content]]
 path = "docs/index.md"
 pattern = '\[Alpha\]\(alpha\.md\): First sample entry'
+why = "The first sibling is listed with its description."
 
 [[content]]
 path = "docs/index.md"
 pattern = '\[Beta\]\(beta\.md\): Second sample entry'
+why = "The second sibling is listed with its description."
