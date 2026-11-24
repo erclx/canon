@@ -105,7 +105,16 @@ The deny list carries what a pass must never run, and a deny wins over any allow
 
 A pass still prompts for `gh api`, `curl`, and `canon pr preview --check` under a mode that asks for every command. `canon migrate session-defaults --write` adds the absent entries to an existing target, and `canon claude sync` warns while any is missing.
 
+### The plan guard
+
 `plan-guard.sh` blocks a new plan under `.canon/plans/` until `plan-feature` is invoked for it, since a heredoc never loads the plan rule. It passes when the transcript holds no assistant tool call it can parse, though a format change confined to the Skill call still blocks. It logs each decision under `.canon/tmp/hooks/plan-guard/`.
+
+That log also names each plan's owner, the session on the last `pass` line for it, and guards a write onto an existing plan.
+
+- Another session's write is refused until its transcript holds a `Read` of the plan stamped at or after the owner's time. The refusal names the owner and that time.
+- The owner amends freely, and a plan no `pass` line names passes.
+- A missing or unreadable session id, transcript, or log passes, and so does a transcript where no tool call parses.
+- Each judged amendment logs `amend` or `block-owned` with its `owner=` and `owned_at=`.
 
 ## User settings
 
