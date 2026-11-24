@@ -220,6 +220,22 @@ export function reelPath(
   return `pr-${number}/${head.slice(0, SHORT_HEAD_LENGTH)}/${pass}/reel-${width}.webp`
 }
 
+/** A reel path `reelPath` writes, or the bare `reel.webp` one written before reels carried a width. */
+const REEL_PATH =
+  /^pr-\d+\/[0-9a-f]+\/(\d{8}T\d{6}Z)\/reel(?:-([1-9]\d*))?\.webp$/
+
+/** The widest reel of the newest pass among the paths, a bare `reel.webp` reading as 1280, or undefined when none is a reel. */
+export function newestReelPath(paths: readonly string[]): string | undefined {
+  const reels = paths.flatMap((path) => {
+    const match = REEL_PATH.exec(path)
+    return match?.[1] === undefined
+      ? []
+      : [{ path, pass: match[1], width: Number(match[2] ?? 1280) }]
+  })
+  reels.sort((a, b) => a.pass.localeCompare(b.pass) || a.width - b.width)
+  return reels.at(-1)?.path
+}
+
 /** The reel's bytes, refusing a file that is absent, not a WebP, or past the cap. */
 export async function readReel(path: string): Promise<ReelRead> {
   const bytes = await readFile(path).catch(() => undefined)

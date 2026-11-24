@@ -13,6 +13,7 @@ import {
   isFrameHead,
   isFramePass,
   isFrameTheme,
+  newestReelPath,
   type PullClosure,
   pruneFrames,
   pruneFramesWithLegacy,
@@ -767,6 +768,26 @@ describe('pushFrame with a reel', () => {
       `pr-12/abcdef0/${PASS}/reel-1280.webp`,
       `pr-12/abcdef0/${PASS}/reel-390.webp`,
     ])
+  })
+
+  it('should pick the widest reel of the newest pass, reading a bare reel.webp as 1280', () => {
+    const paths = [
+      'pr-12/abcdef0/20261001T100000Z/reel-1536.webp',
+      'pr-12/abcdef0/20261002T100000Z/reel.webp',
+      'pr-12/abcdef0/20261002T100000Z/reel-390.webp',
+      'pr-12/abcdef0/20261002T100000Z/box-1.png',
+    ]
+
+    expect(newestReelPath(paths)).toBe(
+      'pr-12/abcdef0/20261002T100000Z/reel.webp',
+    )
+    expect(
+      newestReelPath([
+        ...paths,
+        'pr-12/abcdef0/20261002T100000Z/reel-1536.webp',
+      ]),
+    ).toBe('pr-12/abcdef0/20261002T100000Z/reel-1536.webp')
+    expect(newestReelPath(['pr-12/abcdef0/x/box-1.png'])).toBeUndefined()
   })
 
   it('should match the path reelPath names', () => {
