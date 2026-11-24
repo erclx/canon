@@ -162,10 +162,8 @@ interface GitWriteResult {
 const STDERR_DRAIN_MS = 200
 
 /**
- * The environment a retried write runs under. Only the message language is
- * pinned, so a hook the write fires keeps the caller's character set and
- * collation. `LC_ALL` and `LANGUAGE` are dropped because either one overrides
- * `LC_MESSAGES`.
+ * Pins only the message language, so a hook keeps the caller's charset. `LC_ALL`
+ * and `LANGUAGE` are dropped since either overrides `LC_MESSAGES`.
  */
 function englishMessagesEnv(): Record<string, string> {
   const { LC_ALL: _all, LANGUAGE: _language, ...rest } = gitEnv()
@@ -173,11 +171,9 @@ function englishMessagesEnv(): Record<string, string> {
 }
 
 /**
- * Runs a git write with its output and any hook's on stderr, so a caller's
- * stdout stays a clean record. The stderr is also returned, in git's English
- * text, since a retry keys on its wording. The write ends when git exits, with
- * a short drain for what it already wrote, since a hook's background child can
- * hold the pipe open long after git is gone.
+ * Runs a git write with its output on stderr, so a caller's stdout stays a clean
+ * record, and returns that stderr in English for the retry to read. It ends at
+ * git's exit plus a short drain, since a hook's child can hold the pipe open.
  */
 function gitWrite(
   cwd: string,
