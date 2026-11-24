@@ -73,7 +73,7 @@ Holds the standard for what a rule states, being its shape limits, content test,
 
 ### `internal/`
 
-Holds `governance.toml`, which names the one stack and extras this repository consumes, and `rules/` for toolkit authoring alone.
+Holds `governance.toml`, which names the one stack and extras this repository consumes, so the regen never reads `.claude/rules/` to decide what it holds and a deliberate addition shows in a diff, and `rules/` for toolkit authoring alone.
 
 - `canon gov regen` resolves the record through the install machinery into `.claude/rules/canon/`, and `internal/rules/` installs beside it into `.claude/rules/internal/`
 - A new rule must be named in a stack, the record's `add` list, or `internal/rules/`, since the drift assertion passes on a rule nothing names
