@@ -308,7 +308,7 @@ export function registerEvidence(pr: Command): void {
         'The ok, no-evidence, and --check records carry `uncaptured`, the',
         'painted paths the pull request changed while no evidence image did, in',
         "a project whose base branch's tree holds one. Painted is the set",
-        '`canon/config/painted.json` tunes, minus any path under an evidence/',
+        'the [painted] table of `canon/config/app.toml` tunes, minus any path under an evidence/',
         'segment or canon/design/, and any changed evidence image empties the',
         'list. A path the pull request deletes is left out, and a deleted',
         'evidence image empties nothing, since a deletion captures nothing.',

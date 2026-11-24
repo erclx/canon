@@ -109,6 +109,17 @@ describe('canon pr drive-copy', () => {
     ).toBe('{"x":0}')
   })
 
+  it('should copy the folders the [preview] table of app.toml declares', async () => {
+    writeRepoFile('canon/config/app.toml', '[preview]\nwrites = ["board"]\n')
+
+    const outcome = await runDriveCopy(['7'])
+
+    expect(outcome.record).toMatchObject({
+      reason: 'copied',
+      copied: ['board'],
+    })
+  })
+
   it('should keep a declared keep path and a root-level file through a --baseline rebuild', async () => {
     writeRepoFile(
       'canon/config/preview.json',

@@ -1,15 +1,11 @@
-import { existsSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
-
-/** Where a project adds to or trims the default list of painted paths. */
-export const PAINTED_CONFIG_REL = join('canon', 'config', 'painted.json')
+import { readAppTable } from '@/config/app'
 
 export interface PaintedPatterns {
   /** A path matching any of these is painted unless `unpainted` also matches. */
   readonly painted: readonly string[]
   readonly unpainted: readonly string[]
   /**
-   * The project's own `painted` globs. A path matching one paints even inside
+   * The project's own `paths` globs under `[painted]`. A path matching one paints even inside
    * a default fixture folder, so a target serving a real page from one keeps
    * its capture gate. Test, story, and project exclusions still apply.
    */
@@ -85,27 +81,27 @@ function strings(value: unknown): string[] {
 }
 
 /**
- * The default list plus the project's own, read from `canon/config/painted.json`
- * as `{ "painted", "unpainted", "reelInputs" }`. A file that is absent or does
- * not parse leaves the default, since a typo must not make every push unpainted.
+ * The default list plus the project's own, read from the `[painted]` table of
+ * `canon/config/app.toml` as `paths`, `exclude`, and `reel-inputs`, or from
+ * `painted.json` before it. A table that is absent or does not parse leaves the
+ * default, since a typo must not make every push unpainted.
  */
 export function loadPaintedPatterns(root: string): PaintedPatterns {
-  const path = join(root, PAINTED_CONFIG_REL)
-  if (!existsSync(path)) return DEFAULT_PAINTED
-
-  try {
-    const parsed: unknown = JSON.parse(readFileSync(path, 'utf8'))
-    if (typeof parsed !== 'object' || parsed === null) return DEFAULT_PAINTED
-    const { painted, unpainted, reelInputs } = parsed as Record<string, unknown>
-    const inputs = stringList(reelInputs)
-    return {
-      painted: [...DEFAULT_PAINTED.painted, ...strings(painted)],
-      unpainted: [...DEFAULT_PAINTED.unpainted, ...strings(unpainted)],
-      repainted: strings(painted),
-      ...(inputs !== undefined && { reelInputs: inputs }),
-    }
-  } catch {
-    return DEFAULT_PAINTED
+  const read = readAppTable(root, 'painted')
+  if (read.kind !== 'table') return DEFAULT_PAINTED
+  const parsed = read.value
+  if (typeof parsed !== 'object' || parsed === null) return DEFAULT_PAINTED
+  const {
+    paths,
+    exclude,
+    'reel-inputs': reelInputs,
+  } = parsed as Record<string, unknown>
+  const inputs = stringList(reelInputs)
+  return {
+    painted: [...DEFAULT_PAINTED.painted, ...strings(paths)],
+    unpainted: [...DEFAULT_PAINTED.unpainted, ...strings(exclude)],
+    repainted: strings(paths),
+    ...(inputs !== undefined && { reelInputs: inputs }),
   }
 }
 

@@ -1,15 +1,11 @@
-import { existsSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { readAppTable } from '@/config/app'
 
 /** The key listing folders whose listeners skip the health paths. */
 export const PAGE_ONLY_KEY = 'page-only'
 
-/** Where a project declares what `canon pr local` checks beyond the page. */
-export const LOCAL_CONFIG_REL = join('canon', 'config', 'local.toml')
-
 /**
  * The health paths a project declared, with the folders whose listeners skip
- * them. `none` is an absent file or an empty `health = []`, and `invalid` exists
+ * them. `none` is an absent table or an empty `paths = []`, and `invalid` exists
  * but cannot be used, so it refuses rather than fall back to the page-only probe.
  */
 export type HealthDeclaration =
@@ -48,27 +44,36 @@ function toFolder(entry: unknown): string | undefined {
   return segments.join('/')
 }
 
+/**
+ * Reads the `[health]` table of `canon/config/app.toml`, or `local.toml` before
+ * it, where `paths` was spelled `health`.
+ */
 export function readHealthPaths(root: string): HealthDeclaration {
-  const path = join(root, LOCAL_CONFIG_REL)
-  if (!existsSync(path)) return { kind: 'none', pageOnly: [] }
-
-  let parsed: Record<string, unknown>
-  try {
-    parsed = Bun.TOML.parse(readFileSync(path, 'utf8')) as Record<
-      string,
-      unknown
-    >
-  } catch {
-    return { kind: 'invalid', reason: `${LOCAL_CONFIG_REL} is not valid TOML` }
+  const read = readAppTable(root, 'health')
+  if (read.kind === 'absent') return { kind: 'none', pageOnly: [] }
+  if (read.kind === 'unparsable') {
+    return { kind: 'invalid', reason: `${read.source} ${read.detail}` }
   }
+  const { source, spell } = read
+  const parsed: Record<string, unknown> =
+    typeof read.value === 'object' &&
+    read.value !== null &&
+    !Array.isArray(read.value)
+      ? (read.value as Record<string, unknown>)
+      : {}
 
-  const hasHealth = 'health' in parsed
+  const invalidHealth = (): HealthDeclaration => ({
+    kind: 'invalid',
+    reason: `${source} needs ${spell('paths')} as a list of paths, each starting with a single /`,
+  })
+
+  const hasPaths = 'paths' in parsed
   const hasPageOnly = PAGE_ONLY_KEY in parsed
-  if (!hasHealth && !hasPageOnly) return invalidHealth()
+  if (!hasPaths && !hasPageOnly) return invalidHealth()
 
   let paths: readonly string[] = []
-  if (hasHealth) {
-    const declared = parsed.health
+  if (hasPaths) {
+    const declared = parsed.paths
     if (!Array.isArray(declared) || !declared.every(isLocalPath)) {
       return invalidHealth()
     }
@@ -82,7 +87,7 @@ export function readHealthPaths(root: string): HealthDeclaration {
     if (!Array.isArray(declared) || folders.includes(undefined)) {
       return {
         kind: 'invalid',
-        reason: `${LOCAL_CONFIG_REL} needs ${PAGE_ONLY_KEY} as a list of folders relative to the repository, with no leading / and no ..`,
+        reason: `${source} needs ${spell(PAGE_ONLY_KEY)} as a list of folders relative to the repository, with no leading / and no ..`,
       }
     }
     pageOnly = folders as string[]
@@ -91,11 +96,4 @@ export function readHealthPaths(root: string): HealthDeclaration {
   return paths.length === 0
     ? { kind: 'none', pageOnly }
     : { kind: 'paths', paths, pageOnly }
-}
-
-function invalidHealth(): HealthDeclaration {
-  return {
-    kind: 'invalid',
-    reason: `${LOCAL_CONFIG_REL} needs health as a list of paths, each starting with a single /`,
-  }
 }
