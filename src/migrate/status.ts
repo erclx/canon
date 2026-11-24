@@ -19,6 +19,7 @@ export const MIGRATIONS: readonly Migration[] = [
   { name: 'rename', flags: ['--scope', 'target'] },
   { name: 'skill-names', flags: [] },
   { name: 'surface-roots', flags: [] },
+  { name: 'app-config', flags: [] },
   { name: 'session-defaults', flags: [] },
 ]
 

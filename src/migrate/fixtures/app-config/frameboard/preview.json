@@ -1,0 +1,5 @@
+{
+  "writes": ["test/fixtures/boards/basic"],
+  "keep": ["test/fixtures/boards/basic/.run"],
+  "seed": ["bun", "scripts/drive-seed.ts"]
+}

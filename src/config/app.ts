@@ -166,6 +166,11 @@ export function readAppTable(root: string, table: AppTable): AppTableRead {
     }
   }
 
+  return readLegacyTable(root, table)
+}
+
+/** The table as its old file alone reads, for a project that has not moved and for the move's own read-back. */
+export function readLegacyTable(root: string, table: AppTable): AppTableRead {
   const legacy = LEGACY_APP_FILES[table]
   const legacyPath = join(root, legacy.rel)
   if (!existsSync(legacyPath)) return { kind: 'absent' }

@@ -1,0 +1,5 @@
+{
+  "writes": [".wrangler/state"],
+  "env": "LICHTRINH_STATE_ROOT",
+  "seed": ["bun", "scripts/seed.ts"]
+}

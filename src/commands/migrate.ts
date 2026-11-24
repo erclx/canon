@@ -3,6 +3,7 @@ import { join, resolve } from 'node:path'
 import type { Command } from 'commander'
 import { cliRunner } from '@/gate/sequencer'
 import { listRepositoryFiles } from '@/git/files'
+import { APP_CONFIG_REL } from '@/config/app'
 import { indexSourceRules } from '@/gov/adapter'
 import { applyRecordsMove, applyRename, readSources } from '@/migrate/apply'
 import { isToolkitOwned, planRename, type RenamePlan } from '@/migrate/plan'
@@ -36,6 +37,11 @@ import {
   SKILL_NAME_MAP,
   SKILL_NAME_RULES,
 } from '@/migrate/skill-names'
+import {
+  applyAppConfig,
+  planAppConfig,
+  scanAppConfigCitations,
+} from '@/migrate/app-config'
 import { readMigrationStatus, statusExitCode } from '@/migrate/status'
 import {
   planSurfaceRootsMove,
@@ -1002,6 +1008,88 @@ function toSessionDefaultsRecord(
   }
 }
 
+interface AppConfigOptions {
+  readonly json?: boolean
+  readonly write?: boolean
+  readonly root?: string
+}
+
+/**
+ * Moves the old app config files into `canon/config/app.toml`. It runs in the
+ * toolkit too, since the toolkit keeps its own painted globs there.
+ */
+async function runAppConfig(opts: AppConfigOptions): Promise<number> {
+  const root = resolve(opts.root ?? process.cwd())
+
+  const mismatch = checkoutMismatchWarning(process.cwd())
+  if (mismatch !== undefined) logWarn(mismatch)
+
+  const plan = planAppConfig(root)
+  const citations =
+    plan.kind === 'planned' && plan.moves.length > 0
+      ? await scanAppConfigCitations(root)
+      : []
+  const write = opts.write === true && plan.kind === 'planned'
+
+  if (opts.json) {
+    process.stdout.write(
+      `${JSON.stringify(
+        plan.kind === 'refused'
+          ? {
+              ok: false,
+              wrote: false,
+              reason: plan.reason,
+              message: plan.message,
+            }
+          : {
+              ok: true,
+              wrote: write && plan.moves.length > 0,
+              path: APP_CONFIG_REL,
+              moves: plan.moves,
+              citations: citations ?? null,
+            },
+      )}\n`,
+    )
+  }
+
+  if (plan.kind === 'refused') {
+    logError(plan.message)
+    return 1
+  }
+
+  if (plan.moves.length === 0) {
+    logInfo('No old app config file, so there is nothing to move.')
+    return 0
+  }
+
+  for (const move of plan.moves) {
+    logAdd(`[${move.table}] from ${move.from}`)
+  }
+  if (citations === undefined) {
+    logWarn(
+      'Git could not be read, so no citation of the old files was looked for.',
+    )
+  } else if (citations.length > 0) {
+    logWarn(
+      `${plural(citations.length, 'tracked line')} still name an old file. Reword each by hand:`,
+    )
+    for (const citation of citations) {
+      logInfo(`${citation.path}:${citation.line}`)
+    }
+  }
+
+  if (!write) {
+    logWarn('Nothing was written. Pass --write to apply this plan.')
+    return 2
+  }
+
+  applyAppConfig(root, plan)
+  logStep(
+    `Wrote ${APP_CONFIG_REL} and removed ${plural(plan.moves.length, 'old file')}.`,
+  )
+  return 0
+}
+
 interface StatusOptions {
   readonly json?: boolean
   readonly root?: string
@@ -1482,6 +1570,64 @@ export function register(program: Command): void {
     )
     .action(async (opts: SessionDefaultsOptions) => {
       process.exitCode = await runSessionDefaults(opts)
+    })
+
+  migrate
+    .command('app-config')
+    .description('Move the app config files into canon/config/app.toml')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .option('--write', 'Apply the plan rather than reporting it')
+    .option(
+      '--root <path>',
+      'Project root, defaulting to the working directory',
+    )
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Moves each old file under canon/config/ into its table of app.toml,',
+        'in this order:',
+        '  app-drive.toml       [drive], its [targets.<name>] tables becoming',
+        '                       [drive.targets.<name>]',
+        '  preview.json         [preview]',
+        '  local.toml           [health], with health becoming paths',
+        '  painted.json         [painted], with painted, unpainted, and',
+        '                       reelInputs becoming paths, exclude, and',
+        '                       reel-inputs',
+        '  device-classes.toml  [device-classes], as written',
+        '',
+        'A TOML file moves as text, so its comments stay beside their keys, and',
+        'a JSON file is written as TOML. An existing app.toml keeps its text,',
+        'and the new tables follow it. Each moved table is read back and',
+        'compared with what its old file reads as before anything is written,',
+        'and --write then removes the old files.',
+        '',
+        'The move rewrites no citation. It lists each tracked line naming an',
+        'old file, since a citation usually names a key or a shape the move',
+        'changes and needs a person to reword it. The readers still fall back',
+        'to an old file a project has not moved.',
+        '',
+        'Refuses, writing nothing, when app.toml or an old file does not',
+        'parse, when app.toml already holds a table whose old file still',
+        'exists, when a JSON value has no TOML form, or when a moved table would',
+        'read differently.',
+        '',
+        'Exit codes:',
+        '  0  nothing to move, or --write applied the plan',
+        '  1  refused: a file that does not parse, a table held twice, a',
+        '     value TOML cannot hold, or a read-back that differs',
+        '  2  a plan exists and --write was not passed',
+        '',
+        'Examples:',
+        '  canon migrate app-config',
+        '  canon migrate app-config --write',
+        '  canon migrate app-config --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (opts: AppConfigOptions) => {
+      process.exitCode = await runAppConfig(opts)
     })
 
   migrate
