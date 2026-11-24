@@ -87,7 +87,7 @@ The skills and rules around the plugin each own one slice.
 - `docs/workflow/` owns the skill map a coverage claim is measured against, one row per skill
 - `.claude/skills/` owns the toolkit-internal `internal-*` skills, covered in `canon/context/workflow/internal-skills.md`
 - `sandbox/claude/` owns the per-skill scenarios that provision a seeded project for a headless run
-- `src/labels/` and `src/feedback/` own the verbs `git-pr`, `git-issue`, `canon-feedback`, and `session-retro` call, labelling from `canon/config/pr-labels.toml` and filing or listing toolkit issues. `canon labels audit` names a surface neither table reaches and never gates, since whether it earns a label is a judgment, so the fix is a prefix on the row owning its subject or a `[declined]` row naming why. A declined path is a decision and an unlisted one a gap, which is why `[declined]` is data the audit reads. The plugin manifest sits under `release-managed`, since every change to it has been a release.
+- `src/labels/` and `src/feedback/` own the verbs `git-pr`, `git-issue`, `canon-feedback`, and `session-retro` call, labelling from `canon/config/pr-labels.toml` and filing or listing toolkit issues
 
 ## Gotchas
 
