@@ -1466,6 +1466,7 @@ describe('lift', () => {
         'not-filmed: the reel step was not run',
         'target-missing: beat 2: no match',
         'server-unreachable: connection refused',
+        'deferred: behind #3461',
       ])('should refuse reel-unsettled on the skip %s', async (reelSkip) => {
         const { api } = makeApi({
           evidence: { ...drivable, reelSkip },
@@ -1636,6 +1637,7 @@ describe('lift', () => {
         'target-ambiguous: beat 2: text=New file',
         ' target-missing ',
         'no-server: unreachable',
+        'deferred: behind #3461',
       ])(
         'should refuse a reel waiver over the skip %s, naming the waiver',
         async (reelSkip) => {
