@@ -3,6 +3,7 @@ import { resolve } from 'node:path'
 import { type HeadRefusal, resolveTip } from '@/pr/head'
 import {
   DEFAULT_WAIT_SECONDS,
+  readBaseReading,
   readChangedPaths,
   readRebasedPaths,
   readUnmergedCommits,
@@ -13,7 +14,9 @@ import {
   readReviewState,
   type ReviewStateApi,
   type ReviewStateRecord,
+  type StandingWait,
   waitForReviews,
+  waitForStanding,
 } from '@/pr/review-state'
 import { intro, logInfo, logStep, logWarn, outro } from '@/cli/ui'
 import {
@@ -23,6 +26,7 @@ import {
   gitRunner,
   listReviews,
   readIdentity,
+  readPull,
   refReader,
   refuseWith,
   refusePull,
@@ -32,6 +36,18 @@ import { LIFT_REFUSALS, readEvidenceGate } from '@/commands/pr/gates'
 
 interface ReviewStateOptions extends ReadOptions {
   readonly wait?: string
+  readonly waitStanding?: string
+}
+
+const WAIT_STANDING_REFUSALS = {
+  shape: '--wait-standing takes a whole number of seconds, zero or more.',
+  both: '--wait and --wait-standing are two waits with different endings, so name one.',
+} as const
+
+/** A whole number of seconds, undefined when the flag was not given, null when it is malformed. */
+function parseSeconds(value: string | undefined): number | undefined | null {
+  if (value === undefined) return undefined
+  return /^\d+$/.test(value) ? Number(value) : null
 }
 
 export function registerReviewState(pr: Command): void {
@@ -46,6 +62,10 @@ export function registerReviewState(pr: Command): void {
     .option(
       '--wait <seconds>',
       `Hold until a pass covers the tip in every bound family, default ${DEFAULT_WAIT_SECONDS}`,
+    )
+    .option(
+      '--wait-standing <seconds>',
+      'Hold until the base moves a path the branch writes, the two conflict, or the pull request closes',
     )
     .addHelpText(
       'after',
@@ -117,6 +137,20 @@ export function registerReviewState(pr: Command): void {
         '`waitedSeconds`. A wait past 600 seconds outlasts a foreground shell',
         'call, so run it in the background.',
         '',
+        '`--wait-standing <seconds>` is the wait a worker holds once both',
+        'families are covered, until its branch merges. It reads the base',
+        'through a local `git fetch` and `git merge-tree`, the standing',
+        '`canon pr lift` gates on, at the same growing gap, and reads no',
+        'review. The pull request state is read only before an ending, since',
+        'a squash merge reads as stale against the base it landed on. It',
+        'refuses beside `--wait`. The record carries `head`, `reason`, and',
+        '`waitedSeconds` in place of the review fields:',
+        '  stale     the base changed a path the branch writes, named in `moved`',
+        '  conflict  the branch no longer merges cleanly onto the base',
+        '  closed    the pull request merged or closed, so nothing is owed',
+        '  timeout   the deadline passed with the base `standing` still',
+        '            `fresh` or `unknown`, so wait again',
+        '',
         'Refusals, read off `reason`:',
         '  ambiguous-pull    two open pull requests share the branch against',
         '                    different bases, so name a number',
@@ -134,11 +168,12 @@ export function registerReviewState(pr: Command): void {
         '                    refused before any call to GitHub',
         '  no-pull           no pull request carries the number named',
         '  no-object-head    the pull request object reported no head commit',
-        '  bad-wait          --wait takes a whole number of seconds',
+        '  bad-wait          --wait and --wait-standing each take a whole',
+        '                    number of seconds, and only one is named',
         '',
         'Exit codes:',
-        '  0  the thread was read, whether it carries a pass or not, or the',
-        '     wait ended covered',
+        '  0  the thread was read, whether it carries a pass or not, the',
+        '     wait ended covered, or the standing wait ended on an event',
         '  1  refused, with the reason on stderr or in the JSON record, or the',
         '     wait reached its deadline as `timeout`',
         '',
@@ -146,6 +181,7 @@ export function registerReviewState(pr: Command): void {
         '  canon pr review-state',
         '  canon pr review-state 1341 --json',
         '  canon pr review-state 1341 --wait 1200 --json',
+        '  canon pr review-state 1341 --wait-standing 1200 --json',
         '',
       ].join('\n'),
     )
@@ -163,12 +199,16 @@ async function runReviewState(
 
   intro('canon pr review-state')
 
-  let waitSeconds: number | undefined
-  if (opts.wait !== undefined) {
-    if (!/^\d+$/.test(opts.wait)) {
-      return refuseWith('bad-wait', LIFT_REFUSALS['bad-wait'], emitJson, root)
-    }
-    waitSeconds = Number(opts.wait)
+  const waitSeconds = parseSeconds(opts.wait)
+  if (waitSeconds === null) {
+    return refuseWith('bad-wait', LIFT_REFUSALS['bad-wait'], emitJson, root)
+  }
+  const standingSeconds = parseSeconds(opts.waitStanding)
+  if (standingSeconds === null) {
+    return refuseWith('bad-wait', WAIT_STANDING_REFUSALS.shape, emitJson, root)
+  }
+  if (waitSeconds !== undefined && standingSeconds !== undefined) {
+    return refuseWith('bad-wait', WAIT_STANDING_REFUSALS.both, emitJson, root)
   }
 
   if (Bun.which('gh') === null) {
@@ -218,6 +258,34 @@ async function runReviewState(
     now: () => Date.now(),
   }
 
+  if (standingSeconds !== undefined) {
+    const standing = await waitForStanding(
+      {
+        readTip: api.readTip,
+        readStanding: async (head) =>
+          base === undefined
+            ? { standing: 'unknown' }
+            : readBaseReading(
+                git,
+                Number(resolved.number),
+                head,
+                `origin/${base}`,
+              ),
+        readOpen: async () => {
+          const pull = await readPull(root, resolved.number)
+          return pull.kind === 'read' ? pull.row.state === 'open' : undefined
+        },
+        sleep: api.sleep,
+        now: api.now,
+      },
+      { waitSeconds: standingSeconds },
+    )
+    if (standing.kind === 'refused') {
+      return refuseWith(failure, PULL_REFUSALS[failure], emitJson, root)
+    }
+    return reportStanding(Number(resolved.number), standing, emitJson, root)
+  }
+
   const painted = loadPaintedPatterns(root)
   const wait =
     waitSeconds === undefined
@@ -260,6 +328,48 @@ async function runReviewState(
   }
 
   return waited?.reason === 'timeout' ? 1 : 0
+}
+
+type StandingEnding = Exclude<StandingWait, { readonly kind: 'refused' }>
+
+const STANDING_STEPS: Record<StandingEnding['reason'], string> = {
+  stale: 'Stale',
+  conflict: 'Conflict',
+  closed: 'Closed',
+  timeout: 'Timeout',
+}
+
+function standingLine(ending: StandingEnding): string {
+  const after = `after ${ending.waitedSeconds}s`
+  switch (ending.reason) {
+    case 'stale':
+      return `the base moved ${ending.moved.join(', ')} under ${ending.head.slice(0, 8)} ${after}, so rebase`
+    case 'conflict':
+      return `${ending.head.slice(0, 8)} no longer merges cleanly onto the base ${after}, so rebase`
+    case 'closed':
+      return `the pull request closed ${after}, so there is nothing to keep current`
+    case 'timeout':
+      return `the base standing read ${ending.standing} at ${ending.head.slice(0, 8)} for ${ending.waitedSeconds}s, so wait again`
+  }
+}
+
+/** Exits 1 on `timeout` alone, as `--wait` does, since every other ending is the event waited on. */
+function reportStanding(
+  number: number,
+  ending: StandingEnding,
+  emitJson: boolean,
+  root: string,
+): number {
+  logStep(STANDING_STEPS[ending.reason])
+  if (ending.reason === 'timeout') logWarn(standingLine(ending))
+  else logInfo(standingLine(ending))
+  outro()
+
+  if (emitJson) {
+    const { kind: _kind, ...fields } = ending
+    process.stdout.write(`${JSON.stringify({ root, number, ...fields })}\n`)
+  }
+  return ending.reason === 'timeout' ? 1 : 0
 }
 
 function logReviewState(number: number, record: ReviewStateRecord): void {
