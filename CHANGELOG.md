@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.121.0](https://github.com/erclx/canon/compare/v5.120.0...v5.121.0) (2026-11-24)
+
+
+### Features
+
+* **design:** let a record declare the device classes it supports ([#3495](https://github.com/erclx/canon/issues/3495)) ([13c719d](https://github.com/erclx/canon/commit/13c719de1b78ea7ff37a8a8f30798742067818a0))
+* **feedback:** file retro picks on the board in the toolkit ([#3491](https://github.com/erclx/canon/issues/3491)) ([7f43363](https://github.com/erclx/canon/commit/7f4336337ddfaf786aa75f439e2935c7c5316216))
+* **take:** hold the camera wide under 768 by default ([#3494](https://github.com/erclx/canon/issues/3494)) ([da2c936](https://github.com/erclx/canon/commit/da2c936f3847d15bbdf97ba672c7f6436cecca3e))
+* **tooling:** split the web and reel references by concern ([#3492](https://github.com/erclx/canon/issues/3492)) ([48f4086](https://github.com/erclx/canon/commit/48f40864da54195525d65f57ec99ba9b936ef712))
+
+
+### Bug Fixes
+
+* **tasks:** keep an operator-word hold when plan-link moves a row ([#3496](https://github.com/erclx/canon/issues/3496)) ([8160484](https://github.com/erclx/canon/commit/8160484788922c252c838ed8dbf8921298f0f52c))
+
 ## [5.120.0](https://github.com/erclx/canon/compare/v5.119.0...v5.120.0) (2026-11-24)
 
 
