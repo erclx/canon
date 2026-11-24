@@ -1,35 +1,9 @@
-# Pull request domain labels.
-#
-# `git-pr` reads this file, matches the paths a branch changed against the
-# prefixes below, and applies every label that matches. A project without this
-# file gets no labels and no warning.
-#
-# Each label named here has to exist on the remote before the first run that
-# matches it. `canon labels sync` creates every one the remote lacks, coloring
-# each from a fixed palette in the order the rows appear below.
-#
-# A row may take the table form to choose its own color, such as
-# `cli = { paths = ["src/"], color = "1f6feb" }`. `canon labels sync --check`
-# reports a declared color the remote holds differently and never edits it.
-#
-# `canon labels audit` detects a surface neither table below reaches, so a
-# directory added after this census is named rather than merging bare. It runs
-# inside `canon audits` as well, and it reports without gating, since whether an
-# uncovered surface deserves a label is a judgment. The remedy it asks for is
-# manual either way: give the surface a prefix on the row that owns its subject,
-# or add it to `[declined]` with the reason it earns no label.
-# `claude/skills/git-pr/references/labels.md` carries the matching rule and the
-# declined-path rule, and it ships wherever this map does.
-#
-# Matching is prefix-anchored, so a `.claude/` path earns no row written for an
-# authoring root: `internal/rules/` never matches `.claude/rules/internal/`.
-# Every surface living only under a dotted folder carries its own prefix on the
-# row that owns its subject. `internal/` holds rules rather than a subject of its
-# own, so the `governance` row names its paths one by one.
+# Labels git-pr adds to a pull request, by path prefix.
+# Create them with canon labels sync. Every key: canon docs config
+# Matching is prefix-anchored, so a dotted folder needs its own prefix.
 
 [domains]
-# The plugin surface: shipped skills, toolkit-internal skills, and the
-# marketplace entry a consumer adds.
+# Shipped skills, internal skills, and the marketplace entry.
 skills = ["claude/skills/", ".claude/skills/", ".claude-plugin/"]
 governance = [
   "governance/",
@@ -38,12 +12,10 @@ governance = [
   "internal/governance.toml",
 ]
 tooling = ["tooling/"]
-# `scripts/core/` and `sandbox/` are left to the rows below, so a new
-# `scripts/` folder goes bare until the uncovered-surface check names it.
+# A new scripts/ folder goes bare until canon labels audit names it.
 cli = ["src/", "scripts/eval/"]
 sandbox = ["sandbox/", "src/sandbox/"]
-# `assets/loops/` holds the README's loops, so a change to them rides with the
-# README rather than merging bare.
+# assets/loops/ holds the README's loops, so it rides with the README.
 docs = [
   "docs/",
   "wiki/",
@@ -52,15 +24,10 @@ docs = [
   "examples/",
   "assets/loops/",
 ]
-# The canon.erclx.com landing page: its own Astro config, its own manual
-# typecheck path, its own Playwright e2e suite, and its own deploy workflow
-# (deploy-site.yml) building and shipping it independently of every row
-# above, which is what earns it a row of its own rather than riding with
-# docs or landing in [declined].
+# The landing page, built and deployed apart from every row above.
 web = ["web/"]
-# `scripts/core/` reaches the whole folder, maintenance scripts included, and
-# the two hook families enforce what the verify gate cannot. `.claude/settings.json`
-# registers those hooks, so it rides the same row.
+# The hooks enforce what the verify gate cannot, and settings.json
+# registers them, so both ride here.
 ci = [
   ".github/",
   "scripts/ci/",
@@ -69,13 +36,8 @@ ci = [
   ".claude/hooks/",
   ".claude/settings.json",
 ]
-# Internal narrative and the always-loaded record, which `docs` does not reach.
-# `assets/brand/` rides here rather than under `generated`,
-# since a mark under it is hand-authored source `canon/DESIGN.md`'s own
-# iconography field names, not a mechanical derivative of anything.
-# `canon/design/` rides beside `canon/DESIGN.md` as the record's other half,
-# its synced PNGs and kit included, rather than as `[declined]` generated
-# output, since its index is hand-written and an unlisted path reads as a gap.
+# The context entries and the design record, with the hand-drawn brand
+# marks and canon/design/, whose index is written by hand.
 context = [
   "canon/context/",
   "canon/REQUIREMENTS.md",
@@ -84,9 +46,8 @@ context = [
   "CLAUDE.md",
   "assets/brand/",
 ]
-# Repository configuration belonging to no domain, this map included. The
-# toolkit-owned folder takes a folder prefix rather than this file's own path,
-# so a second file landing beside it is labelled without another census.
+# Repository configuration belonging to no domain, this map included.
+# A folder prefix, so a new file in canon/config/ is labelled too.
 repo = [
   ".gitignore",
   "canon/config/",
@@ -96,36 +57,24 @@ repo = [
   "commitlint.config.test.ts",
 ]
 
-# Deliberately unlabelled: every release commit.
-#
-# These are data rather than prose because the check reads them. A path here is
-# a decision already taken and a path under neither table is a gap nobody has
-# gotten to, and a report that could not tell the two apart would be useful
-# about neither. Each key is the reason, and matching is prefix-anchored exactly
-# as it is above.
+# Paths deliberately left unlabelled, keyed by the reason.
 [declined]
-# Release automation opens its own pull request and applies its own label, so a
-# domain label here would give every release a subject it does not have.
-# `claude/.claude-plugin/plugin.json` moved on 53 commits over that span and
-# every one was a release, which is what settles it as release-managed rather
-# than as a plugin surface.
+# Release automation opens its own pull request and applies its own label.
+# Every change to the plugin manifest is a release.
 release-managed = [
   "CHANGELOG.md",
   "package.json",
   ".release-please-manifest.json",
   "claude/.claude-plugin/",
 ]
-# Each is rewritten by a command rather than authored, and it travels in the
-# commit that changed its source, which already carries that source's label. A
-# row over any of them adds a second label to a mechanical edit. An `assets/`
-# entry is a stem, so it covers the light sibling and the stamp.
+# Written by a command, riding in the commit that changed its source.
+# An assets/ entry is a stem, covering the light sibling and the stamp.
 generated = [
   "assets/evidence/catalog",
   "assets/evidence/home/",
   "canon/config/baseline.json",
 ]
-# Formatting configuration nobody reviews for behavior, and no row above owns
-# its subject.
+# Formatting configuration nobody reviews for behavior.
 formatting = [
   ".oxfmtrc.jsonc",
   ".prettierrc",

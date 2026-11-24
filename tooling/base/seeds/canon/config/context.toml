@@ -1,0 +1,10 @@
+# What canon context audit covers and gates. Every key: canon docs config
+
+# Code folders the context entries must cover. Without it, src.
+# roots = ["src"]
+
+# Context folders where a badly shaped entry fails the gate.
+# gated = ["canon/context/"]
+
+# Fail an entry past the line checkpoint.
+# gate-length = true

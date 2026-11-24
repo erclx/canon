@@ -290,6 +290,15 @@ describe('the context stage reads', () => {
     expect(declaresContextGate(root)).toBe(true)
   })
 
+  it('should read no opt-in from a file whose every key is commented out', () => {
+    write(
+      'canon/config/context.toml',
+      '# gated = ["canon/context/"]\n# gate-length = true\n',
+    )
+
+    expect(declaresContextGate(root)).toBe(false)
+  })
+
   it('should read no opt-in from gate-length set to false', () => {
     write('canon/config/context.toml', 'gate-length = false\n')
 

@@ -126,7 +126,10 @@ function writeGatedList(root: string, prefixes: readonly string[]): void {
   const lines = prefixes.map((each) => `  ${JSON.stringify(each)},`)
 
   mkdirSync(dirname(path), { recursive: true })
-  writeFileSync(path, `[markdown]\ngated = [\n${lines.join('\n')}\n]\n`)
+  writeFileSync(
+    path,
+    `# Markdown that fails the gate. Add a path with canon markdown gated add.\n[markdown]\ngated = [\n${lines.join('\n')}\n]\n`,
+  )
   if (mode !== undefined) chmodSync(path, mode)
 }
 

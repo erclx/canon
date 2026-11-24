@@ -39,7 +39,8 @@ canon context audit tooling/base/seeds --gate
 The coverage roots come from `roots` in `canon/config/context.toml`, a list of folders or globs such as `packages/*/src`.
 
 - Without the file the root defaults to `src` when that folder exists, and `roots = []` opts out
-- A file that is not valid TOML, or holds no list of strings under `roots`, gates under `--gate`
+- A file with no `roots` key declares nothing, so the commented starter keeps the `src` default
+- A file that is not valid TOML, or holds `roots` in another shape, gates under `--gate`
 - With no declaration and no `src/`, the audit reports no code root and never gates
 
 The shape kinds are `retired-section`, `gotcha-count`, `gotcha-heading`, `gotcha-paragraph`, `layout-heading`, `layout-bullets`, `layout-paragraphs`, and `layout-depth`. A shape break is any of these:
@@ -52,13 +53,7 @@ The development entry may carry a `Scripts` H3 exempt from both folder caps.
 
 **Project gates**
 
-Two optional keys in `canon/config/context.toml` turn the gate on for a project's own folders. A project that sets neither gates exactly as before.
-
-```toml
-roots = ["src"]
-gated = ["canon/context/"]
-gate-length = true
-```
+Two optional keys in `canon/config/context.toml`, `gated` and `gate-length`, turn the gate on for a project's own folders. A project that sets neither gates exactly as before. `canon docs config` lists every key in the file with its type and default.
 
 - `gated` lists path prefixes from the project root whose entries gate on a shape break
 - A declared list replaces the toolkit's own in `src/context/shape-gated.ts` rather than adding to it, and `gated = []` gates no folder

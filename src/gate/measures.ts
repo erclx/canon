@@ -19,6 +19,7 @@ import { familyKeys } from '@/claude/skills-families'
 import { listSkills } from '@/claude/skills-list'
 import { measureDesignProse } from '@/design/budget'
 import { APP_CONFIG_REL, readAppTable } from '@/config/app'
+import { CONFIG_DIR_REL, checkConfigFolder } from '@/config/check'
 import { readDeviceConfig } from '@/design/device-classes'
 import { DESIGN_DOCUMENT } from '@/design/regen'
 import { listRepositoryFiles } from '@/git/files'
@@ -307,6 +308,35 @@ export const designProse: Measure = async (ctx) => {
   if (emissions.length === 0)
     emissions.push(info('No design record to measure'))
   return { emissions }
+}
+
+/**
+ * Every file under `canon/config/` against the keys canon reads, so a misspelled key fails here rather than reading
+ * as absent. A file no reader reads warns, since deleting it changes nothing.
+ */
+export const configFiles: Measure = async (ctx) => {
+  const findings = checkConfigFolder(ctx.root)
+  const failures = findings.filter((finding) => finding.severity === 'fail')
+  const warnings = findings
+    .filter((finding) => finding.severity === 'warn')
+    .map((finding) => warn(finding.message))
+
+  if (failures.length > 0) {
+    return {
+      emissions: warnings,
+      failure: `${failures.map((finding) => finding.message).join(' ')} Every key: canon docs config`,
+    }
+  }
+  return {
+    emissions: [
+      ...warnings,
+      info(
+        existsSync(join(ctx.root, CONFIG_DIR_REL))
+          ? `Every key in ${CONFIG_DIR_REL} is one canon reads`
+          : `No ${CONFIG_DIR_REL}, so every setting is its default`,
+      ),
+    ],
+  }
 }
 
 const PROSE_DEVICE_LINE = /^\s*(?:[-*+]\s+)?Device classes:/im

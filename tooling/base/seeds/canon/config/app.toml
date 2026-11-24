@@ -1,0 +1,66 @@
+# How canon runs, checks, and reviews this app. Nothing is on until you
+# uncomment a table and its keys. Every key: canon docs config
+
+# How app-drive, ui-film, and review-ui start and open the app.
+# [drive]
+
+# The command that installs, builds, and serves the app.
+# launch = "bun run build && bun run preview"
+
+# A fixture path to load before serving.
+# data = "fixtures/demo"
+
+# Who uses the app. A drive runs every goal as each one.
+# personas = ["a person in the browser"]
+
+# The path or address that opens the app's start state.
+# access = "/"
+
+# Scenario files a drive runs first.
+# scripts = ["canon/drive/basics.md"]
+
+# Where a drive puts the frames of an undecided taste finding.
+# proposals = ".canon/picks"
+
+# The board project and home folder a drive draws in.
+# board-project = "drive-<nn>"
+# board-folder = "Drives"
+
+# Folders a running preview saves into, copied fresh for each review.
+# [preview]
+# writes = ["fixtures/demo"]
+
+# Paths inside writes that a rebuild leaves as the server wrote them.
+# keep = ["fixtures/demo/.run"]
+
+# The command that lays demo state into the copy.
+# seed = ["bun", "scripts/seed.ts"]
+
+# The variable the server reads for the copy's root.
+# env = "CANON_PREVIEW_ROOT"
+
+# A fresh server per review pass, and the port it takes.
+# serve = ["bun", "run", "preview"]
+# port = 4173
+
+# What must answer before a local preview link is posted.
+# [health]
+# paths = ["/api/health"]
+
+# Folders whose server has no health path.
+# page-only = ["web"]
+
+# Files that count as a visible change, and files that do not.
+# [painted]
+# paths = ["src/client/**/*.ts"]
+# exclude = ["src/client/**/fixtures.ts"]
+
+# Other files a filmed reel depends on.
+# reel-inputs = ["bun.lock"]
+
+# Screen sizes the app supports. Without this table, all three.
+# [device-classes]
+# default = ["phone", "tablet", "desktop"]
+
+# Why, required whenever default is set.
+# why = "Every surface is responsive"

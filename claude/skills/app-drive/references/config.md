@@ -21,18 +21,7 @@ board-folder = "Drives"
 
 ## Keys
 
-| Key             | Holds                                                                     |
-| --------------- | ------------------------------------------------------------------------- |
-| `launch`        | The shell command that installs, builds, and serves the app in a worktree |
-| `data`          | A fixture path inside the worktree to load before serving, if any         |
-| `personas`      | Who uses the app, each driven through every goal                          |
-| `scripts`       | Tracked scenario files, each run once per persona before any goal         |
-| `access`        | The path or address that opens the app in the state a pass starts from    |
-| `proposals`     | The folder for an undecided taste finding's frames and a fallback mock    |
-| `board-project` | The board project a drive draws in, where `<nn>` is the intake ordinal    |
-| `board-folder`  | The board's home folder the drive's project files under                   |
-
-Some of the keys carry a reading the table cannot hold.
+`canon docs config` lists every `[drive]` key with its type and default. The bullets below carry what a drive does with them that a key list cannot hold.
 
 - `launch` runs from the worktree root and names the port it serves on, so `canon pr local --root` finds it
 - `personas` covers an agent or API caller as well as a person in the UI, when the app has one
@@ -86,7 +75,7 @@ personas = ["a developer reading the landing page"]
 board-project = "landing-<nn>"
 ```
 
-A `[drive.targets.<name>]` table takes the keys above and one more.
+A `[drive.targets.<name>]` table takes the flat keys and one more.
 
 - `root` is the folder inside the worktree the target's `launch` runs from, defaulting to the worktree root
 - A key the table leaves out falls back to the flat key of the same name, except `board-project`

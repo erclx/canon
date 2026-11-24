@@ -93,6 +93,28 @@ describe('appendGatedPrefix', () => {
     })
   })
 
+  it('should open the written file on a header naming the verb', () => {
+    appendGatedPrefix(root, [], 'docs/')
+
+    expect(readFileSync(join(root, GATED_CONFIG_REL), 'utf8')).toBe(
+      '# Markdown that fails the gate. Add a path with canon markdown gated add.\n[markdown]\ngated = [\n  "docs/",\n]\n',
+    )
+  })
+
+  it('should add the header to a file that predates it and keep every prefix', () => {
+    writeConfig('[markdown]\ngated = ["docs/"]\n')
+
+    appendGatedPrefix(root, ['docs/'], 'README.md')
+
+    expect(readFileSync(join(root, GATED_CONFIG_REL), 'utf8')).toMatch(
+      /^# Markdown that fails the gate\./,
+    )
+    expect(readGatedConfig(root)).toEqual({
+      kind: 'listed',
+      prefixes: ['docs/', 'README.md'],
+    })
+  })
+
   it('should write nothing for a duplicate prefix', () => {
     appendGatedPrefix(root, [], 'docs/')
     const before = readFileSync(join(root, GATED_CONFIG_REL), 'utf8')

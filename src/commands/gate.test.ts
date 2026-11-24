@@ -52,6 +52,7 @@ describe('canon gate run in a target', () => {
       expect(record.root).toBe(target)
       expect(record.stages.map((stage) => stage.id)).toEqual([
         'design-prose',
+        'config',
         'device-classes',
         'context-citations',
         'canonical-records',

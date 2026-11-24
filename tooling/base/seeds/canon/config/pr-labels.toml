@@ -1,22 +1,5 @@
-# Pull request domain labels.
-#
-# `git-pr` matches the paths a branch changed against the prefixes below and
-# applies every label that matches. The rows here cover what the toolkit
-# installs. Add a row per surface of your own, such as `app = ["src/"]`, and
-# `canon labels audit` names any changed path no row reaches.
-#
-# Each label has to exist on the remote before a pull request can carry it.
-# Run `canon labels sync` once to create the ones the remote lacks, and again
-# after adding a row.
-#
-# `canon labels sync` colors each label it creates from a fixed palette in row
-# order. A row may take the table form to choose its own color, such as
-# `app = { paths = ["src/"], color = "1f6feb" }`, and `canon labels sync
-# --check` reports a declared color the remote holds differently without
-# editing it.
-#
-# The matching rule and the `[declined]` table are described in the `git-pr`
-# skill's labels reference.
+# Labels git-pr adds to a pull request, by path prefix.
+# Create them with canon labels sync. Every key: canon docs config
 
 [domains]
 tooling = [

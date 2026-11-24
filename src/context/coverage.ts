@@ -76,7 +76,8 @@ export function readRoots(root: string): RootDeclaration {
     }
   }
 
-  if (config.kind === 'parsed') {
+  // A file holding no roots key, such as the commented starter, declares nothing and keeps the src default.
+  if (config.kind === 'parsed' && config.table.roots !== undefined) {
     const declared = config.table.roots
     if (!isStringList(declared)) {
       return {

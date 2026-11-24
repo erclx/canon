@@ -18,6 +18,7 @@ import {
   canonicalRecords,
   auditSet,
   clientCommandCitations,
+  configFiles,
   designProse,
   deviceClasses,
   documentCeiling,
@@ -359,6 +360,15 @@ export const STAGES: readonly Stage[] = [
     shared: true,
     label: 'Design prose',
     checks: [{ kind: 'measure', measure: designProse }],
+  },
+  {
+    // Every config file's key names and value types, since a reader takes a
+    // misspelled key as absent and the setting silently stops applying. Each
+    // reader keeps its own deeper validation, as Device classes does below.
+    id: 'config',
+    shared: true,
+    label: 'Config',
+    checks: [{ kind: 'measure', measure: configFiles }],
   },
   {
     // The one config every width reader shares, read here so a typo fails the
