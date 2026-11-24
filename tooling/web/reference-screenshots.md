@@ -12,6 +12,14 @@ The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project tha
 - `VIEWPORTS` holds 390, 768, 1280, and 1536, the last swept alone. A case also fails the run at 320 on a sideways scroll or a clipped control.
 - Set `excludeViewports` to skip a width, naming `320` to defer the reflow check
 
+## Device classes
+
+The harness reads the `Device classes:` line under `## Layout` in `canon/DESIGN.md`, and a project with no record or no line captures every width as before.
+
+- A width outside the declared classes takes no frame, with phone under 600, tablet from 600 to 839, and desktop from 840, 1536 included
+- Leaving phone out also skips the 320 reflow check, and a name outside phone, tablet, and desktop exits 1
+- Committed frames at a width the record drops stay under `EVIDENCE_ROOT` until the project deletes them
+
 ## Screenshot sections
 
 - Set `evidence: true` to also write `<EVIDENCE_ROOT>/<section>/<width>--<theme>.png` at 390, 768, and 1280. `EVIDENCE_ROOT` defaults to `e2e/evidence`.
