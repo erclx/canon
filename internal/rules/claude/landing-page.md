@@ -2,6 +2,7 @@
 description: Hold the landing page's provenance conventions for counts, images, and README citations, each of which fails silently when broken
 paths:
   - 'web/**'
+  - 'README.md'
 ---
 
 # Landing page standards
@@ -24,6 +25,7 @@ paths:
 - Anchor a string in `copy.ts` to `README.md` with `// README.md: "<phrase>"`, quoting the current `README.md` verbatim.
 - Never cite a line number, which drifts silently where a quoted phrase fails `readmeCitations` loudly.
 - Mark a string paraphrasing `README.md` with `canon-allow-readme-paraphrase: <reason>` rather than forcing a distorted quote.
-- Write a citation with more than one phrase as `// README.md: "<phrase>" "<phrase>"` on the one anchor line, never split across two comments.
+- Write a citation with more than one phrase as `// README.md: "<phrase>" "<phrase>"` on one anchor line, never split across two.
 - Put a borrowed quote on the same line as `canon-allow-readme-paraphrase`, since the marker exempts only the unquoted part and `readmeCitations` still checks the quote.
+- Mark a `README.md` section the page leaves out with `<!-- canon-readme-only: <reason> -->` under its heading, since `readmeCitations` fails a section nothing quotes.
 - Quote a source in `web/src/content/practice.ts` word for word from the ledger row it names, which `practice.test.ts` checks.
