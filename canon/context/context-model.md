@@ -69,6 +69,6 @@ Three more paths belong to the catalog system.
 
 - A child folder with no `index.md` drops out of every catalog and regen still reports success, so create the child index in the same change as the folder
 - One unparseable sibling leaves every `index.md` in its folder unwritten, and a `description` opening with a backtick or colon, or holding `: `, needs quotes
-- `walkEntries` in `src/docs/read.ts` reads one folder and one folder inside it, so an entry in a nested folder lists and resolves as `<folder>/<leaf>` and a third level stays unread. Turning an entry into a folder without its `index.md` drops it from `docs list` silently and strands its relative links
+- `walkEntries` in `src/docs/read.ts` reads a folder and the one inside it, so a nested entry resolves as `<folder>/<leaf>`, and an entry turned into a folder with no `index.md` drops from `docs list`
 - A gitignored folder takes a positional regen but not a whole-repo walk, and a shell `mv` fires no hook, so run `canon indexes regen` after moving an entry
 - Hand-written prose in an auto-managed `index.md` is overwritten unless it sets `auto: false`
