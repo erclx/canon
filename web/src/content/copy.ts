@@ -226,8 +226,8 @@ export const guardrails = {
 export const worktrees = {
   // README.md: "Every feature gets its own worktree"
   head: 'Every feature gets its own worktree',
-  // README.md: "So several agents can build at once without touching each other's files."
-  lede: "So several agents can build at once without touching each other's files.",
+  // README.md: "Several agents can build at once without touching each other's files."
+  lede: "Several agents can build at once without touching each other's files.",
   // README.md: canon-allow-readme-paraphrase: the band naming the shared folder, which the README states as the record in the main checkout. "the one `.canon/` record in the main checkout"
   band: {
     name: '.canon/',
@@ -245,8 +245,8 @@ export const worktrees = {
 export const evidence = {
   // README.md: "See the interface evidence before you merge"
   head: 'See the interface evidence before you merge',
-  // README.md: "Every pull request comes with a short film of the new screen working in the app."
-  lede: 'Every pull request comes with a short film of the new screen working in the app.',
+  // README.md: "Every pull request that changes a screen comes with a short film of the new screen working in the app."
+  lede: 'Every pull request that changes a screen comes with a short film of the new screen working in the app.',
   // README.md: canon-allow-readme-paraphrase: the reel's control and caption, which no README sentence carries. "posts the reel"
   still: (pullRequest: number, repository: string) =>
     `The opening frame of the reel on pull request #${pullRequest} on ${repository}`,
@@ -262,15 +262,15 @@ export const evidence = {
 export const board = {
   // README.md: "Come back to finished pull requests"
   head: 'Come back to finished pull requests',
-  // README.md: "Queue features on the task board before you leave. Canon builds and reviews them, and holds each merge for you."
+  // README.md: canon-allow-readme-paraphrase: the product name capitalized as the page writes it. "Queue features on the task board before you leave." "builds and reviews them, and holds each merge for you."
   lede: 'Queue features on the task board before you leave. Canon builds and reviews them, and holds each merge for you.',
 }
 
 export const health = {
   // README.md: "Audits for code an agent wrote"
   head: 'Audits for code an agent wrote',
-  // README.md: "They list the files and functions past a line limit, so you know what to split before it gets worse."
-  lede: 'They list the files and functions past a line limit, so you know what to split before it gets worse.',
+  // README.md: "Each audit lists the files and functions past a line limit, so you know what to split before it gets worse."
+  lede: 'Each audit lists the files and functions past a line limit, so you know what to split before it gets worse.',
   /** The labels around the figures `web/src/lib/health.ts` reads at build time. */
   // README.md: canon-allow-readme-paraphrase: column heads and captions for the two reports, which no README sentence carries.
   view: {

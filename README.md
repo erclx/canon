@@ -57,8 +57,10 @@ Give each step of a change its own session and a written record the next one rea
 Each plan, review, and handoff is a markdown file written to the same standard every time. Records live under `.canon/` in the main checkout.
 
 - Before a build: intake, groundwork, the plan, its task, and the board
-- Around a pull request: the code review, the UI review, and the screenshot evidence
+- Around a pull request: the pull request itself, the code review, the UI review, and the screenshot evidence
 - Across sessions: the drive log, the context entries, and the handoff a compaction would lose
+
+The [examples](examples/index.md) fill in every one of them for a single invented change, from beta feedback to a merged pull request.
 
 ## Skills that cite their sources
 
@@ -72,7 +74,7 @@ Each one teaches your agent an engineering practice, and every rule in it links 
 | `ui-craft`             | When a rendered file changes    | W3C, Using ARIA                           |
 | `systematic-debugging` | On a bug nobody has explained   | Jesse Vincent, superpowers                |
 
-Each rule has its own source row in a ledger, and the skill audit fails when a skill's rules and its rows disagree in count.
+Every rule links its source, and an audit fails if one goes missing.
 
 ## Rules your agent cannot ignore
 
@@ -85,22 +87,33 @@ Each one is backed by a check that stops the work when it's broken.
 
 ## Every feature gets its own worktree
 
-So several agents can build at once without touching each other's files. Each worker builds in its own worktree on its own branch, and every session reads and writes the one `.canon/` record in the main checkout, so no worktree keeps a copy of its own.
+Several agents can build at once without touching each other's files. Each worker builds in its own worktree on its own branch, and every session reads and writes the one `.canon/` record in the main checkout, so no worktree keeps a copy of its own.
 
 ## See the interface evidence before you merge
 
-Every pull request comes with a short film of the new screen working in the app.
+Every pull request that changes a screen comes with a short film of the new screen working in the app. canon films the change in the running app and posts the reel beside the checklist a reviewer ticks.
 
-- canon films the change in the running app and posts the reel beside the checklist a reviewer ticks
-- canon drives the running app beside you and puts the options on a board for you to pick
+## Pick a design in the running app
+
+<!-- canon-readme-only: the landing page has no design section yet, and one is a later row -->
+
+Run `/canon:design-pick` when the call is taste. canon drives the running app beside you and puts the options on a board for you to pick, then `/canon:design-record` lands the one you chose in the project's design record.
 
 ## Come back to finished pull requests
 
-Queue features on the task board before you leave. Canon builds and reviews them, and holds each merge for you. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide.
+Queue features on the task board before you leave. canon builds and reviews them, and holds each merge for you. The orchestrator works the ready rows from now or from a set time, and stops at what only you decide.
+
+Stay at the desk and the run is attended instead, launching each row once the rows it depends on have merged while you do the merging. Ask for a talk session when you want to shape a plan or a build with the session until you end it.
+
+## You make the merge
+
+<!-- canon-readme-only: the landing page shows the merge as the relay's last card, and a section of its own is a later row -->
+
+No agent merges a pull request on its own. Run `canon pr merge <number>` to squash it with a message carrying only the change, or name it for the orchestrator to merge. A standing authorization covers the pull requests in flight when you give it, so the orchestrator merges each as its gates pass and reports after.
 
 ## Audits for code an agent wrote
 
-They list the files and functions past a line limit, so you know what to split before it gets worse. canon measures file, function, and comment length, and charts what shipped each week.
+Each audit lists the files and functions past a line limit, so you know what to split before it gets worse. canon measures file, function, and comment length, and charts what shipped each week.
 
 ## For your agent
 
@@ -114,6 +127,8 @@ They list the files and functions past a line limit, so you know what to split b
 
 - [AI workflow](docs/workflow/ai-workflow.md): the loop a feature runs
 - [Operating model](docs/workflow/operating-model.md): planners, workers, and reviewers in parallel
+- [Plan to merge](docs/workflow/plan-to-merge.md): one change followed from filing to merge
+- [Examples](examples/index.md): every record that change leaves, filled in
 - [Skill map](docs/workflow/skill-map.md): every skill by the moment you reach for it
 - [Agents](docs/agents/index.md): flags, exit codes, and output shapes
 - [Docs index](docs/index.md): every reference doc, updating canon among them
