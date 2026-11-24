@@ -836,6 +836,35 @@ describe('promoteTask', () => {
     )
   })
 
+  it('should keep a Needs a plan cell that holds the row for the operator', async () => {
+    const held =
+      'follows v1.1, housekeeping, never auto-dispatched, launch on the operator’s word'
+    await seedPlan('one', ['a.ts'])
+    await seedTask('v1.0-one', { title: 'v1.0: One', plans: ['one'] })
+    await seedBoard(...NEEDS_A_PLAN, `| [v1.0: One](v1.0-one.md) | ${held} |`)
+
+    await promoteTask(ROOT, 'v1.0-one')
+
+    const text = await readFile(orderingPath(ROOT), 'utf8')
+    expect(text).toContain(`| [v1.0: One](v1.0-one.md) | 1 file |  | ${held} |`)
+    expect(text).not.toContain('Planned, not dispatched yet')
+  })
+
+  it('should replace a held cell when the caller passes its own', async () => {
+    await seedPlan('one', ['a.ts'])
+    await seedTask('v1.0-one', { title: 'v1.0: One', plans: ['one'] })
+    await seedBoard(
+      ...NEEDS_A_PLAN,
+      "| [v1.0: One](v1.0-one.md) | launch on the operator's word |",
+    )
+
+    await promoteTask(ROOT, 'v1.0-one', { waiting: 'the gate' })
+
+    expect(await readFile(orderingPath(ROOT), 'utf8')).toContain(
+      '| [v1.0: One](v1.0-one.md) | 1 file |  | the gate |',
+    )
+  })
+
   it('should refuse a row already under In flight', async () => {
     await seedPlan('one', ['a.ts'])
     await seedTask('v1.0-one', { plans: ['one'] })
