@@ -92,11 +92,8 @@ const SECTION_HEADING = /^## (.+)$/
 const FENCE = /^\s*(```|~~~)/
 
 /**
- * Every `## ` section of `README.md` that no quoted phrase falls inside and no
- * `canon-readme-only: <reason>` marker covers. The marker sits on the first
- * non-blank line under the heading, since a formatter puts a blank line between
- * the two. A phrase counts anywhere in the section, heading included, so a
- * section cited only through its body passes.
+ * Every `## ` section of `README.md` no quoted phrase falls inside, heading included, and no marker covers.
+ * The marker sits on the first non-blank line under the heading, since a formatter inserts a blank line there.
  */
 export function uncitedReadmeSections(
   readme: string,
