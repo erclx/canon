@@ -18,11 +18,7 @@ access = "/write?token=demo"
 
 ## Keys a take reads
 
-| Key      | Holds                                                                  |
-| -------- | ---------------------------------------------------------------------- |
-| `launch` | The command that installs, builds, and serves the app in a worktree    |
-| `data`   | A fixture path inside the worktree to load before serving, if any      |
-| `access` | The path or address that opens the app in the state a take starts from |
+A take reads `launch`, `data`, and `access`, and `canon docs config` states what each holds.
 
 `access` is optional. A take joins it, and so does a `review-ui` pass, which opens its chosen address behind it. `app-drive` ignores it.
 
