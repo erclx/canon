@@ -13,7 +13,7 @@ Read `${CLAUDE_SKILL_DIR}/references/tasks.md` before writing any file. It holds
 
 ## Guards
 
-- Resolve the board at the main worktree root with `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd` outside a git repo
+- Resolve the board at the main worktree root the way `${CLAUDE_SKILL_DIR}/../session-worktree/references/main-root-writes.md` states, falling back to `pwd` outside a git repo
   - The board is gitignored scratch shared across worktrees, so a linked worktree writing its own `pwd` creates a second board nothing reads
 - A new task file is a main-root write, so it goes out as a heredoc, routed the way `session-worktree` states. Declining runs through `canon tasks decline`, which resolves the root itself.
 - If `.canon/tasks/` does not exist at that root, stop: `❌ No .canon/tasks/ board. Run canon claude init to set it up.`
