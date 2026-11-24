@@ -47,7 +47,9 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Install Shell Tools
-        run: sudo apt-get install -y shfmt shellcheck
+        run: |
+          bash scripts/ci/prefer-archive-mirror.sh
+          sudo apt-get install -y shfmt shellcheck
 
       - name: Install Plugin CLI
         # Pinned deliberately. Reason and revisit test in canon/context/development/ci.md
@@ -182,7 +184,9 @@ jobs:
       # rather than fails, so the step bound turns a hang into a red step.
       - name: Install FFmpeg
         timeout-minutes: 5
-        run: sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 ffmpeg
+        run: |
+          bash scripts/ci/prefer-archive-mirror.sh
+          sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 ffmpeg
 
       # Its own key, since the capture job's cache holds no agent CLI revision
       # and a hit on it would skip the install below
