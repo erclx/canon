@@ -1,9 +1,11 @@
 import {
+  chmodSync,
   cpSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -202,16 +204,12 @@ describe('planAppConfig text moves', () => {
 
   it('should keep the mode of an existing app.toml', () => {
     write('app.toml', '[drive]\nlaunch = "x"\n')
-    execaSync('chmod', ['600', config('app.toml')])
+    chmodSync(config('app.toml'), 0o600)
     write('preview.json', '{"writes":["data"]}')
 
     applyAppConfig(root, planned())
 
-    expect(
-      (
-        execaSync('stat', ['-c', '%a', config('app.toml')]).stdout as string
-      ).trim(),
-    ).toBe('600')
+    expect((statSync(config('app.toml')).mode & 0o777).toString(8)).toBe('600')
   })
 
   it('should plan nothing for a project holding no old file', () => {
