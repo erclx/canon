@@ -89,7 +89,7 @@ The state and the remote a run touches sit outside the repository.
 
 ## Gotchas
 
-- An `expect.toml` takes a `purpose` and a `why` per entry, as a bare string or a `{ path, why }` or `{ text, why }` table, refuses history in either, and throws on a bare key below `[[content]]`
+- An `expect.toml` takes a `purpose` and a `why` per entry, refuses history in either, throws on a bare key below `[[content]]`, and reads a single-quoted `pattern` as a literal string
 - `canon sandbox check` mints a fresh run id and asserts nothing on a multi-arm scenario without an arm, so name the arm and pin `CANON_SANDBOX_DIR` outside `~/.claude/`, where every `Write` is refused
 - A run serves toolkit-only verbs to the driven session, which a consumer's install refuses, so an arm calling one passes on behavior no consumer gets
 - A skill with a decline guard declines in a cold sandbox, which holds nothing git does not, so the arm's prompt states the reasoning to record as `claude:session-compact` does
