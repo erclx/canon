@@ -85,7 +85,7 @@ The loop stops on the pass that finds nothing left to move. Every test below has
 
 - No `## Up next` row clears the dispatch checks
 - No planner is live, and no live worker is still without a pull request
-- Every open pull request is merge-ready, parked, or stopped, a granted one only on a merge refusal no re-read clears
+- Every open pull request is parked, stopped, or merge-ready, and a granted one reads merge-ready only on a merge refusal no re-read clears
 
 A worker stays in the roster until its branch merges. Count it done once its pull request is merged or passes the last test, so a night that opened one still ends.
 
