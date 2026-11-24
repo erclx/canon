@@ -18,6 +18,7 @@ import {
   auditSet,
   auditsBaselineRel,
   clientCommandCitations,
+  configFiles,
   designProse,
   deviceClasses,
   documentCeiling,
@@ -859,6 +860,85 @@ describe('canonicalRecords', () => {
     const report = await canonicalRecords(context())
 
     expect(report.failure).toBeUndefined()
+  })
+})
+
+describe('configFiles', () => {
+  let root: string
+
+  const refuse = () => {
+    throw new Error('configFiles reads the config and runs nothing')
+  }
+
+  const context = (): MeasureContext => ({
+    root,
+    ci: false,
+    run: refuse,
+    cli: refuse,
+  })
+
+  const write = (name: string, source: string): void => {
+    mkdirSync(join(root, 'canon', 'config'), { recursive: true })
+    writeFileSync(join(root, 'canon', 'config', name), source)
+  }
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-config-files-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('passes a tree holding no config folder', async () => {
+    const report = await configFiles(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.unmeasured).toBeUndefined()
+  })
+
+  it('passes known keys of the right type', async () => {
+    write('context.toml', 'roots = ["src"]\n')
+
+    const report = await configFiles(context())
+
+    expect(report.failure).toBeUndefined()
+  })
+
+  it.each([
+    ['a file that does not parse', 'context.toml', 'roots = [\n'],
+    ['an unknown key', 'app.toml', '[painted]\nreelinputs = ["bun.lock"]\n'],
+    ['a wrong type', 'app.toml', '[drive]\nlaunch = 3\n'],
+  ])('fails %s, naming the file', async (_label, name, source) => {
+    write(name, source)
+
+    const report = await configFiles(context())
+
+    expect(report.failure).toContain(`canon/config/${name}`)
+  })
+
+  it('warns on an unknown file and still passes', async () => {
+    write('nope.toml', 'a = 1\n')
+
+    const report = await configFiles(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.emissions).toContainEqual({
+      kind: 'warn',
+      text: expect.stringContaining('canon/config/nope.toml'),
+    })
+  })
+
+  it('warns on an unmoved old file and still passes', async () => {
+    write('local.toml', 'health = ["/api/health"]\n')
+
+    const report = await configFiles(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.emissions).toContainEqual({
+      kind: 'warn',
+      text: expect.stringContaining('canon migrate app-config'),
+    })
   })
 })
 

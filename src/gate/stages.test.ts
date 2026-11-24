@@ -548,11 +548,12 @@ describe('the shared stage set', () => {
     rmSync(root, { recursive: true, force: true })
   })
 
-  it('should tag the twelve stages that fit any project as shared', () => {
+  it('should tag the thirteen stages that fit any project as shared', () => {
     const shared = STAGES.filter((stage) => stage.shared).map((s) => s.id)
 
     expect(shared).toEqual([
       'design-prose',
+      'config',
       'device-classes',
       'context-citations',
       'canonical-records',
