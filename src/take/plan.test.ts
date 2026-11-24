@@ -187,6 +187,17 @@ describe('readTakePlan', () => {
     })
   })
 
+  it('should read a beat that keeps the push on', () => {
+    const read = readTakePlan(
+      planSource([beat([{ kind: 'wait', ms: 100 }], { push: true })]),
+    )
+
+    expect(read).toMatchObject({
+      kind: 'read',
+      plan: { beats: [{ push: true }] },
+    })
+  })
+
   it('should refuse a push that is not a boolean', () => {
     const read = readTakePlan(
       planSource([beat([{ kind: 'wait', ms: 100 }], { push: 'no' })]),
@@ -769,6 +780,10 @@ describe('beatPushes', () => {
 
   it('should hold wide under 768 when the beat carries no key', () => {
     expect(beatPushes(plain, phone)).toBe(false)
+  })
+
+  it('should hold wide at 767 wide with no key', () => {
+    expect(beatPushes(plain, { width: 767, height: 1024 })).toBe(false)
   })
 
   it('should push at exactly 768 wide with no key', () => {
