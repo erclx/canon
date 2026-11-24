@@ -57,6 +57,18 @@ function keyPaths(spec: TableSpec, prefix = ''): string[] {
   })
 }
 
+/** Every key path including those inside a named sub-table, written under `<name>`. */
+function everyKeyPath(spec: TableSpec, prefix = ''): string[] {
+  return Object.entries(spec.keys).flatMap(([key, child]) => {
+    const path = prefix === '' ? key : `${prefix}.${key}`
+    if (typeof child !== 'object' || child.kind === 'one-of') return [path]
+    if (child.kind === 'table') return [path, ...everyKeyPath(child, path)]
+    return typeof child.of === 'object' && child.of.kind === 'table'
+      ? [path, ...everyKeyPath(child.of, `${path}.<name>`)]
+      : [path]
+  })
+}
+
 let root: string
 
 beforeEach(() => {
@@ -104,6 +116,24 @@ describe('the commented starters', () => {
           )
         })
 
+      expect(missing).toEqual([])
+    },
+  )
+
+  it.each(CONFIG_FILES.map((spec) => [spec.name, spec] as const))(
+    'should have every key on the docs page: %s',
+    (_name, spec) => {
+      const page = readFileSync(
+        join(REPO, 'docs', 'agents', 'config.md'),
+        'utf8',
+      )
+      const section = page.slice(page.indexOf(`## ${spec.name}`))
+      const missing = everyKeyPath(spec.root).filter((path) => {
+        const key = path.split('.').at(-1) ?? ''
+        return !(section.includes(`\`${key}\``) || section.includes(`[${path}`))
+      })
+
+      expect(page).toContain(`## ${spec.name}`)
       expect(missing).toEqual([])
     },
   )

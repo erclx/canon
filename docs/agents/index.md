@@ -9,6 +9,7 @@ category: Agent surface
 CLI catalog and invocation rules for agents, split by command domain. Start with overview.
 
 - [Audits](audits.md): Running every health check as one set, the verdict and exit codes, the corpus states, the retained baseline and its delta, and a catalog of every audit verb with whether a finding gates
+- [Config](config.md): Every file a project writes under canon/config/, each key with its type, default, and reader, the commented starters init seeds, and what the Config gate stage fails and warns on
 - [Context audit](context-audit.md): Running the context audit, its folder scope, the exit codes, every check with the folders it reaches and whether it gates, the seed gate, and the citation exclusions
 - [Indexes](indexes.md): How canon indexes regen and canon indexes list resolve paths, what they stage, and the record and exit codes each emits
 - [Install and sync](install-and-sync.md): What each install and sync verb writes, refuses, or leaves alone, the drift report and its seven side sections, the rule detection record, and version skew states
