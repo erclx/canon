@@ -65,6 +65,64 @@ describe('loadPreviewConfig', () => {
     expect(loadPreviewConfig(worktree)).toEqual({ kind: 'absent' })
   })
 
+  it('should read the [preview] table of app.toml', () => {
+    write(
+      'canon/config/app.toml',
+      [
+        '[preview]',
+        'writes = ["board"]',
+        'keep = ["board/.run"]',
+        'seed = ["bun", "seed.ts"]',
+        'serve = ["bun", "serve.ts"]',
+        'port = 4321',
+        '',
+      ].join('\n'),
+    )
+
+    expect(loadPreviewConfig(worktree)).toEqual({
+      kind: 'read',
+      config: {
+        writes: ['board'],
+        env: 'CANON_PREVIEW_ROOT',
+        keep: ['board/.run'],
+        seed: ['bun', 'seed.ts'],
+        serve: ['bun', 'serve.ts'],
+        port: 4321,
+      },
+    })
+  })
+
+  it('should name the table key when the [preview] table lacks writes', () => {
+    write('canon/config/app.toml', '[preview]\nkeep = []\n')
+
+    expect(loadPreviewConfig(worktree)).toEqual({
+      kind: 'refused',
+      reason: 'bad-config',
+      detail:
+        'canon/config/app.toml carries no "preview.writes" list of paths.',
+    })
+  })
+
+  it('should refuse an app.toml that is not valid TOML', () => {
+    write('canon/config/app.toml', '[preview\n')
+
+    expect(loadPreviewConfig(worktree)).toEqual({
+      kind: 'refused',
+      reason: 'bad-config',
+      detail: 'canon/config/app.toml is not valid TOML.',
+    })
+  })
+
+  it('should read preview.json beside an app.toml holding only [drive]', () => {
+    write('canon/config/app.toml', '[drive]\nlaunch = "bun run dev"\n')
+    write('canon/config/preview.json', '{"writes":["board"]}')
+
+    expect(loadPreviewConfig(worktree)).toMatchObject({
+      kind: 'read',
+      config: { writes: ['board'] },
+    })
+  })
+
   it('should default the variable name when the config leaves it out', () => {
     write('canon/config/preview.json', '{"writes":["board"]}')
 

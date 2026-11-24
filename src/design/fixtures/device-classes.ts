@@ -1,6 +1,7 @@
 /**
- * The `canon/config/device-classes.toml` texts both config readers are tested against, `parseDeviceConfig` in the CLI and
- * the inline reader in the shipped harness, each with the default and per-scope classes read or the refusal.
+ * The config texts both readers are tested against, `readDeviceConfig` in the CLI and the inline reader in the shipped
+ * harness, each with the default and per-scope classes read or the refusal. Each text is read as `canon/config/app.toml`
+ * and as the `device-classes.toml` it replaced, which hold the table alike.
  */
 export interface DeviceConfigCase {
   readonly name: string
@@ -36,6 +37,21 @@ export const DEVICE_CONFIG_CASES: readonly DeviceConfigCase[] = [
     name: 'a config with no device-classes table',
     config: '',
     expected: { default: ALL, scopes: {} },
+  },
+  {
+    name: 'a desktop default beside other tables',
+    config: config(
+      '[drive]',
+      'launch = "bun run dev"',
+      '',
+      '[device-classes]',
+      'default = ["desktop"]',
+      'why = "The board is a canvas"',
+      '',
+      '[painted]',
+      'paths = ["src/client/**"]',
+    ),
+    expected: { default: ['desktop'], scopes: {} },
   },
   {
     name: 'a desktop default',
@@ -129,9 +145,14 @@ export const DEVICE_CONFIG_CASES: readonly DeviceConfigCase[] = [
     },
   },
   {
-    name: 'a misspelled table',
+    name: 'a misspelled key in the table',
+    config: config('[device-classes]', 'defaults = ["desktop"]', 'why = "x"'),
+    expected: { reason: 'unknown-key', field: 'device-classes.defaults' },
+  },
+  {
+    name: 'a misspelled table, which reads as another table',
     config: config('[device-clases]', 'default = ["desktop"]', 'why = "x"'),
-    expected: { reason: 'unknown-key', field: 'device-clases' },
+    expected: { default: ALL, scopes: {} },
   },
   {
     name: 'text that is not TOML',

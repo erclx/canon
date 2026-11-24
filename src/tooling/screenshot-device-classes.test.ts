@@ -6,10 +6,11 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { DEVICE_CONFIG_CASES } from '@/design/fixtures/device-classes'
 
 /**
- * Runs the shipped capture harness's inline reader of `canon/config/device-classes.toml`
- * against the cases `@/design/device-classes` is tested on, so the two readers
- * cannot drift. The print flag exits before a browser launches.
+ * Runs the shipped harness's inline reader, on both config files, against the cases `@/design/device-classes` is
+ * tested on, so the two readers cannot drift. The print flag exits before a browser launches.
  */
+
+const FILES = ['app.toml', 'device-classes.toml'] as const
 
 const SCRIPT = join(
   import.meta.dirname,
@@ -26,23 +27,24 @@ afterEach(() => {
   rmSync(project, { force: true, recursive: true })
 })
 
-const runWith = (config: string | undefined, flag: string) => {
-  if (config !== undefined) {
-    mkdirSync(join(project, 'canon', 'config'), { recursive: true })
-    writeFileSync(
-      join(project, 'canon', 'config', 'device-classes.toml'),
-      config,
-    )
-  }
-  return spawnSync('bun', [SCRIPT, flag], { cwd: project, encoding: 'utf8' })
+const write = (file: string, config: string | undefined): void => {
+  if (config === undefined) return
+  mkdirSync(join(project, 'canon', 'config'), { recursive: true })
+  writeFileSync(join(project, 'canon', 'config', file), config)
 }
 
-const READ_CASES = DEVICE_CONFIG_CASES.flatMap(({ name, config, expected }) =>
-  'default' in expected ? [{ name, config, expected }] : [],
+const run = (flag: string) =>
+  spawnSync('bun', [SCRIPT, flag], { cwd: project, encoding: 'utf8' })
+
+const READ_CASES = FILES.flatMap((file) =>
+  DEVICE_CONFIG_CASES.flatMap(({ name, config, expected }) =>
+    'default' in expected ? [{ file, name, config, expected }] : [],
+  ),
 )
 
-const SCOPE_CASES = READ_CASES.flatMap(({ name, config, expected }) =>
+const SCOPE_CASES = READ_CASES.flatMap(({ file, name, config, expected }) =>
   Object.entries(expected.scopes).map(([scope, classes]) => ({
+    file,
     name,
     config,
     scope,
@@ -50,64 +52,85 @@ const SCOPE_CASES = READ_CASES.flatMap(({ name, config, expected }) =>
   })),
 )
 
-const REFUSED_CASES = DEVICE_CONFIG_CASES.flatMap(
-  ({ name, config, expected }) =>
-    'reason' in expected ? [{ name, config, field: expected.field }] : [],
+const REFUSED_CASES = FILES.flatMap((file) =>
+  DEVICE_CONFIG_CASES.flatMap(({ name, config, expected }) =>
+    'reason' in expected ? [{ file, name, config, field: expected.field }] : [],
+  ),
 )
 
 describe('screenshot.ts device classes', () => {
-  it.each(READ_CASES)('reads the default of $name', ({ config, expected }) => {
-    const run = runWith(config, '--print-device-classes')
+  it.each(READ_CASES)(
+    'reads the default of $name from $file',
+    ({ file, config, expected }) => {
+      write(file, config)
 
-    expect({ status: run.status, stdout: run.stdout.trim() }).toEqual({
-      status: 0,
-      stdout: expected.default.join(','),
-    })
-  })
+      const result = run('--print-device-classes')
+
+      expect({ status: result.status, stdout: result.stdout.trim() }).toEqual({
+        status: 0,
+        stdout: expected.default.join(','),
+      })
+    },
+  )
 
   it.each(SCOPE_CASES)(
-    'reads scope $scope of $name',
-    ({ config, scope, classes }) => {
-      const run = runWith(config, `--print-device-classes=${scope}`)
+    'reads scope $scope of $name from $file',
+    ({ file, config, scope, classes }) => {
+      write(file, config)
 
-      expect({ status: run.status, stdout: run.stdout.trim() }).toEqual({
+      const result = run(`--print-device-classes=${scope}`)
+
+      expect({ status: result.status, stdout: result.stdout.trim() }).toEqual({
         status: 0,
         stdout: classes.join(','),
       })
     },
   )
 
-  it.each(REFUSED_CASES)('exits 1 on $name', ({ config, field }) => {
-    const run = runWith(config, '--print-device-classes')
+  it.each(REFUSED_CASES)(
+    'exits 1 on $name from $file',
+    ({ file, config, field }) => {
+      write(file, config)
 
-    expect(run.status).toBe(1)
-    expect(run.stderr).toContain(
-      field === '' ? 'canon/config/device-classes.toml' : `${field} in`,
+      const result = run('--print-device-classes')
+
+      expect(result.status).toBe(1)
+      expect(result.stderr).toContain(
+        field === ''
+          ? `canon/config/${file}`
+          : `${field} in canon/config/${file}`,
+      )
+    },
+  )
+
+  it('takes the app.toml table over device-classes.toml', () => {
+    write('app.toml', '[device-classes]\ndefault = ["phone"]\nwhy = "x"\n')
+    write(
+      'device-classes.toml',
+      '[device-classes]\ndefault = ["desktop"]\nwhy = "x"\n',
     )
+
+    const result = run('--print-device-classes')
+
+    expect(result.stdout.trim()).toBe('phone')
   })
 
-  it('reads its own file beside a design.toml holding the board keys', () => {
-    mkdirSync(join(project, 'canon', 'config'), { recursive: true })
-    writeFileSync(
-      join(project, 'canon', 'config', 'design.toml'),
-      'board = ".canon/board"\nproject = "landing"\n',
+  it('reads device-classes.toml beside an app.toml holding no such table', () => {
+    write('app.toml', '[drive]\nlaunch = "bun run dev"\n')
+    write(
+      'device-classes.toml',
+      '[device-classes]\ndefault = ["desktop"]\nwhy = "x"\n',
     )
 
-    const run = runWith(
-      '[device-classes]\ndefault = ["desktop"]\nwhy = "A canvas"\n',
-      '--print-device-classes',
-    )
+    const result = run('--print-device-classes')
 
-    expect({ status: run.status, stdout: run.stdout.trim() }).toEqual({
-      status: 0,
-      stdout: 'desktop',
-    })
+    expect(result.stdout.trim()).toBe('desktop')
   })
 
   it('exits 1 on a scope the config does not declare', () => {
-    const run = runWith(undefined, '--print-device-classes=landing')
+    const result = run('--print-device-classes=landing')
 
-    expect(run.status).toBe(1)
-    expect(run.stderr).toContain("No scope 'landing'")
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain("No scope 'landing'")
   })
 })

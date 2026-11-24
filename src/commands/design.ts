@@ -135,7 +135,7 @@ export function register(program: Command): void {
     .command('classes')
     .helpOption('-h, --help', 'Show this help message')
     .description(
-      'Print the device classes a change supports, read from canon/config/device-classes.toml',
+      'Print the device classes a change supports, read from [device-classes] in canon/config/app.toml',
     )
     .argument('[paths...]', 'Changed paths to match against the scopes')
     .option(

@@ -32,7 +32,7 @@ Owns the machine-level index of target projects, kept under `stateDir()`.
 
 ### `src/migrate/`
 
-Holds the one-shot moves behind `canon migrate`, being `records`, `surface-roots`, `record-tree`, `scratch-evidence`, `record-layout`, `rename`, `skill-names`, `rule-layout`, and `session-defaults`. Each plans first and applies only under `--write`. `session-defaults` plans hooks in `src/migrate/hook-wiring.ts`.
+Holds the one-shot moves behind `canon migrate`, being `records`, `surface-roots`, `record-tree`, `scratch-evidence`, `record-layout`, `rename`, `skill-names`, `rule-layout`, `session-defaults`, and `app-config`. Each plans first and applies only under `--write`. `session-defaults` plans hooks in `src/migrate/hook-wiring.ts`.
 
 - `status.ts` orders every move in `MIGRATIONS` and reads each by its exit through `cliRunner`, and a test fails when a registered subcommand is missing from it, so a new move joins by one line there
 - `rename.ts` holds the token sweep and `skill-names.ts` the map it reads, so a renamed or merged skill is a map row plus a pointer left at the old name

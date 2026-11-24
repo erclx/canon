@@ -33,23 +33,33 @@ const DEVICE_CLASSES = ['phone', 'tablet', 'desktop'] as const
 
 type DeviceClass = (typeof DEVICE_CLASSES)[number]
 
-const DEVICE_CONFIG = 'canon/config/device-classes.toml'
+/** `app.toml` first, then the file the table lived in before a project ran `canon migrate app-config`. */
+const DEVICE_CONFIGS = [
+  'canon/config/app.toml',
+  'canon/config/device-classes.toml',
+] as const
 
 interface DeviceConfig {
   readonly default: readonly DeviceClass[]
   readonly scopes: ReadonlyMap<string, readonly DeviceClass[]>
+  /** The file the table was read from, or `app.toml` when no file holds one. */
+  readonly source: string
 }
 
 /**
- * The `[device-classes]` table of `canon/config/device-classes.toml`, all three classes when the file or table is absent.
- * The grammar is the design record standard's, and anything it refuses exits 1 rather than dropping a class.
+ * The `[device-classes]` table of the first file holding one, all three classes when none does. Other tables may sit
+ * beside it. The grammar is the design record standard's, and anything it refuses exits 1 rather than dropping a class.
  */
 function readDeviceConfig(): DeviceConfig {
-  const none: DeviceConfig = { default: DEVICE_CLASSES, scopes: new Map() }
-  if (!existsSync(DEVICE_CONFIG)) return none
+  let source: string = DEVICE_CONFIGS[0]
+  const none = (): DeviceConfig => ({
+    default: DEVICE_CLASSES,
+    scopes: new Map(),
+    source,
+  })
   const refuse = (field: string, detail: string): never => {
     console.error(
-      `${field === '' ? DEVICE_CONFIG : `${field} in ${DEVICE_CONFIG}`} ${detail}.`,
+      `${field === '' ? source : `${field} in ${source}`} ${detail}.`,
     )
     process.exit(1)
   }
@@ -59,12 +69,30 @@ function readDeviceConfig(): DeviceConfig {
       Bun?: { TOML: { parse: (text: string) => unknown } }
     }
   ).Bun?.TOML
-  if (toml === undefined) return refuse('', 'is read under Bun alone')
-  let parsed: unknown
-  try {
-    parsed = toml.parse(readFileSync(DEVICE_CONFIG, 'utf8'))
-  } catch {
-    return refuse('', 'is not valid TOML')
+
+  let found: unknown
+  for (const candidate of DEVICE_CONFIGS) {
+    if (!existsSync(candidate)) continue
+    source = candidate
+    if (toml === undefined) return refuse('', 'is read under Bun alone')
+    let parsed: unknown
+    try {
+      parsed = toml.parse(readFileSync(candidate, 'utf8'))
+    } catch {
+      return refuse('', 'is not valid TOML')
+    }
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      'device-classes' in parsed
+    ) {
+      found = (parsed as Record<string, unknown>)['device-classes']
+      break
+    }
+  }
+  if (found === undefined) {
+    source = DEVICE_CONFIGS[0]
+    return none()
   }
 
   const table = (value: unknown, field: string): Record<string, unknown> =>
@@ -109,10 +137,7 @@ function readDeviceConfig(): DeviceConfig {
     }
   }
 
-  const file = table(parsed, '')
-  keys(file, ['device-classes'], '')
-  if (file['device-classes'] === undefined) return none
-  const root = table(file['device-classes'], 'device-classes')
+  const root = table(found, 'device-classes')
   keys(root, ['default', 'why', 'scopes'], 'device-classes')
   let fallback: readonly DeviceClass[] = DEVICE_CLASSES
   if (root.default !== undefined) {
@@ -136,7 +161,7 @@ function readDeviceConfig(): DeviceConfig {
     scopes.set(name, classes(scope.classes, `${field}.classes`))
     why(scope.why, `${field}.why`)
   }
-  return { default: fallback, scopes }
+  return { default: fallback, scopes, source }
 }
 
 /** The class a width falls in, at the Material 3 window boundaries of 600 and 840. */
@@ -161,7 +186,7 @@ if (printFlag !== undefined) {
       : DEVICE_CONFIG_READ.scopes.get(scope)
   if (classes === undefined) {
     console.error(
-      `No scope '${scope}' under device-classes in ${DEVICE_CONFIG}.`,
+      `No scope '${scope}' under device-classes in ${DEVICE_CONFIG_READ.source}.`,
     )
     process.exit(1)
   }
@@ -280,7 +305,9 @@ const unscoped = SOURCED.filter(
     !DEVICE_CONFIG_READ.scopes.has(captureCase.deviceScope),
 )
 if (unscoped.length > 0) {
-  console.error(`Cases name a deviceScope ${DEVICE_CONFIG} does not declare:`)
+  console.error(
+    `Cases name a deviceScope ${DEVICE_CONFIG_READ.source} does not declare:`,
+  )
   for (const { captureCase, file } of unscoped) {
     console.error(
       `  ${file}: ${captureCase.section}/${captureCase.theme} names '${captureCase.deviceScope}'`,

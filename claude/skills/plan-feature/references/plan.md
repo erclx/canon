@@ -372,7 +372,6 @@ Approved: operator, <YYYY-MM-DD>, in <session name>
 - Take the session name from `canon sessions list --self --json`, since the controller looks the claim up by it.
 - Keep the line outside `## Questions`, since the planner fills no `- Answer:` slot. A line placed after the first section reads as prose and approves nothing.
 - Under the line, `canon tasks plan-answers` launches a blank `needs your call` question and lists it under `deferred`, for the building session to ask at build. A typed answer still wins.
-- A board refuses a plan without the line as `unapproved` only where `canon/config/tasks.toml` sets `require_approval = true`. Elsewhere a blank slot keeps accepting its suggestion.
 
 ## Template
 

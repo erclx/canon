@@ -17,7 +17,7 @@ Step 4 makes `.canon/tmp/pr/review-ui/<number>/<pass>/` and runs every call from
 
 ## The access join
 
-Step 3 reads this section once a rung answers. Read `access` from `canon/config/app-drive.toml` at the main worktree root, since a page needing a write link, a signed-in route, or a demo token shows its start state only behind it. An absent file or key opens the rung as it stands.
+Step 3 reads this section once a rung answers. Read `access` from the `[drive]` table of `canon/config/app.toml` at the main worktree root, or from `app-drive.toml` before it, since a page needing a write link, a signed-in route, or a demo token shows its start state only behind it. An absent table or key opens the rung as it stands.
 
 - Join a value starting with `/` to the rung, and take a full address as it stands. Step 4 opens the joined address alone.
 - Every later route joins to the bare rung, never the joined address, since an `access` holding a query would swallow the path
@@ -134,10 +134,10 @@ A fail names what was expected beside what was read. A not driven never reads as
 A box the pass could not drive because the drive fixture holds no such state is a cause on the branch, never a skip. The building session owes the state, and no other session can add it.
 
 - Name the cause as a missing fixture state, with the state to add and the selector or setup step the box needs
-- Name the project's seed beside the state when `canon/config/preview.json` declares a `seed` command, since the building session lays a drive-only state there
+- Name the project's seed beside the state when `[preview]` in `canon/config/app.toml`, or `preview.json` before it, declares a `seed` command, since the building session lays a drive-only state there
 - Count it as not driven, and never as a fail, since the page may be right
 - An address that did not answer stays a cause off the branch, and a `(local only)` box on a hosted address does too
-- A state no fixture file can hold is the exit, such as one a project with no `canon/config/app-drive.toml` cannot reach inline. Name it a cause off the branch, so the review stays closed.
+- A state no fixture file can hold is the exit, such as one a project with no `[drive]` table cannot reach inline. Name it a cause off the branch, so the review stays closed.
 
 ### A refused address
 

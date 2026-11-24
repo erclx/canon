@@ -21,11 +21,6 @@ Bun.serve({
 console.log('http://localhost:${PORT}/')
 `
 
-// The references key names the fixture alone, so the run with no site named
-// reaches the local page rather than the default list, which needs the network.
-const DESIGN_CONFIG = `references = ["http://localhost:${PORT}/"]
-`
-
 export default scenario({
   config: {
     SANDBOX_SKIP_AUTO_COMMIT: 'true',
@@ -35,7 +30,6 @@ export default scenario({
     default: (ctx) => {
       ctx.write('package.json', PACKAGE)
       ctx.write('server.ts', SERVER)
-      ctx.write('canon/config/design.toml', DESIGN_CONFIG)
       ctx.fixtures('claude', 'design-references', 'default', '01-initial')
       ctx.write('.gitignore', '.canon/\n')
 
@@ -52,9 +46,6 @@ export default scenario({
         `         primary action, and a pinned strip, served by bun run site on port ${PORT}`,
       )
       ctx.log.info(
-        '  canon/config/design.toml names that address under references and nothing else',
-      )
-      ctx.log.info(
         'Before:  install the headless shell once with bunx playwright install chromium, have',
       )
       ctx.log.info(
@@ -65,12 +56,6 @@ export default scenario({
       )
       ctx.log.info(
         `         with bun run site in the background, then capture http://localhost:${PORT}/`,
-      )
-      ctx.log.info(
-        'Or:      /canon:design-references gather references, with the site started the same way,',
-      )
-      ctx.log.info(
-        '         which reaches the fixture through the references key',
       )
       ctx.log.info(
         'Expect:  a references page on the board at .canon/board/, section shots at 320, 834, and',

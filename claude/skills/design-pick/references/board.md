@@ -4,9 +4,9 @@ Read before the first `frameboard` verb a `design-pick` run sends. It carries wh
 
 ## Reaching the board
 
-Resolve `<board>` and `<project>` from the `board` and `project` keys of `canon/config/design.toml`, read at the main worktree root per `${CLAUDE_SKILL_DIR}/references/design-config.md`. A missing file or key falls back to `.canon/board/` and a project named for the surface, as `design-config.md` states.
+Take `<board>` as `.canon/board/` and name `<project>` for the surface per `${CLAUDE_SKILL_DIR}/references/project-name.md`.
 
-- Stop before starting a board when `<board>` came from that fallback, `.canon/board/` is absent, and `.canon/canvas/` exists
+- Stop before starting a board when `.canon/board/` is absent and `.canon/canvas/` exists
 - Report `❌ The board is still at .canon/canvas/. Run canon migrate record-layout --write, then re-run.` on that stop
 - A board started there drafts on an empty page set and leaves the migration a standing collision
 
@@ -37,11 +37,11 @@ frameboard serve --root <board> --no-open --tokens <stylesheet> --json
 
 The board's home lists every project, and a home folder gathers the projects of one kind of run so the operator finds a past drive without scrolling past every round. Each kind of run takes one folder, never one per project.
 
-| Run                | Home folder                                                                   |
-| ------------------ | ----------------------------------------------------------------------------- |
-| `app-drive`        | The `board-folder` key of `canon/config/app-drive.toml`, `Drives` when absent |
-| A groundwork track | `Groundwork`, holding each drawing track's `groundwork-<nn>` project          |
-| A pick round       | None, since a round draws in its one project, opened by name                  |
+| Run                | Home folder                                                          |
+| ------------------ | -------------------------------------------------------------------- |
+| `app-drive`        | The `board-folder` key of the `[drive]` table, `Drives` when absent  |
+| A groundwork track | `Groundwork`, holding each drawing track's `groundwork-<nn>` project |
+| A pick round       | None, since a round draws in its one project, opened by name         |
 
 A run that takes a folder files its project there once the project exists, whether this run added it or found it on the board.
 

@@ -1,0 +1,5 @@
+{
+  "writes": ["data/state"],
+  "env": "APP_STATE_ROOT",
+  "seed": ["bun", "scripts/seed.ts"]
+}

@@ -40,7 +40,7 @@ canon migrate record-layout --json
 canon migrate record-layout --write --json
 ```
 
-A project holding both folders gets a collision, and neither moves. A `board` key in `design.toml` naming `.canon/canvas` stays as written, so update it by hand.
+A project holding both folders gets a collision, and neither moves.
 
 ## Move rules off the flat layout, once
 
@@ -103,6 +103,23 @@ canon migrate surface-roots --write --json
 ```
 
 It moves each surface with `git mv` and repoints every tracked citation. No other command notices a surface left at `.claude/`.
+
+## Merge the app config into one file, once
+
+One app's settings sat in up to five files under `canon/config/`. They now sit as tables of `canon/config/app.toml`, being `[drive]`, `[preview]`, `[health]`, `[painted]`, and `[device-classes]`.
+
+```bash
+canon migrate app-config --json
+canon migrate app-config --write --json
+```
+
+The verb keeps each TOML comment beside its key and writes a JSON file out as TOML. Three keys change spelling. `health` becomes `paths` under `[health]`, and `painted`, `unpainted`, and `reelInputs` become `paths`, `exclude`, and `reel-inputs` under `[painted]`. A drive target moves from `[targets.<name>]` to `[drive.targets.<name>]`.
+
+- It refuses when a file does not parse or `app.toml` already holds a table whose old file still exists, so merge that pair by hand
+- It lists each tracked line still naming an old file and rewrites none, since the wording usually names a key the move changed
+- The readers still fall back to an old file until a later release retires it, and `canon migrate status` lists a project that has not moved
+- `design.toml` and `tasks.toml` under `canon/config/` are no longer read. A round draws on `.canon/board/`, and a board can no longer require an `Approved:` line on every plan.
+- `canon tasks plan-answers` and `canon tasks launchable` no longer refuse as `unapproved` or `bad-config`, so a caller matching either reason never sees it
 
 ## Deny subagents and merges, and turn auto memory off, once
 

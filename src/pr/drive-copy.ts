@@ -14,9 +14,7 @@ import { createConnection } from 'node:net'
 import { dirname, isAbsolute, join, relative, sep } from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { execa } from 'execa'
-
-/** Where a project names the folders its running preview saves into. */
-export const PREVIEW_CONFIG_REL = join('canon', 'config', 'preview.json')
+import { readAppTable } from '@/config/app'
 
 /** The variable a preview server reads for the copy root when the project names none. */
 export const DEFAULT_PREVIEW_ENV = 'CANON_PREVIEW_ROOT'
@@ -109,29 +107,25 @@ function isArgv(value: unknown): value is readonly string[] {
 }
 
 /**
- * Reads `canon/config/preview.json`, refusing rather than reading as absent on a
- * bad parse, a path leaving the worktree, a `keep` outside or equal to a `writes`
- * path, or a `serve` with no `port` to wait on.
+ * Refuses rather than reading as absent on a bad parse, a path leaving the worktree, a `keep` outside or equal to a
+ * `writes` path, or a `serve` with no `port` to wait on.
  */
 export function loadPreviewConfig(worktree: string): PreviewConfigRead {
-  const path = join(worktree, PREVIEW_CONFIG_REL)
-  if (!existsSync(path)) return { kind: 'absent' }
-
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(readFileSync(path, 'utf8'))
-  } catch {
+  const read = readAppTable(worktree, 'preview')
+  if (read.kind === 'absent') return { kind: 'absent' }
+  if (read.kind === 'unparsable') {
     return {
       kind: 'refused',
       reason: 'bad-config',
-      detail: `${PREVIEW_CONFIG_REL} does not parse as JSON.`,
+      detail: `${read.source} ${read.detail}.`,
     }
   }
+  const { value: parsed, source, spell } = read
   if (typeof parsed !== 'object' || parsed === null) {
     return {
       kind: 'refused',
       reason: 'bad-config',
-      detail: `${PREVIEW_CONFIG_REL} is not an object.`,
+      detail: `${source} is not an object.`,
     }
   }
 
@@ -150,7 +144,7 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
     return {
       kind: 'refused',
       reason: 'bad-config',
-      detail: `${PREVIEW_CONFIG_REL} carries no "writes" list of paths.`,
+      detail: `${source} carries no "${spell('writes')}" list of paths.`,
     }
   }
   if (
@@ -160,14 +154,14 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
     return {
       kind: 'refused',
       reason: 'bad-config',
-      detail: `${PREVIEW_CONFIG_REL} names a "keep" that is not a list of paths.`,
+      detail: `${source} names a "${spell('keep')}" that is not a list of paths.`,
     }
   }
   if (env !== undefined && (typeof env !== 'string' || env === '')) {
     return {
       kind: 'refused',
       reason: 'bad-config',
-      detail: `${PREVIEW_CONFIG_REL} names an "env" that is not a variable name.`,
+      detail: `${source} names an "${spell('env')}" that is not a variable name.`,
     }
   }
 
@@ -175,7 +169,7 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
     return {
       kind: 'refused',
       reason: 'bad-config',
-      detail: `${PREVIEW_CONFIG_REL} names a "seed" that is not a list opening on a command.`,
+      detail: `${source} names a "${spell('seed')}" that is not a list opening on a command.`,
     }
   }
 
@@ -183,7 +177,7 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
     return {
       kind: 'refused',
       reason: 'bad-config',
-      detail: `${PREVIEW_CONFIG_REL} names a "serve" that is not a list opening on a command.`,
+      detail: `${source} names a "${spell('serve')}" that is not a list opening on a command.`,
     }
   }
   if (
@@ -196,14 +190,14 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
     return {
       kind: 'refused',
       reason: 'bad-config',
-      detail: `${PREVIEW_CONFIG_REL} names a "port" that is not a whole number from 1 to 65535.`,
+      detail: `${source} names a "${spell('port')}" that is not a whole number from 1 to 65535.`,
     }
   }
   if (serve !== undefined && port === undefined) {
     return {
       kind: 'refused',
       reason: 'bad-config',
-      detail: `${PREVIEW_CONFIG_REL} names a "serve" with no "port", so a started server has no address to wait on.`,
+      detail: `${source} names a "${spell('serve')}" with no "${spell('port')}", so a started server has no address to wait on.`,
     }
   }
 
@@ -212,7 +206,7 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
     return {
       kind: 'refused',
       reason: 'unsafe-path',
-      detail: `${PREVIEW_CONFIG_REL} names "${unsafe}", which leaves the worktree.`,
+      detail: `${source} names "${unsafe}", which leaves the worktree.`,
     }
   }
 
@@ -223,7 +217,7 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
     return {
       kind: 'refused',
       reason: 'bad-config',
-      detail: `${PREVIEW_CONFIG_REL} keeps "${stray}", which no "writes" path holds.`,
+      detail: `${source} keeps "${stray}", which no "${spell('writes')}" path holds.`,
     }
   }
 
@@ -234,7 +228,7 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
     return {
       kind: 'refused',
       reason: 'bad-config',
-      detail: `${PREVIEW_CONFIG_REL} keeps "${clash}", which is also a "writes" path, so the rebuild would never reset it.`,
+      detail: `${source} keeps "${clash}", which is also a "${spell('writes')}" path, so the rebuild would never reset it.`,
     }
   }
 

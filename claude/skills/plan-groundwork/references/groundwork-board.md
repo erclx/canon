@@ -16,9 +16,9 @@ Draw only when an open question is a judgment the operator settles by looking, s
 
 ## Where it draws
 
-A track draws on the board when `canon/config/design.toml` exists or `.canon/board/` exists at the main root. With neither, it starts no server and draws standalone HTML mocks under `scripts/mocks/<question>/`, and the README's `## Method` says the track drew without a board.
+A track draws on the board when `.canon/board/` exists at the main root. Without it, it starts no server and draws standalone HTML mocks under `scripts/mocks/<question>/`, and the README's `## Method` says the track drew without a board.
 
-Reach and start the board per `board.md`, with two differences. `<project>` is `groundwork-<nn>`, the track's own ordinal, never the `project` key of `design.toml`, so a track's pages stay apart from pick rounds and accepted frames.
+Reach and start the board per `board.md`, with two differences. `<project>` is `groundwork-<nn>`, the track's own ordinal, never a name a pick round derives, so a track's pages stay apart from pick rounds and accepted frames.
 
 - Read `frameboard list --root <board> --json` with no `--project`, run `project add` when the list lacks the project, and name it in the README before the first frame
 - File the project under the `Groundwork` home folder once it exists, made or found, per `## Home folders` in `board.md`

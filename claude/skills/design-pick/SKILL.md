@@ -43,7 +43,7 @@ A round drafted with nothing real in front of it comes back generic, so gather r
 Every arm of a round sits as one group of frames on one board page, the groups side by side. The operator judges that page, never a set of separate images compared from memory.
 
 1. Start the board the way `references/board.md` states, unless this run already has. Note whether this run started the server, read off `reused`, since Step 6 ends only a server this run started.
-2. Resolve `<project>` per `references/design-config.md`. Run `frameboard list --root <board> --json` with no `--project`, and `frameboard project add <project> --root <board> --json` if absent.
+2. Resolve `<project>` per `references/project-name.md`. Run `frameboard list --root <board> --json` with no `--project`, and `frameboard project add <project> --root <board> --json` if absent.
 3. Add the round's page with `frameboard page add <page>` and record its `ref` on the run's list of pages. A `name-taken` refusal means the name is somebody else's, so take the next free suffix.
 4. Add each arm at each round width as `frameboard frame add <page>/arm-<id>-<px> --device on --scroll`, laid out per `${CLAUDE_SKILL_DIR}/references/drawing.md`. Step 6's archive keys on the names.
 5. Write each frame's whole document to the `path` the add verb reported. From a linked worktree, take the heredoc route `session-worktree` gives for a main-root write.
@@ -152,7 +152,7 @@ Offer one prototype once the pick settles on an app or product surface with more
 
 The picked round is the final one unless Step 4 resolved a revert. Archiving any other page lets item 6 delete the winning arm with nothing kept, and a variant left on the board is a second design nobody maintains.
 
-The prototype page stays on every board, since later changes land on it first. A board `canon/config/design.toml` names also keeps its picked page, per `${CLAUDE_SKILL_DIR}/references/design-config.md`.
+The prototype page stays on the board, since later changes land on it first.
 
 ## What this delegates
 

@@ -256,6 +256,21 @@ describe('canon pr local', () => {
     })
   })
 
+  it('should refuse as invalid-config when the [health] table holds a bad path', async () => {
+    mkdirSync(join(repoRoot, 'canon', 'config'), { recursive: true })
+    writeFileSync(
+      join(repoRoot, 'canon', 'config', 'app.toml'),
+      '[health]\npaths = ["api/health"]\n',
+    )
+
+    const outcome = await runLocal([])
+
+    expect(outcome).toEqual({
+      record: expect.objectContaining({ reason: 'invalid-config' }),
+      exit: 1,
+    })
+  })
+
   it('should refuse as no-server when nothing listens inside the worktree', async () => {
     const outcome = await runLocal([])
 

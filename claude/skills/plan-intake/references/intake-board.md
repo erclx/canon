@@ -17,14 +17,14 @@ Draw only when an item's fix is a choice the operator settles by looking, such a
 
 ## Where it draws
 
-A pass draws on the board when `canon/config/design.toml` exists or `.canon/board/` exists at the main root. With neither, it starts no board and says on the item that none exists, since a standalone mock is outside the folder and the write scope.
+A pass draws on the board when `.canon/board/` exists at the main root. Without it, it starts no board and says on the item that none exists, since a standalone mock is outside the folder and the write scope.
 
 Reach and start the board per `board.md`, and pass `--root <board>` on every `frameboard` verb, since a verb sent with no root creates a `.frameboard/` folder wherever the session stands. The drawing skill's own start step names no root, so this file's rule decides.
 
 - `<project>` is `drive-<nn>`, the default `${CLAUDE_SKILL_DIR}/../app-drive/references/config.md` gives with the intake's ordinal
-- Never take the `project` key of `design.toml`, so a pass's pages stay apart from pick rounds and accepted frames
+- Never take a name a pick round derives, so a pass's pages stay apart from pick rounds and accepted frames
 - Read `frameboard list --root <board> --json` with no `--project`, run `project add` when the list lacks the project, and name it in the overview before the first frame
-- File it under the `board-folder` key of `canon/config/app-drive.toml`, `Drives` when absent, per `## Home folders` in `board.md`, so a drive and a pass land in one place
+- File it under the `board-folder` key of the `[drive]` table, `Drives` when absent, per `## Home folders` in `board.md`, so a drive and a pass land in one place
 - Note `reused` off the serve record
 
 ### A project another intake left

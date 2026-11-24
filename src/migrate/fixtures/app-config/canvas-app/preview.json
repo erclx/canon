@@ -1,0 +1,5 @@
+{
+  "writes": ["fixtures/demo"],
+  "keep": ["fixtures/demo/.run"],
+  "seed": ["bun", "scripts/seed.ts"]
+}

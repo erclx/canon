@@ -1,0 +1,22 @@
+[drive]
+launch = "bun run build && bun run preview"
+data = "test/fixtures/boards/sample"
+personas = ["a developer in the browser"]
+access = "/api/open"
+
+[preview]
+writes = ["test/fixtures/boards/sample"]
+keep = ["test/fixtures/boards/sample/.run"]
+seed = ["bun", "scripts/seed.ts"]
+
+[health]
+paths = ["/api/health"]
+page-only = ["web"]
+
+[painted]
+paths = ["src/client/**/*.ts"]
+exclude = ["src/client/**/fixtures.ts"]
+
+[device-classes]
+default = ["desktop"]
+why = "The board is a canvas"

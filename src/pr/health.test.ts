@@ -103,3 +103,36 @@ describe('readHealthPaths', () => {
     })
   })
 })
+
+describe('readHealthPaths from the [health] table', () => {
+  function writeApp(toml: string): void {
+    mkdirSync(join(ROOT, 'canon', 'config'), { recursive: true })
+    writeFileSync(join(ROOT, 'canon', 'config', 'app.toml'), toml)
+  }
+
+  it('should read paths and page-only from the table', () => {
+    writeApp('[health]\npaths = ["/api/health"]\npage-only = ["web"]\n')
+
+    expect(readHealthPaths(ROOT)).toEqual({
+      kind: 'paths',
+      paths: ['/api/health'],
+      pageOnly: ['web'],
+    })
+  })
+
+  it('should name the table key when paths is invalid', () => {
+    writeApp('[health]\npaths = ["api/health"]\n')
+
+    expect(readHealthPaths(ROOT)).toEqual({
+      kind: 'invalid',
+      reason:
+        'canon/config/app.toml needs health.paths as a list of paths, each starting with a single /',
+    })
+  })
+
+  it('should read an app.toml with no [health] table as no declaration', () => {
+    writeApp('[drive]\nlaunch = "bun run dev"\n')
+
+    expect(readHealthPaths(ROOT)).toEqual({ kind: 'none', pageOnly: [] })
+  })
+})

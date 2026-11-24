@@ -137,7 +137,7 @@ export async function readEvidenceGate(
 }
 
 /**
- * The classes `canon/config/device-classes.toml` gives the painted paths a change touched, the default for none, read by
+ * The classes `[device-classes]` in `canon/config/app.toml` gives the painted paths a change touched, the default for none, read by
  * the lift and the evidence comment alike. A config the reader refuses warns and reads as all three, so a reel is
  * owed at every width rather than fewer.
  */

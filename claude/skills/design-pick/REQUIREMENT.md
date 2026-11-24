@@ -29,7 +29,7 @@ The pick lands only once it holds at every width, and the run leaves a record of
 
 - No pick folds into the surface while any of its frames scrolls sideways at the width it was drawn at or at 320, and the hold names that width
 - The pick comes through the structured question surface with the recommendation first and every option's cost, and the winner lands in one change
-- Rounds sit on the board the design config names, each openable until the pick
+- Rounds sit on `.canon/board/`, each openable until the pick
 - The picked arms and the references page are archived at the main root before the run's pages go
 
 ### The prototype

@@ -3,12 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it } from 'vitest'
-import {
-  DEFAULT_PAINTED,
-  isPainted,
-  loadPaintedPatterns,
-  PAINTED_CONFIG_REL,
-} from '@/pr/painted'
+import { DEFAULT_PAINTED, isPainted, loadPaintedPatterns } from '@/pr/painted'
 
 describe('isPainted', () => {
   it.each([
@@ -49,15 +44,40 @@ describe('loadPaintedPatterns', () => {
     for (const root of roots.splice(0)) rmSync(root, { recursive: true })
   })
 
-  function rootWith(config?: string): string {
+  function rootWith(config?: string, file = 'painted.json'): string {
     const root = mkdtempSync(join(tmpdir(), 'painted-'))
     roots.push(root)
     if (config !== undefined) {
       mkdirSync(join(root, 'canon', 'config'), { recursive: true })
-      writeFileSync(join(root, PAINTED_CONFIG_REL), config)
+      writeFileSync(join(root, 'canon', 'config', file), config)
     }
     return root
   }
+
+  it('should read paths, exclude, and reel-inputs from the [painted] table', () => {
+    const patterns = loadPaintedPatterns(
+      rootWith(
+        [
+          '[painted]',
+          'paths = ["**/*.mdx"]',
+          'exclude = ["docs/drafts/**"]',
+          'reel-inputs = ["bun.lock"]',
+          '',
+        ].join('\n'),
+        'app.toml',
+      ),
+    )
+
+    expect(isPainted('docs/page.mdx', patterns)).toBe(true)
+    expect(isPainted('docs/drafts/page.mdx', patterns)).toBe(false)
+    expect(patterns.reelInputs).toEqual(['bun.lock'])
+  })
+
+  it('should keep the default when app.toml does not parse', () => {
+    expect(loadPaintedPatterns(rootWith('[painted\n', 'app.toml'))).toEqual(
+      DEFAULT_PAINTED,
+    )
+  })
 
   it('should return the default when the project has no override', () => {
     expect(loadPaintedPatterns(rootWith())).toEqual(DEFAULT_PAINTED)

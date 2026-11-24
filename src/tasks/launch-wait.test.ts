@@ -278,29 +278,4 @@ describe('waitForLaunchable', () => {
     })
     expect(sleeps()).toBe(0)
   })
-
-  it('should end on unapproved at once on a board requiring approval', async () => {
-    mkdirSync(join(ROOT, 'canon', 'config'), { recursive: true })
-    await writeFile(
-      join(ROOT, 'canon', 'config', 'tasks.toml'),
-      'require_approval = true\n',
-      'utf8',
-    )
-    await writePlan('row')
-    await writeTask('v1.1-row', 'Plan: [feature-row](../plans/feature-row.md)')
-    const { clock, sleeps } = fakeClock()
-
-    const outcome = await waitForLaunchable(ROOT, 'v1.1-row', {
-      waitSeconds: 1800,
-      clock,
-      pollMs: 30_000,
-    })
-
-    expect(outcome).toMatchObject({
-      ok: false,
-      reason: 'unapproved',
-      waitedSeconds: 0,
-    })
-    expect(sleeps()).toBe(0)
-  })
 })

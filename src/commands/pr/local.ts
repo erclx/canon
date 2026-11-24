@@ -2,7 +2,7 @@ import type { Command } from 'commander'
 import { resolve } from 'node:path'
 import { machineListenerReader } from '@/listeners/machine'
 import { findEvidenceCommentId } from '@/pr/evidence'
-import { LOCAL_CONFIG_REL, readHealthPaths } from '@/pr/health'
+import { readHealthPaths } from '@/pr/health'
 import {
   dropAddressLine,
   maskLocalAddress,
@@ -42,7 +42,8 @@ const LOCAL_REFUSALS: Record<
   'no-server': `Nothing listening inside this worktree served an HTML page within ${LOCAL_PROBE_TIMEOUT_MS / 1000} seconds. Start the dev server here and re-run to get a link.`,
   unhealthy:
     'A page answered inside this worktree, but a health path it declares failed. Start what the page reaches and re-run to get a link.',
-  'invalid-config': `${LOCAL_CONFIG_REL} cannot be read, so no health path was checked and no link is given. Fix or delete it and re-run. health takes paths starting with /, and page-only takes folders relative to the repository.`,
+  'invalid-config':
+    'The [health] table of canon/config/app.toml, or canon/config/local.toml before it, cannot be read, so no health path was checked and no link is given. Fix or delete it and re-run. paths takes paths starting with /, and page-only takes folders relative to the repository.',
   'no-listener-reader':
     'This machine offers neither lsof nor /proc, so no listening socket could be read. Nothing is posted.',
   'gh-failed':
@@ -72,30 +73,31 @@ export function registerLocal(pr: Command): void {
         'reload socket answering in the same tree. Every port is requested at',
         `once, and each request waits ${LOCAL_PROBE_TIMEOUT_MS / 1000} seconds for an answer.`,
         '',
-        'A project that declares `port` in canon/config/preview.json is read',
-        'there first: the declared port plus the offset scripts/worktree-port.sh',
-        'prints for this worktree, or 0 with no helper. When a listener inside',
-        'this worktree holds that port, it alone is requested, and it answers',
-        'for the worktree, health paths included. The scan runs only when the',
-        'port serves no page or nothing here listens on it, and `source` on the',
-        'record reads `declared` or `scan`. A preview.json or helper that',
-        'refuses warns on stderr and leaves the scan to answer.',
+        'A project that declares `port` under [preview] in canon/config/app.toml',
+        'is read there first: the declared port plus the offset',
+        'scripts/worktree-port.sh prints for this worktree, or 0 with no helper.',
+        'When a listener inside this worktree holds that port, it alone is',
+        'requested, and it answers for the worktree, health paths included. The',
+        'scan runs only when the port serves no page or nothing here listens on',
+        'it, and `source` on the record reads `declared` or `scan`. A [preview]',
+        'table or helper that refuses warns on stderr and leaves the scan to',
+        'answer.',
         '',
-        'A project can declare paths the page must also serve, in',
-        'canon/config/local.toml as health = ["/api/health"]. Each is requested',
+        'A project can declare paths the page must also serve, under [health]',
+        'in canon/config/app.toml as paths = ["/api/health"]. Each is requested',
         "on the page's own port, redirects followed, and only a final 2xx",
         'passes. A page failing one is skipped for the next page port, and the',
         "refusal names the lowest page port's first failing path. An absent",
-        'file or an empty list checks the page alone.',
+        'table or an empty list checks the page alone. A project that has not',
+        'run canon migrate app-config is read from canon/config/preview.json',
+        'and canon/config/local.toml, where paths is spelled health.',
         '',
         'A page served by a static server answers none of those paths, so',
         'page-only = ["web"] lists repository-relative folders whose',
         'listeners skip them and are found on the page probe alone. The match',
         "reads the listener's working directory on whole path segments, so web",
         'does not cover webapp, and a server started from the root with a',
-        'working-directory flag still takes the health check. Keep health',
-        'beside page-only until the binary a project runs carries this key,',
-        'since an older one refuses a file holding page-only alone.',
+        'working-directory flag still takes the health check.',
         '',
         'A process in a sibling worktree, in the main checkout seen from a',
         'linked worktree, or in a linked worktree seen from the main checkout',
@@ -123,9 +125,9 @@ export function registerLocal(pr: Command): void {
         '  unhealthy           a page answered but a declared health path did',
         '                      not, with `port`, `path`, and `status`, which',
         '                      is null on a timeout',
-        '  invalid-config      canon/config/local.toml is not valid TOML,',
-        '                      health is not a list of paths starting with /,',
-        '                      or page-only is not a list of relative folders',
+        '  invalid-config      the [health] table is not valid TOML, paths is',
+        '                      not a list of paths starting with /, or',
+        '                      page-only is not a list of relative folders',
         '  removed             --remove dropped the line',
         '  no-comment          --remove found no marked comment, a no-op',
         '  no-line             --remove found no address line, a no-op',
@@ -249,7 +251,7 @@ async function runLocal(opts: LocalOptions): Promise<number> {
 }
 
 /**
- * The port `canon/config/preview.json` declares plus this worktree's offset, or
+ * The port the `[preview]` table declares plus this worktree's offset, or
  * undefined when none is declared. A config or helper that refuses warns and
  * leaves the scan to answer, since the port only narrows where the scan looks.
  */

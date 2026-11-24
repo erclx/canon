@@ -43,7 +43,7 @@ The throwaway copy Step 1 may build sits outside the repository and is removed a
 
 ## Step 1: reach the start state
 
-Read `${CLAUDE_SKILL_DIR}/references/config.md` for what `canon/config/app-drive.toml` gives a take and what to ask when it is absent.
+Read `${CLAUDE_SKILL_DIR}/references/config.md` for what the `[drive]` table gives a take and what to ask when it is absent.
 
 - Take an address the ask names as it stands, such as the preview server a pull request worker already runs, and confirm it answers with `canon pr local --json` or a fetch
 - Otherwise build a throwaway copy and serve it per `${CLAUDE_SKILL_DIR}/../app-drive/references/isolate.md`. Skip its lines about `drive.json` and the intake folder.
@@ -78,7 +78,7 @@ Read `${CLAUDE_SKILL_DIR}/references/harness.md` beside it when a beat takes the
 List the state each beat opens on, such as a filled list or a failed save, and confirm the served page shows it before writing the beat. The check reads the page and adds no question to Step 2's approval.
 
 - Report a missing state to the operator rather than filming a take that fails on it, naming the state and the beat
-- Route it to the `seed` key of `canon/config/preview.json`, per `canon pr drive-copy --help`, which the building session extends in its own pull request, since this skill writes no tracked file
+- Route it to the `seed` key under `[preview]`, per `canon pr drive-copy --help`, which the building session extends in its own pull request, since this skill writes no tracked file
 - A seeded state reaches a take only through an address serving the drive copy, Step 1's first route, since the throwaway copy runs no seed
 - On the throwaway copy, or with no seed declared, the committed fixture or a setup step inside the beat carries the state
 - Leave out a beat whose state the page still lacks and name that state in the handoff, so a re-film picks it up once the state lands. A state no seed can lay takes the same exit.

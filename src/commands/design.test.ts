@@ -37,7 +37,7 @@ async function runClasses(root: string, args: string[]) {
 
 async function writeConfig(root: string, text: string): Promise<void> {
   await mkdir(join(root, 'canon', 'config'), { recursive: true })
-  await writeFile(join(root, 'canon', 'config', 'device-classes.toml'), text)
+  await writeFile(join(root, 'canon', 'config', 'app.toml'), text)
 }
 
 async function git(root: string, args: string[]): Promise<void> {
@@ -67,11 +67,10 @@ describe('canon design classes', { timeout: RUN_TIMEOUT_MS }, () => {
     })
   })
 
-  it('reads its own file beside a design.toml holding the board keys', async () => {
-    await writeConfig(root, SCOPED)
-    await writeFile(
-      join(root, 'canon', 'config', 'design.toml'),
-      'board = ".canon/board"\nproject = "landing"\nreferences = ["https://linear.app/"]\n',
+  it('reads its table beside the other tables of app.toml', async () => {
+    await writeConfig(
+      root,
+      `[drive]\nlaunch = "bun run dev"\n\n[painted]\npaths = ["web/**"]\n\n${SCOPED}`,
     )
 
     const run = await runClasses(root, ['web/index.html', '--json'])
@@ -131,7 +130,7 @@ describe('canon design classes', { timeout: RUN_TIMEOUT_MS }, () => {
       reason: 'unknown-class',
       field: 'device-classes.default',
     })
-    expect(run.stderr).toContain('canon/config/device-classes.toml')
+    expect(run.stderr).toContain('canon/config/app.toml')
   })
 
   it('reads the painted paths a branch changed with --changed', async () => {

@@ -34,7 +34,7 @@ paths = [
 absent = [".git/worktrees/*/HEAD"]
 
 # Any write outside the skill's scratch fails, the stand-in for "no tracked file
-# changed". The seed's `src/index.html` and `canon/config/app-drive.toml` are
+# changed". The seed's `src/index.html` and `canon/config/app.toml` are
 # the files a run serving from the checkout or writing the config would touch.
 write_scope = [".canon/video/**"]
 

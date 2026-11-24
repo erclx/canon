@@ -45,7 +45,7 @@ A skip whose cause is a state the drive fixture lacks, such as `target-missing` 
 - Film a beat from a box carrying `(needs fixture)` only if the state answers, and otherwise skip it as owed
 - Report the owed skip on the evidence comment's `--reel-skip` line and in the closing report. Name the state, selector, or setup step the beat needed, and the selector a `target-missing` beat tried.
 - Never report it as a plain skip, since the next pull request meets the same fixture and skips again
-- Name the project's seed as where the state goes when `canon/config/preview.json` declares a `seed` command, since a drive-only state laid there leaves the committed fixture alone
+- Name the project's seed as where the state goes when the `[preview]` table declares a `seed` command, since a drive-only state laid there leaves the committed fixture alone
 - Read `canon pr drive-copy --help` for what the seed runs and when, rather than restating it on the comment
 
 ## Check each still
