@@ -113,6 +113,7 @@ A worker that improvised this read polled issue comments, never saw a UI close p
 - Read review state only through `canon pr review-state`, never off issue comments, where neither review family posts
 - Enter `canon pr review-state <number> --wait 1200 --json` again in the background after asking for the re-review, the same wait `auto-ship` Step 7 runs
 - Send the controller that record on `timeout` rather than waiting on, since a silent wait past the deadline is the stall the verb exists to end
+- Hold `canon pr review-state <number> --wait-standing 1200 --json` in the background once both families are covered, rebasing on its wake, per `${CLAUDE_SKILL_DIR}/references/standing-wait.md`
 
 ### Addressing
 

@@ -16,6 +16,7 @@ The channel fails on the worker's side. Blocks open prompts nobody is attached t
 - Session scratch resolves at the main worktree root, and a plan that fails to resolve is reported unreadable from there rather than absent. A task list, where the host has one, tracks each slice.
 - The announcement carries the number, branch, task, reach, any uncleared spend, and any row the build turned up, and a painted diff has its preview server running before the pull request opens
 - A block reaches the controller, ending the turn in a background launch, a fan-in member's done message carries its branch and head commit, and a review wait that times out reaches the controller
+- A branch the base moves under after both reviews close is rebased by its own worker on a standing wait, with no controller message
 - The plan's scope freezes at dispatch, and a late ask is sorted into a defect, a follow-up row, or an addition on the operator's word
 - A refusal of an instruction the tree contradicts carries its evidence, and a talk launch puts its judgment calls to the operator in the session
 
