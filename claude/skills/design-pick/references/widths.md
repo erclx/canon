@@ -9,7 +9,7 @@ Read before a `design-pick` round adds its first frame, again before a pick fold
 
 ## Picking the widths
 
-Draw every arm at one width per device class. Take the widths from the `Draw widths:` line in the `## Layout` section of `canon/DESIGN.md` at the main worktree root, which names phone, tablet, and desktop in that order.
+Draw every arm at one width per device class the project supports. Read the classes from the `Device classes:` line in the `## Layout` section of `canon/DESIGN.md` at the main worktree root, and all three when the record carries none. Take the widths from the `Draw widths:` line beside it, which names phone, tablet, and desktop in that order.
 
 | Class   | Fallback |
 | ------- | -------- |
@@ -19,13 +19,14 @@ Draw every arm at one width per device class. Take the widths from the `Draw wid
 
 The fallback is the set the screenshot harness every target syncs commits as evidence, so a drawn frame lines up with a committed still. The harness also sweeps 1536 into a folder nobody commits, and a round draws no frame there.
 
-- Fill a class the line names no width for from the fallback column
-- Take all three fallbacks when the document is absent, carries no `## Layout`, or its layout carries no `Draw widths:` line
+- Draw no frame for a class the `Device classes:` line leaves out, even where `Draw widths:` names a width for it
+- Fill a supported class the line names no width for from the fallback column
+- Take the fallbacks for every supported class when the document is absent, carries no `## Layout`, or its layout carries no `Draw widths:` line
 - Say in the run's output which widths the round draws and which source gave each
 
 A `--widths` linked width draws no device, so each class takes its own frame, added with its own `--device on`. See `${CLAUDE_SKILL_DIR}/references/drawing.md` for the add.
 
-One width per class keeps the round's frame count at three times its arms. A width between two classes rarely changes a pick, and drawing it grows the board and the composite for no new answer.
+One width per class keeps the round's frame count at most three times its arms. A width between two classes rarely changes a pick, and drawing it grows the board and the composite for no new answer.
 
 ### Where the fallback comes from
 
@@ -37,15 +38,15 @@ Each width is the narrow end of its class in a ranked usage table, since a frame
 
 ### The 320 check
 
-A round draws no 320 frame, and every pick is still measured at 320 for sideways scroll, as the hold below states. 320 is the reflow floor, so a phone frame drawn at 390 that scrolls at 320 fails.
+A round draws no 320 frame, and every pick is still measured at 320 for sideways scroll, as the hold below states. 320 is the reflow floor, so a phone frame drawn at 390 that scrolls at 320 fails. A project whose `Device classes:` line leaves phone out skips the 320 measure, since it draws no phone frame.
 
 ## Drawing the tablet frame
 
-Draw a tablet frame in the desktop form first. Fall back to the phone form at that width only when the desktop form scrolls sideways there, and say which form the frame took.
+Draw a tablet frame only when the project supports tablet. Draw it in the desktop form first. Fall back to the phone form at that width only when the desktop form scrolls sideways there, and say which form the frame took.
 
 ## Holding a pick that scrolls sideways
 
-No pick folds into the surface until every one of its frames renders with no sideways scroll, per [WCAG 2.2 Reflow](https://www.w3.org/TR/WCAG22/#reflow). Measure each of the picked arm's frames at the width it was drawn at, and the phone frame again at 320.
+No pick folds into the surface until every one of its frames renders with no sideways scroll, per [WCAG 2.2 Reflow](https://www.w3.org/TR/WCAG22/#reflow). Measure each of the picked arm's frames at the width it was drawn at, and the phone frame again at 320 where one was drawn.
 
 Open each frame at the address the board serves, never at its file. `canon browser` refuses a local file path, and the eval then reads `about:blank`, which has no overflow and passes every width. Take the address from the `url` that `frameboard serve --json` returned, including a board another session serves (`reused: true`).
 

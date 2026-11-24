@@ -11,6 +11,7 @@ Read by `reel.md` once the beats are filtered, before they are ordered. One reel
 
 A box films at the width its `<route>, <width>:` opening names, even one outside the set such as 834, and at 1280 when it names none. Group the filmable boxes by that width, and film one reel per group.
 
+- Drop a width whose device class the `Device classes:` line in `canon/DESIGN.md` leaves out, since `canon pr lift` owes no reel there, and report the box that named it
 - Film the widths narrowest first, so the comment reads them in that order
 - Pass `--viewport` at 390x844, 768x1024, 1280x800, or 900 tall otherwise, and `--reel-width <width>` under 960
 

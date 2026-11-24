@@ -91,7 +91,12 @@ Add either optional section, and the one line Layout may carry, when the project
 
 - `## Layout`: page width, breakpoints, and grid rules as current constraints. `ui-craft` captures at these, and at 390, 768, and 1280 for a project declaring none.
 - `Draw widths:`, a line inside `## Layout` naming the phone, tablet, and desktop widths a board draws at, which `design-pick` reads
+- `Device classes:`, a line inside `## Layout` naming the classes the project supports, such as `Device classes: desktop` or `Device classes: tablet, desktop`. A record without it supports all three.
 - `## Mark`: the logo's construction rules and the files that carry it
+
+Every surface that picks a width reads `Device classes:`, being the board, the checklist, the reels, and the screenshot harness. A reader places a width under 600 in phone, 600 to 839 in tablet, and 840 and up in desktop, and refuses a name outside the three rather than dropping a class.
+
+Declare fewer only for content that needs a two-dimensional layout, such as a canvas or a drawing tool. Leaving phone out also drops the 320 reflow check, since WCAG Reflow exempts that content.
 
 ## The uncertainty tag
 
