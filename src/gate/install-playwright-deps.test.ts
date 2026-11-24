@@ -24,12 +24,16 @@ const hasTimeout = spawnSync('timeout', ['--version']).status === 0
 let fixture: string
 let bin: string
 let log: string
+let mirrors: string
 
 const stubBin = (name: string, body: string): void => {
   writeFileSync(join(bin, name), `#!/usr/bin/env bash\n${body}\n`, {
     mode: 0o755,
   })
 }
+
+const readMirrors = (): string[] =>
+  readFileSync(mirrors, 'utf8').trimEnd().split('\n')
 
 const readLog = (): string[] =>
   existsSync(log) ? readFileSync(log, 'utf8').trim().split('\n') : []
@@ -39,6 +43,7 @@ beforeEach(() => {
   bin = join(fixture, 'bin')
   mkdirSync(bin, { recursive: true })
   log = join(fixture, 'calls.log')
+  mirrors = join(fixture, 'apt-mirrors.txt')
 
   // sudo records its arguments and never escalates
   stubBin('sudo', `echo "sudo $*" >> "${log}"`)
@@ -68,6 +73,7 @@ const runScript = (
     encoding: 'utf8',
     env: {
       ...process.env,
+      APT_MIRRORS_FILE: mirrors,
       INSTALL_ATTEMPT_SECONDS: '1',
       FAKE_LOG: log,
       FAKE_OUTCOMES: outcomesFile,
@@ -133,5 +139,30 @@ describe.skipIf(!hasTimeout)('install-playwright-deps.sh', () => {
     expect(result.status).toBe(2)
     expect(result.stderr).toContain('Usage:')
     expect(readLog()).toEqual([])
+  })
+
+  it('should drop the ec2 mirror before the first attempt and no other', () => {
+    writeFileSync(
+      mirrors,
+      'http://us-east-2.ec2.archive.ubuntu.com/ubuntu/\nhttp://azure.archive.ubuntu.com/ubuntu/\nhttp://archive.ubuntu.com/ubuntu/\n',
+    )
+
+    runScript(['ok'], ['chromium'])
+
+    expect(readMirrors()).toEqual([
+      'http://azure.archive.ubuntu.com/ubuntu/',
+      'http://archive.ubuntu.com/ubuntu/',
+    ])
+  })
+
+  it('should leave the first mirror on a retry', () => {
+    writeFileSync(
+      mirrors,
+      'http://azure.archive.ubuntu.com/ubuntu/\nhttp://archive.ubuntu.com/ubuntu/\n',
+    )
+
+    runScript(['1', 'ok'], ['chromium'])
+
+    expect(readMirrors()).toEqual(['http://archive.ubuntu.com/ubuntu/'])
   })
 })

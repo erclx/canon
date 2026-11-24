@@ -16,11 +16,16 @@ if [ $# -eq 0 ]; then
 fi
 
 attempts=3
+here=$(cd "$(dirname "$0")" && pwd)
 bound=${INSTALL_ATTEMPT_SECONDS:-150}
 
 # The runner image sets these, yet a stalled log shows gaps of minutes, so
 # print what apt actually reads to settle whether they took effect
 apt-config dump | grep -E '^Acquire::(Retries|http::Timeout) ' || true
+
+# A mirror slow enough to hang an attempt is slow again on the next, so the
+# first attempt drops the ec2 mirror and each retry leaves whichever came first
+bash "$here/prefer-archive-mirror.sh" || true
 
 status=0
 for attempt in $(seq 1 "$attempts"); do
@@ -31,6 +36,7 @@ for attempt in $(seq 1 "$attempts"); do
     # A kill during unpack leaves dpkg interrupted, which refuses the next
     # install. Its own failure must not end the loop.
     sudo dpkg --configure -a || echo "dpkg --configure -a failed before attempt ${attempt}" >&2
+    bash "$here/prefer-archive-mirror.sh" --drop-first || true
   fi
 
   status=0

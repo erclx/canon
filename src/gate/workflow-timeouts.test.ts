@@ -24,6 +24,8 @@ const TOOLING_DIR = join(REPO_ROOT, 'tooling')
 // the basename is what names both
 const INSTALL_SCRIPT = 'install-playwright-deps.sh'
 
+const MIRROR_SCRIPT = 'prefer-archive-mirror.sh'
+
 // A stack's workflows reach every target that installs it, so the gate reads
 // them beside canon's own
 const shippedWorkflowDirs = readdirSync(TOOLING_DIR, { withFileTypes: true })
@@ -101,5 +103,16 @@ describe('every workflow', () => {
       .map(({ file, step }) => `${file}: ${step.name}`)
 
     expect(calls).toEqual([])
+  })
+
+  // An AWS-hosted runner lists a degraded ec2 mirror first, and a step reaching apt without the script waits on it. Shipped workflows lean on the hosted image and stay out.
+  it('should call the mirror script in every canon step that runs apt-get install', () => {
+    const bare = allSteps()
+      .filter(({ file }) => file.startsWith('.github/'))
+      .filter(({ step }) => /apt-get install/.test(step.run ?? ''))
+      .filter(({ step }) => !step.run?.includes(MIRROR_SCRIPT))
+      .map(({ file, step }) => `${file}: ${step.name}`)
+
+    expect(bare).toEqual([])
   })
 })

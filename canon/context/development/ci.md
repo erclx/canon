@@ -35,7 +35,7 @@ Runs `🛡️ Static Checks` on Linux and `🍎 macOS Unit Tests` beside it, nei
 
 A third job runs `bun run test:e2e` for the `*.e2e.test.ts` suites, and a Markdown-only pull request skips it. `scripts/ci/e2e-scope.ts` limits a pull request to the suites its imports reach, and a trigger file, a failed read, or a push runs all. The operator makes it required after 20 consecutive green runs.
 
-- FFmpeg comes from apt with `Acquire::Retries=3` and a 5-minute step bound, since the runner image lists none
+- FFmpeg comes from apt with `Acquire::Retries=3` and a 5-minute step bound, since the runner image lists none, once `prefer-archive-mirror.sh` has run
 - `bunx playwright install chromium` lands the engine's browsers, and `canon browser install-browser chromium` the agent CLI's own revision, which the swipe suite launches
 - The browser cache keys on `bun.lock` and `src/browser/agent-cli.ts` under its own prefix, since a hit on the capture job's cache would skip the agent CLI install
 - `scripts/ci/check-browsers.sh` and `scripts/ci/check-e2e-tools.sh` run first, so a missing revision or `libwebp_anim` encoder, or a Chromium that cannot launch, reddens the job
@@ -71,9 +71,18 @@ Runs weekly and on dispatch, one matrix job per scaffoldable stack through `cano
 Canon's own workflows installing the firefox and webkit system packages call this script, since a stalled `azure.archive.ubuntu.com` connection hangs rather than fails and a step bound alone only turns the hang red. No seeded web workflow calls it, and neither do canon's chromium-only capture and refresh jobs, because the hosted image ships Chrome.
 
 - The script kills an attempt at 150 seconds and retries up to three times, running `dpkg --configure -a` before each retry
+- It runs `prefer-archive-mirror.sh` before the first attempt and with `--drop-first` before each retry, since a retry on the same degraded mirror fails again
 - A signal from the runner user never reaches the root `apt-get` that `sudo` spawns, so the script kills any left behind with `sudo pkill` before that
 - `src/gate/workflow-timeouts.test.ts` fails a direct `install-deps` or `--with-deps` call and an unbounded script step, in `.github/workflows/` and every `tooling/*/configs/.github/workflows/`
 - The same file fails a shipped workflow that calls this script, since the seeded web workflows lean on the hosted image
+
+### `scripts/ci/prefer-archive-mirror.sh`
+
+An AWS-hosted runner lists `ec2.archive.ubuntu.com` first in `/etc/apt/apt-mirrors.txt`, and that mirror can degrade to a trickle that times an install out. Azure runners list `azure.archive.ubuntu.com` first and are left alone.
+
+- The script deletes the ec2 line, or with `--drop-first` every line above `archive.ubuntu.com`, and always exits 0
+- A list with no such line, only that line, or no file is left unchanged, so the list is never emptied
+- `src/gate/workflow-timeouts.test.ts` fails a step in `.github/workflows/` running `apt-get install` without it, and shipped workflows are out of reach
 
 ### `release-please-config.json`
 
