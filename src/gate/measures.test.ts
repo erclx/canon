@@ -1083,13 +1083,13 @@ describe('designProse', () => {
     expect(report.unmeasured).toBeUndefined()
   })
 
-  it('reads the worked example when present', async () => {
+  it('leaves the worked example to the record-examples stage', async () => {
     write('canon/DESIGN.md', WITHIN)
-    write('examples/design/DESIGN.md', OVER)
+    write('examples/project/DESIGN.md', OVER)
 
     const report = await designProse(context())
 
-    expect(report.failure).toContain('in examples/design/DESIGN.md')
+    expect(report.failure).toBeUndefined()
   })
 
   it('reports unmeasured on a record it cannot read', async () => {
