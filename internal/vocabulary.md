@@ -9,7 +9,7 @@ A running bank of terms worth reaching for when authoring rules, prompts, skills
 
 Each entry closes with a use-when rather than naming where the term first appears, because the bank is drawn from every session that produced a term rather than from one body of material, so there is no first appearance to point at. The use-when carries what the reader came for in its place, which is whether to reach for the term at all.
 
-Source: this repo itself. The vocabulary is the toolkit's own working surface, growing a term at a time and getting pruned in place, with no target project consuming it, which is what makes `internal/` its home per `CLAUDE.md`'s content-ownership section.
+Source: this repo itself. The vocabulary is the toolkit's own working surface, growing a term at a time and getting pruned in place, with no target project consuming it, which is what makes `internal/` its home per the ownership table in `canon/context/context-model.md`.
 
 ## Techniques
 
