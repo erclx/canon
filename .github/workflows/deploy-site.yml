@@ -6,11 +6,8 @@ on:
     branches:
       - main
     paths:
-      # The page builds from web/, assets/, and src/design/ and reads no
-      # catalog. Its audits section reads the code and merge log outside these
-      # globs, so those figures refresh only on a page deploy. Keep the list as
-      # it is, since src/pr/preview.test.ts holds a change outside it, such as
-      # src/canvas/, off the site deploy.
+      # The page builds from web/, assets/, and src/design/ and reads no catalog.
+      # src/pr/preview.test.ts holds a change outside this list off the site deploy.
       - 'web/**'
       - 'assets/**'
       # Pull request screenshots, which the page never reads.
@@ -23,11 +20,8 @@ on:
   pull_request:
     types: [closed]
 
-# A second push while a deploy is in flight publishes the newer commit rather
-# than racing it, and the running job is left to finish so a half-uploaded site
-# is never what a reader lands on. The group is keyed on the ref, since GitHub
-# cancels a pending run when a newer one queues in the same group, and a branch
-# preview must never displace a production deploy waiting behind another.
+# A running deploy finishes so a half-uploaded site is never live.
+# The group is keyed on the ref, so a branch preview never displaces a production deploy.
 concurrency:
   group: deploy-site-${{ github.ref_name }}
   cancel-in-progress: false
@@ -56,11 +50,8 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
-      # The build runs inside this checkout rather than against a published
-      # package, because `web/src/lib/canon-cli.ts` spawns `bun` against this
-      # checkout's own `src/cli.ts` directly rather than resolving `canon` on
-      # PATH, so the counts on the deployed page are this commit's rather than
-      # the last release's.
+      # `web/src/lib/canon-cli.ts` runs this checkout's `src/cli.ts`, so the
+      # page counts are this commit's.
       - name: Build
         run: bun run web:build
 
@@ -78,10 +69,8 @@ jobs:
           wranglerVersion: '3.90.0'
           command: pages deploy web/dist --project-name=canon --branch=${{ github.ref_name }}
 
-      # `canon pr preview` reads this line out of the run log, so the marker is
-      # a contract rather than decoration. The alias is read off the deploy
-      # rather than computed from the branch name, since Cloudflare flattens
-      # and may truncate a branch into its alias.
+      # `canon pr preview` reads this marker out of the run log. The alias comes
+      # off the deploy, since Cloudflare may truncate a branch name.
       - name: Report preview alias
         if: steps.publish.outputs.pages-deployment-alias-url != ''
         env:

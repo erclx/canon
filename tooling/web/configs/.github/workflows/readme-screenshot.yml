@@ -6,11 +6,8 @@ name: README Screenshot
 on:
   pull_request:
     paths:
-      # Project-specific. Replace the placeholder with the paths whose change
-      # moves the README frame, such as the component and styles it renders.
-      # The three entries below the placeholder keep the job firing on this
-      # file's own installation, which is what lets the first step refuse an
-      # unfilled template instead of the job never running.
+      # Project-specific. Replace the placeholder with the paths that move the README frame.
+      # The entries below it keep the job firing so the first step can refuse an unfilled template.
       - 'REPLACE_WITH_PROJECT_PATHS'
       - 'scripts/readme-screenshot.sh'
       - 'scripts/lib/preview-server.sh'
@@ -39,17 +36,13 @@ jobs:
         uses: actions/checkout@v7
         with:
           ref: ${{ github.head_ref }}
-          # A push made with GITHUB_TOKEN starts no workflow, so the required
-          # checks never report on the refreshed commit and the pull request
-          # stays blocked. The release token's push starts them. The fallback
-          # keeps a project without the secret capturing, at that cost.
+          # A GITHUB_TOKEN push starts no workflow, so required checks never report.
+          # The fallback keeps a project without the release secret capturing.
           token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
 
       - name: Refuse An Unfilled Template
-        # A path list left at its placeholder never fires on the pages it was
-        # installed to watch, and that failure leaves no run, no diff, and no
-        # complaint. Failing here is what tells the project it has not
-        # finished installing.
+        # A path list left at its placeholder never fires and complains of nothing.
+        # Failing here tells the project it has not finished installing.
         run: |
           if grep -q "^ *- 'REPLACE_WITH_PROJECT_PATHS'" .github/workflows/readme-screenshot.yml; then
             echo "::error file=.github/workflows/readme-screenshot.yml::The paths list still holds REPLACE_WITH_PROJECT_PATHS. Replace it with the paths that move the README frame."
@@ -109,10 +102,8 @@ jobs:
         # which captures again, finds no diff against what was just pushed,
         # and stops here without pushing a second time.
         if: steps.diff.outputs.changed == 'true'
-        # The hooks are off because this commit carries nothing they can read.
-        # `pre-push` runs the full verify, which reruns every check the jobs
-        # in verify.yml already ran against the source, and what this step
-        # pushes is PNG bytes a capture produced.
+        # The hooks are off because this commit carries only PNG bytes, and
+        # `pre-push` would rerun every check verify.yml already ran.
         env:
           HUSKY: 0
           FRAME_DIR: ${{ steps.capture.outputs.dir }}

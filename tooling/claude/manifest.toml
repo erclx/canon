@@ -7,14 +7,7 @@ extends = ""
 runtime = ""
 scaffold = ""
 
-# Checked against this repository's own `.gitignore` by
-# the Ignore parity stage of `bun run check`, which carries no sanctioned
-# divergence now that both sides ship the same two entries.
-#
-# One root entry rather than a folder apiece, so a target that gains a record
-# folder later receives no manifest edit and no sync. `.claude/worktrees/` is
-# the carve-out, since the harness requires a worktree to sit there.
-#
-# The cost taken is in canon/context/surfaces/tooling.md.
+# Checked against this repository's own `.gitignore` by the Ignore parity stage.
+# One root entry covers every record folder, and `.claude/worktrees/` is the carve-out.
 [gitignore]
 "# Claude" = [".canon/", ".claude/worktrees/"]

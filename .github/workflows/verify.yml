@@ -94,10 +94,8 @@ jobs:
         if: steps.detect.outputs.code == 'true'
         run: bun install --frozen-lockfile
 
-      # Which E2E suites the change reaches through imports. A failed read
-      # reports the full suite, never a skip. The base is the merge commit's
-      # first parent, since base.sha is absent from a depth-2 fetch once main
-      # has moved past it.
+      # Which E2E suites the change reaches through imports, the full suite on
+      # a failed read. The base is the merge commit's first parent.
       - name: Scope E2E Suites
         id: scope
         if: steps.detect.outputs.code == 'true'
@@ -110,10 +108,8 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 15
     needs: changes
-    # The ruleset requires this check, so a Markdown-only pull request skips it
-    # by condition, which reports success, rather than by a path filter, which
-    # never reports. !cancelled() lets it run when changes is skipped on a push
-    # or fails, so only a detector that succeeded can skip the tests.
+    # The ruleset requires this check, so a Markdown-only change skips it by
+    # condition, which reports success. Only a detector that succeeded skips it.
     if: >-
       !cancelled() && github.event_name != 'schedule' &&
       !(github.event_name == 'pull_request' &&
@@ -148,20 +144,15 @@ jobs:
       - name: Unit Tests
         run: bun run test
 
-  # The only job that runs *.e2e.test.ts, since vitest.config.ts excludes them
-  # from Static Checks. A suite skips itself when its browser or FFmpeg is
-  # missing, so this job installs both and proves they landed before the suites
-  # start, and a missing tool reddens it rather than skipping green.
-  # Informational: the ruleset does not require it.
+  # The only job that runs *.e2e.test.ts. It proves the browser and FFmpeg
+  # landed before the suites, so a missing tool reddens it. Not required.
   e2e-suites:
     name: 🎬 E2E Suites
     runs-on: ubuntu-latest
     timeout-minutes: 25
     needs: changes
-    # The macOS job's condition, so a Markdown-only pull request skips it and
-    # a push to main, where changes never runs, does not. A pull request also
-    # skips when its imports reach no suite, and runs only the reached suites
-    # unless a trigger forced the full one.
+    # The macOS job's condition, plus a skip when imports reach no suite.
+    # Only the reached suites run unless a trigger forced the full one.
     if: >-
       !cancelled() && github.event_name != 'schedule' &&
       !(github.event_name == 'pull_request' &&

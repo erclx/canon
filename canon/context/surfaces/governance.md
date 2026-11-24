@@ -43,7 +43,7 @@ Holds one `.toml` per stack with an optional `extends` and a `rules` list, where
 
 ### `governance/detect.toml`
 
-Holds one table per opt-in rule, keyed by rule basename, listing the dependencies and file globs that mark a project as wanting it.
+Holds one table per opt-in rule, keyed by rule basename, listing the dependencies and file globs that mark a project as wanting it. A glob also matches a folder holding a match, and one with no wildcard is tested on disk, which reaches a gitignored path. A table for a rule a stack already reaches is harmless.
 
 - `canon gov detect` reads the target's manifests and git-listed paths to depth two, skips what the caller's stack resolves, and returns each match with its evidence
 - The `Unreferenced rules` stage fails on a rule no stack names and no table proposes, and on a table naming no live rule
