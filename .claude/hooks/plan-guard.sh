@@ -257,7 +257,7 @@ if [ -z "$new" ]; then
       | .message.content[]? | select(type == "object" and .type == "tool_use" and .name == "Read")
       | (.input.file_path // "" | tostring) | select(endswith($plan)) | "\($t[0:19]) \(.)"' 2>/dev/null |
       while IFS=' ' read -r stamp file; do
-        case "$file" in /*) at_root "$file" && printf '%s\n' "$stamp" ;; esac
+        [ "${file#/}" != "$file" ] && at_root "$file" && printf '%s\n' "$stamp"
       done | sort | tail -n 1)
     read_at=${read_at:--}
   fi
