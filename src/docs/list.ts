@@ -75,7 +75,8 @@ function collectContext(root: string): DocEntry[] {
   for (const dir of CONTEXT_ROOTS) {
     for (const entry of walkEntries(root, dir)) {
       if (entry.kind === 'leaf') continue
-      if (INTERNAL_TOPICS.includes(entry.name) || seen.has(entry.name)) continue
+      if (INTERNAL_TOPICS.includes(entry.parent ?? entry.name)) continue
+      if (seen.has(entry.name)) continue
 
       seen.add(entry.name)
       const [, description] = describe(root, entry)

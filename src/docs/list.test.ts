@@ -116,6 +116,14 @@ describe('listDocs', () => {
     ])
   })
 
+  it('should leave out a nested folder under an internal context topic', () => {
+    writeDoc('canon/context/development/index.md', 'subtitle: Development')
+    writeDoc('canon/context/development/scripts/index.md', 'subtitle: Scripts')
+    writeDoc('canon/context/web.md', 'description: Landing page')
+
+    expect(listDocs(ROOT).context.map((entry) => entry.name)).toEqual(['web'])
+  })
+
   it('should return the value of a quoted description without the quotes', () => {
     writeDoc(
       'docs/quoted.md',
