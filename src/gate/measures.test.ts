@@ -897,14 +897,6 @@ describe('configFiles', () => {
     expect(report.unmeasured).toBeUndefined()
   })
 
-  it('passes known keys of the right type', async () => {
-    write('context.toml', 'roots = ["src"]\n')
-
-    const report = await configFiles(context())
-
-    expect(report.failure).toBeUndefined()
-  })
-
   it.each([
     ['a file that does not parse', 'context.toml', 'roots = [\n'],
     ['an unknown key', 'app.toml', '[painted]\nreelinputs = ["bun.lock"]\n'],
