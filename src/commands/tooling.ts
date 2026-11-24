@@ -355,6 +355,8 @@ export function register(program: Command): void {
         'A stack resolves under tooling/ at the working root, then the corpus',
         'inside the canon package. No reference installs into a project, so the',
         'package corpus is what answers there. The frame names the copy it read.',
+        "The verb prints the stack's reference.md, then each reference-<topic>.md",
+        "beside it in name order, then the stack's manifest sections.",
         '',
         'Examples:',
         '  canon tooling reference base',
