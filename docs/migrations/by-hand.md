@@ -125,3 +125,15 @@ The `## Key paths` section of `CLAUDE.md` now keeps to 5 bullets in a row, and e
 
 - Regroup the section by hand under H3s, each opening on a one-sentence lead.
 - List `CLAUDE.md` in `canon/config/markdown.toml` to gate it from then on.
+
+## Rewrite relative imports in a python project, once
+
+The python stack's `ruff.toml` now selects `TID`, so its `ban-relative-imports = "all"` takes effect and `TID252` fails each relative import on the next lint. A project synced before this change may hold some.
+
+```bash
+ruff check --select TID252 --fix --unsafe-fixes .
+```
+
+- Run it once after the next `canon tooling sync`, since ruff rewrites most relative imports to absolute ones
+- Ruff marks this fix unsafe, so a bare `--fix` leaves it alone. Read the diff before committing.
+- Rewrite by hand an import it leaves flagged
