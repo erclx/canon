@@ -60,3 +60,4 @@ The scenario tree sits outside this folder.
 - A gate walking a root that is missing passes with nothing walked, so probe it by removing the input root as well as by planting a violation
 - Quoting a pathspec changes what it matches, so `git diff -- 'claude/skills/*/references'` returns nothing for a modified file. Append `/*` or name the directory literally in a hand-run scope check.
 - A harness that reports writes by diffing one directory cannot see a write outside it, and the sandbox harness shares it. Read the transcript beside the file list and clear the stray path.
+- Bash 3.2 on a Mac fails to parse a `case` inside a `$( )`, and `shfmt` strips the `(` that would fix it. Use a `[ ]` test there, since only the macOS job catches a miss.
