@@ -101,7 +101,7 @@ Keep the whole reel at or under 15 seconds, which the take below enforces. Each 
 
 ## Film and check the reel
 
-Read `reel-film.md` for the filming steps, the skip for a state the fixture lacks, and the still check, then continue to the push.
+Read `${CLAUDE_SKILL_DIR}/references/reel-film.md` for the filming steps, the skip for a state the fixture lacks, and the still check, then continue to the push.
 
 ## Push the reel
 
