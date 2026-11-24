@@ -107,9 +107,10 @@ export interface Beat {
   readonly route: Route
   /**
    * False turns the camera's zoom off for this beat, while its track still
-   * carries the cursor and the click ring. Absent means the zoom runs.
+   * carries the cursor and the click ring. True keeps it on at any width.
+   * Absent means the zoom runs, except under `PUSH_MIN_WIDTH`.
    */
-  readonly push?: false
+  readonly push?: boolean
   /**
    * False marks a beat no person drives, such as an agent changing the page,
    * whose track aims nowhere and whose reel draws no cursor. Its steps still
@@ -279,7 +280,7 @@ function readBeat(entry: unknown, index: number, fallback: Route): Beat {
   return {
     name,
     route: route as Route,
-    ...(entry.push === false ? { push: false as const } : {}),
+    ...(typeof entry.push === 'boolean' ? { push: entry.push } : {}),
     ...(entry.hand === false ? { hand: false as const } : {}),
     ...(entry.scrollbars === true ? { scrollbars: true as const } : {}),
     ...(network ? { network } : {}),
@@ -508,6 +509,17 @@ function viewportProblem({ width, height }: Viewport): string | undefined {
 /** The window a beat films in: its own key, then the take's option, then the default. */
 export function beatViewport(beat: Beat, option?: Viewport): Viewport {
   return beat.viewport ?? option ?? DEFAULT_VIEWPORT
+}
+
+/** The narrowest window whose beat zooms by default, the tablet width. */
+export const PUSH_MIN_WIDTH = 768
+
+/**
+ * Whether the camera zooms on a beat filmed in `viewport`: its own key first,
+ * then off under `PUSH_MIN_WIDTH`, where the zoom crops the only column.
+ */
+export function beatPushes(beat: Beat, viewport: Viewport): boolean {
+  return beat.push ?? viewport.width >= PUSH_MIN_WIDTH
 }
 
 function readHold(entry: Record<string, unknown>, at: string): Aimed {

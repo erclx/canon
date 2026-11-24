@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { beatViewport, parseViewport, readTakePlan } from '@/take/plan'
+import {
+  beatPushes,
+  beatViewport,
+  parseViewport,
+  readTakePlan,
+} from '@/take/plan'
 
 /**
  * Covers what a take plan may say before any browser launches. A refusal here
@@ -749,5 +754,38 @@ describe('beatViewport', () => {
       width: 800,
       height: 600,
     })
+  })
+})
+
+describe('beatPushes', () => {
+  const plain = {
+    name: 'wide',
+    route: 'step',
+    setup: [],
+    steps: [{ kind: 'wait', ms: 100 }],
+  } as const
+  const phone = { width: 390, height: 844 }
+  const tablet = { width: 768, height: 1024 }
+
+  it('should hold wide under 768 when the beat carries no key', () => {
+    expect(beatPushes(plain, phone)).toBe(false)
+  })
+
+  it('should push at exactly 768 wide with no key', () => {
+    expect(beatPushes(plain, tablet)).toBe(true)
+  })
+
+  it('should push on desktop with no key', () => {
+    expect(beatPushes(plain, { width: 1920, height: 1080 })).toBe(true)
+  })
+
+  it('should push on a phone when the beat sets true', () => {
+    expect(beatPushes({ ...plain, push: true }, phone)).toBe(true)
+  })
+
+  it('should hold wide on desktop when the beat sets false', () => {
+    expect(
+      beatPushes({ ...plain, push: false }, { width: 1920, height: 1080 }),
+    ).toBe(false)
   })
 })

@@ -33,6 +33,7 @@ import {
   type Route,
   type TakePlan,
   type Viewport,
+  beatPushes,
   beatViewport,
 } from '@/take/plan'
 import { filmScreencast } from '@/take/screencast'
@@ -273,7 +274,7 @@ async function filmBeat(
     fps: FPS,
     route,
     clip: measured,
-    ...(beat.push === false ? { push: false as const } : {}),
+    ...(!beatPushes(beat, viewport) ? { push: false as const } : {}),
     ...(beat.hand === false ? { hand: false as const } : {}),
     ...(filmed.lag === undefined ? {} : { lag: filmed.lag }),
     frames: filmed.frames,
