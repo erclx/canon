@@ -47,6 +47,7 @@ Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and n
 - `.github/pull_request_template.md` has `## Summary`, `## Key changes`, `## Technical context`, `## Outcome`, and `## Testing`, the optional two commented. A project adds its own checklist lines.
 - `canon/context/development/` holds the `setup` and `ci` entries under a folder index. Extend them with project-specific commands and workflows, and keep canonical rationale here.
 - `canon/config/pr-labels.toml` is the starter pull request label map, covering what the toolkit installs. A project adds a row per surface of its own.
+- `canon/config/app.toml` and `canon/config/context.toml` are commented starters naming every key, so an unedited one reads as no file. A project uncomments what it sets.
 
 ## Tool pairing
 
