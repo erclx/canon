@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { feedbackRoute, listFlagProblem, listRecord } from '@/feedback/list'
+import { listFlagProblem, listRecord } from '@/feedback/list'
 
 function issue(number: number) {
   return {
@@ -43,10 +43,7 @@ describe('listRecord', () => {
   })
 
   it('should keep the gh detail out of the record as its own field', () => {
-    const record = listRecord(
-      { ok: false, reason: 'missing-binary' },
-      'issues',
-    )
+    const record = listRecord({ ok: false, reason: 'missing-binary' }, 'issues')
 
     expect(Object.keys(record).sort()).toEqual([
       'message',
