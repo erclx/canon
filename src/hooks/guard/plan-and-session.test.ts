@@ -548,7 +548,10 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
     it('should judge ownership by the last pass line naming the plan', async () => {
       const project = planProject()
       ownedBy(project)
-      const log = join(project.root, '.canon/tmp/hooks/plan-guard/decisions.log')
+      const log = join(
+        project.root,
+        '.canon/tmp/hooks/plan-guard/decisions.log',
+      )
       writeFileSync(
         log,
         `${readFileSync(log, 'utf8')}2026-11-23T10:01:00Z pass plan_guard_session feature-old.md latest=4 spent=2 spent_plan=- lines=4\n2026-11-23T10:02:00Z amend planner_a feature-old.md owner=plan_guard_session owned_at=2026-11-23T10:01:00Z\n`,
