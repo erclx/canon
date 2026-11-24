@@ -1,4 +1,10 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { execa } from 'execa'
@@ -121,6 +127,108 @@ describe('canon tasks closes with no task or plan named', () => {
 
   it('should still refuse a task and a plan both named', async () => {
     const record = await runCloses(root, ['v1-a', '--plan', 'a-b'])
+
+    expect(record).toMatchObject({ ok: false, reason: 'bad-input' })
+  })
+})
+
+describe('canon tasks launch effort floor', () => {
+  let root: string
+  let boardFile: string
+
+  const BOARD = [
+    '# Priority',
+    '',
+    '## Up next',
+    '',
+    '| Task | Touches | Launch | Waiting on |',
+    '| ---- | ------- | ------ | ---------- |',
+    '| [v1.0: One](v1.0-one.md) |  |  | the gate |',
+    '',
+  ].join('\n')
+
+  async function runLaunch(
+    model: string,
+    effort: string,
+    extra: string[] = [],
+  ) {
+    const result = await execa(
+      process.execPath,
+      [
+        CLI,
+        'tasks',
+        'launch',
+        'v1.0-one',
+        '--role',
+        'worker',
+        '--model',
+        model,
+        '--effort',
+        effort,
+        '--route',
+        'background',
+        '--json',
+        '--root',
+        root,
+        ...extra,
+      ],
+      { cwd: root, reject: false, timeout: RUN_TIMEOUT_MS },
+    )
+
+    return {
+      exitCode: result.exitCode,
+      record: JSON.parse(result.stdout || result.stderr) as Record<
+        string,
+        unknown
+      >,
+    }
+  }
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'tasks-launch-'))
+    mkdirSync(join(root, '.canon', 'tasks'), { recursive: true })
+    writeFileSync(
+      join(root, '.canon', 'tasks', 'v1.0-one.md'),
+      '# v1.0: One\n\n## Outcomes\n\n- [ ] it ships\n',
+    )
+    boardFile = join(root, '.canon', 'tasks', 'priority.md')
+    writeFileSync(boardFile, BOARD)
+  })
+
+  afterEach(() => rmSync(root, { recursive: true, force: true }))
+
+  it.each(['opus', 'sonnet'])(
+    'should refuse low on %s and leave the board untouched',
+    async (model) => {
+      const { exitCode, record } = await runLaunch(model, 'low')
+
+      expect(exitCode).toBe(1)
+      expect(record).toMatchObject({ ok: false, reason: 'effort-floor' })
+      expect(readFileSync(boardFile, 'utf8')).toBe(BOARD)
+    },
+  )
+
+  it('should write low on opus when the operator overrides', async () => {
+    const { exitCode, record } = await runLaunch('opus', 'low', ['--override'])
+
+    expect(exitCode).toBe(0)
+    expect(record).toMatchObject({ ok: true })
+    expect(readFileSync(boardFile, 'utf8')).toContain(
+      'worker, opus, low, background (operator)',
+    )
+  })
+
+  it('should write low on fable with no override', async () => {
+    const { exitCode } = await runLaunch('fable', 'low')
+
+    expect(exitCode).toBe(0)
+    expect(readFileSync(boardFile, 'utf8')).toContain(
+      'worker, fable, low, background',
+    )
+  })
+
+  it('should refuse a bad effort as bad-input ahead of the floor', async () => {
+    const { record } = await runLaunch('opus', 'nope')
 
     expect(record).toMatchObject({ ok: false, reason: 'bad-input' })
   })

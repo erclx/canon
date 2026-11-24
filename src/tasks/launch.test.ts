@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { tasksDir } from '@/tasks/archive'
 import type { LaunchPick } from '@/tasks/board'
-import { writeLaunch } from '@/tasks/launch'
+import { belowEffortFloor, writeLaunch } from '@/tasks/launch'
 import { orderingPath } from '@/tasks/validate'
 
 let ROOT: string
@@ -131,4 +131,39 @@ describe('writeLaunch', () => {
       reason: 'no-row',
     })
   })
+})
+
+describe('belowEffortFloor', () => {
+  it.each(['opus', 'sonnet'] as const)(
+    'should hold low below the floor on %s',
+    (model) => {
+      expect(belowEffortFloor({ model, effort: 'low', override: false })).toBe(
+        true,
+      )
+    },
+  )
+
+  it.each(['opus', 'sonnet'] as const)(
+    'should pass low on %s with the operator override',
+    (model) => {
+      expect(belowEffortFloor({ model, effort: 'low', override: true })).toBe(
+        false,
+      )
+    },
+  )
+
+  it('should pass low on fable with no override', () => {
+    expect(
+      belowEffortFloor({ model: 'fable', effort: 'low', override: false }),
+    ).toBe(false)
+  })
+
+  it.each(['medium', 'high', 'xhigh', 'max'] as const)(
+    'should pass %s on opus with no override',
+    (effort) => {
+      expect(belowEffortFloor({ model: 'opus', effort, override: false })).toBe(
+        false,
+      )
+    },
+  )
 })
