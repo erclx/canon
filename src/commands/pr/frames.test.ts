@@ -492,8 +492,24 @@ describe('canon pr frames', () => {
       expect(outcome.record.reason).toBe('bad-pass')
     })
 
+    it('should reach the write with no --width, filing the reel at 1280', async () => {
+      writeFileSync(join(tempDir, 'reel.webp'), WEBP)
+
+      const outcome = await runFrames([
+        '7',
+        '--reel',
+        join(tempDir, 'reel.webp'),
+        '--head',
+        'abc1234',
+        '--pass',
+        '20261002T154450Z',
+      ])
+
+      // The fake gh refuses every write, so reaching it reads as read-only.
+      expect(outcome.record.reason).toBe('read-only')
+    })
+
     it.each([
-      ['no --width', []],
       ['a zero width', ['--width', '0']],
       ['a width that is not a whole number', ['--width', '39o']],
     ])(
