@@ -12,6 +12,14 @@ The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project tha
 - `VIEWPORTS` holds 390, 768, 1280, and 1536, the last swept alone. A case also fails the run at 320 on a sideways scroll or a clipped control.
 - Set `excludeViewports` to skip a width, naming `320` to defer the reflow check
 
+## Device classes
+
+The harness reads the `Device classes:` line under `## Layout` in `canon/DESIGN.md`, and a project with no record or no line captures every width as before.
+
+- A width outside the declared classes takes no frame, with phone under 600, tablet from 600 to 839, and desktop from 840, 1536 included
+- Leaving phone out also skips the 320 reflow check, and a name outside phone, tablet, and desktop exits 1
+- Committed frames at a width the record drops stay under `EVIDENCE_ROOT` until the project deletes them
+
 ## Screenshot sections
 
 - Set `evidence: true` to also write `<EVIDENCE_ROOT>/<section>/<width>--<theme>.png` at 390, 768, and 1280. `EVIDENCE_ROOT` defaults to `e2e/evidence`.
@@ -36,6 +44,7 @@ The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project tha
 - `SCREENSHOT_FILTER` keeps cases whose `<section>/<width>--<theme>` label contains a comma-separated term, and exits 1 listing the labels on no match
 - `--check-console-clean` exits 1 with the list if any `console` error fired, turning the capture into a smoke check
 - `--require-base-url` exits 1 before launching a browser when `SCREENSHOT_BASE_URL` is unset, so a deployment script cannot capture `localhost`
+- `--print-device-classes` prints the supported classes as a comma list, such as `desktop`, and exits 0 before a browser launches, or exits 1 on a `Device classes:` line it refuses
 - With a base URL, every flagged case is skipped so a production smoke run writes nothing to the committed path, and zero cases run exits 1
 
 ## Screenshot evidence

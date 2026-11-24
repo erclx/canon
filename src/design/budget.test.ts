@@ -53,6 +53,30 @@ describe('measureDesignProse', () => {
     ])
   })
 
+  it('counts neither labeled Layout line as a rule', () => {
+    const source = record({
+      Layout: [
+        rules(DESIGN_BUDGET.rules),
+        '- Draw widths: 1280, the desktop frame',
+        '- Device classes: desktop',
+      ].join('\n'),
+    })
+
+    expect(measureDesignProse(source)).toEqual([])
+  })
+
+  it('still counts a Device classes line outside Layout as a rule', () => {
+    const source = record({
+      Shapes: [rules(DESIGN_BUDGET.rules), '- Device classes: desktop'].join(
+        '\n',
+      ),
+    })
+
+    expect(measureDesignProse(source)).toEqual([
+      `Shapes holds ${DESIGN_BUDGET.rules + 1} rules against a cap of ${DESIGN_BUDGET.rules}`,
+    ])
+  })
+
   it('passes a section holding a table and no rules', () => {
     expect(measureDesignProse(record({ Color: TABLE }))).toEqual([])
   })

@@ -40,9 +40,10 @@ Write each box so a session driving the running app can run it without guessing,
 - **Route.** A path or the control that reaches it. A box naming none is driven from the address the driver opens.
   - Write "from the page the app opens on" for a state reached by a sequence.
 - **Width.** Only when the change can differ by width, such as layout, spacing, or anything responsive. Copy, color, or a state rendering the same everywhere leaves it off.
+  - Name a width only from a device class the `Device classes:` line in `canon/DESIGN.md` supports, all three when the record has none, since no capture or reel runs at another
 - **Verb.** An action a driver performs, such as "scroll to", "click", "resize to", "tab to", "wheel", "press", or "tap". Never "read" or "look at", which name no action.
   - A changed surface that scrolls, snaps, or tracks the scroll takes "wheel" or "press" with the key, never "scroll to", which a scripted scroll passes on a page the wheel cannot move.
-  - A touch or hover behavior takes "tap" or "hover" at a phone width. A change that moves nothing takes no wheel box.
+  - A touch or hover behavior takes "tap" or "hover" at a phone width, or the narrowest supported width where phone is left out. A change that moves nothing takes no wheel box.
 - **Taste.** End the line with `(taste)` when the result is a judgment of look or feel. A driver reports such a box as needing a person's eyes rather than passing it.
 - **Setup.** State inline the setup the page does not open in and the fixture state it needs. End with `(local only)` when a hosted preview cannot reach it, such as a stopped service.
 - **Fixture.** End with `(needs fixture)` when the drive fixture lacks the state. The builder adds it, or with no `canon/config/app-drive.toml` writes the setup inline and drops the marker.

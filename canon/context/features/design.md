@@ -23,6 +23,10 @@ Owns the token module, the component layer, the renderers, the markdown parser, 
 - `parse.ts` and `render.ts` write the token preview the landing page embeds, and `prose()` reads only Overview, Motion, and Iconography, so no other rule reaches it
 - `renderDesignDoc` has no verb, and `bun run web:previews` is its only caller, so `render.ts` is live even with nothing in `src/` importing it
 
+### `src/design/fixtures/`
+
+Holds the records both readers of the `Device classes:` line are tested on. `device-classes.ts` reads it for the lift, and the shipped harness `tooling/web/configs/e2e/screenshot.ts` carries its own copy, since a target cannot import the CLI. A grammar change lands in both readers and here.
+
 ### `canon/design/`
 
 Holds the accepted frames a build matches. `bun run design:sync` writes them from the board at the main worktree root through Frameboard's `references sync`, run from the `frameboard` on PATH, the same install that serves and checks the board.

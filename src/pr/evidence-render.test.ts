@@ -1406,6 +1406,26 @@ describe('reels at several widths', () => {
     expect(body).not.toContain('No reel at 1280')
   })
 
+  it('should drop the line naming every width once each width a desktop-only project owes is covered', () => {
+    const body = renderEvidenceBody(
+      [],
+      'o/r',
+      'aaaa000',
+      'bbbb111',
+      undefined,
+      CHECKLIST,
+      undefined,
+      [WIDE],
+      { reel: 'deferred: behind #1' },
+      [],
+      new Set([1280]),
+      undefined,
+      ['desktop'],
+    )
+
+    expect(body).not.toContain('**No reel:**')
+  })
+
   it('should keep the line naming every width while an owed width has no covering reel', () => {
     const body = render('bbbb111', [WIDE], { reel: 'deferred: behind #1' })
 

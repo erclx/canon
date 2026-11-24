@@ -20,6 +20,14 @@ export const DESIGN_BUDGET = {
 
 const OVERVIEW = 'Overview'
 
+const LAYOUT = 'Layout'
+
+/**
+ * The labeled lines `## Layout` carries as data a reader parses, being the
+ * board's draw widths and the supported device classes, which spend no rule.
+ */
+const LAYOUT_DATA = /^\s*(?:[-*+]\s+)?(?:Draw widths|Device classes):/i
+
 /** A list item at any depth, which starts a rule of its own. */
 const BULLET = /^\s*(?:[-*+]|\d+[.)])\s+/
 
@@ -36,7 +44,11 @@ export function measureDesignProse(source: string): string[] {
   const findings: string[] = []
 
   for (const section of splitSections(source)) {
-    const rules = readRules(section.lines)
+    const rules = readRules(
+      section.heading === LAYOUT
+        ? section.lines.filter((line) => !LAYOUT_DATA.test(line))
+        : section.lines,
+    )
     const total = rules.reduce((sum, rule) => sum + rule, 0)
 
     if (section.heading === undefined) {

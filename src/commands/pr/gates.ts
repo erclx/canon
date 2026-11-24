@@ -14,7 +14,17 @@ import {
   stalledRuns,
   withMergeState,
 } from '@/pr/checks'
-import { owedReelWidths, readChecklistBoxes } from '@/pr/evidence'
+import {
+  DEVICE_CLASSES,
+  type DeviceClass,
+  readDeviceClasses,
+} from '@/design/device-classes'
+import {
+  DEFAULT_REEL_WIDTH,
+  defaultReelWidth,
+  owedReelWidths,
+  readChecklistBoxes,
+} from '@/pr/evidence'
 import {
   type ChecksGate,
   type EvidenceGate,
@@ -117,7 +127,18 @@ export async function readEvidenceGate(
   } catch {
     return undefined
   }
-  return toEvidenceGate(record)
+  return toEvidenceGate(record, readSupportedClasses(root))
+}
+
+/**
+ * The classes the project's design record declares, read by the lift and the evidence comment alike. A line the
+ * reader refuses warns and reads as all three, so a reel is owed at every width rather than fewer.
+ */
+export function readSupportedClasses(root: string): readonly DeviceClass[] {
+  const read = readDeviceClasses(root)
+  if (read.ok) return read.classes
+  logWarn(`${read.message} Every class's width is owed a reel.`)
+  return DEVICE_CLASSES
 }
 
 /** The `canon pr evidence --check --json` fields the lift reads, each unchecked until `toEvidenceGate` narrows it. */
@@ -139,11 +160,13 @@ export interface EvidenceCheckRecord {
  */
 export function toEvidenceGate(
   record: EvidenceCheckRecord,
+  classes: readonly DeviceClass[] = DEVICE_CLASSES,
 ): EvidenceGate | undefined {
   if (record.reason !== 'settled' && record.reason !== 'owed') return undefined
 
   const reels = readReels(record.reels)
   const reelSkips = readReelSkips(record.reelSkips)
+  const defaultWidth = defaultReelWidth(classes)
   return {
     isSettled: record.reason === 'settled',
     owed: Array.isArray(record.owed) ? record.owed.map(String) : [],
@@ -156,8 +179,9 @@ export function toEvidenceGate(
     ...(typeof record.reelSkip === 'string' && { reelSkip: record.reelSkip }),
     ...(reelSkips.size > 0 && { reelSkips }),
     ...(typeof record.checklist === 'string' && {
-      owedWidths: owedReelWidths(readChecklistBoxes(record.checklist)),
+      owedWidths: owedReelWidths(readChecklistBoxes(record.checklist), classes),
     }),
+    ...(defaultWidth !== DEFAULT_REEL_WIDTH && { defaultWidth }),
   }
 }
 
