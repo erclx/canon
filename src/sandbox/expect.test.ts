@@ -965,6 +965,14 @@ describe('parseExpectation', () => {
     const expectation = parseExpectation('')
 
     expect(expectation).toEqual({
+      purpose: undefined,
+      whys: {
+        paths: {},
+        absent: {},
+        writeScope: {},
+        escapeScope: {},
+        reply: {},
+      },
       paths: [],
       absent: [],
       content: [],
@@ -979,6 +987,126 @@ describe('parseExpectation', () => {
   it('should distinguish an absent escape scope from a declared empty one', () => {
     expect(parseExpectation('').escapeScope).toBeUndefined()
     expect(parseExpectation('escape_scope = []\n').escapeScope).toEqual([])
+  })
+})
+
+describe('parseExpectation reasons', () => {
+  it('should read an inline table beside a bare string in order', () => {
+    const expectation = parseExpectation(
+      'paths = ["a.md", { path = "b.md", why = "b proves the sync wrote" }, "c.md"]\n',
+    )
+
+    expect(expectation.paths).toEqual(['a.md', 'b.md', 'c.md'])
+    expect(expectation.whys?.paths).toEqual({
+      'b.md': 'b proves the sync wrote',
+    })
+  })
+
+  it('should read text as the value key of a reply entry', () => {
+    const expectation = parseExpectation(
+      'reply = [{ text = "done", why = "the skill reports completion" }]\n',
+    )
+
+    expect(expectation.reply).toEqual(['done'])
+    expect(expectation.whys?.reply).toEqual({
+      done: 'the skill reports completion',
+    })
+  })
+
+  it('should read purpose and a content why', () => {
+    const expectation = parseExpectation(
+      'purpose = "the sync leaves the index current"\n[[content]]\npath = "x.md"\npattern = "y"\nwhy = "the index names the file"\n',
+    )
+
+    expect(expectation.purpose).toBe('the sync leaves the index current')
+    expect(expectation.content[0]?.why).toBe('the index names the file')
+  })
+
+  it('should throw on an inline table with no value key', () => {
+    expect(() => parseExpectation('paths = [{ why = "orphan" }]\n')).toThrow(
+      'paths entry has no path',
+    )
+  })
+
+  it('should throw on a reply table carrying path instead of text', () => {
+    expect(() => parseExpectation('reply = [{ path = "x" }]\n')).toThrow(
+      'reply entry has no text',
+    )
+  })
+
+  it('should still refuse a stray key on a content table', () => {
+    expect(() =>
+      parseExpectation('[[content]]\npath = "x"\npattern = "y"\nnote = "z"\n'),
+    ).toThrow('carries note')
+  })
+
+  it.each([
+    ['a date', 'why = "added 2026-11-23"'],
+    ['a commit hash', 'why = "fixed in b442653f5"'],
+    ['an issue reference', 'why = "see #1234"'],
+  ])('should refuse a why carrying %s', (_name, why) => {
+    expect(() =>
+      parseExpectation(`paths = [{ path = "a", ${why} }]\n`),
+    ).toThrow('Put history in the pull request')
+  })
+
+  it('should refuse a purpose carrying a date', () => {
+    expect(() => parseExpectation('purpose = "since 2026-11-23"\n')).toThrow(
+      'purpose carries a date',
+    )
+  })
+
+  it('should accept a version number in a why', () => {
+    expect(() =>
+      parseExpectation(
+        'paths = [{ path = "a", why = "v212.5 and 3 files" }]\n',
+      ),
+    ).not.toThrow()
+  })
+})
+
+describe('checkExpectation reasons', () => {
+  const declared =
+    'purpose = "the run writes a note"\npaths = [{ path = "note.md", why = "the note is the deliverable" }, "other.md"]\n'
+
+  it('should carry the why on a failed result and count the whyless one', () => {
+    const verdict = checkExpectation(parseExpectation(declared), {
+      sandboxDir: sandbox,
+    })
+
+    expect(verdict.purpose).toBe('the run writes a note')
+    expect(verdict.results[0]).toEqual({
+      ok: false,
+      message: 'missing: note.md',
+      why: 'the note is the deliverable',
+    })
+    expect(verdict.results[1]).toEqual({
+      ok: false,
+      message: 'missing: other.md',
+    })
+    expect(verdict.whyless).toBe(1)
+  })
+
+  it('should count nothing whyless when every assertion carries one', () => {
+    const verdict = checkExpectation(
+      parseExpectation(
+        'paths = [{ path = "a", why = "r" }]\nabsent = [{ path = "b", why = "r" }]\n',
+      ),
+      { sandboxDir: sandbox },
+    )
+
+    expect(verdict.whyless).toBe(0)
+  })
+
+  it('should reach a declared glob reason on an out-of-scope write', () => {
+    const verdict = checkExpectation(
+      parseExpectation(
+        'write_scope = [{ path = "docs/**", why = "a skill writes docs only" }]\n',
+      ),
+      { sandboxDir: sandbox, writes: ['src/x.ts'] },
+    )
+
+    expect(verdict.results[0]?.why).toBe('a skill writes docs only')
   })
 })
 

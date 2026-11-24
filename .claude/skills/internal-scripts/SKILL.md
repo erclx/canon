@@ -23,6 +23,7 @@ Write a scenario as `sandbox/<cat>/<cmd>.ts` per `canon/context/development/sand
 
 - Mirror realistic use of the skill with a happy-path shape that succeeds end to end
 - Put adversarial cases in a separate named arm, such as `conflict`, `degraded`, or `empty`, so pass or fail reads as a property of the skill rather than the fixture
+- Write each `expect.toml` assertion's reason as its `why`, and the arm's reason as `purpose`, in the form `canon/context/development/sandbox.md` states, rather than in a comment nothing reads
 - Run `canon sandbox <cat>:<cmd>` yourself before handing off a skill that has a scenario, and tell the user the exact invocation and what to expect
 
 ### Testing a skill headlessly

@@ -203,16 +203,23 @@ function readPathList(path: string | undefined): string[] | undefined {
 }
 
 /**
- * The unchecked count rides the summary line in every verdict, including a pass.
- * It is the number the rollout is measured by, and a count that surfaces only on
- * arms that happen to carry prose is a count nobody drains.
+ * The unchecked and whyless counts ride the summary line in every verdict,
+ * including a pass, since they measure the rollout and a count shown only on
+ * some arms is one nobody drains. Neither gates.
  */
 function reportVerdict(verdict: Verdict): void {
+  if (verdict.purpose !== undefined) logInfo(`Purpose: ${verdict.purpose}`)
+
   if (verdict.results.length > 0) {
     logStep('Checking expectations')
     for (const result of verdict.results) {
-      if (result.ok) logInfo(result.message)
-      else logRemove(result.message)
+      if (result.ok) {
+        logInfo(result.message)
+        continue
+      }
+
+      logRemove(result.message)
+      if (result.why !== undefined) logInfo(`  why: ${result.why}`)
     }
   }
 
@@ -229,7 +236,8 @@ function reportVerdict(verdict: Verdict): void {
   logStep(`Verdict: ${verdict.state.toUpperCase()}`)
   if (verdict.note !== undefined) logWarn(verdict.note)
 
-  const summary = `${verdict.asserted} asserted, ${verdict.failed} failed, ${verdict.unchecked} unchecked`
+  const whyless = verdict.whyless ?? 0
+  const summary = `${verdict.asserted} asserted, ${verdict.failed} failed, ${verdict.unchecked} unchecked, ${whyless} without a why`
   if (verdict.state === 'unchecked') logWarn(summary)
   else logInfo(summary)
 }

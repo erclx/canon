@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
+import { HISTORY_PATTERNS } from '@/comments/scan'
 
 /**
  * Three states rather than two. An arm with no declaration is `unchecked`: it
@@ -11,9 +12,25 @@ export type VerdictState = 'pass' | 'fail' | 'unchecked'
 export interface ContentAssertion {
   readonly path: string
   readonly pattern: string
+  readonly why?: string
+}
+
+/** The reason each entry of a string array carries, keyed by the entry's text. */
+export type Whys = Readonly<Record<string, string>>
+
+export interface ExpectationWhys {
+  readonly paths: Whys
+  readonly absent: Whys
+  readonly writeScope: Whys
+  readonly escapeScope: Whys
+  readonly reply: Whys
 }
 
 export interface Expectation {
+  /** What the arm proves, printed above its results. */
+  readonly purpose?: string
+  /** Absent on a hand-built expectation, which reads as no reasons. */
+  readonly whys?: ExpectationWhys
   readonly paths: readonly string[]
   readonly absent: readonly string[]
   readonly content: readonly ContentAssertion[]
@@ -32,6 +49,7 @@ export interface Expectation {
 export interface AssertionResult {
   readonly ok: boolean
   readonly message: string
+  readonly why?: string
 }
 
 /**
@@ -56,6 +74,9 @@ export interface RunEnvelope {
 
 export interface Verdict {
   readonly state: VerdictState
+  readonly purpose?: string
+  /** Mechanical assertions declared with no `why`. Counted, never gating. */
+  readonly whyless?: number
   readonly asserted: number
   readonly failed: number
   readonly unchecked: number
@@ -161,6 +182,80 @@ function stringArray(value: unknown): string[] {
   )
 }
 
+/**
+ * Rejects change history in a reason, since a `why` that cites a date, hash, or
+ * issue goes stale the way the comments `HISTORY_PATTERNS` guards do.
+ */
+function guardHistory(field: string, text: string): void {
+  for (const { term, pattern } of HISTORY_PATTERNS) {
+    if (pattern.test(text)) {
+      throw new Error(
+        `${field} carries a ${term}: ${text}. Put history in the pull request.`,
+      )
+    }
+  }
+}
+
+function readWhy(field: string, value: unknown): string | undefined {
+  if (value === undefined) return undefined
+  if (typeof value !== 'string' || value === '') {
+    throw new Error(`${field} must be a non-empty string`)
+  }
+  guardHistory(field, value)
+
+  return value
+}
+
+interface ReadEntries {
+  readonly values: string[]
+  readonly whys: Record<string, string>
+}
+
+/**
+ * An entry is a bare string or an inline table holding `valueKey` and an
+ * optional `why`. A table missing its value throws, since dropping it would
+ * assert nothing and report green.
+ */
+function entryArray(
+  key: string,
+  valueKey: string,
+  value: unknown,
+): ReadEntries {
+  const read: ReadEntries = { values: [], whys: {} }
+  if (!Array.isArray(value)) return read
+
+  for (const entry of value) {
+    if (typeof entry === 'string') {
+      if (entry !== '') read.values.push(entry)
+      continue
+    }
+    if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
+      continue
+    }
+
+    const record = entry as Record<string, unknown>
+    const text = record[valueKey]
+    if (typeof text !== 'string' || text === '') {
+      throw new Error(
+        `${key} entry has no ${valueKey}. Write ${valueKey} = "...".`,
+      )
+    }
+
+    const stray = Object.keys(record).filter(
+      (name) => name !== valueKey && name !== 'why',
+    )
+    if (stray.length > 0) {
+      throw new Error(`${key} entry for ${text} carries ${stray.join(', ')}.`)
+    }
+
+    read.values.push(text)
+    const why = readWhy(`${key} why for ${text}`, record.why)
+    if (why !== undefined) read.whys[text] = why
+  }
+
+  return read
+}
+
 function contentArray(value: unknown): ContentAssertion[] {
   if (!Array.isArray(value)) return []
 
@@ -176,7 +271,7 @@ function contentArray(value: unknown): ContentAssertion[] {
 
     // In TOML a bare key below a `[[content]]` header joins that table, so a misplaced `manual` would assert nothing.
     const stray = Object.keys(record).filter(
-      (key) => key !== 'path' && key !== 'pattern',
+      (key) => key !== 'path' && key !== 'pattern' && key !== 'why',
     )
     if (stray.length > 0) {
       throw new Error(
@@ -184,7 +279,12 @@ function contentArray(value: unknown): ContentAssertion[] {
       )
     }
 
-    assertions.push({ path: record.path, pattern: record.pattern })
+    const why = readWhy(`content why for ${record.path}`, record.why)
+    assertions.push({
+      path: record.path,
+      pattern: record.pattern,
+      ...(why === undefined ? {} : { why }),
+    })
   }
 
   return assertions
@@ -197,17 +297,28 @@ function contentArray(value: unknown): ContentAssertion[] {
  */
 export function parseExpectation(source: string): Expectation {
   const parsed = Bun.TOML.parse(source) as Record<string, unknown>
+  const paths = entryArray('paths', 'path', parsed.paths)
+  const absent = entryArray('absent', 'path', parsed.absent)
+  const writeScope = entryArray('write_scope', 'path', parsed.write_scope)
+  const escapeScope = entryArray('escape_scope', 'path', parsed.escape_scope)
+  const reply = entryArray('reply', 'text', parsed.reply)
 
   return {
-    paths: stringArray(parsed.paths),
-    absent: stringArray(parsed.absent),
+    purpose: readWhy('purpose', parsed.purpose),
+    whys: {
+      paths: paths.whys,
+      absent: absent.whys,
+      writeScope: writeScope.whys,
+      escapeScope: escapeScope.whys,
+      reply: reply.whys,
+    },
+    paths: paths.values,
+    absent: absent.values,
     content: contentArray(parsed.content),
-    writeScope: stringArray(parsed.write_scope),
+    writeScope: writeScope.values,
     escapeScope:
-      parsed.escape_scope === undefined
-        ? undefined
-        : stringArray(parsed.escape_scope),
-    reply: stringArray(parsed.reply),
+      parsed.escape_scope === undefined ? undefined : escapeScope.values,
+    reply: reply.values,
     manual: stringArray(parsed.manual),
     maxTurns:
       typeof parsed.max_turns === 'number' ? parsed.max_turns : undefined,
@@ -231,6 +342,42 @@ export function countMechanicalAssertions(expectation: Expectation): number {
 }
 
 /**
+ * Counts the mechanical assertions declared with no `why`, which the check
+ * reports so the migration can be drained without gating on it.
+ */
+export function countWhyless(expectation: Expectation): number {
+  const whys = expectation.whys
+  const bare = (entries: readonly string[], known: Whys | undefined): number =>
+    entries.filter((entry) => known?.[entry] === undefined).length
+
+  return (
+    bare(expectation.paths, whys?.paths) +
+    bare(expectation.absent, whys?.absent) +
+    bare(expectation.writeScope, whys?.writeScope) +
+    bare(expectation.escapeScope ?? [], whys?.escapeScope) +
+    bare(expectation.reply, whys?.reply) +
+    expectation.content.filter((entry) => entry.why === undefined).length
+  )
+}
+
+/** A scope's results are per write, so a failure carries every declared glob's reason. */
+function scopeWhy(
+  globs: readonly string[],
+  whys: Whys | undefined,
+): string | undefined {
+  const reasons = [...new Set(globs.flatMap((glob) => whys?.[glob] ?? []))]
+
+  return reasons.length === 0 ? undefined : reasons.join('; ')
+}
+
+function withWhy(
+  result: AssertionResult,
+  why: string | undefined,
+): AssertionResult {
+  return why === undefined ? result : { ...result, why }
+}
+
+/**
  * An entry carrying `*` is matched as a glob, so an arm can assert a file whose
  * name a run derives. Reports the matched path rather than the pattern, since a
  * pass on `lessons/0001-*.html` says nothing until the name it found is named.
@@ -242,9 +389,12 @@ function checkPaths(
   return expectation.paths.map((path) => {
     const written = writtenUnder(path, sandboxDir)
 
-    return written
-      ? { ok: true, message: `exists: ${written}` }
-      : { ok: false, message: `missing: ${path}` }
+    return withWhy(
+      written
+        ? { ok: true, message: `exists: ${written}` }
+        : { ok: false, message: `missing: ${path}` },
+      expectation.whys?.paths[path],
+    )
   })
 }
 
@@ -275,9 +425,12 @@ function checkAbsent(
   return expectation.absent.map((path) => {
     const written = writtenUnder(path, sandboxDir)
 
-    return written
-      ? { ok: false, message: `should not exist: ${written}` }
-      : { ok: true, message: `absent: ${path}` }
+    return withWhy(
+      written
+        ? { ok: false, message: `should not exist: ${written}` }
+        : { ok: true, message: `absent: ${path}` },
+      expectation.whys?.absent[path],
+    )
   })
 }
 
@@ -290,28 +443,36 @@ function checkContent(
   expectation: Expectation,
   sandboxDir: string,
 ): AssertionResult[] {
-  return expectation.content.map(({ path, pattern }) => {
-    const matched = writtenUnder(path, sandboxDir) ?? path
-    const full = join(sandboxDir, matched)
-    const label = `${matched} =~ ${pattern}`
+  return expectation.content.map(({ path, pattern, why }) =>
+    withWhy(matchContent(path, pattern, sandboxDir), why),
+  )
+}
 
-    let matcher: RegExp
-    try {
-      matcher = new RegExp(pattern, 'm')
-    } catch {
-      return { ok: false, message: `invalid pattern for ${path}: ${pattern}` }
-    }
+function matchContent(
+  path: string,
+  pattern: string,
+  sandboxDir: string,
+): AssertionResult {
+  const matched = writtenUnder(path, sandboxDir) ?? path
+  const full = join(sandboxDir, matched)
+  const label = `${matched} =~ ${pattern}`
 
-    if (!existsSync(full) || !statSync(full).isFile()) {
-      return { ok: false, message: `no file to match: ${path}` }
-    }
+  let matcher: RegExp
+  try {
+    matcher = new RegExp(pattern, 'm')
+  } catch {
+    return { ok: false, message: `invalid pattern for ${path}: ${pattern}` }
+  }
 
-    if (matcher.test(readFileSync(full, 'utf8'))) {
-      return { ok: true, message: `matches: ${label}` }
-    }
+  if (!existsSync(full) || !statSync(full).isFile()) {
+    return { ok: false, message: `no file to match: ${path}` }
+  }
 
-    return { ok: false, message: `no match: ${label}` }
-  })
+  if (matcher.test(readFileSync(full, 'utf8'))) {
+    return { ok: true, message: `matches: ${label}` }
+  }
+
+  return { ok: false, message: `no match: ${label}` }
 }
 
 /**
@@ -341,12 +502,16 @@ function checkWriteScope(
   }
 
   const globs = expectation.writeScope.map((glob) => new Bun.Glob(glob))
+  const why = scopeWhy(expectation.writeScope, expectation.whys?.writeScope)
 
   return {
     results: writes.map((path) =>
       globs.some((glob) => glob.match(path))
         ? { ok: true, message: `in scope: ${path}` }
-        : { ok: false, message: `wrote outside declared scope: ${path}` },
+        : withWhy(
+            { ok: false, message: `wrote outside declared scope: ${path}` },
+            why,
+          ),
     ),
     skipped: [],
   }
@@ -414,6 +579,7 @@ function checkTiedEscapes(
   }
 
   const globs = expectation.escapeScope.map((glob) => new Bun.Glob(glob))
+  const why = scopeWhy(expectation.escapeScope, expectation.whys?.escapeScope)
   const witnessCount = concurrentSessions?.length ?? 0
   const witnessSuffix =
     witnessCount > 0
@@ -424,10 +590,13 @@ function checkTiedEscapes(
     results: escapes.map((path) =>
       globs.some((glob) => glob.match(path))
         ? { ok: true, message: `declared escape: ${path}` }
-        : {
-            ok: false,
-            message: `unbounded escape: ${path}${witnessSuffix}`,
-          },
+        : withWhy(
+            {
+              ok: false,
+              message: `unbounded escape: ${path}${witnessSuffix}`,
+            },
+            why,
+          ),
     ),
     skipped: [],
   }
@@ -455,9 +624,12 @@ function checkReply(
 
   return {
     results: expectation.reply.map((fragment) =>
-      reply.includes(fragment)
-        ? { ok: true, message: `reply says: ${fragment}` }
-        : { ok: false, message: `reply never says: ${fragment}` },
+      withWhy(
+        reply.includes(fragment)
+          ? { ok: true, message: `reply says: ${fragment}` }
+          : { ok: false, message: `reply never says: ${fragment}` },
+        expectation.whys?.reply[fragment],
+      ),
     ),
     skipped: [],
   }
@@ -566,6 +738,8 @@ export function checkExpectation(
   if (results.length === 0) {
     return {
       state: 'fail',
+      purpose: expectation.purpose,
+      whyless: countWhyless(expectation),
       asserted: 0,
       failed: 1,
       unchecked: expectation.manual.length + skipped.length,
@@ -581,6 +755,8 @@ export function checkExpectation(
 
   return {
     state: failed > 0 ? 'fail' : 'pass',
+    purpose: expectation.purpose,
+    whyless: countWhyless(expectation),
     asserted: results.length,
     failed,
     unchecked: expectation.manual.length + skipped.length,
