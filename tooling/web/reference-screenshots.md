@@ -44,6 +44,7 @@ The harness reads the `Device classes:` line under `## Layout` in `canon/DESIGN.
 - `SCREENSHOT_FILTER` keeps cases whose `<section>/<width>--<theme>` label contains a comma-separated term, and exits 1 listing the labels on no match
 - `--check-console-clean` exits 1 with the list if any `console` error fired, turning the capture into a smoke check
 - `--require-base-url` exits 1 before launching a browser when `SCREENSHOT_BASE_URL` is unset, so a deployment script cannot capture `localhost`
+- `--print-device-classes` prints the supported classes as a comma list, such as `desktop`, and exits 0 before a browser launches, or exits 1 on a `Device classes:` line it refuses
 - With a base URL, every flagged case is skipped so a production smoke run writes nothing to the committed path, and zero cases run exits 1
 
 ## Screenshot evidence

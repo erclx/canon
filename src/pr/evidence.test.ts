@@ -842,6 +842,15 @@ describe('owedReelWidths', () => {
     expect(owedReelWidths(readChecklistBoxes('- [ ] calm (taste)'))).toEqual([])
   })
 
+  it('should owe the widest supported class for a box naming no width where desktop is left out', () => {
+    const boxes = readChecklistBoxes('- [ ] /board: click → opens')
+
+    expect([
+      owedReelWidths(boxes, ['phone']),
+      owedReelWidths(boxes, ['phone', 'tablet']),
+    ]).toEqual([[390], [768]])
+  })
+
   it('should owe no width whose device class the record leaves out', () => {
     const boxes = readChecklistBoxes(
       [

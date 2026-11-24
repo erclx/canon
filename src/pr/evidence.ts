@@ -581,12 +581,15 @@ export function renderEvidenceBody(
     reels.filter((reel) => head.startsWith(reel.head)).map((r) => r.width),
   ),
   previewBuilt?: string,
+  classes: readonly DeviceClass[] = DEVICE_CLASSES,
 ): string {
   const covering = new Set(
     reels.map((reel) => reel.width).filter((width) => coveredWidths.has(width)),
   )
   const owed =
-    checklist === undefined ? [] : owedReelWidths(readChecklistBoxes(checklist))
+    checklist === undefined
+      ? []
+      : owedReelWidths(readChecklistBoxes(checklist), classes)
   const covered =
     covering.size > 0 && owed.every((width) => covering.has(width))
   const segments = [
@@ -1048,6 +1051,21 @@ function readBoxWidth(text: string): { width?: number } {
   return width === undefined ? {} : { width: Number(width) }
 }
 
+/** The viewport width a reel at each device class films at, as `reel-widths.md` passes `--viewport`. */
+const CLASS_REEL_WIDTHS: Readonly<Record<DeviceClass, number>> = {
+  phone: 390,
+  tablet: 768,
+  desktop: DEFAULT_REEL_WIDTH,
+}
+
+/** The width a box naming none films at, being the widest class the project supports. */
+export function defaultReelWidth(
+  classes: readonly DeviceClass[] = DEVICE_CLASSES,
+): number {
+  const widest = classes.at(-1)
+  return widest === undefined ? DEFAULT_REEL_WIDTH : CLASS_REEL_WIDTHS[widest]
+}
+
 /**
  * The widths a reel is owed at, one per width a drivable box names and the default for a box naming none or a
  * malformed one, narrowest first. A width outside the device classes the project supports is owed nothing.
@@ -1059,7 +1077,7 @@ export function owedReelWidths(
   const widths = new Set(
     boxes
       .filter((box) => !box.isTaste)
-      .map((box) => box.width ?? DEFAULT_REEL_WIDTH)
+      .map((box) => box.width ?? defaultReelWidth(classes))
       .filter((width) => classes.includes(deviceClassOf(width))),
   )
   return [...widths].sort((a, b) => a - b)

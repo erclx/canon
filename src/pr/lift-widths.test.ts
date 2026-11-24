@@ -22,6 +22,16 @@ function reelWaiver(reason: string): ReviewRow {
 }
 
 describe('evidenceGate at several widths', () => {
+  it('should owe the gate default width when no named width survives the class filter', () => {
+    const gate = evidenceGate(
+      twoWidths({ owedWidths: [], defaultWidth: 390 }),
+      [],
+      HEAD,
+    )
+
+    expect(gate).toMatchObject({ reason: 'reel-unsettled', reelWidths: [390] })
+  })
+
   it('should refuse reel-unsettled naming the width no reel covers', () => {
     const gate = evidenceGate(
       twoWidths({ reels: [{ width: 1280, head: HEAD.slice(0, 7) }] }),

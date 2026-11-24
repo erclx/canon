@@ -19,7 +19,12 @@ import {
   type DeviceClass,
   readDeviceClasses,
 } from '@/design/device-classes'
-import { owedReelWidths, readChecklistBoxes } from '@/pr/evidence'
+import {
+  DEFAULT_REEL_WIDTH,
+  defaultReelWidth,
+  owedReelWidths,
+  readChecklistBoxes,
+} from '@/pr/evidence'
 import {
   type ChecksGate,
   type EvidenceGate,
@@ -126,13 +131,13 @@ export async function readEvidenceGate(
 }
 
 /**
- * The classes the project's design record declares. A line the reader refuses
- * warns and reads as all three, so the lift owes every width rather than fewer.
+ * The classes the project's design record declares, read by the lift and the evidence comment alike. A line the
+ * reader refuses warns and reads as all three, so a reel is owed at every width rather than fewer.
  */
-function readSupportedClasses(root: string): readonly DeviceClass[] {
+export function readSupportedClasses(root: string): readonly DeviceClass[] {
   const read = readDeviceClasses(root)
   if (read.ok) return read.classes
-  logWarn(`${read.message} The lift owes a reel at every class's width.`)
+  logWarn(`${read.message} Every class's width is owed a reel.`)
   return DEVICE_CLASSES
 }
 
@@ -161,6 +166,7 @@ export function toEvidenceGate(
 
   const reels = readReels(record.reels)
   const reelSkips = readReelSkips(record.reelSkips)
+  const defaultWidth = defaultReelWidth(classes)
   return {
     isSettled: record.reason === 'settled',
     owed: Array.isArray(record.owed) ? record.owed.map(String) : [],
@@ -175,6 +181,7 @@ export function toEvidenceGate(
     ...(typeof record.checklist === 'string' && {
       owedWidths: owedReelWidths(readChecklistBoxes(record.checklist), classes),
     }),
+    ...(defaultWidth !== DEFAULT_REEL_WIDTH && { defaultWidth }),
   }
 }
 

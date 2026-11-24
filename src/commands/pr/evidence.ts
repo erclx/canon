@@ -61,6 +61,7 @@ import {
   refusePull,
   refuseWith,
 } from '@/commands/pr/pull'
+import { readSupportedClasses } from '@/commands/pr/gates'
 import { ghPreviewRunner } from '@/commands/pr/preview'
 import { readWorkflows } from '@/commands/pr/workflows'
 
@@ -994,6 +995,7 @@ async function runEvidence(
     uncaptured,
     coveredWidths,
     previewBuilt,
+    readSupportedClasses(root),
   )
 
   const caseCount = states.reduce((n, s) => n + s.items.length, 0)

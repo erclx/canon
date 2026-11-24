@@ -146,8 +146,10 @@ export interface EvidenceGate {
   readonly reelSkip?: string
   /** The text after each `**No reel at <width>:**` label, which governs its width over `reelSkip`. */
   readonly reelSkips?: ReadonlyMap<number, string>
-  /** The widths a drivable box owes a reel at. Absent reads as the default width alone. */
+  /** The widths a drivable box owes a reel at. Absent or empty reads as `defaultWidth` alone. */
   readonly owedWidths?: readonly number[]
+  /** The width a drivable box owes when none survives, the widest supported class's. Absent reads as 1280. */
+  readonly defaultWidth?: number
 }
 
 export interface EvidenceGateReel {
@@ -512,7 +514,7 @@ export function evidenceGate(
   const owed =
     evidence.owedWidths !== undefined && evidence.owedWidths.length > 0
       ? evidence.owedWidths
-      : [DEFAULT_REEL_WIDTH]
+      : [evidence.defaultWidth ?? DEFAULT_REEL_WIDTH]
   const waiver = readReelWaivers(standing).at(-1)
   const settles = owed.map((width) => ({
     width,

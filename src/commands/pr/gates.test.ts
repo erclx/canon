@@ -58,6 +58,19 @@ describe('toEvidenceGate', () => {
     expect(gate?.owedWidths).toEqual([1280])
   })
 
+  it('should fall back to a phone-only project widest width rather than 1280', () => {
+    const gate = toEvidenceGate(
+      {
+        reason: 'settled',
+        checklist: '- [ ] /board, 1280: click → opens',
+        drivable: 1,
+      },
+      ['phone'],
+    )
+
+    expect(gate).toMatchObject({ owedWidths: [], defaultWidth: 390 })
+  })
+
   it('should owe no width when the record carries no checklist', () => {
     const gate = toEvidenceGate({ reason: 'owed', owed: ['evidence'] })
 
