@@ -33,4 +33,4 @@ Branch on the record's `reason` rather than on the exit, which a shell function 
 
 - A rebase that leaves the branch diff equal per path carries both closes, so `review-address` asks for no re-review, and the next standing wait reads `fresh`
 - A rebase that changed what the branch writes asks for the re-review the channel states, and the standing wait starts again only once that `--wait` reads `covered`
-- A handback from the controller that arrives beside this wake runs `review-address` once, since its step finds the branch fresh on the second call
+- Drop a controller handback that lands after this wake's `review-address` run once the branch reads fresh. A pull request carrying review comments skips the guard that stops a fresh branch.
