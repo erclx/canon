@@ -15,9 +15,10 @@ import {
   withMergeState,
 } from '@/pr/checks'
 import {
+  classesFor,
   DEVICE_CLASSES,
   type DeviceClass,
-  readDeviceClasses,
+  readDeviceConfig,
 } from '@/design/device-classes'
 import {
   DEFAULT_REEL_WIDTH,
@@ -127,18 +128,35 @@ export async function readEvidenceGate(
   } catch {
     return undefined
   }
-  return toEvidenceGate(record, readSupportedClasses(root))
+  return toEvidenceGate(
+    record,
+    readClassList(record.deviceClasses) === undefined
+      ? readSupportedClasses(root)
+      : undefined,
+  )
 }
 
 /**
- * The classes the project's design record declares, read by the lift and the evidence comment alike. A line the
- * reader refuses warns and reads as all three, so a reel is owed at every width rather than fewer.
+ * The classes `canon/config/design.toml` gives the painted paths a change touched, the default for none, read by
+ * the lift and the evidence comment alike. A config the reader refuses warns and reads as all three, so a reel is
+ * owed at every width rather than fewer.
  */
-export function readSupportedClasses(root: string): readonly DeviceClass[] {
-  const read = readDeviceClasses(root)
-  if (read.ok) return read.classes
+export function readSupportedClasses(
+  root: string,
+  paintedPaths: readonly string[] = [],
+): readonly DeviceClass[] {
+  const read = readDeviceConfig(root)
+  if (read.ok) return classesFor(read.config, { paths: paintedPaths }).classes
   logWarn(`${read.message} Every class's width is owed a reel.`)
   return DEVICE_CLASSES
+}
+
+function readClassList(value: unknown): DeviceClass[] | undefined {
+  if (!Array.isArray(value) || value.length === 0) return undefined
+  const classes = DEVICE_CLASSES.filter((deviceClass) =>
+    value.includes(deviceClass),
+  )
+  return classes.length === value.length ? classes : undefined
 }
 
 /** The `canon pr evidence --check --json` fields the lift reads, each unchecked until `toEvidenceGate` narrows it. */
@@ -151,19 +169,22 @@ export interface EvidenceCheckRecord {
   readonly reels?: unknown
   readonly reelSkip?: unknown
   readonly reelSkips?: unknown
+  readonly deviceClasses?: unknown
 }
 
 /**
  * The gate a check record reads as, undefined for a record that is not a
  * check. The owed widths come off the checklist text, so a box naming no
- * width or a malformed one owes the default.
+ * width or a malformed one owes the default. A record carrying its own
+ * `deviceClasses` governs over `fallback`, since the check read the changed set.
  */
 export function toEvidenceGate(
   record: EvidenceCheckRecord,
-  classes: readonly DeviceClass[] = DEVICE_CLASSES,
+  fallback: readonly DeviceClass[] = DEVICE_CLASSES,
 ): EvidenceGate | undefined {
   if (record.reason !== 'settled' && record.reason !== 'owed') return undefined
 
+  const classes = readClassList(record.deviceClasses) ?? fallback
   const reels = readReels(record.reels)
   const reelSkips = readReelSkips(record.reelSkips)
   const defaultWidth = defaultReelWidth(classes)

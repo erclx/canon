@@ -1,5 +1,8 @@
-import { describe, expect, it } from 'vitest'
-import { toEvidenceGate } from '@/commands/pr/gates'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { readSupportedClasses, toEvidenceGate } from '@/commands/pr/gates'
 
 describe('toEvidenceGate', () => {
   const CHECKLIST = [
@@ -58,6 +61,34 @@ describe('toEvidenceGate', () => {
     expect(gate?.owedWidths).toEqual([1280])
   })
 
+  it('should take the classes a record carries over the fallback', () => {
+    const gate = toEvidenceGate(
+      {
+        reason: 'settled',
+        checklist: CHECKLIST,
+        drivable: 2,
+        deviceClasses: ['phone', 'desktop'],
+      },
+      ['desktop'],
+    )
+
+    expect(gate?.owedWidths).toEqual([390, 1280])
+  })
+
+  it('should keep the fallback for a record naming a class outside the three', () => {
+    const gate = toEvidenceGate(
+      {
+        reason: 'settled',
+        checklist: CHECKLIST,
+        drivable: 2,
+        deviceClasses: ['phone', 'watch'],
+      },
+      ['desktop'],
+    )
+
+    expect(gate?.owedWidths).toEqual([1280])
+  })
+
   it('should fall back to a phone-only project widest width rather than 1280', () => {
     const gate = toEvidenceGate(
       {
@@ -83,5 +114,50 @@ describe('toEvidenceGate', () => {
 
   it('should read a record that is not a check as nothing', () => {
     expect(toEvidenceGate({ reason: 'ok' })).toBeUndefined()
+  })
+})
+
+describe('readSupportedClasses', () => {
+  let root: string
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'supported-classes-'))
+    mkdirSync(join(root, 'canon', 'config'), { recursive: true })
+  })
+
+  afterEach(() => {
+    rmSync(root, { force: true, recursive: true })
+  })
+
+  const writeConfig = (text: string): void => {
+    writeFileSync(join(root, 'canon', 'config', 'design.toml'), text)
+  }
+
+  it('should read the scope a changed painted path reaches', () => {
+    writeConfig(
+      [
+        '[device-classes]',
+        'default = ["desktop"]',
+        'why = "A canvas"',
+        '[device-classes.scopes.landing]',
+        'paths = ["web/"]',
+        'classes = ["phone"]',
+        'why = "Responsive"',
+      ].join('\n'),
+    )
+
+    expect(readSupportedClasses(root, ['web/index.astro'])).toEqual(['phone'])
+  })
+
+  it('should read the default for no changed painted path', () => {
+    writeConfig('[device-classes]\ndefault = ["desktop"]\nwhy = "A canvas"\n')
+
+    expect(readSupportedClasses(root)).toEqual(['desktop'])
+  })
+
+  it('should read all three for a config it refuses', () => {
+    writeConfig('[device-classes]\ndefault = ["watch"]\nwhy = "x"\n')
+
+    expect(readSupportedClasses(root)).toEqual(['phone', 'tablet', 'desktop'])
   })
 })
