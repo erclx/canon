@@ -19,6 +19,7 @@ import {
   auditsBaselineRel,
   clientCommandCitations,
   designProse,
+  deviceClasses,
   documentCeiling,
   folderEchoedNames,
   isFolderEchoedName,
@@ -856,6 +857,85 @@ describe('canonicalRecords', () => {
     writeRequirements(`At most 5 words. ${words(1)}\n`)
 
     const report = await canonicalRecords(context())
+
+    expect(report.failure).toBeUndefined()
+  })
+})
+
+describe('deviceClasses', () => {
+  let root: string
+
+  const refuse = () => {
+    throw new Error('deviceClasses reads the config and runs nothing')
+  }
+
+  const context = (): MeasureContext => ({
+    root,
+    ci: false,
+    run: refuse,
+    cli: refuse,
+  })
+
+  const write = (rel: string, source: string): void => {
+    mkdirSync(join(root, rel, '..'), { recursive: true })
+    writeFileSync(join(root, rel), source)
+  }
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-device-classes-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('passes a tree holding no config', async () => {
+    const report = await deviceClasses(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.unmeasured).toBeUndefined()
+  })
+
+  it('passes a config the reader accepts', async () => {
+    write(
+      'canon/config/design.toml',
+      '[device-classes]\ndefault = ["desktop"]\nwhy = "A canvas"\n',
+    )
+
+    const report = await deviceClasses(context())
+
+    expect(report.failure).toBeUndefined()
+  })
+
+  it('fails a bad class name and names the field', async () => {
+    write(
+      'canon/config/design.toml',
+      '[device-classes]\ndefault = ["watch"]\nwhy = "A canvas"\n',
+    )
+
+    const report = await deviceClasses(context())
+
+    expect(report.failure).toContain('device-classes.default')
+  })
+
+  it('fails a Device classes: line left in the record, naming the config', async () => {
+    write(
+      'canon/DESIGN.md',
+      '# Design\n\n## Layout\n\n- Device classes: desktop\n',
+    )
+
+    const report = await deviceClasses(context())
+
+    expect(report.failure).toContain('canon/config/design.toml')
+  })
+
+  it('passes a record carrying no Device classes: line', async () => {
+    write(
+      'canon/DESIGN.md',
+      '# Design\n\n## Layout\n\n- Draw widths: 390, 768, 1280\n',
+    )
+
+    const report = await deviceClasses(context())
 
     expect(report.failure).toBeUndefined()
   })
