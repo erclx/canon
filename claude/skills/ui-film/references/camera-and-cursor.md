@@ -71,6 +71,7 @@ Three controls change the push itself.
 
 - Expect a screencast beat's zoom to stop near 1.35x, since its clip has one pixel per page pixel, and a stepped beat's to reach 1.8x
 - Set `"push": false` on a beat whose change covers the whole page, such as a theme switch or a layout change. Its track keeps the cursor and the click ring and drops the zoom.
+- Expect a beat filmed under 768 wide to hold wide with no key, since a push crops a phone's one column. Set `"push": true` on a beat that wants the zoom there.
 - Set `"hand": false` on a beat no person drives, such as an agent editing the page. Its steps still run, and the camera holds wide with no cursor or ring drawn.
 - Rebuild a beat's track with `canon take camera <dir>/log.json --rate <n> --out <file>` for a clip the edit plays `n` times faster, so the zoom settles on the clock a viewer sees
 
