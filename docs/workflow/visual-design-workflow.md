@@ -44,6 +44,43 @@ Before the pull request opens, the worker runs two checks.
 
 Run `canon drive --help` for the step kinds and the run file shape. A run file naming `"colorScheme": ["light", "dark"]` drives every viewport once per theme, and each pass and finding then carries its `colorScheme`. A run naming none renders the page's default theme alone.
 
+## The evidence reel
+
+A reel is a short animated clip of the change working, posted on the pull request beside the stills. A still shows a state and a reel shows the path to it, so a reviewer sees what a press did rather than inferring it from two frames.
+
+### When a reel is owed
+
+`canon:pr-evidence` films the reel in the same step that posts the captures. A reel holds one width, so the checklist decides how many a pull request gets.
+
+- A checklist holding a drivable box owes one reel per width its drivable boxes name.
+- A box naming no width films once at 1280.
+- A width where nothing can be filmed posts a skip with a reason in place of a reel.
+
+`canon pr lift` settles each width on its own, through a reel at the head, a skip no builder can change, or a waiver in a standing review. A skip whose cause a builder can fix, such as a missing target or a server that is not running, leaves the width unsettled until the fix lands.
+
+A project declaring fewer device classes owes no reel at a width its classes leave out. `canon design classes --changed` prints the classes a change owes.
+
+### What the camera does
+
+`canon:ui-film` owns the camera rules, and a reader sees three of them.
+
+- It zooms in along the glide onto a press and lands as the cursor arrives.
+- It holds one zoom across presses in the same area rather than pulling out and in between them.
+- It pulls out when the page scrolls, since the content moves under it.
+
+A phone reel does not zoom. A push crops a phone's single column, so a beat filmed under 768 wide holds wide unless the beat asks for the zoom.
+
+### Controls on a beat
+
+Two keys in a beat of the take plan change the camera, and `canon take --help` carries the rest.
+
+- `push` turns the zoom on or off. It defaults to off under 768 and either value overrides the default, so `"push": false` suits a beat whose change covers the whole page, such as a theme switch.
+- `hand: false` marks a beat no person drives, such as an agent editing the page. The steps still run, the camera holds wide, and no cursor is drawn.
+
+### A reel and a composed film
+
+An evidence reel is a record for the reviewers. The worker films it, and it runs at most 15 seconds. A composed film is a product video with captions and an edit, made through `canon:ui-film` from the same `canon take` verb. This section covers the first only, and `canon:ui-film` covers the second.
+
 ## Review
 
 Two reviews run beside each other and finish on their own clocks.
