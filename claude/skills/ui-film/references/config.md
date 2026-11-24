@@ -5,7 +5,9 @@ description: What a take reads from the shared [drive] table of canon/config/app
 
 # UI film config
 
-Read at Step 1 of `ui-film`. A take shares its project's `[drive]` table in `canon/config/app.toml` rather than keeping a second one, since both build and serve the same app. The skill reads the table and never writes it. `${CLAUDE_SKILL_DIR}/../app-drive/references/config.md` states the table whole, the targets, and the `app-drive.toml` a project that has not moved still reads.
+Read at Step 1 of `ui-film`. A take shares its project's `[drive]` table in `canon/config/app.toml` rather than keeping a second one, since both build and serve the same app. The skill reads the table and never writes it.
+
+`${CLAUDE_SKILL_DIR}/../app-drive/references/config.md` states the table whole, the targets, and the `app-drive.toml` a project that has not moved still reads.
 
 ```toml
 [drive]

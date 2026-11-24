@@ -27,7 +27,7 @@ When its change makes a reference untrue, the worker redraws the board frame its
 - The `craft` rule fires on the files the worker edits and loads `ui-craft` for behavior and `design-taste` for look.
 - The `ui-craft` capture reference has the worker capture the full page in every theme the surface ships, against a preview server and never a dev server.
 - It sets the widths too, being each breakpoint in `canon/DESIGN.md` or 390, 768, and 1280 for a layout case, checked for sideways scroll at 320, and one width for a state case.
-- The device classes under `[device-classes]` in `canon/config/app.toml` drop the widths of every class the changed surface leaves out, and the 320 check with phone. `canon design classes --changed` prints them.
+- The `[device-classes]` table in `canon/config/app.toml` drops the widths of every class the changed surface leaves out, and the 320 check with phone. `canon design classes --changed` prints them.
 
 ## Self-check
 

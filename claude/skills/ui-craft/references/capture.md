@@ -31,7 +31,7 @@ Only a change with no visible result in any reachable state is exempt, such as a
 
 - Extend the drive fixture in the same branch when a box or a case needs a state it lacks, and commit the added state under a path the fixture declares, since the throwaway copy wipes anything else.
 - Never record the missing state as a skip, since the next pull request meets the same fixture and skips again.
-- State the setup inline when the project has no `[drive]` table in `canon/config/app.toml`, nor the `app-drive.toml` before it, since the drive there starts from the served root and a fixture file is not owed.
+- State the setup inline when the project has no `[drive]` table or `app-drive.toml`, since the drive there starts from the served root and a fixture file is not owed.
 
 ## What a capture covers
 
@@ -41,7 +41,7 @@ Only a change with no visible result in any reachable state is exempt, such as a
 - Capture resizable chrome at its narrowest and widest clamp, at the narrowest width keeping it persistent. Judge the content width beside it.
 - Capture a state case at one width, driving states a first render cannot reach, such as an open menu.
 - Add a surface's case with the surface, and remove it with the surface.
-  - Name the scope as the case's `deviceScope` when a scope under `[device-classes]` in `canon/config/app.toml`, or `device-classes.toml` before it, covers the surface, since a case naming none captures at the default alone.
+  - Name the scope as the case's `deviceScope` when a `[device-classes]` scope in `canon/config/app.toml` covers the surface, since a case naming none captures at the default alone.
 
 ## What a moving change owes
 

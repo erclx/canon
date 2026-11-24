@@ -25,7 +25,10 @@ Owns the token module, the component layer, the renderers, the markdown parser, 
 
 ### `src/design/fixtures/`
 
-Holds the config texts both device class readers are tested on, each read as `canon/config/app.toml` and as the `device-classes.toml` before it. `device-classes.ts` reads the table through `src/config/app.ts` for `canon design classes`, the lift, and the gate, and the shipped harness `tooling/web/configs/e2e/screenshot.ts` carries its own copy, since a target cannot import the CLI. A grammar change lands in both readers and here.
+Holds the config texts both device class readers are tested on, each read as `canon/config/app.toml` and as the `device-classes.toml` before it. A grammar change lands in both readers and here.
+
+- `device-classes.ts` reads the table through `src/config/app.ts` for `canon design classes`, the lift, and the gate
+- The shipped harness `tooling/web/configs/e2e/screenshot.ts` carries its own copy, since a target cannot import the CLI
 
 ### `canon/design/`
 

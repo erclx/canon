@@ -37,7 +37,7 @@ The verb reports the lowest port serving an HTML page whose process runs inside 
 
 - `ok`: hold the record's `url` for the evidence step below.
 - `no-server`, `no-listener-reader`, `unhealthy`, or `invalid-config`: hold the reason and the record's `message` for the closing report and for the evidence step's `--local-skip`, and pass no link.
-- `unhealthy` means a page answered but a health path declared under `[health]` in `canon/config/app.toml`, or `local.toml` before it, failed. `invalid-config` means that table cannot be read, so nothing was checked.
+- `unhealthy` means a page answered but a health path the `[health]` table declares failed. `invalid-config` means that table cannot be read, so nothing was checked.
 - Never start a server here, since the ship chain cannot own one. A worker starts one under `role-worker`.
 - Anything else, including no record or an older binary's unknown-subcommand error: move on silently, as a skip rather than a stop.
 
