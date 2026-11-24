@@ -147,27 +147,72 @@ async function gitRead(
   return result.exitCode === 0 ? result.stdout.toString().trim() : undefined
 }
 
+const LOCK_RETRY_WAITS_MS: readonly number[] = [250, 1000]
+const LOCK_ERROR = /cannot lock ref/
+
+type Sleep = (ms: number) => Promise<void>
+
+const realSleep: Sleep = (ms) => new Promise((done) => setTimeout(done, ms))
+
+interface GitWriteResult {
+  readonly ok: boolean
+  readonly stderr: string
+}
+
 /**
  * Runs a git write with its output and any hook's on stderr, so a caller's
- * stdout stays a clean record.
+ * stdout stays a clean record. The stderr is also returned, in git's English
+ * text, since a retry keys on its wording.
  */
-function gitWrite(cwd: string, args: readonly string[]): Promise<boolean> {
+function gitWrite(
+  cwd: string,
+  args: readonly string[],
+): Promise<GitWriteResult> {
   return new Promise((done) => {
     const child = spawn('git', ['-C', cwd, ...args], {
-      env: gitEnv(),
-      stdio: ['ignore', 2, 2],
+      env: { ...gitEnv(), LC_ALL: 'C' },
+      stdio: ['ignore', 2, 'pipe'],
       timeout: PULL_TIMEOUT_MS,
     })
-    child.on('error', () => done(false))
-    child.on('close', (code) => done(code === 0))
+    const chunks: Buffer[] = []
+    child.stderr?.on('data', (chunk: Buffer) => {
+      chunks.push(chunk)
+      process.stderr.write(chunk)
+    })
+    child.on('error', () => done({ ok: false, stderr: '' }))
+    child.on('close', (code) =>
+      done({ ok: code === 0, stderr: Buffer.concat(chunks).toString() }),
+    )
   })
 }
 
 /**
- * Fast-forwards the main worktree at `cwd` to its remote trunk, firing `post-merge`
- * as a hand pull does. Every outcome but `pulled` leaves the checkout as it was.
+ * Runs a git write, retrying it only while its stderr names a ref lock, which
+ * a concurrent fetch or merge in the same checkout releases within moments.
  */
-export async function fastForwardMain(cwd: string): Promise<MainPull> {
+async function gitWriteRetryingLock(
+  cwd: string,
+  args: readonly string[],
+  sleep: Sleep,
+): Promise<boolean> {
+  let result = await gitWrite(cwd, args)
+  for (const wait of LOCK_RETRY_WAITS_MS) {
+    if (result.ok || !LOCK_ERROR.test(result.stderr)) break
+    await sleep(wait)
+    result = await gitWrite(cwd, args)
+  }
+  return result.ok
+}
+
+/**
+ * Fast-forwards the main worktree at `cwd` to its remote trunk, firing `post-merge`
+ * as a hand pull does, and retries a fetch or merge that meets a ref lock. Every
+ * outcome but `pulled` leaves the checkout as it was.
+ */
+export async function fastForwardMain(
+  cwd: string,
+  sleep: Sleep = realSleep,
+): Promise<MainPull> {
   const dirs = (
     await gitRead(cwd, [
       'rev-parse',
@@ -201,7 +246,12 @@ export async function fastForwardMain(cwd: string): Promise<MainPull> {
   if (status === undefined) return { outcome: 'refused', reason: 'pull-failed' }
   if (status !== '') return { outcome: 'refused', reason: 'dirty-tree' }
 
-  if (!(await gitWrite(cwd, ['fetch', '--quiet', 'origin', trunk]))) {
+  const fetched = await gitWriteRetryingLock(
+    cwd,
+    ['fetch', '--quiet', 'origin', trunk],
+    sleep,
+  )
+  if (!fetched) {
     return { outcome: 'refused', reason: 'pull-failed' }
   }
   const remote = `refs/remotes/origin/${trunk}`
@@ -221,7 +271,12 @@ export async function fastForwardMain(cwd: string): Promise<MainPull> {
       .nothrow()
   if (isBehind.exitCode !== 0) return { outcome: 'refused', reason: 'diverged' }
 
-  if (await gitWrite(cwd, ['merge', '--ff-only', '--quiet', remote])) {
+  const merged = await gitWriteRetryingLock(
+    cwd,
+    ['merge', '--ff-only', '--quiet', remote],
+    sleep,
+  )
+  if (merged) {
     return { outcome: 'pulled', reason: 'fast-forwarded' }
   }
   // The `post-merge` hook runs inside the timed merge, so a kill can land after HEAD moved.

@@ -293,6 +293,75 @@ describe('fastForwardMain', () => {
     })
   })
 
+  describe('on a ref lock', () => {
+    function lockFile(ref: string): string {
+      return join(MAIN, '.git', ref + '.lock')
+    }
+
+    function holdLock(ref: string): string {
+      const path = lockFile(ref)
+      writeFileSync(path, '')
+      return path
+    }
+
+    it('should pull once a fetch lock clears during the wait', async () => {
+      const landed = landOnOrigin('feat: merged elsewhere')
+      const lock = holdLock('refs/remotes/origin/main')
+      const waits: number[] = []
+
+      const result = await fastForwardMain(MAIN, async (ms) => {
+        waits.push(ms)
+        rmSync(lock)
+      })
+
+      expect(result).toEqual({ outcome: 'pulled', reason: 'fast-forwarded' })
+      expect(waits).toEqual([250])
+      expect(head(MAIN)).toBe(landed)
+    })
+
+    it('should pull once a merge lock clears during the wait', async () => {
+      const landed = landOnOrigin('feat: merged elsewhere')
+      const lock = holdLock('refs/heads/main')
+      const waits: number[] = []
+
+      const result = await fastForwardMain(MAIN, async (ms) => {
+        waits.push(ms)
+        rmSync(lock)
+      })
+
+      expect(result).toEqual({ outcome: 'pulled', reason: 'fast-forwarded' })
+      expect(waits).toEqual([250])
+      expect(head(MAIN)).toBe(landed)
+    })
+
+    it('should refuse pull-failed after three attempts when the lock never clears', async () => {
+      landOnOrigin('feat: merged elsewhere')
+      const before = head(MAIN)
+      holdLock('refs/remotes/origin/main')
+      const waits: number[] = []
+
+      const result = await fastForwardMain(MAIN, async (ms) => {
+        waits.push(ms)
+      })
+
+      expect(result).toEqual({ outcome: 'refused', reason: 'pull-failed' })
+      expect(waits).toEqual([250, 1000])
+      expect(head(MAIN)).toBe(before)
+    })
+
+    it('should not wait on a failure that is not a lock', async () => {
+      rmSync(join(BASE, 'origin.git'), { recursive: true, force: true })
+      const waits: number[] = []
+
+      const result = await fastForwardMain(MAIN, async (ms) => {
+        waits.push(ms)
+      })
+
+      expect(result).toEqual({ outcome: 'refused', reason: 'pull-failed' })
+      expect(waits).toEqual([])
+    })
+  })
+
   it('should skip a directory outside a git repository', async () => {
     const notARepo = mkdtempSync(join(tmpdir(), 'canon-ff-none-'))
 
