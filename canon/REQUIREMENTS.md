@@ -1,3 +1,7 @@
+---
+reviewed: 2026-11-24
+---
+
 # Requirements
 
 A developer handing real work to an agent has no way to run it from plan to merge. Planning, building, review, and shipping each get improvised per session, and nothing holds the agent to the practices that make code worth keeping. All of it depends on setup every repository accumulates the same way and lets drift.
@@ -28,9 +32,9 @@ This record holds at most 600 words.
 ## Non-goals
 
 - Replace human code review on risky changes. Agents augment the review loop and humans own the final call.
-- Ship runtime dependencies or application code to target projects. The toolkit ships configs, seeds, rules, and code proven to stay out of the production build, verified per instance.
+- Ship runtime dependencies or application code to target projects. The toolkit ships configs, seeds, rules, and code proven to stay out of the production build, verified per instance. App code a stack's own tool generates belongs to the project.
 - First-class support for every AI coding tool. Claude Code is the platform. Another tool stays deferred until a concrete use case drives it.
-- Produce visual, video, or teaching artifacts as products. Frameboard carries the design board in its own repository, and composed video goes to a tool built for it.
+- Produce visual, video, or teaching artifacts as products. Frameboard carries the design board in its own repository, and composed video goes to a tool built for it. A teaching skill carries how to teach, never a lesson the toolkit ships.
 - Provide a hosted service. Everything runs locally. Publishing to a registry someone else hosts stays in scope.
 
 ## Constraints
@@ -38,4 +42,4 @@ This record holds at most 600 words.
 - Agent-first: every command has a non-interactive path, and data on stdout pipes clean through any wrapper.
 - The toolkit is the authoritative source. Target projects consume through install and sync and never author in place.
 - Skills call the CLI and never reimplement it.
-- The toolkit runs on Linux and macOS, and CI proves both.
+- The toolkit runs on Linux and macOS, and CI runs the unit tests on both.
