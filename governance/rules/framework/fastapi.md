@@ -36,4 +36,4 @@ paths:
 
 ## Middleware
 
-- Configure CORS through `CORSMiddleware`, listing origins explicitly when `allow_credentials=True`, since a wildcard is refused then.
+- Configure CORS through `CORSMiddleware`.

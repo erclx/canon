@@ -9,11 +9,9 @@ The field is PHP programming, and the authority is the PHP manual at php.net, wi
 
 ## Strictness
 
-| Bullet                      | Source                                                                                                                                                                                                                                             | Read                |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| `strict_types=1`            | [Type declarations](https://www.php.net/manual/en/language.types.declarations.php): "By default, PHP will coerce values of the wrong type into the expected scalar type declaration if possible", and strict mode is enabled "on a per-file basis" | 2026-10-18, PHP 8.5 |
-| Native types over docblocks | [Type declarations](https://www.php.net/manual/en/language.types.declarations.php): native declarations "ensure that the value is of the specified type at call time, otherwise a TypeError is thrown", which no docblock does                     | 2026-10-18, PHP 8.5 |
-| `===` over `==`             | [Comparison operators](https://www.php.net/manual/en/language.operators.comparison.php): `==` is "equal after type juggling", and the page's warning shows `"1" == "01"` and `100 == "1e2"` both true in PHP 8                                     | 2026-10-18, PHP 8.5 |
+| Bullet                      | Source                                                                                                                                                                                                                         | Read                |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
+| Native types over docblocks | [Type declarations](https://www.php.net/manual/en/language.types.declarations.php): native declarations "ensure that the value is of the specified type at call time, otherwise a TypeError is thrown", which no docblock does | 2026-10-18, PHP 8.5 |
 
 ## Layout
 
@@ -41,10 +39,17 @@ The field is PHP programming, and the authority is the PHP manual at php.net, wi
 
 ## Declined
 
-Every bullet stayed, so nothing was cut. Three were reshaped.
+Two bullets were cut for a linter, and three more were reshaped.
 
 ### Merged or reworded
 
 - Reworded "a backed `enum` for a closed set" to an `enum`, backed only when stored or serialized. The manual gives a pure enum for a closed set and a backing value for a datastore round trip.
 - Gave the `@` ban an alternative, to check the condition first or catch the exception.
 - Gave the `extract`, variable variables, and `eval` ban an alternative, to name each variable and call each function directly.
+
+### A stack linter already fails on it
+
+The php stack's `.php-cs-fixer.dist.php` sets both rules, and `php-cs-fixer check` fails a file that breaks either.
+
+- Cut "open every file with `declare(strict_types=1);`", which `declare_strict_types` fails.
+- Cut "compare with `===` and `!==`", which `strict_comparison` fails.

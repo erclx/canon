@@ -9,7 +9,7 @@ paths:
 ## Errors
 
 - Wrap an error with `fmt.Errorf("...: %w", err)` when adding context.
-- Match an error with `errors.Is` or `errors.As`. Never compare with `==` or on `err.Error()` strings, which miss a wrapped error.
+- Never match an error on its `err.Error()` string, which misses a wrapped error. Use `errors.Is` or `errors.As`.
 - Never discard an error with `_`. Handle it, return it, or panic on a broken invariant.
 - Return an `error` for a failure a caller can expect. Reserve `panic` for a broken invariant.
 
@@ -17,7 +17,6 @@ paths:
 
 - Pass `context.Context` as the first parameter, named `ctx`.
 - Never store a `context.Context` in a struct field. Pass it to each function that needs it.
-- Do not pass a `nil` context. Use `context.TODO()` where none is available yet.
 
 ## Interfaces
 
