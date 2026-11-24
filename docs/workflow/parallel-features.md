@@ -20,6 +20,7 @@ Run independent features in parallel, one git worktree and one Claude Code sessi
 Assert the orchestrator role in one warm session with `canon:role-orchestrator`. It plans each feature or dispatches a cold planner under `canon:role-planner`, and dispatches a reviewer under `canon:role-reviewer` for each PR or batch of small PRs. The human launches workers and merges. See [operating model](operating-model.md).
 
 - Run one orchestrator at a time
+- A row too big for one pull request splits into a fan-in, which [AI workflow](ai-workflow.md#one-session-for-a-small-row-a-fan-in-for-a-big-one) says when to pick
 - Execution order comes off `.canon/tasks/priority.md`
 - Before a handoff, grep each construct the plan names and open each file it describes
 - A constraint naming a track in flight opens with the commit it was measured against. A merge of that track into `origin/main` over the named paths kills the constraint.

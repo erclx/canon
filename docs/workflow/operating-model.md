@@ -87,4 +87,6 @@ Stop adding worker tracks once you cannot review every output. A row waits only 
 
 - [Claude Code and git worktrees](../../wiki/claude/worktrees.md) for the mechanism and port collisions
 - [Claude Code subagents](../../wiki/claude/subagents.md) for in-session parallelism, and [blocking subagents](../../wiki/claude/permissions.md#blocking-subagents) for the `permissions.deny` rule
+- [Plan to merge](plan-to-merge.md) for one row followed from filing to merge
+- [AI workflow](ai-workflow.md) for which path to pick for your own work
 - [Skill map](skill-map.md) for how the skills in the loop are categorized
