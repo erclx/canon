@@ -86,8 +86,8 @@ Holds `governance.toml`, which names the one stack and extras this repository co
 A few more surfaces shape where a rule lands.
 
 - `.claude/rules/` is produced output, so a hand edit is deleted on the next `bun run check` and the change belongs in the source or the record
-- `governance/renames.toml` carries one entry per renamed shipped rule, or per rule folded onto a pointer such as `craft`, so `canon gov sync` moves a target across
-- `governance/splits.toml` maps a held rule to the partners its bullets moved to, so `canon gov sync` names each one a target lacks. A split is no rename entry, since its key is a live rule
+- `governance/renames.toml` takes an entry in the change that renames or pointer-folds a rule, pruned only once its target retires, since a chain resolves only while every link stays
+- `governance/splits.toml` takes an entry in the change that splits a rule, naming the partners a target lacks to `canon gov sync`. It is no rename entry, since its key is a live rule
 - `claude/skills/git-commit/references/versioning.md` governs no file, so skill instruction reaches it rather than a rule
 - A project holding `.cursor/rules/` from an older toolkit keeps those files, since sync never touches them
 
