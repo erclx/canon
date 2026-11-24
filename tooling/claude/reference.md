@@ -111,7 +111,8 @@ A pass still prompts for `gh api`, `curl`, and `canon pr preview --check` under 
 
 That log also names each plan's owner, the session on the last `pass` line for it, and guards a write onto an existing plan.
 
-- Another session's write is refused until its transcript holds a `Read` of the plan stamped at or after the owner's time. The refusal names the owner and that time.
+- Another session's write onto the main-root plan is refused until it has a `Read` of that file stamped at or after the owner's time. The refusal names the owner and that time.
+- A `cp` source, or a same-named plan in another folder, is never judged.
 - The owner amends freely, and a plan no `pass` line names passes.
 - A missing or unreadable session id, transcript, or log passes, and so does a transcript where no tool call parses.
 - Each judged amendment logs `amend` or `block-owned` with its `owner=` and `owned_at=`.

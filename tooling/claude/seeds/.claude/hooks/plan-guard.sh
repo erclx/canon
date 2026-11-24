@@ -26,12 +26,16 @@ target=$(printf '%s' "$input" | jq -r '
 kind=${target:0:1}
 target=${target:1}
 
-# Prints only the words a write lands on, after `>` or `>>` or as a `tee` or
-# `cp` argument, so a command merely naming a plan passes. A scanner, not a
+# Prints only the words a write lands on, after `>` or `>>`, as a `tee`
+# argument, or as a `cp` target, so a command merely naming a plan passes. A scanner, not a
 # parser: a path built in a variable or by `printf` passes unseen.
 if [ "$kind" = B ]; then
   IFS= read -r -d '' scanner <<'AWK'
 { s = s (NR > 1 ? "\n" : "") $0 }
+function endcmd() {
+  if (last != "") print last
+  last = ""; cmd = ""
+}
 function flush() {
   if (!inword) return
   if (redirect) print word
@@ -40,7 +44,8 @@ function flush() {
     w = word; sub(/.*\//, "", w)
     if (w !~ /^[A-Za-z_][A-Za-z0-9_]*=/ && w !~ /^(sudo|env|command|exec|time|nice|xargs)$/) cmd = w
   }
-  else if ((cmd == "tee" || cmd == "cp") && word !~ /^-/) print word
+  else if (cmd == "tee" && word !~ /^-/) print word
+  else if (cmd == "cp" && word !~ /^-/) last = word
   word = ""; inword = 0; redirect = 0; tag = 0
 }
 END {
@@ -67,9 +72,9 @@ END {
       if (substr(s, i, 1) == "-") { dash = 1; i++ }
       tag = 1; continue
     }
-    if (c ~ /[;|&()<`]/) { flush(); if (c != "<") cmd = ""; i++; continue }
+    if (c ~ /[;|&()<`]/) { flush(); if (c != "<") endcmd(); i++; continue }
     if (c == "\n") {
-      flush(); cmd = ""; i++
+      flush(); endcmd(); i++
       for (t = 1; t <= nt; t++) {
         while (i <= n) {
           e = index(substr(s, i), "\n")
@@ -82,7 +87,7 @@ END {
     }
     word = word c; inword = 1; i++
   }
-  flush()
+  flush(); endcmd()
 }
 AWK
   targets=$(printf '%s' "$target" | awk "$scanner")
@@ -96,6 +101,18 @@ cwd=${payload_cwd:-${CLAUDE_PROJECT_DIR:-.}}
 # Plans live at the main worktree root, which a linked worktree's cwd is not.
 root=$(git -C "$cwd" worktree list --porcelain 2>/dev/null | awk '/^worktree /{sub(/^worktree /, ""); print; exit}')
 root=${root:-$cwd}
+plans_dir=$(cd "$root/.canon/plans" 2>/dev/null && pwd -P)
+
+# Whether a path lands on the main-root plan named by `$rest`, read through
+# symlinks. A path built on a variable cannot be resolved, so it counts.
+at_root() {
+  case "$1" in
+  *'$'*) return 0 ;;
+  /*) dir=${1%/*} ;;
+  *) dir=$cwd/${1%/*} ;;
+  esac
+  [ -n "$plans_dir" ] && [ "$(cd "$dir" 2>/dev/null && pwd -P)/${1##*/}" = "$plans_dir/$rest" ]
+}
 
 # A write onto an existing plan is an amendment its owner judges below, and an
 # archive path holds a shipped plan, so only a path naming no file yet asks for
@@ -114,7 +131,7 @@ while IFS= read -r path; do
   *) continue ;;
   esac
   if [ -e "$root/.canon/plans/$rest" ]; then
-    existing=${existing:-.canon/plans/$rest}
+    [ -z "$existing" ] && at_root "$path" && existing=".canon/plans/$rest"
     continue
   fi
   case "$path" in
@@ -236,10 +253,12 @@ if [ -z "$new" ]; then
   if [ "$owner" != "$key" ]; then
     read_at=$(grep -F '"Read"' "$transcript" 2>/dev/null | jq -Rr --arg plan "/.canon/plans/$rest" '
       fromjson? // empty | select(type == "object" and .type == "assistant")
-      | select(any(.message.content[]?; type == "object" and .type == "tool_use"
-          and .name == "Read" and ((.input.file_path // "") | tostring | endswith($plan))))
-      | .timestamp | select(type == "string" and length >= 19) | .[0:19]' 2>/dev/null |
-      sort | tail -n 1)
+      | .timestamp as $t | select(($t | type) == "string" and ($t | length) >= 19)
+      | .message.content[]? | select(type == "object" and .type == "tool_use" and .name == "Read")
+      | (.input.file_path // "" | tostring) | select(endswith($plan)) | "\($t[0:19]) \(.)"' 2>/dev/null |
+      while IFS=' ' read -r stamp file; do
+        case "$file" in /*) at_root "$file" && printf '%s\n' "$stamp" ;; esac
+      done | sort | tail -n 1)
     read_at=${read_at:--}
   fi
   judged="owner=$owner owned_at=$owned_at read_at=$read_at"

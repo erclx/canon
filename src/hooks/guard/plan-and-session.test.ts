@@ -3,6 +3,7 @@ import {
   mkdirSync,
   readFileSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs'
 import { join } from 'node:path'
@@ -587,6 +588,94 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
           project,
           'cp /wt/.canon/plans/feature-old.md .canon/plans/feature-old.md',
         ),
+      )
+
+      expect(result.code).toBe(0)
+    })
+
+    it.each([
+      [
+        'an absolute main-root path',
+        (root: string) => heredoc(join(root, '.canon/plans/feature-old.md')),
+      ],
+      [
+        'a main-root variable',
+        () => heredoc('"$root/.canon/plans/feature-old.md"'),
+      ],
+    ])('should refuse an unread write naming %s', async (_, command) => {
+      const project = planProject()
+      ownedBy(project)
+
+      const result = await run(hook, shellIn(project, command(project.root)))
+
+      expect(result.code).toBe(2)
+    })
+
+    it('should pass a cp reading the owned plan as its source', async () => {
+      const project = planProject()
+      ownedBy(project)
+
+      const result = await run(
+        hook,
+        shellIn(project, 'cp .canon/plans/feature-old.md notes.md'),
+      )
+
+      expect(result.code).toBe(0)
+    })
+
+    it('should pass a write onto the same plan name in another plans folder', async () => {
+      const project = planProject()
+      ownedBy(project)
+      const other = join(
+        ctx.fixture,
+        `plan-guard-other-${tree.label.replace(/\W/g, '-')}`,
+      )
+      mkdirSync(join(other, '.canon/plans'), { recursive: true })
+      writeFileSync(join(other, '.canon/plans/feature-old.md'), '# Other\n')
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc(join(other, '.canon/plans/feature-old.md'))),
+      )
+
+      expect(result.code).toBe(0)
+    })
+
+    it('should refuse after a read of a same-named plan outside the main root', async () => {
+      const project = planProject()
+      const copy = join(project.root, '.claude/worktrees/wt/.canon/plans')
+      mkdirSync(copy, { recursive: true })
+      writeFileSync(join(copy, 'feature-old.md'), '# Copy\n')
+      writeFileSync(
+        project.transcript,
+        `${OTHER_CALL}\n${readCall(join(copy, 'feature-old.md'), '2026-11-23T11:00:00.000Z')}\n`,
+      )
+      ownedBy(project)
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-old.md')),
+      )
+
+      expect(result.code).toBe(2)
+    })
+
+    it('should pass after a read through a symlinked main root', async () => {
+      const project = planProject()
+      const link = join(
+        ctx.fixture,
+        `plan-guard-link-${tree.label.replace(/\W/g, '-')}`,
+      )
+      symlinkSync(project.root, link)
+      writeFileSync(
+        project.transcript,
+        `${OTHER_CALL}\n${readCall(join(link, '.canon/plans/feature-old.md'), '2026-11-23T11:00:00.000Z')}\n`,
+      )
+      ownedBy(project)
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-old.md')),
       )
 
       expect(result.code).toBe(0)
