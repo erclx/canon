@@ -1,5 +1,5 @@
-import { existsSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import { PROJECT_ROOT } from '@/roots/project'
 import { configFiles, type Manifest, seedFiles } from '@/tooling/manifest'
 
@@ -60,8 +60,24 @@ export function resolveReference(
   return undefined
 }
 
+const TOPIC_FILE = /^reference-.+\.md$/
+
+/**
+ * The topic files that continue a stack's reference, in code-unit order so the sequence holds on every
+ * platform, where a locale-aware sort would reorder them.
+ */
+function topicPaths(reference: ResolvedReference): string[] {
+  const dir = dirname(reference.path)
+  return readdirSync(dir)
+    .filter((name) => TOPIC_FILE.test(name))
+    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+    .map((name) => join(dir, name))
+}
+
+/** Reads the main reference, then each `reference-<topic>.md` beside it, each opening on its own heading. */
 export function readReference(reference: ResolvedReference): string {
-  return readFileSync(reference.path, 'utf8')
+  const topics = topicPaths(reference).map((path) => readFileSync(path, 'utf8'))
+  return [readFileSync(reference.path, 'utf8'), ...topics].join('\n')
 }
 
 function codeList(items: readonly string[]): string {

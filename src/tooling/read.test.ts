@@ -79,6 +79,36 @@ describe('readReference', () => {
 
     expect(resolved && readReference(resolved)).toBe('# Base\n')
   })
+
+  it('should print one topic file after the main reference', () => {
+    writeReference('tooling/web/reference.md', '# Web\n')
+    writeReference('tooling/web/reference-screenshots.md', '# Shots\n')
+    const resolved = resolveReference(ROOT, 'web')
+
+    expect(resolved && readReference(resolved)).toBe('# Web\n\n# Shots\n')
+  })
+
+  it('should print topic files in name order whatever the locale sorts', () => {
+    writeReference('tooling/web/reference.md', '# Web\n')
+    writeReference('tooling/web/reference-b.md', '# B\n')
+    writeReference('tooling/web/reference-Z.md', '# Z\n')
+    writeReference('tooling/web/reference-a.md', '# A\n')
+    const resolved = resolveReference(ROOT, 'web')
+
+    expect(resolved && readReference(resolved)).toBe(
+      '# Web\n\n# Z\n\n# A\n\n# B\n',
+    )
+  })
+
+  it('should ignore a file that is not a topic of the reference', () => {
+    writeReference('tooling/web/reference.md', '# Web\n')
+    writeReference('tooling/web/reference-.md', '# Empty\n')
+    writeReference('tooling/web/references.md', '# Other\n')
+    writeReference('tooling/web/reference-notes.txt', 'notes\n')
+    const resolved = resolveReference(ROOT, 'web')
+
+    expect(resolved && readReference(resolved)).toBe('# Web\n')
+  })
 })
 
 describe('renderStackSections', () => {

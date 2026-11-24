@@ -13,6 +13,14 @@ A stack reference records the explicit decisions a tooling stack makes, so a rea
 - Keep guidance for authoring or maintaining the stack in the `internal-tooling` skill. A target session cannot act on it.
 - Nothing installs the reference and nothing generates it, so it is written and kept current by hand
 
+### Topic files
+
+A reference that nears the 300-line ceiling splits by concern into `tooling/<stack>/reference-<topic>.md`, beside the main file.
+
+- Move sections whole, keep the stack's decisions in `reference.md`, and open the topic file with one line saying it continues the stack's reference
+- The verb prints each topic file after `reference.md` in name order, so a reader of the stack loses nothing and takes no second argument
+- Split when a measured line count from `canon markdown audit` sits within about 20 lines of the ceiling, since a fold commit per edit is the cost of waiting
+
 ### What the verb prints after it
 
 The verb appends two sections from the stack's manifest and folders, so no reference writes either one. A hand list drifts from the files it names.
