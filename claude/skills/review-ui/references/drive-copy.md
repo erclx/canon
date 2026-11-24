@@ -7,7 +7,7 @@ description: Steps 4 and 7 of review-ui, which rebuild the copy a preview saves 
 
 Steps 4 and 7 of `review-ui`. A preview that saves what the pass drives would otherwise write the worker's tracked files, and a drag would land in a committed fixture.
 
-A project names the folders its preview writes in `canon/config/preview.json`. The worker starts its server reading a copy of them, and the pass rebuilds that copy at every head so the last pass's drags never reach this one.
+A project names the folders its preview writes under `[preview]` in `canon/config/app.toml`, or in `canon/config/preview.json` before it. The worker starts its server reading a copy of them, and the pass rebuilds that copy at every head so the last pass's drags never reach this one.
 
 - The rebuild resets each declared `writes` path from the worktree and leaves the rest of the copy root alone
 - A `keep` path inside a declared path is state the server owns, so the rebuild neither clears it nor copies the worktree's own
@@ -47,7 +47,7 @@ Branch on `reason` rather than on the exit code.
 
 ### Refusals that stop the pass
 
-Any other refusal stops the pass with nothing posted, naming the `reason` and `message` for the dispatcher, since a broken `canon/config/preview.json` would send the drives into the real folders.
+Any other refusal stops the pass with nothing posted, naming the `reason` and `message` for the dispatcher, since a broken `[preview]` table would send the drives into the real folders.
 
 - `seed-failed` and `seed-wrote-worktree` mean the copy lacks its seeded pages, or the seed wrote the tracked files `paths` names
 - `serve-failed` means the server never came up, so nothing fresh is left to drive. Name `serve.cause` and the `serve.output` tail.

@@ -30,11 +30,11 @@ The rule states canon's own evidence procedure for a rendered change, so most ro
 
 ## When the fixture cannot reach a state
 
-| Bullet                                      | Source                                                                                                                                                                            | Read       |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Extend the fixture in the same branch       | House choice: a drive fixture lacking a state made a box or reel skip and close, and only the building session can add the state before the pull request opens                    | 2026-11-03 |
-| Never record the state as a skip            | House choice: a skip leaves the fixture as thin as it was, so the next pull request meets the same gap and skips again                                                            | 2026-11-03 |
-| State the setup inline with no fixture file | House choice: a project with no `canon/config/app-drive.toml` drives the served root, so a fixture file is not owed and the setup goes on the box, as `(local only)` already does | 2026-11-03 |
+| Bullet                                      | Source                                                                                                                                                                                         | Read       |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Extend the fixture in the same branch       | House choice: a drive fixture lacking a state made a box or reel skip and close, and only the building session can add the state before the pull request opens                                 | 2026-11-03 |
+| Never record the state as a skip            | House choice: a skip leaves the fixture as thin as it was, so the next pull request meets the same gap and skips again                                                                         | 2026-11-03 |
+| State the setup inline with no fixture file | House choice: a project with no `[drive]` table in `canon/config/app.toml` drives the served root, so a fixture file is not owed and the setup goes on the box, as `(local only)` already does | 2026-11-03 |
 
 ## What a capture covers
 

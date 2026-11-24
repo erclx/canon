@@ -24,7 +24,7 @@ Settle each state the checklist names before Step 6, since a box the driver cann
 
 - Add the state to the drive fixture for each box ending in `(needs fixture)`, then drop the marker from the box
 - Confirm every state the checklist names has a capture case, per the `canon:ui-craft` capture reference, and add the missing ones
-- A project with no `canon/config/app-drive.toml` takes the setup inline on the box instead of a fixture file
+- A project with no `[drive]` table in `canon/config/app.toml`, nor the `app-drive.toml` before it, takes the setup inline on the box instead of a fixture file
 
 ## Reading the counts into the closing block
 

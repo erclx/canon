@@ -39,7 +39,7 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 
 A board frame runs a quiz and cannot save what the learner picked, so the surface decides where the record goes as well as where the lesson is drawn. Decide it the way `app-drive` decides whether a drive draws.
 
-- Draw on the project's Frameboard board when `canon/config/design.toml` or `.canon/board/` exists at the main root, reaching it per `${CLAUDE_SKILL_DIR}/../design-pick/references/board.md`
+- Draw on the project's Frameboard board when `.canon/board/` exists at the main root, reaching it per `${CLAUDE_SKILL_DIR}/../design-pick/references/board.md`
 - Write the lesson as a standalone HTML page otherwise, since a missing board is no reason to refuse a lesson
 - Keep the learning record on the board as a frame the session writes from what the learner reports, beside the lesson it records
 - Keep the record as a file beside the standalone lessons when the project has no board

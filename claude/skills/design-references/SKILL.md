@@ -36,8 +36,7 @@ Operator images are an additive source and never a rung. Copy each to `<asset-di
 Take the sites in this order, stopping at the first that answers.
 
 1. Every address the ask names.
-2. The `references` key of `canon/config/design.toml` at the main worktree root, read per `${CLAUDE_SKILL_DIR}/../design-pick/references/design-config.md`.
-3. The default list in `${CLAUDE_SKILL_DIR}/references/sites.md`. Take three sites that differ in kind and theme unless the ask wants more, and say which. An app surface takes them from the app UI list.
+2. The default list in `${CLAUDE_SKILL_DIR}/references/sites.md`. Take three sites that differ in kind and theme unless the ask wants more, and say which. An app surface takes them from the app UI list.
 
 Derive a kebab `<site>` from each address's host without its `www.`, such as `linear-app` for `https://linear.app/`.
 

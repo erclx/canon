@@ -28,7 +28,7 @@ A drive puts a built app in front of the operator and the session together, and 
 
 ## Step 1: copy
 
-Read `${CLAUDE_SKILL_DIR}/references/config.md` for `canon/config/app-drive.toml`. Before anything is built, ask the operator for each key it lacks, and which target the drive runs when it names targets.
+Read `${CLAUDE_SKILL_DIR}/references/config.md` for the `[drive]` table of `canon/config/app.toml`. Before anything is built, ask the operator for each key it lacks, and which target the drive runs when it names targets.
 
 1. Derive `<slug>` from the build being driven, such as `app-drive-0-12-0` for a tag. Claim the folder with `canon records ordinal intake <slug> --claim`.
 2. Record the baseline with `canon intake drive-check <slug> --baseline --json` from the main root, before the first build step. Stop on any `reason` other than `recorded`.
@@ -40,11 +40,11 @@ Read `${CLAUDE_SKILL_DIR}/references/config.md` for `canon/config/app-drive.toml
 
 ### Starting the board
 
-A drive will draw on the board when the config names `board-project`, `canon/config/design.toml` exists, or `.canon/board/` exists at the main root. With none of the three, the drive starts no server and draws as Step 3's cases state.
+A drive will draw on the board when the config names `board-project` or `.canon/board/` exists at the main root. With neither, the drive starts no server and draws as Step 3's cases state.
 
-Read `${CLAUDE_SKILL_DIR}/../design-pick/references/board.md` for reaching and starting the board, `design-config.md` beside it for the `board` key, and `drawing.md` beside it before the first frame. A drive differs from a `design-pick` run in four ways.
+Read `${CLAUDE_SKILL_DIR}/../design-pick/references/board.md` for reaching and starting the board, and `drawing.md` beside it before the first frame. A drive differs from a `design-pick` run in four ways.
 
-- `<project>` is the config's `board-project` with `<nn>` filled in, never the `project` key of `design.toml`, so a drive's pages stay apart from pick rounds and accepted frames
+- `<project>` is the config's `board-project` with `<nn>` filled in, never the project name a pick round derives, so a drive's pages stay apart from pick rounds and accepted frames
 - Where `frameboard list` holds a versioned project of the stem, such as `landing-v2`, ask whether the drive continues it as `landing-v3`, and never write into the earlier one
 - Test the root with `git check-ignore -q <board>/` before serving, slash kept for a folder not made yet. The write scope forbids an unignored root, and `drive-check` reports its frames under `changed`.
 - That test, a stop either reference names, or no `frameboard` and no `bunx` on PATH ends the board rather than the drive. Report why, leave the row empty, and draw as a project with no board does.
@@ -143,7 +143,7 @@ Close only on the operator's word, and keep the app up while they keep talking.
 3. Run `canon intake drive-check <slug> --json`, and on `failed` fix what each finding list names in the folder and re-run.
 4. Report each path under `changed` to the operator and never revert it, since only they know which to keep.
 5. Run `canon records validate intake <slug>` and fix each `structure` entry.
-6. Hand the operator the text of `canon/config/app-drive.toml` built from Step 1's answers, when the project carried none. Never write it, since a tracked file is the operator's or a worker's.
+6. Hand the operator the text of the `[drive]` table built from Step 1's answers, when the project carried none. Never write it, since a tracked file is the operator's or a worker's.
 
 ### Planning the drive's rows
 

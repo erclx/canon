@@ -1,17 +1,19 @@
 ---
 title: App drive config
-description: The canon/config/app-drive.toml keys launch, data, personas, scripts, proposals, board-project, and board-folder, the script format, the named targets that let one file drive several apps, and what a drive does when the file is absent
+description: The [drive] table of canon/config/app.toml, its keys launch, data, personas, scripts, access, proposals, board-project, and board-folder, the script format, the named targets that let one table drive several apps, the app-drive.toml it replaced, and what a drive does when the table is absent
 ---
 
 # App drive config
 
-Read at Step 1 of `app-drive`. A project describes how its app is driven in `canon/config/app-drive.toml`, which the drive reads and never writes.
+Read at Step 1 of `app-drive`, and cited by every skill that drives the app. A project describes how its app is driven in the `[drive]` table of `canon/config/app.toml`, which the drive reads and never writes.
 
 ```toml
+[drive]
 launch = "bun install --frozen-lockfile && bun run build && PREVIEW_PORT=4530 bun run preview"
 data = "fixtures/demo-board"
 personas = ["a designer laying out a board", "an agent calling the CLI"]
 scripts = ["canon/drive/basics.md"]
+access = "/api/access/open"
 proposals = ".canon/picks"
 board-project = "drive-<nn>"
 board-folder = "Drives"
@@ -25,6 +27,7 @@ board-folder = "Drives"
 | `data`          | A fixture path inside the worktree to load before serving, if any         |
 | `personas`      | Who uses the app, each driven through every goal                          |
 | `scripts`       | Tracked scenario files, each run once per persona before any goal         |
+| `access`        | The path or address that opens the app in the state a pass starts from    |
 | `proposals`     | The folder for an undecided taste finding's frames and a fallback mock    |
 | `board-project` | The board project a drive draws in, where `<nn>` is the intake ordinal    |
 | `board-folder`  | The board's home folder the drive's project files under                   |
@@ -34,6 +37,7 @@ Some of the keys carry a reading the table cannot hold.
 - `launch` runs from the worktree root and names the port it serves on, so `canon pr local --root` finds it
 - `personas` covers an agent or API caller as well as a person in the UI, when the app has one
 - An absent `data` means the app starts empty, and an absent `proposals` means the frames stay in the intake folder's `evidence/`
+- `access` is read by `ui-film` and `review-ui`, which open their address behind it, and a drive ignores it
 - A fallback mock is the standalone HTML a decided finding's frames are lifted into when the copy cannot host them
 
 ### Scripts
@@ -60,9 +64,9 @@ Check: the frame keeps its name after a reload
 
 `board-project` is optional and defaults to `drive-<nn>`. A drive asks about it only when the board holds a versioned project of the stem, such as `landing-v2`, as Step 1 states, so `drive-<nn>` never triggers it.
 
-- Naming the key opts the project in, even with no board yet, while omitting it leaves the call to `canon/config/design.toml` or `.canon/board/`
+- Naming the key opts the project in, even with no board yet, while omitting it leaves the call to whether `.canon/board/` exists
 - Keep `<nn>` in a value you set, since one project across drives loses which frames came from which
-- The board's root comes from `canon/config/design.toml` and never from this file, since a second root setting would let `app-drive` and `design-pick` disagree on which board they draw on
+- The board's root is `.canon/board/` at the main root and never a key here, since a second root setting would let `app-drive` and `design-pick` disagree on which board they draw on
 
 `board-folder` is optional and defaults to `Drives`, so every drive's project sits in one home folder beside the others. Set it to another name to file a project's drives apart, or to an empty string to leave each drive's project loose on home. `board.md` under `design-pick`'s references states the call that files it.
 
@@ -71,30 +75,38 @@ Check: the frame keeps its name after a reload
 A repository shipping a second app, such as a site under `web/` beside the app at the root, names it as a target. The flat keys stay the default target, so a file holding none drives as it did and asks nothing new.
 
 ```toml
+[drive]
 launch = "bun install --frozen-lockfile && bun run build && PREVIEW_PORT=4530 bun run preview"
 personas = ["a designer laying out a board"]
 
-[targets.web]
+[drive.targets.web]
 root = "web"
 launch = "bun install --frozen-lockfile && bun run build && bun run preview"
 personas = ["a developer reading the landing page"]
 board-project = "landing-<nn>"
 ```
 
-A `[targets.<name>]` table takes the keys above and one more.
+A `[drive.targets.<name>]` table takes the keys above and one more.
 
 - `root` is the folder inside the worktree the target's `launch` runs from, defaulting to the worktree root
 - A key the table leaves out falls back to the flat key of the same name, except `board-project`
 - A table may name its own `scripts`, and one leaving the key out runs the flat list
 - A target's `board-project` defaults to `<name>-<nn>`, such as `web-<nn>`, while the flat default stays `drive-<nn>`
-- A static site with no health path reaches `canon pr local` through `page-only` in `canon/config/local.toml`, so a target carries no health key
+- A static site with no health path reaches `canon pr local` through `page-only` under `[health]` in `canon/config/app.toml`, so a target carries no health key
 
-Step 1 asks which target a drive runs when the file names any, with the default target among the options.
+Step 1 asks which target a drive runs when the table names any, with the default target among the options.
 
-## When the file is absent
+## The file it replaced
+
+A project that has not run `canon migrate app-config` holds the same keys at the top of `canon/config/app-drive.toml`, with its targets as `[targets.<name>]`. Read that file only when `app.toml` holds no `[drive]` table, and name the move to the operator once.
+
+- A line commented out is no key, so an `app.toml` whose `[drive]` lines are all commented holds no table
+- A table in `app.toml` wins over the old file beside it
+
+## When the table is absent
 
 Ask the operator for `launch`, `data`, and `personas` once, before the copy is built, putting each through the structured question surface with a proposed default read off the project's manifest and requirements record.
 
 - Propose the manifest's own build and preview scripts as `launch`
 - Propose the requirements record's named users as `personas`
-- Hand the operator the file's text at the close, since the first drive in a project is where the config gets found. The drive never writes it, because the file is tracked.
+- Hand the operator the `[drive]` table's text at the close, since the first drive in a project is where the config gets found. The drive never writes it, because the file is tracked.
