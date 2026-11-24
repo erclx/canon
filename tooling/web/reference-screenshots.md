@@ -14,11 +14,13 @@ The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project tha
 
 ## Device classes
 
-The harness reads the `Device classes:` line under `## Layout` in `canon/DESIGN.md`, and a project with no record or no line captures every width as before.
+The harness reads the `[device-classes]` table in `canon/config/device-classes.toml`, and a project with no file captures every width as before. It needs Bun to parse the file, which `bun e2e/screenshot.ts` already runs it under.
 
-- A width outside the declared classes takes no frame, with phone under 600, tablet from 600 to 839, and desktop from 840, 1536 included
-- Leaving phone out also skips the 320 reflow check, and a name outside phone, tablet, and desktop exits 1
-- Committed frames at a width the record drops stay under `EVIDENCE_ROOT` until the project deletes them
+- A case captures at its `deviceScope`, naming a table under `[device-classes.scopes]`, or at the `default` when it names none, and a scope the config lacks exits 1
+- A width outside the case's classes takes no frame, with phone under 600, tablet from 600 to 839, and desktop from 840, 1536 included
+- A case leaving phone out also skips the 320 reflow check, and a config the reader refuses, such as a name outside phone, tablet, and desktop, exits 1
+- Committed frames at a width the config drops stay under `EVIDENCE_ROOT` until the project deletes them
+- A `Device classes:` line left in `canon/DESIGN.md` is read by nothing. Move its classes into `default` with a `why`.
 
 ## Screenshot sections
 
@@ -44,7 +46,8 @@ The harness reads the `Device classes:` line under `## Layout` in `canon/DESIGN.
 - `SCREENSHOT_FILTER` keeps cases whose `<section>/<width>--<theme>` label contains a comma-separated term, and exits 1 listing the labels on no match
 - `--check-console-clean` exits 1 with the list if any `console` error fired, turning the capture into a smoke check
 - `--require-base-url` exits 1 before launching a browser when `SCREENSHOT_BASE_URL` is unset, so a deployment script cannot capture `localhost`
-- `--print-device-classes` prints the supported classes as a comma list, such as `desktop`, and exits 0 before a browser launches, or exits 1 on a `Device classes:` line it refuses
+- `--print-device-classes` prints the default classes as a comma list, such as `desktop`, and `--print-device-classes=<scope>` prints a scope's, both before a browser launches
+- Either print exits 1 on a config it refuses or a scope it lacks
 - With a base URL, every flagged case is skipped so a production smoke run writes nothing to the committed path, and zero cases run exits 1
 
 ## Screenshot evidence

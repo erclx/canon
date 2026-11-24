@@ -22,11 +22,8 @@ const OVERVIEW = 'Overview'
 
 const LAYOUT = 'Layout'
 
-/**
- * The labeled lines `## Layout` carries as data a reader parses, being the
- * board's draw widths and the supported device classes, which spend no rule.
- */
-const LAYOUT_DATA = /^\s*(?:[-*+]\s+)?(?:Draw widths|Device classes):/i
+/** The labeled line `## Layout` carries as data a reader parses, the board's draw widths, which spends no rule. */
+const LAYOUT_DATA = /^\s*(?:[-*+]\s+)?Draw widths:/i
 
 /** A list item at any depth, which starts a rule of its own. */
 const BULLET = /^\s*(?:[-*+]|\d+[.)])\s+/

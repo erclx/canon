@@ -33,7 +33,7 @@ import {
 import { isWithinTolerance } from '@/pr/pixels'
 import { readCarry, reelMoves } from '@/pr/carry'
 import { readChangedPaths } from '@/pr/lift'
-import { loadPaintedPatterns } from '@/pr/painted'
+import { isPainted, loadPaintedPatterns } from '@/pr/painted'
 import { resolveTip, type TipRefusal } from '@/pr/head'
 import {
   findDeployWorkflow,
@@ -348,7 +348,9 @@ export function registerEvidence(pr: Command): void {
         '`reelSkip`, the text after **No reel:** on the marked comment, present',
         'only when that line is posted, and `reelSkips`, each **No reel at',
         '<width>:** line as `width` and `skip`, narrowest first, present only',
-        'when one is posted. `canon pr lift` reads each reason code, the text',
+        'when one is posted. `deviceClasses` holds the classes the changed',
+        'painted paths reach in canon/config/device-classes.toml, per `canon design',
+        'classes`. `canon pr lift` reads each reason code, the text',
         'before the first colon, to decide whether a drivable checklist with',
         'no reel at the head is settled at each width. --check refuses',
         'with --preview, --local, --checklist, --no-checklist, --reel,',
@@ -736,6 +738,10 @@ async function runEvidence(
     pullFiles.renamedFrom,
   )
   const painted = loadPaintedPatterns(root)
+  const deviceClasses = readSupportedClasses(
+    root,
+    [...pullFiles.present.keys()].filter((path) => isPainted(path, painted)),
+  )
   const uncaptured = readUncaptured(
     [...pullFiles.present.keys()],
     painted,
@@ -852,6 +858,7 @@ async function runEvidence(
           number: identity.number,
           reason: owed.length === 0 ? 'settled' : 'owed',
           owed,
+          deviceClasses,
           ...uncapturedField,
           ...(reelSkip !== undefined && { reelSkip }),
           ...(reelSkips.length > 0 && { reelSkips }),
@@ -995,7 +1002,7 @@ async function runEvidence(
     uncaptured,
     coveredWidths,
     previewBuilt,
-    readSupportedClasses(root),
+    deviceClasses,
   )
 
   const caseCount = states.reduce((n, s) => n + s.items.length, 0)

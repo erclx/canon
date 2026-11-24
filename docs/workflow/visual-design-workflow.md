@@ -27,7 +27,7 @@ When its change makes a reference untrue, the worker redraws the board frame its
 - The `craft` rule fires on the files the worker edits and loads `ui-craft` for behavior and `design-taste` for look.
 - The `ui-craft` capture reference has the worker capture the full page in every theme the surface ships, against a preview server and never a dev server.
 - It sets the widths too, being each breakpoint in `canon/DESIGN.md` or 390, 768, and 1280 for a layout case, checked for sideways scroll at 320, and one width for a state case.
-- A `Device classes:` line in the record's `## Layout` drops the widths of every class it leaves out, and the 320 check with phone.
+- The device classes in `canon/config/device-classes.toml` drop the widths of every class the changed surface leaves out, and the 320 check with phone. `canon design classes --changed` prints them.
 
 ## Self-check
 
@@ -85,8 +85,9 @@ Most projects author design in the loop above and need nothing more. Start with 
 
 A round draws every arm at a phone, a tablet, and a desktop width, read from the `Draw widths:` line in the `## Layout` section of `canon/DESIGN.md` and falling back to 390, 768, and 1280, the widths the screenshot harness commits. A drive with `canon:app-drive` draws on the board by the same convention.
 
-A record whose `Device classes:` line names fewer classes, such as desktop alone for a canvas tool, draws only those.
+A project declaring fewer classes in `canon/config/device-classes.toml`, such as desktop alone for a canvas tool, draws only those. Named scopes, matched by design group or changed path, let a desktop canvas and a responsive landing page share one record.
 
+- A record still carrying the earlier `Device classes:` line fails the gate's Device classes stage until those classes move into `default` with a `why` and the line goes.
 - A pick that scrolls sideways at any of those widths, or at 320, is held until it reflows.
 - Before drafting, a round reuses the board's `references` page or runs `canon:design-references` to fill one, with the sites you name or bare.
 - That page holds section shots at each width, a filmed scroll, and a few hovers, each frame naming its source. Each arm names the frame it draws on and takes structure alone.

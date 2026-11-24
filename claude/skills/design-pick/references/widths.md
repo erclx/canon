@@ -9,7 +9,9 @@ Read before a `design-pick` round adds its first frame, again before a pick fold
 
 ## Picking the widths
 
-Draw every arm at one width per device class the project supports. Read the classes from the `Device classes:` line in the `## Layout` section of `canon/DESIGN.md` at the main worktree root, and all three when the record carries none. Take the widths from the `Draw widths:` line beside it, which names phone, tablet, and desktop in that order.
+Draw every arm at one width per device class the surface supports. Read the classes from `canon design classes --group <group> --json` at the main worktree root, naming the round's design group, or bare for the root record.
+
+Take the widths from the `Draw widths:` line in the `## Layout` section of `canon/DESIGN.md`, which names phone, tablet, and desktop in that order.
 
 | Class   | Fallback |
 | ------- | -------- |
@@ -19,7 +21,7 @@ Draw every arm at one width per device class the project supports. Read the clas
 
 The fallback is the set the screenshot harness every target syncs commits as evidence, so a drawn frame lines up with a committed still. The harness also sweeps 1536 into a folder nobody commits, and a round draws no frame there.
 
-- Draw no frame for a class the `Device classes:` line leaves out, even where `Draw widths:` names a width for it
+- Draw no frame for a class the verb leaves out, even where `Draw widths:` names a width for it
 - Fill a supported class the line names no width for from the fallback column
 - Take the fallbacks for every supported class when the document is absent, carries no `## Layout`, or its layout carries no `Draw widths:` line
 - Say in the run's output which widths the round draws and which source gave each
@@ -38,7 +40,7 @@ Each width is the narrow end of its class in a ranked usage table, since a frame
 
 ### The 320 check
 
-A round draws no 320 frame, and every pick is still measured at 320 for sideways scroll, as the hold below states. 320 is the reflow floor, so a phone frame drawn at 390 that scrolls at 320 fails. A project whose `Device classes:` line leaves phone out skips the 320 measure, since it draws no phone frame.
+A round draws no 320 frame, and every pick is still measured at 320 for sideways scroll, as the hold below states. 320 is the reflow floor, so a phone frame drawn at 390 that scrolls at 320 fails. A surface whose classes leave phone out skips the 320 measure, since it draws no phone frame.
 
 ## Drawing the tablet frame
 

@@ -19,6 +19,7 @@ import {
   auditSet,
   clientCommandCitations,
   designProse,
+  deviceClasses,
   documentCeiling,
   folderEchoedNames,
   markdownBans,
@@ -358,6 +359,14 @@ export const STAGES: readonly Stage[] = [
     shared: true,
     label: 'Design prose',
     checks: [{ kind: 'measure', measure: designProse }],
+  },
+  {
+    // The one config every width reader shares, read here so a typo fails the
+    // gate rather than a capture, a reel, or a board round.
+    id: 'device-classes',
+    shared: true,
+    label: 'Device classes',
+    checks: [{ kind: 'measure', measure: deviceClasses }],
   },
   {
     // The claude manifest carries a target's ignore set and is kept by hand
