@@ -13,7 +13,7 @@ Silence is the second half. A verb the target's binary lacks, or an absent repor
 
 ## Must
 
-- Report one section per domain, read through the verb that already owns that comparison, so a reader can tell which surface a finding came from
+- Report one section per domain, read through the verb that owns that comparison, and list each page past a length cap before a push meets it
 - Take the installed domains from the catalog the report returns rather than from a list in the body
 - Report a refusal, an absent key, and a missing subcommand as unread with the cause, so an unexamined domain never reads as a passing one
 - Report the Claude harness as unchecked on every run while no verb answers for it, as a row rather than an omission, and report the toolkit version first

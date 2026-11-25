@@ -90,6 +90,20 @@ describe('markdown audit', () => {
     )
   })
 
+  it('should carry each entry its own cap in the json record', async () => {
+    write('docs/guide.md', '# Guide\n\nShort.\n')
+    write('pkg/docs/guide.md', '# Nested\n\nShort.\n')
+    write('notes/scratch.md', '# Notes\n\nShort.\n')
+
+    const result = await run(['markdown', 'audit', '--json'])
+
+    expect(JSON.parse(result.stdout).entries).toMatchObject([
+      { path: 'docs/guide.md', ceiling: 200 },
+      { path: 'notes/scratch.md', ceiling: 300 },
+      { path: 'pkg/docs/guide.md', ceiling: 300 },
+    ])
+  })
+
   it('should report a density finding in a target with no config', async () => {
     write('docs/guide.md', `# Guide\n\n${LONG_PARAGRAPH}`)
 
