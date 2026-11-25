@@ -68,6 +68,9 @@ export default scenario({
     ctx.log.info(
       'multi-plan   : default branch + two plans, skill falls to tier 3 and asks which plan',
     )
+    ctx.log.info(
+      'toolkit-sync : default branch + two plans + a toolkit sync, skill takes the dated sync name',
+    )
     ctx.log.info('branch-only  : branch bar + no plans, skill uses bar')
     ctx.log.info(
       'typed-branch : branch feat/baz + matching plan, target collides and the skill stops before entry',
@@ -116,6 +119,22 @@ export default scenario({
       ctx.log.info('Action:  /canon:session-worktree')
       ctx.log.info('Expect:  skill falls to tier 3 and asks which plan')
       ctx.log.info('         respond with alpha or bravo to pick the slug')
+      logCleanup(ctx)
+    },
+    'toolkit-sync': (ctx) => {
+      ctx.mkdir('.canon/plans')
+
+      ctx.fixtures('claude', 'session-worktree', 'multi-plan', '01-plan')
+
+      ctx.log.step('Scenario ready: toolkit sync name (Step 2, tier 0)')
+      ctx.log.info('Branch: default')
+      ctx.log.info('Plans:  feature-alpha.md, feature-bravo.md, both unrelated')
+      ctx.log.info(
+        'Action:  canon:target-check reports this project behind on rules and no plan covers the sync, so enter a worktree for it with /canon:session-worktree',
+      )
+      ctx.log.info(
+        'Expect:  declared in fixtures/claude/session-worktree/toolkit-sync/expect.toml',
+      )
       logCleanup(ctx)
     },
     'branch-only': (ctx) => {

@@ -70,7 +70,7 @@ Target update: `<path>`, canon `<installed>` to `<running>`.
 
 **Tooling holds:** <each tooling config the write would hold, being a drifted entry whose `cause` is `edited` or `unattributed`, then each `dispositions` entry, declined ones by path and customized ones marked when `moved` is true, or omitted when none>
 
-**Where it lands:** <the linked worktree this run is already in, or the worktree `.claude/worktrees/<name>/` it will enter, or the branch it will create in place when the operator declines a worktree>
+**Where it lands:** <the linked worktree this run is already in, or the worktree `.claude/worktrees/<name>/` and the sync branch it will enter, or that branch created in place when the operator declines a worktree>
 
 **Calls for you:** <each judgment call below this run meets, with the default this skill takes>
 
@@ -91,15 +91,16 @@ The migrations, the sync, and the commits write the project, so they land on the
 
 Compare `git rev-parse --git-dir` with `git rev-parse --git-common-dir`, then take the first row that fits:
 
-| State                                      | This skill                                                                                        |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| Different, so already in a linked worktree | Uses it and enters nothing, since a second worktree would nest inside the first                   |
-| Equal, and the operator took the worktree  | Invokes `canon:session-worktree` with `chore/update-canon`, then runs Steps 4 to 6 from inside it |
-| Equal, declined, on `main` or `master`     | Invokes `canon:git-branch` for `chore/update-canon`, then runs Steps 4 to 6 in place              |
-| Equal, declined, on any other branch       | Stops and says so, since `canon:git-branch` would rename that branch under every session on it    |
+| State                                      | This skill                                                                                     |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| Different, so already in a linked worktree | Uses it and enters nothing, since a second worktree would nest inside the first                |
+| Equal, and the operator took the worktree  | Invokes `canon:session-worktree` with `<sync-branch>`, then runs Steps 4 to 6 from inside it   |
+| Equal, declined, on `main` or `master`     | Invokes `canon:git-branch` for `<sync-branch>`, then runs Steps 4 to 6 in place                |
+| Equal, declined, on any other branch       | Stops and says so, since `canon:git-branch` would rename that branch under every session on it |
 
-Four points govern the choice:
+Five points govern the choice:
 
+- Resolve `<sync-branch>` before the preview, from `## Toolkit sync branches` in `${CLAUDE_SKILL_DIR}/../git-branch/references/branch.md`, and use the name the preview showed
 - Offer the worktree as the default in the preview's `Where it lands` line, and take a decline from the operator's reply to it
 - Report it rather than proceeding silently when `canon:session-worktree` does not resolve, as in a project that installed governance without the plugin, then fall back to `canon:git-branch`
 - Stop when neither skill resolves, saying the run would otherwise write onto the shared checkout's branch

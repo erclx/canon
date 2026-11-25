@@ -19,6 +19,12 @@ Silence is the second half. A verb the target's binary lacks, or an absent repor
 - Report the Claude harness as unchecked on every run while no verb answers for it, as a row rather than an omission, and report the toolkit version first
 - Run every read non-interactively, since the caller is a dispatched worker with nobody present to answer a prompt
 
+### The close
+
+The close hands the reader to whatever repairs, without repairing.
+
+- Name `target-update` for the catch-up, and the standard toolkit sync branch for a session repairing by itself, so no session invents one
+
 ## Must not
 
 - Repair a finding, write a file in the target, or open a pull request, since a check that repaired as it read leaves the reader unable to tell a finding from a fix

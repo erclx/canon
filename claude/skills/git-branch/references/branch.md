@@ -37,6 +37,17 @@ The upper bound reads 4 for every branch, whoever named it, so a branch taking i
 
 Nothing can tell such a name from any other, so the wider bound holds for all of them.
 
+## Toolkit sync branches
+
+A branch that brings a project up to the toolkit, and that no plan covers, is `chore/canon-sync-<YYYYMMDD>` on the local date, `date +%Y%m%d`. A planned sync takes its plan's name instead.
+
+- The worktree takes the description alone, `canon-sync-<YYYYMMDD>`
+- A taken name adds the local time, `chore/canon-sync-<YYYYMMDD>-<HHMM>`, and the worktree adds it too
+- Taken means a local branch, a branch on `origin`, or a `.claude/worktrees/` folder under the main root already holds the name
+- Put no rule, config, stack, version, or phase label in it. The pull request title says what changed, and a word per run is what gave one job many names.
+
+Resolve the name once, before any ref or worktree exists, and keep it for the run. Both forms fit the caps above, and `canon sync` cuts the longer one for its own branch.
+
 ## Types
 
 | Type       | Use                                         |
@@ -63,6 +74,7 @@ Each line names its reason after the `#`.
 feat/jwt-expiration                    # clear feature scope
 fix/AUTH-123-connection-pool           # includes ticket ID
 refactor/remove-deprecated-endpoints   # clear refactor intent
+chore/canon-sync-<YYYYMMDD>            # toolkit sync, dated
 ```
 
 ### Incorrect
@@ -73,4 +85,5 @@ Each line names its fault after the `#`.
 feature/auth_stuff                                        # wrong type + underscore
 feat/feature-add-login                                    # duplicates type in description
 fix/DB-456-fix-the-database-connection-pool-memory-leak   # exceeds 50 chars + verbatim message
+feat/rules-configs-sync                                   # toolkit sync, wrong type + scope words
 ```

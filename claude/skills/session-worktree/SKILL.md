@@ -47,9 +47,10 @@ The directory test separates the defect from a genuinely bare repository, which 
 
 Try each source in order. Stop at the first match.
 
-0. **Caller-supplied.** The invocation carried an argument. Take it as the name and infer nothing further.
+0. **Caller-supplied, or a toolkit sync.** The invocation carried an argument, or it is bare for a sync no plan covers. Take the argument, or the dated sync name, and infer nothing further.
    - Accept `<name>` or `<type>/<name>`, where a leading segment matching a type in `${CLAUDE_SKILL_DIR}/../git-branch/references/branch.md` sets `<type>`
    - A bare `<name>` falls to the default type below
+   - A bare sync call takes the dated name `## Toolkit sync branches` states in that file, typed as it spells it
 1. **Plan matched to current branch.** Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`, and use it if `<main-root>/.canon/plans/feature-<slug>.md` exists.
    - An empty result falls through to the next source rather than becoming `latest`, since the slug is one candidate among several
 2. **Single plan file.** List `<main-root>/.canon/plans/feature-*.md`. If exactly one match, derive `<slug>` from the filename.
