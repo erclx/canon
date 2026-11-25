@@ -7,7 +7,7 @@ description: Why a session writing a test needs a stated layer rule and a qualit
 
 ## Gap
 
-A session writing a test has no surface telling it which layer the test belongs at or what makes one good. It writes whatever the touched file suggests, and the suite inverts into hundreds of end to end tests over a few unit files, with timing-sensitive assertions at the layer where load decides the result.
+A session writing a test has no surface telling it which layer the test belongs at or what makes one good. It writes whatever the touched file suggests, and the suite inverts into hundreds of end to end tests over a few unit files, with timing-sensitive assertions where load decides the result. Every push then repeats it on a shared machine.
 
 A stated rule is one a session talks itself out of, since each misplaced test sat where it did for a reason that sounded fine. A path-scoped rule does not reach the first test of a feature either, because it loads on a matching file the write has not created yet.
 
@@ -16,7 +16,7 @@ A stated rule is one a session talks itself out of, since each misplaced test sa
 - Pick the smallest layer that can fail for the behavior from a decision guide keyed on what it touches, splitting a behavior that spans rows into one test per layer
 - Open every test with the question of which production change makes it fail, and whether that change is a bug or a decision
 - Run a final filter over each test, covering mirror assertions, change detectors, mock assertions, fixed pauses, and the mutation check, and rewrite or cut one that fails
-- Hold the structure floors in the body and each layer's specifics in a reference loaded only for that layer
+- Hold the structure floors and the split between a fast push and the suites CI owns in the body, and each layer's specifics in a reference loaded only for that layer
 - Load on writing or changing any test, after implementing as well as before, and close with excuses, red flags, a checklist, and the external sources adopted and declined with the reason for each
 
 ## Must not

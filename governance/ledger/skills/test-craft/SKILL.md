@@ -36,6 +36,16 @@ The field is software testing practice. Software Engineering at Google carries t
 | Every later run pays for a new one    | [Vocke, The Practical Test Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html): "Due to their high maintenance cost you should aim to reduce the number of end-to-end tests to a bare minimum."                                                               | 2026-10-24 |
 | No numeric mix                        | [web.dev, Pyramid or Crab?](https://web.dev/articles/ta-strategies): the strategy "should fir your architecture, your requirements, and last but not least, your users and their requirements", typo as published                                                                 | 2026-10-24 |
 
+## Push on fast checks, and leave the suites to CI
+
+| Bullet                            | Source                                                                                                                                                                                                                                                | Read       |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Only what answers fast on a push  | [Fowler, Continuous Integration](https://martinfowler.com/articles/continuousIntegration.html): "The commit build is the one that has to be done quickly, as a result it will take a number of shortcuts that will reduce the ability to detect bugs" | 2026-11-25 |
+| Full suites to CI's own machines  | [Fowler, Continuous Integration](https://martinfowler.com/articles/continuousIntegration.html): "Additional machines can run further testing routines on the build that take longer to do"                                                            | 2026-11-25 |
+| A tied selection is a heuristic   | [Playwright, Continuous Integration](https://playwright.dev/docs/ci), on `--only-changed`: "This is a heuristic and might miss tests, so it's important that you always run the full test suite after the preliminary test run"                       | 2026-11-25 |
+| A tied test for what CI caught    | [Fowler, Continuous Integration](https://martinfowler.com/articles/continuousIntegration.html): "If the secondary build detects a bug, that's a sign that the commit build could do with another test"                                                | 2026-11-25 |
+| Full suite on the push without CI | House choice: the split moves the suite rather than dropping it, so a project with no pull request tests would otherwise run it nowhere                                                                                                               | 2026-11-25 |
+
 ## Keep test code readable over clever
 
 | Bullet                                  | Source                                                                                                                                                                                                                                               | Read       |
