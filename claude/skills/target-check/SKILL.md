@@ -27,9 +27,10 @@ Run these from the target root, in parallel:
 ```bash
 canon sync --check . --json
 canon context audit --json
+canon markdown audit --json
 ```
 
-The first answers five domains from one read, being `skew`, `domains`, `seeds`, `tooling`, and the layout fields `unmigrated`, `superseded`, `unmovedSurfaces`, and `reverse`. Its `hooks` field answers one question of the harness domain. The second deepens a domain that first read only counts.
+The first answers five domains from one read, being `skew`, `domains`, `seeds`, `tooling`, and the layout fields `unmigrated`, `superseded`, `unmovedSurfaces`, and `reverse`. Its `hooks` field answers one question of the harness domain. The second deepens a domain that first read only counts. The third lists the pages past a length cap.
 
 Then run `canon records validate <kind> --json` once per record folder the target carries, taking `<kind>` from what is present under the record root rather than from a list held here.
 
@@ -83,14 +84,14 @@ Lead with the table, then one detail block per domain that is not current:
 ```markdown
 Target check: `<path>`, against canon `<version>`.
 
-| Domain           | State                     | Evidence                                       |
-| ---------------- | ------------------------- | ---------------------------------------------- |
-| Toolkit version  | current / behind / unread | `skew.installed` against `latest`              |
-| `canon/` folder  | current / behind / unread | the layout fields, including `unmovedSurfaces` |
-| Governance rules | current / behind / unread | the per-state counts                           |
-| Tooling          | current / behind / unread | what a sync would change                       |
-| Seeds            | current / behind / unread | the per-state counts                           |
-| Claude harness   | behind / unchecked        | `hooks`, with the rest unread                  |
+| Domain           | State                     | Evidence                                            |
+| ---------------- | ------------------------- | --------------------------------------------------- |
+| Toolkit version  | current / behind / unread | `skew.installed` against `latest`, pages past a cap |
+| `canon/` folder  | current / behind / unread | the layout fields, including `unmovedSurfaces`      |
+| Governance rules | current / behind / unread | the per-state counts                                |
+| Tooling          | current / behind / unread | what a sync would change                            |
+| Seeds            | current / behind / unread | the per-state counts                                |
+| Claude harness   | behind / unchecked        | `hooks`, with the rest unread                       |
 
 No overall verdict. The harness row is never passing, being behind or unchecked.
 ```

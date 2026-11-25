@@ -17,6 +17,17 @@ Read `skew` off `canon sync --check . --json`. It carries `state`, `installed`, 
 
 Routes to `canon upgrade`, which reinstalls with the manager that installed it.
 
+### Length caps
+
+Read `canon markdown audit --json` once, beside the version. Each entry carries `path`, `renderedLines`, `ceiling`, and `exempt`, so compare the two numbers the verb gave and hold no cap here.
+
+- Past a cap: `renderedLines` exceeds `ceiling` and `exempt` is null. Name each page with both numbers. A page exactly at its cap is not past it.
+- Exempt: `exempt` carries a reason. Name the page as exempt and never as behind.
+- Unread: the record carries no `ceiling` on its entries, which an older binary prints. Name the installed version and report the caps unread, never as no page over.
+- Take the record whatever the exit, since an unrelated finding exits 2 with the record still printed. An exit 2 is not an unread read.
+
+A page past a cap reads the version row `behind`, even when `skew` reads `current`, since the push gate would fail on it. Route it to a split of that page by the user, since no verb splits one, and say the gate keeps failing it either way.
+
 This domain is first because it conditions the other five. A target a release behind carries an older verb surface, so a section reporting unread below may be reporting a missing subcommand rather than a missing surface, and the version state is what separates those two readings.
 
 ## 2. The `canon/` folder
