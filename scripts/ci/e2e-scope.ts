@@ -49,7 +49,8 @@ export function versionOnly(base: string, head: string): boolean {
 
 /**
  * An empty changed set is a read that failed, since a pull request always
- * changes a file, so it takes the full suite like a trigger does.
+ * changes a file, so it takes the full suite like a trigger does. A version
+ * bump beside `bun.lock` stays a trigger, since the lock can move dependencies.
  */
 export function scopeFor(
   changed: readonly string[],
@@ -58,9 +59,10 @@ export function scopeFor(
   cli: CliScope = {},
 ): E2eScope {
   if (changed.length === 0) return FULL
-  const triggers = cli.versionOnly
-    ? changed.filter((file) => file !== 'package.json')
-    : changed
+  const triggers =
+    cli.versionOnly && !changed.includes('bun.lock')
+      ? changed.filter((file) => file !== 'package.json')
+      : changed
   if (triggers.some((file) => FULL_SUITE_TRIGGERS.test(file))) return FULL
   const bootstrap = new Set(cli.bootstrap ?? [])
   const spawners = changed.some((file) => bootstrap.has(file))

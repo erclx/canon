@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { scopeFor, versionOnly } from '../../scripts/ci/e2e-scope'
+import e2eConfig from '../../vitest.e2e.config'
 
 const none = (): readonly string[] => []
 
@@ -116,6 +117,18 @@ describe('scopeFor', () => {
       expect(
         scopeFor(['package.json'], [], none, { versionOnly: false }),
       ).toEqual({ e2e: true, full: true, files: [] })
+    })
+
+    it('should run the full suite when bun.lock changes beside a version bump', () => {
+      expect(
+        scopeFor(['package.json', 'bun.lock'], [], none, {
+          versionOnly: true,
+        }).full,
+      ).toBe(true)
+    })
+
+    it('should leave vitest no default trigger listing every suite for a package.json change', () => {
+      expect(e2eConfig.test?.forceRerunTriggers).toEqual([])
     })
 
     it('should run the full suite when another trigger changes beside a version', () => {
