@@ -55,3 +55,44 @@ describe('canon context audit shape label', () => {
     expect(output).toMatch(/ {2}gated$/m)
   })
 })
+
+describe('canon context audit room advice', () => {
+  let root: string
+
+  beforeEach(async () => {
+    root = await mkdtemp(join(tmpdir(), 'canon-context-room-'))
+    await execa('git', ['init', '-q'], { cwd: root })
+    await mkdir(join(root, 'canon', 'context'), { recursive: true })
+    const bullets = ['a', 'b', 'c', 'd', 'e', 'f'].map((n) => `- ${n}`)
+    await writeFile(
+      join(root, 'canon', 'context', 'context-model.md'),
+      [
+        '---\ntitle: X\ndescription: A domain\n---\n\n# X\n\n## Overview\n\nOwns x.\n\n## Layout\n\n### `a/`\n\nLead.\n\nSecond.\n',
+        ...bullets,
+        '\n## Gotchas\n',
+        ...bullets,
+        '',
+      ].join('\n'),
+    )
+    await writeFile(
+      join(root, 'canon', 'context', 'index.md'),
+      '# Context\n\n- [X](context-model.md): A domain\n',
+    )
+    await execa('git', ['add', '-A'], { cwd: root })
+  }, SETUP_TIMEOUT_MS)
+
+  afterEach(async () => {
+    await rm(root, { recursive: true, force: true })
+  })
+
+  it('prints one advice line for a block carrying two findings', async () => {
+    const result = await audit(root, [])
+    const output = `${result.stdout}\n${result.stderr}`
+
+    expect(output).toContain('2 paragraphs under `a/`, past 1')
+    expect(
+      output.match(/`a\/` holds 6 of 5 bullets and a lead of/g),
+    ).toHaveLength(1)
+    expect(output).toContain('Gotchas holds 6 of 5. Remove a trap')
+  })
+})
