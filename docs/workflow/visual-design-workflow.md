@@ -8,6 +8,8 @@ category: Workflow
 
 Canon runs a UI feature through one loop. A plan cites the design, a worker builds against it and captures what it painted, and two independent reviews check the result. A project with no graphical design tool runs all of it, since the design lives in prose and in tracked frames.
 
+Drafting that design is in [design authoring](design-authoring.md), and the skills by moment are in the [skill map](skill-map.md).
+
 ## Plan
 
 `canon:plan-feature` reads `canon/DESIGN.md`, `canon/design/index.md`, and the group files it links before it places a UI change. It loads `canon:design-taste`, which decides the layer order a surface is designed in, the coherence locks that keep it consistent, and the defaults a model reaches for that the surface should reach past.
@@ -113,40 +115,3 @@ Two kinds of result report without holding the review open.
 At the time of writing, the gated axe classes are contrast, target size, accessible names, labels, alt text, document title and language, valid ARIA, and nested interactive controls. A rule leaves the list on its first false finding, so `canon drive --help` and the `review-ui` skill carry the current one.
 
 A close posts as `## UI review closed`. The reviewers lift the draft mark on their close, and you merge.
-
-## Design authoring
-
-Most projects author design in the loop above and need nothing more. Start with `canon:design-pick`, which drafts candidates as frames on a [Frameboard](https://www.npmjs.com/package/frameboard) board and takes your pick, then record the pick with `canon:design-record`. `canon:design-identity` drafts a logo mark and social card the same way.
-
-### What a round draws
-
-A round draws every arm at a phone, a tablet, and a desktop width, read from the `Draw widths:` line in the `## Layout` section of `canon/DESIGN.md` and falling back to 390, 768, and 1280, the widths the screenshot harness commits. A drive with `canon:app-drive` draws on the board by the same convention.
-
-A project declaring fewer classes under `[device-classes]` in `canon/config/app.toml`, such as desktop alone for a canvas tool, draws only those. Named scopes, matched by design group or changed path, let a desktop canvas and a responsive landing page share one record.
-
-- A record still carrying the earlier `Device classes:` line fails the gate's Device classes stage until those classes move into `default` with a `why` and the line goes.
-- A pick that scrolls sideways at any of those widths, or at 320, is held until it reflows.
-- Before drafting, a round reuses the board's `references` page or runs `canon:design-references` to fill one, with the sites you name or bare.
-- That page holds section shots at each width, a filmed scroll, and a few hovers, each frame naming its source. Each arm names the frame it draws on and takes structure alone.
-
-The round also asks for your taste at its start and archives its work at its close, and an app pick can end in a prototype.
-
-- Before the first look round, `canon:design-pick` asks once for taste words and images. Pasted images join the references page.
-- The close archives the references page beside the picked round and leaves it on the board for the next round.
-
-An app pick with several screens is offered a clickable prototype built to flows you confirm. It then owns behavior and copy, and each handover lists static frames it no longer matches.
-
-### Where a round drafts
-
-A pick round drafts on `.canon/board/` at the main root, in a project named for the surface it draws, such as `landing`. Name a project in the ask to place a round elsewhere, and name sites in a `canon:design-references` ask to replace the default list it captures.
-
-### When a graphical tool fits
-
-A graphical tool earns its place when design is the product, a designer owns it, and it changes more often than code. Then the tool is the source of truth, and `canon/DESIGN.md` carries a top note naming the upstream project.
-
-- Figma with the official [Figma Dev Mode MCP](https://www.figma.com/blog/introducing-claude-code-to-figma/), for a team already on Figma. It syncs both ways and captures a running UI into editable frames.
-- [Claude Design](../../wiki/claude/design.md) with its Claude Code handoff bundle, for a team without Figma. The handoff is one-way.
-
-The loop above runs unchanged on either, with the tool's export standing in for the pick.
-
-For the skills by moment, see the [skill map](skill-map.md).

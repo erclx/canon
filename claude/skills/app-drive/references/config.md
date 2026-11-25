@@ -21,7 +21,7 @@ board-folder = "Drives"
 
 ## Keys
 
-`canon docs config` lists every `[drive]` key with its type and default. The bullets below carry what a drive does with them that a key list cannot hold.
+`canon docs app-config` lists every `[drive]` key with its type and default. The bullets below carry what a drive does with them that a key list cannot hold.
 
 - `launch` runs from the worktree root and names the port it serves on, so `canon pr local --root` finds it
 - `personas` covers an agent or API caller as well as a person in the UI, when the app has one

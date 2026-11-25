@@ -18,7 +18,7 @@ access = "/write?token=demo"
 
 ## Keys a take reads
 
-A take reads `launch`, `data`, and `access`, and `canon docs config` states what each holds.
+A take reads `launch`, `data`, and `access`, and `canon docs app-config` states what each holds.
 
 `access` is optional. A take joins it, and so does a `review-ui` pass, which opens its chosen address behind it. `app-drive` ignores it.
 

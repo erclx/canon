@@ -76,4 +76,4 @@ A `rule-layout` destination holding the same bytes marks a duplicate, which `--w
 
 ## See also
 
-- `install-and-sync.md`: the drift report that names these verbs as remedies
+- `drift-report.md`: the drift report that names these verbs as remedies
