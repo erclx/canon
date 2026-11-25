@@ -103,6 +103,21 @@ describe('e2eCliSpawners', () => {
 
     expect(e2eCliSpawners(sources)).toEqual(['src/a.e2e.test.ts'])
   })
+
+  it('should hold that every real suite imports the command module it drives', () => {
+    const sources = readTestSources(process.cwd())
+    const spawners = e2eCliSpawners(sources)
+
+    const unimported = spawners.filter(
+      (path) =>
+        !/from '@\/commands\/|import '@\/commands\//.test(
+          sources.get(path) ?? '',
+        ),
+    )
+
+    expect(spawners.length).toBeGreaterThan(0)
+    expect(unimported).toEqual([])
+  })
 })
 
 describe('readTestSources', () => {
