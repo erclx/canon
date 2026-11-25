@@ -564,8 +564,7 @@ function tieTests(
   )
 }
 
-// Read below this folder alone and outside each nested root, whose own run
-// takes its files.
+// Outside each nested root, whose own run takes its tests.
 function findTiedTests(base: string): string[] {
   const untracked = ['--others', '--exclude-standard']
   const nested = findNestedRoots()
@@ -573,14 +572,7 @@ function findTiedTests(base: string): string[] {
     !nested.some((root) => path.startsWith(`${root}/`))
 
   const changed = [
-    ...listPaths([
-      'diff',
-      '--name-only',
-      '-z',
-      '--no-renames',
-      '--relative',
-      base,
-    ]),
+    ...listPaths(['diff', '--name-only', '-z', '--no-renames', base]),
     ...listPaths(['ls-files', '-z', ...untracked]),
   ]
   const present = listPaths(['ls-files', '-z', '--cached', ...untracked])
@@ -616,7 +608,7 @@ function findNestedRoots(): string[] {
     .map((path) => dirname(dirname(path)))
 }
 
-function runNestedRoot(root: string, isChanged: boolean): void {
+function runNestedRoot(root: string): void {
   logStep(`Nested root ${root}`)
   const runner = join(root, 'scripts/verify.ts')
   if (!existsSync(runner)) {
@@ -627,11 +619,7 @@ function runNestedRoot(root: string, isChanged: boolean): void {
   const result = spawnSync(process.execPath, ['scripts/verify.ts'], {
     cwd: root,
     encoding: 'utf8',
-    env: {
-      ...process.env,
-      VERIFY_NESTED: 'true',
-      VERIFY_CHANGED: String(isChanged),
-    },
+    env: { ...process.env, VERIFY_NESTED: 'true' },
     maxBuffer: 256 * 1024 * 1024,
   })
   const output = `${result.stdout ?? ''}${result.stderr ?? ''}`
@@ -779,6 +767,20 @@ function openPass(base: string, isForced: boolean): Pass {
   }
 }
 
+// Why a changed run leaves nothing to CI, and undefined when it may. A sync
+// into a subfolder ships no workflow, so no declared script speaks for one there.
+function reasonUnscoped(
+  base: string | undefined,
+  declared: Set<string>,
+): string | undefined {
+  if (base === undefined) return 'origin holds no branch to compare with yet'
+  if (git(['rev-parse', '--show-prefix'])?.trim() !== '') {
+    return 'This folder is not the repository root'
+  }
+  if (!declared.has(TIED_TESTS)) return `${TIED_TESTS} is not declared here`
+  return undefined
+}
+
 interface Flags {
   readonly isChanged: boolean
   readonly isForced: boolean
@@ -789,10 +791,7 @@ function readFlags(args: readonly string[]): Flags | undefined {
   const isForced = args.includes('--force')
   const isKnown = args.every((arg) => arg === '--changed' || arg === '--force')
   if (!isKnown || (isForced && !isChanged)) return undefined
-  return {
-    isChanged: isChanged || (isNested && process.env.VERIFY_CHANGED === 'true'),
-    isForced,
-  }
+  return { isChanged, isForced }
 }
 
 function main(flags: Flags): void {
@@ -805,13 +804,9 @@ function main(flags: Flags): void {
 
   const required = new Set(list.require)
   const base = flags.isChanged ? resolveBase() : undefined
-  // Declaring the script says CI runs what a scoped run leaves out.
-  const isScoped = base !== undefined && declared.has(TIED_TESTS)
-  if (flags.isChanged && base === undefined) {
-    logSkip('origin holds no branch to compare with yet, so every phase runs')
-  } else if (flags.isChanged && !isScoped) {
-    logSkip(`${TIED_TESTS} is not declared here, so every phase runs`)
-  }
+  const unscoped = flags.isChanged ? reasonUnscoped(base, declared) : undefined
+  const isScoped = base !== undefined && unscoped === undefined
+  if (unscoped !== undefined) logSkip(`${unscoped}, so every phase runs`)
 
   // A nested run keeps no pass, since the root's key covers its tree and tools.
   const pass =
@@ -849,8 +844,7 @@ function main(flags: Flags): void {
 
   // A nested run never discovers, so a subfolder's own subfolders run once.
   if (!isNested) {
-    for (const root of findNestedRoots())
-      runNestedRoot(root, base !== undefined)
+    for (const root of findNestedRoots()) runNestedRoot(root)
   }
 
   pass?.keep()

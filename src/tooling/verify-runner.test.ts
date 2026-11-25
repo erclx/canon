@@ -94,9 +94,10 @@ const setUp = (stack: Stack, keys: readonly string[]): void => {
 const run = (
   command: readonly string[],
   env: NodeJS.ProcessEnv = {},
+  cwd = fixture,
 ): SpawnSyncReturns<string> =>
   spawnSync(command[0], command.slice(1), {
-    cwd: fixture,
+    cwd,
     encoding: 'utf8',
     // CI is cleared unless a case sets it, since GitHub Actions sets it on
     // this repository's own run and would flip every no-canon case to bunx.
@@ -792,6 +793,12 @@ const runChanged = (
 ): SpawnSyncReturns<string> =>
   run([process.execPath, RUNNER, '--changed', ...flags], env)
 
+const runChangedIn = (
+  dir: string,
+  env: NodeJS.ProcessEnv = {},
+): SpawnSyncReturns<string> =>
+  run([process.execPath, RUNNER, '--changed'], env, join(fixture, dir))
+
 const WEB_CHANGED = {
   ...declare(STACK_SCRIPTS.web),
   'test:run': 'exit 1',
@@ -1141,14 +1148,23 @@ describe('changed mode in a nested root', () => {
     setUpChanged(['service/cart.ts', 'service/cart.test.ts'])
   })
 
-  it('should run its own tied tests and no full suite', () => {
+  it('should run its full suite when it declares test:changed', () => {
     writeService({ 'test:run': 'exit 1', 'test:changed': 'log-tests' })
+
+    const result = runChanged()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('service failed')
+  })
+
+  it('should keep its tests out of the tied tests at the root', () => {
+    writeService({ 'test:run': 'true', 'test:changed': 'log-tests' })
     writeSource('service/cart.ts', 'edited')
 
     const result = runChanged()
 
     expect(result.status).toBe(0)
-    expect(readTests()).toEqual(['cart.test.ts'])
+    expect(readTests()).toEqual([])
   })
 
   it('should run its full suite when it declares no test:changed', () => {
@@ -1160,23 +1176,22 @@ describe('changed mode in a nested root', () => {
     expect(result.stdout).toContain('service failed')
   })
 
-  it('should read its own folder under a hook that exports GIT_DIR', () => {
+  it('should run its full suite when started from its own folder', () => {
     writeService({ 'test:run': 'exit 1', 'test:changed': 'log-tests' })
 
-    const result = runChanged({ GIT_DIR: join(fixture, '.git') })
-
-    expect(result.status).toBe(0)
-    expect(readTests()).toEqual([])
-  })
-
-  it('should run in full under a plain check', () => {
-    writePackage(declare(STACK_SCRIPTS.web))
-    writeService({ 'test:run': 'exit 1', 'test:changed': 'log-tests' })
-
-    const result = runVerify({ VERIFY_CHANGED: 'true' })
+    const result = runChangedIn('service')
 
     expect(result.status).toBe(1)
-    expect(result.stdout).toContain('service failed')
+    expect(result.stdout).toContain('not the repository root')
+  })
+
+  it('should run its full suite under a hook that exports GIT_DIR', () => {
+    writeService({ 'test:run': 'exit 1', 'test:changed': 'log-tests' })
+
+    const result = runChangedIn('service', { GIT_DIR: join(fixture, '.git') })
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('not the repository root')
   })
 })
 
@@ -1190,13 +1205,6 @@ describe('the remembered pass', () => {
     copyFileSync(RUNNER, join(fixture, dir, 'scripts/verify.ts'))
     commit()
   }
-
-  const runIn = (dir: string): SpawnSyncReturns<string> =>
-    spawnSync(process.execPath, [RUNNER, '--changed'], {
-      cwd: join(fixture, dir),
-      encoding: 'utf8',
-      env: { ...process.env, CI: '', PATH: `${bin}:${process.env.PATH}` },
-    })
 
   describe('a repeat', () => {
     beforeEach(() => {
@@ -1253,7 +1261,7 @@ describe('the remembered pass', () => {
     it('should run in a linked worktree at the same commit', () => {
       runGit('worktree', 'add', '-q', '--detach', 'bin/linked')
 
-      runIn('bin/linked')
+      runChangedIn('bin/linked')
 
       expect(gateRuns()).toBe(2)
     })
@@ -1374,7 +1382,7 @@ describe('the remembered pass', () => {
       writeSource('service/scripts/verify.json', '{}')
       runChanged()
 
-      runIn('service')
+      runChangedIn('service')
 
       expect(gateRuns()).toBe(2)
     })
