@@ -66,6 +66,7 @@ export function makeApi(fixture: Fixture = {}): Harness {
     branch: 'feat/x',
     head: HEAD,
     body: '',
+    isBot: false,
     ...fixture.pull,
   }
   const readings = fixture.checks ?? [{ state: 'passing', isConflicted: false }]

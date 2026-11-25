@@ -144,6 +144,8 @@ export interface PullState {
   readonly head: string
   /** The description, read for a results row still pending. */
   readonly body: string
+  /** Whether a release or dependency bot opened it, whose body quotes rows it never measured. */
+  readonly isBot: boolean
 }
 
 /** A results row still pending, with the run it links and, once read, that run's state. */
@@ -417,8 +419,11 @@ function carried(gates: readonly GateResult[]): {
  * It sits outside the re-draft gates, since a pending run says nothing about
  * whether the ready mark was earned.
  */
-export function measurementGate(body: string): GateResult {
-  const pending = pendingMeasurements(body)
+export function measurementGate(
+  pull: Pick<PullState, 'body' | 'isBot'>,
+): GateResult {
+  if (pull.isBot) return pass('measurement')
+  const pending = pendingMeasurements(pull.body)
   if (pending.length === 0) return pass('measurement')
   return { ...fail('measurement', 'measurement-pending'), pending }
 }
@@ -978,7 +983,7 @@ export async function lift(
       tip,
       await readReelCarry(api, painted, evidence, tip),
     ),
-    measurementGate(pull.body),
+    measurementGate(pull),
     standingGate(standing),
   ]
   if (!pull.isDraft) {

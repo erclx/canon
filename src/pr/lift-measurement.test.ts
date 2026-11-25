@@ -87,6 +87,28 @@ describe('lift over a pending measurement', () => {
     expect(record.pending).toEqual([{ row: 'scan of 200 files' }])
   })
 
+  // The merge exempts a bot body, so the lift reads it the same way and the two verbs never disagree.
+  it('should lift a bot pull request whose body quotes a pending row', async () => {
+    const { api } = makeApi({
+      pull: { isBot: true, body: outcome('pending') },
+    })
+
+    const record = await lift(api, { isCheck: true, waitSeconds: 0 })
+
+    expect(record.reason).toBe('clear')
+    expect(record.pending).toBeUndefined()
+  })
+
+  it('should still refuse a pull request that is not a bot', async () => {
+    const { api } = makeApi({
+      pull: { isBot: false, body: outcome('pending') },
+    })
+
+    const record = await lift(api, { isCheck: true, waitSeconds: 0 })
+
+    expect(record.reason).toBe('measurement-pending')
+  })
+
   it('should leave a body with no Outcome table clear', async () => {
     const { api } = makeApi({ pull: { body: '## Summary\n\n- a\n' } })
 

@@ -510,6 +510,25 @@ describe('canon pr reads through REST alone', () => {
         expect(mutationCalls()).toBe(0)
       })
 
+      it('should read a Dependabot pull request as a bot and clear it past the pending row', async () => {
+        stagePending()
+        writeFixture(
+          'pull.json',
+          pullRow({
+            draft: true,
+            state: 'open',
+            node_id: 'PR_7',
+            head: { ref: 'dependabot/bun/zod-4.1.2', sha: tip },
+            user: { type: 'Bot' },
+            body: `## Outcome\n\n| what | Result | baseline | conditions |\n| --- | --- | --- | --- |\n| scan | pending | 4 ms | [run](${RUN}) |\n`,
+          }),
+        )
+
+        const { record } = await runLift(['7', '--check'])
+
+        expect(record.pending).toBeUndefined()
+      })
+
       it('should list the row without a state when the run cannot be read', async () => {
         stagePending()
 

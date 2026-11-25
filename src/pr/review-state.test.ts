@@ -603,6 +603,7 @@ describe('agrees with lift', () => {
           branch: 'feat/x',
           head: HEAD,
           body: '',
+          isBot: false,
         }),
         readStanding: async () => 'fresh',
         readChecks: async () => passing,

@@ -16,6 +16,7 @@ import {
   SETTLING_REEL_SKIPS,
   UNWAIVABLE_REEL_SKIPS,
 } from '@/pr/lift'
+import { botKind } from '@/pr/merge'
 import { loadPaintedPatterns } from '@/pr/painted'
 import { type RestPull, reviewRowOf } from '@/pr/rest'
 import { intro, logInfo, logStep, logWarn, outro } from '@/cli/ui'
@@ -140,7 +141,8 @@ export function registerLift(pr: Command): void {
         '            merge until it is filled or written `not measured` with a',
         '            reason, and refuses `measurement-pending` on a draft and a',
         '            ready pull request alike, never sending a ready one back to',
-        '            draft. The record lists each as `pending` with its run link',
+        '            draft, and never reads a release-please or Dependabot pull',
+        '            request. The record lists each as `pending` with its run link',
         "            and that run's state, left off when the read fails",
         '  standing  the head is fresh against the base, not stale or conflicted',
         '  ci        every required check run on the tip passed, waited on up to --wait',
@@ -276,6 +278,12 @@ function liftApi(root: string, number: string, baseRef: string): LiftApi {
           branch: row.head.ref,
           head: row.head.sha ?? '',
           body: row.body ?? '',
+          isBot:
+            botKind({
+              branch: row.head.ref,
+              body: row.body ?? '',
+              isBotAuthor: row.user?.type === 'Bot',
+            }) !== undefined,
         }
       } catch {
         return undefined
