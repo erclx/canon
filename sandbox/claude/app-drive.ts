@@ -18,7 +18,7 @@ const CONFIG = `[drive]
 launch = "bun run build && PREVIEW_PORT=4530 bun run preview"
 data = "boards/board.json"
 personas = ["a designer laying out a board"]
-proposals = ".canon/picks"
+proposals = ".canon/proposals"
 `
 
 const PACKAGE = `{
@@ -154,7 +154,10 @@ export default scenario({
         'Action:  /canon:app-drive drive v0.1.0 of the board app, decide one finding, and close the drive, since no operator is present',
       )
       ctx.log.info(
-        'Expect:  both addresses handed before driving and a Board row in the log naming project drive-<nn>,',
+        'Expect:  the app address handed before driving, the board address before the first frame drawn,',
+      )
+      ctx.log.info(
+        '         and a Board row in the log naming project drive-<nn>,',
       )
       ctx.log.info(
         '         whose pages open on 00-current with frames at 390, 834, and 1440, and no empty',

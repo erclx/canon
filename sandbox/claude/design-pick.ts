@@ -31,10 +31,10 @@ export default scenario({
         '         canon/DESIGN.md names Draw widths 320, 768, and 1440 under ## Layout, so a round',
       )
       ctx.log.info(
-        '         draws each arm at those rather than at the 390, 834, 1440 fallback',
+        '         draws each arm at those rather than at the 390, 768, 1280 fallback',
       )
       ctx.log.info(
-        '         .canon/board/picks/references/ holds a references page an earlier run left,',
+        '         .canon/board/pick-01-callout/references/ holds a references page an earlier run left,',
       )
       ctx.log.info(
         '         so the reference step reuses it and each arm names the frame it draws on',
@@ -55,7 +55,7 @@ export default scenario({
         '         browser-not-found everywhere else, which the run reports before drafting further.',
       )
       ctx.log.info(
-        'Action:  /canon:design-pick draft candidates for the callout treatment on index.html in the picks project, and take arm 2 when you put the pick to me',
+        'Action:  /canon:design-pick draft candidates for the callout treatment on index.html in the pick-01-callout project, and take arm 2 when you put the pick to me',
       )
       ctx.log.info(
         'Expect:  the closed state. A headless run has no operator to say the pick is right, so it',
@@ -67,13 +67,13 @@ export default scenario({
         '         the arm applied to the callout in index.html, the rest of that page untouched,',
       )
       ctx.log.info(
-        '         every arm captured at each round width under .canon/picks/, the references page',
+        '         every round page still in .canon/board/pick-01-callout/ with each arm at each round',
       )
       ctx.log.info(
-        '         archived under .canon/picks/references/ and still on the board, and the round pages the run added gone',
+        '         width, the references page beside them, the winner on 00-next, and no copy of any of',
       )
       ctx.log.info(
-        '         from frameboard list. Not yet measured on Frameboard.',
+        '         it elsewhere under .canon/. Not yet measured on Frameboard.',
       )
       ctx.log.info(
         'Not reached: the loop, the pick, and the hand-off. The loop stops on a person saying the',
