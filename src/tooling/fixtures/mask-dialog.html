@@ -9,7 +9,12 @@
         background: #fff;
       }
       .edited,
-      .below {
+      .below,
+      .partial,
+      .cover-left,
+      .cover-top,
+      .cover-bottom,
+      .cover-corner {
         position: absolute;
         width: 200px;
         height: 40px;
@@ -27,6 +32,34 @@
         left: 100px;
         top: 1800px;
       }
+      .partial {
+        left: 100px;
+        top: 400px;
+      }
+      .cover-left {
+        left: 400px;
+        top: 400px;
+      }
+      .cover-top {
+        left: 700px;
+        top: 400px;
+      }
+      .cover-bottom {
+        left: 1000px;
+        top: 400px;
+      }
+      .cover-corner {
+        left: 100px;
+        top: 520px;
+      }
+      .menu {
+        position: absolute;
+        left: 250px;
+        top: 380px;
+        width: 100px;
+        height: 80px;
+        background: #fff;
+      }
       .base {
         position: absolute;
         left: 1000px;
@@ -43,6 +76,30 @@
         height: 20px;
         background: #ccc;
         pointer-events: none;
+      }
+      .menu-left {
+        left: 380px;
+        top: 380px;
+        width: 50px;
+        height: 80px;
+      }
+      .menu-top {
+        left: 690px;
+        top: 380px;
+        width: 220px;
+        height: 25px;
+      }
+      .menu-bottom {
+        left: 990px;
+        top: 435px;
+        width: 220px;
+        height: 25px;
+      }
+      .menu-corner {
+        left: 80px;
+        top: 500px;
+        width: 30px;
+        height: 30px;
       }
       .backdrop {
         position: fixed;
@@ -63,13 +120,25 @@
     <span class="edited" id="under-panel"></span>
     <span class="edited" id="under-backdrop"></span>
     <span class="below"></span>
+    <span class="partial"></span>
+    <div class="menu"></div>
+    <span class="cover-left"></span>
+    <div class="menu menu-left"></div>
+    <span class="cover-top"></span>
+    <div class="menu menu-top"></div>
+    <span class="cover-bottom"></span>
+    <div class="menu menu-bottom"></div>
+    <span class="cover-corner"></span>
+    <div class="menu menu-corner"></div>
     <div class="base"></div>
     <span class="badge"></span>
     <div class="backdrop"></div>
     <div class="panel" role="dialog"></div>
     <script>
       if (location.search === '?closed') {
-        for (const node of document.querySelectorAll('.backdrop, .panel')) {
+        for (const node of document.querySelectorAll(
+          '.backdrop, .panel, .menu',
+        )) {
           node.remove()
         }
       }
