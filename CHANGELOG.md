@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.129.0](https://github.com/erclx/canon/compare/v5.128.0...v5.129.0) (2026-11-25)
+
+
+### Features
+
+* **context:** make a length finding fixable in one pass ([#3576](https://github.com/erclx/canon/issues/3576)) ([48569dc](https://github.com/erclx/canon/commit/48569dccda29e4ddb60757522e750bb73121f78b))
+* **design-pick:** draw a pick where its finding lives and keep rounds ([#3573](https://github.com/erclx/canon/issues/3573)) ([1f8c4be](https://github.com/erclx/canon/commit/1f8c4be56f098151b8678eea196acb5831136c08))
+* **git-branch:** name a toolkit sync branch by one dated standard ([#3579](https://github.com/erclx/canon/issues/3579)) ([f8451ba](https://github.com/erclx/canon/commit/f8451ba62b3c9d76b6289c09691cb6b7cd3177ba))
+* **planner:** announce plans three to a message ([#3575](https://github.com/erclx/canon/issues/3575)) ([15207c2](https://github.com/erclx/canon/commit/15207c244fdf9ac19123043360ff176ce377b029))
+* **pr:** count commit statuses when no check is required ([#3570](https://github.com/erclx/canon/issues/3570)) ([314f9b1](https://github.com/erclx/canon/commit/314f9b1fbfd90e6e47d645087e5b43c36c561b97))
+* **pr:** hold the lift and merge on a pending measurement ([#3578](https://github.com/erclx/canon/issues/3578)) ([ed6a1d1](https://github.com/erclx/canon/commit/ed6a1d1564a25719c20ead04b2b8970975148aa3))
+* **pr:** read capture scripts as inert and carry a reel across a merge ([#3577](https://github.com/erclx/canon/issues/3577)) ([ef18d93](https://github.com/erclx/canon/commit/ef18d93291de9f04adfa349e71e4ba9a706817f8))
+* **pr:** refuse a tick when the newest UI verdict names another commit ([#3572](https://github.com/erclx/canon/issues/3572)) ([22de5f1](https://github.com/erclx/canon/commit/22de5f1690e89bd08fee30f4bce5fd6908c7a3a6))
+* **target-check:** list the pages past a length cap ([#3569](https://github.com/erclx/canon/issues/3569)) ([e64bc3a](https://github.com/erclx/canon/commit/e64bc3a5e81ae4bfb802937338abd74a7165eae5))
+* **verify:** skip an untouched nested root in a changed run ([#3571](https://github.com/erclx/canon/issues/3571)) ([0659272](https://github.com/erclx/canon/commit/06592725ad2645e61aec1b8ed209ff695f911760))
+
 ## [5.128.0](https://github.com/erclx/canon/compare/v5.127.0...v5.128.0) (2026-11-25)
 
 
