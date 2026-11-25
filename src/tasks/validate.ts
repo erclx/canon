@@ -1302,22 +1302,6 @@ async function readLabelFolders(root: string): Promise<LabelFolders> {
   return { live, archived, declined }
 }
 
-/**
- * The tasks a `Waiting on` cell cites, by a bare sibling pointer or a bare
- * phase label, the way the parked-row check reads them. A label naming more
- * than one task yields nothing, since a guess would order a row on the wrong one.
- */
-export async function readCitedStems(
-  cell: string,
-  root: string,
-): Promise<string[]> {
-  const linked = citedStem(cell)
-  if (linked) return [linked]
-
-  const bare = bareLabels(cell, await readLabelFolders(root))
-  return bare.kind === 'stems' ? [...bare.stems] : []
-}
-
 /** Where a blocker clause ends. A comma after a label ends it, a dot inside a filename does not, and `and` does not. */
 const BLOCKER_BREAK = /\.(?=\s|$)|[;,]|\bbecause\b/i
 
@@ -1337,7 +1321,10 @@ const BESIDE_VERB = new RegExp(
 
 /** A word saying the tasks after it gate the row, whatever placing verb came before it in the clause. */
 const BLOCKER_VERB =
-  /\b(?:after|behind|waits?\s+(?:on|for)|blocked\s+(?:by|on)|needs|once)\b/i
+  /\b(?:after|behind|waits?\s+(?:on|for)|waiting\s+on|depends\s+on|blocked\s+(?:by|on)|needs|once|until)\b/i
+
+/** A task followed by `merging`, which gates even inside a placing verb's reach. */
+const MERGING_TASK = /(?:\d+|\bv\d+\.\d+\b)(?=\s+merging\b)/gi
 
 /** What a clause leaves once its citations, `and`, and punctuation go, which is nothing for a bare list of tasks. */
 const CITATION_LIST_RESIDUE = /\uE000\d+\uE001|\bv\d+\.\d+\b|\band\b|[\s,&]/gi
@@ -1350,7 +1337,8 @@ export interface BlockerClause {
 
 /**
  * The part of a clause that can gate. A placing verb cuts what follows it up
- * to the next blocker verb, and a blocker verb ahead of it governs the rest.
+ * to the next blocker verb, sparing a task followed by `merging`, and a blocker
+ * verb ahead of it governs the rest.
  */
 function gatingText(clause: string): string {
   const placing = clause.search(BESIDE_VERB)
@@ -1359,7 +1347,10 @@ function gatingText(clause: string): string {
   const blocker = clause.search(BLOCKER_VERB)
   if (blocker >= 0 && blocker < placing) return clause
 
-  return `${clause.slice(0, placing)} ${blocker < 0 ? '' : clause.slice(blocker)}`
+  const cut = clause.slice(placing, blocker < 0 ? undefined : blocker)
+  const spared = (cut.match(MERGING_TASK) ?? []).join(' ')
+  const tail = blocker < 0 ? '' : clause.slice(blocker)
+  return `${clause.slice(0, placing)} ${spared} ${tail}`
 }
 
 /**
@@ -1392,32 +1383,26 @@ export async function readBlockerClauses(
     ]
   }
 
+  const pieces = masked.split(new RegExp(`(${BLOCKER_BREAK.source})`, 'i'))
   let placing: boolean = false
   const clauses: BlockerClause[] = []
-  for (const raw of masked.split(BLOCKER_BREAK)) {
-    const clause = raw.trim()
+  for (let index = 0; index < pieces.length; index += 2) {
+    const clause = pieces[index].trim()
     if (!clause) continue
 
+    const afterComma = (pieces[index - 1] ?? '').trim() === ','
     const joins: boolean =
-      placing && clause.replace(CITATION_LIST_RESIDUE, '') === ''
-    placing =
-      joins ||
-      (clause.search(BESIDE_VERB) >= 0 && clause.search(BLOCKER_VERB) < 0)
+      placing && afterComma && clause.replace(CITATION_LIST_RESIDUE, '') === ''
+    const verb = clause.search(BESIDE_VERB)
+    const placed: boolean =
+      joins || (verb >= 0 && clause.search(BLOCKER_VERB) < 0)
+    placing = placed && (joins || read(restore(clause.slice(verb))).length > 0)
 
     const stems = joins ? [] : read(restore(gatingText(clause)))
     clauses.push({ clause: restore(clause), stems })
   }
 
   return clauses
-}
-
-/** The tasks a `Waiting on` cell cites as blockers, across the clauses `readBlockerClauses` reads. */
-export async function readBlockerStems(
-  cell: string,
-  root: string,
-): Promise<string[]> {
-  const clauses = await readBlockerClauses(cell, root)
-  return [...new Set(clauses.flatMap((read) => read.stems))]
 }
 
 /** What one blocker citation produced, since a row can be neither settled nor open. */

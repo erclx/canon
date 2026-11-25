@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { recordDir } from '@/roots/record'
 import {
   type Finding,
-  readBlockerStems,
+  readBlockerClauses,
   validateBoard,
   type ValidateOptions,
 } from '@/tasks/validate'
@@ -415,9 +415,14 @@ describe('validateBoard held rows', () => {
   })
 })
 
-describe('readBlockerStems', () => {
+describe('readBlockerClauses', () => {
   async function seedLive(...stems: readonly string[]) {
     for (const stem of stems) await seedTask(stem, '', undefined, NO_PLAN)
+  }
+
+  async function readBlockerStems(cell: string, root: string) {
+    const clauses = await readBlockerClauses(cell, root)
+    return [...new Set(clauses.flatMap((read) => read.stems))]
   }
 
   it('should read a joined share as no blocker', async () => {
@@ -465,7 +470,7 @@ describe('readBlockerStems', () => {
     await seedLive('v44.5-c')
 
     const stems = await readBlockerStems(
-      'waits on [v44.5, with and more](v44.5-c.md)',
+      'waits on [the parser, with more](v44.5-c.md)',
       ROOT,
     )
 
@@ -500,6 +505,12 @@ describe('readBlockerStems', () => {
     'shares a.ts with v44.2, and waits on v44.4',
     'shares a.ts with v44.2, and blocked by v44.4',
     'shares a.ts with v44.2, and v44.4 merging',
+    'ranked above v44.2 and needs v44.4',
+    'ranked above v44.2 and once v44.4 merges',
+    'ranked above v44.2 and v44.4 merging',
+    'one reviewer pass with v44.2 until v44.4 lands',
+    'plan ready with answers waiting on v44.4',
+    'plan ready with answers depends on v44.4',
   ])('should keep an and clause blocking on its own verb: %s', async (cell) => {
     await seedLive('v44.2-a', 'v44.4-b')
 
@@ -519,6 +530,23 @@ describe('readBlockerStems', () => {
       const stems = await readBlockerStems(cell, ROOT)
 
       expect(stems).toEqual([])
+    },
+  )
+
+  it.each([
+    'plan ready with answers settled; v44.4',
+    'parked with the landing page work, and v44.4',
+    'opens the group; v44.4',
+    'follows v44.2; v44.4',
+    'shares a.ts with v44.2; v44.4',
+  ])(
+    'should keep a bare task blocking when no comma joins it to a placing clause: %s',
+    async (cell) => {
+      await seedLive('v44.2-a', 'v44.4-b')
+
+      const stems = await readBlockerStems(cell, ROOT)
+
+      expect(stems).toEqual(['v44.4-b'])
     },
   )
 

@@ -132,7 +132,8 @@ The `Waiting on` column under `## Up next` carries the reason in one of three fo
 `canon tasks waves` reads a cell clause by clause.
 
 - A cell splits at a period, comma, semicolon, or `because`, and a clause's cited tasks block, except after a ranking, sharing, `rebases`, or `with` verb.
-- `after`, `behind`, `waits on`, `blocked by`, `needs`, or `once` gates again, and a bare list of tasks after a placing clause stays beside it.
+- `after`, `behind`, `waits on`, `waiting on`, `depends on`, `blocked by`, `needs`, `once`, or `until` gates the tasks after it anywhere in a clause, and so does a task followed by `merging`.
+- A bare task after a comma joins the placing clause before it, when that clause cites a task.
 - The plans hold a shared file, not the cell. A cell of two clauses or more prints its reading.
 
 Naming what would satisfy a condition separates a blocked row from one nobody examined, so a condition with no way out fails the test. The header text is the contract, since a reader resolves the column by header rather than position. A cell renders at most 120 characters, a link counting as its label alone, and the verbs refuse a longer one.
