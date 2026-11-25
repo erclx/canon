@@ -713,15 +713,9 @@ function reportDensity(
     `${plural(total, 'finding')} across ${plural(carrying.length, 'file')}, ${gating} gating`,
   )
   if (gating > 0) logWarn('A gating finding fails the run.')
-  // A finding inside a Layout block takes that block's own advice, since H3s are forbidden there.
-  const elsewhere = carrying.some((report) =>
-    report.density.some((finding) => !roomAt(report.rooms, finding.line)),
+  logInfo(
+    'Split a long block at its seam, put a heading or a table between paragraphs, give a long list H3s, open each H3 with a sentence or a table, move a long cell into a bullet under the lead, and give a trailing list its own lead sentence.',
   )
-  if (elsewhere) {
-    logInfo(
-      'Split a long block at its seam, put a heading or a table between paragraphs, give a long list H3s, open each H3 with a sentence or a table, move a long cell into a bullet under the lead, and give a trailing list its own lead sentence.',
-    )
-  }
   if (carrying.some((report) => isDesignIndex(report.rel))) {
     logInfo(
       "On a design index still kept as one table, move each row into a group file beside its folder and let canon indexes regen write the list, per '### An index in the older shape' in the design-record skill's folder.md.",

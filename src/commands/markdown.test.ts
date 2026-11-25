@@ -220,7 +220,7 @@ describe('markdown audit', () => {
     const output = `${result.stdout}${result.stderr}`
 
     expect(output).toContain('`src/a/` holds 1 of 5 bullets and a lead of 9')
-    expect(output).not.toContain('give a long list H3s')
+    expect(output).toContain('move a long cell into a bullet')
   })
 
   it('should leave the room advice off a finding in a skill file', async () => {
