@@ -23,7 +23,7 @@ The two runners split a suite differently, which is why the body asks for the sp
 - [Vitest, Improving performance](https://vitest.dev/guide/improving-performance): "Vitest splits your test files, not your test cases, into shards"
 - [GitHub, Workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax): with `fail-fast` on, its default, "GitHub will cancel all in-progress and queued jobs in the matrix if any job in the matrix fails"
 
-House choice: two shards to start and about three minutes as the trigger to raise the count, since a fresh scaffold has a handful of specs and each shard repeats checkout, install, and the browser install.
+House choice: two shards to start and about three minutes for the slowest shard as the trigger to raise the count, since a fresh scaffold has a handful of specs and each shard repeats checkout, install, and the browser install.
 
 ## Adopted for the summary job
 

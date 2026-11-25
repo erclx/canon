@@ -62,6 +62,7 @@ jobs:
         with:
           name: build-output
           path: dist/
+      - run: bun run test:e2e --list
       - run: bun run test:e2e --shard="$SHARD"
         env:
           SHARD: ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}

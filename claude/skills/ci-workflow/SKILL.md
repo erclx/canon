@@ -65,10 +65,11 @@ The platform rules above pick the platform. This section picks the image version
 
 One E2E machine holds every merge for the whole suite's time. A shard matrix spends more machines instead, and a ruleset then needs one check standing for all of them.
 
-- Split E2E into a matrix job behind the build job alone, with `fail-fast: false` so one red shard never hides another. Start at two shards.
-- Raise the count once a run log puts the suite past about three minutes, since each shard repeats checkout, install, and the browser install.
+- Split E2E into a matrix job behind the job that uploads the build artifact alone, with `fail-fast: false` so one red shard never hides another. Start at two shards.
+- Raise the count while a run log puts the slowest shard past about three minutes, since each shard repeats checkout, install, and the browser install.
 - Read what the runner splits first. Playwright hands out whole files unless `fullyParallel` is on and Vitest always does, so one long file sets its shard's time.
 - Keep the shard list and the total in step, since a total above the last index skips the specs past it and still passes.
+- List the unsharded suite ahead of the shard, since a runner may pass an empty shard and an empty suite then reads green.
 
 ### The summary job
 
