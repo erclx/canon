@@ -33,7 +33,10 @@ printf '.canon/\n' >> .gitignore
 - `size` reports one row per folder, heaviest first, with file count, bytes, and growth over 7 and 30 days. After a `pull` every file reads as new.
 - `prune-tmp` lists scratch untouched for 14 days and deletes it only with `--write`. It never offers `tmp/handoff/` or `tmp/pr/poll/`.
 
-`push` blocks a file over 25 MB or one `canon secrets scan` would report, listing it under `blocked`. Move it out of the record folders, then push again.
+`push` never carries the two kinds of file below.
+
+- A file `canon secrets scan` would report refuses the whole push, under `blocked`. Remove the credential, then push again.
+- A file over 25 MB stays behind while the rest is pushed, under `skipped` with its `path` and `bytes`. Move it out of the record folders or shrink it. A tracked one keeps its last pushed version.
 
 Every verb exits `0` when done and `1` when refused. `prune-tmp` exits `2` when candidates exist and `--write` was not passed.
 
@@ -50,9 +53,9 @@ Branch on `reason` in the `--json` record, not the exit code.
 | `remote-unreadable` | The project's own remotes could not be read                                    |
 | `remote-shared`     | The records origin is also a remote of the project. Use a private repository   |
 | `no-remote-records` | `pull` found no branch on the records origin                                   |
-| `local-changes`     | `pull` found records on disk that the history lacks. Run `push` first          |
+| `local-changes`     | `pull` found records the history lacks. Run `push` first, or move them aside   |
 | `local-ahead`       | `pull` found local commits that never reached the origin. Run `push` first     |
-| `unsafe-payload`    | `push` found a file over 25 MB or carrying a credential                        |
+| `unsafe-payload`    | `push` found a file carrying a credential                                      |
 | `git-failed`        | A git call failed, with its stderr in the message                              |
 | `busy`              | `push` waited 10 seconds on another push's lock. Run it again                  |
 

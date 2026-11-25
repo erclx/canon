@@ -1,8 +1,9 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, rm, truncate, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { execa } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { gitEnv } from '@/git/env'
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..')
 const CLI = join(REPO_ROOT, 'src', 'cli.ts')
@@ -14,6 +15,60 @@ async function runCli(args: string[]) {
     timeout: RUN_TIMEOUT_MS,
   })
 }
+
+describe('canon records push', () => {
+  let root: string
+  let origin: string
+  const OVERSIZED_BYTES = 30 * 1024 * 1024
+
+  beforeEach(async () => {
+    root = await mkdtemp(join(tmpdir(), 'canon-records-push-'))
+    origin = await mkdtemp(join(tmpdir(), 'canon-records-push-origin-'))
+    const gitDir = join(root, '.canon', '.records.git')
+    await mkdir(join(root, '.canon', 'design'), { recursive: true })
+    await writeFile(join(root, '.canon', 'design', 'entry.md'), '# entry\n')
+
+    const env = gitEnv()
+    const options = { env, extendEnv: false }
+    await execa('git', ['init', '-q', '--bare', origin], options)
+    await execa('git', ['init', '-q', root], options)
+    await execa('git', ['--git-dir', gitDir, 'init', '-q'], options)
+    await execa(
+      'git',
+      ['--git-dir', gitDir, 'remote', 'add', 'origin', origin],
+      options,
+    )
+
+    const shot = join(root, '.canon', 'design', 'shot.png')
+    await writeFile(shot, '')
+    await truncate(shot, OVERSIZED_BYTES)
+  })
+
+  afterEach(async () => {
+    await rm(root, { recursive: true, force: true })
+    await rm(origin, { recursive: true, force: true })
+  })
+
+  it('should exit 0 with the skipped record in JSON and its path on stderr', async () => {
+    const result = await runCli(['records', 'push', '--json', '--root', root])
+
+    expect(result.exitCode).toBe(0)
+    expect(JSON.parse(result.stdout)).toMatchObject({
+      ok: true,
+      changed: 1,
+      skipped: [{ path: 'design/shot.png', bytes: OVERSIZED_BYTES }],
+    })
+    expect(result.stderr).toContain('design/shot.png (30M)')
+  })
+
+  it('should name the skipped record in the human report', async () => {
+    const result = await runCli(['records', 'push', '--root', root])
+
+    expect(result.exitCode).toBe(0)
+    expect(result.stdout).toBe('')
+    expect(result.stderr).toContain('design/shot.png (30M)')
+  })
+})
 
 describe('canon records stale', () => {
   let root: string

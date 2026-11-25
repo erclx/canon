@@ -76,6 +76,12 @@ function writeCanonRecord(root: string, path: string, text: string): void {
   writeFileSync(full, text)
 }
 
+/** A sparse file one byte past the ceiling, replacing whatever the path held. */
+function writeOversized(root: string, path: string): void {
+  writeCanonRecord(root, path, '')
+  truncateSync(join(root, '.canon', path), MAX_RECORD_BYTES + 1)
+}
+
 function canonRecordsGit(root: string, args: string[]): Promise<string> {
   const tree = join(root, '.canon')
   return git([
@@ -500,24 +506,130 @@ describe('pushRecords', () => {
     expect(outcome.firstSeen).toEqual([])
   })
 
-  it('should refuse the whole push on an oversized record, staging nothing', async () => {
-    await makeRecordsRepo(ROOT, ORIGIN)
-    await pushRecords(ROOT)
-    const before = await recordsState(ROOT)
-    const big = join(ROOT, '.claude', 'groundwork', 'backup.tar')
-    writeFileSync(big, '')
-    truncateSync(big, MAX_RECORD_BYTES + 1)
-    writeFileSync(join(ROOT, '.claude', 'tasks', 'fine.md'), '# fine\n')
+  it('should skip an oversized record by name and push the safe ones beside it', async () => {
+    const canonRoot = await makeCanonProject({
+      'groundwork/notes.md': '# notes\n',
+      'tasks/entry.md': '# tasks\n',
+    })
+    writeOversized(canonRoot, 'groundwork/backup.tar')
 
-    const outcome = await pushRecords(ROOT)
+    const outcome = await pushRecords(canonRoot)
 
-    expect(outcome.ok).toBe(false)
-    if (outcome.ok) return
-    expect(outcome.reason).toBe('unsafe-payload')
-    expect(outcome.blocked?.map((finding) => finding.path)).toEqual([
-      'groundwork/backup.tar',
-    ])
-    expect(await recordsState(ROOT)).toEqual(before)
+    expect(outcome).toMatchObject({
+      ok: true,
+      pushed: true,
+      changed: 2,
+      added: ['groundwork/notes.md', 'tasks/entry.md'],
+      skipped: [{ path: 'groundwork/backup.tar', bytes: MAX_RECORD_BYTES + 1 }],
+    })
+    const safe = 'groundwork/notes.md\ntasks/entry.md'
+    expect(await trackedOnOrigin(canonRoot)).toBe(safe)
+    expect(await canonRecordsGit(canonRoot, ['ls-files'])).toBe(safe)
+  })
+
+  it('should report an empty skipped list on a push with no oversized record', async () => {
+    const canonRoot = await makeCanonProject({ 'tasks/entry.md': '# tasks\n' })
+
+    const outcome = await pushRecords(canonRoot)
+
+    expect(outcome).toMatchObject({ ok: true, skipped: [] })
+  })
+
+  it('should succeed with nothing changed when the oversized record is the only pending one', async () => {
+    const canonRoot = await makeCanonProject({ 'tasks/entry.md': '# tasks\n' })
+    await pushRecords(canonRoot)
+    writeOversized(canonRoot, 'design/shot.png')
+
+    const outcome = await pushRecords(canonRoot)
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      pushed: true,
+      changed: 0,
+      added: [],
+      skipped: [{ path: 'design/shot.png' }],
+    })
+    expect(await trackedOnOrigin(canonRoot)).toBe('tasks/entry.md')
+  })
+
+  it('should commit nothing on a first push holding only an oversized record', async () => {
+    const canonRoot = await makeCanonProject({ 'design/shot.png': 'small' })
+    writeOversized(canonRoot, 'design/shot.png')
+
+    const outcome = await pushRecords(canonRoot)
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      pushed: false,
+      changed: 0,
+      skipped: [{ path: 'design/shot.png' }],
+    })
+  })
+
+  it('should keep the last backed-up version of a tracked record grown oversized', async () => {
+    const canonRoot = await makeCanonProject({ 'tasks/log.md': 'small\n' })
+    await pushRecords(canonRoot)
+    writeOversized(canonRoot, 'tasks/log.md')
+    writeCanonRecord(canonRoot, 'tasks/next.md', '# next\n')
+
+    const outcome = await pushRecords(canonRoot)
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      changed: 1,
+      added: ['tasks/next.md'],
+      skipped: [{ path: 'tasks/log.md' }],
+    })
+    const branch = await projectBranch(canonRoot)
+    expect(await git(['-C', ORIGIN, 'show', `${branch}:tasks/log.md`])).toBe(
+      'small',
+    )
+    expect(await trackedOnOrigin(canonRoot)).toBe('tasks/log.md\ntasks/next.md')
+  })
+
+  it.each([
+    ['a space', 'design/big shot.bin', 'design/big.bin'],
+    ['a leading colon', 'design/:shot.bin', 'design/shot.bin'],
+    ['a glob character', 'design/*.bin', 'design/other.bin'],
+    ['a bracket', 'design/[ab].bin', 'design/a.bin'],
+    ['a non-ASCII character', 'design/é.bin', 'design/e.bin'],
+  ])(
+    'should match an oversized path carrying %s literally',
+    async (_, oversized, neighbor) => {
+      const canonRoot = await makeCanonProject({ [neighbor]: 'safe\n' })
+      writeOversized(canonRoot, oversized)
+
+      const outcome = await pushRecords(canonRoot)
+
+      expect(outcome).toMatchObject({
+        ok: true,
+        changed: 1,
+        skipped: [{ path: oversized }],
+      })
+      expect(await trackedOnOrigin(canonRoot)).toBe(neighbor)
+    },
+  )
+
+  it('should refuse a credential beside an oversized record, naming the credential alone', async () => {
+    const canonRoot = await makeCanonProject({ 'tasks/entry.md': '# tasks\n' })
+    await pushRecords(canonRoot)
+    const before = await canonRecordsGit(canonRoot, ['count-objects', '-v'])
+    writeOversized(canonRoot, 'design/shot.png')
+    writeCanonRecord(canonRoot, 'plans/.env', `TOKEN=ghp_${'a'.repeat(36)}\n`)
+
+    const outcome = await pushRecords(canonRoot)
+
+    expect(outcome).toMatchObject({
+      ok: false,
+      reason: 'unsafe-payload',
+      blocked: [{ path: 'plans/.env', cause: 'credential' }],
+    })
+    expect(await canonRecordsGit(canonRoot, ['ls-files'])).toBe(
+      'tasks/entry.md',
+    )
+    expect(await canonRecordsGit(canonRoot, ['count-objects', '-v'])).toBe(
+      before,
+    )
   })
 
   it('should refuse the whole push on a record carrying a credential', async () => {
@@ -673,6 +785,58 @@ describe('pullRecords', () => {
     expect(
       readFileSync(join(ROOT, '.claude', 'tasks', 'unpushed.md'), 'utf8'),
     ).toBe('local only\n')
+  })
+
+  it('should name the oversized file a push skipped when it refuses', async () => {
+    const canonRoot = await makeCanonProject({ 'tasks/entry.md': '# tasks\n' })
+    writeOversized(canonRoot, 'design/shot.png')
+    await pushRecords(canonRoot)
+
+    const outcome = await pullRecords(canonRoot)
+
+    expect(outcome).toMatchObject({
+      ok: false,
+      reason: 'local-changes',
+      message: expect.stringContaining('design/shot.png'),
+    })
+    expect(existsSync(join(canonRoot, '.canon', 'design', 'shot.png'))).toBe(
+      true,
+    )
+  })
+
+  it('should clear on a machine behind its remote once the named oversized file moves', async () => {
+    const canonRoot = await makeCanonProject({ 'tasks/entry.md': '# tasks\n' })
+    await pushRecords(canonRoot)
+    writeCanonRecord(canonRoot, 'tasks/second.md', '# second\n')
+    await pushRecords(canonRoot)
+    await canonRecordsGit(canonRoot, ['reset', '--hard', '--quiet', 'HEAD~1'])
+    writeOversized(canonRoot, 'design/shot.png')
+
+    const refused = await pullRecords(canonRoot)
+    rmSync(join(canonRoot, '.canon', 'design', 'shot.png'))
+    const cleared = await pullRecords(canonRoot)
+
+    expect(refused).toMatchObject({
+      reason: 'local-changes',
+      message: expect.stringContaining('design/shot.png'),
+    })
+    expect(cleared.ok).toBe(true)
+    expect(existsSync(join(canonRoot, '.canon', 'tasks', 'second.md'))).toBe(
+      true,
+    )
+  })
+
+  it('should name no file when a refused pull holds nothing oversized', async () => {
+    const canonRoot = await makeCanonProject({ 'tasks/entry.md': '# tasks\n' })
+    await pushRecords(canonRoot)
+    writeCanonRecord(canonRoot, 'tasks/local.md', 'local\n')
+
+    const outcome = await pullRecords(canonRoot)
+
+    expect(outcome).toMatchObject({
+      reason: 'local-changes',
+      message: expect.not.stringContaining('tasks/local.md'),
+    })
   })
 
   it('should not read a skipped video file as a local change', async () => {

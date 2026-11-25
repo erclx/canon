@@ -308,6 +308,55 @@ describe('runPostMerge records push lines', () => {
     expect(h.output()).toBe('')
   })
 
+  it('should name each skipped path and size under the backed-up line', async () => {
+    const h = harness({
+      push: record({
+        ok: true,
+        changed: 3,
+        skipped: [
+          { path: 'design/a.png', bytes: 31457280 },
+          { path: 'design/b.mov', bytes: 125829120 },
+        ],
+      }),
+    })
+
+    await h.go()
+
+    expect(h.output()).toBe(
+      '\n🗄️  Backed up 3 record path(s).\n' +
+        'Skipped 2 oversized record(s), not backed up:\n' +
+        '  design/a.png (30M)\n' +
+        '  design/b.mov (120M)\n' +
+        'Move each out of the record folders, such as into .canon/tmp/, or shrink it.\n\n',
+    )
+  })
+
+  it('should name a skipped path on a push that changed nothing', async () => {
+    const h = harness({
+      push: record({
+        ok: true,
+        changed: 0,
+        skipped: [{ path: 'design/a.png', bytes: 31457280 }],
+      }),
+    })
+
+    await h.go()
+
+    expect(h.output()).toBe(
+      '\n🗄️  Skipped 1 oversized record(s), not backed up:\n' +
+        '  design/a.png (30M)\n' +
+        'Move each out of the record folders, such as into .canon/tmp/, or shrink it.\n\n',
+    )
+  })
+
+  it('should count alone on a push whose skipped list is empty', async () => {
+    const h = harness({ push: record({ ok: true, changed: 1, skipped: [] }) })
+
+    await h.go()
+
+    expect(h.output()).toBe('\n🗄️  Backed up 1 record path(s).\n\n')
+  })
+
   it('should stay quiet on a machine with no records history', async () => {
     const h = harness({
       push: record({ ok: false, reason: 'no-repository' }, 1),
