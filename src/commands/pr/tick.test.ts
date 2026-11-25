@@ -342,6 +342,33 @@ describe('canon pr tick', () => {
       expect(existsSync(apiLog)).toBe(false)
     })
 
+    it('should stamp the boxes at the tip across a clean merge of main', async () => {
+      const driven = pushCommit('src/hero.ts')
+      const git = (...args: string[]) =>
+        execaSync('git', ['-C', repoRoot, ...args], IDENTITY)
+      git('checkout', '-q', 'main')
+      writeFileSync(join(repoRoot, 'main-only.ts'), 'main\n')
+      git('add', 'main-only.ts')
+      git('commit', '-q', '-m', 'main')
+      git('push', '-q', 'origin', 'main')
+      git('checkout', '-q', 'feat/x')
+      git('merge', '-q', '--no-edit', 'main')
+      git('push', '-q', 'origin', 'feat/x')
+      const merged = String(git('rev-parse', 'HEAD').stdout)
+
+      const outcome = await runTick(['--boxes', '1', '--head', driven])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({
+          reason: 'ticked',
+          head: merged,
+          carriedFrom: driven,
+          carriedAcross: 'merge',
+        }),
+        exit: 0,
+      })
+    })
+
     it('should refuse stale-head when the driven head was rewritten away', async () => {
       const driven = pushCommit('src/hero.test.ts')
       execaSync(

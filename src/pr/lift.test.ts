@@ -763,23 +763,41 @@ describe('lift', () => {
       expect(calls.unmerged).toEqual([])
     })
 
-    it('should keep a UI close behind the merge while the code close carries', async () => {
+    it('should carry the UI close across the merge beside the code close', async () => {
+      const { api, calls } = makeApi({
+        ...mergedFrom,
+        reviews: [CODE_CLOSED_AT_MOVED, UI_CLOSED_AT_MOVED],
+        evidence: { hasDrivableBox: true, reels: REEL_AT_HEAD },
+        unmerged: [],
+        rebased: { differingPaths: [], ownPaths: ['src/App.tsx'] },
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record).toMatchObject({ reason: 'lifted', carriedFrom: MOVED })
+      expect(record.gates).toContainEqual({
+        gate: 'ui',
+        isOk: true,
+        carriedFrom: MOVED,
+        carriedAcross: 'merge',
+      })
+      expect(calls.marks).toEqual(['PR_node'])
+    })
+
+    it('should not carry a UI close over a path both sides wrote', async () => {
       const { api } = makeApi({
         ...mergedFrom,
         reviews: [CODE_CLOSED_AT_MOVED, UI_CLOSED_AT_MOVED],
         evidence: { hasDrivableBox: true, reels: REEL_AT_HEAD },
         unmerged: [],
-        rebased: { differingPaths: [], ownPaths: [] },
+        rebased: { differingPaths: [], ownPaths: ['src/main-only.ts'] },
       })
 
       const record = await lift(api, { isCheck: false, waitSeconds: 60 })
 
-      expect(record.reason).toBe('ui-behind')
-      expect(record.gates).toContainEqual({
-        gate: 'review',
-        isOk: true,
-        carriedFrom: MOVED,
-        carriedAcross: 'merge',
+      expect(record).toMatchObject({
+        reason: 'ui-behind',
+        drivenPaths: ['src/main-only.ts'],
       })
     })
 

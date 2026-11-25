@@ -154,10 +154,12 @@ describe('readUiCarry', () => {
   function reads(
     changed: ChangedRead | undefined,
     rebased?: RebaseRead,
+    unmerged?: readonly string[],
   ): Parameters<typeof readUiCarry>[0] {
     return {
       readChanged: changedRead(changed),
       readRebased: rebaseRead(rebased),
+      readUnmerged: async () => unmerged,
     }
   }
 
@@ -222,6 +224,101 @@ describe('readUiCarry', () => {
     const carry = await readUiCarry(reads(undefined), DRIVEN, TIP)
 
     expect(carry).toEqual({ kind: 'failed' })
+  })
+
+  describe('across a merge of the base', () => {
+    const MERGED = {
+      isAncestor: true,
+      paths: ['src/main-only.ts', 'src/App.tsx'],
+    }
+
+    it('should carry when the merge brought only paths the branch never wrote', async () => {
+      const carry = await readUiCarry(
+        reads(MERGED, { differingPaths: [], ownPaths: ['src/card.ts'] }, []),
+        DRIVEN,
+        TIP,
+      )
+
+      expect(carry).toEqual({
+        kind: 'carried',
+        carriedFrom: DRIVEN,
+        carriedAcross: 'merge',
+      })
+    })
+
+    it('should move on a path both sides wrote, however cleanly it merged', async () => {
+      const carry = await readUiCarry(
+        reads(
+          MERGED,
+          { differingPaths: [], ownPaths: ['src/App.tsx', 'src/card.ts'] },
+          [],
+        ),
+        DRIVEN,
+        TIP,
+      )
+
+      expect(carry).toEqual({ kind: 'moved', drivenPaths: ['src/App.tsx'] })
+    })
+
+    it('should carry when the path both sides wrote is inert', async () => {
+      const carry = await readUiCarry(
+        reads(
+          { isAncestor: true, paths: ['README.md', 'src/main-only.ts'] },
+          { differingPaths: ['README.md'], ownPaths: ['README.md'] },
+          [],
+        ),
+        DRIVEN,
+        TIP,
+      )
+
+      expect(carry).toMatchObject({ kind: 'carried', carriedAcross: 'merge' })
+    })
+
+    it('should name each differing and each shared path of a merge once, sorted', async () => {
+      const carry = await readUiCarry(
+        reads(
+          MERGED,
+          {
+            differingPaths: ['src/App.tsx', 'src/sneaked.ts'],
+            ownPaths: ['src/App.tsx', 'src/main-only.ts', 'src/sneaked.ts'],
+          },
+          [],
+        ),
+        DRIVEN,
+        TIP,
+      )
+
+      expect(carry).toEqual({
+        kind: 'moved',
+        drivenPaths: ['src/App.tsx', 'src/main-only.ts', 'src/sneaked.ts'],
+      })
+    })
+
+    it('should name every changed path on a branch commit beside the merge', async () => {
+      const carry = await readUiCarry(
+        reads(MERGED, { differingPaths: [], ownPaths: [] }, [TIP]),
+        DRIVEN,
+        TIP,
+      )
+
+      expect(carry).toEqual({ kind: 'moved', drivenPaths: MERGED.paths })
+    })
+
+    it('should name every changed path when the commits of a merge could not be listed', async () => {
+      const carry = await readUiCarry(
+        reads(MERGED, { differingPaths: [], ownPaths: [] }),
+        DRIVEN,
+        TIP,
+      )
+
+      expect(carry).toEqual({ kind: 'moved', drivenPaths: MERGED.paths })
+    })
+
+    it('should read behind when the comparison across a merge could not be read', async () => {
+      const carry = await readUiCarry(reads(MERGED, undefined, []), DRIVEN, TIP)
+
+      expect(carry).toEqual({ kind: 'behind' })
+    })
   })
 })
 

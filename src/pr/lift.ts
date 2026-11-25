@@ -401,11 +401,11 @@ function waivesUndriven(
 
 /**
  * Binds only where the evidence record carries a checklist to drive. A close
- * behind the head holds across what `readUiCarry` carries, and a refusal names
- * every observable path in `drivenPaths` with the painted subset beside it.
+ * behind the head holds, its waiver with it, across what `readUiCarry` carries,
+ * and a refusal names `drivenPaths` with the painted subset beside it.
  */
 export async function uiGate(
-  api: Pick<LiftApi, 'readChanged' | 'readRebased'>,
+  api: Pick<LiftApi, 'readChanged' | 'readRebased' | 'readUnmerged'>,
   painted: PaintedPatterns,
   reviews: readonly ReviewRow[],
   head: string,
@@ -432,6 +432,7 @@ export async function uiGate(
     {
       readChanged: (from, to) => api.readChanged(from, to),
       readRebased: (from, to) => api.readRebased(from, to),
+      readUnmerged: (from, to) => api.readUnmerged(from, to),
     },
     scope.commit,
     head,

@@ -6,7 +6,11 @@ import {
   readChecklistBoxes,
 } from '@/pr/evidence'
 import { resolveTip } from '@/pr/head'
-import { readChangedPaths, readRebasedPaths } from '@/pr/lift'
+import {
+  readChangedPaths,
+  readRebasedPaths,
+  readUnmergedCommits,
+} from '@/pr/lift'
 import { readUiCarry } from '@/pr/carry'
 import { coversHead, resolveUiScope } from '@/pr/review-scope'
 import {
@@ -52,9 +56,9 @@ const TICK_REFUSALS: Record<TickReason | 'gh-failed', string> = {
   'body-refused':
     'The boxes are ticked on the evidence comment, but gh could not edit the pull request body, so its UI pass line still shows the earlier result. Re-run the tick to retry the body.',
   'stale-head':
-    'The head named is not the branch tip on the remote, and neither the gap since it nor the branch diff across a rebase could be read, so a tick would claim a pass on a commit that is no longer the pull request. Re-drive the checklist at the tip.',
+    'The head named is not the branch tip on the remote, and neither the gap since it nor the branch diff across a rebase or a merge of the base could be read, so a tick would claim a pass on a commit that is no longer the pull request. Re-drive the checklist at the tip.',
   'redrive-owed':
-    'A push or a rebase since the driven head changed a path a box can observe, so the pass does not carry to the tip. Nothing was written. Re-drive the checklist at the tip rather than retrying the tick there.',
+    'A push, a rebase, or a merge since the driven head changed a path a box can observe, so the pass does not carry to the tip. Nothing was written. Re-drive the checklist at the tip rather than retrying the tick there.',
   'bad-boxes':
     '--boxes takes box numbers as a comma-separated list of positive whole numbers, such as 1,3, and --head takes the commit that was driven.',
   'count-mismatch':
@@ -112,6 +116,11 @@ export function registerTick(pr: Command): void {
         'branch diff differs at the two commits, each against its own merge',
         'base, is one no box can observe.',
         '',
+        'A --head under merges of the base carries too, with `carriedAcross`',
+        'reading `merge`, when each commit since is a merge or already on the',
+        'base and the same comparison holds. A path the base and the branch',
+        'both changed owes a re-drive however cleanly it merged.',
+        '',
         'Before writing it reads the newest UI verdict. One that covers the tip,',
         'or the driven head on a carry, and carries a count line must match the',
         'ticks this call leaves at the tip, so a re-drive passes every box that',
@@ -130,11 +139,12 @@ export function registerTick(pr: Command): void {
         '               operator an untick of a box that has since failed',
         '  body-refused the comment is ticked but gh could not edit the body,',
         '               exit 1 with `commentTicked`. Re-run to retry the body.',
-        '  redrive-owed a push or a rebase since --head changed a path a box',
-        '               can observe, nothing written, with `driven`, `head`, and',
-        '               `drivenPaths`',
+        '  redrive-owed a push, a rebase, or a merge since --head changed a path',
+        '               a box can observe, nothing written, with `driven`,',
+        '               `head`, and `drivenPaths`',
         '  stale-head   --head is behind the tip and neither the linear gap nor',
-        '               the rebase comparison could be read, nothing written',
+        '               the branch diff comparison could be read, nothing',
+        '               written',
         '  taste-box    a named box carries (taste), nothing written',
         '  no-box       a named number is past the checklist, nothing written',
         '  no-checklist the evidence comment carries no checklist',
@@ -211,6 +221,10 @@ async function runTick(
           base === undefined
             ? undefined
             : readRebasedPaths(git, `origin/${base}`, from, to),
+        readUnmerged: async (from, to) =>
+          base === undefined
+            ? undefined
+            : readUnmergedCommits(git, `origin/${base}`, from, to),
       },
       head,
       reading.tip,

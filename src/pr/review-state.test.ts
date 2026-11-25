@@ -265,7 +265,7 @@ describe('readReviewState', () => {
     })
   })
 
-  it('should carry the code close across a base merge and hold the UI close behind it', async () => {
+  it('should carry both closes across a base merge', async () => {
     const { api } = makeApi({
       tips: [PUSHED],
       reviews: [
@@ -285,7 +285,7 @@ describe('readReviewState', () => {
       kind: 'read',
       record: {
         review: { isCovered: true, carriedFrom: HEAD, carriedAcross: 'merge' },
-        ui: { reason: 'ui-behind', isCovered: false },
+        ui: { isCovered: true, carriedFrom: HEAD, carriedAcross: 'merge' },
       },
     })
   })

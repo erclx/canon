@@ -107,22 +107,25 @@ export type MergeCarry =
   | { readonly kind: 'unmerged' }
   | { readonly kind: 'unread' }
 
+/** What a carry across merges reads: the commits on top, and the branch's own diff. */
+interface MergeReads {
+  readonly readUnmerged: (
+    from: string,
+    to: string,
+  ) => Promise<readonly string[] | undefined>
+  readonly readRebased: (
+    from: string,
+    to: string,
+  ) => Promise<RebaseRead | undefined>
+}
+
 /**
  * Carries a code review close across commits on top of it only when each is a
  * merge or already on the base, and the branch's own diff is equal at both
  * ends. Any commit of the branch's own refuses before the diff is read.
  */
 export async function readMergeCarry(
-  reads: {
-    readonly readUnmerged: (
-      from: string,
-      to: string,
-    ) => Promise<readonly string[] | undefined>
-    readonly readRebased: (
-      from: string,
-      to: string,
-    ) => Promise<RebaseRead | undefined>
-  },
+  reads: MergeReads,
   from: string,
   to: string,
 ): Promise<MergeCarry> {
@@ -137,13 +140,13 @@ export async function readMergeCarry(
   return rebase
 }
 
-/** Whether a UI verdict at one commit holds at the head, across a push or a rebase. */
+/** Whether a UI verdict at one commit holds at the head, and how it got there. */
 export type UiCarry =
   | { readonly kind: 'covered' }
   | {
       readonly kind: 'carried'
       readonly carriedFrom: string
-      readonly carriedAcross: 'push' | 'rebase'
+      readonly carriedAcross: CarriedAcross
     }
   | { readonly kind: 'moved'; readonly drivenPaths: readonly string[] }
   | { readonly kind: 'behind' }
@@ -151,25 +154,24 @@ export type UiCarry =
 
 /**
  * The rule the UI gate and the tick share, so neither passes a head the other
- * refuses. A rebase carries when every differing branch path is inert, and an
- * unreadable comparison reads `behind`.
+ * refuses. A rebase or a merge of the base carries when every path it moved is
+ * inert, and an unreadable comparison reads `behind`.
  */
 export async function readUiCarry(
-  reads: {
+  reads: MergeReads & {
     readonly readChanged: (
       from: string,
       to: string,
     ) => Promise<ChangedRead | undefined>
-    readonly readRebased: (
-      from: string,
-      to: string,
-    ) => Promise<RebaseRead | undefined>
   },
   from: string,
   to: string,
 ): Promise<UiCarry> {
   const carry = await readCarry(reads.readChanged, from, to)
   if (carry.kind === 'carried') return { ...carry, carriedAcross: 'push' }
+  if (carry.kind === 'moved') {
+    return readUiMergeCarry(reads, carry, from, to)
+  }
   if (carry.kind !== 'not-ancestor') return carry
 
   const moves = (path: string) => !isInert(path)
@@ -184,6 +186,33 @@ export async function readUiCarry(
   return rebase.kind === 'changed'
     ? { kind: 'moved', drivenPaths: rebase.differingPaths }
     : { kind: 'behind' }
+}
+
+/**
+ * Narrows a push's driven paths to the branch's own across merges of the base.
+ * A path both sides wrote stays driven, since a clean merge can still change
+ * what it draws. Any commit of the branch's own keeps the whole list.
+ */
+async function readUiMergeCarry(
+  reads: MergeReads,
+  pushed: { readonly kind: 'moved'; readonly drivenPaths: readonly string[] },
+  from: string,
+  to: string,
+): Promise<UiCarry> {
+  const unmerged = await reads.readUnmerged(from, to)
+  if (unmerged === undefined || unmerged.length > 0) return pushed
+
+  const read = await reads.readRebased(from, to)
+  if (read === undefined) return { kind: 'behind' }
+
+  const bothWrote = pushed.drivenPaths.filter((path) =>
+    read.ownPaths.includes(path),
+  )
+  const differing = read.differingPaths.filter((path) => !isInert(path))
+  const drivenPaths = [...new Set([...differing, ...bothWrote])].toSorted()
+  return drivenPaths.length > 0
+    ? { kind: 'moved', drivenPaths }
+    : { kind: 'carried', carriedFrom: from, carriedAcross: 'merge' }
 }
 
 /**

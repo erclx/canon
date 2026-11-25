@@ -1,4 +1,4 @@
-import type { UiCarry } from '@/pr/carry'
+import type { CarriedAcross, UiCarry } from '@/pr/carry'
 import {
   type ChecklistBox,
   CHECKLIST_END,
@@ -120,7 +120,7 @@ export type TickCarry =
   | {
       readonly kind: 'ticks'
       readonly carriedFrom?: string
-      readonly carriedAcross?: 'push' | 'rebase'
+      readonly carriedAcross?: CarriedAcross
     }
   | {
       readonly kind: 'refused'
