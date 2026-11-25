@@ -74,7 +74,7 @@ Each line names its reason after the `#`.
 feat/jwt-expiration                    # clear feature scope
 fix/AUTH-123-connection-pool           # includes ticket ID
 refactor/remove-deprecated-endpoints   # clear refactor intent
-chore/canon-sync-20260729              # toolkit sync, dated
+chore/canon-sync-<YYYYMMDD>            # toolkit sync, dated
 ```
 
 ### Incorrect
