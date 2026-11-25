@@ -1335,8 +1335,12 @@ const BESIDE_VERB = new RegExp(
   'i',
 )
 
-/** A word that keeps a clause a blocker where the clause before it only placed the row. */
-const BLOCKER_WORD = /\b(?:after|behind|waits\s+on|blocked\s+by)\b|\bmerging\b/i
+/** A word saying the tasks after it gate the row, whatever placing verb came before it in the clause. */
+const BLOCKER_VERB =
+  /\b(?:after|behind|waits?\s+(?:on|for)|blocked\s+(?:by|on)|needs|once)\b/i
+
+/** What a clause leaves once its citations, `and`, and punctuation go, which is nothing for a bare list of tasks. */
+const CITATION_LIST_RESIDUE = /\uE000\d+\uE001|\bv\d+\.\d+\b|\band\b|[\s,&]/gi
 
 /** One clause of a `Waiting on` cell as read, and the tasks it blocks on. */
 export interface BlockerClause {
@@ -1345,9 +1349,23 @@ export interface BlockerClause {
 }
 
 /**
- * Reads each clause of a `Waiting on` cell up to a placing verb, which never
- * gates. A clause on `and` after a placing one stays placing unless it carries
- * a blocker word. Links are masked so a filename's dot is no break.
+ * The part of a clause that can gate. A placing verb cuts what follows it up
+ * to the next blocker verb, and a blocker verb ahead of it governs the rest.
+ */
+function gatingText(clause: string): string {
+  const placing = clause.search(BESIDE_VERB)
+  if (placing < 0) return clause
+
+  const blocker = clause.search(BLOCKER_VERB)
+  if (blocker >= 0 && blocker < placing) return clause
+
+  return `${clause.slice(0, placing)} ${blocker < 0 ? '' : clause.slice(blocker)}`
+}
+
+/**
+ * Reads each clause of a `Waiting on` cell. A placing verb never gates what it
+ * governs, and a bare list of tasks after a placing clause joins it. Links are
+ * masked so a filename's dot is no break.
  */
 export async function readBlockerClauses(
   cell: string,
@@ -1360,6 +1378,19 @@ export async function readBlockerClauses(
   })
   const restore = (text: string) =>
     text.replace(/\uE000(\d+)\uE001/g, (_, index) => links[Number(index)])
+  const folders = await readLabelFolders(root)
+
+  const read = (text: string): string[] => {
+    const cited = linkTargets(text)
+      .map((target) => target.split('#')[0])
+      .filter((target) => target && !target.includes('/'))
+      .map((target) => stemOf(target))
+    const bare = bareLabels(text.replace(/\uE000\d+\uE001/g, ' '), folders)
+    const labels = bare.kind === 'stems' ? bare.stems : []
+    return [
+      ...new Set([...cited, ...labels].filter((stem) => stem !== undefined)),
+    ]
+  }
 
   let placing: boolean = false
   const clauses: BlockerClause[] = []
@@ -1367,13 +1398,13 @@ export async function readBlockerClauses(
     const clause = raw.trim()
     if (!clause) continue
 
-    const inherits: boolean =
-      placing && /^and\b/i.test(clause) && !BLOCKER_WORD.test(clause)
-    const at = clause.search(BESIDE_VERB)
-    placing = at >= 0 || inherits
+    const joins: boolean =
+      placing && clause.replace(CITATION_LIST_RESIDUE, '') === ''
+    placing =
+      joins ||
+      (clause.search(BESIDE_VERB) >= 0 && clause.search(BLOCKER_VERB) < 0)
 
-    const kept = inherits ? '' : at < 0 ? clause : clause.slice(0, at)
-    const stems = kept ? await readCitedStems(restore(kept), root) : []
+    const stems = joins ? [] : read(restore(gatingText(clause)))
     clauses.push({ clause: restore(clause), stems })
   }
 

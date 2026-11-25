@@ -515,13 +515,16 @@ function reportWaves(outcome: WavesOutcome, emitJson: boolean): number {
     logStep('Cyclic')
     for (const stem of outcome.cyclic) {
       logWarn(`${stem} waits in a cycle`)
-      const edges = outcome.cycles.find((cycle) => cycle.stem === stem)?.edges
-      for (const edge of edges ?? []) {
+      const cycle = outcome.cycles.find((entry) => entry.stem === stem)
+      for (const edge of cycle?.edges ?? []) {
         logInfo(
           edge.source === 'shared'
             ? `  on ${edge.to}, shared path ${edge.path}`
             : `  on ${edge.to}, Waiting on cell`,
         )
+      }
+      for (const read of cycle?.parse ?? []) {
+        logInfo(`  ${read.blocks ? 'blocks' : 'beside'}: "${read.clause}"`)
       }
     }
   }
@@ -766,7 +769,8 @@ export function registerPlans(tasks: Command): void {
         '',
         'Record fields:',
         '  waves      each a number and its rows, a row carrying its task stem,',
-        '             its plan, and the live tasks its Waiting on cell cites',
+        '             its plan, the live tasks its Waiting on cell cites, and a',
+        '             parse of that cell, each clause with whether it blocks',
         '  shared     each a path two plans declare, the stems holding it, and',
         '             the Up next stem that rebases',
         '  unplanned  Up next rows linking no live plan',

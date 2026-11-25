@@ -339,8 +339,16 @@ describe('planWaves', () => {
     expect(report.cyclic).toEqual(['a', 'b'])
     expect(stems(report)).toEqual([['c']])
     expect(report.cycles).toEqual([
-      { stem: 'a', edges: [{ to: 'b', source: 'waiting' }] },
-      { stem: 'b', edges: [{ to: 'a', source: 'waiting' }] },
+      {
+        stem: 'a',
+        edges: [{ to: 'b', source: 'waiting' }],
+        parse: [{ clause: '[b](b.md)', blocks: true }],
+      },
+      {
+        stem: 'b',
+        edges: [{ to: 'a', source: 'waiting' }],
+        parse: [{ clause: '[a](a.md)', blocks: true }],
+      },
     ])
   })
 

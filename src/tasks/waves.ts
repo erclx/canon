@@ -64,6 +64,8 @@ export type WaveEdge =
 export interface WaveCycle {
   readonly stem: string
   readonly edges: readonly WaveEdge[]
+  /** The cell's clauses as read, since a misread can be what closes the cycle. */
+  readonly parse: readonly WaveParse[]
 }
 
 export interface WavesReport {
@@ -285,7 +287,11 @@ export async function planWaves(root: string): Promise<WavesOutcome> {
     const wave = place(holder.stem)
     if (wave === null || wave === undefined) {
       cyclic.push(holder.stem)
-      cycles.push({ stem: holder.stem, edges: edgesOf(holder) })
+      cycles.push({
+        stem: holder.stem,
+        edges: edgesOf(holder),
+        parse: parses.get(holder.stem) ?? [],
+      })
       continue
     }
 
