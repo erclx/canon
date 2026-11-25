@@ -190,6 +190,31 @@ describe('readUndrivenWaivers', () => {
     expect(readUndrivenWaivers([review(body)])).toEqual([2])
   })
 
+  it('reads no waiver kind inside a fence in a body with CRLF line endings', () => {
+    const body = [
+      '```text',
+      '- **Waived capture:** `src/a.tsx`: sample',
+      '- **Waived reel:** sample',
+      '- **Waived undriven:** 9: sample',
+      '```',
+    ].join('\r\n')
+
+    expect(readWaivers([review(body)])).toEqual([])
+    expect(readReelWaivers([review(body)])).toEqual([])
+    expect(readUndrivenWaivers([review(body)])).toEqual([])
+  })
+
+  it('reads an undriven waiver after a fence in a body with CRLF line endings', () => {
+    const body = [
+      '```text',
+      'sample',
+      '```',
+      '- **Waived undriven:** 2: local only',
+    ].join('\r\n')
+
+    expect(readUndrivenWaivers([review(body)])).toEqual([2])
+  })
+
   it('skips an undriven waiver with no count or no reason', () => {
     const body = [
       '- **Waived undriven:** local only boxes',

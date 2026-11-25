@@ -34,7 +34,8 @@ function unfencedLines(reviews: readonly ReviewRow[]): string[] {
   const lines: string[] = []
   for (const review of reviews) {
     let fence: string | undefined
-    for (const line of (review.body ?? '').split('\n')) {
+    for (const raw of (review.body ?? '').split('\n')) {
+      const line = raw.trimEnd()
       const [, run, info = ''] = FENCE.exec(line) ?? []
       if (run !== undefined) {
         if (fence === undefined) fence = run
@@ -42,7 +43,7 @@ function unfencedLines(reviews: readonly ReviewRow[]): string[] {
         else if (run.startsWith(fence) && info.trim() === '') fence = undefined
         continue
       }
-      if (fence === undefined) lines.push(line.trimEnd())
+      if (fence === undefined) lines.push(line)
     }
   }
   return lines
