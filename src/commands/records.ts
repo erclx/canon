@@ -354,8 +354,13 @@ function backupHelp(verb: 'push' | 'pull'): string {
           'previous run can have committed and then failed to reach the network.',
           '',
           'Before staging, it refuses the whole push as unsafe-payload when any new or',
-          'changed file is over 25 MB or carries a credential canon secrets scan would',
-          'report, naming each path. Nothing is staged or committed when it refuses.',
+          'changed file carries a credential canon secrets scan would report, naming each',
+          'path under blocked. Nothing is staged or committed when it refuses.',
+          '',
+          'A new or changed file over 25 MB is left out instead, and everything else is',
+          'pushed at exit 0. Each lands under skipped with its path and bytes. One already',
+          'backed up stays at its last pushed version until it is moved or shrunk.',
+          '',
           'A push the remote rejects undoes the commit this call made, so the records',
           'stay on disk and no later run sends that commit again.',
         ]
@@ -372,7 +377,9 @@ function backupHelp(verb: 'push' | 'pull'): string {
     '  to see what actually resolved, including any folder seen for the first time)',
     '',
     'Exit codes:',
-    '  0  the records remote and this machine agree',
+    verb === 'push'
+      ? '  0  the records remote and this machine agree, less any file under skipped'
+      : '  0  the records remote and this machine agree',
     '  1  refused, with the reason on stderr or in the JSON record',
     '',
     ...direction,
@@ -651,7 +658,13 @@ async function runPush(opts: BackupCommandOptions): Promise<number> {
   if (!outcome.ok)
     return reportRefusal('canon records push', outcome, opts.json ?? false)
 
+  const skipped = outcome.skipped.map(
+    (entry) =>
+      `skipped, not backed up: ${entry.path} (${formatBytes(entry.bytes)})`,
+  )
+
   if (opts.json ?? false) {
+    for (const line of skipped) process.stderr.write(`${line}\n`)
     process.stdout.write(`${JSON.stringify(outcome)}\n`)
     return 0
   }
@@ -668,6 +681,12 @@ async function runPush(opts: BackupCommandOptions): Promise<number> {
   if (outcome.dropped.length > 0) {
     logWarn(
       `excluded but still tracked, removed from the history going forward: ${outcome.dropped.join(', ')}`,
+    )
+  }
+  for (const line of skipped) logWarn(line)
+  if (skipped.length > 0) {
+    logInfo(
+      'move each out of the record folders, such as into .canon/tmp/, or shrink it',
     )
   }
   logStep(outcome.pushed ? 'Pushed' : 'Nothing to push')

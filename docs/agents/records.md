@@ -33,7 +33,9 @@ printf '.canon/\n' >> .gitignore
 - `size` reports one row per folder, heaviest first, with file count, bytes, and growth over 7 and 30 days. After a `pull` every file reads as new.
 - `prune-tmp` lists scratch untouched for 14 days and deletes it only with `--write`. It never offers `tmp/handoff/` or `tmp/pr/poll/`.
 
-`push` blocks a file over 25 MB or one `canon secrets scan` would report, listing it under `blocked`. Move it out of the record folders, then push again.
+`push` refuses as a whole on a file `canon secrets scan` would report, listing it under `blocked`. Remove the credential, then push again.
+
+`push` leaves out a file over 25 MB and backs up the rest, listing the file under `skipped` with its `path` and `bytes`. A skipped file stays at its last pushed version. Move it out of the record folders or shrink it.
 
 Every verb exits `0` when done and `1` when refused. `prune-tmp` exits `2` when candidates exist and `--write` was not passed.
 
@@ -52,7 +54,7 @@ Branch on `reason` in the `--json` record, not the exit code.
 | `no-remote-records` | `pull` found no branch on the records origin                                   |
 | `local-changes`     | `pull` found records on disk that the history lacks. Run `push` first          |
 | `local-ahead`       | `pull` found local commits that never reached the origin. Run `push` first     |
-| `unsafe-payload`    | `push` found a file over 25 MB or carrying a credential                        |
+| `unsafe-payload`    | `push` found a file carrying a credential                                      |
 | `git-failed`        | A git call failed, with its stderr in the message                              |
 | `busy`              | `push` waited 10 seconds on another push's lock. Run it again                  |
 
