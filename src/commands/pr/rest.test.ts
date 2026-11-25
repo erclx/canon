@@ -459,6 +459,59 @@ describe('canon pr reads through REST alone', () => {
       expect(mutationCalls()).toBe(0)
     })
 
+    describe('over a required set', () => {
+      function stageMacRunning(): void {
+        stageClearPull()
+        writeFixture('rules.json', [
+          {
+            type: 'required_status_checks',
+            parameters: { required_status_checks: [{ context: 'check' }] },
+          },
+        ])
+        writeFixture('checks.json', {
+          total_count: 2,
+          check_runs: [
+            {
+              head_sha: tip,
+              status: 'completed',
+              conclusion: 'success',
+              name: 'check',
+              id: 1,
+            },
+            {
+              head_sha: tip,
+              status: 'in_progress',
+              conclusion: null,
+              name: 'macOS',
+              id: 2,
+            },
+          ],
+        })
+      }
+
+      // The poll holds READY on this field, so the read from the check rows to the record is what it rests on.
+      it('should name a non-required check still running and stay clear', async () => {
+        stageMacRunning()
+        writeFixture('status.json', { statuses: [] })
+
+        const { record } = await runLift(['7', '--check'])
+
+        expect(record).toMatchObject({ reason: 'clear', running: ['macOS'] })
+      })
+
+      // An unread status list could hide a pending context, so the record cannot read as settled.
+      it('should name the unread commit statuses as running when that read fails', async () => {
+        stageMacRunning()
+
+        const { record } = await runLift(['7', '--check'])
+
+        expect(record).toMatchObject({
+          reason: 'clear',
+          running: ['macOS', 'commit statuses (unread)'],
+        })
+      })
+    })
+
     it('should read the posted reel skip off the evidence check into the gate', async () => {
       stageClearPull()
       writeFixture('comments.json', [

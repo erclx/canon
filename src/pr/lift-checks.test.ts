@@ -36,6 +36,28 @@ describe('lift over non-required checks', () => {
     })
 
     // A non-required check still going never gates, so the draft still lifts, and the record names it.
+    it('should lift past a non-required check still running and name it in the record', async () => {
+      const { api, calls } = makeApi({
+        checks: [
+          {
+            state: 'passing',
+            isConflicted: false,
+            advisory: [],
+            running: ['🍎 macOS Unit Tests'],
+          },
+        ],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record).toMatchObject({
+        reason: 'lifted',
+        isOk: true,
+        running: ['🍎 macOS Unit Tests'],
+      })
+      expect(calls.marks).toEqual(['PR_node'])
+    })
+
     it('should read clear under --check and name a non-required check still running', async () => {
       const { api } = makeApi({
         checks: [
