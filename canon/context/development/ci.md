@@ -43,8 +43,11 @@ One check over a matrix that runs each group of `*.e2e.test.ts` suites on its ow
 
 ### `scripts/ci/e2e-scope.ts`
 
-- The two suites that spawn the CLI each import the command they drive, so vitest selects one on a change to that command's import graph, and `src/gate/corpus-readers.test.ts` fails on a spawning suite that imports no `@/commands/` module
-- A change to `src/cli.ts` or to a module it loads outside a command, read by `src/gate/cli-bootstrap.ts`, selects both, since every command runs through them and no command's graph holds them
+Picks the suites a pull request runs from what it changed, and falls back to all of them on any read that fails.
+
+- Each suite that spawns the CLI imports the command it drives, so vitest selects it on a change to that command's graph
+- `src/gate/corpus-readers.test.ts` fails on a spawning suite that imports no `@/commands/` module
+- A change to `src/cli.ts` or a module it loads outside a command, read by `src/gate/cli-bootstrap.ts`, selects both, since every command runs through them
 - A change to `package.json` moving only `version` selects nothing on its own, so a release runs no suite, and a read of either side that fails runs all
 
 ### `scripts/ci/e2e-groups.ts`
