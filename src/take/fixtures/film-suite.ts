@@ -8,7 +8,7 @@ import { findShell } from '@/take/shell'
  * visible only in the pixels it wrote.
  *
  * The suites need chrome-headless-shell and FFmpeg and skip without either.
- * The E2E Suites job in verify.yml installs both and fails before any suite
+ * Each e2e-groups leg in verify.yml installs both and fails before any suite
  * starts when one is missing.
  */
 
