@@ -21,7 +21,7 @@ Run `canon sessions reap --help` for every flag. The verb takes one of two forms
 | Task     | The sessions one task's `Sessions:` line records, live or archived                         | After a merge or a planner's landed plan |
 | Finished | Background sessions here on settled tasks alone, or on none and idle past `--idle-minutes` | Under `--write`, or `--dry-run` first    |
 
-The finished form reaches sessions nobody named, which is why it refuses without `--write`. Its idle threshold is 60 minutes unless `--idle-minutes` says otherwise.
+The finished form reaches sessions nobody named, which is why it refuses without `--write`. Its idle threshold is 60 minutes unless `--idle-minutes` says otherwise. On the task form the same flag sets how long a live task's session must hold a background shell before it reads as finished, 30 minutes by default.
 
 ## Output
 
@@ -64,16 +64,23 @@ Every form leaves the sessions below alone, and the row's `reason` says which sk
 | `open-task`   | A live task other than the one named also records it, that task in `detail`               |
 | `recent`      | Finished form only: no task records it and its dwell is under the threshold or unmeasured |
 
-A session reading `shell` holds a background command, such as a preview server or a review wait. It counts as finished only when every task recording it is archived or declined, and the stop ends the command. On a live task, or on no task, it reads `busy`, since the command is usually a check the session still waits on.
+A session reading `shell` holds a background command, such as a preview server or a review wait. It counts as finished when every task recording it is archived or declined, and the stop ends the command. Otherwise it reads `busy`, since the command is usually a check the session still waits on, until one of the stops below applies.
 
-**Stops the task shows**
+**Stops past a status**
 
-The task form stops two more sessions a status alone would have blocked, and the row's `reason` names why. A landed reviewer reading `idle` or `waiting` stops on its status and carries no reason.
+The task form stops three more sessions a status alone would have blocked, and the row's `reason` names why. A landed reviewer reading `idle` or `waiting` stops on its status and carries no reason.
 
-| Reason    | Session                                                                                               |
-| --------- | ----------------------------------------------------------------------------------------------------- |
-| `merged`  | Any status, once a pull request the task records is on the trunk this clone holds                     |
-| `planned` | A `planner-` session holding no branch and reading `shell`, on a task whose `Plan:` line links a plan |
+| Reason        | Session                                                                                               |
+| ------------- | ----------------------------------------------------------------------------------------------------- |
+| `merged`      | Any status, once a pull request the task records is on the trunk this clone holds                     |
+| `planned`     | A `planner-` session holding no branch and reading `shell`, on a task whose `Plan:` line links a plan |
+| `shell-dwell` | Any other session reading `shell` on the live task named, its dwell past `--idle-minutes`             |
+
+A `busy` session never reads `shell-dwell`, nor does one with no measured dwell. The dwell restarts on every status change, so a session that ran a turn since is safe.
+
+- A command running past the threshold, such as a long CI watch, ends with the stop, so raise `--idle-minutes` or pass `--keep` while one is expected
+- `--idle-minutes 0` turns the reading off on the task form, so every held shell on a live task reads `busy`
+- The finished form never reads `shell-dwell`
 
 The caller, kept, controller, and talk skips still run first. A clone behind the remote reads a merged pull request as not landed, so the reap keeps skipping it.
 
