@@ -2,7 +2,8 @@ import { spawnSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import type { PlaywrightTestConfig as PlaywrightConfig } from '@playwright/test'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 interface WorkflowStep {
   name?: string
@@ -10,7 +11,7 @@ interface WorkflowStep {
   if?: string
   run?: string
   env?: Record<string, string>
-  with?: { key?: string; name?: string }
+  with?: { key?: string; name?: string; path?: string }
 }
 
 interface WorkflowJob {
@@ -177,6 +178,66 @@ describe('web verify.yml e2e-shards job', () => {
 
     expect(upload.if).toBe('failure()')
     expect(upload.with?.name).toContain('${{ matrix.shardIndex }}')
+  })
+})
+
+describe('shipped Playwright configs', () => {
+  const stacks = ['astro', 'nextjs', 'vite-react']
+
+  const loadConfig = async (stack: string): Promise<PlaywrightConfig> => {
+    vi.resetModules()
+    const module = (await import(
+      `../../tooling/${stack}/configs/playwright.config.ts`
+    )) as { default: PlaywrightConfig }
+    return module.default
+  }
+
+  it.each(stacks)(
+    'should declare the one engine the workflow runs, the engine in %s',
+    async (stack) => {
+      const config = await loadConfig(stack)
+
+      expect(config.projects?.map((project) => project.name)).toEqual([
+        'chromium',
+      ])
+    },
+  )
+
+  describe('reporter', () => {
+    afterEach(() => {
+      vi.unstubAllEnvs()
+    })
+
+    it.each(stacks)(
+      'should write the HTML report the upload reads on CI in %s',
+      async (stack) => {
+        vi.stubEnv('CI', '1')
+
+        const config = await loadConfig(stack)
+
+        expect(config.reporter).toEqual([['list'], ['html', { open: 'never' }]])
+      },
+    )
+
+    it.each(stacks)(
+      'should keep the HTML report alone on a local run in %s',
+      async (stack) => {
+        vi.stubEnv('CI', '')
+
+        const config = await loadConfig(stack)
+
+        expect(config.reporter).toBe('html')
+      },
+    )
+
+    it('should upload the folder the HTML report writes by default', () => {
+      const upload = stepNamed(
+        readJobs()['e2e-shards'].steps,
+        'Upload E2E Report',
+      )
+
+      expect(upload.with?.path).toBe('playwright-report/')
+    })
   })
 })
 

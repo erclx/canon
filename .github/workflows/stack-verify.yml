@@ -52,15 +52,11 @@ jobs:
           # The stack's prepare installs golangci-lint here, off the runner's PATH
           echo "$HOME/go/bin" >> "$GITHUB_PATH"
 
-      # Latest, since the scaffold's Sync adds an unpinned @playwright/test
-      - name: Install Playwright System Dependencies
+      # Latest, since the scaffold's Sync adds an unpinned @playwright/test.
+      # Chromium alone, since the scaffolds declare no other engine and the hosted image ships its system libraries
+      - name: Install Playwright Chromium
         if: contains(fromJSON('["astro","nextjs","vite-react"]'), matrix.stack)
-        timeout-minutes: 10
-        run: scripts/ci/install-playwright-deps.sh --package playwright@latest chromium firefox webkit
-
-      - name: Install Playwright Browsers
-        if: contains(fromJSON('["astro","nextjs","vite-react"]'), matrix.stack)
-        run: bunx playwright@latest install chromium firefox webkit
+        run: bunx playwright@latest install chromium
 
       - name: Check PHP and Composer
         if: matrix.stack == 'php'

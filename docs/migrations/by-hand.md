@@ -95,6 +95,13 @@ The web stack no longer ships `.github/workflows/readme-screenshot.yml`, `script
 - Delete them together otherwise, since the workflow runs the script through the `package.json` entry
 - `canon/config/config.json` may still hold a hash or a disposition for each path. Sync and `canon tooling diff` ignore both, and `canon tooling lift <path>` clears a declined or customized entry.
 
+## Match the Playwright engines to CI, your call
+
+The web stack's Playwright config now declares Chromium alone, the one engine the seeded workflow runs. Sync replaces an unedited config and keeps a customized one, telling you the golden changed.
+
+- Remove the `firefox` and `webkit` entries from `projects` in a kept config to match, since CI never ran them
+- Keep them only beside a workflow of your own that installs and runs each engine, since the seeded one passes `--project=chromium`
+
 ## Move decisions out of a held architecture record, once
 
 The toolkit no longer seeds `canon/ARCHITECTURE.md`, and a held file and its `CLAUDE.md` import stay. Move a trap a session would hit into that domain's `## Gotchas`, then delete the file and its `@canon/ARCHITECTURE.md` line.

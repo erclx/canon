@@ -37,7 +37,7 @@ The vite-react stack covers Vite + React + TypeScript web apps and Chrome extens
 - It serves dev on port `5173` and preview on `4173`, each plus `WORKTREE_PORT_OFFSET`, both with `strictPort`.
 - `vitest.config.ts` merges from `vite.config.ts`, imported with its `.ts` extension, which Vite 8 requires. It sets jsdom, globals, the setup file, `passWithNoTests: true`, and v8 coverage.
   - It sets `cacheDir` to `node_modules/.vite-vitest`, since the runner writes its results cache to Vite's `cacheDir`, which the dev server also uses.
-- `playwright.config.ts` runs all browsers, with `webServer` on `bun run dev` at port `5173` plus `WORKTREE_PORT_OFFSET`, `reuseExistingServer: false`, and trace under `use`.
+- `playwright.config.ts` declares Chromium alone, with `webServer` on `bun run dev` at port `5173` plus `WORKTREE_PORT_OFFSET`, `reuseExistingServer: false`, and trace under `use`.
 - `tsconfig.json` is unified, with `noEmit: true`, `skipLibCheck: true`, `@/` paths, and `vitest/globals` and `@testing-library/jest-dom/vitest` in types.
 
 ## Chrome extension variant

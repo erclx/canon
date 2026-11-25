@@ -7,7 +7,7 @@ export default defineConfig({
   testDir: 'e2e',
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
-  reporter: isCI ? 'list' : 'html',
+  reporter: isCI ? [['list'], ['html', { open: 'never' }]] : 'html',
   use: {
     trace: 'on-first-retry',
     baseURL,
@@ -16,11 +16,7 @@ export default defineConfig({
     // `contextOptions` is the spelling that works on every version.
     contextOptions: { reducedMotion: 'reduce' },
   },
-  projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
-  ],
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     command: process.env.DIST_PREBUILT
       ? 'bun run preview'
