@@ -42,3 +42,4 @@ Holds the live-session roster and the branch claim, split by what a stub has to 
 
 - The pass's server writes to `server.log` rather than a pipe, since a pipe closes when `pr drive-copy` exits and takes the detached server down on its next write
 - `pr merge` reads stale from the fork point through the lift's `readBaseReading`, never from the last CI run, so a branch sharing a file with a merged sibling updates first even when both edits pass
+- Linux recomputes `btime` from the current clock, so a clock step forward carries it past running sessions. `boot.ts` bounds it by the `/proc` and `/sys` mount times
