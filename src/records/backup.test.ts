@@ -787,7 +787,7 @@ describe('pullRecords', () => {
     ).toBe('local only\n')
   })
 
-  it('should refuse a pull after a skip and point at the skipped list', async () => {
+  it('should name the oversized file a push skipped when it refuses', async () => {
     const canonRoot = await makeCanonProject({ 'tasks/entry.md': '# tasks\n' })
     writeOversized(canonRoot, 'design/shot.png')
     await pushRecords(canonRoot)
@@ -797,11 +797,46 @@ describe('pullRecords', () => {
     expect(outcome).toMatchObject({
       ok: false,
       reason: 'local-changes',
-      message: expect.stringContaining('skipped'),
+      message: expect.stringContaining('design/shot.png'),
     })
     expect(existsSync(join(canonRoot, '.canon', 'design', 'shot.png'))).toBe(
       true,
     )
+  })
+
+  it('should clear on a machine behind its remote once the named oversized file moves', async () => {
+    const canonRoot = await makeCanonProject({ 'tasks/entry.md': '# tasks\n' })
+    await pushRecords(canonRoot)
+    writeCanonRecord(canonRoot, 'tasks/second.md', '# second\n')
+    await pushRecords(canonRoot)
+    await canonRecordsGit(canonRoot, ['reset', '--hard', '--quiet', 'HEAD~1'])
+    writeOversized(canonRoot, 'design/shot.png')
+
+    const refused = await pullRecords(canonRoot)
+    rmSync(join(canonRoot, '.canon', 'design', 'shot.png'))
+    const cleared = await pullRecords(canonRoot)
+
+    expect(refused).toMatchObject({
+      reason: 'local-changes',
+      message: expect.stringContaining('design/shot.png'),
+    })
+    expect(cleared.ok).toBe(true)
+    expect(existsSync(join(canonRoot, '.canon', 'tasks', 'second.md'))).toBe(
+      true,
+    )
+  })
+
+  it('should name no file when a refused pull holds nothing oversized', async () => {
+    const canonRoot = await makeCanonProject({ 'tasks/entry.md': '# tasks\n' })
+    await pushRecords(canonRoot)
+    writeCanonRecord(canonRoot, 'tasks/local.md', 'local\n')
+
+    const outcome = await pullRecords(canonRoot)
+
+    expect(outcome).toMatchObject({
+      reason: 'local-changes',
+      message: expect.not.stringContaining('tasks/local.md'),
+    })
   })
 
   it('should not read a skipped video file as a local change', async () => {

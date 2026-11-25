@@ -733,9 +733,21 @@ export async function pullRecords(root: string): Promise<PullOutcome> {
     if (!dirty.ok) return failed('status', dirty)
 
     if (dirty.text.length > 0) {
+      const files = await pendingFiles(root, scope)
+      if ('ok' in files) return files
+
+      const { oversized } = await guardPayload(workTree(root), files.pending)
       return refuse(
         'local-changes',
-        `${countLines(dirty.text)} local record(s) are not in the records history. Run canon records push first, then move aside any file it lists under skipped.`,
+        [
+          `${countLines(dirty.text)} local record(s) are not in the records history. Run canon records push first, or move them aside.`,
+          ...(oversized.length > 0
+            ? [
+                'A push leaves each file below out as oversized, so move it out of the record folders:',
+                ...oversized.map((entry) => `  ${entry.path}`),
+              ]
+            : []),
+        ].join('\n'),
       )
     }
   }
