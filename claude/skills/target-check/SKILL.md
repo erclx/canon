@@ -99,3 +99,7 @@ No overall verdict. The harness row is never passing, being behind or unchecked.
 Mark the harness row `behind` when `hooks` names an unwired entry or reads `unreadable`, and `unchecked` otherwise, since no verb reads the rest of it. A domain left out of the table reads as a domain that passed, which is the one shape the row exists to prevent.
 
 Close on one line naming `/canon:target-update` as the skill that applies the catch-up, when a domain reads behind and `target-update` did not invoke this check.
+
+### A repair outside target-update
+
+A session then told to apply a repair itself passes `canon:session-worktree` the name `## Toolkit sync branches` states in `${CLAUDE_SKILL_DIR}/../git-branch/references/branch.md`. This check still cuts no branch.

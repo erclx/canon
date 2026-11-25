@@ -50,6 +50,7 @@ Try each source in order. Stop at the first match.
 0. **Caller-supplied.** The invocation carried an argument. Take it as the name and infer nothing further.
    - Accept `<name>` or `<type>/<name>`, where a leading segment matching a type in `${CLAUDE_SKILL_DIR}/../git-branch/references/branch.md` sets `<type>`
    - A bare `<name>` falls to the default type below
+   - A bare call for a toolkit sync no plan covers takes the name from `## Toolkit sync branches` in that file as its argument
 1. **Plan matched to current branch.** Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`, and use it if `<main-root>/.canon/plans/feature-<slug>.md` exists.
    - An empty result falls through to the next source rather than becoming `latest`, since the slug is one candidate among several
 2. **Single plan file.** List `<main-root>/.canon/plans/feature-*.md`. If exactly one match, derive `<slug>` from the filename.
