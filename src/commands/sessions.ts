@@ -170,6 +170,8 @@ export function register(program: Command): void {
         '"listener". One whose socket is gone is left off the roster and',
         'counted in "foreignDead", so an empty roster beside a count above zero',
         'is one this reader could not check, not one whose sessions ended.',
+        'A foreign record started before the last boot is out of that count,',
+        'since no process outlives a reboot.',
         '',
         'The JSON record also carries "statusUpdatedAt" (the stamp the client',
         'wrote beside "status", or null where its record carries none) and',
@@ -407,11 +409,7 @@ interface ReapCommandOptions {
 }
 
 type ReapRefusal =
-  | 'no-registry'
-  | 'no-task'
-  | 'no-repository'
-  | 'needs-write'
-  | 'bad-input'
+  'no-registry' | 'no-task' | 'no-repository' | 'needs-write' | 'bad-input'
 
 function refuseReap(
   json: boolean | undefined,

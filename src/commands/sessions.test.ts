@@ -162,7 +162,12 @@ describe('canon sessions list from another pid namespace', () => {
   const FOREIGN_DOMAIN = 'linux:test:pid:[1]'
   const readable = existsSync('/proc/self/ns/pid')
 
-  function seed(socket: string, socketPresent: boolean, cwd = REPO): void {
+  function seed(
+    socket: string,
+    socketPresent: boolean,
+    cwd = REPO,
+    startedAt = Date.now(),
+  ): void {
     const registry = join(CONFIG, 'sessions')
     mkdirSync(registry, { recursive: true })
     if (socketPresent) writeFileSync(socket, '')
@@ -175,7 +180,7 @@ describe('canon sessions list from another pid namespace', () => {
         name: 'canon-4242',
         kind: 'interactive',
         status: 'idle',
-        startedAt: 1,
+        startedAt,
         procStart: '1',
         pidDomain: FOREIGN_DOMAIN,
         messagingSocketPath: socket,
@@ -192,6 +197,20 @@ describe('canon sessions list from another pid namespace', () => {
 
       expect(JSON.parse(result.stdout)).toMatchObject({
         foreignDead: 1,
+        sessions: [],
+      })
+    },
+  )
+
+  it.skipIf(!readable)(
+    'should leave a foreign record from before the boot out of the count',
+    async () => {
+      seed(join(DIR, 'gone.sock'), false, REPO, 1)
+
+      const result = await runSessions(['list', '--json'])
+
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        foreignDead: 0,
         sessions: [],
       })
     },
@@ -477,7 +496,7 @@ describe('canon sessions list and usage-limit stops', () => {
           name: 'canon-4242',
           kind: 'interactive',
           status: 'idle',
-          startedAt: 1,
+          startedAt: Date.now(),
           procStart: '1',
           pidDomain: 'linux:test:pid:[1]',
           messagingSocketPath: join(DIR, 'gone.sock'),

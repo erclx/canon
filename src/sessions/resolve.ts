@@ -1,6 +1,7 @@
 import { basename, join } from 'node:path'
 import { $ } from 'bun'
 import { gitEnv } from '@/git/env'
+import { lastBoot } from '@/sessions/boot'
 import {
   type Confidence,
   liveness,
@@ -11,9 +12,7 @@ import { readRegistry, type SessionRecord } from '@/sessions/registry'
 
 /** Why a row carries no branch, stated rather than left as an absent key. */
 export type Unresolved =
-  | 'not-a-repository'
-  | 'detached-head'
-  | 'git-unavailable'
+  'not-a-repository' | 'detached-head' | 'git-unavailable'
 
 export interface ResolvedSession {
   readonly name: string
@@ -82,9 +81,9 @@ export type SessionReport =
        */
       readonly confidence: Confidence
       /**
-       * Foreign-namespace records whose socket is gone. They read dead, but their
-       * pid could not be checked, so an empty roster beside a count above zero
-       * is a roster that could not be checked rather than one that ended.
+       * Foreign records with no socket, started since boot or at no readable time.
+       * Their pid could not be checked, so an empty roster beside a count above
+       * zero is a roster that could not be checked rather than one that ended.
        */
       readonly foreignDead: number
       /**
@@ -92,6 +91,12 @@ export type SessionReport =
        * still types, and a caller reads its absence as every record unplaced.
        */
       readonly foreign?: readonly ForeignRecord[]
+      /**
+       * Foreign records started before this boot, ended since no process outlives
+       * a reboot and so outside `foreignDead`. Optional as `foreign` is, and a
+       * caller reads its absence as none set aside.
+       */
+      readonly foreignPreBoot?: readonly ForeignRecord[]
       readonly sessions: readonly ResolvedSession[]
     }
 
@@ -117,6 +122,8 @@ export interface ResolveOptions {
   readonly locate?: (cwd: string) => Promise<Located>
   /** The instant the dwell is computed against. Defaults to `Date.now`. */
   readonly now?: () => number
+  /** Undefined keeps every foreign record counted. Defaults to `lastBoot`. */
+  readonly bootTime?: () => number | undefined
 }
 
 export interface Located {
@@ -249,12 +256,12 @@ export async function resolveSessions(
     via: ResolvedSession['via']
     confidence: Confidence
   }[] = []
-  const foreign: ForeignRecord[] = []
+  const unanswered: SessionRecord[] = []
 
   for (const record of registry.records) {
     const state = liveness(record, probes)
     if (!state.alive) {
-      if (state.foreign) foreign.push(foreignOf(record, registry.dir))
+      if (state.foreign) unanswered.push(record)
       continue
     }
     live.push({
@@ -288,14 +295,36 @@ export async function resolveSessions(
     ),
   )
 
+  // Read only when a record needs it, since macOS spawns a process to answer.
+  const boot =
+    unanswered.length === 0 ? undefined : (opts.bootTime ?? lastBoot)()
+  const foreign: ForeignRecord[] = []
+  const foreignPreBoot: ForeignRecord[] = []
+  for (const record of unanswered) {
+    const list = predates(record, boot) ? foreignPreBoot : foreign
+    list.push(foreignOf(record, registry.dir))
+  }
+
   return {
     kind: 'resolved',
     dir: registry.dir,
     confidence: confidenceOf(sessions),
     foreignDead: foreign.length,
     foreign,
+    foreignPreBoot,
     sessions,
   }
+}
+
+/** The registry checks no type on `startedAt`, and a null or zero compares as 1970. */
+function predates(record: SessionRecord, boot: number | undefined): boolean {
+  const started: unknown = record.startedAt
+  return (
+    boot !== undefined &&
+    typeof started === 'number' &&
+    started > 0 &&
+    started < boot
+  )
 }
 
 function foreignOf(record: SessionRecord, dir: string): ForeignRecord {

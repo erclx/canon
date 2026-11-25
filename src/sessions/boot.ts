@@ -1,15 +1,13 @@
 import { execFileSync } from 'node:child_process'
 import { readFileSync, statSync } from 'node:fs'
 
-/** A local kernel read, so the bound only has to outlast a busy machine. */
 const SYSCTL_TIMEOUT_MS = 5_000
 
-/** Each reader throws where its source is missing, which reads as no boot time. */
+/** A reader that throws reads as no boot time. */
 export interface BootSources {
   readonly platform: NodeJS.Platform
   readonly procStat: () => string
   readonly kernBoottime: () => string
-  /** The epoch milliseconds the kernel filesystems were mounted at. */
   readonly mountedAt: () => readonly number[]
 }
 
