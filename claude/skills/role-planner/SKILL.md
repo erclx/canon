@@ -99,7 +99,7 @@ Each finding in a task written this way opens with the bold source-and-date labe
 The controlling session cannot watch this one read, so the messages below are owed and nothing else.
 
 - Announce the record as the file lands, carrying its path and what the task file got wrong. Write no summary beside it, which is a second account of a document the reader is about to open.
-- Announce each plan as it lands when the launch handed several rows, one message per plan, rather than one message at the close
+- Announce plans three to a message when the session holds several rows, each linked as it lands, and send sooner on the last plan, on a stop, and on a plan that changes another row
 - In a background launch but a talk one, message the controller on a block and end the turn, since that launch denies the question tool. A hand launch messages, then asks.
 - Name the handed rows still unplanned when a reused session stops under `## Lifetime`
 - Send nothing on progress, which rebuilds on this side the poll the announcement retires on the other
@@ -142,7 +142,7 @@ When the operator approves the plan whole here, write its `Approved:` line per `
 - A reused session's picture of the tree ages, and a compaction silently drops the reasoning behind its earlier records
 - Run the in-flight read again before each handed row, and stop when the operator ends the session or a compaction nears, telling the controller which rows are still unplanned
 
-Validate, link, and announce each plan before starting the next row a launch handed, so a stop mid-batch leaves every finished plan linked.
+Validate and link each plan before starting the next row, so a stop mid-batch leaves every finished plan linked, and name each linked plan not yet announced when stopping.
 
 - Treat this body as possibly older than the branch under it. A plugin skill loads from the marketplace cache rather than from the working tree.
 
