@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { dirname, relative, resolve } from 'node:path'
 import type { Command } from 'commander'
+import { measureRooms, type Room, roomAdvice, roomAt } from '@/context/room'
 import { BAN_SETS, emptyBanSets } from '@/markdown/bans'
 import {
   ceilingFor,
@@ -102,6 +103,8 @@ interface FileReport {
   readonly headingCase: readonly HeadingCaseFinding[]
   /** Empty on a path outside the density scope, so a plan never carries one. */
   readonly density: readonly GatedDensityFinding[]
+  /** The Layout folders and Gotchas of a context entry, empty for any other file. */
+  readonly rooms: readonly Room[]
   /** Empty outside the density scope, and never gating anywhere. */
   readonly tables: readonly TableFinding[]
   /** Empty on a page whose frontmatter does not carry `kind: reference`. */
@@ -407,6 +410,7 @@ async function runAudit(
             gated.alwaysGated,
           ),
         })),
+        rooms: CONTEXT_ENTRY.test(rel) ? measureRooms(rel, lines) : [],
         tables: inDensityScope(rel) ? tableFindings(lines) : [],
         referenceShape: referenceShapeFindings(source).map((finding) => ({
           ...finding,
@@ -645,6 +649,8 @@ function reportLinks(reports: readonly FileReport[], root: string): void {
   )
 }
 
+const CONTEXT_ENTRY = /(?:^|\/)canon\/context\//
+
 const DENSITY_LABELS: Record<DensityKind, string> = {
   'paragraph-length': 'paragraph length',
   'paragraph-run': 'paragraphs in a row',
@@ -707,9 +713,15 @@ function reportDensity(
     `${plural(total, 'finding')} across ${plural(carrying.length, 'file')}, ${gating} gating`,
   )
   if (gating > 0) logWarn('A gating finding fails the run.')
-  logInfo(
-    'Split a long block at its seam, put a heading or a table between paragraphs, give a long list H3s, open each H3 with a sentence or a table, move a long cell into a bullet under the lead, and give a trailing list its own lead sentence.',
+  // A finding inside a Layout block takes that block's own advice, since H3s are forbidden there.
+  const elsewhere = carrying.some((report) =>
+    report.density.some((finding) => !roomAt(report.rooms, finding.line)),
   )
+  if (elsewhere) {
+    logInfo(
+      'Split a long block at its seam, put a heading or a table between paragraphs, give a long list H3s, open each H3 with a sentence or a table, move a long cell into a bullet under the lead, and give a trailing list its own lead sentence.',
+    )
+  }
   if (carrying.some((report) => isDesignIndex(report.rel))) {
     logInfo(
       "On a design index still kept as one table, move each row into a group file beside its folder and let canon indexes regen write the list, per '### An index in the older shape' in the design-record skill's folder.md.",
@@ -721,10 +733,21 @@ function reportDensity(
         (report) =>
           `${report.rel}  ${plural(report.density.length, 'finding')}\n${report.density
             .map(describeDensity)
+            .concat(roomAdviceLines(report).map((text) => `  ${text}`))
             .join('\n')}`,
       )
       .join('\n'),
   )
+}
+
+/** The advice once per block a density finding falls inside. */
+function roomAdviceLines(report: FileReport): string[] {
+  const blocks = new Set(
+    report.density.flatMap(
+      (finding) => roomAt(report.rooms, finding.line) ?? [],
+    ),
+  )
+  return [...blocks].map(roomAdvice)
 }
 
 function densityGatingLine(
