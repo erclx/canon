@@ -17,7 +17,11 @@ import {
 import { resolveScanInput } from '@/labels/event'
 import { checkTitleFormat, type TitleFormatIssue } from '@/labels/format'
 import { MAP_REL, readLabelMap } from '@/labels/map'
-import { checkMeasuredResults, checkMeasurement } from '@/labels/measurement'
+import {
+  checkMeasuredResults,
+  checkMeasurement,
+  pendingMeasurements,
+} from '@/labels/measurement'
 import { isReleasePullRequest, scanPhaseLabels } from '@/labels/phase'
 import { checkSections } from '@/labels/sections'
 import { colorFor, driftedLabels, missingLabels } from '@/labels/sync'
@@ -935,12 +939,16 @@ async function runScan(opts: ScanOptions): Promise<number> {
     sectionsChecked && plan !== undefined
       ? checkMeasuredResults(resolved.body, plan)
       : { checked: false, missing: [] }
+  const pending = sectionsChecked ? pendingMeasurements(resolved.body) : []
   // A perf body already missing its table reports that once, not twice.
   const measurement = {
-    checked: perf.checked || results.checked,
+    checked: perf.checked || results.checked || pending.length > 0,
     missing: [
       ...perf.missing,
       ...results.missing.filter(() => !perf.missing.includes('table')),
+      ...(pending.some((row) => row.run === undefined)
+        ? (['run-link'] as const)
+        : []),
     ],
   }
 
@@ -970,6 +978,11 @@ async function runScan(opts: ScanOptions): Promise<number> {
     if (measurement.missing.includes('results-table')) {
       logWarn(
         'The plan ran a measurement, so the body needs a table with a header row and a data row under ## Outcome: | <what was measured> | result | baseline | conditions |. Write not measured with the reason when nothing can be run.',
+      )
+    }
+    if (measurement.missing.includes('run-link')) {
+      logWarn(
+        'A pending result needs the Actions run it waits on, linked in its row, since the merge holds until the row is filled. Write not measured with the reason when no run will finish.',
       )
     }
     if (measurement.missing.includes('technical-context')) {

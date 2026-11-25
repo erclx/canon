@@ -32,6 +32,7 @@ In review (your turn):
 
 PR #<n> <title>
   → /review-pr
+  measuring: <what>, <run link>
 
 Merge order: #<a> before #<b> (shared paths: <files>).
 
@@ -40,6 +41,7 @@ Next: <the single most useful action>
 
 Omit any section with nothing in it. Recommend a handoff only for a plan the conflict check in `orchestrator-dispatch.md` holds behind no track already in flight, and name any paths it shares with one.
 
+- List a run a worker reported under its pull request as `measuring:` with its link, and drop the line when the worker reports the result, since the lift refuses a pending row until then
 - The block opens on the board rather than a version, since no committed file states one and a version line would restate the rows, dated by nothing
 - Leave a plan out of `Ready to build` once a row in flight names it, since its file stays in `.canon/plans/` for the whole build
 - Listing it would recommend handing off work underway, and the conflict check withdraws that only for a reader who knows what is running

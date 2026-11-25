@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { checkMeasuredResults, checkMeasurement } from '@/labels/measurement'
+import {
+  checkMeasuredResults,
+  checkMeasurement,
+  pendingMeasurements,
+} from '@/labels/measurement'
 
 const TABLE = [
   '| <what was measured> | result | baseline | conditions |',
@@ -175,5 +179,74 @@ describe('checkMeasuredResults', () => {
     const text = `## Verification\n\n### Speed\n\n- Take the median of 5 runs\n\n## Risks\n`
 
     expect(checkMeasuredResults(body('none'), text).checked).toBe(true)
+  })
+})
+
+const RUN = 'https://github.com/erclx/frameboard/actions/runs/45560474777'
+
+function results(...rows: string[]): string {
+  return [
+    '| <what was measured> | Result | baseline | conditions |',
+    '| --- | --- | --- | --- |',
+    ...rows,
+  ].join('\n')
+}
+
+describe('pendingMeasurements', () => {
+  it('should list a pending row with the run it links', () => {
+    const text = body(
+      results(`| scan of 200 files | pending | 41 ms | [run](${RUN}) |`),
+    )
+
+    expect(pendingMeasurements(text)).toEqual([
+      { row: 'scan of 200 files', run: RUN },
+    ])
+  })
+
+  it('should list a pending row that links no run without one', () => {
+    const text = body(
+      results(
+        '| scan | pending | 41 ms | [check](https://github.com/erclx/frameboard/pull/9/checks) |',
+      ),
+    )
+
+    expect(pendingMeasurements(text)).toEqual([{ row: 'scan' }])
+  })
+
+  it('should not list a not measured, a filled, or a fenced row', () => {
+    const filled = results(
+      '| a | not measured: cancelled | 1 ms | x |',
+      `| b | 12 ms | 41 ms | [run](${RUN}) |`,
+    )
+    const fenced = `\`\`\`plaintext\n${results('| c | pending | 1 ms | x |')}\n\`\`\``
+
+    expect(pendingMeasurements(body(filled))).toEqual([])
+    expect(pendingMeasurements(body(fenced))).toEqual([])
+  })
+
+  it('should not read a status column that holds pending with no result header', () => {
+    const text = body('| shape | status |\n| --- | --- |\n| card | pending |')
+
+    expect(pendingMeasurements(text)).toEqual([])
+  })
+
+  it('should read the result header in any case and in any position', () => {
+    const text = body(
+      `| baseline | RESULT | what |\n| --- | --- | --- |\n| 1 ms | Pending ${RUN} | scan |`,
+    )
+
+    expect(pendingMeasurements(text)).toEqual([{ row: '1 ms', run: RUN }])
+  })
+
+  it('should not read a pending row under another section', () => {
+    const text = `${body('none')}\n## Testing\n\n${results('| a | pending | 1 | x |')}\n`
+
+    expect(pendingMeasurements(text)).toEqual([])
+  })
+
+  it('should read a pending row whatever the title, since it takes the body alone', () => {
+    const text = body(results(`| a | pending | 1 | ${RUN} |`))
+
+    expect(pendingMeasurements(text)).toHaveLength(1)
   })
 })

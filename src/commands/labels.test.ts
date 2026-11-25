@@ -22,6 +22,10 @@ interface ScanRecord {
     readonly missing: string[]
   }
   readonly bannedCharacters: string[]
+  readonly measurement?: {
+    readonly checked: boolean
+    readonly missing: string[]
+  }
   readonly density?: {
     readonly section: string | null
     readonly kind: string
@@ -116,6 +120,22 @@ describe('canon labels scan text checks', { timeout: RUN_TIMEOUT_MS }, () => {
     expect(record.exitCode).toBe(2)
     expect(record.sections?.outside).toEqual(['## Commits', '## Whatever'])
     expect(record.sections?.missing).toEqual(['## Key changes'])
+  })
+
+  it('should report a pending result naming no run, whatever the title', async () => {
+    const table = [
+      '| scan | result | baseline | conditions |',
+      '| --- | --- | --- | --- |',
+      '| 200 files | pending | 41 ms | still running |',
+    ].join('\n')
+    const body = await writeBody(
+      `## Summary\n\n- a\n\n## Key changes\n\n- b\n\n## Outcome\n\n${table}\n`,
+    )
+
+    const record = await runScan(['--title', TITLE, '--body-file', body])
+
+    expect(record.exitCode).toBe(2)
+    expect(record.measurement).toEqual({ checked: true, missing: ['run-link'] })
   })
 
   it('should fail a body missing the closing line --closes expects', async () => {

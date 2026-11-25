@@ -1211,6 +1211,32 @@ describe('poll', () => {
       expect(poll().stdout).not.toContain('READY')
     })
 
+    it('should hold READY while a results row is pending and report it once filled', () => {
+      writeThread(closedAtHead, [])
+      expect(poll().stdout).toContain('SEEN')
+      writeLift({
+        isLifted: false,
+        isOk: false,
+        isReady: true,
+        reason: 'measurement-pending',
+        pending: [
+          { row: 'scan', run: 'https://github.com/o/r/actions/runs/1' },
+        ],
+      })
+      expect(poll().stdout).not.toContain('READY')
+
+      writeLift({
+        isLifted: false,
+        isOk: true,
+        isReady: true,
+        reason: 'already-ready',
+      })
+
+      expect(poll().stdout).toBe(
+        'READY     #7 at 1111111, waiting only on the merge',
+      )
+    })
+
     // The lift gates on the required set alone, so READY waits on its running list for every other check.
     it('should hold READY while a non-required check runs and report it once that settles', () => {
       writeThread(closedAtHead, [])

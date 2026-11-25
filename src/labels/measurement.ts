@@ -14,7 +14,11 @@ export function namesMeasurement(line: string): boolean {
   return MEASUREMENT_WORD.test(maskCodeSpans(line))
 }
 
-export type MeasurementGap = 'table' | 'technical-context' | 'results-table'
+export type MeasurementGap =
+  | 'table'
+  | 'technical-context'
+  | 'results-table'
+  | 'run-link'
 
 export interface MeasurementCheck {
   /** False for a title that is not `perf`, which carries no measurement rule. */
@@ -100,4 +104,56 @@ export function checkMeasuredResults(
     checked: true,
     missing: holdsTable(outcome) ? [] : ['results-table'],
   }
+}
+
+const RUN_LINK =
+  /https:\/\/github\.com\/[^\s/()|]+\/[^\s/()|]+\/actions\/runs\/\d+/
+const PENDING = /^pending\b/i
+
+export interface PendingMeasurement {
+  /** The row's first cell. */
+  readonly row: string
+  /** The Actions run address the row carries, absent when it links none. */
+  readonly run?: string
+}
+
+function cellsOf(line: string): string[] {
+  return line
+    .replace(/^\|/, '')
+    .replace(/\|$/, '')
+    .split('|')
+    .map((cell) => cell.trim())
+}
+
+/**
+ * Each Outcome table row whose Result cell opens on `pending`, read only from a
+ * table with a `result` header cell and never from a fence. The one parser the
+ * scan, the lift, and the merge share, so none passes what another refuses.
+ */
+export function pendingMeasurements(body: string): PendingMeasurement[] {
+  const lines = sectionLines(
+    linesOutsideFences(body).map((line) => line.trim()),
+    OUTCOME,
+  )
+  const pending: PendingMeasurement[] = []
+
+  for (let i = 0; i + 1 < lines.length; i++) {
+    if (!isTableRow(lines[i]) || !SEPARATOR_ROW.test(lines[i + 1])) continue
+
+    const column = cellsOf(lines[i]).findIndex(
+      (cell) => cell.toLowerCase() === 'result',
+    )
+    if (column < 0) continue
+
+    for (let j = i + 2; j < lines.length && isTableRow(lines[j]); j++) {
+      const cells = cellsOf(lines[j])
+      if (!PENDING.test(cells[column] ?? '')) continue
+      const run = RUN_LINK.exec(lines[j])?.[0]
+      pending.push(
+        run === undefined ? { row: cells[0] } : { row: cells[0], run },
+      )
+    }
+  }
+
+  return pending
 }

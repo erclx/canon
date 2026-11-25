@@ -123,7 +123,9 @@ A pull request states what it measured when its plan's Verification ran an eval,
 - Put a table under `## Outcome` with a header row, a separator, and a data row per measurement, never in a fence, since a fence reads as an example
 - Give each row what was measured, the result, the baseline, and the conditions, with each run as its own row or its count beside an average
 - Name what a `perf` change trades in `## Technical context`
-- Write one row reading `not measured` with the reason where nothing can be timed, and keep the numbers out of the announcement to the controller, which points here
+- Write one row reading `not measured` with the reason where nothing can be timed or a run was cancelled, and keep the numbers out of the announcement to the controller, which points here
+
+A run still going takes `pending` in its Result cell and its Actions address in Conditions, and the cell is filled once the run ends. The label scan flags a pending row naming no run, and the lift and the merge refuse while one stands. `${CLAUDE_SKILL_DIR}/../role-worker/references/measured-runs.md` has the worker's side.
 
 ```plaintext
 | <what was measured> | result | baseline | conditions |

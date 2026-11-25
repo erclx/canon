@@ -1782,6 +1782,7 @@ describe('lift', () => {
         'review',
         'ui',
         'evidence',
+        'measurement',
         'standing',
         'ci',
       ])

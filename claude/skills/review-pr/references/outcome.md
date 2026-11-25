@@ -31,6 +31,8 @@ Read the table against the claim in the Summary instead.
 
 - A headline number the table does not support, or a table with no run behind its figures, is a `should-fix` under the `**PR body**` block
 - A row reading `not measured` with its reason beside it takes no finding
+- A row reading `pending` is named in the review, and the close waits on the filled row, since `canon pr lift` refuses `measurement-pending` while one stands
+- A `pending` row linking no Actions run is a `should-fix` under the same block, since nothing says what it waits on
 
 ## What takes no finding
 

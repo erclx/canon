@@ -602,6 +602,8 @@ describe('agrees with lift', () => {
           nodeId: 'PR_node',
           branch: 'feat/x',
           head: HEAD,
+          body: '',
+          isBot: false,
         }),
         readStanding: async () => 'fresh',
         readChecks: async () => passing,

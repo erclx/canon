@@ -480,6 +480,70 @@ describe('canon pr reads through REST alone', () => {
       expect(mutationCalls()).toBe(1)
     })
 
+    describe('over a pending measurement', () => {
+      const RUN = 'https://github.com/acme/widgets/actions/runs/45560474777'
+
+      function stagePending(): void {
+        stageClearPull()
+        writeFixture(
+          'pull.json',
+          pullRow({
+            draft: true,
+            state: 'open',
+            node_id: 'PR_7',
+            body: `## Outcome\n\n| what | Result | baseline | conditions |\n| --- | --- | --- | --- |\n| scan | pending | 4 ms | [run](${RUN}) |\n`,
+          }),
+        )
+      }
+
+      it('should refuse a pending row read from the REST body and name its run state', async () => {
+        stagePending()
+        writeFixture('run.json', { status: 'in_progress', conclusion: null })
+
+        const { record, exit } = await runLift(['7'])
+
+        expect(record).toMatchObject({
+          reason: 'measurement-pending',
+          pending: [{ row: 'scan', run: RUN, state: 'in_progress' }],
+        })
+        expect(exit).toBe(1)
+        expect(mutationCalls()).toBe(0)
+      })
+
+      it('should read a Dependabot pull request as a bot and clear it past the pending row', async () => {
+        stagePending()
+        writeFixture(
+          'pull.json',
+          pullRow({
+            draft: true,
+            state: 'open',
+            node_id: 'PR_7',
+            head: { ref: 'dependabot/bun/zod-4.1.2', sha: tip },
+            user: { type: 'Bot' },
+            body: `## Outcome\n\n| what | Result | baseline | conditions |\n| --- | --- | --- | --- |\n| scan | pending | 4 ms | [run](${RUN}) |\n`,
+          }),
+        )
+
+        const { record } = await runLift(['7', '--check'])
+
+        expect(record.pending).toBeUndefined()
+      })
+
+      it('should list the row without a state when the run cannot be read', async () => {
+        stagePending()
+
+        const { record } = await runLift(['7'])
+
+        expect(record).toMatchObject({
+          reason: 'measurement-pending',
+          pending: [{ row: 'scan', run: RUN }],
+        })
+        expect(
+          (record.pending as Record<string, unknown>[])[0].state,
+        ).toBeUndefined()
+      })
+    })
+
     it('should report every gate under --check and call no mutation', async () => {
       stageClearPull()
 

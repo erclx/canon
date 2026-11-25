@@ -168,6 +168,7 @@ describe('stageOfLift', () => {
     ['evidence-owed', 'reviewing'],
     ['painted-uncaptured', 'reviewing'],
     ['ci-failing', 'checks'],
+    ['measurement-pending', 'checks'],
     ['standing-stale', 'rebase'],
     ['standing-unknown', 'unread'],
     ['gh-failed', 'unread'],

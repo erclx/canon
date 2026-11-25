@@ -64,6 +64,11 @@ export function registerMerge(pr: Command): void {
         'UI pass line dropped. Technical context is optional. Testing, the',
         'reviewer requests, and every other section stay out of the trunk.',
         '',
+        'A results row of the `## Outcome` table reading `pending` in its Result',
+        'column refuses `measurement-pending` with the rows as `pending`, read',
+        'before the checks and never for a bot pull request. The way past is to',
+        'fill the row, or write `not measured` with the reason.',
+        '',
         'A release-please or Dependabot pull request is read off its head',
         'branch, plus the release body opening or a bot author, and needs no',
         'flag. A release composes to its changelog without the robot line, the',
@@ -138,6 +143,8 @@ const MERGE_REFUSALS: Record<MergeRefusal | 'gh-missing', string> = {
     'The body carries no `## Summary` with text under it, so the description has no change to state.',
   'missing-key-changes':
     'The body carries no `## Key changes` with text under it, so the description has no change to state.',
+  'measurement-pending':
+    'A results row in the Outcome table still reads pending, so the numbers are not in the body and the squash message would keep the old ones. Fill the row once the run ends, or write not measured with the reason.',
   'ci-failing': 'A check run on the head failed.',
   'ci-conflicted': 'The branch conflicts with its base.',
   'ci-stalled':
@@ -313,6 +320,9 @@ async function runMerge(
           : refusalText(record),
   )
   warnAdvisory(record.advisory)
+  for (const row of record.pending ?? []) {
+    logInfo(`pending: ${row.row}, ${row.run ?? 'no run linked'}`)
+  }
   for (const path of record.moved ?? []) {
     logInfo(`base changed ${path}`)
   }
