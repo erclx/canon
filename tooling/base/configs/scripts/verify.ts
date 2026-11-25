@@ -856,8 +856,9 @@ function main(flags: Flags): void {
   const scopedBase = unscoped === undefined ? base : undefined
   const isScoped = scopedBase !== undefined
 
+  // A nested run discovers no root, so its pass would cover roots it never ran.
   const pass =
-    base === undefined
+    base === undefined || isNested
       ? undefined
       : openPass({ base, isScoped }, flags.isForced)
   if (pass?.hasPassed) {

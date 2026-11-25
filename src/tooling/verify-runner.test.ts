@@ -1507,6 +1507,16 @@ describe('the remembered pass', () => {
       expect(gateRuns()).toBe(2)
     })
 
+    it('should be one that ran no nested root', () => {
+      writeNested('service', '{"require":["lint"]}')
+      const wrapped = runChanged({ VERIFY_NESTED: 'true' })
+
+      const plain = runChanged()
+
+      expect(wrapped.status).toBe(0)
+      expect(plain.status).toBe(1)
+    })
+
     it('should be one whose nested root measured nothing', () => {
       writeNested('service', '{}')
       writeGate(
