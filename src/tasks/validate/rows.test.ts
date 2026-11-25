@@ -550,6 +550,21 @@ describe('readBlockerClauses', () => {
     },
   )
 
+  it.each([
+    ['ranked above v44.2 and v44.4 merging, and v44.5', ['v44.4-b', 'v44.5-c']],
+    ['v44.2 with v44.4, and v44.5', ['v44.2-a', 'v44.5-c']],
+    ['ranked above v44.2 and [v44.4](v44.4-b.md) merging', ['v44.4-b']],
+  ])(
+    'should not pass placing on from a clause that gates: %s',
+    async (cell, expected) => {
+      await seedLive('v44.2-a', 'v44.4-b', 'v44.5-c')
+
+      const stems = await readBlockerStems(cell, ROOT)
+
+      expect(stems).toEqual(expected)
+    },
+  )
+
   it('should read every citation in one clause', async () => {
     await seedLive('v44.2-a', 'v44.4-b')
 

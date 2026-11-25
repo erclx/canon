@@ -1324,7 +1324,7 @@ const BLOCKER_VERB =
   /\b(?:after|behind|waits?\s+(?:on|for)|waiting\s+on|depends\s+on|blocked\s+(?:by|on)|needs|once|until)\b/i
 
 /** A task followed by `merging`, which gates even inside a placing verb's reach. */
-const MERGING_TASK = /(?:\d+|\bv\d+\.\d+\b)(?=\s+merging\b)/gi
+const MERGING_TASK = /(?:\uE000\d+\uE001|\bv\d+\.\d+\b)(?=\s+merging\b)/gi
 
 /** What a clause leaves once its citations, `and`, and punctuation go, which is nothing for a bare list of tasks. */
 const CITATION_LIST_RESIDUE = /\uE000\d+\uE001|\bv\d+\.\d+\b|\band\b|[\s,&]/gi
@@ -1393,12 +1393,13 @@ export async function readBlockerClauses(
     const afterComma = (pieces[index - 1] ?? '').trim() === ','
     const joins: boolean =
       placing && afterComma && clause.replace(CITATION_LIST_RESIDUE, '') === ''
+    const stems: string[] = joins ? [] : read(restore(gatingText(clause)))
     const verb = clause.search(BESIDE_VERB)
-    const placed: boolean =
-      joins || (verb >= 0 && clause.search(BLOCKER_VERB) < 0)
-    placing = placed && (joins || read(restore(clause.slice(verb))).length > 0)
-
-    const stems = joins ? [] : read(restore(gatingText(clause)))
+    placing =
+      joins ||
+      (verb >= 0 &&
+        stems.length === 0 &&
+        read(restore(clause.slice(verb))).length > 0)
     clauses.push({ clause: restore(clause), stems })
   }
 
