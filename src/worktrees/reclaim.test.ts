@@ -11,6 +11,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gitEnv } from '@/git/env'
+import { lastBoot } from '@/sessions/boot'
 import {
   repositoryOf,
   type ResolvedSession,
@@ -665,7 +666,10 @@ describe('reclaimReport', () => {
   describe('when a foreign record sits inside a worktree', () => {
     const BOOT = 1_795_410_604_000
 
-    async function reading(startedAt: number): Promise<ReclaimReport> {
+    async function reading(
+      startedAt: number,
+      platform: NodeJS.Platform = 'linux',
+    ): Promise<ReclaimReport> {
       const path = linked('wt-parser', 'feat/parser')
       const dir = join(ROOT, 'registry')
       mkdirSync(dir)
@@ -690,7 +694,12 @@ describe('reclaimReport', () => {
               responds: () => false,
               ownDomain: () => 'pid:[4026532221]',
             },
-            bootTime: () => BOOT,
+            bootTime: () =>
+              lastBoot({
+                platform,
+                procStat: () => `btime ${BOOT / 1000}\n`,
+                mountedAt: () => [BOOT],
+              }),
             machineId: () => 'abc',
           }),
         mergedPullRequests: async () => merged(['feat/parser', 673]),
@@ -699,6 +708,15 @@ describe('reclaimReport', () => {
 
     it('should refuse on a record started one second after boot', async () => {
       const report = await reading(BOOT + 1_000)
+
+      expect(report).toMatchObject({
+        kind: 'unreadable',
+        reason: 'sessions-unchecked',
+      })
+    })
+
+    it('should refuse on a record started before boot where the platform is not Linux', async () => {
+      const report = await reading(BOOT - 1_000, 'darwin')
 
       expect(report).toMatchObject({
         kind: 'unreadable',

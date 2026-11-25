@@ -299,10 +299,8 @@ export async function resolveSessions(
     ),
   )
 
-  // Read only when a record needs it, since macOS spawns a process to answer.
-  const needed = unanswered.length > 0
-  const boot = needed ? (opts.bootTime ?? lastBoot)() : undefined
-  const machine = needed ? (opts.machineId ?? machineId)() : undefined
+  const boot = (opts.bootTime ?? lastBoot)()
+  const machine = (opts.machineId ?? machineId)()
   const foreign: ForeignRecord[] = []
   const foreignPreBoot: ForeignRecord[] = []
   for (const record of unanswered) {

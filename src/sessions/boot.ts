@@ -1,33 +1,17 @@
-import { execFileSync } from 'node:child_process'
 import { readFileSync, statSync } from 'node:fs'
-
-const SYSCTL_TIMEOUT_MS = 5_000
 
 /** A reader that throws reads as no boot time. */
 export interface BootSources {
   readonly platform: NodeJS.Platform
   readonly procStat: () => string
-  readonly kernBoottime: () => string
   readonly mountedAt: () => readonly number[]
 }
 
 const SYSTEM_SOURCES: BootSources = {
   platform: process.platform,
   procStat: () => readFileSync('/proc/stat', 'utf8'),
-  // The absolute path, since a hook's PATH can leave /usr/sbin out.
-  kernBoottime: () =>
-    execFileSync('/usr/sbin/sysctl', ['-n', 'kern.boottime'], {
-      encoding: 'utf8',
-      timeout: SYSCTL_TIMEOUT_MS,
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }),
   // A sandbox mounts its own /proc later and usually keeps the host's /sys.
   mountedAt: () => ['/proc', '/sys'].map((path) => statSync(path).ctimeMs),
-}
-
-function millisecondsIn(text: string, pattern: RegExp): number | undefined {
-  const seconds = Number(pattern.exec(text)?.[1])
-  return seconds > 0 ? seconds * 1000 : undefined
 }
 
 /**
@@ -36,10 +20,10 @@ function millisecondsIn(text: string, pattern: RegExp): number | undefined {
  * still running. A mount time is stamped once, so the earliest of them bounds it.
  */
 function linuxBoot(sources: BootSources): number | undefined {
-  const btime = millisecondsIn(sources.procStat(), /^btime (\d+)$/m)
+  const seconds = Number(/^btime (\d+)$/m.exec(sources.procStat())?.[1])
   const mounted = sources.mountedAt()
-  if (btime === undefined || mounted.length === 0) return undefined
-  return Math.min(btime, ...mounted)
+  if (!(seconds > 0) || mounted.length === 0) return undefined
+  return Math.min(seconds * 1000, ...mounted)
 }
 
 /**
@@ -50,12 +34,7 @@ export function lastBoot(
   sources: BootSources = SYSTEM_SOURCES,
 ): number | undefined {
   try {
-    if (sources.platform === 'linux') return linuxBoot(sources)
-    if (sources.platform === 'darwin') {
-      // No record reads foreign without /proc, so no clock step is bounded here.
-      return millisecondsIn(sources.kernBoottime(), /\bsec = (\d+)/)
-    }
-    return undefined
+    return sources.platform === 'linux' ? linuxBoot(sources) : undefined
   } catch {
     return undefined
   }

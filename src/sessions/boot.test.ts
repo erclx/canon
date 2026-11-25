@@ -16,7 +16,6 @@ function sources(fields: Partial<BootSources>): BootSources {
   return {
     platform: 'linux',
     procStat: unread,
-    kernBoottime: unread,
     mountedAt: unread,
     ...fields,
   }
@@ -75,48 +74,25 @@ describe('lastBoot on Linux', () => {
   })
 })
 
-describe('lastBoot on macOS', () => {
-  it('should read the sec field rather than usec', () => {
-    const boot = lastBoot(
-      sources({
-        platform: 'darwin',
-        kernBoottime: () =>
-          '{ sec = 1795410604, usec = 372281 } Mon Nov 23 05:10:04 2026\n',
-      }),
-    )
-
-    expect(boot).toBe(1_795_410_604_000)
-  })
-
-  it('should read undefined where the output carries no sec field', () => {
-    const boot = lastBoot(
-      sources({ platform: 'darwin', kernBoottime: () => '{ usec = 372281 }' }),
-    )
-
-    expect(boot).toBeUndefined()
-  })
-
-  it('should read undefined where sysctl cannot run', () => {
-    expect(lastBoot(sources({ platform: 'darwin' }))).toBeUndefined()
-  })
-})
-
 describe('lastBoot elsewhere', () => {
-  it('should read undefined on a platform with neither source', () => {
-    const boot = lastBoot(
-      sources({
-        platform: 'win32',
-        procStat: () => STAT,
-        mountedAt: () => [1_795_410_605_023],
-      }),
-    )
+  it.each(['darwin', 'win32'] as const)(
+    'should read undefined on %s whatever the sources answer',
+    (platform) => {
+      const boot = lastBoot(
+        sources({
+          platform,
+          procStat: () => STAT,
+          mountedAt: () => [1_795_410_605_023],
+        }),
+      )
 
-    expect(boot).toBeUndefined()
-  })
+      expect(boot).toBeUndefined()
+    },
+  )
 })
 
 describe('lastBoot on this machine', () => {
-  it.runIf(process.platform === 'linux' || process.platform === 'darwin')(
+  it.runIf(process.platform === 'linux')(
     'should read a boot time earlier than this process started',
     () => {
       const started = Date.now() - process.uptime() * 1000
