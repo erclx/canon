@@ -1,6 +1,6 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { execa } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
@@ -11,6 +11,7 @@ import {
   reviewGate,
   uiGate,
 } from '@/pr/lift'
+import { readReelCarry } from '@/pr/carry'
 import { DEFAULT_PAINTED } from '@/pr/painted'
 
 const LINES = Array.from({ length: 20 }, (_, index) => `line ${index + 1}`)
@@ -57,6 +58,7 @@ describe('closes across a merge of the base', () => {
 
   async function commit(files: Record<string, string>, message: string) {
     for (const [path, text] of Object.entries(files)) {
+      mkdirSync(dirname(join(root, path)), { recursive: true })
       writeFileSync(join(root, path), text)
     }
     await git('add', '-A')
@@ -249,6 +251,52 @@ describe('closes across a merge of the base', () => {
       })
     })
 
+    it('should carry the close when both sides wrote one capture script', async () => {
+      await onMain({ 'e2e/capture/cases.ts': `${LINES.join('\n')}\n` }, 'seed')
+      await mergeMain()
+      const driven = await commit(
+        { 'e2e/capture/cases.ts': edit(17, 'branch') },
+        'feat',
+      )
+      await onMain({ 'e2e/capture/cases.ts': edit(2, 'main') }, 'main')
+      const head = await mergeMain()
+
+      expect(await gateAt(driven, head)).toMatchObject({
+        isOk: true,
+        carriedFrom: driven,
+      })
+    })
+
+    it('should name the source file alone when a capture script was also written by both', async () => {
+      await onMain(
+        {
+          'e2e/capture/cases.ts': `${LINES.join('\n')}\n`,
+        },
+        'seed',
+      )
+      await mergeMain()
+      const driven = await commit(
+        {
+          'e2e/capture/cases.ts': edit(17, 'branch'),
+          'shared.ts': edit(17, 'branch'),
+        },
+        'feat',
+      )
+      await onMain(
+        {
+          'e2e/capture/cases.ts': edit(2, 'main'),
+          'shared.ts': edit(2, 'main'),
+        },
+        'main',
+      )
+      const head = await mergeMain()
+
+      expect(await gateAt(driven, head)).toMatchObject({
+        reason: 'ui-behind',
+        drivenPaths: ['shared.ts'],
+      })
+    })
+
     it('should name only the path both sides wrote in a clean merge', async () => {
       const driven = await commit({ 'shared.ts': edit(17, 'branch') }, 'feat')
       await onMain({ 'shared.ts': edit(2, 'main'), 'main.ts': 'm\n' }, 'main')
@@ -337,6 +385,63 @@ describe('closes across a merge of the base', () => {
       gate: 'review',
       isOk: false,
       reason: 'review-behind',
+    })
+  })
+  describe('readReelCarry', () => {
+    function reelAt(filmed: string, head: string) {
+      return readReelCarry(api, DEFAULT_PAINTED, filmed, head)
+    }
+
+    it('should carry a reel across a clean merge that moved a path the branch did not write', async () => {
+      const filmed = await commit({ 'feat.ts': 'feat\n' }, 'feat')
+      await onMain({ 'main.ts': 'm\n', 'other.ts': 'moved\n' }, 'main')
+      const head = await mergeMain()
+
+      expect(await reelAt(filmed, head)).toEqual({
+        kind: 'carried',
+        carriedFrom: filmed,
+      })
+    })
+
+    it('should not carry a reel past a commit of the branch own after the merge', async () => {
+      const filmed = await commit({ 'feat.ts': 'feat\n' }, 'feat')
+      await onMain({ 'main.ts': 'm\n' }, 'main')
+      await mergeMain()
+      const head = await commit({ 'feat.ts': 'again\n' }, 'again')
+
+      expect(await reelAt(filmed, head)).toMatchObject({ kind: 'moved' })
+    })
+
+    it('should not carry a reel when a conflict in a path was resolved by hand', async () => {
+      const filmed = await commit({ 'shared.ts': edit(10, 'branch') }, 'feat')
+      await onMain({ 'shared.ts': edit(10, 'main'), 'main.ts': 'm\n' }, 'main')
+      await execa('git', ['merge', '-q', 'main'], { cwd: root, reject: false })
+      const head = await commit({ 'shared.ts': edit(10, 'resolved') }, 'merge')
+
+      expect(await reelAt(filmed, head)).toMatchObject({
+        kind: 'moved',
+        drivenPaths: ['shared.ts'],
+      })
+    })
+
+    it('should not carry a reel across a rebase of the branch', async () => {
+      const filmed = await commit({ 'feat.ts': 'feat\n' }, 'feat')
+      await onMain({ 'main.ts': 'm\n' }, 'main')
+      await git('rebase', '-q', 'main')
+      const head = await git('rev-parse', 'HEAD')
+
+      expect(await reelAt(filmed, head)).toEqual({ kind: 'not-ancestor' })
+    })
+
+    it('should not carry a reel when the commit list cannot be read', async () => {
+      const filmed = await commit({ 'feat.ts': 'feat\n' }, 'feat')
+      await onMain({ 'main.ts': 'm\n' }, 'main')
+      const head = await mergeMain()
+      const blind = { ...api, readUnmerged: async () => undefined }
+
+      expect(
+        await readReelCarry(blind, DEFAULT_PAINTED, filmed, head),
+      ).toMatchObject({ kind: 'moved' })
     })
   })
 })

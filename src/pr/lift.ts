@@ -12,11 +12,10 @@ import {
 import {
   type CarriedAcross,
   type RebaseRead,
-  readCarry,
   readMergeCarry,
   readRebaseCarry,
+  readReelCarry as readReelCarryAcross,
   readUiCarry,
-  reelMoves,
 } from '@/pr/carry'
 import { DEFAULT_REEL_WIDTH } from '@/pr/evidence'
 import { readReelWaivers, readUndrivenWaivers, readWaivers } from '@/pr/waiver'
@@ -608,11 +607,11 @@ export function evidenceGate(
 
 /**
  * The commit each reel filmed before the head carries from, by width, when no
- * later push moved a `reelMoves` path. A rewritten commit or failed read
+ * later push moved a `reelMoves` path the branch wrote. A rewritten commit or failed read
  * carries nothing, and a reel at the head needs no carry.
  */
 async function readReelCarry(
-  api: Pick<LiftApi, 'readChanged'>,
+  api: Pick<LiftApi, 'readChanged' | 'readRebased' | 'readUnmerged'>,
   painted: PaintedPatterns,
   evidence: EvidenceGate,
   head: string,
@@ -622,11 +621,15 @@ async function readReelCarry(
   )
   const carries = await Promise.all(
     trailing.map(async (reel) => {
-      const carry = await readCarry(
-        (from, to) => api.readChanged(from, to),
+      const carry = await readReelCarryAcross(
+        {
+          readChanged: (from, to) => api.readChanged(from, to),
+          readRebased: (from, to) => api.readRebased(from, to),
+          readUnmerged: (from, to) => api.readUnmerged(from, to),
+        },
+        painted,
         reel.head,
         head,
-        reelMoves(painted),
       )
       return carry.kind === 'carried'
         ? ([[reel.width, carry.carriedFrom]] as const)

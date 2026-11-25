@@ -35,6 +35,10 @@ describe('isInert', () => {
     '.github/PULL_REQUEST_TEMPLATE.md',
     'evidence/board/light.png',
     'canon/design/board/frame.html',
+    'e2e/capture/board/chrome.ts',
+    'web/e2e/capture/cases.ts',
+    'e2e/screenshot.ts',
+    'web/e2e/capture-types.ts',
   ])('should classify %s as inert', (path) => {
     expect(isInert(path)).toBe(true)
   })
@@ -51,6 +55,9 @@ describe('isInert', () => {
     'web/README.md',
     'vite.config.ts',
     'evidence/capture.ts',
+    'e2e/capture/board/page.tsx',
+    'e2e/capture/board/style.css',
+    'e2e/helpers/login.ts',
   ])('should classify %s as driven', (path) => {
     expect(isInert(path)).toBe(false)
   })

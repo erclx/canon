@@ -19,7 +19,7 @@ Number the boxes off the `boxes` field Step 2 kept. Leave a box that failed, nee
 
 A push that landed while this pass drove carries the ticks to the tip when it changed only paths no box observes. The record then reads `ticked` with the head it came from in `carriedFrom`.
 
-- Tests, stories, snapshots, evidence captures, and `canon/design/` carry.
+- Tests, stories, snapshots, evidence captures, capture scripts (`e2e/capture/**/*.ts`, `e2e/screenshot.ts`, `e2e/capture-types.ts`), and `canon/design/` carry.
 - Markdown carries only in the root and under `canon/`, `.claude/`, `.github/`, and `docs/`.
 - Markdown anywhere else, such as a page a stack renders, is driven.
 

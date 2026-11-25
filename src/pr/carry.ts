@@ -15,6 +15,9 @@ export const DEFAULT_INERT: readonly string[] = [
   '.claude/**/*.md',
   '.github/**/*.md',
   'docs/**/*.md',
+  '**/e2e/capture/**/*.ts',
+  '**/e2e/screenshot.ts',
+  '**/e2e/capture-types.ts',
 ]
 
 /**
@@ -198,6 +201,7 @@ async function readUiMergeCarry(
   pushed: { readonly kind: 'moved'; readonly drivenPaths: readonly string[] },
   from: string,
   to: string,
+  moves: (path: string) => boolean = (path) => !isInert(path),
 ): Promise<UiCarry> {
   const unmerged = await reads.readUnmerged(from, to)
   if (unmerged === undefined || unmerged.length > 0) return pushed
@@ -208,7 +212,7 @@ async function readUiMergeCarry(
   const bothWrote = pushed.drivenPaths.filter((path) =>
     read.ownPaths.includes(path),
   )
-  const differing = read.differingPaths.filter((path) => !isInert(path))
+  const differing = read.differingPaths.filter(moves)
   const drivenPaths = [...new Set([...differing, ...bothWrote])].toSorted()
   return drivenPaths.length > 0
     ? { kind: 'moved', drivenPaths }
@@ -228,4 +232,31 @@ export function reelMoves(painted: PaintedPatterns): (path: string) => boolean {
       : (path: string) =>
           reelInputs.some((glob) => new Bun.Glob(glob).match(path))
   return (path) => isPainted(path, painted) || reads(path)
+}
+
+/**
+ * Whether a reel filmed at one commit holds at the head: across pushes that
+ * move no reel path, or merges of the base narrowed to the branch's own paths
+ * as the UI close is. A rebase never carries, since the commit was rewritten.
+ */
+export async function readReelCarry(
+  reads: MergeReads & {
+    readonly readChanged: (
+      from: string,
+      to: string,
+    ) => Promise<ChangedRead | undefined>
+  },
+  painted: PaintedPatterns,
+  from: string,
+  to: string,
+): Promise<Carry> {
+  const moves = reelMoves(painted)
+  const carry = await readCarry(reads.readChanged, from, to, moves)
+  if (carry.kind !== 'moved') return carry
+
+  const merged = await readUiMergeCarry(reads, carry, from, to, moves)
+  if (merged.kind === 'carried') {
+    return { kind: 'carried', carriedFrom: merged.carriedFrom }
+  }
+  return merged.kind === 'moved' ? merged : carry
 }
