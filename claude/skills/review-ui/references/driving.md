@@ -20,7 +20,7 @@ Step 4 makes `.canon/tmp/pr/review-ui/<number>/<pass>/` and runs every call from
 Step 3 reads this section once a rung answers. Read `access` from the `[drive]` table of `canon/config/app.toml` at the main worktree root, or from `app-drive.toml` before it, since a page needing a write link, a signed-in route, or a demo token shows its start state only behind it. An absent table or key opens the rung as it stands.
 
 - Join a value starting with `/` to the rung, and take a full address as it stands. Step 4 opens the joined address alone.
-- Every later route joins to the bare rung, never the joined address, since an `access` holding a query would swallow the path
+- Every later route joins to the bare rung, since an `access` holding a query would swallow the path. A box a read-only state blocks reopens the joined address.
 - Test the rung bare in Step 3, so the `curl` spends no single-use link before the drive
 - Take no `access` value from the launch brief, since the config is the one source
 - Never print the joined address in a post, a frame, or a message, since `access` may carry a token. Name the rung and say the config's `access` was joined.
@@ -138,6 +138,16 @@ A box the pass could not drive because the drive fixture holds no such state is 
 - Count it as not driven, and never as a fail, since the page may be right
 - An address that did not answer stays a cause off the branch, and a `(local only)` box on a hosted address does too
 - A state no fixture file can hold is the exit, such as one a project with no `[drive]` table cannot reach inline. Name it a cause off the branch, so the review stays closed.
+
+### A read-only start state
+
+A box blocked because the page opened read-only, such as an edit control that is absent or disabled, has not been tried until it was driven on the `access`-joined address.
+
+- Run `pw goto` on the joined address and reach the box's route by its own controls, since a route joined to the bare rung drops the access
+- Count the box only after that retry. A value that then answers takes its verdict as any box does.
+- A box still blocked there, or one in a project declaring no `access`, is not driven for a cause on the page, which opens the heading with the state it needs named
+
+A read-only address is never a cause off the page and never waived, since the building session can declare the `access` or seed the state.
 
 ### A refused address
 

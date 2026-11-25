@@ -29,7 +29,7 @@ A pull request the proof check read with `uncaptured` paths launches its reviewe
 The evidence check lists these painted paths as uncaptured: <path>, <path>. For each, either write a - **Waived capture:** `<path>`: <reason> line in your pass or file a capture finding naming it, since canon pr lift refuses painted-uncaptured on any path left with neither.
 ```
 
-A batch shape prefixes the clause with the number it belongs to. The UI reviewer takes no such clause, since a waiver is the code review's word alone.
+A batch shape prefixes the clause with the number it belongs to. The UI reviewer takes no such clause, since a capture waiver is the code review's word alone.
 
 ### Record the reviewer on the task
 
