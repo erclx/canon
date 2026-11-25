@@ -43,8 +43,9 @@ The root run calls each nested runner after its own stages, so one `bun run chec
 `bun run check:changed` is the gate a push runs. A web project at the repository root runs a scoped push, since the `web` stack installs the CI there that runs the rest. Everywhere else a push runs all of `check`, the full suite and the build included.
 
 - A scoped push runs typecheck, lint, format, shell, and the canon checks over the whole tree, then the tied tests. It leaves the full suite, the build, and the two checks reading the build to CI.
-- The runner reads a web project as one declaring `test:changed`, which the `web` stack alone ships. A root over a nested project scopes itself alone, and the nested project runs all of `check`.
-- A push compares against the merge base with `origin/HEAD`, then `origin/main`, then `origin/master`, and refuses with a fetch hint when none resolves.
+- The runner reads a web project as one whose phase list requires `build` and whose `package.json` declares `test:changed`. A root over a nested project scopes itself alone.
+- That CI starts on a pull request into `main`, so a push runs every phase where `main` is checked out, and where the trunk is any other branch.
+- The trunk is `origin/HEAD`, then `origin/main`, then `origin/master`. A scoped push refuses with a hint when none resolves, and a push that is not scoped runs every phase without one.
 - A first push runs every phase, since `origin` holds no branch to compare with and no fetch can bring one.
 
 A test ties to the change by name, and no import is followed.
@@ -57,7 +58,8 @@ A test ties to the change by name, and no import is followed.
 A changed run that passes is remembered, so the ship skills and the hook gate one tree once. A repeat at the same content prints one skip line, and `--force` runs it again.
 
 - The pass sits in the worktree's own git directory, so a pass in one worktree never skips another.
-- Its key holds the content git would track, untracked files included, the merge base, the folder, whether `CI` is set, and the version of `canon`, `bun`, `node`, and each tool the phases probe.
+- Its key holds the content git would track, the untracked paths, the merge base, the folder, whether the run was scoped, and whether `CI` is set.
+- It also holds the version of `canon`, `bun`, `node`, and each tool the phases probe.
 - A run keeps no pass when it fails, when a check measured nothing, when a tool reports no version, when the content moved while it ran, or when the tree holds another repository.
 - Ignored files stay out of the key, so run with `--force` after installing packages under an unchanged lockfile.
 

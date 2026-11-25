@@ -100,8 +100,8 @@ Run it from the project root, checked against shadcn `4.23.0` on 2026-11-22.
 - Expect `scripts/verify.json` to require `typecheck`, `lint`, `test:run`, and `build`, which base's `scripts/verify.ts` runs in its fixed order
 - That order is typecheck, lint, format, shell where the `shell` stack declares it, unit tests, build, the canon checks stage, the card exclusion check, then the head tag check
 - Expect `test:changed` to take the tied test files as Vitest filters from base's changed mode, so a Playwright spec among them matches nothing and passes
-- Expect the card stage to run `scripts/check-card-exclusion.sh` whenever that file is installed, so a project with no card route runs one less stage with no override
-- Expect the head tag stage to run `scripts/check-head-meta.sh` the same way, whenever that file is installed
+- Expect a full run to call `scripts/check-card-exclusion.sh` and `scripts/check-head-meta.sh` where each is installed, so a project without one runs one less stage with no override
+- Expect a scoped push to call neither, and the build job in `verify.yml` to call each where it is installed
 
 ## CI docs (extend)
 
