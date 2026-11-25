@@ -372,8 +372,8 @@ describe('tools and preconditions', () => {
 })
 
 // Stands in for canon or bunx, logging each call's argv on its own line and
-// printing a gate record whose root is the directory it runs in, or `root`. A
-// --version call reads bin/canon.version and logs nothing.
+// printing a gate record whose root is the directory it runs in, or `root`. Every
+// answer carries bin/canon.version, so a --version call changes with it.
 const argvLog = (): string => join(fixture, 'canon-argv.log')
 
 const writeGate = (
@@ -387,9 +387,8 @@ const writeGate = (
     join(bin, name),
     [
       '#!/usr/bin/env bash',
-      `if [ "$1" = --version ]; then echo "v$(< ${join(bin, 'canon.version')})"; exit; fi`,
       `echo "$*" >> ${argvLog()}`,
-      `printf '{"ok":${ok},"root":"%s","stages":${stages}}\\n' "${root}"`,
+      `printf '{"ok":${ok},"root":"%s","version":"%s","stages":${stages}}\\n' "${root}" "$(< ${join(bin, 'canon.version')})"`,
       `exit ${exitCode}`,
       '',
     ].join('\n'),
@@ -403,6 +402,7 @@ const readArgv = (): string[] =>
     : []
 
 const PASSED = '[{"label":"Markdown","status":"passed"}]'
+const FAILED = '[{"label":"Markdown","status":"failed"}]'
 
 describe('canon checks', () => {
   beforeEach(() => {
@@ -1396,7 +1396,7 @@ describe('the remembered pass', () => {
     })
 
     it('should be one that failed', () => {
-      writeGate('canon', 1, PASSED)
+      writeGate('canon', 0, FAILED)
 
       expectNoPass()
     })
@@ -1454,7 +1454,7 @@ describe('the remembered pass', () => {
   it('should drop the last pass when a forced run fails', () => {
     setUpChanged()
     runChanged()
-    writeGate('canon', 1, PASSED)
+    writeGate('canon', 0, FAILED)
     runChanged({}, '--force')
     writeGate('canon', 0, PASSED)
 
