@@ -85,6 +85,8 @@ export const FINDING_KINDS = [
   'callers-malformed',
   'ceiling-unstated',
   'bundle-unshared',
+  'evidence-missing',
+  'evidence-unresolved',
 ] as const
 
 export type FindingKind = (typeof FINDING_KINDS)[number]
@@ -358,9 +360,70 @@ function shorten(label: string): string {
 }
 
 const SUGGESTED_PREFIX = '- Suggested:'
+const EVIDENCE_PREFIX = '- Evidence:'
 const ANSWER_PREFIX = '- Answer:'
+const EVIDENCE_NONE = /^none,\s*\S/i
+const LINE_SUFFIX = /:\d+(?:-\d+)?$/
+const FILE_EXTENSION = /\.[a-z][a-z0-9]*$/i
 
-function checkQuestionContract(name: string, lines: string[]): Finding[] {
+/** Answers whether a project-relative path exists, a file or a folder alike. */
+export type PathExists = (rel: string) => boolean
+
+/**
+ * A span with a space, placeholder, glob, scheme, or alias is a command or a
+ * pattern, so only its shape is checked, since running a command would write.
+ */
+function citedPath(span: string): string | undefined {
+  if (/[\s<>*]|:\/\/|^@/.test(span)) return undefined
+
+  const path = span.replace(LINE_SUFFIX, '').replace(/^\.\//, '')
+  if (!path.includes('/') && !FILE_EXTENSION.test(path)) return undefined
+
+  return path.replace(/\/$/, '')
+}
+
+function checkEvidence(
+  name: string,
+  subject: string,
+  body: readonly string[],
+  pathExists?: PathExists,
+): Finding[] {
+  const line = body.find((entry) => entry.startsWith(EVIDENCE_PREFIX))
+  const text = line?.slice(EVIDENCE_PREFIX.length).trim() ?? ''
+  const spans = [...text.matchAll(/`([^`]+)`/g)].map((match) => match[1])
+
+  if (!EVIDENCE_NONE.test(text) && spans.length === 0) {
+    return [
+      finding(
+        'evidence-missing',
+        name,
+        subject,
+        'carries no Evidence line citing a command or path in a code span, or none with a reason, so its claim reaches the build unchecked.',
+      ),
+    ]
+  }
+
+  if (!pathExists) return []
+
+  return spans
+    .map(citedPath)
+    .filter((path): path is string => path !== undefined)
+    .filter((path) => !pathExists(path))
+    .map((path) =>
+      finding(
+        'evidence-unresolved',
+        name,
+        subject,
+        `cites ${path} as evidence, and no such path exists in the project.`,
+      ),
+    )
+}
+
+function checkQuestionContract(
+  name: string,
+  lines: string[],
+  pathExists?: PathExists,
+): Finding[] {
   if (lines.some((line) => line.trim() === NONE_IDENTIFIED)) return []
 
   const findings: Finding[] = []
@@ -393,6 +456,8 @@ function checkQuestionContract(name: string, lines: string[]): Finding[] {
         ),
       )
     }
+
+    findings.push(...checkEvidence(name, subject, question.body, pathExists))
 
     if (
       suggested &&
@@ -541,6 +606,7 @@ export function checkPlan(
   counterpart?: CounterpartRoot,
   readDocument?: ReadDocument,
   callers?: CallersRoot,
+  pathExists?: PathExists,
 ): Finding[] {
   const findings: Finding[] = []
 
@@ -637,7 +703,9 @@ export function checkPlan(
     )
   }
 
-  findings.push(...checkQuestionContract(name, sections.get('Questions') ?? []))
+  findings.push(
+    ...checkQuestionContract(name, sections.get('Questions') ?? [], pathExists),
+  )
   findings.push(...checkSources(name, sections.get('Sources') ?? []))
   findings.push(...checkVerification(name, sections.get('Verification') ?? []))
   findings.push(
@@ -1111,7 +1179,14 @@ export async function validateRecords(
       kind,
       names,
       (name, text) =>
-        checkPlan(name, text, counterpart, documentReader(root), callers),
+        checkPlan(
+          name,
+          text,
+          counterpart,
+          documentReader(root),
+          callers,
+          (rel) => existsSync(join(root, rel)),
+        ),
       planStructure,
     )
   }

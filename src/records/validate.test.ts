@@ -64,9 +64,17 @@ function conformingPlan(): string {
     '',
     '1. Which check reaches a gitignored folder?',
     '   - Suggested: a validate verb, since it reports without writing',
+    '   - Evidence: `grep -n Answer standards/plan.md` finds the contract',
     '   - Answer:',
     '',
   ].join('\n')
+}
+
+const EVIDENCE_LINE =
+  '   - Evidence: `grep -n Answer standards/plan.md` finds the contract'
+
+function withEvidence(line: string): string {
+  return conformingPlan().replace(EVIDENCE_LINE, line)
 }
 
 function counterpartPlan(): string {
@@ -715,11 +723,121 @@ describe('checkPlan', () => {
     ])
   })
 
+  describe('Evidence', () => {
+    const exists = (rel: string) => rel === 'src/real.ts' || rel === 'src/dir'
+
+    function evidenceKinds(line: string): FindingKind[] {
+      return kinds(
+        checkPlan(
+          'feature-a-b.md',
+          withEvidence(line),
+          undefined,
+          undefined,
+          undefined,
+          exists,
+        ),
+      )
+    }
+
+    it('should report a question carrying no Evidence line', () => {
+      const body = conformingPlan().replace(`${EVIDENCE_LINE}\n`, '')
+
+      expect(kinds(checkPlan('feature-a-b.md', body))).toEqual([
+        'evidence-missing',
+      ])
+    })
+
+    it('should report a bare Evidence line', () => {
+      expect(evidenceKinds('   - Evidence:')).toEqual(['evidence-missing'])
+    })
+
+    it('should report an Evidence line citing nothing in a code span', () => {
+      expect(evidenceKinds('   - Evidence: I read the validator')).toEqual([
+        'evidence-missing',
+      ])
+    })
+
+    it('should report none given with no reason', () => {
+      expect(evidenceKinds('   - Evidence: none')).toEqual(['evidence-missing'])
+    })
+
+    it('should accept none given with a reason', () => {
+      expect(evidenceKinds('   - Evidence: none, preference')).toEqual([])
+    })
+
+    it('should accept a cited path that resolves', () => {
+      expect(evidenceKinds('   - Evidence: `src/real.ts` reads it')).toEqual([])
+    })
+
+    it('should drop a trailing line number before resolving', () => {
+      expect(
+        evidenceKinds('   - Evidence: `src/real.ts:363` reads it'),
+      ).toEqual([])
+    })
+
+    it('should accept a cited folder that resolves', () => {
+      expect(evidenceKinds('   - Evidence: `src/dir/` holds it')).toEqual([])
+    })
+
+    it('should report a cited path absent from the tree', () => {
+      expect(evidenceKinds('   - Evidence: `src/gone.ts` reads it')).toEqual([
+        'evidence-unresolved',
+      ])
+    })
+
+    it('should report a bare filename absent from the tree', () => {
+      expect(evidenceKinds('   - Evidence: `gone.md` says so')).toEqual([
+        'evidence-unresolved',
+      ])
+    })
+
+    it('should never resolve a placeholder path', () => {
+      expect(
+        evidenceKinds(
+          '   - Evidence: `.canon/plans/feature-<slug>.md` holds it',
+        ),
+      ).toEqual([])
+    })
+
+    it('should read a span holding a space as a command, never a path', () => {
+      expect(
+        evidenceKinds(
+          '   - Evidence: `bun --bun vitest run src/gone.test.ts` fails',
+        ),
+      ).toEqual([])
+    })
+
+    it('should read a span with no slash or extension as a symbol', () => {
+      expect(
+        evidenceKinds('   - Evidence: `checkQuestionContract` reads it'),
+      ).toEqual([])
+    })
+
+    it('should never resolve a cited URL', () => {
+      expect(
+        evidenceKinds('   - Evidence: `https://example.com/a.md` says so'),
+      ).toEqual([])
+    })
+
+    it('should never resolve an import alias', () => {
+      expect(
+        evidenceKinds('   - Evidence: `@/records/validate` exports it'),
+      ).toEqual([])
+    })
+
+    it('should leave a cited path unresolved when no root is read', () => {
+      const body = withEvidence('   - Evidence: `src/gone.ts` reads it')
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+  })
+
   it('should accept None identified in place of the question list', () => {
     const body = conformingPlan().replace(
       [
         '1. Which check reaches a gitignored folder?',
         '   - Suggested: a validate verb, since it reports without writing',
+        EVIDENCE_LINE,
         '   - Answer:',
       ].join('\n'),
       'None identified.',
@@ -1140,7 +1258,7 @@ describe('validateRecords', () => {
 
   describe('measured-run placement', () => {
     function withVerification(...entries: string[]): string {
-      return `# Feature: x\n\nBody.\n\n## Summary\n\n- a\n\n## Files to touch\n\n- \`a.ts\`: b\n\n## Verification\n\n${entries.join('\n')}\n\n## Risks\n\nNone identified.\n\n## Review focus\n\nNone identified.\n\n## Questions\n\n1. Which check reaches a gitignored folder?\n   - Suggested: a validate verb, since it reports without writing\n   - Answer:\n`
+      return `# Feature: x\n\nBody.\n\n## Summary\n\n- a\n\n## Files to touch\n\n- \`a.ts\`: b\n\n## Verification\n\n${entries.join('\n')}\n\n## Risks\n\nNone identified.\n\n## Review focus\n\nNone identified.\n\n## Questions\n\n1. Which check reaches a gitignored folder?\n   - Suggested: a validate verb, since it reports without writing\n   - Evidence: \`grep -n Answer a.ts\` finds it\n   - Answer:\n`
     }
 
     async function measuredRuns(...entries: string[]) {
