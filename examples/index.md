@@ -10,8 +10,8 @@ Filled-in canon records for Tidewell, an invented tide-table app, following one 
 
 ## Research
 
-- [Intake folder](research/intake/03-tide-feedback/): spring beta feedback sorted into advisory and tide-time items, one of them sent on to groundwork. Read against `claude/skills/plan-intake/references/intake.md` at `ddaf2570`.
-- [App drive](research/drive/05-tide-drive/): a drive of the station week view, its log, its `drive.json`, and the two items it decided. Read against `claude/skills/app-drive/references/drive-record.md` at `d48e12dd` and `claude/skills/plan-intake/references/intake.md` at `ddaf2570`.
+- [Intake folder](research/intake/03-tide-feedback/): spring beta feedback sorted into advisory and tide-time items, one of them sent on to groundwork. Read against `claude/skills/plan-intake/references/intake.md` at `16cd8e2a`.
+- [App drive](research/drive/05-tide-drive/): a drive of the station week view, its log, its `drive.json`, and the two items it decided. Read against `claude/skills/app-drive/references/drive-record.md` at `3dc5a647` and `claude/skills/plan-intake/references/intake.md` at `16cd8e2a`.
 - [Groundwork track](research/groundwork/04-surge-alerts/): a closed track measuring how a surge advisory reaches a closed app, ending on push. Read against `claude/skills/plan-groundwork/references/groundwork.md` at `11b4687c`.
 
 ## Planning

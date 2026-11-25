@@ -25,7 +25,7 @@ A track fanning out to subagents returns findings without their reasoning. Under
 - Dispatch subagents, since a search too large to run inline is a finding that the question is too broad
 - Close while an open question quietly fails an outcome, or spawn more than three billed headless runs without asking
 - Pause for approval between steps, or open a track with no topic or fewer than two of the three qualifying conditions
-- Draw to settle a measurement, write into a pick round's project or an accepted frame, cite a frame from the board alone, or remove its own board project at close
+- Draw to settle a measurement, write into a standalone pick's project or an accepted frame, cite a frame from the board alone, or remove its own board project at close
 
 ## Out of scope
 

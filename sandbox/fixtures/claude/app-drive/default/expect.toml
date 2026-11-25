@@ -16,7 +16,7 @@ absent = [
 write_scope = [
   { path = ".canon/intake/**", why = "Any write to boards/, dist/, or another tracked path fails, which stands in for the check's changed axis." },
   { path = ".canon/tmp/app-drive/**", why = "The drive keeps its scratch here." },
-  { path = ".canon/picks/**", why = "The config's proposals folder, where a taste item's frames go. A scope without it passes a run with no taste item and fails a correct one that has one." },
+  { path = ".canon/proposals/**", why = "The config's proposals folder, where a fallback mock goes. A scope without it passes a run that needed none and fails a correct one that lifted a mock there." },
 ]
 
 escape_scope = []

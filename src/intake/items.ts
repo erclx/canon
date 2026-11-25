@@ -17,6 +17,14 @@ const HEADING = /^###\s+(\d+[a-z]*)\.\s*(.*)$/i
 const FIELD = /^-\s+\*\*([^*]+):\*\*\s*(.*)$/
 
 /**
+ * The word opening an answer that leaves an item waiting on a pick. It matches the
+ * answer's first word alone, so an answer mentioning it later stays a decision.
+ */
+export const PENDING_PICK = 'sketch'
+
+const PENDING = new RegExp(`^${PENDING_PICK}(?![\\w-])`, 'i')
+
+/**
  * Any heading, which ends the item above it. A numbered `###` is tested first, so a
  * heading reaching here closes the open item, and a `### Notes` block must not stay
  * inside it.
@@ -176,6 +184,11 @@ export function writeAnswerLine(
 /** An item nobody has reached, which is an empty slot rather than a missing one. */
 export function isUnread(item: IntakeItem): boolean {
   return item.answerLine !== undefined && item.answer === undefined
+}
+
+/** An item whose answer waits on a pick, so it holds no decision yet. */
+export function isPendingPick(item: IntakeItem): boolean {
+  return item.answer !== undefined && PENDING.test(item.answer)
 }
 
 /**

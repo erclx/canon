@@ -915,6 +915,12 @@ describe('checkDrive current page and visible skips', () => {
     '| Board | `http://127.0.0.1:4173`, project `drive-13` |',
   ].join('\n')
 
+  const DRAWN = [
+    '## 02. Layers click leaves a frame',
+    '- **Drawn:** `evidence/layers/02-options.png`',
+    '- **Decision (operator):** center the frame',
+  ].join('\n\n')
+
   const SKIPPED = [
     '## 03. Export drops the alpha channel',
     '- **Drawn:** skipped, nothing visible changes',
@@ -939,14 +945,56 @@ describe('checkDrive current page and visible skips', () => {
     )
   }
 
+  function writeBoardLog(...findings: string[]) {
+    write(`${FOLDER}/evidence/layers/02-options.png`, 'png')
+    write(
+      `${FOLDER}/evidence/drive-log.md`,
+      [BOARD_LOG, ...findings].join('\n\n'),
+    )
+  }
+
   async function check() {
     await recordBaseline(ROOT, 'app-drive-1-0')
     writeRecord({ goals: BOTH_DRIVEN })
     return checkDrive(ROOT, 'app-drive-1-0')
   }
 
-  it('should fail a board drive with no current-page capture', async () => {
-    write(`${FOLDER}/evidence/drive-log.md`, BOARD_LOG)
+  it('should pass a board drive that decided no finding and drew nothing', async () => {
+    writeBoardLog()
+
+    expect(await check()).toMatchObject({
+      reason: 'clean',
+      findings: { uncaptured: [] },
+    })
+  })
+
+  it('should pass a board drive whose only decision skipped its drawing', async () => {
+    writeBoardLog(SKIPPED.join('\n\n'))
+
+    expect(await check()).toMatchObject({
+      reason: 'clean',
+      findings: { uncaptured: [] },
+    })
+  })
+
+  it('should require the capture of a drawn finding another one points back at', async () => {
+    writeBoardLog(
+      DRAWN,
+      '## 04. Layers click on a nested frame',
+      '- **Decision (operator):** see 02',
+    )
+
+    expect(await check()).toMatchObject({
+      reason: 'failed',
+      findings: {
+        undrawn: [],
+        uncaptured: ['evidence/baseline/00-current'],
+      },
+    })
+  })
+
+  it('should fail a board drive that drew a finding with no current-page capture', async () => {
+    writeBoardLog(DRAWN)
     write(`${FOLDER}/evidence/baseline/00-next.png`, 'png')
 
     expect(await check()).toMatchObject({
@@ -956,7 +1004,7 @@ describe('checkDrive current page and visible skips', () => {
   })
 
   it('should pass a board drive holding the capture in any image format', async () => {
-    write(`${FOLDER}/evidence/drive-log.md`, BOARD_LOG)
+    writeBoardLog(DRAWN)
     write(`${FOLDER}/evidence/baseline/00-current.webp`, 'img')
 
     expect(await check()).toMatchObject({
@@ -966,7 +1014,7 @@ describe('checkDrive current page and visible skips', () => {
   })
 
   it('should count a current-page capture carrying a width and theme suffix', async () => {
-    write(`${FOLDER}/evidence/drive-log.md`, BOARD_LOG)
+    writeBoardLog(DRAWN)
     write(`${FOLDER}/evidence/baseline/00-current-1440.light.png`, 'img')
     write(`${FOLDER}/evidence/baseline/00-current-1440.dark.png`, 'img')
 
@@ -977,7 +1025,7 @@ describe('checkDrive current page and visible skips', () => {
   })
 
   it('should not count a name that only begins with the stem', async () => {
-    write(`${FOLDER}/evidence/drive-log.md`, BOARD_LOG)
+    writeBoardLog(DRAWN)
     write(`${FOLDER}/evidence/baseline/00-currently.png`, 'img')
 
     expect(await check()).toMatchObject({
@@ -986,7 +1034,8 @@ describe('checkDrive current page and visible skips', () => {
   })
 
   it('should pass a drive that names no board and holds no capture', async () => {
-    write(`${FOLDER}/evidence/drive-log.md`, '| Board |  |')
+    write(`${FOLDER}/evidence/layers/02-options.png`, 'png')
+    write(`${FOLDER}/evidence/drive-log.md`, `| Board |  |\n\n${DRAWN}`)
 
     expect(await check()).toMatchObject({
       reason: 'clean',

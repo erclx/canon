@@ -25,7 +25,7 @@ An empty operator slot reads as consent under a blank-means-accept contract, whi
 - Fill an operator's slot, or replace a verdict with an overlap line
 - Reserve mid-range numbers or date every file
 - Open a folder for a single question or for no dump
-- Draw to settle a measurement, write into a pick round's project or an accepted frame, or cite a frame from the board alone
+- Draw to settle a measurement, write into a standalone pick's project or an accepted frame, or cite a frame from the board alone
 
 ## Out of scope
 

@@ -6,33 +6,33 @@ max_turns = 30
 paths = [
   { path = "index.html", why = "The page the applied arm lands in." },
   { path = "canon/DESIGN.md", why = "The design note carrying the decision. Step 6 directs the write, since a pick that records nothing about why is the loss the note exists to prevent." },
-  { path = ".canon/picks/**/arm-*-320*", why = "A capture at the narrow width, which the seeded Layout section's Draw widths line names." },
-  { path = ".canon/picks/**/arm-*-768*", why = "The 768 column separates a run that read the record from one that took the 390, 834, and 1440 fallback." },
-  { path = ".canon/picks/**/arm-*-1440*", why = "A capture at the wide width." },
-  { path = ".canon/picks/references/*", why = "The scenario seeds a references page, so the archive holds its capture." },
-  { path = ".canon/board/picks/references/fieldnote-app-1440-s01.html", why = "The seeded frame still stands, which proves the close left the page rather than deleting it with the round pages." },
+  { path = ".canon/board/pick-01-callout/*/arm-*-320.html", why = "A kept arm at the narrow width, which the seeded Layout section's Draw widths line names and the 390, 768, and 1280 fallback does not." },
+  { path = ".canon/board/pick-01-callout/*/arm-*-768.html", why = "A kept arm at the middle width." },
+  { path = ".canon/board/pick-01-callout/*/arm-*-1440.html", why = "A kept arm at the wide width, which proves the close deleted no round page." },
+  { path = ".canon/board/pick-01-callout/00-next/*-next-1440.html", why = "The winner sits on the page a standalone pick opens on." },
+  { path = ".canon/board/pick-01-callout/references/fieldnote-app-1440-s01.html", why = "The seeded frame still stands, which proves the close left the references page too." },
 ]
 
 write_scope = [
-  { path = ".canon/board/**", why = "The board the run works on. The composite render from step 3 lands in its own .run/captures/." },
+  { path = ".canon/board/**", why = "The board the run works on. The composite render from step 3 lands in its own .run/captures/, and an archive written anywhere else under .canon/ fails." },
   { path = ".canon/tmp/**", why = "Scratch the run keeps." },
-  { path = ".canon/picks/**", why = "Step 6 captures the picked round's arms here as the durable revert record, before the round pages are deleted from the board." },
   { path = "index.html", why = "Carries the applied arm. Step 6 directs both this write and the design note's, so the scope admits exactly what the body sends a run to touch, and a third edited file fails." },
   { path = "canon/DESIGN.md", why = "The design note carrying the decision." },
 ]
 
 manual = [
   "The arms differ in a way worth choosing between. Semantic: this is the whole judgment the skill exists to serve, and a fixture with the answer pre-supplied proves the run reached a pick rather than that the candidates were worth choosing between.",
-  "Three to five arms were drafted as frames on one Frameboard page, each labeled with its id and its cost, with the shipping state among them. Unwired: step 6 deletes the round pages, so the page the claim is about is gone by the time anything reads the tree. The archive globs above assert a width column, not the arm count.",
+  "Three to five arms were drafted as frames on one Frameboard page, each labeled with its id and its cost, with the shipping state among them. Unwired: the path globs above assert a width column, not the arm count or a label's text.",
   "The picked arm was measured for sideways scroll at each width before it folded in. Unwired: the harness captures no tool calls, and the seeded callout reflows at every width, so no fixture forces a hold.",
-  "The arms varied one property. Semantic: the seeded decision names a border, a ground shift, and a rule down one edge, and whether a run held everything else fixed is read off markup that no longer exists once the run closes.",
-  "Every frame declared a font stack the machine resolves. Unwired: the frames are deleted by the close, and the render it gates is a property of the machine rather than of the run.",
+  "The arms varied one property. Semantic: the seeded decision names a border, a ground shift, and a rule down one edge, and whether a run held everything else fixed is a judgment over the kept frames' markup.",
+  "Every frame declared a font stack the machine resolves. Unwired: the render it gates is a property of the machine rather than of the run.",
   "The applied treatment is the arm the prompt picked rather than another. Semantic: which arm is second is a property of the order the run authored, so no pattern can tie the pick to the treatment without fixing the arms the run is meant to invent.",
   "The pick was put through the structured question surface with the recommendation ranked first and marked. Unwired: the harness captures no tool calls, and a headless session has no operator to put a question to, so this arm cannot reach it at all.",
   "The loop narrowed to the picked arm and handed off before closing. Unwired: the loop stops on a person saying the pick is right and no fixture supplies one, so a headless run closes on the pick and a green verdict here is not coverage of the loop.",
-  "The board was served and its link emitted ahead of the pick question. Unwired: the harness captures no tool calls and cannot assert ordering, and step 6 ends the server it started and deletes the round pages before anything reads the tree.",
-  "The close deleted only the round pages the run added and left no other board page touched. Unwired: the fixture seeds no operator page beside the run's, so nothing here separates a delete by recorded name from a delete by prefix.",
-  "Each arm named the references frame it draws on and what it takes, and copied no text or number off it. Semantic: the arms are deleted by the close, and the run's reply carries the field only when an envelope is passed.",
+  "The board was served and its link emitted ahead of the pick question. Unwired: the harness captures no tool calls and cannot assert ordering, and step 6 ends the server it started before anything reads the tree.",
+  "The close deleted no page holding a frame, a losing round's among them. Unwired: the run names its own round pages, so a deleted one leaves no path to assert.",
+  "The project was filed under the Picks home folder. Unwired: where Frameboard records a folder is its own layout rather than this skill's.",
+  "Each arm named the references frame it draws on and what it takes, and copied no text or number off it. Semantic: a pattern cannot tell a borrowed structure from a copied one.",
   "The design note names the arm that won and the ones that stayed defensible, rather than merely being touched. Judgment: step 6 now directs the write and write_scope admits it, so what nothing asserts is whether the record says anything useful, and any pattern over it would match wording the run chooses.",
 ]
 

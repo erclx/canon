@@ -27,16 +27,24 @@ An operator who judges design on the board has no way to see a drive's frames th
 
 A project with a board gets its frames there, and a project with none draws as it did.
 
-- A drive draws in a board project of its own, and the operator holds the board's address before the first frame, each page's address as it is drawn, and the address inside every pick question
+- A drive draws in a board project of its own, and the operator holds the board's address before the first frame drawn, each page's address as it is drawn, and the address inside every pick question
 - `evidence/mocks/` stays the record a finding cites, wherever its frames were drawn
 - Every frame follows the drawing guide `design-pick` shares, so the operator never restates a width, a name, or a page order
-- A drive draws the shipped page before its first finding, and the page with every pick applied once the picks settle
+- The board starts at the first finding the operator decides, while the copy still runs. The drive draws the shipped page before that finding, and the page with every pick applied once the picks settle.
+- A drive that drew no finding passes its check with no picture of the page
 
 ### On a repository with several apps
 
 A site beside its app is a common shape, and both get a drive from one config.
 
 - A drive names the target it runs when the config holds several, and a config holding one drives as it did
+
+### On a taste finding nobody decided
+
+A drive and a pick are told apart by whether there is an app to test.
+
+- An undecided taste finding is logged undrawn, its item takes `sketch`, and a later `design-pick` pass draws it on this drive's project
+- An ask holding nothing to test goes to `design-pick` before a copy is made
 
 ## Must not
 
@@ -51,5 +59,5 @@ A site beside its app is a common shape, and both get a drive from one config.
 - Reading source for roughness, which `ui-audit` owns
 - Driving one pull request's checklist, which `review-ui` owns
 - Measuring paint and layout cost, which `ui-measure` owns
-- Picking between a now frame and a fix frame for an undecided taste finding, which `design-pick` owns
+- Drawing and picking an undecided taste finding, which `design-pick` owns
 - Messaging the controller and ending the session, which `role-planner` owns

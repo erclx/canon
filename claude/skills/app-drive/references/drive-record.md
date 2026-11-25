@@ -66,7 +66,7 @@ The setup table is written once, before the first finding, and every row stays e
 
 - `Commit`, `Copy`, and `Launch` come from making the copy, per `isolate.md`, or read as `live.md` sets for a drive of the live app
 - `Address` is the `url` that `canon pr local --root <worktree> --json` confirmed in Step 1
-- `Board` is the `url` the board's serve record returned in Step 1 and the drive's board project, and stays empty when the drive draws no board
+- `Board` is the `url` the board's serve record returned and the drive's board project, written when the first finding is drawn, and stays empty when the drive draws no board
 - `In flight` names each open branch or live plan holding a path the drive covers, as `canon:role-planner` reads what is in flight, and reads `none` when nothing is
 
 ### Fields

@@ -6,6 +6,7 @@ import {
   INDEX_FILE,
   type IntakeItem,
   isMalformed,
+  isPendingPick,
   isUnread,
   parseDecided,
   readItems,
@@ -46,6 +47,8 @@ export interface FolderSummary {
 export interface ResolvedItem extends IntakeItem {
   /** The decision the pointer reaches, absent when it reaches none. */
   readonly decision: string | undefined
+  /** Whether the answer only opens a pick, which the answer route may replace. */
+  readonly pendingPick: boolean
 }
 
 export interface ClusterItems {
@@ -239,7 +242,11 @@ async function readClusters(folder: string): Promise<ClusterItems[]> {
     names.map(async (cluster) => ({
       cluster,
       items: readItems(await readFile(join(folder, cluster), 'utf8')).map(
-        (item) => ({ ...item, decision: resolveDecision(item, decisions) }),
+        (item) => ({
+          ...item,
+          decision: resolveDecision(item, decisions),
+          pendingPick: isPendingPick(item),
+        }),
       ),
     })),
   )
@@ -261,9 +268,9 @@ export async function readFolder(
 }
 
 /**
- * Lands a batch of selections in one cluster file, in one read-modify-write, since a
- * call per selection races on the read and drops every answer but the last. A
- * `decided` label that reaches no decision refuses the whole call.
+ * Lands a batch in one cluster file in one read-modify-write, since a call per
+ * selection races on the read. A `decided` label reaching no decision refuses the
+ * whole call, as does a filled slot, a pending pick aside.
  */
 export async function answerItems(
   root: string,
@@ -323,17 +330,16 @@ export async function answerItems(
     )
   }
 
-  const filled = named
-    .filter((label) => find(label)?.answer !== undefined)
-    .map((label) => ({ label }))
+  const filled = named.filter((label) => {
+    const item = find(label)
+    return item?.answer !== undefined && !isPendingPick(item)
+  })
 
   if (filled.length > 0) {
     return refuse(
       'answered',
-      `${name} item ${filled.map((entry) => entry.label).join(', ')} already carries an answer.`,
-      filled.map(
-        (entry) => `${entry.label}. ${find(entry.label)?.answer ?? ''}`,
-      ),
+      `${name} item ${filled.join(', ')} already carries an answer.`,
+      filled.map((label) => `${label}. ${find(label)?.answer ?? ''}`),
     )
   }
 

@@ -1,20 +1,32 @@
 ---
 title: Project name
-description: How a design-pick or design-references run names the Frameboard project its pages go in, from the surface it draws, and the slugs it refuses
+description: How a design-pick or design-references run names the Frameboard project its pages go in, from the three homes a pick has and the rule for reusing one
 ---
 
 # Project name
 
-Read before the first `frameboard` verb a `design-pick` run sends. A round draws on `.canon/board/` at the main worktree root, and names its project for the surface it draws, so a second surface never lands among the first one's pages.
+Read before the first `frameboard` verb a `design-pick` run sends. A round draws on `.canon/board/` at the main worktree root, and where its project comes from depends on what started it.
 
-- Take the kebab-case slug of the surface the round edits, such as `landing` or `settings`, from the route or file Step 1's decision names, since the declared read names a kind and not a surface
-- Reuse the project when it already exists, and add the round's page to it under the next free page name, since a second round on one surface belongs beside its first
-- Leave a drive's `drive-<nn>` project alone, since `app-drive` names it
-- Leave a round already open in `picks` where it is, since no verb moves a page between projects and its refs are handed out
+| The pick started from                 | Project                                                  |
+| ------------------------------------- | -------------------------------------------------------- |
+| An ask of its own                     | `pick-<nn>-<topic>`, filed under `Picks`                 |
+| A drive finding or an intake item     | The drive's or the pass's project, per `from-finding.md` |
+| A question in a live groundwork track | The project the track's README names, `groundwork-<nn>`  |
+
+A pick inside a drive or a track never takes a `pick-<nn>` project, so its frames sit beside the finding or the question they answer.
+
+## A standalone pick
+
+- `<topic>` is the kebab-case slug of the surface or concept the ask names, such as `landing` or `empty-inbox`
+- `<nn>` is the highest `pick-<nn>` on the board plus one, two digits, read off `frameboard list`, and `01` when it lists none
+- Reuse a `pick-<nn>-<topic>` project with the same topic, and add this pick's pages to it, since a second pick on one topic belongs beside its first
 - Take the project the ask names when it names one, since a round asked to sit beside another is the operator's to place
 
-A standalone `design-references` run names its project the same way, from the surface the operator's ask names, and asks when the ask names none.
+## A project an earlier round named
 
-## Reserved slugs
+An older round named its project for the surface alone, such as `landing` or `picks`. No verb moves a page between projects and its refs are handed out, so leave that project where it is.
 
-The archive lands at `.canon/<project>/<page>/`, so it follows the project name. Stop and ask the operator for a name when the slug is `board`, `canvas`, `compact`, `tmp`, or a `.canon/` kind that `${CLAUDE_SKILL_DIR}/../create-skill/references/skill.md` lists under `### Where output lands`, since the archive would write into that record's folder.
+- Finish a round still open there in that project
+- Start a new pick in a `pick-<nn>-<topic>` project, unless the ask names the older one
+
+A standalone `design-references` run names its project by the same rule, from the surface the operator's ask names, and asks when the ask names none.

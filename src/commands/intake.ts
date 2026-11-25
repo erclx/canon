@@ -100,6 +100,9 @@ export function register(program: Command): void {
         'answer verb cannot reach it and folding it into either count hides a',
         'file that needs fixing.',
         '',
+        'An answer opening on the word "sketch" is a pending pick, reported as',
+        '`pendingPick` on each item. It is answered and decides nothing.',
+        '',
         'Examples:',
         '  canon intake list',
         '  canon intake list toolkit-overview --unread --json',
@@ -141,7 +144,8 @@ export function register(program: Command): void {
         '                  folder, all named in `detail`',
         '  no-cluster      the cluster file named does not exist',
         '  no-item         the item number named does not exist in the cluster',
-        '  answered        the item already carries an answer',
+        '  answered        the item already carries an answer other than a',
+        '                  pending pick',
         '  undecided       a --decided item carries no Decided: field, or its',
         "                  pointer reaches no decision in this folder's",
         '                  evidence/drive-log.md',
@@ -158,7 +162,8 @@ export function register(program: Command): void {
         'keeps a batch from racing on the file every selection shares.',
         '',
         'An item already carrying an answer is refused rather than overwritten.',
-        'A filled slot is a decision already made.',
+        'A filled slot is a decision already made. The exception is a pending',
+        'pick, an answer opening on the word "sketch", which either flag fills.',
         '',
         '--decided writes "ok, as decided in drive-log finding <nn>", so the',
         'slot names the decision it accepts. Any refusal writes no slot.',
@@ -210,8 +215,8 @@ export function register(program: Command): void {
         '                   where null records a drive of the live app',
         '  undrawn          a decision in evidence/drive-log.md with no Drawn',
         '                   path and no skipped reason',
-        '  uncaptured       a drive whose log names a Board with no',
-        '                   evidence/baseline/00-current image',
+        '  uncaptured       a drive whose log names a Board and draws a decided',
+        '                   finding, with no evidence/baseline/00-current image',
         '  skippedVisible   a Drawn skip on a finding whose intake item names a',
         '                   rendered-surface file in its Fix or Worth it line',
         '',
@@ -503,7 +508,8 @@ function reportFolder(
     logStep(cluster.cluster)
     for (const item of cluster.items) {
       const state = isUnread(item) ? 'unread' : (item.answer ?? 'no slot')
-      logInfo(`${item.label}. ${item.title} (${state})`)
+      const pending = item.pendingPick ? 'pending pick: ' : ''
+      logInfo(`${item.label}. ${item.title} (${pending}${state})`)
     }
   }
 

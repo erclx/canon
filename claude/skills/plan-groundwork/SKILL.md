@@ -24,7 +24,7 @@ Apply it in open mode alone, after Step 1 resolves the mode and before the folde
 
 - When one or fewer holds, stop: `❌ Already decided enough to plan. Run /plan-feature instead.`
 - Resume and close are exempt, since a measured track fails the test by definition and applying it would refuse the folder it admitted
-- A launch naming a finished `design-pick` run's picked page or archive path is exempt, per `${CLAUDE_SKILL_DIR}/references/design-run-record.md`
+- A launch naming a finished `design-pick` run's picked page is exempt, per `${CLAUDE_SKILL_DIR}/references/design-run-record.md`
 - A refused topic that is a broad dump rather than one question routes to `plan-intake`, which dispositions many findings in breadth, not to the planning skill the stop names
 
 ## Write scope
@@ -41,7 +41,7 @@ Write only inside `.canon/groundwork/<nn>-<slug>/`. A feature plan, source chang
 
 What a spike produces stays inside the track, under `.canon/groundwork/<nn>-<slug>/evidence/`, which the first rule already permits. Mode detection matches only top-level entries, so a nested folder cannot be mistaken for a track, and scratch holds only what can be deleted without loss.
 
-A `design-pick` run invoked from inside a live track follows its own branch for this. It writes its renders to `evidence/` here, and drafts its candidates as pages on the Frameboard board `design-pick` resolves, where its close removes the round.
+A `design-pick` run invoked from inside a live track follows its own branch for this. It writes its renders to `evidence/` here, and drafts its candidates as pages in this track's own board project, where its close leaves them.
 
 ### Drawing a judgment question
 

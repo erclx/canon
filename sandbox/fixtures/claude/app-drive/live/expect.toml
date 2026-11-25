@@ -12,7 +12,7 @@ absent = [
 write_scope = [
   { path = ".canon/intake/**", why = "Intake files land in the folder the pass opens." },
   { path = ".canon/tmp/app-drive/**", why = "The drive keeps its scratch here." },
-  { path = ".canon/picks/**", why = "The proposals folder, where a taste item frames go." },
+  { path = ".canon/proposals/**", why = "The proposals folder, where a fallback mock goes." },
   { path = "dist/**", why = "The Action names the launch, so the build output is the one checkout write a correct run makes." },
 ]
 

@@ -73,6 +73,8 @@ Write `.canon/tasks/vXX.Y-<slug>.md` under the claimed label, reading the file f
 
 Write the outcome of a row citing an intake item from that item's `Fix:` line, read through `canon intake list <slug> --json` and never from a relayed summary. Drop the class prefix such as "plan-worthy", and carry a narrowing from the `You:` line beside the fix. A bundled row takes one outcome per item.
 
+Never promote an item the record lists as `pendingPick`, since its answer waits on a pick and decides nothing. Leave it out of a bundled row and name it in the report.
+
 ### Step 4: place it on a surface
 
 A task file with no row is a dropped task, so name its surface in the same pass that creates it. The test is in `${CLAUDE_SKILL_DIR}/references/backlog.md`, and the board shape in `${CLAUDE_SKILL_DIR}/references/board.md` beside it.
@@ -120,6 +122,8 @@ Those reads give four states, and the first three earn a line each.
 | The archive cites it                                                    | Promoted and shipped, so nothing                                     |
 
 The first state tests two counts because a malformed item is neither unread nor answered. Reading `unread` alone reports a broken file as decided work nobody promoted.
+
+The counts read a pending pick as answered, so open each folder in the first state with `canon intake list <slug> --json`. Report its `pendingPick` items as waiting on a pick, and as decided work only what is left.
 
 ### How to report it
 

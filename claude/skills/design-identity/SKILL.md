@@ -75,7 +75,7 @@ The final icon and card renders below are not arms, so they stay off the board. 
 
 ## Step 6: finalize the mark and the icons
 
-This step and Step 7 replace `design-pick`'s own Step 6 items 1 and 2, since the pick here produces several final files rather than one applied surface. Its archive capture, its page delete, and its server stop still run, after Step 7.
+This step and Step 7 replace `design-pick`'s own Step 6 items 1 and 2, since the pick here produces several final files rather than one applied surface. Its `00-next` page and its server stop still run, after Step 7.
 
 1. Extract the picked arm's `.mark` markup as the final vector source. Write it to `<write-folder>/favicon.svg`.
 2. Under `<dest>/render/`, write one `icon-<w>x<h>.html` page per Step 2 size, carrying the picked `.mark` markup in an element with the shared class `.render`.
@@ -93,7 +93,7 @@ The card leaves this batch and takes Step 7 instead. An icon is the mark alone a
 
 ## Step 7: write the card as a route and capture it through the server
 
-A card captured from a page this run deletes leaves a PNG and nothing that produced it, so renaming the project means another pick loop to move one string. Write the composition into a route the project keeps, and capture it through a running server so it reads the real stylesheet, tokens, and fonts.
+A card captured from a scratch page leaves a PNG and nothing the project holds that produced it, so renaming the project means another pick loop to move one string. Write the composition into a route the project keeps, and capture it through a running server so it reads the real stylesheet, tokens, and fonts.
 
 Both paths write two cards, each captured with `--color-scheme` set to its theme. An `og:image` tag names one URL that every viewer sees whatever their own theme, so only one is wired:
 
@@ -119,7 +119,7 @@ These take their own calls because Step 6's batch is already captured by the tim
 
 ### Closing the scratch folder and the board
 
-Delete `<dest>` once the icon and card captures land, then close the board through `design-pick` Step 6 items 3 to 8, which archive every arm and delete the pages the run added. The route is not a leftover variant, since it holds the arm the operator picked.
+Delete `<dest>` once the icon and card captures land, then close the board through `design-pick` Step 6 items 3 to 7, which draw the picked card on `00-next` and keep every page the run added. The route holds the arm the operator picked, so it stays too.
 
 A project whose card was generated before this route existed keeps its PNG. Say so rather than regenerating it, since the pick loop spends attention on a file nobody complained about, and the next real edit picks up the route.
 

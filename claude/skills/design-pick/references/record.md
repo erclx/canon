@@ -13,14 +13,14 @@ A run under `role-planner` lands no pick through `design-record`, so nothing els
 
 ## What the offer carries
 
-Make the offer before the close report. On a yes, this same planning session runs `plan-groundwork` under that skill's own write scope, so the track is a second record beside the archive. Carry what the track writes from:
+Make the offer before the close report. On a yes, this same planning session runs `plan-groundwork` under that skill's own write scope, so the track is a second record beside the kept pages. Carry what the track writes from:
 
-- The picked page ref, or the archive path under `.canon/` from item 5, either of which exempts the launch from the groundwork qualifying test
+- The picked page ref, which exempts the launch from the groundwork qualifying test
 - The arms each pick beat, by id and cost
 - The measurements behind each pick, such as the width checks and the capture paths
 - The operator's reason when they gave one
 
-Name the track's path in the handoff to the controller, beside the frame refs, the page ref, and the archive path.
+Name the track's path in the handoff to the controller, beside the frame refs and the page ref.
 
 ## Outside `role-planner`
 

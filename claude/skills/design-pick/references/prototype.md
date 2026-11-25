@@ -72,9 +72,9 @@ The prototype is the reference for behavior and copy from the moment it exists, 
 Before every handover, the first and each one after an edit, list each static frame of the picked design that carries copy or a control label the prototype no longer renders.
 
 1. Collect the visible text of every screen in the prototype, walking each confirmed flow.
-2. Collect the visible text of each static frame of the pick from its HTML file on the board, while the picked page is still there.
+2. Collect the visible text of each static frame of the pick from its HTML file on the board.
 3. Report each string a static frame carries and the prototype does not, grouped by frame, such as a removed button or a renamed screen.
 
-The close deletes the picked page, and the archive and the design record hold images, which a text scan cannot read. Report each frame a handover after the close cannot reach as unread by name, never as clean.
+The close keeps the picked page, so its static frames stay readable at every later handover. The design record holds images, which a text scan cannot read. Report each frame no board page holds any more as unread by name, never as clean.
 
 Redraw or retire each listed frame through `design-record` before handover, or name it to the operator as stale. A list that comes back empty with no frame unread says only that no text drifted. The scan cannot see a moved control or a changed layout, so a clean scan is a floor and never proof the frames agree.

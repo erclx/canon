@@ -528,3 +528,111 @@ describe('Decided route', () => {
     if (!outcome.ok) expect(outcome.reason).toBe('answered')
   })
 })
+
+describe('pending pick', () => {
+  const DECIDED = 'evidence/drive-log.md, finding 2'
+
+  it.each(['sketch', 'Sketch, with the inspector', 'sketch it'])(
+    'should list an answer of %j as a pending pick',
+    async (answer) => {
+      await seedFolder('a-dump', {
+        '01-domain.md': cluster(item({ label: '1', answer })),
+      })
+
+      const outcome = await readFolder(ROOT, 'a-dump')
+
+      if (!outcome.ok) throw new Error(outcome.message)
+      expect(outcome.clusters[0].items[0]).toMatchObject({
+        answer,
+        pendingPick: true,
+      })
+    },
+  )
+
+  it.each(['ok, sketch first', 'sketchy, drop it', 'ok', undefined])(
+    'should list an answer of %j as no pending pick',
+    async (answer) => {
+      await seedFolder('a-dump', {
+        '01-domain.md': cluster(item({ label: '1', answer })),
+      })
+
+      const outcome = await readFolder(ROOT, 'a-dump')
+
+      if (!outcome.ok) throw new Error(outcome.message)
+      expect(outcome.clusters[0].items[0].pendingPick).toBe(false)
+    },
+  )
+
+  it('should land a set selection on a pending slot', async () => {
+    const folder = await seedFolder('a-dump', {
+      '01-domain.md': cluster(item({ label: '1', answer: 'sketch' })),
+    })
+
+    const outcome = await answerItems(ROOT, 'a-dump', '01-domain.md', [
+      { label: '1', answer: 'pill row' },
+    ])
+
+    expect(outcome.ok).toBe(true)
+    const text = await readFile(join(folder, '01-domain.md'), 'utf8')
+    expect(readItems(text)[0].answer).toBe('pill row')
+  })
+
+  it('should land a drive decision on a pending slot', async () => {
+    const folder = await seedDrive(decidedItem('1', DECIDED, 'Sketch it'))
+
+    const outcome = await answerItems(ROOT, 'drive', '01-layers.md', [], ['1'])
+
+    expect(outcome.ok).toBe(true)
+    const text = await readFile(join(folder, '01-layers.md'), 'utf8')
+    expect(readItems(text)[0].answer).toBe(
+      'ok, as decided in drive-log finding 02',
+    )
+  })
+
+  it('should refuse undecided for a pending slot whose pointer reaches no decision', async () => {
+    const folder = await seedDrive(
+      decidedItem('1', 'evidence/drive-log.md, finding 05', 'sketch'),
+    )
+    const before = await readFile(join(folder, '01-layers.md'), 'utf8')
+
+    const outcome = await answerItems(ROOT, 'drive', '01-layers.md', [], ['1'])
+
+    expect(outcome.ok).toBe(false)
+    if (!outcome.ok) expect(outcome.reason).toBe('undecided')
+    expect(await readFile(join(folder, '01-layers.md'), 'utf8')).toBe(before)
+  })
+
+  it('should refuse an answer that mentions a sketch past its first word', async () => {
+    await seedFolder('a-dump', {
+      '01-domain.md': cluster(item({ label: '1', answer: 'ok, sketch first' })),
+    })
+
+    const outcome = await answerItems(ROOT, 'a-dump', '01-domain.md', [
+      { label: '1', answer: 'pill row' },
+    ])
+
+    expect(outcome.ok).toBe(false)
+    if (!outcome.ok) expect(outcome.reason).toBe('answered')
+  })
+
+  it('should refuse the whole call when one label is pending and another answered', async () => {
+    const folder = await seedFolder('a-dump', {
+      '01-domain.md': cluster(
+        item({ label: '1', answer: 'sketch' }),
+        item({ label: '2', answer: 'already decided' }),
+      ),
+    })
+    const before = await readFile(join(folder, '01-domain.md'), 'utf8')
+
+    const outcome = await answerItems(ROOT, 'a-dump', '01-domain.md', [
+      { label: '1', answer: 'pill row' },
+      { label: '2', answer: 'ok' },
+    ])
+
+    expect(outcome.ok).toBe(false)
+    if (outcome.ok) return
+    expect(outcome.reason).toBe('answered')
+    expect(outcome.detail).toEqual(['2. already decided'])
+    expect(await readFile(join(folder, '01-domain.md'), 'utf8')).toBe(before)
+  })
+})

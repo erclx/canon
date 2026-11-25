@@ -14,7 +14,7 @@ data = "fixtures/demo-board"
 personas = ["a designer laying out a board", "an agent calling the CLI"]
 scripts = ["canon/drive/basics.md"]
 access = "/api/access/open"
-proposals = ".canon/picks"
+proposals = ".canon/proposals"
 board-project = "drive-<nn>"
 board-folder = "Drives"
 ```
@@ -25,9 +25,9 @@ board-folder = "Drives"
 
 - `launch` runs from the worktree root and names the port it serves on, so `canon pr local --root` finds it
 - `personas` covers an agent or API caller as well as a person in the UI, when the app has one
-- An absent `data` means the app starts empty, and an absent `proposals` means the frames stay in the intake folder's `evidence/`
+- An absent `data` means the app starts empty, and an absent `proposals` means a fallback mock stays in the intake folder's `evidence/`
 - `access` is read by `ui-film` and `review-ui`, which open their address behind it, and a drive ignores it
-- A fallback mock is the standalone HTML a decided finding's frames are lifted into when the copy cannot host them
+- `proposals` holds the fallback mock alone, the standalone HTML a decided finding's frames are lifted into when the copy cannot host them and the drive draws no board
 
 ### Scripts
 
@@ -51,7 +51,7 @@ Check: the frame keeps its name after a reload
 
 ### The board key
 
-`board-project` is optional and defaults to `drive-<nn>`. A drive asks about it only when the board holds a versioned project of the stem, such as `landing-v2`, as Step 1 states, so `drive-<nn>` never triggers it.
+`board-project` is optional and defaults to `drive-<nn>`. A drive asks about it only when the board holds a versioned project of the stem, such as `landing-v2`, as `drive-board.md` states, so `drive-<nn>` never triggers it.
 
 - Naming the key opts the project in, even with no board yet, while omitting it leaves the call to whether `.canon/board/` exists
 - Keep `<nn>` in a value you set, since one project across drives loses which frames came from which

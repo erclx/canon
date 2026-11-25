@@ -9,8 +9,8 @@ paths = [
   { path = ".canon/board/drive-*/project.json", why = "The drive's board project." },
   { path = ".canon/board/drive-*/00-current/layout.json", why = "The current-state page leads the board." },
   { path = ".canon/board/drive-*/00-current/*-390.html", why = "A frame at the narrow width." },
-  { path = ".canon/board/drive-*/00-current/*-834.html", why = "A frame at the middle width." },
-  { path = ".canon/board/drive-*/00-current/*-1440.html", why = "A frame at the wide width." },
+  { path = ".canon/board/drive-*/00-current/*-768.html", why = "A frame at the middle width." },
+  { path = ".canon/board/drive-*/00-current/*-1280.html", why = "A frame at the wide width." },
 ]
 
 absent = [
@@ -22,7 +22,7 @@ absent = [
 write_scope = [
   { path = ".canon/intake/**", why = "Intake files land in the folder the pass opens." },
   { path = ".canon/tmp/app-drive/**", why = "The drive keeps its scratch here." },
-  { path = ".canon/picks/**", why = "The proposals folder, where a taste item frames go." },
+  { path = ".canon/proposals/**", why = "The proposals folder, where a fallback mock goes." },
   { path = ".canon/board/**", why = "The default scope plus the board root, where a board run writes its pages." },
 ]
 
@@ -30,7 +30,7 @@ escape_scope = []
 
 manual = [
   "The pick question carried the board page address and named each option's frame. Unwired: the question is a turn in the transcript, which the checker does not read.",
-  "Both addresses were handed before driving. Unwired: an ordering inside the reply.",
+  "The app's address was handed before driving, and the board's before the first frame drawn. Unwired: an ordering inside the reply.",
   "The board server and the app server ended. Unwired: a listener is not a file in the sandbox tree.",
   "The run's own `canon intake drive-check <slug> --json` returned clean. Unwired: a command's exit is not in the envelope.",
 ]

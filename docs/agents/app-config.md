@@ -20,7 +20,7 @@ Read by `app-drive`, `ui-film`, `review-ui`, and `canon intake drive-check`, to 
 | `personas`      | string list | asked         | Who uses the app, each driven through every goal              |
 | `access`        | string      | served root   | A path or address opening the app's start state               |
 | `scripts`       | string list | none          | Scenario files a drive runs once per persona before any goal  |
-| `proposals`     | string      | intake folder | Where an undecided taste finding's frames go                  |
+| `proposals`     | string      | intake folder | Where the fallback mock goes when the copy hosts none         |
 | `board-project` | string      | `drive-<nn>`  | The board project a drive draws in, `<nn>` the intake ordinal |
 | `board-folder`  | string      | `Drives`      | The board's home folder the project files under               |
 
