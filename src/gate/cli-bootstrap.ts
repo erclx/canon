@@ -9,10 +9,14 @@ function resolveLocal(root: string, from: string, spec: string): string {
   const base = spec.startsWith('@/')
     ? join(root, 'src', spec.slice(2))
     : resolve(dirname(join(root, from)), spec)
-  const found = [`${base}.ts`, `${base}.tsx`, base, join(base, 'index.ts')].find(
-    (path) => /\.tsx?$/.test(path) && existsSync(path),
-  )
-  if (found === undefined) throw new Error(`cannot resolve ${spec} from ${from}`)
+  const found = [
+    `${base}.ts`,
+    `${base}.tsx`,
+    base,
+    join(base, 'index.ts'),
+  ].find((path) => /\.tsx?$/.test(path) && existsSync(path))
+  if (found === undefined)
+    throw new Error(`cannot resolve ${spec} from ${from}`)
   return relative(root, found)
 }
 

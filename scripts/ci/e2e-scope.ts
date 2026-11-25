@@ -96,18 +96,13 @@ function measure(base: string): E2eScope {
     relative(root, entry.file),
   )
   const sources = readTestSources(root)
-  return scopeFor(
-    changed,
-    affected,
-    (file) => e2eReadersOf(file, sources),
-    {
-      spawners: e2eCliSpawners(sources),
-      bootstrap: cliBootstrap(root),
-      versionOnly: changed.includes('package.json')
-        ? versionOnly(show(base), show('HEAD'))
-        : false,
-    },
-  )
+  return scopeFor(changed, affected, (file) => e2eReadersOf(file, sources), {
+    spawners: e2eCliSpawners(sources),
+    bootstrap: cliBootstrap(root),
+    versionOnly: changed.includes('package.json')
+      ? versionOnly(show(base), show('HEAD'))
+      : false,
+  })
 }
 
 function show(ref: string): string {
