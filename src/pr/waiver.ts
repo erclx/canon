@@ -20,11 +20,7 @@ const WAIVER_LINE = /^- \*\*Waived capture:\*\* `([^`]+)`:\s*(\S.*)$/
  */
 const REEL_WAIVER_LINE = /^- \*\*Waived reel:\*\*\s*(\S.*)$/
 
-/**
- * The line `review-ui` writes in its own verdict to accept the boxes it left
- * undriven. It counts them rather than naming any, so a later pass that leaves
- * a different number undriven outgrows it.
- */
+/** Counts the boxes `review-ui` left undriven rather than naming any, since numbers shift. */
 const UNDRIVEN_WAIVER_LINE = /^- \*\*Waived undriven:\*\* (\d+):\s*\S/
 
 const FENCE = /^\s*(```|~~~)/
