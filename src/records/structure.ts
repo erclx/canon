@@ -1,3 +1,4 @@
+import { namesMeasurement } from '@/labels/measurement'
 import { findBacktickSpans } from '@/markdown/backticks'
 import { type DensityKind, densityFindings } from '@/markdown/density'
 import { bodyLines, visibleText } from '@/markdown/scan'
@@ -21,7 +22,11 @@ export type StructureCriterion = (typeof STRUCTURE_CRITERIA)[number]
 
 /** One place a record misses a criterion, an intake field spilling past its line, or a bundle row no reader resolves. */
 export interface StructureEntry {
-  readonly criterion: StructureCriterion | 'intake-spill' | 'bundle-unresolved'
+  readonly criterion:
+    | StructureCriterion
+    | 'intake-spill'
+    | 'bundle-unresolved'
+    | 'measured-run-unplaced'
   /** The line as an editor numbers it, frontmatter included. */
   readonly line: number
   readonly message: string
@@ -213,6 +218,40 @@ function withinProse(lines: readonly string[], entry: StructureEntry): boolean {
   return proseLength(bulletAt(lines, entry.line - 1)) <= CHECKPOINTS.bullet
 }
 
+const PLACE = /`(?:test|CI|operator)`/
+const VERIFICATION_HEADING = /^##\s+Verification\s*$/
+
+/**
+ * Each Verification bullet naming a measurement with none of the three places written as a code
+ * span. It reports under structure alone, so no plan written before it is refused.
+ */
+function measuredRunUnplaced(text: string): StructureEntry[] {
+  const lines = text.split('\n')
+  const found: StructureEntry[] = []
+  let inVerification = false
+
+  for (const line of bodyLines(text)) {
+    if (line.fenced) continue
+    if (/^##\s/.test(line.text)) {
+      inVerification = VERIFICATION_HEADING.test(line.text)
+      continue
+    }
+    if (!inVerification || !LIST_ITEM.test(line.text)) continue
+
+    const bullet = bulletAt(lines, line.number - 1)
+    if (!namesMeasurement(bullet) || PLACE.test(bullet)) continue
+
+    found.push({
+      criterion: 'measured-run-unplaced',
+      line: line.number,
+      message:
+        'names a measured run with no place. Write `test`, `CI`, or `operator` as a code span beside it.',
+    })
+  }
+
+  return found
+}
+
 /**
  * The structure report for a plan. A path with its reason, or a command with what it showed, is
  * what the plan standard asks a bullet to carry, and a writer cannot shorten the path or the
@@ -221,7 +260,10 @@ function withinProse(lines: readonly string[], entry: StructureEntry): boolean {
 export function planStructure(text: string): StructureEntry[] {
   const lines = text.split('\n')
 
-  return structureFindings(text).filter(
-    (entry) => !(entry.criterion === 'S4' && withinProse(lines, entry)),
-  )
+  return [
+    ...structureFindings(text).filter(
+      (entry) => !(entry.criterion === 'S4' && withinProse(lines, entry)),
+    ),
+    ...measuredRunUnplaced(text),
+  ].sort((a, b) => a.line - b.line)
 }

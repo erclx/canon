@@ -6,8 +6,13 @@ const OUTCOME = '## Outcome'
 const TECHNICAL_CONTEXT = '## Technical context'
 const VERIFICATION = '## Verification'
 const MEASUREMENT_WORD =
-  /\b(eval|evals|benchmark|benchmarks|benchmarked|latency|p50|p95|median|timed)\b/i
+  /\b(eval|evals|benchmark|benchmarks|benchmarked|latency|p50|p95|median|timed|frame time|frames per second)\b/i
 const SEPARATOR_ROW = /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?$/
+
+/** True when a line of prose names a measurement, a word in a code span never counting. */
+export function namesMeasurement(line: string): boolean {
+  return MEASUREMENT_WORD.test(maskCodeSpans(line))
+}
 
 export type MeasurementGap = 'table' | 'technical-context' | 'results-table'
 
@@ -83,9 +88,7 @@ export function checkMeasuredResults(
     linesOutsideFences(plan).map((line) => line.trim()),
     VERIFICATION,
   )
-  const measured = verification.some((line) =>
-    MEASUREMENT_WORD.test(maskCodeSpans(line)),
-  )
+  const measured = verification.some(namesMeasurement)
   if (!measured) return { checked: false, missing: [] }
 
   const outcome = sectionLines(
