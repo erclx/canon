@@ -601,6 +601,22 @@ function tieTests(
   )
 }
 
+// Relative to the working folder, as findNestedRoots and ls-files print them,
+// since a diff prints repository-relative paths where --relative does not.
+function listChangedPaths(base: string): string[] {
+  return [
+    ...listPaths([
+      'diff',
+      '--name-only',
+      '-z',
+      '--no-renames',
+      '--relative',
+      base,
+    ]),
+    ...listPaths(['ls-files', '-z', '--others', '--exclude-standard']),
+  ]
+}
+
 // Outside each nested root, whose own run takes its tests.
 function findTiedTests(base: string): string[] {
   const untracked = ['--others', '--exclude-standard']
@@ -608,10 +624,7 @@ function findTiedTests(base: string): string[] {
   const isOwn = (path: string): boolean =>
     !nested.some((root) => path.startsWith(`${root}/`))
 
-  const changed = [
-    ...listPaths(['diff', '--name-only', '-z', '--no-renames', base]),
-    ...listPaths(['ls-files', '-z', ...untracked]),
-  ]
+  const changed = listChangedPaths(base)
   const present = listPaths(['ls-files', '-z', '--cached', ...untracked])
   const files = new Set(present.filter((path) => existsSync(path)))
   return tieTests(changed, [...files].filter(isOwn))
@@ -645,7 +658,26 @@ function findNestedRoots(): string[] {
     .map((path) => dirname(dirname(path)))
 }
 
-function runNestedRoot(root: string): void {
+const LOCKFILES = [
+  'bun.lock',
+  'bun.lockb',
+  'package-lock.json',
+  'yarn.lock',
+  'pnpm-lock.yaml',
+]
+
+// A folder with its own lockfile and no node_modules is a checkout never
+// installed there. A workspace member has no lockfile of its own, so it passes.
+function checkPackages(root: string): void {
+  const hasLockfile = LOCKFILES.some((name) => existsSync(join(root, name)))
+  if (hasLockfile && !existsSync(join(root, 'node_modules'))) {
+    fail(
+      `Nested root ${root} has no installed packages. Run 'bun install' in ${root}, then run this again`,
+    )
+  }
+}
+
+function runNestedRoot(root: string, isChanged: boolean): void {
   logStep(`Nested root ${root}`)
   const runner = join(root, 'scripts/verify.ts')
   if (!existsSync(runner)) {
@@ -653,6 +685,7 @@ function runNestedRoot(root: string): void {
       `No ${runner} here, though git tracks ${root}/${PHASE_LIST}. Sync the stack into ${root} or stage its removal`,
     )
   }
+  if (isChanged) checkPackages(root)
   const result = spawnSync(process.execPath, ['scripts/verify.ts'], {
     cwd: root,
     encoding: 'utf8',
@@ -894,7 +927,15 @@ function main(flags: Flags): void {
 
   // A nested run never discovers, so a subfolder's own subfolders run once.
   if (!isNested) {
-    for (const root of findNestedRoots()) runNestedRoot(root)
+    const changed = base === undefined ? undefined : listChangedPaths(base)
+    for (const root of findNestedRoots()) {
+      const isTouched = changed?.some((path) => path.startsWith(`${root}/`))
+      if (isTouched === false) {
+        logSkip(`Skipped: nested root ${root}, which the change does not touch`)
+      } else {
+        runNestedRoot(root, flags.isChanged)
+      }
+    }
   }
 
   pass?.keep()

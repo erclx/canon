@@ -48,6 +48,12 @@ The root run calls each nested runner after its own stages, so one `bun run chec
 - The trunk is `origin/HEAD`, then `origin/main`, then `origin/master`. A scoped push refuses with a hint when none resolves, and a push that is not scoped runs every phase without one.
 - A first push runs every phase, since `origin` holds no branch to compare with and no fetch can bring one.
 
+A changed run reads each nested root against the change too.
+
+- It skips a nested root with no changed, added, or deleted path under it and prints its folder, and runs a touched one whole.
+- A root change a nested root imports waits for a full `check`, which is the cost of the skip.
+- It stops a touched root with its own lockfile and no `node_modules`, naming the folder and `bun install`. A workspace member has no lockfile, so it never stops.
+
 A test ties to the change by name, and no import is followed.
 
 - It ties a test that changed, and one in a changed file's folder under its stem with `.test.`, `.spec.`, or `_test`.
