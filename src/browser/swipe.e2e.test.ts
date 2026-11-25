@@ -4,6 +4,9 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { CHROMIUM_REVISION, browsersRoot } from '@/browser/agent-cli'
+// Spawns `canon browser` through the CLI, so vitest selects this suite on a
+// change to the command only through this import.
+import '@/commands/browser'
 
 /**
  * Drives `canon browser swipe` against a served pinned section, since only a real

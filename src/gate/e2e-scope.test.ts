@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { scopeFor } from '../../scripts/ci/e2e-scope'
+import { scopeFor, versionOnly } from '../../scripts/ci/e2e-scope'
+import e2eConfig from '../../vitest.e2e.config'
 
 const none = (): readonly string[] => []
 
@@ -68,20 +69,95 @@ describe('scopeFor', () => {
     ).toEqual(['src/tooling/screenshot-mask.e2e.test.ts'])
   })
 
-  it('should add the suites spawning the cli when a source under src changes', () => {
-    const spawners = ['src/browser/swipe.e2e.test.ts']
+  describe('cli', () => {
+    const cli = {
+      spawners: ['src/browser/swipe.e2e.test.ts'],
+      bootstrap: ['src/cli.ts', 'src/cli/retired.ts'],
+    }
 
-    expect(scopeFor(['src/commands/browser.ts'], [], none, spawners)).toEqual({
-      e2e: true,
-      full: false,
-      files: spawners,
+    it('should add the spawning suites when a file the cli loads outside a command changes', () => {
+      expect(scopeFor(['src/cli/retired.ts'], [], none, cli)).toEqual({
+        e2e: true,
+        full: false,
+        files: cli.spawners,
+      })
+    })
+
+    it('should add the spawning suites when the cli entry changes', () => {
+      expect(scopeFor(['src/cli.ts'], [], none, cli).files).toEqual(
+        cli.spawners,
+      )
+    })
+
+    it('should leave the spawning suites out when only a command changes', () => {
+      expect(scopeFor(['src/records/backup.ts'], [], none, cli).e2e).toBe(false)
+    })
+
+    it('should leave the spawning suites out when no source changes', () => {
+      expect(scopeFor(['docs/a.md'], [], none, cli).e2e).toBe(false)
     })
   })
 
-  it('should leave the cli spawners out when no source under src changes', () => {
-    const spawners = ['src/browser/swipe.e2e.test.ts']
+  describe('version', () => {
+    it('should skip every suite when a release moves only the package version', () => {
+      expect(
+        scopeFor(['package.json', 'CHANGELOG.md'], [], none, {
+          versionOnly: true,
+        }),
+      ).toEqual({ e2e: false, full: false, files: [] })
+    })
 
-    expect(scopeFor(['docs/a.md'], [], none, spawners).e2e).toBe(false)
+    it('should skip every suite when the package version is the only change', () => {
+      expect(
+        scopeFor(['package.json'], [], none, { versionOnly: true }).e2e,
+      ).toBe(false)
+    })
+
+    it('should run the full suite when package.json changes more than its version', () => {
+      expect(
+        scopeFor(['package.json'], [], none, { versionOnly: false }),
+      ).toEqual({ e2e: true, full: true, files: [] })
+    })
+
+    it('should run the full suite when bun.lock changes beside a version bump', () => {
+      expect(
+        scopeFor(['package.json', 'bun.lock'], [], none, {
+          versionOnly: true,
+        }).full,
+      ).toBe(true)
+    })
+
+    it('should leave vitest no default trigger listing every suite for a package.json change', () => {
+      expect(e2eConfig.test?.forceRerunTriggers).toEqual([])
+    })
+
+    it('should run the full suite when another trigger changes beside a version', () => {
+      expect(
+        scopeFor(['package.json', 'tsconfig.json'], [], none, {
+          versionOnly: true,
+        }).full,
+      ).toBe(true)
+    })
+  })
+
+  describe('versionOnly', () => {
+    it('should hold when only the version differs', () => {
+      const base = '{"name":"a","version":"1.0.0","dependencies":{"x":"1"}}'
+      const head = '{"name":"a","version":"1.1.0","dependencies":{"x":"1"}}'
+
+      expect(versionOnly(base, head)).toBe(true)
+    })
+
+    it('should fail when a dependency differs beside the version', () => {
+      const base = '{"version":"1.0.0","dependencies":{"x":"1"}}'
+      const head = '{"version":"1.1.0","dependencies":{"x":"2"}}'
+
+      expect(versionOnly(base, head)).toBe(false)
+    })
+
+    it('should fail when a side is not json', () => {
+      expect(versionOnly('', '{"version":"1.0.0"}')).toBe(false)
+    })
   })
 
   it('should run the full suite when the changed set is empty', () => {

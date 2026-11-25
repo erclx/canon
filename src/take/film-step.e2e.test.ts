@@ -32,6 +32,9 @@ import {
 import type { TakeLog } from '@/take/log'
 import { readTakePlan } from '@/take/plan'
 import { take } from '@/take/film'
+// Spawns `canon take` through the CLI, so vitest selects this suite on a change
+// to the command only through this import.
+import '@/commands/take'
 
 const PAGE = readFileSync(
   new URL('./fixtures/fade.html', import.meta.url),

@@ -26,6 +26,9 @@ export default defineConfig({
   test: {
     globalSetup: base.test?.globalSetup,
     maxWorkers: base.test?.maxWorkers,
+    // Vitest's default would list every suite for a `package.json` change from
+    // a path with no dot folder, and `FULL_SUITE_TRIGGERS` holds that list.
+    forceRerunTriggers: [],
     // Projects with the same `groupOrder` run together and groups run from the
     // lowest up, so the timed group starts once the parallel one has finished.
     projects: [

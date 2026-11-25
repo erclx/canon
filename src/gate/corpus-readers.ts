@@ -83,7 +83,8 @@ export function e2eReadersOf(
 
 /**
  * The end-to-end suites that run the CLI entry as a child process, which reach
- * every command through no import, so a change under `src/` selects them.
+ * the commands through the entry, so a change to what the entry loads outside a
+ * command selects them and the command each imports reaches the rest.
  */
 export function e2eCliSpawners(
   sources: ReadonlyMap<string, string>,
