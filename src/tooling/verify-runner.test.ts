@@ -10,7 +10,7 @@ import {
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 const TOOLING = join(import.meta.dirname, '../../tooling')
@@ -726,5 +726,430 @@ describe('a folder with no git repository', () => {
 
     expect(result.status).toBe(0)
     expect(result.stdout).toContain('Verification passed')
+  })
+})
+
+// Stubs and logs stay out of git, so neither reads as a change.
+const testLog = (): string => join(bin, 'tests.log')
+
+const runGit = (...args: readonly string[]): SpawnSyncReturns<string> =>
+  spawnSync(
+    'git',
+    [
+      '-c',
+      'user.name=fixture',
+      '-c',
+      'user.email=fixture@example.com',
+      '-c',
+      'commit.gpgsign=false',
+      ...args,
+    ],
+    { cwd: fixture, encoding: 'utf8' },
+  )
+
+const writeSource = (path: string, body = ''): void => {
+  mkdirSync(dirname(join(fixture, path)), { recursive: true })
+  writeFileSync(join(fixture, path), body)
+}
+
+const commit = (): void => {
+  runGit('add', '-A')
+  runGit('commit', '-q', '--no-verify', '-m', 'change')
+}
+
+const pushTrunk = (name = 'main'): void => {
+  runGit('update-ref', `refs/remotes/origin/${name}`, 'HEAD')
+}
+
+const initProject = (): void => {
+  runGit('init', '-q')
+  mkdirSync(join(fixture, '.git/info'), { recursive: true })
+  writeFileSync(
+    join(fixture, '.git/info/exclude'),
+    '/bin/\n/vendor/\n/canon-argv.log\n',
+  )
+}
+
+const writeTestRunner = (exitCode = 0): void => {
+  writeFileSync(
+    join(bin, 'log-tests'),
+    `#!/usr/bin/env bash\nprintf '%s\\n' "$@" >> ${testLog()}\nexit ${exitCode}\n`,
+    { mode: 0o755 },
+  )
+}
+
+const readTests = (): string[] =>
+  existsSync(testLog())
+    ? readFileSync(testLog(), 'utf8').trim().split('\n')
+    : []
+
+const runChanged = (
+  env: NodeJS.ProcessEnv = {},
+  ...flags: readonly string[]
+): SpawnSyncReturns<string> =>
+  run([process.execPath, RUNNER, '--changed', ...flags], env)
+
+const WEB_CHANGED = {
+  ...declare(STACK_SCRIPTS.web),
+  'test:run': 'exit 1',
+  build: 'exit 1',
+  'test:changed': 'log-tests',
+}
+
+const setUpChanged = (files: readonly string[] = []): void => {
+  writeList('web')
+  writePackage(WEB_CHANGED)
+  writeTestRunner()
+  writeGate('canon', 0, PASSED)
+  initProject()
+  for (const file of files) writeSource(file)
+  commit()
+  pushTrunk()
+}
+
+describe('changed mode', () => {
+  it('should run no build and no full suite', () => {
+    setUpChanged(['src/cart.ts', 'src/cart.test.ts'])
+    writeSource('src/cart.ts', 'edited')
+
+    const result = runChanged()
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).not.toContain('Build passed')
+    expect(result.stdout).not.toContain('Unit tests passed')
+  })
+
+  it('should run the whole-tree checks and the gate', () => {
+    setUpChanged()
+
+    const result = runChanged()
+
+    expect(result.stdout).toContain('Typecheck passed')
+    expect(result.stdout).toContain('Lint passed')
+    expect(readArgv()).toContain('gate run --nested --json')
+  })
+
+  it('should fail when a test beside a changed file fails', () => {
+    setUpChanged(['src/cart.ts', 'src/cart.test.ts'])
+    writeTestRunner(1)
+    writeSource('src/cart.ts', 'edited')
+
+    const result = runChanged()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('Tied tests failed')
+  })
+
+  it('should run neither check that reads the build', () => {
+    setUpChanged()
+    writeSource('scripts/check-head-meta.sh', 'exit 1\n')
+    writeSource('scripts/check-card-exclusion.sh', 'exit 1\n')
+
+    expect(runChanged().status).toBe(0)
+  })
+
+  it('should skip the tests with a reason when test:changed is undeclared', () => {
+    setUpChanged(['src/cart.ts', 'src/cart.test.ts'])
+    writePackage(declare(STACK_SCRIPTS.web))
+    writeSource('src/cart.ts', 'edited')
+
+    const result = runChanged()
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain(
+      'Skipped: test:changed is not declared here',
+    )
+  })
+
+  it('should say no test is tied when the change reaches none', () => {
+    setUpChanged(['src/cart.ts'])
+    writeSource('src/cart.ts', 'edited')
+
+    const result = runChanged()
+
+    expect(result.stdout).toContain('Skipped: no test is tied to the change')
+    expect(readTests()).toEqual([])
+  })
+
+  it('should close by naming what it left to CI', () => {
+    setUpChanged()
+
+    const result = runChanged()
+
+    expect(result.stdout).toContain('left to CI')
+    expect(result.stdout).not.toContain('Verification passed')
+  })
+})
+
+describe('the tie rule', () => {
+  it.each([
+    ['a .test. file beside its source', 'src/cart.ts', 'src/cart.test.ts'],
+    ['a .spec. file beside its source', 'src/cart.tsx', 'src/cart.spec.tsx'],
+    ['a _test file beside its source', 'pkg/cart.py', 'pkg/cart_test.py'],
+    ['a test_ file in another folder', 'app/tax.py', 'tests/test_tax.py'],
+    ['a test beside a stylesheet', 'src/a.module.css', 'src/a.test.tsx'],
+    ['a path a shell expands', 'app/(a)/$id x.ts', 'app/(a)/$id x.test.ts'],
+  ])('should tie %s', (_case, source, test) => {
+    setUpChanged([source, test])
+    writeSource(source, 'edited')
+
+    runChanged()
+
+    expect(readTests()).toEqual([test])
+  })
+
+  it.each([
+    ['a same-named test in another folder', 'src/a.ts', 'lib/a.test.ts'],
+    ['a test whose stem only starts the same', 'src/a.ts', 'src/ab.test.ts'],
+    ['a snapshot', 'src/a.ts', 'src/a.test.ts.snap'],
+    ['a data file carrying a marker', 'src/a.ts', 'src/a.spec.yaml'],
+  ])('should not tie %s', (_case, source, other) => {
+    setUpChanged([source, other])
+    writeSource(source, 'edited')
+
+    runChanged()
+
+    expect(readTests()).toEqual([])
+  })
+
+  it('should tie a test that itself changed', () => {
+    setUpChanged(['src/cart.ts', 'src/cart.test.ts'])
+    writeSource('src/cart.test.ts', 'edited')
+
+    runChanged()
+
+    expect(readTests()).toEqual(['src/cart.test.ts'])
+  })
+
+  it('should tie the test of a deleted source', () => {
+    setUpChanged(['src/cart.ts', 'src/cart.test.ts'])
+    rmSync(join(fixture, 'src/cart.ts'))
+
+    runChanged()
+
+    expect(readTests()).toEqual(['src/cart.test.ts'])
+  })
+
+  it('should leave out a deleted test', () => {
+    setUpChanged(['src/cart.ts', 'src/cart.test.ts'])
+    rmSync(join(fixture, 'src/cart.test.ts'))
+
+    runChanged()
+
+    expect(readTests()).toEqual([])
+  })
+
+  it('should tie the test of an untracked source', () => {
+    setUpChanged()
+    writeSource('src/cart.ts')
+    writeSource('src/cart.test.ts')
+
+    runChanged()
+
+    expect(readTests()).toEqual(['src/cart.test.ts'])
+  })
+
+  it('should tie the test of a source committed since the trunk', () => {
+    setUpChanged(['src/cart.ts', 'src/cart.test.ts'])
+    writeSource('src/cart.ts', 'edited')
+    commit()
+
+    runChanged()
+
+    expect(readTests()).toEqual(['src/cart.test.ts'])
+  })
+
+  it('should leave out a file only the trunk changed', () => {
+    setUpChanged(['src/cart.ts', 'src/cart.test.ts'])
+    writeSource('src/cart.ts', 'trunk moved')
+    commit()
+    pushTrunk()
+    runGit('reset', '-q', '--hard', 'HEAD~1')
+
+    const result = runChanged()
+
+    expect(result.stdout).toContain('Skipped: no test is tied to the change')
+  })
+
+  const changeTests = (count: number): void => {
+    setUpChanged()
+    Array.from({ length: count }, (_, i) => writeSource(`src/t${i}.test.ts`))
+  }
+
+  it('should run 40 tied files', () => {
+    changeTests(40)
+
+    runChanged()
+
+    expect(readTests()).toHaveLength(40)
+  })
+
+  it('should leave the tests to CI past 40 tied files', () => {
+    changeTests(41)
+
+    const result = runChanged()
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('past the 40 run here')
+    expect(readTests()).toEqual([])
+  })
+})
+
+describe('the trunk', () => {
+  it('should read a trunk named master', () => {
+    setUpChanged(['src/cart.ts', 'src/cart.test.ts'])
+    runGit('update-ref', '-d', 'refs/remotes/origin/main')
+    pushTrunk('master')
+    writeSource('src/cart.ts', 'edited')
+
+    runChanged()
+
+    expect(readTests()).toEqual(['src/cart.test.ts'])
+  })
+
+  it('should read origin/HEAD ahead of origin/main', () => {
+    setUpChanged(['src/cart.ts', 'src/cart.test.ts'])
+    writeSource('src/cart.ts', 'edited')
+    commit()
+    pushTrunk('trunk')
+    runGit(
+      'symbolic-ref',
+      'refs/remotes/origin/HEAD',
+      'refs/remotes/origin/trunk',
+    )
+
+    const result = runChanged()
+
+    expect(result.stdout).toContain('Skipped: no test is tied to the change')
+  })
+
+  it('should refuse with a fetch hint when no trunk resolves', () => {
+    setUpChanged()
+    runGit('update-ref', '-d', 'refs/remotes/origin/main')
+
+    const result = runChanged()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('git fetch origin')
+  })
+
+  it('should refuse when origin holds other branches and no trunk', () => {
+    setUpChanged()
+    runGit('remote', 'add', 'origin', 'https://example.com/a.git')
+    runGit('update-ref', '-d', 'refs/remotes/origin/main')
+    pushTrunk('feature')
+
+    const result = runChanged()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('git fetch origin')
+  })
+
+  it('should refuse when the trunk shares no history', () => {
+    setUpChanged()
+    runGit('checkout', '-q', '--orphan', 'other')
+    writeSource('src/other.ts')
+    commit()
+
+    const result = runChanged()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('No merge base with origin/main')
+  })
+
+  it('should refuse outside a git repository', () => {
+    setUp('web', STACK_SCRIPTS.web)
+
+    const result = runChanged()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('Not a git repository')
+  })
+
+  it('should run every phase on a first push, where origin has no branch', () => {
+    setUpChanged()
+    runGit('remote', 'add', 'origin', 'https://example.com/a.git')
+    runGit('update-ref', '-d', 'refs/remotes/origin/main')
+    writePackage({ ...WEB_CHANGED, 'test:run': 'true', build: 'true' })
+
+    const result = runChanged()
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('so every phase runs')
+    expect(result.stdout).toContain('Unit tests passed')
+    expect(result.stdout).toContain('Build passed')
+  })
+})
+
+describe('the flags', () => {
+  it('should refuse an unknown flag with the usage', () => {
+    setUpChanged()
+
+    const result = runChanged({}, '--fast')
+
+    expect(result.status).toBe(2)
+    expect(result.stderr).toContain('Usage: bun scripts/verify.ts')
+  })
+
+  it('should refuse --force without --changed', () => {
+    setUpChanged()
+
+    expect(run([process.execPath, RUNNER, '--force']).status).toBe(2)
+  })
+})
+
+describe('changed mode in a nested root', () => {
+  const writeService = (scripts: Readonly<Record<string, string>>): void => {
+    writeSource('service/package.json', JSON.stringify({ scripts }))
+    writeSource(
+      'service/scripts/verify.json',
+      JSON.stringify({ require: ['test:run'] }),
+    )
+    copyFileSync(RUNNER, join(fixture, 'service/scripts/verify.ts'))
+    commit()
+  }
+
+  beforeEach(() => {
+    setUpChanged(['service/cart.ts', 'service/cart.test.ts'])
+  })
+
+  it('should run its own tied tests and no full suite', () => {
+    writeService({ 'test:run': 'exit 1', 'test:changed': 'log-tests' })
+    writeSource('service/cart.ts', 'edited')
+
+    const result = runChanged()
+
+    expect(result.status).toBe(0)
+    expect(readTests()).toEqual(['cart.test.ts'])
+  })
+
+  it('should skip its tests when it declares no test:changed', () => {
+    writeService({ 'test:run': 'exit 1' })
+
+    const result = runChanged()
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain(
+      'Skipped: test:changed is not declared here',
+    )
+  })
+
+  it('should read its own folder under a hook that exports GIT_DIR', () => {
+    writeService({ 'test:run': 'exit 1', 'test:changed': 'log-tests' })
+    writeSource('service/cart.ts', 'edited')
+
+    runChanged({ GIT_DIR: join(fixture, '.git') })
+
+    expect(readTests()).toEqual(['cart.test.ts'])
+  })
+
+  it('should run in full under a plain check', () => {
+    writePackage(declare(STACK_SCRIPTS.web))
+    writeService({ 'test:run': 'exit 1', 'test:changed': 'log-tests' })
+
+    const result = runVerify({ VERIFY_CHANGED: 'true' })
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('service failed')
   })
 })
