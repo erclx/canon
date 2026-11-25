@@ -107,3 +107,14 @@ ruff check --select TID252 --fix --unsafe-fixes .
 - Run it once after the next `canon tooling sync`, since ruff rewrites most relative imports to absolute ones
 - Ruff marks this fix unsafe, so a bare `--fix` leaves it alone. Read the diff before committing.
 - Rewrite by hand an import it leaves flagged
+
+## Split a guide past 200 lines under `docs/`, once
+
+The Document ceiling gate stage now holds every page under the root `docs/` to 200 rendered lines, so a guide between 201 and 300 that passed before fails the next gate.
+
+```bash
+canon markdown audit docs
+```
+
+- Split each page the Length step lists at a seam into a second page, and retarget every link into a moved section
+- For a verbatim record, add a `<!-- canon-length-exempt: <reason> -->` line naming why instead
