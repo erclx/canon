@@ -1,4 +1,5 @@
-import { basename } from 'node:path'
+import { realpathSync } from 'node:fs'
+import { basename, relative } from 'node:path'
 import { bodyLines } from '@/markdown/scan'
 import { CHECKPOINTS, documentHeight } from '@/markdown/structure'
 
@@ -42,6 +43,14 @@ export function ceilingFor(rel: string): number {
   return rel.startsWith(DOCS_FOLDER)
     ? CHECKPOINTS.docsCeiling
     : CHECKPOINTS.ceiling
+}
+
+/**
+ * A document's path from its checkout root, both sides resolved through any
+ * symlink, since git prints the real path a caller's root may not carry.
+ */
+export function checkoutPath(checkout: string, path: string): string {
+  return relative(realpathSync(checkout), realpathSync(path))
 }
 
 /** The reason a document is exempt from the ceiling, or null where it is not. */

@@ -1,5 +1,11 @@
 import { execaSync } from 'execa'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -1484,6 +1490,22 @@ describe('documentCeiling', () => {
       })
 
       expect(report.failure).toBeUndefined()
+    })
+
+    it('holds a consumer doc to the docs cap when the gate root is a symlink', async () => {
+      write('docs/guide.md', 201)
+      const link = `${root}-link`
+      symlinkSync(root, link)
+
+      try {
+        const report = await documentCeiling({ ...context(), root: link })
+
+        expect(report.failure).toContain(
+          'docs/guide.md 201 rendered lines past 200',
+        )
+      } finally {
+        rmSync(link, { force: true })
+      }
     })
 
     it('passes a tree whose only long document is exempt, counting it', async () => {

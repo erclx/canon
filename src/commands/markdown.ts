@@ -3,7 +3,12 @@ import { readFile } from 'node:fs/promises'
 import { dirname, relative, resolve } from 'node:path'
 import type { Command } from 'commander'
 import { BAN_SETS, emptyBanSets } from '@/markdown/bans'
-import { ceilingFor, isChangelog, lengthExemption } from '@/markdown/ceiling'
+import {
+  ceilingFor,
+  checkoutPath,
+  isChangelog,
+  lengthExemption,
+} from '@/markdown/ceiling'
 import { type ColonFinding, findColons } from '@/markdown/colons'
 import { type MarkdownAuditRefusal, resolveMarkdown } from '@/markdown/files'
 import type { DensityKind } from '@/markdown/density'
@@ -412,7 +417,7 @@ async function runAudit(
         ),
         structure: measureStructure(rel, lines, checkpoints),
         renderedLines: documentHeight(source, checkpoints.renderWidth),
-        ceiling: ceilingFor(relative(checkout, abs)),
+        ceiling: ceilingFor(checkoutPath(checkout, abs)),
         exempt: lengthExemption(rel, source),
       }
     }),

@@ -24,7 +24,7 @@ import { readDeviceConfig } from '@/design/device-classes'
 import { DESIGN_DOCUMENT } from '@/design/regen'
 import { listRepositoryFiles } from '@/git/files'
 import { currentWorktreeRoot } from '@/git/worktree'
-import { ceilingFindings, isChangelog } from '@/markdown/ceiling'
+import { ceilingFindings, checkoutPath, isChangelog } from '@/markdown/ceiling'
 import { resolveMarkdown } from '@/markdown/files'
 import { CHECKPOINTS } from '@/markdown/structure'
 import {
@@ -542,7 +542,10 @@ export const documentCeiling: Measure = async (ctx) => {
     const path = join(ctx.root, rel)
     try {
       return [
-        { rel: relative(checkout, path), source: readFileSync(path, 'utf8') },
+        {
+          rel: checkoutPath(checkout, path),
+          source: readFileSync(path, 'utf8'),
+        },
       ]
     } catch {
       return []
