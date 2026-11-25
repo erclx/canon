@@ -29,6 +29,8 @@ Branch on the record's `reason` rather than on the exit, which a shell function 
 | `timeout`   | Enter the wait again, sending nothing, since a fresh base is the state the wait holds on                |
 | Any refusal | Send the controller the `reason` per the channel and stop, since an unread base is not a fresh one      |
 
+Rebase on `stale` even where that step's own test prints nothing. The verb's `moved` can name a file the branch depends on without writing, which the test does not read, and the wait ends `stale` again until the branch updates.
+
 ## After the rebase
 
 - A rebase that leaves the branch diff equal per path carries both closes, so `review-address` asks for no re-review, and the next standing wait reads `fresh`
