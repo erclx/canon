@@ -91,7 +91,7 @@ export interface DriveFindings {
   readonly worktreeLeft: readonly string[]
   /** Logged findings the operator decided with no drawn outcome. */
   readonly undrawn: readonly string[]
-  /** `evidence/baseline/00-current` when a drive that drew a board holds no capture of the current page. */
+  /** `evidence/baseline/00-current` when a drive that drew a decided finding on a board holds no capture of the current page. */
   readonly uncaptured: readonly string[]
   /** Findings whose drawing was skipped while the item deciding them fixes a rendered surface. */
   readonly skippedVisible: readonly string[]
@@ -596,7 +596,7 @@ export async function checkDrive(
         : [],
     undrawn: drawn.undrawn,
     uncaptured:
-      drawn.board && !(await holdsCurrentPage(folder))
+      drawn.board && drawn.paths.length > 0 && !(await holdsCurrentPage(folder))
         ? [join(BASELINE_DIR, CURRENT_PAGE)]
         : [],
     skippedVisible: await skippedOnVisible(folder, drawn.skipped),
