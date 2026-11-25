@@ -10,5 +10,7 @@ One-time moves a project scaffolded under an older toolkit makes before its next
 
 ## Agent surface
 
-- [Target migrations by hand](by-hand.md): One-time moves and keep-or-delete calls a person makes by hand, which no canon migrate verb runs or detects
+- [Target migrations by hand](by-hand.md): One-time moves a person makes by hand, which no canon migrate verb runs or detects
 - [Target migrations by verb](by-verb.md): One-time moves a canon migrate verb runs, for a project scaffolded under an older toolkit, in the order canon migrate status lists them
+- [Keep or delete](keep-or-delete.md): Files a project scaffolded under an older toolkit still holds, retired or customized, which sync leaves alone, and what keeping or changing each one takes
+- [Skill renames](skill-names.md): Each plugin skill name canon migrate skill-names rewrites, and the retired skills and verbs with no successor

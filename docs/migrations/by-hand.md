@@ -1,12 +1,12 @@
 ---
 title: Target migrations by hand
-description: One-time moves and keep-or-delete calls a person makes by hand, which no canon migrate verb runs or detects
+description: One-time moves a person makes by hand, which no canon migrate verb runs or detects
 category: Agent surface
 ---
 
 # Target migrations by hand
 
-Each section is a move a project scaffolded before the change it names makes by hand, since no `canon migrate` verb runs it and `canon migrate status` never lists it. The moves a verb runs, and the order to run them in, are in [target migrations by verb](by-verb.md).
+Each section is a move a project scaffolded before the change it names makes by hand, since no `canon migrate` verb runs it and `canon migrate status` never lists it. The moves a verb runs, and the order to run them in, are in [target migrations by verb](by-verb.md). A retired or customized file you choose to keep or change is in [keep or delete](keep-or-delete.md).
 
 ## Back records up off this machine, once
 
@@ -56,51 +56,6 @@ From the registry the walk reports `historyUnavailable`, so check both paths by 
 | `session-map`     | `session`                                                     |
 
 The `standard` name became `skill-reference.md` in `create-skill`.
-
-## Keep or delete the wireframes folder, your call
-
-The wireframes record is retired, and nothing deletes what a project holds.
-
-- `canon/wireframes/` stays yours and unaudited. Keep it as notes or delete it.
-- Delete the `@canon/wireframes/index.md` line in your `CLAUDE.md` with the folder. `canon claude sync` does not rewrite it.
-- `canon gov sync` removes `.claude/rules/canon/standards/wireframes.md`
-
-## Keep or delete the retired product files, your call
-
-The learning workspace, deck renderer, app recorder, canvas, and design install are retired with their verbs, and nothing deletes what a project holds.
-
-- `.canon/teach/` holds HTML that opens as it is <!-- canon-keep-retired -->
-- `.canon/slides/` and a `demos/` folder hold sources nothing renders any more, so delete them once nothing cites them <!-- canon-keep-retired -->
-- Move the `.claude/design/project/` values, `fonts/`, and `fonts.css` to the stylesheet your `canon/DESIGN.md` lead names, then delete `.claude/design/`
-
-A reference to a retired skill takes a hand edit.
-
-- Replace a `canon:teach-workspace` reference with `canon:teach-craft` by hand, since `canon migrate skill-names` does not rewrite it <!-- canon-keep-retired -->
-- Delete a `canon:make-deck`, `canon:script-screencast`, `canon:record-screencast`, `canon:read-frames`, or `canon:video-craft` reference, since none has a successor <!-- canon-keep-retired -->
-- Delete a `canon:canvas-board` reference too. Frameboard, which `canon:design-pick` drives, reads each `.canon/canvas/` folder as a project, so move a kept page under one <!-- canon-keep-retired -->
-
-## Delete the retired Playwright deps script, your call
-
-The web stack no longer ships `scripts/install-playwright-deps.sh`, and nothing deletes the copy a project already synced.
-
-- No seeded workflow calls it, since both hosted Ubuntu images ship Chrome and the libraries Chromium loads, so deleting it is safe
-- A workflow of your own may still call it, so search for the name before deleting
-- A self-hosted runner adds `bunx playwright install-deps chromium` before the browser install
-
-## Keep or delete the README screenshot files, your call
-
-The web stack no longer ships `.github/workflows/readme-screenshot.yml`, `scripts/readme-screenshot.sh`, or the `readme-screenshot` script in `package.json`. Sync deletes nothing, so a copy you hold stays yours, and no later sync updates it.
-
-- Keep all three if the workflow refreshes your README frame. The script sources `scripts/lib/preview-server.sh` and calls `e2e/screenshot.ts --print-evidence-root`, and the stack still ships both.
-- Delete them together otherwise, since the workflow runs the script through the `package.json` entry
-- `canon/config/config.json` may still hold a hash or a disposition for each path. Sync and `canon tooling diff` ignore both, and `canon tooling lift <path>` clears a declined or customized entry.
-
-## Match the Playwright engines to CI, your call
-
-The web stack's Playwright config now declares Chromium alone, the one engine the seeded workflow runs. Sync replaces an unedited config and keeps a customized one, telling you the golden changed.
-
-- Remove the `firefox` and `webkit` entries from `projects` in a kept config to match, since CI never ran them
-- Keep them only beside a workflow of your own that installs and runs each engine, since the seeded one passes `--project=chromium`
 
 ## Move decisions out of a held architecture record, once
 
@@ -152,3 +107,14 @@ ruff check --select TID252 --fix --unsafe-fixes .
 - Run it once after the next `canon tooling sync`, since ruff rewrites most relative imports to absolute ones
 - Ruff marks this fix unsafe, so a bare `--fix` leaves it alone. Read the diff before committing.
 - Rewrite by hand an import it leaves flagged
+
+## Split a guide past 200 lines under `docs/`, once
+
+The Document ceiling gate stage now holds every page under the root `docs/` to 200 rendered lines, so a guide between 201 and 300 that passed before fails the next gate.
+
+```bash
+canon markdown audit docs
+```
+
+- Split each page the Length step lists at a seam into a second page, and retarget every link into a moved section
+- For a verbatim record, add a `<!-- canon-length-exempt: <reason> -->` line naming why instead

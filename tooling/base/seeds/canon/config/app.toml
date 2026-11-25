@@ -1,5 +1,5 @@
 # How canon runs, checks, and reviews this app. Nothing is on until you
-# uncomment a table and its keys. Every key: canon docs config
+# uncomment a table and its keys. Every key: canon docs app-config
 
 # How app-drive, ui-film, and review-ui start and open the app.
 # [drive]

@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs'
-import { join, relative } from 'node:path'
+import { basename, join, relative } from 'node:path'
 import {
   CLIENT_COMMAND_MARKER,
   CLIENT_COMMANDS,
@@ -23,7 +23,8 @@ import { CONFIG_DIR_REL, checkConfigFolder } from '@/config/check'
 import { readDeviceConfig } from '@/design/device-classes'
 import { DESIGN_DOCUMENT } from '@/design/regen'
 import { listRepositoryFiles } from '@/git/files'
-import { ceilingFindings, isChangelog } from '@/markdown/ceiling'
+import { currentWorktreeRoot } from '@/git/worktree'
+import { ceilingFindings, checkoutPath, isChangelog } from '@/markdown/ceiling'
 import { resolveMarkdown } from '@/markdown/files'
 import { CHECKPOINTS } from '@/markdown/structure'
 import {
@@ -321,9 +322,18 @@ export const configFiles: Measure = async (ctx) => {
     .map((finding) => warn(finding.message))
 
   if (failures.length > 0) {
+    const pages = [
+      ...new Set(
+        failures.map((finding) =>
+          basename(finding.file) === 'app.toml'
+            ? 'canon docs app-config'
+            : 'canon docs config',
+        ),
+      ),
+    ]
     return {
       emissions: warnings,
-      failure: `${failures.map((finding) => finding.message).join(' ')} Every key: canon docs config`,
+      failure: `${failures.map((finding) => finding.message).join(' ')} Every key: ${pages.join(', ')}`,
     }
   }
   return {
@@ -513,8 +523,8 @@ export const skillDescriptionTotal: Measure = async (ctx) => {
 }
 
 /**
- * Every tracked document against the whole-document ceiling, naming each one
- * past it. In-process, since a gating length in `canon markdown audit` would
+ * Every tracked document against its whole-document ceiling, naming each one
+ * past it with the cap it broke. In-process, since a gating length in `canon markdown audit` would
  * fail every long plan the planning skills audit.
  */
 export const documentCeiling: Measure = async (ctx) => {
@@ -526,9 +536,17 @@ export const documentCeiling: Measure = async (ctx) => {
     }
   }
 
+  // Named from the repository root, so a gate run from a subfolder reads the docs cap as the audit does.
+  const checkout = await currentWorktreeRoot(ctx.root)
   const documents = scope.files.flatMap((rel) => {
+    const path = join(ctx.root, rel)
     try {
-      return [{ rel, source: readFileSync(join(ctx.root, rel), 'utf8') }]
+      return [
+        {
+          rel: checkoutPath(checkout, path),
+          source: readFileSync(path, 'utf8'),
+        },
+      ]
     } catch {
       return []
     }
@@ -536,25 +554,28 @@ export const documentCeiling: Measure = async (ctx) => {
   const findings = ceilingFindings(documents)
   const over = findings.filter((finding) => finding.exempt === null)
   const exempt = findings.length - over.length
-  const ceiling = CHECKPOINTS.ceiling
+  const caps = `the ${CHECKPOINTS.ceiling}-line ceiling or the ${CHECKPOINTS.docsCeiling}-line docs/ cap`
 
   if (over.length === 0) {
     const exemptNote = exempt > 0 ? `, ${exempt} exempt` : ''
     return {
       emissions: [
         info(
-          `No document past the ${ceiling}-line ceiling across ${plural(documents.length, 'markdown file')}${exemptNote}`,
+          `No document past ${caps} across ${plural(documents.length, 'markdown file')}${exemptNote}`,
         ),
       ],
     }
   }
 
   const where = over
-    .map((finding) => `${finding.rel} ${finding.renderedLines} rendered lines`)
+    .map(
+      (finding) =>
+        `${finding.rel} ${finding.renderedLines} rendered lines past ${finding.ceiling}`,
+    )
     .join(', ')
   return {
     emissions: [],
-    failure: `${plural(over.length, 'document')} past the ${ceiling}-line ceiling: ${where}. Split each at a seam, or for a verbatim record add a \`<!-- canon-length-exempt: <reason> -->\` line naming why.`,
+    failure: `${plural(over.length, 'document')} past ${caps}: ${where}. Split each at a seam, or for a verbatim record add a \`<!-- canon-length-exempt: <reason> -->\` line naming why.`,
   }
 }
 

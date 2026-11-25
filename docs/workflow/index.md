@@ -13,6 +13,7 @@ How a person and their agents run a feature, from the design loop through the pa
 
 ## Workflow
 
+- [Design authoring](design-authoring.md): How a project drafts the design a UI plan cites, from a pick round on a Frameboard board at each device width to a graphical tool that owns the design
 - [Operating model](operating-model.md): Orchestrator, planner, and worker roles for building across parallel sessions
 - [Parallel features](parallel-features.md): Run independent features in parallel worktrees, with the records and board every session shares
 - [Plan to merge](plan-to-merge.md): One invented row followed from filing to merge, naming the session, skill, and record at each step and what the operator still does by hand

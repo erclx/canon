@@ -1,5 +1,11 @@
 import { execaSync } from 'execa'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -802,6 +808,24 @@ describe('configFiles', () => {
     expect(report.failure).toContain(`canon/config/${name}`)
   })
 
+  it('points an app.toml finding at the app config page', async () => {
+    write('app.toml', '[drive]\nlaunch = 3\n')
+
+    const report = await configFiles(context())
+
+    expect(report.failure).toContain('Every key: canon docs app-config')
+    expect(report.failure).not.toContain('canon docs config')
+  })
+
+  it('points a finding in another file at the config page', async () => {
+    write('context.toml', 'roots = 3\n')
+
+    const report = await configFiles(context())
+
+    expect(report.failure).toContain('Every key: canon docs config')
+    expect(report.failure).not.toContain('canon docs app-config')
+  })
+
   it('warns on an unknown file and still passes', async () => {
     write('nope.toml', 'a = 1\n')
 
@@ -1391,7 +1415,8 @@ describe('documentCeiling', () => {
     })
 
     it('reports only the count where every document sits under the ceiling', async () => {
-      write('docs/guide.md', 300)
+      write('claude/skills/a/references/guide.md', 300)
+      write('docs/guide.md', 200)
 
       const report = await documentCeiling(context())
 
@@ -1399,27 +1424,39 @@ describe('documentCeiling', () => {
       expect(report.emissions).toEqual([
         {
           kind: 'info',
-          text: 'No document past the 300-line ceiling across 1 markdown file',
+          text: 'No document past the 300-line ceiling or the 200-line docs/ cap across 2 markdown files',
         },
       ])
     })
 
-    it('fails on a document past the ceiling, naming it and its height', async () => {
-      write('docs/guide.md', 301)
+    it('fails on a consumer doc past the docs cap, naming the cap it broke', async () => {
+      write('docs/guide.md', 201)
 
       const report = await documentCeiling(context())
 
-      expect(report.failure).toContain('docs/guide.md 301 rendered lines')
+      expect(report.failure).toContain(
+        'docs/guide.md 201 rendered lines past 200',
+      )
+    })
+
+    it('fails on a document past the ceiling, naming it and its height', async () => {
+      write('claude/skills/a/references/guide.md', 301)
+
+      const report = await documentCeiling(context())
+
+      expect(report.failure).toContain(
+        'claude/skills/a/references/guide.md 301 rendered lines past 300',
+      )
     })
 
     it('names every document past the ceiling, longest first', async () => {
-      write('docs/a.md', 310)
-      write('docs/b.md', 340)
+      write('notes/a.md', 310)
+      write('notes/b.md', 340)
 
       const report = await documentCeiling(context())
 
       expect(report.failure).toMatch(
-        /docs\/b\.md 340 rendered lines.*docs\/a\.md 310 rendered lines/,
+        /notes\/b\.md 340 rendered lines.*notes\/a\.md 310 rendered lines/,
       )
     })
 
@@ -1444,6 +1481,33 @@ describe('documentCeiling', () => {
       expect(report.emissions).toEqual([])
     })
 
+    it('holds a docs folder under a subfolder gate root to the ceiling, as the repository root reads it', async () => {
+      write('pkg/docs/a.md', 250)
+
+      const report = await documentCeiling({
+        ...context(),
+        root: join(root, 'pkg'),
+      })
+
+      expect(report.failure).toBeUndefined()
+    })
+
+    it('holds a consumer doc to the docs cap when the gate root is a symlink', async () => {
+      write('docs/guide.md', 201)
+      const link = `${root}-link`
+      symlinkSync(root, link)
+
+      try {
+        const report = await documentCeiling({ ...context(), root: link })
+
+        expect(report.failure).toContain(
+          'docs/guide.md 201 rendered lines past 200',
+        )
+      } finally {
+        rmSync(link, { force: true })
+      }
+    })
+
     it('passes a tree whose only long document is exempt, counting it', async () => {
       write(
         'scripts/record.md',
@@ -1457,7 +1521,7 @@ describe('documentCeiling', () => {
         emissions: [
           {
             kind: 'info',
-            text: 'No document past the 300-line ceiling across 1 markdown file, 1 exempt',
+            text: 'No document past the 300-line ceiling or the 200-line docs/ cap across 1 markdown file, 1 exempt',
           },
         ],
       })

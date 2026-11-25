@@ -3,7 +3,12 @@ import { readFile } from 'node:fs/promises'
 import { dirname, relative, resolve } from 'node:path'
 import type { Command } from 'commander'
 import { BAN_SETS, emptyBanSets } from '@/markdown/bans'
-import { isChangelog, lengthExemption } from '@/markdown/ceiling'
+import {
+  ceilingFor,
+  checkoutPath,
+  isChangelog,
+  lengthExemption,
+} from '@/markdown/ceiling'
 import { type ColonFinding, findColons } from '@/markdown/colons'
 import { type MarkdownAuditRefusal, resolveMarkdown } from '@/markdown/files'
 import type { DensityKind } from '@/markdown/density'
@@ -69,6 +74,7 @@ import {
   pipeOutput,
   plural,
 } from '@/cli/ui'
+import { currentWorktreeRoot } from '@/git/worktree'
 import { isOwnCheckout } from '@/roots/project'
 
 /** A config the audit cannot read refuses rather than gating nothing. */
@@ -102,6 +108,8 @@ interface FileReport {
   readonly referenceShape: readonly GatedReferenceShapeFinding[]
   readonly structure: StructureReport
   readonly renderedLines: number
+  /** Read off the path from the document's own repository root, as the gate reads it. */
+  readonly ceiling: number
   /** The stated reason, or null where the document is not exempt. */
   readonly exempt: string | null
 }
@@ -370,9 +378,17 @@ async function runAudit(
   const empty = emptyBanSets(bans)
   const checkpoints = CHECKPOINTS
 
+  const checkouts = new Map<string, Promise<string>>()
+  const checkoutOf = (dir: string): Promise<string> => {
+    const known = checkouts.get(dir) ?? currentWorktreeRoot(dir)
+    checkouts.set(dir, known)
+    return known
+  }
+
   const reports: FileReport[] = await Promise.all(
     scope.files.map(async (rel) => {
       const abs = resolve(root, rel)
+      const checkout = await checkoutOf(dirname(abs))
       const source = await readFile(abs, 'utf8')
       const lines = bodyLines(source)
       // The release tool writes a changelog, so neither advisory reads it.
@@ -401,6 +417,7 @@ async function runAudit(
         ),
         structure: measureStructure(rel, lines, checkpoints),
         renderedLines: documentHeight(source, checkpoints.renderWidth),
+        ceiling: ceilingFor(checkoutPath(checkout, abs)),
         exempt: lengthExemption(rel, source),
       }
     }),
@@ -443,6 +460,7 @@ async function runAudit(
           spread: checkpoints.spread,
           opener: checkpoints.opener,
           ceiling: checkpoints.ceiling,
+          docsCeiling: checkpoints.docsCeiling,
         },
         entries: reports.map((report) => ({
           path: report.rel,
@@ -1151,24 +1169,22 @@ function reportLength(
     'A changelog is exempt by name, and so is a document carrying a canon-length-exempt marker that names a reason.',
   )
 
-  const past = reports.filter(
-    (report) => report.renderedLines > checkpoints.ceiling,
-  )
+  const caps = `the ${checkpoints.ceiling}-line ceiling or the ${checkpoints.docsCeiling}-line docs/ cap`
+  const past = reports.filter((report) => report.renderedLines > report.ceiling)
   const over = past
     .filter((report) => report.exempt === null)
     .sort((a, b) => b.renderedLines - a.renderedLines)
   const exempt = past.length - over.length
 
   if (over.length === 0) {
-    logInfo(`No document past the ${checkpoints.ceiling}-line ceiling.`)
+    logInfo(`No document past ${caps}.`)
   } else {
-    logWarn(
-      `${plural(over.length, 'document')} past the ${checkpoints.ceiling}-line ceiling`,
-    )
+    logWarn(`${plural(over.length, 'document')} past ${caps}`)
     pipeOutput(
       over
         .map(
-          (report) => `${report.rel}  ${report.renderedLines} rendered lines`,
+          (report) =>
+            `${report.rel}  ${report.renderedLines} rendered lines past ${report.ceiling}`,
         )
         .join('\n'),
     )

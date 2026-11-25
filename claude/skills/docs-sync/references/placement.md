@@ -27,7 +27,7 @@ Each row names a fact the diff and the pages settle between them, so two session
 
 - **A command run by hand** is one a person or a target project types. A command only a skill calls gets no page, since the calling skill and its `--help` cover it, per `docs.md`.
 - **A name a user sees or types** is a screen, a panel, a setting, or a mode in an app. In a command-line tool or a library it is a subcommand group or a public export.
-- **The bullet-run limit and the ceiling** are the ones `markdown.md` states, being 5 plain bullets in a row and 300 rendered lines. Read both from `canon markdown audit`, never by counting.
+- **The bullet-run limit and the ceiling** are the ones `markdown.md` states, being 5 plain bullets in a row and 200 rendered lines in `docs/`. Read both from `canon markdown audit`, never by counting.
 - **A shelf reading as a section** is the signal `docs.md` states under its folder split. This reference adds no second rule for it.
 
 ## Finding the nearest page
