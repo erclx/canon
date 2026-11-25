@@ -5,7 +5,9 @@ description: Every table and key in canon/config/app.toml, being how canon drive
 
 # App config
 
-One table per concern. A table left out, or present only as comments, reads as absent, and every reader falls back to the old file beside it.
+`canon/config/app.toml` holds how canon drives, previews, health-checks, and films the app, one table per concern. Every key is optional unless its row says otherwise.
+
+A table left out, or present only as comments, reads as absent, and its reader falls back to the older file `canon migrate app-config` folds into it. `canon docs config` lists those files, the other config files, and what the gate checks.
 
 ## [drive]
 
