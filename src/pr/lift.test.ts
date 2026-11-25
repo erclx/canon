@@ -562,7 +562,7 @@ describe('lift', () => {
     it('should lift when the branch diff is equal at both commits', async () => {
       const { api, calls } = makeApi({
         ...rebasedFrom,
-        rebased: { differingPaths: [] },
+        rebased: { differingPaths: [], ownPaths: [] },
       })
 
       const record = await lift(api, { isCheck: false, waitSeconds: 60 })
@@ -584,7 +584,7 @@ describe('lift', () => {
     it('should refuse the code review on one differing inert path and carry the UI close', async () => {
       const { api } = makeApi({
         ...rebasedFrom,
-        rebased: { differingPaths: ['README.md'] },
+        rebased: { differingPaths: ['README.md'], ownPaths: ['README.md'] },
       })
 
       const record = await lift(api, { isCheck: true, waitSeconds: 60 })
@@ -608,7 +608,7 @@ describe('lift', () => {
       const { api } = makeApi({
         ...rebasedFrom,
         reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
-        rebased: { differingPaths: ['src/App.tsx'] },
+        rebased: { differingPaths: ['src/App.tsx'], ownPaths: ['src/App.tsx'] },
       })
 
       const record = await lift(api, { isCheck: false, waitSeconds: 60 })
@@ -638,7 +638,7 @@ describe('lift', () => {
       const { api, calls } = makeApi({
         reviews: [CODE_CLOSED_AT_MOVED],
         changed: { isAncestor: true, paths: ['README.md'] },
-        rebased: { differingPaths: [] },
+        rebased: { differingPaths: [], ownPaths: [] },
         unmerged: [HEAD],
       })
 
@@ -651,7 +651,7 @@ describe('lift', () => {
     it('should never list merged commits across a rebase', async () => {
       const { api, calls } = makeApi({
         ...rebasedFrom,
-        rebased: { differingPaths: [] },
+        rebased: { differingPaths: [], ownPaths: [] },
         unmerged: [],
       })
 
@@ -678,7 +678,7 @@ describe('lift', () => {
       async (reason, fixture) => {
         const { api } = makeApi({
           ...rebasedFrom,
-          rebased: { differingPaths: [] },
+          rebased: { differingPaths: [], ownPaths: [] },
           ...fixture,
         })
 
@@ -699,7 +699,7 @@ describe('lift', () => {
       const { api, calls } = makeApi({
         ...mergedFrom,
         unmerged: [],
-        rebased: { differingPaths: [] },
+        rebased: { differingPaths: [], ownPaths: [] },
       })
 
       const record = await lift(api, { isCheck: false, waitSeconds: 60 })
@@ -722,7 +722,7 @@ describe('lift', () => {
       const { api, calls } = makeApi({
         ...mergedFrom,
         unmerged: [HEAD],
-        rebased: { differingPaths: [] },
+        rebased: { differingPaths: [], ownPaths: [] },
       })
 
       const record = await lift(api, { isCheck: false, waitSeconds: 60 })
@@ -754,7 +754,7 @@ describe('lift', () => {
         ...mergedFrom,
         changed: null,
         unmerged: [],
-        rebased: { differingPaths: [] },
+        rebased: { differingPaths: [], ownPaths: [] },
       })
 
       const record = await lift(api, { isCheck: false, waitSeconds: 60 })
@@ -769,7 +769,7 @@ describe('lift', () => {
         reviews: [CODE_CLOSED_AT_MOVED, UI_CLOSED_AT_MOVED],
         evidence: { hasDrivableBox: true, reels: REEL_AT_HEAD },
         unmerged: [],
-        rebased: { differingPaths: [] },
+        rebased: { differingPaths: [], ownPaths: [] },
       })
 
       const record = await lift(api, { isCheck: false, waitSeconds: 60 })
@@ -792,7 +792,7 @@ describe('lift', () => {
         const { api } = makeApi({
           ...mergedFrom,
           unmerged: [],
-          rebased: { differingPaths: [] },
+          rebased: { differingPaths: [], ownPaths: [] },
           ...fixture,
         })
 

@@ -1149,8 +1149,8 @@ const FILE_HEADER = 'diff --git '
 
 /**
  * One patch text per path, without the blob ids and hunk line numbers a rebase
- * shifts. Context stays, so a base change beside the branch's own differs, and a
- * quoted path stays quoted, which no inert glob matches.
+ * shifts. Context stays, so a base change beside the branch's own differs. A
+ * quoted path stays quoted, as `--name-only` spells it, matching no inert glob.
  */
 function patchesByPath(patch: string): Map<string, string> {
   const files = new Map<string, string>()
@@ -1163,9 +1163,8 @@ function patchesByPath(patch: string): Map<string, string> {
     if (line.startsWith(FILE_HEADER)) {
       flush()
       const sides = line.slice(FILE_HEADER.length)
-      path = sides.startsWith('a/')
-        ? sides.slice(2, (sides.length - 1) / 2)
-        : sides
+      const old = sides.slice(0, (sides.length - 1) / 2)
+      path = old.startsWith('"') ? `"${old.slice(3)}` : old.slice(2)
       lines = []
     } else if (line.startsWith('@@')) {
       lines.push('@@')
@@ -1216,9 +1215,9 @@ export async function readRebasedPaths(
   const [before, after] = await Promise.all([branchDiff(full), branchDiff(to)])
   if (before === undefined || after === undefined) return undefined
 
-  const paths = new Set([...before.keys(), ...after.keys()])
-  const differingPaths = [...paths]
-    .filter((path) => before.get(path) !== after.get(path))
-    .toSorted()
-  return { differingPaths }
+  const ownPaths = [...new Set([...before.keys(), ...after.keys()])].toSorted()
+  const differingPaths = ownPaths.filter(
+    (path) => before.get(path) !== after.get(path),
+  )
+  return { differingPaths, ownPaths }
 }

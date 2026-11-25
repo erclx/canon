@@ -67,6 +67,8 @@ export async function readCarry(
  */
 export interface RebaseRead {
   readonly differingPaths: readonly string[]
+  /** Every path the branch wrote at either commit, differing or not. */
+  readonly ownPaths: readonly string[]
 }
 
 /** Whether a verdict holds across a rebase of the branch under it. */
