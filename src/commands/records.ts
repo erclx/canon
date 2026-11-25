@@ -366,7 +366,8 @@ function backupHelp(verb: 'push' | 'pull'): string {
         ]
       : [
           'It refuses rather than discarding local records that never reached the remote,',
-          'so a machine holding uncommitted or unpushed records is told to push first.',
+          'so a machine holding uncommitted or unpushed records is told to push first,',
+          'then to move aside any file that push lists under skipped.',
         ]
 
   return [

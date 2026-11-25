@@ -53,7 +53,7 @@ Branch on `reason` in the `--json` record, not the exit code.
 | `remote-unreadable` | The project's own remotes could not be read                                    |
 | `remote-shared`     | The records origin is also a remote of the project. Use a private repository   |
 | `no-remote-records` | `pull` found no branch on the records origin                                   |
-| `local-changes`     | `pull` found records on disk that the history lacks. Run `push` first          |
+| `local-changes`     | `pull` found records the history lacks. `push`, then move its `skipped` aside  |
 | `local-ahead`       | `pull` found local commits that never reached the origin. Run `push` first     |
 | `unsafe-payload`    | `push` found a file carrying a credential                                      |
 | `git-failed`        | A git call failed, with its stderr in the message                              |

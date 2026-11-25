@@ -735,7 +735,7 @@ export async function pullRecords(root: string): Promise<PullOutcome> {
     if (dirty.text.length > 0) {
       return refuse(
         'local-changes',
-        `${countLines(dirty.text)} local record(s) are not in the records history. Run canon records push first, or move them aside.`,
+        `${countLines(dirty.text)} local record(s) are not in the records history. Run canon records push first, then move aside any file it lists under skipped.`,
       )
     }
   }

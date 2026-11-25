@@ -787,6 +787,23 @@ describe('pullRecords', () => {
     ).toBe('local only\n')
   })
 
+  it('should refuse a pull after a skip and point at the skipped list', async () => {
+    const canonRoot = await makeCanonProject({ 'tasks/entry.md': '# tasks\n' })
+    writeOversized(canonRoot, 'design/shot.png')
+    await pushRecords(canonRoot)
+
+    const outcome = await pullRecords(canonRoot)
+
+    expect(outcome).toMatchObject({
+      ok: false,
+      reason: 'local-changes',
+      message: expect.stringContaining('skipped'),
+    })
+    expect(existsSync(join(canonRoot, '.canon', 'design', 'shot.png'))).toBe(
+      true,
+    )
+  })
+
   it('should not read a skipped video file as a local change', async () => {
     const canonRoot = await makeCanonProject({
       'video/demo/plan.json': '{}\n',
