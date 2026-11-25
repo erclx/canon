@@ -117,7 +117,7 @@ The squash commit carries Summary, Key changes, and Technical context alone, so 
 
 ### Performance claims
 
-A pull request states what it measured when its plan's Verification ran an eval, a benchmark, or a timed run, and every `perf` pull request does whatever its plan says. A body that mentions speed with neither owes nothing.
+A pull request states what it measured when its plan's Verification ran an eval, a benchmark, or a timed run, and every `perf` pull request does whatever its plan says. A body that mentions speed with neither owes nothing. Take the numbers by `${CLAUDE_SKILL_DIR}/../test-craft/references/measure.md`.
 
 - State the headline number in the second sentence of `## Summary`, so the squash commit keeps the claim
 - Put a table under `## Outcome` with a header row, a separator, and a data row per measurement, never in a fence, since a fence reads as an example

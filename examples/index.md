@@ -18,12 +18,12 @@ Filled-in canon records for Tidewell, an invented tide-table app, following one 
 
 - [Task](planning/v03.2-surge-alerts.md): the surge alert task with its origins, outcomes, and findings. Read against `claude/skills/task-board/references/tasks.md` at `af045565`.
 - [Board](planning/priority.md): Tidewell's board with the surge alert task in flight beside the rows waiting on it. Read against `claude/skills/task-board/references/board.md` at `aa4b4b6c`.
-- [Feature plan](planning/feature-surge-alerts.md): the approved surge alert plan a worker builds from. Read against `claude/skills/plan-feature/references/plan.md` at `14b21294`.
+- [Feature plan](planning/feature-surge-alerts.md): the approved surge alert plan a worker builds from. Read against `claude/skills/plan-feature/references/plan.md` at `e5bc7dc6`.
 
 ## Shipping
 
-- [Pull request body](shipping/pull-request-body.md): the surge alert body, with Testing and a reviewer section. Read against `claude/skills/git-pr/references/pr.md` at `cb10464a`.
-- [Performance pull request body](shipping/pull-request-body-perf.md): a tide-table cache fix carrying its measurement table. Read against `claude/skills/git-pr/references/pr.md` at `cb10464a`.
+- [Pull request body](shipping/pull-request-body.md): the surge alert body, with Testing and a reviewer section. Read against `claude/skills/git-pr/references/pr.md` at `874e0ae4`.
+- [Performance pull request body](shipping/pull-request-body-perf.md): a tide-table cache fix carrying its measurement table. Read against `claude/skills/git-pr/references/pr.md` at `874e0ae4`.
 - [Evidence comment](shipping/evidence-comment.md): the screenshots, reel, and checklist on the surge alert pull request. Read against `claude/skills/pr-evidence/references/evidence.md` at `8dc630b2`.
 - [Code review](shipping/code-review.md): a findings pass and the close-out that follows the fix. Read against `claude/skills/review-pr/references/post.md` at `61171fa3` and `claude/skills/review-pr/references/body-variants.md` at `84168b71`.
 - [UI review](shipping/ui-review.md): a driven pass with one failed box and one not driven. Read against `claude/skills/review-ui/references/post.md` at `681b0a02`.
