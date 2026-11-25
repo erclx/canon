@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.128.0](https://github.com/erclx/canon/compare/v5.127.0...v5.128.0) (2026-11-25)
+
+
+### Features
+
+* **markdown:** hold a doc under docs/ to 200 rendered lines ([#3556](https://github.com/erclx/canon/issues/3556)) ([46aa032](https://github.com/erclx/canon/commit/46aa0327c733d1c5dc0f62c9b3936e64e166a6f0))
+* **pr:** hold the poll's READY until every check at the head settles ([#3559](https://github.com/erclx/canon/issues/3559)) ([d65e887](https://github.com/erclx/canon/commit/d65e88785bac9a83724ac7c5b8653c34627813cc))
+* **records:** report a plan question citing no evidence ([#3558](https://github.com/erclx/canon/issues/3558)) ([d8d42ee](https://github.com/erclx/canon/commit/d8d42ee49944afdac250a8a430a010851286b023))
+* **ship:** read declared scripts before naming a verify command ([#3557](https://github.com/erclx/canon/issues/3557)) ([28da107](https://github.com/erclx/canon/commit/28da1070d1afc468c3b455d135ff271c0793a952))
+
 ## [5.127.0](https://github.com/erclx/canon/compare/v5.126.0...v5.127.0) (2026-11-25)
 
 
