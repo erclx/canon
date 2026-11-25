@@ -1211,6 +1211,48 @@ describe('poll', () => {
       expect(poll().stdout).not.toContain('READY')
     })
 
+    // The lift gates on the required set alone, so READY waits on its running list for every other check.
+    it('should hold READY while a non-required check runs and report it once that settles', () => {
+      writeThread(closedAtHead, [])
+      expect(poll().stdout).toContain('SEEN')
+      writeLift({
+        isLifted: false,
+        isOk: true,
+        isReady: true,
+        reason: 'already-ready',
+        running: ['🍎 macOS Unit Tests'],
+      })
+      expect(poll().stdout).not.toContain('READY')
+
+      writeLift({
+        isLifted: false,
+        isOk: true,
+        isReady: true,
+        reason: 'already-ready',
+      })
+
+      expect(poll().stdout).toBe(
+        'READY     #7 at 1111111, waiting only on the merge',
+      )
+    })
+
+    it('should name a failed non-required check on the READY line', () => {
+      writeThread(closedAtHead, [])
+      expect(poll().stdout).toContain('SEEN')
+
+      writeLift({
+        advisory: ['🍎 macOS Unit Tests', '🐧 Linux Unit Tests'],
+        isLifted: false,
+        isOk: true,
+        isReady: true,
+        reason: 'already-ready',
+      })
+
+      expect(poll().stdout).toBe(
+        'READY     #7 at 1111111, waiting only on the merge, advisory failed: 🍎 macOS Unit Tests, 🐧 Linux Unit Tests',
+      )
+    })
+
     it('should not report a draft every gate clears', () => {
       writeThread(closedAtHead, [])
       expect(poll().stdout).toContain('SEEN')
