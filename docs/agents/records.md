@@ -33,9 +33,10 @@ printf '.canon/\n' >> .gitignore
 - `size` reports one row per folder, heaviest first, with file count, bytes, and growth over 7 and 30 days. After a `pull` every file reads as new.
 - `prune-tmp` lists scratch untouched for 14 days and deletes it only with `--write`. It never offers `tmp/handoff/` or `tmp/pr/poll/`.
 
-`push` refuses as a whole on a file `canon secrets scan` would report, listing it under `blocked`. Remove the credential, then push again.
+`push` never carries the two kinds of file below.
 
-`push` leaves out a file over 25 MB and backs up the rest, listing the file under `skipped` with its `path` and `bytes`. A skipped file stays at its last pushed version. Move it out of the record folders or shrink it.
+- A file `canon secrets scan` would report refuses the whole push, under `blocked`. Remove the credential, then push again.
+- A file over 25 MB stays behind while the rest is pushed, under `skipped` with its `path` and `bytes`. Move it out of the record folders or shrink it. A tracked one keeps its last pushed version.
 
 Every verb exits `0` when done and `1` when refused. `prune-tmp` exits `2` when candidates exist and `--write` was not passed.
 
